@@ -1,0 +1,41 @@
+{
+  "name": "preact",
+  "version": "1.2.0",
+  "description": "Tiny & fast Component-based virtual DOM framework.",
+  "main": "preact.js",
+  "scripts": {
+    "build": "npm run transpile && npm run minify && npm run size",
+    "transpile": "babel src --source-root src -s -d .",
+    "minify": "uglifyjs -c sequences,dead_code,conditionals,booleans,unused,if_return,join_vars,drop_console -m -o $npm_package_main --in-source-map ${npm_package_main}.map --source-map ${npm_package_main}.map -- $npm_package_main",
+    "size": "size=$(gzip-size $npm_package_main) && echo \"gzip size: $size / $(pretty-bytes $size)\"",
+    "test": "jshint {src,tests}/**.js && mocha --compilers js:babel/register test",
+    "prepublish": "npm run build",
+    "release": "npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/developit/preact.git"
+  },
+  "author": "Jason Miller <jason@developit.ca>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/developit/preact/issues"
+  },
+  "homepage": "https://github.com/developit/preact",
+  "devDependencies": {
+    "babel": "^5.8.23",
+    "chai": "^3.2.0",
+    "gzip-size": "^3.0.0",
+    "jshint": "^2.8.0",
+    "mocha": "^2.3.2",
+    "pretty-bytes": "^2.0.1",
+    "uglify-js": "^2.4.24",
+    "xo": "^0.8.0"
+  },
+  "xo": {
+    "esnext": true,
+    "ignore": [
+      "*.js"
+    ]
+  }
+}
