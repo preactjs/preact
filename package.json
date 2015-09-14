@@ -8,7 +8,7 @@
     "transpile": "babel src --source-root src -s -d .",
     "minify": "uglifyjs -c sequences,dead_code,conditionals,booleans,unused,if_return,join_vars,drop_console -m -o $npm_package_main --in-source-map ${npm_package_main}.map --source-map ${npm_package_main}.map -- $npm_package_main",
     "size": "size=$(gzip-size $npm_package_main) && echo \"gzip size: $size / $(pretty-bytes $size)\"",
-    "test": "jshint {src,tests}/**.js && mocha --compilers js:babel/register test",
+    "test": "eslint src test && mocha --recursive --compilers js:babel/register test/shared test/node",
     "prepublish": "npm run build",
     "release": "npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
