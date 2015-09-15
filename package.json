@@ -11,6 +11,8 @@
     "test": "eslint src test && npm run test:mocha && npm run test:karma",
     "test:mocha": "mocha --recursive --compilers js:babel/register test/shared test/node",
     "test:karma": "karma start --single-run",
+    "test:mocha:watch": "npm run test:mocha -- --watch",
+    "test:karma:watch": "npm run test:karma -- no-single-run",
     "prepublish": "npm run build",
     "release": "npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
@@ -36,6 +38,7 @@
     "karma": "^0.13.9",
     "karma-babel-preprocessor": "^5.2.2",
     "karma-chai": "^0.1.0",
+    "karma-chai-sinon": "^0.1.5",
     "karma-mocha": "^0.2.0",
     "karma-mocha-reporter": "^1.1.1",
     "karma-phantomjs-launcher": "^0.2.1",
@@ -45,6 +48,7 @@
     "phantomjs": "^1.9.18",
     "pretty-bytes": "^2.0.1",
     "sinon": "^1.16.1",
+    "sinon-chai": "^2.8.0",
     "uglify-js": "^2.4.24",
     "webpack": "^1.12.1",
     "xo": "^0.8.0"
