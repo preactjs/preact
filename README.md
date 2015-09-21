@@ -13,6 +13,13 @@ Preact is an attempt to recreate the core value proposition of React (or similar
 It retains a large amount of compatibility with React, but only the [ES6 Classes] interface.  As one would expect coming from React, Components are simple building blocks for composing a User Interface.
 
 
+## Demos
+
+- [Flickr Browser](http://codepen.io/developit/full/vNKJZq/) (@ CodePen)
+- [Simple Clock](http://jsfiddle.net/developit/u9m5x0L7/embedded/result,js/) (@ JSFiddle)
+- [Create your Own!](https://jsfiddle.net/developit/rs6zrh5f/embedded/result/) (@ JSFiddle)
+
+
 ## Getting Started
 
 > You don't _have_ to use ES2015 to use Preact... but you should.
@@ -151,7 +158,7 @@ class Clock extends Component {
 render(<Clock />, document.body);
 ```
 
-Now we have a ticking clock!
+Now we have [a ticking clock](http://jsfiddle.net/developit/u9m5x0L7/embedded/result,js/)!
 
 
 ### Props & State
