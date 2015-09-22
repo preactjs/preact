@@ -10,8 +10,10 @@ const NON_DIMENSION_PROPS = {};
 /** @private */
 let slice = Array.prototype.slice;
 
+let hop = Object.prototype.hasOwnProperty;
+
 /** @private */
-let memoize = (fn, mem={}) => k => mem.hasOwnProperty(k) ? mem[k] : (mem[k] = fn(k));
+let memoize = (fn, mem={}) => k => hop.call(mem, k) ? mem[k] : (mem[k] = fn(k));
 
 /** @public @object Global options */
 let options = {
@@ -44,7 +46,7 @@ hooks.vnode = ({ attributes }) => {
 	}
 
 	let c = attributes['class'];
-	if (attributes.hasOwnProperty('className')) {
+	if (hop.call(attributes, 'className')) {
 		c = attributes['class'] = attributes.className;
 		delete attributes.className;
 	}
@@ -340,7 +342,7 @@ function build(dom, vnode, rootComponent) {
 	// removed attributes
 	if (old!==EMPTY) {
 		for (let name in old) {
-			if (old.hasOwnProperty(name)) {
+			if (hop.call(old, name)) {
 				let o = attrs[name];
 				if (o===undefined || o===null || o===false) {
 					setAccessor(out, name, null, old[name]);
@@ -352,7 +354,7 @@ function build(dom, vnode, rootComponent) {
 	// new & updated attributes
 	if (attrs!==EMPTY) {
 		for (let name in attrs) {
-			if (attrs.hasOwnProperty(name)) {
+			if (hop.call(attrs, name)) {
 				let value = attrs[name];
 				if (value!==undefined && value!==null && value!==false) {
 					let prev = getAccessor(out, name, old[name]);
@@ -641,12 +643,12 @@ function styleObjToCss(s) {
 		sep = ': ',
 		term = '; ';
 	for (let prop in s) {
-		if (s.hasOwnProperty(prop)) {
+		if (hop.call(s, prop)) {
 			let val = s[prop];
 			str += jsToCss(prop);
 			str += sep;
 			str += val;
-			if (typeof val==='number' && !NON_DIMENSION_PROPS.hasOwnProperty(prop)) {
+			if (typeof val==='number' && !hop.call(NON_DIMENSION_PROPS, prop)) {
 				str += 'px';
 			}
 			str += term;
@@ -675,7 +677,7 @@ let jsToCss = memoize( s => s.replace(/([A-Z])/,'-$1').toLowerCase() );
 
 /** @private Copy own-properties from `props` onto `obj`. Returns `obj`. */
 function extend(obj, props) {
-	for (let i in props) if (props.hasOwnProperty(i)) {
+	for (let i in props) if (hop.call(props, i)) {
 		obj[i] = props[i];
 	}
 	return obj;
