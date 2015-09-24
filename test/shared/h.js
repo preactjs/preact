@@ -5,7 +5,7 @@ import { h, VNode } from '../../preact';
 
 let flatten = obj => JSON.parse(JSON.stringify(obj));
 
-describe('h()', () => {
+describe('h(jsx)', () => {
 	it('should return a VNode', () => {
 		var r;
 		expect( () => r = h('foo') ).not.to.throw();

@@ -3,9 +3,7 @@ const NO_RENDER = { render: false };
 const SYNC_RENDER = { renderSync: true };
 const DOM_RENDER = { build: true };
 const EMPTY_BASE = '';
-const NON_DIMENSION_PROPS = {};
-
-'boxFlex boxFlexGroup columnCount fillOpacity flex flexGrow flexPositive flexShrink flexNegative fontWeight lineClamp lineHeight opacity order orphans strokeOpacity widows zIndex zoom'.split(' ').forEach(k => NON_DIMENSION_PROPS[k] = true);
+const NON_DIMENSION_PROPS = 'boxFlex boxFlexGroup columnCount fillOpacity flex flexGrow flexPositive flexShrink flexNegative fontWeight lineClamp lineHeight opacity order orphans strokeOpacity widows zIndex zoom'.split(' ').reduce( (a,k) => (a[k]=true, a), {});
 
 /** @private */
 let slice = Array.prototype.slice;
@@ -67,6 +65,7 @@ export class Component {
 		this.props = hook(this, 'getDefaultProps') || {};
 		/** @type {object} */
 		this.state = hook(this, 'getInitialState') || {};
+		// @TODO remove me?
 		hook(this, 'initialize');
 	}
 
@@ -93,12 +92,12 @@ export class Component {
 	*	@param {object} [opts.render=true] - If `false`, no render will be triggered.
 	 */
 	setProps(props, opts=EMPTY) {
-		let d = this._disableRendering===true;
+		let d = this._disableRendering;
 		this._disableRendering = true;
 		hook(this, 'componentWillReceiveProps', props, this.props);
 		this.nextProps = props;
 		this._disableRendering = d;
-		if (opts.renderSync===true && options.syncComponentUpdates===true) {
+		if (opts.renderSync && options.syncComponentUpdates) {
 			this._render();
 		}
 		else if (opts.render!==false) {
@@ -108,7 +107,7 @@ export class Component {
 
 	/** Mark component as dirty and queue up a render. */
 	triggerRender() {
-		if (this._dirty!==true) {
+		if (!this._dirty) {
 			this._dirty = true;
 			renderQueue.add(this);
 		}
@@ -116,15 +115,17 @@ export class Component {
 
 	/** Accepts `props` and `state`, and returns a new Virtual DOM tree to build.
 	 *	Virtual DOM is generally constructed via [JSX](http://jasonformat.com/wtf-is-jsx).
+	 *	@param {object} props		Props (eg: JSX attributes) received from parent element/component
+	 *	@param {object} state		The component's current state
 	 *	@returns VNode
 	 */
-	render(props, state) {
-		return h('div', { component:this.constructor.name }, props.children);
+	render(props) {
+		return h('div', null, props.children);
 	}
 
 	/** @private */
-	_render(opts=EMPTY) {
-		if (this._disableRendering===true) return;
+	_render(opts) {
+		if (this._disableRendering) return;
 
 		this._dirty = false;
 
@@ -170,8 +171,8 @@ export function h(nodeName, attributes, ...args) {
 		children = [];
 		for (let i=0; i<len; i++) {
 			let p = args[i];
-			if (p===null || p===undefined) continue;
-			if (p.join) {			// Array.isArray(args[i])
+			if (isEmpty(p)) continue;
+			if (p.join) {
 				arr = p;
 			}
 			else {
@@ -180,12 +181,12 @@ export function h(nodeName, attributes, ...args) {
 			}
 			for (let j=0; j<arr.length; j++) {
 				let child = arr[j],
-					simple = notEmpty(child) && !isVNode(child);
+					simple = !empty(child) && !isVNode(child);
 				if (simple) child = String(child);
 				if (simple && lastSimple) {
 					children[children.length-1] += child;
 				}
-				else if (notEmpty(child)) {
+				else if (!empty(child)) {
 					children.push(child);
 				}
 				lastSimple = simple;
@@ -233,8 +234,8 @@ function isVNode(obj) {
 
 
 /** @private Check if a value is `null` or `undefined`. */
-function notEmpty(x) {
-	return x!==null && x!==undefined;
+function empty(x) {
+	return x===null || x===undefined;
 }
 
 
@@ -596,12 +597,9 @@ function setComplexAccessor(node, name, value, old) {
 /** @private Proxy an event to hooked event handlers */
 function eventProxy(e) {
 	let l = this._listeners,
-		fn = l[normalizeEventType(e.type)];
+		fn = l[e.type.toUpperCase()];
 	if (fn) return fn.call(this, hook(hooks, 'event', e) || e);
 }
-
-/** @private @function Normalize an event type/name to lowercase */
-let normalizeEventType = memoize(type => type.toLowerCase());
 
 
 
