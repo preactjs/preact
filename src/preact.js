@@ -13,6 +13,8 @@ let hop = Object.prototype.hasOwnProperty;
 /** @private */
 let memoize = (fn, mem={}) => k => hop.call(mem, k) ? mem[k] : (mem[k] = fn(k));
 
+let delve = (obj, key) => key.split('.').reduce( (r,k) => (r && r[k]), obj);
+
 /** @public @object Global options */
 let options = {
 	/** If `true`, `prop` changes trigger synchronous component updates. */
@@ -59,6 +61,8 @@ export class Component {
 	constructor() {
 		/** @private */
 		this._dirty = this._disableRendering = false;
+		/** @private */
+		this._linkedStates = {};
 		/** @public */
 		this.nextProps = this.base = null;
 		/** @type {object} */
@@ -75,6 +79,31 @@ export class Component {
 	 */
 	shouldComponentUpdate(props, state) {
 		return true;
+	}
+
+	/** Returns a function that sets a state property when called.
+	 *	Calling linkState() repeatedly with the same arguments returns a cached link function.
+	 *
+	 *	Provides some built-in special cases:
+	 *		- Checkboxes and radio buttons link their boolean `checked` value
+	 *		- Inputs automatically link their `value` property
+	 *		- Event paths fall back to any associated Component if not found on an element
+	 *		- If linked value is a function, will invoke it and use the result
+	 *
+	 *	@param {string} key				The path to set - can be a dot-notated deep key
+	 *	@param {string} [eventPath]		If set, attempts to find the new state value at a given dot-notated path within the object passed to the linkedState setter.
+	 *	@returns {function} linkStateSetter(e)
+	 *
+	 *	@example Update a "text" state value when an input changes:
+	 *		<input onChange={ this.linkState('text') } />
+	 *
+	 *	@example Set a deep state value on click
+	 *		<button onClick={ this.linkState('touch.coords', 'touches.0') }>Tap</button
+	 */
+	linkState(key, eventPath) {
+		let c = this._linkedStates,
+			cacheKey = key + '|' + (eventPath || '');
+		return c[cacheKey] || (c[cacheKey] = createLinkedState(this, key, eventPath));
 	}
 
 	/** Update component state by copying values from `state` to `this.state`.
@@ -129,27 +158,35 @@ export class Component {
 
 		this._dirty = false;
 
-		if (this.base && hook(this, 'shouldComponentUpdate', this.props, this.state)===false) {
-			this.props = this.nextProps;
-			return;
+		let p = this.nextProps,
+			s = this.state;
+
+		if (this.base) {
+			if (hook(this, 'shouldComponentUpdate', p, s)===false) {
+				this.props = p;
+				return;
+			}
+
+			hook(this, 'componentWillUpdate', p, s);
 		}
 
-		this.props = this.nextProps;
+		this.props = p;
 
-		hook(this, 'componentWillUpdate');
+		let rendered = hook(this, 'render', p, s);
 
-		let rendered = hook(this, 'render', this.props, this.state);
-
-		if (this.base || opts.build===true) {
+		if (this.base || (opts && opts.build)) {
 			let base = build(this.base, rendered || EMPTY_BASE, this);
+
 			if (this.base && base!==this.base) {
 				let p = this.base.parentNode;
 				if (p) p.replaceChild(base, this.base);
 			}
 			this.base = base;
+
+			hook(this, 'componentDidUpdate', p, s);
 		}
 
-		hook(this, 'componentDidUpdate');
+		return rendered;
 	}
 }
 
@@ -451,6 +488,34 @@ function build(dom, vnode, rootComponent) {
 }
 
 
+/** @private */
+function createLinkedState(component, key, eventPath) {
+	let path = key.split('.'),
+		p0 = path[0];
+	return function(e) {
+		let t = this,
+			obj = component.state,
+			v, i;
+		if (typeof eventPath==='string') {
+			v = delve(e, eventPath);
+			if (empty(v) && (t=t._component)) {
+				v = delve(t, eventPath);
+			}
+		}
+		else {
+			v = (t.nodeName+t.type).match(/^input(checkbox|radio)$/i) ? t.checked : t.value;
+		}
+		if (typeof v==='function') v = v.call(t);
+		for (i=0; i<path.length-1; i++) {
+			obj = obj[path[i]] || {};
+		}
+		obj[path[i]] = v;
+		component.setState({ [p0]: component.state[p0] });
+	};
+}
+
+
+
 /** @private Managed re-rendering queue for dirty components. */
 let renderQueue = {
 	items: [],
@@ -517,15 +582,19 @@ let recycler = {
 let componentRecycler = {
 	components: {},
 	collect(component) {
-		let name = component.constructor.name;
-		let list = componentRecycler.components[name] || (componentRecycler.components[name] = []);
-		list.push(component);
+		let name = component.constructor.name,
+			list = componentRecycler.components[name];
+		if (list) list.push(component);
+		else componentRecycler.components[name] = [component];
 	},
 	create(ctor) {
-		let name = ctor.name,
-			list = componentRecycler.components[name];
+		let list = componentRecycler.components[ctor.name];
 		if (list && list.length) {
-			return list.splice(0, 1)[0];
+			for (let i=list.length; i--; ) {
+				if (list[i].constructor===ctor) {
+					return list.splice(i, 1)[0];
+				}
+			}
 		}
 		return new ctor();
 	}
