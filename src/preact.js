@@ -158,27 +158,35 @@ export class Component {
 
 		this._dirty = false;
 
-		if (this.base && hook(this, 'shouldComponentUpdate', this.props, this.state)===false) {
-			this.props = this.nextProps;
-			return;
+		let p = this.nextProps,
+			s = this.state;
+
+		if (this.base) {
+			if (hook(this, 'shouldComponentUpdate', p, s)===false) {
+				this.props = p;
+				return;
+			}
+
+			hook(this, 'componentWillUpdate', p, s);
 		}
 
-		this.props = this.nextProps;
+		this.props = p;
 
-		hook(this, 'componentWillUpdate');
+		let rendered = hook(this, 'render', p, s);
 
-		let rendered = hook(this, 'render', this.props, this.state);
-
-		if (this.base || opts.build===true) {
+		if (this.base || (opts && opts.build)) {
 			let base = build(this.base, rendered || EMPTY_BASE, this);
+
 			if (this.base && base!==this.base) {
 				let p = this.base.parentNode;
 				if (p) p.replaceChild(base, this.base);
 			}
 			this.base = base;
+
+			hook(this, 'componentDidUpdate', p, s);
 		}
 
-		hook(this, 'componentDidUpdate');
+		return rendered;
 	}
 }
 
