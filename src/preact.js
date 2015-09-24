@@ -13,6 +13,8 @@ let hop = Object.prototype.hasOwnProperty;
 /** @private */
 let memoize = (fn, mem={}) => k => hop.call(mem, k) ? mem[k] : (mem[k] = fn(k));
 
+let delve = (obj, key) => key.split('.').reduce( (r,k) => (r && r[k]), obj);
+
 /** @public @object Global options */
 let options = {
 	/** If `true`, `prop` changes trigger synchronous component updates. */
@@ -59,6 +61,8 @@ export class Component {
 	constructor() {
 		/** @private */
 		this._dirty = this._disableRendering = false;
+		/** @private */
+		this._linkedStates = {};
 		/** @public */
 		this.nextProps = this.base = null;
 		/** @type {object} */
@@ -75,6 +79,31 @@ export class Component {
 	 */
 	shouldComponentUpdate(props, state) {
 		return true;
+	}
+
+	/** Returns a function that sets a state property when called.
+	 *	Calling linkState() repeatedly with the same arguments returns a cached link function.
+	 *
+	 *	Provides some built-in special cases:
+	 *		- Checkboxes and radio buttons link their boolean `checked` value
+	 *		- Inputs automatically link their `value` property
+	 *		- Event paths fall back to any associated Component if not found on an element
+	 *		- If linked value is a function, will invoke it and use the result
+	 *
+	 *	@param {string} key				The path to set - can be a dot-notated deep key
+	 *	@param {string} [eventPath]		If set, attempts to find the new state value at a given dot-notated path within the object passed to the linkedState setter.
+	 *	@returns {function} linkStateSetter(e)
+	 *
+	 *	@example Update a "text" state value when an input changes:
+	 *		<input onChange={ this.linkState('text') } />
+	 *
+	 *	@example Set a deep state value on click
+	 *		<button onClick={ this.linkState('touch.coords', 'touches.0') }>Tap</button
+	 */
+	linkState(key, eventPath) {
+		let c = this._linkedStates,
+			cacheKey = key + '|' + (eventPath || '');
+		return c[cacheKey] || (c[cacheKey] = createLinkedState(this, key, eventPath));
 	}
 
 	/** Update component state by copying values from `state` to `this.state`.
@@ -449,6 +478,34 @@ function build(dom, vnode, rootComponent) {
 
 	return out;
 }
+
+
+/** @private */
+function createLinkedState(component, key, eventPath) {
+	let path = key.split('.'),
+		p0 = path[0];
+	return function(e) {
+		let t = this,
+			obj = component.state,
+			v, i;
+		if (typeof eventPath==='string') {
+			v = delve(e, eventPath);
+			if (empty(v) && (t=t._component)) {
+				v = delve(t, eventPath);
+			}
+		}
+		else {
+			v = (t.nodeName+t.type).match(/^input(checkbox|radio)$/i) ? t.checked : t.value;
+		}
+		if (typeof v==='function') v = v.call(t);
+		for (i=0; i<path.length-1; i++) {
+			obj = obj[path[i]] || {};
+		}
+		obj[path[i]] = v;
+		component.setState({ [p0]: component.state[p0] });
+	};
+}
+
 
 
 /** @private Managed re-rendering queue for dirty components. */
