@@ -582,15 +582,19 @@ let recycler = {
 let componentRecycler = {
 	components: {},
 	collect(component) {
-		let name = component.constructor.name;
-		let list = componentRecycler.components[name] || (componentRecycler.components[name] = []);
-		list.push(component);
+		let name = component.constructor.name,
+			list = componentRecycler.components[name];
+		if (list) list.push(component);
+		else componentRecycler.components[name] = [component];
 	},
 	create(ctor) {
-		let name = ctor.name,
-			list = componentRecycler.components[name];
+		let list = componentRecycler.components[ctor.name];
 		if (list && list.length) {
-			return list.splice(0, 1)[0];
+			for (let i=list.length; i--; ) {
+				if (list[i].constructor===ctor) {
+					return list.splice(i, 1)[0];
+				}
+			}
 		}
 		return new ctor();
 	}
