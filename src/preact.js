@@ -645,7 +645,7 @@ function setAccessor(node, name, value, old) {
 /** @private For props without explicit behavior, apply to a Node as event handlers or attributes. */
 function setComplexAccessor(node, name, value, old) {
 	if (name.substring(0,2)==='on') {
-		let type = name.substring(2).toLowerCase(),
+		let type = normalizeEventName(name),
 			l = node._listeners || (node._listeners = {});
 		if (!l[type]) node.addEventListener(type, eventProxy);
 		l[type] = value;
@@ -666,9 +666,11 @@ function setComplexAccessor(node, name, value, old) {
 /** @private Proxy an event to hooked event handlers */
 function eventProxy(e) {
 	let l = this._listeners,
-		fn = l[e.type.toUpperCase()];
+		fn = l[normalizeEventName(e.type)];
 	if (fn) return fn.call(this, hook(hooks, 'event', e) || e);
 }
+
+let normalizeEventName = memoize(t => t.replace(/^on/i,'').toLowerCase());
 
 
 
