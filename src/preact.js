@@ -208,7 +208,7 @@ export function h(nodeName, attributes, ...args) {
 		children = [];
 		for (let i=0; i<len; i++) {
 			let p = args[i];
-			if (isEmpty(p)) continue;
+			if (empty(p)) continue;
 			if (p.join) {
 				arr = p;
 			}
