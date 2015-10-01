@@ -520,7 +520,6 @@ function createLinkedState(component, key, eventPath) {
 let renderQueue = {
 	items: [],
 	itemsOffline: [],
-	pending: false,
 	add(component) {
 		if (renderQueue.items.push(component)!==1) return;
 
