@@ -50,13 +50,6 @@
     "sinon": "^1.16.1",
     "sinon-chai": "^2.8.0",
     "uglify-js": "^2.4.24",
-    "webpack": "^1.12.1",
-    "xo": "^0.8.0"
-  },
-  "xo": {
-    "esnext": true,
-    "ignore": [
-      "*.js"
-    ]
+    "webpack": "^1.12.1"
   }
 }
