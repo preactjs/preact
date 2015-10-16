@@ -32,7 +32,7 @@ export function render(component, parent) {
 	if (c) hook(c, 'componentWillMount');
 	parent.appendChild(built);
 	if (c) hook(c, 'componentDidMount');
-	return build;
+	return built;
 }
 
 
