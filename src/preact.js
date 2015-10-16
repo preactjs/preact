@@ -456,7 +456,7 @@ function build(dom, vnode, rootComponent) {
 
 	// apply the constructed/enhanced ordered list to the parent
 	for (let i=0, len=newChildren.length; i<len; i++) {
-		// we're intentionally re-referencing out.childNodes here as it is a live array (akin to live NodeList)
+		// we're intentionally re-referencing out.childNodes here as it is a live NodeList
 		if (out.childNodes[i]!==newChildren[i]) {
 			let child = newChildren[i],
 				c = child._component,
