@@ -11,14 +11,16 @@ describe('render()', () => {
 		(document.body || document.documentElement).appendChild(scratch);
 	});
 
+	beforeEach( () => {
+		scratch.innerHTML = '';
+	});
+
 	after( () => {
 		scratch.parentNode.removeChild(scratch);
 		scratch = null;
 	});
 
-	it('should basic empty nodes (<* />)', () => {
-		scratch.innerHTML = '';
-
+	it('should create empty nodes (<* />)', () => {
 		render(<div />, scratch);
 		expect(scratch.childNodes)
 			.to.have.length(1)
@@ -40,9 +42,7 @@ describe('render()', () => {
 		expect(scratch.childNodes[1]).to.have.property('nodeName', 'X-BAR');
 	});
 
-	it('should nested empty nodes', () => {
-		scratch.innerHTML = '';
-
+	it('should nest empty nodes', () => {
 		render((
 			<div>
 				<span />
@@ -63,8 +63,6 @@ describe('render()', () => {
 	});
 
 	it('should apply string attributes', () => {
-		scratch.innerHTML = '';
-
 		render(<div foo="bar" data-foo="databar" />, scratch);
 
 		let div = scratch.childNodes[0];
@@ -77,18 +75,17 @@ describe('render()', () => {
 		expect(div).to.have.deep.property('attributes[1].value', 'databar');
 	});
 
-	it('should apply class/className as String', () => {
-		scratch.innerHTML = '';
+	it('should apply class as String', () => {
 		render(<div class="foo" />, scratch);
 		expect(scratch.childNodes[0]).to.have.property('className', 'foo');
+	});
 
-		scratch.innerHTML = '';
+	it('should alias className to class', () => {
 		render(<div className="bar" />, scratch);
 		expect(scratch.childNodes[0]).to.have.property('className', 'bar');
 	});
 
 	it('should apply style as String', () => {
-		scratch.innerHTML = '';
 		render(<div style="top:5px; position:relative;" />, scratch);
 		expect(scratch.childNodes[0]).to.have.deep.property('style.cssText')
 			.that.matches(/top\s*:\s*5px\s*/)
@@ -96,8 +93,6 @@ describe('render()', () => {
 	});
 
 	it('should only register on* functions as handlers', () => {
-		scratch.innerHTML = '';
-
 		let click = () => {},
 			onclick = () => {},
 			calls = [];
@@ -117,8 +112,6 @@ describe('render()', () => {
 	});
 
 	it('should serialize style objects', () => {
-		scratch.innerHTML = '';
-
 		render(<div style={{
 			color: 'rgb(255, 255, 255)',
 			background: 'rgb(255, 100, 0)',
@@ -140,8 +133,6 @@ describe('render()', () => {
 	});
 
 	it('should serialize class/className', () => {
-		scratch.innerHTML = '';
-
 		render(<div class={{
 			no1: false,
 			no2: 0,
