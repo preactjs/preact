@@ -372,7 +372,7 @@ function build(dom, vnode, rootComponent) {
 		// reclaim element nodes
 		if (dom.nodeType===1) recycler.collect(dom);
 	}
-	else if (dom._component && dom._component!==rootComponent) {
+	else if (rootComponent && dom._component && dom._component!==rootComponent) {
 		unmountComponent(dom, dom._component);
 	}
 
