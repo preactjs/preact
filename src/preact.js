@@ -126,11 +126,13 @@ export class Component {
 		hook(this, 'componentWillReceiveProps', props, this.props);
 		this.nextProps = props;
 		this._disableRendering = d;
-		if (opts.renderSync && options.syncComponentUpdates) {
-			this._render();
-		}
-		else if (opts.render!==false) {
-			this.triggerRender();
+		if (opts.render!==false) {
+			if (opts.renderSync || options.syncComponentUpdates) {
+				this._render();
+			}
+			else {
+				this.triggerRender();
+			}
 		}
 	}
 
