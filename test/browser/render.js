@@ -152,4 +152,44 @@ describe('render()', () => {
 			.to.include.members(['yes1', 'yes2', 'yes3', 'yes4', 'yes5'])
 			.and.not.include.members(['no1', 'no2', 'no3', 'no4', 'no5']);
 	});
+
+	it('should render components', () => {
+		class C1 extends Component {
+			render() {
+				return <div>C1</div>;
+			}
+		}
+		sinon.spy(C1.prototype, 'render');
+		render(<C1 />, scratch);
+
+		expect(C1.prototype.render)
+			.to.have.been.calledOnce
+			.and.to.have.been.calledWithMatch({}, {})
+			.and.to.have.returned(sinon.match({ nodeName:'div' }));
+
+		expect(scratch.innerHTML).to.equal('<div>C1</div>');
+	});
+
+	it('should render components with props', () => {
+		const PROPS = { foo:'bar', onBaz:()=>{} };
+
+		class C2 extends Component {
+			render(props) {
+				return <div {...props} />;
+			}
+		}
+		sinon.spy(C2.prototype, 'render');
+
+		render(<C2 {...PROPS} />, scratch);
+
+		expect(C2.prototype.render)
+			.to.have.been.calledOnce
+			.and.to.have.been.calledWithMatch(PROPS, {})
+			.and.to.have.returned(sinon.match({
+				nodeName: 'div',
+				attributes: PROPS
+			}));
+
+		expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
+	});
 });
