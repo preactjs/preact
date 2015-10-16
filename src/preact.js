@@ -290,6 +290,9 @@ function isSameNodeType(node, vnode) {
 /** @private Apply the component referenced by a VNode to the DOM. */
 function buildComponentFromVNode(dom, vnode) {
 	let c = dom && dom._component;
+	if (!vnode.nodeName.prototype.render) {
+		return build(dom, vnode.nodeName(getNodeProps(vnode)) || EMPTY_BASE);
+	}
 
 	if (c && dom._componentConstructor===vnode.nodeName) {
 		let props = getNodeProps(vnode);
@@ -369,7 +372,7 @@ function build(dom, vnode, rootComponent) {
 		// reclaim element nodes
 		if (dom.nodeType===1) recycler.collect(dom);
 	}
-	else if (dom._component && dom._component!==rootComponent) {
+	else if (rootComponent && dom._component && dom._component!==rootComponent) {
 		unmountComponent(dom, dom._component);
 	}
 
