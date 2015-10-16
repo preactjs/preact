@@ -1,4 +1,4 @@
-import { h, render } from '../../preact';
+import { h, render, rerender, Component } from '../../preact';
 let { expect } = chai;
 
 /** @jsx h */
