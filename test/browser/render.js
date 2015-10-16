@@ -192,4 +192,118 @@ describe('render()', () => {
 
 		expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
 	});
+
+	it('should render functional components', () => {
+		const PROPS = { foo:'bar', onBaz:()=>{} };
+
+		const C3 = sinon.spy( props => <div {...props} /> );
+
+		render(<C3 {...PROPS} />, scratch);
+
+		expect(C3)
+			.to.have.been.calledOnce
+			.and.to.have.been.calledWithExactly(PROPS)
+			.and.to.have.returned(sinon.match({
+				nodeName: 'div',
+				attributes: PROPS
+			}));
+
+		expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
+	});
+
+	it('should render nested functional components', () => {
+		const PROPS = { foo:'bar', onBaz:()=>{} };
+
+		const Outer = sinon.spy(
+			props => <Inner {...props} />
+		);
+
+		const Inner = sinon.spy(
+			props => <div {...props}>inner</div>
+		);
+
+		render(<Outer {...PROPS} />, scratch);
+
+		expect(Outer)
+			.to.have.been.calledOnce
+			.and.to.have.been.calledWithExactly(PROPS)
+			.and.to.have.returned(sinon.match({
+				nodeName: Inner,
+				attributes: PROPS
+			}));
+
+		expect(Inner)
+			.to.have.been.calledOnce
+			.and.to.have.been.calledWithExactly(PROPS)
+			.and.to.have.returned(sinon.match({
+				nodeName: 'div',
+				attributes: PROPS,
+				children: ['inner']
+			}));
+
+		expect(scratch.innerHTML).to.equal('<div foo="bar">inner</div>');
+	});
+
+	it('should re-render nested functional components', () => {
+		let doRender = null;
+		class Outer extends Component {
+			componentDidMount() {
+				let i = 1;
+				doRender = () => this.setState({ i: ++i });
+			}
+			componentWillUnmount() {}
+			render(props, { i }) {
+				return <Inner i={i} {...props} />;
+			}
+		}
+		sinon.spy(Outer.prototype, 'render');
+		sinon.spy(Outer.prototype, 'componentWillUnmount');
+
+		let j = 0;
+		const Inner = sinon.spy(
+			props => <div j={ ++j } {...props}>inner</div>
+		);
+
+		render(<Outer foo="bar" />, scratch);
+
+		// update & flush
+		doRender();
+		rerender();
+
+		expect(Outer.prototype.componentWillUnmount)
+			.not.to.have.been.called;
+
+		expect(Inner).to.have.been.calledTwice;
+
+		expect(Inner.secondCall)
+			.to.have.been.calledWithExactly({ foo:'bar', i:2 })
+			.and.to.have.returned(sinon.match({
+				attributes: {
+					j: 2,
+					i: 2,
+					foo: 'bar'
+				}
+			}));
+
+		expect(scratch.innerHTML).to.equal('<div j="2" foo="bar" i="2">inner</div>');
+
+		// update & flush
+		doRender();
+		rerender();
+
+		expect(Inner).to.have.been.calledThrice;
+
+		expect(Inner.thirdCall)
+			.to.have.been.calledWithExactly({ foo:'bar', i:3 })
+			.and.to.have.returned(sinon.match({
+				attributes: {
+					j: 3,
+					i: 3,
+					foo: 'bar'
+				}
+			}));
+
+		expect(scratch.innerHTML).to.equal('<div j="3" foo="bar" i="3">inner</div>');
+	});
+
 });
