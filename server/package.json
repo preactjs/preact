@@ -1,6 +1,6 @@
 {
   "name": "preact-render-to-string",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Render JSX to an HTML string, with support for Preact components.",
   "main": "dist/index.js",
   "scripts": {
@@ -11,8 +11,9 @@
   },
   "keywords": [
     "preact",
-    "photon",
-    "electron"
+    "render",
+    "universal",
+    "isomorphic"
   ],
   "author": "Jason Miller <jason@developit.ca>",
   "license": "ISC",
