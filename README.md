@@ -1,7 +1,8 @@
 # Preact
 
-[![npm Version](https://img.shields.io/npm/v/preact.svg)](http://npm.im/preact)
-[![travis-ci](https://travis-ci.org/developit/preact.svg)](https://travis-ci.org/developit/preact)
+[![npm](https://img.shields.io/npm/v/preact.svg)](http://npm.im/preact)
+[![travis](https://travis-ci.org/developit/preact.svg)](https://travis-ci.org/developit/preact)
+[![gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/developit/preact)
 
 > Name stolen, if found return to jason [at] developit [dot] ca
 
