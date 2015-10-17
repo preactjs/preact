@@ -13,6 +13,13 @@ describe('render-to-string', () => {
 
 			expect(rendered).to.equal(expected);
 		});
+
+		it('should omit null and undefined attributes', () => {
+			let rendered = render(<div a={null} b={undefined} />),
+				expected = `<div></div>`;
+
+			expect(rendered).to.equal(expected);
+		});
 	});
 
 	describe('Functional Components', () => {

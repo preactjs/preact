@@ -21,11 +21,8 @@ export default function renderToString(vnode) {
 
 	// components
 	if (typeof nodeName==='function') {
-		let props = { children },
+		let props = { children, ...attributes },
 			rendered;
-		for (let i in attributes) if (HOP.call(attributes, i)) {
-			props[i] = attributes[i];
-		}
 
 		if (typeof nodeName.prototype.render!=='function') {
 			// stateless functional components
@@ -42,14 +39,18 @@ export default function renderToString(vnode) {
 
 	// render JSX to HTML
 	let s = `<${nodeName}`;
-	for (let name in attributes) if (HOP.call(attributes, name)) {
-		s += ` ${name}="${escape(attributes[name])}"`;
+	for (let name in attributes) {
+		if (HOP.call(attributes, name)) {
+			let v = attributes[name];
+			if (v!==null && v!==undefined) {
+				s += ` ${name}="${escape(v)}"`;
+			}
+		}
 	}
+	s += '>';
 	if (children && children.length) {
-		s += `>${children.map(renderToString).join('')}</${nodeName}>`;
+		s += children.map(renderToString).join('');
 	}
-	else {
-		s += ' />';
-	}
+	s += `</${nodeName}>`
 	return s;
 };
