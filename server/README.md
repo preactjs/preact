@@ -5,6 +5,9 @@ Render JSX and [Preact] components to an HTML string.
 Works in Node & the browser, making it useful for universal/isomorphic rendering.
 
 
+---
+
+
 ### Render JSX/VDOM to HTML
 
 ```js
@@ -49,4 +52,14 @@ console.log(html);
 // <div class="box box-open"><span class="fox">Finn</span></div>
 ```
 
+
+---
+
+
+### License
+
+[MIT]
+
+
 [Preact]: https://github.com/developit/preact
+[MIT]: http://choosealicense.com/licenses/mit/
