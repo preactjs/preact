@@ -17,6 +17,14 @@
   ],
   "author": "Jason Miller <jason@developit.ca>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/developit/preact-render-to-string.git"
+  },
+  "bugs": {
+    "url": "https://github.com/developit/preact-render-to-string/issues"
+  },
+  "homepage": "https://github.com/developit/preact-render-to-string",
   "devDependencies": {
     "babel": "^5.8.23",
     "babel-eslint": "^4.1.3",
