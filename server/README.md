@@ -67,6 +67,7 @@ console.log(html);
 import express from 'express';
 import { h } from 'preact';
 import render from 'preact-render-to-string';
+/** @jsx h */
 
 // silly example component:
 const Fox = ({ name }) => (
