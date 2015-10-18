@@ -293,7 +293,9 @@ function isSameNodeType(node, vnode) {
 function buildComponentFromVNode(dom, vnode) {
 	let c = dom && dom._component;
 	if (!vnode.nodeName.prototype.render) {
-		return build(dom, vnode.nodeName(getNodeProps(vnode)) || EMPTY_BASE);
+		let p = build(dom, vnode.nodeName(getNodeProps(vnode)) || EMPTY_BASE);
+		p._componentConstructor = vnode.nodeName;
+		return p;
 	}
 
 	if (c && dom._componentConstructor===vnode.nodeName) {
