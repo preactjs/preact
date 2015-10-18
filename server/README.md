@@ -7,6 +7,8 @@ Render JSX and [Preact] components to an HTML string.
 
 Works in Node & the browser, making it useful for universal/isomorphic rendering.
 
+\>\> **[Cute Fox-Related Demo](http://codepen.io/developit/pen/dYZqjE?editors=001)** _(@ CodePen)_ <<
+
 
 ---
 
@@ -53,6 +55,37 @@ let html = render(
 
 console.log(html);
 // <div class="box box-open"><span class="fox">Finn</span></div>
+```
+
+
+---
+
+
+### Render JSX / Preact / Whatever via Express!
+
+```js
+import express from 'express';
+import { h } from 'preact';
+import render from 'preact-render-to-string';
+
+// silly example component:
+const Fox = ({ name }) => (
+	<div class="fox">
+		<h5>{ name }</h5>
+		<p>This page is all about {name}.</p>
+	</div>
+);
+
+// basic HTTP server via express:
+const app = express();
+app.listen(8080);
+
+// on each request, render and return a component:
+app.get('/:fox', (req, res) => {
+	let html = render(<Fox name={req.params.fox} />);
+	// send it back wrapped up as an HTML5 document:
+	res.send(`<!DOCTYPE html><html><body>${html}</body></html>`);
+});
 ```
 
 
