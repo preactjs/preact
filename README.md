@@ -17,6 +17,7 @@ It retains a large amount of compatibility with React, but only the [stateless f
 ## Demos
 
 - [ESBench](http://esbench.com) is built using Preact.
+- [Documentation Viewer](https://documentation-viewer.firebaseapp.com) ([Github Project](https://github.com/developit/documentation-viewer))
 - [Flickr Browser](http://codepen.io/developit/full/VvMZwK/) (@ CodePen)
 - [Animating Text](http://codepen.io/developit/full/LpNOdm/) (@ CodePen)
 - [60FPS Rainbow Spiral](http://codepen.io/developit/full/xGoagz/) (@ CodePen)
