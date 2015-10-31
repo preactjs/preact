@@ -574,6 +574,13 @@ let recycler = {
 	},
 	clean(node) {
 		node.remove();
+
+		// remove event listeners & registry
+		let l = node._listeners;
+		delete node._listeners;
+		if (l) for (let i in l) node.removeEventListener(i, eventProxy);
+
+		// strip attributes
 		let len = node.attributes && node.attributes.length;
 		if (len) for (let i=len; i--; ) {
 			node.removeAttribute(node.attributes[i].name);
