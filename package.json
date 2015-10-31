@@ -5,7 +5,7 @@
   "main": "preact.js",
   "scripts": {
     "build": "npm run transpile && npm run minify && npm run size",
-    "transpile": "babel src --source-root src -s -d .",
+    "transpile": "babel -f preact.js -s -o $npm_package_main < src/${npm_package_main}",
     "minify": "uglifyjs -c sequences,dead_code,conditionals,booleans,unused,if_return,join_vars,drop_console -m -o $npm_package_main --in-source-map ${npm_package_main}.map --source-map ${npm_package_main}.map -- $npm_package_main",
     "size": "size=$(gzip-size $npm_package_main) && echo \"gzip size: $size / $(pretty-bytes $size)\"",
     "test": "eslint src test && npm run test:mocha && npm run test:karma",
