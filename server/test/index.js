@@ -129,4 +129,21 @@ describe('render-to-string', () => {
 				);
 		});
 	});
+
+	describe('className / class massaging', () => {
+		it('should render class using className', () => {
+			let rendered = render(<div className="foo bar" />);
+			expect(rendered).to.equal('<div class="foo bar"></div>');
+		});
+
+		it('should render class using class', () => {
+			let rendered = render(<div class="foo bar" />);
+			expect(rendered).to.equal('<div class="foo bar"></div>');
+		});
+
+		it('should prefer className over class', () => {
+			let rendered = render(<div class="foo" className="foo bar" />);
+			expect(rendered).to.equal('<div class="foo bar"></div>');
+		});
+	});
 });
