@@ -42,6 +42,10 @@ export default function renderToString(vnode) {
 	for (let name in attributes) {
 		if (HOP.call(attributes, name)) {
 			let v = attributes[name];
+			if (name==='className') {
+				if (attributes['class']) continue;
+				name = 'class';
+			}
 			if (v!==null && v!==undefined) {
 				s += ` ${name}="${escape(v)}"`;
 			}
