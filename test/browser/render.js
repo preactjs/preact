@@ -1,4 +1,4 @@
-import { h, render, rerender, Component } from '../../preact';
+import { h, render, rerender, Component } from '../../src/preact';
 let { expect } = chai;
 
 /** @jsx h */
@@ -306,4 +306,85 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('<div j="3" foo="bar" i="3">inner</div>');
 	});
 
+	it('should re-render nested components', () => {
+		let doRender = null;
+		class Outer extends Component {
+			componentDidMount() {
+				let i = 1;
+				doRender = () => this.setState({ i: ++i });
+			}
+			componentWillUnmount() {}
+			render(props, { i }) {
+				return <Inner i={i} {...props} />;
+			}
+		}
+		sinon.spy(Outer.prototype, 'render');
+		sinon.spy(Outer.prototype, 'componentDidMount');
+		sinon.spy(Outer.prototype, 'componentWillUnmount');
+
+		let j = 0;
+		class Inner extends Component {
+			constructor(...args) {
+				super();
+				this._constructor(...args);
+			}
+			_constructor() {}
+			componentDidMount() {}
+			componentWillUnmount() {}
+			render(props) {
+				return <div j={ ++j } {...props}>inner</div>;
+			}
+		}
+		sinon.spy(Inner.prototype, '_constructor');
+		sinon.spy(Inner.prototype, 'render');
+		sinon.spy(Inner.prototype, 'componentDidMount');
+		sinon.spy(Inner.prototype, 'componentWillUnmount');
+
+		render(<Outer foo="bar" />, scratch);
+
+		expect(Outer.prototype.componentDidMount).to.have.been.calledOnce;
+
+		// update & flush
+		doRender();
+		rerender();
+
+		expect(Outer.prototype.componentWillUnmount).not.to.have.been.called;
+
+		expect(Inner.prototype._constructor).to.have.been.calledOnce;
+		expect(Inner.prototype.componentWillUnmount).not.to.have.been.called;
+		expect(Inner.prototype.componentDidMount).to.have.been.calledOnce;
+		expect(Inner.prototype.render).to.have.been.calledTwice;
+
+		expect(Inner.prototype.render.secondCall)
+			.to.have.been.calledWith({ foo:'bar', i:2 })
+			.and.to.have.returned(sinon.match({
+				attributes: {
+					j: 2,
+					i: 2,
+					foo: 'bar'
+				}
+			}));
+
+		expect(scratch.innerHTML).to.equal('<div j="2" foo="bar" i="2">inner</div>');
+
+		// update & flush
+		doRender();
+		rerender();
+
+		expect(Inner.prototype.componentWillUnmount).not.to.have.been.called;
+		expect(Inner.prototype.componentDidMount).to.have.been.calledOnce;
+		expect(Inner.prototype.render).to.have.been.calledThrice;
+
+		expect(Inner.prototype.render.thirdCall)
+			.to.have.been.calledWith({ foo:'bar', i:3 })
+			.and.to.have.returned(sinon.match({
+				attributes: {
+					j: 3,
+					i: 3,
+					foo: 'bar'
+				}
+			}));
+
+		expect(scratch.innerHTML).to.equal('<div j="3" foo="bar" i="3">inner</div>');
+	});
 });
