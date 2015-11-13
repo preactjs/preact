@@ -36,38 +36,36 @@ let options = {
 	syncComponentUpdates: true
 };
 
-/** @public @object Global hook methods */
-let hooks = {};
 
 
-/** @public Render JSX into a `parent` Element. */
-export function render(component, parent) {
-	let built = build(null, component),
-		c = built._component;
-	if (c) hook(c, 'componentWillMount');
-	parent.appendChild(built);
-	if (c) hook(c, 'componentDidMount');
-	return built;
-}
+/** Global hook methods
+ *	@public
+ *	@namespace {Object}
+ */
+let hooks = {
 
+	/** Processes all created VNodes.
+	 *	@param {VNode} vnode	A newly-created VNode to normalize/process
+	 *	@protected
+	 */
+	vnode({ attributes }) {
+		if (!attributes) return;
 
-/** @protected Processes all created VNodes */
-hooks.vnode = ({ attributes }) => {
-	if (!attributes) return;
+		let s = attributes.style;
+		if (s && !s.substring) {
+			attributes.style = styleObjToCss(s);
+		}
 
-	let s = attributes.style;
-	if (s && !s.substring) {
-		attributes.style = styleObjToCss(s);
+		let c = attributes['class'];
+		if (hop.call(attributes, 'className')) {
+			c = attributes['class'] = attributes.className;
+			delete attributes.className;
+		}
+		if (c && !c.substring) {
+			attributes['class'] = hashToClassName(c);
+		}
 	}
 
-	let c = attributes['class'];
-	if (hop.call(attributes, 'className')) {
-		c = attributes['class'] = attributes.className;
-		delete attributes.className;
-	}
-	if (c && !c.substring) {
-		attributes['class'] = hashToClassName(c);
-	}
 };
 
 
@@ -136,37 +134,7 @@ export class Component {
 	 */
 	setState(state) {
 		extend(this.state, state);
-		this.triggerRender();
-	}
-
-	/** Set `props` for the component.
-	*	@param {object} props
-	*	@param {object} [opts]
-	*	@param {object} [opts.renderSync] - If `true` and {@link options.syncComponentUpdates} is `true`, triggers synchronous rendering.
-	*	@param {object} [opts.render=true] - If `false`, no render will be triggered.
-	 */
-	setProps(props, opts=EMPTY) {
-		let d = this._disableRendering;
-		this._disableRendering = true;
-		hook(this, 'componentWillReceiveProps', props, this.props);
-		this.nextProps = props;
-		this._disableRendering = d;
-		if (opts.render!==false) {
-			if (opts.renderSync || options.syncComponentUpdates) {
-				this._render();
-			}
-			else {
-				this.triggerRender();
-			}
-		}
-	}
-
-	/** Mark component as dirty and queue up a render. */
-	triggerRender() {
-		if (!this._dirty) {
-			this._dirty = true;
-			renderQueue.add(this);
-		}
+		triggerComponentRender(this);
 	}
 
 	/** Accepts `props` and `state`, and returns a new Virtual DOM tree to build.
@@ -178,43 +146,52 @@ export class Component {
 	render(props) {
 		return h('div', null, props.children);
 	}
+}
 
-	/** @private */
-	_render(opts) {
-		if (this._disableRendering) return;
 
-		this._dirty = false;
 
-		let p = this.nextProps,
-			s = this.state;
+/** Virtual DOM Node */
+export class VNode {
+	constructor(nodeName, attributes, children) {
+		/** @type {string|function} */
+		this.nodeName = nodeName;
 
-		if (this.base) {
-			if (hook(this, 'shouldComponentUpdate', p, s)===false) {
-				this.props = p;
-				return;
-			}
+		/** @type {object<string>|undefined} */
+		this.attributes = attributes;
 
-			hook(this, 'componentWillUpdate', p, s);
-		}
-
-		this.props = p;
-
-		let rendered = hook(this, 'render', p, s);
-
-		if (this.base || (opts && opts.build)) {
-			let base = build(this.base, rendered || EMPTY_BASE, this);
-
-			if (this.base && base!==this.base) {
-				let p = this.base.parentNode;
-				if (p) p.replaceChild(base, this.base);
-			}
-			this.base = base;
-
-			hook(this, 'componentDidUpdate', p, s);
-		}
-
-		return rendered;
+		/** @type {array<VNode>|undefined} */
+		this.children = children;
 	}
+}
+VNode.prototype.__isVNode = true;
+
+
+
+/** Render JSX into a `parent` Element.
+ *	@param {VNode} vnode		A (JSX) VNode to render
+ *	@param {Element} parent		DOM element to render into
+ *	@param {Element} [merge]	Attempt to re-use an existing DOM tree rooted at `merge`
+ *	@public
+ *
+ *	@example
+ *	// render a div into <body>:
+ *	render(<div id="hello">hello!</div>, document.body);
+ *
+ *	@example
+ *	// render a "Thing" component into #foo:
+ *	const Thing = ({ name }) => <span>{ name }</span>;
+ *	render(<Thing name="one" />, document.querySelector('#foo'));
+ */
+export function render(vnode, parent, merge=null) {
+	let existing = merge && merge._component && merge._componentConstructor===vnode.nodeName,
+		built = build(merge, vnode),
+		c = !existing && built._component;
+	if (c) deepHook(c, 'componentWillMount');
+	if (build.parentNode!==parent) {
+		parent.appendChild(built);
+	}
+	if (c) deepHook(c, 'componentDidMount');
+	return built;
 }
 
 
@@ -268,21 +245,6 @@ export function h(nodeName, attributes, ...args) {
 }
 
 
-/** Virtual DOM Node */
-export class VNode {
-	constructor(nodeName, attributes, children) {
-		/** @type {string|class} */
-		this.nodeName = nodeName;
-
-		/** @type {object<string>|undefined} */
-		this.attributes = attributes;
-
-		/** @type {array<VNode>|undefined} */
-		this.children = children;
-	}
-}
-VNode.prototype.__isVNode = true;
-
 
 /** Invoke a "hook" method with arguments if it exists.
  *	@private
@@ -332,13 +294,158 @@ function isSameNodeType(node, vnode) {
 	if (node.nodeType===3) {
 		return typeof vnode==='string';
 	}
+	if (isFunctionalComponent(vnode)) return true;
 	let nodeName = vnode.nodeName;
 	if (typeof nodeName==='function') return node._componentConstructor===nodeName;
 	return node.nodeName.toLowerCase()===nodeName;
 }
 
 
-/** @private Apply the component referenced by a VNode to the DOM. */
+
+/** Check if a VNode is a reference to a stateless functional component.
+ *	A function component is represented as a VNode whose `nodeName` property is a reference to a function.
+ *	If that function is not a Component (ie, has no `.render()` method on a prototype), it is considered a stateless functional component.
+ *	@param {VNode} vnode	A VNode
+ *	@private
+ */
+function isFunctionalComponent({ nodeName }) {
+	return typeof nodeName==='function' && !nodeName.prototype.render;
+}
+
+
+
+/** Construct a resultant VNode from a VNode referencing a stateless functional component.
+ *	@param {VNode} vnode	A VNode with a `nodeName` property that is a reference to a function.
+ *	@private
+ */
+function buildFunctionalComponent(vnode) {
+	return vnode.nodeName(getNodeProps(vnode)) || EMPTY_BASE;
+}
+
+
+
+/** Mark component as dirty and queue up a render.
+ *	@param {Component} component
+ *	@private
+ */
+function triggerComponentRender(component) {
+	if (!component._dirty) {
+		component._dirty = true;
+		renderQueue.add(component);
+	}
+}
+
+
+
+/** Set a component's `props` (generally derived from JSX attributes).
+*	@param {Object} props
+*	@param {Object} [opts]
+*	@param {boolean} [opts.renderSync=false]	If `true` and {@link options.syncComponentUpdates} is `true`, triggers synchronous rendering.
+*	@param {boolean} [opts.render=true]			If `false`, no render will be triggered.
+ */
+function setComponentProps(component, props, opts=EMPTY) {
+	let d = component._disableRendering;
+	component._disableRendering = true;
+	hook(component, 'componentWillReceiveProps', props, component.props);
+	component.nextProps = props;
+	component._disableRendering = d;
+	if (opts.render!==false) {
+		if (opts.renderSync || options.syncComponentUpdates) {
+			renderComponent(component);
+		}
+		else {
+			triggerComponentRender(component);
+		}
+	}
+}
+
+
+
+/** Render a Component, triggering necessary lifecycle events and taking High-Order Components into account.
+ *	@param {Component} component
+ *	@param {Object} [opts]
+ *	@param {boolean} [opts.build=false]		If `true`, component will build and store a DOM node if not already associated with one.
+ *	@private
+ */
+function renderComponent(component, opts) {
+	if (component._disableRendering) return;
+
+	component._dirty = false;
+
+	let p = component.nextProps,
+		s = component.state;
+
+	if (component.base) {
+		if (hook(component, 'shouldComponentUpdate', p, s)===false) {
+			component.props = p;
+			return;
+		}
+
+		hook(component, 'componentWillUpdate', p, s);
+	}
+
+	component.props = p;
+
+	let rendered = hook(component, 'render', p, s),
+		childComponent = rendered && rendered.nodeName,
+		base;
+
+	if (typeof childComponent==='function' && childComponent.prototype.render) {
+		// set up high order component link
+
+		let inst = component._component;
+		if (inst && inst.constructor!==childComponent) {
+			unmountComponent(component.base, inst);
+			inst = null;
+		}
+
+		let childProps = getNodeProps(rendered);
+
+		if (inst) {
+			setComponentProps(inst, childProps, SYNC_RENDER);
+		}
+		else {
+			inst = componentRecycler.create(childComponent);
+			inst._parentComponent = component;
+			component._component = inst;
+			if (component.base) deepHook(inst, 'componentWillMount');
+			setComponentProps(inst, childProps, NO_RENDER);
+			renderComponent(inst, opts);
+			if (component.base) deepHook(inst, 'componentDidMount');
+		}
+
+		base = inst.base;
+	}
+	else {
+		// destroy high order component link
+		if (component._component) {
+			unmountComponent(component.base, component._component);
+		}
+		component._component = null;
+
+		if (component.base || (opts && opts.build)) {
+			base = build(component.base, rendered || EMPTY_BASE, component);
+		}
+	}
+
+	if (component.base && base!==component.base) {
+		let p = component.base.parentNode;
+		if (p) p.replaceChild(base, component.base);
+	}
+
+	component.base = base;
+	if (base) {
+		base._component = component;
+		base._componentConstructor = component.constructor;
+	}
+
+	hook(component, 'componentDidUpdate', p, s);
+
+	return rendered;
+}
+
+
+
 /** Apply the Component referenced by a VNode to the DOM.
  *	@param {Element} dom	The DOM node to mutate
  *	@param {VNode} vnode	A Component-referencing VNode
@@ -347,21 +454,29 @@ function isSameNodeType(node, vnode) {
  */
 function buildComponentFromVNode(dom, vnode) {
 	let c = dom && dom._component;
-	if (!vnode.nodeName.prototype.render) {
-		let p = build(dom, vnode.nodeName(getNodeProps(vnode)) || EMPTY_BASE);
+
+	if (isFunctionalComponent(vnode)) {
+		let p = build(dom, buildFunctionalComponent(vnode));
 		p._componentConstructor = vnode.nodeName;
 		return p;
 	}
 
-	if (c && dom._componentConstructor===vnode.nodeName) {
-		let props = getNodeProps(vnode);
-		c.setProps(props, SYNC_RENDER);
-		return dom;
+	let isOwner = c && dom._componentConstructor===vnode.nodeName;
+	while (c && !isOwner && (c=c._parentComponent)) {
+		isOwner = c.constructor===vnode.nodeName;
+	}
+
+	if (isOwner) {
+		setComponentProps(c, getNodeProps(vnode), SYNC_RENDER);
 	}
 	else {
-		if (c) unmountComponent(dom, c);
-		return createComponentFromVNode(vnode);
+		if (c) {
+			unmountComponent(dom, c);
+		}
+		dom = createComponentFromVNode(vnode);
 	}
+
+	return dom;
 }
 
 
@@ -374,14 +489,16 @@ function createComponentFromVNode(vnode) {
 	let component = componentRecycler.create(vnode.nodeName);
 
 	let props = getNodeProps(vnode);
-	component.setProps(props, NO_RENDER);
-	component._render(DOM_RENDER);
+	setComponentProps(component, props, NO_RENDER);
+	renderComponent(component, DOM_RENDER);
 
-	let node = component.base;
-	node._component = component;
-	node._componentConstructor = vnode.nodeName;
+	// let node = component.base;
+	//if (!node._component) {
+	//	node._component = component;
+	//	node._componentConstructor = vnode.nodeName;
+	//}
 
-	return node;
+	return component.base;
 }
 
 
@@ -394,7 +511,10 @@ function createComponentFromVNode(vnode) {
 function unmountComponent(dom, component) {
 	console.warn('unmounting mismatched component', component);
 
-	delete dom._component;
+	if (dom._component===component) {
+		delete dom._component;
+		delete dom._componentConstructor;
+	}
 	hook(component, 'componentWillUnmount');
 	let base = component.base;
 	if (base && base.parentNode) {
@@ -405,10 +525,21 @@ function unmountComponent(dom, component) {
 }
 
 
-/** @private Apply differences in a given vnode (and it's deep children) to a real DOM Node. */
-function build(dom, vnode, rootComponent) {
+
+/** Apply differences in a given vnode (and it's deep children) to a real DOM Node.
+ *	@param {Element} [dom=null]		A DOM node to mutate into the shape of the `vnode`
+ *	@param {VNode} vnode			A VNode (with descendants forming a tree) representing the desired DOM structure
+ *	@returns {Element} dom			The created/mutated element
+ *	@private
+ */
+function build(dom, vnode) {
 	let out = dom,
 		nodeName = vnode.nodeName;
+
+	if (typeof nodeName==='function' && !nodeName.prototype.render) {
+		vnode = buildFunctionalComponent(vnode);
+		nodeName = vnode.nodeName;
+	}
 
 	if (typeof nodeName==='function') {
 		return buildComponentFromVNode(dom, vnode);
@@ -439,9 +570,6 @@ function build(dom, vnode, rootComponent) {
 		appendChildren(out, slice.call(dom.childNodes));
 		// reclaim element nodes
 		if (dom.nodeType===1) recycler.collect(dom);
-	}
-	else if (rootComponent && dom._component && dom._component!==rootComponent) {
-		unmountComponent(dom, dom._component);
 	}
 
 	// apply attributes
@@ -497,8 +625,11 @@ function build(dom, vnode, rootComponent) {
 	if (vnode.children) {
 		for (let i=0, vlen=vnode.children.length; i<vlen; i++) {
 			let vchild = vnode.children[i];
-			let attrs = vchild.attributes;
-			let key, child;
+			// if (isFunctionalComponent(vchild)) {
+			// 	vchild = buildFunctionalComponent(vchild);
+			// }
+			let attrs = vchild.attributes,
+				key, child;
 			if (attrs) {
 				key = attrs.key;
 				child = key && keyed[key];
@@ -529,14 +660,14 @@ function build(dom, vnode, rootComponent) {
 			let child = newChildren[i],
 				c = child._component,
 				next = out.childNodes[i+1];
-			if (c) hook(c, 'componentWillMount');
+			if (c) deepHook(c, 'componentWillMount');
 			if (next) {
 				out.insertBefore(child, next);
 			}
 			else {
 				out.appendChild(child);
 			}
-			if (c) hook(c, 'componentDidMount');
+			if (c) deepHook(c, 'componentDidMount');
 		}
 	}
 
@@ -619,7 +750,7 @@ let renderQueue = {
 		renderQueue.itemsOffline = items;
 		while (len--) {
 			if (items[len]._dirty) {
-				items[len]._render();
+				renderComponent(items[len]);
 			}
 		}
 	}
@@ -657,6 +788,11 @@ let recycler = {
 
 	clean(node) {
 		node.remove();
+
+		if (node.nodeType===3) return;
+
+		delete node._component;
+		delete node._componentConstructor;
 
 		// remove event listeners & registry
 		let l = node._listeners;
