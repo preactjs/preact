@@ -1,6 +1,6 @@
 {
   "name": "preact",
-  "version": "1.5.2",
+  "version": "2.0.0",
   "description": "Tiny & fast Component-based virtual DOM framework.",
   "main": "preact.js",
   "scripts": {
