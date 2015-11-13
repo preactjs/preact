@@ -9,19 +9,30 @@ const NON_DIMENSION_PROPS = {
 	opacity:1,order:1,orphans:1,strokeOpacity:1,widows:1,zIndex:1,zoom:1
 };
 
-/** @private */
 let slice = Array.prototype.slice;
 
 let hop = Object.prototype.hasOwnProperty;
 
-/** @private */
+/** Create a caching wrapper for the given function.
+ *	@private
+ */
 let memoize = (fn, mem={}) => k => hop.call(mem, k) ? mem[k] : (mem[k] = fn(k));
 
-let delve = (obj, key) => key.split('.').reduce( (r,k) => (r && r[k]), obj);
+/** Get a deep property value from the given object, expressed in dot-notation.
+ *	@private
+ */
+let delve = (obj, key) => (key.split('.').map( p => (obj = obj && obj[p]) ), obj);
 
-/** @public @object Global options */
+
+
+/** Global options
+ *	@public
+ *	@namespace {Object}
+ */
 let options = {
-	/** If `true`, `prop` changes trigger synchronous component updates. */
+	/** If `true`, `prop` changes trigger synchronous component updates.
+	 *	@boolean
+	 */
 	syncComponentUpdates: true
 };
 
@@ -60,7 +71,17 @@ hooks.vnode = ({ attributes }) => {
 };
 
 
-/** @public Base Component, with API similar to React. */
+
+/** Base Component class, for he ES6 Class method of creating Components
+ *	@public
+ *
+ *	@example
+ *	class MyFoo extends Component {
+ *		render(props, state) {
+ *			return <div />;
+ *		}
+ *	}
+ */
 export class Component {
 	constructor() {
 		/** @private */
@@ -110,8 +131,8 @@ export class Component {
 		return c[cacheKey] || (c[cacheKey] = createLinkedState(this, key, eventPath));
 	}
 
-	/** Update component state by copying values from `state` to `this.state`.
-	 *	@param {object} state
+	/** Update component state by copying properties from `state` to `this.state`.
+	 *	@param {object} state		A hash of state properties to update with new values
 	 */
 	setState(state) {
 		extend(this.state, state);
@@ -263,26 +284,50 @@ export class VNode {
 VNode.prototype.__isVNode = true;
 
 
-/** @private Invoke a "hook" method with arguments if it exists. */
+/** Invoke a "hook" method with arguments if it exists.
+ *	@private
+ */
 function hook(obj, name, ...args) {
 	let fn = obj[name];
 	if (fn && typeof fn==='function') return fn.apply(obj, args);
 }
 
 
-/** @private Fast check if an object is a VNode. */
+
+/** Invoke hook() on a component and child components (recursively)
+ *	@private
+ */
+function deepHook(obj, ...args) {
+	do {
+		hook(obj, ...args);
+	} while (obj=obj._component);
+}
+
+
+
+/** Fast check if an object is a VNode.
+ *	@private
+ */
 function isVNode(obj) {
 	return obj && obj.__isVNode===true;
 }
 
 
-/** @private Check if a value is `null` or `undefined`. */
+
+/** Check if a value is `null` or `undefined`.
+ *	@private
+ */
 function empty(x) {
 	return x===null || x===undefined;
 }
 
 
-/** @private Check if two nodes are equivalent. */
+
+/** Check if two nodes are equivalent.
+ *	@param {Element} node
+ *	@param {VNode} vnode
+ *	@private
+ */
 function isSameNodeType(node, vnode) {
 	if (node.nodeType===3) {
 		return typeof vnode==='string';
@@ -294,6 +339,12 @@ function isSameNodeType(node, vnode) {
 
 
 /** @private Apply the component referenced by a VNode to the DOM. */
+/** Apply the Component referenced by a VNode to the DOM.
+ *	@param {Element} dom	The DOM node to mutate
+ *	@param {VNode} vnode	A Component-referencing VNode
+ *	@returns {Element} dom	The created/mutated element
+ *	@private
+ */
 function buildComponentFromVNode(dom, vnode) {
 	let c = dom && dom._component;
 	if (!vnode.nodeName.prototype.render) {
@@ -314,7 +365,11 @@ function buildComponentFromVNode(dom, vnode) {
 }
 
 
-/** @private Instantiate and render a Component, given a VNode whose nodeName is a constructor. */
+
+/** Instantiate and render a Component, given a VNode whose nodeName is a constructor.
+ *	@param {VNode} vnode
+ *	@private
+ */
 function createComponentFromVNode(vnode) {
 	let component = componentRecycler.create(vnode.nodeName);
 
@@ -330,7 +385,12 @@ function createComponentFromVNode(vnode) {
 }
 
 
-/** @private Remove a component from the DOM and recycle it. */
+
+/** Remove a component from the DOM and recycle it.
+ *	@param {Element} dom			A DOM node from which to unmount the given Component
+ *	@param {Component} component	The Component instance to unmount
+ *	@private
+ */
 function unmountComponent(dom, component) {
 	console.warn('unmounting mismatched component', component);
 
@@ -499,7 +559,14 @@ function build(dom, vnode, rootComponent) {
 }
 
 
-/** @private */
+
+/** Create an Event handler function that sets a given state property.
+ *	@param {Component} component	The component whose state should be updated
+ *	@param {string} key				A dot-notated key path to update in the component's state
+ *	@param {string} eventPath		A dot-notated key path to the value that should be retrieved from the Event or component
+ *	@returns {function} linkedStateHandler
+ *	@private
+ */
 function createLinkedState(component, key, eventPath) {
 	let path = key.split('.'),
 		p0 = path[0];
@@ -527,10 +594,14 @@ function createLinkedState(component, key, eventPath) {
 
 
 
-/** @private Managed re-rendering queue for dirty components. */
+/** Managed queue of dirty components to be re-rendered.
+ *	@private
+ */
 let renderQueue = {
+	// items/itemsOffline swap on each process() call (just a simple pool technique)
 	items: [],
 	itemsOffline: [],
+
 	add(component) {
 		if (renderQueue.items.push(component)!==1) return;
 
@@ -538,6 +609,7 @@ let renderQueue = {
 		if (d) d(renderQueue.process);
 		else setTimeout(renderQueue.process, 0);
 	},
+
 	process() {
 		let items = renderQueue.items,
 			len = items.length;
@@ -553,13 +625,22 @@ let renderQueue = {
 	}
 };
 
-/** @private @function Trigger all pending render() calls. */
+
+
+/** Trigger all queued component renders.
+ *	@function
+ */
 let rerender = renderQueue.process
 
 
-/** @private DOM node pool, keyed on nodeName. */
+
+/** DOM node pool, keyed on nodeName.
+ *	@private
+ */
 let recycler = {
 	nodes: {},
+	normalizeName: memoize(name => name.toUpperCase()),
+
 	collect(node) {
 		recycler.clean(node);
 		let name = recycler.normalizeName(node.nodeName),
@@ -567,11 +648,13 @@ let recycler = {
 		if (list) list.push(node);
 		else recycler.nodes[name] = [node];
 	},
+
 	create(nodeName) {
 		let name = recycler.normalizeName(nodeName),
 			list = recycler.nodes[name];
 		return list && list.pop() || document.createElement(nodeName);
 	},
+
 	clean(node) {
 		node.remove();
 
@@ -590,20 +673,24 @@ let recycler = {
 		// 	console.warn(`Warning: Recycler collecting <${node.nodeName}> with ${node.childNodes.length} children.`);
 		// 	slice.call(node.childNodes).forEach(recycler.collect);
 		// }
-	},
-	normalizeName: memoize(name => name.toUpperCase())
+	}
 };
 
 
-/** @private Retains a pool of Components for re-use, keyed on component name. */
+
+/** Retains a pool of Components for re-use, keyed on component name.
+ *	@private
+ */
 let componentRecycler = {
 	components: {},
+
 	collect(component) {
 		let name = component.constructor.name,
 			list = componentRecycler.components[name];
 		if (list) list.push(component);
 		else componentRecycler.components[name] = [component];
 	},
+
 	create(ctor) {
 		let list = componentRecycler.components[ctor.name];
 		if (list && list.length) {
@@ -618,8 +705,10 @@ let componentRecycler = {
 };
 
 
-/** @private Append children to a Node.
+
+/** Append multiple children to a Node.
  *	Uses a Document Fragment to batch when appending 2 or more children
+ *	@private
  */
 function appendChildren(parent, children) {
 	let len = children.length;
@@ -635,7 +724,10 @@ function appendChildren(parent, children) {
 }
 
 
-/** @private Get the value of a rendered attribute */
+
+/** Retrieve the value of a rendered attribute
+ *	@private
+ */
 function getAccessor(node, name, value) {
 	if (name==='class') return node.className;
 	if (name==='style') return node.style.cssText;
@@ -643,8 +735,10 @@ function getAccessor(node, name, value) {
 }
 
 
-/** @private Set a named attribute on the given Node, with special behavior for some names and event handlers.
+
+/** Set a named attribute on the given Node, with special behavior for some names and event handlers.
  *	If `value` is `null`, the attribute/handler will be removed.
+ *	@private
  */
 function setAccessor(node, name, value, old) {
 	if (name==='class') {
@@ -659,7 +753,9 @@ function setAccessor(node, name, value, old) {
 }
 
 
-/** @private For props without explicit behavior, apply to a Node as event handlers or attributes. */
+/** For props without explicit behavior, apply to a Node as event handlers or attributes.
+ *	@private
+ */
 function setComplexAccessor(node, name, value, old) {
 	if (name.substring(0,2)==='on') {
 		let type = normalizeEventName(name),
@@ -680,18 +776,28 @@ function setComplexAccessor(node, name, value, old) {
 }
 
 
-/** @private Proxy an event to hooked event handlers */
+
+/** Proxy an event to hooked event handlers
+ *	@private
+ */
 function eventProxy(e) {
-	let l = this._listeners,
-		fn = l[normalizeEventName(e.type)];
+	let fn = this._listeners[normalizeEventName(e.type)];
 	if (fn) return fn.call(this, hook(hooks, 'event', e) || e);
 }
 
+
+
+/** Convert an Event name/type to lowercase and strip any "on*" prefix.
+ *	@function
+ *	@private
+ */
 let normalizeEventName = memoize(t => t.replace(/^on/i,'').toLowerCase());
 
 
 
-/** @private Get a node's attributes as a hashmap, regardless of type. */
+/** Get a node's attributes as a hashmap, regardless of type.
+ *	@private
+ */
 function getNodeAttributes(node) {
 	let list = node.attributes;
 	if (!list || !list.getNamedItem) return list;
@@ -699,7 +805,10 @@ function getNodeAttributes(node) {
 }
 
 
-/** @private Convert a DOM `.attributes` NamedNodeMap to a hashmap. */
+
+/** Convert a DOM `.attributes` NamedNodeMap to a hashmap.
+ *	@private
+ */
 function getAttributesAsObject(list) {
 	let attrs = {};
 	for (let i=list.length; i--; ) {
@@ -710,20 +819,23 @@ function getAttributesAsObject(list) {
 }
 
 
-/** @private Reconstruct `props` from a VNode */
+
+/** Reconstruct Component-style `props` from a VNode
+ *	@private
+ */
 function getNodeProps(vnode) {
 	let props = extend({}, vnode.attributes);
 	if (vnode.children) {
 		props.children = vnode.children;
 	}
-	if (vnode.text) {
-		props._content = vnode.text;
-	}
 	return props;
 }
 
 
-/** @private Convert a hashmap of styles to CSSText */
+
+/** Convert a hashmap of styles to CSSText
+ *	@private
+ */
 function styleObjToCss(s) {
 	let str = '',
 		sep = ': ',
@@ -744,7 +856,10 @@ function styleObjToCss(s) {
 }
 
 
-/** @private Convert a hashmap of CSS classes to a space-delimited className string */
+
+/** Convert a hashmap of CSS classes to a space-delimited className string
+ *	@private
+ */
 function hashToClassName(c) {
 	let str = '';
 	for (let prop in c) {
@@ -757,11 +872,19 @@ function hashToClassName(c) {
 }
 
 
-/** @private @function Convert a JavaScript camel-case CSS property name to a CSS property name */
+
+/** Convert a JavaScript camel-case CSS property name to a CSS property name
+ *	@private
+ *	@function
+ */
 let jsToCss = memoize( s => s.replace(/([A-Z])/,'-$1').toLowerCase() );
 
 
-/** @private Copy own-properties from `props` onto `obj`. Returns `obj`. */
+
+/** Copy own-properties from `props` onto `obj`.
+ *	@returns obj
+ *	@private
+ */
 function extend(obj, props) {
 	for (let i in props) if (hop.call(props, i)) {
 		obj[i] = props[i];
