@@ -137,6 +137,11 @@ export class Component {
 		triggerComponentRender(this);
 	}
 
+	/** @private */
+	setProps(props, opts) {
+		return setComponentProps(this, props, opts);
+	}
+
 	/** Accepts `props` and `state`, and returns a new Virtual DOM tree to build.
 	 *	Virtual DOM is generally constructed via [JSX](http://jasonformat.com/wtf-is-jsx).
 	 *	@param {object} props		Props (eg: JSX attributes) received from parent element/component
