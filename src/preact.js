@@ -872,6 +872,7 @@ function appendChildren(parent, children) {
 function getAccessor(node, name, value) {
 	if (name==='class') return node.className;
 	if (name==='style') return node.style.cssText;
+	if (name!=='type' && name in node) return node[name];
 	return value;
 }
 
@@ -887,6 +888,9 @@ function setAccessor(node, name, value, old) {
 	}
 	else if (name==='style') {
 		node.style.cssText = value;
+	}
+	else if (name in node) {
+		node[name] = value;
 	}
 	else {
 		setComplexAccessor(node, name, value, old);
