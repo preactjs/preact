@@ -400,7 +400,7 @@ function renderComponent(component, opts) {
 
 		let inst = component._component;
 		if (inst && inst.constructor!==childComponent) {
-			unmountComponent(component.base, inst);
+			unmountComponent(inst.base, inst, false);
 			inst = null;
 		}
 
@@ -415,7 +415,7 @@ function renderComponent(component, opts) {
 			component._component = inst;
 			if (component.base) deepHook(inst, 'componentWillMount');
 			setComponentProps(inst, childProps, NO_RENDER);
-			renderComponent(inst, opts);
+			renderComponent(inst, DOM_RENDER);
 			if (component.base) deepHook(inst, 'componentDidMount');
 		}
 
@@ -513,18 +513,21 @@ function createComponentFromVNode(vnode) {
  *	@param {Component} component	The Component instance to unmount
  *	@private
  */
-function unmountComponent(dom, component) {
-	console.warn('unmounting mismatched component', component);
+function unmountComponent(dom, component, remove) {
+	// console.warn('unmounting mismatched component', component);
 
-	if (dom._component===component) {
-		delete dom._component;
-		delete dom._componentConstructor;
-	}
 	hook(component, 'componentWillUnmount');
-	let base = component.base;
-	if (base && base.parentNode) {
-		base.parentNode.removeChild(base);
+	if (remove!==false) {
+		if (dom._component===component) {
+			delete dom._component;
+			delete dom._componentConstructor;
+		}
+		let base = component.base;
+		if (base && base.parentNode) {
+			base.parentNode.removeChild(base);
+		}
 	}
+	component._parentComponent = null;
 	hook(component, 'componentDidUnmount');
 	componentRecycler.collect(component);
 }
