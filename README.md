@@ -13,7 +13,8 @@ It retains a large amount of compatibility with React, but only the [stateless f
 ## Demos
 
 - [ESBench](http://esbench.com) is built using Preact.
-- [Documentation Viewer](https://documentation-viewer.firebaseapp.com) ([Github Project](https://github.com/developit/documentation-viewer))
+- [Documentation Viewer](https://documentation-viewer.firebaseapp.com) _([Github Project](https://github.com/developit/documentation-viewer))_
+- [TodoMVC](http://developit.github.io/preact-todomvc/) _([Github Project](https://github.com/developit/preact-todomvc))_
 - [Flickr Browser](http://codepen.io/developit/full/VvMZwK/) (@ CodePen)
 - [Animating Text](http://codepen.io/developit/full/LpNOdm/) (@ CodePen)
 - [60FPS Rainbow Spiral](http://codepen.io/developit/full/xGoagz/) (@ CodePen)
@@ -26,7 +27,7 @@ It retains a large amount of compatibility with React, but only the [stateless f
 - :link: [**preact-router**](http://git.io/preact-router): URL routing for your components.
 - :triangular_ruler: [**preact-svg**](http://git.io/preact-svg): Use inline `<svg>` in Preact.
 - :neckbeard: [**preact-render-to-string**](http://git.io/preact-render-to-string): Universal rendering.
-- :raised_hands: [**preact-compat**](http://git.io/preact-compat): use any React library with Preact. _([full example](http://git.io/preact-compat-example))_
+- :raised_hands: [**preact-compat**](http://git.io/preact-compat): use any React library with Preact. *([full example](http://git.io/preact-compat-example))*
 - :rocket: [**preact-photon**](http://git.io/preact-photon): build beautiful desktop UI with [photon](http://photonkit.com).
 
 
