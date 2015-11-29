@@ -24,9 +24,9 @@ It retains a large amount of compatibility with React, but only the [stateless f
 
 ## Libraries & Add-ons
 
-- :link: [**preact-router**](http://git.io/preact-router): URL routing for your components.
-- :triangular_ruler: [**preact-svg**](http://git.io/preact-svg): Use inline `<svg>` in Preact.
-- :neckbeard: [**preact-render-to-string**](http://git.io/preact-render-to-string): Universal rendering.
+- :earth_americas: [**preact-router**](http://git.io/preact-router): URL routing for your components.
+- :tulip: [**preact-svg**](http://git.io/preact-svg): Use inline `<svg>` in Preact.
+- :page_facing_up: [**preact-render-to-string**](http://git.io/preact-render-to-string): Universal rendering.
 - :raised_hands: [**preact-compat**](http://git.io/preact-compat): use any React library with Preact. *([full example](http://git.io/preact-compat-example))*
 - :rocket: [**preact-photon**](http://git.io/preact-photon): build beautiful desktop UI with [photon](http://photonkit.com).
 
@@ -35,7 +35,7 @@ It retains a large amount of compatibility with React, but only the [stateless f
 
 > :information_desk_person: You don't _have_ to use ES2015 to use Preact... but you should.
 
-I'm going to assume you have some sort of ES2015 build set up using babel and/or webpack/browserify/gulp/grunt/etc.  If you don't, start with [preact-boilerplate].
+The following guide assumes you have some sort of ES2015 build set up using babel and/or webpack/browserify/gulp/grunt/etc.  If you don't, start with [preact-boilerplate] or a [CodePen Template](http://codepen.io/developit/pen/PPMNjd?editors=001).
 
 
 ### Import what you need
