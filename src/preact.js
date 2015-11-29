@@ -589,7 +589,7 @@ function build(dom, vnode) {
 		for (let name in old) {
 			if (hop.call(old, name)) {
 				let o = attrs[name];
-				if (o===undefined || o===null || o===false) {
+				if (o===undefined || o===null) {
 					setAccessor(out, name, null, old[name]);
 				}
 			}
@@ -601,7 +601,7 @@ function build(dom, vnode) {
 		for (let name in attrs) {
 			if (hop.call(attrs, name)) {
 				let value = attrs[name];
-				if (value!==undefined && value!==null && value!==false) {
+				if (value!==undefined && value!==null) {
 					let prev = getAccessor(out, name, old[name]);
 					if (value!==prev) {
 						setAccessor(out, name, value, prev);
