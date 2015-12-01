@@ -8,36 +8,29 @@ module.exports = function(config) {
 		browsers: ['PhantomJS'],
 
 		files: [
-			'preact.js',
 			'test/browser/**.js',
 			'test/shared/**.js'
 		],
 
 		preprocessors: {
 			'test/**/*.js': ['webpack'],
+	        'src/**/*.js': ['webpack'],
 			'**/*.js': ['sourcemap']
 		},
 
 		webpack: {
 			module: {
-				// noParse: [/(^|\/)(node_modules|~)(\/|$)/],
-				// noParse: [
-				// 	/\bsinon\b/i
-				// ],
 				loaders: [
 					{
 						test: /\.jsx?$/,
-						// exclude: /(^|\/)(node_modules|~)(\/|$)/,
-						loader: 'babel?optional=runtime&stage=0'
+						exclude: /node_modules/,
+						loader: 'babel'
 					}
 				]
 			},
 			resolve: {
 				modulesDirectories: [__dirname, 'node_modules'],
-				//alias: { preact: path.join(__dirname, 'preact.js') }
-				// alias: { sinon: path.join(__dirname, 'node_modules', 'sinon', 'pkg', 'sinon.js') }
 			}
-			// webpack configuration
 		},
 
 		webpackMiddleware: {

@@ -1,7 +1,3 @@
 {
-  "modules": "umdStrict",
-  "sourceMaps": true,
-  "compact": true,
-  "comments": false,
   "loose": "all"
 }
