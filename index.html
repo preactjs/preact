@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Preact by developit</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Preact</h1>
+      <h2 class="project-tagline">Tiny &amp; fast Component-based Virtual DOM framework, largely compatible with React.</h2>
+      <a href="https://github.com/developit/preact" class="btn">View on GitHub</a>
+      <a href="https://github.com/developit/preact/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/developit/preact/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="preact" class="anchor" href="#preact" aria-hidden="true"><span class="octicon octicon-link"></span></a>Preact</h1>
+
+<p><a href="http://npm.im/preact"><img src="https://img.shields.io/npm/v/preact.svg" alt="npm"></a>
+<a href="https://travis-ci.org/developit/preact"><img src="https://travis-ci.org/developit/preact.svg" alt="travis"></a>
+<a href="https://gitter.im/developit/preact"><img src="https://badges.gitter.im/Join%20Chat.svg" alt="gitter"></a></p>
+
+<p>Preact is an attempt to recreate the core value proposition of React <em>(or similar libraries like Mithril)</em> using as little code as possible, with first-class support for ES2015.  Currently the library is around <strong>3kb</strong> (minified &amp; gzipped).</p>
+
+<p>It retains a large amount of compatibility with React, but only the <a href="https://facebook.github.io/react/blog/2015/10/07/react-v0.14.html#stateless-functional-components">stateless functional components</a> and <a href="https://facebook.github.io/react/docs/reusable-components.html#es6-classes">ES6 Classes</a> interface.  As one would expect coming from React, Components are simple building blocks for composing a User Interface.</p>
+
+<h2>
+<a id="demos" class="anchor" href="#demos" aria-hidden="true"><span class="octicon octicon-link"></span></a>Demos</h2>
+
+<ul>
+<li>
+<a href="http://esbench.com">ESBench</a> is built using Preact.</li>
+<li>
+<a href="https://documentation-viewer.firebaseapp.com">Documentation Viewer</a> <em>(<a href="https://github.com/developit/documentation-viewer">Github Project</a>)</em>
+</li>
+<li>
+<a href="http://developit.github.io/preact-todomvc/">TodoMVC</a> <em>(<a href="https://github.com/developit/preact-todomvc">Github Project</a>)</em>
+</li>
+<li>
+<a href="http://codepen.io/developit/full/VvMZwK/">Flickr Browser</a> (@ CodePen)</li>
+<li>
+<a href="http://codepen.io/developit/full/LpNOdm/">Animating Text</a> (@ CodePen)</li>
+<li>
+<a href="http://codepen.io/developit/full/xGoagz/">60FPS Rainbow Spiral</a> (@ CodePen)</li>
+<li>
+<a href="http://jsfiddle.net/developit/u9m5x0L7/embedded/result,js/">Simple Clock</a> (@ JSFiddle)</li>
+<li>
+<a href="https://jsfiddle.net/developit/rs6zrh5f/embedded/result/"><strong>Create your Own!</strong></a> (@ JSFiddle)</li>
+</ul>
+
+<h2>
+<a id="libraries--add-ons" class="anchor" href="#libraries--add-ons" aria-hidden="true"><span class="octicon octicon-link"></span></a>Libraries &amp; Add-ons</h2>
+
+<ul>
+<li>
+<img class="emoji" title=":earth_americas:" alt=":earth_americas:" src="https://assets-cdn.github.com/images/icons/emoji/unicode/1f30e.png" height="20" width="20" align="absmiddle"> <a href="http://git.io/preact-router"><strong>preact-router</strong></a>: URL routing for your components.</li>
+<li>
+<img class="emoji" title=":tulip:" alt=":tulip:" src="https://assets-cdn.github.com/images/icons/emoji/unicode/1f337.png" height="20" width="20" align="absmiddle"> <a href="http://git.io/preact-svg"><strong>preact-svg</strong></a>: Use inline <code>&lt;svg&gt;</code> in Preact.</li>
+<li>
+<img class="emoji" title=":page_facing_up:" alt=":page_facing_up:" src="https://assets-cdn.github.com/images/icons/emoji/unicode/1f4c4.png" height="20" width="20" align="absmiddle"> <a href="http://git.io/preact-render-to-string"><strong>preact-render-to-string</strong></a>: Universal rendering.</li>
+<li>
+<img class="emoji" title=":raised_hands:" alt=":raised_hands:" src="https://assets-cdn.github.com/images/icons/emoji/unicode/1f64c.png" height="20" width="20" align="absmiddle"> <a href="http://git.io/preact-compat"><strong>preact-compat</strong></a>: use any React library with Preact. <em>(<a href="http://git.io/preact-compat-example">full example</a>)</em>
+</li>
+<li>
+<img class="emoji" title=":rocket:" alt=":rocket:" src="https://assets-cdn.github.com/images/icons/emoji/unicode/1f680.png" height="20" width="20" align="absmiddle"> <a href="http://git.io/preact-photon"><strong>preact-photon</strong></a>: build beautiful desktop UI with <a href="http://photonkit.com">photon</a>.</li>
+</ul>
+
+<h2>
+<a id="getting-started" class="anchor" href="#getting-started" aria-hidden="true"><span class="octicon octicon-link"></span></a>Getting Started</h2>
+
+<blockquote>
+<p><img class="emoji" title=":information_desk_person:" alt=":information_desk_person:" src="https://assets-cdn.github.com/images/icons/emoji/unicode/1f481.png" height="20" width="20" align="absmiddle"> You don't <em>have</em> to use ES2015 to use Preact... but you should.</p>
+</blockquote>
+
+<p>The following guide assumes you have some sort of ES2015 build set up using babel and/or webpack/browserify/gulp/grunt/etc.  If you don't, start with <a href="https://github.com/developit/preact-boilerplate">preact-boilerplate</a> or a <a href="http://codepen.io/developit/pen/PPMNjd?editors=001">CodePen Template</a>.</p>
+
+<h3>
+<a id="import-what-you-need" class="anchor" href="#import-what-you-need" aria-hidden="true"><span class="octicon octicon-link"></span></a>Import what you need</h3>
+
+<p>The <code>preact</code> module provides both named and default exports, so you can either import everything under a namespace of your choosing, or just what you need as locals:</p>
+
+<h5>
+<a id="named" class="anchor" href="#named" aria-hidden="true"><span class="octicon octicon-link"></span></a>Named:</h5>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> { <span class="pl-smi">h</span>, <span class="pl-smi">render</span>, <span class="pl-smi">Component</span> } <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>preact<span class="pl-pds">'</span></span>;
+
+<span class="pl-c">// Tell Babel to transform JSX into h() calls:</span>
+<span class="pl-c">/** @jsx h */</span></pre></div>
+
+<h5>
+<a id="default" class="anchor" href="#default" aria-hidden="true"><span class="octicon octicon-link"></span></a>Default:</h5>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> <span class="pl-smi">preact</span> <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>preact<span class="pl-pds">'</span></span>;
+
+<span class="pl-c">// Tell Babel to transform JSX into preact.h() calls:</span>
+<span class="pl-c">/** @jsx preact.h */</span></pre></div>
+
+<blockquote>
+<p>Named imports work well for highly structured applications, whereas the default import is quick and never needs to be updated when using different parts of the library.</p>
+
+<p>Instead of declaring the <code>@jsx</code> pragma in your code, it's best to configure it globally in a <code>.babelrc</code>:</p>
+
+<div class="highlight highlight-source-js"><pre>{ <span class="pl-s"><span class="pl-pds">"</span>jsxPragma<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>h<span class="pl-pds">"</span></span> }</pre></div>
+</blockquote>
+
+<h3>
+<a id="rendering-jsx" class="anchor" href="#rendering-jsx" aria-hidden="true"><span class="octicon octicon-link"></span></a>Rendering JSX</h3>
+
+<p>Out of the box, Preact provides an <code>h()</code> function that turns your JSX into Virtual DOM elements <em>(<a href="http://jasonformat.com/wtf-is-jsx">here's how</a>)</em>. It also provides a <code>render()</code> function that creates a DOM tree from that Virtual DOM.</p>
+
+<p>To render some JSX, just import those two functions and use them like so:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> { <span class="pl-smi">h</span>, <span class="pl-smi">render</span> } <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>preact<span class="pl-pds">'</span></span>;
+
+<span class="pl-en">render</span>((
+    <span class="pl-k">&lt;</span>div id<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>foo<span class="pl-pds">"</span></span><span class="pl-k">&gt;</span>
+        <span class="pl-k">&lt;</span>span<span class="pl-k">&gt;</span>Hello, world<span class="pl-k">!</span><span class="pl-k">&lt;</span><span class="pl-k">/</span>span<span class="pl-k">&gt;</span>
+        <span class="pl-k">&lt;</span>button onClick<span class="pl-k">=</span>{ e <span class="pl-k">=&gt;</span> <span class="pl-c1">alert</span>(<span class="pl-s"><span class="pl-pds">"</span>hi!<span class="pl-pds">"</span></span>); }<span class="pl-k">&gt;</span>Click Me<span class="pl-k">&lt;</span><span class="pl-k">/</span>button<span class="pl-k">&gt;</span>
+    <span class="pl-k">&lt;</span><span class="pl-k">/</span>div<span class="pl-k">&gt;</span>
+), <span class="pl-smi">document</span>.<span class="pl-c1">body</span>);</pre></div>
+
+<p>This should seem pretty straightforward if you've used <a href="https://github.com/dominictarr/hyperscript">hyperscript</a> or one of its many friends.</p>
+
+<p>Rendering hyperscript with a virtual DOM is pointless, though. We want to render components and have them updated when data changes - that's where the power of virtual DOM diffing shines. <img class="emoji" title=":star2:" alt=":star2:" src="https://assets-cdn.github.com/images/icons/emoji/unicode/1f31f.png" height="20" width="20" align="absmiddle"></p>
+
+<h3>
+<a id="components" class="anchor" href="#components" aria-hidden="true"><span class="octicon octicon-link"></span></a>Components</h3>
+
+<p>Preact exports a generic <code>Component</code> class, which can be extended to build encapsulated, self-updating pieces of a User Interface.  Components support all of the standard React <a href="https://facebook.github.io/react/docs/component-specs.html">lifecycle methods</a>, like <code>shouldComponentUpdate()</code> and <code>componentWillReceiveProps()</code>.  Providing specific implementations of these methods is the preferred mechanism for controlling <em>when</em> and <em>how</em> components update.</p>
+
+<p>Components also have a <code>render()</code> method, but unlike React this method is passed <code>(props, state)</code> as arguments. This provides an ergonomic means to destructure <code>props</code> and <code>state</code> into local variables to be referenced from JSX.</p>
+
+<p>Let's take a look at a very simple <code>Clock</code> component, which shows the current time.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> { <span class="pl-smi">h</span>, <span class="pl-smi">render</span>, <span class="pl-smi">Component</span> } <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>preact<span class="pl-pds">'</span></span>;
+
+<span class="pl-k">class</span> <span class="pl-en">Clock</span> <span class="pl-k">extends</span> <span class="pl-en">Component</span> {
+    <span class="pl-en">render</span>() {
+        <span class="pl-k">let</span> time <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Date</span>().<span class="pl-en">toLocaleTimeString</span>();
+        <span class="pl-k">return</span> <span class="pl-k">&lt;</span>span<span class="pl-k">&gt;</span>{ time }<span class="pl-k">&lt;</span><span class="pl-k">/</span>span<span class="pl-k">&gt;</span>;
+    }
+}
+
+<span class="pl-c">// render an instance of Clock into &lt;body&gt;:</span>
+<span class="pl-en">render</span>(<span class="pl-k">&lt;</span>Clock <span class="pl-k">/</span><span class="pl-k">&gt;</span>, <span class="pl-smi">document</span>.<span class="pl-c1">body</span>);</pre></div>
+
+<p>That's great. Running this produces the following HTML DOM structure:</p>
+
+<div class="highlight highlight-text-html-basic"><pre>&lt;<span class="pl-ent">span</span>&gt;10:28:57 PM&lt;/<span class="pl-ent">span</span>&gt;</pre></div>
+
+<p>In order to have the clock's time update every second, we need to know when <code>&lt;Clock&gt;</code> gets mounted to the DOM. <em>If you've used HTML5 Custom Elements, this is similar to the <code>attachedCallback</code> and <code>detachedCallback</code> lifecycle methods.</em> Preact invokes the following lifecycle methods if they are defined for a Component:</p>
+
+<table>
+<thead>
+<tr>
+<th>Lifecycle method</th>
+<th>When it gets called</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>componentWillMount</code></td>
+<td>before the component gets mounted to the DOM</td>
+</tr>
+<tr>
+<td><code>componentDidMount</code></td>
+<td>after the component gets mounted to the DOM</td>
+</tr>
+<tr>
+<td><code>componentWillUnmount</code></td>
+<td>prior to removal from the DOM</td>
+</tr>
+<tr>
+<td><code>componentDidUnmount</code></td>
+<td>after removal from the DOM</td>
+</tr>
+<tr>
+<td><code>componentWillReceiveProps</code></td>
+<td>before new props get accepted</td>
+</tr>
+<tr>
+<td><code>shouldComponentUpdate</code></td>
+<td>before <code>render()</code>. Return <code>false</code> to skip render</td>
+</tr>
+<tr>
+<td><code>componentWillUpdate</code></td>
+<td>before <code>render()</code>
+</td>
+</tr>
+<tr>
+<td><code>componentDidUpdate</code></td>
+<td>after <code>render()</code>
+</td>
+</tr>
+</tbody>
+</table>
+
+<p>So, we want to have a 1-second timer start once the Component gets added to the DOM, and stop if it is removed. We'll create the timer and store a reference to it in <code>componentDidMount</code>, and stop the timer in <code>componentWillUnmount</code>. On each timer tick, we'll update the component's <code>state</code> object with a new time value. Doing this will automatically re-render the component.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> { <span class="pl-smi">h</span>, <span class="pl-smi">render</span>, <span class="pl-smi">Component</span> } <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>preact<span class="pl-pds">'</span></span>;
+
+<span class="pl-k">class</span> <span class="pl-en">Clock</span> <span class="pl-k">extends</span> <span class="pl-en">Component</span> {
+    <span class="pl-en">constructor</span>() {
+        <span class="pl-v">super</span>();
+        <span class="pl-c">// set initial time:</span>
+        <span class="pl-smi">this</span>.<span class="pl-smi">state</span>.<span class="pl-smi">time</span> <span class="pl-k">=</span> <span class="pl-smi">Date</span>.<span class="pl-en">now</span>();
+    }
+
+    <span class="pl-en">componentDidMount</span>() {
+        <span class="pl-c">// update time every second</span>
+        <span class="pl-smi">this</span>.<span class="pl-smi">timer</span> <span class="pl-k">=</span> <span class="pl-c1">setInterval</span>(() <span class="pl-k">=&gt;</span> {
+            <span class="pl-smi">this</span>.<span class="pl-en">setState</span>({ time<span class="pl-k">:</span> <span class="pl-smi">Date</span>.<span class="pl-en">now</span>() });
+        }, <span class="pl-c1">1000</span>);
+    }
+
+    <span class="pl-en">componentWillUnmount</span>() {
+        <span class="pl-c">// stop when not renderable</span>
+        <span class="pl-c1">clearInterval</span>(<span class="pl-smi">this</span>.<span class="pl-smi">timer</span>);
+    }
+
+    <span class="pl-en">render</span>(<span class="pl-smi">props</span>, <span class="pl-smi">state</span>) {
+        <span class="pl-k">let</span> time <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Date</span>(<span class="pl-smi">state</span>.<span class="pl-smi">time</span>).<span class="pl-en">toLocaleTimeString</span>();
+        <span class="pl-k">return</span> <span class="pl-k">&lt;</span>span<span class="pl-k">&gt;</span>{ time }<span class="pl-k">&lt;</span><span class="pl-k">/</span>span<span class="pl-k">&gt;</span>;
+    }
+}
+
+<span class="pl-c">// render an instance of Clock into &lt;body&gt;:</span>
+<span class="pl-en">render</span>(<span class="pl-k">&lt;</span>Clock <span class="pl-k">/</span><span class="pl-k">&gt;</span>, <span class="pl-smi">document</span>.<span class="pl-c1">body</span>);</pre></div>
+
+<p>Now we have <a href="http://jsfiddle.net/developit/u9m5x0L7/embedded/result,js/">a ticking clock</a>!</p>
+
+<h3>
+<a id="props--state" class="anchor" href="#props--state" aria-hidden="true"><span class="octicon octicon-link"></span></a>Props &amp; State</h3>
+
+<p>The concept (and nomenclature) for <code>props</code> and <code>state</code> is the same as in React. <code>props</code> are passed to a component by defining attributes in JSX, <code>state</code> is internal state. Changing either triggers a re-render, though by default Preact re-renders Components asynchronously for <code>state</code> changes and synchronously for <code>props</code> changes.  You can tell Preact to render <code>prop</code> changes asynchronously by setting <code>options.syncComponentUpdates</code> to <code>false</code>.</p>
+
+<hr>
+
+<h2>
+<a id="linked-state" class="anchor" href="#linked-state" aria-hidden="true"><span class="octicon octicon-link"></span></a>Linked State</h2>
+
+<p>One area Preact takes a little further than React is in optimizing state changes. A common pattern in ES2015 React code is to use Arrow functions within a <code>render()</code> method in order to update state in response to events.  Creating functions enclosed in a scope on every render is inefficient and forces the garbage collector to do more work than is necessary.</p>
+
+<p>One solution to this is to bind component methods declaratively.
+Here is an example using <a href="http://git.io/decko">decko</a>:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">class</span> <span class="pl-en">Foo</span> <span class="pl-k">extends</span> <span class="pl-en">Component</span> {
+    @bind
+    <span class="pl-en">updateText</span>(<span class="pl-smi">e</span>) {
+        <span class="pl-smi">this</span>.<span class="pl-en">setState</span>({ text<span class="pl-k">:</span> <span class="pl-smi">e</span>.<span class="pl-c1">target</span>.<span class="pl-c1">value</span> });
+    }
+    <span class="pl-en">render</span>({ }, { <span class="pl-smi">text</span> }) {
+        <span class="pl-k">return</span> <span class="pl-k">&lt;</span>input value<span class="pl-k">=</span>{text} onInput<span class="pl-k">=</span>{<span class="pl-smi">this</span>.<span class="pl-smi">updateText</span>} <span class="pl-k">/</span><span class="pl-k">&gt;</span>;
+    }
+}</pre></div>
+
+<p>While this achieves much better runtime performance, it's still a lot of unnecessary code to wire up state to UI.</p>
+
+<p>Fortunately there is a solution, in the form of <code>linkState()</code>. Calling <code>component.linkState('text')</code> returns a function that accepts an Event and uses it's associated value to update the given property in your component's state. Calls to linkState() with the same state property are cached, so there is no performance penalty.  Here is the previous example rewritten using <em>Linked State</em>:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">class</span> <span class="pl-en">Foo</span> <span class="pl-k">extends</span> <span class="pl-en">Component</span> {
+    <span class="pl-en">render</span>({ }, { <span class="pl-smi">text</span> }) {
+        <span class="pl-k">return</span> <span class="pl-k">&lt;</span>input value<span class="pl-k">=</span>{text} inInput<span class="pl-k">=</span>{<span class="pl-smi">this</span>.<span class="pl-en">linkState</span>(<span class="pl-s"><span class="pl-pds">'</span>text<span class="pl-pds">'</span></span>)} <span class="pl-k">/</span><span class="pl-k">&gt;</span>;
+    }
+}</pre></div>
+
+<p>Simple and effective. It handles linking state from any input type, or an optional second parameter can be used to explicitly provide a keypath to the new state value.</p>
+
+<h2>
+<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Examples</h2>
+
+<p>Here is a somewhat verbose Preact <code>&lt;Link&gt;</code> component:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">class</span> <span class="pl-en">Link</span> <span class="pl-k">extends</span> <span class="pl-en">Component</span> {
+    <span class="pl-en">render</span>(<span class="pl-smi">props</span>, <span class="pl-smi">state</span>) {
+        <span class="pl-k">return</span> <span class="pl-k">&lt;</span>a href<span class="pl-k">=</span>{ <span class="pl-smi">props</span>.<span class="pl-c1">href</span> }<span class="pl-k">&gt;</span>{ <span class="pl-smi">props</span>.<span class="pl-smi">children</span> }<span class="pl-k">&lt;</span><span class="pl-k">/</span>a<span class="pl-k">&gt;</span>;
+    }
+}</pre></div>
+
+<p>Since this is ES6/ES2015, we can further simplify:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">class</span> <span class="pl-en">Link</span> <span class="pl-k">extends</span> <span class="pl-en">Component</span> {
+    <span class="pl-en">render</span>({ <span class="pl-smi">href</span>, <span class="pl-smi">children</span> }) {
+        <span class="pl-k">return</span> <span class="pl-k">&lt;</span>a {...{ href, children }} <span class="pl-k">/</span><span class="pl-k">&gt;</span>;
+    }
+}
+
+<span class="pl-c">// or, for wide-open props support:</span>
+<span class="pl-k">class</span> <span class="pl-en">Link</span> <span class="pl-k">extends</span> <span class="pl-en">Component</span> {
+    <span class="pl-en">render</span>(<span class="pl-smi">props</span>) {
+        <span class="pl-k">return</span> <span class="pl-k">&lt;</span>a {...<span class="pl-smi">props</span>} <span class="pl-k">/</span><span class="pl-k">&gt;</span>;
+    }
+}
+
+<span class="pl-c">// or, as a stateless functional component:</span>
+<span class="pl-k">const</span> <span class="pl-c1">Link</span> <span class="pl-k">=</span> ({ <span class="pl-smi">children</span>, ...<span class="pl-smi">props</span> }) <span class="pl-k">=&gt;</span> (
+    <span class="pl-k">&lt;</span>a {...<span class="pl-smi">props</span>}<span class="pl-k">&gt;</span>{ children }<span class="pl-k">&lt;</span><span class="pl-k">/</span>a<span class="pl-k">&gt;</span>
+);</pre></div>
+
+<h2>
+<a id="extensions" class="anchor" href="#extensions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Extensions</h2>
+
+<p>It is likely that some projects based on Preact would wish to extend Component with great new functionality.</p>
+
+<p>Perhaps automatic connection to stores for a Flux-like architecture, or mixed-in context bindings to make it feel more like <code>React.createClass()</code>.  Just use ES2015 inheritance:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">class</span> <span class="pl-en">BoundComponent</span> <span class="pl-k">extends</span> <span class="pl-en">Component</span> {
+    <span class="pl-en">constructor</span>(<span class="pl-smi">props</span>) {
+        <span class="pl-v">super</span>(props);
+        <span class="pl-smi">this</span>.<span class="pl-en">bind</span>();
+    }
+    <span class="pl-en">bind</span>() {
+        <span class="pl-smi">this</span>.<span class="pl-smi">binds</span> <span class="pl-k">=</span> {};
+        <span class="pl-k">for</span> (<span class="pl-k">let</span> i <span class="pl-k">in</span> <span class="pl-v">this</span>) {
+            <span class="pl-smi">this</span>.<span class="pl-smi">binds</span>[i] <span class="pl-k">=</span> <span class="pl-v">this</span>[i].<span class="pl-en">bind</span>(<span class="pl-v">this</span>);
+        }
+    }
+}
+
+<span class="pl-c">// example usage</span>
+<span class="pl-k">class</span> <span class="pl-en">Link</span> <span class="pl-k">extends</span> <span class="pl-en">BoundComponent</span> {
+    <span class="pl-en">click</span>() {
+        <span class="pl-en">open</span>(<span class="pl-smi">this</span>.<span class="pl-c1">href</span>);
+    }
+    <span class="pl-en">render</span>() {
+        <span class="pl-k">let</span> { click } <span class="pl-k">=</span> <span class="pl-smi">this</span>.<span class="pl-smi">binds</span>;
+        <span class="pl-k">return</span> <span class="pl-k">&lt;</span>span onclick<span class="pl-k">=</span>{ click }<span class="pl-k">&gt;</span>{ children }<span class="pl-k">&lt;</span><span class="pl-k">/</span>span<span class="pl-k">&gt;</span>;
+    }
+}</pre></div>
+
+<p>The possibilities are pretty endless here. You could even add support for rudimentary mixins:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">class</span> <span class="pl-en">MixedComponent</span> <span class="pl-k">extends</span> <span class="pl-en">Component</span> {
+    <span class="pl-en">constructor</span>() {
+        <span class="pl-v">super</span>();
+        (<span class="pl-smi">this</span>.<span class="pl-smi">mixins</span> <span class="pl-k">||</span> []).<span class="pl-en">forEach</span>( m <span class="pl-k">=&gt;</span> <span class="pl-smi">Object</span>.<span class="pl-en">assign</span>(<span class="pl-v">this</span>, m) );
+    }
+}</pre></div>
+
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h2>
+
+<p>MIT</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/developit/preact">Preact</a> is maintained by <a href="https://github.com/developit">developit</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+            <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-6031694-18");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
