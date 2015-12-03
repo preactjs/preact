@@ -410,7 +410,7 @@ function renderComponent(component, opts) {
 			setComponentProps(inst, childProps, SYNC_RENDER);
 		}
 		else {
-			inst = componentRecycler.create(childComponent);
+			inst = componentRecycler.create(childComponent, childProps);
 			inst._parentComponent = component;
 			component._component = inst;
 			if (component.base) deepHook(inst, 'componentWillMount');
@@ -491,9 +491,8 @@ function buildComponentFromVNode(dom, vnode) {
  *	@private
  */
 function createComponentFromVNode(vnode) {
-	let component = componentRecycler.create(vnode.nodeName);
-
 	let props = getNodeProps(vnode);
+	let component = componentRecycler.create(vnode.nodeName, props);
 	setComponentProps(component, props, NO_RENDER);
 	renderComponent(component, DOM_RENDER);
 
@@ -835,7 +834,7 @@ let componentRecycler = {
 		else componentRecycler.components[name] = [component];
 	},
 
-	create(ctor) {
+	create(ctor, props) {
 		let list = componentRecycler.components[ctor.name];
 		if (list && list.length) {
 			for (let i=list.length; i--; ) {
@@ -844,7 +843,7 @@ let componentRecycler = {
 				}
 			}
 		}
-		return new ctor();
+		return new ctor(props);
 	}
 };
 
