@@ -174,8 +174,13 @@ describe('render()', () => {
 
 	it('should render components with props', () => {
 		const PROPS = { foo:'bar', onBaz:()=>{} };
+		let constructorProps;
 
 		class C2 extends Component {
+			constructor(props) {
+				super(props);
+				constructorProps = props;
+			}
 			render(props) {
 				return <div {...props} />;
 			}
@@ -183,6 +188,8 @@ describe('render()', () => {
 		sinon.spy(C2.prototype, 'render');
 
 		render(<C2 {...PROPS} />, scratch);
+
+		expect(constructorProps).to.deep.equal(PROPS);
 
 		expect(C2.prototype.render)
 			.to.have.been.calledOnce
