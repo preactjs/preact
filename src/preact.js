@@ -559,8 +559,8 @@ function build(dom, vnode) {
 				dom.textContent = vnode;
 				return dom;
 			}
-			else {
-				if (dom.nodeType===1) recycler.collect(dom);
+			else if (dom.nodeType===1) {
+				recycler.collect(dom);
 			}
 		}
 		return document.createTextNode(vnode);
@@ -769,7 +769,7 @@ let renderQueue = {
 /** Trigger all queued component renders.
  *	@function
  */
-let rerender = renderQueue.process
+let rerender = renderQueue.process;
 
 
 
@@ -805,7 +805,7 @@ let recycler = {
 		// remove event listeners & registry
 		let l = node._listeners;
 		delete node._listeners;
-		if (l) for (let i in l) node.removeEventListener(i, eventProxy);
+		if (l) for (let i in l) if (hop.call(l, i)) node.removeEventListener(i, eventProxy);
 
 		// strip attributes
 		let len = node.attributes && node.attributes.length;

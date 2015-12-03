@@ -1,10 +1,13 @@
 import { h, render, rerender, Component } from '../../src/preact';
 let { expect } = chai;
 
+/*eslint-env browser, mocha */
+/*global sinon, chai*/
+
 /** @jsx h */
 
 describe('render()', () => {
-	var scratch;
+	let scratch;
 
 	before( () => {
 		scratch = document.createElement('div');
@@ -37,7 +40,7 @@ describe('render()', () => {
 
 		render(<foo />, scratch);
 		render(<x-bar />, scratch);
-		expect(scratch.childNodes).to.have.length(2)
+		expect(scratch.childNodes).to.have.length(2);
 		expect(scratch.childNodes[0]).to.have.property('nodeName', 'FOO');
 		expect(scratch.childNodes[1]).to.have.property('nodeName', 'X-BAR');
 	});
@@ -56,9 +59,9 @@ describe('render()', () => {
 			.and.to.have.deep.property('0.nodeName', 'DIV');
 
 		let c = scratch.childNodes[0].childNodes;
-		expect(c).to.have.length(3)
-		expect(c).to.have.deep.property('0.nodeName', 'SPAN')
-		expect(c).to.have.deep.property('1.nodeName', 'FOO')
+		expect(c).to.have.length(3);
+		expect(c).to.have.deep.property('0.nodeName', 'SPAN');
+		expect(c).to.have.deep.property('1.nodeName', 'FOO');
 		expect(c).to.have.deep.property('2.nodeName', 'X-BAR');
 	});
 
@@ -94,8 +97,7 @@ describe('render()', () => {
 
 	it('should only register on* functions as handlers', () => {
 		let click = () => {},
-			onclick = () => {},
-			calls = [];
+			onclick = () => {};
 
 		let proto = document.createElement('div').constructor.prototype;
 

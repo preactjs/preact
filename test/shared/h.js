@@ -1,13 +1,15 @@
 import { expect } from 'chai';
 import { h, VNode } from '../../src/preact';
 
+/*eslint-env browser, mocha */
+
 /** @jsx h */
 
 let flatten = obj => JSON.parse(JSON.stringify(obj));
 
 describe('h(jsx)', () => {
 	it('should return a VNode', () => {
-		var r;
+		let r;
 		expect( () => r = h('foo') ).not.to.throw();
 		expect(r).to.be.an('object');
 		expect(r).to.be.an.instanceof(VNode);
