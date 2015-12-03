@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { default as preact, h, render, Component, hooks, options } from '../../preact';
+import { default as preact, h, render, Component, hooks, options } from '../../src/preact';
 
 describe('preact', () => {
 	it('should be available as a default export', () => {

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { h, VNode } from '../../preact';
+import { h, VNode } from '../../src/preact';
 
 /** @jsx h */
 
