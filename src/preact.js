@@ -267,7 +267,7 @@ function hook(obj, name, ...args) {
 function deepHook(obj, ...args) {
 	do {
 		hook(obj, ...args);
-	} while (obj=obj._component);
+	} while ((obj=obj._component));
 }
 
 
@@ -794,7 +794,7 @@ let recycler = {
 	},
 
 	clean(node) {
-		node.remove();
+		if (node.parentNode) node.parentNode.removeChild(node);
 
 		if (node.nodeType===3) return;
 
@@ -891,7 +891,7 @@ function setAccessor(node, name, value, old) {
 	else if (name==='style') {
 		node.style.cssText = value;
 	}
-	else if (name in node) {
+	else if (name in node && name!=='type') {
 		node[name] = value;
 	}
 	else {
