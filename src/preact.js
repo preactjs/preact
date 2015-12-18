@@ -1,9 +1,10 @@
+const HAS_DOM = typeof document!=='undefined';
 const EMPTY = {};
 const NO_RENDER = { render: false };
 const SYNC_RENDER = { renderSync: true };
 const DOM_RENDER = { build: true };
 const EMPTY_BASE = '';
-const TEXT_CONTENT = 'textContent' in document ? 'textContent' : 'nodeValue';
+const TEXT_CONTENT = !HAS_DOM || 'textContent' in document ? 'textContent' : 'nodeValue';
 const NON_DIMENSION_PROPS = {
 	boxFlex:1,boxFlexGroup:1,columnCount:1,fillOpacity:1,flex:1,flexGrow:1,
 	flexPositive:1,flexShrink:1,flexNegative:1,fontWeight:1,lineClamp:1,lineHeight:1,
