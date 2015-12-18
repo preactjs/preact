@@ -9,7 +9,11 @@ const NON_DIMENSION_PROPS = {
 	opacity:1,order:1,orphans:1,strokeOpacity:1,widows:1,zIndex:1,zoom:1
 };
 
-let slice = Array.prototype.slice;
+let toArray = obj => {
+	let arr = [];
+	for (let i=obj.length; i--; ) arr[i] = obj[i];
+	return arr;
+};
 
 let hop = Object.prototype.hasOwnProperty;
 
@@ -574,7 +578,7 @@ function build(dom, vnode) {
 	}
 	else if (dom.nodeName.toLowerCase()!==nodeName) {
 		out = recycler.create(nodeName);
-		appendChildren(out, slice.call(dom.childNodes));
+		appendChildren(out, toArray(dom.childNodes));
 		// reclaim element nodes
 		if (dom.nodeType===1) recycler.collect(dom);
 	}
@@ -611,7 +615,7 @@ function build(dom, vnode) {
 	}
 
 
-	let children = slice.call(out.childNodes);
+	let children = toArray(out.childNodes);
 	let keyed = {};
 	for (let i=children.length; i--; ) {
 		let t = children[i].nodeType;
@@ -814,7 +818,7 @@ let recycler = {
 
 		// if (node.childNodes.length>0) {
 		// 	console.warn(`Warning: Recycler collecting <${node.nodeName}> with ${node.childNodes.length} children.`);
-		// 	slice.call(node.childNodes).forEach(recycler.collect);
+		// 	toArray(node.childNodes).forEach(recycler.collect);
 		// }
 	}
 };
