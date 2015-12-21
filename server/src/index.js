@@ -7,11 +7,29 @@ const ESC = {
 	'&': '&amp;'
 };
 
+const EMPTY = {};
+
 const HOP = Object.prototype.hasOwnProperty;
 
 let escape = s => String(s).replace(/[<>"&]/, a => ESC[a] || a);
 
-export default function renderToString(vnode) {
+/** Convert JSX to a string, rendering out all nested components along the way.
+ *	@param {VNode} vnode		A VNode, generally created via JSX
+ *	@param {Object} [options]	Options for the renderer
+ *	@param {Boolean} [options.shallow=false]	Passing `true` stops at Component VNodes without rendering them. Note: a component located at the root will always be rendered.
+ */
+export function render(vnode, opts) {
+	return internalRender(vnode, opts || EMPTY, true);
+}
+
+export function shallowRender(vnode, opts) {
+	return internalRender(vnode, { shallow:true, ...(opts || EMPTY) }, true);
+}
+
+export default render;
+
+
+function internalRender(vnode, opts, root) {
 	let { nodeName, attributes, children } = vnode || EMPTY;
 
 	// #text nodes
@@ -21,20 +39,26 @@ export default function renderToString(vnode) {
 
 	// components
 	if (typeof nodeName==='function') {
-		let props = { children, ...attributes },
-			rendered;
-
-		if (typeof nodeName.prototype.render!=='function') {
-			// stateless functional components
-			rendered = nodeName(props);
+		if (opts.shallow===true && !root) {
+			nodeName = getComponentName(nodeName);
 		}
 		else {
-			// class-based components
-			let c = new nodeName();
-			c.setProps(props, NO_RENDER);
-			rendered = c.render(c.props = props, c.state);
+			let props = { children, ...attributes },
+				rendered;
+
+			if (typeof nodeName.prototype.render!=='function') {
+				// stateless functional components
+				rendered = nodeName(props);
+			}
+			else {
+				// class-based components
+				let c = new nodeName();
+				c.setProps(props, NO_RENDER);
+				rendered = c.render(c.props = props, c.state);
+			}
+
+			return internalRender(rendered, opts, false);
 		}
-		return renderToString(rendered);
 	}
 
 	// render JSX to HTML
@@ -53,8 +77,12 @@ export default function renderToString(vnode) {
 	}
 	s += '>';
 	if (children && children.length) {
-		s += children.map(renderToString).join('');
+		s += children.map( child => internalRender(child, opts, false) ).join('');
 	}
 	s += `</${nodeName}>`
 	return s;
-};
+}
+
+function getComponentName(component) {
+	return component.displayName || component.name || component.prototype.displayName || component.prototype.name || (Function.prototype.toString.call(component).match(/\s([^\(]+)/) || EMPTY)[1] || 'Component';
+}
