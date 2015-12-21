@@ -52,7 +52,7 @@ function internalRender(vnode, opts, root) {
 			}
 			else {
 				// class-based components
-				let c = new nodeName();
+				let c = new nodeName(props);
 				c.setProps(props, NO_RENDER);
 				rendered = c.render(c.props = props, c.state);
 			}
