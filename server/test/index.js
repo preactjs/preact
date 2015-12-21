@@ -90,18 +90,22 @@ describe('render-to-string', () => {
 
 				let rendered = render(<Test foo="test">content</Test>);
 
+				const PROPS = {
+					foo: 'test',
+					children: ['content']
+				};
+
 				expect(rendered)
 					.to.equal(`<div foo="test">content</div>`);
 
-				expect(Test).to.have.been.calledOnce;
+				expect(Test)
+					.to.have.been.calledOnce
+					.and.calledWith(match(PROPS));
 
 				expect(Test.prototype.render)
 					.to.have.been.calledOnce
 					.and.calledWithExactly(
-						match({
-							foo: 'test',
-							children: ['content']
-						}),
+						match(PROPS),
 						match({})	// empty state
 					);
 			});
