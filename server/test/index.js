@@ -31,6 +31,20 @@ describe('render-to-string', () => {
 
 				expect(rendered).to.equal(expected);
 			});
+
+			it('should omit functions', () => {
+				let rendered = render(<div a={()=>{}} b={function(){}} />),
+					expected = `<div></div>`;
+
+				expect(rendered).to.equal(expected);
+			});
+
+			it('should encode entities', () => {
+				let rendered = render(<div a={'"<>&'}>{'"<>&'}</div>),
+					expected = `<div a="&quot;&lt;&gt;&amp;">&quot;&lt;&gt;&amp;</div>`;
+
+				expect(rendered).to.equal(expected);
+			});
 		});
 
 		describe('Functional Components', () => {
