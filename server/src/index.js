@@ -11,7 +11,7 @@ const EMPTY = {};
 
 const HOP = Object.prototype.hasOwnProperty;
 
-let escape = s => String(s).replace(/[<>"&]/, a => ESC[a] || a);
+let encodeEntities = s => String(s).replace(/[<>"&]/g, a => ESC[a] || a);
 
 /** Convert JSX to a string, rendering out all nested components along the way.
  *	@param {VNode} vnode		A VNode, generally created via JSX
@@ -34,7 +34,7 @@ function internalRender(vnode, opts, root) {
 
 	// #text nodes
 	if (!nodeName) {
-		return escape(vnode);
+		return encodeEntities(vnode);
 	}
 
 	// components
@@ -70,8 +70,8 @@ function internalRender(vnode, opts, root) {
 				if (attributes['class']) continue;
 				name = 'class';
 			}
-			if (v!==null && v!==undefined) {
-				s += ` ${name}="${escape(v)}"`;
+			if (v!==null && v!==undefined && typeof v!=='function') {
+				s += ` ${name}="${encodeEntities(String(v))}"`;
 			}
 		}
 	}
