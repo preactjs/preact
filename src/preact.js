@@ -1,3 +1,4 @@
+const ATTR_PREFIX = '__preactattr_';
 const HAS_DOM = typeof document!=='undefined';
 const EMPTY = {};
 const NO_RENDER = { render: false };
@@ -814,8 +815,12 @@ let recycler = {
 
 		// strip attributes
 		let len = node.attributes && node.attributes.length;
-		if (len) for (let i=len; i--; ) {
-			node.removeAttribute(node.attributes[i].name);
+		if (len) {
+			for (let i=len; i--; ) {
+				let { name } = node.attributes[i];
+				delete node[`${ATTR_PREFIX}${name}`];
+				node.removeAttribute(name);
+			}
 		}
 
 		// if (node.childNodes.length>0) {
@@ -891,7 +896,7 @@ function getAccessor(node, name, value) {
  *	@private
  */
 function setAccessor(node, name, value, old) {
-	let key = `__preactattr_${name}`;
+	let key = `${ATTR_PREFIX}${name}`;
 	if (node[key]===value) return;
 	node[key] = value;
 	if (name==='class') {
