@@ -891,6 +891,9 @@ function getAccessor(node, name, value) {
  *	@private
  */
 function setAccessor(node, name, value, old) {
+	let key = `__preactattr_${name}`;
+	if (node[key]===value) return;
+	node[key] = value;
 	if (name==='class') {
 		node.className = value;
 	}
