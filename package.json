@@ -9,7 +9,7 @@
   "scripts": {
     "clean": "rimraf dist/",
     "build": "npm-run-all clean transpile minify size",
-    "transpile": "rollup -c rollup.config.js -m -f umd -n $npm_package_amdName src/preact.js -o $npm_package_main",
+    "transpile": "rollup -c rollup.config.js -m ${npm_package_main}.map -f umd -n $npm_package_amdName src/preact.js -o $npm_package_main",
     "minify": "uglifyjs $npm_package_main -cm -o $npm_package_minified_main -p relative --in-source-map ${npm_package_main}.map --source-map ${npm_package_minified_main}.map",
     "size": "size=$(gzip-size $npm_package_minified_main) && echo \"gzip size: $size / $(pretty-bytes $size)\"",
     "test": "eslint src test && npm run test:mocha && npm run test:karma",
@@ -53,7 +53,7 @@
     "phantomjs": "^1.9.18",
     "pretty-bytes": "^2.0.1",
     "rimraf": "2.4.4",
-    "rollup": "^0.21.1",
+    "rollup": "^0.24.0",
     "rollup-plugin-babel": "^1.0.0",
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0",
