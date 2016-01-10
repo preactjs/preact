@@ -25,7 +25,7 @@
     "url": "https://github.com/developit/preact.git"
   },
   "author": "Jason Miller <jason@developit.ca>",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/developit/preact/issues"
   },
