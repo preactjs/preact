@@ -808,18 +808,10 @@ let recycler = {
 		delete node._component;
 		delete node._componentConstructor;
 
-		// remove event listeners & registry
-		let l = node._listeners;
-		delete node._listeners;
-		if (l) for (let i in l) if (hop.call(l, i)) node.removeEventListener(i, eventProxy);
-
-		// strip attributes
-		let len = node.attributes && node.attributes.length;
-		if (len) {
-			for (let i=len; i--; ) {
-				let { name } = node.attributes[i];
-				delete node[`${ATTR_PREFIX}${name}`];
-				node.removeAttribute(name);
+		let len = ATTR_PREFIX.length;
+		for (let i in node) {
+			if (i.indexOf(ATTR_PREFIX)===0) {
+				setAccessor(node, i.substring(len), null, node[i]);
 			}
 		}
 
