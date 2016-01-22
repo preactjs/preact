@@ -19,6 +19,7 @@ It retains a large amount of compatibility with React, but only the [stateless f
 - [Animating Text](http://codepen.io/developit/full/LpNOdm/) (@ CodePen)
 - [60FPS Rainbow Spiral](http://codepen.io/developit/full/xGoagz/) (@ CodePen)
 - [Simple Clock](http://jsfiddle.net/developit/u9m5x0L7/embedded/result,js/) (@ JSFiddle)
+- [3D + ThreeJS](http://codepen.io/developit/pen/PPMNjd?editors=0010) (@ CodePen)
 - [**Create your Own!**](https://jsfiddle.net/developit/rs6zrh5f/embedded/result/) (@ JSFiddle)
 
 
@@ -35,7 +36,7 @@ It retains a large amount of compatibility with React, but only the [stateless f
 
 > :information_desk_person: You don't _have_ to use ES2015 to use Preact... but you should.
 
-The following guide assumes you have some sort of ES2015 build set up using babel and/or webpack/browserify/gulp/grunt/etc.  If you don't, start with [preact-boilerplate] or a [CodePen Template](http://codepen.io/developit/pen/PPMNjd?editors=001).
+The following guide assumes you have some sort of ES2015 build set up using babel and/or webpack/browserify/gulp/grunt/etc.  If you don't, start with [preact-boilerplate] or a [CodePen Template](http://codepen.io/developit/pen/pgaROe?editors=0010).
 
 
 ### Import what you need
