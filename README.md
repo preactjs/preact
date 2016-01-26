@@ -28,11 +28,14 @@ It retains a large amount of compatibility with React, but only the [stateless f
 
 ## Libraries & Add-ons
 
-- :earth_americas: [**preact-router**](http://git.io/preact-router): URL routing for your components.
-- :tulip: [**preact-svg**](http://git.io/preact-svg): Use inline `<svg>` in Preact.
-- :page_facing_up: [**preact-render-to-string**](http://git.io/preact-render-to-string): Universal rendering.
-- :raised_hands: [**preact-compat**](http://git.io/preact-compat): use any React library with Preact. *([full example](http://git.io/preact-compat-example))*
-- :rocket: [**preact-photon**](http://git.io/preact-photon): build beautiful desktop UI with [photon](http://photonkit.com).
+- :earth_americas: [**preact-router**](https://git.io/preact-router): URL routing for your components.
+- :tulip: [**preact-svg**](https://git.io/preact-svg): Use inline `<svg>` in Preact.
+- :page_facing_up: [**preact-render-to-string**](https://git.io/preact-render-to-string): Universal rendering.
+- :raised_hands: [**preact-compat**](https://git.io/preact-compat): use any React library with Preact. *([full example](http://git.io/preact-compat-example))*
+- :rocket: [**preact-photon**](https://git.io/preact-photon): build beautiful desktop UI with [photon](http://photonkit.com).
+- :microscope: [**preact-jsx-chai**](https://git.io/preact-jsx-chai): JSX assertion testing _(no DOM or phantomjs!)_
+- :bookmark_tabs: [**preact-markup**](https://git.io/preact-markup): Render HTML & Custom Elements as JSX & Components
+- :pencil: [**preact-richtextarea**](https://git.io/preact-richtextarea): Simple HTML editor component
 
 
 ## Getting Started
