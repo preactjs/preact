@@ -12,16 +12,17 @@ It retains a large amount of compatibility with React, but only the [stateless f
 
 ## Demos
 
-- [ESBench](http://esbench.com) is built using Preact.
-- [Documentation Viewer](https://documentation-viewer.firebaseapp.com) _([Github Project](https://github.com/developit/documentation-viewer))_
-- [TodoMVC](http://developit.github.io/preact-todomvc/) _([Github Project](https://github.com/developit/preact-todomvc))_
-- [Hacker News Minimal](https://developit.github.io/hn_minimal/) _([Github Project](https://github.com/developit/hn_minimal))_
-- [Preact Boilerplate](https://preact-boilerplate.surge.sh) _([Github Project](https://github.com/developit/preact-boilerplate))_ :zap:
-- [Flickr Browser](http://codepen.io/developit/full/VvMZwK/) (@ CodePen)
-- [Animating Text](http://codepen.io/developit/full/LpNOdm/) (@ CodePen)
-- [60FPS Rainbow Spiral](http://codepen.io/developit/full/xGoagz/) (@ CodePen)
-- [Simple Clock](http://jsfiddle.net/developit/u9m5x0L7/embedded/result,js/) (@ JSFiddle)
-- [3D + ThreeJS](http://codepen.io/developit/pen/PPMNjd?editors=0010) (@ CodePen)
+- [**ESBench**](http://esbench.com) is built using Preact.
+- [**Nectarine.rocks**](http://nectarine.rocks) _([Github Project](https://github.com/developit/nectarine))_ :peach:
+- [**Documentation Viewer**](https://documentation-viewer.firebaseapp.com) _([Github Project](https://github.com/developit/documentation-viewer))_
+- [**TodoMVC**](http://developit.github.io/preact-todomvc/) _([Github Project](https://github.com/developit/preact-todomvc))_
+- [**Hacker News Minimal**](https://developit.github.io/hn_minimal/) _([Github Project](https://github.com/developit/hn_minimal))_
+- [**Preact Boilerplate**](https://preact-boilerplate.surge.sh) _([Github Project](https://github.com/developit/preact-boilerplate))_ :zap:
+- [**Flickr Browser**](http://codepen.io/developit/full/VvMZwK/) (@ CodePen)
+- [**Animating Text**](http://codepen.io/developit/full/LpNOdm/) (@ CodePen)
+- [**60FPS Rainbow Spiral**](http://codepen.io/developit/full/xGoagz/) (@ CodePen)
+- [**Simple Clock**](http://jsfiddle.net/developit/u9m5x0L7/embedded/result,js/) (@ JSFiddle)
+- [**3D + ThreeJS**](http://codepen.io/developit/pen/PPMNjd?editors=0010) (@ CodePen)
 - [**Create your Own!**](https://jsfiddle.net/developit/rs6zrh5f/embedded/result/) (@ JSFiddle)
 
 
