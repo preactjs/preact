@@ -9,6 +9,7 @@ Preact is an attempt to recreate the core value proposition of React _(or simila
 
 It retains a large amount of compatibility with React, but only the [stateless functional components](https://facebook.github.io/react/blog/2015/10/07/react-v0.14.html#stateless-functional-components) and [ES6 Classes] interface.  As one would expect coming from React, Components are simple building blocks for composing a User Interface.
 
+>  :information_desk_person: **Documentation is available in the [Preact Wiki](https://github.com/developit/preact/wiki).**
 
 ## Demos
 
