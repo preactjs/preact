@@ -209,7 +209,7 @@ Fortunately there is a solution, in the form of `linkState()`. Calling `componen
 ```js
 class Foo extends Component {
 	render({ }, { text }) {
-		return <input value={text} inInput={this.linkState('text')} />;
+		return <input value={text} onInput={this.linkState('text')} />;
 	}
 }
 ```
