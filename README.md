@@ -1,7 +1,7 @@
 # Preact
 
 [![npm](https://img.shields.io/npm/v/preact.svg)](http://npm.im/preact)
-[![travis](https://travis-ci.org/developit/preact.svg)](https://travis-ci.org/developit/preact)
+[![travis](https://travis-ci.org/developit/preact.svg?branch=master)](https://travis-ci.org/developit/preact)
 [![gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/developit/preact)
 
 
