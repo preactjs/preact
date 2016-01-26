@@ -15,6 +15,8 @@ It retains a large amount of compatibility with React, but only the [stateless f
 - [ESBench](http://esbench.com) is built using Preact.
 - [Documentation Viewer](https://documentation-viewer.firebaseapp.com) _([Github Project](https://github.com/developit/documentation-viewer))_
 - [TodoMVC](http://developit.github.io/preact-todomvc/) _([Github Project](https://github.com/developit/preact-todomvc))_
+- [Hacker News Minimal](https://developit.github.io/hn_minimal/) _([Github Project](https://github.com/developit/hn_minimal))_
+- [Preact Boilerplate](https://preact-boilerplate.surge.sh) _([Github Project](https://github.com/developit/preact-boilerplate))_ :zap:
 - [Flickr Browser](http://codepen.io/developit/full/VvMZwK/) (@ CodePen)
 - [Animating Text](http://codepen.io/developit/full/LpNOdm/) (@ CodePen)
 - [60FPS Rainbow Spiral](http://codepen.io/developit/full/xGoagz/) (@ CodePen)
