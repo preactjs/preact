@@ -1,3 +1,6 @@
 {
-  "loose": "all"
+  "presets": ["es2015-loose"],
+  "plugins": [
+    ["transform-react-jsx", { "pragma": "h" }]
+  ]
 }
