@@ -1,7 +1,7 @@
 # Preact
 
 [![npm](https://img.shields.io/npm/v/preact.svg)](http://npm.im/preact)
-[![travis](https://travis-ci.org/developit/preact.svg)](https://travis-ci.org/developit/preact)
+[![travis](https://travis-ci.org/developit/preact.svg?branch=master)](https://travis-ci.org/developit/preact)
 [![gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/developit/preact)
 
 
@@ -9,27 +9,34 @@ Preact is an attempt to recreate the core value proposition of React _(or simila
 
 It retains a large amount of compatibility with React, but only the [stateless functional components](https://facebook.github.io/react/blog/2015/10/07/react-v0.14.html#stateless-functional-components) and [ES6 Classes] interface.  As one would expect coming from React, Components are simple building blocks for composing a User Interface.
 
+>  :information_desk_person: **Documentation is available in the [Preact Wiki](https://github.com/developit/preact/wiki).**
 
 ## Demos
 
-- [ESBench](http://esbench.com) is built using Preact.
-- [Documentation Viewer](https://documentation-viewer.firebaseapp.com) _([Github Project](https://github.com/developit/documentation-viewer))_
-- [TodoMVC](http://developit.github.io/preact-todomvc/) _([Github Project](https://github.com/developit/preact-todomvc))_
-- [Flickr Browser](http://codepen.io/developit/full/VvMZwK/) (@ CodePen)
-- [Animating Text](http://codepen.io/developit/full/LpNOdm/) (@ CodePen)
-- [60FPS Rainbow Spiral](http://codepen.io/developit/full/xGoagz/) (@ CodePen)
-- [Simple Clock](http://jsfiddle.net/developit/u9m5x0L7/embedded/result,js/) (@ JSFiddle)
-- [3D + ThreeJS](http://codepen.io/developit/pen/PPMNjd?editors=0010) (@ CodePen)
+- [**ESBench**](http://esbench.com) is built using Preact.
+- [**Nectarine.rocks**](http://nectarine.rocks) _([Github Project](https://github.com/developit/nectarine))_ :peach:
+- [**Documentation Viewer**](https://documentation-viewer.firebaseapp.com) _([Github Project](https://github.com/developit/documentation-viewer))_
+- [**TodoMVC**](http://developit.github.io/preact-todomvc/) _([Github Project](https://github.com/developit/preact-todomvc))_
+- [**Hacker News Minimal**](https://developit.github.io/hn_minimal/) _([Github Project](https://github.com/developit/hn_minimal))_
+- [**Preact Boilerplate**](https://preact-boilerplate.surge.sh) _([Github Project](https://github.com/developit/preact-boilerplate))_ :zap:
+- [**Flickr Browser**](http://codepen.io/developit/full/VvMZwK/) (@ CodePen)
+- [**Animating Text**](http://codepen.io/developit/full/LpNOdm/) (@ CodePen)
+- [**60FPS Rainbow Spiral**](http://codepen.io/developit/full/xGoagz/) (@ CodePen)
+- [**Simple Clock**](http://jsfiddle.net/developit/u9m5x0L7/embedded/result,js/) (@ JSFiddle)
+- [**3D + ThreeJS**](http://codepen.io/developit/pen/PPMNjd?editors=0010) (@ CodePen)
 - [**Create your Own!**](https://jsfiddle.net/developit/rs6zrh5f/embedded/result/) (@ JSFiddle)
 
 
 ## Libraries & Add-ons
 
-- :earth_americas: [**preact-router**](http://git.io/preact-router): URL routing for your components.
-- :tulip: [**preact-svg**](http://git.io/preact-svg): Use inline `<svg>` in Preact.
-- :page_facing_up: [**preact-render-to-string**](http://git.io/preact-render-to-string): Universal rendering.
-- :raised_hands: [**preact-compat**](http://git.io/preact-compat): use any React library with Preact. *([full example](http://git.io/preact-compat-example))*
-- :rocket: [**preact-photon**](http://git.io/preact-photon): build beautiful desktop UI with [photon](http://photonkit.com).
+- :earth_americas: [**preact-router**](https://git.io/preact-router): URL routing for your components.
+- :tulip: [**preact-svg**](https://git.io/preact-svg): Use inline `<svg>` in Preact.
+- :page_facing_up: [**preact-render-to-string**](https://git.io/preact-render-to-string): Universal rendering.
+- :raised_hands: [**preact-compat**](https://git.io/preact-compat): use any React library with Preact. *([full example](http://git.io/preact-compat-example))*
+- :rocket: [**preact-photon**](https://git.io/preact-photon): build beautiful desktop UI with [photon](http://photonkit.com).
+- :microscope: [**preact-jsx-chai**](https://git.io/preact-jsx-chai): JSX assertion testing _(no DOM or phantomjs!)_
+- :bookmark_tabs: [**preact-markup**](https://git.io/preact-markup): Render HTML & Custom Elements as JSX & Components
+- :pencil: [**preact-richtextarea**](https://git.io/preact-richtextarea): Simple HTML editor component
 
 
 ## Getting Started
@@ -207,7 +214,7 @@ Fortunately there is a solution, in the form of `linkState()`. Calling `componen
 ```js
 class Foo extends Component {
 	render({ }, { text }) {
-		return <input value={text} inInput={this.linkState('text')} />;
+		return <input value={text} onInput={this.linkState('text')} />;
 	}
 }
 ```
