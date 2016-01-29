@@ -194,7 +194,7 @@ VNode.prototype.__isVNode = true;
  *	const Thing = ({ name }) => <span>{ name }</span>;
  *	render(<Thing name="one" />, document.querySelector('#foo'));
  */
-export function render(vnode, parent, merge=null) {
+export function render(vnode, parent, merge) {
 	let existing = merge && merge._component && merge._componentConstructor===vnode.nodeName,
 		built = build(merge, vnode),
 		c = !existing && built._component;
@@ -484,8 +484,9 @@ function buildComponentFromVNode(dom, vnode) {
 	else {
 		if (c) {
 			unmountComponent(dom, c);
+			dom = null;
 		}
-		dom = createComponentFromVNode(vnode);
+		dom = createComponentFromVNode(vnode, dom);
 	}
 
 	return dom;
@@ -497,9 +498,10 @@ function buildComponentFromVNode(dom, vnode) {
  *	@param {VNode} vnode
  *	@private
  */
-function createComponentFromVNode(vnode) {
+function createComponentFromVNode(vnode, dom) {
 	let props = getNodeProps(vnode);
 	let component = componentRecycler.create(vnode.nodeName, props);
+	if (dom) component.base = dom;
 	setComponentProps(component, props, NO_RENDER);
 	renderComponent(component, DOM_RENDER);
 
