@@ -877,9 +877,9 @@ function appendChildren(parent, children) {
 function getAccessor(node, name, value) {
 	let key = `${ATTR_PREFIX}${name}`;
 	if (name!=='type' && name in node) return node[name];
-	if (hop.call(node, key)) return node[key];
 	if (name==='class') return node.className;
 	if (name==='style') return node.style.cssText;
+	if (hop.call(node, key)) return node[key];
 	return value;
 }
 
