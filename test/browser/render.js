@@ -155,6 +155,24 @@ describe('render()', () => {
 			.and.not.include.members(['no1', 'no2', 'no3', 'no4', 'no5']);
 	});
 
+	it('should reconcile mutated DOM attributes', () => {
+		let check = p => render(<input type="checkbox" checked={p} />, scratch, scratch.lastChild),
+			value = () => scratch.lastChild.checked,
+			setValue = p => scratch.lastChild.checked = p;
+		check(true);
+		expect(value()).to.equal(true);
+		check(false);
+		expect(value()).to.equal(false);
+		check(true);
+		expect(value()).to.equal(true);
+		setValue(true);
+		check(false);
+		expect(value()).to.equal(false);
+		setValue(false);
+		check(true);
+		expect(value()).to.equal(true);
+	});
+
 	it('should render components', () => {
 		class C1 extends Component {
 			render() {
