@@ -107,9 +107,9 @@ export class Component {
 	 *	@param {object} props
 	 *	@param {object} state
 	 */
-	shouldComponentUpdate(props, state) {
-		return true;
-	}
+	// shouldComponentUpdate() {
+	// 	return true;
+	// }
 
 	/** Returns a function that sets a state property when called.
 	 *	Calling linkState() repeatedly with the same arguments returns a cached link function.
@@ -888,8 +888,12 @@ function getAccessor(node, name, value) {
 /** Set a named attribute on the given Node, with special behavior for some names and event handlers.
  *	If `value` is `null`, the attribute/handler will be removed.
  *	@private
+ *	@param {Element} node	Element to mutate
+ *	@param {String} name	prop to set
+ *	@param {Any} value		new value to apply
+ *	@param {Any} old		old value (not currently used)
  */
-function setAccessor(node, name, value, old) {
+function setAccessor(node, name, value) {
 	if (name==='class') {
 		node.className = value;
 	}
@@ -900,7 +904,7 @@ function setAccessor(node, name, value, old) {
 		node[name] = value;
 	}
 	else {
-		setComplexAccessor(node, name, value, old);
+		setComplexAccessor(node, name, value);
 	}
 
 	node[`${ATTR_PREFIX}${name}`] = getAccessor(node, name, value);
@@ -910,7 +914,7 @@ function setAccessor(node, name, value, old) {
 /** For props without explicit behavior, apply to a Node as event handlers or attributes.
  *	@private
  */
-function setComplexAccessor(node, name, value, old) {
+function setComplexAccessor(node, name, value) {
 	if (name.substring(0,2)==='on') {
 		let type = normalizeEventName(name),
 			l = node._listeners || (node._listeners = {});
