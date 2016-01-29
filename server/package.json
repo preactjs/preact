@@ -1,10 +1,11 @@
 {
   "name": "preact-render-to-string",
+  "amdName": "preactRenderToString",
   "version": "1.4.1",
   "description": "Render JSX to an HTML string, with support for Preact components.",
   "main": "dist/index.js",
   "scripts": {
-    "build": "babel src -s -d dist",
+    "build": "babel src -s -d dist --module-id $npm_package_amdName",
     "test": "eslint {src,test} && mocha --compilers js:babel/register test/**/*.js",
     "prepublish": "npm run build",
     "release": "npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
