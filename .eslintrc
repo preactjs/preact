@@ -11,6 +11,7 @@
   "rules": {
     "no-unused-vars": [1, { "varsIgnorePattern": "^h$" }],
     "no-cond-assign": 1,
+    "no-console": 1,
     "semi": 2,
     "camelcase": 0,
     "comma-style": 2,
@@ -23,7 +24,7 @@
     "no-implied-eval": 2,
     "no-new-func": 2,
     "guard-for-in": 2,
-    "eqeqeq": 2,
+    "eqeqeq": 1,
     "no-else-return": 2,
     "no-redeclare": 2,
     "no-dupe-keys": 2,

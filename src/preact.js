@@ -609,7 +609,7 @@ function build(dom, vnode) {
 				let value = attrs[name];
 				if (value!==undefined && value!==null) {
 					let prev = getAccessor(out, name, old[name]);
-					if (value!==prev) {
+					if (value!=prev) {
 						setAccessor(out, name, value, prev);
 					}
 				}
@@ -875,9 +875,11 @@ function appendChildren(parent, children) {
  *	@private
  */
 function getAccessor(node, name, value) {
+	let key = `${ATTR_PREFIX}${name}`;
+	if (name!=='type' && name in node) return node[name];
+	if (hop.call(node, key)) return node[key];
 	if (name==='class') return node.className;
 	if (name==='style') return node.style.cssText;
-	if (name!=='type' && name in node) return node[name];
 	return value;
 }
 
@@ -888,9 +890,6 @@ function getAccessor(node, name, value) {
  *	@private
  */
 function setAccessor(node, name, value, old) {
-	let key = `${ATTR_PREFIX}${name}`;
-	if (node[key]===value) return;
-	node[key] = value;
 	if (name==='class') {
 		node.className = value;
 	}
@@ -903,6 +902,8 @@ function setAccessor(node, name, value, old) {
 	else {
 		setComplexAccessor(node, name, value, old);
 	}
+
+	node[`${ATTR_PREFIX}${name}`] = getAccessor(node, name, value);
 }
 
 
