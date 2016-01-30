@@ -41,7 +41,7 @@ It retains a large amount of compatibility with React, but only the [stateless f
 
 ## Getting Started
 
-> :information_desk_person: You don't _have_ to use ES2015 to use Preact... but you should.
+> :information_desk_person: You [don't _have_ to use ES2015 to use Preact](https://github.com/developit/preact-without-babel)... but you should.
 
 The following guide assumes you have some sort of ES2015 build set up using babel and/or webpack/browserify/gulp/grunt/etc.  If you don't, start with [preact-boilerplate] or a [CodePen Template](http://codepen.io/developit/pen/pgaROe?editors=0010).
 
