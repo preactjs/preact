@@ -180,7 +180,6 @@ class VNode {
 		this.children = children;
 	}
 }
-VNode.prototype.__isVNode = true;
 
 
 
@@ -239,7 +238,7 @@ function h(nodeName, attributes, ...args) {
 			}
 			for (let j=0; j<arr.length; j++) {
 				let child = arr[j],
-					simple = !empty(child) && !isVNode(child);
+					simple = !empty(child) && !(child instanceof VNode);
 				if (simple) child = String(child);
 				if (simple && lastSimple) {
 					children[children.length-1] += child;
@@ -280,15 +279,6 @@ function deepHook(obj, ...args) {
 	do {
 		hook(obj, ...args);
 	} while ((obj=obj._component));
-}
-
-
-
-/** Fast check if an object is a VNode.
- *	@private
- */
-function isVNode(obj) {
-	return obj && obj.__isVNode===true;
 }
 
 
