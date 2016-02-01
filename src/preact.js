@@ -1086,4 +1086,4 @@ function extend(obj, props) {
 
 
 // export everything in loose mode (works with both root and named imports)
-export default { options, render, rerender, h, Component, VNode };
+export default { options, hooks:options, render, rerender, h, Component, VNode };
