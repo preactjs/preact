@@ -73,7 +73,6 @@ let options = {
 		}
 	}
 };
-let hooks = options;
 
 
 
@@ -88,7 +87,7 @@ let hooks = options;
  *	}
  */
 class Component {
-	constructor(props) {
+	constructor(props, context) {
 		/** @private */
 		this._dirty = this._disableRendering = false;
 		/** @private */
@@ -96,7 +95,9 @@ class Component {
 		/** @private */
 		this._renderCallbacks = [];
 		/** @public */
-		this.prevState = this.prevProps = this.prevContext = this.context = this.base = null;
+		this.prevState = this.prevProps = this.prevContext = this.base = null;
+		/** @public */
+		this.context = context || null;
 		/** @type {object} */
 		this.props = props || hook(this, 'getDefaultProps') || {};
 		/** @type {object} */
@@ -107,6 +108,9 @@ class Component {
 	 *	@param {object} nextProps
 	 *	@param {object} nextState
 	 *	@param {object} nextContext
+	 *	@returns {Boolean} should the component re-render
+	 *	@name shouldComponentUpdate
+	 *	@function
 	 */
 	// shouldComponentUpdate() {
 	// 	return true;
@@ -1082,4 +1086,4 @@ function extend(obj, props) {
 
 
 // export everything in loose mode (works with both root and named imports)
-export default { options, hooks, render, rerender, h, Component, VNode };
+export default { options, render, rerender, h, Component, VNode };
