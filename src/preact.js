@@ -1,17 +1,25 @@
-const ATTR_PREFIX = '__preactattr_';
-const HAS_DOM = typeof document!=='undefined';
-const EMPTY = {};
+// render modes
 const NO_RENDER = { render: false };
 const SYNC_RENDER = { renderSync: true };
 const DOM_RENDER = { build: true };
+
+const EMPTY = {};
 const EMPTY_BASE = '';
+
+// is this a DOM environment
+const HAS_DOM = typeof document!=='undefined';
 const TEXT_CONTENT = !HAS_DOM || 'textContent' in document ? 'textContent' : 'nodeValue';
+
+const ATTR_PREFIX = '__preactattr_';
+
+// DOM properties that should NOT have "px" added when numeric
 const NON_DIMENSION_PROPS = {
 	boxFlex:1,boxFlexGroup:1,columnCount:1,fillOpacity:1,flex:1,flexGrow:1,
 	flexPositive:1,flexShrink:1,flexNegative:1,fontWeight:1,lineClamp:1,lineHeight:1,
 	opacity:1,order:1,orphans:1,strokeOpacity:1,widows:1,zIndex:1,zoom:1
 };
 
+// convert an Array-like object to an Array
 let toArray = obj => {
 	let arr = [];
 	for (let i=obj.length; i--; ) arr[i] = obj[i];
@@ -79,8 +87,8 @@ let hooks = options;
  *		}
  *	}
  */
-	constructor() {
 class Component {
+	constructor(props) {
 		/** @private */
 		this._dirty = this._disableRendering = false;
 		/** @private */
@@ -90,16 +98,15 @@ class Component {
 		/** @public */
 		this.prevState = this.prevProps = this.prevContext = this.context = this.base = null;
 		/** @type {object} */
-		this.props = hook(this, 'getDefaultProps') || {};
+		this.props = props || hook(this, 'getDefaultProps') || {};
 		/** @type {object} */
 		this.state = hook(this, 'getInitialState') || {};
-		// @TODO remove me?
-		hook(this, 'initialize');
 	}
 
 	/** Returns a `boolean` value indicating if the component should re-render when receiving the given `props` and `state`.
-	 *	@param {object} props
-	 *	@param {object} state
+	 *	@param {object} nextProps
+	 *	@param {object} nextState
+	 *	@param {object} nextContext
 	 */
 	// shouldComponentUpdate() {
 	// 	return true;
@@ -152,8 +159,9 @@ class Component {
 	 *	@param {object} state		The component's current state
 	 *	@returns VNode
 	 */
-	render(props) {
-		return h('div', null, props.children);
+	render() {
+		// return h('div', null, props.children);
+		return null;
 	}
 }
 
@@ -915,11 +923,11 @@ function getAccessor(node, name, value) {
 
 /** Set a named attribute on the given Node, with special behavior for some names and event handlers.
  *	If `value` is `null`, the attribute/handler will be removed.
+ *	@param {Element} node	An element to mutate
+ *	@param {string} name	The name/key to set, such as an event or attribute name
+ *	@param {any} value		An attribute value, such as a function to be used as an event handler
+ *	@param {any} previousValue	The last value that was set for this name/node pair
  *	@private
- *	@param {Element} node	Element to mutate
- *	@param {String} name	prop to set
- *	@param {Any} value		new value to apply
- *	@param {Any} old		old value (not currently used)
  */
 function setAccessor(node, name, value) {
 	if (name==='class') {
@@ -1023,19 +1031,17 @@ function getNodeProps(vnode) {
  *	@private
  */
 function styleObjToCss(s) {
-	let str = '',
-		sep = ': ',
-		term = '; ';
+	let str = '';
 	for (let prop in s) {
 		if (hop.call(s, prop)) {
 			let val = s[prop];
 			str += jsToCss(prop);
-			str += sep;
+			str += ': ';
 			str += val;
 			if (typeof val==='number' && !hop.call(NON_DIMENSION_PROPS, prop)) {
 				str += 'px';
 			}
-			str += term;
+			str += '; ';
 		}
 	}
 	return str;
