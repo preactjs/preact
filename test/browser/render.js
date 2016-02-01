@@ -150,6 +150,14 @@ describe('render()', () => {
 			.and.not.include.members(['no1', 'no2', 'no3', 'no4', 'no5']);
 	});
 
+	it('should support dangerouslySetInnerHTML', () => {
+		let html = '<b>foo &amp; bar</b>';
+		render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
+
+		expect(scratch.firstChild).to.have.property('innerHTML', html);
+		expect(scratch.innerHTML).to.equal('<div>'+html+'</div>');
+	});
+
 	it('should reconcile mutated DOM attributes', () => {
 		let check = p => render(<input type="checkbox" checked={p} />, scratch, scratch.lastChild),
 			value = () => scratch.lastChild.checked,

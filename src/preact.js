@@ -628,6 +628,9 @@ function build(dom, vnode, context) {
 		}
 	}
 
+	// grab children prior to setting attributes to ignore children added via dangerouslySetInnerHTML
+	let children = toArray(out.childNodes);
+
 	// new & updated attributes
 	if (attrs!==EMPTY) {
 		for (let name in attrs) {
@@ -644,7 +647,6 @@ function build(dom, vnode, context) {
 	}
 
 
-	let children = toArray(out.childNodes);
 	let keyed = {};
 	for (let i=children.length; i--; ) {
 		let t = children[i].nodeType;
@@ -926,6 +928,9 @@ function setAccessor(node, name, value) {
 	}
 	else if (name==='style') {
 		node.style.cssText = value;
+	}
+	else if (name==='dangerouslySetInnerHTML') {
+		node.innerHTML = value.__html;
 	}
 	else if (name in node && name!=='type') {
 		node[name] = value;
