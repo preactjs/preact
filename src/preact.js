@@ -40,40 +40,32 @@ let options = {
 	/** If `true`, `prop` changes trigger synchronous component updates.
 	 *	@boolean
 	 */
-	syncComponentUpdates: true
-};
-
-
-
-/** Global hook methods
- *	@public
- *	@namespace {Object}
- */
-let hooks = {
+	syncComponentUpdates: true,
 
 	/** Processes all created VNodes.
 	 *	@param {VNode} vnode	A newly-created VNode to normalize/process
 	 *	@protected
 	 */
-	vnode({ attributes }) {
-		if (!attributes) return;
+	vnode(n) {
+		let attrs = n.attributes;
+		if (!attrs) return;
 
-		let s = attributes.style;
+		let s = attrs.style;
 		if (s && !s.substring) {
-			attributes.style = styleObjToCss(s);
+			attrs.style = styleObjToCss(s);
 		}
 
-		let c = attributes['class'];
-		if (hop.call(attributes, 'className')) {
-			c = attributes['class'] = attributes.className;
-			delete attributes.className;
+		let c = attrs['class'];
+		if (hop.call(attrs, 'className')) {
+			c = attrs['class'] = attrs.className;
+			delete attrs.className;
 		}
 		if (c && !c.substring) {
-			attributes['class'] = hashToClassName(c);
+			attrs['class'] = hashToClassName(c);
 		}
 	}
-
 };
+let hooks = options;
 
 
 
@@ -87,8 +79,8 @@ let hooks = {
  *		}
  *	}
  */
-export class Component {
 	constructor() {
+class Component {
 		/** @private */
 		this._dirty = this._disableRendering = false;
 		/** @private */
@@ -168,7 +160,7 @@ export class Component {
 
 
 /** Virtual DOM Node */
-export class VNode {
+class VNode {
 	constructor(nodeName, attributes, children) {
 		/** @type {string|function} */
 		this.nodeName = nodeName;
@@ -199,7 +191,7 @@ VNode.prototype.__isVNode = true;
  *	const Thing = ({ name }) => <span>{ name }</span>;
  *	render(<Thing name="one" />, document.querySelector('#foo'));
  */
-export function render(vnode, parent, merge) {
+function render(vnode, parent, merge) {
 	let existing = merge && merge._component && merge._componentConstructor===vnode.nodeName,
 		built = build(merge, vnode),
 		c = !existing && built._component;
@@ -220,7 +212,7 @@ export function render(vnode, parent, merge) {
  *  import { render, h } from 'preact';
  *  render(<span>foo</span>, document.body);
  */
-export function h(nodeName, attributes, ...args) {
+function h(nodeName, attributes, ...args) {
 	let children,
 		sharedArr = [],
 		len = args.length,
@@ -257,7 +249,7 @@ export function h(nodeName, attributes, ...args) {
 	}
 
 	let p = new VNode(nodeName, attributes || undefined, children || undefined);
-	hook(hooks, 'vnode', p);
+	hook(options, 'vnode', p);
 	return p;
 }
 
@@ -786,7 +778,7 @@ let renderQueue = {
 	add(component) {
 		if (renderQueue.items.push(component)!==1) return;
 
-		let d = hooks.debounceRendering;
+		let d = options.debounceRendering;
 		if (d) d(renderQueue.process);
 		else setTimeout(renderQueue.process, 0);
 	},
@@ -976,7 +968,7 @@ function setComplexAccessor(node, name, value) {
  */
 function eventProxy(e) {
 	let fn = this._listeners[normalizeEventName(e.type)];
-	if (fn) return fn.call(this, hook(hooks, 'event', e) || e);
+	if (fn) return fn.call(this, hook(options, 'event', e) || e);
 }
 
 
@@ -1087,5 +1079,5 @@ function extend(obj, props) {
 }
 
 
-export { options, hooks, rerender };
-export default { options, hooks, render, rerender, h, Component };
+// export everything in loose mode (works with both root and named imports)
+export default { options, hooks, render, rerender, h, Component, VNode };
