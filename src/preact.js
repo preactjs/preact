@@ -199,7 +199,7 @@ export function render(vnode, parent, merge) {
 		built = build(merge, vnode),
 		c = !existing && built._component;
 	if (c) deepHook(c, 'componentWillMount');
-	if (build.parentNode!==parent) {
+	if (built.parentNode!==parent) {
 		parent.appendChild(built);
 	}
 	if (c) deepHook(c, 'componentDidMount');
