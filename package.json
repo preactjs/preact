@@ -12,11 +12,12 @@
     "transpile": "rollup -c rollup.config.js -m ${npm_package_main}.map -f umd -n $npm_package_amdName src/preact.js -o $npm_package_main",
     "minify": "uglifyjs $npm_package_main -cm -o $npm_package_minified_main -p relative --in-source-map ${npm_package_main}.map --source-map ${npm_package_minified_main}.map",
     "size": "size=$(gzip-size $npm_package_minified_main) && echo \"gzip size: $size / $(pretty-bytes $size)\"",
-    "test": "eslint src test && npm-run-all --parallel test:mocha test:karma",
+    "test": "npm-run-all lint --parallel test:mocha test:karma",
     "test:mocha": "mocha --recursive --compilers js:babel/register test/shared test/node",
     "test:karma": "karma start --single-run",
     "test:mocha:watch": "npm run test:mocha -- --watch",
     "test:karma:watch": "npm run test:karma -- no-single-run",
+    "lint": "eslint src test",
     "prepublish": "npm run build",
     "release": "npm run build && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
   },

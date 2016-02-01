@@ -1,7 +1,5 @@
+import preact, { h, render, Component, hooks, options } from '../../src/preact';
 import { expect } from 'chai';
-import { default as preact, h, render, Component, hooks, options } from '../../src/preact';
-
-/*eslint-env browser, mocha */
 
 describe('preact', () => {
 	it('should be available as a default export', () => {

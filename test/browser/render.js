@@ -1,9 +1,4 @@
 import { h, render, rerender, Component } from '../../src/preact';
-let { expect } = chai;
-
-/*eslint-env browser, mocha */
-/*global sinon, chai*/
-
 /** @jsx h */
 
 describe('render()', () => {

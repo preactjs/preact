@@ -1,10 +1,7 @@
 import { h, render } from '../../src/preact';
-import { expect } from 'chai';
-
-/*eslint-env browser, mocha */
-/*eslint no-console:0 */
-
 /** @jsx h */
+
+/*eslint no-console:0*/
 
 describe('performance', () => {
 	let scratch;

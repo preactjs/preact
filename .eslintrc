@@ -2,11 +2,16 @@
   "parser": "babel-eslint",
   "extends": "eslint:recommended",
   "env": {
-    "browser": true
+    "browser": true,
+    "mocha": true
   },
   "ecmaFeatures": {
     "modules": true,
     "jsx": true
+  },
+  "globals": {
+    "sinon": true,
+    "expect": true
   },
   "rules": {
     "no-unused-vars": [1, { "varsIgnorePattern": "^h$" }],
