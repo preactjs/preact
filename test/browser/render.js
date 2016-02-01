@@ -224,7 +224,7 @@ describe('render()', () => {
 
 		expect(C3)
 			.to.have.been.calledOnce
-			.and.to.have.been.calledWithExactly(PROPS)
+			.and.to.have.been.calledWith(PROPS)
 			.and.to.have.returned(sinon.match({
 				nodeName: 'div',
 				attributes: PROPS
@@ -248,7 +248,7 @@ describe('render()', () => {
 
 		expect(Outer)
 			.to.have.been.calledOnce
-			.and.to.have.been.calledWithExactly(PROPS)
+			.and.to.have.been.calledWith(PROPS)
 			.and.to.have.returned(sinon.match({
 				nodeName: Inner,
 				attributes: PROPS
@@ -256,7 +256,7 @@ describe('render()', () => {
 
 		expect(Inner)
 			.to.have.been.calledOnce
-			.and.to.have.been.calledWithExactly(PROPS)
+			.and.to.have.been.calledWith(PROPS)
 			.and.to.have.returned(sinon.match({
 				nodeName: 'div',
 				attributes: PROPS,
@@ -298,7 +298,7 @@ describe('render()', () => {
 		expect(Inner).to.have.been.calledTwice;
 
 		expect(Inner.secondCall)
-			.to.have.been.calledWithExactly({ foo:'bar', i:2 })
+			.to.have.been.calledWith({ foo:'bar', i:2 })
 			.and.to.have.returned(sinon.match({
 				attributes: {
 					j: 2,
@@ -316,7 +316,7 @@ describe('render()', () => {
 		expect(Inner).to.have.been.calledThrice;
 
 		expect(Inner.thirdCall)
-			.to.have.been.calledWithExactly({ foo:'bar', i:3 })
+			.to.have.been.calledWith({ foo:'bar', i:3 })
 			.and.to.have.returned(sinon.match({
 				attributes: {
 					j: 3,

@@ -93,8 +93,10 @@ export class Component {
 		this._dirty = this._disableRendering = false;
 		/** @private */
 		this._linkedStates = {};
+		/** @private */
+		this._renderCallbacks = [];
 		/** @public */
-		this.nextProps = this.base = null;
+		this.prevState = this.prevProps = this.prevContext = this.context = this.base = null;
 		/** @type {object} */
 		this.props = hook(this, 'getDefaultProps') || {};
 		/** @type {object} */
@@ -139,8 +141,11 @@ export class Component {
 	/** Update component state by copying properties from `state` to `this.state`.
 	 *	@param {object} state		A hash of state properties to update with new values
 	 */
-	setState(state) {
-		extend(this.state, state);
+	setState(state, callback) {
+		let s = this.state;
+		if (!this.prevState) this.prevState = extend({}, s);
+		extend(s, typeof state==='function' ? state(s, this.props) : state);
+		if (callback) this._renderCallbacks.push(callback);
 		triggerComponentRender(this);
 	}
 
@@ -330,8 +335,8 @@ function isFunctionalComponent({ nodeName }) {
  *	@param {VNode} vnode	A VNode with a `nodeName` property that is a reference to a function.
  *	@private
  */
-function buildFunctionalComponent(vnode) {
-	return vnode.nodeName(getNodeProps(vnode)) || EMPTY_BASE;
+function buildFunctionalComponent(vnode, context) {
+	return vnode.nodeName(getNodeProps(vnode), context) || EMPTY_BASE;
 }
 
 
@@ -355,11 +360,16 @@ function triggerComponentRender(component) {
 *	@param {boolean} [opts.renderSync=false]	If `true` and {@link options.syncComponentUpdates} is `true`, triggers synchronous rendering.
 *	@param {boolean} [opts.render=true]			If `false`, no render will be triggered.
  */
-function setComponentProps(component, props, opts=EMPTY) {
+function setComponentProps(component, props, opts=EMPTY, context) {
 	let d = component._disableRendering;
 	component._disableRendering = true;
-	hook(component, 'componentWillReceiveProps', props, component.props);
-	component.nextProps = props;
+	if (context) {
+		if (!component.prevContext) component.prevContext = extend({}, component.context);
+		component.context = context;
+	}
+	hook(component, 'componentWillReceiveProps', props, component.context);
+	if (!component.prevProps) component.prevProps = extend({}, component.props);
+	component.props = props;
 	component._disableRendering = d;
 	if (opts.render!==false) {
 		if (opts.renderSync || options.syncComponentUpdates) {
@@ -382,76 +392,99 @@ function setComponentProps(component, props, opts=EMPTY) {
 function renderComponent(component, opts) {
 	if (component._disableRendering) return;
 
-	component._dirty = false;
+	let skip, rendered,
+		props = component.props,
+		state = component.state,
+		context = component.context,
+		previousProps = component.prevProps || props,
+		previousState = component.prevState || state,
+		previousContext = component.prevContext || context,
+		isUpdate = component.base;
 
-	let p = component.nextProps,
-		s = component.state;
-
-	if (component.base) {
-		if (hook(component, 'shouldComponentUpdate', p, s)===false) {
-			component.props = p;
-			return;
-		}
-
-		hook(component, 'componentWillUpdate', p, s);
-	}
-
-	component.props = p;
-
-	let rendered = hook(component, 'render', p, s),
-		childComponent = rendered && rendered.nodeName,
-		base;
-
-	if (typeof childComponent==='function' && childComponent.prototype.render) {
-		// set up high order component link
-
-		let inst = component._component;
-		if (inst && inst.constructor!==childComponent) {
-			unmountComponent(inst.base, inst, false);
-			inst = null;
-		}
-
-		let childProps = getNodeProps(rendered);
-
-		if (inst) {
-			setComponentProps(inst, childProps, SYNC_RENDER);
+	if (isUpdate) {
+		component.props = previousProps;
+		component.state = previousState;
+		component.context = previousContext;
+		if (hook(component, 'shouldComponentUpdate', props, state, context)===false) {
+			skip = true;
 		}
 		else {
-			inst = componentRecycler.create(childComponent, childProps);
-			inst._parentComponent = component;
-			component._component = inst;
-			if (component.base) deepHook(inst, 'componentWillMount');
-			setComponentProps(inst, childProps, NO_RENDER);
-			renderComponent(inst, DOM_RENDER);
-			if (component.base) deepHook(inst, 'componentDidMount');
+			hook(component, 'componentWillUpdate', props, state, context);
+		}
+		component.props = props;
+		component.state = state;
+		component.context = context;
+	}
+
+	component.prevProps = component.prevState = component.prevContext = null;
+	component._dirty = false;
+
+	if (!skip) {
+		rendered = hook(component, 'render', props, state, context);
+
+		let childComponent = rendered && rendered.nodeName,
+			childContext = component.getChildContext ? component.getChildContext() : context,
+			base;
+
+		if (typeof childComponent==='function' && childComponent.prototype.render) {
+			// set up high order component link
+
+			let inst = component._component;
+			if (inst && inst.constructor!==childComponent) {
+				unmountComponent(inst.base, inst, false);
+				inst = null;
+			}
+
+			let childProps = getNodeProps(rendered);
+
+			if (inst) {
+				setComponentProps(inst, childProps, SYNC_RENDER, childContext);
+			}
+			else {
+				inst = componentRecycler.create(childComponent, childProps);
+				inst._parentComponent = component;
+				component._component = inst;
+				if (component.base) deepHook(inst, 'componentWillMount');
+				setComponentProps(inst, childProps, NO_RENDER, childContext);
+				renderComponent(inst, DOM_RENDER);
+				if (component.base) deepHook(inst, 'componentDidMount');
+			}
+
+			base = inst.base;
+		}
+		else {
+			// destroy high order component link
+			if (component._component) {
+				unmountComponent(component.base, component._component);
+			}
+			component._component = null;
+
+			if (component.base || (opts && opts.build)) {
+				base = build(component.base, rendered || EMPTY_BASE, childContext);
+			}
 		}
 
-		base = inst.base;
-	}
-	else {
-		// destroy high order component link
-		if (component._component) {
-			unmountComponent(component.base, component._component);
+		if (component.base && base!==component.base) {
+			let p = component.base.parentNode;
+			if (p) p.replaceChild(base, component.base);
 		}
-		component._component = null;
 
-		if (component.base || (opts && opts.build)) {
-			base = build(component.base, rendered || EMPTY_BASE, component);
+		component.base = base;
+		if (base) {
+			base._component = component;
+			base._componentConstructor = component.constructor;
+		}
+
+		if (isUpdate) {
+			hook(component, 'componentDidUpdate', previousProps, previousState, previousContext);
 		}
 	}
 
-	if (component.base && base!==component.base) {
-		let p = component.base.parentNode;
-		if (p) p.replaceChild(base, component.base);
+	let cb = component._renderCallbacks;
+	if (cb) {
+		for (let i=cb.length; i--; ) cb[i]();
+		cb.length = 0;
 	}
-
-	component.base = base;
-	if (base) {
-		base._component = component;
-		base._componentConstructor = component.constructor;
-	}
-
-	hook(component, 'componentDidUpdate', p, s);
 
 	return rendered;
 }
@@ -464,11 +497,11 @@ function renderComponent(component, opts) {
  *	@returns {Element} dom	The created/mutated element
  *	@private
  */
-function buildComponentFromVNode(dom, vnode) {
+function buildComponentFromVNode(dom, vnode, context) {
 	let c = dom && dom._component;
 
 	if (isFunctionalComponent(vnode)) {
-		let p = build(dom, buildFunctionalComponent(vnode));
+		let p = build(dom, buildFunctionalComponent(vnode, context), context);
 		p._componentConstructor = vnode.nodeName;
 		return p;
 	}
@@ -479,14 +512,14 @@ function buildComponentFromVNode(dom, vnode) {
 	}
 
 	if (isOwner) {
-		setComponentProps(c, getNodeProps(vnode), SYNC_RENDER);
+		setComponentProps(c, getNodeProps(vnode), SYNC_RENDER, context);
 	}
 	else {
 		if (c) {
 			unmountComponent(dom, c);
 			dom = null;
 		}
-		dom = createComponentFromVNode(vnode, dom);
+		dom = createComponentFromVNode(vnode, dom, context);
 	}
 
 	return dom;
@@ -498,11 +531,11 @@ function buildComponentFromVNode(dom, vnode) {
  *	@param {VNode} vnode
  *	@private
  */
-function createComponentFromVNode(vnode, dom) {
+function createComponentFromVNode(vnode, dom, context) {
 	let props = getNodeProps(vnode);
 	let component = componentRecycler.create(vnode.nodeName, props);
 	if (dom) component.base = dom;
-	setComponentProps(component, props, NO_RENDER);
+	setComponentProps(component, props, NO_RENDER, context);
 	renderComponent(component, DOM_RENDER);
 
 	// let node = component.base;
@@ -548,17 +581,17 @@ function unmountComponent(dom, component, remove) {
  *	@returns {Element} dom			The created/mutated element
  *	@private
  */
-function build(dom, vnode) {
+function build(dom, vnode, context) {
 	let out = dom,
 		nodeName = vnode.nodeName;
 
 	if (typeof nodeName==='function' && !nodeName.prototype.render) {
-		vnode = buildFunctionalComponent(vnode);
+		vnode = buildFunctionalComponent(vnode, context);
 		nodeName = vnode.nodeName;
 	}
 
 	if (typeof nodeName==='function') {
-		return buildComponentFromVNode(dom, vnode);
+		return buildComponentFromVNode(dom, vnode, context);
 	}
 
 	if (typeof vnode==='string') {
@@ -665,7 +698,7 @@ function build(dom, vnode) {
 			}
 
 			// morph the matched/found/created DOM child to match vchild (deep)
-			newChildren.push(build(child, vchild));
+			newChildren.push(build(child, vchild, context));
 		}
 	}
 
@@ -719,7 +752,8 @@ function createLinkedState(component, key, eventPath) {
 		p0 = path[0];
 	return function(e) {
 		let t = this,
-			obj = component.state,
+			s = component.state,
+			obj = s,
 			v, i;
 		if (typeof eventPath==='string') {
 			v = delve(e, eventPath);
@@ -735,7 +769,7 @@ function createLinkedState(component, key, eventPath) {
 			obj = obj[path[i]] || {};
 		}
 		obj[path[i]] = v;
-		component.setState({ [p0]: component.state[p0] });
+		component.setState({ [p0]: s[p0] });
 	};
 }
 
