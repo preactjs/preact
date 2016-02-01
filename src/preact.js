@@ -212,8 +212,9 @@ function render(vnode, parent, merge) {
 
 
 
-/** @public JSX/hyperscript reviver
+/** JSX/hyperscript reviver
  *	@see http://jasonformat.com/wtf-is-jsx
+ *	@public
  *  @example
  *  /** @jsx h *\/
  *  import { render, h } from 'preact';
