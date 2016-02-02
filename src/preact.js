@@ -843,7 +843,7 @@ let recycler = {
 
 		let len = ATTR_PREFIX.length;
 		for (let i in node) {
-			if (i.indexOf(ATTR_PREFIX)===0) {
+			if (hop.call(node,i) && i.indexOf(ATTR_PREFIX)===0) {
 				setAccessor(node, i.substring(len), null, node[i]);
 			}
 		}
@@ -953,10 +953,10 @@ function setAccessor(node, name, value) {
 function setComplexAccessor(node, name, value) {
 	if (name.substring(0,2)==='on') {
 		let type = normalizeEventName(name),
-			l = node._listeners || (node._listeners = {});
-		if (!l[type]) node.addEventListener(type, eventProxy);
+			l = node._listeners || (node._listeners = {}),
+			fn = !l[type] ? 'add' : !value ? 'remove' : null;
+		if (fn) node[fn+'EventListener'](type, eventProxy);
 		l[type] = value;
-		// @TODO automatically remove proxy event listener when no handlers are left
 		return;
 	}
 
@@ -989,15 +989,37 @@ let normalizeEventName = memoize(t => t.replace(/^on/i,'').toLowerCase());
 
 
 
-/** Get a node's attributes as a hashmap, regardless of type.
+/** Get a hashmap of node properties, preferring preact's cached property values over the DOM's
  *	@private
  */
 function getNodeAttributes(node) {
+	let list = getRawNodeAttributes(node),
+		l = getExtendedAttributes(node);
+	return l && list ? extend(list, l) : (l || list || EMPTY);
+}
+
+
+/** Get a node's attributes as a hashmap, regardless of type.
+ *	@private
+ */
+function getRawNodeAttributes(node) {
 	let list = node.attributes;
 	if (!list || !list.getNamedItem) return list;
 	if (list.length) return getAttributesAsObject(list);
 }
 
+
+function getExtendedAttributes(node) {
+	let len = ATTR_PREFIX.length,
+		attrs;
+	for (let i in node) {
+		if (hop.call(node, i) && i.indexOf(ATTR_PREFIX)===0) {
+			if (!attrs) attrs = {};
+			attrs[i.substring(len)] = node[i];
+		}
+	}
+	return attrs;
+}
 
 
 /** Convert a DOM `.attributes` NamedNodeMap to a hashmap.
