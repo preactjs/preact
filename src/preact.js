@@ -86,24 +86,24 @@ let options = {
  *		}
  *	}
  */
-class Component {
-	constructor(props, context) {
-		/** @private */
-		this._dirty = this._disableRendering = false;
-		/** @private */
-		this._linkedStates = {};
-		/** @private */
-		this._renderCallbacks = [];
-		/** @public */
-		this.prevState = this.prevProps = this.prevContext = this.base = null;
-		/** @public */
-		this.context = context || null;
-		/** @type {object} */
-		this.props = props || hook(this, 'getDefaultProps') || {};
-		/** @type {object} */
-		this.state = hook(this, 'getInitialState') || {};
-	}
+function Component(props, context) {
+	/** @private */
+	this._dirty = this._disableRendering = false;
+	/** @private */
+	this._linkedStates = {};
+	/** @private */
+	this._renderCallbacks = [];
+	/** @public */
+	this.prevState = this.prevProps = this.prevContext = this.base = null;
+	/** @public */
+	this.context = context || null;
+	/** @type {object} */
+	this.props = props || hook(this, 'getDefaultProps') || {};
+	/** @type {object} */
+	this.state = hook(this, 'getInitialState') || {};
+}
 
+extend(Component.prototype, {
 	/** Returns a `boolean` value indicating if the component should re-render when receiving the given `props` and `state`.
 	 *	@param {object} nextProps
 	 *	@param {object} nextState
@@ -114,7 +114,7 @@ class Component {
 	 */
 	// shouldComponentUpdate() {
 	// 	return true;
-	// }
+	// },
 
 	/** Returns a function that sets a state property when called.
 	 *	Calling linkState() repeatedly with the same arguments returns a cached link function.
@@ -139,7 +139,7 @@ class Component {
 		let c = this._linkedStates,
 			cacheKey = key + '|' + (eventPath || '');
 		return c[cacheKey] || (c[cacheKey] = createLinkedState(this, key, eventPath));
-	}
+	},
 
 	/** Update component state by copying properties from `state` to `this.state`.
 	 *	@param {object} state		A hash of state properties to update with new values
@@ -150,12 +150,12 @@ class Component {
 		extend(s, typeof state==='function' ? state(s, this.props) : state);
 		if (callback) this._renderCallbacks.push(callback);
 		triggerComponentRender(this);
-	}
+	},
 
 	/** @private */
 	setProps(props, opts) {
 		return setComponentProps(this, props, opts);
-	}
+	},
 
 	/** Accepts `props` and `state`, and returns a new Virtual DOM tree to build.
 	 *	Virtual DOM is generally constructed via [JSX](http://jasonformat.com/wtf-is-jsx).
@@ -167,22 +167,20 @@ class Component {
 		// return h('div', null, props.children);
 		return null;
 	}
-}
+});
 
 
 
 /** Virtual DOM Node */
-class VNode {
-	constructor(nodeName, attributes, children) {
-		/** @type {string|function} */
-		this.nodeName = nodeName;
+function VNode(nodeName, attributes, children) {
+	/** @type {string|function} */
+	this.nodeName = nodeName;
 
-		/** @type {object<string>|undefined} */
-		this.attributes = attributes;
+	/** @type {object<string>|undefined} */
+	this.attributes = attributes;
 
-		/** @type {array<VNode>|undefined} */
-		this.children = children;
-	}
+	/** @type {array<VNode>|undefined} */
+	this.children = children;
 }
 
 
