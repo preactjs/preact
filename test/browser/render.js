@@ -122,7 +122,7 @@ describe('render()', () => {
 			on.dispatchEvent(e);
 		}
 
-		render(<div onClick={ e => click(1) } onMouseDown={ mousedown } />, scratch);
+		render(<div onClick={ () => click(1) } onMouseDown={ mousedown } />, scratch);
 
 		expect(proto.addEventListener).to.have.been.calledTwice
 			.and.to.have.been.calledWith('click')
@@ -135,7 +135,7 @@ describe('render()', () => {
 		proto.addEventListener.reset();
 		click.reset();
 
-		render(<div onClick={ e => click(2) } />, scratch, scratch.firstChild);
+		render(<div onClick={ () => click(2) } />, scratch, scratch.firstChild);
 
 		expect(proto.addEventListener).not.to.have.been.called;
 
