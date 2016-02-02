@@ -108,6 +108,65 @@ describe('render()', () => {
 		proto.addEventListener.restore();
 	});
 
+	it('should add and remove event handlers', () => {
+		let click = sinon.spy(),
+			mousedown = sinon.spy();
+
+		let proto = document.createElement('div').constructor.prototype;
+		sinon.spy(proto, 'addEventListener');
+		sinon.spy(proto, 'removeEventListener');
+
+		function fireEvent(on, type) {
+			let e = document.createEvent('Event');
+			e.initEvent(type);
+			on.dispatchEvent(e);
+		}
+
+		render(<div onClick={ e => click(1) } onMouseDown={ mousedown } />, scratch);
+
+		expect(proto.addEventListener).to.have.been.calledTwice
+			.and.to.have.been.calledWith('click')
+			.and.calledWith('mousedown');
+
+		fireEvent(scratch.childNodes[0], 'click');
+		expect(click).to.have.been.calledOnce
+			.and.calledWith(1);
+
+		proto.addEventListener.reset();
+		click.reset();
+
+		render(<div onClick={ e => click(2) } />, scratch, scratch.firstChild);
+
+		expect(proto.addEventListener).not.to.have.been.called;
+
+		expect(proto.removeEventListener)
+			.to.have.been.calledOnce
+			.and.calledWith('mousedown');
+
+		fireEvent(scratch.childNodes[0], 'click');
+		expect(click).to.have.been.calledOnce
+			.and.to.have.been.calledWith(2);
+
+		fireEvent(scratch.childNodes[0], 'mousedown');
+		expect(mousedown).not.to.have.been.called;
+
+		proto.removeEventListener.reset();
+		click.reset();
+		mousedown.reset();
+
+		render(<div />, scratch, scratch.firstChild);
+
+		expect(proto.removeEventListener)
+			.to.have.been.calledOnce
+			.and.calledWith('click');
+
+		fireEvent(scratch.childNodes[0], 'click');
+		expect(click).not.to.have.been.called;
+
+		proto.addEventListener.restore();
+		proto.removeEventListener.restore();
+	});
+
 	it('should serialize style objects', () => {
 		render(<div style={{
 			color: 'rgb(255, 255, 255)',
