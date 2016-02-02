@@ -602,7 +602,7 @@ function build(dom, vnode, context) {
 		return document.createTextNode(vnode);
 	}
 
-	if (nodeName===null || nodeName===undefined) {
+	if (empty(nodeName)) {
 		nodeName = 'x-undefined-element';
 	}
 
@@ -625,7 +625,7 @@ function build(dom, vnode, context) {
 		for (let name in old) {
 			if (hop.call(old, name)) {
 				let o = attrs[name];
-				if (o===undefined || o===null) {
+				if (empty(o)) {
 					setAccessor(out, name, null, old[name]);
 				}
 			}
@@ -640,7 +640,7 @@ function build(dom, vnode, context) {
 		for (let name in attrs) {
 			if (hop.call(attrs, name)) {
 				let value = attrs[name];
-				if (value!==undefined && value!==null) {
+				if (!empty(value)) {
 					let prev = getAccessor(out, name, old[name]);
 					if (value!=prev) {
 						setAccessor(out, name, value, prev);
