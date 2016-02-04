@@ -22,7 +22,7 @@ export function createNode(nodeName) {
 	let name = normalizeName(nodeName),
 		list = nodes[name],
 		node = list && list.pop() || document.createElement(nodeName);
-	node[ATTR_KEY] = {};
+	ensureNodeData(node);
 	return node;
 }
 

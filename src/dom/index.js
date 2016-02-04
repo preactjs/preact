@@ -3,6 +3,12 @@ import { hasOwnProperty, memoize } from '../util';
 import options from '../options';
 import { hook } from '../hooks';
 
+
+export function ensureNodeData(node) {
+	return node[ATTR_KEY] || (node[ATTR_KEY] = {});
+}
+
+
 /** Append multiple children to a Node.
  *	Uses a Document Fragment to batch when appending 2 or more children
  *	@private
@@ -61,7 +67,7 @@ export function setAccessor(node, name, value) {
 		setComplexAccessor(node, name, value);
 	}
 
-	node[ATTR_KEY][name] = getAccessor(node, name, value);
+	ensureNodeData(node)[name] = getAccessor(node, name, value);
 }
 
 
