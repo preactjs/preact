@@ -31,12 +31,12 @@ export function appendChildren(parent, children) {
 /** Retrieve the value of a rendered attribute
  *	@private
  */
-export function getAccessor(node, name, value) {
+export function getAccessor(node, name, value, cache) {
 	if (name!=='type' && name in node) return node[name];
 	if (name==='class') return node.className;
 	if (name==='style') return node.style.cssText;
 	let attrs = node[ATTR_KEY];
-	if (hasOwnProperty.call(attrs, name)) return attrs[name];
+	if (cache!==false && attrs && hasOwnProperty.call(attrs, name)) return attrs[name];
 	return value;
 }
 
@@ -67,7 +67,7 @@ export function setAccessor(node, name, value) {
 		setComplexAccessor(node, name, value);
 	}
 
-	ensureNodeData(node)[name] = getAccessor(node, name, value);
+	ensureNodeData(node)[name] = getAccessor(node, name, value, false);
 }
 
 
