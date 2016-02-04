@@ -32,16 +32,14 @@ function cleanNode(node) {
 
 	if (node.nodeType===3) return;
 
-	delete node._component;
-	delete node._componentConstructor;
-
 	let attrs = node[ATTR_KEY];
 	for (let i in attrs) {
 		if (hasOwnProperty.call(attrs, i)) {
 			setAccessor(node, i, null, attrs[i]);
 		}
 	}
-	node[ATTR_KEY] = null;
+
+	node[ATTR_KEY] = node._component = node._componentConstructor = null;
 
 	// if (node.childNodes.length>0) {
 	// 	console.warn(`Warning: Recycler collecting <${node.nodeName}> with ${node.childNodes.length} children.`);
