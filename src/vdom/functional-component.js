@@ -1,5 +1,5 @@
 import { EMPTY_BASE } from '../constants';
-import { getNodeProps } from './index';
+import { getNodeProps } from '.';
 
 
 /** Check if a VNode is a reference to a stateless functional component.

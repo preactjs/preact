@@ -1,10 +1,10 @@
 import { TEXT_CONTENT, EMPTY } from '../constants';
 import { hasOwnProperty, empty, toArray } from '../util';
 import { hook, deepHook } from '../hooks';
-import { isSameNodeType } from './index';
+import { isSameNodeType } from '.';
 import { buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
-import { appendChildren, getAccessor, setAccessor, getNodeAttributes } from '../dom/index';
+import { appendChildren, getAccessor, setAccessor, getNodeAttributes } from '../dom';
 import { collectComponent } from './component-recycler';
 import { createNode, collectNode } from '../dom/recycler';
 

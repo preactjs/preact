@@ -3,7 +3,7 @@ import options from '../options';
 import { extend } from '../util';
 import { hook, deepHook } from '../hooks';
 import { enqueueRender } from '../render-queue';
-import { getNodeProps } from './index';
+import { getNodeProps } from '.';
 import build from './build';
 import { createComponent, collectComponent } from './component-recycler';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';

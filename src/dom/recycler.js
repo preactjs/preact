@@ -1,6 +1,6 @@
 import { ATTR_KEY } from '../constants';
 import { hasOwnProperty, memoize } from '../util';
-import { setAccessor } from './index';
+import { setAccessor, ensureNodeData } from '.';
 
 /** DOM node pool, keyed on nodeName. */
 

@@ -56,6 +56,7 @@
     "rimraf": "^2.5.1",
     "rollup": "^0.25.1",
     "rollup-plugin-babel": "^1.0.0",
+    "rollup-plugin-npm": "^1.4.0",
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0",
     "uglify-js": "^2.6.0",
