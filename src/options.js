@@ -17,7 +17,7 @@ export default {
 	 */
 	vnode(n) {
 		let attrs = n.attributes;
-		if (!attrs) return;
+		if (!attrs || isFunction(n.nodeName)) return;
 
 		// normalize className to class.
 		let p = attrs.className;
