@@ -22,6 +22,11 @@ export function memoize(fn, mem) {
 }
 
 
+export const isFunction = obj => 'function'===typeof obj;
+
+export const isString = obj => 'string'===typeof obj;
+
+
 /** Get a deep property value from the given object, expressed in dot-notation.
  *	@private
  */

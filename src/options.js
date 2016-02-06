@@ -1,4 +1,4 @@
-import { styleObjToCss, hashToClassName } from './util';
+import { isFunction, isString, styleObjToCss, hashToClassName } from './util';
 
 /** Global options
  *	@public
@@ -32,7 +32,7 @@ export default {
 
 function normalize(obj, prop, fn) {
 	let v = obj[prop];
-	if (v && typeof v!=='string') {
+	if (v && !isString(v)) {
 		obj[prop] = fn(v);
 	}
 }

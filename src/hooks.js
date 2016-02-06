@@ -1,9 +1,11 @@
+import { isFunction } from './util';
+
 /** Invoke a "hook" method with arguments if it exists.
  *	@private
  */
 export function hook(obj, name, ...args) {
 	let fn = obj[name];
-	if (fn && typeof fn==='function') return fn.apply(obj, args);
+	if (fn && isFunction(fn)) return fn.apply(obj, args);
 }
 
 

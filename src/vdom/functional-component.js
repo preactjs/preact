@@ -1,5 +1,6 @@
 import { EMPTY_BASE } from '../constants';
 import { getNodeProps } from '.';
+import { isFunction } from '../util';
 
 
 /** Check if a VNode is a reference to a stateless functional component.
@@ -9,7 +10,7 @@ import { getNodeProps } from '.';
  *	@private
  */
 export function isFunctionalComponent({ nodeName }) {
-	return typeof nodeName==='function' && !nodeName.prototype.render;
+	return isFunction(nodeName) && !nodeName.prototype.render;
 }
 
 

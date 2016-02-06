@@ -1,6 +1,6 @@
 import { SYNC_RENDER, DOM_RENDER, NO_RENDER, EMPTY, EMPTY_BASE } from '../constants';
 import options from '../options';
-import { extend } from '../util';
+import { extend, isFunction } from '../util';
 import { hook, deepHook } from '../hooks';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from '.';
@@ -101,7 +101,7 @@ export function renderComponent(component, opts) {
 			childContext = component.getChildContext ? component.getChildContext() : context,
 			base;
 
-		if (typeof childComponent==='function' && childComponent.prototype.render) {
+		if (isFunction(childComponent) && childComponent.prototype.render) {
 			// set up high order component link
 
 			let inst = component._component;

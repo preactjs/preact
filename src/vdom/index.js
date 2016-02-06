@@ -1,4 +1,4 @@
-import { extend } from '../util';
+import { extend, isFunction, isString } from '../util';
 import { isFunctionalComponent } from './functional-component';
 
 
@@ -8,18 +8,17 @@ import { isFunctionalComponent } from './functional-component';
  *	@private
  */
 export function isSameNodeType(node, vnode) {
-	if (node.nodeType===3) {
-		return typeof vnode==='string';
-	}
+	if (node.nodeType===3) return isString(vnode);
 	if (isFunctionalComponent(vnode)) return true;
 	let nodeName = vnode.nodeName;
-	if (typeof nodeName==='function') return node._componentConstructor===nodeName;
+	if (isFunction(nodeName)) return node._componentConstructor===nodeName;
 	return node.nodeName.toLowerCase()===nodeName;
 }
 
 
 
 /** Reconstruct Component-style `props` from a VNode
+ *	@todo: determine if it would be acceptible to drop the extend() clone here for speed
  *	@private
  */
 export function getNodeProps(vnode) {

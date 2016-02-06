@@ -1,4 +1,4 @@
-import { empty, delve } from './util';
+import { empty, isString, isFunction, delve } from './util';
 
 /** Create an Event handler function that sets a given state property.
  *	@param {Component} component	The component whose state should be updated
@@ -15,7 +15,7 @@ export function createLinkedState(component, key, eventPath) {
 			s = component.state,
 			obj = s,
 			v, i;
-		if (typeof eventPath==='string') {
+		if (isString(eventPath)) {
 			v = delve(e, eventPath);
 			if (empty(v) && (t=t._component)) {
 				v = delve(t, eventPath);
@@ -24,7 +24,7 @@ export function createLinkedState(component, key, eventPath) {
 		else {
 			v = (t.nodeName+t.type).match(/^input(checkbox|radio)$/i) ? t.checked : t.value;
 		}
-		if (typeof v==='function') v = v.call(t);
+		if (isFunction(v)) v = v.call(t);
 		for (i=0; i<path.length-1; i++) {
 			obj = obj[path[i]] || {};
 		}

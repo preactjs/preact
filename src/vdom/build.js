@@ -1,5 +1,5 @@
 import { TEXT_CONTENT, EMPTY } from '../constants';
-import { hasOwnProperty, empty, toArray } from '../util';
+import { hasOwnProperty, empty, toArray, isString, isFunction } from '../util';
 import { hook, deepHook } from '../hooks';
 import { isSameNodeType } from '.';
 import { buildFunctionalComponent } from './functional-component';
@@ -19,16 +19,16 @@ export default function build(dom, vnode, context) {
 	let out = dom,
 		nodeName = vnode.nodeName;
 
-	if (typeof nodeName==='function' && !nodeName.prototype.render) {
+	if (isFunction(nodeName) && !nodeName.prototype.render) {
 		vnode = buildFunctionalComponent(vnode, context);
 		nodeName = vnode.nodeName;
 	}
 
-	if (typeof nodeName==='function') {
+	if (isFunction(nodeName)) {
 		return buildComponentFromVNode(dom, vnode, context);
 	}
 
-	if (typeof vnode==='string') {
+	if (isString(vnode)) {
 		if (dom) {
 			if (dom.nodeType===3) {
 				dom[TEXT_CONTENT] = vnode;
