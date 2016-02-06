@@ -22,11 +22,6 @@ export function memoize(fn, mem) {
 }
 
 
-export const isFunction = obj => 'function'===typeof obj;
-
-export const isString = obj => 'string'===typeof obj;
-
-
 /** Get a deep property value from the given object, expressed in dot-notation.
  *	@private
  */
@@ -38,16 +33,27 @@ export function delve(obj, key) {
 }
 
 
-export const hasOwnProperty = Object.prototype.hasOwnProperty;
-
-
-// convert an Array-like object to an Array
+/** Convert an Array-like object to an Array
+ *	@private
+ */
 export function toArray(obj) {
 	let arr = [],
 		i = obj.length;
 	while (i--) arr[i] = obj[i];
 	return arr;
 }
+
+
+/** @private is the given object a Function? */
+export const isFunction = obj => 'function'===typeof obj;
+
+
+/** @private is the given object a String? */
+export const isString = obj => 'string'===typeof obj;
+
+
+/** @private Safe reference to builtin hasOwnProperty */
+export const hasOwnProperty = Object.prototype.hasOwnProperty;
 
 
 /** Check if a value is `null` or `undefined`.
