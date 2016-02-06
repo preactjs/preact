@@ -159,9 +159,10 @@ export default function build(dom, vnode, context) {
 	// remove orphaned children
 	for (let i=0, len=children.length; i<len; i++) {
 		let child = children[i],
-			c = child._component;
+			c = child._component,
+			p = child.parentNode;
 		if (c) hook(c, 'componentWillUnmount');
-		child.parentNode.removeChild(child);
+		if (p) p.removeChild(child);
 		if (c) {
 			hook(c, 'componentDidUnmount');
 			collectComponent(c);
