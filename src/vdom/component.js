@@ -116,7 +116,7 @@ export function renderComponent(component, opts) {
 				setComponentProps(inst, childProps, SYNC_RENDER, childContext);
 			}
 			else {
-				inst = createComponent(childComponent, childProps);
+				inst = createComponent(childComponent, childProps, childContext);
 				inst._parentComponent = component;
 				component._component = inst;
 				if (component.base) deepHook(inst, 'componentWillMount');
@@ -208,7 +208,7 @@ export function buildComponentFromVNode(dom, vnode, context) {
  */
 function createComponentFromVNode(vnode, dom, context) {
 	let props = getNodeProps(vnode);
-	let component = createComponent(vnode.nodeName, props);
+	let component = createComponent(vnode.nodeName, props, context);
 	if (dom) component.base = dom;
 	setComponentProps(component, props, NO_RENDER, context);
 	renderComponent(component, DOM_RENDER);

@@ -13,7 +13,7 @@ export function collectComponent(component) {
 }
 
 
-export function createComponent(ctor, props) {
+export function createComponent(ctor, props, context) {
 	let list = components[ctor.name];
 	if (list && list.length) {
 		for (let i=list.length; i--; ) {
@@ -22,5 +22,5 @@ export function createComponent(ctor, props) {
 			}
 		}
 	}
-	return new ctor(props);
+	return new ctor(props, context);
 }
