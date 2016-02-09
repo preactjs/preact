@@ -38,6 +38,7 @@ It retains a large amount of compatibility with React, but only the [stateless f
 - :microscope: [**preact-jsx-chai**](https://git.io/preact-jsx-chai): JSX assertion testing _(no DOM or phantomjs!)_
 - :bookmark_tabs: [**preact-markup**](https://git.io/preact-markup): Render HTML & Custom Elements as JSX & Components
 - :pencil: [**preact-richtextarea**](https://git.io/preact-richtextarea): Simple HTML editor component
+- :repeat: [**preact-cycle**](https://git.io/preact-cycle): Functional-reactive paradigm for Preact.
 
 
 ## Getting Started
