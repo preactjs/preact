@@ -1,4 +1,4 @@
-import { extend, isFunction, isString } from '../util';
+import { clone, toLowerCase, isFunction, isString } from '../util';
 import { isFunctionalComponent } from './functional-component';
 
 
@@ -12,7 +12,7 @@ export function isSameNodeType(node, vnode) {
 	if (isFunctionalComponent(vnode)) return true;
 	let nodeName = vnode.nodeName;
 	if (isFunction(nodeName)) return node._componentConstructor===nodeName;
-	return node.nodeName.toLowerCase()===nodeName;
+	return toLowerCase(node.nodeName)===nodeName;
 }
 
 
@@ -22,7 +22,7 @@ export function isSameNodeType(node, vnode) {
  *	@private
  */
 export function getNodeProps(vnode) {
-	let props = extend({}, vnode.attributes);
+	let props = clone(vnode.attributes);
 	if (vnode.children) {
 		props.children = vnode.children;
 	}

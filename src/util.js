@@ -13,6 +13,15 @@ export function extend(obj, props) {
 }
 
 
+/** Fast clone. Note: does not filter out non-own properties. */
+export function clone(obj) {
+	let out = {};
+	/*eslint guard-for-in:0*/
+	for (let i in obj) out[i] = obj[i];
+	return out;
+}
+
+
 /** Create a caching wrapper for the given function.
  *	@private
  */
@@ -105,3 +114,7 @@ export function hashToClassName(c) {
  *	@function
  */
 export const jsToCss = memoize( s => s.replace(/([A-Z])/,'-$1').toLowerCase() );
+
+
+/** Just a memoized String.prototype.toLowerCase */
+export const toLowerCase = memoize( s => s.toLowerCase() );

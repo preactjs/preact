@@ -1,5 +1,5 @@
 import { hook } from './hooks';
-import { extend, isFunction } from './util';
+import { extend, clone, isFunction } from './util';
 import { createLinkedState } from './linked-state';
 import { triggerComponentRender, setComponentProps } from './vdom/component';
 
@@ -77,7 +77,7 @@ extend(Component.prototype, {
 	 */
 	setState(state, callback) {
 		let s = this.state;
-		if (!this.prevState) this.prevState = extend({}, s);
+		if (!this.prevState) this.prevState = clone(s);
 		extend(s, isFunction(state) ? state(s, this.props) : state);
 		if (callback) this._renderCallbacks.push(callback);
 		triggerComponentRender(this);
