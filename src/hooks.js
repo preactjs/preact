@@ -1,20 +1,18 @@
-import { isFunction } from './util';
 
 /** Invoke a "hook" method with arguments if it exists.
  *	@private
  */
-export function hook(obj, name, ...args) {
+export function hook(obj, name, a, b, c) {
 	let fn = obj[name];
-	if (fn && isFunction(fn)) return fn.apply(obj, args);
+	if (fn && fn.call) return fn.call(obj, a, b, c);
 }
-
 
 
 /** Invoke hook() on a component and child components (recursively)
  *	@private
  */
-export function deepHook(obj, ...args) {
+export function deepHook(obj, type) {
 	do {
-		hook(obj, ...args);
+		hook(obj, type);
 	} while ((obj=obj._component));
 }
