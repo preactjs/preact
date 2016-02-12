@@ -146,8 +146,11 @@ export function renderComponent(component, opts) {
 
 		component.base = base;
 		if (base) {
-			base._component = component;
-			base._componentConstructor = component.constructor;
+			let componentRef = component,
+				t = component;
+			while ((t=t._parentComponent)) { componentRef = t; }
+			base._component = componentRef;
+			base._componentConstructor = componentRef.constructor;
 		}
 
 		if (isUpdate) {
