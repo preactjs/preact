@@ -155,11 +155,8 @@ export function renderComponent(component, opts) {
 		}
 	}
 
-	let cb = component._renderCallbacks;
-	if (cb) {
-		for (let i=cb.length; i--; ) cb[i]();
-		cb.length = 0;
-	}
+	let cb = component._renderCallbacks, fn;
+	if (cb) while ( (fn = cb.pop()) ) fn();
 
 	return rendered;
 }
