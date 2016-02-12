@@ -396,7 +396,9 @@ describe('render()', () => {
 	});
 
 	it('should re-render nested components', () => {
-		let doRender = null;
+		let doRender = null,
+			alt = false;
+
 		class Outer extends Component {
 			componentDidMount() {
 				let i = 1;
@@ -404,6 +406,7 @@ describe('render()', () => {
 			}
 			componentWillUnmount() {}
 			render(props, { i }) {
+				if (alt) return <div />;
 				return <Inner i={i} {...props} />;
 			}
 		}
@@ -418,15 +421,19 @@ describe('render()', () => {
 				this._constructor(...args);
 			}
 			_constructor() {}
+			componentWillMount() {}
 			componentDidMount() {}
 			componentWillUnmount() {}
+			componentDidUnmount() {}
 			render(props) {
 				return <div j={ ++j } {...props}>inner</div>;
 			}
 		}
 		sinon.spy(Inner.prototype, '_constructor');
 		sinon.spy(Inner.prototype, 'render');
+		sinon.spy(Inner.prototype, 'componentWillMount');
 		sinon.spy(Inner.prototype, 'componentDidMount');
+		sinon.spy(Inner.prototype, 'componentDidUnmount');
 		sinon.spy(Inner.prototype, 'componentWillUnmount');
 
 		render(<Outer foo="bar" />, scratch);
@@ -441,6 +448,8 @@ describe('render()', () => {
 
 		expect(Inner.prototype._constructor).to.have.been.calledOnce;
 		expect(Inner.prototype.componentWillUnmount).not.to.have.been.called;
+		expect(Inner.prototype.componentDidUnmount).not.to.have.been.called;
+		expect(Inner.prototype.componentWillMount).to.have.been.calledOnce;
 		expect(Inner.prototype.componentDidMount).to.have.been.calledOnce;
 		expect(Inner.prototype.render).to.have.been.calledTwice;
 
@@ -461,6 +470,8 @@ describe('render()', () => {
 		rerender();
 
 		expect(Inner.prototype.componentWillUnmount).not.to.have.been.called;
+		expect(Inner.prototype.componentDidUnmount).not.to.have.been.called;
+		expect(Inner.prototype.componentWillMount).to.have.been.calledOnce;
 		expect(Inner.prototype.componentDidMount).to.have.been.calledOnce;
 		expect(Inner.prototype.render).to.have.been.calledThrice;
 
@@ -475,5 +486,14 @@ describe('render()', () => {
 			}));
 
 		expect(scratch.innerHTML).to.equal('<div j="3" foo="bar" i="3">inner</div>');
+
+
+		// update & flush
+		alt = true;
+		doRender();
+		rerender();
+
+		expect(Inner.prototype.componentWillUnmount).to.have.been.calledOnce;
+		expect(Inner.prototype.componentDidUnmount).to.have.been.calledOnce;
 	});
 });

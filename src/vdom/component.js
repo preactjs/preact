@@ -232,7 +232,7 @@ function createComponentFromVNode(vnode, dom, context) {
 function unmountComponent(dom, component, remove) {
 	// console.warn('unmounting mismatched component', component);
 
-	hook(component, 'componentWillUnmount');
+	deepHook(component, 'componentWillUnmount');
 	if (remove!==false) {
 		if (dom._component===component) {
 			delete dom._component;
@@ -244,6 +244,6 @@ function unmountComponent(dom, component, remove) {
 		}
 	}
 	component._parentComponent = null;
-	hook(component, 'componentDidUnmount');
+	deepHook(component, 'componentDidUnmount');
 	collectComponent(component);
 }
