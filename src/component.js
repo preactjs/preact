@@ -21,7 +21,7 @@ export default function Component(props, context) {
 	/** @private */
 	this._renderCallbacks = [];
 	/** @public */
-	this.prevState = this.prevProps = this.prevContext = this.base = null;
+	this.prevState = this.prevProps = this.prevContext = this.base = this._parentComponent = this._component = null;
 	/** @public */
 	this.context = context || null;
 	/** @type {object} */
