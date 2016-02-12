@@ -21,8 +21,10 @@ export default {
 
 		// normalize className to class.
 		let p = attrs.className;
-		if (p) attrs['class'] = p;
+		if (p) {
+			attrs['class'] = p;
 		delete attrs.className;
+		}
 
 		normalize(attrs, 'class', hashToClassName);
 		normalize(attrs, 'style', styleObjToCss);
