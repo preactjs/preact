@@ -1,7 +1,7 @@
 import { hook } from './hooks';
 import { extend, clone, isFunction } from './util';
 import { createLinkedState } from './linked-state';
-import { triggerComponentRender, setComponentProps } from './vdom/component';
+import { triggerComponentRender, renderComponent } from './vdom/component';
 
 /** Base Component class, for he ES6 Class method of creating Components
  *	@public
@@ -84,9 +84,11 @@ extend(Component.prototype, {
 	},
 
 
-	/** @private */
-	setProps(props, opts) {
-		return setComponentProps(this, props, opts);
+	/** Immediately perform a synchronous re-render of the component.
+	 *	@private
+	 */
+	forceUpdate() {
+		renderComponent(this);
 	},
 
 
@@ -97,7 +99,6 @@ extend(Component.prototype, {
 	 *	@returns VNode
 	 */
 	render() {
-		// return h('div', null, props.children);
 		return null;
 	}
 
