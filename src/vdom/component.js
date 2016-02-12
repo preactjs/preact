@@ -4,7 +4,7 @@ import { clone, isFunction } from '../util';
 import { hook, deepHook } from '../hooks';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from '.';
-import build from './build';
+import diff from './diff';
 import { createComponent, collectComponent } from './component-recycler';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 
@@ -135,7 +135,7 @@ export function renderComponent(component, opts) {
 			component._component = null;
 
 			if (component.base || (opts && opts.build)) {
-				base = build(component.base, rendered || EMPTY_BASE, childContext);
+				base = diff(component.base, rendered || EMPTY_BASE, childContext);
 			}
 		}
 
@@ -176,7 +176,7 @@ export function buildComponentFromVNode(dom, vnode, context) {
 	let c = dom && dom._component;
 
 	if (isFunctionalComponent(vnode)) {
-		let p = build(dom, buildFunctionalComponent(vnode, context), context);
+		let p = diff(dom, buildFunctionalComponent(vnode, context), context);
 		p._componentConstructor = vnode.nodeName;
 		return p;
 	}

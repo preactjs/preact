@@ -12,6 +12,8 @@ export const TEXT_CONTENT = !HAS_DOM || 'textContent' in document ? 'textContent
 
 export const ATTR_KEY = '__preactattr_';
 
+export const UNDEFINED_ELEMENT = 'x-undefined-element';
+
 // DOM properties that should NOT have "px" added when numeric
 export const NON_DIMENSION_PROPS = {
 	boxFlex:1,boxFlexGroup:1,columnCount:1,fillOpacity:1,flex:1,flexGrow:1,
