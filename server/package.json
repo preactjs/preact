@@ -25,13 +25,16 @@
     "url": "https://github.com/developit/preact-render-to-string/issues"
   },
   "homepage": "https://github.com/developit/preact-render-to-string",
+  "peerDependencies": {
+    "preact": "*"
+  },
   "devDependencies": {
     "babel": "^5.8.23",
     "babel-eslint": "^4.1.3",
     "chai": "^3.3.0",
     "eslint": "^1.7.1",
     "mocha": "^2.3.3",
-    "preact": "^1.5.0",
+    "preact": "^3.3.0",
     "sinon": "^1.17.1",
     "sinon-chai": "^2.8.0"
   }
