@@ -1,4 +1,5 @@
-const NO_RENDER = { render: false };
+
+const SHALLOW = { shallow: true };
 
 const ESC = {
 	'<': '&lt;',
@@ -7,30 +8,47 @@ const ESC = {
 	'&': '&amp;'
 };
 
-const EMPTY = {};
-
 const HOP = Object.prototype.hasOwnProperty;
 
-let encodeEntities = s => String(s).replace(/[<>"&]/g, a => ESC[a] || a);
+let encodeEntities = s => String(s).replace(/[<>"&]/g, escapeChar);
 
-/** Convert JSX to a string, rendering out all nested components along the way.
- *	@param {VNode} vnode		A VNode, generally created via JSX
- *	@param {Object} [options]	Options for the renderer
- *	@param {Boolean} [options.shallow=false]	Passing `true` stops at Component VNodes without rendering them. Note: a component located at the root will always be rendered.
+let escapeChar = a => ESC[a] || a;
+
+
+/** Render Preact JSX + Components to an HTML string.
+ *	@name render
+ *	@function
+ *	@param {VNode} vnode	JSX VNode to render.
+ *	@param {Object} [options={}]	Rendering options
+ *	@param {Boolean} [options.shallow=false]	If `true`, renders nested Components as HTML elements (`<Foo a="b" />`).
+ *	@param {Boolean} [options.xml=false]		If `true`, uses self-closing tags for elements without children.
+ *	@param {Object} [context={}]	Optionally pass an initial context object through the render path.
  */
-export function render(vnode, opts) {
-	return internalRender(vnode, opts || EMPTY, true);
-}
-
-export function shallowRender(vnode, opts) {
-	return internalRender(vnode, { shallow:true, ...(opts || EMPTY) }, true);
-}
-
-export default render;
+renderToString.render = renderToString;
 
 
-function internalRender(vnode, opts, root) {
+/** Only render elements, leaving Components inline as `<ComponentName ... />`.
+ *	This method is just a convenience alias for `render(vnode, context, { shallow:true })`
+ *	@name shallow
+ *	@function
+ *	@param {VNode} vnode	JSX VNode to render.
+ *	@param {Object} [context={}]	Optionally pass an initial context object through the render path.
+ */
+renderToString.shallowRender = (vnode, context) => renderToString(vnode, context, SHALLOW);
+
+
+/** You can actually skip preact entirely and import this empty Component base class (or not use a base class at all).
+ *	preact-render-to-string doesn't use any of Preact's functionality to do its job.
+ *	@name Component
+ *	@class
+ */
+// renderToString.Component = function Component(){};
+
+
+/** The default export is an alias of `render()`. */
+export default function renderToString(vnode, context, opts, inner) {
 	let { nodeName, attributes, children } = vnode || EMPTY;
+	context = context || {};
 
 	// #text nodes
 	if (!nodeName) {
@@ -39,7 +57,7 @@ function internalRender(vnode, opts, root) {
 
 	// components
 	if (typeof nodeName==='function') {
-		if (opts.shallow===true && !root) {
+		if (opts && opts.shallow && inner) {
 			nodeName = getComponentName(nodeName);
 		}
 		else {
@@ -48,21 +66,28 @@ function internalRender(vnode, opts, root) {
 
 			if (typeof nodeName.prototype.render!=='function') {
 				// stateless functional components
-				rendered = nodeName(props);
+				rendered = nodeName(props, context);
 			}
 			else {
 				// class-based components
-				let c = new nodeName(props);
-				c.setProps(props, NO_RENDER);
-				rendered = c.render(c.props = props, c.state);
+				let c = new nodeName(props, context);
+				c.props = props;
+				c.context = context;
+				rendered = c.render(c.props, c.state, c.context);
+
+				if (c.getChildContext) {
+					context = c.getChildContext();
+				}
 			}
 
-			return internalRender(rendered, opts, false);
+			return renderToString(rendered, context, opts, !opts || opts.shallowHighOrder!==false);
 		}
 	}
 
 	// render JSX to HTML
-	let s = `<${nodeName}`;
+	let s = `<${nodeName}`,
+		html;
+
 	for (let name in attributes) {
 		if (HOP.call(attributes, name)) {
 			let v = attributes[name];
@@ -70,18 +95,34 @@ function internalRender(vnode, opts, root) {
 				if (attributes['class']) continue;
 				name = 'class';
 			}
-			if (v!==null && v!==undefined && typeof v!=='function') {
-				s += ` ${name}="${encodeEntities(String(v))}"`;
+			if (name==='dangerouslySetInnerHTML') {
+				html = v && v.__html;
+			}
+			else if (v!==null && v!==undefined && typeof v!=='function') {
+				s += ` ${name}="${encodeEntities(v)}"`;
 			}
 		}
 	}
 	s += '>';
-	if (children && children.length) {
-		s += children.map( child => internalRender(child, opts, false) ).join('');
+
+	if (html) {
+		s += html;
 	}
+	else {
+		let len = children && children.length;
+		if (len) {
+			for (let i=0; i<len; i++) {
+				s += renderToString(children[i], context, opts, true);
+			}
+		}
+		else if (opts && opts.xml) {
+			return s.substring(0, s.length-1) + ' />';
+		}
+	}
+
 	s += `</${nodeName}>`
 	return s;
-}
+};
 
 function getComponentName(component) {
 	return component.displayName || component.name || component.prototype.displayName || component.prototype.name || (Function.prototype.toString.call(component).match(/\s([^\(]+)/) || EMPTY)[1] || 'Component';
