@@ -70,11 +70,10 @@ function diffNode(dom, vnode, context) {
 				key = getAccessor(child, 'key') || child._component && child._component.props && child._component.props.key;
 			if (!empty(key)) {
 				if (!keyed) keyed = {};
-				keyed[key] = child;		//childrenLen;
+				keyed[key] = child;
 				keyedLen++;
 			}
 			else {
-				//if (!children) children = [];
 				children[childrenLen++] = child;
 			}
 		}
@@ -102,11 +101,6 @@ function diffNode(dom, vnode, context) {
 				if (!empty(key) && keyed.hasOwnProperty(key)) {
 					child = keyed[key];
 					keyedLen--;
-					// let j = keyed[key];
-					// child = children[j];
-					// children[j] = null;
-					// if (j===childrenLen-1) childrenLen--;
-					// if (j===min+1) min++;
 				}
 			}
 
