@@ -59,31 +59,36 @@ function diffNode(dom, vnode, context) {
 
 	let children,
 		keyed,
+		keyedLen = 0,
 		len = out.childNodes.length,
-		childrenLen = 0;
+		childrenLen = 0,
+		i = 0;
 	if (len) {
-		for (let i=0; i<len; i++) {
+		children = [];
+		for ( ; i<len; i++) {
 			let child = out.childNodes[i],
-				key = child.key || child._component && child._component.props && child._component.props.key;
-			if (key) {
+				key = getAccessor(child, 'key') || child._component && child._component.props && child._component.props.key;
+			if (!empty(key)) {
 				if (!keyed) keyed = {};
-				keyed[key] = child;
+				keyed[key] = child;		//childrenLen;
+				keyedLen++;
 			}
 			else {
-				if (!children) children = [];
+				//if (!children) children = [];
 				children[childrenLen++] = child;
 			}
 		}
 	}
 
+
 	diffAttributes(out, vnode);
+
 
 	let vchildren = vnode.children,
 		vlen = vchildren && vchildren.length,
-		min = 0,
-		i = 0;
+		min = 0;
 	if (vlen) {
-		for ( ; i<vlen; i++) {
+		for (i=0; i<vlen; i++) {
 			let vchild = vchildren[i],
 				child;
 
@@ -91,12 +96,17 @@ function diffNode(dom, vnode, context) {
 			// 	vchild = buildFunctionalComponent(vchild);
 			// }
 
-			if (keyed) {
+			if (keyedLen) {
 				let attrs = vchild.attributes,
-					key;
-				if (attrs) {
-					key = attrs.key;
-					child = key && keyed[key];
+					key = attrs && attrs.key;
+				if (!empty(key) && keyed.hasOwnProperty(key)) {
+					child = keyed[key];
+					keyedLen--;
+					// let j = keyed[key];
+					// child = children[j];
+					// children[j] = null;
+					// if (j===childrenLen-1) childrenLen--;
+					// if (j===min+1) min++;
 				}
 			}
 
@@ -129,6 +139,14 @@ function diffNode(dom, vnode, context) {
 				}
 				if (c) deepHook(c, 'componentDidMount');
 			}
+		}
+	}
+
+
+	if (keyedLen) {
+		/*eslint guard-for-in:0*/
+		for (i in keyed) {
+			children[childrenLen++] = keyed[i];
 		}
 	}
 
