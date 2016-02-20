@@ -16,15 +16,16 @@ export function enqueueRender(component) {
 
 
 export function rerender() {
+	if (!items.length) return;
+
 	let currentItems = items,
-		len = currentItems.length;
-	if (!len) return;
+		p;
+
+	// swap online & offline
 	items = itemsOffline;
-	items.length = 0;
 	itemsOffline = currentItems;
-	while (len--) {
-		if (currentItems[len]._dirty) {
-			renderComponent(currentItems[len]);
-		}
+
+	while( (p = currentItems.pop()) ) {
+		if (p._dirty) renderComponent(p);
 	}
 }
