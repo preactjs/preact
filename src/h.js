@@ -1,6 +1,5 @@
-import options from './options';
 import VNode from './vnode';
-import { hook } from './hooks';
+import { optionsHook } from './hooks';
 import { empty } from './util';
 
 
@@ -51,6 +50,6 @@ export default function h(nodeName, attributes) {
 	}
 
 	let p = new VNode(nodeName, attributes || undefined, children || undefined);
-	hook(options, 'vnode', p);
+	optionsHook('vnode', p);
 	return p;
 }

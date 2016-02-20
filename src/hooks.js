@@ -1,3 +1,11 @@
+import options from './options';
+
+
+/** Invoke a hook on the `options` export. */
+export function optionsHook(name, a, b) {
+	return hook(options, name, a, b);
+}
+
 
 /** Invoke a "hook" method with arguments if it exists.
  *	@private

@@ -1,7 +1,6 @@
 import { ATTR_KEY, EMPTY } from '../constants';
 import { hasOwnProperty, memoize } from '../util';
-import options from '../options';
-import { hook } from '../hooks';
+import { optionsHook } from '../hooks';
 
 
 export function ensureNodeData(node) {
@@ -100,7 +99,7 @@ function setComplexAccessor(node, name, value) {
  */
 function eventProxy(e) {
 	let fn = this._listeners[normalizeEventName(e.type)];
-	if (fn) return fn.call(this, hook(options, 'event', e) || e);
+	if (fn) return fn.call(this, optionsHook('event', e) || e);
 }
 
 
