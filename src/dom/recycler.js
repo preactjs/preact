@@ -1,5 +1,4 @@
-import { ATTR_KEY } from '../constants';
-import { hasOwnProperty, memoize } from '../util';
+import { memoize } from '../util';
 import { ensureNodeData, getNodeType } from '.';
 
 /** DOM node pool, keyed on nodeName. */
@@ -33,17 +32,10 @@ function cleanNode(node) {
 
 	if (getNodeType(node)===3) return;
 
-	let attrs = node[ATTR_KEY];
-	for (let i in attrs) {
-		if (hasOwnProperty.call(attrs, i)) {
-			setAccessor(node, i, null, attrs[i]);
-		}
-	}
-
-	node[ATTR_KEY] = node._component = node._componentConstructor = null;
+	node._component = node._componentConstructor = null;
 
 	// if (node.childNodes.length>0) {
-	// 	console.warn(`Warning: Recycler collecting <${node.nodeName}> with ${node.childNodes.length} children.`);
-	// 	toArray(node.childNodes).forEach(recycler.collect);
+	// 	console.trace(`Warning: Recycler collecting <${node.nodeName}> with ${node.childNodes.length} children.`);
+	// 	for (let i=node.childNodes.length; i--; ) collectNode(node.childNodes[i]);
 	// }
 }
