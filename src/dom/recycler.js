@@ -28,7 +28,8 @@ export function createNode(nodeName) {
 
 
 function cleanNode(node) {
-	if (node.parentNode) node.parentNode.removeChild(node);
+	let p = node.parentNode;
+	if (p) p.removeChild(node);
 
 	if (getNodeType(node)===3) return;
 

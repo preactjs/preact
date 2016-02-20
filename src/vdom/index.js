@@ -23,9 +23,8 @@ export function isSameNodeType(node, vnode) {
  *	@private
  */
 export function getNodeProps(vnode) {
-	let props = clone(vnode.attributes);
-	if (vnode.children) {
-		props.children = vnode.children;
-	}
+	let props = clone(vnode.attributes),
+		c = vnode.children;
+	if (c) props.children = c;
 	return props;
 }
