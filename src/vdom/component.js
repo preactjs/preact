@@ -39,7 +39,9 @@ export function setComponentProps(component, props, opts, context) {
 		component.context = context;
 	}
 
-	hook(component, 'componentWillReceiveProps', props, component.context);
+	if (component.base) {
+		hook(component, 'componentWillReceiveProps', props, component.context);
+	}
 
 	if (!component.prevProps) component.prevProps = clone(component.props);
 	component.props = props;
