@@ -46,10 +46,10 @@ export function getAccessor(node, name, value, cache) {
  */
 export function setAccessor(node, name, value) {
 	if (name==='class') {
-		node.className = value;
+		node.className = value || '';
 	}
 	else if (name==='style') {
-		node.style.cssText = value;
+		node.style.cssText = value || '';
 	}
 	else if (name==='dangerouslySetInnerHTML') {
 		node.innerHTML = value.__html;
