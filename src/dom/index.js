@@ -13,16 +13,11 @@ export function ensureNodeData(node) {
  *	@private
  */
 export function appendChildren(parent, children) {
-	let len = children.length;
-	if (len<=2) {
-		parent.appendChild(children[0]);
-		if (len===2) parent.appendChild(children[1]);
-		return;
-	}
-
-	let frag = document.createDocumentFragment();
-	for (let i=0; i<len; i++) frag.appendChild(children[i]);
-	parent.appendChild(frag);
+	let len = children.length,
+		many = len>2,
+		into = many ? document.createDocumentFragment() : parent;
+	for (let i=0; i<len; i++) into.appendChild(children[i]);
+	if (many) parent.appendChild(into);
 }
 
 
