@@ -124,7 +124,7 @@ export function getNodeAttributes(node) {
 function getRawNodeAttributes(node) {
 	let list = node.attributes;
 	if (!list || !list.getNamedItem) return list;
-	if (list.length) return getAttributesAsObject(list);
+	return getAttributesAsObject(list);
 }
 
 
