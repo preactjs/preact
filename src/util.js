@@ -79,6 +79,7 @@ export function styleObjToCss(s) {
 	for (let prop in s) {
 		if (hasOwnProperty.call(s, prop)) {
 			let val = s[prop];
+			if (!empty(val)) {
 			str += jsToCss(prop);
 			str += ': ';
 			str += val;
@@ -87,6 +88,7 @@ export function styleObjToCss(s) {
 			}
 			str += '; ';
 		}
+	}
 	}
 	return str;
 }
