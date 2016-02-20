@@ -120,3 +120,16 @@ export const jsToCss = memoize( s => s.replace(/([A-Z])/,'-$1').toLowerCase() );
 
 /** Just a memoized String.prototype.toLowerCase */
 export const toLowerCase = memoize( s => s.toLowerCase() );
+
+
+
+let ch;
+try { ch = new MessageChannel(); } catch(e) {}
+
+/** Call a function asynchronously, as soon as possible.
+ *	@param {Function} callback
+ */
+export const setImmediate = ch ? ( f => {
+	ch.port1.onmessage = f;
+	ch.port2.postMessage('');
+}) : setTimeout;
