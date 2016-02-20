@@ -4,8 +4,8 @@ import { hook, deepHook } from '../hooks';
 import { isSameNodeType } from '.';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
-import { appendChildren, getAccessor, setAccessor, getNodeAttributes } from '../dom';
 import { collectComponent } from './component-recycler';
+import { appendChildren, getAccessor, setAccessor, getNodeAttributes, getNodeType } from '../dom';
 import { createNode, collectNode } from '../dom/recycler';
 
 
@@ -26,7 +26,7 @@ export default function diff(dom, vnode, context) {
 
 	if (isString(vnode)) {
 		if (dom) {
-			let type = dom.nodeType;
+			let type = getNodeType(dom);
 			if (type===3) {
 				dom[TEXT_CONTENT] = vnode;
 				return dom;

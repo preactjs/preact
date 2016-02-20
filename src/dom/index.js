@@ -8,6 +8,11 @@ export function ensureNodeData(node) {
 }
 
 
+export function getNodeType(node) {
+	return node.nodeType;
+}
+
+
 /** Append multiple children to a Node.
  *	Uses a Document Fragment to batch when appending 2 or more children
  *	@private

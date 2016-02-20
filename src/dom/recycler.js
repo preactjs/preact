@@ -1,6 +1,6 @@
 import { ATTR_KEY } from '../constants';
 import { hasOwnProperty, memoize } from '../util';
-import { setAccessor, ensureNodeData } from '.';
+import { ensureNodeData, getNodeType } from '.';
 
 /** DOM node pool, keyed on nodeName. */
 
@@ -30,7 +30,7 @@ export function createNode(nodeName) {
 function cleanNode(node) {
 	if (node.parentNode) node.parentNode.removeChild(node);
 
-	if (node.nodeType===3) return;
+	if (getNodeType(node)===3) return;
 
 	let attrs = node[ATTR_KEY];
 	for (let i in attrs) {
