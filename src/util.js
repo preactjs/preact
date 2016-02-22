@@ -80,15 +80,15 @@ export function styleObjToCss(s) {
 		if (hasOwnProperty.call(s, prop)) {
 			let val = s[prop];
 			if (!empty(val)) {
-			str += jsToCss(prop);
-			str += ': ';
-			str += val;
-			if (typeof val==='number' && !NON_DIMENSION_PROPS[prop]) {
-				str += 'px';
+				str += jsToCss(prop);
+				str += ': ';
+				str += val;
+				if (typeof val==='number' && !NON_DIMENSION_PROPS[prop]) {
+					str += 'px';
+				}
+				str += '; ';
 			}
-			str += '; ';
 		}
-	}
 	}
 	return str;
 }
