@@ -5,6 +5,7 @@ import { hook, deepHook } from '../hooks';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from '.';
 import diff from './diff';
+import { removeOrphanedChildren } from './diff';
 import { createComponent, collectComponent } from './component-recycler';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 
@@ -99,14 +100,14 @@ export function renderComponent(component, opts) {
 
 		let childComponent = rendered && rendered.nodeName,
 			childContext = component.getChildContext ? component.getChildContext() : context,
-			base;
+			toUnmount, base;
 
 		if (isFunction(childComponent) && childComponent.prototype.render) {
 			// set up high order component link
 
 			let inst = component._component;
 			if (inst && inst.constructor!==childComponent) {
-				unmountComponent(inst.base, inst, false);
+				toUnmount = inst;
 				inst = null;
 			}
 
@@ -128,20 +129,26 @@ export function renderComponent(component, opts) {
 			base = inst.base;
 		}
 		else {
+			let cbase = component.base;
+
 			// destroy high order component link
-			if (component._component) {
-				unmountComponent(component.base, component._component);
+			toUnmount = component._component;
+			if (toUnmount) {
+				cbase = component._component = null;
 			}
-			component._component = null;
 
 			if (component.base || (opts && opts.build)) {
-				base = diff(component.base, rendered || EMPTY_BASE, childContext);
+				base = diff(cbase, rendered || EMPTY_BASE, childContext);
 			}
 		}
 
 		if (component.base && base!==component.base) {
 			let p = component.base.parentNode;
 			if (p) p.replaceChild(base, component.base);
+		}
+
+		if (toUnmount) {
+			unmountComponent(toUnmount.base, toUnmount);
 		}
 
 		component.base = base;
@@ -188,6 +195,7 @@ export function buildComponentFromVNode(dom, vnode, context) {
 
 	if (isOwner) {
 		setComponentProps(c, getNodeProps(vnode), SYNC_RENDER, context);
+		dom = c.base;
 	}
 	else {
 		if (c) {
@@ -209,7 +217,9 @@ export function buildComponentFromVNode(dom, vnode, context) {
 function createComponentFromVNode(vnode, dom, context) {
 	let props = getNodeProps(vnode);
 	let component = createComponent(vnode.nodeName, props, context);
-	if (dom) component.base = dom;
+
+	if (dom && !component.base) component.base = dom;
+
 	setComponentProps(component, props, NO_RENDER, context);
 	renderComponent(component, DOM_RENDER);
 
@@ -229,19 +239,21 @@ function createComponentFromVNode(vnode, dom, context) {
  *	@param {Component} component	The Component instance to unmount
  *	@private
  */
-function unmountComponent(dom, component, remove) {
+export function unmountComponent(dom, component, remove) {
 	// console.warn('unmounting mismatched component', component);
 
 	deepHook(component, 'componentWillUnmount');
-	if (remove!==false) {
-		if (dom._component===component) {
-			delete dom._component;
-			delete dom._componentConstructor;
+	if (dom._component===component) {
+		delete dom._component;
+		delete dom._componentConstructor;
+	}
+	let base = component.base;
+	if (base) {
+		if (remove!==false) {
+			let p = base.parentNode;
+			if (p) p.removeChild(base);
 		}
-		let base = component.base;
-		if (base && base.parentNode) {
-			base.parentNode.removeChild(base);
-		}
+		removeOrphanedChildren(base, base.childNodes, true);
 	}
 	component._parentComponent = null;
 	deepHook(component, 'componentDidUnmount');
