@@ -9,10 +9,10 @@ import { getNodeType } from '../dom/index';
  *	@private
  */
 export function isSameNodeType(node, vnode) {
-	if (getNodeType(node)===3) return isString(vnode);
 	if (isFunctionalComponent(vnode)) return true;
 	let nodeName = vnode.nodeName;
 	if (isFunction(nodeName)) return node._componentConstructor===nodeName;
+	if (getNodeType(node)===3) return isString(vnode);
 	return toLowerCase(node.nodeName)===nodeName;
 }
 
