@@ -1,4 +1,4 @@
-import { clone, toLowerCase, isFunction, isString, extend, hasOwnProperty } from '../util';
+import { clone, toLowerCase, isFunction, isString, hasOwnProperty } from '../util';
 import { isFunctionalComponent } from './functional-component';
 
 
