@@ -25,7 +25,7 @@ export default function Component(props, context) {
 	/** @public */
 	this.context = context || null;
 	/** @type {object} */
-	this.props = props || hook(this, 'getDefaultProps') || {};
+	this.props = props || {};
 	/** @type {object} */
 	this.state = hook(this, 'getInitialState') || {};
 }

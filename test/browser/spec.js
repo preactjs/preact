@@ -18,25 +18,21 @@ describe('Component spec', () => {
 		scratch = null;
 	});
 
-	describe('#getDefaultProps', () => {
+	describe('#defaultProps', () => {
 		it('should apply default props on initial render', () => {
 			class WithDefaultProps extends Component {
 				constructor(props, context) {
 					super(props, context);
 					expect(props).to.be.deep.equal({
-						fieldA: 1, fieldB: 2,
 						fieldC: 1, fieldD: 2
 					});
-				}
-				getDefaultProps() {
-					return { fieldA: 1, fieldB: 1 };
 				}
 				render() {
 					return <div />;
 				}
 			}
 			WithDefaultProps.defaultProps = { fieldC: 1, fieldD: 1 };
-			render(<WithDefaultProps fieldB={2} fieldD={2} />, scratch);
+			render(<WithDefaultProps fieldD={2} />, scratch);
 		});
 		it('should apply default props on rerender', () => {
 			let doRender;
@@ -45,23 +41,18 @@ describe('Component spec', () => {
 					doRender = () => this.setState({ i: 2 });
 				}
 				render(props, { i }) {
-					return <WithDefaultProps fieldB={i} fieldD={i} />;
+					return <WithDefaultProps fieldD={i} />;
 				}
 			}
 			class WithDefaultProps extends Component {
 				constructor(props, context) {
 					super(props, context);
 					expect(props).to.be.deep.equal({
-						fieldA: 1, fieldB: 1,
 						fieldC: 1, fieldD: 1
 					});
 				}
-				getDefaultProps() {
-					return { fieldA: 1, fieldB: 1 };
-				}
 				componentWillReceiveProps(nextProps) {
 					expect(nextProps).to.be.deep.equal({
-						fieldA: 1, fieldB: 2,
 						fieldC: 1, fieldD: 2
 					});
 				}
@@ -77,34 +68,6 @@ describe('Component spec', () => {
 			doRender();
 			rerender();
 			expect(WithDefaultProps.prototype.componentWillReceiveProps).to.be.called;
-		});
-		it('should cache default props', () => {
-			class WithDefaultProps extends Component {
-				constructor(props, context) {
-					super(props, context);
-					expect(props).to.be.deep.equal({
-						fieldA: 1, fieldB: 2,
-						fieldC: 1, fieldD: 2,
-						fieldX: 10
-					});
-				}
-				getDefaultProps() {
-					return { fieldA: 1, fieldB: 1 };
-				}
-				render() {
-					return <div />;
-				}
-			}
-			WithDefaultProps.defaultProps = { fieldC: 1, fieldD: 1 };
-			sinon.spy(WithDefaultProps.prototype, 'getDefaultProps');
-			render((
-				<div>
-					<WithDefaultProps fieldB={2} fieldD={2} fieldX={10} />
-					<WithDefaultProps fieldB={2} fieldD={2} fieldX={10} />
-					<WithDefaultProps fieldB={2} fieldD={2} fieldX={10} />
-				</div>
-			), scratch);
-			expect(WithDefaultProps.prototype.getDefaultProps).to.be.calledOnce;
 		});
 	});
 });

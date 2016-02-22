@@ -27,15 +27,7 @@ export function isSameNodeType(node, vnode) {
 export function setDefaultProps(nodeName, props) {
 	if (!isString(nodeName)) {
 		// Get default props from cache or set a cache
-		let defaultProps = nodeName.__defaultPropsCache;
-		if (!defaultProps) {
-			defaultProps = extend({}, nodeName.defaultProps || {});
-			const defaultPropsGenerator = nodeName.prototype.getDefaultProps;
-			if (defaultPropsGenerator) {
-				extend(defaultProps, defaultPropsGenerator() || {});
-			}
-			nodeName.__defaultPropsCache = defaultProps;
-		}
+		let defaultProps = nodeName.defaultProps || {};
 
 		// Merge props with given props object
 		for (let k in defaultProps) {
