@@ -18,7 +18,7 @@ describe('Component spec', () => {
 		scratch = null;
 	});
 
-	describe('#getDefaultProps', () => {
+	describe('defaultProps', () => {
 		it('should apply default props on initial render', () => {
 			class WithDefaultProps extends Component {
 				constructor(props, context) {
@@ -28,57 +28,71 @@ describe('Component spec', () => {
 						fieldC: 1, fieldD: 2
 					});
 				}
-				getDefaultProps() {
-					return { fieldA: 1, fieldB: 1 };
-				}
 				render() {
 					return <div />;
 				}
 			}
 			WithDefaultProps.defaultProps = { fieldC: 1, fieldD: 1 };
-			render(<WithDefaultProps fieldB={2} fieldD={2} />, scratch);
+			render(<WithDefaultProps fieldA={1} fieldB={2} fieldD={2} />, scratch);
 		});
+
 		it('should apply default props on rerender', () => {
 			let doRender;
 			class Outer extends Component {
+				constructor() {
+					super();
+					this.state = { i:1 };
+				}
 				componentDidMount() {
 					doRender = () => this.setState({ i: 2 });
 				}
 				render(props, { i }) {
-					return <WithDefaultProps fieldB={i} fieldD={i} />;
+					return <WithDefaultProps fieldA={1} fieldB={i} fieldD={i} />;
 				}
 			}
 			class WithDefaultProps extends Component {
 				constructor(props, context) {
 					super(props, context);
-					expect(props).to.be.deep.equal({
-						fieldA: 1, fieldB: 1,
-						fieldC: 1, fieldD: 1
-					});
+					this.ctor(props, context);
 				}
-				getDefaultProps() {
-					return { fieldA: 1, fieldB: 1 };
-				}
-				componentWillReceiveProps(nextProps) {
-					expect(nextProps).to.be.deep.equal({
-						fieldA: 1, fieldB: 2,
-						fieldC: 1, fieldD: 2
-					});
-				}
+				ctor(){}
+				componentWillReceiveProps() {}
 				render() {
 					return <div />;
 				}
 			}
 			WithDefaultProps.defaultProps = { fieldC: 1, fieldD: 1 };
-			sinon.spy(WithDefaultProps.prototype, 'componentWillReceiveProps');
-			sinon.spy(Outer.prototype, 'componentDidMount');
+
+			let proto = WithDefaultProps.prototype;
+			sinon.spy(proto, 'ctor');
+			sinon.spy(proto, 'componentWillReceiveProps');
+			sinon.spy(proto, 'render');
 
 			render(<Outer />, scratch);
 			doRender();
+
+			const PROPS1 = {
+				fieldA: 1, fieldB: 1,
+				fieldC: 1, fieldD: 1
+			};
+
+			const PROPS2 = {
+				fieldA: 1, fieldB: 2,
+				fieldC: 1, fieldD: 2
+			};
+
+			expect(proto.ctor).to.have.been.calledWith(PROPS1);
+			expect(proto.render).to.have.been.calledWith(PROPS1);
+
 			rerender();
-			expect(WithDefaultProps.prototype.componentWillReceiveProps).to.be.called;
+
+			// expect(proto.ctor).to.have.been.calledWith(PROPS2);
+			expect(proto.componentWillReceiveProps).to.have.been.calledWith(PROPS2);
+			expect(proto.render).to.have.been.calledWith(PROPS2);
 		});
-		it('should cache default props', () => {
+
+		// @TODO: migrate this to preact-compat
+		xit('should cache default props', () => {
 			class WithDefaultProps extends Component {
 				constructor(props, context) {
 					super(props, context);
