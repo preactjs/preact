@@ -16,6 +16,7 @@
   "rules": {
     "no-unused-vars": [1, { "varsIgnorePattern": "^h$" }],
     "no-cond-assign": 1,
+    "no-empty": 0,
     "no-console": 1,
     "semi": 2,
     "camelcase": 0,
