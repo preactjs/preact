@@ -208,11 +208,9 @@ function diffAttributes(dom, vnode) {
 		name, value;
 
 	// removed
-	if (old!==EMPTY) {
-		for (name in old) {
-			if (!hasOwnProperty.call(attrs, name)) {
-				setAccessor(dom, name, null);
-			}
+	for (name in old) {
+		if (empty(attrs[name])) {
+			setAccessor(dom, name, null);
 		}
 	}
 
@@ -221,7 +219,7 @@ function diffAttributes(dom, vnode) {
 		for (name in attrs) {
 			if (hasOwnProperty.call(attrs, name)) {
 				value = attrs[name];
-				if (value!=getAccessor(dom, name)) {
+				if (!empty(value) && value!=getAccessor(dom, name)) {
 					setAccessor(dom, name, value);
 				}
 			}
