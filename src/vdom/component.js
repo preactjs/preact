@@ -140,7 +140,7 @@ export function renderComponent(component, opts) {
 			}
 
 			if (component.base || (opts && opts.build)) {
-				base = diff(cbase, rendered || EMPTY_BASE, childContext);
+				base = diff(cbase, rendered || EMPTY_BASE, childContext, component);
 			}
 		}
 

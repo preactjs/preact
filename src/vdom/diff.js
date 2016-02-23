@@ -15,7 +15,7 @@ import { createNode, collectNode } from '../dom/recycler';
  *	@returns {Element} dom			The created/mutated element
  *	@private
  */
-export default function diff(dom, vnode, context) {
+export default function diff(dom, vnode, context, component) {
 	if (isFunctionalComponent(vnode)) {
 		return diff(dom, buildFunctionalComponent(vnode, context), context);
 	}
@@ -38,12 +38,12 @@ export default function diff(dom, vnode, context) {
 		return document.createTextNode(vnode);
 	}
 
-	return diffNode(dom, vnode, context);
+	return diffNode(dom, vnode, context, component);
 }
 
 
 /** Morph a DOM node to look like the given VNode. Creates DOM if it doesn't exist. */
-function diffNode(dom, vnode, context) {
+function diffNode(dom, vnode, context, component) {
 	let out = dom,
 		nodeName = vnode.nodeName || UNDEFINED_ELEMENT;
 
@@ -58,14 +58,21 @@ function diffNode(dom, vnode, context) {
 		recollectNodeTree(dom);
 	}
 
-	innerDiffNode(out, vnode, context);
+	let attrs = vnode.attributes,
+		ref = component && attrs && attrs.ref;
+	if (ref) {
+		let refs = component.refs || (component.refs = {});
+		refs[ref] = out._component || out;
+	}
+
+	innerDiffNode(out, vnode, context, component);
 
 	return out;
 }
 
 
 /** Apply child and attribute changes between a VNode and a DOM Node to the DOM. */
-function innerDiffNode(dom, vnode, context) {
+function innerDiffNode(dom, vnode, context, component) {
 	let children,
 		keyed,
 		keyedLen = 0,
@@ -130,7 +137,7 @@ function innerDiffNode(dom, vnode, context) {
 			}
 
 			// morph the matched/found/created DOM child to match vchild (deep)
-			child = diff(child, vchild, context);
+			child = diff(child, vchild, context, component);
 
 			if (dom.childNodes[i]!==child) {
 				let c = child.parentNode!==dom && child._component,
