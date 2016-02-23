@@ -7,7 +7,6 @@ import { getNodeProps } from '.';
 import diff from './diff';
 import { removeOrphanedChildren } from './diff';
 import { createComponent, collectComponent } from './component-recycler';
-import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 
 
 /** Mark component as dirty and queue up a render.
@@ -183,12 +182,6 @@ export function renderComponent(component, opts) {
  */
 export function buildComponentFromVNode(dom, vnode, context) {
 	let c = dom && dom._component;
-
-	if (isFunctionalComponent(vnode)) {
-		let p = diff(dom, buildFunctionalComponent(vnode, context), context);
-		p._componentConstructor = vnode.nodeName;
-		return p;
-	}
 
 	let isOwner = c && dom._componentConstructor===vnode.nodeName;
 	while (c && !isOwner && (c=c._parentComponent)) {
