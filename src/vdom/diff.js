@@ -75,7 +75,8 @@ function innerDiffNode(dom, vnode, context) {
 		children = [];
 		for (let i=0; i<len; i++) {
 			let child = dom.childNodes[i],
-				key = getAccessor(child, 'key') || child._component && child._component.props && child._component.props.key;
+				props = child._component && child._component.props,
+				key = props ? props.key : getAccessor(child, 'key');
 			if (!empty(key)) {
 				if (!keyed) keyed = {};
 				keyed[key] = child;
