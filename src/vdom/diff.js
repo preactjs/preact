@@ -38,12 +38,12 @@ export default function diff(dom, vnode, context, component) {
 		return document.createTextNode(vnode);
 	}
 
-	return diffNode(dom, vnode, context, component);
-}
+	// return diffNode(dom, vnode, context, component);
+// }
 
 
 /** Morph a DOM node to look like the given VNode. Creates DOM if it doesn't exist. */
-function diffNode(dom, vnode, context, component) {
+// function diffNode(dom, vnode, context, component) {
 	let out = dom,
 		nodeName = vnode.nodeName || UNDEFINED_ELEMENT;
 
