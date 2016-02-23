@@ -62,7 +62,6 @@ export default function diff(dom, vnode, context) {
 
 	let attrs = vnode.attributes;
 	if (attrs) hook(attrs, 'ref', out._component || out);
-	// if (attrs && attrs.ref && isFunction(attrs.ref)) attrs.ref(out._component || out);
 
 	return out;
 }
