@@ -7,13 +7,14 @@ import { isFunction, isString, styleObjToCss, hashToClassName } from './util';
 export default {
 
 	/** If `true`, `prop` changes trigger synchronous component updates.
-	 *	@boolean
+	 *	@name syncComponentUpdates
+	 *	@type Boolean
+	 *	@default true
 	 */
-	syncComponentUpdates: true,
+	//syncComponentUpdates: true,
 
 	/** Processes all created VNodes.
 	 *	@param {VNode} vnode	A newly-created VNode to normalize/process
-	 *	@protected
 	 */
 	vnode(n) {
 		let attrs = n.attributes;

@@ -50,7 +50,7 @@ export function setComponentProps(component, props, opts, context) {
 	component._disableRendering = d;
 
 	if (opts.render!==false) {
-		if (opts.renderSync || options.syncComponentUpdates) {
+		if (opts.renderSync || options.syncComponentUpdates!==false) {
 			renderComponent(component);
 		}
 		else {
