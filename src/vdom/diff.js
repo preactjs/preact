@@ -16,8 +16,8 @@ import { createNode, collectNode } from '../dom/recycler';
  *	@private
  */
 export default function diff(dom, vnode, context, component) {
-	if (isFunctionalComponent(vnode)) {
-		return diff(dom, buildFunctionalComponent(vnode, context), context);
+	while (isFunctionalComponent(vnode)) {
+		vnode = buildFunctionalComponent(vnode, context);
 	}
 
 	if (isFunction(vnode.nodeName)) {
