@@ -1,6 +1,6 @@
-import { TEXT_CONTENT, UNDEFINED_ELEMENT, EMPTY } from '../constants';
+import { ATTR_KEY, TEXT_CONTENT, UNDEFINED_ELEMENT, EMPTY } from '../constants';
 import { hasOwnProperty, toArray, empty, toLowerCase, isString, isFunction } from '../util';
-import { deepHook } from '../hooks';
+import { hook, deepHook } from '../hooks';
 import { isSameNodeType } from '.';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
@@ -15,7 +15,7 @@ import { createNode, collectNode } from '../dom/recycler';
  *	@returns {Element} dom			The created/mutated element
  *	@private
  */
-export default function diff(dom, vnode, context, component) {
+export default function diff(dom, vnode, context) {
 	while (isFunctionalComponent(vnode)) {
 		vnode = buildFunctionalComponent(vnode, context);
 	}
@@ -38,12 +38,12 @@ export default function diff(dom, vnode, context, component) {
 		return document.createTextNode(vnode);
 	}
 
-	// return diffNode(dom, vnode, context, component);
+	// return diffNode(dom, vnode, context);
 // }
 
 
 /** Morph a DOM node to look like the given VNode. Creates DOM if it doesn't exist. */
-// function diffNode(dom, vnode, context, component) {
+// function diffNode(dom, vnode, context) {
 	let out = dom,
 		nodeName = vnode.nodeName || UNDEFINED_ELEMENT;
 
@@ -58,20 +58,18 @@ export default function diff(dom, vnode, context, component) {
 		recollectNodeTree(dom);
 	}
 
-	innerDiffNode(out, vnode, context, component);
+	innerDiffNode(out, vnode, context);
 
-	let attrs = vnode.attributes,
-		ref = attrs && attrs.ref,
-		r = out._component || out;
-	if (isFunction(ref)) ref(r);
-	else if (component && isString(ref)) (component.refs || (component.refs={}))[ref] = r;
+	let attrs = vnode.attributes;
+	if (attrs) hook(attrs, 'ref', out._component || out);
+	// if (attrs && attrs.ref && isFunction(attrs.ref)) attrs.ref(out._component || out);
 
 	return out;
 }
 
 
 /** Apply child and attribute changes between a VNode and a DOM Node to the DOM. */
-function innerDiffNode(dom, vnode, context, component) {
+function innerDiffNode(dom, vnode, context) {
 	let children,
 		keyed,
 		keyedLen = 0,
@@ -136,7 +134,7 @@ function innerDiffNode(dom, vnode, context, component) {
 			}
 
 			// morph the matched/found/created DOM child to match vchild (deep)
-			child = diff(child, vchild, context, component);
+			child = diff(child, vchild, context);
 
 			if (dom.childNodes[i]!==child) {
 				let c = child.parentNode!==dom && child._component,
@@ -185,7 +183,11 @@ export function recollectNodeTree(node, unmountOnly) {
 	// Currently it *does* remove them. Discussion: https://github.com/developit/preact/issues/39
 	//if (!node[ATTR_KEY]) return;
 
+	let attrs = node[ATTR_KEY];
+	if (attrs) hook(attrs, 'ref', null);
+
 	let component = node._component;
+
 	if (component) {
 		unmountComponent(node, component);
 	}
