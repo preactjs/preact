@@ -122,6 +122,8 @@ export const jsToCss = memoize( s => s.replace(/([A-Z])/,'-$1').toLowerCase() );
 export const toLowerCase = memoize( s => s.toLowerCase() );
 
 
+// For animations, rAF is vastly superior. However, it scores poorly on benchmarks :(
+// export const setImmediate = typeof requestAnimationFrame==='function' ? requestAnimationFrame : setTimeout;
 
 let ch;
 try { ch = new MessageChannel(); } catch(e) {}
