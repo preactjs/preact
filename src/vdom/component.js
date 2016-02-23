@@ -56,6 +56,8 @@ export function setComponentProps(component, props, opts, context) {
 			triggerComponentRender(component);
 		}
 	}
+
+	hook(props, 'ref', component);
 }
 
 
