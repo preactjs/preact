@@ -62,13 +62,13 @@ export const isString = obj => 'string'===typeof obj;
 
 
 /** @private Safe reference to builtin hasOwnProperty */
-export const hasOwnProperty = Object.prototype.hasOwnProperty;
+export const hasOwnProperty = {}.hasOwnProperty;
 
 
 /** Check if a value is `null` or `undefined`.
  *	@private
  */
-export const empty = x => (x===null || x===undefined);
+export const empty = x => x==null;
 
 
 /** Convert a hashmap of styles to CSSText
