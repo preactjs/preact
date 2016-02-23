@@ -58,14 +58,13 @@ export default function diff(dom, vnode, context, component) {
 		recollectNodeTree(dom);
 	}
 
-	let attrs = vnode.attributes,
-		ref = component && attrs && attrs.ref;
-	if (ref) {
-		let refs = component.refs || (component.refs = {});
-		refs[ref] = out._component || out;
-	}
-
 	innerDiffNode(out, vnode, context, component);
+
+	let attrs = vnode.attributes,
+		ref = attrs && attrs.ref,
+		r = out._component || out;
+	if (isFunction(ref)) ref(r);
+	else if (component && isString(ref)) (component.refs || (component.refs={}))[ref] = r;
 
 	return out;
 }
