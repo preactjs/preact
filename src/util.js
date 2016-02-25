@@ -115,7 +115,7 @@ export function hashToClassName(c) {
  *	@private
  *	@function
  */
-export const jsToCss = memoize( s => s.replace(/([A-Z])/,'-$1').toLowerCase() );
+export const jsToCss = memoize( s => s.replace(/([A-Z])/g,'-$1').toLowerCase() );
 
 
 /** Just a memoized String.prototype.toLowerCase */
