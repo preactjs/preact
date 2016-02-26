@@ -187,7 +187,6 @@ export function recollectNodeTree(node, unmountOnly) {
 	if (attrs) hook(attrs, 'ref', null);
 
 	let component = node._component;
-
 	if (component) {
 		unmountComponent(node, component);
 	}
