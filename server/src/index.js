@@ -8,6 +8,8 @@ const ESC = {
 	'&': '&amp;'
 };
 
+const EMPTY = {};
+
 const HOP = Object.prototype.hasOwnProperty;
 
 let encodeEntities = s => String(s).replace(/[<>"&]/g, escapeChar);
