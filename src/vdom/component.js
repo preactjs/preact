@@ -239,6 +239,7 @@ function createComponentFromVNode(vnode, dom, context) {
 export function unmountComponent(dom, component, remove) {
 	// console.warn('unmounting mismatched component', component);
 
+	hook(component.props, 'ref', null);
 	deepHook(component, 'componentWillUnmount');
 	if (dom._component===component) {
 		delete dom._component;
