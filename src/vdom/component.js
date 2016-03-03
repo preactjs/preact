@@ -169,7 +169,7 @@ export function renderComponent(component, opts) {
 	}
 
 	let cb = component._renderCallbacks, fn;
-	if (cb) while ( (fn = cb.pop()) ) fn();
+	if (cb) while ( (fn = cb.pop()) ) fn.call(component);
 
 	return rendered;
 }
