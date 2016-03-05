@@ -38,7 +38,7 @@
     "babel-loader": "^5.3.2",
     "babel-runtime": "^5.8.24",
     "chai": "^3.4.1",
-    "eslint": "^1.9.0",
+    "eslint": "^2.3.0",
     "gzip-size-cli": "^1.0.0",
     "karma": "^0.13.15",
     "karma-babel-preprocessor": "^5.2.2",
