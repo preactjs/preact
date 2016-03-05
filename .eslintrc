@@ -3,11 +3,14 @@
   "extends": "eslint:recommended",
   "env": {
     "browser": true,
-    "mocha": true
+    "mocha": true,
+    "es6": true
   },
-  "ecmaFeatures": {
-    "modules": true,
-    "jsx": true
+  "parserOptions": {
+    "ecmaFeatures": {
+      "modules": true,
+      "jsx": true
+    }
   },
   "globals": {
     "sinon": true,
@@ -43,7 +46,7 @@
     "no-shadow-restricted-names": 2,
     "handle-callback-err": 0,
     "no-lonely-if": 2,
-    "space-return-throw-case": 2,
+    "keyword-spacing": 2,
     "constructor-super": 2,
     "no-this-before-super": 2,
     "no-dupe-class-members": 2,

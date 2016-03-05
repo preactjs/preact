@@ -25,7 +25,7 @@ export function rerender() {
 	items = itemsOffline;
 	itemsOffline = currentItems;
 
-	while( (p = currentItems.pop()) ) {
+	while ( (p = currentItems.pop()) ) {
 		if (p._dirty) renderComponent(p);
 	}
 }

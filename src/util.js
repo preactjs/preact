@@ -126,7 +126,7 @@ export const toLowerCase = memoize( s => s.toLowerCase() );
 // export const setImmediate = typeof requestAnimationFrame==='function' ? requestAnimationFrame : setTimeout;
 
 let ch;
-try { ch = new MessageChannel(); } catch(e) {}
+try { ch = new MessageChannel(); } catch (e) {}
 
 /** Call a function asynchronously, as soon as possible.
  *	@param {Function} callback
