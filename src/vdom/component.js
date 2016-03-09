@@ -5,7 +5,7 @@ import { hook, deepHook } from '../hooks';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from '.';
 import diff from './diff';
-import { removeOrphanedChildren } from './diff';
+import { removeOrphanedChildren, recollectNodeTree } from './diff';
 import { createComponent, collectComponent } from './component-recycler';
 
 
@@ -183,7 +183,8 @@ export function renderComponent(component, opts) {
  *	@private
  */
 export function buildComponentFromVNode(dom, vnode, context) {
-	let c = dom && dom._component;
+	let c = dom && dom._component,
+		oldDom = dom;
 
 	let isOwner = c && dom._componentConstructor===vnode.nodeName;
 	while (c && !isOwner && (c=c._parentComponent)) {
@@ -197,9 +198,12 @@ export function buildComponentFromVNode(dom, vnode, context) {
 	else {
 		if (c) {
 			unmountComponent(dom, c);
-			dom = null;
+			dom = oldDom = null;
 		}
 		dom = createComponentFromVNode(vnode, dom, context);
+		if (oldDom && dom!==oldDom) {
+			recollectNodeTree(oldDom);
+		}
 	}
 
 	return dom;
