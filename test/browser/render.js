@@ -496,4 +496,24 @@ describe('render()', () => {
 		expect(Inner.prototype.componentWillUnmount).to.have.been.calledOnce;
 		expect(Inner.prototype.componentDidUnmount).to.have.been.calledOnce;
 	});
+
+	// Test for Issue #73
+	it('should remove orphaned elements replaced by Components', () => {
+		class Comp extends Component {
+			render() {
+				return <span>span in a component</span>;
+			}
+		}
+
+		let root;
+		function test(content) {
+			root = render(content, scratch, root);
+		}
+
+		test(<Comp />);
+		test(<div>just a div</div>);
+		test(<Comp />);
+
+		expect(scratch.innerHTML).to.equal('<span>span in a component</span>');
+	});
 });
