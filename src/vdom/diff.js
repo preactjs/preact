@@ -155,7 +155,7 @@ function innerDiffNode(dom, vnode, context) {
 	if (keyedLen) {
 		/*eslint guard-for-in:0*/
 		for (let i in keyed) if (keyed.hasOwnProperty(i) && keyed[i]) {
-			children[childrenLen++] = keyed[i];
+			children[min=childrenLen++] = keyed[i];
 		}
 	}
 
