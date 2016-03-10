@@ -71,6 +71,10 @@ export const hasOwnProperty = {}.hasOwnProperty;
 export const empty = x => x==null;
 
 
+/** Check if a value is `null`, `undefined`, or explicitly `false`. */
+export const falsey = value => value===false || value==null;
+
+
 /** Convert a hashmap of styles to CSSText
  *	@private
  */

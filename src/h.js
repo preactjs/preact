@@ -1,6 +1,6 @@
 import VNode from './vnode';
 import { optionsHook } from './hooks';
-import { empty } from './util';
+import { falsey } from './util';
 
 
 const SHARED_TEMP_ARRAY = [];
@@ -22,7 +22,7 @@ export default function h(nodeName, attributes) {
 		children = [];
 		for (let i=2; i<len; i++) {
 			let p = arguments[i];
-			if (empty(p)) continue;
+			if (falsey(p)) continue;
 			if (p.join) {
 				arr = p;
 			}
@@ -32,12 +32,12 @@ export default function h(nodeName, attributes) {
 			}
 			for (let j=0; j<arr.length; j++) {
 				let child = arr[j],
-					simple = !empty(child) && !(child instanceof VNode);
+					simple = !falsey(child) && !(child instanceof VNode);
 				if (simple) child = String(child);
 				if (simple && lastSimple) {
 					children[children.length-1] += child;
 				}
-				else if (!empty(child)) {
+				else if (!falsey(child)) {
 					children.push(child);
 				}
 				lastSimple = simple;

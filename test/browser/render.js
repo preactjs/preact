@@ -60,6 +60,16 @@ describe('render()', () => {
 		expect(c).to.have.deep.property('2.nodeName', 'X-BAR');
 	});
 
+	it('should not render falsey values', () => {
+		render((
+			<div>
+				{null},{undefined},{false},{0},{NaN}
+			</div>
+		), scratch);
+
+		expect(scratch.firstChild).to.have.property('innerHTML', ',,,0,NaN');
+	});
+
 	it('should apply string attributes', () => {
 		render(<div foo="bar" data-foo="databar" />, scratch);
 
