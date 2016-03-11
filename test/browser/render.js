@@ -70,6 +70,42 @@ describe('render()', () => {
 		expect(scratch.firstChild).to.have.property('innerHTML', ',,,0,NaN');
 	});
 
+	it('should clear falsey attributes', () => {
+		let root = render((
+			<div anull="anull" aundefined="aundefined" afalse="afalse" a0="a0" anan="aNaN" />
+		), scratch);
+
+		root = render((
+			<div anull={null} aundefined={undefined} afalse={false} a0={0} anan={NaN} />
+		), scratch, root);
+
+		expect(scratch).to.have.property('innerHTML', '<div a0="0" anan="NaN"></div>');
+	});
+
+	it('should clear falsey DOM properties', () => {
+		let root;
+		function test(val) {
+			root = render((
+				<div>
+					<input value={val} />
+					<table border={val} />
+				</div>
+			), scratch, root);
+		}
+
+		test('2');
+		test(false);
+		expect(scratch).to.have.property('innerHTML', '<div><input><table></table></div>', 'for false');
+
+		test('3');
+		test(null);
+		expect(scratch).to.have.property('innerHTML', '<div><input><table></table></div>', 'for null');
+
+		test('4');
+		test(undefined);
+		expect(scratch).to.have.property('innerHTML', '<div><input><table></table></div>', 'for undefined');
+	});
+
 	it('should apply string attributes', () => {
 		render(<div foo="bar" data-foo="databar" />, scratch);
 

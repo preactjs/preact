@@ -1,5 +1,5 @@
 import { ATTR_KEY, EMPTY } from '../constants';
-import { hasOwnProperty, memoize } from '../util';
+import { hasOwnProperty, memoize, falsey } from '../util';
 import { optionsHook } from '../hooks';
 
 
@@ -61,6 +61,7 @@ export function setAccessor(node, name, value) {
 	}
 	else if (name==='key' || (name in node && name!=='type')) {
 		node[name] = value;
+		if (falsey(value)) node.removeAttribute(name);
 	}
 	else {
 		setComplexAccessor(node, name, value);
@@ -84,7 +85,7 @@ function setComplexAccessor(node, name, value) {
 	}
 
 	let type = typeof value;
-	if (value===null) {
+	if (falsey(value)) {
 		node.removeAttribute(name);
 	}
 	else if (type!=='function' && type!=='object') {
