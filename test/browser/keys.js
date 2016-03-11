@@ -1,4 +1,4 @@
-import { h, render, Component } from '../../src/preact';
+import { h, render } from '../../src/preact';
 /** @jsx h */
 
 describe('keys', () => {
