@@ -16,6 +16,8 @@ let encodeEntities = s => String(s).replace(/[<>"&]/g, escapeChar);
 
 let escapeChar = a => ESC[a] || a;
 
+let falsey = v => v==null || v===false;
+
 
 /** Render Preact JSX + Components to an HTML string.
  *	@name render
@@ -100,7 +102,7 @@ export default function renderToString(vnode, context, opts, inner) {
 			if (name==='dangerouslySetInnerHTML') {
 				html = v && v.__html;
 			}
-			else if (v!==null && v!==undefined && typeof v!=='function') {
+			else if (!falsey(v) && typeof v!=='function') {
 				s += ` ${name}="${encodeEntities(v)}"`;
 			}
 		}
@@ -114,7 +116,10 @@ export default function renderToString(vnode, context, opts, inner) {
 		let len = children && children.length;
 		if (len) {
 			for (let i=0; i<len; i++) {
-				s += renderToString(children[i], context, opts, true);
+				let child = children[i];
+				if (!falsey(child)) {
+					s += renderToString(child, context, opts, true);
+				}
 			}
 		}
 		else if (opts && opts.xml) {

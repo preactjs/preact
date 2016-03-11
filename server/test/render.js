@@ -14,8 +14,8 @@ describe('render', () => {
 			expect(rendered).to.equal(expected);
 		});
 
-		it('should omit null and undefined attributes', () => {
-			let rendered = render(<div a={null} b={undefined} />),
+		it('should omit falsey attributes', () => {
+			let rendered = render(<div a={null} b={undefined} c={false} />),
 				expected = `<div></div>`;
 
 			expect(rendered).to.equal(expected);
@@ -31,6 +31,13 @@ describe('render', () => {
 		it('should encode entities', () => {
 			let rendered = render(<div a={'"<>&'}>{'"<>&'}</div>),
 				expected = `<div a="&quot;&lt;&gt;&amp;">&quot;&lt;&gt;&amp;</div>`;
+
+			expect(rendered).to.equal(expected);
+		});
+
+		it('should omit falsey children', () => {
+			let rendered = render(<div>{null}|{undefined}|{false}</div>),
+				expected = `<div>||</div>`;
 
 			expect(rendered).to.equal(expected);
 		});
