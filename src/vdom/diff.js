@@ -15,7 +15,9 @@ import { createNode, collectNode } from '../dom/recycler';
  *	@returns {Element} dom			The created/mutated element
  *	@private
  */
-export default function diff(dom, vnode, context, component) {
+export default function diff(dom, vnode, context) {
+	let originalAttributes = vnode.attributes;
+
 	while (isFunctionalComponent(vnode)) {
 		vnode = buildFunctionalComponent(vnode, context);
 	}
@@ -60,9 +62,9 @@ export default function diff(dom, vnode, context, component) {
 
 	innerDiffNode(out, vnode, context);
 
-	let attrs = vnode.attributes,
-		c = out._component;
-	if (attrs) hook(attrs, 'ref', (!component || c===component) && c || out);
+	if (originalAttributes && originalAttributes.ref) {
+		(out[ATTR_KEY].ref = originalAttributes.ref)(out);
+	}
 
 	return out;
 }
