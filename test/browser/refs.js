@@ -1,6 +1,13 @@
 import { h, render, Component } from '../../src/preact';
 /** @jsx h */
 
+// gives call count and argument errors names (otherwise sinon just uses "spy"):
+let spy = (name, ...args) => {
+	let spy = sinon.spy(...args);
+	spy.displayName = `spy('${name}')`;
+	return spy;
+};
+
 describe('refs', () => {
 	let scratch;
 
@@ -19,14 +26,14 @@ describe('refs', () => {
 	});
 
 	it('should invoke refs in render()', () => {
-		let spy = sinon.spy();
-		render(<div ref={spy} />, scratch);
-		expect(spy).to.have.been.calledOnce.and.calledWith(scratch.firstChild);
+		let ref = spy('ref');
+		render(<div ref={ref} />, scratch);
+		expect(ref).to.have.been.calledOnce.and.calledWith(scratch.firstChild);
 	});
 
 	it('should invoke refs in Component.render()', () => {
-		let outer = sinon.spy(),
-			inner = sinon.spy();
+		let outer = spy('outer'),
+			inner = spy('inner');
 		class Foo extends Component {
 			render() {
 				return (
@@ -43,7 +50,7 @@ describe('refs', () => {
 	});
 
 	it('should pass components to ref functions', () => {
-		let spy = sinon.spy(),
+		let ref = spy('ref'),
 			instance;
 		class Foo extends Component {
 			constructor() {
@@ -54,14 +61,81 @@ describe('refs', () => {
 				return <div />;
 			}
 		}
-		render(<Foo ref={spy} />, scratch);
+		render(<Foo ref={ref} />, scratch);
 
-		expect(spy).to.have.been.calledOnce.and.calledWith(instance);
+		expect(ref).to.have.been.calledOnce.and.calledWith(instance);
+	});
+
+	it('should pass rendered DOM from functional components to ref functions', () => {
+		let ref = spy('ref');
+
+		const Foo = () => <div />;
+
+		let root = render(<Foo ref={ref} />, scratch);
+		expect(ref).to.have.been.calledOnce.and.calledWith(scratch.firstChild);
+
+		ref.reset();
+		render(<Foo ref={ref} />, scratch, root);
+		expect(ref).to.have.been.calledOnce.and.calledWith(scratch.firstChild);
+
+		ref.reset();
+		render(<span />, scratch, root);
+		expect(ref).to.have.been.calledOnce.and.calledWith(null);
+	});
+
+	it('should pass children to ref functions', () => {
+		let outer = spy('outer'),
+			inner = spy('inner'),
+			rerender, inst;
+		class Outer extends Component {
+			constructor() {
+				super();
+				rerender = () => this.forceUpdate();
+			}
+			render() {
+				return (
+					<div>
+						<Inner ref={outer} />
+					</div>
+				);
+			}
+		}
+		class Inner extends Component {
+			constructor() {
+				super();
+				inst = this;
+			}
+			render() {
+				return <span ref={inner} />;
+			}
+		}
+
+		let root = render(<Outer />, scratch);
+
+		expect(outer).to.have.been.calledOnce.and.calledWith(inst);
+		expect(inner).to.have.been.calledOnce.and.calledWith(inst.base);
+
+		outer.reset();
+		inner.reset();
+
+		rerender();
+
+		expect(outer).to.have.been.calledOnce.and.calledWith(inst);
+		expect(inner).to.have.been.calledOnce.and.calledWith(inst.base);
+
+		outer.reset();
+		inner.reset();
+
+		render(<div />, scratch, root);
+
+		expect(outer).to.have.been.calledOnce.and.calledWith(null);
+		expect(inner).to.have.been.calledOnce.and.calledWith(null);
 	});
 
 	it('should pass high-order children to ref functions', () => {
-		let outer = sinon.spy(),
-			inner = sinon.spy(),
+		let outer = spy('outer'),
+			inner = spy('inner'),
+			innermost = spy('innermost'),
 			outerInst,
 			innerInst;
 		class Outer extends Component {
@@ -79,12 +153,32 @@ describe('refs', () => {
 				innerInst = this;
 			}
 			render() {
-				return <span />;
+				return <span ref={innermost} />;
 			}
 		}
-		render(<Outer ref={outer} />, scratch);
+
+		let root = render(<Outer ref={outer} />, scratch);
 
 		expect(outer).to.have.been.calledOnce.and.calledWith(outerInst);
 		expect(inner).to.have.been.calledOnce.and.calledWith(innerInst);
+		expect(innermost).to.have.been.calledOnce.and.calledWith(innerInst.base);
+
+		outer.reset();
+		inner.reset();
+		innermost.reset();
+		root = render(<Outer ref={outer} />, scratch, root);
+
+		expect(outer).to.have.been.calledOnce.and.calledWith(outerInst);
+		expect(inner).to.have.been.calledOnce.and.calledWith(innerInst);
+		expect(innermost).to.have.been.calledOnce.and.calledWith(innerInst.base);
+
+		outer.reset();
+		inner.reset();
+		innermost.reset();
+		root = render(<div />, scratch, root);
+
+		expect(outer).to.have.been.calledOnce.and.calledWith(null);
+		expect(inner).to.have.been.calledOnce.and.calledWith(null);
+		expect(innermost).to.have.been.calledOnce.and.calledWith(null);
 	});
 });
