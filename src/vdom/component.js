@@ -244,11 +244,20 @@ export function unmountComponent(dom, component, remove) {
 	// console.warn('unmounting mismatched component', component);
 
 	hook(component.props, 'ref', null);
-	deepHook(component, 'componentWillUnmount');
-	if (dom._component===component) {
+	hook(component, 'componentWillUnmount');
+	if (dom && dom._component===component) {
 		delete dom._component;
 		delete dom._componentConstructor;
 	}
+
+	// recursively tear down & recollect high-order component children:
+	let inner = component._component;
+	if (inner) {
+		unmountComponent(dom, inner, remove);
+		// high order components do not own their rendered nodes:
+		component.base = component._component = null;
+	}
+
 	let base = component.base;
 	if (base) {
 		if (remove!==false) {
@@ -257,7 +266,8 @@ export function unmountComponent(dom, component, remove) {
 		}
 		removeOrphanedChildren(base, base.childNodes, true);
 	}
+
 	component._parentComponent = null;
-	deepHook(component, 'componentDidUnmount');
+	hook(component, 'componentDidUnmount');
 	collectComponent(component);
 }
