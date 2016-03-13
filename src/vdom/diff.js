@@ -95,9 +95,6 @@ function innerDiffNode(dom, vnode, context) {
 	}
 
 
-	diffAttributes(dom, vnode);
-
-
 	let vchildren = vnode.children,
 		vlen = vchildren && vchildren.length,
 		min = 0;
@@ -165,6 +162,8 @@ function innerDiffNode(dom, vnode, context) {
 	if (min<childrenLen) {
 		removeOrphanedChildren(dom, children);
 	}
+
+	diffAttributes(dom, vnode);
 }
 
 
