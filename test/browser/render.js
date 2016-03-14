@@ -257,9 +257,17 @@ describe('render()', () => {
 
 	it('should support dangerouslySetInnerHTML', () => {
 		let html = '<b>foo &amp; bar</b>';
-		render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
+		let root = render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
 
 		expect(scratch.firstChild).to.have.property('innerHTML', html);
+		expect(scratch.innerHTML).to.equal('<div>'+html+'</div>');
+
+		root = render(<div>a<strong>b</strong></div>, scratch, root);
+
+		expect(scratch).to.have.property('innerHTML', `<div>a<strong>b</strong></div>`);
+
+		root = render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, root);
+
 		expect(scratch.innerHTML).to.equal('<div>'+html+'</div>');
 	});
 
