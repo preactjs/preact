@@ -57,7 +57,7 @@ export function setAccessor(node, name, value) {
 		node.style.cssText = value || '';
 	}
 	else if (name==='dangerouslySetInnerHTML') {
-		node.innerHTML = value.__html;
+		node.innerHTML = value && value.__html || '';
 	}
 	else if (name==='key' || (name in node && name!=='type')) {
 		node[name] = value;
