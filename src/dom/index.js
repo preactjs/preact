@@ -79,9 +79,17 @@ function setComplexAccessor(node, name, value) {
 		let type = normalizeEventName(name),
 			l = node._listeners || (node._listeners = {}),
 			fn = !l[type] ? 'add' : !value ? 'remove' : null;
-		if (fn) node[fn+'EventListener'](type, eventProxy);
 		l[type] = value;
-		return;
+		if (typeof(value) === "string"){
+			node.setAttribute(name, value);
+			value = node['on'+type];
+			l[type] = value;
+		}
+		if (fn && typeof(value) !== "string"){
+			node[fn+'EventListener'](type, eventProxy);
+			node.removeAttribute(name);
+			return;
+		}
 	}
 
 	let type = typeof value;

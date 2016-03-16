@@ -154,6 +154,21 @@ describe('render()', () => {
 		proto.addEventListener.restore();
 	});
 
+	it('should correctly proxy on* handlers defined as strings', () => {
+		window.stub = sinon.stub();
+		let click = () => {},
+			onclick = "stub(arguments[0]);";
+		render(<div click={ click } onClick={ onclick } />, scratch);
+		let element = scratch.childNodes[0];
+		let ev = document.createEvent("MouseEvent");
+		ev.initMouseEvent("click");
+		expect(window.stub.called,"stub should not be called before click handler").to.equal(false);
+		element.dispatchEvent(ev);
+		expect(window.stub.called,"stub should be called from click handler").to.equal(true);
+		expect(window.stub, "click handler should be supplied event as argument").to.have.been.calledWithExactly(ev);
+		delete window.stub;
+	});
+
 	it('should add and remove event handlers', () => {
 		let click = sinon.spy(),
 			mousedown = sinon.spy();
