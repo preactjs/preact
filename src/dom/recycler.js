@@ -1,5 +1,6 @@
+import { ATTR_KEY } from '../constants';
 import { memoize } from '../util';
-import { ensureNodeData, getNodeType } from '.';
+import { ensureNodeData, getNodeType, getRawNodeAttributes } from '.';
 
 /** DOM node pool, keyed on nodeName. */
 
@@ -31,6 +32,11 @@ function cleanNode(node) {
 	if (p) p.removeChild(node);
 
 	if (getNodeType(node)===3) return;
+
+	// When reclaiming externally created nodes, seed the attribute cache: (Issue #97)
+	if (!node[ATTR_KEY]) {
+		node[ATTR_KEY] = getRawNodeAttributes(node);
+	}
 
 	node._component = node._componentConstructor = null;
 

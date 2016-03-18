@@ -127,7 +127,7 @@ export function getNodeAttributes(node) {
 /** Get a node's attributes as a hashmap, regardless of type.
  *	@private
  */
-function getRawNodeAttributes(node) {
+export function getRawNodeAttributes(node) {
 	let list = node.attributes;
 	if (!list || !list.getNamedItem) return list;
 	return getAttributesAsObject(list);
