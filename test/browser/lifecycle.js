@@ -176,9 +176,146 @@ describe('Lifecycle methods', () => {
 			doRender();
 			rerender();
 
-			expect(Inner.prototype.componentWillReceiveProps).to.have.been.called;
-			expect(Inner.prototype.componentWillUpdate).to.have.been.called;
-			expect(Inner.prototype.componentDidUpdate).to.have.been.called;
+			expect(Inner.prototype.componentWillReceiveProps).to.have.been.calledBefore(Inner.prototype.componentWillUpdate);
+			expect(Inner.prototype.componentWillUpdate).to.have.been.calledBefore(Inner.prototype.componentDidUpdate);
+		});
+	});
+
+
+	describe('#component(Did|Will)(Mount|Unmount)', () => {
+		it('should be invoked for nested components', () => {
+			let setState;
+			class Outer extends Component {
+				constructor() {
+					super();
+					this.state = { show:true };
+					setState = s => this.setState(s);
+				}
+				render(props, { show }) {
+					return (
+						<div>
+							{ show && (
+								<div>
+									<Inner {...props} />
+								</div>
+							) }
+						</div>
+					);
+				}
+			}
+
+			class Inner extends Component {
+				componentWillMount() {}
+				componentDidMount() {}
+				componentWillUnmount() {}
+				componentDidUnmount() {}
+				render() {
+					return <div />;
+				}
+			}
+
+			let proto = Inner.prototype;
+			let spies = ['componentWillMount', 'componentDidMount', 'componentWillUnmount', 'componentDidUnmount'];
+			spies.forEach( s => sinon.spy(proto, s) );
+
+			let reset = () => spies.forEach( s => proto[s].reset() );
+
+			render(<Outer />, scratch);
+			expect(proto.componentWillMount).to.have.been.called;
+			expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
+			expect(proto.componentDidMount).to.have.been.called;
+
+			reset();
+			setState({ show:false });
+			rerender();
+
+			expect(proto.componentWillUnmount).to.have.been.called;
+			expect(proto.componentWillUnmount).to.have.been.calledBefore(proto.componentDidUnmount);
+			expect(proto.componentDidUnmount).to.have.been.called;
+
+			reset();
+			setState({ show:true });
+			rerender();
+
+			expect(proto.componentWillMount).to.have.been.called;
+			expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
+			expect(proto.componentDidMount).to.have.been.called;
+		});
+
+		describe('when shouldComponentUpdate() returns false', () => {
+			let setState;
+
+			class Outer extends Component {
+				constructor() {
+					super();
+					this.state = { show:true };
+					setState = s => this.setState(s);
+				}
+				render(props, { show }) {
+					return (
+						<div>
+							{ show && (
+								<div>
+									<Inner {...props} />
+								</div>
+							) }
+						</div>
+					);
+				}
+			}
+
+			class Inner extends Component {
+				shouldComponentUpdate(){ return false; }
+				componentWillMount() {}
+				componentDidMount() {}
+				componentWillUnmount() {}
+				componentDidUnmount() {}
+				render() {
+					return <div />;
+				}
+			}
+
+			let proto = Inner.prototype;
+			let spies = ['componentWillMount', 'componentDidMount', 'componentWillUnmount', 'componentDidUnmount'];
+			spies.forEach( s => sinon.spy(proto, s) );
+
+			let reset = () => spies.forEach( s => proto[s].reset() );
+
+			beforeEach( () => reset() );
+
+			it('should be invoke normally on initial mount', () => {
+				render(<Outer />, scratch);
+				expect(proto.componentWillMount).to.have.been.called;
+				expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
+				expect(proto.componentDidMount).to.have.been.called;
+			});
+
+			it('should be invoked normally on unmount', () => {
+				setState({ show:false });
+				rerender();
+
+				expect(proto.componentWillUnmount).to.have.been.called;
+				expect(proto.componentWillUnmount).to.have.been.calledBefore(proto.componentDidUnmount);
+				expect(proto.componentDidUnmount).to.have.been.called;
+			});
+
+			it('should still invoke mount for shouldComponentUpdate():false', () => {
+				setState({ show:true });
+				rerender();
+
+				expect(proto.componentWillMount).to.have.been.called;
+				expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
+				expect(proto.componentDidMount).to.have.been.called;
+			});
+
+			it('should still invoke unmount for shouldComponentUpdate():false', () => {
+				setState({ show:false });
+				rerender();
+
+				expect(proto.componentWillUnmount).to.have.been.called;
+				expect(proto.componentWillUnmount).to.have.been.calledBefore(proto.componentDidUnmount);
+				expect(proto.componentDidUnmount).to.have.been.called;
+			});
 		});
 	});
 });
