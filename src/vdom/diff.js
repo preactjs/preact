@@ -111,7 +111,7 @@ function innerDiffNode(dom, vnode, context) {
 			if (keyedLen) {
 				let attrs = vchild.attributes,
 					key = attrs && attrs.key;
-				if (!empty(key) && keyed.hasOwnProperty(key)) {
+				if (!empty(key) && hasOwnProperty.call(keyed, key)) {
 					child = keyed[key];
 					keyed[key] = null;
 					keyedLen--;
@@ -153,7 +153,7 @@ function innerDiffNode(dom, vnode, context) {
 
 	if (keyedLen) {
 		/*eslint guard-for-in:0*/
-		for (let i in keyed) if (keyed.hasOwnProperty(i) && keyed[i]) {
+		for (let i in keyed) if (hasOwnProperty.call(keyed, i) && keyed[i]) {
 			children[min=childrenLen++] = keyed[i];
 		}
 	}
