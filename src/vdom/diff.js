@@ -189,7 +189,7 @@ export function recollectNodeTree(node, unmountOnly) {
 
 	let component = node._component;
 	if (component) {
-		unmountComponent(node, component);
+		unmountComponent(node, component, !unmountOnly);
 	}
 	else {
 		if (!unmountOnly) {

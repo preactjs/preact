@@ -151,7 +151,7 @@ export function renderComponent(component, opts) {
 		}
 
 		if (toUnmount) {
-			unmountComponent(toUnmount.base, toUnmount);
+			unmountComponent(toUnmount.base, toUnmount, true);
 		}
 
 		component.base = base;
@@ -197,7 +197,7 @@ export function buildComponentFromVNode(dom, vnode, context) {
 	}
 	else {
 		if (c) {
-			unmountComponent(dom, c);
+			unmountComponent(dom, c, true);
 			dom = oldDom = null;
 		}
 		dom = createComponentFromVNode(vnode, dom, context);
@@ -241,21 +241,15 @@ function createComponentFromVNode(vnode, dom, context) {
  *	@private
  */
 export function unmountComponent(dom, component, remove) {
-	// console.warn('unmounting mismatched component', component);
+	// console.log(`${remove?'Removing':'Unmounting'} component: ${component.constructor.name}`, component);
 
 	hook(component.props, 'ref', null);
 	hook(component, 'componentWillUnmount');
-	if (dom && dom._component===component) {
-		delete dom._component;
-		delete dom._componentConstructor;
-	}
 
 	// recursively tear down & recollect high-order component children:
 	let inner = component._component;
 	if (inner) {
-		unmountComponent(dom, inner, remove);
-		// high order components do not own their rendered nodes:
-		component.base = component._component = null;
+		unmountComponent(dom, inner);
 	}
 
 	let base = component.base;
@@ -267,7 +261,9 @@ export function unmountComponent(dom, component, remove) {
 		removeOrphanedChildren(base, base.childNodes, true);
 	}
 
-	component._parentComponent = null;
+	if (remove) {
+		component._parentComponent = null;
+		collectComponent(component);
+	}
 	hook(component, 'componentDidUnmount');
-	collectComponent(component);
 }
