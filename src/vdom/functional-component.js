@@ -1,4 +1,4 @@
-import { EMPTY_BASE } from '../constants';
+import { EMPTY, EMPTY_BASE } from '../constants';
 import { getNodeProps } from '.';
 import { isFunction } from '../util';
 
@@ -20,5 +20,5 @@ export function isFunctionalComponent({ nodeName }) {
  *	@private
  */
 export function buildFunctionalComponent(vnode, context) {
-	return vnode.nodeName(getNodeProps(vnode), context) || EMPTY_BASE;
+	return vnode.nodeName(getNodeProps(vnode), context || EMPTY) || EMPTY_BASE;
 }

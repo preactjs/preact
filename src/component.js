@@ -23,7 +23,7 @@ export default function Component(props, context) {
 	/** @public */
 	this.prevState = this.prevProps = this.prevContext = this.base = this._parentComponent = this._component = null;
 	/** @public */
-	this.context = context || null;
+	this.context = context || {};
 	/** @type {object} */
 	this.props = props || {};
 	/** @type {object} */
@@ -96,6 +96,7 @@ extend(Component.prototype, {
 	 *	Virtual DOM is generally constructed via [JSX](http://jasonformat.com/wtf-is-jsx).
 	 *	@param {object} props		Props (eg: JSX attributes) received from parent element/component
 	 *	@param {object} state		The component's current state
+	 *	@param {object} context		Context object (if a parent component has provided context)
 	 *	@returns VNode
 	 */
 	render() {
