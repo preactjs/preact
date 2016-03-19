@@ -10,6 +10,23 @@ const ESC = {
 
 const EMPTY = {};
 
+const VOID_ELEMENTS = [
+	'area',
+	'base',
+	'br',
+	'col',
+	'embed',
+	'hr',
+	'img',
+	'input',
+	'link',
+	'meta',
+	'param',
+	'source',
+	'track',
+	'wbr'
+];
+
 const HOP = Object.prototype.hasOwnProperty;
 
 let encodeEntities = s => String(s).replace(/[<>"&]/g, escapeChar);
@@ -127,7 +144,10 @@ export default function renderToString(vnode, context, opts, inner) {
 		}
 	}
 
-	s += `</${nodeName}>`
+	if (VOID_ELEMENTS.indexOf(nodeName) === -1) {
+		s += `</${nodeName}>`;
+	}
+
 	return s;
 };
 
