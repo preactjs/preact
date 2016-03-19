@@ -1,6 +1,6 @@
-import { SYNC_RENDER, DOM_RENDER, NO_RENDER, EMPTY, EMPTY_BASE } from '../constants';
+import { SYNC_RENDER, DOM_RENDER, NO_RENDER, EMPTY_BASE } from '../constants';
 import options from '../options';
-import { clone, isFunction } from '../util';
+import { isFunction } from '../util';
 import { hook, deepHook } from '../hooks';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from '.';
@@ -38,7 +38,7 @@ export function setComponentProps(component, props, opts, context) {
 	component._disableRendering = true;
 
 	if (context) {
-		if (!component.prevContext) component.prevContext = clone(component.context);
+		if (!component.prevContext) component.prevContext = component.context;
 		component.context = context;
 	}
 
@@ -46,13 +46,13 @@ export function setComponentProps(component, props, opts, context) {
 		hook(component, 'componentWillReceiveProps', props, component.context);
 	}
 
-	if (!component.prevProps) component.prevProps = clone(component.props);
+	if (!component.prevProps) component.prevProps = component.props;
 	component.props = props;
 
 	component._disableRendering = d;
 
-	if (opts.render!==false) {
-		if (opts.renderSync || options.syncComponentUpdates!==false) {
+	if (!opts || opts.render!==false) {
+		if ((opts && opts.renderSync) || options.syncComponentUpdates!==false) {
 			renderComponent(component);
 		}
 		else {
@@ -105,7 +105,7 @@ export function renderComponent(component, opts) {
 		rendered = hook(component, 'render', props, state, context);
 
 		let childComponent = rendered && rendered.nodeName,
-			childContext = component.getChildContext ? component.getChildContext() : context,
+			childContext = component.getChildContext ? component.getChildContext() : context,	// @TODO might want to clone() new context obj
 			toUnmount, base;
 
 		if (isFunction(childComponent) && childComponent.prototype.render) {

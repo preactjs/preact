@@ -21,6 +21,7 @@ describe('context', () => {
 	it('should pass context to grandchildren', () => {
 		const CONTEXT = { a:'a' };
 		const PROPS = { b:'b' };
+		// let inner;
 
 		class Outer extends Component {
 			getChildContext() {
@@ -33,6 +34,10 @@ describe('context', () => {
 		sinon.spy(Outer.prototype, 'getChildContext');
 
 		class Inner extends Component {
+			// constructor() {
+			// 	super();
+			// 	inner = this;
+			// }
 			shouldComponentUpdate() { return true; }
 			componentWillReceiveProps() {}
 			componentWillUpdate() {}
@@ -64,6 +69,16 @@ describe('context', () => {
 		expect(Inner.prototype.componentWillUpdate).to.have.been.calledWith(PROPS, {});
 		expect(Inner.prototype.componentDidUpdate).to.have.been.calledWith({}, {});
 		expect(Inner.prototype.render).to.have.been.calledWith(PROPS, {}, CONTEXT);
+
+
+		/* Future:
+		 *  Newly created context objects are *not* currently cloned.
+		 *  This test checks that they *are* cloned.
+		 */
+		// Inner.prototype.render.reset();
+		// CONTEXT.foo = 'baz';
+		// inner.forceUpdate();
+		// expect(Inner.prototype.render).to.have.been.calledWith(PROPS, {}, { a:'a', foo:'bar' });
 	});
 
 	it('should pass context to direct children', () => {
