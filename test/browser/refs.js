@@ -181,4 +181,26 @@ describe('refs', () => {
 		expect(inner).to.have.been.calledOnce.and.calledWith(null);
 		expect(innermost).to.have.been.calledOnce.and.calledWith(null);
 	});
+
+	it('should not pass ref into component as a prop', () => {
+		let foo = spy('foo'),
+			bar = spy('bar');
+
+		class Foo extends Component {
+			render(){ return <div />; }
+		}
+		const Bar = spy('Bar', () => <div />);
+
+		sinon.spy(Foo.prototype, 'render');
+
+		render((
+			<div>
+				<Foo ref={foo} a="a" />
+				<Bar ref={bar} b="b" />
+			</div>
+		), scratch);
+
+		expect(Foo.prototype.render).to.have.been.calledWithExactly({ a:'a' }, { }, { });
+		expect(Bar).to.have.been.calledWithExactly({ b:'b', ref:bar }, { });
+	});
 });

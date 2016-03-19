@@ -30,9 +30,12 @@ export function triggerComponentRender(component) {
  */
 export function setComponentProps(component, props, opts, context) {
 	let d = component._disableRendering;
-	component._disableRendering = true;
 
-	opts = opts || EMPTY;
+	component._ref = props.ref;
+	delete props.ref;
+	delete props.key;
+
+	component._disableRendering = true;
 
 	if (context) {
 		if (!component.prevContext) component.prevContext = clone(component.context);
@@ -57,7 +60,7 @@ export function setComponentProps(component, props, opts, context) {
 		}
 	}
 
-	hook(props, 'ref', component);
+	hook(component, '_ref', component);
 }
 
 
@@ -243,7 +246,7 @@ function createComponentFromVNode(vnode, dom, context) {
 export function unmountComponent(dom, component, remove) {
 	// console.log(`${remove?'Removing':'Unmounting'} component: ${component.constructor.name}`, component);
 
-	hook(component.props, 'ref', null);
+	hook(component, '_ref', null);
 	hook(component, 'componentWillUnmount');
 
 	// recursively tear down & recollect high-order component children:
