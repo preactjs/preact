@@ -41,6 +41,20 @@ describe('render', () => {
 
 			expect(rendered).to.equal(expected);
 		});
+
+		it('does not close void elements', () => {
+			let rendered, expected;
+
+			rendered = render(<div><input type='text' /><wbr /></div>);
+			expected = `<div><input type="text"><wbr></div>`;
+
+			expect(rendered).to.equal(expected);
+
+			rendered = render(<input><p>Hello World</p></input>);
+			expected = `<input><p>Hello World</p>`;
+
+			expect(rendered).to.equal(expected);
+		});
 	});
 
 	describe('Functional Components', () => {
