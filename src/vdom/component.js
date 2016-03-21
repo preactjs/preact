@@ -261,7 +261,7 @@ export function unmountComponent(dom, component, remove) {
 			let p = base.parentNode;
 			if (p) p.removeChild(base);
 		}
-		removeOrphanedChildren(base, base.childNodes, true);
+		removeOrphanedChildren(base.childNodes, true);
 	}
 
 	if (remove) {
