@@ -96,8 +96,7 @@ function innerDiffNode(dom, vnode, context) {
 
 
 	let vchildren = vnode.children,
-		vlen = vchildren && vchildren.length,
-		min = 0;
+		vlen = vchildren && vchildren.length;
 	if (vlen) {
 		for (let i=0; i<vlen; i++) {
 			let vchild = vchildren[i],
@@ -113,20 +112,18 @@ function innerDiffNode(dom, vnode, context) {
 					key = attrs && attrs.key;
 				if (!empty(key) && hasOwnProperty.call(keyed, key)) {
 					child = keyed[key];
-					keyed[key] = null;
+				 	delete keyed[key];
 					keyedLen--;
 				}
 			}
 
 			// attempt to pluck a node of the same type from the existing children
-			if (!child && min<childrenLen) {
-				for (let j=min; j<childrenLen; j++) {
-					let c = children[j];
-					if (c && isSameNodeType(c, vchild)) {
-						child = c;
-						children[j] = null;
-						if (j===childrenLen-1) childrenLen--;
-						if (j===min) min++;
+			if (!child && childrenLen) {
+				for (let j=0; j<childrenLen; j++) {
+					if (isSameNodeType(children[j], vchild)) {
+						child = children[j];
+						children.splice(j, 1);
+						childrenLen--;
 						break;
 					}
 				}
@@ -153,13 +150,13 @@ function innerDiffNode(dom, vnode, context) {
 
 	if (keyedLen) {
 		/*eslint guard-for-in:0*/
-		for (let i in keyed) if (hasOwnProperty.call(keyed, i) && keyed[i]) {
-			children[min=childrenLen++] = keyed[i];
+		for (let i in keyed) if (hasOwnProperty.call(keyed, i)) {
+			children[childrenLen++] = keyed[i];
 		}
 	}
 
 	// remove orphaned children
-	if (min<childrenLen) {
+	if (childrenLen) {
 		removeOrphanedChildren(dom, children);
 	}
 
