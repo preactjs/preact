@@ -1,4 +1,5 @@
 import options from './options';
+import {isFunction} from './util';
 
 
 /** Invoke a hook on the `options` export. */
@@ -12,7 +13,7 @@ export function optionsHook(name, a, b) {
  */
 export function hook(obj, name, a, b, c) {
 	let fn = obj[name];
-	if (fn && fn.call) return fn.call(obj, a, b, c);
+	if (isFunction(fn)) return obj[name](a, b, c);
 }
 
 
