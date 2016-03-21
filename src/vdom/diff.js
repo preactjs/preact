@@ -160,7 +160,7 @@ function innerDiffNode(dom, vnode, context) {
 
 	// remove orphaned children
 	if (min<childrenLen) {
-		removeOrphanedChildren(dom, children);
+		removeOrphanedChildren(children);
 	}
 
 	diffAttributes(dom, vnode);
@@ -168,7 +168,7 @@ function innerDiffNode(dom, vnode, context) {
 
 
 /** Reclaim children that were unreferenced in the desired VTree */
-export function removeOrphanedChildren(out, children, unmountOnly) {
+export function removeOrphanedChildren(children, unmountOnly) {
 	for (let i=children.length; i--; ) {
 		let child = children[i];
 		if (child) {
@@ -204,7 +204,7 @@ export function recollectNodeTree(node, unmountOnly) {
 
 		let c = node.childNodes;
 		if (c && c.length) {
-			removeOrphanedChildren(node, c, unmountOnly);
+			removeOrphanedChildren(c, unmountOnly);
 		}
 	}
 }
