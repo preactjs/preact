@@ -61,7 +61,8 @@ export default function diff(dom, vnode, context) {
 	}
 
 	innerDiffNode(out, vnode, context);
-
+	diffAttributes(out, vnode);
+	
 	if (originalAttributes && originalAttributes.ref) {
 		(out[ATTR_KEY].ref = originalAttributes.ref)(out);
 	}
@@ -162,8 +163,6 @@ function innerDiffNode(dom, vnode, context) {
 	if (min<childrenLen) {
 		removeOrphanedChildren(children);
 	}
-
-	diffAttributes(dom, vnode);
 }
 
 
