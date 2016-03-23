@@ -1,5 +1,5 @@
 import { ATTR_KEY } from '../constants';
-import { memoize } from '../util';
+import { memoize,removeNode } from '../util';
 import { ensureNodeData, getNodeType, getRawNodeAttributes } from '.';
 
 /** DOM node pool, keyed on nodeName. */
@@ -28,8 +28,7 @@ export function createNode(nodeName) {
 
 
 function cleanNode(node) {
-	let p = node.parentNode;
-	if (p) p.removeChild(node);
+	removeNode(node);
 
 	if (getNodeType(node)===3) return;
 
