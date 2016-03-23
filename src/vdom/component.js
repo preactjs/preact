@@ -1,6 +1,6 @@
 import { SYNC_RENDER, DOM_RENDER, NO_RENDER, EMPTY_BASE } from '../constants';
 import options from '../options';
-import { isFunction } from '../util';
+import { isFunction,removeNode } from '../util';
 import { hook, deepHook } from '../hooks';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from '.';
@@ -260,8 +260,7 @@ export function unmountComponent(dom, component, remove) {
 	let base = component.base;
 	if (base) {
 		if (remove!==false) {
-			let p = base.parentNode;
-			if (p) p.removeChild(base);
+			removeNode(base);
 		}
 		removeOrphanedChildren(base.childNodes, true);
 	}
