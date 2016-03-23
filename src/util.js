@@ -139,9 +139,4 @@ export const setImmediate = ch ? ( f => {
 	ch.port2.postMessage('');
 }) : setTimeout;
 
-export const removeNode = function(node){
-	let p = node.parentNode;
-        if (p) {
-            p.removeChild(node);
-        }
-};
+export const removeNode = node => {let p = node.parentNode; (p && p.removeChild(node));};
