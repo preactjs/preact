@@ -1,17 +1,19 @@
-# Preact
+# [Preact](https://preactjs.com)
 
 **Preact is a fast, `3kb` alternative to React, with the same ES2015 API.**
 
 Preact retains a large amount of compatibility with React, but only the modern ([ES6 Classes] and [stateless functional components](https://facebook.github.io/react/blog/2015/10/07/react-v0.14.html#stateless-functional-components)) interfaces.
 As one would expect coming from React, Components are simple building blocks for composing a User Interface.
 
->  :information_desk_person: **Documentation is available in the [Preact Wiki](https://github.com/developit/preact/wiki).**
+### :information_desk_person: Full documentation is available at the [Preact Website ➞](https://preactjs.com)
 
 [![npm](https://img.shields.io/npm/v/preact.svg)](http://npm.im/preact)
 [![travis](https://travis-ci.org/developit/preact.svg?branch=master)](https://travis-ci.org/developit/preact)
 [![gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/developit/preact)
 
+
 ---
+
 
 ## Demos
 
