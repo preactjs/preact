@@ -1,6 +1,6 @@
 import { SYNC_RENDER, DOM_RENDER, NO_RENDER, EMPTY_BASE } from '../constants';
 import options from '../options';
-import { isFunction } from '../util';
+import { isFunction,removeNode } from '../util';
 import { hook, deepHook } from '../hooks';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from '.';
@@ -154,7 +154,7 @@ export function renderComponent(component, opts) {
 		}
 
 		if (toUnmount) {
-			unmountComponent(toUnmount.base, toUnmount, true);
+			unmountComponent(toUnmount, true);
 		}
 
 		component.base = base;
@@ -200,7 +200,7 @@ export function buildComponentFromVNode(dom, vnode, context) {
 	}
 	else {
 		if (c) {
-			unmountComponent(dom, c, true);
+			unmountComponent(c, true);
 			dom = oldDom = null;
 		}
 		dom = createComponentFromVNode(vnode, dom, context);
@@ -243,7 +243,7 @@ function createComponentFromVNode(vnode, dom, context) {
  *	@param {Component} component	The Component instance to unmount
  *	@private
  */
-export function unmountComponent(dom, component, remove) {
+export function unmountComponent(component, remove) {
 	// console.log(`${remove?'Removing':'Unmounting'} component: ${component.constructor.name}`, component);
 
 	hook(component, '_ref', null);
@@ -252,14 +252,13 @@ export function unmountComponent(dom, component, remove) {
 	// recursively tear down & recollect high-order component children:
 	let inner = component._component;
 	if (inner) {
-		unmountComponent(dom, inner);
+		unmountComponent(inner);
 	}
 
 	let base = component.base;
 	if (base) {
 		if (remove!==false) {
-			let p = base.parentNode;
-			if (p) p.removeChild(base);
+			removeNode(base);
 		}
 		removeOrphanedChildren(base.childNodes, true);
 	}

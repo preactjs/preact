@@ -1,5 +1,5 @@
 import { ATTR_KEY, TEXT_CONTENT, UNDEFINED_ELEMENT, EMPTY } from '../constants';
-import { hasOwnProperty, toArray, empty, toLowerCase, isString, isFunction } from '../util';
+import { hasOwnProperty, toArray, empty, toLowerCase, isString, isFunction,removeNode } from '../util';
 import { hook, deepHook } from '../hooks';
 import { isSameNodeType } from '.';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
@@ -188,13 +188,12 @@ export function recollectNodeTree(node, unmountOnly) {
 
 	let component = node._component;
 	if (component) {
-		unmountComponent(node, component, !unmountOnly);
+		unmountComponent(component, !unmountOnly);
 	}
 	else {
 		if (!unmountOnly) {
 			if (getNodeType(node)!==1) {
-				let p = node.parentNode;
-				if (p) p.removeChild(node);
+				removeNode(node);
 				return;
 			}
 
