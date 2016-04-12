@@ -10,7 +10,7 @@ import { isFunction } from '../util';
  *	@private
  */
 export function isFunctionalComponent({ nodeName }) {
-	return isFunction(nodeName) && !nodeName.prototype.render;
+	return isFunction(nodeName) && !(nodeName.prototype && nodeName.prototype.render);
 }
 
 
