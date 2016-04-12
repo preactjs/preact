@@ -36,7 +36,7 @@ export function memoize(fn, mem) {
  */
 export function delve(obj, key) {
 	for (let p=key.split('.'), i=0; i<p.length && obj; i++) {
-		obj = obj[p];
+		obj = obj[p[i]];
 	}
 	return obj;
 }
