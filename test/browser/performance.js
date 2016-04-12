@@ -55,7 +55,7 @@ describe('performance', () => {
 
 		function noop() {}
 
-		let now = typeof performance==='undefined' ? Date.now : performance.now;
+		let now = typeof performance==='undefined' ? () => Date.now() : () => performance.now();
 
 		function loop(iter) {
 			let start = now(),
