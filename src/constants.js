@@ -10,7 +10,7 @@ export const EMPTY_BASE = '';
 export const HAS_DOM = typeof document!=='undefined';
 export const TEXT_CONTENT = !HAS_DOM || 'textContent' in document ? 'textContent' : 'nodeValue';
 
-export const ATTR_KEY = typeof Symbol!=='undefined' ? Symbol('preactattr') : '__preactattr_';
+export const ATTR_KEY = typeof Symbol!=='undefined' ? Symbol.for('preactattr') : '__preactattr_';
 
 export const UNDEFINED_ELEMENT = 'undefined';
 
