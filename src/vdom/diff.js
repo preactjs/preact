@@ -62,7 +62,7 @@ export default function diff(dom, vnode, context) {
 
 	innerDiffNode(out, vnode, context);
 	diffAttributes(out, vnode);
-	
+
 	if (originalAttributes && originalAttributes.ref) {
 		(out[ATTR_KEY].ref = originalAttributes.ref)(out);
 	}
@@ -82,8 +82,7 @@ function innerDiffNode(dom, vnode, context) {
 		children = [];
 		for (let i=0; i<len; i++) {
 			let child = dom.childNodes[i],
-				props = child._component && child._component.props,
-				key = props ? props.key : getAccessor(child, 'key');
+				key = child._component ? child._component.__key : getAccessor(child, 'key');
 			if (!empty(key)) {
 				if (!keyed) keyed = {};
 				keyed[key] = child;
