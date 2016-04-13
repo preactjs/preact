@@ -21,8 +21,9 @@ export function createComponent(ctor, props, context) {
 		c = list[i];
 		if (c.constructor===ctor) {
 			list.splice(i, 1);
-			ctor.call(c, props, context);
-			return c;
+			let inst = new ctor(props, context);
+			inst.base = c.base;
+			return inst;
 		}
 	}
 	return new ctor(props, context);
