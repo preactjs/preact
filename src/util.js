@@ -81,17 +81,16 @@ export const falsey = value => value===false || value==null;
 export function styleObjToCss(s) {
 	let str = '';
 	for (let prop in s) {
-		if (hasOwnProperty.call(s, prop)) {
-			let val = s[prop];
-			if (!empty(val)) {
-				str += jsToCss(prop);
-				str += ': ';
-				str += val;
-				if (typeof val==='number' && !NON_DIMENSION_PROPS[prop]) {
-					str += 'px';
-				}
-				str += '; ';
+		let val = s[prop];
+		if (!empty(val)) {
+			if (str) str += ' ';
+			str += jsToCss(prop);
+			str += ': ';
+			str += val;
+			if (typeof val==='number' && !NON_DIMENSION_PROPS[prop]) {
+				str += 'px';
 			}
+			str += ';';
 		}
 	}
 	return str;
