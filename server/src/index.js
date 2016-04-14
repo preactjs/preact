@@ -89,7 +89,7 @@ export default function renderToString(vnode, context, opts, inner) {
 			let props = { children, ...attributes },
 				rendered;
 
-			if (typeof nodeName.prototype.render!=='function') {
+			if (!nodeName.prototype || typeof nodeName.prototype.render!=='function') {
 				// stateless functional components
 				rendered = nodeName(props, context);
 			}
