@@ -27,7 +27,11 @@ const VOID_ELEMENTS = [
 	'wbr'
 ];
 
-const HOP = Object.prototype.hasOwnProperty;
+const objectKeys = Object.keys || (obj => {
+	let keys = [];
+	for (let i in obj) if (obj.hasOwnProperty(i)) keys.push(i);
+	return keys;
+});
 
 let encodeEntities = s => String(s).replace(/[<>"&]/g, escapeChar);
 
@@ -109,9 +113,15 @@ export default function renderToString(vnode, context, opts, inner) {
 	let s = `<${nodeName}`,
 		html;
 
-	for (let name in attributes) {
-		if (HOP.call(attributes, name)) {
-			let v = attributes[name];
+	if (attributes) {
+		let attrs = objectKeys(attributes);
+
+		// allow sorting lexicographically for more determinism (useful for tests, such as via preact-jsx-chai)
+		if (opts && opts.sortAttributes===true) attrs.sort();
+
+		for (let i=0; i<attrs.length; i++) {
+			let name = attrs[i],
+				v = attributes[name];
 			if (name==='className') {
 				if (attributes['class']) continue;
 				name = 'class';
@@ -124,6 +134,7 @@ export default function renderToString(vnode, context, opts, inner) {
 			}
 		}
 	}
+
 	s += '>';
 
 	if (html) {
@@ -149,7 +160,7 @@ export default function renderToString(vnode, context, opts, inner) {
 	}
 
 	return s;
-};
+}
 
 function getComponentName(component) {
 	return component.displayName || component.name || component.prototype.displayName || component.prototype.name || (Function.prototype.toString.call(component).match(/\s([^\(]+)/) || EMPTY)[1] || 'Component';

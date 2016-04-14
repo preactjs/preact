@@ -242,4 +242,16 @@ describe('render', () => {
 			expect(rendered).to.equal('<div class="foo bar"></div>');
 		});
 	});
+
+	describe('sortAttributes', () => {
+		it('should leave attributes unsorted by default', () => {
+			let rendered = render(<div b1="b1" c="c" a="a" b="b" />);
+			expect(rendered).to.equal('<div b1="b1" c="c" a="a" b="b"></div>');
+		});
+
+		it('should sort attributes lexicographically if enabled', () => {
+			let rendered = render(<div b1="b1" c="c" a="a" b="b" />, null, { sortAttributes:true });
+			expect(rendered).to.equal('<div a="a" b="b" b1="b1" c="c"></div>');
+		});
+	});
 });
