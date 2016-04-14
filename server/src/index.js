@@ -44,10 +44,10 @@ let falsey = v => v==null || v===false;
  *	@name render
  *	@function
  *	@param {VNode} vnode	JSX VNode to render.
+ *	@param {Object} [context={}]	Optionally pass an initial context object through the render path.
  *	@param {Object} [options={}]	Rendering options
  *	@param {Boolean} [options.shallow=false]	If `true`, renders nested Components as HTML elements (`<Foo a="b" />`).
  *	@param {Boolean} [options.xml=false]		If `true`, uses self-closing tags for elements without children.
- *	@param {Object} [context={}]	Optionally pass an initial context object through the render path.
  */
 renderToString.render = renderToString;
 
