@@ -82,7 +82,7 @@ export default function renderToString(vnode, context, opts, inner) {
 
 	// components
 	if (typeof nodeName==='function') {
-		if (opts && opts.shallow && inner) {
+		if (opts && opts.shallow && (inner || (opts && opts.renderRootComponent===false))) {
 			nodeName = getComponentName(nodeName);
 		}
 		else {
