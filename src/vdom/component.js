@@ -151,7 +151,7 @@ export function renderComponent(component, opts) {
 
 		if (component.base && base!==component.base) {
 			let p = component.base.parentNode;
-			if (p) p.replaceChild(base, component.base);
+			if (p && base!==p) p.replaceChild(base, component.base);
 		}
 
 		if (toUnmount) {
