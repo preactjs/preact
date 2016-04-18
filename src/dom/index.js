@@ -26,6 +26,12 @@ export function appendChildren(parent, children) {
 }
 
 
+/** Removes a given DOM Node from its parent. */
+export function removeNode(node) {
+	let p = node.parentNode;
+	if (p) p.removeChild(node);
+}
+
 
 /** Retrieve the value of a rendered attribute
  *	@private

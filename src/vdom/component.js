@@ -1,12 +1,13 @@
 import { SYNC_RENDER, DOM_RENDER, NO_RENDER, EMPTY_BASE } from '../constants';
 import options from '../options';
-import { isFunction,removeNode } from '../util';
+import { isFunction } from '../util';
 import { hook, deepHook } from '../hooks';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from '.';
 import diff from './diff';
 import { removeOrphanedChildren, recollectNodeTree } from './diff';
 import { createComponent, collectComponent } from './component-recycler';
+import { removeNode } from '../dom';
 
 
 /** Mark component as dirty and queue up a render.
@@ -155,7 +156,7 @@ export function renderComponent(component, opts) {
 		}
 
 		if (toUnmount) {
-			unmountComponent(toUnmount.base, toUnmount, true);
+			unmountComponent(toUnmount, true);
 		}
 
 		component.base = base;
@@ -201,7 +202,7 @@ export function buildComponentFromVNode(dom, vnode, context) {
 	}
 	else {
 		if (c) {
-			unmountComponent(dom, c, true);
+			unmountComponent(c, true);
 			dom = oldDom = null;
 		}
 		dom = createComponentFromVNode(vnode, dom, context);
@@ -244,7 +245,7 @@ function createComponentFromVNode(vnode, dom, context) {
  *	@param {Component} component	The Component instance to unmount
  *	@private
  */
-export function unmountComponent(dom, component, remove) {
+export function unmountComponent(component, remove) {
 	// console.log(`${remove?'Removing':'Unmounting'} component: ${component.constructor.name}`, component);
 
 	hook(component, '__ref', null);
@@ -253,15 +254,13 @@ export function unmountComponent(dom, component, remove) {
 	// recursively tear down & recollect high-order component children:
 	let inner = component._component;
 	if (inner) {
-		unmountComponent(dom, inner, remove);
+		unmountComponent(inner, remove);
 		remove = false;
 	}
 
 	let base = component.base;
 	if (base) {
-		if (remove!==false) {
-			removeNode(base);
-		}
+		if (remove!==false) removeNode(base);
 		removeOrphanedChildren(base.childNodes, true);
 	}
 
@@ -269,5 +268,6 @@ export function unmountComponent(dom, component, remove) {
 		component._parentComponent = null;
 		collectComponent(component);
 	}
+
 	hook(component, 'componentDidUnmount');
 }

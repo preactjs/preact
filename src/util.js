@@ -138,5 +138,3 @@ export const setImmediate = ch ? ( f => {
 	ch.port1.onmessage = f;
 	ch.port2.postMessage('');
 }) : setTimeout;
-
-export const removeNode = node => {let p = node.parentNode; (p && p.removeChild(node));};

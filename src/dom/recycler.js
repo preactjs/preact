@@ -1,6 +1,6 @@
 import { ATTR_KEY } from '../constants';
-import { memoize,removeNode } from '../util';
-import { ensureNodeData, getNodeType, getRawNodeAttributes } from '.';
+import { memoize } from '../util';
+import { ensureNodeData, getNodeType, getRawNodeAttributes, removeNode } from '.';
 
 /** DOM node pool, keyed on nodeName. */
 

@@ -1,10 +1,10 @@
 import { ATTR_KEY, TEXT_CONTENT, UNDEFINED_ELEMENT, EMPTY } from '../constants';
-import { hasOwnProperty, toArray, empty, toLowerCase, isString, isFunction,removeNode } from '../util';
+import { hasOwnProperty, toArray, empty, toLowerCase, isString, isFunction } from '../util';
 import { hook, deepHook } from '../hooks';
 import { isSameNodeType } from '.';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
-import { appendChildren, getAccessor, setAccessor, getNodeAttributes, getNodeType } from '../dom';
+import { removeNode, appendChildren, getAccessor, setAccessor, getNodeAttributes, getNodeType } from '../dom';
 import { unmountComponent } from './component';
 import { createNode, collectNode } from '../dom/recycler';
 
@@ -187,7 +187,7 @@ export function recollectNodeTree(node, unmountOnly) {
 
 	let component = node._component;
 	if (component) {
-		unmountComponent(node, component, !unmountOnly);
+		unmountComponent(component, !unmountOnly);
 	}
 	else {
 		if (!unmountOnly) {
