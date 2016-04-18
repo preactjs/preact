@@ -183,7 +183,7 @@ describe('Lifecycle methods', () => {
 
 
 	describe('#component(Did|Will)(Mount|Unmount)', () => {
-		it('should be invoked for nested components', () => {
+		it('should be invoked for nested components and called when dom does (DidMount, WillUnMount) or does not (WillMount, DidUnMount) exist', () => {
 			let setState;
 			class Outer extends Component {
 				constructor() {
@@ -191,9 +191,21 @@ describe('Lifecycle methods', () => {
 					this.state = { show:true };
 					setState = s => this.setState(s);
 				}
+				componentWillMount() {
+					expect(document.getElementById('OuterDiv')).to.not.exist;
+				}
+				componentDidMount() {
+					expect(document.getElementById('OuterDiv')).to.exist;
+				}
+				componentWillUnmount() {
+					expect(document.getElementById('OuterDiv')).to.exist;
+				}
+				componentDidUnmount() {
+					expect(document.getElementById('OuterDiv')).to.not.exist;
+				}
 				render(props, { show }) {
 					return (
-						<div>
+						<div id='OuterDiv'>
 							{ show && (
 								<div>
 									<Inner {...props} />
@@ -205,12 +217,21 @@ describe('Lifecycle methods', () => {
 			}
 
 			class Inner extends Component {
-				componentWillMount() {}
-				componentDidMount() {}
-				componentWillUnmount() {}
-				componentDidUnmount() {}
+				componentWillMount() {
+					expect(document.getElementById('InnerDiv')).to.not.exist;
+				}
+				componentDidMount() {
+					expect(document.getElementById('InnerDiv')).to.exist;
+				}
+				componentWillUnmount() {
+					expect(document.getElementById('InnerDiv')).to.exist;
+				}
+				componentDidUnmount() {
+					expect(document.getElementById('InnerDiv')).to.not.exist;
+				}
+
 				render() {
-					return <div />;
+					return <div id='InnerDiv'/>;
 				}
 			}
 
@@ -318,4 +339,6 @@ describe('Lifecycle methods', () => {
 			});
 		});
 	});
+
+
 });
