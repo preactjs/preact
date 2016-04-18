@@ -16,16 +16,12 @@ import { triggerComponentRender, renderComponent } from './vdom/component';
 export default function Component(props, context) {
 	/** @private */
 	this._dirty = this._disableRendering = false;
-	/** @private */
-	this._linkedStates = {};
-	/** @private */
-	this._renderCallbacks = [];
 	/** @public */
-	this.prevState = this.prevProps = this.prevContext = this.base = this._parentComponent = this._component = this.__ref = this.__key = null;
+	this.prevState = this.prevProps = this.prevContext = this.base = this._parentComponent = this._component = this.__ref = this.__key = this._linkedStates = this._renderCallbacks = null;
 	/** @public */
 	this.context = context || {};
 	/** @type {object} */
-	this.props = props || {};
+	this.props = props;
 	/** @type {object} */
 	this.state = hook(this, 'getInitialState') || {};
 }
@@ -66,7 +62,7 @@ extend(Component.prototype, {
 	 *		<button onClick={ this.linkState('touch.coords', 'touches.0') }>Tap</button
 	 */
 	linkState(key, eventPath) {
-		let c = this._linkedStates,
+		let c = this._linkedStates || (this._linkedStates = {}),
 			cacheKey = key + '|' + (eventPath || '');
 		return c[cacheKey] || (c[cacheKey] = createLinkedState(this, key, eventPath));
 	},
@@ -79,7 +75,7 @@ extend(Component.prototype, {
 		let s = this.state;
 		if (!this.prevState) this.prevState = clone(s);
 		extend(s, isFunction(state) ? state(s, this.props) : state);
-		if (callback) this._renderCallbacks.push(callback);
+		if (callback) (this._renderCallbacks = (this._renderCallbacks || [])).push(callback);
 		triggerComponentRender(this);
 	},
 

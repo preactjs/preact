@@ -23,7 +23,7 @@ export function createLinkedState(component, key, eventPath) {
 			}
 		}
 		else {
-			v = (t.nodeName+t.type).match(/^input(checkbox|radio)$/i) ? t.checked : t.value;
+			v = (t.nodeName+t.type).match(/^input(check|rad)/i) ? t.checked : t.value;
 		}
 		if (isFunction(v)) v = v.call(t);
 		if (len>1) {
