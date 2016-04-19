@@ -155,8 +155,6 @@ export function renderComponent(component, opts) {
 		if (initialBase && base!==initialBase) {
 			let p = initialBase.parentNode;
 			if (p && base!==p) p.replaceChild(base, initialBase);
-			initialBase._component = null;
-			recollectNodeTree(initialBase);
 		}
 
 		if (toUnmount) {
@@ -211,6 +209,7 @@ export function buildComponentFromVNode(dom, vnode, context) {
 		}
 		dom = createComponentFromVNode(vnode, dom, context);
 		if (oldDom && dom!==oldDom) {
+			oldDom._component = null;
 			recollectNodeTree(oldDom);
 		}
 	}
