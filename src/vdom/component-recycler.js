@@ -22,7 +22,7 @@ export function createComponent(ctor, props, context) {
 		if (c.constructor===ctor) {
 			list.splice(i, 1);
 			let inst = new ctor(props, context);
-			inst.base = c.base;
+			inst.nextBase = c.base;
 			return inst;
 		}
 	}

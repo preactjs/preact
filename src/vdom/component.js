@@ -137,7 +137,7 @@ export function renderComponent(component, opts) {
 			base = inst.base;
 		}
 		else {
-			let cbase = component.base;
+			let cbase = component.base || component.nextBase;
 
 			// destroy high order component link
 			toUnmount = component._component;
