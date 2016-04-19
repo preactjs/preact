@@ -83,8 +83,10 @@ export function renderComponent(component, opts) {
 		previousProps = component.prevProps || props,
 		previousState = component.prevState || state,
 		previousContext = component.prevContext || context,
-		isUpdate = component.base;
+		isUpdate = component.base,
+		initialBase = isUpdate || component.nextBase;
 
+	// if updating
 	if (isUpdate) {
 		component.props = previousProps;
 		component.state = previousState;
@@ -100,7 +102,7 @@ export function renderComponent(component, opts) {
 		component.context = context;
 	}
 
-	component.prevProps = component.prevState = component.prevContext = null;
+	component.prevProps = component.prevState = component.prevContext = component.nextBase = null;
 	component._dirty = false;
 
 	if (!skip) {
@@ -128,16 +130,16 @@ export function renderComponent(component, opts) {
 				inst = createComponent(childComponent, childProps, childContext);
 				inst._parentComponent = component;
 				component._component = inst;
-				if (component.base) deepHook(inst, 'componentWillMount');
+				if (isUpdate) deepHook(inst, 'componentWillMount');
 				setComponentProps(inst, childProps, NO_RENDER, childContext);
 				renderComponent(inst, DOM_RENDER);
-				if (component.base) deepHook(inst, 'componentDidMount');
+				if (isUpdate) deepHook(inst, 'componentDidMount');
 			}
 
 			base = inst.base;
 		}
 		else {
-			let cbase = component.base || component.nextBase;
+			let cbase = initialBase;
 
 			// destroy high order component link
 			toUnmount = component._component;
@@ -145,14 +147,16 @@ export function renderComponent(component, opts) {
 				cbase = component._component = null;
 			}
 
-			if (component.base || (opts && opts.build)) {
+			if (initialBase || (opts && opts.build)) {
 				base = diff(cbase, rendered || EMPTY_BASE, childContext);
 			}
 		}
 
-		if (component.base && base!==component.base) {
-			let p = component.base.parentNode;
-			if (p && base!==p) p.replaceChild(base, component.base);
+		if (initialBase && base!==initialBase) {
+			let p = initialBase.parentNode;
+			if (p && base!==p) p.replaceChild(base, initialBase);
+			initialBase._component = null;
+			recollectNodeTree(initialBase);
 		}
 
 		if (toUnmount) {
