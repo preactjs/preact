@@ -13,18 +13,18 @@ export function collectComponent(component) {
 }
 
 
-export function createComponent(ctor, props, context) {
-	let list = components[ctor.name],
+export function createComponent(Ctor, props, context) {
+	let list = components[Ctor.name],
 		len = list && list.length,
 		c;
 	for (let i=0; i<len; i++) {
 		c = list[i];
-		if (c.constructor===ctor) {
+		if (c.constructor===Ctor) {
 			list.splice(i, 1);
-			let inst = new ctor(props, context);
+			let inst = new Ctor(props, context);
 			inst.nextBase = c.base;
 			return inst;
 		}
 	}
-	return new ctor(props, context);
+	return new Ctor(props, context);
 }
