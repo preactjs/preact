@@ -1,9 +1,23 @@
+/*eslint-env node */
+/*eslint no-var: 0 */
 var path = require('path');
 
 module.exports = function(config) {
 	config.set({
 		frameworks: ['mocha', 'chai-sinon'],
-		reporters: ['mocha'],
+
+		reporters: ['mocha', 'coverage'],
+		coverageReporter: {
+			reporters: [
+				{
+					type: 'text-summary'
+				},
+				{
+					type: 'html',
+					dir: 'coverage'
+				}
+			]
+		},
 
 		browsers: ['PhantomJS'],
 
@@ -20,16 +34,25 @@ module.exports = function(config) {
 
 		webpack: {
 			module: {
-				loaders: [
+				/* Transpile source and test files */
+				preLoaders: [
 					{
 						test: /\.jsx?$/,
 						exclude: /node_modules/,
 						loader: 'babel'
 					}
+				],
+				/* Only Instrument our source files for coverage */
+				loaders: [
+					{
+						test: /\.jsx?$/,
+						loader: 'isparta',
+						include: /src/
+					}
 				]
 			},
 			resolve: {
-				modulesDirectories: [__dirname, 'node_modules'],
+				modulesDirectories: [__dirname, 'node_modules']
 			}
 		},
 
