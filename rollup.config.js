@@ -9,6 +9,7 @@ export default {
 		}),
 		babel({
 			sourceMap: true,
+			loose: 'all',
 			exclude: 'node_modules/**'
 		})
 	]

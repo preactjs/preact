@@ -3,3 +3,4 @@
 .DS_Store
 /dist
 /_dev
+/coverage
