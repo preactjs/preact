@@ -15,7 +15,9 @@ import { triggerComponentRender, renderComponent } from './vdom/component';
  */
 export default function Component(props, context) {
 	/** @private */
-	this._dirty = this._disableRendering = false;
+	this._dirty = true;
+	/** @public */
+	this._disableRendering = false;
 	/** @public */
 	this.prevState = this.prevProps = this.prevContext = this.base = this.nextBase = this._parentComponent = this._component = this.__ref = this.__key = this._linkedStates = this._renderCallbacks = null;
 	/** @public */
