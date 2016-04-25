@@ -18,7 +18,7 @@ import { deepHook } from './hooks';
  */
 export default function render(vnode, parent, merge) {
 	let existing = merge && merge._component && merge._componentConstructor===vnode.nodeName,
-		built = diff(merge, vnode),
+		built = diff(merge, vnode, {}),
 		c = !existing && built._component;
 
 	if (c) deepHook(c, 'componentWillMount');
