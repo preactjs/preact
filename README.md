@@ -82,8 +82,20 @@ import preact from 'preact';
 >
 > Instead of declaring the `@jsx` pragma in your code, it's best to configure it globally in a `.babelrc`:
 >
-> ```js
+> **For Babel 5 and prior:**
+>
+> ```json
 > { "jsxPragma": "h" }
+> ```
+>
+> **For Babel 6:**
+>
+> ```json
+> {
+>   "plugins": [
+>     ["transform-react-jsx", { "pragma":"h" }]
+>   ]
+> }
 > ```
 
 
