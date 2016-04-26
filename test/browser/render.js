@@ -570,4 +570,26 @@ describe('render()', () => {
 
 		expect(scratch.innerHTML).to.equal('<span>span in a component</span>');
 	});
+
+	describe('props.children', () => {
+		it('should support passing children as a prop', () => {
+			const Foo = props => <div {...props} />;
+
+			render(<Foo a="b" children={[
+				<span class="bar">bar</span>,
+				'123',
+				456
+			]} />, scratch);
+
+			expect(scratch.innerHTML).to.equal('<div a="b"><span class="bar">bar</span>123456</div>');
+		});
+
+		it('should be ignored when explicit children exist', () => {
+			const Foo = props => <div {...props}>a</div>;
+
+			render(<Foo children={'b'} />, scratch);
+
+			expect(scratch.innerHTML).to.equal('<div>a</div>');
+		});
+	});
 });
