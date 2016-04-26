@@ -1,7 +1,7 @@
 // render modes
-export const NO_RENDER = { render: false };
-export const SYNC_RENDER = { renderSync: true };
-export const DOM_RENDER = { build: true };
+export const NO_RENDER = 0;
+export const SYNC_RENDER = 1;
+export const DOM_RENDER = 2;
 
 export const EMPTY = {};
 export const EMPTY_BASE = '';

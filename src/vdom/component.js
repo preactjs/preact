@@ -53,8 +53,8 @@ export function setComponentProps(component, props, opts, context) {
 
 	component._disableRendering = d;
 
-	if (!opts || opts.render!==false) {
-		if ((opts && opts.renderSync) || options.syncComponentUpdates!==false) {
+	if (opts!==NO_RENDER) {
+		if (opts===SYNC_RENDER || options.syncComponentUpdates!==false) {
 			renderComponent(component);
 		}
 		else {
@@ -147,7 +147,7 @@ export function renderComponent(component, opts) {
 				cbase = component._component = null;
 			}
 
-			if (initialBase || (opts && opts.build)) {
+			if (initialBase || opts===DOM_RENDER) {
 				base = diff(cbase, rendered || EMPTY_BASE, childContext);
 			}
 		}
