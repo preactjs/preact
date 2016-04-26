@@ -8,7 +8,6 @@ export const EMPTY_BASE = '';
 
 // is this a DOM environment
 export const HAS_DOM = typeof document!=='undefined';
-export const TEXT_CONTENT = !HAS_DOM || 'textContent' in document ? 'textContent' : 'nodeValue';
 
 export const ATTR_KEY = typeof Symbol!=='undefined' ? Symbol.for('preactattr') : '__preactattr_';
 

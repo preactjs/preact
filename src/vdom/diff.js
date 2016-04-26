@@ -1,5 +1,5 @@
-import { ATTR_KEY, TEXT_CONTENT, UNDEFINED_ELEMENT, EMPTY } from '../constants';
 import { hasOwnProperty, toArray, empty, toLowerCase, isString, isFunction } from '../util';
+import { ATTR_KEY, UNDEFINED_ELEMENT, EMPTY } from '../constants';
 import { hook, deepHook } from '../hooks';
 import { isSameNodeType } from '.';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
@@ -7,6 +7,21 @@ import { buildComponentFromVNode } from './component';
 import { removeNode, appendChildren, getAccessor, setAccessor, getNodeAttributes, getNodeType } from '../dom';
 import { unmountComponent } from './component';
 import { createNode, collectNode } from '../dom/recycler';
+
+
+function buildTextNode(dom, str) {
+	if (dom) {
+		let type = getNodeType(dom);
+		if (type===3) {
+			if (dom.nodeValue!==str) {
+				dom.nodeValue = str;
+			}
+			return dom;
+		}
+		if (type===1) collectNode(dom);
+	}
+	return document.createTextNode(str);
+}
 
 
 /** Apply differences in a given vnode (and it's deep children) to a real DOM Node.
@@ -27,17 +42,7 @@ export default function diff(dom, vnode, context) {
 	}
 
 	if (isString(vnode)) {
-		if (dom) {
-			let type = getNodeType(dom);
-			if (type===3) {
-				dom[TEXT_CONTENT] = vnode;
-				return dom;
-			}
-			else if (type===1) {
-				collectNode(dom);
-			}
-		}
-		return document.createTextNode(vnode);
+		return buildTextNode(dom, vnode);
 	}
 
 	// return diffNode(dom, vnode, context);
