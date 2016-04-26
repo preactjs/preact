@@ -1,6 +1,5 @@
 /*eslint-env node */
 /*eslint no-var: 0 */
-var path = require('path');
 
 module.exports = function(config) {
 	config.set({
@@ -39,7 +38,11 @@ module.exports = function(config) {
 					{
 						test: /\.jsx?$/,
 						exclude: /node_modules/,
-						loader: 'babel'
+						loader: 'babel',
+						query: {
+							loose: 'all',
+							blacklist: ['es6.tailCall']
+						}
 					}
 				],
 				/* Only Instrument our source files for coverage */
