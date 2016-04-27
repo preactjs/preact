@@ -16,15 +16,15 @@ export function collectComponent(component) {
 export function createComponent(Ctor, props, context) {
 	let list = components[Ctor.name],
 		len = list && list.length,
+		inst = new Ctor(props, context),
 		c;
 	for (let i=0; i<len; i++) {
 		c = list[i];
 		if (c.constructor===Ctor) {
 			list.splice(i, 1);
-			let inst = new Ctor(props, context);
 			inst.nextBase = c.base;
-			return inst;
+			break;
 		}
 	}
-	return new Ctor(props, context);
+	return inst;
 }
