@@ -42,6 +42,9 @@ let escapeChar = a => ESC[a] || a;
 
 let falsey = v => v==null || v===false;
 
+let indent = (s, char) => String(s).replace(/(\n+)/g, '$1' + (char || '\t'));
+
+let isLargeString = s => (String(s).length>40 || String(s).indexOf('\n')!==-1 || String(s).indexOf('<')!==-1);
 
 /** Render Preact JSX + Components to an HTML string.
  *	@name render
@@ -51,6 +54,7 @@ let falsey = v => v==null || v===false;
  *	@param {Object} [options={}]	Rendering options
  *	@param {Boolean} [options.shallow=false]	If `true`, renders nested Components as HTML elements (`<Foo a="b" />`).
  *	@param {Boolean} [options.xml=false]		If `true`, uses self-closing tags for elements without children.
+ *	@param {Boolean} [options.pretty=false]		If `true`, adds whitespace for readability
  */
 renderToString.render = renderToString;
 
@@ -77,6 +81,10 @@ renderToString.shallowRender = (vnode, context) => renderToString(vnode, context
 export default function renderToString(vnode, context, opts, inner) {
 	let { nodeName, attributes, children } = vnode || EMPTY;
 	context = context || {};
+	opts = opts || {};
+
+	let pretty = opts.pretty,
+		indentChar = typeof pretty==='string' ? pretty : '\t';
 
 	// #text nodes
 	if (!nodeName) {
@@ -85,7 +93,7 @@ export default function renderToString(vnode, context, opts, inner) {
 
 	// components
 	if (typeof nodeName==='function') {
-		if (opts && opts.shallow && (inner || (opts && opts.renderRootComponent===false))) {
+		if (opts.shallow && (inner || opts.renderRootComponent===false)) {
 			nodeName = getComponentName(nodeName);
 		}
 		else {
@@ -108,7 +116,7 @@ export default function renderToString(vnode, context, opts, inner) {
 				}
 			}
 
-			return renderToString(rendered, context, opts, !opts || opts.shallowHighOrder!==false);
+			return renderToString(rendered, context, opts, opts.shallowHighOrder!==false);
 		}
 	}
 
@@ -140,18 +148,39 @@ export default function renderToString(vnode, context, opts, inner) {
 
 	s += '>';
 
+	// if (pretty) s += '\n' + indentChar;
+
 	if (html) {
+		// if multiline, indent.
+		if (pretty && isLargeString(html)) {
+			html = '\n' + indentChar + indent(html, indentChar);
+		}
 		s += html;
 	}
 	else {
 		let len = children && children.length;
 		if (len) {
+			let pieces = [],
+				hasLarge = false;
 			for (let i=0; i<len; i++) {
 				let child = children[i];
 				if (!falsey(child)) {
-					s += renderToString(child, context, opts, true);
+					let ret = renderToString(child, context, opts, true);
+					// if (pretty && isLargeString(ret)) {
+					// if (pretty && isLargeString(ret)) {
+					// 	ret = '\n' + indentChar + indent(ret);
+					// }
+					//s += ret;
+					if (!hasLarge && pretty && isLargeString(ret)) hasLarge = true;
+					pieces.push(ret);
 				}
 			}
+			if (hasLarge) {
+				for (let i=pieces.length; i--; ) {
+					pieces[i] = '\n' + indentChar + indent(pieces[i], indentChar);
+				}
+			}
+			s += pieces.join('');
 		}
 		else if (opts && opts.xml) {
 			return s.substring(0, s.length-1) + ' />';
@@ -159,6 +188,7 @@ export default function renderToString(vnode, context, opts, inner) {
 	}
 
 	if (VOID_ELEMENTS.indexOf(nodeName) === -1) {
+		if (pretty && ~s.indexOf('\n')) s += '\n';
 		s += `</${nodeName}>`;
 	}
 
