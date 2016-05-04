@@ -48,7 +48,7 @@
     "karma-babel-preprocessor": "^5.2.2",
     "karma-chai": "^0.1.0",
     "karma-chai-sinon": "^0.1.5",
-    "karma-coverage": "^0.5.5",
+    "karma-coverage": "^1.0.0",
     "karma-mocha": "^0.2.0",
     "karma-mocha-reporter": "^2.0.0",
     "karma-phantomjs-launcher": "^1.0.0",
