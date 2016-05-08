@@ -74,10 +74,11 @@ describe('performance', () => {
 		let renderCount = loop(fullRender);
 
 		// adjust for simple loop speed:
-		let per = 1000 / (500/renderCount - 500/noopCount);
+		let per = noopCount / renderCount;
 
-		console.log(`render(): ${per.toLocaleString()}/s`);
+		console.log(`render(): ${(renderCount*2)|0}/s (${per|0} ticks)`);
 
-		expect(renderCount / noopCount).to.be.above(0.0001);
+		// expect(renderCount / noopCount).to.be.above(0.0001);
+		expect(per).to.be.below(350);
 	});
 });
