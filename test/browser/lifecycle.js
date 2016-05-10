@@ -183,63 +183,103 @@ describe('Lifecycle methods', () => {
 
 
 	describe('#component(Did|Will)(Mount|Unmount)', () => {
-		it('should be invoked for nested components', () => {
-			let setState;
-			class Outer extends Component {
-				constructor() {
-					super();
-					this.state = { show:true };
-					setState = s => this.setState(s);
-				}
-				render(props, { show }) {
-					return (
-						<div>
-							{ show && (
-								<div>
-									<Inner {...props} />
-								</div>
-							) }
-						</div>
-					);
-				}
+		let setState;
+		class Outer extends Component {
+			constructor() {
+				super();
+				this.state = { show:true };
+				setState = s => this.setState(s);
 			}
-
-			class Inner extends Component {
-				componentWillMount() {}
-				componentDidMount() {}
-				componentWillUnmount() {}
-				componentDidUnmount() {}
-				render() {
-					return <div />;
-				}
+			render(props, { show }) {
+				return (
+					<div>
+						{ show && (
+							<div>
+								<Inner {...props} />
+							</div>
+						) }
+					</div>
+				);
 			}
+		}
 
-			let proto = Inner.prototype;
-			let spies = ['componentWillMount', 'componentDidMount', 'componentWillUnmount', 'componentDidUnmount'];
-			spies.forEach( s => sinon.spy(proto, s) );
+		class Inner extends Component {
+			componentWillMount() {}
+			componentDidMount() {}
+			componentWillUnmount() {}
+			componentDidUnmount() {}
+			render() {
+				return (
+					<div>
+						<InnerMost />
+					</div>
+				);
+			}
+		}
 
-			let reset = () => spies.forEach( s => proto[s].reset() );
+		class InnerMost extends Component {
+			componentWillMount() {}
+			componentDidMount() {}
+			componentWillUnmount() {}
+			componentDidUnmount() {}
+			render() {
+				return <div />;
+			}
+		}
 
+		let innerProto = Inner.prototype;
+		let innerMostProto = InnerMost.prototype;
+		let spies = ['componentWillMount', 'componentDidMount', 'componentWillUnmount', 'componentDidUnmount'];
+		spies.forEach( s => { sinon.spy(innerProto, s); sinon.spy(innerMostProto, s); });
+
+		let reset = () => spies.forEach( s => { innerProto[s].reset(); innerMostProto[s].reset(); });
+
+		beforeEach( () => reset() );
+
+		it('should be invoked for inner components', () => {
 			render(<Outer />, scratch);
-			expect(proto.componentWillMount).to.have.been.called;
-			expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
-			expect(proto.componentDidMount).to.have.been.called;
+			expect(innerProto.componentWillMount).to.have.been.called;
+			expect(innerProto.componentWillMount).to.have.been.calledBefore(innerProto.componentDidMount);
+			expect(innerProto.componentDidMount).to.have.been.called;
 
 			reset();
 			setState({ show:false });
 			rerender();
 
-			expect(proto.componentWillUnmount).to.have.been.called;
-			expect(proto.componentWillUnmount).to.have.been.calledBefore(proto.componentDidUnmount);
-			expect(proto.componentDidUnmount).to.have.been.called;
+			expect(innerProto.componentWillUnmount).to.have.been.called;
+			expect(innerProto.componentWillUnmount).to.have.been.calledBefore(innerProto.componentDidUnmount);
+			expect(innerProto.componentDidUnmount).to.have.been.called;
 
 			reset();
 			setState({ show:true });
 			rerender();
 
-			expect(proto.componentWillMount).to.have.been.called;
-			expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
-			expect(proto.componentDidMount).to.have.been.called;
+			expect(innerProto.componentWillMount).to.have.been.called;
+			expect(innerProto.componentWillMount).to.have.been.calledBefore(innerProto.componentDidMount);
+			expect(innerProto.componentDidMount).to.have.been.called;
+		});
+
+		it('should be invoked for innermost components', () => {
+			render(<Outer />, scratch);
+			expect(innerMostProto.componentWillMount).to.have.been.called;
+			expect(innerMostProto.componentWillMount).to.have.been.calledBefore(innerProto.componentDidMount);
+			expect(innerMostProto.componentDidMount).to.have.been.called;
+
+			reset();
+			setState({ show:false });
+			rerender();
+
+			expect(innerMostProto.componentWillUnmount).to.have.been.called;
+			expect(innerMostProto.componentWillUnmount).to.have.been.calledBefore(innerMostProto.componentDidUnmount);
+			expect(innerMostProto.componentDidUnmount).to.have.been.called;
+
+			reset();
+			setState({ show:true });
+			rerender();
+
+			expect(innerMostProto.componentWillMount).to.have.been.called;
+			expect(innerMostProto.componentWillMount).to.have.been.calledBefore(innerMostProto.componentDidMount);
+			expect(innerMostProto.componentDidMount).to.have.been.called;
 		});
 
 		describe('when shouldComponentUpdate() returns false', () => {
