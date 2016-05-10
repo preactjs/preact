@@ -148,8 +148,6 @@ export default function renderToString(vnode, context, opts, inner) {
 
 	s += '>';
 
-	// if (pretty) s += '\n' + indentChar;
-
 	if (html) {
 		// if multiline, indent.
 		if (pretty && isLargeString(html)) {
@@ -166,11 +164,6 @@ export default function renderToString(vnode, context, opts, inner) {
 				let child = children[i];
 				if (!falsey(child)) {
 					let ret = renderToString(child, context, opts, true);
-					// if (pretty && isLargeString(ret)) {
-					// if (pretty && isLargeString(ret)) {
-					// 	ret = '\n' + indentChar + indent(ret);
-					// }
-					//s += ret;
 					if (!hasLarge && pretty && isLargeString(ret)) hasLarge = true;
 					pieces.push(ret);
 				}
