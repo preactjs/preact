@@ -331,20 +331,31 @@ describe('Components', () => {
 		});
 
 		it('should unmount children of high-order components without unmounting parent', () => {
-			let inner, counter=0;
+			let outer, inner, inner2, counter=0;
 
 			class Outer extends Component {
+				constructor(props, context) {
+					super(props, context);
+					outer = this;
+					this.state = {
+						child: this.props.child
+					};
+				}
 				componentWillUnmount(){}
 				componentDidUnmount(){}
 				componentWillMount(){}
 				componentDidMount(){}
-				render() {
-					return <Inner ref={c=>inner=c} />;
+				render(_, { child:C }) {
+					return <C />;
 				}
 			}
 			spyAll(Outer.prototype);
 
 			class Inner extends Component {
+				constructor(props, context) {
+					super(props, context);
+					inner = this;
+				}
 				componentWillUnmount(){}
 				componentDidUnmount(){}
 				componentWillMount(){}
@@ -355,37 +366,61 @@ describe('Components', () => {
 			}
 			spyAll(Inner.prototype);
 
-			render(<Outer />, scratch);
+			class Inner2 extends Component {
+				constructor(props, context) {
+					super(props, context);
+					inner2 = this;
+				}
+				componentWillUnmount(){}
+				componentDidUnmount(){}
+				componentWillMount(){}
+				componentDidMount(){}
+				render() {
+					return h('element'+(++counter));
+				}
+			}
+			spyAll(Inner2.prototype);
 
-			console.log(inner);
+			render(<Outer child={Inner} />, scratch);
+
+			console.log(outer);
 
 			// outer should only have been mounted once
 			expect(Outer.prototype.componentWillMount).to.have.been.calledOnce;
 			expect(Outer.prototype.componentDidMount).to.have.been.calledOnce;
 			expect(Outer.prototype.componentWillUnmount).not.to.have.been.called;
-			expect(Outer.prototype.componentWillUnmount).not.to.have.been.called;
+			expect(Outer.prototype.componentDidUnmount).not.to.have.been.called;
 
 			// inner should only have been mounted once
 			expect(Inner.prototype.componentWillMount).to.have.been.calledOnce;
 			expect(Inner.prototype.componentDidMount).to.have.been.calledOnce;
 			expect(Inner.prototype.componentWillUnmount).not.to.have.been.called;
-			expect(Inner.prototype.componentWillUnmount).not.to.have.been.called;
+			expect(Inner.prototype.componentDidUnmount).not.to.have.been.called;
 
-			inner.forceUpdate();
+			outer.setState({ child:Inner2 });
+			outer.forceUpdate();
 
-			expect(Inner.prototype.render).to.have.been.calledTwice;
+			expect(Inner2.prototype.render).to.have.been.calledOnce;
 
 			// outer should still only have been mounted once
 			expect(Outer.prototype.componentWillMount).to.have.been.calledOnce;
 			expect(Outer.prototype.componentDidMount).to.have.been.calledOnce;
 			expect(Outer.prototype.componentWillUnmount).not.to.have.been.called;
-			expect(Outer.prototype.componentWillUnmount).not.to.have.been.called;
+			expect(Outer.prototype.componentDidUnmount).not.to.have.been.called;
 
 			// inner should only have been mounted once
-			expect(Inner.prototype.componentWillMount).to.have.been.calledTwice;
-			expect(Inner.prototype.componentDidMount).to.have.been.calledTwice;
-			expect(Inner.prototype.componentWillUnmount).to.have.been.calledOnce;
-			expect(Inner.prototype.componentWillUnmount).to.have.been.calledOnce;
+			expect(Inner2.prototype.componentWillMount).to.have.been.calledOnce;
+			expect(Inner2.prototype.componentDidMount).to.have.been.calledOnce;
+			expect(Inner2.prototype.componentWillUnmount).not.to.have.been.called;
+			expect(Inner2.prototype.componentDidUnmount).not.to.have.been.called;
+
+			inner2.forceUpdate();
+
+			expect(Inner2.prototype.render).to.have.been.calledTwice;
+			expect(Inner2.prototype.componentWillMount).to.have.been.calledOnce;
+			expect(Inner2.prototype.componentDidMount).to.have.been.calledOnce;
+			expect(Inner2.prototype.componentWillUnmount, 'on grandchild re-render').not.to.have.been.called;
+			expect(Inner2.prototype.componentDidUnmount).not.to.have.been.called;
 		});
 	});
 });
