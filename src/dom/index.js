@@ -106,6 +106,9 @@ function setComplexAccessor(node, name, value) {
  */
 function eventProxy(e) {
 	let fn = this._listeners[normalizeEventName(e.type)];
+	if (fn && typeof(fn) !== "function"){
+		throw new Error(`Expecting ${e.type} event handler to be a function`);
+	}
 	if (fn) return fn.call(this, optionsHook('event', e) || e);
 }
 
