@@ -106,7 +106,7 @@ function setComplexAccessor(node, name, value) {
  */
 function eventProxy(e) {
 	let fn = this._listeners[normalizeEventName(e.type)];
-	if (fn) return fn.call(this, optionsHook('event', e) || e);
+	if (fn) return fn(optionsHook('event', e) || e);
 }
 
 
