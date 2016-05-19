@@ -109,8 +109,12 @@ export function renderComponent(component, opts) {
 		rendered = hook(component, 'render', props, state, context);
 
 		let childComponent = rendered && rendered.nodeName,
-			childContext = component.getChildContext ? component.getChildContext() : context,	// @TODO might want to clone() new context obj
 			toUnmount, base;
+
+		// context to pass to the child, can be updated via (grand-)parent component
+		if (component.getChildContext) {
+			context = extend(clone(context), component.getChildContext());
+		}
 
 		if (isFunction(childComponent) && childComponent.prototype.render) {
 			// set up high order component link
@@ -124,14 +128,14 @@ export function renderComponent(component, opts) {
 			let childProps = getNodeProps(rendered);
 
 			if (inst) {
-				setComponentProps(inst, childProps, SYNC_RENDER, childContext);
+				setComponentProps(inst, childProps, SYNC_RENDER, context);
 			}
 			else {
-				inst = createComponent(childComponent, childProps, childContext);
+				inst = createComponent(childComponent, childProps, context);
 				inst._parentComponent = component;
 				component._component = inst;
 				if (isUpdate) deepHook(inst, 'componentWillMount');
-				setComponentProps(inst, childProps, NO_RENDER, childContext);
+				setComponentProps(inst, childProps, NO_RENDER, context);
 				renderComponent(inst, DOM_RENDER);
 				if (isUpdate) deepHook(inst, 'componentDidMount');
 			}
@@ -149,7 +153,7 @@ export function renderComponent(component, opts) {
 
 			if (initialBase || opts===DOM_RENDER) {
 				if (cbase) cbase._component = null;
-				base = diff(cbase, rendered || EMPTY_BASE, childContext);
+				base = diff(cbase, rendered || EMPTY_BASE, context);
 			}
 		}
 
