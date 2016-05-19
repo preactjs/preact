@@ -113,9 +113,8 @@ function innerDiffNode(dom, vnode, context) {
 			// }
 
 			// attempt to find a node based on key matching
-			if (keyedLen) {
-				let attrs = vchild.attributes,
-					key = attrs && attrs.key;
+			if (keyedLen!==0 && vchild.attributes) {
+				let key = vchild.key;
 				if (!empty(key) && hasOwnProperty.call(keyed, key)) {
 					child = keyed[key];
 					keyed[key] = null;

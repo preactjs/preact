@@ -36,4 +36,10 @@ describe('keys', () => {
 
 		expect(scratch.innerHTML).to.equal('<div><div>2</div><li>b</li></div>');
 	});
+
+	it('should set VNode#key property', () => {
+		expect(<div />).to.have.property('key').that.is.empty;
+		expect(<div a="a" />).to.have.property('key').that.is.empty;
+		expect(<div key="1" />).to.have.property('key', '1');
+	});
 });
