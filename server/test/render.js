@@ -19,6 +19,15 @@ describe('render', () => {
 				expected = `<div></div>`;
 
 			expect(rendered).to.equal(expected);
+
+			expect(render(<div foo={0} />)).to.equal(`<div foo="0"></div>`)
+		});
+
+		it('should collapse collapsible attributes', () => {
+			let rendered = render(<div class="" style="" foo={true} bar />),
+				expected = `<div foo bar></div>`;
+
+			expect(rendered).to.equal(expected);
 		});
 
 		it('should omit functions', () => {
@@ -252,6 +261,24 @@ describe('render', () => {
 		it('should sort attributes lexicographically if enabled', () => {
 			let rendered = render(<div b1="b1" c="c" a="a" b="b" />, null, { sortAttributes:true });
 			expect(rendered).to.equal('<div a="a" b="b" b1="b1" c="c"></div>');
+		});
+	});
+
+	describe('xml:true', () => {
+		let renderXml = jsx => render(jsx, null, { xml:true });
+
+		it('should render end-tags', () => {
+			expect(renderXml(<div />)).to.equal(`<div />`);
+			expect(renderXml(<a />)).to.equal(`<a />`);
+			expect(renderXml(<a>b</a>)).to.equal(`<a>b</a>`);
+		});
+
+		it('should render boolean attributes with named values', () => {
+			expect(renderXml(<div foo bar />)).to.equal(`<div foo="foo" bar="bar" />`);
+		});
+
+		it('should exclude falsey attributes', () => {
+			expect(renderXml(<div foo={false} bar={0} />)).to.equal(`<div bar="0" />`);
 		});
 	});
 });

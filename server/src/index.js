@@ -140,7 +140,15 @@ export default function renderToString(vnode, context, opts, inner) {
 			if (name==='dangerouslySetInnerHTML') {
 				html = v && v.__html;
 			}
-			else if (!falsey(v) && typeof v!=='function') {
+			else if ((v || v===0) && typeof v!=='function') {
+				if (v===true) {
+					v = name;
+					// in non-xml mode, allow boolean attributes
+					if (!opts || !opts.xml) {
+						s += ' ' + name;
+						continue;
+					}
+				}
 				s += ` ${name}="${encodeEntities(v)}"`;
 			}
 		}
