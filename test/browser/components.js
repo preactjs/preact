@@ -331,7 +331,7 @@ describe('Components', () => {
 		});
 
 		it('should unmount children of high-order components without unmounting parent', () => {
-			let outer, inner, inner2, counter=0;
+			let outer, inner2, counter=0;
 
 			class Outer extends Component {
 				constructor(props, context) {
@@ -352,10 +352,6 @@ describe('Components', () => {
 			spyAll(Outer.prototype);
 
 			class Inner extends Component {
-				constructor(props, context) {
-					super(props, context);
-					inner = this;
-				}
 				componentWillUnmount(){}
 				componentDidUnmount(){}
 				componentWillMount(){}
@@ -382,8 +378,6 @@ describe('Components', () => {
 			spyAll(Inner2.prototype);
 
 			render(<Outer child={Inner} />, scratch);
-
-			console.log(outer);
 
 			// outer should only have been mounted once
 			expect(Outer.prototype.componentWillMount).to.have.been.calledOnce;
