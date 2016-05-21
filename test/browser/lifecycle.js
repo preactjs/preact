@@ -31,6 +31,7 @@ describe('Lifecycle methods', () => {
 			render(<ReceivePropsComponent />, scratch);
 			expect(ReceivePropsComponent.prototype.componentWillUpdate).not.to.have.been.called;
 		});
+
 		it('should be called when rerender with new props from parent', () => {
 			let doRender;
 			class Outer extends Component {
@@ -66,6 +67,7 @@ describe('Lifecycle methods', () => {
 			rerender();
 			expect(Inner.prototype.componentWillUpdate).to.have.been.called;
 		});
+
 		it('should be called on new state', () => {
 			let doRender;
 			class ReceivePropsComponent extends Component {
@@ -99,6 +101,7 @@ describe('Lifecycle methods', () => {
 			render(<ReceivePropsComponent />, scratch);
 			expect(ReceivePropsComponent.prototype.componentWillReceiveProps).not.to.have.been.called;
 		});
+
 		it('should be called when rerender with new props from parent', () => {
 			let doRender;
 			class Outer extends Component {
@@ -127,7 +130,7 @@ describe('Lifecycle methods', () => {
 			sinon.spy(Inner.prototype, 'componentWillReceiveProps');
 			sinon.spy(Outer.prototype, 'componentDidMount');
 
-      // Initial render
+			// Initial render
 			render(<Outer />, scratch);
 			expect(Inner.prototype.componentWillReceiveProps).not.to.have.been.called;
 
@@ -136,6 +139,7 @@ describe('Lifecycle methods', () => {
 			rerender();
 			expect(Inner.prototype.componentWillReceiveProps).to.have.been.called;
 		});
+
 		it('should be called in right execution order', () => {
 			let doRender;
 			class Outer extends Component {
