@@ -1,10 +1,10 @@
 import { ATTR_KEY } from '../constants';
-import { memoize } from '../util';
 import { ensureNodeData, getNodeType, getRawNodeAttributes, removeNode } from '.';
+import { createObject, memoize } from '../util';
 
 /** DOM node pool, keyed on nodeName. */
 
-let nodes = {};
+let nodes = createObject();
 
 let normalizeName = memoize(name => name.toUpperCase());
 

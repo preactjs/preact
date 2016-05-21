@@ -1,6 +1,17 @@
 import { NON_DIMENSION_PROPS } from './constants';
 
 
+let createObject = () => ({});
+
+try {
+	function Obj() {}  // eslint-disable-line
+	Obj.prototype = Object.create(null);
+	createObject = () => new Obj;
+} catch (e) {}
+
+export { createObject };
+
+
 /** Copy own-properties from `props` onto `obj`.
  *	@returns obj
  *	@private
@@ -26,7 +37,9 @@ export function clone(obj) {
  *	@private
  */
 export function memoize(fn, mem) {
-	mem = mem || {};
+	mem = mem || createObject();
+	// @TODO: if createObject is able to return objects without a prototype, we should use `in`:
+	// return k => k in mem ? mem[k] : (mem[k] = fn(k));
 	return k => hasOwnProperty.call(mem, k) ? mem[k] : (mem[k] = fn(k));
 }
 

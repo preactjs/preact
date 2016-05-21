@@ -1,10 +1,10 @@
 import { ATTR_KEY, EMPTY } from '../constants';
-import { hasOwnProperty, memoize, falsey } from '../util';
+import { createObject, memoize, falsey, isFunction } from '../util';
 import { optionsHook } from '../hooks';
 
 
 export function ensureNodeData(node) {
-	return node[ATTR_KEY] || (node[ATTR_KEY] = {});
+	return node[ATTR_KEY] || (node[ATTR_KEY] = createObject());
 }
 
 

@@ -1,5 +1,5 @@
 import { hook } from './hooks';
-import { extend, clone, isFunction } from './util';
+import { createObject, extend, clone, isFunction } from './util';
 import { createLinkedState } from './linked-state';
 import { triggerComponentRender, renderComponent } from './vdom/component';
 
@@ -21,11 +21,11 @@ export default function Component(props, context) {
 	/** @public */
 	this.prevState = this.prevProps = this.prevContext = this.base = this.nextBase = this._parentComponent = this._component = this.__ref = this.__key = this._linkedStates = this._renderCallbacks = null;
 	/** @public */
-	this.context = context || {};
+	this.context = context || createObject();
 	/** @type {object} */
 	this.props = props;
 	/** @type {object} */
-	this.state = hook(this, 'getInitialState') || {};
+	this.state = hook(this, 'getInitialState') || createObject();
 }
 
 
@@ -64,7 +64,7 @@ extend(Component.prototype, {
 	 *		<button onClick={ this.linkState('touch.coords', 'touches.0') }>Tap</button
 	 */
 	linkState(key, eventPath) {
-		let c = this._linkedStates || (this._linkedStates = {}),
+		let c = this._linkedStates || (this._linkedStates = createObject()),
 			cacheKey = key + '|' + (eventPath || '');
 		return c[cacheKey] || (c[cacheKey] = createLinkedState(this, key, eventPath));
 	},

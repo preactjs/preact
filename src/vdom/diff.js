@@ -1,5 +1,5 @@
-import { hasOwnProperty, toArray, empty, toLowerCase, isString, isFunction } from '../util';
 import { ATTR_KEY, UNDEFINED_ELEMENT, EMPTY } from '../constants';
+import { createObject, hasOwnProperty, toArray, empty, toLowerCase, isString, isFunction } from '../util';
 import { hook, deepHook } from '../hooks';
 import { isSameNodeType } from '.';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
@@ -89,7 +89,7 @@ function innerDiffNode(dom, vnode, context) {
 			let child = dom.childNodes[i],
 				key = child._component ? child._component.__key : getAccessor(child, 'key');
 			if (!empty(key)) {
-				if (!keyed) keyed = {};
+				if (!keyed) keyed = createObject();
 				keyed[key] = child;
 				keyedLen++;
 			}

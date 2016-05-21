@@ -1,8 +1,10 @@
+import { createObject } from '../util';
+
 /** Retains a pool of Components for re-use, keyed on component name.
  *	Note: since component names are not unique or even necessarily available, these are primarily a form of sharding.
  *	@private
  */
-const components = {};
+const components = createObject();
 
 
 export function collectComponent(component) {
