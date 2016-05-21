@@ -152,7 +152,7 @@ export function renderComponent(component, opts) {
 
 			if (initialBase || opts===DOM_RENDER) {
 				if (cbase) cbase._component = null;
-				base = diff(cbase, rendered || EMPTY_BASE, context);
+				base = diff(cbase, rendered || EMPTY_BASE, context, !isUpdate);
 			}
 		}
 

@@ -30,7 +30,7 @@ function buildTextNode(dom, str) {
  *	@returns {Element} dom			The created/mutated element
  *	@private
  */
-export default function diff(dom, vnode, context) {
+export default function diff(dom, vnode, context, mountAll) {
 	let originalAttributes = vnode.attributes;
 
 	while (isFunctionalComponent(vnode)) {
@@ -137,20 +137,23 @@ function innerDiffNode(dom, vnode, context) {
 			}
 
 			// morph the matched/found/created DOM child to match vchild (deep)
-			child = diff(child, vchild, context);
+			child = diff(child, vchild, context, mountAll);
 
-			if (dom.childNodes[i]!==child) {
-				let c = child.parentNode!==dom && child._component,
-					next = dom.childNodes[i+1];
-				if (c) deepHook(c, 'componentWillMount');
+			let c = (mountAll || child.parentNode!==dom) && child._component;
+
+			if (c) deepHook(c, 'componentWillMount');
+
+			if (originalChildren[i]!==child) {
+				let next = originalChildren[i+1];
 				if (next) {
 					dom.insertBefore(child, next);
 				}
 				else {
 					dom.appendChild(child);
 				}
-				if (c) deepHook(c, 'componentDidMount');
 			}
+
+			if (c) deepHook(c, 'componentDidMount');
 		}
 	}
 
