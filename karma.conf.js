@@ -1,7 +1,8 @@
 /*eslint-env node */
-/*eslint no-var: 0 */
+/*eslint no-var:0, object-shorthand:0 */
 
-var coverage = String(process.env.COVERAGE)!=='false';
+var coverage = String(process.env.COVERAGE)!=='false',
+	webpack = require('webpack');
 
 module.exports = function(config) {
 	config.set({
@@ -57,7 +58,12 @@ module.exports = function(config) {
 			},
 			resolve: {
 				modulesDirectories: [__dirname, 'node_modules']
-			}
+			},
+			plugins: [
+				new webpack.DefinePlugin({
+					coverage: coverage
+				})
+			]
 		},
 
 		webpackMiddleware: {

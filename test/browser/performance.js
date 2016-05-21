@@ -1,12 +1,18 @@
 import { h, render } from '../../src/preact';
 /** @jsx h */
 
+/*global coverage*/
 /*eslint no-console:0*/
+
+const MULTIPLIER = coverage ? 5 : 1;
 
 describe('performance', () => {
 	let scratch;
 
 	before( () => {
+		if (coverage) {
+			console.warn('WARNING: Code coverage is enabled, which dramatically reduces performance. Do not pay attention to these numbers.');
+		}
 		scratch = document.createElement('div');
 		(document.body || document.documentElement).appendChild(scratch);
 	});
@@ -79,7 +85,7 @@ describe('performance', () => {
 		console.log(`render(): ${(renderCount*4)|0}/s (${per|0} ticks)`);
 
 		// expect(renderCount / noopCount).to.be.above(0.0001);
-		expect(per).to.be.below(350);
+		expect(per).to.be.below(350 * MULTIPLIER);
 	});
 
 	it('should rerender repeated trees fast', () => {
@@ -190,6 +196,6 @@ describe('performance', () => {
 
 		console.log(`render(): ${(renderCount*4)|0}/s (${per|0} ticks)`);
 
-		expect(per).to.be.below(2000);
+		expect(per).to.be.below(2000 * MULTIPLIER);
 	});
 });
