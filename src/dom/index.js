@@ -113,7 +113,7 @@ function eventProxy(e) {
  *	@function
  *	@private
  */
-let normalizeEventName = memoize(t => t.replace(/^on/i,'').toLowerCase());
+let normalizeEventName = memoize( t => toLowerCase(t.replace(/^on/i,'')) );
 
 
 
