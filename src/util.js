@@ -67,11 +67,15 @@ export function toArray(obj) {
 
 
 /** @private is the given object a Function? */
-export const isFunction = obj => 'function'===typeof obj;
+export function isFunction(obj) {
+	return 'function'===typeof obj;
+}
 
 
 /** @private is the given object a String? */
-export const isString = obj => 'string'===typeof obj;
+export function isString(obj) {
+	return 'string'===typeof obj;
+}
 
 
 /** @private Safe reference to builtin hasOwnProperty */
@@ -81,11 +85,15 @@ export const hasOwnProperty = {}.hasOwnProperty;
 /** Check if a value is `null` or `undefined`.
  *	@private
  */
-export const empty = x => x==null;
+export function empty(x) {
+	return x===undefined || x===null;
+}
 
 
 /** Check if a value is `null`, `undefined`, or explicitly `false`. */
-export const falsey = value => value===false || value==null;
+export function falsey(value) {
+	return value===false || empty(value);
+}
 
 
 /** Convert a hashmap of styles to CSSText
@@ -131,7 +139,7 @@ export function hashToClassName(c) {
  *	@private
  *	@function
  */
-export const jsToCss = memoize( s => s.replace(/([A-Z])/g,'-$1').toLowerCase() );
+export const jsToCss = memoize( s => toLowerCase(s.replace(/([A-Z])/g,'-$1')) );
 
 
 /** Just a memoized String.prototype.toLowerCase */
