@@ -131,4 +131,40 @@ describe('context', () => {
 		// make sure render() could make use of context.a
 		expect(Inner.prototype.render).to.have.returned(sinon.match({ children:['a'] }));
 	});
+
+	it('should preserve existing context properties when creating child contexts', () => {
+		let outerContext = { outer:true },
+			innerContext = { inner:true };
+		class Outer extends Component {
+			getChildContext() {
+				return { outerContext };
+			}
+			render() {
+				return <div><Inner /></div>;
+			}
+		}
+
+		class Inner extends Component {
+			getChildContext() {
+				return { innerContext };
+			}
+			render() {
+				return <InnerMost />;
+			}
+		}
+
+		class InnerMost extends Component {
+			render() {
+				return <strong>test</strong>;
+			}
+		}
+
+		sinon.spy(Inner.prototype, 'render');
+		sinon.spy(InnerMost.prototype, 'render');
+
+		render(<Outer />, scratch);
+
+		expect(Inner.prototype.render).to.have.been.calledWith({}, {}, { outerContext });
+		expect(InnerMost.prototype.render).to.have.been.calledWith({}, {}, { outerContext, innerContext });
+	});
 });

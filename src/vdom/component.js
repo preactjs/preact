@@ -1,6 +1,6 @@
 import { SYNC_RENDER, DOM_RENDER, NO_RENDER, EMPTY_BASE } from '../constants';
 import options from '../options';
-import { isFunction } from '../util';
+import { isFunction, clone, extend } from '../util';
 import { hook, deepHook } from '../hooks';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from '.';
@@ -30,22 +30,21 @@ export function triggerComponentRender(component) {
  *	@param {boolean} [opts.render=true]			If `false`, no render will be triggered.
  */
 export function setComponentProps(component, props, opts, context) {
-	let d = component._disableRendering;
+	let d = component._disableRendering===true;
+	component._disableRendering = true;
 
 	component.__ref = props.ref;
 	component.__key = props.key;
-	delete props.ref;
-	delete props.key;
+	if (props.ref) delete props.ref;
+	if (props.key) delete props.key;
 
-	component._disableRendering = true;
-
-	if (context) {
-		if (!component.prevContext) component.prevContext = component.context;
-		component.context = context;
+	if (component.base!==undefined && component.base!==null) {
+		hook(component, 'componentWillReceiveProps', props, context);
 	}
 
-	if (component.base) {
-		hook(component, 'componentWillReceiveProps', props, component.context);
+	if (context && context!==component.context) {
+		if (!component.prevContext) component.prevContext = component.context;
+		component.context = context;
 	}
 
 	if (!component.prevProps) component.prevProps = component.props;
@@ -53,8 +52,8 @@ export function setComponentProps(component, props, opts, context) {
 
 	component._disableRendering = d;
 
-	if (!opts || opts.render!==false) {
-		if ((opts && opts.renderSync) || options.syncComponentUpdates!==false) {
+	if (opts!==NO_RENDER) {
+		if (opts===SYNC_RENDER || options.syncComponentUpdates!==false) {
 			renderComponent(component);
 		}
 		else {
@@ -109,8 +108,12 @@ export function renderComponent(component, opts) {
 		rendered = hook(component, 'render', props, state, context);
 
 		let childComponent = rendered && rendered.nodeName,
-			childContext = component.getChildContext ? component.getChildContext() : context,	// @TODO might want to clone() new context obj
 			toUnmount, base;
+
+		// context to pass to the child, can be updated via (grand-)parent component
+		if (component.getChildContext) {
+			context = extend(clone(context), component.getChildContext());
+		}
 
 		if (isFunction(childComponent) && childComponent.prototype.render) {
 			// set up high order component link
@@ -124,14 +127,14 @@ export function renderComponent(component, opts) {
 			let childProps = getNodeProps(rendered);
 
 			if (inst) {
-				setComponentProps(inst, childProps, SYNC_RENDER, childContext);
+				setComponentProps(inst, childProps, SYNC_RENDER, context);
 			}
 			else {
-				inst = createComponent(childComponent, childProps, childContext);
+				inst = createComponent(childComponent, childProps, context);
 				inst._parentComponent = component;
 				component._component = inst;
 				if (isUpdate) deepHook(inst, 'componentWillMount');
-				setComponentProps(inst, childProps, NO_RENDER, childContext);
+				setComponentProps(inst, childProps, NO_RENDER, context);
 				renderComponent(inst, DOM_RENDER);
 				if (isUpdate) deepHook(inst, 'componentDidMount');
 			}
@@ -147,8 +150,9 @@ export function renderComponent(component, opts) {
 				cbase = component._component = null;
 			}
 
-			if (initialBase || (opts && opts.build)) {
-				base = diff(cbase, rendered || EMPTY_BASE, childContext);
+			if (initialBase || opts===DOM_RENDER) {
+				if (cbase) cbase._component = null;
+				base = diff(cbase, rendered || EMPTY_BASE, context, !isUpdate);
 			}
 		}
 

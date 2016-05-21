@@ -8,4 +8,7 @@ export default function VNode(nodeName, attributes, children) {
 
 	/** @type {array<VNode>|undefined} */
 	this.children = children;
+
+	/** Reference to the given key. */
+	this.key = attributes && attributes.key;
 }

@@ -1,11 +1,14 @@
 /*eslint-env node */
 /*eslint no-var: 0 */
 
+var coverage = String(process.env.COVERAGE)!=='false';
+
 module.exports = function(config) {
 	config.set({
 		frameworks: ['mocha', 'chai-sinon'],
 
-		reporters: ['mocha', 'coverage'],
+		reporters: ['mocha'].concat(coverage ? 'coverage' : []),
+
 		coverageReporter: {
 			reporters: [
 				{
@@ -46,13 +49,11 @@ module.exports = function(config) {
 					}
 				],
 				/* Only Instrument our source files for coverage */
-				loaders: [
-					{
-						test: /\.jsx?$/,
-						loader: 'isparta',
-						include: /src/
-					}
-				]
+				loaders: [].concat( coverage ? {
+					test: /\.jsx?$/,
+					loader: 'isparta',
+					include: /src/
+				} : [])
 			},
 			resolve: {
 				modulesDirectories: [__dirname, 'node_modules']

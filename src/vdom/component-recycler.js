@@ -1,8 +1,10 @@
+import { createObject } from '../util';
+
 /** Retains a pool of Components for re-use, keyed on component name.
  *	Note: since component names are not unique or even necessarily available, these are primarily a form of sharding.
  *	@private
  */
-const components = {};
+const components = createObject();
 
 
 export function collectComponent(component) {
@@ -14,16 +16,15 @@ export function collectComponent(component) {
 
 
 export function createComponent(Ctor, props, context) {
-	let list = components[Ctor.name],
-		len = list && list.length,
-		inst = new Ctor(props, context),
-		c;
-	for (let i=0; i<len; i++) {
-		c = list[i];
-		if (c.constructor===Ctor) {
-			list.splice(i, 1);
-			inst.nextBase = c.base;
-			break;
+	let inst = new Ctor(props, context),
+		list = components[Ctor.name];
+	if (list) {
+		for (let i=0; i<list.length; i++) {
+			if (list[i].constructor===Ctor) {
+				inst.nextBase = list[i].base;
+				list.splice(i, 1);
+				break;
+			}
 		}
 	}
 	return inst;

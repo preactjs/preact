@@ -1,15 +1,22 @@
-import { ATTR_KEY, EMPTY } from '../constants';
-import { hasOwnProperty, memoize, falsey } from '../util';
+import { ATTR_KEY } from '../constants';
+import { createObject, toLowerCase, memoize, falsey, isFunction } from '../util';
 import { optionsHook } from '../hooks';
 
 
-export function ensureNodeData(node) {
-	return node[ATTR_KEY] || (node[ATTR_KEY] = {});
+export function ensureNodeData(node, data) {
+	return getNodeData(node) || (node[ATTR_KEY] = (data || createObject()));
+}
+
+
+export function getNodeData(node) {
+	if (node[ATTR_KEY]!==undefined) return node[ATTR_KEY];
 }
 
 
 export function getNodeType(node) {
-	return node.nodeType;
+	if (node instanceof Text) return 3;
+	if (node instanceof Element) return 1;
+	return 0;
 }
 
 
@@ -36,13 +43,12 @@ export function removeNode(node) {
 /** Retrieve the value of a rendered attribute
  *	@private
  */
-export function getAccessor(node, name, value, cache) {
-	if (name!=='type' && name!=='style' && name in node) return node[name];
-	let attrs = node[ATTR_KEY];
-	if (cache!==false && attrs && hasOwnProperty.call(attrs, name)) return attrs[name];
-	if (name==='class') return node.className;
-	if (name==='style') return node.style.cssText;
-	return value;
+export function getAccessor(node, name) {
+	if (name!=='type' && name!=='style' && name!=='key' && name in node) return node[name];
+	let attrs = getNodeData(node);
+	if (attrs && (name in attrs)) return attrs[name];
+	if (name==='class') return node.className || '';
+	if (name==='style') return node.style.cssText || '';
 }
 
 
@@ -65,39 +71,31 @@ export function setAccessor(node, name, value) {
 	else if (name==='dangerouslySetInnerHTML') {
 		if (value && value.__html) node.innerHTML = value.__html;
 	}
-	else if (name==='key' || (name in node && name!=='type')) {
-		node[name] = value;
-		if (falsey(value)) node.removeAttribute(name);
-	}
-	else {
-		setComplexAccessor(node, name, value);
+	else if (name!=='key') {
+		// let valueIsFalsey = falsey(value);
+
+		if (name!=='type' && name in node) {
+			node[name] = value;
+			if (falsey(value)) node.removeAttribute(name);
+		}
+		else if (name.substring(0, 2)==='on') {
+			let type = normalizeEventName(name),
+				l = node._listeners || (node._listeners = createObject());
+			if (!l[type]) node.addEventListener(type, eventProxy);
+			else if (!value) node.removeEventListener(type, eventProxy);
+			l[type] = value;
+		}
+		else if (falsey(value)) {
+			node.removeAttribute(name);
+		}
+		else if (typeof value!=='object' && !isFunction(value)) {
+			node.setAttribute(name, value);
+		}
 	}
 
 	ensureNodeData(node)[name] = value;
 }
 
-
-/** For props without explicit behavior, apply to a Node as event handlers or attributes.
- *	@private
- */
-function setComplexAccessor(node, name, value) {
-	if (name.substring(0,2)==='on') {
-		let type = normalizeEventName(name),
-			l = node._listeners || (node._listeners = {}),
-			fn = !l[type] ? 'add' : !value ? 'remove' : null;
-		if (fn) node[fn+'EventListener'](type, eventProxy);
-		l[type] = value;
-		return;
-	}
-
-	let type = typeof value;
-	if (falsey(value)) {
-		node.removeAttribute(name);
-	}
-	else if (type!=='function' && type!=='object') {
-		node.setAttribute(name, value);
-	}
-}
 
 
 
@@ -115,40 +113,21 @@ function eventProxy(e) {
  *	@function
  *	@private
  */
-let normalizeEventName = memoize(t => t.replace(/^on/i,'').toLowerCase());
+let normalizeEventName = memoize( t => toLowerCase(t.replace(/^on/i,'')) );
 
 
 
-/** Get a hashmap of node properties, preferring preact's cached property values over the DOM's
- *	@private
- */
-export function getNodeAttributes(node) {
-	return node[ATTR_KEY] || getRawNodeAttributes(node) || EMPTY;
-	// let list = getRawNodeAttributes(node),
-	// 	l = node[ATTR_KEY];
-	// return l && list ? extend(list, l) : (l || list || EMPTY);
-}
 
 
-/** Get a node's attributes as a hashmap, regardless of type.
+/** Get a node's attributes as a hashmap.
  *	@private
  */
 export function getRawNodeAttributes(node) {
-	let list = node.attributes;
-	if (!list || !list.getNamedItem) return list;
-	return getAttributesAsObject(list);
-}
-
-
-/** Convert a DOM `.attributes` NamedNodeMap to a hashmap.
- *	@private
- */
-function getAttributesAsObject(list) {
-	let attrs;
-	for (let i=list.length; i--; ) {
-		let item = list[i];
-		if (!attrs) attrs = {};
-		attrs[item.name] = item.value;
-	}
+	let list = node.attributes,
+		attrs = createObject(),
+		i = list.length;
+	while (i--) attrs[list[i].name] = list[i].value;
 	return attrs;
 }
+
+

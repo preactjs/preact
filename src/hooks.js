@@ -2,8 +2,8 @@ import options from './options';
 
 
 /** Invoke a hook on the `options` export. */
-export function optionsHook(name, a, b) {
-	return hook(options, name, a, b);
+export function optionsHook(name, a) {
+	return hook(options, name, a);
 }
 
 

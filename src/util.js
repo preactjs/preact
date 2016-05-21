@@ -1,6 +1,17 @@
 import { NON_DIMENSION_PROPS } from './constants';
 
 
+let createObject = () => ({});
+
+try {
+	function Obj() {}  // eslint-disable-line
+	Obj.prototype = Object.create(null);
+	createObject = () => new Obj;
+} catch (e) {}
+
+export { createObject };
+
+
 /** Copy own-properties from `props` onto `obj`.
  *	@returns obj
  *	@private
@@ -26,7 +37,9 @@ export function clone(obj) {
  *	@private
  */
 export function memoize(fn, mem) {
-	mem = mem || {};
+	mem = mem || createObject();
+	// @TODO: if createObject is able to return objects without a prototype, we should use `in`:
+	// return k => k in mem ? mem[k] : (mem[k] = fn(k));
 	return k => hasOwnProperty.call(mem, k) ? mem[k] : (mem[k] = fn(k));
 }
 
@@ -54,11 +67,15 @@ export function toArray(obj) {
 
 
 /** @private is the given object a Function? */
-export const isFunction = obj => 'function'===typeof obj;
+export function isFunction(obj) {
+	return 'function'===typeof obj;
+}
 
 
 /** @private is the given object a String? */
-export const isString = obj => 'string'===typeof obj;
+export function isString(obj) {
+	return 'string'===typeof obj;
+}
 
 
 /** @private Safe reference to builtin hasOwnProperty */
@@ -68,11 +85,15 @@ export const hasOwnProperty = {}.hasOwnProperty;
 /** Check if a value is `null` or `undefined`.
  *	@private
  */
-export const empty = x => x==null;
+export function empty(x) {
+	return x===undefined || x===null;
+}
 
 
 /** Check if a value is `null`, `undefined`, or explicitly `false`. */
-export const falsey = value => value===false || value==null;
+export function falsey(value) {
+	return value===false || empty(value);
+}
 
 
 /** Convert a hashmap of styles to CSSText
@@ -80,6 +101,7 @@ export const falsey = value => value===false || value==null;
  */
 export function styleObjToCss(s) {
 	let str = '';
+	/* eslint guard-for-in:0 */
 	for (let prop in s) {
 		let val = s[prop];
 		if (!empty(val)) {
@@ -118,7 +140,7 @@ export function hashToClassName(c) {
  *	@private
  *	@function
  */
-export const jsToCss = memoize( s => s.replace(/([A-Z])/g,'-$1').toLowerCase() );
+export const jsToCss = memoize( s => toLowerCase(s.replace(/([A-Z])/g,'-$1')) );
 
 
 /** Just a memoized String.prototype.toLowerCase */
