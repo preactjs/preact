@@ -79,7 +79,31 @@ describe('render()', () => {
 			<div anull={null} aundefined={undefined} afalse={false} a0={0} anan={NaN} />
 		), scratch, root);
 
-		expect(scratch).to.have.property('innerHTML', '<div a0="0" anan="NaN"></div>');
+		expect(scratch, 'from previous truthy values').to.have.property('innerHTML', '<div a0="0" anan="NaN"></div>');
+
+		scratch.innerHTML = '';
+
+		root = render((
+			<div anull={null} aundefined={undefined} afalse={false} a0={0} anan={NaN} />
+		), scratch);
+
+		expect(scratch, 'initial render').to.have.property('innerHTML', '<div a0="0" anan="NaN"></div>');
+	});
+
+	it('should clear falsey input values', () => {
+		let root = render((
+			<div>
+				<input value={0} />
+				<input value={false} />
+				<input value={null} />
+				<input value={undefined} />
+			</div>
+		), scratch);
+
+		expect(root.children[0]).to.have.property('value', '0');
+		expect(root.children[1]).to.have.property('value', 'false');
+		expect(root.children[2]).to.have.property('value', '');
+		expect(root.children[3]).to.have.property('value', '');
 	});
 
 	it('should clear falsey DOM properties', () => {
