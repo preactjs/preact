@@ -1,6 +1,6 @@
 import VNode from './vnode';
 import { optionsHook } from './hooks';
-import { falsey } from './util';
+import { falsey, isString } from './util';
 
 
 const SHARED_TEMP_ARRAY = [];
@@ -14,7 +14,7 @@ const SHARED_TEMP_ARRAY = [];
  *  import { render, h } from 'preact';
  *  render(<span>foo</span>, document.body);
  */
-export default function h(nodeName, attributes) {
+export default function h(nodeName, attributes, firstChild) {
 	let len = arguments.length,
 		attributeChildren = attributes && attributes.children,
 		children, arr, lastSimple;
@@ -29,28 +29,36 @@ export default function h(nodeName, attributes) {
 		if (len<3) return h(nodeName, attributes, attributeChildren);
 	}
 
-	for (let i=2; i<len; i++) {
-		let p = arguments[i];
-		if (falsey(p)) continue;
-		if (!children) children = [];
-		if (p.join) {
-			arr = p;
+	let type = typeof firstChild;
+	if (len===3 && type!=='object' && type!=='function') {
+		if (!falsey(firstChild)) {
+			children = [String(firstChild)];
 		}
-		else {
-			arr = SHARED_TEMP_ARRAY;
-			arr[0] = p;
-		}
-		for (let j=0; j<arr.length; j++) {
-			let child = arr[j],
-				simple = !falsey(child) && !(child instanceof VNode);
-			if (simple) child = String(child);
-			if (simple && lastSimple) {
-				children[children.length-1] += child;
+	}
+	else if (len>2) {
+		children = [];
+		for (let i=2; i<len; i++) {
+			let p = arguments[i];
+			if (falsey(p)) continue;
+			if (p.join) {
+				arr = p;
 			}
-			else if (!falsey(child)) {
-				children.push(child);
+			else {
+				arr = SHARED_TEMP_ARRAY;
+				arr[0] = p;
 			}
-			lastSimple = simple;
+			for (let j=0; j<arr.length; j++) {
+				let child = arr[j],
+					simple = !falsey(child) && !(child instanceof VNode);
+				if (simple && !isString(child)) child = String(child);
+				if (simple && lastSimple) {
+					children[children.length-1] += child;
+				}
+				else if (!falsey(child)) {
+					children.push(child);
+				}
+				lastSimple = simple;
+			}
 		}
 	}
 
