@@ -1,6 +1,6 @@
 import { SYNC_RENDER, DOM_RENDER, NO_RENDER, EMPTY_BASE } from '../constants';
 import options from '../options';
-import { isFunction } from '../util';
+import { isFunction, clone, extend } from '../util';
 import { hook, deepHook } from '../hooks';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from '.';
@@ -30,22 +30,21 @@ export function triggerComponentRender(component) {
  *	@param {boolean} [opts.render=true]			If `false`, no render will be triggered.
  */
 export function setComponentProps(component, props, opts, context) {
-	let d = component._disableRendering;
+	let d = component._disableRendering===true;
+	component._disableRendering = true;
 
 	component.__ref = props.ref;
 	component.__key = props.key;
-	delete props.ref;
-	delete props.key;
+	if (props.ref) delete props.ref;
+	if (props.key) delete props.key;
 
-	component._disableRendering = true;
-
-	if (context) {
-		if (!component.prevContext) component.prevContext = component.context;
-		component.context = context;
+	if (component.base!==undefined && component.base!==null) {
+		hook(component, 'componentWillReceiveProps', props, context);
 	}
 
-	if (component.base) {
-		hook(component, 'componentWillReceiveProps', props, component.context);
+	if (context && context!==component.context) {
+		if (!component.prevContext) component.prevContext = component.context;
+		component.context = context;
 	}
 
 	if (!component.prevProps) component.prevProps = component.props;
