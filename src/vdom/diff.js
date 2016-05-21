@@ -1,27 +1,14 @@
-import { ATTR_KEY, UNDEFINED_ELEMENT, EMPTY } from '../constants';
-import { createObject, hasOwnProperty, toArray, empty, toLowerCase, isString, isFunction } from '../util';
+import { ATTR_KEY } from '../constants';
+import { createObject, hasOwnProperty, toArray, empty, isString, isFunction } from '../util';
 import { hook, deepHook } from '../hooks';
-import { isSameNodeType } from '.';
+import { isSameNodeType, isNamedNode } from '.';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
-import { unmountComponent } from './component';
 import { removeNode, appendChildren, setAccessor, getNodeData, getRawNodeAttributes, getNodeType } from '../dom';
 import { createNode, collectNode } from '../dom/recycler';
+import { unmountComponent } from './component';
 
 
-function buildTextNode(dom, str) {
-	if (dom) {
-		let type = getNodeType(dom);
-		if (type===3) {
-			if (dom.nodeValue!==str) {
-				dom.nodeValue = str;
-			}
-			return dom;
-		}
-		if (type===1) collectNode(dom);
-	}
-	return document.createTextNode(str);
-}
 
 
 /** Apply differences in a given vnode (and it's deep children) to a real DOM Node.
@@ -42,22 +29,29 @@ export default function diff(dom, vnode, context, mountAll) {
 	}
 
 	if (isString(vnode)) {
-		return buildTextNode(dom, vnode);
+		if (dom) {
+			if (getNodeType(dom)===3) {
+				if (dom.nodeValue!==vnode) {
+					dom.nodeValue = vnode;
+				}
+				return dom;
+			}
+			collectNode(dom);
+		}
+		return document.createTextNode(vnode);
 	}
 
 	// return diffNode(dom, vnode, context);
 // }
-
-
-/** Morph a DOM node to look like the given VNode. Creates DOM if it doesn't exist. */
-// function diffNode(dom, vnode, context) {
 	let out = dom,
-		nodeName = vnode.nodeName || UNDEFINED_ELEMENT;
+		nodeName = String(vnode.nodeName);
+
+
 
 	if (!dom) {
 		out = createNode(nodeName);
 	}
-	else if (toLowerCase(dom.nodeName)!==nodeName) {
+	else if (!isNamedNode(dom, nodeName)) {
 		out = createNode(nodeName);
 		// move children into the replacement node
 		appendChildren(out, toArray(dom.childNodes));
@@ -65,8 +59,7 @@ export default function diff(dom, vnode, context, mountAll) {
 		recollectNodeTree(dom);
 	}
 
-	innerDiffNode(out, vnode, context);
-	diffAttributes(out, vnode);
+	diffNode(out, vnode, context, mountAll);
 
 	if (originalAttributes && originalAttributes.ref) {
 		(out[ATTR_KEY].ref = originalAttributes.ref)(out);
@@ -76,19 +69,45 @@ export default function diff(dom, vnode, context, mountAll) {
 }
 
 
+/** Morph a DOM node to look like the given VNode. Creates DOM if it doesn't exist. */
+function diffNode(dom, vnode, context, mountAll) {
+
+	let vchildren = vnode.children,
+		firstChild = dom.firstChild;
+	if (vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && firstChild instanceof Text && dom.childNodes.length===1) {
+		firstChild.nodeValue = vchildren[0];
+	}
+	else if (vchildren || firstChild) {
+		innerDiffNode(dom, vchildren, context, mountAll);
+	}
+
+	diffAttributes(dom, vnode);
+}
+
+
+function getKey(child) {
+	let data = getNodeData(child);
+	if (data && !empty(data.key)) return data.key;
+}
+
+
 /** Apply child and attribute changes between a VNode and a DOM Node to the DOM. */
-function innerDiffNode(dom, vnode, context) {
-	let children,
+function innerDiffNode(dom, vchildren, context, mountAll) {
+	let originalChildren = dom.childNodes,
+		children,
 		keyed,
 		keyedLen = 0,
-		len = dom.childNodes.length,
+		min = 0,
+		vlen = vchildren && vchildren.length,
+		len = originalChildren.length,
 		childrenLen = 0;
+
 	if (len) {
 		children = [];
 		for (let i=0; i<len; i++) {
-			let child = dom.childNodes[i],
-				key = child._component ? child._component.__key : getAccessor(child, 'key');
-			if (!empty(key)) {
+			let child = originalChildren[i],
+				key = child._component ? child._component.__key : getKey(child);
+			if (key || key===0) {
 				if (!keyed) keyed = createObject();
 				keyed[key] = child;
 				keyedLen++;
@@ -99,10 +118,6 @@ function innerDiffNode(dom, vnode, context) {
 		}
 	}
 
-
-	let vchildren = vnode.children,
-		vlen = vchildren && vchildren.length,
-		min = 0;
 	if (vlen) {
 		for (let i=0; i<vlen; i++) {
 			let vchild = vchildren[i],
@@ -216,25 +231,22 @@ export function recollectNodeTree(node, unmountOnly) {
 
 /** Apply differences in attributes from a VNode to the given DOM Node. */
 function diffAttributes(dom, vnode) {
-		attrs = vnode.attributes || EMPTY,
-		name, value;
 	let old = getNodeData(dom) || getRawNodeAttributes(dom),
+		attrs = vnode.attributes;
 
-	// removed
-	for (name in old) {
-		if (empty(attrs[name])) {
+	// removeAttributes(dom, old, attrs || EMPTY);
+	for (let name in old) {
+		if (!attrs || !hasOwnProperty.call(attrs, name)) {
 			setAccessor(dom, name, null);
 		}
 	}
 
 	// new & updated
-	if (attrs!==EMPTY) {
-		for (name in attrs) {
-			if (hasOwnProperty.call(attrs, name)) {
-				value = attrs[name];
-				if (!empty(value) && value!=getAccessor(dom, name)) {
-					setAccessor(dom, name, value);
-				}
+	if (attrs) {
+		for (let name in attrs) {
+			let value = attrs[name]===undefined ? null : attrs[name];
+			if (value!=old[name]) {
+				setAccessor(dom, name, value);
 			}
 		}
 	}
