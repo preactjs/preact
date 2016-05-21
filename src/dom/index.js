@@ -103,8 +103,7 @@ export function setAccessor(node, name, value) {
  *	@private
  */
 function eventProxy(e) {
-	let fn = this._listeners[normalizeEventName(e.type)];
-	if (fn) return fn(optionsHook('event', e) || e);
+	return this._listeners[normalizeEventName(e.type)](optionsHook('event', e) || e);
 }
 
 
@@ -129,5 +128,3 @@ export function getRawNodeAttributes(node) {
 	while (i--) attrs[list[i].name] = list[i].value;
 	return attrs;
 }
-
-
