@@ -5,9 +5,6 @@ import { ensureNodeData, getNodeType, getRawNodeAttributes, removeNode } from '.
 
 let nodes = createObject();
 
-let normalizeName = memoize(name => name.toUpperCase());
-
-
 export function collectNode(node) {
 	cleanNode(node);
 	let name = toLowerCase(node.nodeName),
