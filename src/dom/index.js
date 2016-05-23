@@ -9,7 +9,7 @@ export function ensureNodeData(node, data) {
 
 
 export function getNodeData(node) {
-	if (node[ATTR_KEY]!==undefined) return node[ATTR_KEY];
+	return node[ATTR_KEY];
 }
 
 
