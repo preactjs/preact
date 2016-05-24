@@ -1,5 +1,21 @@
-export { h } from './h';
-export { Component } from './component';
-export { render } from './render';
-export { rerender } from './render-queue';
-export { default as options } from './options';
+import { h } from './h';
+import { Component } from './component';
+import { render } from './render';
+import { rerender } from './render-queue';
+import options from './options';
+
+export default {
+	h,
+	Component,
+	render,
+	rerender,
+	options
+};
+
+export {
+	h,
+	Component,
+	render,
+	rerender,
+	options
+};
