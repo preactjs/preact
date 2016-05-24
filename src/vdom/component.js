@@ -1,6 +1,6 @@
 import { SYNC_RENDER, DOM_RENDER, NO_RENDER, FORCE_RENDER, EMPTY_BASE } from '../constants';
 import options from '../options';
-import { isFunction, clone, extend } from '../util';
+import { isFunction, clone, extend, empty } from '../util';
 import { hook, deepHook } from '../hooks';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from '.';
@@ -33,12 +33,10 @@ export function setComponentProps(component, props, opts, context) {
 	let d = component._disableRendering===true;
 	component._disableRendering = true;
 
-	component.__ref = props.ref;
-	component.__key = props.key;
-	if (props.ref) delete props.ref;
-	if (props.key) delete props.key;
+	if ((component.__ref = props.ref)) delete props.ref;
+	if ((component.__key = props.key)) delete props.key;
 
-	if (component.base!==undefined && component.base!==null) {
+	if (!empty(component.base)) {
 		hook(component, 'componentWillReceiveProps', props, context);
 	}
 

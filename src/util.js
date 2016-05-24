@@ -17,7 +17,8 @@ export { createObject };
  *	@private
  */
 export function extend(obj, props) {
-	for (let i in props) if (hasOwnProperty.call(props, i)) {
+	let pure = props.prototype===undefined;
+	for (let i in props) if (pure || hasOwnProperty.call(props, i)) {
 		obj[i] = props[i];
 	}
 	return obj;
@@ -34,13 +35,12 @@ export function clone(obj) {
 
 
 /** Create a caching wrapper for the given function.
+ *	Note: As this method is only used for memoizing string operations, it does not safeguard against Object.prototype manipulation.
  *	@private
  */
-export function memoize(fn, mem) {
-	mem = mem || createObject();
-	// @TODO: if createObject is able to return objects without a prototype, we should use `in`:
-	// return k => k in mem ? mem[k] : (mem[k] = fn(k));
-	return k => hasOwnProperty.call(mem, k) ? mem[k] : (mem[k] = fn(k));
+export function memoize(fn) {
+	let mem = createObject();
+	return k => mem[k] || (mem[k] = fn(k));
 }
 
 

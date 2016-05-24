@@ -66,7 +66,7 @@ extend(Component.prototype, {
 	 */
 	linkState(key, eventPath) {
 		let c = this._linkedStates || (this._linkedStates = createObject()),
-			cacheKey = key + '|' + (eventPath || '');
+			cacheKey = key + '|' + eventPath;
 		return c[cacheKey] || (c[cacheKey] = createLinkedState(this, key, eventPath));
 	},
 
