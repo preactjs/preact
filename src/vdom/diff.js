@@ -23,10 +23,6 @@ export default function diff(dom, vnode, context, mountAll) {
 		vnode = buildFunctionalComponent(vnode, context);
 	}
 
-	if (isFunction(vnode.nodeName)) {
-		return buildComponentFromVNode(dom, vnode, context);
-	}
-
 	if (isString(vnode)) {
 		if (dom) {
 			if (getNodeType(dom)===3) {
@@ -40,12 +36,12 @@ export default function diff(dom, vnode, context, mountAll) {
 		return document.createTextNode(vnode);
 	}
 
-	// return diffNode(dom, vnode, context);
-// }
+	if (isFunction(vnode.nodeName)) {
+		return buildComponentFromVNode(dom, vnode, context);
+	}
+
 	let out = dom,
 		nodeName = String(vnode.nodeName);
-
-
 
 	if (!dom) {
 		out = createNode(nodeName);
@@ -60,6 +56,8 @@ export default function diff(dom, vnode, context, mountAll) {
 
 	diffNode(out, vnode, context, mountAll);
 
+	diffAttributes(out, vnode);
+
 	if (originalAttributes && originalAttributes.ref) {
 		(out[ATTR_KEY].ref = originalAttributes.ref)(out);
 	}
@@ -70,7 +68,6 @@ export default function diff(dom, vnode, context, mountAll) {
 
 /** Morph a DOM node to look like the given VNode. Creates DOM if it doesn't exist. */
 function diffNode(dom, vnode, context, mountAll) {
-
 	let vchildren = vnode.children,
 		firstChild = dom.firstChild;
 	if (vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && firstChild instanceof Text && dom.childNodes.length===1) {
@@ -80,7 +77,6 @@ function diffNode(dom, vnode, context, mountAll) {
 		innerDiffNode(dom, vchildren, context, mountAll);
 	}
 
-	diffAttributes(dom, vnode);
 }
 
 
