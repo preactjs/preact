@@ -12,7 +12,7 @@ export function createLinkedState(component, key, eventPath) {
 		p0 = path[0],
 		len = path.length;
 	return function(e) {
-		let t = this,
+		let t = e && e.currentTarget || this,
 			s = component.state,
 			obj = s,
 			v, i;
