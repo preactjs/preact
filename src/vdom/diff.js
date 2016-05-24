@@ -156,8 +156,8 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 
 			if (c) deepHook(c, 'componentWillMount');
 
-			if (originalChildren[i]!==child) {
-				let next = originalChildren[i+1];
+			let next = originalChildren[i];
+			if (next!==child) {
 				if (next) {
 					dom.insertBefore(child, next);
 				}
