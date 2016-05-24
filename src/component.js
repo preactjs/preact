@@ -13,7 +13,7 @@ import { triggerComponentRender, renderComponent } from './vdom/component';
  *		}
  *	}
  */
-export default function Component(props, context) {
+export function Component(props, context) {
 	/** @private */
 	this._dirty = true;
 	/** @public */

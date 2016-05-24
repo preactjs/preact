@@ -1,5 +1,5 @@
 /** Virtual DOM Node */
-export default function VNode(nodeName, attributes, children) {
+export function VNode(nodeName, attributes, children) {
 	/** @type {string|function} */
 	this.nodeName = nodeName;
 

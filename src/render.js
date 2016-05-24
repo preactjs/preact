@@ -16,7 +16,7 @@ import { deepHook } from './hooks';
  *	const Thing = ({ name }) => <span>{ name }</span>;
  *	render(<Thing name="one" />, document.querySelector('#foo'));
  */
-export default function render(vnode, parent, merge) {
+export function render(vnode, parent, merge) {
 	let existing = merge && merge._component && merge._componentConstructor===vnode.nodeName,
 		built = diff(merge, vnode, {}, false),
 		c = !existing && built._component;

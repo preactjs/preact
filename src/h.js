@@ -1,4 +1,4 @@
-import VNode from './vnode';
+import { VNode } from './vnode';
 import { optionsHook } from './hooks';
 import { falsey, isString } from './util';
 
@@ -14,7 +14,7 @@ const SHARED_TEMP_ARRAY = [];
  *  import { render, h } from 'preact';
  *  render(<span>foo</span>, document.body);
  */
-export default function h(nodeName, attributes, firstChild) {
+export function h(nodeName, attributes, firstChild) {
 	let len = arguments.length,
 		attributeChildren = attributes && attributes.children,
 		children, arr, lastSimple;
