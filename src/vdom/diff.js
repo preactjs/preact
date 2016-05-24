@@ -130,7 +130,7 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 				let key = vchild.key;
 				if (!empty(key) && hasOwnProperty.call(keyed, key)) {
 					child = keyed[key];
-					keyed[key] = null;
+					keyed[key] = undefined;
 					keyedLen--;
 				}
 			}
@@ -141,7 +141,7 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 					let c = children[j];
 					if (c && isSameNodeType(c, vchild)) {
 						child = c;
-						children[j] = null;
+						children[j] = undefined;
 						if (j===childrenLen-1) childrenLen--;
 						if (j===min) min++;
 						break;
@@ -234,7 +234,7 @@ function diffAttributes(dom, vnode) {
 
 	// removeAttributes(dom, old, attrs || EMPTY);
 	for (let name in old) {
-		if (!attrs || !hasOwnProperty.call(attrs, name)) {
+		if (!attrs || !(name in attrs)) {
 			setAccessor(dom, name, null);
 		}
 	}
@@ -242,8 +242,9 @@ function diffAttributes(dom, vnode) {
 	// new & updated
 	if (attrs) {
 		for (let name in attrs) {
-			let value = attrs[name]===undefined ? null : attrs[name];
-			if (value!=old[name]) {
+			let value = attrs[name];
+			if (value===undefined) value = null;
+			if (!(name in old) || value!=old[name]) {
 				setAccessor(dom, name, value);
 			}
 		}
