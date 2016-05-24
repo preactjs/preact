@@ -4,12 +4,7 @@ import { optionsHook } from '../hooks';
 
 
 export function ensureNodeData(node, data) {
-	return getNodeData(node) || (node[ATTR_KEY] = (data || createObject()));
-}
-
-
-export function getNodeData(node) {
-	return node[ATTR_KEY];
+	return node[ATTR_KEY] || (node[ATTR_KEY] = (data || createObject()));
 }
 
 
@@ -45,7 +40,7 @@ export function removeNode(node) {
  */
 export function getAccessor(node, name) {
 	if (name!=='type' && name!=='style' && name!=='key' && name in node) return node[name];
-	let attrs = getNodeData(node);
+	let attrs = node[ATTR_KEY];
 	if (attrs && (name in attrs)) return attrs[name];
 	if (name==='class') return node.className || '';
 	if (name==='style') return node.style.cssText || '';

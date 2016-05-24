@@ -4,10 +4,9 @@ import { hook, deepHook } from '../hooks';
 import { isSameNodeType, isNamedNode } from '.';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
-import { removeNode, appendChildren, setAccessor, getNodeData, getRawNodeAttributes, getNodeType } from '../dom';
+import { removeNode, appendChildren, setAccessor, getRawNodeAttributes, getNodeType } from '../dom';
 import { createNode, collectNode } from '../dom/recycler';
 import { unmountComponent } from './component';
-
 
 
 
@@ -86,8 +85,8 @@ function diffNode(dom, vnode, context, mountAll) {
 
 
 function getKey(child) {
-	let data = getNodeData(child);
-	if (data && !empty(data.key)) return data.key;
+	let data = child[ATTR_KEY];
+	if (data) return data.key;
 }
 
 
@@ -231,7 +230,7 @@ export function recollectNodeTree(node, unmountOnly) {
 
 /** Apply differences in attributes from a VNode to the given DOM Node. */
 function diffAttributes(dom, vnode) {
-	let old = getNodeData(dom) || getRawNodeAttributes(dom),
+	let old = dom[ATTR_KEY] || getRawNodeAttributes(dom),
 		attrs = vnode.attributes;
 
 	// removeAttributes(dom, old, attrs || EMPTY);
