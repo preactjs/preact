@@ -26,9 +26,15 @@ describe('linked-state', () => {
 			element.type= 'text';
 			element.value = 'newValue';
 
-			linkFunction.call(element);
+			linkFunction({ currentTarget: element });
+
 			expect(TestComponent.prototype.setState).to.have.been.calledOnce;
 			expect(TestComponent.prototype.setState).to.have.been.calledWith({'testStateKey': 'newValue'});
+
+			linkFunction.call(element);
+
+			expect(TestComponent.prototype.setState).to.have.been.calledTwice;
+			expect(TestComponent.prototype.setState.secondCall).to.have.been.calledWith({'testStateKey': 'newValue'});
 		});
 
 		it('should use checked attribute on checkbox input when no eventPath is supplied', () => {
@@ -36,7 +42,8 @@ describe('linked-state', () => {
 			checkboxElement.type= 'checkbox';
 			checkboxElement.checked = true;
 
-			linkFunction.call(checkboxElement);
+			linkFunction({ currentTarget: checkboxElement });
+
 			expect(TestComponent.prototype.setState).to.have.been.calledOnce;
 			expect(TestComponent.prototype.setState).to.have.been.calledWith({'testStateKey': true});
 		});
@@ -45,7 +52,9 @@ describe('linked-state', () => {
 			let radioElement = document.createElement('input');
 			radioElement.type= 'radio';
 			radioElement.checked = true;
-			linkFunction.call(radioElement);
+
+			linkFunction({ currentTarget: radioElement });
+
 			expect(TestComponent.prototype.setState).to.have.been.calledOnce;
 			expect(TestComponent.prototype.setState).to.have.been.calledWith({'testStateKey': true});
 		});
@@ -57,7 +66,8 @@ describe('linked-state', () => {
 			element.type= 'text';
 			element.value = 'newValue';
 
-			linkFunction.call(element);
+			linkFunction({ currentTarget: element });
+
 			expect(TestComponent.prototype.setState).to.have.been.calledOnce;
 			expect(TestComponent.prototype.setState).to.have.been.calledWith({nested: {state: {key: 'newValue'}}});
 		});
@@ -80,6 +90,7 @@ describe('linked-state', () => {
 			let component = {_component: {nested: {path: 'nestedPathValueFromComponent'}}};
 
 			linkFunction.call(component, event);
+
 			expect(TestComponent.prototype.setState).to.have.been.calledOnce;
 			expect(TestComponent.prototype.setState).to.have.been.calledWith({'testStateKey': 'nestedPathValueFromEvent'});
 		});
@@ -98,9 +109,9 @@ describe('linked-state', () => {
 			element.type= 'text';
 			element.anAttribute = 'functionValue';
 			let testFunction = function() { return this.anAttribute; };
-			let event = {nested: {path: testFunction}};
 
-			linkFunction.call(element, event);
+			linkFunction({ currentTarget:element, nested: {path: testFunction}});
+
 			expect(TestComponent.prototype.setState).to.have.been.calledOnce;
 			expect(TestComponent.prototype.setState).to.have.been.calledWith({'testStateKey': 'functionValue'});
 		});
