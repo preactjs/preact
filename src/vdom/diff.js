@@ -81,6 +81,9 @@ function diffNode(dom, vnode, context, mountAll) {
 
 
 function getKey(child) {
+	let c = child._component;
+	if (c) return c.__key;
+
 	let data = child[ATTR_KEY];
 	if (data) return data.key;
 }
@@ -101,7 +104,7 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 		children = [];
 		for (let i=0; i<len; i++) {
 			let child = originalChildren[i],
-				key = child._component ? child._component.__key : getKey(child);
+				key = getKey(child);
 			if (key || key===0) {
 				if (!keyed) keyed = createObject();
 				keyed[key] = child;
