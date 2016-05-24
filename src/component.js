@@ -1,3 +1,4 @@
+import { FORCE_RENDER } from './constants';
 import { hook } from './hooks';
 import { createObject, extend, clone, isFunction } from './util';
 import { createLinkedState } from './linked-state';
@@ -86,7 +87,7 @@ extend(Component.prototype, {
 	 *	@private
 	 */
 	forceUpdate() {
-		renderComponent(this);
+		renderComponent(this, FORCE_RENDER);
 	},
 
 

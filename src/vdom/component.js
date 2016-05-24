@@ -1,4 +1,4 @@
-import { SYNC_RENDER, DOM_RENDER, NO_RENDER, EMPTY_BASE } from '../constants';
+import { SYNC_RENDER, DOM_RENDER, NO_RENDER, FORCE_RENDER, EMPTY_BASE } from '../constants';
 import options from '../options';
 import { isFunction, clone, extend } from '../util';
 import { hook, deepHook } from '../hooks';
@@ -90,7 +90,7 @@ export function renderComponent(component, opts) {
 		component.props = previousProps;
 		component.state = previousState;
 		component.context = previousContext;
-		if (hook(component, 'shouldComponentUpdate', props, state, context)===false) {
+		if (opts!==FORCE_RENDER && hook(component, 'shouldComponentUpdate', props, state, context)===false) {
 			skip = true;
 		}
 		else {
