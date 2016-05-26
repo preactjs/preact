@@ -17,7 +17,7 @@ export function collectNode(node) {
 export function createNode(nodeName) {
 	let name = toLowerCase(nodeName),
 		list = nodes[name],
-		node = list && list.pop() || document.createElement(name);
+		node = list && list.pop() || document.createElement(nodeName);
 	ensureNodeData(node);
 	node.normalizedNodeName = name;
 	return node;
