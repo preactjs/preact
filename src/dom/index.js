@@ -66,7 +66,7 @@ export function setAccessor(node, name, value) {
 	else if (name==='dangerouslySetInnerHTML') {
 		if (value && value.__html) node.innerHTML = value.__html;
 	}
-	else if (name!=='key') {
+	else if (name!=='key' && name!=='children') {
 		// let valueIsFalsey = falsey(value);
 
 		if (name!=='type' && name in node) {
