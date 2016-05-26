@@ -41,7 +41,8 @@ export default function diff(dom, vnode, context, mountAll) {
 	}
 
 	let out = dom,
-		nodeName = String(vnode.nodeName);
+		nodeName = vnode.nodeName;
+	if (!isString(nodeName)) nodeName = String(nodeName);
 
 	if (!dom) {
 		out = createNode(nodeName);
