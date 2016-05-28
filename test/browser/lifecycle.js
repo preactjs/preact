@@ -207,7 +207,7 @@ describe('Lifecycle methods', () => {
 			}
 		}
 
-		class Inner extends Component {
+		class LifecycleTestComponent extends Component {
 			constructor() { super(); this._constructor(); }
 			_constructor() {}
 			getInitialState() {}
@@ -215,6 +215,10 @@ describe('Lifecycle methods', () => {
 			componentDidMount() {}
 			componentWillUnmount() {}
 			componentDidUnmount() {}
+			render() { return <div />; }
+		}
+
+		class Inner extends LifecycleTestComponent {
 			render() {
 				return (
 					<div>
@@ -224,80 +228,56 @@ describe('Lifecycle methods', () => {
 			}
 		}
 
-		class InnerMost extends Component {
-			constructor() { super(); this._constructor(); }
-			_constructor() {}
-			getInitialState() {}
-			componentWillMount() {}
-			componentDidMount() {}
-			componentWillUnmount() {}
-			componentDidUnmount() {}
-			render() {
-				return <div />;
-			}
+		class InnerMost extends LifecycleTestComponent {
+			render() { return <div />; }
 		}
 
-		let innerProto = Inner.prototype;
-		let innerMostProto = InnerMost.prototype;
 		let spies = ['_constructor', 'getInitialState', 'componentWillMount', 'componentDidMount', 'componentWillUnmount', 'componentDidUnmount'];
-		spies.forEach( s => { sinon.spy(innerProto, s); sinon.spy(innerMostProto, s); });
 
-		let reset = () => spies.forEach( s => { innerProto[s].reset(); innerMostProto[s].reset(); });
+		let verifyLifycycleMethods = (TestComponent) => {
+			let proto = TestComponent.prototype;
+			spies.forEach( s => sinon.spy(proto, s) );
+			let reset = () => spies.forEach( s => proto[s].reset() );
 
-		beforeEach( () => reset() );
+			it('should be invoked for components on initial render', () => {
+				reset();
+				render(<Outer />, scratch);
+				expect(proto._constructor).to.have.been.called;
+				expect(proto.getInitialState).to.have.been.called;
+				expect(proto.componentWillMount).to.have.been.called;
+				expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
+				expect(proto.componentDidMount).to.have.been.called;
+			});
 
-		it('should be invoked for inner components', () => {
-			render(<Outer />, scratch);
-			expect(innerProto._constructor).to.have.been.called;
-			expect(innerProto.getInitialState).to.have.been.called;
-			expect(innerProto.componentWillMount).to.have.been.called;
-			expect(innerProto.componentWillMount).to.have.been.calledBefore(innerProto.componentDidMount);
-			expect(innerProto.componentDidMount).to.have.been.called;
+			it('should be invoked for components on unmount', () => {
+				reset();
+				setState({ show:false });
+				rerender();
 
-			reset();
-			setState({ show:false });
-			rerender();
+				expect(proto.componentWillUnmount).to.have.been.called;
+				expect(proto.componentWillUnmount).to.have.been.calledBefore(proto.componentDidUnmount);
+				expect(proto.componentDidUnmount).to.have.been.called;
+			});
 
-			expect(innerProto.componentWillUnmount).to.have.been.called;
-			expect(innerProto.componentWillUnmount).to.have.been.calledBefore(innerProto.componentDidUnmount);
-			expect(innerProto.componentDidUnmount).to.have.been.called;
+			it('should be invoked for components on re-render', () => {
+				reset();
+				setState({ show:true });
+				rerender();
 
-			reset();
-			setState({ show:true });
-			rerender();
+				expect(proto._constructor).to.have.been.called;
+				expect(proto.getInitialState).to.have.been.called;
+				expect(proto.componentWillMount).to.have.been.called;
+				expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
+				expect(proto.componentDidMount).to.have.been.called;
+			});
+		};
 
-			expect(innerProto._constructor).to.have.been.called;
-			expect(innerProto.getInitialState).to.have.been.called;
-			expect(innerProto.componentWillMount).to.have.been.called;
-			expect(innerProto.componentWillMount).to.have.been.calledBefore(innerProto.componentDidMount);
-			expect(innerProto.componentDidMount).to.have.been.called;
+		describe('inner components', () => {
+			verifyLifycycleMethods(Inner);
 		});
 
-		it('should be invoked for innermost components', () => {
-			render(<Outer />, scratch);
-			expect(innerMostProto._constructor).to.have.been.called;
-			expect(innerMostProto.getInitialState).to.have.been.called;
-			expect(innerMostProto.componentWillMount).to.have.been.called;
-			expect(innerMostProto.componentWillMount).to.have.been.calledBefore(innerProto.componentDidMount);
-			expect(innerMostProto.componentDidMount).to.have.been.called;
-
-			reset();
-			setState({ show:false });
-			rerender();
-
-			expect(innerMostProto.componentWillUnmount).to.have.been.called;
-			expect(innerMostProto.componentWillUnmount).to.have.been.calledBefore(innerMostProto.componentDidUnmount);
-			expect(innerMostProto.componentDidUnmount).to.have.been.called;
-
-			reset();
-			setState({ show:true });
-			rerender();
-
-			expect(innerMostProto._constructor).to.have.been.called;
-			expect(innerMostProto.getInitialState).to.have.been.called;
-			expect(innerMostProto.componentWillMount).to.have.been.called;
-			expect(innerMostProto.componentWillMount).to.have.been.calledBefore(innerMostProto.componentDidMount);
-			expect(innerMostProto.componentDidMount).to.have.been.called;
+		describe('innermost components', () => {
+			verifyLifycycleMethods(InnerMost);
 		});
 
 		describe('when shouldComponentUpdate() returns false', () => {
