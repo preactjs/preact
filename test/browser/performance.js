@@ -6,6 +6,54 @@ import { h, render } from '../../src/preact';
 
 const MULTIPLIER = coverage ? 5 : 1;
 
+
+let now = typeof performance==='undefined' ? () => Date.now() : () => performance.now();
+
+function loop(iter, time) {
+	let start = now(),
+		count = 0;
+	while ( now()-start < time ) {
+		count++;
+		iter();
+	}
+	return count;
+}
+
+
+function benchmark(iter, callback) {
+	function noop() {}
+
+	// warm
+	for (let i=3; i--; ) noop(), iter();
+
+	let count = 5,
+		time = 100,
+		passes = 0,
+		noops = loop(noop, time),
+		iterations = 0;
+
+	function next() {
+		iterations += loop(iter, time);
+		// if ((++passes) % 2) {
+		// 	noops += loop(noop, time);
+		// }
+		// else {
+		//	iterations += loop(iter, time);
+		// }
+		setTimeout(++passes===count ? done : next, 10);
+	}
+
+	function done() {
+		let ticks = Math.round(noops / iterations * count),
+			hz = iterations / count / time * 1000,
+			message = `${hz|0}/s (${ticks} ticks)`;
+		callback({ iterations, noops, count, time, ticks, hz, message });
+	}
+
+	next();
+}
+
+
 describe('performance', () => {
 	let scratch;
 
@@ -26,7 +74,7 @@ describe('performance', () => {
 		scratch = null;
 	});
 
-	it('should rerender without changes fast', () => {
+	it('should rerender without changes fast', done => {
 		let jsx = (
 			<div class="foo bar" data-foo="bar" p={2}>
 				<header>
@@ -55,40 +103,17 @@ describe('performance', () => {
 			</div>
 		);
 
-		function fullRender() {
-			render(jsx, scratch, scratch.firstChild);
-		}
-
-		function noop() {}
-
-		let now = typeof performance==='undefined' ? () => Date.now() : () => performance.now();
-
-		function loop(iter) {
-			let start = now(),
-				count = 0;
-			while ( now()-start < 250 ) {
-				count++;
-				iter();
-			}
-			return count;
-		}
-
-		fullRender();
-
-		let noopCount = loop(noop);
-
-		let renderCount = loop(fullRender);
-
-		// adjust for simple loop speed:
-		let per = noopCount / renderCount;
-
-		console.log(`render(): ${(renderCount*4)|0}/s (${per|0} ticks)`);
-
-		// expect(renderCount / noopCount).to.be.above(0.0001);
-		expect(per).to.be.below(350 * MULTIPLIER);
+		let root;
+		benchmark( () => {
+			root = render(jsx, scratch, root);
+		}, ({ ticks, message }) => {
+			console.log(`render(): ${message}`);
+			expect(ticks).to.be.below(350 * MULTIPLIER);
+			done();
+		});
 	});
 
-	it('should rerender repeated trees fast', () => {
+	it('should rerender repeated trees fast', done => {
 		class Header {
 			render() {
 				return (
@@ -161,41 +186,46 @@ describe('performance', () => {
 		}
 
 		let root;
-		function fullRender() {
+		benchmark( () => {
 			root = render(<Parent child={Root} />, scratch, root);
 			root = render(<Parent child={Empty} />, scratch, root);
-		}
+		}, ({ ticks, message }) => {
+			console.log(`render(): ${message}`);
+			expect(ticks).to.be.below(2000 * MULTIPLIER);
+			done();
+		});
 
-		// let test = {};
-		function noop() {
-			// test.width = String(scratch.firstChild.offsetWidth);
-			// test.height = String(scratch.firstChild.offsetHeight);
-			// test.left = String(scratch.firstChild.offsetLeft);
-		}
-
-		let now = typeof performance==='undefined' ? () => Date.now() : () => performance.now();
-
-		function loop(iter) {
-			let start = now(),
-				count = 0;
-			while ( now()-start < 250 ) {
-				count++;
-				iter();
-			}
-			return count;
-		}
-
-		fullRender();
-
-		let noopCount = loop(noop);
-
-		let renderCount = loop(fullRender);
-
-		// adjust for simple loop speed:
-		let per = noopCount / renderCount;
-
-		console.log(`render(): ${(renderCount*4)|0}/s (${per|0} ticks)`);
-
-		expect(per).to.be.below(2000 * MULTIPLIER);
+		// let root;
+		// function fullRender() {
+		// 	root = render(<Parent child={Root} />, scratch, root);
+		// 	root = render(<Parent child={Empty} />, scratch, root);
+		// }
+		//
+		// function noop() {}
+		//
+		// let now = typeof performance==='undefined' ? () => Date.now() : () => performance.now();
+		//
+		// function loop(iter) {
+		// 	let start = now(),
+		// 		count = 0;
+		// 	while ( now()-start < 250 ) {
+		// 		count++;
+		// 		iter();
+		// 	}
+		// 	return count;
+		// }
+		//
+		// fullRender();
+		//
+		// let noopCount = loop(noop);
+		//
+		// let renderCount = loop(fullRender);
+		//
+		// // adjust for simple loop speed:
+		// let per = noopCount / renderCount;
+		//
+		// console.log(`render(): ${(renderCount*4)|0}/s (${per|0} ticks)`);
+		//
+		// expect(per).to.be.below(2000 * MULTIPLIER);
 	});
 });
