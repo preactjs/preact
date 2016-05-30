@@ -1,4 +1,4 @@
-import { SYNC_RENDER, DOM_RENDER, NO_RENDER, FORCE_RENDER, EMPTY_BASE } from '../constants';
+import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, EMPTY_BASE } from '../constants';
 import options from '../options';
 import { isFunction, clone, extend, empty } from '../util';
 import { hook, deepHook } from '../hooks';
@@ -128,12 +128,12 @@ export function renderComponent(component, opts, mountAll) {
 				setComponentProps(inst, childProps, SYNC_RENDER, context);
 			}
 			else {
-				inst = createComponent(childComponent, childProps, context);
+				inst = createComponent(childComponent, childProps, context, false);
 				inst._parentComponent = component;
 				component._component = inst;
 				if (isUpdate) deepHook(inst, 'componentWillMount');
 				setComponentProps(inst, childProps, NO_RENDER, context);
-				renderComponent(inst, DOM_RENDER);
+				renderComponent(inst, SYNC_RENDER);
 				if (isUpdate) deepHook(inst, 'componentDidMount');
 			}
 
@@ -148,7 +148,7 @@ export function renderComponent(component, opts, mountAll) {
 				cbase = component._component = null;
 			}
 
-			if (initialBase || opts===DOM_RENDER) {
+			if (initialBase || opts===SYNC_RENDER) {
 				if (cbase) cbase._component = null;
 				base = diff(cbase, rendered || EMPTY_BASE, context, mountAll || !isUpdate);
 			}
@@ -195,12 +195,12 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 	let c = dom && dom._component,
 		oldDom = dom;
 
-	let isOwner = !mountAll && c && dom._componentConstructor===vnode.nodeName;
+	let isOwner = c && dom._componentConstructor===vnode.nodeName;
 	while (c && !isOwner && (c=c._parentComponent)) {
 		isOwner = c.constructor===vnode.nodeName;
 	}
 
-	if (isOwner) {
+	if (isOwner && (!mountAll || c._component)) {
 		setComponentProps(c, getNodeProps(vnode), SYNC_RENDER, context, mountAll);
 		dom = c.base;
 	}
@@ -227,18 +227,11 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
  */
 function createComponentFromVNode(vnode, dom, context, mountAll) {
 	let props = getNodeProps(vnode);
-	let component = createComponent(vnode.nodeName, props, context);
+	let component = createComponent(vnode.nodeName, props, context, !!dom);
 
-	if (dom && !component.base) component.base = dom;
+	if (dom) component.nextBase = dom;
 
-	setComponentProps(component, props, NO_RENDER, context);
-	renderComponent(component, DOM_RENDER, mountAll);
-
-	// let node = component.base;
-	//if (!node._component) {
-	//	node._component = component;
-	//	node._componentConstructor = vnode.nodeName;
-	//}
+	setComponentProps(component, props, SYNC_RENDER, context, mountAll);
 
 	return component.base;
 }

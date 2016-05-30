@@ -15,9 +15,9 @@ export function collectComponent(component) {
 }
 
 
-export function createComponent(Ctor, props, context) {
+export function createComponent(Ctor, props, context, fresh) {
 	let inst = new Ctor(props, context),
-		list = components[Ctor.name];
+		list = !fresh && components[Ctor.name];
 	if (list) {
 		for (let i=0; i<list.length; i++) {
 			if (list[i].constructor===Ctor) {
