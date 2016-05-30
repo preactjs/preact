@@ -3,6 +3,14 @@ import { h, render, rerender, Component } from '../../src/preact';
 
 let spyAll = obj => Object.keys(obj).forEach( key => sinon.spy(obj,key) );
 
+function getAttributes(node) {
+	let attrs = {};
+	for (let i=node.attributes.length; i--; ) {
+		attrs[node.attributes[i].name] = node.attributes[i].value;
+	}
+	return attrs;
+}
+
 describe('Components', () => {
 	let scratch;
 
@@ -207,7 +215,11 @@ describe('Components', () => {
 					}
 				}));
 
-			expect(scratch.innerHTML).to.equal('<div j="2" foo="bar" i="2">inner</div>');
+			expect(getAttributes(scratch.firstChild)).to.eql({
+				j: '2',
+				i: '2',
+				foo: 'bar'
+			});
 
 			// update & flush
 			doRender();
@@ -225,7 +237,11 @@ describe('Components', () => {
 					}
 				}));
 
-			expect(scratch.innerHTML).to.equal('<div j="3" foo="bar" i="3">inner</div>');
+			expect(getAttributes(scratch.firstChild)).to.eql({
+				j: '3',
+				i: '3',
+				foo: 'bar'
+			});
 		});
 
 		it('should re-render nested components', () => {
@@ -296,7 +312,11 @@ describe('Components', () => {
 					}
 				}));
 
-			expect(scratch.innerHTML).to.equal('<div j="2" foo="bar" i="2">inner</div>');
+			expect(getAttributes(scratch.firstChild)).to.eql({
+				j: '2',
+				i: '2',
+				foo: 'bar'
+			});
 
 			// update & flush
 			doRender();
@@ -318,7 +338,11 @@ describe('Components', () => {
 					}
 				}));
 
-			expect(scratch.innerHTML).to.equal('<div j="3" foo="bar" i="3">inner</div>');
+			expect(getAttributes(scratch.firstChild)).to.eql({
+				j: '3',
+				i: '3',
+				foo: 'bar'
+			});
 
 
 			// update & flush

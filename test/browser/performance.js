@@ -21,7 +21,10 @@ function loop(iter, time) {
 
 
 function benchmark(iter, callback) {
-	function noop() {}
+	let a = 0;
+	function noop() {
+		try { } finally { a += Math.random(); }
+	}
 
 	// warm
 	for (let i=3; i--; ) noop(), iter();
@@ -34,12 +37,6 @@ function benchmark(iter, callback) {
 
 	function next() {
 		iterations += loop(iter, time);
-		// if ((++passes) % 2) {
-		// 	noops += loop(noop, time);
-		// }
-		// else {
-		//	iterations += loop(iter, time);
-		// }
 		setTimeout(++passes===count ? done : next, 10);
 	}
 
@@ -107,7 +104,7 @@ describe('performance', () => {
 		benchmark( () => {
 			root = render(jsx, scratch, root);
 		}, ({ ticks, message }) => {
-			console.log(`render(): ${message}`);
+			console.log(`empty diff render(): ${message}`);
 			expect(ticks).to.be.below(350 * MULTIPLIER);
 			done();
 		});
@@ -190,42 +187,9 @@ describe('performance', () => {
 			root = render(<Parent child={Root} />, scratch, root);
 			root = render(<Parent child={Empty} />, scratch, root);
 		}, ({ ticks, message }) => {
-			console.log(`render(): ${message}`);
+			console.log(`repeated diff render(): ${message}`);
 			expect(ticks).to.be.below(2000 * MULTIPLIER);
 			done();
 		});
-
-		// let root;
-		// function fullRender() {
-		// 	root = render(<Parent child={Root} />, scratch, root);
-		// 	root = render(<Parent child={Empty} />, scratch, root);
-		// }
-		//
-		// function noop() {}
-		//
-		// let now = typeof performance==='undefined' ? () => Date.now() : () => performance.now();
-		//
-		// function loop(iter) {
-		// 	let start = now(),
-		// 		count = 0;
-		// 	while ( now()-start < 250 ) {
-		// 		count++;
-		// 		iter();
-		// 	}
-		// 	return count;
-		// }
-		//
-		// fullRender();
-		//
-		// let noopCount = loop(noop);
-		//
-		// let renderCount = loop(fullRender);
-		//
-		// // adjust for simple loop speed:
-		// let per = noopCount / renderCount;
-		//
-		// console.log(`render(): ${(renderCount*4)|0}/s (${per|0} ticks)`);
-		//
-		// expect(per).to.be.below(2000 * MULTIPLIER);
 	});
 });

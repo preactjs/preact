@@ -1,6 +1,14 @@
 import { h, render } from '../../src/preact';
 /** @jsx h */
 
+function getAttributes(node) {
+	let attrs = {};
+	for (let i=node.attributes.length; i--; ) {
+		attrs[node.attributes[i].name] = node.attributes[i].value;
+	}
+	return attrs;
+}
+
 describe('render()', () => {
 	let scratch;
 
@@ -72,22 +80,28 @@ describe('render()', () => {
 
 	it('should clear falsey attributes', () => {
 		let root = render((
-			<div anull="anull" aundefined="aundefined" afalse="afalse" a0="a0" anan="aNaN" />
+			<div anull="anull" aundefined="aundefined" afalse="afalse" anan="aNaN" a0="a0" />
 		), scratch);
 
 		root = render((
-			<div anull={null} aundefined={undefined} afalse={false} a0={0} anan={NaN} />
+			<div anull={null} aundefined={undefined} afalse={false} anan={NaN} a0={0} />
 		), scratch, root);
 
-		expect(scratch, 'from previous truthy values').to.have.property('innerHTML', '<div a0="0" anan="NaN"></div>');
+		expect(getAttributes(scratch.firstChild), 'from previous truthy values').to.eql({
+			a0: '0',
+			anan: 'NaN'
+		});
 
 		scratch.innerHTML = '';
 
 		root = render((
-			<div anull={null} aundefined={undefined} afalse={false} a0={0} anan={NaN} />
+			<div anull={null} aundefined={undefined} afalse={false} anan={NaN} a0={0} />
 		), scratch);
 
-		expect(scratch, 'initial render').to.have.property('innerHTML', '<div a0="0" anan="NaN"></div>');
+		expect(getAttributes(scratch.firstChild), 'initial render').to.eql({
+			a0: '0',
+			anan: 'NaN'
+		});
 	});
 
 	it('should clear falsey input values', () => {
@@ -188,7 +202,7 @@ describe('render()', () => {
 
 		function fireEvent(on, type) {
 			let e = document.createEvent('Event');
-			e.initEvent(type);
+			e.initEvent(type, true, true);
 			on.dispatchEvent(e);
 		}
 
