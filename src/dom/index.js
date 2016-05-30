@@ -35,19 +35,6 @@ export function removeNode(node) {
 }
 
 
-/** Retrieve the value of a rendered attribute
- *	@private
- */
-export function getAccessor(node, name) {
-	if (name!=='type' && name!=='style' && name!=='key' && name in node) return node[name];
-	let attrs = node[ATTR_KEY];
-	if (attrs && (name in attrs)) return attrs[name];
-	if (name==='class') return node.className || '';
-	if (name==='style') return node.style.cssText || '';
-}
-
-
-
 /** Set a named attribute on the given Node, with special behavior for some names and event handlers.
  *	If `value` is `null`, the attribute/handler will be removed.
  *	@param {Element} node	An element to mutate
