@@ -117,7 +117,8 @@ export function renderComponent(component, opts, mountAll) {
 			// set up high order component link
 
 			let inst = component._component;
-			if (inst && inst.constructor!==childComponent) {
+			let childRender = childComponent.prototype.render;
+			if (inst && !(inst.constructor===childComponent || inst.render===childRender)) {
 				toUnmount = inst;
 				inst = null;
 			}
