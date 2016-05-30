@@ -195,7 +195,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 	let c = dom && dom._component,
 		oldDom = dom;
 
-	let isOwner = c && dom._componentConstructor===vnode.nodeName;
+	let isOwner = !mountAll && c && dom._componentConstructor===vnode.nodeName;
 	while (c && !isOwner && (c=c._parentComponent)) {
 		isOwner = c.constructor===vnode.nodeName;
 	}
