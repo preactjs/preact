@@ -198,9 +198,7 @@ describe('Lifecycle methods', () => {
 				return (
 					<div>
 						{ show && (
-							<div>
-								<Inner {...props} />
-							</div>
+							<Inner {...props} />
 						) }
 					</div>
 				);
@@ -281,9 +279,9 @@ describe('Lifecycle methods', () => {
 			setState({ show:true });
 			rerender();
 
-			expect(innerMostProto.componentWillMount).to.have.been.called;
-			expect(innerMostProto.componentWillMount).to.have.been.calledBefore(innerMostProto.componentDidMount);
-			expect(innerMostProto.componentDidMount).to.have.been.called;
+			expect(innerMostProto.componentWillMount, 'second call').to.have.been.called;
+			expect(innerMostProto.componentWillMount, 'second call').to.have.been.calledBefore(innerMostProto.componentDidMount);
+			expect(innerMostProto.componentDidMount, 'second call').to.have.been.called;
 		});
 
 		describe('when shouldComponentUpdate() returns false', () => {

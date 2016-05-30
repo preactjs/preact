@@ -37,7 +37,7 @@ export default function diff(dom, vnode, context, mountAll) {
 	}
 
 	if (isFunction(vnode.nodeName)) {
-		return buildComponentFromVNode(dom, vnode, context);
+		return buildComponentFromVNode(dom, vnode, context, mountAll);
 	}
 
 	let out = dom,

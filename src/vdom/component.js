@@ -29,7 +29,7 @@ export function triggerComponentRender(component) {
  *	@param {boolean} [opts.renderSync=false]	If `true` and {@link options.syncComponentUpdates} is `true`, triggers synchronous rendering.
  *	@param {boolean} [opts.render=true]			If `false`, no render will be triggered.
  */
-export function setComponentProps(component, props, opts, context) {
+export function setComponentProps(component, props, opts, context, mountAll) {
 	let d = component._disableRendering===true;
 	component._disableRendering = true;
 
@@ -52,7 +52,7 @@ export function setComponentProps(component, props, opts, context) {
 
 	if (opts!==NO_RENDER) {
 		if (opts===SYNC_RENDER || options.syncComponentUpdates!==false) {
-			renderComponent(component);
+			renderComponent(component, SYNC_RENDER, mountAll);
 		}
 		else {
 			triggerComponentRender(component);
@@ -70,7 +70,7 @@ export function setComponentProps(component, props, opts, context) {
  *	@param {boolean} [opts.build=false]		If `true`, component will build and store a DOM node if not already associated with one.
  *	@private
  */
-export function renderComponent(component, opts) {
+export function renderComponent(component, opts, mountAll) {
 	if (component._disableRendering) return;
 
 	let skip, rendered,
@@ -150,7 +150,7 @@ export function renderComponent(component, opts) {
 
 			if (initialBase || opts===DOM_RENDER) {
 				if (cbase) cbase._component = null;
-				base = diff(cbase, rendered || EMPTY_BASE, context, !isUpdate);
+				base = diff(cbase, rendered || EMPTY_BASE, context, mountAll || !isUpdate);
 			}
 		}
 
@@ -191,7 +191,7 @@ export function renderComponent(component, opts) {
  *	@returns {Element} dom	The created/mutated element
  *	@private
  */
-export function buildComponentFromVNode(dom, vnode, context) {
+export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 	let c = dom && dom._component,
 		oldDom = dom;
 
@@ -201,7 +201,7 @@ export function buildComponentFromVNode(dom, vnode, context) {
 	}
 
 	if (isOwner) {
-		setComponentProps(c, getNodeProps(vnode), SYNC_RENDER, context);
+		setComponentProps(c, getNodeProps(vnode), SYNC_RENDER, context, mountAll);
 		dom = c.base;
 	}
 	else {
@@ -209,7 +209,7 @@ export function buildComponentFromVNode(dom, vnode, context) {
 			unmountComponent(c, true);
 			dom = oldDom = null;
 		}
-		dom = createComponentFromVNode(vnode, dom, context);
+		dom = createComponentFromVNode(vnode, dom, context, mountAll);
 		if (oldDom && dom!==oldDom) {
 			oldDom._component = null;
 			recollectNodeTree(oldDom);
@@ -225,14 +225,14 @@ export function buildComponentFromVNode(dom, vnode, context) {
  *	@param {VNode} vnode
  *	@private
  */
-function createComponentFromVNode(vnode, dom, context) {
+function createComponentFromVNode(vnode, dom, context, mountAll) {
 	let props = getNodeProps(vnode);
 	let component = createComponent(vnode.nodeName, props, context);
 
 	if (dom && !component.base) component.base = dom;
 
 	setComponentProps(component, props, NO_RENDER, context);
-	renderComponent(component, DOM_RENDER);
+	renderComponent(component, DOM_RENDER, mountAll);
 
 	// let node = component.base;
 	//if (!node._component) {
