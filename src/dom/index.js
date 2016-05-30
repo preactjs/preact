@@ -44,6 +44,10 @@ export function removeNode(node) {
  *	@private
  */
 export function setAccessor(node, name, value) {
+	ensureNodeData(node)[name] = value;
+
+	if (name==='key' || name==='children') return;
+
 	if (name==='class') {
 		node.className = value || '';
 	}
@@ -53,31 +57,24 @@ export function setAccessor(node, name, value) {
 	else if (name==='dangerouslySetInnerHTML') {
 		if (value && value.__html) node.innerHTML = value.__html;
 	}
-	else if (name!=='key' && name!=='children') {
-		// let valueIsFalsey = falsey(value);
-
-		if (name!=='type' && name in node) {
-			node[name] = value;
-			if (falsey(value)) node.removeAttribute(name);
-		}
-		else if (name.substring(0, 2)==='on') {
-			let type = normalizeEventName(name),
-				l = node._listeners || (node._listeners = createObject());
-			if (!l[type]) node.addEventListener(type, eventProxy);
-			else if (!value) node.removeEventListener(type, eventProxy);
-			l[type] = value;
-		}
-		else if (falsey(value)) {
-			node.removeAttribute(name);
-		}
-		else if (typeof value!=='object' && !isFunction(value)) {
-			node.setAttribute(name, value);
-		}
+	else if (name!=='type' && name in node) {
+		node[name] = value;
+		if (falsey(value)) node.removeAttribute(name);
 	}
-
-	ensureNodeData(node)[name] = value;
+	else if (name[0]==='o' && name[1]==='n') {
+		let type = normalizeEventName(name),
+			l = node._listeners || (node._listeners = createObject());
+		if (!l[type]) node.addEventListener(type, eventProxy);
+		else if (!value) node.removeEventListener(type, eventProxy);
+		l[type] = value;
+	}
+	else if (falsey(value)) {
+		node.removeAttribute(name);
+	}
+	else if (typeof value!=='object' && !isFunction(value)) {
+		node.setAttribute(name, value);
+	}
 }
-
 
 
 
