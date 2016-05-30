@@ -6,7 +6,7 @@ var coverage = String(process.env.COVERAGE)!=='false',
 
 module.exports = function(config) {
 	config.set({
-		frameworks: ['mocha', 'chai-sinon'],
+		frameworks: ['source-map-support', 'mocha', 'chai-sinon'],
 
 		reporters: ['mocha'].concat(coverage ? 'coverage' : []),
 
@@ -25,17 +25,17 @@ module.exports = function(config) {
 		browsers: ['PhantomJS'],
 
 		files: [
-			'test/browser/**.js',
-			'test/shared/**.js'
+			{ pattern: 'test/setup.js', watched: false },
+			{ pattern: 'test/{browser,shared}/**.js', watched: false }
 		],
 
 		preprocessors: {
-			'test/**/*.js': ['webpack'],
-			'src/**/*.js': ['webpack'],
-			'**/*.js': ['sourcemap']
+			'test/**/*.js': ['webpack', 'sourcemap'],
+			'src/**/*.js': ['webpack', 'sourcemap']
 		},
 
 		webpack: {
+			devtool: 'inline-source-map',
 			module: {
 				/* Transpile source and test files */
 				preLoaders: [
