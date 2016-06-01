@@ -7,7 +7,7 @@ import { h, render } from '../../src/preact';
 const MULTIPLIER = coverage ? 5 : 1;
 
 
-let now = typeof performance==='undefined' ? () => Date.now() : () => performance.now();
+let now = typeof performance!=='undefined' && performance.now ? () => performance.now() : () => +new Date();
 
 function loop(iter, time) {
 	let start = now(),
