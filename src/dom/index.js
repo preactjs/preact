@@ -1,5 +1,5 @@
 import { ATTR_KEY } from '../constants';
-import { createObject, toLowerCase, memoize, falsey, isFunction } from '../util';
+import { createObject, toLowerCase, memoize, empty, falsey, isFunction } from '../util';
 import { optionsHook } from '../hooks';
 
 
@@ -58,7 +58,7 @@ export function setAccessor(node, name, value) {
 		if (value && value.__html) node.innerHTML = value.__html;
 	}
 	else if (name!=='type' && name in node) {
-		node[name] = value;
+		setProperty(node, name, empty(value) ? '' : value);
 		if (falsey(value)) node.removeAttribute(name);
 	}
 	else if (name[0]==='o' && name[1]==='n') {
@@ -76,6 +76,15 @@ export function setAccessor(node, name, value) {
 	}
 }
 
+
+/** Attempt to set a DOM property to the given value.
+ *	IE & FF throw for certain property-value combinations.
+ */
+function setProperty(node, name, value) {
+	try {
+		node[name] = value;
+	} catch (e) { }
+}
 
 
 /** Proxy an event to hooked event handlers
