@@ -242,7 +242,7 @@ describe('Lifecycle methods', () => {
 				render(<Outer />, scratch);
 				expect(proto._constructor).to.have.been.called;
 				expect(proto.getInitialState).to.have.been.called;
-				expect(proto.componentWillMount).to.have.been.called;
+				expect(proto.componentDidMount).to.have.been.called;
 				expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
 				expect(proto.componentDidMount).to.have.been.called;
 			});
@@ -252,7 +252,7 @@ describe('Lifecycle methods', () => {
 				setState({ show:false });
 				rerender();
 
-				expect(proto.componentWillUnmount).to.have.been.called;
+				expect(proto.componentDidUnmount).to.have.been.called;
 				expect(proto.componentWillUnmount).to.have.been.calledBefore(proto.componentDidUnmount);
 				expect(proto.componentDidUnmount).to.have.been.called;
 			});
@@ -264,7 +264,7 @@ describe('Lifecycle methods', () => {
 
 				expect(proto._constructor).to.have.been.called;
 				expect(proto.getInitialState).to.have.been.called;
-				expect(proto.componentWillMount).to.have.been.called;
+				expect(proto.componentDidMount).to.have.been.called;
 				expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
 				expect(proto.componentDidMount).to.have.been.called;
 			});
