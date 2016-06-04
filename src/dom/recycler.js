@@ -1,9 +1,9 @@
-import { createObject, toLowerCase } from '../util';
+import { toLowerCase } from '../util';
 import { ensureNodeData, getNodeType, getRawNodeAttributes, removeNode } from '.';
 
 /** DOM node pool, keyed on nodeName. */
 
-let nodes = createObject();
+let nodes = {};
 
 export function collectNode(node) {
 	cleanNode(node);

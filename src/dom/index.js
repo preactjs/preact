@@ -1,10 +1,10 @@
 import { ATTR_KEY } from '../constants';
-import { createObject, toLowerCase, memoize, empty, falsey, isFunction } from '../util';
+import { toLowerCase, memoize, empty, falsey, isFunction } from '../util';
 import { optionsHook } from '../hooks';
 
 
 export function ensureNodeData(node, data) {
-	return node[ATTR_KEY] || (node[ATTR_KEY] = (data || createObject()));
+	return node[ATTR_KEY] || (node[ATTR_KEY] = (data || {}));
 }
 
 
@@ -63,7 +63,7 @@ export function setAccessor(node, name, value) {
 	}
 	else if (name[0]==='o' && name[1]==='n') {
 		let type = normalizeEventName(name),
-			l = node._listeners || (node._listeners = createObject());
+			l = node._listeners || (node._listeners = {});
 		if (!l[type]) node.addEventListener(type, eventProxy);
 		else if (!value) node.removeEventListener(type, eventProxy);
 		l[type] = value;
@@ -111,7 +111,7 @@ let normalizeEventName = memoize( t => toLowerCase(t.replace(/^on/i,'')) );
  */
 export function getRawNodeAttributes(node) {
 	let list = node.attributes,
-		attrs = createObject(),
+		attrs = {},
 		i = list.length;
 	while (i--) attrs[list[i].name] = list[i].value;
 	return attrs;

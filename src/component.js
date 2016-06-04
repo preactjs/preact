@@ -1,6 +1,6 @@
 import { FORCE_RENDER } from './constants';
 import { hook } from './hooks';
-import { createObject, extend, clone, isFunction } from './util';
+import { extend, clone, isFunction } from './util';
 import { createLinkedState } from './linked-state';
 import { triggerComponentRender, renderComponent } from './vdom/component';
 
@@ -22,11 +22,11 @@ export function Component(props, context) {
 	/** @public */
 	this.prevState = this.prevProps = this.prevContext = this.base = this.nextBase = this._parentComponent = this._component = this.__ref = this.__key = this._linkedStates = this._renderCallbacks = null;
 	/** @public */
-	this.context = context || createObject();
+	this.context = context || {};
 	/** @type {object} */
 	this.props = props;
 	/** @type {object} */
-	this.state = hook(this, 'getInitialState') || createObject();
+	this.state = hook(this, 'getInitialState') || {};
 }
 
 
@@ -65,7 +65,7 @@ extend(Component.prototype, {
 	 *		<button onClick={ this.linkState('touch.coords', 'touches.0') }>Tap</button
 	 */
 	linkState(key, eventPath) {
-		let c = this._linkedStates || (this._linkedStates = createObject()),
+		let c = this._linkedStates || (this._linkedStates = {}),
 			cacheKey = key + '|' + eventPath;
 		return c[cacheKey] || (c[cacheKey] = createLinkedState(this, key, eventPath));
 	},

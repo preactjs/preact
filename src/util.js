@@ -1,36 +1,21 @@
 import { NON_DIMENSION_PROPS } from './constants';
 
 
-let createObject = () => ({});
-
-try {
-	function Obj() {}  // eslint-disable-line
-	Obj.prototype = Object.create(null);
-	createObject = () => new Obj;
-} catch (e) {}
-
-export { createObject };
-
-
 /** Copy own-properties from `props` onto `obj`.
  *	@returns obj
  *	@private
  */
 export function extend(obj, props) {
-	let pure = props.prototype===undefined;
-	for (let i in props) if (pure || hasOwnProperty.call(props, i)) {
-		obj[i] = props[i];
-	}
+	if (props) for (let i in props) obj[i] = props[i];
 	return obj;
 }
 
 
-/** Fast clone. Note: does not filter out non-own properties. */
+/** Fast clone. Note: does not filter out non-own properties.
+ *	@see https://esbench.com/bench/56baa34f45df6895002e03b6
+ */
 export function clone(obj) {
-	let out = {};
-	/*eslint guard-for-in:0*/
-	for (let i in obj) out[i] = obj[i];
-	return out;
+	return extend({}, obj);
 }
 
 
@@ -39,7 +24,7 @@ export function clone(obj) {
  *	@private
  */
 export function memoize(fn) {
-	let mem = createObject();
+	let mem = {};
 	return k => mem[k] || (mem[k] = fn(k));
 }
 
@@ -58,11 +43,8 @@ export function delve(obj, key) {
 /** Convert an Array-like object to an Array
  *	@private
  */
-export function toArray(obj) {
-	let arr = [],
-		i = obj.length;
-	while (i--) arr[i] = obj[i];
-	return arr;
+export function toArray(obj, offset) {
+	return [].slice.call(obj, offset);
 }
 
 
@@ -76,10 +58,6 @@ export function isFunction(obj) {
 export function isString(obj) {
 	return 'string'===typeof obj;
 }
-
-
-/** @private Safe reference to builtin hasOwnProperty */
-export const hasOwnProperty = {}.hasOwnProperty;
 
 
 /** Check if a value is `null` or `undefined`.

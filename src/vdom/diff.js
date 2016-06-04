@@ -1,5 +1,5 @@
 import { ATTR_KEY } from '../constants';
-import { createObject, hasOwnProperty, toArray, empty, isString, isFunction } from '../util';
+import { toArray, empty, isString, isFunction } from '../util';
 import { hook, deepHook } from '../hooks';
 import { isSameNodeType, isNamedNode } from '.';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
@@ -107,7 +107,7 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 			let child = originalChildren[i],
 				key = getKey(child);
 			if (key || key===0) {
-				if (!keyed) keyed = createObject();
+				if (!keyed) keyed = {};
 				keyed[key] = child;
 				keyedLen++;
 			}
@@ -129,7 +129,7 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 			// attempt to find a node based on key matching
 			if (keyedLen!==0 && vchild.attributes) {
 				let key = vchild.key;
-				if (!empty(key) && hasOwnProperty.call(keyed, key)) {
+				if (!empty(key) && key in keyed) {
 					child = keyed[key];
 					keyed[key] = undefined;
 					keyedLen--;
@@ -174,7 +174,7 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 
 	if (keyedLen) {
 		/*eslint guard-for-in:0*/
-		for (let i in keyed) if (hasOwnProperty.call(keyed, i) && keyed[i]) {
+		for (let i in keyed) if (keyed[i]) {
 			children[min=childrenLen++] = keyed[i];
 		}
 	}
