@@ -7,7 +7,7 @@ export default {
 	plugins: [
 		memory({
 			path: 'src/preact',
-			contents: "export { h, Component, render, rerender, options } from './preact';"
+			contents: "export { h, cloneElement, Component, render, rerender, options } from './preact';"
 		}),
 		npm({
 			main: true
