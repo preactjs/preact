@@ -150,13 +150,14 @@ export function renderComponent(component, opts, mountAll) {
 
 			if (initialBase || opts===SYNC_RENDER) {
 				if (cbase) cbase._component = null;
-				base = diff(cbase, rendered || EMPTY_BASE, context, mountAll || !isUpdate);
+				base = diff(cbase, rendered || EMPTY_BASE, context, mountAll || !isUpdate, true);
 			}
 		}
 
 		if (initialBase && base!==initialBase) {
 			let p = initialBase.parentNode;
 			if (p && base!==p) p.replaceChild(base, initialBase);
+			if (!toUnmount) recollectNodeTree(initialBase);
 		}
 
 		if (toUnmount) {

@@ -117,6 +117,32 @@ describe('Components', () => {
 	});
 
 
+	// Test for Issue #176
+	it('should remove children when root changes to text node', () => {
+		let comp;
+
+		class Comp extends Component {
+			render(_, { alt }) {
+				return alt ? 'asdf' : <div>test</div>;
+			}
+		}
+
+		render(<Comp ref={c=>comp=c} />, scratch);
+
+		comp.setState({ alt:true });
+		comp.forceUpdate();
+		expect(scratch.innerHTML, 'switching to textnode').to.equal('asdf');
+
+		comp.setState({ alt:false });
+		comp.forceUpdate();
+		expect(scratch.innerHTML, 'switching to element').to.equal('<div>test</div>');
+
+		comp.setState({ alt:true });
+		comp.forceUpdate();
+		expect(scratch.innerHTML, 'switching to textnode').to.equal('asdf');
+	});
+
+
 	describe('props.children', () => {
 		it('should support passing children as a prop', () => {
 			const Foo = props => <div {...props} />;

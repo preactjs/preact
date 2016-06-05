@@ -16,7 +16,7 @@ import { unmountComponent } from './component';
  *	@returns {Element} dom			The created/mutated element
  *	@private
  */
-export default function diff(dom, vnode, context, mountAll) {
+export default function diff(dom, vnode, context, mountAll, unmountChildrenOnly) {
 	let originalAttributes = vnode.attributes;
 
 	while (isFunctionalComponent(vnode)) {
@@ -31,7 +31,7 @@ export default function diff(dom, vnode, context, mountAll) {
 				}
 				return dom;
 			}
-			collectNode(dom);
+			if (!unmountChildrenOnly) collectNode(dom);
 		}
 		return document.createTextNode(vnode);
 	}
@@ -52,7 +52,7 @@ export default function diff(dom, vnode, context, mountAll) {
 		// move children into the replacement node
 		appendChildren(out, toArray(dom.childNodes));
 		// reclaim element nodes
-		recollectNodeTree(dom);
+		if (!unmountChildrenOnly) recollectNodeTree(dom);
 	}
 
 	diffNode(out, vnode, context, mountAll);
