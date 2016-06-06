@@ -198,9 +198,9 @@ export function renderComponent(component, opts, mountAll) {
  */
 export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 	let c = dom && dom._component,
-		oldDom = dom;
-
-	let isOwner = c && dom._componentConstructor===vnode.nodeName;
+		oldDom = dom,
+		isDirectOwner = c && dom._componentConstructor===vnode.nodeName,
+		isOwner = isDirectOwner;
 	while (c && !isOwner && (c=c._parentComponent)) {
 		isOwner = c.constructor===vnode.nodeName;
 	}
@@ -210,7 +210,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 		dom = c.base;
 	}
 	else {
-		if (c) {
+		if (c && !isDirectOwner) {
 			unmountComponent(c, true);
 			dom = oldDom = null;
 		}
