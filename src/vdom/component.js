@@ -5,6 +5,7 @@ import { hook, deepHook } from '../hooks';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from '.';
 import { diff, removeOrphanedChildren, recollectNodeTree } from './diff';
+import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { createComponent, collectComponent } from './component-recycler';
 import { removeNode } from '../dom';
 
@@ -104,13 +105,17 @@ export function renderComponent(component, opts, mountAll) {
 	if (!skip) {
 		rendered = hook(component, 'render', props, state, context);
 
-		let childComponent = rendered && rendered.nodeName,
-			toUnmount, base;
-
 		// context to pass to the child, can be updated via (grand-)parent component
 		if (component.getChildContext) {
 			context = extend(clone(context), component.getChildContext());
 		}
+
+		while (isFunctionalComponent(rendered)) {
+			rendered = buildFunctionalComponent(rendered, context);
+		}
+
+		let childComponent = rendered && rendered.nodeName,
+			toUnmount, base;
 
 		if (isFunction(childComponent) && childComponent.prototype.render) {
 			// set up high order component link

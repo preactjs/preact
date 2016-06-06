@@ -384,6 +384,42 @@ describe('Components', () => {
 			expect(Inner.prototype.componentDidUnmount).to.have.been.calledOnce;
 		});
 
+		it('should resolve intermediary functional component', () => {
+			let ctx = {};
+			class Root extends Component {
+				getChildContext() {
+					return { ctx };
+				}
+				render() {
+					return <Func />;
+				}
+			}
+			const Func = sinon.spy( () => <Inner /> );
+			class Inner extends Component {
+				componentWillMount() {}
+				componentDidMount() {}
+				componentWillUnmount() {}
+				componentDidUnmount() {}
+				render() {
+					return <div>inner</div>;
+				}
+			}
+
+			spyAll(Inner.prototype);
+
+			let root = render(<Root />, scratch);
+
+			expect(Inner.prototype.componentWillMount).to.have.been.calledOnce;
+			expect(Inner.prototype.componentDidMount).to.have.been.calledOnce;
+			expect(Inner.prototype.componentWillMount).to.have.been.calledBefore(Inner.prototype.componentDidMount);
+
+			root = render(<asdf />, scratch, root);
+
+			expect(Inner.prototype.componentWillUnmount).to.have.been.calledOnce;
+			expect(Inner.prototype.componentDidUnmount).to.have.been.calledOnce;
+			expect(Inner.prototype.componentWillUnmount).to.have.been.calledBefore(Inner.prototype.componentDidUnmount);
+		});
+
 		it('should unmount children of high-order components without unmounting parent', () => {
 			let outer, inner2, counter=0;
 
