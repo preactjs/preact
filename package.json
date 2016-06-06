@@ -61,7 +61,7 @@
     "pretty-bytes-cli": "^1.0.0",
     "rimraf": "^2.5.1",
     "rollup": "^0.26.0",
-    "rollup-plugin-babel": "^1.0.0",
+    "rollup-plugin-babel": "^2.5.0",
     "rollup-plugin-memory": "^1.0.0",
     "rollup-plugin-npm": "^1.4.0",
     "sinon": "^1.17.2",
