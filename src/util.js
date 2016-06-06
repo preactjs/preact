@@ -1,4 +1,4 @@
-import { NON_DIMENSION_PROPS } from './constants';
+import { EMPTY_BASE, NON_DIMENSION_PROPS } from './constants';
 
 
 /** Copy own-properties from `props` onto `obj`.
@@ -136,5 +136,5 @@ try { ch = new MessageChannel(); } catch (e) {}
  */
 export const setImmediate = ch ? ( f => {
 	ch.port1.onmessage = f;
-	ch.port2.postMessage('');
+	ch.port2.postMessage(EMPTY_BASE);
 }) : setTimeout;
