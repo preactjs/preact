@@ -11,6 +11,8 @@ function getAttributes(node) {
 	return attrs;
 }
 
+const Empty = () => null;
+
 describe('Components', () => {
 	let scratch;
 
@@ -20,6 +22,8 @@ describe('Components', () => {
 	});
 
 	beforeEach( () => {
+		let c = scratch.firstChild;
+		if (c) render(<Empty />, scratch, c);
 		scratch.innerHTML = '';
 	});
 

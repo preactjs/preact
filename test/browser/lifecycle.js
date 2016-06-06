@@ -35,8 +35,8 @@ describe('Lifecycle methods', () => {
 		it('should be called when rerender with new props from parent', () => {
 			let doRender;
 			class Outer extends Component {
-				constructor() {
-					super();
+				constructor(p, c) {
+					super(p, c);
 					this.state = { i: 0 };
 				}
 				componentDidMount() {
@@ -105,8 +105,8 @@ describe('Lifecycle methods', () => {
 		it('should be called when rerender with new props from parent', () => {
 			let doRender;
 			class Outer extends Component {
-				constructor() {
-					super();
+				constructor(p, c) {
+					super(p, c);
 					this.state = { i: 0 };
 				}
 				componentDidMount() {
@@ -143,8 +143,8 @@ describe('Lifecycle methods', () => {
 		it('should be called in right execution order', () => {
 			let doRender;
 			class Outer extends Component {
-				constructor() {
-					super();
+				constructor(p, c) {
+					super(p, c);
 					this.state = { i: 0 };
 				}
 				componentDidMount() {
@@ -189,8 +189,8 @@ describe('Lifecycle methods', () => {
 	describe('#constructor, getInitialState and component(Did|Will)(Mount|Unmount)', () => {
 		let setState;
 		class Outer extends Component {
-			constructor() {
-				super();
+			constructor(p, c) {
+				super(p, c);
 				this.state = { show:true };
 				setState = s => this.setState(s);
 			}
@@ -206,7 +206,7 @@ describe('Lifecycle methods', () => {
 		}
 
 		class LifecycleTestComponent extends Component {
-			constructor() { super(); this._constructor(); }
+			constructor(p, c) { super(p, c); this._constructor(); }
 			_constructor() {}
 			getInitialState() {}
 			componentWillMount() {}
