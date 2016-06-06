@@ -1,4 +1,4 @@
-import diff from './vdom/diff';
+import { diff } from './vdom/diff';
 import { deepHook } from './hooks';
 
 /** Render JSX into a `parent` Element.

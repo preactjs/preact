@@ -4,8 +4,7 @@ import { isFunction, clone, extend, empty } from '../util';
 import { hook, deepHook } from '../hooks';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from '.';
-import diff from './diff';
-import { removeOrphanedChildren, recollectNodeTree } from './diff';
+import { diff, removeOrphanedChildren, recollectNodeTree } from './diff';
 import { createComponent, collectComponent } from './component-recycler';
 import { removeNode } from '../dom';
 

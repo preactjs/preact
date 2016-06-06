@@ -16,7 +16,7 @@ import { unmountComponent } from './component';
  *	@returns {Element} dom			The created/mutated element
  *	@private
  */
-export default function diff(dom, vnode, context, mountAll, unmountChildrenOnly) {
+export function diff(dom, vnode, context, mountAll, unmountChildrenOnly) {
 	let originalAttributes = vnode.attributes;
 
 	while (isFunctionalComponent(vnode)) {
