@@ -9,8 +9,9 @@ import { isFunction } from '../util';
  *	@param {VNode} vnode	A VNode
  *	@private
  */
-export function isFunctionalComponent({ nodeName }) {
-	return isFunction(nodeName) && !(nodeName.prototype && nodeName.prototype.render);
+export function isFunctionalComponent(vnode) {
+	let nodeName = vnode.nodeName;
+	return nodeName && isFunction(nodeName) && !(nodeName.prototype && nodeName.prototype.render);
 }
 
 
