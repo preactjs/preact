@@ -21,9 +21,8 @@ export default {
 		if (!attrs || isFunction(n.nodeName)) return;
 
 		// normalize className to class.
-		let p = attrs.className;
-		if (p) {
-			attrs['class'] = p;
+		if ('className' in attrs) {
+			attrs['class'] = attrs.className;
 			delete attrs.className;
 		}
 
