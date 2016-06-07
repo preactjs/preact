@@ -10,7 +10,7 @@ import { isFunction } from '../util';
  *	@private
  */
 export function isFunctionalComponent(vnode) {
-	let nodeName = vnode.nodeName;
+	let nodeName = vnode && vnode.nodeName;
 	return nodeName && isFunction(nodeName) && !(nodeName.prototype && nodeName.prototype.render);
 }
 
