@@ -13,7 +13,7 @@ export function isSameNodeType(node, vnode) {
 	let nodeName = vnode.nodeName,
 		type = typeof nodeName;
 	if (type==='string') {
-		return node.normalizedNodeName===nodeName || isNamedNode(node, nodeName);
+		return isNamedNode(node, nodeName);
 	}
 	if (type==='function') {
 		return node._componentConstructor===nodeName || isFunctionalComponent(vnode);
@@ -22,7 +22,7 @@ export function isSameNodeType(node, vnode) {
 
 
 export function isNamedNode(node, nodeName) {
-	return toLowerCase(node.nodeName)===toLowerCase(nodeName);
+	return (node.normalizedNodeName || toLowerCase(node.nodeName))===toLowerCase(nodeName);
 }
 
 
