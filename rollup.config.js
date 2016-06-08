@@ -4,10 +4,11 @@ import memory from 'rollup-plugin-memory';
 
 export default {
 	exports: 'named',
+	useStrict: false,
 	plugins: [
 		memory({
 			path: 'src/preact',
-			contents: "export { h, cloneElement, Component, render, rerender, options } from './preact';"
+			contents: "export * from './preact';"
 		}),
 		npm({
 			main: true
