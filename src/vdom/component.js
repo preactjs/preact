@@ -161,8 +161,7 @@ export function renderComponent(component, opts, mountAll) {
 		if (initialBase && base!==initialBase) {
 			let p = initialBase.parentNode;
 			if (p && base!==p) p.replaceChild(base, initialBase);
-			if (!toUnmount) {
-				initialBase._component = null;
+			if (!toUnmount && initialBase._component===component) {
 				recollectNodeTree(initialBase);
 			}
 		}
