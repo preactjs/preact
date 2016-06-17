@@ -55,9 +55,9 @@ export function diff(dom, vnode, context, mountAll, unmountChildrenOnly) {
 		if (!unmountChildrenOnly) recollectNodeTree(dom);
 	}
 
-	diffNode(out, vnode, context, mountAll);
+	diffNode(out, vnode.children, context, mountAll);
 
-	diffAttributes(out, vnode);
+	diffAttributes(out, vnode.attributes);
 
 	if (originalAttributes && originalAttributes.ref) {
 		(out[ATTR_KEY].ref = originalAttributes.ref)(out);
@@ -68,9 +68,8 @@ export function diff(dom, vnode, context, mountAll, unmountChildrenOnly) {
 
 
 /** Morph a DOM node to look like the given VNode. Creates DOM if it doesn't exist. */
-function diffNode(dom, vnode, context, mountAll) {
-	let vchildren = vnode.children,
-		firstChild = dom.firstChild;
+function diffNode(dom, vchildren, context, mountAll) {
+	let firstChild = dom.firstChild;
 	if (vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && firstChild instanceof Text && dom.childNodes.length===1) {
 		firstChild.nodeValue = vchildren[0];
 	}
@@ -97,7 +96,6 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 		keyed,
 		keyedLen = 0,
 		min = 0,
-		vlen = vchildren && vchildren.length,
 		len = originalChildren.length,
 		childrenLen = 0;
 
@@ -107,9 +105,8 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 			let child = originalChildren[i],
 				key = getKey(child);
 			if (key || key===0) {
-				if (!keyed) keyed = {};
+				if (!keyedLen++) keyed = {};
 				keyed[key] = child;
-				keyedLen++;
 			}
 			else {
 				children[childrenLen++] = child;
@@ -117,8 +114,8 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 		}
 	}
 
-	if (vlen) {
-		for (let i=0; i<vlen; i++) {
+	if (vchildren) {
+		for (let i=0; i<vchildren.length; i++) {
 			let vchild = vchildren[i],
 				child;
 
@@ -127,7 +124,7 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 			// }
 
 			// attempt to find a node based on key matching
-			if (keyedLen!==0 && vchild.attributes) {
+			if (keyedLen && vchild.attributes) {
 				let key = vchild.key;
 				if (!empty(key) && key in keyed) {
 					child = keyed[key];
@@ -229,9 +226,8 @@ export function recollectNodeTree(node, unmountOnly) {
 
 
 /** Apply differences in attributes from a VNode to the given DOM Node. */
-function diffAttributes(dom, vnode) {
-	let old = dom[ATTR_KEY] || getRawNodeAttributes(dom),
-		attrs = vnode.attributes;
+function diffAttributes(dom, attrs) {
+	let old = dom[ATTR_KEY] || getRawNodeAttributes(dom);
 
 	// removeAttributes(dom, old, attrs || EMPTY);
 	for (let name in old) {
