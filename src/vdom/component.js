@@ -81,7 +81,8 @@ export function renderComponent(component, opts, mountAll) {
 		previousState = component.prevState || state,
 		previousContext = component.prevContext || context,
 		isUpdate = component.base,
-		initialBase = isUpdate || component.nextBase;
+		initialBase = isUpdate || component.nextBase,
+		initialComponent = initialBase && initialBase._component;
 
 	// if updating
 	if (isUpdate) {
@@ -161,7 +162,7 @@ export function renderComponent(component, opts, mountAll) {
 		if (initialBase && base!==initialBase) {
 			let p = initialBase.parentNode;
 			if (p && base!==p) p.replaceChild(base, initialBase);
-			if (!toUnmount && initialBase._component===component) {
+			if (!toUnmount && initialComponent===component) {
 				recollectNodeTree(initialBase);
 			}
 		}
