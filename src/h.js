@@ -1,6 +1,6 @@
 import { VNode } from './vnode';
 import { optionsHook } from './hooks';
-import { falsey, isFunction, isString } from './util';
+import { falsey, isFunction, isString, styleObjToCss, hashToClassName } from './util';
 
 
 const SHARED_TEMP_ARRAY = [];
@@ -31,13 +31,8 @@ export function h(nodeName, attributes, firstChild) {
 			for (let i=2; i<len; i++) {
 				let p = arguments[i];
 				if (falsey(p)) continue;
-				if (p.join) {
-					arr = p;
-				}
-				else {
-					arr = SHARED_TEMP_ARRAY;
-					arr[0] = p;
-				}
+				if (p.join) arr = p;
+				else (arr = SHARED_TEMP_ARRAY)[0] = p;
 				for (let j=0; j<arr.length; j++) {
 					let child = arr[j],
 						simple = !(falsey(child) || isFunction(child) || child instanceof VNode);
@@ -53,8 +48,28 @@ export function h(nodeName, attributes, firstChild) {
 			}
 		}
 	}
-	else if (attributes && attributes.children) {
-		return h(nodeName, attributes, attributes.children);
+	else if (attributes) {
+		if (attributes.children) {
+			return h(nodeName, attributes, attributes.children);
+		}
+
+		if (!isFunction(nodeName)) {
+			// normalize className to class.
+			if ('className' in attributes) {
+				attributes.class = attributes.className;
+				delete attributes.className;
+			}
+
+			lastSimple = attributes.class;
+			if (lastSimple && !isString(lastSimple)) {
+				attributes.class = hashToClassName(lastSimple);
+			}
+
+			lastSimple = attributes.style;
+			if (lastSimple && !isString(lastSimple)) {
+				attributes.style = styleObjToCss(lastSimple);
+			}
+		}
 	}
 
 	let p = new VNode(nodeName, attributes || undefined, children);
