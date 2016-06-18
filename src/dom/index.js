@@ -55,11 +55,11 @@ export function setAccessor(node, name, value) {
 		if (falsey(value)) node.removeAttribute(name);
 	}
 	else if (name[0]==='o' && name[1]==='n') {
-		let type = normalizeEventName(name),
-			l = node._listeners || (node._listeners = {});
-		if (!l[type]) node.addEventListener(type, eventProxy);
-		else if (!value) node.removeEventListener(type, eventProxy);
-		l[type] = value;
+		let l = node._listeners || (node._listeners = {});
+		name = toLowerCase(name.substring(2));
+		if (!l[name]) node.addEventListener(name, eventProxy);
+		else if (!value) node.removeEventListener(name, eventProxy);
+		l[name] = value;
 	}
 	else if (falsey(value)) {
 		node.removeAttribute(name);
@@ -84,28 +84,17 @@ function setProperty(node, name, value) {
  *	@private
  */
 function eventProxy(e) {
-	return this._listeners[normalizeEventName(e.type)](optionsHook('event', e) || e);
+	return this._listeners[toLowerCase(e.type)](optionsHook('event', e) || e);
 }
-
-
-
-/** Convert an Event name/type to lowercase and strip any "on*" prefix.
- *	@function
- *	@private
- */
-let normalizeEventName = memoize( t => toLowerCase(t.replace(/^on/i,'')) );
-
-
-
 
 
 /** Get a node's attributes as a hashmap.
  *	@private
  */
 export function getRawNodeAttributes(node) {
-	let list = node.attributes,
-		attrs = {},
-		i = list.length;
-	while (i--) attrs[list[i].name] = list[i].value;
+	let attrs = {};
+	for (let i=node.attributes.length; i--; ) {
+		attrs[node.attributes[i].name] = node.attributes[i].value;
+	}
 	return attrs;
 }
