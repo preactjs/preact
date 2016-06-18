@@ -79,7 +79,6 @@ export function falsey(value) {
  */
 export function styleObjToCss(s) {
 	let str = '';
-	/* eslint guard-for-in:0 */
 	for (let prop in s) {
 		let val = s[prop];
 		if (!empty(val)) {
