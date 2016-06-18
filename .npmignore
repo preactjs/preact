@@ -4,3 +4,4 @@
 karma.conf.js
 rollup.config.js
 test/
+-codemod.js
