@@ -6,9 +6,6 @@ export const FORCE_RENDER = 2;
 export const EMPTY = {};
 export const EMPTY_BASE = '';
 
-// is this a DOM environment
-export const HAS_DOM = typeof document!=='undefined';
-
 export const ATTR_KEY = typeof Symbol!=='undefined' ? Symbol.for('preactattr') : '__preactattr_';
 
 // DOM properties that should NOT have "px" added when numeric
