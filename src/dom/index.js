@@ -30,7 +30,7 @@ export function removeNode(node) {
  *	@param {any} previousValue	The last value that was set for this name/node pair
  *	@private
  */
-export function setAccessor(node, name, value) {
+export function setAccessor(node, name, value, isSvg) {
 	ensureNodeData(node)[name] = value;
 
 	if (name==='key' || name==='children') return;
@@ -44,7 +44,7 @@ export function setAccessor(node, name, value) {
 	else if (name==='dangerouslySetInnerHTML') {
 		if (value && value.__html) node.innerHTML = value.__html;
 	}
-	else if (name!=='type' && name in node) {
+	else if (!isSvg && name!=='type' && name in node) {
 		setProperty(node, name, empty(value) ? '' : value);
 		if (falsey(value)) node.removeAttribute(name);
 	}
@@ -55,11 +55,16 @@ export function setAccessor(node, name, value) {
 		else if (!value) node.removeEventListener(name, eventProxy);
 		l[name] = value;
 	}
-	else if (falsey(value)) {
-		node.removeAttribute(name);
-	}
-	else if (typeof value!=='object' && !isFunction(value)) {
-		node.setAttribute(name, value);
+	else {
+		let ns = isSvg && name.match(/^xlink\:?(.+)/);
+		if (falsey(value)) {
+			if (ns) node.removeAttributeNS('http://www.w3.org/1999/xlink', ns[1]);
+			else node.removeAttribute(name);
+		}
+		else if (typeof value!=='object' && !isFunction(value)) {
+			if (ns) node.setAttributeNS('http://www.w3.org/1999/xlink', ns[1], value);
+			else node.setAttribute(name, value);
+		}
 	}
 }
 

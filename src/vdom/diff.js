@@ -1,5 +1,5 @@
 import { ATTR_KEY } from '../constants';
-import { empty, isString, isFunction } from '../util';
+import { toLowerCase, empty, isString, isFunction } from '../util';
 import { hook, deepHook } from '../hooks';
 import { isSameNodeType, isNamedNode } from '.';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
@@ -8,6 +8,8 @@ import { removeNode, setAccessor, getRawNodeAttributes, getNodeType } from '../d
 import { createNode, collectNode } from '../dom/recycler';
 import { unmountComponent } from './component';
 
+
+let SVG_MODE = false;
 
 
 /** Apply differences in a given vnode (and it's deep children) to a real DOM Node.
@@ -36,19 +38,26 @@ export function diff(dom, vnode, context, mountAll, unmountChildrenOnly) {
 		return document.createTextNode(vnode);
 	}
 
-	if (isFunction(vnode.nodeName)) {
+	let out = dom,
+		nodeName = vnode.nodeName,
+		svgMode;
+
+	if (isFunction(nodeName)) {
 		return buildComponentFromVNode(dom, vnode, context, mountAll);
 	}
+	if (!isString(nodeName)) {
+		nodeName = String(nodeName);
+	}
 
-	let out = dom,
-		nodeName = vnode.nodeName;
-	if (!isString(nodeName)) nodeName = String(nodeName);
+	svgMode = toLowerCase(nodeName)==='svg';
+
+	if (svgMode) SVG_MODE = true;
 
 	if (!dom) {
-		out = createNode(nodeName);
+		out = createNode(nodeName, SVG_MODE);
 	}
 	else if (!isNamedNode(dom, nodeName)) {
-		out = createNode(nodeName);
+		out = createNode(nodeName, SVG_MODE);
 		// move children into the replacement node
 		while (dom.firstChild) out.appendChild(dom.firstChild);
 		// reclaim element nodes
@@ -62,6 +71,8 @@ export function diff(dom, vnode, context, mountAll, unmountChildrenOnly) {
 	if (originalAttributes && originalAttributes.ref) {
 		(out[ATTR_KEY].ref = originalAttributes.ref)(out);
 	}
+
+	if (svgMode) SVG_MODE = false;
 
 	return out;
 }
@@ -232,7 +243,7 @@ function diffAttributes(dom, attrs) {
 	// removeAttributes(dom, old, attrs || EMPTY);
 	for (let name in old) {
 		if (!attrs || !(name in attrs)) {
-			setAccessor(dom, name, null);
+			setAccessor(dom, name, null, SVG_MODE);
 		}
 	}
 
@@ -240,7 +251,7 @@ function diffAttributes(dom, attrs) {
 	if (attrs) {
 		for (let name in attrs) {
 			if (!(name in old) || attrs[name]!=(name==='value' || name==='selected' || name==='checked' ? dom[name] : old[name])) {
-				setAccessor(dom, name, attrs[name]);
+				setAccessor(dom, name, attrs[name], SVG_MODE);
 			}
 		}
 	}
