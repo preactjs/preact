@@ -1,10 +1,10 @@
 import { ATTR_KEY } from '../constants';
-import { toArray, empty, isString, isFunction } from '../util';
+import { toLowerCase, empty, isString, isFunction } from '../util';
 import { hook, deepHook } from '../hooks';
 import { isSameNodeType, isNamedNode } from '.';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
-import { removeNode, appendChildren, setAccessor, getRawNodeAttributes, getNodeType } from '../dom';
+import { removeNode, setAccessor, getRawNodeAttributes, getNodeType } from '../dom';
 import { createNode, collectNode } from '../dom/recycler';
 import { unmountComponent } from './component';
 
@@ -50,7 +50,7 @@ export function diff(dom, vnode, context, mountAll, unmountChildrenOnly) {
 	else if (!isNamedNode(dom, nodeName)) {
 		out = createNode(nodeName);
 		// move children into the replacement node
-		appendChildren(out, toArray(dom.childNodes));
+		while (dom.firstChild) out.appendChild(dom.firstChild);
 		// reclaim element nodes
 		if (!unmountChildrenOnly) recollectNodeTree(dom);
 	}

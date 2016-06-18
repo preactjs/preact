@@ -1,5 +1,5 @@
 import { ATTR_KEY } from '../constants';
-import { toLowerCase, memoize, empty, falsey, isFunction } from '../util';
+import { toLowerCase, empty, falsey, isFunction } from '../util';
 import { optionsHook } from '../hooks';
 
 
@@ -19,13 +19,6 @@ export function getNodeType(node) {
  *	Uses a Document Fragment to batch when appending 2 or more children
  *	@private
  */
-export function appendChildren(parent, children) {
-	let len = children.length,
-		many = len>2,
-		into = many ? document.createDocumentFragment() : parent;
-	for (let i=0; i<len; i++) into.appendChild(children[i]);
-	if (many) parent.appendChild(into);
-}
 
 
 /** Removes a given DOM Node from its parent. */
