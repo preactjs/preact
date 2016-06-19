@@ -62,7 +62,7 @@
     "phantomjs-prebuilt": "^2.1.7",
     "pretty-bytes-cli": "^1.0.0",
     "rimraf": "^2.5.1",
-    "rollup": "^0.29.0",
+    "rollup": "^0.32.0",
     "rollup-plugin-babel": "^1.0.0",
     "rollup-plugin-memory": "^1.0.0",
     "rollup-plugin-npm": "^1.4.0",
