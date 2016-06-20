@@ -15,12 +15,6 @@ export function getNodeType(node) {
 }
 
 
-/** Append multiple children to a Node.
- *	Uses a Document Fragment to batch when appending 2 or more children
- *	@private
- */
-
-
 /** Removes a given DOM Node from its parent. */
 export function removeNode(node) {
 	let p = node.parentNode;
