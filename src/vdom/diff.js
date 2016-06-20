@@ -1,5 +1,5 @@
 import { ATTR_KEY } from '../constants';
-import { toLowerCase, empty, isString, isFunction } from '../util';
+import { empty, isString, isFunction } from '../util';
 import { hook, deepHook } from '../hooks';
 import { isSameNodeType, isNamedNode } from '.';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
@@ -239,10 +239,8 @@ function diffAttributes(dom, attrs) {
 	// new & updated
 	if (attrs) {
 		for (let name in attrs) {
-			let value = attrs[name];
-			if (value===undefined) value = null;
-			if (!(name in old) || value!=old[name]) {
-				setAccessor(dom, name, value);
+			if (!(name in old) || attrs[name]!=(name==='value' || name==='selected' || name==='checked' ? dom[name] : old[name])) {
+				setAccessor(dom, name, attrs[name]);
 			}
 		}
 	}
