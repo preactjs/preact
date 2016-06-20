@@ -1,4 +1,4 @@
-import npm from 'rollup-plugin-npm';
+import npm from 'rollup-plugin-node-resolve';
 import babel from 'rollup-plugin-babel';
 import memory from 'rollup-plugin-memory';
 
@@ -15,8 +15,7 @@ export default {
 		}),
 		babel({
 			sourceMap: true,
-			loose: 'all',
-			blacklist: ['es6.tailCall'],
+			externalHelpers: true,
 			exclude: 'node_modules/**'
 		})
 	]

@@ -1,4 +1,5 @@
 import { h, render, Component } from '../../src/preact';
+import 'babel-polyfill';
 /** @jsx h */
 
 describe('context', () => {
