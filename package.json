@@ -45,7 +45,7 @@
     "eslint-plugin-react": "^5.1.1",
     "gzip-size-cli": "^1.0.0",
     "isparta-loader": "^2.0.0",
-    "jscodeshift": "^0.3.20",
+    "jscodeshift": "^0.3.21",
     "karma": "^0.13.22",
     "karma-babel-preprocessor": "^5.2.2",
     "karma-chai": "^0.1.0",
