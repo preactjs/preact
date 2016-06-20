@@ -1,4 +1,4 @@
-import npm from 'rollup-plugin-node-resolve';
+import nodeResolve from 'rollup-plugin-node-resolve';
 import babel from 'rollup-plugin-babel';
 import memory from 'rollup-plugin-memory';
 
@@ -10,7 +10,7 @@ export default {
 			path: 'src/preact',
 			contents: "export * from './preact';"
 		}),
-		npm({
+		nodeResolve({
 			main: true
 		}),
 		babel({
