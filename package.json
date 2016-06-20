@@ -13,7 +13,7 @@
     "transpile": "rollup -c rollup.config.js -m ${npm_package_dev_main}.map -f umd -n $npm_package_amdName $npm_package_jsnext_main -o $npm_package_dev_main",
     "optimize": "uglifyjs $npm_package_dev_main -c conditionals=false,sequences=false,loops=false,join_vars=false,collapse_vars=false --pure-funcs=Object.defineProperty -b width=120,quote_style=3 -o $npm_package_main -p relative --in-source-map ${npm_package_dev_main}.map --source-map ${npm_package_main}.map",
     "minify": "uglifyjs $npm_package_main -c screw_ie8,unsafe,loops=false,keep_fargs=false,pure_getters,unused,dead_code -m -o $npm_package_minified_main -p relative --in-source-map ${npm_package_dev_main}.map --source-map ${npm_package_minified_main}.map",
-    "strip": "jscodeshift -t .strip-tdz-codemod.js dist/preact.dev.js",
+    "strip": "jscodeshift --parser=babylon -t .strip-tdz-codemod.js dist/preact.dev.js",
     "size": "size=$(gzip-size $npm_package_minified_main) && echo \"gzip size: $size / $(pretty-bytes $size)\"",
     "test": "npm-run-all lint --parallel test:mocha test:karma",
     "test:mocha": "mocha --recursive --compilers js:babel/register test/shared test/node",
