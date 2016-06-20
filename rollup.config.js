@@ -1,4 +1,4 @@
-import npm from 'rollup-plugin-npm';
+import npm from 'rollup-plugin-node-resolve';
 import babel from 'rollup-plugin-babel';
 import memory from 'rollup-plugin-memory';
 
