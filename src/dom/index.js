@@ -42,9 +42,9 @@ export function setAccessor(node, name, value, isSvg) {
 		node.style.cssText = value || '';
 	}
 	else if (name==='dangerouslySetInnerHTML') {
-		if (value && value.__html) node.innerHTML = value.__html;
+		if (value) node.innerHTML = value.__html;
 	}
-	else if (!isSvg && name!=='type' && name in node) {
+	else if (name!=='type' && !isSvg && name in node) {
 		setProperty(node, name, empty(value) ? '' : value);
 		if (falsey(value)) node.removeAttribute(name);
 	}
@@ -83,7 +83,7 @@ function setProperty(node, name, value) {
  *	@private
  */
 function eventProxy(e) {
-	return this._listeners[toLowerCase(e.type)](optionsHook('event', e) || e);
+	return this._listeners[e.type](optionsHook('event', e) || e);
 }
 
 
