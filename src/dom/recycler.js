@@ -14,10 +14,9 @@ export function collectNode(node) {
 }
 
 
-export function createNode(nodeName) {
+export function createNode(nodeName, isSvg) {
 	let name = toLowerCase(nodeName),
-		list = nodes[name],
-		node = list && list.pop() || document.createElement(nodeName);
+		node = nodes[name] && nodes[name].pop() || (isSvg ? document.createElementNS('http://www.w3.org/2000/svg', nodeName) : document.createElement(nodeName));
 	ensureNodeData(node);
 	node.normalizedNodeName = name;
 	return node;
