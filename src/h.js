@@ -52,21 +52,27 @@ export function h(nodeName, attributes, firstChild) {
 		return h(nodeName, attributes, attributes.children);
 	}
 
-	if (attributes && !isFunction(nodeName)) {
-		// normalize className to class.
-		if ('className' in attributes) {
-			attributes.class = attributes.className;
-			delete attributes.className;
+	if (attributes) {
+		if (attributes.children) {
+			delete attributes.children;
 		}
 
-		lastSimple = attributes.class;
-		if (lastSimple && !isString(lastSimple)) {
-			attributes.class = hashToClassName(lastSimple);
-		}
+		if (!isFunction(nodeName)) {
+			// normalize className to class.
+			if ('className' in attributes) {
+				attributes.class = attributes.className;
+				delete attributes.className;
+			}
 
-		lastSimple = attributes.style;
-		if (lastSimple && !isString(lastSimple)) {
-			attributes.style = styleObjToCss(lastSimple);
+			lastSimple = attributes.class;
+			if (lastSimple && !isString(lastSimple)) {
+				attributes.class = hashToClassName(lastSimple);
+			}
+
+			lastSimple = attributes.style;
+			if (lastSimple && !isString(lastSimple)) {
+				attributes.style = styleObjToCss(lastSimple);
+			}
 		}
 	}
 

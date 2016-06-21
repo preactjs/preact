@@ -22,6 +22,10 @@ module.exports = function(config) {
 			]
 		},
 
+		mochaReporter: {
+			showDiff: true
+		},
+
 		browsers: ['PhantomJS'],
 
 		files: [
