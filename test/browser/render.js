@@ -252,20 +252,24 @@ describe('render()', () => {
 	});
 
 	it('should serialize style objects', () => {
-		render(<div style={{
-			color: 'rgb(255, 255, 255)',
-			background: 'rgb(255, 100, 0)',
-			backgroundPosition: '0 0',
-			'background-size': 'cover',
-			padding: 5,
-			top: 100,
-			left: '100%'
-		}} />, scratch);
+		render((
+			<div style={{
+				color: 'rgb(255, 255, 255)',
+				background: 'rgb(255, 100, 0)',
+				backgroundPosition: '10px 10px',
+				'background-size': 'cover',
+				padding: 5,
+				top: 100,
+				left: '100%'
+			}}>
+				test
+			</div>
+		), scratch);
 
 		let { style } = scratch.childNodes[0];
-		expect(style).to.have.property('color', 'rgb(255, 255, 255)');
+		expect(style).to.have.property('color').that.equals('rgb(255, 255, 255)');
 		expect(style).to.have.property('background').that.contains('rgb(255, 100, 0)');
-		expect(style).to.have.property('backgroundPosition').that.matches(/0(px)? 0(px)?/);
+		expect(style).to.have.property('backgroundPosition').that.equals('10px 10px');
 		expect(style).to.have.property('backgroundSize', 'cover');
 		expect(style).to.have.property('padding', '5px');
 		expect(style).to.have.property('top', '100px');
