@@ -51,8 +51,10 @@ function benchmark(iter, callback) {
 }
 
 
-describe('performance', () => {
+describe('performance', function() {
 	let scratch;
+	
+	this.timeout(10000);
 
 	before( () => {
 		if (coverage) {
