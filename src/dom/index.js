@@ -58,11 +58,11 @@ export function setAccessor(node, name, value, isSvg) {
 	else {
 		let ns = isSvg && name.match(/^xlink\:?(.+)/);
 		if (falsey(value)) {
-			if (ns) node.removeAttributeNS('http://www.w3.org/1999/xlink', ns[1]);
+			if (ns) node.removeAttributeNS('http://www.w3.org/1999/xlink', toLowerCase(ns[1]));
 			else node.removeAttribute(name);
 		}
 		else if (typeof value!=='object' && !isFunction(value)) {
-			if (ns) node.setAttributeNS('http://www.w3.org/1999/xlink', ns[1], value);
+			if (ns) node.setAttributeNS('http://www.w3.org/1999/xlink', toLowerCase(ns[1]), value);
 			else node.setAttribute(name, value);
 		}
 	}
