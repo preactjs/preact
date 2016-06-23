@@ -506,5 +506,43 @@ describe('Components', () => {
 			expect(Inner2.prototype.componentWillUnmount, 'on grandchild re-render').not.to.have.been.called;
 			expect(Inner2.prototype.componentDidUnmount).not.to.have.been.called;
 		});
+
+		it('should remount when swapping between HOC child types', () => {
+			class Outer extends Component {
+				render({ child: Child }) {
+					return <Child />;
+				}
+			}
+
+			class Inner extends Component {
+				componentWillMount() {}
+				componentWillUnmount() {}
+				render() {
+					return <div class="inner">foo</div>;
+				}
+			}
+			spyAll(Inner.prototype);
+
+			const InnerFunc = () => (
+				<div class="inner-func">bar</div>
+			);
+
+			let root = render(<Outer child={Inner} />, scratch, root);
+
+			expect(Inner.prototype.componentWillMount, 'initial mount').to.have.been.calledOnce;
+			expect(Inner.prototype.componentWillUnmount, 'initial mount').not.to.have.been.called;
+
+			Inner.prototype.componentWillMount.reset();
+			root = render(<Outer child={InnerFunc} />, scratch, root);
+
+			expect(Inner.prototype.componentWillMount, 'unmount').not.to.have.been.called;
+			expect(Inner.prototype.componentWillUnmount, 'unmount').to.have.been.calledOnce;
+
+			Inner.prototype.componentWillUnmount.reset();
+			root = render(<Outer child={Inner} />, scratch, root);
+
+			expect(Inner.prototype.componentWillMount, 'remount').to.have.been.calledOnce;
+			expect(Inner.prototype.componentWillUnmount, 'remount').not.to.have.been.called;
+		});
 	});
 });

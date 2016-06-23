@@ -121,18 +121,14 @@ export function renderComponent(component, opts, mountAll) {
 		if (isFunction(childComponent) && childComponent.prototype.render) {
 			// set up high order component link
 
-			let inst = component._component;
-			if (inst && inst.constructor!==childComponent) {
-				toUnmount = inst;
-				inst = null;
-			}
+			let inst = component._component,
+				childProps = getNodeProps(rendered);
 
-			let childProps = getNodeProps(rendered);
-
-			if (inst) {
+			if (inst && inst.constructor===childComponent) {
 				setComponentProps(inst, childProps, SYNC_RENDER, context);
 			}
 			else {
+				toUnmount = inst;
 				inst = createComponent(childComponent, childProps, context, false);
 				inst._parentComponent = component;
 				component._component = inst;
@@ -163,6 +159,7 @@ export function renderComponent(component, opts, mountAll) {
 			let p = initialBase.parentNode;
 			if (p && base!==p) p.replaceChild(base, initialBase);
 			if (!toUnmount && initialComponent===component) {
+				initialBase._component = null;
 				recollectNodeTree(initialBase);
 			}
 		}
