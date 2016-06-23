@@ -70,5 +70,16 @@
     "sinon-chai": "^2.8.0",
     "uglify-js": "^2.6.3",
     "webpack": "^1.13.1"
+  },
+  "greenkeeper": {
+    "ignore": [
+      "rollup-plugin-babel",
+      "babel",
+      "babel-core",
+      "babel-eslint",
+      "babel-loader",
+      "babel-runtime",
+      "jscodeshift"
+    ]
   }
 }
