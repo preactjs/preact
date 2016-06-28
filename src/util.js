@@ -1,4 +1,4 @@
-import { EMPTY_BASE, NON_DIMENSION_PROPS } from './constants';
+import { NON_DIMENSION_PROPS } from './constants';
 
 
 /** Copy own-properties from `props` onto `obj`.
@@ -133,13 +133,8 @@ export const toLowerCase = memoize( s => s.toLowerCase() );
 // For animations, rAF is vastly superior. However, it scores poorly on benchmarks :(
 // export const setImmediate = typeof requestAnimationFrame==='function' ? requestAnimationFrame : setTimeout;
 
-let ch;
-try { ch = new MessageChannel(); } catch (e) {}
-
 /** Call a function asynchronously, as soon as possible.
  *	@param {Function} callback
  */
-export const setImmediate = ch ? ( f => {
-	ch.port1.onmessage = f;
-	ch.port2.postMessage(EMPTY_BASE);
-}) : setTimeout;
+let resolved = typeof Promise!=='undefined' && Promise.resolve();
+export const setImmediate = resolved ? (f => { resolved.then(f); }) : setTimeout;
