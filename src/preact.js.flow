@@ -1,0 +1,9 @@
+/* @flow */
+
+import { createElement as h, cloneElement, Component, render } from 'react';
+
+export { h, cloneElement, Component, render };
+export default { h, cloneElement, Component, render };
+
+declare export function rerender(): void;
+declare export var options: Object;
