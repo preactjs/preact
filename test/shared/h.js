@@ -88,6 +88,7 @@ describe('h(jsx)', () => {
 			h('baz'),
 			h('baz'),
 			'four',
+			null,
 			'five',
 			'six'
 		);
@@ -103,6 +104,27 @@ describe('h(jsx)', () => {
 				{ nodeName:'baz' },
 				{ nodeName:'baz' },
 				'fourfivesix'
+			]);
+	});
+
+	it('should merge nested adjacent text children', () => {
+		let r = h(
+			'foo',
+			null,
+			'one',
+			['two', null, 'three'],
+			null,
+			['four', null, 'five', null],
+			'six',
+			null
+		);
+
+		r = flatten(r);
+
+		expect(r).to.be.an('object')
+			.with.property('children')
+			.that.deep.equals([
+				'onetwothreefourfivesix'
 			]);
 	});
 });

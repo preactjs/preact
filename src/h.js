@@ -42,8 +42,8 @@ export function h(nodeName, attributes, firstChild) {
 					}
 					else if (!falsey(child)) {
 						children.push(child);
+						lastSimple = simple;
 					}
-					lastSimple = simple;
 				}
 			}
 		}
