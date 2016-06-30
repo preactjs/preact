@@ -133,6 +133,8 @@ export default function renderToString(vnode, context, opts, inner) {
 		for (let i=0; i<attrs.length; i++) {
 			let name = attrs[i],
 				v = attributes[name];
+			if (name==='children') continue;
+			if (!(opts && opts.allAttributes) && (name==='key' || name==='ref')) continue;
 			if (name==='className') {
 				if (attributes['class']) continue;
 				name = 'class';
