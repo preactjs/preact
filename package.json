@@ -42,7 +42,7 @@
     "babel-loader": "^5.3.2",
     "babel-runtime": "^5.8.24",
     "chai": "^3.4.1",
-    "eslint": "^2.13.1",
+    "eslint": "^3.0.0",
     "eslint-plugin-react": "^5.2.2",
     "gzip-size-cli": "^1.0.0",
     "isparta-loader": "^2.0.0",
