@@ -17,7 +17,7 @@ module.exports = function(config) {
 				},
 				{
 					type: 'html',
-					dir: 'coverage'
+					dir: __dirname+'/../coverage'
 				}
 			]
 		},
@@ -26,16 +26,17 @@ module.exports = function(config) {
 			showDiff: true
 		},
 
+		browserLogOptions: { terminal: true },
+		browserConsoleLogOptions: { terminal: true },
+
 		browsers: ['PhantomJS'],
 
 		files: [
-			{ pattern: 'test/setup.js', watched: false },
-			{ pattern: 'test/{browser,shared}/**.js', watched: false }
+			{ pattern: '{browser,shared}/**.js', watched: false }
 		],
 
 		preprocessors: {
-			'test/**/*.js': ['webpack', 'sourcemap'],
-			'src/**/*.js': ['webpack', 'sourcemap']
+			'**/*': ['webpack', 'sourcemap']
 		},
 
 		webpack: {
