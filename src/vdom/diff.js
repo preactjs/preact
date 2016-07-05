@@ -9,7 +9,7 @@ import { createNode, collectNode } from '../dom/recycler';
 import { unmountComponent } from './component';
 
 
-let SVG_MODE = false;
+let isSvgMode = false;
 
 
 /** Apply differences in a given vnode (and it's deep children) to a real DOM Node.
@@ -51,13 +51,13 @@ export function diff(dom, vnode, context, mountAll, unmountChildrenOnly) {
 
 	svgMode = toLowerCase(nodeName)==='svg';
 
-	if (svgMode) SVG_MODE = true;
+	if (svgMode) isSvgMode = true;
 
 	if (!dom) {
-		out = createNode(nodeName, SVG_MODE);
+		out = createNode(nodeName, isSvgMode);
 	}
 	else if (!isNamedNode(dom, nodeName)) {
-		out = createNode(nodeName, SVG_MODE);
+		out = createNode(nodeName, isSvgMode);
 		// move children into the replacement node
 		while (dom.firstChild) out.appendChild(dom.firstChild);
 		// reclaim element nodes
@@ -72,7 +72,7 @@ export function diff(dom, vnode, context, mountAll, unmountChildrenOnly) {
 		(out[ATTR_KEY].ref = originalAttributes.ref)(out);
 	}
 
-	if (svgMode) SVG_MODE = false;
+	if (svgMode) isSvgMode = false;
 
 	return out;
 }
@@ -243,7 +243,7 @@ function diffAttributes(dom, attrs) {
 	// removeAttributes(dom, old, attrs || EMPTY);
 	for (let name in old) {
 		if (!attrs || !(name in attrs)) {
-			setAccessor(dom, name, null, SVG_MODE);
+			setAccessor(dom, name, null, isSvgMode);
 		}
 	}
 
@@ -251,7 +251,7 @@ function diffAttributes(dom, attrs) {
 	if (attrs) {
 		for (let name in attrs) {
 			if (!(name in old) || attrs[name]!=(name==='value' || name==='selected' || name==='checked' ? dom[name] : old[name])) {
-				setAccessor(dom, name, attrs[name], SVG_MODE);
+				setAccessor(dom, name, attrs[name], isSvgMode);
 			}
 		}
 	}
