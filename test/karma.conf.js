@@ -1,4 +1,3 @@
-/*eslint-env node */
 /*eslint no-var:0, object-shorthand:0 */
 
 var coverage = String(process.env.COVERAGE)!=='false',

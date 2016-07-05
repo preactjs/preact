@@ -25,6 +25,9 @@
     "prepublish": "npm run build",
     "release": "npm run build && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
+  "eslintConfig": {
+    "extends": "./config/eslint-config.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/developit/preact.git"
