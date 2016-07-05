@@ -1,4 +1,4 @@
-import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, EMPTY_BASE } from '../constants';
+import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, EMPTY_BASE } from '../constants';
 import options from '../options';
 import { isFunction, clone, extend, empty } from '../util';
 import { hook, deepHook } from '../hooks';
@@ -30,13 +30,14 @@ export function triggerComponentRender(component) {
  *	@param {boolean} [opts.render=true]			If `false`, no render will be triggered.
  */
 export function setComponentProps(component, props, opts, context, mountAll) {
-	let d = component._disableRendering===true;
+	let d = component._disableRendering===true,
+		b = component.base;
 	component._disableRendering = true;
 
 	if ((component.__ref = props.ref)) delete props.ref;
 	if ((component.__key = props.key)) delete props.key;
 
-	if (!empty(component.base)) {
+	if (!empty(b)) {
 		hook(component, 'componentWillReceiveProps', props, context);
 	}
 
@@ -51,7 +52,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 	component._disableRendering = d;
 
 	if (opts!==NO_RENDER) {
-		if (opts===SYNC_RENDER || options.syncComponentUpdates!==false) {
+		if (opts===SYNC_RENDER || options.syncComponentUpdates!==false || !b) {
 			renderComponent(component, SYNC_RENDER, mountAll);
 		}
 		else {
@@ -206,7 +207,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 	}
 
 	if (isOwner && (!mountAll || c._component)) {
-		setComponentProps(c, getNodeProps(vnode), SYNC_RENDER, context, mountAll);
+		setComponentProps(c, getNodeProps(vnode), ASYNC_RENDER, context, mountAll);
 		dom = c.base;
 	}
 	else {
