@@ -83,7 +83,8 @@ export function renderComponent(component, opts, mountAll) {
 		previousContext = component.prevContext || context,
 		isUpdate = component.base,
 		initialBase = isUpdate || component.nextBase,
-		initialComponent = initialBase && initialBase._component;
+		initialComponent = initialBase && initialBase._component,
+		initialChildComponent = component._component;
 
 	// if updating
 	if (isUpdate) {
@@ -122,7 +123,7 @@ export function renderComponent(component, opts, mountAll) {
 		if (isFunction(childComponent) && childComponent.prototype.render) {
 			// set up high order component link
 
-			let inst = component._component,
+			let inst = initialChildComponent,
 				childProps = getNodeProps(rendered);
 
 			if (inst && inst.constructor===childComponent) {
@@ -145,7 +146,7 @@ export function renderComponent(component, opts, mountAll) {
 			let cbase = initialBase;
 
 			// destroy high order component link
-			toUnmount = component._component;
+			toUnmount = initialChildComponent;
 			if (toUnmount) {
 				cbase = component._component = null;
 			}
@@ -159,7 +160,7 @@ export function renderComponent(component, opts, mountAll) {
 		if (initialBase && base!==initialBase) {
 			let p = initialBase.parentNode;
 			if (p && base!==p) p.replaceChild(base, initialBase);
-			if (!toUnmount && initialComponent===component) {
+			if (!toUnmount && initialComponent===component && !initialChildComponent) {
 				initialBase._component = null;
 				recollectNodeTree(initialBase);
 			}
