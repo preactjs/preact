@@ -3,7 +3,7 @@ import { ensureNodeData, getNodeType, getRawNodeAttributes, removeNode } from '.
 
 /** DOM node pool, keyed on nodeName. */
 
-let nodes = {};
+const nodes = {};
 
 export function collectNode(node) {
 	cleanNode(node);
