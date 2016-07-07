@@ -202,13 +202,14 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 	let c = dom && dom._component,
 		oldDom = dom,
 		isDirectOwner = c && dom._componentConstructor===vnode.nodeName,
-		isOwner = isDirectOwner;
+		isOwner = isDirectOwner,
+		props = getNodeProps(vnode);
 	while (c && !isOwner && (c=c._parentComponent)) {
 		isOwner = c.constructor===vnode.nodeName;
 	}
 
 	if (isOwner && (!mountAll || c._component)) {
-		setComponentProps(c, getNodeProps(vnode), ASYNC_RENDER, context, mountAll);
+		setComponentProps(c, props, ASYNC_RENDER, context, mountAll);
 		dom = c.base;
 	}
 	else {
@@ -216,7 +217,12 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 			unmountComponent(c, true);
 			dom = oldDom = null;
 		}
-		dom = createComponentFromVNode(vnode, dom, context, mountAll);
+
+		c = createComponent(vnode.nodeName, props, context);
+		if (dom && !c.nextBase) c.nextBase = dom;
+		setComponentProps(c, props, SYNC_RENDER, context, mountAll);
+		dom = c.base;
+
 		if (oldDom && dom!==oldDom) {
 			oldDom._component = null;
 			recollectNodeTree(oldDom);
@@ -224,23 +230,6 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 	}
 
 	return dom;
-}
-
-
-
-/** Instantiate and render a Component, given a VNode whose nodeName is a constructor.
- *	@param {VNode} vnode
- *	@private
- */
-function createComponentFromVNode(vnode, dom, context, mountAll) {
-	let props = getNodeProps(vnode);
-	let component = createComponent(vnode.nodeName, props, context, !!dom);
-
-	if (dom) component.nextBase = dom;
-
-	setComponentProps(component, props, SYNC_RENDER, context, mountAll);
-
-	return component.base;
 }
 
 
