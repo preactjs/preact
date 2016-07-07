@@ -103,20 +103,21 @@ function getKey(child) {
 /** Apply child and attribute changes between a VNode and a DOM Node to the DOM. */
 function innerDiffNode(dom, vchildren, context, mountAll) {
 	let originalChildren = dom.childNodes,
-		children,
-		keyed,
+		children = [],
+		keyed = {},
 		keyedLen = 0,
 		min = 0,
 		len = originalChildren.length,
-		childrenLen = 0;
+		childrenLen = 0,
+		vlen = vchildren && vchildren.length,
+		j, c;
 
 	if (len) {
-		children = [];
 		for (let i=0; i<len; i++) {
 			let child = originalChildren[i],
 				key = getKey(child);
-			if (key || key===0) {
-				if (!keyedLen++) keyed = {};
+			if ((key || key===0) && vlen) {
+				keyedLen++;
 				keyed[key] = child;
 			}
 			else {
@@ -125,8 +126,8 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 		}
 	}
 
-	if (vchildren) {
-		for (let i=0; i<vchildren.length; i++) {
+	if (vlen) {
+		for (let i=0; i<vlen; i++) {
 			let vchild = vchildren[i],
 				child;
 
@@ -146,8 +147,8 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 
 			// attempt to pluck a node of the same type from the existing children
 			if (!child && min<childrenLen) {
-				for (let j=min; j<childrenLen; j++) {
-					let c = children[j];
+				for (j=min; j<childrenLen; j++) {
+					c = children[j];
 					if (c && isSameNodeType(c, vchild)) {
 						child = c;
 						children[j] = undefined;
@@ -161,12 +162,12 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 			// morph the matched/found/created DOM child to match vchild (deep)
 			child = diff(child, vchild, context, mountAll);
 
-			let c = (mountAll || child.parentNode!==dom) && child._component;
+			c = (mountAll || child.parentNode!==dom) && child._component;
 
 			if (c) deepHook(c, 'componentWillMount');
 
 			let next = originalChildren[i];
-			if (next!==child) {
+			if (next!==child && originalChildren[i+1]!==child) {
 				if (next) {
 					dom.insertBefore(child, next);
 				}
