@@ -1,4 +1,4 @@
-import { h, render } from '../../src/preact';
+import { h, Component, render } from '../../src/preact';
 /** @jsx h */
 
 /*global coverage*/
@@ -53,7 +53,7 @@ function benchmark(iter, callback) {
 
 describe('performance', function() {
 	let scratch;
-	
+
 	this.timeout(10000);
 
 	before( () => {
@@ -113,7 +113,7 @@ describe('performance', function() {
 	});
 
 	it('should rerender repeated trees fast', done => {
-		class Header {
+		class Header extends Component {
 			render() {
 				return (
 					<header>
@@ -126,7 +126,7 @@ describe('performance', function() {
 				);
 			}
 		}
-		class Form {
+		class Form extends Component {
 			render() {
 				return (
 					<form onSubmit={()=>{}}>
@@ -141,7 +141,7 @@ describe('performance', function() {
 				);
 			}
 		}
-		class ButtonBar {
+		class ButtonBar extends Component {
 			render() {
 				return (
 					<button-bar>
@@ -153,17 +153,17 @@ describe('performance', function() {
 				);
 			}
 		}
-		class Button {
+		class Button extends Component {
 			render(props) {
 				return <button {...props} />;
 			}
 		}
-		class Main {
+		class Main extends Component {
 			render() {
 				return <Form />;
 			}
 		}
-		class Root {
+		class Root extends Component {
 			render() {
 				return (
 					<div class="foo bar" data-foo="bar" p={2}>
@@ -173,12 +173,12 @@ describe('performance', function() {
 				);
 			}
 		}
-		class Empty {
+		class Empty extends Component {
 			render() {
 				return <div />;
 			}
 		}
-		class Parent {
+		class Parent extends Component {
 			render({ child:C }) {
 				return <C />;
 			}
