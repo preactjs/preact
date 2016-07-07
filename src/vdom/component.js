@@ -249,19 +249,19 @@ export function unmountComponent(component, remove) {
 	let inner = component._component;
 	if (inner) {
 		unmountComponent(inner, remove);
-		remove = false;
+	}
+	else {
+		let base = component.base;
+		if (base) {
+			if (remove) {
+				removeNode(base);
+				collectComponent(component);
+			}
+			removeOrphanedChildren(base.childNodes, true, remove);
+		}
+
 	}
 
-	let base = component.base;
-	if (base) {
-		if (remove!==false) removeNode(base);
-		removeOrphanedChildren(base.childNodes, true);
-	}
-
-	if (remove) {
-		component._parentComponent = null;
-		collectComponent(component);
-	}
 
 	hook(component, 'componentDidUnmount');
 }
