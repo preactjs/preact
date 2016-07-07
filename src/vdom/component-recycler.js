@@ -17,7 +17,7 @@ export function createComponent(Ctor, props, context, fresh) {
 	let inst = new Ctor(props, context),
 		list = !fresh && components[Ctor.name];
 	if (list) {
-		for (let i=0; i<list.length; i++) {
+		for (let i=list.length; i--; ) {
 			if (list[i].constructor===Ctor) {
 				inst.nextBase = list[i].base;
 				list.splice(i, 1);
