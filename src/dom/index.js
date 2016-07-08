@@ -51,8 +51,12 @@ export function setAccessor(node, name, value, isSvg) {
 	else if (name[0]==='o' && name[1]==='n') {
 		let l = node._listeners || (node._listeners = {});
 		name = toLowerCase(name.substring(2));
-		if (!value && l[name]) node.removeEventListener(name, eventProxy);
-		else if (!l[name]) node.addEventListener(name, eventProxy);
+		if (value) {
+			if (!l[name]) node.addEventListener(name, eventProxy);
+		}
+		else if (l[name]) {
+			node.removeEventListener(name, eventProxy);
+		}
 		l[name] = value;
 	}
 	else {
