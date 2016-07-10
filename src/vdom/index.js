@@ -1,6 +1,6 @@
 import { clone, extend, isString, toLowerCase } from '../util';
 import { isFunctionalComponent } from './functional-component';
-import { getNodeType } from '../dom';
+import { getNodeType } from '../dom/index';
 
 
 /** Check if two nodes are equivalent.

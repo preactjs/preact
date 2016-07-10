@@ -1,5 +1,5 @@
 import { toLowerCase } from '../util';
-import { ensureNodeData, getNodeType, getRawNodeAttributes, removeNode } from '.';
+import { ensureNodeData, getNodeType, getRawNodeAttributes, removeNode } from './index';
 
 /** DOM node pool, keyed on nodeName. */
 

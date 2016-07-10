@@ -1,5 +1,5 @@
 import { EMPTY, EMPTY_BASE } from '../constants';
-import { getNodeProps } from '.';
+import { getNodeProps } from './index';
 import { isFunction } from '../util';
 
 

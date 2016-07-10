@@ -3,11 +3,11 @@ import options from '../options';
 import { isFunction, clone, extend, empty } from '../util';
 import { hook, deepHook } from '../hooks';
 import { enqueueRender } from '../render-queue';
-import { getNodeProps } from '.';
+import { getNodeProps } from './index';
 import { diff, removeOrphanedChildren, recollectNodeTree } from './diff';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { createComponent, collectComponent } from './component-recycler';
-import { removeNode } from '../dom';
+import { removeNode } from '../dom/index';
 
 
 /** Mark component as dirty and queue up a render.
