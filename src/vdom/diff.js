@@ -1,10 +1,10 @@
 import { ATTR_KEY } from '../constants';
 import { toLowerCase, empty, isString, isFunction } from '../util';
 import { hook, deepHook } from '../hooks';
-import { isSameNodeType, isNamedNode } from '.';
+import { isSameNodeType, isNamedNode } from './index';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
-import { removeNode, setAccessor, getRawNodeAttributes, getNodeType } from '../dom';
+import { removeNode, setAccessor, getRawNodeAttributes, getNodeType } from '../dom/index';
 import { createNode, collectNode } from '../dom/recycler';
 import { unmountComponent } from './component';
 
@@ -129,7 +129,7 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 	if (vlen) {
 		for (let i=0; i<vlen; i++) {
 			let vchild = vchildren[i],
-				child;
+				child = null;
 
 			// if (isFunctionalComponent(vchild)) {
 			// 	vchild = buildFunctionalComponent(vchild);
