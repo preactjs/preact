@@ -110,7 +110,7 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 		len = originalChildren.length,
 		childrenLen = 0,
 		vlen = vchildren && vchildren.length,
-		j, c;
+		j, c, vchild, child;
 
 	if (len) {
 		for (let i=0; i<len; i++) {
@@ -128,8 +128,8 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 
 	if (vlen) {
 		for (let i=0; i<vlen; i++) {
-			let vchild = vchildren[i],
-				child = null;
+			vchild = vchildren[i];
+			child = null;
 
 			// if (isFunctionalComponent(vchild)) {
 			// 	vchild = buildFunctionalComponent(vchild);
