@@ -1,53 +1,46 @@
-/* eslint-disable */
+/* eslint no-console:0 */
+
+
+// parent node types that we don't want to remove pointless initializations from (because it breaks hoisting)
+const BLOCKED = ['ForStatement', 'WhileStatement']; // 'IfStatement', 'SwitchStatement'
 
 /** Removes var initialization to `void 0`, which Babel adds for TDZ strictness. */
-module.exports = function(file, api, options) {
-	var jscodeshift = api.jscodeshift;
+export default (file, api) => {
+	let { jscodeshift } = api,
+		found = 0;
 
-	var found = 0;
-
-	// parent node types that we don't want to remove pointless initializations from (because it breaks hoisting)
-	var blocked = ['ForStatement', 'WhileStatement', 'IfStatement', 'SwtichStatement'];
-
-	var code = api.jscodeshift(file.source)
+	let code = jscodeshift(file.source)
 		.find(jscodeshift.VariableDeclaration)
 		.forEach(handleDeclaration);
 
 	function handleDeclaration(decl) {
-		var p = decl,
-			remove = true,
-			fname;
+		let p = decl,
+			remove = true;
 
-		while (p = p.parentPath) {
-			if (!blocked.indexOf(p.value.type)) {
+		while ((p = p.parentPath)) {
+			if (~BLOCKED.indexOf(p.value.type)) {
 				remove = false;
-				break
-			}
-
-			if (p.value.type && p.value.type.match(/Function/)) {
-				fname = p.value.id && p.value.id.name || '<anon>';
 				break;
 			}
 		}
 
-		decl.value.declarations.filter(isPointless).forEach(function(node) {
+		decl.value.declarations.filter(isPointless).forEach( node => {
 			if (remove===false) {
-				console.log('> Skipping removal of undefined init for "'+node.id.name+'": within '+p.value.type);
+				console.log(`> Skipping removal of undefined init for "${node.id.name}": within ${p.value.type}`);
 			}
 			else {
-				removeNodeInitialization(node, fname);
+				removeNodeInitialization(node);
 			}
 		});
 	}
 
-	function removeNodeInitialization(node, fname) {
-		// console.log('Removing undefined init for "'+node.id.name+'" within '+fname+'()');
+	function removeNodeInitialization(node) {
 		node.init = null;
 		found++;
 	}
 
 	function isPointless(node) {
-		var init = node.init;
+		let { init } = node;
 		if (init) {
 			if (init.type==='UnaryExpression' && init.operator==='void' && init.argument.value==0) {
 				return true;
