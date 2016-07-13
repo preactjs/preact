@@ -34,6 +34,7 @@ As one would expect coming from React, Components are simple building blocks for
 - [**Stock Ticker**](http://codepen.io/developit/pen/wMYoBb?editors=0010) (@ CodePen)
 - [**Create your Own!**](https://jsfiddle.net/developit/rs6zrh5f/embedded/result/) (@ JSFiddle)
 - [**Preact Coffeescript**](https://github.com/crisward/preact-coffee)
+- [**GuriVR**](https://gurivr.com) _([Github Project](https://github.com/opennewslabs/guri-vr))_
 
 ## Libraries & Add-ons
 
