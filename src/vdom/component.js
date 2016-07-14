@@ -37,7 +37,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 	if ((component.__ref = props.ref)) delete props.ref;
 	if ((component.__key = props.key)) delete props.key;
 
-	if (empty(b)) {
+	if (empty(b) || mountAll) {
 		hook(component, 'componentWillMount');
 	}
 	else {
@@ -180,7 +180,7 @@ export function renderComponent(component, opts, mountAll) {
 			base._componentConstructor = componentRef.constructor;
 		}
 
-		if (isUpdate) {
+		if (isUpdate && !mountAll) {
 			hook(component, 'componentDidUpdate', previousProps, previousState, previousContext);
 		}
 		else {
@@ -245,7 +245,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
  *	@private
  */
 export function unmountComponent(component, remove) {
-	// console.log(`${remove?'Removing':'Unmounting'} component: ${component.constructor.name}`, component);
+	// console.log(`${remove?'Removing':'Unmounting'} component: ${component.constructor.name}`);
 
 	hook(component, '__ref', null);
 	hook(component, 'componentWillUnmount');
@@ -266,7 +266,6 @@ export function unmountComponent(component, remove) {
 		}
 
 	}
-
 
 	hook(component, 'componentDidUnmount');
 }
