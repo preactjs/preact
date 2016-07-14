@@ -354,4 +354,90 @@ describe('Lifecycle methods', () => {
 			});
 		});
 	});
+
+	describe('Lifecycle DOM Timing', () => {
+		it('should be invoked when dom does (DidMount, WillUnmount) or does not (WillMount, DidUnmount) exist', () => {
+			let setState;
+			class Outer extends Component {
+				constructor() {
+					super();
+					this.state = { show:true };
+					setState = s => {
+						this.setState(s);
+						this.forceUpdate();
+					};
+				}
+				componentWillMount() {
+					expect(document.getElementById('OuterDiv'), 'Outer componentWillMount').to.not.exist;
+				}
+				componentDidMount() {
+					expect(document.getElementById('OuterDiv'), 'Outer componentDidMount').to.exist;
+				}
+				componentWillUnmount() {
+					expect(document.getElementById('OuterDiv'), 'Outer componentWillUnmount').to.exist;
+				}
+				componentDidUnmount() {
+					expect(document.getElementById('OuterDiv'), 'Outer componentDidUnmount').to.not.exist;
+				}
+				render(props, { show }) {
+					return (
+						<div id="OuterDiv">
+							{ show && (
+								<div>
+									<Inner {...props} />
+								</div>
+							) }
+						</div>
+					);
+				}
+			}
+
+			class Inner extends Component {
+				componentWillMount() {
+					expect(document.getElementById('InnerDiv'), 'Inner componentWillMount').to.not.exist;
+				}
+				componentDidMount() {
+					expect(document.getElementById('InnerDiv'), 'Inner componentDidMount').to.exist;
+				}
+				componentWillUnmount() {
+					// @TODO Component mounted into elements (non-components)
+					// are currently unmounted after those elements, so their
+					// DOM is unmounted prior to the method being called.
+					//expect(document.getElementById('InnerDiv'), 'Inner componentWillUnmount').to.exist;
+				}
+				componentDidUnmount() {
+					expect(document.getElementById('InnerDiv'), 'Inner componentDidUnmount').to.not.exist;
+				}
+
+				render() {
+					return <div id="InnerDiv" />;
+				}
+			}
+
+			let proto = Inner.prototype;
+			let spies = ['componentWillMount', 'componentDidMount', 'componentWillUnmount', 'componentDidUnmount'];
+			spies.forEach( s => sinon.spy(proto, s) );
+
+			let reset = () => spies.forEach( s => proto[s].reset() );
+
+			render(<Outer />, scratch);
+			expect(proto.componentWillMount).to.have.been.called;
+			expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
+			expect(proto.componentDidMount).to.have.been.called;
+
+			reset();
+			setState({ show:false });
+
+			expect(proto.componentWillUnmount).to.have.been.called;
+			expect(proto.componentWillUnmount).to.have.been.calledBefore(proto.componentDidUnmount);
+			expect(proto.componentDidUnmount).to.have.been.called;
+
+			reset();
+			setState({ show:true });
+
+			expect(proto.componentWillMount).to.have.been.called;
+			expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
+			expect(proto.componentDidMount).to.have.been.called;
+		});
+	});
 });
