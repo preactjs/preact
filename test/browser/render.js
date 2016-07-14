@@ -338,4 +338,31 @@ describe('render()', () => {
 			<div a>c</div>
 		);
 	});
+
+	it('should reorder child pairs', () => {
+		let root = render((
+			<div>
+				<a>a</a>
+				<b>b</b>
+			</div>
+		), scratch, root);
+
+		let a = scratch.firstChild.firstChild;
+		let b = scratch.firstChild.lastChild;
+
+		expect(a).to.have.property('nodeName', 'A');
+		expect(b).to.have.property('nodeName', 'B');
+
+		root = render((
+			<div>
+				<b>b</b>
+				<a>a</a>
+			</div>
+		), scratch, root);
+
+		expect(scratch.firstChild.firstChild).to.have.property('nodeName', 'B');
+		expect(scratch.firstChild.lastChild).to.have.property('nodeName', 'A');
+		expect(scratch.firstChild.firstChild).to.equal(b);
+		expect(scratch.firstChild.lastChild).to.equal(a);
+	});
 });
