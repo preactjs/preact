@@ -1,6 +1,6 @@
 import { ATTR_KEY } from '../constants';
 import { toLowerCase, empty, isString, isFunction } from '../util';
-import { hook, deepHook } from '../hooks';
+import { hook } from '../hooks';
 import { isSameNodeType, isNamedNode } from './index';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
@@ -9,7 +9,19 @@ import { createNode, collectNode } from '../dom/recycler';
 import { unmountComponent } from './component';
 
 
+/** Diff recursion count, used to track the end of the diff cycle. */
+export const mounts = [];
+
+/** Diff recursion count, used to track the end of the diff cycle. */
+export let diffLevel = 0;
+
 let isSvgMode = false;
+
+
+export function flushMounts() {
+	let c;
+	while ((c=mounts.pop())) hook(c, 'componentDidMount');
+}
 
 
 /** Apply differences in a given vnode (and it's deep children) to a real DOM Node.
@@ -18,7 +30,16 @@ let isSvgMode = false;
  *	@returns {Element} dom			The created/mutated element
  *	@private
  */
-export function diff(dom, vnode, context, mountAll, unmountChildrenOnly) {
+export function diff(dom, vnode, context, mountAll, unmountChildrenOnly, parent) {
+	diffLevel++;
+	let ret = idiff(dom, vnode, context, mountAll, unmountChildrenOnly);
+	if (parent && ret.parentNode!==parent) parent.appendChild(ret);
+	if (!--diffLevel) flushMounts();
+	return ret;
+}
+
+
+function idiff(dom, vnode, context, mountAll, unmountChildrenOnly) {
 	let originalAttributes = vnode.attributes;
 
 	while (isFunctionalComponent(vnode)) {
@@ -87,7 +108,6 @@ function diffNode(dom, vchildren, context, mountAll) {
 	else if (vchildren || firstChild) {
 		innerDiffNode(dom, vchildren, context, mountAll);
 	}
-
 }
 
 
@@ -160,17 +180,13 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 			}
 
 			// morph the matched/found/created DOM child to match vchild (deep)
-			child = diff(child, vchild, context, mountAll);
+			child = idiff(child, vchild, context, mountAll);
 
 			c = (mountAll || child.parentNode!==dom) && child._component;
-
-			if (c) deepHook(c, 'componentWillMount');
 
 			if (child!==originalChildren[i]) {
 				dom.insertBefore(child, originalChildren[i] || null);
 			}
-
-			if (c) deepHook(c, 'componentDidMount');
 		}
 	}
 

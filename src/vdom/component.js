@@ -1,10 +1,10 @@
 import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, EMPTY_BASE } from '../constants';
 import options from '../options';
 import { isFunction, clone, extend, empty } from '../util';
-import { hook, deepHook } from '../hooks';
+import { hook } from '../hooks';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from './index';
-import { diff, removeOrphanedChildren, recollectNodeTree } from './diff';
+import { diff, mounts, diffLevel, flushMounts, removeOrphanedChildren, recollectNodeTree } from './diff';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { createComponent, collectComponent } from './component-recycler';
 import { removeNode } from '../dom/index';
@@ -37,7 +37,10 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 	if ((component.__ref = props.ref)) delete props.ref;
 	if ((component.__key = props.key)) delete props.key;
 
-	if (!empty(b)) {
+	if (empty(b)) {
+		hook(component, 'componentWillMount');
+	}
+	else {
 		hook(component, 'componentWillReceiveProps', props, context);
 	}
 
@@ -134,10 +137,8 @@ export function renderComponent(component, opts, mountAll) {
 				inst = createComponent(childComponent, childProps, context, false);
 				inst._parentComponent = component;
 				component._component = inst;
-				if (isUpdate) deepHook(inst, 'componentWillMount');
 				setComponentProps(inst, childProps, NO_RENDER, context);
 				renderComponent(inst, SYNC_RENDER);
-				if (isUpdate) deepHook(inst, 'componentDidMount');
 			}
 
 			base = inst.base;
@@ -181,6 +182,10 @@ export function renderComponent(component, opts, mountAll) {
 
 		if (isUpdate) {
 			hook(component, 'componentDidUpdate', previousProps, previousState, previousContext);
+		}
+		else {
+			mounts.splice(0, 0, component);
+			if (!diffLevel) flushMounts();
 		}
 	}
 

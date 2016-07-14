@@ -13,13 +13,3 @@ export function optionsHook(name, a) {
 export function hook(obj, name, a, b, c) {
 	if (obj[name]) return obj[name](a, b, c);
 }
-
-
-/** Invoke hook() on a component and child components (recursively)
- *	@private
- */
-export function deepHook(obj, type) {
-	do {
-		hook(obj, type);
-	} while ((obj=obj._component));
-}
