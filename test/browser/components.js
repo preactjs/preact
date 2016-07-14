@@ -420,6 +420,107 @@ describe('Components', () => {
 			expect(Inner.prototype.componentWillUnmount).to.have.been.calledBefore(Inner.prototype.componentDidUnmount);
 		});
 
+		it('should resolve many intermediary functional components', () => {
+			let useIntermediary = false;
+
+			let createComponent = (Intermediary) => {
+				class C extends Component {
+					componentWillMount() {}
+					componentDidUnmount() {}
+					render({ children }) {
+						if (!useIntermediary) return children[0];
+						return <Intermediary>{children}</Intermediary>;
+					}
+				}
+				spyAll(C.prototype);
+				return C;
+			};
+
+			let createFunction = () => sinon.spy( ({ children }) => children[0] );
+
+			let root;
+			let rndr = n => root = render(n, scratch, root);
+
+			let F1 = createFunction();
+			let F2 = createFunction();
+			let F3 = createFunction();
+
+			let C1 = createComponent(F1);
+			let C2 = createComponent(F2);
+			let C3 = createComponent(F3);
+
+			let reset = () => [C1, C2, C3].reduce(
+				(acc, c) => acc.concat( Object.keys(c.prototype).map(key => c.prototype[key]) ),
+				[F1, F2, F3]
+			).forEach( c => c.reset && c.reset() );
+
+
+			reset();
+			rndr(<C1><C2><C3>Some Text</C3></C2></C1>);
+
+			expect(C1.prototype.componentWillMount, 'initial mount').to.have.been.calledOnce;
+			expect(C2.prototype.componentWillMount, 'initial mount').to.have.been.calledOnce;
+			expect(C3.prototype.componentWillMount, 'initial mount').to.have.been.calledOnce;
+
+			reset();
+			rndr(<C1><C2>Some Text</C2></C1>);
+
+			expect(C1.prototype.componentWillMount, 'unmount innermost').not.to.have.been.called;
+			expect(C2.prototype.componentWillMount, 'unmount innermost').not.to.have.been.called;
+			expect(C3.prototype.componentDidUnmount, 'unmount innermost').to.have.been.calledOnce;
+
+			reset();
+			rndr(<C1><C3>Some Text</C3></C1>);
+
+			expect(C1.prototype.componentWillMount, 'swap innermost').not.to.have.been.called;
+			expect(C2.prototype.componentDidUnmount, 'swap innermost').to.have.been.calledOnce;
+			expect(C3.prototype.componentWillMount, 'swap innermost').to.have.been.calledOnce;
+
+			reset();
+			rndr(<C1><C2><C3>Some Text</C3></C2></C1>);
+
+			expect(C1.prototype.componentDidUnmount, 'inject between, C1').not.to.have.been.called;
+			expect(C1.prototype.componentWillMount, 'inject between, C1').not.to.have.been.called;
+			expect(C2.prototype.componentWillMount, 'inject between, C2').to.have.been.calledOnce;
+			expect(C3.prototype.componentDidUnmount, 'inject between, C3').to.have.been.calledOnce;
+			expect(C3.prototype.componentWillMount, 'inject between, C3').to.have.been.calledOnce;
+
+
+			/** now test with intermediary functional components within the above tree */
+			useIntermediary = true;
+
+			rndr(<div />);
+			reset();
+			rndr(<C1><C2><C3>Some Text</C3></C2></C1>);
+
+			expect(C1.prototype.componentWillMount, 'initial mount w/ intermediary').to.have.been.calledOnce;
+			expect(C2.prototype.componentWillMount, 'initial mount w/ intermediary').to.have.been.calledOnce;
+			expect(C3.prototype.componentWillMount, 'initial mount w/ intermediary').to.have.been.calledOnce;
+
+			reset();
+			rndr(<C1><C2>Some Text</C2></C1>);
+
+			expect(C1.prototype.componentWillMount, 'unmount innermost w/ intermediary').not.to.have.been.called;
+			expect(C2.prototype.componentWillMount, 'unmount innermost w/ intermediary').not.to.have.been.called;
+			expect(C3.prototype.componentDidUnmount, 'unmount innermost w/ intermediary').to.have.been.calledOnce;
+
+			reset();
+			rndr(<C1><C3>Some Text</C3></C1>);
+
+			expect(C1.prototype.componentWillMount, 'swap innermost w/ intermediary').not.to.have.been.called;
+			expect(C2.prototype.componentDidUnmount, 'swap innermost w/ intermediary').to.have.been.calledOnce;
+			expect(C3.prototype.componentWillMount, 'swap innermost w/ intermediary').to.have.been.calledOnce;
+
+			reset();
+			rndr(<C1><C2><C3>Some Text</C3></C2></C1>);
+
+			expect(C1.prototype.componentDidUnmount, 'inject between, C1 w/ intermediary').not.to.have.been.called;
+			expect(C1.prototype.componentWillMount, 'inject between, C1 w/ intermediary').not.to.have.been.called;
+			expect(C2.prototype.componentWillMount, 'inject between, C2 w/ intermediary').to.have.been.calledOnce;
+			expect(C3.prototype.componentDidUnmount, 'inject between, C3 w/ intermediary').to.have.been.calledOnce;
+			expect(C3.prototype.componentWillMount, 'inject between, C3 w/ intermediary').to.have.been.calledOnce;
+		});
+
 		it('should unmount children of high-order components without unmounting parent', () => {
 			let outer, inner2, counter=0;
 
@@ -470,16 +571,16 @@ describe('Components', () => {
 			render(<Outer child={Inner} />, scratch);
 
 			// outer should only have been mounted once
-			expect(Outer.prototype.componentWillMount).to.have.been.calledOnce;
-			expect(Outer.prototype.componentDidMount).to.have.been.calledOnce;
-			expect(Outer.prototype.componentWillUnmount).not.to.have.been.called;
-			expect(Outer.prototype.componentDidUnmount).not.to.have.been.called;
+			expect(Outer.prototype.componentWillMount, 'outer initial').to.have.been.calledOnce;
+			expect(Outer.prototype.componentDidMount, 'outer initial').to.have.been.calledOnce;
+			expect(Outer.prototype.componentWillUnmount, 'outer initial').not.to.have.been.called;
+			expect(Outer.prototype.componentDidUnmount, 'outer initial').not.to.have.been.called;
 
 			// inner should only have been mounted once
-			expect(Inner.prototype.componentWillMount).to.have.been.calledOnce;
-			expect(Inner.prototype.componentDidMount).to.have.been.calledOnce;
-			expect(Inner.prototype.componentWillUnmount).not.to.have.been.called;
-			expect(Inner.prototype.componentDidUnmount).not.to.have.been.called;
+			expect(Inner.prototype.componentWillMount, 'inner initial').to.have.been.calledOnce;
+			expect(Inner.prototype.componentDidMount, 'inner initial').to.have.been.calledOnce;
+			expect(Inner.prototype.componentWillUnmount, 'inner initial').not.to.have.been.called;
+			expect(Inner.prototype.componentDidUnmount, 'inner initial').not.to.have.been.called;
 
 			outer.setState({ child:Inner2 });
 			outer.forceUpdate();
@@ -487,24 +588,24 @@ describe('Components', () => {
 			expect(Inner2.prototype.render).to.have.been.calledOnce;
 
 			// outer should still only have been mounted once
-			expect(Outer.prototype.componentWillMount).to.have.been.calledOnce;
-			expect(Outer.prototype.componentDidMount).to.have.been.calledOnce;
-			expect(Outer.prototype.componentWillUnmount).not.to.have.been.called;
-			expect(Outer.prototype.componentDidUnmount).not.to.have.been.called;
+			expect(Outer.prototype.componentWillMount, 'outer swap').to.have.been.calledOnce;
+			expect(Outer.prototype.componentDidMount, 'outer swap').to.have.been.calledOnce;
+			expect(Outer.prototype.componentWillUnmount, 'outer swap').not.to.have.been.called;
+			expect(Outer.prototype.componentDidUnmount, 'outer swap').not.to.have.been.called;
 
 			// inner should only have been mounted once
-			expect(Inner2.prototype.componentWillMount).to.have.been.calledOnce;
-			expect(Inner2.prototype.componentDidMount).to.have.been.calledOnce;
-			expect(Inner2.prototype.componentWillUnmount).not.to.have.been.called;
-			expect(Inner2.prototype.componentDidUnmount).not.to.have.been.called;
+			expect(Inner2.prototype.componentWillMount, 'inner2 swap').to.have.been.calledOnce;
+			expect(Inner2.prototype.componentDidMount, 'inner2 swap').to.have.been.calledOnce;
+			expect(Inner2.prototype.componentWillUnmount, 'inner2 swap').not.to.have.been.called;
+			expect(Inner2.prototype.componentDidUnmount, 'inner2 swap').not.to.have.been.called;
 
 			inner2.forceUpdate();
 
-			expect(Inner2.prototype.render).to.have.been.calledTwice;
-			expect(Inner2.prototype.componentWillMount).to.have.been.calledOnce;
-			expect(Inner2.prototype.componentDidMount).to.have.been.calledOnce;
-			expect(Inner2.prototype.componentWillUnmount, 'on grandchild re-render').not.to.have.been.called;
-			expect(Inner2.prototype.componentDidUnmount).not.to.have.been.called;
+			expect(Inner2.prototype.render, 'inner2 update').to.have.been.calledTwice;
+			expect(Inner2.prototype.componentWillMount, 'inner2 update').to.have.been.calledOnce;
+			expect(Inner2.prototype.componentDidMount, 'inner2 update').to.have.been.calledOnce;
+			expect(Inner2.prototype.componentWillUnmount, 'inner2 update').not.to.have.been.called;
+			expect(Inner2.prototype.componentDidUnmount, 'inner2 update').not.to.have.been.called;
 		});
 
 		it('should remount when swapping between HOC child types', () => {
