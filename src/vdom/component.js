@@ -247,7 +247,6 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 export function unmountComponent(component, remove) {
 	// console.log(`${remove?'Removing':'Unmounting'} component: ${component.constructor.name}`);
 
-	hook(component, '__ref', null);
 	hook(component, 'componentWillUnmount');
 
 	// recursively tear down & recollect high-order component children:
@@ -267,5 +266,6 @@ export function unmountComponent(component, remove) {
 
 	}
 
+	hook(component, '__ref', null);
 	hook(component, 'componentDidUnmount');
 }
