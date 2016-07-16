@@ -134,7 +134,7 @@ export function renderComponent(component, opts, mountAll) {
 			}
 			else {
 				toUnmount = inst;
-				inst = createComponent(childComponent, childProps, context, false);
+				inst = createComponent(childComponent, childProps, context);
 				inst._parentComponent = component;
 				component._component = inst;
 				setComponentProps(inst, childProps, NO_RENDER, context);
@@ -180,13 +180,14 @@ export function renderComponent(component, opts, mountAll) {
 			base._componentConstructor = componentRef.constructor;
 		}
 
-		if (isUpdate && !mountAll) {
-			hook(component, 'componentDidUpdate', previousProps, previousState, previousContext);
-		}
-		else {
-			mounts.splice(0, 0, component);
-			if (!diffLevel) flushMounts();
-		}
+	}
+
+	if (!isUpdate || mountAll) {
+		mounts.splice(0, 0, component);
+		if (!diffLevel) flushMounts();
+	}
+	else if (!skip) {
+		hook(component, 'componentDidUpdate', previousProps, previousState, previousContext);
 	}
 
 	let cb = component._renderCallbacks, fn;
@@ -257,12 +258,14 @@ export function unmountComponent(component, remove) {
 	else {
 		let base = component.base;
 		if (base) {
+			component.nextBase = base;
+			component.base = null;
 			if (base[ATTR_KEY]) hook(base[ATTR_KEY], 'ref', null);
 			if (remove) {
 				removeNode(base);
 				collectComponent(component);
 			}
-			removeOrphanedChildren(base.childNodes, true, remove);
+			removeOrphanedChildren(base.childNodes, true);
 		}
 
 	}

@@ -13,13 +13,13 @@ export function collectComponent(component) {
 }
 
 
-export function createComponent(Ctor, props, context, fresh) {
+export function createComponent(Ctor, props, context) {
 	let inst = new Ctor(props, context),
-		list = !fresh && components[Ctor.name];
+		list = components[Ctor.name];
 	if (list) {
 		for (let i=list.length; i--; ) {
 			if (list[i].constructor===Ctor) {
-				inst.nextBase = list[i].base;
+				inst.nextBase = list[i].nextBase;
 				list.splice(i, 1);
 				break;
 			}
