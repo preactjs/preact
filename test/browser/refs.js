@@ -203,4 +203,44 @@ describe('refs', () => {
 		expect(Foo.prototype.render).to.have.been.calledWithExactly({ a:'a' }, { }, { });
 		expect(Bar).to.have.been.calledWithExactly({ b:'b', ref:bar }, { });
 	});
+
+	// Test for #232
+	it('should only null refs after unmount', () => {
+		let root, outer, inner;
+
+		class TestUnmount extends Component {
+			componentWillUnmount() {
+				expect(this).to.have.property('outer', outer);
+				expect(this).to.have.property('inner', inner);
+			}
+
+			componentDidUnmount() {
+				expect(this).to.have.property('outer', null);
+				expect(this).to.have.property('inner', null);
+			}
+
+			render() {
+				return (
+					<div id="outer" ref={ c => this.outer=c }>
+						<div id="inner" ref={ c => this.inner=c } />
+					</div>
+				);
+			}
+		}
+
+		sinon.spy(TestUnmount.prototype, 'componentWillUnmount');
+		sinon.spy(TestUnmount.prototype, 'componentDidUnmount');
+
+		root = render(<div><TestUnmount /></div>, scratch, root);
+		outer = scratch.querySelector('#outer');
+		inner = scratch.querySelector('#inner');
+
+		expect(TestUnmount.prototype.componentWillUnmount).not.to.have.been.called;
+		expect(TestUnmount.prototype.componentDidUnmount).not.to.have.been.called;
+
+		root = render(<div />, scratch, root);
+
+		expect(TestUnmount.prototype.componentWillUnmount).to.have.been.calledOnce;
+		expect(TestUnmount.prototype.componentDidUnmount).to.have.been.calledOnce;
+	});
 });

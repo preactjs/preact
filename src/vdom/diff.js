@@ -220,14 +220,13 @@ export function recollectNodeTree(node, unmountOnly) {
 	// Currently it *does* remove them. Discussion: https://github.com/developit/preact/issues/39
 	//if (!node[ATTR_KEY]) return;
 
-	let attrs = node[ATTR_KEY];
-	if (attrs) hook(attrs, 'ref', null);
-
 	let component = node._component;
 	if (component) {
 		unmountComponent(component, !unmountOnly);
 	}
 	else {
+		if (node[ATTR_KEY]) hook(node[ATTR_KEY], 'ref', null);
+
 		if (!unmountOnly) {
 			if (getNodeType(node)!==1) {
 				removeNode(node);

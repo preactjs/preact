@@ -1,4 +1,4 @@
-import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, EMPTY_BASE } from '../constants';
+import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, EMPTY_BASE, ATTR_KEY } from '../constants';
 import options from '../options';
 import { isFunction, clone, extend, empty } from '../util';
 import { hook } from '../hooks';
@@ -257,6 +257,7 @@ export function unmountComponent(component, remove) {
 	else {
 		let base = component.base;
 		if (base) {
+			if (base[ATTR_KEY]) hook(base[ATTR_KEY], 'ref', null);
 			if (remove) {
 				removeNode(base);
 				collectComponent(component);
