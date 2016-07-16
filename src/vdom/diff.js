@@ -236,9 +236,8 @@ export function recollectNodeTree(node, unmountOnly) {
 			collectNode(node);
 		}
 
-		let c = node.childNodes;
-		if (c && c.length) {
-			removeOrphanedChildren(c, unmountOnly);
+		if (node.childNodes.length) {
+			removeOrphanedChildren(node.childNodes, unmountOnly);
 		}
 	}
 }
