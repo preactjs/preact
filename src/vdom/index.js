@@ -1,4 +1,4 @@
-import { clone, extend, isString, toLowerCase } from '../util';
+import { clone, extend, isString, isFunction, toLowerCase } from '../util';
 import { isFunctionalComponent } from './functional-component';
 import { getNodeType } from '../dom/index';
 
@@ -9,14 +9,14 @@ import { getNodeType } from '../dom/index';
  *	@private
  */
 export function isSameNodeType(node, vnode) {
-	if (isString(vnode)) return getNodeType(node)===3;
-	let nodeName = vnode.nodeName,
-		type = typeof nodeName;
-	if (type==='string') {
-		return isNamedNode(node, nodeName);
+	if (isString(vnode)) {
+		return getNodeType(node)===3;
 	}
-	if (type==='function') {
-		return node._componentConstructor===nodeName || isFunctionalComponent(vnode);
+	if (isString(vnode.nodeName)) {
+		return isNamedNode(node, vnode.nodeName);
+	}
+	if (isFunction(vnode.nodeName)) {
+		return node._componentConstructor===vnode.nodeName || isFunctionalComponent(vnode);
 	}
 }
 
