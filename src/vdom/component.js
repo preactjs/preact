@@ -258,13 +258,15 @@ export function unmountComponent(component, remove) {
 	else {
 		let base = component.base;
 		if (base) {
+			component.nextBase = base;
+			component.base = null;
+
 			if (base[ATTR_KEY]) hook(base[ATTR_KEY], 'ref', null);
 			if (remove) {
-				removeNode(component.nextBase = base);
-				component.base = null;
+				removeNode(base);
 				collectComponent(component);
 			}
-			removeOrphanedChildren(base.childNodes, true);
+			removeOrphanedChildren(base.childNodes, !remove);
 		}
 
 	}
