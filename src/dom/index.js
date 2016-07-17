@@ -39,10 +39,10 @@ export function setAccessor(node, name, value, old, isSvg) {
 		node.className = value || '';
 	}
 	else if (name==='style') {
-		if (isString(value) || isString(old)) {
+		if (!value || isString(value) || isString(old)) {
 			node.style.cssText = value || '';
 		}
-		if (typeof value==='object') {
+		if (value && typeof value==='object') {
 			for (let i in old) if (!(i in value)) node.style[i] = '';
 			for (let i in value) {
 				node.style[i] = typeof value[i]==='number' && !NON_DIMENSION_PROPS[i] ? (value[i]+'px') : value[i];
