@@ -1,6 +1,6 @@
 import { VNode } from './vnode';
 import { optionsHook } from './hooks';
-import { falsey, isFunction, isString, styleObjToCss, hashToClassName } from './util';
+import { falsey, isFunction, isString, hashToClassName } from './util';
 
 
 const SHARED_TEMP_ARRAY = [];
@@ -69,10 +69,10 @@ export function h(nodeName, attributes, firstChild) {
 				attributes.class = hashToClassName(lastSimple);
 			}
 
-			lastSimple = attributes.style;
-			if (lastSimple && !isString(lastSimple)) {
-				attributes.style = styleObjToCss(lastSimple);
-			}
+			// lastSimple = attributes.style;
+			// if (lastSimple && !isString(lastSimple)) {
+			// 	attributes.style = styleObjToCss(lastSimple);
+			// }
 		}
 	}
 

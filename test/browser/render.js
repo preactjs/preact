@@ -252,7 +252,7 @@ describe('render()', () => {
 	});
 
 	it('should serialize style objects', () => {
-		render((
+		let root = render((
 			<div style={{
 				color: 'rgb(255, 255, 255)',
 				background: 'rgb(255, 100, 0)',
@@ -274,6 +274,24 @@ describe('render()', () => {
 		expect(style).to.have.property('padding', '5px');
 		expect(style).to.have.property('top', '100px');
 		expect(style).to.have.property('left', '100%');
+
+		root = render((
+			<div style={{ color: 'rgb(0, 255, 255)' }}>test</div>
+		), scratch, root);
+
+		expect(root).to.have.deep.property('style.cssText').that.equals('color: rgb(0, 255, 255);');
+
+		root = render((
+			<div style="display: inline;">test</div>
+		), scratch, root);
+
+		expect(root).to.have.deep.property('style.cssText').that.equals('display: inline;');
+
+		root = render((
+			<div style={{ backgroundColor: 'rgb(0, 255, 255)' }}>test</div>
+		), scratch, root);
+
+		expect(root).to.have.deep.property('style.cssText').that.equals('background-color: rgb(0, 255, 255);');
 	});
 
 	it('should serialize class/className', () => {

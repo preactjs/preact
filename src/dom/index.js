@@ -1,5 +1,5 @@
-import { ATTR_KEY } from '../constants';
-import { toLowerCase, empty, falsey, isFunction } from '../util';
+import { ATTR_KEY, NON_DIMENSION_PROPS } from '../constants';
+import { toLowerCase, empty, falsey, isString, isFunction } from '../util';
 import { optionsHook } from '../hooks';
 
 
@@ -30,7 +30,7 @@ export function removeNode(node) {
  *	@param {any} previousValue	The last value that was set for this name/node pair
  *	@private
  */
-export function setAccessor(node, name, value, isSvg) {
+export function setAccessor(node, name, value, old, isSvg) {
 	ensureNodeData(node)[name] = value;
 
 	if (name==='key' || name==='children') return;
@@ -39,7 +39,15 @@ export function setAccessor(node, name, value, isSvg) {
 		node.className = value || '';
 	}
 	else if (name==='style') {
-		node.style.cssText = value || '';
+		if (isString(value) || isString(old)) {
+			node.style.cssText = value || '';
+		}
+		if (typeof value==='object') {
+			for (let i in old) if (!(i in value)) node.style[i] = '';
+			for (let i in value) {
+				node.style[i] = typeof value[i]==='number' && !NON_DIMENSION_PROPS[i] ? (value[i]+'px') : value[i];
+			}
+		}
 	}
 	else if (name==='dangerouslySetInnerHTML') {
 		if (value) node.innerHTML = value.__html;

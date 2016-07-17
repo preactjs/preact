@@ -243,7 +243,7 @@ function diffAttributes(dom, attrs) {
 	if (attrs) {
 		for (let name in attrs) {
 			if (!(name in old) || attrs[name]!=(name==='value' || name==='selected' || name==='checked' ? dom[name] : old[name])) {
-				setAccessor(dom, name, attrs[name], isSvgMode);
+				setAccessor(dom, name, attrs[name], old[name], isSvgMode);
 			}
 		}
 	}
