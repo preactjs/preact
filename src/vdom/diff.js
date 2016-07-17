@@ -85,7 +85,13 @@ function idiff(dom, vnode, context, mountAll, unmountChildrenOnly) {
 		if (!unmountChildrenOnly) recollectNodeTree(dom);
 	}
 
-	diffNode(out, vnode.children, context, mountAll);
+	// fast-path for elements containing a single TextNode:
+	if (vnode.children && vnode.children.length===1 && typeof vnode.children[0]==='string' && out.childNodes.length===1 && out.firstChild instanceof Text) {
+		out.firstChild.nodeValue = vnode.children[0];
+	}
+	else if (vnode.children || out.firstChild) {
+		innerDiffNode(out, vnode.children, context, mountAll);
+	}
 
 	diffAttributes(out, vnode.attributes);
 
@@ -96,18 +102,6 @@ function idiff(dom, vnode, context, mountAll, unmountChildrenOnly) {
 	if (svgMode) isSvgMode = false;
 
 	return out;
-}
-
-
-/** Morph a DOM node to look like the given VNode. Creates DOM if it doesn't exist. */
-function diffNode(dom, vchildren, context, mountAll) {
-	let firstChild = dom.firstChild;
-	if (vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && firstChild instanceof Text && dom.childNodes.length===1) {
-		firstChild.nodeValue = vchildren[0];
-	}
-	else if (vchildren || firstChild) {
-		innerDiffNode(dom, vchildren, context, mountAll);
-	}
 }
 
 
