@@ -105,15 +105,6 @@ function idiff(dom, vnode, context, mountAll, unmountChildrenOnly) {
 }
 
 
-function getKey(child) {
-	let c = child._component;
-	if (c) return c.__key;
-
-	let data = child[ATTR_KEY];
-	if (data) return data.key;
-}
-
-
 /** Apply child and attribute changes between a VNode and a DOM Node to the DOM. */
 function innerDiffNode(dom, vchildren, context, mountAll) {
 	let originalChildren = dom.childNodes,
@@ -129,7 +120,7 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 	if (len) {
 		for (let i=0; i<len; i++) {
 			let child = originalChildren[i],
-				key = getKey(child);
+				key = (c = child._component) ? c.__key : (c = child[ATTR_KEY]) ? c.key : null;
 			if ((key || key===0) && vlen) {
 				keyedLen++;
 				keyed[key] = child;
