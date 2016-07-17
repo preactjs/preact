@@ -22,16 +22,6 @@ export function clone(obj) {
 }
 
 
-/** Create a caching wrapper for the given function.
- *	Note: As this method is only used for memoizing string operations, it does not safeguard against Object.prototype manipulation.
- *	@private
- */
-export function memoize(fn) {
-	let mem = {};
-	return k => mem[k] || (mem[k] = fn(k));
-}
-
-
 /** Get a deep property value from the given object, expressed in dot-notation.
  *	@private
  */
@@ -92,12 +82,10 @@ export function hashToClassName(c) {
 }
 
 
-/** Just a memoized String.prototype.toLowerCase */
-export const toLowerCase = memoize( s => s.toLowerCase() );
+/** Just a memoized String#toLowerCase */
+let lcCache = {};
+export const toLowerCase = s => lcCache[s] || (lcCache[s] = s.toLowerCase());
 
-
-// For animations, rAF is vastly superior. However, it scores poorly on benchmarks :(
-// export const setImmediate = typeof requestAnimationFrame==='function' ? requestAnimationFrame : setTimeout;
 
 /** Call a function asynchronously, as soon as possible.
  *	@param {Function} callback
