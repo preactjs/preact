@@ -39,7 +39,6 @@ As one would expect coming from React, Components are simple building blocks for
 ## Libraries & Add-ons
 
 - :earth_americas: [**preact-router**](https://git.io/preact-router): URL routing for your components.
-- :tulip: [**preact-svg**](https://git.io/preact-svg): Use inline `<svg>` in Preact.
 - :page_facing_up: [**preact-render-to-string**](https://git.io/preact-render-to-string): Universal rendering.
 - :raised_hands: [**preact-compat**](https://git.io/preact-compat): use any React library with Preact. *([full example](http://git.io/preact-compat-example))*
 - :rocket: [**preact-photon**](https://git.io/preact-photon): build beautiful desktop UI with [photon](http://photonkit.com).
@@ -48,6 +47,8 @@ As one would expect coming from React, Components are simple building blocks for
 - :pencil: [**preact-richtextarea**](https://git.io/preact-richtextarea): Simple HTML editor component
 - :repeat: [**preact-cycle**](https://git.io/preact-cycle): Functional-reactive paradigm for Preact.
 - :satellite: [**preact-portal**](https://git.io/preact-portal): Render Preact components into (a) SPACE :milky_way:
+- :construction: [**preact-classless-component**](https://github.com/ld0rman/preact-classless-component): A utility method to create Preact components without using the `class` keyword
+- :hammer: [**preact-hyperscript**](https://github.com/queckezz/preact-hyperscript): Hyperscript-like syntax for creating elements
 
 
 ## Getting Started
