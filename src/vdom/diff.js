@@ -120,7 +120,7 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 	if (len) {
 		for (let i=0; i<len; i++) {
 			let child = originalChildren[i],
-				key = vlen && ((c = child._component) ? c.__key : (c = child[ATTR_KEY]) ? c.key : null);
+				key = vlen ? ((c = child._component) ? c.__key : (c = child[ATTR_KEY]) ? c.key : null) : null;
 			if (key || key===0) {
 				keyedLen++;
 				keyed[key] = child;
