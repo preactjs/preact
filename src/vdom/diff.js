@@ -20,7 +20,11 @@ let isSvgMode = false;
 
 export function flushMounts() {
 	let c;
-	while ((c=mounts.pop())) hook(c, 'componentDidMount');
+	while ((c=mounts.pop())) {
+		if (c.componentDidMount) {
+			c.componentDidMount();
+		}
+	}
 }
 
 
