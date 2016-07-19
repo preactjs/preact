@@ -1,7 +1,6 @@
 import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, EMPTY_BASE, ATTR_KEY } from '../constants';
 import options from '../options';
 import { isFunction, clone, extend, empty } from '../util';
-import { hook } from '../hooks';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from './index';
 import { diff, mounts, diffLevel, flushMounts, removeOrphanedChildren, recollectNodeTree } from './diff';
@@ -38,9 +37,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 	if ((component.__key = props.key)) delete props.key;
 
 	if (empty(b) || mountAll) {
-		if (component.componentWillMount) {
-			component.componentWillMount();
-		}
+		if (component.componentWillMount) component.componentWillMount();
 	}
 	else if (component.componentWillReceiveProps) {
 		component.componentWillReceiveProps(props, context);
@@ -65,9 +62,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 		}
 	}
 
-	if (component.__ref) {
-		component.__ref(component);
-	}
+	if (component.__ref) component.__ref(component);
 }
 
 
@@ -115,9 +110,7 @@ export function renderComponent(component, opts, mountAll) {
 	component._dirty = false;
 
 	if (!skip) {
-		if (component.render) {
-			rendered = component.render(props, state, context);
-		}
+		if (component.render) rendered = component.render(props, state, context);
 
 		// context to pass to the child, can be updated via (grand-)parent component
 		if (component.getChildContext) {
@@ -256,9 +249,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 export function unmountComponent(component, remove) {
 	// console.log(`${remove?'Removing':'Unmounting'} component: ${component.constructor.name}`);
 
-	if (component.componentWillUnmount) {
-		component.componentWillUnmount();
-	}
+	if (component.componentWillUnmount) component.componentWillUnmount();
 
 	// recursively tear down & recollect high-order component children:
 	let inner = component._component;
@@ -270,8 +261,8 @@ export function unmountComponent(component, remove) {
 		if (base) {
 			component.nextBase = base;
 			component.base = null;
-
-			if (base[ATTR_KEY]) hook(base[ATTR_KEY], 'ref', null);
+			const baseRef = base[ATTR_KEY];
+			if (baseRef && baseRef.ref) baseRef.ref(null);
 			if (remove) {
 				removeNode(base);
 				collectComponent(component);
@@ -281,10 +272,6 @@ export function unmountComponent(component, remove) {
 
 	}
 
-	if (component.__ref) {
-		component.__ref(null);
-	}
-	if (component.componentDidUnmount) {
-		component.componentDidUnmount();
-	}
+	if (component.__ref) component.__ref(null);
+	if (component.componentDidUnmount) component.componentDidUnmount();
 }

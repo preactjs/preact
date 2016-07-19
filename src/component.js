@@ -1,5 +1,4 @@
 import { FORCE_RENDER } from './constants';
-import { hook } from './hooks';
 import { extend, clone, isFunction } from './util';
 import { createLinkedState } from './linked-state';
 import { triggerComponentRender, renderComponent } from './vdom/component';
@@ -26,7 +25,7 @@ export function Component(props, context) {
 	/** @type {object} */
 	this.props = props;
 	/** @type {object} */
-	this.state = hook(this, 'getInitialState') || {};
+	this.state = this.getInitialState && this.getInitialState() || {};
 }
 
 
