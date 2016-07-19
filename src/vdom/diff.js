@@ -121,7 +121,7 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 	if (len) {
 		for (let i=0; i<len; i++) {
 			let child = originalChildren[i],
-				key = vlen && ((c = child._component) ? c.__key : (c = child[ATTR_KEY]) ? c.key : null);
+				key = vlen ? ((c = child._component) ? c.__key : (c = child[ATTR_KEY]) ? c.key : null) : null;
 			if (key || key===0) {
 				keyedLen++;
 				keyed[key] = child;
@@ -211,8 +211,7 @@ export function recollectNodeTree(node, unmountOnly) {
 		unmountComponent(component, !unmountOnly);
 	}
 	else {
-		const nodeRef = node[ATTR_KEY];
-		if (nodeRef && nodeRef.ref) nodeRef.ref(null);
+		if (node[ATTR_KEY] && node[ATTR_KEY].ref) node[ATTR_KEY].ref(null);
 
 		if (!unmountOnly) {
 			if (getNodeType(node)!==1) {

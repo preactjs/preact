@@ -1,6 +1,6 @@
 import { ATTR_KEY, NON_DIMENSION_PROPS } from '../constants';
+import options from '../options';
 import { toLowerCase, empty, falsey, isString, isFunction } from '../util';
-import { optionsHook } from '../hooks';
 
 
 export function ensureNodeData(node, data) {
@@ -95,7 +95,7 @@ function setProperty(node, name, value) {
  *	@private
  */
 function eventProxy(e) {
-	return this._listeners[e.type](optionsHook('event', e) || e);
+	return this._listeners[e.type](options.event && options.event(e) || e);
 }
 
 
