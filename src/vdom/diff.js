@@ -1,6 +1,5 @@
 import { ATTR_KEY } from '../constants';
 import { toLowerCase, empty, isString, isFunction } from '../util';
-import { hook } from '../hooks';
 import { isSameNodeType, isNamedNode } from './index';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
@@ -20,7 +19,9 @@ let isSvgMode = false;
 
 export function flushMounts() {
 	let c;
-	while ((c=mounts.pop())) hook(c, 'componentDidMount');
+	while ((c=mounts.pop())) {
+		if (c.componentDidMount) c.componentDidMount();
+	}
 }
 
 
@@ -210,7 +211,7 @@ export function recollectNodeTree(node, unmountOnly) {
 		unmountComponent(component, !unmountOnly);
 	}
 	else {
-		if (node[ATTR_KEY]) hook(node[ATTR_KEY], 'ref', null);
+		if (node[ATTR_KEY] && node[ATTR_KEY].ref) node[ATTR_KEY].ref(null);
 
 		if (!unmountOnly) {
 			if (getNodeType(node)!==1) {

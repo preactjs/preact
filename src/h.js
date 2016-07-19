@@ -1,5 +1,5 @@
 import { VNode } from './vnode';
-import { optionsHook } from './hooks';
+import options from './options';
 import { falsey, isFunction, isString, hashToClassName } from './util';
 
 
@@ -77,6 +77,6 @@ export function h(nodeName, attributes, firstChild) {
 	}
 
 	let p = new VNode(nodeName, attributes || undefined, children);
-	optionsHook('vnode', p);
+	if (options.vnode) options.vnode(p);
 	return p;
 }

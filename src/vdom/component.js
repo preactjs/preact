@@ -1,7 +1,6 @@
 import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, EMPTY_BASE, ATTR_KEY } from '../constants';
 import options from '../options';
 import { isFunction, clone, extend, empty } from '../util';
-import { hook } from '../hooks';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from './index';
 import { diff, mounts, diffLevel, flushMounts, removeOrphanedChildren, recollectNodeTree } from './diff';
@@ -38,10 +37,10 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 	if ((component.__key = props.key)) delete props.key;
 
 	if (empty(b) || mountAll) {
-		hook(component, 'componentWillMount');
+		if (component.componentWillMount) component.componentWillMount();
 	}
-	else {
-		hook(component, 'componentWillReceiveProps', props, context);
+	else if (component.componentWillReceiveProps) {
+		component.componentWillReceiveProps(props, context);
 	}
 
 	if (context && context!==component.context) {
@@ -63,7 +62,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 		}
 	}
 
-	hook(component, '__ref', component);
+	if (component.__ref) component.__ref(component);
 }
 
 
@@ -94,11 +93,13 @@ export function renderComponent(component, opts, mountAll) {
 		component.props = previousProps;
 		component.state = previousState;
 		component.context = previousContext;
-		if (opts!==FORCE_RENDER && hook(component, 'shouldComponentUpdate', props, state, context)===false) {
+		if (opts!==FORCE_RENDER
+			&& component.shouldComponentUpdate
+			&& component.shouldComponentUpdate(props, state, context) === false) {
 			skip = true;
 		}
-		else {
-			hook(component, 'componentWillUpdate', props, state, context);
+		else if (component.componentWillUpdate) {
+			component.componentWillUpdate(props, state, context);
 		}
 		component.props = props;
 		component.state = state;
@@ -109,7 +110,7 @@ export function renderComponent(component, opts, mountAll) {
 	component._dirty = false;
 
 	if (!skip) {
-		rendered = hook(component, 'render', props, state, context);
+		if (component.render) rendered = component.render(props, state, context);
 
 		// context to pass to the child, can be updated via (grand-)parent component
 		if (component.getChildContext) {
@@ -186,8 +187,8 @@ export function renderComponent(component, opts, mountAll) {
 		mounts.splice(0, 0, component);
 		if (!diffLevel) flushMounts();
 	}
-	else if (!skip) {
-		hook(component, 'componentDidUpdate', previousProps, previousState, previousContext);
+	else if (!skip && component.componentDidUpdate) {
+		component.componentDidUpdate(previousProps, previousState, previousContext);
 	}
 
 	let cb = component._renderCallbacks, fn;
@@ -248,7 +249,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 export function unmountComponent(component, remove) {
 	// console.log(`${remove?'Removing':'Unmounting'} component: ${component.constructor.name}`);
 
-	hook(component, 'componentWillUnmount');
+	if (component.componentWillUnmount) component.componentWillUnmount();
 
 	// recursively tear down & recollect high-order component children:
 	let inner = component._component;
@@ -260,8 +261,7 @@ export function unmountComponent(component, remove) {
 		if (base) {
 			component.nextBase = base;
 			component.base = null;
-
-			if (base[ATTR_KEY]) hook(base[ATTR_KEY], 'ref', null);
+			if (base[ATTR_KEY] && base[ATTR_KEY].ref) base[ATTR_KEY].ref(null);
 			if (remove) {
 				removeNode(base);
 				collectComponent(component);
@@ -271,6 +271,6 @@ export function unmountComponent(component, remove) {
 
 	}
 
-	hook(component, '__ref', null);
-	hook(component, 'componentDidUnmount');
+	if (component.__ref) component.__ref(null);
+	if (component.componentDidUnmount) component.componentDidUnmount();
 }
