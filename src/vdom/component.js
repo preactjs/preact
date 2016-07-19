@@ -29,8 +29,8 @@ export function triggerComponentRender(component) {
  *	@param {boolean} [opts.render=true]			If `false`, no render will be triggered.
  */
 export function setComponentProps(component, props, opts, context, mountAll) {
-	let d = component._disableRendering===true,
-		b = component.base;
+	let b = component.base;
+	if (component._disableRendering) return;
 	component._disableRendering = true;
 
 	if ((component.__ref = props.ref)) delete props.ref;
@@ -51,7 +51,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 	if (!component.prevProps) component.prevProps = component.props;
 	component.props = props;
 
-	component._disableRendering = d;
+	component._disableRendering = false;
 
 	if (opts!==NO_RENDER) {
 		if (opts===SYNC_RENDER || options.syncComponentUpdates!==false || !b) {
@@ -248,6 +248,8 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
  */
 export function unmountComponent(component, remove) {
 	// console.log(`${remove?'Removing':'Unmounting'} component: ${component.constructor.name}`);
+
+	component._disableRendering = true;
 
 	if (component.componentWillUnmount) component.componentWillUnmount();
 
