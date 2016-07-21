@@ -236,7 +236,7 @@ function diffAttributes(dom, attrs) {
 	// removeAttributes(dom, old, attrs || EMPTY);
 	for (let name in old) {
 		if (!attrs || !(name in attrs)) {
-			setAccessor(dom, name, null, isSvgMode);
+			setAccessor(dom, name, null, old[name], isSvgMode);
 		}
 	}
 
