@@ -1,6 +1,8 @@
 import { h, render, rerender, Component } from '../../src/preact';
 /** @jsx h */
 
+let spyAll = obj => Object.keys(obj).forEach( key => sinon.spy(obj,key) );
+
 describe('Lifecycle methods', () => {
 	let scratch;
 
@@ -438,6 +440,53 @@ describe('Lifecycle methods', () => {
 			expect(proto.componentWillMount).to.have.been.called;
 			expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
 			expect(proto.componentDidMount).to.have.been.called;
+		});
+
+		it('should remove this.base for HOC', () => {
+			let createComponent = (name, fn) => {
+				class C extends Component {
+					componentWillUnmount() {
+						expect(this.base, `${name}.componentWillUnmount`).to.exist;
+					}
+					componentDidUnmount() {
+						expect(this.base, `${name}.componentDidUnmount`).not.to.exist;
+					}
+					render(props) { return fn(props); }
+				}
+				spyAll(C.prototype);
+				return C;
+			};
+
+			class Wrapper extends Component {
+				render({ children }) {
+					return <div class="wrapper">{children}</div>;
+				}
+			}
+
+			let One = createComponent('One', () => <Wrapper>one</Wrapper> );
+			let Two = createComponent('Two', () => <Wrapper>two</Wrapper> );
+			let Three = createComponent('Three', () => <Wrapper>three</Wrapper> );
+
+			let components = [One, Two, Three];
+
+			let Selector = createComponent('Selector', ({ page }) => {
+				let Child = components[page];
+				return <Child />;
+			});
+
+			class App extends Component {
+				render(_, { page }) {
+					return <Selector page={page} />;
+				}
+			}
+
+			let app;
+			render(<App ref={ c => app=c } />, scratch);
+
+			for (let i=0; i<20; i++) {
+				app.setState({ page: i%components.length });
+				app.forceUpdate();
+			}
 		});
 	});
 });
