@@ -1,9 +1,10 @@
 {
-  "loose": "all",
-  "modules": "umd",
-  "sourceMaps": true,
-  "nonStandard": true,
-  "compact": true,
-  "comments": false,
-  "jsxPragma": "h"
+  "presets": [
+    "es2015-minimal",
+    "stage-0"
+  ],
+  "plugins": [
+    "transform-class-properties",
+    ["transform-react-jsx", {"pragma":"h"}]
+  ]
 }

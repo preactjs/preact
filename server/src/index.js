@@ -66,7 +66,7 @@ renderToString.render = renderToString;
  *	@param {VNode} vnode	JSX VNode to render.
  *	@param {Object} [context={}]	Optionally pass an initial context object through the render path.
  */
-renderToString.shallowRender = (vnode, context) => renderToString(vnode, context, SHALLOW);
+let shallowRender = (vnode, context) => renderToString(vnode, context, SHALLOW);
 
 
 /** You can actually skip preact entirely and import this empty Component base class (or not use a base class at all).
@@ -224,3 +224,11 @@ function getFallbackComponentName(component) {
 	}
 	return name;
 }
+renderToString.shallowRender = shallowRender;
+
+
+export {
+	renderToString as render,
+	renderToString,
+	shallowRender
+};

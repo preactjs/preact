@@ -4,9 +4,10 @@
   "version": "2.6.1",
   "description": "Render JSX to an HTML string, with support for Preact components.",
   "main": "dist/index.js",
+  "jsnext:main": "src/index.js",
   "scripts": {
-    "build": "babel src -s -d dist --module-id $npm_package_amdName",
-    "test": "eslint {src,test} && mocha --compilers js:babel/register test/**/*.js",
+    "build": "rollup -c rollup.config.js -m ${npm_package_main}.map -f umd -n $npm_package_amdName $npm_package_jsnext_main -o $npm_package_main",
+    "test": "eslint {src,test} && mocha --compilers js:babel-register test/**/*.js",
     "prepublish": "npm run build",
     "release": "npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
@@ -30,12 +31,23 @@
     "preact": "*"
   },
   "devDependencies": {
-    "babel": "^5.8.23",
-    "babel-eslint": "^4.1.3",
+    "babel-cli": "^6.11.4",
+    "babel-core": "^6.11.4",
+    "babel-eslint": "^6.1.2",
+    "babel-plugin-transform-class-properties": "^6.10.2",
+    "babel-plugin-transform-react-jsx": "^6.8.0",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-es2015-minimal": "^2.0.0",
+    "babel-preset-es2015-minimal-rollup": "^2.0.0",
+    "babel-preset-stage-0": "^6.5.0",
+    "babel-register": "^6.9.0",
     "chai": "^3.3.0",
-    "eslint": "^1.7.1",
+    "eslint": "^3.1.1",
     "mocha": "^2.3.3",
-    "preact": "^4.1.3",
+    "preact": "^5.5.0",
+    "rollup": "^0.34.1",
+    "rollup-plugin-babel": "^2.6.1",
+    "rollup-plugin-memory": "^1.0.0",
     "sinon": "^1.17.1",
     "sinon-chai": "^2.8.0"
   }

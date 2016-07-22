@@ -1,9 +1,9 @@
 import { render, shallowRender } from '../src';
 import { h, Component } from 'preact';
-import { expect, use } from 'chai';
+import chai, { expect } from 'chai';
 import { spy, match } from 'sinon';
 import sinonChai from 'sinon-chai';
-use(sinonChai);
+chai.use(sinonChai);
 
 describe('pretty', () => {
 	let prettyRender = jsx => render(jsx, {}, { pretty:true });
