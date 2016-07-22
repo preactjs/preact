@@ -20,7 +20,7 @@ describe('render', () => {
 
 			expect(rendered).to.equal(expected);
 
-			expect(render(<div foo={0} />)).to.equal(`<div foo="0"></div>`)
+			expect(render(<div foo={0} />)).to.equal(`<div foo="0"></div>`);
 		});
 
 		it('should collapse collapsible attributes', () => {
@@ -110,17 +110,27 @@ describe('render', () => {
 					match({})
 				);
 		});
+
+		it('should apply defaultProps', () => {
+			const Test = props => <div {...props} />;
+			Test.defaultProps = {
+				foo: 'default foo',
+				bar: 'default bar'
+			};
+
+			expect(render(<Test />), 'defaults').to.equal('<div foo="default foo" bar="default bar"></div>');
+			expect(render(<Test bar="b" />), 'partial').to.equal('<div foo="default foo" bar="b"></div>');
+			expect(render(<Test foo="a" bar="b" />), 'overridden').to.equal('<div foo="a" bar="b"></div>');
+		});
 	});
 
 	describe('Classical Components', () => {
 		it('should render classical components', () => {
-			class Test extends Component {
+			let Test = spy(class Test extends Component {
 				render({ foo, children }, state) {
 					return <div foo={foo}>{ children }</div>;
 				}
-			}
-
-			Test = spy(Test);
+			});
 			spy(Test.prototype, 'render');
 
 			let rendered = render(<Test foo="test">content</Test>);
@@ -147,13 +157,12 @@ describe('render', () => {
 		});
 
 		it('should render classical components within JSX', () => {
-			class Test extends Component {
+			let Test = spy(class Test extends Component {
 				render({ foo, children }, state) {
 					return <div foo={foo}>{ children }</div>;
 				}
-			}
+			});
 
-			Test = spy(Test);
 			spy(Test.prototype, 'render');
 
 			let rendered = render(
@@ -179,6 +188,22 @@ describe('render', () => {
 					match({}),	// empty state
 					match({})
 				);
+		});
+
+		it('should apply defaultProps', () => {
+			class Test extends Component {
+				static defaultProps = {
+					foo: 'default foo',
+					bar: 'default bar'
+				};
+				render(props) {
+					return <div {...props} />;
+				}
+			}
+
+			expect(render(<Test />), 'defaults').to.equal('<div foo="default foo" bar="default bar"></div>');
+			expect(render(<Test bar="b" />), 'partial').to.equal('<div foo="default foo" bar="b"></div>');
+			expect(render(<Test foo="a" bar="b" />), 'overridden').to.equal('<div foo="a" bar="b"></div>');
 		});
 	});
 
@@ -206,18 +231,19 @@ describe('render', () => {
 		});
 
 		it('should render nested high order components when shallowHighOrder=false', () => {
-			const Outer = () => <Middle />;
-			const Middle = () => <div><Inner /></div>;
-			const Inner = () => 'hi';
+			// using functions for meaningful generation of displayName
+			function Outer() { return <Middle />; }
+			function Middle() { return <div><Inner /></div>; }
+			function Inner() { return 'hi'; }
 
 			let rendered = render(<Outer />);
 			expect(rendered).to.equal('<div>hi</div>');
 
 			rendered = render(<Outer />, null, { shallow:true });
-			expect(rendered).to.equal('<Middle></Middle>');
+			expect(rendered, '{shallow:true}').to.equal('<Middle></Middle>');
 
 			rendered = render(<Outer />, null, { shallow:true, shallowHighOrder:false });
-			expect(rendered).to.equal('<div><Inner></Inner></div>', 'but it should never render nested grandchild components');
+			expect(rendered, '{shallow:true,shallowHighOrder:false}').to.equal('<div><Inner></Inner></div>', 'but it should never render nested grandchild components');
 		});
 	});
 

@@ -46,6 +46,19 @@ let indent = (s, char) => String(s).replace(/(\n+)/g, '$1' + (char || '\t'));
 
 let isLargeString = s => (String(s).length>40 || String(s).indexOf('\n')!==-1 || String(s).indexOf('<')!==-1);
 
+function assign(obj, props) {
+	for (let i in props) obj[i] = props[i];
+	return obj;
+}
+
+function getNodeProps(vnode) {
+	let defaultProps = vnode.nodeName.defaultProps,
+		props = assign({}, defaultProps || vnode.attributes);
+	if (defaultProps) assign(props, vnode.attributes);
+	if (vnode.children) props.children = vnode.children;
+	return props;
+}
+
 /** Render Preact JSX + Components to an HTML string.
  *	@name render
  *	@function
@@ -97,7 +110,7 @@ export default function renderToString(vnode, context, opts, inner) {
 			nodeName = getComponentName(nodeName);
 		}
 		else {
-			let props = { children, ...attributes },
+			let props = getNodeProps(vnode),
 				rendered;
 
 			if (!nodeName.prototype || typeof nodeName.prototype.render!=='function') {
