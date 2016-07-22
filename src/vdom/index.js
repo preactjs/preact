@@ -22,7 +22,7 @@ export function isSameNodeType(node, vnode) {
 
 
 export function isNamedNode(node, nodeName) {
-	return (node.normalizedNodeName || toLowerCase(node.nodeName))===toLowerCase(nodeName);
+	return node.normalizedNodeName===nodeName || toLowerCase(node.nodeName)===toLowerCase(nodeName);
 }
 
 
