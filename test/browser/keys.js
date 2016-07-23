@@ -79,6 +79,7 @@ describe('keys', () => {
 		root = render(<App opened loading />, scratch, root);
 		root = render(<App opened />, scratch, root);
 
-		expect(root).to.have.property('innerHTML', '<div>This div needs to be here for this to break</div><div class=""></div><div class="indicator"><div>indicator</div><div>indicator</div><div>indicator</div></div>');
+		let html = String(root.innerHTML).replace(/ class=""/g, '');
+		expect(html).to.equal('<div>This div needs to be here for this to break</div><div></div><div class="indicator"><div>indicator</div><div>indicator</div><div>indicator</div></div>');
 	});
 });
