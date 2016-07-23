@@ -159,27 +159,27 @@ describe('refs', () => {
 
 		let root = render(<Outer ref={outer} />, scratch);
 
-		expect(outer).to.have.been.calledOnce.and.calledWith(outerInst);
-		expect(inner).to.have.been.calledOnce.and.calledWith(innerInst);
-		expect(innermost).to.have.been.calledOnce.and.calledWith(innerInst.base);
+		expect(outer, 'outer initial').to.have.been.calledOnce.and.calledWith(outerInst);
+		expect(inner, 'inner initial').to.have.been.calledOnce.and.calledWith(innerInst);
+		expect(innermost, 'innerMost initial').to.have.been.calledOnce.and.calledWith(innerInst.base);
 
 		outer.reset();
 		inner.reset();
 		innermost.reset();
 		root = render(<Outer ref={outer} />, scratch, root);
 
-		expect(outer).to.have.been.calledOnce.and.calledWith(outerInst);
-		expect(inner).to.have.been.calledOnce.and.calledWith(innerInst);
-		expect(innermost).to.have.been.calledOnce.and.calledWith(innerInst.base);
+		expect(outer, 'outer update').to.have.been.calledOnce.and.calledWith(outerInst);
+		expect(inner, 'inner update').to.have.been.calledOnce.and.calledWith(innerInst);
+		expect(innermost, 'innerMost update').to.have.been.calledOnce.and.calledWith(innerInst.base);
 
 		outer.reset();
 		inner.reset();
 		innermost.reset();
 		root = render(<div />, scratch, root);
 
-		expect(outer).to.have.been.calledOnce.and.calledWith(null);
-		expect(inner).to.have.been.calledOnce.and.calledWith(null);
-		expect(innermost).to.have.been.calledOnce.and.calledWith(null);
+		expect(outer, 'outer unmount').to.have.been.calledOnce.and.calledWith(null);
+		expect(inner, 'inner unmount').to.have.been.calledOnce.and.calledWith(null);
+		expect(innermost, 'innerMost unmount').to.have.been.calledOnce.and.calledWith(null);
 	});
 
 	it('should not pass ref into component as a prop', () => {
