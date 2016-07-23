@@ -49,8 +49,8 @@ function idiff(dom, vnode, context, mountAll, unmountChildrenOnly) {
 
 	if (isString(vnode)) {
 		if (dom) {
-			if (getNodeType(dom)===3) {
-				if (dom.nodeValue!==vnode) {
+			if (getNodeType(dom)===3 && dom.parentNode) {
+				if (dom.nodeValue!=vnode) {
 					dom.nodeValue = vnode;
 				}
 				return dom;
