@@ -243,4 +243,45 @@ describe('refs', () => {
 		expect(TestUnmount.prototype.componentWillUnmount).to.have.been.calledOnce;
 		expect(TestUnmount.prototype.componentDidUnmount).to.have.been.calledOnce;
 	});
+
+	it('should null and re-invoke refs when swapping component root element type', () => {
+		let inst;
+
+		class App extends Component {
+			render() {
+				return <div><Child /></div>;
+			}
+		}
+
+		class Child extends Component {
+			constructor(props, context) {
+				super(props, context);
+				this.state = { show:false };
+				inst = this;
+			}
+			handleMount(){}
+			render(_, { show }) {
+				if (!show) return <div id="div" ref={this.handleMount}></div>;
+				return <span id="span" ref={this.handleMount}>some test content</span>;
+			}
+		}
+		sinon.spy(Child.prototype, 'handleMount');
+
+		render(<App />, scratch);
+		expect(inst.handleMount).to.have.been.calledOnce.and.calledWith(scratch.querySelector('#div'));
+		inst.handleMount.reset();
+
+		inst.setState({ show:true });
+		inst.forceUpdate();
+		expect(inst.handleMount).to.have.been.calledTwice;
+		expect(inst.handleMount.firstCall).to.have.been.calledWith(null);
+		expect(inst.handleMount.secondCall).to.have.been.calledWith(scratch.querySelector('#span'));
+		inst.handleMount.reset();
+
+		inst.setState({ show:false });
+		inst.forceUpdate();
+		expect(inst.handleMount).to.have.been.calledTwice;
+		expect(inst.handleMount.firstCall).to.have.been.calledWith(null);
+		expect(inst.handleMount.secondCall).to.have.been.calledWith(scratch.querySelector('#div'));
+	});
 });

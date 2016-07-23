@@ -85,6 +85,8 @@ export function renderComponent(component, opts, mountAll) {
 		previousContext = component.prevContext || context,
 		isUpdate = component.base,
 		initialBase = isUpdate || component.nextBase,
+		nextSibling = initialBase && initialBase.nextSibling,
+		baseParent = initialBase && initialBase.parentNode,
 		initialComponent = initialBase && initialBase._component,
 		initialChildComponent = component._component;
 
@@ -155,14 +157,13 @@ export function renderComponent(component, opts, mountAll) {
 
 			if (initialBase || opts===SYNC_RENDER) {
 				if (cbase) cbase._component = null;
-				base = diff(cbase, rendered || EMPTY_BASE, context, mountAll || !isUpdate, true);
+				base = diff(cbase, rendered || EMPTY_BASE, context, mountAll || !isUpdate);
 			}
 		}
 
 		if (initialBase && base!==initialBase) {
-			let p = initialBase.parentNode;
-			if (p && base!==p) p.replaceChild(base, initialBase);
-			if (!toUnmount && initialComponent===component && !initialChildComponent) {
+			if (baseParent && base!==baseParent) baseParent.insertBefore(base, nextSibling || null);
+			if (!toUnmount && initialComponent===component && !initialChildComponent && initialBase.parentNode) {
 				initialBase._component = null;
 				recollectNodeTree(initialBase);
 			}
@@ -184,7 +185,7 @@ export function renderComponent(component, opts, mountAll) {
 	}
 
 	if (!isUpdate || mountAll) {
-		mounts.splice(0, 0, component);
+		mounts.unshift(component);
 		if (!diffLevel) flushMounts();
 	}
 	else if (!skip && component.componentDidUpdate) {
@@ -263,7 +264,9 @@ export function unmountComponent(component, remove) {
 	}
 	else if (base) {
 		if (base[ATTR_KEY] && base[ATTR_KEY].ref) base[ATTR_KEY].ref(null);
+
 		component.nextBase = base;
+
 		if (remove) {
 			removeNode(base);
 			collectComponent(component);

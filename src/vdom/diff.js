@@ -31,16 +31,16 @@ export function flushMounts() {
  *	@returns {Element} dom			The created/mutated element
  *	@private
  */
-export function diff(dom, vnode, context, mountAll, unmountChildrenOnly, parent) {
+export function diff(dom, vnode, context, mountAll, parent) {
 	diffLevel++;
-	let ret = idiff(dom, vnode, context, mountAll, unmountChildrenOnly);
+	let ret = idiff(dom, vnode, context, mountAll);
 	if (parent && ret.parentNode!==parent) parent.appendChild(ret);
 	if (!--diffLevel) flushMounts();
 	return ret;
 }
 
 
-function idiff(dom, vnode, context, mountAll, unmountChildrenOnly) {
+function idiff(dom, vnode, context, mountAll) {
 	let originalAttributes = vnode.attributes;
 
 	while (isFunctionalComponent(vnode)) {
@@ -55,7 +55,7 @@ function idiff(dom, vnode, context, mountAll, unmountChildrenOnly) {
 				}
 				return dom;
 			}
-			if (!unmountChildrenOnly) collectNode(dom);
+			collectNode(dom);
 		}
 		return document.createTextNode(vnode);
 	}
@@ -83,7 +83,7 @@ function idiff(dom, vnode, context, mountAll, unmountChildrenOnly) {
 		// move children into the replacement node
 		while (dom.firstChild) out.appendChild(dom.firstChild);
 		// reclaim element nodes
-		if (!unmountChildrenOnly) recollectNodeTree(dom);
+		recollectNodeTree(dom);
 	}
 
 	// fast-path for elements containing a single TextNode:
