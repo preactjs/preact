@@ -1,6 +1,17 @@
 import { h, render } from '../../src/preact';
 /** @jsx h */
 
+
+// hacky normalization of attribute order across browsers.
+function sortAttributes(html) {
+	return html.replace(/<([a-z0-9-]+)((?:\s[a-z0-9:_.-]+=".*?")+)((?:\s*\/)?>)/gi, (s, pre, attrs, after) => {
+		let list = attrs.match(/\s[a-z0-9:_.-]+=".*?"/gi).sort( (a, b) => a>b ? 1 : -1 );
+		if (~after.indexOf('/')) after = '></'+pre+'>';
+		return '<' + pre + list.join('') + after;
+	});
+}
+
+
 describe('svg', () => {
 	let scratch;
 
@@ -21,26 +32,28 @@ describe('svg', () => {
 	it('should render SVG to string', () => {
 		render((
 			<svg viewBox="0 0 360 360">
-				<path stroke="white" fill="black" d="M347.1 357.9L183.3 256.5 13 357.9V1.7h334.1v356.2zM58.5 47.2v231.4l124.8-74.1 118.3 72.8V47.2H58.5z" />
+				<path stroke="white" fill="black" d="M 347.1 357.9 L 183.3 256.5 L 13 357.9 V 1.7 h 334.1 v 356.2 Z M 58.5 47.2 v 231.4 l 124.8 -74.1 l 118.3 72.8 V 47.2 H 58.5 Z" />
 			</svg>
 		), scratch);
 
-		expect(scratch.innerHTML).to.equal(`
+		let html = sortAttributes(String(scratch.innerHTML).replace(' xmlns="http://www.w3.org/2000/svg"', ''));
+		expect(html).to.equal(sortAttributes(`
 			<svg viewBox="0 0 360 360">
-				<path stroke="white" fill="black" d="M347.1 357.9L183.3 256.5 13 357.9V1.7h334.1v356.2zM58.5 47.2v231.4l124.8-74.1 118.3 72.8V47.2H58.5z"></path>
+				<path d="M 347.1 357.9 L 183.3 256.5 L 13 357.9 V 1.7 h 334.1 v 356.2 Z M 58.5 47.2 v 231.4 l 124.8 -74.1 l 118.3 72.8 V 47.2 H 58.5 Z" fill="black" stroke="white"></path>
 			</svg>
-		`.replace(/[\n\t]+/g,''));
+		`.replace(/[\n\t]+/g,'')));
 	});
 
 	it('should render SVG to DOM', () => {
 		const Demo = () => (
 			<svg viewBox="0 0 360 360">
-				<path stroke="white" fill="black" d="M347.1 357.9L183.3 256.5 13 357.9V1.7h334.1v356.2zM58.5 47.2v231.4l124.8-74.1 118.3 72.8V47.2H58.5z" />
+				<path d="M 347.1 357.9 L 183.3 256.5 L 13 357.9 V 1.7 h 334.1 v 356.2 Z M 58.5 47.2 v 231.4 l 124.8 -74.1 l 118.3 72.8 V 47.2 H 58.5 Z" fill="black" stroke="white" />
 			</svg>
 		);
 		render(<Demo />, scratch);
 
-		expect(scratch.innerHTML).to.equal('<svg viewBox="0 0 360 360"><path stroke="white" fill="black" d="M347.1 357.9L183.3 256.5 13 357.9V1.7h334.1v356.2zM58.5 47.2v231.4l124.8-74.1 118.3 72.8V47.2H58.5z"></path></svg>');
+		let html = sortAttributes(String(scratch.innerHTML).replace(' xmlns="http://www.w3.org/2000/svg"', ''));
+		expect(html).to.equal(sortAttributes('<svg viewBox="0 0 360 360"><path stroke="white" fill="black" d="M 347.1 357.9 L 183.3 256.5 L 13 357.9 V 1.7 h 334.1 v 356.2 Z M 58.5 47.2 v 231.4 l 124.8 -74.1 l 118.3 72.8 V 47.2 H 58.5 Z"></path></svg>'));
 	});
 
 	it('should use attributes for className', () => {
@@ -70,6 +83,6 @@ describe('svg', () => {
 			<svg viewBox="0 0 1 1" class="foo bar" />
 		), scratch);
 
-		expect(scratch.innerHTML).to.equal(`<svg viewBox="0 0 1 1" class="foo bar"></svg>`);
+		expect(scratch.innerHTML).to.contain(` class="foo bar"`);
 	});
 });
