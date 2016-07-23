@@ -1,10 +1,10 @@
 import { h, Component, render } from '../../src/preact';
 /** @jsx h */
 
-/*global coverage*/
+/*global coverage, ENABLE_PERFORMANCE*/
 /*eslint no-console:0*/
 
-const MULTIPLIER = coverage ? 5 : 1;
+const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
 
 
 let now = typeof performance!=='undefined' && performance.now ? () => performance.now() : () => +new Date();
@@ -23,7 +23,7 @@ function loop(iter, time) {
 function benchmark(iter, callback) {
 	let a = 0;
 	function noop() {
-		try { } finally { a += Math.random(); }
+		try { a++; } finally { a += Math.random(); }
 	}
 
 	// warm
