@@ -5,8 +5,10 @@ let spyAll = obj => Object.keys(obj).forEach( key => sinon.spy(obj,key) );
 
 function getAttributes(node) {
 	let attrs = {};
-	for (let i=node.attributes.length; i--; ) {
-		attrs[node.attributes[i].name] = node.attributes[i].value;
+	if (node.attributes) {
+		for (let i=node.attributes.length; i--; ) {
+			attrs[node.attributes[i].name] = node.attributes[i].value;
+		}
 	}
 	return attrs;
 }
@@ -22,7 +24,7 @@ describe('Components', () => {
 	});
 
 	beforeEach( () => {
-		let c = scratch.firstChild;
+		let c = scratch.firstElementChild;
 		if (c) render(<Empty />, scratch, c);
 		scratch.innerHTML = '';
 	});
@@ -143,7 +145,7 @@ describe('Components', () => {
 
 		comp.setState({ alt:true });
 		comp.forceUpdate();
-		expect(scratch.innerHTML, 'switching to textnode').to.equal('asdf');
+		expect(scratch.innerHTML, 'switching to textnode 2').to.equal('asdf');
 	});
 
 
@@ -245,7 +247,7 @@ describe('Components', () => {
 					}
 				}));
 
-			expect(getAttributes(scratch.firstChild)).to.eql({
+			expect(getAttributes(scratch.firstElementChild)).to.eql({
 				j: '2',
 				i: '2',
 				foo: 'bar'
@@ -267,7 +269,7 @@ describe('Components', () => {
 					}
 				}));
 
-			expect(getAttributes(scratch.firstChild)).to.eql({
+			expect(getAttributes(scratch.firstElementChild)).to.eql({
 				j: '3',
 				i: '3',
 				foo: 'bar'
@@ -342,7 +344,7 @@ describe('Components', () => {
 					}
 				}));
 
-			expect(getAttributes(scratch.firstChild)).to.eql({
+			expect(getAttributes(scratch.firstElementChild)).to.eql({
 				j: '2',
 				i: '2',
 				foo: 'bar'
@@ -368,7 +370,7 @@ describe('Components', () => {
 					}
 				}));
 
-			expect(getAttributes(scratch.firstChild)).to.eql({
+			expect(getAttributes(scratch.firstElementChild)).to.eql({
 				j: '3',
 				i: '3',
 				foo: 'bar'
