@@ -3,7 +3,7 @@ import { toLowerCase, empty, isString, isFunction } from '../util';
 import { isSameNodeType, isNamedNode } from './index';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
-import { removeNode, setAccessor, getRawNodeAttributes, getNodeType } from '../dom/index';
+import { setAccessor, getRawNodeAttributes, getNodeType } from '../dom/index';
 import { createNode, collectNode } from '../dom/recycler';
 import { unmountComponent } from './component';
 
@@ -214,15 +214,11 @@ export function recollectNodeTree(node, unmountOnly) {
 		if (node[ATTR_KEY] && node[ATTR_KEY].ref) node[ATTR_KEY].ref(null);
 
 		if (!unmountOnly) {
-			if (getNodeType(node)!==1) {
-				removeNode(node);
-				return;
-			}
 
 			collectNode(node);
 		}
 
-		if (node.childNodes.length) {
+		if (node.childNodes && node.childNodes.length) {
 			removeOrphanedChildren(node.childNodes, unmountOnly);
 		}
 	}
