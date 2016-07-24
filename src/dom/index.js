@@ -54,10 +54,6 @@ export function setAccessor(node, name, value, old, isSvg) {
 	else if (name==='dangerouslySetInnerHTML') {
 		if (value) node.innerHTML = value.__html;
 	}
-	else if (name!=='type' && !isSvg && name in node) {
-		setProperty(node, name, empty(value) ? '' : value);
-		if (falsey(value)) node.removeAttribute(name);
-	}
 	else if (name[0]==='o' && name[1]==='n') {
 		let l = node._listeners || (node._listeners = {});
 		name = toLowerCase(name.substring(2));
@@ -68,6 +64,10 @@ export function setAccessor(node, name, value, old, isSvg) {
 			node.removeEventListener(name, eventProxy);
 		}
 		l[name] = value;
+	}
+	else if (name!=='type' && !isSvg && name in node) {
+		setProperty(node, name, empty(value) ? '' : value);
+		if (falsey(value)) node.removeAttribute(name);
 	}
 	else {
 		let ns = isSvg && name.match(/^xlink\:?(.+)/);
