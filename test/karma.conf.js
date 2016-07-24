@@ -39,7 +39,7 @@ var sauceLabsLaunchers = {
 
 module.exports = function(config) {
 	config.set({
-		browsers: ['PhantomJS'].concat(sauceLabs ? Object.keys(sauceLabsLaunchers) : []),
+		browsers: sauceLabs ? Object.keys(sauceLabsLaunchers) : ['PhantomJS'],
 
 		frameworks: ['source-map-support', 'mocha', 'chai-sinon'],
 
