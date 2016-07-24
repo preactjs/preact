@@ -189,6 +189,9 @@ describe('Lifecycle methods', () => {
 
 
 	describe('#constructor, getInitialState and component(Did|Will)(Mount|Unmount)', () => {
+		/* global DISABLE_FLAKEY */
+		let flakeyIt = DISABLE_FLAKEY ? xit : it;
+
 		let setState;
 		class Outer extends Component {
 			constructor(p, c) {
@@ -249,7 +252,7 @@ describe('Lifecycle methods', () => {
 				expect(proto.componentDidMount).to.have.been.called;
 			});
 
-			it('should be invoked for components on unmount', () => {
+			flakeyIt('should be invoked for components on unmount', () => {
 				reset();
 				setState({ show:false });
 				rerender();
@@ -328,7 +331,7 @@ describe('Lifecycle methods', () => {
 				expect(proto.componentDidMount).to.have.been.called;
 			});
 
-			it('should be invoked normally on unmount', () => {
+			flakeyIt('should be invoked normally on unmount', () => {
 				setState({ show:false });
 				rerender();
 

@@ -112,7 +112,8 @@ module.exports = function(config) {
 			plugins: [
 				new webpack.DefinePlugin({
 					coverage: coverage,
-					ENABLE_PERFORMANCE: performance
+					ENABLE_PERFORMANCE: performance,
+					DISABLE_FLAKEY: !!String(process.env.FLAKEY).match(/^(0|false)$/gi)
 				})
 			]
 		},
