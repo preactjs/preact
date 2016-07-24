@@ -26,7 +26,7 @@ export function createNode(nodeName, isSvg) {
 function cleanNode(node) {
 	removeNode(node);
 
-	if (getNodeType(node)===3) return;
+	if (getNodeType(node)!==1) return;
 
 	// When reclaiming externally created nodes, seed the attribute cache: (Issue #97)
 

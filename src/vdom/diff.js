@@ -41,10 +41,14 @@ export function diff(dom, vnode, context, mountAll, parent) {
 
 
 function idiff(dom, vnode, context, mountAll) {
-	let originalAttributes = vnode.attributes;
+	let originalAttributes = vnode && vnode.attributes;
 
 	while (isFunctionalComponent(vnode)) {
 		vnode = buildFunctionalComponent(vnode, context);
+	}
+
+	if (empty(vnode)) {
+		return document.createComment('');
 	}
 
 	if (isString(vnode)) {
@@ -67,6 +71,7 @@ function idiff(dom, vnode, context, mountAll) {
 	if (isFunction(nodeName)) {
 		return buildComponentFromVNode(dom, vnode, context, mountAll);
 	}
+
 	if (!isString(nodeName)) {
 		nodeName = String(nodeName);
 	}

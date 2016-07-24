@@ -6,7 +6,6 @@ export const FORCE_RENDER = 2;
 export const ASYNC_RENDER = 3;
 
 export const EMPTY = {};
-export const EMPTY_BASE = '';
 
 export const ATTR_KEY = typeof Symbol!=='undefined' ? Symbol.for('preactattr') : '__preactattr_';
 

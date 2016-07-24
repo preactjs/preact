@@ -1,4 +1,4 @@
-import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, EMPTY_BASE, ATTR_KEY } from '../constants';
+import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, ATTR_KEY } from '../constants';
 import options from '../options';
 import { isFunction, clone, extend, empty } from '../util';
 import { enqueueRender } from '../render-queue';
@@ -157,7 +157,7 @@ export function renderComponent(component, opts, mountAll) {
 
 			if (initialBase || opts===SYNC_RENDER) {
 				if (cbase) cbase._component = null;
-				base = diff(cbase, rendered || EMPTY_BASE, context, mountAll || !isUpdate);
+				base = diff(cbase, rendered, context, mountAll || !isUpdate);
 			}
 		}
 
