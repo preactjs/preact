@@ -9,8 +9,7 @@ import { empty, isString, isFunction, delve } from './util';
  */
 export function createLinkedState(component, key, eventPath) {
 	let path = key.split('.'),
-		p0 = path[0],
-		len = path.length;
+		p0 = path[0];
 	return function(e) {
 		let t = e && e.currentTarget || this,
 			s = component.state,
@@ -23,11 +22,11 @@ export function createLinkedState(component, key, eventPath) {
 			}
 		}
 		else {
-			v = (t.nodeName+t.type).match(/^input(check|rad)/i) ? t.checked : t.value;
+			v = t.nodeName ? ((t.nodeName+t.type).match(/^input(check|rad)/i) ? t.checked : t.value) : e;
 		}
 		if (isFunction(v)) v = v.call(t);
-		if (len>1) {
-			for (i=0; i<len-1; i++) {
+		if (path.length>1) {
+			for (i=0; i<path.length-1; i++) {
 				obj = obj[path[i]] || (obj[path[i]] = {});
 			}
 			obj[path[i]] = v;
