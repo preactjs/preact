@@ -64,7 +64,7 @@
     "karma-webpack": "^1.7.0",
     "mocha": "^2.5.0",
     "npm-run-all": "^2.2.2",
-    "phantomjs-prebuilt": "^2.1.7",
+    "phantomjs-prebuilt": "^2.1.8",
     "pretty-bytes-cli": "^1.0.0",
     "rimraf": "^2.5.3",
     "rollup": "^0.34.1",
