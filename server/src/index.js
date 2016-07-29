@@ -152,6 +152,7 @@ export default function renderToString(vnode, context, opts, inner) {
 				let c = new nodeName(props, context);
 				c.props = props;
 				c.context = context;
+				if (c.componentWillMount) c.componentWillMount();
 				rendered = c.render(c.props, c.state, c.context);
 
 				if (c.getChildContext) {

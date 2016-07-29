@@ -212,6 +212,23 @@ describe('render', () => {
 			expect(render(<Test bar="b" />), 'partial').to.equal('<div foo="default foo" bar="b"></div>');
 			expect(render(<Test foo="a" bar="b" />), 'overridden').to.equal('<div foo="a" bar="b"></div>');
 		});
+
+		it('should invoke componentWillMount', () => {
+			class Test extends Component {
+				componentWillMount() {}
+				render(props) {
+					return <div {...props} />;
+				}
+			}
+			spy(Test.prototype, 'componentWillMount');
+			spy(Test.prototype, 'render');
+
+			render(<Test />);
+
+			expect(Test.prototype.componentWillMount)
+				.to.have.been.calledOnce
+				.and.to.have.been.calledBefore(Test.prototype.render);
+		});
 	});
 
 	describe('High-order components', () => {
