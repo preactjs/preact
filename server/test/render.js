@@ -64,6 +64,13 @@ describe('render', () => {
 
 			expect(rendered).to.equal(expected);
 		});
+
+		it('should serialize object styles', () => {
+			let rendered = render(<div style={{ color:'red', border:'none' }} />),
+				expected = `<div style="color: red; border: none;"></div>`;
+
+			expect(rendered).to.equal(expected);
+		});
 	});
 
 	describe('Functional Components', () => {
