@@ -229,6 +229,111 @@ describe('render', () => {
 				.to.have.been.calledOnce
 				.and.to.have.been.calledBefore(Test.prototype.render);
 		});
+
+		it('should pass context to grandchildren', () => {
+			const CONTEXT = { a:'a' };
+			const PROPS = { b:'b' };
+
+			class Outer extends Component {
+				getChildContext() {
+					return CONTEXT;
+				}
+				render(props) {
+					return <div><Inner {...props} /></div>;
+				}
+			}
+			spy(Outer.prototype, 'getChildContext');
+
+			class Inner extends Component {
+				render(props, state, context) {
+					return <div>{ context && context.a }</div>;
+				}
+			}
+			spy(Inner.prototype, 'render');
+
+			render(<Outer />);
+
+			expect(Outer.prototype.getChildContext).to.have.been.calledOnce;
+			expect(Inner.prototype.render).to.have.been.calledWith({}, {}, CONTEXT);
+
+			CONTEXT.foo = 'bar';
+			render(<Outer {...PROPS} />);
+
+			expect(Outer.prototype.getChildContext).to.have.been.calledTwice;
+			expect(Inner.prototype.render).to.have.been.calledWith(PROPS, {}, CONTEXT);
+		});
+
+		it('should pass context to direct children', () => {
+			const CONTEXT = { a:'a' };
+			const PROPS = { b:'b' };
+
+			class Outer extends Component {
+				getChildContext() {
+					return CONTEXT;
+				}
+				render(props) {
+					return <Inner {...props} />;
+				}
+			}
+			spy(Outer.prototype, 'getChildContext');
+
+			class Inner extends Component {
+				render(props, state, context) {
+					return <div>{ context && context.a }</div>;
+				}
+			}
+			spy(Inner.prototype, 'render');
+
+			render(<Outer />);
+
+			expect(Outer.prototype.getChildContext).to.have.been.calledOnce;
+			expect(Inner.prototype.render).to.have.been.calledWith({}, {}, CONTEXT);
+
+			CONTEXT.foo = 'bar';
+			render(<Outer {...PROPS} />);
+
+			expect(Outer.prototype.getChildContext).to.have.been.calledTwice;
+			expect(Inner.prototype.render).to.have.been.calledWith(PROPS, {}, CONTEXT);
+
+			// make sure render() could make use of context.a
+			expect(Inner.prototype.render).to.have.returned(match({ children:['a'] }));
+		});
+
+		it('should preserve existing context properties when creating child contexts', () => {
+			let outerContext = { outer:true },
+				innerContext = { inner:true };
+			class Outer extends Component {
+				getChildContext() {
+					return { outerContext };
+				}
+				render() {
+					return <div><Inner /></div>;
+				}
+			}
+
+			class Inner extends Component {
+				getChildContext() {
+					return { innerContext };
+				}
+				render() {
+					return <InnerMost />;
+				}
+			}
+
+			class InnerMost extends Component {
+				render() {
+					return <strong>test</strong>;
+				}
+			}
+
+			spy(Inner.prototype, 'render');
+			spy(InnerMost.prototype, 'render');
+
+			render(<Outer />);
+
+			expect(Inner.prototype.render).to.have.been.calledWith({}, {}, { outerContext });
+			expect(InnerMost.prototype.render).to.have.been.calledWith({}, {}, { outerContext, innerContext });
+		});
 	});
 
 	describe('High-order components', () => {

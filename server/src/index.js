@@ -156,7 +156,7 @@ export default function renderToString(vnode, context, opts, inner) {
 				rendered = c.render(c.props, c.state, c.context);
 
 				if (c.getChildContext) {
-					context = c.getChildContext();
+					context = assign(assign({}, context), c.getChildContext());
 				}
 			}
 
