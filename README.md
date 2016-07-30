@@ -49,7 +49,7 @@ As one would expect coming from React, Components are simple building blocks for
 - :pencil: [**preact-richtextarea**](https://git.io/preact-richtextarea): Simple HTML editor component
 - :repeat: [**preact-cycle**](https://git.io/preact-cycle): Functional-reactive paradigm for Preact.
 - :satellite: [**preact-portal**](https://git.io/preact-portal): Render Preact components into (a) SPACE :milky_way:
-- :construction: [**preact-classless-component**](https://github.com/ld0rman/preact-classless-component): A utility method to create Preact components without using the `class` keyword
+- :construction: [**preact-classless-component**](https://github.com/ld0rman/preact-classless-component): A utility method to create components without the `class` keyword
 - :hammer: [**preact-hyperscript**](https://github.com/queckezz/preact-hyperscript): Hyperscript-like syntax for creating elements
 
 
