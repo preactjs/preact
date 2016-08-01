@@ -93,16 +93,10 @@ function getNodeProps(vnode) {
 // we have to patch in Array support, Possible issue in npm.im/pretty-format
 let preactPlugin = {
 	test(object) {
-		if (Array.isArray(object)) {
-			return preactPlugin.test(object[0]);
-		}
 		// return object && Object.prototype.toString.call(object)==='[object VNode]';
-		return object && typeof object==='object' && 'nodeName' in object && 'attributes' in object && 'children' in object;
+		return object && typeof object==='object' && 'nodeName' in object && 'attributes' in object && 'children' in object && !('nodeType' in object);
 	},
 	print(val, print, indent) {
-		if (Array.isArray(val)) {
-			return 'Array [\n  ' + val.map( v => preactPlugin.test(v) ? renderToString(v, preactPlugin.context, preactPlugin.opts, true) : v ).join(',\n  ') + '\n]';
-		}
 		return renderToString(val, preactPlugin.context, preactPlugin.opts, true);
 	}
 };

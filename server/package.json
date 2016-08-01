@@ -52,6 +52,6 @@
     "sinon-chai": "^2.8.0"
   },
   "dependencies": {
-    "pretty-format": "^3.5.0"
+    "pretty-format": "^3.5.1"
   }
 }
