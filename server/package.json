@@ -50,5 +50,8 @@
     "rollup-plugin-memory": "^1.0.0",
     "sinon": "^1.17.1",
     "sinon-chai": "^2.8.0"
+  },
+  "dependencies": {
+    "pretty-format": "^3.5.0"
   }
 }

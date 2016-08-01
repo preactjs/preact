@@ -1,3 +1,4 @@
+import prettyFormat from 'pretty-format';
 
 const SHALLOW = { shallow: true };
 
@@ -53,7 +54,7 @@ let memoize = (fn, mem={}) => v => mem[v] || (mem[v] = fn(v));
 
 let indent = (s, char) => String(s).replace(/(\n+)/g, '$1' + (char || '\t'));
 
-let isLargeString = s => (String(s).length>40 || String(s).indexOf('\n')!==-1 || String(s).indexOf('<')!==-1);
+let isLargeString = (s, length, ignoreLines) => (String(s).length>(length || 40) || (!ignoreLines && String(s).indexOf('\n')!==-1) || String(s).indexOf('<')!==-1);
 
 function styleObjToCss(s) {
 	let str = '';
@@ -88,6 +89,27 @@ function getNodeProps(vnode) {
 	if (vnode.children) props.children = vnode.children;
 	return props;
 }
+
+// we have to patch in Array support, Possible issue in npm.im/pretty-format
+let preactPlugin = {
+	test(object) {
+		if (Array.isArray(object)) {
+			return preactPlugin.test(object[0]);
+		}
+		// return object && Object.prototype.toString.call(object)==='[object VNode]';
+		return object && typeof object==='object' && 'nodeName' in object && 'attributes' in object && 'children' in object;
+	},
+	print(val, print, indent) {
+		if (Array.isArray(val)) {
+			return 'Array [\n  ' + val.map( v => preactPlugin.test(v) ? renderToString(v, preactPlugin.context, preactPlugin.opts, true) : v ).join(',\n  ') + '\n]';
+		}
+		return renderToString(val, preactPlugin.context, preactPlugin.opts, true);
+	}
+};
+
+let prettyFormatOpts = {
+	plugins: [preactPlugin]
+};
 
 /** Render Preact JSX + Components to an HTML string.
  *	@name render
@@ -165,8 +187,7 @@ export default function renderToString(vnode, context, opts, inner) {
 	}
 
 	// render JSX to HTML
-	let s = `<${nodeName}`,
-		html;
+	let s = '', html;
 
 	if (attributes) {
 		let attrs = objectKeys(attributes);
@@ -179,6 +200,23 @@ export default function renderToString(vnode, context, opts, inner) {
 				v = attributes[name];
 			if (name==='children') continue;
 			if (!(opts && opts.allAttributes) && (name==='key' || name==='ref')) continue;
+
+			if (opts.jsx) {
+				if (typeof v!=='string') {
+					preactPlugin.context = context;
+					preactPlugin.opts = opts;
+					v = prettyFormat(v, prettyFormatOpts);
+					if (~v.indexOf('\n')) {
+						v = `${indent('\n'+v, indentChar)}\n`;
+					}
+					s += indent(`\n${name}={${v}}`, indentChar);
+				}
+				else {
+					s += `\n${indentChar}${name}="${encodeEntities(v)}"`;
+				}
+				continue;
+			}
+
 			if (name==='className') {
 				if (attributes['class']) continue;
 				name = 'class';
@@ -186,6 +224,7 @@ export default function renderToString(vnode, context, opts, inner) {
 			if (name==='style' && v && typeof v==='object') {
 				v = styleObjToCss(v);
 			}
+
 			if (name==='dangerouslySetInnerHTML') {
 				html = v && v.__html;
 			}
@@ -203,7 +242,25 @@ export default function renderToString(vnode, context, opts, inner) {
 		}
 	}
 
-	s += '>';
+	// account for >1 multiline attribute
+	let sub = s.replace(/^\n\s*/, ' ');
+	if (sub!==s && !~sub.indexOf('\n')) s = sub;
+	else if (~s.indexOf('\n')) s += '\n';
+	// s += '>';
+
+	s = `<${nodeName}${s}>`;
+
+	// if (opts && opts.jsx) {
+	// 	if (isLargeString(s, 80, true) || s.split('\n').length>3) {
+	// 		s = `<${nodeName}${s}\n>`;
+	// 	}
+	// 	else {
+	// 		s = `<${nodeName}${s}\n>`;
+	// 	}
+	// }
+	// else {
+	// 	s = `<${nodeName}${s}>`;
+	// }
 
 	if (html) {
 		// if multiline, indent.
@@ -216,7 +273,7 @@ export default function renderToString(vnode, context, opts, inner) {
 		let len = children && children.length;
 		if (len) {
 			let pieces = [],
-				hasLarge = false;
+				hasLarge = ~s.indexOf('\n');
 			for (let i=0; i<len; i++) {
 				let child = children[i];
 				if (!falsey(child)) {
