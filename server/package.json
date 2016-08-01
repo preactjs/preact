@@ -41,14 +41,14 @@
     "babel-preset-es2015-minimal-rollup": "^2.0.0",
     "babel-preset-stage-0": "^6.5.0",
     "babel-register": "^6.9.0",
-    "chai": "^3.3.0",
+    "chai": "^3.5.0",
     "eslint": "^3.1.1",
-    "mocha": "^2.3.3",
+    "mocha": "^3.0.0",
     "preact": "^5.5.0",
-    "rollup": "^0.34.1",
+    "rollup": "^0.34.2",
     "rollup-plugin-babel": "^2.6.1",
     "rollup-plugin-memory": "^1.0.0",
-    "sinon": "^1.17.1",
+    "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0"
   },
   "dependencies": {
