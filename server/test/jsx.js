@@ -5,10 +5,8 @@ import { spy, match } from 'sinon';
 import sinonChai from 'sinon-chai';
 chai.use(sinonChai);
 
-// remove leading whitespace from tagged template literal
-// let dedent = ([str]) => str.replace(/^\n+/g,'').split( '\n'+str.match(/^\n+?(\s+)/)[1] ).join('\n');
+// tag to remove leading whitespace from tagged template literal
 function dedent([str]) {
-	// str = str.replace(/^\n+/g,'\n');
 	return str.split( '\n'+str.match(/^\n*(\s+)/)[1] ).join('\n').replace(/(^\n+|\n+\s*$)/g, '');
 }
 

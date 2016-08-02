@@ -93,7 +93,6 @@ function getNodeProps(vnode) {
 // we have to patch in Array support, Possible issue in npm.im/pretty-format
 let preactPlugin = {
 	test(object) {
-		// return object && Object.prototype.toString.call(object)==='[object VNode]';
 		return object && typeof object==='object' && 'nodeName' in object && 'attributes' in object && 'children' in object && !('nodeType' in object);
 	},
 	print(val, print, indent) {
@@ -126,14 +125,6 @@ renderToString.render = renderToString;
  *	@param {Object} [context={}]	Optionally pass an initial context object through the render path.
  */
 let shallowRender = (vnode, context) => renderToString(vnode, context, SHALLOW);
-
-
-/** You can actually skip preact entirely and import this empty Component base class (or not use a base class at all).
- *	preact-render-to-string doesn't use any of Preact's functionality to do its job.
- *	@name Component
- *	@class
- */
-// renderToString.Component = function Component(){};
 
 
 /** The default export is an alias of `render()`. */
@@ -240,21 +231,8 @@ export default function renderToString(vnode, context, opts, inner) {
 	let sub = s.replace(/^\n\s*/, ' ');
 	if (sub!==s && !~sub.indexOf('\n')) s = sub;
 	else if (~s.indexOf('\n')) s += '\n';
-	// s += '>';
 
 	s = `<${nodeName}${s}>`;
-
-	// if (opts && opts.jsx) {
-	// 	if (isLargeString(s, 80, true) || s.split('\n').length>3) {
-	// 		s = `<${nodeName}${s}\n>`;
-	// 	}
-	// 	else {
-	// 		s = `<${nodeName}${s}\n>`;
-	// 	}
-	// }
-	// else {
-	// 	s = `<${nodeName}${s}>`;
-	// }
 
 	if (html) {
 		// if multiline, indent.
