@@ -4,7 +4,6 @@
   "version": "5.6.0",
   "description": "Tiny & fast Component-based virtual DOM framework.",
   "main": "dist/preact.js",
-  "typings": "src/preact.d.ts",
   "jsnext:main": "src/preact.js",
   "dev:main": "dist/preact.dev.js",
   "minified:main": "dist/preact.min.js",
