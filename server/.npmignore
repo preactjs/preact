@@ -1,1 +1,3 @@
-.eslintrc
+!/dist
+!/src
+jsx.js
