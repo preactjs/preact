@@ -1,4 +1,4 @@
-import { render, shallowRender } from '../src';
+import render from '../src/jsx';
 import { h, Component } from 'preact';
 import chai, { expect } from 'chai';
 import { spy, match } from 'sinon';
@@ -11,7 +11,7 @@ function dedent([str]) {
 }
 
 describe('jsx', () => {
-	let renderJsx = jsx => render(jsx, {}, { jsx:true, xml:true, pretty:'  ' }).replace(/ {2}/g, '\t');
+	let renderJsx = jsx => render(jsx).replace(/ {2}/g, '\t');
 
 	it('should render as JSX', () => {
 		let rendered = renderJsx(

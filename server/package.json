@@ -6,7 +6,9 @@
   "main": "dist/index.js",
   "jsnext:main": "src/index.js",
   "scripts": {
-    "build": "rollup -c rollup.config.js -m ${npm_package_main}.map -f umd -n $npm_package_amdName $npm_package_jsnext_main -o $npm_package_main",
+    "build": "npm run -s transpile && npm run -s transpile:jsx",
+    "transpile": "rollup -c rollup.config.js -m ${npm_package_main}.map -f umd -n $npm_package_amdName $npm_package_jsnext_main -o $npm_package_main",
+    "transpile:jsx": "ENTRY=jsx rollup -c rollup.config.js -m dist/jsx.js.map -f umd -n $npm_package_amdName src/jsx.js -o dist/jsx.js",
     "test": "eslint {src,test} && mocha --compilers js:babel-register test/**/*.js",
     "prepublish": "npm run build",
     "release": "npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
@@ -42,12 +44,14 @@
     "babel-preset-stage-0": "^6.5.0",
     "babel-register": "^6.9.0",
     "chai": "^3.5.0",
-    "eslint": "^3.1.1",
+    "eslint": "^3.2.2",
     "mocha": "^3.0.0",
     "preact": "^5.5.0",
-    "rollup": "^0.34.2",
+    "rollup": "^0.34.3",
     "rollup-plugin-babel": "^2.6.1",
+    "rollup-plugin-commonjs": "^3.3.1",
     "rollup-plugin-memory": "^1.0.0",
+    "rollup-plugin-node-resolve": "^2.0.0",
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0"
   },
