@@ -70,6 +70,16 @@ describe('jsx', () => {
 		`);
 	});
 
+	it('should skip null and undefined attributes', () => {
+		expect(renderJsx(
+			<a b={null}>bar</a>
+		)).to.equal(`<a>bar</a>`);
+
+		expect(renderJsx(
+			<a b={undefined}>bar</a>
+		)).to.equal(`<a>bar</a>`);
+	});
+
 	it('should render attributes containing VNodes', () => {
 		expect(renderJsx(
 			<a b={<c />}>bar</a>
