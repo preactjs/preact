@@ -26,7 +26,7 @@ export default {
 		babel({
 			babelrc: false,
 			comments: false,
-			exclude: 'node_modules/**',
+			exclude: [],
 			presets: ['es2015-minimal-rollup'].concat(babelRc.presets.slice(1)),
 			plugins: babelRc.plugins
 		})
