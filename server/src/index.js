@@ -1,13 +1,9 @@
-import prettyFormat from 'pretty-format';
+import { objectKeys, encodeEntities, falsey, memoize, indent, isLargeString, styleObjToCss, assign, getNodeProps } from './util';
 
 const SHALLOW = { shallow: true };
 
-const ESC = {
-	'<': '&lt;',
-	'>': '&gt;',
-	'"': '&quot;',
-	'&': '&amp;'
-};
+// components without names, kept as a hash for later comparison to return consistent UnnamedComponentXX names.
+const UNNAMED = [];
 
 const EMPTY = {};
 
@@ -28,81 +24,6 @@ const VOID_ELEMENTS = [
 	'wbr'
 ];
 
-// DOM properties that should NOT have "px" added when numeric
-export const NON_DIMENSION_PROPS = {
-	boxFlex:1, boxFlexGroup:1, columnCount:1, fillOpacity:1, flex:1, flexGrow:1,
-	flexPositive:1, flexShrink:1, flexNegative:1, fontWeight:1, lineClamp:1, lineHeight:1,
-	opacity:1, order:1, orphans:1, strokeOpacity:1, widows:1, zIndex:1, zoom:1
-};
-
-// components without names, kept as a hash for later comparison to return consistent UnnamedComponentXX names.
-const UNNAMED = [];
-
-const objectKeys = Object.keys || (obj => {
-	let keys = [];
-	for (let i in obj) if (obj.hasOwnProperty(i)) keys.push(i);
-	return keys;
-});
-
-let encodeEntities = s => String(s).replace(/[<>"&]/g, escapeChar);
-
-let escapeChar = a => ESC[a] || a;
-
-let falsey = v => v==null || v===false;
-
-let memoize = (fn, mem={}) => v => mem[v] || (mem[v] = fn(v));
-
-let indent = (s, char) => String(s).replace(/(\n+)/g, '$1' + (char || '\t'));
-
-let isLargeString = (s, length, ignoreLines) => (String(s).length>(length || 40) || (!ignoreLines && String(s).indexOf('\n')!==-1) || String(s).indexOf('<')!==-1);
-
-function styleObjToCss(s) {
-	let str = '';
-	for (let prop in s) {
-		let val = s[prop];
-		if (val!=null) {
-			if (str) str += ' ';
-			str += jsToCss(prop);
-			str += ': ';
-			str += val;
-			if (typeof val==='number' && !NON_DIMENSION_PROPS[prop]) {
-				str += 'px';
-			}
-			str += ';';
-		}
-	}
-	return str;
-}
-
-// Convert a JavaScript camel-case CSS property name to a CSS property name
-let jsToCss = memoize( s => s.replace(/([A-Z])/g,'-$1').toLowerCase() );
-
-function assign(obj, props) {
-	for (let i in props) obj[i] = props[i];
-	return obj;
-}
-
-function getNodeProps(vnode) {
-	let defaultProps = vnode.nodeName.defaultProps,
-		props = assign({}, defaultProps || vnode.attributes);
-	if (defaultProps) assign(props, vnode.attributes);
-	if (vnode.children) props.children = vnode.children;
-	return props;
-}
-
-// we have to patch in Array support, Possible issue in npm.im/pretty-format
-let preactPlugin = {
-	test(object) {
-		return object && typeof object==='object' && 'nodeName' in object && 'attributes' in object && 'children' in object && !('nodeType' in object);
-	},
-	print(val, print, indent) {
-		return renderToString(val, preactPlugin.context, preactPlugin.opts, true);
-	}
-};
-
-let prettyFormatOpts = {
-	plugins: [preactPlugin]
-};
 
 /** Render Preact JSX + Components to an HTML string.
  *	@name render
@@ -186,19 +107,9 @@ export default function renderToString(vnode, context, opts, inner) {
 			if (name==='children') continue;
 			if (!(opts && opts.allAttributes) && (name==='key' || name==='ref')) continue;
 
-			if (opts.jsx) {
-				if (typeof v!=='string') {
-					preactPlugin.context = context;
-					preactPlugin.opts = opts;
-					v = prettyFormat(v, prettyFormatOpts);
-					if (~v.indexOf('\n')) {
-						v = `${indent('\n'+v, indentChar)}\n`;
-					}
-					s += indent(`\n${name}={${v}}`, indentChar);
-				}
-				else {
-					s += `\n${indentChar}${name}="${encodeEntities(v)}"`;
-				}
+			let hooked = opts.attributeHook && opts.attributeHook(name, v, context, opts);
+			if (hooked) {
+				s += hooked;
 				continue;
 			}
 
