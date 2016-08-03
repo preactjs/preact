@@ -21,6 +21,8 @@ let prettyFormatOpts = {
 
 
 function attributeHook(name, value, context, opts) {
+	if (value==null) return '';
+
 	let indentChar = typeof opts.pretty==='string' ? opts.pretty : '\t';
 	if (typeof value!=='string') {
 		preactPlugin.context = context;

@@ -108,7 +108,7 @@ export default function renderToString(vnode, context, opts, inner) {
 			if (!(opts && opts.allAttributes) && (name==='key' || name==='ref')) continue;
 
 			let hooked = opts.attributeHook && opts.attributeHook(name, v, context, opts);
-			if (hooked) {
+			if (hooked || hooked==='') {
 				s += hooked;
 				continue;
 			}
