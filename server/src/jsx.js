@@ -40,7 +40,7 @@ function attributeHook(name, value, context, opts) {
 let defaultOpts = {
 	attributeHook,
 	jsx: true,
-	xml: true,
+	xml: false,
 	pretty: '  '
 };
 
