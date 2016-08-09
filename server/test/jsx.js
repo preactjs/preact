@@ -105,4 +105,23 @@ describe('jsx', () => {
 			</a>
 		`);
 	});
+
+	it('should render empty resolved children identically to no children', () => {
+		const Empty = () => null;
+		expect(renderJsx(
+			<div>
+				<a />
+				<b>{null}</b>
+				<c><Empty /></c>
+			</div>
+		)).to.equal(dedent`
+			<div>
+				<a />
+				<b />
+				<c>
+					<!---->
+				</c>
+			</div>
+		`);
+	});
 });

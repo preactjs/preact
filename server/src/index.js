@@ -57,6 +57,10 @@ export default function renderToString(vnode, context, opts, inner) {
 	let pretty = opts.pretty,
 		indentChar = typeof pretty==='string' ? pretty : '\t';
 
+	if (vnode==null) {
+		return '<!---->';
+	}
+
 	// #text nodes
 	if (!nodeName) {
 		return encodeEntities(vnode);
@@ -153,23 +157,23 @@ export default function renderToString(vnode, context, opts, inner) {
 		s += html;
 	}
 	else {
-		let len = children && children.length;
-		if (len) {
-			let pieces = [],
-				hasLarge = ~s.indexOf('\n');
-			for (let i=0; i<len; i++) {
-				let child = children[i];
-				if (!falsey(child)) {
-					let ret = renderToString(child, context, opts, true);
-					if (!hasLarge && pretty && isLargeString(ret)) hasLarge = true;
-					pieces.push(ret);
-				}
+		let len = children && children.length,
+			pieces = [],
+			hasLarge = ~s.indexOf('\n');
+		for (let i=0; i<len; i++) {
+			let child = children[i];
+			if (!falsey(child)) {
+				let ret = renderToString(child, context, opts, true);
+				if (!hasLarge && pretty && isLargeString(ret)) hasLarge = true;
+				pieces.push(ret);
 			}
-			if (hasLarge) {
-				for (let i=pieces.length; i--; ) {
-					pieces[i] = '\n' + indentChar + indent(pieces[i], indentChar);
-				}
+		}
+		if (hasLarge) {
+			for (let i=pieces.length; i--; ) {
+				pieces[i] = '\n' + indentChar + indent(pieces[i], indentChar);
 			}
+		}
+		if (pieces.length) {
 			s += pieces.join('');
 		}
 		else if (opts && opts.xml) {
@@ -177,7 +181,7 @@ export default function renderToString(vnode, context, opts, inner) {
 		}
 	}
 
-	if (VOID_ELEMENTS.indexOf(nodeName) === -1) {
+	if (opts.jsx || VOID_ELEMENTS.indexOf(nodeName)===-1) {
 		if (pretty && ~s.indexOf('\n')) s += '\n';
 		s += `</${nodeName}>`;
 	}
