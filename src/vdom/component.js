@@ -37,22 +37,22 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 	if ((component.__key = props.key)) delete props.key;
 
 	if (empty(b) || mountAll) {
-  component.context = context;
-  component.props = props;
+		component.context = context;
+		component.props = props;
 		if (component.componentWillMount) component.componentWillMount();
 	} else {
-	 if (component.componentWillReceiveProps) {
-		 component.componentWillReceiveProps(props, context);
-	 }
+		if (component.componentWillReceiveProps) {
+			component.componentWillReceiveProps(props, context);
+		}
 
- 	if (context && context!==component.context) {
-	 	if (!component.prevContext) component.prevContext = component.context;
-		 component.context = context;
- 	}
+		if (context && context!==component.context) {
+			if (!component.prevContext) component.prevContext = component.context;
+			component.context = context;
+		}
 
-	 if (!component.prevProps) component.prevProps = component.props;
- 	component.props = props;
- }
+		if (!component.prevProps) component.prevProps = component.props;
+		component.props = props;
+	}
 	component._disableRendering = false;
 
 	if (opts!==NO_RENDER) {
