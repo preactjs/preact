@@ -33,6 +33,10 @@
     "type": "git",
     "url": "https://github.com/developit/preact.git"
   },
+  "files": [
+    "src",
+    "dist"
+  ],
   "author": "Jason Miller <jason@developit.ca>",
   "license": "MIT",
   "bugs": {
