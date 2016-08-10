@@ -1,5 +1,5 @@
 import options from './options';
-import { setImmediate } from './util';
+import { defer } from './util';
 import { renderComponent } from './vdom/component';
 
 /** Managed queue of dirty components to be re-rendered */
@@ -11,7 +11,7 @@ let items = [],
 export function enqueueRender(component) {
 	if (items.push(component)!==1) return;
 
-	(options.debounceRendering || setImmediate)(rerender);
+	(options.debounceRendering || defer)(rerender);
 }
 
 
