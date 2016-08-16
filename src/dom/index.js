@@ -58,10 +58,10 @@ export function setAccessor(node, name, value, old, isSvg) {
 		let l = node._listeners || (node._listeners = {});
 		name = toLowerCase(name.substring(2));
 		if (value) {
-			if (!l[name]) node.addEventListener(name, eventProxy);
+			if (!l[name]) node.addEventListener(name, eventProxy, true);
 		}
 		else if (l[name]) {
-			node.removeEventListener(name, eventProxy);
+			node.removeEventListener(name, eventProxy, true);
 		}
 		l[name] = value;
 	}
