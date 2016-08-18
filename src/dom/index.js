@@ -1,4 +1,4 @@
-import { ATTR_KEY, NON_DIMENSION_PROPS } from '../constants';
+import { ATTR_KEY, NON_DIMENSION_PROPS, NON_BUBBLING_EVENTS } from '../constants';
 import options from '../options';
 import { toLowerCase, empty, falsey, isString, isFunction } from '../util';
 
@@ -57,11 +57,12 @@ export function setAccessor(node, name, value, old, isSvg) {
 	else if (name[0]=='o' && name[1]=='n') {
 		let l = node._listeners || (node._listeners = {});
 		name = toLowerCase(name.substring(2));
+		let capture = useCapture(name);
 		if (value) {
-			if (!l[name]) node.addEventListener(name, eventProxy);
+			if (!l[name]) node.addEventListener(name, eventProxy, capture);
 		}
 		else if (l[name]) {
-			node.removeEventListener(name, eventProxy);
+			node.removeEventListener(name, eventProxy, capture);
 		}
 		l[name] = value;
 	}
@@ -100,6 +101,12 @@ function eventProxy(e) {
 	return this._listeners[e.type](options.event && options.event(e) || e);
 }
 
+/** Test whether an event type is non-bubbling and therefore should trigger at the capture stage
+ *	@private
+ */
+function useCapture(name) {
+	return NON_BUBBLING_EVENTS.indexOf(name) > -1;
+}
 
 /** Get a node's attributes as a hashmap.
  *	@private
