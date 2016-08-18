@@ -16,4 +16,5 @@ export const NON_DIMENSION_PROPS = {
 	opacity:1, order:1, orphans:1, strokeOpacity:1, widows:1, zIndex:1, zoom:1
 };
 
-export const NON_BUBBLING_EVENTS = ['blur', 'error', 'focus', 'load', 'resize', 'scroll'];
+// DOM event types that do not bubble and should be attached via useCapture
+export const NON_BUBBLING_EVENTS = { blur:1, error:1, focus:1, load:1, resize:1, scroll:1 };

@@ -57,12 +57,11 @@ export function setAccessor(node, name, value, old, isSvg) {
 	else if (name[0]=='o' && name[1]=='n') {
 		let l = node._listeners || (node._listeners = {});
 		name = toLowerCase(name.substring(2));
-		let capture = useCapture(name);
 		if (value) {
-			if (!l[name]) node.addEventListener(name, eventProxy, capture);
+			if (!l[name]) node.addEventListener(name, eventProxy, !!NON_BUBBLING_EVENTS[name]);
 		}
 		else if (l[name]) {
-			node.removeEventListener(name, eventProxy, capture);
+			node.removeEventListener(name, eventProxy, !!NON_BUBBLING_EVENTS[name]);
 		}
 		l[name] = value;
 	}
@@ -99,13 +98,6 @@ function setProperty(node, name, value) {
  */
 function eventProxy(e) {
 	return this._listeners[e.type](options.event && options.event(e) || e);
-}
-
-/** Test whether an event type is non-bubbling and therefore should trigger at the capture stage
- *	@private
- */
-function useCapture(name) {
-	return NON_BUBBLING_EVENTS.indexOf(name) > -1;
 }
 
 /** Get a node's attributes as a hashmap.
