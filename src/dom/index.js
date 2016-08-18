@@ -33,7 +33,7 @@ export function removeNode(node) {
 export function setAccessor(node, name, value, old, isSvg) {
 	ensureNodeData(node)[name] = value;
 
-	if (name==='key' || name==='children') return;
+	if (name==='key' || name==='children' || name==='innerHTML') return;
 
 	if (name==='class' && !isSvg) {
 		node.className = value || '';
