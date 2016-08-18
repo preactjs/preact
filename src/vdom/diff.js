@@ -31,16 +31,16 @@ export function flushMounts() {
  *	@returns {Element} dom			The created/mutated element
  *	@private
  */
-export function diff(dom, vnode, context, mountAll, parent) {
+export function diff(dom, vnode, context, mountAll, parent, rootComponent) {
 	diffLevel++;
-	let ret = idiff(dom, vnode, context, mountAll);
 	if (parent && ret.parentNode!==parent) parent.appendChild(ret);
+	let ret = idiff(dom, vnode, context, mountAll, rootComponent);
 	if (!--diffLevel) flushMounts();
 	return ret;
 }
 
 
-function idiff(dom, vnode, context, mountAll) {
+function idiff(dom, vnode, context, mountAll, rootComponent) {
 	let originalAttributes = vnode && vnode.attributes;
 
 	while (isFunctionalComponent(vnode)) {
@@ -48,15 +48,20 @@ function idiff(dom, vnode, context, mountAll) {
 	}
 
 	if (empty(vnode)) {
-		return document.createComment('');
+		vnode = '';
+		if (rootComponent) {
+			if (dom) {
+				if (dom.nodeType===8) return dom;
+				collectNode(dom);
+			}
+			return document.createComment(vnode);
+		}
 	}
 
 	if (isString(vnode)) {
 		if (dom) {
 			if (getNodeType(dom)===3 && dom.parentNode) {
-				if (dom.nodeValue!=vnode) {
-					dom.nodeValue = vnode;
-				}
+				dom.nodeValue = vnode;
 				return dom;
 			}
 			collectNode(dom);

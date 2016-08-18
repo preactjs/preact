@@ -157,7 +157,7 @@ export function renderComponent(component, opts, mountAll) {
 
 			if (initialBase || opts===SYNC_RENDER) {
 				if (cbase) cbase._component = null;
-				base = diff(cbase, rendered, context, mountAll || !isUpdate);
+				base = diff(cbase, rendered, context, mountAll || !isUpdate, null, true);
 			}
 		}
 
