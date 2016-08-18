@@ -1,7 +1,7 @@
 /*eslint no-var:0, object-shorthand:0 */
 
 var coverage = String(process.env.COVERAGE)!=='false',
-	sauceLabs = String(process.env.SAUCELABS).match(/^(1|true)$/gi) && String(process.env.TRAVIS_PULL_REQUEST)!=='true',
+	sauceLabs = String(process.env.SAUCELABS).match(/^(1|true)$/gi) && !String(process.env.TRAVIS_PULL_REQUEST).match(/^(1|true)$/gi),
 	performance = !coverage && !sauceLabs && String(process.env.PERFORMANCE)!=='false',
 	webpack = require('webpack');
 
