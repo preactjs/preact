@@ -54,7 +54,7 @@ export function setAccessor(node, name, value, old, isSvg) {
 	else if (name==='dangerouslySetInnerHTML') {
 		if (value) node.innerHTML = value.__html;
 	}
-	else if (name.match(/^on/i)) {
+	else if ((name[0] === 'o' || name[0] === 'O') && (name[1] === 'n' || name[1] === 'N')) {
 		let l = node._listeners || (node._listeners = {});
 		name = toLowerCase(name.substring(2));
 		if (value) {
