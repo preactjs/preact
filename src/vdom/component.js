@@ -85,7 +85,6 @@ export function renderComponent(component, opts, mountAll) {
 		previousContext = component.prevContext || context,
 		isUpdate = component.base,
 		initialBase = isUpdate || component.nextBase,
-		nextSibling = initialBase && initialBase.nextSibling,
 		baseParent = initialBase && initialBase.parentNode,
 		initialComponent = initialBase && initialBase._component,
 		initialChildComponent = component._component;
@@ -157,12 +156,11 @@ export function renderComponent(component, opts, mountAll) {
 
 			if (initialBase || opts===SYNC_RENDER) {
 				if (cbase) cbase._component = null;
-				base = diff(cbase, rendered, context, mountAll || !isUpdate, null, true);
+				base = diff(cbase, rendered, context, mountAll || !isUpdate, baseParent, true, initialBase && initialBase.nextSibling);
 			}
 		}
 
 		if (initialBase && base!==initialBase) {
-			if (baseParent && base!==baseParent) baseParent.insertBefore(base, nextSibling || null);
 			if (!toUnmount && initialComponent===component && !initialChildComponent && initialBase.parentNode) {
 				initialBase._component = null;
 				recollectNodeTree(initialBase);
