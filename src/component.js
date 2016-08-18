@@ -21,7 +21,7 @@ export function Component(props, context) {
 	/** @public */
 	this.prevState = this.prevProps = this.prevContext = this.base = this.nextBase = this._parentComponent = this._component = this.__ref = this.__key = this._linkedStates = this._renderCallbacks = null;
 	/** @public */
-	this.context = context || {};
+	this.context = context;
 	/** @type {object} */
 	this.props = props;
 	/** @type {object} */
