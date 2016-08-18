@@ -187,7 +187,7 @@ describe('render()', () => {
 		expect(scratch.childNodes[0]).to.have.deep.property('attributes.length', 0);
 
 		expect(proto.addEventListener).to.have.been.calledOnce
-			.and.to.have.been.calledWithExactly('click', sinon.match.func);
+			.and.to.have.been.calledWithExactly('click', sinon.match.func, false);
 
 		proto.addEventListener.restore();
 	});
@@ -249,6 +249,19 @@ describe('render()', () => {
 
 		proto.addEventListener.restore();
 		proto.removeEventListener.restore();
+	});
+
+	it('should use capturing for events that do not bubble', () => {
+		let click = sinon.spy(),
+			focus = sinon.spy();
+
+		let root = render(<button onClick={click} onFocus={focus} />, scratch);
+
+		root.click();
+		root.focus();
+
+		sinon.assert.calledWith(click, sinon.match({ bubbles: true }));
+		sinon.assert.calledWith(focus, sinon.match({ bubbles: false }));
 	});
 
 	it('should serialize style objects', () => {
