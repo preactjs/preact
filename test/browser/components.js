@@ -287,7 +287,7 @@ describe('Components', () => {
 				}
 				componentWillUnmount() {}
 				render(props, { i }) {
-					if (alt) return <div />;
+					if (alt) return <div is-alt />;
 					return <Inner i={i} {...props} />;
 				}
 			}
@@ -350,6 +350,8 @@ describe('Components', () => {
 				foo: 'bar'
 			});
 
+			expect(scratch.innerHTML).to.equal('<div foo="bar" j="2" i="2">inner</div>');
+
 			// update & flush
 			doRender();
 			rerender();
@@ -384,6 +386,15 @@ describe('Components', () => {
 
 			expect(Inner.prototype.componentWillUnmount).to.have.been.calledOnce;
 			expect(Inner.prototype.componentDidUnmount).to.have.been.calledOnce;
+
+			expect(scratch.innerHTML).to.equal('<div is-alt="true"></div>');
+
+			// update & flush
+			alt = false;
+			doRender();
+			rerender();
+
+			expect(scratch.innerHTML).to.equal('<div foo="bar" j="4" i="5">inner</div>');
 		});
 
 		it('should resolve intermediary functional component', () => {

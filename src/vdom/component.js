@@ -85,8 +85,6 @@ export function renderComponent(component, opts, mountAll) {
 		previousContext = component.prevContext || context,
 		isUpdate = component.base,
 		initialBase = isUpdate || component.nextBase,
-		baseParent = initialBase && initialBase.parentNode,
-		initialComponent = initialBase && initialBase._component,
 		initialChildComponent = component._component;
 
 	// if updating
@@ -156,12 +154,17 @@ export function renderComponent(component, opts, mountAll) {
 
 			if (initialBase || opts===SYNC_RENDER) {
 				if (cbase) cbase._component = null;
-				base = diff(cbase, rendered, context, mountAll || !isUpdate, baseParent, true, initialBase && initialBase.nextSibling);
+				base = diff(cbase, rendered, context, mountAll || !isUpdate, initialBase && initialBase.parentNode, true);
 			}
 		}
 
 		if (initialBase && base!==initialBase) {
-			if (!toUnmount && initialComponent===component && !initialChildComponent && initialBase.parentNode) {
+			let baseParent = initialBase.parentNode;
+			if (baseParent && base!==baseParent) {
+				baseParent.replaceChild(base, initialBase);
+			}
+
+			if (!toUnmount && component._parentComponent) {
 				initialBase._component = null;
 				recollectNodeTree(initialBase);
 			}
@@ -179,7 +182,6 @@ export function renderComponent(component, opts, mountAll) {
 			base._component = componentRef;
 			base._componentConstructor = componentRef.constructor;
 		}
-
 	}
 
 	if (!isUpdate || mountAll) {

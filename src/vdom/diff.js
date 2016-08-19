@@ -31,12 +31,10 @@ export function flushMounts() {
  *	@returns {Element} dom			The created/mutated element
  *	@private
  */
-export function diff(dom, vnode, context, mountAll, parent, rootComponent, nextSibling) {
+export function diff(dom, vnode, context, mountAll, parent, rootComponent) {
 	diffLevel++;
 	let ret = idiff(dom, vnode, context, mountAll, rootComponent);
-	if (parent && ret.parentNode!==parent) {
-		parent.insertBefore(ret, nextSibling || null);
-	}
+	if (parent && ret.parentNode!==parent) parent.appendChild(ret);
 	if (!--diffLevel) flushMounts();
 	return ret;
 }
