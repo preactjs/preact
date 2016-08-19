@@ -255,13 +255,26 @@ describe('render()', () => {
 		let click = sinon.spy(),
 			focus = sinon.spy();
 
-		let root = render(<button onClick={click} onFocus={focus} />, scratch);
+		let root = render((
+			<div onClick={click} onFocus={focus}>
+				<button />
+			</div>
+		), scratch);
 
-		root.click();
-		root.focus();
+		root.firstElementChild.click();
+		root.firstElementChild.focus();
 
-		sinon.assert.calledWith(click, sinon.match({ bubbles: true }));
-		sinon.assert.calledWith(focus, sinon.match({ bubbles: false }));
+		expect(click, 'click').to.have.been.calledOnce;
+
+		/* global DISABLE_FLAKEY */
+		if (DISABLE_FLAKEY!==true) {
+			// Focus delegation requires a 50b hack I'm not sure we want to incur
+			expect(focus, 'focus').to.have.been.calledOnce;
+
+			// IE doesn't set it
+			expect(click).to.have.been.calledWithMatch({ eventPhase: 0 });		// capturing
+			expect(focus).to.have.been.calledWithMatch({ eventPhase: 0 });		// capturing
+		}
 	});
 
 	it('should serialize style objects', () => {

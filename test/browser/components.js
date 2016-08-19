@@ -13,6 +13,15 @@ function getAttributes(node) {
 	return attrs;
 }
 
+// hacky normalization of attribute order across browsers.
+function sortAttributes(html) {
+	return html.replace(/<([a-z0-9-]+)((?:\s[a-z0-9:_.-]+=".*?")+)((?:\s*\/)?>)/gi, (s, pre, attrs, after) => {
+		let list = attrs.match(/\s[a-z0-9:_.-]+=".*?"/gi).sort( (a, b) => a>b ? 1 : -1 );
+		if (~after.indexOf('/')) after = '></'+pre+'>';
+		return '<' + pre + list.join('') + after;
+	});
+}
+
 const Empty = () => null;
 
 describe('Components', () => {
@@ -350,7 +359,7 @@ describe('Components', () => {
 				foo: 'bar'
 			});
 
-			expect(scratch.innerHTML).to.equal('<div foo="bar" j="2" i="2">inner</div>');
+			expect(sortAttributes(scratch.innerHTML)).to.equal(sortAttributes('<div foo="bar" j="2" i="2">inner</div>'));
 
 			// update & flush
 			doRender();
