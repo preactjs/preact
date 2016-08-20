@@ -85,4 +85,20 @@ describe('svg', () => {
 
 		expect(scratch.innerHTML).to.contain(` class="foo bar"`);
 	});
+
+	it('should switch back to HTML for <foreignObject>', () => {
+		render((
+			<svg>
+				<g>
+					<foreignObject>
+						<a href="#foo">test</a>
+					</foreignObject>
+				</g>
+			</svg>
+		), scratch);
+
+		expect(scratch.getElementsByTagName('a'))
+			.to.have.property('0')
+			.that.is.a('HTMLAnchorElement');
+	});
 });
