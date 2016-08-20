@@ -71,7 +71,7 @@ function idiff(dom, vnode, context, mountAll, rootComponent) {
 
 	let out = dom,
 		nodeName = vnode.nodeName,
-		svgMode;
+		prevSvgMode = isSvgMode;
 
 	if (isFunction(nodeName)) {
 		return buildComponentFromVNode(dom, vnode, context, mountAll);
@@ -81,9 +81,7 @@ function idiff(dom, vnode, context, mountAll, rootComponent) {
 		nodeName = String(nodeName);
 	}
 
-	svgMode = toLowerCase(nodeName)==='svg';
-
-	if (svgMode) isSvgMode = true;
+	isSvgMode = nodeName==='svg' ? true : nodeName==='foreignObject' ? false : isSvgMode;
 
 	if (!dom) {
 		out = createNode(nodeName, isSvgMode);
@@ -110,7 +108,7 @@ function idiff(dom, vnode, context, mountAll, rootComponent) {
 		(out[ATTR_KEY].ref = originalAttributes.ref)(out);
 	}
 
-	if (svgMode) isSvgMode = false;
+	isSvgMode = prevSvgMode;
 
 	return out;
 }
