@@ -16,7 +16,7 @@ const SHARED_TEMP_ARRAY = [];
  */
 export function h(nodeName, attributes, firstChild) {
 	let len = arguments.length,
-		children, arr, lastSimple;
+		children, arr, lastSimple, lastSimple2;
 
 
 	if (len>2) {
@@ -35,10 +35,24 @@ export function h(nodeName, attributes, firstChild) {
 				else (arr = SHARED_TEMP_ARRAY)[0] = p;
 				for (let j=0; j<arr.length; j++) {
 					let child = arr[j],
-						simple = !(falsey(child) || isFunction(child) || child instanceof VNode);
+						simple = !(falsey(child) || isFunction(child) || child instanceof VNode || child.join);
 					if (simple && !isString(child)) child = String(child);
 					if (simple && lastSimple) {
 						children[children.length-1] += child;
+					}
+					else if (child.join) {
+						let arr2 = child;
+						for (let k = 0; k < arr2.length; k++) {
+							let child2 = arr2[k],
+								simple2 = !(falsey(child2) || isFunction(child2) || child2 instanceof VNode);
+							if (simple2 && !isString(child2)) child2 = String(child2);
+							if (simple2 && lastSimple2)
+								children[children.length - 1] += child2;
+							else if (!falsey(child2)) {
+								children.push(child2);
+								lastSimple2 = simple;
+							}
+						}
 					}
 					else if (!falsey(child)) {
 						children.push(child);
