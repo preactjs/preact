@@ -57,6 +57,8 @@ export function setAccessor(node, name, value, old, isSvg) {
 	else if (name[0]=='o' && name[1]=='n') {
 		let l = node._listeners || (node._listeners = {});
 		name = toLowerCase(name.substring(2));
+		// @TODO: this might be worth it later, un-breaks focus/blur bubbling in IE9:
+		// if (node.attachEvent) name = name=='focus'?'focusin':name=='blur'?'focusout':name;
 		if (value) {
 			if (!l[name]) node.addEventListener(name, eventProxy, !!NON_BUBBLING_EVENTS[name]);
 		}
