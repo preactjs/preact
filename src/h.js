@@ -68,11 +68,6 @@ export function h(nodeName, attributes, firstChild) {
 			if (lastSimple && !isString(lastSimple)) {
 				attributes.class = hashToClassName(lastSimple);
 			}
-
-			// lastSimple = attributes.style;
-			// if (lastSimple && !isString(lastSimple)) {
-			// 	attributes.style = styleObjToCss(lastSimple);
-			// }
 		}
 	}
 
