@@ -94,27 +94,5 @@ describe('linked-state', () => {
 			expect(TestComponent.prototype.setState).to.have.been.calledOnce;
 			expect(TestComponent.prototype.setState).to.have.been.calledWith({'testStateKey': 'nestedPathValueFromEvent'});
 		});
-
-		it('should use nested.path when supplied on component and nested.path not in event', () => {
-			let event = {};
-			let component = {_component: {nested: {path: 'nestedPathValueFromComponent'}}};
-
-			linkFunction.call(component, event);
-			expect(TestComponent.prototype.setState).to.have.been.calledOnce;
-			expect(TestComponent.prototype.setState).to.have.been.calledWith({'testStateKey': 'nestedPathValueFromComponent'});
-		});
-
-		it('should call the function with the calling element as "this" if value is a function', () => {
-			let element = document.createElement('input');
-			element.type= 'text';
-			element.anAttribute = 'functionValue';
-			let testFunction = function() { return this.anAttribute; };
-
-			linkFunction({ currentTarget:element, nested: {path: testFunction}});
-
-			expect(TestComponent.prototype.setState).to.have.been.calledOnce;
-			expect(TestComponent.prototype.setState).to.have.been.calledWith({'testStateKey': 'functionValue'});
-		});
-
 	});
 });
