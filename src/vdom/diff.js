@@ -1,5 +1,5 @@
 import { ATTR_KEY } from '../constants';
-import { toLowerCase, empty, isString, isFunction } from '../util';
+import { empty, isString, isFunction } from '../util';
 import { isSameNodeType, isNamedNode } from './index';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
@@ -169,6 +169,10 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 						if (j===min) min++;
 						break;
 					}
+				}
+				if (!child && min<childrenLen && isFunction(vchild.nodeName) && mountAll) {
+					child = children[min];
+					children[min++] = undefined;
 				}
 			}
 
