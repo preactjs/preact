@@ -150,17 +150,16 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 			// }
 
 			// attempt to find a node based on key matching
-			if (keyedLen && vchild.attributes) {
-				let key = vchild.key;
-				if (!empty(key) && key in keyed) {
+			let key = vchild.key;
+			if (!empty(key)) {
+				if (keyedLen && key in keyed) {
 					child = keyed[key];
 					keyed[key] = undefined;
 					keyedLen--;
 				}
 			}
-
 			// attempt to pluck a node of the same type from the existing children
-			if (!child && min<childrenLen) {
+			else if (!child && min<childrenLen) {
 				for (j=min; j<childrenLen; j++) {
 					c = children[j];
 					if (c && isSameNodeType(c, vchild)) {
