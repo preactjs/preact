@@ -1,5 +1,3 @@
-import { empty } from './util';
-
 /** Global options
  *	@public
  *	@namespace options {Object}
@@ -16,5 +14,5 @@ export default {
 	/** Processes all created VNodes.
 	 *	@param {VNode} vnode	A newly-created VNode to normalize/process
 	 */
-	vnode: empty
+	//vnode(vnode) { }
 };
