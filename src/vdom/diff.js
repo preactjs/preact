@@ -52,7 +52,7 @@ function idiff(dom, vnode, context, mountAll, rootComponent) {
 		if (rootComponent) {
 			if (dom) {
 				if (dom.nodeType===8) return dom;
-				collectNode(dom);
+				recollectNodeTree(dom);
 			}
 			return document.createComment(vnode);
 		}
@@ -64,7 +64,7 @@ function idiff(dom, vnode, context, mountAll, rootComponent) {
 				dom.nodeValue = vnode;
 				return dom;
 			}
-			collectNode(dom);
+			recollectNodeTree(dom);
 		}
 		return document.createTextNode(vnode);
 	}
@@ -222,7 +222,6 @@ export function recollectNodeTree(node, unmountOnly) {
 		if (node[ATTR_KEY] && node[ATTR_KEY].ref) node[ATTR_KEY].ref(null);
 
 		if (!unmountOnly) {
-
 			collectNode(node);
 		}
 
