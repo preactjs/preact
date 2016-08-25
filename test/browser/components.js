@@ -403,7 +403,7 @@ describe('Components', () => {
 			doRender();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal('<div foo="bar" j="4" i="5">inner</div>');
+			expect(sortAttributes(scratch.innerHTML)).to.equal(sortAttributes('<div foo="bar" j="4" i="5">inner</div>'));
 		});
 
 		it('should resolve intermediary functional component', () => {
