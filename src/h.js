@@ -77,6 +77,9 @@ export function h(nodeName, attributes, firstChild) {
 	}
 
 	let p = new VNode(nodeName, attributes || undefined, children);
+
+	// if a "vnode hook" is defined, pass every created VNode to it
 	if (options.vnode) options.vnode(p);
+
 	return p;
 }
