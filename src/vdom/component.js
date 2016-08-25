@@ -135,6 +135,7 @@ export function renderComponent(component, opts, mountAll) {
 			else {
 				toUnmount = inst;
 				inst = createComponent(childComponent, childProps, context);
+				inst.nextBase = inst.nextBase || mountAll && initialBase;
 				inst._parentComponent = component;
 				component._component = inst;
 				setComponentProps(inst, childProps, NO_RENDER, context);
