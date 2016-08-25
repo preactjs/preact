@@ -6,6 +6,8 @@ import { ensureNodeData, getNodeType, getRawNodeAttributes, removeNode } from '.
 const nodes = {};
 
 export function collectNode(node) {
+	removeNode(node);
+	if (getNodeType(node)!==1) return;
 	cleanNode(node);
 	let name = toLowerCase(node.nodeName),
 		list = nodes[name];
@@ -24,10 +26,6 @@ export function createNode(nodeName, isSvg) {
 
 
 function cleanNode(node) {
-	removeNode(node);
-
-	if (getNodeType(node)!==1) return;
-
 	// When reclaiming externally created nodes, seed the attribute cache: (Issue #97)
 
 	ensureNodeData(node, getRawNodeAttributes(node));
