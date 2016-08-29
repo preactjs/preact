@@ -36,6 +36,9 @@
     "type": "git",
     "url": "https://github.com/developit/preact.git"
   },
+  "engines": {
+    "node": ">=6.0.0"
+  },
   "files": [
     "src",
     "dist"
