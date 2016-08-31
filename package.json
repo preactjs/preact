@@ -65,7 +65,7 @@
     "karma-coverage": "^1.0.0",
     "karma-mocha": "^1.1.1",
     "karma-mocha-reporter": "^2.0.4",
-    "karma-phantomjs-launcher": "^1.0.1",
+    "karma-phantomjs-launcher": "^1.0.2",
     "karma-sauce-launcher": "^1.0.0",
     "karma-source-map-support": "^1.1.0",
     "karma-sourcemap-loader": "^0.3.6",
