@@ -105,7 +105,6 @@ function idiff(dom, vnode, context, mountAll, rootComponent) {
 	diffAttributes(out, vnode.attributes);
 
 	if (originalAttributes && originalAttributes.ref) {
-		ensureNodeData(out);
 		(out[ATTR_KEY].ref = originalAttributes.ref)(out);
 	}
 
@@ -238,7 +237,9 @@ export function recollectNodeTree(node, unmountOnly) {
 
 /** Apply differences in attributes from a VNode to the given DOM Node. */
 function diffAttributes(dom, attrs) {
-	let old = dom[ATTR_KEY] || getRawNodeAttributes(dom);
+	ensureNodeData(dom);
+
+	const old = dom[ATTR_KEY] || getRawNodeAttributes(dom);
 
 	// removeAttributes(dom, old, attrs || EMPTY);
 	for (let name in old) {
