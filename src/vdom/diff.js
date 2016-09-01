@@ -3,7 +3,7 @@ import { empty, isString, isFunction } from '../util';
 import { isSameNodeType, isNamedNode } from './index';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
-import { setAccessor, getRawNodeAttributes, getNodeType } from '../dom/index';
+import { setAccessor, getRawNodeAttributes, getNodeType, ensureNodeData } from '../dom/index';
 import { createNode, collectNode } from '../dom/recycler';
 import { unmountComponent } from './component';
 
@@ -105,6 +105,7 @@ function idiff(dom, vnode, context, mountAll, rootComponent) {
 	diffAttributes(out, vnode.attributes);
 
 	if (originalAttributes && originalAttributes.ref) {
+		ensureNodeData(out);
 		(out[ATTR_KEY].ref = originalAttributes.ref)(out);
 	}
 
