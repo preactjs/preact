@@ -237,9 +237,8 @@ export function recollectNodeTree(node, unmountOnly) {
 
 /** Apply differences in attributes from a VNode to the given DOM Node. */
 function diffAttributes(dom, attrs) {
-	ensureNodeData(dom);
-
 	const old = dom[ATTR_KEY] || getRawNodeAttributes(dom);
+	ensureNodeData(dom);
 
 	// removeAttributes(dom, old, attrs || EMPTY);
 	for (let name in old) {
