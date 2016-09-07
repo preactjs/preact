@@ -11,6 +11,15 @@ function getAttributes(node) {
 	return attrs;
 }
 
+// hacky normalization of attribute order across browsers.
+function sortAttributes(html) {
+	return html.replace(/<([a-z0-9-]+)((?:\s[a-z0-9:_.-]+=".*?")+)((?:\s*\/)?>)/gi, (s, pre, attrs, after) => {
+		let list = attrs.match(/\s[a-z0-9:_.-]+=".*?"/gi).sort( (a, b) => a>b ? 1 : -1 );
+		if (~after.indexOf('/')) after = '></'+pre+'>';
+		return '<' + pre + list.join('') + after;
+	});
+}
+
 describe('render()', () => {
 	let scratch;
 
@@ -424,6 +433,7 @@ describe('render()', () => {
 			</div>
 		), scratch);
 
-		expect(scratch.firstElementChild.firstElementChild).to.have.property('outerHTML', '<input type="range" min="0" max="100" list="steplist">');
+		let html = scratch.firstElementChild.firstElementChild.outerHTML;
+		expect(sortAttributes(html)).to.equal(sortAttributes('<input type="range" min="0" max="100" list="steplist">'));
 	});
 });
