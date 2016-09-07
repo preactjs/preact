@@ -67,7 +67,7 @@ export function setAccessor(node, name, value, old, isSvg) {
 		}
 		l[name] = value;
 	}
-	else if (name!=='type' && !isSvg && name in node) {
+	else if (name!=='list' && name!=='type' && !isSvg && name in node) {
 		setProperty(node, name, empty(value) ? '' : value);
 		if (falsey(value)) node.removeAttribute(name);
 	}

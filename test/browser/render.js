@@ -409,4 +409,19 @@ describe('render()', () => {
 		expect(scratch.firstChild.firstChild).to.equal(b);
 		expect(scratch.firstChild.lastChild).to.equal(a);
 	});
+
+	// Discussion: https://github.com/developit/preact/issues/287
+	it('should allow <input list /> to pass through as an attribute', () => {
+		render((
+			<div>
+				<input type="range" min="0" max="100" step="50" list="steplist"/>
+				<datalist id="steplist">
+					<option>0</option>
+					<option>50</option>
+					<option>100</option>
+				</datalist>
+			</div>
+		), scratch);
+		expect(scratch.firstChild.firstChild).to.have.property('outerHTML', '<input type="range" min="0" max="100" step="50" list="steplist">');
+	});
 });
