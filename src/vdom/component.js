@@ -172,7 +172,7 @@ export function renderComponent(component, opts, mountAll) {
 		}
 
 		if (toUnmount) {
-			unmountComponent(toUnmount, true);
+			unmountComponent(toUnmount, base!==initialBase);
 		}
 
 		component.base = base;
