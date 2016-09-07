@@ -1,3 +1,5 @@
+/* global DISABLE_FLAKEY */
+
 import { h, render } from '../../src/preact';
 /** @jsx h */
 
@@ -266,7 +268,6 @@ describe('render()', () => {
 
 		expect(click, 'click').to.have.been.calledOnce;
 
-		/* global DISABLE_FLAKEY */
 		if (DISABLE_FLAKEY!==true) {
 			// Focus delegation requires a 50b hack I'm not sure we want to incur
 			expect(focus, 'focus').to.have.been.calledOnce;
@@ -411,10 +412,10 @@ describe('render()', () => {
 	});
 
 	// Discussion: https://github.com/developit/preact/issues/287
-	it('should allow <input list /> to pass through as an attribute', () => {
+	('HTMLDataListElement' in window ? it : xit)('should allow <input list /> to pass through as an attribute', () => {
 		render((
 			<div>
-				<input type="range" min="0" max="100" step="50" list="steplist"/>
+				<input type="range" min="0" max="100" list="steplist" />
 				<datalist id="steplist">
 					<option>0</option>
 					<option>50</option>
@@ -422,6 +423,7 @@ describe('render()', () => {
 				</datalist>
 			</div>
 		), scratch);
-		expect(scratch.firstChild.firstChild).to.have.property('outerHTML', '<input type="range" min="0" max="100" step="50" list="steplist">');
+
+		expect(scratch.firstElementChild.firstElementChild).to.have.property('outerHTML', '<input type="range" min="0" max="100" list="steplist">');
 	});
 });
