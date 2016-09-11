@@ -1,5 +1,6 @@
 import { clone, extend, isString, isFunction, toLowerCase } from '../util';
 import { isFunctionalComponent } from './functional-component';
+import { buildComponentFromVNode } from './component';
 import { getNodeType } from '../dom/index';
 
 
@@ -16,7 +17,9 @@ export function isSameNodeType(node, vnode) {
 		return isNamedNode(node, vnode.nodeName);
 	}
 	if (isFunction(vnode.nodeName)) {
-		return node._componentConstructor===vnode.nodeName || isFunctionalComponent(vnode);
+		return node._componentConstructor===vnode.nodeName
+			|| isNamedNode(node, buildComponentFromVNode(null, vnode).nodeName)
+			|| isFunctionalComponent(vnode);
 	}
 }
 
