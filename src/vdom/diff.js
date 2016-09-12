@@ -3,7 +3,7 @@ import { empty, isString, isFunction } from '../util';
 import { isSameNodeType, isNamedNode } from './index';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
-import { setAccessor, getRawNodeAttributes, getNodeType } from '../dom/index';
+import { setAccessor, getRawNodeAttributes, getNodeType, ensureNodeData } from '../dom/index';
 import { createNode, collectNode } from '../dom/recycler';
 import { unmountComponent } from './component';
 
@@ -237,7 +237,8 @@ export function recollectNodeTree(node, unmountOnly) {
 
 /** Apply differences in attributes from a VNode to the given DOM Node. */
 function diffAttributes(dom, attrs) {
-	let old = dom[ATTR_KEY] || getRawNodeAttributes(dom);
+	const old = dom[ATTR_KEY] || getRawNodeAttributes(dom);
+	ensureNodeData(dom);
 
 	// removeAttributes(dom, old, attrs || EMPTY);
 	for (let name in old) {

@@ -3,8 +3,8 @@ import options from '../options';
 import { toLowerCase, empty, falsey, isString, isFunction } from '../util';
 
 
-export function ensureNodeData(node, data) {
-	return node[ATTR_KEY] || (node[ATTR_KEY] = (data || {}));
+export function ensureNodeData(node, data={}) {
+	return node[ATTR_KEY] || (node[ATTR_KEY] = data);
 }
 
 
@@ -31,7 +31,7 @@ export function removeNode(node) {
  *	@private
  */
 export function setAccessor(node, name, value, old, isSvg) {
-	ensureNodeData(node)[name] = value;
+	node[ATTR_KEY][name] = value;
 
 	if (name==='key' || name==='children' || name==='innerHTML') return;
 
