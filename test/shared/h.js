@@ -8,7 +8,7 @@ import { expect } from 'chai';
 
 let flatten = obj => JSON.parse(JSON.stringify(obj));
 
-describe('h(jsx)', () => {
+describe.only('h(jsx)', () => {
 	it('should return a VNode', () => {
 		let r;
 		expect( () => r = h('foo') ).not.to.throw();
@@ -43,12 +43,56 @@ describe('h(jsx)', () => {
 			]);
 	});
 
-	it('should support element children', () => {
+	it('should support multiple element children, given as arg list', () => {
 		let r = h(
 			'foo',
 			null,
 			h('bar'),
 			h('baz', null, h('test'))
+		);
+
+		r = flatten(r);
+
+		expect(r).to.be.an('object')
+			.with.property('children')
+			.that.deep.equals([
+				{ nodeName:'bar' },
+				{ nodeName:'baz', children:[
+					{ nodeName:'test' }
+				]}
+			]);
+	});
+
+	it('should handle multiple element children, given as an array', () => {
+		let r = h(
+			'foo',
+			null,
+			[
+				h('bar'),
+				h('baz', null, h('test'))
+			]
+		);
+
+		r = flatten(r);
+
+		expect(r).to.be.an('object')
+			.with.property('children')
+			.that.deep.equals([
+				{ nodeName:'bar' },
+				{ nodeName:'baz', children:[
+					{ nodeName:'test' }
+				]}
+			]);
+	});
+
+	it('should handle multiple children, flattening one layer as needed', () => {
+		let r = h(
+			'foo',
+			null,
+			h('bar'),
+			[
+				h('baz', null, h('test'))
+			]
 		);
 
 		r = flatten(r);
@@ -127,4 +171,5 @@ describe('h(jsx)', () => {
 				'onetwothreefourfivesix'
 			]);
 	});
+
 });
