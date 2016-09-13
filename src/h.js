@@ -1,6 +1,6 @@
 import { VNode } from './vnode';
 import options from './options';
-import { falsey, isFunction, isString, hashToClassName, toArray, flattenOnce } from './util';
+import { falsey, isFunction, isString, hashToClassName } from './util';
 
 
 const SHARED_TEMP_ARRAY = [];
@@ -17,9 +17,21 @@ export function h(nodeName, attributes, firstChild) {
 	let outChildren, arr, lastSimple;
 
 	if (arguments.length > 2) {
-		const inChildren = flattenOnce(toArray(arguments, 2));
-		const firstChild = inChildren[0];
-		const type = typeof firstChild;
+		let inChildren = [];
+
+		// Flatten one layer of children.
+		for (let i=2, ilen=arguments.length; i < ilen; i++) {
+			if (Array.isArray(arguments[i])) {
+				for (let j=0, jlen=arguments[i].length; j < jlen; j++) {
+					inChildren.push(arguments[i][j]);
+				}
+			} else {
+				inChildren.push(arguments[i]);
+			}
+		}
+
+		let firstChild = inChildren[0];
+		let type = typeof firstChild;
 
 		if (inChildren.length === 1 && type!=='object' && type!=='function') {
 			if (!falsey(firstChild)) {
@@ -29,7 +41,7 @@ export function h(nodeName, attributes, firstChild) {
 		else {
 			outChildren = [];
 			for (let i=0, ilen=inChildren.length; i<ilen; i++) {
-				const p = inChildren[i];
+				let p = inChildren[i];
 	
 				if (falsey(p)) continue;
 				if (p.join) arr = p;

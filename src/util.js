@@ -81,21 +81,6 @@ export function hashToClassName(c) {
 	return str;
 }
 
-export function flattenOnce(arr) {
-	const out = [];
-
-	for (let i=0, ilen=arr.length; i < ilen; i++) {
-		if (Array.isArray(arr[i])) {
-			for (let j=0, jlen=arr[i].length; j < jlen; j++) {
-				out.push(arr[i][j]);
-			}
-		} else {
-			out.push(arr[i]);
-		}
-	}
-	return out;
-}
-
 /** Just a memoized String#toLowerCase */
 let lcCache = {};
 export const toLowerCase = s => lcCache[s] || (lcCache[s] = s.toLowerCase());
