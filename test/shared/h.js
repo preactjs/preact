@@ -171,5 +171,4 @@ describe('h(jsx)', () => {
 				'onetwothreefourfivesix'
 			]);
 	});
-
 });
