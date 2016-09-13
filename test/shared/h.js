@@ -8,7 +8,7 @@ import { expect } from 'chai';
 
 let flatten = obj => JSON.parse(JSON.stringify(obj));
 
-describe.only('h(jsx)', () => {
+describe('h(jsx)', () => {
 	it('should return a VNode', () => {
 		let r;
 		expect( () => r = h('foo') ).not.to.throw();
