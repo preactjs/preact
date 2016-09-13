@@ -1,6 +1,6 @@
 import { VNode } from './vnode';
 import options from './options';
-import { falsey, isObject, isFunction, isString, hashToClassName, toArray, flattenOnce } from './util';
+import { falsey, isFunction, isString, hashToClassName, toArray, flattenOnce } from './util';
 
 
 const SHARED_TEMP_ARRAY = [];
