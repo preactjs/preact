@@ -4,8 +4,14 @@ declare namespace preact {
 		key?:string;
 	}
 
+	interface DangerouslySetInnerHTML {
+	 __html: string;
+	}
+
 	interface PreactHTMLAttributes {
+		dangerouslySetInnerHTML?:DangerouslySetInnerHTML;
 		key?:string;
+		ref?:(el?: Element) => void;
 	}
 
 	interface VNode {
@@ -51,8 +57,8 @@ declare namespace preact {
 		abstract render(props:PropsType & ComponentProps, state:any):JSX.Element;
 	}
 
-	function h<PropsType>(node:ComponentConstructor<PropsType, any>, params:PropsType, ...children:(JSX.Element|string)[]):JSX.Element;
-	function h(node:string, params:JSX.HTMLAttributes&JSX.SVGAttributes, ...children:(JSX.Element|string)[]):JSX.Element;
+	function h<PropsType>(node:ComponentConstructor<PropsType, any>, params:PropsType, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
+	function h(node:string, params:JSX.HTMLAttributes&JSX.SVGAttributes&{[propName: string]: any}, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
 
 	function render(node:JSX.Element, parent:Element, merge?:boolean):Element;
 
@@ -277,8 +283,8 @@ declare namespace JSX {
 		charSet?:string;
 		challenge?:string;
 		checked?:boolean;
-		class?:string;
-		className?:string;
+		class?:string | { [key:string]: boolean };
+		className?:string | { [key:string]: boolean };
 		cols?:number;
 		colSpan?:number;
 		content?:string;
