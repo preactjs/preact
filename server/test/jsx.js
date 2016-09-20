@@ -11,7 +11,7 @@ function dedent([str]) {
 }
 
 describe('jsx', () => {
-	let renderJsx = jsx => render(jsx).replace(/ {2}/g, '\t');
+	let renderJsx = (jsx, opts) => render(jsx, null, opts).replace(/ {2}/g, '\t');
 
 	it('should render as JSX', () => {
 		let rendered = renderJsx(
@@ -47,7 +47,15 @@ describe('jsx', () => {
 		expect(renderJsx(
 			<a b={false}>bar</a>
 		)).to.equal(dedent`
-			<a b={false}>bar</a>
+			<a>bar</a>
+		`);
+
+		function F(){}
+		expect(renderJsx(
+			<F b={false}>bar</F>,
+			{ shallow:true, renderRootComponent:false }
+		)).to.equal(dedent`
+			<F b={false}>bar</F>
 		`);
 	});
 
@@ -84,7 +92,7 @@ describe('jsx', () => {
 		expect(renderJsx(
 			<a b={<c />}>bar</a>
 		)).to.equal(dedent`
-			<a b={<c />}>bar</a>
+			<a b={<c></c>}>bar</a>
 		`);
 
 		expect(renderJsx(
@@ -96,8 +104,8 @@ describe('jsx', () => {
 			<a
 				b={
 					Array [
-						<c />,
-						<d f="g" />
+						<c></c>,
+						<d f="g"></d>
 					]
 				}
 			>
@@ -116,12 +124,31 @@ describe('jsx', () => {
 			</div>
 		)).to.equal(dedent`
 			<div>
-				<a />
-				<b />
+				<a></a>
+				<b></b>
 				<c>
 					<!---->
 				</c>
 			</div>
 		`);
+	});
+
+	it('should skip functions if functions=false', () => {
+		expect(renderJsx(
+			<div onClick={() => {}} />,
+			{ functions:false }
+		)).to.equal('<div></div>');
+	});
+
+	it('should skip function names if functionNames=false', () => {
+		expect(renderJsx(
+			<div onClick={() => {}} />,
+			{ functionNames:false }
+		)).to.equal('<div onClick={Function}></div>');
+
+		expect(renderJsx(
+			<div onClick={function foo(){}} />,
+			{ functionNames:false }
+		)).to.equal('<div onClick={Function}></div>');
 	});
 });
