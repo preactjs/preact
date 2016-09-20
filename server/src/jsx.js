@@ -24,7 +24,9 @@ function attributeHook(name, value, context, opts, isComponent) {
 	let type = typeof value;
 
 	// always skip null & undefined values, skip false DOM attributes, skip functions if told to
-	if (value==null || (!isComponent && opts.skipFalseAttributes && value===false) || (type==='function' && !opts.functions)) return '';
+	if (value==null || (type==='function' && !opts.functions)) return '';
+
+	if (opts.skipFalseAttributes && !isComponent && (value===false || ((name==='class' || name==='style') && value===''))) return '';
 
 	let indentChar = typeof opts.pretty==='string' ? opts.pretty : '\t';
 	if (type!=='string') {

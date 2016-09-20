@@ -31,6 +31,15 @@ describe('jsx', () => {
 		`);
 	});
 
+	it('should not render empty class or style DOM attributes', () => {
+		expect(renderJsx(<a b={false} />)).to.equal('<a></a>');
+		expect(renderJsx(<a b="" />)).to.equal('<a b=""></a>');
+		expect(renderJsx(<a class={false} />)).to.equal('<a></a>');
+		expect(renderJsx(<a style={false} />)).to.equal('<a></a>');
+		expect(renderJsx(<a class="" />)).to.equal('<a></a>');
+		expect(renderJsx(<a style="" />)).to.equal('<a></a>');
+	});
+
 	it('should render JSX attributes inline if short enough', () => {
 		expect(renderJsx(
 			<a b="c">bar</a>
