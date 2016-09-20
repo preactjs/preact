@@ -50,7 +50,8 @@ let shallowRender = (vnode, context) => renderToString(vnode, context, SHALLOW);
 
 /** The default export is an alias of `render()`. */
 export default function renderToString(vnode, context, opts, inner) {
-	let { nodeName, attributes, children } = vnode || EMPTY;
+	let { nodeName, attributes, children } = vnode || EMPTY,
+		isComponent = false;
 	context = context || {};
 	opts = opts || {};
 
@@ -68,6 +69,7 @@ export default function renderToString(vnode, context, opts, inner) {
 
 	// components
 	if (typeof nodeName==='function') {
+		isComponent = true;
 		if (opts.shallow && (inner || opts.renderRootComponent===false)) {
 			nodeName = getComponentName(nodeName);
 		}
@@ -111,7 +113,7 @@ export default function renderToString(vnode, context, opts, inner) {
 			if (name==='children') continue;
 			if (!(opts && opts.allAttributes) && (name==='key' || name==='ref')) continue;
 
-			let hooked = opts.attributeHook && opts.attributeHook(name, v, context, opts);
+			let hooked = opts.attributeHook && opts.attributeHook(name, v, context, opts, isComponent);
 			if (hooked || hooked==='') {
 				s += hooked;
 				continue;

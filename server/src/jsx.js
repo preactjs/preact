@@ -20,16 +20,24 @@ let prettyFormatOpts = {
 };
 
 
-function attributeHook(name, value, context, opts) {
-	if (value==null) return '';
+function attributeHook(name, value, context, opts, isComponent) {
+	let type = typeof value;
+
+	// always skip null & undefined values, skip false DOM attributes, skip functions if told to
+	if (value==null || (!isComponent && value===false) || (type==='function' && !opts.functions)) return '';
 
 	let indentChar = typeof opts.pretty==='string' ? opts.pretty : '\t';
-	if (typeof value!=='string') {
-		preactPlugin.context = context;
-		preactPlugin.opts = opts;
-		value = prettyFormat(value, prettyFormatOpts);
-		if (~value.indexOf('\n')) {
-			value = `${indent('\n'+value, indentChar)}\n`;
+	if (type!=='string') {
+		if (type==='function' && !opts.functionNames) {
+			value = 'Function';
+		}
+		else {
+			preactPlugin.context = context;
+			preactPlugin.opts = opts;
+			value = prettyFormat(value, prettyFormatOpts);
+			if (~value.indexOf('\n')) {
+				value = `${indent('\n'+value, indentChar)}\n`;
+			}
 		}
 		return indent(`\n${name}={${value}}`, indentChar);
 	}
@@ -41,6 +49,8 @@ let defaultOpts = {
 	attributeHook,
 	jsx: true,
 	xml: false,
+	functions: true,
+	functionNames: true,
 	pretty: '  '
 };
 
