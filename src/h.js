@@ -32,7 +32,7 @@ export default function h(nodeName, attributes) {
 			}
 			for (let j=0; j<arr.length; j++) {
 				let child = arr[j],
-					simple = !empty(child) && !(child instanceof VNode);
+					simple = !empty(child) && !(child.nodeName);
 				if (simple) child = String(child);
 				if (simple && lastSimple) {
 					children[children.length-1] += child;
