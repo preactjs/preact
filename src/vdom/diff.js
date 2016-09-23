@@ -31,32 +31,23 @@ export function flushMounts() {
  *	@returns {Element} dom			The created/mutated element
  *	@private
  */
-export function diff(dom, vnode, context, mountAll, parent, rootComponent) {
+export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 	diffLevel++;
-	let ret = idiff(dom, vnode, context, mountAll, rootComponent);
+	let ret = idiff(dom, vnode, context, mountAll);
 	if (parent && ret.parentNode!==parent) parent.appendChild(ret);
-	if (!--diffLevel) flushMounts();
+	if (!--diffLevel && !componentRoot) flushMounts();
 	return ret;
 }
 
 
-function idiff(dom, vnode, context, mountAll, rootComponent) {
+function idiff(dom, vnode, context, mountAll) {
 	let originalAttributes = vnode && vnode.attributes;
 
 	while (isFunctionalComponent(vnode)) {
 		vnode = buildFunctionalComponent(vnode, context);
 	}
 
-	if (empty(vnode)) {
-		vnode = '';
-		if (rootComponent) {
-			if (dom) {
-				if (dom.nodeType===8) return dom;
-				recollectNodeTree(dom);
-			}
-			return document.createComment(vnode);
-		}
-	}
+	if (empty(vnode)) vnode = '';
 
 	if (isString(vnode)) {
 		if (dom) {
@@ -179,7 +170,7 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 			// morph the matched/found/created DOM child to match vchild (deep)
 			child = idiff(child, vchild, context, mountAll);
 
-			if (child!==originalChildren[i]) {
+			if (child && child!==dom && child!==originalChildren[i]) {
 				dom.insertBefore(child, originalChildren[i] || null);
 			}
 		}
@@ -187,10 +178,7 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 
 
 	if (keyedLen) {
-		/*eslint guard-for-in:0*/
-		for (let i in keyed) if (keyed[i]) {
-			children[min=childrenLen++] = keyed[i];
-		}
+		for (let i in keyed) if (keyed[i]) recollectNodeTree(keyed[i]);
 	}
 
 	// remove orphaned children
@@ -203,9 +191,8 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 /** Reclaim children that were unreferenced in the desired VTree */
 export function removeOrphanedChildren(children, unmountOnly) {
 	for (let i=children.length; i--; ) {
-		let child = children[i];
-		if (child) {
-			recollectNodeTree(child, unmountOnly);
+		if (children[i]) {
+			recollectNodeTree(children[i], unmountOnly);
 		}
 	}
 }

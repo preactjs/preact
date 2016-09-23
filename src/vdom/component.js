@@ -61,7 +61,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
  *	@param {boolean} [opts.build=false]		If `true`, component will build and store a DOM node if not already associated with one.
  *	@private
  */
-export function renderComponent(component, opts, mountAll) {
+export function renderComponent(component, opts, mountAll, isChild) {
 	if (component._disableRendering) return;
 
 	let skip, rendered,
@@ -72,8 +72,10 @@ export function renderComponent(component, opts, mountAll) {
 		previousState = component.prevState || state,
 		previousContext = component.prevContext || context,
 		isUpdate = component.base,
-		initialBase = isUpdate || component.nextBase,
-		initialChildComponent = component._component;
+		nextBase = component.nextBase,
+		initialBase = isUpdate || nextBase,
+		initialChildComponent = component._component,
+		inst;
 
 	// if updating
 	if (isUpdate) {
@@ -111,23 +113,25 @@ export function renderComponent(component, opts, mountAll) {
 		let childComponent = rendered && rendered.nodeName,
 			toUnmount, base;
 
-		if (isFunction(childComponent) && childComponent.prototype.render) {
+		if (isFunction(childComponent)) {
 			// set up high order component link
 
-			let inst = initialChildComponent,
-				childProps = getNodeProps(rendered);
+
+			inst = initialChildComponent;
+			let childProps = getNodeProps(rendered);
 
 			if (inst && inst.constructor===childComponent) {
 				setComponentProps(inst, childProps, SYNC_RENDER, context);
 			}
 			else {
 				toUnmount = inst;
+
 				inst = createComponent(childComponent, childProps, context);
-				inst.nextBase = inst.nextBase || mountAll && initialBase;
+				inst.nextBase = inst.nextBase || nextBase;
 				inst._parentComponent = component;
 				component._component = inst;
 				setComponentProps(inst, childProps, NO_RENDER, context);
-				renderComponent(inst, SYNC_RENDER);
+				renderComponent(inst, SYNC_RENDER, mountAll, true);
 			}
 
 			base = inst.base;
@@ -147,7 +151,7 @@ export function renderComponent(component, opts, mountAll) {
 			}
 		}
 
-		if (initialBase && base!==initialBase) {
+		if (initialBase && base!==initialBase && inst!==initialChildComponent) {
 			let baseParent = initialBase.parentNode;
 			if (baseParent && base!==baseParent) {
 				baseParent.replaceChild(base, initialBase);
@@ -175,7 +179,6 @@ export function renderComponent(component, opts, mountAll) {
 
 	if (!isUpdate || mountAll) {
 		mounts.unshift(component);
-		if (!diffLevel) flushMounts();
 	}
 	else if (!skip && component.componentDidUpdate) {
 		component.componentDidUpdate(previousProps, previousState, previousContext);
@@ -184,7 +187,7 @@ export function renderComponent(component, opts, mountAll) {
 	let cb = component._renderCallbacks, fn;
 	if (cb) while ( (fn = cb.pop()) ) fn.call(component);
 
-	return rendered;
+	if (!diffLevel && !isChild) flushMounts();
 }
 
 
