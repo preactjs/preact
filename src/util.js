@@ -4,11 +4,7 @@
  */
 export function extend(obj, props) {
 	if (props) {
-		for (let i in props) {
-			if (props[i]!==undefined) {
-				obj[i] = props[i];
-			}
-		}
+		for (let i in props) obj[i] = props[i];
 	}
 	return obj;
 }

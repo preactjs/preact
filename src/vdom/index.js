@@ -1,4 +1,4 @@
-import { clone, extend, isString, isFunction, toLowerCase } from '../util';
+import { clone, isString, isFunction, toLowerCase } from '../util';
 import { isFunctionalComponent } from './functional-component';
 import { getNodeType } from '../dom/index';
 
@@ -35,9 +35,15 @@ export function isNamedNode(node, nodeName) {
  */
 export function getNodeProps(vnode) {
 	let defaultProps = vnode.nodeName.defaultProps,
-		props = clone(defaultProps || vnode.attributes);
+		props = clone(vnode.attributes);
 
-	if (defaultProps) extend(props, vnode.attributes);
+	if (defaultProps) {
+		for (let i in defaultProps) {
+			if (props[i]===undefined) {
+				props[i] = defaultProps[i];
+			}
+		}
+	}
 
 	if (vnode.children) props.children = vnode.children;
 
