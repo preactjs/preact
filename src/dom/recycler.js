@@ -1,5 +1,5 @@
 import { toLowerCase } from '../util';
-import { ensureNodeData, getNodeType, getRawNodeAttributes, removeNode } from './index';
+import { ensureNodeData, getRawNodeAttributes, removeNode } from './index';
 
 /** DOM node pool, keyed on nodeName. */
 
@@ -7,12 +7,16 @@ const nodes = {};
 
 export function collectNode(node) {
 	removeNode(node);
-	if (getNodeType(node)!==1) return;
-	cleanNode(node);
-	let name = toLowerCase(node.nodeName),
-		list = nodes[name];
-	if (list) list.push(node);
-	else nodes[name] = [node];
+
+	if (node instanceof Element) {
+		if (node[ATTR_KEY]) {
+			ensureNodeData(node, getRawNodeAttributes(node));
+		}
+		node._component = node._componentConstructor = null;
+
+		let name = node.normalizedNodeName || toLowerCase(node.nodeName);
+		(nodes[name] || (nodes[name] = [])).push(node);
+	}
 }
 
 
@@ -25,15 +29,3 @@ export function createNode(nodeName, isSvg) {
 }
 
 
-function cleanNode(node) {
-	// When reclaiming externally created nodes, seed the attribute cache: (Issue #97)
-
-	ensureNodeData(node, getRawNodeAttributes(node));
-
-	node._component = node._componentConstructor = null;
-
-	// if (node.childNodes.length>0) {
-	// 	console.trace(`Warning: Recycler collecting <${node.nodeName}> with ${node.childNodes.length} children.`);
-	// 	for (let i=node.childNodes.length; i--; ) collectNode(node.childNodes[i]);
-	// }
-}

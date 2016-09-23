@@ -8,13 +8,6 @@ export function ensureNodeData(node, data) {
 }
 
 
-export function getNodeType(node) {
-	if (node instanceof Text) return 3;
-	if (node instanceof Element) return 1;
-	return 0;
-}
-
-
 /** Removes a given DOM Node from its parent. */
 export function removeNode(node) {
 	let p = node.parentNode;

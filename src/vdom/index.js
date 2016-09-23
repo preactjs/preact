@@ -1,6 +1,5 @@
 import { clone, isString, isFunction, toLowerCase } from '../util';
 import { isFunctionalComponent } from './functional-component';
-import { getNodeType } from '../dom/index';
 
 
 /** Check if two nodes are equivalent.
@@ -10,7 +9,7 @@ import { getNodeType } from '../dom/index';
  */
 export function isSameNodeType(node, vnode) {
 	if (isString(vnode)) {
-		return getNodeType(node)===3;
+		return node instanceof Text;
 	}
 	if (isString(vnode.nodeName)) {
 		return isNamedNode(node, vnode.nodeName);

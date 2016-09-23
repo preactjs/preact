@@ -3,7 +3,7 @@ import { empty, isString, isFunction } from '../util';
 import { isSameNodeType, isNamedNode } from './index';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
-import { setAccessor, getRawNodeAttributes, getNodeType } from '../dom/index';
+import { setAccessor, removeNode, getRawNodeAttributes } from '../dom/index';
 import { createNode, collectNode } from '../dom/recycler';
 import { unmountComponent } from './component';
 
@@ -60,7 +60,7 @@ function idiff(dom, vnode, context, mountAll, rootComponent) {
 
 	if (isString(vnode)) {
 		if (dom) {
-			if (getNodeType(dom)===3 && dom.parentNode) {
+			if (dom instanceof Text && dom.parentNode) {
 				dom.nodeValue = vnode;
 				return dom;
 			}
