@@ -33,14 +33,6 @@ export function delve(obj, key) {
 }
 
 
-/** Convert an Array-like object to an Array
- *	@private
- */
-export function toArray(obj, offset) {
-	return [].slice.call(obj, offset);
-}
-
-
 /** @private is the given object a Function? */
 export function isFunction(obj) {
 	return 'function'===typeof obj;
