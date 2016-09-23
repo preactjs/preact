@@ -9,18 +9,6 @@ import { createComponent, collectComponent } from './component-recycler';
 import { removeNode } from '../dom/index';
 
 
-/** Mark component as dirty and queue up a render.
- *	@param {Component} component
- *	@private
- */
-export function triggerComponentRender(component) {
-	if (!component._dirty) {
-		component._dirty = true;
-		enqueueRender(component);
-	}
-}
-
-
 
 /** Set a component's `props` (generally derived from JSX attributes).
  *	@param {Object} props
@@ -58,7 +46,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 			renderComponent(component, SYNC_RENDER, mountAll);
 		}
 		else {
-			triggerComponentRender(component);
+			enqueueRender(component);
 		}
 	}
 

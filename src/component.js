@@ -1,7 +1,8 @@
 import { FORCE_RENDER } from './constants';
 import { extend, clone, isFunction } from './util';
 import { createLinkedState } from './linked-state';
-import { triggerComponentRender, renderComponent } from './vdom/component';
+import { renderComponent } from './vdom/component';
+import { enqueueRender } from './render-queue';
 
 /** Base Component class, for he ES6 Class method of creating Components
  *	@public
@@ -78,7 +79,7 @@ extend(Component.prototype, {
 		if (!this.prevState) this.prevState = clone(s);
 		extend(s, isFunction(state) ? state(s, this.props) : state);
 		if (callback) (this._renderCallbacks = (this._renderCallbacks || [])).push(callback);
-		triggerComponentRender(this);
+		enqueueRender(this);
 	},
 
 

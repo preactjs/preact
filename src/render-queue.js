@@ -9,9 +9,10 @@ let items = [],
 	itemsOffline = [];
 
 export function enqueueRender(component) {
-	if (items.push(component)!==1) return;
-
-	(options.debounceRendering || defer)(rerender);
+	component._dirty = true;
+	if (items.push(component)==1) {
+		(options.debounceRendering || defer)(rerender);
+	}
 }
 
 
