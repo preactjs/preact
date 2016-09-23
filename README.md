@@ -37,6 +37,7 @@ As one would expect coming from React, Components are simple building blocks for
 - [**Create your Own!**](https://jsfiddle.net/developit/rs6zrh5f/embedded/result/) (@ JSFiddle)
 - [**Preact Coffeescript**](https://github.com/crisward/preact-coffee)
 - [**GuriVR**](https://gurivr.com) _([Github Project](https://github.com/opennewslabs/guri-vr))_
+- [**V2EX Preact**](https://github.com/yanni4night/v2ex-preact)
 
 ## Libraries & Add-ons
 
