@@ -227,7 +227,7 @@ function diffAttributes(dom, attrs) {
 	let old = dom[ATTR_KEY] || getRawNodeAttributes(dom);
 
 	for (let name in old) {
-		if (!attrs || !(name in attrs)) {
+		if (!(attrs && name in attrs) && !empty(old[name])) {
 			setAccessor(dom, name, null, old[name], isSvgMode);
 		}
 	}
