@@ -235,7 +235,7 @@ function diffAttributes(dom, attrs) {
 	// new & updated
 	if (attrs) {
 		for (let name in attrs) {
-			if (!(name in old) || attrs[name]!=old[name] || ((name==='value' || name==='checked') && attrs[name]!=dom[name])) {
+			if (!(name in old) || attrs[name]!==(name==='value' || name==='checked' ? dom[name] : old[name])) {
 				setAccessor(dom, name, attrs[name], old[name], isSvgMode);
 			}
 		}
