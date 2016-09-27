@@ -10,7 +10,7 @@ export function collectNode(node) {
 	removeNode(node);
 
 	if (node instanceof Element) {
-		if (node[ATTR_KEY]) {
+		if (!(ATTR_KEY in node)) {
 			ensureNodeData(node, getRawNodeAttributes(node));
 		}
 		node._component = node._componentConstructor = null;
