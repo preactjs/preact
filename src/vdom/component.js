@@ -75,7 +75,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		nextBase = component.nextBase,
 		initialBase = isUpdate || nextBase,
 		initialChildComponent = component._component,
-		inst;
+		inst, cbase;
 
 	// if updating
 	if (isUpdate) {
@@ -137,7 +137,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 			base = inst.base;
 		}
 		else {
-			let cbase = initialBase;
+			cbase = initialBase;
 
 			// destroy high order component link
 			toUnmount = initialChildComponent;
@@ -157,7 +157,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 				baseParent.replaceChild(base, initialBase);
 			}
 
-			if (!toUnmount && component._parentComponent) {
+			if (!cbase && !toUnmount && component._parentComponent) {
 				initialBase._component = null;
 				recollectNodeTree(initialBase);
 			}
@@ -168,7 +168,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		}
 
 		component.base = base;
-		if (base) {
+		if (base && !isChild) {
 			let componentRef = component,
 				t = component;
 			while ((t=t._parentComponent)) { componentRef = t; }
@@ -208,7 +208,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 		isOwner = c.constructor===vnode.nodeName;
 	}
 
-	if (isOwner && (!mountAll || c._component)) {
+	if (c && isOwner && (!mountAll || c._component)) {
 		setComponentProps(c, props, ASYNC_RENDER, context, mountAll);
 		dom = c.base;
 	}
