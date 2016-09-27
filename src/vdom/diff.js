@@ -3,7 +3,7 @@ import { empty, isString, isFunction } from '../util';
 import { isSameNodeType, isNamedNode } from './index';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
-import { setAccessor, removeNode, getRawNodeAttributes } from '../dom/index';
+import { setAccessor, getRawNodeAttributes } from '../dom/index';
 import { createNode, collectNode } from '../dom/recycler';
 import { unmountComponent } from './component';
 
@@ -226,7 +226,6 @@ export function recollectNodeTree(node, unmountOnly) {
 function diffAttributes(dom, attrs) {
 	let old = dom[ATTR_KEY] || getRawNodeAttributes(dom);
 
-	// removeAttributes(dom, old, attrs || EMPTY);
 	for (let name in old) {
 		if (!attrs || !(name in attrs)) {
 			setAccessor(dom, name, null, old[name], isSvgMode);
