@@ -5,7 +5,6 @@ import { falsey, isFunction, isString, hashToClassName } from './util';
 
 const SHARED_TEMP_ARRAY = [];
 
-
 /** JSX/hyperscript reviver
  *	@see http://jasonformat.com/wtf-is-jsx
  *	@public
@@ -15,21 +14,35 @@ const SHARED_TEMP_ARRAY = [];
  *  render(<span>foo</span>, document.body);
  */
 export function h(nodeName, attributes, firstChild) {
-	let len = arguments.length,
-		children, arr, lastSimple;
+	let outChildren, arr, lastSimple;
 
+	if (arguments.length > 2) {
+		let inChildren = [];
 
-	if (len>2) {
+		// Flatten one layer of children.
+		for (let i=2, ilen=arguments.length; i < ilen; i++) {
+			if (Array.isArray(arguments[i])) {
+				for (let j=0, jlen=arguments[i].length; j < jlen; j++) {
+					inChildren.push(arguments[i][j]);
+				}
+			} else {
+				inChildren.push(arguments[i]);
+			}
+		}
+
+		let firstChild = inChildren[0];
 		let type = typeof firstChild;
-		if (len===3 && type!=='object' && type!=='function') {
+
+		if (inChildren.length === 1 && type!=='object' && type!=='function') {
 			if (!falsey(firstChild)) {
-				children = [String(firstChild)];
+				outChildren = [String(firstChild)];
 			}
 		}
 		else {
-			children = [];
-			for (let i=2; i<len; i++) {
-				let p = arguments[i];
+			outChildren = [];
+			for (let i=0, ilen=inChildren.length; i<ilen; i++) {
+				let p = inChildren[i];
+	
 				if (falsey(p)) continue;
 				if (p.join) arr = p;
 				else (arr = SHARED_TEMP_ARRAY)[0] = p;
@@ -38,10 +51,10 @@ export function h(nodeName, attributes, firstChild) {
 						simple = !(falsey(child) || isFunction(child) || child instanceof VNode);
 					if (simple && !isString(child)) child = String(child);
 					if (simple && lastSimple) {
-						children[children.length-1] += child;
+						outChildren[outChildren.length-1] += child;
 					}
 					else if (!falsey(child)) {
-						children.push(child);
+						outChildren.push(child);
 						lastSimple = simple;
 					}
 				}
@@ -71,7 +84,7 @@ export function h(nodeName, attributes, firstChild) {
 		}
 	}
 
-	let p = new VNode(nodeName, attributes || undefined, children);
+	let p = new VNode(nodeName, attributes || undefined, outChildren);
 
 	// if a "vnode hook" is defined, pass every created VNode to it
 	if (options.vnode) options.vnode(p);
