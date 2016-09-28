@@ -35,12 +35,12 @@ export function h(nodeName, attributes, firstChild) {
 				else (arr = SHARED_TEMP_ARRAY)[0] = p;
 				for (let j=0; j<arr.length; j++) {
 					let child = arr[j],
-						simple = !(falsey(child) || isFunction(child) || child instanceof VNode || child.join);
+						simple = !(falsey(child) || isFunction(child) || child instanceof VNode || Array.isArray(child));
 					if (simple && !isString(child)) child = String(child);
 					if (simple && lastSimple) {
 						children[children.length-1] += child;
 					}
-					else if (child.join) {
+					else if (Array.isArray(child)) {
 						let arr2 = child;
 						for (let k = 0; k < arr2.length; k++) {
 							let child2 = arr2[k],
