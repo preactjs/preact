@@ -1,6 +1,6 @@
 import { VNode } from './vnode';
 import options from './options';
-import { falsey, isFunction, isString, hashToClassName } from './util';
+import { falsey, isFunction, isString } from './util';
 
 
 // tracks whether the previously normalized child was a "simple" vnode (ie, converts to a String)
@@ -53,18 +53,6 @@ export function h(nodeName, attributes) {
 			delete attributes.children;
 		}
 
-		if (!isFunction(nodeName)) {
-			// normalize className to class.
-			if ('className' in attributes) {
-				attributes.class = attributes.className;
-				delete attributes.className;
-			}
-
-			lastSimple = attributes.class;
-			if (lastSimple && !isString(lastSimple)) {
-				attributes.class = hashToClassName(lastSimple);
-			}
-		}
 	}
 
 	let p = new VNode(nodeName, attributes || undefined, children);

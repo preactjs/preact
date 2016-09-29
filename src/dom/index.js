@@ -1,6 +1,6 @@
 import { ATTR_KEY, NON_DIMENSION_PROPS, NON_BUBBLING_EVENTS } from '../constants';
 import options from '../options';
-import { toLowerCase, empty, falsey, isString, isFunction } from '../util';
+import { toLowerCase, empty, falsey, isString, isFunction, hashToClassName } from '../util';
 
 
 export function ensureNodeData(node, data) {
@@ -28,8 +28,8 @@ export function setAccessor(node, name, value, old, isSvg) {
 
 	if (name==='key' || name==='children' || name==='innerHTML') return;
 
-	if (name==='class' && !isSvg) {
-		node.className = value || '';
+	if ((name==='class' || name==='className') && !isSvg) {
+		node.className = value && typeof value==='object' ? hashToClassName(value) : value || '';
 	}
 	else if (name==='style') {
 		if (!value || isString(value) || isString(old)) {
