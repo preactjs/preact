@@ -28,11 +28,15 @@ export function setAccessor(node, name, value, old, isSvg) {
 
 	if (name==='className') name = 'class';
 
+	if (name==='class') {
+		value = value && typeof value==='object' ? hashToClassName(value) : value;
+	}
+
 	if (name==='key' || name==='children' || name==='innerHTML') {
 		// skip these
 	}
 	else if (name==='class' && !isSvg) {
-		node.className = value && typeof value==='object' ? hashToClassName(value) : value || '';
+		node.className = value || '';
 	}
 	else if (name==='style') {
 		if (!value || isString(value) || isString(old)) {
