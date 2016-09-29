@@ -26,9 +26,12 @@ export function removeNode(node) {
 export function setAccessor(node, name, value, old, isSvg) {
 	ensureNodeData(node)[name] = value;
 
-	if (name==='key' || name==='children' || name==='innerHTML') return;
+	if (name==='className') name = 'class';
 
-	if ((name==='class' || name==='className') && !isSvg) {
+	if (name==='key' || name==='children' || name==='innerHTML') {
+		// skip these
+	}
+	else if (name==='class' && !isSvg) {
 		node.className = value && typeof value==='object' ? hashToClassName(value) : value || '';
 	}
 	else if (name==='style') {
