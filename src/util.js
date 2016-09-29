@@ -69,6 +69,7 @@ export function hashToClassName(c) {
 	return str;
 }
 
+
 /** Just a memoized String#toLowerCase */
 let lcCache = {};
 export const toLowerCase = s => lcCache[s] || (lcCache[s] = s.toLowerCase());
