@@ -3,6 +3,30 @@ import options from './options';
 import { falsey, isFunction, isString, hashToClassName } from './util';
 
 
+// tracks whether the previously normalized child was a "simple" vnode (ie, converts to a String)
+let lastSimple = false;
+
+
+function normalizeChildren(acc, arr, index) {
+	for ( ; index<arr.length; index++) {
+		let child = arr[index];
+		if (child && child.join) {
+			normalizeChildren(acc, child, 0);
+		}
+		else {
+			let simple = !(falsey(child) || isFunction(child) || child instanceof VNode);
+			if (simple && !isString(child)) child = String(child);
+			if (simple && lastSimple) {
+				acc[acc.length-1] += child;
+			}
+			else if (!falsey(child)) {
+				acc.push(child);
+				lastSimple = simple;
+			}
+		}
+	}
+}
+
 
 /** JSX/hyperscript reviver
  *	@see http://jasonformat.com/wtf-is-jsx
@@ -49,27 +73,4 @@ export function h(nodeName, attributes) {
 	if (options.vnode) options.vnode(p);
 
 	return p;
-}
-
-
-
-let lastSimple = false;
-function normalizeChildren(acc, arr, start) {
-	for (let i=start; i<arr.length; i++) {
-		let child = arr[i];
-		if (child && child.join) {
-			normalizeChildren(acc, child, 0);
-		}
-		else {
-			let simple = !(falsey(child) || isFunction(child) || child instanceof VNode);
-			if (simple && !isString(child)) child = String(child);
-			if (simple && lastSimple) {
-				acc[acc.length-1] += child;
-			}
-			else if (!falsey(child)) {
-				acc.push(child);
-				lastSimple = simple;
-			}
-		}
-	}
 }
