@@ -46,7 +46,7 @@
     "chai": "^3.5.0",
     "eslint": "^3.2.2",
     "mocha": "^3.0.0",
-    "preact": "^5.5.0",
+    "preact": "^6.1.0",
     "rollup": "^0.34.3",
     "rollup-plugin-babel": "^2.6.1",
     "rollup-plugin-commonjs": "^3.3.1",

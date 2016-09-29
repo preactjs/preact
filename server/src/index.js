@@ -1,4 +1,4 @@
-import { objectKeys, encodeEntities, falsey, memoize, indent, isLargeString, styleObjToCss, assign, getNodeProps } from './util';
+import { objectKeys, encodeEntities, falsey, memoize, indent, isLargeString, styleObjToCss, hashToClassName, assign, getNodeProps } from './util';
 
 const SHALLOW = { shallow: true };
 
@@ -123,7 +123,11 @@ export default function renderToString(vnode, context, opts, inner) {
 				if (attributes['class']) continue;
 				name = 'class';
 			}
-			if (name==='style' && v && typeof v==='object') {
+
+			if (name==='class' && v && typeof v==='object') {
+				v = hashToClassName(v);
+			}
+			else if (name==='style' && v && typeof v==='object') {
 				v = styleObjToCss(v);
 			}
 

@@ -30,6 +30,7 @@ export let indent = (s, char) => String(s).replace(/(\n+)/g, '$1' + (char || '\t
 
 export let isLargeString = (s, length, ignoreLines) => (String(s).length>(length || 40) || (!ignoreLines && String(s).indexOf('\n')!==-1) || String(s).indexOf('<')!==-1);
 
+// Convert an Object style to a CSSText string
 export function styleObjToCss(s) {
 	let str = '';
 	for (let prop in s) {
@@ -43,6 +44,19 @@ export function styleObjToCss(s) {
 				str += 'px';
 			}
 			str += ';';
+		}
+	}
+	return str;
+}
+
+
+// See https://github.com/developit/preact/blob/master/src/util.js#L61
+export function hashToClassName(c) {
+	let str = '';
+	for (let prop in c) {
+		if (c[prop]) {
+			if (str) str += ' ';
+			str += prop;
 		}
 	}
 	return str;
