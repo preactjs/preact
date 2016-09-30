@@ -113,12 +113,6 @@ export default function renderToString(vnode, context, opts, inner) {
 			if (name==='children') continue;
 			if (!(opts && opts.allAttributes) && (name==='key' || name==='ref')) continue;
 
-			let hooked = opts.attributeHook && opts.attributeHook(name, v, context, opts, isComponent);
-			if (hooked || hooked==='') {
-				s += hooked;
-				continue;
-			}
-
 			if (name==='className') {
 				if (attributes['class']) continue;
 				name = 'class';
@@ -129,6 +123,12 @@ export default function renderToString(vnode, context, opts, inner) {
 			}
 			else if (name==='style' && v && typeof v==='object') {
 				v = styleObjToCss(v);
+			}
+
+			let hooked = opts.attributeHook && opts.attributeHook(name, v, context, opts, isComponent);
+			if (hooked || hooked==='') {
+				s += hooked;
+				continue;
 			}
 
 			if (name==='dangerouslySetInnerHTML') {
