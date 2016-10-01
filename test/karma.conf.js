@@ -77,6 +77,7 @@ module.exports = function(config) {
 		customLaunchers: sauceLabsLaunchers,
 
 		files: [
+			{ pattern: 'polyfills.js', watched: false },
 			{ pattern: '{browser,shared}/**.js', watched: false }
 		],
 
