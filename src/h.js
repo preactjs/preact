@@ -1,34 +1,13 @@
 import { VNode } from './vnode';
 import options from './options';
-import { falsey, isFunction, isString } from './util';
 
 
-// tracks whether the previously normalized child was a "simple" vnode (ie, converts to a String)
-let lastSimple = false;
+let stack = [];
 
-
-function normalizeChildren(acc, arr, index) {
-	for ( ; index<arr.length; index++) {
-		let child = arr[index];
-		if (child && child.join) {
-			normalizeChildren(acc, child, 0);
-		}
-		else {
-			let simple = !(falsey(child) || isFunction(child) || child instanceof VNode);
-			if (simple && !isString(child)) child = String(child);
-			if (simple && lastSimple) {
-				acc[acc.length-1] += child;
-			}
-			else if (!falsey(child)) {
-				acc.push(child);
-				lastSimple = simple;
-			}
-		}
-	}
-}
 
 
 /** JSX/hyperscript reviver
+*	Benchmarks: https://esbench.com/bench/57ee8f8e330ab09900a1a1a0
  *	@see http://jasonformat.com/wtf-is-jsx
  *	@public
  *  @example
@@ -37,22 +16,34 @@ function normalizeChildren(acc, arr, index) {
  *  render(<span>foo</span>, document.body);
  */
 export function h(nodeName, attributes) {
-	let children;
-
-	lastSimple = false;
-
-	if (arguments.length>2) {
-		normalizeChildren(children = [], arguments, 2);
+	let children, lastSimple, child, simple, i;
+	for (i=arguments.length; i-- > 2; ) {
+		stack.push(arguments[i]);
 	}
-
-	if (attributes) {
-		if (attributes.children) {
-			if (!children) {
-				normalizeChildren(children = [], attributes.children, 0);
+	if (attributes && attributes.children) {
+		if (!stack.length) stack.push(attributes.children);
+		delete attributes.children;
+	}
+	if (stack.length) {
+		children = [];
+		while (stack.length) {
+			if ((child = stack.pop())!=null && child!==false) {
+				if (child instanceof Array) {
+					for (i=child.length; i--; ) stack.push(child[i]);
+				}
+				else {
+					if (typeof child=='number' || child===true) child = String(child);
+					simple = typeof child=='string';
+					if (simple && lastSimple) {
+						children[children.length-1] += child;
+					}
+					else {
+						children.push(child);
+						lastSimple = simple;
+					}
+				}
 			}
-			delete attributes.children;
 		}
-
 	}
 
 	let p = new VNode(nodeName, attributes || undefined, children);
