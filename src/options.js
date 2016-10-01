@@ -15,4 +15,15 @@ export default {
 	 *	@param {VNode} vnode	A newly-created VNode to normalize/process
 	 */
 	//vnode(vnode) { }
+
+	/** Hook invoked after a component is mounted. */
+	// afterMount(component) { }
+
+	/**
+	 * Hook invoked after the DOM is updated with a component's latest render.
+	 */
+	// afterUpdate(component) { }
+
+	/** Hook invoked immediately before a component is unmounted. */
+	// beforeUnmount(component) { }
 };
