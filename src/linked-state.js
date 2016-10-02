@@ -14,13 +14,8 @@ export function createLinkedState(component, key, eventPath) {
 		let t = e && e.currentTarget || this,
 			s = component.state,
 			obj = s,
-			v, i;
-		if (isString(eventPath)) {
-			v = delve(e, eventPath);
-		}
-		else {
-			v = t.nodeName ? ((t.nodeName+t.type).match(/^input(check|rad)/i) ? t.checked : t.value) : e;
-		}
+			v = isString(eventPath) ? delve(e, eventPath) : t.nodeName ? ((t.nodeName+t.type).match(/^input(che|rad)/i) ? t.checked : t.value) : e,
+			i;
 		if (path.length>1) {
 			for (i=0; i<path.length-1; i++) {
 				obj = obj[path[i]] || (obj[path[i]] = {});
