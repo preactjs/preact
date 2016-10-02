@@ -39,7 +39,10 @@
   },
   "files": [
     "src",
-    "dist"
+    "dist",
+    "aliases.js",
+    "aliases.js.map",
+    "typings.json"
   ],
   "author": "Jason Miller <jason@developit.ca>",
   "license": "MIT",
