@@ -17,10 +17,10 @@ import { enqueueRender } from './render-queue';
 export function Component(props, context) {
 	/** @private */
 	this._dirty = true;
-	/** @public */
-	this._disableRendering = false;
-	/** @public */
-	this.prevState = this.prevProps = this.prevContext = this.base = this.nextBase = this._parentComponent = this._component = this.__ref = this.__key = this._linkedStates = this._renderCallbacks = null;
+	// /** @public */
+	// this._disableRendering = false;
+	// /** @public */
+	// this.prevState = this.prevProps = this.prevContext = this.base = this.nextBase = this._parentComponent = this._component = this.__ref = this.__key = this._linkedStates = this._renderCallbacks = null;
 	/** @public */
 	this.context = context;
 	/** @type {object} */
