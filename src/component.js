@@ -65,9 +65,8 @@ extend(Component.prototype, {
 	 *		<button onClick={ this.linkState('touch.coords', 'touches.0') }>Tap</button
 	 */
 	linkState(key, eventPath) {
-		let c = this._linkedStates || (this._linkedStates = {}),
-			cacheKey = key + '|' + eventPath;
-		return c[cacheKey] || (c[cacheKey] = createLinkedState(this, key, eventPath));
+		let c = this._linkedStates || (this._linkedStates = {});
+		return c[key+eventPath] || (c[key+eventPath] = createLinkedState(this, key, eventPath));
 	},
 
 
@@ -88,7 +87,7 @@ extend(Component.prototype, {
 	 */
 	forceUpdate() {
 		renderComponent(this, FORCE_RENDER);
-	},
+	}
 
 
 	/** Accepts `props` and `state`, and returns a new Virtual DOM tree to build.
@@ -98,8 +97,8 @@ extend(Component.prototype, {
 	 *	@param {object} context		Context object (if a parent component has provided context)
 	 *	@returns VNode
 	 */
-	render() {
-		return null;
-	}
+	// render() {
+	// 	return null;
+	// }
 
 });

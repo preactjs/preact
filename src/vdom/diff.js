@@ -60,13 +60,13 @@ function idiff(dom, vnode, context, mountAll) {
 		return document.createTextNode(vnode);
 	}
 
+	if (isFunction(vnode.nodeName)) {
+		return buildComponentFromVNode(dom, vnode, context, mountAll);
+	}
+
 	let out = dom,
 		nodeName = vnode.nodeName,
 		prevSvgMode = isSvgMode;
-
-	if (isFunction(nodeName)) {
-		return buildComponentFromVNode(dom, vnode, context, mountAll);
-	}
 
 	if (!isString(nodeName)) {
 		nodeName = String(nodeName);
