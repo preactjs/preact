@@ -1,3 +1,5 @@
+import { Component } from '../component';
+
 /** Retains a pool of Components for re-use, keyed on component name.
  *	Note: since component names are not unique or even necessarily available, these are primarily a form of sharding.
  *	@private
@@ -16,8 +18,7 @@ export function collectComponent(component) {
 export function createComponent(Ctor, props, context) {
 	let inst = new Ctor(props, context),
 		list = components[Ctor.name];
-	inst.props = props;
-	inst.context = context;
+	Component.call(inst, props, context);
 	if (list) {
 		for (let i=list.length; i--; ) {
 			if (list[i].constructor===Ctor) {

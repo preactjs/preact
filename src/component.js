@@ -26,7 +26,7 @@ export function Component(props, context) {
 	/** @type {object} */
 	this.props = props;
 	/** @type {object} */
-	this.state = this.getInitialState && this.getInitialState() || {};
+	if (!this.state) this.state = {};
 }
 
 
