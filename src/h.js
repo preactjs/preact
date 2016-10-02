@@ -24,24 +24,20 @@ export function h(nodeName, attributes) {
 		if (!stack.length) stack.push(attributes.children);
 		delete attributes.children;
 	}
-	if (stack.length) {
-		children = [];
-		while (stack.length) {
-			if ((child = stack.pop())!=null && child!==false) {
-				if (child instanceof Array) {
-					for (i=child.length; i--; ) stack.push(child[i]);
-				}
-				else {
-					if (typeof child=='number' || child===true) child = String(child);
-					simple = typeof child=='string';
-					if (simple && lastSimple) {
-						children[children.length-1] += child;
-					}
-					else {
-						children.push(child);
-						lastSimple = simple;
-					}
-				}
+	while (stack.length) {
+		if ((child = stack.pop()) instanceof Array) {
+			for (i=child.length; i--; ) stack.push(child[i]);
+		}
+		else if (child!=null && child!==false) {
+			if (typeof child=='number' || child===true) child = String(child);
+			simple = typeof child=='string';
+			if (simple && lastSimple) {
+				children[children.length-1] += child;
+			}
+			else {
+				if (children) children.push(child);
+				else children = [child];
+				lastSimple = simple;
 			}
 		}
 	}
