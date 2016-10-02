@@ -1,6 +1,6 @@
 import { ATTR_KEY, NON_DIMENSION_PROPS, NON_BUBBLING_EVENTS } from '../constants';
 import options from '../options';
-import { toLowerCase, empty, falsey, isString, isFunction, hashToClassName } from '../util';
+import { toLowerCase, empty, isString, isFunction, hashToClassName } from '../util';
 
 
 export function ensureNodeData(node, data) {
@@ -69,11 +69,11 @@ export function setAccessor(node, name, value, old, isSvg) {
 	}
 	else if (name!=='list' && name!=='type' && !isSvg && name in node) {
 		setProperty(node, name, empty(value) ? '' : value);
-		if (falsey(value)) node.removeAttribute(name);
+		if (value==null || value===false) node.removeAttribute(name);
 	}
 	else {
 		let ns = isSvg && name.match(/^xlink\:?(.+)/);
-		if (falsey(value)) {
+		if (value==null || value===false) {
 			if (ns) node.removeAttributeNS('http://www.w3.org/1999/xlink', toLowerCase(ns[1]));
 			else node.removeAttribute(name);
 		}

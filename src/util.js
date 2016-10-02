@@ -49,12 +49,6 @@ export function empty(x) {
 }
 
 
-/** Check if a value is `null`, `undefined`, or explicitly `false`. */
-export function falsey(value) {
-	return value===false || empty(value);
-}
-
-
 /** Convert a hashmap of CSS classes to a space-delimited className string
  *	@private
  */
