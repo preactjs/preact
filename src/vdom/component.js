@@ -17,8 +17,8 @@ import { removeNode } from '../dom/index';
  *	@param {boolean} [opts.render=true]			If `false`, no render will be triggered.
  */
 export function setComponentProps(component, props, opts, context, mountAll) {
-	if (component._disableRendering) return;
-	component._disableRendering = true;
+	if (component._disable) return;
+	component._disable = true;
 
 	if ((component.__ref = props.ref)) delete props.ref;
 	if ((component.__key = props.key)) delete props.key;
@@ -38,7 +38,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 	if (!component.prevProps) component.prevProps = component.props;
 	component.props = props;
 
-	component._disableRendering = false;
+	component._disable = false;
 
 	if (opts!==NO_RENDER) {
 		if (opts===SYNC_RENDER || options.syncComponentUpdates!==false || !component.base) {
@@ -61,7 +61,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
  *	@private
  */
 export function renderComponent(component, opts, mountAll, isChild) {
-	if (component._disableRendering) return;
+	if (component._disable) return;
 
 	let skip, rendered,
 		props = component.props,
@@ -242,7 +242,7 @@ export function unmountComponent(component, remove) {
 	// console.log(`${remove?'Removing':'Unmounting'} component: ${component.constructor.name}`);
 	let base = component.base;
 
-	component._disableRendering = true;
+	component._disable = true;
 
 	if (component.componentWillUnmount) component.componentWillUnmount();
 
