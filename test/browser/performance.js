@@ -1,8 +1,8 @@
-import { h, Component, render } from '../../src/preact';
+/*global coverage, ENABLE_PERFORMANCE, NODE_ENV*/
+/*eslint no-console:0*/
 /** @jsx h */
 
-/*global coverage, ENABLE_PERFORMANCE*/
-/*eslint no-console:0*/
+let { h, Component, render } = require(NODE_ENV==='production' ? '../../dist/preact.min.js' : '../../src/preact');
 
 const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
 
@@ -30,7 +30,7 @@ function benchmark(iter, callback) {
 	for (let i=3; i--; ) noop(), iter();
 
 	let count = 5,
-		time = 100,
+		time = 200,
 		passes = 0,
 		noops = loop(noop, time),
 		iterations = 0;
@@ -106,7 +106,7 @@ describe('performance', function() {
 		benchmark( () => {
 			root = render(jsx, scratch, root);
 		}, ({ ticks, message }) => {
-			console.log(`empty diff render(): ${message}`);
+			console.log(`PERF: empty diff: ${message}`);
 			expect(ticks).to.be.below(350 * MULTIPLIER);
 			done();
 		});
@@ -189,7 +189,7 @@ describe('performance', function() {
 			root = render(<Parent child={Root} />, scratch, root);
 			root = render(<Parent child={Empty} />, scratch, root);
 		}, ({ ticks, message }) => {
-			console.log(`repeated diff render(): ${message}`);
+			console.log(`PERF: repeat diff: ${message}`);
 			expect(ticks).to.be.below(2000 * MULTIPLIER);
 			done();
 		});
