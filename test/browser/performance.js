@@ -194,4 +194,52 @@ describe('performance', function() {
 			done();
 		});
 	});
+
+	it('should construct large VDOM trees fast', done => {
+		const FIELDS = [];
+		for (let i=100; i--; ) FIELDS.push((i*999).toString(36));
+
+		let out = [];
+		function digest(vnode) {
+			out.push(vnode);
+			out.length = 0;
+		}
+		benchmark( () => {
+			digest(
+				<div class="foo bar" data-foo="bar" p={2}>
+					<header>
+						<h1 class="asdf">a {'b'} c {0} d</h1>
+						<nav>
+							<a href="/foo">Foo</a>
+							<a href="/bar">Bar</a>
+						</nav>
+					</header>
+					<main>
+						<form onSubmit={()=>{}}>
+							<input type="checkbox" checked />
+							<input type="checkbox" />
+							<fieldset>
+								{ FIELDS.map( field => (
+									<label>
+										{field}:
+										<input placeholder={field} />
+									</label>
+								)) }
+							</fieldset>
+							<button-bar>
+								<button style="width:10px; height:10px; border:1px solid #FFF;">Normal CSS</button>
+								<button style="top:0 ; right: 20">Poor CSS</button>
+								<button style="invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;" icon>Poorer CSS</button>
+								<button style={{ margin:0, padding:'10px', overflow:'visible' }}>Object CSS</button>
+							</button-bar>
+						</form>
+					</main>
+				</div>
+			);
+		}, ({ ticks, message }) => {
+			console.log(`PERF: large VTree: ${message}`);
+			expect(ticks).to.be.below(2000 * MULTIPLIER);
+			done();
+		});
+	});
 });
