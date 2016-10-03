@@ -16,7 +16,6 @@ export function enqueueRender(component) {
 
 
 export function rerender() {
-	if (!items.length) return;
 
 	let currentItems = items,
 		p;
