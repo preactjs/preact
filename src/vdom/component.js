@@ -1,6 +1,6 @@
 import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, ATTR_KEY } from '../constants';
 import options from '../options';
-import { isFunction, clone, extend, empty } from '../util';
+import { isFunction, clone, extend } from '../util';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from './index';
 import { diff, mounts, diffLevel, flushMounts, removeOrphanedChildren, recollectNodeTree } from './diff';
@@ -17,14 +17,13 @@ import { removeNode } from '../dom/index';
  *	@param {boolean} [opts.render=true]			If `false`, no render will be triggered.
  */
 export function setComponentProps(component, props, opts, context, mountAll) {
-	let b = component.base;
 	if (component._disableRendering) return;
 	component._disableRendering = true;
 
 	if ((component.__ref = props.ref)) delete props.ref;
 	if ((component.__key = props.key)) delete props.key;
 
-	if (empty(b) || mountAll) {
+	if (!component.base || mountAll) {
 		if (component.componentWillMount) component.componentWillMount();
 	}
 	else if (component.componentWillReceiveProps) {
@@ -42,7 +41,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 	component._disableRendering = false;
 
 	if (opts!==NO_RENDER) {
-		if (opts===SYNC_RENDER || options.syncComponentUpdates!==false || !b) {
+		if (opts===SYNC_RENDER || options.syncComponentUpdates!==false || !component.base) {
 			renderComponent(component, SYNC_RENDER, mountAll);
 		}
 		else {
