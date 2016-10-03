@@ -1,5 +1,5 @@
 import { ATTR_KEY } from '../constants';
-import { empty, isString, isFunction } from '../util';
+import { isString, isFunction } from '../util';
 import { isSameNodeType, isNamedNode } from './index';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
@@ -47,7 +47,7 @@ function idiff(dom, vnode, context, mountAll) {
 		vnode = buildFunctionalComponent(vnode, context);
 	}
 
-	if (empty(vnode)) vnode = '';
+	if (vnode==null) vnode = '';
 
 	if (isString(vnode)) {
 		if (dom) {
@@ -148,7 +148,7 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 
 			// attempt to find a node based on key matching
 			let key = vchild.key;
-			if (!empty(key)) {
+			if (key!=null) {
 				if (keyedLen && key in keyed) {
 					child = keyed[key];
 					keyed[key] = undefined;
@@ -231,7 +231,7 @@ export function recollectNodeTree(node, unmountOnly) {
 /** Apply differences in attributes from a VNode to the given DOM Node. */
 function diffAttributes(dom, attrs, old) {
 	for (let name in old) {
-		if (!(attrs && name in attrs) && !empty(old[name])) {
+		if (!(attrs && name in attrs) && old[name]!=null) {
 			setAccessor(dom, name, null, old[name], isSvgMode);
 		}
 	}

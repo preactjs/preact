@@ -1,6 +1,6 @@
 import { ATTR_KEY, NON_DIMENSION_PROPS, NON_BUBBLING_EVENTS } from '../constants';
 import options from '../options';
-import { toLowerCase, empty, isString, isFunction, hashToClassName } from '../util';
+import { toLowerCase, isString, isFunction, hashToClassName } from '../util';
 
 
 
@@ -25,8 +25,8 @@ export function setAccessor(node, name, value, old, isSvg) {
 
 	if (name==='className') name = 'class';
 
-	if (name==='class') {
-		value = value && typeof value==='object' ? hashToClassName(value) : value;
+	if (name==='class' && value && typeof value==='object') {
+		value = hashToClassName(value);
 	}
 
 	if (name==='key' || name==='children' || name==='innerHTML') {
@@ -65,7 +65,7 @@ export function setAccessor(node, name, value, old, isSvg) {
 		l[name] = value;
 	}
 	else if (name!=='list' && name!=='type' && !isSvg && name in node) {
-		setProperty(node, name, empty(value) ? '' : value);
+		setProperty(node, name, value==null ? '' : value);
 		if (value==null || value===false) node.removeAttribute(name);
 	}
 	else {

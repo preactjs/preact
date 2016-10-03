@@ -41,14 +41,6 @@ export function isString(obj) {
 }
 
 
-/** Check if a value is `null` or `undefined`.
- *	@private
- */
-export function empty(x) {
-	return x==null;
-}
-
-
 /** Convert a hashmap of CSS classes to a space-delimited className string
  *	@private
  */
