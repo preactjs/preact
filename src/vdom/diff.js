@@ -3,7 +3,7 @@ import { empty, isString, isFunction } from '../util';
 import { isSameNodeType, isNamedNode } from './index';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
-import { setAccessor, getRawNodeAttributes } from '../dom/index';
+import { setAccessor } from '../dom/index';
 import { createNode, collectNode } from '../dom/recycler';
 import { unmountComponent } from './component';
 
@@ -93,10 +93,16 @@ function idiff(dom, vnode, context, mountAll) {
 		innerDiffNode(out, vnode.children, context, mountAll);
 	}
 
-	diffAttributes(out, vnode.attributes);
+	let props = out[ATTR_KEY];
+	if (!props) {
+		out[ATTR_KEY] = props = {};
+		for (let a=out.attributes, i=a.length; i--; ) props[a[i].name] = a[i].value;
+	}
 
-	if (originalAttributes && originalAttributes.ref) {
-		(out[ATTR_KEY].ref = originalAttributes.ref)(out);
+	diffAttributes(out, vnode.attributes, props);
+
+	if (originalAttributes && typeof originalAttributes.ref==='function') {
+		(props.ref = originalAttributes.ref)(out);
 	}
 
 	isSvgMode = prevSvgMode;
@@ -223,9 +229,7 @@ export function recollectNodeTree(node, unmountOnly) {
 
 
 /** Apply differences in attributes from a VNode to the given DOM Node. */
-function diffAttributes(dom, attrs) {
-	let old = dom[ATTR_KEY] || getRawNodeAttributes(dom);
-
+function diffAttributes(dom, attrs, old) {
 	for (let name in old) {
 		if (!(attrs && name in attrs) && !empty(old[name])) {
 			setAccessor(dom, name, null, old[name], isSvgMode);

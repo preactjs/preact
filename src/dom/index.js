@@ -3,9 +3,6 @@ import options from '../options';
 import { toLowerCase, empty, isString, isFunction, hashToClassName } from '../util';
 
 
-export function ensureNodeData(node, data) {
-	return node[ATTR_KEY] || (node[ATTR_KEY] = (data || {}));
-}
 
 
 /** Removes a given DOM Node from its parent. */
@@ -24,7 +21,7 @@ export function removeNode(node) {
  *	@private
  */
 export function setAccessor(node, name, value, old, isSvg) {
-	ensureNodeData(node)[name] = value;
+	node[ATTR_KEY][name] = value;
 
 	if (name==='className') name = 'class';
 
@@ -100,15 +97,4 @@ function setProperty(node, name, value) {
  */
 function eventProxy(e) {
 	return this._listeners[e.type](options.event && options.event(e) || e);
-}
-
-/** Get a node's attributes as a hashmap.
- *	@private
- */
-export function getRawNodeAttributes(node) {
-	let attrs = {};
-	for (let i=node.attributes.length; i--; ) {
-		attrs[node.attributes[i].name] = node.attributes[i].value;
-	}
-	return attrs;
 }
