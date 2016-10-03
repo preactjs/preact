@@ -189,7 +189,7 @@ describe('Lifecycle methods', () => {
 
 
 	let _it = it;
-	describe('#constructor, getInitialState and component(Did|Will)(Mount|Unmount)', () => {
+	describe('#constructor and component(Did|Will)(Mount|Unmount)', () => {
 		/* global DISABLE_FLAKEY */
 		let it = DISABLE_FLAKEY ? xit : _it;
 
@@ -214,7 +214,6 @@ describe('Lifecycle methods', () => {
 		class LifecycleTestComponent extends Component {
 			constructor(p, c) { super(p, c); this._constructor(); }
 			_constructor() {}
-			getInitialState() {}
 			componentWillMount() {}
 			componentDidMount() {}
 			componentWillUnmount() {}
@@ -236,7 +235,7 @@ describe('Lifecycle methods', () => {
 			render() { return <div />; }
 		}
 
-		let spies = ['_constructor', 'getInitialState', 'componentWillMount', 'componentDidMount', 'componentWillUnmount', 'componentDidUnmount'];
+		let spies = ['_constructor', 'componentWillMount', 'componentDidMount', 'componentWillUnmount', 'componentDidUnmount'];
 
 		let verifyLifycycleMethods = (TestComponent) => {
 			let proto = TestComponent.prototype;
@@ -247,7 +246,6 @@ describe('Lifecycle methods', () => {
 				reset();
 				render(<Outer />, scratch);
 				expect(proto._constructor).to.have.been.called;
-				expect(proto.getInitialState).to.have.been.called;
 				expect(proto.componentDidMount).to.have.been.called;
 				expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
 				expect(proto.componentDidMount).to.have.been.called;
@@ -269,7 +267,6 @@ describe('Lifecycle methods', () => {
 				rerender();
 
 				expect(proto._constructor).to.have.been.called;
-				expect(proto.getInitialState).to.have.been.called;
 				expect(proto.componentDidMount).to.have.been.called;
 				expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
 				expect(proto.componentDidMount).to.have.been.called;
