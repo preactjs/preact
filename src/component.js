@@ -87,7 +87,7 @@ extend(Component.prototype, {
 	 */
 	forceUpdate() {
 		renderComponent(this, FORCE_RENDER);
-	}
+	},
 
 
 	/** Accepts `props` and `state`, and returns a new Virtual DOM tree to build.
@@ -97,8 +97,6 @@ extend(Component.prototype, {
 	 *	@param {object} context		Context object (if a parent component has provided context)
 	 *	@returns VNode
 	 */
-	// render() {
-	// 	return null;
-	// }
+	render() {}
 
 });
