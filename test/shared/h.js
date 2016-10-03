@@ -107,6 +107,33 @@ describe('h(jsx)', () => {
 			]);
 	});
 
+	it('should support nested children', () => {
+		const m = x => h(x);
+		expect(
+			h('foo', null, m('a'), [m('b'), m('c')], m('d'))
+		).to.have.property('children').that.eql(['a', 'b', 'c', 'd'].map(m));
+
+		expect(
+			h('foo', null, [m('a'), [m('b'), m('c')], m('d')])
+		).to.have.property('children').that.eql(['a', 'b', 'c', 'd'].map(m));
+
+		expect(
+			h('foo', { children: [m('a'), [m('b'), m('c')], m('d')] })
+		).to.have.property('children').that.eql(['a', 'b', 'c', 'd'].map(m));
+
+		expect(
+			h('foo', { children: [[m('a'), [m('b'), m('c')], m('d')]] })
+		).to.have.property('children').that.eql(['a', 'b', 'c', 'd'].map(m));
+
+		expect(
+			h('foo', { children: m('a') })
+		).to.have.property('children').that.eql([m('a')]);
+
+		expect(
+			h('foo', { children: 'a' })
+		).to.have.property('children').that.eql(['a']);
+	});
+
 	it('should support text children', () => {
 		let r = h(
 			'foo',
