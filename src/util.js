@@ -45,7 +45,7 @@ export function isString(obj) {
  *	@private
  */
 export function empty(x) {
-	return x===undefined || x===null;
+	return x==null;
 }
 
 
