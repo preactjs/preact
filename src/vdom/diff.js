@@ -32,7 +32,7 @@ export function flushMounts() {
  *	@private
  */
 export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
-	if (!diffLevel++) isSvgMode = dom instanceof SVGElement;
+	if (!diffLevel++) isSvgMode = parent instanceof SVGElement;
 	let ret = idiff(dom, vnode, context, mountAll);
 	if (parent && ret.parentNode!==parent) parent.appendChild(ret);
 	if (!--diffLevel && !componentRoot) flushMounts();
