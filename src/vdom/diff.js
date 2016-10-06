@@ -89,7 +89,7 @@ function idiff(dom, vnode, context, mountAll) {
 	if (vnode.children && vnode.children.length===1 && typeof vnode.children[0]==='string' && out.childNodes.length===1 && out.firstChild instanceof Text) {
 		out.firstChild.nodeValue = vnode.children[0];
 	}
-	else if (vnode.children || out.firstChild) {
+	else if (vnode.children && vnode.children.length || out.firstChild) {
 		innerDiffNode(out, vnode.children, context, mountAll);
 	}
 
@@ -232,15 +232,15 @@ export function recollectNodeTree(node, unmountOnly) {
 function diffAttributes(dom, attrs, old) {
 	for (let name in old) {
 		if (!(attrs && name in attrs) && old[name]!=null) {
-			setAccessor(dom, name, null, old[name], isSvgMode);
+			setAccessor(dom, name, old[name], old[name] = undefined, isSvgMode);
 		}
 	}
 
 	// new & updated
 	if (attrs) {
 		for (let name in attrs) {
-			if (!(name in old) || attrs[name]!==(name==='value' || name==='checked' ? dom[name] : old[name])) {
-				setAccessor(dom, name, attrs[name], old[name], isSvgMode);
+			if (name!=='children' && name!=='innerHTML' && (!(name in old) || attrs[name]!==(name==='value' || name==='checked' ? dom[name] : old[name]))) {
+				setAccessor(dom, name, old[name], old[name] = attrs[name], isSvgMode);
 			}
 		}
 	}

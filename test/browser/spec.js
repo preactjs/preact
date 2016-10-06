@@ -1,6 +1,8 @@
 import { h, render, rerender, Component } from '../../src/preact';
 /** @jsx h */
 
+const EMPTY_CHILDREN = [];
+
 describe('Component spec', () => {
 	let scratch;
 
@@ -24,6 +26,7 @@ describe('Component spec', () => {
 				constructor(props, context) {
 					super(props, context);
 					expect(props).to.be.deep.equal({
+						children: EMPTY_CHILDREN,
 						fieldA: 1, fieldB: 2,
 						fieldC: 1, fieldD: 2
 					});
@@ -81,14 +84,14 @@ describe('Component spec', () => {
 				fieldC: 1, fieldD: 2
 			};
 
-			expect(proto.ctor).to.have.been.calledWith(PROPS1);
-			expect(proto.render).to.have.been.calledWith(PROPS1);
+			expect(proto.ctor).to.have.been.calledWithMatch(PROPS1);
+			expect(proto.render).to.have.been.calledWithMatch(PROPS1);
 
 			rerender();
 
 			// expect(proto.ctor).to.have.been.calledWith(PROPS2);
-			expect(proto.componentWillReceiveProps).to.have.been.calledWith(PROPS2);
-			expect(proto.render).to.have.been.calledWith(PROPS2);
+			expect(proto.componentWillReceiveProps).to.have.been.calledWithMatch(PROPS2);
+			expect(proto.render).to.have.been.calledWithMatch(PROPS2);
 		});
 
 		// @TODO: migrate this to preact-compat

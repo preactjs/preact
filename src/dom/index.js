@@ -1,4 +1,4 @@
-import { ATTR_KEY, NON_DIMENSION_PROPS, NON_BUBBLING_EVENTS } from '../constants';
+import { NON_DIMENSION_PROPS, NON_BUBBLING_EVENTS } from '../constants';
 import options from '../options';
 import { toLowerCase, isString, isFunction, hashToClassName } from '../util';
 
@@ -20,8 +20,7 @@ export function removeNode(node) {
  *	@param {any} previousValue	The last value that was set for this name/node pair
  *	@private
  */
-export function setAccessor(node, name, value, old, isSvg) {
-	node[ATTR_KEY][name] = value;
+export function setAccessor(node, name, old, value, isSvg) {
 
 	if (name==='className') name = 'class';
 
@@ -29,8 +28,8 @@ export function setAccessor(node, name, value, old, isSvg) {
 		value = hashToClassName(value);
 	}
 
-	if (name==='key' || name==='children' || name==='innerHTML') {
-		// skip these
+	if (name==='key') {
+		// ignore
 	}
 	else if (name==='class' && !isSvg) {
 		node.className = value || '';

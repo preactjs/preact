@@ -2,8 +2,7 @@ import { VNode } from './vnode';
 import options from './options';
 
 
-let stack = [];
-
+const stack = [];
 
 
 /** JSX/hyperscript reviver
@@ -16,7 +15,8 @@ let stack = [];
  *  render(<span>foo</span>, document.body);
  */
 export function h(nodeName, attributes) {
-	let children, lastSimple, child, simple, i;
+	let children = [],
+		lastSimple, child, simple, i;
 	for (i=arguments.length; i-- > 2; ) {
 		stack.push(arguments[i]);
 	}
@@ -35,8 +35,7 @@ export function h(nodeName, attributes) {
 				children[children.length-1] += child;
 			}
 			else {
-				if (children) children.push(child);
-				else children = [child];
+				children.push(child);
 				lastSimple = simple;
 			}
 		}

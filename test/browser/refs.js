@@ -200,8 +200,8 @@ describe('refs', () => {
 			</div>
 		), scratch);
 
-		expect(Foo.prototype.render).to.have.been.calledWithExactly({ a:'a' }, { }, { });
-		expect(Bar).to.have.been.calledWithExactly({ b:'b', ref:bar }, { });
+		expect(Foo.prototype.render).to.have.been.calledWithMatch({ ref:sinon.match.falsy, a:'a' }, { }, { });
+		expect(Bar).to.have.been.calledWithMatch({ b:'b', ref:bar }, { });
 	});
 
 	// Test for #232

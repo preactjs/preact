@@ -6,7 +6,12 @@ import { expect } from 'chai';
 
 /** @jsx h */
 
-let flatten = obj => JSON.parse(JSON.stringify(obj));
+const buildVNode = (nodeName, attributes, children=[]) => ({
+	nodeName,
+	children,
+	attributes,
+	key: attributes && attributes.key
+});
 
 describe('h(jsx)', () => {
 	it('should return a VNode', () => {
@@ -16,7 +21,7 @@ describe('h(jsx)', () => {
 		expect(r).to.be.an.instanceof(VNode);
 		expect(r).to.have.property('nodeName', 'foo');
 		expect(r).to.have.property('attributes', undefined);
-		expect(r).to.have.property('children', undefined);
+		expect(r).to.have.property('children').that.eql([]);
 	});
 
 	it('should perserve raw attributes', () => {
@@ -38,8 +43,8 @@ describe('h(jsx)', () => {
 		expect(r).to.be.an('object')
 			.with.property('children')
 			.that.deep.equals([
-				new VNode('bar'),
-				new VNode('baz')
+				buildVNode('bar'),
+				buildVNode('baz')
 			]);
 	});
 
@@ -51,15 +56,13 @@ describe('h(jsx)', () => {
 			h('baz', null, h('test'))
 		);
 
-		r = flatten(r);
-
 		expect(r).to.be.an('object')
 			.with.property('children')
 			.that.deep.equals([
-				{ nodeName:'bar' },
-				{ nodeName:'baz', children:[
-					{ nodeName:'test' }
-				]}
+				buildVNode('bar'),
+				buildVNode('baz', undefined, [
+					buildVNode('test')
+				])
 			]);
 	});
 
@@ -73,15 +76,13 @@ describe('h(jsx)', () => {
 			]
 		);
 
-		r = flatten(r);
-
 		expect(r).to.be.an('object')
 			.with.property('children')
 			.that.deep.equals([
-				{ nodeName:'bar' },
-				{ nodeName:'baz', children:[
-					{ nodeName:'test' }
-				]}
+				buildVNode('bar'),
+				buildVNode('baz', undefined, [
+					buildVNode('test')
+				])
 			]);
 	});
 
@@ -95,15 +96,13 @@ describe('h(jsx)', () => {
 			]
 		);
 
-		r = flatten(r);
-
 		expect(r).to.be.an('object')
 			.with.property('children')
 			.that.deep.equals([
-				{ nodeName:'bar' },
-				{ nodeName:'baz', children:[
-					{ nodeName:'test' }
-				]}
+				buildVNode('bar'),
+				buildVNode('baz', undefined, [
+					buildVNode('test')
+				])
 			]);
 	});
 
@@ -164,16 +163,14 @@ describe('h(jsx)', () => {
 			'six'
 		);
 
-		r = flatten(r);
-
 		expect(r).to.be.an('object')
 			.with.property('children')
 			.that.deep.equals([
 				'onetwo',
-				{ nodeName:'bar' },
+				buildVNode('bar'),
 				'three',
-				{ nodeName:'baz' },
-				{ nodeName:'baz' },
+				buildVNode('baz'),
+				buildVNode('baz'),
 				'fourfivesix'
 			]);
 	});
@@ -189,8 +186,6 @@ describe('h(jsx)', () => {
 			'six',
 			null
 		);
-
-		r = flatten(r);
 
 		expect(r).to.be.an('object')
 			.with.property('children')
