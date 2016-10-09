@@ -24,7 +24,7 @@ As one would expect coming from React, Components are simple building blocks for
 - [**ESBench**](http://esbench.com) is built using Preact.
 - [**Nectarine.rocks**](http://nectarine.rocks) _([Github Project](https://github.com/developit/nectarine))_ :peach:
 - [**Documentation Viewer**](https://documentation-viewer.firebaseapp.com) _([Github Project](https://github.com/developit/documentation-viewer))_
-- [**TodoMVC**](http://developit.github.io/preact-todomvc/) _([Github Project](https://github.com/developit/preact-todomvc))_
+- [**TodoMVC**](https://preact-todomvc.surge.sh) _([Github Project](https://github.com/developit/preact-todomvc))_
 - [**Hacker News Minimal**](https://developit.github.io/hn_minimal/) _([Github Project](https://github.com/developit/hn_minimal))_
 - [**Preact Boilerplate**](https://preact-boilerplate.surge.sh) _([Github Project](https://github.com/developit/preact-boilerplate))_ :zap:
 - [**Preact Redux Example**](https://github.com/developit/preact-redux-example) :star:
