@@ -12,7 +12,7 @@ declare namespace preact {
 		dangerouslySetInnerHTML?:DangerouslySetInnerHTML;
 		key?:string;
 		defaultValue?:string;
-		ref?:<T,S>(component:Component<T,S>) => void;
+		ref?:<T,S>(el:Component<T,S>|Element)=>void;
 	}
 
 	interface VNode {
