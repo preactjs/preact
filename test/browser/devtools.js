@@ -1,5 +1,5 @@
 import { h, Component, render } from '../../src/preact';
-import { initDevTools, _setComponentNameProperty } from '../../devtools/index';
+import { initDevTools } from '../../devtools/index';
 import { unmountComponent } from '../../src/vdom/component';
 
 class StatefulComponent extends Component {
@@ -44,12 +44,6 @@ describe('React Developer Tools integration', () => {
 	// component rendered by that component (domInstanceMap)
 	let instanceMap = new Map();
 	let domInstanceMap = new Map();
-
-	before(() => {
-		// Work around PhantomJS 2.x disallowing replacing the configurable but
-		// non-writable Function.name property
-		_setComponentNameProperty('displayName');
-	});
 
 	beforeEach(() => {
 		container = document.createElement('div');
@@ -169,13 +163,15 @@ describe('React Developer Tools integration', () => {
 	});
 
 	it('exposes the name of functional components', () => {
-		const vnode = h(FunctionalComponent);
-		expect(vnode.nodeName).to.have.property('displayName', 'FunctionalComponent');
+		const node = render(h(FunctionalComponent), container);
+		const instance = instanceMap.get(node);
+		expect(instance.getName()).to.equal('FunctionalComponent');
 	});
 
 	it('exposes a fallback name if the component has no useful name', () => {
-		const vnode = h(() => null);
-		expect(vnode.nodeName).to.have.property('displayName', '(Function.name missing)');
+		const node = render(h(() => h('div')), container);
+		const instance = instanceMap.get(node);
+		expect(instance.getName()).to.equal('(Function.name missing)');
 	});
 
 	// Test handling of DOM children

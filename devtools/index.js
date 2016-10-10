@@ -6,17 +6,6 @@ import { options, Component } from 'preact';
 import { ATTR_KEY } from '../src/constants';
 import { isFunctionalComponent } from '../src/vdom/functional-component';
 
-/** Property on functions used for the component name. */
-let componentNameProperty = 'name';
-
-/**
- * Override the default property on functional component wrappers which
- * the function name is saved to.
- */
-export function _setComponentNameProperty(name) {
-	componentNameProperty = name;
-}
-
 /**
  * Return a ReactElement-compatible object for the current state of a preact
  * component.
@@ -78,7 +67,7 @@ function createReactDOMComponent(node) {
  */
 function typeName(element) {
 	if (typeof element.type === 'function') {
-		return element.type.name;
+		return element.type.displayName || element.type.name;
 	}
 	return element.type;
 }
@@ -199,16 +188,17 @@ function wrapFunctionalComponent(vnode) {
 	const name = vnode.nodeName.name || '(Function.name missing)';
 	const wrappers = functionalComponentWrappers;
 	if (!wrappers.has(originalRender)) {
-		const wrapper = class extends Component {
+		let wrapper = class extends Component {
 			render(props, state, context) {
 				return originalRender(props, context);
 			}
 		};
-		// Function.name is non-writable, but we can replace it using
-		// defineProperty() instead in most browsers.
-		try {
-			Object.defineProperty(wrapper, componentNameProperty, {value: name});
-		} catch (err) {}
+
+		// Expose the original component name. React Dev Tools will use
+		// this property if it exists or fall back to Function.name
+		// otherwise.
+		wrapper.displayName = name;
+
 		wrappers.set(originalRender, wrapper);
 	}
 	vnode.nodeName = wrappers.get(originalRender);
