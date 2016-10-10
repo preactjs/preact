@@ -11,7 +11,8 @@ declare namespace preact {
 	interface PreactHTMLAttributes {
 		dangerouslySetInnerHTML?:DangerouslySetInnerHTML;
 		key?:string;
-		ref?:(el?: Element) => void;
+		defaultValue?:string;
+		ref?:<T,S>(component:Component<T,S>) => void;
 	}
 
 	interface VNode {
@@ -49,6 +50,7 @@ declare namespace preact {
 		state:StateType;
 		props:PropsType & ComponentProps;
 		base:HTMLElement;
+		context: any;
 
 		linkState:(name:string) => void;
 
