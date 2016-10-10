@@ -39,6 +39,7 @@
     "url": "https://github.com/developit/preact.git"
   },
   "files": [
+    "devtools",
     "src",
     "dist",
     "aliases.js",

@@ -1,5 +1,5 @@
 import { h, Component, render } from '../../src/preact';
-import { initDevTools } from '../../devtools/index';
+import { initDevTools } from '../../devtools/devtools';
 import { unmountComponent } from '../../src/vdom/component';
 
 class StatefulComponent extends Component {
