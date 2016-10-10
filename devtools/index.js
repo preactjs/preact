@@ -1,9 +1,10 @@
 /* global __REACT_DEVTOOLS_GLOBAL_HOOK__ */
 
-import options from './options';
-import { ATTR_KEY } from './constants';
-import { isFunctionalComponent } from './vdom/functional-component';
-import { Component } from './component';
+import { options, Component } from 'preact';
+
+// Internal helpers from preact
+import { ATTR_KEY } from '../src/constants';
+import { isFunctionalComponent } from '../src/vdom/functional-component';
 
 /** Property on functions used for the component name. */
 let componentNameProperty = 'name';
