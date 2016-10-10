@@ -74,8 +74,16 @@ declare namespace preact {
 	};
 }
 
+declare namespace preactDevTools {
+	function initDevTools():void;
+}
+
 declare module "preact" {
 	export = preact;
+}
+
+declare module "preact/devtools" {
+	export = preactDevTools;
 }
 
 declare namespace JSX {
