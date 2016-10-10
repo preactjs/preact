@@ -9,13 +9,14 @@
   "dev:main": "dist/preact.dev.js",
   "minified:main": "dist/preact.min.js",
   "scripts": {
-    "clean": "rimraf dist/ $npm_package_aliases_main ${npm_package_aliases_main}.map",
+    "clean": "rimraf dist/ $npm_package_aliases_main ${npm_package_aliases_main}.map devtools.js devtools.js.map",
     "copy-flow-definition": "cp src/preact.js.flow dist/preact.js.flow",
     "copy-typescript-definition": "cp src/preact.d.ts dist/preact.d.ts",
     "build": "npm-run-all --silent clean transpile copy-flow-definition copy-typescript-definition strip optimize minify size",
     "transpile:main": "rollup -c config/rollup.config.js -m ${npm_package_dev_main}.map -f umd -n $npm_package_amdName $npm_package_jsnext_main -o $npm_package_dev_main",
+    "transpile:devtools": "rollup -c config/rollup.config.devtools.js -o devtools.js -m devtools.js.map",
     "transpile:aliases": "rollup -c config/rollup.config.aliases.js -m ${npm_package_aliases_main}.map -f umd -n $npm_package_amdName $npm_package_jsnext_main -o $npm_package_aliases_main",
-    "transpile": "npm-run-all transpile:main transpile:aliases",
+    "transpile": "npm-run-all transpile:main transpile:aliases transpile:devtools",
     "optimize": "uglifyjs $npm_package_dev_main -c conditionals=false,sequences=false,loops=false,join_vars=false,collapse_vars=false --pure-funcs=Object.defineProperty -b width=120,quote_style=3 -o $npm_package_main -p relative --in-source-map ${npm_package_dev_main}.map --source-map ${npm_package_main}.map",
     "minify": "uglifyjs $npm_package_main -c collapse_vars,evaluate,screw_ie8,unsafe,loops=false,keep_fargs=false,pure_getters,unused,dead_code -m -o $npm_package_minified_main -p relative --in-source-map ${npm_package_main}.map --source-map ${npm_package_minified_main}.map",
     "strip": "jscodeshift --run-in-band -s -t config/codemod-strip-tdz.js dist/preact.dev.js && jscodeshift --run-in-band -s -t config/codemod-const.js dist/preact.dev.js",
@@ -25,7 +26,7 @@
     "test:karma": "karma start test/karma.conf.js --single-run",
     "test:mocha:watch": "npm run test:mocha -- --watch",
     "test:karma:watch": "npm run test:karma -- no-single-run",
-    "lint": "eslint src test",
+    "lint": "eslint devtools src test",
     "prepublish": "npm run build",
     "release": "npm run build && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
@@ -38,10 +39,13 @@
     "url": "https://github.com/developit/preact.git"
   },
   "files": [
+    "devtools",
     "src",
     "dist",
     "aliases.js",
     "aliases.js.map",
+    "devtools.js",
+    "devtools.js.map",
     "typings.json"
   ],
   "author": "Jason Miller <jason@developit.ca>",
@@ -57,6 +61,7 @@
     "babel-loader": "^5.3.2",
     "babel-runtime": "^5.8.24",
     "chai": "^3.4.1",
+    "core-js": "^2.4.1",
     "diff": "^3.0.0",
     "eslint": "^3.0.0",
     "eslint-plugin-react": "^6.0.0",

@@ -179,8 +179,11 @@ export function renderComponent(component, opts, mountAll, isChild) {
 	if (!isUpdate || mountAll) {
 		mounts.unshift(component);
 	}
-	else if (!skip && component.componentDidUpdate) {
-		component.componentDidUpdate(previousProps, previousState, previousContext);
+	else if (!skip) {
+		if (component.componentDidUpdate) {
+			component.componentDidUpdate(previousProps, previousState, previousContext);
+		}
+		if (options.afterUpdate) options.afterUpdate(component);
 	}
 
 	let cb = component._renderCallbacks, fn;
@@ -239,6 +242,8 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
  *	@private
  */
 export function unmountComponent(component, remove) {
+	if (options.beforeUnmount) options.beforeUnmount(component);
+
 	// console.log(`${remove?'Removing':'Unmounting'} component: ${component.constructor.name}`);
 	let base = component.base;
 

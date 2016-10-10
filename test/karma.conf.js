@@ -77,6 +77,7 @@ module.exports = function(config) {
 		customLaunchers: sauceLabsLaunchers,
 
 		files: [
+			{ pattern: 'polyfills.js', watched: false },
 			{ pattern: '{browser,shared}/**.js', watched: false }
 		],
 
@@ -107,6 +108,10 @@ module.exports = function(config) {
 				} : [])
 			},
 			resolve: {
+				// The React DevTools integration requires preact as a module
+				// rather than referencing source files inside the module
+				// directly
+				alias: { preact: '../src/preact' },
 				modulesDirectories: [__dirname, 'node_modules']
 			},
 			plugins: [

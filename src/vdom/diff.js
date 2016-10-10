@@ -6,6 +6,7 @@ import { buildComponentFromVNode } from './component';
 import { setAccessor } from '../dom/index';
 import { createNode, collectNode } from '../dom/recycler';
 import { unmountComponent } from './component';
+import options from '../options';
 
 
 /** Diff recursion count, used to track the end of the diff cycle. */
@@ -20,6 +21,7 @@ let isSvgMode = false;
 export function flushMounts() {
 	let c;
 	while ((c=mounts.pop())) {
+		if (options.afterMount) options.afterMount(c);
 		if (c.componentDidMount) c.componentDidMount();
 	}
 }
