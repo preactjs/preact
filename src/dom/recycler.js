@@ -1,3 +1,4 @@
+import { ATTR_KEY } from '../constants';
 import { toLowerCase } from '../util';
 import { removeNode } from './index';
 
