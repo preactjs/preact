@@ -101,9 +101,11 @@ function createReactCompositeComponent(component) {
 		node
 	};
 
-	// React DevTools exposes the `_instance` field of the selected
-	// item in the component tree as `$r` in the console
-	instance._instance = instance;
+	// React DevTools exposes the `_instance` field of the selected item in the
+	// component tree as `$r` in the console.  `_instance` must refer to a
+	// React Component (or compatible) class instance with `props` and `state`
+	// fields and `setState()`, `forceUpdate()` methods.
+	instance._instance = component;
 
 	// If the root node returned by this component instance's render function
 	// was itself a composite component, there will be a `_component` property
