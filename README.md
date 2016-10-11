@@ -329,6 +329,24 @@ class MixedComponent extends Component {
 }
 ```
 
+## Developer Tools
+
+You can inspect and modify the state of your Preact UI components at runtime using the
+[React Developer Tools](https://github.com/facebook/react-devtools) browser extension.
+
+1. Install the [React Developer Tools](https://github.com/facebook/react-devtools) extension
+2. Import the "preact/devtools" module in your app
+3. Reload and go to the 'React' tab in the browser's development tools
+
+
+```js
+import { h, Component, render } from 'preact';
+
+// Enable devtools. You can reduce the size of your app by only including this
+// module in development builds. eg. In Webpack, wrap this with an `if (module.hot) {...}`
+// check.
+require('preact/devtools');
+```
 
 ## License
 
