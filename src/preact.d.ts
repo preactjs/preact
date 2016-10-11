@@ -74,16 +74,13 @@ declare namespace preact {
 	};
 }
 
-declare namespace preactDevTools {
-	function initDevTools():void;
-}
-
 declare module "preact" {
 	export = preact;
 }
 
 declare module "preact/devtools" {
-	export = preactDevTools;
+	// Empty. This module initializes the React Developer Tools integration
+	// when imported.
 }
 
 declare namespace JSX {
