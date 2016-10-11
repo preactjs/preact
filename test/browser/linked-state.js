@@ -26,7 +26,10 @@ describe('linked-state', () => {
 			element.type= 'text';
 			element.value = 'newValue';
 
-			linkFunction({ currentTarget: element });
+			linkFunction({
+				currentTarget: element,
+				target: element
+			});
 
 			expect(TestComponent.prototype.setState).to.have.been.calledOnce;
 			expect(TestComponent.prototype.setState).to.have.been.calledWith({'testStateKey': 'newValue'});
@@ -42,7 +45,10 @@ describe('linked-state', () => {
 			checkboxElement.type= 'checkbox';
 			checkboxElement.checked = true;
 
-			linkFunction({ currentTarget: checkboxElement });
+			linkFunction({
+				currentTarget: checkboxElement,
+				target: checkboxElement
+			});
 
 			expect(TestComponent.prototype.setState).to.have.been.calledOnce;
 			expect(TestComponent.prototype.setState).to.have.been.calledWith({'testStateKey': true});
@@ -53,7 +59,10 @@ describe('linked-state', () => {
 			radioElement.type= 'radio';
 			radioElement.checked = true;
 
-			linkFunction({ currentTarget: radioElement });
+			linkFunction({
+				currentTarget: radioElement,
+				target: radioElement
+			});
 
 			expect(TestComponent.prototype.setState).to.have.been.calledOnce;
 			expect(TestComponent.prototype.setState).to.have.been.calledWith({'testStateKey': true});
@@ -66,7 +75,10 @@ describe('linked-state', () => {
 			element.type= 'text';
 			element.value = 'newValue';
 
-			linkFunction({ currentTarget: element });
+			linkFunction({
+				currentTarget: element,
+				target: element
+			});
 
 			expect(TestComponent.prototype.setState).to.have.been.calledOnce;
 			expect(TestComponent.prototype.setState).to.have.been.calledWith({nested: {state: {key: 'newValue'}}});
