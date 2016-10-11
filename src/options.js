@@ -19,9 +19,7 @@ export default {
 	/** Hook invoked after a component is mounted. */
 	// afterMount(component) { }
 
-	/**
-	 * Hook invoked after the DOM is updated with a component's latest render.
-	 */
+	/** Hook invoked after the DOM is updated with a component's latest render. */
 	// afterUpdate(component) { }
 
 	/** Hook invoked immediately before a component is unmounted. */
