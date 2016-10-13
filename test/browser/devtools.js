@@ -33,7 +33,13 @@ class MultiChild extends Component {
 	}
 }
 
-describe('React Developer Tools integration', () => {
+let describe_ = describe;
+if (!('name' in Function.prototype)) {
+	// Skip these tests under Internet Explorer
+	describe_ = describe.skip;
+}
+
+describe_('React Developer Tools integration', () => {
 	let cleanup;
 	let container;
 	let renderer;
