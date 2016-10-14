@@ -71,6 +71,13 @@ describe('render', () => {
 
 			expect(rendered).to.equal(expected);
 		});
+
+		it('should render SVG elements', () => {
+			let rendered = render(<svg viewBox="0 0 360 360"><use xlinkHref="#foo"></use></svg>),
+				expected = `<svg viewBox="0 0 360 360"><use xlink:href="#foo"></use></svg>`;
+
+			expect(rendered).to.equal(expected);
+		});
 	});
 
 	describe('Functional Components', () => {
