@@ -49,7 +49,7 @@ let shallowRender = (vnode, context) => renderToString(vnode, context, SHALLOW);
 
 
 /** The default export is an alias of `render()`. */
-export default function renderToString(vnode, context, opts, inner) {
+export default function renderToString(vnode, context, opts, inner, isSvgMode) {
 	let { nodeName, attributes, children } = vnode || EMPTY,
 		isComponent = false;
 	context = context || {};
@@ -117,6 +117,9 @@ export default function renderToString(vnode, context, opts, inner) {
 				if (attributes['class']) continue;
 				name = 'class';
 			}
+			else if (isSvgMode && name.match(/^xlink\:?(.+)/)) {
+				name = name.toLowerCase().replace(/^xlink\:?(.+)/, 'xlink:$1')
+			}
 
 			if (name==='class' && v && typeof v==='object') {
 				v = hashToClassName(v);
@@ -169,7 +172,7 @@ export default function renderToString(vnode, context, opts, inner) {
 		for (let i=0; i<len; i++) {
 			let child = children[i];
 			if (!falsey(child)) {
-				let ret = renderToString(child, context, opts, true);
+				let ret = renderToString(child, context, opts, true, nodeName==='svg');
 				if (!hasLarge && pretty && isLargeString(ret)) hasLarge = true;
 				pieces.push(ret);
 			}
