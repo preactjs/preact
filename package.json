@@ -63,7 +63,7 @@
     "chai": "^3.4.1",
     "core-js": "^2.4.1",
     "diff": "^3.0.0",
-    "eslint": "^3.0.0",
+    "eslint": "^3.8.0",
     "eslint-plugin-react": "^6.0.0",
     "gzip-size-cli": "^1.0.0",
     "isparta-loader": "^2.0.0",
