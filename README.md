@@ -9,6 +9,7 @@ As one would expect coming from React, Components are simple building blocks for
 
 ### :information_desk_person: Full documentation is available at the [Preact Website ➞](https://preactjs.com)
 
+[![CDNJS](https://img.shields.io/cdnjs/v/preact.svg)](https://cdnjs.com/libraries/preact)
 [![npm](https://img.shields.io/npm/v/preact.svg)](http://npm.im/preact)
 [![travis](https://travis-ci.org/developit/preact.svg?branch=master)](https://travis-ci.org/developit/preact)
 [![gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/developit/preact)
