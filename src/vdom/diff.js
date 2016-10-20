@@ -54,7 +54,9 @@ function idiff(dom, vnode, context, mountAll) {
 	if (isString(vnode)) {
 		if (dom) {
 			if (dom instanceof Text && dom.parentNode) {
-				dom.nodeValue = vnode;
+				if (dom.nodeValue!=vnode) {
+					dom.nodeValue = vnode;
+				}
 				return dom;
 			}
 			recollectNodeTree(dom);
@@ -68,7 +70,8 @@ function idiff(dom, vnode, context, mountAll) {
 
 	let out = dom,
 		nodeName = vnode.nodeName,
-		prevSvgMode = isSvgMode;
+		prevSvgMode = isSvgMode,
+		vchildren = vnode.children;
 
 	if (!isString(nodeName)) {
 		nodeName = String(nodeName);
@@ -88,11 +91,13 @@ function idiff(dom, vnode, context, mountAll) {
 	}
 
 	// fast-path for elements containing a single TextNode:
-	if (vnode.children && vnode.children.length===1 && typeof vnode.children[0]==='string' && out.childNodes.length===1 && out.firstChild instanceof Text) {
-		out.firstChild.nodeValue = vnode.children[0];
+	if (vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && out.childNodes.length===1 && out.firstChild instanceof Text) {
+		if (out.firstChild.nodeValue!=vchildren[0]) {
+			out.firstChild.nodeValue = vchildren[0];
+		}
 	}
-	else if (vnode.children && vnode.children.length || out.firstChild) {
-		innerDiffNode(out, vnode.children, context, mountAll);
+	else if (vchildren && vchildren.length || out.firstChild) {
+		innerDiffNode(out, vchildren, context, mountAll);
 	}
 
 	let props = out[ATTR_KEY];
