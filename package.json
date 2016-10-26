@@ -92,7 +92,7 @@
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
     "uglify-js": "^2.7.0",
-    "webpack": "^1.13.1"
+    "webpack": "^1.13.3"
   },
   "greenkeeper": {
     "ignore": [
