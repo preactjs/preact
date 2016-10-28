@@ -435,7 +435,7 @@ describe('Components', () => {
 			expect(Inner.prototype.componentDidMount).to.have.been.calledOnce;
 			expect(Inner.prototype.componentWillMount).to.have.been.calledBefore(Inner.prototype.componentDidMount);
 
-			root = render(<asdf />, scratch, root);
+			render(<asdf />, scratch, root);
 
 			expect(Inner.prototype.componentWillUnmount).to.have.been.calledOnce;
 			expect(Inner.prototype.componentDidUnmount).to.have.been.calledOnce;
