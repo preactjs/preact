@@ -154,11 +154,11 @@ export function renderComponent(component, opts, mountAll, isChild) {
 			let baseParent = initialBase.parentNode;
 			if (baseParent && base!==baseParent) {
 				baseParent.replaceChild(base, initialBase);
-			}
 
-			if (!cbase && !toUnmount && component._parentComponent) {
-				initialBase._component = null;
-				recollectNodeTree(initialBase);
+				if (!toUnmount) {
+					initialBase._component = null;
+					recollectNodeTree(initialBase);
+				}
 			}
 		}
 
@@ -223,7 +223,11 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 		}
 
 		c = createComponent(vnode.nodeName, props, context);
-		if (dom && !c.nextBase) c.nextBase = dom;
+		if (dom && !c.nextBase) {
+			c.nextBase = dom;
+			// passing dom/oldDom as nextBase will recycle it if unused, so bypass recycling on L241:
+			oldDom = null;
+		}
 		setComponentProps(c, props, SYNC_RENDER, context, mountAll);
 		dom = c.base;
 

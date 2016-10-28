@@ -689,8 +689,7 @@ describe('Components', () => {
 
 			expect(C1.prototype.componentWillMount, 'unmount innermost w/ intermediary div, C1').not.to.have.been.called;
 			expect(C2.prototype.componentDidUnmount, 'unmount innermost w/ intermediary div, C2 ummount').not.to.have.been.called;
-			// @TODO this was just incorrect?
-			// expect(C2.prototype.componentWillMount, 'unmount innermost w/ intermediary div, C2').not.to.have.been.called;
+			expect(C2.prototype.componentWillMount, 'unmount innermost w/ intermediary div, C2').not.to.have.been.called;
 			expect(C3.prototype.componentDidUnmount, 'unmount innermost w/ intermediary div, C3').to.have.been.calledOnce;
 
 			reset();
