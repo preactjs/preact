@@ -2,7 +2,7 @@
 <img alt="Preact" title="Preact" src="https://cdn.rawgit.com/developit/b4416d5c92b743dbaec1e68bc4c27cda/raw/3235dc508f7eb834ebf48418aea212a05df13db1/preact-logo-trans.svg" width="550">
 </a>
 
-**Preact is a fast, `3kb` alternative to React, with the same ES2015 API.**
+**Preact is a fast, `3kB` alternative to React, with the same ES2015 API.**
 
 Preact retains a large amount of compatibility with React, but only the modern ([ES6 Classes] and [stateless functional components](https://facebook.github.io/react/blog/2015/10/07/react-v0.14.html#stateless-functional-components)) interfaces.
 As one would expect coming from React, Components are simple building blocks for composing a User Interface.
