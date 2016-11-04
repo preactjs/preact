@@ -16,6 +16,11 @@ var sauceLabsLaunchers = {
 		browserName: 'firefox',
 		platform: 'Windows 10'
 	},
+	sl_safari: {
+		base: 'SauceLabs',
+		browserName: 'safari',
+		platform: 'OS X 10.11'
+	},
 	sl_ie_11: {
 		base: 'SauceLabs',
 		browserName: 'internet explorer',
