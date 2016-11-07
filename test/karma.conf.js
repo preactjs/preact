@@ -1,9 +1,10 @@
 /*eslint no-var:0, object-shorthand:0 */
 
 var coverage = String(process.env.COVERAGE)!=='false',
+	ci = String(process.env.CI).match(/^(1|true)$/gi),
 	pullRequest = !String(process.env.TRAVIS_PULL_REQUEST).match(/^(0|false|undefined)$/gi),
 	realBrowser = String(process.env.BROWSER).match(/^(1|true)$/gi),
-	sauceLabs = realBrowser && !pullRequest,
+	sauceLabs = realBrowser && ci && !pullRequest,
 	performance = !coverage && !realBrowser && String(process.env.PERFORMANCE)!=='false',
 	webpack = require('webpack');
 
