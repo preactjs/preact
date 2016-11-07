@@ -247,7 +247,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
  *	@param {Component} component	The Component instance to unmount
  *	@private
  */
-export function unmountComponent(component, remove) {
+export function unmountComponent(component, remove, isChild) {
 	if (options.beforeUnmount) options.beforeUnmount(component);
 
 	// console.log(`${remove?'Removing':'Unmounting'} component: ${component.constructor.name}`);
@@ -260,11 +260,11 @@ export function unmountComponent(component, remove) {
 	component.base = null;
 
 	// recursively tear down & recollect high-order component children:
-	let inner = component._component;
-	if (inner) {
-		unmountComponent(inner, remove);
+	if (component._component) {
+		unmountComponent(component._component, false, true);
 	}
-	else if (base) {
+
+	if (base && !isChild) {
 		if (base[ATTR_KEY] && base[ATTR_KEY].ref) base[ATTR_KEY].ref(null);
 
 		component.nextBase = base;
@@ -273,7 +273,8 @@ export function unmountComponent(component, remove) {
 			removeNode(base);
 			collectComponent(component);
 		}
-		removeOrphanedChildren(base.childNodes, !remove);
+
+		removeOrphanedChildren(base.childNodes, true);
 	}
 
 	if (component.__ref) component.__ref(null);
