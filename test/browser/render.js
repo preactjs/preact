@@ -1,6 +1,6 @@
 /* global DISABLE_FLAKEY */
 
-import { h, render } from '../../src/preact';
+import { h, render, Component } from '../../src/preact';
 /** @jsx h */
 
 function getAttributes(node) {
@@ -94,7 +94,7 @@ describe('render()', () => {
 			<div anull="anull" aundefined="aundefined" afalse="afalse" anan="aNaN" a0="a0" />
 		), scratch);
 
-		root = render((
+		render((
 			<div anull={null} aundefined={undefined} afalse={false} anan={NaN} a0={0} />
 		), scratch, root);
 
@@ -105,7 +105,7 @@ describe('render()', () => {
 
 		scratch.innerHTML = '';
 
-		root = render((
+		render((
 			<div anull={null} aundefined={undefined} afalse={false} anan={NaN} a0={0} />
 		), scratch);
 
@@ -362,7 +362,7 @@ describe('render()', () => {
 
 		expect(scratch).to.have.property('innerHTML', `<div>a<strong>b</strong></div>`);
 
-		root = render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, root);
+		render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, root);
 
 		expect(scratch.innerHTML).to.equal('<div>'+html+'</div>');
 	});
