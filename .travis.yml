@@ -9,13 +9,19 @@ cache:
   directories:
     - node_modules
 
+# Make chrome browser available for testing
+before_install:
+  - export CHROME_BIN=chromium-browser
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+
 install:
   - npm install
 
 script:
   - npm run build
   - npm run test
-  - SAUCELABS=true COVERAGE=false FLAKEY=false PERFORMANCE=false npm run test:karma
+  - BROWSER=true COVERAGE=false FLAKEY=false PERFORMANCE=false npm run test:karma
 
 # Necessary to compile native modules for io.js v3 or Node.js v4
 env:
