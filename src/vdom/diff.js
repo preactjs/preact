@@ -77,13 +77,10 @@ function idiff(dom, vnode, context, mountAll) {
 	}
 
 	let out = dom,
-		nodeName = vnode.nodeName,
+		nodeName = String(vnode.nodeName),
 		prevSvgMode = isSvgMode,
 		vchildren = vnode.children;
 
-	if (!isString(nodeName)) {
-		nodeName = String(nodeName);
-	}
 
 	isSvgMode = nodeName==='svg' ? true : nodeName==='foreignObject' ? false : isSvgMode;
 
