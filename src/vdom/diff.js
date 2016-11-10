@@ -17,6 +17,8 @@ export let diffLevel = 0;
 
 let isSvgMode = false;
 
+let hydrating = false;
+
 
 export function flushMounts() {
 	let c;
@@ -34,10 +36,16 @@ export function flushMounts() {
  *	@private
  */
 export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
-	if (!diffLevel++) isSvgMode = parent instanceof SVGElement;
+	if (!diffLevel++) {
+		isSvgMode = parent instanceof SVGElement;
+		hydrating = dom && !(ATTR_KEY in dom);
+	}
 	let ret = idiff(dom, vnode, context, mountAll);
 	if (parent && ret.parentNode!==parent) parent.appendChild(ret);
-	if (!--diffLevel && !componentRoot) flushMounts();
+	if (!--diffLevel) {
+		hydrating = false;
+		if (!componentRoot) flushMounts();
+	}
 	return ret;
 }
 
@@ -90,23 +98,26 @@ function idiff(dom, vnode, context, mountAll) {
 		recollectNodeTree(dom);
 	}
 
-	// fast-path for elements containing a single TextNode:
-	if (vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && out.childNodes.length===1 && out.firstChild instanceof Text) {
-		if (out.firstChild.nodeValue!=vchildren[0]) {
-			out.firstChild.nodeValue = vchildren[0];
-		}
-	}
-	else if (vchildren && vchildren.length || out.firstChild) {
-		innerDiffNode(out, vchildren, context, mountAll);
-	}
 
-	let props = out[ATTR_KEY];
+	let fc = out.firstChild,
+		props = out[ATTR_KEY];
 	if (!props) {
 		out[ATTR_KEY] = props = {};
 		for (let a=out.attributes, i=a.length; i--; ) props[a[i].name] = a[i].value;
 	}
 
 	diffAttributes(out, vnode.attributes, props);
+
+
+	// fast-path for elements containing a single TextNode:
+	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc instanceof Text && !fc.nextSibling) {
+		if (fc.nodeValue!=vchildren[0]) {
+			fc.nodeValue = vchildren[0];
+		}
+	}
+	else if (vchildren && vchildren.length || fc) {
+		innerDiffNode(out, vchildren, context, mountAll);
+	}
 
 	if (originalAttributes && typeof originalAttributes.ref==='function') {
 		(props.ref = originalAttributes.ref)(out);
@@ -138,7 +149,7 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 				keyedLen++;
 				keyed[key] = child;
 			}
-			else {
+			else if (hydrating || child[ATTR_KEY] || child instanceof Text) {
 				children[childrenLen++] = child;
 			}
 		}
