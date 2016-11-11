@@ -103,9 +103,7 @@ function idiff(dom, vnode, context, mountAll, options) {
 	let props = out[ATTR_KEY];
 	if (!props) {
 		out[ATTR_KEY] = props = {};
-		for (let a=out.attributes, i=a.length; i--; ) {
-			props[a[i].name] = a[i].value;
-		}
+		for (let a=out.attributes, i=a.length; i--; ) props[a[i].name] = a[i].value;
 	}
 
 	if (vnode && vnode.attributes) {
