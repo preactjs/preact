@@ -33,16 +33,16 @@ export function flushMounts() {
  *	@returns {Element} dom			The created/mutated element
  *	@private
  */
-export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
+export function diff(dom, vnode, context, mountAll, parent, componentRoot, options) {
 	if (!diffLevel++) isSvgMode = parent instanceof SVGElement;
-	let ret = idiff(dom, vnode, context, mountAll);
+	let ret = idiff(dom, vnode, context, mountAll, options || {});
 	if (parent && ret.parentNode!==parent) parent.appendChild(ret);
 	if (!--diffLevel && !componentRoot) flushMounts();
 	return ret;
 }
 
 
-function idiff(dom, vnode, context, mountAll) {
+function idiff(dom, vnode, context, mountAll, options) {
 	let originalAttributes = vnode && vnode.attributes;
 
 	while (isFunctionalComponent(vnode)) {
@@ -97,13 +97,23 @@ function idiff(dom, vnode, context, mountAll) {
 		}
 	}
 	else if (vchildren && vchildren.length || out.firstChild) {
-		innerDiffNode(out, vchildren, context, mountAll);
+		innerDiffNode(out, vchildren, context, mountAll, options);
 	}
 
 	let props = out[ATTR_KEY];
 	if (!props) {
 		out[ATTR_KEY] = props = {};
-		for (let a=out.attributes, i=a.length; i--; ) props[a[i].name] = a[i].value;
+		for (let a=out.attributes, i=a.length; i--; ) {
+			props[a[i].name] = a[i].value;
+		}
+	}
+
+	if (vnode && vnode.attributes) {
+		for (let k in vnode.attributes) {
+			vnode.attributes[k] = options.attributeValueHook
+				? options.attributeValueHook(k, vnode.attributes[k])
+				: vnode.attributes[k];
+		}
 	}
 
 	diffAttributes(out, vnode.attributes, props);
@@ -119,7 +129,7 @@ function idiff(dom, vnode, context, mountAll) {
 
 
 /** Apply child and attribute changes between a VNode and a DOM Node to the DOM. */
-function innerDiffNode(dom, vchildren, context, mountAll) {
+function innerDiffNode(dom, vchildren, context, mountAll, options) {
 	let originalChildren = dom.childNodes,
 		children = [],
 		keyed = {},
@@ -181,7 +191,7 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 			}
 
 			// morph the matched/found/created DOM child to match vchild (deep)
-			child = idiff(child, vchild, context, mountAll);
+			child = idiff(child, vchild, context, mountAll, options);
 
 			if (child && child!==dom && child!==originalChildren[i]) {
 				dom.insertBefore(child, originalChildren[i] || null);

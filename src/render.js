@@ -15,6 +15,6 @@ import { diff } from './vdom/diff';
  *	const Thing = ({ name }) => <span>{ name }</span>;
  *	render(<Thing name="one" />, document.querySelector('#foo'));
  */
-export function render(vnode, parent, merge) {
-	return diff(merge, vnode, {}, false, parent);
+export function render(vnode, parent, merge, options) {
+	return diff(merge, vnode, {}, false, parent, false, options);
 }
