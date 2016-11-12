@@ -11,7 +11,12 @@ export function collectNode(node) {
 
 	if (node instanceof Element) {
 		if (node.nodeName === 'IMG') {
-			node.src = node[ATTR_KEY].src = '';
+			node.removeAttribute ('src');
+			delete node[ATTR_KEY].src;
+		}
+		if (node.nodeName === 'IMAGE') {
+			node.removeAttributeNS ('http://www.w3.org/1999/xlink', 'href');
+			delete node[ATTR_KEY].xlinkhref;
 		}
 
 		node._component = node._componentConstructor = null;
