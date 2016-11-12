@@ -41,7 +41,7 @@ export function setAccessor(node, name, old, value, isSvg) {
 		if (value && typeof value==='object') {
 			if (!isString(old)) {
 				for (let i in old)
-					if (!(i in value) || value[i] == null || value[i] === false) node.style[i] = '';
+					if (value[i] == null || value[i] === false) node.style[i] = '';
 			}
 			for (let i in value) {
 				node.style[i] = typeof value[i]==='number' && !NON_DIMENSION_PROPS[i] ? (value[i]+'px') : value[i];
