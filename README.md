@@ -39,6 +39,7 @@ As one would expect coming from React, Components are simple building blocks for
 - [**Preact Coffeescript**](https://github.com/crisward/preact-coffee)
 - [**GuriVR**](https://gurivr.com) _([Github Project](https://github.com/opennewslabs/guri-vr))_
 - [**V2EX Preact**](https://github.com/yanni4night/v2ex-preact)
+- [**BigWebQuiz**](https://bigwebquiz.com/) _([Github Project](https://github.com/jakearchibald/big-web-quiz))_
 
 ## Libraries & Add-ons
 
