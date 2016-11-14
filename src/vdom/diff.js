@@ -60,16 +60,19 @@ function idiff(dom, vnode, context, mountAll) {
 	if (vnode==null) vnode = '';
 
 	if (isString(vnode)) {
-		if (dom) {
-			if (dom instanceof Text && dom.parentNode) {
-				if (dom.nodeValue!=vnode) {
-					dom.nodeValue = vnode;
-				}
-				return dom;
+
+		if (dom && dom instanceof Text) {
+			if (dom.nodeValue!=vnode) {
+				dom.nodeValue = vnode;
 			}
-			recollectNodeTree(dom);
 		}
-		return document.createTextNode(vnode);
+		else {
+			if (dom) recollectNodeTree(dom);
+			dom = document.createTextNode(vnode);
+		}
+		dom[ATTR_KEY] = true;
+		return dom;
+
 	}
 
 	if (isFunction(vnode.nodeName)) {
@@ -141,12 +144,13 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 	if (len) {
 		for (let i=0; i<len; i++) {
 			let child = originalChildren[i],
-				key = vlen ? ((c = child._component) ? c.__key : (c = child[ATTR_KEY]) ? c.key : null) : null;
-			if (key || key===0) {
+				props = child[ATTR_KEY],
+				key = vlen ? ((c = child._component) ? c.__key : props ? props.key : null) : null;
+			if (key!=null) {
 				keyedLen++;
 				keyed[key] = child;
 			}
-			else if (hydrating || child[ATTR_KEY] || child instanceof Text) {
+			else if (hydrating || props) {
 				children[childrenLen++] = child;
 			}
 		}
