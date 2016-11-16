@@ -10,8 +10,8 @@
   "minified:main": "dist/preact.min.js",
   "scripts": {
     "clean": "rimraf dist/ aliases.js aliases.js.map  devtools.js devtools.js.map",
-    "copy-flow-definition": "copyfiles src/preact.js.flow dist/preact.js.flow",
-    "copy-typescript-definition": "copyfiles src/preact.d.ts dist/preact.d.ts",
+    "copy-flow-definition": "copyfiles -f src/preact.js.flow dist",
+    "copy-typescript-definition": "copyfiles -f src/preact.d.ts dist",
     "build": "npm-run-all --silent clean transpile copy-flow-definition copy-typescript-definition strip optimize minify size",
     "transpile:main": "rollup -c config/rollup.config.js -m dist/preact.dev.js.map -f umd -n preact src/preact.js -o dist/preact.dev.js",
     "transpile:devtools": "rollup -c config/rollup.config.devtools.js -o devtools.js -m devtools.js.map",
@@ -34,7 +34,7 @@
   "eslintConfig": {
     "extends": "./config/eslint-config.js"
   },
-  "typings": "./src/preact.d.ts",
+  "typings": "./dist/preact.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/developit/preact.git"
