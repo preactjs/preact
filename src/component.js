@@ -44,6 +44,23 @@ extend(Component.prototype, {
 	// 	return true;
 	// },
 
+	/** Sets a `requestIdleCallback` id on the component. If there are
+   * repeated calls to render the component (and the component is set to render
+   * asynchronously), the existing rIC callback will be cancelled using this id.
+   *
+   * @private
+   */
+  set renderId (id) {
+    this._id = id;
+  },
+
+  /** Gets the stored `requestIdleCallback` id.
+   *
+   * @private
+   */
+  get renderId () {
+    return this._id || null;
+  },
 
 	/** Returns a function that sets a state property when called.
 	 *	Calling linkState() repeatedly with the same arguments returns a cached link function.
