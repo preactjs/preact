@@ -50,17 +50,17 @@ extend(Component.prototype, {
    *
    * @private
    */
-  set renderId (id) {
-    this._id = id;
-  },
+	set renderId (id) {
+		this._id = id;
+	},
 
   /** Gets the stored `requestIdleCallback` id.
    *
    * @private
    */
-  get renderId () {
-    return this._id || null;
-  },
+	get renderId () {
+		return this._id || null;
+	},
 
 	/** Returns a function that sets a state property when called.
 	 *	Calling linkState() repeatedly with the same arguments returns a cached link function.
