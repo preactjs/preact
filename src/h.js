@@ -17,7 +17,7 @@ const stack = [];
 export function h(nodeName, attributes) {
 	let children = [],
 		lastSimple, child, simple, i;
-	for (i=arguments.length; i-- > 2; ) {
+	for (i = arguments.length; i-- > 2;) {
 		stack.push(arguments[i]);
 	}
 	if (attributes && attributes.children) {
