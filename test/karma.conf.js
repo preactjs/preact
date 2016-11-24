@@ -1,8 +1,11 @@
 /*eslint no-var:0, object-shorthand:0 */
 
 var coverage = String(process.env.COVERAGE)!=='false',
-	sauceLabs = String(process.env.SAUCELABS).match(/^(1|true)$/gi) && !String(process.env.TRAVIS_PULL_REQUEST).match(/^(1|true)$/gi),
-	performance = !coverage && !sauceLabs && String(process.env.PERFORMANCE)!=='false',
+	ci = String(process.env.CI).match(/^(1|true)$/gi),
+	pullRequest = !String(process.env.TRAVIS_PULL_REQUEST).match(/^(0|false|undefined)$/gi),
+	realBrowser = String(process.env.BROWSER).match(/^(1|true)$/gi),
+	sauceLabs = realBrowser && ci && !pullRequest,
+	performance = !coverage && !realBrowser && String(process.env.PERFORMANCE)!=='false',
 	webpack = require('webpack');
 
 var sauceLabsLaunchers = {
@@ -46,9 +49,18 @@ var sauceLabsLaunchers = {
 	}
 };
 
+var travisLaunchers = {
+	chrome_travis: {
+		base: 'Chrome',
+		flags: ['--no-sandbox']
+	}
+};
+
+var localBrowsers = realBrowser ? Object.keys(travisLaunchers) : ['PhantomJS'];
+
 module.exports = function(config) {
 	config.set({
-		browsers: sauceLabs ? Object.keys(sauceLabsLaunchers) : ['PhantomJS'],
+		browsers: sauceLabs ? Object.keys(sauceLabsLaunchers) : localBrowsers,
 
 		frameworks: ['source-map-support', 'mocha', 'chai-sinon'],
 
@@ -86,7 +98,7 @@ module.exports = function(config) {
 		// 	startConnect: false
 		// },
 
-		customLaunchers: sauceLabsLaunchers,
+		customLaunchers: sauceLabs ? sauceLabsLaunchers : travisLaunchers,
 
 		files: [
 			{ pattern: 'polyfills.js', watched: false },
