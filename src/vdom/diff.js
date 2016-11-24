@@ -195,8 +195,13 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 			// morph the matched/found/created DOM child to match vchild (deep)
 			child = idiff(child, vchild, context, mountAll);
 
-			if (child && child!==dom && child!==originalChildren[i]) {
-				dom.insertBefore(child, originalChildren[i] || null);
+			if (child && child!==dom) {
+				if (i>=len) {
+					dom.appendChild(child);
+				}
+				else if (child!==originalChildren[i]) {
+					dom.insertBefore(child, originalChildren[i] || null);
+				}
 			}
 		}
 	}
