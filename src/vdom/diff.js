@@ -60,7 +60,6 @@ function idiff(dom, vnode, context, mountAll) {
 	if (vnode==null) vnode = '';
 
 	if (isString(vnode)) {
-
 		if (dom && dom instanceof Text) {
 			if (dom.nodeValue!=vnode) {
 				dom.nodeValue = vnode;
@@ -95,6 +94,7 @@ function idiff(dom, vnode, context, mountAll) {
 		// move children into the replacement node
 		while (dom.firstChild) out.appendChild(dom.firstChild);
 		// reclaim element nodes
+		if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
 		recollectNodeTree(dom);
 	}
 
