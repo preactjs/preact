@@ -3,7 +3,7 @@ import { isString, isFunction } from '../util';
 import { isSameNodeType, isNamedNode } from './index';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
-import { setAccessor } from '../dom/index';
+import { setAccessor, removeNode } from '../dom/index';
 import { createNode, collectNode } from '../dom/recycler';
 import { unmountComponent } from './component';
 import options from '../options';
@@ -200,6 +200,9 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 					dom.appendChild(child);
 				}
 				else if (child!==originalChildren[i]) {
+					if (child===originalChildren[i+1]) {
+						removeNode(originalChildren[i]);
+					}
 					dom.insertBefore(child, originalChildren[i] || null);
 				}
 			}
