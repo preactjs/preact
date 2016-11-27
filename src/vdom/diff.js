@@ -215,20 +215,13 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 	}
 
 	// remove orphaned children
-	if (min<childrenLen) {
-		removeOrphanedChildren(children);
+	while (min<=childrenLen) {
+		child = children[childrenLen--];
+		if (child) recollectNodeTree(child);
 	}
 }
 
 
-/** Reclaim children that were unreferenced in the desired VTree */
-export function removeOrphanedChildren(children, unmountOnly) {
-	for (let i=children.length; i--; ) {
-		if (children[i]) {
-			recollectNodeTree(children[i], unmountOnly);
-		}
-	}
-}
 
 
 /** Reclaim an entire tree of nodes, starting at the root. */
@@ -248,9 +241,8 @@ export function recollectNodeTree(node, unmountOnly) {
 			collectNode(node);
 		}
 
-		if (node.childNodes && node.childNodes.length) {
-			removeOrphanedChildren(node.childNodes, unmountOnly);
-		}
+		let c;
+		while ((c=node.lastChild)) recollectNodeTree(c, unmountOnly);
 	}
 }
 
