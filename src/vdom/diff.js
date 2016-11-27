@@ -110,7 +110,7 @@ function idiff(dom, vnode, context, mountAll) {
 
 
 	// fast-path for elements containing a single TextNode:
-	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc instanceof Text && !fc.nextSibling) {
+	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc && fc instanceof Text && !fc.nextSibling) {
 		if (fc.nodeValue!=vchildren[0]) {
 			fc.nodeValue = vchildren[0];
 		}
