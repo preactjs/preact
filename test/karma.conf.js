@@ -70,14 +70,11 @@ module.exports = function(config) {
 		),
 
 		coverageReporter: {
+			dir: __dirname+'/../coverage',
 			reporters: [
-				{
-					type: 'text-summary'
-				},
-				{
-					type: 'html',
-					dir: __dirname+'/../coverage'
-				}
+				{ type: 'text-summary' },
+				{ type: 'html' },
+				{ type: 'lcovonly', subdir: '.', file: 'lcov.info' }
 			]
 		},
 
