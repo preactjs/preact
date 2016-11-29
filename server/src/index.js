@@ -59,7 +59,7 @@ export default function renderToString(vnode, context, opts, inner) {
 		indentChar = typeof pretty==='string' ? pretty : '\t';
 
 	if (vnode==null) {
-		return '<!---->';
+		return '';
 	}
 
 	// #text nodes
