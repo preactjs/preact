@@ -15,8 +15,9 @@ export const mounts = [];
 /** Diff recursion count, used to track the end of the diff cycle. */
 export let diffLevel = 0;
 
-let isSvgMode = false;
+const svgNamespace = "http://www.w3.org/2000/svg";
 
+let isSvgMode = false;
 
 export function flushMounts() {
 	let c;
@@ -34,7 +35,7 @@ export function flushMounts() {
  *	@private
  */
 export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
-	if (!diffLevel++) isSvgMode = parent instanceof SVGElement;
+	if (!diffLevel++) isSvgMode = parent && parent.namespaceURI === svgNamespace;
 	let ret = idiff(dom, vnode, context, mountAll);
 	if (parent && ret.parentNode!==parent) parent.appendChild(ret);
 	if (!--diffLevel && !componentRoot) flushMounts();
