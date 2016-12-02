@@ -186,10 +186,6 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 						break;
 					}
 				}
-				if (!child && min<childrenLen && isFunction(vchild.nodeName) && mountAll) {
-					child = children[min];
-					children[min++] = undefined;
-				}
 			}
 
 			// morph the matched/found/created DOM child to match vchild (deep)
