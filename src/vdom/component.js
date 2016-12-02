@@ -115,11 +115,11 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		if (isFunction(childComponent)) {
 			// set up high order component link
 
+			let inst = initialChildComponent,
+				childProps = getNodeProps(rendered),
+				childKey = childProps.key;
 
-			inst = initialChildComponent;
-			let childProps = getNodeProps(rendered);
-
-			if (inst && inst.constructor===childComponent) {
+			if (inst && inst.constructor===childComponent && (!childKey || inst.__key===childKey)) {
 				setComponentProps(inst, childProps, SYNC_RENDER, context);
 			}
 			else {
