@@ -3,7 +3,7 @@ import { isString, isFunction } from '../util';
 import { isSameNodeType, isNamedNode } from './index';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
-import { setAccessor } from '../dom/index';
+import { setAccessor, removeNode } from '../dom/index';
 import { createNode, collectNode } from '../dom/recycler';
 import { unmountComponent } from './component';
 import options from '../options';
@@ -16,6 +16,8 @@ export const mounts = [];
 export let diffLevel = 0;
 
 let isSvgMode = false;
+
+let hydrating = false;
 
 
 export function flushMounts() {
@@ -34,10 +36,16 @@ export function flushMounts() {
  *	@private
  */
 export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
-	if (!diffLevel++) isSvgMode = parent instanceof SVGElement;
+	if (!diffLevel++) {
+		isSvgMode = parent instanceof SVGElement;
+		hydrating = dom && !(ATTR_KEY in dom);
+	}
 	let ret = idiff(dom, vnode, context, mountAll);
 	if (parent && ret.parentNode!==parent) parent.appendChild(ret);
-	if (!--diffLevel && !componentRoot) flushMounts();
+	if (!--diffLevel) {
+		hydrating = false;
+		if (!componentRoot) flushMounts();
+	}
 	return ret;
 }
 
@@ -52,16 +60,18 @@ function idiff(dom, vnode, context, mountAll) {
 	if (vnode==null) vnode = '';
 
 	if (isString(vnode)) {
-		if (dom) {
-			if (dom instanceof Text && dom.parentNode) {
-				if (dom.nodeValue!=vnode) {
-					dom.nodeValue = vnode;
-				}
-				return dom;
+		if (dom && dom instanceof Text) {
+			if (dom.nodeValue!=vnode) {
+				dom.nodeValue = vnode;
 			}
-			recollectNodeTree(dom);
 		}
-		return document.createTextNode(vnode);
+		else {
+			if (dom) recollectNodeTree(dom);
+			dom = document.createTextNode(vnode);
+		}
+		dom[ATTR_KEY] = true;
+		return dom;
+
 	}
 
 	if (isFunction(vnode.nodeName)) {
@@ -69,13 +79,10 @@ function idiff(dom, vnode, context, mountAll) {
 	}
 
 	let out = dom,
-		nodeName = vnode.nodeName,
+		nodeName = String(vnode.nodeName),
 		prevSvgMode = isSvgMode,
 		vchildren = vnode.children;
 
-	if (!isString(nodeName)) {
-		nodeName = String(nodeName);
-	}
 
 	isSvgMode = nodeName==='svg' ? true : nodeName==='foreignObject' ? false : isSvgMode;
 
@@ -87,26 +94,30 @@ function idiff(dom, vnode, context, mountAll) {
 		// move children into the replacement node
 		while (dom.firstChild) out.appendChild(dom.firstChild);
 		// reclaim element nodes
+		if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
 		recollectNodeTree(dom);
 	}
 
-	// fast-path for elements containing a single TextNode:
-	if (vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && out.childNodes.length===1 && out.firstChild instanceof Text) {
-		if (out.firstChild.nodeValue!=vchildren[0]) {
-			out.firstChild.nodeValue = vchildren[0];
-		}
-	}
-	else if (vchildren && vchildren.length || out.firstChild) {
-		innerDiffNode(out, vchildren, context, mountAll);
-	}
 
-	let props = out[ATTR_KEY];
+	let fc = out.firstChild,
+		props = out[ATTR_KEY];
 	if (!props) {
 		out[ATTR_KEY] = props = {};
 		for (let a=out.attributes, i=a.length; i--; ) props[a[i].name] = a[i].value;
 	}
 
 	diffAttributes(out, vnode.attributes, props);
+
+
+	// fast-path for elements containing a single TextNode:
+	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc && fc instanceof Text && !fc.nextSibling) {
+		if (fc.nodeValue!=vchildren[0]) {
+			fc.nodeValue = vchildren[0];
+		}
+	}
+	else if (vchildren && vchildren.length || fc) {
+		innerDiffNode(out, vchildren, context, mountAll);
+	}
 
 	if (originalAttributes && typeof originalAttributes.ref==='function') {
 		(props.ref = originalAttributes.ref)(out);
@@ -133,12 +144,13 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 	if (len) {
 		for (let i=0; i<len; i++) {
 			let child = originalChildren[i],
-				key = vlen ? ((c = child._component) ? c.__key : (c = child[ATTR_KEY]) ? c.key : null) : null;
-			if (key || key===0) {
+				props = child[ATTR_KEY],
+				key = vlen ? ((c = child._component) ? c.__key : props ? props.key : null) : null;
+			if (key!=null) {
 				keyedLen++;
 				keyed[key] = child;
 			}
-			else {
+			else if (hydrating || props) {
 				children[childrenLen++] = child;
 			}
 		}
@@ -174,17 +186,21 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 						break;
 					}
 				}
-				if (!child && min<childrenLen && isFunction(vchild.nodeName) && mountAll) {
-					child = children[min];
-					children[min++] = undefined;
-				}
 			}
 
 			// morph the matched/found/created DOM child to match vchild (deep)
 			child = idiff(child, vchild, context, mountAll);
 
-			if (child && child!==dom && child!==originalChildren[i]) {
-				dom.insertBefore(child, originalChildren[i] || null);
+			if (child && child!==dom) {
+				if (i>=len) {
+					dom.appendChild(child);
+				}
+				else if (child!==originalChildren[i]) {
+					if (child===originalChildren[i+1]) {
+						removeNode(originalChildren[i]);
+					}
+					dom.insertBefore(child, originalChildren[i] || null);
+				}
 			}
 		}
 	}
@@ -195,20 +211,13 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 	}
 
 	// remove orphaned children
-	if (min<childrenLen) {
-		removeOrphanedChildren(children);
+	while (min<=childrenLen) {
+		child = children[childrenLen--];
+		if (child) recollectNodeTree(child);
 	}
 }
 
 
-/** Reclaim children that were unreferenced in the desired VTree */
-export function removeOrphanedChildren(children, unmountOnly) {
-	for (let i=children.length; i--; ) {
-		if (children[i]) {
-			recollectNodeTree(children[i], unmountOnly);
-		}
-	}
-}
 
 
 /** Reclaim an entire tree of nodes, starting at the root. */
@@ -228,9 +237,8 @@ export function recollectNodeTree(node, unmountOnly) {
 			collectNode(node);
 		}
 
-		if (node.childNodes && node.childNodes.length) {
-			removeOrphanedChildren(node.childNodes, unmountOnly);
-		}
+		let c;
+		while ((c=node.lastChild)) recollectNodeTree(c, unmountOnly);
 	}
 }
 

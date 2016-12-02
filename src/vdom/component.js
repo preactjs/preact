@@ -3,7 +3,7 @@ import options from '../options';
 import { isFunction, clone, extend } from '../util';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from './index';
-import { diff, mounts, diffLevel, flushMounts, removeOrphanedChildren, recollectNodeTree } from './diff';
+import { diff, mounts, diffLevel, flushMounts, recollectNodeTree } from './diff';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { createComponent, collectComponent } from './component-recycler';
 import { removeNode } from '../dom/index';
@@ -247,7 +247,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
  *	@param {Component} component	The Component instance to unmount
  *	@private
  */
-export function unmountComponent(component, remove, isChild) {
+export function unmountComponent(component, remove) {
 	if (options.beforeUnmount) options.beforeUnmount(component);
 
 	// console.log(`${remove?'Removing':'Unmounting'} component: ${component.constructor.name}`);
@@ -260,11 +260,11 @@ export function unmountComponent(component, remove, isChild) {
 	component.base = null;
 
 	// recursively tear down & recollect high-order component children:
-	if (component._component) {
-		unmountComponent(component._component, false, true);
+	let inner = component._component;
+	if (inner) {
+		unmountComponent(inner, remove);
 	}
-
-	if (base && !isChild) {
+	else if (base) {
 		if (base[ATTR_KEY] && base[ATTR_KEY].ref) base[ATTR_KEY].ref(null);
 
 		component.nextBase = base;
@@ -273,8 +273,9 @@ export function unmountComponent(component, remove, isChild) {
 			removeNode(base);
 			collectComponent(component);
 		}
-
-		removeOrphanedChildren(base.childNodes, true);
+		let c;
+		while ((c=base.lastChild)) recollectNodeTree(c, !remove);
+		// removeOrphanedChildren(base.childNodes, true);
 	}
 
 	if (component.__ref) component.__ref(null);

@@ -12,10 +12,10 @@ export function isSameNodeType(node, vnode) {
 		return node instanceof Text;
 	}
 	if (isString(vnode.nodeName)) {
-		return isNamedNode(node, vnode.nodeName);
+		return !node._componentConstructor && isNamedNode(node, vnode.nodeName);
 	}
 	if (isFunction(vnode.nodeName)) {
-		return node._componentConstructor===vnode.nodeName || isFunctionalComponent(vnode);
+		return (node._componentConstructor ? node._componentConstructor===vnode.nodeName : true) || isFunctionalComponent(vnode);
 	}
 }
 
