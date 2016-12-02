@@ -1,7 +1,7 @@
 {
   "name": "preact",
   "amdName": "preact",
-  "version": "7.0.3",
+  "version": "7.1.0",
   "description": "Tiny & fast Component-based virtual DOM framework.",
   "main": "dist/preact.js",
   "jsnext:main": "src/preact.js",
