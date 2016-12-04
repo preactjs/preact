@@ -48,7 +48,7 @@ export function setAccessor(node, name, old, value, isSvg) {
 		}
 	}
 	else if (name==='dangerouslySetInnerHTML') {
-		if (value) node.innerHTML = value.__html;
+		node.innerHTML = value && value.__html || '';
 	}
 	else if (name[0]=='o' && name[1]=='n') {
 		let l = node._listeners || (node._listeners = {});

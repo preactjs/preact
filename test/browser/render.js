@@ -420,6 +420,62 @@ describe('render()', () => {
 		expect(scratch.firstChild.lastChild).to.equal(a);
 	});
 
+	it('should skip non-preact elements', () => {
+		class Foo extends Component {
+			render() {
+				let alt = this.props.alt || this.state.alt || this.alt;
+				let c = [
+					<a>foo</a>,
+					<b>{ alt?'alt':'bar' }</b>
+				];
+				if (alt) c.reverse();
+				return <div>{c}</div>;
+			}
+		}
+
+		let comp;
+		let root = render(<Foo ref={ c => comp = c } />, scratch, root);
+
+		let c = document.createElement('c');
+		c.textContent = 'baz';
+		comp.base.appendChild(c);
+
+		let b = document.createElement('b');
+		b.textContent = 'bat';
+		comp.base.appendChild(b);
+
+		expect(scratch.firstChild.children, 'append').to.have.length(4);
+
+		comp.forceUpdate();
+
+		expect(scratch.firstChild.children, 'forceUpdate').to.have.length(4);
+		expect(scratch.innerHTML, 'forceUpdate').to.equal(`<div><a>foo</a><b>bar</b><c>baz</c><b>bat</b></div>`);
+
+		comp.alt = true;
+		comp.forceUpdate();
+
+		expect(scratch.firstChild.children, 'forceUpdate alt').to.have.length(4);
+		expect(scratch.innerHTML, 'forceUpdate alt').to.equal(`<div><b>alt</b><a>foo</a><c>baz</c><b>bat</b></div>`);
+
+		// Re-rendering from the root is non-destructive if the root was a previous render:
+		comp.alt = false;
+		root = render(<Foo ref={ c => comp = c } />, scratch, root);
+
+		expect(scratch.firstChild.children, 'root re-render').to.have.length(4);
+		expect(scratch.innerHTML, 'root re-render').to.equal(`<div><a>foo</a><b>bar</b><c>baz</c><b>bat</b></div>`);
+
+		comp.alt = true;
+		root = render(<Foo ref={ c => comp = c } />, scratch, root);
+
+		expect(scratch.firstChild.children, 'root re-render 2').to.have.length(4);
+		expect(scratch.innerHTML, 'root re-render 2').to.equal(`<div><b>alt</b><a>foo</a><c>baz</c><b>bat</b></div>`);
+
+		root = render(<div><Foo ref={ c => comp = c } /></div>, scratch, root);
+
+		expect(scratch.firstChild.children, 'root re-render changed').to.have.length(3);
+		expect(scratch.innerHTML, 'root re-render changed').to.equal(`<div><div><a>foo</a><b>bar</b></div><c>baz</c><b>bat</b></div>`);
+	});
+
 	// Discussion: https://github.com/developit/preact/issues/287
 	('HTMLDataListElement' in window ? it : xit)('should allow <input list /> to pass through as an attribute', () => {
 		render((

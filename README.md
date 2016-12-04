@@ -31,6 +31,7 @@ As one would expect coming from React, Components are simple building blocks for
 - [**TodoMVC**](https://preact-todomvc.surge.sh) _([Github Project](https://github.com/developit/preact-todomvc))_
 - [**Hacker News Minimal**](https://developit.github.io/hn_minimal/) _([Github Project](https://github.com/developit/hn_minimal))_
 - [**Preact Boilerplate**](https://preact-boilerplate.surge.sh) _([Github Project](https://github.com/developit/preact-boilerplate))_ :zap:
+- [**Preact Mobx Starter**](https://awaw00.github.io/preact-mobx-starter/) _([Github Project](https://github.com/awaw00/preact-mobx-starter))_ :sunny:
 - [**Preact Redux Example**](https://github.com/developit/preact-redux-example) :star:
 - [**Flickr Browser**](http://codepen.io/developit/full/VvMZwK/) (@ CodePen)
 - [**Animating Text**](http://codepen.io/developit/full/LpNOdm/) (@ CodePen)
