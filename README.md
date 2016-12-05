@@ -17,6 +17,8 @@ As one would expect coming from React, Components are simple building blocks for
 [![OpenCollective](https://opencollective.com/preact/backers/badge.svg)](#backers) 
 [![OpenCollective](https://opencollective.com/preact/sponsors/badge.svg)](#sponsors)
 
+Preact supports modern browsers and IE9+. The chart below shows test status for `master`:
+
 [![Browsers](https://saucelabs.com/browser-matrix/preact.svg)](https://saucelabs.com/u/preact)
 
 
