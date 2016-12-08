@@ -42,7 +42,7 @@ As one would expect coming from React, Components are simple building blocks for
 
 ## Libraries & Add-ons
 
-- :metal: [**preact-mui**](https://git.io/preact-router): The MUI CSS Preact library.
+- :metal: [**preact-mui**](https://git.io/preact-mui): The MUI CSS Preact library.
 - :earth_americas: [**preact-router**](https://git.io/preact-router): URL routing for your components.
 - :page_facing_up: [**preact-render-to-string**](https://git.io/preact-render-to-string): Universal rendering.
 - :raised_hands: [**preact-compat**](https://git.io/preact-compat): use any React library with Preact. *([full example](http://git.io/preact-compat-example))*
