@@ -3,7 +3,7 @@ import options from '../options';
 import { isFunction, clone, extend } from '../util';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from './index';
-import { diff, mounts, diffLevel, flushMounts, removeOrphanedChildren, recollectNodeTree } from './diff';
+import { diff, mounts, diffLevel, flushMounts, recollectNodeTree } from './diff';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { createComponent, collectComponent } from './component-recycler';
 import { removeNode } from '../dom/index';
@@ -115,11 +115,10 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		if (isFunction(childComponent)) {
 			// set up high order component link
 
-
-			inst = initialChildComponent;
 			let childProps = getNodeProps(rendered);
+			inst = initialChildComponent;
 
-			if (inst && inst.constructor===childComponent) {
+			if (inst && inst.constructor===childComponent && childProps.key==inst.__key) {
 				setComponentProps(inst, childProps, SYNC_RENDER, context);
 			}
 			else {
@@ -154,11 +153,11 @@ export function renderComponent(component, opts, mountAll, isChild) {
 			let baseParent = initialBase.parentNode;
 			if (baseParent && base!==baseParent) {
 				baseParent.replaceChild(base, initialBase);
-			}
 
-			if (!cbase && !toUnmount && component._parentComponent) {
-				initialBase._component = null;
-				recollectNodeTree(initialBase);
+				if (!toUnmount) {
+					initialBase._component = null;
+					recollectNodeTree(initialBase);
+				}
 			}
 		}
 
@@ -170,7 +169,9 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		if (base && !isChild) {
 			let componentRef = component,
 				t = component;
-			while ((t=t._parentComponent)) { componentRef = t; }
+			while ((t=t._parentComponent)) {
+				(componentRef = t).base = base;
+			}
 			base._component = componentRef;
 			base._componentConstructor = componentRef.constructor;
 		}
@@ -221,7 +222,11 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 		}
 
 		c = createComponent(vnode.nodeName, props, context);
-		if (dom && !c.nextBase) c.nextBase = dom;
+		if (dom && !c.nextBase) {
+			c.nextBase = dom;
+			// passing dom/oldDom as nextBase will recycle it if unused, so bypass recycling on L241:
+			oldDom = null;
+		}
 		setComponentProps(c, props, SYNC_RENDER, context, mountAll);
 		dom = c.base;
 
@@ -267,7 +272,9 @@ export function unmountComponent(component, remove) {
 			removeNode(base);
 			collectComponent(component);
 		}
-		removeOrphanedChildren(base.childNodes, !remove);
+		let c;
+		while ((c=base.lastChild)) recollectNodeTree(c, !remove);
+		// removeOrphanedChildren(base.childNodes, true);
 	}
 
 	if (component.__ref) component.__ref(null);

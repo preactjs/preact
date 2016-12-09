@@ -284,4 +284,22 @@ describe('refs', () => {
 		expect(inst.handleMount.firstCall).to.have.been.calledWith(null);
 		expect(inst.handleMount.secondCall).to.have.been.calledWith(scratch.querySelector('#div'));
 	});
+
+
+	it('should add refs to components representing DOM nodes with no attributes if they have been pre-rendered', () => {
+		// Simulate pre-render
+		let parent = document.createElement('div');
+		let child = document.createElement('div');
+		parent.appendChild(child);
+		scratch.appendChild(parent); // scratch contains: <div><div></div></div>
+
+		let ref = spy('ref');
+
+		function Wrapper() {
+			return <div></div>;
+		}
+
+		render(<div><Wrapper ref={ref} /></div>, scratch, scratch.firstChild);
+		expect(ref).to.have.been.calledOnce.and.calledWith(scratch.firstChild.firstChild);
+	});
 });
