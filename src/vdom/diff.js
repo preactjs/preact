@@ -179,7 +179,7 @@ function idiff(dom, vnode, context, mountAll) {
  *	@param {Element} dom		Element whose children should be compared & mutated
  *	@param {Array} vchildren	Array of VNodes to compare to `dom.childNodes`
  *	@param {Object} context		Implicitly descendant context object (from most recent `getChildContext()`)
- *	@param {Boolean} moutAll
+ *	@param {Boolean} mountAll
  */
 function innerDiffNode(dom, vchildren, context, mountAll) {
 	let originalChildren = dom.childNodes,
