@@ -117,7 +117,7 @@ function idiff(dom, vnode, context, mountAll) {
 
 	if (!dom) {
 		// case: we had no element to begin with
-		// - create an element to with the nodeName from VNode
+		// - create an element with the nodeName from VNode
 		out = createNode(nodeName, isSvgMode);
 	}
 	else if (!isNamedNode(dom, nodeName)) {
