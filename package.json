@@ -89,7 +89,7 @@
     "npm-run-all": "^3.0.0",
     "phantomjs-prebuilt": "^2.1.7",
     "rimraf": "^2.5.3",
-    "rollup": "^0.34.1",
+    "rollup": "^0.36.3",
     "rollup-plugin-babel": "^1.0.0",
     "rollup-plugin-memory": "^2.0.0",
     "rollup-plugin-node-resolve": "^2.0.0",
