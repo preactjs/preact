@@ -165,7 +165,7 @@ function idiff(dom, vnode, context, mountAll) {
 
 
 	// invoke original ref (from before resolving Pure Functional Components):
-	if (typeof ref==='function') {
+	if (ref) {
 		(props.ref = ref)(out);
 	}
 
