@@ -65,7 +65,7 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 
 
 function idiff(dom, vnode, context, mountAll) {
-	let originalAttributes = vnode && vnode.attributes;
+	let ref = vnode && vnode.attributes && vnode.attributes.ref;
 
 
 	// Resolve ephemeral Pure Functional Components
@@ -165,8 +165,8 @@ function idiff(dom, vnode, context, mountAll) {
 
 
 	// invoke original ref (from before resolving Pure Functional Components):
-	if (originalAttributes && typeof originalAttributes.ref==='function') {
-		(props.ref = originalAttributes.ref)(out);
+	if (typeof ref==='function') {
+		(props.ref = ref)(out);
 	}
 
 	isSvgMode = prevSvgMode;
