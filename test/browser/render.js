@@ -378,7 +378,7 @@ describe('render()', () => {
 		existingEl[ATTR_KEY] = vdomEl.attributes; // For an element fetched from its element cache, ATTR_KEY will be set with previous state values.
 		diff( existingEl, vdomEl );
 		expect( existingEl.outerHTML ).to.equal('<div>'+html+'</div>');
-	})
+	});
 
 	it('should reconcile mutated DOM attributes', () => {
 		let check = p => render(<input type="checkbox" checked={p} />, scratch, scratch.lastChild),
