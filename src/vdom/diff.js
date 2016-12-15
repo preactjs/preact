@@ -315,7 +315,17 @@ function diffAttributes(dom, attrs, old) {
 	// add new & update changed attributes
 	if (attrs) {
 		for (let name in attrs) {
-			if (name!=='children' && name!=='innerHTML' && (!(name in old) || attrs[name]!==(name==='value' || name==='checked' ? dom[name] : old[name]))) {
+			if (
+				name!=='children' &&  // break if attributeName is children
+				name!=='innerHTML' &&  // break if attributeName is innerHTML
+				(
+					( name=== 'dangerouslySetInnerHTML' ) || // continue if attributeName is dangerouslySetInnerHTML
+					(
+						!(name in old) ||  // continue if attr doesn't exists
+						attrs[name] !== (name==='value' || name==='checked' ? dom[name] : old[name]) // continue if attr is different
+					)
+				)
+			) {
 				setAccessor(dom, name, old[name], old[name] = attrs[name], isSvgMode);
 			}
 		}
