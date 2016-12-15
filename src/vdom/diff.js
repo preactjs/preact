@@ -152,17 +152,15 @@ function idiff(dom, vnode, context, mountAll) {
 	diffAttributes(out, vnode.attributes, props);
 
 
-	if (!props.dangerouslySetInnerHTML) {
-		// Optimization: fast-path for elements containing a single TextNode:
-		if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc && fc instanceof Text && !fc.nextSibling) {
-			if (fc.nodeValue!=vchildren[0]) {
-				fc.nodeValue = vchildren[0];
-			}
+	// Optimization: fast-path for elements containing a single TextNode:
+	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc && fc instanceof Text && !fc.nextSibling) {
+		if (fc.nodeValue!=vchildren[0]) {
+			fc.nodeValue = vchildren[0];
 		}
-		// otherwise, if there are existing or new children, diff them:
-		else if (vchildren && vchildren.length || fc) {
-			innerDiffNode(out, vchildren, context, mountAll);
-		}
+	}
+	// otherwise, if there are existing or new children, diff them:
+	else if ((vchildren && vchildren.length || fc) && !props.dangerouslySetInnerHTML) {
+		innerDiffNode(out, vchildren, context, mountAll);
 	}
 
 
