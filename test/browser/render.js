@@ -1,6 +1,8 @@
 /* global DISABLE_FLAKEY */
 
 import { h, render, Component } from '../../src/preact';
+import { diff } from '../../src/vdom/diff';
+import { ATTR_KEY } from '../../src/constants';
 /** @jsx h */
 
 function getAttributes(node) {
@@ -366,6 +368,17 @@ describe('render()', () => {
 
 		expect(scratch.innerHTML).to.equal('<div>'+html+'</div>');
 	});
+
+	it( 'should apply proper mutation for VNodes with dangerouslySetInnerHTML attr', () => {
+		let html = '<b><i>test</i></b>';
+		let existingEl = document.createElement('div');
+
+		let vdomEl = ( <div dangerouslySetInnerHTML={{ __html: html }} /> );
+
+		existingEl[ATTR_KEY] = vdomEl.attributes; // For an element fetched from its element cache, ATTR_KEY will be set with previous state values.
+		diff( existingEl, vdomEl );
+		expect( existingEl.outerHTML ).to.equal('<div>'+html+'</div>');
+	})
 
 	it('should reconcile mutated DOM attributes', () => {
 		let check = p => render(<input type="checkbox" checked={p} />, scratch, scratch.lastChild),
