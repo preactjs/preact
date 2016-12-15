@@ -306,7 +306,8 @@ export function recollectNodeTree(node, unmountOnly) {
  */
 function diffAttributes(dom, attrs, old) {
 	// remove attributes no longer present on the vnode by setting them to undefined
-	for (let name in old) {
+	let name;
+	for (name in old) {
 		if (!(attrs && name in attrs) && old[name]!=null) {
 			setAccessor(dom, name, old[name], old[name] = undefined, isSvgMode);
 		}
@@ -314,7 +315,7 @@ function diffAttributes(dom, attrs, old) {
 
 	// add new & update changed attributes
 	if (attrs) {
-		for (let name in attrs) {
+		for (name in attrs) {
 			if (
 				name!=='children' &&  // break if attributeName is children
 				name!=='innerHTML' &&  // break if attributeName is innerHTML
