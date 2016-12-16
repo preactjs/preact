@@ -81,7 +81,7 @@ function idiff(dom, vnode, context, mountAll) {
 	// Fast case: Strings create/update Text nodes.
 	if (isString(vnode)) {
 		// update if it's already a Text node
-		if (dom && dom instanceof Text) {
+		if (dom && dom instanceof Text && dom.parentNode) {
 			if (dom.nodeValue!=vnode) {
 				dom.nodeValue = vnode;
 			}
