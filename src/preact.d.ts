@@ -50,7 +50,7 @@ declare namespace preact {
 		props:PropsType & ComponentProps;
 		base:HTMLElement;
 
-		linkState:(name:string) => void;
+		linkState:(name:string) => (event: Event) => void;
 
 		setState(state:StateType, opts?:any):void;
 
