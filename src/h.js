@@ -15,6 +15,10 @@ const stack = [];
  *  render(<span>foo</span>, document.body);
  */
 export function h(nodeName, attributes) {
+	if (!nodeName) {
+		throw new Error('Component is missing');
+	}
+
 	let children = [],
 		lastSimple, child, simple, i;
 	for (i=arguments.length; i-- > 2; ) {
