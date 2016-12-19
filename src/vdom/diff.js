@@ -201,7 +201,7 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 				keyedLen++;
 				keyed[key] = child;
 			}
-			else if (hydrating || props) {
+			else if (hydrating || props || child instanceof Text) {
 				children[childrenLen++] = child;
 			}
 		}
