@@ -28,7 +28,7 @@ export function h(nodeName, attributes) {
 		if ((child = stack.pop()) instanceof Array) {
 			for (i=child.length; i--; ) stack.push(child[i]);
 		}
-		else if (child!=null && typeof child !== 'boolean') {
+		else if (child!=null && child!==true && child!==false) {
 			if (typeof child=='number') child = String(child);
 			simple = typeof child=='string';
 			if (simple && lastSimple) {
