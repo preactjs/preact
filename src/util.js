@@ -41,6 +41,12 @@ export function isString(obj) {
 }
 
 
+/** @private is the given object an Object? */
+export function isObject(obj) {
+	return 'object'===typeof obj;
+}
+
+
 /** Convert a hashmap of CSS classes to a space-delimited className string
  *	@private
  */

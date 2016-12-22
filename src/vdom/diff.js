@@ -153,7 +153,7 @@ function idiff(dom, vnode, context, mountAll) {
 
 
 	// Optimization: fast-path for elements containing a single TextNode:
-	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc && fc instanceof Text && !fc.nextSibling) {
+	if (!hydrating && vchildren && vchildren.length===1 && isString(vchildren[0]) && fc && fc instanceof Text && !fc.nextSibling) {
 		if (fc.nodeValue!=vchildren[0]) {
 			fc.nodeValue = vchildren[0];
 		}
@@ -165,7 +165,7 @@ function idiff(dom, vnode, context, mountAll) {
 
 
 	// invoke original ref (from before resolving Pure Functional Components):
-	if (originalAttributes && typeof originalAttributes.ref==='function') {
+	if (originalAttributes && isFunction(originalAttributes.ref)) {
 		(props.ref = originalAttributes.ref)(out);
 	}
 

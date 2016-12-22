@@ -1,6 +1,6 @@
 import { NON_DIMENSION_PROPS, NON_BUBBLING_EVENTS } from '../constants';
 import options from '../options';
-import { toLowerCase, isString, isFunction, hashToClassName } from '../util';
+import { toLowerCase, isString, isFunction, isObject, hashToClassName } from '../util';
 
 
 
@@ -25,7 +25,7 @@ export function setAccessor(node, name, old, value, isSvg) {
 
 	if (name==='className') name = 'class';
 
-	if (name==='class' && value && typeof value==='object') {
+	if (name==='class' && value && isObject(value)) {
 		value = hashToClassName(value);
 	}
 
@@ -39,7 +39,7 @@ export function setAccessor(node, name, old, value, isSvg) {
 		if (!value || isString(value) || isString(old)) {
 			node.style.cssText = value || '';
 		}
-		if (value && typeof value==='object') {
+		if (value && isObject(value)) {
 			if (!isString(old)) {
 				for (let i in old) if (!(i in value)) node.style[i] = '';
 			}
@@ -74,7 +74,7 @@ export function setAccessor(node, name, old, value, isSvg) {
 			if (ns) node.removeAttributeNS('http://www.w3.org/1999/xlink', toLowerCase(ns[1]));
 			else node.removeAttribute(name);
 		}
-		else if (typeof value!=='object' && !isFunction(value)) {
+		else if (!isObject(value) && !isFunction(value)) {
 			if (ns) node.setAttributeNS('http://www.w3.org/1999/xlink', toLowerCase(ns[1]), value);
 			else node.setAttribute(name, value);
 		}
