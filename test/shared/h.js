@@ -193,4 +193,19 @@ describe('h(jsx)', () => {
 				'onetwothreefourfivesix'
 			]);
 	});
+	it('should not merge children that are boolean values', () => {
+		let r = h(
+			'foo',
+			null,
+			'one',
+			true,
+			'two',
+			false,
+			'three'
+		);
+
+		expect(r).to.be.an('object')
+			.with.property('children')
+			.that.deep.equals(['onetwothree']);
+	});
 });
