@@ -49,6 +49,15 @@
     "devtools.js.map",
     "typings.json"
   ],
+  "keywords": [
+    "preact",
+    "react",
+    "virtual dom",
+    "vdom",
+    "components",
+    "virtual",
+    "dom"
+  ],
   "author": "Jason Miller <jason@developit.ca>",
   "license": "MIT",
   "bugs": {
