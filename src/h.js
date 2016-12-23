@@ -28,8 +28,8 @@ export function h(nodeName, attributes) {
 		if ((child = stack.pop()) instanceof Array) {
 			for (i=child.length; i--; ) stack.push(child[i]);
 		}
-		else if (child!=null && child!==false) {
-			if (typeof child=='number' || child===true) child = String(child);
+		else if (child!=null && child!==true && child!==false) {
+			if (typeof child=='number') child = String(child);
 			simple = typeof child=='string';
 			if (simple && lastSimple) {
 				children[children.length-1] += child;
