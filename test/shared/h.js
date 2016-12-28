@@ -86,6 +86,26 @@ describe('h(jsx)', () => {
 			]);
 	});
 
+	it('should handle multiple element children, given as an iterable', () => {
+		let r = h(
+			'foo',
+			null,
+			new Set([
+				h('bar'),
+				h('baz', null, h('test'))
+			])
+		);
+
+		expect(r).to.be.an('object')
+			.with.property('children')
+			.that.deep.equals([
+				buildVNode('bar'),
+				buildVNode('baz', undefined, [
+					buildVNode('test')
+				])
+			]);
+	});
+
 	it('should handle multiple children, flattening one layer as needed', () => {
 		let r = h(
 			'foo',
