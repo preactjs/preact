@@ -92,8 +92,6 @@ function idiff(dom, vnode, context, mountAll) {
 			dom = document.createTextNode(vnode);
 		}
 
-		// Mark for non-hydration updates
-		dom[ATTR_KEY] = true;
 		return dom;
 	}
 
