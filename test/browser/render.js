@@ -397,6 +397,15 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('<div><foo><bar>test</bar></foo></div>');
 	});
 
+	it('should hydrate with dangerouslySetInnerHTML', () => {
+		let html = '<b>foo &amp; bar</b>';
+		scratch.innerHTML = `<div>${html}</div>`;
+		render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, scratch.lastChild);
+
+		expect(scratch.firstChild).to.have.property('innerHTML', html);
+		expect(scratch.innerHTML).to.equal(`<div>${html}</div>`);
+	});
+
 	it('should reconcile mutated DOM attributes', () => {
 		let check = p => render(<input type="checkbox" checked={p} />, scratch, scratch.lastChild),
 			value = () => scratch.lastChild.checked,
