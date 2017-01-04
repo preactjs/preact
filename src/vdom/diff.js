@@ -148,10 +148,6 @@ function idiff(dom, vnode, context, mountAll) {
 		for (let a=out.attributes, i=a.length; i--; ) props[a[i].name] = a[i].value;
 	}
 
-	// Apply attributes/props from VNode to the DOM Element:
-	diffAttributes(out, vnode.attributes, props);
-
-
 	// Optimization: fast-path for elements containing a single TextNode:
 	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc && fc instanceof Text && !fc.nextSibling) {
 		if (fc.nodeValue!=vchildren[0]) {
@@ -160,8 +156,12 @@ function idiff(dom, vnode, context, mountAll) {
 	}
 	// otherwise, if there are existing or new children, diff them:
 	else if (vchildren && vchildren.length || fc) {
-		innerDiffNode(out, vchildren, context, mountAll);
+		innerDiffNode(out, vchildren, context, mountAll, !!props.dangerouslySetInnerHTML);
 	}
+
+
+	// Apply attributes/props from VNode to the DOM Element:
+	diffAttributes(out, vnode.attributes, props);
 
 
 	// invoke original ref (from before resolving Pure Functional Components):
@@ -180,8 +180,9 @@ function idiff(dom, vnode, context, mountAll) {
  *	@param {Array} vchildren	Array of VNodes to compare to `dom.childNodes`
  *	@param {Object} context		Implicitly descendant context object (from most recent `getChildContext()`)
  *	@param {Boolean} mountAll
+ *	@param {Boolean} absorb		If `true`, consumes externally created elements similar to hydration
  */
-function innerDiffNode(dom, vchildren, context, mountAll) {
+function innerDiffNode(dom, vchildren, context, mountAll, absorb) {
 	let originalChildren = dom.childNodes,
 		children = [],
 		keyed = {},
@@ -201,7 +202,7 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 				keyedLen++;
 				keyed[key] = child;
 			}
-			else if (hydrating || props) {
+			else if (hydrating || absorb || props) {
 				children[childrenLen++] = child;
 			}
 		}
@@ -306,7 +307,8 @@ export function recollectNodeTree(node, unmountOnly) {
  */
 function diffAttributes(dom, attrs, old) {
 	// remove attributes no longer present on the vnode by setting them to undefined
-	for (let name in old) {
+	let name;
+	for (name in old) {
 		if (!(attrs && name in attrs) && old[name]!=null) {
 			setAccessor(dom, name, old[name], old[name] = undefined, isSvgMode);
 		}
@@ -314,7 +316,7 @@ function diffAttributes(dom, attrs, old) {
 
 	// add new & update changed attributes
 	if (attrs) {
-		for (let name in attrs) {
+		for (name in attrs) {
 			if (name!=='children' && name!=='innerHTML' && (!(name in old) || attrs[name]!==(name==='value' || name==='checked' ? dom[name] : old[name]))) {
 				setAccessor(dom, name, old[name], old[name] = attrs[name], isSvgMode);
 			}
