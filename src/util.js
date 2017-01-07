@@ -66,3 +66,22 @@ export const toLowerCase = s => lcCache[s] || (lcCache[s] = s.toLowerCase());
  */
 let resolved = typeof Promise!=='undefined' && Promise.resolve();
 export const defer = resolved ? (f => { resolved.then(f); }) : setTimeout;
+
+/** A simple helper to convert Iterable to an Array
+ * @returns {Array}
+ * @private
+ */
+export function iterableToArray(iterable) {
+	let iterStep;
+	const tmpArr = [];
+	while (true) { // eslint-disable-line
+		iterStep = iterable.next();
+		if (iterStep.done) {
+			break;
+		}
+		else {
+			tmpArr.push(iterStep.value);
+		}
+	}
+	return tmpArr;
+}
