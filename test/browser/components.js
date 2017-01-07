@@ -157,6 +157,95 @@ describe('Components', () => {
 		expect(scratch.innerHTML, 'switching to textnode 2').to.equal('asdf');
 	});
 
+		// Test for Issue #254
+	it('should not recycle common class children with different keys', () => {
+		let idx = 0;
+		let msgs = ['A','B','C','D','E','F','G','H'];
+		let comp1, comp2, comp3;
+		let sideEffect = sinon.spy();
+
+		class Comp extends Component {
+			componentWillMount() {
+				this.innerMsg = msgs[(idx++ % 8)];
+				console.log('innerMsg', this.innerMsg);
+				sideEffect();
+			}
+			render() {
+				return <div>{this.innerMsg}</div>;
+			}
+		}
+		sinon.spy(Comp.prototype, 'componentWillMount');
+
+		class GoodContainer extends Component {
+
+			constructor(props) {
+				super(props);
+				this.state.alt = false;
+			}
+
+			render(_, {alt}) {
+				return (
+					<div>
+						{alt ? null : (<Comp ref={c=>comp1=c} key={1} alt={alt}/>)}
+						{alt ? null : (<Comp ref={c=>comp2=c} key={2} alt={alt}/>)}
+						{alt ? (<Comp ref={c=>comp3=c} key={3} alt={alt}/>) : null}
+					</div>
+				);
+			}
+		}
+
+		class BadContainer extends Component {
+
+			constructor(props) {
+				super(props);
+				this.state.alt = false;
+			}
+
+			render(_, {alt}) {
+				return (
+					<div>
+						{alt ? null : (<Comp ref={c=>comp1=c} alt={alt}/>)}
+						{alt ? null : (<Comp ref={c=>comp2=c} alt={alt}/>)}
+						{alt ? (<Comp ref={c=>comp3=c} alt={alt}/>) : null}
+					</div>
+				);
+			}
+		}
+
+		let good, bad;
+		let root = render(<GoodContainer ref={c=>good=c} />, scratch);
+		expect(scratch.innerText, 'new component with key present').to.equal('A\nB');
+		expect(Comp.prototype.componentWillMount).to.have.been.calledTwice;
+		expect(sideEffect).to.have.been.calledTwice;
+
+		sideEffect.reset();
+		Comp.prototype.componentWillMount.reset();
+		good.setState({alt: true});
+		good.forceUpdate();
+		expect(scratch.innerText, 'new component with key present re-rendered').to.equal('C');
+		//we are recycling the first 2 components already rendered, just need a new one
+		expect(Comp.prototype.componentWillMount).to.have.been.calledOnce;
+		expect(sideEffect).to.have.been.calledOnce;
+
+		sideEffect.reset();
+		Comp.prototype.componentWillMount.reset();
+		root = render(<BadContainer ref={c=>bad=c} />, scratch, root);
+		expect(scratch.innerText, 'new component without key').to.equal('D\nE');
+		expect(Comp.prototype.componentWillMount).to.have.been.calledTwice;
+		expect(sideEffect).to.have.been.calledTwice;
+
+		sideEffect.reset();
+		Comp.prototype.componentWillMount.reset();
+		bad.setState({alt: true});
+		bad.forceUpdate();
+		expect(scratch.innerText, 'new component without key re-rendered').to.equal('D');
+		expect(Comp.prototype.componentWillMount).to.not.have.been.called;
+		expect(sideEffect).to.not.have.been.called;
+
+
+	});
+
+
 
 	describe('props.children', () => {
 		it('should support passing children as a prop', () => {

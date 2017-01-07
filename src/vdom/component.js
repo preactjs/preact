@@ -3,7 +3,7 @@ import options from '../options';
 import { isFunction, clone, extend } from '../util';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from './index';
-import { diff, mounts, diffLevel, flushMounts, removeOrphanedChildren, recollectNodeTree } from './diff';
+import { diff, mounts, diffLevel, flushMounts, recollectNodeTree } from './diff';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { createComponent, collectComponent } from './component-recycler';
 import { removeNode } from '../dom/index';
@@ -115,11 +115,10 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		if (isFunction(childComponent)) {
 			// set up high order component link
 
-
-			inst = initialChildComponent;
 			let childProps = getNodeProps(rendered);
+			inst = initialChildComponent;
 
-			if (inst && inst.constructor===childComponent) {
+			if (inst && inst.constructor===childComponent && childProps.key==inst.__key) {
 				setComponentProps(inst, childProps, SYNC_RENDER, context);
 			}
 			else {
@@ -273,7 +272,9 @@ export function unmountComponent(component, remove) {
 			removeNode(base);
 			collectComponent(component);
 		}
-		removeOrphanedChildren(base.childNodes, !remove);
+		let c;
+		while ((c=base.lastChild)) recollectNodeTree(c, !remove);
+		// removeOrphanedChildren(base.childNodes, true);
 	}
 
 	if (component.__ref) component.__ref(null);

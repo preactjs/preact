@@ -1,6 +1,8 @@
 /* global DISABLE_FLAKEY */
 
-import { h, render } from '../../src/preact';
+import { h, render, Component } from '../../src/preact';
+import { diff } from '../../src/vdom/diff';
+import { ATTR_KEY } from '../../src/constants';
 /** @jsx h */
 
 function getAttributes(node) {
@@ -94,7 +96,7 @@ describe('render()', () => {
 			<div anull="anull" aundefined="aundefined" afalse="afalse" anan="aNaN" a0="a0" />
 		), scratch);
 
-		root = render((
+		render((
 			<div anull={null} aundefined={undefined} afalse={false} anan={NaN} a0={0} />
 		), scratch, root);
 
@@ -105,7 +107,7 @@ describe('render()', () => {
 
 		scratch.innerHTML = '';
 
-		root = render((
+		render((
 			<div anull={null} aundefined={undefined} afalse={false} anan={NaN} a0={0} />
 		), scratch);
 
@@ -355,16 +357,53 @@ describe('render()', () => {
 		let html = '<b>foo &amp; bar</b>';
 		let root = render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
 
-		expect(scratch.firstChild).to.have.property('innerHTML', html);
+		expect(scratch.firstChild, 'set').to.have.property('innerHTML', html);
 		expect(scratch.innerHTML).to.equal('<div>'+html+'</div>');
 
 		root = render(<div>a<strong>b</strong></div>, scratch, root);
 
-		expect(scratch).to.have.property('innerHTML', `<div>a<strong>b</strong></div>`);
+		expect(scratch, 'unset').to.have.property('innerHTML', `<div>a<strong>b</strong></div>`);
 
-		root = render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, root);
+		render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, root);
 
-		expect(scratch.innerHTML).to.equal('<div>'+html+'</div>');
+		expect(scratch.innerHTML, 're-set').to.equal('<div>'+html+'</div>');
+	});
+
+	it( 'should apply proper mutation for VNodes with dangerouslySetInnerHTML attr', () => {
+		class Thing extends Component {
+			constructor(props, context) {
+				super(props, context);
+				this.state.html = this.props.html;
+			}
+			render(props, { html }) {
+				return html ? <div dangerouslySetInnerHTML={{ __html: html }} /> : <div />;
+			}
+		}
+
+		let thing;
+
+		render(<Thing ref={ c => thing=c } html="<b><i>test</i></b>" />, scratch);
+
+		expect(scratch.innerHTML).to.equal('<div><b><i>test</i></b></div>');
+
+		thing.setState({ html: false });
+		thing.forceUpdate();
+
+		expect(scratch.innerHTML).to.equal('<div></div>');
+
+		thing.setState({ html: '<foo><bar>test</bar></foo>' });
+		thing.forceUpdate();
+
+		expect(scratch.innerHTML).to.equal('<div><foo><bar>test</bar></foo></div>');
+	});
+
+	it('should hydrate with dangerouslySetInnerHTML', () => {
+		let html = '<b>foo &amp; bar</b>';
+		scratch.innerHTML = `<div>${html}</div>`;
+		render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, scratch.lastChild);
+
+		expect(scratch.firstChild).to.have.property('innerHTML', html);
+		expect(scratch.innerHTML).to.equal(`<div>${html}</div>`);
 	});
 
 	it('should reconcile mutated DOM attributes', () => {
@@ -418,6 +457,62 @@ describe('render()', () => {
 		expect(scratch.firstChild.lastChild).to.have.property('nodeName', 'A');
 		expect(scratch.firstChild.firstChild).to.equal(b);
 		expect(scratch.firstChild.lastChild).to.equal(a);
+	});
+
+	it('should skip non-preact elements', () => {
+		class Foo extends Component {
+			render() {
+				let alt = this.props.alt || this.state.alt || this.alt;
+				let c = [
+					<a>foo</a>,
+					<b>{ alt?'alt':'bar' }</b>
+				];
+				if (alt) c.reverse();
+				return <div>{c}</div>;
+			}
+		}
+
+		let comp;
+		let root = render(<Foo ref={ c => comp = c } />, scratch, root);
+
+		let c = document.createElement('c');
+		c.textContent = 'baz';
+		comp.base.appendChild(c);
+
+		let b = document.createElement('b');
+		b.textContent = 'bat';
+		comp.base.appendChild(b);
+
+		expect(scratch.firstChild.children, 'append').to.have.length(4);
+
+		comp.forceUpdate();
+
+		expect(scratch.firstChild.children, 'forceUpdate').to.have.length(4);
+		expect(scratch.innerHTML, 'forceUpdate').to.equal(`<div><a>foo</a><b>bar</b><c>baz</c><b>bat</b></div>`);
+
+		comp.alt = true;
+		comp.forceUpdate();
+
+		expect(scratch.firstChild.children, 'forceUpdate alt').to.have.length(4);
+		expect(scratch.innerHTML, 'forceUpdate alt').to.equal(`<div><b>alt</b><a>foo</a><c>baz</c><b>bat</b></div>`);
+
+		// Re-rendering from the root is non-destructive if the root was a previous render:
+		comp.alt = false;
+		root = render(<Foo ref={ c => comp = c } />, scratch, root);
+
+		expect(scratch.firstChild.children, 'root re-render').to.have.length(4);
+		expect(scratch.innerHTML, 'root re-render').to.equal(`<div><a>foo</a><b>bar</b><c>baz</c><b>bat</b></div>`);
+
+		comp.alt = true;
+		root = render(<Foo ref={ c => comp = c } />, scratch, root);
+
+		expect(scratch.firstChild.children, 'root re-render 2').to.have.length(4);
+		expect(scratch.innerHTML, 'root re-render 2').to.equal(`<div><b>alt</b><a>foo</a><c>baz</c><b>bat</b></div>`);
+
+		root = render(<div><Foo ref={ c => comp = c } /></div>, scratch, root);
+
+		expect(scratch.firstChild.children, 'root re-render changed').to.have.length(3);
+		expect(scratch.innerHTML, 'root re-render changed').to.equal(`<div><div><a>foo</a><b>bar</b></div><c>baz</c><b>bat</b></div>`);
 	});
 
 	// Discussion: https://github.com/developit/preact/issues/287
