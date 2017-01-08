@@ -161,7 +161,6 @@ describe('Components', () => {
 	it('should not recycle common class children with different keys', () => {
 		let idx = 0;
 		let msgs = ['A','B','C','D','E','F','G','H'];
-		let comp1, comp2, comp3;
 		let sideEffect = sinon.spy();
 
 		class Comp extends Component {
@@ -185,9 +184,9 @@ describe('Components', () => {
 			render(_, {alt}) {
 				return (
 					<div>
-						{alt ? null : (<Comp ref={c=>comp1=c} key={1} alt={alt}/>)}
-						{alt ? null : (<Comp ref={c=>comp2=c} key={2} alt={alt}/>)}
-						{alt ? (<Comp ref={c=>comp3=c} key={3} alt={alt}/>) : null}
+						{alt ? null : (<Comp key={1} alt={alt}/>)}
+						{alt ? null : (<Comp key={2} alt={alt}/>)}
+						{alt ? (<Comp key={3} alt={alt}/>) : null}
 					</div>
 				);
 			}
@@ -203,9 +202,9 @@ describe('Components', () => {
 			render(_, {alt}) {
 				return (
 					<div>
-						{alt ? null : (<Comp ref={c=>comp1=c} alt={alt}/>)}
-						{alt ? null : (<Comp ref={c=>comp2=c} alt={alt}/>)}
-						{alt ? (<Comp ref={c=>comp3=c} alt={alt}/>) : null}
+						{alt ? null : (<Comp alt={alt}/>)}
+						{alt ? null : (<Comp alt={alt}/>)}
+						{alt ? (<Comp alt={alt}/>) : null}
 					</div>
 				);
 			}
