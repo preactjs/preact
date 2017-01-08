@@ -167,7 +167,6 @@ describe('Components', () => {
 		class Comp extends Component {
 			componentWillMount() {
 				this.innerMsg = msgs[(idx++ % 8)];
-				console.log('innerMsg', this.innerMsg);
 				sideEffect();
 			}
 			render() {
