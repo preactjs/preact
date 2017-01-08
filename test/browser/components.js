@@ -227,7 +227,7 @@ describe('Components', () => {
 
 		sideEffect.reset();
 		Comp.prototype.componentWillMount.reset();
-		root = render(<BadContainer ref={c=>bad=c} />, scratch, root);
+		render(<BadContainer ref={c=>bad=c} />, scratch, root);
 		expect(scratch.innerText, 'new component without key').to.equal('D\nE');
 		expect(Comp.prototype.componentWillMount).to.have.been.calledTwice;
 		expect(sideEffect).to.have.been.calledTwice;
