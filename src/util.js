@@ -72,16 +72,10 @@ export const defer = resolved ? (f => { resolved.then(f); }) : setTimeout;
  * @private
  */
 export function iterableToArray(iterable) {
-	let iterStep;
-	const tmpArr = [];
-	while (true) { // eslint-disable-line
+	let iterStep = {}, tmpArr = [];
+	while (!iterStep.done) {
 		iterStep = iterable.next();
-		if (iterStep.done) {
-			break;
-		}
-		else {
-			tmpArr.push(iterStep.value);
-		}
+		iterStep.value ? tmpArr.push(iterStep.value) : void 0;
 	}
 	return tmpArr;
 }
