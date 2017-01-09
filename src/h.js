@@ -1,8 +1,7 @@
 import { VNode } from './vnode';
 import options from './options';
-import { iterableToArray, isFunction } from './util';
-
-const hasSymbolSupport = isFunction(Symbol) && Symbol.iterator;
+import { iterableToArray } from './util';
+import { ATTR_KEY } from './constants';
 
 const stack = [];
 
@@ -30,9 +29,8 @@ export function h(nodeName, attributes) {
 		if ((child = stack.pop()) instanceof Array) {
 			for (i=child.length; i--; ) stack.push(child[i]);
 		}
-		else if (hasSymbolSupport && child[Symbol.iterator]) {
-			const iter = child[Symbol.iterator]();
-			const tmpArr = iterableToArray(iter);
+		else if (typeof ATTR_KEY === 'symbol' && child[Symbol.iterator]) {
+			const tmpArr = iterableToArray(child[Symbol.iterator]());
 			for (i=tmpArr.length; i--; ) stack.push(tmpArr[i]);
 		}
 		else if (child!=null && child!==true && child!==false) {
