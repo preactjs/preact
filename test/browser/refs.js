@@ -175,7 +175,7 @@ describe('refs', () => {
 		outer.reset();
 		inner.reset();
 		innermost.reset();
-		root = render(<div />, scratch, root);
+		render(<div />, scratch, root);
 
 		expect(outer, 'outer unmount').to.have.been.calledOnce.and.calledWith(null);
 		expect(inner, 'inner unmount').to.have.been.calledOnce.and.calledWith(null);
@@ -238,7 +238,7 @@ describe('refs', () => {
 		expect(TestUnmount.prototype.componentWillUnmount).not.to.have.been.called;
 		expect(TestUnmount.prototype.componentDidUnmount).not.to.have.been.called;
 
-		root = render(<div />, scratch, root);
+		render(<div />, scratch, root);
 
 		expect(TestUnmount.prototype.componentWillUnmount).to.have.been.calledOnce;
 		expect(TestUnmount.prototype.componentDidUnmount).to.have.been.calledOnce;
