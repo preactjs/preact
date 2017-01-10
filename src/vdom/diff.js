@@ -305,7 +305,7 @@ export function recollectNodeTree(node, unmountOnly) {
  *	@param {Object} attrs		The desired end-state key-value attribute pairs
  *	@param {Object} old			Current/previous attributes (from previous VNode or element's prop cache)
  */
-function diffAttributes(dom, attrs, old) {
+export function diffAttributes(dom, attrs, old) {
 	// remove attributes no longer present on the vnode by setting them to undefined
 	let name;
 	for (name in old) {
