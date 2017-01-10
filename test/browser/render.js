@@ -406,6 +406,20 @@ describe('render()', () => {
 		expect(scratch.innerHTML, 're-set').to.equal('<div>'+html+'</div>');
 	});
 
+	it('should apply width property via setAttribute', () => {
+		class Thing extends Component {
+			render({width}) {
+				return <img width={width} />;
+			}
+		}
+
+		render(<Thing width="100%" />, scratch);
+		let img = scratch.childNodes[0];
+		expect(img).to.have.deep.property('attributes.length', 1);
+		expect(img).to.have.deep.property('attributes[0].name', 'width');
+		expect(img).to.have.deep.property('attributes[0].value', '100%');
+	});
+
 	it('should apply proper mutation for VNodes with dangerouslySetInnerHTML attr', () => {
 		class Thing extends Component {
 			constructor(props, context) {
