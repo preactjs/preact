@@ -13,9 +13,9 @@ As one would expect coming from React, Components are simple building blocks for
 [![npm](https://img.shields.io/npm/v/preact.svg)](http://npm.im/preact)
 [![travis](https://travis-ci.org/developit/preact.svg?branch=master)](https://travis-ci.org/developit/preact)
 [![coveralls](https://img.shields.io/coveralls/developit/preact/master.svg)](https://coveralls.io/github/developit/preact)
-[![gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/developit/preact)
-[![OpenCollective](https://opencollective.com/preact/backers/badge.svg)](#backers) 
-[![OpenCollective](https://opencollective.com/preact/sponsors/badge.svg)](#sponsors)
+[![Preact Slack Community](https://preact-slack.now.sh/badge.svg)](https://preact-slack.now.sh)
+[![OpenCollective Backers](https://opencollective.com/preact/backers/badge.svg)](#backers) 
+[![OpenCollective Sponsors](https://opencollective.com/preact/sponsors/badge.svg)](#sponsors)
 
 Preact supports modern browsers and IE9+. The chart below shows test status for `master`:
 
