@@ -1,4 +1,4 @@
-import { ATTR_KEY } from '../constants';
+import { ATTR_KEY, SVG_NAMESPACE } from '../constants';
 import { isString, isFunction } from '../util';
 import { isSameNodeType, isNamedNode } from './index';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
@@ -14,8 +14,6 @@ export const mounts = [];
 
 /** Diff recursion count, used to track the end of the diff cycle. */
 export let diffLevel = 0;
-
-const svgNamespace = "http://www.w3.org/2000/svg";
 
 /** Global flag indicating if the diff is currently within an SVG */
 let isSvgMode = false;
@@ -43,7 +41,7 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 	// diffLevel having been 0 here indicates initial entry into the diff (not a subdiff)
 	if (!diffLevel++) {
 		// when first starting the diff, check if we're diffing an SVG or within an SVG
-		isSvgMode = parent && parent.namespaceURI === svgNamespace;
+		isSvgMode = parent && parent.namespaceURI===SVG_NAMESPACE;
 
 		// hydration is inidicated by the existing element to be diffed not having a prop cache
 		hydrating = dom && !(ATTR_KEY in dom);
