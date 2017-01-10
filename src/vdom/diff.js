@@ -1,4 +1,4 @@
-import { ATTR_KEY } from '../constants';
+import { ATTR_KEY, SVG_NAMESPACE } from '../constants';
 import { isString, isFunction } from '../util';
 import { isSameNodeType, isNamedNode } from './index';
 import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
@@ -21,7 +21,6 @@ let isSvgMode = false;
 /** Global flag indicating if the diff is performing hydration */
 let hydrating = false;
 
-
 /** Invoke queued componentDidMount lifecycle methods */
 export function flushMounts() {
 	let c;
@@ -42,7 +41,7 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 	// diffLevel having been 0 here indicates initial entry into the diff (not a subdiff)
 	if (!diffLevel++) {
 		// when first starting the diff, check if we're diffing an SVG or within an SVG
-		isSvgMode = parent instanceof SVGElement;
+		isSvgMode = parent && parent.namespaceURI===SVG_NAMESPACE;
 
 		// hydration is inidicated by the existing element to be diffed not having a prop cache
 		hydrating = dom && !(ATTR_KEY in dom);
@@ -81,7 +80,7 @@ function idiff(dom, vnode, context, mountAll) {
 	// Fast case: Strings create/update Text nodes.
 	if (isString(vnode)) {
 		// update if it's already a Text node
-		if (dom && dom instanceof Text) {
+		if (dom && dom instanceof Text && dom.parentNode) {
 			if (dom.nodeValue!=vnode) {
 				dom.nodeValue = vnode;
 			}
@@ -92,8 +91,6 @@ function idiff(dom, vnode, context, mountAll) {
 			dom = document.createTextNode(vnode);
 		}
 
-		// Mark for non-hydration updates
-		dom[ATTR_KEY] = true;
 		return dom;
 	}
 
@@ -202,7 +199,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, absorb) {
 				keyedLen++;
 				keyed[key] = child;
 			}
-			else if (hydrating || absorb || props) {
+			else if (hydrating || absorb || props || child instanceof Text) {
 				children[childrenLen++] = child;
 			}
 		}

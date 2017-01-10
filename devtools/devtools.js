@@ -344,7 +344,15 @@ function createDevToolsBridge() {
  * `render()` into a container Element.
  */
 function isRootComponent(component) {
-	return !component.base.parentElement || !component.base.parentElement[ATTR_KEY];
+	if (component._parentComponent) {
+		// Component with a composite parent
+		return false;
+	}
+	if (component.base.parentElement && component.base.parentElement[ATTR_KEY]) {
+		// Component with a parent DOM element rendered by Preact
+		return false;
+	}
+	return true;
 }
 
 /**

@@ -20,14 +20,14 @@ describe('keys', () => {
 
 	// See developit/preact-compat#21
 	it('should remove orphaned keyed nodes', () => {
-		let root = render((
+		const root = render((
 			<div>
 				<div>1</div>
 				<li key="a">a</li>
 			</div>
 		), scratch);
 
-		root = render((
+		render((
 			<div>
 				<div>2</div>
 				<li key="b">b</li>

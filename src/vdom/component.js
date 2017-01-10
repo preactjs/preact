@@ -203,6 +203,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
  */
 export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 	let c = dom && dom._component,
+		originalComponent = c,
 		oldDom = dom,
 		isDirectOwner = c && dom._componentConstructor===vnode.nodeName,
 		isOwner = isDirectOwner,
@@ -216,8 +217,8 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 		dom = c.base;
 	}
 	else {
-		if (c && !isDirectOwner) {
-			unmountComponent(c, true);
+		if (originalComponent && !isDirectOwner) {
+			unmountComponent(originalComponent, true);
 			dom = oldDom = null;
 		}
 

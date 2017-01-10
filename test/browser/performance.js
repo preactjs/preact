@@ -21,7 +21,7 @@ function loop(iter, time) {
 
 
 function benchmark(iter, callback) {
-	let a = 0;
+	let a = 0; // eslint-disable-line no-unused-vars
 	function noop() {
 		try { a++; } finally { a += Math.random(); }
 	}
