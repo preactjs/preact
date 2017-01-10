@@ -1,7 +1,7 @@
 {
   "name": "preact",
   "amdName": "preact",
-  "version": "6.4.0",
+  "version": "7.1.0",
   "description": "Tiny & fast Component-based virtual DOM framework.",
   "main": "dist/preact.js",
   "jsnext:main": "src/preact.js",
@@ -10,8 +10,8 @@
   "minified:main": "dist/preact.min.js",
   "scripts": {
     "clean": "rimraf dist/ aliases.js aliases.js.map  devtools.js devtools.js.map",
-    "copy-flow-definition": "copyfiles src/preact.js.flow dist/preact.js.flow",
-    "copy-typescript-definition": "copyfiles src/preact.d.ts dist/preact.d.ts",
+    "copy-flow-definition": "copyfiles -f src/preact.js.flow dist",
+    "copy-typescript-definition": "copyfiles -f src/preact.d.ts dist",
     "build": "npm-run-all --silent clean transpile copy-flow-definition copy-typescript-definition strip optimize minify size",
     "transpile:main": "rollup -c config/rollup.config.js -m dist/preact.dev.js.map -f umd -n preact src/preact.js -o dist/preact.dev.js",
     "transpile:devtools": "rollup -c config/rollup.config.devtools.js -o devtools.js -m devtools.js.map",
@@ -34,7 +34,7 @@
   "eslintConfig": {
     "extends": "./config/eslint-config.js"
   },
-  "typings": "./src/preact.d.ts",
+  "typings": "./dist/preact.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/developit/preact.git"
@@ -48,6 +48,15 @@
     "devtools.js",
     "devtools.js.map",
     "typings.json"
+  ],
+  "keywords": [
+    "preact",
+    "react",
+    "virtual dom",
+    "vdom",
+    "components",
+    "virtual",
+    "dom"
   ],
   "author": "Jason Miller <jason@developit.ca>",
   "license": "MIT",
@@ -64,6 +73,7 @@
     "chai": "^3.4.1",
     "copyfiles": "^1.0.0",
     "core-js": "^2.4.1",
+    "coveralls": "^2.11.15",
     "cross-env": "^3.1.3",
     "diff": "^3.0.0",
     "eslint": "^3.0.0",
@@ -85,16 +95,16 @@
     "karma-sourcemap-loader": "^0.3.6",
     "karma-webpack": "^1.7.0",
     "mocha": "^3.0.1",
-    "npm-run-all": "^3.0.0",
+    "npm-run-all": "^4.0.0",
     "phantomjs-prebuilt": "^2.1.7",
     "rimraf": "^2.5.3",
-    "rollup": "^0.34.1",
+    "rollup": "^0.40.0",
     "rollup-plugin-babel": "^1.0.0",
     "rollup-plugin-memory": "^2.0.0",
     "rollup-plugin-node-resolve": "^2.0.0",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
-    "uglify-js": "^2.7.0",
+    "uglify-js": "^2.7.5",
     "webpack": "^1.13.1"
   },
   "greenkeeper": {

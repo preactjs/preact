@@ -4,6 +4,7 @@ import options from './options';
 
 const stack = [];
 
+const EMPTY_CHILDREN = [];
 
 /** JSX/hyperscript reviver
 *	Benchmarks: https://esbench.com/bench/57ee8f8e330ab09900a1a1a0
@@ -15,8 +16,7 @@ const stack = [];
  *  render(<span>foo</span>, document.body);
  */
 export function h(nodeName, attributes) {
-	let children = [],
-		lastSimple, child, simple, i;
+	let children, lastSimple, child, simple, i;
 	for (i=arguments.length; i-- > 2; ) {
 		stack.push(arguments[i]);
 	}
@@ -28,20 +28,20 @@ export function h(nodeName, attributes) {
 		if ((child = stack.pop()) instanceof Array) {
 			for (i=child.length; i--; ) stack.push(child[i]);
 		}
-		else if (child!=null && child!==false) {
-			if (typeof child=='number' || child===true) child = String(child);
+		else if (child!=null && child!==true && child!==false) {
+			if (typeof child=='number') child = String(child);
 			simple = typeof child=='string';
 			if (simple && lastSimple) {
 				children[children.length-1] += child;
 			}
 			else {
-				children.push(child);
+				(children || (children = [])).push(child);
 				lastSimple = simple;
 			}
 		}
 	}
 
-	let p = new VNode(nodeName, attributes || undefined, children);
+	let p = new VNode(nodeName, attributes || undefined, children || EMPTY_CHILDREN);
 
 	// if a "vnode hook" is defined, pass every created VNode to it
 	if (options.vnode) options.vnode(p);
