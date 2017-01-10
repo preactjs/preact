@@ -82,7 +82,7 @@ function idiff(dom, vnode, context, mountAll) {
 	// Fast case: Strings create/update Text nodes.
 	if (isString(vnode)) {
 		// update if it's already a Text node
-		if (dom && dom instanceof Text) {
+		if (dom && dom instanceof Text && dom.parentNode) {
 			if (dom.nodeValue!=vnode) {
 				dom.nodeValue = vnode;
 			}
@@ -93,8 +93,6 @@ function idiff(dom, vnode, context, mountAll) {
 			dom = document.createTextNode(vnode);
 		}
 
-		// Mark for non-hydration updates
-		dom[ATTR_KEY] = true;
 		return dom;
 	}
 
@@ -203,7 +201,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, absorb) {
 				keyedLen++;
 				keyed[key] = child;
 			}
-			else if (hydrating || absorb || props) {
+			else if (hydrating || absorb || props || child instanceof Text) {
 				children[childrenLen++] = child;
 			}
 		}

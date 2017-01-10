@@ -190,6 +190,32 @@ describe('Lifecycle methods', () => {
 	});
 
 
+	describe('top-level componentWillUnmount', () => {
+		it('should invoke componentWillUnmount for top-level components', () => {
+			class Foo extends Component {
+				componentDidMount() {}
+				componentWillUnmount() {}
+			}
+			class Bar extends Component {
+				componentDidMount() {}
+				componentWillUnmount() {}
+			}
+			spyAll(Foo.prototype);
+			spyAll(Bar.prototype);
+
+			render(<Foo />, scratch, scratch.lastChild);
+			expect(Foo.prototype.componentDidMount, 'initial render').to.have.been.calledOnce;
+
+			render(<Bar />, scratch, scratch.lastChild);
+			expect(Foo.prototype.componentWillUnmount, 'when replaced').to.have.been.calledOnce;
+			expect(Bar.prototype.componentDidMount, 'when replaced').to.have.been.calledOnce;
+
+			render(<div />, scratch, scratch.lastChild);
+			expect(Bar.prototype.componentWillUnmount, 'when removed').to.have.been.calledOnce;
+		});
+	});
+
+
 	let _it = it;
 	describe('#constructor and component(Did|Will)(Mount|Unmount)', () => {
 		/* global DISABLE_FLAKEY */

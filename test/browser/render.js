@@ -1,8 +1,6 @@
 /* global DISABLE_FLAKEY */
 
 import { h, render, Component } from '../../src/preact';
-import { diff } from '../../src/vdom/diff';
-import { ATTR_KEY } from '../../src/constants';
 /** @jsx h */
 
 function getAttributes(node) {
