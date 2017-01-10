@@ -92,8 +92,6 @@ function idiff(dom, vnode, context, mountAll) {
 			dom = document.createTextNode(vnode);
 		}
 
-		// Mark for non-hydration updates
-		dom[ATTR_KEY] = true;
 		return dom;
 	}
 
@@ -201,7 +199,7 @@ function innerDiffNode(dom, vchildren, context, mountAll) {
 				keyedLen++;
 				keyed[key] = child;
 			}
-			else if (hydrating || props) {
+			else if (hydrating || props || child instanceof Text) {
 				children[childrenLen++] = child;
 			}
 		}
