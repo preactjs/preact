@@ -15,12 +15,13 @@ export const mounts = [];
 /** Diff recursion count, used to track the end of the diff cycle. */
 export let diffLevel = 0;
 
+const svgNamespace = "http://www.w3.org/2000/svg";
+
 /** Global flag indicating if the diff is currently within an SVG */
 let isSvgMode = false;
 
 /** Global flag indicating if the diff is performing hydration */
 let hydrating = false;
-
 
 /** Invoke queued componentDidMount lifecycle methods */
 export function flushMounts() {
@@ -42,7 +43,7 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 	// diffLevel having been 0 here indicates initial entry into the diff (not a subdiff)
 	if (!diffLevel++) {
 		// when first starting the diff, check if we're diffing an SVG or within an SVG
-		isSvgMode = parent instanceof SVGElement;
+		isSvgMode = parent && parent.namespaceURI === svgNamespace;
 
 		// hydration is inidicated by the existing element to be diffed not having a prop cache
 		hydrating = dom && !(ATTR_KEY in dom);
