@@ -45,7 +45,7 @@ declare namespace preact {
 
 		linkState:(name:string) => (event: Event) => void;
 
-		setState(state:StateType, opts?:any):void;
+		setState(state:StateType | ((prevState: StateType) => StateType), opts?:any):void;
 		abstract render(props:PropsType & ComponentProps, state:any):JSX.Element;
 	}
 
