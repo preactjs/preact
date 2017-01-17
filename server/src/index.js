@@ -134,7 +134,7 @@ export default function renderToString(vnode, context, opts, inner) {
 			if (name==='dangerouslySetInnerHTML') {
 				html = v && v.__html;
 			}
-			else if ((v || v===0 || v==='') && typeof v!=='object' && typeof v!=='function') {
+			else if ((v || v===0 || v==='') && typeof v!=='function') {
 				if (v===true || v==='') {
 					v = name;
 					// in non-xml mode, allow boolean attributes
