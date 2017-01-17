@@ -18,7 +18,7 @@ declare namespace preact {
 		nodeName:ComponentConstructor<any, any>|string;
 		attributes:{[name:string]:any};
 		children:VNode[];
-		key:string | number | any;
+		key:string;
 	}
 
 	interface ComponentLifecycle<PropsType, StateType> {
