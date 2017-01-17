@@ -25,7 +25,7 @@ describe('render', () => {
 
 		it('should collapse collapsible attributes', () => {
 			let rendered = render(<div class="" style="" foo={true} bar />),
-				expected = `<div foo bar></div>`;
+				expected = `<div class style foo bar></div>`;
 
 			expect(rendered).to.equal(expected);
 		});
@@ -254,13 +254,13 @@ describe('render', () => {
 			render(<Outer />);
 
 			expect(Outer.prototype.getChildContext).to.have.been.calledOnce;
-			expect(Inner.prototype.render).to.have.been.calledWith({}, {}, CONTEXT);
+			expect(Inner.prototype.render).to.have.been.calledWith(match({}), {}, CONTEXT);
 
 			CONTEXT.foo = 'bar';
 			render(<Outer {...PROPS} />);
 
 			expect(Outer.prototype.getChildContext).to.have.been.calledTwice;
-			expect(Inner.prototype.render).to.have.been.calledWith(PROPS, {}, CONTEXT);
+			expect(Inner.prototype.render).to.have.been.calledWith(match(PROPS), {}, CONTEXT);
 		});
 
 		it('should pass context to direct children', () => {
@@ -287,13 +287,13 @@ describe('render', () => {
 			render(<Outer />);
 
 			expect(Outer.prototype.getChildContext).to.have.been.calledOnce;
-			expect(Inner.prototype.render).to.have.been.calledWith({}, {}, CONTEXT);
+			expect(Inner.prototype.render).to.have.been.calledWith(match({}), {}, CONTEXT);
 
 			CONTEXT.foo = 'bar';
 			render(<Outer {...PROPS} />);
 
 			expect(Outer.prototype.getChildContext).to.have.been.calledTwice;
-			expect(Inner.prototype.render).to.have.been.calledWith(PROPS, {}, CONTEXT);
+			expect(Inner.prototype.render).to.have.been.calledWith(match(PROPS), {}, CONTEXT);
 
 			// make sure render() could make use of context.a
 			expect(Inner.prototype.render).to.have.returned(match({ children:['a'] }));
@@ -331,8 +331,8 @@ describe('render', () => {
 
 			render(<Outer />);
 
-			expect(Inner.prototype.render).to.have.been.calledWith({}, {}, { outerContext });
-			expect(InnerMost.prototype.render).to.have.been.calledWith({}, {}, { outerContext, innerContext });
+			expect(Inner.prototype.render).to.have.been.calledWith(match({}), {}, { outerContext });
+			expect(InnerMost.prototype.render).to.have.been.calledWith(match({}), {}, { outerContext, innerContext });
 		});
 	});
 
