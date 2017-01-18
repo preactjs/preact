@@ -45,14 +45,7 @@ export function isString(obj) {
  *	@private
  */
 export function hashToClassName(c) {
-	let str = '';
-	for (let prop in c) {
-		if (c[prop]) {
-			if (str) str += ' ';
-			str += prop;
-		}
-	}
-	return str;
+	return Object.keys(c).reduce((acc, x) => c[x] ? [...acc, x] : acc, []).join(' ');
 }
 
 
