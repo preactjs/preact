@@ -73,10 +73,19 @@ describe('render', () => {
 		});
 
 		it('should render SVG elements', () => {
-			let rendered = render(<svg viewBox="0 0 360 360"><use xlinkHref="#foo"></use></svg>),
-				expected = `<svg viewBox="0 0 360 360"><use xlink:href="#foo"></use></svg>`;
+			let rendered = render((
+				<svg>
+					<image xlinkHref="#" />
+					<foreignObject>
+						<div xlinkHref="#" />
+					</foreignObject>
+					<g>
+						<image xlinkHref="#" />
+					</g>
+				</svg>
+			));
 
-			expect(rendered).to.equal(expected);
+			expect(rendered).to.equal(`<svg><image xlink:href="#"></image><foreignObject><div xlinkHref="#"></div></foreignObject><g><image xlink:href="#"></image></g></svg>`);
 		});
 	});
 
