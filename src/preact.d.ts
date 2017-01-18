@@ -1,7 +1,7 @@
 declare namespace preact {
 	interface ComponentProps {
 		children?:JSX.Element[];
-		key?:string;
+		key?:string | number | any;
 	}
 
 	interface DangerouslySetInnerHTML {
