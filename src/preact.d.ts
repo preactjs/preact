@@ -48,6 +48,8 @@ declare namespace preact {
 		setState(state:StateType, callback?:() => void):void;
 		setState(fn:(prevState:StateType, props:PropsType) => StateType, callback?:() => void):void;
 
+		forceUpdate(): void;
+
 		abstract render(props:PropsType & ComponentProps, state:any):JSX.Element;
 	}
 
