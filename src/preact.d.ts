@@ -23,19 +23,12 @@ declare namespace preact {
 
 	interface ComponentLifecycle<PropsType, StateType> {
 		componentWillMount?():void;
-
 		componentDidMount?():void;
-
 		componentWillUnmount?():void;
-
 		componentDidUnmount?():void;
-
 		componentWillReceiveProps?(props:PropsType):void;
-
 		shouldComponentUpdate?(props:PropsType):boolean;
-
 		componentWillUpdate?():void;
-
 		componentDidUpdate?():void;
 	}
 
@@ -52,7 +45,8 @@ declare namespace preact {
 
 		linkState:(name:string) => (event: Event) => void;
 
-		setState(state:StateType, opts?:any):void;
+		setState(state:StateType, callback?:() => void):void;
+		setState(fn:(prevState:StateType, props:PropsType) => StateType, callback?:() => void):void;
 
 		forceUpdate(): void;
 
@@ -61,11 +55,8 @@ declare namespace preact {
 
 	function h<PropsType>(node:ComponentConstructor<PropsType, any>, params:PropsType, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
 	function h(node:string, params:JSX.HTMLAttributes&JSX.SVGAttributes&{[propName: string]: any}, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
-
 	function render(node:JSX.Element, parent:Element, mergeWith?:Element):Element;
-
 	function rerender():void;
-
 	function cloneElement(element:JSX.Element, props:any):JSX.Element;
 
 	var options:{
@@ -87,11 +78,9 @@ declare module "preact/devtools" {
 
 declare namespace JSX {
 	interface Element extends preact.VNode {
-
 	}
 
 	interface ElementClass extends preact.Component<any, any> {
-
 	}
 
 	interface ElementAttributesProperty {
@@ -175,10 +164,9 @@ declare namespace JSX {
 	type WheelEventHandler = EventHandler<WheelEvent>;
 	type AnimationEventHandler = EventHandler<AnimationEvent>;
 	type TransitionEventHandler = EventHandler<TransitionEvent>;
-
 	type GenericEventHandler = EventHandler<Event>;
 
-	interface DOMAttributed {
+	interface DOMAttributes {
 		// Clipboard Events
 		onCopy?:ClipboardEventHandler;
 		onCut?:ClipboardEventHandler;
@@ -271,7 +259,7 @@ declare namespace JSX {
 		onTransitionEnd?:TransitionEventHandler;
 	}
 
-	interface HTMLAttributes extends preact.PreactHTMLAttributes, DOMAttributed {
+	interface HTMLAttributes extends preact.PreactHTMLAttributes, DOMAttributes {
 		// Standard HTML Attributes
 		accept?:string;
 		acceptCharset?:string;
