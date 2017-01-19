@@ -26,10 +26,10 @@ declare namespace preact {
 		componentDidMount?():void;
 		componentWillUnmount?():void;
 		componentDidUnmount?():void;
-		componentWillReceiveProps?(props:PropsType):void;
-		shouldComponentUpdate?(props:PropsType):boolean;
-		componentWillUpdate?():void;
-		componentDidUpdate?():void;
+		componentWillReceiveProps?(nextProps:PropsType,nextContext:any):void;
+		shouldComponentUpdate?(nextProps:PropsType,nextState:StateType,nextContext:any):boolean;
+		componentWillUpdate?(nextProps:PropsType,nextState:StateType,nextContext:any):void;
+		componentDidUpdate?(previousProps:PropsType,previousState:StateType,previousContext:any):void;
 	}
 
 	interface ComponentConstructor<PropsType, StateType> {
