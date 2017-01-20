@@ -118,7 +118,7 @@ export default function renderToString(vnode, context, opts, inner, isSvgMode) {
 				name = 'class';
 			}
 			else if (isSvgMode && name.match(/^xlink\:?(.+)/)) {
-				name = name.toLowerCase().replace(/^xlink\:?(.+)/, 'xlink:$1')
+				name = name.toLowerCase().replace(/^xlink\:?(.+)/, 'xlink:$1');
 			}
 
 			if (name==='class' && v && typeof v==='object') {
