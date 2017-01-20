@@ -70,7 +70,7 @@ Preact supports modern browsers and IE9+. The chart below shows test status for 
 - :tophat: [**preact-classless-component**](https://github.com/ld0rman/preact-classless-component): create preact components without the class keyword
 - :hammer: [**preact-hyperscript**](https://github.com/queckezz/preact-hyperscript): Hyperscript-like syntax for creating elements
 - :white_check_mark: [**shallow-compare**](https://github.com/tkh44/shallow-compare): simplified `shouldComponentUpdate` helper.
-
+- :shaved_ice: [**preact-codemod**](https://github.com/vutran/preact-codemod): Transform your React code to Preact.
 
 ## Getting Started
 
