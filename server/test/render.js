@@ -71,6 +71,22 @@ describe('render', () => {
 
 			expect(rendered).to.equal(expected);
 		});
+
+		it('should render SVG elements', () => {
+			let rendered = render((
+				<svg>
+					<image xlinkHref="#" />
+					<foreignObject>
+						<div xlinkHref="#" />
+					</foreignObject>
+					<g>
+						<image xlinkHref="#" />
+					</g>
+				</svg>
+			));
+
+			expect(rendered).to.equal(`<svg><image xlink:href="#"></image><foreignObject><div xlinkHref="#"></div></foreignObject><g><image xlink:href="#"></image></g></svg>`);
+		});
 	});
 
 	describe('Functional Components', () => {
