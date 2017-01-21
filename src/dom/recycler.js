@@ -1,4 +1,4 @@
-import { SVG_NAMESPACE } from '../constants';
+import { ATTR_KEY, SVG_NAMESPACE } from '../constants';
 import { toLowerCase } from '../util';
 import { removeNode } from './index';
 
@@ -10,6 +10,15 @@ export function collectNode(node) {
 	removeNode(node);
 
 	if (node instanceof Element) {
+		if (node.nodeName === 'IMG') {
+			node.removeAttribute ('src');
+			delete node[ATTR_KEY].src;
+		}
+		if (node.nodeName === 'IMAGE') {
+			node.removeAttributeNS ('http://www.w3.org/1999/xlink', 'href');
+			delete node[ATTR_KEY].xlinkhref;
+		}
+
 		node._component = node._componentConstructor = null;
 
 		let name = node.normalizedNodeName || toLowerCase(node.nodeName);
