@@ -18,5 +18,3 @@ export const NON_DIMENSION_PROPS = {
 
 // DOM event types that do not bubble and should be attached via useCapture
 export const NON_BUBBLING_EVENTS = { blur:1, error:1, focus:1, load:1, resize:1, scroll:1 };
-
-export const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
