@@ -58,7 +58,7 @@ export default function renderToString(vnode, context, opts, inner, isSvgMode) {
 	let pretty = opts.pretty,
 		indentChar = typeof pretty==='string' ? pretty : '\t';
 
-	if (vnode==null) {
+	if (vnode==null || vnode===false) {
 		return '';
 	}
 

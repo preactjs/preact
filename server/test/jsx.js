@@ -125,17 +125,20 @@ describe('jsx', () => {
 
 	it('should render empty resolved children identically to no children', () => {
 		const Empty = () => null;
+		const False = () => false;
 		expect(renderJsx(
 			<div>
 				<a />
 				<b>{null}</b>
 				<c><Empty /></c>
+				<d><False /></d>
 			</div>
 		)).to.equal(dedent`
 			<div>
 				<a></a>
 				<b></b>
 				<c></c>
+				<d></d>
 			</div>
 		`);
 	});
