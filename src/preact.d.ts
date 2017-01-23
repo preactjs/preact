@@ -1,7 +1,7 @@
 declare namespace preact {
 	interface ComponentProps {
 		children?:JSX.Element[];
-		key?:string;
+		key?:string | number | any;
 	}
 
 	interface DangerouslySetInnerHTML {
@@ -26,10 +26,10 @@ declare namespace preact {
 		componentDidMount?():void;
 		componentWillUnmount?():void;
 		componentDidUnmount?():void;
-		componentWillReceiveProps?(props:PropsType):void;
-		shouldComponentUpdate?(props:PropsType):boolean;
-		componentWillUpdate?():void;
-		componentDidUpdate?():void;
+		componentWillReceiveProps?(nextProps:PropsType,nextContext:any):void;
+		shouldComponentUpdate?(nextProps:PropsType,nextState:StateType,nextContext:any):boolean;
+		componentWillUpdate?(nextProps:PropsType,nextState:StateType,nextContext:any):void;
+		componentDidUpdate?(previousProps:PropsType,previousState:StateType,previousContext:any):void;
 	}
 
 	interface ComponentConstructor<PropsType, StateType> {
@@ -45,7 +45,11 @@ declare namespace preact {
 
 		linkState:(name:string) => (event: Event) => void;
 
-		setState(state:StateType, opts?:any):void;
+		setState(state:StateType, callback?:() => void):void;
+		setState(fn:(prevState:StateType, props:PropsType) => StateType, callback?:() => void):void;
+
+		forceUpdate(): void;
+
 		abstract render(props:PropsType & ComponentProps, state:any):JSX.Element;
 	}
 
