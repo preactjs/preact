@@ -131,7 +131,8 @@ describe('jsx', () => {
 				<a />
 				<b>{null}</b>
 				<c><Empty /></c>
-				<d><False /></d>
+				<d>{false}</d>
+				<e><False /></e>
 			</div>
 		)).to.equal(dedent`
 			<div>
@@ -139,6 +140,7 @@ describe('jsx', () => {
 				<b></b>
 				<c></c>
 				<d></d>
+				<e></e>
 			</div>
 		`);
 	});
