@@ -45,8 +45,8 @@ declare namespace preact {
 
 		linkState:(name:string) => (event: Event) => void;
 
-		setState(state:StateType, callback?:() => void):void;
-		setState(fn:(prevState:StateType, props:PropsType) => StateType, callback?:() => void):void;
+		setState<K extends keyof StateType>(state:Pick<StateType, K>, callback?:() => void):void;
+		setState<K extends keyof StateType>(fn:(prevState:StateType, props:PropsType) => Pick<StateType, K>, callback?:() => void):void;
 
 		forceUpdate(): void;
 
