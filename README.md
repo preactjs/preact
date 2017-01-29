@@ -139,7 +139,7 @@ render((
 ), document.body);
 ```
 
-This should seem pretty straightforward if you've used [hyperscript] or one of its many friends.
+This should seem pretty straightforward if you've used hyperscript or one of its many friends. If you're not, the short of it is that the h function import gets used in the final, transpiled code as a drop in replacement for React.createElement, and so needs to be imported even if you don't explicitly use it in the code you write. Also note that if you're the kind of person who likes writing your React code in "pure JavaScript" (you know who you are) you will need to use h(...) wherever you would otherwise use React.createElement.
 
 Rendering hyperscript with a virtual DOM is pointless, though. We want to render components and have them updated when data changes - that's where the power of virtual DOM diffing shines. :star2:
 
