@@ -33,6 +33,7 @@ Preact supports modern browsers and IE9+. The chart below shows test status for 
 - [**TodoMVC**](https://preact-todomvc.surge.sh) _([Github Project](https://github.com/developit/preact-todomvc))_
 - [**Hacker News Minimal**](https://developit.github.io/hn_minimal/) _([Github Project](https://github.com/developit/hn_minimal))_
 - [**Preact Boilerplate**](https://preact-boilerplate.surge.sh) _([Github Project](https://github.com/developit/preact-boilerplate))_ :zap:
+- [**Preact Offline Starter**](https://preact-starter.now.sh) _([Github Project](https://github.com/lukeed/preact-starter))_ :100:
 - [**Preact Mobx Starter**](https://awaw00.github.io/preact-mobx-starter/) _([Github Project](https://github.com/awaw00/preact-mobx-starter))_ :sunny:
 - [**Preact Redux Example**](https://github.com/developit/preact-redux-example) :star:
 - [**Flickr Browser**](http://codepen.io/developit/full/VvMZwK/) (@ CodePen)
@@ -69,7 +70,7 @@ Preact supports modern browsers and IE9+. The chart below shows test status for 
 - :tophat: [**preact-classless-component**](https://github.com/ld0rman/preact-classless-component): create preact components without the class keyword
 - :hammer: [**preact-hyperscript**](https://github.com/queckezz/preact-hyperscript): Hyperscript-like syntax for creating elements
 - :white_check_mark: [**shallow-compare**](https://github.com/tkh44/shallow-compare): simplified `shouldComponentUpdate` helper.
-
+- :shaved_ice: [**preact-codemod**](https://github.com/vutran/preact-codemod): Transform your React code to Preact.
 
 ## Getting Started
 
@@ -138,7 +139,7 @@ render((
 ), document.body);
 ```
 
-This should seem pretty straightforward if you've used [hyperscript] or one of its many friends.
+This should seem pretty straightforward if you've used hyperscript or one of its many friends. If you're not, the short of it is that the h function import gets used in the final, transpiled code as a drop in replacement for React.createElement, and so needs to be imported even if you don't explicitly use it in the code you write. Also note that if you're the kind of person who likes writing your React code in "pure JavaScript" (you know who you are) you will need to use h(...) wherever you would otherwise use React.createElement.
 
 Rendering hyperscript with a virtual DOM is pointless, though. We want to render components and have them updated when data changes - that's where the power of virtual DOM diffing shines. :star2:
 
