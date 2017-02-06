@@ -53,14 +53,14 @@ describe('render', () => {
 
 		it('should self-close void elements', () => {
 			let rendered = render(<div><input type='text' /><wbr /></div>),
-				expected = `<div><input type="text"/><wbr/></div>`;
+				expected = `<div><input type="text" /><wbr /></div>`;
 
 			expect(rendered).to.equal(expected);
 		});
 
 		it('does not close void elements with closing tags', () => {
 			let rendered = render(<input><p>Hello World</p></input>),
-				expected = `<input/><p>Hello World</p>`;
+				expected = `<input /><p>Hello World</p>`;
 
 			expect(rendered).to.equal(expected);
 		});
