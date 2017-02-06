@@ -159,7 +159,7 @@ export default function renderToString(vnode, context, opts, inner, isSvgMode) {
 	s = `<${nodeName}${s}>`;
 
 	if (VOID_ELEMENTS.indexOf(nodeName)>-1) {
-		s = s.replace(/>$/, '/>');
+		s = s.replace(/>$/, ' />');
 	}
 
 	if (html) {
