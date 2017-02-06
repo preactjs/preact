@@ -55,7 +55,7 @@ describe('pretty', () => {
 				<img src="b.jpg" />
 				<b>hi</b>
 			</div>
-		)).to.equal(`<div>\n\thi\n\t<img src="a.jpg">\n\t<img src="b.jpg">\n\t<b>hi</b>\n</div>`);
+		)).to.equal(`<div>\n\thi\n\t<img src="a.jpg" />\n\t<img src="b.jpg" />\n\t<b>hi</b>\n</div>`);
 	});
 
 	it('should support empty tags', () => {
