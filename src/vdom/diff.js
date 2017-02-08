@@ -47,7 +47,7 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 		hydrating = dom && !(ATTR_KEY in dom);
 	}
 
-	let ret = idiff(dom, vnode, context, mountAll);
+	let ret = idiff(dom, vnode, context, mountAll, componentRoot);
 
 	// append the element if its a new parent
 	if (parent && ret.parentNode!==parent) parent.appendChild(ret);
@@ -63,7 +63,7 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 }
 
 
-function idiff(dom, vnode, context, mountAll) {
+function idiff(dom, vnode, context, mountAll, componentRoot) {
 	let ref = vnode && vnode.attributes && vnode.attributes.ref;
 
 
@@ -73,8 +73,19 @@ function idiff(dom, vnode, context, mountAll) {
 	}
 
 
-	// empty values (null & undefined) render as empty Text nodes
-	if (vnode==null) vnode = '';
+	// Manage empty values (null & undefined)
+	if (vnode==null) {
+		if (componentRoot) {
+			if (dom) {
+				// reuse current node if it's already a Comment node
+				if (dom.nodeType==8) return dom;
+				recollectNodeTree(dom);
+			}
+			return document.createComment('');
+		}
+		// render as empty Text node
+		vnode = '';
+	}
 
 
 	// Fast case: Strings create/update Text nodes.
