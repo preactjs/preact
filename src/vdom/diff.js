@@ -153,7 +153,7 @@ function idiff(dom, vnode, context, mountAll) {
 	}
 	// otherwise, if there are existing or new children, diff them:
 	else if (vchildren && vchildren.length || fc) {
-		innerDiffNode(out, vchildren, context, mountAll, !!props.dangerouslySetInnerHTML);
+		innerDiffNode(out, vchildren, context, mountAll, hydrating || !!props.dangerouslySetInnerHTML);
 	}
 
 
@@ -173,13 +173,13 @@ function idiff(dom, vnode, context, mountAll) {
 
 
 /** Apply child and attribute changes between a VNode and a DOM Node to the DOM.
- *	@param {Element} dom		Element whose children should be compared & mutated
- *	@param {Array} vchildren	Array of VNodes to compare to `dom.childNodes`
- *	@param {Object} context		Implicitly descendant context object (from most recent `getChildContext()`)
+ *	@param {Element} dom			Element whose children should be compared & mutated
+ *	@param {Array} vchildren		Array of VNodes to compare to `dom.childNodes`
+ *	@param {Object} context			Implicitly descendant context object (from most recent `getChildContext()`)
  *	@param {Boolean} mountAll
- *	@param {Boolean} absorb		If `true`, consumes externally created elements similar to hydration
+ *	@param {Boolean} isHydrating	If `true`, consumes externally created elements similar to hydration
  */
-function innerDiffNode(dom, vchildren, context, mountAll, absorb) {
+function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 	let originalChildren = dom.childNodes,
 		children = [],
 		keyed = {},
@@ -199,7 +199,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, absorb) {
 				keyedLen++;
 				keyed[key] = child;
 			}
-			else if (hydrating || absorb || props || child instanceof Text) {
+			else if (isHydrating || props || child instanceof Text) {
 				children[childrenLen++] = child;
 			}
 		}
@@ -227,7 +227,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, absorb) {
 			else if (!child && min<childrenLen) {
 				for (j=min; j<childrenLen; j++) {
 					c = children[j];
-					if (c && isSameNodeType(c, vchild)) {
+					if (c && isSameNodeType(c, vchild, isHydrating)) {
 						child = c;
 						children[j] = undefined;
 						if (j===childrenLen-1) childrenLen--;
