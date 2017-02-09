@@ -88,6 +88,8 @@ declare namespace JSX {
 	}
 
 	interface SVGAttributes {
+		class?:string | { [key:string]: boolean };
+		className?:string | { [key:string]: boolean };
 		clipPath?:string;
 		cx?:number | string;
 		cy?:number | string;
