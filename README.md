@@ -34,7 +34,7 @@ Preact supports modern browsers and IE9+. The chart below shows test status for 
 - [**Hacker News Minimal**](https://developit.github.io/hn_minimal/) _([Github Project](https://github.com/developit/hn_minimal))_
 - [**Preact Boilerplate**](https://preact-boilerplate.surge.sh) _([Github Project](https://github.com/developit/preact-boilerplate))_ :zap:
 - [**Preact Offline Starter**](https://preact-starter.now.sh) _([Github Project](https://github.com/lukeed/preact-starter))_ :100:
-- [**Preact PWA**](https://preact-pwa.appspot.com/) _([Github Project](https://github.com/ezekielchentnik/preact-pwa))_ :cheese_wedge:
+- [**Preact PWA**](https://preact-pwa.appspot.com/) _([Github Project](https://github.com/ezekielchentnik/preact-pwa))_ :hamburger:
 - [**Preact Mobx Starter**](https://awaw00.github.io/preact-mobx-starter/) _([Github Project](https://github.com/awaw00/preact-mobx-starter))_ :sunny:
 - [**Preact Redux Example**](https://github.com/developit/preact-redux-example) :star:
 - [**Flickr Browser**](http://codepen.io/developit/full/VvMZwK/) (@ CodePen)
