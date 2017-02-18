@@ -72,6 +72,7 @@ Preact supports modern browsers and IE9+. The chart below shows test status for 
 - :hammer: [**preact-hyperscript**](https://github.com/queckezz/preact-hyperscript): Hyperscript-like syntax for creating elements
 - :white_check_mark: [**shallow-compare**](https://github.com/tkh44/shallow-compare): simplified `shouldComponentUpdate` helper.
 - :shaved_ice: [**preact-codemod**](https://github.com/vutran/preact-codemod): Transform your React code to Preact.
+- :construction_worker: [**preact-helmet**](https://github.com/download/preact-helmet): A document head manager for Preact
 
 ## Getting Started
 
