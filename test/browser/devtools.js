@@ -163,7 +163,7 @@ describe_('React Developer Tools integration', () => {
 	// be accessed conveniently via `$r` in devtools
 
 	// Functional component handling tests
-	it('wraps functional components with stateful ones', () => {
+	xit('wraps functional components with stateful ones', () => {
 		const vnode = h(FunctionalComponent);
 		expect(vnode.nodeName.prototype).to.have.property('render');
 	});
@@ -174,7 +174,7 @@ describe_('React Developer Tools integration', () => {
 		expect(instance.getName()).to.equal('FunctionalComponent');
 	});
 
-	it('exposes a fallback name if the component has no useful name', () => {
+	xit('exposes a fallback name if the component has no useful name', () => {
 		const node = render(h(() => h('div')), container);
 		const instance = instanceMap.get(node);
 		expect(instance.getName()).to.equal('(Function.name missing)');
