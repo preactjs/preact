@@ -87,7 +87,7 @@ declare namespace JSX {
 		props:any;
 	}
 
-	interface SVGAttributes {
+	interface SVGAttributes extends HTMLAttributes {
 		clipPath?:string;
 		cx?:number | string;
 		cy?:number | string;
