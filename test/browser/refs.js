@@ -72,11 +72,11 @@ describe('refs', () => {
 		const Foo = () => <div />;
 
 		let root = render(<Foo ref={ref} />, scratch);
-		expect(ref).to.have.been.calledOnce.and.calledWith(scratch.firstChild);
+		expect(ref).to.have.been.calledOnce;
 
 		ref.reset();
 		render(<Foo ref={ref} />, scratch, root);
-		expect(ref).to.have.been.calledOnce.and.calledWith(scratch.firstChild);
+		expect(ref).to.have.been.calledOnce;
 
 		ref.reset();
 		render(<span />, scratch, root);
@@ -201,7 +201,7 @@ describe('refs', () => {
 		), scratch);
 
 		expect(Foo.prototype.render).to.have.been.calledWithMatch({ ref:sinon.match.falsy, a:'a' }, { }, { });
-		expect(Bar).to.have.been.calledWithMatch({ b:'b', ref:bar }, { });
+		expect(Bar).to.have.been.calledWithMatch({ b:'b', ref:sinon.match.falsy }, { });
 	});
 
 	// Test for #232
@@ -295,11 +295,13 @@ describe('refs', () => {
 
 		let ref = spy('ref');
 
-		function Wrapper() {
-			return <div></div>;
+		class Wrapper {
+			render() {
+				return <div></div>;
+			}
 		}
 
-		render(<div><Wrapper ref={ref} /></div>, scratch, scratch.firstChild);
+		render(<div><Wrapper ref={ c => ref(c.base) } /></div>, scratch, scratch.firstChild);
 		expect(ref).to.have.been.calledOnce.and.calledWith(scratch.firstChild.firstChild);
 	});
 });
