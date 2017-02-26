@@ -11,10 +11,11 @@ import { removeNode } from '../dom/index';
 
 
 /** Set a component's `props` (generally derived from JSX attributes).
+ *	@param {Component} component
  *	@param {Object} props
- *	@param {Object} [opts]
- *	@param {boolean} [opts.renderSync=false]	If `true` and {@link options.syncComponentUpdates} is `true`, triggers synchronous rendering.
- *	@param {boolean} [opts.render=true]			If `false`, no render will be triggered.
+ *	@param {number=} opts
+ *	@param {Object=} context
+ *	@param {boolean=} mountAll
  */
 export function setComponentProps(component, props, opts, context, mountAll) {
 	if (component._disable) return;
@@ -56,9 +57,9 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 
 /** Render a Component, triggering necessary lifecycle events and taking High-Order Components into account.
  *	@param {Component} component
- *	@param {Object} [opts]
- *	@param {boolean} [opts.build=false]		If `true`, component will build and store a DOM node if not already associated with one.
- *	@private
+ *	@param {number=} opts
+ *	@param {boolean=} mountAll
+ *  @param {boolean=} isChild
  */
 export function renderComponent(component, opts, mountAll, isChild) {
 	if (component._disable) return;
@@ -198,7 +199,9 @@ export function renderComponent(component, opts, mountAll, isChild) {
 /** Apply the Component referenced by a VNode to the DOM.
  *	@param {Element} dom	The DOM node to mutate
  *	@param {VNode} vnode	A Component-referencing VNode
- *	@returns {Element} dom	The created/mutated element
+ *	@param {Object} context
+ *	@param {boolean=} mountAll
+ *	@return {Element} dom	The created/mutated element
  *	@private
  */
 export function buildComponentFromVNode(dom, vnode, context, mountAll) {
@@ -243,8 +246,8 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 
 
 /** Remove a component from the DOM and recycle it.
- *	@param {Element} dom			A DOM node from which to unmount the given Component
- *	@param {Component} component	The Component instance to unmount
+ *	@param {Element} component A DOM node from which to unmount the given Component
+ *	@param {boolean} remove
  *	@private
  */
 export function unmountComponent(component, remove) {

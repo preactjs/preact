@@ -32,9 +32,13 @@ export function flushMounts() {
 
 
 /** Apply differences in a given vnode (and it's deep children) to a real DOM Node.
- *	@param {Element} [dom=null]		A DOM node to mutate into the shape of the `vnode`
- *	@param {VNode} vnode			A VNode (with descendants forming a tree) representing the desired DOM structure
- *	@returns {Element} dom			The created/mutated element
+ *	@param {Element} dom A DOM node to mutate into the shape of the `vnode`
+ *	@param {VNode} vnode  VNode (with descendants forming a tree) representing the desired DOM structure
+ *	@param {Object=} context
+ *	@param {boolean=} mountAll
+ *  @param {Element=} parent
+ *	@param {boolean=} componentRoot
+ *	@return {Element} dom			The created/mutated element
  *	@private
  */
 export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
@@ -174,10 +178,10 @@ function idiff(dom, vnode, context, mountAll) {
 
 /** Apply child and attribute changes between a VNode and a DOM Node to the DOM.
  *	@param {Element} dom		Element whose children should be compared & mutated
- *	@param {Array} vchildren	Array of VNodes to compare to `dom.childNodes`
+ *	@param {Array<VNode>} vchildren	Array of VNodes to compare to `dom.childNodes`
  *	@param {Object} context		Implicitly descendant context object (from most recent `getChildContext()`)
- *	@param {Boolean} mountAll
- *	@param {Boolean} absorb		If `true`, consumes externally created elements similar to hydration
+ *	@param {boolean} mountAll
+ *	@param {boolean} absorb		If `true`, consumes externally created elements similar to hydration
  */
 function innerDiffNode(dom, vchildren, context, mountAll, absorb) {
 	let originalChildren = dom.childNodes,
@@ -269,8 +273,8 @@ function innerDiffNode(dom, vchildren, context, mountAll, absorb) {
 
 
 /** Recursively recycle (or just unmount) a node an its descendants.
- *	@param {Node} node						DOM node to start unmount/removal from
- *	@param {Boolean} [unmountOnly=false]	If `true`, only triggers unmount lifecycle, skips removal
+ *	@param {Node} node DOM node to start unmount/removal from
+ *	@param {boolean=} unmountOnly `true`, only triggers unmount lifecycle, skips removal
  */
 export function recollectNodeTree(node, unmountOnly) {
 	let component = node._component;

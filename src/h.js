@@ -7,10 +7,10 @@ const stack = [];
 const EMPTY_CHILDREN = [];
 
 /** JSX/hyperscript reviver
-*	Benchmarks: https://esbench.com/bench/57ee8f8e330ab09900a1a1a0
- *	@see http://jasonformat.com/wtf-is-jsx
- *	@public
- *  @example
+ *  Benchmarks: https://esbench.com/bench/57ee8f8e330ab09900a1a1a0
+ *  @param {string} nodeName
+ *  @param {Object|undefined} attributes
+ *  @param {...*}
  *  /** @jsx h *\/
  *  import { render, h } from 'preact';
  *  render(<span>foo</span>, document.body);

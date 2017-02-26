@@ -1,12 +1,11 @@
-/** Global options
- *	@public
- *	@namespace options {Object}
+/**
+ * @type {Options}
  */
 export default {
 
 	/** If `true`, `prop` changes trigger synchronous component updates.
 	 *	@name syncComponentUpdates
-	 *	@type Boolean
+	 *	@type boolean
 	 *	@default true
 	 */
 	//syncComponentUpdates: true,

@@ -1,5 +1,5 @@
 /** Copy own-properties from `props` onto `obj`.
- *	@returns obj
+ *	@return obj
  *	@private
  */
 export function extend(obj, props) {
