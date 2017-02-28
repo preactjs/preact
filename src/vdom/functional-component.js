@@ -21,6 +21,5 @@ export function isFunctionalComponent(vnode) {
  *	@private
  */
 export function buildFunctionalComponent(vnode, context) {
-  let /** @type {!NodeName} */ nodeName = vnode.nodeName;
-  return (nodeName())(getNodeProps(vnode), context || EMPTY);
+  return /** @type {!NodeName} */(vnode.nodeName)()(getNodeProps(vnode), context || EMPTY);
 }
