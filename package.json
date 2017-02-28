@@ -12,7 +12,7 @@
     "clean": "rimraf dist/ aliases.js aliases.js.map  devtools.js devtools.js.map",
     "copy-flow-definition": "copyfiles -f src/preact.js.flow dist",
     "copy-typescript-definition": "copyfiles -f src/preact.d.ts dist",
-    "build": "npm-run-all --silent clean transpile copy-flow-definition copy-typescript-definition strip optimize minify size",
+    "build": "npm-run-all --silent clean transpile",
     "transpile:main": "rollup -c config/rollup.config.js -m dist/preact.dev.js.map -f umd -n preact src/preact.js -o dist/preact.dev.js",
     "transpile:devtools": "rollup -c config/rollup.config.devtools.js -o devtools.js -m devtools.js.map",
     "transpile:aliases": "rollup -c config/rollup.config.aliases.js -m aliases.js.map -f umd -n preact src/preact.js -o aliases.js",

@@ -1,7 +1,7 @@
 /**
  * Virtual DOM Node
  * @constructor
- * @param {string|Function} nodeName
+ * @param {(string|!NodeName)} nodeName
  * @param {Object|undefined} attributes
  * @param {Array<VNode>|undefined} children
  */

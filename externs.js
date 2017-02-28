@@ -1,13 +1,21 @@
 /**
  * @constructor
- * @param {string|Function} nodeName
+ * @param {(string|!NodeName)} nodeName
  * @param {Object|undefined} attributes
  * @param {Array<VNode>|undefined} children
  * @return {undefined}
  */
 function VNode(nodeName, attributes, children) {}
 
-/** @type {string|Function} */
+/** @record
+ * @return {?}
+ */
+function NodeName() { }
+
+/** @type {Object} */
+NodeName.prototype.defaultProps
+
+/** @type {(string|!NodeName)} */
 VNode.prototype.nodeName;
 
 /** @type {Object|undefined} */
