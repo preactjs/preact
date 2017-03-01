@@ -36,6 +36,16 @@ declare namespace preact {
 		new (props?:PropsType):Component<PropsType, StateType>;
 	}
 
+	interface FunctionalComponent<PropsType> {
+		(props:PropsType & ComponentProps, context?:any):JSX.Element;
+		displayName?:string;
+		defaultProps?:any;
+	}
+
+	// An "inclusive" component is a component that is either a functional
+	// component or a more full-fledged component.
+	type InclusiveComponent<PropsType, StateType> = FunctionalComponent<PropsType> | typeof Component;
+
 	abstract class Component<PropsType, StateType> implements ComponentLifecycle<PropsType, StateType> {
 		constructor(props?:PropsType);
 
