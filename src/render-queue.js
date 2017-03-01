@@ -4,7 +4,6 @@ import { renderComponent } from './vdom/component';
 
 /** Managed queue of dirty components to be re-rendered */
 
-// items/itemsOffline swap on each rerender() call (just a simple pool technique)
 let items = [];
 
 export function enqueueRender(component) {

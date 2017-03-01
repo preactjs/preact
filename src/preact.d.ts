@@ -1,7 +1,7 @@
 declare namespace preact {
 	interface ComponentProps {
 		children?:JSX.Element[];
-		key?:string;
+		key?:string | number | any;
 	}
 
 	interface DangerouslySetInnerHTML {
@@ -23,20 +23,13 @@ declare namespace preact {
 
 	interface ComponentLifecycle<PropsType, StateType> {
 		componentWillMount?():void;
-
 		componentDidMount?():void;
-
 		componentWillUnmount?():void;
-
 		componentDidUnmount?():void;
-
-		componentWillReceiveProps?(props:PropsType):void;
-
-		shouldComponentUpdate?(props:PropsType):boolean;
-
-		componentWillUpdate?():void;
-
-		componentDidUpdate?():void;
+		componentWillReceiveProps?(nextProps:PropsType,nextContext:any):void;
+		shouldComponentUpdate?(nextProps:PropsType,nextState:StateType,nextContext:any):boolean;
+		componentWillUpdate?(nextProps:PropsType,nextState:StateType,nextContext:any):void;
+		componentDidUpdate?(previousProps:PropsType,previousState:StateType,previousContext:any):void;
 	}
 
 	interface ComponentConstructor<PropsType, StateType> {
@@ -52,18 +45,18 @@ declare namespace preact {
 
 		linkState:(name:string) => (event: Event) => void;
 
-		setState(state:StateType, opts?:any):void;
+		setState<K extends keyof StateType>(state:Pick<StateType, K>, callback?:() => void):void;
+		setState<K extends keyof StateType>(fn:(prevState:StateType, props:PropsType) => Pick<StateType, K>, callback?:() => void):void;
+
+		forceUpdate(): void;
 
 		abstract render(props:PropsType & ComponentProps, state:any):JSX.Element;
 	}
 
 	function h<PropsType>(node:ComponentConstructor<PropsType, any>, params:PropsType, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
 	function h(node:string, params:JSX.HTMLAttributes&JSX.SVGAttributes&{[propName: string]: any}, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
-
 	function render(node:JSX.Element, parent:Element, mergeWith?:Element):Element;
-
 	function rerender():void;
-
 	function cloneElement(element:JSX.Element, props:any):JSX.Element;
 
 	var options:{
@@ -85,18 +78,16 @@ declare module "preact/devtools" {
 
 declare namespace JSX {
 	interface Element extends preact.VNode {
-
 	}
 
 	interface ElementClass extends preact.Component<any, any> {
-
 	}
 
 	interface ElementAttributesProperty {
 		props:any;
 	}
 
-	interface SVGAttributes {
+	interface SVGAttributes extends HTMLAttributes {
 		clipPath?:string;
 		cx?:number | string;
 		cy?:number | string;
@@ -173,10 +164,9 @@ declare namespace JSX {
 	type WheelEventHandler = EventHandler<WheelEvent>;
 	type AnimationEventHandler = EventHandler<AnimationEvent>;
 	type TransitionEventHandler = EventHandler<TransitionEvent>;
-
 	type GenericEventHandler = EventHandler<Event>;
 
-	interface DOMAttributed {
+	interface DOMAttributes {
 		// Clipboard Events
 		onCopy?:ClipboardEventHandler;
 		onCut?:ClipboardEventHandler;
@@ -269,7 +259,7 @@ declare namespace JSX {
 		onTransitionEnd?:TransitionEventHandler;
 	}
 
-	interface HTMLAttributes extends preact.PreactHTMLAttributes, DOMAttributed {
+	interface HTMLAttributes extends preact.PreactHTMLAttributes, DOMAttributes {
 		// Standard HTML Attributes
 		accept?:string;
 		acceptCharset?:string;

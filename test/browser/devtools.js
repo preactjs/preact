@@ -231,4 +231,30 @@ describe_('React Developer Tools integration', () => {
 		unmountComponent(node._component, true);
 		expect(Object.keys(renderer.Mount._instancesByReactRootID).length).to.equal(0);
 	});
+
+	it('counts root components correctly when a root renders a composite child', () => {
+		function Child() {
+			return h('main');
+		}
+		function Parent() {
+			return h(Child);
+		}
+
+		render(h(Parent), container);
+
+		expect(Object.keys(renderer.Mount._instancesByReactRootID).length).to.equal(1);
+	});
+
+	it('counts root components correctly when a native element has a composite child', () => {
+		function Link() {
+			return h('a');
+		}
+		function Root() {
+			return h('div', {}, h(Link));
+		}
+
+		render(h(Root), container);
+
+		expect(Object.keys(renderer.Mount._instancesByReactRootID).length).to.equal(1);
+	});
 });
