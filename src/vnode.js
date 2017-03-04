@@ -1,13 +1,9 @@
 /**
  * Virtual DOM Node
- * @constructor
- * @param {(string|!NodeName)} nodeName
- * @param {Object|undefined} attributes
- * @param {Array<VNode>|undefined} children
  */
-export function VNode(nodeName, attributes, children) {
+export function VNode(nodeName, opt_attributes, opt_children) {
 	this.nodeName = nodeName;
-	this.attributes = attributes;
-	this.children = children;
+	this.attributes = opt_attributes;
+	this.children = opt_children;
 	this.key = attributes && attributes.key;
 }

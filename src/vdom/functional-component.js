@@ -16,10 +16,9 @@ export function isFunctionalComponent(vnode) {
 
 
 
-/** Construct a resultant VNode from a VNode referencing a stateless functional component.
- *	@param {VNode} vnode	A VNode with a `nodeName` property that is a reference to a function.
- *	@private
+/**
+ * Construct a resultant VNode from a VNode referencing a stateless functional component.
  */
 export function buildFunctionalComponent(vnode, context) {
-  return /** @type {!NodeName} */(vnode.nodeName)()(getNodeProps(vnode), context || EMPTY);
+  return vnode.nodeName()(getNodeProps(vnode), context || EMPTY);
 }

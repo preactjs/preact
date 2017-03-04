@@ -1,11 +1,10 @@
 /**
  * @constructor
  * @param {(string|!NodeName)} nodeName
- * @param {Object|undefined} attributes
- * @param {Array<VNode>|undefined} children
- * @return {undefined}
+ * @param {Object=} opt_attributes
+ * @param {Array<VNode>=} opt_children
  */
-function VNode(nodeName, attributes, children) {}
+function VNode(nodeName, opt_attributes, opt_children) {}
 
 /** @record
  * @return {?}
@@ -82,7 +81,7 @@ Component.prototype.shouldComponentUpdate = function(nextProps, nextState, nextC
 /**
  *	@param {string} key		The path to set - can be a dot-notated deep key
  *	@param {string} [eventPath]	If set, attempts to find the new state value at a given dot-notated path within the object passed to the linkedState setter.
- *	@return {Function} linkStateSetter(e)
+ *	@return {function(!Event)}
  */
 Component.prototype.linkState = function(key, eventPath){};
 
@@ -109,3 +108,12 @@ Component.prototype.forceUpdate = function(){}
 
 /** @typedef {{syncComponentUpdates: (boolean|undefined), vnode: (Function|undefined), afterMount: (Function|undefined), beforeUnmount: (Function|undefined)}}*/
 var Options;
+
+
+/**
+ * @param {!{nodeName: !NodeName}} vnode
+ * @param {?} context
+ * @return {?}
+ */
+function buildFunctionalComponent(vnode, context) {}
+

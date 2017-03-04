@@ -9,10 +9,10 @@ const EMPTY_CHILDREN = [];
 /** JSX/hyperscript reviver
  *  Benchmarks: https://esbench.com/bench/57ee8f8e330ab09900a1a1a0
  *  @param {(string|!NodeName)} nodeName
- *  @param {(Object|undefined)} attributes
- *  @param {...?} args
+ *  @param {Object=} attributes
+ *  @param {...?} var_args
  */
-export function h(nodeName, attributes) {
+export function h(nodeName, attributes, var_args) {
 	let children, lastSimple, child, simple, i;
 	for (i=arguments.length; i-- > 2; ) {
 		stack.push(arguments[i]);
