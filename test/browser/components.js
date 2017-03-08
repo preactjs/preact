@@ -157,7 +157,28 @@ describe('Components', () => {
 		expect(scratch.innerHTML, 'switching to textnode 2').to.equal('asdf');
 	});
 
-		// Test for Issue #254
+	// Test for Issue #430
+	it('should render components with empty roots', () => {
+		let comp;
+
+		class Comp extends Component {
+			render(_, { alt }) {
+				return alt ? <div></div> : null;
+			}
+		}
+
+		render(<Comp ref={c=>comp=c} />, scratch);
+
+		comp.setState({ alt:true });
+		comp.forceUpdate();
+		comp.setState({ alt:false });
+		comp.forceUpdate();
+
+		expect(scratch.firstChild._component == comp, 'checking mounted component').to.be.true;
+		expect(scratch.childNodes.length, 'checking nodes count').to.equal(1);
+	});
+
+	// Test for Issue #254
 	it('should not recycle common class children with different keys', () => {
 		let idx = 0;
 		let msgs = ['A','B','C','D','E','F','G','H'];
