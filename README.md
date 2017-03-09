@@ -14,7 +14,7 @@ As one would expect coming from React, Components are simple building blocks for
 [![travis](https://travis-ci.org/developit/preact.svg?branch=master)](https://travis-ci.org/developit/preact)
 [![coveralls](https://img.shields.io/coveralls/developit/preact/master.svg)](https://coveralls.io/github/developit/preact)
 [![Preact Slack Community](https://preact-slack.now.sh/badge.svg)](https://preact-slack.now.sh)
-[![OpenCollective Backers](https://opencollective.com/preact/backers/badge.svg)](#backers) 
+[![OpenCollective Backers](https://opencollective.com/preact/backers/badge.svg)](#backers)
 [![OpenCollective Sponsors](https://opencollective.com/preact/sponsors/badge.svg)](#sponsors)
 
 Preact supports modern browsers and IE9+. The chart below shows test status for `master`:
@@ -34,6 +34,7 @@ Preact supports modern browsers and IE9+. The chart below shows test status for 
 - [**Hacker News Minimal**](https://developit.github.io/hn_minimal/) _([Github Project](https://github.com/developit/hn_minimal))_
 - [**Preact Boilerplate**](https://preact-boilerplate.surge.sh) _([Github Project](https://github.com/developit/preact-boilerplate))_ :zap:
 - [**Preact Offline Starter**](https://preact-starter.now.sh) _([Github Project](https://github.com/lukeed/preact-starter))_ :100:
+- [**Preact PWA**](https://preact-pwa.appspot.com/) _([Github Project](https://github.com/ezekielchentnik/preact-pwa))_ :hamburger:
 - [**Preact Mobx Starter**](https://awaw00.github.io/preact-mobx-starter/) _([Github Project](https://github.com/awaw00/preact-mobx-starter))_ :sunny:
 - [**Preact Redux Example**](https://github.com/developit/preact-redux-example) :star:
 - [**Flickr Browser**](http://codepen.io/developit/full/VvMZwK/) (@ CodePen)
@@ -71,6 +72,8 @@ Preact supports modern browsers and IE9+. The chart below shows test status for 
 - :hammer: [**preact-hyperscript**](https://github.com/queckezz/preact-hyperscript): Hyperscript-like syntax for creating elements
 - :white_check_mark: [**shallow-compare**](https://github.com/tkh44/shallow-compare): simplified `shouldComponentUpdate` helper.
 - :shaved_ice: [**preact-codemod**](https://github.com/vutran/preact-codemod): Transform your React code to Preact.
+- :construction_worker: [**preact-helmet**](https://github.com/download/preact-helmet): A document head manager for Preact
+- :necktie: [**preact-delegate**](https://github.com/NekR/preact-delegate): Delegate DOM events
 
 ## Getting Started
 
