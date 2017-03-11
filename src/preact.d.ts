@@ -39,6 +39,9 @@ declare namespace preact {
 	abstract class Component<PropsType, StateType> implements ComponentLifecycle<PropsType, StateType> {
 		constructor(props?:PropsType);
 
+		static displayName?:string;
+		static defaultProps?:any;
+
 		state:StateType;
 		props:PropsType & ComponentProps;
 		base:HTMLElement;
@@ -87,7 +90,7 @@ declare namespace JSX {
 		props:any;
 	}
 
-	interface SVGAttributes {
+	interface SVGAttributes extends HTMLAttributes {
 		clipPath?:string;
 		cx?:number | string;
 		cy?:number | string;
