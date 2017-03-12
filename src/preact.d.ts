@@ -1,7 +1,8 @@
 declare namespace preact {
-	interface ComponentProps {
+	interface ComponentProps<C extends Component<any, any>> {
 		children?:JSX.Element[];
 		key?:string | number | any;
+		ref?:(el: C) => void;
 	}
 
 	interface DangerouslySetInnerHTML {
@@ -43,7 +44,7 @@ declare namespace preact {
 		static defaultProps?:any;
 
 		state:StateType;
-		props:PropsType & ComponentProps;
+		props:PropsType & ComponentProps<this>;
 		base:HTMLElement;
 
 		linkState:(name:string) => (event: Event) => void;
@@ -53,7 +54,7 @@ declare namespace preact {
 
 		forceUpdate(): void;
 
-		abstract render(props:PropsType & ComponentProps, state:any):JSX.Element;
+		abstract render(props:PropsType & ComponentProps<this>, state:any):JSX.Element;
 	}
 
 	function h<PropsType>(node:ComponentConstructor<PropsType, any>, params:PropsType, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;

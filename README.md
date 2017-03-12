@@ -48,6 +48,8 @@ Preact supports modern browsers and IE9+. The chart below shows test status for 
 - [**GuriVR**](https://gurivr.com) _([Github Project](https://github.com/opennewslabs/guri-vr))_
 - [**V2EX Preact**](https://github.com/yanni4night/v2ex-preact)
 - [**BigWebQuiz**](https://bigwebquiz.com/) _([Github Project](https://github.com/jakearchibald/big-web-quiz))_
+- [**Color Picker**](https://colors.now.sh) _([Github Project](https://github.com/lukeed/colors-app))_ :art:
+
 
 ## Libraries & Add-ons
 
