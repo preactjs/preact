@@ -68,7 +68,7 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 
 
 function idiff(dom, vnode, context, mountAll) {
-	let ref = vnode && vnode.attributes && vnode.attributes.ref;
+	let ref = vnode && vnode.attributes.ref;
 
 
 	// Resolve ephemeral Pure Functional Components
@@ -150,13 +150,13 @@ function idiff(dom, vnode, context, mountAll) {
 	}
 
 	// Optimization: fast-path for elements containing a single TextNode:
-	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc && fc instanceof Text && !fc.nextSibling) {
+	if (!hydrating && vchildren.length===1 && typeof vchildren[0]==='string' && fc && fc instanceof Text && !fc.nextSibling) {
 		if (fc.nodeValue!=vchildren[0]) {
 			fc.nodeValue = vchildren[0];
 		}
 	}
 	// otherwise, if there are existing or new children, diff them:
-	else if (vchildren && vchildren.length || fc) {
+	else if (vchildren.length || fc) {
 		innerDiffNode(out, vchildren, context, mountAll, !!props.dangerouslySetInnerHTML);
 	}
 
@@ -316,11 +316,9 @@ function diffAttributes(dom, attrs, old) {
 	}
 
 	// add new & update changed attributes
-	if (attrs) {
-		for (name in attrs) {
-			if (name!=='children' && name!=='innerHTML' && (!(name in old) || attrs[name]!==(name==='value' || name==='checked' ? dom[name] : old[name]))) {
-				setAccessor(dom, name, old[name], old[name] = attrs[name], isSvgMode);
-			}
+	for (name in attrs) {
+		if (name!=='children' && name!=='innerHTML' && (!(name in old) || attrs[name]!==(name==='value' || name==='checked' ? dom[name] : old[name]))) {
+			setAccessor(dom, name, old[name], old[name] = attrs[name], isSvgMode);
 		}
 	}
 }
