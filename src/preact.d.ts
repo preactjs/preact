@@ -40,6 +40,9 @@ declare namespace preact {
 	abstract class Component<PropsType, StateType> implements ComponentLifecycle<PropsType, StateType> {
 		constructor(props?:PropsType);
 
+		static displayName?:string;
+		static defaultProps?:any;
+
 		state:StateType;
 		props:PropsType & ComponentProps<this>;
 		base:HTMLElement;
