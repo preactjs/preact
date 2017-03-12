@@ -48,6 +48,8 @@ Preact supports modern browsers and IE9+. The chart below shows test status for 
 - [**GuriVR**](https://gurivr.com) _([Github Project](https://github.com/opennewslabs/guri-vr))_
 - [**V2EX Preact**](https://github.com/yanni4night/v2ex-preact)
 - [**BigWebQuiz**](https://bigwebquiz.com/) _([Github Project](https://github.com/jakearchibald/big-web-quiz))_
+- [**Color Picker**](https://colors.now.sh) _([Github Project](https://github.com/lukeed/colors-app))_ :art:
+
 
 ## Libraries & Add-ons
 
@@ -73,6 +75,7 @@ Preact supports modern browsers and IE9+. The chart below shows test status for 
 - :white_check_mark: [**shallow-compare**](https://github.com/tkh44/shallow-compare): simplified `shouldComponentUpdate` helper.
 - :shaved_ice: [**preact-codemod**](https://github.com/vutran/preact-codemod): Transform your React code to Preact.
 - :construction_worker: [**preact-helmet**](https://github.com/download/preact-helmet): A document head manager for Preact
+- :necktie: [**preact-delegate**](https://github.com/NekR/preact-delegate): Delegate DOM events
 
 ## Getting Started
 
