@@ -86,6 +86,10 @@ function createReactCompositeComponent(component) {
 	const _currentElement = createReactElement(component);
 	const node = component.base;
 
+	if (!component.forceUpdate || !component.setState) {
+		console.warn('Warning: Preact encountered a Component which does not extend Preact.Component. Please ensure that you are rendering valid Preact component for ' + component.constructor.name);
+	}
+
 	let instance = {
 		// --- ReactDOMComponent properties
 		getName() {
@@ -94,8 +98,8 @@ function createReactCompositeComponent(component) {
 		_currentElement: createReactElement(component),
 		props: component.props,
 		state: component.state,
-		forceUpdate: component.forceUpdate.bind(component),
-		setState: component.setState.bind(component),
+		forceUpdate: component.forceUpdate && component.forceUpdate.bind(component),
+		setState: component.setState && component.setState.bind(component),
 
 		// --- Additional properties used by preact devtools
 		node
