@@ -70,13 +70,17 @@ export function setAccessor(node, name, old, value, isSvg) {
 	}
 	else {
 		let ns = isSvg && name.match(/^xlink\:?(.+)/);
+		if (ns) {
+			name = toLowerCase(ns[1]);
+			ns = 'http://www.w3.org/1999/xlink';
+		} else {
+			ns = '';
+		}
 		if (value==null || value===false) {
-			if (ns) node.removeAttributeNS('http://www.w3.org/1999/xlink', toLowerCase(ns[1]));
-			else node.removeAttribute(name);
+			node.removeAttributeNS(ns, name);
 		}
 		else if (typeof value!=='object' && !isFunction(value)) {
-			if (ns) node.setAttributeNS('http://www.w3.org/1999/xlink', toLowerCase(ns[1]), value);
-			else node.setAttribute(name, value);
+			node.setAttributeNS(ns, name, value);
 		}
 	}
 }
