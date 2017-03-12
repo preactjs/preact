@@ -12,7 +12,7 @@ function VNode(nodeName, opt_attributes, opt_children) {}
 function NodeName() { }
 
 /** @type {Object} */
-NodeName.prototype.defaultProps
+NodeName.prototype.defaultProps;
 
 /** @type {(string|!NodeName)} */
 VNode.prototype.nodeName;
@@ -21,7 +21,7 @@ VNode.prototype.nodeName;
 VNode.prototype.attributes;
 
 /** @type {Array<VNode>|undefined} */
-VNode.prototypechildren;
+VNode.prototype.children;
 
 /** @type{boolean|string} */
 VNode.prototype.key;
@@ -45,21 +45,6 @@ Component.prototype.prevContext;
 Component.prototype.base;
 /** @type {?} */
 Component.prototype.nextBase;
-/** @type {?} */
-Component.prototype._parentComponent;
-/** @type {?} */
-Component.prototype._component;
-/** @type {?} */
-Component.prototype.__ref;
-/** @type {?} */
-Component.prototype.__key;
-/** @type {?} */
-Component.prototype._linkedStates;
-/** @type {?} */
-Component.prototype._renderCallbacks;
-
-/** @type {boolean} */
-Component.prototype._dirty;
 
 /** @type {Object} */
 Component.prototype.context;
