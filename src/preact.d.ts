@@ -1,5 +1,5 @@
 declare namespace preact {
-	interface ComponentProps<C extends Component<any, any>> {
+	interface ComponentProps<C extends (Component<any, any> | StatelessComponent<any>)> {
 		children?:JSX.Element[];
 		key?:string | number | any;
 		ref?:(el: C) => void;
@@ -37,15 +37,14 @@ declare namespace preact {
 		new (props?:PropsType):Component<PropsType, StateType>;
 	}
 
-	interface FunctionalComponent<PropsType> {
-		(props:PropsType & ComponentProps, context?:any):JSX.Element;
+	interface StatelessComponent<PropsType> {
+		(props:PropsType & ComponentProps<this>, context?:any):JSX.Element;
 		displayName?:string;
 		defaultProps?:any;
 	}
 
-	// An "inclusive" component is a component that is either a functional
-	// component or a more full-fledged component.
-	type InclusiveComponent<PropsType, StateType> = FunctionalComponent<PropsType> | typeof Component;
+    // Type alias for a component considered generally, whether stateless or stateful.
+	type AnyComponent<PropsType, StateType> = StatelessComponent<PropsType> | typeof Component;
 
 	abstract class Component<PropsType, StateType> implements ComponentLifecycle<PropsType, StateType> {
 		constructor(props?:PropsType);
