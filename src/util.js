@@ -65,4 +65,5 @@ export const toLowerCase = s => lcCache[s] || (lcCache[s] = s.toLowerCase());
  *	@param {Function} callback
  */
 let resolved = typeof Promise!=='undefined' && Promise.resolve();
-export const defer = resolved ? (f => { resolved.then(f); }) : setTimeout;
+let errorHandler = err => { setTimeout(() => { throw err }, 0); };
+export const defer = resolved ? (f => { resolved.then(f).catch(errorHandler); }) : setTimeout;
