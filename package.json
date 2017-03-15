@@ -29,7 +29,8 @@
     "lint": "eslint devtools src test",
     "prepublish": "npm run build",
     "smart-release": "npm run build && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish",
-    "release": "cross-env npm run smart-release"
+    "release": "cross-env npm run smart-release",
+    "postinstall": "./node_modules/.bin/opencollective-postinstall"
   },
   "eslintConfig": {
     "extends": "./config/eslint-config.js"
@@ -96,6 +97,7 @@
     "karma-webpack": "^2.0.1",
     "mocha": "^3.0.1",
     "npm-run-all": "^4.0.0",
+    "opencollective-postinstall": "^1.0.9",
     "phantomjs-prebuilt": "^2.1.7",
     "rimraf": "^2.5.3",
     "rollup": "^0.40.0",
@@ -117,5 +119,10 @@
       "babel-runtime",
       "jscodeshift"
     ]
+  },
+  "collective": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/preact",
+    "logo": "https://opencollective.com/preact/logo.txt?height=40&variant=blocks&reverse=true"
   }
 }
