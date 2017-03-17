@@ -27,6 +27,10 @@ export function flushMounts() {
 	while ((c=mounts.pop())) {
 		if (options.afterMount) options.afterMount(c);
 		if (c.componentDidMount) c.componentDidMount();
+
+		// Ensure the nodes call cDM lifecycle method before callbacks from setState/forceUpdate
+		let cb = c._renderCallbacks, fn;
+		if (cb) while ( (fn = cb.pop()) ) fn.call(c);
 	}
 }
 

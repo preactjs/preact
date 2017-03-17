@@ -384,6 +384,37 @@ describe('Lifecycle methods', () => {
 				expect(proto.componentDidUnmount).to.have.been.called;
 			});
 		});
+
+		// Test for Issue #556
+		it('should fire setState callback after componentDidMount', () => {
+			let log = [];
+
+			class A extends LifecycleTestComponent {
+				componentWillMount() {
+					this.setState({
+						a: 'a'
+					}, () => {
+						log.push('setState');
+					});
+				}
+				render() {
+					return <B />;
+				}
+			}
+
+			class B extends LifecycleTestComponent {
+				render() {
+					return <div>B</div>;
+				}
+				componentDidMount() {
+					log.push('didMount');
+				}
+			}
+
+			render(<A />, scratch);
+
+			expect(log).to.deep.equal(['didMount', 'setState']);
+		});
 	});
 
 	describe('Lifecycle DOM Timing', () => {

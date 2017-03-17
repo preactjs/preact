@@ -187,9 +187,6 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		if (options.afterUpdate) options.afterUpdate(component);
 	}
 
-	let cb = component._renderCallbacks, fn;
-	if (cb) while ( (fn = cb.pop()) ) fn.call(component);
-
 	if (!diffLevel && !isChild) flushMounts();
 }
 
