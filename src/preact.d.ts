@@ -33,14 +33,16 @@ declare namespace preact {
 		componentDidUpdate?(previousProps:PropsType,previousState:StateType,previousContext:any):void;
 	}
 
-	type FunctionalComponent<PropsType, StateType> = (props: PropsType & ComponentProps<FunctionalComponent<any, any>>, state: StateType) => JSX.Element;
+	interface FunctionalComponent<PropsType, StateType> {
+		(props?: PropsType & ComponentProps<this>, state?: StateType): JSX.Element
+	}
 
 	interface ComponentConstructor<PropsType, StateType> {
 		new (props?:PropsType):Component<PropsType, StateType>;
 	}
 
 	abstract class Component<PropsType, StateType> implements ComponentLifecycle<PropsType, StateType> {
-		constructor(props?:PropsType);
+		constructor(props?:PropsType, context?:any);
 
 		static displayName?:string;
 		static defaultProps?:any;
