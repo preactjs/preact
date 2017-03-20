@@ -38,7 +38,7 @@ declare namespace preact {
 	}
 
 	interface ComponentConstructor<PropsType, StateType> {
-		new (props?:PropsType):Component<PropsType, StateType>;
+		new (props?:PropsType, context?: any):Component<PropsType, StateType>;
 	}
 
 	abstract class Component<PropsType, StateType> implements ComponentLifecycle<PropsType, StateType> {
@@ -49,6 +49,7 @@ declare namespace preact {
 
 		state:StateType;
 		props:PropsType & ComponentProps<this>;
+		context: any;
 		base:HTMLElement;
 
 		linkState:(name:string) => (event: Event) => void;
