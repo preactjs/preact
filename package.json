@@ -102,7 +102,7 @@
     "rollup-plugin-babel": "^1.0.0",
     "rollup-plugin-memory": "^2.0.0",
     "rollup-plugin-node-resolve": "^2.0.0",
-    "sinon": "^1.17.4",
+    "sinon": "^2.1.0",
     "sinon-chai": "^2.8.0",
     "uglify-js": "^2.7.5",
     "webpack": "^1.13.1"
