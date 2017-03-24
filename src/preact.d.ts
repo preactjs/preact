@@ -33,8 +33,8 @@ declare namespace preact {
 		componentDidUpdate?(previousProps:PropsType,previousState:StateType,previousContext:any):void;
 	}
 
-	interface FunctionalComponent<PropsType, StateType> {
-		(props?: PropsType & ComponentProps<this>, state?: StateType): JSX.Element
+	interface FunctionalComponent<PropsType> {
+		(props?: PropsType & ComponentProps<this>, context?: any): JSX.Element
 	}
 
 	interface ComponentConstructor<PropsType, StateType> {
@@ -59,10 +59,10 @@ declare namespace preact {
 
 		forceUpdate(): void;
 
-		abstract render(props:PropsType & ComponentProps<this>, state:any):JSX.Element;
+		abstract render(props?:PropsType & ComponentProps<this>, state?:StateType, context?: any):JSX.Element;
 	}
 
-	function h<PropsType>(node:ComponentConstructor<PropsType, any> | FunctionalComponent<PropsType, any>, params:PropsType, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
+	function h<PropsType>(node:ComponentConstructor<PropsType, any> | FunctionalComponent<PropsType>, params:PropsType, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
 	function h(node:string, params:JSX.HTMLAttributes&JSX.SVGAttributes&{[propName: string]: any}, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
 	function render(node:JSX.Element, parent:Element, mergeWith?:Element):Element;
 	function rerender():void;
