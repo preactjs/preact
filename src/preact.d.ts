@@ -1,5 +1,5 @@
 declare namespace preact {
-	interface ComponentProps<C extends Component<any, any> | FunctionalComponent<any, any>> {
+	interface ComponentProps<C extends Component<any, any> | FunctionalComponent<any>> {
 		children?:JSX.Element[];
 		key?:string | number | any;
 		ref?:(el: C) => void;
