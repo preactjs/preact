@@ -7,7 +7,8 @@ export const ASYNC_RENDER = 3;
 
 export const EMPTY = {};
 
-export const ATTR_KEY = typeof Symbol!=='undefined' ? Symbol.for('preactattr') : '__preactattr_';
+export const HAS_SYMBOL = typeof Symbol!=='undefined';
+export const ATTR_KEY = HAS_SYMBOL ? Symbol.for('preactattr') : '__preactattr_';
 
 // DOM properties that should NOT have "px" added when numeric
 export const NON_DIMENSION_PROPS = {

@@ -1,7 +1,7 @@
 import { VNode } from './vnode';
 import options from './options';
 import { iterableToArray } from './util';
-import { ATTR_KEY } from './constants';
+import { HAS_SYMBOL } from './constants';
 
 const stack = [];
 
@@ -29,7 +29,7 @@ export function h(nodeName, attributes) {
 		if ((child = stack.pop()) instanceof Array) {
 			for (i=child.length; i--; ) stack.push(child[i]);
 		}
-		else if (typeof ATTR_KEY === 'symbol' && child[Symbol.iterator]) {
+		else if (HAS_SYMBOL && child[Symbol.iterator]) {
 			const tmpArr = iterableToArray(child[Symbol.iterator]());
 			for (i=tmpArr.length; i--; ) stack.push(tmpArr[i]);
 		}
