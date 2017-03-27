@@ -227,11 +227,11 @@ function innerDiffNode(dom, vchildren, context, mountAll, absorb) {
 			else if (!child && min<childrenLen) {
 				for (j=min; j<childrenLen; j++) {
 					c = children[j];
-					if (c && isSameNodeType(c, vchild)) {
+					if (isSameNodeType(c, vchild)) {
 						child = c;
-						children[j] = undefined;
-						if (j===childrenLen-1) childrenLen--;
-						if (j===min) min++;
+						children[j] = children[min];
+						children[min] = undefined;
+						min++
 						break;
 					}
 				}
