@@ -231,7 +231,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, absorb) {
 						child = c;
 						children[j] = children[min];
 						children[min] = undefined;
-						min++
+						min++;
 						break;
 					}
 				}
