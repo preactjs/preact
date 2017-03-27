@@ -549,6 +549,7 @@ declare namespace JSX {
 		shape?:string;
 		size?:number;
 		sizes?:string;
+		slot?:string;
 		span?:number;
 		spellCheck?:boolean;
 		src?:string;
@@ -671,6 +672,7 @@ declare namespace JSX {
 		script:HTMLAttributes;
 		section:HTMLAttributes;
 		select:HTMLAttributes;
+		slot:HTMLAttributes;
 		small:HTMLAttributes;
 		source:HTMLAttributes;
 		span:HTMLAttributes;
