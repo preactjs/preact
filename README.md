@@ -235,7 +235,9 @@ class Clock extends Component {
 	constructor() {
 		super();
 		// set initial time:
-		this.setState({ time: Date.now() });
+		this.state = {
+			time: Date.now()
+		};
 	}
 
 	componentDidMount() {
