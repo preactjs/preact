@@ -1,6 +1,5 @@
 {
   "name": "preact",
-  "amdName": "preact",
   "version": "7.2.1",
   "description": "Tiny & fast Component-based virtual DOM framework.",
   "main": "dist/preact.js",
