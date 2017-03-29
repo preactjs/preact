@@ -1,3 +1,4 @@
+import { ATTR_KEY } from '../constants';
 import { toLowerCase } from '../util';
 import { removeNode } from './index';
 
@@ -9,6 +10,10 @@ export function collectNode(node) {
 	removeNode(node);
 
 	if (node instanceof Element) {
+		if (node.nodeName === 'IMG') {
+			node.src = node[ATTR_KEY].src = '';
+		}
+
 		node._component = node._componentConstructor = null;
 
 		let name = node.normalizedNodeName || toLowerCase(node.nodeName);
