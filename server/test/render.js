@@ -72,6 +72,13 @@ describe('render', () => {
 			expect(rendered).to.equal(expected);
 		});
 
+		it('should ignore empty object styles', () => {
+			let rendered = render(<div style={{}} />),
+				expected = `<div></div>`;
+
+			expect(rendered).to.equal(expected);
+		});
+
 		it('should render SVG elements', () => {
 			let rendered = render((
 				<svg>
