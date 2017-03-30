@@ -46,7 +46,7 @@ export function styleObjToCss(s) {
 			str += ';';
 		}
 	}
-	return str;
+	return str || undefined;
 }
 
 
