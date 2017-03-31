@@ -20,7 +20,8 @@
     "minify": "uglifyjs dist/preact.js -c collapse_vars,evaluate,screw_ie8,unsafe,loops=false,keep_fargs=false,pure_getters,unused,dead_code -m -o dist/preact.min.js -p relative --in-source-map dist/preact.js.map --source-map dist/preact.min.js.map",
     "strip": "jscodeshift --run-in-band -s -t config/codemod-strip-tdz.js dist/preact.dev.js && jscodeshift --run-in-band -s -t config/codemod-const.js dist/preact.dev.js",
     "size": "node -e \"process.stdout.write('gzip size: ')\" && gzip-size dist/preact.min.js",
-    "test": "npm-run-all lint --parallel test:mocha test:karma",
+    "test": "npm-run-all lint --parallel test:mocha test:karma test:ts",
+    "test:ts": "tsc -p test/ts/",
     "test:mocha": "mocha --recursive --compilers js:babel/register test/shared test/node",
     "test:karma": "karma start test/karma.conf.js --single-run",
     "test:mocha:watch": "npm run test:mocha -- --watch",
@@ -103,6 +104,7 @@
     "rollup-plugin-node-resolve": "^2.0.0",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
+    "typescript": "^2.2.2",
     "uglify-js": "^2.7.5",
     "webpack": "^1.13.1"
   },
