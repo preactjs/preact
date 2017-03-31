@@ -1,5 +1,5 @@
 declare namespace preact {
-	interface ComponentProps<C extends Component<any, any>> {
+	interface ComponentProps<C extends Component<any, any> | FunctionalComponent<any>> {
 		children?:JSX.Element[];
 		key?:string | number | any;
 		ref?:(el: C) => void;
@@ -33,18 +33,23 @@ declare namespace preact {
 		componentDidUpdate?(previousProps:PropsType,previousState:StateType,previousContext:any):void;
 	}
 
+	interface FunctionalComponent<PropsType> {
+		(props?: PropsType & ComponentProps<this>, context?: any): JSX.Element
+	}
+
 	interface ComponentConstructor<PropsType, StateType> {
-		new (props?:PropsType):Component<PropsType, StateType>;
+		new (props?:PropsType, context?: any):Component<PropsType, StateType>;
 	}
 
 	abstract class Component<PropsType, StateType> implements ComponentLifecycle<PropsType, StateType> {
-		constructor(props?:PropsType);
+		constructor(props?:PropsType, context?:any);
 
 		static displayName?:string;
 		static defaultProps?:any;
 
 		state:StateType;
 		props:PropsType & ComponentProps<this>;
+		context: any;
 		base:HTMLElement;
 
 		linkState:(name:string) => (event: Event) => void;
@@ -54,10 +59,10 @@ declare namespace preact {
 
 		forceUpdate(): void;
 
-		abstract render(props:PropsType & ComponentProps<this>, state:any):JSX.Element;
+		abstract render(props?:PropsType & ComponentProps<this>, state?:StateType, context?: any):JSX.Element;
 	}
 
-	function h<PropsType>(node:ComponentConstructor<PropsType, any>, params:PropsType, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
+	function h<PropsType>(node:ComponentConstructor<PropsType, any> | FunctionalComponent<PropsType>, params:PropsType, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
 	function h(node:string, params:JSX.HTMLAttributes&JSX.SVGAttributes&{[propName: string]: any}, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
 	function render(node:JSX.Element, parent:Element, mergeWith?:Element):Element;
 	function rerender():void;
