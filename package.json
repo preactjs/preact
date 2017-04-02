@@ -26,7 +26,7 @@
     "test:karma": "karma start test/karma.conf.js --single-run",
     "test:mocha:watch": "npm run test:mocha -- --watch",
     "test:karma:watch": "npm run test:karma -- no-single-run",
-    "lint": "npm run lint:js && npm run lint:ts",
+    "lint": "npm-run-all lint:js lint:ts",
     "lint:js": "eslint devtools src test",
     "lint:ts": "npm run format:ts -- --verify",
     "lint:ts:fix": "npm run format:ts -- -r",
