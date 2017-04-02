@@ -86,10 +86,6 @@ function createReactCompositeComponent(component) {
 	const _currentElement = createReactElement(component);
 	const node = component.base;
 
-	if (!component.forceUpdate || !component.setState) {
-		console.warn('Warning: Preact encountered a Component which does not extend Preact.Component. Please ensure that you are rendering valid Preact component for ' + component.constructor.name);
-	}
-
 	let instance = {
 		// --- ReactDOMComponent properties
 		getName() {
@@ -132,7 +128,7 @@ function createReactCompositeComponent(component) {
  * The same React*Component instance must be used when notifying devtools
  * about the initial mount of a component and subsequent updates.
  */
-let instanceMap = new Map();
+let instanceMap = typeof Map==='function' && new Map();
 
 /**
  * Update (and create if necessary) the ReactDOMComponent|ReactCompositeComponent-like
@@ -177,7 +173,7 @@ function findRoots(node, roots) {
 /**
  * Map of functional component name -> wrapper class.
  */
-let functionalComponentWrappers = new Map();
+let functionalComponentWrappers = typeof Map==='function' && new Map();
 
 /**
  * Wrap a functional component with a stateful component.
