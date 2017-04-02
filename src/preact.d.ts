@@ -1,5 +1,9 @@
 // Type definitions for Preact v7.0
 // TypeScript Version: 2.2
+
+export = preact;
+export as namespace preact;
+
 declare namespace preact {
 
 	type PreactType = string | ComponentClass<any, any> | SFC<any>;
@@ -31,8 +35,7 @@ declare namespace preact {
 	 * ```
 	 */
 	interface ComponentProps {
-		// interface ComponentProps {
-		children?: JSX.Element[];
+		children?: VNode<any>[];
 		key?: Key;
 		ref?: Ref<any>;
 	}
@@ -67,7 +70,7 @@ declare namespace preact {
 
 	type SFC<Props> = StatelessComponent<Props>;
 	interface StatelessComponent<Props> {
-		(props: Readonly<Props> & Readonly<ComponentProps>, context?: any): JSX.Element;
+		(props: Readonly<Props> & Readonly<ComponentProps>, context?: any): VNode<any>;
 		defaultProps?: Partial<Props>;
 		displayName?: string;
 	}
@@ -110,7 +113,7 @@ declare namespace preact {
 		setState<K extends keyof State>(state: Pick<State, K>, callback?: () => void): void;
 		setState<K extends keyof State>(fn: (prevState: State, props: Props) => Pick<State, K>, callback?: () => void): void;
 
-		forceUpdate(callBack?: () => any): void;
+		forceUpdate(): void;
 
 		abstract render(props?: Readonly<Props> & Readonly<ComponentProps>, state?: Readonly<State>, context?: any): JSX.Element | null;
 	}
@@ -120,7 +123,7 @@ declare namespace preact {
 	}
 
 	function h<PropsType>(node: ComponentClass<PropsType, ComponentState> | SFC<PropsType>, params: PropsType, ...children: (JSX.Element | JSX.Element[] | string)[]): JSX.Element;
-	function h(node: string, params: JSX.HTMLAttributes & JSX.SVGAttributes & { [propName: string]: any }, ...children: (JSX.Element | JSX.Element[] | string)[]): JSX.Element;
+	function h(node: string, params: HTMLAttributes & SVGAttributes & { [propName: string]: any }, ...children: (JSX.Element | JSX.Element[] | string)[]): JSX.Element;
 	function render(node: JSX.Element, parent: Element, mergeWith?: Element): Element;
 	function rerender(): void;
 	function cloneElement(element: JSX.Element, props: any): JSX.Element;
@@ -131,32 +134,10 @@ declare namespace preact {
 		vnode?: (vnode: VNode<any>) => void;
 		event?: (event: Event) => Event;
 	};
-}
 
-declare module "preact" {
-	export = preact;
-}
-
-declare module "preact/devtools" {
-	// Empty. This module initializes the React Developer Tools integration when imported.
-}
-
-// augment global Function
-interface Function {
-	defaultProps?: { [prop: string]: any };
-	displayName?: string;
-}
-
-declare namespace JSX {
-	interface Element extends preact.VNode<any> {
-	}
-
-	interface ElementClass extends preact.Component<any, any> {
-	}
-
-	interface ElementAttributesProperty {
-		props: {};
-	}
+	//
+	// Props / DOM Attributes
+	// ----------------------------------------------------------------------
 
 	interface SVGAttributes extends HTMLAttributes {
 		accentHeight?: number | string;
@@ -514,7 +495,7 @@ declare namespace JSX {
 		onTransitionEnd?: TransitionEventHandler;
 	}
 
-	interface HTMLAttributes extends preact.PreactHTMLAttributes, DOMAttributes {
+	interface HTMLAttributes extends PreactHTMLAttributes, DOMAttributes {
 		// Standard HTML Attributes
 		accept?: string;
 		acceptCharset?: string;
@@ -649,164 +630,191 @@ declare namespace JSX {
 		vocab?: string;
 	}
 
-	interface IntrinsicElements {
-		// HTML
-		a: HTMLAttributes;
-		abbr: HTMLAttributes;
-		address: HTMLAttributes;
-		area: HTMLAttributes;
-		article: HTMLAttributes;
-		aside: HTMLAttributes;
-		audio: HTMLAttributes;
-		b: HTMLAttributes;
-		base: HTMLAttributes;
-		bdi: HTMLAttributes;
-		bdo: HTMLAttributes;
-		big: HTMLAttributes;
-		blockquote: HTMLAttributes;
-		body: HTMLAttributes;
-		br: HTMLAttributes;
-		button: HTMLAttributes;
-		canvas: HTMLAttributes;
-		caption: HTMLAttributes;
-		cite: HTMLAttributes;
-		code: HTMLAttributes;
-		col: HTMLAttributes;
-		colgroup: HTMLAttributes;
-		data: HTMLAttributes;
-		datalist: HTMLAttributes;
-		dd: HTMLAttributes;
-		del: HTMLAttributes;
-		details: HTMLAttributes;
-		dfn: HTMLAttributes;
-		dialog: HTMLAttributes;
-		div: HTMLAttributes;
-		dl: HTMLAttributes;
-		dt: HTMLAttributes;
-		em: HTMLAttributes;
-		embed: HTMLAttributes;
-		fieldset: HTMLAttributes;
-		figcaption: HTMLAttributes;
-		figure: HTMLAttributes;
-		footer: HTMLAttributes;
-		form: HTMLAttributes;
-		h1: HTMLAttributes;
-		h2: HTMLAttributes;
-		h3: HTMLAttributes;
-		h4: HTMLAttributes;
-		h5: HTMLAttributes;
-		h6: HTMLAttributes;
-		head: HTMLAttributes;
-		header: HTMLAttributes;
-		hr: HTMLAttributes;
-		html: HTMLAttributes;
-		i: HTMLAttributes;
-		iframe: HTMLAttributes;
-		img: HTMLAttributes;
-		input: HTMLAttributes;
-		ins: HTMLAttributes;
-		kbd: HTMLAttributes;
-		keygen: HTMLAttributes;
-		label: HTMLAttributes;
-		legend: HTMLAttributes;
-		li: HTMLAttributes;
-		link: HTMLAttributes;
-		main: HTMLAttributes;
-		map: HTMLAttributes;
-		mark: HTMLAttributes;
-		menu: HTMLAttributes;
-		menuitem: HTMLAttributes;
-		meta: HTMLAttributes;
-		meter: HTMLAttributes;
-		nav: HTMLAttributes;
-		noscript: HTMLAttributes;
-		object: HTMLAttributes;
-		ol: HTMLAttributes;
-		optgroup: HTMLAttributes;
-		option: HTMLAttributes;
-		output: HTMLAttributes;
-		p: HTMLAttributes;
-		param: HTMLAttributes;
-		picture: HTMLAttributes;
-		pre: HTMLAttributes;
-		progress: HTMLAttributes;
-		q: HTMLAttributes;
-		rp: HTMLAttributes;
-		rt: HTMLAttributes;
-		ruby: HTMLAttributes;
-		s: HTMLAttributes;
-		samp: HTMLAttributes;
-		script: HTMLAttributes;
-		section: HTMLAttributes;
-		select: HTMLAttributes;
-		slot: HTMLAttributes;
-		small: HTMLAttributes;
-		source: HTMLAttributes;
-		span: HTMLAttributes;
-		strong: HTMLAttributes;
-		style: HTMLAttributes;
-		sub: HTMLAttributes;
-		summary: HTMLAttributes;
-		sup: HTMLAttributes;
-		table: HTMLAttributes;
-		tbody: HTMLAttributes;
-		td: HTMLAttributes;
-		textarea: HTMLAttributes;
-		tfoot: HTMLAttributes;
-		th: HTMLAttributes;
-		thead: HTMLAttributes;
-		time: HTMLAttributes;
-		title: HTMLAttributes;
-		tr: HTMLAttributes;
-		track: HTMLAttributes;
-		u: HTMLAttributes;
-		ul: HTMLAttributes;
-		"var": HTMLAttributes;
-		video: HTMLAttributes;
-		wbr: HTMLAttributes;
+}
 
-		//SVG
-		svg: SVGAttributes;
-		animate: SVGAttributes;
-		circle: SVGAttributes;
-		clipPath: SVGAttributes;
-		defs: SVGAttributes;
-		ellipse: SVGAttributes;
-		feBlend: SVGAttributes;
-		feColorMatrix: SVGAttributes;
-		feComponentTransfer: SVGAttributes;
-		feComposite: SVGAttributes;
-		feConvolveMatrix: SVGAttributes;
-		feDiffuseLighting: SVGAttributes;
-		feDisplacementMap: SVGAttributes;
-		feFlood: SVGAttributes;
-		feGaussianBlur: SVGAttributes;
-		feImage: SVGAttributes;
-		feMerge: SVGAttributes;
-		feMergeNode: SVGAttributes;
-		feMorphology: SVGAttributes;
-		feOffset: SVGAttributes;
-		feSpecularLighting: SVGAttributes;
-		feTile: SVGAttributes;
-		feTurbulence: SVGAttributes;
-		filter: SVGAttributes;
-		foreignObject: SVGAttributes;
-		g: SVGAttributes;
-		image: SVGAttributes;
-		line: SVGAttributes;
-		linearGradient: SVGAttributes;
-		marker: SVGAttributes;
-		mask: SVGAttributes;
-		path: SVGAttributes;
-		pattern: SVGAttributes;
-		polygon: SVGAttributes;
-		polyline: SVGAttributes;
-		radialGradient: SVGAttributes;
-		rect: SVGAttributes;
-		stop: SVGAttributes;
-		symbol: SVGAttributes;
-		text: SVGAttributes;
-		tspan: SVGAttributes;
-		use: SVGAttributes;
+declare module "preact/devtools" {
+	// Empty. This module initializes the React Developer Tools integration when imported.
+}
+
+declare global {
+
+	// augment global Function
+	interface Function {
+		defaultProps?: { [prop: string]: any };
+		displayName?: string;
 	}
+
+	namespace JSX {
+		interface Element extends preact.VNode<any> {
+		}
+
+		interface ElementClass extends preact.Component<any, any> {
+		}
+
+		interface ElementAttributesProperty {
+			props: {};
+		}
+
+		interface IntrinsicElements {
+			// HTML
+			a: preact.HTMLAttributes;
+			abbr: preact.HTMLAttributes;
+			address: preact.HTMLAttributes;
+			area: preact.HTMLAttributes;
+			article: preact.HTMLAttributes;
+			aside: preact.HTMLAttributes;
+			audio: preact.HTMLAttributes;
+			b: preact.HTMLAttributes;
+			base: preact.HTMLAttributes;
+			bdi: preact.HTMLAttributes;
+			bdo: preact.HTMLAttributes;
+			big: preact.HTMLAttributes;
+			blockquote: preact.HTMLAttributes;
+			body: preact.HTMLAttributes;
+			br: preact.HTMLAttributes;
+			button: preact.HTMLAttributes;
+			canvas: preact.HTMLAttributes;
+			caption: preact.HTMLAttributes;
+			cite: preact.HTMLAttributes;
+			code: preact.HTMLAttributes;
+			col: preact.HTMLAttributes;
+			colgroup: preact.HTMLAttributes;
+			data: preact.HTMLAttributes;
+			datalist: preact.HTMLAttributes;
+			dd: preact.HTMLAttributes;
+			del: preact.HTMLAttributes;
+			details: preact.HTMLAttributes;
+			dfn: preact.HTMLAttributes;
+			dialog: preact.HTMLAttributes;
+			div: preact.HTMLAttributes;
+			dl: preact.HTMLAttributes;
+			dt: preact.HTMLAttributes;
+			em: preact.HTMLAttributes;
+			embed: preact.HTMLAttributes;
+			fieldset: preact.HTMLAttributes;
+			figcaption: preact.HTMLAttributes;
+			figure: preact.HTMLAttributes;
+			footer: preact.HTMLAttributes;
+			form: preact.HTMLAttributes;
+			h1: preact.HTMLAttributes;
+			h2: preact.HTMLAttributes;
+			h3: preact.HTMLAttributes;
+			h4: preact.HTMLAttributes;
+			h5: preact.HTMLAttributes;
+			h6: preact.HTMLAttributes;
+			head: preact.HTMLAttributes;
+			header: preact.HTMLAttributes;
+			hr: preact.HTMLAttributes;
+			html: preact.HTMLAttributes;
+			i: preact.HTMLAttributes;
+			iframe: preact.HTMLAttributes;
+			img: preact.HTMLAttributes;
+			input: preact.HTMLAttributes;
+			ins: preact.HTMLAttributes;
+			kbd: preact.HTMLAttributes;
+			keygen: preact.HTMLAttributes;
+			label: preact.HTMLAttributes;
+			legend: preact.HTMLAttributes;
+			li: preact.HTMLAttributes;
+			link: preact.HTMLAttributes;
+			main: preact.HTMLAttributes;
+			map: preact.HTMLAttributes;
+			mark: preact.HTMLAttributes;
+			menu: preact.HTMLAttributes;
+			menuitem: preact.HTMLAttributes;
+			meta: preact.HTMLAttributes;
+			meter: preact.HTMLAttributes;
+			nav: preact.HTMLAttributes;
+			noscript: preact.HTMLAttributes;
+			object: preact.HTMLAttributes;
+			ol: preact.HTMLAttributes;
+			optgroup: preact.HTMLAttributes;
+			option: preact.HTMLAttributes;
+			output: preact.HTMLAttributes;
+			p: preact.HTMLAttributes;
+			param: preact.HTMLAttributes;
+			picture: preact.HTMLAttributes;
+			pre: preact.HTMLAttributes;
+			progress: preact.HTMLAttributes;
+			q: preact.HTMLAttributes;
+			rp: preact.HTMLAttributes;
+			rt: preact.HTMLAttributes;
+			ruby: preact.HTMLAttributes;
+			s: preact.HTMLAttributes;
+			samp: preact.HTMLAttributes;
+			script: preact.HTMLAttributes;
+			section: preact.HTMLAttributes;
+			select: preact.HTMLAttributes;
+			slot: preact.HTMLAttributes;
+			small: preact.HTMLAttributes;
+			source: preact.HTMLAttributes;
+			span: preact.HTMLAttributes;
+			strong: preact.HTMLAttributes;
+			style: preact.HTMLAttributes;
+			sub: preact.HTMLAttributes;
+			summary: preact.HTMLAttributes;
+			sup: preact.HTMLAttributes;
+			table: preact.HTMLAttributes;
+			tbody: preact.HTMLAttributes;
+			td: preact.HTMLAttributes;
+			textarea: preact.HTMLAttributes;
+			tfoot: preact.HTMLAttributes;
+			th: preact.HTMLAttributes;
+			thead: preact.HTMLAttributes;
+			time: preact.HTMLAttributes;
+			title: preact.HTMLAttributes;
+			tr: preact.HTMLAttributes;
+			track: preact.HTMLAttributes;
+			u: preact.HTMLAttributes;
+			ul: preact.HTMLAttributes;
+			"var": preact.HTMLAttributes;
+			video: preact.HTMLAttributes;
+			wbr: preact.HTMLAttributes;
+
+			//SVG
+			svg: preact.SVGAttributes;
+			animate: preact.SVGAttributes;
+			circle: preact.SVGAttributes;
+			clipPath: preact.SVGAttributes;
+			defs: preact.SVGAttributes;
+			ellipse: preact.SVGAttributes;
+			feBlend: preact.SVGAttributes;
+			feColorMatrix: preact.SVGAttributes;
+			feComponentTransfer: preact.SVGAttributes;
+			feComposite: preact.SVGAttributes;
+			feConvolveMatrix: preact.SVGAttributes;
+			feDiffuseLighting: preact.SVGAttributes;
+			feDisplacementMap: preact.SVGAttributes;
+			feFlood: preact.SVGAttributes;
+			feGaussianBlur: preact.SVGAttributes;
+			feImage: preact.SVGAttributes;
+			feMerge: preact.SVGAttributes;
+			feMergeNode: preact.SVGAttributes;
+			feMorphology: preact.SVGAttributes;
+			feOffset: preact.SVGAttributes;
+			feSpecularLighting: preact.SVGAttributes;
+			feTile: preact.SVGAttributes;
+			feTurbulence: preact.SVGAttributes;
+			filter: preact.SVGAttributes;
+			foreignObject: preact.SVGAttributes;
+			g: preact.SVGAttributes;
+			image: preact.SVGAttributes;
+			line: preact.SVGAttributes;
+			linearGradient: preact.SVGAttributes;
+			marker: preact.SVGAttributes;
+			mask: preact.SVGAttributes;
+			path: preact.SVGAttributes;
+			pattern: preact.SVGAttributes;
+			polygon: preact.SVGAttributes;
+			polyline: preact.SVGAttributes;
+			radialGradient: preact.SVGAttributes;
+			rect: preact.SVGAttributes;
+			stop: preact.SVGAttributes;
+			symbol: preact.SVGAttributes;
+			text: preact.SVGAttributes;
+			tspan: preact.SVGAttributes;
+			use: preact.SVGAttributes;
+		}
+	}
+
 }

@@ -2,6 +2,7 @@
 	"compilerOptions": {
 		"target": "es5",
 		"module": "commonjs",
+		"moduleResolution": "node",
 		"lib": [
 			"es6",
 			"dom"
@@ -9,14 +10,19 @@
 		"noImplicitAny": true,
 		"noImplicitThis": true,
 		"strictNullChecks": true,
+		"baseUrl": "./",
 		"typeRoots": [
 			"../../"
 		],
-		"types": [],
+		"types": ["devtools"],
+		"paths": {
+			"preact": ["../../src/preact.d.ts"]
+		},
 		"noEmit": true,
 		"forceConsistentCasingInFileNames": true,
 		"jsx": "react",
-		"jsxFactory": "h"
+		"jsxFactory": "h",
+		"pretty": true
 	},
 	"files": [
 		"prect-test.tsx",

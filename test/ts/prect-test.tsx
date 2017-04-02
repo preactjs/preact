@@ -1,5 +1,6 @@
 import { h, render, Component, SFC, ChildContextProvider, ComponentProps, ComponentClass } from 'preact';
 
+import 'preact/devtools';
 
 // #Components and StatellesComponents
 type DummyProps = { initialInput: string; }
