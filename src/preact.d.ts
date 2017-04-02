@@ -35,7 +35,7 @@ declare namespace preact {
 	 * ```
 	 */
 	interface ComponentProps {
-		children?: VNode<any>[];
+		children?: PreactChildren;
 		key?: Key;
 		ref?: Ref<any>;
 	}
@@ -56,6 +56,10 @@ declare namespace preact {
 		children: VNode<any>[];
 		key: Key | null | undefined;
 	}
+
+	//
+	// Component API
+	// ----------------------------------------------------------------------
 
 	interface ComponentLifecycle<Props, State> {
 		componentWillMount?(): void;
@@ -97,12 +101,12 @@ declare namespace preact {
 		// -- --> static defaultProps: Props = { myProp: 'hello' }
 		static defaultProps?: {};
 
-		props: Readonly<Props> & Readonly<ComponentProps>;
+		props: Readonly<ComponentProps> & Readonly<Props>;
 		state: Readonly<State>;
 		context: any;
 		base: HTMLElement;
 
-		// @TODO - preact-compat
+		// @TODO - preact-compat addition
 		// this is needed when used with react libs via preact-compat ( because React has refs on Component instance )
 		// refs?: any;
 
@@ -113,7 +117,7 @@ declare namespace preact {
 		setState<K extends keyof State>(state: Pick<State, K>, callback?: () => void): void;
 		setState<K extends keyof State>(fn: (prevState: State, props: Props) => Pick<State, K>, callback?: () => void): void;
 
-		forceUpdate(): void;
+		forceUpdate(callback?: () => void): void;
 
 		abstract render(props?: Readonly<Props> & Readonly<ComponentProps>, state?: Readonly<State>, context?: any): JSX.Element | null;
 	}
@@ -122,11 +126,23 @@ declare namespace preact {
 		getChildContext(): CC,
 	}
 
-	function h<PropsType>(node: ComponentClass<PropsType, ComponentState> | SFC<PropsType>, params: PropsType, ...children: (JSX.Element | JSX.Element[] | string)[]): JSX.Element;
-	function h(node: string, params: HTMLAttributes & SVGAttributes & { [propName: string]: any }, ...children: (JSX.Element | JSX.Element[] | string)[]): JSX.Element;
-	function render(node: JSX.Element, parent: Element, mergeWith?: Element): Element;
+	//
+	// Peact Nodes
+	// ----------------------------------------------------------------------
+
+	type PreactText = string | number;
+	type PreactChild = VNode<any> | PreactText;
+	type PreactChildren = PreactChild[] | any[];
+
+	//
+	// Top Level API
+	// ----------------------------------------------------------------------
+	type HChildren = (VNode<any> | VNode<any>[] | string | number)[]
+	function h<Props>(node: ComponentClass<Props, ComponentState> | SFC<Props>, params: Props, ...children: HChildren): VNode<any>;
+	function h(node: string, params: HTMLAttributes & SVGAttributes & { [propName: string]: any }, ...children: HChildren): VNode<any>;
+	function render(node: VNode<any>, parent: Element | Document, mergeWith?: Element): Element;
 	function rerender(): void;
-	function cloneElement(element: JSX.Element, props: any): JSX.Element;
+	function cloneElement(element: VNode<any>, props: any): VNode<any>;
 
 	var options: {
 		syncComponentUpdates?: boolean;

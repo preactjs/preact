@@ -265,7 +265,6 @@ type Store = {
 }
 type ProviderProps = {
 	store: {},
-	children?: [JSX.Element],
 };
 type ProviderContext = {
 	store: Store,
@@ -289,9 +288,13 @@ class Provider extends Component<ProviderProps, void> implements ChildContextPro
 		}
 	}
 	render() {
-		const { children = [] } = this.props
+		const { children } = this.props;
 
-		return children[0];
+		if (Array.isArray(children) && children[0]) {
+			return children[0];
+		}
+
+		throw new Error(`<Provider> needs one child VNode`)
 	}
 }
 
@@ -299,6 +302,7 @@ const App = () => (
 	<Provider store={{ loading: true }}>
 		<ConnectedGreeter who="Jason" />
 		<ConnectedContainer time={new Date()} />
+		<div></div>
 	</Provider>
 )
 
