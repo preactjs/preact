@@ -86,10 +86,6 @@ function createReactCompositeComponent(component) {
 	const _currentElement = createReactElement(component);
 	const node = component.base;
 
-	if (!component.forceUpdate || !component.setState) {
-		console.warn('Warning: Preact encountered a Component which does not extend Preact.Component. Please ensure that you are rendering valid Preact component for ' + component.constructor.name);
-	}
-
 	let instance = {
 		// --- ReactDOMComponent properties
 		getName() {
