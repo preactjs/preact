@@ -34,12 +34,17 @@ declare namespace preact {
 	}
 
 	interface FunctionalComponent<PropsType> {
-		(props?: PropsType & ComponentProps<this>, context?: any): JSX.Element
+		(props?:PropsType & ComponentProps<this>, context?:any):JSX.Element;
+		displayName?:string;
+		defaultProps?:any;
 	}
 
 	interface ComponentConstructor<PropsType, StateType> {
 		new (props?:PropsType, context?: any):Component<PropsType, StateType>;
 	}
+
+    // Type alias for a component considered generally, whether stateless or stateful.
+	type AnyComponent<PropsType, StateType> = FunctionalComponent<PropsType> | typeof Component;
 
 	abstract class Component<PropsType, StateType> implements ComponentLifecycle<PropsType, StateType> {
 		constructor(props?:PropsType, context?:any);
@@ -49,7 +54,7 @@ declare namespace preact {
 
 		state:StateType;
 		props:PropsType & ComponentProps<this>;
-		context: any;
+		context:any;
 		base:HTMLElement;
 
 		linkState:(name:string) => (event: Event) => void;
@@ -59,7 +64,7 @@ declare namespace preact {
 
 		forceUpdate(): void;
 
-		abstract render(props?:PropsType & ComponentProps<this>, state?:StateType, context?: any):JSX.Element;
+		abstract render(props?:PropsType & ComponentProps<this>, state?:StateType, context?:any):JSX.Element;
 	}
 
 	function h<PropsType>(node:ComponentConstructor<PropsType, any> | FunctionalComponent<PropsType>, params:PropsType, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
