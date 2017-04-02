@@ -30,7 +30,7 @@ export function isNamedNode(node, nodeName) {
  * Ensures default/fallback values from `defaultProps`:
  * Own-properties of `defaultProps` not present in `vnode.attributes` are added.
  * @param {VNode} vnode
- * @returns {Object} props
+ * @return {Object} props
  */
 export function getNodeProps(vnode) {
 	let props = clone(vnode.attributes);

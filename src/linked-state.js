@@ -4,7 +4,7 @@ import { isString, delve } from './util';
  *	@param {Component} component	The component whose state should be updated
  *	@param {string} key				A dot-notated key path to update in the component's state
  *	@param {string} eventPath		A dot-notated key path to the value that should be retrieved from the Event or component
- *	@returns {function} linkedStateHandler
+ *	@return {Function} linkedStateHandler
  *	@private
  */
 export function createLinkedState(component, key, eventPath) {

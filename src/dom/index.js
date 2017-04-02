@@ -16,8 +16,8 @@ export function removeNode(node) {
  *	If `value` is `null`, the attribute/handler will be removed.
  *	@param {Element} node	An element to mutate
  *	@param {string} name	The name/key to set, such as an event or attribute name
- *	@param {any} old	The last value that was set for this name/node pair
- *	@param {any} value	An attribute value, such as a function to be used as an event handler
+ *	@param {?} old	The last value that was set for this name/node pair
+ *	@param {?} value	An attribute value, such as a function to be used as an event handler
  *	@param {Boolean} isSvg	Are we currently diffing inside an svg?
  *	@private
  */
@@ -70,13 +70,17 @@ export function setAccessor(node, name, old, value, isSvg) {
 	}
 	else {
 		let ns = isSvg && name.match(/^xlink\:?(.+)/);
+		if (ns) {
+			name = toLowerCase(ns[1]);
+			ns = 'http://www.w3.org/1999/xlink';
+		} else {
+			ns = '';
+		}
 		if (value==null || value===false) {
-			if (ns) node.removeAttributeNS('http://www.w3.org/1999/xlink', toLowerCase(ns[1]));
-			else node.removeAttribute(name);
+			node.removeAttributeNS(ns, name);
 		}
 		else if (typeof value!=='object' && !isFunction(value)) {
-			if (ns) node.setAttributeNS('http://www.w3.org/1999/xlink', toLowerCase(ns[1]), value);
-			else node.setAttribute(name, value);
+			node.setAttributeNS(ns, name, value);
 		}
 	}
 }

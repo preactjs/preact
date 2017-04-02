@@ -1,14 +1,10 @@
-/** Virtual DOM Node */
-export function VNode(nodeName, attributes, children) {
-	/** @type {string|function} */
+/**
+ * Virtual DOM Node
+ */
+export function VNode(nodeName, opt_attributes, opt_children) {
+	opt_attributes=opt_attributes||{};
 	this.nodeName = nodeName;
-
-	/** @type {object<string>|undefined} */
-	this.attributes = attributes;
-
-	/** @type {array<VNode>|undefined} */
-	this.children = children;
-
-	/** Reference to the given key. */
-	this.key = attributes && attributes.key;
+	this.attributes = opt_attributes;
+	this.children = opt_children||[];
+	this.key = opt_attributes.key;
 }
