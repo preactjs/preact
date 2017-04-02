@@ -72,6 +72,11 @@ declare namespace preact {
 		componentDidUpdate?(previousProps: Props, previousState: State, previousContext: any): void;
 	}
 
+	/**
+	 *	@deprecated
+	 *	use StatelessComponent or SFC instead
+	 */
+	type FunctionalComponent<Props> = StatelessComponent<Props>;
 	type SFC<Props> = StatelessComponent<Props>;
 	interface StatelessComponent<Props> {
 		(props: Readonly<Props> & Readonly<ComponentProps>, context?: any): VNode<any>;
@@ -80,9 +85,9 @@ declare namespace preact {
 	}
 
 	/**
-	   * @deprecated
-	   * use ComponentClass instead
-	   */
+	 *	@deprecated
+	 *	use ComponentClass instead
+	 */
 	type ComponentConstructor<Props, State> = ComponentClass<Props, State>;
 
 	interface ComponentClass<Props, State> {
