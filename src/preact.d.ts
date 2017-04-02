@@ -62,7 +62,7 @@ declare namespace preact {
 		setState<K extends keyof StateType>(state:Pick<StateType, K>, callback?:() => void):void;
 		setState<K extends keyof StateType>(fn:(prevState:StateType, props:PropsType) => Pick<StateType, K>, callback?:() => void):void;
 
-		forceUpdate(): void;
+		forceUpdate(callback?:() => void): void;
 
 		abstract render(props?:PropsType & ComponentProps<this>, state?:StateType, context?:any):JSX.Element;
 	}
