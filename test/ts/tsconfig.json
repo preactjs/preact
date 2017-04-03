@@ -14,7 +14,7 @@
 		"typeRoots": [
 			"../../"
 		],
-		"types": ["devtools"],
+		"types": [],
 		"paths": {
 			"preact": ["../../src/preact.d.ts"]
 		},

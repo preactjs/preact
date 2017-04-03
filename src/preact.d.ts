@@ -124,7 +124,7 @@ declare namespace preact {
 
 		forceUpdate(callback?: () => void): void;
 
-		abstract render(props?: Readonly<Props> & Readonly<ComponentProps>, state?: Readonly<State>, context?: any): JSX.Element | null;
+		abstract render(props?: Readonly<Props> & Readonly<ComponentProps>, state?: Readonly<State>, context?: any): VNode<any> | null;
 	}
 
 	interface ChildContextProvider<CC> {
@@ -135,9 +135,10 @@ declare namespace preact {
 	// Peact Nodes
 	// ----------------------------------------------------------------------
 
-	type PreactText = string | number;
-	type PreactChild = VNode<any> | PreactText;
-	type PreactChildren = PreactChild[] | any[];
+	// Preact doesn't distinquish between number | string | boolean, if it's not VNode | Object | Function it's always string
+	type PreactText = string;
+	type PreactChild = PreactText | VNode<any> | {} | ((...args: any[]) => any);
+	type PreactChildren = PreactChild[];
 
 	//
 	// Top Level API
@@ -651,10 +652,6 @@ declare namespace preact {
 		vocab?: string;
 	}
 
-}
-
-declare module "preact/devtools" {
-	// Empty. This module initializes the React Developer Tools integration when imported.
 }
 
 declare global {

@@ -1,6 +1,6 @@
-import { h, render, Component, SFC, ChildContextProvider, ComponentProps, ComponentClass } from 'preact';
+import { h, render, Component, SFC, ChildContextProvider, ComponentProps, ComponentClass, VNode } from 'preact';
 
-import 'preact/devtools';
+// import 'preact/devtools';
 
 // #Components and StatellesComponents
 type DummyProps = { initialInput: string; }
@@ -44,6 +44,92 @@ const DummerComponent2: SFC<DummerComponentProps> = ({ initialInput, input }) =>
 DummerComponent2.defaultProps = { input: 'yay' };
 DummerComponent2.displayName = 'Hello2';
 
+// Children Projection
+
+type LayoutProps = {
+	children?: [LayoutProjecitionFn]
+};
+type Slots = {
+	toolbar: VNode<any>,
+	content: VNode<any>,
+}
+type LayoutProjecitionFn = () => Slots
+const Layout: SFC<LayoutProps> = ({ children }) => {
+	const projectionFn = (children as [LayoutProjecitionFn])[0];
+
+	if (typeof projectionFn === 'function') {
+		const slots = projectionFn();
+		return (
+			<div>
+				<nav class="toolbar">{slots.toolbar}</nav>
+				<main class="content">{slots.content}</main>
+			</div>
+		);
+	}
+	throw new Error(`Layout accepts children as a function`)
+}
+
+type LayoutAsObjectProps = {
+	children?: [Slots]
+};
+const LayoutAsObject: SFC<LayoutAsObjectProps> = ({ children }) => {
+	const slots = (children as [Slots])[0];
+
+	if (typeof slots === 'object') {
+		return (
+			<div>
+				<nav class="toolbar">{slots.toolbar}</nav>
+				<main class="content">{slots.content}</main>
+			</div>
+		);
+	}
+	throw new Error(`Layout accepts children as an object`)
+}
+
+const LayoutApp: SFC<{}> = () => {
+	return (
+		<div>
+			<Layout>
+				{
+					() => ({
+						toolbar: (
+							<ul>
+								<li><img src="logo.png" /></li>
+								<li><a>Home</a></li>
+							</ul>
+						),
+						main: (
+							<div>
+								<section>
+									<h2>Welcome !</h2>
+								</section>
+							</div>
+						)
+					})
+				}
+			</Layout>
+			<LayoutAsObject>
+				{
+					{
+						toolbar: (
+							<ul>
+								<li><img src="logo.png" /></li>
+								<li><a>Home</a></li>
+							</ul>
+						),
+						main: (
+							<div>
+								<section>
+									<h2>Welcome !</h2>
+								</section>
+							</div>
+						)
+					}
+				}
+			</LayoutAsObject>
+		</div>
+	)
+}
 
 // #HOC
 
@@ -126,7 +212,7 @@ class Form extends Component<any, void> {
 }
 
 
-// ## controller indout HOC
+// ## controller input HOC
 
 const controlledCmpHOC = <Props, State>(WrappedComponent: ComponentClass<Props, State> | SFC<Props>) => {
 	return class PP extends Component<Partial<Props>, { name: string }> {
@@ -290,8 +376,8 @@ class Provider extends Component<ProviderProps, void> implements ChildContextPro
 	render() {
 		const { children } = this.props;
 
-		if (Array.isArray(children) && children[0]) {
-			return children[0];
+		if (Array.isArray(children)) {
+			return children[0] as VNode<any>;
 		}
 
 		throw new Error(`<Provider> needs one child VNode`)
