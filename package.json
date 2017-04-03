@@ -106,7 +106,7 @@
     "sinon-chai": "^2.8.0",
     "typescript": "^2.2.2",
     "uglify-js": "^2.7.5",
-    "webpack": "^1.13.1"
+    "webpack": "^2.3.3"
   },
   "greenkeeper": {
     "ignore": [
