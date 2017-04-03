@@ -1,5 +1,4 @@
 import { clone, isString, isFunction, toLowerCase } from '../util';
-import { isFunctionalComponent } from './functional-component';
 
 
 /** Check if two nodes are equivalent.
@@ -15,7 +14,7 @@ export function isSameNodeType(node, vnode) {
 		return !node._componentConstructor && isNamedNode(node, vnode.nodeName);
 	}
 	if (isFunction(vnode.nodeName)) {
-		return (node._componentConstructor ? node._componentConstructor===vnode.nodeName : true) || isFunctionalComponent(vnode);
+		return node._componentConstructor ? node._componentConstructor===vnode.nodeName : true;
 	}
 }
 

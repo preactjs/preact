@@ -4,7 +4,6 @@ import { isFunction, clone, extend } from '../util';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from './index';
 import { diff, mounts, diffLevel, flushMounts, recollectNodeTree } from './diff';
-import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { createComponent, collectComponent } from './component-recycler';
 import { removeNode } from '../dom/index';
 
@@ -103,10 +102,6 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		// context to pass to the child, can be updated via (grand-)parent component
 		if (component.getChildContext) {
 			context = extend(clone(context), component.getChildContext());
-		}
-
-		while (isFunctionalComponent(rendered)) {
-			rendered = buildFunctionalComponent(rendered, context);
 		}
 
 		let childComponent = rendered && rendered.nodeName,
