@@ -6,5 +6,5 @@
 /coverage
 
 # Additional bundles
-/*.js
-/*.js.map
+devtools.js
+devtools.js.map

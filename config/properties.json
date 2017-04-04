@@ -1,0 +1,17 @@
+{
+  "props": {
+    "cname": 6,
+    "props": {
+      "$_dirty": "__d",
+      "$_disable": "__x",
+      "$_listeners": "__l",
+      "$_renderCallbacks": "__c",
+      "$__key": "__k",
+      "$__ref": "__r"
+    }
+  },
+  "vars": {
+    "cname": -1,
+    "props": {}
+  }
+}

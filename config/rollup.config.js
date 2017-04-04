@@ -3,12 +3,17 @@ import babel from 'rollup-plugin-babel';
 import memory from 'rollup-plugin-memory';
 
 export default {
-	exports: 'named',
-	useStrict: false,
+	useStrict: true,
+	format: 'iife',
+	entry: 'src/preact.js',
 	plugins: [
 		memory({
-			path: 'src/preact',
-			contents: "export * from './preact';"
+			path: 'src/preact.js',
+			contents: `
+				import preact from './preact';
+				if (typeof module!='undefined') module.exports = preact;
+				else self.preact = preact;
+			`
 		}),
 		nodeResolve({
 			main: true
