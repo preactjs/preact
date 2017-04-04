@@ -51,8 +51,3 @@ let lcCache = {};
 export const toLowerCase = s => lcCache[s] || (lcCache[s] = s.toLowerCase());
 
 
-/** Call a function asynchronously, as soon as possible.
- *	@param {Function} callback
- */
-let resolved = typeof Promise!=='undefined' && Promise.resolve();
-export const defer = resolved ? (f => { resolved.then(f); }) : setTimeout;
