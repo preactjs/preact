@@ -61,12 +61,15 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 
 
 function idiff(dom, vnode, context, mountAll, componentRoot) {
+	let out = dom,
+		prevSvgMode = isSvgMode;
+
 	// empty values (null & undefined) render as empty Text nodes
 	if (vnode==null) vnode = '';
 
 
 	// Fast case: Strings create/update Text nodes.
-	if (typeof vnode==='string' || typeof vnode==='number') {
+	if (typeof vnode==='string') {
 
 		// update if it's already a Text node
 		if (dom && dom.splitText!==undefined && dom.parentNode && (!dom._component || componentRoot)) {
@@ -76,16 +79,16 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 		}
 		else {
 			// it wasn't a Text node: replace it with one and recycle the old Element
-			let old = dom;
-			dom = document.createTextNode(vnode);
-			if (old) {
-				if (old.parentNode) old.parentNode.replaceChild(dom, old);
-				recollectNodeTree(old, true);
+			out = document.createTextNode(vnode);
+			if (dom) {
+				if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
+				recollectNodeTree(dom, true);
 			}
 		}
 
-		dom[ATTR_KEY] = true;
-		return dom;
+		out[ATTR_KEY] = true;
+
+		return out;
 	}
 
 
@@ -95,9 +98,6 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	}
 
 
-	let out = dom,
-		prevSvgMode = isSvgMode,
-		vchildren = vnode.children;
 
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
@@ -121,14 +121,8 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 
 	let fc = out.firstChild,
-		props = out[ATTR_KEY];
-
-	// Attribute Hydration: if there is no prop cache on the element,
-	// ...create it and populate it with the element's attributes.
-	if (props==null) {
-		out[ATTR_KEY] = props = {};
-		for (let a=out.attributes, i=a.length; i--; ) props[a[i].name] = a[i].value;
-	}
+		props = out[ATTR_KEY]!=null ? out[ATTR_KEY] : (out[ATTR_KEY] = {}),
+		vchildren = vnode.children;
 
 	// Optimization: fast-path for elements containing a single TextNode:
 	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc && fc.splitText!==undefined && fc.nextSibling===null) {
