@@ -21,12 +21,8 @@ export function removeNode(node) {
  *	@private
  */
 export function setAccessor(node, name, old, value, isSvg) {
-
 	if (name==='className') name = 'class';
 
-	if (name==='class' && value && typeof value==='object') {
-		value = hashToClassName(value);
-	}
 
 	if (name==='key') {
 		// ignore
