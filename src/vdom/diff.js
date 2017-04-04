@@ -1,7 +1,6 @@
 import { ATTR_KEY } from '../constants';
 import { isString, isFunction } from '../util';
 import { isSameNodeType, isNamedNode } from './index';
-import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
 import { setAccessor, removeNode } from '../dom/index';
 import { createNode, collectNode } from '../dom/recycler';
@@ -65,12 +64,6 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 
 function idiff(dom, vnode, context, mountAll) {
 	let ref = vnode && vnode.attributes && vnode.attributes.ref;
-
-
-	// Resolve ephemeral Pure Functional Components
-	while (isFunctionalComponent(vnode)) {
-		vnode = buildFunctionalComponent(vnode, context);
-	}
 
 
 	// empty values (null & undefined) render as empty Text nodes
@@ -209,10 +202,6 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 		for (let i=0; i<vlen; i++) {
 			vchild = vchildren[i];
 			child = null;
-
-			// if (isFunctionalComponent(vchild)) {
-			// 	vchild = buildFunctionalComponent(vchild);
-			// }
 
 			// attempt to find a node based on key matching
 			let key = vchild.key;
