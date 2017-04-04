@@ -96,17 +96,16 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 
 	let out = dom,
-		nodeName = String(vnode.nodeName),	// @TODO this masks undefined component errors as `<undefined>`
 		prevSvgMode = isSvgMode,
 		vchildren = vnode.children;
 
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
-	isSvgMode = nodeName==='svg' ? true : nodeName==='foreignObject' ? false : isSvgMode;
+	isSvgMode = vnode.nodeName==='svg' ? true : vnode.nodeName==='foreignObject' ? false : isSvgMode;
 
 
-	if (!dom || !isNamedNode(dom, nodeName)) {
-		out = createNode(nodeName, isSvgMode);
+	if (!dom || !isNamedNode(dom, vnode.nodeName)) {
+		out = createNode(vnode.nodeName, isSvgMode);
 
 		if (dom) {
 			// move children into the replacement node
