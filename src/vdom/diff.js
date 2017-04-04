@@ -44,7 +44,7 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 		hydrating = dom && !(ATTR_KEY in dom);
 	}
 
-	let ret = idiff(dom, vnode, context, mountAll);
+	let ret = idiff(dom, vnode, context, mountAll, componentRoot);
 
 	// append the element if its a new parent
 	if (parent && ret.parentNode!==parent) parent.appendChild(ret);
@@ -60,10 +60,7 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 }
 
 
-function idiff(dom, vnode, context, mountAll) {
-	let ref = vnode && vnode.attributes && vnode.attributes.ref;
-
-
+function idiff(dom, vnode, context, mountAll, componentRoot) {
 	// empty values (null & undefined) render as empty Text nodes
 	if (vnode==null) vnode = '';
 
@@ -79,8 +76,12 @@ function idiff(dom, vnode, context, mountAll) {
 		}
 		else {
 			// it wasn't a Text node: replace it with one and recycle the old Element
-			if (dom) recollectNodeTree(dom);
+			let old = dom;
 			dom = document.createTextNode(vnode);
+			if (old) {
+				if (old.parentNode) old.parentNode.replaceChild(dom, old);
+				recollectNodeTree(old, true);
+			}
 		}
 
 		return dom;
@@ -99,31 +100,23 @@ function idiff(dom, vnode, context, mountAll) {
 		vchildren = vnode.children;
 
 
-	// SVGs have special namespace stuff.
-	// This tracks entering and exiting that namespace when descending through the tree.
+	// Tracks entering and exiting SVG namespace when descending through the tree.
 	isSvgMode = nodeName==='svg' ? true : nodeName==='foreignObject' ? false : isSvgMode;
 
 
-	if (!dom) {
-		// case: we had no element to begin with
-		// - create an element with the nodeName from VNode
-		out = createNode(nodeName, isSvgMode);
-	}
-	else if (!isNamedNode(dom, nodeName)) {
-		// case: Element and VNode had different nodeNames
-		// - need to create the correct Element to match VNode
-		// - then migrate children from old to new
-
+	if (!dom || !isNamedNode(dom, nodeName)) {
 		out = createNode(nodeName, isSvgMode);
 
-		// move children into the replacement node
-		while (dom.firstChild) out.appendChild(dom.firstChild);
+		if (dom) {
+			// move children into the replacement node
+			while (dom.firstChild) out.appendChild(dom.firstChild);
 
-		// if the previous Element was mounted into the DOM, replace it inline
-		if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
+			// if the previous Element was mounted into the DOM, replace it inline
+			if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
 
-		// recycle the old element (skips non-Element node types)
-		recollectNodeTree(dom);
+			// recycle the old element (skips non-Element node types)
+			recollectNodeTree(dom, true);
+		}
 	}
 
 
