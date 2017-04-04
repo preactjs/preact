@@ -30,6 +30,10 @@ export function setAccessor(node, name, old, value, isSvg) {
 	if (name==='key') {
 		// ignore
 	}
+	else if (name==='ref') {
+		if (old) old(null);
+		if (value) value(node);
+	}
 	else if (name==='class' && !isSvg) {
 		node.className = value || '';
 	}
