@@ -28,16 +28,21 @@ export function h(nodeName, attributes) {
 		if ((child = stack.pop()) && child.pop!==undefined) {
 			for (i=child.length; i--; ) stack.push(child[i]);
 		}
-		else if (child!=null && child!==true && child!==false) {
-			if (typeof child=='number') child = String(child);
-			simple = typeof child=='string';
+		else {
+			if ((simple = typeof nodeName!=='function')) {
+				if (typeof child==='number') child = String(child);
+				else if (child===true || child===false || child==null) child = '';
+				else if (typeof child!=='string') simple = false;
+			}
+
 			if (simple && lastSimple) {
 				children[children.length-1] += child;
 			}
 			else {
-				(children || (children = [])).push(child);
-				lastSimple = simple;
+				(children===undefined ? (children = []) : children).push(child);
 			}
+
+			lastSimple = simple;
 		}
 	}
 
