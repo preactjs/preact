@@ -9,10 +9,8 @@ const components = {};
 
 /** Reclaim a component for later re-use by the recycler. */
 export function collectComponent(component) {
-	let name = component.constructor.name,
-		list = components[name];
-	if (list) list.push(component);
-	else components[name] = [component];
+	let name = component.constructor.name;
+	(components[name] || (components[name] = [])).push(component);
 }
 
 
@@ -21,16 +19,16 @@ export function createComponent(Ctor, props, context) {
 	let list = components[Ctor.name],
 		inst;
 
-	if (!Ctor.prototype || !Ctor.prototype.render) {
-		inst = new Component;
+	if (Ctor.prototype && Ctor.prototype.render) {
+		inst = new Ctor(props, context);
+		Component.call(inst, props, context);
+	}
+	else {
+		inst = new Component(props, context);
 		inst.constructor = Ctor;
 		inst.render = doRender;
 	}
-	else {
-		inst = new Ctor(props, context);
-	}
 
-	Component.call(inst, props, context);
 
 	if (list) {
 		for (let i=list.length; i--; ) {
