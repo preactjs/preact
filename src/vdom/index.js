@@ -1,5 +1,4 @@
-import { clone, isString, toLowerCase } from '../util';
-import { isFunctionalComponent } from './functional-component';
+import { toLowerCase, isString, clone, extend } from '../util';
 
 
 /** Check if two nodes are equivalent.
@@ -8,18 +7,18 @@ import { isFunctionalComponent } from './functional-component';
  *	@private
  */
 export function isSameNodeType(node, vnode, hydrating) {
-	if (isString(vnode)) {
-		return node instanceof Text;
+	if (typeof vnode==='string' || typeof vnode==='number') {
+		return node.splitText!==undefined;
 	}
-	if (isString(vnode.nodeName)) {
+	if (typeof vnode.nodeName==='string') {
 		return !node._componentConstructor && isNamedNode(node, vnode.nodeName);
 	}
-	return hydrating || node._componentConstructor===vnode.nodeName || isFunctionalComponent(vnode);
+	return hydrating || node._componentConstructor===vnode.nodeName;
 }
 
 
 export function isNamedNode(node, nodeName) {
-	return node.normalizedNodeName===nodeName || toLowerCase(node.nodeName)===toLowerCase(nodeName);
+	return node.normalizedNodeName===nodeName || node.nodeName.toLowerCase()===nodeName.toLowerCase();
 }
 
 
@@ -31,11 +30,11 @@ export function isNamedNode(node, nodeName) {
  * @returns {Object} props
  */
 export function getNodeProps(vnode) {
-	let props = clone(vnode.attributes);
+	let props = extend({}, vnode.attributes);
 	props.children = vnode.children;
 
 	let defaultProps = vnode.nodeName.defaultProps;
-	if (defaultProps) {
+	if (defaultProps!==undefined) {
 		for (let i in defaultProps) {
 			if (props[i]===undefined) {
 				props[i] = defaultProps[i];

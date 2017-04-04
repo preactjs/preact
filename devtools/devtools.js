@@ -4,7 +4,6 @@ import { options, Component } from 'preact';
 
 // Internal helpers from preact
 import { ATTR_KEY } from '../src/constants';
-import { isFunctionalComponent } from '../src/vdom/functional-component';
 
 /**
  * Return a ReactElement-compatible object for the current state of a preact
@@ -174,37 +173,6 @@ function findRoots(node, roots) {
  * Map of functional component name -> wrapper class.
  */
 let functionalComponentWrappers = typeof Map==='function' && new Map();
-
-/**
- * Wrap a functional component with a stateful component.
- *
- * preact does not record any information about the original hierarchy of
- * functional components in the rendered DOM nodes. Wrapping functional components
- * with a trivial wrapper allows us to recover information about the original
- * component structure from the DOM.
- *
- * @param {VNode} vnode
- */
-function wrapFunctionalComponent(vnode) {
-	const originalRender = vnode.nodeName;
-	const name = vnode.nodeName.name || '(Function.name missing)';
-	const wrappers = functionalComponentWrappers;
-	if (!wrappers.has(originalRender)) {
-		let wrapper = class extends Component {
-			render(props, state, context) {
-				return originalRender(props, context);
-			}
-		};
-
-		// Expose the original component name. React Dev Tools will use
-		// this property if it exists or fall back to Function.name
-		// otherwise.
-		wrapper.displayName = name;
-
-		wrappers.set(originalRender, wrapper);
-	}
-	vnode.nodeName = wrappers.get(originalRender);
-}
 
 /**
  * Create a bridge for exposing preact's component tree to React DevTools.
@@ -394,14 +362,6 @@ export function initDevTools() {
 		// React DevTools are not installed
 		return;
 	}
-
-	// Hook into preact element creation in order to wrap functional components
-	// with stateful ones in order to make them visible in the devtools
-	const nextVNode = options.vnode;
-	options.vnode = (vnode) => {
-		if (isFunctionalComponent(vnode)) wrapFunctionalComponent(vnode);
-		if (nextVNode) return nextVNode(vnode);
-	};
 
 	// Notify devtools when preact components are mounted, updated or unmounted
 	const bridge = createDevToolsBridge();
