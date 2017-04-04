@@ -114,7 +114,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 			inst = initialChildComponent;
 
 			if (inst && inst.constructor===childComponent && childProps.key==inst.__key) {
-				setComponentProps(inst, childProps, SYNC_RENDER, context);
+				setComponentProps(inst, childProps, SYNC_RENDER, context, false);
 			}
 			else {
 				toUnmount = inst;
@@ -123,7 +123,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 				inst.nextBase = inst.nextBase || nextBase;
 				inst._parentComponent = component;
 				component._component = inst;
-				setComponentProps(inst, childProps, NO_RENDER, context);
+				setComponentProps(inst, childProps, NO_RENDER, context, false);
 				renderComponent(inst, SYNC_RENDER, mountAll, true);
 			}
 
@@ -151,7 +151,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 
 				if (!toUnmount) {
 					initialBase._component = null;
-					recollectNodeTree(initialBase);
+					recollectNodeTree(initialBase, false);
 				}
 			}
 		}
