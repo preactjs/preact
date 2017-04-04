@@ -1,6 +1,6 @@
 import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, ATTR_KEY } from '../constants';
 import options from '../options';
-import { isFunction, clone, extend } from '../util';
+import { extend } from '../util';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from './index';
 import { diff, mounts, diffLevel, flushMounts, recollectNodeTree } from './diff';
@@ -101,13 +101,13 @@ export function renderComponent(component, opts, mountAll, isChild) {
 
 		// context to pass to the child, can be updated via (grand-)parent component
 		if (component.getChildContext) {
-			context = extend(clone(context), component.getChildContext());
+			context = extend(extend({}, context), component.getChildContext());
 		}
 
 		let childComponent = rendered && rendered.nodeName,
 			toUnmount, base;
 
-		if (isFunction(childComponent)) {
+		if (typeof childComponent==='function') {
 			// set up high order component link
 
 			let childProps = getNodeProps(rendered);

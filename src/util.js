@@ -3,18 +3,8 @@
  *	@private
  */
 export function extend(obj, props) {
-	if (props) {
-		for (let i in props) obj[i] = props[i];
-	}
+	for (let i in props) obj[i] = props[i];
 	return obj;
-}
-
-
-/** Fast clone. Note: does not filter out non-own properties.
- *	@see https://esbench.com/bench/56baa34f45df6895002e03b6
- */
-export function clone(obj) {
-	return extend({}, obj);
 }
 
 
