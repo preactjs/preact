@@ -187,10 +187,10 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 		min = 0,
 		len = originalChildren.length,
 		childrenLen = 0,
-		vlen = vchildren && vchildren.length,
+		vlen = vchildren ? vchildren.length : 0,
 		j, c, vchild, child;
 
-	if (len) {
+	if (len!==0) {
 		for (let i=0; i<len; i++) {
 			let child = originalChildren[i],
 				props = child[ATTR_KEY],
@@ -205,7 +205,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 		}
 	}
 
-	if (vlen) {
+	if (vlen!==0) {
 		for (let i=0; i<vlen; i++) {
 			vchild = vchildren[i];
 			child = null;
