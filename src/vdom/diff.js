@@ -147,9 +147,6 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 
 	// invoke original ref (from before resolving Pure Functional Components):
-	if (ref) {
-		(props.ref = ref)(out);
-	}
 
 	isSvgMode = prevSvgMode;
 
