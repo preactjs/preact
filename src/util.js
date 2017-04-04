@@ -31,19 +31,6 @@ export function isString(obj) {
 }
 
 
-/** Convert a hashmap of CSS classes to a space-delimited className string
- *	@private
- */
-export function hashToClassName(c) {
-	let str = '';
-	for (let prop in c) {
-		if (c[prop]) {
-			if (str) str += ' ';
-			str += prop;
-		}
-	}
-	return str;
-}
 
 
 /** Just a memoized String#toLowerCase */
