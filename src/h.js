@@ -25,7 +25,7 @@ export function h(nodeName, attributes) {
 		delete attributes.children;
 	}
 	while (stack.length) {
-		if ((child = stack.pop()) instanceof Array) {
+		if ((child = stack.pop()) && child.pop!==undefined) {
 			for (i=child.length; i--; ) stack.push(child[i]);
 		}
 		else if (child!=null && child!==true && child!==false) {
