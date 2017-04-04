@@ -1,5 +1,4 @@
 import { ATTR_KEY } from '../constants';
-import { isString, isFunction } from '../util';
 import { isSameNodeType, isNamedNode } from './index';
 import { buildComponentFromVNode } from './component';
 import { setAccessor, removeNode } from '../dom/index';
@@ -71,9 +70,10 @@ function idiff(dom, vnode, context, mountAll) {
 
 
 	// Fast case: Strings create/update Text nodes.
-	if (isString(vnode)) {
+	if (typeof vnode==='string' || typeof vnode==='number') {
+
 		// update if it's already a Text node
-		if (dom && dom instanceof Text && dom.parentNode) {
+		if (dom && dom.splitText!==undefined && dom.parentNode && (!dom._component || componentRoot)) {
 			if (dom.nodeValue!=vnode) {
 				dom.nodeValue = vnode;
 			}
@@ -89,7 +89,7 @@ function idiff(dom, vnode, context, mountAll) {
 
 
 	// If the VNode represents a Component, perform a component diff.
-	if (isFunction(vnode.nodeName)) {
+	if (typeof vnode.nodeName==='function') {
 		return buildComponentFromVNode(dom, vnode, context, mountAll);
 	}
 

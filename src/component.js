@@ -1,6 +1,6 @@
 import { FORCE_RENDER } from './constants';
-import { extend, clone, isFunction } from './util';
 import { createLinkedState } from './linked-state';
+import { extend } from './util';
 import { renderComponent } from './vdom/component';
 import { enqueueRender } from './render-queue';
 
@@ -75,8 +75,8 @@ extend(Component.prototype, {
 	 */
 	setState(state, callback) {
 		let s = this.state;
-		if (!this.prevState) this.prevState = clone(s);
-		extend(s, isFunction(state) ? state(s, this.props) : state);
+		if (!this.prevState) this.prevState = extend({}, s);
+		extend(s, typeof state==='function' ? state(s, this.props) : state);
 		if (callback) (this._renderCallbacks = (this._renderCallbacks || [])).push(callback);
 		enqueueRender(this);
 	},

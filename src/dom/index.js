@@ -1,6 +1,5 @@
 import { NON_DIMENSION_PROPS, NON_BUBBLING_EVENTS } from '../constants';
 import options from '../options';
-import { toLowerCase, isString, isFunction, hashToClassName } from '../util';
 
 
 
