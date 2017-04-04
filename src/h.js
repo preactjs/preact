@@ -20,7 +20,7 @@ export function h(nodeName, attributes) {
 	for (i=arguments.length; i-- > 2; ) {
 		stack.push(arguments[i]);
 	}
-	if (attributes && attributes.children) {
+	if (attributes && attributes.children!=null) {
 		if (!stack.length) stack.push(attributes.children);
 		delete attributes.children;
 	}
@@ -46,10 +46,14 @@ export function h(nodeName, attributes) {
 		}
 	}
 
-	let p = new VNode(nodeName, attributes || undefined, children || EMPTY_CHILDREN);
+	let p = new VNode();
+	p.nodeName = nodeName;
+	p.children = children==null ? EMPTY_CHILDREN : children;
+	p.attributes = attributes==null ? undefined : attributes;
+	p.key = attributes==null ? undefined : attributes.key;
 
 	// if a "vnode hook" is defined, pass every created VNode to it
-	if (options.vnode) options.vnode(p);
+	if (options.vnode!==undefined) options.vnode(p);
 
 	return p;
 }
