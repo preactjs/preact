@@ -1,4 +1,4 @@
-import { NON_DIMENSION_PROPS, NON_BUBBLING_EVENTS } from '../constants';
+import { IS_NON_DIMENSIONAL, NON_BUBBLING_EVENTS } from '../constants';
 import options from '../options';
 
 
@@ -35,15 +35,15 @@ export function setAccessor(node, name, old, value, isSvg) {
 		node.className = value || '';
 	}
 	else if (name==='style') {
-		if (!value || isString(value) || isString(old)) {
+		if (!value || typeof value==='string' || typeof old==='string') {
 			node.style.cssText = value || '';
 		}
 		if (value && typeof value==='object') {
-			if (!isString(old)) {
+			if (typeof old!=='string') {
 				for (let i in old) if (!(i in value)) node.style[i] = '';
 			}
 			for (let i in value) {
-				node.style[i] = typeof value[i]==='number' && !NON_DIMENSION_PROPS[i] ? (value[i]+'px') : value[i];
+				node.style[i] = typeof value[i]==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (value[i]+'px') : value[i];
 			}
 		}
 	}
@@ -52,7 +52,7 @@ export function setAccessor(node, name, old, value, isSvg) {
 	}
 	else if (name[0]=='o' && name[1]=='n') {
 		let l = node._listeners || (node._listeners = {});
-		name = toLowerCase(name.substring(2));
+		name = name.substring(2).toLowerCase();
 		// @TODO: this might be worth it later, un-breaks focus/blur bubbling in IE9:
 		// if (node.attachEvent) name = name=='focus'?'focusin':name=='blur'?'focusout':name;
 		if (value) {
@@ -70,11 +70,11 @@ export function setAccessor(node, name, old, value, isSvg) {
 	else {
 		let ns = isSvg && name.match(/^xlink\:?(.+)/);
 		if (value==null || value===false) {
-			if (ns) node.removeAttributeNS('http://www.w3.org/1999/xlink', toLowerCase(ns[1]));
+			if (ns) node.removeAttributeNS('http://www.w3.org/1999/xlink', ns[1].toLowerCase());
 			else node.removeAttribute(name);
 		}
-		else if (typeof value!=='object' && !isFunction(value)) {
-			if (ns) node.setAttributeNS('http://www.w3.org/1999/xlink', toLowerCase(ns[1]), value);
+		else if (typeof value!=='object' && typeof value!=='function') {
+			if (ns) node.setAttributeNS('http://www.w3.org/1999/xlink', ns[1].toLowerCase(), value);
 			else node.setAttribute(name, value);
 		}
 	}
