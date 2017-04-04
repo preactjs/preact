@@ -2,12 +2,15 @@ import { IS_NON_DIMENSIONAL, NON_BUBBLING_EVENTS } from '../constants';
 import options from '../options';
 
 
-
-
-/** Removes a given DOM Node from its parent. */
-export function removeNode(node) {
-	let p = node.parentNode;
-	if (p) p.removeChild(node);
+/** Create an element with the given nodeName.
+ *	@param {String} nodeName
+ *	@param {Boolean} [isSvg=false]	If `true`, creates an element within the SVG namespace.
+ *	@returns {Element} node
+ */
+export function createNode(nodeName, isSvg) {
+	let node = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', nodeName) : document.createElement(nodeName);
+	node.normalizedNodeName = nodeName;
+	return node;
 }
 
 
