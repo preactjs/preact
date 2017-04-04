@@ -3,7 +3,7 @@ import { extend } from './util';
 import { renderComponent } from './vdom/component';
 import { enqueueRender } from './render-queue';
 
-/** Base Component class, for the ES6 Class method of creating Components
+/** Base Component class, for the ES Class method of creating Components
  *	@public
  *
  *	@example
@@ -25,7 +25,7 @@ export function Component(props, context) {
 	/** @type {object} */
 	this.props = props;
 	/** @type {object} */
-	if (!this.state) this.state = {};
+	this.state = this.state || {};
 }
 
 
