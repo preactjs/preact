@@ -84,6 +84,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 			}
 		}
 
+		dom[ATTR_KEY] = true;
 		return dom;
 	}
 
