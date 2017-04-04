@@ -1,8 +1,7 @@
 import { ATTR_KEY } from '../constants';
 import { isSameNodeType, isNamedNode } from './index';
 import { buildComponentFromVNode } from './component';
-import { setAccessor, removeNode } from '../dom/index';
-import { createNode, collectNode } from '../dom/recycler';
+import { createNode, setAccessor } from '../dom/index';
 import { unmountComponent } from './component';
 import options from '../options';
 
@@ -235,7 +234,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 				}
 				else if (child!==originalChildren[i]) {
 					if (child===originalChildren[i+1]) {
-						removeNode(originalChildren[i]);
+						originalChildren[i].remove();
 					}
 					dom.insertBefore(child, originalChildren[i] || null);
 				}
@@ -272,8 +271,8 @@ export function recollectNodeTree(node, unmountOnly) {
 		// (this is part of the React spec, and smart for unsetting references)
 		if (node[ATTR_KEY] && node[ATTR_KEY].ref) node[ATTR_KEY].ref(null);
 
-		if (!unmountOnly) {
-			collectNode(node);
+		if (!unmountOnly || node[ATTR_KEY]==null) {
+			node.remove();
 		}
 
 		// Recollect/unmount all children.

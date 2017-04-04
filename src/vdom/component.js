@@ -5,7 +5,6 @@ import { enqueueRender } from '../render-queue';
 import { getNodeProps } from './index';
 import { diff, mounts, diffLevel, flushMounts, recollectNodeTree } from './diff';
 import { createComponent, collectComponent } from './component-recycler';
-import { removeNode } from '../dom/index';
 
 
 
@@ -264,12 +263,8 @@ export function unmountComponent(component, remove) {
 
 		component.nextBase = base;
 
-		if (remove) {
-			removeNode(base);
-			collectComponent(component);
-		}
-		let c;
-		while ((c=base.lastChild)) recollectNodeTree(c, !remove);
+		base.remove();
+		collectComponent(component);
 		// removeOrphanedChildren(base.childNodes, true);
 	}
 
