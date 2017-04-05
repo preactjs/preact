@@ -219,7 +219,9 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 					if (child===originalChildren[i+1]) {
 						originalChildren[i].remove();
 					}
-					dom.insertBefore(child, originalChildren[i] || null);
+					else {
+						dom.insertBefore(child, originalChildren[i] || null);
+					}
 				}
 			}
 		}
