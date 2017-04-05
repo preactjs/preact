@@ -227,13 +227,12 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 
 
 	if (keyedLen) {
-		for (let i in keyed) if (keyed[i]) recollectNodeTree(keyed[i], false);
+		for (let i in keyed) if (keyed[i]!==undefined) recollectNodeTree(keyed[i], false);
 	}
 
 	// remove orphaned children
 	while (min<=childrenLen) {
-		child = children[childrenLen--];
-		if (child) recollectNodeTree(child, false);
+		if ((child = children[childrenLen--])!==undefined) recollectNodeTree(child, false);
 	}
 }
 
@@ -254,7 +253,7 @@ export function recollectNodeTree(node, unmountOnly) {
 		// (this is part of the React spec, and smart for unsetting references)
 		if (node[ATTR_KEY]!=null && node[ATTR_KEY].ref) node[ATTR_KEY].ref(null);
 
-		if (!unmountOnly || node[ATTR_KEY]==null) {
+		if (unmountOnly===false || node[ATTR_KEY]==null) {
 			node.remove();
 		}
 
