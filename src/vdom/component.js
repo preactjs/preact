@@ -3,7 +3,7 @@ import options from '../options';
 import { extend } from '../util';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from './index';
-import { diff, mounts, diffLevel, flushMounts, recollectNodeTree } from './diff';
+import { diff, mounts, diffLevel, flushMounts, recollectNodeTree, removeChildren } from './diff';
 import { createComponent, collectComponent } from './component-recycler';
 
 
@@ -156,7 +156,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		}
 
 		if (toUnmount) {
-			unmountComponent(toUnmount, base!==initialBase);
+			unmountComponent(toUnmount);
 		}
 
 		component.base = base;
@@ -212,7 +212,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 	}
 	else {
 		if (originalComponent && !isDirectOwner) {
-			unmountComponent(originalComponent, true);
+			unmountComponent(originalComponent);
 			dom = oldDom = null;
 		}
 
@@ -227,7 +227,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 
 		if (oldDom && dom!==oldDom) {
 			oldDom._component = null;
-			recollectNodeTree(oldDom);
+			recollectNodeTree(oldDom, false);
 		}
 	}
 
@@ -241,7 +241,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
  *	@param {Component} component	The Component instance to unmount
  *	@private
  */
-export function unmountComponent(component, remove) {
+export function unmountComponent(component) {
 	if (options.beforeUnmount) options.beforeUnmount(component);
 
 	// console.log(`${remove?'Removing':'Unmounting'} component: ${component.constructor.name}`);
@@ -256,7 +256,7 @@ export function unmountComponent(component, remove) {
 	// recursively tear down & recollect high-order component children:
 	let inner = component._component;
 	if (inner) {
-		unmountComponent(inner, remove);
+		unmountComponent(inner);
 	}
 	else if (base) {
 		if (base[ATTR_KEY] && base[ATTR_KEY].ref) base[ATTR_KEY].ref(null);
@@ -265,6 +265,8 @@ export function unmountComponent(component, remove) {
 
 		base.remove();
 		collectComponent(component);
+
+		removeChildren(base);
 		// removeOrphanedChildren(base.childNodes, true);
 	}
 
