@@ -10,13 +10,9 @@ const EMPTY_CHILDREN = [];
 *	Benchmarks: https://esbench.com/bench/57ee8f8e330ab09900a1a1a0
  *	@see http://jasonformat.com/wtf-is-jsx
  *	@public
- *  @example
- *  /** @jsx h *\/
- *  import { render, h } from 'preact';
- *  render(<span>foo</span>, document.body);
  */
 export function h(nodeName, attributes) {
-	let children, lastSimple, child, simple, i;
+	let children=EMPTY_CHILDREN, lastSimple, child, simple, i;
 	for (i=arguments.length; i-- > 2; ) {
 		stack.push(arguments[i]);
 	}
@@ -38,8 +34,11 @@ export function h(nodeName, attributes) {
 			if (simple && lastSimple) {
 				children[children.length-1] += child;
 			}
+			else if (children===EMPTY_CHILDREN) {
+				children = [child];
+			}
 			else {
-				(children===undefined ? (children = []) : children).push(child);
+				children.push(child);
 			}
 
 			lastSimple = simple;
@@ -48,7 +47,7 @@ export function h(nodeName, attributes) {
 
 	let p = new VNode();
 	p.nodeName = nodeName;
-	p.children = children==null ? EMPTY_CHILDREN : children;
+	p.children = children;
 	p.attributes = attributes==null ? undefined : attributes;
 	p.key = attributes==null ? undefined : attributes.key;
 
