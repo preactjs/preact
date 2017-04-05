@@ -248,7 +248,7 @@ export function recollectNodeTree(node, unmountOnly) {
 	let component = node._component;
 	if (component) {
 		// if node is owned by a Component, unmount that component (ends up recursing back here)
-		unmountComponent(component, !unmountOnly);
+		unmountComponent(component);
 	}
 	else {
 		// If the node's VNode had a ref function, invoke it with null here.
@@ -259,11 +259,11 @@ export function recollectNodeTree(node, unmountOnly) {
 			node.remove();
 		}
 
+		removeChildren(node);
+
 		// Recollect/unmount all children.
 		// - we use .lastChild here because it causes less reflow than .firstChild
 		// - it's also cheaper than accessing the .childNodes Live NodeList
-		let c;
-		while ((c=node.lastChild)) recollectNodeTree(c, unmountOnly);
 	}
 }
 
