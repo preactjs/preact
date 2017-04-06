@@ -245,7 +245,6 @@ describe('Lifecycle methods', () => {
 			componentWillMount() {}
 			componentDidMount() {}
 			componentWillUnmount() {}
-			componentDidUnmount() {}
 			render() { return <div />; }
 		}
 
@@ -263,7 +262,7 @@ describe('Lifecycle methods', () => {
 			render() { return <div />; }
 		}
 
-		let spies = ['_constructor', 'componentWillMount', 'componentDidMount', 'componentWillUnmount', 'componentDidUnmount'];
+		let spies = ['_constructor', 'componentWillMount', 'componentDidMount', 'componentWillUnmount'];
 
 		let verifyLifycycleMethods = (TestComponent) => {
 			let proto = TestComponent.prototype;
@@ -284,9 +283,7 @@ describe('Lifecycle methods', () => {
 				setState({ show:false });
 				rerender();
 
-				expect(proto.componentDidUnmount).to.have.been.called;
-				expect(proto.componentWillUnmount).to.have.been.calledBefore(proto.componentDidUnmount);
-				expect(proto.componentDidUnmount).to.have.been.called;
+				expect(proto.componentWillUnmount).to.have.been.called;
 			});
 
 			it('should be invoked for components on re-render', () => {
@@ -336,14 +333,13 @@ describe('Lifecycle methods', () => {
 				componentWillMount() {}
 				componentDidMount() {}
 				componentWillUnmount() {}
-				componentDidUnmount() {}
 				render() {
 					return <div />;
 				}
 			}
 
 			let proto = Inner.prototype;
-			let spies = ['componentWillMount', 'componentDidMount', 'componentWillUnmount', 'componentDidUnmount'];
+			let spies = ['componentWillMount', 'componentDidMount', 'componentWillUnmount'];
 			spies.forEach( s => sinon.spy(proto, s) );
 
 			let reset = () => spies.forEach( s => proto[s].reset() );
@@ -362,8 +358,6 @@ describe('Lifecycle methods', () => {
 				rerender();
 
 				expect(proto.componentWillUnmount).to.have.been.called;
-				expect(proto.componentWillUnmount).to.have.been.calledBefore(proto.componentDidUnmount);
-				expect(proto.componentDidUnmount).to.have.been.called;
 			});
 
 			it('should still invoke mount for shouldComponentUpdate():false', () => {
@@ -380,8 +374,6 @@ describe('Lifecycle methods', () => {
 				rerender();
 
 				expect(proto.componentWillUnmount).to.have.been.called;
-				expect(proto.componentWillUnmount).to.have.been.calledBefore(proto.componentDidUnmount);
-				expect(proto.componentDidUnmount).to.have.been.called;
 			});
 		});
 	});
@@ -406,9 +398,9 @@ describe('Lifecycle methods', () => {
 				}
 				componentWillUnmount() {
 					expect(document.getElementById('OuterDiv'), 'Outer componentWillUnmount').to.exist;
-				}
-				componentDidUnmount() {
-					expect(document.getElementById('OuterDiv'), 'Outer componentDidUnmount').to.not.exist;
+					setTimeout( () => {
+						expect(document.getElementById('OuterDiv'), 'Outer after componentWillUnmount').to.not.exist;
+					}, 0);
 				}
 				render(props, { show }) {
 					return (
@@ -435,9 +427,9 @@ describe('Lifecycle methods', () => {
 					// are currently unmounted after those elements, so their
 					// DOM is unmounted prior to the method being called.
 					//expect(document.getElementById('InnerDiv'), 'Inner componentWillUnmount').to.exist;
-				}
-				componentDidUnmount() {
-					expect(document.getElementById('InnerDiv'), 'Inner componentDidUnmount').to.not.exist;
+					setTimeout( () => {
+						expect(document.getElementById('InnerDiv'), 'Inner after componentWillUnmount').to.not.exist;
+					}, 0);
 				}
 
 				render() {
@@ -446,7 +438,7 @@ describe('Lifecycle methods', () => {
 			}
 
 			let proto = Inner.prototype;
-			let spies = ['componentWillMount', 'componentDidMount', 'componentWillUnmount', 'componentDidUnmount'];
+			let spies = ['componentWillMount', 'componentDidMount', 'componentWillUnmount'];
 			spies.forEach( s => sinon.spy(proto, s) );
 
 			let reset = () => spies.forEach( s => proto[s].reset() );
@@ -460,8 +452,6 @@ describe('Lifecycle methods', () => {
 			setState({ show:false });
 
 			expect(proto.componentWillUnmount).to.have.been.called;
-			expect(proto.componentWillUnmount).to.have.been.calledBefore(proto.componentDidUnmount);
-			expect(proto.componentDidUnmount).to.have.been.called;
 
 			reset();
 			setState({ show:true });
@@ -476,9 +466,9 @@ describe('Lifecycle methods', () => {
 				class C extends Component {
 					componentWillUnmount() {
 						expect(this.base, `${name}.componentWillUnmount`).to.exist;
-					}
-					componentDidUnmount() {
-						expect(this.base, `${name}.componentDidUnmount`).not.to.exist;
+						setTimeout( () => {
+							expect(this.base, `after ${name}.componentWillUnmount`).not.to.exist;
+						}, 0);
 					}
 					render(props) { return fn(props); }
 				}
@@ -500,7 +490,7 @@ describe('Lifecycle methods', () => {
 
 			let Selector = createComponent('Selector', ({ page }) => {
 				let Child = components[page];
-				return <Child />;
+				return Child && <Child />;
 			});
 
 			class App extends Component {

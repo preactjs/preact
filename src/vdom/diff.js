@@ -1,13 +1,10 @@
 import { ATTR_KEY } from '../constants';
-import { isString, isFunction } from '../util';
 import { isSameNodeType, isNamedNode } from './index';
-import { isFunctionalComponent, buildFunctionalComponent } from './functional-component';
 import { buildComponentFromVNode } from './component';
-import { setAccessor, removeNode } from '../dom/index';
-import { createNode, collectNode } from '../dom/recycler';
+import { createNode, setAccessor } from '../dom/index';
 import { unmountComponent } from './component';
 import options from '../options';
-
+import { removeNode } from '../dom';
 
 /** Queue of components that have been mounted and are awaiting componentDidMount */
 export const mounts = [];
@@ -41,13 +38,13 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 	// diffLevel having been 0 here indicates initial entry into the diff (not a subdiff)
 	if (!diffLevel++) {
 		// when first starting the diff, check if we're diffing an SVG or within an SVG
-		isSvgMode = parent && typeof parent.ownerSVGElement!=='undefined';
+		isSvgMode = parent!=null && parent.ownerSVGElement!==undefined;
 
 		// hydration is inidicated by the existing element to be diffed not having a prop cache
-		hydrating = dom && !(ATTR_KEY in dom);
+		hydrating = dom!=null && !(ATTR_KEY in dom);
 	}
 
-	let ret = idiff(dom, vnode, context, mountAll);
+	let ret = idiff(dom, vnode, context, mountAll, componentRoot);
 
 	// append the element if its a new parent
 	if (parent && ret.parentNode!==parent) parent.appendChild(ret);
@@ -63,97 +60,79 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 }
 
 
-function idiff(dom, vnode, context, mountAll) {
-	let ref = vnode && vnode.attributes && vnode.attributes.ref;
-
-
-	// Resolve ephemeral Pure Functional Components
-	while (isFunctionalComponent(vnode)) {
-		vnode = buildFunctionalComponent(vnode, context);
-	}
-
+function idiff(dom, vnode, context, mountAll, componentRoot) {
+	let out = dom,
+		prevSvgMode = isSvgMode;
 
 	// empty values (null & undefined) render as empty Text nodes
 	if (vnode==null) vnode = '';
 
 
 	// Fast case: Strings create/update Text nodes.
-	if (isString(vnode)) {
+	if (typeof vnode==='string') {
+
 		// update if it's already a Text node
-		if (dom && dom instanceof Text && dom.parentNode) {
+		if (dom && dom.splitText!==undefined && dom.parentNode && (!dom._component || componentRoot)) {
 			if (dom.nodeValue!=vnode) {
 				dom.nodeValue = vnode;
 			}
 		}
 		else {
 			// it wasn't a Text node: replace it with one and recycle the old Element
-			if (dom) recollectNodeTree(dom);
-			dom = document.createTextNode(vnode);
+			out = document.createTextNode(vnode);
+			if (dom) {
+				if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
+				recollectNodeTree(dom, true);
+			}
 		}
 
-		return dom;
+		out[ATTR_KEY] = true;
+
+		return out;
 	}
 
 
 	// If the VNode represents a Component, perform a component diff.
-	if (isFunction(vnode.nodeName)) {
+	if (typeof vnode.nodeName==='function') {
 		return buildComponentFromVNode(dom, vnode, context, mountAll);
 	}
 
 
-	let out = dom,
-		nodeName = String(vnode.nodeName),	// @TODO this masks undefined component errors as `<undefined>`
-		prevSvgMode = isSvgMode,
-		vchildren = vnode.children;
 
 
-	// SVGs have special namespace stuff.
-	// This tracks entering and exiting that namespace when descending through the tree.
-	isSvgMode = nodeName==='svg' ? true : nodeName==='foreignObject' ? false : isSvgMode;
+	// Tracks entering and exiting SVG namespace when descending through the tree.
+	isSvgMode = vnode.nodeName==='svg' ? true : vnode.nodeName==='foreignObject' ? false : isSvgMode;
 
 
-	if (!dom) {
-		// case: we had no element to begin with
-		// - create an element with the nodeName from VNode
-		out = createNode(nodeName, isSvgMode);
-	}
-	else if (!isNamedNode(dom, nodeName)) {
-		// case: Element and VNode had different nodeNames
-		// - need to create the correct Element to match VNode
-		// - then migrate children from old to new
+	if (!dom || !isNamedNode(dom, vnode.nodeName)) {
+		out = createNode(vnode.nodeName, isSvgMode);
 
-		out = createNode(nodeName, isSvgMode);
+		if (dom) {
+			// move children into the replacement node
+			while (dom.firstChild) out.appendChild(dom.firstChild);
 
-		// move children into the replacement node
-		while (dom.firstChild) out.appendChild(dom.firstChild);
+			// if the previous Element was mounted into the DOM, replace it inline
+			if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
 
-		// if the previous Element was mounted into the DOM, replace it inline
-		if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
-
-		// recycle the old element (skips non-Element node types)
-		recollectNodeTree(dom);
+			// recycle the old element (skips non-Element node types)
+			recollectNodeTree(dom, true);
+		}
 	}
 
 
 	let fc = out.firstChild,
-		props = out[ATTR_KEY];
-
-	// Attribute Hydration: if there is no prop cache on the element,
-	// ...create it and populate it with the element's attributes.
-	if (!props) {
-		out[ATTR_KEY] = props = {};
-		for (let a=out.attributes, i=a.length; i--; ) props[a[i].name] = a[i].value;
-	}
+		props = out[ATTR_KEY]!=null ? out[ATTR_KEY] : (out[ATTR_KEY] = {}),
+		vchildren = vnode.children;
 
 	// Optimization: fast-path for elements containing a single TextNode:
-	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc && fc instanceof Text && !fc.nextSibling) {
+	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc!=null && fc.splitText!==undefined && fc.nextSibling===null) {
 		if (fc.nodeValue!=vchildren[0]) {
 			fc.nodeValue = vchildren[0];
 		}
 	}
 	// otherwise, if there are existing or new children, diff them:
-	else if (vchildren && vchildren.length || fc) {
-		innerDiffNode(out, vchildren, context, mountAll, hydrating || !!props.dangerouslySetInnerHTML);
+	else if (vchildren && vchildren.length || fc!=null) {
+		innerDiffNode(out, vchildren, context, mountAll, hydrating || props.dangerouslySetInnerHTML!=null);
 	}
 
 
@@ -162,9 +141,6 @@ function idiff(dom, vnode, context, mountAll) {
 
 
 	// invoke original ref (from before resolving Pure Functional Components):
-	if (ref) {
-		(props.ref = ref)(out);
-	}
 
 	isSvgMode = prevSvgMode;
 
@@ -194,12 +170,12 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 		for (let i=0; i<len; i++) {
 			let child = originalChildren[i],
 				props = child[ATTR_KEY],
-				key = vlen ? ((c = child._component) ? c.__key : props ? props.key : null) : null;
+				key = vlen && props ? child._component ? child._component.__key : props.key : null;
 			if (key!=null) {
 				keyedLen++;
 				keyed[key] = child;
 			}
-			else if (isHydrating || props || child instanceof Text) {
+			else if (props || (child.splitText!==undefined ? (isHydrating ? child.nodeValue.trim() : true) : isHydrating)) {
 				children[childrenLen++] = child;
 			}
 		}
@@ -210,14 +186,10 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 			vchild = vchildren[i];
 			child = null;
 
-			// if (isFunctionalComponent(vchild)) {
-			// 	vchild = buildFunctionalComponent(vchild);
-			// }
-
 			// attempt to find a node based on key matching
 			let key = vchild.key;
 			if (key!=null) {
-				if (keyedLen && key in keyed) {
+				if (keyedLen && keyed[key]!==undefined) {
 					child = keyed[key];
 					keyed[key] = undefined;
 					keyedLen--;
@@ -226,8 +198,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 			// attempt to pluck a node of the same type from the existing children
 			else if (!child && min<childrenLen) {
 				for (j=min; j<childrenLen; j++) {
-					c = children[j];
-					if (c && isSameNodeType(c, vchild, isHydrating)) {
+					if (children[j]!==undefined && isSameNodeType(c = children[j], vchild, isHydrating)) {
 						child = c;
 						children[j] = undefined;
 						if (j===childrenLen-1) childrenLen--;
@@ -248,7 +219,9 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 					if (child===originalChildren[i+1]) {
 						removeNode(originalChildren[i]);
 					}
-					dom.insertBefore(child, originalChildren[i] || null);
+					else {
+						dom.insertBefore(child, originalChildren[i] || null);
+					}
 				}
 			}
 		}
@@ -256,13 +229,12 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 
 
 	if (keyedLen) {
-		for (let i in keyed) if (keyed[i]) recollectNodeTree(keyed[i]);
+		for (let i in keyed) if (keyed[i]!==undefined) recollectNodeTree(keyed[i], false);
 	}
 
 	// remove orphaned children
 	while (min<=childrenLen) {
-		child = children[childrenLen--];
-		if (child) recollectNodeTree(child);
+		if ((child = children[childrenLen--])!==undefined) recollectNodeTree(child, false);
 	}
 }
 
@@ -276,25 +248,33 @@ export function recollectNodeTree(node, unmountOnly) {
 	let component = node._component;
 	if (component) {
 		// if node is owned by a Component, unmount that component (ends up recursing back here)
-		unmountComponent(component, !unmountOnly);
+		unmountComponent(component);
 	}
 	else {
 		// If the node's VNode had a ref function, invoke it with null here.
 		// (this is part of the React spec, and smart for unsetting references)
-		if (node[ATTR_KEY] && node[ATTR_KEY].ref) node[ATTR_KEY].ref(null);
+		if (node[ATTR_KEY]!=null && node[ATTR_KEY].ref) node[ATTR_KEY].ref(null);
 
-		if (!unmountOnly) {
-			collectNode(node);
+		if (unmountOnly===false || node[ATTR_KEY]==null) {
+			removeNode(node);
 		}
 
 		// Recollect/unmount all children.
 		// - we use .lastChild here because it causes less reflow than .firstChild
 		// - it's also cheaper than accessing the .childNodes Live NodeList
-		let c;
-		while ((c=node.lastChild)) recollectNodeTree(c, unmountOnly);
+		removeChildren(node);
 	}
 }
 
+
+export function removeChildren(node) {
+	node = node.lastChild;
+	while (node) {
+		let next = node.previousSibling;
+		recollectNodeTree(node, true);
+		node = next;
+	}
+}
 
 
 /** Apply differences in attributes from a VNode to the given DOM Element.
@@ -306,17 +286,15 @@ function diffAttributes(dom, attrs, old) {
 	// remove attributes no longer present on the vnode by setting them to undefined
 	let name;
 	for (name in old) {
-		if (!(attrs && name in attrs) && old[name]!=null) {
+		if (!(attrs && attrs[name]!=null) && old[name]!=null) {
 			setAccessor(dom, name, old[name], old[name] = undefined, isSvgMode);
 		}
 	}
 
 	// add new & update changed attributes
-	if (attrs) {
-		for (name in attrs) {
-			if (name!=='children' && name!=='innerHTML' && (!(name in old) || attrs[name]!==(name==='value' || name==='checked' ? dom[name] : old[name]))) {
-				setAccessor(dom, name, old[name], old[name] = attrs[name], isSvgMode);
-			}
+	for (name in attrs) {
+		if (name!=='children' && name!=='innerHTML' && (!(name in old) || attrs[name]!==(name==='value' || name==='checked' ? dom[name] : old[name]))) {
+			setAccessor(dom, name, old[name], old[name] = attrs[name], isSvgMode);
 		}
 	}
 }

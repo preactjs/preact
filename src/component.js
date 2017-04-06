@@ -1,10 +1,9 @@
 import { FORCE_RENDER } from './constants';
-import { extend, clone, isFunction } from './util';
-import { createLinkedState } from './linked-state';
+import { extend } from './util';
 import { renderComponent } from './vdom/component';
 import { enqueueRender } from './render-queue';
 
-/** Base Component class, for the ES6 Class method of creating Components
+/** Base Component class, for the ES Class method of creating Components
  *	@public
  *
  *	@example
@@ -26,7 +25,7 @@ export function Component(props, context) {
 	/** @type {object} */
 	this.props = props;
 	/** @type {object} */
-	if (!this.state) this.state = {};
+	this.state = this.state || {};
 }
 
 
@@ -45,29 +44,6 @@ extend(Component.prototype, {
 	// },
 
 
-	/** Returns a function that sets a state property when called.
-	 *	Calling linkState() repeatedly with the same arguments returns a cached link function.
-	 *
-	 *	Provides some built-in special cases:
-	 *		- Checkboxes and radio buttons link their boolean `checked` value
-	 *		- Inputs automatically link their `value` property
-	 *		- Event paths fall back to any associated Component if not found on an element
-	 *		- If linked value is a function, will invoke it and use the result
-	 *
-	 *	@param {string} key		The path to set - can be a dot-notated deep key
-	 *	@param {string} [eventPath]	If set, attempts to find the new state value at a given dot-notated path within the object passed to the linkedState setter.
-	 *	@returns {function} linkStateSetter(e)
-	 *
-	 *	@example Update a "text" state value when an input changes:
-	 *		<input onChange={ this.linkState('text') } />
-	 *
-	 *	@example Set a deep state value on click
-	 *		<button onClick={ this.linkState('touch.coords', 'touches.0') }>Tap</button
-	 */
-	linkState(key, eventPath) {
-		let c = this._linkedStates || (this._linkedStates = {});
-		return c[key+eventPath] || (c[key+eventPath] = createLinkedState(this, key, eventPath));
-	},
 
 
 	/** Update component state by copying properties from `state` to `this.state`.
@@ -75,8 +51,8 @@ extend(Component.prototype, {
 	 */
 	setState(state, callback) {
 		let s = this.state;
-		if (!this.prevState) this.prevState = clone(s);
-		extend(s, isFunction(state) ? state(s, this.props) : state);
+		if (!this.prevState) this.prevState = extend({}, s);
+		extend(s, typeof state==='function' ? state(s, this.props) : state);
 		if (callback) (this._renderCallbacks = (this._renderCallbacks || [])).push(callback);
 		enqueueRender(this);
 	},
