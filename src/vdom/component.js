@@ -49,7 +49,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 		}
 	}
 
-	if (component.__ref) component.__ref(component);
+	if (component.__ref && isFunction(component.__ref)) component.__ref(component);
 }
 
 
@@ -278,6 +278,6 @@ export function unmountComponent(component, remove) {
 		// removeOrphanedChildren(base.childNodes, true);
 	}
 
-	if (component.__ref) component.__ref(null);
+	if (component.__ref && isFunction(component.__ref)) component.__ref(null);
 	if (component.componentDidUnmount) component.componentDidUnmount();
 }
