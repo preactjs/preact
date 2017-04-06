@@ -17,7 +17,7 @@
       "$_componentConstructor": "_componentConstructor",
       "$__html": "__html",
       "$_component": "_component",
-      "$__preactattr_": "q"
+      "$__preactattr_": "__preactattr_"
     }
   },
   "vars": {
