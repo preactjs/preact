@@ -4,7 +4,7 @@ import { buildComponentFromVNode } from './component';
 import { createNode, setAccessor } from '../dom/index';
 import { unmountComponent } from './component';
 import options from '../options';
-
+import { removeNode } from '../dom';
 
 /** Queue of components that have been mounted and are awaiting componentDidMount */
 export const mounts = [];
@@ -217,7 +217,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 				}
 				else if (child!==originalChildren[i]) {
 					if (child===originalChildren[i+1]) {
-						originalChildren[i].remove();
+						removeNode(originalChildren[i]);
 					}
 					else {
 						dom.insertBefore(child, originalChildren[i] || null);
@@ -256,7 +256,7 @@ export function recollectNodeTree(node, unmountOnly) {
 		if (node[ATTR_KEY]!=null && node[ATTR_KEY].ref) node[ATTR_KEY].ref(null);
 
 		if (unmountOnly===false || node[ATTR_KEY]==null) {
-			node.remove();
+			removeNode(node);
 		}
 
 		removeChildren(node);
