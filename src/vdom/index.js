@@ -1,4 +1,4 @@
-import { clone, isString, isFunction, toLowerCase } from '../util';
+import { clone, isString, toLowerCase } from '../util';
 import { isFunctionalComponent } from './functional-component';
 
 
@@ -7,16 +7,14 @@ import { isFunctionalComponent } from './functional-component';
  *	@param {VNode} vnode
  *	@private
  */
-export function isSameNodeType(node, vnode) {
+export function isSameNodeType(node, vnode, hydrating) {
 	if (isString(vnode)) {
 		return node instanceof Text;
 	}
 	if (isString(vnode.nodeName)) {
 		return !node._componentConstructor && isNamedNode(node, vnode.nodeName);
 	}
-	if (isFunction(vnode.nodeName)) {
-		return (node._componentConstructor ? node._componentConstructor===vnode.nodeName : true) || isFunctionalComponent(vnode);
-	}
+	return hydrating || node._componentConstructor===vnode.nodeName || isFunctionalComponent(vnode);
 }
 
 
