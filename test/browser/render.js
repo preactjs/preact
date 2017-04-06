@@ -262,12 +262,12 @@ describe('render()', () => {
 		proto.removeEventListener.restore();
 	});
 
-	it('should use capturing for events that do not bubble', () => {
+	it('should use capturing for event props ending with *Capture', () => {
 		let click = sinon.spy(),
 			focus = sinon.spy();
 
 		let root = render((
-			<div onClick={click} onFocus={focus}>
+			<div onClickCapture={click} onFocusCapture={focus}>
 				<button />
 			</div>
 		), scratch);
