@@ -1,4 +1,4 @@
-import { IS_NON_DIMENSIONAL, NON_BUBBLING_EVENTS } from '../constants';
+import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
 
 
@@ -54,17 +54,15 @@ export function setAccessor(node, name, old, value, isSvg) {
 		if (value) node.innerHTML = value.__html || '';
 	}
 	else if (name[0]=='o' && name[1]=='n') {
-		let l = node._listeners || (node._listeners = {});
-		name = name.substring(2).toLowerCase();
-		// @TODO: this might be worth it later, un-breaks focus/blur bubbling in IE9:
-		// if (node.attachEvent) name = name=='focus'?'focusin':name=='blur'?'focusout':name;
+		let useCapture = name !== (name=name.replace(/Capture$/, ''));
+		name = name.toLowerCase().substring(2);
 		if (value) {
-			if (!l[name]) node.addEventListener(name, eventProxy, !!NON_BUBBLING_EVENTS[name]);
+			if (!old) node.addEventListener(name, eventProxy, useCapture);
 		}
-		else if (l[name]) {
-			node.removeEventListener(name, eventProxy, !!NON_BUBBLING_EVENTS[name]);
+		else {
+			node.removeEventListener(name, eventProxy, useCapture);
 		}
-		l[name] = value;
+		(node._listeners || (node._listeners = {}))[name] = value;
 	}
 	else if (name!=='list' && name!=='type' && !isSvg && name in node) {
 		setProperty(node, name, value==null ? '' : value);
