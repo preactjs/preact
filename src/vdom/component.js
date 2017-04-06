@@ -61,8 +61,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 export function renderComponent(component, opts, mountAll, isChild) {
 	if (component._disable) return;
 
-	let skip, rendered,
-		props = component.props,
+	let props = component.props,
 		state = component.state,
 		context = component.context,
 		previousProps = component.prevProps || props,
@@ -72,7 +71,8 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		nextBase = component.nextBase,
 		initialBase = isUpdate || nextBase,
 		initialChildComponent = component._component,
-		inst, cbase;
+		skip = false,
+		rendered, inst, cbase;
 
 	// if updating
 	if (isUpdate) {
@@ -96,7 +96,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 	component._dirty = false;
 
 	if (!skip) {
-		if (component.render) rendered = component.render(props, state, context);
+		rendered = component.render(props, state, context);
 
 		// context to pass to the child, can be updated via (grand-)parent component
 		if (component.getChildContext) {
@@ -118,10 +118,9 @@ export function renderComponent(component, opts, mountAll, isChild) {
 			else {
 				toUnmount = inst;
 
-				inst = createComponent(childComponent, childProps, context);
+				component._component = inst = createComponent(childComponent, childProps, context);
 				inst.nextBase = inst.nextBase || nextBase;
 				inst._parentComponent = component;
-				component._component = inst;
 				setComponentProps(inst, childProps, NO_RENDER, context, false);
 				renderComponent(inst, SYNC_RENDER, mountAll, true);
 			}
@@ -181,8 +180,9 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		if (options.afterUpdate) options.afterUpdate(component);
 	}
 
-	let cb = component._renderCallbacks, fn;
-	if (cb) while ( (fn = cb.pop()) ) fn.call(component);
+	if (component._renderCallbacks!=null) {
+		while (component._renderCallbacks.length) component._renderCallbacks.pop().call(component);
+	}
 
 	if (!diffLevel && !isChild) flushMounts();
 }
