@@ -259,11 +259,10 @@ export function recollectNodeTree(node, unmountOnly) {
 			removeNode(node);
 		}
 
-		removeChildren(node);
-
 		// Recollect/unmount all children.
 		// - we use .lastChild here because it causes less reflow than .firstChild
 		// - it's also cheaper than accessing the .childNodes Live NodeList
+		removeChildren(node);
 	}
 }
 

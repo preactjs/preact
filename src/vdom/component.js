@@ -266,7 +266,6 @@ export function unmountComponent(component) {
 		collectComponent(component);
 
 		removeChildren(base);
-		// removeOrphanedChildren(base.childNodes, true);
 	}
 
 	if (component.__ref) component.__ref(null);
