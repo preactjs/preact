@@ -218,7 +218,6 @@ In order to have the clock's time update every second, we need to know when `<Cl
 | `componentWillMount`        | before the component gets mounted to the DOM     |
 | `componentDidMount`         | after the component gets mounted to the DOM      |
 | `componentWillUnmount`      | prior to removal from the DOM                    |
-| `componentDidUnmount`       | after removal from the DOM                       |
 | `componentWillReceiveProps` | before new props get accepted                    |
 | `shouldComponentUpdate`     | before `render()`. Return `false` to skip render |
 | `componentWillUpdate`       | before `render()`                                |

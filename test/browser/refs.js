@@ -86,6 +86,7 @@ describe('refs', () => {
 	it('should pass children to ref functions', () => {
 		let outer = spy('outer'),
 			inner = spy('inner'),
+			InnermostComponent = 'span',
 			rerender, inst;
 		class Outer extends Component {
 			constructor() {
@@ -106,7 +107,7 @@ describe('refs', () => {
 				inst = this;
 			}
 			render() {
-				return <span ref={inner} />;
+				return <InnermostComponent ref={inner} />;
 			}
 		}
 
@@ -120,22 +121,31 @@ describe('refs', () => {
 
 		rerender();
 
-		expect(outer).to.have.been.calledOnce.and.calledWith(inst);
-		expect(inner).to.have.been.calledOnce.and.calledWith(inst.base);
+		expect(outer, 're-render').to.have.been.calledOnce.and.calledWith(inst);
+		expect(inner, 're-render').not.to.have.been.called;
+
+		inner.reset();
+		InnermostComponent = 'x-span';
+		rerender();
+		expect(inner, 're-render swap');
+		expect(inner.firstCall, 're-render swap').to.have.been.calledWith(null);
+		expect(inner.secondCall, 're-render swap').to.have.been.calledWith(inst.base);
+		InnermostComponent = 'span';
 
 		outer.reset();
 		inner.reset();
 
 		render(<div />, scratch, root);
 
-		expect(outer).to.have.been.calledOnce.and.calledWith(null);
-		expect(inner).to.have.been.calledOnce.and.calledWith(null);
+		expect(outer, 'unrender').to.have.been.calledOnce.and.calledWith(null);
+		expect(inner, 'unrender').to.have.been.calledOnce.and.calledWith(null);
 	});
 
 	it('should pass high-order children to ref functions', () => {
 		let outer = spy('outer'),
 			inner = spy('inner'),
 			innermost = spy('innermost'),
+			InnermostComponent = 'span',
 			outerInst,
 			innerInst;
 		class Outer extends Component {
@@ -153,7 +163,7 @@ describe('refs', () => {
 				innerInst = this;
 			}
 			render() {
-				return <span ref={innermost} />;
+				return <InnermostComponent ref={innermost} />;
 			}
 		}
 
@@ -170,7 +180,15 @@ describe('refs', () => {
 
 		expect(outer, 'outer update').to.have.been.calledOnce.and.calledWith(outerInst);
 		expect(inner, 'inner update').to.have.been.calledOnce.and.calledWith(innerInst);
-		expect(innermost, 'innerMost update').to.have.been.calledOnce.and.calledWith(innerInst.base);
+		expect(innermost, 'innerMost update').not.to.have.been.called;
+
+		innermost.reset();
+		InnermostComponent = 'x-span';
+		root = render(<Outer ref={outer} />, scratch, root);
+		expect(innermost, 'innerMost swap');
+		expect(innermost.firstCall, 'innerMost swap').to.have.been.calledWith(null);
+		expect(innermost.secondCall, 'innerMost swap').to.have.been.calledWith(innerInst.base);
+		InnermostComponent = 'span';
 
 		outer.reset();
 		inner.reset();
@@ -212,11 +230,11 @@ describe('refs', () => {
 			componentWillUnmount() {
 				expect(this).to.have.property('outer', outer);
 				expect(this).to.have.property('inner', inner);
-			}
 
-			componentDidUnmount() {
-				expect(this).to.have.property('outer', null);
-				expect(this).to.have.property('inner', null);
+				setTimeout( () => {
+					expect(this).to.have.property('outer', null);
+					expect(this).to.have.property('inner', null);
+				});
 			}
 
 			render() {
@@ -229,19 +247,16 @@ describe('refs', () => {
 		}
 
 		sinon.spy(TestUnmount.prototype, 'componentWillUnmount');
-		sinon.spy(TestUnmount.prototype, 'componentDidUnmount');
 
 		root = render(<div><TestUnmount /></div>, scratch, root);
 		outer = scratch.querySelector('#outer');
 		inner = scratch.querySelector('#inner');
 
 		expect(TestUnmount.prototype.componentWillUnmount).not.to.have.been.called;
-		expect(TestUnmount.prototype.componentDidUnmount).not.to.have.been.called;
 
 		render(<div />, scratch, root);
 
 		expect(TestUnmount.prototype.componentWillUnmount).to.have.been.calledOnce;
-		expect(TestUnmount.prototype.componentDidUnmount).to.have.been.calledOnce;
 	});
 
 	it('should null and re-invoke refs when swapping component root element type', () => {
