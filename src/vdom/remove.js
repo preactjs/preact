@@ -1,3 +1,4 @@
 export default function remove(el) {
-	el.parentNode && el.parentNode.removeChild(el);
+	if (el.parentNode !== null)
+		el.parentNode.removeChild(el);
 }
