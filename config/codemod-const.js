@@ -15,7 +15,7 @@ export default (file, api) => {
 				let node = decl.value.declarations[i],
 					name = node.id && node.id.name,
 					init = node.init;
-				if (name && init && name.match(/^[A-Z0-9_$]+$/g) && String(init.raw).match(/^\d+$/g)) {
+				if (name && init && name.match(/^[A-Z0-9_$]+$/g) && !init.regex) {
 					if (init.type==='Literal') {
 						console.log(`Inlining constant: ${name}=${init.raw}`);
 						found++;
