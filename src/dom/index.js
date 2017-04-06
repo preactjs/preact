@@ -102,7 +102,7 @@ function eventProxy(e) {
 /** Remove the child node from parent if attached
  * @param {Element} el
  */
-export default function removeNode(el) {
+export function removeNode(el) {
 	if (el.parentNode !== null)
 		el.parentNode.removeChild(el);
 }
