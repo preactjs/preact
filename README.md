@@ -1,23 +1,54 @@
-<a href="https://preactjs.com">
+<p align="center">
+<a href="https://preactjs.com" target="_blank">
 <img alt="Preact" title="Preact" src="https://cdn.rawgit.com/developit/b4416d5c92b743dbaec1e68bc4c27cda/raw/3235dc508f7eb834ebf48418aea212a05df13db1/preact-logo-trans.svg" width="550">
 </a>
+</p>
+<p align="center">Fast <b>3kB</b> alternative to React, with the same ES2015 API.</p>
 
-**Preact is a fast, `3kB` alternative to React, with the same ES2015 API.**
+**All the power of Virtual DOM components, without the overhead:**
 
-Preact retains a large amount of compatibility with React, but only the modern ([ES6 Classes] and [stateless functional components](https://facebook.github.io/react/blog/2015/10/07/react-v0.14.html#stateless-functional-components)) interfaces.
-As one would expect coming from React, Components are simple building blocks for composing a User Interface.
+- Familiar React API & patterns: [ES6 Class] and [Functional Components]
+- Extensive React compatibility via a simple [preact-compat] alias
+- Everything you need: JSX, <abbr title="Virtual DOM">VDOM</abbr>, React DevTools, <abbr title="Hot Module Replacement">HMR</abbr>, <abbr title="Server-Side Rendering">SSR</abbr>..
+- A highly optimized diff algorithm and seamless Server Side Rendering
+- Transparent asynchronous rendering with a pluggable scheduler
 
-### :information_desk_person: Full documentation is available at the [Preact Website ➞](https://preactjs.com)
+### 💁 More information at the [Preact Website ➞](https://preactjs.com)
 
-[![CDNJS](https://img.shields.io/cdnjs/v/preact.svg)](https://cdnjs.com/libraries/preact)
+
+---
+
+<!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
+
+- [Demos](#demos)
+- [Libraries & Add-ons](#libraries--add-ons)
+- [Getting Started](#getting-started)
+	- [Import what you need](#import-what-you-need)
+	- [Rendering JSX](#rendering-jsx)
+	- [Components](#components)
+	- [Props & State](#props--state)
+- [Linked State](#linked-state)
+- [Examples](#examples)
+- [Extensions](#extensions)
+- [Developer Tools](#developer-tools)
+- [Backers](#backers)
+- [Sponsors](#sponsors)
+- [License](#license)
+
+<!-- /TOC -->
+
+
+# Preact
+
 [![npm](https://img.shields.io/npm/v/preact.svg)](http://npm.im/preact)
-[![travis](https://travis-ci.org/developit/preact.svg?branch=master)](https://travis-ci.org/developit/preact)
-[![coveralls](https://img.shields.io/coveralls/developit/preact/master.svg)](https://coveralls.io/github/developit/preact)
+[![CDNJS](https://img.shields.io/cdnjs/v/preact.svg)](https://cdnjs.com/libraries/preact)
 [![Preact Slack Community](https://preact-slack.now.sh/badge.svg)](https://preact-slack.now.sh)
 [![OpenCollective Backers](https://opencollective.com/preact/backers/badge.svg)](#backers)
 [![OpenCollective Sponsors](https://opencollective.com/preact/sponsors/badge.svg)](#sponsors)
+[![travis](https://travis-ci.org/developit/preact.svg?branch=master)](https://travis-ci.org/developit/preact)
+[![coveralls](https://img.shields.io/coveralls/developit/preact/master.svg)](https://coveralls.io/github/developit/preact)
 
-Preact supports modern browsers and IE9+. The chart below shows test status for `master`:
+Preact supports modern browsers and IE9+:
 
 [![Browsers](https://saucelabs.com/browser-matrix/preact.svg)](https://saucelabs.com/u/preact)
 
@@ -49,7 +80,8 @@ Preact supports modern browsers and IE9+. The chart below shows test status for 
 - [**V2EX Preact**](https://github.com/yanni4night/v2ex-preact)
 - [**BigWebQuiz**](https://bigwebquiz.com/) _([Github Project](https://github.com/jakearchibald/big-web-quiz))_
 - [**Color Picker**](https://colors.now.sh) _([Github Project](https://github.com/lukeed/colors-app))_ :art:
-
+- [**Rainbow Explorer**](https://use-the-platform.com/rainbow-explorer/) _([Github Project](https://github.com/vaneenige/rainbow-explorer/))_ :rainbow:
+- [**Offline Gallery**](https://use-the-platform.com/offline-gallery/) _([Github Project](https://github.com/vaneenige/offline-gallery/))_ :balloon:
 
 ## Libraries & Add-ons
 
@@ -77,9 +109,11 @@ Preact supports modern browsers and IE9+. The chart below shows test status for 
 - :construction_worker: [**preact-helmet**](https://github.com/download/preact-helmet): A document head manager for Preact
 - :necktie: [**preact-delegate**](https://github.com/NekR/preact-delegate): Delegate DOM events
 
+---
+
 ## Getting Started
 
-> :information_desk_person: You [don't _have_ to use ES2015 to use Preact](https://github.com/developit/preact-without-babel)... but you should.
+> 💁 You [don't _have_ to use ES2015 to use Preact](https://github.com/developit/preact-without-babel)... but you should.
 
 The following guide assumes you have some sort of ES2015 build set up using babel and/or webpack/browserify/gulp/grunt/etc.  If you don't, start with [preact-boilerplate] or a [CodePen Template](http://codepen.io/developit/pen/pgaROe?editors=0010).
 
@@ -202,7 +236,9 @@ class Clock extends Component {
 	constructor() {
 		super();
 		// set initial time:
-		this.state.time = Date.now();
+		this.state = {
+			time: Date.now()
+		};
 	}
 
 	componentDidMount() {
@@ -450,8 +486,9 @@ MIT
 [![Preact](http://i.imgur.com/YqCHvEW.gif)](https://preactjs.com)
 
 
-
-[ES6 Classes]: https://facebook.github.io/react/docs/reusable-components.html#es6-classes
+[preact-compat]: https://github.com/developit/preact-compat
+[ES6 Class]: https://facebook.github.io/react/docs/reusable-components.html#es6-classes
+[Functional Components]: https://facebook.github.io/react/blog/2015/10/07/react-v0.14.html#stateless-functional-components
 [hyperscript]: https://github.com/dominictarr/hyperscript
 [preact-boilerplate]: https://github.com/developit/preact-boilerplate
 [lifecycle methods]: https://facebook.github.io/react/docs/component-specs.html
