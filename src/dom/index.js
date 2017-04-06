@@ -14,6 +14,14 @@ export function createNode(nodeName, isSvg) {
 }
 
 
+/** Remove the child node from parent if attached
+ * @param {Element} node
+ */
+export function removeNode(node) {
+	if (node.parentNode) node.parentNode.removeChild(node);
+}
+
+
 /** Set a named attribute on the given Node, with special behavior for some names and event handlers.
  *	If `value` is `null`, the attribute/handler will be removed.
  *	@param {Element} node	An element to mutate
@@ -97,12 +105,4 @@ function setProperty(node, name, value) {
  */
 function eventProxy(e) {
 	return this._listeners[e.type](options.event && options.event(e) || e);
-}
-
-/** Remove the child node from parent if attached
- * @param {Element} el
- */
-export function removeNode(el) {
-	if (el.parentNode !== null)
-		el.parentNode.removeChild(el);
 }
