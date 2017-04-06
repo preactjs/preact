@@ -1,6 +1,6 @@
 /* global __REACT_DEVTOOLS_GLOBAL_HOOK__ */
 
-import { options, Component } from 'preact';
+import { options } from 'preact';
 
 // Internal helpers from preact
 import { ATTR_KEY } from '../src/constants';
@@ -168,11 +168,6 @@ function findRoots(node, roots) {
 		}
 	});
 }
-
-/**
- * Map of functional component name -> wrapper class.
- */
-let functionalComponentWrappers = typeof Map==='function' && new Map();
 
 /**
  * Create a bridge for exposing preact's component tree to React DevTools.
