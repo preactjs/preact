@@ -271,5 +271,4 @@ export function unmountComponent(component) {
 	}
 
 	if (component.__ref) component.__ref(null);
-	if (component.componentDidUnmount) component.componentDidUnmount();
 }
