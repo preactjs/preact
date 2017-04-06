@@ -98,3 +98,11 @@ function setProperty(node, name, value) {
 function eventProxy(e) {
 	return this._listeners[e.type](options.event && options.event(e) || e);
 }
+
+/** Remove the child node from parent if attached
+ * @param {Element} el
+ */
+export function removeNode(el) {
+	if (el.parentNode !== null)
+		el.parentNode.removeChild(el);
+}
