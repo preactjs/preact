@@ -312,7 +312,8 @@ function createDevToolsBridge() {
  * `render()` into a container Element.
  */
 function isRootComponent(component) {
-	if (component._parentComponent) {
+	// `_parentComponent` is actually `__u` after minification
+	if (component._parentComponent || component.__u) {
 		// Component with a composite parent
 		return false;
 	}
