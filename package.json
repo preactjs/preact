@@ -1,7 +1,7 @@
 {
   "name": "preact",
-  "version": "7.2.1",
-  "description": "Tiny & fast Component-based virtual DOM framework.",
+  "version": "8.0.0",
+  "description": "Fast 3kb React alternative with the same ES6 API. Components & Virtual DOM.",
   "main": "dist/preact.js",
   "jsnext:main": "src/preact.js",
   "dev:main": "dist/preact.dev.js",
