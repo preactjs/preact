@@ -268,6 +268,15 @@ export function recollectNodeTree(node, unmountOnly) {
 }
 
 
+export function removeChildren(node) {
+	node = node.lastChild;
+	while (node) {
+		let next = node.previousSibling;
+		recollectNodeTree(node, true);
+		node = next;
+	}
+}
+
 
 /** Apply differences in attributes from a VNode to the given DOM Element.
  *	@param {Element} dom		Element with attributes to diff `attrs` against
