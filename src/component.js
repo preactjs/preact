@@ -48,6 +48,7 @@ extend(Component.prototype, {
 
 	/** Update component state by copying properties from `state` to `this.state`.
 	 *	@param {object} state		A hash of state properties to update with new values
+	 *	@param {function} callback	A function to be called once component state is updated
 	 */
 	setState(state, callback) {
 		let s = this.state;
