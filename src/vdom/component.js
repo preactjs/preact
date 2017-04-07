@@ -218,7 +218,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 		c = createComponent(vnode.nodeName, props, context);
 		if (dom && !c.nextBase) {
 			c.nextBase = dom;
-			// passing dom/oldDom as nextBase will recycle it if unused, so bypass recycling on L241:
+			// passing dom/oldDom as nextBase will recycle it if unused, so bypass recycling on L229:
 			oldDom = null;
 		}
 		setComponentProps(c, props, SYNC_RENDER, context, mountAll);
@@ -243,7 +243,6 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 export function unmountComponent(component) {
 	if (options.beforeUnmount) options.beforeUnmount(component);
 
-	// console.log(`${remove?'Removing':'Unmounting'} component: ${component.constructor.name}`);
 	let base = component.base;
 
 	component._disable = true;
