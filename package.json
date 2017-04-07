@@ -7,13 +7,14 @@
   "dev:main": "dist/preact.dev.js",
   "minified:main": "dist/preact.min.js",
   "scripts": {
-    "clean": "rimraf dist/ devtools.js devtools.js.map",
+    "clean": "rimraf dist/ devtools.js devtools.js.map debug/",
     "copy-flow-definition": "copyfiles -f src/preact.js.flow dist",
     "copy-typescript-definition": "copyfiles -f src/preact.d.ts dist",
     "build": "npm-run-all --silent clean transpile copy-flow-definition copy-typescript-definition strip optimize minify size",
     "transpile:main": "rollup -c config/rollup.config.js -m dist/preact.dev.js.map -n preact -o dist/preact.dev.js",
     "transpile:devtools": "rollup -c config/rollup.config.devtools.js -o devtools.js -m devtools.js.map",
-    "transpile": "npm-run-all transpile:main transpile:devtools",
+    "transpile:debug": "babel debug_src/ -d debug/ -s",
+    "transpile": "npm-run-all transpile:main transpile:devtools transpile:debug",
     "optimize": "uglifyjs dist/preact.dev.js -c conditionals=false,sequences=false,loops=false,join_vars=false,collapse_vars=false --pure-funcs=Object.defineProperty --mangle-props --mangle-regex=\"/^(_|normalizedNodeName|nextBase|prev[CPS]|_parentC)/\" --name-cache config/properties.json -b width=120,quote_style=3 -o dist/preact.js -p relative --in-source-map dist/preact.dev.js.map --source-map dist/preact.js.map",
     "minify": "uglifyjs dist/preact.js -c collapse_vars,evaluate,screw_ie8,unsafe,loops=false,keep_fargs=false,pure_getters,unused,dead_code -m -o dist/preact.min.js -p relative --in-source-map dist/preact.js.map --source-map dist/preact.min.js.map",
     "strip": "jscodeshift --run-in-band -s -t config/codemod-strip-tdz.js dist/preact.dev.js && jscodeshift --run-in-band -s -t config/codemod-const.js dist/preact.dev.js",
@@ -24,7 +25,7 @@
     "test:karma": "karma start test/karma.conf.js --single-run",
     "test:mocha:watch": "npm run test:mocha -- --watch",
     "test:karma:watch": "npm run test:karma -- no-single-run",
-    "lint": "eslint devtools src test",
+    "lint": "eslint debug devtools src test",
     "prepublish": "npm run build",
     "smart-release": "npm run build && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish",
     "release": "cross-env npm run smart-release"
@@ -39,6 +40,7 @@
   },
   "files": [
     "devtools",
+    "debug",
     "src",
     "dist",
     "devtools.js",
