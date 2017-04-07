@@ -60,6 +60,7 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 }
 
 
+/** Internals of `diff()`, separated to allow bypassing diffLevel / mount flushing. */
 function idiff(dom, vnode, context, mountAll, componentRoot) {
 	let out = dom,
 		prevSvgMode = isSvgMode;
@@ -71,7 +72,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	// Fast case: Strings create/update Text nodes.
 	if (typeof vnode==='string') {
 
-		// update if it's already a Text node
+		// update if it's already a Text node:
 		if (dom && dom.splitText!==undefined && dom.parentNode && (!dom._component || componentRoot)) {
 			if (dom.nodeValue!=vnode) {
 				dom.nodeValue = vnode;
@@ -92,18 +93,17 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	}
 
 
-	// If the VNode represents a Component, perform a component diff.
+	// If the VNode represents a Component, perform a component diff:
 	if (typeof vnode.nodeName==='function') {
 		return buildComponentFromVNode(dom, vnode, context, mountAll);
 	}
-
-
 
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	isSvgMode = vnode.nodeName==='svg' ? true : vnode.nodeName==='foreignObject' ? false : isSvgMode;
 
 
+	// If there's no existing element or it's the wrong type, create a new one:
 	if (!dom || !isNamedNode(dom, vnode.nodeName)) {
 		out = createNode(vnode.nodeName, isSvgMode);
 
@@ -140,8 +140,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	diffAttributes(out, vnode.attributes, props);
 
 
-	// invoke original ref (from before resolving Pure Functional Components):
-
+	// restore previous SVG mode: (in case we're exiting an SVG namespace)
 	isSvgMode = prevSvgMode;
 
 	return out;
@@ -166,6 +165,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 		vlen = vchildren ? vchildren.length : 0,
 		j, c, vchild, child;
 
+	// Build up a map of keyed children and an Array of unkeyed children:
 	if (len!==0) {
 		for (let i=0; i<len; i++) {
 			let child = originalChildren[i],
@@ -228,11 +228,12 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 	}
 
 
+	// remove unused keyed children:
 	if (keyedLen) {
 		for (let i in keyed) if (keyed[i]!==undefined) recollectNodeTree(keyed[i], false);
 	}
 
-	// remove orphaned children
+	// remove orphaned unkeyed children:
 	while (min<=childrenLen) {
 		if ((child = children[childrenLen--])!==undefined) recollectNodeTree(child, false);
 	}
@@ -259,14 +260,15 @@ export function recollectNodeTree(node, unmountOnly) {
 			removeNode(node);
 		}
 
-		// Recollect/unmount all children.
-		// - we use .lastChild here because it causes less reflow than .firstChild
-		// - it's also cheaper than accessing the .childNodes Live NodeList
 		removeChildren(node);
 	}
 }
 
 
+/** Recollect/unmount all children.
+ *	- we use .lastChild here because it causes less reflow than .firstChild
+ *	- it's also cheaper than accessing the .childNodes Live NodeList
+ */
 export function removeChildren(node) {
 	node = node.lastChild;
 	while (node) {
@@ -283,8 +285,9 @@ export function removeChildren(node) {
  *	@param {Object} old			Current/previous attributes (from previous VNode or element's prop cache)
  */
 function diffAttributes(dom, attrs, old) {
-	// remove attributes no longer present on the vnode by setting them to undefined
 	let name;
+
+	// remove attributes no longer present on the vnode by setting them to undefined
 	for (name in old) {
 		if (!(attrs && attrs[name]!=null) && old[name]!=null) {
 			setAccessor(dom, name, old[name], old[name] = undefined, isSvgMode);

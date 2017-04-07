@@ -3,7 +3,8 @@ import { extend } from './util';
 import { renderComponent } from './vdom/component';
 import { enqueueRender } from './render-queue';
 
-/** Base Component class, for the ES Class method of creating Components
+/** Base Component class.
+ *	Provides `setState()` and `forceUpdate()`, which trigger rendering.
  *	@public
  *
  *	@example
@@ -14,24 +15,28 @@ import { enqueueRender } from './render-queue';
  *	}
  */
 export function Component(props, context) {
-	/** @private */
 	this._dirty = true;
-	// /** @public */
-	// this._disableRendering = false;
-	// /** @public */
-	// this.prevState = this.prevProps = this.prevContext = this.base = this.nextBase = this._parentComponent = this._component = this.__ref = this.__key = this._linkedStates = this._renderCallbacks = null;
-	/** @public */
+
+	/** @public
+	 *	@type {object}
+	 */
 	this.context = context;
-	/** @type {object} */
+
+	/** @public
+	 *	@type {object}
+	 */
 	this.props = props;
-	/** @type {object} */
+
+	/** @public
+	 *	@type {object}
+	 */
 	this.state = this.state || {};
 }
 
 
 extend(Component.prototype, {
 
-	/** Returns a `boolean` value indicating if the component should re-render when receiving the given `props` and `state`.
+	/** Returns a `boolean` indicating if the component should re-render when receiving the given `props` and `state`.
 	 *	@param {object} nextProps
 	 *	@param {object} nextState
 	 *	@param {object} nextContext
@@ -39,11 +44,6 @@ extend(Component.prototype, {
 	 *	@name shouldComponentUpdate
 	 *	@function
 	 */
-	// shouldComponentUpdate() {
-	// 	return true;
-	// },
-
-
 
 
 	/** Update component state by copying properties from `state` to `this.state`.
