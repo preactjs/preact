@@ -28,9 +28,9 @@ export function h(nodeName, attributes) {
 			if (child===true || child===false) child = null;
 
 			if ((simple = typeof nodeName!=='function')) {
-		    if (child==null) child = '';
-		    else if (typeof child==='number') child = String(child);
-		    else if (typeof child!=='string') simple = false;
+				if (child==null) child = '';
+				else if (typeof child==='number') child = String(child);
+				else if (typeof child!=='string') simple = false;
 			}
 
 			if (simple && lastSimple) {
