@@ -401,7 +401,6 @@ describe('Components', () => {
 				componentWillMount() {}
 				componentDidMount() {}
 				componentWillUnmount() {}
-				componentDidUnmount() {}
 				render(props) {
 					return <div j={ ++j } {...props}>inner</div>;
 				}
@@ -410,7 +409,6 @@ describe('Components', () => {
 			sinon.spy(Inner.prototype, 'render');
 			sinon.spy(Inner.prototype, 'componentWillMount');
 			sinon.spy(Inner.prototype, 'componentDidMount');
-			sinon.spy(Inner.prototype, 'componentDidUnmount');
 			sinon.spy(Inner.prototype, 'componentWillUnmount');
 
 			render(<Outer foo="bar" />, scratch);
@@ -425,7 +423,6 @@ describe('Components', () => {
 
 			expect(Inner.prototype._constructor).to.have.been.calledOnce;
 			expect(Inner.prototype.componentWillUnmount).not.to.have.been.called;
-			expect(Inner.prototype.componentDidUnmount).not.to.have.been.called;
 			expect(Inner.prototype.componentWillMount).to.have.been.calledOnce;
 			expect(Inner.prototype.componentDidMount).to.have.been.calledOnce;
 			expect(Inner.prototype.render).to.have.been.calledTwice;
@@ -453,7 +450,6 @@ describe('Components', () => {
 			rerender();
 
 			expect(Inner.prototype.componentWillUnmount).not.to.have.been.called;
-			expect(Inner.prototype.componentDidUnmount).not.to.have.been.called;
 			expect(Inner.prototype.componentWillMount).to.have.been.calledOnce;
 			expect(Inner.prototype.componentDidMount).to.have.been.calledOnce;
 			expect(Inner.prototype.render).to.have.been.calledThrice;
@@ -481,7 +477,6 @@ describe('Components', () => {
 			rerender();
 
 			expect(Inner.prototype.componentWillUnmount).to.have.been.calledOnce;
-			expect(Inner.prototype.componentDidUnmount).to.have.been.calledOnce;
 
 			expect(scratch.innerHTML).to.equal('<div is-alt="true"></div>');
 
@@ -508,7 +503,6 @@ describe('Components', () => {
 				componentWillMount() {}
 				componentDidMount() {}
 				componentWillUnmount() {}
-				componentDidUnmount() {}
 				render() {
 					return <div>inner</div>;
 				}
@@ -525,8 +519,6 @@ describe('Components', () => {
 			render(<asdf />, scratch, root);
 
 			expect(Inner.prototype.componentWillUnmount).to.have.been.calledOnce;
-			expect(Inner.prototype.componentDidUnmount).to.have.been.calledOnce;
-			expect(Inner.prototype.componentWillUnmount).to.have.been.calledBefore(Inner.prototype.componentDidUnmount);
 		});
 
 		it('should unmount children of high-order components without unmounting parent', () => {
@@ -541,7 +533,6 @@ describe('Components', () => {
 					};
 				}
 				componentWillUnmount(){}
-				componentDidUnmount(){}
 				componentWillMount(){}
 				componentDidMount(){}
 				render(_, { child:C }) {
@@ -552,7 +543,6 @@ describe('Components', () => {
 
 			class Inner extends Component {
 				componentWillUnmount(){}
-				componentDidUnmount(){}
 				componentWillMount(){}
 				componentDidMount(){}
 				render() {
@@ -567,7 +557,6 @@ describe('Components', () => {
 					inner2 = this;
 				}
 				componentWillUnmount(){}
-				componentDidUnmount(){}
 				componentWillMount(){}
 				componentDidMount(){}
 				render() {
@@ -582,13 +571,11 @@ describe('Components', () => {
 			expect(Outer.prototype.componentWillMount, 'outer initial').to.have.been.calledOnce;
 			expect(Outer.prototype.componentDidMount, 'outer initial').to.have.been.calledOnce;
 			expect(Outer.prototype.componentWillUnmount, 'outer initial').not.to.have.been.called;
-			expect(Outer.prototype.componentDidUnmount, 'outer initial').not.to.have.been.called;
 
 			// inner should only have been mounted once
 			expect(Inner.prototype.componentWillMount, 'inner initial').to.have.been.calledOnce;
 			expect(Inner.prototype.componentDidMount, 'inner initial').to.have.been.calledOnce;
 			expect(Inner.prototype.componentWillUnmount, 'inner initial').not.to.have.been.called;
-			expect(Inner.prototype.componentDidUnmount, 'inner initial').not.to.have.been.called;
 
 			outer.setState({ child:Inner2 });
 			outer.forceUpdate();
@@ -599,13 +586,11 @@ describe('Components', () => {
 			expect(Outer.prototype.componentWillMount, 'outer swap').to.have.been.calledOnce;
 			expect(Outer.prototype.componentDidMount, 'outer swap').to.have.been.calledOnce;
 			expect(Outer.prototype.componentWillUnmount, 'outer swap').not.to.have.been.called;
-			expect(Outer.prototype.componentDidUnmount, 'outer swap').not.to.have.been.called;
 
 			// inner should only have been mounted once
 			expect(Inner2.prototype.componentWillMount, 'inner2 swap').to.have.been.calledOnce;
 			expect(Inner2.prototype.componentDidMount, 'inner2 swap').to.have.been.calledOnce;
 			expect(Inner2.prototype.componentWillUnmount, 'inner2 swap').not.to.have.been.called;
-			expect(Inner2.prototype.componentDidUnmount, 'inner2 swap').not.to.have.been.called;
 
 			inner2.forceUpdate();
 
@@ -613,7 +598,6 @@ describe('Components', () => {
 			expect(Inner2.prototype.componentWillMount, 'inner2 update').to.have.been.calledOnce;
 			expect(Inner2.prototype.componentDidMount, 'inner2 update').to.have.been.calledOnce;
 			expect(Inner2.prototype.componentWillUnmount, 'inner2 update').not.to.have.been.called;
-			expect(Inner2.prototype.componentDidUnmount, 'inner2 update').not.to.have.been.called;
 		});
 
 		it('should remount when swapping between HOC child types', () => {
@@ -661,7 +645,6 @@ describe('Components', () => {
 		let createComponent = (Intermediary) => {
 			class C extends Component {
 				componentWillMount() {}
-				componentDidUnmount() {}
 				render({ children }) {
 					if (!useIntermediary) return children[0];
 					let I = useIntermediary===true ? Intermediary : useIntermediary;
@@ -704,22 +687,18 @@ describe('Components', () => {
 
 			expect(C1.prototype.componentWillMount, 'unmount innermost, C1').not.to.have.been.called;
 			expect(C2.prototype.componentWillMount, 'unmount innermost, C2').not.to.have.been.called;
-			expect(C3.prototype.componentDidUnmount, 'unmount innermost, C3').to.have.been.calledOnce;
 
 			reset();
 			rndr(<C1><C3>Some Text</C3></C1>);
 
 			expect(C1.prototype.componentWillMount, 'swap innermost').not.to.have.been.called;
-			expect(C2.prototype.componentDidUnmount, 'swap innermost').to.have.been.calledOnce;
 			expect(C3.prototype.componentWillMount, 'swap innermost').to.have.been.calledOnce;
 
 			reset();
 			rndr(<C1><C2><C3>Some Text</C3></C2></C1>);
 
-			expect(C1.prototype.componentDidUnmount, 'inject between, C1').not.to.have.been.called;
 			expect(C1.prototype.componentWillMount, 'inject between, C1').not.to.have.been.called;
 			expect(C2.prototype.componentWillMount, 'inject between, C2').to.have.been.calledOnce;
-			expect(C3.prototype.componentDidUnmount, 'inject between, C3').to.have.been.calledOnce;
 			expect(C3.prototype.componentWillMount, 'inject between, C3').to.have.been.calledOnce;
 		});
 
@@ -740,22 +719,18 @@ describe('Components', () => {
 
 			expect(C1.prototype.componentWillMount, 'unmount innermost w/ intermediary fn, C1').not.to.have.been.called;
 			expect(C2.prototype.componentWillMount, 'unmount innermost w/ intermediary fn, C2').not.to.have.been.called;
-			expect(C3.prototype.componentDidUnmount, 'unmount innermost w/ intermediary fn, C3').to.have.been.calledOnce;
 
 			reset();
 			rndr(<C1><C3>Some Text</C3></C1>);
 
 			expect(C1.prototype.componentWillMount, 'swap innermost w/ intermediary fn').not.to.have.been.called;
-			expect(C2.prototype.componentDidUnmount, 'swap innermost w/ intermediary fn').to.have.been.calledOnce;
 			expect(C3.prototype.componentWillMount, 'swap innermost w/ intermediary fn').to.have.been.calledOnce;
 
 			reset();
 			rndr(<C1><C2><C3>Some Text</C3></C2></C1>);
 
-			expect(C1.prototype.componentDidUnmount, 'inject between, C1 w/ intermediary fn').not.to.have.been.called;
 			expect(C1.prototype.componentWillMount, 'inject between, C1 w/ intermediary fn').not.to.have.been.called;
 			expect(C2.prototype.componentWillMount, 'inject between, C2 w/ intermediary fn').to.have.been.calledOnce;
-			expect(C3.prototype.componentDidUnmount, 'inject between, C3 w/ intermediary fn').to.have.been.calledOnce;
 			expect(C3.prototype.componentWillMount, 'inject between, C3 w/ intermediary fn').to.have.been.calledOnce;
 		});
 
@@ -775,24 +750,19 @@ describe('Components', () => {
 			rndr(<C1><C2>Some Text</C2></C1>);
 
 			expect(C1.prototype.componentWillMount, 'unmount innermost w/ intermediary div, C1').not.to.have.been.called;
-			expect(C2.prototype.componentDidUnmount, 'unmount innermost w/ intermediary div, C2 ummount').not.to.have.been.called;
 			expect(C2.prototype.componentWillMount, 'unmount innermost w/ intermediary div, C2').not.to.have.been.called;
-			expect(C3.prototype.componentDidUnmount, 'unmount innermost w/ intermediary div, C3').to.have.been.calledOnce;
 
 			reset();
 			rndr(<C1><C3>Some Text</C3></C1>);
 
 			expect(C1.prototype.componentWillMount, 'swap innermost w/ intermediary div').not.to.have.been.called;
-			expect(C2.prototype.componentDidUnmount, 'swap innermost w/ intermediary div').to.have.been.calledOnce;
 			expect(C3.prototype.componentWillMount, 'swap innermost w/ intermediary div').to.have.been.calledOnce;
 
 			reset();
 			rndr(<C1><C2><C3>Some Text</C3></C2></C1>);
 
-			expect(C1.prototype.componentDidUnmount, 'inject between, C1 w/ intermediary div').not.to.have.been.called;
 			expect(C1.prototype.componentWillMount, 'inject between, C1 w/ intermediary div').not.to.have.been.called;
 			expect(C2.prototype.componentWillMount, 'inject between, C2 w/ intermediary div').to.have.been.calledOnce;
-			expect(C3.prototype.componentDidUnmount, 'inject between, C3 w/ intermediary div').to.have.been.calledOnce;
 			expect(C3.prototype.componentWillMount, 'inject between, C3 w/ intermediary div').to.have.been.calledOnce;
 		});
 	});

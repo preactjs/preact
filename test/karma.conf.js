@@ -118,7 +118,9 @@ module.exports = function(config) {
 						loader: 'babel',
 						query: {
 							loose: 'all',
-							blacklist: ['es6.tailCall']
+							blacklist: ['es6.tailCall'],
+							comments: false,
+							compact: true
 						}
 					}
 				],
