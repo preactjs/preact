@@ -173,6 +173,10 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		mounts.unshift(component);
 	}
 	else if (!skip) {
+		// Ensure that pending componentDidMount() hooks of child components
+		// are called before the componentDidUpdate() hook in the parent.
+		flushMounts();
+
 		if (component.componentDidUpdate) {
 			component.componentDidUpdate(previousProps, previousState, previousContext);
 		}
