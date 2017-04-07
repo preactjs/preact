@@ -27,10 +27,10 @@ function benchmark(iter, callback) {
 	}
 
 	// warm
-	for (let i=3; i--; ) noop(), iter();
+	for (let i=100; i--; ) noop(), iter();
 
-	let count = 5,
-		time = 200,
+	let count = 2,
+		time = 500,
 		passes = 0,
 		noops = loop(noop, time),
 		iterations = 0;
@@ -107,7 +107,7 @@ describe('performance', function() {
 			root = render(jsx, scratch, root);
 		}, ({ ticks, message }) => {
 			console.log(`PERF: empty diff: ${message}`);
-			expect(ticks).to.be.below(350 * MULTIPLIER);
+			expect(ticks).to.be.below(150 * MULTIPLIER);
 			done();
 		});
 	});
@@ -239,6 +239,124 @@ describe('performance', function() {
 		}, ({ ticks, message }) => {
 			console.log(`PERF: large VTree: ${message}`);
 			expect(ticks).to.be.below(2000 * MULTIPLIER);
+			done();
+		});
+	});
+
+
+	it('should mutate styles/properties quickly', done => {
+		let counter = 0;
+		const keyLooper = n => c => c % n ? `${c}px` : c;
+		const get = (obj, i) => obj[i%obj.length];
+		const CLASSES = ['foo', 'foo bar', '', 'baz-bat', null];
+		const STYLES = [];
+		const MULTIVALUE = ['0 1px', '0 0 1px 0', '0', '1px', '20px 10px', '7em 5px', '1px 0 5em 2px'];
+		const STYLEKEYS = [
+			['left', keyLooper(3)],
+			['top', keyLooper(2)],
+			['margin', c => get(MULTIVALUE, c).replace('1px', c+'px')],
+			['padding', c => get(MULTIVALUE, c)],
+			['position', c => c%5 ? c%2 ? 'absolute' : 'relative' : null],
+			['display', c => c%10 ? c%2 ? 'block' : 'inline' : 'none'],
+			['color', c => `rgba(${c%255}, ${255 - c%255}, ${50+c%150}, ${c%50/50})`],
+			['border', c => c%5 ? `${c%10}px ${c%2?'solid':'dotted'} ${STYLEKEYS[6][1](c)}` : '']
+		];
+		for (let i=0; i<1000; i++) {
+			let style = {};
+			for (let j=0; j<i%10; j++) {
+				let conf = get(STYLEKEYS, ++counter);
+				style[conf[0]] = conf[1](counter);
+			}
+			STYLES[i] = style;
+		}
+
+		const app = index => (
+			<div class={get(CLASSES, index)} data-index={index} title={index.toString(36)}>
+				<input type="checkbox" checked={index%3 == 0} />
+				<input value={`test ${index/4|0}`} disabled={index%10 ? null : true} />
+				<div class={get(CLASSES, index*10)}>
+					<p style={get(STYLES, index)}>p1</p>
+					<p style={get(STYLES, index+1)}>p2</p>
+					<p style={get(STYLES, index*2)}>p3</p>
+					<p style={get(STYLES, index*3+1)}>p4</p>
+				</div>
+			</div>
+		);
+
+		let root, count=0;
+		benchmark( () => {
+			root = render(app(++count), scratch, root);
+		}, ({ ticks, message }) => {
+			console.log(`PERF: style/prop mutation: ${message}`);
+			expect(ticks).to.be.below(350 * MULTIPLIER);
+			done();
+		});
+	});
+
+	it('should hydrate from SSR quickly', done => {
+		class Header extends Component {
+			render() {
+				return (
+					<header>
+						<h1 class="asdf">a {'b'} c {0} d</h1>
+						<nav>
+							<a href="/foo">Foo</a>
+							<a href="/bar">Bar</a>
+						</nav>
+					</header>
+				);
+			}
+		}
+		class Form extends Component {
+			render() {
+				return (
+					<form onSubmit={()=>{}}>
+						<input type="checkbox" checked={true} />
+						<input type="checkbox" checked={false} />
+						<fieldset>
+							<label><input type="radio" checked /></label>
+							<label><input type="radio" /></label>
+						</fieldset>
+						<ButtonBar />
+					</form>
+				);
+			}
+		}
+		const ButtonBar = () => (
+			<button-bar>
+				<Button style="width:10px; height:10px; border:1px solid #FFF;">Normal CSS</Button>
+				<Button style="top:0 ; right: 20">Poor CSS</Button>
+				<Button style="invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;" icon>Poorer CSS</Button>
+				<Button style={{ margin:0, padding:'10px', overflow:'visible' }}>Object CSS</Button>
+			</button-bar>
+		);
+		class Button extends Component {
+			handleClick() {}
+			render(props) {
+				return <button onClick={this.handleClick} {...props} />;
+			}
+		}
+		const Main = () => <Form />;
+		class App extends Component {
+			render() {
+				return (
+					<div class="foo bar" data-foo="bar" p={2}>
+						<Header />
+						<Main />
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch, scratch.firstChild);
+		let html = scratch.innerHTML;
+
+		benchmark( () => {
+			scratch.innerHTML = html;
+			render(<App />, scratch, scratch.firstChild);
+		}, ({ ticks, message }) => {
+			console.log(`PERF: SSR Hydrate: ${message}`);
+			expect(ticks).to.be.below(3000 * MULTIPLIER);
 			done();
 		});
 	});
