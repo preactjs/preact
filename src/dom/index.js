@@ -82,7 +82,7 @@ export function setAccessor(node, name, old, value, isSvg) {
 			if (ns) node.removeAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase());
 			else node.removeAttribute(name);
 		}
-		else if (typeof value!=='object' && typeof value!=='function') {
+		else if (typeof value!=='function') {
 			if (ns) node.setAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase(), value);
 			else node.setAttribute(name, value);
 		}
