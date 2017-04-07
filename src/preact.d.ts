@@ -56,8 +56,6 @@ declare namespace preact {
 		context:any;
 		base:HTMLElement;
 
-		linkState:(name:string) => (event: Event) => void;
-
 		setState<K extends keyof StateType>(state:Pick<StateType, K>, callback?:() => void):void;
 		setState<K extends keyof StateType>(fn:(prevState:StateType, props:PropsType) => Pick<StateType, K>, callback?:() => void):void;
 
