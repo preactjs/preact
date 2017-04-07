@@ -63,16 +63,16 @@ declare namespace preact {
 
 		forceUpdate(callback?:() => void): void;
 
-		abstract render(props?:PropsType & ComponentProps<this>, state?:StateType, context?:any):JSX.Element;
+		abstract render(props?:PropsType & ComponentProps<this>, state?:StateType, context?:any):JSX.Element | null;
 	}
 
 	function h<PropsType>(node:ComponentConstructor<PropsType, any> | FunctionalComponent<PropsType>, params:PropsType, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
 	function h(node:string, params:JSX.HTMLAttributes&JSX.SVGAttributes&{[propName: string]: any}, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
-	function render(node:JSX.Element, parent:Element|Document, mergeWith?:Element):Element;
+	function render(node:JSX.Element|null, parent:Element|Document|null, mergeWith?:Element|null):Element;
 	function rerender():void;
 	function cloneElement(element:JSX.Element, props:any):JSX.Element;
 
-	var options:{
+	const options:{
 		syncComponentUpdates?:boolean;
 		debounceRendering?:(render:() => void) => void;
 		vnode?:(vnode:VNode) => void;
@@ -374,14 +374,29 @@ declare namespace JSX {
 		onCompositionStart?:CompositionEventHandler;
 		onCompositionUpdate?:CompositionEventHandler;
 
+		// Error Events
+		onError?:FocusEventHandler;
+		onErrorCapture?:FocusEventHandler;
+
+		// Load Events
+		onLoad?:FocusEventHandler;
+		onLoadCapture?:FocusEventHandler;
+
+		// Resize Events
+		onResize?:FocusEventHandler;
+		onResizeCapture?:FocusEventHandler;
+
 		// Focus Events
 		onFocus?:FocusEventHandler;
+		onFocusCapture?:FocusEventHandler;
 		onBlur?:FocusEventHandler;
+		onBlurCapture?:FocusEventHandler;
 
 		// Form Events
 		onChange?:GenericEventHandler;
 		onInput?:GenericEventHandler;
 		onSubmit?:GenericEventHandler;
+		onReset?: GenericEventHandler
 
 		// Keyboard Events
 		onKeyDown?:KeyboardEventHandler;
@@ -443,6 +458,7 @@ declare namespace JSX {
 
 		// UI Events
 		onScroll?:UIEventHandler;
+		onScrollCapture?:UIEventHandler;
 
 		// Wheel Events
 		onWheel?:WheelEventHandler;
@@ -475,8 +491,8 @@ declare namespace JSX {
 		charSet?:string;
 		challenge?:string;
 		checked?:boolean;
-		class?:string | { [key:string]: boolean };
-		className?:string | { [key:string]: boolean };
+		class?:string;
+		className?:string;
 		cols?:number;
 		colSpan?:number;
 		content?:string;
