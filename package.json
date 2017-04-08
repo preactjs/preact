@@ -25,7 +25,7 @@
     "test:karma": "karma start test/karma.conf.js --single-run",
     "test:mocha:watch": "npm run test:mocha -- --watch",
     "test:karma:watch": "npm run test:karma -- no-single-run",
-    "lint": "eslint debug devtools src test",
+    "lint": "eslint debug_src devtools src test",
     "prepublish": "npm run build",
     "smart-release": "npm run build && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish",
     "release": "cross-env npm run smart-release"
