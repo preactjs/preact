@@ -240,7 +240,6 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 
 
 /** Remove a component from the DOM and recycle it.
- *	@param {Element} dom			A DOM node from which to unmount the given Component
  *	@param {Component} component	The Component instance to unmount
  *	@private
  */
