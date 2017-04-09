@@ -373,16 +373,16 @@ declare namespace JSX {
 		onCompositionUpdate?:CompositionEventHandler;
 
 		// Error Events
-		onError?:FocusEventHandler;
-		onErrorCapture?:FocusEventHandler;
+		onError?:GenericEventHandler;
+		onErrorCapture?:GenericEventHandler;
 
 		// Load Events
-		onLoad?:FocusEventHandler;
-		onLoadCapture?:FocusEventHandler;
+		onLoad?:GenericEventHandler;
+		onLoadCapture?:GenericEventHandler;
 
 		// Resize Events
-		onResize?:FocusEventHandler;
-		onResizeCapture?:FocusEventHandler;
+		onResize?:GenericEventHandler;
+		onResizeCapture?:GenericEventHandler;
 
 		// Focus Events
 		onFocus?:FocusEventHandler;
