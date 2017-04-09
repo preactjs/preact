@@ -15,7 +15,7 @@ export function enqueueRender(component) {
 export function rerender() {
 	let p, list = items;
 	items = [];
-	while ( (p = list.pop()) ) {
+	while ((p = list.pop()) ) {
 		if (p._dirty) renderComponent(p);
 	}
 }

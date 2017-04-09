@@ -4,15 +4,13 @@ import options from './options';
 
 const stack = [];
 
-const EMPTY_CHILDREN = [];
-
 /** JSX/hyperscript reviver
 *	Benchmarks: https://esbench.com/bench/57ee8f8e330ab09900a1a1a0
  *	@see http://jasonformat.com/wtf-is-jsx
  *	@public
  */
 export function h(nodeName, attributes) {
-	let children=EMPTY_CHILDREN, lastSimple, child, simple, i;
+	let children=[], lastSimple, child, simple, i;
 	for (i=arguments.length; i-- > 2; ) {
 		stack.push(arguments[i]);
 	}
@@ -36,7 +34,7 @@ export function h(nodeName, attributes) {
 			if (simple && lastSimple) {
 				children[children.length-1] += child;
 			}
-			else if (children===EMPTY_CHILDREN) {
+			else if (children===[]) {
 				children = [child];
 			}
 			else {
