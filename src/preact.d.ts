@@ -364,6 +364,9 @@ declare namespace JSX {
 	type GenericEventHandler = EventHandler<Event>;
 
 	interface DOMAttributes {
+		// Image Events
+		onLoad?:GenericEventHandler;
+
 		// Clipboard Events
 		onCopy?:ClipboardEventHandler;
 		onCut?:ClipboardEventHandler;
