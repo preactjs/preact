@@ -26,7 +26,6 @@ declare namespace preact {
 		componentWillMount?():void;
 		componentDidMount?():void;
 		componentWillUnmount?():void;
-		componentDidUnmount?():void;
 		componentWillReceiveProps?(nextProps:PropsType,nextContext:any):void;
 		shouldComponentUpdate?(nextProps:PropsType,nextState:StateType,nextContext:any):boolean;
 		componentWillUpdate?(nextProps:PropsType,nextState:StateType,nextContext:any):void;

@@ -94,14 +94,6 @@ describe('svg', () => {
 		expect(scratch.innerHTML).to.contain(` class="foo bar"`);
 	});
 
-	it('should serialize class', () => {
-		render((
-			<svg viewBox="0 0 1 1" class={{ foo: true, bar: false, other: 'hello' }} />
-		), scratch);
-
-		expect(scratch.innerHTML).to.contain(` class="foo other"`);
-	});
-
 	it('should switch back to HTML for <foreignObject>', () => {
 		render((
 			<svg>
