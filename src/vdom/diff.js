@@ -104,8 +104,8 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 
 	// If there's no existing element or it's the wrong type, create a new one:
-	if (!dom || !isNamedNode(dom, vnode.nodeName)) {
-		out = createNode(vnode.nodeName, isSvgMode);
+	if (!dom || !isNamedNode(dom, String(vnode.nodeName))) {
+		out = createNode(String(vnode.nodeName), isSvgMode);
 
 		if (dom) {
 			// move children into the replacement node
