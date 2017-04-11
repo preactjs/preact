@@ -40,7 +40,7 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 		// when first starting the diff, check if we're diffing an SVG or within an SVG
 		isSvgMode = parent!=null && parent.ownerSVGElement!==undefined;
 
-		// hydration is inidicated by the existing element to be diffed not having a prop cache
+		// hydration is indicated by the existing element to be diffed not having a prop cache
 		hydrating = dom!=null && !(ATTR_KEY in dom);
 	}
 
