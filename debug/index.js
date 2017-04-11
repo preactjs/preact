@@ -9,7 +9,9 @@ if (process.env.NODE_ENV === 'development') {
 			throw new Error('Undefined component passed to preact.h()');
 		}
 
-		if (attributes && attributes.ref !== void 0 && typeof attributes.ref !== 'function'
+		if (
+			attributes && attributes.ref !== void 0 &&
+			typeof attributes.ref !== 'function'
 		) {
 			throw new Error(
 				`Component's "ref" property should be a function,` +
