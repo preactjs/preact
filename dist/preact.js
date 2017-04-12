@@ -133,8 +133,8 @@
         }
         if ('function' == typeof vnode.nodeName) return buildComponentFromVNode(dom, vnode, context, mountAll);
         isSvgMode = 'svg' === vnode.nodeName ? !0 : 'foreignObject' === vnode.nodeName ? !1 : isSvgMode;
-        if (!dom || !isNamedNode(dom, vnode.nodeName)) {
-            out = createNode(vnode.nodeName, isSvgMode);
+        if (!dom || !isNamedNode(dom, String(vnode.nodeName))) {
+            out = createNode(String(vnode.nodeName), isSvgMode);
             if (dom) {
                 while (dom.firstChild) out.appendChild(dom.firstChild);
                 if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
@@ -287,6 +287,7 @@
                 if (initialBase && base !== initialBase && inst !== initialChildComponent) {
                     var baseParent = initialBase.parentNode;
                     if (baseParent && base !== baseParent) {
+                        if (toUnmount) replaceComponent(toUnmount);
                         baseParent.replaceChild(base, initialBase);
                         if (!toUnmount) {
                             initialBase._component = null;
@@ -336,6 +337,11 @@
             }
         }
         return dom;
+    }
+    function replaceComponent(component) {
+        if (component.componentWillReplace) component.componentWillReplace();
+        var inner = component._component;
+        if (inner) replaceComponent(inner);
     }
     function unmountComponent(component) {
         if (options.beforeUnmount) options.beforeUnmount(component);

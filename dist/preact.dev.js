@@ -303,7 +303,7 @@
             // when first starting the diff, check if we're diffing an SVG or within an SVG
             isSvgMode = parent != null && parent.ownerSVGElement !== undefined;
 
-            // hydration is inidicated by the existing element to be diffed not having a prop cache
+            // hydration is indicated by the existing element to be diffed not having a prop cache
             hydrating = dom != null && !('__preactattr_' in dom);
         }
 
@@ -361,8 +361,8 @@
         isSvgMode = vnode.nodeName === 'svg' ? true : vnode.nodeName === 'foreignObject' ? false : isSvgMode;
 
         // If there's no existing element or it's the wrong type, create a new one:
-        if (!dom || !isNamedNode(dom, vnode.nodeName)) {
-            out = createNode(vnode.nodeName, isSvgMode);
+        if (!dom || !isNamedNode(dom, String(vnode.nodeName))) {
+            out = createNode(String(vnode.nodeName), isSvgMode);
 
             if (dom) {
                 // move children into the replacement node
@@ -731,6 +731,9 @@
             if (initialBase && base !== initialBase && inst !== initialChildComponent) {
                 var baseParent = initialBase.parentNode;
                 if (baseParent && base !== baseParent) {
+                    if (toUnmount) {
+                        replaceComponent(toUnmount);
+                    }
                     baseParent.replaceChild(base, initialBase);
 
                     if (!toUnmount) {
@@ -819,6 +822,21 @@
         }
 
         return dom;
+    }
+
+    /**
+     * Call a function before component got replaced by something in dom
+     * It has no use for regular components but it makes sense for IFRAME internals
+     * cause when it got ejected from dom it looses document stored in it
+     *	@param {Component} component	The Component instance to replace
+     *	@private
+     */
+    function replaceComponent(component) {
+        if (component.componentWillReplace) component.componentWillReplace();
+        var inner = component._component;
+        if (inner) {
+            replaceComponent(inner);
+        }
     }
 
     /** Remove a component from the DOM and recycle it.

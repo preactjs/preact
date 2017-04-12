@@ -144,6 +144,9 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		if (initialBase && base!==initialBase && inst!==initialChildComponent) {
 			let baseParent = initialBase.parentNode;
 			if (baseParent && base!==baseParent) {
+				if (toUnmount) {
+					replaceComponent(toUnmount)
+				}
 				baseParent.replaceChild(base, initialBase);
 
 				if (!toUnmount) {
@@ -237,7 +240,20 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 	return dom;
 }
 
-
+/**
+ * Call a function before component got replaced by something in dom
+ * It has no use for regular components but it makes sense for IFRAME internals
+ * cause when it got ejected from dom it looses document stored in it
+ *	@param {Component} component	The Component instance to replace
+ *	@private
+ */
+function replaceComponent(component){
+	if (component.componentWillReplace) component.componentWillReplace();
+	let inner = component._component;
+	if (inner) {
+		replaceComponent(inner);
+	}
+}
 
 /** Remove a component from the DOM and recycle it.
  *	@param {Component} component	The Component instance to unmount

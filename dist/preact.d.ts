@@ -30,6 +30,7 @@ declare namespace preact {
 		shouldComponentUpdate?(nextProps:PropsType,nextState:StateType,nextContext:any):boolean;
 		componentWillUpdate?(nextProps:PropsType,nextState:StateType,nextContext:any):void;
 		componentDidUpdate?(previousProps:PropsType,previousState:StateType,previousContext:any):void;
+		componentWillReplace?():void;
 	}
 
 	interface FunctionalComponent<PropsType> {
