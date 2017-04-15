@@ -28,7 +28,7 @@ if (process.env.NODE_ENV === 'development') {
 				// In Preact, all keys are stored as object values, i.e. being strings
 				const key = deepChild.key + '';
 
-				if (key in keys) {
+				if (keys.hasOwnProperty(key)) {
 					/* eslint-disable no-console */
 					console.error(
 						'Following component has two or more children with the ' +
