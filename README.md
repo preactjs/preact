@@ -302,17 +302,22 @@ class Foo extends Component {
 
 While this achieves much better runtime performance, it's still a lot of unnecessary code to wire up state to UI.
 
-Fortunately there is a solution, in the form of `linkState()`. Calling `component.linkState('text')` returns a function that accepts an Event and uses it's associated value to update the given property in your component's state. Calls to linkState() with the same state property are cached, so there is no performance penalty.  Here is the previous example rewritten using _Linked State_:
+Fortunately there is a solution, in the form of a module called [linkstate](https://github.com/developit/linkstate). Calling `linkState(component, 'text')` returns a function that accepts an Event and uses it's associated value to update the given property in your component's state. Calls to `linkState()` with the same arguments are cached, so there is no performance penalty.  Here is the previous example rewritten using _Linked State_:
 
 ```js
+import linkState from 'linkstate';
+
 class Foo extends Component {
 	render({ }, { text }) {
-		return <input value={text} onInput={this.linkState('text')} />;
+		return <input value={text} onInput={linkState(this, 'text')} />;
 	}
 }
 ```
 
 Simple and effective. It handles linking state from any input type, or an optional second parameter can be used to explicitly provide a keypath to the new state value.
+
+> **Note:** In Preact 7 and prior, `linkState()` was built right into Component. In 8.0, it was moved to a separate module. You can restore the 7.x behavior by using linkstate as a polyfill - see [the linkstate docs](https://github.com/developit/linkstate#usage).
+
 
 
 ## Examples
