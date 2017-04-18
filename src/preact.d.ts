@@ -384,6 +384,7 @@ declare namespace JSX {
 		// Form Events
 		onChange?:GenericEventHandler;
 		onInput?:GenericEventHandler;
+		onSearch?:GenericEventHandler;
 		onSubmit?:GenericEventHandler;
 
 		// Keyboard Events
