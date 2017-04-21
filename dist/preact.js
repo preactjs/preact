@@ -72,14 +72,14 @@
             }
         } else if ('dangerouslySetInnerHTML' === name) {
             if (value) node.innerHTML = value.__html || '';
-        } else if ('o' == name[0] && 'n' == name[1]) {
+        } else if ('o' == name[0] && 'n' == name[1] && 'string' != typeof value) {
             var useCapture = name !== (name = name.replace(/Capture$/, ''));
             name = name.toLowerCase().substring(2);
             if (value) {
                 if (!old) node.addEventListener(name, eventProxy, useCapture);
             } else node.removeEventListener(name, eventProxy, useCapture);
             (node.__l || (node.__l = {}))[name] = value;
-        } else if ('list' !== name && 'type' !== name && !isSvg && name in node) {
+        } else if ('list' !== name && 'type' !== name && 'o' != name[0] && 'n' != name[1] && !isSvg && name in node) {
             setProperty(node, name, null == value ? '' : value);
             if (null == value || !1 === value) node.removeAttribute(name);
         } else {

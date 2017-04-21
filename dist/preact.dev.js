@@ -230,7 +230,7 @@
                 }
             } else if (name === 'dangerouslySetInnerHTML') {
                 if (value) node.innerHTML = value.__html || '';
-            } else if (name[0] == 'o' && name[1] == 'n') {
+            } else if (name[0] == 'o' && name[1] == 'n' && typeof value !== 'string') {
                 var useCapture = name !== (name = name.replace(/Capture$/, ''));
                 name = name.toLowerCase().substring(2);
                 if (value) {
@@ -239,7 +239,7 @@
                     node.removeEventListener(name, eventProxy, useCapture);
                 }
                 (node._listeners || (node._listeners = {}))[name] = value;
-            } else if (name !== 'list' && name !== 'type' && !isSvg && name in node) {
+            } else if (name !== 'list' && name !== 'type' && name[0] != 'o' && name[1] != 'n' && !isSvg && name in node) {
                 setProperty(node, name, value == null ? '' : value);
                 if (value == null || value === false) node.removeAttribute(name);
             } else {
