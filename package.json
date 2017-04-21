@@ -27,7 +27,9 @@
     "lint": "eslint devtools src test",
     "prepublish": "npm run build",
     "smart-release": "npm run build && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish",
-    "release": "cross-env npm run smart-release"
+    "release": "cross-env npm run smart-release",
+    "postinstall": "npm run -s donate",
+    "donate": "echo \"\n   *** Thanks for downloading Preact! ***\nPlease consider donating to our open collective\n\n => https://opencollective.com/preact/donate\n\""
   },
   "eslintConfig": {
     "extends": "./config/eslint-config.js"
