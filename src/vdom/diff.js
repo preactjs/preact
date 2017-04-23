@@ -109,7 +109,6 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 		if (dom) {
 			// move children into the replacement node
-			while (dom.firstChild) out.appendChild(dom.firstChild);
 
 			// if the previous Element was mounted into the DOM, replace it inline
 			if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
