@@ -14,7 +14,7 @@ import { removeNode } from '../dom';
  *	@param {boolean} [opts.render=true]			If `false`, no render will be triggered.
  */
 export function setComponentProps(component, props, opts, context, mountAll) {
-	if (component._disable) return;
+	if (component._disable===true) return;
 	component._disable = true;
 
 	if ((component.__ref = props.ref)!=null) delete props.ref;
@@ -58,7 +58,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
  *	@private
  */
 export function renderComponent(component, opts, mountAll, isChild) {
-	if (component._disable) return;
+	if (component._disable===true) return;
 
 	let props = component.props,
 		state = component.state,
@@ -158,7 +158,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		}
 
 		component.base = base;
-		if (base && !isChild) {
+		if (base && base._component!==component && !isChild) {
 			let componentRef = component,
 				t = component;
 			while ((t=t._parentComponent)) {
