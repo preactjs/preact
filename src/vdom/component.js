@@ -4,7 +4,7 @@ import { extend } from '../util';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from './index';
 import { diff, mounts, diffLevel, flushMounts, recollectNodeTree, removeChildren } from './diff';
-import { createComponent, collectComponent } from './component-recycler';
+import { createComponent } from './component-utils';
 import { removeNode } from '../dom';
 
 /** Set a component's `props` (generally derived from JSX attributes).
@@ -265,8 +265,6 @@ export function unmountComponent(component) {
 		component.nextBase = base;
 
 		removeNode(base);
-		collectComponent(component);
-
 		removeChildren(base);
 	}
 
