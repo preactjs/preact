@@ -9,15 +9,12 @@ const components = {};
 
 /** Reclaim a component for later re-use by the recycler. */
 export function collectComponent(component) {
-	let name = component.constructor.name;
-	(components[name] || (components[name] = [])).push(component);
 }
 
 
 /** Create a component. Normalizes differences between PFC's and classful Components. */
 export function createComponent(Ctor, props, context) {
-	let list = components[Ctor.name],
-		inst;
+	let inst;
 
 	if (Ctor.prototype && Ctor.prototype.render) {
 		inst = new Ctor(props, context);
@@ -29,16 +26,6 @@ export function createComponent(Ctor, props, context) {
 		inst.render = doRender;
 	}
 
-
-	if (list) {
-		for (let i=list.length; i--; ) {
-			if (list[i].constructor===Ctor) {
-				inst.nextBase = list[i].nextBase;
-				list.splice(i, 1);
-				break;
-			}
-		}
-	}
 	return inst;
 }
 

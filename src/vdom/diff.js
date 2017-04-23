@@ -249,14 +249,14 @@ export function recollectNodeTree(node, unmountOnly) {
 	let component = node._component;
 	if (component) {
 		// if node is owned by a Component, unmount that component (ends up recursing back here)
-		unmountComponent(component);
+		unmountComponent(component, !unmountOnly);
 	}
 	else {
 		// If the node's VNode had a ref function, invoke it with null here.
 		// (this is part of the React spec, and smart for unsetting references)
 		if (node[ATTR_KEY]!=null && node[ATTR_KEY].ref) node[ATTR_KEY].ref(null);
 
-		if (unmountOnly===false || node[ATTR_KEY]==null) {
+		if (unmountOnly===false) {
 			removeNode(node);
 		}
 

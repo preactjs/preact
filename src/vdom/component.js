@@ -215,16 +215,11 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 	}
 	else {
 		if (originalComponent && !isDirectOwner) {
-			unmountComponent(originalComponent);
-			dom = oldDom = null;
+			unmountComponent(originalComponent, false);
 		}
 
 		c = createComponent(vnode.nodeName, props, context);
-		if (dom && !c.nextBase) {
-			c.nextBase = dom;
-			// passing dom/oldDom as nextBase will recycle it if unused, so bypass recycling on L229:
-			oldDom = null;
-		}
+		c.nextBase = dom;
 		setComponentProps(c, props, SYNC_RENDER, context, mountAll);
 		dom = c.base;
 
@@ -243,7 +238,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
  *	@param {Component} component	The Component instance to unmount
  *	@private
  */
-export function unmountComponent(component) {
+export function unmountComponent(component, remove) {
 	if (options.beforeUnmount) options.beforeUnmount(component);
 
 	let base = component.base;
@@ -257,15 +252,17 @@ export function unmountComponent(component) {
 	// recursively tear down & recollect high-order component children:
 	let inner = component._component;
 	if (inner) {
-		unmountComponent(inner);
+		unmountComponent(inner, remove);
 	}
 	else if (base) {
 		if (base[ATTR_KEY] && base[ATTR_KEY].ref) base[ATTR_KEY].ref(null);
 
 		component.nextBase = base;
 
-		removeNode(base);
-		collectComponent(component);
+		if (remove!==false) {
+			removeNode(base);
+			collectComponent(component);
+		}
 
 		removeChildren(base);
 	}
