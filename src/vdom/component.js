@@ -17,8 +17,8 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 	if (component._disable) return;
 	component._disable = true;
 
-	if ((component.__ref = props.ref)) delete props.ref;
-	if ((component.__key = props.key)) delete props.key;
+	if ((component.__ref = props.ref)!=null) delete props.ref;
+	if ((component.__key = props.key)!=null) delete props.key;
 
 	if (!component.base || mountAll) {
 		if (component.componentWillMount) component.componentWillMount();
