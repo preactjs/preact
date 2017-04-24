@@ -1,5 +1,5 @@
 declare namespace preact {
-	interface ComponentProps<C extends Component<any, any> | FunctionalComponent<any>> {
+	interface ComponentProps<C extends Component<PropsType, any> | FunctionalComponent<PropsType>, PropsType> {
 		children?:JSX.Element[];
 		key?:string | number | any;
 		ref?:(el: C) => void;
@@ -33,7 +33,7 @@ declare namespace preact {
 	}
 
 	interface FunctionalComponent<PropsType> {
-		(props?:PropsType & ComponentProps<this>, context?:any):JSX.Element;
+		(props?:PropsType & ComponentProps<this, PropsType>, context?:any):JSX.Element;
 		displayName?:string;
 		defaultProps?:any;
 	}
@@ -52,7 +52,7 @@ declare namespace preact {
 		static defaultProps?:any;
 
 		state:StateType;
-		props:PropsType & ComponentProps<this>;
+		props:PropsType & ComponentProps<this, PropsType>;
 		context:any;
 		base:HTMLElement;
 
@@ -63,7 +63,7 @@ declare namespace preact {
 
 		forceUpdate(callback?:() => void): void;
 
-		abstract render(props?:PropsType & ComponentProps<this>, state?:StateType, context?:any):JSX.Element;
+		abstract render(props?:PropsType & ComponentProps<this, PropsType>, state?:StateType, context?:any):JSX.Element|null;
 	}
 
 	function h<PropsType>(node:ComponentConstructor<PropsType, any> | FunctionalComponent<PropsType>, params:PropsType, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
