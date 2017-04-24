@@ -47,6 +47,7 @@
 [![OpenCollective Sponsors](https://opencollective.com/preact/sponsors/badge.svg)](#sponsors)
 [![travis](https://travis-ci.org/developit/preact.svg?branch=master)](https://travis-ci.org/developit/preact)
 [![coveralls](https://img.shields.io/coveralls/developit/preact/master.svg)](https://coveralls.io/github/developit/preact)
+![gzip size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=gzip)
 
 Preact supports modern browsers and IE9+:
 
