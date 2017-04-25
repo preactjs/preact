@@ -65,12 +65,12 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	let out = dom,
 		prevSvgMode = isSvgMode;
 
-	// empty values (null & undefined) render as empty Text nodes
-	if (vnode==null) vnode = '';
+	// empty values (null, undefined, booleans) render as empty Text nodes
+	if (vnode==null || vnode===false || vnode===true) vnode = '';
 
 
-	// Fast case: Strings create/update Text nodes.
-	if (typeof vnode==='string') {
+	// Fast case: Strings & Numbers create/update Text nodes.
+	if (typeof vnode==='string' || typeof vnode==='number') {
 
 		// update if it's already a Text node:
 		if (dom && dom.splitText!==undefined && dom.parentNode && (!dom._component || componentRoot)) {
