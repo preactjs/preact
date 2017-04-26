@@ -89,6 +89,46 @@ describe('render()', () => {
 		expect(scratch.firstChild).to.have.property('innerHTML', ',,,0,NaN');
 	});
 
+	it('should not render null', () => {
+		render(null, scratch);
+		expect(scratch.innerHTML).to.equal('');
+	});
+
+	it('should not render undefined', () => {
+		render(undefined, scratch);
+		expect(scratch.innerHTML).to.equal('');
+	});
+
+	it('should not render boolean true', () => {
+		render(true, scratch);
+		expect(scratch.innerHTML).to.equal('');
+	});
+
+	it('should not render boolean false', () => {
+		render(false, scratch);
+		expect(scratch.innerHTML).to.equal('');
+	});
+
+	it('should render NaN as text content', () => {
+		render(NaN, scratch);
+		expect(scratch.innerHTML).to.equal('NaN');
+	});
+
+	it('should render numbers (0) as text content', () => {
+		render(0, scratch);
+		expect(scratch.innerHTML).to.equal('0');
+	});
+
+	it('should render numbers (42) as text content', () => {
+		render(42, scratch);
+		expect(scratch.innerHTML).to.equal('42');
+	});
+
+	it('should render strings as text content', () => {
+		render('Testing, huh! How is it going?', scratch);
+		expect(scratch.innerHTML).to.equal('Testing, huh! How is it going?');
+	});
+
 	it('should clear falsey attributes', () => {
 		let root = render((
 			<div anull="anull" aundefined="aundefined" afalse="afalse" anan="aNaN" a0="a0" />
