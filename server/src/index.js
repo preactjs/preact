@@ -84,6 +84,8 @@ export default function renderToString(vnode, context, opts, inner, isSvgMode) {
 			else {
 				// class-based components
 				let c = new nodeName(props, context);
+				// turn off stateful re-rendering:
+				c._disable = c.__x = true;
 				c.props = props;
 				c.context = context;
 				if (c.componentWillMount) c.componentWillMount();

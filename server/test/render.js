@@ -1,7 +1,7 @@
 import { render, shallowRender } from '../src';
 import { h, Component } from 'preact';
 import chai, { expect } from 'chai';
-import { spy, match } from 'sinon';
+import { spy, stub, match } from 'sinon';
 import sinonChai from 'sinon-chai';
 chai.use(sinonChai);
 
@@ -465,6 +465,45 @@ describe('render', () => {
 
 		it('should exclude falsey attributes', () => {
 			expect(renderXml(<div foo={false} bar={0} />)).to.equal(`<div bar="0" />`);
+		});
+	});
+	
+	describe('state locking', () => {
+		it('should set _disable and __x to true', () => {
+			let inst;
+			class Foo extends Component {
+				constructor(props, context) {
+					super(props, context);
+					inst = this;
+				}
+				render() {
+					return <div />;
+				}
+			}
+			
+			expect(render(<Foo />)).to.equal('<div></div>');
+			
+			expect(inst).to.have.property('_disable', true);
+			expect(inst).to.have.property('__x', true);
+		});
+
+		it('should prevent re-rendering', () => {
+			const Bar = stub().returns(<div />);
+
+			let count = 0;
+
+			class Foo extends Component {
+				componentWillMount() {
+					this.forceUpdate();
+				}
+				render() {
+					return <Bar count={++count} />;
+				}
+			}
+			
+			expect(render(<Foo />)).to.equal('<div></div>');
+			
+			expect(Bar).to.have.been.calledOnce.and.calledWithMatch({ count: 1 });
 		});
 	});
 });
