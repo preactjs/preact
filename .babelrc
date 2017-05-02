@@ -1,0 +1,9 @@
+{
+  "presets": [
+    ["es2015", { "loose": true }]
+  ],
+  "plugins": [
+    "transform-object-rest-spread",
+    ["transform-react-jsx", { "pragma": "preact.h" }]
+  ]
+}

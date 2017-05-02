@@ -20,9 +20,9 @@ export default {
 		}),
 		babel({
 			sourceMap: true,
-			loose: 'all',
-			blacklist: ['es6.tailCall'],
-			exclude: 'node_modules/**'
+			exclude: 'node_modules/**',
+			babelrc: false,
+			presets: [ ['es2015', { loose: true, modules: false }] ]
 		})
 	]
 };

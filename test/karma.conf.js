@@ -116,13 +116,7 @@ module.exports = function(config) {
 						enforce: 'pre',
 						test: /\.jsx?$/,
 						exclude: /node_modules/,
-						loader: 'babel-loader',
-						options: {
-							loose: 'all',
-							blacklist: ['es6.tailCall'],
-							comments: false,
-							compact: true
-						}
+						loader: 'babel-loader'
 					},
 					/* Only Instrument our source files for coverage */
 					coverage ? {
