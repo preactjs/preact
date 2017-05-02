@@ -13,7 +13,16 @@ export default {
 			sourceMap: true,
 			exclude: 'node_modules/**',
 			babelrc: false,
-			presets: [ ['es2015', { loose: true, modules: false }] ]
+			presets: [
+				['env', {
+					modules: false,
+					loose: true,
+					exclude: ['transform-es2015-typeof-symbol'],
+					targets: {
+						browsers: ['last 2 versions', 'IE >= 9']
+					}
+				}]
+			]
 		})
 	]
 };
