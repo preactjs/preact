@@ -96,7 +96,7 @@ describe('jsx', () => {
 			<a b={undefined}>bar</a>
 		)).to.equal(`<a>bar</a>`);
 	});
-
+	
 	it('should render attributes containing VNodes', () => {
 		expect(renderJsx(
 			<a b={<c />}>bar</a>
@@ -142,6 +142,19 @@ describe('jsx', () => {
 				<d></d>
 				<e></e>
 			</div>
+		`);
+	});
+
+	it('should skip null siblings', () => {
+		expect(renderJsx(
+			<jsx>
+				<span/>
+				{null}
+			</jsx>
+		)).to.deep.equal(dedent`
+			<jsx>
+				<span></span>
+			</jsx>
 		`);
 	});
 

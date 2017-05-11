@@ -181,7 +181,7 @@ export default function renderToString(vnode, context, opts, inner, isSvgMode) {
 				let childSvgMode = nodeName==='svg' ? true : nodeName==='foreignObject' ? false : isSvgMode,
 					ret = renderToString(child, context, opts, true, childSvgMode);
 				if (!hasLarge && pretty && isLargeString(ret)) hasLarge = true;
-				pieces.push(ret);
+				if (ret) pieces.push(ret);
 			}
 		}
 		if (hasLarge) {
