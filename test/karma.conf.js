@@ -111,32 +111,33 @@ module.exports = function(config) {
 			devtool: 'inline-source-map',
 			module: {
 				/* Transpile source and test files */
-				preLoaders: [
+				rules: [
 					{
+						enforce: 'pre',
 						test: /\.jsx?$/,
 						exclude: /node_modules/,
-						loader: 'babel',
-						query: {
+						loader: 'babel-loader',
+						options: {
 							loose: 'all',
 							blacklist: ['es6.tailCall'],
 							comments: false,
 							compact: true
 						}
-					}
-				],
-				/* Only Instrument our source files for coverage */
-				loaders: [].concat( coverage ? {
-					test: /\.jsx?$/,
-					loader: 'isparta',
-					include: /src/
-				} : [])
+					},
+					/* Only Instrument our source files for coverage */
+					coverage ? {
+						test: /\.jsx?$/,
+						loader: 'isparta-loader',
+						include: /src/
+					} : {}
+				]
 			},
 			resolve: {
 				// The React DevTools integration requires preact as a module
 				// rather than referencing source files inside the module
 				// directly
 				alias: { preact: '../src/preact' },
-				modulesDirectories: [__dirname, 'node_modules']
+				modules: [__dirname, 'node_modules']
 			},
 			plugins: [
 				new webpack.DefinePlugin({
