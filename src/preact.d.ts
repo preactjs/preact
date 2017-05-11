@@ -470,8 +470,8 @@ declare namespace JSX {
 		allowTransparency?:boolean;
 		alt?:string;
 		async?:boolean;
-		autocomplete?:string;
-		autofocus?:boolean;
+		autoComplete?:string;
+		autoFocus?:boolean;
 		autoPlay?:boolean;
 		capture?:boolean;
 		cellPadding?:number | string;
@@ -498,6 +498,7 @@ declare namespace JSX {
 		download?:any;
 		draggable?:boolean;
 		encType?:string;
+		for?:string;
 		form?:string;
 		formAction?:string;
 		formEncType?:string;
@@ -511,7 +512,7 @@ declare namespace JSX {
 		high?:number;
 		href?:string;
 		hrefLang?:string;
-		for?:string;
+		htmlFor?:string;
 		httpEquiv?:string;
 		icon?:string;
 		id?:string;
