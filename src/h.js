@@ -22,7 +22,7 @@ export function h(nodeName, attributes) {
 	}
 	while (stack.length) {
 		if ((child = stack.pop()) && child.pop!==undefined) {
-			for (i=child.length; i--; ) stack.push(child[i]);
+			for (i=child.length; i--; ) child[i]!==undefined && stack.push(child[i]);
 		}
 		else {
 			if (child===true || child===false) child = null;
@@ -46,7 +46,6 @@ export function h(nodeName, attributes) {
 			lastSimple = simple;
 		}
 	}
-
 	let p = new VNode();
 	p.nodeName = nodeName;
 	p.children = children;
