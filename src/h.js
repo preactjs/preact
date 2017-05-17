@@ -22,7 +22,9 @@ export function h(nodeName, attributes) {
 	}
 	while (stack.length) {
 		if ((child = stack.pop()) && child.pop!==undefined) {
-			for (i=child.length; i--; ) stack.push(child[i]);
+			[].concat(child).reverse().forEach((item) => {
+				stack.push(item);
+			});
 		}
 		else {
 			if (child===true || child===false) child = null;
