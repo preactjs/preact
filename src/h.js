@@ -22,9 +22,11 @@ export function h(nodeName, attributes) {
 	}
 	while (stack.length) {
 		if ((child = stack.pop()) && child.pop!==undefined) {
-			[].concat(child).reverse().forEach((item) => {
-				stack.push(item);
-			});
+			for (i=child.length; i--; ) {
+				if (i in child) {
+					stack.push(child[i]);
+				}
+			}
 		}
 		else {
 			if (child===true || child===false) child = null;
