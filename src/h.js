@@ -46,6 +46,7 @@ export function h(nodeName, attributes) {
 			lastSimple = simple;
 		}
 	}
+
 	let p = new VNode();
 	p.nodeName = nodeName;
 	p.children = children;
