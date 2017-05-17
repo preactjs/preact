@@ -162,6 +162,19 @@ describe('h(jsx)', () => {
 			.that.deep.equals(arr);
 	});
 
+	it('should support ["one", undefined, undefined] array children when nodeName is function', () => {
+		const nodeName = function () {};
+		const arr = ['one', undefined, undefined];
+		let r = h(
+			nodeName,
+			null,
+			arr
+		);
+		expect(r).to.be.an('object')
+			.with.property('children')
+			.that.deep.equals(arr);
+	});
+
 	it('should merge adjacent text children', () => {
 		let r = h(
 			'foo',
