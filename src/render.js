@@ -1,5 +1,4 @@
-import diff from './vdom/diff';
-import { deepHook } from './hooks';
+import { diff } from './vdom/diff';
 
 /** Render JSX into a `parent` Element.
  *	@param {VNode} vnode		A (JSX) VNode to render
@@ -16,18 +15,6 @@ import { deepHook } from './hooks';
  *	const Thing = ({ name }) => <span>{ name }</span>;
  *	render(<Thing name="one" />, document.querySelector('#foo'));
  */
-export default function render(vnode, parent, merge) {
-	let existing = merge && merge._component && merge._componentConstructor===vnode.nodeName,
-		built = diff(merge, vnode),
-		c = !existing && built._component;
-
-	if (c) deepHook(c, 'componentWillMount');
-
-	if (built.parentNode!==parent) {
-		parent.appendChild(built);
-	}
-
-	if (c) deepHook(c, 'componentDidMount');
-
-	return built;
+export function render(vnode, parent, merge) {
+	return diff(merge, vnode, {}, false, parent, false);
 }

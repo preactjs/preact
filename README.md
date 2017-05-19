@@ -1,26 +1,73 @@
-# Preact
+<p align="center">
+<a href="https://preactjs.com" target="_blank">
+<img alt="Preact" title="Preact" src="https://cdn.rawgit.com/developit/b4416d5c92b743dbaec1e68bc4c27cda/raw/3235dc508f7eb834ebf48418aea212a05df13db1/preact-logo-trans.svg" width="550">
+</a>
+</p>
+<p align="center">Fast <b>3kB</b> alternative to React, with the same ES2015 API.</p>
 
-**Preact is a fast, `3kb` alternative to React, with the same ES2015 API.**
+**All the power of Virtual DOM components, without the overhead:**
 
-Preact retains a large amount of compatibility with React, but only the modern ([ES6 Classes] and [stateless functional components](https://facebook.github.io/react/blog/2015/10/07/react-v0.14.html#stateless-functional-components)) interfaces.
-As one would expect coming from React, Components are simple building blocks for composing a User Interface.
+- Familiar React API & patterns: [ES6 Class] and [Functional Components]
+- Extensive React compatibility via a simple [preact-compat] alias
+- Everything you need: JSX, <abbr title="Virtual DOM">VDOM</abbr>, React DevTools, <abbr title="Hot Module Replacement">HMR</abbr>, <abbr title="Server-Side Rendering">SSR</abbr>..
+- A highly optimized diff algorithm and seamless Server Side Rendering
+- Transparent asynchronous rendering with a pluggable scheduler
 
->  :information_desk_person: **Documentation is available in the [Preact Wiki](https://github.com/developit/preact/wiki).**
+### 💁 More information at the [Preact Website ➞](https://preactjs.com)
 
-[![npm](https://img.shields.io/npm/v/preact.svg)](http://npm.im/preact)
-[![travis](https://travis-ci.org/developit/preact.svg?branch=master)](https://travis-ci.org/developit/preact)
-[![gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/developit/preact)
 
 ---
+
+<!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
+
+- [Demos](#demos)
+- [Libraries & Add-ons](#libraries--add-ons)
+- [Getting Started](#getting-started)
+	- [Import what you need](#import-what-you-need)
+	- [Rendering JSX](#rendering-jsx)
+	- [Components](#components)
+	- [Props & State](#props--state)
+- [Linked State](#linked-state)
+- [Examples](#examples)
+- [Extensions](#extensions)
+- [Developer Tools](#developer-tools)
+- [Backers](#backers)
+- [Sponsors](#sponsors)
+- [License](#license)
+
+<!-- /TOC -->
+
+
+# Preact
+
+[![npm](https://img.shields.io/npm/v/preact.svg)](http://npm.im/preact)
+[![CDNJS](https://img.shields.io/cdnjs/v/preact.svg)](https://cdnjs.com/libraries/preact)
+[![Preact Slack Community](https://preact-slack.now.sh/badge.svg)](https://preact-slack.now.sh)
+[![OpenCollective Backers](https://opencollective.com/preact/backers/badge.svg)](#backers)
+[![OpenCollective Sponsors](https://opencollective.com/preact/sponsors/badge.svg)](#sponsors)
+[![travis](https://travis-ci.org/developit/preact.svg?branch=master)](https://travis-ci.org/developit/preact)
+[![coveralls](https://img.shields.io/coveralls/developit/preact/master.svg)](https://coveralls.io/github/developit/preact)
+[![gzip size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=gzip)](https://unpkg.com/preact/dist/preact.min.js)
+
+Preact supports modern browsers and IE9+:
+
+[![Browsers](https://saucelabs.com/browser-matrix/preact.svg)](https://saucelabs.com/u/preact)
+
+
+---
+
 
 ## Demos
 
 - [**ESBench**](http://esbench.com) is built using Preact.
 - [**Nectarine.rocks**](http://nectarine.rocks) _([Github Project](https://github.com/developit/nectarine))_ :peach:
 - [**Documentation Viewer**](https://documentation-viewer.firebaseapp.com) _([Github Project](https://github.com/developit/documentation-viewer))_
-- [**TodoMVC**](http://developit.github.io/preact-todomvc/) _([Github Project](https://github.com/developit/preact-todomvc))_
+- [**TodoMVC**](https://preact-todomvc.surge.sh) _([Github Project](https://github.com/developit/preact-todomvc))_
 - [**Hacker News Minimal**](https://developit.github.io/hn_minimal/) _([Github Project](https://github.com/developit/hn_minimal))_
 - [**Preact Boilerplate**](https://preact-boilerplate.surge.sh) _([Github Project](https://github.com/developit/preact-boilerplate))_ :zap:
+- [**Preact Offline Starter**](https://preact-starter.now.sh) _([Github Project](https://github.com/lukeed/preact-starter))_ :100:
+- [**Preact PWA**](https://preact-pwa.appspot.com/) _([Github Project](https://github.com/ezekielchentnik/preact-pwa))_ :hamburger:
+- [**Preact Mobx Starter**](https://awaw00.github.io/preact-mobx-starter/) _([Github Project](https://github.com/awaw00/preact-mobx-starter))_ :sunny:
 - [**Preact Redux Example**](https://github.com/developit/preact-redux-example) :star:
 - [**Flickr Browser**](http://codepen.io/developit/full/VvMZwK/) (@ CodePen)
 - [**Animating Text**](http://codepen.io/developit/full/LpNOdm/) (@ CodePen)
@@ -29,25 +76,54 @@ As one would expect coming from React, Components are simple building blocks for
 - [**3D + ThreeJS**](http://codepen.io/developit/pen/PPMNjd?editors=0010) (@ CodePen)
 - [**Stock Ticker**](http://codepen.io/developit/pen/wMYoBb?editors=0010) (@ CodePen)
 - [**Create your Own!**](https://jsfiddle.net/developit/rs6zrh5f/embedded/result/) (@ JSFiddle)
-
+- [**Preact Coffeescript**](https://github.com/crisward/preact-coffee)
+- [**GuriVR**](https://gurivr.com) _([Github Project](https://github.com/opennewslabs/guri-vr))_
+- [**V2EX Preact**](https://github.com/yanni4night/v2ex-preact)
+- [**BigWebQuiz**](https://bigwebquiz.com/) _([Github Project](https://github.com/jakearchibald/big-web-quiz))_
+- [**Color Picker**](https://colors.now.sh) _([Github Project](https://github.com/lukeed/colors-app))_ :art:
+- [**Rainbow Explorer**](https://use-the-platform.com/rainbow-explorer/) _([Github Project](https://github.com/vaneenige/rainbow-explorer/))_ :rainbow:
+- [**Offline Gallery**](https://use-the-platform.com/offline-gallery/) _([Github Project](https://github.com/vaneenige/offline-gallery/))_ :balloon:
+- [**Periodic Weather**](https://use-the-platform.com/periodic-weather/) _([Github Project](https://github.com/vaneenige/periodic-weather/))_ :sunny:
 
 ## Libraries & Add-ons
 
-- :earth_americas: [**preact-router**](https://git.io/preact-router): URL routing for your components.
-- :tulip: [**preact-svg**](https://git.io/preact-svg): Use inline `<svg>` in Preact.
+- :raised_hands: [**preact-compat**](https://git.io/preact-compat): use any React library with Preact *([full example](http://git.io/preact-compat-example))*
 - :page_facing_up: [**preact-render-to-string**](https://git.io/preact-render-to-string): Universal rendering.
-- :raised_hands: [**preact-compat**](https://git.io/preact-compat): use any React library with Preact. *([full example](http://git.io/preact-compat-example))*
-- :rocket: [**preact-photon**](https://git.io/preact-photon): build beautiful desktop UI with [photon](http://photonkit.com).
-- :microscope: [**preact-jsx-chai**](https://git.io/preact-jsx-chai): JSX assertion testing _(no DOM, right in Node)_
+- :earth_americas: [**preact-router**](https://git.io/preact-router): URL routing for your components
 - :bookmark_tabs: [**preact-markup**](https://git.io/preact-markup): Render HTML & Custom Elements as JSX & Components
-- :pencil: [**preact-richtextarea**](https://git.io/preact-richtextarea): Simple HTML editor component
-- :repeat: [**preact-cycle**](https://git.io/preact-cycle): Functional-reactive paradigm for Preact.
 - :satellite: [**preact-portal**](https://git.io/preact-portal): Render Preact components into (a) SPACE :milky_way:
+- :pencil: [**preact-richtextarea**](https://git.io/preact-richtextarea): Simple HTML editor component
+- :bookmark: [**preact-token-input**](https://github.com/developit/preact-token-input): Text field that tokenizes input, for things like tags
+- :card_index: [**preact-virtual-list**](https://github.com/developit/preact-virtual-list): Easily render lists with millions of rows ([demo](https://jsfiddle.net/developit/qqan9pdo/))
+- :repeat: [**preact-cycle**](https://git.io/preact-cycle): Functional-reactive paradigm for Preact
+- :triangular_ruler: [**preact-layout**](https://download.github.io/preact-layout/): Small and simple layout library
+- :thought_balloon: [**preact-socrates**](https://github.com/matthewmueller/preact-socrates): Preact plugin for [Socrates](http://github.com/matthewmueller/socrates)
+- :rowboat: [**preact-flyd**](https://github.com/xialvjun/preact-flyd): Use [flyd](https://github.com/paldepind/flyd) FRP streams in Preact + JSX
+- :speech_balloon: [**preact-i18nline**](https://github.com/download/preact-i18nline): Integrates the ecosystem around [i18n-js](https://github.com/everydayhero/i18n-js) with Preact via [i18nline](https://github.com/download/i18nline).
+- :microscope: [**preact-jsx-chai**](https://git.io/preact-jsx-chai): JSX assertion testing _(no DOM, right in Node)_
+- :tophat: [**preact-classless-component**](https://github.com/ld0rman/preact-classless-component): create preact components without the class keyword
+- :hammer: [**preact-hyperscript**](https://github.com/queckezz/preact-hyperscript): Hyperscript-like syntax for creating elements
+- :white_check_mark: [**shallow-compare**](https://github.com/tkh44/shallow-compare): simplified `shouldComponentUpdate` helper.
+- :shaved_ice: [**preact-codemod**](https://github.com/vutran/preact-codemod): Transform your React code to Preact.
+- :construction_worker: [**preact-helmet**](https://github.com/download/preact-helmet): A document head manager for Preact
+- :necktie: [**preact-delegate**](https://github.com/NekR/preact-delegate): Delegate DOM events
 
+#### UI Component Libraries
+
+> Want to prototype something or speed up your development? Try one of these toolkits:
+
+- [**preact-material-components**](https://github.com/prateekbh/preact-material-components): Material Design Components for Preact ([website](https://prateekbh.github.io/preact-material-components/))
+- [**preact-mdc**](https://github.com/BerndWessels/preact-mdc): Material Design Components for Preact ([demo](https://github.com/BerndWessels/preact-mdc-demo))
+- [**preact-mui**](https://git.io/v1aVO): The MUI CSS Preact library.
+- [**preact-photon**](https://git.io/preact-photon): build beautiful desktop UI with [photon](http://photonkit.com)
+- [**preact-mdl**](https://git.io/preact-mdl): [Material Design Lite](https://getmdl.io) for Preact
+
+
+---
 
 ## Getting Started
 
-> :information_desk_person: You [don't _have_ to use ES2015 to use Preact](https://github.com/developit/preact-without-babel)... but you should.
+> 💁 You [don't _have_ to use ES2015 to use Preact](https://github.com/developit/preact-without-babel)... but you should.
 
 The following guide assumes you have some sort of ES2015 build set up using babel and/or webpack/browserify/gulp/grunt/etc.  If you don't, start with [preact-boilerplate] or a [CodePen Template](http://codepen.io/developit/pen/pgaROe?editors=0010).
 
@@ -78,8 +154,20 @@ import preact from 'preact';
 >
 > Instead of declaring the `@jsx` pragma in your code, it's best to configure it globally in a `.babelrc`:
 >
-> ```js
+> **For Babel 5 and prior:**
+>
+> ```json
 > { "jsxPragma": "h" }
+> ```
+>
+> **For Babel 6:**
+>
+> ```json
+> {
+>   "plugins": [
+>     ["transform-react-jsx", { "pragma":"h" }]
+>   ]
+> }
 > ```
 
 
@@ -95,12 +183,12 @@ import { h, render } from 'preact';
 render((
 	<div id="foo">
 		<span>Hello, world!</span>
-		<button onClick={ e => alert("hi!"); }>Click Me</button>
+		<button onClick={ e => alert("hi!") }>Click Me</button>
 	</div>
 ), document.body);
 ```
 
-This should seem pretty straightforward if you've used [hyperscript] or one of its many friends.
+This should seem pretty straightforward if you've used hyperscript or one of its many friends. If you're not, the short of it is that the h function import gets used in the final, transpiled code as a drop in replacement for React.createElement, and so needs to be imported even if you don't explicitly use it in the code you write. Also note that if you're the kind of person who likes writing your React code in "pure JavaScript" (you know who you are) you will need to use h(...) wherever you would otherwise use React.createElement.
 
 Rendering hyperscript with a virtual DOM is pointless, though. We want to render components and have them updated when data changes - that's where the power of virtual DOM diffing shines. :star2:
 
@@ -141,7 +229,6 @@ In order to have the clock's time update every second, we need to know when `<Cl
 | `componentWillMount`        | before the component gets mounted to the DOM     |
 | `componentDidMount`         | after the component gets mounted to the DOM      |
 | `componentWillUnmount`      | prior to removal from the DOM                    |
-| `componentDidUnmount`       | after removal from the DOM                       |
 | `componentWillReceiveProps` | before new props get accepted                    |
 | `shouldComponentUpdate`     | before `render()`. Return `false` to skip render |
 | `componentWillUpdate`       | before `render()`                                |
@@ -158,7 +245,9 @@ class Clock extends Component {
 	constructor() {
 		super();
 		// set initial time:
-		this.state.time = Date.now();
+		this.state = {
+			time: Date.now()
+		};
 	}
 
 	componentDidMount() {
@@ -215,17 +304,22 @@ class Foo extends Component {
 
 While this achieves much better runtime performance, it's still a lot of unnecessary code to wire up state to UI.
 
-Fortunately there is a solution, in the form of `linkState()`. Calling `component.linkState('text')` returns a function that accepts an Event and uses it's associated value to update the given property in your component's state. Calls to linkState() with the same state property are cached, so there is no performance penalty.  Here is the previous example rewritten using _Linked State_:
+Fortunately there is a solution, in the form of a module called [linkstate](https://github.com/developit/linkstate). Calling `linkState(component, 'text')` returns a function that accepts an Event and uses it's associated value to update the given property in your component's state. Calls to `linkState()` with the same arguments are cached, so there is no performance penalty.  Here is the previous example rewritten using _Linked State_:
 
 ```js
+import linkState from 'linkstate';
+
 class Foo extends Component {
 	render({ }, { text }) {
-		return <input value={text} onInput={this.linkState('text')} />;
+		return <input value={text} onInput={linkState(this, 'text')} />;
 	}
 }
 ```
 
 Simple and effective. It handles linking state from any input type, or an optional second parameter can be used to explicitly provide a keypath to the new state value.
+
+> **Note:** In Preact 7 and prior, `linkState()` was built right into Component. In 8.0, it was moved to a separate module. You can restore the 7.x behavior by using linkstate as a polyfill - see [the linkstate docs](https://github.com/developit/linkstate#usage).
+
 
 
 ## Examples
@@ -307,6 +401,95 @@ class MixedComponent extends Component {
 }
 ```
 
+## Developer Tools
+
+You can inspect and modify the state of your Preact UI components at runtime using the
+[React Developer Tools](https://github.com/facebook/react-devtools) browser extension.
+
+1. Install the [React Developer Tools](https://github.com/facebook/react-devtools) extension
+2. Import the "preact/devtools" module in your app
+3. Reload and go to the 'React' tab in the browser's development tools
+
+
+```js
+import { h, Component, render } from 'preact';
+
+// Enable devtools. You can reduce the size of your app by only including this
+// module in development builds. eg. In Webpack, wrap this with an `if (module.hot) {...}`
+// check.
+require('preact/devtools');
+```
+
+
+
+## Backers
+Support us with a monthly donation and help us continue our activities. [[Become a backer](https://opencollective.com/preact#backer)]
+
+<a href="https://opencollective.com/preact/backer/0/website" target="_blank"><img src="https://opencollective.com/preact/backer/0/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/1/website" target="_blank"><img src="https://opencollective.com/preact/backer/1/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/2/website" target="_blank"><img src="https://opencollective.com/preact/backer/2/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/3/website" target="_blank"><img src="https://opencollective.com/preact/backer/3/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/4/website" target="_blank"><img src="https://opencollective.com/preact/backer/4/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/5/website" target="_blank"><img src="https://opencollective.com/preact/backer/5/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/6/website" target="_blank"><img src="https://opencollective.com/preact/backer/6/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/7/website" target="_blank"><img src="https://opencollective.com/preact/backer/7/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/8/website" target="_blank"><img src="https://opencollective.com/preact/backer/8/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/9/website" target="_blank"><img src="https://opencollective.com/preact/backer/9/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/10/website" target="_blank"><img src="https://opencollective.com/preact/backer/10/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/11/website" target="_blank"><img src="https://opencollective.com/preact/backer/11/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/12/website" target="_blank"><img src="https://opencollective.com/preact/backer/12/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/13/website" target="_blank"><img src="https://opencollective.com/preact/backer/13/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/14/website" target="_blank"><img src="https://opencollective.com/preact/backer/14/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/15/website" target="_blank"><img src="https://opencollective.com/preact/backer/15/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/16/website" target="_blank"><img src="https://opencollective.com/preact/backer/16/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/17/website" target="_blank"><img src="https://opencollective.com/preact/backer/17/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/18/website" target="_blank"><img src="https://opencollective.com/preact/backer/18/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/19/website" target="_blank"><img src="https://opencollective.com/preact/backer/19/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/20/website" target="_blank"><img src="https://opencollective.com/preact/backer/20/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/21/website" target="_blank"><img src="https://opencollective.com/preact/backer/21/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/22/website" target="_blank"><img src="https://opencollective.com/preact/backer/22/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/23/website" target="_blank"><img src="https://opencollective.com/preact/backer/23/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/24/website" target="_blank"><img src="https://opencollective.com/preact/backer/24/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/25/website" target="_blank"><img src="https://opencollective.com/preact/backer/25/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/26/website" target="_blank"><img src="https://opencollective.com/preact/backer/26/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/27/website" target="_blank"><img src="https://opencollective.com/preact/backer/27/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/28/website" target="_blank"><img src="https://opencollective.com/preact/backer/28/avatar.svg"></a>
+<a href="https://opencollective.com/preact/backer/29/website" target="_blank"><img src="https://opencollective.com/preact/backer/29/avatar.svg"></a>
+
+
+## Sponsors
+Become a sponsor and get your logo on our README on Github with a link to your site. [[Become a sponsor](https://opencollective.com/preact#sponsor)]
+
+<a href="https://opencollective.com/preact/sponsor/0/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/1/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/2/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/3/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/4/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/5/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/6/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/6/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/7/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/7/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/8/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/8/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/9/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/9/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/10/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/10/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/11/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/11/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/12/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/12/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/13/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/13/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/14/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/14/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/15/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/15/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/16/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/16/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/17/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/17/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/18/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/18/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/19/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/19/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/20/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/20/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/21/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/21/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/22/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/22/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/23/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/23/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/24/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/24/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/25/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/25/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/26/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/26/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/27/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/27/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/28/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/28/avatar.svg"></a>
+<a href="https://opencollective.com/preact/sponsor/29/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/29/avatar.svg"></a>
 
 ## License
 
@@ -314,7 +497,12 @@ MIT
 
 
 
-[ES6 Classes]: https://facebook.github.io/react/docs/reusable-components.html#es6-classes
+[![Preact](http://i.imgur.com/YqCHvEW.gif)](https://preactjs.com)
+
+
+[preact-compat]: https://github.com/developit/preact-compat
+[ES6 Class]: https://facebook.github.io/react/docs/reusable-components.html#es6-classes
+[Functional Components]: https://facebook.github.io/react/blog/2015/10/07/react-v0.14.html#stateless-functional-components
 [hyperscript]: https://github.com/dominictarr/hyperscript
 [preact-boilerplate]: https://github.com/developit/preact-boilerplate
 [lifecycle methods]: https://facebook.github.io/react/docs/component-specs.html

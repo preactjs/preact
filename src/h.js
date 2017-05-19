@@ -1,55 +1,60 @@
-import VNode from './vnode';
-import { optionsHook } from './hooks';
-import { falsey } from './util';
+import { VNode } from './vnode';
+import options from './options';
 
 
-const SHARED_TEMP_ARRAY = [];
+const stack = [];
 
+const EMPTY_CHILDREN = [];
 
 /** JSX/hyperscript reviver
+*	Benchmarks: https://esbench.com/bench/57ee8f8e330ab09900a1a1a0
  *	@see http://jasonformat.com/wtf-is-jsx
  *	@public
- *  @example
- *  /** @jsx h *\/
- *  import { render, h } from 'preact';
- *  render(<span>foo</span>, document.body);
  */
-export default function h(nodeName, attributes) {
-	let len = arguments.length,
-		children, arr, lastSimple;
+export function h(nodeName, attributes) {
+	let children=EMPTY_CHILDREN, lastSimple, child, simple, i;
+	for (i=arguments.length; i-- > 2; ) {
+		stack.push(arguments[i]);
+	}
+	if (attributes && attributes.children!=null) {
+		if (!stack.length) stack.push(attributes.children);
+		delete attributes.children;
+	}
+	while (stack.length) {
+		if ((child = stack.pop()) && child.pop!==undefined) {
+			for (i=child.length; i--; ) stack.push(child[i]);
+		}
+		else {
+			if (child===true || child===false) child = null;
 
-	if (len>2) {
-		children = [];
-		for (let i=2; i<len; i++) {
-			let p = arguments[i];
-			if (falsey(p)) continue;
-			if (p.join) {
-				arr = p;
+			if ((simple = typeof nodeName!=='function')) {
+				if (child==null) child = '';
+				else if (typeof child==='number') child = String(child);
+				else if (typeof child!=='string') simple = false;
+			}
+
+			if (simple && lastSimple) {
+				children[children.length-1] += child;
+			}
+			else if (children===EMPTY_CHILDREN) {
+				children = [child];
 			}
 			else {
-				arr = SHARED_TEMP_ARRAY;
-				arr[0] = p;
+				children.push(child);
 			}
-			for (let j=0; j<arr.length; j++) {
-				let child = arr[j],
-					simple = !falsey(child) && !(child instanceof VNode);
-				if (simple) child = String(child);
-				if (simple && lastSimple) {
-					children[children.length-1] += child;
-				}
-				else if (!falsey(child)) {
-					children.push(child);
-				}
-				lastSimple = simple;
-			}
+
+			lastSimple = simple;
 		}
 	}
 
-	if (attributes && attributes.children) {
-		delete attributes.children;
-	}
+	let p = new VNode();
+	p.nodeName = nodeName;
+	p.children = children;
+	p.attributes = attributes==null ? undefined : attributes;
+	p.key = attributes==null ? undefined : attributes.key;
 
-	let p = new VNode(nodeName, attributes || undefined, children || undefined);
-	optionsHook('vnode', p);
+	// if a "vnode hook" is defined, pass every created VNode to it
+	if (options.vnode!==undefined) options.vnode(p);
+
 	return p;
 }

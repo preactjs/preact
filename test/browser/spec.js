@@ -1,6 +1,8 @@
 import { h, render, rerender, Component } from '../../src/preact';
 /** @jsx h */
 
+const EMPTY_CHILDREN = [];
+
 describe('Component spec', () => {
 	let scratch;
 
@@ -24,6 +26,7 @@ describe('Component spec', () => {
 				constructor(props, context) {
 					super(props, context);
 					expect(props).to.be.deep.equal({
+						children: EMPTY_CHILDREN,
 						fieldA: 1, fieldB: 2,
 						fieldC: 1, fieldD: 2
 					});
@@ -81,14 +84,14 @@ describe('Component spec', () => {
 				fieldC: 1, fieldD: 2
 			};
 
-			expect(proto.ctor).to.have.been.calledWith(PROPS1);
-			expect(proto.render).to.have.been.calledWith(PROPS1);
+			expect(proto.ctor).to.have.been.calledWithMatch(PROPS1);
+			expect(proto.render).to.have.been.calledWithMatch(PROPS1);
 
 			rerender();
 
 			// expect(proto.ctor).to.have.been.calledWith(PROPS2);
-			expect(proto.componentWillReceiveProps).to.have.been.calledWith(PROPS2);
-			expect(proto.render).to.have.been.calledWith(PROPS2);
+			expect(proto.componentWillReceiveProps).to.have.been.calledWithMatch(PROPS2);
+			expect(proto.render).to.have.been.calledWithMatch(PROPS2);
 		});
 
 		// @TODO: migrate this to preact-compat
@@ -119,6 +122,51 @@ describe('Component spec', () => {
 				</div>
 			), scratch);
 			expect(WithDefaultProps.prototype.getDefaultProps).to.be.calledOnce;
+		});
+	});
+
+	describe('forceUpdate', () => {
+		it('should force a rerender', () => {
+			let forceUpdate;
+			class ForceUpdateComponent extends Component {
+				componentWillUpdate() {}
+				componentDidMount() {
+					forceUpdate = () => this.forceUpdate();
+				}
+				render() {
+					return <div />;
+				}
+			}
+			sinon.spy(ForceUpdateComponent.prototype, 'componentWillUpdate');
+			sinon.spy(ForceUpdateComponent.prototype, 'forceUpdate');
+			render(<ForceUpdateComponent />, scratch);
+			expect(ForceUpdateComponent.prototype.componentWillUpdate).not.to.have.been.called;
+
+			forceUpdate();
+
+			expect(ForceUpdateComponent.prototype.componentWillUpdate).to.have.been.called;
+			expect(ForceUpdateComponent.prototype.forceUpdate).to.have.been.called;
+		});
+
+		it('should add callback to renderCallbacks', () => {
+			let forceUpdate;
+			let callback = sinon.spy();
+			class ForceUpdateComponent extends Component {
+				componentDidMount() {
+					forceUpdate = () => this.forceUpdate(callback);
+				}
+				render() {
+					return <div />;
+				}
+			}
+			sinon.spy(ForceUpdateComponent.prototype, 'forceUpdate');
+			render(<ForceUpdateComponent />, scratch);
+
+			forceUpdate();
+
+			expect(ForceUpdateComponent.prototype.forceUpdate).to.have.been.called;
+			expect(ForceUpdateComponent.prototype.forceUpdate).to.have.been.calledWith(callback);
+			expect(callback).to.have.been.called;
 		});
 	});
 });

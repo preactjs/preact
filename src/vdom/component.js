@@ -1,26 +1,11 @@
-import { SYNC_RENDER, DOM_RENDER, NO_RENDER, EMPTY, EMPTY_BASE } from '../constants';
+import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, ATTR_KEY } from '../constants';
 import options from '../options';
-import { clone, isFunction } from '../util';
-import { hook, deepHook } from '../hooks';
+import { extend } from '../util';
 import { enqueueRender } from '../render-queue';
-import { getNodeProps } from '.';
-import diff from './diff';
-import { removeOrphanedChildren, recollectNodeTree } from './diff';
+import { getNodeProps } from './index';
+import { diff, mounts, diffLevel, flushMounts, recollectNodeTree, removeChildren } from './diff';
 import { createComponent, collectComponent } from './component-recycler';
-
-
-/** Mark component as dirty and queue up a render.
- *	@param {Component} component
- *	@private
- */
-export function triggerComponentRender(component) {
-	if (!component._dirty) {
-		component._dirty = true;
-		enqueueRender(component);
-	}
-}
-
-
+import { removeNode } from '../dom';
 
 /** Set a component's `props` (generally derived from JSX attributes).
  *	@param {Object} props
@@ -28,36 +13,40 @@ export function triggerComponentRender(component) {
  *	@param {boolean} [opts.renderSync=false]	If `true` and {@link options.syncComponentUpdates} is `true`, triggers synchronous rendering.
  *	@param {boolean} [opts.render=true]			If `false`, no render will be triggered.
  */
-export function setComponentProps(component, props, opts, context) {
-	let d = component._disableRendering;
-	component._disableRendering = true;
+export function setComponentProps(component, props, opts, context, mountAll) {
+	if (component._disable) return;
+	component._disable = true;
 
-	opts = opts || EMPTY;
+	if ((component.__ref = props.ref)) delete props.ref;
+	if ((component.__key = props.key)) delete props.key;
 
-	if (context) {
-		if (!component.prevContext) component.prevContext = clone(component.context);
+	if (!component.base || mountAll) {
+		if (component.componentWillMount) component.componentWillMount();
+	}
+	else if (component.componentWillReceiveProps) {
+		component.componentWillReceiveProps(props, context);
+	}
+
+	if (context && context!==component.context) {
+		if (!component.prevContext) component.prevContext = component.context;
 		component.context = context;
 	}
 
-	if (component.base) {
-		hook(component, 'componentWillReceiveProps', props, component.context);
-	}
-
-	if (!component.prevProps) component.prevProps = clone(component.props);
+	if (!component.prevProps) component.prevProps = component.props;
 	component.props = props;
 
-	component._disableRendering = d;
+	component._disable = false;
 
-	if (opts.render!==false) {
-		if (opts.renderSync || options.syncComponentUpdates!==false) {
-			renderComponent(component);
+	if (opts!==NO_RENDER) {
+		if (opts===SYNC_RENDER || options.syncComponentUpdates!==false || !component.base) {
+			renderComponent(component, SYNC_RENDER, mountAll);
 		}
 		else {
-			triggerComponentRender(component);
+			enqueueRender(component);
 		}
 	}
 
-	hook(props, 'ref', component);
+	if (component.__ref) component.__ref(component);
 }
 
 
@@ -68,110 +57,137 @@ export function setComponentProps(component, props, opts, context) {
  *	@param {boolean} [opts.build=false]		If `true`, component will build and store a DOM node if not already associated with one.
  *	@private
  */
-export function renderComponent(component, opts) {
-	if (component._disableRendering) return;
+export function renderComponent(component, opts, mountAll, isChild) {
+	if (component._disable) return;
 
-	let skip, rendered,
-		props = component.props,
+	let props = component.props,
 		state = component.state,
 		context = component.context,
 		previousProps = component.prevProps || props,
 		previousState = component.prevState || state,
 		previousContext = component.prevContext || context,
-		isUpdate = component.base;
+		isUpdate = component.base,
+		nextBase = component.nextBase,
+		initialBase = isUpdate || nextBase,
+		initialChildComponent = component._component,
+		skip = false,
+		rendered, inst, cbase;
 
+	// if updating
 	if (isUpdate) {
 		component.props = previousProps;
 		component.state = previousState;
 		component.context = previousContext;
-		if (hook(component, 'shouldComponentUpdate', props, state, context)===false) {
+		if (opts!==FORCE_RENDER
+			&& component.shouldComponentUpdate
+			&& component.shouldComponentUpdate(props, state, context) === false) {
 			skip = true;
 		}
-		else {
-			hook(component, 'componentWillUpdate', props, state, context);
+		else if (component.componentWillUpdate) {
+			component.componentWillUpdate(props, state, context);
 		}
 		component.props = props;
 		component.state = state;
 		component.context = context;
 	}
 
-	component.prevProps = component.prevState = component.prevContext = null;
+	component.prevProps = component.prevState = component.prevContext = component.nextBase = null;
 	component._dirty = false;
 
 	if (!skip) {
-		rendered = hook(component, 'render', props, state, context);
+		rendered = component.render(props, state, context);
+
+		// context to pass to the child, can be updated via (grand-)parent component
+		if (component.getChildContext) {
+			context = extend(extend({}, context), component.getChildContext());
+		}
 
 		let childComponent = rendered && rendered.nodeName,
-			childContext = component.getChildContext ? component.getChildContext() : context,
 			toUnmount, base;
 
-		if (isFunction(childComponent) && childComponent.prototype.render) {
+		if (typeof childComponent==='function') {
 			// set up high order component link
 
-			let inst = component._component;
-			if (inst && inst.constructor!==childComponent) {
-				toUnmount = inst;
-				inst = null;
-			}
-
 			let childProps = getNodeProps(rendered);
+			inst = initialChildComponent;
 
-			if (inst) {
-				setComponentProps(inst, childProps, SYNC_RENDER, childContext);
+			if (inst && inst.constructor===childComponent && childProps.key==inst.__key) {
+				setComponentProps(inst, childProps, SYNC_RENDER, context, false);
 			}
 			else {
-				inst = createComponent(childComponent, childProps, childContext);
+				toUnmount = inst;
+
+				component._component = inst = createComponent(childComponent, childProps, context);
+				inst.nextBase = inst.nextBase || nextBase;
 				inst._parentComponent = component;
-				component._component = inst;
-				if (component.base) deepHook(inst, 'componentWillMount');
-				setComponentProps(inst, childProps, NO_RENDER, childContext);
-				renderComponent(inst, DOM_RENDER);
-				if (component.base) deepHook(inst, 'componentDidMount');
+				setComponentProps(inst, childProps, NO_RENDER, context, false);
+				renderComponent(inst, SYNC_RENDER, mountAll, true);
 			}
 
 			base = inst.base;
 		}
 		else {
-			let cbase = component.base;
+			cbase = initialBase;
 
 			// destroy high order component link
-			toUnmount = component._component;
+			toUnmount = initialChildComponent;
 			if (toUnmount) {
 				cbase = component._component = null;
 			}
 
-			if (component.base || (opts && opts.build)) {
-				base = diff(cbase, rendered || EMPTY_BASE, childContext);
+			if (initialBase || opts===SYNC_RENDER) {
+				if (cbase) cbase._component = null;
+				base = diff(cbase, rendered, context, mountAll || !isUpdate, initialBase && initialBase.parentNode, true);
 			}
 		}
 
-		if (component.base && base!==component.base) {
-			let p = component.base.parentNode;
-			if (p) p.replaceChild(base, component.base);
+		if (initialBase && base!==initialBase && inst!==initialChildComponent) {
+			let baseParent = initialBase.parentNode;
+			if (baseParent && base!==baseParent) {
+				baseParent.replaceChild(base, initialBase);
+
+				if (!toUnmount) {
+					initialBase._component = null;
+					recollectNodeTree(initialBase, false);
+				}
+			}
 		}
 
 		if (toUnmount) {
-			unmountComponent(toUnmount.base, toUnmount);
+			unmountComponent(toUnmount);
 		}
 
 		component.base = base;
-		if (base) {
+		if (base && !isChild) {
 			let componentRef = component,
 				t = component;
-			while ((t=t._parentComponent)) { componentRef = t; }
+			while ((t=t._parentComponent)) {
+				(componentRef = t).base = base;
+			}
 			base._component = componentRef;
 			base._componentConstructor = componentRef.constructor;
 		}
-
-		if (isUpdate) {
-			hook(component, 'componentDidUpdate', previousProps, previousState, previousContext);
-		}
 	}
 
-	let cb = component._renderCallbacks, fn;
-	if (cb) while ( (fn = cb.pop()) ) fn.call(component);
+	if (!isUpdate || mountAll) {
+		mounts.unshift(component);
+	}
+	else if (!skip) {
+		// Ensure that pending componentDidMount() hooks of child components
+		// are called before the componentDidUpdate() hook in the parent.
+		flushMounts();
 
-	return rendered;
+		if (component.componentDidUpdate) {
+			component.componentDidUpdate(previousProps, previousState, previousContext);
+		}
+		if (options.afterUpdate) options.afterUpdate(component);
+	}
+
+	if (component._renderCallbacks!=null) {
+		while (component._renderCallbacks.length) component._renderCallbacks.pop().call(component);
+	}
+
+	if (!diffLevel && !isChild) flushMounts();
 }
 
 
@@ -182,27 +198,39 @@ export function renderComponent(component, opts) {
  *	@returns {Element} dom	The created/mutated element
  *	@private
  */
-export function buildComponentFromVNode(dom, vnode, context) {
+export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 	let c = dom && dom._component,
-		oldDom = dom;
-
-	let isOwner = c && dom._componentConstructor===vnode.nodeName;
+		originalComponent = c,
+		oldDom = dom,
+		isDirectOwner = c && dom._componentConstructor===vnode.nodeName,
+		isOwner = isDirectOwner,
+		props = getNodeProps(vnode);
 	while (c && !isOwner && (c=c._parentComponent)) {
 		isOwner = c.constructor===vnode.nodeName;
 	}
 
-	if (isOwner) {
-		setComponentProps(c, getNodeProps(vnode), SYNC_RENDER, context);
+	if (c && isOwner && (!mountAll || c._component)) {
+		setComponentProps(c, props, ASYNC_RENDER, context, mountAll);
 		dom = c.base;
 	}
 	else {
-		if (c) {
-			unmountComponent(dom, c);
+		if (originalComponent && !isDirectOwner) {
+			unmountComponent(originalComponent);
 			dom = oldDom = null;
 		}
-		dom = createComponentFromVNode(vnode, dom, context);
+
+		c = createComponent(vnode.nodeName, props, context);
+		if (dom && !c.nextBase) {
+			c.nextBase = dom;
+			// passing dom/oldDom as nextBase will recycle it if unused, so bypass recycling on L229:
+			oldDom = null;
+		}
+		setComponentProps(c, props, SYNC_RENDER, context, mountAll);
+		dom = c.base;
+
 		if (oldDom && dom!==oldDom) {
-			recollectNodeTree(oldDom);
+			oldDom._component = null;
+			recollectNodeTree(oldDom, false);
 		}
 	}
 
@@ -211,63 +239,36 @@ export function buildComponentFromVNode(dom, vnode, context) {
 
 
 
-/** Instantiate and render a Component, given a VNode whose nodeName is a constructor.
- *	@param {VNode} vnode
- *	@private
- */
-function createComponentFromVNode(vnode, dom, context) {
-	let props = getNodeProps(vnode);
-	let component = createComponent(vnode.nodeName, props, context);
-
-	if (dom && !component.base) component.base = dom;
-
-	setComponentProps(component, props, NO_RENDER, context);
-	renderComponent(component, DOM_RENDER);
-
-	// let node = component.base;
-	//if (!node._component) {
-	//	node._component = component;
-	//	node._componentConstructor = vnode.nodeName;
-	//}
-
-	return component.base;
-}
-
-
-
 /** Remove a component from the DOM and recycle it.
- *	@param {Element} dom			A DOM node from which to unmount the given Component
  *	@param {Component} component	The Component instance to unmount
  *	@private
  */
-export function unmountComponent(dom, component, remove) {
-	// console.warn('unmounting mismatched component', component);
+export function unmountComponent(component) {
+	if (options.beforeUnmount) options.beforeUnmount(component);
 
-	hook(component.props, 'ref', null);
-	hook(component, 'componentWillUnmount');
-	if (dom && dom._component===component) {
-		delete dom._component;
-		delete dom._componentConstructor;
-	}
+	let base = component.base;
+
+	component._disable = true;
+
+	if (component.componentWillUnmount) component.componentWillUnmount();
+
+	component.base = null;
 
 	// recursively tear down & recollect high-order component children:
 	let inner = component._component;
 	if (inner) {
-		unmountComponent(dom, inner, remove);
-		// high order components do not own their rendered nodes:
-		component.base = component._component = null;
+		unmountComponent(inner);
+	}
+	else if (base) {
+		if (base[ATTR_KEY] && base[ATTR_KEY].ref) base[ATTR_KEY].ref(null);
+
+		component.nextBase = base;
+
+		removeNode(base);
+		collectComponent(component);
+
+		removeChildren(base);
 	}
 
-	let base = component.base;
-	if (base) {
-		if (remove!==false) {
-			let p = base.parentNode;
-			if (p) p.removeChild(base);
-		}
-		removeOrphanedChildren(base, base.childNodes, true);
-	}
-
-	component._parentComponent = null;
-	hook(component, 'componentDidUnmount');
-	collectComponent(component);
+	if (component.__ref) component.__ref(null);
 }

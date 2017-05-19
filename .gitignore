@@ -3,3 +3,8 @@
 .DS_Store
 /dist
 /_dev
+/coverage
+
+# Additional bundles
+/devtools.js
+/devtools.js.map

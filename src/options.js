@@ -1,5 +1,3 @@
-import { isFunction, isString, styleObjToCss, hashToClassName } from './util';
-
 /** Global options
  *	@public
  *	@namespace options {Object}
@@ -16,26 +14,14 @@ export default {
 	/** Processes all created VNodes.
 	 *	@param {VNode} vnode	A newly-created VNode to normalize/process
 	 */
-	vnode(n) {
-		let attrs = n.attributes;
-		if (!attrs || isFunction(n.nodeName)) return;
+	//vnode(vnode) { }
 
-		// normalize className to class.
-		let p = attrs.className;
-		if (p) {
-			attrs['class'] = p;
-			delete attrs.className;
-		}
+	/** Hook invoked after a component is mounted. */
+	// afterMount(component) { }
 
-		if (attrs['class']) normalize(attrs, 'class', hashToClassName);
-		if (attrs.style) normalize(attrs, 'style', styleObjToCss);
-	}
+	/** Hook invoked after the DOM is updated with a component's latest render. */
+	// afterUpdate(component) { }
+
+	/** Hook invoked immediately before a component is unmounted. */
+	// beforeUnmount(component) { }
 };
-
-
-function normalize(obj, prop, fn) {
-	let v = obj[prop];
-	if (v && !isString(v)) {
-		obj[prop] = fn(v);
-	}
-}
