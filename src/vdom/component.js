@@ -49,6 +49,8 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 	if (component.__ref) component.__ref(component);
 }
 
+
+
 /** Render a Component, triggering necessary lifecycle events and taking High-Order Components into account.
  *	@param {Component} component
  *	@param {Object} [opts]
@@ -213,6 +215,8 @@ export function renderComponent(component, opts, mountAll, isChild) {
 	if (!diffLevel && !isChild) flushMounts();
 }
 
+
+
 /** Apply the Component referenced by a VNode to the DOM.
  *	@param {Element} dom	The DOM node to mutate
  *	@param {VNode} vnode	A Component-referencing VNode
@@ -258,6 +262,8 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 	return dom;
 }
 
+
+
 /** Remove a component from the DOM and recycle it.
  *	@param {Component} component	The Component instance to unmount
  *	@private
@@ -277,7 +283,8 @@ export function unmountComponent(component) {
 	let inner = component._component;
 	if (inner) {
 		unmountComponent(inner);
-	} else if (base) {
+	}
+	else if (base) {
 		if (base[ATTR_KEY] && base[ATTR_KEY].ref) base[ATTR_KEY].ref(null);
 
 		component.nextBase = base;
