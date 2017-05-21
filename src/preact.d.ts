@@ -419,7 +419,7 @@ declare namespace JSX {
 		// MouseEvents
 		onClick?:MouseEventHandler;
 		onContextMenu?:MouseEventHandler;
-		onDoubleClick?:MouseEventHandler;
+		onDblClick?: MouseEventHandler;
 		onDrag?:DragEventHandler;
 		onDragEnd?:DragEventHandler;
 		onDragEnter?:DragEventHandler;
