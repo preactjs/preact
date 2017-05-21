@@ -65,12 +65,12 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	let out = dom,
 		prevSvgMode = isSvgMode;
 
-	// empty values (null & undefined) render as empty Text nodes
-	if (vnode==null) vnode = '';
+	// empty values (null, undefined, booleans) render as empty Text nodes
+	if (vnode==null || typeof vnode==='boolean') vnode = '';
 
 
-	// Fast case: Strings create/update Text nodes.
-	if (typeof vnode==='string') {
+	// Fast case: Strings & Numbers create/update Text nodes.
+	if (typeof vnode==='string' || typeof vnode==='number') {
 
 		// update if it's already a Text node:
 		if (dom && dom.splitText!==undefined && dom.parentNode && (!dom._component || componentRoot)) {
@@ -94,18 +94,20 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 
 	// If the VNode represents a Component, perform a component diff:
-	if (typeof vnode.nodeName==='function') {
+	let vnodeName = vnode.nodeName;
+	if (typeof vnodeName==='function') {
 		return buildComponentFromVNode(dom, vnode, context, mountAll);
 	}
 
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
-	isSvgMode = vnode.nodeName==='svg' ? true : vnode.nodeName==='foreignObject' ? false : isSvgMode;
+	isSvgMode = vnodeName==='svg' ? true : vnodeName==='foreignObject' ? false : isSvgMode;
 
 
 	// If there's no existing element or it's the wrong type, create a new one:
-	if (!dom || !isNamedNode(dom, String(vnode.nodeName))) {
-		out = createNode(String(vnode.nodeName), isSvgMode);
+	vnodeName = String(vnodeName);
+	if (!dom || !isNamedNode(dom, vnodeName)) {
+		out = createNode(vnodeName, isSvgMode);
 
 		if (dom) {
 			// move children into the replacement node
