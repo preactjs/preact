@@ -66,7 +66,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 		prevSvgMode = isSvgMode;
 
 	// empty values (null, undefined, booleans) render as empty Text nodes
-	if (vnode==null || vnode===false || vnode===true) vnode = '';
+	if (vnode==null || typeof vnode==='boolean') vnode = '';
 
 
 	// Fast case: Strings & Numbers create/update Text nodes.
