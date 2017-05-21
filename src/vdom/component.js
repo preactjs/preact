@@ -13,7 +13,7 @@ import { removeNode } from '../dom';
  *	@param {boolean} [opts.renderSync=false]	If `true` and {@link options.syncComponentUpdates} is `true`, triggers synchronous rendering.
  *	@param {boolean} [opts.render=true]			If `false`, no render will be triggered.
  */
-export function setComponentProps(component, props, opts, context, mountAll) {
+export function setComponentProps(component, props, opts, context, mountAll, parent) {
 	if (component._disable) return;
 	component._disable = true;
 
@@ -39,7 +39,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 
 	if (opts!==NO_RENDER) {
 		if (opts===SYNC_RENDER || options.syncComponentUpdates!==false || !component.base) {
-			renderComponent(component, SYNC_RENDER, mountAll);
+			renderComponent(component, SYNC_RENDER, mountAll, !parent, parent);
 		}
 		else {
 			enqueueRender(component);
@@ -57,7 +57,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
  *	@param {boolean} [opts.build=false]		If `true`, component will build and store a DOM node if not already associated with one.
  *	@private
  */
-export function renderComponent(component, opts, mountAll, isChild) {
+export function renderComponent(component, opts, mountAll, isChild, parent) {
 	if (component._disable) return;
 
 	let props = component.props,
@@ -103,15 +103,54 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		}
 
 		if (Array.isArray(rendered)) {
+			component.base = parent;
 			// We need to figure out how to compare these against the parent's base
-			// initialBase = initialBase.parentNode;
-			rendered.forEach(renderChildren);
-		} else {
-			renderChildren(rendered);
-		}
+			let toUnmount = false;
+			let base = diff(
+				cbase,
+				rendered,
+				context,
+				mountAll || !isUpdate,
+				parent,
+				false
+			);
 
-		function renderChildren(renderedChild) {
-			let childComponent = renderedChild && renderedChild.nodeName, toUnmount, base;
+			if (
+				initialBase &&
+				base !== initialBase &&
+				inst !== initialChildComponent
+			) {
+				let baseParent = initialBase.parentNode;
+				if (baseParent && base !== baseParent) {
+					baseParent.replaceChild(base, initialBase);
+
+					if (!toUnmount) {
+						initialBase._component = null;
+						recollectNodeTree(initialBase, false);
+					}
+				}
+			}
+
+			if (toUnmount) {
+				unmountComponent(toUnmount);
+			}
+
+			console.log('base', base);
+			component.base = base;
+			if (base && !isChild) {
+				let componentRef = component, t = component;
+				while ((t = t._parentComponent)) {
+					(componentRef = t).base = base;
+				}
+				base._component = componentRef;
+				base._componentConstructor = componentRef.constructor;
+			}
+		}
+		else {
+
+			let renderedChild = rendered;
+			let childComponent = renderedChild && renderedChild.nodeName, toUnmount,
+				base;
 
 			if (typeof childComponent === 'function') {
 				// set up high order component link
@@ -135,8 +174,9 @@ export function renderComponent(component, opts, mountAll, isChild) {
 					);
 					inst.nextBase = inst.nextBase || nextBase;
 					inst._parentComponent = component;
+					console.log('inst', inst)
 					setComponentProps(inst, childProps, NO_RENDER, context, false);
-					renderComponent(inst, SYNC_RENDER, mountAll, true);
+					renderComponent(inst, SYNC_RENDER, mountAll, true, parent);
 				}
 
 				base = inst.base;
@@ -223,7 +263,8 @@ export function renderComponent(component, opts, mountAll, isChild) {
  *	@returns {Element} dom	The created/mutated element
  *	@private
  */
-export function buildComponentFromVNode(dom, vnode, context, mountAll) {
+export function buildComponentFromVNode(dom, vnode, context, mountAll, componentRoot, parent) {
+	console.log('buildComponentFromVNode', dom, vnode.nodeName, parent);
 	let c = dom && dom._component,
 		originalComponent = c,
 		oldDom = dom,
@@ -235,7 +276,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 	}
 
 	if (c && isOwner && (!mountAll || c._component)) {
-		setComponentProps(c, props, ASYNC_RENDER, context, mountAll);
+		setComponentProps(c, props, ASYNC_RENDER, context, mountAll, parent);
 		dom = c.base;
 	}
 	else {
@@ -250,7 +291,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 			// passing dom/oldDom as nextBase will recycle it if unused, so bypass recycling on L229:
 			oldDom = null;
 		}
-		setComponentProps(c, props, SYNC_RENDER, context, mountAll);
+		setComponentProps(c, props, SYNC_RENDER, context, mountAll, parent);
 		dom = c.base;
 
 		if (oldDom && dom!==oldDom) {

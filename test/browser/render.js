@@ -89,28 +89,19 @@ describe('render()', () => {
 			}
 		}
 		render(
-			[
-				<div className="1">
-					<one />
-					<two />
-					<three />
-				</div>,
-				<div className="2">
-					<four />
-					<five />
-					<six />
-				</div>,
+			<div>
+				<article/>
+				text
 				<Frag />
-			],
+				after
+				{[<span/>, <span/>]}
+			</div>,
 			scratch
 		);
-
-		expect(scratch.childNodes).to.have
-			.length(3)
-
-		let c = scratch.childNodes[0].childNodes;
-		expect(c).to.have.length(3);
-		console.log('scratch\n\n', scratch);
+		console.log('dom', scratch);
+		expect(scratch).to.equal(
+			`<div><div><article></article>text<seven></seven><eight></eight><nine></nine>after<span></span><span></span></div></div>`
+		)
 	});
 
 	it('should not render falsey values', () => {
