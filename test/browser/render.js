@@ -79,10 +79,8 @@ describe('render()', () => {
 		expect(c).to.have.deep.property('2.nodeName', 'X-BAR');
 	});
 
-	it('should render arrays', (done) => {
-		// function Frag() {
-		// 	return [<seven />, <eight />, <nine />];
-		// }
+	it.only('should render arrays', (done) => {
+
 		class Frag extends Component {
 			constructor (props) {
 				super(props);
@@ -97,15 +95,29 @@ describe('render()', () => {
 				}), 10);
 			}
 
+
 			render (props, state) {
 				return state.flip
 					? [<seven />, <eight />, <nine />]
 					: [<one />, <two/>, <three />];
 			}
 		}
+
+		function Custom () {
+			return <custom />;
+		}
+
+		function FragA () {
+			return [<a />, <b />, <c />, <Custom />];
+		}
+
+
 		render(
 			<div>
 				<Frag/>
+				<div>
+					<FragA />
+				</div>
 			</div>,
 			scratch
 		);
