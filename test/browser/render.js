@@ -79,7 +79,7 @@ describe('render()', () => {
 		expect(c).to.have.deep.property('2.nodeName', 'X-BAR');
 	});
 
-	it.only('should render arrays', (done) => {
+	it('should render arrays', (done) => {
 
 		class Frag extends Component {
 			constructor (props) {
