@@ -79,29 +79,50 @@ describe('render()', () => {
 		expect(c).to.have.deep.property('2.nodeName', 'X-BAR');
 	});
 
-	it.only('should render arrays', () => {
+	it('should render arrays', (done) => {
 		// function Frag() {
 		// 	return [<seven />, <eight />, <nine />];
 		// }
 		class Frag extends Component {
-			render() {
-				return [<seven />, <eight />, <nine />];
+			constructor (props) {
+				super(props);
+
+				this.state = { flip: true }
+				setTimeout(() => this.setState({ flip: false }, () => {
+					console.log('DOM AFTER STATE UPDATE:', scratch);
+					setTimeout(() => this.setState({ flip: true }, () => {
+						console.log('DOM AFTER STATE UPDATE 2:', scratch);
+						done();
+					}), 10);
+				}), 10);
+			}
+
+			render (props, state) {
+				return state.flip
+					? [<seven />, <eight />, <nine />]
+					: [<one />, <two/>, <three />];
 			}
 		}
 		render(
 			<div>
-				<article/>
-				text
-				<Frag />
-				after
-				{[<span/>, <span/>]}
+				<Frag/>
 			</div>,
 			scratch
 		);
-		console.log('dom', scratch);
-		expect(scratch).to.equal(
-			`<div><div><article></article>text<seven></seven><eight></eight><nine></nine>after<span></span><span></span></div></div>`
-		)
+		console.log('DOM ON MOUNT:', scratch);
+		console.log('\n\nSTATE UPDATE!\n\n')
+		// expect(scratch).to.equal(
+		// 	`<div><div><article></article>text<seven></seven><eight></eight><nine></nine>after<span></span><span></span></div></div>`
+		// )
+
+		// render(
+		// 	<div>
+		// 		<section/>
+		// 	</div>,
+		// 	scratch
+		// );
+    //
+		// console.log('dom 2', scratch);
 	});
 
 	it('should not render falsey values', () => {
