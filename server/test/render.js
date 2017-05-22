@@ -14,6 +14,39 @@ describe('render', () => {
 			expect(rendered).to.equal(expected);
 		});
 
+		describe('whitespace', () => {
+			it('should omit whitespace between elements', () => {
+				let children = [];
+				for (let i=0; i<1000; i++) {
+					children.push(Math.random()>.5 ? String(i) : h('x-'+String(i), null, i));
+				}
+				let rendered = render(
+					<div class="foo">
+						x
+						<a>a</a>
+						<b>b</b>
+						c
+						{children}
+						d
+					</div>
+				);
+
+				expect(rendered).not.to.contain(/\s/);
+			});
+
+			it('should not indent when attributes contain newlines', () => {
+				let rendered = render(
+					<div class={`foo\n\tbar\n\tbaz`}>
+						<a>a</a>
+						<b>b</b>
+						c
+					</div>
+				);
+
+				expect(rendered).to.equal(`<div class="foo\n\tbar\n\tbaz"><a>a</a><b>b</b>c</div>`);
+			});
+		});
+
 		it('should omit falsey attributes', () => {
 			let rendered = render(<div a={null} b={undefined} c={false} />),
 				expected = `<div></div>`;

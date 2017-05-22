@@ -156,7 +156,7 @@ export default function renderToString(vnode, context, opts, inner, isSvgMode) {
 	// account for >1 multiline attribute
 	let sub = s.replace(/^\n\s*/, ' ');
 	if (sub!==s && !~sub.indexOf('\n')) s = sub;
-	else if (~s.indexOf('\n')) s += '\n';
+	else if (pretty && ~s.indexOf('\n')) s += '\n';
 
 	s = `<${nodeName}${s}>`;
 
@@ -184,7 +184,7 @@ export default function renderToString(vnode, context, opts, inner, isSvgMode) {
 				if (ret) pieces.push(ret);
 			}
 		}
-		if (hasLarge) {
+		if (pretty && hasLarge) {
 			for (let i=pieces.length; i--; ) {
 				pieces[i] = '\n' + indentChar + indent(pieces[i], indentChar);
 			}

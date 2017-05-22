@@ -25,7 +25,6 @@
     "indent": [2, "tab", {"SwitchCase": 1}],
     "no-mixed-spaces-and-tabs": [2, "smart-tabs"],
     "no-trailing-spaces": [2, { "skipBlankLines": true }],
-    "max-nested-callbacks": [2, 3],
     "no-eval": 2,
     "no-implied-eval": 2,
     "no-new-func": 2,
