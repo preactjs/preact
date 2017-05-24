@@ -120,8 +120,7 @@ module.exports = function(config) {
 						options: {
 							loose: 'all',
 							blacklist: ['es6.tailCall'],
-							comments: false,
-							compact: true
+							comments: false
 						}
 					},
 					/* Only Instrument our source files for coverage */
