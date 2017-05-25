@@ -406,7 +406,7 @@ describe('render()', () => {
 		expect(scratch.innerHTML, 're-set').to.equal('<div>'+html+'</div>');
 	});
 
-	it( 'should apply proper mutation for VNodes with dangerouslySetInnerHTML attr', () => {
+	it('should apply proper mutation for VNodes with dangerouslySetInnerHTML attr', () => {
 		class Thing extends Component {
 			constructor(props, context) {
 				super(props, context);
@@ -494,6 +494,20 @@ describe('render()', () => {
 		expect(scratch.firstChild.lastChild).to.have.property('nodeName', 'A');
 		expect(scratch.firstChild.firstChild).to.equal(b);
 		expect(scratch.firstChild.lastChild).to.equal(a);
+	});
+
+	it('should not merge attributes with node created by the DOM', () => {
+		const html = (htmlString) => {
+			const div = document.createElement('div');
+			div.innerHTML = htmlString;
+			return div.firstChild;
+		};
+
+		const DOMElement = html`<div><a foo="bar"></a></div>`;
+		const preactElement = <div><a></a></div>;
+
+		render(preactElement, scratch, DOMElement);
+		expect(scratch).to.have.property('innerHTML', '<div><a></a></div>');
 	});
 
 	it('should skip non-preact elements', () => {

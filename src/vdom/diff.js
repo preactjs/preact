@@ -123,8 +123,16 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 
 	let fc = out.firstChild,
-		props = out[ATTR_KEY] || (out[ATTR_KEY] = {}),
+		props,
 		vchildren = vnode.children;
+
+	if (out[ATTR_KEY]) {
+		props = out[ATTR_KEY];
+	}
+	else {
+		props = out[ATTR_KEY] = {};
+		for (let a=out.attributes, i=a.length; i--; ) props[a[i].name] = a[i].value;
+	}
 
 	// Optimization: fast-path for elements containing a single TextNode:
 	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc!=null && fc.splitText!==undefined && fc.nextSibling==null) {
