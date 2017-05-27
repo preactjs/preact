@@ -8,3 +8,5 @@
 # Additional bundles
 /devtools.js
 /devtools.js.map
+/debug.js
+/debug.js.map
