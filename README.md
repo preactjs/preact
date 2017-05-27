@@ -47,6 +47,7 @@
 [![OpenCollective Sponsors](https://opencollective.com/preact/sponsors/badge.svg)](#sponsors)
 [![travis](https://travis-ci.org/developit/preact.svg?branch=master)](https://travis-ci.org/developit/preact)
 [![coveralls](https://img.shields.io/coveralls/developit/preact/master.svg)](https://coveralls.io/github/developit/preact)
+[![gzip size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=gzip)](https://unpkg.com/preact/dist/preact.min.js)
 
 Preact supports modern browsers and IE9+:
 
@@ -82,6 +83,7 @@ Preact supports modern browsers and IE9+:
 - [**Color Picker**](https://colors.now.sh) _([Github Project](https://github.com/lukeed/colors-app))_ :art:
 - [**Rainbow Explorer**](https://use-the-platform.com/rainbow-explorer/) _([Github Project](https://github.com/vaneenige/rainbow-explorer/))_ :rainbow:
 - [**Offline Gallery**](https://use-the-platform.com/offline-gallery/) _([Github Project](https://github.com/vaneenige/offline-gallery/))_ :balloon:
+- [**Periodic Weather**](https://use-the-platform.com/periodic-weather/) _([Github Project](https://github.com/vaneenige/periodic-weather/))_ :sunny:
 
 ## Libraries & Add-ons
 
