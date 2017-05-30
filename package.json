@@ -67,12 +67,13 @@
   },
   "homepage": "https://github.com/developit/preact",
   "devDependencies": {
+    "babel-cli": "^6.24.1",
     "babel-core": "^6.24.1",
     "babel-eslint": "^7.2.3",
     "babel-loader": "^7.0.0",
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "babel-plugin-transform-react-jsx": "^6.24.1",
-    "babel-preset-env": "^1.4.0",
+    "babel-preset-env": "^1.5.1",
     "chai": "^3.4.1",
     "copyfiles": "^1.0.0",
     "core-js": "^2.4.1",
@@ -113,13 +114,12 @@
   },
   "greenkeeper": {
     "ignore": [
-      "rollup-plugin-babel",
-      "babel",
+      "babel-cli",
       "babel-core",
       "babel-eslint",
       "babel-loader",
-      "babel-runtime",
-      "jscodeshift"
+      "jscodeshift",
+      "rollup-plugin-babel"
     ]
   }
 }
