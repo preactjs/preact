@@ -99,6 +99,10 @@ module.exports = function(config) {
 		customLaunchers: sauceLabs ? sauceLabsLaunchers : travisLaunchers,
 
 		files: [
+			// We can't load this up front because it's ES2015 and we need it only
+			// for certain tests that run under those conditions. We also can't load
+			// it via CDN because { included: false } won't work.
+			{ pattern: 'custom-elements-es5-adapter.js', included: false },
 			{ pattern: 'polyfills.js', watched: false },
 			{ pattern: '{browser,shared}/**.js', watched: false }
 		],

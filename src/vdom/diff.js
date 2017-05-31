@@ -1,5 +1,5 @@
 import { ATTR_KEY } from '../constants';
-import { isSameNodeType, isNamedNode } from './index';
+import { isCustomElement, isSameNodeConstructor, isSameNodeName, isSameNodeType } from './index';
 import { buildComponentFromVNode } from './component';
 import { createNode, setAccessor } from '../dom/index';
 import { unmountComponent } from './component';
@@ -95,7 +95,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 	// If the VNode represents a Component, perform a component diff:
 	let vnodeName = vnode.nodeName;
-	if (typeof vnodeName==='function') {
+	if (typeof vnodeName==='function' && !isCustomElement(vnodeName)) {
 		return buildComponentFromVNode(dom, vnode, context, mountAll);
 	}
 
@@ -105,8 +105,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 
 	// If there's no existing element or it's the wrong type, create a new one:
-	vnodeName = String(vnodeName);
-	if (!dom || !isNamedNode(dom, vnodeName)) {
+	if (!dom || !isSameNodeName(dom, vnodeName) && !isSameNodeConstructor(dom, vnodeName)) {
 		out = createNode(vnodeName, isSvgMode);
 
 		if (dom) {

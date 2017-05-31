@@ -1,14 +1,21 @@
 import { IS_NON_DIMENSIONAL } from '../constants';
+import { lowercase } from '../util';
 import options from '../options';
 
 
 /** Create an element with the given nodeName.
- *	@param {String} nodeName
+ *	@param {String|Function} nodeName
  *	@param {Boolean} [isSvg=false]	If `true`, creates an element within the SVG namespace.
  *	@returns {Element} node
  */
 export function createNode(nodeName, isSvg) {
-	let node = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', nodeName) : document.createElement(nodeName);
+	let node;
+	if (typeof nodeName==='function') {
+		node = new nodeName();
+		nodeName = node.localName;
+	} else {
+		node = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', nodeName) : document.createElement(nodeName);
+	}
 	node.normalizedNodeName = nodeName;
 	return node;
 }
@@ -64,7 +71,7 @@ export function setAccessor(node, name, old, value, isSvg) {
 	}
 	else if (name[0]=='o' && name[1]=='n') {
 		let useCapture = name !== (name=name.replace(/Capture$/, ''));
-		name = name.toLowerCase().substring(2);
+		name = lowercase(name).substring(2);
 		if (value) {
 			if (!old) node.addEventListener(name, eventProxy, useCapture);
 		}
@@ -80,11 +87,11 @@ export function setAccessor(node, name, old, value, isSvg) {
 	else {
 		let ns = isSvg && (name !== (name = name.replace(/^xlink\:?/, '')));
 		if (value==null || value===false) {
-			if (ns) node.removeAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase());
+			if (ns) node.removeAttributeNS('http://www.w3.org/1999/xlink', lowercase(name));
 			else node.removeAttribute(name);
 		}
 		else if (typeof value!=='function') {
-			if (ns) node.setAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase(), value);
+			if (ns) node.setAttributeNS('http://www.w3.org/1999/xlink', lowercase(name), value);
 			else node.setAttribute(name, value);
 		}
 	}
