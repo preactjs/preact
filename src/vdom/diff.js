@@ -222,7 +222,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 			child = idiff(child, vchild, context, mountAll);
 
 			if (child && child!==dom) {
-				if (i>=len) {
+				if (i>len) {
 					dom.appendChild(child);
 				}
 				else if (child!==originalChildren[i]) {
