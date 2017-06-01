@@ -119,8 +119,7 @@ module.exports = function(config) {
 						loader: 'babel-loader',
 						options: {
 							loose: 'all',
-							blacklist: ['es6.tailCall'],
-							comments: false
+							blacklist: ['es6.tailCall']
 						}
 					},
 					/* Only Instrument our source files for coverage */
