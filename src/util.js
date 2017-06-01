@@ -3,8 +3,6 @@
  *	@private
  */
 export function extend(obj, props) {
-	for (let i in props) obj[i] = props[i];
+	Object.keys(props).forEach(key => obj[key] = props[key]);
 	return obj;
 }
-
-
