@@ -9,8 +9,7 @@ const components = {};
 
 /** Reclaim a component for later re-use by the recycler. */
 export function collectComponent(component) {
-	let name = component.constructor.name;
-	(components[name] || (components[name] = [])).push(component);
+	(components[component.constructor.name] || (components[component.constructor.name] = [])).push(component);
 }
 
 

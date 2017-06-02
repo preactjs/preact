@@ -176,7 +176,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 		j, c, vchild, child;
 
 	// Build up a map of keyed children and an Array of unkeyed children:
-	if (len!==0) {
+	if (len!=0) {
 		for (let i=0; i<len; i++) {
 			let child = originalChildren[i],
 				props = child[ATTR_KEY],
@@ -191,7 +191,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 		}
 	}
 
-	if (vlen!==0) {
+	if (vlen!=0) {
 		for (let i=0; i<vlen; i++) {
 			vchild = vchildren[i];
 			child = null;
@@ -264,7 +264,7 @@ export function recollectNodeTree(node, unmountOnly) {
 	else {
 		// If the node's VNode had a ref function, invoke it with null here.
 		// (this is part of the React spec, and smart for unsetting references)
-		if (node[ATTR_KEY]!=null && node[ATTR_KEY].ref) node[ATTR_KEY].ref(null);
+		if (node[ATTR_KEY]  && node[ATTR_KEY].ref) node[ATTR_KEY].ref(null);
 
 		if (unmountOnly===false || node[ATTR_KEY]==null) {
 			removeNode(node);

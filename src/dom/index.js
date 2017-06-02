@@ -33,6 +33,7 @@ export function removeNode(node) {
  *	@private
  */
 export function setAccessor(node, name, old, value, isSvg) {
+	let i;
 	if (name==='className') name = 'class';
 
 
@@ -52,9 +53,9 @@ export function setAccessor(node, name, old, value, isSvg) {
 		}
 		if (value && typeof value==='object') {
 			if (typeof old!=='string') {
-				for (let i in old) if (!(i in value)) node.style[i] = '';
+				for (i in old) if (!(i in value)) node.style[i] = '';
 			}
-			for (let i in value) {
+			for (i in value) {
 				node.style[i] = typeof value[i]==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (value[i]+'px') : value[i];
 			}
 		}
@@ -62,7 +63,7 @@ export function setAccessor(node, name, old, value, isSvg) {
 	else if (name==='dangerouslySetInnerHTML') {
 		if (value) node.innerHTML = value.__html || '';
 	}
-	else if (name[0]=='o' && name[1]=='n') {
+	else if (name.slice(0,2)==='on') {
 		let useCapture = name !== (name=name.replace(/Capture$/, ''));
 		name = name.toLowerCase().substring(2);
 		if (value) {
@@ -74,7 +75,12 @@ export function setAccessor(node, name, old, value, isSvg) {
 		(node._listeners || (node._listeners = {}))[name] = value;
 	}
 	else if (name!=='list' && name!=='type' && !isSvg && name in node) {
-		setProperty(node, name, value==null ? '' : value);
+        /** Attempt to set a DOM property to the given value.
+         *	IE & FF throw for certain property-value combinations.
+         */
+		try {
+			node[name] = value==null ? '' : value;
+		} catch (e) { }
 		if (value==null || value===false) node.removeAttribute(name);
 	}
 	else {
@@ -89,17 +95,6 @@ export function setAccessor(node, name, old, value, isSvg) {
 		}
 	}
 }
-
-
-/** Attempt to set a DOM property to the given value.
- *	IE & FF throw for certain property-value combinations.
- */
-function setProperty(node, name, value) {
-	try {
-		node[name] = value;
-	} catch (e) { }
-}
-
 
 /** Proxy an event to hooked event handlers
  *	@private
