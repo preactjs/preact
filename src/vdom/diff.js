@@ -170,7 +170,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 		len = originalChildren.length,
 		childrenLen = 0,
 		vlen = vchildren ? vchildren.length : 0,
-		j, c, vchild, child;
+		j, c, f, vchild, child;
 
 	// Build up a map of keyed children and an Array of unkeyed children:
 	if (len!==0) {
@@ -218,17 +218,16 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 			// morph the matched/found/created DOM child to match vchild (deep)
 			child = idiff(child, vchild, context, mountAll);
 
-			if (child && child!==dom) {
-				if (i>len) {
+			f = originalChildren[i];
+			if (child && child!==dom && child!==f) {
+				if (f==null) {
 					dom.appendChild(child);
 				}
-				else if (child!==originalChildren[i]) {
-					if (child===originalChildren[i+1]) {
-						removeNode(originalChildren[i]);
-					}
-					else {
-						dom.insertBefore(child, originalChildren[i] || null);
-					}
+				else if (child===f.nextSibling) {
+					removeNode(f);
+				}
+				else {
+					dom.insertBefore(child, f);
 				}
 			}
 		}
