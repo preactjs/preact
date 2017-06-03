@@ -123,13 +123,10 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 
 	let fc = out.firstChild,
-		props,
+		props = out[ATTR_KEY],
 		vchildren = vnode.children;
 
-	if (out[ATTR_KEY]) {
-		props = out[ATTR_KEY];
-	}
-	else {
+	if (props==null) {
 		props = out[ATTR_KEY] = {};
 		for (let a=out.attributes, i=a.length; i--; ) props[a[i].name] = a[i].value;
 	}
