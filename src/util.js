@@ -1,5 +1,3 @@
-export const root = typeof window === 'undefined' ? global : window;
-
 /** Copy own-properties from `props` onto `obj`.
  *	@returns obj
  *	@private
