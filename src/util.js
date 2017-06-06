@@ -9,10 +9,7 @@ export function extend(obj, props) {
 	return obj;
 }
 
-
-/** Coerces and returns a lowercased representation of the argument.
- *  @param {mixed} str
+/** Call a function asynchronously, as soon as possible.
+ *	@param {Function} callback
  */
-export function lowercase (str) {
-	return String(str).toLowerCase();
-}
+export const defer = typeof Promise=='function' ? Promise.resolve().then.bind(Promise.resolve()) : setTimeout;
