@@ -3,6 +3,7 @@
   "version": "8.1.0",
   "description": "Fast 3kb React alternative with the same ES6 API. Components & Virtual DOM.",
   "main": "dist/preact.js",
+  "module": "dist/preact.esm.js",
   "jsnext:main": "src/preact.js",
   "dev:main": "dist/preact.dev.js",
   "minified:main": "dist/preact.min.js",
