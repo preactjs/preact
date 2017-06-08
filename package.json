@@ -83,7 +83,7 @@
     "gzip-size-cli": "^1.0.0",
     "isparta-loader": "^2.0.0",
     "jscodeshift": "^0.3.25",
-    "karma": "^1.1.0",
+    "karma": "^1.3.0",
     "karma-babel-preprocessor": "^5.2.2",
     "karma-chai": "^0.1.0",
     "karma-chai-sinon": "^0.1.5",
