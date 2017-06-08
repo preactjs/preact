@@ -96,7 +96,7 @@ describe('jsx', () => {
 			<a b={undefined}>bar</a>
 		)).to.equal(`<a>bar</a>`);
 	});
-	
+
 	it('should render attributes containing VNodes', () => {
 		expect(renderJsx(
 			<a b={<c />}>bar</a>
@@ -175,5 +175,13 @@ describe('jsx', () => {
 			<div onClick={function foo(){}} />,
 			{ functionNames:false }
 		)).to.equal('<div onClick={Function}></div>');
+	});
+
+	it('should render self-closing elements', () => {
+		expect(renderJsx(
+			<meta charset="utf-8" />
+		)).to.deep.equal(dedent`
+			<meta charset="utf-8" />
+		`);
 	});
 });

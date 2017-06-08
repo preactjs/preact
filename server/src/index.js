@@ -197,7 +197,7 @@ export default function renderToString(vnode, context, opts, inner, isSvgMode) {
 		}
 	}
 
-	if (opts.jsx || VOID_ELEMENTS.indexOf(nodeName)===-1) {
+	if (VOID_ELEMENTS.indexOf(nodeName)===-1) {
 		if (pretty && ~s.indexOf('\n')) s += '\n';
 		s += `</${nodeName}>`;
 	}
