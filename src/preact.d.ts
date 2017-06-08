@@ -574,7 +574,7 @@ declare namespace JSX {
 		step?:number | string;
 		style?:any;
 		summary?:string;
-		tabIndex?:number;
+		tabIndex?:number | string;
 		target?:string;
 		title?:string;
 		type?:string;
