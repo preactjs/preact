@@ -12,6 +12,7 @@
 - Everything you need: JSX, <abbr title="Virtual DOM">VDOM</abbr>, React DevTools, <abbr title="Hot Module Replacement">HMR</abbr>, <abbr title="Server-Side Rendering">SSR</abbr>..
 - A highly optimized diff algorithm and seamless Server Side Rendering
 - Transparent asynchronous rendering with a pluggable scheduler
+- 🆕💥 **Instant no-config app bundling with [Preact CLI](https://github.com/developit/preact-cli)**
 
 ### 💁 More information at the [Preact Website ➞](https://preactjs.com)
 
@@ -125,9 +126,13 @@ Preact supports modern browsers and IE9+:
 
 ## Getting Started
 
-> 💁 You [don't _have_ to use ES2015 to use Preact](https://github.com/developit/preact-without-babel)... but you should.
+> 💁 _**Note:** You [don't need ES2015 to use Preact](https://github.com/developit/preact-in-es3)... but give it a try!_
 
-The following guide assumes you have some sort of ES2015 build set up using babel and/or webpack/browserify/gulp/grunt/etc.  If you don't, start with [preact-boilerplate] or a [CodePen Template](http://codepen.io/developit/pen/pgaROe?editors=0010).
+The easiest way to get started with Preact is to install [Preact CLI](https://github.com/developit/preact-cli). This simple command-line tool wraps up the best possible Webpack and Babel setup for you, and even keeps you up-to-date as the underlying tools change. Best of all, it's easy to understand! It builds your app in a single command (`preact build`), doesn't need any configuration, and bakes in best-practises 🙌.
+
+The following guide assumes you have some sort of ES2015 build set up using babel and/or webpack/browserify/gulp/grunt/etc.
+
+You can also start with [preact-boilerplate] or a [CodePen Template](http://codepen.io/developit/pen/pgaROe?editors=0010).
 
 
 ### Import what you need
@@ -331,7 +336,7 @@ Here is a somewhat verbose Preact `<Link>` component:
 ```js
 class Link extends Component {
 	render(props, state) {
-		return <a href={ props.href }>{ props.children }</a>;
+		return <a href={props.href}>{props.children}</a>;
 	}
 }
 ```
@@ -340,21 +345,21 @@ Since this is ES6/ES2015, we can further simplify:
 
 ```js
 class Link extends Component {
-	render({ href, children }) {
-		return <a {...{ href, children }} />;
-	}
+    render({ href, children }) {
+        return <a {...{ href, children }} />;
+    }
 }
 
 // or, for wide-open props support:
 class Link extends Component {
-	render(props) {
-		return <a {...props} />;
-	}
+    render(props) {
+        return <a {...props} />;
+    }
 }
 
 // or, as a stateless functional component:
 const Link = ({ children, ...props }) => (
-	<a {...props}>{ children }</a>
+    <a {...props}>{ children }</a>
 );
 ```
 
