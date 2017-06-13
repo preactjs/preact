@@ -45,7 +45,7 @@ declare namespace preact {
     // Type alias for a component considered generally, whether stateless or stateful.
 	type AnyComponent<PropsType, StateType> = FunctionalComponent<PropsType> | typeof Component;
 
-	abstract class Component<PropsType, StateType> extends ComponenLifecycle<PropsType, StateType> {
+	abstract class Component<PropsType, StateType> extends ComponentLifecycle<PropsType, StateType> {
 		constructor(props?:PropsType, context?:any);
 
 		static displayName?:string;
