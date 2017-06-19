@@ -16,6 +16,8 @@
 
 ### 💁 More information at the [Preact Website ➞](https://preactjs.com)
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/developit/preact.svg)](https://greenkeeper.io/)
+
 
 ---
 
