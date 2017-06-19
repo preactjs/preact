@@ -107,7 +107,7 @@
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
     "typescript": "^2.2.2",
-    "uglify-js": "^2.7.5",
+    "uglify-js": "^3.0.1",
     "webpack": "^2.4.1"
   },
   "greenkeeper": {
