@@ -144,12 +144,18 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		if (initialBase && base!==initialBase && inst!==initialChildComponent) {
 			let baseParent = initialBase.parentNode;
 			if (baseParent && base!==baseParent) {
-				baseParent.replaceChild(base, initialBase);
 
 				if (!toUnmount) {
+					baseParent.replaceChild(base, initialBase);
 					initialBase._component = null;
 					recollectNodeTree(initialBase, false);
 				}
+				// @TODO Formerly the initialBase was always replaced by the base
+				//		 but somehow all tests passes also if its only called at not unmounting.
+				//       These else condition was the original fix.
+				// else {
+				// 	baseParent.insertBefore(base, initialBase);
+				// }
 			}
 		}
 
@@ -264,10 +270,11 @@ export function unmountComponent(component) {
 
 		component.nextBase = base;
 
-		removeNode(base);
 		collectComponent(component);
-
 		removeChildren(base);
+
+		// Remove Node as last, so all childs exists when componentWillUnmount is called
+		removeNode(base);
 	}
 
 	if (component.__ref) component.__ref(null);
