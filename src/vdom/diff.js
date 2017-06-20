@@ -262,11 +262,12 @@ export function recollectNodeTree(node, unmountOnly) {
 		// (this is part of the React spec, and smart for unsetting references)
 		if (node[ATTR_KEY]!=null && node[ATTR_KEY].ref) node[ATTR_KEY].ref(null);
 
+		removeChildren(node);
+
+		// Remove Node as last, so all childs exists when componentWillUnmount is called
 		if (unmountOnly===false || node[ATTR_KEY]==null) {
 			removeNode(node);
 		}
-
-		removeChildren(node);
 	}
 }
 
