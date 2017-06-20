@@ -456,42 +456,74 @@ describe('Lifecycle methods', () => {
 					expect(document.getElementById('InnerDiv'), 'Inner componentDidMount').to.exist;
 				}
 				componentWillUnmount() {
-					// @TODO Component mounted into elements (non-components)
-					// are currently unmounted after those elements, so their
-					// DOM is unmounted prior to the method being called.
-					//expect(document.getElementById('InnerDiv'), 'Inner componentWillUnmount').to.exist;
+					expect(document.getElementById('InnerDiv'), 'Inner componentWillUnmount').to.exist;
 					setTimeout( () => {
 						expect(document.getElementById('InnerDiv'), 'Inner after componentWillUnmount').to.not.exist;
 					}, 0);
 				}
 
 				render() {
-					return <div id="InnerDiv" />;
+					return <div id="InnerDiv">
+						<Innerest />
+					</div>;
+				}
+			}
+
+			class Innerest extends  Component {
+				componentWillMount() {
+					expect(document.getElementById('InnerestDiv'), 'Innerest componentWillMount').to.not.exist;
+				}
+				componentDidMount() {
+					expect(document.getElementById('InnerestDiv'), 'Innerest componentDidMount').to.exist;
+				}
+				componentWillUnmount() {
+					expect(document.getElementById('InnerestDiv'), 'Innerest componentWillUnmount').to.exist;
+					setTimeout( () => {
+						expect(document.getElementById('InnerestDiv'), 'Innerest after componentWillUnmount').to.not.exist;
+					}, 0);
+				}
+
+				render() {
+					return <div id="InnerestDiv"/>;
 				}
 			}
 
 			let proto = Inner.prototype;
+			let proto_innerest = Innerest.prototype;
 			let spies = ['componentWillMount', 'componentDidMount', 'componentWillUnmount'];
 			spies.forEach( s => sinon.spy(proto, s) );
+			spies.forEach( s => sinon.spy(proto_innerest, s) );
 
 			let reset = () => spies.forEach( s => proto[s].reset() );
+			let reset_innerest = () => spies.forEach( s => proto_innerest[s].reset() );
 
 			render(<Outer />, scratch);
-			expect(proto.componentWillMount).to.have.been.called;
-			expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
-			expect(proto.componentDidMount).to.have.been.called;
+			expect(proto.componentWillMount, 'Inner componentWillMount').to.have.been.called;
+			expect(proto.componentWillMount, 'Inner componentWillMount').to.have.been.calledBefore(proto.componentDidMount);
+			expect(proto.componentDidMount, 'Inner componentDidMount').to.have.been.called;
+
+			expect(proto_innerest.componentWillMount, 'Innerest componentWillMount').to.have.been.called;
+			expect(proto_innerest.componentWillMount, 'Innerest componentWillMount').to.have.been.calledBefore(proto_innerest.componentDidMount);
+			expect(proto_innerest.componentDidMount, 'Innerest componentDidMount').to.have.been.called;
 
 			reset();
+			reset_innerest();
 			setState({ show:false });
 
-			expect(proto.componentWillUnmount).to.have.been.called;
+			expect(proto.componentWillUnmount, 'Inner componentWillUnmount').to.have.been.called;
+			expect(proto_innerest.componentWillUnmount, 'Innerest componentWillUnmount').to.have.been.called;
 
 			reset();
+			reset_innerest();
 			setState({ show:true });
 
-			expect(proto.componentWillMount).to.have.been.called;
-			expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
-			expect(proto.componentDidMount).to.have.been.called;
+			expect(proto.componentWillMount, 'Inner componentWillMount').to.have.been.called;
+			expect(proto.componentWillMount, 'Inner componentWillMount').to.have.been.calledBefore(proto.componentDidMount);
+			expect(proto.componentDidMount, 'Inner componentDidMount').to.have.been.called;
+
+			expect(proto_innerest.componentWillMount, 'Innerest componentWillMount').to.have.been.called;
+			expect(proto_innerest.componentWillMount, 'Innerest componentWillMount').to.have.been.calledBefore(proto_innerest.componentDidMount);
+			expect(proto_innerest.componentDidMount, 'Innerest componentDidMount').to.have.been.called;
 		});
 
 		it('should remove this.base for HOC', () => {
