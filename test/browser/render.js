@@ -406,7 +406,7 @@ describe('render()', () => {
 		expect(scratch.innerHTML, 're-set').to.equal('<div>'+html+'</div>');
 	});
 
-	it( 'should apply proper mutation for VNodes with dangerouslySetInnerHTML attr', () => {
+	it('should apply proper mutation for VNodes with dangerouslySetInnerHTML attr', () => {
 		class Thing extends Component {
 			constructor(props, context) {
 				super(props, context);
@@ -496,6 +496,20 @@ describe('render()', () => {
 		expect(scratch.firstChild.lastChild).to.equal(a);
 	});
 
+	it('should not merge attributes with node created by the DOM', () => {
+		const html = (htmlString) => {
+			const div = document.createElement('div');
+			div.innerHTML = htmlString;
+			return div.firstChild;
+		};
+
+		const DOMElement = html`<div><a foo="bar"></a></div>`;
+		const preactElement = <div><a></a></div>;
+
+		render(preactElement, scratch, DOMElement);
+		expect(scratch).to.have.property('innerHTML', '<div><a></a></div>');
+	});
+
 	it('should skip non-preact elements', () => {
 		class Foo extends Component {
 			render() {
@@ -567,5 +581,46 @@ describe('render()', () => {
 
 		let html = scratch.firstElementChild.firstElementChild.outerHTML;
 		expect(sortAttributes(html)).to.equal(sortAttributes('<input type="range" min="0" max="100" list="steplist">'));
+	});
+
+	it('should not execute append operation when child is at last', (done) => {
+		let input;
+		class TodoList extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { todos: [], text: '' };
+				this.setText = this.setText.bind(this);
+				this.addTodo = this.addTodo.bind(this);
+			}
+			setText(e) {
+				this.setState({ text: e.target.value });
+			}
+			addTodo() {
+				let { todos, text } = this.state;
+				todos = todos.concat({ text });
+				this.setState({ todos, text: '' });
+			}
+			render() {
+				const {todos, text} = this.state;
+				return (
+						<div onKeyDown={ this.addTodo }>
+								{ todos.map( todo => (<div>{todo.text}</div> )) }
+								<input value={text} onInput={this.setText} ref={(i) => input = i} />
+						</div>
+				);
+			}
+		}
+		const root = render(<TodoList />, scratch);
+		input.focus();
+		input.value = 1;
+		root._component.setText({
+			target: input
+		});
+		root._component.addTodo();
+		expect(document.activeElement).to.equal(input);
+		setTimeout(() =>{
+			expect(/1/.test(scratch.innerHTML)).to.equal(true);
+			done();
+		}, 10);
 	});
 });
