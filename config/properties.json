@@ -1,0 +1,27 @@
+{
+  "props": {
+    "cname": 16,
+    "props": {
+      "$_dirty": "__d",
+      "$_disable": "__x",
+      "$_listeners": "__l",
+      "$_renderCallbacks": "__h",
+      "$__key": "__k",
+      "$__ref": "__r",
+      "$normalizedNodeName": "__n",
+      "$nextBase": "__b",
+      "$prevContext": "__c",
+      "$prevProps": "__p",
+      "$prevState": "__s",
+      "$_parentComponent": "__u",
+      "$_componentConstructor": "_componentConstructor",
+      "$__html": "__html",
+      "$_component": "_component",
+      "$__preactattr_": "__preactattr_"
+    }
+  },
+  "vars": {
+    "cname": -1,
+    "props": {}
+  }
+}

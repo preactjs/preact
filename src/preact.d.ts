@@ -1,5 +1,5 @@
 declare namespace preact {
-	interface ComponentProps<C extends Component<any, any>> {
+	interface ComponentProps<C extends Component<any, any> | FunctionalComponent<any>> {
 		children?:JSX.Element[];
 		key?:string | number | any;
 		ref?:(el: C) => void;
@@ -26,25 +26,34 @@ declare namespace preact {
 		componentWillMount?():void;
 		componentDidMount?():void;
 		componentWillUnmount?():void;
-		componentDidUnmount?():void;
 		componentWillReceiveProps?(nextProps:PropsType,nextContext:any):void;
 		shouldComponentUpdate?(nextProps:PropsType,nextState:StateType,nextContext:any):boolean;
 		componentWillUpdate?(nextProps:PropsType,nextState:StateType,nextContext:any):void;
 		componentDidUpdate?(previousProps:PropsType,previousState:StateType,previousContext:any):void;
 	}
 
-	interface ComponentConstructor<PropsType, StateType> {
-		new (props?:PropsType):Component<PropsType, StateType>;
+	interface FunctionalComponent<PropsType> {
+		(props?:PropsType & ComponentProps<this>, context?:any):JSX.Element;
+		displayName?:string;
+		defaultProps?:any;
 	}
 
+	interface ComponentConstructor<PropsType, StateType> {
+		new (props?:PropsType, context?: any):Component<PropsType, StateType>;
+	}
+
+    // Type alias for a component considered generally, whether stateless or stateful.
+	type AnyComponent<PropsType, StateType> = FunctionalComponent<PropsType> | typeof Component;
+
 	abstract class Component<PropsType, StateType> implements ComponentLifecycle<PropsType, StateType> {
-		constructor(props?:PropsType);
+		constructor(props?:PropsType, context?:any);
 
 		static displayName?:string;
 		static defaultProps?:any;
 
 		state:StateType;
 		props:PropsType & ComponentProps<this>;
+		context:any;
 		base:HTMLElement;
 
 		linkState:(name:string) => (event: Event) => void;
@@ -52,14 +61,14 @@ declare namespace preact {
 		setState<K extends keyof StateType>(state:Pick<StateType, K>, callback?:() => void):void;
 		setState<K extends keyof StateType>(fn:(prevState:StateType, props:PropsType) => Pick<StateType, K>, callback?:() => void):void;
 
-		forceUpdate(): void;
+		forceUpdate(callback?:() => void): void;
 
-		abstract render(props:PropsType & ComponentProps<this>, state:any):JSX.Element;
+		abstract render(props?:PropsType & ComponentProps<this>, state?:StateType, context?:any):JSX.Element;
 	}
 
-	function h<PropsType>(node:ComponentConstructor<PropsType, any>, params:PropsType, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
+	function h<PropsType>(node:ComponentConstructor<PropsType, any> | FunctionalComponent<PropsType>, params:PropsType, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
 	function h(node:string, params:JSX.HTMLAttributes&JSX.SVGAttributes&{[propName: string]: any}, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
-	function render(node:JSX.Element, parent:Element, mergeWith?:Element):Element;
+	function render(node:JSX.Element, parent:Element|Document, mergeWith?:Element):Element;
 	function rerender():void;
 	function cloneElement(element:JSX.Element, props:any):JSX.Element;
 

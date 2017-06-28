@@ -1,5 +1,4 @@
-import { clone, isString, isFunction, toLowerCase } from '../util';
-import { isFunctionalComponent } from './functional-component';
+import { extend } from '../util';
 
 
 /** Check if two nodes are equivalent.
@@ -7,21 +6,23 @@ import { isFunctionalComponent } from './functional-component';
  *	@param {VNode} vnode
  *	@private
  */
-export function isSameNodeType(node, vnode) {
-	if (isString(vnode)) {
-		return node instanceof Text;
+export function isSameNodeType(node, vnode, hydrating) {
+	if (typeof vnode==='string' || typeof vnode==='number') {
+		return node.splitText!==undefined;
 	}
-	if (isString(vnode.nodeName)) {
+	if (typeof vnode.nodeName==='string') {
 		return !node._componentConstructor && isNamedNode(node, vnode.nodeName);
 	}
-	if (isFunction(vnode.nodeName)) {
-		return (node._componentConstructor ? node._componentConstructor===vnode.nodeName : true) || isFunctionalComponent(vnode);
-	}
+	return hydrating || node._componentConstructor===vnode.nodeName;
 }
 
 
+/** Check if an Element has a given normalized name.
+*	@param {Element} node
+*	@param {String} nodeName
+ */
 export function isNamedNode(node, nodeName) {
-	return node.normalizedNodeName===nodeName || toLowerCase(node.nodeName)===toLowerCase(nodeName);
+	return node.normalizedNodeName===nodeName || node.nodeName.toLowerCase()===nodeName.toLowerCase();
 }
 
 
@@ -33,11 +34,11 @@ export function isNamedNode(node, nodeName) {
  * @returns {Object} props
  */
 export function getNodeProps(vnode) {
-	let props = clone(vnode.attributes);
+	let props = extend({}, vnode.attributes);
 	props.children = vnode.children;
 
 	let defaultProps = vnode.nodeName.defaultProps;
-	if (defaultProps) {
+	if (defaultProps!==undefined) {
 		for (let i in defaultProps) {
 			if (props[i]===undefined) {
 				props[i] = defaultProps[i];

@@ -7,18 +7,29 @@ import { Component } from '../component';
 const components = {};
 
 
+/** Reclaim a component for later re-use by the recycler. */
 export function collectComponent(component) {
-	let name = component.constructor.name,
-		list = components[name];
-	if (list) list.push(component);
-	else components[name] = [component];
+	let name = component.constructor.name;
+	(components[name] || (components[name] = [])).push(component);
 }
 
 
+/** Create a component. Normalizes differences between PFC's and classful Components. */
 export function createComponent(Ctor, props, context) {
-	let inst = new Ctor(props, context),
-		list = components[Ctor.name];
-	Component.call(inst, props, context);
+	let list = components[Ctor.name],
+		inst;
+
+	if (Ctor.prototype && Ctor.prototype.render) {
+		inst = new Ctor(props, context);
+		Component.call(inst, props, context);
+	}
+	else {
+		inst = new Component(props, context);
+		inst.constructor = Ctor;
+		inst.render = doRender;
+	}
+
+
 	if (list) {
 		for (let i=list.length; i--; ) {
 			if (list[i].constructor===Ctor) {
@@ -29,4 +40,10 @@ export function createComponent(Ctor, props, context) {
 		}
 	}
 	return inst;
+}
+
+
+/** The `.render()` method for a PFC backing instance. */
+function doRender(props, state, context) {
+	return this.constructor(props, context);
 }
