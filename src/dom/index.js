@@ -47,15 +47,13 @@ export function setAccessor(node, name, old, value, isSvg) {
 		node.className = value || '';
 	}
 	else if (name==='style') {
-		if (!value || typeof value==='string' || typeof old==='string') {
-			node.style.cssText = value || '';
+		node.style.cssText = '';
+		if (typeof value === 'string') {
+			node.style.cssText = value;
 		}
-		if (value && typeof value==='object') {
-			if (typeof old!=='string') {
-				for (let i in old) if (!(i in value)) node.style[i] = '';
-			}
+		if (value && typeof value === 'object') {
 			for (let i in value) {
-				node.style[i] = typeof value[i]==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (value[i]+'px') : value[i];
+				node.style[i] = typeof value[i] === 'number' && IS_NON_DIMENSIONAL.test(i) === false ? (value[i] + 'px') : value[i];
 			}
 		}
 	}
