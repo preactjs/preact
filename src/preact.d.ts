@@ -22,7 +22,7 @@ declare namespace preact {
 		key:string;
 	}
 
-	abstract class ComponentLifecycle<PropsType, StateType> {
+	interface ComponentLifecycle<PropsType, StateType> {
 		componentWillMount?():void;
 		componentDidMount?():void;
 		componentWillUnmount?():void;
@@ -45,7 +45,7 @@ declare namespace preact {
     // Type alias for a component considered generally, whether stateless or stateful.
 	type AnyComponent<PropsType, StateType> = FunctionalComponent<PropsType> | typeof Component;
 
-	abstract class Component<PropsType, StateType> extends ComponentLifecycle<PropsType, StateType> {
+	abstract class Component<PropsType, StateType> {
 		constructor(props?:PropsType, context?:any);
 
 		static displayName?:string;
@@ -65,6 +65,7 @@ declare namespace preact {
 
 		abstract render(props?:PropsType & ComponentProps<this>, state?:StateType, context?:any):JSX.Element;
 	}
+	interface Component<PropsType, StateType> extends ComponentLifecycle<PropsType, StateType> { }
 
 	function h<PropsType>(node:ComponentConstructor<PropsType, any> | FunctionalComponent<PropsType>, params:PropsType, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
 	function h(node:string, params:JSX.HTMLAttributes&JSX.SVGAttributes&{[propName: string]: any}, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
