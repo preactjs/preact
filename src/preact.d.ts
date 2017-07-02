@@ -33,7 +33,7 @@ declare namespace preact {
 	}
 
 	interface FunctionalComponent<PropsType> {
-		(props?:PropsType & ComponentProps<this>, context?:any):JSX.Element;
+		(props?:PropsType & ComponentProps<this, PropsType>, context?:any):JSX.Element;
 		displayName?:string;
 		defaultProps?:any;
 	}
@@ -52,7 +52,7 @@ declare namespace preact {
 		static defaultProps?:any;
 
 		state:StateType;
-		props:PropsType & ComponentProps<this>;
+		props:PropsType & ComponentProps<this, PropsType>;
 		context:any;
 		base:HTMLElement;
 
@@ -63,7 +63,7 @@ declare namespace preact {
 
 		forceUpdate(callback?:() => void): void;
 
-		abstract render(props?:PropsType & ComponentProps<this>, state?:StateType, context?:any):JSX.Element;
+		abstract render(props?:PropsType & ComponentProps<this, PropsType>, state?:StateType, context?:any):JSX.Element|null;
 	}
 	interface Component<PropsType, StateType> extends ComponentLifecycle<PropsType, StateType> { }
 
