@@ -73,7 +73,7 @@
     "babel-eslint": "^6.1.0",
     "babel-loader": "^5.3.2",
     "babel-runtime": "^5.8.24",
-    "bundlesize": "^0.5.7",
+    "bundlesize": "^0.6.1",
     "chai": "^3.4.1",
     "copyfiles": "^1.0.0",
     "core-js": "^2.4.1",
