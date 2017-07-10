@@ -148,15 +148,6 @@ import { h, render, Component } from 'preact';
 /** @jsx h */
 ```
 
-##### Default:
-
-```js
-import preact from 'preact';
-
-// Tell Babel to transform JSX into preact.h() calls:
-/** @jsx preact.h */
-```
-
 >
 > **For TypeScript:**
 > 
@@ -167,6 +158,16 @@ import preact from 'preact';
 >     "jsxFactory": "h",
 >   }
 > }
+
+
+##### Default:
+
+```js
+import preact from 'preact';
+
+// Tell Babel to transform JSX into preact.h() calls:
+/** @jsx preact.h */
+```
 
 > Named imports work well for highly structured applications, whereas the default import is quick and never needs to be updated when using different parts of the library.
 >
