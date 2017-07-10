@@ -157,6 +157,17 @@ import preact from 'preact';
 /** @jsx preact.h */
 ```
 
+>
+> **For TypeScript:**
+> 
+> ```json
+> {
+>   "compilerOptions": {
+>     "jsx": "react",
+>     "jsxFactory": "h",
+>   }
+> }
+
 > Named imports work well for highly structured applications, whereas the default import is quick and never needs to be updated when using different parts of the library.
 >
 > Instead of declaring the `@jsx` pragma in your code, it's best to configure it globally in a `.babelrc`:
@@ -176,16 +187,6 @@ import preact from 'preact';
 >   ]
 > }
 > ```
->
-> **For TypeScript:**
-> 
-> ```json
-> {
->   "compilerOptions": {
->     "jsx": "react",
->     "jsxFactory": "h",
->   }
-> }
 
 
 ### Rendering JSX
