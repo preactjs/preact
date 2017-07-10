@@ -176,6 +176,16 @@ import preact from 'preact';
 >   ]
 > }
 > ```
+>
+> **For TypeScript:**
+> 
+> ```json
+> {
+>   "compilerOptions": {
+>     "jsx": "react",
+>     "jsxFactory": "h",
+>   }
+> }
 
 
 ### Rendering JSX
