@@ -19,12 +19,13 @@
     "minify": "uglifyjs dist/preact.js -c collapse_vars,evaluate,screw_ie8,unsafe,loops=false,keep_fargs=false,pure_getters,unused,dead_code -m -o dist/preact.min.js -p relative --in-source-map dist/preact.js.map --source-map dist/preact.min.js.map",
     "strip": "jscodeshift --run-in-band -s -t config/codemod-strip-tdz.js dist/preact.dev.js && jscodeshift --run-in-band -s -t config/codemod-const.js dist/preact.dev.js && jscodeshift --run-in-band -s -t config/codemod-let-name.js dist/preact.dev.js",
     "size": "node -e \"process.stdout.write('gzip size: ')\" && gzip-size dist/preact.min.js",
-    "test": "npm-run-all lint --parallel test:mocha test:karma test:ts",
+    "test": "npm-run-all lint --parallel test:mocha test:karma test:ts test:size",
     "test:ts": "tsc -p test/ts/",
     "test:mocha": "mocha --recursive --require babel-register test/shared test/node",
     "test:karma": "karma start test/karma.conf.js --single-run",
     "test:mocha:watch": "npm run test:mocha -- --watch",
     "test:karma:watch": "npm run test:karma -- no-single-run",
+    "test:size": "bundlesize",
     "lint": "eslint debug devtools src test",
     "prepublish": "npm run build",
     "smart-release": "npm run build && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish",
@@ -74,6 +75,7 @@
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-preset-env": "^1.5.1",
+    "bundlesize": "^0.6.1",
     "chai": "^3.4.1",
     "copyfiles": "^1.0.0",
     "core-js": "^2.4.1",
@@ -106,7 +108,7 @@
     "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-memory": "^2.0.0",
     "rollup-plugin-node-resolve": "^2.0.0",
-    "sinon": "^1.17.4",
+    "sinon": "^2.2.0",
     "sinon-chai": "^2.8.0",
     "typescript": "^2.2.2",
     "uglify-js": "^2.7.5",
@@ -121,5 +123,11 @@
       "jscodeshift",
       "rollup-plugin-babel"
     ]
-  }
+  },
+  "bundlesize": [
+    {
+      "path": "./dist/preact.min.js",
+      "threshold": "4Kb"
+    }
+  ]
 }

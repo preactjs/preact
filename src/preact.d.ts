@@ -33,7 +33,7 @@ declare namespace preact {
 	}
 
 	interface FunctionalComponent<PropsType> {
-		(props?:PropsType & ComponentProps<this>, context?:any):JSX.Element;
+		(props?:PropsType & ComponentProps<this, PropsType>, context?:any):JSX.Element;
 		displayName?:string;
 		defaultProps?:any;
 	}
@@ -45,14 +45,14 @@ declare namespace preact {
     // Type alias for a component considered generally, whether stateless or stateful.
 	type AnyComponent<PropsType, StateType> = FunctionalComponent<PropsType> | typeof Component;
 
-	abstract class Component<PropsType, StateType> implements ComponentLifecycle<PropsType, StateType> {
+	abstract class Component<PropsType, StateType> {
 		constructor(props?:PropsType, context?:any);
 
 		static displayName?:string;
 		static defaultProps?:any;
 
 		state:StateType;
-		props:PropsType & ComponentProps<this>;
+		props:PropsType & ComponentProps<this, PropsType>;
 		context:any;
 		base:HTMLElement;
 
@@ -63,8 +63,9 @@ declare namespace preact {
 
 		forceUpdate(callback?:() => void): void;
 
-		abstract render(props?:PropsType & ComponentProps<this>, state?:StateType, context?:any):JSX.Element;
+		abstract render(props?:PropsType & ComponentProps<this, PropsType>, state?:StateType, context?:any):JSX.Element|null;
 	}
+	interface Component<PropsType, StateType> extends ComponentLifecycle<PropsType, StateType> { }
 
 	function h<PropsType>(node:ComponentConstructor<PropsType, any> | FunctionalComponent<PropsType>, params:PropsType, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
 	function h(node:string, params:JSX.HTMLAttributes&JSX.SVGAttributes&{[propName: string]: any}, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
