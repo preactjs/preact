@@ -1,19 +1,9 @@
-import nodeResolve from 'rollup-plugin-node-resolve';
-import babel from 'rollup-plugin-babel';
+import config from './rollup.config';
 
-export default {
-	useStrict: true,
-	format: 'es',
-	entry: 'src/preact.js',
-	plugins: [
-		nodeResolve({
-			main: true
-		}),
-		babel({
-			sourceMap: true,
-			loose: 'all',
-			blacklist: ['es6.tailCall'],
-			exclude: 'node_modules/**'
-		})
-	]
-};
+// ES output
+config.format = 'es';
+
+// remove memory() plugin
+config.plugins.splice(0, 1);
+
+export default config;
