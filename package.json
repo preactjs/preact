@@ -34,8 +34,7 @@
     "prepublish": "npm run build",
     "smart-release": "npm run build && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish",
     "release": "cross-env npm run smart-release",
-    "postinstall": "npm run -s donate",
-    "donate": "echo \"\n   *** Thanks for downloading Preact! ***\nPlease consider donating to our open collective\n\n => https://opencollective.com/preact/donate\n\""
+    "postinstall": "echo \"\u001b[35m\u001b[1mLove Preact? You can now donate to our open collective:\u001b[22m\u001b[39m\n > \u001b[34mhttps://opencollective.com/preact/donate\u001b[39m\""
   },
   "eslintConfig": {
     "extends": "./config/eslint-config.js"
