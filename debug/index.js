@@ -75,7 +75,7 @@ if (process.env.NODE_ENV === 'development') {
 
 				// If it is an object but doesn't have toString(), use Object.toString
 				if (Object(attrValue) === attrValue && !attrValue.toString) {
-				  attrValueString =  Object.prototype.toString.call(attrValue)
+				  attrValueString = Object.prototype.toString.call(attrValue);
 				} else {
 				  attrValueString = attrValue + '';
 				}
