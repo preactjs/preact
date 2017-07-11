@@ -1,44 +1,37 @@
-import fs from 'fs';
-import memory from 'rollup-plugin-memory';
-import buble from 'rollup-plugin-buble';
 import nodeResolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
-
-let pkg = JSON.parse(fs.readFileSync('./package.json'));
-
-let external = Object.keys(pkg.peerDependencies || {}).concat(Object.keys(pkg.dependencies || {}));
-
-let format = process.env.FORMAT === 'es' ? 'es' : 'iife';
+import babel from 'rollup-plugin-babel';
+import memory from 'rollup-plugin-memory';
 
 export default {
-	entry: 'src/preact.js',
-	sourceMap: true,
-	exports: format==='es' ? null : 'default',
-	dest: format==='es' ? pkg.module : pkg.main,
-	format,
-	external,
 	useStrict: true,
+	format: 'iife',
+	entry: 'src/preact.js',
 	plugins: [
-		format==='iife' && memory({
-            path: 'src/preact.js',
+		memory({
+			path: 'src/preact.js',
 			contents: `
 				import preact from './preact';
 				if (typeof module!='undefined') module.exports = preact;
 				else self.preact = preact;
 			`
 		}),
-		buble({
-			objectAssign: 'extend',
-			namedFunctionExpressions: false
-		}),
 		nodeResolve({
-			jsnext: true,
-			main: true,
-			skip: external
+			main: true
 		}),
-		commonjs({
-			include: 'node_modules/**',
-			exclude: '**/*.css'
+		babel({
+			sourceMap: true,
+			exclude: 'node_modules/**',
+			babelrc: false,
+			presets: [
+				['env', {
+					modules: false,
+					loose: true,
+					exclude: ['transform-es2015-typeof-symbol'],
+					targets: {
+						browsers: ['last 2 versions', 'IE >= 9']
+					}
+				}]
+			]
 		})
-	].filter(Boolean)
+	]
 };
