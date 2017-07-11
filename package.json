@@ -119,6 +119,21 @@
     "uglify-js": "^2.7.5",
     "webpack": "^2.4.1"
   },
+  "babel": {
+    "presets": [
+      ["env", {
+        "loose": true,
+        "exclude": ["transform-es2015-typeof-symbol"],
+        "targets": {
+          "browsers": ["last 2 versions", "IE >= 9"]
+        }
+      }]
+    ],
+    "plugins": [
+      "transform-object-rest-spread",
+      "transform-react-jsx"
+    ]
+  },
   "greenkeeper": {
     "ignore": [
       "babel-cli",
