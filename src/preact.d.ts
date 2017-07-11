@@ -63,7 +63,7 @@ declare namespace preact {
 
 		forceUpdate(callback?:() => void): void;
 
-		abstract render(props?:PropsType & ComponentProps<this>, state?:StateType, context?:any):JSX.Element;
+		abstract render(props?:PropsType & ComponentProps<this>, state?:StateType, context?:any):JSX.Element|null;
 	}
 	interface Component<PropsType, StateType> extends ComponentLifecycle<PropsType, StateType> { }
 
