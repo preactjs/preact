@@ -18,7 +18,8 @@ export function createNode(nodeName, isSvg) {
  *	@param {Element} node		The node to remove
  */
 export function removeNode(node) {
-	if (node.parentNode) node.parentNode.removeChild(node);
+	let parentNode = node.parentNode;
+	if (parentNode) parentNode.removeChild(node);
 }
 
 

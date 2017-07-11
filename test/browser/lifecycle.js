@@ -411,6 +411,51 @@ describe('Lifecycle methods', () => {
 		});
 	});
 
+
+	describe('shouldComponentUpdate', () => {
+		let setState;
+
+		class Should extends Component {
+			constructor() {
+				super();
+				this.state = { show:true };
+				setState = s => this.setState(s);
+			}
+			render(props, { show }) {
+				return show ? <div /> : null;
+			}
+		}
+
+		class ShouldNot extends Should {
+			shouldComponentUpdate() {
+				return false;
+			}
+		}
+
+		sinon.spy(Should.prototype, 'render');
+		sinon.spy(ShouldNot.prototype, 'shouldComponentUpdate');
+
+		beforeEach(() => Should.prototype.render.reset());
+
+		it('should rerender component on change by default', () => {
+			render(<Should />, scratch);
+			setState({ show:false });
+			rerender();
+
+			expect(Should.prototype.render).to.have.been.calledTwice;
+		});
+
+		it('should not rerender component if shouldComponentUpdate returns false', () => {
+			render(<ShouldNot />, scratch);
+			setState({ show:false });
+			rerender();
+
+			expect(ShouldNot.prototype.shouldComponentUpdate).to.have.been.calledOnce;
+			expect(ShouldNot.prototype.render).to.have.been.calledOnce;
+		});
+	});
+
+
 	describe('Lifecycle DOM Timing', () => {
 		it('should be invoked when dom does (DidMount, WillUnmount) or does not (WillMount, DidUnmount) exist', () => {
 			let setState;
