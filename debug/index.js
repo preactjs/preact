@@ -70,7 +70,7 @@ if (process.env.NODE_ENV === 'development') {
 
 		if (attributes) {
 			props = Object.keys(attributes).map(attr => {
-				return `${attr}=${JSON.stringify(attributes[attr] + '')}`;
+				return `${attr}=${JSON.stringify(Object.prototype.toString.call(attributes[attr]))}`;
 			});
 		}
 
