@@ -74,6 +74,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 		// update if it's already a Text node:
 		if (dom && dom.splitText!==undefined && dom.parentNode && (!dom._component || componentRoot)) {
+			/* istanbul ignore if */ /* Browser quirk that can't be covered: https://github.com/developit/preact/commit/fd4f21f5c45dfd75151bd27b4c217d8003aa5eb9 */
 			if (dom.nodeValue!=vnode) {
 				dom.nodeValue = vnode;
 			}
@@ -123,13 +124,10 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 
 	let fc = out.firstChild,
-		props,
+		props = out[ATTR_KEY],
 		vchildren = vnode.children;
 
-	if (out[ATTR_KEY]) {
-		props = out[ATTR_KEY];
-	}
-	else {
+	if (props==null) {
 		props = out[ATTR_KEY] = {};
 		for (let a=out.attributes, i=a.length; i--; ) props[a[i].name] = a[i].value;
 	}
@@ -173,7 +171,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 		len = originalChildren.length,
 		childrenLen = 0,
 		vlen = vchildren ? vchildren.length : 0,
-		j, c, vchild, child;
+		j, c, f, vchild, child;
 
 	// Build up a map of keyed children and an Array of unkeyed children:
 	if (len!==0) {
@@ -221,17 +219,16 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 			// morph the matched/found/created DOM child to match vchild (deep)
 			child = idiff(child, vchild, context, mountAll);
 
-			if (child && child!==dom) {
-				if (i>=len) {
+			f = originalChildren[i];
+			if (child && child!==dom && child!==f) {
+				if (f==null) {
 					dom.appendChild(child);
 				}
-				else if (child!==originalChildren[i]) {
-					if (child===originalChildren[i+1]) {
-						removeNode(originalChildren[i]);
-					}
-					else {
-						dom.insertBefore(child, originalChildren[i] || null);
-					}
+				else if (child===f.nextSibling) {
+					removeNode(f);
+				}
+				else {
+					dom.insertBefore(child, f);
 				}
 			}
 		}
