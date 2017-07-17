@@ -175,7 +175,8 @@ export function renderComponent(component, opts, mountAll, isChild) {
 	else if (!skip) {
 		// Ensure that pending componentDidMount() hooks of child components
 		// are called before the componentDidUpdate() hook in the parent.
-		flushMounts();
+		// Note: disabled as it causes duplicate hooks, see https://github.com/developit/preact/issues/750
+		// flushMounts();
 
 		if (component.componentDidUpdate) {
 			component.componentDidUpdate(previousProps, previousState, previousContext);
