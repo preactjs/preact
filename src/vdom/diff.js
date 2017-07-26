@@ -102,7 +102,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
-	isSvgMode = vnodeName==='svg' ? true : vnodeName==='foreignObject' ? false : isSvgMode;
+	isSvgMode = vnodeName==='svg' ? true : isSvgMode;
 
 
 	// If there's no existing element or it's the wrong type, create a new one:
@@ -140,7 +140,14 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	}
 	// otherwise, if there are existing or new children, diff them:
 	else if (vchildren && vchildren.length || fc!=null) {
+		// if the vnode is foreignObject exit svg mode for children
+		let vnodeSvgMode = isSvgMode;
+		isSvgMode = vnodeName==='foreignObject' ? false : isSvgMode;
+
 		innerDiffNode(out, vchildren, context, mountAll, hydrating || props.dangerouslySetInnerHTML!=null);
+
+		// restore correct svg mode after diffing children
+		isSvgMode = vnodeSvgMode;
 	}
 
 
