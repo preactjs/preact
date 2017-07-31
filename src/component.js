@@ -28,7 +28,7 @@ export function Component(props, context) {
 	/** @type {object} */
 	if (!this.state) this.state = {};
 }
-
+// extend的作用
 
 extend(Component.prototype, {
 
