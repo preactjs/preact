@@ -64,14 +64,14 @@ export function setAccessor(node, name, old, value, isSvg) {
 	}
 	else if (name[0]=='o' && name[1]=='n') {
 		let useCapture = name !== (name=name.replace(/Capture$/, ''));
-		name = name.toLowerCase().substring(2);
+		name = name.substring(2);
 		if (value) {
 			if (!old) node.addEventListener(name, eventProxy, useCapture);
 		}
 		else {
 			node.removeEventListener(name, eventProxy, useCapture);
 		}
-		(node._listeners || (node._listeners = {}))[name] = value;
+		(node._listeners || (node._listeners = {}))[name.toLowerCase()] = value;
 	}
 	else if (name!=='list' && name!=='type' && !isSvg && name in node) {
 		setProperty(node, name, value==null ? '' : value);
@@ -105,5 +105,5 @@ function setProperty(node, name, value) {
  *	@private
  */
 function eventProxy(e) {
-	return this._listeners[e.type](options.event && options.event(e) || e);
+	return this._listeners[e.type.toLowerCase()](options.event && options.event(e) || e);
 }
