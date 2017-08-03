@@ -1,4 +1,5 @@
 import { Component } from '../component';
+import options from '../options';
 
 /** Retains a pool of Components for re-use, keyed on component name.
  *	Note: since component names are not unique or even necessarily available, these are primarily a form of sharding.
@@ -16,8 +17,7 @@ export function collectComponent(component) {
 
 /** Create a component. Normalizes differences between PFC's and classful Components. */
 export function createComponent(Ctor, props, context) {
-	let list = components[Ctor.name],
-		inst;
+	let inst;
 
 	if (Ctor.prototype && Ctor.prototype.render) {
 		inst = new Ctor(props, context);
@@ -29,16 +29,19 @@ export function createComponent(Ctor, props, context) {
 		inst.render = doRender;
 	}
 
-
-	if (list) {
-		for (let i=list.length; i--; ) {
-			if (list[i].constructor===Ctor) {
-				inst.nextBase = list[i].nextBase;
-				list.splice(i, 1);
-				break;
+	if (options.recycleComponents!==false) {
+		let list = components[Ctor.name];
+		if (list) {
+			for (let i=list.length; i--; ) {
+				if (list[i].constructor===Ctor) {
+					inst.nextBase = list[i].nextBase;
+					list.splice(i, 1);
+					break;
+				}
 			}
 		}
 	}
+
 	return inst;
 }
 

@@ -11,6 +11,13 @@ export default {
 	 */
 	//syncComponentUpdates: true,
 
+	/** If `true`, a pool of Components is retained for re-use.
+	 *	@name recycleComponents
+	 *	@type Boolean
+	 *	@default true
+	 */
+	// recycleComponents: true,
+
 	/** Processes all created VNodes.
 	 *	@param {VNode} vnode	A newly-created VNode to normalize/process
 	 */

@@ -75,6 +75,7 @@ declare namespace preact {
 
 	var options:{
 		syncComponentUpdates?:boolean;
+		recycleComponents?:boolean;
 		debounceRendering?:(render:() => void) => void;
 		vnode?:(vnode:VNode) => void;
 		event?:(event:Event) => Event;

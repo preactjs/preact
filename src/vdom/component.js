@@ -266,7 +266,10 @@ export function unmountComponent(component) {
 		component.nextBase = base;
 
 		removeNode(base);
-		collectComponent(component);
+
+		if (options.recycleComponents!==false) {
+			collectComponent(component);
+		}
 
 		removeChildren(base);
 	}
