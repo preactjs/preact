@@ -22,7 +22,7 @@ declare namespace preact {
 		key:string;
 	}
 
-	interface ComponentLifecycle<PropsType, StateType> {
+	abstract class ComponentLifecycle<PropsType, StateType> {
 		componentWillMount?():void;
 		componentDidMount?():void;
 		componentWillUnmount?():void;
@@ -45,7 +45,7 @@ declare namespace preact {
     // Type alias for a component considered generally, whether stateless or stateful.
 	type AnyComponent<PropsType, StateType> = FunctionalComponent<PropsType> | typeof Component;
 
-	abstract class Component<PropsType, StateType> implements ComponentLifecycle<PropsType, StateType> {
+	abstract class Component<PropsType, StateType> extends ComponentLifecycle<PropsType, StateType> {
 		constructor(props?:PropsType, context?:any);
 
 		static displayName?:string;
