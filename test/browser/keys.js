@@ -24,6 +24,7 @@ describe('keys', () => {
 			<div>
 				<div>1</div>
 				<li key="a">a</li>
+				<li key="b">b</li>
 			</div>
 		), scratch);
 
@@ -31,10 +32,11 @@ describe('keys', () => {
 			<div>
 				<div>2</div>
 				<li key="b">b</li>
+				<li key="c">c</li>
 			</div>
 		), scratch, root);
 
-		expect(scratch.innerHTML).to.equal('<div><div>2</div><li>b</li></div>');
+		expect(scratch.innerHTML).to.equal('<div><div>2</div><li>b</li><li>c</li></div>');
 	});
 
 	it('should set VNode#key property', () => {

@@ -1,9 +1,10 @@
 {
   "name": "preact",
-  "version": "8.1.0",
+  "version": "8.2.1",
   "description": "Fast 3kb React alternative with the same ES6 API. Components & Virtual DOM.",
   "main": "dist/preact.js",
-  "jsnext:main": "src/preact.js",
+  "jsnext:main": "dist/preact.esm.js",
+  "module": "dist/preact.esm.js",
   "dev:main": "dist/preact.dev.js",
   "minified:main": "dist/preact.min.js",
   "scripts": {
@@ -13,24 +14,28 @@
     "build": "npm-run-all --silent clean transpile copy-flow-definition copy-typescript-definition strip optimize minify size",
     "transpile:main": "rollup -c config/rollup.config.js -m dist/preact.dev.js.map -n preact -o dist/preact.dev.js",
     "transpile:devtools": "rollup -c config/rollup.config.devtools.js -o devtools.js -m devtools.js.map",
+    "transpile:esm": "rollup -c config/rollup.config.esm.js -m dist/preact.esm.js.map -o dist/preact.esm.js",
     "transpile:debug": "babel debug/ -o debug.js -s",
-    "transpile": "npm-run-all transpile:main transpile:devtools transpile:debug",
+    "transpile": "npm-run-all transpile:main transpile:esm transpile:devtools transpile:debug",
     "optimize": "uglifyjs dist/preact.dev.js -c conditionals=false,sequences=false,loops=false,join_vars=false,collapse_vars=false --pure-funcs=Object.defineProperty --mangle-props --mangle-regex=\"/^(_|normalizedNodeName|nextBase|prev[CPS]|_parentC)/\" --name-cache config/properties.json -b width=120,quote_style=3 -o dist/preact.js -p relative --in-source-map dist/preact.dev.js.map --source-map dist/preact.js.map",
     "minify": "uglifyjs dist/preact.js -c collapse_vars,evaluate,screw_ie8,unsafe,loops=false,keep_fargs=false,pure_getters,unused,dead_code -m -o dist/preact.min.js -p relative --in-source-map dist/preact.js.map --source-map dist/preact.min.js.map",
-    "strip": "jscodeshift --run-in-band -s -t config/codemod-strip-tdz.js dist/preact.dev.js && jscodeshift --run-in-band -s -t config/codemod-const.js dist/preact.dev.js",
+    "strip:main": "jscodeshift --run-in-band -s -t config/codemod-strip-tdz.js dist/preact.dev.js && jscodeshift --run-in-band -s -t config/codemod-const.js dist/preact.dev.js && jscodeshift --run-in-band -s -t config/codemod-let-name.js dist/preact.dev.js",
+    "strip:esm": "jscodeshift --run-in-band -s -t config/codemod-strip-tdz.js dist/preact.esm.js && jscodeshift --run-in-band -s -t config/codemod-const.js dist/preact.esm.js && jscodeshift --run-in-band -s -t config/codemod-let-name.js dist/preact.esm.js",
+    "strip": "npm-run-all strip:main strip:esm",
     "size": "node -e \"process.stdout.write('gzip size: ')\" && gzip-size dist/preact.min.js",
-    "test": "npm-run-all lint --parallel test:mocha test:karma test:ts",
+    "test": "npm-run-all lint --parallel test:mocha test:karma test:ts test:size",
     "test:ts": "tsc -p test/ts/",
-    "test:mocha": "mocha --recursive --compilers js:babel/register test/shared test/node",
+    "test:mocha": "mocha --recursive --require babel-register test/shared test/node",
     "test:karma": "karma start test/karma.conf.js --single-run",
     "test:mocha:watch": "npm run test:mocha -- --watch",
     "test:karma:watch": "npm run test:karma -- no-single-run",
+    "test:size": "bundlesize",
     "lint": "eslint debug devtools src test",
     "prepublish": "npm run build",
     "smart-release": "npm run build && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish",
     "release": "cross-env npm run smart-release",
     "postinstall": "npm run -s donate",
-    "donate": "echo \"\n   *** Thanks for downloading Preact! ***\nPlease consider donating to our open collective\n\n => https://opencollective.com/preact/donate\n\""
+    "donate": "echo \"\u001b[35m\u001b[1mLove Preact? You can now donate to our open collective:\u001b[22m\u001b[39m\n > \u001b[34mhttps://opencollective.com/preact/donate\u001b[39m\""
   },
   "eslintConfig": {
     "extends": "./config/eslint-config.js"
@@ -67,11 +72,14 @@
   },
   "homepage": "https://github.com/developit/preact",
   "devDependencies": {
-    "babel": "^5.8.23",
-    "babel-core": "^5.8.24",
-    "babel-eslint": "^6.1.0",
-    "babel-loader": "^5.3.2",
-    "babel-runtime": "^5.8.24",
+    "babel-cli": "^6.24.1",
+    "babel-core": "^6.24.1",
+    "babel-eslint": "^7.2.3",
+    "babel-loader": "^7.0.0",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "babel-preset-env": "^1.5.1",
+    "bundlesize": "^0.6.1",
     "chai": "^3.4.1",
     "copyfiles": "^1.0.0",
     "core-js": "^2.4.1",
@@ -101,24 +109,44 @@
     "phantomjs-prebuilt": "^2.1.7",
     "rimraf": "^2.5.3",
     "rollup": "^0.40.0",
-    "rollup-plugin-babel": "^1.0.0",
+    "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-memory": "^2.0.0",
     "rollup-plugin-node-resolve": "^2.0.0",
-    "sinon": "^1.17.4",
+    "sinon": "^2.2.0",
     "sinon-chai": "^2.8.0",
     "typescript": "^2.2.2",
     "uglify-js": "^2.7.5",
     "webpack": "^2.4.1"
   },
+  "babel": {
+    "presets": [
+      ["env", {
+        "loose": true,
+        "exclude": ["transform-es2015-typeof-symbol"],
+        "targets": {
+          "browsers": ["last 2 versions", "IE >= 9"]
+        }
+      }]
+    ],
+    "plugins": [
+      "transform-object-rest-spread",
+      "transform-react-jsx"
+    ]
+  },
   "greenkeeper": {
     "ignore": [
-      "rollup-plugin-babel",
-      "babel",
+      "babel-cli",
       "babel-core",
       "babel-eslint",
       "babel-loader",
-      "babel-runtime",
-      "jscodeshift"
+      "jscodeshift",
+      "rollup-plugin-babel"
     ]
-  }
+  },
+  "bundlesize": [
+    {
+      "path": "./dist/preact.min.js",
+      "threshold": "4Kb"
+    }
+  ]
 }

@@ -74,6 +74,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 		// update if it's already a Text node:
 		if (dom && dom.splitText!==undefined && dom.parentNode && (!dom._component || componentRoot)) {
+			/* istanbul ignore if */ /* Browser quirk that can't be covered: https://github.com/developit/preact/commit/fd4f21f5c45dfd75151bd27b4c217d8003aa5eb9 */
 			if (dom.nodeValue!=vnode) {
 				dom.nodeValue = vnode;
 			}
@@ -247,7 +248,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 
 
 
-/** Recursively recycle (or just unmount) a node an its descendants.
+/** Recursively recycle (or just unmount) a node and its descendants.
  *	@param {Node} node						DOM node to start unmount/removal from
  *	@param {Boolean} [unmountOnly=false]	If `true`, only triggers unmount lifecycle, skips removal
  */

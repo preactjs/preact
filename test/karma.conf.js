@@ -118,8 +118,6 @@ module.exports = function(config) {
 						exclude: /node_modules/,
 						loader: 'babel-loader',
 						options: {
-							loose: 'all',
-							blacklist: ['es6.tailCall'],
 							comments: false,
 							compact: true
 						}

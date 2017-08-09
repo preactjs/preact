@@ -1,4 +1,4 @@
-import { h, render, rerender, Component } from '../../src/preact';
+import { h, cloneElement, render, rerender, Component } from '../../src/preact';
 /** @jsx h */
 
 let spyAll = obj => Object.keys(obj).forEach( key => sinon.spy(obj,key) );
@@ -108,6 +108,14 @@ describe('Components', () => {
 			}));
 
 		expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
+	});
+
+
+	it('should clone components', () => {
+		function Comp () {}
+		let instance = <Comp/>;
+		let clone = cloneElement(instance);
+		expect(clone.prototype).to.equal(instance.prototype);
 	});
 
 
