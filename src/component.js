@@ -51,9 +51,10 @@ extend(Component.prototype, {
 	 *	@param {function} callback	A function to be called once component state is updated
 	 */
 	setState(state, callback) {
-		let s = this.state;
-		if (!this.prevState) this.prevState = extend({}, s);
-		extend(s, typeof state==='function' ? state(s, this.props) : state);
+		const s = this.state;
+		if (!this.prevState) this.prevState = s;
+		const nextState = extend(extend({}, s), typeof state==='function' ? state(s, this.props) : state);
+		this.state = nextState;
 		if (callback) (this._renderCallbacks = (this._renderCallbacks || [])).push(callback);
 		enqueueRender(this);
 	},
