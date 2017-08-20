@@ -120,6 +120,7 @@ Preact supports modern browsers and IE9+:
 - [**preact-mui**](https://git.io/v1aVO): The MUI CSS Preact library.
 - [**preact-photon**](https://git.io/preact-photon): build beautiful desktop UI with [photon](http://photonkit.com)
 - [**preact-mdl**](https://git.io/preact-mdl): [Material Design Lite](https://getmdl.io) for Preact
+- [**preact-weui**](https://github.com/afeiship/preact-weui): [Weui](https://github.com/afeiship/preact-weui) for Preact
 
 
 ---
