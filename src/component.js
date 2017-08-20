@@ -32,7 +32,7 @@ export function Component(props, context) {
 	 */
 	this.state = this.state || {};
 }
-
+// extend的作用
 
 extend(Component.prototype, {
 
