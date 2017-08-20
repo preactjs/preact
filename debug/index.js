@@ -70,7 +70,17 @@ if (process.env.NODE_ENV === 'development') {
 
 		if (attributes) {
 			props = Object.keys(attributes).map(attr => {
-				return `${attr}=${JSON.stringify(attributes[attr] + '')}`;
+				const attrValue = attributes[attr];
+				let attrValueString;
+
+				// If it is an object but doesn't have toString(), use Object.toString
+				if (Object(attrValue) === attrValue && !attrValue.toString) {
+				  attrValueString = Object.prototype.toString.call(attrValue);
+				} else {
+				  attrValueString = attrValue + '';
+				}
+
+				return `${attr}=${JSON.stringify(attrValueString)}`;
 			});
 		}
 
