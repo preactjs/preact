@@ -52,7 +52,11 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 export function catchErrorInComponent(error, component) {
 	for (; component; component = component._parentComponent) {
 		if (component.componentDidCatch) {
-			return component.componentDidCatch(error);
+			try {
+				return component.componentDidCatch(error);
+			} catch (e) {
+				error = e;
+			}
 		}
 	}
 	throw error;

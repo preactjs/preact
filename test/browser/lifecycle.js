@@ -573,6 +573,35 @@ describe('Lifecycle methods', () => {
 			expect(scratch).to.have.property('textContent', 'Error contents');
 		});
 
+		it('should be able to adapt and rethrow errors', () => {
+			class ErrorReceiverComponent extends Component {
+				componentDidCatch(error) {
+					this.setState({ "error": error });
+				}
+				render() {
+					return <div>{this.state.error ? String(this.state.error) : this.props.children}</div>;
+				}
+			}
+			class ErrorAdapterComponent extends Component {
+				componentDidCatch(error) {
+					throw "Adapted " + String(error);
+				}
+				render() {
+					return <div>{this.props.children}</div>;
+				}
+			}
+			function ErrorGeneratorComponent() {
+				throw "Error!";
+			}
+			sinon.spy(ErrorAdapterComponent.prototype, 'componentDidCatch');
+			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
+			render(<ErrorReceiverComponent><ErrorAdapterComponent><ErrorGeneratorComponent/></ErrorAdapterComponent></ErrorReceiverComponent>, scratch);
+			expect(ErrorAdapterComponent.prototype.componentDidCatch).to.have.been.called;
+			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
+			rerender();
+			expect(scratch).to.have.property('textContent', 'Adapted Error!');
+		});
+
 	});
 
 	describe('Lifecycle DOM Timing', () => {
