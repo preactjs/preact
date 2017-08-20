@@ -2,8 +2,11 @@
  *	@returns obj
  *	@private
  */
-export function extend(obj, props) {
-	for (let i in props) obj[i] = props[i];
+export function extend(obj, props, noOverride) {
+	for (let i in props) {
+		if (noOverride && obj[i]!==undefined) continue;
+		obj[i] = props[i];
+	}
 	return obj;
 }
 

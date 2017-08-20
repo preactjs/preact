@@ -34,17 +34,10 @@ export function isNamedNode(node, nodeName) {
  * @returns {Object} props
  */
 export function getNodeProps(vnode) {
-	let props = extend({}, vnode.attributes);
-	props.children = vnode.children;
+	let props = vnode.children!==undefined ? { children: vnode.children } : {};
+	props = extend(props, vnode.attributes);
 
-	let defaultProps = vnode.nodeName.defaultProps;
-	if (defaultProps!==undefined) {
-		for (let i in defaultProps) {
-			if (props[i]===undefined) {
-				props[i] = defaultProps[i];
-			}
-		}
-	}
-
-	return props;
+	return vnode.nodeName.defaultProps!==undefined
+		? extend(props, vnode.nodeName.defaultProps, true)
+		: props;
 }
