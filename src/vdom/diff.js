@@ -1,6 +1,6 @@
 import { ATTR_KEY } from '../constants';
 import { isSameNodeType, isNamedNode } from './index';
-import { buildComponentFromVNode } from './component';
+import { buildComponentFromVNode, catchErrorInComponent } from './component';
 import { createNode, setAccessor } from '../dom/index';
 import { unmountComponent } from './component';
 import options from '../options';
@@ -23,7 +23,13 @@ export function flushMounts() {
 	let c;
 	while ((c=mounts.pop())) {
 		if (options.afterMount) options.afterMount(c);
-		if (c.componentDidMount) c.componentDidMount();
+		if (c.componentDidMount) {
+			try {
+				c.componentDidMount();
+			} catch (e) {
+				catchErrorInComponent(e, c._parentComponent);
+			}
+		}
 	}
 }
 
@@ -43,20 +49,20 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 		// hydration is indicated by the existing element to be diffed not having a prop cache
 		hydrating = dom!=null && !(ATTR_KEY in dom);
 	}
+	let ret;
+	try {
+		return ret = idiff(dom, vnode, context, mountAll, componentRoot);
+	} finally {
+		// append the element if its a new parent
+		if (ret && parent && ret.parentNode!==parent) parent.appendChild(ret);
 
-	let ret = idiff(dom, vnode, context, mountAll, componentRoot);
-
-	// append the element if its a new parent
-	if (parent && ret.parentNode!==parent) parent.appendChild(ret);
-
-	// diffLevel being reduced to 0 means we're exiting the diff
-	if (!--diffLevel) {
-		hydrating = false;
-		// invoke queued componentDidMount lifecycle methods
-		if (!componentRoot) flushMounts();
+		// diffLevel being reduced to 0 means we're exiting the diff
+		if (!--diffLevel) {
+			hydrating = false;
+			// invoke queued componentDidMount lifecycle methods
+			if (!componentRoot) flushMounts();
+		}
 	}
-
-	return ret;
 }
 
 
@@ -97,7 +103,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	// If the VNode represents a Component, perform a component diff:
 	let vnodeName = vnode.nodeName;
 	if (typeof vnodeName==='function') {
-		return buildComponentFromVNode(dom, vnode, context, mountAll);
+		return buildComponentFromVNode(dom, vnode, context, mountAll, componentRoot);
 	}
 
 
@@ -140,7 +146,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	}
 	// otherwise, if there are existing or new children, diff them:
 	else if (vchildren && vchildren.length || fc!=null) {
-		innerDiffNode(out, vchildren, context, mountAll, hydrating || props.dangerouslySetInnerHTML!=null);
+		innerDiffNode(out, vchildren, context, mountAll, hydrating || props.dangerouslySetInnerHTML!=null, componentRoot);
 	}
 
 
@@ -162,7 +168,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
  *	@param {Boolean} mountAll
  *	@param {Boolean} isHydrating	If `true`, consumes externally created elements similar to hydration
  */
-function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
+function innerDiffNode(dom, vchildren, context, mountAll, isHydrating, componentRoot) {
 	let originalChildren = dom.childNodes,
 		children = [],
 		keyed = {},
@@ -217,7 +223,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 			}
 
 			// morph the matched/found/created DOM child to match vchild (deep)
-			child = idiff(child, vchild, context, mountAll);
+			child = idiff(child, vchild, context, mountAll, componentRoot);
 
 			f = originalChildren[i];
 			if (child && child!==dom && child!==f) {

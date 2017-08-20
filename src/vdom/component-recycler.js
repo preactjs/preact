@@ -15,7 +15,7 @@ export function collectComponent(component) {
 
 
 /** Create a component. Normalizes differences between PFC's and classful Components. */
-export function createComponent(Ctor, props, context) {
+export function createComponent(Ctor, props, context, parentComponent) {
 	let list = components[Ctor.name],
 		inst;
 
@@ -28,7 +28,7 @@ export function createComponent(Ctor, props, context) {
 		inst.constructor = Ctor;
 		inst.render = doRender;
 	}
-
+	inst._parentComponent = parentComponent;
 
 	if (list) {
 		for (let i=list.length; i--; ) {
