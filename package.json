@@ -34,7 +34,7 @@
     "prepublish": "npm run build",
     "smart-release": "npm run build && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish",
     "release": "cross-env npm run smart-release",
-    "postinstall": "node ./scripts/donation-message.js"
+    "postinstall": "node ./config/donation-message.js"
   },
   "eslintConfig": {
     "extends": "./config/eslint-config.js"
