@@ -460,7 +460,7 @@ describe('Lifecycle methods', () => {
 		it('should be called when child fails in constructor', () => {
 			class ErrorReceiverComponent extends Component {
 				componentDidCatch(error) {
-					this.setState({ "error": error });
+					this.setState({ error });
 				}
 				render() {
 					return <div>{this.state.error ? String(this.state.error) : this.props.children}</div>;
@@ -480,7 +480,7 @@ describe('Lifecycle methods', () => {
 		it('should be called when child fails in componentWillMount', () => {
 			class ErrorReceiverComponent extends Component {
 				componentDidCatch(error) {
-					this.setState({ "error": error });
+					this.setState({ error });
 				}
 				render() {
 					return <div>{this.state.error ? String(this.state.error) : this.props.children}</div>;
@@ -499,7 +499,7 @@ describe('Lifecycle methods', () => {
 		it('should be called when child fails in render', () => {
 			class ErrorReceiverComponent extends Component {
 				componentDidCatch(error) {
-					this.setState({ "error": error });
+					this.setState({ error });
 				}
 				render() {
 					return <div>{this.state.error ? String(this.state.error) : this.props.children}</div>;
@@ -518,7 +518,7 @@ describe('Lifecycle methods', () => {
 		it('should be called when child fails in componentDidMount', () => {
 			class ErrorReceiverComponent extends Component {
 				componentDidCatch(error) {
-					this.setState({ "error": error });
+					this.setState({ error });
 				}
 				render() {
 					return <div>{this.state.error ? String(this.state.error) : this.props.children}</div>;
@@ -537,7 +537,7 @@ describe('Lifecycle methods', () => {
 		it('should be called when functional child fails', () => {
 			class ErrorReceiverComponent extends Component {
 				componentDidCatch(error) {
-					this.setState({ "error": error });
+					this.setState({ error });
 				}
 				render() {
 					return <div>{this.state.error ? String(this.state.error) : this.props.children}</div>;
@@ -554,7 +554,7 @@ describe('Lifecycle methods', () => {
 		it('should re-render with new content', () => {
 			class ErrorReceiverComponent extends Component {
 				componentDidCatch(error) {
-					this.setState({ "error": error });
+					this.setState({ error });
 				}
 				render() {
 					return <span>{this.state.error ? String(this.state.error) : this.props.children}</span>;
@@ -576,7 +576,7 @@ describe('Lifecycle methods', () => {
 		it('should be able to adapt and rethrow errors', () => {
 			class ErrorReceiverComponent extends Component {
 				componentDidCatch(error) {
-					this.setState({ "error": error });
+					this.setState({ error });
 				}
 				render() {
 					return <div>{this.state.error ? String(this.state.error) : this.props.children}</div>;
