@@ -52,10 +52,21 @@ export function setAccessor(node, name, old, value, isSvg) {
 		}
 		if (value && typeof value==='object') {
 			if (typeof old!=='string') {
-				for (let i in old) if (!(i in value)) node.style[i] = '';
+				for (let i in old) if (!(i in value)) {
+					if (i.indexOf('--') === 0) {
+						node.style.removeProperty(i);
+					} else {
+						node.style[i] = '';
+					}
+				}
 			}
 			for (let i in value) {
-				node.style[i] = typeof value[i]==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (value[i]+'px') : value[i];
+				if (i.indexOf('--') === 0) {
+					node.style.setProperty(i, value[i]);
+				}
+				else {
+					node.style[i] = typeof value[i]==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (value[i]+'px') : value[i];
+				}
 			}
 		}
 	}
