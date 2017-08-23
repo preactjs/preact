@@ -1,3 +1,5 @@
+<script>location.href='https://preactjs.com';</script>
+
 # Preact
 
 **Preact is a fast, `3kb` alternative to React, with the same ES2015 API.**
