@@ -9,7 +9,9 @@ const UNNECESSARY_KEYS = [
 	'eslintConfig'
 ];
 
-UNNECESSARY_KEYS.forEach(key => delete pkg[key]);
+UNNECESSARY_KEYS.forEach(function (key) {
+	delete pkg[key];
+});
 
 pkg.scripts = {
 	donate: pkg.scripts.donate,
