@@ -1,0 +1,8 @@
+title: Preact
+description: "Fast 3kb React alternative with the same ES6 API. Components & Virtual DOM. "
+google_analytics: UA-6031694-18
+show_downloads: true
+theme: jekyll-theme-cayman
+
+gems:
+  - jekyll-mentions
