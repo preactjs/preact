@@ -53,7 +53,7 @@ export function setAccessor(node, name, old, value, isSvg) {
 		if (value && typeof value==='object') {
 			if (typeof old!=='string') {
 				for (let i in old) if (!(i in value)) {
-					if (i.indexOf('--') === 0) {
+					if (~i.indexOf('-')) {
 						node.style.removeProperty(i);
 					} else {
 						node.style[i] = '';
@@ -61,7 +61,7 @@ export function setAccessor(node, name, old, value, isSvg) {
 				}
 			}
 			for (let i in value) {
-				if (i.indexOf('--') === 0) {
+				if (~i.indexOf('-')) {
 					node.style.setProperty(i, value[i]);
 				}
 				else {
