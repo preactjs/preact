@@ -1,6 +1,6 @@
 {
   "name": "preact",
-  "version": "8.2.2",
+  "version": "8.2.3",
   "description": "Fast 3kb React alternative with the same ES6 API. Components & Virtual DOM.",
   "main": "dist/preact.js",
   "jsnext:main": "dist/preact.esm.js",
