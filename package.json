@@ -32,6 +32,7 @@
     "test:size": "bundlesize",
     "lint": "eslint debug devtools src test",
     "prepublish": "npm run build",
+    "prepublishOnly": "cp package.json .package.json; node config/prepublish.js",
     "smart-release": "npm run build && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish",
     "release": "cross-env npm run smart-release",
     "postinstall": "node ./config/donation-message.js"
