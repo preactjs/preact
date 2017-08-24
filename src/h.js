@@ -12,7 +12,7 @@ const EMPTY_CHILDREN = [];
  *	@public
  */
 export function h(nodeName, attributes) {
-	let children=EMPTY_CHILDREN, lastSimple, child, simple, i;
+	let children=EMPTY_CHILDREN, isPromised=false, lastSimple, child, simple, i;
 	for (i=arguments.length; i-- > 2; ) {
 		stack.push(arguments[i]);
 	}
@@ -45,6 +45,7 @@ export function h(nodeName, attributes) {
 
 			lastSimple = simple;
 		}
+		isPromised = isPromised || child instanceof Promise;
 	}
 
 	let p = new VNode();
@@ -55,6 +56,15 @@ export function h(nodeName, attributes) {
 
 	// if a "vnode hook" is defined, pass every created VNode to it
 	if (options.vnode!==undefined) options.vnode(p);
+
+	if (isPromised) {
+		return Promise
+			.all(children)
+			.then(children => {
+				p.children = children;
+				return p;
+			});
+	}
 
 	return p;
 }
