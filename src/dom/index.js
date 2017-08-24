@@ -54,7 +54,7 @@ export function setAccessor(node, name, old, value, isSvg) {
 			if (typeof old!=='string') {
 				for (let i in old) if (!(i in value)) {
 					if (~i.indexOf('-')) {
-						node.style.removeProperty(i);
+						node.style.setProperty(i, '');
 					} else {
 						node.style[i] = '';
 					}
