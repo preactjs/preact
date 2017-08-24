@@ -1,7 +1,9 @@
 /* @flow */
 
 import { createElement as h, cloneElement, Component } from 'react';
-import { render } from 'react-dom';
+
+declare function VNode(): any
+declare function render(VNode, HTMLElement, HTMLElement): HTMLElement;
 
 export { h, cloneElement, Component, render };
 export default { h, cloneElement, Component, render };
