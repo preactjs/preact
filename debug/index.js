@@ -45,7 +45,7 @@ if (process.env.NODE_ENV === 'development') {
 			});
 		}
 
-		return oldVnodeOption.call(this, vnode);
+		if (oldVnodeOption) oldVnodeOption.call(this, vnode);
 	};
 
 	const inspectChildren = (children, inspect) => {
