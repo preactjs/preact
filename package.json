@@ -35,7 +35,7 @@
     "prepublishOnly": "cp package.json .package.json; node config/prepublish.js",
     "smart-release": "npm run build && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish",
     "release": "cross-env npm run smart-release",
-    "postinstall": "node ./config/donation-message.js"
+    "postinstall": "node -e \"console.log('\\u001b[35m\\u001b[1mLove Preact? You can now donate to our open collective:\\u001b[22m\\u001b[39m\\n > \\u001b[34mhttps://opencollective.com/preact/donate\\u001b[0m')\""
   },
   "eslintConfig": {
     "extends": "./config/eslint-config.js"
