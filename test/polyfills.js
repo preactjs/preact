@@ -3,3 +3,5 @@ import 'core-js/es6/map';
 import 'core-js/fn/array/fill';
 import 'core-js/fn/array/from';
 import 'core-js/fn/object/assign';
+import 'core-js/es6/symbol';
+import 'core-js/es6/set';

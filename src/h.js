@@ -1,6 +1,6 @@
 import { VNode } from './vnode';
 import options from './options';
-
+import { iterableToArray } from './util';
 
 const stack = [];
 
@@ -21,8 +21,12 @@ export function h(nodeName, attributes) {
 		delete attributes.children;
 	}
 	while (stack.length) {
-		if ((child = stack.pop()) && child.pop!==undefined) {
+		if ((child = stack.pop()) && Array.isArray(child)) {
 			for (i=child.length; i--; ) stack.push(child[i]);
+		}
+		else if (typeof Symbol !== 'undefined' && child[Symbol.iterator]) {
+			const tmpArr = iterableToArray(child[Symbol.iterator]());
+			for (i=tmpArr.length; i--; ) stack.push(tmpArr[i]);
 		}
 		else {
 			if (typeof child==='boolean') child = null;

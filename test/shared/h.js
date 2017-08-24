@@ -1,6 +1,7 @@
 import { h } from '../../src/preact';
 import { VNode } from '../../src/vnode';
 import { expect } from 'chai';
+import { fromJS } from 'immutable';
 
 /*eslint-env browser, mocha */
 
@@ -74,6 +75,46 @@ describe('h(jsx)', () => {
 				h('bar'),
 				h('baz', null, h('test'))
 			]
+		);
+
+		expect(r).to.be.an('object')
+			.with.property('children')
+			.that.deep.equals([
+				buildVNode('bar'),
+				buildVNode('baz', undefined, [
+					buildVNode('test')
+				])
+			]);
+	});
+
+	it('should handle multiple element children, given as an List from Immutable.js', () => {
+		let r = h(
+			'foo',
+			null,
+			fromJS([
+				h('bar'),
+				h('baz', null, h('test'))
+			])
+		);
+
+		expect(r).to.be.an('object')
+			.with.property('children')
+			.that.deep.equals([
+				buildVNode('bar'),
+				buildVNode('baz', undefined, [
+					buildVNode('test')
+				])
+			]);
+	});
+
+	it('should handle multiple element children, given as a built in iterable', () => {
+		let r = h(
+			'foo',
+			null,
+			new Set([
+				h('bar'),
+				h('baz', null, h('test'))
+			])
 		);
 
 		expect(r).to.be.an('object')

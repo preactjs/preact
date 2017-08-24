@@ -89,6 +89,7 @@
     "eslint": "^3.0.0",
     "eslint-plugin-react": "^6.0.0",
     "gzip-size-cli": "^1.0.0",
+    "immutable": "^3.8.1",
     "isparta-loader": "^2.0.0",
     "jscodeshift": "^0.3.25",
     "karma": "^1.1.0",
