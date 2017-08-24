@@ -11,7 +11,8 @@ if (process.env.NODE_ENV === 'development') {
 
 		if (
 			attributes && attributes.ref !== void 0 &&
-			typeof attributes.ref !== 'function'
+			typeof attributes.ref !== 'function' &&
+			!('$$typeof' in vnode)  // allow string refs when preact-compat is installed
 		) {
 			throw new Error(
 				`Component's "ref" property should be a function,` +
