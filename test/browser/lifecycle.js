@@ -602,6 +602,26 @@ describe('Lifecycle methods', () => {
 			expect(scratch).to.have.property('textContent', 'Adapted Error!');
 		});
 
+		it('should be called through non-component parent elements', () => {
+			class ErrorReceiverComponent extends Component {
+				componentDidCatch(error) {
+					this.setState({ error });
+				}
+				render() {
+					return <div>{this.state.error ? String(this.state.error) : this.props.children}</div>;
+				}
+			}
+			class ErrorGeneratorComponent extends Component {
+				constructor(props, context) {
+					super(props, context);
+					throw "Error!";
+				}
+			}
+			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
+			render(<ErrorReceiverComponent><div><ErrorGeneratorComponent/></div></ErrorReceiverComponent>, scratch);
+			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
+		});
+
 	});
 
 	describe('Lifecycle DOM Timing', () => {
