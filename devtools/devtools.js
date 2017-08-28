@@ -83,7 +83,7 @@ function typeName(element) {
  */
 function createReactCompositeComponent(component) {
 	const _currentElement = createReactElement(component);
-	const node = component.base;
+	const node = component.base || component.rootNode;
 
 	let instance = {
 		// --- ReactDOMComponent properties
