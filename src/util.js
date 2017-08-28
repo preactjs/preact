@@ -3,8 +3,7 @@
  *	@private
  */
 export function extend(obj, props) {
-	for (let i in props) obj[i] = props[i];
-	return obj;
+	return Object.assign(obj, props);
 }
 
 /** Call a function asynchronously, as soon as possible.
