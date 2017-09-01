@@ -3,9 +3,14 @@ import babel from 'rollup-plugin-babel';
 import memory from 'rollup-plugin-memory';
 
 export default {
-	useStrict: true,
-	format: 'iife',
-	entry: 'src/preact.js',
+	strict: true,
+	input: 'src/preact.js',
+	output: {
+		format: 'iife',
+		file: 'dist/preact.dev.js',
+		name: 'preact',
+		sourcemap: true
+	},
 	plugins: [
 		memory({
 			path: 'src/preact.js',
@@ -20,9 +25,18 @@ export default {
 		}),
 		babel({
 			sourceMap: true,
-			loose: 'all',
-			blacklist: ['es6.tailCall'],
-			exclude: 'node_modules/**'
+			exclude: 'node_modules/**',
+			babelrc: false,
+			presets: [
+				['env', {
+					modules: false,
+					loose: true,
+					exclude: ['transform-es2015-typeof-symbol'],
+					targets: {
+						browsers: ['last 2 versions', 'IE >= 9']
+					}
+				}]
+			]
 		})
 	]
 };
