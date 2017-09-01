@@ -32,7 +32,7 @@ declare namespace preact {
 		componentDidUpdate?(previousProps:PropsType,previousState:StateType,previousContext:any):void;
 	}
 
-  interface FunctionalComponent<PropsType> {
+  interface FunctionalComponent<PropsType = {}> {
 		(props:PropsType & ComponentProps<this>, context?:any):JSX.Element;
 		displayName?:string;
 		defaultProps?:any;
@@ -45,7 +45,7 @@ declare namespace preact {
     // Type alias for a component considered generally, whether stateless or stateful.
 	type AnyComponent<PropsType, StateType> = FunctionalComponent<PropsType> | typeof Component;
 
-	abstract class Component<PropsType, StateType> {
+  abstract class Component<PropsType = {}, StateType = {}> {
 		constructor(props?:PropsType, context?:any);
 
 		static displayName?:string;
