@@ -12,6 +12,7 @@
 - Everything you need: JSX, <abbr title="Virtual DOM">VDOM</abbr>, React DevTools, <abbr title="Hot Module Replacement">HMR</abbr>, <abbr title="Server-Side Rendering">SSR</abbr>..
 - A highly optimized diff algorithm and seamless Server Side Rendering
 - Transparent asynchronous rendering with a pluggable scheduler
+- 🆕💥 **Instant no-config app bundling with [Preact CLI](https://github.com/developit/preact-cli)**
 
 ### 💁 More information at the [Preact Website ➞](https://preactjs.com)
 
@@ -47,6 +48,7 @@
 [![OpenCollective Sponsors](https://opencollective.com/preact/sponsors/badge.svg)](#sponsors)
 [![travis](https://travis-ci.org/developit/preact.svg?branch=master)](https://travis-ci.org/developit/preact)
 [![coveralls](https://img.shields.io/coveralls/developit/preact/master.svg)](https://coveralls.io/github/developit/preact)
+[![gzip size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=gzip)](https://unpkg.com/preact/dist/preact.min.js)
 
 Preact supports modern browsers and IE9+:
 
@@ -59,14 +61,14 @@ Preact supports modern browsers and IE9+:
 ## Demos
 
 - [**ESBench**](http://esbench.com) is built using Preact.
-- [**Nectarine.rocks**](http://nectarine.rocks) _([Github Project](https://github.com/developit/nectarine))_ :peach:
-- [**Documentation Viewer**](https://documentation-viewer.firebaseapp.com) _([Github Project](https://github.com/developit/documentation-viewer))_
-- [**TodoMVC**](https://preact-todomvc.surge.sh) _([Github Project](https://github.com/developit/preact-todomvc))_
-- [**Hacker News Minimal**](https://developit.github.io/hn_minimal/) _([Github Project](https://github.com/developit/hn_minimal))_
-- [**Preact Boilerplate**](https://preact-boilerplate.surge.sh) _([Github Project](https://github.com/developit/preact-boilerplate))_ :zap:
-- [**Preact Offline Starter**](https://preact-starter.now.sh) _([Github Project](https://github.com/lukeed/preact-starter))_ :100:
-- [**Preact PWA**](https://preact-pwa.appspot.com/) _([Github Project](https://github.com/ezekielchentnik/preact-pwa))_ :hamburger:
-- [**Preact Mobx Starter**](https://awaw00.github.io/preact-mobx-starter/) _([Github Project](https://github.com/awaw00/preact-mobx-starter))_ :sunny:
+- [**Nectarine.rocks**](http://nectarine.rocks) _([GitHub Project](https://github.com/developit/nectarine))_ :peach:
+- [**Documentation Viewer**](https://documentation-viewer.firebaseapp.com) _([GitHub Project](https://github.com/developit/documentation-viewer))_
+- [**TodoMVC**](https://preact-todomvc.surge.sh) _([GitHub Project](https://github.com/developit/preact-todomvc))_
+- [**Hacker News Minimal**](https://developit.github.io/hn_minimal/) _([GitHub Project](https://github.com/developit/hn_minimal))_
+- [**Preact Boilerplate**](https://preact-boilerplate.surge.sh) _([GitHub Project](https://github.com/developit/preact-boilerplate))_ :zap:
+- [**Preact Offline Starter**](https://preact-starter.now.sh) _([GitHub Project](https://github.com/lukeed/preact-starter))_ :100:
+- [**Preact PWA**](https://preact-pwa.appspot.com/) _([GitHub Project](https://github.com/ezekielchentnik/preact-pwa))_ :hamburger:
+- [**Preact Mobx Starter**](https://awaw00.github.io/preact-mobx-starter/) _([GitHub Project](https://github.com/awaw00/preact-mobx-starter))_ :sunny:
 - [**Preact Redux Example**](https://github.com/developit/preact-redux-example) :star:
 - [**Flickr Browser**](http://codepen.io/developit/full/VvMZwK/) (@ CodePen)
 - [**Animating Text**](http://codepen.io/developit/full/LpNOdm/) (@ CodePen)
@@ -76,17 +78,21 @@ Preact supports modern browsers and IE9+:
 - [**Stock Ticker**](http://codepen.io/developit/pen/wMYoBb?editors=0010) (@ CodePen)
 - [**Create your Own!**](https://jsfiddle.net/developit/rs6zrh5f/embedded/result/) (@ JSFiddle)
 - [**Preact Coffeescript**](https://github.com/crisward/preact-coffee)
-- [**GuriVR**](https://gurivr.com) _([Github Project](https://github.com/opennewslabs/guri-vr))_
+- [**GuriVR**](https://gurivr.com) _([GitHub Project](https://github.com/opennewslabs/guri-vr))_
 - [**V2EX Preact**](https://github.com/yanni4night/v2ex-preact)
-- [**BigWebQuiz**](https://bigwebquiz.com/) _([Github Project](https://github.com/jakearchibald/big-web-quiz))_
-- [**Color Picker**](https://colors.now.sh) _([Github Project](https://github.com/lukeed/colors-app))_ :art:
-- [**Rainbow Explorer**](https://use-the-platform.com/rainbow-explorer/) _([Github Project](https://github.com/vaneenige/rainbow-explorer/))_ :rainbow:
-- [**Offline Gallery**](https://use-the-platform.com/offline-gallery/) _([Github Project](https://github.com/vaneenige/offline-gallery/))_ :balloon:
+- [**BigWebQuiz**](https://bigwebquiz.com/) _([GitHub Project](https://github.com/jakearchibald/big-web-quiz))_
+- [**Color Picker**](https://colors.now.sh) _([GitHub Project](https://github.com/lukeed/colors-app))_ :art:
+- [**Rainbow Explorer**](https://use-the-platform.com/rainbow-explorer/) _([GitHub Project](https://github.com/vaneenige/rainbow-explorer/))_ :rainbow:
+- [**Offline Gallery**](https://use-the-platform.com/offline-gallery/) _([GitHub Project](https://github.com/vaneenige/offline-gallery/))_ :balloon:
+- [**Periodic Weather**](https://use-the-platform.com/periodic-weather/) _([GitHub Project](https://github.com/vaneenige/periodic-weather/))_ :sunny:
+- [**Play.cash**](https://play.cash) :notes:
+- [**Rugby News Board**](http://nbrugby.com) _[(GitHub Project)](https://github.com/rugby-board/rugby-board-node)_
 
 ## Libraries & Add-ons
 
 - :raised_hands: [**preact-compat**](https://git.io/preact-compat): use any React library with Preact *([full example](http://git.io/preact-compat-example))*
 - :page_facing_up: [**preact-render-to-string**](https://git.io/preact-render-to-string): Universal rendering.
+- :loop: [**preact-render-to-json**](https://git.io/preact-render-to-json): Render for Jest Snapshot testing.
 - :earth_americas: [**preact-router**](https://git.io/preact-router): URL routing for your components
 - :bookmark_tabs: [**preact-markup**](https://git.io/preact-markup): Render HTML & Custom Elements as JSX & Components
 - :satellite: [**preact-portal**](https://git.io/preact-portal): Render Preact components into (a) SPACE :milky_way:
@@ -98,9 +104,6 @@ Preact supports modern browsers and IE9+:
 - :thought_balloon: [**preact-socrates**](https://github.com/matthewmueller/preact-socrates): Preact plugin for [Socrates](http://github.com/matthewmueller/socrates)
 - :rowboat: [**preact-flyd**](https://github.com/xialvjun/preact-flyd): Use [flyd](https://github.com/paldepind/flyd) FRP streams in Preact + JSX
 - :speech_balloon: [**preact-i18nline**](https://github.com/download/preact-i18nline): Integrates the ecosystem around [i18n-js](https://github.com/everydayhero/i18n-js) with Preact via [i18nline](https://github.com/download/i18nline).
-- :metal: [**preact-mui**](https://git.io/v1aVO): The MUI CSS Preact library.
-- :white_square_button: [**preact-mdl**](https://git.io/preact-mdl): Use [MDL](https://getmdl.io) as Preact components
-- :rocket: [**preact-photon**](https://git.io/preact-photon): build beautiful desktop UI with [photon](http://photonkit.com)
 - :microscope: [**preact-jsx-chai**](https://git.io/preact-jsx-chai): JSX assertion testing _(no DOM, right in Node)_
 - :tophat: [**preact-classless-component**](https://github.com/ld0rman/preact-classless-component): create preact components without the class keyword
 - :hammer: [**preact-hyperscript**](https://github.com/queckezz/preact-hyperscript): Hyperscript-like syntax for creating elements
@@ -109,13 +112,29 @@ Preact supports modern browsers and IE9+:
 - :construction_worker: [**preact-helmet**](https://github.com/download/preact-helmet): A document head manager for Preact
 - :necktie: [**preact-delegate**](https://github.com/NekR/preact-delegate): Delegate DOM events
 
+#### UI Component Libraries
+
+> Want to prototype something or speed up your development? Try one of these toolkits:
+
+- [**preact-material-components**](https://github.com/prateekbh/preact-material-components): Material Design Components for Preact ([website](https://prateekbh.github.io/preact-material-components/))
+- [**preact-mdc**](https://github.com/BerndWessels/preact-mdc): Material Design Components for Preact ([demo](https://github.com/BerndWessels/preact-mdc-demo))
+- [**preact-mui**](https://git.io/v1aVO): The MUI CSS Preact library.
+- [**preact-photon**](https://git.io/preact-photon): build beautiful desktop UI with [photon](http://photonkit.com)
+- [**preact-mdl**](https://git.io/preact-mdl): [Material Design Lite](https://getmdl.io) for Preact
+- [**preact-weui**](https://github.com/afeiship/preact-weui): [Weui](https://github.com/afeiship/preact-weui) for Preact
+
+
 ---
 
 ## Getting Started
 
-> 💁 You [don't _have_ to use ES2015 to use Preact](https://github.com/developit/preact-without-babel)... but you should.
+> 💁 _**Note:** You [don't need ES2015 to use Preact](https://github.com/developit/preact-in-es3)... but give it a try!_
 
-The following guide assumes you have some sort of ES2015 build set up using babel and/or webpack/browserify/gulp/grunt/etc.  If you don't, start with [preact-boilerplate] or a [CodePen Template](http://codepen.io/developit/pen/pgaROe?editors=0010).
+The easiest way to get started with Preact is to install [Preact CLI](https://github.com/developit/preact-cli). This simple command-line tool wraps up the best possible Webpack and Babel setup for you, and even keeps you up-to-date as the underlying tools change. Best of all, it's easy to understand! It builds your app in a single command (`preact build`), doesn't need any configuration, and bakes in best-practises 🙌.
+
+The following guide assumes you have some sort of ES2015 build set up using babel and/or webpack/browserify/gulp/grunt/etc.
+
+You can also start with [preact-boilerplate] or a [CodePen Template](http://codepen.io/developit/pen/pgaROe?editors=0010).
 
 
 ### Import what you need
@@ -294,17 +313,22 @@ class Foo extends Component {
 
 While this achieves much better runtime performance, it's still a lot of unnecessary code to wire up state to UI.
 
-Fortunately there is a solution, in the form of `linkState()`. Calling `component.linkState('text')` returns a function that accepts an Event and uses it's associated value to update the given property in your component's state. Calls to linkState() with the same state property are cached, so there is no performance penalty.  Here is the previous example rewritten using _Linked State_:
+Fortunately there is a solution, in the form of a module called [linkstate](https://github.com/developit/linkstate). Calling `linkState(component, 'text')` returns a function that accepts an Event and uses it's associated value to update the given property in your component's state. Calls to `linkState()` with the same arguments are cached, so there is no performance penalty.  Here is the previous example rewritten using _Linked State_:
 
 ```js
+import linkState from 'linkstate';
+
 class Foo extends Component {
 	render({ }, { text }) {
-		return <input value={text} onInput={this.linkState('text')} />;
+		return <input value={text} onInput={linkState(this, 'text')} />;
 	}
 }
 ```
 
 Simple and effective. It handles linking state from any input type, or an optional second parameter can be used to explicitly provide a keypath to the new state value.
+
+> **Note:** In Preact 7 and prior, `linkState()` was built right into Component. In 8.0, it was moved to a separate module. You can restore the 7.x behavior by using linkstate as a polyfill - see [the linkstate docs](https://github.com/developit/linkstate#usage).
+
 
 
 ## Examples
@@ -314,7 +338,7 @@ Here is a somewhat verbose Preact `<Link>` component:
 ```js
 class Link extends Component {
 	render(props, state) {
-		return <a href={ props.href }>{ props.children }</a>;
+		return <a href={props.href}>{props.children}</a>;
 	}
 }
 ```
@@ -323,21 +347,21 @@ Since this is ES6/ES2015, we can further simplify:
 
 ```js
 class Link extends Component {
-	render({ href, children }) {
-		return <a {...{ href, children }} />;
-	}
+    render({ href, children }) {
+        return <a {...{ href, children }} />;
+    }
 }
 
 // or, for wide-open props support:
 class Link extends Component {
-	render(props) {
-		return <a {...props} />;
-	}
+    render(props) {
+        return <a {...props} />;
+    }
 }
 
 // or, as a stateless functional component:
 const Link = ({ children, ...props }) => (
-	<a {...props}>{ children }</a>
+    <a {...props}>{ children }</a>
 );
 ```
 
@@ -443,7 +467,7 @@ Support us with a monthly donation and help us continue our activities. [[Become
 
 
 ## Sponsors
-Become a sponsor and get your logo on our README on Github with a link to your site. [[Become a sponsor](https://opencollective.com/preact#sponsor)]
+Become a sponsor and get your logo on our README on GitHub with a link to your site. [[Become a sponsor](https://opencollective.com/preact#sponsor)]
 
 <a href="https://opencollective.com/preact/sponsor/0/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/0/avatar.svg"></a>
 <a href="https://opencollective.com/preact/sponsor/1/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/1/avatar.svg"></a>
