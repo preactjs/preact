@@ -32,8 +32,8 @@ declare namespace preact {
 		componentDidUpdate?(previousProps:PropsType,previousState:StateType,previousContext:any):void;
 	}
 
-	interface FunctionalComponent<PropsType> {
-		(props?:PropsType & ComponentProps<this>, context?:any):JSX.Element;
+  interface FunctionalComponent<PropsType> {
+		(props:PropsType & ComponentProps<this>, context?:any):JSX.Element;
 		displayName?:string;
 		defaultProps?:any;
 	}
