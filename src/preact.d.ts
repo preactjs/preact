@@ -32,7 +32,7 @@ declare namespace preact {
 		componentDidUpdate?(previousProps:PropsType,previousState:StateType,previousContext:any):void;
 	}
 
-  interface FunctionalComponent<PropsType = {}> {
+	interface FunctionalComponent<PropsType = {}> {
 		(props:PropsType & ComponentProps<this>, context?:any):JSX.Element;
 		displayName?:string;
 		defaultProps?:any;
@@ -42,10 +42,10 @@ declare namespace preact {
 		new (props?:PropsType, context?: any):Component<PropsType, StateType>;
 	}
 
-    // Type alias for a component considered generally, whether stateless or stateful.
+		// Type alias for a component considered generally, whether stateless or stateful.
 	type AnyComponent<PropsType, StateType> = FunctionalComponent<PropsType> | typeof Component;
 
-  abstract class Component<PropsType = {}, StateType = {}> {
+	abstract class Component<PropsType = {}, StateType = {}> {
 		constructor(props?:PropsType, context?:any);
 
 		static displayName?:string;
@@ -596,121 +596,135 @@ declare namespace JSX {
 		vocab?:string;
 	}
 
+	interface NormalElement extends HTMLAttributes {
+		children?: string | Element | Element[]
+	}
+
+	interface VoidElement extends HTMLAttributes { }
+
+	interface RawTextElement extends HTMLAttributes {
+		children?: string
+	}
+
+	interface EscapableRawTextElement extends HTMLAttributes {
+		children?: string
+	}
+
 	interface IntrinsicElements {
 		// HTML
-		a:HTMLAttributes;
-		abbr:HTMLAttributes;
-		address:HTMLAttributes;
-		area:HTMLAttributes;
-		article:HTMLAttributes;
-		aside:HTMLAttributes;
-		audio:HTMLAttributes;
-		b:HTMLAttributes;
-		base:HTMLAttributes;
-		bdi:HTMLAttributes;
-		bdo:HTMLAttributes;
-		big:HTMLAttributes;
-		blockquote:HTMLAttributes;
-		body:HTMLAttributes;
-		br:HTMLAttributes;
-		button:HTMLAttributes;
-		canvas:HTMLAttributes;
-		caption:HTMLAttributes;
-		cite:HTMLAttributes;
-		code:HTMLAttributes;
-		col:HTMLAttributes;
-		colgroup:HTMLAttributes;
-		data:HTMLAttributes;
-		datalist:HTMLAttributes;
-		dd:HTMLAttributes;
-		del:HTMLAttributes;
-		details:HTMLAttributes;
-		dfn:HTMLAttributes;
-		dialog:HTMLAttributes;
-		div:HTMLAttributes;
-		dl:HTMLAttributes;
-		dt:HTMLAttributes;
-		em:HTMLAttributes;
-		embed:HTMLAttributes;
-		fieldset:HTMLAttributes;
-		figcaption:HTMLAttributes;
-		figure:HTMLAttributes;
-		footer:HTMLAttributes;
-		form:HTMLAttributes;
-		h1:HTMLAttributes;
-		h2:HTMLAttributes;
-		h3:HTMLAttributes;
-		h4:HTMLAttributes;
-		h5:HTMLAttributes;
-		h6:HTMLAttributes;
-		head:HTMLAttributes;
-		header:HTMLAttributes;
-		hr:HTMLAttributes;
-		html:HTMLAttributes;
-		i:HTMLAttributes;
-		iframe:HTMLAttributes;
-		img:HTMLAttributes;
-		input:HTMLAttributes;
-		ins:HTMLAttributes;
-		kbd:HTMLAttributes;
-		keygen:HTMLAttributes;
-		label:HTMLAttributes;
-		legend:HTMLAttributes;
-		li:HTMLAttributes;
-		link:HTMLAttributes;
-		main:HTMLAttributes;
-		map:HTMLAttributes;
-		mark:HTMLAttributes;
-		menu:HTMLAttributes;
-		menuitem:HTMLAttributes;
-		meta:HTMLAttributes;
-		meter:HTMLAttributes;
-		nav:HTMLAttributes;
-		noscript:HTMLAttributes;
-		object:HTMLAttributes;
-		ol:HTMLAttributes;
-		optgroup:HTMLAttributes;
-		option:HTMLAttributes;
-		output:HTMLAttributes;
-		p:HTMLAttributes;
-		param:HTMLAttributes;
-		picture:HTMLAttributes;
-		pre:HTMLAttributes;
-		progress:HTMLAttributes;
-		q:HTMLAttributes;
-		rp:HTMLAttributes;
-		rt:HTMLAttributes;
-		ruby:HTMLAttributes;
-		s:HTMLAttributes;
-		samp:HTMLAttributes;
-		script:HTMLAttributes;
-		section:HTMLAttributes;
-		select:HTMLAttributes;
-		slot:HTMLAttributes;
-		small:HTMLAttributes;
-		source:HTMLAttributes;
-		span:HTMLAttributes;
-		strong:HTMLAttributes;
-		style:HTMLAttributes;
-		sub:HTMLAttributes;
-		summary:HTMLAttributes;
-		sup:HTMLAttributes;
-		table:HTMLAttributes;
-		tbody:HTMLAttributes;
-		td:HTMLAttributes;
-		textarea:HTMLAttributes;
-		tfoot:HTMLAttributes;
-		th:HTMLAttributes;
-		thead:HTMLAttributes;
-		time:HTMLAttributes;
-		title:HTMLAttributes;
-		tr:HTMLAttributes;
-		track:HTMLAttributes;
-		u:HTMLAttributes;
-		ul:HTMLAttributes;
-		"var":HTMLAttributes;
-		video:HTMLAttributes;
-		wbr:HTMLAttributes;
+		a:NormalElement;
+		abbr:NormalElement;
+		address:NormalElement;
+		area:VoidElement;
+		article:NormalElement;
+		aside:NormalElement;
+		audio:NormalElement;
+		b:NormalElement;
+		base:VoidElement;
+		bdi:NormalElement;
+		bdo:NormalElement;
+		big:NormalElement;
+		blockquote:NormalElement;
+		body:NormalElement;
+		br:VoidElement;
+		button:NormalElement;
+		canvas:NormalElement;
+		caption:NormalElement;
+		cite:NormalElement;
+		code:NormalElement;
+		col:VoidElement;
+		colgroup:NormalElement;
+		data:NormalElement;
+		datalist:NormalElement;
+		dd:NormalElement;
+		del:NormalElement;
+		details:NormalElement;
+		dfn:NormalElement;
+		dialog:NormalElement;
+		div:NormalElement;
+		dl:NormalElement;
+		dt:NormalElement;
+		em:NormalElement;
+		embed:VoidElement;
+		fieldset:NormalElement;
+		figcaption:NormalElement;
+		figure:NormalElement;
+		footer:NormalElement;
+		form:NormalElement;
+		h1:NormalElement;
+		h2:NormalElement;
+		h3:NormalElement;
+		h4:NormalElement;
+		h5:NormalElement;
+		h6:NormalElement;
+		head:NormalElement;
+		header:NormalElement;
+		hr:VoidElement;
+		html:NormalElement;
+		i:NormalElement;
+		iframe:NormalElement;
+		img:VoidElement;
+		input:VoidElement;
+		ins:NormalElement;
+		kbd:NormalElement;
+		keygen:NormalElement;
+		label:NormalElement;
+		legend:NormalElement;
+		li:NormalElement;
+		link:VoidElement;
+		main:NormalElement;
+		map:NormalElement;
+		mark:NormalElement;
+		menu:NormalElement;
+		menuitem:NormalElement;
+		meta:VoidElement;
+		meter:NormalElement;
+		nav:NormalElement;
+		noscript:NormalElement;
+		object:NormalElement;
+		ol:NormalElement;
+		optgroup:NormalElement;
+		option:NormalElement;
+		output:NormalElement;
+		p:NormalElement;
+		param:VoidElement;
+		picture:NormalElement;
+		pre:NormalElement;
+		progress:NormalElement;
+		q:NormalElement;
+		rp:NormalElement;
+		rt:NormalElement;
+		ruby:NormalElement;
+		s:NormalElement;
+		samp:NormalElement;
+		script:RawTextElement;
+		section:NormalElement;
+		select:NormalElement;
+		slot:NormalElement;
+		small:NormalElement;
+		source:VoidElement;
+		span:NormalElement;
+		strong:NormalElement;
+		style:RawTextElement;
+		sub:NormalElement;
+		summary:NormalElement;
+		sup:NormalElement;
+		table:NormalElement;
+		tbody:NormalElement;
+		td:NormalElement;
+		textarea:EscapableRawTextElement;
+		tfoot:NormalElement;
+		th:NormalElement;
+		thead:NormalElement;
+		time:NormalElement;
+		title:EscapableRawTextElement;
+		tr:NormalElement;
+		track:VoidElement;
+		u:NormalElement;
+		ul:NormalElement;
+		"var":NormalElement;
+		video:NormalElement;
+		wbr:VoidElement;
 
 		//SVG
 		svg:SVGAttributes;
