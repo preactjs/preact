@@ -29,4 +29,4 @@ function DummerComponent({ input, initialInput }: DummerComponentProps) {
 	return <div>Input: {input}, initial: {initialInput}</div>;
 }
 
-render(h(DummerComponent, { initialInput: "The input" }), document.getElementById("xxx"));
+render(h(DummerComponent, { initialInput: "The input" }), document.getElementById("xxx")!);

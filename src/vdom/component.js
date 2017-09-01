@@ -145,7 +145,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 			let baseParent = initialBase.parentNode;
 			if (baseParent && base!==baseParent) {
 				if (toUnmount) {
-					replaceComponent(toUnmount)
+					replaceComponent(toUnmount);
 				}
 				baseParent.replaceChild(base, initialBase);
 

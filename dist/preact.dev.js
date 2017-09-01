@@ -41,7 +41,6 @@
      *	@see http://jasonformat.com/wtf-is-jsx
      *	@public
      */
-
     function h(nodeName, attributes) {
         var children = EMPTY_CHILDREN,
             lastSimple,
@@ -57,9 +56,11 @@
         }
         while (stack.length) {
             if ((child = stack.pop()) && child.pop !== undefined) {
-                for (i = child.length; i--;) stack.push(child[i]);
+                for (i = child.length; i--;) {
+                    stack.push(child[i]);
+                }
             } else {
-                if (child === true || child === false) child = null;
+                if (typeof child === 'boolean') child = null;
 
                 if (simple = typeof nodeName !== 'function') {
                     if (child == null) child = '';else if (typeof child === 'number') child = String(child);else if (typeof child !== 'string') simple = false;
@@ -99,6 +100,11 @@
       }return obj;
     }
 
+    /** Call a function asynchronously, as soon as possible.
+     *	@param {Function} callback
+     */
+    var defer = typeof Promise == 'function' ? Promise.resolve().then.bind(Promise.resolve()) : setTimeout;
+
     function cloneElement(vnode, props) {
         return h(vnode.nodeName, extend(extend({}, vnode.attributes), props), arguments.length > 2 ? [].slice.call(arguments, 2) : vnode.children);
     }
@@ -112,7 +118,7 @@
 
     function enqueueRender(component) {
         if (!component._dirty && (component._dirty = true) && items.push(component) == 1) {
-            (options.debounceRendering || setTimeout)(rerender);
+            (options.debounceRendering || defer)(rerender);
         }
     }
 
@@ -130,7 +136,6 @@
      *	@param {VNode} vnode
      *	@private
      */
-
     function isSameNodeType(node, vnode, hydrating) {
         if (typeof vnode === 'string' || typeof vnode === 'number') {
             return node.splitText !== undefined;
@@ -145,7 +150,6 @@
     *	@param {Element} node
     *	@param {String} nodeName
      */
-
     function isNamedNode(node, nodeName) {
         return node.normalizedNodeName === nodeName || node.nodeName.toLowerCase() === nodeName.toLowerCase();
     }
@@ -157,7 +161,6 @@
      * @param {VNode} vnode
      * @returns {Object} props
      */
-
     function getNodeProps(vnode) {
         var props = extend({}, vnode.attributes);
         props.children = vnode.children;
@@ -179,7 +182,6 @@
      *	@param {Boolean} [isSvg=false]	If `true`, creates an element within the SVG namespace.
      *	@returns {Element} node
      */
-
     function createNode(nodeName, isSvg) {
         var node = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', nodeName) : document.createElement(nodeName);
         node.normalizedNodeName = nodeName;
@@ -189,9 +191,9 @@
     /** Remove a child node from its parent if attached.
      *	@param {Element} node		The node to remove
      */
-
     function removeNode(node) {
-        if (node.parentNode) node.parentNode.removeChild(node);
+        var parentNode = node.parentNode;
+        if (parentNode) parentNode.removeChild(node);
     }
 
     /** Set a named attribute on the given Node, with special behavior for some names and event handlers.
@@ -203,53 +205,52 @@
      *	@param {Boolean} isSvg	Are we currently diffing inside an svg?
      *	@private
      */
-
     function setAccessor(node, name, old, value, isSvg) {
         if (name === 'className') name = 'class';
 
         if (name === 'key') {
             // ignore
         } else if (name === 'ref') {
-                if (old) old(null);
-                if (value) value(node);
-            } else if (name === 'class' && !isSvg) {
-                node.className = value || '';
-            } else if (name === 'style') {
-                if (!value || typeof value === 'string' || typeof old === 'string') {
-                    node.style.cssText = value || '';
-                }
-                if (value && typeof value === 'object') {
-                    if (typeof old !== 'string') {
-                        for (var i in old) {
-                            if (!(i in value)) node.style[i] = '';
-                        }
-                    }
-                    for (var i in value) {
-                        node.style[i] = typeof value[i] === 'number' && IS_NON_DIMENSIONAL.test(i) === false ? value[i] + 'px' : value[i];
+            if (old) old(null);
+            if (value) value(node);
+        } else if (name === 'class' && !isSvg) {
+            node.className = value || '';
+        } else if (name === 'style') {
+            if (!value || typeof value === 'string' || typeof old === 'string') {
+                node.style.cssText = value || '';
+            }
+            if (value && typeof value === 'object') {
+                if (typeof old !== 'string') {
+                    for (var i in old) {
+                        if (!(i in value)) node.style[i] = '';
                     }
                 }
-            } else if (name === 'dangerouslySetInnerHTML') {
-                if (value) node.innerHTML = value.__html || '';
-            } else if (name[0] == 'o' && name[1] == 'n') {
-                var useCapture = name !== (name = name.replace(/Capture$/, ''));
-                name = name.toLowerCase().substring(2);
-                if (value) {
-                    if (!old) node.addEventListener(name, eventProxy, useCapture);
-                } else {
-                    node.removeEventListener(name, eventProxy, useCapture);
-                }
-                (node._listeners || (node._listeners = {}))[name] = value;
-            } else if (name !== 'list' && name !== 'type' && !isSvg && name in node) {
-                setProperty(node, name, value == null ? '' : value);
-                if (value == null || value === false) node.removeAttribute(name);
-            } else {
-                var ns = isSvg && name !== (name = name.replace(/^xlink\:?/, ''));
-                if (value == null || value === false) {
-                    if (ns) node.removeAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase());else node.removeAttribute(name);
-                } else if (typeof value !== 'function') {
-                    if (ns) node.setAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase(), value);else node.setAttribute(name, value);
+                for (var i in value) {
+                    node.style[i] = typeof value[i] === 'number' && IS_NON_DIMENSIONAL.test(i) === false ? value[i] + 'px' : value[i];
                 }
             }
+        } else if (name === 'dangerouslySetInnerHTML') {
+            if (value) node.innerHTML = value.__html || '';
+        } else if (name[0] == 'o' && name[1] == 'n') {
+            var useCapture = name !== (name = name.replace(/Capture$/, ''));
+            name = name.toLowerCase().substring(2);
+            if (value) {
+                if (!old) node.addEventListener(name, eventProxy, useCapture);
+            } else {
+                node.removeEventListener(name, eventProxy, useCapture);
+            }
+            (node._listeners || (node._listeners = {}))[name] = value;
+        } else if (name !== 'list' && name !== 'type' && !isSvg && name in node) {
+            setProperty(node, name, value == null ? '' : value);
+            if (value == null || value === false) node.removeAttribute(name);
+        } else {
+            var ns = isSvg && name !== (name = name.replace(/^xlink\:?/, ''));
+            if (value == null || value === false) {
+                if (ns) node.removeAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase());else node.removeAttribute(name);
+            } else if (typeof value !== 'function') {
+                if (ns) node.setAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase(), value);else node.setAttribute(name, value);
+            }
+        }
     }
 
     /** Attempt to set a DOM property to the given value.
@@ -281,7 +282,6 @@
     var hydrating = false;
 
     /** Invoke queued componentDidMount lifecycle methods */
-
     function flushMounts() {
         var c;
         while (c = mounts.pop()) {
@@ -296,10 +296,9 @@
      *	@returns {Element} dom			The created/mutated element
      *	@private
      */
-
     function diff(dom, vnode, context, mountAll, parent, componentRoot) {
         // diffLevel having been 0 here indicates initial entry into the diff (not a subdiff)
-        if (! diffLevel++) {
+        if (!diffLevel++) {
             // when first starting the diff, check if we're diffing an SVG or within an SVG
             isSvgMode = parent != null && parent.ownerSVGElement !== undefined;
 
@@ -327,14 +326,15 @@
         var out = dom,
             prevSvgMode = isSvgMode;
 
-        // empty values (null & undefined) render as empty Text nodes
-        if (vnode == null) vnode = '';
+        // empty values (null, undefined, booleans) render as empty Text nodes
+        if (vnode == null || typeof vnode === 'boolean') vnode = '';
 
-        // Fast case: Strings create/update Text nodes.
-        if (typeof vnode === 'string') {
+        // Fast case: Strings & Numbers create/update Text nodes.
+        if (typeof vnode === 'string' || typeof vnode === 'number') {
 
             // update if it's already a Text node:
             if (dom && dom.splitText !== undefined && dom.parentNode && (!dom._component || componentRoot)) {
+                /* istanbul ignore if */ /* Browser quirk that can't be covered: https://github.com/developit/preact/commit/fd4f21f5c45dfd75151bd27b4c217d8003aa5eb9 */
                 if (dom.nodeValue != vnode) {
                     dom.nodeValue = vnode;
                 }
@@ -353,22 +353,24 @@
         }
 
         // If the VNode represents a Component, perform a component diff:
-        if (typeof vnode.nodeName === 'function') {
+        var vnodeName = vnode.nodeName;
+        if (typeof vnodeName === 'function') {
             return buildComponentFromVNode(dom, vnode, context, mountAll);
         }
 
         // Tracks entering and exiting SVG namespace when descending through the tree.
-        isSvgMode = vnode.nodeName === 'svg' ? true : vnode.nodeName === 'foreignObject' ? false : isSvgMode;
+        isSvgMode = vnodeName === 'svg' ? true : vnodeName === 'foreignObject' ? false : isSvgMode;
 
         // If there's no existing element or it's the wrong type, create a new one:
-        if (!dom || !isNamedNode(dom, String(vnode.nodeName))) {
-            out = createNode(String(vnode.nodeName), isSvgMode);
+        vnodeName = String(vnodeName);
+        if (!dom || !isNamedNode(dom, vnodeName)) {
+            out = createNode(vnodeName, isSvgMode);
 
             if (dom) {
                 // move children into the replacement node
-                while (dom.firstChild) out.appendChild(dom.firstChild);
-
-                // if the previous Element was mounted into the DOM, replace it inline
+                while (dom.firstChild) {
+                    out.appendChild(dom.firstChild);
+                } // if the previous Element was mounted into the DOM, replace it inline
                 if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
 
                 // recycle the old element (skips non-Element node types)
@@ -377,8 +379,15 @@
         }
 
         var fc = out.firstChild,
-            props = out['__preactattr_'] || (out['__preactattr_'] = {}),
+            props = out['__preactattr_'],
             vchildren = vnode.children;
+
+        if (props == null) {
+            props = out['__preactattr_'] = {};
+            for (var a = out.attributes, i = a.length; i--;) {
+                props[a[i].name] = a[i].value;
+            }
+        }
 
         // Optimization: fast-path for elements containing a single TextNode:
         if (!hydrating && vchildren && vchildren.length === 1 && typeof vchildren[0] === 'string' && fc != null && fc.splitText !== undefined && fc.nextSibling == null) {
@@ -418,6 +427,7 @@
             vlen = vchildren ? vchildren.length : 0,
             j,
             c,
+            f,
             vchild,
             child;
 
@@ -466,15 +476,14 @@
                 // morph the matched/found/created DOM child to match vchild (deep)
                 child = idiff(child, vchild, context, mountAll);
 
-                if (child && child !== dom) {
-                    if (i >= len) {
+                f = originalChildren[i];
+                if (child && child !== dom && child !== f) {
+                    if (f == null) {
                         dom.appendChild(child);
-                    } else if (child !== originalChildren[i]) {
-                        if (child === originalChildren[i + 1]) {
-                            removeNode(originalChildren[i]);
-                        } else {
-                            dom.insertBefore(child, originalChildren[i] || null);
-                        }
+                    } else if (child === f.nextSibling) {
+                        removeNode(f);
+                    } else {
+                        dom.insertBefore(child, f);
                     }
                 }
             }
@@ -493,11 +502,10 @@
         }
     }
 
-    /** Recursively recycle (or just unmount) a node an its descendants.
+    /** Recursively recycle (or just unmount) a node and its descendants.
      *	@param {Node} node						DOM node to start unmount/removal from
      *	@param {Boolean} [unmountOnly=false]	If `true`, only triggers unmount lifecycle, skips removal
      */
-
     function recollectNodeTree(node, unmountOnly) {
         var component = node._component;
         if (component) {
@@ -520,7 +528,6 @@
      *	- we use .lastChild here because it causes less reflow than .firstChild
      *	- it's also cheaper than accessing the .childNodes Live NodeList
      */
-
     function removeChildren(node) {
         node = node.lastChild;
         while (node) {
@@ -560,14 +567,12 @@
     var components = {};
 
     /** Reclaim a component for later re-use by the recycler. */
-
     function collectComponent(component) {
         var name = component.constructor.name;
         (components[name] || (components[name] = [])).push(component);
     }
 
     /** Create a component. Normalizes differences between PFC's and classful Components. */
-
     function createComponent(Ctor, props, context) {
         var list = components[Ctor.name],
             inst;
@@ -604,7 +609,6 @@
      *	@param {boolean} [opts.renderSync=false]	If `true` and {@link options.syncComponentUpdates} is `true`, triggers synchronous rendering.
      *	@param {boolean} [opts.render=true]			If `false`, no render will be triggered.
      */
-
     function setComponentProps(component, props, opts, context, mountAll) {
         if (component._disable) return;
         component._disable = true;
@@ -645,7 +649,6 @@
      *	@param {boolean} [opts.build=false]		If `true`, component will build and store a DOM node if not already associated with one.
      *	@private
      */
-
     function renderComponent(component, opts, mountAll, isChild) {
         if (component._disable) return;
 
@@ -764,7 +767,8 @@
         } else if (!skip) {
             // Ensure that pending componentDidMount() hooks of child components
             // are called before the componentDidUpdate() hook in the parent.
-            flushMounts();
+            // Note: disabled as it causes duplicate hooks, see https://github.com/developit/preact/issues/750
+            // flushMounts();
 
             if (component.componentDidUpdate) {
                 component.componentDidUpdate(previousProps, previousState, previousContext);
@@ -773,7 +777,9 @@
         }
 
         if (component._renderCallbacks != null) {
-            while (component._renderCallbacks.length) component._renderCallbacks.pop().call(component);
+            while (component._renderCallbacks.length) {
+                component._renderCallbacks.pop().call(component);
+            }
         }
 
         if (!diffLevel && !isChild) flushMounts();
@@ -785,7 +791,6 @@
      *	@returns {Element} dom	The created/mutated element
      *	@private
      */
-
     function buildComponentFromVNode(dom, vnode, context, mountAll) {
         var c = dom && dom._component,
             originalComponent = c,
@@ -843,7 +848,6 @@
      *	@param {Component} component	The Component instance to unmount
      *	@private
      */
-
     function unmountComponent(component) {
         if (options.beforeUnmount) options.beforeUnmount(component);
 
@@ -884,7 +888,6 @@
      *		}
      *	}
      */
-
     function Component(props, context) {
         this._dirty = true;
 
@@ -927,6 +930,7 @@
             enqueueRender(this);
         },
 
+
         /** Immediately perform a synchronous re-render of the component.
       *	@param {function} callback		A function to be called after component is re-rendered.
       *	@private
@@ -936,6 +940,7 @@
             renderComponent(this, 2);
         },
 
+
         /** Accepts `props` and `state`, and returns a new Virtual DOM tree to build.
       *	Virtual DOM is generally constructed via [JSX](http://jasonformat.com/wtf-is-jsx).
       *	@param {object} props		Props (eg: JSX attributes) received from parent element/component
@@ -944,7 +949,6 @@
       *	@returns VNode
       */
         render: function render() {}
-
     });
 
     /** Render JSX into a `parent` Element.
@@ -962,7 +966,6 @@
      *	const Thing = ({ name }) => <span>{ name }</span>;
      *	render(<Thing name="one" />, document.querySelector('#foo'));
      */
-
     function render(vnode, parent, merge) {
       return diff(merge, vnode, {}, false, parent, false);
     }
