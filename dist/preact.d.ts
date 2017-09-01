@@ -30,11 +30,10 @@ declare namespace preact {
 		shouldComponentUpdate?(nextProps:PropsType,nextState:StateType,nextContext:any):boolean;
 		componentWillUpdate?(nextProps:PropsType,nextState:StateType,nextContext:any):void;
 		componentDidUpdate?(previousProps:PropsType,previousState:StateType,previousContext:any):void;
-		componentWillReplace?():void;
 	}
 
 	interface FunctionalComponent<PropsType> {
-		(props?:PropsType & ComponentProps<this>, context?:any):JSX.Element;
+		(props?:PropsType & ComponentProps<this>, context?:any):JSX.Element|null;
 		displayName?:string;
 		defaultProps?:any;
 	}
@@ -57,24 +56,23 @@ declare namespace preact {
 		context:any;
 		base:HTMLElement;
 
-		linkState:(name:string) => (event: Event) => void;
-
 		setState<K extends keyof StateType>(state:Pick<StateType, K>, callback?:() => void):void;
 		setState<K extends keyof StateType>(fn:(prevState:StateType, props:PropsType) => Pick<StateType, K>, callback?:() => void):void;
 
 		forceUpdate(callback?:() => void): void;
 
-		abstract render(props?:PropsType & ComponentProps<this>, state?:StateType, context?:any):JSX.Element|null;
+		abstract render(props?:PropsType & ComponentProps<this>, state?:StateType, context?:any):JSX.Element | null;
 	}
+
 	interface Component<PropsType, StateType> extends ComponentLifecycle<PropsType, StateType> { }
 
 	function h<PropsType>(node:ComponentConstructor<PropsType, any> | FunctionalComponent<PropsType>, params:PropsType, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
 	function h(node:string, params:JSX.HTMLAttributes&JSX.SVGAttributes&{[propName: string]: any}, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
-	function render(node:JSX.Element, parent:Element|Document, mergeWith?:Element):Element;
+	function render(node:JSX.Element|null, parent:Element|Document|null, mergeWith?:Element|null):Element;
 	function rerender():void;
 	function cloneElement(element:JSX.Element, props:any):JSX.Element;
 
-	var options:{
+	const options:{
 		syncComponentUpdates?:boolean;
 		debounceRendering?:(render:() => void) => void;
 		vnode?:(vnode:VNode) => void;
@@ -366,8 +364,6 @@ declare namespace JSX {
 	type GenericEventHandler = EventHandler<Event>;
 
 	interface DOMAttributes {
-		// Image Events
-		onLoad?:GenericEventHandler;
 
 		// Clipboard Events
 		onCopy?:ClipboardEventHandler;
@@ -379,15 +375,30 @@ declare namespace JSX {
 		onCompositionStart?:CompositionEventHandler;
 		onCompositionUpdate?:CompositionEventHandler;
 
+		// Error Events
+		onError?:GenericEventHandler;
+		onErrorCapture?:GenericEventHandler;
+
+		// Load Events
+		onLoad?:GenericEventHandler;
+		onLoadCapture?:GenericEventHandler;
+
+		// Resize Events
+		onResize?:GenericEventHandler;
+		onResizeCapture?:GenericEventHandler;
+
 		// Focus Events
 		onFocus?:FocusEventHandler;
+		onFocusCapture?:FocusEventHandler;
 		onBlur?:FocusEventHandler;
+		onBlurCapture?:FocusEventHandler;
 
 		// Form Events
 		onChange?:GenericEventHandler;
 		onInput?:GenericEventHandler;
 		onSearch?:GenericEventHandler;
 		onSubmit?:GenericEventHandler;
+		onReset?: GenericEventHandler
 
 		// Keyboard Events
 		onKeyDown?:KeyboardEventHandler;
@@ -421,7 +432,7 @@ declare namespace JSX {
 		// MouseEvents
 		onClick?:MouseEventHandler;
 		onContextMenu?:MouseEventHandler;
-		onDblClick?: MouseEventHandler;
+		onDoubleClick?:MouseEventHandler;
 		onDrag?:DragEventHandler;
 		onDragEnd?:DragEventHandler;
 		onDragEnter?:DragEventHandler;
@@ -449,6 +460,7 @@ declare namespace JSX {
 
 		// UI Events
 		onScroll?:UIEventHandler;
+		onScrollCapture?:UIEventHandler;
 
 		// Wheel Events
 		onWheel?:WheelEventHandler;
@@ -481,8 +493,8 @@ declare namespace JSX {
 		charSet?:string;
 		challenge?:string;
 		checked?:boolean;
-		class?:string | { [key:string]: boolean };
-		className?:string | { [key:string]: boolean };
+		class?:string;
+		className?:string;
 		cols?:number;
 		colSpan?:number;
 		content?:string;
