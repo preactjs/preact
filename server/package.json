@@ -41,8 +41,6 @@
     "babel-plugin-transform-class-properties": "^6.10.2",
     "babel-plugin-transform-react-jsx": "^6.8.0",
     "babel-preset-es2015": "^6.9.0",
-    "babel-preset-es2015-minimal": "^2.0.0",
-    "babel-preset-es2015-minimal-rollup": "^2.1.0",
     "babel-preset-stage-0": "^6.5.0",
     "babel-register": "^6.9.0",
     "chai": "^3.5.0",

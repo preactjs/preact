@@ -5,6 +5,7 @@ import memory from 'rollup-plugin-memory';
 import babel from 'rollup-plugin-babel';
 
 let babelRc = JSON.parse(fs.readFileSync('./.babelrc'));
+babelRc.presets[0][1].modules = false;
 
 let entry = process.env.ENTRY || 'index';
 
@@ -27,7 +28,7 @@ export default {
 			babelrc: false,
 			comments: false,
 			exclude: [],
-			presets: ['es2015-minimal-rollup'].concat(babelRc.presets.slice(1)),
+			presets: babelRc.presets,
 			plugins: babelRc.plugins
 		})
 	]
