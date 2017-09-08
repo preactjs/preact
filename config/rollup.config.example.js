@@ -19,7 +19,7 @@ export default {
 			exclude: 'node_modules/**',
 			babelrc: false,
 			plugins: [
-        ["transform-react-jsx", { "pragma":"h" }]
+				["transform-react-jsx", { "pragma":"h" }]
 			],
 			presets: [
 				['env', {
