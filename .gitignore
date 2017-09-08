@@ -4,7 +4,6 @@
 /dist
 /_dev
 /coverage
-/.package.json
 
 # Additional bundles
 /devtools.js
