@@ -1,22 +1,6 @@
 import { extend } from '../util';
 
 
-/** Check if two nodes are equivalent.
- *	@param {Element} node
- *	@param {VNode} vnode
- *	@private
- */
-export function isSameNodeType(node, vnode, hydrating) {
-	if (typeof vnode==='string' || typeof vnode==='number') {
-		return node.splitText!==undefined;
-	}
-	if (typeof vnode.nodeName==='string') {
-		return !node._componentConstructor && isNamedNode(node, vnode.nodeName);
-	}
-	return hydrating || node._componentConstructor===vnode.nodeName;
-}
-
-
 /** Check if an Element has a given normalized name.
 *	@param {Element} node
 *	@param {String} nodeName

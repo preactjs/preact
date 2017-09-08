@@ -7,6 +7,7 @@ export const ASYNC_RENDER = 3;
 
 
 export const ATTR_KEY = '__preactattr_';
+export const ELT_KEY_PREFIX = 'preact-';
 
 // DOM properties that should NOT have "px" added when numeric
 export const IS_NON_DIMENSIONAL = /acit|ex(?:s|g|n|p|$)|rph|ows|mnc|ntw|ine[ch]|zoo|^ord/i;
