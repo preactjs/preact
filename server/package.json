@@ -6,7 +6,8 @@
   "main": "dist/index.js",
   "jsnext:main": "src/index.js",
   "scripts": {
-    "build": "npm run -s transpile && npm run -s transpile:jsx",
+    "build": "npm run -s transpile && npm run -s transpile:jsx && npm run -s copy-typescript-definition",
+    "copy-typescript-definition": "copyfiles -f src/index.d.ts dist",
     "transpile": "rollup -c rollup.config.js -m ${npm_package_main}.map -f umd -n $npm_package_amdName $npm_package_jsnext_main -o $npm_package_main",
     "transpile:jsx": "ENTRY=jsx rollup -c rollup.config.js -m dist/jsx.js.map -f umd -n $npm_package_amdName src/jsx.js -o dist/jsx.js",
     "test": "eslint src test && mocha --compilers js:babel-register test/**/*.js",
@@ -21,6 +22,7 @@
   ],
   "author": "Jason Miller <jason@developit.ca>",
   "license": "MIT",
+  "typings": "src/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/developit/preact-render-to-string.git"
@@ -44,6 +46,7 @@
     "babel-preset-stage-0": "^6.5.0",
     "babel-register": "^6.9.0",
     "chai": "^3.5.0",
+    "copyfiles": "^1.2.0",
     "eslint": "^3.2.2",
     "mocha": "^3.0.0",
     "preact": "^8.1.0",
