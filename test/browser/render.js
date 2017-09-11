@@ -195,6 +195,20 @@ describe('render()', () => {
 		expect(scratch).to.have.property('innerHTML', '<div><input><table></table></div>', 'for undefined');
 	});
 
+	it('should be order-insensitive when setting value attribute on range input element', () => {
+		let root = render((
+			<div>
+				<input value={0.5} type="range" min={0} max={1} step={0.1} />
+				<input type="range" min={0} value={0.5} max={1} step={0.1} />
+				<input type="range" min={0} max={1} step={0.1} value={0.5} />
+			</div>
+		), scratch);
+
+		expect(root.children[0]).to.have.property('value', '0.5');
+		expect(root.children[1]).to.have.property('value', '0.5');
+		expect(root.children[2]).to.have.property('value', '0.5');
+	});
+
 	it('should apply string attributes', () => {
 		render(<div foo="bar" data-foo="databar" />, scratch);
 

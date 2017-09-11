@@ -293,6 +293,7 @@ export function removeChildren(node) {
  */
 function diffAttributes(dom, attrs, old) {
 	let name;
+	const isInput = dom.tagName.toLowerCase() === "input";
 
 	// remove attributes no longer present on the vnode by setting them to undefined
 	for (name in old) {
@@ -303,8 +304,14 @@ function diffAttributes(dom, attrs, old) {
 
 	// add new & update changed attributes
 	for (name in attrs) {
-		if (name!=='children' && name!=='innerHTML' && (!(name in old) || attrs[name]!==(name==='value' || name==='checked' ? dom[name] : old[name]))) {
+		if (name==='children' || name==='innerHTML' || (isInput && name==='value')) continue;
+		if (!(name in old) || attrs[name]!==(name==='value' || name==='checked' ? dom[name] : old[name])) {
 			setAccessor(dom, name, old[name], old[name] = attrs[name], isSvgMode);
 		}
+	}
+
+	// update value last so that browser does not reject it for not fitting the default min/max/step
+	if (isInput && ("value" in attrs) && (!("value" in old) || attrs.value !== dom.value)) {
+		setAccessor(dom, "value", old.value, old.value = attrs.value, isSvgMode);
 	}
 }
