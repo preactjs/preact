@@ -293,7 +293,7 @@ export function removeChildren(node) {
  */
 function diffAttributes(dom, attrs, old) {
 	let name;
-	const isInput = dom.tagName.toLowerCase() === "input";
+	const isInput = isNamedNode(dom, "input");
 
 	// remove attributes no longer present on the vnode by setting them to undefined
 	for (name in old) {
