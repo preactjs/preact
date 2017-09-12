@@ -410,24 +410,50 @@ class MixedComponent extends Component {
 }
 ```
 
-## Developer Tools
+## Debug Mode
 
 You can inspect and modify the state of your Preact UI components at runtime using the
 [React Developer Tools](https://github.com/facebook/react-devtools) browser extension.
 
 1. Install the [React Developer Tools](https://github.com/facebook/react-devtools) extension
-2. Import the "preact/devtools" module in your app
-3. Reload and go to the 'React' tab in the browser's development tools
+2. Import the "preact/debug" module in your app
+3. Set `process.env.NODE_ENV` to 'development'
+4. Reload and go to the 'React' tab in the browser's development tools
 
 
 ```js
 import { h, Component, render } from 'preact';
 
-// Enable devtools. You can reduce the size of your app by only including this
+// Enable debug mode. You can reduce the size of your app by only including this
 // module in development builds. eg. In Webpack, wrap this with an `if (module.hot) {...}`
 // check.
-require('preact/devtools');
+require('preact/debug');
 ```
+
+### Runtime Error Checking
+
+To enable debug mode, you need to set `process.env.NODE_ENV=development`. You can do this
+with webpack via a builtin plugin.
+
+```js
+// webpack.config.js
+
+// Set NODE_ENV=development to enable error checking
+new webpack.DefinePlugin({
+  'process.env': {
+    'NODE_ENV': JSON.stringify('development')
+  }
+});
+```
+
+When enabled, warnings are logged to the console when undefined components or string refs
+are detected.
+
+### Developer Tools
+
+If you only want to include devtool integration, without runtime error checking, you can
+replace `preact/debug` in the above example with `preact/devtools`. This option doesn't
+require setting `NODE_ENV=development`.
 
 
 
