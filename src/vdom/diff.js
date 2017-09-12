@@ -27,7 +27,7 @@ export function flushMounts() {
 			try {
 				c.componentDidMount();
 			} catch (e) {
-				catchErrorInComponent(e, c._parentComponent);
+				catchErrorInComponent(e, c._ancestorComponent);
 			}
 		}
 	}

@@ -50,7 +50,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 }
 
 export function catchErrorInComponent(error, component) {
-	for (; component; component = component._parentComponent) {
+	for (; component; component = component._ancestorComponent) {
 		if (component.componentDidCatch) {
 			try {
 				return component.componentDidCatch(error);
@@ -132,6 +132,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 
 					component._component = inst = createComponent(childComponent, childProps, context, component);
 					inst.nextBase = inst.nextBase || nextBase;
+					inst._parentComponent = component;
 					setComponentProps(inst, childProps, NO_RENDER, context, false);
 					renderComponent(inst, SYNC_RENDER, mountAll, true);
 				}
@@ -191,7 +192,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 			try {
 				component.componentDidUpdate(previousProps, previousState, previousContext);
 			} catch (e) {
-				catchErrorInComponent(e, component._parentComponent);
+				catchErrorInComponent(e, component._ancestorComponent);
 			}
 		}
 		if (options.afterUpdate) options.afterUpdate(component);
@@ -212,7 +213,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
  *	@returns {Element} dom	The created/mutated element
  *	@private
  */
-export function buildComponentFromVNode(dom, vnode, context, mountAll, parentComponent) {
+export function buildComponentFromVNode(dom, vnode, context, mountAll, ancestorComponent) {
 	let c = dom && dom._component,
 		originalComponent = c,
 		oldDom = dom,
@@ -233,7 +234,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll, parentCom
 			dom = oldDom = null;
 		}
 
-		c = createComponent(vnode.nodeName, props, context, parentComponent);
+		c = createComponent(vnode.nodeName, props, context, ancestorComponent);
 		if (dom && !c.nextBase) {
 			c.nextBase = dom;
 			// passing dom/oldDom as nextBase will recycle it if unused, so bypass recycling on L229:
