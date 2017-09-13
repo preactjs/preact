@@ -107,7 +107,6 @@
     "karma-sourcemap-loader": "^0.3.6",
     "karma-webpack": "^2.0.3",
     "mocha": "^3.0.1",
-    "node-watch": "^0.5.5",
     "npm-run-all": "^4.0.0",
     "phantomjs-prebuilt": "^2.1.7",
     "rimraf": "^2.5.3",
@@ -119,7 +118,8 @@
     "sinon-chai": "^2.8.0",
     "typescript": "^2.2.2",
     "uglify-js": "^2.7.5",
-    "webpack": "^2.4.1"
+    "webpack": "^2.7.0",
+    "webpack-dev-middleware": "^1.12.0"
   },
   "greenkeeper": {
     "ignore": [
