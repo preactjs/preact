@@ -313,7 +313,7 @@ class Foo extends Component {
 
 While this achieves much better runtime performance, it's still a lot of unnecessary code to wire up state to UI.
 
-Fortunately there is a solution, in the form of a module called [linkstate](https://github.com/developit/linkstate). Calling `linkState(component, 'text')` returns a function that accepts an Event and uses it's associated value to update the given property in your component's state. Calls to `linkState()` with the same arguments are cached, so there is no performance penalty.  Here is the previous example rewritten using _Linked State_:
+Fortunately there is a solution, in the form of a module called [linkstate](https://github.com/developit/linkstate). Calling `linkState(component, 'text')` returns a function that accepts an Event and uses its associated value to update the given property in your component's state. Calls to `linkState()` with the same arguments are cached, so there is no performance penalty.  Here is the previous example rewritten using _Linked State_:
 
 ```js
 import linkState from 'linkstate';
