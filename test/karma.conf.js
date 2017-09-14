@@ -125,7 +125,10 @@ module.exports = function(config) {
 					/* Only Instrument our source files for coverage */
 					coverage ? {
 						test: /\.jsx?$/,
-						loader: 'isparta-loader',
+						use: {
+					    loader: 'istanbul-instrumenter-loader',
+					    options: { esModules: true }
+					  },
 						include: /src/
 					} : {}
 				]

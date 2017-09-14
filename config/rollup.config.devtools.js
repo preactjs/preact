@@ -18,10 +18,10 @@ export default {
 			exclude: 'node_modules/**',
 			babelrc: false,
 			presets: [
-				['env', {
+				['@babel/env', {
 					modules: false,
 					loose: true,
-					exclude: ['transform-es2015-typeof-symbol'],
+					exclude: ['transform-typeof-symbol'],
 					targets: {
 						browsers: ['last 2 versions', 'IE >= 9']
 					}

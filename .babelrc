@@ -1,11 +1,11 @@
 {
   "presets": [
     [
-      "env",
+      "@babel/env",
       {
         "loose": true,
         "exclude": [
-          "transform-es2015-typeof-symbol"
+          "transform-typeof-symbol"
         ],
         "targets": {
           "browsers": [
@@ -17,7 +17,7 @@
     ]
   ],
   "plugins": [
-    "transform-object-rest-spread",
-    "transform-react-jsx"
+    "@babel/proposal-object-rest-spread",
+    "@babel/transform-react-jsx"
   ]
 }
