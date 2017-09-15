@@ -63,7 +63,7 @@ export default function renderToString(vnode, context, opts, inner, isSvgMode) {
 	}
 
 	// #text nodes
-	if (!nodeName) {
+	if (typeof vnode!=='object' && !nodeName) {
 		return encodeEntities(vnode);
 	}
 
