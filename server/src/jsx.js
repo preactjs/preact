@@ -22,6 +22,9 @@ let prettyFormatOpts = {
 
 function attributeHook(name, value, context, opts, isComponent) {
 	let type = typeof value;
+	
+	// Use render-to-string's built-in handling for these properties
+	if (name==='dangerouslySetInnerHTML') return false;
 
 	// always skip null & undefined values, skip false DOM attributes, skip functions if told to
 	if (value==null || (type==='function' && !opts.functions)) return '';
