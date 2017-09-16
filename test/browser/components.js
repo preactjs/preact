@@ -774,4 +774,28 @@ describe('Components', () => {
 			expect(C3.prototype.componentWillMount, 'inject between, C3 w/ intermediary div').to.have.been.calledOnce;
 		});
 	});
+
+	it('should be return an empty object, if the component is class-based. (Component.prototype.isPreactComponent) ', () => {
+		class ClassBased extends Component {
+			render() {
+				return <div>ClassBased</div>;
+			}
+		}
+		sinon.spy(ClassBased.prototype, 'render');
+		render(<ClassBased />, scratch);
+
+		const isPreactComponent = {};
+
+		expect(ClassBased.prototype.isPreactComponent)
+			.to.deep.equal(isPreactComponent);
+	});
+
+	it('should be return undefined, if the component is stateless. (Component.prototype.isPreactComponent)', () => {
+		const StateLess = () => <div>StateLess</div>;
+
+		render(<StateLess />, scratch);
+
+		expect(StateLess.prototype.isPreactComponent)
+			.to.be.undefined;
+	});
 });

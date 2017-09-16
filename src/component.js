@@ -76,6 +76,11 @@ extend(Component.prototype, {
 	 *	@param {object} context		Context object (if a parent component has provided context)
 	 *	@returns VNode
 	 */
-	render() {}
+	render() {},
+
+	/** Checking if current component is class-based or not
+	 * @returns Empty object
+	 */
+	isPreactComponent: {}
 
 });
