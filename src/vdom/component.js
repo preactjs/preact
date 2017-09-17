@@ -95,7 +95,20 @@ export function renderComponent(component, opts, mountAll, isChild) {
 	component._dirty = false;
 
 	if (!skip) {
-		rendered = component.render(props, state, context);
+		if ( component.componentDidCatch ) {
+			try {
+				rendered = component.render(props, state, context);
+			} catch (e) {
+				component.componentDidCatch(e);
+				skip = true;
+			}
+		}
+		else {
+			rendered = component.render(props, state, context);
+		}
+	}
+
+	if (!skip) {
 
 		// context to pass to the child, can be updated via (grand-)parent component
 		if (component.getChildContext) {
