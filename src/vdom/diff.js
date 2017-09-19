@@ -9,6 +9,9 @@ import { removeNode } from '../dom/index';
 /** Queue of components that have been mounted and are awaiting componentDidMount */
 export const mounts = [];
 
+/** Queue of post-rendered components that are awaiting componentDidUpdate */
+export const updates = [];
+
 /** Diff recursion count, used to track the end of the diff cycle. */
 export let diffLevel = 0;
 
@@ -24,6 +27,16 @@ export function flushMounts() {
 	while ((c=mounts.pop())) {
 		if (options.afterMount) options.afterMount(c);
 		if (c.componentDidMount) c.componentDidMount();
+	}
+}
+
+/** Invoke queued componentDidUpdate lifecycle methods */
+export function flushUpdates() {
+	let obj;
+	while ((obj=updates.pop())) {
+		const {c, pp, ps, pc} = obj; //component, previousProps, previousState, previousContext
+		if (c.componentDidUpdate) c.componentDidUpdate(pp, ps, pc);
+		if (options.afterUpdate) options.afterUpdate(c);
 	}
 }
 
@@ -53,7 +66,10 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 	if (!--diffLevel) {
 		hydrating = false;
 		// invoke queued componentDidMount lifecycle methods
-		if (!componentRoot) flushMounts();
+		if (!componentRoot) {
+			flushMounts();
+			flushUpdates();
+		}
 	}
 
 	return ret;

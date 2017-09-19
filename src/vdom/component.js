@@ -3,7 +3,7 @@ import options from '../options';
 import { extend } from '../util';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from './index';
-import { diff, mounts, diffLevel, flushMounts, recollectNodeTree, removeChildren } from './diff';
+import { diff, mounts, updates, diffLevel, flushMounts, flushUpdates, recollectNodeTree, removeChildren } from './diff';
 import { createComponent, collectComponent } from './component-recycler';
 import { removeNode } from '../dom/index';
 
@@ -173,22 +173,17 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		mounts.unshift(component);
 	}
 	else if (!skip) {
-		// Ensure that pending componentDidMount() hooks of child components
-		// are called before the componentDidUpdate() hook in the parent.
-		// Note: disabled as it causes duplicate hooks, see https://github.com/developit/preact/issues/750
-		// flushMounts();
-
-		if (component.componentDidUpdate) {
-			component.componentDidUpdate(previousProps, previousState, previousContext);
-		}
-		if (options.afterUpdate) options.afterUpdate(component);
+		updates.unshift({c: component, pp: previousProps, ps: previousState, pc: previousContext});
 	}
 
 	if (component._renderCallbacks!=null) {
 		while (component._renderCallbacks.length) component._renderCallbacks.pop().call(component);
 	}
 
-	if (!diffLevel && !isChild) flushMounts();
+	if (!diffLevel && !isChild) {
+		flushMounts();
+		flushUpdates();
+	}
 }
 
 

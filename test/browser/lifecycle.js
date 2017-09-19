@@ -124,6 +124,54 @@ describe('Lifecycle methods', () => {
 
 			// expect(log).to.deep.equal(['Inner mounted', 'Outer updated']);
 		});
+
+	});
+
+	describe('#componentDidUpdate', () => {
+		it('should be called after all DOM elements are updated', () => {
+			let element;
+			let setState;
+
+			class Outer extends Component {
+				constructor(p, c) {
+					super(p, c);
+					this.state = { i: 0 };
+					setState = i => this.setState({ i });
+				}
+
+				render(props, { i }) {
+					return <div>
+						<Inner i={i} {...props} />
+						<p className="textNode">{i}</p>
+					</div>;
+				}
+			}
+
+			class Inner extends Component {
+				componentDidUpdate() {
+					element = document.querySelector('.textNode');
+				}
+
+				render(props, { i }) {
+					return <div>
+						<p>{i}</p>
+					</div>;
+				}
+			}
+
+			sinon.spy(Inner.prototype, 'componentDidUpdate');
+
+			// Initial render
+			render(<Outer/>, scratch);
+			expect(Inner.prototype.componentDidUpdate).to.not.have.been.called;
+
+			// Set state with a new i
+			const newValue = 5;
+			setState(newValue);
+			rerender();
+			expect(Inner.prototype.componentDidUpdate).to.have.been.called;
+			expect(element.innerHTML).to.equal(newValue.toString()); // expect the element value captured to be equal to newValue
+		});
 	});
 
 	describe('#componentWillReceiveProps', () => {
