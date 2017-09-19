@@ -14,7 +14,6 @@ app.use(webpackDevMiddleware(compiler, {
 }));
 
 app.use(Express.static('./dist'));
-app.use(Express.static('./example_tmp'));
 
 app.get('/*', (req, res) => {
 	res.sendFile(path.join(__dirname, 'index.html'));
