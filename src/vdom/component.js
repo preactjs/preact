@@ -49,6 +49,18 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 	if (component.__ref) component.__ref(component);
 }
 
+export function catchErrorInComponent(error, component) {
+	for (; component; component = component._ancestorComponent) {
+		if (component.componentDidCatch) {
+			try {
+				return component.componentDidCatch(error);
+			} catch (e) {
+				error = e;
+			}
+		}
+	}
+	throw error;
+}
 
 
 /** Render a Component, triggering necessary lifecycle events and taking High-Order Components into account.
@@ -105,40 +117,45 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		let childComponent = rendered && rendered.nodeName,
 			toUnmount, base;
 
-		if (typeof childComponent==='function') {
-			// set up high order component link
+		try {
+			if (typeof childComponent==='function') {
+				// set up high order component link
 
-			let childProps = getNodeProps(rendered);
-			inst = initialChildComponent;
+				let childProps = getNodeProps(rendered);
+				inst = initialChildComponent;
 
-			if (inst && inst.constructor===childComponent && childProps.key==inst.__key) {
-				setComponentProps(inst, childProps, SYNC_RENDER, context, false);
+				if (inst && inst.constructor===childComponent && childProps.key==inst.__key) {
+					setComponentProps(inst, childProps, SYNC_RENDER, context, false);
+				}
+				else {
+					toUnmount = inst;
+
+					component._component = inst = createComponent(childComponent, childProps, context, component);
+					inst.nextBase = inst.nextBase || nextBase;
+					inst._parentComponent = component;
+					setComponentProps(inst, childProps, NO_RENDER, context, false);
+					renderComponent(inst, SYNC_RENDER, mountAll, true);
+				}
+
+				base = inst.base;
 			}
 			else {
-				toUnmount = inst;
+				cbase = initialBase;
 
-				component._component = inst = createComponent(childComponent, childProps, context);
-				inst.nextBase = inst.nextBase || nextBase;
-				inst._parentComponent = component;
-				setComponentProps(inst, childProps, NO_RENDER, context, false);
-				renderComponent(inst, SYNC_RENDER, mountAll, true);
+				// destroy high order component link
+				toUnmount = initialChildComponent;
+				if (toUnmount) {
+					cbase = component._component = null;
+				}
+
+				if (initialBase || opts===SYNC_RENDER) {
+					if (cbase) cbase._component = null;
+					base = diff(cbase, rendered, context, mountAll || !isUpdate, initialBase && initialBase.parentNode, component);
+				}
 			}
-
-			base = inst.base;
-		}
-		else {
-			cbase = initialBase;
-
-			// destroy high order component link
-			toUnmount = initialChildComponent;
-			if (toUnmount) {
-				cbase = component._component = null;
-			}
-
-			if (initialBase || opts===SYNC_RENDER) {
-				if (cbase) cbase._component = null;
-				base = diff(cbase, rendered, context, mountAll || !isUpdate, initialBase && initialBase.parentNode, true);
-			}
+		} catch (e) {
+			base = initialBase || document.createTextNode("");
+			catchErrorInComponent(e, component);
 		}
 
 		if (initialBase && base!==initialBase && inst!==initialChildComponent) {
@@ -179,7 +196,11 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		// flushMounts();
 
 		if (component.componentDidUpdate) {
-			component.componentDidUpdate(previousProps, previousState, previousContext);
+			try {
+				component.componentDidUpdate(previousProps, previousState, previousContext);
+			} catch (e) {
+				catchErrorInComponent(e, component._ancestorComponent);
+			}
 		}
 		if (options.afterUpdate) options.afterUpdate(component);
 	}
@@ -199,7 +220,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
  *	@returns {Element} dom	The created/mutated element
  *	@private
  */
-export function buildComponentFromVNode(dom, vnode, context, mountAll) {
+export function buildComponentFromVNode(dom, vnode, context, mountAll, ancestorComponent) {
 	let c = dom && dom._component,
 		originalComponent = c,
 		oldDom = dom,
@@ -220,7 +241,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 			dom = oldDom = null;
 		}
 
-		c = createComponent(vnode.nodeName, props, context);
+		c = createComponent(vnode.nodeName, props, context, ancestorComponent);
 		if (dom && !c.nextBase) {
 			c.nextBase = dom;
 			// passing dom/oldDom as nextBase will recycle it if unused, so bypass recycling on L229:
