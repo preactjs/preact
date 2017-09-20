@@ -175,8 +175,15 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		}
 
 		component.base = base;
-		base._component = component;
-		base._componentConstructor = component.constructor;
+		if (base && !isChild) {
+			let componentRef = component,
+				t = component;
+			while ((t=t._parentComponent)) {
+				(componentRef = t).base = base;
+			}
+			base._component = componentRef;
+			base._componentConstructor = componentRef.constructor;
+		}
 	}
 
 	if (!isUpdate || mountAll) {
