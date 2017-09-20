@@ -774,4 +774,50 @@ describe('Components', () => {
 			expect(C3.prototype.componentWillMount, 'inject between, C3 w/ intermediary div').to.have.been.calledOnce;
 		});
 	});
+
+	describe('Properties', () => {
+		let ancestorComponent;
+		let childComponent;
+		class Ancestor extends Component {
+			constructor(props, context) {
+				super(props, context);
+				ancestorComponent = this;
+			}
+			render() {
+				return this.props.children[0];
+			}
+		}
+		class Child extends Component {
+			constructor(props, context) {
+				super(props, context);
+				childComponent = this;
+			}
+			render() {
+				return <div/>;
+			}
+		}
+		const HighOrderChild = () => <Child/>;
+		it('should have correct ancestor/parent with immediate child', () => {
+			render(<Ancestor><Child/></Ancestor>, scratch);
+			expect(childComponent._ancestorComponent).to.equal(ancestorComponent);
+			expect(childComponent._parentComponent).to.equal(ancestorComponent);
+			expect(ancestorComponent._ancestorComponent).to.equal(undefined);
+			expect(ancestorComponent._parentComponent).to.equal(undefined);
+		});
+		it('should have correct ancestor/parent with grandchild', () => {
+			render(<Ancestor><div><Child/></div></Ancestor>, scratch);
+			expect(childComponent._ancestorComponent).to.equal(ancestorComponent);
+			expect(childComponent._parentComponent).to.equal(undefined);
+			expect(ancestorComponent._ancestorComponent).to.equal(undefined);
+			expect(ancestorComponent._parentComponent).to.equal(undefined);
+		});
+		it('should have correct ancestor/parent with high-order grandchild', () => {
+			render(<Ancestor><div><HighOrderChild/></div></Ancestor>, scratch);
+			expect(childComponent._ancestorComponent).to.not.equal(undefined);
+			expect(childComponent._ancestorComponent).to.equal(childComponent._parentComponent);
+			expect(childComponent._ancestorComponent._ancestorComponent).to.equal(ancestorComponent);
+			expect(ancestorComponent._ancestorComponent).to.equal(undefined);
+			expect(ancestorComponent._parentComponent).to.equal(undefined);
+		});
+	});
 });
