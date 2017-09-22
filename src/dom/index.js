@@ -35,18 +35,23 @@ export function removeNode(node) {
 export function setAccessor(node, name, old, value, isSvg) {
 	if (name==='className') name = 'class';
 
-
 	if (name==='key') {
-		// ignore
+		return;
 	}
-	else if (name==='ref') {
+
+	if (name==='ref') {
 		if (old) old(null);
 		if (value) value(node);
+
+		return;
 	}
-	else if (name==='class' && !isSvg) {
+
+	if (name==='class' && !isSvg) {
 		node.className = value || '';
+		return;
 	}
-	else if (name==='style') {
+
+	if (name==='style') {
 		if (!value || typeof value==='string' || typeof old==='string') {
 			node.style.cssText = value || '';
 		}
@@ -58,11 +63,16 @@ export function setAccessor(node, name, old, value, isSvg) {
 				node.style[i] = typeof value[i]==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (value[i]+'px') : value[i];
 			}
 		}
+
+		return;
 	}
-	else if (name==='dangerouslySetInnerHTML') {
+
+	if (name==='dangerouslySetInnerHTML') {
 		if (value) node.innerHTML = value.__html || '';
+		return;
 	}
-	else if (name[0]=='o' && name[1]=='n') {
+
+	if (name[0]=='o' && name[1]=='n') {
 		let useCapture = name !== (name=name.replace(/Capture$/, ''));
 		name = name.toLowerCase().substring(2);
 		if (value) {
@@ -72,21 +82,30 @@ export function setAccessor(node, name, old, value, isSvg) {
 			node.removeEventListener(name, eventProxy, useCapture);
 		}
 		(node._listeners || (node._listeners = {}))[name] = value;
+
+		return;
 	}
-	else if (name!=='list' && name!=='type' && !isSvg && name in node) {
+
+	if (name!=='list' && name!=='type' && !isSvg && name in node) {
 		setProperty(node, name, value==null ? '' : value);
 		if (value==null || value===false) node.removeAttribute(name);
+
+		return;
 	}
-	else {
-		let ns = isSvg && (name !== (name = name.replace(/^xlink\:?/, '')));
-		if (value==null || value===false) {
-			if (ns) node.removeAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase());
-			else node.removeAttribute(name);
-		}
-		else if (typeof value!=='function') {
-			if (ns) node.setAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase(), value);
-			else node.setAttribute(name, value);
-		}
+
+	let ns = isSvg && (name !== (name = name.replace(/^xlink\:?/, '')));
+	if (value==null || value===false) {
+		if (ns) node.removeAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase());
+		else node.removeAttribute(name);
+
+		return;
+	}
+
+	if (typeof value!=='function') {
+		if (ns) node.setAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase(), value);
+		else node.setAttribute(name, value);
+
+		return;
 	}
 }
 
