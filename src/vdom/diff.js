@@ -132,20 +132,23 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 		for (let a=out.attributes, i=a.length; i--; ) props[a[i].name] = a[i].value;
 	}
 
-	// Optimization: fast-path for elements containing a single TextNode:
-	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc!=null && fc.splitText!==undefined && fc.nextSibling==null) {
-		if (fc.nodeValue!=vchildren[0]) {
-			fc.nodeValue = vchildren[0];
+	let vattributes = vnode.attributes;
+	// dangerouslySetInnerHTML attribute causes children to be ignored
+	if (!vattributes || !vattributes.dangerouslySetInnerHTML) {
+		// Optimization: fast-path for elements containing a single TextNode:
+		if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc!=null && fc.splitText!==undefined && fc.nextSibling==null) {
+			if (fc.nodeValue!=vchildren[0]) {
+				fc.nodeValue = vchildren[0];
+			}
+		}
+		// otherwise, if there are existing or new children, diff them:
+		else if (vchildren && vchildren.length || fc!=null) {
+			innerDiffNode(out, vchildren, context, mountAll, hydrating || props.dangerouslySetInnerHTML!=null);
 		}
 	}
-	// otherwise, if there are existing or new children, diff them:
-	else if (vchildren && vchildren.length || fc!=null) {
-		innerDiffNode(out, vchildren, context, mountAll, hydrating || props.dangerouslySetInnerHTML!=null);
-	}
-
 
 	// Apply attributes/props from VNode to the DOM Element:
-	diffAttributes(out, vnode.attributes, props);
+	diffAttributes(out, vattributes, props);
 
 
 	// restore previous SVG mode: (in case we're exiting an SVG namespace)
@@ -292,7 +295,7 @@ export function removeChildren(node) {
  *	@param {Object} old			Current/previous attributes (from previous VNode or element's prop cache)
  */
 function diffAttributes(dom, attrs, old) {
-	let name;
+	let name, value;
 
 	// remove attributes no longer present on the vnode by setting them to undefined
 	for (name in old) {
@@ -303,8 +306,13 @@ function diffAttributes(dom, attrs, old) {
 
 	// add new & update changed attributes
 	for (name in attrs) {
-		if (name!=='children' && name!=='innerHTML' && (!(name in old) || attrs[name]!==(name==='value' || name==='checked' ? dom[name] : old[name]))) {
-			setAccessor(dom, name, old[name], old[name] = attrs[name], isSvgMode);
+		value = attrs[name];
+		// Diff the dangerouslySetInnerHTML attribute based on the applied HTML string
+		if (name==='dangerouslySetInnerHTML') {
+			value = value.__html;
+		}
+		if (name!=='children' && name!=='innerHTML' && (!(name in old) || value!==(name==='value' || name==='checked' ? dom[name] : old[name]))) {
+			setAccessor(dom, name, old[name], old[name] = value, isSvgMode);
 		}
 	}
 }

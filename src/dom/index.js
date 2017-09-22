@@ -60,7 +60,7 @@ export function setAccessor(node, name, old, value, isSvg) {
 		}
 	}
 	else if (name==='dangerouslySetInnerHTML') {
-		if (value) node.innerHTML = value.__html || '';
+		if (typeof value !== "undefined") node.innerHTML = value;
 	}
 	else if (name[0]=='o' && name[1]=='n') {
 		let useCapture = name !== (name=name.replace(/Capture$/, ''));
