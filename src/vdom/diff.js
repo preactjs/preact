@@ -295,7 +295,7 @@ export function removeChildren(node) {
  *	@param {Object} old			Current/previous attributes (from previous VNode or element's prop cache)
  */
 function diffAttributes(dom, attrs, old) {
-	let name, value;
+	let name;
 
 	// remove attributes no longer present on the vnode by setting them to undefined
 	for (name in old) {
@@ -306,13 +306,8 @@ function diffAttributes(dom, attrs, old) {
 
 	// add new & update changed attributes
 	for (name in attrs) {
-		value = attrs[name];
-		// Diff the dangerouslySetInnerHTML attribute based on the applied HTML string
-		if (name==='dangerouslySetInnerHTML') {
-			value = value.__html;
-		}
-		if (name!=='children' && name!=='innerHTML' && (!(name in old) || value!==(name==='value' || name==='checked' ? dom[name] : old[name]))) {
-			setAccessor(dom, name, old[name], old[name] = value, isSvgMode);
+		if (name!=='children' && name!=='innerHTML' && (!(name in old) || attrs[name]!==(name==='value' || name==='checked' ? dom[name] : old[name]))) {
+			setAccessor(dom, name, old[name], old[name] = attrs[name], isSvgMode);
 		}
 	}
 }
