@@ -70,17 +70,17 @@ module.exports = function(config) {
 			sauceLabs ? 'saucelabs' : []
 		),
 		coverageIstanbulReporter: {
-            reports: ['html', 'lcovonly', 'text-summary'],
-            dir: 'coverage',
-            fixWebpackSourcePaths: true,
-            'report-config': {
-                lcovonly: {
+			reports: ['html', 'lcovonly', 'text-summary'],
+			dir: 'coverage',
+			fixWebpackSourcePaths: true,
+			'report-config': {
+				lcovonly: {
 					subdir: '.',
 					file: 'lcov.info'
-                }
+				}
 
-            }
-        },
+			}
+		},
 		// coverageReporter: {
 		// 	dir: __dirname+'/../coverage',
 		// 	reporters: [
@@ -140,12 +140,12 @@ module.exports = function(config) {
 					// 	include: /src/
 					// } : {}
 					coverage ?
-                    {
-                        test: /\.jsx?$/,
-                        use: 'istanbul-instrumenter-loader',
-                        include:  /src/,
-                        exclude: /node_modules/
-                    }: {}
+					{
+						test: /\.jsx?$/,
+						use: 'istanbul-instrumenter-loader',
+						include:  /src/,
+						exclude: /node_modules/
+					}: {}
 				]
 			},
 			resolve: {
