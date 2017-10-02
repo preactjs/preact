@@ -60,6 +60,7 @@ Preact supports modern browsers and IE9+:
 
 ## Demos
 
+- [**Preact Redux/RxJS/Reselect Example**](https://github.com/continuata/preact-seed) (GitHub Project)
 - [**ESBench**](http://esbench.com) is built using Preact.
 - [**Nectarine.rocks**](http://nectarine.rocks) _([GitHub Project](https://github.com/developit/nectarine))_ :peach:
 - [**Documentation Viewer**](https://documentation-viewer.firebaseapp.com) _([GitHub Project](https://github.com/developit/documentation-viewer))_
