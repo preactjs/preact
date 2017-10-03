@@ -91,22 +91,22 @@ describe('render()', () => {
 
 	it('should not render null', () => {
 		render(null, scratch);
-		expect(scratch.innerHTML).to.equal('');
+		expect(scratch.innerHTML).to.equal('<!-- preact empty -->');
 	});
 
 	it('should not render undefined', () => {
 		render(undefined, scratch);
-		expect(scratch.innerHTML).to.equal('');
+		expect(scratch.innerHTML).to.equal('<!-- preact empty -->');
 	});
 
 	it('should not render boolean true', () => {
 		render(true, scratch);
-		expect(scratch.innerHTML).to.equal('');
+		expect(scratch.innerHTML).to.equal('<!-- preact empty -->');
 	});
 
 	it('should not render boolean false', () => {
 		render(false, scratch);
-		expect(scratch.innerHTML).to.equal('');
+		expect(scratch.innerHTML).to.equal('<!-- preact empty -->');
 	});
 
 	it('should render NaN as text content', () => {

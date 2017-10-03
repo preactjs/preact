@@ -65,8 +65,19 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	let out = dom,
 		prevSvgMode = isSvgMode;
 
-	// empty values (null, undefined, booleans) render as empty Text nodes
-	if (vnode==null || typeof vnode==='boolean') vnode = '';
+	// empty values (null, undefined, booleans) render as comment nodes
+	if (vnode==null || typeof vnode==='boolean') {
+		const comment = ' preact empty ';
+		if (!dom || dom.nodeName !== '#comment' || dom.textContent !== comment) {
+			out = document.createComment(comment);
+			if (dom) {
+				if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
+				recollectNodeTree(dom, true);
+			}
+		}
+		out[ATTR_KEY] = true;
+		return out;
+	}
 
 
 	// Fast case: Strings & Numbers create/update Text nodes.

@@ -251,6 +251,24 @@ describe('Components', () => {
 
 	});
 
+	it('should trigger componentWillUnmount when unmounting component that renders null', () => {
+		const componentWillUnmount = sinon.spy(() => { });
+		class Comp extends Component {
+			componentWillUnmount() {
+				componentWillUnmount();
+			}
+			render() {
+				return null;
+			}
+		}
+		const Parent = ({ show }) => <div>{show && <Comp />}</div>;
+		render(<Parent show />, scratch);
+		expect(scratch.lastChild.innerHTML).to.equal('<!-- preact empty -->');
+		render(<Parent show={false} />, scratch, scratch.lastChild);
+
+		expect(componentWillUnmount).to.have.been.calledOnce;
+		expect(scratch.lastChild.innerHTML).to.equal('');
+	});
 
 
 	describe('props.children', () => {
