@@ -92,6 +92,7 @@ Preact supports modern browsers and IE9+:
 
 - :raised_hands: [**preact-compat**](https://git.io/preact-compat): use any React library with Preact *([full example](http://git.io/preact-compat-example))*
 - :page_facing_up: [**preact-render-to-string**](https://git.io/preact-render-to-string): Universal rendering.
+- :eyes: [**preact-render-spy**](https://github.com/mzgoddard/preact-render-spy): Enzyme-lite: Renderer with access to the produced virtual dom for testing. 
 - :loop: [**preact-render-to-json**](https://git.io/preact-render-to-json): Render for Jest Snapshot testing.
 - :earth_americas: [**preact-router**](https://git.io/preact-router): URL routing for your components
 - :bookmark_tabs: [**preact-markup**](https://git.io/preact-markup): Render HTML & Custom Elements as JSX & Components
