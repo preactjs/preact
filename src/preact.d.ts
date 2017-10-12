@@ -470,6 +470,7 @@ declare namespace JSX {
 		allowFullScreen?:boolean;
 		allowTransparency?:boolean;
 		alt?:string;
+		as?:string;
 		async?:boolean;
 		autocomplete?:string;
 		autofocus?:boolean;
