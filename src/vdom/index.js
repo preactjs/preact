@@ -7,13 +7,14 @@ import { extend } from '../util';
  *	@private
  */
 export function isSameNodeType(node, vnode, hydrating) {
-	if (typeof vnode==='string' || typeof vnode==='number') {
+	if (['string', 'number'].indexOf(typeof vnode) >= 0) {
 		return node.splitText!==undefined;
 	}
-	if (typeof vnode.nodeName==='string') {
-		return !node._componentConstructor && isNamedNode(node, vnode.nodeName);
+	const nodeName = vnode.nodeName;
+	if (typeof nodeName==='string') {
+		return !node._componentConstructor && isNamedNode(node, nodeName);
 	}
-	return hydrating || node._componentConstructor===vnode.nodeName;
+	return hydrating || node._componentConstructor===nodeName;
 }
 
 
