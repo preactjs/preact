@@ -80,7 +80,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		component.context = previousContext;
 		if (opts!==FORCE_RENDER
 			&& component.shouldComponentUpdate
-			&& component.shouldComponentUpdate(props, state, context) === false) {
+			&& !component.shouldComponentUpdate(props, state, context)) {
 			skip = true;
 		}
 		else if (component.componentWillUpdate) {
