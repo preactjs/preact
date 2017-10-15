@@ -5,7 +5,7 @@ import { h } from './h';
  * The method is used to clone a given virtual node with
  * the given properties.
  * 
- * @param {Vnode} vnode the virutal node to clone
+ * @param {VNode} vnode the virutal node to clone
  *
  * @param props the attributes/properties to add to the
  * clone node

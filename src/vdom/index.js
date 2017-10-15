@@ -7,7 +7,9 @@ import { extend } from '../util';
  * @param {Element} node the element node
  * 
  * @param {VNode} vnode the virtual node
- * 
+ *
+ * @param hyrdating
+ *
  * @private
  */
 export function isSameNodeType(node, vnode, hydrating) {
