@@ -1,8 +1,9 @@
 /* @flow */
 
-import { createElement as h, cloneElement, Component, render } from 'react';
+import { createElement as h, cloneElement, Component } from 'react';
+import { render } from 'react-dom';
 
-export { h, cloneElement, Component, render };
+export { h, createElement, cloneElement, Component, render };
 export default { h, cloneElement, Component, render };
 
 declare export function rerender(): void;
