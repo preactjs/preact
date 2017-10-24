@@ -7,20 +7,20 @@ const stack = [];
 const EMPTY_CHILDREN = [];
 
 /** 
- * JSX/hyperscript reviver
+ * JSX/hyperscript reviver.
+ * @see http://jasonformat.com/wtf-is-jsx
  * Benchmarks: https://esbench.com/bench/57ee8f8e330ab09900a1a1a0
  *
- * This function represents a HTML node programmatically. This is
- * essential to build the virtual DOM tree so that it can later be
- * compared against the actual DOM tree and differences applied to
- * make change application easy.
- * 
- * It takes a node name, a list of all attributes that the node has,
- * and an optional list of children that the node has. Because 
- * children are typically nodes themselves, they are optional to 
- * pass.
+ * Note: this is exported as both `h()` and `createElement()` for compatibility reasons.
  *
- * @example The following HTML construct
+ * Creates a VNode (virtual DOM element). A tree of VNodes can be used as a lightweight representation
+ * of the structure of a DOM tree. This structure can be realized by recursively comparing it against
+ * the current _actual_ DOM structure, and applying only the differences.
+ * 
+ * `h()`/`createElement()` accepts an element name, a list of attributes/props,
+ * and optionally children to append to the element.
+ *
+ * @example The following DOM tree
  *
  * `<div id="foo" name="bar">Hello!</div>`
  *
@@ -28,16 +28,9 @@ const EMPTY_CHILDREN = [];
  *
  * `h('div', { id: 'foo', name : 'bar' }, 'Hello!');`
  *
- * @param {string} nodeName the tag name of the HTML node, like 
- * `DIV`, `A`, `SPAN` etc.
- *
- * @param {Object} attributes an object representing all attributes 
- * that the HTML tag contains
- *
- * Note: Additional arguments to this method call are considered as
- * the children to be added to this DOM node.
- * 
- * @see http://jasonformat.com/wtf-is-jsx
+ * @param {string} nodeName	An element name. Ex: `div`, `a`, `span`, etc.
+ * @param {Object} attributes	Any attributes/props to set on the created element.
+ * @param rest			Additional arguments are taken to be children to append. Can be infinitely nested Arrays.
  * 
  * @public
  */
