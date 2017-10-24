@@ -92,7 +92,7 @@ Preact supports modern browsers and IE9+:
 
 - :raised_hands: [**preact-compat**](https://git.io/preact-compat): use any React library with Preact *([full example](http://git.io/preact-compat-example))*
 - :page_facing_up: [**preact-render-to-string**](https://git.io/preact-render-to-string): Universal rendering.
-- :eyes: [**preact-render-spy**](https://github.com/mzgoddard/preact-render-spy): Enzyme-lite: Renderer with access to the produced virtual dom for testing. 
+- :eyes: [**preact-render-spy**](https://github.com/mzgoddard/preact-render-spy): Enzyme-lite: Renderer with access to the produced virtual dom for testing.
 - :loop: [**preact-render-to-json**](https://git.io/preact-render-to-json): Render for Jest Snapshot testing.
 - :earth_americas: [**preact-router**](https://git.io/preact-router): URL routing for your components
 - :bookmark_tabs: [**preact-markup**](https://git.io/preact-markup): Render HTML & Custom Elements as JSX & Components
@@ -117,7 +117,7 @@ Preact supports modern browsers and IE9+:
 
 > Want to prototype something or speed up your development? Try one of these toolkits:
 
-- [**preact-material-components**](https://github.com/prateekbh/preact-material-components): Material Design Components for Preact ([website](https://prateekbh.github.io/preact-material-components/))
+- [**preact-material-components**](https://github.com/prateekbh/preact-material-components): Material Design Components for Preact ([website](https://material.preactjs.com/))
 - [**preact-mdc**](https://github.com/BerndWessels/preact-mdc): Material Design Components for Preact ([demo](https://github.com/BerndWessels/preact-mdc-demo))
 - [**preact-mui**](https://git.io/v1aVO): The MUI CSS Preact library.
 - [**preact-photon**](https://git.io/preact-photon): build beautiful desktop UI with [photon](http://photonkit.com)
@@ -177,6 +177,14 @@ import preact from 'preact';
 >   "plugins": [
 >     ["transform-react-jsx", { "pragma":"h" }]
 >   ]
+> }
+> ```
+> **Using Preact along with TypeScript:**
+>
+> ```json
+> {
+>   "jsx": "react",
+>   "jsxFactory": "h",
 > }
 > ```
 
