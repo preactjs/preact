@@ -3,13 +3,10 @@ import { extend } from '../util';
 
 /** 
  * Check if two nodes are equivalent.
- * 
- * @param {Element} node the element node
- * 
- * @param {VNode} vnode the virtual node
  *
- * @param hyrdating
- *
+ * @param {Node} node			DOM Node to compare
+ * @param {VNode} vnode			Virtual DOM node to compare
+ * @param {boolean} [hyrdating=false]	If true, ignores component constructors when comparing.
  * @private
  */
 export function isSameNodeType(node, vnode, hydrating) {
@@ -24,11 +21,10 @@ export function isSameNodeType(node, vnode, hydrating) {
 
 
 /** 
- * Check if an Element has a given normalized name.
- *	
- * @param {Element} node the Element to check name for
- *	
- * @param {String} nodeName the normalized name
+ * Check if an Element has a given nodeName, case-insensitively.
+ *
+ * @param {Element} node	A DOM Element to inspect the name of.
+ * @param {String} nodeName	Unnormalized name to compare against.
  */
 export function isNamedNode(node, nodeName) {
 	return node.normalizedNodeName===nodeName || node.nodeName.toLowerCase()===nodeName.toLowerCase();
@@ -41,7 +37,6 @@ export function isNamedNode(node, nodeName) {
  * Own-properties of `defaultProps` not present in `vnode.attributes` are added.
  * 
  * @param {VNode} vnode
- * 
  * @returns {Object} props
  */
 export function getNodeProps(vnode) {
