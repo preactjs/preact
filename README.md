@@ -31,7 +31,7 @@
 - [Linked State](#linked-state)
 - [Examples](#examples)
 - [Extensions](#extensions)
-- [Developer Tools](#developer-tools)
+- [Debug Mode](#debug-mode)
 - [Backers](#backers)
 - [Sponsors](#sponsors)
 - [License](#license)
