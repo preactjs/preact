@@ -92,6 +92,7 @@ Preact supports modern browsers and IE9+:
 
 - :raised_hands: [**preact-compat**](https://git.io/preact-compat): use any React library with Preact *([full example](http://git.io/preact-compat-example))*
 - :page_facing_up: [**preact-render-to-string**](https://git.io/preact-render-to-string): Universal rendering.
+- :eyes: [**preact-render-spy**](https://github.com/mzgoddard/preact-render-spy): Enzyme-lite: Renderer with access to the produced virtual dom for testing.
 - :loop: [**preact-render-to-json**](https://git.io/preact-render-to-json): Render for Jest Snapshot testing.
 - :earth_americas: [**preact-router**](https://git.io/preact-router): URL routing for your components
 - :bookmark_tabs: [**preact-markup**](https://git.io/preact-markup): Render HTML & Custom Elements as JSX & Components
@@ -116,7 +117,7 @@ Preact supports modern browsers and IE9+:
 
 > Want to prototype something or speed up your development? Try one of these toolkits:
 
-- [**preact-material-components**](https://github.com/prateekbh/preact-material-components): Material Design Components for Preact ([website](https://prateekbh.github.io/preact-material-components/))
+- [**preact-material-components**](https://github.com/prateekbh/preact-material-components): Material Design Components for Preact ([website](https://material.preactjs.com/))
 - [**preact-mdc**](https://github.com/BerndWessels/preact-mdc): Material Design Components for Preact ([demo](https://github.com/BerndWessels/preact-mdc-demo))
 - [**preact-mui**](https://git.io/v1aVO): The MUI CSS Preact library.
 - [**preact-photon**](https://git.io/preact-photon): build beautiful desktop UI with [photon](http://photonkit.com)
@@ -178,6 +179,14 @@ import preact from 'preact';
 >   ]
 > }
 > ```
+> **Using Preact along with TypeScript:**
+>
+> ```json
+> {
+>   "jsx": "react",
+>   "jsxFactory": "h",
+> }
+> ```
 
 
 ### Rendering JSX
@@ -197,7 +206,7 @@ render((
 ), document.body);
 ```
 
-This should seem pretty straightforward if you've used hyperscript or one of its many friends. If you're not, the short of it is that the h function import gets used in the final, transpiled code as a drop in replacement for React.createElement, and so needs to be imported even if you don't explicitly use it in the code you write. Also note that if you're the kind of person who likes writing your React code in "pure JavaScript" (you know who you are) you will need to use h(...) wherever you would otherwise use React.createElement.
+This should seem pretty straightforward if you've used hyperscript or one of its many friends. If you're not, the short of it is that the `h()` function import gets used in the final, transpiled code as a drop in replacement for `React.createElement()`, and so needs to be imported even if you don't explicitly use it in the code you write. Also note that if you're the kind of person who likes writing your React code in "pure JavaScript" (you know who you are) you will need to use `h()` wherever you would otherwise use `React.createElement()`.
 
 Rendering hyperscript with a virtual DOM is pointless, though. We want to render components and have them updated when data changes - that's where the power of virtual DOM diffing shines. :star2:
 
@@ -245,7 +254,7 @@ In order to have the clock's time update every second, we need to know when `<Cl
 
 
 
-So, we want to have a 1-second timer start once the Component gets added to the DOM, and stop if it is removed. We'll create the timer and store a reference to it in `componentDidMount`, and stop the timer in `componentWillUnmount`. On each timer tick, we'll update the component's `state` object with a new time value. Doing this will automatically re-render the component.
+So, we want to have a 1-second timer start once the Component gets added to the DOM, and stop if it is removed. We'll create the timer and store a reference to it in `componentDidMount()`, and stop the timer in `componentWillUnmount()`. On each timer tick, we'll update the component's `state` object with a new time value. Doing this will automatically re-render the component.
 
 ```js
 import { h, render, Component } from 'preact';
@@ -313,7 +322,7 @@ class Foo extends Component {
 
 While this achieves much better runtime performance, it's still a lot of unnecessary code to wire up state to UI.
 
-Fortunately there is a solution, in the form of a module called [linkstate](https://github.com/developit/linkstate). Calling `linkState(component, 'text')` returns a function that accepts an Event and uses it's associated value to update the given property in your component's state. Calls to `linkState()` with the same arguments are cached, so there is no performance penalty.  Here is the previous example rewritten using _Linked State_:
+Fortunately there is a solution, in the form of a module called [linkstate](https://github.com/developit/linkstate). Calling `linkState(component, 'text')` returns a function that accepts an Event and uses its associated value to update the given property in your component's state. Calls to `linkState()` with the same arguments are cached, so there is no performance penalty.  Here is the previous example rewritten using _Linked State_:
 
 ```js
 import linkState from 'linkstate';
@@ -410,24 +419,50 @@ class MixedComponent extends Component {
 }
 ```
 
-## Developer Tools
+## Debug Mode
 
 You can inspect and modify the state of your Preact UI components at runtime using the
 [React Developer Tools](https://github.com/facebook/react-devtools) browser extension.
 
 1. Install the [React Developer Tools](https://github.com/facebook/react-devtools) extension
-2. Import the "preact/devtools" module in your app
-3. Reload and go to the 'React' tab in the browser's development tools
+2. Import the "preact/debug" module in your app
+3. Set `process.env.NODE_ENV` to 'development'
+4. Reload and go to the 'React' tab in the browser's development tools
 
 
 ```js
 import { h, Component, render } from 'preact';
 
-// Enable devtools. You can reduce the size of your app by only including this
+// Enable debug mode. You can reduce the size of your app by only including this
 // module in development builds. eg. In Webpack, wrap this with an `if (module.hot) {...}`
 // check.
-require('preact/devtools');
+require('preact/debug');
 ```
+
+### Runtime Error Checking
+
+To enable debug mode, you need to set `process.env.NODE_ENV=development`. You can do this
+with webpack via a builtin plugin.
+
+```js
+// webpack.config.js
+
+// Set NODE_ENV=development to enable error checking
+new webpack.DefinePlugin({
+  'process.env': {
+    'NODE_ENV': JSON.stringify('development')
+  }
+});
+```
+
+When enabled, warnings are logged to the console when undefined components or string refs
+are detected.
+
+### Developer Tools
+
+If you only want to include devtool integration, without runtime error checking, you can
+replace `preact/debug` in the above example with `preact/devtools`. This option doesn't
+require setting `NODE_ENV=development`.
 
 
 

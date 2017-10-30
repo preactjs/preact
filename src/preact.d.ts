@@ -43,7 +43,7 @@ declare namespace preact {
 	}
 
     // Type alias for a component considered generally, whether stateless or stateful.
-	type AnyComponent<PropsType, StateType> = FunctionalComponent<PropsType> | typeof Component;
+	type AnyComponent<PropsType, StateType> = FunctionalComponent<PropsType> | ComponentConstructor<PropsType, StateType>;
 
 	abstract class Component<PropsType, StateType> {
 		constructor(props?:PropsType, context?:any);
@@ -470,6 +470,7 @@ declare namespace JSX {
 		allowFullScreen?:boolean;
 		allowTransparency?:boolean;
 		alt?:string;
+		as?:string;
 		async?:boolean;
 		autocomplete?:string;
 		autofocus?:boolean;
