@@ -48,6 +48,24 @@ describe('h(jsx)', () => {
 			]);
 	});
 
+	it('should support consecutive empty nodes', () => {
+		let r = h(
+			'foo',
+			null,
+			null,
+			null,
+			h('baz')
+		);
+
+		expect(r).to.be.an('object')
+			.with.property('children')
+			.that.deep.equals([
+				'',
+				'',
+				buildVNode('baz')
+			]);
+	});
+
 	it('should support multiple element children, given as arg list', () => {
 		let r = h(
 			'foo',
@@ -147,7 +165,7 @@ describe('h(jsx)', () => {
 			.that.equals('textstuff');
 	});
 
-	it('should merge adjacent text children', () => {
+	/* it('should merge adjacent text children', () => {
 		let r = h(
 			'foo',
 			null,
@@ -208,6 +226,7 @@ describe('h(jsx)', () => {
 			.with.property('children')
 			.that.deep.equals(['onetwothree']);
 	});
+	*/
 
 	it('should not merge children of components', () => {
 		let Component = ({children}) => children;

@@ -12,7 +12,7 @@ const EMPTY_CHILDREN = [];
  *	@public
  */
 export function h(nodeName, attributes) {
-	let children=EMPTY_CHILDREN, lastSimple, child, simple, i;
+	let children=EMPTY_CHILDREN, child, i;
 	for (i=arguments.length; i-- > 2; ) {
 		stack.push(arguments[i]);
 	}
@@ -27,23 +27,17 @@ export function h(nodeName, attributes) {
 		else {
 			if (typeof child==='boolean') child = null;
 
-			if ((simple = typeof nodeName!=='function')) {
+			if (typeof nodeName!=='function') {
 				if (child==null) child = '';
 				else if (typeof child==='number') child = String(child);
-				else if (typeof child!=='string') simple = false;
 			}
 
-			if (simple && lastSimple) {
-				children[children.length-1] += child;
-			}
-			else if (children===EMPTY_CHILDREN) {
+			if (children === EMPTY_CHILDREN) {
 				children = [child];
 			}
 			else {
 				children.push(child);
 			}
-
-			lastSimple = simple;
 		}
 	}
 

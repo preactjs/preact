@@ -472,8 +472,8 @@ describe('render()', () => {
 	it('should reorder child pairs', () => {
 		let root = render((
 			<div>
-				<a>a</a>
-				<b>b</b>
+				<a key="a">a</a>
+				<b key="b">b</b>
 			</div>
 		), scratch, root);
 
@@ -485,8 +485,8 @@ describe('render()', () => {
 
 		root = render((
 			<div>
-				<b>b</b>
-				<a>a</a>
+				<b key="b">b</b>
+				<a key="a">a</a>
 			</div>
 		), scratch, root);
 
@@ -510,7 +510,7 @@ describe('render()', () => {
 		expect(scratch).to.have.property('innerHTML', '<div><a></a></div>');
 	});
 
-	it('should skip non-preact elements', () => {
+	it('should not skip non-preact elements', () => {
 		class Foo extends Component {
 			render() {
 				let alt = this.props.alt || this.state.alt || this.alt;
@@ -538,32 +538,8 @@ describe('render()', () => {
 
 		comp.forceUpdate();
 
-		expect(scratch.firstChild.children, 'forceUpdate').to.have.length(4);
-		expect(scratch.innerHTML, 'forceUpdate').to.equal(`<div><a>foo</a><b>bar</b><c>baz</c><b>bat</b></div>`);
-
-		comp.alt = true;
-		comp.forceUpdate();
-
-		expect(scratch.firstChild.children, 'forceUpdate alt').to.have.length(4);
-		expect(scratch.innerHTML, 'forceUpdate alt').to.equal(`<div><b>alt</b><a>foo</a><c>baz</c><b>bat</b></div>`);
-
-		// Re-rendering from the root is non-destructive if the root was a previous render:
-		comp.alt = false;
-		root = render(<Foo ref={ c => comp = c } />, scratch, root);
-
-		expect(scratch.firstChild.children, 'root re-render').to.have.length(4);
-		expect(scratch.innerHTML, 'root re-render').to.equal(`<div><a>foo</a><b>bar</b><c>baz</c><b>bat</b></div>`);
-
-		comp.alt = true;
-		root = render(<Foo ref={ c => comp = c } />, scratch, root);
-
-		expect(scratch.firstChild.children, 'root re-render 2').to.have.length(4);
-		expect(scratch.innerHTML, 'root re-render 2').to.equal(`<div><b>alt</b><a>foo</a><c>baz</c><b>bat</b></div>`);
-
-		root = render(<div><Foo ref={ c => comp = c } /></div>, scratch, root);
-
-		expect(scratch.firstChild.children, 'root re-render changed').to.have.length(3);
-		expect(scratch.innerHTML, 'root re-render changed').to.equal(`<div><div><a>foo</a><b>bar</b></div><c>baz</c><b>bat</b></div>`);
+		expect(scratch.firstChild.children, 'forceUpdate').to.have.length(2);
+		expect(scratch.innerHTML, 'forceUpdate').to.equal(`<div><a>foo</a><b>bar</b></div>`);
 	});
 
 	// Discussion: https://github.com/developit/preact/issues/287

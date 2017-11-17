@@ -1,5 +1,5 @@
-import { ATTR_KEY } from '../constants';
-import { isSameNodeType, isNamedNode } from './index';
+import { ATTR_KEY, ELT_KEY_PREFIX } from '../constants';
+import { isNamedNode } from './index';
 import { buildComponentFromVNode } from './component';
 import { createNode, setAccessor } from '../dom/index';
 import { unmountComponent } from './component';
@@ -140,7 +140,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	}
 	// otherwise, if there are existing or new children, diff them:
 	else if (vchildren && vchildren.length || fc!=null) {
-		innerDiffNode(out, vchildren, context, mountAll, hydrating || props.dangerouslySetInnerHTML!=null);
+		innerDiffNode(out, vchildren, context, mountAll);
 	}
 
 
@@ -160,18 +160,14 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
  *	@param {Array} vchildren		Array of VNodes to compare to `dom.childNodes`
  *	@param {Object} context			Implicitly descendant context object (from most recent `getChildContext()`)
  *	@param {Boolean} mountAll
- *	@param {Boolean} isHydrating	If `true`, consumes externally created elements similar to hydration
  */
-function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
+function innerDiffNode(dom, vchildren, context, mountAll) {
 	let originalChildren = dom.childNodes,
-		children = [],
 		keyed = {},
 		keyedLen = 0,
-		min = 0,
 		len = originalChildren.length,
-		childrenLen = 0,
 		vlen = vchildren ? vchildren.length : 0,
-		j, c, f, vchild, child;
+		f, vchild, child;
 
 	// Build up a map of keyed children and an Array of unkeyed children:
 	if (len!==0) {
@@ -179,13 +175,9 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 			let child = originalChildren[i],
 				props = child[ATTR_KEY],
 				key = vlen && props ? child._component ? child._component.__key : props.key : null;
-			if (key!=null) {
-				keyedLen++;
-				keyed[key] = child;
-			}
-			else if (props || (child.splitText!==undefined ? (isHydrating ? child.nodeValue.trim() : true) : isHydrating)) {
-				children[childrenLen++] = child;
-			}
+			key = key || ( ELT_KEY_PREFIX + i );
+			keyedLen++;
+			keyed[key] = child;
 		}
 	}
 
@@ -195,25 +187,11 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 			child = null;
 
 			// attempt to find a node based on key matching
-			let key = vchild.key;
-			if (key!=null) {
-				if (keyedLen && keyed[key]!==undefined) {
-					child = keyed[key];
-					keyed[key] = undefined;
-					keyedLen--;
-				}
-			}
-			// attempt to pluck a node of the same type from the existing children
-			else if (!child && min<childrenLen) {
-				for (j=min; j<childrenLen; j++) {
-					if (children[j]!==undefined && isSameNodeType(c = children[j], vchild, isHydrating)) {
-						child = c;
-						children[j] = undefined;
-						if (j===childrenLen-1) childrenLen--;
-						if (j===min) min++;
-						break;
-					}
-				}
+			let key = vchild.key || ( ELT_KEY_PREFIX + i );
+			if (keyedLen && keyed[key]!==undefined) {
+				child = keyed[key];
+				keyed[key] = undefined;
+				keyedLen--;
 			}
 
 			// morph the matched/found/created DOM child to match vchild (deep)
@@ -236,14 +214,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 
 
 	// remove unused keyed children:
-	if (keyedLen) {
-		for (let i in keyed) if (keyed[i]!==undefined) recollectNodeTree(keyed[i], false);
-	}
-
-	// remove orphaned unkeyed children:
-	while (min<=childrenLen) {
-		if ((child = children[childrenLen--])!==undefined) recollectNodeTree(child, false);
-	}
+	for (let i in keyed) if (keyed[i]!==undefined) recollectNodeTree(keyed[i], false);
 }
 
 
