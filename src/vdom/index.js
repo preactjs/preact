@@ -1,7 +1,7 @@
 import { extend } from '../util';
 
 
-/** 
+/**
  * Check if two nodes are equivalent.
  *
  * @param {Node} node			DOM Node to compare
@@ -20,7 +20,7 @@ export function isSameNodeType(node, vnode, hydrating) {
 }
 
 
-/** 
+/**
  * Check if an Element has a given nodeName, case-insensitively.
  *
  * @param {Element} node	A DOM Element to inspect the name of.
@@ -35,7 +35,7 @@ export function isNamedNode(node, nodeName) {
  * Reconstruct Component-style `props` from a VNode.
  * Ensures default/fallback values from `defaultProps`:
  * Own-properties of `defaultProps` not present in `vnode.attributes` are added.
- * 
+ *
  * @param {VNode} vnode
  * @returns {Object} props
  */
