@@ -15,6 +15,13 @@ declare namespace preact {
 		ref?:(el?: Element) => void;
 	}
 
+	/**
+	 * Define the contract for a virtual node in preact.
+	 *
+	 * A virutal node has a name, a map of attributes, an array
+	 * of child {VNode}s and a key. The key is used by preact for
+	 * internal purposes.
+	 */
 	interface VNode {
 		nodeName:ComponentConstructor<any, any>|string;
 		attributes:{[name:string]:any};
@@ -91,6 +98,11 @@ declare module "preact/devtools" {
 }
 
 declare namespace JSX {
+
+	/**
+	 * The ELement interface that holds details on an Element
+	 * node. It is derived from the {Vnode} class of preact.
+	 */
 	interface Element extends preact.VNode {
 	}
 
@@ -364,6 +376,10 @@ declare namespace JSX {
 	type TransitionEventHandler = EventHandler<TransitionEvent>;
 	type GenericEventHandler = EventHandler<Event>;
 
+	/**
+	 * Interface defining all event handlers that can be
+	 * attached a DOM node.
+	 */
 	interface DOMAttributes {
 		// Image Events
 		onLoad?:GenericEventHandler;
