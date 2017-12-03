@@ -15,6 +15,13 @@ declare namespace preact {
 		ref?:(el?: Element) => void;
 	}
 
+	/**
+	 * Define the contract for a virtual node in preact.
+	 *
+	 * A virutal node has a name, a map of attributes, an array
+	 * of child {VNode}s and a key. The key is used by preact for
+	 * internal purposes.
+	 */
 	interface VNode {
 		nodeName:ComponentConstructor<any, any>|string;
 		attributes:{[name:string]:any};
@@ -43,7 +50,7 @@ declare namespace preact {
 	}
 
     // Type alias for a component considered generally, whether stateless or stateful.
-	type AnyComponent<PropsType, StateType> = FunctionalComponent<PropsType> | typeof Component;
+	type AnyComponent<PropsType, StateType> = FunctionalComponent<PropsType> | ComponentConstructor<PropsType, StateType>;
 
 	abstract class Component<PropsType, StateType> {
 		constructor(props?:PropsType, context?:any);
@@ -69,7 +76,7 @@ declare namespace preact {
 
 	function h<PropsType>(node:ComponentConstructor<PropsType, any> | FunctionalComponent<PropsType>, params:PropsType, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
 	function h(node:string, params:JSX.HTMLAttributes&JSX.SVGAttributes&{[propName: string]: any}, ...children:(JSX.Element|JSX.Element[]|string)[]):JSX.Element;
-	function render(node:JSX.Element, parent:Element|Document, mergeWith?:Element):Element;
+	function render(node:JSX.Element, parent:Element|Document|null, mergeWith?:Element):Element;
 	function rerender():void;
 	function cloneElement(element:JSX.Element, props:any):JSX.Element;
 
@@ -91,6 +98,11 @@ declare module "preact/devtools" {
 }
 
 declare namespace JSX {
+
+	/**
+	 * The ELement interface that holds details on an Element
+	 * node. It is derived from the {Vnode} class of preact.
+	 */
 	interface Element extends preact.VNode {
 	}
 
@@ -364,6 +376,10 @@ declare namespace JSX {
 	type TransitionEventHandler = EventHandler<TransitionEvent>;
 	type GenericEventHandler = EventHandler<Event>;
 
+	/**
+	 * Interface defining all event handlers that can be
+	 * attached a DOM node.
+	 */
 	interface DOMAttributes {
 		// Image Events
 		onLoad?:GenericEventHandler;
