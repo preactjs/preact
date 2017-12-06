@@ -246,6 +246,21 @@ describe('Lifecycle methods', () => {
 			render(<div />, scratch, scratch.lastChild);
 			expect(Bar.prototype.componentWillUnmount, 'when removed').to.have.been.calledOnce;
 		});
+
+		it('should invoke componentWillUnmount for same components', () => {
+			class Foo extends Component {
+				componentDidMount() {}
+				componentWillUnmount() {}
+				render() { return <div>[component]</div>; }
+			}
+			spyAll(Foo.prototype);
+
+			render(<Foo />, scratch, scratch.lastChild);
+			expect(Foo.prototype.componentDidMount, 'initial render').to.have.been.calledOnce;
+
+			render(<div>[div]</div>, scratch, scratch.lastChild);
+			expect(Foo.prototype.componentWillUnmount, 'when replaced').to.have.been.calledOnce;
+		});
 	});
 
 
