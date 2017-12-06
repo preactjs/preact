@@ -623,4 +623,27 @@ describe('render()', () => {
 			done();
 		}, 10);
 	});
+
+	it('should clone the props passed to the component', (done) => {
+		let InnerComponent = ({children}) => <div>{children}</div>;
+		
+		function connect(WrappedComponent) {
+			return class Connect extends Component {
+				componentDidMount() {
+					setTimeout(() => this.forceUpdate(), 0);
+				}
+				render() {
+					return <WrappedComponent {...this.props} />;
+				}
+			};
+		}
+		
+		const HOC = connect(InnerComponent);
+
+		const root = render(<HOC><span></span></HOC>, scratch);
+		setTimeout(() => {
+			expect(scratch.innerHTML, 'root').to.equal(`<div><span></span></div>`);
+			done();
+		}, 10);
+	});
 });
