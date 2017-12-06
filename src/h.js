@@ -1,4 +1,5 @@
 import { VNode } from './vnode';
+import { extend } from './util';
 import options from './options';
 
 
@@ -38,6 +39,9 @@ export function h(nodeName, attributes) {
 	let children=EMPTY_CHILDREN, lastSimple, child, simple, i;
 	for (i=arguments.length; i-- > 2; ) {
 		stack.push(arguments[i]);
+	}
+	if (attributes) {
+		attributes = extend({}, attributes);
 	}
 	if (attributes && attributes.children!=null) {
 		if (!stack.length) stack.push(attributes.children);
