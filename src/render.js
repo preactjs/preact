@@ -1,5 +1,5 @@
-import { map } from './constants';
-import { diff, getVNodeChildren } from './diff/index';
+import { map, EMPTY_OBJ } from './constants';
+import { diff /*, getVNodeChildren*/ } from './diff/index';
 import { diffChildren } from './diff/children';
 import { createVNode } from './create-element';
 
@@ -13,7 +13,7 @@ export function hydrate(vnode, parent) {
 	// let oldTree = toVNode(parent);
 	// diffChildren(parent, null, [vnode], oldTree.children);
 	parent.__vroot = vnode;
-	diffChildren(parent, [vnode], [], [].slice.call(parent.childNodes));
+	diffChildren(parent, [vnode], [], [].slice.call(parent.childNodes), EMPTY_OBJ, false);
 }
 
 export function toVNode(node) {

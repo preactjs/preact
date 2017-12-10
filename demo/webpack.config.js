@@ -9,6 +9,7 @@ module.exports = {
 				test: /\.js$/,
 				loader: 'babel-loader',
 				options: {
+					sourceMap: true,
 					presets: [
 						[require.resolve('babel-preset-env'), {
 							targets: {
@@ -16,12 +17,21 @@ module.exports = {
 							},
 							modules: false,
 							loose: true
-						}]
+						}],
+						require.resolve('babel-preset-stage-0')
 					],
 					plugins: [
 						[require.resolve('babel-plugin-transform-react-jsx'), { pragma: 'createElement' }]
 					]
 				}
+			},
+			{
+				test: /\.s?css$/,
+				use: [
+					'style-loader',
+					'css-loader',
+					'sass-loader'
+				]
 			}
 		]
 	},

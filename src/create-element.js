@@ -6,6 +6,23 @@ export function createElement(tag, props) {
 	return createVNode(ELEMENT_NODE, tag, props, children, null, props!=null ? props.key : null);
 }
 
+// const RECYCLED_VNODES = [];
+
+// export function reclaimVNode(vnode) {
+// 	vnode.index = vnode._children = vnode._el = vnode._component = null;
+// 	RECYCLED_VNODES.push(vnode);
+// }
+
 export function createVNode(type, tag, props, children, text, key) {
+	// let r = RECYCLED_VNODES.pop();
+	// if (r!=null) {
+	// 	r.type = type;
+	// 	r.tag = tag;
+	// 	r.props = props;
+	// 	r.children = children;
+	// 	r.text = text;
+	// 	r.key = key;
+	// 	return r;
+	// }
 	return { type, tag, props, children, text, key, index: null, _children: null, _el: null, _component: null };
 }

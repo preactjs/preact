@@ -1,9 +1,9 @@
 import { EMPTY_OBJ } from '../constants';
-import { diff, getVNodeChildren } from './index';
+import { diff, unmount, getVNodeChildren } from './index';
 import { toVNode } from '../render';
 import { diffProps } from './props';
 
-export function diffChildren(node, children, oldChildren, excessChildren, context) {
+export function diffChildren(node, children, oldChildren, excessChildren, context, isSvg) {
 	let seen = {},
 		c;
 
@@ -39,26 +39,32 @@ export function diffChildren(node, children, oldChildren, excessChildren, contex
 
 		child.index = i;
 		if (old && old._el!=null) {
-			diff(old._el, node, child, old, context);
+			// console.log('updating child in place', old, child);
+			diff(old._el, node, child, old, context, isSvg);
 			if (old.index!==i) {
 				node.insertBefore(child._el, oldInPlaceChild);
 				continue;
 			}
 		}
 		else {
-			let created = create(null, node, child, context);
+			let created = create(null, node, child, context, isSvg);
 			node.insertBefore(created, oldInPlaceChild);
 		}
 	}
 
-	for (let i in seen) if (seen[i]!=null && (c = seen[i]._el)) c.remove();
+	// for (let i in seen) if (seen[i] != null && (c = seen[i]._el)) c.remove();
+	for (let i in seen) {
+		if (seen[i]!=null) {
+			unmount(seen[i]);
+		}
+	}
 }
 
-export function create(node, parent, vnode, context) {
+export function create(node, parent, vnode, context, isSvg) {
 	let old = node;
 
 	if (typeof vnode.tag==='function') {
-		return diff(node, parent, vnode, null, context)
+		return diff(node, parent, vnode, null, context, isSvg);
 	}
 	else if (vnode.type===3) {
 		if (node==null || node.nodeType!==3) {
@@ -71,14 +77,14 @@ export function create(node, parent, vnode, context) {
 	else {
 		// diff(null, parent, vnode, oldVNode);
 		if (node==null || node.localName!==vnode.tag) {
-			node = document.createElement(vnode.tag);
+			node = isSvg ? document.createElementNS('http://www.w3.org/2000/svg') : document.createElement(vnode.tag);
 		}
 		if (vnode.props!=null) {
-			diffProps(node, vnode.props, EMPTY_OBJ);
+			diffProps(node, vnode.props, EMPTY_OBJ, isSvg);
 		}
 		let children = getVNodeChildren(vnode);
 		for (let i=0; i<children.length; i++) {
-			node.appendChild(create(null, node, children[i], context));
+			node.appendChild(create(null, node, children[i], context, isSvg));
 		}
 	}
 
