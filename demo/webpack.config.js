@@ -1,8 +1,23 @@
+/* eslint-disable */
+const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+const ceviche = path.resolve(__dirname, '../src');
 
 module.exports = {
 	context: __dirname,
 	entry: './index',
+	output: {
+		publicPath: '/'
+	},
+	resolve: {
+		alias: {
+			ceviche: ceviche,
+			preact: path.resolve(__dirname, './preact'),
+			react: ceviche,
+			'react-dom': ceviche
+		}
+	},
 	module: {
 		rules: [
 			{
@@ -21,7 +36,13 @@ module.exports = {
 						require.resolve('babel-preset-stage-0')
 					],
 					plugins: [
-						[require.resolve('babel-plugin-transform-react-jsx'), { pragma: 'createElement' }]
+						[require.resolve('babel-plugin-transform-react-jsx'), { pragma: 'createElement' }],
+						require.resolve('babel-plugin-transform-react-constant-elements'),
+						[require.resolve('babel-plugin-jsx-pragmatic'), {
+							module: 'ceviche',
+							export: 'createElement',
+							import: 'createElement'
+						}]
 					]
 				}
 			},
@@ -40,6 +61,9 @@ module.exports = {
 		process: 'mock',
 		Buffer: false,
 		setImmediate: false
+	},
+	devServer: {
+		historyApiFallback: true
 	},
 	plugins: [
 		new HtmlWebpackPlugin()

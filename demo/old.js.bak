@@ -1,0 +1,103 @@
+
+// function createRoot(title) {
+// 	let div = document.createElement('div');
+// 	let h2 = document.createElement('h2');
+// 	h2.textContent = title;
+// 	div.appendChild(h2);
+// 	document.body.appendChild(div);
+// 	return div;
+// }
+
+
+/*
+function logCall(obj, method, name) {
+	let old = obj[method];
+	obj[method] = function(...args) {
+		console.log(`<${this.localName}>.`+(name || `${method}(${args})`));
+		return old.apply(this, args);
+	};
+}
+
+logCall(HTMLElement.prototype, 'appendChild');
+logCall(HTMLElement.prototype, 'removeChild');
+logCall(HTMLElement.prototype, 'insertBefore');
+logCall(HTMLElement.prototype, 'replaceChild');
+logCall(HTMLElement.prototype, 'setAttribute');
+logCall(HTMLElement.prototype, 'removeAttribute');
+let d = Object.getOwnPropertyDescriptor(Node.prototype, 'nodeValue');
+Object.defineProperty(Text.prototype, 'nodeValue', {
+	get() {
+		let value = d.get.call(this);
+		console.log('get Text#nodeValue: ', value);
+		return value;
+	},
+	set(v) {
+		console.log('set Text#nodeValue', v);
+		return d.set.call(this, v);
+	}
+});
+
+
+render((
+	<div>
+		<h4>This is a test.</h4>
+		<Foo />
+		<time>...</time>
+	</div>
+), createRoot('Stateful component update demo:'));
+
+
+class Foo extends Component {
+	componentDidMount() {
+		console.log('mounted');
+		this.timer = setInterval( () => {
+			this.setState({ time: Date.now() });
+		}, 5000);
+	}
+	componentWillUnmount() {
+		clearInterval(this.timer);
+	}
+	render(props, state, context) {
+		// console.log('rendering', props, state, context);
+		return <time>test: {state.time}</time>
+	}
+}
+
+
+render((
+	<div>
+		<h4>This is a test.</h4>
+		<Foo />
+		<time>...</time>
+	</div>
+), createRoot('Stateful component update demo:'));
+
+
+let items = [];
+let count = 0;
+let three = createRoot('Top-level render demo:');
+
+setInterval( () => {
+	if (count++ %20 < 10 ) {
+		items.push(<li key={count} style={{
+			position: 'relative',
+			transition: 'all 200ms ease',
+			paddingLeft: items.length*20 +'px'
+		}}>item #{items.length}</li>);
+	}
+	else {
+		items.shift();
+	}
+
+	render((
+		<div>
+			<h4>This is a test.</h4>
+			<time>{Date.now()}</time>
+			<ul>{items}</ul>
+		</div>
+	), three);
+}, 5000);
+
+// Mount the top-level component to the DOM:
+render(<Main />, document.body);
+*/

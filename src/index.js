@@ -1,6 +1,7 @@
-export { render } from './render';
+export { render, hydrate } from './render';
 export { createElement } from './create-element';
 export { Component } from './component';
+export { cloneElement } from './clone-element';
 
 /*
 function createElement(nodeName, props) {

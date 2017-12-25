@@ -1,41 +1,126 @@
-// import { assign } from './util';
+import { assign } from './util';
 import { diff } from './diff/index';
+// import { diff, diffLevel } from './diff/index';
 
 export function Component(props, context) {
 	this.props = props;
 	this.context = context;
+	// if (this.state==null) this.state = {};
 	this.state = {};
 	this._dirty = true;
 	this._renderCallbacks = [];
 }
 
 Component.prototype.setState = function(update, callback) {
-	let s = this.nextState || this.state;
-	if (typeof update==='function') update = update(s);
-	// this.nextState = assign(assign({}, this.state), update);
-	this.nextState = Object.assign({}, s, update);
+	// if (this.prevState==null) this.prevState = assign({}, this.state);
+	// let s = this._nextState || this.state;
+	// let s = this.state;
+	// assign(this.state, update);
+
+	// only clone state when copying to nextState the first time.
+	let s = this._nextState || (this._nextState = assign({}, this.state));
+
+	// if update() mutates state in-place, skip the copy:
+	if (typeof update!=='function' || (update = update(s, this.props))) {
+		assign(s, update);
+	}
+
+	// let s = this._nextState || this.state;
+	// this._nextState = assign(assign({}, s), typeof update==='function' && update(s, this.props) || s);
+
+	// console.log(update, this._nextState);
+	// this._nextState = Object.assign({}, s, update);
 	if (callback!=null) this._renderCallbacks.push(callback);
+
 	enqueueRender(this);
+	// if (!this._dirty && (this._dirty = true) && q.push(this)===1) (0, Component.debounce)(process);
 };
 
 Component.prototype.forceUpdate = function(callback) {
-	diff(this.base, this.base.parentNode, this.vnode, this.vnode, this.context);
-	if (callback != null) callback();
+	if (this.base!=null) {
+		diff(this.base, this.base.parentNode, this._vnode, this._vnode, this.context, false, true);
+		if (callback!=null) callback();
+	}
 };
 
 
 let q = [];
-// resolved = Promise.resolve();
-function enqueueRender(c) {
-	// if (!c._dirty && (c._dirty = true) && q.push(c) === 1) resolved.then(process);
-	if (!c._dirty && (c._dirty = true) && q.push(c) === 1) requestAnimationFrame(process);
+
+// const defer = typeof Promise=='function' ? Promise.resolve().then.bind(Promise.resolve()) : setTimeout;
+Component.debounce = typeof Promise=='function' ? Promise.resolve().then.bind(Promise.resolve()) : setTimeout;
+// Component.debounce = setTimeout;
+
+export function enqueueRender(c) {
+	// console.log('enqueueRender', c.id, q.length===0, c._dirty);
+	if (!c._dirty && (c._dirty = true) && q.push(c) === 1) {
+		(0, Component.debounce)(process);
+		// (Component.debounce || setTimeout)(process);
+		// defer(process);
+		// (Component.debounce || setTimeout)(process);
+		// (0, Component.debounce || defer)(process);
+	}
+
+	// if (!c._dirty) {
+	// 	c._dirty = true;
+	// 	if (diffLevel!==0) {
+	// 		q.push(c);
+	// 	}
+	// 	else {
+	// 		diff(c.base, c.base.parentNode, c._vnode, c._vnode, c.context);
+	// 	}
+	// }
+
+	// if (!c._dirty && (c._dirty = true) && q.push(c) === 1) {
+	// 	requestAnimationFrame(process);
+	// }
 	// if (q.push(c) === 1) setTimeout(process);
 }
+
 function process() {
+	// console.log('process queue', q.map(c => c.context.__depth)+' ');
+
+	// requestIdleCallback( (c) => {
+	// 	let p;
+	// 	while (c.timeRemaining()>0 && (p=q.pop())) {
+	// 		if (p._dirty) p.forceUpdate();
+	// 	}
+	// 	if (q.length) process();
+	// });
+
 	let p;
-	while ((p = q.pop())) {
-		if (p._dirty) {
-			diff(p.base, p.base.parentNode, p.vnode, p.vnode, p.context);
-		}
+	while ((p=q.pop())) {
+		if (p._dirty) p.forceUpdate();
 	}
+
+	// let time = Date.now(), len=q.length, i=len;
+	// while (i--) {
+	// 	if (Date.now() - time > 2) break;
+	// 	if (q[i]._dirty) q[i].forceUpdate();
+	// }
+	// q.splice(i, len-i);
+	// if (i>=0) (0, Component.debounce)(process);
+
+	// while ( Date.now() - time < 5 && (p=q.pop())) {
+	// 	if (p._dirty) p.forceUpdate();
+	// }
+	// if (q.length) (0, Component.debounce)(process);
+
+	// let current = q;
+	// q = [];
+	// for (let i=current.length; i--; ) {
+	// 	if (current[i]._dirty) {
+	// 		current[i].forceUpdate();
+	// 	}
+	// }
+
+	// let current = q, p;
+	// q = [];
+	// while ((p = current.pop())) {
+	// 	if (p._dirty) {
+	// 		p.forceUpdate();
+	// 		// diff(p.base, p.base.parentNode, p._vnode, p._vnode, p.context);
+	// 	}
+	// }
 }
+
+// export { process as processQueue };

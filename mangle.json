@@ -1,0 +1,52 @@
+{
+  "vars": {
+    "cname": 30,
+    "props": {
+      "$assign": "n",
+      "$Component": "l",
+      "$enqueueRender": "u",
+      "$process": "r",
+      "$createElement": "i",
+      "$createVNode": "t",
+      "$diffProps": "o",
+      "$setProperty": "f",
+      "$diffChildren": "e",
+      "$create": "c",
+      "$diff": "a",
+      "$diffElementNodes": "s",
+      "$unmount": "v",
+      "$mount": "h",
+      "$getVNodeChildren": "p",
+      "$flattenChildren": "y",
+      "$createComponent": "d",
+      "$doRender": "b",
+      "$render": "g",
+      "$hydrate": "m",
+      "$toVNode": "w",
+      "$cloneElement": "x",
+      "$ELEMENT_NODE": "j",
+      "$TEXT_NODE": "O",
+      "$EMPTY_OBJ": "S",
+      "$map": "_",
+      "$IS_NON_DIMENSIONAL": "k",
+      "$q": "A",
+      "$resolved": "z",
+      "$mounts": "N",
+      "$diffLevel": "P"
+    }
+  },
+  "props": {
+    "cname": 6,
+    "props": {
+      "$_dirty": "__d",
+      "$_nextState": "__s",
+      "$_renderCallbacks": "__h",
+      "$_vnode": "__v",
+      "$_children": "__k",
+      "$_el": "__e",
+      "$_component": "__c",
+      "$_previousVTree": "__t",
+      "$__html": "__html"
+    }
+  }
+}
