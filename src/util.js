@@ -1,3 +1,5 @@
+import {Component} from './component';
+
 /**
  *  Copy all properties from `props` onto `obj`.
  *  @param {Object} obj		Object onto which properties should be copied.
@@ -18,3 +20,16 @@ export function extend(obj, props) {
  * @param {Function} callback
  */
 export const defer = typeof Promise=='function' ? Promise.resolve().then.bind(Promise.resolve()) : setTimeout;
+
+/**
+ * Extend an object from `Component`.
+ * @param {Object} obj    Object onto `Component` should be applied to.
+ * @param {Object} props	Object from which to copy properties.
+ * @private
+ */
+export function extendComponent(obj, props) {
+	obj = Object.create(Component.prototype);
+	obj.constructor = Component;
+	extend(obj, props);
+}
+
