@@ -14,7 +14,7 @@ export function createContext(key) {
 	function Provider(props, context) {
 		Component.call(this, props, context);
 
-		c = [];
+		this.c = [];
 	}
 
 	extendComponent(Provider.prototype, {
@@ -29,7 +29,7 @@ export function createContext(key) {
 
 		componentWillReceiveProps(nextProps) {
 			if (!Object.is(this.props.value, nextProps.value)) {
-				c.forEach(subscriber => {
+				this.c.forEach(subscriber => {
 					subscriber(nextProps.value);
 				});
 			}
