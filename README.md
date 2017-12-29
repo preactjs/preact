@@ -87,7 +87,7 @@ Preact supports modern browsers and IE9+:
 - [**Periodic Weather**](https://use-the-platform.com/periodic-weather/) _([GitHub Project](https://github.com/vaneenige/periodic-weather/))_ :sunny:
 - [**Play.cash**](https://play.cash) :notes:
 - [**Rugby News Board**](http://nbrugby.com) _[(GitHub Project)](https://github.com/rugby-board/rugby-board-node)_
-
+- [**Parcel + Preact + Unistore Starter**](https://github.com/hwclass/parcel-preact-unistore-starter)
 ## Libraries & Add-ons
 
 - :raised_hands: [**preact-compat**](https://git.io/preact-compat): use any React library with Preact *([full example](http://git.io/preact-compat-example))*
