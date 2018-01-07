@@ -18,7 +18,7 @@ declare namespace preact {
 	/**
 	 * Define the contract for a virtual node in preact.
 	 *
-	 * A virutal node has a name, a map of attributes, an array
+	 * A virtual node has a name, a map of attributes, an array
 	 * of child {VNode}s and a key. The key is used by preact for
 	 * internal purposes.
 	 */
