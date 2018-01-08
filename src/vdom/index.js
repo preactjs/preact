@@ -6,7 +6,7 @@ import { extend } from '../util';
  *
  * @param {Node} node			DOM Node to compare
  * @param {VNode} vnode			Virtual DOM node to compare
- * @param {boolean} [hyrdating=false]	If true, ignores component constructors when comparing.
+ * @param {boolean} [hydrating=false]	If true, ignores component constructors when comparing.
  * @private
  */
 export function isSameNodeType(node, vnode, hydrating) {

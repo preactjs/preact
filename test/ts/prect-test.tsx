@@ -17,16 +17,16 @@ class DummyComponent extends Component<DummyProps, DummyState> {
 	}
 
 	render({ initialInput }: DummyProps, { input }: DummyState) {
-		return <DummerComponent initialInput={initialInput} input={input} />
+		return <DumberComponent initialInput={initialInput} input={input} />
 	}
 }
 
-interface DummerComponentProps extends DummyProps, DummyState {
+interface DumberComponentProps extends DummyProps, DummyState {
 
 }
 
-function DummerComponent({ input, initialInput }: DummerComponentProps) {
+function DumberComponent({ input, initialInput }: DumberComponentProps) {
 	return <div>Input: {input}, initial: {initialInput}</div>;
 }
 
-render(h(DummerComponent, { initialInput: "The input" }), document.getElementById("xxx"));
+render(h(DumberComponent, { initialInput: "The input" }), document.getElementById("xxx"));
