@@ -245,14 +245,16 @@ function createDevToolsBridge() {
 
 	/** Notify devtools that a component has been updated with new props/state. */
 	const componentUpdated = component => {
+		// Must updateReactComponent first, incase unstable_renderSubtreeIntoContainer component not in instanceMap
+		// Notify devtools about updates to this component and any non-composite
+		// children
+		const instance = updateReactComponent(component);
+
 		const prevRenderedChildren = [];
 		visitNonCompositeChildren(instanceMap.get(component), childInst => {
 			prevRenderedChildren.push(childInst);
 		});
 
-		// Notify devtools about updates to this component and any non-composite
-		// children
-		const instance = updateReactComponent(component);
 		Reconciler.receiveComponent(instance);
 		visitNonCompositeChildren(instance, childInst => {
 			if (!childInst._inDevTools) {
