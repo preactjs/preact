@@ -510,6 +510,25 @@ describe('render()', () => {
 		expect(scratch).to.have.property('innerHTML', '<div><a></a></div>');
 	});
 
+	it('should not merge style from reused node', () => {
+		const html = (htmlString) => {
+		  const div = document.createElement('div');
+		  div.innerHTML = htmlString;
+		  return div.firstChild;
+		};
+			
+		render(<div><a></a></div>, scratch);
+		
+		const DOMElement = scratch.firstChild;
+		DOMElement.style.marginLeft = "30px";
+		
+		const preactElement = <div><a></a></div>;
+
+		render(preactElement, scratch, DOMElement);
+
+		expect(scratch).to.have.property('innerHTML', '<div><a></a></div>');
+	});
+
 	it('should skip non-preact elements', () => {
 		class Foo extends Component {
 			render() {
