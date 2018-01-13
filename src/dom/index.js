@@ -63,8 +63,11 @@ export function setAccessor(node, name, old, value, isSvg) {
 		if (value) node.innerHTML = value.__html || '';
 	}
 	else if (name[0]=='o' && name[1]=='n') {
-		let useCapture = name !== (name=name.replace(/Capture$/, ''));
-		name = name.toLowerCase().substring(2);
+		// In NativeScript the third addEventListener Parameter is a self reference https://docs.nativescript.org/api-reference/classes/_data_observable_.observable#addeventlistener
+		let useCapture = options.nativeScript ? node : name !== (name=name.replace(/Capture$/, ''));
+		// in NativeScript Events are case sensitive hence we only lowercase the first character of the eventName
+		// (e.g. onTextChanged would become textchanged but needs to be textChanged)
+		name = options.nativeScript ? name.substring(2, 3).toLowerCase() + name.substring(3) : name.toLowerCase().substring(2);
 		if (value) {
 			if (!old) node.addEventListener(name, eventProxy, useCapture);
 		}
@@ -105,5 +108,6 @@ function setProperty(node, name, value) {
  *	@private
  */
 function eventProxy(e) {
-	return this._listeners[e.type](options.event && options.event(e) || e);
+	const type = options.nativeScript ? e.eventName : e.type;
+	return this._listeners[type](options.event && options.event(e) || e);
 }

@@ -82,6 +82,7 @@ declare namespace preact {
 
 	var options:{
 		syncComponentUpdates?:boolean;
+		nativeScript?:boolean;
 		debounceRendering?:(render:() => void) => void;
 		vnode?:(vnode:VNode) => void;
 		event?:(event:Event) => Event;

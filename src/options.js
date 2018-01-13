@@ -24,4 +24,11 @@ export default {
 
 	/** Hook invoked immediately before a component is unmounted. */
 	// beforeUnmount(component) { }
+
+	/** If `true`, preact will use NativeScript API for add and removeEventListener
+	 *	@name nativeScript
+	 *	@type Boolean
+	 *	@default false
+	 */
+	//nativeScript: false,
 };
