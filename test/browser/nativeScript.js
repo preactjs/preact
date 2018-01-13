@@ -1,5 +1,3 @@
-/* global DISABLE_FLAKEY */
-
 import { h, render, options } from '../../src/preact';
 /** @jsx h */
 
