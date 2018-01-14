@@ -3,7 +3,7 @@
 <img alt="Preact" title="Preact" src="https://cdn.rawgit.com/developit/b4416d5c92b743dbaec1e68bc4c27cda/raw/3235dc508f7eb834ebf48418aea212a05df13db1/preact-logo-trans.svg" width="550">
 </a>
 </p>
-<p align="center">Fast <b>3kB</b> alternative to React, with the same ES2015 API.</p>
+<p align="center">Fast <b>3kB</b> alternative to React with the same modern API.</p>
 
 **All the power of Virtual DOM components, without the overhead:**
 
@@ -31,7 +31,7 @@
 - [Linked State](#linked-state)
 - [Examples](#examples)
 - [Extensions](#extensions)
-- [Developer Tools](#developer-tools)
+- [Debug Mode](#debug-mode)
 - [Backers](#backers)
 - [Sponsors](#sponsors)
 - [License](#license)
@@ -91,17 +91,20 @@ Preact supports modern browsers and IE9+:
 - [**Preact Boilerplate**](https://preact-boilerplate.surge.sh) _([GitHub Project](https://github.com/developit/preact-boilerplate))_ :zap:
 - [**Preact Offline Starter**](https://preact-starter.now.sh) _([GitHub Project](https://github.com/lukeed/preact-starter))_ :100:
 - [**Preact PWA**](https://preact-pwa.appspot.com/) _([GitHub Project](https://github.com/ezekielchentnik/preact-pwa))_ :hamburger:
+- [**Parcel + Preact + Unistore Starter**](https://github.com/hwclass/parcel-preact-unistore-starter)
 - [**Preact Mobx Starter**](https://awaw00.github.io/preact-mobx-starter/) _([GitHub Project](https://github.com/awaw00/preact-mobx-starter))_ :sunny:
 - [**Preact Redux Example**](https://github.com/developit/preact-redux-example) :star:
 - [**Preact Redux/RxJS/Reselect Example**](https://github.com/continuata/preact-seed)
 - [**V2EX Preact**](https://github.com/yanni4night/v2ex-preact)
 - [**Preact Coffeescript**](https://github.com/crisward/preact-coffee)
 
+---
 
 ## Libraries & Add-ons
 
 - :raised_hands: [**preact-compat**](https://git.io/preact-compat): use any React library with Preact *([full example](http://git.io/preact-compat-example))*
 - :page_facing_up: [**preact-render-to-string**](https://git.io/preact-render-to-string): Universal rendering.
+- :eyes: [**preact-render-spy**](https://github.com/mzgoddard/preact-render-spy): Enzyme-lite: Renderer with access to the produced virtual dom for testing.
 - :loop: [**preact-render-to-json**](https://git.io/preact-render-to-json): Render for Jest Snapshot testing.
 - :earth_americas: [**preact-router**](https://git.io/preact-router): URL routing for your components
 - :bookmark_tabs: [**preact-markup**](https://git.io/preact-markup): Render HTML & Custom Elements as JSX & Components
@@ -121,12 +124,13 @@ Preact supports modern browsers and IE9+:
 - :shaved_ice: [**preact-codemod**](https://github.com/vutran/preact-codemod): Transform your React code to Preact.
 - :construction_worker: [**preact-helmet**](https://github.com/download/preact-helmet): A document head manager for Preact
 - :necktie: [**preact-delegate**](https://github.com/NekR/preact-delegate): Delegate DOM events
+- :art: [**preact-stylesheet-decorator**](https://github.com/k1r0s/preact-stylesheet-decorator): Add Scoped Stylesheets to your Preact Components
 
 #### UI Component Libraries
 
 > Want to prototype something or speed up your development? Try one of these toolkits:
 
-- [**preact-material-components**](https://github.com/prateekbh/preact-material-components): Material Design Components for Preact ([website](https://prateekbh.github.io/preact-material-components/))
+- [**preact-material-components**](https://github.com/prateekbh/preact-material-components): Material Design Components for Preact ([website](https://material.preactjs.com/))
 - [**preact-mdc**](https://github.com/BerndWessels/preact-mdc): Material Design Components for Preact ([demo](https://github.com/BerndWessels/preact-mdc-demo))
 - [**preact-mui**](https://git.io/v1aVO): The MUI CSS Preact library.
 - [**preact-photon**](https://git.io/preact-photon): build beautiful desktop UI with [photon](http://photonkit.com)
@@ -186,6 +190,14 @@ import preact from 'preact';
 >   "plugins": [
 >     ["transform-react-jsx", { "pragma":"h" }]
 >   ]
+> }
+> ```
+> **Using Preact along with TypeScript:**
+>
+> ```json
+> {
+>   "jsx": "react",
+>   "jsxFactory": "h",
 > }
 > ```
 
