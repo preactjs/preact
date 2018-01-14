@@ -70,7 +70,7 @@ Preact supports modern browsers and IE9+:
 - [**Preact PWA**](https://preact-pwa.appspot.com/) _([GitHub Project](https://github.com/ezekielchentnik/preact-pwa))_ :hamburger:
 - [**Preact Mobx Starter**](https://awaw00.github.io/preact-mobx-starter/) _([GitHub Project](https://github.com/awaw00/preact-mobx-starter))_ :sunny:
 - [**Preact Redux Example**](https://github.com/developit/preact-redux-example) :star:
-- [**Preact Redux/RxJS/Reselect Example**](https://github.com/continuata/preact-seed) (GitHub Project)
+- [**Preact Redux/RxJS/Reselect Example**](https://github.com/continuata/preact-seed)
 - [**Flickr Browser**](http://codepen.io/developit/full/VvMZwK/) (@ CodePen)
 - [**Animating Text**](http://codepen.io/developit/full/LpNOdm/) (@ CodePen)
 - [**60FPS Rainbow Spiral**](http://codepen.io/developit/full/xGoagz/) (@ CodePen)
