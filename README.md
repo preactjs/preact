@@ -60,34 +60,43 @@ Preact supports modern browsers and IE9+:
 
 ## Demos
 
+#### Real-World Apps
+
+- [**Preact Hacker News**](https://hn.kristoferbaxter.com) _([GitHub Project](https://github.com/kristoferbaxter/preact-hn))_
+- [**Play.cash**](https://play.cash) :notes:
 - [**ESBench**](http://esbench.com) is built using Preact.
+- [**BigWebQuiz**](https://bigwebquiz.com) _([GitHub Project](https://github.com/jakearchibald/big-web-quiz))_
 - [**Nectarine.rocks**](http://nectarine.rocks) _([GitHub Project](https://github.com/developit/nectarine))_ :peach:
-- [**Documentation Viewer**](https://documentation-viewer.firebaseapp.com) _([GitHub Project](https://github.com/developit/documentation-viewer))_
 - [**TodoMVC**](https://preact-todomvc.surge.sh) _([GitHub Project](https://github.com/developit/preact-todomvc))_
-- [**Hacker News Minimal**](https://developit.github.io/hn_minimal/) _([GitHub Project](https://github.com/developit/hn_minimal))_
-- [**Preact Boilerplate**](https://preact-boilerplate.surge.sh) _([GitHub Project](https://github.com/developit/preact-boilerplate))_ :zap:
-- [**Preact Offline Starter**](https://preact-starter.now.sh) _([GitHub Project](https://github.com/lukeed/preact-starter))_ :100:
-- [**Preact PWA**](https://preact-pwa.appspot.com/) _([GitHub Project](https://github.com/ezekielchentnik/preact-pwa))_ :hamburger:
-- [**Preact Mobx Starter**](https://awaw00.github.io/preact-mobx-starter/) _([GitHub Project](https://github.com/awaw00/preact-mobx-starter))_ :sunny:
-- [**Preact Redux Example**](https://github.com/developit/preact-redux-example) :star:
-- [**Preact Redux/RxJS/Reselect Example**](https://github.com/continuata/preact-seed)
+- [**OSS.Ninja**](https://oss.ninja) _([GitHub Project](https://github.com/developit/oss.ninja))_
+- [**GuriVR**](https://gurivr.com) _([GitHub Project](https://github.com/opennewslabs/guri-vr))_
+- [**Color Picker**](https://colors.now.sh) _([GitHub Project](https://github.com/lukeed/colors-app))_ :art:
+- [**Rainbow Explorer**](https://use-the-platform.com/rainbow-explorer/) _([GitHub Project](https://github.com/vaneenige/rainbow-explorer/))_ :rainbow:
+- [**Offline Gallery**](https://use-the-platform.com/offline-gallery/) _([GitHub Project](https://github.com/vaneenige/offline-gallery/))_ :balloon:
+- [**Periodic Weather**](https://use-the-platform.com/periodic-weather/) _([GitHub Project](https://github.com/vaneenige/periodic-weather/))_ :sunny:
+- [**Rugby News Board**](http://nbrugby.com) _[(GitHub Project)](https://github.com/rugby-board/rugby-board-node)_
+
+#### Runnable Examples
+
 - [**Flickr Browser**](http://codepen.io/developit/full/VvMZwK/) (@ CodePen)
 - [**Animating Text**](http://codepen.io/developit/full/LpNOdm/) (@ CodePen)
 - [**60FPS Rainbow Spiral**](http://codepen.io/developit/full/xGoagz/) (@ CodePen)
 - [**Simple Clock**](http://jsfiddle.net/developit/u9m5x0L7/embedded/result,js/) (@ JSFiddle)
 - [**3D + ThreeJS**](http://codepen.io/developit/pen/PPMNjd?editors=0010) (@ CodePen)
 - [**Stock Ticker**](http://codepen.io/developit/pen/wMYoBb?editors=0010) (@ CodePen)
-- [**Create your Own!**](https://jsfiddle.net/developit/rs6zrh5f/embedded/result/) (@ JSFiddle)
-- [**Preact Coffeescript**](https://github.com/crisward/preact-coffee)
-- [**GuriVR**](https://gurivr.com) _([GitHub Project](https://github.com/opennewslabs/guri-vr))_
+- [*Create your Own!*](https://jsfiddle.net/developit/rs6zrh5f/embedded/result/) (@ JSFiddle)
+
+### Starter Projects
+
+- [**Preact Boilerplate**](https://preact-boilerplate.surge.sh) _([GitHub Project](https://github.com/developit/preact-boilerplate))_ :zap:
+- [**Preact Offline Starter**](https://preact-starter.now.sh) _([GitHub Project](https://github.com/lukeed/preact-starter))_ :100:
+- [**Preact PWA**](https://preact-pwa.appspot.com/) _([GitHub Project](https://github.com/ezekielchentnik/preact-pwa))_ :hamburger:
+- [**Preact Mobx Starter**](https://awaw00.github.io/preact-mobx-starter/) _([GitHub Project](https://github.com/awaw00/preact-mobx-starter))_ :sunny:
+- [**Preact Redux Example**](https://github.com/developit/preact-redux-example) :star:
+- [**Preact Redux/RxJS/Reselect Example**](https://github.com/continuata/preact-seed)
 - [**V2EX Preact**](https://github.com/yanni4night/v2ex-preact)
-- [**BigWebQuiz**](https://bigwebquiz.com/) _([GitHub Project](https://github.com/jakearchibald/big-web-quiz))_
-- [**Color Picker**](https://colors.now.sh) _([GitHub Project](https://github.com/lukeed/colors-app))_ :art:
-- [**Rainbow Explorer**](https://use-the-platform.com/rainbow-explorer/) _([GitHub Project](https://github.com/vaneenige/rainbow-explorer/))_ :rainbow:
-- [**Offline Gallery**](https://use-the-platform.com/offline-gallery/) _([GitHub Project](https://github.com/vaneenige/offline-gallery/))_ :balloon:
-- [**Periodic Weather**](https://use-the-platform.com/periodic-weather/) _([GitHub Project](https://github.com/vaneenige/periodic-weather/))_ :sunny:
-- [**Play.cash**](https://play.cash) :notes:
-- [**Rugby News Board**](http://nbrugby.com) _[(GitHub Project)](https://github.com/rugby-board/rugby-board-node)_
+- [**Preact Coffeescript**](https://github.com/crisward/preact-coffee)
+
 
 ## Libraries & Add-ons
 
