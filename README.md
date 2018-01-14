@@ -60,7 +60,6 @@ Preact supports modern browsers and IE9+:
 
 ## Demos
 
-- [**Preact Redux/RxJS/Reselect Example**](https://github.com/continuata/preact-seed) (GitHub Project)
 - [**ESBench**](http://esbench.com) is built using Preact.
 - [**Nectarine.rocks**](http://nectarine.rocks) _([GitHub Project](https://github.com/developit/nectarine))_ :peach:
 - [**Documentation Viewer**](https://documentation-viewer.firebaseapp.com) _([GitHub Project](https://github.com/developit/documentation-viewer))_
@@ -71,6 +70,7 @@ Preact supports modern browsers and IE9+:
 - [**Preact PWA**](https://preact-pwa.appspot.com/) _([GitHub Project](https://github.com/ezekielchentnik/preact-pwa))_ :hamburger:
 - [**Preact Mobx Starter**](https://awaw00.github.io/preact-mobx-starter/) _([GitHub Project](https://github.com/awaw00/preact-mobx-starter))_ :sunny:
 - [**Preact Redux Example**](https://github.com/developit/preact-redux-example) :star:
+- [**Preact Redux/RxJS/Reselect Example**](https://github.com/continuata/preact-seed) (GitHub Project)
 - [**Flickr Browser**](http://codepen.io/developit/full/VvMZwK/) (@ CodePen)
 - [**Animating Text**](http://codepen.io/developit/full/LpNOdm/) (@ CodePen)
 - [**60FPS Rainbow Spiral**](http://codepen.io/developit/full/xGoagz/) (@ CodePen)
