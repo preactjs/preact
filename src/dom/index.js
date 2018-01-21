@@ -85,6 +85,7 @@ export function setAccessor(node, name, old, value, isSvg) {
 		}
 		else if (typeof value!=='function') {
 			if (ns) node.setAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase(), value);
+			else if (value===true) node.setAttribute(name, "");
 			else node.setAttribute(name, value);
 		}
 	}
