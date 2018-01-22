@@ -9,7 +9,7 @@
   "umd:main": "dist/ceviche.umd.js",
   "scripts": {
     "build": "microbundle build",
-    "dev": "microbundle watch --format cjs --format umd",
+    "dev": "microbundle watch --format cjs,umd",
     "test": "eslint src"
   },
   "mangle": {
@@ -42,10 +42,10 @@
   "license": "MIT",
   "repository": "developit/ceviche",
   "devDependencies": {
-    "eslint": "^4.6.1",
+    "eslint": "^4.15.0",
     "eslint-config-developit": "^1.1.1",
-    "jest": "^21.2.1",
-    "microbundle": "^0.2.4"
+    "jest": "^22.1.1",
+    "microbundle": "^0.3.1"
   },
   "dependencies": {
     "object-shape": "^0.2.0"
