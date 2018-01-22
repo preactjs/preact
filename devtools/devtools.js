@@ -248,7 +248,7 @@ function createDevToolsBridge() {
 		const prevRenderedChildren = [];
 		let instance = instanceMap.get(component);
 		if (instance) {
-			visitNonCompositeChildren(instanceMap.get(component), childInst => {
+			visitNonCompositeChildren(instance, childInst => {
 				prevRenderedChildren.push(childInst);
 			});
 		}
