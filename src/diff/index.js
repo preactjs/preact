@@ -360,21 +360,21 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 		dom = null;
 	}
 
-	if (dom==null && excessChildren!=null) {
-		// console.log('hydrating from '+excessChildren.length+' excess children', excessChildren.map( c => c.nodeType+' @ '+c.localName), vnode.type, vnode.tag);
-		for (let j=0; j<excessChildren.length; j++) {
-			let c = excessChildren[j];
-			if (c!=null && c.nodeType==vnode.type && c.localName==vnode.tag) {
-				oldVNode = toVNode(dom = d = c);
-				// console.log(vnode, oldVNode, dom);
-				excessChildren[j] = null;
-				// console.log('found hydration match for '+vnode.tag+' ('+vnode.type+')', oldVNode);
-				// console.log(oldVNode, vnode);
-				// dom = toVNode(c);
-				break;
-			}
-		}
-	}
+	// if (dom==null && excessChildren!=null) {
+	// 	console.log('hydrating from '+excessChildren.length+' excess children', excessChildren.map( c => c && `${c.nodeType} @ ${c.localName}`), vnode.type, vnode.tag);
+	// 	for (let j=0; j<excessChildren.length; j++) {
+	// 		let c = excessChildren[j];
+	// 		if (c!=null && c.nodeType==vnode.type && c.localName==vnode.tag) {
+	// 			oldVNode = toVNode(dom = d = c);
+	// 			// console.log(vnode, oldVNode, dom);
+	// 			excessChildren[j] = null;
+	// 			// console.log('found hydration match for '+vnode.tag+' ('+vnode.type+')', oldVNode);
+	// 			// console.log(oldVNode, vnode);
+	// 			// dom = toVNode(c);
+	// 			break;
+	// 		}
+	// 	}
+	// }
 
 	if (dom==null) {
 	// if (dom==null || vnode.type!==(oldVNode==null?null:oldVNode.type) || vnode.tag!==(oldVNode==null?null:oldVNode.tag)) {

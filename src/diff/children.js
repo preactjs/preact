@@ -1,17 +1,24 @@
-import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
-import { diff, unmount, getVNodeChildren } from './index';
-import { toVNode } from '../render';
-import { diffProps } from './props';
+import { diff, unmount } from './index';
+// import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
+// import { diff, unmount, getVNodeChildren } from './index';
+// import { toVNode } from '../render';
+// import { diffProps } from './props';
+// import { cloneElement } from '../clone-element';
+
 
 export function diffChildren(node, children, oldChildren, context, isSvg, excessChildren) {
 	// if (oldChildren==null) oldChildren = EMPTY_ARR;
 
+	// let __children = oldChildren.map(cloneElement);
+	// let __operation = `Diff (${__children.length} -> ${children.length}).`;
+	// let oldDomChildren = Array.prototype.slice.call(node.childNodes);
+
 	// let seen = {},
 	// 	c;
 	
-	// console.log('diffChildren', excessChildren);
+	// // console.log('diffChildren', excessChildren);
 
-	// let types = {};
+	// // let types = {};
 	// if (oldChildren!=null) {
 	// 	// for (let i=oldChildren.length; i--; ) {
 	// 	for (let i=0; i<oldChildren.length; i++) {
@@ -42,10 +49,12 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 	// 	}
 	// }
 
-	let child, i, j, p, index, old, newEl;
+	let child, i, j, p, index, old, newEl,
+		oldChildrenLength = oldChildren.length,
+		childNode = node.firstChild,
+		next, sib;
 
 	// types = {};
-	let childNode = node.firstChild;
 	for (i=0; i<children.length; i++) {
 		// let nextChild = childNode==null ? null : childNode.nextSibling;
 
@@ -56,25 +65,23 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 		// }
 
 		child = children[i];
-		old = null;
-	
-		// let child = children[i],
-		// key = child.key || i,
-		// key = child.key,
-		// oldInPlaceVNode = oldChildren[i],
-		// oldInPlaceChild = oldInPlaceVNode!=null ? oldInPlaceVNode._el : null,
-		// old;
+		old = index = null;
 
+		// let child = children[i],
+
+		// __operation += '\n';
 		// let index;
-		for (j=0; j<oldChildren.length; j++) {
+		for (j=0; j<oldChildrenLength; j++) {
 			p = oldChildren[j];
 			if (p!=null) {
 				if (child.key!=null && p.key===child.key) {
 					index = j;
+					// __operation += `Match by key ${p.key} (index: ${index})`;
 					break;
 				}
 				if (index==null && p.type===child.type && p.tag===child.tag) {
 					index = j;
+					// __operation += `Match by index: ${index}`;
 					// old = p;
 					// oldChildren[j] = null;
 				}
@@ -83,6 +90,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 		if (index!=null) {
 			old = oldChildren[index];
 			oldChildren[index] = null;
+			// __operation += ` -> <${old.tag && old.tag.name || old.tag} index="${index}" key="${old.key}">`;
 		}
 
 		// let previousNode = old==null ? null : old._el;
@@ -126,7 +134,15 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 		// child.index = i;
 		// diff(old && old._el, node, child, old, context, isSvg, oldInPlaceChild);
 
+		// console.log(old);
+
+		// let next = old!=null && old._el && old._el.nextSibling;
 		
+		// let next = old!=null && old._el!=null && old._el.nextSibling;
+		// let prev = old!=null && old._el;
+
+		next = childNode!=null && childNode.nextSibling;
+
 		newEl = diff(old==null ? null : old._el, node, child, old, context, isSvg, false, excessChildren);
 		if (newEl!=null) {
 			// let childNode;
@@ -135,22 +151,50 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 			// if (old==null || newEl!=childNode || newEl.parentNode==null) {
 			// if (newEl!=null && (old==null || old.index!==i)) {
 			// if (old==null || newEl.parentNode==null || newEl!=(childNode = node.childNodes[i])) {
-			if (old==null || newEl.parentNode==null || newEl!=childNode) {
+			if (old==null || newEl!=childNode || newEl.parentNode==null) {
 				// node.insertBefore(newEl, node.childNodes[i]);
 				// node.insertBefore(newEl, childNode);
 				// let nextChild;
 
-				if (childNode!=null && newEl===childNode.nextSibling) {
-					// nextChild = nextChild.nextSibling;
-					childNode.remove();
+
+				outer: if (childNode==null || childNode.parentNode!==node) {
+					node.appendChild(newEl);
 				}
 				else {
+					sib = childNode;
+					// j = i;
+					// j = 0;
+					// while ((sib=sib.nextSibling) && j++<oldChildrenLength/2) {
+					while ((sib=sib.nextSibling) && j++<oldChildrenLength/2) {
+						if (sib===newEl) {
+							oldChildren[index] = childNode;
+							break outer;
+						}
+					}
 					node.insertBefore(newEl, childNode);
 				}
-			}
 
-			childNode = newEl.nextSibling;
+				next = newEl.nextSibling;
+			}
+			// else {
+			// 	// __operation += ` -> unchanged`;
+			// 	childNode = next;
+			// }
+
+			childNode = next;
+
+			// childNode = newEl.nextSibling;
 		}
+		// else {
+		// 	// childNode = next;
+		// 	// if (index!=null) {
+		// 	// 	old._el = prev;
+		// 	// 	oldChildren[index] = old;
+		// 	// 	// oldChildren[index] = old;
+		// 	// }
+		// 	__operation += ` -> unrendered ${index!=null ? `(index: ${index})` : '' } ${old} ${old && old._el}`;
+		// 	// childNode = next;
+		// }
 
 		// let newEl = diff(old==null ? null : old._el, node, child, old, context, isSvg, false, excessChildren);
 		// if (old==null || newEl!==childNode || newEl.parentNode==null) {
