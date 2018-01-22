@@ -18,6 +18,7 @@ function random() {
 export default class Reorder extends Component {
 	state = {
 		items: createItems(),
+		count: 1,
 		useKeys: false
 	};
 
@@ -42,9 +43,21 @@ export default class Reorder extends Component {
 		this.setState({ items: this.state.items.slice().reverse() });
 	};
 
+	setCount = e => {
+		this.setState({ count: Math.round(e.target.value) });
+	};
+
 	rotate = () => {
-		let { items } = this.state;
-		this.setState({ items: items.slice(1).concat(items[0]) });
+		let { items, count } = this.state;
+		items = items.slice(count).concat(items.slice(0, count));
+		this.setState({ items });
+	};
+
+	rotateBackward = () => {
+		let { items, count } = this.state,
+			len = items.length;
+		items = items.slice(len-count, len).concat(items.slice(0, len-count));
+		this.setState({ items });
 	};
 
 	toggleKeys = () => {
@@ -55,7 +68,7 @@ export default class Reorder extends Component {
 		<li key={this.state.useKeys ? item.key : null}>{item.label}</li>
 	);
 
-	render({}, { items, useKeys }) {
+	render({}, { items, count, useKeys }) {
 		return (
 			<div class="reorder-demo">
 				<header>
@@ -63,7 +76,9 @@ export default class Reorder extends Component {
 					<button onClick={this.swapTwo}>Swap Two</button>
 					<button onClick={this.reverse}>Reverse</button>
 					<button onClick={this.rotate}>Rotate</button>
+					<button onClick={this.rotateBackward}>Rotate Backward</button>
 					<label><input type="checkbox" onClick={this.toggleKeys} checked={useKeys} /> use keys?</label>
+					<label><input type="number" step="1" min="1" style={{ width: '3em' }} onInput={this.setCount} value={count} /> count</label>
 				</header>
 				<ul>
 					{items.map(this.renderItem)}
@@ -72,42 +87,3 @@ export default class Reorder extends Component {
 		);
 	}
 }
-
-
-/** Represents a single coloured dot. */
-class Cursor extends Component {
-	// get shared/pooled class object
-	getClass(big, label) {
-		let cl = 'cursor';
-		if (big) cl += ' big';
-		if (label) cl += ' label';
-		return cl;
-	}
-
-	// skip any pointless re-renders
-	shouldComponentUpdate(props) {
-		for (let i in props) if (i !== 'children' && props[i] !== this.props[i]) return true;
-		return false;
-	}
-
-	// first argument is "props", the attributes passed to <Cursor ...>
-	render({ x, y, label, color, big }) {
-		let inner = null;
-		if (label) inner = <span class="label">{x},{y}</span>;
-		return (
-			<div
-				class={this.getClass(big, label)}
-				style={{
-					transform: `translate(${x || 0}px, ${y || 0}px) scale(${big?2:1})`,
-					// transform: `translate3d(${x || 0}px, ${y || 0}px, 0) scale(${big?2:1})`,
-					borderColor: color
-				}}
-				// style={{ left: x || 0, top: y || 0, borderColor: color }}
-			>{inner}</div>
-		);
-	}
-}
-
-
-// Addendum: disable dragging on mobile
-addEventListener('touchstart', e => (e.preventDefault(), false));
