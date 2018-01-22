@@ -2,7 +2,7 @@
   "name": "demo",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --inline --hot"
+    "start": "webpack-dev-server --inline"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
