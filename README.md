@@ -125,6 +125,7 @@ Preact supports modern browsers and IE9+:
 - :construction_worker: [**preact-helmet**](https://github.com/download/preact-helmet): A document head manager for Preact
 - :necktie: [**preact-delegate**](https://github.com/NekR/preact-delegate): Delegate DOM events
 - :art: [**preact-stylesheet-decorator**](https://github.com/k1r0s/preact-stylesheet-decorator): Add Scoped Stylesheets to your Preact Components
+- :electric_plug: [**preact-routlet**](https://github.com/k1r0s/preact-routlet): Simple `Component Driven` Routing for Preact using ES7 Decorators
 
 #### UI Component Libraries
 
