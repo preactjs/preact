@@ -163,7 +163,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 				else {
 					sib = childNode;
 					// j = i;
-					// j = 0;
+					j = 0;
 					// while ((sib=sib.nextSibling) && j++<oldChildrenLength/2) {
 					while ((sib=sib.nextSibling) && j++<oldChildrenLength/2) {
 						if (sib===newEl) {
