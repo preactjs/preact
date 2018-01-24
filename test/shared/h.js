@@ -24,7 +24,7 @@ describe('h(jsx)', () => {
 		expect(r).to.have.property('children').that.eql([]);
 	});
 
-	it('should perserve raw attributes', () => {
+	it('should preserve raw attributes', () => {
 		let attrs = { foo:'bar', baz:10, func:()=>{} },
 			r = h('foo', attrs);
 		expect(r).to.be.an('object')
@@ -235,5 +235,14 @@ describe('h(jsx)', () => {
 		expect(r).to.be.an('object')
 			.with.property('children')
 			.that.deep.equals(['onetwothree']);
+	});
+
+	it('should not merge children of components', () => {
+		let Component = ({children}) => children;
+		let r = h(Component, null, 'x', 'y');
+
+		expect(r).to.be.an('object')
+			.with.property('children')
+			.that.deep.equals(['x', 'y']);
 	});
 });

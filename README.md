@@ -3,7 +3,7 @@
 <img alt="Preact" title="Preact" src="https://cdn.rawgit.com/developit/b4416d5c92b743dbaec1e68bc4c27cda/raw/3235dc508f7eb834ebf48418aea212a05df13db1/preact-logo-trans.svg" width="550">
 </a>
 </p>
-<p align="center">Fast <b>3kB</b> alternative to React, with the same ES2015 API.</p>
+<p align="center">Fast <b>3kB</b> alternative to React with the same modern API.</p>
 
 **All the power of Virtual DOM components, without the overhead:**
 
@@ -12,6 +12,7 @@
 - Everything you need: JSX, <abbr title="Virtual DOM">VDOM</abbr>, React DevTools, <abbr title="Hot Module Replacement">HMR</abbr>, <abbr title="Server-Side Rendering">SSR</abbr>..
 - A highly optimized diff algorithm and seamless Server Side Rendering
 - Transparent asynchronous rendering with a pluggable scheduler
+- 🆕💥 **Instant no-config app bundling with [Preact CLI](https://github.com/developit/preact-cli)**
 
 ### 💁 More information at the [Preact Website ➞](https://preactjs.com)
 
@@ -30,7 +31,7 @@
 - [Linked State](#linked-state)
 - [Examples](#examples)
 - [Extensions](#extensions)
-- [Developer Tools](#developer-tools)
+- [Debug Mode](#debug-mode)
 - [Backers](#backers)
 - [Sponsors](#sponsors)
 - [License](#license)
@@ -59,36 +60,52 @@ Preact supports modern browsers and IE9+:
 
 ## Demos
 
+#### Real-World Apps
+
+- [**Preact Hacker News**](https://hn.kristoferbaxter.com) _([GitHub Project](https://github.com/kristoferbaxter/preact-hn))_
+- [**Play.cash**](https://play.cash) :notes:
 - [**ESBench**](http://esbench.com) is built using Preact.
-- [**Nectarine.rocks**](http://nectarine.rocks) _([Github Project](https://github.com/developit/nectarine))_ :peach:
-- [**Documentation Viewer**](https://documentation-viewer.firebaseapp.com) _([Github Project](https://github.com/developit/documentation-viewer))_
-- [**TodoMVC**](https://preact-todomvc.surge.sh) _([Github Project](https://github.com/developit/preact-todomvc))_
-- [**Hacker News Minimal**](https://developit.github.io/hn_minimal/) _([Github Project](https://github.com/developit/hn_minimal))_
-- [**Preact Boilerplate**](https://preact-boilerplate.surge.sh) _([Github Project](https://github.com/developit/preact-boilerplate))_ :zap:
-- [**Preact Offline Starter**](https://preact-starter.now.sh) _([Github Project](https://github.com/lukeed/preact-starter))_ :100:
-- [**Preact PWA**](https://preact-pwa.appspot.com/) _([Github Project](https://github.com/ezekielchentnik/preact-pwa))_ :hamburger:
-- [**Preact Mobx Starter**](https://awaw00.github.io/preact-mobx-starter/) _([Github Project](https://github.com/awaw00/preact-mobx-starter))_ :sunny:
-- [**Preact Redux Example**](https://github.com/developit/preact-redux-example) :star:
+- [**BigWebQuiz**](https://bigwebquiz.com) _([GitHub Project](https://github.com/jakearchibald/big-web-quiz))_
+- [**Nectarine.rocks**](http://nectarine.rocks) _([GitHub Project](https://github.com/developit/nectarine))_ :peach:
+- [**TodoMVC**](https://preact-todomvc.surge.sh) _([GitHub Project](https://github.com/developit/preact-todomvc))_
+- [**OSS.Ninja**](https://oss.ninja) _([GitHub Project](https://github.com/developit/oss.ninja))_
+- [**GuriVR**](https://gurivr.com) _([GitHub Project](https://github.com/opennewslabs/guri-vr))_
+- [**Color Picker**](https://colors.now.sh) _([GitHub Project](https://github.com/lukeed/colors-app))_ :art:
+- [**Rainbow Explorer**](https://use-the-platform.com/rainbow-explorer/) _([GitHub Project](https://github.com/vaneenige/rainbow-explorer/))_ :rainbow:
+- [**Offline Gallery**](https://use-the-platform.com/offline-gallery/) _([GitHub Project](https://github.com/vaneenige/offline-gallery/))_ :balloon:
+- [**Periodic Weather**](https://use-the-platform.com/periodic-weather/) _([GitHub Project](https://github.com/vaneenige/periodic-weather/))_ :sunny:
+- [**Rugby News Board**](http://nbrugby.com) _[(GitHub Project)](https://github.com/rugby-board/rugby-board-node)_
+
+#### Runnable Examples
+
 - [**Flickr Browser**](http://codepen.io/developit/full/VvMZwK/) (@ CodePen)
 - [**Animating Text**](http://codepen.io/developit/full/LpNOdm/) (@ CodePen)
 - [**60FPS Rainbow Spiral**](http://codepen.io/developit/full/xGoagz/) (@ CodePen)
 - [**Simple Clock**](http://jsfiddle.net/developit/u9m5x0L7/embedded/result,js/) (@ JSFiddle)
 - [**3D + ThreeJS**](http://codepen.io/developit/pen/PPMNjd?editors=0010) (@ CodePen)
 - [**Stock Ticker**](http://codepen.io/developit/pen/wMYoBb?editors=0010) (@ CodePen)
-- [**Create your Own!**](https://jsfiddle.net/developit/rs6zrh5f/embedded/result/) (@ JSFiddle)
-- [**Preact Coffeescript**](https://github.com/crisward/preact-coffee)
-- [**GuriVR**](https://gurivr.com) _([Github Project](https://github.com/opennewslabs/guri-vr))_
+- [*Create your Own!*](https://jsfiddle.net/developit/rs6zrh5f/embedded/result/) (@ JSFiddle)
+
+### Starter Projects
+
+- [**Preact Boilerplate**](https://preact-boilerplate.surge.sh) _([GitHub Project](https://github.com/developit/preact-boilerplate))_ :zap:
+- [**Preact Offline Starter**](https://preact-starter.now.sh) _([GitHub Project](https://github.com/lukeed/preact-starter))_ :100:
+- [**Preact PWA**](https://preact-pwa.appspot.com/) _([GitHub Project](https://github.com/ezekielchentnik/preact-pwa))_ :hamburger:
+- [**Parcel + Preact + Unistore Starter**](https://github.com/hwclass/parcel-preact-unistore-starter)
+- [**Preact Mobx Starter**](https://awaw00.github.io/preact-mobx-starter/) _([GitHub Project](https://github.com/awaw00/preact-mobx-starter))_ :sunny:
+- [**Preact Redux Example**](https://github.com/developit/preact-redux-example) :star:
+- [**Preact Redux/RxJS/Reselect Example**](https://github.com/continuata/preact-seed)
 - [**V2EX Preact**](https://github.com/yanni4night/v2ex-preact)
-- [**BigWebQuiz**](https://bigwebquiz.com/) _([Github Project](https://github.com/jakearchibald/big-web-quiz))_
-- [**Color Picker**](https://colors.now.sh) _([Github Project](https://github.com/lukeed/colors-app))_ :art:
-- [**Rainbow Explorer**](https://use-the-platform.com/rainbow-explorer/) _([Github Project](https://github.com/vaneenige/rainbow-explorer/))_ :rainbow:
-- [**Offline Gallery**](https://use-the-platform.com/offline-gallery/) _([Github Project](https://github.com/vaneenige/offline-gallery/))_ :balloon:
-- [**Periodic Weather**](https://use-the-platform.com/periodic-weather/) _([Github Project](https://github.com/vaneenige/periodic-weather/))_ :sunny:
+- [**Preact Coffeescript**](https://github.com/crisward/preact-coffee)
+
+---
 
 ## Libraries & Add-ons
 
 - :raised_hands: [**preact-compat**](https://git.io/preact-compat): use any React library with Preact *([full example](http://git.io/preact-compat-example))*
 - :page_facing_up: [**preact-render-to-string**](https://git.io/preact-render-to-string): Universal rendering.
+- :eyes: [**preact-render-spy**](https://github.com/mzgoddard/preact-render-spy): Enzyme-lite: Renderer with access to the produced virtual dom for testing.
+- :loop: [**preact-render-to-json**](https://git.io/preact-render-to-json): Render for Jest Snapshot testing.
 - :earth_americas: [**preact-router**](https://git.io/preact-router): URL routing for your components
 - :bookmark_tabs: [**preact-markup**](https://git.io/preact-markup): Render HTML & Custom Elements as JSX & Components
 - :satellite: [**preact-portal**](https://git.io/preact-portal): Render Preact components into (a) SPACE :milky_way:
@@ -107,25 +124,32 @@ Preact supports modern browsers and IE9+:
 - :shaved_ice: [**preact-codemod**](https://github.com/vutran/preact-codemod): Transform your React code to Preact.
 - :construction_worker: [**preact-helmet**](https://github.com/download/preact-helmet): A document head manager for Preact
 - :necktie: [**preact-delegate**](https://github.com/NekR/preact-delegate): Delegate DOM events
+- :art: [**preact-stylesheet-decorator**](https://github.com/k1r0s/preact-stylesheet-decorator): Add Scoped Stylesheets to your Preact Components
+- :electric_plug: [**preact-routlet**](https://github.com/k1r0s/preact-routlet): Simple `Component Driven` Routing for Preact using ES7 Decorators
 
 #### UI Component Libraries
 
 > Want to prototype something or speed up your development? Try one of these toolkits:
 
-- [**preact-material-components**](https://github.com/prateekbh/preact-material-components): Material Design Components for Preact ([website](https://prateekbh.github.io/preact-material-components/))
+- [**preact-material-components**](https://github.com/prateekbh/preact-material-components): Material Design Components for Preact ([website](https://material.preactjs.com/))
 - [**preact-mdc**](https://github.com/BerndWessels/preact-mdc): Material Design Components for Preact ([demo](https://github.com/BerndWessels/preact-mdc-demo))
 - [**preact-mui**](https://git.io/v1aVO): The MUI CSS Preact library.
 - [**preact-photon**](https://git.io/preact-photon): build beautiful desktop UI with [photon](http://photonkit.com)
 - [**preact-mdl**](https://git.io/preact-mdl): [Material Design Lite](https://getmdl.io) for Preact
+- [**preact-weui**](https://github.com/afeiship/preact-weui): [Weui](https://github.com/afeiship/preact-weui) for Preact
 
 
 ---
 
 ## Getting Started
 
-> 💁 You [don't _have_ to use ES2015 to use Preact](https://github.com/developit/preact-without-babel)... but you should.
+> 💁 _**Note:** You [don't need ES2015 to use Preact](https://github.com/developit/preact-in-es3)... but give it a try!_
 
-The following guide assumes you have some sort of ES2015 build set up using babel and/or webpack/browserify/gulp/grunt/etc.  If you don't, start with [preact-boilerplate] or a [CodePen Template](http://codepen.io/developit/pen/pgaROe?editors=0010).
+The easiest way to get started with Preact is to install [Preact CLI](https://github.com/developit/preact-cli). This simple command-line tool wraps up the best possible Webpack and Babel setup for you, and even keeps you up-to-date as the underlying tools change. Best of all, it's easy to understand! It builds your app in a single command (`preact build`), doesn't need any configuration, and bakes in best-practises 🙌.
+
+The following guide assumes you have some sort of ES2015 build set up using babel and/or webpack/browserify/gulp/grunt/etc.
+
+You can also start with [preact-boilerplate] or a [CodePen Template](http://codepen.io/developit/pen/pgaROe?editors=0010).
 
 
 ### Import what you need
@@ -169,6 +193,14 @@ import preact from 'preact';
 >   ]
 > }
 > ```
+> **Using Preact along with TypeScript:**
+>
+> ```json
+> {
+>   "jsx": "react",
+>   "jsxFactory": "h",
+> }
+> ```
 
 
 ### Rendering JSX
@@ -188,7 +220,7 @@ render((
 ), document.body);
 ```
 
-This should seem pretty straightforward if you've used hyperscript or one of its many friends. If you're not, the short of it is that the h function import gets used in the final, transpiled code as a drop in replacement for React.createElement, and so needs to be imported even if you don't explicitly use it in the code you write. Also note that if you're the kind of person who likes writing your React code in "pure JavaScript" (you know who you are) you will need to use h(...) wherever you would otherwise use React.createElement.
+This should seem pretty straightforward if you've used hyperscript or one of its many friends. If you're not, the short of it is that the `h()` function import gets used in the final, transpiled code as a drop in replacement for `React.createElement()`, and so needs to be imported even if you don't explicitly use it in the code you write. Also note that if you're the kind of person who likes writing your React code in "pure JavaScript" (you know who you are) you will need to use `h()` wherever you would otherwise use `React.createElement()`.
 
 Rendering hyperscript with a virtual DOM is pointless, though. We want to render components and have them updated when data changes - that's where the power of virtual DOM diffing shines. :star2:
 
@@ -236,7 +268,7 @@ In order to have the clock's time update every second, we need to know when `<Cl
 
 
 
-So, we want to have a 1-second timer start once the Component gets added to the DOM, and stop if it is removed. We'll create the timer and store a reference to it in `componentDidMount`, and stop the timer in `componentWillUnmount`. On each timer tick, we'll update the component's `state` object with a new time value. Doing this will automatically re-render the component.
+So, we want to have a 1-second timer start once the Component gets added to the DOM, and stop if it is removed. We'll create the timer and store a reference to it in `componentDidMount()`, and stop the timer in `componentWillUnmount()`. On each timer tick, we'll update the component's `state` object with a new time value. Doing this will automatically re-render the component.
 
 ```js
 import { h, render, Component } from 'preact';
@@ -304,7 +336,7 @@ class Foo extends Component {
 
 While this achieves much better runtime performance, it's still a lot of unnecessary code to wire up state to UI.
 
-Fortunately there is a solution, in the form of a module called [linkstate](https://github.com/developit/linkstate). Calling `linkState(component, 'text')` returns a function that accepts an Event and uses it's associated value to update the given property in your component's state. Calls to `linkState()` with the same arguments are cached, so there is no performance penalty.  Here is the previous example rewritten using _Linked State_:
+Fortunately there is a solution, in the form of a module called [linkstate](https://github.com/developit/linkstate). Calling `linkState(component, 'text')` returns a function that accepts an Event and uses its associated value to update the given property in your component's state. Calls to `linkState()` with the same arguments are cached, so there is no performance penalty.  Here is the previous example rewritten using _Linked State_:
 
 ```js
 import linkState from 'linkstate';
@@ -329,7 +361,7 @@ Here is a somewhat verbose Preact `<Link>` component:
 ```js
 class Link extends Component {
 	render(props, state) {
-		return <a href={ props.href }>{ props.children }</a>;
+		return <a href={props.href}>{props.children}</a>;
 	}
 }
 ```
@@ -338,21 +370,21 @@ Since this is ES6/ES2015, we can further simplify:
 
 ```js
 class Link extends Component {
-	render({ href, children }) {
-		return <a {...{ href, children }} />;
-	}
+    render({ href, children }) {
+        return <a {...{ href, children }} />;
+    }
 }
 
 // or, for wide-open props support:
 class Link extends Component {
-	render(props) {
-		return <a {...props} />;
-	}
+    render(props) {
+        return <a {...props} />;
+    }
 }
 
 // or, as a stateless functional component:
 const Link = ({ children, ...props }) => (
-	<a {...props}>{ children }</a>
+    <a {...props}>{ children }</a>
 );
 ```
 
@@ -401,24 +433,50 @@ class MixedComponent extends Component {
 }
 ```
 
-## Developer Tools
+## Debug Mode
 
 You can inspect and modify the state of your Preact UI components at runtime using the
 [React Developer Tools](https://github.com/facebook/react-devtools) browser extension.
 
 1. Install the [React Developer Tools](https://github.com/facebook/react-devtools) extension
-2. Import the "preact/devtools" module in your app
-3. Reload and go to the 'React' tab in the browser's development tools
+2. Import the "preact/debug" module in your app
+3. Set `process.env.NODE_ENV` to 'development'
+4. Reload and go to the 'React' tab in the browser's development tools
 
 
 ```js
 import { h, Component, render } from 'preact';
 
-// Enable devtools. You can reduce the size of your app by only including this
+// Enable debug mode. You can reduce the size of your app by only including this
 // module in development builds. eg. In Webpack, wrap this with an `if (module.hot) {...}`
 // check.
-require('preact/devtools');
+require('preact/debug');
 ```
+
+### Runtime Error Checking
+
+To enable debug mode, you need to set `process.env.NODE_ENV=development`. You can do this
+with webpack via a builtin plugin.
+
+```js
+// webpack.config.js
+
+// Set NODE_ENV=development to enable error checking
+new webpack.DefinePlugin({
+  'process.env': {
+    'NODE_ENV': JSON.stringify('development')
+  }
+});
+```
+
+When enabled, warnings are logged to the console when undefined components or string refs
+are detected.
+
+### Developer Tools
+
+If you only want to include devtool integration, without runtime error checking, you can
+replace `preact/debug` in the above example with `preact/devtools`. This option doesn't
+require setting `NODE_ENV=development`.
 
 
 
@@ -458,7 +516,7 @@ Support us with a monthly donation and help us continue our activities. [[Become
 
 
 ## Sponsors
-Become a sponsor and get your logo on our README on Github with a link to your site. [[Become a sponsor](https://opencollective.com/preact#sponsor)]
+Become a sponsor and get your logo on our README on GitHub with a link to your site. [[Become a sponsor](https://opencollective.com/preact#sponsor)]
 
 <a href="https://opencollective.com/preact/sponsor/0/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/0/avatar.svg"></a>
 <a href="https://opencollective.com/preact/sponsor/1/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/1/avatar.svg"></a>
