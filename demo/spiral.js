@@ -1,15 +1,12 @@
 import { createElement, Component } from 'ceviche';
-import './style.scss';
 
-const COUNT = 1000;
+const COUNT = 500;
 const LOOPS = 6;
 
 // Component.debounce = requestAnimationFrame;
 
 export default class Spiral extends Component {
 	state = { x: 0, y: 0, big: false, counter: 0 };
-
-	c = window.spiral = this;
 
 	handleClick = e => {
 		console.log('click');
@@ -19,6 +16,7 @@ export default class Spiral extends Component {
 		if (this.stop) return;
 		// this.setState({ counter: this.state.counter + 1 }, this.increment);
 		this.setState({ counter: this.state.counter + 1 });
+		// this.forceUpdate();
 		requestAnimationFrame(this.increment);
 	};
 

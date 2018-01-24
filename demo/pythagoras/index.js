@@ -55,7 +55,7 @@ export default class PythagorasDemo extends Component {
 	}
 
 	componentWillUnmount() {
-		this.selected.off('mousemove', this.onMouseMove);
+		this.selected.on('mousemove', null);
 		clearTimeout(this.timer);
 	}
 

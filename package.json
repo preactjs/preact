@@ -25,7 +25,8 @@
     "rules": {
       "prefer-rest-params": 0,
       "prefer-spread": 0,
-      "no-cond-assign": 0
+      "no-cond-assign": 0,
+      "react/prefer-stateless-function": 0
     }
   },
   "files": [
