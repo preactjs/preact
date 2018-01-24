@@ -42,10 +42,10 @@
   "license": "MIT",
   "repository": "developit/ceviche",
   "devDependencies": {
-    "eslint": "^4.15.0",
+    "eslint": "^4.16.0",
     "eslint-config-developit": "^1.1.1",
-    "jest": "^22.1.1",
-    "microbundle": "^0.3.1"
+    "jest": "^22.1.4",
+    "microbundle": "^0.4.1"
   },
   "dependencies": {
     "object-shape": "^0.2.0"
