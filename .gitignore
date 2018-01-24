@@ -4,6 +4,7 @@
 /dist
 /_dev
 /coverage
+package-lock.json
 
 # Additional bundles
 /devtools.js

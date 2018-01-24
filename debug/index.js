@@ -1,21 +1,25 @@
+/* eslint-disable no-console */
+
 if (process.env.NODE_ENV === 'development') {
-	const { options } = require('preact');
+	const preact = require('preact');
+	const options = preact.options;
 	const oldVnodeOption = options.vnode;
 
 	options.vnode = function(vnode) {
 		const { nodeName, attributes, children } = vnode;
 
 		if (nodeName === void 0) {
-			throw new Error('Undefined component passed to preact.h()');
+			console.error('Undefined component passed to preact.h()\n'+serializeVNode(vnode));
 		}
 
 		if (
 			attributes && attributes.ref !== void 0 &&
-			typeof attributes.ref !== 'function'
+			typeof attributes.ref !== 'function' &&
+			!('$$typeof' in vnode)  // allow string refs when preact-compat is installed
 		) {
 			throw new Error(
 				`Component's "ref" property should be a function,` +
-				` but [${typeof attributes.ref}] passed`
+				` but [${typeof attributes.ref}] passed\n` + serializeVNode(vnode)
 			);
 		}
 
@@ -23,18 +27,17 @@ if (process.env.NODE_ENV === 'development') {
 			const keys = {};
 
 			inspectChildren(children, (deepChild) => {
-				if (!deepChild) return;
+				if (!deepChild || deepChild.key==null) return;
 
 				// In Preact, all keys are stored as object values, i.e. being strings
 				const key = deepChild.key + '';
 
 				if (keys.hasOwnProperty(key)) {
-					/* eslint-disable no-console */
 					console.error(
 						'Following component has two or more children with the ' +
 						'same "key" attribute. This may cause glitches and misbehavior ' +
 						'in rendering process. Component: \n\n' +
-						serializeVNode(vnode) + '\n\n'
+						serializeVNode(vnode)
 					);
 
 					// Return early to not spam the console
@@ -45,10 +48,36 @@ if (process.env.NODE_ENV === 'development') {
 			});
 		}
 
-		return oldVnodeOption.call(this, vnode);
+		if (oldVnodeOption) oldVnodeOption.call(this, vnode);
 	};
 
+	try {
+		const oldRender = preact.render;
+		preact.render = function (vnode, parent, merge) {
+			if (parent == null && merge == null) {
+				// render(vnode, parent, merge) can't have both parent and merge be undefined
+				console.error('The "containerNode" or "replaceNode" is not defined in the render method. ' +
+					'Component: \n\n' + serializeVNode(vnode));
+			}
+			else if (parent == merge) {
+				// if parent == merge, it doesn't reason well and would cause trouble when preact
+				// tries to update or replace that 'replaceNode' element
+				console.error(
+					'The "containerNode" and "replaceNode" are the same in render method, ' +
+					'when the "replaceNode" DOM node is expected to be a child of "containerNode". ' +
+					'docs-ref: https://preactjs.com/guide/api-reference#-preact-render-. Component: \n\n' +
+					serializeVNode(vnode)
+				);
+			}
+			return oldRender(vnode, parent, merge);
+		};
+	}
+	catch (e) {}
+
 	const inspectChildren = (children, inspect) => {
+		if (!Array.isArray(children)) {
+			children = [children];
+		}
 		return children.some((child, i) => {
 			if (Array.isArray(child)) {
 				return inspectChildren(child, inspect);
@@ -58,27 +87,34 @@ if (process.env.NODE_ENV === 'development') {
 		});
 	};
 
-	const serializeVNode = ({ nodeName, attributes }) => {
-		let name;
-		let props;
-
-		if (typeof nodeName === 'function') {
-			name = nodeName.name || nodeName.displayName;
-		} else {
-			name = nodeName;
+	const serializeVNode = ({ nodeName, attributes, children }) => {
+		if (typeof nodeName==='function') {
+			nodeName = nodeName.name || nodeName.displayName;
 		}
 
+		let props = '';
 		if (attributes) {
-			props = Object.keys(attributes).map(attr => {
-				return `${attr}=${JSON.stringify(attributes[attr] + '')}`;
-			});
+			for (let attr in attributes) {
+				if (attributes.hasOwnProperty(attr) && attr!=='children') {
+					let value = attributes[attr];
+
+					// If it is an object but doesn't have toString(), use Object.toString
+					if (typeof value==='function') {
+						value = `function ${value.displayName || value.name}() {}`;
+					}
+					if (Object(value) === value && !value.toString) {
+						value = Object.prototype.toString.call(value);
+					}
+					else {
+						value = value + '';
+					}
+
+					props += ` ${attr}=${JSON.stringify(value)}`;
+				}
+			}
 		}
 
-		if (!props) {
-			return `<${name} />`;
-		}
-
-		return `<${name} ${props.join(' ')} />`;
+		return `<${nodeName}${props}${children && children.length ? ('>..</'+nodeName+'>') : ' />'}`;
 	};
 
 	require('preact/devtools');

@@ -17,7 +17,7 @@ export default (file, api) => {
 					init = node.init;
 				if (name && init && name.match(/^[A-Z0-9_$]+$/g) && !init.regex) {
 					if (init.type==='Literal') {
-						console.log(`Inlining constant: ${name}=${init.raw}`);
+						// console.log(`Inlining constant: ${name}=${init.raw}`);
 						found++;
 						constants[name] = init;
 						// remove declaration
