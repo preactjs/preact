@@ -97,6 +97,7 @@ Preact supports modern browsers and IE9+:
 - [**Preact Redux/RxJS/Reselect Example**](https://github.com/continuata/preact-seed)
 - [**V2EX Preact**](https://github.com/yanni4night/v2ex-preact)
 - [**Preact Coffeescript**](https://github.com/crisward/preact-coffee)
+- [**Preact + TypeScript + Webpack**](https://github.com/k1r0s/bleeding-preact-starter)
 
 ---
 
