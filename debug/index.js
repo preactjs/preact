@@ -1,7 +1,8 @@
 /* eslint-disable no-console */
 
 if (process.env.NODE_ENV === 'development') {
-	const { options } = require('preact');
+	const preact = require('preact');
+	const options = preact.options;
 	const oldVnodeOption = options.vnode;
 
 	options.vnode = function(vnode) {
@@ -49,6 +50,29 @@ if (process.env.NODE_ENV === 'development') {
 
 		if (oldVnodeOption) oldVnodeOption.call(this, vnode);
 	};
+
+	try {
+		const oldRender = preact.render;
+		preact.render = function (vnode, parent, merge) {
+			if (parent == null && merge == null) {
+				// render(vnode, parent, merge) can't have both parent and merge be undefined
+				console.error('The "containerNode" or "replaceNode" is not defined in the render method. ' +
+					'Component: \n\n' + serializeVNode(vnode));
+			}
+			else if (parent == merge) {
+				// if parent == merge, it doesn't reason well and would cause trouble when preact
+				// tries to update or replace that 'replaceNode' element
+				console.error(
+					'The "containerNode" and "replaceNode" are the same in render method, ' +
+					'when the "replaceNode" DOM node is expected to be a child of "containerNode". ' +
+					'docs-ref: https://preactjs.com/guide/api-reference#-preact-render-. Component: \n\n' +
+					serializeVNode(vnode)
+				);
+			}
+			return oldRender(vnode, parent, merge);
+		};
+	}
+	catch (e) {}
 
 	const inspectChildren = (children, inspect) => {
 		if (!Array.isArray(children)) {
