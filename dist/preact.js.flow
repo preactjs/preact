@@ -1,0 +1,13 @@
+/* @flow */
+
+import { createElement, cloneElement, Component, type Node } from 'react';
+
+declare var h: createElement;
+
+declare function render(vnode: Node, parent: Element, toReplace?: Element): Element;
+
+export { h, createElement, cloneElement, Component, render };
+export default { h, createElement, cloneElement, Component, render };
+
+declare export function rerender(): void;
+declare export var options: Object;
