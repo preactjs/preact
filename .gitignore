@@ -10,3 +10,5 @@ package-lock.json
 /devtools.js.map
 /debug.js
 /debug.js.map
+.npmrc
+/dist
