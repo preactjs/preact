@@ -1,6 +1,6 @@
 {
   "name": "preact",
-  "version": "8.2.7",
+  "version": "8.2.8",
   "description": "Fast 3kb React alternative with the same modern API. Components & Virtual DOM.",
   "main": "dist/preact.js",
   "jsnext:main": "dist/preact.esm.js",
@@ -34,7 +34,7 @@
     "test:size": "bundlesize",
     "lint": "eslint debug devtools src test",
     "prepublish": "npm run build",
-    "smart-release": "npm run build && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish",
+    "smart-release": "npm run build && npm test",
     "release": "cross-env npm run smart-release",
     "postinstall": "node -e \"console.log('\\u001b[35m\\u001b[1mLove Preact? You can now donate to our open collective:\\u001b[22m\\u001b[39m\\n > \\u001b[34mhttps://opencollective.com/preact/donate\\u001b[0m')\""
   },
@@ -116,7 +116,7 @@
     "rollup-plugin-node-resolve": "^3.0.0",
     "sinon": "^2.2.0",
     "sinon-chai": "^2.8.0",
-    "typescript": "^2.2.2",
+    "typescript": "^2.5.2",
     "uglify-js": "^2.7.5",
     "webpack": "^2.4.1"
   },

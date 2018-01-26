@@ -1,7 +1,6 @@
 /node_modules
 /npm-debug.log
 .DS_Store
-/dist
 /_dev
 /coverage
 package-lock.json
@@ -11,3 +10,5 @@ package-lock.json
 /devtools.js.map
 /debug.js
 /debug.js.map
+.npmrc
+/dist
