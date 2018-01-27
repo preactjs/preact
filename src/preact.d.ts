@@ -40,7 +40,7 @@ declare namespace preact {
 	}
 
 	interface FunctionalComponent<PropsType> {
-		(props?:PropsType & ComponentProps<this>, context?:any):JSX.Element;
+		(props:PropsType & ComponentProps<this>, context?:any):JSX.Element;
 		displayName?:string;
 		defaultProps?:any;
 	}
