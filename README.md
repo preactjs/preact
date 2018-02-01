@@ -194,7 +194,7 @@ import preact from 'preact';
 >   ]
 > }
 > ```
-> **Using Preact along with TypeScript:**
+> **For using Preact along with TypeScript add to `tsconfig.json`:**
 >
 > ```json
 > {
