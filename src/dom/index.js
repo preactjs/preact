@@ -50,6 +50,13 @@ export function setAccessor(node, name, old, value, isSvg) {
 		if (!value || typeof value==='string' || typeof old==='string') {
 			node.style.cssText = value || '';
 		}
+		if (value && value instanceof Array) {
+			let		temp	= {};
+			for (let i in value) {
+				Object.assign (temp, value[i]);
+			}
+			value	= temp;
+		}
 		if (value && typeof value==='object') {
 			if (typeof old!=='string') {
 				for (let i in old) if (!(i in value)) node.style[i] = '';
