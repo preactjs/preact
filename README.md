@@ -268,6 +268,7 @@ In order to have the clock's time update every second, we need to know when `<Cl
 | `componentDidUpdate`        | after `render()`                                 |
 
 
+Note that `componentWillUnmount` is sometimes called after the DOM has been modified to remove the component's DOM elements. This is a bug. See [issue #732](https://github.com/developit/preact/issues/732) and [this pull request](https://github.com/developit/preact/pull/733).
 
 So, we want to have a 1-second timer start once the Component gets added to the DOM, and stop if it is removed. We'll create the timer and store a reference to it in `componentDidMount()`, and stop the timer in `componentWillUnmount()`. On each timer tick, we'll update the component's `state` object with a new time value. Doing this will automatically re-render the component.
 
