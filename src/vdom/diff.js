@@ -4,7 +4,7 @@ import { buildComponentFromVNode } from './component';
 import { createNode, setAccessor } from '../dom/index';
 import { unmountComponent } from './component';
 import options from '../options';
-import { removeNode } from '../dom';
+import { removeNode } from '../dom/index';
 
 /** Queue of components that have been mounted and are awaiting componentDidMount */
 export const mounts = [];
