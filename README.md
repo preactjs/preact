@@ -98,6 +98,7 @@ Preact supports modern browsers and IE9+:
 - [**V2EX Preact**](https://github.com/yanni4night/v2ex-preact)
 - [**Preact Coffeescript**](https://github.com/crisward/preact-coffee)
 - [**Preact + TypeScript + Webpack**](https://github.com/k1r0s/bleeding-preact-starter)
+- [**0 config => Preact + Poi**](https://github.com/k1r0s/preact-poi-starter)
 
 ---
 
