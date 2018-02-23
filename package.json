@@ -1,12 +1,13 @@
 {
   "name": "preact",
-  "version": "8.2.6",
-  "description": "Fast 3kb React alternative with the same ES6 API. Components & Virtual DOM.",
+  "version": "8.2.7",
+  "description": "Fast 3kb React alternative with the same modern API. Components & Virtual DOM.",
   "main": "dist/preact.js",
   "jsnext:main": "dist/preact.esm.js",
   "module": "dist/preact.esm.js",
   "dev:main": "dist/preact.dev.js",
   "minified:main": "dist/preact.min.js",
+  "types": "dist/preact.d.ts",
   "scripts": {
     "clean": "rimraf dist/ devtools.js devtools.js.map debug.js debug.js.map",
     "copy-flow-definition": "copyfiles -f src/preact.js.flow dist",
