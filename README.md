@@ -98,6 +98,7 @@ Preact supports modern browsers and IE9+:
 - [**V2EX Preact**](https://github.com/yanni4night/v2ex-preact)
 - [**Preact Coffeescript**](https://github.com/crisward/preact-coffee)
 - [**Preact + TypeScript + Webpack**](https://github.com/k1r0s/bleeding-preact-starter)
+- [**0 config => Preact + Poi**](https://github.com/k1r0s/preact-poi-starter)
 
 ---
 
@@ -127,6 +128,7 @@ Preact supports modern browsers and IE9+:
 - :necktie: [**preact-delegate**](https://github.com/NekR/preact-delegate): Delegate DOM events
 - :art: [**preact-stylesheet-decorator**](https://github.com/k1r0s/preact-stylesheet-decorator): Add Scoped Stylesheets to your Preact Components
 - :electric_plug: [**preact-routlet**](https://github.com/k1r0s/preact-routlet): Simple `Component Driven` Routing for Preact using ES7 Decorators
+- :fax: [**preact-bind-group**](https://github.com/k1r0s/preact-bind-group): Preact Forms made easy, Group Events into a Single Callback
 
 #### UI Component Libraries
 
@@ -194,7 +196,7 @@ import preact from 'preact';
 >   ]
 > }
 > ```
-> **Using Preact along with TypeScript:**
+> **For using Preact along with TypeScript add to `tsconfig.json`:**
 >
 > ```json
 > {
