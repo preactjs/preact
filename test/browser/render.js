@@ -79,7 +79,7 @@ describe('render()', () => {
 		expect(c).to.have.deep.property('2.nodeName', 'X-BAR');
 	});
 
-	it('should not render falsey values', () => {
+	it('should not render falsy values', () => {
 		render((
 			<div>
 				{null},{undefined},{false},{0},{NaN}
@@ -129,7 +129,7 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('Testing, huh! How is it going?');
 	});
 
-	it('should clear falsey attributes', () => {
+	it('should clear falsy attributes', () => {
 		let root = render((
 			<div anull="anull" aundefined="aundefined" afalse="afalse" anan="aNaN" a0="a0" />
 		), scratch);
@@ -155,7 +155,7 @@ describe('render()', () => {
 		});
 	});
 
-	it('should clear falsey input values', () => {
+	it('should clear falsy input values', () => {
 		let root = render((
 			<div>
 				<input value={0} />
@@ -171,7 +171,7 @@ describe('render()', () => {
 		expect(root.children[3]).to.have.property('value', '');
 	});
 
-	it('should clear falsey DOM properties', () => {
+	it('should clear falsy DOM properties', () => {
 		let root;
 		function test(val) {
 			root = render((

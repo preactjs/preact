@@ -18,7 +18,7 @@ declare namespace preact {
 	/**
 	 * Define the contract for a virtual node in preact.
 	 *
-	 * A virutal node has a name, a map of attributes, an array
+	 * A virtual node has a name, a map of attributes, an array
 	 * of child {VNode}s and a key. The key is used by preact for
 	 * internal purposes.
 	 */
@@ -40,7 +40,7 @@ declare namespace preact {
 	}
 
 	interface FunctionalComponent<PropsType> {
-		(props?:PropsType & ComponentProps<this>, context?:any):JSX.Element;
+		(props:PropsType & ComponentProps<this>, context?:any):JSX.Element;
 		displayName?:string;
 		defaultProps?:any;
 	}
@@ -799,6 +799,7 @@ declare namespace JSX {
 		//SVG
 		svg:SVGAttributes;
 		animate:SVGAttributes;
+		animateMotion:SVGAttributes;
 		circle:SVGAttributes;
 		clipPath:SVGAttributes;
 		defs:SVGAttributes;
@@ -828,6 +829,7 @@ declare namespace JSX {
 		linearGradient:SVGAttributes;
 		marker:SVGAttributes;
 		mask:SVGAttributes;
+		mpath:SVGAttributes;
 		path:SVGAttributes;
 		pattern:SVGAttributes;
 		polygon:SVGAttributes;
