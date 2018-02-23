@@ -41,7 +41,7 @@ declare namespace preact {
 	}
 
 	interface FunctionalComponent<PropsType> {
-		(props?:PropsType & ComponentProps<this>, context?:any):JSX.Element;
+		(props:PropsType & ComponentProps<this>, context?:any):JSX.Element;
 		displayName?:string;
 		defaultProps?:any;
 	}
@@ -800,6 +800,7 @@ declare namespace JSX {
 		//SVG
 		svg:SVGAttributes;
 		animate:SVGAttributes;
+		animateMotion:SVGAttributes;
 		circle:SVGAttributes;
 		clipPath:SVGAttributes;
 		defs:SVGAttributes;
@@ -829,6 +830,7 @@ declare namespace JSX {
 		linearGradient:SVGAttributes;
 		marker:SVGAttributes;
 		mask:SVGAttributes;
+		mpath:SVGAttributes;
 		path:SVGAttributes;
 		pattern:SVGAttributes;
 		polygon:SVGAttributes;
