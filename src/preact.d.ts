@@ -97,6 +97,10 @@ declare module "preact/devtools" {
 	// when imported.
 }
 
+declare module "preact/debug" {
+	// Empty. This module initializes checks inside development
+}
+
 declare namespace JSX {
 
 	/**
