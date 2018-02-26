@@ -556,7 +556,7 @@ declare namespace JSX {
 		as?:string;
 		async?:boolean;
 		autocomplete?:string;
-		autofocus?:boolean;
+		autoFocus?:boolean;
 		autoPlay?:boolean;
 		capture?:boolean;
 		cellPadding?:number | string;
