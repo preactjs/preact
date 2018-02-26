@@ -66,18 +66,29 @@ module.exports = function(config) {
 		frameworks: ['source-map-support', 'mocha', 'chai-sinon'],
 
 		reporters: ['mocha'].concat(
-			coverage ? 'coverage' : [],
+			coverage ? 'coverage-istanbul' : [],
 			sauceLabs ? 'saucelabs' : []
 		),
+		coverageIstanbulReporter: {
+			reports: ['html', 'lcovonly', 'text-summary'],
+			dir: 'coverage',
+			fixWebpackSourcePaths: true,
+			'report-config': {
+				lcovonly: {
+					subdir: '.',
+					file: 'lcov.info'
+				}
 
-		coverageReporter: {
-			dir: __dirname+'/../coverage',
-			reporters: [
-				{ type: 'text-summary' },
-				{ type: 'html' },
-				{ type: 'lcovonly', subdir: '.', file: 'lcov.info' }
-			]
+			}
 		},
+		// coverageReporter: {
+		// 	dir: __dirname+'/../coverage',
+		// 	reporters: [
+		// 		{ type: 'text-summary' },
+		// 		{ type: 'html' },
+		// 		{ type: 'lcovonly', subdir: '.', file: 'lcov.info' }
+		// 	]
+		// },
 
 		mochaReporter: {
 			showDiff: true
@@ -123,11 +134,18 @@ module.exports = function(config) {
 						}
 					},
 					/* Only Instrument our source files for coverage */
-					coverage ? {
+					// coverage ? {
+					// 	test: /\.jsx?$/,
+					// 	loader: 'isparta-loader',
+					// 	include: /src/
+					// } : {}
+					coverage ?
+					{
 						test: /\.jsx?$/,
-						loader: 'isparta-loader',
-						include: /src/
-					} : {}
+						use: 'istanbul-instrumenter-loader',
+						include:  /src/,
+						exclude: /node_modules/
+					}: {}
 				]
 			},
 			resolve: {
