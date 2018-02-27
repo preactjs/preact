@@ -43,15 +43,19 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 		// hydration is indicated by the existing element to be diffed not having a prop cache
 		hydrating = dom!=null && !(ATTR_KEY in dom);
 	}
+	let ret;
+	try {
+		ret = idiff(dom, vnode, context, mountAll, componentRoot);
 
-	let ret = idiff(dom, vnode, context, mountAll, componentRoot);
-
-	// append the element if its a new parent
-	if (parent && ret.parentNode!==parent) parent.appendChild(ret);
+		// append the element if its a new parent
+		if (parent && ret.parentNode !== parent) parent.appendChild(ret);
+	} finally {
+		diffLevel--;
+		hydrating = diffLevel ? hydrating : false;
+	}
 
 	// diffLevel being reduced to 0 means we're exiting the diff
-	if (!--diffLevel) {
-		hydrating = false;
+	if (!diffLevel) {
 		// invoke queued componentDidMount lifecycle methods
 		if (!componentRoot) flushMounts();
 	}

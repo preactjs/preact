@@ -623,4 +623,28 @@ describe('render()', () => {
 			done();
 		}, 10);
 	});
+
+	it('should still call lifecycle events after rendering an unrelated component failed', () => {
+		function FailingComponent() {
+			throw new Error('expected error');
+		}
+
+		let didMount = false;
+
+		class LifecycleComponent extends Component {
+			componentDidMount() {
+				didMount = true;
+			}
+			render() {
+				return <div></div>;
+			}
+		}
+
+		try {
+			render(<FailingComponent />, scratch); // Comment this line out to see cdm working in the Good component
+		} catch (e) {}
+
+		render(<LifecycleComponent />, scratch);
+		expect(didMount).to.equal(true);
+	});
 });
