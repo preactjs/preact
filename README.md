@@ -75,6 +75,8 @@ Preact supports modern browsers and IE9+:
 - [**Offline Gallery**](https://use-the-platform.com/offline-gallery/) _([GitHub Project](https://github.com/vaneenige/offline-gallery/))_ :balloon:
 - [**Periodic Weather**](https://use-the-platform.com/periodic-weather/) _([GitHub Project](https://github.com/vaneenige/periodic-weather/))_ :sunny:
 - [**Rugby News Board**](http://nbrugby.com) _[(GitHub Project)](https://github.com/rugby-board/rugby-board-node)_
+- [**Preact Gallery**](https://preact.gallery/) an 8KB photo gallery PWA.
+- [**Rainbow Explorer**](https://preact.gallery/) Preact app to translate real life color to digital color.
 
 #### Runnable Examples
 
@@ -129,6 +131,7 @@ Preact supports modern browsers and IE9+:
 - :art: [**preact-stylesheet-decorator**](https://github.com/k1r0s/preact-stylesheet-decorator): Add Scoped Stylesheets to your Preact Components
 - :electric_plug: [**preact-routlet**](https://github.com/k1r0s/preact-routlet): Simple `Component Driven` Routing for Preact using ES7 Decorators
 - :fax: [**preact-bind-group**](https://github.com/k1r0s/preact-bind-group): Preact Forms made easy, Group Events into a Single Callback
+- :hatching_chick: [**preact-habitat**](https://github.com/zouhir/preact-habitat): Declerative Preact widgets renderer in any CMS or DOM host, [demo](https://codepen.io/zouhir/pen/brrOPB).
 
 #### UI Component Libraries
 
