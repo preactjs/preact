@@ -76,7 +76,7 @@ Preact supports modern browsers and IE9+:
 - [**Periodic Weather**](https://use-the-platform.com/periodic-weather/) _([GitHub Project](https://github.com/vaneenige/periodic-weather/))_ :sunny:
 - [**Rugby News Board**](http://nbrugby.com) _[(GitHub Project)](https://github.com/rugby-board/rugby-board-node)_
 - [**Preact Gallery**](https://preact.gallery/) an 8KB photo gallery PWA built using Preact.
-- [**Rainbow Explorer**](https://preact.gallery/) Preact app to translate real life color to digital color _([Github project](https://github.com/vaneenige/rainbow-explorer))_.
+- [**Rainbow Explorer**](https://use-the-platform.com/rainbow-explorer/) Preact app to translate real life color to digital color _([Github project](https://github.com/vaneenige/rainbow-explorer))_.
 
 #### Runnable Examples
 
