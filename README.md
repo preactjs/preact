@@ -75,6 +75,8 @@ Preact supports modern browsers and IE9+:
 - [**Offline Gallery**](https://use-the-platform.com/offline-gallery/) _([GitHub Project](https://github.com/vaneenige/offline-gallery/))_ :balloon:
 - [**Periodic Weather**](https://use-the-platform.com/periodic-weather/) _([GitHub Project](https://github.com/vaneenige/periodic-weather/))_ :sunny:
 - [**Rugby News Board**](http://nbrugby.com) _[(GitHub Project)](https://github.com/rugby-board/rugby-board-node)_
+- [**Preact Gallery**](https://preact.gallery/) an 8KB photo gallery PWA built using Preact.
+- [**Rainbow Explorer**](https://use-the-platform.com/rainbow-explorer/) Preact app to translate real life color to digital color _([Github project](https://github.com/vaneenige/rainbow-explorer))_.
 
 #### Runnable Examples
 
@@ -97,6 +99,8 @@ Preact supports modern browsers and IE9+:
 - [**Preact Redux/RxJS/Reselect Example**](https://github.com/continuata/preact-seed)
 - [**V2EX Preact**](https://github.com/yanni4night/v2ex-preact)
 - [**Preact Coffeescript**](https://github.com/crisward/preact-coffee)
+- [**Preact + TypeScript + Webpack**](https://github.com/k1r0s/bleeding-preact-starter)
+- [**0 config => Preact + Poi**](https://github.com/k1r0s/preact-poi-starter)
 
 ---
 
@@ -126,6 +130,8 @@ Preact supports modern browsers and IE9+:
 - :necktie: [**preact-delegate**](https://github.com/NekR/preact-delegate): Delegate DOM events
 - :art: [**preact-stylesheet-decorator**](https://github.com/k1r0s/preact-stylesheet-decorator): Add Scoped Stylesheets to your Preact Components
 - :electric_plug: [**preact-routlet**](https://github.com/k1r0s/preact-routlet): Simple `Component Driven` Routing for Preact using ES7 Decorators
+- :fax: [**preact-bind-group**](https://github.com/k1r0s/preact-bind-group): Preact Forms made easy, Group Events into a Single Callback
+- :hatching_chick: [**preact-habitat**](https://github.com/zouhir/preact-habitat): Declerative Preact widgets renderer in any CMS or DOM host ([demo](https://codepen.io/zouhir/pen/brrOPB)).
 
 #### UI Component Libraries
 
@@ -193,7 +199,7 @@ import preact from 'preact';
 >   ]
 > }
 > ```
-> **Using Preact along with TypeScript:**
+> **For using Preact along with TypeScript add to `tsconfig.json`:**
 >
 > ```json
 > {

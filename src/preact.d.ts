@@ -40,7 +40,7 @@ declare namespace preact {
 	}
 
 	interface FunctionalComponent<PropsType> {
-		(props?:PropsType & ComponentProps<this>, context?:any):JSX.Element;
+		(props:PropsType & ComponentProps<this>, context?:any):JSX.Element;
 		displayName?:string;
 		defaultProps?:any;
 	}
@@ -95,6 +95,10 @@ declare module "preact" {
 declare module "preact/devtools" {
 	// Empty. This module initializes the React Developer Tools integration
 	// when imported.
+}
+
+declare module "preact/debug" {
+	// Empty. This module initializes checks inside development
 }
 
 declare namespace JSX {
@@ -800,6 +804,7 @@ declare namespace JSX {
 		//SVG
 		svg:SVGAttributes;
 		animate:SVGAttributes;
+		animateMotion:SVGAttributes;
 		circle:SVGAttributes;
 		clipPath:SVGAttributes;
 		defs:SVGAttributes;
@@ -829,6 +834,7 @@ declare namespace JSX {
 		linearGradient:SVGAttributes;
 		marker:SVGAttributes;
 		mask:SVGAttributes;
+		mpath:SVGAttributes;
 		path:SVGAttributes;
 		pattern:SVGAttributes;
 		polygon:SVGAttributes;
