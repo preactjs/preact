@@ -40,15 +40,16 @@ describe('render()', () => {
 	it('should create empty nodes (<* />)', () => {
 		render(<div />, scratch);
 		expect(scratch.childNodes)
-			.to.have.length(1)
-			.and.to.have.deep.property('0.nodeName', 'DIV');
-
+			.to.have.length(1);
+		expect(scratch.childNodes[0])
+			.to.have.property('nodeName', 'DIV');
 		scratch.innerHTML = '';
 
 		render(<span />, scratch);
 		expect(scratch.childNodes)
-			.to.have.length(1)
-			.and.to.have.deep.property('0.nodeName', 'SPAN');
+			.to.have.length(1);
+		expect(scratch.childNodes[0])
+			.to.have.property('nodeName', 'SPAN');
 
 		scratch.innerHTML = '';
 
@@ -69,14 +70,15 @@ describe('render()', () => {
 		), scratch);
 
 		expect(scratch.childNodes)
-			.to.have.length(1)
-			.and.to.have.deep.property('0.nodeName', 'DIV');
+			.to.have.length(1);
+		expect(scratch.childNodes[0])
+			.to.have.property('nodeName', 'DIV');
 
 		let c = scratch.childNodes[0].childNodes;
 		expect(c).to.have.length(3);
-		expect(c).to.have.deep.property('0.nodeName', 'SPAN');
-		expect(c).to.have.deep.property('1.nodeName', 'FOO');
-		expect(c).to.have.deep.property('2.nodeName', 'X-BAR');
+		expect(c[0]).to.have.property('nodeName', 'SPAN');
+		expect(c[1]).to.have.property('nodeName', 'FOO');
+		expect(c[2]).to.have.property('nodeName', 'X-BAR');
 	});
 
 	it('should not render falsy values', () => {
@@ -199,33 +201,33 @@ describe('render()', () => {
 		render(<div foo="bar" data-foo="databar" />, scratch);
 
 		let div = scratch.childNodes[0];
-		expect(div).to.have.deep.property('attributes.length', 2);
+		expect(div['attributes']).to.have.property('length', 2);
 
-		expect(div).to.have.deep.property('attributes[0].name', 'foo');
-		expect(div).to.have.deep.property('attributes[0].value', 'bar');
+		expect(div['attributes'][0]).to.have.property('name', 'foo');
+		expect(div['attributes'][0]).to.have.property('value', 'bar');
 
-		expect(div).to.have.deep.property('attributes[1].name', 'data-foo');
-		expect(div).to.have.deep.property('attributes[1].value', 'databar');
+		expect(div['attributes'][1]).to.have.property('name', 'data-foo');
+		expect(div['attributes'][1]).to.have.property('value', 'databar');
 	});
 
 	it('should not serialize function props as attributes', () => {
 		render(<div click={function a(){}} ONCLICK={function b(){}} />, scratch);
 
 		let div = scratch.childNodes[0];
-		expect(div).to.have.deep.property('attributes.length', 0);
+		expect(div['attributes']).to.have.property('length', 0);
 	});
 
 	it('should serialize object props as attributes', () => {
 		render(<div foo={{ a: 'b' }} bar={{ toString() { return 'abc'; } }} />, scratch);
 
 		let div = scratch.childNodes[0];
-		expect(div).to.have.deep.property('attributes.length', 2);
+		expect(div['attributes']).to.have.property('length', 2);
 
-		expect(div).to.have.deep.property('attributes[0].name', 'foo');
-		expect(div).to.have.deep.property('attributes[0].value', '[object Object]');
+		expect(div['attributes'][0]).to.have.property('name', 'foo');
+		expect(div['attributes'][0]).to.have.property('value', '[object Object]');
 
-		expect(div).to.have.deep.property('attributes[1].name', 'bar');
-		expect(div).to.have.deep.property('attributes[1].value', 'abc');
+		expect(div['attributes'][1]).to.have.property('name', 'bar');
+		expect(div['attributes'][1]).to.have.property('value', 'abc');
 	});
 
 	it('should apply class as String', () => {
@@ -240,7 +242,7 @@ describe('render()', () => {
 
 	it('should apply style as String', () => {
 		render(<div style="top:5px; position:relative;" />, scratch);
-		expect(scratch.childNodes[0]).to.have.deep.property('style.cssText')
+		expect(scratch.childNodes[0]['style']).to.have.property('cssText')
 			.that.matches(/top\s*:\s*5px\s*/)
 			.and.matches(/position\s*:\s*relative\s*/);
 	});
@@ -255,7 +257,7 @@ describe('render()', () => {
 
 		render(<div click={ click } onClick={ onclick } />, scratch);
 
-		expect(scratch.childNodes[0]).to.have.deep.property('attributes.length', 0);
+		expect(scratch.childNodes[0]['attributes']).to.have.property('length', 0);
 
 		expect(proto.addEventListener).to.have.been.calledOnce
 			.and.to.have.been.calledWithExactly('click', sinon.match.func, false);
@@ -375,19 +377,19 @@ describe('render()', () => {
 			<div style={{ color: 'rgb(0, 255, 255)' }}>test</div>
 		), scratch, root);
 
-		expect(root).to.have.deep.property('style.cssText').that.equals('color: rgb(0, 255, 255);');
+		expect(root.style).to.have.property('cssText').that.equals('color: rgb(0, 255, 255);');
 
 		root = render((
 			<div style="display: inline;">test</div>
 		), scratch, root);
 
-		expect(root).to.have.deep.property('style.cssText').that.equals('display: inline;');
+		expect(root.style).to.have.property('cssText').that.equals('display: inline;');
 
 		root = render((
 			<div style={{ backgroundColor: 'rgb(0, 255, 255)' }}>test</div>
 		), scratch, root);
 
-		expect(root).to.have.deep.property('style.cssText').that.equals('background-color: rgb(0, 255, 255);');
+		expect(root.style).to.have.property('cssText').that.equals('background-color: rgb(0, 255, 255);');
 	});
 
 	it('should support dangerouslySetInnerHTML', () => {
@@ -603,10 +605,10 @@ describe('render()', () => {
 			render() {
 				const {todos, text} = this.state;
 				return (
-						<div onKeyDown={ this.addTodo }>
-								{ todos.map( todo => (<div>{todo.text}</div> )) }
-								<input value={text} onInput={this.setText} ref={(i) => input = i} />
-						</div>
+					<div onKeyDown={ this.addTodo }>
+						{ todos.map( todo => (<div>{todo.text}</div> )) }
+						<input value={text} onInput={this.setText} ref={(i) => input = i} />
+					</div>
 				);
 			}
 		}
