@@ -68,13 +68,13 @@ declare namespace preact {
 	type AnyComponent<PropsType, StateType> = FunctionalComponent<PropsType> | typeof Component;
 
 	interface Component<PropsType, StateType> {
-		componentWillMount(): void;
-		componentDidMount(): void;
-		componentWillUnmount(): void;
-		componentWillReceiveProps(nextProps: Readonly<PropsType>, nextContext: any): void;
-		shouldComponentUpdate(nextProps: Readonly<PropsType>, nextState: Readonly<StateType>, nextContext: any): boolean;
-		componentWillUpdate(nextProps: Readonly<PropsType>, nextState: Readonly<StateType>, nextContext: any): void;
-		componentDidUpdate(previousProps: Readonly<PropsType>, previousState: Readonly<StateType>, previousContext: any): void;
+		componentWillMount?(): void;
+		componentDidMount?(): void;
+		componentWillUnmount?(): void;
+		componentWillReceiveProps?(nextProps: Readonly<PropsType>, nextContext: any): void;
+		shouldComponentUpdate?(nextProps: Readonly<PropsType>, nextState: Readonly<StateType>, nextContext: any): boolean;
+		componentWillUpdate?(nextProps: Readonly<PropsType>, nextState: Readonly<StateType>, nextContext: any): void;
+		componentDidUpdate?(previousProps: Readonly<PropsType>, previousState: Readonly<StateType>, previousContext: any): void;
 	}
 
 	abstract class Component<PropsType, StateType> {
