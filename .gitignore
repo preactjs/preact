@@ -4,6 +4,8 @@
 /dist
 /_dev
 /coverage
+package-lock.json
+/test/ts/**/*.js
 
 # Additional bundles
 /devtools.js
