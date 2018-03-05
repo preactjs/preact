@@ -98,7 +98,7 @@ declare namespace preact {
 
 	function h<PropsType>(node: ComponentFactory<PropsType>, params: PropsType, ...children: (ComponentChild | ComponentChildren)[]): JSX.Element;
 	function h(node: string, params: JSX.HTMLAttributes & JSX.SVGAttributes & { [propName: string]: any }, ...children: (ComponentChild | ComponentChildren)[]): JSX.Element;
-	function render(node: JSX.Element, parent: Element | Document, mergeWith?: Element): Element;
+	function render(node: ComponentChild, parent: Element | Document, mergeWith?: Element): Element;
 	function rerender(): void;
 	function cloneElement(element: JSX.Element, props: any): JSX.Element;
 

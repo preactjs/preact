@@ -37,6 +37,14 @@ describe('render()', () => {
 		scratch = null;
 	});
 
+	it('should render a empty text node', () => {
+		render(null, scratch);
+		let c = scratch.childNodes;
+		expect(c).to.have.length(1);
+		expect(c).to.have.deep.property('0.data', '');
+		expect(c).to.have.deep.property('0.nodeName', '#text');
+	});
+
 	it('should create empty nodes (<* />)', () => {
 		render(<div />, scratch);
 		expect(scratch.childNodes)
