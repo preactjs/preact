@@ -4,6 +4,8 @@ export as namespace preact;
 declare namespace preact {
 	type Key = string | number;
 	type Ref<T> = (instance: T) => void;
+	type ComponentChild = JSX.Element | string | number | null;
+	type ComponentChildren = ComponentChild[];
 
 	/**
 	 * @deprecated
@@ -29,7 +31,7 @@ declare namespace preact {
 	}
 
 	interface PreactDOMAttributes {
-		children?: JSX.Element[];
+		children?: ComponentChildren;
 		dangerouslySetInnerHTML?: {
 			__html: string;
 		};
@@ -50,7 +52,7 @@ declare namespace preact {
 		key?: Key | null;
 	}
 
-	type RenderableProps<P> = Readonly<P> & Readonly<{ children?: JSX.Element[] }>;
+	type RenderableProps<P> = Readonly<P> & Readonly<{ children?: ComponentChildren }>;
 
 	interface FunctionalComponent<PropsType> {
 		(props: RenderableProps<PropsType>, context?: any): VNode<any>;
@@ -66,13 +68,13 @@ declare namespace preact {
 	type AnyComponent<PropsType, StateType> = FunctionalComponent<PropsType> | typeof Component;
 
 	interface Component<PropsType, StateType> {
-		componentWillMount(): void;
-		componentDidMount(): void;
-		componentWillUnmount(): void;
-		componentWillReceiveProps(nextProps: Readonly<PropsType>, nextContext: any): void;
-		shouldComponentUpdate(nextProps: Readonly<PropsType>, nextState: Readonly<StateType>, nextContext: any): boolean;
-		componentWillUpdate(nextProps: Readonly<PropsType>, nextState: Readonly<StateType>, nextContext: any): void;
-		componentDidUpdate(previousProps: Readonly<PropsType>, previousState: Readonly<StateType>, previousContext: any): void;
+		componentWillMount?(): void;
+		componentDidMount?(): void;
+		componentWillUnmount?(): void;
+		componentWillReceiveProps?(nextProps: Readonly<PropsType>, nextContext: any): void;
+		shouldComponentUpdate?(nextProps: Readonly<PropsType>, nextState: Readonly<StateType>, nextContext: any): boolean;
+		componentWillUpdate?(nextProps: Readonly<PropsType>, nextState: Readonly<StateType>, nextContext: any): void;
+		componentDidUpdate?(previousProps: Readonly<PropsType>, previousState: Readonly<StateType>, previousContext: any): void;
 	}
 
 	abstract class Component<PropsType, StateType> {
@@ -94,8 +96,8 @@ declare namespace preact {
 		abstract render(props?: RenderableProps<PropsType>, state?: Readonly<StateType>, context?: any): JSX.Element | null;
 	}
 
-	function h<PropsType>(node: ComponentFactory<PropsType>, params: PropsType, ...children: (JSX.Element | JSX.Element[] | string)[]): JSX.Element;
-	function h(node: string, params: JSX.HTMLAttributes & JSX.SVGAttributes & { [propName: string]: any }, ...children: (JSX.Element | JSX.Element[] | string)[]): JSX.Element;
+	function h<PropsType>(node: ComponentFactory<PropsType>, params: PropsType, ...children: (ComponentChild | ComponentChildren)[]): JSX.Element;
+	function h(node: string, params: JSX.HTMLAttributes & JSX.SVGAttributes & { [propName: string]: any }, ...children: (ComponentChild | ComponentChildren)[]): JSX.Element;
 	function render(node: JSX.Element, parent: Element | Document, mergeWith?: Element): Element;
 	function rerender(): void;
 	function cloneElement(element: JSX.Element, props: any): JSX.Element;
