@@ -1,11 +1,10 @@
-import fs from 'fs';
 import buble from 'rollup-plugin-buble';
 import uglify from 'rollup-plugin-uglify';
 import replace from 'rollup-plugin-post-replace';
 
-let pkg = JSON.parse(fs.readFileSync('./package.json'));
+const pkg = require('./package.json');
 
-let format = process.env.FORMAT;
+const format = process.env.FORMAT;
 
 export default {
 	strict: false,

@@ -66,7 +66,7 @@ document.body.innerHTML = `
 </div>
 `;
 
-hydrate(<App />, document.body);
+render(<App />, document.body);
 
 if (String(localStorage.LOG)==='true' || location.href.match(/logger/)) {
 	installLogger();
