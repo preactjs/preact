@@ -5,11 +5,11 @@
     "start": "webpack-dev-server --inline"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0-beta.39",
+    "@babel/core": "^7.0.0-beta.40",
     "@babel/plugin-transform-react-constant-elements": "^7.0.0-beta.40",
     "@babel/plugin-transform-react-jsx": "^7.0.0-beta.40",
-    "@babel/preset-env": "^7.0.0-beta.39",
-    "@babel/preset-react": "^7.0.0-beta.39",
+    "@babel/preset-env": "^7.0.0-beta.40",
+    "@babel/preset-react": "^7.0.0-beta.40",
     "@babel/preset-stage-0": "^7.0.0-beta.40",
     "babel-loader": "^8.0.0-beta.0",
     "babel-plugin-jsx-pragmatic": "^1.0.2",
