@@ -12,3 +12,7 @@ package-lock.json
 /devtools.js.map
 /debug.js
 /debug.js.map
+
+# Editor and IDE configuration
+.vscode/
+.idea/
