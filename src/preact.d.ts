@@ -54,50 +54,61 @@ declare namespace preact {
 
 	type RenderableProps<P> = Readonly<P> & Readonly<{ children?: ComponentChildren }>;
 
-	interface FunctionalComponent<PropsType> {
-		(props: RenderableProps<PropsType>, context?: any): VNode<any>;
+	interface FunctionalComponent<P = {}> {
+		(props: RenderableProps<P>, context?: any): VNode<any> | null;
 		displayName?: string;
-		defaultProps?: any;
+		defaultProps?: Partial<P>;
 	}
 
-	interface ComponentConstructor<PropsType> {
-		new (props?: PropsType, context?: any): Component<PropsType, {}>;
+	interface ComponentConstructor<P = {}, S = {}> {
+		new (props: P, context?: any): Component<P, S>;
+		displayName?: string;
+		defaultProps?: Partial<P>;
 	}
 
 	// Type alias for a component considered generally, whether stateless or stateful.
-	type AnyComponent<PropsType, StateType> = FunctionalComponent<PropsType> | typeof Component;
+	type AnyComponent<P = {}, S = {}> = FunctionalComponent<P> | Component<P, S>;
 
-	interface Component<PropsType, StateType> {
+	interface Component<P = {}, S = {}> {
 		componentWillMount?(): void;
 		componentDidMount?(): void;
 		componentWillUnmount?(): void;
-		componentWillReceiveProps?(nextProps: Readonly<PropsType>, nextContext: any): void;
-		shouldComponentUpdate?(nextProps: Readonly<PropsType>, nextState: Readonly<StateType>, nextContext: any): boolean;
-		componentWillUpdate?(nextProps: Readonly<PropsType>, nextState: Readonly<StateType>, nextContext: any): void;
-		componentDidUpdate?(previousProps: Readonly<PropsType>, previousState: Readonly<StateType>, previousContext: any): void;
+		componentWillReceiveProps?(nextProps: Readonly<P>, nextContext: any): void;
+		shouldComponentUpdate?(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): boolean;
+		componentWillUpdate?(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): void;
+		componentDidUpdate?(previousProps: Readonly<P>, previousState: Readonly<S>, previousContext: any): void;
 	}
 
-	abstract class Component<PropsType, StateType> {
-		constructor(props?: PropsType, context?: any);
+	abstract class Component<P, S> {
+		constructor(props?: P, context?: any);
 
 		static displayName?: string;
 		static defaultProps?: any;
 
-		state: Readonly<StateType>;
-		props: RenderableProps<PropsType>;
+		state: Readonly<S>;
+		props: RenderableProps<P>;
 		context: any;
 		base?: HTMLElement;
 
-		setState<K extends keyof StateType>(state: Pick<StateType, K>, callback?: () => void): void;
-		setState<K extends keyof StateType>(fn: (prevState: StateType, props: PropsType) => Pick<StateType, K>, callback?: () => void): void;
+		setState<K extends keyof S>(state: Pick<S, K>, callback?: () => void): void;
+		setState<K extends keyof S>(fn: (prevState: S, props: P) => Pick<S, K>, callback?: () => void): void;
 
 		forceUpdate(callback?: () => void): void;
 
-		abstract render(props?: RenderableProps<PropsType>, state?: Readonly<StateType>, context?: any): JSX.Element | null;
+		abstract render(props?: RenderableProps<P>, state?: Readonly<S>, context?: any): JSX.Element | null;
 	}
 
-	function h<PropsType>(node: ComponentFactory<PropsType>, params: PropsType, ...children: (ComponentChild | ComponentChildren)[]): JSX.Element;
-	function h(node: string, params: JSX.HTMLAttributes & JSX.SVGAttributes & { [propName: string]: any }, ...children: (ComponentChild | ComponentChildren)[]): JSX.Element;
+	function h<P>(
+		node: ComponentFactory<P>,
+		params: Attributes & P | null,
+		...children: (ComponentChild | ComponentChildren)[]
+	): VNode<any>;
+	function h(
+		node: string,
+		params: JSX.HTMLAttributes & JSX.SVGAttributes & Record<string, any> | null,
+		...children: (ComponentChild | ComponentChildren)[]
+	): VNode<any>;
+
 	function render(node: ComponentChild, parent: Element | Document, mergeWith?: Element): Element;
 	function rerender(): void;
 	function cloneElement(element: JSX.Element, props: any): JSX.Element;
