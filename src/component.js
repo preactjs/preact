@@ -1,5 +1,4 @@
 import { FORCE_RENDER } from './constants';
-import { extend } from './util';
 import { renderComponent } from './vdom/component';
 import { enqueueRender } from './render-queue';
 
@@ -34,7 +33,7 @@ export function Component(props, context) {
 }
 
 
-extend(Component.prototype, {
+Object.assign(Component.prototype, {
 
 	/** Returns a `boolean` indicating if the component should re-render when receiving the given `props` and `state`.
 	 *	@param {object} nextProps
@@ -52,8 +51,8 @@ extend(Component.prototype, {
 	 */
 	setState(state, callback) {
 		let s = this.state;
-		if (!this.prevState) this.prevState = extend({}, s);
-		extend(s, typeof state==='function' ? state(s, this.props) : state);
+		if (!this.prevState) this.prevState = Object.assign({}, s);
+		Object.assign(s, typeof state==='function' ? state(s, this.props) : state);
 		if (callback) (this._renderCallbacks = (this._renderCallbacks || [])).push(callback);
 		enqueueRender(this);
 	},

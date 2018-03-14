@@ -1,4 +1,3 @@
-import { extend } from './util';
 import { h } from './h';
 
 /**
@@ -10,6 +9,6 @@ import { h } from './h';
 export const cloneElement = (vnode, props, ...rest) =>
 	h(
 		vnode.nodeName,
-		extend(extend({}, vnode.attributes), props),
+		Object.assign({}, vnode.attributes, props),
 		rest.length ? rest : vnode.children
 	);
