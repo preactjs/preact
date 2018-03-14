@@ -15,7 +15,7 @@ export interface highlightedProps {
 }
 
 export function highlighted<T>(Wrappable: ComponentFactory<T>): ComponentConstructor<T & highlightedProps> {
-	return class extends Component<T & highlightedProps, any> {
+	return class extends Component<T & highlightedProps> {
 
 		constructor(props: T & highlightedProps) {
 			super(props);

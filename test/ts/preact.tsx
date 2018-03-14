@@ -29,10 +29,12 @@ function DummerComponent({ input, initialInput }: DummerComponentProps) {
 	return <div>Input: {input}, initial: {initialInput}</div>;
 }
 
-render(h(DummerComponent, { initialInput: "The input" }), document);
+render(h(DummerComponent, { initialInput: "The input", input: "New input" }), document);
 
 // Accessing children
-const ComponentWithChildren: FunctionalComponent<DummerComponentProps> = ({ input, initialInput, children }) => {
+const ComponentWithChildren: FunctionalComponent<DummerComponentProps> = (
+	{ input, initialInput, children }
+) => {
 	return <div>
 		<span>{initialInput}</span>
 		<span>{input}</span>
@@ -53,7 +55,7 @@ const UseOfComponentWithChildren = () => {
 // using ref and or jsx
 class ComponentUsingRef extends Component<any, any> {
 	private array: string[];
-	private refs: Element[];
+	private refs: Element[] = [];
 
 	constructor() {
 		super();
