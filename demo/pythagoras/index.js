@@ -1,7 +1,7 @@
 import { Component } from 'ceviche';
 import { select as d3select, mouse as d3mouse } from 'd3-selection';
 import { scaleLinear } from 'd3-scale';
-import Pythagoras from './Pythagoras';
+import Pythagoras from './pythagoras';
 
 export default class PythagorasDemo extends Component {
 	svg = {
