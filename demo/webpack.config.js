@@ -26,18 +26,19 @@ module.exports = {
 				options: {
 					sourceMap: true,
 					presets: [
-						[require.resolve('babel-preset-env'), {
+						[require.resolve('@babel/preset-env'), {
 							targets: {
 								browsers: ['last 2 versions', 'IE >= 9']
 							},
 							modules: false,
 							loose: true
 						}],
-						require.resolve('babel-preset-stage-0')
+						require.resolve('@babel/preset-react'),
+						require.resolve('@babel/preset-stage-0')
 					],
 					plugins: [
-						[require.resolve('babel-plugin-transform-react-jsx'), { pragma: 'createElement' }],
-						require.resolve('babel-plugin-transform-react-constant-elements'),
+						[require.resolve('@babel/plugin-transform-react-jsx'), { pragma: 'createElement' }],
+						require.resolve('@babel/plugin-transform-react-constant-elements'),
 						[require.resolve('babel-plugin-jsx-pragmatic'), {
 							module: 'ceviche',
 							export: 'createElement',
