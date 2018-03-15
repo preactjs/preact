@@ -1,6 +1,3 @@
-import { extend } from '../util';
-
-
 /**
  * Check if two nodes are equivalent.
  *
@@ -40,7 +37,7 @@ export function isNamedNode(node, nodeName) {
  * @returns {Object} props
  */
 export function getNodeProps(vnode) {
-	let props = extend({}, vnode.attributes);
+	let props = Object.assign({}, vnode.attributes);
 	props.children = vnode.children;
 
 	let defaultProps = vnode.nodeName.defaultProps;

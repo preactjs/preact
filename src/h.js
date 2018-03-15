@@ -34,10 +34,10 @@ const EMPTY_CHILDREN = [];
  *
  * @public
  */
-export function h(nodeName, attributes) {
+export function h(nodeName, attributes, ...rest) {
 	let children=EMPTY_CHILDREN, lastSimple, child, simple, i;
-	for (i=arguments.length; i-- > 2; ) {
-		stack.push(arguments[i]);
+	for (i=rest.length; i-- > 0; ) {
+		stack.push(rest[i]);
 	}
 	if (attributes && attributes.children!=null) {
 		if (!stack.length) stack.push(attributes.children);

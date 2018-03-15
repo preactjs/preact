@@ -1,4 +1,3 @@
-import { extend } from './util';
 import { h } from './h';
 
 /**
@@ -7,10 +6,9 @@ import { h } from './h';
  * @param {Object} props	Attributes/props to add when cloning
  * @param {VNode} rest		Any additional arguments will be used as replacement children.
  */
-export function cloneElement(vnode, props) {
-	return h(
+export const cloneElement = (vnode, props, ...rest) =>
+	h(
 		vnode.nodeName,
-		extend(extend({}, vnode.attributes), props),
-		arguments.length>2 ? [].slice.call(arguments, 2) : vnode.children
+		Object.assign({}, vnode.attributes, props),
+		rest.length ? rest : vnode.children
 	);
-}
