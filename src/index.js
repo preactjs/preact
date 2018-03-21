@@ -1,5 +1,5 @@
 export { render, hydrate } from './render';
-export { createElement } from './create-element';
+export { createElement, createFragment } from './create-element';
 export { Component } from './component';
 export { cloneElement } from './clone-element';
 
@@ -27,4 +27,3 @@ document.body.appendChild(
 	</div>
 );
 */
-

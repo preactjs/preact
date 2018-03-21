@@ -37,7 +37,7 @@ module.exports = {
 						require.resolve('@babel/preset-stage-0')
 					],
 					plugins: [
-						[require.resolve('@babel/plugin-transform-react-jsx'), { pragma: 'createElement' }],
+						[require.resolve('@babel/plugin-transform-react-jsx'), { pragma: 'createElement', pragmaFrag: 'createFragment' }],
 						require.resolve('@babel/plugin-transform-react-constant-elements'),
 						[require.resolve('babel-plugin-jsx-pragmatic'), {
 							module: 'ceviche',

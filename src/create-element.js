@@ -1,10 +1,16 @@
-import { ELEMENT_NODE } from './constants';
+import { ELEMENT_NODE, FRAGMENT } from './constants';
 
 export function createElement(tag, props) {
 	let children = [];
 	for (let i=2; i<arguments.length; i++) children.push(arguments[i]);
 	return createVNode(ELEMENT_NODE, tag, props, children, null, props!=null ? props.key : null);
 	// return createVNode(ELEMENT_NODE, tag, props==null ? EMPTY_OBJ : props, children, null, props!=null ? props.key : null);
+}
+
+export function createFragment(children, props) {
+	return children.children.map(
+		child => createVNode(child.type, child.tag, child.props, child.props.children, child.text, props!=null ? props.key : null)
+	)
 }
 
 // const RECYCLED_VNODES = [];
@@ -17,11 +23,11 @@ export function createElement(tag, props) {
 export function createVNode(type, tag, props, children, text, key) {
 
 	// @TODO this is likely better off in createElement():
-	if (type===ELEMENT_NODE) {
+	if (type===ELEMENT_NODE || type===FRAGMENT) {
 		if (props==null) props = {};
 		if (props.children==null) props.children = children;
 		// children = props.children || (props.children = children);
-		if (tag.defaultProps!=null) {
+		if (type!==FRAGMENT && tag.defaultProps!=null) {
 			for (let i in tag.defaultProps) {
 				if (props[i]===undefined) props[i] = tag.defaultProps[i];
 			}
