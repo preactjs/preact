@@ -155,12 +155,12 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 
 	let c, p, isNew = false, oldProps, oldState, oldContext,
 		oldTag = oldTree!=null ? oldTree.tag : null;
-	
+
 	// root of a diff:
 	if (diffLevel++ === 0) {
 		isSvg = parent!=null && parent.ownerSVGElement!==undefined;
 	}
-	
+
 	// @TODO unmounting here removes the dom pointer
 	// if (newTree.tag!==oldTag) {
 	// 	// console.log('mismatched tags: ', oldTag, newTree.tag);
@@ -190,7 +190,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			// 	c.state = c.prevState;
 			// 	c.prevState = null;
 			// }
-	
+
 			let s = c._nextState || c.state;
 			// console.log('updating component in-place', c._nextState);
 			// if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, c.state)===false) {
@@ -247,6 +247,10 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		c.context = context;
 		let prev = c._previousVTree;
 		let vnode = c._previousVTree = c.render(c.props, c.state, c.context);
+		if (vnode instanceof Array) {
+			diffChildren(parent, vnode, prev || [], isSvg, excessChildren);
+			return null;
+		}
 		// context = assign({}, context);
 		// context.__depth = (context.__depth || 0) + 1;
 		// context = assign({
@@ -398,7 +402,7 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 
 		// vnode._el = dom = typeof vnode==='string' || typeof vnode==='number' ? document.createTextNode(vnode) : isSvg ? document.createElementNS('http://www.w3.org/2000/svg', vnode.tag) : document.createElement(vnode.tag);
 		vnode._el = dom = vnode.type===3 ? document.createTextNode(vnode.text) : isSvg ? document.createElementNS('http://www.w3.org/2000/svg', vnode.tag) : document.createElement(vnode.tag);
-	
+
 		// dom = vnode.type===3 ? document.createTextNode(vnode.text) : document.createElement(vnode.tag);
 		// if (d) {
 		// 	parent.replaceChild(dom, d);

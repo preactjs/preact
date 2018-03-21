@@ -26,15 +26,22 @@ export default class TodoList extends Component {
 				<input value={text} onInput={this.setText} />
 				<button type="submit">Add</button>
 				<ul>
-					{ todos.map( todo => (
-						<li key={todo.id}>
-							<button onClick={this.removeTodo} data-id={todo.id}>&times;</button>
-							{' '}
-							{todo.text}
-						</li>
-					)) }
+					<TodoItems todos={todos} removeTodo={this.removeTodo}/>
 				</ul>
 			</form>
 		);
+	}
+}
+
+
+class TodoItems extends Component {
+	render({ todos, removeTodo }) {
+		return todos.map( todo => (
+			<li key={todo.id}>
+				<button onClick={removeTodo} data-id={todo.id}>&times;</button>
+				{' '}
+				{todo.text}
+			</li>
+		));
 	}
 }
