@@ -247,9 +247,16 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		c.context = context;
 		let prev = c._previousVTree;
 		let vnode = c._previousVTree = c.render(c.props, c.state, c.context);
+
+		if (c.getChildContext!=null) {
+			// context = assign(assign({}, context), c.getChildContext());
+			context = Object.assign({}, context, c.getChildContext());
+		}
+
 		if (vnode instanceof Array) {
 			diffChildren(parent, vnode, prev || [], isSvg, excessChildren);
-			return null;
+		} else {
+			c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren);
 		}
 		// context = assign({}, context);
 		// context.__depth = (context.__depth || 0) + 1;
@@ -259,15 +266,10 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		// if (c.getChildContext!=null) {
 		// 	assign(context, c.getChildContext());
 		// }
-		if (c.getChildContext!=null) {
-			// context = assign(assign({}, context), c.getChildContext());
-			context = Object.assign({}, context, c.getChildContext());
-		}
 		// if (c.id==20) {
 		// 	// console.trace('diffing '+c.id);
 		// 	console.log('diffing '+c.id, vnode, prev);
 		// }
-		c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren);
 		c._dirty = false;
 		// newTree.tag.$precache = c.base;
 		c._vnode = newTree;
