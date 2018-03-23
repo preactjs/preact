@@ -1,5 +1,5 @@
 export { render, hydrate } from './render';
-export { createElement, createFragment } from './create-element';
+export { createElement, Fragment } from './create-element';
 export { Component } from './component';
 export { cloneElement } from './clone-element';
 

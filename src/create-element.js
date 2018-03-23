@@ -7,8 +7,8 @@ export function createElement(tag, props) {
 	// return createVNode(ELEMENT_NODE, tag, props==null ? EMPTY_OBJ : props, children, null, props!=null ? props.key : null);
 }
 
-export function createFragment(children, props) {
-	return children.children.map(
+export function Fragment(vnode, props) {
+	return vnode.children.map(
 		child => createVNode(child.type, child.tag, child.props, child.props.children, child.text, props!=null ? props.key : null)
 	)
 }

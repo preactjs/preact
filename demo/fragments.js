@@ -1,4 +1,4 @@
-import { createElement, Component, createFragment } from 'ceviche';
+import { createElement, Component, Fragment } from 'ceviche';
 
 export default class extends Component {
 
