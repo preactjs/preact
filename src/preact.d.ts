@@ -73,6 +73,7 @@ declare namespace preact {
 		componentWillMount?(): void;
 		componentDidMount?(): void;
 		componentWillUnmount?(): void;
+		getChildContext?(): object;
 		componentWillReceiveProps?(nextProps: Readonly<P>, nextContext: any): void;
 		shouldComponentUpdate?(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): boolean;
 		componentWillUpdate?(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): void;
