@@ -3,7 +3,7 @@ sudo: false
 language: node_js
 
 node_js:
-  - "6"
+  - "8"
 
 cache:
   directories:
@@ -20,18 +20,6 @@ install:
 
 script:
   - npm run build
-  - npm run test
-  - BROWSER=true COVERAGE=false FLAKEY=false PERFORMANCE=false npm run test:karma
+  - COVERAGE=true npm run test
+  - COVERAGE=false FLAKEY=false PERFORMANCE=false npm run test:karma
   - ./node_modules/coveralls/bin/coveralls.js < ./coverage/lcov.info
-
-# Necessary to compile native modules for io.js v3 or Node.js v4
-env:
-  - CXX=g++-4.8
-
-# Necessary to compile native modules for io.js v3 or Node.js v4
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-4.8
