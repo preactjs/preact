@@ -77,6 +77,9 @@ Preact supports modern browsers and IE9+:
 - [**Rugby News Board**](http://nbrugby.com) _[(GitHub Project)](https://github.com/rugby-board/rugby-board-node)_
 - [**Preact Gallery**](https://preact.gallery/) an 8KB photo gallery PWA built using Preact.
 - [**Rainbow Explorer**](https://use-the-platform.com/rainbow-explorer/) Preact app to translate real life color to digital color _([Github project](https://github.com/vaneenige/rainbow-explorer))_.
+- [**YASCC**](https://carlosqsilva.github.io/YASCC/#/) Yet Another SoundCloud Client _([Github project](https://github.com/carlosqsilva/YASCC))_.
+- [**Journalize**](https://preact-journal.herokuapp.com/) 14k offline-capable journaling PWA using preact. _([Github project](https://github.com/jpodwys/preact-journal))_.
+
 
 #### Runnable Examples
 
