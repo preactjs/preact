@@ -78,7 +78,7 @@ export function setAccessor(node, name, old, value, isSvg) {
 		if (value==null || value===false) node.removeAttribute(name);
 	}
 	else {
-		let ns = isSvg && (name !== (name = name.replace(/^xlink\:?/, '')));
+		let ns = isSvg && (name !== (name = name.replace(/^xlink:?/, '')));
 		if (value==null || value===false) {
 			if (ns) node.removeAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase());
 			else node.removeAttribute(name);
