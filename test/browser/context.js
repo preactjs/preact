@@ -1,10 +1,15 @@
-import { h, render, Component } from '../../src/preact';
+import { h, render as prender, Component, createContext } from '../../src/preact';
 /** @jsx h */
+import * as sinon from "sinon";
 
 const CHILDREN_MATCHER = sinon.match( v => v==null || Array.isArray(v) && !v.length , '[empty children]');
 
 describe('context', () => {
 	let scratch;
+
+	function render(comp) {
+		return prender(comp, scratch, scratch.lastChild);
+	}
 
 	before( () => {
 		scratch = document.createElement('div');
@@ -54,7 +59,7 @@ describe('context', () => {
 		sinon.spy(Inner.prototype, 'componentDidUpdate');
 		sinon.spy(Inner.prototype, 'render');
 
-		render(<Outer />, scratch, scratch.lastChild);
+		render(<Outer />);
 
 		expect(Outer.prototype.getChildContext).to.have.been.calledOnce;
 
@@ -62,7 +67,7 @@ describe('context', () => {
 		expect(Inner.prototype.render).to.have.been.calledWith({ children:CHILDREN_MATCHER }, {}, CONTEXT);
 
 		CONTEXT.foo = 'bar';
-		render(<Outer {...PROPS} />, scratch, scratch.lastChild);
+		render(<Outer {...PROPS} />);
 
 		expect(Outer.prototype.getChildContext).to.have.been.calledTwice;
 
@@ -113,7 +118,7 @@ describe('context', () => {
 		sinon.spy(Inner.prototype, 'componentDidUpdate');
 		sinon.spy(Inner.prototype, 'render');
 
-		render(<Outer />, scratch, scratch.lastChild);
+		render(<Outer />);
 
 		expect(Outer.prototype.getChildContext).to.have.been.calledOnce;
 
@@ -121,7 +126,7 @@ describe('context', () => {
 		expect(Inner.prototype.render).to.have.been.calledWith({ children: CHILDREN_MATCHER }, {}, CONTEXT);
 
 		CONTEXT.foo = 'bar';
-		render(<Outer {...PROPS} />, scratch, scratch.lastChild);
+		render(<Outer {...PROPS} />);
 
 		expect(Outer.prototype.getChildContext).to.have.been.calledTwice;
 
@@ -166,9 +171,107 @@ describe('context', () => {
 		sinon.spy(Inner.prototype, 'render');
 		sinon.spy(InnerMost.prototype, 'render');
 
-		render(<Outer />, scratch);
+		render(<Outer />);
 
 		expect(Inner.prototype.render).to.have.been.calledWith({ children: CHILDREN_MATCHER }, {}, { outerContext });
 		expect(InnerMost.prototype.render).to.have.been.calledWith({ children: CHILDREN_MATCHER }, {}, { outerContext, innerContext });
+	});
+
+	describe("new API", () => {
+		const sandbox = sinon.sandbox.create();
+
+		afterEach(() => {
+			sandbox.restore();
+		});
+
+		it("exposes a createContext function", () => {
+			expect(createContext).to.exist;
+		});
+
+		describe("createContext", () => {
+			it("creates an object with a Provider", () => {
+				const ctx = createContext("");
+				expect(ctx).haveOwnProperty("Provider");
+			});
+
+			it("creates an object with a Consumer", () => {
+				const ctx = createContext("");
+				expect(ctx).haveOwnProperty("Consumer");
+			});
+		});
+
+		describe("Provider", () => {
+			it("returns the given children as is", () => {
+				const ctx = createContext("");
+				render(<ctx.Provider value="a value">
+						Hi from provider
+					</ctx.Provider>);
+
+				expect(scratch.innerHTML).to.eq("Hi from provider");
+			});
+		});
+
+		describe("Consumer", () => {
+			it("returns the given children as is", () => {
+				const ctx = createContext("");
+				render(<ctx.Provider value="init">
+						<ctx.Consumer>Hi from consumer</ctx.Consumer>
+					</ctx.Provider>);
+
+				expect(scratch.innerHTML).to.eq("Hi from consumer");
+			});
+
+			it("executes the given children function", () => {
+				const ctx = createContext("");
+				render(<ctx.Provider value="init">
+						<ctx.Consumer>{() => "Hi from function"}</ctx.Consumer>
+					</ctx.Provider>);
+
+				expect(scratch.innerHTML).to.eq("Hi from function");
+			});
+
+			// shall we suport also a render function or always asume
+			// children as a function ?
+			it.skip("executes the given render function", () => {
+				const ctx = createContext("");
+				render(<ctx.Provider value="init">
+						<ctx.Consumer render={() => "Hi from render"} />
+					</ctx.Provider>);
+
+				expect(scratch.innerHTML).to.eq("Hi from render");
+			});
+
+			it("has access to the default value if no provider is given", () => {
+				const ctx = createContext("The Default Context");
+				render(<ctx.Consumer>{value => `Hi from '${value}'`}</ctx.Consumer>);
+				expect(scratch.innerHTML).to.eq("Hi from 'The Default Context'");
+			});
+
+			it("has access to the provided value", () => {
+				const ctx = createContext("The Default Context");
+				render(<ctx.Provider value="The Provided Context">
+						<ctx.Consumer>{value => `Hi from '${value}'`}</ctx.Consumer>
+					</ctx.Provider>);
+				expect(scratch.innerHTML).to.eq("Hi from 'The Provided Context'");
+			});
+
+			it("updates the value accordingly", () => {
+				const ctx = createContext("The Default Context");
+				const componentWillReceiveProps = sandbox.spy(ctx.Provider.prototype, "componentWillReceiveProps");
+				render(<ctx.Provider value="The Provided Context">
+						<ctx.Consumer>{value => `Hi from '${value}'`}</ctx.Consumer>
+					</ctx.Provider>);
+
+				// rerender
+				render(<ctx.Provider value="The updated context">
+						<ctx.Consumer>{value => `Hi from '${value}'`}</ctx.Consumer>
+					</ctx.Provider>);
+
+				expect(scratch.innerHTML).to.eq("Hi from 'The updated context'");
+				expect(componentWillReceiveProps).to.have.been.calledWithMatch({
+					value: "The updated context"
+				});
+			});
+		});
 	});
 });

@@ -4,6 +4,7 @@ import { Component } from './component';
 import { render } from './render';
 import { rerender } from './render-queue';
 import options from './options';
+import { createContext } from './context';
 
 export default {
 	h,
@@ -12,7 +13,8 @@ export default {
 	Component,
 	render,
 	rerender,
-	options
+	options,
+	createContext
 };
 
 export {
@@ -22,5 +24,6 @@ export {
 	Component,
 	render,
 	rerender,
-	options
+	options,
+	createContext
 };
