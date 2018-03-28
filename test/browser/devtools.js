@@ -193,7 +193,7 @@ describe_('React Developer Tools integration', () => {
 		node._component.setState({count: 4});
 		node._component.forceUpdate();
 
-		expect(renderer.Reconciler.mountComponent).to.have.been.called.twice;
+		expect(renderer.Reconciler.mountComponent).to.have.been.called.callCount(2);
 	});
 
 	it('notifies dev tools when a component update modifies DOM children', () => {
