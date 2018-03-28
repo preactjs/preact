@@ -78,7 +78,7 @@ describe('context', () => {
 		 *  Newly created context objects are *not* currently cloned.
 		 *  This test checks that they *are* cloned.
 		 */
-		// Inner.prototype.render.reset();
+		// Inner.prototype.render.resetHistory();
 		// CONTEXT.foo = 'baz';
 		// inner.forceUpdate();
 		// expect(Inner.prototype.render).to.have.been.calledWith(PROPS, {}, { a:'a', foo:'bar' });
