@@ -8,6 +8,16 @@ import {
 	RenderableProps
 } from "../../src/preact";
 
+export class ContextComponent extends Component<{ foo: string}> {
+	getChildContext() {
+		return { something: 2 };
+	}
+
+	render() {
+		return null;
+	}
+}
+
 export interface SimpleComponentProps {
 	initialName: string | null;
 }
