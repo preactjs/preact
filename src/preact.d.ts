@@ -51,7 +51,7 @@ declare namespace preact {
 		children: Array<VNode<any> | string>;
 		key?: Key | null;
 	}
-  
+
 	type RenderableProps<P> = Readonly<P> & Readonly<{ children?: ComponentChildren }>;
 
 	interface FunctionalComponent<P = {}> {
