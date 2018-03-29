@@ -78,6 +78,7 @@ declare namespace preact {
 		shouldComponentUpdate?(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): boolean;
 		componentWillUpdate?(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): void;
 		componentDidUpdate?(previousProps: Readonly<P>, previousState: Readonly<S>, previousContext: any): void;
+    componentDidCatch?(error: any): void;
 	}
 
 	abstract class Component<P, S> {

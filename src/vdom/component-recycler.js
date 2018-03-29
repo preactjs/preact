@@ -15,7 +15,7 @@ export function collectComponent(component) {
 
 
 /** Create a component. Normalizes differences between PFC's and classful Components. */
-export function createComponent(Ctor, props, context) {
+export function createComponent(Ctor, props, context, ancestorComponent) {
 	let list = components[Ctor.name],
 		inst;
 
@@ -30,6 +30,7 @@ export function createComponent(Ctor, props, context) {
 
 	// Always redefine the constructor to make it play nice with react-hot-loader proxies
 	inst.constructor = Ctor;
+	inst._ancestorComponent = ancestorComponent;
 
 	if (list) {
 		for (let i=list.length; i--; ) {
