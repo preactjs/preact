@@ -25,10 +25,11 @@ export function createComponent(Ctor, props, context) {
 	}
 	else {
 		inst = new Component(props, context);
-		inst.constructor = Ctor;
 		inst.render = doRender;
 	}
 
+	// Always redefine the constructor to make it play nice with react-hot-loader proxies
+	inst.constructor = Ctor;
 
 	if (list) {
 		for (let i=list.length; i--; ) {
