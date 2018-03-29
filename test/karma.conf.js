@@ -114,6 +114,7 @@ module.exports = function(config) {
 		},
 
 		webpack: {
+			mode: 'development',
 			devtool: 'inline-source-map',
 			module: {
 				/* Transpile source and test files */
@@ -131,7 +132,7 @@ module.exports = function(config) {
 					/* Only Instrument our source files for coverage */
 					coverage ? {
 						test: /\.jsx?$/,
-						loader: 'isparta-loader',
+						loader: 'istanbul-instrumenter-loader',
 						include: /src/
 					} : {}
 				]
@@ -150,7 +151,10 @@ module.exports = function(config) {
 					ENABLE_PERFORMANCE: performance,
 					DISABLE_FLAKEY: !!String(process.env.FLAKEY).match(/^(0|false)$/gi)
 				})
-			]
+			],
+			performance: {
+				hints: false
+			}
 		},
 
 		webpackMiddleware: {

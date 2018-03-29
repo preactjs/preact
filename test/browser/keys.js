@@ -40,8 +40,8 @@ describe('keys', () => {
 	});
 
 	it('should set VNode#key property', () => {
-		expect(<div />).to.have.property('key').that.is.empty;
-		expect(<div a="a" />).to.have.property('key').that.is.empty;
+		expect(<div />).to.have.property('key').that.is.undefined;
+		expect(<div a="a" />).to.have.property('key').that.is.undefined;
 		expect(<div key="1" />).to.have.property('key', '1');
 	});
 
