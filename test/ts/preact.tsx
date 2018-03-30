@@ -21,7 +21,7 @@ class DummyComponent extends Component<DummyProps, DummyState> {
 			<div>
 				<DummerComponent initialInput={initialInput} input={input} />
 				{/* Can specify all Preact attributes on a typed FunctionalComponent */}
-				<ComponentWithChildren initialInput={initialInput} input={input} key="1" jsx={true} />
+				<ComponentWithChildren initialInput={initialInput} input={input} key="1" />
 			</div>
 		);
 	}
@@ -35,7 +35,7 @@ function DummerComponent({ input, initialInput }: DummerComponentProps) {
 	return <div>Input: {input}, initial: {initialInput}</div>;
 }
 
-render(h(DummerComponent, { initialInput: "The input", input: "New input", key: "1", jsx: false }), document);
+render(h(DummerComponent, { initialInput: "The input", input: "New input", key: "1"}), document);
 
 // Accessing children
 const ComponentWithChildren: FunctionalComponent<DummerComponentProps> = (
@@ -76,7 +76,7 @@ class ComponentUsingRef extends Component<any, any> {
 			)}
 
 			{/* Can specify Preact attributes on class component */}
-			<DummyComponent initialInput="1" key="1" jsx={true} ref={this.setRef} />
+			<DummyComponent initialInput="1" key="1" ref={this.setRef} />
 		</div>
 	}
 

@@ -10,18 +10,16 @@ declare namespace preact {
 	/**
 	 * @deprecated
 	 *
-	 * Use Attributes instead. This type must remain an interface to not break
-	 * other libraries' types (e.g. preact-router)
+	 * Use Attributes instead.
 	 */
-	interface ComponentProps extends Attributes {}
+	type ComponentProps = Attributes;
 
 	/**
 	 * @deprecated
 	 *
-	 * Use ClassAttributes instead. This type must remain an interface to not break
-	 * other libraries' types (e.g. preact-router)
+	 * Use ClassAttributes instead.
 	 */
-	interface PreactHTMLAttributes extends ClassAttributes<any> {}
+	type PreactHTMLAttributes = ClassAttributes<any>;
 
 	interface Attributes {
 		key?: string | number | any;
@@ -54,7 +52,7 @@ declare namespace preact {
 		key?: Key | null;
 	}
 
-	type RenderableProps<P> = Readonly<P> & Readonly<Attributes> & Readonly<{ children?: ComponentChildren }>;
+	type RenderableProps<P> = Readonly<P & Attributes & { children?: ComponentChildren }>;
 	type ClassRenderableProps<P> = RenderableProps<P> & Readonly<ClassAttributes<any>>;
 
 	interface FunctionalComponent<P = {}> {
