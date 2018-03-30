@@ -10,14 +10,14 @@ declare namespace preact {
 	/**
 	 * @deprecated
 	 *
-	 * Use Attributes instead.
+	 * Use Attributes instead
 	 */
 	type ComponentProps = Attributes;
 
 	/**
 	 * @deprecated
 	 *
-	 * Use ClassAttributes instead.
+	 * Use ClassAttributes instead
 	 */
 	type PreactHTMLAttributes = ClassAttributes<any>;
 
