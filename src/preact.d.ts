@@ -10,16 +10,18 @@ declare namespace preact {
 	/**
 	 * @deprecated
 	 *
-	 * Use Attributes instead
+	 * Use Attributes instead. This type must remain an interface to not break
+	 * other libraries' types (e.g. preact-router)
 	 */
-	type ComponentProps = Attributes;
+	interface ComponentProps extends Attributes {}
 
 	/**
 	 * @deprecated
 	 *
-	 * Use ClassAttributes instead
+	 * Use ClassAttributes instead. This type must remain an interface to not break
+	 * other libraries' types (e.g. preact-router)
 	 */
-	type PreactHTMLAttributes = ClassAttributes<any>;
+	interface PreactHTMLAttributes extends ClassAttributes<any> {}
 
 	interface Attributes {
 		key?: string | number | any;
@@ -52,7 +54,8 @@ declare namespace preact {
 		key?: Key | null;
 	}
 
-	type RenderableProps<P> = Readonly<P> & Readonly<{ children?: ComponentChildren }>;
+	type RenderableProps<P> = Readonly<P> & Readonly<Attributes> & Readonly<{ children?: ComponentChildren }>;
+	type ClassRenderableProps<P> = RenderableProps<P> & Readonly<ClassAttributes<any>>;
 
 	interface FunctionalComponent<P = {}> {
 		(props: RenderableProps<P>, context?: any): VNode<any> | null;
@@ -87,7 +90,7 @@ declare namespace preact {
 		static defaultProps?: any;
 
 		state: Readonly<S>;
-		props: RenderableProps<P>;
+		props: ClassRenderableProps<P>;
 		context: any;
 		base?: HTMLElement;
 
@@ -96,7 +99,7 @@ declare namespace preact {
 
 		forceUpdate(callback?: () => void): void;
 
-		abstract render(props?: RenderableProps<P>, state?: Readonly<S>, context?: any): JSX.Element | null;
+		abstract render(props?: ClassRenderableProps<P>, state?: Readonly<S>, context?: any): JSX.Element | null;
 	}
 
 	function h<P>(
