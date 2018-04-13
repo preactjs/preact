@@ -1,4 +1,5 @@
 /** Virtual DOM Node */
 export function VNode() {}
 
-VNode.undefined = undefined
+// For more info look at issue #1063
+VNode.undefined = undefined;
