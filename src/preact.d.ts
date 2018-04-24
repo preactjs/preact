@@ -91,10 +91,10 @@ declare namespace preact {
 		context: any;
 		base?: HTMLElement;
 
-		setState<K extends keyof S>(state: Pick<S, K>, callback?: () => void): void;
-		setState<K extends keyof S>(fn: (prevState: S, props: P) => Pick<S, K>, callback?: () => void): void;
+		setState<K extends keyof S>(state: Pick<S, K>, callback?: (...args) => void): void;
+		setState<K extends keyof S>(fn: (prevState: S, props: P) => Pick<S, K>, callback?: (...args) => void): void;
 
-		forceUpdate(callback?: () => void): void;
+		forceUpdate(callback?: (...args) => void): void;
 
 		abstract render(props?: RenderableProps<P>, state?: Readonly<S>, context?: any): JSX.Element | null;
 	}
