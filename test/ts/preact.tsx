@@ -1,4 +1,4 @@
-import { h, render, Component, ComponentProps, FunctionalComponent } from "../../src/preact";
+import { h, render, Component, ComponentProps, FunctionalComponent, AnyComponent } from "../../src/preact";
 
 interface DummyProps {
 	initialInput: string;
@@ -16,8 +16,18 @@ class DummyComponent extends Component<DummyProps, DummyState> {
 		}
 	}
 
+	private setRef = (el: AnyComponent<any>) => {
+		console.log(el);
+	}
+
 	render({ initialInput }: DummyProps, { input }: DummyState) {
-		return <DummerComponent initialInput={initialInput} input={input} />
+		return (
+			<div>
+				<DummerComponent initialInput={initialInput} input={input} />
+				{/* Can specify all Preact attributes on a typed FunctionalComponent */}
+				<ComponentWithChildren initialInput={initialInput} input={input} key="1" ref={this.setRef} />
+			</div>
+		);
 	}
 }
 
@@ -29,7 +39,7 @@ function DummerComponent({ input, initialInput }: DummerComponentProps) {
 	return <div>Input: {input}, initial: {initialInput}</div>;
 }
 
-render(h(DummerComponent, { initialInput: "The input", input: "New input" }), document);
+render(h(DummerComponent, { initialInput: "The input", input: "New input", key: "1"}), document);
 
 // Accessing children
 const ComponentWithChildren: FunctionalComponent<DummerComponentProps> = (
@@ -68,6 +78,9 @@ class ComponentUsingRef extends Component<any, any> {
 			{this.array.map(el =>
 				<span ref={this.setRef}>{el}</span>
 			)}
+
+			{/* Can specify Preact attributes on a component */}
+			<DummyComponent initialInput="1" key="1" ref={this.setRef} />
 		</div>
 	}
 

@@ -52,7 +52,9 @@ declare namespace preact {
 		key?: Key | null;
 	}
 
-	type RenderableProps<P> = Readonly<P> & Readonly<{ children?: ComponentChildren }>;
+	type RenderableProps<P, RefType = any> = Readonly<
+		P & Attributes & { children?: ComponentChildren; ref?: Ref<RefType> }
+	>;
 
 	interface FunctionalComponent<P = {}> {
 		(props: RenderableProps<P>, context?: any): VNode<any> | null;
