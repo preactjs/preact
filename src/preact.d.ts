@@ -52,8 +52,9 @@ declare namespace preact {
 		key?: Key | null;
 	}
 
-	type RenderableProps<P> = Readonly<P & Attributes & { children?: ComponentChildren }>;
-	type ClassRenderableProps<P> = RenderableProps<P> & Readonly<ClassAttributes<any>>;
+	type RenderableProps<P, RefType = any> = Readonly<
+		P & Attributes & { children?: ComponentChildren; ref?: Ref<RefType> }
+	>;
 
 	interface FunctionalComponent<P = {}> {
 		(props: RenderableProps<P>, context?: any): VNode<any> | null;
@@ -88,7 +89,7 @@ declare namespace preact {
 		static defaultProps?: any;
 
 		state: Readonly<S>;
-		props: ClassRenderableProps<P>;
+		props: RenderableProps<P>;
 		context: any;
 		base?: HTMLElement;
 
@@ -97,7 +98,7 @@ declare namespace preact {
 
 		forceUpdate(callback?: () => void): void;
 
-		abstract render(props?: ClassRenderableProps<P>, state?: Readonly<S>, context?: any): JSX.Element | null;
+		abstract render(props?: RenderableProps<P>, state?: Readonly<S>, context?: any): JSX.Element | null;
 	}
 
 	function h<P>(
