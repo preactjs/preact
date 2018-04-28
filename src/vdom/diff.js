@@ -5,6 +5,7 @@ import { createNode, setAccessor } from '../dom/index';
 import { unmountComponent } from './component';
 import options from '../options';
 import { removeNode } from '../dom/index';
+import { Fragment } from '../component';
 
 /** Queue of components that have been mounted and are awaiting componentDidMount */
 export const mounts = [];
@@ -45,9 +46,17 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 	}
 
 	let ret = idiff(dom, vnode, context, mountAll, componentRoot);
-
-	// append the element if its a new parent
-	if (parent && ret.parentNode!==parent) parent.appendChild(ret);
+	if (parent) {
+		// append the element if its a new parent
+		if (ret instanceof Array) {
+			ret.forEach(x => {
+				if (x.parentNode!==parent) parent.appendChild(x);
+			});
+		} else if ( ret.parentNode!==parent) {
+			// append the element if its a new parent
+			parent.appendChild(ret);
+		}
+	}
 
 	// diffLevel being reduced to 0 means we're exiting the diff
 	if (!--diffLevel) {
@@ -93,10 +102,13 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 		return out;
 	}
 
+	if (Array.isArray(vnode)) {
+		return vnode.map(x => idiff(dom, x, context, mountAll, componentRoot));
+	}
 
 	// If the VNode represents a Component, perform a component diff:
 	let vnodeName = vnode.nodeName;
-	if (typeof vnodeName==='function') {
+	if (typeof vnodeName==='function' && vnodeName !== Fragment) {
 		return buildComponentFromVNode(dom, vnode, context, mountAll);
 	}
 
@@ -107,7 +119,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 	// If there's no existing element or it's the wrong type, create a new one:
 	vnodeName = String(vnodeName);
-	if (!dom || !isNamedNode(dom, vnodeName)) {
+	if ((!dom || !isNamedNode(dom, vnodeName)) && vnode.vnodeName !== Fragment) {
 		out = createNode(vnodeName, isSvgMode);
 
 		if (dom) {
@@ -214,6 +226,11 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 						break;
 					}
 				}
+			}
+
+			if (vchild.nodeName === Fragment) {
+				innerDiffNode(dom, vchild.children, context, mountAll, isHydrating);
+				return;
 			}
 
 			// morph the matched/found/created DOM child to match vchild (deep)
