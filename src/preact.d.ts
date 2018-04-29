@@ -45,7 +45,7 @@ declare namespace preact {
 	 * of child {VNode}s and a key. The key is used by preact for
 	 * internal purposes.
 	 */
-	interface VNode<P> {
+	interface VNode<P = any> {
 		nodeName: ComponentFactory<P> | string;
 		attributes: P;
 		children: Array<VNode<any> | string>;
