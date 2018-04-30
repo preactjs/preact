@@ -15,6 +15,7 @@ describe('preact', () => {
 	it('should be available as named exports', () => {
 		expect(h).to.be.a('function');
 		expect(Component).to.be.a('function');
+		expect(Fragment).to.be.a('function');
 		expect(render).to.be.a('function');
 		expect(rerender).to.be.a('function');
 		expect(options).to.exist.and.be.an('object');
