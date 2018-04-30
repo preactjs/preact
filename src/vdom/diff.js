@@ -49,9 +49,10 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 	if (parent) {
 		// append the element if its a new parent
 		if (ret instanceof Array) {
-			ret.forEach(x => {
-				if (x.parentNode!==parent) parent.appendChild(x);
-			});
+			for (let i = 0; i < ret.length; i++) {
+				if (ret[i].parentNode!==parent) parent.appendChild(ret[i]);
+
+			}
 		} else if ( ret.parentNode!==parent) {
 			// append the element if its a new parent
 			parent.appendChild(ret);
