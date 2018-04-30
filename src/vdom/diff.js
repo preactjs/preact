@@ -237,16 +237,13 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 			child = idiff(child, vchild, context, mountAll);
 
 			f = originalChildren[i];
-			if (child && child!==dom && child!==f) {
-				if (f==null) {
-					dom.appendChild(child);
+			if (child instanceof Array) {
+				for (let i = 0; i < child.length; i++) {
+					updateChild(dom, child[i], f);
 				}
-				else if (child===f.nextSibling) {
-					removeNode(f);
-				}
-				else {
-					dom.insertBefore(child, f);
-				}
+			}
+			else {
+				updateChild(dom, child, f);
 			}
 		}
 	}
@@ -260,6 +257,20 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 	// remove orphaned unkeyed children:
 	while (min<=childrenLen) {
 		if ((child = children[childrenLen--])!==undefined) recollectNodeTree(child, false);
+	}
+}
+
+export function updateChild(dom, child, original) {
+	if (child && child!==dom && child!==original) {
+		if (original==null) {
+			dom.appendChild(child);
+		}
+		else if (child===original.nextSibling) {
+			removeNode(original);
+		}
+		else {
+			dom.insertBefore(child, original);
+		}
 	}
 }
 

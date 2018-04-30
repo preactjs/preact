@@ -808,7 +808,7 @@ describe('Components', () => {
 		});
 	});
 
-	describe.only("Fragments", () => {
+	describe("Fragments", () => {
 		it("should render child fragment", () => {
 			let root;
 			function test(content) {
@@ -851,7 +851,7 @@ describe('Components', () => {
 
 			test(<div><Comp /></div>);
 
-			expect(scratch.innerHTML).to.equal('<span>foo</span>bar');
+			expect(scratch.innerHTML).to.equal('<div><span>foo</span>bar</div>');
 		});
 	});
 });
