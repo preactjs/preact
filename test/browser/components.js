@@ -853,5 +853,20 @@ describe('Components', () => {
 
 			expect(scratch.innerHTML).to.equal('<div><span>foo</span>bar</div>');
 		});
+
+		it("should support array returns", () => {
+			let root;
+			function test(content) {
+				root = render(content, scratch, root);
+			}
+
+			function Comp() {
+				return [<span>foo</span>, "bar"];
+			}
+
+			test(<div><Comp /></div>);
+
+			expect(scratch.innerHTML).to.equal('<div><span>foo</span>bar</div>');
+		});
 	});
 });
