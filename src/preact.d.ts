@@ -124,11 +124,6 @@ declare namespace preact {
 	};
 }
 
-declare module "preact/devtools" {
-	// Empty. This module initializes the React Developer Tools integration
-	// when imported.
-}
-
 declare global {
 	namespace JSX {
 		interface Element extends preact.VNode<any> {
