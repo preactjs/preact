@@ -64,7 +64,7 @@ export function setAccessor(node, name, old, value, isSvg) {
 	}
 	else if (name[0]=='o' && name[1]=='n') {
 		let useCapture = name !== (name=name.replace(/Capture$/, ''));
-		name = name.toLowerCase().substring(2);
+		name = name.toLowerCase().slice(2);
 		if (value) {
 			if (!old) node.addEventListener(name, eventProxy, useCapture);
 		}
