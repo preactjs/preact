@@ -6,12 +6,12 @@ export default {
 		format: 'umd',
 		file: 'devtools.js',
 		name: 'preactDevTools',
-		sourcemap: true
+		sourcemap: true,
+		globals: {
+			preact: 'preact'
+		}
 	},
 	external: ['preact'],
-	globals: {
-		preact: 'preact'
-	},
 	plugins: [
 		babel({
 			sourceMap: true,

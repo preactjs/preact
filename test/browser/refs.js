@@ -74,11 +74,11 @@ describe('refs', () => {
 		let root = render(<Foo ref={ref} />, scratch);
 		expect(ref).to.have.been.calledOnce;
 
-		ref.reset();
+		ref.resetHistory();
 		render(<Foo ref={ref} />, scratch, root);
 		expect(ref).to.have.been.calledOnce;
 
-		ref.reset();
+		ref.resetHistory();
 		render(<span />, scratch, root);
 		expect(ref).to.have.been.calledOnce.and.calledWith(null);
 	});
@@ -116,15 +116,15 @@ describe('refs', () => {
 		expect(outer).to.have.been.calledOnce.and.calledWith(inst);
 		expect(inner).to.have.been.calledOnce.and.calledWith(inst.base);
 
-		outer.reset();
-		inner.reset();
+		outer.resetHistory();
+		inner.resetHistory();
 
 		rerender();
 
 		expect(outer, 're-render').to.have.been.calledOnce.and.calledWith(inst);
 		expect(inner, 're-render').not.to.have.been.called;
 
-		inner.reset();
+		inner.resetHistory();
 		InnermostComponent = 'x-span';
 		rerender();
 		expect(inner, 're-render swap');
@@ -132,8 +132,8 @@ describe('refs', () => {
 		expect(inner.secondCall, 're-render swap').to.have.been.calledWith(inst.base);
 		InnermostComponent = 'span';
 
-		outer.reset();
-		inner.reset();
+		outer.resetHistory();
+		inner.resetHistory();
 
 		render(<div />, scratch, root);
 
@@ -173,16 +173,16 @@ describe('refs', () => {
 		expect(inner, 'inner initial').to.have.been.calledOnce.and.calledWith(innerInst);
 		expect(innermost, 'innerMost initial').to.have.been.calledOnce.and.calledWith(innerInst.base);
 
-		outer.reset();
-		inner.reset();
-		innermost.reset();
+		outer.resetHistory();
+		inner.resetHistory();
+		innermost.resetHistory();
 		root = render(<Outer ref={outer} />, scratch, root);
 
 		expect(outer, 'outer update').to.have.been.calledOnce.and.calledWith(outerInst);
 		expect(inner, 'inner update').to.have.been.calledOnce.and.calledWith(innerInst);
 		expect(innermost, 'innerMost update').not.to.have.been.called;
 
-		innermost.reset();
+		innermost.resetHistory();
 		InnermostComponent = 'x-span';
 		root = render(<Outer ref={outer} />, scratch, root);
 		expect(innermost, 'innerMost swap');
@@ -190,9 +190,9 @@ describe('refs', () => {
 		expect(innermost.secondCall, 'innerMost swap').to.have.been.calledWith(innerInst.base);
 		InnermostComponent = 'span';
 
-		outer.reset();
-		inner.reset();
-		innermost.reset();
+		outer.resetHistory();
+		inner.resetHistory();
+		innermost.resetHistory();
 		render(<div />, scratch, root);
 
 		expect(outer, 'outer unmount').to.have.been.calledOnce.and.calledWith(null);
@@ -284,14 +284,14 @@ describe('refs', () => {
 
 		render(<App />, scratch);
 		expect(inst.handleMount).to.have.been.calledOnce.and.calledWith(scratch.querySelector('#div'));
-		inst.handleMount.reset();
+		inst.handleMount.resetHistory();
 
 		inst.setState({ show:true });
 		inst.forceUpdate();
 		expect(inst.handleMount).to.have.been.calledTwice;
 		expect(inst.handleMount.firstCall).to.have.been.calledWith(null);
 		expect(inst.handleMount.secondCall).to.have.been.calledWith(scratch.querySelector('#span'));
-		inst.handleMount.reset();
+		inst.handleMount.resetHistory();
 
 		inst.setState({ show:false });
 		inst.forceUpdate();
