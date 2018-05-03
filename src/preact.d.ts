@@ -69,7 +69,7 @@ declare namespace preact {
 	}
 
 	// Type alias for a component considered generally, whether stateless or stateful.
-	type AnyComponent<P = {}, S = {}> = FunctionalComponent<P> | Component<P, S>;
+	type AnyComponent<P = {}, S = {}> = FunctionalComponent<P> | ComponentConstructor<P, S>;
 
 	interface Component<P = {}, S = {}> {
 		componentWillMount?(): void;
