@@ -118,6 +118,38 @@ describe('Components', () => {
 		expect(clone.prototype).to.equal(instance.prototype);
 	});
 
+	it('should render string', () => {
+		class StringComponent extends Component {
+			render() {
+				return "Hi there";
+			}
+		}
+
+		render(<StringComponent />, scratch);
+		expect(scratch.innerHTML).to.equal('Hi there');
+	});
+
+	it('should render number as string', () => {
+		class NumberComponent extends Component {
+			render() {
+				return 42;
+			}
+		}
+
+		render(<NumberComponent />, scratch);
+		expect(scratch.innerHTML).to.equal('42');
+	});
+
+	it('should render null as empty string', () => {
+		class NullComponent extends Component {
+			render() {
+				return null;
+			}
+		}
+
+		render(<NullComponent />, scratch);
+		expect(scratch.innerHTML).to.equal('');
+	});
 
 	// Test for Issue #73
 	it('should remove orphaned elements replaced by Components', () => {
