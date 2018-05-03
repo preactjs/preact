@@ -868,5 +868,20 @@ describe('Components', () => {
 
 			expect(scratch.innerHTML).to.equal('<div><span>foo</span>bar</div>');
 		});
+
+		it("should Fragments with siblings", () => {
+			let root;
+			function test(content) {
+				root = render(content, scratch, root);
+			}
+
+			function Comp() {
+				return <div>foo,<Fragment>bar,</Fragment>baz,</div>;
+			}
+
+			test(<Comp />);
+
+			expect(scratch.innerHTML).to.equal('<div>foo,bar,baz,</div>');
+		});
 	});
 });
