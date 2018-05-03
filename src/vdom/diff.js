@@ -104,7 +104,10 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	}
 
 	if (Array.isArray(vnode)) {
-		return vnode.map(x => idiff(dom, x, context, mountAll, componentRoot));
+		for (let i = 0; i < vnode.length; i++) {
+			vnode[i] = idiff(dom, vnode[i], context, mountAll, componentRoot);
+		}
+		return vnode;
 	}
 
 	// If the VNode represents a Component, perform a component diff:
