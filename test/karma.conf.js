@@ -99,7 +99,7 @@ module.exports = function(config) {
 
 		sauceLabs: {
 			tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER || ('local'+require('../package.json').version),
-			startConnect: !!process.env.TRAVIS
+			startConnect: sauceLabs
 		},
 
 		customLaunchers: sauceLabs ? sauceLabsLaunchers : localLaunchers,
