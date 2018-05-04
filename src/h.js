@@ -37,7 +37,19 @@ const EMPTY_CHILDREN = [];
 export function h(nodeName, attributes) {
 	let children=EMPTY_CHILDREN, lastSimple, child, simple, i;
 	for (i=arguments.length; i-- > 2; ) {
-		stack.push(arguments[i]);
+		child = arguments[i];
+		if ((child instanceof VNode) && (child.key==null)) {
+			const key = `preact-${arguments.length - i}`
+			child.key = key;
+			if (child.attributes) {
+				child.attributes.key = key
+			} else {
+				child.attributes = {
+					key: key
+				}
+			}
+		}
+		stack.push(child);
 	}
 	if (attributes && attributes.children!=null) {
 		if (!stack.length) stack.push(attributes.children);
