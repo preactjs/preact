@@ -87,8 +87,8 @@ module.exports = function(config) {
 		concurrency: 2,
 
 		sauceLabs: {
-			tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER || ('local'+require('../package.json').version),
-			startConnect: sauceLabs
+			//tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER || ('local'+require('../package.json').version),
+			startConnect: false
 		},
 
 		customLaunchers: sauceLabs ? sauceLabsLaunchers : localLaunchers,
