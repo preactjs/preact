@@ -112,7 +112,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 	// If the VNode represents a Component, perform a component diff:
 	let vnodeName = vnode.nodeName;
-	if (typeof vnodeName==='function' && vnodeName !== Fragment) {
+	if (typeof vnodeName==='function') {
 		return buildComponentFromVNode(dom, vnode, context, mountAll);
 	}
 
@@ -123,7 +123,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 	// If there's no existing element or it's the wrong type, create a new one:
 	vnodeName = String(vnodeName);
-	if ((!dom || !isNamedNode(dom, vnodeName)) && vnode.vnodeName !== Fragment) {
+	if (!dom || !isNamedNode(dom, vnodeName)) {
 		out = createNode(vnodeName, isSvgMode);
 
 		if (dom) {
@@ -230,11 +230,6 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 						break;
 					}
 				}
-			}
-
-			if (vchild.nodeName === Fragment) {
-				innerDiffNode(dom, vchild.children, context, mountAll, isHydrating);
-				return;
 			}
 
 			// morph the matched/found/created DOM child to match vchild (deep)

@@ -816,7 +816,9 @@ describe('Components', () => {
 			}
 
 			function Comp() {
-				return <div>{h(Fragment, null, [<span>foo</span>, "bar"])}</div>;
+				return <div>
+					<Fragment><span>foo</span>bar</Fragment>
+				</div>;
 			}
 
 			test(<Comp />);
@@ -831,7 +833,7 @@ describe('Components', () => {
 			}
 
 			function Comp() {
-				return h(Fragment, null, [<span>foo</span>, "bar"]);
+				return <Fragment><span>foo</span>bar</Fragment>;
 			}
 
 			test(<Comp />);
@@ -846,22 +848,7 @@ describe('Components', () => {
 			}
 
 			function Comp() {
-				return h(Fragment, null, [<span>foo</span>, "bar"]);
-			}
-
-			test(<div><Comp /></div>);
-
-			expect(scratch.innerHTML).to.equal('<div><span>foo</span>bar</div>');
-		});
-
-		it("should support array returns", () => {
-			let root;
-			function test(content) {
-				root = render(content, scratch, root);
-			}
-
-			function Comp() {
-				return [<span>foo</span>, "bar"];
+				return <Fragment><span>foo</span>bar</Fragment>;
 			}
 
 			test(<div><Comp /></div>);
@@ -875,11 +862,7 @@ describe('Components', () => {
 				root = render(content, scratch, root);
 			}
 
-			function Comp() {
-				return <div>foo,<Fragment>bar,</Fragment>baz,</div>;
-			}
-
-			test(<Comp />);
+			test(<div>foo,<Fragment>bar,</Fragment>baz,</div>);
 
 			expect(scratch.innerHTML).to.equal('<div>foo,bar,baz,</div>');
 		});
