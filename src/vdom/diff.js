@@ -102,7 +102,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 		return out;
 	}
 
-	if (Array.isArray(vnode)) {
+	if (vnode instanceof Array) {
 		for (let i = 0; i < vnode.length; i++) {
 			vnode[i] = idiff(dom, vnode[i], context, mountAll, componentRoot);
 		}
