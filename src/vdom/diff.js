@@ -5,7 +5,6 @@ import { createNode, setAccessor } from '../dom/index';
 import { unmountComponent } from './component';
 import options from '../options';
 import { removeNode } from '../dom/index';
-import { Fragment } from '../component';
 
 /** Queue of components that have been mounted and are awaiting componentDidMount */
 export const mounts = [];
