@@ -8,10 +8,11 @@ import { createComponent, collectComponent } from './component-recycler';
 import { removeNode } from '../dom/index';
 
 /** Set a component's `props` (generally derived from JSX attributes).
+ *  @param {Component} component
  *	@param {Object} props
- *	@param {Object} [opts]
- *	@param {boolean} [opts.renderSync=false]	If `true` and {@link options.syncComponentUpdates} is `true`, triggers synchronous rendering.
- *	@param {boolean} [opts.render=true]			If `false`, no render will be triggered.
+ *	@param {number} [opts] A number indicating which kind of render is running (e.g. sync, async, force). See ../constants.js for available renders
+ *  @param {Object} [context]
+ *  @param {boolean} [mountAll]
  */
 export function setComponentProps(component, props, opts, context, mountAll) {
 	if (component._disable) return;
@@ -52,9 +53,10 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 
 
 /** Render a Component, triggering necessary lifecycle events and taking High-Order Components into account.
- *	@param {Component} component
- *	@param {Object} [opts]
- *	@param {boolean} [opts.build=false]		If `true`, component will build and store a DOM node if not already associated with one.
+ *	@param {Component} component  The component to render
+ *	@param {number} [opts]        A number indicating which kind of render is running (e.g. sync, async, force). See ../constants.js for available renders
+ *  @param {boolean} [mountAll]
+ *  @param {boolean} [isChild]
  *	@private
  */
 export function renderComponent(component, opts, mountAll, isChild) {
@@ -196,7 +198,9 @@ export function renderComponent(component, opts, mountAll, isChild) {
 /** Apply the Component referenced by a VNode to the DOM.
  *	@param {Element} dom	The DOM node to mutate
  *	@param {VNode} vnode	A Component-referencing VNode
- *	@returns {Element} dom	The created/mutated element
+ *  @param {Object} [context]
+ *  @param {boolean} [mountAll]
+ *	@returns {Element} The created/mutated element
  *	@private
  */
 export function buildComponentFromVNode(dom, vnode, context, mountAll) {
