@@ -26,10 +26,10 @@ describe('Lifecycle methods', () => {
 	describe('static getDerivedStateFromProps', () => {
 		it('should set initial state with value returned from getDerivedStateFromProps', () => {
 			class Foo extends Component {
-				static getDerivedStateFromProps(nextProps, prevState) {
+				static getDerivedStateFromProps(nextProps) {
 					return {
 						foo: nextProps.foo,
-						bar: 'bar',
+						bar: 'bar'
 					};
 				}
 				render() {
@@ -47,12 +47,12 @@ describe('Lifecycle methods', () => {
 					super(props, context);
 					this.state = {
 						foo: 'foo',
-						bar: 'bar',
+						bar: 'bar'
 					};
 				}
 				static getDerivedStateFromProps(nextProps, prevState) {
 					return {
-						foo: `not-${prevState.foo}`,
+						foo: `not-${prevState.foo}`
 					};
 				}
 				render() {
@@ -69,13 +69,13 @@ describe('Lifecycle methods', () => {
 				constructor(props, context) {
 					super(props, context);
 					this.state = {
-						value: 'initial',
+						value: 'initial'
 					};
 				}
-				static getDerivedStateFromProps(nextProps, prevState) {
+				static getDerivedStateFromProps(nextProps) {
 					if (nextProps.update) {
 						return {
-							value: 'updated',
+							value: 'updated'
 						};
 					}
 
@@ -95,13 +95,13 @@ describe('Lifecycle methods', () => {
 
 			element = render(<Foo update={false} />, scratch, element);
 			expect(element.className).to.equal('initial');
-			expect(Foo.getDerivedStateFromProps).to.have.callCount(1)
+			expect(Foo.getDerivedStateFromProps).to.have.callCount(1);
 			expect(Foo.prototype.componentDidMount).to.have.callCount(1); // verify mount occurred
 			expect(Foo.prototype.componentDidUpdate).to.have.callCount(0);
 
 			element = render(<Foo update={true} />, scratch, element);
 			expect(element.className).to.equal('updated');
-			expect(Foo.getDerivedStateFromProps).to.have.callCount(2)
+			expect(Foo.getDerivedStateFromProps).to.have.callCount(2);
 			expect(Foo.prototype.componentDidMount).to.have.callCount(1);
 			expect(Foo.prototype.componentDidUpdate).to.have.callCount(1); // verify update occurred
 		});
@@ -111,7 +111,7 @@ describe('Lifecycle methods', () => {
 				constructor(props, context) {
 					super(props, context);
 					this.state = {
-						value: 'initial',
+						value: 'initial'
 					};
 				}
 				static getDerivedStateFromProps(nextProps, prevState) {
@@ -121,7 +121,7 @@ describe('Lifecycle methods', () => {
 					}
 
 					return {
-						value: 'unexpected',
+						value: 'unexpected'
 					};
 				}
 				componentDidMount() {
@@ -150,7 +150,7 @@ describe('Lifecycle methods', () => {
 					super(props, context);
 					this.state = {
 						foo: 'foo',
-						bar: 'bar',
+						bar: 'bar'
 					};
 				}
 				static getDerivedStateFromProps() {
@@ -176,7 +176,7 @@ describe('Lifecycle methods', () => {
 					super(props, context);
 					this.state = {
 						foo: 'foo',
-						bar: 'bar',
+						bar: 'bar'
 					};
 				}
 				static getDerivedStateFromProps() {}
@@ -198,10 +198,10 @@ describe('Lifecycle methods', () => {
 			class Foo extends Component {
 				static getDerivedStateFromProps() {}
 				componentWillMount() {
-					throw new Error('componentWillMount should not be called if getDerivedStateFromProps is present.')
+					throw new Error('componentWillMount should not be called if getDerivedStateFromProps is present.');
 				}
 				componentWillReceiveProps() {
-					throw new Error('componentWillReceiveProps should not be called if getDerivedStateFromProps is present.')
+					throw new Error('componentWillReceiveProps should not be called if getDerivedStateFromProps is present.');
 				}
 				render() {
 					return <div />;
