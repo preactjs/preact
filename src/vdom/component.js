@@ -20,7 +20,9 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 	if ((component.__ref = props.ref)) delete props.ref;
 	if ((component.__key = props.key)) delete props.key;
 
-	if (!component.base || mountAll) {
+	if (component.constructor.getDerivedStateFromProps) {
+		component.state = extend(component.state, component.constructor.getDerivedStateFromProps(props, component.state));
+	} else if (!component.base || mountAll) {
 		if (component.componentWillMount) component.componentWillMount();
 	}
 	else if (component.componentWillReceiveProps) {
