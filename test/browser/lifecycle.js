@@ -106,7 +106,7 @@ describe('Lifecycle methods', () => {
 			expect(Foo.prototype.componentDidUpdate).to.have.callCount(1); // verify update occurred
 		});
 
-		it('should NOT be invoked on state only updates', () => {
+		it('should update the instance\'s state with the value returned from getDerivedStateFromProps when state changes', () => {
 			class Foo extends Component {
 				constructor(props, context) {
 					super(props, context);
@@ -121,7 +121,7 @@ describe('Lifecycle methods', () => {
 					}
 
 					return {
-						value: 'unexpected'
+						value: prevState.value + ' derived'
 					};
 				}
 				componentDidMount() {
@@ -140,8 +140,8 @@ describe('Lifecycle methods', () => {
 			expect(Foo.getDerivedStateFromProps).to.have.been.calledOnce;
 
 			rerender(); // call rerender to handle cDM setState call
-			expect(element.className).to.equal('updated');
-			expect(Foo.getDerivedStateFromProps).to.have.been.calledOnce;
+			expect(element.className).to.equal('updated derived');
+			expect(Foo.getDerivedStateFromProps).to.have.been.calledTwice;
 		});
 
 		it('should NOT modify state if null is returned', () => {
@@ -197,12 +197,8 @@ describe('Lifecycle methods', () => {
 		it('should NOT invoke deprecated lifecycles (cWM/cWRP) if new static gDSFP is present', () => {
 			class Foo extends Component {
 				static getDerivedStateFromProps() {}
-				componentWillMount() {
-					throw new Error('componentWillMount should not be called if getDerivedStateFromProps is present.');
-				}
-				componentWillReceiveProps() {
-					throw new Error('componentWillReceiveProps should not be called if getDerivedStateFromProps is present.');
-				}
+				componentWillMount() {}
+				componentWillReceiveProps() {}
 				render() {
 					return <div />;
 				}
