@@ -37,18 +37,24 @@ describe('render()', () => {
 		scratch = null;
 	});
 
+	it('should render a empty text node', () => {
+		render(null, scratch);
+		let c = scratch.childNodes;
+		expect(c).to.have.length(1);
+		expect(c[0].data).to.equal('');
+		expect(c[0].nodeName).to.equal('#text');
+	});
+
 	it('should create empty nodes (<* />)', () => {
 		render(<div />, scratch);
-		expect(scratch.childNodes)
-			.to.have.length(1)
-			.and.to.have.deep.property('0.nodeName', 'DIV');
+		expect(scratch.childNodes).to.have.length(1);
+		expect(scratch.childNodes[0].nodeName).to.equal('DIV');
 
 		scratch.innerHTML = '';
 
 		render(<span />, scratch);
-		expect(scratch.childNodes)
-			.to.have.length(1)
-			.and.to.have.deep.property('0.nodeName', 'SPAN');
+		expect(scratch.childNodes).to.have.length(1);
+		expect(scratch.childNodes[0].nodeName).to.equal('SPAN');
 
 		scratch.innerHTML = '';
 
@@ -68,15 +74,14 @@ describe('render()', () => {
 			</div>
 		), scratch);
 
-		expect(scratch.childNodes)
-			.to.have.length(1)
-			.and.to.have.deep.property('0.nodeName', 'DIV');
+		expect(scratch.childNodes).to.have.length(1);
+		expect(scratch.childNodes[0].nodeName).to.equal('DIV');
 
 		let c = scratch.childNodes[0].childNodes;
 		expect(c).to.have.length(3);
-		expect(c).to.have.deep.property('0.nodeName', 'SPAN');
-		expect(c).to.have.deep.property('1.nodeName', 'FOO');
-		expect(c).to.have.deep.property('2.nodeName', 'X-BAR');
+		expect(c[0].nodeName).to.equal('SPAN');
+		expect(c[1].nodeName).to.equal('FOO');
+		expect(c[2].nodeName).to.equal('X-BAR');
 	});
 
 	it('should not render falsy values', () => {
@@ -199,33 +204,33 @@ describe('render()', () => {
 		render(<div foo="bar" data-foo="databar" />, scratch);
 
 		let div = scratch.childNodes[0];
-		expect(div).to.have.deep.property('attributes.length', 2);
+		expect(div.attributes.length).to.equal(2);
 
-		expect(div).to.have.deep.property('attributes[0].name', 'foo');
-		expect(div).to.have.deep.property('attributes[0].value', 'bar');
+		expect(div.attributes[0].name).to.equal('foo');
+		expect(div.attributes[0].value).to.equal('bar');
 
-		expect(div).to.have.deep.property('attributes[1].name', 'data-foo');
-		expect(div).to.have.deep.property('attributes[1].value', 'databar');
+		expect(div.attributes[1].name).to.equal('data-foo');
+		expect(div.attributes[1].value).to.equal('databar');
 	});
 
 	it('should not serialize function props as attributes', () => {
 		render(<div click={function a(){}} ONCLICK={function b(){}} />, scratch);
 
 		let div = scratch.childNodes[0];
-		expect(div).to.have.deep.property('attributes.length', 0);
+		expect(div.attributes.length).to.equal(0);
 	});
 
 	it('should serialize object props as attributes', () => {
 		render(<div foo={{ a: 'b' }} bar={{ toString() { return 'abc'; } }} />, scratch);
 
 		let div = scratch.childNodes[0];
-		expect(div).to.have.deep.property('attributes.length', 2);
+		expect(div.attributes.length).to.equal(2);
 
-		expect(div).to.have.deep.property('attributes[0].name', 'foo');
-		expect(div).to.have.deep.property('attributes[0].value', '[object Object]');
+		expect(div.attributes[0].name).equal('foo');
+		expect(div.attributes[0].value).equal('[object Object]');
 
-		expect(div).to.have.deep.property('attributes[1].name', 'bar');
-		expect(div).to.have.deep.property('attributes[1].value', 'abc');
+		expect(div.attributes[1].name).equal('bar');
+		expect(div.attributes[1].value).equal('abc');
 	});
 
 	it('should apply class as String', () => {
@@ -240,7 +245,7 @@ describe('render()', () => {
 
 	it('should apply style as String', () => {
 		render(<div style="top:5px; position:relative;" />, scratch);
-		expect(scratch.childNodes[0]).to.have.deep.property('style.cssText')
+		expect(scratch.childNodes[0].style.cssText)
 			.that.matches(/top\s*:\s*5px\s*/)
 			.and.matches(/position\s*:\s*relative\s*/);
 	});
@@ -255,7 +260,7 @@ describe('render()', () => {
 
 		render(<div click={ click } onClick={ onclick } />, scratch);
 
-		expect(scratch.childNodes[0]).to.have.deep.property('attributes.length', 0);
+		expect(scratch.childNodes[0].attributes.length).to.equal(0);
 
 		expect(proto.addEventListener).to.have.been.calledOnce
 			.and.to.have.been.calledWithExactly('click', sinon.match.func, false);
@@ -287,8 +292,8 @@ describe('render()', () => {
 		expect(click).to.have.been.calledOnce
 			.and.calledWith(1);
 
-		proto.addEventListener.reset();
-		click.reset();
+		proto.addEventListener.resetHistory();
+		click.resetHistory();
 
 		render(<div onClick={ () => click(2) } />, scratch, scratch.firstChild);
 
@@ -305,9 +310,9 @@ describe('render()', () => {
 		fireEvent(scratch.childNodes[0], 'mousedown');
 		expect(mousedown).not.to.have.been.called;
 
-		proto.removeEventListener.reset();
-		click.reset();
-		mousedown.reset();
+		proto.removeEventListener.resetHistory();
+		click.resetHistory();
+		mousedown.resetHistory();
 
 		render(<div />, scratch, scratch.firstChild);
 
@@ -375,19 +380,19 @@ describe('render()', () => {
 			<div style={{ color: 'rgb(0, 255, 255)' }}>test</div>
 		), scratch, root);
 
-		expect(root).to.have.deep.property('style.cssText').that.equals('color: rgb(0, 255, 255);');
+		expect(root.style.cssText).to.equal('color: rgb(0, 255, 255);');
 
 		root = render((
 			<div style="display: inline;">test</div>
 		), scratch, root);
 
-		expect(root).to.have.deep.property('style.cssText').that.equals('display: inline;');
+		expect(root.style.cssText).to.equal('display: inline;');
 
 		root = render((
 			<div style={{ backgroundColor: 'rgb(0, 255, 255)' }}>test</div>
 		), scratch, root);
 
-		expect(root).to.have.deep.property('style.cssText').that.equals('background-color: rgb(0, 255, 255);');
+		expect(root.style.cssText).to.equal('background-color: rgb(0, 255, 255);');
 	});
 
 	it('should support dangerouslySetInnerHTML', () => {
@@ -603,10 +608,10 @@ describe('render()', () => {
 			render() {
 				const {todos, text} = this.state;
 				return (
-						<div onKeyDown={ this.addTodo }>
-								{ todos.map( todo => (<div>{todo.text}</div> )) }
-								<input value={text} onInput={this.setText} ref={(i) => input = i} />
-						</div>
+					<div onKeyDown={ this.addTodo }>
+						{ todos.map( todo => (<div>{todo.text}</div> )) }
+						<input value={text} onInput={this.setText} ref={(i) => input = i} />
+					</div>
 				);
 			}
 		}

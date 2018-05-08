@@ -5,9 +5,14 @@
 /_dev
 /coverage
 package-lock.json
+/test/ts/**/*.js
 
 # Additional bundles
 /devtools.js
 /devtools.js.map
 /debug.js
 /debug.js.map
+
+# Editor and IDE configuration
+.vscode/
+.idea/

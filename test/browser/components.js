@@ -118,6 +118,38 @@ describe('Components', () => {
 		expect(clone.prototype).to.equal(instance.prototype);
 	});
 
+	it('should render string', () => {
+		class StringComponent extends Component {
+			render() {
+				return "Hi there";
+			}
+		}
+
+		render(<StringComponent />, scratch);
+		expect(scratch.innerHTML).to.equal('Hi there');
+	});
+
+	it('should render number as string', () => {
+		class NumberComponent extends Component {
+			render() {
+				return 42;
+			}
+		}
+
+		render(<NumberComponent />, scratch);
+		expect(scratch.innerHTML).to.equal('42');
+	});
+
+	it('should render null as empty string', () => {
+		class NullComponent extends Component {
+			render() {
+				return null;
+			}
+		}
+
+		render(<NullComponent />, scratch);
+		expect(scratch.innerHTML).to.equal('');
+	});
 
 	// Test for Issue #73
 	it('should remove orphaned elements replaced by Components', () => {
@@ -165,7 +197,7 @@ describe('Components', () => {
 		expect(scratch.innerHTML, 'switching to textnode 2').to.equal('asdf');
 	});
 
-		// Test for Issue #254
+	// Test for Issue #254
 	it('should not recycle common class children with different keys', () => {
 		let idx = 0;
 		let msgs = ['A','B','C','D','E','F','G','H'];
@@ -224,8 +256,8 @@ describe('Components', () => {
 		expect(Comp.prototype.componentWillMount).to.have.been.calledTwice;
 		expect(sideEffect).to.have.been.calledTwice;
 
-		sideEffect.reset();
-		Comp.prototype.componentWillMount.reset();
+		sideEffect.resetHistory();
+		Comp.prototype.componentWillMount.resetHistory();
 		good.setState({alt: true});
 		good.forceUpdate();
 		expect(scratch.textContent, 'new component with key present re-rendered').to.equal('C');
@@ -233,15 +265,15 @@ describe('Components', () => {
 		expect(Comp.prototype.componentWillMount).to.have.been.calledOnce;
 		expect(sideEffect).to.have.been.calledOnce;
 
-		sideEffect.reset();
-		Comp.prototype.componentWillMount.reset();
+		sideEffect.resetHistory();
+		Comp.prototype.componentWillMount.resetHistory();
 		render(<BadContainer ref={c=>bad=c} />, scratch, root);
 		expect(scratch.textContent, 'new component without key').to.equal('DE');
 		expect(Comp.prototype.componentWillMount).to.have.been.calledTwice;
 		expect(sideEffect).to.have.been.calledTwice;
 
-		sideEffect.reset();
-		Comp.prototype.componentWillMount.reset();
+		sideEffect.resetHistory();
+		Comp.prototype.componentWillMount.resetHistory();
 		bad.setState({alt: true});
 		bad.forceUpdate();
 		expect(scratch.textContent, 'new component without key re-rendered').to.equal('D');
@@ -633,13 +665,13 @@ describe('Components', () => {
 			expect(Inner.prototype.componentWillMount, 'initial mount').to.have.been.calledOnce;
 			expect(Inner.prototype.componentWillUnmount, 'initial mount').not.to.have.been.called;
 
-			Inner.prototype.componentWillMount.reset();
+			Inner.prototype.componentWillMount.resetHistory();
 			root = render(<Outer child={InnerFunc} />, scratch, root);
 
 			expect(Inner.prototype.componentWillMount, 'unmount').not.to.have.been.called;
 			expect(Inner.prototype.componentWillUnmount, 'unmount').to.have.been.calledOnce;
 
-			Inner.prototype.componentWillUnmount.reset();
+			Inner.prototype.componentWillUnmount.resetHistory();
 			root = render(<Outer child={Inner} />, scratch, root);
 
 			expect(Inner.prototype.componentWillMount, 'remount').to.have.been.calledOnce;
@@ -679,7 +711,7 @@ describe('Components', () => {
 		let reset = () => [C1, C2, C3].reduce(
 			(acc, c) => acc.concat( Object.keys(c.prototype).map(key => c.prototype[key]) ),
 			[F1, F2, F3]
-		).forEach( c => c.reset && c.reset() );
+		).forEach( c => c.reset && c.resetHistory() );
 
 
 		it('should handle lifecycle for no intermediary in component tree', () => {
