@@ -18,9 +18,6 @@ before_install:
 install:
   - npm install
 
-addons:
-  sauce_connect: true
-
 script:
   - npm run build
   - COVERAGE=true npm run test
