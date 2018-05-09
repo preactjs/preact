@@ -86,8 +86,11 @@ module.exports = function(config) {
 		// Use only two browsers concurrently, works better with open source Sauce Labs remote testing
 		concurrency: 2,
 
+		logLevel: config.LOG_DEBUG,
+
 		sauceLabs: {
-			//tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER || ('local'+require('../package.json').version),
+			build: 'CI #' + process.env.TRAVIS_BUILD_NUMBER + ' (' + process.env.TRAVIS_BUILD_ID + ')',
+			tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER || ('local'+require('../package.json').version),
 			startConnect: false
 		},
 
