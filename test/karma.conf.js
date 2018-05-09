@@ -87,6 +87,7 @@ module.exports = function(config) {
 		concurrency: 2,
 
 		logLevel: config.LOG_DEBUG,
+		captureTimeout: 0,
 
 		sauceLabs: {
 			build: 'CI #' + process.env.TRAVIS_BUILD_NUMBER + ' (' + process.env.TRAVIS_BUILD_ID + ')',
