@@ -25,7 +25,7 @@ export function removeNode(node) {
 
 /** Set a named attribute on the given Node, with special behavior for some names and event handlers.
  *	If `value` is `null`, the attribute/handler will be removed.
- *	@param {Element} node	An element to mutate
+ *	@param {HTMLElement | SVGElement} node	An element to mutate
  *	@param {string} name	The name/key to set, such as an event or attribute name
  *	@param {any} old	The last value that was set for this name/node pair
  *	@param {any} value	An attribute value, such as a function to be used as an event handler
@@ -102,6 +102,7 @@ function setProperty(node, name, value) {
 
 
 /** Proxy an event to hooked event handlers
+ *  @param {Event} e The event object from the browser
  *	@private
  */
 function eventProxy(e) {

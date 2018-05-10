@@ -6,7 +6,7 @@ import { enqueueRender } from './render-queue';
 /** Base Component class.
  *	Provides `setState()` and `forceUpdate()`, which trigger rendering.
  *	@public
- *
+ *  @typedef {Object} Component
  *	@example
  *	class MyFoo extends Component {
  *		render(props, state) {
@@ -37,12 +37,12 @@ export function Component(props, context) {
 extend(Component.prototype, {
 
 	/** Returns a `boolean` indicating if the component should re-render when receiving the given `props` and `state`.
+	 *	@name shouldComponentUpdate
+	 *	@function
 	 *	@param {object} nextProps
 	 *	@param {object} nextState
 	 *	@param {object} nextContext
 	 *	@returns {Boolean} should the component re-render
-	 *	@name shouldComponentUpdate
-	 *	@function
 	 */
 
 

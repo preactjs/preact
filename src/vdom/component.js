@@ -1,3 +1,8 @@
+/**
+ * @typedef {import('../component').Component} Component
+ * @typedef {import('../vnode').VNode} VNode
+ */
+
 import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, ATTR_KEY } from '../constants';
 import options from '../options';
 import { extend } from '../util';
