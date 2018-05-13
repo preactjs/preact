@@ -1,4 +1,3 @@
-import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
 
 
@@ -55,7 +54,7 @@ export function setAccessor(node, name, old, value, isSvg) {
 				for (let i in old) if (!(i in value)) node.style[i] = '';
 			}
 			for (let i in value) {
-				node.style[i] = typeof value[i]==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (value[i]+'px') : value[i];
+				node.style[i] = value[i];
 			}
 		}
 	}
