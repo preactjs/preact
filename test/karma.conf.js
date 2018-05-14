@@ -1,12 +1,11 @@
 /*eslint no-var:0, object-shorthand:0 */
 
-var coverage = String(process.env.COVERAGE)!=='false',
+var coverage = String(process.env.COVERAGE) === 'true',
 	ci = String(process.env.CI).match(/^(1|true)$/gi),
 	pullRequest = !String(process.env.TRAVIS_PULL_REQUEST).match(/^(0|false|undefined)$/gi),
 	masterBranch = String(process.env.TRAVIS_BRANCH).match(/^master$/gi),
-	realBrowser = String(process.env.BROWSER).match(/^(1|true)$/gi),
-	sauceLabs = realBrowser && ci && !pullRequest && masterBranch,
-	performance = !coverage && !realBrowser && String(process.env.PERFORMANCE)!=='false',
+	sauceLabs = ci && !pullRequest && masterBranch,
+	performance = !coverage && String(process.env.PERFORMANCE)!=='false',
 	webpack = require('webpack');
 
 var sauceLabsLaunchers = {
@@ -35,33 +34,28 @@ var sauceLabsLaunchers = {
 		browserName: 'internet explorer',
 		version: '11.103',
 		platform: 'Windows 10'
-	},
-	sl_ie_10: {
-		base: 'SauceLabs',
-		browserName: 'internet explorer',
-		version: '10.0',
-		platform: 'Windows 7'
-	},
-	sl_ie_9: {
-		base: 'SauceLabs',
-		browserName: 'internet explorer',
-		version: '9.0',
-		platform: 'Windows 7'
 	}
 };
 
-var travisLaunchers = {
-	chrome_travis: {
+var localLaunchers = {
+	ChromeNoSandboxHeadless: {
 		base: 'Chrome',
-		flags: ['--no-sandbox']
+		flags: [
+			'--no-sandbox',
+			// See https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
+			'--headless',
+			'--disable-gpu',
+			// Without a remote debugging port, Google Chrome exits immediately.
+			'--remote-debugging-port=9333'
+		]
 	}
 };
-
-var localBrowsers = realBrowser ? Object.keys(travisLaunchers) : ['PhantomJS'];
 
 module.exports = function(config) {
 	config.set({
-		browsers: sauceLabs ? Object.keys(sauceLabsLaunchers) : localBrowsers,
+		browsers: sauceLabs
+			? Object.keys(sauceLabsLaunchers)
+			: Object.keys(localLaunchers),
 
 		frameworks: ['source-map-support', 'mocha', 'chai-sinon'],
 
@@ -96,7 +90,7 @@ module.exports = function(config) {
 		// 	startConnect: false
 		// },
 
-		customLaunchers: sauceLabs ? sauceLabsLaunchers : travisLaunchers,
+		customLaunchers: sauceLabs ? sauceLabsLaunchers : localLaunchers,
 
 		files: [
 			{ pattern: 'polyfills.js', watched: false },
@@ -108,6 +102,7 @@ module.exports = function(config) {
 		},
 
 		webpack: {
+			mode: 'development',
 			devtool: 'inline-source-map',
 			module: {
 				/* Transpile source and test files */
@@ -125,7 +120,7 @@ module.exports = function(config) {
 					/* Only Instrument our source files for coverage */
 					coverage ? {
 						test: /\.jsx?$/,
-						loader: 'isparta-loader',
+						loader: 'istanbul-instrumenter-loader',
 						include: /src/
 					} : {}
 				]
@@ -144,7 +139,10 @@ module.exports = function(config) {
 					ENABLE_PERFORMANCE: performance,
 					DISABLE_FLAKEY: !!String(process.env.FLAKEY).match(/^(0|false)$/gi)
 				})
-			]
+			],
+			performance: {
+				hints: false
+			}
 		},
 
 		webpackMiddleware: {

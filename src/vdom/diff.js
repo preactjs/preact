@@ -211,7 +211,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating, component
 				}
 			}
 			// attempt to pluck a node of the same type from the existing children
-			else if (!child && min<childrenLen) {
+			else if (min<childrenLen) {
 				for (j=min; j<childrenLen; j++) {
 					if (children[j]!==undefined && isSameNodeType(c = children[j], vchild, isHydrating)) {
 						child = c;

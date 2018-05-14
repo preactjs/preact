@@ -246,13 +246,16 @@ function createDevToolsBridge() {
 	/** Notify devtools that a component has been updated with new props/state. */
 	const componentUpdated = component => {
 		const prevRenderedChildren = [];
-		visitNonCompositeChildren(instanceMap.get(component), childInst => {
-			prevRenderedChildren.push(childInst);
-		});
-
+		let instance = instanceMap.get(component);
+		if (instance) {
+			visitNonCompositeChildren(instance, childInst => {
+				prevRenderedChildren.push(childInst);
+			});
+		}
 		// Notify devtools about updates to this component and any non-composite
 		// children
-		const instance = updateReactComponent(component);
+		instance = updateReactComponent(component);
+
 		Reconciler.receiveComponent(instance);
 		visitNonCompositeChildren(instance, childInst => {
 			if (!childInst._inDevTools) {
@@ -327,6 +330,7 @@ function isRootComponent(component) {
  * @param {(Component) => void} visitor
  */
 function visitNonCompositeChildren(component, visitor) {
+	if (!component) return;
 	if (component._renderedComponent) {
 		if (!component._renderedComponent._component) {
 			visitor(component._renderedComponent);
