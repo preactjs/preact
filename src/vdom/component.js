@@ -1,4 +1,4 @@
-import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, ATTR_KEY } from '../constants';
+import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, REATTEMPT_RENDER, ATTR_KEY } from '../constants';
 import options from '../options';
 import { extend } from '../util';
 import { enqueueRender } from '../render-queue';
@@ -38,7 +38,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 	component._disable = false;
 
 	if (opts!==NO_RENDER) {
-		if (opts===SYNC_RENDER || options.syncComponentUpdates!==false || !component.base) {
+		if ((opts&SYNC_RENDER) || options.syncComponentUpdates!==false || !component.base) {
 			renderComponent(component, SYNC_RENDER, mountAll);
 		}
 		else {
@@ -149,12 +149,15 @@ export function renderComponent(component, opts, mountAll, isChild) {
 					cbase = component._component = null;
 				}
 
-				if (initialBase || opts===SYNC_RENDER) {
+				if (initialBase || (opts&SYNC_RENDER)) {
 					if (cbase) cbase._component = null;
 					base = diff(cbase, rendered, context, mountAll || !isUpdate, initialBase && initialBase.parentNode, component);
 				}
 			}
 		} catch (e) {
+			if (opts == REATTEMPT_RENDER) {
+				throw e;
+			}
 			base = initialBase || document.createTextNode("");
 			exception = e;
 			hasException = true;
@@ -211,7 +214,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		flushMounts();
 		catchErrorInComponent(exception, component);
 		if (component._dirty) {
-			renderComponent(component, opts, mountAll, isChild);
+			renderComponent(component, REATTEMPT_RENDER, mountAll, isChild);
 		}
 	}
 
