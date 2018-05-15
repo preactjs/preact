@@ -83,7 +83,8 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		initialBase = isUpdate || nextBase,
 		initialChildComponent = component._component,
 		skip = false,
-		rendered, inst, cbase;
+		rendered, inst, cbase,
+		exception, hasException;
 
 	// if updating
 	if (isUpdate) {
@@ -155,7 +156,8 @@ export function renderComponent(component, opts, mountAll, isChild) {
 			}
 		} catch (e) {
 			base = initialBase || document.createTextNode("");
-			catchErrorInComponent(e, component);
+			exception = e;
+			hasException = true;
 		}
 
 		if (initialBase && base!==initialBase && inst!==initialChildComponent) {
@@ -196,17 +198,21 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		// flushMounts();
 
 		if (component.componentDidUpdate) {
-			try {
-				component.componentDidUpdate(previousProps, previousState, previousContext);
-			} catch (e) {
-				catchErrorInComponent(e, component._ancestorComponent);
-			}
+			component.componentDidUpdate(previousProps, previousState, previousContext);
 		}
 		if (options.afterUpdate) options.afterUpdate(component);
 	}
 
 	if (component._renderCallbacks!=null) {
 		while (component._renderCallbacks.length) component._renderCallbacks.pop().call(component);
+	}
+
+	if (hasException) {
+		flushMounts();
+		catchErrorInComponent(exception, component);
+		if (component._dirty) {
+			renderComponent(component, opts, mountAll, isChild);
+		}
 	}
 
 	if (!diffLevel && !isChild) flushMounts();
