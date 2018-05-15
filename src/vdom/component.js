@@ -272,7 +272,13 @@ export function unmountComponent(component) {
 
 	component._disable = true;
 
-	if (component.componentWillUnmount) component.componentWillUnmount();
+	if (component.componentWillUnmount) {
+		try {
+			component.componentWillUnmount();
+		} catch (e) {
+			catchErrorInComponent(e, component._ancestorComponent);
+		}
+	}
 
 	component.base = null;
 
