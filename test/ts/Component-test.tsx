@@ -5,10 +5,11 @@ import {
 	Component,
 	FunctionalComponent,
 	ComponentConstructor,
-	RenderableProps
+	RenderableProps,
+	render
 } from "../../src/preact";
 
-export class ContextComponent extends Component<{ foo: string}> {
+export class ContextComponent extends Component<{ foo: string }> {
 	getChildContext() {
 		return { something: 2 };
 	}
@@ -23,10 +24,13 @@ export interface SimpleComponentProps {
 }
 
 export interface SimpleState {
-	name: string | null
+	name: string | null;
 }
 
-export class SimpleComponent extends Component<SimpleComponentProps, SimpleState> {
+export class SimpleComponent extends Component<
+	SimpleComponentProps,
+	SimpleState
+> {
 	constructor(props: SimpleComponentProps) {
 		super(props);
 		this.state = {
@@ -50,9 +54,10 @@ export class SimpleComponent extends Component<SimpleComponentProps, SimpleState
 	}
 }
 
-class DestructuringRenderPropsComponent
-	extends	Component<SimpleComponentProps, SimpleState> {
-
+class DestructuringRenderPropsComponent extends Component<
+	SimpleComponentProps,
+	SimpleState
+> {
 	constructor(props: SimpleComponentProps) {
 		super(props);
 		this.state = {
@@ -69,6 +74,28 @@ class DestructuringRenderPropsComponent
 				{this.props.initialName} / {this.state.name}
 			</span>
 		);
+	}
+}
+
+interface RandomChildrenComponenProps {
+	num?: number;
+	val?: string;
+	span?: boolean;
+}
+
+class RandomChildrenComponen extends Component<RandomChildrenComponenProps> {
+	render() {
+		const { num, val, span } = this.props;
+		if (num) {
+			return num;
+		}
+		if (val) {
+			return val;
+		}
+		if (span) {
+			return <span>hi</span>
+		}
+		return null;
 	}
 }
 

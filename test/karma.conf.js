@@ -34,18 +34,6 @@ var sauceLabsLaunchers = {
 		browserName: 'internet explorer',
 		version: '11.103',
 		platform: 'Windows 10'
-	},
-	sl_ie_10: {
-		base: 'SauceLabs',
-		browserName: 'internet explorer',
-		version: '10.0',
-		platform: 'Windows 7'
-	},
-	sl_ie_9: {
-		base: 'SauceLabs',
-		browserName: 'internet explorer',
-		version: '9.0',
-		platform: 'Windows 7'
 	}
 };
 

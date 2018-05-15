@@ -98,7 +98,7 @@ declare namespace preact {
 
 		forceUpdate(callback?: () => void): void;
 
-		abstract render(props?: RenderableProps<P>, state?: Readonly<S>, context?: any): JSX.Element | null;
+		abstract render(props?: RenderableProps<P>, state?: Readonly<S>, context?: any): ComponentChild;
 	}
 
 	function h<P>(
