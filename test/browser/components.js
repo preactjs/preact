@@ -80,6 +80,29 @@ describe('Components', () => {
 	});
 
 
+	it('should render functional components that return nested components', () => {
+		const PROPS = { foo:'bar', onBaz:()=>{} };
+
+		class C4 extends Component {
+			render() {
+				return <div>C4</div>;
+			}
+		}
+		sinon.spy(C4.prototype, 'render');
+
+		const C4hoc = sinon.spy( props => <C4 {...props} /> );
+
+		render(<C4hoc {...PROPS} />, scratch);
+
+		expect(C4.prototype.render)
+			.to.have.been.calledOnce
+			.and.to.have.been.calledWithMatch(PROPS)
+			.and.to.have.returned(sinon.match({ nodeName:'div' }));
+
+		expect(scratch.innerHTML).to.equal('<div>C4</div>');
+	});
+
+
 	it('should render components with props', () => {
 		const PROPS = { foo:'bar', onBaz:()=>{} };
 		let constructorProps;
