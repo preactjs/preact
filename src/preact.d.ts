@@ -398,6 +398,7 @@ declare global {
 		type AnimationEventHandler = EventHandler<AnimationEvent>;
 		type TransitionEventHandler = EventHandler<TransitionEvent>;
 		type GenericEventHandler = EventHandler<Event>;
+		type PointerEventHandler = EventHandler<PointerEvent>;
 
 		interface DOMAttributes extends preact.PreactDOMAttributes {
 			// Image Events
@@ -480,6 +481,28 @@ declare global {
 			onTouchEnd?: TouchEventHandler;
 			onTouchMove?: TouchEventHandler;
 			onTouchStart?: TouchEventHandler;
+
+			// Pointer Events
+			onPointerOver?: PointerEventHandler;
+			onPointerOverCapture?: PointerEventHandler;
+			onPointerEnter?: PointerEventHandler;
+			onPointerEnterCapture?: PointerEventHandler;
+			onPointerDown?: PointerEventHandler;
+			onPointerDownCapture?: PointerEventHandler;
+			onPointerMove?: PointerEventHandler;
+			onPointerMoveCapture?: PointerEventHandler;
+			onPointerUp?: PointerEventHandler;
+			onPointerUpCapture?: PointerEventHandler;
+			onPointerCancel?: PointerEventHandler;
+			onPointerCancelCapture?: PointerEventHandler;
+			onPointerOut?: PointerEventHandler;
+			onPointerOutCapture?: PointerEventHandler;
+			onPointerLeave?: PointerEventHandler;
+			onPointerLeaveCapture?: PointerEventHandler;
+			onGotPointerCapture?: PointerEventHandler;
+			onGotPointerCaptureCapture?: PointerEventHandler;
+			onLostPointerCapture?: PointerEventHandler;
+			onLostPointerCaptureCapture?: PointerEventHandler;
 
 			// UI Events
 			onScroll?: UIEventHandler;
