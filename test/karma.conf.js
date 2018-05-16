@@ -1,6 +1,6 @@
 /*eslint no-var:0, object-shorthand:0 */
 
-var coverage = String(process.env.COVERAGE)!=='false',
+var coverage = String(process.env.COVERAGE) === 'true',
 	ci = String(process.env.CI).match(/^(1|true)$/gi),
 	pullRequest = !String(process.env.TRAVIS_PULL_REQUEST).match(/^(0|false|undefined)$/gi),
 	masterBranch = String(process.env.TRAVIS_BRANCH).match(/^master$/gi),
@@ -34,18 +34,6 @@ var sauceLabsLaunchers = {
 		browserName: 'internet explorer',
 		version: '11.103',
 		platform: 'Windows 10'
-	},
-	sl_ie_10: {
-		base: 'SauceLabs',
-		browserName: 'internet explorer',
-		version: '10.0',
-		platform: 'Windows 7'
-	},
-	sl_ie_9: {
-		base: 'SauceLabs',
-		browserName: 'internet explorer',
-		version: '9.0',
-		platform: 'Windows 7'
 	}
 };
 
@@ -114,6 +102,7 @@ module.exports = function(config) {
 		},
 
 		webpack: {
+			mode: 'development',
 			devtool: 'inline-source-map',
 			module: {
 				/* Transpile source and test files */
@@ -131,7 +120,7 @@ module.exports = function(config) {
 					/* Only Instrument our source files for coverage */
 					coverage ? {
 						test: /\.jsx?$/,
-						loader: 'isparta-loader',
+						loader: 'istanbul-instrumenter-loader',
 						include: /src/
 					} : {}
 				]
@@ -150,7 +139,10 @@ module.exports = function(config) {
 					ENABLE_PERFORMANCE: performance,
 					DISABLE_FLAKEY: !!String(process.env.FLAKEY).match(/^(0|false)$/gi)
 				})
-			]
+			],
+			performance: {
+				hints: false
+			}
 		},
 
 		webpackMiddleware: {

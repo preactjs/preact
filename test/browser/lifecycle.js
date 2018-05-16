@@ -300,7 +300,7 @@ describe('Lifecycle methods', () => {
 		let verifyLifecycleMethods = (TestComponent) => {
 			let proto = TestComponent.prototype;
 			spies.forEach( s => sinon.spy(proto, s) );
-			let reset = () => spies.forEach( s => proto[s].reset() );
+			let reset = () => spies.forEach( s => proto[s].resetHistory() );
 
 			it('should be invoked for components on initial render', () => {
 				reset();
@@ -375,7 +375,7 @@ describe('Lifecycle methods', () => {
 			let spies = ['componentWillMount', 'componentDidMount', 'componentWillUnmount'];
 			spies.forEach( s => sinon.spy(proto, s) );
 
-			let reset = () => spies.forEach( s => proto[s].reset() );
+			let reset = () => spies.forEach( s => proto[s].resetHistory() );
 
 			beforeEach( () => reset() );
 
@@ -435,7 +435,7 @@ describe('Lifecycle methods', () => {
 		sinon.spy(Should.prototype, 'render');
 		sinon.spy(ShouldNot.prototype, 'shouldComponentUpdate');
 
-		beforeEach(() => Should.prototype.render.reset());
+		beforeEach(() => Should.prototype.render.resetHistory());
 
 		it('should rerender component on change by default', () => {
 			render(<Should />, scratch);
@@ -519,7 +519,7 @@ describe('Lifecycle methods', () => {
 			let spies = ['componentWillMount', 'componentDidMount', 'componentWillUnmount'];
 			spies.forEach( s => sinon.spy(proto, s) );
 
-			let reset = () => spies.forEach( s => proto[s].reset() );
+			let reset = () => spies.forEach( s => proto[s].resetHistory() );
 
 			render(<Outer />, scratch);
 			expect(proto.componentWillMount).to.have.been.called;
