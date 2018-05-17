@@ -75,9 +75,8 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		skip = false,
 		rendered, inst, cbase;
 
-	let getDerivedStateFromProps = component.constructor.getDerivedStateFromProps;
-	if (getDerivedStateFromProps) {
-		state = component.state = extend(state, getDerivedStateFromProps(props, state));
+	if (component.constructor.getDerivedStateFromProps) {
+		state = component.state = extend(state, component.constructor.getDerivedStateFromProps(props, state));
 	}
 
 	// if updating
