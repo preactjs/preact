@@ -2,10 +2,11 @@ import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
 
 
-/** Create an element with the given nodeName.
- *	@param {String} nodeName
- *	@param {Boolean} [isSvg=false]	If `true`, creates an element within the SVG namespace.
- *	@returns {Element} node
+/**
+ * Create an element with the given nodeName.
+ * @param {String} nodeName
+ * @param {Boolean} [isSvg=false] If `true`, creates an element within the SVG namespace.
+ * @returns {Element} node
  */
 export function createNode(nodeName, isSvg) {
 	let node = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', nodeName) : document.createElement(nodeName);
@@ -14,8 +15,9 @@ export function createNode(nodeName, isSvg) {
 }
 
 
-/** Remove a child node from its parent if attached.
- *	@param {Node} node		The node to remove
+/**
+ * Remove a child node from its parent if attached.
+ * @param {Node} node The node to remove
  */
 export function removeNode(node) {
 	let parentNode = node.parentNode;
@@ -23,14 +25,15 @@ export function removeNode(node) {
 }
 
 
-/** Set a named attribute on the given Node, with special behavior for some names and event handlers.
- *	If `value` is `null`, the attribute/handler will be removed.
- *	@param {HTMLElement | SVGElement} node	An element to mutate
- *	@param {string} name	The name/key to set, such as an event or attribute name
- *	@param {any} old	The last value that was set for this name/node pair
- *	@param {any} value	An attribute value, such as a function to be used as an event handler
- *	@param {Boolean} isSvg	Are we currently diffing inside an svg?
- *	@private
+/**
+ * Set a named attribute on the given Node, with special behavior for some names and event handlers.
+ * If `value` is `null`, the attribute/handler will be removed.
+ * @param {HTMLElement | SVGElement} node An element to mutate
+ * @param {string} name The name/key to set, such as an event or attribute name
+ * @param {any} old The last value that was set for this name/node pair
+ * @param {any} value An attribute value, such as a function to be used as an event handler
+ * @param {Boolean} isSvg Are we currently diffing inside an svg?
+ * @private
  */
 export function setAccessor(node, name, old, value, isSvg) {
 	if (name==='className') name = 'class';
@@ -91,8 +94,12 @@ export function setAccessor(node, name, old, value, isSvg) {
 }
 
 
-/** Attempt to set a DOM property to the given value.
- *	IE & FF throw for certain property-value combinations.
+/**
+ * Attempt to set a DOM property to the given value.
+ * IE & FF throw for certain property-value combinations.
+ * @param {Node} node The node to set a property on
+ * @param {string} name The name of the property to set
+ * @param {any} value The value to set
  */
 function setProperty(node, name, value) {
 	try {
@@ -101,9 +108,10 @@ function setProperty(node, name, value) {
 }
 
 
-/** Proxy an event to hooked event handlers
- *  @param {Event} e The event object from the browser
- *	@private
+/**
+ * Proxy an event to hooked event handlers
+ * @param {Event} e The event object from the browser
+ * @private
  */
 function eventProxy(e) {
 	return this._listeners[e.type](options.event && options.event(e) || e);

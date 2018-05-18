@@ -12,12 +12,13 @@ import { diff, mounts, diffLevel, flushMounts, recollectNodeTree, removeChildren
 import { createComponent, collectComponent } from './component-recycler';
 import { removeNode } from '../dom/index';
 
-/** Set a component's `props` (generally derived from JSX attributes).
- *  @param {Component} component
- *	@param {Object} props
- *	@param {number} [opts] A number indicating which kind of render is running (e.g. sync, async, force). See ../constants.js for available renders
- *  @param {Object} [context]
- *  @param {boolean} [mountAll]
+/**
+ * Set a component's `props` and possibly re-render the component
+ * @param {Component} component The Component to set props on
+ * @param {object} props The new props
+ * @param {number} opts Render options - specifies how to re-render the component
+ * @param {object} context The new context
+ * @param {boolean} mountAll Whether or not to immediately mount all components
  */
 export function setComponentProps(component, props, opts, context, mountAll) {
 	if (component._disable) return;
@@ -57,12 +58,13 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 
 
 
-/** Render a Component, triggering necessary lifecycle events and taking High-Order Components into account.
- *	@param {Component} component  The component to render
- *	@param {number} [opts]        A number indicating which kind of render is running (e.g. sync, async, force). See ../constants.js for available renders
- *  @param {boolean} [mountAll]
- *  @param {boolean} [isChild]
- *	@private
+/**
+ * Render a Component, triggering necessary lifecycle events and taking High-Order Components into account.
+ * @param {Component} component The component to render
+ * @param {number} [opts] A number indicating the kind of render to execute (e.g. sync, async, force)
+ * @param {boolean} [mountAll] Whether or not to immediately mount all components
+ * @param {boolean} [isChild] ?
+ * @private
  */
 export function renderComponent(component, opts, mountAll, isChild) {
 	if (component._disable) return;
@@ -200,13 +202,14 @@ export function renderComponent(component, opts, mountAll, isChild) {
 
 
 
-/** Apply the Component referenced by a VNode to the DOM.
- *	@param {Element} dom	The DOM node to mutate
- *	@param {VNode} vnode	A Component-referencing VNode
- *  @param {Object} [context]
- *  @param {boolean} [mountAll]
- *	@returns {Element} The created/mutated element
- *	@private
+/**
+ * Apply the Component referenced by a VNode to the DOM.
+ * @param {Element} dom The DOM node to mutate
+ * @param {VNode} vnode A Component-reference VNode
+ * @param {object} context The current context
+ * @param {boolean} mountAll Whether or not to immediately mount all components
+ * @returns {Element} The created/mutated element
+ * @private
  */
 export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 	let c = dom && dom._component,
@@ -249,9 +252,10 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 
 
 
-/** Remove a component from the DOM and recycle it.
- *	@param {Component} component	The Component instance to unmount
- *	@private
+/**
+ * Remove a component from the DOM and recycle it.
+ * @param {Component} component The Component instance to unmount
+ * @private
  */
 export function unmountComponent(component) {
 	if (options.beforeUnmount) options.beforeUnmount(component);

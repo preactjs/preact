@@ -1,20 +1,30 @@
 import { Component } from '../component';
 
-/** Retains a pool of Components for re-use, keyed on component name.
- *	Note: since component names are not unique or even necessarily available, these are primarily a form of sharding.
- *	@private
+/**
+ * Retains a pool of Components for re-use, keyed on component name.
+ * Note: since component names are not unique or even necessarily available, these are primarily a form of sharding.
+ * @type {Record<string, Component[]>}
+ * @private
  */
 const components = {};
 
 
-/** Reclaim a component for later re-use by the recycler. */
+/**
+ * Reclaim a component for later re-use by the recycler.
+ * @param {Component} component The component to collect
+ */
 export function collectComponent(component) {
 	let name = component.constructor.name;
 	(components[name] || (components[name] = [])).push(component);
 }
 
 
-/** Create a component. Normalizes differences between PFC's and classful Components. */
+/**
+ * Create a component. Normalizes differences between PFC's and classful Components.
+ * @param {ComponentConstructor} Ctor The constructor of the component to create
+ * @param {any} props The initial props of the component
+ * @param {any} context The initial context of the component
+ */
 export function createComponent(Ctor, props, context) {
 	let list = components[Ctor.name],
 		inst;

@@ -6,7 +6,10 @@ import { unmountComponent } from './component';
 import options from '../options';
 import { removeNode } from '../dom/index';
 
-/** Queue of components that have been mounted and are awaiting componentDidMount */
+/**
+ * Queue of components that have been mounted and are awaiting componentDidMount
+ * @type {Component[]}
+ */
 export const mounts = [];
 
 /** Diff recursion count, used to track the end of the diff cycle. */
@@ -155,12 +158,13 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 }
 
 
-/** Apply child and attribute changes between a VNode and a DOM Node to the DOM.
- *	@param {Element} dom			Element whose children should be compared & mutated
- *	@param {Array} vchildren		Array of VNodes to compare to `dom.childNodes`
- *	@param {Object} context			Implicitly descendant context object (from most recent `getChildContext()`)
- *	@param {Boolean} mountAll
- *	@param {Boolean} isHydrating	If `true`, consumes externally created elements similar to hydration
+/**
+ * Apply child and attribute changes between a VNode and a DOM Node to the DOM.
+ * @param {Element} dom Element whose children should be compared & mutated
+ * @param {VNode[]} vchildren Array of VNodes to compare to `dom.childNodes`
+ * @param {object} context Implicitly descendant context object (from most recent `getChildContext()`)
+ * @param {boolean} mountAll Whether or not to immediately mount all components
+ * @param {boolean} isHydrating if `true`, consumes externally created elements similar to hydration
  */
 function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 	let originalChildren = dom.childNodes,
@@ -248,9 +252,10 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 
 
 
-/** Recursively recycle (or just unmount) a node and its descendants.
- *	@param {Node} node						DOM node to start unmount/removal from
- *	@param {Boolean} [unmountOnly=false]	If `true`, only triggers unmount lifecycle, skips removal
+/**
+ * Recursively recycle (or just unmount) a node and its descendants.
+ * @param {Node} node DOM node to start unmount/removal from
+ * @param {boolean} [unmountOnly=false] If `true`, only triggers unmount lifecycle, skips removal
  */
 export function recollectNodeTree(node, unmountOnly) {
 	let component = node._component;
@@ -286,10 +291,11 @@ export function removeChildren(node) {
 }
 
 
-/** Apply differences in attributes from a VNode to the given DOM Element.
- *	@param {Element} dom		Element with attributes to diff `attrs` against
- *	@param {Object} attrs		The desired end-state key-value attribute pairs
- *	@param {Object} old			Current/previous attributes (from previous VNode or element's prop cache)
+/**
+ * Apply differences in attributes from a VNode to the given DOM Element.
+ * @param {Element} dom Element with attributes to diff `attrs` against
+ * @param {object} attrs The desired end-state key-value attribute pairs
+ * @param {object} old Current/previous attributes (from previous VNode or element's prop cache)
  */
 function diffAttributes(dom, attrs, old) {
 	let name;
