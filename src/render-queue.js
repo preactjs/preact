@@ -4,13 +4,15 @@ import options from './options';
 import { defer } from './util';
 import { renderComponent } from './vdom/component';
 
-/** Managed queue of dirty components to be re-rendered
- *  @type {Component[]}
+/**
+ * Managed queue of dirty components to be re-rendered
+ * @type {Component[]}
  */
 let items = [];
 
-/** Enqueue a rerender of a component
- *  @param {Component} component The component to rerender
+/**
+ * Enqueue a rerender of a component
+ * @param {Component} component The component to rerender
  */
 export function enqueueRender(component) {
 	if (!component._dirty && (component._dirty = true) && items.push(component)==1) {
