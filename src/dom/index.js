@@ -5,7 +5,7 @@ import options from '../options';
 /**
  * Create an element with the given nodeName.
  * @param {String} nodeName
- * @param {Boolean} [isSvg=false] If `true`, creates an element within the SVG namespace.
+ * @param {boolean} [isSvg=false] If `true`, creates an element within the SVG namespace.
  * @returns {Element} node
  */
 export function createNode(nodeName, isSvg) {
@@ -32,7 +32,7 @@ export function removeNode(node) {
  * @param {string} name The name/key to set, such as an event or attribute name
  * @param {any} old The last value that was set for this name/node pair
  * @param {any} value An attribute value, such as a function to be used as an event handler
- * @param {Boolean} isSvg Are we currently diffing inside an svg?
+ * @param {boolean} isSvg Are we currently diffing inside an svg?
  * @private
  */
 export function setAccessor(node, name, old, value, isSvg) {

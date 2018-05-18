@@ -21,9 +21,9 @@ export function collectComponent(component) {
 
 /**
  * Create a component. Normalizes differences between PFC's and classful Components.
- * @param {ComponentConstructor} Ctor The constructor of the component to create
- * @param {any} props The initial props of the component
- * @param {any} context The initial context of the component
+ * @param {Function} Ctor The constructor of the component to create
+ * @param {object} props The initial props of the component
+ * @param {object} context The initial context of the component
  */
 export function createComponent(Ctor, props, context) {
 	let list = components[Ctor.name],

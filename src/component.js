@@ -6,7 +6,7 @@ import { enqueueRender } from './render-queue';
 /** Base Component class.
  *	Provides `setState()` and `forceUpdate()`, which trigger rendering.
  *	@public
- *  @typedef {Object} Component
+ *	@typedef {object} Component
  *	@example
  *	class MyFoo extends Component {
  *		render(props, state) {

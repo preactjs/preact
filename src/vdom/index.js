@@ -1,9 +1,13 @@
+/**
+ * @typedef {import('../vnode').VNode} VNode
+ */
+
 import { extend } from '../util';
 
 
 /**
  * Check if two nodes are equivalent.
- * @param {Node} node DOM Node to compare
+ * @param {Element} node DOM Node to compare
  * @param {VNode} vnode Virtual DOM node to compare
  * @param {boolean} [hydrating=false] If true, ignores component constructors when comparing.
  * @private
@@ -34,7 +38,7 @@ export function isNamedNode(node, nodeName) {
  * Ensures default/fallback values from `defaultProps`:
  * Own-properties of `defaultProps` not present in `vnode.attributes` are added.
  * @param {VNode} vnode The VNode to get props for
- * @returns {Object} The props to use for this VNode
+ * @returns {object} The props to use for this VNode
  */
 export function getNodeProps(vnode) {
 	let props = extend({}, vnode.attributes);
