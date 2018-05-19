@@ -1,3 +1,8 @@
+/**
+ * @typedef {import('../vnode').VNode} VNode
+ * @typedef {import('../component').Component} Component
+ */
+
 import { ATTR_KEY } from '../constants';
 import { isSameNodeType, isNamedNode } from './index';
 import { buildComponentFromVNode } from './component';
@@ -31,11 +36,15 @@ export function flushMounts() {
 }
 
 
-/** Apply differences in a given vnode (and it's deep children) to a real DOM Node.
- *	@param {Element} [dom=null]		A DOM node to mutate into the shape of the `vnode`
- *	@param {VNode} vnode			A VNode (with descendants forming a tree) representing the desired DOM structure
- *	@returns {Element} dom			The created/mutated element
- *	@private
+/**
+ * Apply differences in a given vnode (and it's deep children) to a real DOM Node.
+ * @param {Element} dom A DOM node to mutate into the shape of a `vnode`
+ * @param {VNode} vnode A VNode (with descendants forming a tree) representing the desired DOM structure
+ * @param {object} context The current context
+ * @param {boolean} mountAll Whether or not to immediately mount all components
+ * @param {Element} parent ?
+ * @param {boolean} componentRoot ?
+ * @private
  */
 export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 	// diffLevel having been 0 here indicates initial entry into the diff (not a subdiff)
@@ -63,7 +72,15 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 }
 
 
-/** Internals of `diff()`, separated to allow bypassing diffLevel / mount flushing. */
+/**
+ * Internals of `diff()`, separated to allow bypassing diffLevel / mount flushing.
+ * @param {Element} dom A DOM node to mutate into the shape of a `vnode`
+ * @param {VNode} vnode A VNode (with descendants forming a tree) representing the desired DOM structure
+ * @param {object} context The current context
+ * @param {boolean} mountAll Whether or not to immediately mount all components
+ * @param {boolean} [componentRoot] ?
+ * @private
+ */
 function idiff(dom, vnode, context, mountAll, componentRoot) {
 	let out = dom,
 		prevSvgMode = isSvgMode;
