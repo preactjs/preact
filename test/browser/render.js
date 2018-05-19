@@ -359,8 +359,8 @@ describe('render()', () => {
 				background: 'rgb(255, 100, 0)',
 				backgroundPosition: '10px 10px',
 				'background-size': 'cover',
-				padding: 5,
-				top: 100,
+				padding: '5px',
+				top: '100px',
 				left: '100%'
 			}}>
 				test
