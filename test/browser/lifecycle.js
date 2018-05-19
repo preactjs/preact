@@ -23,6 +23,202 @@ describe('Lifecycle methods', () => {
 	});
 
 
+	describe('static getDerivedStateFromProps', () => {
+		it('should set initial state with value returned from getDerivedStateFromProps', () => {
+			class Foo extends Component {
+				static getDerivedStateFromProps(nextProps) {
+					return {
+						foo: nextProps.foo,
+						bar: 'bar'
+					};
+				}
+				render() {
+					return <div className={`${this.state.foo} ${this.state.bar}`} />;
+				}
+			}
+
+			let element = render(<Foo foo="foo" />, scratch);
+			expect(element.className).to.be.equal('foo bar');
+		});
+
+		it('should update initial state with value returned from getDerivedStateFromProps', () => {
+			class Foo extends Component {
+				constructor(props, context) {
+					super(props, context);
+					this.state = {
+						foo: 'foo',
+						bar: 'bar'
+					};
+				}
+				static getDerivedStateFromProps(nextProps, prevState) {
+					return {
+						foo: `not-${prevState.foo}`
+					};
+				}
+				render() {
+					return <div className={`${this.state.foo} ${this.state.bar}`} />;
+				}
+			}
+
+			let element = render(<Foo />, scratch);
+			expect(element.className).to.equal('not-foo bar');
+		});
+
+		it('should update the instance\'s state with the value returned from getDerivedStateFromProps when props change', () => {
+			class Foo extends Component {
+				constructor(props, context) {
+					super(props, context);
+					this.state = {
+						value: 'initial'
+					};
+				}
+				static getDerivedStateFromProps(nextProps) {
+					if (nextProps.update) {
+						return {
+							value: 'updated'
+						};
+					}
+
+					return null;
+				}
+				componentDidMount() {}
+				componentDidUpdate() {}
+				render() {
+					return <div className={this.state.value} />;
+				}
+			}
+
+			let element;
+			sinon.spy(Foo, 'getDerivedStateFromProps');
+			sinon.spy(Foo.prototype, 'componentDidMount');
+			sinon.spy(Foo.prototype, 'componentDidUpdate');
+
+			element = render(<Foo update={false} />, scratch, element);
+			expect(element.className).to.equal('initial');
+			expect(Foo.getDerivedStateFromProps).to.have.callCount(1);
+			expect(Foo.prototype.componentDidMount).to.have.callCount(1); // verify mount occurred
+			expect(Foo.prototype.componentDidUpdate).to.have.callCount(0);
+
+			element = render(<Foo update={true} />, scratch, element);
+			expect(element.className).to.equal('updated');
+			expect(Foo.getDerivedStateFromProps).to.have.callCount(2);
+			expect(Foo.prototype.componentDidMount).to.have.callCount(1);
+			expect(Foo.prototype.componentDidUpdate).to.have.callCount(1); // verify update occurred
+		});
+
+		it('should update the instance\'s state with the value returned from getDerivedStateFromProps when state changes', () => {
+			class Foo extends Component {
+				constructor(props, context) {
+					super(props, context);
+					this.state = {
+						value: 'initial'
+					};
+				}
+				static getDerivedStateFromProps(nextProps, prevState) {
+					// Don't change state for call that happens after the constructor
+					if (prevState.value === 'initial') {
+						return null;
+					}
+
+					return {
+						value: prevState.value + ' derived'
+					};
+				}
+				componentDidMount() {
+					this.setState({ value: 'updated' });
+				}
+				render() {
+					return <div className={this.state.value} />;
+				}
+			}
+
+			let element;
+			sinon.spy(Foo, 'getDerivedStateFromProps');
+
+			element = render(<Foo />, scratch, element);
+			expect(element.className).to.equal('initial');
+			expect(Foo.getDerivedStateFromProps).to.have.been.calledOnce;
+
+			rerender(); // call rerender to handle cDM setState call
+			expect(element.className).to.equal('updated derived');
+			expect(Foo.getDerivedStateFromProps).to.have.been.calledTwice;
+		});
+
+		it('should NOT modify state if null is returned', () => {
+			class Foo extends Component {
+				constructor(props, context) {
+					super(props, context);
+					this.state = {
+						foo: 'foo',
+						bar: 'bar'
+					};
+				}
+				static getDerivedStateFromProps() {
+					return null;
+				}
+				render() {
+					return <div className={`${this.state.foo} ${this.state.bar}`} />;
+				}
+			}
+
+			sinon.spy(Foo, 'getDerivedStateFromProps');
+
+			let element = render(<Foo />, scratch);
+			expect(element.className).to.equal('foo bar');
+			expect(Foo.getDerivedStateFromProps).to.have.been.called;
+		});
+
+		// NOTE: Difference from React
+		// React v16.3.2 warns if undefined if returned from getDerivedStateFromProps
+		it('should NOT modify state if undefined is returned', () => {
+			class Foo extends Component {
+				constructor(props, context) {
+					super(props, context);
+					this.state = {
+						foo: 'foo',
+						bar: 'bar'
+					};
+				}
+				static getDerivedStateFromProps() {}
+				render() {
+					return <div className={`${this.state.foo} ${this.state.bar}`} />;
+				}
+			}
+
+			sinon.spy(Foo, 'getDerivedStateFromProps');
+
+			let element = render(<Foo />, scratch);
+			expect(element.className).to.equal('foo bar');
+			expect(Foo.getDerivedStateFromProps).to.have.been.called;
+		});
+
+		// TODO: Consider if componentWillUpdate should still be called
+		// Likely, componentWillUpdate should not be called only if getSnapshotBeforeUpdate is implemented
+		it('should NOT invoke deprecated lifecycles (cWM/cWRP) if new static gDSFP is present', () => {
+			class Foo extends Component {
+				static getDerivedStateFromProps() {}
+				componentWillMount() {}
+				componentWillReceiveProps() {}
+				render() {
+					return <div />;
+				}
+			}
+
+			sinon.spy(Foo, 'getDerivedStateFromProps');
+			sinon.spy(Foo.prototype, 'componentWillMount');
+			sinon.spy(Foo.prototype, 'componentWillReceiveProps');
+
+			render(<Foo />, scratch);
+			expect(Foo.getDerivedStateFromProps).to.have.been.called;
+			expect(Foo.prototype.componentWillMount).to.not.have.been.called;
+			expect(Foo.prototype.componentWillReceiveProps).to.not.have.been.called;
+		});
+
+		// TODO: Investigate this test:
+		// [should not override state with stale values if prevState is spread within getDerivedStateFromProps](https://github.com/facebook/react/blob/25dda90c1ecb0c662ab06e2c80c1ee31e0ae9d36/packages/react-dom/src/__tests__/ReactComponentLifeCycle-test.js#L1035)
+	});
+
+
 	describe('#componentWillUpdate', () => {
 		it('should NOT be called on initial render', () => {
 			class ReceivePropsComponent extends Component {
