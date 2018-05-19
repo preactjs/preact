@@ -2,7 +2,20 @@ import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
 
 /**
- * @typedef {Element & ElementCSSInlineStyle} PreactElement
+ * @typedef {(e: Event) => void} EventListner
+ * @typedef {{ [eventType: string]: EventListener}} EventListenerMap
+ */
+
+/**
+ * @typedef PreactHtmlProperties
+ * @property {string} [normalizedNodeName]
+ * @property {EventListenerMap} [_listeners]
+ * @property {import('../component').Component} [_component]
+ * @property {Function} [_componentConstructor]
+ */
+
+/**
+ * @typedef {Element & ElementCSSInlineStyle & PreactHtmlProperties} PreactElement
  */
 
 /**
@@ -12,6 +25,7 @@ import options from '../options';
  * @returns {PreactElement} node
  */
 export function createNode(nodeName, isSvg) {
+	/** @type {PreactElement} */
 	let node = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', nodeName) : document.createElement(nodeName);
 	node.normalizedNodeName = nodeName;
 	return node;
