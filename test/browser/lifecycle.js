@@ -398,14 +398,14 @@ describe('Lifecycle methods', () => {
 			class MyComponent extends Component {
 				getSnapshotBeforeUpdate(prevProps) {
 					log.push('getSnapshotBeforeUpdate');
-					expect(this.divRef.current.textContent).to.equal(
+					expect(this.divRef.textContent).to.equal(
 						`value:${prevProps.value}`,
 					);
 					return 'foobar';
 				}
 				componentDidUpdate(prevProps, prevState, snapshot) {
 					log.push('componentDidUpdate');
-					expect(this.divRef.current.textContent).to.equal(
+					expect(this.divRef.textContent).to.equal(
 						`value:${this.props.value}`,
 					);
 					expect(snapshot).to.equal('foobar');
