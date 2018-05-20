@@ -320,13 +320,19 @@ describe('Lifecycle methods', () => {
 			// Dedup warnings
 			log = [];
 			render(<Outer x={2} />, scratch, scratch.firstChild);
+			// Note: we differ from react here in that we apply changes to the dom
+			// as we find them while diffing. React on the other hand separates this
+			// into specific phases, meaning changes to the dom are only flushed
+			// once the whole diff-phase is complete. This is why
+			// "outer getSnapshotBeforeUpdate" is called just before the "inner" hooks.
+			// For react this call would be right before "outer componentDidUpdate"
 			expect(log).to.deep.equal([
 				'outer getDerivedStateFromProps',
 				'outer shouldComponentUpdate',
+				'outer getSnapshotBeforeUpdate',
 				'inner getDerivedStateFromProps',
 				'inner shouldComponentUpdate',
 				'inner getSnapshotBeforeUpdate',
-				'outer getSnapshotBeforeUpdate',
 				'inner componentDidUpdate',
 				'outer componentDidUpdate'
 			]);
