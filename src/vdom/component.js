@@ -75,6 +75,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		initialBase = isUpdate || nextBase,
 		initialChildComponent = component._component,
 		skip = false,
+		snapshot = previousContext,
 		rendered, inst, cbase;
 
 	if (component.constructor.getDerivedStateFromProps) {
@@ -93,6 +94,8 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		}
 		else if (component.componentWillUpdate) {
 			component.componentWillUpdate(props, state, context);
+		} else if (component.getSnapshotBeforeUpdate) {
+			snapshot = component.getSnapshotBeforeUpdate(props, state);
 		}
 		component.props = props;
 		component.state = state;
@@ -187,7 +190,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		// flushMounts();
 
 		if (component.componentDidUpdate) {
-			component.componentDidUpdate(previousProps, previousState, previousContext);
+			component.componentDidUpdate(previousProps, previousState, snapshot);
 		}
 		if (options.afterUpdate) options.afterUpdate(component);
 	}
