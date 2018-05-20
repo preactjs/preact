@@ -1,5 +1,6 @@
 /**
  * @typedef {import('../vnode').VNode} VNode
+ * @typedef {import('../dom').PreactElement} PreactElement
  */
 
 import { extend } from '../util';
@@ -7,7 +8,7 @@ import { extend } from '../util';
 
 /**
  * Check if two nodes are equivalent.
- * @param {Element} node DOM Node to compare
+ * @param {PreactElement} node DOM Node to compare
  * @param {VNode} vnode Virtual DOM node to compare
  * @param {boolean} [hydrating=false] If true, ignores component constructors when comparing.
  * @private
@@ -25,7 +26,7 @@ export function isSameNodeType(node, vnode, hydrating) {
 
 /**
  * Check if an Element has a given nodeName, case-insensitively.
- * @param {Element} node A DOM Element to inspect the name of.
+ * @param {PreactElement} node A DOM Element to inspect the name of.
  * @param {string} nodeName Unnormalized name to compare against.
  */
 export function isNamedNode(node, nodeName) {

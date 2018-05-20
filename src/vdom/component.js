@@ -1,6 +1,7 @@
 /**
  * @typedef {import('../component').Component} Component
  * @typedef {import('../vnode').VNode} VNode
+ * @typedef {import('../dom').PreactElement} PreactElement
  */
 
 import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, ATTR_KEY } from '../constants';
@@ -204,11 +205,11 @@ export function renderComponent(component, opts, mountAll, isChild) {
 
 /**
  * Apply the Component referenced by a VNode to the DOM.
- * @param {Element} dom The DOM node to mutate
+ * @param {PreactElement} dom The DOM node to mutate
  * @param {VNode} vnode A Component-reference VNode
  * @param {object} context The current context
  * @param {boolean} mountAll Whether or not to immediately mount all components
- * @returns {Element} The created/mutated element
+ * @returns {PreactElement} The created/mutated element
  * @private
  */
 export function buildComponentFromVNode(dom, vnode, context, mountAll) {

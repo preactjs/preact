@@ -1,6 +1,7 @@
 /**
  * @typedef {import('../vnode').VNode} VNode
  * @typedef {import('../component').Component} Component
+ * @typedef {import('../dom').PreactElement} PreactElement
  */
 
 import { ATTR_KEY } from '../constants';
@@ -38,7 +39,7 @@ export function flushMounts() {
 
 /**
  * Apply differences in a given vnode (and it's deep children) to a real DOM Node.
- * @param {Element} dom A DOM node to mutate into the shape of a `vnode`
+ * @param {PreactElement} dom A DOM node to mutate into the shape of a `vnode`
  * @param {VNode} vnode A VNode (with descendants forming a tree) representing the desired DOM structure
  * @param {object} context The current context
  * @param {boolean} mountAll Whether or not to immediately mount all components
@@ -74,7 +75,7 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 
 /**
  * Internals of `diff()`, separated to allow bypassing diffLevel / mount flushing.
- * @param {Element} dom A DOM node to mutate into the shape of a `vnode`
+ * @param {PreactElement} dom A DOM node to mutate into the shape of a `vnode`
  * @param {VNode} vnode A VNode (with descendants forming a tree) representing the desired DOM structure
  * @param {object} context The current context
  * @param {boolean} mountAll Whether or not to immediately mount all components
@@ -177,7 +178,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 /**
  * Apply child and attribute changes between a VNode and a DOM Node to the DOM.
- * @param {Element} dom Element whose children should be compared & mutated
+ * @param {PreactElement} dom Element whose children should be compared & mutated
  * @param {VNode[]} vchildren Array of VNodes to compare to `dom.childNodes`
  * @param {object} context Implicitly descendant context object (from most recent `getChildContext()`)
  * @param {boolean} mountAll Whether or not to immediately mount all components
@@ -271,7 +272,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 
 /**
  * Recursively recycle (or just unmount) a node and its descendants.
- * @param {Node} node DOM node to start unmount/removal from
+ * @param {PreactElement} node DOM node to start unmount/removal from
  * @param {boolean} [unmountOnly=false] If `true`, only triggers unmount lifecycle, skips removal
  */
 export function recollectNodeTree(node, unmountOnly) {
@@ -310,7 +311,7 @@ export function removeChildren(node) {
 
 /**
  * Apply differences in attributes from a VNode to the given DOM Element.
- * @param {Element} dom Element with attributes to diff `attrs` against
+ * @param {PreactElement} dom Element with attributes to diff `attrs` against
  * @param {object} attrs The desired end-state key-value attribute pairs
  * @param {object} old Current/previous attributes (from previous VNode or element's prop cache)
  */

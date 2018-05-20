@@ -1,12 +1,15 @@
 import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
 
+/**
+ * @typedef {Element & ElementCSSInlineStyle} PreactElement
+ */
 
 /**
  * Create an element with the given nodeName.
  * @param {String} nodeName
  * @param {boolean} [isSvg=false] If `true`, creates an element within the SVG namespace.
- * @returns {Element} node
+ * @returns {PreactElement} node
  */
 export function createNode(nodeName, isSvg) {
 	let node = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', nodeName) : document.createElement(nodeName);
@@ -28,7 +31,7 @@ export function removeNode(node) {
 /**
  * Set a named attribute on the given Node, with special behavior for some names and event handlers.
  * If `value` is `null`, the attribute/handler will be removed.
- * @param {HTMLElement | SVGElement} node An element to mutate
+ * @param {PreactElement} node An element to mutate
  * @param {string} name The name/key to set, such as an event or attribute name
  * @param {any} old The last value that was set for this name/node pair
  * @param {any} value An attribute value, such as a function to be used as an event handler
