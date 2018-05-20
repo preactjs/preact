@@ -81,10 +81,13 @@ export function setAccessor(node, name, old, value, isSvg) {
 	}
 	else if (name!=='list' && name!=='type' && !isSvg && name in node) {
 		setProperty(node, name, value==null ? '' : value);
-		if (value==null || value===false) node.removeAttribute(name);
+		if ((value==null || value===false) && name!='spellcheck') node.removeAttribute(name);
 	}
 	else {
 		let ns = isSvg && (name !== (name = name.replace(/^xlink:?/, '')));
+		// spellcheck is treated differently than all other boolean values and
+		// should not be removed when the value is `false`. See:
+		// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-spellcheck
 		if (value==null || value===false) {
 			if (ns) node.removeAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase());
 			else node.removeAttribute(name);
