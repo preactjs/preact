@@ -319,7 +319,7 @@ describe('Lifecycle methods', () => {
 
 			// Dedup warnings
 			log = [];
-			render(<Outer x={2} />, scratch);
+			render(<Outer x={2} />, scratch, scratch.firstChild);
 			expect(log).to.deep.equal([
 				'outer getDerivedStateFromProps',
 				'outer shouldComponentUpdate',
@@ -368,21 +368,11 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(
-				<div>
-					<MyComponent value="foo" />
-				</div>,
-				scratch,
-			);
+			render(<MyComponent value="foo" />, scratch, scratch.firstChild);
 			expect(log).to.deep.equal(['render']);
 			log = [];
 
-			render(
-				<div>
-					<MyComponent value="bar" />
-				</div>,
-				scratch,
-			);
+			render(<MyComponent value="bar" />, scratch, scratch.firstChild);
 			expect(log).to.deep.equal([
 				'render',
 				'getSnapshotBeforeUpdate() prevProps:foo prevState:1',
@@ -390,12 +380,7 @@ describe('Lifecycle methods', () => {
 			]);
 			log = [];
 
-			render(
-				<div>
-					<MyComponent value="baz" />
-				</div>,
-				scratch,
-			);
+			render(<MyComponent value="baz" />, scratch, scratch.firstChild);
 			expect(log).to.deep.equal([
 				'render',
 				'getSnapshotBeforeUpdate() prevProps:bar prevState:2',
@@ -403,7 +388,7 @@ describe('Lifecycle methods', () => {
 			]);
 			log = [];
 
-			render(<div />, scratch);
+			render(<div />, scratch.firstChild);
 			expect(log).to.deep.equal([]);
 		});
 
@@ -413,7 +398,7 @@ describe('Lifecycle methods', () => {
 			class MyComponent extends Component {
 				getSnapshotBeforeUpdate(prevProps) {
 					log.push('getSnapshotBeforeUpdate');
-					expect(this.divRef.current.textContent).toBe(
+					expect(this.divRef.current.textContent).to.equal(
 						`value:${prevProps.value}`,
 					);
 					return 'foobar';
@@ -435,13 +420,12 @@ describe('Lifecycle methods', () => {
 			expect(log).to.deep.equal(['render']);
 			log = [];
 
-			render(<MyComponent value="bar" />, scratch	);
+			render(<MyComponent value="bar" />, scratch, scratch.firstChild);
 			expect(log).to.deep.equal([
 				'render',
 				'getSnapshotBeforeUpdate',
 				'componentDidUpdate'
 			]);
-			log = [];
 		});
 	});
 

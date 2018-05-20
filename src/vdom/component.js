@@ -94,8 +94,6 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		}
 		else if (component.componentWillUpdate) {
 			component.componentWillUpdate(props, state, context);
-		} else if (component.getSnapshotBeforeUpdate) {
-			snapshot = component.getSnapshotBeforeUpdate(props, state);
 		}
 		component.props = props;
 		component.state = state;
@@ -111,6 +109,10 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		// context to pass to the child, can be updated via (grand-)parent component
 		if (component.getChildContext) {
 			context = extend(extend({}, context), component.getChildContext());
+		}
+
+		if (isUpdate && component.getSnapshotBeforeUpdate) {
+			snapshot = component.getSnapshotBeforeUpdate(previousProps, previousState);
 		}
 
 		let childComponent = rendered && rendered.nodeName,
