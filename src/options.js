@@ -3,6 +3,7 @@
  *	@namespace options {Object}
  */
 export default {
+	warn: console.warn //eslint-disable-line no-console
 
 	/** If `true`, `prop` changes trigger synchronous component updates.
 	 *	@name syncComponentUpdates

@@ -21,10 +21,17 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 	if ((component.__key = props.key)) delete props.key;
 
 	if (!component.base || mountAll) {
-		if (component.componentWillMount) component.componentWillMount();
+		if (component.componentWillMount) {
+			options.warn("'componentWillMount' is deprecated");
+			component.componentWillMount();
+		}
 	}
 	else if (component.componentWillReceiveProps) {
+		options.warn("'componentWillReceiveProps' is deprecated");
 		component.componentWillReceiveProps(props, context);
+	}
+	if (component.getDerivedStateFromProps) {
+		component.setState(component.getDerivedStateFromProps(props, component.state));
 	}
 
 	if (context && context!==component.context) {
@@ -84,6 +91,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 			skip = true;
 		}
 		else if (component.componentWillUpdate) {
+			options.log("'componentWillUpdate' is deprecated");
 			component.componentWillUpdate(props, state, context);
 		}
 		component.props = props;
