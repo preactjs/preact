@@ -1,9 +1,3 @@
-/**
- * @typedef {import('../component').Component} Component
- * @typedef {import('../vnode').VNode} VNode
- * @typedef {import('../dom').PreactElement} PreactElement
- */
-
 import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, ATTR_KEY } from '../constants';
 import options from '../options';
 import { extend } from '../util';
@@ -15,7 +9,7 @@ import { removeNode } from '../dom/index';
 
 /**
  * Set a component's `props` and possibly re-render the component
- * @param {Component} component The Component to set props on
+ * @param {import('../component').Component} component The Component to set props on
  * @param {object} props The new props
  * @param {number} opts Render options - specifies how to re-render the component
  * @param {object} context The new context
@@ -61,7 +55,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 
 /**
  * Render a Component, triggering necessary lifecycle events and taking High-Order Components into account.
- * @param {Component} component The component to render
+ * @param {import('../component').Component} component The component to render
  * @param {number} [opts] A number indicating the kind of render to execute (e.g. sync, async, force)
  * @param {boolean} [mountAll] Whether or not to immediately mount all components
  * @param {boolean} [isChild] ?
@@ -205,11 +199,11 @@ export function renderComponent(component, opts, mountAll, isChild) {
 
 /**
  * Apply the Component referenced by a VNode to the DOM.
- * @param {PreactElement} dom The DOM node to mutate
- * @param {VNode} vnode A Component-reference VNode
+ * @param {import('../dom').PreactElement} dom The DOM node to mutate
+ * @param {import('../vnode').VNode} vnode A Component-reference VNode
  * @param {object} context The current context
  * @param {boolean} mountAll Whether or not to immediately mount all components
- * @returns {PreactElement} The created/mutated element
+ * @returns {import('../dom').PreactElement} The created/mutated element
  * @private
  */
 export function buildComponentFromVNode(dom, vnode, context, mountAll) {
@@ -255,7 +249,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 
 /**
  * Remove a component from the DOM and recycle it.
- * @param {Component} component The Component instance to unmount
+ * @param {import('../component').Component} component The Component instance to unmount
  * @private
  */
 export function unmountComponent(component) {

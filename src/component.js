@@ -1,7 +1,3 @@
-/**
- * @typedef {import('./vnode').VNode} VNode
- */
-
 import { FORCE_RENDER } from './constants';
 import { extend } from './util';
 import { renderComponent } from './vdom/component';
@@ -76,7 +72,7 @@ extend(Component.prototype, {
 	 * @param {object} props Props (eg: JSX attributes) received from parent element/component
 	 * @param {object} state The component's current state
 	 * @param {object} context Context object (if a parent component has provided context)
-	 * @returns {VNode | void}
+	 * @returns {import('./vnode').VNode | void}
 	 */
 	render() {}
 
