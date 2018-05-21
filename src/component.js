@@ -44,7 +44,7 @@ extend(Component.prototype, {
 	/**
 	 * Update component state by copying properties from `state` to `this.state`.
 	 * @param {object} state A hash of state properties to update with new values
-	 * @param {function} callback A function to be called once component state is updated
+	 * @param {() => void} callback A function to be called once component state is updated
 	 */
 	setState(state, callback) {
 		let s = this.state;
@@ -57,7 +57,7 @@ extend(Component.prototype, {
 
 	/**
 	 * Immediately perform a synchronous re-render of the component.
-	 * @param {function} callback A function to be called after component is re-rendered.
+	 * @param {() => void} callback A function to be called after component is re-rendered.
 	 * @private
 	 */
 	forceUpdate(callback) {
