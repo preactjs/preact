@@ -259,7 +259,7 @@ describe('Lifecycle methods', () => {
 		// [should not override state with stale values if prevState is spread within getDerivedStateFromProps](https://github.com/facebook/react/blob/25dda90c1ecb0c662ab06e2c80c1ee31e0ae9d36/packages/react-dom/src/__tests__/ReactComponentLifeCycle-test.js#L1035)
 	});
 
-	describe.only("#getSnapshotBeforeUpdate", () => {
+	describe("#getSnapshotBeforeUpdate", () => {
 		it('should call nested new lifecycle methods in the right order', () => {
 			let log;
 			const logger = function(msg) {
@@ -374,7 +374,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<MyComponent value="foo" />, scratch, scratch.firstChild);
+			render(<MyComponent value="foo" />, scratch);
 			expect(log).to.deep.equal(['render']);
 			log = [];
 
@@ -394,7 +394,7 @@ describe('Lifecycle methods', () => {
 			]);
 			log = [];
 
-			render(<div />, scratch.firstChild);
+			render(<div />, scratch, scratch.firstChild);
 			expect(log).to.deep.equal([]);
 		});
 
