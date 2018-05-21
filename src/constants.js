@@ -6,7 +6,7 @@ export const NO_RENDER = 0;
 export const SYNC_RENDER = 1;
 /** Force a re-render of a component */
 export const FORCE_RENDER = 2;
-/** Asynchronously queue re-renders of a component and it's children */
+/** Queue asynchronous re-render of a component and it's children */
 export const ASYNC_RENDER = 3;
 
 

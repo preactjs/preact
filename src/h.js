@@ -1,6 +1,7 @@
 import { VNode } from './vnode';
 import options from './options';
 
+
 const stack = [];
 
 const EMPTY_CHILDREN = [];
