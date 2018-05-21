@@ -78,6 +78,9 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		snapshot = previousContext,
 		rendered, inst, cbase;
 
+	// FIXME: Do we have an issue with previous state??
+	const prev = extend({}, previousState);
+
 	if (component.constructor.getDerivedStateFromProps) {
 		state = component.state = extend(state, component.constructor.getDerivedStateFromProps(props, state));
 	}
@@ -112,7 +115,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		}
 
 		if (isUpdate && component.getSnapshotBeforeUpdate) {
-			snapshot = component.getSnapshotBeforeUpdate(previousProps, previousState);
+			snapshot = component.getSnapshotBeforeUpdate(previousProps, prev);
 		}
 
 		let childComponent = rendered && rendered.nodeName,
@@ -192,7 +195,8 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		// flushMounts();
 
 		if (component.componentDidUpdate) {
-			component.componentDidUpdate(previousProps, previousState, snapshot);
+			// FIXME: Do we have an issue with previous state!?
+			component.componentDidUpdate(previousProps, prev, snapshot);
 		}
 		if (options.afterUpdate) options.afterUpdate(component);
 	}
