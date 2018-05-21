@@ -22,11 +22,13 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 	if ((component.__ref = props.ref)) delete props.ref;
 	if ((component.__key = props.key)) delete props.key;
 
-	if (!component.base || mountAll) {
-		if (component.componentWillMount) component.componentWillMount();
-	}
-	else if (component.componentWillReceiveProps) {
-		component.componentWillReceiveProps(props, context);
+	if (typeof component.constructor.getDerivedStateFromProps === 'undefined') {
+		if (!component.base || mountAll) {
+			if (component.componentWillMount) component.componentWillMount();
+		}
+		else if (component.componentWillReceiveProps) {
+			component.componentWillReceiveProps(props, context);
+		}
 	}
 
 	if (context && context!==component.context) {
@@ -76,6 +78,10 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		initialChildComponent = component._component,
 		skip = false,
 		rendered, inst, cbase;
+
+	if (component.constructor.getDerivedStateFromProps) {
+		state = component.state = extend(state, component.constructor.getDerivedStateFromProps(props, state));
+	}
 
 	// if updating
 	if (isUpdate) {
