@@ -289,7 +289,8 @@ export function recollectNodeTree(node, unmountOnly) {
 }
 
 
-/** Recollect/unmount all children.
+/**
+ * Recollect/unmount all children.
  *	- we use .lastChild here because it causes less reflow than .firstChild
  *	- it's also cheaper than accessing the .childNodes Live NodeList
  */

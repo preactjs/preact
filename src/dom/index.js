@@ -2,27 +2,34 @@ import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
 
 /**
+ * A DOM event listener
  * @typedef {(e: Event) => void} EventListner
+ */
+
+/**
+ * A mapping of event types to event listeners
  * @typedef {{ [eventType: string]: EventListener}} EventListenerMap
  */
 
 /**
- * @typedef PreactHtmlProperties
- * @property {string} [normalizedNodeName]
- * @property {EventListenerMap} [_listeners]
- * @property {import('../component').Component} [_component]
- * @property {Function} [_componentConstructor]
+ * Properties Preact adds to elements it creates
+ * @typedef PreactElementExtensions
+ * @property {string} [normalizedNodeName] A normalized node name to use in diffing
+ * @property {EventListenerMap} [_listeners] A map of event listeners added by components to this DOM node
+ * @property {import('../component').Component} [_component] The component that rendered this DOM node
+ * @property {Function} [_componentConstructor] The constructor of the component that rendered this DOM node
  */
 
 /**
- * @typedef {Element & ElementCSSInlineStyle & PreactHtmlProperties} PreactElement
+ * A DOM element that has been extended with Preact properties
+ * @typedef {Element & ElementCSSInlineStyle & PreactElementExtensions} PreactElement
  */
 
 /**
  * Create an element with the given nodeName.
- * @param {String} nodeName
+ * @param {string} nodeName The DOM node to create
  * @param {boolean} [isSvg=false] If `true`, creates an element within the SVG namespace.
- * @returns {PreactElement} node
+ * @returns {PreactElement} The created DOM node
  */
 export function createNode(nodeName, isSvg) {
 	/** @type {PreactElement} */
