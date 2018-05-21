@@ -10,11 +10,7 @@ import { removeNode } from '../dom/index';
 /**
  * Set a component's `props` (generally derived from JSX attributes).
  * @param {Object} props
- * @param {Object|number} [opts] If opts is a `number` it is equal to the render
- *  mode (see constants.js for available options). Otherwise it is an options
- *  object.
- * @param {boolean} [opts.syncComponentUpdates] triggers synchronous rendering.
- * @param {boolean} [opts.render=true] If `false`, no render will be triggered.
+ * @param {number} [opts] Render mode, see constants.js for available options.
  */
 export function setComponentProps(component, props, opts, context, mountAll) {
 	if (component._disable) return;
