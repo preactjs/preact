@@ -11,11 +11,13 @@ const EMPTY_CHILDREN = [];
  * @see http://jasonformat.com/wtf-is-jsx
  * Benchmarks: https://esbench.com/bench/57ee8f8e330ab09900a1a1a0
  *
- * Note: this is exported as both `h()` and `createElement()` for compatibility reasons.
+ * Note: this is exported as both `h()` and `createElement()` for compatibility
+ * reasons.
  *
- * Creates a VNode (virtual DOM element). A tree of VNodes can be used as a lightweight representation
- * of the structure of a DOM tree. This structure can be realized by recursively comparing it against
- * the current _actual_ DOM structure, and applying only the differences.
+ * Creates a VNode (virtual DOM element). A tree of VNodes can be used as a
+ * lightweight representation of the structure of a DOM tree. This structure can
+ * be realized by recursively comparing it against the current _actual_ DOM
+ * structure, and applying only the differences.
  *
  * `h()`/`createElement()` accepts an element name, a list of attributes/props,
  * and optionally children to append to the element.
@@ -30,7 +32,8 @@ const EMPTY_CHILDREN = [];
  *
  * @param {string} nodeName	An element name. Ex: `div`, `a`, `span`, etc.
  * @param {Object} attributes	Any attributes/props to set on the created element.
- * @param rest			Additional arguments are taken to be children to append. Can be infinitely nested Arrays.
+ * @param {...object} rest Additional arguments are taken to be children to
+ *  append. Can be infinitely nested Arrays.
  *
  * @public
  */

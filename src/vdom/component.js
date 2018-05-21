@@ -7,11 +7,10 @@ import { diff, mounts, diffLevel, flushMounts, recollectNodeTree, removeChildren
 import { createComponent, collectComponent } from './component-recycler';
 import { removeNode } from '../dom/index';
 
-/** Set a component's `props` (generally derived from JSX attributes).
- *	@param {Object} props
- *	@param {Object} [opts]
- *	@param {boolean} [opts.renderSync=false]	If `true` and {@link options.syncComponentUpdates} is `true`, triggers synchronous rendering.
- *	@param {boolean} [opts.render=true]			If `false`, no render will be triggered.
+/**
+ * Set a component's `props` (generally derived from JSX attributes).
+ * @param {Object} props
+ * @param {number} [opts] Render mode, see constants.js for available options.
  */
 export function setComponentProps(component, props, opts, context, mountAll) {
 	if (component._disable) return;
@@ -53,11 +52,14 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 
 
 
-/** Render a Component, triggering necessary lifecycle events and taking High-Order Components into account.
- *	@param {Component} component
- *	@param {Object} [opts]
- *	@param {boolean} [opts.build=false]		If `true`, component will build and store a DOM node if not already associated with one.
- *	@private
+/**
+ * Render a Component, triggering necessary lifecycle events and taking
+ * High-Order Components into account.
+ * @param {Component} component
+ * @param {number} [opts] render mode, see constants.js for available options.
+ * @param {boolean} [mountAll=false]
+ * @param {boolean} [isChild=false]
+ * @private
  */
 export function renderComponent(component, opts, mountAll, isChild) {
 	if (component._disable) return;
@@ -199,11 +201,12 @@ export function renderComponent(component, opts, mountAll, isChild) {
 
 
 
-/** Apply the Component referenced by a VNode to the DOM.
- *	@param {Element} dom	The DOM node to mutate
- *	@param {VNode} vnode	A Component-referencing VNode
- *	@returns {Element} dom	The created/mutated element
- *	@private
+/**
+ * Apply the Component referenced by a VNode to the DOM.
+ * @param {Element} dom The DOM node to mutate
+ * @param {VNode} vnode A Component-referencing VNode
+ * @returns {Element} The created/mutated element
+ * @private
  */
 export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 	let c = dom && dom._component,
@@ -246,9 +249,10 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 
 
 
-/** Remove a component from the DOM and recycle it.
- *	@param {Component} component	The Component instance to unmount
- *	@private
+/**
+ * Remove a component from the DOM and recycle it.
+ * @param {Component} component The Component instance to unmount
+ * @private
  */
 export function unmountComponent(component) {
 	if (options.beforeUnmount) options.beforeUnmount(component);
