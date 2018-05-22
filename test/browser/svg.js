@@ -1,4 +1,5 @@
-import { h, render } from '../../src/preact';
+import { createElement as h, render } from '../../src/index';
+
 /** @jsx h */
 
 
@@ -61,12 +62,12 @@ describe('svg', () => {
 
 		let namespace = scratch.querySelector('svg').namespaceURI;
 
-		expect(namespace).to.equal("http://www.w3.org/2000/svg");
+		expect(namespace).to.equal('http://www.w3.org/2000/svg');
 	});
 
 	it('should use attributes for className', () => {
 		const Demo = ({ c }) => (
-			<svg viewBox="0 0 360 360" {...(c ? {class:'foo_'+c} : {})}>
+			<svg viewBox="0 0 360 360" {...(c ? { class: 'foo_'+c } : {})}>
 				<path class={c && ('bar_'+c)} stroke="white" fill="black" d="M347.1 357.9L183.3 256.5 13 357.9V1.7h334.1v356.2zM58.5 47.2v231.4l124.8-74.1 118.3 72.8V47.2H58.5z" />
 			</svg>
 		);

@@ -2,7 +2,7 @@
 /*eslint no-console:0*/
 /** @jsx h */
 
-let { h, Component, render } = require(NODE_ENV==='production' ? '../../dist/preact.min.js' : '../../src/preact');
+let { createElement: h, Component, render } = require(NODE_ENV==='production' ? '../../dist/ceviche.min.js' : '../../dist/ceviche');
 
 const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
 
@@ -23,7 +23,8 @@ function loop(iter, time) {
 function benchmark(iter, callback) {
 	let a = 0; // eslint-disable-line no-unused-vars
 	function noop() {
-		try { a++; } finally { a += Math.random(); }
+		try { a++; }
+		finally { a += Math.random(); }
 	}
 
 	// warm
@@ -84,8 +85,8 @@ describe('performance', function() {
 					</nav>
 				</header>
 				<main>
-					<form onSubmit={()=>{}}>
-						<input type="checkbox" checked={true} />
+					<form onSubmit={() => {}}>
+						<input type="checkbox" checked />
 						<input type="checkbox" checked={false} />
 						<fieldset>
 							<label><input type="radio" checked /></label>
@@ -95,7 +96,7 @@ describe('performance', function() {
 							<button style="width:10px; height:10px; border:1px solid #FFF;">Normal CSS</button>
 							<button style="top:0 ; right: 20">Poor CSS</button>
 							<button style="invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;" icon>Poorer CSS</button>
-							<button style={{ margin:0, padding:'10px', overflow:'visible' }}>Object CSS</button>
+							<button style={{ margin: 0, padding: '10px', overflow: 'visible' }}>Object CSS</button>
 						</button-bar>
 					</form>
 				</main>
@@ -129,8 +130,8 @@ describe('performance', function() {
 		class Form extends Component {
 			render() {
 				return (
-					<form onSubmit={()=>{}}>
-						<input type="checkbox" checked={true} />
+					<form onSubmit={() => {}}>
+						<input type="checkbox" checked />
 						<input type="checkbox" checked={false} />
 						<fieldset>
 							<label><input type="radio" checked /></label>
@@ -148,7 +149,7 @@ describe('performance', function() {
 						<Button style="width:10px; height:10px; border:1px solid #FFF;">Normal CSS</Button>
 						<Button style="top:0 ; right: 20">Poor CSS</Button>
 						<Button style="invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;" icon>Poorer CSS</Button>
-						<Button style={{ margin:0, padding:'10px', overflow:'visible' }}>Object CSS</Button>
+						<Button style={{ margin: 0, padding: '10px', overflow: 'visible' }}>Object CSS</Button>
 					</button-bar>
 				);
 			}
@@ -179,7 +180,7 @@ describe('performance', function() {
 			}
 		}
 		class Parent extends Component {
-			render({ child:C }) {
+			render({ child: C }) {
 				return <C />;
 			}
 		}
@@ -215,7 +216,7 @@ describe('performance', function() {
 						</nav>
 					</header>
 					<main>
-						<form onSubmit={()=>{}}>
+						<form onSubmit={() => {}}>
 							<input type="checkbox" checked />
 							<input type="checkbox" />
 							<fieldset>
@@ -230,7 +231,7 @@ describe('performance', function() {
 								<button style="width:10px; height:10px; border:1px solid #FFF;">Normal CSS</button>
 								<button style="top:0 ; right: 20">Poor CSS</button>
 								<button style="invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;" icon>Poorer CSS</button>
-								<button style={{ margin:0, padding:'10px', overflow:'visible' }}>Object CSS</button>
+								<button style={{ margin: 0, padding: '10px', overflow: 'visible' }}>Object CSS</button>
 							</button-bar>
 						</form>
 					</main>
@@ -310,8 +311,8 @@ describe('performance', function() {
 		class Form extends Component {
 			render() {
 				return (
-					<form onSubmit={()=>{}}>
-						<input type="checkbox" checked={true} />
+					<form onSubmit={() => {}}>
+						<input type="checkbox" checked />
 						<input type="checkbox" checked={false} />
 						<fieldset>
 							<label><input type="radio" checked /></label>
@@ -327,7 +328,7 @@ describe('performance', function() {
 				<Button style="width:10px; height:10px; border:1px solid #FFF;">Normal CSS</Button>
 				<Button style="top:0 ; right: 20">Poor CSS</Button>
 				<Button style="invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;" icon>Poorer CSS</Button>
-				<Button style={{ margin:0, padding:'10px', overflow:'visible' }}>Object CSS</Button>
+				<Button style={{ margin: 0, padding: '10px', overflow: 'visible' }}>Object CSS</Button>
 			</button-bar>
 		);
 		class Button extends Component {

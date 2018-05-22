@@ -1,4 +1,5 @@
-import { h, render, rerender, Component } from '../../src/preact';
+import { createElement as h, render, Component } from '../../src/index';
+
 /** @jsx h */
 
 const EMPTY_CHILDREN = [];
@@ -44,7 +45,7 @@ describe('Component spec', () => {
 			class Outer extends Component {
 				constructor() {
 					super();
-					this.state = { i:1 };
+					this.state = { i: 1 };
 				}
 				componentDidMount() {
 					doRender = () => this.setState({ i: 2 });
@@ -87,7 +88,7 @@ describe('Component spec', () => {
 			expect(proto.ctor).to.have.been.calledWithMatch(PROPS1);
 			expect(proto.render).to.have.been.calledWithMatch(PROPS1);
 
-			rerender();
+			render(<Outer />, scratch);
 
 			// expect(proto.ctor).to.have.been.calledWith(PROPS2);
 			expect(proto.componentWillReceiveProps).to.have.been.calledWithMatch(PROPS2);

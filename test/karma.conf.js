@@ -105,6 +105,7 @@ module.exports = function(config) {
 			mode: 'development',
 			devtool: 'inline-source-map',
 			module: {
+
 				/* Transpile source and test files */
 				rules: [
 					{
@@ -117,6 +118,7 @@ module.exports = function(config) {
 							compact: true
 						}
 					},
+
 					/* Only Instrument our source files for coverage */
 					coverage ? {
 						test: /\.jsx?$/,

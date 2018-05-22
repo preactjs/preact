@@ -1,4 +1,5 @@
-import { h, render, rerender, Component } from '../../src/preact';
+import { createElement as h, render, rerender, Component } from '../../src/index';
+
 /** @jsx h */
 
 let spyAll = obj => Object.keys(obj).forEach( key => sinon.spy(obj,key) );
@@ -99,7 +100,7 @@ describe('Lifecycle methods', () => {
 			expect(Foo.prototype.componentDidMount).to.have.callCount(1); // verify mount occurred
 			expect(Foo.prototype.componentDidUpdate).to.have.callCount(0);
 
-			element = render(<Foo update={true} />, scratch, element);
+			element = render(<Foo update />, scratch, element);
 			expect(element.className).to.equal('updated');
 			expect(Foo.getDerivedStateFromProps).to.have.callCount(2);
 			expect(Foo.prototype.componentDidMount).to.have.callCount(1);
@@ -125,6 +126,7 @@ describe('Lifecycle methods', () => {
 					};
 				}
 				componentDidMount() {
+					// eslint-disable-next-line react/no-did-mount-set-state
 					this.setState({ value: 'updated' });
 				}
 				render() {
@@ -132,14 +134,14 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			let element;
+			let element = <Foo />;
 			sinon.spy(Foo, 'getDerivedStateFromProps');
 
-			element = render(<Foo />, scratch, element);
+			render(<Foo />, scratch);
 			expect(element.className).to.equal('initial');
 			expect(Foo.getDerivedStateFromProps).to.have.been.calledOnce;
 
-			rerender(); // call rerender to handle cDM setState call
+			render(<Foo />, scratch); // call rerender to handle cDM setState call
 			expect(element.className).to.equal('updated derived');
 			expect(Foo.getDerivedStateFromProps).to.have.been.calledTwice;
 		});
@@ -248,7 +250,7 @@ describe('Lifecycle methods', () => {
 			}
 			class Inner extends Component {
 				componentWillUpdate(nextProps, nextState) {
-					expect(nextProps).to.be.deep.equal({ children:EMPTY_CHILDREN, i: 1 });
+					expect(nextProps).to.be.deep.equal({ children: EMPTY_CHILDREN, i: 1 });
 					expect(nextState).to.be.deep.equal({});
 				}
 				render() {
@@ -301,7 +303,7 @@ describe('Lifecycle methods', () => {
 				}
 
 				render() {
-					return <div id="inner"/>;
+					return <div id="inner" />;
 				}
 			}
 
@@ -316,7 +318,7 @@ describe('Lifecycle methods', () => {
 			}
 
 			const elem = render(<Outer renderInner={false} />, scratch);
-			render(<Outer renderInner={true} />, scratch, elem);
+			render(<Outer renderInner />, scratch, elem);
 
 			// expect(log).to.deep.equal(['Inner mounted', 'Outer updated']);
 		});
@@ -454,7 +456,7 @@ describe('Lifecycle methods', () => {
 		class Outer extends Component {
 			constructor(p, c) {
 				super(p, c);
-				this.state = { show:true };
+				this.state = { show: true };
 				setState = s => this.setState(s);
 			}
 			render(props, { show }) {
@@ -509,7 +511,7 @@ describe('Lifecycle methods', () => {
 
 			it('should be invoked for components on unmount', () => {
 				reset();
-				setState({ show:false });
+				setState({ show: false });
 				rerender();
 
 				expect(proto.componentWillUnmount).to.have.been.called;
@@ -517,7 +519,7 @@ describe('Lifecycle methods', () => {
 
 			it('should be invoked for components on re-render', () => {
 				reset();
-				setState({ show:true });
+				setState({ show: true });
 				rerender();
 
 				expect(proto._constructor).to.have.been.called;
@@ -541,7 +543,7 @@ describe('Lifecycle methods', () => {
 			class Outer extends Component {
 				constructor() {
 					super();
-					this.state = { show:true };
+					this.state = { show: true };
 					setState = s => this.setState(s);
 				}
 				render(props, { show }) {
@@ -583,14 +585,14 @@ describe('Lifecycle methods', () => {
 			});
 
 			it('should be invoked normally on unmount', () => {
-				setState({ show:false });
+				setState({ show: false });
 				rerender();
 
 				expect(proto.componentWillUnmount).to.have.been.called;
 			});
 
 			it('should still invoke mount for shouldComponentUpdate():false', () => {
-				setState({ show:true });
+				setState({ show: true });
 				rerender();
 
 				expect(proto.componentWillMount).to.have.been.called;
@@ -599,7 +601,7 @@ describe('Lifecycle methods', () => {
 			});
 
 			it('should still invoke unmount for shouldComponentUpdate():false', () => {
-				setState({ show:false });
+				setState({ show: false });
 				rerender();
 
 				expect(proto.componentWillUnmount).to.have.been.called;
@@ -614,7 +616,7 @@ describe('Lifecycle methods', () => {
 		class Should extends Component {
 			constructor() {
 				super();
-				this.state = { show:true };
+				this.state = { show: true };
 				setState = s => this.setState(s);
 			}
 			render(props, { show }) {
@@ -635,7 +637,7 @@ describe('Lifecycle methods', () => {
 
 		it('should rerender component on change by default', () => {
 			render(<Should />, scratch);
-			setState({ show:false });
+			setState({ show: false });
 			rerender();
 
 			expect(Should.prototype.render).to.have.been.calledTwice;
@@ -643,7 +645,7 @@ describe('Lifecycle methods', () => {
 
 		it('should not rerender component if shouldComponentUpdate returns false', () => {
 			render(<ShouldNot />, scratch);
-			setState({ show:false });
+			setState({ show: false });
 			rerender();
 
 			expect(ShouldNot.prototype.shouldComponentUpdate).to.have.been.calledOnce;
@@ -658,7 +660,7 @@ describe('Lifecycle methods', () => {
 			class Outer extends Component {
 				constructor() {
 					super();
-					this.state = { show:true };
+					this.state = { show: true };
 					setState = s => {
 						this.setState(s);
 						this.forceUpdate();
@@ -723,12 +725,12 @@ describe('Lifecycle methods', () => {
 			expect(proto.componentDidMount).to.have.been.called;
 
 			reset();
-			setState({ show:false });
+			setState({ show: false });
 
 			expect(proto.componentWillUnmount).to.have.been.called;
 
 			reset();
-			setState({ show:true });
+			setState({ show: true });
 
 			expect(proto.componentWillMount).to.have.been.called;
 			expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
@@ -774,7 +776,7 @@ describe('Lifecycle methods', () => {
 			}
 
 			let app;
-			render(<App ref={ c => app=c } />, scratch);
+			render(<App ref={c => app=c} />, scratch);
 
 			for (let i=0; i<20; i++) {
 				app.setState({ page: i%components.length });

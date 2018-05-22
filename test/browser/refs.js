@@ -1,4 +1,5 @@
-import { h, render, Component } from '../../src/preact';
+import { createElement as h, render, Component } from '../../src/index';
+
 /** @jsx h */
 
 // gives call count and argument errors names (otherwise sinon just uses "spy"):
@@ -218,8 +219,8 @@ describe('refs', () => {
 			</div>
 		), scratch);
 
-		expect(Foo.prototype.render).to.have.been.calledWithMatch({ ref:sinon.match.falsy, a:'a' }, { }, { });
-		expect(Bar).to.have.been.calledWithMatch({ b:'b', ref:sinon.match.falsy }, { });
+		expect(Foo.prototype.render).to.have.been.calledWithMatch({ ref: sinon.match.falsy, a: 'a' }, { }, { });
+		expect(Bar).to.have.been.calledWithMatch({ b: 'b', ref: sinon.match.falsy }, { });
 	});
 
 	// Test for #232
@@ -239,8 +240,8 @@ describe('refs', () => {
 
 			render() {
 				return (
-					<div id="outer" ref={ c => this.outer=c }>
-						<div id="inner" ref={ c => this.inner=c } />
+					<div id="outer" ref={c => this.outer=c}>
+						<div id="inner" ref={c => this.inner=c} />
 					</div>
 				);
 			}
@@ -271,12 +272,12 @@ describe('refs', () => {
 		class Child extends Component {
 			constructor(props, context) {
 				super(props, context);
-				this.state = { show:false };
+				this.state = { show: false };
 				inst = this;
 			}
 			handleMount(){}
 			render(_, { show }) {
-				if (!show) return <div id="div" ref={this.handleMount}></div>;
+				if (!show) return <div id="div" ref={this.handleMount} />;
 				return <span id="span" ref={this.handleMount}>some test content</span>;
 			}
 		}
@@ -286,14 +287,14 @@ describe('refs', () => {
 		expect(inst.handleMount).to.have.been.calledOnce.and.calledWith(scratch.querySelector('#div'));
 		inst.handleMount.resetHistory();
 
-		inst.setState({ show:true });
+		inst.setState({ show: true });
 		inst.forceUpdate();
 		expect(inst.handleMount).to.have.been.calledTwice;
 		expect(inst.handleMount.firstCall).to.have.been.calledWith(null);
 		expect(inst.handleMount.secondCall).to.have.been.calledWith(scratch.querySelector('#span'));
 		inst.handleMount.resetHistory();
 
-		inst.setState({ show:false });
+		inst.setState({ show: false });
 		inst.forceUpdate();
 		expect(inst.handleMount).to.have.been.calledTwice;
 		expect(inst.handleMount.firstCall).to.have.been.calledWith(null);
@@ -312,11 +313,11 @@ describe('refs', () => {
 
 		class Wrapper {
 			render() {
-				return <div></div>;
+				return <div />;
 			}
 		}
 
-		render(<div><Wrapper ref={ c => ref(c.base) } /></div>, scratch, scratch.firstChild);
+		render(<div><Wrapper ref={c => ref(c.base)} /></div>, scratch, scratch.firstChild);
 		expect(ref).to.have.been.calledOnce.and.calledWith(scratch.firstChild.firstChild);
 	});
 });

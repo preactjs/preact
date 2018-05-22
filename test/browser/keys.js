@@ -1,4 +1,5 @@
-import { h, Component, render } from '../../src/preact';
+import { createElement as h, Component, render } from '../../src/index';
+
 /** @jsx h */
 
 describe('keys', () => {
@@ -48,8 +49,8 @@ describe('keys', () => {
 	it('should remove keyed nodes (#232)', () => {
 		class App extends Component {
 			componentDidMount() {
-				setTimeout(() => this.setState({opened: true,loading: true}), 10);
-				setTimeout(() => this.setState({opened: true,loading: false}), 20);
+				setTimeout(() => this.setState({ opened: true,loading: true }), 10);
+				setTimeout(() => this.setState({ opened: true,loading: false }), 20);
 			}
 
 			render({ opened, loading }) {
@@ -64,14 +65,14 @@ describe('keys', () => {
 
 		class BusyIndicator extends Component {
 			render({ children, busy }) {
-				return <div class={busy ? "busy" : ""}>
-					{ children && children.length ? children : <div class="busy-placeholder"></div> }
+				return (<div class={busy ? 'busy' : ''}>
+					{ children && children.length ? children : <div class="busy-placeholder" /> }
 					<div class="indicator">
 						<div>indicator</div>
 						<div>indicator</div>
 						<div>indicator</div>
 					</div>
-				</div>;
+				</div>);
 			}
 		}
 

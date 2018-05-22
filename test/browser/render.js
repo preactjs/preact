@@ -1,6 +1,7 @@
 /* global DISABLE_FLAKEY */
 
-import { h, render, Component } from '../../src/preact';
+import { createElement as h, render, Component } from '../../src/index';
+
 /** @jsx h */
 
 function getAttributes(node) {
@@ -258,7 +259,7 @@ describe('render()', () => {
 
 		sinon.spy(proto, 'addEventListener');
 
-		render(<div click={ click } onClick={ onclick } />, scratch);
+		render(<div click={click} onClick={onclick} />, scratch);
 
 		expect(scratch.childNodes[0].attributes.length).to.equal(0);
 
@@ -282,7 +283,7 @@ describe('render()', () => {
 			on.dispatchEvent(e);
 		}
 
-		render(<div onClick={ () => click(1) } onMouseDown={ mousedown } />, scratch);
+		render(<div onClick={() => click(1)} onMouseDown={mousedown} />, scratch);
 
 		expect(proto.addEventListener).to.have.been.calledTwice
 			.and.to.have.been.calledWith('click')
@@ -295,7 +296,7 @@ describe('render()', () => {
 		proto.addEventListener.resetHistory();
 		click.resetHistory();
 
-		render(<div onClick={ () => click(2) } />, scratch, scratch.firstChild);
+		render(<div onClick={() => click(2)} />, scratch, scratch.firstChild);
 
 		expect(proto.addEventListener).not.to.have.been.called;
 
@@ -362,7 +363,8 @@ describe('render()', () => {
 				padding: 5,
 				top: 100,
 				left: '100%'
-			}}>
+			}}
+			>
 				test
 			</div>
 		), scratch);
@@ -397,6 +399,7 @@ describe('render()', () => {
 
 	it('should support dangerouslySetInnerHTML', () => {
 		let html = '<b>foo &amp; bar</b>';
+		// eslint-disable-next-line react/no-danger
 		let root = render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
 
 		expect(scratch.firstChild, 'set').to.have.property('innerHTML', html);
@@ -406,6 +409,7 @@ describe('render()', () => {
 
 		expect(scratch, 'unset').to.have.property('innerHTML', `<div>a<strong>b</strong></div>`);
 
+		// eslint-disable-next-line react/no-danger
 		render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, root);
 
 		expect(scratch.innerHTML, 're-set').to.equal('<div>'+html+'</div>');
@@ -418,13 +422,14 @@ describe('render()', () => {
 				this.state.html = this.props.html;
 			}
 			render(props, { html }) {
+				// eslint-disable-next-line react/no-danger
 				return html ? <div dangerouslySetInnerHTML={{ __html: html }} /> : <div />;
 			}
 		}
 
 		let thing;
 
-		render(<Thing ref={ c => thing=c } html="<b><i>test</i></b>" />, scratch);
+		render(<Thing ref={c => thing=c} html="<b><i>test</i></b>" />, scratch);
 
 		expect(scratch.innerHTML).to.equal('<div><b><i>test</i></b></div>');
 
@@ -442,6 +447,7 @@ describe('render()', () => {
 	it('should hydrate with dangerouslySetInnerHTML', () => {
 		let html = '<b>foo &amp; bar</b>';
 		scratch.innerHTML = `<div>${html}</div>`;
+		// eslint-disable-next-line react/no-danger
 		render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, scratch.lastChild);
 
 		expect(scratch.firstChild).to.have.property('innerHTML', html);
@@ -509,7 +515,7 @@ describe('render()', () => {
 		};
 
 		const DOMElement = html`<div><a foo="bar"></a></div>`;
-		const preactElement = <div><a></a></div>;
+		const preactElement = <div><a /></div>;
 
 		render(preactElement, scratch, DOMElement);
 		expect(scratch).to.have.property('innerHTML', '<div><a></a></div>');
@@ -529,7 +535,7 @@ describe('render()', () => {
 		}
 
 		let comp;
-		let root = render(<Foo ref={ c => comp = c } />, scratch, root);
+		let root = render(<Foo ref={c => comp = c} />, scratch, root);
 
 		let c = document.createElement('c');
 		c.textContent = 'baz';
@@ -554,18 +560,18 @@ describe('render()', () => {
 
 		// Re-rendering from the root is non-destructive if the root was a previous render:
 		comp.alt = false;
-		root = render(<Foo ref={ c => comp = c } />, scratch, root);
+		root = render(<Foo ref={c => comp = c} />, scratch, root);
 
 		expect(scratch.firstChild.children, 'root re-render').to.have.length(4);
 		expect(scratch.innerHTML, 'root re-render').to.equal(`<div><a>foo</a><b>bar</b><c>baz</c><b>bat</b></div>`);
 
 		comp.alt = true;
-		root = render(<Foo ref={ c => comp = c } />, scratch, root);
+		root = render(<Foo ref={c => comp = c} />, scratch, root);
 
 		expect(scratch.firstChild.children, 'root re-render 2').to.have.length(4);
 		expect(scratch.innerHTML, 'root re-render 2').to.equal(`<div><b>alt</b><a>foo</a><c>baz</c><b>bat</b></div>`);
 
-		root = render(<div><Foo ref={ c => comp = c } /></div>, scratch, root);
+		root = render(<div><Foo ref={c => comp = c} /></div>, scratch, root);
 
 		expect(scratch.firstChild.children, 'root re-render changed').to.have.length(3);
 		expect(scratch.innerHTML, 'root re-render changed').to.equal(`<div><div><a>foo</a><b>bar</b></div><c>baz</c><b>bat</b></div>`);
@@ -606,9 +612,9 @@ describe('render()', () => {
 				this.setState({ todos, text: '' });
 			}
 			render() {
-				const {todos, text} = this.state;
+				const { todos, text } = this.state;
 				return (
-					<div onKeyDown={ this.addTodo }>
+					<div onKeyDown={this.addTodo}>
 						{ todos.map( todo => (<div>{todo.text}</div> )) }
 						<input value={text} onInput={this.setText} ref={(i) => input = i} />
 					</div>
@@ -623,7 +629,7 @@ describe('render()', () => {
 		});
 		root._component.addTodo();
 		expect(document.activeElement).to.equal(input);
-		setTimeout(() =>{
+		setTimeout(() => {
 			expect(/1/.test(scratch.innerHTML)).to.equal(true);
 			done();
 		}, 10);
