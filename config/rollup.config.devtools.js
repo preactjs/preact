@@ -1,13 +1,17 @@
 import babel from 'rollup-plugin-babel';
 
 export default {
-	entry: 'devtools/index.js',
-	external: ['preact'],
-	format: 'umd',
-	globals: {
-		preact: 'preact'
+	input: 'devtools/index.js',
+	output: {
+		format: 'umd',
+		file: 'devtools.js',
+		name: 'preactDevTools',
+		sourcemap: true,
+		globals: {
+			preact: 'preact'
+		}
 	},
-	moduleName: 'preactDevTools',
+	external: ['preact'],
 	plugins: [
 		babel({
 			sourceMap: true,
