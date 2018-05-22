@@ -2,7 +2,7 @@
  * Copy all properties from `props` onto `obj`.
  * @param {object} obj Object onto which properties should be copied.
  * @param {object} props Object from which to copy properties.
- * @returns {object} obj
+ * @returns {object}
  * @private
  */
 export function extend(obj, props) {

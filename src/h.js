@@ -29,7 +29,7 @@ const EMPTY_CHILDREN = [];
  * `h('div', { id: 'foo', name : 'bar' }, 'Hello!');`
  *
  * @param {string | Function} nodeName An element name. Ex: `div`, `a`, `span`, etc.
- * @param {object} attributes Any attributes/props to set on the created element.
+ * @param {object | null} attributes Any attributes/props to set on the created element.
  * @param {VNode[]} [rest] Additional arguments are taken to be children to append. Can be infinitely nested Arrays.
  *
  * @public

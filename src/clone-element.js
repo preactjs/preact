@@ -1,11 +1,12 @@
 import { extend } from './util';
 import { h } from './h';
+import { VNode } from './vnode';
 
 /**
  * Clones the given VNode, optionally adding attributes/props and replacing its children.
- * @param {import('./vnode').VNode} vnode The virtual DOM element to clone
+ * @param {VNode} vnode The virtual DOM element to clone
  * @param {object} props Attributes/props to add when cloning
- * @param {Array<import('./vnode').VNode>} [rest] Any additional arguments will be used as replacement children.
+ * @param {Array<VNode>} [rest] Any additional arguments will be used as replacement children.
  */
 export function cloneElement(vnode, props) {
 	return h(

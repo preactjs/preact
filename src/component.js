@@ -42,7 +42,7 @@ export function Component(props, context) {
 extend(Component.prototype, {
 
 	/**
-	 * Update component state by copying properties from `state` to `this.state`.
+	 * Update component state and schedule a re-render.
 	 * @param {object} state A hash of state properties to update with new values
 	 * @param {() => void} callback A function to be called once component state is updated
 	 */
@@ -71,7 +71,7 @@ extend(Component.prototype, {
 	 * Virtual DOM is generally constructed via [JSX](http://jasonformat.com/wtf-is-jsx).
 	 * @param {object} props Props (eg: JSX attributes) received from parent element/component
 	 * @param {object} state The component's current state
-	 * @param {object} context Context object (if a parent component has provided context)
+	 * @param {object} context Context object, as returned by the nearest  ancestor's `getChildContext()`
 	 * @returns {import('./vnode').VNode | void}
 	 */
 	render() {}

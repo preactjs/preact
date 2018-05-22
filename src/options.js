@@ -7,7 +7,7 @@
  * Global options
  * @public
  * @typedef Options
- * @property {Boolean} [syncComponentUpdates] If `true`, `prop` changes trigger synchronous component updates. Defaults to true.
+ * @property {boolean} [syncComponentUpdates] If `true`, `prop` changes trigger synchronous component updates. Defaults to true.
  * @property {(vnode: VNode) => void} [vnode] Processes all created VNodes.
  * @property {(component: Component) => void} [afterMount] Hook invoked after a component is mounted.
  * @property {(component: Component) => void} [afterUpdate] Hook invoked after the DOM is updated with a component's latest render.
