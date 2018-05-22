@@ -50,32 +50,27 @@ class App extends Component {
 		);
 	}
 }
-//
-//
-// document.body.innerHTML = `
-// <div class="app">
-// 	<header>
-// 		<nav>
-// 			<a href="/">Home SSR</a>
-// 			<a href="/reorder">Reorder</a>
-// 			<a href="/spiral">Spiral SSR</a>
-// 			<a href="/pythagoras">Pythagoras SSR</a>
-// 			<a href="/todo">ToDo</a>
-// 			<a href="/fragments">Fragments</a>
-// 		</nav>
-// 	</header>
-// 	<main>
-// 		<h1>SSR Content</h1>
-// 	</main>
-// </div>
-// `;
 
-// skip hydrate with fragments
-document.body._previousVTree = (
-  <div></div>
-)
 
-render(<App />, document.body);
+document.body.innerHTML = `
+<div class="app">
+	<header>
+		<nav>
+			<a href="/">Home SSR</a>
+			<a href="/reorder">Reorder</a>
+			<a href="/spiral">Spiral SSR</a>
+			<a href="/pythagoras">Pythagoras SSR</a>
+			<a href="/todo">ToDo</a>
+			<a href="/fragments">Fragments</a>
+		</nav>
+	</header>
+	<main>
+		<h1>SSR Content</h1>
+	</main>
+</div>
+`;
+
+hydrate(<App />, document.body);
 
 if (String(localStorage.LOG)==='true' || location.href.match(/logger/)) {
 	installLogger();
