@@ -245,10 +245,10 @@ describe('render()', () => {
 
 	it('should apply style as String', () => {
 		render(<div style="top:5px; position:relative; --var-font-size: 12px; font-size: var(--var-font-size);" />, scratch);
-		expect(scratch.childNodes[0]).to.have.deep.property('style.cssText')
-			.that.matches(/top\s*:\s*5px\s*/)
-			.and.matches(/position\s*:\s*relative\s*/)
-			.and.matches(/--var-font-size\s*:\s*12px\s*/);
+		expect(scratch.childNodes[0].style.cssText)
+			.to.match(/top\s*:\s*5px\s*/)
+			.and.match(/position\s*:\s*relative\s*/)
+			.and.match(/--var-font-size\s*:\s*12px\s*/);
 	});
 
 	it('should only register on* functions as handlers', () => {
@@ -383,7 +383,7 @@ describe('render()', () => {
 			<div style={{ color: 'rgb(0, 255, 255)', '--var-font-size': '24px' }}>test</div>
 		), scratch, root);
 
-		expect(root).to.have.deep.property('style.cssText').that.equals('color: rgb(0, 255, 255); --var-font-size:24px;');
+		expect(root.style.cssText).to.equal('color: rgb(0, 255, 255); --var-font-size:24px;');
 
 		root = render((
 			<div style="display: inline;">test</div>
