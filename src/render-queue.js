@@ -1,6 +1,6 @@
 import options from './options';
 import { defer } from './util';
-import { renderComponent, catchErrorInComponent } from './vdom/component';
+import { renderComponent } from './vdom/component';
 
 /** Managed queue of dirty components to be re-rendered */
 
@@ -16,12 +16,6 @@ export function rerender() {
 	let p, list = items;
 	items = [];
 	while ( (p = list.pop()) ) {
-		if (p._dirty) {
-			try {
-				renderComponent(p);
-			} catch (e) {
-				catchErrorInComponent(e, p._ancestorComponent);
-			}
-		}
+		if (p._dirty) renderComponent(p);
 	}
 }

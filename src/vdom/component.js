@@ -1,4 +1,4 @@
-import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, REATTEMPT_RENDER, ATTR_KEY } from '../constants';
+import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, ERROR_RENDER, ATTR_KEY } from '../constants';
 import options from '../options';
 import { extend } from '../util';
 import { enqueueRender } from '../render-queue';
@@ -39,7 +39,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 
 	if (opts!==NO_RENDER) {
 		if ((opts&SYNC_RENDER) || options.syncComponentUpdates!==false || !component.base) {
-			renderComponent(component, SYNC_RENDER, mountAll);
+			renderComponent(component, opts|SYNC_RENDER, mountAll);
 		}
 		else {
 			enqueueRender(component);
@@ -62,15 +62,7 @@ export function catchErrorInComponent(error, component) {
 	throw error;
 }
 
-
-/** Render a Component, triggering necessary lifecycle events and taking High-Order Components into account.
- *	@param {Component} component
- *	@param {Object} [opts]
- *	@param {boolean} [opts.build=false]		If `true`, component will build and store a DOM node if not already associated with one.
- *	@private
- */
-export function renderComponent(component, opts, mountAll, isChild) {
-	if (component._disable) return;
+function renderComponentAttempt(component, opts, mountAll, isChild) {
 
 	let props = component.props,
 		state = component.state,
@@ -83,8 +75,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		initialBase = isUpdate || nextBase,
 		initialChildComponent = component._component,
 		skip = false,
-		rendered, inst, cbase,
-		exception, hasException;
+		rendered, inst, cbase;
 
 	// if updating
 	if (isUpdate) {
@@ -118,49 +109,40 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		let childComponent = rendered && rendered.nodeName,
 			toUnmount, base;
 
-		try {
-			if (typeof childComponent==='function') {
-				// set up high order component link
+		if (typeof childComponent==='function') {
+			// set up high order component link
 
-				let childProps = getNodeProps(rendered);
-				inst = initialChildComponent;
+			let childProps = getNodeProps(rendered);
+			inst = initialChildComponent;
 
-				if (inst && inst.constructor===childComponent && childProps.key==inst.__key) {
-					setComponentProps(inst, childProps, SYNC_RENDER, context, false);
-				}
-				else {
-					toUnmount = inst;
-
-					component._component = inst = createComponent(childComponent, childProps, context, component);
-					inst.nextBase = inst.nextBase || nextBase;
-					inst._parentComponent = component;
-					setComponentProps(inst, childProps, NO_RENDER, context, false);
-					renderComponent(inst, SYNC_RENDER, mountAll, true);
-				}
-
-				base = inst.base;
+			if (inst && inst.constructor===childComponent && childProps.key==inst.__key) {
+				setComponentProps(inst, childProps, opts|SYNC_RENDER, context, false);
 			}
 			else {
-				cbase = initialBase;
+				toUnmount = inst;
 
-				// destroy high order component link
-				toUnmount = initialChildComponent;
-				if (toUnmount) {
-					cbase = component._component = null;
-				}
+				component._component = inst = createComponent(childComponent, childProps, context, component);
+				inst.nextBase = inst.nextBase || nextBase;
+				inst._parentComponent = component;
+				setComponentProps(inst, childProps, NO_RENDER, context, false);
+				renderComponent(inst, opts|SYNC_RENDER, mountAll, true);
+			}
 
-				if (initialBase || (opts&SYNC_RENDER)) {
-					if (cbase) cbase._component = null;
-					base = diff(cbase, rendered, context, mountAll || !isUpdate, initialBase && initialBase.parentNode, component);
-				}
+			base = inst.base;
+		}
+		else {
+			cbase = initialBase;
+
+			// destroy high order component link
+			toUnmount = initialChildComponent;
+			if (toUnmount) {
+				cbase = component._component = null;
 			}
-		} catch (e) {
-			if (opts == REATTEMPT_RENDER) {
-				throw e;
+
+			if (initialBase || (opts&SYNC_RENDER)) {
+				if (cbase) cbase._component = null;
+				base = diff(cbase, rendered, context, mountAll || !isUpdate, initialBase && initialBase.parentNode, component);
 			}
-			base = initialBase || document.createTextNode("");
-			exception = e;
-			hasException = true;
 		}
 
 		if (initialBase && base!==initialBase && inst!==initialChildComponent) {
@@ -210,15 +192,38 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		while (component._renderCallbacks.length) component._renderCallbacks.pop().call(component);
 	}
 
-	if (hasException) {
-		flushMounts();
-		catchErrorInComponent(exception, component);
-		if (component._dirty) {
-			renderComponent(component, REATTEMPT_RENDER, mountAll, isChild);
-		}
-	}
-
 	if (!diffLevel && !isChild) flushMounts();
+}
+
+
+/** Render a Component, triggering necessary lifecycle events and taking High-Order Components into account.
+ *	@param {Component} component
+ *	@param {Object} [opts]
+ *	@param {boolean} [opts.build=false]		If `true`, component will build and store a DOM node if not already associated with one.
+ *	@private
+ */
+export function renderComponent(component, opts, mountAll, isChild) {
+	if (component._disable) return;
+
+	if (opts !== ERROR_RENDER) {
+		try {
+			renderComponentAttempt(component, opts, mountAll, isChild);
+		} catch (e) {
+			catchErrorInComponent(e, component);
+		}
+
+		if (component._dirty && component.componentDidCatch) {
+			// Error was caught, rerender with errors in children propagated via throw
+			try {
+				renderComponentAttempt(component, ERROR_RENDER, mountAll, isChild);
+			} catch (e) {
+				catchErrorInComponent(e, component._ancestorComponent);
+			}
+		}
+	} else {
+		// Asked by a call further up the stack to propagate errors via throw
+		renderComponentAttempt(component, opts, mountAll, isChild);
+	}
 }
 
 
