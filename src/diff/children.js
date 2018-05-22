@@ -15,7 +15,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 
 	// let seen = {},
 	// 	c;
-	
+
 	// // console.log('diffChildren', excessChildren);
 
 	// // let types = {};
@@ -137,7 +137,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 		// console.log(old);
 
 		// let next = old!=null && old._el && old._el.nextSibling;
-		
+
 		// let next = old!=null && old._el!=null && old._el.nextSibling;
 		// let prev = old!=null && old._el;
 
@@ -157,7 +157,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 				// let nextChild;
 
 
-				outer: if (childNode==null || childNode.parentNode!==node) {
+				outer: if (Array.isArray(children) || (childNode==null || childNode.parentNode!==node)) {
 					node.appendChild(newEl);
 				}
 				else {
