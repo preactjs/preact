@@ -68,7 +68,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		state = component.state,
 		context = component.context,
 		previousProps = component.prevProps || props,
-		previousState = extend({}, component.prevState || state),
+		previousState = component.prevState || state,
 		previousContext = component.prevContext || context,
 		isUpdate = component.base,
 		nextBase = component.nextBase,
@@ -79,7 +79,8 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		rendered, inst, cbase;
 
 	if (component.constructor.getDerivedStateFromProps) {
-		state = component.state = extend(state, component.constructor.getDerivedStateFromProps(props, state));
+		previousState = extend({}, previousState);
+		component.state = extend(state, component.constructor.getDerivedStateFromProps(props, state));
 	}
 
 	// if updating
