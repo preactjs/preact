@@ -49,6 +49,7 @@
 [![travis](https://travis-ci.org/developit/preact.svg?branch=master)](https://travis-ci.org/developit/preact)
 [![coveralls](https://img.shields.io/coveralls/developit/preact/master.svg)](https://coveralls.io/github/developit/preact)
 [![gzip size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=gzip)](https://unpkg.com/preact/dist/preact.min.js)
+[![install size](https://packagephobia.now.sh/badge?p=preact)](https://packagephobia.now.sh/result?p=preact)
 
 Preact supports modern browsers and IE9+:
 
@@ -104,12 +105,14 @@ Preact supports modern browsers and IE9+:
 - [**Preact Coffeescript**](https://github.com/crisward/preact-coffee)
 - [**Preact + TypeScript + Webpack**](https://github.com/k1r0s/bleeding-preact-starter)
 - [**0 config => Preact + Poi**](https://github.com/k1r0s/preact-poi-starter)
+- [**Zero configuration => Preact + Typescript + Parcel**](https://github.com/aalises/preact-typescript-parcel-starter)
 
 ---
 
 ## Libraries & Add-ons
 
 - :raised_hands: [**preact-compat**](https://git.io/preact-compat): use any React library with Preact *([full example](http://git.io/preact-compat-example))*
+- :twisted_rightwards_arrows: [**preact-context**](https://github.com/valotas/preact-context): React's `createContext` api for Preact
 - :page_facing_up: [**preact-render-to-string**](https://git.io/preact-render-to-string): Universal rendering.
 - :eyes: [**preact-render-spy**](https://github.com/mzgoddard/preact-render-spy): Enzyme-lite: Renderer with access to the produced virtual dom for testing.
 - :loop: [**preact-render-to-json**](https://git.io/preact-render-to-json): Render for Jest Snapshot testing.
@@ -134,7 +137,7 @@ Preact supports modern browsers and IE9+:
 - :art: [**preact-stylesheet-decorator**](https://github.com/k1r0s/preact-stylesheet-decorator): Add Scoped Stylesheets to your Preact Components
 - :electric_plug: [**preact-routlet**](https://github.com/k1r0s/preact-routlet): Simple `Component Driven` Routing for Preact using ES7 Decorators
 - :fax: [**preact-bind-group**](https://github.com/k1r0s/preact-bind-group): Preact Forms made easy, Group Events into a Single Callback
-- :hatching_chick: [**preact-habitat**](https://github.com/zouhir/preact-habitat): Declerative Preact widgets renderer in any CMS or DOM host ([demo](https://codepen.io/zouhir/pen/brrOPB)).
+- :hatching_chick: [**preact-habitat**](https://github.com/zouhir/preact-habitat): Declarative Preact widgets renderer in any CMS or DOM host ([demo](https://codepen.io/zouhir/pen/brrOPB)).
 
 #### UI Component Libraries
 
