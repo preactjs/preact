@@ -18,6 +18,17 @@ export default {
 	 */
 	//vnode(vnode) { }
 
+	/**
+	 * Compares two Components
+	 * @param {Component} component1 First Component to compare
+	 * @param {Component} component2 Second Component to compare
+	 * @returns Boolean, true if components are equal
+   */
+	areComponentsEqual(component1, component2) {
+		// default implementation is 4x times faster than optional object property access
+		return component1 === component2;
+	}
+
 	/** Hook invoked after a component is mounted. */
 	// afterMount(component) { }
 

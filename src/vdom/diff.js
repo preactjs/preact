@@ -29,7 +29,6 @@ export function flushMounts() {
 	}
 }
 
-
 /**
  * Apply differences in a given vnode (and it's deep children) to a real DOM Node.
  * @param {Element} [dom=null] A DOM node to mutate into the shape of the `vnode`

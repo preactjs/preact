@@ -1,5 +1,16 @@
 import { extend } from '../util';
+import options from '../options';
 
+/**
+ * Checks that two components are equal
+ * @param {Component} component1 First component to compare
+ * @param {Component} component2 Second component to compare
+ * @return {boolean}
+ * @private
+ */
+export function areComponentsEqual(component1, component2) {
+	return options.areComponentsEqual(component1, component2);
+}
 
 /**
  * Check if two nodes are equivalent.
@@ -16,7 +27,7 @@ export function isSameNodeType(node, vnode, hydrating) {
 	if (typeof vnode.nodeName==='string') {
 		return !node._componentConstructor && isNamedNode(node, vnode.nodeName);
 	}
-	return hydrating || node._componentConstructor===vnode.nodeName;
+	return hydrating || areComponentsEqual(node._componentConstructor, vnode.nodeName);
 }
 
 

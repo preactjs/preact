@@ -2,7 +2,7 @@ import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, ATTR_KEY } from '..
 import options from '../options';
 import { extend } from '../util';
 import { enqueueRender } from '../render-queue';
-import { getNodeProps } from './index';
+import { areComponentsEqual, getNodeProps } from './index';
 import { diff, mounts, diffLevel, flushMounts, recollectNodeTree, removeChildren } from './diff';
 import { createComponent, collectComponent } from './component-recycler';
 import { removeNode } from '../dom/index';
@@ -212,11 +212,11 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 	let c = dom && dom._component,
 		originalComponent = c,
 		oldDom = dom,
-		isDirectOwner = c && dom._componentConstructor===vnode.nodeName,
+		isDirectOwner = c && areComponentsEqual(dom._componentConstructor, vnode.nodeName),
 		isOwner = isDirectOwner,
 		props = getNodeProps(vnode);
 	while (c && !isOwner && (c=c._parentComponent)) {
-		isOwner = c.constructor===vnode.nodeName;
+		isOwner = areComponentsEqual(c.constructor, vnode.nodeName);
 	}
 
 	if (c && isOwner && (!mountAll || c._component)) {
