@@ -5,7 +5,8 @@ import { extend } from '../util';
  * Check if two nodes are equivalent.
  * @param {import('../dom').PreactElement} node DOM Node to compare
  * @param {import('../vnode').VNode} vnode Virtual DOM node to compare
- * @param {boolean} [hydrating=false] If true, ignores component constructors when comparing.
+ * @param {boolean} [hydrating=false] If true, ignores component constructors
+ *  when comparing.
  * @private
  */
 export function isSameNodeType(node, vnode, hydrating) {

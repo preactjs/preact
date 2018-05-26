@@ -28,7 +28,8 @@ import options from '../options';
 /**
  * Create an element with the given nodeName.
  * @param {string} nodeName The DOM node to create
- * @param {boolean} [isSvg=false] If `true`, creates an element within the SVG namespace.
+ * @param {boolean} [isSvg=false] If `true`, creates an element within the SVG
+ *  namespace.
  * @returns {PreactElement} The created DOM node
  */
 export function createNode(nodeName, isSvg) {
@@ -50,12 +51,14 @@ export function removeNode(node) {
 
 
 /**
- * Set a named attribute on the given Node, with special behavior for some names and event handlers.
- * If `value` is `null`, the attribute/handler will be removed.
+ * Set a named attribute on the given Node, with special behavior for some names
+ * and event handlers. If `value` is `null`, the attribute/handler will be
+ * removed.
  * @param {PreactElement} node An element to mutate
  * @param {string} name The name/key to set, such as an event or attribute name
  * @param {any} old The last value that was set for this name/node pair
- * @param {any} value An attribute value, such as a function to be used as an event handler
+ * @param {any} value An attribute value, such as a function to be used as an
+ *  event handler
  * @param {boolean} isSvg Are we currently diffing inside an svg?
  * @private
  */

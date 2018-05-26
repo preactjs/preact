@@ -56,9 +56,10 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 
 
 /**
- * Render a Component, triggering necessary lifecycle events and taking High-Order Components into account.
+ * Render a Component, triggering necessary lifecycle events and taking
+ * High-Order Components into account.
  * @param {import('../component').Component} component The component to render
- * @param {number} [opts] A number indicating the kind of render to execute (e.g. sync, async, force)
+ * @param {number} [opts] render mode, see constants.js for available options.
  * @param {boolean} [mountAll] Whether or not to immediately mount all components
  * @param {boolean} [isChild] ?
  * @private
@@ -206,7 +207,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 /**
  * Apply the Component referenced by a VNode to the DOM.
  * @param {import('../dom').PreactElement} dom The DOM node to mutate
- * @param {import('../vnode').VNode} vnode A Component-reference VNode
+ * @param {import('../vnode').VNode} vnode A Component-referencing VNode
  * @param {object} context The current context
  * @param {boolean} mountAll Whether or not to immediately mount all components
  * @returns {import('../dom').PreactElement} The created/mutated element
