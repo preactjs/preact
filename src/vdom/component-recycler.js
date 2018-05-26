@@ -4,7 +4,7 @@ import { Component } from '../component';
  * Retains a pool of Components for re-use, keyed on component name.
  * Note: since component names are not unique or even necessarily available,
  * these are primarily a form of sharding.
- * @type {Record<string, Component[]>}
+ * @type {Object.<string, Component[]>}
  * @private
  */
 const components = {};
@@ -23,7 +23,7 @@ export function collectComponent(component) {
 /**
  * Create a component. Normalizes differences between PFC's and classful
  * Components.
- * @param {Function} Ctor The constructor of the component to create
+ * @param {function} Ctor The constructor of the component to create
  * @param {object} props The initial props of the component
  * @param {object} context The initial context of the component
  * @returns {import('../component').Component}

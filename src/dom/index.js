@@ -8,7 +8,7 @@ import options from '../options';
 
 /**
  * A mapping of event types to event listeners
- * @typedef {{ [eventType: string]: EventListener}} EventListenerMap
+ * @typedef {Object.<string, EventListener>} EventListenerMap
  */
 
 /**
@@ -17,7 +17,7 @@ import options from '../options';
  * @property {string} [normalizedNodeName] A normalized node name to use in diffing
  * @property {EventListenerMap} [_listeners] A map of event listeners added by components to this DOM node
  * @property {import('../component').Component} [_component] The component that rendered this DOM node
- * @property {Function} [_componentConstructor] The constructor of the component that rendered this DOM node
+ * @property {function} [_componentConstructor] The constructor of the component that rendered this DOM node
  */
 
 /**
@@ -56,8 +56,8 @@ export function removeNode(node) {
  * removed.
  * @param {PreactElement} node An element to mutate
  * @param {string} name The name/key to set, such as an event or attribute name
- * @param {any} old The last value that was set for this name/node pair
- * @param {any} value An attribute value, such as a function to be used as an
+ * @param {*} old The last value that was set for this name/node pair
+ * @param {*} value An attribute value, such as a function to be used as an
  *  event handler
  * @param {boolean} isSvg Are we currently diffing inside an svg?
  * @private
@@ -126,7 +126,7 @@ export function setAccessor(node, name, old, value, isSvg) {
  * IE & FF throw for certain property-value combinations.
  * @param {Node} node The node to set a property on
  * @param {string} name The name of the property to set
- * @param {any} value The value to set
+ * @param {*} value The value to set
  */
 function setProperty(node, name, value) {
 	try {
