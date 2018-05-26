@@ -75,8 +75,8 @@ extend(Component.prototype, {
 	 * @param {object} props Props (eg: JSX attributes) received from parent
 	 * 	element/component
 	 * @param {object} state The component's current state
-	 * @param {object} context Context object (if a parent component has provided
-	 * 	context)
+	 * @param {object} context Context object, as returned by the nearest
+	 *  ancestor's `getChildContext()`
 	 * @returns {import('./vnode').VNode | void}
 	 */
 	render() {}
