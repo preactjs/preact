@@ -270,7 +270,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 
 /**
  * Recursively recycle (or just unmount) a node and its descendants.
- * @param {import('../dom').PreactElement} node DOM node to start 
+ * @param {import('../dom').PreactElement} node DOM node to start
  *  unmount/removal from
  * @param {boolean} [unmountOnly=false] If `true`, only triggers unmount
  *  lifecycle, skips removal

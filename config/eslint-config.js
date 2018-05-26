@@ -23,7 +23,7 @@ module.exports = {
 	rules: {
 		'react/jsx-uses-react': 2,
 		'react/jsx-uses-vars': 2,
-		'no-unused-vars': [1, { varsIgnorePattern: '^h$' }],
+		'no-unused-vars': [1, { varsIgnorePattern: '(^h$|^VNode$)' }],
 		'no-cond-assign': 1,
 		'no-empty': 0,
 		'no-console': 1,
