@@ -192,8 +192,6 @@ describe('Lifecycle methods', () => {
 			expect(Foo.getDerivedStateFromProps).to.have.been.called;
 		});
 
-		// TODO: Consider if componentWillUpdate should still be called
-		// Likely, componentWillUpdate should not be called only if getSnapshotBeforeUpdate is implemented
 		it('should NOT invoke deprecated lifecycles (cWM/cWRP) if new static gDSFP is present', () => {
 			class Foo extends Component {
 				static getDerivedStateFromProps() {}
@@ -212,6 +210,49 @@ describe('Lifecycle methods', () => {
 			expect(Foo.getDerivedStateFromProps).to.have.been.called;
 			expect(Foo.prototype.componentWillMount).to.not.have.been.called;
 			expect(Foo.prototype.componentWillReceiveProps).to.not.have.been.called;
+		});
+
+		it('is not called if neither state nor props have changed', () => {
+			let logs = [];
+			let childRef;
+
+			class Parent extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { parentRenders: 0 };
+				}
+
+				static getDerivedStateFromProps(props, prevState) {
+					logs.push('parent getDerivedStateFromProps');
+					return prevState.parentRenders + 1;
+				}
+
+				render() {
+					logs.push('parent render');
+					return <Child parentRenders={this.state.parentRenders} ref={child => childRef = child} />;
+				}
+			}
+
+			class Child extends Component {
+				render() {
+					logs.push('child render');
+					return this.props.parentRenders;
+				}
+			}
+
+			render(<Parent />, scratch);
+			expect(logs).to.deep.equal([
+				'parent getDerivedStateFromProps',
+				'parent render',
+				'child render'
+			]);
+
+			logs = [];
+			childRef.setState({});
+			rerender();
+			expect(logs).to.deep.equal([
+				'child render'
+			]);
 		});
 
 		// TODO: Investigate this test:
