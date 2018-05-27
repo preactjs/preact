@@ -22,6 +22,83 @@ describe('Lifecycle methods', () => {
 		scratch = null;
 	});
 
+	it('should call nested new lifecycle methods in the right order', () => {
+		let log;
+		const logger = function(msg) {
+			return function() {
+				// return true for shouldComponentUpdate
+				log.push(msg);
+				return true;
+			};
+		};
+		class Outer extends Component {
+			static getDerivedStateFromProps() {
+				log.push('outer getDerivedStateFromProps');
+				return null;
+			}
+			render() {
+				return (
+					<div>
+						<Inner x={this.props.x} />
+					</div>
+				);
+			}
+		}
+
+		Object.assign(Outer.prototype, {
+			componentDidMount: logger('outer componentDidMount'),
+			shouldComponentUpdate: logger('outer shouldComponentUpdate'),
+			getSnapshotBeforeUpdate: logger('outer getSnapshotBeforeUpdate'),
+			componentDidUpdate: logger('outer componentDidUpdate'),
+			componentWillUnmount: logger('outer componentWillUnmount')
+		});
+
+		class Inner extends Component {
+			static getDerivedStateFromProps() {
+				log.push('inner getDerivedStateFromProps');
+				return null;
+			}
+			render() {
+				return <span>{this.props.x}</span>;
+			}
+		}
+		Object.assign(Inner.prototype, {
+			componentDidMount: logger('inner componentDidMount'),
+			shouldComponentUpdate: logger('inner shouldComponentUpdate'),
+			getSnapshotBeforeUpdate: logger('inner getSnapshotBeforeUpdate'),
+			componentDidUpdate: logger('inner componentDidUpdate'),
+			componentWillUnmount: logger('inner componentWillUnmount')
+		});
+
+		log = [];
+		render(<Outer x={1} />, scratch);
+		expect(log).to.deep.equal([
+			'outer getDerivedStateFromProps',
+			'inner getDerivedStateFromProps',
+			'inner componentDidMount',
+			'outer componentDidMount'
+		]);
+
+		// Dedup warnings
+		log = [];
+		render(<Outer x={2} />, scratch, scratch.firstChild);
+		// Note: we differ from react here in that we apply changes to the dom
+		// as we find them while diffing. React on the other hand separates this
+		// into specific phases, meaning changes to the dom are only flushed
+		// once the whole diff-phase is complete. This is why
+		// "outer getSnapshotBeforeUpdate" is called just before the "inner" hooks.
+		// For react this call would be right before "outer componentDidUpdate"
+		expect(log).to.deep.equal([
+			'outer getDerivedStateFromProps',
+			'outer shouldComponentUpdate',
+			'outer getSnapshotBeforeUpdate',
+			'inner getDerivedStateFromProps',
+			'inner shouldComponentUpdate',
+			'inner getSnapshotBeforeUpdate',
+			'inner componentDidUpdate',
+			'outer componentDidUpdate'
+		]);
+	});
 
 	describe('static getDerivedStateFromProps', () => {
 		it('should set initial state with value returned from getDerivedStateFromProps', () => {
@@ -259,6 +336,103 @@ describe('Lifecycle methods', () => {
 		// [should not override state with stale values if prevState is spread within getDerivedStateFromProps](https://github.com/facebook/react/blob/25dda90c1ecb0c662ab06e2c80c1ee31e0ae9d36/packages/react-dom/src/__tests__/ReactComponentLifeCycle-test.js#L1035)
 	});
 
+	describe("#getSnapshotBeforeUpdate", () => {
+		it('should pass the return value from getSnapshotBeforeUpdate to componentDidUpdate', () => {
+			let log = [];
+
+			class MyComponent extends Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						value: 0
+					};
+				}
+				static getDerivedStateFromProps(nextProps, prevState) {
+					return {
+						value: prevState.value + 1
+					};
+				}
+				getSnapshotBeforeUpdate(prevProps, prevState) {
+					log.push(
+						`getSnapshotBeforeUpdate() prevProps:${prevProps.value} prevState:${
+							prevState.value
+						}`,
+					);
+					return 'abc';
+				}
+				componentDidUpdate(prevProps, prevState, snapshot) {
+					log.push(
+						`componentDidUpdate() prevProps:${prevProps.value} prevState:${
+							prevState.value
+						} snapshot:${snapshot}`,
+					);
+				}
+				render() {
+					log.push('render');
+					return null;
+				}
+			}
+
+			render(<MyComponent value="foo" />, scratch);
+			expect(log).to.deep.equal(['render']);
+			log = [];
+
+			render(<MyComponent value="bar" />, scratch, scratch.firstChild);
+			expect(log).to.deep.equal([
+				'render',
+				'getSnapshotBeforeUpdate() prevProps:foo prevState:1',
+				'componentDidUpdate() prevProps:foo prevState:1 snapshot:abc'
+			]);
+			log = [];
+
+			render(<MyComponent value="baz" />, scratch, scratch.firstChild);
+			expect(log).to.deep.equal([
+				'render',
+				'getSnapshotBeforeUpdate() prevProps:bar prevState:2',
+				'componentDidUpdate() prevProps:bar prevState:2 snapshot:abc'
+			]);
+			log = [];
+
+			render(<div />, scratch, scratch.firstChild);
+			expect(log).to.deep.equal([]);
+		});
+
+		it('should call getSnapshotBeforeUpdate before mutations are committed', () => {
+			let log = [];
+
+			class MyComponent extends Component {
+				getSnapshotBeforeUpdate(prevProps) {
+					log.push('getSnapshotBeforeUpdate');
+					expect(this.divRef.textContent).to.equal(
+						`value:${prevProps.value}`,
+					);
+					return 'foobar';
+				}
+				componentDidUpdate(prevProps, prevState, snapshot) {
+					log.push('componentDidUpdate');
+					expect(this.divRef.textContent).to.equal(
+						`value:${this.props.value}`,
+					);
+					expect(snapshot).to.equal('foobar');
+				}
+				render() {
+					log.push('render');
+					return <div ref={ref => this.divRef = ref}>{`value:${this.props.value}`}</div>;
+				}
+			}
+
+			render(<MyComponent value="foo" />, scratch);
+			expect(log).to.deep.equal(['render']);
+			log = [];
+
+			render(<MyComponent value="bar" />, scratch, scratch.firstChild);
+			expect(log).to.deep.equal([
+				'render',
+				'getSnapshotBeforeUpdate',
+				'componentDidUpdate'
+			]);
+		});
+	});
 
 	describe('#componentWillUpdate', () => {
 		it('should NOT be called on initial render', () => {
