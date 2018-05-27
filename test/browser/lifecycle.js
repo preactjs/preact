@@ -22,6 +22,83 @@ describe('Lifecycle methods', () => {
 		scratch = null;
 	});
 
+	it('should call nested new lifecycle methods in the right order', () => {
+		let log;
+		const logger = function(msg) {
+			return function() {
+				// return true for shouldComponentUpdate
+				log.push(msg);
+				return true;
+			};
+		};
+		class Outer extends Component {
+			static getDerivedStateFromProps() {
+				log.push('outer getDerivedStateFromProps');
+				return null;
+			}
+			render() {
+				return (
+					<div>
+						<Inner x={this.props.x} />
+					</div>
+				);
+			}
+		}
+
+		Object.assign(Outer.prototype, {
+			componentDidMount: logger('outer componentDidMount'),
+			shouldComponentUpdate: logger('outer shouldComponentUpdate'),
+			getSnapshotBeforeUpdate: logger('outer getSnapshotBeforeUpdate'),
+			componentDidUpdate: logger('outer componentDidUpdate'),
+			componentWillUnmount: logger('outer componentWillUnmount')
+		});
+
+		class Inner extends Component {
+			static getDerivedStateFromProps() {
+				log.push('inner getDerivedStateFromProps');
+				return null;
+			}
+			render() {
+				return <span>{this.props.x}</span>;
+			}
+		}
+		Object.assign(Inner.prototype, {
+			componentDidMount: logger('inner componentDidMount'),
+			shouldComponentUpdate: logger('inner shouldComponentUpdate'),
+			getSnapshotBeforeUpdate: logger('inner getSnapshotBeforeUpdate'),
+			componentDidUpdate: logger('inner componentDidUpdate'),
+			componentWillUnmount: logger('inner componentWillUnmount')
+		});
+
+		log = [];
+		render(<Outer x={1} />, scratch);
+		expect(log).to.deep.equal([
+			'outer getDerivedStateFromProps',
+			'inner getDerivedStateFromProps',
+			'inner componentDidMount',
+			'outer componentDidMount'
+		]);
+
+		// Dedup warnings
+		log = [];
+		render(<Outer x={2} />, scratch, scratch.firstChild);
+		// Note: we differ from react here in that we apply changes to the dom
+		// as we find them while diffing. React on the other hand separates this
+		// into specific phases, meaning changes to the dom are only flushed
+		// once the whole diff-phase is complete. This is why
+		// "outer getSnapshotBeforeUpdate" is called just before the "inner" hooks.
+		// For react this call would be right before "outer componentDidUpdate"
+		expect(log).to.deep.equal([
+			'outer getDerivedStateFromProps',
+			'outer shouldComponentUpdate',
+			'outer getSnapshotBeforeUpdate',
+			'inner getDerivedStateFromProps',
+			'inner shouldComponentUpdate',
+			'inner getSnapshotBeforeUpdate',
+			'inner componentDidUpdate',
+			'outer componentDidUpdate'
+		]);
+	});
 
 	describe('static getDerivedStateFromProps', () => {
 		it('should set initial state with value returned from getDerivedStateFromProps', () => {
@@ -260,84 +337,6 @@ describe('Lifecycle methods', () => {
 	});
 
 	describe("#getSnapshotBeforeUpdate", () => {
-		it('should call nested new lifecycle methods in the right order', () => {
-			let log;
-			const logger = function(msg) {
-				return function() {
-					// return true for shouldComponentUpdate
-					log.push(msg);
-					return true;
-				};
-			};
-			class Outer extends Component {
-				static getDerivedStateFromProps() {
-					log.push('outer getDerivedStateFromProps');
-					return null;
-				}
-				render() {
-					return (
-						<div>
-							<Inner x={this.props.x} />
-						</div>
-					);
-				}
-			}
-
-			Object.assign(Outer.prototype, {
-				componentDidMount: logger('outer componentDidMount'),
-				shouldComponentUpdate: logger('outer shouldComponentUpdate'),
-				getSnapshotBeforeUpdate: logger('outer getSnapshotBeforeUpdate'),
-				componentDidUpdate: logger('outer componentDidUpdate'),
-				componentWillUnmount: logger('outer componentWillUnmount')
-			});
-
-			class Inner extends Component {
-				static getDerivedStateFromProps() {
-					log.push('inner getDerivedStateFromProps');
-					return null;
-				}
-				render() {
-					return <span>{this.props.x}</span>;
-				}
-			}
-			Object.assign(Inner.prototype, {
-				componentDidMount: logger('inner componentDidMount'),
-				shouldComponentUpdate: logger('inner shouldComponentUpdate'),
-				getSnapshotBeforeUpdate: logger('inner getSnapshotBeforeUpdate'),
-				componentDidUpdate: logger('inner componentDidUpdate'),
-				componentWillUnmount: logger('inner componentWillUnmount')
-			});
-
-			log = [];
-			render(<Outer x={1} />, scratch);
-			expect(log).to.deep.equal([
-				'outer getDerivedStateFromProps',
-				'inner getDerivedStateFromProps',
-				'inner componentDidMount',
-				'outer componentDidMount'
-			]);
-
-			// Dedup warnings
-			log = [];
-			render(<Outer x={2} />, scratch, scratch.firstChild);
-			// Note: we differ from react here in that we apply changes to the dom
-			// as we find them while diffing. React on the other hand separates this
-			// into specific phases, meaning changes to the dom are only flushed
-			// once the whole diff-phase is complete. This is why
-			// "outer getSnapshotBeforeUpdate" is called just before the "inner" hooks.
-			// For react this call would be right before "outer componentDidUpdate"
-			expect(log).to.deep.equal([
-				'outer getDerivedStateFromProps',
-				'outer shouldComponentUpdate',
-				'outer getSnapshotBeforeUpdate',
-				'inner getDerivedStateFromProps',
-				'inner shouldComponentUpdate',
-				'inner getSnapshotBeforeUpdate',
-				'inner componentDidUpdate',
-				'outer componentDidUpdate'
-			]);
-		});
-
 		it('should pass the return value from getSnapshotBeforeUpdate to componentDidUpdate', () => {
 			let log = [];
 
