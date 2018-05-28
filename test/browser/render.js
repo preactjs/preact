@@ -48,6 +48,8 @@ describe('render()', () => {
 	it('should create empty nodes (<* />)', () => {
 		scratch.innerHTML = '';
 
+		expect(scratch.childNodes).to.have.length(0); // Check clean scratch
+
 		render(<div />, scratch);
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.childNodes[0].nodeName).to.equal('DIV');
