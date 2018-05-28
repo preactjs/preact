@@ -80,11 +80,18 @@ export function setAccessor(node, name, old, value, isSvg) {
 		(node._listeners || (node._listeners = {}))[name] = value;
 	}
 	else if (name!=='list' && name!=='type' && !isSvg && name in node) {
-		setProperty(node, name, value==null ? '' : value);
-		if (value==null || value===false) node.removeAttribute(name);
+		// Attempt to set a DOM property to the given value.
+		// IE & FF throw for certain property-value combinations.
+		try {
+			node[name] = value==null ? '' : value;
+		} catch (e) { }
+		if ((value==null || value===false) && name!='spellcheck') node.removeAttribute(name);
 	}
 	else {
 		let ns = isSvg && (name !== (name = name.replace(/^xlink:?/, '')));
+		// spellcheck is treated differently than all other boolean values and
+		// should not be removed when the value is `false`. See:
+		// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-spellcheck
 		if (value==null || value===false) {
 			if (ns) node.removeAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase());
 			else node.removeAttribute(name);
@@ -94,17 +101,6 @@ export function setAccessor(node, name, old, value, isSvg) {
 			else node.setAttribute(name, value);
 		}
 	}
-}
-
-
-/**
- * Attempt to set a DOM property to the given value.
- * IE & FF throw for certain property-value combinations.
- */
-function setProperty(node, name, value) {
-	try {
-		node[name] = value;
-	} catch (e) { }
 }
 
 

@@ -694,7 +694,7 @@ declare global {
 			sizes?: string;
 			slot?: string;
 			span?: number;
-			spellCheck?: boolean;
+			spellcheck?: boolean;
 			src?: string;
 			srcset?: string;
 			srcDoc?: string;
