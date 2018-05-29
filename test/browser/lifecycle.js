@@ -22,6 +22,417 @@ describe('Lifecycle methods', () => {
 		scratch = null;
 	});
 
+	it('should call nested new lifecycle methods in the right order', () => {
+		let log;
+		const logger = function(msg) {
+			return function() {
+				// return true for shouldComponentUpdate
+				log.push(msg);
+				return true;
+			};
+		};
+		class Outer extends Component {
+			static getDerivedStateFromProps() {
+				log.push('outer getDerivedStateFromProps');
+				return null;
+			}
+			render() {
+				return (
+					<div>
+						<Inner x={this.props.x} />
+					</div>
+				);
+			}
+		}
+
+		Object.assign(Outer.prototype, {
+			componentDidMount: logger('outer componentDidMount'),
+			shouldComponentUpdate: logger('outer shouldComponentUpdate'),
+			getSnapshotBeforeUpdate: logger('outer getSnapshotBeforeUpdate'),
+			componentDidUpdate: logger('outer componentDidUpdate'),
+			componentWillUnmount: logger('outer componentWillUnmount')
+		});
+
+		class Inner extends Component {
+			static getDerivedStateFromProps() {
+				log.push('inner getDerivedStateFromProps');
+				return null;
+			}
+			render() {
+				return <span>{this.props.x}</span>;
+			}
+		}
+		Object.assign(Inner.prototype, {
+			componentDidMount: logger('inner componentDidMount'),
+			shouldComponentUpdate: logger('inner shouldComponentUpdate'),
+			getSnapshotBeforeUpdate: logger('inner getSnapshotBeforeUpdate'),
+			componentDidUpdate: logger('inner componentDidUpdate'),
+			componentWillUnmount: logger('inner componentWillUnmount')
+		});
+
+		log = [];
+		render(<Outer x={1} />, scratch);
+		expect(log).to.deep.equal([
+			'outer getDerivedStateFromProps',
+			'inner getDerivedStateFromProps',
+			'inner componentDidMount',
+			'outer componentDidMount'
+		]);
+
+		// Dedup warnings
+		log = [];
+		render(<Outer x={2} />, scratch, scratch.firstChild);
+		// Note: we differ from react here in that we apply changes to the dom
+		// as we find them while diffing. React on the other hand separates this
+		// into specific phases, meaning changes to the dom are only flushed
+		// once the whole diff-phase is complete. This is why
+		// "outer getSnapshotBeforeUpdate" is called just before the "inner" hooks.
+		// For react this call would be right before "outer componentDidUpdate"
+		expect(log).to.deep.equal([
+			'outer getDerivedStateFromProps',
+			'outer shouldComponentUpdate',
+			'outer getSnapshotBeforeUpdate',
+			'inner getDerivedStateFromProps',
+			'inner shouldComponentUpdate',
+			'inner getSnapshotBeforeUpdate',
+			'inner componentDidUpdate',
+			'outer componentDidUpdate'
+		]);
+	});
+
+	describe('static getDerivedStateFromProps', () => {
+		it('should set initial state with value returned from getDerivedStateFromProps', () => {
+			class Foo extends Component {
+				static getDerivedStateFromProps(nextProps) {
+					return {
+						foo: nextProps.foo,
+						bar: 'bar'
+					};
+				}
+				render() {
+					return <div className={`${this.state.foo} ${this.state.bar}`} />;
+				}
+			}
+
+			let element = render(<Foo foo="foo" />, scratch);
+			expect(element.className).to.be.equal('foo bar');
+		});
+
+		it('should update initial state with value returned from getDerivedStateFromProps', () => {
+			class Foo extends Component {
+				constructor(props, context) {
+					super(props, context);
+					this.state = {
+						foo: 'foo',
+						bar: 'bar'
+					};
+				}
+				static getDerivedStateFromProps(nextProps, prevState) {
+					return {
+						foo: `not-${prevState.foo}`
+					};
+				}
+				render() {
+					return <div className={`${this.state.foo} ${this.state.bar}`} />;
+				}
+			}
+
+			let element = render(<Foo />, scratch);
+			expect(element.className).to.equal('not-foo bar');
+		});
+
+		it('should update the instance\'s state with the value returned from getDerivedStateFromProps when props change', () => {
+			class Foo extends Component {
+				constructor(props, context) {
+					super(props, context);
+					this.state = {
+						value: 'initial'
+					};
+				}
+				static getDerivedStateFromProps(nextProps) {
+					if (nextProps.update) {
+						return {
+							value: 'updated'
+						};
+					}
+
+					return null;
+				}
+				componentDidMount() {}
+				componentDidUpdate() {}
+				render() {
+					return <div className={this.state.value} />;
+				}
+			}
+
+			let element;
+			sinon.spy(Foo, 'getDerivedStateFromProps');
+			sinon.spy(Foo.prototype, 'componentDidMount');
+			sinon.spy(Foo.prototype, 'componentDidUpdate');
+
+			element = render(<Foo update={false} />, scratch, element);
+			expect(element.className).to.equal('initial');
+			expect(Foo.getDerivedStateFromProps).to.have.callCount(1);
+			expect(Foo.prototype.componentDidMount).to.have.callCount(1); // verify mount occurred
+			expect(Foo.prototype.componentDidUpdate).to.have.callCount(0);
+
+			element = render(<Foo update={true} />, scratch, element);
+			expect(element.className).to.equal('updated');
+			expect(Foo.getDerivedStateFromProps).to.have.callCount(2);
+			expect(Foo.prototype.componentDidMount).to.have.callCount(1);
+			expect(Foo.prototype.componentDidUpdate).to.have.callCount(1); // verify update occurred
+		});
+
+		it('should update the instance\'s state with the value returned from getDerivedStateFromProps when state changes', () => {
+			class Foo extends Component {
+				constructor(props, context) {
+					super(props, context);
+					this.state = {
+						value: 'initial'
+					};
+				}
+				static getDerivedStateFromProps(nextProps, prevState) {
+					// Don't change state for call that happens after the constructor
+					if (prevState.value === 'initial') {
+						return null;
+					}
+
+					return {
+						value: prevState.value + ' derived'
+					};
+				}
+				componentDidMount() {
+					this.setState({ value: 'updated' });
+				}
+				render() {
+					return <div className={this.state.value} />;
+				}
+			}
+
+			let element;
+			sinon.spy(Foo, 'getDerivedStateFromProps');
+
+			element = render(<Foo />, scratch, element);
+			expect(element.className).to.equal('initial');
+			expect(Foo.getDerivedStateFromProps).to.have.been.calledOnce;
+
+			rerender(); // call rerender to handle cDM setState call
+			expect(element.className).to.equal('updated derived');
+			expect(Foo.getDerivedStateFromProps).to.have.been.calledTwice;
+		});
+
+		it('should NOT modify state if null is returned', () => {
+			class Foo extends Component {
+				constructor(props, context) {
+					super(props, context);
+					this.state = {
+						foo: 'foo',
+						bar: 'bar'
+					};
+				}
+				static getDerivedStateFromProps() {
+					return null;
+				}
+				render() {
+					return <div className={`${this.state.foo} ${this.state.bar}`} />;
+				}
+			}
+
+			sinon.spy(Foo, 'getDerivedStateFromProps');
+
+			let element = render(<Foo />, scratch);
+			expect(element.className).to.equal('foo bar');
+			expect(Foo.getDerivedStateFromProps).to.have.been.called;
+		});
+
+		// NOTE: Difference from React
+		// React v16.3.2 warns if undefined if returned from getDerivedStateFromProps
+		it('should NOT modify state if undefined is returned', () => {
+			class Foo extends Component {
+				constructor(props, context) {
+					super(props, context);
+					this.state = {
+						foo: 'foo',
+						bar: 'bar'
+					};
+				}
+				static getDerivedStateFromProps() {}
+				render() {
+					return <div className={`${this.state.foo} ${this.state.bar}`} />;
+				}
+			}
+
+			sinon.spy(Foo, 'getDerivedStateFromProps');
+
+			let element = render(<Foo />, scratch);
+			expect(element.className).to.equal('foo bar');
+			expect(Foo.getDerivedStateFromProps).to.have.been.called;
+		});
+
+		it('should NOT invoke deprecated lifecycles (cWM/cWRP) if new static gDSFP is present', () => {
+			class Foo extends Component {
+				static getDerivedStateFromProps() {}
+				componentWillMount() {}
+				componentWillReceiveProps() {}
+				render() {
+					return <div />;
+				}
+			}
+
+			sinon.spy(Foo, 'getDerivedStateFromProps');
+			sinon.spy(Foo.prototype, 'componentWillMount');
+			sinon.spy(Foo.prototype, 'componentWillReceiveProps');
+
+			render(<Foo />, scratch);
+			expect(Foo.getDerivedStateFromProps).to.have.been.called;
+			expect(Foo.prototype.componentWillMount).to.not.have.been.called;
+			expect(Foo.prototype.componentWillReceiveProps).to.not.have.been.called;
+		});
+
+		it('is not called if neither state nor props have changed', () => {
+			let logs = [];
+			let childRef;
+
+			class Parent extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { parentRenders: 0 };
+				}
+
+				static getDerivedStateFromProps(props, prevState) {
+					logs.push('parent getDerivedStateFromProps');
+					return prevState.parentRenders + 1;
+				}
+
+				render() {
+					logs.push('parent render');
+					return <Child parentRenders={this.state.parentRenders} ref={child => childRef = child} />;
+				}
+			}
+
+			class Child extends Component {
+				render() {
+					logs.push('child render');
+					return this.props.parentRenders;
+				}
+			}
+
+			render(<Parent />, scratch);
+			expect(logs).to.deep.equal([
+				'parent getDerivedStateFromProps',
+				'parent render',
+				'child render'
+			]);
+
+			logs = [];
+			childRef.setState({});
+			rerender();
+			expect(logs).to.deep.equal([
+				'child render'
+			]);
+		});
+
+		// TODO: Investigate this test:
+		// [should not override state with stale values if prevState is spread within getDerivedStateFromProps](https://github.com/facebook/react/blob/25dda90c1ecb0c662ab06e2c80c1ee31e0ae9d36/packages/react-dom/src/__tests__/ReactComponentLifeCycle-test.js#L1035)
+	});
+
+	describe("#getSnapshotBeforeUpdate", () => {
+		it('should pass the return value from getSnapshotBeforeUpdate to componentDidUpdate', () => {
+			let log = [];
+
+			class MyComponent extends Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						value: 0
+					};
+				}
+				static getDerivedStateFromProps(nextProps, prevState) {
+					return {
+						value: prevState.value + 1
+					};
+				}
+				getSnapshotBeforeUpdate(prevProps, prevState) {
+					log.push(
+						`getSnapshotBeforeUpdate() prevProps:${prevProps.value} prevState:${
+							prevState.value
+						}`,
+					);
+					return 'abc';
+				}
+				componentDidUpdate(prevProps, prevState, snapshot) {
+					log.push(
+						`componentDidUpdate() prevProps:${prevProps.value} prevState:${
+							prevState.value
+						} snapshot:${snapshot}`,
+					);
+				}
+				render() {
+					log.push('render');
+					return null;
+				}
+			}
+
+			render(<MyComponent value="foo" />, scratch);
+			expect(log).to.deep.equal(['render']);
+			log = [];
+
+			render(<MyComponent value="bar" />, scratch, scratch.firstChild);
+			expect(log).to.deep.equal([
+				'render',
+				'getSnapshotBeforeUpdate() prevProps:foo prevState:1',
+				'componentDidUpdate() prevProps:foo prevState:1 snapshot:abc'
+			]);
+			log = [];
+
+			render(<MyComponent value="baz" />, scratch, scratch.firstChild);
+			expect(log).to.deep.equal([
+				'render',
+				'getSnapshotBeforeUpdate() prevProps:bar prevState:2',
+				'componentDidUpdate() prevProps:bar prevState:2 snapshot:abc'
+			]);
+			log = [];
+
+			render(<div />, scratch, scratch.firstChild);
+			expect(log).to.deep.equal([]);
+		});
+
+		it('should call getSnapshotBeforeUpdate before mutations are committed', () => {
+			let log = [];
+
+			class MyComponent extends Component {
+				getSnapshotBeforeUpdate(prevProps) {
+					log.push('getSnapshotBeforeUpdate');
+					expect(this.divRef.textContent).to.equal(
+						`value:${prevProps.value}`,
+					);
+					return 'foobar';
+				}
+				componentDidUpdate(prevProps, prevState, snapshot) {
+					log.push('componentDidUpdate');
+					expect(this.divRef.textContent).to.equal(
+						`value:${this.props.value}`,
+					);
+					expect(snapshot).to.equal('foobar');
+				}
+				render() {
+					log.push('render');
+					return <div ref={ref => this.divRef = ref}>{`value:${this.props.value}`}</div>;
+				}
+			}
+
+			render(<MyComponent value="foo" />, scratch);
+			expect(log).to.deep.equal(['render']);
+			log = [];
+
+			render(<MyComponent value="bar" />, scratch, scratch.firstChild);
+			expect(log).to.deep.equal([
+				'render',
+				'getSnapshotBeforeUpdate',
+				'componentDidUpdate'
+			]);
+		});
+	});
 
 	describe('#componentWillUpdate', () => {
 		it('should NOT be called on initial render', () => {

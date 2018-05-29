@@ -7,11 +7,10 @@ import { diff, mounts, diffLevel, flushMounts, recollectNodeTree, removeChildren
 import { createComponent, collectComponent } from './component-recycler';
 import { removeNode } from '../dom/index';
 
-/** Set a component's `props` (generally derived from JSX attributes).
- *	@param {Object} props
- *	@param {Object} [opts]
- *	@param {boolean} [opts.renderSync=false]	If `true` and {@link options.syncComponentUpdates} is `true`, triggers synchronous rendering.
- *	@param {boolean} [opts.render=true]			If `false`, no render will be triggered.
+/**
+ * Set a component's `props` (generally derived from JSX attributes).
+ * @param {Object} props
+ * @param {number} [opts] Render mode, see constants.js for available options.
  */
 export function setComponentProps(component, props, opts, context, mountAll) {
 	if (component._disable) return;
@@ -20,11 +19,13 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 	if ((component.__ref = props.ref)) delete props.ref;
 	if ((component.__key = props.key)) delete props.key;
 
-	if (!component.base || mountAll) {
-		if (component.componentWillMount) component.componentWillMount();
-	}
-	else if (component.componentWillReceiveProps) {
-		component.componentWillReceiveProps(props, context);
+	if (typeof component.constructor.getDerivedStateFromProps === 'undefined') {
+		if (!component.base || mountAll) {
+			if (component.componentWillMount) component.componentWillMount();
+		}
+		else if (component.componentWillReceiveProps) {
+			component.componentWillReceiveProps(props, context);
+		}
 	}
 
 	if (context && context!==component.context) {
@@ -63,7 +64,6 @@ export function catchErrorInComponent(error, component) {
 }
 
 function renderComponentAttempt(component, opts, mountAll, isChild) {
-
 	let props = component.props,
 		state = component.state,
 		context = component.context,
@@ -75,7 +75,13 @@ function renderComponentAttempt(component, opts, mountAll, isChild) {
 		initialBase = isUpdate || nextBase,
 		initialChildComponent = component._component,
 		skip = false,
+		snapshot = previousContext,
 		rendered, inst, cbase;
+
+	if (component.constructor.getDerivedStateFromProps) {
+		previousState = extend({}, previousState);
+		component.state = extend(state, component.constructor.getDerivedStateFromProps(props, state));
+	}
 
 	// if updating
 	if (isUpdate) {
@@ -104,6 +110,10 @@ function renderComponentAttempt(component, opts, mountAll, isChild) {
 		// context to pass to the child, can be updated via (grand-)parent component
 		if (component.getChildContext) {
 			context = extend(extend({}, context), component.getChildContext());
+		}
+
+		if (isUpdate && component.getSnapshotBeforeUpdate) {
+			snapshot = component.getSnapshotBeforeUpdate(previousProps, previousState);
 		}
 
 		let childComponent = rendered && rendered.nodeName,
@@ -183,24 +193,26 @@ function renderComponentAttempt(component, opts, mountAll, isChild) {
 		// flushMounts();
 
 		if (component.componentDidUpdate) {
-			component.componentDidUpdate(previousProps, previousState, previousContext);
+			component.componentDidUpdate(previousProps, previousState, snapshot);
 		}
 		if (options.afterUpdate) options.afterUpdate(component);
 	}
 
-	if (component._renderCallbacks!=null) {
-		while (component._renderCallbacks.length) component._renderCallbacks.pop().call(component);
-	}
+	while (component._renderCallbacks.length) component._renderCallbacks.pop().call(component);
 
 	if (!diffLevel && !isChild) flushMounts();
 }
 
 
-/** Render a Component, triggering necessary lifecycle events and taking High-Order Components into account.
- *	@param {Component} component
- *	@param {Object} [opts]
- *	@param {boolean} [opts.build=false]		If `true`, component will build and store a DOM node if not already associated with one.
- *	@private
+
+/**
+ * Render a Component, triggering necessary lifecycle events and taking
+ * High-Order Components into account.
+ * @param {Component} component
+ * @param {number} [opts] render mode, see constants.js for available options.
+ * @param {boolean} [mountAll=false]
+ * @param {boolean} [isChild=false]
+ * @private
  */
 export function renderComponent(component, opts, mountAll, isChild) {
 	if (component._disable) return;
@@ -228,11 +240,12 @@ export function renderComponent(component, opts, mountAll, isChild) {
 
 
 
-/** Apply the Component referenced by a VNode to the DOM.
- *	@param {Element} dom	The DOM node to mutate
- *	@param {VNode} vnode	A Component-referencing VNode
- *	@returns {Element} dom	The created/mutated element
- *	@private
+/**
+ * Apply the Component referenced by a VNode to the DOM.
+ * @param {Element} dom The DOM node to mutate
+ * @param {VNode} vnode A Component-referencing VNode
+ * @returns {Element} The created/mutated element
+ * @private
  */
 export function buildComponentFromVNode(dom, vnode, context, mountAll, ancestorComponent) {
 	let c = dom && dom._component,
@@ -275,9 +288,10 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll, ancestorC
 
 
 
-/** Remove a component from the DOM and recycle it.
- *	@param {Component} component	The Component instance to unmount
- *	@private
+/**
+ * Remove a component from the DOM and recycle it.
+ * @param {Component} component The Component instance to unmount
+ * @private
  */
 export function unmountComponent(component) {
 	if (options.beforeUnmount) options.beforeUnmount(component);

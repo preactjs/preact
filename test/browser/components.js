@@ -151,6 +151,12 @@ describe('Components', () => {
 		expect(scratch.innerHTML).to.equal('');
 	});
 
+	// Test for #651
+	it('should set enumerable boolean attribute', () => {
+		render(<input spellcheck={false} />, scratch);
+		expect(scratch.firstChild.spellcheck).to.equal(false);
+	});
+
 	// Test for Issue #73
 	it('should remove orphaned elements replaced by Components', () => {
 		class Comp extends Component {

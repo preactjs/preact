@@ -1,8 +1,10 @@
 import { Component } from '../component';
 
-/** Retains a pool of Components for re-use, keyed on component name.
- *	Note: since component names are not unique or even necessarily available, these are primarily a form of sharding.
- *	@private
+/**
+ * Retains a pool of Components for re-use, keyed on component name.
+ * Note: since component names are not unique or even necessarily available,
+ * these are primarily a form of sharding.
+ * @private
  */
 const components = {};
 
@@ -14,7 +16,10 @@ export function collectComponent(component) {
 }
 
 
-/** Create a component. Normalizes differences between PFC's and classful Components. */
+/**
+ * Create a component. Normalizes differences between PFC's and classful
+ * Components.
+ */
 export function createComponent(Ctor, props, context, ancestorComponent) {
 	let list = components[Ctor.name],
 		inst;
