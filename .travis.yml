@@ -25,8 +25,8 @@ addons:
 script:
   - npm run build
   - COVERAGE=true ALLOW_SAUCELABS=false npm test
-  - if [ $TRAVIS_NODE_VERSION == "8" ]; then
-    export ALLOW_SAUCELABS=true
+  - if [ "$TRAVIS_NODE_VERSION" = "8" ]; then
+    export ALLOW_SAUCELABS=true;
     fi
   - COVERAGE=false FLAKEY=false PERFORMANCE=false npm run test:karma
   - ./node_modules/coveralls/bin/coveralls.js < ./coverage/lcov.info
