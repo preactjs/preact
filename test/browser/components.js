@@ -312,55 +312,77 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div>a</div>');
 		});
 
-		it('should always be an array', () => {
+		describe('should always be an array', () => {
 			let children;
 
-			const Foo = props => {
+			let Foo = props => {
 				children = props.children;
-				return <div>{...props.children}</div>;
+				return <div>{props.children}</div>;
 			};
 
-			const Bar = () => <span>Bar</span>;
+			let FunctionFoo = props => {
+				children = props.children;
+				return <div>{props.children[0](2)}</div>;
+			};
 
-			// No children
-			render(<Foo></Foo>, scratch);
-			expect(children).to.be.an('array');
-			expect(children).to.have.lengthOf(0);
+			let Bar = () => <span>Bar</span>;
 
-			// Text children
-			children = undefined;
-			render(<Foo>text</Foo>, scratch);
-			expect(children).to.be.an('array');
-			expect(children).to.have.lengthOf(1);
-			expect(children[0]).to.be.a('string');
+			beforeEach(() => {
+				children = undefined;
+			});
 
-			// DOM node child
-			children = undefined;
-			render(<Foo><span /></Foo>, scratch);
-			expect(children).to.be.an('array');
-			expect(children).to.have.lengthOf(1);
-			expect(children[0]).to.be.an('object');
+			it('with no child', () => {
+				render(<Foo></Foo>, scratch);
 
-			// Component child
-			children = undefined;
-			render(<Foo><Bar /></Foo>, scratch);
-			expect(children).to.be.an('array');
-			expect(children).to.have.lengthOf(1);
-			expect(children[0]).to.be.an('object');
+				expect(children).to.be.an('array');
+				expect(children).to.have.lengthOf(0);
+				expect(scratch.innerHTML).to.equal('<div></div>');
+			});
 
-			// Function child
-			children = undefined;
-			render(<Foo>{num => num.toFixed(2)}</Foo>, scratch);
-			expect(children).to.be.an('array');
-			expect(children).to.have.lengthOf(1);
-			expect(children[0]).to.be.a('function');
+			it('with a text child', () => {
+				render(<Foo>text</Foo>, scratch);
 
-			// Multiple chldren
-			children = undefined;
-			render(<Foo><span /><Bar /><span /></Foo>, scratch);
-			expect(children).to.be.an('array');
-			expect(children).to.have.lengthOf(3);
-			expect(children[0]).to.be.an('object');
+				expect(children).to.be.an('array');
+				expect(children).to.have.lengthOf(1);
+				expect(children[0]).to.be.a('string');
+				expect(scratch.innerHTML).to.equal('<div>text</div>');
+			});
+
+			it('with a DOM node child', () => {
+				render(<Foo><span /></Foo>, scratch);
+
+				expect(children).to.be.an('array');
+				expect(children).to.have.lengthOf(1);
+				expect(children[0]).to.be.an('object');
+				expect(scratch.innerHTML).to.equal('<div><span></span></div>');
+			});
+
+			it('with a Component child', () => {
+				render(<Foo><Bar /></Foo>, scratch);
+
+				expect(children).to.be.an('array');
+				expect(children).to.have.lengthOf(1);
+				expect(children[0]).to.be.an('object');
+				expect(scratch.innerHTML).to.equal('<div><span>Bar</span></div>');
+			});
+
+			it('with a function child', () => {
+				render(<FunctionFoo>{num => num.toFixed(2)}</FunctionFoo>, scratch);
+
+				expect(children).to.be.an('array');
+				expect(children).to.have.lengthOf(1);
+				expect(children[0]).to.be.a('function');
+				expect(scratch.innerHTML).to.equal('<div>2.00</div>');
+			});
+
+			it('with multiple children', () => {
+				render(<Foo><span /><Bar /><span /></Foo>, scratch);
+
+				expect(children).to.be.an('array');
+				expect(children).to.have.lengthOf(3);
+				expect(children[0]).to.be.an('object');
+				expect(scratch.innerHTML).to.equal('<div><span></span><span>Bar</span><span></span></div>');
+			});
 		});
 	});
 
