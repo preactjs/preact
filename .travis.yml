@@ -4,6 +4,7 @@ language: node_js
 
 node_js:
   - "8"
+  - "10"
 
 cache:
   directories:
@@ -23,6 +24,9 @@ addons:
 
 script:
   - npm run build
-  - COVERAGE=true RUN_SAUCE=false npm test
+  - COVERAGE=true ALLOW_SAUCELABS=false npm test
+  - if [ $TRAVIS_NODE_VERSION == "8" ]; then
+    export ALLOW_SAUCELABS=true
+    fi
   - COVERAGE=false FLAKEY=false PERFORMANCE=false npm run test:karma
   - ./node_modules/coveralls/bin/coveralls.js < ./coverage/lcov.info
