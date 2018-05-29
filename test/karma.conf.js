@@ -2,11 +2,11 @@
 
 var coverage = String(process.env.COVERAGE) === 'true',
 	ci = String(process.env.CI).match(/^(1|true)$/gi),
-	runSauce = String(process.env.RUN_SAUCE)!=='false',
+	allowSauce = String(process.env.ALLOW_SAUCELABS)!=='false',
 	pullRequest = !String(process.env.TRAVIS_PULL_REQUEST).match(/^(0|false|undefined)$/gi),
 	masterBranch = String(process.env.TRAVIS_BRANCH).match(/^master$/gi),
 	sauceTestBranch = String(process.env.TRAVIS_BRANCH).match(/^sauce-test$/gi),
-	sauceLabs = runSauce && ci && !pullRequest && (masterBranch || sauceTestBranch),
+	sauceLabs = allowSauce && ci && !pullRequest && (masterBranch || sauceTestBranch),
 	performance = !coverage && String(process.env.PERFORMANCE)!=='false',
 	webpack = require('webpack');
 
