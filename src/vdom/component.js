@@ -97,7 +97,7 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 		skip = false,
 		snapshot = previousContext,
 		rendered, inst, cbase,
-		exception, caught = component._caught;
+		exception, clearCaught = component._caught;
 
 	try {
 		if (component.constructor.getDerivedStateFromProps) {
@@ -178,6 +178,7 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 				}
 			} catch (e) {
 				exception = e;
+				clearCaught = false;
 				if (!base) {
 					base = initialBase || document.createTextNode("");
 				}
@@ -228,7 +229,7 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 
 		while (component._renderCallbacks.length) component._renderCallbacks.pop().call(component);
 
-		if (caught) {
+		if (clearCaught) {
 			component._caught = false;
 		}
 
