@@ -1,5 +1,15 @@
-import { h, render, rerender, Component } from '../../src/preact';
+import { h, render, options, Component } from '../../src/preact';
 /** @jsx h */
+
+// Wrapper rerender function that fully drains the queue
+const renderQueue = [];
+options.debounceRendering = (callback) => renderQueue.push(callback);
+function rerender() {
+	let renderCallback;
+	while (renderCallback = renderQueue.shift()) {
+		renderCallback();
+	}
+}
 
 let spyAll = obj => Object.keys(obj).forEach( key => sinon.spy(obj,key) );
 
