@@ -8,11 +8,14 @@ import { createComponent, collectComponent } from './component-recycler';
 import { removeNode } from '../dom/index';
 
 /**
- * Set a component's `props` (generally derived from JSX attributes).
- * @param {Object} props
- * @param {number} [opts] Render mode, see constants.js for available options.
+ * Set a component's `props` and possibly re-render the component
+ * @param {import('../component').Component} component The Component to set props on
+ * @param {object} props The new props
+ * @param {number} renderMode Render options - specifies how to re-render the component
+ * @param {object} context The new context
+ * @param {boolean} mountAll Whether or not to immediately mount all components
  */
-export function setComponentProps(component, props, opts, context, mountAll) {
+export function setComponentProps(component, props, renderMode, context, mountAll) {
 	if (component._disable) return;
 	component._disable = true;
 
@@ -38,8 +41,8 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 
 	component._disable = false;
 
-	if (opts!==NO_RENDER) {
-		if (opts===SYNC_RENDER || options.syncComponentUpdates!==false || !component.base) {
+	if (renderMode!==NO_RENDER) {
+		if (renderMode===SYNC_RENDER || options.syncComponentUpdates!==false || !component.base) {
 			renderComponent(component, SYNC_RENDER, mountAll);
 		}
 		else {
@@ -66,7 +69,7 @@ export function catchErrorInComponent(error, component) {
 	throw error;
 }
 
-function renderComponentAttempt(component, opts, mountAll, isChild) {
+function irenderComponent(component, renderMode, mountAll, isChild) {
 	let props = component.props,
 		state = component.state,
 		context = component.context,
@@ -92,7 +95,7 @@ function renderComponentAttempt(component, opts, mountAll, isChild) {
 		component.props = previousProps;
 		component.state = previousState;
 		component.context = previousContext;
-		if (opts!==FORCE_RENDER
+		if (renderMode!==FORCE_RENDER
 			&& component.shouldComponentUpdate
 			&& component.shouldComponentUpdate(props, state, context) === false) {
 			skip = true;
@@ -153,7 +156,7 @@ function renderComponentAttempt(component, opts, mountAll, isChild) {
 					cbase = component._component = null;
 				}
 
-				if (initialBase || opts===SYNC_RENDER) {
+				if (initialBase || renderMode===SYNC_RENDER) {
 					if (cbase) cbase._component = null;
 					base = diff(cbase, rendered, context, mountAll || !isUpdate, initialBase && initialBase.parentNode, component);
 				}
@@ -222,20 +225,20 @@ function renderComponentAttempt(component, opts, mountAll, isChild) {
 /**
  * Render a Component, triggering necessary lifecycle events and taking
  * High-Order Components into account.
- * @param {Component} component
- * @param {number} [opts] render mode, see constants.js for available options.
- * @param {boolean} [mountAll=false]
- * @param {boolean} [isChild=false]
+ * @param {import('../component').Component} component The component to render
+ * @param {number} [renderMode] render mode, see constants.js for available options.
+ * @param {boolean} [mountAll] Whether or not to immediately mount all components
+ * @param {boolean} [isChild] ?
  * @private
  */
-export function renderComponent(component, opts, mountAll, isChild) {
+export function renderComponent(component, renderMode, mountAll, isChild) {
 	if (component._disable) return;
 
 	try {
-		renderComponentAttempt(component, opts, mountAll, isChild);
+		irenderComponent(component, renderMode, mountAll, isChild);
 		if (component._caught) {
 			// Attempt rendering again, but let any further errors pass through to ancestor
-			renderComponentAttempt(component, opts, false, isChild);
+			irenderComponent(component, renderMode, false, isChild);
 			component._caught = false;
 		}
 	} catch (e) {
@@ -247,9 +250,11 @@ export function renderComponent(component, opts, mountAll, isChild) {
 
 /**
  * Apply the Component referenced by a VNode to the DOM.
- * @param {Element} dom The DOM node to mutate
- * @param {VNode} vnode A Component-referencing VNode
- * @returns {Element} The created/mutated element
+ * @param {import('../dom').PreactElement} dom The DOM node to mutate
+ * @param {import('../vnode').VNode} vnode A Component-referencing VNode
+ * @param {object} context The current context
+ * @param {boolean} mountAll Whether or not to immediately mount all components
+ * @returns {import('../dom').PreactElement} The created/mutated element
  * @private
  */
 export function buildComponentFromVNode(dom, vnode, context, mountAll, ancestorComponent) {
@@ -295,7 +300,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll, ancestorC
 
 /**
  * Remove a component from the DOM and recycle it.
- * @param {Component} component The Component instance to unmount
+ * @param {import('../component').Component} component The Component instance to unmount
  * @private
  */
 export function unmountComponent(component) {

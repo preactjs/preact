@@ -5,6 +5,9 @@ import { enqueueRender } from './render-queue';
 /**
  * Base Component class.
  * Provides `setState()` and `forceUpdate()`, which trigger rendering.
+ * @typedef {object} Component
+ * @param {object} props The initial component props
+ * @param {object} context The initial context from parent components' getChildContext
  * @public
  *
  * @example
@@ -43,21 +46,9 @@ export function Component(props, context) {
 extend(Component.prototype, {
 
 	/**
-	 * Returns a `boolean` indicating if the component should re-render when
-	 * receiving the given `props` and `state`.
-	 * @param {object} nextProps
-	 * @param {object} nextState
-	 * @param {object} nextContext
-	 * @returns {boolean} should the component re-render
-	 * @name shouldComponentUpdate
-	 * @function
-	 */
-
-
-	/**
-	 * Update component state by copying properties from `state` to `this.state`.
+	 * Update component state and schedule a re-render.
 	 * @param {object} state A hash of state properties to update with new values
-	 * @param {function} callback	A function to be called once component state is
+	 * @param {() => void} callback A function to be called once component state is
 	 * 	updated
 	 */
 	setState(state, callback) {
@@ -71,7 +62,7 @@ extend(Component.prototype, {
 
 	/**
 	 * Immediately perform a synchronous re-render of the component.
-	 * @param {function} callback	A function to be called after component is
+	 * @param {() => void} callback A function to be called after component is
 	 * 	re-rendered.
 	 * @private
 	 */
@@ -87,9 +78,9 @@ extend(Component.prototype, {
 	 * @param {object} props Props (eg: JSX attributes) received from parent
 	 * 	element/component
 	 * @param {object} state The component's current state
-	 * @param {object} context Context object (if a parent component has provided
-	 * 	context)
-	 * @returns {VNode}
+	 * @param {object} context Context object, as returned by the nearest
+	 *  ancestor's `getChildContext()`
+	 * @returns {import('./vnode').VNode | void}
 	 */
 	render() {}
 

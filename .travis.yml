@@ -4,6 +4,7 @@ language: node_js
 
 node_js:
   - "8"
+  - "10"
 
 cache:
   directories:
@@ -18,8 +19,13 @@ before_install:
 install:
   - npm install
 
+addons:
+  sauce_connect: true
+
 script:
   - npm run build
-  - COVERAGE=true npm run test
-  - COVERAGE=false FLAKEY=false PERFORMANCE=false npm run test:karma
+  - COVERAGE=true ALLOW_SAUCELABS=false npm run test
+  - if [ "$TRAVIS_NODE_VERSION" = "8" ]; then
+    COVERAGE=false FLAKEY=false PERFORMANCE=false ALLOW_SAUCELABS=true npm run test:karma;
+    fi
   - ./node_modules/coveralls/bin/coveralls.js < ./coverage/lcov.info
