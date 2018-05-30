@@ -301,9 +301,10 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll, ancestorC
 export function unmountComponent(component) {
 	if (options.beforeUnmount) options.beforeUnmount(component);
 
-	let base = component.base;
-
+	if (component._disable) return;
 	component._disable = true;
+
+	let base = component.base;
 
 	if (component.componentWillUnmount) {
 		try {
