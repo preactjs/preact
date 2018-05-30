@@ -25,6 +25,8 @@ describe('Lifecycle methods', () => {
 	it('should call nested new lifecycle methods in the right order', () => {
 		let updateOuterState;
 		let updateInnerState;
+		let forceUpdateOuter;
+		let forceUpdateInner;
 
 		let log;
 		const logger = function(msg) {
@@ -45,6 +47,7 @@ describe('Lifecycle methods', () => {
 				log.push('outer constructor');
 
 				this.state = { value: 0 };
+				forceUpdateOuter = () => this.forceUpdate();
 				updateOuterState = () => this.setState({
 					value: (this.state.value + 1) % 2
 				});
@@ -76,6 +79,7 @@ describe('Lifecycle methods', () => {
 				log.push('inner constructor');
 
 				this.state = { value: 0 };
+				forceUpdateInner = () => this.forceUpdate();
 				updateInnerState = () => this.setState({
 					value: (this.state.value + 1) % 2
 				});
@@ -155,7 +159,34 @@ describe('Lifecycle methods', () => {
 			'inner shouldComponentUpdate',
 			'inner render',
 			'inner getSnapshotBeforeUpdate',
+			'inner componentDidUpdate'
+		]);
+
+		// Force update Outer
+		log = [];
+		forceUpdateOuter();
+		rerender();
+		expect(log).to.deep.equal([
+			'outer getDerivedStateFromProps',
+			'outer render',
+			'outer getSnapshotBeforeUpdate',
+			'inner getDerivedStateFromProps',
+			'inner shouldComponentUpdate',
+			'inner render',
+			'inner getSnapshotBeforeUpdate',
 			'inner componentDidUpdate',
+			'outer componentDidUpdate'
+		]);
+
+		// Force update Inner
+		log = [];
+		forceUpdateInner();
+		rerender();
+		expect(log).to.deep.equal([
+			'inner getDerivedStateFromProps',
+			'inner render',
+			'inner getSnapshotBeforeUpdate',
+			'inner componentDidUpdate'
 		]);
 
 		// Unmounting Outer & Inner
