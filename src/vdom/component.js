@@ -79,7 +79,8 @@ function renderComponentAttempt(component, opts, mountAll, isChild) {
 		initialChildComponent = component._component,
 		skip = false,
 		snapshot = previousContext,
-		rendered, inst, cbase;
+		rendered, inst, cbase,
+		exception;
 
 	if (component.constructor.getDerivedStateFromProps) {
 		previousState = extend({}, previousState);
@@ -119,10 +120,9 @@ function renderComponentAttempt(component, opts, mountAll, isChild) {
 			snapshot = component.getSnapshotBeforeUpdate(previousProps, previousState);
 		}
 
+		let childComponent = rendered && rendered.nodeName,
+			toUnmount, base;
 		try {
-			let childComponent = rendered && rendered.nodeName,
-				toUnmount, base;
-
 			if (typeof childComponent==='function') {
 				// set up high order component link
 
@@ -158,35 +158,38 @@ function renderComponentAttempt(component, opts, mountAll, isChild) {
 					base = diff(cbase, rendered, context, mountAll || !isUpdate, initialBase && initialBase.parentNode, component);
 				}
 			}
-
-			if (initialBase && base!==initialBase && inst!==initialChildComponent) {
-				let baseParent = initialBase.parentNode;
-				if (baseParent && base!==baseParent) {
-					baseParent.replaceChild(base, initialBase);
-
-					if (!toUnmount) {
-						initialBase._component = null;
-						recollectNodeTree(initialBase, false);
-					}
-				}
-			}
-
-			if (toUnmount) {
-				unmountComponent(toUnmount);
-			}
-
-			component.base = base;
-			if (base && !isChild) {
-				let componentRef = component,
-					t = component;
-				while ((t=t._parentComponent)) {
-					(componentRef = t).base = base;
-				}
-				base._component = componentRef;
-				base._componentConstructor = componentRef.constructor;
-			}
 		} catch (e) {
-			catchErrorInComponent(e, component);
+			exception = e;
+			if (!base) {
+				base = initialBase || document.createTextNode("");
+			}
+		}
+
+		if (initialBase && base!==initialBase && inst!==initialChildComponent) {
+			let baseParent = initialBase.parentNode;
+			if (baseParent && base!==baseParent) {
+				baseParent.replaceChild(base, initialBase);
+
+				if (!toUnmount) {
+					initialBase._component = null;
+					recollectNodeTree(initialBase, false);
+				}
+			}
+		}
+
+		if (toUnmount && toUnmount.base) {
+			unmountComponent(toUnmount);
+		}
+
+		component.base = base;
+		if (base && !isChild) {
+			let componentRef = component,
+				t = component;
+			while ((t=t._parentComponent)) {
+				(componentRef = t).base = base;
+			}
+			base._component = componentRef;
+			base._componentConstructor = componentRef.constructor;
 		}
 	}
 
@@ -206,6 +209,10 @@ function renderComponentAttempt(component, opts, mountAll, isChild) {
 	}
 
 	while (component._renderCallbacks.length) component._renderCallbacks.pop().call(component);
+
+	if (typeof exception !== "undefined") {
+		catchErrorInComponent(exception, component);
+	}
 
 	if (!diffLevel && !isChild) flushMounts();
 }
@@ -228,7 +235,7 @@ export function renderComponent(component, opts, mountAll, isChild) {
 		renderComponentAttempt(component, opts, mountAll, isChild);
 		if (component._caught) {
 			// Attempt rendering again, but let any further errors pass through to ancestor
-			renderComponentAttempt(component, opts, mountAll, isChild);
+			renderComponentAttempt(component, opts, false, isChild);
 			component._caught = false;
 		}
 	} catch (e) {
