@@ -104,7 +104,11 @@ export function setAccessor(node, name, old, value, isSvg) {
 		(node._listeners || (node._listeners = {}))[name] = value;
 	}
 	else if (name!=='list' && name!=='type' && !isSvg && name in node) {
-		setProperty(node, name, value==null ? '' : value);
+		// Attempt to set a DOM property to the given value.
+		// IE & FF throw for certain property-value combinations.
+		try {
+			node[name] = value==null ? '' : value;
+		} catch (e) { }
 		if ((value==null || value===false) && name!='spellcheck') node.removeAttribute(name);
 	}
 	else {
@@ -121,20 +125,6 @@ export function setAccessor(node, name, old, value, isSvg) {
 			else node.setAttribute(name, value);
 		}
 	}
-}
-
-
-/**
- * Attempt to set a DOM property to the given value.
- * IE & FF throw for certain property-value combinations.
- * @param {Node} node The node to set a property on
- * @param {string} name The name of the property to set
- * @param {*} value The value to set
- */
-function setProperty(node, name, value) {
-	try {
-		node[name] = value;
-	} catch (e) { }
 }
 
 

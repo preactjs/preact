@@ -37,6 +37,8 @@ export function Component(props, context) {
 	 * @type {object}
 	 */
 	this.state = this.state || {};
+
+	this._renderCallbacks = [];
 }
 
 
@@ -52,7 +54,7 @@ extend(Component.prototype, {
 		let s = this.state;
 		if (!this.prevState) this.prevState = extend({}, s);
 		extend(s, typeof state==='function' ? state(s, this.props) : state);
-		if (callback) (this._renderCallbacks = (this._renderCallbacks || [])).push(callback);
+		if (callback) this._renderCallbacks.push(callback);
 		enqueueRender(this);
 	},
 
@@ -64,7 +66,7 @@ extend(Component.prototype, {
 	 * @private
 	 */
 	forceUpdate(callback) {
-		if (callback) (this._renderCallbacks = (this._renderCallbacks || [])).push(callback);
+		if (callback) this._renderCallbacks.push(callback);
 		renderComponent(this, FORCE_RENDER);
 	},
 

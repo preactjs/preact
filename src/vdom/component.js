@@ -78,10 +78,12 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 		initialBase = isUpdate || nextBase,
 		initialChildComponent = component._component,
 		skip = false,
+		snapshot = previousContext,
 		rendered, inst, cbase;
 
 	if (component.constructor.getDerivedStateFromProps) {
-		state = component.state = extend(state, component.constructor.getDerivedStateFromProps(props, state));
+		previousState = extend({}, previousState);
+		component.state = extend(state, component.constructor.getDerivedStateFromProps(props, state));
 	}
 
 	// if updating
@@ -111,6 +113,10 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 		// context to pass to the child, can be updated via (grand-)parent component
 		if (component.getChildContext) {
 			context = extend(extend({}, context), component.getChildContext());
+		}
+
+		if (isUpdate && component.getSnapshotBeforeUpdate) {
+			snapshot = component.getSnapshotBeforeUpdate(previousProps, previousState);
 		}
 
 		let childComponent = rendered && rendered.nodeName,
@@ -190,14 +196,12 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 		// flushMounts();
 
 		if (component.componentDidUpdate) {
-			component.componentDidUpdate(previousProps, previousState, previousContext);
+			component.componentDidUpdate(previousProps, previousState, snapshot);
 		}
 		if (options.afterUpdate) options.afterUpdate(component);
 	}
 
-	if (component._renderCallbacks!=null) {
-		while (component._renderCallbacks.length) component._renderCallbacks.pop().call(component);
-	}
+	while (component._renderCallbacks.length) component._renderCallbacks.pop().call(component);
 
 	if (!diffLevel && !isChild) flushMounts();
 }

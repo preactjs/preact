@@ -4,8 +4,8 @@ export as namespace preact;
 declare namespace preact {
 	type Key = string | number;
 	type Ref<T> = (instance: T) => void;
-	type ComponentChild = JSX.Element | string | number | null;
-	type ComponentChildren = ComponentChild[];
+	type ComponentChild = VNode<any> | string | number | null;
+	type ComponentChildren = ComponentChild[] | ComponentChild | object | string | number | null;
 
 	/**
 	 * @deprecated
@@ -104,12 +104,12 @@ declare namespace preact {
 	function h<P>(
 		node: ComponentFactory<P>,
 		params: Attributes & P | null,
-		...children: (ComponentChild | ComponentChildren)[]
+		...children: ComponentChildren[]
 	): VNode<any>;
 	function h(
 		node: string,
 		params: JSX.HTMLAttributes & JSX.SVGAttributes & Record<string, any> | null,
-		...children: (ComponentChild | ComponentChildren)[]
+		...children: ComponentChildren[]
 	): VNode<any>;
 
 	function render(node: ComponentChild, parent: Element | Document, mergeWith?: Element): Element;
@@ -134,6 +134,10 @@ declare global {
 
 		interface ElementAttributesProperty {
 			props: any;
+		}
+
+		interface ElementChildrenAttribute {
+			children: any;
 		}
 
 		interface SVGAttributes extends HTMLAttributes {
