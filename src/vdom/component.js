@@ -51,6 +51,7 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 }
 
 export function catchErrorInComponent(error, component) {
+	flushMounts();
 	for (; component; component = component._ancestorComponent) {
 		if (component.componentDidCatch && !component._caught) {
 			try {
