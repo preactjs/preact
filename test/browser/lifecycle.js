@@ -1225,7 +1225,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 			class ErrorAdapterComponent extends Component {
-				componentDidCatch(error) {
+				componentDidCatch() {
 					// Ignore the error
 				}
 				render() {
