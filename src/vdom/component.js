@@ -60,6 +60,7 @@ export function catchErrorInComponent(error, component) {
 			try {
 				component.componentDidCatch(error);
 				component._caught = true;
+				enqueueRender(component);
 				return;
 			} catch (e) {
 				error = e;
@@ -67,157 +68,6 @@ export function catchErrorInComponent(error, component) {
 		}
 	}
 	throw error;
-}
-
-function irenderComponent(component, renderMode, mountAll, isChild) {
-	let props = component.props,
-		state = component.state,
-		context = component.context,
-		previousProps = component.prevProps || props,
-		previousState = component.prevState || state,
-		previousContext = component.prevContext || context,
-		isUpdate = component.base,
-		nextBase = component.nextBase,
-		initialBase = isUpdate || nextBase,
-		initialChildComponent = component._component,
-		skip = false,
-		snapshot = previousContext,
-		rendered, inst, cbase,
-		exception;
-
-	if (component.constructor.getDerivedStateFromProps) {
-		previousState = extend({}, previousState);
-		component.state = extend(state, component.constructor.getDerivedStateFromProps(props, state));
-	}
-
-	// if updating
-	if (isUpdate) {
-		component.props = previousProps;
-		component.state = previousState;
-		component.context = previousContext;
-		if (renderMode!==FORCE_RENDER
-			&& component.shouldComponentUpdate
-			&& component.shouldComponentUpdate(props, state, context) === false) {
-			skip = true;
-		}
-		else if (component.componentWillUpdate) {
-			component.componentWillUpdate(props, state, context);
-		}
-		component.props = props;
-		component.state = state;
-		component.context = context;
-	}
-
-	component.prevProps = component.prevState = component.prevContext = component.nextBase = null;
-	component._dirty = false;
-
-	if (!skip) {
-		rendered = component.render(props, state, context);
-
-		// context to pass to the child, can be updated via (grand-)parent component
-		if (component.getChildContext) {
-			context = extend(extend({}, context), component.getChildContext());
-		}
-
-		if (isUpdate && component.getSnapshotBeforeUpdate) {
-			snapshot = component.getSnapshotBeforeUpdate(previousProps, previousState);
-		}
-
-		let childComponent = rendered && rendered.nodeName,
-			toUnmount, base;
-		try {
-			if (typeof childComponent==='function') {
-				// set up high order component link
-
-				let childProps = getNodeProps(rendered);
-				inst = initialChildComponent;
-
-				if (inst && inst.constructor===childComponent && childProps.key==inst.__key) {
-					setComponentProps(inst, childProps, SYNC_RENDER, context, false);
-				}
-				else {
-					toUnmount = inst;
-
-					component._component = inst = createComponent(childComponent, childProps, context, component);
-					inst.nextBase = inst.nextBase || nextBase;
-					inst._parentComponent = component;
-					setComponentProps(inst, childProps, NO_RENDER, context, false);
-					renderComponent(inst, SYNC_RENDER, mountAll, true);
-				}
-
-				base = inst.base;
-			}
-			else {
-				cbase = initialBase;
-
-				// destroy high order component link
-				toUnmount = initialChildComponent;
-				if (toUnmount) {
-					cbase = component._component = null;
-				}
-
-				if (initialBase || renderMode===SYNC_RENDER) {
-					if (cbase) cbase._component = null;
-					base = diff(cbase, rendered, context, mountAll || !isUpdate, initialBase && initialBase.parentNode, component);
-				}
-			}
-		} catch (e) {
-			exception = e;
-			if (!base) {
-				base = initialBase || document.createTextNode("");
-			}
-		}
-
-		if (initialBase && base!==initialBase && inst!==initialChildComponent) {
-			let baseParent = initialBase.parentNode;
-			if (baseParent && base!==baseParent) {
-				baseParent.replaceChild(base, initialBase);
-
-				if (!toUnmount) {
-					initialBase._component = null;
-					recollectNodeTree(initialBase, false);
-				}
-			}
-		}
-
-		if (toUnmount && toUnmount.base) {
-			unmountComponent(toUnmount);
-		}
-
-		component.base = base;
-		if (base && !isChild) {
-			let componentRef = component,
-				t = component;
-			while ((t=t._parentComponent)) {
-				(componentRef = t).base = base;
-			}
-			base._component = componentRef;
-			base._componentConstructor = componentRef.constructor;
-		}
-	}
-
-	if (!isUpdate || mountAll) {
-		mounts.unshift(component);
-	}
-	else if (!skip) {
-		// Ensure that pending componentDidMount() hooks of child components
-		// are called before the componentDidUpdate() hook in the parent.
-		// Note: disabled as it causes duplicate hooks, see https://github.com/developit/preact/issues/750
-		// flushMounts();
-
-		if (component.componentDidUpdate) {
-			component.componentDidUpdate(previousProps, previousState, snapshot);
-		}
-		if (options.afterUpdate) options.afterUpdate(component);
-	}
-
-	while (component._renderCallbacks.length) component._renderCallbacks.pop().call(component);
-
-	if (typeof exception !== "undefined") {
-		catchErrorInComponent(exception, component);
-	}
-
-	if (!diffLevel && !isChild) flushMounts();
 }
 
 
@@ -234,16 +84,163 @@ function irenderComponent(component, renderMode, mountAll, isChild) {
 export function renderComponent(component, renderMode, mountAll, isChild) {
 	if (component._disable) return;
 
+	let props = component.props,
+		state = component.state,
+		context = component.context,
+		previousProps = component.prevProps || props,
+		previousState = component.prevState || state,
+		previousContext = component.prevContext || context,
+		isUpdate = component.base,
+		nextBase = component.nextBase,
+		initialBase = isUpdate || nextBase,
+		initialChildComponent = component._component,
+		skip = false,
+		snapshot = previousContext,
+		rendered, inst, cbase,
+		exception, caught = component._caught;
+
 	try {
-		irenderComponent(component, renderMode, mountAll, isChild);
-		if (component._caught) {
-			// Attempt rendering again, but let any further errors pass through to ancestor
-			irenderComponent(component, renderMode, false, isChild);
+		if (component.constructor.getDerivedStateFromProps) {
+			previousState = extend({}, previousState);
+			component.state = extend(state, component.constructor.getDerivedStateFromProps(props, state));
+		}
+
+		// if updating
+		if (isUpdate) {
+			component.props = previousProps;
+			component.state = previousState;
+			component.context = previousContext;
+			if (renderMode!==FORCE_RENDER
+				&& component.shouldComponentUpdate
+				&& component.shouldComponentUpdate(props, state, context) === false) {
+				skip = true;
+			}
+			else if (component.componentWillUpdate) {
+				component.componentWillUpdate(props, state, context);
+			}
+			component.props = props;
+			component.state = state;
+			component.context = context;
+		}
+
+		component.prevProps = component.prevState = component.prevContext = component.nextBase = null;
+		component._dirty = false;
+
+		if (!skip) {
+			rendered = component.render(props, state, context);
+
+			// context to pass to the child, can be updated via (grand-)parent component
+			if (component.getChildContext) {
+				context = extend(extend({}, context), component.getChildContext());
+			}
+
+			if (isUpdate && component.getSnapshotBeforeUpdate) {
+				snapshot = component.getSnapshotBeforeUpdate(previousProps, previousState);
+			}
+
+			let childComponent = rendered && rendered.nodeName,
+				toUnmount, base;
+			try {
+				if (typeof childComponent==='function') {
+					// set up high order component link
+
+					let childProps = getNodeProps(rendered);
+					inst = initialChildComponent;
+
+					if (inst && inst.constructor===childComponent && childProps.key==inst.__key) {
+						setComponentProps(inst, childProps, SYNC_RENDER, context, false);
+					}
+					else {
+						toUnmount = inst;
+
+						component._component = inst = createComponent(childComponent, childProps, context, component);
+						inst.nextBase = inst.nextBase || nextBase;
+						inst._parentComponent = component;
+						setComponentProps(inst, childProps, NO_RENDER, context, false);
+						renderComponent(inst, SYNC_RENDER, mountAll, true);
+					}
+
+					base = inst.base;
+				}
+				else {
+					cbase = initialBase;
+
+					// destroy high order component link
+					toUnmount = initialChildComponent;
+					if (toUnmount) {
+						cbase = component._component = null;
+					}
+
+					if (initialBase || renderMode===SYNC_RENDER) {
+						if (cbase) cbase._component = null;
+						base = diff(cbase, rendered, context, mountAll || !isUpdate, initialBase && initialBase.parentNode, component);
+					}
+				}
+			} catch (e) {
+				exception = e;
+				if (!base) {
+					base = initialBase || document.createTextNode("");
+				}
+			}
+
+			if (initialBase && base!==initialBase && inst!==initialChildComponent) {
+				let baseParent = initialBase.parentNode;
+				if (baseParent && base!==baseParent) {
+					baseParent.replaceChild(base, initialBase);
+
+					if (!toUnmount) {
+						initialBase._component = null;
+						recollectNodeTree(initialBase, false);
+					}
+				}
+			}
+
+			if (toUnmount && toUnmount.base) {
+				unmountComponent(toUnmount);
+			}
+
+			component.base = base;
+			if (base && !isChild) {
+				let componentRef = component,
+					t = component;
+				while ((t=t._parentComponent)) {
+					(componentRef = t).base = base;
+				}
+				base._component = componentRef;
+				base._componentConstructor = componentRef.constructor;
+			}
+		}
+
+		if (!isUpdate || mountAll) {
+			mounts.unshift(component);
+		}
+		else if (!skip) {
+			// Ensure that pending componentDidMount() hooks of child components
+			// are called before the componentDidUpdate() hook in the parent.
+			// Note: disabled as it causes duplicate hooks, see https://github.com/developit/preact/issues/750
+			// flushMounts();
+
+			if (component.componentDidUpdate) {
+				component.componentDidUpdate(previousProps, previousState, snapshot);
+			}
+			if (options.afterUpdate) options.afterUpdate(component);
+		}
+
+		while (component._renderCallbacks.length) component._renderCallbacks.pop().call(component);
+
+		if (caught) {
 			component._caught = false;
 		}
+
 	} catch (e) {
 		catchErrorInComponent(e, component._ancestorComponent);
 	}
+
+	if (typeof exception !== "undefined") {
+		catchErrorInComponent(exception, component);
+	}
+
+	if (!diffLevel && !isChild) flushMounts();
 }
 
 
