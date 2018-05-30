@@ -1,8 +1,9 @@
 {
   "props": {
-    "cname": 16,
+    "cname": 17,
     "props": {
       "$_dirty": "__d",
+      "$_caught": "__e",
       "$_disable": "__x",
       "$_listeners": "__l",
       "$_renderCallbacks": "__h",

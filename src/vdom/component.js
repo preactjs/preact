@@ -1,4 +1,4 @@
-import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, ERROR_RENDER, ATTR_KEY } from '../constants';
+import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, ATTR_KEY } from '../constants';
 import options from '../options';
 import { extend } from '../util';
 import { enqueueRender } from '../render-queue';
@@ -39,8 +39,8 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 	component._disable = false;
 
 	if (opts!==NO_RENDER) {
-		if ((opts&SYNC_RENDER) || options.syncComponentUpdates!==false || !component.base) {
-			renderComponent(component, opts|SYNC_RENDER, mountAll);
+		if (opts===SYNC_RENDER || options.syncComponentUpdates!==false || !component.base) {
+			renderComponent(component, SYNC_RENDER, mountAll);
 		}
 		else {
 			enqueueRender(component);
@@ -52,9 +52,11 @@ export function setComponentProps(component, props, opts, context, mountAll) {
 
 export function catchErrorInComponent(error, component) {
 	for (; component; component = component._ancestorComponent) {
-		if (component.componentDidCatch) {
+		if (component.componentDidCatch && !component._caught) {
 			try {
-				return component.componentDidCatch(error);
+				component.componentDidCatch(error);
+				component._caught = true;
+				return;
 			} catch (e) {
 				error = e;
 			}
@@ -116,70 +118,74 @@ function renderComponentAttempt(component, opts, mountAll, isChild) {
 			snapshot = component.getSnapshotBeforeUpdate(previousProps, previousState);
 		}
 
-		let childComponent = rendered && rendered.nodeName,
-			toUnmount, base;
+		try {
+			let childComponent = rendered && rendered.nodeName,
+				toUnmount, base;
 
-		if (typeof childComponent==='function') {
-			// set up high order component link
+			if (typeof childComponent==='function') {
+				// set up high order component link
 
-			let childProps = getNodeProps(rendered);
-			inst = initialChildComponent;
+				let childProps = getNodeProps(rendered);
+				inst = initialChildComponent;
 
-			if (inst && inst.constructor===childComponent && childProps.key==inst.__key) {
-				setComponentProps(inst, childProps, opts|SYNC_RENDER, context, false);
+				if (inst && inst.constructor===childComponent && childProps.key==inst.__key) {
+					setComponentProps(inst, childProps, SYNC_RENDER, context, false);
+				}
+				else {
+					toUnmount = inst;
+
+					component._component = inst = createComponent(childComponent, childProps, context, component);
+					inst.nextBase = inst.nextBase || nextBase;
+					inst._parentComponent = component;
+					setComponentProps(inst, childProps, NO_RENDER, context, false);
+					renderComponent(inst, SYNC_RENDER, mountAll, true);
+				}
+
+				base = inst.base;
 			}
 			else {
-				toUnmount = inst;
+				cbase = initialBase;
 
-				component._component = inst = createComponent(childComponent, childProps, context, component);
-				inst.nextBase = inst.nextBase || nextBase;
-				inst._parentComponent = component;
-				setComponentProps(inst, childProps, NO_RENDER, context, false);
-				renderComponent(inst, opts|SYNC_RENDER, mountAll, true);
-			}
+				// destroy high order component link
+				toUnmount = initialChildComponent;
+				if (toUnmount) {
+					cbase = component._component = null;
+				}
 
-			base = inst.base;
-		}
-		else {
-			cbase = initialBase;
-
-			// destroy high order component link
-			toUnmount = initialChildComponent;
-			if (toUnmount) {
-				cbase = component._component = null;
-			}
-
-			if (initialBase || (opts&SYNC_RENDER)) {
-				if (cbase) cbase._component = null;
-				base = diff(cbase, rendered, context, mountAll || !isUpdate, initialBase && initialBase.parentNode, component);
-			}
-		}
-
-		if (initialBase && base!==initialBase && inst!==initialChildComponent) {
-			let baseParent = initialBase.parentNode;
-			if (baseParent && base!==baseParent) {
-				baseParent.replaceChild(base, initialBase);
-
-				if (!toUnmount) {
-					initialBase._component = null;
-					recollectNodeTree(initialBase, false);
+				if (initialBase || opts===SYNC_RENDER) {
+					if (cbase) cbase._component = null;
+					base = diff(cbase, rendered, context, mountAll || !isUpdate, initialBase && initialBase.parentNode, component);
 				}
 			}
-		}
 
-		if (toUnmount) {
-			unmountComponent(toUnmount);
-		}
+			if (initialBase && base!==initialBase && inst!==initialChildComponent) {
+				let baseParent = initialBase.parentNode;
+				if (baseParent && base!==baseParent) {
+					baseParent.replaceChild(base, initialBase);
 
-		component.base = base;
-		if (base && !isChild) {
-			let componentRef = component,
-				t = component;
-			while ((t=t._parentComponent)) {
-				(componentRef = t).base = base;
+					if (!toUnmount) {
+						initialBase._component = null;
+						recollectNodeTree(initialBase, false);
+					}
+				}
 			}
-			base._component = componentRef;
-			base._componentConstructor = componentRef.constructor;
+
+			if (toUnmount) {
+				unmountComponent(toUnmount);
+			}
+
+			component.base = base;
+			if (base && !isChild) {
+				let componentRef = component,
+					t = component;
+				while ((t=t._parentComponent)) {
+					(componentRef = t).base = base;
+				}
+				base._component = componentRef;
+				base._componentConstructor = componentRef.constructor;
+			}
+		} catch (e) {
+			catchErrorInComponent(e, component);
 		}
 	}
 
@@ -217,24 +223,15 @@ function renderComponentAttempt(component, opts, mountAll, isChild) {
 export function renderComponent(component, opts, mountAll, isChild) {
 	if (component._disable) return;
 
-	if (opts !== ERROR_RENDER) {
-		try {
-			renderComponentAttempt(component, opts, mountAll, isChild);
-		} catch (e) {
-			catchErrorInComponent(e, component);
-		}
-
-		if (component._dirty && component.componentDidCatch) {
-			// Error was caught, rerender with errors in children propagated via throw
-			try {
-				renderComponentAttempt(component, ERROR_RENDER, mountAll, isChild);
-			} catch (e) {
-				catchErrorInComponent(e, component._ancestorComponent);
-			}
-		}
-	} else {
-		// Asked by a call further up the stack to propagate errors via throw
+	try {
 		renderComponentAttempt(component, opts, mountAll, isChild);
+		if (component._caught) {
+			// Attempt rendering again, but let any further errors pass through to ancestor
+			renderComponentAttempt(component, opts, mountAll, isChild);
+			component._caught = false;
+		}
+	} catch (e) {
+		catchErrorInComponent(e, component._ancestorComponent);
 	}
 }
 

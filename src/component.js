@@ -16,6 +16,7 @@ import { enqueueRender } from './render-queue';
  */
 export function Component(props, context) {
 	this._dirty = true;
+	this._caught = false;
 
 	/**
 	 * @public
