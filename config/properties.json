@@ -1,6 +1,5 @@
 {
   "props": {
-    "cname": 16,
     "props": {
       "$_dirty": "__d",
       "$_disable": "__x",
@@ -21,7 +20,6 @@
     }
   },
   "vars": {
-    "cname": -1,
     "props": {}
   }
 }
