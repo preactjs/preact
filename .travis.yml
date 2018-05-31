@@ -27,5 +27,5 @@ script:
   - COVERAGE=true ALLOW_SAUCELABS=false npm run test
   - if [ "$TRAVIS_NODE_VERSION" = "8" ]; then
     COVERAGE=false FLAKEY=false PERFORMANCE=false ALLOW_SAUCELABS=true npm run test:karma;
+    ./node_modules/coveralls/bin/coveralls.js < ./coverage/lcov.info;
     fi
-  - ./node_modules/coveralls/bin/coveralls.js < ./coverage/lcov.info
