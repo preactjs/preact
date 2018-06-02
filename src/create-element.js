@@ -8,9 +8,7 @@ export function createElement(tag, props) {
 }
 
 export function Fragment(vnode, props) {
-	return vnode.children.map(
-		child => createVNode(child.type, child.tag, child.props, child.props.children, child.text, props!=null ? props.key : null)
-	)
+	return vnode.children.slice()
 }
 
 // const RECYCLED_VNODES = [];
