@@ -967,6 +967,25 @@ describe('Lifecycle methods', () => {
 
 
 	describe('Lifecycle DOM Timing', () => {
+		it('should render in a single microtask', () => {
+			class Counter extends Component {
+				constructor() {
+					super();
+					this.state = { count: 0 };
+				}
+				render(props, { count }) {
+					if (count < 2) {
+						this.setState({ count: count + 1 });
+					}
+					return count;
+				}
+			}
+			render(<Counter />, scratch);
+			rerender();
+			expect(scratch.textContent).to.equal("2");
+			rerender();
+		});
+
 		it('should be invoked when dom does (DidMount, WillUnmount) or does not (WillMount, DidUnmount) exist', () => {
 			let setState;
 			class Outer extends Component {
