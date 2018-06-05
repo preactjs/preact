@@ -6,7 +6,7 @@ const renderQueue = [];
 options.debounceRendering = (callback) => renderQueue.push(callback);
 function rerender() {
 	let renderCallback;
-	while (renderCallback = renderQueue.shift()) {
+	while ((renderCallback = renderQueue.shift())) {
 		renderCallback();
 	}
 }
@@ -1349,6 +1349,35 @@ describe('Lifecycle methods', () => {
 			render(<ErrorReceiverComponent><ErrorAdapterComponent><ErrorGeneratorComponent/></ErrorAdapterComponent></ErrorReceiverComponent>, scratch);
 			rerender();
 			expect(ErrorAdapterComponent.prototype.componentDidCatch).to.have.been.called;
+			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
+			expect(scratch).to.have.property('textContent', 'Error: Error!');
+		});
+
+		it('should not bubble on caught errors', () => {
+			class TopLevelReceiverComponent extends Component {
+				componentDidCatch(error) {
+					this.setState({ error });
+				}
+				render() {
+					return <div>{this.state.error ? String(this.state.error) : this.props.children}</div>;
+				}
+			}
+			class ErrorReceiverComponent extends Component {
+				componentDidCatch(error) {
+					this.setState({ error });
+				}
+				render() {
+					return <div>{this.state.error ? String(this.state.error) : this.props.children}</div>;
+				}
+			}
+			function ErrorGeneratorComponent() {
+				throw new Error("Error!");
+			}
+			sinon.spy(TopLevelReceiverComponent.prototype, 'componentDidCatch');
+			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
+			render(<TopLevelReceiverComponent><ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent></TopLevelReceiverComponent>, scratch);
+			rerender();
+			expect(TopLevelReceiverComponent.prototype.componentDidCatch).not.to.have.been.called;
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 			expect(scratch).to.have.property('textContent', 'Error: Error!');
 		});
