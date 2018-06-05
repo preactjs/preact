@@ -304,10 +304,10 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll, ancestorC
  * @private
  */
 export function unmountComponent(component) {
-	if (options.beforeUnmount) options.beforeUnmount(component);
-
 	if (component._disable) return;
 	component._disable = true;
+
+	if (options.beforeUnmount) options.beforeUnmount(component);
 
 	let base = component.base;
 
