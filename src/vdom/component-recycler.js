@@ -26,6 +26,8 @@ export function collectComponent(component) {
  * @param {function} Ctor The constructor of the component to create
  * @param {object} props The initial props of the component
  * @param {object} context The initial context of the component
+ * @param {import('../component').Component} [ancestorComponent] The nearest ancestor component beneath
+ *  which the new component will be mounted
  * @returns {import('../component').Component}
  */
 export function createComponent(Ctor, props, context, ancestorComponent) {

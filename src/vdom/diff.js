@@ -45,7 +45,8 @@ export function flushMounts() {
  * @param {object} context The current context
  * @param {boolean} mountAll Whether or not to immediately mount all components
  * @param {Element} parent ?
- * @param {import('../component').Component} componentRoot ?
+ * @param {import('../component').Component} [componentRoot] The nearest ancestor component beneath
+ *  which the diff will occur
  * @returns {import('../dom').PreactElement} The created/mutated element
  * @private
  */
@@ -82,7 +83,8 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
  * @param {import('../vnode').VNode} vnode A VNode (with descendants forming a tree) representing the desired DOM structure
  * @param {object} context The current context
  * @param {boolean} mountAll Whether or not to immediately mount all components
- * @param {import('../component').Component} [componentRoot] ?
+ * @param {import('../component').Component} [componentRoot] The nearest ancestor component beneath
+ *  which the diff will occur
  * @private
  */
 function idiff(dom, vnode, context, mountAll, componentRoot) {
@@ -188,6 +190,8 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
  * @param {boolean} mountAll Whether or not to immediately mount all components
  * @param {boolean} isHydrating if `true`, consumes externally created elements
  *  similar to hydration
+ * @param {import('../component').Component} [componentRoot] The nearest ancestor component beneath
+ *  which the diff will occur
  */
 function innerDiffNode(dom, vchildren, context, mountAll, isHydrating, componentRoot) {
 	let originalChildren = dom.childNodes,
