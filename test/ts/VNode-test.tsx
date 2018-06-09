@@ -21,10 +21,9 @@ const SimpleFunctionalComponent = () => <div />;
 describe("VNode", () => {
 	it("is returned by h", () => {
 		const actual = <div className="wow"/>;
-		expect(actual).to.haveOwnProperty("nodeName")
-			.and.to.haveOwnProperty("attributes")
-			.and.to.haveOwnProperty("children")
-			.and.to.haveOwnProperty("key");
+		expect(Object.keys(actual)).to.have.members([
+			"nodeName", "attributes", "children", "key"
+		]);
 	});
 
 	it("has a nodeName of string when html element", () => {
@@ -58,3 +57,9 @@ describe("VNode", () => {
 		expect(comp.children[1]).to.be.a("string");
 	});
 });
+
+class TypedChildren extends Component<{children: (num: number) => string}> {
+	render() { return null }
+}
+
+const typedChild = <TypedChildren>{num => num.toFixed(2)}</TypedChildren>

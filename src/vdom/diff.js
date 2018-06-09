@@ -6,7 +6,10 @@ import { unmountComponent } from './component';
 import options from '../options';
 import { removeNode } from '../dom/index';
 
-/** Queue of components that have been mounted and are awaiting componentDidMount */
+/**
+ * Queue of components that have been mounted and are awaiting componentDidMount
+ * @type {Array<import('../component').Component>}
+ */
 export const mounts = [];
 
 /** Diff recursion count, used to track the end of the diff cycle. */
@@ -28,11 +31,17 @@ export function flushMounts() {
 }
 
 
-/** Apply differences in a given vnode (and it's deep children) to a real DOM Node.
- *	@param {Element} [dom=null]		A DOM node to mutate into the shape of the `vnode`
- *	@param {VNode} vnode			A VNode (with descendants forming a tree) representing the desired DOM structure
- *	@returns {Element} dom			The created/mutated element
- *	@private
+/**
+ * Apply differences in a given vnode (and it's deep children) to a real DOM Node.
+ * @param {import('../dom').PreactElement} dom A DOM node to mutate into the shape of a `vnode`
+ * @param {import('../vnode').VNode} vnode A VNode (with descendants forming a tree) representing
+ *  the desired DOM structure
+ * @param {object} context The current context
+ * @param {boolean} mountAll Whether or not to immediately mount all components
+ * @param {Element} parent ?
+ * @param {boolean} componentRoot ?
+ * @returns {import('../dom').PreactElement} The created/mutated element
+ * @private
  */
 export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 	// diffLevel having been 0 here indicates initial entry into the diff (not a subdiff)
@@ -60,7 +69,15 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 }
 
 
-/** Internals of `diff()`, separated to allow bypassing diffLevel / mount flushing. */
+/**
+ * Internals of `diff()`, separated to allow bypassing diffLevel / mount flushing.
+ * @param {import('../dom').PreactElement} dom A DOM node to mutate into the shape of a `vnode`
+ * @param {import('../vnode').VNode} vnode A VNode (with descendants forming a tree) representing the desired DOM structure
+ * @param {object} context The current context
+ * @param {boolean} mountAll Whether or not to immediately mount all components
+ * @param {boolean} [componentRoot] ?
+ * @private
+ */
 function idiff(dom, vnode, context, mountAll, componentRoot) {
 	let out = dom,
 		prevSvgMode = isSvgMode;
@@ -155,12 +172,15 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 }
 
 
-/** Apply child and attribute changes between a VNode and a DOM Node to the DOM.
- *	@param {Element} dom			Element whose children should be compared & mutated
- *	@param {Array} vchildren		Array of VNodes to compare to `dom.childNodes`
- *	@param {Object} context			Implicitly descendant context object (from most recent `getChildContext()`)
- *	@param {Boolean} mountAll
- *	@param {Boolean} isHydrating	If `true`, consumes externally created elements similar to hydration
+/**
+ * Apply child and attribute changes between a VNode and a DOM Node to the DOM.
+ * @param {import('../dom').PreactElement} dom Element whose children should be compared & mutated
+ * @param {Array<import('../vnode').VNode>} vchildren Array of VNodes to compare to `dom.childNodes`
+ * @param {object} context Implicitly descendant context object (from most
+ *  recent `getChildContext()`)
+ * @param {boolean} mountAll Whether or not to immediately mount all components
+ * @param {boolean} isHydrating if `true`, consumes externally created elements
+ *  similar to hydration
  */
 function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 	let originalChildren = dom.childNodes,
@@ -204,7 +224,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 				}
 			}
 			// attempt to pluck a node of the same type from the existing children
-			else if (!child && min<childrenLen) {
+			else if (min<childrenLen) {
 				for (j=min; j<childrenLen; j++) {
 					if (children[j]!==undefined && isSameNodeType(c = children[j], vchild, isHydrating)) {
 						child = c;
@@ -248,9 +268,12 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 
 
 
-/** Recursively recycle (or just unmount) a node and its descendants.
- *	@param {Node} node						DOM node to start unmount/removal from
- *	@param {Boolean} [unmountOnly=false]	If `true`, only triggers unmount lifecycle, skips removal
+/**
+ * Recursively recycle (or just unmount) a node and its descendants.
+ * @param {import('../dom').PreactElement} node DOM node to start
+ *  unmount/removal from
+ * @param {boolean} [unmountOnly=false] If `true`, only triggers unmount
+ *  lifecycle, skips removal
  */
 export function recollectNodeTree(node, unmountOnly) {
 	let component = node._component;
@@ -272,7 +295,8 @@ export function recollectNodeTree(node, unmountOnly) {
 }
 
 
-/** Recollect/unmount all children.
+/**
+ * Recollect/unmount all children.
  *	- we use .lastChild here because it causes less reflow than .firstChild
  *	- it's also cheaper than accessing the .childNodes Live NodeList
  */
@@ -286,10 +310,12 @@ export function removeChildren(node) {
 }
 
 
-/** Apply differences in attributes from a VNode to the given DOM Element.
- *	@param {Element} dom		Element with attributes to diff `attrs` against
- *	@param {Object} attrs		The desired end-state key-value attribute pairs
- *	@param {Object} old			Current/previous attributes (from previous VNode or element's prop cache)
+/**
+ * Apply differences in attributes from a VNode to the given DOM Element.
+ * @param {import('../dom').PreactElement} dom Element with attributes to diff `attrs` against
+ * @param {object} attrs The desired end-state key-value attribute pairs
+ * @param {object} old Current/previous attributes (from previous VNode or
+ *  element's prop cache)
  */
 function diffAttributes(dom, attrs, old) {
 	let name;

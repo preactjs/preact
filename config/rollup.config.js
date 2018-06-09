@@ -3,13 +3,13 @@ import babel from 'rollup-plugin-babel';
 import memory from 'rollup-plugin-memory';
 
 export default {
-	strict: true,
 	input: 'src/preact.js',
 	output: {
 		format: 'iife',
 		file: 'dist/preact.dev.js',
 		name: 'preact',
-		sourcemap: true
+		sourcemap: true,
+		strict: true
 	},
 	plugins: [
 		memory({

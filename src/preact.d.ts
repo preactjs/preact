@@ -4,6 +4,8 @@ export as namespace preact;
 declare namespace preact {
 	type Key = string | number;
 	type Ref<T> = (instance: T) => void;
+	type ComponentChild = VNode<any> | string | number | null;
+	type ComponentChildren = ComponentChild[] | ComponentChild | object | string | number | null;
 
 	/**
 	 * @deprecated
@@ -29,7 +31,7 @@ declare namespace preact {
 	}
 
 	interface PreactDOMAttributes {
-		children?: JSX.Element[];
+		children?: ComponentChildren;
 		dangerouslySetInnerHTML?: {
 			__html: string;
 		};
@@ -43,60 +45,74 @@ declare namespace preact {
 	 * of child {VNode}s and a key. The key is used by preact for
 	 * internal purposes.
 	 */
-	interface VNode<P> {
+	interface VNode<P = any> {
 		nodeName: ComponentFactory<P> | string;
 		attributes: P;
 		children: Array<VNode<any> | string>;
 		key?: Key | null;
 	}
 
-	type RenderableProps<P> = Readonly<P> & Readonly<{ children?: JSX.Element[] }>;
+	type RenderableProps<P, RefType = any> = Readonly<
+		P & Attributes & { children?: ComponentChildren; ref?: Ref<RefType> }
+	>;
 
-	interface FunctionalComponent<PropsType> {
-		(props: RenderableProps<PropsType>, context?: any): VNode<any>;
+	interface FunctionalComponent<P = {}> {
+		(props: RenderableProps<P>, context?: any): VNode<any> | null;
 		displayName?: string;
-		defaultProps?: any;
+		defaultProps?: Partial<P>;
 	}
 
-	interface ComponentConstructor<PropsType> {
-		new (props?: PropsType, context?: any): Component<PropsType, {}>;
+	interface ComponentConstructor<P = {}, S = {}> {
+		new (props: P, context?: any): Component<P, S>;
+		displayName?: string;
+		defaultProps?: Partial<P>;
 	}
 
 	// Type alias for a component considered generally, whether stateless or stateful.
-	type AnyComponent<PropsType, StateType> = FunctionalComponent<PropsType> | typeof Component;
+	type AnyComponent<P = {}, S = {}> = FunctionalComponent<P> | Component<P, S>;
 
-	interface Component<PropsType, StateType> {
-		componentWillMount(): void;
-		componentDidMount(): void;
-		componentWillUnmount(): void;
-		componentWillReceiveProps(nextProps: Readonly<PropsType>, nextContext: any): void;
-		shouldComponentUpdate(nextProps: Readonly<PropsType>, nextState: Readonly<StateType>, nextContext: any): boolean;
-		componentWillUpdate(nextProps: Readonly<PropsType>, nextState: Readonly<StateType>, nextContext: any): void;
-		componentDidUpdate(previousProps: Readonly<PropsType>, previousState: Readonly<StateType>, previousContext: any): void;
+	interface Component<P = {}, S = {}> {
+		componentWillMount?(): void;
+		componentDidMount?(): void;
+		componentWillUnmount?(): void;
+		getChildContext?(): object;
+		componentWillReceiveProps?(nextProps: Readonly<P>, nextContext: any): void;
+		shouldComponentUpdate?(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): boolean;
+		componentWillUpdate?(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): void;
+		componentDidUpdate?(previousProps: Readonly<P>, previousState: Readonly<S>, previousContext: any): void;
 	}
 
-	abstract class Component<PropsType, StateType> {
-		constructor(props?: PropsType, context?: any);
+	abstract class Component<P, S> {
+		constructor(props?: P, context?: any);
 
 		static displayName?: string;
 		static defaultProps?: any;
 
-		state: Readonly<StateType>;
-		props: RenderableProps<PropsType>;
+		state: Readonly<S>;
+		props: RenderableProps<P>;
 		context: any;
 		base?: HTMLElement;
 
-		setState<K extends keyof StateType>(state: Pick<StateType, K>, callback?: () => void): void;
-		setState<K extends keyof StateType>(fn: (prevState: StateType, props: PropsType) => Pick<StateType, K>, callback?: () => void): void;
+		setState<K extends keyof S>(state: Pick<S, K>, callback?: () => void): void;
+		setState<K extends keyof S>(fn: (prevState: S, props: P) => Pick<S, K>, callback?: () => void): void;
 
 		forceUpdate(callback?: () => void): void;
 
-		abstract render(props?: RenderableProps<PropsType>, state?: Readonly<StateType>, context?: any): JSX.Element | null;
+		abstract render(props?: RenderableProps<P>, state?: Readonly<S>, context?: any): ComponentChild;
 	}
 
-	function h<PropsType>(node: ComponentFactory<PropsType>, params: PropsType, ...children: (JSX.Element | JSX.Element[] | string)[]): JSX.Element;
-	function h(node: string, params: JSX.HTMLAttributes & JSX.SVGAttributes & { [propName: string]: any }, ...children: (JSX.Element | JSX.Element[] | string)[]): JSX.Element;
-	function render(node: JSX.Element, parent: Element | Document, mergeWith?: Element): Element;
+	function h<P>(
+		node: ComponentFactory<P>,
+		params: Attributes & P | null,
+		...children: ComponentChildren[]
+	): VNode<any>;
+	function h(
+		node: string,
+		params: JSX.HTMLAttributes & JSX.SVGAttributes & Record<string, any> | null,
+		...children: ComponentChildren[]
+	): VNode<any>;
+
+	function render(node: ComponentChild, parent: Element | Document, mergeWith?: Element): Element;
 	function rerender(): void;
 	function cloneElement(element: JSX.Element, props: any): JSX.Element;
 
@@ -106,11 +122,6 @@ declare namespace preact {
 		vnode?: (vnode: VNode<any>) => void;
 		event?: (event: Event) => Event;
 	};
-}
-
-declare module "preact/devtools" {
-	// Empty. This module initializes the React Developer Tools integration
-	// when imported.
 }
 
 declare global {
@@ -123,6 +134,10 @@ declare global {
 
 		interface ElementAttributesProperty {
 			props: any;
+		}
+
+		interface ElementChildrenAttribute {
+			children: any;
 		}
 
 		interface SVGAttributes extends HTMLAttributes {
@@ -387,102 +402,192 @@ declare global {
 		type AnimationEventHandler = EventHandler<AnimationEvent>;
 		type TransitionEventHandler = EventHandler<TransitionEvent>;
 		type GenericEventHandler = EventHandler<Event>;
+		type PointerEventHandler = EventHandler<PointerEvent>;
 
 		interface DOMAttributes extends preact.PreactDOMAttributes {
 			// Image Events
 			onLoad?: GenericEventHandler;
+			onLoadCapture?: GenericEventHandler;
 
 			// Clipboard Events
 			onCopy?: ClipboardEventHandler;
+			onCopyCapture?: ClipboardEventHandler;
 			onCut?: ClipboardEventHandler;
+			onCutCapture?: ClipboardEventHandler;
 			onPaste?: ClipboardEventHandler;
+			onPasteCapture?: ClipboardEventHandler;
 
 			// Composition Events
 			onCompositionEnd?: CompositionEventHandler;
+			onCompositionEndCapture?: CompositionEventHandler;
 			onCompositionStart?: CompositionEventHandler;
+			onCompositionStartCapture?: CompositionEventHandler;
 			onCompositionUpdate?: CompositionEventHandler;
+			onCompositionUpdateCapture?: CompositionEventHandler;
 
 			// Focus Events
 			onFocus?: FocusEventHandler;
+			onFocusCapture?: FocusEventHandler;
 			onBlur?: FocusEventHandler;
+			onBlurCapture?: FocusEventHandler;
 
 			// Form Events
 			onChange?: GenericEventHandler;
+			onChangeCapture?: GenericEventHandler;
 			onInput?: GenericEventHandler;
+			onInputCapture?: GenericEventHandler;
 			onSearch?: GenericEventHandler;
+			onSearchCapture?: GenericEventHandler;
 			onSubmit?: GenericEventHandler;
+			onSubmitCapture?: GenericEventHandler;
 
 			// Keyboard Events
 			onKeyDown?: KeyboardEventHandler;
+			onKeyDownCapture?: KeyboardEventHandler;
 			onKeyPress?: KeyboardEventHandler;
+			onKeyPressCapture?: KeyboardEventHandler;
 			onKeyUp?: KeyboardEventHandler;
+			onKeyUpCapture?: KeyboardEventHandler;
 
 			// Media Events
 			onAbort?: GenericEventHandler;
+			onAbortCapture?: GenericEventHandler;
 			onCanPlay?: GenericEventHandler;
+			onCanPlayCapture?: GenericEventHandler;
 			onCanPlayThrough?: GenericEventHandler;
+			onCanPlayThroughCapture?: GenericEventHandler;
 			onDurationChange?: GenericEventHandler;
+			onDurationChangeCapture?: GenericEventHandler;
 			onEmptied?: GenericEventHandler;
+			onEmptiedCapture?: GenericEventHandler;
 			onEncrypted?: GenericEventHandler;
+			onEncryptedCapture?: GenericEventHandler;
 			onEnded?: GenericEventHandler;
+			onEndedCapture?: GenericEventHandler;
 			onLoadedData?: GenericEventHandler;
+			onLoadedDataCapture?: GenericEventHandler;
 			onLoadedMetadata?: GenericEventHandler;
+			onLoadedMetadataCapture?: GenericEventHandler;
 			onLoadStart?: GenericEventHandler;
+			onLoadStartCapture?: GenericEventHandler;
 			onPause?: GenericEventHandler;
+			onPauseCapture?: GenericEventHandler;
 			onPlay?: GenericEventHandler;
+			onPlayCapture?: GenericEventHandler;
 			onPlaying?: GenericEventHandler;
+			onPlayingCapture?: GenericEventHandler;
 			onProgress?: GenericEventHandler;
+			onProgressCapture?: GenericEventHandler;
 			onRateChange?: GenericEventHandler;
+			onRateChangeCapture?: GenericEventHandler;
 			onSeeked?: GenericEventHandler;
+			onSeekedCapture?: GenericEventHandler;
 			onSeeking?: GenericEventHandler;
+			onSeekingCapture?: GenericEventHandler;
 			onStalled?: GenericEventHandler;
+			onStalledCapture?: GenericEventHandler;
 			onSuspend?: GenericEventHandler;
+			onSuspendCapture?: GenericEventHandler;
 			onTimeUpdate?: GenericEventHandler;
+			onTimeUpdateCapture?: GenericEventHandler;
 			onVolumeChange?: GenericEventHandler;
+			onVolumeChangeCapture?: GenericEventHandler;
 			onWaiting?: GenericEventHandler;
+			onWaitingCapture?: GenericEventHandler;
 
 			// MouseEvents
 			onClick?: MouseEventHandler;
+			onClickCapture?: MouseEventHandler;
 			onContextMenu?: MouseEventHandler;
+			onContextMenuCapture?: MouseEventHandler;
 			onDblClick?: MouseEventHandler;
+			onDblClickCapture?: MouseEventHandler;
 			onDrag?: DragEventHandler;
+			onDragCapture?: DragEventHandler;
 			onDragEnd?: DragEventHandler;
+			onDragEndCapture?: DragEventHandler;
 			onDragEnter?: DragEventHandler;
+			onDragEnterCapture?: DragEventHandler;
 			onDragExit?: DragEventHandler;
+			onDragExitCapture?: DragEventHandler;
 			onDragLeave?: DragEventHandler;
+			onDragLeaveCapture?: DragEventHandler;
 			onDragOver?: DragEventHandler;
+			onDragOverCapture?: DragEventHandler;
 			onDragStart?: DragEventHandler;
+			onDragStartCapture?: DragEventHandler;
 			onDrop?: DragEventHandler;
+			onDropCapture?: DragEventHandler;
 			onMouseDown?: MouseEventHandler;
+			onMouseDownCapture?: MouseEventHandler;
 			onMouseEnter?: MouseEventHandler;
+			onMouseEnterCapture?: MouseEventHandler;
 			onMouseLeave?: MouseEventHandler;
+			onMouseLeaveCapture?: MouseEventHandler;
 			onMouseMove?: MouseEventHandler;
+			onMouseMoveCapture?: MouseEventHandler;
 			onMouseOut?: MouseEventHandler;
+			onMouseOutCapture?: MouseEventHandler;
 			onMouseOver?: MouseEventHandler;
+			onMouseOverCapture?: MouseEventHandler;
 			onMouseUp?: MouseEventHandler;
+			onMouseUpCapture?: MouseEventHandler;
 
 			// Selection Events
 			onSelect?: GenericEventHandler;
+			onSelectCapture?: GenericEventHandler;
 
 			// Touch Events
 			onTouchCancel?: TouchEventHandler;
+			onTouchCancelCapture?: TouchEventHandler;
 			onTouchEnd?: TouchEventHandler;
+			onTouchEndCapture?: TouchEventHandler;
 			onTouchMove?: TouchEventHandler;
+			onTouchMoveCapture?: TouchEventHandler;
 			onTouchStart?: TouchEventHandler;
+			onTouchStartCapture?: TouchEventHandler;
+
+			// Pointer Events
+			onPointerOver?: PointerEventHandler;
+			onPointerOverCapture?: PointerEventHandler;
+			onPointerEnter?: PointerEventHandler;
+			onPointerEnterCapture?: PointerEventHandler;
+			onPointerDown?: PointerEventHandler;
+			onPointerDownCapture?: PointerEventHandler;
+			onPointerMove?: PointerEventHandler;
+			onPointerMoveCapture?: PointerEventHandler;
+			onPointerUp?: PointerEventHandler;
+			onPointerUpCapture?: PointerEventHandler;
+			onPointerCancel?: PointerEventHandler;
+			onPointerCancelCapture?: PointerEventHandler;
+			onPointerOut?: PointerEventHandler;
+			onPointerOutCapture?: PointerEventHandler;
+			onPointerLeave?: PointerEventHandler;
+			onPointerLeaveCapture?: PointerEventHandler;
+			onGotPointerCapture?: PointerEventHandler;
+			onGotPointerCaptureCapture?: PointerEventHandler;
+			onLostPointerCapture?: PointerEventHandler;
+			onLostPointerCaptureCapture?: PointerEventHandler;
 
 			// UI Events
 			onScroll?: UIEventHandler;
+			onScrollCapture?: UIEventHandler;
 
 			// Wheel Events
 			onWheel?: WheelEventHandler;
+			onWheelCapture?: WheelEventHandler;
 
 			// Animation Events
 			onAnimationStart?: AnimationEventHandler;
+			onAnimationStartCapture?: AnimationEventHandler;
 			onAnimationEnd?: AnimationEventHandler;
+			onAnimationEndCapture?: AnimationEventHandler;
 			onAnimationIteration?: AnimationEventHandler;
+			onAnimationIterationCapture?: AnimationEventHandler;
 
 			// Transition Events
 			onTransitionEnd?: TransitionEventHandler;
+			onTransitionEndCapture?: TransitionEventHandler;
 		}
 
 		interface HTMLAttributes extends preact.PreactHTMLAttributes, DOMAttributes {
@@ -504,14 +609,15 @@ declare global {
 			charSet?: string;
 			challenge?: string;
 			checked?: boolean;
-			class?: string | { [key: string]: boolean };
-			className?: string | { [key: string]: boolean };
+			class?: string;
+			className?: string;
 			cols?: number;
 			colSpan?: number;
 			content?: string;
 			contentEditable?: boolean;
 			contextMenu?: string;
 			controls?: boolean;
+			controlsList?: string;
 			coords?: string;
 			crossOrigin?: string;
 			data?: string;
@@ -589,7 +695,7 @@ declare global {
 			sizes?: string;
 			slot?: string;
 			span?: number;
-			spellCheck?: boolean;
+			spellcheck?: boolean;
 			src?: string;
 			srcset?: string;
 			srcDoc?: string;
@@ -604,7 +710,7 @@ declare global {
 			title?: string;
 			type?: string;
 			useMap?: string;
-			value?: string | string[];
+			value?: string | string[] | number;
 			width?: number | string;
 			wmode?: string;
 			wrap?: string;

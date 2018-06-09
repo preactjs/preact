@@ -1,10 +1,10 @@
 /*eslint no-var:0, object-shorthand:0 */
 
-var coverage = String(process.env.COVERAGE)!=='false',
-	ci = String(process.env.CI).match(/^(1|true)$/gi),
+var coverage = String(process.env.COVERAGE) === 'true',
+	allowSauce = !String(process.env.ALLOW_SAUCELABS).match(/^(0|false|undefined)$/gi),
 	pullRequest = !String(process.env.TRAVIS_PULL_REQUEST).match(/^(0|false|undefined)$/gi),
 	masterBranch = String(process.env.TRAVIS_BRANCH).match(/^master$/gi),
-	sauceLabs = ci && !pullRequest && masterBranch,
+	sauceLabs = allowSauce && !pullRequest && masterBranch,
 	performance = !coverage && String(process.env.PERFORMANCE)!=='false',
 	webpack = require('webpack');
 
@@ -32,19 +32,7 @@ var sauceLabsLaunchers = {
 	sl_ie_11: {
 		base: 'SauceLabs',
 		browserName: 'internet explorer',
-		version: '11.103',
-		platform: 'Windows 10'
-	},
-	sl_ie_10: {
-		base: 'SauceLabs',
-		browserName: 'internet explorer',
-		version: '10.0',
-		platform: 'Windows 7'
-	},
-	sl_ie_9: {
-		base: 'SauceLabs',
-		browserName: 'internet explorer',
-		version: '9.0',
+		version: '11.0',
 		platform: 'Windows 7'
 	}
 };
@@ -97,10 +85,15 @@ module.exports = function(config) {
 		// Use only two browsers concurrently, works better with open source Sauce Labs remote testing
 		concurrency: 2,
 
-		// sauceLabs: {
-		// 	tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER || ('local'+require('./package.json').version),
-		// 	startConnect: false
-		// },
+		captureTimeout: 0,
+
+		sauceLabs: {
+			build: 'CI #' + process.env.TRAVIS_BUILD_NUMBER + ' (' + process.env.TRAVIS_BUILD_ID + ')',
+			tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER || ('local'+require('../package.json').version),
+			connectLocationForSERelay: 'localhost',
+			connectPortForSERelay: 4445,
+			startConnect: false
+		},
 
 		customLaunchers: sauceLabs ? sauceLabsLaunchers : localLaunchers,
 
@@ -114,6 +107,7 @@ module.exports = function(config) {
 		},
 
 		webpack: {
+			mode: 'development',
 			devtool: 'inline-source-map',
 			module: {
 				/* Transpile source and test files */
@@ -131,10 +125,7 @@ module.exports = function(config) {
 					/* Only Instrument our source files for coverage */
 					coverage ? {
 						test: /\.jsx?$/,
-						use: {
-					    loader: 'istanbul-instrumenter-loader',
-					    options: { esModules: true }
-					  },
+						loader: 'istanbul-instrumenter-loader',
 						include: /src/
 					} : {}
 				]
@@ -153,7 +144,10 @@ module.exports = function(config) {
 					ENABLE_PERFORMANCE: performance,
 					DISABLE_FLAKEY: !!String(process.env.FLAKEY).match(/^(0|false)$/gi)
 				})
-			]
+			],
+			performance: {
+				hints: false
+			}
 		},
 
 		webpackMiddleware: {
