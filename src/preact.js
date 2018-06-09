@@ -5,10 +5,13 @@ import { render } from './render';
 import { rerender } from './render-queue';
 import options from './options';
 
+const createRef = Object;
+
 export default {
 	h,
 	createElement,
 	cloneElement,
+	createRef,
 	Component,
 	render,
 	rerender,
@@ -19,6 +22,7 @@ export {
 	h,
 	createElement,
 	cloneElement,
+	createRef,
 	Component,
 	render,
 	rerender,

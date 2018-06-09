@@ -4,6 +4,7 @@ import { buildComponentFromVNode } from './component';
 import { createNode, setAccessor } from '../dom/index';
 import { unmountComponent } from './component';
 import options from '../options';
+import { applyRef } from '../util';
 import { removeNode } from '../dom/index';
 
 /**
@@ -284,7 +285,7 @@ export function recollectNodeTree(node, unmountOnly) {
 	else {
 		// If the node's VNode had a ref function, invoke it with null here.
 		// (this is part of the React spec, and smart for unsetting references)
-		if (node[ATTR_KEY]!=null && node[ATTR_KEY].ref) node[ATTR_KEY].ref(null);
+		if (node[ATTR_KEY]!=null) applyRef(node[ATTR_KEY].ref, null);
 
 		if (unmountOnly===false || node[ATTR_KEY]==null) {
 			removeNode(node);
