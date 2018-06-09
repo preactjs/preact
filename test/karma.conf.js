@@ -8,6 +8,10 @@ var coverage = String(process.env.COVERAGE) === 'true',
 	performance = !coverage && String(process.env.PERFORMANCE)!=='false',
 	webpack = require('webpack');
 
+if (!process.env.CHROME_BIN) {
+	process.env.CHROME_BIN = require('puppeteer').executablePath();
+}
+
 var sauceLabsLaunchers = {
 	sl_chrome: {
 		base: 'SauceLabs',
