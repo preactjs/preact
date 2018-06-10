@@ -5,7 +5,9 @@ import { render } from './render';
 import { rerender } from './render-queue';
 import options from './options';
 
-const createRef = Object;
+function createRef() {
+	return {};
+}
 
 export default {
 	h,
