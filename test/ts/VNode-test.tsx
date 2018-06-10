@@ -57,3 +57,9 @@ describe("VNode", () => {
 		expect(comp.children[1]).to.be.a("string");
 	});
 });
+
+class TypedChildren extends Component<{children: (num: number) => string}> {
+	render() { return null }
+}
+
+const typedChild = <TypedChildren>{num => num.toFixed(2)}</TypedChildren>
