@@ -618,6 +618,7 @@ declare global {
 			contentEditable?: boolean;
 			contextMenu?: string;
 			controls?: boolean;
+			controlsList?: string;
 			coords?: string;
 			crossOrigin?: string;
 			data?: string;
