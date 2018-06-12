@@ -1,0 +1,10 @@
+[ignore]
+<PROJECT_ROOT>/dist/.*
+
+[include]
+
+[libs]
+
+[lints]
+
+[options]

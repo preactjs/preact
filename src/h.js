@@ -6,10 +6,36 @@ const stack = [];
 
 const EMPTY_CHILDREN = [];
 
-/** JSX/hyperscript reviver
-*	Benchmarks: https://esbench.com/bench/57ee8f8e330ab09900a1a1a0
- *	@see http://jasonformat.com/wtf-is-jsx
- *	@public
+/**
+ * JSX/hyperscript reviver.
+ * @see http://jasonformat.com/wtf-is-jsx
+ * Benchmarks: https://esbench.com/bench/57ee8f8e330ab09900a1a1a0
+ *
+ * Note: this is exported as both `h()` and `createElement()` for compatibility
+ * reasons.
+ *
+ * Creates a VNode (virtual DOM element). A tree of VNodes can be used as a
+ * lightweight representation of the structure of a DOM tree. This structure can
+ * be realized by recursively comparing it against the current _actual_ DOM
+ * structure, and applying only the differences.
+ *
+ * `h()`/`createElement()` accepts an element name, a list of attributes/props,
+ * and optionally children to append to the element.
+ *
+ * @example The following DOM tree
+ *
+ * `<div id="foo" name="bar">Hello!</div>`
+ *
+ * can be constructed using this function as:
+ *
+ * `h('div', { id: 'foo', name : 'bar' }, 'Hello!');`
+ *
+ * @param {string | function} nodeName An element name. Ex: `div`, `a`, `span`, etc.
+ * @param {object | null} attributes Any attributes/props to set on the created element.
+ * @param {VNode[]} [rest] Additional arguments are taken to be children to
+ *  append. Can be infinitely nested Arrays.
+ *
+ * @public
  */
 export function h(nodeName, attributes) {
 	let children=EMPTY_CHILDREN, lastSimple, child, simple, i;
