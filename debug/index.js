@@ -4,6 +4,7 @@ if (process.env.NODE_ENV === 'development') {
 	const preact = require('preact');
 	const options = preact.options;
 	const oldVnodeOption = options.vnode;
+	const supportPerf = performance && performance.mark && performance.clearMarks && performance.measure && performance.clearMeasures;
 
 	options.vnode = function(vnode) {
 		const { nodeName, attributes, children } = vnode;
@@ -54,10 +55,11 @@ if (process.env.NODE_ENV === 'development') {
 	try {
 		const oldRender = preact.render;
 		preact.render = function (vnode, parent, merge) {
+			const serializedVNode = serializedVNode(vnode);
 			if (parent == null && merge == null) {
 				// render(vnode, parent, merge) can't have both parent and merge be undefined
 				console.error('The "containerNode" or "replaceNode" is not defined in the render method. ' +
-					'Component: \n\n' + serializeVNode(vnode));
+					'Component: \n\n' + serializedVNode);
 			}
 			else if (parent == merge) {
 				// if parent == merge, it doesn't reason well and would cause trouble when preact
@@ -66,10 +68,21 @@ if (process.env.NODE_ENV === 'development') {
 					'The "containerNode" and "replaceNode" are the same in render method, ' +
 					'when the "replaceNode" DOM node is expected to be a child of "containerNode". ' +
 					'docs-ref: https://preactjs.com/guide/api-reference#-preact-render-. Component: \n\n' +
-					serializeVNode(vnode)
+					serializedVNode
 				);
 			}
-			return oldRender(vnode, parent, merge);
+			if (supportPerf) {
+				performance.mark('perf-start: ' + serializedVNode);
+			}
+			const oldRenderResult = oldRender(vnode, parent, merge);
+			if (supportPerf) {
+				performance.mark('perf-end: ' + serializedVNode);
+				performance.measure(serializedVNode, 'perf-start: ' + serializedVNode, 'perf-end: ' + serializedVNode);
+				performance.clearMarks('perf-start: ' + serializedVNode);
+				performance.clearMarks('perf-end: ' + serializedVNode);
+				performance.clearMeasures(serializedVNode);
+			}
+			return oldRenderResult;
 		};
 	}
 	catch (e) {}
