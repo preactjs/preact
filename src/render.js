@@ -1,4 +1,4 @@
-import { EMPTY_OBJ, EMPTY_ARR } from './constants';
+import { EMPTY_OBJ, EMPTY_ARR, TEXT_NODE } from './constants';
 import { diff /*, getVNodeChildren*/ } from './diff/index';
 import { diffChildren } from './diff/children';
 import { createVNode } from './create-element';
@@ -17,25 +17,34 @@ export function hydrate(vnode, parent) {
 }
 
 export function toVNode(node) {
-	if (node.nodeType===3) {
-		return createVNode(3, null, null, null, node.nodeValue, null);
+	// Text nodes correspond to VNodes with type=3 (TEXT_NODE)
+	if (node.nodeType===TEXT_NODE) {
+		return createVNode(TEXT_NODE, null, null, null, node.nodeValue, null);
 	}
+
 	let props = {};
-	for (let i=0; i<node.attributes.length; i++) {
-		let attr = node.attributes[i];
-		props[attr.name] = attr.value;
+
+	// Benchmark:  https://esbench.com/bench/5b2072d7f2949800a0f61d63
+	let attrs = node.getAttributeNames();
+	for (let i=0; i<attrs.length; i++) {
+		props[attrs[i]] = node.getAttribute(attrs[i]);
 	}
+	// for (let i=0; i<node.attributes.length; i++) {
+	// 	let attr = node.attributes[i];
+	// 	props[attr.name] = attr.value;
+	// }
+
 	return createVNode(node.nodeType, node.localName, props, EMPTY_ARR.map.call(node.childNodes, toVNode), null, null);
 
-	// if (node.nodeType===1) {
+	// if (node.nodeType===ELEMENT_NODE) {
 	// 	let props = {};
 	// 	for (let i=0; i<node.attributes.length; i++) {
 	// 		let attr = node.attributes[i];
 	// 		props[attr.name] = attr.value;
 	// 	}
-	// 	return createVNode(1, node.localName, props, EMPTY_ARR.map.call(node.childNodes, toVNode), null, null);
+	// 	return createVNode(ELEMENT_NODE, node.localName, props, EMPTY_ARR.map.call(node.childNodes, toVNode), null, null);
 	// }
-	// return createVNode(3, null, null, null, node.nodeValue, null);
+	// return createVNode(TEXT_NODE, null, null, null, node.nodeValue, null);
 
 	// let type = node.nodeType,
 	// 	props = null;
@@ -46,5 +55,5 @@ export function toVNode(node) {
 	// 		props[attr.name] = attr.value;
 	// 	}
 	// }
-	// return createVNode(type, type===1 ? node.localName : null, props, node.childNodes==null ? null : EMPTY_ARR.map.call(node.childNodes, toVNode), type===3 ? node.nodeValue : null, null);
+	// return createVNode(type, type===1 ? node.localName : null, props, node.childNodes==null ? null : EMPTY_ARR.map.call(node.childNodes, toVNode), type===TEXT_NODE ? node.nodeValue : null, null);
 }
