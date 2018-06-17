@@ -19,8 +19,22 @@ export function setComponentProps(component, props, renderMode, context, mountAl
 	if (component._disable) return;
 	component._disable = true;
 
-	if ((component.__ref = props.ref)) delete props.ref;
-	if ((component.__key = props.key)) delete props.key;
+	// if ((component.__ref = props.ref)) delete props.ref;
+	// if ((component.__key = props.key)) delete props.key;
+
+	// component.__ref = props.ref;
+	// component.__key = props.key;
+	// if ('ref' in props) delete props.ref;
+	// if ('key' in props) delete props.key;
+
+	// if ('ref' in props) {
+	// 	component.__ref = props.ref;
+	// 	delete props.ref;
+	// }
+	// if ('key' in props) {
+	// 	component.__key = props.key;
+	// 	delete props.key;
+	// }
 
 	if (typeof component.constructor.getDerivedStateFromProps === 'undefined') {
 		if (!component.base || mountAll) {
