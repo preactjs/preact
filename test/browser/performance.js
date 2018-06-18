@@ -30,7 +30,7 @@ function benchmark(iter, callback) {
 	for (let i=100; i--; ) noop(), iter();
 
 	let count = 2,
-		time = 500,
+		time = 1000,
 		passes = 0,
 		noops = loop(noop, time),
 		iterations = 0;
