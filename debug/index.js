@@ -55,7 +55,7 @@ if (process.env.NODE_ENV === 'development') {
 	try {
 		const oldRender = preact.render;
 		preact.render = function (vnode, parent, merge) {
-			const serializedVNode = serializedVNode(vnode);
+			const serializedVNode = serializeVNode(vnode);
 			if (parent == null && merge == null) {
 				// render(vnode, parent, merge) can't have both parent and merge be undefined
 				console.error('The "containerNode" or "replaceNode" is not defined in the render method. ' +
