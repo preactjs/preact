@@ -7,3 +7,6 @@
  * @property {object} attributes The properties of this VNode
  */
 export function VNode() {}
+
+// For more info look at issue #1063
+VNode.undefined = undefined;
