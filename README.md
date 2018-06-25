@@ -251,8 +251,8 @@ import { h, render, Component } from 'preact';
 
 class Clock extends Component {
 	render() {
-		let time = new Date().toLocaleTimeString();
-		return <span>{ time }</span>;
+		let time = new Date();
+		return <time datetime={time.toISOString()}>{ time.toLocaleTimeString() }</time>;
 	}
 }
 
