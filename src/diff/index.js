@@ -692,6 +692,15 @@ function flattenChildren(children, flattened) {
 // }
 
 
+/**
+ * Create a component. Normalizes differences between PFC's and classful
+ * Components.
+ * @param {function} Ctor The constructor of the component to create
+ * @param {object} props The initial props of the component
+ * @param {object} context The initial context of the component
+ * @param {import('../component').Component} ancestorComponent The direct parent component of this component
+ * @returns {import('../component').Component}
+ */
 function createComponent(Ctor, props, context, ancestorComponent) {
 	let inst;
 	if (Ctor.prototype && Ctor.prototype.render) {

@@ -1,5 +1,27 @@
 import { EMPTY_OBJ } from './constants';
 
+/**
+ * @typedef {string | function} VNodeTag
+ */
+
+/**
+ * @typedef VNode
+ * @property {VNodeTag} tag
+ * @property {*} props
+ * @property {string} text
+ * @property {string} key
+ * @property {*} _children
+ * @property {*} _el
+ * @property {*} _component
+ */
+
+/**
+  * Create an Element type Virtual Node
+  * @param {VNodeTag} tag
+  * @param {*} props
+  * @param {Array<*>} children
+  * @returns {VNode}
+  */
 export function createElement(tag, props, children) {
 	if (props==null) props = {};
 	if (arguments.length>3) {
@@ -19,6 +41,14 @@ export function createElement(tag, props, children) {
 	return createVNode(tag, props, null, props.key);
 }
 
+/**
+ * Create a VNode
+ * @param {VNodeTag} tag
+ * @param {*} props
+ * @param {string} text
+ * @param {string} key
+ * @returns {VNode}
+ */
 function createVNode(tag, props, text, key) {
 	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
 	// Do not inline into createElement and coerceToVNode!
