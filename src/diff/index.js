@@ -4,6 +4,7 @@ import { Component /* , enqueueRender */ } from '../component';
 import { createVNode /*, reclaimVNode*/ } from '../create-element';
 import { diffChildren /*, create */ } from './children';
 import { diffProps } from './props';
+import { assign } from '../util';
 // import { toVNode } from '../render';
 // import { processQueue } from '../component';
 
@@ -192,6 +193,11 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			// }
 
 			let s = c._nextState || c.state;
+			if (c.constructor.getDerivedStateFromProps) {
+				// Since c._nextState is modified, the previous state doesn't need to be saved.
+				// It remains intact at c.state
+				assign(s, c.constructor.getDerivedStateFromProps(newTree.props, s));
+			}
 			// console.log('updating component in-place', c._nextState);
 			// if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, c.state)===false) {
 			// 	c.state = nextState;
@@ -214,6 +220,11 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			c.props = newTree.props;
 			if (!c.state) c.state = {};
 			c.context = context;
+			if (c.constructor.getDerivedStateFromProps) {
+				// Since c._nextState is modified, the previous state doesn't need to be saved.
+				// It remains intact at c.state
+				assign(c.state, c.constructor.getDerivedStateFromProps(newTree.props, c.state));
+			}
 			if (c.componentWillMount!=null) c.componentWillMount();
 			mounts.push(c);
 
