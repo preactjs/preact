@@ -19,14 +19,18 @@ export function collectComponent(component) {
 	(components[name] || (components[name] = [])).push(component);
 }
 
+/**
+ * @typedef {Component} CustomComponent
+ * @property {function} render
+ */
 
 /**
  * Create a component. Normalizes differences between PFC's and classful
  * Components.
- * @param {function} Ctor The constructor of the component to create
+ * @param {(props, context) => void} Ctor The constructor of the component to create
  * @param {object} props The initial props of the component
  * @param {object} context The initial context of the component
- * @returns {import('../component').Component}
+ * @returns {Component}
  */
 export function createComponent(Ctor, props, context) {
 	let list = components[Ctor.name],
@@ -39,7 +43,8 @@ export function createComponent(Ctor, props, context) {
 	else {
 		inst = new Component(props, context);
 		inst.constructor = Ctor;
-		inst.render = doRender;
+		/** @type {CustomComponent} */(inst).render =
+			doRender;
 	}
 
 

@@ -2,6 +2,11 @@ import { FORCE_RENDER } from './constants';
 import { extend } from './util';
 import { renderComponent } from './vdom/component';
 import { enqueueRender } from './render-queue';
+
+/**
+ * @typedef {import('./vnode').VNode} VNode
+ */
+
 /**
  * Base Component class.
  * Provides `setState()` and `forceUpdate()`, which trigger rendering.
@@ -79,7 +84,7 @@ extend(Component.prototype, {
 	 * @param {object} state The component's current state
 	 * @param {object} context Context object, as returned by the nearest
 	 *  ancestor's `getChildContext()`
-	 * @returns {import('./vnode').VNode | void}
+	 * @returns {VNode | void}
 	 */
 	render() {}
 
