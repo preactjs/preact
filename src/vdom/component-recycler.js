@@ -33,13 +33,13 @@ export function createComponent(Ctor, props, context) {
 		inst;
 
 	if (Ctor.prototype && Ctor.prototype.render) {
-		inst = new Ctor(props, context);
+		inst = new /** @type {(props, context) => void} */(Ctor)(props, context);
 		Component.call(inst, props, context);
 	}
 	else {
 		inst = new Component(props, context);
 		inst.constructor = Ctor;
-		inst.render = doRender;
+		inst['render'] = doRender;
 	}
 
 
