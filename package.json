@@ -111,6 +111,7 @@
     "karma-webpack": "^3.0.0",
     "mocha": "^5.0.4",
     "npm-run-all": "^4.0.0",
+    "puppeteer": "^1.5.0",
     "rimraf": "^2.5.3",
     "rollup": "^0.57.1",
     "rollup-plugin-babel": "^3.0.2",
