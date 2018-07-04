@@ -11,7 +11,7 @@ import { extend } from '../util';
  */
 export function isSameNodeType(node, vnode, hydrating) {
 	if (typeof vnode==='string' || typeof vnode==='number') {
-		return node.splitText!==undefined;
+		return node['splitText']!==undefined;
 	}
 	if (typeof vnode.nodeName==='string') {
 		return !node._componentConstructor && isNamedNode(node, vnode.nodeName);
@@ -41,7 +41,7 @@ export function getNodeProps(vnode) {
 	let props = extend({}, vnode.attributes);
 	props.children = vnode.children;
 
-	let defaultProps = vnode.nodeName.defaultProps;
+	let defaultProps = vnode.nodeName['defaultProps'];
 	if (defaultProps!==undefined) {
 		for (let i in defaultProps) {
 			if (props[i]===undefined) {
