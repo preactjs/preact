@@ -1,0 +1,28 @@
+{
+	"compilerOptions": {
+		"target": "es6",
+		"module": "es6",
+		"moduleResolution": "node",
+		"lib": [
+			"es6",
+			"dom"
+		],
+		"noImplicitAny": true,
+		"noImplicitThis": true,
+		"strictNullChecks": true,
+		"strict": true,
+		"typeRoots": [
+			"../../"
+		],
+		"types": [],
+		"forceConsistentCasingInFileNames": true,
+		"jsx": "react",
+		"jsxFactory": "h"
+	},
+	"files": [
+		"VNode-test.tsx",
+		"Component-test.tsx",
+		"hoc-test.tsx",
+		"preact.tsx"
+	]
+}

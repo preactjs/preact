@@ -1,10 +1,10 @@
 import { TEXT_NODE, EMPTY_OBJ, EMPTY_ARR } from '../constants';
-import { assign } from '../util';
-import { Component, enqueueRender } from '../component';
+// import { assign } from '../util';
+import { Component /* , enqueueRender */ } from '../component';
 import { createVNode /*, reclaimVNode*/ } from '../create-element';
 import { diffChildren /*, create */ } from './children';
 import { diffProps } from './props';
-import { toVNode } from '../render';
+// import { toVNode } from '../render';
 // import { processQueue } from '../component';
 
 const mounts = [];
@@ -155,12 +155,12 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 
 	let c, p, isNew = false, oldProps, oldState, oldContext,
 		oldTag = oldTree!=null ? oldTree.tag : null;
-	
+
 	// root of a diff:
 	if (diffLevel++ === 0) {
 		isSvg = parent!=null && parent.ownerSVGElement!==undefined;
 	}
-	
+
 	// @TODO unmounting here removes the dom pointer
 	// if (newTree.tag!==oldTag) {
 	// 	// console.log('mismatched tags: ', oldTag, newTree.tag);
@@ -190,7 +190,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			// 	c.state = c.prevState;
 			// 	c.prevState = null;
 			// }
-	
+
 			let s = c._nextState || c.state;
 			// console.log('updating component in-place', c._nextState);
 			// if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, c.state)===false) {
@@ -398,7 +398,7 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 
 		// vnode._el = dom = typeof vnode==='string' || typeof vnode==='number' ? document.createTextNode(vnode) : isSvg ? document.createElementNS('http://www.w3.org/2000/svg', vnode.tag) : document.createElement(vnode.tag);
 		vnode._el = dom = vnode.type===3 ? document.createTextNode(vnode.text) : isSvg ? document.createElementNS('http://www.w3.org/2000/svg', vnode.tag) : document.createElement(vnode.tag);
-	
+
 		// dom = vnode.type===3 ? document.createTextNode(vnode.text) : document.createElement(vnode.tag);
 		// if (d) {
 		// 	parent.replaceChild(dom, d);
