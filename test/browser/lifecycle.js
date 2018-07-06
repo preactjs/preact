@@ -801,10 +801,72 @@ describe('Lifecycle methods', () => {
 		});
 	});
 
-	// TODO - Look at
 	describe('#componentDidUpdate', () => {
-		it('should be passed previous state', () => {
-			//
+		it('should be passed previous props and state', () => {
+			let previousProps = [];
+			let previousStates = [];
+
+			let currentProps = [];
+			let currentStates = [];
+
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						value: 0
+					};
+				}
+				static getDerivedStateFromProps(props, state) {
+					return {
+						value: state.value + 1,
+					};
+				}
+				componentDidUpdate(prevProps, prevState) {
+					previousProps.push(prevProps);
+					previousStates.push(prevState);
+
+					currentProps.push(this.props);
+					currentStates.push(this.state);
+				}
+				componentDidMount() {
+					this.setState({
+						value: this.state.value + 1
+					});
+				}
+				render() {
+					return <div>{this.state.value}</div>
+				}
+			}
+
+			let element = render(<Foo foo="foo" />, scratch);
+			expect(element.textContent).to.be.equal('1');
+			expect(previousStates).to.have.length(0);
+			expect(currentStates).to.have.length(0);
+
+			element = render(<Foo foo="bar" />, scratch, scratch.firstChild);
+			expect(element.textContent).to.be.equal('3');
+
+			expect(previousProps).to.deep.equal([{
+				foo: "foo",
+				children: []
+			}]);
+
+			// prevState in componentDidUpdate should be
+			// the state before getDerivedStateFromProps is called...
+			expect(previousStates).to.deep.equal([{
+				value: 1
+			}]);
+
+			// ...and this.state in componentDidUpdate should be
+			// the updated state after getDerivedStateFromProps is called...
+			expect(currentStates).to.deep.equal([{
+				value: 3
+			}]);
+
+			expect(currentProps).to.deep.equal([{
+				foo: "bar",
+				children: []
+			}]);
 		});
 	});
 
