@@ -438,8 +438,8 @@ describe('Lifecycle methods', () => {
 			/** @type {() => void} */
 			let updateState;
 
-			let propLog = [];
-			let stateLog = [];
+			let propsArg;
+			let stateArg;
 
 			class Foo extends Component {
 				constructor(props) {
@@ -452,8 +452,10 @@ describe('Lifecycle methods', () => {
 					});
 				}
 				static getDerivedStateFromProps(props, state) {
-					propLog.push({...props});
-					stateLog.push({...state});
+					// These object references might be updated later so copy
+					// object so we can assert their values at this snapshot in time
+					propsArg = {...props};
+					stateArg = {...state};
 
 					// NOTE: Don't do this in real production code!
 					// https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html
@@ -470,54 +472,38 @@ describe('Lifecycle methods', () => {
 			// state.value: initialized to 0 in constructor, 0 -> 1 in gDSFP
 			let element = render(<Foo foo="foo" />, scratch);
 			expect(element.textContent).to.be.equal('1');
-			expect(stateLog).to.have.length(1);
-			expect(stateLog).to.deep.equal([{
-				value: 0
-			}]);
-			expect(propLog).to.deep.equal([{
+			expect(propsArg).to.deep.equal({
 				foo: "foo",
 				children: []
-			}]);
+			});
+			expect(stateArg).to.deep.equal({
+				value: 0
+			});
 
 			// New Props
 			// state.value: 1 -> 2 in gDSFP
 			render(<Foo foo="bar" />, scratch, scratch.firstChild);
 			expect(element.textContent).to.be.equal('2');
-			expect(stateLog).to.deep.equal([{
-				value: 0
-			}, {
-				value: 1
-			}]);
-			expect(propLog).to.deep.equal([{
-				foo: "foo",
-				children: []
-			}, {
+			expect(propsArg).to.deep.equal({
 				foo: "bar",
 				children: []
-			}]);
+			});
+			expect(stateArg).to.deep.equal({
+				value: 1
+			});
 
 			// New state
 			// state.value: 2 -> 3 in updateState, 3 -> 4 in gDSFP
 			updateState();
 			rerender();
 			expect(element.textContent).to.be.equal('4');
-			expect(stateLog).to.deep.equal([{
-				value: 0
-			}, {
-				value: 1
-			}, {
+			expect(propsArg).to.deep.equal({
+				foo: "bar",
+				children: []
+			});
+			expect(stateArg).to.deep.equal({
 				value: 3
-			}]);
-			expect(propLog).to.deep.equal([{
-				foo: "foo",
-				children: []
-			}, {
-				foo: "bar",
-				children: []
-			}, {
-				foo: "bar",
-				children: []
-			}]);
+			});
 		});
 	});
 
@@ -622,11 +608,10 @@ describe('Lifecycle methods', () => {
 			/** @type {() => void} */
 			let updateState;
 
-			let prevPropsLog = [];
-			let prevStateLog = [];
-
-			let curPropsLog = [];
-			let curStateLog = [];
+			let prevPropsArg;
+			let prevStateArg;
+			let curProps;
+			let curState;
 
 			class Foo extends Component {
 				constructor(props) {
@@ -646,11 +631,13 @@ describe('Lifecycle methods', () => {
 					};
 				}
 				getSnapshotBeforeUpdate(prevProps, prevState) {
-					prevPropsLog.push({...prevProps});
-					prevStateLog.push({...prevState});
+					// These object references might be updated later so copy
+					// object so we can assert their values at this snapshot in time
+					prevPropsArg = {...prevProps};
+					prevStateArg = {...prevState};
 
-					curPropsLog.push({...this.props});
-					curStateLog.push({...this.state});
+					curProps = {...this.props};
+					curState = {...this.state};
 				}
 				render() {
 					return <div>{this.state.value}</div>;
@@ -663,61 +650,53 @@ describe('Lifecycle methods', () => {
 			// `this.state` in getSnapshotBeforeUpdate should be
 			// the updated state after getDerivedStateFromProps was called.
 
-			const finalPrevPropsLogs = [{
-				foo: "foo",
-				children: []
-			}, {
-				foo: "bar",
-				children: []
-			}];
-
-			const finalPrevStateLogs = [{
-				value: 1
-			}, {
-				value: 2
-			}];
-
-			const finalCurPropsLogs = [{
-				foo: "bar",
-				children: []
-			}, {
-				foo: "bar",
-				children: []
-			}];
-
-			const finalCurStateLogs = [{
-				value: 2
-			}, {
-				value: 4
-			}];
-
 			// Initial render
 			// state.value: initialized to 0 in constructor, 0 -> 1 in gDSFP
 			let element = render(<Foo foo="foo" />, scratch);
 			expect(element.textContent).to.be.equal('1');
-			expect(prevPropsLog).to.have.length(0);
-			expect(prevStateLog).to.have.length(0);
-			expect(curPropsLog).to.have.length(0);
-			expect(curStateLog).to.have.length(0);
+			expect(prevPropsArg).to.be.undefined;
+			expect(prevStateArg).to.be.undefined;
+			expect(curProps).to.be.undefined;
+			expect(curState).to.be.undefined;
 
 			// New props
 			// state.value: 1 -> 2 in gDSFP
 			element = render(<Foo foo="bar" />, scratch, scratch.firstChild);
 			expect(element.textContent).to.be.equal('2');
-			expect(prevPropsLog).to.deep.equal(finalPrevPropsLogs.slice(0, 1));
-			expect(prevStateLog).to.deep.equal(finalPrevStateLogs.slice(0, 1));
-			expect(curPropsLog).to.deep.equal(finalCurPropsLogs.slice(0, 1));
-			expect(curStateLog).to.deep.equal(finalCurStateLogs.slice(0, 1));
+			expect(prevPropsArg).to.deep.equal({
+				foo: "foo",
+				children: []
+			});
+			expect(prevStateArg).to.deep.equal({
+				value: 1
+			});
+			expect(curProps).to.deep.equal({
+				foo: "bar",
+				children: []
+			});
+			expect(curState).to.deep.equal({
+				value: 2
+			});
 
 			// New state
 			// state.value: 2 -> 3 in updateState, 3 -> 4 in gDSFP
 			updateState();
 			rerender();
 			expect(element.textContent).to.be.equal('4');
-			expect(prevPropsLog).to.deep.equal(finalPrevPropsLogs);
-			expect(prevStateLog).to.deep.equal(finalPrevStateLogs);
-			expect(curPropsLog).to.deep.equal(finalCurPropsLogs);
-			expect(curStateLog).to.deep.equal(finalCurStateLogs);
+			expect(prevPropsArg).to.deep.equal({
+				foo: "bar",
+				children: []
+			});
+			expect(prevStateArg).to.deep.equal({
+				value: 2
+			});
+			expect(curProps).to.deep.equal({
+				foo: "bar",
+				children: []
+			});
+			expect(curState).to.deep.equal({
+				value: 4
+			});
 		});
 	});
 
@@ -926,11 +905,10 @@ describe('Lifecycle methods', () => {
 			/** @type {() => void} */
 			let updateState;
 
-			let prevPropsLog = [];
-			let prevStateLog = [];
-
-			let curPropsLog = [];
-			let curStateLog = [];
+			let prevPropsArg;
+			let prevStateArg;
+			let curProps;
+			let curState;
 
 			class Foo extends Component {
 				constructor(props) {
@@ -950,11 +928,13 @@ describe('Lifecycle methods', () => {
 					};
 				}
 				componentDidUpdate(prevProps, prevState) {
-					prevPropsLog.push({...prevProps});
-					prevStateLog.push(prevState);
+					// These object references might be updated later so copy
+					// object so we can assert their values at this snapshot in time
+					prevPropsArg = {...prevProps};
+					prevStateArg = {...prevState};
 
-					curPropsLog.push({...this.props});
-					curStateLog.push({...this.state});
+					curProps = {...this.props};
+					curState = {...this.state};
 				}
 				render() {
 					return <div>{this.state.value}</div>;
@@ -967,61 +947,53 @@ describe('Lifecycle methods', () => {
 			// `this.state` in componentDidUpdate should be
 			// the updated state after getDerivedStateFromProps was called.
 
-			const finalPrevPropsLogs = [{
-				foo: "foo",
-				children: []
-			}, {
-				foo: "bar",
-				children: []
-			}];
-
-			const finalPrevStateLogs = [{
-				value: 1
-			}, {
-				value: 2
-			}];
-
-			const finalCurPropsLogs = [{
-				foo: "bar",
-				children: []
-			}, {
-				foo: "bar",
-				children: []
-			}];
-
-			const finalCurStateLogs = [{
-				value: 2
-			}, {
-				value: 4
-			}];
-
 			// Initial render
 			// state.value: initialized to 0 in constructor, 0 -> 1 in gDSFP
 			let element = render(<Foo foo="foo" />, scratch);
 			expect(element.textContent).to.be.equal('1');
-			expect(prevPropsLog).to.have.length(0);
-			expect(prevStateLog).to.have.length(0);
-			expect(curPropsLog).to.have.length(0);
-			expect(curStateLog).to.have.length(0);
+			expect(prevPropsArg).to.be.undefined;
+			expect(prevStateArg).to.be.undefined;
+			expect(curProps).to.be.undefined;
+			expect(curState).to.be.undefined;
 
 			// New props
 			// state.value: 1 -> 2 in gDSFP
 			element = render(<Foo foo="bar" />, scratch, scratch.firstChild);
 			expect(element.textContent).to.be.equal('2');
-			expect(prevPropsLog).to.deep.equal(finalPrevPropsLogs.slice(0, 1));
-			expect(prevStateLog).to.deep.equal(finalPrevStateLogs.slice(0, 1));
-			expect(curPropsLog).to.deep.equal(finalCurPropsLogs.slice(0, 1));
-			expect(curStateLog).to.deep.equal(finalCurStateLogs.slice(0, 1));
+			expect(prevPropsArg).to.deep.equal({
+				foo: "foo",
+				children: []
+			});
+			expect(prevStateArg).to.deep.equal({
+				value: 1
+			});
+			expect(curProps).to.deep.equal({
+				foo: "bar",
+				children: []
+			});
+			expect(curState).to.deep.equal({
+				value: 2
+			});
 
 			// New state
 			// state.value: 2 -> 3 in updateState, 3 -> 4 in gDSFP
 			updateState();
 			rerender();
 			expect(element.textContent).to.be.equal('4');
-			expect(prevPropsLog).to.deep.equal(finalPrevPropsLogs);
-			expect(prevStateLog).to.deep.equal(finalPrevStateLogs);
-			expect(curPropsLog).to.deep.equal(finalCurPropsLogs);
-			expect(curStateLog).to.deep.equal(finalCurStateLogs);
+			expect(prevPropsArg).to.deep.equal({
+				foo: "bar",
+				children: []
+			});
+			expect(prevStateArg).to.deep.equal({
+				value: 2
+			});
+			expect(curProps).to.deep.equal({
+				foo: "bar",
+				children: []
+			});
+			expect(curState).to.deep.equal({
+				value: 4
+			});
 		});
 	});
 
@@ -1261,11 +1233,10 @@ describe('Lifecycle methods', () => {
 			/** @type {() => void} */
 			let updateState;
 
-			let curPropsLog = [];
-			let curStateLog = [];
-
-			let nextPropsLog = [];
-			let nextStateLog = [];
+			let curProps;
+			let curState;
+			let nextPropsArg;
+			let nextStateArg;
 
 			class Foo extends Component {
 				constructor(props) {
@@ -1285,11 +1256,11 @@ describe('Lifecycle methods', () => {
 					};
 				}
 				shouldComponentUpdate(nextProps, nextState) {
-					nextPropsLog.push({...nextProps});
-					nextStateLog.push({...nextState});
+					nextPropsArg = {...nextProps};
+					nextStateArg = {...nextState};
 
-					curPropsLog.push({...this.props});
-					curStateLog.push({...this.state});
+					curProps = {...this.props};
+					curState = {...this.state};
 
 					return true;
 				}
@@ -1304,61 +1275,53 @@ describe('Lifecycle methods', () => {
 			// `nextState` in shouldComponentUpdate should be
 			// the updated state after getDerivedStateFromProps was called
 
-			const finalCurPropsLogs = [{
-				foo: "foo",
-				children: []
-			}, {
-				foo: "bar",
-				children: []
-			}];
-
-			const finalCurStateLogs = [{
-				value: 1
-			}, {
-				value: 2
-			}];
-
-			const finalNextPropsLogs = [{
-				foo: "bar",
-				children: []
-			}, {
-				foo: "bar",
-				children: []
-			}];
-
-			const finalNextStateLogs = [{
-				value: 2
-			}, {
-				value: 4
-			}];
-
 			// Initial render
 			// state.value: initialized to 0 in constructor, 0 -> 1 in gDSFP
 			let element = render(<Foo foo="foo" />, scratch);
 			expect(element.textContent).to.be.equal('1');
-			expect(curPropsLog).to.have.length(0);
-			expect(curStateLog).to.have.length(0);
-			expect(nextPropsLog).to.have.length(0);
-			expect(nextStateLog).to.have.length(0);
+			expect(curProps).to.be.undefined;
+			expect(curState).to.be.undefined;
+			expect(nextPropsArg).to.be.undefined;
+			expect(nextStateArg).to.be.undefined;
 
 			// New props
 			// state.value: 1 -> 2 in gDSFP
 			element = render(<Foo foo="bar" />, scratch, scratch.firstChild);
 			expect(element.textContent).to.be.equal('2');
-			expect(curPropsLog).to.deep.equal(finalCurPropsLogs.slice(0, 1));
-			expect(curStateLog).to.deep.equal(finalCurStateLogs.slice(0, 1));
-			expect(nextPropsLog).to.deep.equal(finalNextPropsLogs.slice(0, 1));
-			expect(nextStateLog).to.deep.equal(finalNextStateLogs.slice(0, 1));
+			expect(curProps).to.deep.equal({
+				foo: "foo",
+				children: []
+			});
+			expect(curState).to.deep.equal({
+				value: 1
+			});
+			expect(nextPropsArg).to.deep.equal({
+				foo: "bar",
+				children: []
+			});
+			expect(nextStateArg).to.deep.equal({
+				value: 2
+			});
 
 			// New state
 			// state.value: 2 -> 3 in updateState, 3 -> 4 in gDSFP
 			updateState();
 			rerender();
 			expect(element.textContent).to.be.equal('4');
-			expect(curPropsLog).to.deep.equal(finalCurPropsLogs);
-			expect(curStateLog).to.deep.equal(finalCurStateLogs);
-			expect(nextPropsLog).to.deep.equal(finalNextPropsLogs);
-			expect(nextStateLog).to.deep.equal(finalNextStateLogs);
+			expect(curProps).to.deep.equal({
+				foo: "bar",
+				children: []
+			});
+			expect(curState).to.deep.equal({
+				value: 2
+			});
+			expect(nextPropsArg).to.deep.equal({
+				foo: "bar",
+				children: []
+			});
+			expect(nextStateArg).to.deep.equal({
+				value: 4
+			});
 		});
 	});
 
