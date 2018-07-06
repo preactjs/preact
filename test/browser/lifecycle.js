@@ -1060,7 +1060,6 @@ describe('Lifecycle methods', () => {
 	});
 
 
-	// TODO - look at
 	describe('shouldComponentUpdate', () => {
 		let setState;
 
@@ -1101,6 +1100,75 @@ describe('Lifecycle methods', () => {
 
 			expect(ShouldNot.prototype.shouldComponentUpdate).to.have.been.calledOnce;
 			expect(ShouldNot.prototype.render).to.have.been.calledOnce;
+		});
+
+		it('should be passed next props and state', () => {
+			let currentPropsLog = [];
+			let currentStatesLog = [];
+
+			let nextPropsLog = [];
+			let nextStatesLog = [];
+
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						value: 0
+					};
+				}
+				static getDerivedStateFromProps(props, state) {
+					return {
+						value: state.value + 1,
+					};
+				}
+				shouldComponentUpdate(nextProps, nextState) {
+					nextPropsLog.push(nextProps);
+					nextStatesLog.push(nextState);
+
+					currentPropsLog.push(this.props);
+					currentStatesLog.push(this.state);
+
+					return true;
+				}
+				componentDidMount() {
+					this.setState({
+						value: this.state.value + 1
+					});
+				}
+				render() {
+					return <div>{this.state.value}</div>
+				}
+			}
+
+			let element = render(<Foo foo="foo" />, scratch);
+			expect(element.textContent).to.be.equal('1');
+			expect(nextStatesLog).to.have.length(0);
+			expect(currentStatesLog).to.have.length(0);
+
+			element = render(<Foo foo="bar" />, scratch, scratch.firstChild);
+			expect(element.textContent).to.be.equal('3');
+
+			expect(currentPropsLog).to.deep.equal([{
+				foo: "foo",
+				children: []
+			}]);
+
+			// this.state in shouldComponentUpdate should be
+			// the state before getDerivedStateFromProps is called...
+			expect(currentStatesLog).to.deep.equal([{
+				value: 1
+			}]);
+
+			// ...and nextState in shouldComponentUpdate should be
+			// the updated state after getDerivedStateFromProps is called...
+			expect(nextStatesLog).to.deep.equal([{
+				value: 3
+			}]);
+
+			expect(nextPropsLog).to.deep.equal([{
+				foo: "bar",
+				children: []
+			}]);
 		});
 	});
 
