@@ -433,6 +433,59 @@ describe('Lifecycle methods', () => {
 
 		// TODO: Investigate this test:
 		// [should not override state with stale values if prevState is spread within getDerivedStateFromProps](https://github.com/facebook/react/blob/25dda90c1ecb0c662ab06e2c80c1ee31e0ae9d36/packages/react-dom/src/__tests__/ReactComponentLifeCycle-test.js#L1035)
+
+		it('should be passed next props and state', () => {
+			let nextPropsLog = [];
+			let nextStatesLog = [];
+
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						value: 0
+					};
+				}
+				static getDerivedStateFromProps(props, state) {
+					nextPropsLog.push({...props});
+					nextStatesLog.push({...state});
+
+					return {
+						value: state.value + 1,
+					};
+				}
+				componentDidMount() {
+					this.setState({
+						value: this.state.value + 1
+					});
+				}
+				render() {
+					return <div>{this.state.value}</div>
+				}
+			}
+
+			let element = render(<Foo foo="foo" />, scratch);
+			expect(element.textContent).to.be.equal('1');
+			expect(nextStatesLog).to.have.length(1);
+
+			element = render(<Foo foo="bar" />, scratch, scratch.firstChild);
+			expect(element.textContent).to.be.equal('3');
+
+			// ...and nextState in shouldComponentUpdate should be
+			// the updated state after getDerivedStateFromProps is called...
+			expect(nextStatesLog).to.deep.equal([{
+				value: 0
+			},{
+				value: 2
+			}]);
+
+			expect(nextPropsLog).to.deep.equal([{
+				foo: "foo",
+				children: []
+			},{
+				foo: "bar",
+				children: []
+			}]);
+		});
 	});
 
 	describe("#getSnapshotBeforeUpdate", () => {
@@ -600,7 +653,7 @@ describe('Lifecycle methods', () => {
 		});
 	});
 
-	// TODO - look at
+	// TODO - add test for parameters
 	describe('#componentWillUpdate', () => {
 		it('should NOT be called on initial render', () => {
 			class ReceivePropsComponent extends Component {
@@ -704,7 +757,6 @@ describe('Lifecycle methods', () => {
 		});
 	});
 
-	// TODO - look at
 	describe('#componentWillReceiveProps', () => {
 		it('should NOT be called on initial render', () => {
 			class ReceivePropsComponent extends Component {
