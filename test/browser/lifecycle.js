@@ -700,7 +700,6 @@ describe('Lifecycle methods', () => {
 		});
 	});
 
-	// TODO - add test for parameters
 	describe('#componentWillUpdate', () => {
 		it('should NOT be called on initial render', () => {
 			class ReceivePropsComponent extends Component {
