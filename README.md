@@ -178,6 +178,18 @@ import { h, render, Component } from 'preact';
 /** @jsx h */
 ```
 
+>
+> **For TypeScript:**
+> 
+> ```json
+> {
+>   "compilerOptions": {
+>     "jsx": "react",
+>     "jsxFactory": "h",
+>   }
+> }
+
+
 ##### Default:
 
 ```js
