@@ -6,6 +6,7 @@
 /coverage
 package-lock.json
 /test/ts/**/*.js
+.*.swp
 
 # Additional bundles
 /devtools.js
