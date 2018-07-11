@@ -7,12 +7,14 @@ import options from '../options';
 import { removeNode } from '../dom/index';
 
 /**
+ * @typedef {import('../component').Component} Component
  * @typedef {import('../dom/index.js').PreactElement} PreactElement
+ * @typedef {import('../vnode').VNode} VNode
  */
 
 /**
  * Queue of components that have been mounted and are awaiting componentDidMount
- * @type {Array<import('../component').Component>}
+ * @type {Array<Component>}
  */
 export const mounts = [];
 
@@ -38,7 +40,7 @@ export function flushMounts() {
 /**
  * Apply differences in a given vnode (and it's deep children) to a real DOM Node.
  * @param {PreactElement} dom A DOM node to mutate into the shape of a `vnode`
- * @param {import('../vnode').VNode} vnode A VNode (with descendants forming a tree) representing
+ * @param {VNode} vnode A VNode (with descendants forming a tree) representing
  *  the desired DOM structure
  * @param {object} context The current context
  * @param {boolean} mountAll Whether or not to immediately mount all components
@@ -78,7 +80,7 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 /**
  * Internals of `diff()`, separated to allow bypassing diffLevel / mount flushing.
  * @param {PreactElement} dom A DOM node to mutate into the shape of a `vnode`
- * @param {import('../vnode').VNode} vnode A VNode (with descendants forming a tree) representing the desired DOM structure
+ * @param {VNode} vnode A VNode (with descendants forming a tree) representing the desired DOM structure
  * @param {object} context The current context
  * @param {boolean} mountAll Whether or not to immediately mount all components
  * @param {boolean} [componentRoot] ?
@@ -166,7 +168,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	// otherwise, if there are existing or new children, diff them:
 	else if (vchildren && vchildren.length || fc!=null) {
 		innerDiffNode(out,
-			/** @type {import('../vnode').VNode[]} */(vchildren),
+			/** @type {VNode[]} */(vchildren),
 			context, mountAll, hydrating || props.dangerouslySetInnerHTML!=null);
 	}
 
@@ -185,7 +187,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 /**
  * Apply child and attribute changes between a VNode and a DOM Node to the DOM.
  * @param {PreactElement} dom Element whose children should be compared & mutated
- * @param {Array<import('../vnode').VNode>} vchildren Array of VNodes to compare to `dom.childNodes`
+ * @param {Array<VNode>} vchildren Array of VNodes to compare to `dom.childNodes`
  * @param {object} context Implicitly descendant context object (from most
  *  recent `getChildContext()`)
  * @param {boolean} mountAll Whether or not to immediately mount all components
