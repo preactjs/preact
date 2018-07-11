@@ -3,14 +3,18 @@ import { defer } from './util';
 import { renderComponent } from './vdom/component';
 
 /**
+ * @typedef {import('./component').Component} Component
+ */
+
+/**
  * Managed queue of dirty components to be re-rendered
- * @type {Array<import('./component').Component>}
+ * @type {Array<Component>}
  */
 let items = [];
 
 /**
  * Enqueue a rerender of a component
- * @param {import('./component').Component} component The component to rerender
+ * @param {Component} component The component to rerender
  */
 export function enqueueRender(component) {
 	if (!component._dirty && (component._dirty = true) && items.push(component)==1) {
