@@ -9,6 +9,7 @@
   "minified:main": "dist/preact.min.js",
   "types": "dist/preact.d.ts",
   "scripts": {
+    "checkjs": "tsc --allowJs --checkJs --noEmit --target ES6 src/*.js src/**/*.js",
     "clean": "rimraf dist/ devtools.js devtools.js.map debug.js debug.js.map test/ts/**/*.js",
     "copy-flow-definition": "copyfiles -f src/preact.js.flow dist",
     "copy-typescript-definition": "copyfiles -f src/preact.d.ts dist",
