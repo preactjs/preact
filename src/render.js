@@ -1,10 +1,14 @@
 import { diff } from './vdom/diff';
 
 /**
+ * @typedef {import('./dom/index.js').PreactElement} PreactElement
+ */
+
+/**
  * Render JSX into a `parent` Element.
  * @param {import('./vnode').VNode} vnode A (JSX) VNode to render
- * @param {import('./dom').PreactElement} parent DOM element to render into
- * @param {import('./dom').PreactElement} [merge] Attempt to re-use an existing DOM tree rooted at
+ * @param {PreactElement} parent DOM element to render into
+ * @param {PreactElement} [merge] Attempt to re-use an existing DOM tree rooted at
  *  `merge`
  * @public
  *

@@ -8,6 +8,10 @@ import { createComponent, collectComponent } from './component-recycler';
 import { removeNode } from '../dom/index';
 
 /**
+ * @typedef {import('../dom/index.js').PreactElement} PreactElement
+ */
+
+/**
  * Set a component's `props` and possibly re-render the component
  * @param {import('../component').Component} component The Component to set props on
  * @param {object} props The new props
@@ -212,11 +216,11 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 
 /**
  * Apply the Component referenced by a VNode to the DOM.
- * @param {import('../dom').PreactElement} dom The DOM node to mutate
+ * @param {PreactElement} dom The DOM node to mutate
  * @param {import('../vnode').VNode} vnode A Component-referencing VNode
  * @param {object} context The current context
  * @param {boolean} mountAll Whether or not to immediately mount all components
- * @returns {import('../dom').PreactElement} The created/mutated element
+ * @returns {PreactElement} The created/mutated element
  * @private
  */
 export function buildComponentFromVNode(dom, vnode, context, mountAll) {
