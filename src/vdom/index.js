@@ -2,13 +2,14 @@ import { extend } from '../util';
 
 /**
  * @typedef {import('../dom/index.js').PreactElement} PreactElement
+ * @typedef {import('../vnode').VNode} VNode
  */
 
 
 /**
  * Check if two nodes are equivalent.
  * @param {PreactElement} node DOM Node to compare
- * @param {import('../vnode').VNode} vnode Virtual DOM node to compare
+ * @param {VNode} vnode Virtual DOM node to compare
  * @param {boolean} [hydrating=false] If true, ignores component constructors
  *  when comparing.
  * @private
@@ -38,7 +39,7 @@ export function isNamedNode(node, nodeName) {
  * Reconstruct Component-style `props` from a VNode.
  * Ensures default/fallback values from `defaultProps`:
  * Own-properties of `defaultProps` not present in `vnode.attributes` are added.
- * @param {import('../vnode').VNode} vnode The VNode to get props for
+ * @param {VNode} vnode The VNode to get props for
  * @returns {object} The props to use for this VNode
  */
 export function getNodeProps(vnode) {

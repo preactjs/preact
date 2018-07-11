@@ -26,7 +26,7 @@ export function collectComponent(component) {
  * @param {(props, context) => void} Ctor The constructor of the component to create
  * @param {object} props The initial props of the component
  * @param {object} context The initial context of the component
- * @returns {import('../component').Component}
+ * @returns {Component}
  */
 export function createComponent(Ctor, props, context) {
 	let list = components[Ctor.name],
