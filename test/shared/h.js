@@ -6,12 +6,12 @@ import { expect } from 'chai';
 
 /** @jsx h */
 
-const buildVNode = (nodeName, attributes, children=[]) => ({
-	nodeName,
-	children,
-	attributes,
-	key: attributes && attributes.key
-});
+// const buildVNode = (nodeName, attributes, children=[]) => ({
+// 	nodeName,
+// 	children,
+// 	attributes,
+// 	key: attributes && attributes.key
+// });
 
 describe('h(jsx)', () => {
 	it('should return a VNode', () => {
