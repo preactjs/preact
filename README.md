@@ -138,6 +138,7 @@ Preact supports modern browsers and IE9+:
 - :electric_plug: [**preact-routlet**](https://github.com/k1r0s/preact-routlet): Simple `Component Driven` Routing for Preact using ES7 Decorators
 - :fax: [**preact-bind-group**](https://github.com/k1r0s/preact-bind-group): Preact Forms made easy, Group Events into a Single Callback
 - :hatching_chick: [**preact-habitat**](https://github.com/zouhir/preact-habitat): Declarative Preact widgets renderer in any CMS or DOM host ([demo](https://codepen.io/zouhir/pen/brrOPB)).
+- :tada: [**proppy-preact**](https://github.com/fahad19/proppy): Functional props composition for Preact components
 
 #### UI Component Libraries
 
@@ -250,8 +251,8 @@ import { h, render, Component } from 'preact';
 
 class Clock extends Component {
 	render() {
-		let time = new Date().toLocaleTimeString();
-		return <span>{ time }</span>;
+		let time = new Date();
+		return <time datetime={time.toISOString()}>{ time.toLocaleTimeString() }</time>;
 	}
 }
 

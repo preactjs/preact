@@ -6,4 +6,4 @@
  * @property {string | number | undefined} key The key used to identify this VNode in a list
  * @property {object} attributes The properties of this VNode
  */
-export function VNode() {}
+export const VNode = function VNode() {};
