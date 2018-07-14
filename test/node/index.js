@@ -9,7 +9,7 @@ describe('build artifact', () => {
 		expect(preact).to.have.property('createElement');
 		expect(preact).to.have.property('Component');
 		expect(preact).to.have.property('render');
-		expect(preact).to.have.property('rerender');
-		expect(preact).to.have.property('options');
+		expect(preact).to.have.property('hydrate');
+		// expect(preact).to.have.property('options');
 	});
 });

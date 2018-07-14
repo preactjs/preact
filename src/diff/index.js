@@ -409,7 +409,7 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 	// if (typeof vnode==='string' || typeof vnode==='number') {
 	if (vnode.type===3) {
 		if (dom===d && vnode.text!==oldVNode.text) {
-			dom.nodeValue = vnode.text;
+			dom.data = vnode.text;
 		}
 	}
 	else {

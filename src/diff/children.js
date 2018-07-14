@@ -71,19 +71,18 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 
 		// __operation += '\n';
 		// let index;
-		for (j=0; j<oldChildrenLength; j++) {
-			p = oldChildren[j];
-			if (p!=null) {
-				if (child.key!=null && p.key===child.key) {
-					index = j;
-					// __operation += `Match by key ${p.key} (index: ${index})`;
-					break;
-				}
-				if (index==null && p.type===child.type && p.tag===child.tag) {
-					index = j;
-					// __operation += `Match by index: ${index}`;
-					// old = p;
-					// oldChildren[j] = null;
+		p = oldChildren[i];
+		if (p != null && (child.key==null ? (child.type === p.type && child.tag === p.tag) : (child.key === p.key))) {
+			index = i;
+		}
+		else {
+			for (j=0; j<oldChildrenLength; j++) {
+				p = oldChildren[j];
+				if (p!=null) {
+					if (child.key==null ? (child.type === p.type && child.tag === p.tag) : (child.key === p.key)) {
+						index = j;
+						break;
+					}
 				}
 			}
 		}

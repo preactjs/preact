@@ -6,12 +6,12 @@ import { expect } from 'chai';
 
 /** @jsx h */
 
-const buildVNode = (nodeName, attributes, children=[]) => ({
-	nodeName,
-	children,
-	attributes,
-	key: attributes && attributes.key
-});
+// const buildVNode = (nodeName, attributes, children=[]) => ({
+// 	nodeName,
+// 	children,
+// 	attributes,
+// 	key: attributes && attributes.key
+// });
 
 describe('h(jsx)', () => {
 	it('should return a VNode', () => {
@@ -20,89 +20,72 @@ describe('h(jsx)', () => {
 		expect(r).to.be.an('object');
 		// expect(r).to.be.an.instanceof(VNode);
 		expect(r).to.have.property('tag', 'foo');
-		expect(r).to.have.property('attributes', undefined);
-		expect(r).to.have.property('children').that.eql([]);
+		expect(r).to.have.property('props').that.eql({});
+		// expect(r).to.have.deep.property('props.children').that.eql(null);
 	});
 
-	it('should preserve raw attributes', () => {
-		let attrs = { foo: 'bar', baz: 10, func: () => {} },
-			r = h('foo', attrs);
+	it('should preserve raw props', () => {
+		let props = { foo: 'bar', baz: 10, func: () => {} },
+			r = h('foo', props);
 		expect(r).to.be.an('object')
-			.with.property('attributes')
-			.that.deep.equals(attrs);
+			.with.property('props')
+			.that.deep.equals(props);
 	});
 
 	it('should support element children', () => {
+		let kid1 = h('bar');
+		let kid2 = h('baz');
 		let r = h(
 			'foo',
 			null,
-			h('bar'),
-			h('baz')
+			kid1,
+			kid2
 		);
 
 		expect(r).to.be.an('object')
-			.with.property('_children')
-			.that.deep.equals([
-				buildVNode('bar'),
-				buildVNode('baz')
+			.with.nested.deep.property('props.children', [
+				kid1,
+				kid2
 			]);
 	});
 
 	it('should support multiple element children, given as arg list', () => {
+		let kid1 = h('bar');
+		let kid3 = h('test');
+		let kid2 = h('baz', null, kid3);
+
 		let r = h(
 			'foo',
 			null,
-			h('bar'),
-			h('baz', null, h('test'))
+			kid1,
+			kid2
 		);
 
 		expect(r).to.be.an('object')
-			.with.property('_children')
-			.that.deep.equals([
-				buildVNode('bar'),
-				buildVNode('baz', undefined, [
-					buildVNode('test')
-				])
+			.with.nested.deep.property('props.children', [
+				kid1,
+				kid2
 			]);
 	});
 
 	it('should handle multiple element children, given as an array', () => {
+		let kid1 = h('bar');
+		let kid3 = h('test');
+		let kid2 = h('baz', null, kid3);
+
 		let r = h(
 			'foo',
 			null,
 			[
-				h('bar'),
-				h('baz', null, h('test'))
+				kid1,
+				kid2
 			]
 		);
 
 		expect(r).to.be.an('object')
-			.with.property('_children')
-			.that.deep.equals([
-				buildVNode('bar'),
-				buildVNode('baz', undefined, [
-					buildVNode('test')
-				])
-			]);
-	});
-
-	it('should handle multiple children, flattening one layer as needed', () => {
-		let r = h(
-			'foo',
-			null,
-			h('bar'),
-			[
-				h('baz', null, h('test'))
-			]
-		);
-
-		expect(r).to.be.an('object')
-			.with.property('_children')
-			.that.deep.equals([
-				buildVNode('bar'),
-				buildVNode('baz', undefined, [
-					buildVNode('test')
-				])
+			.with.nested.deep.property('props.children', [
+				kid1,
+				kid2
 			]);
 	});
 
@@ -110,27 +93,31 @@ describe('h(jsx)', () => {
 		const m = x => h(x);
 		expect(
 			h('foo', null, m('a'), [m('b'), m('c')], m('d'))
-		).to.have.property('_children').that.eql(['a', 'b', 'c', 'd'].map(m));
+		).to.have.nested.property('props.children')
+			.that.eql([m('a'), [m('b'), m('c')], m('d')]);
 
 		expect(
 			h('foo', null, [m('a'), [m('b'), m('c')], m('d')])
-		).to.have.property('_children').that.eql(['a', 'b', 'c', 'd'].map(m));
+		).to.have.nested.property('props.children')
+			.that.eql([m('a'), [m('b'), m('c')], m('d')]);
 
 		expect(
 			h('foo', { children: [m('a'), [m('b'), m('c')], m('d')] })
-		).to.have.property('_children').that.eql(['a', 'b', 'c', 'd'].map(m));
+		).to.have.nested.property('props.children')
+			.that.eql([m('a'), [m('b'), m('c')], m('d')]);
 
 		expect(
 			h('foo', { children: [[m('a'), [m('b'), m('c')], m('d')]] })
-		).to.have.property('_children').that.eql(['a', 'b', 'c', 'd'].map(m));
+		).to.have.nested.property('props.children')
+			.that.eql([[m('a'), [m('b'), m('c')], m('d')]]);
 
 		expect(
 			h('foo', { children: m('a') })
-		).to.have.property('_children').that.eql([m('a')]);
+		).to.have.nested.property('props.children').that.eql(m('a'));
 
 		expect(
 			h('foo', { children: 'a' })
-		).to.have.property('_children').that.eql(['a']);
+		).to.have.nested.property('props.children').that.eql('a');
 	});
 
 	it('should support text children', () => {
@@ -141,13 +128,11 @@ describe('h(jsx)', () => {
 		);
 
 		expect(r).to.be.an('object')
-			.with.property('_children')
-			.with.length(1)
-			.with.property('0')
+			.with.nested.property('props.children')
 			.that.equals('textstuff');
 	});
 
-	it('should merge adjacent text children', () => {
+	it('should NOT merge adjacent text children', () => {
 		let r = h(
 			'foo',
 			null,
@@ -164,18 +149,22 @@ describe('h(jsx)', () => {
 		);
 
 		expect(r).to.be.an('object')
-			.with.property('children')
+			.with.nested.property('props.children')
 			.that.deep.equals([
-				'onetwo',
-				buildVNode('bar'),
+				'one',
+				'two',
+				h('bar'),
 				'three',
-				buildVNode('baz'),
-				buildVNode('baz'),
-				'fourfivesix'
+				h('baz'),
+				h('baz'),
+				'four',
+				null,
+				'five',
+				'six'
 			]);
 	});
 
-	it('should merge nested adjacent text children', () => {
+	it('should not merge nested adjacent text children', () => {
 		let r = h(
 			'foo',
 			null,
@@ -188,9 +177,14 @@ describe('h(jsx)', () => {
 		);
 
 		expect(r).to.be.an('object')
-			.with.property('_children')
+			.with.nested.property('props.children')
 			.that.deep.equals([
-				'onetwothreefourfivesix'
+				'one',
+				['two', null, 'three'],
+				null,
+				['four', null, 'five', null],
+				'six',
+				null
 			]);
 	});
 	it('should not merge children that are boolean values', () => {
@@ -205,8 +199,8 @@ describe('h(jsx)', () => {
 		);
 
 		expect(r).to.be.an('object')
-			.with.property('children')
-			.that.deep.equals(['onetwothree']);
+			.with.nested.property('props.children')
+			.that.deep.equals(['one',true,'two',false,'three']);
 	});
 
 	it('should not merge children of components', () => {
@@ -214,7 +208,7 @@ describe('h(jsx)', () => {
 		let r = h(Component, null, 'x', 'y');
 
 		expect(r).to.be.an('object')
-			.with.property('_children')
+			.with.nested.property('props.children')
 			.that.deep.equals(['x', 'y']);
 	});
 });
