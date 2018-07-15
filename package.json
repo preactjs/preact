@@ -21,7 +21,7 @@
     "lint": "eslint debug devtools src test"
   },
   "mangle": {
-    "regex": "^(_)"
+    "regex": "^(_|(type|text|key|index)$)"
   },
   "eslintConfig": {
     "extends": "eslint-config-developit",
@@ -108,8 +108,8 @@
   },
   "bundlesize": [
     {
-      "path": "./dist/ceviche.min.js",
-      "threshold": "4Kb"
+      "path": "./dist/ceviche.js",
+      "threshold": "3Kb"
     }
   ]
 }
