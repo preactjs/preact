@@ -38,8 +38,8 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			let element = render(<Foo foo="foo" />, scratch);
-			expect(element.className).to.be.equal('foo bar');
+			render(<Foo foo="foo" />, scratch);
+			expect(scratch.firstChild.className).to.be.equal('foo bar');
 		});
 
 		it('should update initial state with value returned from getDerivedStateFromProps', () => {
@@ -61,8 +61,8 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			let element = render(<Foo />, scratch);
-			expect(element.className).to.equal('not-foo bar');
+			render(<Foo />, scratch);
+			expect(scratch.firstChild.className).to.equal('not-foo bar');
 		});
 
 		it('should update the instance\'s state with the value returned from getDerivedStateFromProps when props change', () => {
@@ -89,19 +89,18 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			let element;
 			sinon.spy(Foo, 'getDerivedStateFromProps');
 			sinon.spy(Foo.prototype, 'componentDidMount');
 			sinon.spy(Foo.prototype, 'componentDidUpdate');
 
-			element = render(<Foo update={false} />, scratch, element);
-			expect(element.className).to.equal('initial');
+			render(<Foo update={false} />, scratch);
+			expect(scratch.firstChild.className).to.equal('initial');
 			expect(Foo.getDerivedStateFromProps).to.have.callCount(1);
 			expect(Foo.prototype.componentDidMount).to.have.callCount(1); // verify mount occurred
 			expect(Foo.prototype.componentDidUpdate).to.have.callCount(0);
 
-			element = render(<Foo update />, scratch, element);
-			expect(element.className).to.equal('updated');
+			render(<Foo update />, scratch);
+			expect(scratch.firstChild.className).to.equal('updated');
 			expect(Foo.getDerivedStateFromProps).to.have.callCount(2);
 			expect(Foo.prototype.componentDidMount).to.have.callCount(1);
 			expect(Foo.prototype.componentDidUpdate).to.have.callCount(1); // verify update occurred
@@ -134,15 +133,14 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			let element = <Foo />;
 			sinon.spy(Foo, 'getDerivedStateFromProps');
 
 			render(<Foo />, scratch);
-			expect(element.className).to.equal('initial');
+			expect(scratch.firstChild.className).to.equal('initial');
 			expect(Foo.getDerivedStateFromProps).to.have.been.calledOnce;
 
 			render(<Foo />, scratch); // call rerender to handle cDM setState call
-			expect(element.className).to.equal('updated derived');
+			expect(scratch.firstChild.className).to.equal('updated derived');
 			expect(Foo.getDerivedStateFromProps).to.have.been.calledTwice;
 		});
 
@@ -165,8 +163,8 @@ describe('Lifecycle methods', () => {
 
 			sinon.spy(Foo, 'getDerivedStateFromProps');
 
-			let element = render(<Foo />, scratch);
-			expect(element.className).to.equal('foo bar');
+			render(<Foo />, scratch);
+			expect(scratch.firstChild.className).to.equal('foo bar');
 			expect(Foo.getDerivedStateFromProps).to.have.been.called;
 		});
 
@@ -189,8 +187,8 @@ describe('Lifecycle methods', () => {
 
 			sinon.spy(Foo, 'getDerivedStateFromProps');
 
-			let element = render(<Foo />, scratch);
-			expect(element.className).to.equal('foo bar');
+			render(<Foo />, scratch);
+			expect(scratch.firstChild.className).to.equal('foo bar');
 			expect(Foo.getDerivedStateFromProps).to.have.been.called;
 		});
 
