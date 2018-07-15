@@ -90,7 +90,7 @@ export let diffLevel = 0;
 export function diff(dom, parent, newTree, oldTree, context, isSvg, append, excessChildren) {
 	if (newTree==null) {
 		if (oldTree!=null) {
-			unmount(oldTree, true);
+			unmount(oldTree);
 		}
 		return null;
 	}
@@ -444,11 +444,10 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 }
 
 
-export function unmount(vnode, recursive, remove) {
+export function unmount(vnode) {
 	let r;
 	if (vnode.props!=null && (r = vnode.props.ref)) r(null);
-	if (remove!==false && (r = vnode._el)!=null) r.remove();
-	// if ((r = vnode._el)!=null) r.remove();
+	if ((r = vnode._el)!=null) r.remove();
 	vnode._el = null;
 
 	if ((r = vnode._component)!=null) {
