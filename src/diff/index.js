@@ -155,6 +155,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	// console.log(oldTree, newTree);
 
 	let c, p, isNew = false, oldProps, oldState, oldContext,
+		newTag = newTree.tag,
 		oldTag = oldTree!=null ? oldTree.tag : null;
 
 	// root of a diff:
@@ -173,8 +174,8 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	// 	}
 	// }
 
-	outer: if (typeof newTree.tag==='function') {
-		if (typeof oldTag==='function' && oldTag!==newTree.tag) {
+	outer: if (typeof newTag==='function') {
+		if (typeof oldTag==='function' && oldTag!==newTag) {
 			// unmount(oldTree);
 			oldTree = null;
 			// oldTree._component.componentWillUnmount();
@@ -193,10 +194,10 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			// }
 
 			let s = c._nextState || c.state;
-			if (newTree.tag.getDerivedStateFromProps) {
+			if (newTag.getDerivedStateFromProps!=null) {
 				// Since c._nextState is modified, the previous state doesn't need to be saved.
 				// It remains intact at c.state
-				assign(s, c.constructor.getDerivedStateFromProps(newTree.props, s));
+				assign(s, newTag.getDerivedStateFromProps(newTree.props, s));
 			}
 			// console.log('updating component in-place', c._nextState);
 			// if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, c.state)===false) {
@@ -207,7 +208,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				break outer;
 				// return newTree._el = c.base;
 			}
-			if (newTree.tag.getDerivedStateFromProps== null && c.componentWillReceiveProps!=null) {
+			if (newTag.getDerivedStateFromProps==null && c.componentWillReceiveProps!=null) {
 				c.componentWillReceiveProps(newTree.props, s, context);
 			}
 
@@ -220,12 +221,12 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			c.props = newTree.props;
 			if (!c.state) c.state = {};
 			c.context = context;
-			if (newTree.tag.getDerivedStateFromProps) {
+			if (newTag.getDerivedStateFromProps!=null) {
 				// Since c._nextState is modified, the previous state doesn't need to be saved.
 				// It remains intact at c.state
-				assign(c.state, c.constructor.getDerivedStateFromProps(newTree.props, c.state));
+				assign(c.state, newTag.getDerivedStateFromProps(newTree.props, c.state));
 			}
-			if (newTree.tag.getDerivedStateFromProps==null && c.componentWillMount!=null) {
+			else if (c.componentWillMount!=null) {
 				c.componentWillMount();
 			}
 			mounts.push(c);
