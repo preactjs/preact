@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "Something something virtual DOM.",
   "source": "src/index.js",
-  "module": "dist/ceviche.es.js",
+  "module": "dist/ceviche.mjs",
   "main": "dist/ceviche.js",
   "umd:main": "dist/ceviche.umd.js",
   "scripts": {
