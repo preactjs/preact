@@ -107,7 +107,9 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 		}
 		else {
 			// it wasn't a Text node: replace it with one and recycle the old Element
-			/** @type {any} */(out) = document.createTextNode(vnode);
+			/** @type {any} */(out) =
+				document.createTextNode(vnode);
+
 			if (dom) {
 				if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
 				recollectNodeTree(dom, true);
