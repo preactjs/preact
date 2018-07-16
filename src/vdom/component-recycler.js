@@ -23,7 +23,7 @@ export function collectComponent(component) {
 /**
  * Create a component. Normalizes differences between PFC's and classful
  * Components.
- * @param {function} Ctor The constructor of the component to create
+ * @param {(props, context) => void} Ctor The constructor of the component to create
  * @param {object} props The initial props of the component
  * @param {object} context The initial context of the component
  * @returns {import('../component').Component}
@@ -33,7 +33,7 @@ export function createComponent(Ctor, props, context) {
 		inst;
 
 	if (Ctor.prototype && Ctor.prototype.render) {
-		inst = new /** @type {(props, context) => void} */(Ctor)(props, context);
+		inst = new Ctor(props, context);
 		Component.call(inst, props, context);
 	}
 	else {
