@@ -1,4 +1,4 @@
-import { ELEMENT_NODE, FRAGMENT } from './constants';
+import { ELEMENT_NODE } from './constants';
 
 export function createElement(tag, props, children) {
 	if (arguments.length>3) {
@@ -25,11 +25,11 @@ export function Fragment(vnode, props) {
 export function createVNode(type, tag, props, children, text, key) {
 
 	// @TODO this is likely better off in createElement():
-	if (type===ELEMENT_NODE || type===FRAGMENT) {
+	if (type===ELEMENT_NODE) {
 		if (props==null) props = {};
 		if (children!=null) props.children = children;
 		// children = props.children || (props.children = children);
-		if (type!==FRAGMENT && tag.defaultProps!=null) {
+		if (tag.defaultProps!=null) {
 			for (let i in tag.defaultProps) {
 				if (props[i]===undefined) props[i] = tag.defaultProps[i];
 			}

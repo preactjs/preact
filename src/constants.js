@@ -1,5 +1,4 @@
 export const ELEMENT_NODE = 1;
-export const FRAGMENT = 2;
 export const TEXT_NODE = 3;
 export const EMPTY_OBJ = {};
 export const EMPTY_ARR = [];
