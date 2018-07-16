@@ -4,19 +4,27 @@
   "version": "0.1.0",
   "description": "Something something virtual DOM.",
   "source": "src/index.js",
-  "module": "dist/ceviche.es.js",
+  "module": "dist/ceviche.mjs",
   "main": "dist/ceviche.js",
   "umd:main": "dist/ceviche.umd.js",
   "scripts": {
     "build": "microbundle build",
     "dev": "microbundle watch --format cjs,umd",
-    "test": "eslint src"
+    "test": "npm-run-all lint --parallel test:mocha test:karma",
+    "test:flow": "flow check",
+    "test:ts": "tsc -p test/ts/ && mocha --require babel-register test/ts/**/*-test.js",
+    "test:mocha": "mocha --recursive --require babel-register test/shared test/node",
+    "test:karma": "karma start test/karma.conf.js --single-run",
+    "test:mocha:watch": "npm run test:mocha -- --watch",
+    "test:karma:watch": "npm run test:karma -- no-single-run",
+    "test:size": "bundlesize",
+    "lint": "eslint debug devtools src test"
   },
   "mangle": {
-    "regex": "^(_)"
+    "regex": "^(_|(type|text|key|index)$)"
   },
   "eslintConfig": {
-    "extends": "eslint-config-developit",
+    "extends": "developit",
     "settings": {
       "react": {
         "pragma": "createElement"
@@ -26,7 +34,8 @@
       "prefer-rest-params": 0,
       "prefer-spread": 0,
       "no-cond-assign": 0,
-      "react/prefer-stateless-function": 0
+      "react/prefer-stateless-function": 0,
+      "jest/valid-expect": 0
     }
   },
   "files": [
@@ -35,20 +44,55 @@
   ],
   "keywords": [
     "ceviche",
-    "Virtual DOM",
-    "VDOM",
-    "DOM"
+    "virtual dom",
+    "vdom",
+    "dom"
   ],
-  "author": "Jason Miller <jason@developit.ca>",
+  "authors": [
+    "Jason Miller <jason@developit.ca>"
+  ],
   "license": "MIT",
   "repository": "developit/ceviche",
   "devDependencies": {
-    "eslint": "^4.16.0",
+    "@types/chai": "^4.1.2",
+    "@types/mocha": "^5.0.0",
+    "@types/node": "^10.5.2",
+    "babel-cli": "^6.24.1",
+    "babel-core": "^6.26.3",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "babel-preset-env": "^1.6.1",
+    "bundlesize": "^0.17.0",
+    "chai": "^4.1.2",
+    "coveralls": "^3.0.0",
+    "diff": "^3.5.0",
+    "eslint": "^5.1.0",
     "eslint-config-developit": "^1.1.1",
-    "jest": "^22.1.4",
-    "microbundle": "^0.4.1"
+    "flow-bin": "^0.76.0",
+    "karma": "^2.0.0",
+    "karma-babel-preprocessor": "^7.0.0",
+    "karma-chai-sinon": "^0.1.5",
+    "karma-chrome-launcher": "^2.0.0",
+    "karma-coverage": "^1.0.0",
+    "karma-mocha": "^1.1.1",
+    "karma-mocha-reporter": "^2.0.4",
+    "karma-sauce-launcher": "^1.1.0",
+    "karma-sinon": "^1.0.5",
+    "karma-source-map-support": "^1.2.0",
+    "karma-sourcemap-loader": "^0.3.6",
+    "karma-webpack": "^3.0.0",
+    "microbundle": "^0.5.1",
+    "mocha": "^5.2.0",
+    "npm-run-all": "^4.0.0",
+    "sinon": "^6.1.3",
+    "sinon-chai": "^3.0.0",
+    "typescript": "^2.8.1",
+    "webpack": "^4.3.0"
   },
-  "dependencies": {
-    "object-shape": "^0.2.0"
-  }
+  "bundlesize": [
+    {
+      "path": "./dist/ceviche.js",
+      "threshold": "3Kb"
+    }
+  ]
 }

@@ -1,8 +1,12 @@
 import { ELEMENT_NODE, FRAGMENT } from './constants';
 
-export function createElement(tag, props) {
-	let children = [];
-	for (let i=2; i<arguments.length; i++) children.push(arguments[i]);
+export function createElement(tag, props, children) {
+	if (arguments.length>3) {
+		children = [];
+		for (let i=2; i<arguments.length; i++) {
+			children.push(arguments[i]);
+		}
+	}
 	return createVNode(ELEMENT_NODE, tag, props, children, null, props!=null ? props.key : null);
 	// return createVNode(ELEMENT_NODE, tag, props==null ? EMPTY_OBJ : props, children, null, props!=null ? props.key : null);
 }
@@ -23,7 +27,7 @@ export function createVNode(type, tag, props, children, text, key) {
 	// @TODO this is likely better off in createElement():
 	if (type===ELEMENT_NODE || type===FRAGMENT) {
 		if (props==null) props = {};
-		if (props.children==null) props.children = children;
+		if (children!=null) props.children = children;
 		// children = props.children || (props.children = children);
 		if (type!==FRAGMENT && tag.defaultProps!=null) {
 			for (let i in tag.defaultProps) {
@@ -42,6 +46,7 @@ export function createVNode(type, tag, props, children, text, key) {
 	// 	r.key = key;
 	// 	return r;
 	// }
-	return { type, tag, props, attributes: props, /*children,*/ text, key, index: null, _children: null, _el: null, _component: null };
+	// return { type, tag, props, attributes: props, /*children,*/ text, key, index: null, _children: null, _el: null, _component: null };
+	return { type, tag, props, /*children,*/ text, key, index: null, _children: null, _el: null, _component: null };
 	// return { type, tag, props, children, text, key, index: null, _children: null, _el: null, _component: null };
 }

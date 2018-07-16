@@ -1,10 +1,11 @@
 import { TEXT_NODE, EMPTY_OBJ, EMPTY_ARR } from '../constants';
-import { assign } from '../util';
-import { Component, enqueueRender } from '../component';
+// import { assign } from '../util';
+import { Component /* , enqueueRender */ } from '../component';
 import { createVNode /*, reclaimVNode*/ } from '../create-element';
 import { diffChildren /*, create */ } from './children';
 import { diffProps } from './props';
-import { toVNode } from '../render';
+import { assign } from '../util';
+// import { toVNode } from '../render';
 // import { processQueue } from '../component';
 
 const mounts = [];
@@ -192,6 +193,11 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			// }
 
 			let s = c._nextState || c.state;
+			if (newTree.tag.getDerivedStateFromProps) {
+				// Since c._nextState is modified, the previous state doesn't need to be saved.
+				// It remains intact at c.state
+				assign(s, c.constructor.getDerivedStateFromProps(newTree.props, s));
+			}
 			// console.log('updating component in-place', c._nextState);
 			// if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, c.state)===false) {
 			// 	c.state = nextState;
@@ -201,7 +207,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				break outer;
 				// return newTree._el = c.base;
 			}
-			if (c.componentWillReceiveProps!=null) {
+			if (newTree.tag.getDerivedStateFromProps== null && c.componentWillReceiveProps!=null) {
 				c.componentWillReceiveProps(newTree.props, s, context);
 			}
 
@@ -214,7 +220,14 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			c.props = newTree.props;
 			if (!c.state) c.state = {};
 			c.context = context;
-			if (c.componentWillMount!=null) c.componentWillMount();
+			if (newTree.tag.getDerivedStateFromProps) {
+				// Since c._nextState is modified, the previous state doesn't need to be saved.
+				// It remains intact at c.state
+				assign(c.state, c.constructor.getDerivedStateFromProps(newTree.props, c.state));
+			}
+			if (newTree.tag.getDerivedStateFromProps==null && c.componentWillMount!=null) {
+				c.componentWillMount();
+			}
 			mounts.push(c);
 
 			// if (dom==null && newTree.tag.recycle===true && newTree.tag.__cache!=null) {
@@ -415,7 +428,7 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 	// if (typeof vnode==='string' || typeof vnode==='number') {
 	if (vnode.type===3) {
 		if (dom===d && vnode.text!==oldVNode.text) {
-			dom.nodeValue = vnode.text;
+			dom.data = vnode.text;
 		}
 	}
 	else {
