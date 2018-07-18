@@ -107,7 +107,9 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 		}
 		else {
 			// it wasn't a Text node: replace it with one and recycle the old Element
-			/** @type {any} */(out) = document.createTextNode(vnode);
+			/** @type {any} */(out) =
+				document.createTextNode(vnode);
+
 			if (dom) {
 				if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
 				recollectNodeTree(dom, true);
@@ -160,15 +162,17 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 	// Optimization: fast-path for elements containing a single TextNode:
 	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc!=null && fc['splitText']!==undefined && fc.nextSibling==null) {
-		if (fc.nodeValue!=vchildren[0]) {
-			fc.nodeValue =
-				/** @type {string} */(vchildren[0]);
+		const vchild =
+			/** @type {string} */(vchildren[0]);
+		if (fc.nodeValue!=vchild) {
+			fc.nodeValue = vchild;
 		}
 	}
 	// otherwise, if there are existing or new children, diff them:
 	else if (vchildren && vchildren.length || fc!=null) {
-		innerDiffNode(out,
-			/** @type {VNode[]} */(vchildren),
+		const vnodeChildren =
+			/** @type {VNode[]} */(vchildren);
+		innerDiffNode(out, vnodeChildren,
 			context, mountAll, hydrating || props.dangerouslySetInnerHTML!=null);
 	}
 
@@ -203,7 +207,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 		len = originalChildren.length,
 		childrenLen = 0,
 		vlen = vchildren ? vchildren.length : 0,
-		j, c, f, vchild, child;
+		j, f, vchild, child;
 
 	// Build up a map of keyed children and an Array of unkeyed children:
 	if (len!==0) {
@@ -238,8 +242,9 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 			// attempt to pluck a node of the same type from the existing children
 			else if (min<childrenLen) {
 				for (j=min; j<childrenLen; j++) {
-					if (children[j] !== undefined &&
-							isSameNodeType(c = /** @type {any[]} */(children)[j], vchild, isHydrating)) {
+					const c =
+						/** @type {any[]} */(children)[j];
+					if (c !== undefined && isSameNodeType(c, vchild, isHydrating)) {
 						child = c;
 						children[j] = undefined;
 						if (j===childrenLen-1) childrenLen--;
@@ -275,8 +280,10 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 
 	// remove orphaned unkeyed children:
 	while (min<=childrenLen) {
-		if ((child = children[childrenLen--]) !== undefined)
-			recollectNodeTree(/** @type { any } */(child), false);
+		const c =
+			/** @type { any } */(children[childrenLen--]);
+		if (c !== undefined)
+			recollectNodeTree(c, false);
 	}
 }
 
