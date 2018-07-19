@@ -266,7 +266,7 @@ export function create(node, parent, vnode, context, isSvg) {
 			node = document.createTextNode(vnode.text);
 		}
 		else {
-			node.nodeValue = vnode.text;
+			node.data = vnode.text;
 		}
 	}
 	else {

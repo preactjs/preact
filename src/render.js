@@ -19,7 +19,7 @@ export function hydrate(vnode, parent) {
 export function toVNode(node) {
 	// Text nodes correspond to VNodes with type=3 (TEXT_NODE)
 	if (node.nodeType===TEXT_NODE) {
-		return createVNode(TEXT_NODE, null, null, null, node.nodeValue, null);
+		return createVNode(TEXT_NODE, null, null, null, node.data, null);
 	}
 
 	let props = {};
@@ -44,7 +44,7 @@ export function toVNode(node) {
 	// 	}
 	// 	return createVNode(ELEMENT_NODE, node.localName, props, EMPTY_ARR.map.call(node.childNodes, toVNode), null, null);
 	// }
-	// return createVNode(TEXT_NODE, null, null, null, node.nodeValue, null);
+	// return createVNode(TEXT_NODE, null, null, null, node.data, null);
 
 	// let type = node.nodeType,
 	// 	props = null;
@@ -55,5 +55,5 @@ export function toVNode(node) {
 	// 		props[attr.name] = attr.value;
 	// 	}
 	// }
-	// return createVNode(type, type===1 ? node.localName : null, props, node.childNodes==null ? null : EMPTY_ARR.map.call(node.childNodes, toVNode), type===TEXT_NODE ? node.nodeValue : null, null);
+	// return createVNode(type, type===1 ? node.localName : null, props, node.childNodes==null ? null : EMPTY_ARR.map.call(node.childNodes, toVNode), type===TEXT_NODE ? node.data : null, null);
 }
