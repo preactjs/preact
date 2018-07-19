@@ -646,7 +646,7 @@ function createComponent(Ctor, props, context) {
 	}
 	else {
 		inst = new Component(props, context);
-		inst.constructor = Ctor;
+		inst._constructor = Ctor;
 		inst.render = doRender;
 	}
 	return inst;
@@ -654,5 +654,5 @@ function createComponent(Ctor, props, context) {
 
 /** The `.render()` method for a PFC backing instance. */
 function doRender(props, state, context) {
-	return this.constructor(props, context);
+	return this._constructor(props, context);
 }
