@@ -25,14 +25,14 @@ export function toVNode(node) {
 	let props = {};
 
 	// Benchmark:  https://esbench.com/bench/5b2072d7f2949800a0f61d63
-	let attrs = node.getAttributeNames();
-	for (let i=0; i<attrs.length; i++) {
-		props[attrs[i]] = node.getAttribute(attrs[i]);
-	}
-	// for (let i=0; i<node.attributes.length; i++) {
-	// 	let attr = node.attributes[i];
-	// 	props[attr.name] = attr.value;
+	// let attrs = node.getAttributeNames();
+	// for (let i=0; i<attrs.length; i++) {
+	// 	props[attrs[i]] = node.getAttribute(attrs[i]);
 	// }
+	for (let i=0; i<node.attributes.length; i++) {
+		let attr = node.attributes[i];
+		props[attr.name] = attr.value;
+	}
 
 	return createVNode(node.nodeType, node.localName, props, EMPTY_ARR.map.call(node.childNodes, toVNode), null, null);
 
