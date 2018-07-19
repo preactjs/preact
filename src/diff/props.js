@@ -49,16 +49,14 @@ function setProperty(node, name, value, oldValue, isSvg) {
 	// if (name==='children') return;
 
 	// let name = iname==='class' ? 'className' : iname;
+	if (name==='class' || name==='className') name = isSvg ? 'class' : 'className';
 	// let isProperty = !isSvg && name in node;
 
 	// let obj = node[name];
 
 	// if (name==='children' || name==='key') {}
 	// else
-	if (name==='class' || name==='className') {
-		node.className = value;
-	}
-	else if (name==='ref') {
+	if (name==='ref') {
 		if (oldValue) oldValue(null);
 		if (value) value(node);
 	}
