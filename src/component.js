@@ -39,8 +39,8 @@ Component.prototype.setState = function(update, callback) {
 Component.prototype.forceUpdate = function(callback) {
 	if (this.base!=null) {
 		diff(this.base, this.base.parentNode, this._vnode, this._vnode, this.context, false, true);
-		if (callback!=null) callback();
 	}
+	if (callback!=null) callback();
 };
 
 
