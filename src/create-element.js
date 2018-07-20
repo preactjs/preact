@@ -2,8 +2,8 @@ import { ELEMENT_NODE } from './constants';
 
 export function createElement(tag, props, children) {
 	if (arguments.length>3) {
-		children = [];
-		for (let i=2; i<arguments.length; i++) {
+		children = [children];
+		for (let i=3; i<arguments.length; i++) {
 			children.push(arguments[i]);
 		}
 	}
