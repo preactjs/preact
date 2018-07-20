@@ -63,6 +63,21 @@ function setProperty(node, name, value, oldValue, isSvg) {
 	else if (name==='style') {
 		// setStyle(node, value, oldValue);
 
+		/* Possible golfing activities for setting styles:
+		 *   - we could just drop String style values. They're not supported in other VDOM libs.
+		 *   - assigning to .style sets .style.cssText - TODO: benchmark this, might not be worth the bytes.
+		 *   - assigning also casts to String, and ignores invalid values. This means assigning an Object clears all styles.
+		 */
+		// if (typeof value==='string') {
+		// 	// node.style.cssText = value;
+		// 	node.style = value;
+		// }
+		// else {
+		// 	if (typeof oldValue==='string') {
+		// 		// node.style.cssText = '';
+		// 		node.style = '';
+		// 	}
+
 		let s = node.style;
 
 		// remove values not in the new list
@@ -87,6 +102,8 @@ function setProperty(node, name, value, oldValue, isSvg) {
 				// node.style[i] = v;
 			}
 		}
+
+		// }
 	}
 	// else if (name.charCodeAt(0)===111 && name.charCodeAt(1)===110) {
 	else if (name[0]==='o' && name[1]==='n') {
