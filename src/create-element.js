@@ -1,13 +1,14 @@
 import { ELEMENT_NODE } from './constants';
 
 export function createElement(tag, props, children) {
+	if (props==null) props = {};
 	if (arguments.length>3) {
 		children = [children];
 		for (let i=3; i<arguments.length; i++) {
 			children.push(arguments[i]);
 		}
 	}
-	return createVNode(ELEMENT_NODE, tag, props, children, null, props!=null ? props.key : null);
+	return createVNode(ELEMENT_NODE, tag, props, children, null, props.key);
 	// return createVNode(ELEMENT_NODE, tag, props==null ? EMPTY_OBJ : props, children, null, props!=null ? props.key : null);
 }
 
@@ -22,7 +23,7 @@ export function createVNode(type, tag, props, children, text, key) {
 
 	// @TODO this is likely better off in createElement():
 	if (type===ELEMENT_NODE) {
-		if (props==null) props = {};
+		// if (props==null) props = {};
 		if (children!=null) props.children = children;
 		// children = props.children || (props.children = children);
 		if (tag.defaultProps!=null) {
