@@ -1,4 +1,5 @@
 import { createElement as h, render, rerender, Component } from '../../src/index';
+import { setup, teardown } from './helpers';
 
 /** @jsx h */
 
@@ -9,18 +10,12 @@ const EMPTY_CHILDREN = [];
 describe('Lifecycle methods', () => {
 	let scratch;
 
-	before( () => {
-		scratch = document.createElement('div');
-		(document.body || document.documentElement).appendChild(scratch);
+	beforeEach(() => {
+		scratch = setup();
 	});
 
-	beforeEach( () => {
-		scratch.innerHTML = '';
-	});
-
-	after( () => {
-		scratch.parentNode.removeChild(scratch);
-		scratch = null;
+	afterEach(() => {
+		teardown(scratch);
 	});
 
 	it('should call nested new lifecycle methods in the right order', () => {

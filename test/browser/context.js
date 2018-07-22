@@ -1,4 +1,5 @@
 import { createElement as h, render, Component } from '../../src/index';
+import { setup, teardown } from './helpers';
 
 /** @jsx h */
 
@@ -7,18 +8,12 @@ const CHILDREN_MATCHER = sinon.match( v => v==null || Array.isArray(v) && !v.len
 describe('context', () => {
 	let scratch;
 
-	before( () => {
-		scratch = document.createElement('div');
-		(document.body || document.documentElement).appendChild(scratch);
+	beforeEach(() => {
+		scratch = setup();
 	});
 
-	beforeEach( () => {
-		scratch.innerHTML = '';
-	});
-
-	after( () => {
-		scratch.parentNode.removeChild(scratch);
-		scratch = null;
+	afterEach(() => {
+		teardown(scratch);
 	});
 
 	it('should pass context to grandchildren', () => {

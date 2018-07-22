@@ -8,9 +8,6 @@ import { assign } from '../util';
 // import { toVNode } from '../render';
 // import { processQueue } from '../component';
 
-const mounts = [];
-export let diffLevel = 0;
-
 // let hash = [
 // 	['type', ['number']],
 // 	['tag', [null,'string','function']],
@@ -87,7 +84,7 @@ export let diffLevel = 0;
 // }
 
 
-export function diff(dom, parent, newTree, oldTree, context, isSvg, append, excessChildren) {
+export function diff(dom, parent, newTree, oldTree, context, isSvg, append, excessChildren, diffLevel, mounts) {
 	if (newTree==null) {
 		if (oldTree!=null) {
 			unmount(oldTree);
@@ -277,7 +274,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		// 	// console.trace('diffing '+c.id);
 		// 	console.log('diffing '+c.id, vnode, prev);
 		// }
-		c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren);
+		c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, diffLevel, mounts);
 		c._dirty = false;
 		// newTree.tag.$precache = c.base;
 		c._vnode = newTree;
@@ -322,7 +319,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		// }
 	}
 	else {
-		dom = newTree._el = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren);
+		dom = newTree._el = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren, diffLevel, mounts);
 	}
 
 	if (--diffLevel===0) {
@@ -348,7 +345,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	return dom;
 }
 
-function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessChildren) {
+function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessChildren, diffLevel, mounts) {
 	// if (vnode==null) {
 	// 	let c = document.createComment('empty');
 	// 	if (parent!=null) {
@@ -433,7 +430,7 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 		// console.log('diffChildren(', getVNodeChildren(vnode).map( p => Object.assign({}, p) ), getVNodeChildren(oldVNode).map( p => Object.assign({}, p) ), ')');
 		// let newChildren = getVNodeChildren(vnode);
 		// diffChildren(dom, newChildren, vnode===oldVNode ? newChildren : oldVNode==null ? [] : getVNodeChildren(oldVNode), context, isSvg, excessChildren);
-		diffChildren(dom, getVNodeChildren(vnode), oldVNode==null ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessChildren);
+		diffChildren(dom, getVNodeChildren(vnode), oldVNode==null ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessChildren, diffLevel, mounts);
 		if (vnode!==oldVNode) {
 			diffProps(dom, vnode.props, oldVNode==null ? EMPTY_OBJ : oldVNode.props, isSvg);
 		}
