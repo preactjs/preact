@@ -249,8 +249,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 			// attempt to pluck a node of the same type from the existing children
 			else if (min<childrenLen) {
 				for (j=min; j<childrenLen; j++) {
-					const c =
-						/** @type {any[]} */(children)[j];
+					const c = (children)[j];
 					if (c !== undefined && isSameNodeType(c, vchild, isHydrating)) {
 						child = c;
 						children[j] = undefined;
@@ -287,8 +286,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 
 	// remove orphaned unkeyed children:
 	while (min<=childrenLen) {
-		const c =
-			/** @type { any } */(children[childrenLen--]);
+		const c = children[childrenLen--];
 		if (c !== undefined)
 			recollectNodeTree(c, false);
 	}
