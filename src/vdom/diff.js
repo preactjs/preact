@@ -167,18 +167,18 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 	// Optimization: fast-path for elements containing a single TextNode:
 	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc!=null && fc.splitText!==undefined && fc.nextSibling==null) {
-		const vchild =
-			/** @type {string} */(vchildren[0]);
-		if (fc.nodeValue!=vchild) {
-			fc.nodeValue = vchild;
+		if (fc.nodeValue != vchildren[0]) {
+			fc.nodeValue =
+				/** @type {string} */(vchildren[0]);
 		}
 	}
 	// otherwise, if there are existing or new children, diff them:
 	else if (vchildren && vchildren.length || fc!=null) {
-		const vnodeChildren =
-			/** @type {VNode[]} */(vchildren);
-		innerDiffNode(out, vnodeChildren,
-			context, mountAll, hydrating || props.dangerouslySetInnerHTML!=null);
+		innerDiffNode(out,
+			/** @type {VNode[]} */(vchildren),
+			context,
+			mountAll,
+			hydrating || props.dangerouslySetInnerHTML!=null);
 	}
 
 
