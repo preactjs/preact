@@ -99,7 +99,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	if (typeof vnode==='string' || typeof vnode==='number') {
 
 		// update if it's already a Text node:
-		if (dom && dom['splitText']!==undefined && dom.parentNode && (!dom._component || componentRoot)) {
+		if (dom && dom.splitText !== undefined && dom.parentNode && (!dom._component || componentRoot)) {
 			/* istanbul ignore if */ /* Browser quirk that can't be covered: https://github.com/developit/preact/commit/fd4f21f5c45dfd75151bd27b4c217d8003aa5eb9 */
 			if (dom.nodeValue!=vnode) {
 				dom.nodeValue = vnode;
@@ -151,8 +151,13 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	}
 
 
-	let fc = out.firstChild,
-		props = out[ATTR_KEY],
+	/**
+	 * @type {object}
+	 * @property {string} [splitText]
+	 */
+	const fc = out.firstChild;
+
+	let props = out[ATTR_KEY],
 		vchildren = vnode.children;
 
 	if (props==null) {
@@ -161,7 +166,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	}
 
 	// Optimization: fast-path for elements containing a single TextNode:
-	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc!=null && fc['splitText']!==undefined && fc.nextSibling==null) {
+	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc!=null && fc.splitText!==undefined && fc.nextSibling==null) {
 		const vchild =
 			/** @type {string} */(vchildren[0]);
 		if (fc.nodeValue!=vchild) {
@@ -212,14 +217,16 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 	// Build up a map of keyed children and an Array of unkeyed children:
 	if (len!==0) {
 		for (let i=0; i<len; i++) {
-			let child = originalChildren[i],
-				props = child[ATTR_KEY],
-				key = vlen && props ? child['_component'] ? child['_component'].__key : props.key : null;
+			/** @type{object} */
+			const child = originalChildren[i];
+
+			const props = child[ATTR_KEY];
+			const key = vlen && props ? child._component ? child._component.__key : props.key : null;
 			if (key!=null) {
 				keyedLen++;
 				keyed[key] = child;
 			}
-			else if (props || (child['splitText']!==undefined ? (isHydrating ? child.nodeValue.trim() : true) : isHydrating)) {
+			else if (props || (child.splitText !== undefined ? (isHydrating ? child.nodeValue.trim() : true) : isHydrating)) {
 				children[childrenLen++] = child;
 			}
 		}
