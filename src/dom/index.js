@@ -3,7 +3,7 @@ import options from '../options';
 
 /**
  * A DOM event listener
- * @typedef {(e: Event) => void} EventListner
+ * @typedef {(e: Event) => void} EventListener
  */
 
 /**
