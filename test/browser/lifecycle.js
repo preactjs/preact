@@ -1186,7 +1186,7 @@ describe('Lifecycle methods', () => {
 	});
 
 
-	describe('shouldComponentUpdate', () => {
+	describe('#shouldComponentUpdate', () => {
 		let setState;
 
 		class Should extends Component {
@@ -1323,6 +1323,38 @@ describe('Lifecycle methods', () => {
 			});
 		});
 	});
+
+
+	describe('#setState', () => {
+		it('should not mutate state, only create new versions', () => {
+			const stateConstant = {};
+			let didMount = false;
+			let componentState;
+
+			expect(stateConstant).to.deep.equal({});
+
+			class Stateful extends Component {
+				constructor() {
+					super(...arguments);
+					this.state = stateConstant;
+				}
+
+				componentDidMount() {
+					didMount = true;
+					this.setState({key: 'value'}, () => {
+						componentState = this.state;
+					});
+				}
+			}
+
+			render(<Stateful />, scratch);
+			rerender();
+
+			expect(didMount).to.equal(true);
+			expect(componentState).to.deep.equal({key: 'value'});
+			expect(stateConstant).to.deep.equal({});
+		});
+	}),
 
 
 	describe('Lifecycle DOM Timing', () => {
