@@ -2,6 +2,10 @@ import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
 
 /**
+ * @typedef {import('../component').Component} Component
+ */
+
+/**
  * A DOM event listener
  * @typedef {(e: Event) => void} EventListener
  */
@@ -17,7 +21,7 @@ import options from '../options';
  * @property {string} [normalizedNodeName] A normalized node name to use in diffing
  * @property {string} [splitText]
  * @property {EventListenerMap} [_listeners] A map of event listeners added by components to this DOM node
- * @property {import('../component').Component} [_component] The component that rendered this DOM node
+ * @property {Component} [_component] The component that rendered this DOM node
  * @property {function} [_componentConstructor] The constructor of the component that rendered this DOM node
  */
 
