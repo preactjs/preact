@@ -151,13 +151,13 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	}
 
 
-	/**
-	 * @type {object}
-	 * @property {string} [splitText]
-	 */
-	const fc = out.firstChild;
-
-	let props = out[ATTR_KEY],
+	let fc =
+		/**
+		 * @type {object}
+		 * @property {string} [splitText]
+		 */
+		(out.firstChild),
+		props = out[ATTR_KEY],
 		vchildren = vnode.children;
 
 	if (props==null) {
@@ -212,16 +212,16 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 		len = originalChildren.length,
 		childrenLen = 0,
 		vlen = vchildren ? vchildren.length : 0,
-		j, f, vchild, child;
+		j, c, f, vchild, child;
 
 	// Build up a map of keyed children and an Array of unkeyed children:
 	if (len!==0) {
 		for (let i=0; i<len; i++) {
-			/** @type{object} */
-			const child = originalChildren[i];
+			const child =
+				/** @type{object} */(originalChildren[i]),
+				props = child[ATTR_KEY],
+				key = vlen && props ? child._component ? child._component.__key : props.key : null;
 
-			const props = child[ATTR_KEY];
-			const key = vlen && props ? child._component ? child._component.__key : props.key : null;
 			if (key!=null) {
 				keyedLen++;
 				keyed[key] = child;
@@ -249,8 +249,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 			// attempt to pluck a node of the same type from the existing children
 			else if (min<childrenLen) {
 				for (j=min; j<childrenLen; j++) {
-					const c = (children)[j];
-					if (c !== undefined && isSameNodeType(c, vchild, isHydrating)) {
+					if (children[j]!==undefined && isSameNodeType(c = children[j], vchild, isHydrating)) {
 						child = c;
 						children[j] = undefined;
 						if (j===childrenLen-1) childrenLen--;
@@ -286,9 +285,8 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 
 	// remove orphaned unkeyed children:
 	while (min<=childrenLen) {
-		const c = children[childrenLen--];
-		if (c !== undefined)
-			recollectNodeTree(c, false);
+		if ((child = children[childrenLen--])!==undefined)
+			recollectNodeTree(child, false);
 	}
 }
 
