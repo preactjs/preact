@@ -1,5 +1,3 @@
-// @ts-nocheck
-// Prevent warning of using VNode before declaration in defnition of children property.
 /**
  * Virtual DOM Node
  * @typedef VNode
