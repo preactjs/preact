@@ -7,8 +7,14 @@ import options from '../options';
 import { removeNode } from '../dom/index';
 
 /**
+ * @typedef {import('../component').Component} Component
+ * @typedef {import('../dom/index.js').PreactElement} PreactElement
+ * @typedef {import('../vnode').VNode} VNode
+ */
+
+/**
  * Queue of components that have been mounted and are awaiting componentDidMount
- * @type {Array<import('../component').Component>}
+ * @type {Array<Component>}
  */
 export const mounts = [];
 
@@ -33,21 +39,23 @@ export function flushMounts() {
 
 /**
  * Apply differences in a given vnode (and it's deep children) to a real DOM Node.
- * @param {import('../dom').PreactElement} dom A DOM node to mutate into the shape of a `vnode`
- * @param {import('../vnode').VNode} vnode A VNode (with descendants forming a tree) representing
+ * @param {PreactElement} dom A DOM node to mutate into the shape of a `vnode`
+ * @param {VNode} vnode A VNode (with descendants forming a tree) representing
  *  the desired DOM structure
  * @param {object} context The current context
  * @param {boolean} mountAll Whether or not to immediately mount all components
  * @param {Element} parent ?
  * @param {boolean} componentRoot ?
- * @returns {import('../dom').PreactElement} The created/mutated element
+ * @returns {PreactElement} The created/mutated element
  * @private
  */
 export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 	// diffLevel having been 0 here indicates initial entry into the diff (not a subdiff)
 	if (!diffLevel++) {
 		// when first starting the diff, check if we're diffing an SVG or within an SVG
-		isSvgMode = parent!=null && parent.ownerSVGElement!==undefined;
+		isSvgMode =
+			parent != null &&
+			/** @type{SVGElement} */(parent).ownerSVGElement !== undefined;
 
 		// hydration is indicated by the existing element to be diffed not having a prop cache
 		hydrating = dom!=null && !(ATTR_KEY in dom);
@@ -71,8 +79,8 @@ export function diff(dom, vnode, context, mountAll, parent, componentRoot) {
 
 /**
  * Internals of `diff()`, separated to allow bypassing diffLevel / mount flushing.
- * @param {import('../dom').PreactElement} dom A DOM node to mutate into the shape of a `vnode`
- * @param {import('../vnode').VNode} vnode A VNode (with descendants forming a tree) representing the desired DOM structure
+ * @param {PreactElement} dom A DOM node to mutate into the shape of a `vnode`
+ * @param {VNode} vnode A VNode (with descendants forming a tree) representing the desired DOM structure
  * @param {object} context The current context
  * @param {boolean} mountAll Whether or not to immediately mount all components
  * @param {boolean} [componentRoot] ?
@@ -83,14 +91,15 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 		prevSvgMode = isSvgMode;
 
 	// empty values (null, undefined, booleans) render as empty Text nodes
-	if (vnode==null || typeof vnode==='boolean') vnode = '';
+	if (vnode == null || typeof vnode === 'boolean')
+		/** @type {any} */(vnode) = '';
 
 
 	// Fast case: Strings & Numbers create/update Text nodes.
 	if (typeof vnode==='string' || typeof vnode==='number') {
 
 		// update if it's already a Text node:
-		if (dom && dom.splitText!==undefined && dom.parentNode && (!dom._component || componentRoot)) {
+		if (dom && dom.splitText !== undefined && dom.parentNode && (!dom._component || componentRoot)) {
 			/* istanbul ignore if */ /* Browser quirk that can't be covered: https://github.com/developit/preact/commit/fd4f21f5c45dfd75151bd27b4c217d8003aa5eb9 */
 			if (dom.nodeValue!=vnode) {
 				dom.nodeValue = vnode;
@@ -98,7 +107,9 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 		}
 		else {
 			// it wasn't a Text node: replace it with one and recycle the old Element
-			out = document.createTextNode(vnode);
+			/** @type {Node} */(out) =
+				document.createTextNode(vnode);
+
 			if (dom) {
 				if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
 				recollectNodeTree(dom, true);
@@ -140,7 +151,12 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	}
 
 
-	let fc = out.firstChild,
+	let fc =
+		/**
+		 * @type {object}
+		 * @property {string} [splitText]
+		 */
+		(out.firstChild),
 		props = out[ATTR_KEY],
 		vchildren = vnode.children;
 
@@ -151,13 +167,18 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 	// Optimization: fast-path for elements containing a single TextNode:
 	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc!=null && fc.splitText!==undefined && fc.nextSibling==null) {
-		if (fc.nodeValue!=vchildren[0]) {
-			fc.nodeValue = vchildren[0];
+		if (fc.nodeValue != vchildren[0]) {
+			fc.nodeValue =
+				/** @type {string} */(vchildren[0]);
 		}
 	}
 	// otherwise, if there are existing or new children, diff them:
 	else if (vchildren && vchildren.length || fc!=null) {
-		innerDiffNode(out, vchildren, context, mountAll, hydrating || props.dangerouslySetInnerHTML!=null);
+		innerDiffNode(out,
+			/** @type {VNode[]} */(vchildren),
+			context,
+			mountAll,
+			hydrating || props.dangerouslySetInnerHTML!=null);
 	}
 
 
@@ -174,8 +195,8 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 /**
  * Apply child and attribute changes between a VNode and a DOM Node to the DOM.
- * @param {import('../dom').PreactElement} dom Element whose children should be compared & mutated
- * @param {Array<import('../vnode').VNode>} vchildren Array of VNodes to compare to `dom.childNodes`
+ * @param {PreactElement} dom Element whose children should be compared & mutated
+ * @param {Array<VNode>} vchildren Array of VNodes to compare to `dom.childNodes`
  * @param {object} context Implicitly descendant context object (from most
  *  recent `getChildContext()`)
  * @param {boolean} mountAll Whether or not to immediately mount all components
@@ -196,14 +217,16 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 	// Build up a map of keyed children and an Array of unkeyed children:
 	if (len!==0) {
 		for (let i=0; i<len; i++) {
-			let child = originalChildren[i],
+			const child =
+				/** @type{object} */(originalChildren[i]),
 				props = child[ATTR_KEY],
 				key = vlen && props ? child._component ? child._component.__key : props.key : null;
+
 			if (key!=null) {
 				keyedLen++;
 				keyed[key] = child;
 			}
-			else if (props || (child.splitText!==undefined ? (isHydrating ? child.nodeValue.trim() : true) : isHydrating)) {
+			else if (props || (child.splitText !== undefined ? (isHydrating ? child.nodeValue.trim() : true) : isHydrating)) {
 				children[childrenLen++] = child;
 			}
 		}
@@ -262,7 +285,8 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 
 	// remove orphaned unkeyed children:
 	while (min<=childrenLen) {
-		if ((child = children[childrenLen--])!==undefined) recollectNodeTree(child, false);
+		if ((child = children[childrenLen--])!==undefined)
+			recollectNodeTree(child, false);
 	}
 }
 
@@ -270,7 +294,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 
 /**
  * Recursively recycle (or just unmount) a node and its descendants.
- * @param {import('../dom').PreactElement} node DOM node to start
+ * @param {PreactElement} node DOM node to start
  *  unmount/removal from
  * @param {boolean} [unmountOnly=false] If `true`, only triggers unmount
  *  lifecycle, skips removal
@@ -312,7 +336,7 @@ export function removeChildren(node) {
 
 /**
  * Apply differences in attributes from a VNode to the given DOM Element.
- * @param {import('../dom').PreactElement} dom Element with attributes to diff `attrs` against
+ * @param {PreactElement} dom Element with attributes to diff `attrs` against
  * @param {object} attrs The desired end-state key-value attribute pairs
  * @param {object} old Current/previous attributes (from previous VNode or
  *  element's prop cache)

@@ -8,8 +8,14 @@ import { createComponent, collectComponent } from './component-recycler';
 import { removeNode } from '../dom/index';
 
 /**
+ * @typedef {import('../component').Component} Component
+ * @typedef {import('../dom/index.js').PreactElement} PreactElement
+ * @typedef {import('../vnode').VNode} VNode
+ */
+
+/**
  * Set a component's `props` and possibly re-render the component
- * @param {import('../component').Component} component The Component to set props on
+ * @param {Component} component The Component to set props on
  * @param {object} props The new props
  * @param {number} renderMode Render options - specifies how to re-render the component
  * @param {object} context The new context
@@ -60,7 +66,7 @@ export function setComponentProps(component, props, renderMode, context, mountAl
 /**
  * Render a Component, triggering necessary lifecycle events and taking
  * High-Order Components into account.
- * @param {import('../component').Component} component The component to render
+ * @param {Component} component The component to render
  * @param {number} [renderMode] render mode, see constants.js for available options.
  * @param {boolean} [mountAll] Whether or not to immediately mount all components
  * @param {boolean} [isChild] ?
@@ -212,11 +218,11 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 
 /**
  * Apply the Component referenced by a VNode to the DOM.
- * @param {import('../dom').PreactElement} dom The DOM node to mutate
- * @param {import('../vnode').VNode} vnode A Component-referencing VNode
+ * @param {PreactElement} dom The DOM node to mutate
+ * @param {VNode} vnode A Component-referencing VNode
  * @param {object} context The current context
  * @param {boolean} mountAll Whether or not to immediately mount all components
- * @returns {import('../dom').PreactElement} The created/mutated element
+ * @returns {PreactElement} The created/mutated element
  * @private
  */
 export function buildComponentFromVNode(dom, vnode, context, mountAll) {
@@ -240,7 +246,10 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 			dom = oldDom = null;
 		}
 
-		c = createComponent(vnode.nodeName, props, context);
+		c = createComponent(
+			/** @type {(props, context) => void} */(vnode.nodeName),
+			props, context);
+
 		if (dom && !c.nextBase) {
 			c.nextBase = dom;
 			// passing dom/oldDom as nextBase will recycle it if unused, so bypass recycling on L229:
@@ -262,7 +271,7 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 
 /**
  * Remove a component from the DOM and recycle it.
- * @param {import('../component').Component} component The Component instance to unmount
+ * @param {Component} component The Component instance to unmount
  * @private
  */
 export function unmountComponent(component) {
