@@ -1,7 +1,7 @@
-import { TEXT_NODE, EMPTY_OBJ, EMPTY_ARR } from '../constants';
+import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 // import { assign } from '../util';
 import { Component /* , enqueueRender */ } from '../component';
-import { createVNode /*, reclaimVNode*/ } from '../create-element';
+import { coerceToVNode /*, reclaimVNode*/ } from '../create-element';
 import { diffChildren /*, create */ } from './children';
 import { diffProps } from './props';
 import { assign } from '../util';
@@ -257,7 +257,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		}
 		c.context = context;
 		let prev = c._previousVTree;
-		let vnode = c._previousVTree = c.render(c.props, c.state, c.context);
+		let vnode = c._previousVTree = coerceToVNode(c.render(c.props, c.state, c.context));
 		// context = assign({}, context);
 		// context.__depth = (context.__depth || 0) + 1;
 		// context = assign({
@@ -552,7 +552,8 @@ function flattenChildren(children, flattened) {
 	// if (type==='object' && typeof Symbol!=='undefined' && Symbol.iterator in children) {
 	// 	children = Array.from(children);
 	// }
-	if (children==null) {}
+	// if (children==null) {}
+	if (children==null || typeof children === 'boolean') {}
 	// else if (isObject && 'pop' in children) {
 	else if (typeof children==='object' && ('pop' in children || Symbol.iterator in children && (children = Array.from(children)))) {
 	// else if (type==='object' && 'pop' in children) {
@@ -582,10 +583,11 @@ function flattenChildren(children, flattened) {
 		// pushChild(children, flattened, path, index, type);
 		// if (!isObject) {
 
-		if (typeof children!=='object' && typeof children!=='function') {
-			children = createVNode(TEXT_NODE, null, null, null, children, null);
-			// children = createVNode(TEXT_NODE, null, null, null, children, key);
-		}
+		// if (typeof children!=='object' && typeof children!=='function') {
+		// 	children = createVNode(TEXT_NODE, null, null, null, children, null);
+		// 	// children = createVNode(TEXT_NODE, null, null, null, children, key);
+		// }
+		children = coerceToVNode(children);
 
 		// else if (children.key == null) {
 		// 	children.key = key;
