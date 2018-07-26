@@ -95,6 +95,14 @@ describe('svg', () => {
 		expect(scratch.innerHTML).to.contain(` class="foo bar"`);
 	});
 
+	it('should still support className attribute', () => {
+		render((
+			<svg viewBox="0 0 1 1" className="foo bar" />
+		), scratch);
+
+		expect(scratch.innerHTML).to.contain(` class="foo bar"`);
+	});
+
 	it('should switch back to HTML for <foreignObject>', () => {
 		render((
 			<svg>
