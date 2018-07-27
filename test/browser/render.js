@@ -148,8 +148,9 @@ describe('render()', () => {
 			anan: 'NaN'
 		});
 
-		scratch.innerHTML = '';
+	});
 
+	it('should not render falsy attributes on initial render', () => {
 		render((
 			<div anull={null} aundefined={undefined} afalse={false} anan={NaN} a0={0} />
 		), scratch);
@@ -249,6 +250,51 @@ describe('render()', () => {
 			.that.matches(/top\s*:\s*5px\s*/)
 			.and.matches(/position\s*:\s*relative\s*/);
 	});
+
+	it('should serialize style objects', () => {
+		let root = render((
+			<div style={{
+				color: 'rgb(255, 255, 255)',
+				background: 'rgb(255, 100, 0)',
+				backgroundPosition: '10px 10px',
+				'background-size': 'cover',
+				padding: 5,
+				top: 100,
+				left: '100%'
+			}}
+			>
+				test
+			</div>
+		), scratch);
+
+		let { style } = scratch.childNodes[0];
+		expect(style).to.have.property('color').that.equals('rgb(255, 255, 255)');
+		expect(style).to.have.property('background').that.contains('rgb(255, 100, 0)');
+		expect(style).to.have.property('backgroundPosition').that.equals('10px 10px');
+		expect(style).to.have.property('backgroundSize', 'cover');
+		expect(style).to.have.property('padding', '5px');
+		expect(style).to.have.property('top', '100px');
+		expect(style).to.have.property('left', '100%');
+
+		root = render((
+			<div style={{ color: 'rgb(0, 255, 255)' }}>test</div>
+		), scratch, root);
+
+		expect(root.style.cssText).to.equal('color: rgb(0, 255, 255);');
+
+		root = render((
+			<div style="display: inline;">test</div>
+		), scratch, root);
+
+		expect(root.style.cssText).to.equal('display: inline;');
+
+		root = render((
+			<div style={{ backgroundColor: 'rgb(0, 255, 255)' }}>test</div>
+		), scratch, root);
+
+		expect(root.style.cssText).to.equal('background-color: rgb(0, 255, 255);');
+	});
+
 
 	it('should only register on* functions as handlers', () => {
 		let click = () => {},
@@ -352,51 +398,9 @@ describe('render()', () => {
 		}
 	});
 
-	it('should serialize style objects', () => {
-		let root = render((
-			<div style={{
-				color: 'rgb(255, 255, 255)',
-				background: 'rgb(255, 100, 0)',
-				backgroundPosition: '10px 10px',
-				'background-size': 'cover',
-				padding: 5,
-				top: 100,
-				left: '100%'
-			}}>
-				test
-			</div>
-		), scratch);
-
-		let { style } = scratch.childNodes[0];
-		expect(style).to.have.property('color').that.equals('rgb(255, 255, 255)');
-		expect(style).to.have.property('background').that.contains('rgb(255, 100, 0)');
-		expect(style).to.have.property('backgroundPosition').that.equals('10px 10px');
-		expect(style).to.have.property('backgroundSize', 'cover');
-		expect(style).to.have.property('padding', '5px');
-		expect(style).to.have.property('top', '100px');
-		expect(style).to.have.property('left', '100%');
-
-		root = render((
-			<div style={{ color: 'rgb(0, 255, 255)' }}>test</div>
-		), scratch, root);
-
-		expect(root.style.cssText).to.equal('color: rgb(0, 255, 255);');
-
-		root = render((
-			<div style="display: inline;">test</div>
-		), scratch, root);
-
-		expect(root.style.cssText).to.equal('display: inline;');
-
-		root = render((
-			<div style={{ backgroundColor: 'rgb(0, 255, 255)' }}>test</div>
-		), scratch, root);
-
-		expect(root.style.cssText).to.equal('background-color: rgb(0, 255, 255);');
-	});
-
 	it('should support dangerouslySetInnerHTML', () => {
 		let html = '<b>foo &amp; bar</b>';
+		// eslint-disable-next-line react/no-danger
 		let root = render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
 
 		expect(scratch.firstChild, 'set').to.have.property('innerHTML', html);
@@ -406,6 +410,7 @@ describe('render()', () => {
 
 		expect(scratch, 'unset').to.have.property('innerHTML', `<div>a<strong>b</strong></div>`);
 
+		// eslint-disable-next-line react/no-danger
 		render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, root);
 
 		expect(scratch.innerHTML, 're-set').to.equal('<div>'+html+'</div>');
@@ -418,13 +423,14 @@ describe('render()', () => {
 				this.state.html = this.props.html;
 			}
 			render(props, { html }) {
+				// eslint-disable-next-line react/no-danger
 				return html ? <div dangerouslySetInnerHTML={{ __html: html }} /> : <div />;
 			}
 		}
 
 		let thing;
 
-		render(<Thing ref={ c => thing=c } html="<b><i>test</i></b>" />, scratch);
+		render(<Thing ref={c => thing=c} html="<b><i>test</i></b>" />, scratch);
 
 		expect(scratch.innerHTML).to.equal('<div><b><i>test</i></b></div>');
 
@@ -442,6 +448,7 @@ describe('render()', () => {
 	it('should hydrate with dangerouslySetInnerHTML', () => {
 		let html = '<b>foo &amp; bar</b>';
 		scratch.innerHTML = `<div>${html}</div>`;
+		// eslint-disable-next-line react/no-danger
 		render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, scratch.lastChild);
 
 		expect(scratch.firstChild).to.have.property('innerHTML', html);
@@ -509,7 +516,7 @@ describe('render()', () => {
 		};
 
 		const DOMElement = html`<div><a foo="bar"></a></div>`;
-		const preactElement = <div><a></a></div>;
+		const preactElement = <div><a /></div>;
 
 		render(preactElement, scratch, DOMElement);
 		expect(scratch).to.have.property('innerHTML', '<div><a></a></div>');
@@ -529,7 +536,7 @@ describe('render()', () => {
 		}
 
 		let comp;
-		let root = render(<Foo ref={ c => comp = c } />, scratch, root);
+		let root = render(<Foo ref={c => comp = c} />, scratch, root);
 
 		let c = document.createElement('c');
 		c.textContent = 'baz';
@@ -554,18 +561,18 @@ describe('render()', () => {
 
 		// Re-rendering from the root is non-destructive if the root was a previous render:
 		comp.alt = false;
-		root = render(<Foo ref={ c => comp = c } />, scratch, root);
+		root = render(<Foo ref={c => comp = c} />, scratch, root);
 
 		expect(scratch.firstChild.children, 'root re-render').to.have.length(4);
 		expect(scratch.innerHTML, 'root re-render').to.equal(`<div><a>foo</a><b>bar</b><c>baz</c><b>bat</b></div>`);
 
 		comp.alt = true;
-		root = render(<Foo ref={ c => comp = c } />, scratch, root);
+		root = render(<Foo ref={c => comp = c} />, scratch, root);
 
 		expect(scratch.firstChild.children, 'root re-render 2').to.have.length(4);
 		expect(scratch.innerHTML, 'root re-render 2').to.equal(`<div><b>alt</b><a>foo</a><c>baz</c><b>bat</b></div>`);
 
-		root = render(<div><Foo ref={ c => comp = c } /></div>, scratch, root);
+		root = render(<div><Foo ref={c => comp = c} /></div>, scratch, root);
 
 		expect(scratch.firstChild.children, 'root re-render changed').to.have.length(3);
 		expect(scratch.innerHTML, 'root re-render changed').to.equal(`<div><div><a>foo</a><b>bar</b></div><c>baz</c><b>bat</b></div>`);
@@ -606,9 +613,9 @@ describe('render()', () => {
 				this.setState({ todos, text: '' });
 			}
 			render() {
-				const {todos, text} = this.state;
+				const { todos, text } = this.state;
 				return (
-					<div onKeyDown={ this.addTodo }>
+					<div onKeyDown={this.addTodo}>
 						{ todos.map( todo => (<div>{todo.text}</div> )) }
 						<input value={text} onInput={this.setText} ref={(i) => input = i} />
 					</div>
@@ -623,7 +630,7 @@ describe('render()', () => {
 		});
 		root._component.addTodo();
 		expect(document.activeElement).to.equal(input);
-		setTimeout(() =>{
+		setTimeout(() => {
 			expect(/1/.test(scratch.innerHTML)).to.equal(true);
 			done();
 		}, 10);
