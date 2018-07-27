@@ -33,8 +33,14 @@ describe('render()', () => {
 		teardown(scratch);
 	});
 
-	it('should render a empty text node', () => {
+	it('should render nothing node given null', () => {
 		render(null, scratch);
+		let c = scratch.childNodes;
+		expect(c).to.have.length(0);
+	});
+
+	it('should render an empty text node given an empty string', () => {
+		render('', scratch);
 		let c = scratch.childNodes;
 		expect(c).to.have.length(1);
 		expect(c[0].data).to.equal('');
@@ -46,19 +52,50 @@ describe('render()', () => {
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.childNodes[0].nodeName).to.equal('DIV');
 
-		scratch.innerHTML = '';
+		scratch.parentNode.removeChild(scratch);
+		scratch = document.createElement('div');
+		(document.body || document.documentElement).appendChild(scratch);
 
 		render(<span />, scratch);
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.childNodes[0].nodeName).to.equal('SPAN');
 
-		scratch.innerHTML = '';
+	});
 
+	it('should support custom tag names', () => {
 		render(<foo />, scratch);
+		expect(scratch.childNodes).to.have.length(1);
+		expect(scratch.firstChild).to.have.property('nodeName', 'FOO');
+
+		scratch.parentNode.removeChild(scratch);
+		scratch = document.createElement('div');
+		(document.body || document.documentElement).appendChild(scratch);
+
 		render(<x-bar />, scratch);
+		expect(scratch.childNodes).to.have.length(1);
+		expect(scratch.firstChild).to.have.property('nodeName', 'X-BAR');
+	});
+
+	// Not supported currently
+	xit('should append new elements when called without a merge argument', () => {
+		render(<div />, scratch);
+		expect(scratch.childNodes).to.have.length(1);
+		expect(scratch.firstChild).to.have.property('nodeName', 'DIV');
+
+		render(<span />, scratch);
 		expect(scratch.childNodes).to.have.length(2);
-		expect(scratch.childNodes[0]).to.have.property('nodeName', 'FOO');
-		expect(scratch.childNodes[1]).to.have.property('nodeName', 'X-BAR');
+		expect(scratch.childNodes[0]).to.have.property('nodeName', 'DIV');
+		expect(scratch.childNodes[1]).to.have.property('nodeName', 'SPAN');
+	});
+
+	it('should merge new elements when called twice', () => {
+		render(<div />, scratch);
+		expect(scratch.childNodes).to.have.length(1);
+		expect(scratch.firstChild).to.have.property('nodeName', 'DIV');
+
+		render(<span />, scratch);
+		expect(scratch.childNodes).to.have.length(1);
+		expect(scratch.firstChild).to.have.property('nodeName', 'SPAN');
 	});
 
 	it('should nest empty nodes', () => {
@@ -130,7 +167,7 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('Testing, huh! How is it going?');
 	});
 
-	it('should clear attributes with falsy values on render', () => {
+	it('should clear falsy attributes', () => {
 		render((
 			<div anull="anull" aundefined="aundefined" afalse="afalse" anan="aNaN" a0="a0" />
 		), scratch);
@@ -240,39 +277,92 @@ describe('render()', () => {
 		expect(scratch.childNodes[0]).to.have.property('className', 'bar');
 	});
 
-	// Not supported currently
-	xit('should apply style as String', () => {
-		render(<div style="top:5px; position:relative;" />, scratch);
-		expect(scratch.childNodes[0].style.cssText)
-			.that.matches(/top\s*:\s*5px\s*/)
-			.and.matches(/position\s*:\s*relative\s*/);
+	describe('style attribute', () => {
+		// Not supported currently
+		xit('should apply style as String', () => {
+			render(<div style="top:5px; position:relative;" />, scratch);
+			expect(scratch.childNodes[0].style.cssText)
+				.that.matches(/top\s*:\s*5px\s*/)
+				.and.matches(/position\s*:\s*relative\s*/);
+		});
+
+		// Not supported currently
+		xit('should properly switch from string styles to object styles and back', () => {
+			render((
+				<div style="display: inline;">test</div>
+			), scratch);
+
+			let root = scratch.firstChild;
+			expect(root.style.cssText).to.equal('display: inline;');
+
+			render((
+				<div style={{ color: 'red' }} />
+			), scratch);
+
+			expect(root.style.cssText).to.equal('color: red;');
+
+			render((
+				<div style="color: blue" />
+			), scratch);
+
+			expect(root.style.cssText).to.equal('color: blue;');
+
+			render((
+				<div style={{ color: 'yellow' }} />
+			), scratch);
+
+			expect(root.style.cssText).to.equal('color: yellow;');
+
+			render((
+				<div style="display: block" />
+			), scratch);
+
+			expect(root.style.cssText).to.equal('display: block;');
+		});
+
+		it('should serialize style objects', () => {
+			render((
+				<div style={{
+					color: 'rgb(255, 255, 255)',
+					background: 'rgb(255, 100, 0)',
+					backgroundPosition: '10px 10px',
+					'background-size': 'cover',
+					padding: 5,
+					top: 100,
+					left: '100%'
+				}}
+				>
+					test
+				</div>
+			), scratch);
+
+			let root = scratch.firstChild;
+			let { style } = root;
+			expect(style).to.have.property('color').that.equals('rgb(255, 255, 255)');
+			expect(style).to.have.property('background').that.contains('rgb(255, 100, 0)');
+			expect(style).to.have.property('backgroundPosition').that.equals('10px 10px');
+			expect(style).to.have.property('backgroundSize', 'cover');
+			expect(style).to.have.property('padding', '5px');
+			expect(style).to.have.property('top', '100px');
+			expect(style).to.have.property('left', '100%');
+
+			render((
+				<div style={{ color: 'rgb(0, 255, 255)' }}>test</div>
+			), scratch);
+
+			expect(root.style.cssText).to.equal('color: rgb(0, 255, 255);');
+
+			render((
+				<div style={{ backgroundColor: 'rgb(0, 255, 255)' }}>test</div>
+			), scratch);
+
+			expect(root.style.cssText).to.equal('background-color: rgb(0, 255, 255);');
+		});
+
 	});
 
-	it('should only register on* functions as handlers', () => {
-		let click = () => {},
-			onclick = () => {};
-
-		let proto = document.createElement('div').constructor.prototype;
-
-		sinon.spy(proto, 'addEventListener');
-
-		render(<div click={click} onClick={onclick} />, scratch);
-
-		expect(scratch.childNodes[0].attributes.length).to.equal(0);
-
-		expect(proto.addEventListener).to.have.been.calledOnce
-			.and.to.have.been.calledWithExactly('click', sinon.match.func, false);
-
-		proto.addEventListener.restore();
-	});
-
-	it('should add and remove event handlers', () => {
-		let click = sinon.spy(),
-			mousedown = sinon.spy();
-
-		let proto = document.createElement('div').constructor.prototype;
-		sinon.spy(proto, 'addEventListener');
-		sinon.spy(proto, 'removeEventListener');
+	describe('event handling', () => {
+		let proto;
 
 		function fireEvent(on, type) {
 			let e = document.createEvent('Event');
@@ -280,176 +370,177 @@ describe('render()', () => {
 			on.dispatchEvent(e);
 		}
 
-		render(<div onClick={() => click(1)} onMouseDown={mousedown} />, scratch);
+		beforeEach(() => {
+			proto = document.createElement('div').constructor.prototype;
 
-		expect(proto.addEventListener).to.have.been.calledTwice
-			.and.to.have.been.calledWith('click')
-			.and.calledWith('mousedown');
+			sinon.spy(proto, 'addEventListener');
+			sinon.spy(proto, 'removeEventListener');
+		});
 
-		fireEvent(scratch.childNodes[0], 'click');
-		expect(click).to.have.been.calledOnce
-			.and.calledWith(1);
+		afterEach(() => {
+			proto.addEventListener.restore();
+			proto.removeEventListener.restore();
+		});
 
-		proto.addEventListener.resetHistory();
-		click.resetHistory();
+		it('should only register on* functions as handlers', () => {
+			let click = () => {},
+				onclick = () => {};
 
-		render(<div onClick={() => click(2)} />, scratch, scratch.firstChild);
+			render(<div click={click} onClick={onclick} />, scratch);
 
-		expect(proto.addEventListener).not.to.have.been.called;
+			expect(scratch.childNodes[0].attributes.length).to.equal(0);
 
-		expect(proto.removeEventListener)
-			.to.have.been.calledOnce
-			.and.calledWith('mousedown');
+			expect(proto.addEventListener).to.have.been.calledOnce
+				.and.to.have.been.calledWithExactly('click', sinon.match.func, false);
+		});
 
-		fireEvent(scratch.childNodes[0], 'click');
-		expect(click).to.have.been.calledOnce
-			.and.to.have.been.calledWith(2);
+		it('should add event handlers with a normalized event name', () => {
+			let click = sinon.spy(),
+				mousedown = sinon.spy();
 
-		fireEvent(scratch.childNodes[0], 'mousedown');
-		expect(mousedown).not.to.have.been.called;
+			render(<div onClick={() => click(1)} onMouseDown={mousedown} />, scratch);
 
-		proto.removeEventListener.resetHistory();
-		click.resetHistory();
-		mousedown.resetHistory();
+			expect(proto.addEventListener).to.have.been.calledTwice
+				.and.to.have.been.calledWith('click')
+				.and.calledWith('mousedown');
 
-		render(<div />, scratch, scratch.firstChild);
+			fireEvent(scratch.childNodes[0], 'click');
+			expect(click).to.have.been.calledOnce
+				.and.calledWith(1);
+		});
 
-		expect(proto.removeEventListener)
-			.to.have.been.calledOnce
-			.and.calledWith('click');
+		it('should update event handlers', () => {
+			let click1 = sinon.spy();
+			let click2 = sinon.spy();
 
-		fireEvent(scratch.childNodes[0], 'click');
-		expect(click).not.to.have.been.called;
+			render(<div onClick={click1} />, scratch);
 
-		proto.addEventListener.restore();
-		proto.removeEventListener.restore();
-	});
+			fireEvent(scratch.childNodes[0], 'click');
+			expect(click1).to.have.been.calledOnce;
+			expect(click2).to.not.have.been.called;
 
-	it('should use capturing for event props ending with *Capture', () => {
-		let click = sinon.spy(),
-			focus = sinon.spy();
+			click1.resetHistory();
+			click2.resetHistory();
 
-		render((
-			<div onClickCapture={click} onFocusCapture={focus}>
-				<button />
-			</div>
-		), scratch);
+			render(<div onClick={click2} />, scratch);
 
-		let root = scratch.firstChild;
-		root.firstElementChild.click();
-		root.firstElementChild.focus();
+			fireEvent(scratch.childNodes[0], 'click');
+			expect(click1).to.not.have.been.called;
+			expect(click2).to.have.been.called;
+		});
 
-		expect(click, 'click').to.have.been.calledOnce;
+		it('should remove event handlers', () => {
+			let click = sinon.spy(),
+				mousedown = sinon.spy();
 
-		if (DISABLE_FLAKEY!==true) {
-			// Focus delegation requires a 50b hack I'm not sure we want to incur
-			expect(focus, 'focus').to.have.been.calledOnce;
+			render(<div onClick={() => click(1)} onMouseDown={mousedown} />, scratch);
+			render(<div onClick={() => click(2)} />, scratch);
 
-			// IE doesn't set it
-			expect(click).to.have.been.calledWithMatch({ eventPhase: 0 });		// capturing
-			expect(focus).to.have.been.calledWithMatch({ eventPhase: 0 });		// capturing
-		}
-	});
+			expect(proto.removeEventListener)
+				.to.have.been.calledOnce
+				.and.calledWith('mousedown');
 
-	it('should serialize style objects', () => {
-		let root = render((
-			<div style={{
-				color: 'rgb(255, 255, 255)',
-				background: 'rgb(255, 100, 0)',
-				backgroundPosition: '10px 10px',
-				'background-size': 'cover',
-				padding: 5,
-				top: 100,
-				left: '100%'
-			}}
-			>
-				test
-			</div>
-		), scratch);
+			fireEvent(scratch.childNodes[0], 'mousedown');
+			expect(mousedown).not.to.have.been.called;
 
-		let { style } = scratch.childNodes[0];
-		expect(style).to.have.property('color').that.equals('rgb(255, 255, 255)');
-		expect(style).to.have.property('background').that.contains('rgb(255, 100, 0)');
-		expect(style).to.have.property('backgroundPosition').that.equals('10px 10px');
-		expect(style).to.have.property('backgroundSize', 'cover');
-		expect(style).to.have.property('padding', '5px');
-		expect(style).to.have.property('top', '100px');
-		expect(style).to.have.property('left', '100%');
+			proto.removeEventListener.resetHistory();
+			click.resetHistory();
+			mousedown.resetHistory();
 
-		root = render((
-			<div style={{ color: 'rgb(0, 255, 255)' }}>test</div>
-		), scratch, root);
+			render(<div />, scratch);
 
-		expect(root.style.cssText).to.equal('color: rgb(0, 255, 255);');
+			expect(proto.removeEventListener)
+				.to.have.been.calledOnce
+				.and.calledWith('click');
 
-		root = render((
-			<div style="display: inline;">test</div>
-		), scratch, root);
+			fireEvent(scratch.childNodes[0], 'click');
+			expect(click).not.to.have.been.called;
+		});
 
-		expect(root.style.cssText).to.equal('display: inline;');
+		it('should use capturing for event props ending with *Capture', () => {
+			let click = sinon.spy(),
+				focus = sinon.spy();
 
-		root = render((
-			<div style={{ backgroundColor: 'rgb(0, 255, 255)' }}>test</div>
-		), scratch, root);
+			render((
+				<div onClickCapture={click} onFocusCapture={focus}>
+					<button />
+				</div>
+			), scratch);
 
-		expect(root.style.cssText).to.equal('background-color: rgb(0, 255, 255);');
-	});
+			let root = scratch.firstChild;
+			root.firstElementChild.click();
+			root.firstElementChild.focus();
 
-	it('should support dangerouslySetInnerHTML', () => {
-		let html = '<b>foo &amp; bar</b>';
-		// eslint-disable-next-line react/no-danger
-		let root = render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
+			expect(click, 'click').to.have.been.calledOnce;
 
-		expect(scratch.firstChild, 'set').to.have.property('innerHTML', html);
-		expect(scratch.innerHTML).to.equal('<div>'+html+'</div>');
+			if (DISABLE_FLAKEY!==true) {
+				// Focus delegation requires a 50b hack I'm not sure we want to incur
+				expect(focus, 'focus').to.have.been.calledOnce;
 
-		root = render(<div>a<strong>b</strong></div>, scratch, root);
-
-		expect(scratch, 'unset').to.have.property('innerHTML', `<div>a<strong>b</strong></div>`);
-
-		// eslint-disable-next-line react/no-danger
-		render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, root);
-
-		expect(scratch.innerHTML, 're-set').to.equal('<div>'+html+'</div>');
-	});
-
-	it('should apply proper mutation for VNodes with dangerouslySetInnerHTML attr', () => {
-		class Thing extends Component {
-			constructor(props, context) {
-				super(props, context);
-				this.state.html = this.props.html;
+				// IE doesn't set it
+				expect(click).to.have.been.calledWithMatch({ eventPhase: 0 });		// capturing
+				expect(focus).to.have.been.calledWithMatch({ eventPhase: 0 });		// capturing
 			}
-			render(props, { html }) {
-				// eslint-disable-next-line react/no-danger
-				return html ? <div dangerouslySetInnerHTML={{ __html: html }} /> : <div />;
-			}
-		}
-
-		let thing;
-
-		render(<Thing ref={c => thing=c} html="<b><i>test</i></b>" />, scratch);
-
-		expect(scratch.innerHTML).to.equal('<div><b><i>test</i></b></div>');
-
-		thing.setState({ html: false });
-		thing.forceUpdate();
-
-		expect(scratch.innerHTML).to.equal('<div></div>');
-
-		thing.setState({ html: '<foo><bar>test</bar></foo>' });
-		thing.forceUpdate();
-
-		expect(scratch.innerHTML).to.equal('<div><foo><bar>test</bar></foo></div>');
+		});
 	});
 
-	it('should hydrate with dangerouslySetInnerHTML', () => {
-		let html = '<b>foo &amp; bar</b>';
-		scratch.innerHTML = `<div>${html}</div>`;
-		// eslint-disable-next-line react/no-danger
-		render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, scratch.lastChild);
+	describe('dangerouslySetInnerHTML', () => {
+		it('should support dangerouslySetInnerHTML', () => {
+			let html = '<b>foo &amp; bar</b>';
+			// eslint-disable-next-line react/no-danger
+			let root = render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
 
-		expect(scratch.firstChild).to.have.property('innerHTML', html);
-		expect(scratch.innerHTML).to.equal(`<div>${html}</div>`);
+			expect(scratch.firstChild, 'set').to.have.property('innerHTML', html);
+			expect(scratch.innerHTML).to.equal('<div>'+html+'</div>');
+
+			root = render(<div>a<strong>b</strong></div>, scratch, root);
+
+			expect(scratch, 'unset').to.have.property('innerHTML', `<div>a<strong>b</strong></div>`);
+
+			// eslint-disable-next-line react/no-danger
+			render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, root);
+
+			expect(scratch.innerHTML, 're-set').to.equal('<div>'+html+'</div>');
+		});
+
+		it('should apply proper mutation for VNodes with dangerouslySetInnerHTML attr', () => {
+			class Thing extends Component {
+				constructor(props, context) {
+					super(props, context);
+					this.state.html = this.props.html;
+				}
+				render(props, { html }) {
+					// eslint-disable-next-line react/no-danger
+					return html ? <div dangerouslySetInnerHTML={{ __html: html }} /> : <div />;
+				}
+			}
+
+			let thing;
+
+			render(<Thing ref={c => thing=c} html="<b><i>test</i></b>" />, scratch);
+
+			expect(scratch.innerHTML).to.equal('<div><b><i>test</i></b></div>');
+
+			thing.setState({ html: false });
+			thing.forceUpdate();
+
+			expect(scratch.innerHTML).to.equal('<div></div>');
+
+			thing.setState({ html: '<foo><bar>test</bar></foo>' });
+			thing.forceUpdate();
+
+			expect(scratch.innerHTML).to.equal('<div><foo><bar>test</bar></foo></div>');
+		});
+
+		it('should hydrate with dangerouslySetInnerHTML', () => {
+			let html = '<b>foo &amp; bar</b>';
+			scratch.innerHTML = `<div>${html}</div>`;
+			// eslint-disable-next-line react/no-danger
+			render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, scratch.lastChild);
+
+			expect(scratch.firstChild).to.have.property('innerHTML', html);
+			expect(scratch.innerHTML).to.equal(`<div>${html}</div>`);
+		});
 	});
 
 	it('should reconcile mutated DOM attributes', () => {
