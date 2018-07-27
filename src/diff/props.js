@@ -130,7 +130,7 @@ function setProperty(node, name, value, oldValue, isSvg) {
 	else if (value==null || value===false) {
 		node.removeAttribute(name);
 	}
-	else {
+	else if (typeof value!=='function') {
 		node.setAttribute(name, value);
 	}
 	// @TODO handle this implicitly in set?
