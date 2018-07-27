@@ -244,55 +244,57 @@ describe('render()', () => {
 		expect(scratch.childNodes[0]).to.have.property('className', 'bar');
 	});
 
-	it('should apply style as String', () => {
-		render(<div style="top:5px; position:relative;" />, scratch);
-		expect(scratch.childNodes[0].style.cssText)
-			.that.matches(/top\s*:\s*5px\s*/)
-			.and.matches(/position\s*:\s*relative\s*/);
-	});
+	describe('style attribute', () => {
+		it('should apply style as String', () => {
+			render(<div style="top:5px; position:relative;" />, scratch);
+			expect(scratch.childNodes[0].style.cssText)
+				.that.matches(/top\s*:\s*5px\s*/)
+				.and.matches(/position\s*:\s*relative\s*/);
+		});
 
-	it('should serialize style objects', () => {
-		let root = render((
-			<div style={{
-				color: 'rgb(255, 255, 255)',
-				background: 'rgb(255, 100, 0)',
-				backgroundPosition: '10px 10px',
-				'background-size': 'cover',
-				padding: 5,
-				top: 100,
-				left: '100%'
-			}}
-			>
-				test
-			</div>
-		), scratch);
+		it('should serialize style objects', () => {
+			let root = render((
+				<div style={{
+					color: 'rgb(255, 255, 255)',
+					background: 'rgb(255, 100, 0)',
+					backgroundPosition: '10px 10px',
+					'background-size': 'cover',
+					padding: 5,
+					top: 100,
+					left: '100%'
+				}}
+				>
+					test
+				</div>
+			), scratch);
 
-		let { style } = scratch.childNodes[0];
-		expect(style).to.have.property('color').that.equals('rgb(255, 255, 255)');
-		expect(style).to.have.property('background').that.contains('rgb(255, 100, 0)');
-		expect(style).to.have.property('backgroundPosition').that.equals('10px 10px');
-		expect(style).to.have.property('backgroundSize', 'cover');
-		expect(style).to.have.property('padding', '5px');
-		expect(style).to.have.property('top', '100px');
-		expect(style).to.have.property('left', '100%');
+			let { style } = scratch.childNodes[0];
+			expect(style).to.have.property('color').that.equals('rgb(255, 255, 255)');
+			expect(style).to.have.property('background').that.contains('rgb(255, 100, 0)');
+			expect(style).to.have.property('backgroundPosition').that.equals('10px 10px');
+			expect(style).to.have.property('backgroundSize', 'cover');
+			expect(style).to.have.property('padding', '5px');
+			expect(style).to.have.property('top', '100px');
+			expect(style).to.have.property('left', '100%');
 
-		root = render((
-			<div style={{ color: 'rgb(0, 255, 255)' }}>test</div>
-		), scratch, root);
+			root = render((
+				<div style={{ color: 'rgb(0, 255, 255)' }}>test</div>
+			), scratch, root);
 
-		expect(root.style.cssText).to.equal('color: rgb(0, 255, 255);');
+			expect(root.style.cssText).to.equal('color: rgb(0, 255, 255);');
 
-		root = render((
-			<div style="display: inline;">test</div>
-		), scratch, root);
+			root = render((
+				<div style="display: inline;">test</div>
+			), scratch, root);
 
-		expect(root.style.cssText).to.equal('display: inline;');
+			expect(root.style.cssText).to.equal('display: inline;');
 
-		root = render((
-			<div style={{ backgroundColor: 'rgb(0, 255, 255)' }}>test</div>
-		), scratch, root);
+			root = render((
+				<div style={{ backgroundColor: 'rgb(0, 255, 255)' }}>test</div>
+			), scratch, root);
 
-		expect(root.style.cssText).to.equal('background-color: rgb(0, 255, 255);');
+			expect(root.style.cssText).to.equal('background-color: rgb(0, 255, 255);');
+		});
 	});
 
 	describe('event handling', () => {
