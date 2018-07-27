@@ -108,7 +108,7 @@ function setProperty(node, name, value, oldValue, isSvg) {
 	// else if (name.charCodeAt(0)===111 && name.charCodeAt(1)===110) {
 	else if (name[0]==='o' && name[1]==='n') {
 		let useCapture = name !== (name=name.replace(/Capture$/, ''));
-		let listenerName = name[2].toLowerCase() + name.substring(3);
+		let listenerName = name.toLowerCase().substring(2);
 		node.removeEventListener(listenerName, oldValue, useCapture);
 		node.addEventListener(listenerName, value, useCapture);
 	}
