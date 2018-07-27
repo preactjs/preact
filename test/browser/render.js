@@ -329,12 +329,13 @@ describe('render()', () => {
 		let click = sinon.spy(),
 			focus = sinon.spy();
 
-		let root = render((
+		render((
 			<div onClickCapture={click} onFocusCapture={focus}>
 				<button />
 			</div>
 		), scratch);
 
+		let root = scratch.firstChild;
 		root.firstElementChild.click();
 		root.firstElementChild.focus();
 
