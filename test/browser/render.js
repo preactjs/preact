@@ -295,32 +295,8 @@ describe('render()', () => {
 		expect(root.style.cssText).to.equal('background-color: rgb(0, 255, 255);');
 	});
 
-
-	it('should only register on* functions as handlers', () => {
-		let click = () => {},
-			onclick = () => {};
-
-		let proto = document.createElement('div').constructor.prototype;
-
-		sinon.spy(proto, 'addEventListener');
-
-		render(<div click={ click } onClick={ onclick } />, scratch);
-
-		expect(scratch.childNodes[0].attributes.length).to.equal(0);
-
-		expect(proto.addEventListener).to.have.been.calledOnce
-			.and.to.have.been.calledWithExactly('click', sinon.match.func, false);
-
-		proto.addEventListener.restore();
-	});
-
-	it('should add and remove event handlers', () => {
-		let click = sinon.spy(),
-			mousedown = sinon.spy();
-
-		let proto = document.createElement('div').constructor.prototype;
-		sinon.spy(proto, 'addEventListener');
-		sinon.spy(proto, 'removeEventListener');
+	describe('event handling', () => {
+		let proto;
 
 		function fireEvent(on, type) {
 			let e = document.createEvent('Event');
@@ -328,74 +304,117 @@ describe('render()', () => {
 			on.dispatchEvent(e);
 		}
 
-		render(<div onClick={ () => click(1) } onMouseDown={ mousedown } />, scratch);
+		beforeEach(() => {
+			proto = document.createElement('div').constructor.prototype;
 
-		expect(proto.addEventListener).to.have.been.calledTwice
-			.and.to.have.been.calledWith('click')
-			.and.calledWith('mousedown');
+			sinon.spy(proto, 'addEventListener');
+			sinon.spy(proto, 'removeEventListener');
+		});
 
-		fireEvent(scratch.childNodes[0], 'click');
-		expect(click).to.have.been.calledOnce
-			.and.calledWith(1);
+		afterEach(() => {
+			proto.addEventListener.restore();
+			proto.removeEventListener.restore();
+		});
 
-		proto.addEventListener.resetHistory();
-		click.resetHistory();
+		it('should only register on* functions as handlers', () => {
+			let click = () => {},
+				onclick = () => {};
 
-		render(<div onClick={ () => click(2) } />, scratch, scratch.firstChild);
+			render(<div click={click} onClick={onclick} />, scratch);
 
-		expect(proto.addEventListener).not.to.have.been.called;
+			expect(scratch.childNodes[0].attributes.length).to.equal(0);
 
-		expect(proto.removeEventListener)
-			.to.have.been.calledOnce
-			.and.calledWith('mousedown');
+			expect(proto.addEventListener).to.have.been.calledOnce
+				.and.to.have.been.calledWithExactly('click', sinon.match.func, false);
+		});
 
-		fireEvent(scratch.childNodes[0], 'click');
-		expect(click).to.have.been.calledOnce
-			.and.to.have.been.calledWith(2);
+		it('should add event handlers using a normalized event name', () => {
+			let click = sinon.spy(),
+				mousedown = sinon.spy();
 
-		fireEvent(scratch.childNodes[0], 'mousedown');
-		expect(mousedown).not.to.have.been.called;
+			render(<div onClick={() => click(1)} onMouseDown={mousedown} />, scratch);
 
-		proto.removeEventListener.resetHistory();
-		click.resetHistory();
-		mousedown.resetHistory();
+			expect(proto.addEventListener).to.have.been.calledTwice
+				.and.to.have.been.calledWith('click')
+				.and.calledWith('mousedown');
 
-		render(<div />, scratch, scratch.firstChild);
+			fireEvent(scratch.childNodes[0], 'click');
+			expect(click).to.have.been.calledOnce
+				.and.calledWith(1);
+		});
 
-		expect(proto.removeEventListener)
-			.to.have.been.calledOnce
-			.and.calledWith('click');
+		it('should update event handlers', () => {
+			let click1 = sinon.spy();
+			let click2 = sinon.spy();
 
-		fireEvent(scratch.childNodes[0], 'click');
-		expect(click).not.to.have.been.called;
+			render(<div onClick={click1} />, scratch);
 
-		proto.addEventListener.restore();
-		proto.removeEventListener.restore();
-	});
+			fireEvent(scratch.childNodes[0], 'click');
+			expect(click1).to.have.been.calledOnce;
+			expect(click2).to.not.have.been.called;
 
-	it('should use capturing for event props ending with *Capture', () => {
-		let click = sinon.spy(),
-			focus = sinon.spy();
+			click1.resetHistory();
+			click2.resetHistory();
 
-		let root = render((
-			<div onClickCapture={click} onFocusCapture={focus}>
-				<button />
-			</div>
-		), scratch);
+			render(<div onClick={click2} />, scratch, scratch.firstChild);
 
-		root.firstElementChild.click();
-		root.firstElementChild.focus();
+			fireEvent(scratch.childNodes[0], 'click');
+			expect(click1).to.not.have.been.called;
+			expect(click2).to.have.been.called;
+		});
 
-		expect(click, 'click').to.have.been.calledOnce;
+		it('should remove event handlers', () => {
+			let click = sinon.spy(),
+				mousedown = sinon.spy();
 
-		if (DISABLE_FLAKEY!==true) {
-			// Focus delegation requires a 50b hack I'm not sure we want to incur
-			expect(focus, 'focus').to.have.been.calledOnce;
+			render(<div onClick={() => click(1)} onMouseDown={mousedown} />, scratch);
+			render(<div onClick={() => click(2)} />, scratch, scratch.firstChild);
 
-			// IE doesn't set it
-			expect(click).to.have.been.calledWithMatch({ eventPhase: 0 });		// capturing
-			expect(focus).to.have.been.calledWithMatch({ eventPhase: 0 });		// capturing
-		}
+			expect(proto.removeEventListener)
+				.to.have.been.calledOnce
+				.and.calledWith('mousedown');
+
+			fireEvent(scratch.childNodes[0], 'mousedown');
+			expect(mousedown).not.to.have.been.called;
+
+			proto.removeEventListener.resetHistory();
+			click.resetHistory();
+			mousedown.resetHistory();
+
+			render(<div />, scratch, scratch.firstChild);
+
+			expect(proto.removeEventListener)
+				.to.have.been.calledOnce
+				.and.calledWith('click');
+
+			fireEvent(scratch.childNodes[0], 'click');
+			expect(click).not.to.have.been.called;
+		});
+
+		it('should use capturing for event props ending with *Capture', () => {
+			let click = sinon.spy(),
+				focus = sinon.spy();
+
+			let root = render((
+				<div onClickCapture={click} onFocusCapture={focus}>
+					<button />
+				</div>
+			), scratch);
+
+			root.firstElementChild.click();
+			root.firstElementChild.focus();
+
+			expect(click, 'click').to.have.been.calledOnce;
+
+			if (DISABLE_FLAKEY!==true) {
+				// Focus delegation requires a 50b hack I'm not sure we want to incur
+				expect(focus, 'focus').to.have.been.calledOnce;
+
+				// IE doesn't set it
+				expect(click).to.have.been.calledWithMatch({ eventPhase: 0 });		// capturing
+				expect(focus).to.have.been.calledWithMatch({ eventPhase: 0 });		// capturing
+			}
+		});
 	});
 
 	it('should support dangerouslySetInnerHTML', () => {
