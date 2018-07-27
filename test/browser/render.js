@@ -130,22 +130,23 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('Testing, huh! How is it going?');
 	});
 
-	it('should clear falsy attributes', () => {
-		let root = render((
+	it('should clear attributes with falsy values on render', () => {
+		render((
 			<div anull="anull" aundefined="aundefined" afalse="afalse" anan="aNaN" a0="a0" />
 		), scratch);
 
 		render((
 			<div anull={null} aundefined={undefined} afalse={false} anan={NaN} a0={0} />
-		), scratch, root);
+		), scratch);
 
 		expect(getAttributes(scratch.firstChild), 'from previous truthy values').to.eql({
 			a0: '0',
 			anan: 'NaN'
 		});
 
-		scratch.innerHTML = '';
+	});
 
+	it('should not render falsy attributes on hydrate', () => {
 		render((
 			<div anull={null} aundefined={undefined} afalse={false} anan={NaN} a0={0} />
 		), scratch);
@@ -157,7 +158,7 @@ describe('render()', () => {
 	});
 
 	it('should clear falsy input values', () => {
-		let root = render((
+		render((
 			<div>
 				<input value={0} />
 				<input value={false} />
@@ -166,6 +167,7 @@ describe('render()', () => {
 			</div>
 		), scratch);
 
+		let root = scratch.firstChild;
 		expect(root.children[0]).to.have.property('value', '0');
 		expect(root.children[1]).to.have.property('value', 'false');
 		expect(root.children[2]).to.have.property('value', '');
@@ -173,14 +175,13 @@ describe('render()', () => {
 	});
 
 	it('should clear falsy DOM properties', () => {
-		let root;
 		function test(val) {
-			root = render((
+			render((
 				<div>
 					<input value={val} />
 					<table border={val} />
 				</div>
-			), scratch, root);
+			), scratch);
 		}
 
 		test('2');
