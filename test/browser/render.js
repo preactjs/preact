@@ -417,61 +417,63 @@ describe('render()', () => {
 		});
 	});
 
-	it('should support dangerouslySetInnerHTML', () => {
-		let html = '<b>foo &amp; bar</b>';
-		// eslint-disable-next-line react/no-danger
-		let root = render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
+	describe('dangerouslySetInnerHTML', () => {
+		it('should support dangerouslySetInnerHTML', () => {
+			let html = '<b>foo &amp; bar</b>';
+			// eslint-disable-next-line react/no-danger
+			let root = render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
 
-		expect(scratch.firstChild, 'set').to.have.property('innerHTML', html);
-		expect(scratch.innerHTML).to.equal('<div>'+html+'</div>');
+			expect(scratch.firstChild, 'set').to.have.property('innerHTML', html);
+			expect(scratch.innerHTML).to.equal('<div>'+html+'</div>');
 
-		root = render(<div>a<strong>b</strong></div>, scratch, root);
+			root = render(<div>a<strong>b</strong></div>, scratch, root);
 
-		expect(scratch, 'unset').to.have.property('innerHTML', `<div>a<strong>b</strong></div>`);
+			expect(scratch, 'unset').to.have.property('innerHTML', `<div>a<strong>b</strong></div>`);
 
-		// eslint-disable-next-line react/no-danger
-		render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, root);
+			// eslint-disable-next-line react/no-danger
+			render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, root);
 
-		expect(scratch.innerHTML, 're-set').to.equal('<div>'+html+'</div>');
-	});
+			expect(scratch.innerHTML, 're-set').to.equal('<div>'+html+'</div>');
+		});
 
-	it('should apply proper mutation for VNodes with dangerouslySetInnerHTML attr', () => {
-		class Thing extends Component {
-			constructor(props, context) {
-				super(props, context);
-				this.state.html = this.props.html;
+		it('should apply proper mutation for VNodes with dangerouslySetInnerHTML attr', () => {
+			class Thing extends Component {
+				constructor(props, context) {
+					super(props, context);
+					this.state.html = this.props.html;
+				}
+				render(props, { html }) {
+					// eslint-disable-next-line react/no-danger
+					return html ? <div dangerouslySetInnerHTML={{ __html: html }} /> : <div />;
+				}
 			}
-			render(props, { html }) {
-				// eslint-disable-next-line react/no-danger
-				return html ? <div dangerouslySetInnerHTML={{ __html: html }} /> : <div />;
-			}
-		}
 
-		let thing;
+			let thing;
 
-		render(<Thing ref={c => thing=c} html="<b><i>test</i></b>" />, scratch);
+			render(<Thing ref={c => thing=c} html="<b><i>test</i></b>" />, scratch);
 
-		expect(scratch.innerHTML).to.equal('<div><b><i>test</i></b></div>');
+			expect(scratch.innerHTML).to.equal('<div><b><i>test</i></b></div>');
 
-		thing.setState({ html: false });
-		thing.forceUpdate();
+			thing.setState({ html: false });
+			thing.forceUpdate();
 
-		expect(scratch.innerHTML).to.equal('<div></div>');
+			expect(scratch.innerHTML).to.equal('<div></div>');
 
-		thing.setState({ html: '<foo><bar>test</bar></foo>' });
-		thing.forceUpdate();
+			thing.setState({ html: '<foo><bar>test</bar></foo>' });
+			thing.forceUpdate();
 
-		expect(scratch.innerHTML).to.equal('<div><foo><bar>test</bar></foo></div>');
-	});
+			expect(scratch.innerHTML).to.equal('<div><foo><bar>test</bar></foo></div>');
+		});
 
-	it('should hydrate with dangerouslySetInnerHTML', () => {
-		let html = '<b>foo &amp; bar</b>';
-		scratch.innerHTML = `<div>${html}</div>`;
-		// eslint-disable-next-line react/no-danger
-		render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, scratch.lastChild);
+		it('should hydrate with dangerouslySetInnerHTML', () => {
+			let html = '<b>foo &amp; bar</b>';
+			scratch.innerHTML = `<div>${html}</div>`;
+			// eslint-disable-next-line react/no-danger
+			render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, scratch.lastChild);
 
-		expect(scratch.firstChild).to.have.property('innerHTML', html);
-		expect(scratch.innerHTML).to.equal(`<div>${html}</div>`);
+			expect(scratch.firstChild).to.have.property('innerHTML', html);
+			expect(scratch.innerHTML).to.equal(`<div>${html}</div>`);
+		});
 	});
 
 	it('should reconcile mutated DOM attributes', () => {
