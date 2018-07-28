@@ -437,8 +437,7 @@ describe('render()', () => {
 			render(<div onClick={() => click(2)} />, scratch);
 
 			expect(proto.removeEventListener)
-				.to.have.been.calledOnce
-				.and.calledWith('mousedown');
+				.to.have.been.calledWith('mousedown');
 
 			fireEvent(scratch.childNodes[0], 'mousedown');
 			expect(mousedown).not.to.have.been.called;
@@ -450,8 +449,7 @@ describe('render()', () => {
 			render(<div />, scratch);
 
 			expect(proto.removeEventListener)
-				.to.have.been.calledOnce
-				.and.calledWith('click');
+				.to.have.been.calledWith('click');
 
 			fireEvent(scratch.childNodes[0], 'click');
 			expect(click).not.to.have.been.called;
