@@ -37,8 +37,16 @@ describe('render()', () => {
 		scratch = null;
 	});
 
-	it('should render a empty text node', () => {
+	it('should render a empty text node given null', () => {
 		render(null, scratch);
+		let c = scratch.childNodes;
+		expect(c).to.have.length(1);
+		expect(c[0].data).to.equal('');
+		expect(c[0].nodeName).to.equal('#text');
+	});
+
+	it('should render an empty text node given an empty string', () => {
+		render('', scratch);
 		let c = scratch.childNodes;
 		expect(c).to.have.length(1);
 		expect(c[0].data).to.equal('');
@@ -56,13 +64,39 @@ describe('render()', () => {
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.childNodes[0].nodeName).to.equal('SPAN');
 
+	});
+
+	it('should support custom tag names', () => {
+		render(<foo />, scratch);
+		expect(scratch.childNodes).to.have.length(1);
+		expect(scratch.firstChild).to.have.property('nodeName', 'FOO');
+
 		scratch.innerHTML = '';
 
-		render(<foo />, scratch);
 		render(<x-bar />, scratch);
+		expect(scratch.childNodes).to.have.length(1);
+		expect(scratch.firstChild).to.have.property('nodeName', 'X-BAR');
+	});
+
+	it('should append new elements when called without a merge argument', () => {
+		render(<div />, scratch);
+		expect(scratch.childNodes).to.have.length(1);
+		expect(scratch.firstChild).to.have.property('nodeName', 'DIV');
+
+		render(<span />, scratch);
 		expect(scratch.childNodes).to.have.length(2);
-		expect(scratch.childNodes[0]).to.have.property('nodeName', 'FOO');
-		expect(scratch.childNodes[1]).to.have.property('nodeName', 'X-BAR');
+		expect(scratch.childNodes[0]).to.have.property('nodeName', 'DIV');
+		expect(scratch.childNodes[1]).to.have.property('nodeName', 'SPAN');
+	});
+
+	it('should merge new elements when called with a merge argument', () => {
+		let root = render(<div />, scratch);
+		expect(scratch.childNodes).to.have.length(1);
+		expect(scratch.firstChild).to.have.property('nodeName', 'DIV');
+
+		render(<span />, scratch, root);
+		expect(scratch.childNodes).to.have.length(1);
+		expect(scratch.firstChild).to.have.property('nodeName', 'SPAN');
 	});
 
 	it('should nest empty nodes', () => {
