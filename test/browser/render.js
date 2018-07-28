@@ -681,44 +681,72 @@ describe('render()', () => {
 		expect(sortAttributes(html)).to.equal(sortAttributes('<input type="range" min="0" max="100" list="steplist">'));
 	});
 
-	it('should not execute append operation when child is at last', (done) => {
+	it('should not execute append operation when child is at last', () => {
+		// See developit/preact#717 for discussion about the issue this addresses
+
+		let todoText = 'new todo that I should complete';
 		let input;
+		let setText;
+		let addTodo;
+
+		const ENTER = 13;
+
 		class TodoList extends Component {
 			constructor(props) {
 				super(props);
 				this.state = { todos: [], text: '' };
-				this.setText = this.setText.bind(this);
-				this.addTodo = this.addTodo.bind(this);
+				setText = this.setText = this.setText.bind(this);
+				addTodo = this.addTodo = this.addTodo.bind(this);
 			}
 			setText(e) {
 				this.setState({ text: e.target.value });
 			}
-			addTodo() {
-				let { todos, text } = this.state;
-				todos = todos.concat({ text });
-				this.setState({ todos, text: '' });
+			addTodo(e) {
+				if (e.keyCode === ENTER) {
+					let { todos, text } = this.state;
+					todos = todos.concat({ text });
+					this.setState({ todos, text: '' });
+				}
 			}
 			render() {
 				const { todos, text } = this.state;
 				return (
 					<div onKeyDown={this.addTodo}>
-						{ todos.map( todo => (<div>{todo.text}</div> )) }
+						{ todos.map( todo => ([
+							<span>{todo.text}</span>,
+							<span> [ <a href="javascript:;">Delete</a> ]</span>,
+							<br />
+						])) }
 						<input value={text} onInput={this.setText} ref={(i) => input = i} />
 					</div>
 				);
 			}
 		}
-		const root = render(<TodoList />, scratch);
+
+		render(<TodoList />, scratch);
+
+		// Simulate user typing
 		input.focus();
-		input.value = 1;
-		root._component.setText({
+		input.value = todoText;
+		setText({
 			target: input
 		});
-		root._component.addTodo();
+
+		// Commit the user typing setState call
+		render(<TodoList />, scratch);
+
+		// Simulate user pressing enter
+		addTodo({
+			keyCode: ENTER
+		});
+
+		// Before Preact rerenders, focus should be on the input
 		expect(document.activeElement).to.equal(input);
-		setTimeout(() => {
-			expect(/1/.test(scratch.innerHTML)).to.equal(true);
-			done();
-		}, 10);
+
+		render(<TodoList />, scratch);
+
+		// After Preact rerenders, focus should remain on the input
+		expect(document.activeElement).to.equal(input);
+		expect(scratch.innerHTML).to.contain(`<span>${todoText}</span>`);
 	});
 });
