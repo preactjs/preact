@@ -252,6 +252,38 @@ describe('render()', () => {
 				.and.matches(/position\s*:\s*relative\s*/);
 		});
 
+		it('should properly switch from string styles to object styles and back', () => {
+			let root = render((
+				<div style="display: inline;">test</div>
+			), scratch);
+
+			expect(root.style.cssText).to.equal('display: inline;');
+
+			root = render((
+				<div style={{ color: 'red' }} />
+			), scratch, root);
+
+			expect(root.style.cssText).to.equal('color: red;');
+
+			root = render((
+				<div style="color: blue" />
+			), scratch, root);
+
+			expect(root.style.cssText).to.equal('color: blue;');
+
+			root = render((
+				<div style={{ color: 'yellow' }} />
+			), scratch, root);
+
+			expect(root.style.cssText).to.equal('color: yellow;');
+
+			root = render((
+				<div style="display: block" />
+			), scratch, root);
+
+			expect(root.style.cssText).to.equal('display: block;');
+		});
+
 		it('should serialize style objects', () => {
 			let root = render((
 				<div style={{
@@ -282,12 +314,6 @@ describe('render()', () => {
 			), scratch, root);
 
 			expect(root.style.cssText).to.equal('color: rgb(0, 255, 255);');
-
-			root = render((
-				<div style="display: inline;">test</div>
-			), scratch, root);
-
-			expect(root.style.cssText).to.equal('display: inline;');
 
 			root = render((
 				<div style={{ backgroundColor: 'rgb(0, 255, 255)' }}>test</div>
