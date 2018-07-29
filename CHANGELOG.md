@@ -16,6 +16,8 @@
 6. `setState` no longer modifies `this.state` synchronously
 7. Falsy attributes values are no longer removed from the DOM. For some attributes (e.g. `spellcheck`,
    the values `false` and `''` have different meaning so being able to render `false` is important.
+8. `props.children`
+    1. A Component with no children will have no `children` prop defined on `props` instead of an an empty list.
 
 ### Minor changes
 

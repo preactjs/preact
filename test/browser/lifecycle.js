@@ -401,11 +401,15 @@ describe('Lifecycle methods', () => {
 
 				render() {
 					logs.push('parent render');
-					return <Child parentRenders={this.state.parentRenders} ref={child => childRef = child} />;
+					return <Child parentRenders={this.state.parentRenders} />;
 				}
 			}
 
 			class Child extends Component {
+				constructor(props) {
+					super(props);
+					childRef = this;
+				}
 				render() {
 					logs.push('child render');
 					return this.props.parentRenders;
@@ -467,11 +471,12 @@ describe('Lifecycle methods', () => {
 
 			// Initial render
 			// state.value: initialized to 0 in constructor, 0 -> 1 in gDSFP
-			let element = render(<Foo foo="foo" />, scratch);
+			render(<Foo foo="foo" />, scratch);
+
+			let element = scratch.firstChild;
 			expect(element.textContent).to.be.equal('1');
 			expect(propsArg).to.deep.equal({
-				foo: 'foo',
-				children: []
+				foo: 'foo'
 			});
 			expect(stateArg).to.deep.equal({
 				value: 0
@@ -479,11 +484,10 @@ describe('Lifecycle methods', () => {
 
 			// New Props
 			// state.value: 1 -> 2 in gDSFP
-			render(<Foo foo="bar" />, scratch, scratch.firstChild);
+			render(<Foo foo="bar" />, scratch);
 			expect(element.textContent).to.be.equal('2');
 			expect(propsArg).to.deep.equal({
-				foo: 'bar',
-				children: []
+				foo: 'bar'
 			});
 			expect(stateArg).to.deep.equal({
 				value: 1
@@ -495,8 +499,7 @@ describe('Lifecycle methods', () => {
 			rerender();
 			expect(element.textContent).to.be.equal('4');
 			expect(propsArg).to.deep.equal({
-				foo: 'bar',
-				children: []
+				foo: 'bar'
 			});
 			expect(stateArg).to.deep.equal({
 				value: 3
