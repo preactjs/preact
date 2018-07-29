@@ -505,6 +505,31 @@ describe('Lifecycle methods', () => {
 				value: 3
 			});
 		});
+
+		it('should NOT mutate state, only create new versions', () => {
+			const stateConstant = {};
+			let componentState;
+
+			class Stateful extends Component {
+				static getDerivedStateFromProps() {
+					return {key: 'value'};
+				}
+
+				constructor() {
+					super(...arguments);
+					this.state = stateConstant;
+				}
+
+				componentDidMount() {
+					componentState = this.state;
+				}
+			}
+
+			render(<Stateful />, scratch);
+
+			expect(componentState).to.deep.equal({key: 'value'});
+			expect(stateConstant).to.deep.equal({});
+		});
 	});
 
 	describe("#getSnapshotBeforeUpdate", () => {
@@ -1326,12 +1351,10 @@ describe('Lifecycle methods', () => {
 
 
 	describe('#setState', () => {
-		it('should not mutate state, only create new versions', () => {
+		it('should NOT mutate state, only create new versions', () => {
 			const stateConstant = {};
 			let didMount = false;
 			let componentState;
-
-			expect(stateConstant).to.deep.equal({});
 
 			class Stateful extends Component {
 				constructor() {
