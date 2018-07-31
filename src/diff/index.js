@@ -265,9 +265,9 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		}
 
 		if (vnode instanceof Array) {
-			diffChildren(parent, vnode, prev || [], isSvg, excessChildren);
+			diffChildren(parent, vnode, prev || [], isSvg, excessChildren, diffLevel, mounts);
 		} else {
-			c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren);
+			c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, diffLevel, mounts);
 		}
 		// context = assign({}, context);
 		// context.__depth = (context.__depth || 0) + 1;
