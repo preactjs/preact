@@ -1,4 +1,5 @@
 import { createElement as h, cloneElement, render, Component } from '../../src/index';
+import { setup, teardown } from './helpers';
 
 /** @jsx h */
 
@@ -23,25 +24,15 @@ function sortAttributes(html) {
 	});
 }
 
-const Empty = () => null;
-
 describe('Components', () => {
 	let scratch;
 
-	before( () => {
-		scratch = document.createElement('div');
-		(document.body || document.documentElement).appendChild(scratch);
+	beforeEach(() => {
+		scratch = setup();
 	});
 
-	beforeEach( () => {
-		let c = scratch.firstElementChild;
-		if (c) render(<Empty />, scratch, c);
-		scratch.innerHTML = '';
-	});
-
-	after( () => {
-		scratch.parentNode.removeChild(scratch);
-		scratch = null;
+	afterEach(() => {
+		teardown(scratch);
 	});
 
 	it('should render components', () => {

@@ -5,7 +5,7 @@ import { createVNode } from './create-element';
 
 export function render(vnode, parent) {
 	let oldTree = parent._previousVTree;
-	if (oldTree) diff(oldTree._el, parent, parent._previousVTree = vnode, oldTree, EMPTY_OBJ, false, true, null);
+	if (oldTree) diff(oldTree._el, parent, parent._previousVTree = vnode, oldTree, EMPTY_OBJ, false, true, null, 0, [] );
 	else hydrate(vnode, parent);
 }
 
@@ -13,7 +13,7 @@ export function hydrate(vnode, parent) {
 	// let oldTree = toVNode(parent);
 	// diffChildren(parent, null, [vnode], oldTree.children);
 	parent._previousVTree = vnode;
-	diffChildren(parent, [vnode], EMPTY_ARR, EMPTY_OBJ, false, EMPTY_ARR.slice.call(parent.childNodes));
+	diffChildren(parent, [vnode], EMPTY_ARR, EMPTY_OBJ, false, EMPTY_ARR.slice.call(parent.childNodes), 0, []);
 }
 
 export function toVNode(node) {

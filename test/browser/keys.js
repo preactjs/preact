@@ -1,22 +1,17 @@
 import { createElement as h, Component, render } from '../../src/index';
+import { setup, teardown } from './helpers';
 
 /** @jsx h */
 
 describe('keys', () => {
 	let scratch;
 
-	before( () => {
-		scratch = document.createElement('div');
-		(document.body || document.documentElement).appendChild(scratch);
+	beforeEach(() => {
+		scratch = setup();
 	});
 
-	beforeEach( () => {
-		scratch.innerHTML = '';
-	});
-
-	after( () => {
-		scratch.parentNode.removeChild(scratch);
-		scratch = null;
+	afterEach(() => {
+		teardown(scratch);
 	});
 
 	// See developit/preact-compat#21

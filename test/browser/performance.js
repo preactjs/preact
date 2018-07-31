@@ -1,7 +1,7 @@
 /*global coverage, ENABLE_PERFORMANCE, NODE_ENV*/
 /*eslint no-console:0*/
 /** @jsx h */
-
+import { setup, teardown } from './helpers';
 let { createElement: h, Component, render } = require(NODE_ENV==='production' ? '../../dist/ceviche.min.js' : '../../dist/ceviche');
 
 const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
@@ -61,17 +61,14 @@ describe('performance', function() {
 		if (coverage) {
 			console.warn('WARNING: Code coverage is enabled, which dramatically reduces performance. Do not pay attention to these numbers.');
 		}
-		scratch = document.createElement('div');
-		(document.body || document.documentElement).appendChild(scratch);
 	});
 
-	beforeEach( () => {
-		scratch.innerHTML = '';
+	beforeEach(() => {
+		scratch = setup();
 	});
 
-	after( () => {
-		scratch.parentNode.removeChild(scratch);
-		scratch = null;
+	afterEach(() => {
+		teardown(scratch);
 	});
 
 	it('should rerender without changes fast', done => {
