@@ -99,7 +99,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	if (typeof vnode==='string' || typeof vnode==='number') {
 
 		// update if it's already a Text node:
-		if (dom && dom['splitText']!==undefined && dom.parentNode && (!dom._component || componentRoot)) {
+		if (dom && dom.splitText !== undefined && dom.parentNode && (!dom._component || componentRoot)) {
 			/* istanbul ignore if */ /* Browser quirk that can't be covered: https://github.com/developit/preact/commit/fd4f21f5c45dfd75151bd27b4c217d8003aa5eb9 */
 			if (dom.nodeValue!=vnode) {
 				dom.nodeValue = vnode;
@@ -151,7 +151,12 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	}
 
 
-	let fc = out.firstChild,
+	let fc =
+		/**
+		 * @type {object}
+		 * @property {string} [splitText]
+		 */
+		(out.firstChild),
 		props = out[ATTR_KEY],
 		vchildren = vnode.children;
 
@@ -161,19 +166,19 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 	}
 
 	// Optimization: fast-path for elements containing a single TextNode:
-	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc!=null && fc['splitText']!==undefined && fc.nextSibling==null) {
-		const vchild =
-			/** @type {string} */(vchildren[0]);
-		if (fc.nodeValue!=vchild) {
-			fc.nodeValue = vchild;
+	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc!=null && fc.splitText!==undefined && fc.nextSibling==null) {
+		if (fc.nodeValue != vchildren[0]) {
+			fc.nodeValue =
+				/** @type {string} */(vchildren[0]);
 		}
 	}
 	// otherwise, if there are existing or new children, diff them:
 	else if (vchildren && vchildren.length || fc!=null) {
-		const vnodeChildren =
-			/** @type {VNode[]} */(vchildren);
-		innerDiffNode(out, vnodeChildren,
-			context, mountAll, hydrating || props.dangerouslySetInnerHTML!=null);
+		innerDiffNode(out,
+			/** @type {VNode[]} */(vchildren),
+			context,
+			mountAll,
+			hydrating || props.dangerouslySetInnerHTML!=null);
 	}
 
 
@@ -207,19 +212,21 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 		len = originalChildren.length,
 		childrenLen = 0,
 		vlen = vchildren ? vchildren.length : 0,
-		j, f, vchild, child;
+		j, c, f, vchild, child;
 
 	// Build up a map of keyed children and an Array of unkeyed children:
 	if (len!==0) {
 		for (let i=0; i<len; i++) {
-			let child = originalChildren[i],
+			const child =
+				/** @type{object} */(originalChildren[i]),
 				props = child[ATTR_KEY],
-				key = vlen && props ? child['_component'] ? child['_component'].__key : props.key : null;
+				key = vlen && props ? child._component ? child._component.__key : props.key : null;
+
 			if (key!=null) {
 				keyedLen++;
 				keyed[key] = child;
 			}
-			else if (props || (child['splitText']!==undefined ? (isHydrating ? child.nodeValue.trim() : true) : isHydrating)) {
+			else if (props || (child.splitText !== undefined ? (isHydrating ? child.nodeValue.trim() : true) : isHydrating)) {
 				children[childrenLen++] = child;
 			}
 		}
@@ -242,9 +249,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 			// attempt to pluck a node of the same type from the existing children
 			else if (min<childrenLen) {
 				for (j=min; j<childrenLen; j++) {
-					const c =
-						/** @type {any[]} */(children)[j];
-					if (c !== undefined && isSameNodeType(c, vchild, isHydrating)) {
+					if (children[j]!==undefined && isSameNodeType(c = children[j], vchild, isHydrating)) {
 						child = c;
 						children[j] = undefined;
 						if (j===childrenLen-1) childrenLen--;
@@ -280,10 +285,8 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 
 	// remove orphaned unkeyed children:
 	while (min<=childrenLen) {
-		const c =
-			/** @type { any } */(children[childrenLen--]);
-		if (c !== undefined)
-			recollectNodeTree(c, false);
+		if ((child = children[childrenLen--])!==undefined)
+			recollectNodeTree(child, false);
 	}
 }
 

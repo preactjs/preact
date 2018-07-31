@@ -246,10 +246,10 @@ export function buildComponentFromVNode(dom, vnode, context, mountAll) {
 			dom = oldDom = null;
 		}
 
-		const f =
-			/** @type {(props, context) => void} */(vnode.nodeName);
+		c = createComponent(
+			/** @type {(props, context) => void} */(vnode.nodeName),
+			props, context);
 
-		c = createComponent(f, props, context);
 		if (dom && !c.nextBase) {
 			c.nextBase = dom;
 			// passing dom/oldDom as nextBase will recycle it if unused, so bypass recycling on L229:

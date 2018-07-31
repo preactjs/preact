@@ -19,6 +19,10 @@ export function collectComponent(component) {
 	(components[name] || (components[name] = [])).push(component);
 }
 
+/**
+ * @typedef {Component} CustomComponent
+ * @property {function} render
+ */
 
 /**
  * Create a component. Normalizes differences between PFC's and classful
@@ -39,7 +43,8 @@ export function createComponent(Ctor, props, context) {
 	else {
 		inst = new Component(props, context);
 		inst.constructor = Ctor;
-		inst['render'] = doRender;
+		/** @type {CustomComponent} */(inst).render =
+			doRender;
 	}
 
 
