@@ -38,22 +38,24 @@ Component.prototype.setState = function(update, callback) {
 
 Component.prototype.forceUpdate = function(callback) {
 	if (this.base!=null) {
-		diff(this.base, this.base.parentNode, this._vnode, this._vnode, this.context, false, true);
-		if (callback!=null) callback();
+		diff(this.base, this.base.parentNode, this._vnode, this._vnode, this.context, false, true, null, 0, []);
 	}
+	if (callback!=null) callback();
 };
 
 
 let q = [];
 
 // const defer = typeof Promise=='function' ? Promise.resolve().then.bind(Promise.resolve()) : setTimeout;
-Component.debounce = typeof Promise=='function' ? Promise.resolve().then.bind(Promise.resolve()) : setTimeout;
+// Component.debounce = typeof Promise=='function' ? Promise.resolve().then.bind(Promise.resolve()) : setTimeout;
+const defer = typeof Promise=='function' ? Promise.resolve().then.bind(Promise.resolve()) : setTimeout;
 // Component.debounce = setTimeout;
 
 export function enqueueRender(c) {
 	// console.log('enqueueRender', c.id, q.length===0, c._dirty);
 	if (!c._dirty && (c._dirty = true) && q.push(c) === 1) {
-		(0, Component.debounce)(process);
+		// (0, Component.debounce)(process);
+		(Component.debounce || defer)(process);
 		// (Component.debounce || setTimeout)(process);
 		// defer(process);
 		// (Component.debounce || setTimeout)(process);

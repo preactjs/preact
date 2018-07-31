@@ -1,4 +1,5 @@
 import { createElement as h, render } from '../../src/index';
+import { setup, teardown } from './helpers';
 
 /** @jsx h */
 
@@ -16,14 +17,12 @@ function sortAttributes(html) {
 describe('svg', () => {
 	let scratch;
 
-	beforeEach( () => {
-		scratch = document.createElement('div');
-		(document.body || document.documentElement).appendChild(scratch);
+	beforeEach(() => {
+		scratch = setup();
 	});
 
 	afterEach(() => {
-		scratch.parentNode.removeChild(scratch);
-		scratch = null;
+		teardown(scratch);
 	});
 
 	it('should render SVG to string', () => {
@@ -90,6 +89,14 @@ describe('svg', () => {
 	it('should still support class attribute', () => {
 		render((
 			<svg viewBox="0 0 1 1" class="foo bar" />
+		), scratch);
+
+		expect(scratch.innerHTML).to.contain(` class="foo bar"`);
+	});
+
+	it('should still support className attribute', () => {
+		render((
+			<svg viewBox="0 0 1 1" className="foo bar" />
 		), scratch);
 
 		expect(scratch.innerHTML).to.contain(` class="foo bar"`);

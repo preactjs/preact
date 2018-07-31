@@ -8,9 +8,6 @@ import { assign } from '../util';
 // import { toVNode } from '../render';
 // import { processQueue } from '../component';
 
-const mounts = [];
-export let diffLevel = 0;
-
 // let hash = [
 // 	['type', ['number']],
 // 	['tag', [null,'string','function']],
@@ -87,10 +84,10 @@ export let diffLevel = 0;
 // }
 
 
-export function diff(dom, parent, newTree, oldTree, context, isSvg, append, excessChildren) {
+export function diff(dom, parent, newTree, oldTree, context, isSvg, append, excessChildren, diffLevel, mounts) {
 	if (newTree==null) {
 		if (oldTree!=null) {
-			unmount(oldTree, true);
+			unmount(oldTree);
 		}
 		return null;
 	}
@@ -155,6 +152,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	// console.log(oldTree, newTree);
 
 	let c, p, isNew = false, oldProps, oldState, oldContext,
+		newTag = newTree.tag,
 		oldTag = oldTree!=null ? oldTree.tag : null;
 
 	// root of a diff:
@@ -173,8 +171,8 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	// 	}
 	// }
 
-	outer: if (typeof newTree.tag==='function') {
-		if (typeof oldTag==='function' && oldTag!==newTree.tag) {
+	outer: if (typeof newTag==='function') {
+		if (typeof oldTag==='function' && oldTag!==newTag) {
 			// unmount(oldTree);
 			oldTree = null;
 			// oldTree._component.componentWillUnmount();
@@ -193,10 +191,10 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			// }
 
 			let s = c._nextState || c.state;
-			if (newTree.tag.getDerivedStateFromProps) {
+			if (newTag.getDerivedStateFromProps!=null) {
 				// Since c._nextState is modified, the previous state doesn't need to be saved.
 				// It remains intact at c.state
-				assign(s, c.constructor.getDerivedStateFromProps(newTree.props, s));
+				assign(s, newTag.getDerivedStateFromProps(newTree.props, s));
 			}
 			// console.log('updating component in-place', c._nextState);
 			// if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, c.state)===false) {
@@ -207,7 +205,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				break outer;
 				// return newTree._el = c.base;
 			}
-			if (newTree.tag.getDerivedStateFromProps== null && c.componentWillReceiveProps!=null) {
+			if (newTag.getDerivedStateFromProps==null && c.componentWillReceiveProps!=null) {
 				c.componentWillReceiveProps(newTree.props, s, context);
 			}
 
@@ -220,12 +218,12 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			c.props = newTree.props;
 			if (!c.state) c.state = {};
 			c.context = context;
-			if (newTree.tag.getDerivedStateFromProps) {
+			if (newTag.getDerivedStateFromProps!=null) {
 				// Since c._nextState is modified, the previous state doesn't need to be saved.
 				// It remains intact at c.state
-				assign(c.state, c.constructor.getDerivedStateFromProps(newTree.props, c.state));
+				assign(c.state, newTag.getDerivedStateFromProps(newTree.props, c.state));
 			}
-			if (newTree.tag.getDerivedStateFromProps==null && c.componentWillMount!=null) {
+			else if (c.componentWillMount!=null) {
 				c.componentWillMount();
 			}
 			mounts.push(c);
@@ -279,6 +277,10 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		// if (c.getChildContext!=null) {
 		// 	assign(context, c.getChildContext());
 		// }
+		if (c.getChildContext!=null) {
+			// context = assign(assign({}, context), c.getChildContext());
+			context = assign(assign({}, context), c.getChildContext());
+		}
 		// if (c.id==20) {
 		// 	// console.trace('diffing '+c.id);
 		// 	console.log('diffing '+c.id, vnode, prev);
@@ -327,7 +329,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		// }
 	}
 	else {
-		dom = newTree._el = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren);
+		dom = newTree._el = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren, diffLevel, mounts);
 	}
 
 	if (--diffLevel===0) {
@@ -353,7 +355,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	return dom;
 }
 
-function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessChildren) {
+function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessChildren, diffLevel, mounts) {
 	// if (vnode==null) {
 	// 	let c = document.createComment('empty');
 	// 	if (parent!=null) {
@@ -438,7 +440,7 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 		// console.log('diffChildren(', getVNodeChildren(vnode).map( p => Object.assign({}, p) ), getVNodeChildren(oldVNode).map( p => Object.assign({}, p) ), ')');
 		// let newChildren = getVNodeChildren(vnode);
 		// diffChildren(dom, newChildren, vnode===oldVNode ? newChildren : oldVNode==null ? [] : getVNodeChildren(oldVNode), context, isSvg, excessChildren);
-		diffChildren(dom, getVNodeChildren(vnode), oldVNode==null ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessChildren);
+		diffChildren(dom, getVNodeChildren(vnode), oldVNode==null ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessChildren, diffLevel, mounts);
 		if (vnode!==oldVNode) {
 			diffProps(dom, vnode.props, oldVNode==null ? EMPTY_OBJ : oldVNode.props, isSvg);
 		}
@@ -450,11 +452,10 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 }
 
 
-export function unmount(vnode, recursive, remove) {
+export function unmount(vnode) {
 	let r;
 	if (vnode.props!=null && (r = vnode.props.ref)) r(null);
-	if (remove!==false && (r = vnode._el)!=null) r.remove();
-	// if ((r = vnode._el)!=null) r.remove();
+	if ((r = vnode._el)!=null) r.remove();
 	vnode._el = null;
 
 	if ((r = vnode._component)!=null) {
@@ -652,7 +653,7 @@ function createComponent(Ctor, props, context) {
 	}
 	else {
 		inst = new Component(props, context);
-		inst.constructor = Ctor;
+		inst._constructor = Ctor;
 		inst.render = doRender;
 	}
 	return inst;
@@ -660,5 +661,5 @@ function createComponent(Ctor, props, context) {
 
 /** The `.render()` method for a PFC backing instance. */
 function doRender(props, state, context) {
-	return this.constructor(props, context);
+	return this._constructor(props, context);
 }
