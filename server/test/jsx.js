@@ -1,5 +1,4 @@
-// import render from '../src/jsx';
-import render from '../dist/jsx';
+import render from '../src/jsx';
 import { h, Component } from 'preact';
 import chai, { expect } from 'chai';
 import { spy, match } from 'sinon';

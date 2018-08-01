@@ -500,14 +500,6 @@ describe('render', () => {
 			let rendered = render(<div class="foo" className="foo bar" />);
 			expect(rendered).to.equal('<div class="foo"></div>');
 		});
-
-		it('should stringify object classNames', () => {
-			let rendered = render(<div class={{ foo:1, bar:0, baz:true, buzz:false }} />);
-			expect(rendered, 'class').to.equal('<div class="foo baz"></div>');
-
-			rendered = render(<div className={{ foo:1, bar:0, baz:true, buzz:false }} />);
-			expect(rendered, 'className').to.equal('<div class="foo baz"></div>');
-		});
 	});
 
 	describe('sortAttributes', () => {

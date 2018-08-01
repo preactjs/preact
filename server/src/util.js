@@ -8,10 +8,10 @@ export const objectKeys = Object.keys || (obj => {
 });
 
 export let encodeEntities = s => String(s)
+	.replace(/&/g, '&amp;')
 	.replace(/</g, '&lt;')
 	.replace(/>/g, '&gt;')
-	.replace(/"/g, '&quot;')
-	.replace(/&/g, '&amp;');
+	.replace(/"/g, '&quot;');
 
 export let indent = (s, char) => String(s).replace(/(\n+)/g, '$1' + (char || '\t'));
 
