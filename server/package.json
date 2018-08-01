@@ -8,13 +8,10 @@
   "module": "dist/index.mjs",
   "jsnext:main": "dist/index.mjs",
   "scripts": {
-    "x-build": "microbundle src/index.js src/jsx.js --target web --external none --no-compress && npm run -s copy-typescript-definition",
     "build": "npm run -s transpile && npm run -s transpile:jsx && npm run -s copy-typescript-definition",
     "transpile": "microbundle src/index.js -f es,umd --target web --external none",
     "transpile:jsx": "microbundle src/jsx.js -o dist/jsx.js --target web --external none",
     "copy-typescript-definition": "copyfiles -f src/index.d.ts dist",
-    "x-transpile": "rollup -c rollup.config.js -m ${npm_package_main}.map -f umd -n $npm_package_amdName $npm_package_jsnext_main -o $npm_package_main",
-    "x-transpile:jsx": "ENTRY=jsx rollup -c rollup.config.js -m dist/jsx.js.map -f umd -n $npm_package_amdName src/jsx.js -o dist/jsx.js",
     "test": "eslint src test && mocha --compilers js:babel-register test/**/*.js",
     "prepublish": "npm run build",
     "release": "npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
@@ -25,44 +22,55 @@
     "universal",
     "isomorphic"
   ],
+  "eslintConfig": {
+    "extends": "developit",
+    "rules": {
+      "react/prefer-stateless-function": 0,
+      "react/jsx-no-bind": 0,
+      "react/no-danger": 0,
+      "jest/valid-expect": 0,
+      "new-cap": 0
+    }
+  },
+  "babel": {
+    "presets": [
+      "env"
+    ],
+    "plugins": [
+      [
+        "transform-react-jsx",
+        {
+          "pragma": "h"
+        }
+      ],
+      "transform-object-rest-spread"
+    ]
+  },
   "author": "Jason Miller <jason@developit.ca>",
   "license": "MIT",
   "typings": "src/index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/developit/preact-render-to-string.git"
-  },
-  "bugs": {
-    "url": "https://github.com/developit/preact-render-to-string/issues"
-  },
+  "repository": "developit/preact-render-to-string",
+  "bugs": "https://github.com/developit/preact-render-to-string/issues",
   "homepage": "https://github.com/developit/preact-render-to-string",
   "peerDependencies": {
     "preact": "*"
   },
   "devDependencies": {
-    "babel-cli": "^6.11.4",
-    "babel-core": "^6.11.4",
-    "babel-eslint": "^6.1.2",
-    "babel-plugin-transform-class-properties": "^6.10.2",
-    "babel-plugin-transform-react-jsx": "^6.8.0",
-    "babel-preset-es2015": "^6.9.0",
-    "babel-preset-stage-0": "^6.5.0",
-    "babel-register": "^6.9.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "babel-preset-env": "^1.7.0",
+    "babel-register": "^6.26.0",
     "chai": "^3.5.0",
     "copyfiles": "^1.2.0",
-    "eslint": "^3.2.2",
-    "mocha": "^3.0.0",
+    "eslint": "^4.19.1",
+    "eslint-config-developit": "^1.1.1",
+    "microbundle": "^0.6.0",
+    "mocha": "^5.2.0",
     "preact": "^8.1.0",
-    "rollup": "^0.34.3",
-    "rollup-plugin-babel": "^2.6.1",
-    "rollup-plugin-commonjs": "^3.3.1",
-    "rollup-plugin-memory": "^1.0.0",
-    "rollup-plugin-node-resolve": "^2.0.0",
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0"
   },
   "dependencies": {
-    "microbundle": "^0.6.0",
     "pretty-format": "^3.5.1"
   }
 }

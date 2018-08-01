@@ -1,7 +1,7 @@
 import { shallowRender } from '../src';
-import { h, Component } from 'preact';
+import { h } from 'preact';
 import chai, { expect } from 'chai';
-import { spy, match } from 'sinon';
+import { spy } from 'sinon';
 import sinonChai from 'sinon-chai';
 chai.use(sinonChai);
 

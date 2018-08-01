@@ -96,14 +96,14 @@ describe('render', () => {
 		});
 
 		it('should collapse collapsible attributes', () => {
-			let rendered = render(<div class="" style="" foo={true} bar />),
+			let rendered = render(<div class="" style="" foo bar />),
 				expected = `<div class style foo bar></div>`;
 
 			expect(rendered).to.equal(expected);
 		});
 
 		it('should omit functions', () => {
-			let rendered = render(<div a={()=>{}} b={function(){}} />),
+			let rendered = render(<div a={() => {}} b={function(){}} />),
 				expected = `<div></div>`;
 
 			expect(rendered).to.equal(expected);
@@ -124,7 +124,7 @@ describe('render', () => {
 		});
 
 		it('should self-close void elements', () => {
-			let rendered = render(<div><input type='text' /><wbr /></div>),
+			let rendered = render(<div><input type="text" /><wbr /></div>),
 				expected = `<div><input type="text" /><wbr /></div>`;
 
 			expect(rendered).to.equal(expected);
@@ -138,7 +138,7 @@ describe('render', () => {
 		});
 
 		it('should serialize object styles', () => {
-			let rendered = render(<div style={{ color:'red', border:'none' }} />),
+			let rendered = render(<div style={{ color: 'red', border: 'none' }} />),
 				expected = `<div style="color: red; border: none;"></div>`;
 
 			expect(rendered).to.equal(expected);
@@ -206,7 +206,7 @@ describe('render', () => {
 					match({
 						foo: 1,
 						children: [
-							match({ nodeName:'span', children:['asdf'] })
+							match({ nodeName: 'span', children: ['asdf'] })
 						]
 					}),
 					match({})
@@ -284,7 +284,7 @@ describe('render', () => {
 					match({
 						foo: 1,
 						children: [
-							match({ nodeName:'span', children:['asdf'] })
+							match({ nodeName: 'span', children: ['asdf'] })
 						]
 					}),
 					match({}),	// empty state
@@ -294,14 +294,14 @@ describe('render', () => {
 
 		it('should apply defaultProps', () => {
 			class Test extends Component {
-				static defaultProps = {
-					foo: 'default foo',
-					bar: 'default bar'
-				};
 				render(props) {
 					return <div {...props} />;
 				}
 			}
+			Test.defaultProps = {
+				foo: 'default foo',
+				bar: 'default bar'
+			};
 
 			expect(render(<Test />), 'defaults').to.equal('<div foo="default foo" bar="default bar"></div>');
 			expect(render(<Test bar="b" />), 'partial').to.equal('<div foo="default foo" bar="b"></div>');
@@ -326,8 +326,8 @@ describe('render', () => {
 		});
 
 		it('should pass context to grandchildren', () => {
-			const CONTEXT = { a:'a' };
-			const PROPS = { b:'b' };
+			const CONTEXT = { a: 'a' };
+			const PROPS = { b: 'b' };
 
 			class Outer extends Component {
 				getChildContext() {
@@ -359,8 +359,8 @@ describe('render', () => {
 		});
 
 		it('should pass context to direct children', () => {
-			const CONTEXT = { a:'a' };
-			const PROPS = { b:'b' };
+			const CONTEXT = { a: 'a' };
+			const PROPS = { b: 'b' };
 
 			class Outer extends Component {
 				getChildContext() {
@@ -391,12 +391,12 @@ describe('render', () => {
 			expect(Inner.prototype.render).to.have.been.calledWith(match(PROPS), {}, CONTEXT);
 
 			// make sure render() could make use of context.a
-			expect(Inner.prototype.render).to.have.returned(match({ children:['a'] }));
+			expect(Inner.prototype.render).to.have.returned(match({ children: ['a'] }));
 		});
 
 		it('should preserve existing context properties when creating child contexts', () => {
-			let outerContext = { outer:true },
-				innerContext = { inner:true };
+			let outerContext = { outer: true },
+				innerContext = { inner: true };
 			class Outer extends Component {
 				getChildContext() {
 					return { outerContext };
@@ -463,10 +463,10 @@ describe('render', () => {
 			let rendered = render(<Outer />);
 			expect(rendered).to.equal('<div>hi</div>');
 
-			rendered = render(<Outer />, null, { shallow:true });
+			rendered = render(<Outer />, null, { shallow: true });
 			expect(rendered, '{shallow:true}').to.equal('<Middle></Middle>');
 
-			rendered = render(<Outer />, null, { shallow:true, shallowHighOrder:false });
+			rendered = render(<Outer />, null, { shallow: true, shallowHighOrder: false });
 			expect(rendered, '{shallow:true,shallowHighOrder:false}').to.equal('<div><Inner></Inner></div>', 'but it should never render nested grandchild components');
 		});
 	});
@@ -475,12 +475,12 @@ describe('render', () => {
 		it('should support dangerouslySetInnerHTML', () => {
 			// some invalid HTML to make sure we're being flakey:
 			let html = '<a href="foo">asdf</a> some text <ul><li>foo<li>bar</ul>';
-			let rendered = render(<div id="f" dangerouslySetInnerHTML={{__html:html}} />);
+			let rendered = render(<div id="f" dangerouslySetInnerHTML={{ __html: html }} />);
 			expect(rendered).to.equal(`<div id="f">${html}</div>`);
 		});
 
 		it('should override children', () => {
-			let rendered = render(<div dangerouslySetInnerHTML={{__html:'foo'}}><b>bar</b></div>);
+			let rendered = render(<div dangerouslySetInnerHTML={{ __html: 'foo' }}><b>bar</b></div>);
 			expect(rendered).to.equal('<div>foo</div>');
 		});
 	});
@@ -509,13 +509,13 @@ describe('render', () => {
 		});
 
 		it('should sort attributes lexicographically if enabled', () => {
-			let rendered = render(<div b1="b1" c="c" a="a" b="b" />, null, { sortAttributes:true });
+			let rendered = render(<div b1="b1" c="c" a="a" b="b" />, null, { sortAttributes: true });
 			expect(rendered).to.equal('<div a="a" b="b" b1="b1" c="c"></div>');
 		});
 	});
 
 	describe('xml:true', () => {
-		let renderXml = jsx => render(jsx, null, { xml:true });
+		let renderXml = jsx => render(jsx, null, { xml: true });
 
 		it('should render end-tags', () => {
 			expect(renderXml(<div />)).to.equal(`<div />`);

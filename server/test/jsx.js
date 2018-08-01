@@ -1,7 +1,6 @@
 import render from '../src/jsx';
 import { h, Component } from 'preact';
 import chai, { expect } from 'chai';
-import { spy, match } from 'sinon';
 import sinonChai from 'sinon-chai';
 chai.use(sinonChai);
 
@@ -62,7 +61,7 @@ describe('jsx', () => {
 		function F(){}
 		expect(renderJsx(
 			<F b={false}>bar</F>,
-			{ shallow:true, renderRootComponent:false }
+			{ shallow: true, renderRootComponent: false }
 		)).to.equal(dedent`
 			<F b={false}>bar</F>
 		`);
@@ -108,7 +107,8 @@ describe('jsx', () => {
 			<a b={[
 				<c />,
 				<d f="g" />
-			]}>bar</a>
+			]}
+			>bar</a>
 		)).to.equal(dedent`
 			<a
 				b={
@@ -148,7 +148,7 @@ describe('jsx', () => {
 	it('should skip null siblings', () => {
 		expect(renderJsx(
 			<jsx>
-				<span/>
+				<span />
 				{null}
 			</jsx>
 		)).to.deep.equal(dedent`
@@ -161,19 +161,19 @@ describe('jsx', () => {
 	it('should skip functions if functions=false', () => {
 		expect(renderJsx(
 			<div onClick={() => {}} />,
-			{ functions:false }
+			{ functions: false }
 		)).to.equal('<div></div>');
 	});
 
 	it('should skip function names if functionNames=false', () => {
 		expect(renderJsx(
 			<div onClick={() => {}} />,
-			{ functionNames:false }
+			{ functionNames: false }
 		)).to.equal('<div onClick={Function}></div>');
 
 		expect(renderJsx(
 			<div onClick={function foo(){}} />,
-			{ functionNames:false }
+			{ functionNames: false }
 		)).to.equal('<div onClick={Function}></div>');
 	});
 

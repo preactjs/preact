@@ -5,8 +5,6 @@ const SHALLOW = { shallow: true };
 // components without names, kept as a hash for later comparison to return consistent UnnamedComponentXX names.
 const UNNAMED = [];
 
-const EMPTY = {};
-
 const VOID_ELEMENTS = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
 
 
@@ -34,18 +32,19 @@ let shallowRender = (vnode, context) => renderToString(vnode, context, SHALLOW);
 
 
 /** The default export is an alias of `render()`. */
-export default function renderToString(vnode, context, opts, inner, isSvgMode) {
-	let { nodeName, attributes, children } = vnode || EMPTY,
+function renderToString(vnode, context, opts, inner, isSvgMode) {
+	if (vnode==null || typeof vnode==='boolean') {
+		return '';
+	}
+
+	let nodeName = vnode.nodeName,
+		attributes = vnode.attributes,
 		isComponent = false;
 	context = context || {};
 	opts = opts || {};
 
 	let pretty = opts.pretty,
 		indentChar = typeof pretty==='string' ? pretty : '\t';
-
-	if (vnode==null || typeof vnode==='boolean') {
-		return '';
-	}
 
 	// #text nodes
 	if (typeof vnode!=='object' && !nodeName) {
@@ -99,16 +98,16 @@ export default function renderToString(vnode, context, opts, inner, isSvgMode) {
 				v = attributes[name];
 			if (name==='children') continue;
 
-			if (name.match(/[\s\n\/='"\0<>]/)) continue;
+			if (name.match(/[\s\n\\/='"\0<>]/)) continue;
 
 			if (!(opts && opts.allAttributes) && (name==='key' || name==='ref')) continue;
 
 			if (name==='className') {
-				if (attributes['class']) continue;
+				if (attributes.class) continue;
 				name = 'class';
 			}
-			else if (isSvgMode && name.match(/^xlink\:?./)) {
-				name = name.toLowerCase().replace(/^xlink\:?/, 'xlink:');
+			else if (isSvgMode && name.match(/^xlink:?./)) {
+				name = name.toLowerCase().replace(/^xlink:?/, 'xlink:');
 			}
 
 			if (name==='style' && v && typeof v==='object') {
@@ -144,11 +143,12 @@ export default function renderToString(vnode, context, opts, inner, isSvgMode) {
 	else if (pretty && ~s.indexOf('\n')) s += '\n';
 
 	s = `<${nodeName}${s}>`;
-	if (nodeName.match(/[\s\n\/='"\0<>]/)) throw s;
+	if (nodeName.match(/[\s\n\\/='"\0<>]/)) throw s;
 
 	let isVoid = nodeName.match(VOID_ELEMENTS);
 	if (isVoid) s = s.replace(/>$/, ' />');
 
+	let pieces = [];
 	if (html) {
 		// if multiline, indent.
 		if (pretty && isLargeString(html)) {
@@ -156,12 +156,10 @@ export default function renderToString(vnode, context, opts, inner, isSvgMode) {
 		}
 		s += html;
 	}
-	else {
-		let len = children && children.length,
-			pieces = [],
-			hasLarge = ~s.indexOf('\n');
-		for (let i=0; i<len; i++) {
-			let child = children[i];
+	else if (vnode.children) {
+		let hasLarge = ~s.indexOf('\n');
+		for (let i=0; i<vnode.children.length; i++) {
+			let child = vnode.children[i];
 			if (child!=null && child!==false) {
 				let childSvgMode = nodeName==='svg' ? true : nodeName==='foreignObject' ? false : isSvgMode,
 					ret = renderToString(child, context, opts, true, childSvgMode);
@@ -174,12 +172,13 @@ export default function renderToString(vnode, context, opts, inner, isSvgMode) {
 				pieces[i] = '\n' + indentChar + indent(pieces[i], indentChar);
 			}
 		}
-		if (pieces.length) {
-			s += pieces.join('');
-		}
-		else if (opts && opts.xml) {
-			return s.substring(0, s.length-1) + ' />';
-		}
+	}
+
+	if (pieces.length) {
+		s += pieces.join('');
+	}
+	else if (opts && opts.xml) {
+		return s.substring(0, s.length-1) + ' />';
 	}
 
 	if (!isVoid) {
@@ -216,6 +215,7 @@ function getFallbackComponentName(component) {
 }
 renderToString.shallowRender = shallowRender;
 
+export default renderToString;
 
 export {
 	renderToString as render,
