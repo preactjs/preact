@@ -4,12 +4,17 @@
   "version": "3.7.0",
   "description": "Render JSX to an HTML string, with support for Preact components.",
   "main": "dist/index.js",
-  "jsnext:main": "src/index.js",
+  "umd:main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "jsnext:main": "dist/index.mjs",
   "scripts": {
+    "x-build": "microbundle src/index.js src/jsx.js --target web --external none --no-compress && npm run -s copy-typescript-definition",
     "build": "npm run -s transpile && npm run -s transpile:jsx && npm run -s copy-typescript-definition",
+    "transpile": "microbundle src/index.js -f es,umd --target web --external none",
+    "transpile:jsx": "microbundle src/jsx.js -o dist/jsx.js --target web --external none",
     "copy-typescript-definition": "copyfiles -f src/index.d.ts dist",
-    "transpile": "rollup -c rollup.config.js -m ${npm_package_main}.map -f umd -n $npm_package_amdName $npm_package_jsnext_main -o $npm_package_main",
-    "transpile:jsx": "ENTRY=jsx rollup -c rollup.config.js -m dist/jsx.js.map -f umd -n $npm_package_amdName src/jsx.js -o dist/jsx.js",
+    "x-transpile": "rollup -c rollup.config.js -m ${npm_package_main}.map -f umd -n $npm_package_amdName $npm_package_jsnext_main -o $npm_package_main",
+    "x-transpile:jsx": "ENTRY=jsx rollup -c rollup.config.js -m dist/jsx.js.map -f umd -n $npm_package_amdName src/jsx.js -o dist/jsx.js",
     "test": "eslint src test && mocha --compilers js:babel-register test/**/*.js",
     "prepublish": "npm run build",
     "release": "npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
@@ -57,6 +62,7 @@
     "sinon-chai": "^2.8.0"
   },
   "dependencies": {
+    "microbundle": "^0.6.0",
     "pretty-format": "^3.5.1"
   }
 }

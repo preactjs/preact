@@ -1,4 +1,4 @@
-import { objectKeys, encodeEntities, falsey, memoize, indent, isLargeString, styleObjToCss, hashToClassName, assign, getNodeProps } from './util';
+import { objectKeys, encodeEntities, indent, isLargeString, styleObjToCss, assign, getNodeProps } from './util';
 
 const SHALLOW = { shallow: true };
 
@@ -119,14 +119,11 @@ export default function renderToString(vnode, context, opts, inner, isSvgMode) {
 				if (attributes['class']) continue;
 				name = 'class';
 			}
-			else if (isSvgMode && name.match(/^xlink\:?(.+)/)) {
-				name = name.toLowerCase().replace(/^xlink\:?(.+)/, 'xlink:$1');
+			else if (isSvgMode && name.match(/^xlink\:?./)) {
+				name = name.toLowerCase().replace(/^xlink\:?/, 'xlink:');
 			}
 
-			if (name==='class' && v && typeof v==='object') {
-				v = hashToClassName(v);
-			}
-			else if (name==='style' && v && typeof v==='object') {
+			if (name==='style' && v && typeof v==='object') {
 				v = styleObjToCss(v);
 			}
 
@@ -177,7 +174,7 @@ export default function renderToString(vnode, context, opts, inner, isSvgMode) {
 			hasLarge = ~s.indexOf('\n');
 		for (let i=0; i<len; i++) {
 			let child = children[i];
-			if (!falsey(child)) {
+			if (child!=null && child!==false) {
 				let childSvgMode = nodeName==='svg' ? true : nodeName==='foreignObject' ? false : isSvgMode,
 					ret = renderToString(child, context, opts, true, childSvgMode);
 				if (!hasLarge && pretty && isLargeString(ret)) hasLarge = true;

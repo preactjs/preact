@@ -1,5 +1,5 @@
 import './polyfills';
-import renderToString from '.';
+import renderToString from './index';
 import { indent, encodeEntities, assign } from './util';
 import prettyFormat from 'pretty-format';
 
