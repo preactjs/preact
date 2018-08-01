@@ -7,22 +7,7 @@ const UNNAMED = [];
 
 const EMPTY = {};
 
-const VOID_ELEMENTS = [
-	'area',
-	'base',
-	'br',
-	'col',
-	'embed',
-	'hr',
-	'img',
-	'input',
-	'link',
-	'meta',
-	'param',
-	'source',
-	'track',
-	'wbr'
-];
+const VOID_ELEMENTS = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
 
 
 /** Render Preact JSX + Components to an HTML string.
@@ -159,11 +144,10 @@ export default function renderToString(vnode, context, opts, inner, isSvgMode) {
 	else if (pretty && ~s.indexOf('\n')) s += '\n';
 
 	s = `<${nodeName}${s}>`;
-	if (String(nodeName).match(/[\s\n\/='"\0<>]/)) throw s;
+	if (nodeName.match(/[\s\n\/='"\0<>]/)) throw s;
 
-	if (VOID_ELEMENTS.indexOf(nodeName)>-1) {
-		s = s.replace(/>$/, ' />');
-	}
+	let isVoid = nodeName.match(VOID_ELEMENTS);
+	if (isVoid) s = s.replace(/>$/, ' />');
 
 	if (html) {
 		// if multiline, indent.
@@ -198,7 +182,7 @@ export default function renderToString(vnode, context, opts, inner, isSvgMode) {
 		}
 	}
 
-	if (VOID_ELEMENTS.indexOf(nodeName)===-1) {
+	if (!isVoid) {
 		if (pretty && ~s.indexOf('\n')) s += '\n';
 		s += `</${nodeName}>`;
 	}
