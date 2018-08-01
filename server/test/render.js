@@ -85,6 +85,16 @@ describe('render', () => {
 			});
 		});
 
+		it('should throw for invalid nodeName values', () => {
+			expect(() => render(h('div'))).not.to.throw();
+			expect(() => render(h('x-💩'))).not.to.throw();
+			expect(() => render(h('a b'))).to.throw(/<a b>/);
+			expect(() => render(h('a\0b'))).to.throw(/<a\0b>/);
+			expect(() => render(h('a>'))).to.throw(/<a>>/);
+			expect(() => render(h('<'))).to.throw(/<<>/);
+			expect(() => render(h('"'))).to.throw(/<">/);
+		});
+
 		it('should collapse collapsible attributes', () => {
 			let rendered = render(<div class="" style="" foo={true} bar />),
 				expected = `<div class style foo bar></div>`;
