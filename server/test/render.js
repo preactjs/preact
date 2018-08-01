@@ -56,6 +56,35 @@ describe('render', () => {
 			expect(render(<div foo={0} />)).to.equal(`<div foo="0"></div>`);
 		});
 
+		describe('attribute name sanitization', () => {
+			it('should omit attributes with invalid names', () => {
+				let rendered = render(h('div', {
+					'<a': '1',
+					'a>': '1',
+					'foo"bar': '1',
+					'"hello"': '1'
+				}));
+				expect(rendered).to.equal(`<div></div>`);
+			});
+
+			it('should mitigate attribute name injection', () => {
+				let rendered = render(h('div', {
+					'></div><script>alert("hi")</script>': '',
+					'foo onclick': 'javascript:alert()',
+					a: 'b'
+				}));
+				expect(rendered).to.equal(`<div a="b"></div>`);
+			});
+
+			it('should allow emoji attribute names', () => {
+				let rendered = render(h('div', {
+					'a;b': '1',
+					'a🧙‍b': '1'
+				}));
+				expect(rendered).to.equal(`<div a;b="1" a🧙‍b="1"></div>`);
+			});
+		});
+
 		it('should collapse collapsible attributes', () => {
 			let rendered = render(<div class="" style="" foo={true} bar />),
 				expected = `<div class style foo bar></div>`;

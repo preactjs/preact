@@ -113,6 +113,9 @@ export default function renderToString(vnode, context, opts, inner, isSvgMode) {
 			let name = attrs[i],
 				v = attributes[name];
 			if (name==='children') continue;
+
+			if (name.match(/[\s\n\/='"\0<>]/)) continue;
+
 			if (!(opts && opts.allAttributes) && (name==='key' || name==='ref')) continue;
 
 			if (name==='className') {
