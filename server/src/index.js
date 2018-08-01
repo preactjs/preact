@@ -113,6 +113,9 @@ export default function renderToString(vnode, context, opts, inner, isSvgMode) {
 			let name = attrs[i],
 				v = attributes[name];
 			if (name==='children') continue;
+
+			if (name.match(/[\s\n\/='"\0<>]/)) continue;
+
 			if (!(opts && opts.allAttributes) && (name==='key' || name==='ref')) continue;
 
 			if (name==='className') {
@@ -156,6 +159,7 @@ export default function renderToString(vnode, context, opts, inner, isSvgMode) {
 	else if (pretty && ~s.indexOf('\n')) s += '\n';
 
 	s = `<${nodeName}${s}>`;
+	if (String(nodeName).match(/[\s\n\/='"\0<>]/)) throw s;
 
 	if (VOID_ELEMENTS.indexOf(nodeName)>-1) {
 		s = s.replace(/>$/, ' />');
