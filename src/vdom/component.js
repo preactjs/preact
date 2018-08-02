@@ -84,8 +84,8 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 		rendered, inst, cbase;
 
 	if (component.constructor.getDerivedStateFromProps) {
-		previousState = extend({}, previousState);
-		component.state = extend(state, component.constructor.getDerivedStateFromProps(props, state));
+		state = extend(extend({}, state), component.constructor.getDerivedStateFromProps(props, state));
+		component.state = state;
 	}
 
 	// if updating

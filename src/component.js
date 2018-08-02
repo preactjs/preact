@@ -46,14 +46,16 @@ extend(Component.prototype, {
 
 	/**
 	 * Update component state and schedule a re-render.
-	 * @param {object} state A hash of state properties to update with new values
+	 * @param {object} state A dict of state properties to be shallowly merged
+	 * 	into the current state, or a function that will produce such a dict. The
+	 * 	function is called with the current state and props.
 	 * @param {() => void} callback A function to be called once component state is
 	 * 	updated
 	 */
 	setState(state, callback) {
-		let s = this.state;
-		if (!this.prevState) this.prevState = extend({}, s);
-		extend(s, typeof state==='function' ? state(s, this.props) : state);
+		const prev = this.prevState = this.state;
+		if (typeof state === 'function') state = state(prev, this.props);
+		this.state = extend(extend({}, prev), state);
 		if (callback) this._renderCallbacks.push(callback);
 		enqueueRender(this);
 	},
