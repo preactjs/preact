@@ -1,5 +1,5 @@
 import render from '../src/jsx';
-import { h, Component } from 'preact';
+import { h } from 'preact';
 import chai, { expect } from 'chai';
 import sinonChai from 'sinon-chai';
 chai.use(sinonChai);

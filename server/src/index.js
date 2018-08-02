@@ -195,7 +195,7 @@ function getComponentName(component) {
 
 function getFallbackComponentName(component) {
 	let str = Function.prototype.toString.call(component),
-		name = (str.match(/^\s*function\s+([^\( ]+)/) || EMPTY)[1];
+		name = (str.match(/^\s*function\s+([^( ]+)/) || '')[1];
 	if (!name) {
 		// search for an existing indexed name for the given component:
 		let index = -1;
