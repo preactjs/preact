@@ -1,5 +1,5 @@
-import { createElement as h, render, rerender, Component } from '../../src/index';
-import { setup, teardown } from './helpers';
+import { createElement as h, render, Component } from '../../src/index';
+import { setupScratch, teardown, setupRerender } from './helpers';
 
 /** @jsx h */
 
@@ -8,10 +8,11 @@ let spyAll = obj => Object.keys(obj).forEach( key => sinon.spy(obj,key) );
 const EMPTY_CHILDREN = [];
 
 describe('Lifecycle methods', () => {
-	let scratch;
+	let scratch, rerender;
 
 	beforeEach(() => {
-		scratch = setup();
+		scratch = setupScratch();
+		rerender = setupRerender();
 	});
 
 	afterEach(() => {
@@ -310,7 +311,7 @@ describe('Lifecycle methods', () => {
 			expect(scratch.firstChild.className).to.equal('initial');
 			expect(Foo.getDerivedStateFromProps).to.have.been.calledOnce;
 
-			render(<Foo />, scratch); // call rerender to handle cDM setState call
+			rerender(); // call rerender to handle cDM setState call
 			expect(scratch.firstChild.className).to.equal('updated derived');
 			expect(Foo.getDerivedStateFromProps).to.have.been.calledTwice;
 		});

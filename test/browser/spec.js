@@ -1,15 +1,16 @@
 import { createElement as h, render, Component } from '../../src/index';
-import { setup, teardown } from './helpers';
+import { setupScratch, teardown, setupRerender } from './helpers';
 
 /** @jsx h */
 
 const EMPTY_CHILDREN = [];
 
 describe('Component spec', () => {
-	let scratch;
+	let scratch, rerender;
 
 	beforeEach(() => {
-		scratch = setup();
+		scratch = setupScratch();
+		rerender = setupRerender();
 	});
 
 	afterEach(() => {
@@ -83,7 +84,7 @@ describe('Component spec', () => {
 			expect(proto.ctor).to.have.been.calledWithMatch(PROPS1);
 			expect(proto.render).to.have.been.calledWithMatch(PROPS1);
 
-			render(<Outer />, scratch);
+			rerender();
 
 			// expect(proto.ctor).to.have.been.calledWith(PROPS2);
 			expect(proto.componentWillReceiveProps).to.have.been.calledWithMatch(PROPS2);

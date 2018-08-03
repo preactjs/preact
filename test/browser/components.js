@@ -1,5 +1,5 @@
 import { createElement as h, cloneElement, render, Component } from '../../src/index';
-import { setup, teardown } from './helpers';
+import { setupScratch, teardown } from './helpers';
 
 /** @jsx h */
 
@@ -28,7 +28,7 @@ describe('Components', () => {
 	let scratch;
 
 	beforeEach(() => {
-		scratch = setup();
+		scratch = setupScratch();
 	});
 
 	afterEach(() => {

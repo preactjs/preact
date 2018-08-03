@@ -1,5 +1,5 @@
 import { createElement as h, render, Component } from '../../src/index';
-import { setup, teardown } from './helpers';
+import { setupScratch, teardown } from './helpers';
 
 /** @jsx h */
 
@@ -9,7 +9,7 @@ describe('context', () => {
 	let scratch;
 
 	beforeEach(() => {
-		scratch = setup();
+		scratch = setupScratch();
 	});
 
 	afterEach(() => {
