@@ -236,6 +236,12 @@ describe('render()', () => {
 		expect(scratch).to.have.property('innerHTML', '<div><input><table border=""></table></div>', 'for undefined');
 	});
 
+	// Test for developit/preact#651
+	it('should set enumerable boolean attribute', () => {
+		render(<input spellcheck={false} />, scratch);
+		expect(scratch.firstChild.spellcheck).to.equal(false);
+	});
+
 	it('should apply string attributes', () => {
 		render(<div foo="bar" data-foo="databar" />, scratch);
 
