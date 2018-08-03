@@ -50,7 +50,7 @@ export function createVNode(type, tag, props, children, text, key) {
 
 /**
  * Coerce an untrusted value into a VNode
- * Specifically, this should be used anywhere a user could provide a boolean, sting, or number where
+ * Specifically, this should be used anywhere a user could provide a boolean, string, or number where
  * a VNode or Component is desired instead
  * @param {boolean | string | number | function | object} possibleVNode A possible VNode
  * @returns {object | function}

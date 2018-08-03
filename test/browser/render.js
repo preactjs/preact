@@ -1,7 +1,7 @@
 /* global DISABLE_FLAKEY */
 
 import { createElement as h, render, Component } from '../../src/index';
-import { setupScratch, teardown } from './helpers';
+import { setupScratch, setupRerender, teardown } from './helpers';
 
 /** @jsx h */
 
@@ -23,10 +23,11 @@ function sortAttributes(html) {
 }
 
 describe('render()', () => {
-	let scratch;
+	let scratch, rerender;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		rerender = setupRerender();
 	});
 
 	afterEach(() => {
@@ -733,7 +734,7 @@ describe('render()', () => {
 		});
 
 		// Commit the user typing setState call
-		render(<TodoList />, scratch);
+		rerender();
 
 		// Simulate user pressing enter
 		addTodo({
@@ -743,7 +744,7 @@ describe('render()', () => {
 		// Before Preact rerenders, focus should be on the input
 		expect(document.activeElement).to.equal(input);
 
-		render(<TodoList />, scratch);
+		rerender();
 
 		// After Preact rerenders, focus should remain on the input
 		expect(document.activeElement).to.equal(input);
