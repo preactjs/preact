@@ -116,7 +116,7 @@ function setProperty(node, name, value, oldValue, isSvg) {
 	// else if (name in node) {
 	else if (name!=='list' && !isSvg && (name in node)) {
 		node[name] = value==null ? '' : value;
-		if (value==null || value===false) node.removeAttribute(name);
+		// if (value==null || value===false) node.removeAttribute(name);
 	}
 	// else if (name in node && (isSvg===false || obj!=null && obj.baseVal!=null && obj.baseVal.valueAsString!=null)) {
 	// 	if (isSvg===true) {

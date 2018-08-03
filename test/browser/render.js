@@ -196,6 +196,7 @@ describe('render()', () => {
 	});
 
 	it('should clear falsy input values', () => {
+		// Note: this test just demonstrates the default browser behavior
 		render((
 			<div>
 				<input value={0} />
@@ -212,7 +213,7 @@ describe('render()', () => {
 		expect(root.children[3]).to.have.property('value', '');
 	});
 
-	it('should clear falsy DOM properties', () => {
+	it('should not clear falsy DOM properties', () => {
 		function test(val) {
 			render((
 				<div>
@@ -224,15 +225,15 @@ describe('render()', () => {
 
 		test('2');
 		test(false);
-		expect(scratch).to.have.property('innerHTML', '<div><input><table></table></div>', 'for false');
+		expect(scratch).to.have.property('innerHTML', '<div><input><table border="false"></table></div>', 'for false');
 
 		test('3');
 		test(null);
-		expect(scratch).to.have.property('innerHTML', '<div><input><table></table></div>', 'for null');
+		expect(scratch).to.have.property('innerHTML', '<div><input><table border=""></table></div>', 'for null');
 
 		test('4');
 		test(undefined);
-		expect(scratch).to.have.property('innerHTML', '<div><input><table></table></div>', 'for undefined');
+		expect(scratch).to.have.property('innerHTML', '<div><input><table border=""></table></div>', 'for undefined');
 	});
 
 	it('should apply string attributes', () => {
