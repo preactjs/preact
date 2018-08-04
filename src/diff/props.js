@@ -105,6 +105,7 @@ function setProperty(node, name, value, oldValue, isSvg) {
 
 		// }
 	}
+	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	// else if (name.charCodeAt(0)===111 && name.charCodeAt(1)===110) {
 	else if (name[0]==='o' && name[1]==='n') {
 		let useCapture = name !== (name=name.replace(/Capture$/, ''));
