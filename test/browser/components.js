@@ -166,17 +166,21 @@ describe('Components', () => {
 	});
 
 
-	// Test for Issue #176
+	// Test for Issue developit/preact#176
 	it('should remove children when root changes to text node', () => {
 		let comp;
 
 		class Comp extends Component {
+			constructor() {
+				super();
+				comp = this;
+			}
 			render(_, { alt }) {
 				return alt ? 'asdf' : <div>test</div>;
 			}
 		}
 
-		render(<Comp ref={c => comp=c} />, scratch);
+		render(<Comp />, scratch);
 
 		comp.setState({ alt: true });
 		comp.forceUpdate();
