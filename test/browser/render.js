@@ -402,7 +402,22 @@ describe('render()', () => {
 				.and.to.have.been.calledWithExactly('click', sinon.match.func, false);
 		});
 
-		it('should add event handlers with a normalized event name', () => {
+		it('should support native event names', () => {
+			let click = sinon.spy(),
+				mousedown = sinon.spy();
+
+			render(<div onclick={() => click(1)} onmousedown={mousedown} />, scratch);
+
+			expect(proto.addEventListener).to.have.been.calledTwice
+				.and.to.have.been.calledWith('click')
+				.and.calledWith('mousedown');
+
+			fireEvent(scratch.childNodes[0], 'click');
+			expect(click).to.have.been.calledOnce
+				.and.calledWith(1);
+		});
+
+		it('should support camel-case event names', () => {
 			let click = sinon.spy(),
 				mousedown = sinon.spy();
 
