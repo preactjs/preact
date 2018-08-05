@@ -4,7 +4,7 @@ import { extend } from '../util';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from './index';
 import { diff, mounts, diffLevel, flushMounts, recollectNodeTree, removeChildren } from './diff';
-import { createComponent, collectComponent } from './component-recycler';
+import { createComponent, recyclerComponents } from './component-recycler';
 import { removeNode } from '../dom/index';
 
 /**
@@ -103,8 +103,8 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 
 	try {
 		if (component.constructor.getDerivedStateFromProps) {
-			previousState = extend({}, previousState);
-			component.state = extend(state, component.constructor.getDerivedStateFromProps(props, state));
+			state = extend(extend({}, state), component.constructor.getDerivedStateFromProps(props, state));
+			component.state = state;
 		}
 
 		// if updating
@@ -334,7 +334,7 @@ export function unmountComponent(component) {
 		component.nextBase = base;
 
 		removeNode(base);
-		collectComponent(component);
+		recyclerComponents.push(component);
 
 		removeChildren(base);
 	}

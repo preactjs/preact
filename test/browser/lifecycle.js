@@ -515,6 +515,31 @@ describe('Lifecycle methods', () => {
 				value: 3
 			});
 		});
+
+		it('should NOT mutate state, only create new versions', () => {
+			const stateConstant = {};
+			let componentState;
+
+			class Stateful extends Component {
+				static getDerivedStateFromProps() {
+					return {key: 'value'};
+				}
+
+				constructor() {
+					super(...arguments);
+					this.state = stateConstant;
+				}
+
+				componentDidMount() {
+					componentState = this.state;
+				}
+			}
+
+			render(<Stateful />, scratch);
+
+			expect(componentState).to.deep.equal({key: 'value'});
+			expect(stateConstant).to.deep.equal({});
+		});
 	});
 
 	describe("#getSnapshotBeforeUpdate", () => {
@@ -1196,7 +1221,7 @@ describe('Lifecycle methods', () => {
 	});
 
 
-	describe('shouldComponentUpdate', () => {
+	describe('#shouldComponentUpdate', () => {
 		let setState;
 
 		class Should extends Component {
@@ -1762,6 +1787,36 @@ describe('Lifecycle methods', () => {
 		});
 
 	});
+
+	describe('#setState', () => {
+		it('should NOT mutate state, only create new versions', () => {
+			const stateConstant = {};
+			let didMount = false;
+			let componentState;
+
+			class Stateful extends Component {
+				constructor() {
+					super(...arguments);
+					this.state = stateConstant;
+				}
+
+				componentDidMount() {
+					didMount = true;
+					this.setState({key: 'value'}, () => {
+						componentState = this.state;
+					});
+				}
+			}
+
+			render(<Stateful />, scratch);
+			rerender();
+
+			expect(didMount).to.equal(true);
+			expect(componentState).to.deep.equal({key: 'value'});
+			expect(stateConstant).to.deep.equal({});
+		});
+	}),
+
 
 	describe('Lifecycle DOM Timing', () => {
 		it('should be invoked when dom does (DidMount, WillUnmount) or does not (WillMount, DidUnmount) exist', () => {
