@@ -1,4 +1,4 @@
-import { ELEMENT_NODE } from './constants';
+import { ELEMENT_NODE, TEXT_NODE } from './constants';
 
 export function createElement(tag, props, children) {
 	if (props==null) props = {};
@@ -46,4 +46,20 @@ export function createVNode(type, tag, props, children, text, key) {
 	// return { type, tag, props, attributes: props, /*children,*/ text, key, index: null, _children: null, _el: null, _component: null };
 	return { type, tag, props, /*children,*/ text, key, index: null, _children: null, _el: null, _component: null };
 	// return { type, tag, props, children, text, key, index: null, _children: null, _el: null, _component: null };
+}
+
+/**
+ * Coerce an untrusted value into a VNode
+ * Specifically, this should be used anywhere a user could provide a boolean, string, or number where
+ * a VNode or Component is desired instead
+ * @param {boolean | string | number | function | object} possibleVNode A possible VNode
+ * @returns {object | function}
+ */
+export function coerceToVNode(possibleVNode) {
+	if (typeof possibleVNode === 'boolean') return null;
+	if (typeof possibleVNode === 'string' || typeof possibleVNode === 'number') {
+		return createVNode(TEXT_NODE, null, null, null, possibleVNode, null);
+	}
+
+	return possibleVNode;
 }

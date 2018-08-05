@@ -105,15 +105,17 @@ function setProperty(node, name, value, oldValue, isSvg) {
 
 		// }
 	}
+	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	// else if (name.charCodeAt(0)===111 && name.charCodeAt(1)===110) {
 	else if (name[0]==='o' && name[1]==='n') {
-		let listenerName = name[2].toLowerCase() + name.substring(3);
-		node.removeEventListener(listenerName, oldValue);
-		node.addEventListener(listenerName, value);
+		let useCapture = name !== (name=name.replace(/Capture$/, ''));
+		let listenerName = name.toLowerCase().substring(2);
+		node.removeEventListener(listenerName, oldValue, useCapture);
+		node.addEventListener(listenerName, value, useCapture);
 	}
 	// else if (isProperty===true) {
 	// else if (name in node) {
-	else if (!isSvg && (name in node)) {
+	else if (name!=='list' && !isSvg && (name in node)) {
 		node[name] = value==null ? '' : value;
 		// if (value==null || value===false) node.removeAttribute(name);
 	}
@@ -130,7 +132,7 @@ function setProperty(node, name, value, oldValue, isSvg) {
 	else if (value==null || value===false) {
 		node.removeAttribute(name);
 	}
-	else {
+	else if (typeof value!=='function') {
 		node.setAttribute(name, value);
 	}
 	// @TODO handle this implicitly in set?
