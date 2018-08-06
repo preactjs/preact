@@ -1,5 +1,5 @@
-import { createElement as h, cloneElement, render, Component } from '../../src/index';
-import { setup, teardown } from './helpers';
+import { createElement as h, cloneElement, render, Component, Fragment } from '../../src/index';
+import { setupScratch, teardown } from './helpers';
 
 /** @jsx h */
 
@@ -28,7 +28,7 @@ describe('Components', () => {
 	let scratch;
 
 	beforeEach(() => {
-		scratch = setup();
+		scratch = setupScratch();
 	});
 
 	afterEach(() => {
@@ -47,7 +47,7 @@ describe('Components', () => {
 		expect(C1.prototype.render)
 			.to.have.been.calledOnce
 			.and.to.have.been.calledWithMatch({}, {})
-			.and.to.have.returned(sinon.match({ nodeName: 'div' }));
+			.and.to.have.returned(sinon.match({ tag: 'div' }));
 
 		expect(scratch.innerHTML).to.equal('<div>C1</div>');
 	});
@@ -64,8 +64,8 @@ describe('Components', () => {
 			.to.have.been.calledOnce
 			.and.to.have.been.calledWithMatch(PROPS)
 			.and.to.have.returned(sinon.match({
-				nodeName: 'div',
-				attributes: PROPS
+				tag: 'div',
+				props: PROPS
 			}));
 
 		expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
@@ -95,8 +95,8 @@ describe('Components', () => {
 			.to.have.been.calledOnce
 			.and.to.have.been.calledWithMatch(PROPS, {})
 			.and.to.have.returned(sinon.match({
-				nodeName: 'div',
-				attributes: PROPS
+				tag: 'div',
+				props: PROPS
 			}));
 
 		expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
@@ -275,7 +275,6 @@ describe('Components', () => {
 
 	});
 
-
 	describe('props.children', () => {
 		it('should support passing children as a prop', () => {
 			const Foo = props => <div {...props} />;
@@ -285,7 +284,7 @@ describe('Components', () => {
 				'123',
 				456
 			]}
-			       />, scratch);
+						 />, scratch);
 
 			expect(scratch.innerHTML).to.equal('<div a="b"><span class="bar">bar</span>123456</div>');
 		});
@@ -314,21 +313,21 @@ describe('Components', () => {
 
 			render(<Outer {...PROPS} />, scratch);
 
+
 			expect(Outer)
 				.to.have.been.calledOnce
 				.and.to.have.been.calledWithMatch(PROPS)
 				.and.to.have.returned(sinon.match({
-					nodeName: Inner,
-					attributes: PROPS
+					tag: Inner,
+					props: PROPS
 				}));
 
 			expect(Inner)
 				.to.have.been.calledOnce
 				.and.to.have.been.calledWithMatch(PROPS)
 				.and.to.have.returned(sinon.match({
-					nodeName: 'div',
-					attributes: PROPS,
-					children: ['inner']
+					tag: 'div',
+					props: { ...PROPS, children: 'inner' }
 				}));
 
 			expect(scratch.innerHTML).to.equal('<div foo="bar">inner</div>');
@@ -368,7 +367,7 @@ describe('Components', () => {
 			expect(Inner.secondCall)
 				.to.have.been.calledWithMatch({ foo: 'bar', i: 2 })
 				.and.to.have.returned(sinon.match({
-					attributes: {
+					props: {
 						j: 2,
 						i: 2,
 						foo: 'bar'
@@ -390,7 +389,7 @@ describe('Components', () => {
 			expect(Inner.thirdCall)
 				.to.have.been.calledWithMatch({ foo: 'bar', i: 3 })
 				.and.to.have.returned(sinon.match({
-					attributes: {
+					props: {
 						j: 3,
 						i: 3,
 						foo: 'bar'
@@ -462,7 +461,7 @@ describe('Components', () => {
 			expect(Inner.prototype.render.secondCall)
 				.to.have.been.calledWithMatch({ foo: 'bar', i: 2 })
 				.and.to.have.returned(sinon.match({
-					attributes: {
+					props: {
 						j: 2,
 						i: 2,
 						foo: 'bar'
@@ -489,7 +488,7 @@ describe('Components', () => {
 			expect(Inner.prototype.render.thirdCall)
 				.to.have.been.calledWithMatch({ foo: 'bar', i: 3 })
 				.and.to.have.returned(sinon.match({
-					attributes: {
+					props: {
 						j: 3,
 						i: 3,
 						foo: 'bar'

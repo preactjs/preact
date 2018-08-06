@@ -70,7 +70,7 @@
     "eslint": "^5.1.0",
     "eslint-config-developit": "^1.1.1",
     "flow-bin": "^0.76.0",
-    "karma": "^2.0.0",
+    "karma": "^2.0.5",
     "karma-babel-preprocessor": "^7.0.0",
     "karma-chai-sinon": "^0.1.5",
     "karma-chrome-launcher": "^2.0.0",
