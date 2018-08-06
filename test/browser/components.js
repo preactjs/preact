@@ -275,6 +275,29 @@ describe('Components', () => {
 
 	});
 
+	// Test for Fragments
+	it('should just render children for fragments', () => {
+		class Comp extends Component {
+			render() {
+				return (
+					<Fragment>
+						<div>Child1</div>
+						<div>Child2</div>
+					</Fragment>
+				);
+			}
+		}
+
+		let root;
+		function test(content) {
+			root = render(content, scratch, root);
+		}
+
+		test(<Comp />);
+		expect(scratch.innerHTML).to.equal('<div>Child1</div><div>Child2</div>');
+	});
+
+
 	describe('props.children', () => {
 		it('should support passing children as a prop', () => {
 			const Foo = props => <div {...props} />;
