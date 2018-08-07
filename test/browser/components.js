@@ -1,5 +1,5 @@
 import { createElement as h, cloneElement, render, Component, Fragment } from '../../src/index';
-import { setupScratch, teardown } from './helpers';
+import { setupScratch, teardown, setupRerender } from './helpers';
 
 /** @jsx h */
 
@@ -26,9 +26,11 @@ function sortAttributes(html) {
 
 describe('Components', () => {
 	let scratch;
+	let rerender;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		rerender = setupRerender();
 	});
 
 	afterEach(() => {
@@ -275,28 +277,101 @@ describe('Components', () => {
 
 	});
 
-	// Test for Fragments
-	it('should just render children for fragments', () => {
-		class Comp extends Component {
-			render() {
-				return (
-					<Fragment>
-						<div>Child1</div>
-						<div>Child2</div>
-					</Fragment>
-				);
+	describe('Fragment', () => {
+		it('should not render empty Fragment', () => {
+			render(<Fragment />, scratch);
+			expect(scratch.innerHTML).to.equal('');
+		});
+
+		it('should just render children for fragments', () => {
+			class Comp extends Component {
+				render() {
+					return (
+						<Fragment>
+							<div>Child1</div>
+							<div>Child2</div>
+						</Fragment>
+					);
+				}
 			}
-		}
 
-		let root;
-		function test(content) {
-			root = render(content, scratch, root);
-		}
+			let root;
+			function test(content) {
+				root = render(content, scratch, root);
+			}
 
-		test(<Comp />);
-		expect(scratch.innerHTML).to.equal('<div>Child1</div><div>Child2</div>');
+			test(<Comp />);
+			expect(scratch.innerHTML).to.equal('<div>Child1</div><div>Child2</div>');
+		});
+
+		it('should render nested Fragments', () => {
+			render((
+				<Fragment>
+					<Fragment>foo</Fragment>
+					bar
+				</Fragment>
+			), scratch);
+			expect(scratch.innerHTML).to.equal('foobar');
+
+			render((
+				<Fragment>
+					<Fragment>foo</Fragment>
+					<Fragment>bar</Fragment>
+				</Fragment>
+			), scratch);
+			expect(scratch.innerHTML).to.equal('foobar');
+		});
+
+		it('should respect keyed Fragments', () => {
+			let update;
+			class Comp extends Component {
+
+				constructor() {
+					super();
+					this.state = { key: 'foo' };
+					update = () => this.setState({ key: 'bar' });
+				}
+
+				render() {
+					return <Fragment key={this.state.key}>foo</Fragment>;
+				}
+			}
+			render(<Comp />, scratch);
+			expect(scratch.innerHTML).to.equal('foo');
+
+			update();
+			rerender();
+
+			expect(scratch.innerHTML).to.equal('foo');
+		});
+
+		it('should work with holey arrays', () => {
+			let update;
+			class Comp extends Component {
+
+				constructor() {
+					super();
+					this.state = { value: true };
+					update = () => this.setState({ value: false });
+				}
+
+				render() {
+					return (
+						<Fragment>
+							{this.state.value && 'foo'}
+						</Fragment>
+					);
+				}
+			}
+			render(<Comp />, scratch);
+			expect(scratch.innerHTML).to.equal('foo');
+
+			update();
+			rerender();
+
+			expect(scratch.innerHTML).to.equal('');
+		});
 	});
-
 
 	describe('props.children', () => {
 		it('should support passing children as a prop', () => {
