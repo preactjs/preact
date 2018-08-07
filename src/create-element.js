@@ -13,7 +13,7 @@ export function createElement(tag, props, children) {
 }
 
 export function Fragment(vnode, props) {
-	return vnode.children.slice()
+	return vnode.children;
 }
 
 // const RECYCLED_VNODES = [];
