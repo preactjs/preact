@@ -136,10 +136,6 @@ declare global {
 			props: any;
 		}
 
-		interface ElementChildrenAttribute {
-			children: any;
-		}
-
 		interface SVGAttributes extends HTMLAttributes {
 			accentHeight?: number | string;
 			accumulate?: "none" | "sum";
