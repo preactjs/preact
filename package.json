@@ -119,7 +119,7 @@
     "rollup-plugin-node-resolve": "^3.0.0",
     "sinon": "^4.4.2",
     "sinon-chai": "^3.0.0",
-    "typescript": "^2.9.0-rc",
+    "typescript": "^3.0.1",
     "uglify-js": "^2.7.5",
     "webpack": "^4.3.0"
   },

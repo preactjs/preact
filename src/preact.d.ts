@@ -124,6 +124,15 @@ declare namespace preact {
 	};
 }
 
+type Defaultize<Props, Defaults> =
+	// Distribute over unions
+	Props extends any
+		? 	// Make any properties included in Default optional
+			& Partial<Pick<Props, Extract<keyof Props, keyof Defaults>>>
+			// Include the remaining properties from Props
+			& Pick<Props, Exclude<keyof Props, keyof Defaults>>
+		: never;
+
 declare global {
 	namespace JSX {
 		interface Element extends preact.VNode<any> {
@@ -139,6 +148,11 @@ declare global {
 		interface ElementChildrenAttribute {
 			children: any;
 		}
+
+		type LibraryManagedAttributes<Component, Props> =
+			Component extends { defaultProps: infer Defaults }
+				? Defaultize<Props, Defaults>
+				: Props;
 
 		interface SVGAttributes extends HTMLAttributes {
 			accentHeight?: number | string;
