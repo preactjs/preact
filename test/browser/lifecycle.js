@@ -26,13 +26,13 @@ describe('Lifecycle methods', () => {
 		let forceUpdateInner;
 
 		let log;
-		const logger = function(msg) {
+		function logger(msg) {
 			return function() {
 				// return true for shouldComponentUpdate
 				log.push(msg);
 				return true;
 			};
-		};
+		}
 
 		class Outer extends Component {
 			static getDerivedStateFromProps() {
@@ -401,11 +401,15 @@ describe('Lifecycle methods', () => {
 
 				render() {
 					logs.push('parent render');
-					return <Child parentRenders={this.state.parentRenders} ref={child => childRef = child} />;
+					return <Child parentRenders={this.state.parentRenders} />;
 				}
 			}
 
 			class Child extends Component {
+				constructor(props) {
+					super(props);
+					childRef = this;
+				}
 				render() {
 					logs.push('child render');
 					return this.props.parentRenders;
@@ -431,6 +435,7 @@ describe('Lifecycle methods', () => {
 		// [should not override state with stale values if prevState is spread within getDerivedStateFromProps](https://github.com/facebook/react/blob/25dda90c1ecb0c662ab06e2c80c1ee31e0ae9d36/packages/react-dom/src/__tests__/ReactComponentLifeCycle-test.js#L1035)
 
 		it('should be passed next props and state', () => {
+
 			/** @type {() => void} */
 			let updateState;
 
@@ -450,8 +455,8 @@ describe('Lifecycle methods', () => {
 				static getDerivedStateFromProps(props, state) {
 					// These object references might be updated later so copy
 					// object so we can assert their values at this snapshot in time
-					propsArg = {...props};
-					stateArg = {...state};
+					propsArg = { ...props };
+					stateArg = { ...state };
 
 					// NOTE: Don't do this in real production code!
 					// https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html
@@ -466,11 +471,12 @@ describe('Lifecycle methods', () => {
 
 			// Initial render
 			// state.value: initialized to 0 in constructor, 0 -> 1 in gDSFP
-			let element = render(<Foo foo="foo" />, scratch);
+			render(<Foo foo="foo" />, scratch);
+
+			let element = scratch.firstChild;
 			expect(element.textContent).to.be.equal('1');
 			expect(propsArg).to.deep.equal({
-				foo: "foo",
-				children: []
+				foo: 'foo'
 			});
 			expect(stateArg).to.deep.equal({
 				value: 0
@@ -478,11 +484,10 @@ describe('Lifecycle methods', () => {
 
 			// New Props
 			// state.value: 1 -> 2 in gDSFP
-			render(<Foo foo="bar" />, scratch, scratch.firstChild);
+			render(<Foo foo="bar" />, scratch);
 			expect(element.textContent).to.be.equal('2');
 			expect(propsArg).to.deep.equal({
-				foo: "bar",
-				children: []
+				foo: 'bar'
 			});
 			expect(stateArg).to.deep.equal({
 				value: 1
@@ -494,8 +499,7 @@ describe('Lifecycle methods', () => {
 			rerender();
 			expect(element.textContent).to.be.equal('4');
 			expect(propsArg).to.deep.equal({
-				foo: "bar",
-				children: []
+				foo: 'bar'
 			});
 			expect(stateArg).to.deep.equal({
 				value: 3
@@ -503,7 +507,7 @@ describe('Lifecycle methods', () => {
 		});
 	});
 
-	describe("#getSnapshotBeforeUpdate", () => {
+	describe('#getSnapshotBeforeUpdate', () => {
 		it('should pass the return value from getSnapshotBeforeUpdate to componentDidUpdate', () => {
 			let log = [];
 
@@ -601,6 +605,7 @@ describe('Lifecycle methods', () => {
 		});
 
 		it('should be passed the previous props and state', () => {
+
 			/** @type {() => void} */
 			let updateState;
 
@@ -629,11 +634,11 @@ describe('Lifecycle methods', () => {
 				getSnapshotBeforeUpdate(prevProps, prevState) {
 					// These object references might be updated later so copy
 					// object so we can assert their values at this snapshot in time
-					prevPropsArg = {...prevProps};
-					prevStateArg = {...prevState};
+					prevPropsArg = { ...prevProps };
+					prevStateArg = { ...prevState };
 
-					curProps = {...this.props};
-					curState = {...this.state};
+					curProps = { ...this.props };
+					curState = { ...this.state };
 				}
 				render() {
 					return <div>{this.state.value}</div>;
@@ -660,14 +665,14 @@ describe('Lifecycle methods', () => {
 			element = render(<Foo foo="bar" />, scratch, scratch.firstChild);
 			expect(element.textContent).to.be.equal('2');
 			expect(prevPropsArg).to.deep.equal({
-				foo: "foo",
+				foo: 'foo',
 				children: []
 			});
 			expect(prevStateArg).to.deep.equal({
 				value: 1
 			});
 			expect(curProps).to.deep.equal({
-				foo: "bar",
+				foo: 'bar',
 				children: []
 			});
 			expect(curState).to.deep.equal({
@@ -680,14 +685,14 @@ describe('Lifecycle methods', () => {
 			rerender();
 			expect(element.textContent).to.be.equal('4');
 			expect(prevPropsArg).to.deep.equal({
-				foo: "bar",
+				foo: 'bar',
 				children: []
 			});
 			expect(prevStateArg).to.deep.equal({
 				value: 2
 			});
 			expect(curProps).to.deep.equal({
-				foo: "bar",
+				foo: 'bar',
 				children: []
 			});
 			expect(curState).to.deep.equal({
@@ -897,6 +902,7 @@ describe('Lifecycle methods', () => {
 
 	describe('#componentDidUpdate', () => {
 		it('should be passed previous props and state', () => {
+
 			/** @type {() => void} */
 			let updateState;
 
@@ -925,11 +931,11 @@ describe('Lifecycle methods', () => {
 				componentDidUpdate(prevProps, prevState) {
 					// These object references might be updated later so copy
 					// object so we can assert their values at this snapshot in time
-					prevPropsArg = {...prevProps};
-					prevStateArg = {...prevState};
+					prevPropsArg = { ...prevProps };
+					prevStateArg = { ...prevState };
 
-					curProps = {...this.props};
-					curState = {...this.state};
+					curProps = { ...this.props };
+					curState = { ...this.state };
 				}
 				render() {
 					return <div>{this.state.value}</div>;
@@ -956,14 +962,14 @@ describe('Lifecycle methods', () => {
 			element = render(<Foo foo="bar" />, scratch, scratch.firstChild);
 			expect(element.textContent).to.be.equal('2');
 			expect(prevPropsArg).to.deep.equal({
-				foo: "foo",
+				foo: 'foo',
 				children: []
 			});
 			expect(prevStateArg).to.deep.equal({
 				value: 1
 			});
 			expect(curProps).to.deep.equal({
-				foo: "bar",
+				foo: 'bar',
 				children: []
 			});
 			expect(curState).to.deep.equal({
@@ -976,14 +982,14 @@ describe('Lifecycle methods', () => {
 			rerender();
 			expect(element.textContent).to.be.equal('4');
 			expect(prevPropsArg).to.deep.equal({
-				foo: "bar",
+				foo: 'bar',
 				children: []
 			});
 			expect(prevStateArg).to.deep.equal({
 				value: 2
 			});
 			expect(curProps).to.deep.equal({
-				foo: "bar",
+				foo: 'bar',
 				children: []
 			});
 			expect(curState).to.deep.equal({
@@ -1224,6 +1230,7 @@ describe('Lifecycle methods', () => {
 		});
 
 		it('should be passed next props and state', () => {
+
 			/** @type {() => void} */
 			let updateState;
 
@@ -1250,11 +1257,11 @@ describe('Lifecycle methods', () => {
 					};
 				}
 				shouldComponentUpdate(nextProps, nextState) {
-					nextPropsArg = {...nextProps};
-					nextStateArg = {...nextState};
+					nextPropsArg = { ...nextProps };
+					nextStateArg = { ...nextState };
 
-					curProps = {...this.props};
-					curState = {...this.state};
+					curProps = { ...this.props };
+					curState = { ...this.state };
 
 					return true;
 				}
@@ -1283,14 +1290,14 @@ describe('Lifecycle methods', () => {
 			element = render(<Foo foo="bar" />, scratch, scratch.firstChild);
 			expect(element.textContent).to.be.equal('2');
 			expect(curProps).to.deep.equal({
-				foo: "foo",
+				foo: 'foo',
 				children: []
 			});
 			expect(curState).to.deep.equal({
 				value: 1
 			});
 			expect(nextPropsArg).to.deep.equal({
-				foo: "bar",
+				foo: 'bar',
 				children: []
 			});
 			expect(nextStateArg).to.deep.equal({
@@ -1303,14 +1310,14 @@ describe('Lifecycle methods', () => {
 			rerender();
 			expect(element.textContent).to.be.equal('4');
 			expect(curProps).to.deep.equal({
-				foo: "bar",
+				foo: 'bar',
 				children: []
 			});
 			expect(curState).to.deep.equal({
 				value: 2
 			});
 			expect(nextPropsArg).to.deep.equal({
-				foo: "bar",
+				foo: 'bar',
 				children: []
 			});
 			expect(nextStateArg).to.deep.equal({
