@@ -506,7 +506,8 @@ describe('Lifecycle methods', () => {
 			});
 		});
 
-		it('should NOT mutate state, only create new versions', () => {
+		// From developit/preact#1170
+		it('should NOT mutate state on mount, only create new versions', () => {
 			const stateConstant = {};
 			let componentState;
 
@@ -1338,6 +1339,7 @@ describe('Lifecycle methods', () => {
 
 
 	describe('#setState', () => {
+		// From developit/preact#1170
 		it('should NOT mutate state, only create new versions', () => {
 			const stateConstant = {};
 			let didMount = false;
