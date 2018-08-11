@@ -204,9 +204,9 @@ describe('Lifecycle methods', () => {
 	describe('static getDerivedStateFromProps', () => {
 		it('should set initial state with value returned from getDerivedStateFromProps', () => {
 			class Foo extends Component {
-				static getDerivedStateFromProps(nextProps) {
+				static getDerivedStateFromProps(props) {
 					return {
-						foo: nextProps.foo,
+						foo: props.foo,
 						bar: 'bar'
 					};
 				}
@@ -228,9 +228,9 @@ describe('Lifecycle methods', () => {
 						bar: 'bar'
 					};
 				}
-				static getDerivedStateFromProps(nextProps, prevState) {
+				static getDerivedStateFromProps(props, state) {
 					return {
-						foo: `not-${prevState.foo}`
+						foo: `not-${state.foo}`
 					};
 				}
 				render() {
@@ -250,8 +250,8 @@ describe('Lifecycle methods', () => {
 						value: 'initial'
 					};
 				}
-				static getDerivedStateFromProps(nextProps) {
-					if (nextProps.update) {
+				static getDerivedStateFromProps(props) {
+					if (props.update) {
 						return {
 							value: 'updated'
 						};
@@ -291,14 +291,14 @@ describe('Lifecycle methods', () => {
 						value: 'initial'
 					};
 				}
-				static getDerivedStateFromProps(nextProps, prevState) {
+				static getDerivedStateFromProps(props, state) {
 					// Don't change state for call that happens after the constructor
-					if (prevState.value === 'initial') {
+					if (state.value === 'initial') {
 						return null;
 					}
 
 					return {
-						value: prevState.value + ' derived'
+						value: state.value + ' derived'
 					};
 				}
 				componentDidMount() {
@@ -399,9 +399,9 @@ describe('Lifecycle methods', () => {
 					this.state = { parentRenders: 0 };
 				}
 
-				static getDerivedStateFromProps(props, prevState) {
+				static getDerivedStateFromProps(props, state) {
 					logs.push('parent getDerivedStateFromProps');
-					return prevState.parentRenders + 1;
+					return state.parentRenders + 1;
 				}
 
 				render() {
@@ -539,6 +539,50 @@ describe('Lifecycle methods', () => {
 
 			expect(componentState).to.deep.equal({ key: 'value' });
 			expect(stateConstant).to.deep.equal({});
+		});
+
+		it('should NOT mutate state on update, only create new versions', () => {
+			const initialState = {};
+			const capturedStates = [];
+
+			let setState;
+
+			class Stateful extends Component {
+				static getDerivedStateFromProps(props, state) {
+					return { value: (state.value || 0) + 1 };
+				}
+
+				constructor() {
+					super(...arguments);
+					this.state = initialState;
+					capturedStates.push(this.state);
+
+					setState = this.setState.bind(this);
+				}
+
+				componentDidMount() {
+					capturedStates.push(this.state);
+				}
+
+				componentDidUpdate() {
+					capturedStates.push(this.state);
+				}
+
+				render() {
+					return <div />;
+				}
+			}
+
+			render(<Stateful />, scratch);
+
+			setState({ value: 10 });
+			rerender();
+
+			expect(capturedStates).to.deep.equal([
+				{},
+				{ value: 1 },
+				{ value: 11 }
+			]);
 		});
 	});
 
