@@ -730,7 +730,7 @@ describe('Lifecycle methods', () => {
 			}
 			class Inner extends Component {
 				componentWillUpdate(nextProps, nextState) {
-					expect(nextProps).to.be.deep.equal({ children: EMPTY_CHILDREN, i: 1 });
+					expect(nextProps).to.be.deep.equal({ i: 1 });
 					expect(nextState).to.be.deep.equal({});
 				}
 				render() {
