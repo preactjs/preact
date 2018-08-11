@@ -195,7 +195,7 @@ describe('Components', () => {
 		expect(scratch.innerHTML, 'switching to textnode 2').to.equal('asdf');
 	});
 
-	// Test for Issue #254
+	// Test for Issue developit/preact#254
 	it('should not recycle common class children with different keys', () => {
 		let idx = 0;
 		let msgs = ['A','B','C','D','E','F','G','H'];
@@ -421,7 +421,7 @@ describe('Components', () => {
 			});
 
 			it('with no child', () => {
-				render(<Foo></Foo>, scratch);
+				render(<Foo />, scratch);
 
 				expect(children).to.be.an('array');
 				expect(children).to.have.lengthOf(0);
