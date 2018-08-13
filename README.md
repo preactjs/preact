@@ -97,7 +97,7 @@ Preact supports modern browsers and IE9+:
 
 - [**Preact Boilerplate**](https://preact-boilerplate.surge.sh) _([GitHub Project](https://github.com/developit/preact-boilerplate))_ :zap:
 - [**Preact Offline Starter**](https://preact-starter.now.sh) _([GitHub Project](https://github.com/lukeed/preact-starter))_ :100:
-- [**Preact PWA**](https://preact-pwa.appspot.com/) _([GitHub Project](https://github.com/ezekielchentnik/preact-pwa))_ :hamburger:
+- [**Preact PWA**](https://preact-pwa-yfxiijbzit.now.sh/) _([GitHub Project](https://github.com/ezekielchentnik/preact-pwa))_ :hamburger:
 - [**Parcel + Preact + Unistore Starter**](https://github.com/hwclass/parcel-preact-unistore-starter)
 - [**Preact Mobx Starter**](https://awaw00.github.io/preact-mobx-starter/) _([GitHub Project](https://github.com/awaw00/preact-mobx-starter))_ :sunny:
 - [**Preact Redux Example**](https://github.com/developit/preact-redux-example) :star:
