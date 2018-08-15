@@ -120,7 +120,7 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
-	isSvgMode = vnodeName==='svg' ? true : vnodeName==='foreignObject' ? false : isSvgMode;
+	if (vnodeName==='svg') isSvgMode = true;
 
 
 	// If there's no existing element or it's the wrong type, create a new one:
@@ -150,6 +150,9 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 		for (let a=out.attributes, i=a.length; i--; ) props[a[i].name] = a[i].value;
 	}
 
+	// Exit SVG namespace for foreignObject children.
+	if (vnodeName==='foreignObject') isSvgMode = false;
+
 	// Optimization: fast-path for elements containing a single TextNode:
 	if (!hydrating && vchildren && vchildren.length===1 && typeof vchildren[0]==='string' && fc!=null && fc.splitText!==undefined && fc.nextSibling==null) {
 		if (fc.nodeValue!=vchildren[0]) {
@@ -161,6 +164,8 @@ function idiff(dom, vnode, context, mountAll, componentRoot) {
 		innerDiffNode(out, vchildren, context, mountAll, hydrating || props.dangerouslySetInnerHTML!=null);
 	}
 
+	// Enter SVG namespace for diffing attributes if this is foreignObject node
+	if (vnodeName==='foreignObject') isSvgMode = true;
 
 	// Apply attributes/props from VNode to the DOM Element:
 	diffAttributes(out, vnode.attributes, props);
