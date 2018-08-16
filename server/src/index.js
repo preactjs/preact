@@ -1,4 +1,5 @@
 import { encodeEntities, indent, isLargeString, styleObjToCss, assign, getNodeProps } from './util';
+import { ENABLE_PRETTY } from '../env';
 
 const SHALLOW = { shallow: true };
 
@@ -43,8 +44,8 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 	context = context || {};
 	opts = opts || {};
 
-	let pretty = opts.pretty,
-		indentChar = typeof pretty==='string' ? pretty : '\t';
+	let pretty = ENABLE_PRETTY && opts.pretty,
+		indentChar = pretty && typeof pretty==='string' ? pretty : '\t';
 
 	// #text nodes
 	if (typeof vnode!=='object' && !nodeName) {
@@ -138,9 +139,11 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 	}
 
 	// account for >1 multiline attribute
-	let sub = s.replace(/^\n\s*/, ' ');
-	if (sub!==s && !~sub.indexOf('\n')) s = sub;
-	else if (pretty && ~s.indexOf('\n')) s += '\n';
+	if (pretty) {
+		let sub = s.replace(/^\n\s*/, ' ');
+		if (sub!==s && !~sub.indexOf('\n')) s = sub;
+		else if (pretty && ~s.indexOf('\n')) s += '\n';
+	}
 
 	s = `<${nodeName}${s}>`;
 	if (String(nodeName).match(/[\s\n\\/='"\0<>]/)) throw s;
@@ -157,13 +160,13 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 		s += html;
 	}
 	else if (vnode.children) {
-		let hasLarge = ~s.indexOf('\n');
+		let hasLarge = pretty && ~s.indexOf('\n');
 		for (let i=0; i<vnode.children.length; i++) {
 			let child = vnode.children[i];
 			if (child!=null && child!==false) {
 				let childSvgMode = nodeName==='svg' ? true : nodeName==='foreignObject' ? false : isSvgMode,
 					ret = renderToString(child, context, opts, true, childSvgMode);
-				if (!hasLarge && pretty && isLargeString(ret)) hasLarge = true;
+				if (pretty && !hasLarge && isLargeString(ret)) hasLarge = true;
 				if (ret) pieces.push(ret);
 			}
 		}
