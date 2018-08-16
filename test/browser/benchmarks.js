@@ -102,13 +102,13 @@ describe('benchmarks', function() {
 			ceviche(i) {
 				render(component(i % 1000), parent);
 			}
-		}, (({ text, results }) => {
+		}, ({ text, results }) => {
 			const THRESHOLD = 10 * MULTIPLIER;
 			// const slowdown = Math.sqrt(results.ceviche.hz * results.vanilla.hz);
-			const slowdown = (results.vanilla.hz / results.ceviche.hz).toFixed(2);
-			console.log(`in-place text update is ${slowdown}x slower:` + text);
+			const slowdown = results.vanilla.hz / results.ceviche.hz;
+			console.log(`in-place text update is ${slowdown.toFixed(2)}x slower:` + text);
 			expect(slowdown).to.be.below(THRESHOLD);
 			done();
-		}));
+		});
 	});
 });
