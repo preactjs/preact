@@ -22,6 +22,12 @@
     "universal",
     "isomorphic"
   ],
+  "files": [
+    "src",
+    "dist",
+    "jsx.js",
+    "typings.json"
+  ],
   "eslintConfig": {
     "extends": "developit",
     "rules": {
