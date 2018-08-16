@@ -143,9 +143,9 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 	else if (pretty && ~s.indexOf('\n')) s += '\n';
 
 	s = `<${nodeName}${s}>`;
-	if (nodeName.match(/[\s\n\\/='"\0<>]/)) throw s;
+	if (String(nodeName).match(/[\s\n\\/='"\0<>]/)) throw s;
 
-	let isVoid = nodeName.match(VOID_ELEMENTS);
+	let isVoid = String(nodeName).match(VOID_ELEMENTS);
 	if (isVoid) s = s.replace(/>$/, ' />');
 
 	let pieces = [];
