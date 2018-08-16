@@ -27,6 +27,7 @@ export default {
 			sourceMap: true,
 			exclude: 'node_modules/**',
 			babelrc: false,
+			comments: false,
 			presets: [
 				['env', {
 					modules: false,

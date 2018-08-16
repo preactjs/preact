@@ -64,7 +64,8 @@ Preact supports modern browsers and IE9+:
 #### Real-World Apps
 
 - [**Preact Hacker News**](https://hn.kristoferbaxter.com) _([GitHub Project](https://github.com/kristoferbaxter/preact-hn))_
-- [**Play.cash**](https://play.cash) :notes:
+- [**Play.cash**](https://play.cash) :notes: _([GitHub Project](https://github.com/feross/play.cash))_
+- [**BitMidi**](https://bitmidi.com/) 🎹 Wayback machine for free MIDI files _([GitHub Project](https://github.com/feross/bitmidi.com))_
 - [**ESBench**](http://esbench.com) is built using Preact.
 - [**BigWebQuiz**](https://bigwebquiz.com) _([GitHub Project](https://github.com/jakearchibald/big-web-quiz))_
 - [**Nectarine.rocks**](http://nectarine.rocks) _([GitHub Project](https://github.com/developit/nectarine))_ :peach:
@@ -96,7 +97,7 @@ Preact supports modern browsers and IE9+:
 
 - [**Preact Boilerplate**](https://preact-boilerplate.surge.sh) _([GitHub Project](https://github.com/developit/preact-boilerplate))_ :zap:
 - [**Preact Offline Starter**](https://preact-starter.now.sh) _([GitHub Project](https://github.com/lukeed/preact-starter))_ :100:
-- [**Preact PWA**](https://preact-pwa.appspot.com/) _([GitHub Project](https://github.com/ezekielchentnik/preact-pwa))_ :hamburger:
+- [**Preact PWA**](https://preact-pwa-yfxiijbzit.now.sh/) _([GitHub Project](https://github.com/ezekielchentnik/preact-pwa))_ :hamburger:
 - [**Parcel + Preact + Unistore Starter**](https://github.com/hwclass/parcel-preact-unistore-starter)
 - [**Preact Mobx Starter**](https://awaw00.github.io/preact-mobx-starter/) _([GitHub Project](https://github.com/awaw00/preact-mobx-starter))_ :sunny:
 - [**Preact Redux Example**](https://github.com/developit/preact-redux-example) :star:
@@ -138,6 +139,7 @@ Preact supports modern browsers and IE9+:
 - :electric_plug: [**preact-routlet**](https://github.com/k1r0s/preact-routlet): Simple `Component Driven` Routing for Preact using ES7 Decorators
 - :fax: [**preact-bind-group**](https://github.com/k1r0s/preact-bind-group): Preact Forms made easy, Group Events into a Single Callback
 - :hatching_chick: [**preact-habitat**](https://github.com/zouhir/preact-habitat): Declarative Preact widgets renderer in any CMS or DOM host ([demo](https://codepen.io/zouhir/pen/brrOPB)).
+- :tada: [**proppy-preact**](https://github.com/fahad19/proppy): Functional props composition for Preact components
 
 #### UI Component Libraries
 
@@ -250,8 +252,8 @@ import { h, render, Component } from 'preact';
 
 class Clock extends Component {
 	render() {
-		let time = new Date().toLocaleTimeString();
-		return <span>{ time }</span>;
+		let time = new Date();
+		return <time datetime={time.toISOString()}>{ time.toLocaleTimeString() }</time>;
 	}
 }
 
