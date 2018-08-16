@@ -39,15 +39,37 @@ export function styleObjToCss(s) {
 	return str || undefined;
 }
 
+/**
+ * Copy all properties from `props` onto `obj`.
+ * @param {object} obj Object onto which properties should be copied.
+ * @param {object} props Object from which to copy properties.
+ * @returns {object}
+ * @private
+ */
 export function assign(obj, props) {
 	for (let i in props) obj[i] = props[i];
 	return obj;
 }
 
+/**
+ * Reconstruct Component-style `props` from a VNode.
+ * Ensures default/fallback values from `defaultProps`:
+ * Own-properties of `defaultProps` not present in `vnode.attributes` are added.
+ * @param {import('preact').VNode} vnode The VNode to get props for
+ * @returns {object} The props to use for this VNode
+ */
 export function getNodeProps(vnode) {
-	let defaultProps = vnode.nodeName.defaultProps,
-		props = assign({}, defaultProps || vnode.attributes);
-	if (defaultProps) assign(props, vnode.attributes);
-	if (vnode.children) props.children = vnode.children;
+	let props = assign({}, vnode.attributes);
+	props.children = vnode.children;
+
+	let defaultProps = vnode.nodeName.defaultProps;
+	if (defaultProps!==undefined) {
+		for (let i in defaultProps) {
+			if (props[i]===undefined) {
+				props[i] = defaultProps[i];
+			}
+		}
+	}
+
 	return props;
 }

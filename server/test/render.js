@@ -221,8 +221,9 @@ describe('render', () => {
 			};
 
 			expect(render(<Test />), 'defaults').to.equal('<div foo="default foo" bar="default bar"></div>');
-			expect(render(<Test bar="b" />), 'partial').to.equal('<div foo="default foo" bar="b"></div>');
+			expect(render(<Test bar="b" />), 'partial').to.equal('<div bar="b" foo="default foo"></div>');
 			expect(render(<Test foo="a" bar="b" />), 'overridden').to.equal('<div foo="a" bar="b"></div>');
+			expect(render(<Test foo={undefined} bar="b" />), 'overridden').to.equal('<div foo="default foo" bar="b"></div>');
 		});
 	});
 
@@ -304,8 +305,9 @@ describe('render', () => {
 			};
 
 			expect(render(<Test />), 'defaults').to.equal('<div foo="default foo" bar="default bar"></div>');
-			expect(render(<Test bar="b" />), 'partial').to.equal('<div foo="default foo" bar="b"></div>');
+			expect(render(<Test bar="b" />), 'partial').to.equal('<div bar="b" foo="default foo"></div>');
 			expect(render(<Test foo="a" bar="b" />), 'overridden').to.equal('<div foo="a" bar="b"></div>');
+			expect(render(<Test foo={undefined} bar="b" />), 'overridden').to.equal('<div foo="default foo" bar="b"></div>');
 		});
 
 		it('should invoke componentWillMount', () => {
