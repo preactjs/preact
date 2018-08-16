@@ -1,4 +1,4 @@
-import { objectKeys, encodeEntities, indent, isLargeString, styleObjToCss, assign, getNodeProps } from './util';
+import { encodeEntities, indent, isLargeString, styleObjToCss, assign, getNodeProps } from './util';
 
 const SHALLOW = { shallow: true };
 
@@ -88,7 +88,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 	let s = '', html;
 
 	if (attributes) {
-		let attrs = objectKeys(attributes);
+		let attrs = Object.keys(attributes);
 
 		// allow sorting lexicographically for more determinism (useful for tests, such as via preact-jsx-chai)
 		if (opts && opts.sortAttributes===true) attrs.sort();
