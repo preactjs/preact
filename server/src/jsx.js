@@ -61,7 +61,10 @@ let defaultOpts = {
 };
 
 
-export default function renderToJsxString(vnode, context, opts, inner) {
+function renderToJsxString(vnode, context, opts, inner) {
 	opts = assign(assign({}, defaultOpts), opts || {});
 	return renderToString(vnode, context, opts, inner);
 }
+
+export default renderToJsxString;
+export { renderToJsxString as render };
