@@ -10,7 +10,7 @@
   "scripts": {
     "build": "npm run -s transpile && npm run -s transpile:jsx && npm run -s copy-typescript-definition",
     "transpile": "microbundle src/index.js -f es,umd --target web --external none",
-    "transpile:jsx": "microbundle src/jsx.js -o dist/jsx.js --target web --external none",
+    "transpile:jsx": "microbundle src/jsx.js -o dist/jsx.js --target web --external none && microbundle dist/jsx.js -o dist/jsx.js -f cjs",
     "copy-typescript-definition": "copyfiles -f src/index.d.ts dist",
     "test": "eslint src test && mocha --compilers js:babel-register test/**/*.js",
     "prepublish": "npm run build",
