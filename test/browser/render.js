@@ -1,7 +1,7 @@
 /* global DISABLE_FLAKEY */
 
 import { createElement as h, render, Component } from '../../src/index';
-import { setupScratch, setupRerender, teardown } from './helpers';
+import { setupScratch, setupRerender, teardown } from '../_util/helpers';
 
 /** @jsx h */
 

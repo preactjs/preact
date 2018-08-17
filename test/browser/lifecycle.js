@@ -1,5 +1,5 @@
 import { createElement as h, render, Component } from '../../src/index';
-import { setupScratch, teardown, setupRerender } from './helpers';
+import { setupScratch, teardown, setupRerender } from '../_util/helpers';
 
 /** @jsx h */
 
