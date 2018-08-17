@@ -310,6 +310,23 @@ describe('render', () => {
 			expect(render(<Test foo={undefined} bar="b" />), 'overridden').to.equal('<div foo="default foo" bar="b"></div>');
 		});
 
+		it('should invoke getDerivedStateFromProps', () => {
+			class Test extends Component {
+				static getDerivedStateFromProps() {}
+				render(props) {
+					return <div {...props} />;
+				}
+			}
+			spy(Test.prototype.constructor, 'getDerivedStateFromProps');
+			spy(Test.prototype, 'render');
+
+			render(<Test />);
+
+			expect(Test.prototype.constructor.getDerivedStateFromProps)
+				.to.have.been.calledOnce
+				.and.to.have.been.calledBefore(Test.prototype.render);
+		});
+
 		it('should invoke componentWillMount', () => {
 			class Test extends Component {
 				componentWillMount() {}
@@ -325,6 +342,27 @@ describe('render', () => {
 			expect(Test.prototype.componentWillMount)
 				.to.have.been.calledOnce
 				.and.to.have.been.calledBefore(Test.prototype.render);
+		});
+
+		it('should invoke getDerivedStateFromProps rather than componentWillMount', () => {
+			class Test extends Component {
+				static getDerivedStateFromProps() {}
+				componentWillMount() {}
+				render(props) {
+					return <div {...props} />;
+				}
+			}
+			spy(Test.prototype.constructor, 'getDerivedStateFromProps');
+			spy(Test.prototype, 'componentWillMount');
+			spy(Test.prototype, 'render');
+
+			render(<Test />);
+
+			expect(Test.prototype.constructor.getDerivedStateFromProps)
+				.to.have.been.calledOnce
+				.and.to.have.been.calledBefore(Test.prototype.render);
+			expect(Test.prototype.componentWillMount)
+				.to.not.have.been.called;
 		});
 
 		it('should pass context to grandchildren', () => {
