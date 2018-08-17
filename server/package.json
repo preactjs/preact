@@ -10,7 +10,7 @@
   "scripts": {
     "build": "npm run -s transpile && npm run -s transpile:jsx && npm run -s copy-typescript-definition",
     "transpile": "echo 'export const ENABLE_PRETTY = false;'>env.js && microbundle src/index.js -f es,umd --target web --external none",
-    "transpile:jsx": "echo 'export const ENABLE_PRETTY = true;'>env.js && microbundle src/jsx.js -o dist/jsx.js --target web --external none",
+    "transpile:jsx": "echo 'export const ENABLE_PRETTY = true;'>env.js && microbundle src/jsx.js -o dist/jsx.js --target web --external pretty-format",
     "copy-typescript-definition": "copyfiles -f src/index.d.ts dist",
     "test": "eslint src test && mocha --compilers js:babel-register test/**/*.js",
     "prepublish": "npm run build",
@@ -77,6 +77,6 @@
     "sinon-chai": "^2.8.0"
   },
   "dependencies": {
-    "pretty-format": "^3.5.1"
+    "pretty-format": "^3.8.0"
   }
 }
