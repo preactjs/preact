@@ -105,6 +105,9 @@ module.exports = function(config) {
 			mode: 'development',
 			devtool: 'inline-source-map',
 			module: {
+				noParse: [
+					/benchmark\.js$/
+				],
 
 				/* Transpile source and test files */
 				rules: [
