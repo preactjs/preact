@@ -32,6 +32,7 @@
 - [Examples](#examples)
 - [Extensions](#extensions)
 - [Debug Mode](#debug-mode)
+- [Warnings](#warnings)
 - [Backers](#backers)
 - [Sponsors](#sponsors)
 - [License](#license)
@@ -492,7 +493,9 @@ If you only want to include devtool integration, without runtime error checking,
 replace `preact/debug` in the above example with `preact/devtools`. This option doesn't
 require setting `NODE_ENV=development`.
 
+## Warnings
 
+- When using `UglifyJS >= v3`, make sure to turn off [`compress.reduce_funcs`](https://github.com/mishoo/UglifyJS2#compress-options) to stop it from inlining the `VNode` class.
 
 ## Backers
 Support us with a monthly donation and help us continue our activities. [[Become a backer](https://opencollective.com/preact#backer)]
