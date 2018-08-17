@@ -115,7 +115,7 @@ describe('Components', () => {
 		function Comp () {}
 		let instance = <Comp/>;
 		let clone = cloneElement(instance);
-		expect(clone.prototype).to.equal(instance.prototype);
+		expect(clone.nodeName.prototype).to.equal(instance.nodeName.prototype);
 	});
 
 	it('should render string', () => {
