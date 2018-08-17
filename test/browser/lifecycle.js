@@ -22,6 +22,708 @@ describe('Lifecycle methods', () => {
 		scratch = null;
 	});
 
+	it('should call nested new lifecycle methods in the right order', () => {
+		let updateOuterState;
+		let updateInnerState;
+		let forceUpdateOuter;
+		let forceUpdateInner;
+
+		let log;
+		const logger = function(msg) {
+			return function() {
+				// return true for shouldComponentUpdate
+				log.push(msg);
+				return true;
+			};
+		};
+
+		class Outer extends Component {
+			static getDerivedStateFromProps() {
+				log.push('outer getDerivedStateFromProps');
+				return null;
+			}
+			constructor() {
+				super();
+				log.push('outer constructor');
+
+				this.state = { value: 0 };
+				forceUpdateOuter = () => this.forceUpdate();
+				updateOuterState = () => this.setState({
+					value: (this.state.value + 1) % 2
+				});
+			}
+			render() {
+				log.push('outer render');
+				return (
+					<div>
+						<Inner x={this.props.x} outerValue={this.state.value} />
+					</div>
+				);
+			}
+		}
+		Object.assign(Outer.prototype, {
+			componentDidMount: logger('outer componentDidMount'),
+			shouldComponentUpdate: logger('outer shouldComponentUpdate'),
+			getSnapshotBeforeUpdate: logger('outer getSnapshotBeforeUpdate'),
+			componentDidUpdate: logger('outer componentDidUpdate'),
+			componentWillUnmount: logger('outer componentWillUnmount')
+		});
+
+		class Inner extends Component {
+			static getDerivedStateFromProps() {
+				log.push('inner getDerivedStateFromProps');
+				return null;
+			}
+			constructor() {
+				super();
+				log.push('inner constructor');
+
+				this.state = { value: 0 };
+				forceUpdateInner = () => this.forceUpdate();
+				updateInnerState = () => this.setState({
+					value: (this.state.value + 1) % 2
+				});
+			}
+			render() {
+				log.push('inner render');
+				return <span>{this.props.x} {this.props.outerValue} {this.state.value}</span>;
+			}
+		}
+		Object.assign(Inner.prototype, {
+			componentDidMount: logger('inner componentDidMount'),
+			shouldComponentUpdate: logger('inner shouldComponentUpdate'),
+			getSnapshotBeforeUpdate: logger('inner getSnapshotBeforeUpdate'),
+			componentDidUpdate: logger('inner componentDidUpdate'),
+			componentWillUnmount: logger('inner componentWillUnmount')
+		});
+
+		// Constructor & mounting
+		log = [];
+		render(<Outer x={1} />, scratch);
+		expect(log).to.deep.equal([
+			'outer constructor',
+			'outer getDerivedStateFromProps',
+			'outer render',
+			'inner constructor',
+			'inner getDerivedStateFromProps',
+			'inner render',
+			'inner componentDidMount',
+			'outer componentDidMount'
+		]);
+
+		// Outer & Inner props update
+		log = [];
+		render(<Outer x={2} />, scratch, scratch.firstChild);
+		// Note: we differ from react here in that we apply changes to the dom
+		// as we find them while diffing. React on the other hand separates this
+		// into specific phases, meaning changes to the dom are only flushed
+		// once the whole diff-phase is complete. This is why
+		// "outer getSnapshotBeforeUpdate" is called just before the "inner" hooks.
+		// For react this call would be right before "outer componentDidUpdate"
+		expect(log).to.deep.equal([
+			'outer getDerivedStateFromProps',
+			'outer shouldComponentUpdate',
+			'outer render',
+			'outer getSnapshotBeforeUpdate',
+			'inner getDerivedStateFromProps',
+			'inner shouldComponentUpdate',
+			'inner render',
+			'inner getSnapshotBeforeUpdate',
+			'inner componentDidUpdate',
+			'outer componentDidUpdate'
+		]);
+
+		// Outer state update & Inner props update
+		log = [];
+		updateOuterState();
+		rerender();
+		expect(log).to.deep.equal([
+			'outer getDerivedStateFromProps',
+			'outer shouldComponentUpdate',
+			'outer render',
+			'outer getSnapshotBeforeUpdate',
+			'inner getDerivedStateFromProps',
+			'inner shouldComponentUpdate',
+			'inner render',
+			'inner getSnapshotBeforeUpdate',
+			'inner componentDidUpdate',
+			'outer componentDidUpdate'
+		]);
+
+		// Inner state update
+		log = [];
+		updateInnerState();
+		rerender();
+		expect(log).to.deep.equal([
+			'inner getDerivedStateFromProps',
+			'inner shouldComponentUpdate',
+			'inner render',
+			'inner getSnapshotBeforeUpdate',
+			'inner componentDidUpdate'
+		]);
+
+		// Force update Outer
+		log = [];
+		forceUpdateOuter();
+		rerender();
+		expect(log).to.deep.equal([
+			'outer getDerivedStateFromProps',
+			'outer render',
+			'outer getSnapshotBeforeUpdate',
+			'inner getDerivedStateFromProps',
+			'inner shouldComponentUpdate',
+			'inner render',
+			'inner getSnapshotBeforeUpdate',
+			'inner componentDidUpdate',
+			'outer componentDidUpdate'
+		]);
+
+		// Force update Inner
+		log = [];
+		forceUpdateInner();
+		rerender();
+		expect(log).to.deep.equal([
+			'inner getDerivedStateFromProps',
+			'inner render',
+			'inner getSnapshotBeforeUpdate',
+			'inner componentDidUpdate'
+		]);
+
+		// Unmounting Outer & Inner
+		log = [];
+		render(<table />, scratch, scratch.firstChild);
+		expect(log).to.deep.equal([
+			'outer componentWillUnmount',
+			'inner componentWillUnmount'
+		]);
+
+	});
+
+	describe('static getDerivedStateFromProps', () => {
+		it('should set initial state with value returned from getDerivedStateFromProps', () => {
+			class Foo extends Component {
+				static getDerivedStateFromProps(nextProps) {
+					return {
+						foo: nextProps.foo,
+						bar: 'bar'
+					};
+				}
+				render() {
+					return <div className={`${this.state.foo} ${this.state.bar}`} />;
+				}
+			}
+
+			let element = render(<Foo foo="foo" />, scratch);
+			expect(element.className).to.be.equal('foo bar');
+		});
+
+		it('should update initial state with value returned from getDerivedStateFromProps', () => {
+			class Foo extends Component {
+				constructor(props, context) {
+					super(props, context);
+					this.state = {
+						foo: 'foo',
+						bar: 'bar'
+					};
+				}
+				static getDerivedStateFromProps(nextProps, prevState) {
+					return {
+						foo: `not-${prevState.foo}`
+					};
+				}
+				render() {
+					return <div className={`${this.state.foo} ${this.state.bar}`} />;
+				}
+			}
+
+			let element = render(<Foo />, scratch);
+			expect(element.className).to.equal('not-foo bar');
+		});
+
+		it('should update the instance\'s state with the value returned from getDerivedStateFromProps when props change', () => {
+			class Foo extends Component {
+				constructor(props, context) {
+					super(props, context);
+					this.state = {
+						value: 'initial'
+					};
+				}
+				static getDerivedStateFromProps(nextProps) {
+					if (nextProps.update) {
+						return {
+							value: 'updated'
+						};
+					}
+
+					return null;
+				}
+				componentDidMount() {}
+				componentDidUpdate() {}
+				render() {
+					return <div className={this.state.value} />;
+				}
+			}
+
+			let element;
+			sinon.spy(Foo, 'getDerivedStateFromProps');
+			sinon.spy(Foo.prototype, 'componentDidMount');
+			sinon.spy(Foo.prototype, 'componentDidUpdate');
+
+			element = render(<Foo update={false} />, scratch, element);
+			expect(element.className).to.equal('initial');
+			expect(Foo.getDerivedStateFromProps).to.have.callCount(1);
+			expect(Foo.prototype.componentDidMount).to.have.callCount(1); // verify mount occurred
+			expect(Foo.prototype.componentDidUpdate).to.have.callCount(0);
+
+			element = render(<Foo update={true} />, scratch, element);
+			expect(element.className).to.equal('updated');
+			expect(Foo.getDerivedStateFromProps).to.have.callCount(2);
+			expect(Foo.prototype.componentDidMount).to.have.callCount(1);
+			expect(Foo.prototype.componentDidUpdate).to.have.callCount(1); // verify update occurred
+		});
+
+		it('should update the instance\'s state with the value returned from getDerivedStateFromProps when state changes', () => {
+			class Foo extends Component {
+				constructor(props, context) {
+					super(props, context);
+					this.state = {
+						value: 'initial'
+					};
+				}
+				static getDerivedStateFromProps(nextProps, prevState) {
+					// Don't change state for call that happens after the constructor
+					if (prevState.value === 'initial') {
+						return null;
+					}
+
+					return {
+						value: prevState.value + ' derived'
+					};
+				}
+				componentDidMount() {
+					this.setState({ value: 'updated' });
+				}
+				render() {
+					return <div className={this.state.value} />;
+				}
+			}
+
+			let element;
+			sinon.spy(Foo, 'getDerivedStateFromProps');
+
+			element = render(<Foo />, scratch, element);
+			expect(element.className).to.equal('initial');
+			expect(Foo.getDerivedStateFromProps).to.have.been.calledOnce;
+
+			rerender(); // call rerender to handle cDM setState call
+			expect(element.className).to.equal('updated derived');
+			expect(Foo.getDerivedStateFromProps).to.have.been.calledTwice;
+		});
+
+		it('should NOT modify state if null is returned', () => {
+			class Foo extends Component {
+				constructor(props, context) {
+					super(props, context);
+					this.state = {
+						foo: 'foo',
+						bar: 'bar'
+					};
+				}
+				static getDerivedStateFromProps() {
+					return null;
+				}
+				render() {
+					return <div className={`${this.state.foo} ${this.state.bar}`} />;
+				}
+			}
+
+			sinon.spy(Foo, 'getDerivedStateFromProps');
+
+			let element = render(<Foo />, scratch);
+			expect(element.className).to.equal('foo bar');
+			expect(Foo.getDerivedStateFromProps).to.have.been.called;
+		});
+
+		// NOTE: Difference from React
+		// React v16.3.2 warns if undefined if returned from getDerivedStateFromProps
+		it('should NOT modify state if undefined is returned', () => {
+			class Foo extends Component {
+				constructor(props, context) {
+					super(props, context);
+					this.state = {
+						foo: 'foo',
+						bar: 'bar'
+					};
+				}
+				static getDerivedStateFromProps() {}
+				render() {
+					return <div className={`${this.state.foo} ${this.state.bar}`} />;
+				}
+			}
+
+			sinon.spy(Foo, 'getDerivedStateFromProps');
+
+			let element = render(<Foo />, scratch);
+			expect(element.className).to.equal('foo bar');
+			expect(Foo.getDerivedStateFromProps).to.have.been.called;
+		});
+
+		it('should NOT invoke deprecated lifecycles (cWM/cWRP) if new static gDSFP is present', () => {
+			class Foo extends Component {
+				static getDerivedStateFromProps() {}
+				componentWillMount() {}
+				componentWillReceiveProps() {}
+				render() {
+					return <div />;
+				}
+			}
+
+			sinon.spy(Foo, 'getDerivedStateFromProps');
+			sinon.spy(Foo.prototype, 'componentWillMount');
+			sinon.spy(Foo.prototype, 'componentWillReceiveProps');
+
+			render(<Foo />, scratch);
+			expect(Foo.getDerivedStateFromProps).to.have.been.called;
+			expect(Foo.prototype.componentWillMount).to.not.have.been.called;
+			expect(Foo.prototype.componentWillReceiveProps).to.not.have.been.called;
+		});
+
+		it('is not called if neither state nor props have changed', () => {
+			let logs = [];
+			let childRef;
+
+			class Parent extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { parentRenders: 0 };
+				}
+
+				static getDerivedStateFromProps(props, prevState) {
+					logs.push('parent getDerivedStateFromProps');
+					return prevState.parentRenders + 1;
+				}
+
+				render() {
+					logs.push('parent render');
+					return <Child parentRenders={this.state.parentRenders} ref={child => childRef = child} />;
+				}
+			}
+
+			class Child extends Component {
+				render() {
+					logs.push('child render');
+					return this.props.parentRenders;
+				}
+			}
+
+			render(<Parent />, scratch);
+			expect(logs).to.deep.equal([
+				'parent getDerivedStateFromProps',
+				'parent render',
+				'child render'
+			]);
+
+			logs = [];
+			childRef.setState({});
+			rerender();
+			expect(logs).to.deep.equal([
+				'child render'
+			]);
+		});
+
+		// TODO: Investigate this test:
+		// [should not override state with stale values if prevState is spread within getDerivedStateFromProps](https://github.com/facebook/react/blob/25dda90c1ecb0c662ab06e2c80c1ee31e0ae9d36/packages/react-dom/src/__tests__/ReactComponentLifeCycle-test.js#L1035)
+
+		it('should be passed next props and state', () => {
+			/** @type {() => void} */
+			let updateState;
+
+			let propsArg;
+			let stateArg;
+
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						value: 0
+					};
+					updateState = () => this.setState({
+						value: this.state.value + 1
+					});
+				}
+				static getDerivedStateFromProps(props, state) {
+					// These object references might be updated later so copy
+					// object so we can assert their values at this snapshot in time
+					propsArg = {...props};
+					stateArg = {...state};
+
+					// NOTE: Don't do this in real production code!
+					// https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html
+					return {
+						value: state.value + 1
+					};
+				}
+				render() {
+					return <div>{this.state.value}</div>;
+				}
+			}
+
+			// Initial render
+			// state.value: initialized to 0 in constructor, 0 -> 1 in gDSFP
+			let element = render(<Foo foo="foo" />, scratch);
+			expect(element.textContent).to.be.equal('1');
+			expect(propsArg).to.deep.equal({
+				foo: "foo",
+				children: []
+			});
+			expect(stateArg).to.deep.equal({
+				value: 0
+			});
+
+			// New Props
+			// state.value: 1 -> 2 in gDSFP
+			render(<Foo foo="bar" />, scratch, scratch.firstChild);
+			expect(element.textContent).to.be.equal('2');
+			expect(propsArg).to.deep.equal({
+				foo: "bar",
+				children: []
+			});
+			expect(stateArg).to.deep.equal({
+				value: 1
+			});
+
+			// New state
+			// state.value: 2 -> 3 in updateState, 3 -> 4 in gDSFP
+			updateState();
+			rerender();
+			expect(element.textContent).to.be.equal('4');
+			expect(propsArg).to.deep.equal({
+				foo: "bar",
+				children: []
+			});
+			expect(stateArg).to.deep.equal({
+				value: 3
+			});
+		});
+
+		it('should NOT mutate state, only create new versions', () => {
+			const stateConstant = {};
+			let componentState;
+
+			class Stateful extends Component {
+				static getDerivedStateFromProps() {
+					return {key: 'value'};
+				}
+
+				constructor() {
+					super(...arguments);
+					this.state = stateConstant;
+				}
+
+				componentDidMount() {
+					componentState = this.state;
+				}
+			}
+
+			render(<Stateful />, scratch);
+
+			expect(componentState).to.deep.equal({key: 'value'});
+			expect(stateConstant).to.deep.equal({});
+		});
+	});
+
+	describe("#getSnapshotBeforeUpdate", () => {
+		it('should pass the return value from getSnapshotBeforeUpdate to componentDidUpdate', () => {
+			let log = [];
+
+			class MyComponent extends Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						value: 0
+					};
+				}
+				static getDerivedStateFromProps(nextProps, prevState) {
+					return {
+						value: prevState.value + 1
+					};
+				}
+				getSnapshotBeforeUpdate(prevProps, prevState) {
+					log.push(
+						`getSnapshotBeforeUpdate() prevProps:${prevProps.value} prevState:${
+							prevState.value
+						}`,
+					);
+					return 'abc';
+				}
+				componentDidUpdate(prevProps, prevState, snapshot) {
+					log.push(
+						`componentDidUpdate() prevProps:${prevProps.value} prevState:${
+							prevState.value
+						} snapshot:${snapshot}`,
+					);
+				}
+				render() {
+					log.push('render');
+					return null;
+				}
+			}
+
+			render(<MyComponent value="foo" />, scratch);
+			expect(log).to.deep.equal(['render']);
+			log = [];
+
+			render(<MyComponent value="bar" />, scratch, scratch.firstChild);
+			expect(log).to.deep.equal([
+				'render',
+				'getSnapshotBeforeUpdate() prevProps:foo prevState:1',
+				'componentDidUpdate() prevProps:foo prevState:1 snapshot:abc'
+			]);
+			log = [];
+
+			render(<MyComponent value="baz" />, scratch, scratch.firstChild);
+			expect(log).to.deep.equal([
+				'render',
+				'getSnapshotBeforeUpdate() prevProps:bar prevState:2',
+				'componentDidUpdate() prevProps:bar prevState:2 snapshot:abc'
+			]);
+			log = [];
+
+			render(<div />, scratch, scratch.firstChild);
+			expect(log).to.deep.equal([]);
+		});
+
+		it('should call getSnapshotBeforeUpdate before mutations are committed', () => {
+			let log = [];
+
+			class MyComponent extends Component {
+				getSnapshotBeforeUpdate(prevProps) {
+					log.push('getSnapshotBeforeUpdate');
+					expect(this.divRef.textContent).to.equal(
+						`value:${prevProps.value}`,
+					);
+					return 'foobar';
+				}
+				componentDidUpdate(prevProps, prevState, snapshot) {
+					log.push('componentDidUpdate');
+					expect(this.divRef.textContent).to.equal(
+						`value:${this.props.value}`,
+					);
+					expect(snapshot).to.equal('foobar');
+				}
+				render() {
+					log.push('render');
+					return <div ref={ref => this.divRef = ref}>{`value:${this.props.value}`}</div>;
+				}
+			}
+
+			render(<MyComponent value="foo" />, scratch);
+			expect(log).to.deep.equal(['render']);
+			log = [];
+
+			render(<MyComponent value="bar" />, scratch, scratch.firstChild);
+			expect(log).to.deep.equal([
+				'render',
+				'getSnapshotBeforeUpdate',
+				'componentDidUpdate'
+			]);
+		});
+
+		it('should be passed the previous props and state', () => {
+			/** @type {() => void} */
+			let updateState;
+
+			let prevPropsArg;
+			let prevStateArg;
+			let curProps;
+			let curState;
+
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						value: 0
+					};
+					updateState = () => this.setState({
+						value: this.state.value + 1
+					});
+				}
+				static getDerivedStateFromProps(props, state) {
+					// NOTE: Don't do this in real production code!
+					// https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html
+					return {
+						value: state.value + 1
+					};
+				}
+				getSnapshotBeforeUpdate(prevProps, prevState) {
+					// These object references might be updated later so copy
+					// object so we can assert their values at this snapshot in time
+					prevPropsArg = {...prevProps};
+					prevStateArg = {...prevState};
+
+					curProps = {...this.props};
+					curState = {...this.state};
+				}
+				render() {
+					return <div>{this.state.value}</div>;
+				}
+			}
+
+			// Expectation:
+			// `prevState` in getSnapshotBeforeUpdate should be
+			// the state before setState or getDerivedStateFromProps was called.
+			// `this.state` in getSnapshotBeforeUpdate should be
+			// the updated state after getDerivedStateFromProps was called.
+
+			// Initial render
+			// state.value: initialized to 0 in constructor, 0 -> 1 in gDSFP
+			let element = render(<Foo foo="foo" />, scratch);
+			expect(element.textContent).to.be.equal('1');
+			expect(prevPropsArg).to.be.undefined;
+			expect(prevStateArg).to.be.undefined;
+			expect(curProps).to.be.undefined;
+			expect(curState).to.be.undefined;
+
+			// New props
+			// state.value: 1 -> 2 in gDSFP
+			element = render(<Foo foo="bar" />, scratch, scratch.firstChild);
+			expect(element.textContent).to.be.equal('2');
+			expect(prevPropsArg).to.deep.equal({
+				foo: "foo",
+				children: []
+			});
+			expect(prevStateArg).to.deep.equal({
+				value: 1
+			});
+			expect(curProps).to.deep.equal({
+				foo: "bar",
+				children: []
+			});
+			expect(curState).to.deep.equal({
+				value: 2
+			});
+
+			// New state
+			// state.value: 2 -> 3 in updateState, 3 -> 4 in gDSFP
+			updateState();
+			rerender();
+			expect(element.textContent).to.be.equal('4');
+			expect(prevPropsArg).to.deep.equal({
+				foo: "bar",
+				children: []
+			});
+			expect(prevStateArg).to.deep.equal({
+				value: 2
+			});
+			expect(curProps).to.deep.equal({
+				foo: "bar",
+				children: []
+			});
+			expect(curState).to.deep.equal({
+				value: 4
+			});
+		});
+	});
 
 	describe('#componentWillUpdate', () => {
 		it('should NOT be called on initial render', () => {
@@ -222,6 +924,103 @@ describe('Lifecycle methods', () => {
 		});
 	});
 
+	describe('#componentDidUpdate', () => {
+		it('should be passed previous props and state', () => {
+			/** @type {() => void} */
+			let updateState;
+
+			let prevPropsArg;
+			let prevStateArg;
+			let curProps;
+			let curState;
+
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						value: 0
+					};
+					updateState = () => this.setState({
+						value: this.state.value + 1
+					});
+				}
+				static getDerivedStateFromProps(props, state) {
+					// NOTE: Don't do this in real production code!
+					// https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html
+					return {
+						value: state.value + 1
+					};
+				}
+				componentDidUpdate(prevProps, prevState) {
+					// These object references might be updated later so copy
+					// object so we can assert their values at this snapshot in time
+					prevPropsArg = {...prevProps};
+					prevStateArg = {...prevState};
+
+					curProps = {...this.props};
+					curState = {...this.state};
+				}
+				render() {
+					return <div>{this.state.value}</div>;
+				}
+			}
+
+			// Expectation:
+			// `prevState` in componentDidUpdate should be
+			// the state before setState and getDerivedStateFromProps was called.
+			// `this.state` in componentDidUpdate should be
+			// the updated state after getDerivedStateFromProps was called.
+
+			// Initial render
+			// state.value: initialized to 0 in constructor, 0 -> 1 in gDSFP
+			let element = render(<Foo foo="foo" />, scratch);
+			expect(element.textContent).to.be.equal('1');
+			expect(prevPropsArg).to.be.undefined;
+			expect(prevStateArg).to.be.undefined;
+			expect(curProps).to.be.undefined;
+			expect(curState).to.be.undefined;
+
+			// New props
+			// state.value: 1 -> 2 in gDSFP
+			element = render(<Foo foo="bar" />, scratch, scratch.firstChild);
+			expect(element.textContent).to.be.equal('2');
+			expect(prevPropsArg).to.deep.equal({
+				foo: "foo",
+				children: []
+			});
+			expect(prevStateArg).to.deep.equal({
+				value: 1
+			});
+			expect(curProps).to.deep.equal({
+				foo: "bar",
+				children: []
+			});
+			expect(curState).to.deep.equal({
+				value: 2
+			});
+
+			// New state
+			// state.value: 2 -> 3 in updateState, 3 -> 4 in gDSFP
+			updateState();
+			rerender();
+			expect(element.textContent).to.be.equal('4');
+			expect(prevPropsArg).to.deep.equal({
+				foo: "bar",
+				children: []
+			});
+			expect(prevStateArg).to.deep.equal({
+				value: 2
+			});
+			expect(curProps).to.deep.equal({
+				foo: "bar",
+				children: []
+			});
+			expect(curState).to.deep.equal({
+				value: 4
+			});
+		});
+	});
+
 
 	describe('top-level componentWillUnmount', () => {
 		it('should invoke componentWillUnmount for top-level components', () => {
@@ -300,7 +1099,7 @@ describe('Lifecycle methods', () => {
 		let verifyLifecycleMethods = (TestComponent) => {
 			let proto = TestComponent.prototype;
 			spies.forEach( s => sinon.spy(proto, s) );
-			let reset = () => spies.forEach( s => proto[s].reset() );
+			let reset = () => spies.forEach( s => proto[s].resetHistory() );
 
 			it('should be invoked for components on initial render', () => {
 				reset();
@@ -375,7 +1174,7 @@ describe('Lifecycle methods', () => {
 			let spies = ['componentWillMount', 'componentDidMount', 'componentWillUnmount'];
 			spies.forEach( s => sinon.spy(proto, s) );
 
-			let reset = () => spies.forEach( s => proto[s].reset() );
+			let reset = () => spies.forEach( s => proto[s].resetHistory() );
 
 			beforeEach( () => reset() );
 
@@ -412,7 +1211,7 @@ describe('Lifecycle methods', () => {
 	});
 
 
-	describe('shouldComponentUpdate', () => {
+	describe('#shouldComponentUpdate', () => {
 		let setState;
 
 		class Should extends Component {
@@ -435,7 +1234,7 @@ describe('Lifecycle methods', () => {
 		sinon.spy(Should.prototype, 'render');
 		sinon.spy(ShouldNot.prototype, 'shouldComponentUpdate');
 
-		beforeEach(() => Should.prototype.render.reset());
+		beforeEach(() => Should.prototype.render.resetHistory());
 
 		it('should rerender component on change by default', () => {
 			render(<Should />, scratch);
@@ -453,10 +1252,213 @@ describe('Lifecycle methods', () => {
 			expect(ShouldNot.prototype.shouldComponentUpdate).to.have.been.calledOnce;
 			expect(ShouldNot.prototype.render).to.have.been.calledOnce;
 		});
+
+		it('should be passed next props and state', () => {
+			/** @type {() => void} */
+			let updateState;
+
+			let curProps;
+			let curState;
+			let nextPropsArg;
+			let nextStateArg;
+
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						value: 0
+					};
+					updateState = () => this.setState({
+						value: this.state.value + 1
+					});
+				}
+				static getDerivedStateFromProps(props, state) {
+					// NOTE: Don't do this in real production code!
+					// https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html
+					return {
+						value: state.value + 1
+					};
+				}
+				shouldComponentUpdate(nextProps, nextState) {
+					nextPropsArg = {...nextProps};
+					nextStateArg = {...nextState};
+
+					curProps = {...this.props};
+					curState = {...this.state};
+
+					return true;
+				}
+				render() {
+					return <div>{this.state.value}</div>;
+				}
+			}
+
+			// Expectation:
+			// `this.state` in shouldComponentUpdate should be
+			// the state before setState or getDerivedStateFromProps was called
+			// `nextState` in shouldComponentUpdate should be
+			// the updated state after getDerivedStateFromProps was called
+
+			// Initial render
+			// state.value: initialized to 0 in constructor, 0 -> 1 in gDSFP
+			let element = render(<Foo foo="foo" />, scratch);
+			expect(element.textContent).to.be.equal('1');
+			expect(curProps).to.be.undefined;
+			expect(curState).to.be.undefined;
+			expect(nextPropsArg).to.be.undefined;
+			expect(nextStateArg).to.be.undefined;
+
+			// New props
+			// state.value: 1 -> 2 in gDSFP
+			element = render(<Foo foo="bar" />, scratch, scratch.firstChild);
+			expect(element.textContent).to.be.equal('2');
+			expect(curProps).to.deep.equal({
+				foo: "foo",
+				children: []
+			});
+			expect(curState).to.deep.equal({
+				value: 1
+			});
+			expect(nextPropsArg).to.deep.equal({
+				foo: "bar",
+				children: []
+			});
+			expect(nextStateArg).to.deep.equal({
+				value: 2
+			});
+
+			// New state
+			// state.value: 2 -> 3 in updateState, 3 -> 4 in gDSFP
+			updateState();
+			rerender();
+			expect(element.textContent).to.be.equal('4');
+			expect(curProps).to.deep.equal({
+				foo: "bar",
+				children: []
+			});
+			expect(curState).to.deep.equal({
+				value: 2
+			});
+			expect(nextPropsArg).to.deep.equal({
+				foo: "bar",
+				children: []
+			});
+			expect(nextStateArg).to.deep.equal({
+				value: 4
+			});
+		});
+
+		it("should be passed correct this.state for batched setState", () => {
+			/** @type {() => void} */
+			let updateState;
+
+			let curState;
+			let nextStateArg;
+			let shouldComponentUpdateCount = 0;
+
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						value: 0
+					};
+					updateState = (value) => this.setState({
+						value
+					});
+				}
+				shouldComponentUpdate(nextProps, nextState) {
+					shouldComponentUpdateCount++;
+					nextStateArg = {...nextState};
+					curState = {...this.state};
+					return this.state.value !== nextState.value;
+				}
+				render() {
+					return <div>{this.state.value}</div>;
+				}
+			}
+
+			// Initial render
+			// state.value: initialized to 0 in constructor, 0 -> 1 in gDSFP
+			let element = render(<Foo foo="foo" />, scratch);
+
+			expect(element.textContent).to.be.equal('0');
+			expect(curState).to.be.undefined;
+			expect(nextStateArg).to.be.undefined;
+			expect(shouldComponentUpdateCount).to.be.equal(0);
+
+			// New state
+			// state.value: 'bar2'
+
+			// batch 2 setState calls with same value
+			updateState('bar');
+			updateState('bar2');
+
+			// Expectation:
+			// `this.state` in shouldComponentUpdate should be
+			// the state from last render, before apply batched setState
+
+			rerender();
+			expect(nextStateArg).to.deep.equal({
+				value: 'bar2'
+			});
+			expect(curState).to.deep.equal({
+				value: 0
+			});
+			expect(shouldComponentUpdateCount).to.be.equal(1);
+			expect(element.textContent).to.be.equal('bar2');
+		});
 	});
+
+	describe('#setState', () => {
+		it('should NOT mutate state, only create new versions', () => {
+			const stateConstant = {};
+			let didMount = false;
+			let componentState;
+
+			class Stateful extends Component {
+				constructor() {
+					super(...arguments);
+					this.state = stateConstant;
+				}
+
+				componentDidMount() {
+					didMount = true;
+					this.setState({key: 'value'}, () => {
+						componentState = this.state;
+					});
+				}
+			}
+
+			render(<Stateful />, scratch);
+			rerender();
+
+			expect(didMount).to.equal(true);
+			expect(componentState).to.deep.equal({key: 'value'});
+			expect(stateConstant).to.deep.equal({});
+		});
+	}),
 
 
 	describe('Lifecycle DOM Timing', () => {
+		it('should render in a single microtask', () => {
+			class Counter extends Component {
+				constructor() {
+					super();
+					this.state = { count: 0 };
+				}
+				render(props, { count }) {
+					if (count < 2) {
+						this.setState({ count: count + 1 });
+					}
+					return count;
+				}
+			}
+			render(<Counter />, scratch);
+			rerender();
+			expect(scratch.textContent).to.equal("2");
+			rerender();
+		});
+
 		it('should be invoked when dom does (DidMount, WillUnmount) or does not (WillMount, DidUnmount) exist', () => {
 			let setState;
 			class Outer extends Component {
@@ -519,7 +1521,7 @@ describe('Lifecycle methods', () => {
 			let spies = ['componentWillMount', 'componentDidMount', 'componentWillUnmount'];
 			spies.forEach( s => sinon.spy(proto, s) );
 
-			let reset = () => spies.forEach( s => proto[s].reset() );
+			let reset = () => spies.forEach( s => proto[s].resetHistory() );
 
 			render(<Outer />, scratch);
 			expect(proto.componentWillMount).to.have.been.called;
