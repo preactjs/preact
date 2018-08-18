@@ -73,7 +73,6 @@ Preact supports modern browsers and IE9+:
 - [**OSS.Ninja**](https://oss.ninja) _([GitHub Project](https://github.com/developit/oss.ninja))_
 - [**GuriVR**](https://gurivr.com) _([GitHub Project](https://github.com/opennewslabs/guri-vr))_
 - [**Color Picker**](https://colors.now.sh) _([GitHub Project](https://github.com/lukeed/colors-app))_ :art:
-- [**Rainbow Explorer**](https://use-the-platform.com/rainbow-explorer/) _([GitHub Project](https://github.com/vaneenige/rainbow-explorer/))_ :rainbow:
 - [**Offline Gallery**](https://use-the-platform.com/offline-gallery/) _([GitHub Project](https://github.com/vaneenige/offline-gallery/))_ :balloon:
 - [**Periodic Weather**](https://use-the-platform.com/periodic-weather/) _([GitHub Project](https://github.com/vaneenige/periodic-weather/))_ :sunny:
 - [**Rugby News Board**](http://nbrugby.com) _[(GitHub Project)](https://github.com/rugby-board/rugby-board-node)_
