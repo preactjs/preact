@@ -198,7 +198,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			// console.log('updating component in-place', c._nextState);
 			// if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, c.state)===false) {
 			// 	c.state = nextState;
-			if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, s)===false) {
+			if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, s, context)===false) {
 				// diffLevel--;
 				dom = newTree._el = c.base;
 				break outer;
@@ -208,6 +208,9 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				c.componentWillReceiveProps(newTree.props, s, context);
 			}
 
+			if (c.componentWillUpdate!=null) {
+				c.componentWillUpdate(newTree.props, s, context);
+			}
 			// c.state = nextState;
 		}
 		else {
@@ -248,13 +251,12 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 
 		oldProps = c.props;
 		if (!oldState) oldState = c.state;
-		oldContext = c.context;
+		oldContext = c.context = context;
 		c.props = newTree.props;
 		if (c._nextState!=null) {
 			c.state = c._nextState;
 			c._nextState = null;
 		}
-		c.context = context;
 		let prev = c._previousVTree;
 		let vnode = c._previousVTree = coerceToVNode(c.render(c.props, c.state, c.context));
 		// context = assign({}, context);

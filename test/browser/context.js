@@ -3,8 +3,6 @@ import { setupScratch, teardown } from './helpers';
 
 /** @jsx h */
 
-const CHILDREN_MATCHER = sinon.match( v => v==null || Array.isArray(v) && !v.length , '[empty children]');
-
 describe('context', () => {
 	let scratch;
 
@@ -50,24 +48,23 @@ describe('context', () => {
 		sinon.spy(Inner.prototype, 'componentDidUpdate');
 		sinon.spy(Inner.prototype, 'render');
 
-		render(<Outer />, scratch, scratch.lastChild);
+		render(<Outer />, scratch);
 
 		expect(Outer.prototype.getChildContext).to.have.been.calledOnce;
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWith({ children: CHILDREN_MATCHER }, {}, CONTEXT);
+		expect(Inner.prototype.render).to.have.been.calledWith({}, {}, CONTEXT);
 
 		CONTEXT.foo = 'bar';
-		render(<Outer {...PROPS} />, scratch, scratch.lastChild);
+		render(<Outer {...PROPS} />, scratch);
 
 		expect(Outer.prototype.getChildContext).to.have.been.calledTwice;
 
-		let props = { children: CHILDREN_MATCHER, ...PROPS };
-		expect(Inner.prototype.shouldComponentUpdate).to.have.been.calledOnce.and.calledWith(props, {}, CONTEXT);
-		expect(Inner.prototype.componentWillReceiveProps).to.have.been.calledWith(props, CONTEXT);
-		expect(Inner.prototype.componentWillUpdate).to.have.been.calledWith(props, {});
-		expect(Inner.prototype.componentDidUpdate).to.have.been.calledWith({ children: CHILDREN_MATCHER }, {});
-		expect(Inner.prototype.render).to.have.been.calledWith(props, {}, CONTEXT);
+		expect(Inner.prototype.shouldComponentUpdate).to.have.been.calledOnce.and.calledWith(PROPS, {});
+		expect(Inner.prototype.componentWillReceiveProps).to.have.been.calledWith(PROPS, {}, CONTEXT);
+		expect(Inner.prototype.componentWillUpdate).to.have.been.calledWith(PROPS, {}, CONTEXT);
+		expect(Inner.prototype.componentDidUpdate).to.have.been.calledWith({}, {}, CONTEXT);
+		expect(Inner.prototype.render).to.have.been.calledWith(PROPS, {}, CONTEXT);
 
 
 		/* Future:
@@ -109,27 +106,26 @@ describe('context', () => {
 		sinon.spy(Inner.prototype, 'componentDidUpdate');
 		sinon.spy(Inner.prototype, 'render');
 
-		render(<Outer />, scratch, scratch.lastChild);
+		render(<Outer />, scratch);
 
 		expect(Outer.prototype.getChildContext).to.have.been.calledOnce;
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWith({ children: CHILDREN_MATCHER }, {}, CONTEXT);
+		expect(Inner.prototype.render).to.have.been.calledWith({}, {}, CONTEXT);
 
 		CONTEXT.foo = 'bar';
-		render(<Outer {...PROPS} />, scratch, scratch.lastChild);
+		render(<Outer {...PROPS} />, scratch);
 
 		expect(Outer.prototype.getChildContext).to.have.been.calledTwice;
 
-		let props = { children: CHILDREN_MATCHER, ...PROPS };
-		expect(Inner.prototype.shouldComponentUpdate).to.have.been.calledOnce.and.calledWith(props, {}, CONTEXT);
-		expect(Inner.prototype.componentWillReceiveProps).to.have.been.calledWith(props, CONTEXT);
-		expect(Inner.prototype.componentWillUpdate).to.have.been.calledWith(props, {});
-		expect(Inner.prototype.componentDidUpdate).to.have.been.calledWith({ children: CHILDREN_MATCHER }, {});
-		expect(Inner.prototype.render).to.have.been.calledWith(props, {}, CONTEXT);
+		expect(Inner.prototype.shouldComponentUpdate).to.have.been.calledOnce.and.calledWith(PROPS, {}, CONTEXT);
+		expect(Inner.prototype.componentWillReceiveProps).to.have.been.calledWith(PROPS, {}, CONTEXT);
+		expect(Inner.prototype.componentWillUpdate).to.have.been.calledWith(PROPS, {}, CONTEXT);
+		expect(Inner.prototype.componentDidUpdate).to.have.been.calledWith({}, {});
+		expect(Inner.prototype.render).to.have.been.calledWith(PROPS, {}, CONTEXT);
 
 		// make sure render() could make use of context.a
-		expect(Inner.prototype.render).to.have.returned(sinon.match({ children: ['a'] }));
+		expect(Inner.prototype.render).to.have.returned(sinon.match({ props: { children: 'a' } }));
 	});
 
 	it('should preserve existing context properties when creating child contexts', () => {
@@ -164,7 +160,7 @@ describe('context', () => {
 
 		render(<Outer />, scratch);
 
-		expect(Inner.prototype.render).to.have.been.calledWith({ children: CHILDREN_MATCHER }, {}, { outerContext });
-		expect(InnerMost.prototype.render).to.have.been.calledWith({ children: CHILDREN_MATCHER }, {}, { outerContext, innerContext });
+		expect(Inner.prototype.render).to.have.been.calledWith({}, {}, { outerContext });
+		expect(InnerMost.prototype.render).to.have.been.calledWith({}, {}, { outerContext, innerContext });
 	});
 });
