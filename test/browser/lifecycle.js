@@ -548,7 +548,7 @@ describe('Lifecycle methods', () => {
 			expect(log).to.deep.equal(['render']);
 			log = [];
 
-			render(<MyComponent value="bar" />, scratch, scratch.firstChild);
+			render(<MyComponent value="bar" />, scratch);
 			expect(log).to.deep.equal([
 				'render',
 				'getSnapshotBeforeUpdate() prevProps:foo prevState:1',
@@ -556,7 +556,7 @@ describe('Lifecycle methods', () => {
 			]);
 			log = [];
 
-			render(<MyComponent value="baz" />, scratch, scratch.firstChild);
+			render(<MyComponent value="baz" />, scratch);
 			expect(log).to.deep.equal([
 				'render',
 				'getSnapshotBeforeUpdate() prevProps:bar prevState:2',
@@ -596,7 +596,7 @@ describe('Lifecycle methods', () => {
 			expect(log).to.deep.equal(['render']);
 			log = [];
 
-			render(<MyComponent value="bar" />, scratch, scratch.firstChild);
+			render(<MyComponent value="bar" />, scratch);
 			expect(log).to.deep.equal([
 				'render',
 				'getSnapshotBeforeUpdate',
@@ -653,7 +653,9 @@ describe('Lifecycle methods', () => {
 
 			// Initial render
 			// state.value: initialized to 0 in constructor, 0 -> 1 in gDSFP
-			let element = render(<Foo foo="foo" />, scratch);
+			render(<Foo foo="foo" />, scratch);
+			const element = scratch.firstChild;
+			rerender();
 			expect(element.textContent).to.be.equal('1');
 			expect(prevPropsArg).to.be.undefined;
 			expect(prevStateArg).to.be.undefined;
@@ -662,18 +664,18 @@ describe('Lifecycle methods', () => {
 
 			// New props
 			// state.value: 1 -> 2 in gDSFP
-			element = render(<Foo foo="bar" />, scratch, scratch.firstChild);
+			render(<Foo foo="bar" />, scratch);
+			rerender();
+
 			expect(element.textContent).to.be.equal('2');
 			expect(prevPropsArg).to.deep.equal({
-				foo: 'foo',
-				children: []
+				foo: 'foo'
 			});
 			expect(prevStateArg).to.deep.equal({
 				value: 1
 			});
 			expect(curProps).to.deep.equal({
-				foo: 'bar',
-				children: []
+				foo: 'bar'
 			});
 			expect(curState).to.deep.equal({
 				value: 2
@@ -685,15 +687,13 @@ describe('Lifecycle methods', () => {
 			rerender();
 			expect(element.textContent).to.be.equal('4');
 			expect(prevPropsArg).to.deep.equal({
-				foo: 'bar',
-				children: []
+				foo: 'bar'
 			});
 			expect(prevStateArg).to.deep.equal({
 				value: 2
 			});
 			expect(curProps).to.deep.equal({
-				foo: 'bar',
-				children: []
+				foo: 'bar'
 			});
 			expect(curState).to.deep.equal({
 				value: 4

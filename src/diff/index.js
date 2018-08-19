@@ -192,8 +192,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 
 			let s = c._nextState || c.state;
 			if (newTag.getDerivedStateFromProps!=null) {
-				// Since c._nextState is modified, the previous state doesn't need to be saved.
-				// It remains intact at c.state
+				oldState = assign({}, c.state);
 				assign(s, newTag.getDerivedStateFromProps(newTree.props, s));
 			}
 			// console.log('updating component in-place', c._nextState);
@@ -248,7 +247,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		}
 
 		oldProps = c.props;
-		oldState = c.state;
+		if (!oldState) oldState = c.state;
 		oldContext = c.context;
 		c.props = newTree.props;
 		if (c._nextState!=null) {
@@ -274,6 +273,11 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		// 	// console.trace('diffing '+c.id);
 		// 	console.log('diffing '+c.id, vnode, prev);
 		// }
+
+		if (!isNew && c.getSnapshotBeforeUpdate!=null) {
+			oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
+		}
+
 		c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, diffLevel, mounts);
 		c._dirty = false;
 		// newTree.tag.$precache = c.base;
