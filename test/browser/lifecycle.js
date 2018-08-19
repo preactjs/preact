@@ -950,8 +950,8 @@ describe('Lifecycle methods', () => {
 
 			// Initial render
 			// state.value: initialized to 0 in constructor, 0 -> 1 in gDSFP
-			let element = render(<Foo foo="foo" />, scratch);
-			expect(element.textContent).to.be.equal('1');
+			render(<Foo foo="foo" />, scratch);
+			expect(scratch.firstChild.textContent).to.be.equal('1');
 			expect(prevPropsArg).to.be.undefined;
 			expect(prevStateArg).to.be.undefined;
 			expect(curProps).to.be.undefined;
@@ -959,42 +959,22 @@ describe('Lifecycle methods', () => {
 
 			// New props
 			// state.value: 1 -> 2 in gDSFP
-			element = render(<Foo foo="bar" />, scratch, scratch.firstChild);
-			expect(element.textContent).to.be.equal('2');
-			expect(prevPropsArg).to.deep.equal({
-				foo: 'foo',
-				children: []
-			});
-			expect(prevStateArg).to.deep.equal({
-				value: 1
-			});
-			expect(curProps).to.deep.equal({
-				foo: 'bar',
-				children: []
-			});
-			expect(curState).to.deep.equal({
-				value: 2
-			});
+			render(<Foo foo="bar" />, scratch);
+			expect(scratch.firstChild.textContent).to.be.equal('2');
+			expect(prevPropsArg).to.deep.equal({ foo: 'foo' });
+			expect(prevStateArg).to.deep.equal({ value: 1 });
+			expect(curProps).to.deep.equal({ foo: 'bar' });
+			expect(curState).to.deep.equal({ value: 2 });
 
 			// New state
 			// state.value: 2 -> 3 in updateState, 3 -> 4 in gDSFP
 			updateState();
 			rerender();
-			expect(element.textContent).to.be.equal('4');
-			expect(prevPropsArg).to.deep.equal({
-				foo: 'bar',
-				children: []
-			});
-			expect(prevStateArg).to.deep.equal({
-				value: 2
-			});
-			expect(curProps).to.deep.equal({
-				foo: 'bar',
-				children: []
-			});
-			expect(curState).to.deep.equal({
-				value: 4
-			});
+			expect(scratch.firstChild.textContent).to.be.equal('4');
+			expect(prevPropsArg).to.deep.equal({ foo: 'bar' });
+			expect(prevStateArg).to.deep.equal({ value: 2 });
+			expect(curProps).to.deep.equal({ foo: 'bar' });
+			expect(curState).to.deep.equal({ value: 4 });
 		});
 	});
 
@@ -1003,22 +983,24 @@ describe('Lifecycle methods', () => {
 			class Foo extends Component {
 				componentDidMount() {}
 				componentWillUnmount() {}
+				render() { return 'foo'; }
 			}
 			class Bar extends Component {
 				componentDidMount() {}
 				componentWillUnmount() {}
+				render() { return 'bar'; }
 			}
 			spyAll(Foo.prototype);
 			spyAll(Bar.prototype);
 
-			render(<Foo />, scratch, scratch.lastChild);
+			render(<Foo />, scratch);
 			expect(Foo.prototype.componentDidMount, 'initial render').to.have.been.calledOnce;
 
-			render(<Bar />, scratch, scratch.lastChild);
+			render(<Bar />, scratch);
 			expect(Foo.prototype.componentWillUnmount, 'when replaced').to.have.been.calledOnce;
 			expect(Bar.prototype.componentDidMount, 'when replaced').to.have.been.calledOnce;
 
-			render(<div />, scratch, scratch.lastChild);
+			render(<div />, scratch);
 			expect(Bar.prototype.componentWillUnmount, 'when removed').to.have.been.calledOnce;
 		});
 	});
