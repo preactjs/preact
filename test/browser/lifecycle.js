@@ -655,7 +655,7 @@ describe('Lifecycle methods', () => {
 			// state.value: initialized to 0 in constructor, 0 -> 1 in gDSFP
 			render(<Foo foo="foo" />, scratch);
 			const element = scratch.firstChild;
-			rerender();
+
 			expect(element.textContent).to.be.equal('1');
 			expect(prevPropsArg).to.be.undefined;
 			expect(prevStateArg).to.be.undefined;
@@ -665,7 +665,6 @@ describe('Lifecycle methods', () => {
 			// New props
 			// state.value: 1 -> 2 in gDSFP
 			render(<Foo foo="bar" />, scratch);
-			rerender();
 
 			expect(element.textContent).to.be.equal('2');
 			expect(prevPropsArg).to.deep.equal({
