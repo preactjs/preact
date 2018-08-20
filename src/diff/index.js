@@ -205,7 +205,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				// return newTree._el = c.base;
 			}
 			if (newTag.getDerivedStateFromProps==null && c.componentWillReceiveProps!=null) {
-				c.componentWillReceiveProps(newTree.props, s, context);
+				c.componentWillReceiveProps(newTree.props, context);
 			}
 
 			if (c.componentWillUpdate!=null) {
