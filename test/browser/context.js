@@ -60,8 +60,8 @@ describe('context', () => {
 
 		expect(Outer.prototype.getChildContext).to.have.been.calledTwice;
 
-		expect(Inner.prototype.shouldComponentUpdate).to.have.been.calledOnce.and.calledWith(PROPS, {});
-		expect(Inner.prototype.componentWillReceiveProps).to.have.been.calledWith(PROPS, {}, CONTEXT);
+		expect(Inner.prototype.shouldComponentUpdate).to.have.been.calledOnce.and.calledWith(PROPS, {}, CONTEXT);
+		expect(Inner.prototype.componentWillReceiveProps).to.have.been.calledWith(PROPS, CONTEXT);
 		expect(Inner.prototype.componentWillUpdate).to.have.been.calledWith(PROPS, {}, CONTEXT);
 		expect(Inner.prototype.componentDidUpdate).to.have.been.calledWith({}, {}, CONTEXT);
 		expect(Inner.prototype.render).to.have.been.calledWith(PROPS, {}, CONTEXT);
@@ -119,9 +119,9 @@ describe('context', () => {
 		expect(Outer.prototype.getChildContext).to.have.been.calledTwice;
 
 		expect(Inner.prototype.shouldComponentUpdate).to.have.been.calledOnce.and.calledWith(PROPS, {}, CONTEXT);
-		expect(Inner.prototype.componentWillReceiveProps).to.have.been.calledWith(PROPS, {}, CONTEXT);
+		expect(Inner.prototype.componentWillReceiveProps).to.have.been.calledWith(PROPS, CONTEXT);
 		expect(Inner.prototype.componentWillUpdate).to.have.been.calledWith(PROPS, {}, CONTEXT);
-		expect(Inner.prototype.componentDidUpdate).to.have.been.calledWith({}, {});
+		expect(Inner.prototype.componentDidUpdate).to.have.been.calledWith({}, {}, CONTEXT);
 		expect(Inner.prototype.render).to.have.been.calledWith(PROPS, {}, CONTEXT);
 
 		// make sure render() could make use of context.a
