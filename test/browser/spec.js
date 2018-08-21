@@ -23,7 +23,6 @@ describe('Component spec', () => {
 				constructor(props, context) {
 					super(props, context);
 					expect(props).to.be.deep.equal({
-						children: EMPTY_CHILDREN,
 						fieldA: 1, fieldB: 2,
 						fieldC: 1, fieldD: 2
 					});

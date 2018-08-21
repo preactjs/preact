@@ -192,23 +192,25 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 
 			let s = c._nextState || c.state;
 			if (newTag.getDerivedStateFromProps!=null) {
-				// Since c._nextState is modified, the previous state doesn't need to be saved.
-				// It remains intact at c.state
+				oldState = assign({}, c.state);
 				assign(s, newTag.getDerivedStateFromProps(newTree.props, s));
 			}
 			// console.log('updating component in-place', c._nextState);
 			// if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, c.state)===false) {
 			// 	c.state = nextState;
-			if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, s)===false) {
+			if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, s, context)===false) {
 				// diffLevel--;
 				dom = newTree._el = c.base;
 				break outer;
 				// return newTree._el = c.base;
 			}
 			if (newTag.getDerivedStateFromProps==null && c.componentWillReceiveProps!=null) {
-				c.componentWillReceiveProps(newTree.props, s, context);
+				c.componentWillReceiveProps(newTree.props, context);
 			}
 
+			if (c.componentWillUpdate!=null) {
+				c.componentWillUpdate(newTree.props, s, context);
+			}
 			// c.state = nextState;
 		}
 		else {
@@ -248,14 +250,14 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		}
 
 		oldProps = c.props;
-		oldState = c.state;
-		oldContext = c.context;
+		if (!oldState) oldState = c.state;
+
+		oldContext = c.context = context;
 		c.props = newTree.props;
 		if (c._nextState!=null) {
 			c.state = c._nextState;
 			c._nextState = null;
 		}
-		c.context = context;
 		let prev = c._previousVTree;
 		let vnode = c._previousVTree = coerceToVNode(c.render(c.props, c.state, c.context));
 
@@ -264,8 +266,12 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			context = Object.assign({}, context, c.getChildContext());
 		}
 
+		if (!isNew && c.getSnapshotBeforeUpdate!=null) {
+			oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
+		}
+
 		if (vnode instanceof Array) {
-			diffChildren(parent, vnode, prev || [], EMPTY_OBJ, isSvg, excessChildren, diffLevel, mounts);
+			diffChildren(parent, vnode, prev, EMPTY_OBJ, isSvg, excessChildren, diffLevel, mounts);
 		}
 		else {
 			c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, diffLevel, mounts);
