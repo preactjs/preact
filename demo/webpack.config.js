@@ -34,10 +34,10 @@ module.exports = {
 							loose: true
 						}],
 						require.resolve('@babel/preset-react'),
-						require.resolve('@babel/preset-stage-0')
 					],
 					plugins: [
-						[require.resolve('@babel/plugin-transform-react-jsx'), { pragma: 'createElement' }],
+						[require.resolve('@babel/plugin-transform-react-jsx'), { pragma: 'createElement', pragmaFrag: 'Fragment' }],
+						require.resolve('@babel/plugin-proposal-class-properties'),
 						require.resolve('@babel/plugin-transform-react-constant-elements'),
 						[require.resolve('babel-plugin-jsx-pragmatic'), {
 							module: 'ceviche',

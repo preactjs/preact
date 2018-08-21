@@ -251,6 +251,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 
 		oldProps = c.props;
 		if (!oldState) oldState = c.state;
+
 		oldContext = c.context = context;
 		c.props = newTree.props;
 		if (c._nextState!=null) {
@@ -259,6 +260,22 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		}
 		let prev = c._previousVTree;
 		let vnode = c._previousVTree = coerceToVNode(c.render(c.props, c.state, c.context));
+
+		if (c.getChildContext!=null) {
+			// context = assign(assign({}, context), c.getChildContext());
+			context = Object.assign({}, context, c.getChildContext());
+		}
+
+		if (!isNew && c.getSnapshotBeforeUpdate!=null) {
+			oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
+		}
+
+		if (vnode instanceof Array) {
+			diffChildren(parent, vnode, prev, EMPTY_OBJ, isSvg, excessChildren, diffLevel, mounts);
+		}
+		else {
+			c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, diffLevel, mounts);
+		}
 		// context = assign({}, context);
 		// context.__depth = (context.__depth || 0) + 1;
 		// context = assign({
@@ -275,12 +292,6 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		// 	// console.trace('diffing '+c.id);
 		// 	console.log('diffing '+c.id, vnode, prev);
 		// }
-
-		if (!isNew && c.getSnapshotBeforeUpdate!=null) {
-			oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
-		}
-
-		c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, diffLevel, mounts);
 		c._dirty = false;
 		// newTree.tag.$precache = c.base;
 		c._vnode = newTree;
