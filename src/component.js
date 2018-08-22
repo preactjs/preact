@@ -53,9 +53,11 @@ extend(Component.prototype, {
 	 * 	updated
 	 */
 	setState(state, callback) {
-		const prev = this.prevState = this.state;
-		if (typeof state === 'function') state = state(prev, this.props);
-		this.state = extend(extend({}, prev), state);
+		if (!this.prevState) this.prevState = this.state;
+		this.state = extend(
+			extend({}, this.state),
+			typeof state === 'function' ? state(this.state, this.props) : state
+		);
 		if (callback) this._renderCallbacks.push(callback);
 		enqueueRender(this);
 	},

@@ -20,9 +20,8 @@ export function enqueueRender(component) {
 
 /** Rerender all enqueued dirty components */
 export function rerender() {
-	let p, list = items;
-	items = [];
-	while ( (p = list.pop()) ) {
+	let p;
+	while ( (p = items.pop()) ) {
 		if (p._dirty) renderComponent(p);
 	}
 }

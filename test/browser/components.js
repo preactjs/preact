@@ -113,9 +113,9 @@ describe('Components', () => {
 
 	it('should clone components', () => {
 		function Comp () {}
-		let instance = <Comp/>;
+		let instance = <Comp a />;
 		let clone = cloneElement(instance);
-		expect(clone.prototype).to.equal(instance.prototype);
+		expect(clone).to.deep.equal(instance);
 	});
 
 	it('should render string', () => {

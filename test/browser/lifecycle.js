@@ -1347,8 +1347,67 @@ describe('Lifecycle methods', () => {
 				value: 4
 			});
 		});
-	});
 
+		it("should be passed correct this.state for batched setState", () => {
+			/** @type {() => void} */
+			let updateState;
+
+			let curState;
+			let nextStateArg;
+			let shouldComponentUpdateCount = 0;
+
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						value: 0
+					};
+					updateState = (value) => this.setState({
+						value
+					});
+				}
+				shouldComponentUpdate(nextProps, nextState) {
+					shouldComponentUpdateCount++;
+					nextStateArg = {...nextState};
+					curState = {...this.state};
+					return this.state.value !== nextState.value;
+				}
+				render() {
+					return <div>{this.state.value}</div>;
+				}
+			}
+
+			// Initial render
+			// state.value: initialized to 0 in constructor, 0 -> 1 in gDSFP
+			let element = render(<Foo foo="foo" />, scratch);
+
+			expect(element.textContent).to.be.equal('0');
+			expect(curState).to.be.undefined;
+			expect(nextStateArg).to.be.undefined;
+			expect(shouldComponentUpdateCount).to.be.equal(0);
+
+			// New state
+			// state.value: 'bar2'
+
+			// batch 2 setState calls with same value
+			updateState('bar');
+			updateState('bar2');
+
+			// Expectation:
+			// `this.state` in shouldComponentUpdate should be
+			// the state from last render, before apply batched setState
+
+			rerender();
+			expect(nextStateArg).to.deep.equal({
+				value: 'bar2'
+			});
+			expect(curState).to.deep.equal({
+				value: 0
+			});
+			expect(shouldComponentUpdateCount).to.be.equal(1);
+			expect(element.textContent).to.be.equal('bar2');
+		});
+	});
 
 	describe('#setState', () => {
 		it('should NOT mutate state, only create new versions', () => {
@@ -1381,6 +1440,25 @@ describe('Lifecycle methods', () => {
 
 
 	describe('Lifecycle DOM Timing', () => {
+		it('should render in a single microtask', () => {
+			class Counter extends Component {
+				constructor() {
+					super();
+					this.state = { count: 0 };
+				}
+				render(props, { count }) {
+					if (count < 2) {
+						this.setState({ count: count + 1 });
+					}
+					return count;
+				}
+			}
+			render(<Counter />, scratch);
+			rerender();
+			expect(scratch.textContent).to.equal("2");
+			rerender();
+		});
+
 		it('should be invoked when dom does (DidMount, WillUnmount) or does not (WillMount, DidUnmount) exist', () => {
 			let setState;
 			class Outer extends Component {
