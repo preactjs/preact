@@ -262,7 +262,6 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		let vnode = c._previousVTree = coerceToVNode(c.render(c.props, c.state, c.context));
 
 		if (c.getChildContext!=null) {
-			// context = assign(assign({}, context), c.getChildContext());
 			context = Object.assign({}, context, c.getChildContext());
 		}
 
@@ -284,10 +283,6 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		// if (c.getChildContext!=null) {
 		// 	assign(context, c.getChildContext());
 		// }
-		if (c.getChildContext!=null) {
-			// context = assign(assign({}, context), c.getChildContext());
-			context = assign(assign({}, context), c.getChildContext());
-		}
 		// if (c.id==20) {
 		// 	// console.trace('diffing '+c.id);
 		// 	console.log('diffing '+c.id, vnode, prev);
