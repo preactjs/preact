@@ -113,9 +113,9 @@ describe('Components', () => {
 
 	it('should clone components', () => {
 		function Comp () {}
-		let instance = <Comp/>;
+		let instance = <Comp a />;
 		let clone = cloneElement(instance);
-		expect(clone.prototype).to.equal(instance.prototype);
+		expect(clone).to.deep.equal(instance);
 	});
 
 	it('should render string', () => {
@@ -149,6 +149,12 @@ describe('Components', () => {
 
 		render(<NullComponent />, scratch);
 		expect(scratch.innerHTML).to.equal('');
+	});
+
+	// Test for #651
+	it('should set enumerable boolean attribute', () => {
+		render(<input spellcheck={false} />, scratch);
+		expect(scratch.firstChild.spellcheck).to.equal(false);
 	});
 
 	// Test for Issue #73
@@ -304,6 +310,79 @@ describe('Components', () => {
 			render(<Foo children={'b'} />, scratch);
 
 			expect(scratch.innerHTML).to.equal('<div>a</div>');
+		});
+
+		describe('should always be an array', () => {
+			let children;
+
+			let Foo = props => {
+				children = props.children;
+				return <div>{props.children}</div>;
+			};
+
+			let FunctionFoo = props => {
+				children = props.children;
+				return <div>{props.children[0](2)}</div>;
+			};
+
+			let Bar = () => <span>Bar</span>;
+
+			beforeEach(() => {
+				children = undefined;
+			});
+
+			it('with no child', () => {
+				render(<Foo></Foo>, scratch);
+
+				expect(children).to.be.an('array');
+				expect(children).to.have.lengthOf(0);
+				expect(scratch.innerHTML).to.equal('<div></div>');
+			});
+
+			it('with a text child', () => {
+				render(<Foo>text</Foo>, scratch);
+
+				expect(children).to.be.an('array');
+				expect(children).to.have.lengthOf(1);
+				expect(children[0]).to.be.a('string');
+				expect(scratch.innerHTML).to.equal('<div>text</div>');
+			});
+
+			it('with a DOM node child', () => {
+				render(<Foo><span /></Foo>, scratch);
+
+				expect(children).to.be.an('array');
+				expect(children).to.have.lengthOf(1);
+				expect(children[0]).to.be.an('object');
+				expect(scratch.innerHTML).to.equal('<div><span></span></div>');
+			});
+
+			it('with a Component child', () => {
+				render(<Foo><Bar /></Foo>, scratch);
+
+				expect(children).to.be.an('array');
+				expect(children).to.have.lengthOf(1);
+				expect(children[0]).to.be.an('object');
+				expect(scratch.innerHTML).to.equal('<div><span>Bar</span></div>');
+			});
+
+			it('with a function child', () => {
+				render(<FunctionFoo>{num => num.toFixed(2)}</FunctionFoo>, scratch);
+
+				expect(children).to.be.an('array');
+				expect(children).to.have.lengthOf(1);
+				expect(children[0]).to.be.a('function');
+				expect(scratch.innerHTML).to.equal('<div>2.00</div>');
+			});
+
+			it('with multiple children', () => {
+				render(<Foo><span /><Bar /><span /></Foo>, scratch);
+
+				expect(children).to.be.an('array');
+				expect(children).to.have.lengthOf(3);
+				expect(children[0]).to.be.an('object');
+				expect(scratch.innerHTML).to.equal('<div><span></span><span>Bar</span><span></span></div>');
+			});
 		});
 	});
 
