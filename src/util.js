@@ -10,6 +10,17 @@ export function extend(obj, props) {
 	return obj;
 }
 
+/** Invoke or update a ref, depending on whether it is a function or object ref.
+ *  @param {object|function} [ref=null]
+ *  @param {any} [value]
+ */
+export function applyRef(ref, value) {
+	if (ref!=null) {
+		if (typeof ref=='function') ref(value);
+		else ref.current = value;
+	}
+}
+
 /**
  * Call a function asynchronously, as soon as possible. Makes
  * use of HTML Promise to schedule the callback if available,
