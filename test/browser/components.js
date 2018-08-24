@@ -166,17 +166,21 @@ describe('Components', () => {
 	});
 
 
-	// Test for Issue #176
+	// Test for Issue developit/preact#176
 	it('should remove children when root changes to text node', () => {
 		let comp;
 
 		class Comp extends Component {
+			constructor() {
+				super();
+				comp = this;
+			}
 			render(_, { alt }) {
 				return alt ? 'asdf' : <div>test</div>;
 			}
 		}
 
-		render(<Comp ref={c => comp=c} />, scratch);
+		render(<Comp />, scratch);
 
 		comp.setState({ alt: true });
 		comp.forceUpdate();
@@ -191,7 +195,7 @@ describe('Components', () => {
 		expect(scratch.innerHTML, 'switching to textnode 2').to.equal('asdf');
 	});
 
-	// Test for Issue #254
+	// Test for Issue developit/preact#254
 	it('should not recycle common class children with different keys', () => {
 		let idx = 0;
 		let msgs = ['A','B','C','D','E','F','G','H'];
@@ -394,6 +398,81 @@ describe('Components', () => {
 
 			expect(scratch.innerHTML).to.equal('<div>a</div>');
 		});
+
+		// TODO: Not currently supported. Redefine these tests once we settle
+		// on children normalization
+		xdescribe('should always be an array', () => {
+			let children;
+
+			let Foo = props => {
+				children = props.children;
+				return <div>{props.children}</div>;
+			};
+
+			let FunctionFoo = props => {
+				children = props.children;
+				return <div>{props.children[0](2)}</div>;
+			};
+
+			let Bar = () => <span>Bar</span>;
+
+			beforeEach(() => {
+				children = undefined;
+			});
+
+			it('with no child', () => {
+				render(<Foo />, scratch);
+
+				expect(children).to.be.an('array');
+				expect(children).to.have.lengthOf(0);
+				expect(scratch.innerHTML).to.equal('<div></div>');
+			});
+
+			it('with a text child', () => {
+				render(<Foo>text</Foo>, scratch);
+
+				expect(children).to.be.an('array');
+				expect(children).to.have.lengthOf(1);
+				expect(children[0]).to.be.a('string');
+				expect(scratch.innerHTML).to.equal('<div>text</div>');
+			});
+
+			it('with a DOM node child', () => {
+				render(<Foo><span /></Foo>, scratch);
+
+				expect(children).to.be.an('array');
+				expect(children).to.have.lengthOf(1);
+				expect(children[0]).to.be.an('object');
+				expect(scratch.innerHTML).to.equal('<div><span></span></div>');
+			});
+
+			it('with a Component child', () => {
+				render(<Foo><Bar /></Foo>, scratch);
+
+				expect(children).to.be.an('array');
+				expect(children).to.have.lengthOf(1);
+				expect(children[0]).to.be.an('object');
+				expect(scratch.innerHTML).to.equal('<div><span>Bar</span></div>');
+			});
+
+			it('with a function child', () => {
+				render(<FunctionFoo>{num => num.toFixed(2)}</FunctionFoo>, scratch);
+
+				expect(children).to.be.an('array');
+				expect(children).to.have.lengthOf(1);
+				expect(children[0]).to.be.a('function');
+				expect(scratch.innerHTML).to.equal('<div>2.00</div>');
+			});
+
+			it('with multiple children', () => {
+				render(<Foo><span /><Bar /><span /></Foo>, scratch);
+
+				expect(children).to.be.an('array');
+				expect(children).to.have.lengthOf(3);
+				expect(children[0]).to.be.an('object');
+				expect(scratch.innerHTML).to.equal('<div><span></span><span>Bar</span><span></span></div>');
+			});
+		});
 	});
 
 
@@ -455,7 +534,7 @@ describe('Components', () => {
 
 			// update & flush
 			doRender();
-			render(<Outer foo="bar" />, scratch);
+			rerender();
 
 			expect(Outer.prototype.componentWillUnmount)
 				.not.to.have.been.called;
@@ -480,7 +559,7 @@ describe('Components', () => {
 
 			// update & flush
 			doRender();
-			render(<Outer foo="bar" />, scratch);
+			rerender();
 
 			expect(Inner).to.have.been.calledThrice;
 
@@ -546,7 +625,7 @@ describe('Components', () => {
 
 			// update & flush
 			doRender();
-			render(<Outer foo="bar" />, scratch);
+			rerender();
 
 			expect(Outer.prototype.componentWillUnmount).not.to.have.been.called;
 
@@ -576,7 +655,7 @@ describe('Components', () => {
 
 			// update & flush
 			doRender();
-			render(<Outer foo="bar" />, scratch);
+			rerender();
 
 			expect(Inner.prototype.componentWillUnmount).not.to.have.been.called;
 			expect(Inner.prototype.componentWillMount).to.have.been.calledOnce;
@@ -603,7 +682,7 @@ describe('Components', () => {
 			// update & flush
 			alt = true;
 			doRender();
-			render(<Outer foo="bar" />, scratch);
+			rerender();
 
 			expect(Inner.prototype.componentWillUnmount).to.have.been.calledOnce;
 
@@ -612,7 +691,7 @@ describe('Components', () => {
 			// update & flush
 			alt = false;
 			doRender();
-			render(<Outer foo="bar" />, scratch);
+			rerender();
 
 			expect(sortAttributes(scratch.innerHTML)).to.equal(sortAttributes('<div foo="bar" j="4" i="5">inner</div>'));
 		});

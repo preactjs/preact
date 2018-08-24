@@ -15,10 +15,10 @@ export function setupScratch() {
  * @returns {() => void}
  */
 export function setupRerender() {
-	let drainQueue;
 	Component.__test__previousDebounce = Component.debounce;
-	Component.debounce = cb => drainQueue = cb;
-	return () => drainQueue && drainQueue();
+	Component.debounce = cb => Component.__test__drainQueue = cb;
+
+	return () => Component.__test__drainQueue && Component.__test__drainQueue();
 }
 
 /**
@@ -27,6 +27,12 @@ export function setupRerender() {
  */
 export function teardown(scratch) {
 	scratch.parentNode.removeChild(scratch);
+
+	if (Component.__test__drainQueue) {
+		// Flush any pending updates leftover by test
+		Component.__test__drainQueue();
+		delete Component.__test__drainQueue;
+	}
 
 	if (typeof Component.__test__previousDebounce !== 'undefined') {
 		Component.debounce = Component.__test__previousDebounce;

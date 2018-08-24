@@ -528,7 +528,7 @@ export function getVNodeChildren(vnode) {
 	if (vnode._children==null) {
 		// flattenChildren(vnode.children, vnode._children=[], '', 0);
 		// flattenChildren(vnode.props.children, vnode._children=[], '', 0);
-		flattenChildren(vnode.props.children, vnode._children=[]);
+		flattenChildren(vnode.props && vnode.props.children, vnode._children=[]);
 	}
 	return vnode._children;
 

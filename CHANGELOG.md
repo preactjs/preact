@@ -8,10 +8,11 @@
     1. `attributes` has been renamed to `props`
     2. `nodeName` is now `tag`
     3. `props.children`
-        1. The children of a VNode are no longer normalized in `h` and could be a nested array of children.
-        2. `children` is only stored as a property on the `props` property (i.e. `props.children`).
-        3. A Component with no children will not have a `children` prop defined on `props`. Preact
+        1. The children of a VNode are no longer guaranteed to be a flat array. It could be `undefined`
+           or it could be a nested array of children.
+        2. A Component with no children will not have a `children` prop defined on `props`. Preact
            instead guaranteed an empty list would always be there. That can no longer be relied on.
+        3. `children` is only stored as a property on the `props` property (i.e. `props.children`).
 2. `h` has been renamed to `createElement`
 3. `render` no longer returns the newly created DOM element. Its return type is now `void`
 4. `render` no longer supports a third argument to hydrate the DOM. Use the new `hydrate`

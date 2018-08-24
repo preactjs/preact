@@ -505,6 +505,36 @@ describe('Lifecycle methods', () => {
 				value: 3
 			});
 		});
+
+		// From developit/preact#1170
+		it('should NOT mutate state on mount, only create new versions', () => {
+			const stateConstant = {};
+			let componentState;
+
+			class Stateful extends Component {
+				static getDerivedStateFromProps() {
+					return { key: 'value' };
+				}
+
+				constructor() {
+					super(...arguments);
+					this.state = stateConstant;
+				}
+
+				componentDidMount() {
+					componentState = this.state;
+				}
+
+				render() {
+					return <div />;
+				}
+			}
+
+			render(<Stateful />, scratch);
+
+			expect(componentState).to.deep.equal({ key: 'value' });
+			expect(stateConstant).to.deep.equal({});
+		});
 	});
 
 	describe('#getSnapshotBeforeUpdate', () => {
@@ -655,7 +685,7 @@ describe('Lifecycle methods', () => {
 			// state.value: initialized to 0 in constructor, 0 -> 1 in gDSFP
 			render(<Foo foo="foo" />, scratch);
 			const element = scratch.firstChild;
-			rerender();
+
 			expect(element.textContent).to.be.equal('1');
 			expect(prevPropsArg).to.be.undefined;
 			expect(prevStateArg).to.be.undefined;
@@ -665,7 +695,6 @@ describe('Lifecycle methods', () => {
 			// New props
 			// state.value: 1 -> 2 in gDSFP
 			render(<Foo foo="bar" />, scratch);
-			rerender();
 
 			expect(element.textContent).to.be.equal('2');
 			expect(prevPropsArg).to.deep.equal({
@@ -1169,7 +1198,7 @@ describe('Lifecycle methods', () => {
 	});
 
 
-	describe('shouldComponentUpdate', () => {
+	describe('#shouldComponentUpdate', () => {
 		let setState;
 
 		class Should extends Component {
@@ -1307,6 +1336,43 @@ describe('Lifecycle methods', () => {
 			});
 		});
 	});
+
+
+	describe('#setState', () => {
+		// From developit/preact#1170
+		it('should NOT mutate state, only create new versions', () => {
+			const stateConstant = {};
+			let didMount = false;
+			let componentState;
+
+			class Stateful extends Component {
+				constructor() {
+					super(...arguments);
+					this.state = stateConstant;
+				}
+
+				componentDidMount() {
+					didMount = true;
+
+					// eslint-disable-next-line react/no-did-mount-set-state
+					this.setState({ key: 'value' }, () => {
+						componentState = this.state;
+					});
+				}
+
+				render() {
+					return <div />;
+				}
+			}
+
+			render(<Stateful />, scratch);
+			rerender();
+
+			expect(didMount).to.equal(true);
+			expect(componentState).to.deep.equal({ key: 'value' });
+			expect(stateConstant).to.deep.equal({});
+		});
+	}),
 
 
 	describe('Lifecycle DOM Timing', () => {
