@@ -474,6 +474,12 @@ export function unmount(vnode) {
 		// }
 
 		r.base = null;
+		if (r = r._previousVTree) unmount(r);
+	}
+	else if (r = vnode._children) {
+		for (let i = 0; i < r.length; i++) {
+			unmount(r[i]);
+		}
 	}
 
 	// if (recursive) {
