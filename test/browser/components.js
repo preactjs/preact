@@ -775,7 +775,7 @@ describe('Components', () => {
 			class C extends Component {
 				componentWillMount() {}
 				render({ children }) {
-					if (!useIntermediary) return children[0];
+					if (!useIntermediary) return children;
 					let I = useIntermediary===true ? Intermediary : useIntermediary;
 					return <I>{children}</I>;
 				}
@@ -784,10 +784,7 @@ describe('Components', () => {
 			return C;
 		};
 
-		let createFunction = () => sinon.spy( ({ children }) => children[0] );
-
-		let root;
-		let rndr = n => root = render(n, scratch, root);
+		let createFunction = () => sinon.spy( ({ children }) => children );
 
 		let F1 = createFunction();
 		let F2 = createFunction();
@@ -800,31 +797,31 @@ describe('Components', () => {
 		let reset = () => [C1, C2, C3].reduce(
 			(acc, c) => acc.concat( Object.keys(c.prototype).map(key => c.prototype[key]) ),
 			[F1, F2, F3]
-		).forEach( c => c.reset && c.resetHistory() );
+		).forEach( c => c.resetHistory() );
 
 
 		it('should handle lifecycle for no intermediary in component tree', () => {
 			reset();
-			rndr(<C1><C2><C3>Some Text</C3></C2></C1>);
+			render(<C1><C2><C3>Some Text</C3></C2></C1>, scratch);
 
 			expect(C1.prototype.componentWillMount, 'initial mount').to.have.been.calledOnce;
 			expect(C2.prototype.componentWillMount, 'initial mount').to.have.been.calledOnce;
 			expect(C3.prototype.componentWillMount, 'initial mount').to.have.been.calledOnce;
 
 			reset();
-			rndr(<C1><C2>Some Text</C2></C1>);
+			render(<C1><C2>Some Text</C2></C1>, scratch);
 
 			expect(C1.prototype.componentWillMount, 'unmount innermost, C1').not.to.have.been.called;
 			expect(C2.prototype.componentWillMount, 'unmount innermost, C2').not.to.have.been.called;
 
 			reset();
-			rndr(<C1><C3>Some Text</C3></C1>);
+			render(<C1><C3>Some Text</C3></C1>, scratch);
 
 			expect(C1.prototype.componentWillMount, 'swap innermost').not.to.have.been.called;
 			expect(C3.prototype.componentWillMount, 'swap innermost').to.have.been.calledOnce;
 
 			reset();
-			rndr(<C1><C2><C3>Some Text</C3></C2></C1>);
+			render(<C1><C2><C3>Some Text</C3></C2></C1>, scratch);
 
 			expect(C1.prototype.componentWillMount, 'inject between, C1').not.to.have.been.called;
 			expect(C2.prototype.componentWillMount, 'inject between, C2').to.have.been.calledOnce;
@@ -835,28 +832,28 @@ describe('Components', () => {
 		it('should handle lifecycle for nested intermediary functional components', () => {
 			useIntermediary = true;
 
-			rndr(<div />);
+			render(<div />, scratch);
 			reset();
-			rndr(<C1><C2><C3>Some Text</C3></C2></C1>);
+			render(<C1><C2><C3>Some Text</C3></C2></C1>, scratch);
 
 			expect(C1.prototype.componentWillMount, 'initial mount w/ intermediary fn, C1').to.have.been.calledOnce;
 			expect(C2.prototype.componentWillMount, 'initial mount w/ intermediary fn, C2').to.have.been.calledOnce;
 			expect(C3.prototype.componentWillMount, 'initial mount w/ intermediary fn, C3').to.have.been.calledOnce;
 
 			reset();
-			rndr(<C1><C2>Some Text</C2></C1>);
+			render(<C1><C2>Some Text</C2></C1>, scratch);
 
 			expect(C1.prototype.componentWillMount, 'unmount innermost w/ intermediary fn, C1').not.to.have.been.called;
 			expect(C2.prototype.componentWillMount, 'unmount innermost w/ intermediary fn, C2').not.to.have.been.called;
 
 			reset();
-			rndr(<C1><C3>Some Text</C3></C1>);
+			render(<C1><C3>Some Text</C3></C1>, scratch);
 
 			expect(C1.prototype.componentWillMount, 'swap innermost w/ intermediary fn').not.to.have.been.called;
 			expect(C3.prototype.componentWillMount, 'swap innermost w/ intermediary fn').to.have.been.calledOnce;
 
 			reset();
-			rndr(<C1><C2><C3>Some Text</C3></C2></C1>);
+			render(<C1><C2><C3>Some Text</C3></C2></C1>, scratch);
 
 			expect(C1.prototype.componentWillMount, 'inject between, C1 w/ intermediary fn').not.to.have.been.called;
 			expect(C2.prototype.componentWillMount, 'inject between, C2 w/ intermediary fn').to.have.been.calledOnce;
@@ -867,28 +864,28 @@ describe('Components', () => {
 		it('should handle lifecycle for nested intermediary elements', () => {
 			useIntermediary = 'div';
 
-			rndr(<div />);
+			render(<div />, scratch);
 			reset();
-			rndr(<C1><C2><C3>Some Text</C3></C2></C1>);
+			render(<C1><C2><C3>Some Text</C3></C2></C1>, scratch);
 
 			expect(C1.prototype.componentWillMount, 'initial mount w/ intermediary div, C1').to.have.been.calledOnce;
 			expect(C2.prototype.componentWillMount, 'initial mount w/ intermediary div, C2').to.have.been.calledOnce;
 			expect(C3.prototype.componentWillMount, 'initial mount w/ intermediary div, C3').to.have.been.calledOnce;
 
 			reset();
-			rndr(<C1><C2>Some Text</C2></C1>);
+			render(<C1><C2>Some Text</C2></C1>, scratch);
 
 			expect(C1.prototype.componentWillMount, 'unmount innermost w/ intermediary div, C1').not.to.have.been.called;
 			expect(C2.prototype.componentWillMount, 'unmount innermost w/ intermediary div, C2').not.to.have.been.called;
 
 			reset();
-			rndr(<C1><C3>Some Text</C3></C1>);
+			render(<C1><C3>Some Text</C3></C1>, scratch);
 
 			expect(C1.prototype.componentWillMount, 'swap innermost w/ intermediary div').not.to.have.been.called;
 			expect(C3.prototype.componentWillMount, 'swap innermost w/ intermediary div').to.have.been.calledOnce;
 
 			reset();
-			rndr(<C1><C2><C3>Some Text</C3></C2></C1>);
+			render(<C1><C2><C3>Some Text</C3></C2></C1>, scratch);
 
 			expect(C1.prototype.componentWillMount, 'inject between, C1 w/ intermediary div').not.to.have.been.called;
 			expect(C2.prototype.componentWillMount, 'inject between, C2 w/ intermediary div').to.have.been.calledOnce;
