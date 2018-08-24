@@ -71,13 +71,11 @@ describe('keys', () => {
 			}
 		}
 
-		let root;
+		render(<App />, scratch);
+		render(<App opened loading />, scratch);
+		render(<App opened />, scratch);
 
-		root = render(<App />, scratch, root);
-		root = render(<App opened loading />, scratch, root);
-		root = render(<App opened />, scratch, root);
-
-		let html = String(root.innerHTML).replace(/ class=""/g, '');
+		const html = String(scratch.firstChild.innerHTML).replace(/ class=""/g, '');
 		expect(html).to.equal('<div>This div needs to be here for this to break</div><div></div><div class="indicator"><div>indicator</div><div>indicator</div><div>indicator</div></div>');
 	});
 });
