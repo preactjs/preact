@@ -18,7 +18,7 @@
     "test:mocha:watch": "npm run test:mocha -- --watch",
     "test:karma:watch": "npm run test:karma -- no-single-run",
     "test:size": "bundlesize",
-    "lint": "eslint debug devtools src test"
+    "lint": "eslint src test"
   },
   "mangle": {
     "regex": "^(_|(type|text|key|index)$)"

@@ -386,7 +386,7 @@ describe('Components', () => {
 				'123',
 				456
 			]}
-						 />, scratch);
+			       />, scratch);
 
 			expect(scratch.innerHTML).to.equal('<div a="b"><span class="bar">bar</span>123456</div>');
 		});

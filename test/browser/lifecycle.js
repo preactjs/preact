@@ -5,7 +5,7 @@ import { setupScratch, teardown, setupRerender } from './helpers';
 
 let spyAll = obj => Object.keys(obj).forEach( key => sinon.spy(obj,key) );
 
-const EMPTY_CHILDREN = [];
+// const EMPTY_CHILDREN = [];
 
 describe('Lifecycle methods', () => {
 	let scratch, rerender;
