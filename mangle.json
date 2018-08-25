@@ -15,7 +15,9 @@
       "$_component": "__c",
       "$_constructor": "__c",
       "$_previousVTree": "__t",
-      "$__html": "__html"
+      "$__html": "__html",
+      "$_ancestorComponent": "__a",
+      "$_processingException": "__p"
     }
   }
 }

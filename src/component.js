@@ -9,6 +9,7 @@ export function Component(props, context) {
 	this.state = {};
 	this._dirty = true;
 	this._renderCallbacks = [];
+	this._ancestorComponent = null;
 }
 
 Component.prototype.setState = function(update, callback) {
@@ -38,7 +39,7 @@ Component.prototype.setState = function(update, callback) {
 
 Component.prototype.forceUpdate = function(callback) {
 	if (this.base!=null) {
-		diff(this.base, this.base.parentNode, this._vnode, this._vnode, this.context, false, true, null, 0, []);
+		diff(this.base, this.base.parentNode, this._vnode, this._vnode, this.context, false, true, null, 0, [], this._ancestorComponent);
 	}
 	if (callback!=null) callback();
 };

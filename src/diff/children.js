@@ -6,7 +6,7 @@ import { diff, unmount } from './index';
 // import { cloneElement } from '../clone-element';
 
 
-export function diffChildren(node, children, oldChildren, context, isSvg, excessChildren, diffLevel, mounts) {
+export function diffChildren(node, children, oldChildren, context, isSvg, excessChildren, diffLevel, mounts, ancestorComponent) {
 	// if (oldChildren==null) oldChildren = EMPTY_ARR;
 
 	// let __children = oldChildren.map(cloneElement);
@@ -142,7 +142,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 
 		next = childNode!=null && childNode.nextSibling;
 
-		newEl = diff(old==null ? null : old._el, node, child, old, context, isSvg, false, excessChildren, diffLevel, mounts);
+		newEl = diff(old==null ? null : old._el, node, child, old, context, isSvg, false, excessChildren, diffLevel, mounts, ancestorComponent);
 		if (newEl!=null) {
 			// let childNode;
 			// childNode = null;
