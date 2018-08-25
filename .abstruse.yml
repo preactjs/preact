@@ -1,7 +1,7 @@
 image: chrome_nvm
 
 matrix:
-  - env: NODE_VERSION=10
+  - env: NODE_VERSION=10 PERFORMANCE=false
 
 cache:
   - node_modules
