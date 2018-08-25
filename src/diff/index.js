@@ -340,7 +340,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	}
 
 	if (clearProcessingException) {
-		delete c._processingException;
+		c._processingException = 0;
 	}
 
 	} catch (e) {
@@ -707,9 +707,7 @@ function catchErrorInComponent(error, component) {
 		if (component.componentDidCatch && !component._processingException) {
 			try {
 				component.componentDidCatch(error);
-				component._processingException = true;
-				enqueueRender(component);
-				return;
+				return enqueueRender(component._processingException = component);
 			} catch (e) {
 				error = e;
 			}
