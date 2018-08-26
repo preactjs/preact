@@ -2357,6 +2357,46 @@ describe('Lifecycle methods', () => {
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
 
+		it('should be called when ref throws', () => {
+			class ErrorReceiverComponent extends Component {
+				componentDidCatch(error) {
+					this.setState({ error });
+				}
+				render() {
+					return <div>{this.state.error ? String(this.state.error) : this.props.children}</div>;
+				}
+			}
+			function throwError() {
+				throw new Error("Error!");
+			}
+			function ErrorGeneratorComponent() {
+				return <div ref={throwError}/>
+			}
+			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
+		});
+
+		it('should be called when array ref throws', () => {
+			class ErrorReceiverComponent extends Component {
+				componentDidCatch(error) {
+					this.setState({ error });
+				}
+				render() {
+					return this.state.error ? String(this.state.error) : this.props.children;
+				}
+			}
+			function throwError() {
+				throw new Error("Error!");
+			}
+			function ErrorGeneratorComponent() {
+				return <div ref={throwError}/>
+			}
+			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
+		});
+
 	});
 
 
