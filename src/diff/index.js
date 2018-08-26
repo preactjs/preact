@@ -5,7 +5,6 @@ import { coerceToVNode /*, reclaimVNode*/ } from '../create-element';
 import { diffChildren /*, create */ } from './children';
 import { diffProps } from './props';
 import { assign } from '../util';
-// import { toVNode } from '../render';
 // import { processQueue } from '../component';
 
 // let hash = [
@@ -409,7 +408,7 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 	// 	for (let j=0; j<excessChildren.length; j++) {
 	// 		let c = excessChildren[j];
 	// 		if (c!=null && c.nodeType==vnode.type && c.localName==vnode.tag) {
-	// 			oldVNode = toVNode(dom = d = c);
+	// 			// oldVNode = toVNode(dom = d = c);
 	// 			// console.log(vnode, oldVNode, dom);
 	// 			excessChildren[j] = null;
 	// 			// console.log('found hydration match for '+vnode.tag+' ('+vnode.type+')', oldVNode);
