@@ -273,7 +273,7 @@ describe('Components', () => {
 		sideEffect.resetHistory();
 		Comp.prototype.componentWillMount.resetHistory();
 		bad.setState({ alt: true });
-		bad.forceUpdate();
+		rerender();
 		expect(scratch.textContent, 'new component without key re-rendered').to.equal('D');
 		expect(Comp.prototype.componentWillMount).to.not.have.been.called;
 		expect(sideEffect).to.not.have.been.called;
