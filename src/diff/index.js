@@ -240,7 +240,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			// 	c.state = nextState;
 			if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, s, context)===false) {
 				// diffLevel--;
-				dom = newTree._el = c.base;
+				dom = c.base;
 				break outer;
 				// return newTree._el = c.base;
 			}
@@ -319,7 +319,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		// 	else parent.replaceChild(c.base, dom);
 		// }
 
-		dom = newTree._el = c.base;
+		dom = c.base;
 		while (p=c._renderCallbacks.pop()) p();
 
 		// if (c!=null) {
