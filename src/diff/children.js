@@ -1,7 +1,6 @@
 import { diff, unmount } from './index';
 // import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 // import { diff, unmount, getVNodeChildren } from './index';
-// import { toVNode } from '../render';
 // import { diffProps } from './props';
 // import { cloneElement } from '../clone-element';
 
@@ -124,7 +123,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 		// 		if (c!=null && c.localName===child.tag) {
 		// 			// console.log('found hydration match for '+child.tag);
 		// 			excessChildren[j] = null;
-		// 			old = toVNode(c);
+		// 			//old = toVNode(c);
 		// 			break;
 		// 		}
 		// 	}
