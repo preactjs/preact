@@ -475,7 +475,6 @@ describe('Components', () => {
 		});
 	});
 
-
 	describe('High-Order Components', () => {
 		it('should render nested functional components', () => {
 			const PROPS = { foo: 'bar', onBaz: () => {} };
@@ -706,7 +705,7 @@ describe('Components', () => {
 					return <Func />;
 				}
 			}
-			const Func = sinon.spy( () => <Inner /> );
+			const Func = () => <Inner />;
 			class Inner extends Component {
 				componentWillMount() {}
 				componentDidMount() {}
@@ -718,13 +717,13 @@ describe('Components', () => {
 
 			spyAll(Inner.prototype);
 
-			let root = render(<Root />, scratch);
+			render(<Root />, scratch);
 
 			expect(Inner.prototype.componentWillMount).to.have.been.calledOnce;
 			expect(Inner.prototype.componentDidMount).to.have.been.calledOnce;
 			expect(Inner.prototype.componentWillMount).to.have.been.calledBefore(Inner.prototype.componentDidMount);
 
-			render(<asdf />, scratch, root);
+			render(<asdf />, scratch);
 
 			expect(Inner.prototype.componentWillUnmount).to.have.been.calledOnce;
 		});
@@ -828,19 +827,19 @@ describe('Components', () => {
 				<div class="inner-func">bar</div>
 			);
 
-			let root = render(<Outer child={Inner} />, scratch, root);
+			render(<Outer child={Inner} />, scratch);
 
 			expect(Inner.prototype.componentWillMount, 'initial mount').to.have.been.calledOnce;
 			expect(Inner.prototype.componentWillUnmount, 'initial mount').not.to.have.been.called;
 
 			Inner.prototype.componentWillMount.resetHistory();
-			root = render(<Outer child={InnerFunc} />, scratch, root);
+			render(<Outer child={InnerFunc} />, scratch);
 
 			expect(Inner.prototype.componentWillMount, 'unmount').not.to.have.been.called;
 			expect(Inner.prototype.componentWillUnmount, 'unmount').to.have.been.calledOnce;
 
 			Inner.prototype.componentWillUnmount.resetHistory();
-			root = render(<Outer child={Inner} />, scratch, root);
+			render(<Outer child={Inner} />, scratch);
 
 			expect(Inner.prototype.componentWillMount, 'remount').to.have.been.calledOnce;
 			expect(Inner.prototype.componentWillUnmount, 'remount').not.to.have.been.called;
