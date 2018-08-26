@@ -264,7 +264,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		let vnode = c._previousVTree = coerceToVNode(c.render(c.props, c.state, c.context));
 
 		if (c.getChildContext!=null) {
-			context = Object.assign({}, context, c.getChildContext());
+			context = assign(assign({}, context), c.getChildContext());
 		}
 
 		if (!isNew && c.getSnapshotBeforeUpdate!=null) {
