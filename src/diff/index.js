@@ -180,37 +180,10 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			// 	oldTree.props.ref(null);
 			// }
 		}
+
+		// Get component and set it to `c`
 		if (oldTree!=null && oldTree._component) {
 			c = newTree._component = oldTree._component;
-
-			// let nextState = c.state;
-			// if (c.prevState!=null) {
-			// 	c.state = c.prevState;
-			// 	c.prevState = null;
-			// }
-
-			let s = c._nextState || c.state;
-			if (newTag.getDerivedStateFromProps!=null) {
-				oldState = assign({}, c.state);
-				assign(s, newTag.getDerivedStateFromProps(newTree.props, s));
-			}
-			// console.log('updating component in-place', c._nextState);
-			// if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, c.state)===false) {
-			// 	c.state = nextState;
-			if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, s, context)===false) {
-				// diffLevel--;
-				dom = newTree._el = c.base;
-				break outer;
-				// return newTree._el = c.base;
-			}
-			if (newTag.getDerivedStateFromProps==null && c.componentWillReceiveProps!=null) {
-				c.componentWillReceiveProps(newTree.props, context);
-			}
-
-			if (c.componentWillUpdate!=null) {
-				c.componentWillUpdate(newTree.props, s, context);
-			}
-			// c.state = nextState;
 		}
 		else {
 			isNew = true;
@@ -219,14 +192,18 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			c.props = newTree.props;
 			if (!c.state) c.state = {};
 			c.context = context;
-			if (newTag.getDerivedStateFromProps!=null) {
-				// Since c._nextState is modified, the previous state doesn't need to be saved.
-				// It remains intact at c.state
-				assign(c.state, newTag.getDerivedStateFromProps(newTree.props, c.state));
-			}
-			else if (c.componentWillMount!=null) {
-				c.componentWillMount();
-			}
+		}
+
+		// Invoke getDerivedStateFromProps
+		let s = c._nextState || c.state;
+		if (newTag.getDerivedStateFromProps!=null) {
+			oldState = assign({}, c.state);
+			assign(s, newTag.getDerivedStateFromProps(newTree.props, s));
+		}
+
+		// Invoke pre-render lifecycle methods
+		if (isNew) {
+			if (newTag.getDerivedStateFromProps==null && c.componentWillMount!=null) c.componentWillMount();
 			mounts.push(c);
 
 			// if (dom==null && newTree.tag.recycle===true && newTree.tag.__cache!=null) {
@@ -247,6 +224,31 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			// 	dom = newTree.tag.$cache.cloneNode(true);
 			// }
 		}
+		else {
+			// let nextState = c.state;
+			// if (c.prevState!=null) {
+			// 	c.state = c.prevState;
+			// 	c.prevState = null;
+			// }
+
+			// console.log('updating component in-place', c._nextState);
+			// if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, c.state)===false) {
+			// 	c.state = nextState;
+			if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, s, context)===false) {
+				// diffLevel--;
+				dom = newTree._el = c.base;
+				break outer;
+				// return newTree._el = c.base;
+			}
+			if (newTag.getDerivedStateFromProps==null && c.componentWillReceiveProps!=null) {
+				c.componentWillReceiveProps(newTree.props, context);
+			}
+
+			if (c.componentWillUpdate!=null) {
+				c.componentWillUpdate(newTree.props, s, context);
+			}
+			// c.state = nextState;
+		}
 
 		oldProps = c.props;
 		if (!oldState) oldState = c.state;
@@ -261,7 +263,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		let vnode = c._previousVTree = coerceToVNode(c.render(c.props, c.state, c.context));
 
 		if (c.getChildContext!=null) {
-			context = Object.assign({}, context, c.getChildContext());
+			context = assign(assign({}, context), c.getChildContext());
 		}
 
 		if (!isNew && c.getSnapshotBeforeUpdate!=null) {
