@@ -212,11 +212,12 @@ describe('Components', () => {
 		}
 		sinon.spy(Comp.prototype, 'componentWillMount');
 
+		let good, bad;
 		class GoodContainer extends Component {
-
 			constructor(props) {
 				super(props);
 				this.state.alt = false;
+				good = this;
 			}
 
 			render(_, { alt }) {
@@ -231,10 +232,10 @@ describe('Components', () => {
 		}
 
 		class BadContainer extends Component {
-
 			constructor(props) {
 				super(props);
 				this.state.alt = false;
+				bad = this;
 			}
 
 			render(_, { alt }) {
@@ -248,8 +249,7 @@ describe('Components', () => {
 			}
 		}
 
-		let good, bad;
-		let root = render(<GoodContainer ref={c => good=c} />, scratch);
+		render(<GoodContainer />, scratch);
 		expect(scratch.textContent, 'new component with key present').to.equal('AB');
 		expect(Comp.prototype.componentWillMount).to.have.been.calledTwice;
 		expect(sideEffect).to.have.been.calledTwice;
@@ -257,7 +257,7 @@ describe('Components', () => {
 		sideEffect.resetHistory();
 		Comp.prototype.componentWillMount.resetHistory();
 		good.setState({ alt: true });
-		good.forceUpdate();
+		rerender();
 		expect(scratch.textContent, 'new component with key present re-rendered').to.equal('C');
 		//we are recycling the first 2 components already rendered, just need a new one
 		expect(Comp.prototype.componentWillMount).to.have.been.calledOnce;
@@ -265,7 +265,7 @@ describe('Components', () => {
 
 		sideEffect.resetHistory();
 		Comp.prototype.componentWillMount.resetHistory();
-		render(<BadContainer ref={c => bad=c} />, scratch, root);
+		render(<BadContainer />, scratch);
 		expect(scratch.textContent, 'new component without key').to.equal('DE');
 		expect(Comp.prototype.componentWillMount).to.have.been.calledTwice;
 		expect(sideEffect).to.have.been.calledTwice;
@@ -277,8 +277,6 @@ describe('Components', () => {
 		expect(scratch.textContent, 'new component without key re-rendered').to.equal('D');
 		expect(Comp.prototype.componentWillMount).to.not.have.been.called;
 		expect(sideEffect).to.not.have.been.called;
-
-
 	});
 
 	describe('Fragment', () => {
