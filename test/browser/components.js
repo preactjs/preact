@@ -847,7 +847,7 @@ describe('Components', () => {
 		});
 	});
 
-	describe.skip('Component Nesting', () => {
+	describe('Component Nesting', () => {
 		let useIntermediary = false;
 
 		let createComponent = (Intermediary) => {
