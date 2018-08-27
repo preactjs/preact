@@ -155,7 +155,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 				// let nextChild;
 
 
-				outer: if (Array.isArray(children) || (childNode==null || childNode.parentNode!==node)) {
+				outer: if (childNode==null || childNode.parentNode!==node) {
 					node.appendChild(newEl);
 				}
 				else {

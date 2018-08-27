@@ -132,8 +132,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	// 	// return newTree._el = dom;
 	// }
 
-	let originalDom = dom,
-		originalOldTree = oldTree;
+	let originalOldTree = oldTree;
 
 	// if (newTree==null) {
 	// 	newTree = createVNode(3, null, null, null, '', null);
@@ -375,7 +374,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	// if (originalOldTree && originalOldTree._el && originalOldTree._el!==dom) {
 	// 	unmount(originalOldTree);
 	// }
-	if (dom!==originalDom && originalOldTree!=null && originalOldTree._el!==dom) {
+	if (originalOldTree!=null && originalOldTree.tag!==newTag) {
 		// console.trace('unmount', originalOldTree._el);
 		unmount(originalOldTree, ancestorComponent);
 	}
@@ -511,6 +510,12 @@ export function unmount(vnode, ancestorComponent) {
 		// }
 
 		r.base = null;
+		if (r = r._previousVTree) unmount(r);
+	}
+	else if (r = vnode._children) {
+		for (let i = 0; i < r.length; i++) {
+			unmount(r[i]);
+		}
 	}
 
 	// if (recursive) {
