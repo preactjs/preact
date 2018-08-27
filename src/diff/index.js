@@ -371,7 +371,7 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 	let d = dom;
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
-	isSvg = vnode.tag === 'svg' ? true : vnode.tag === 'foreignObject' ? false : isSvg;
+	isSvg = isSvg ? vnode.tag !== 'foreignObject' : vnode.tag === 'svg';
 
 	// if (oldVNode!=null) {
 	// 	if (vnode.type!==oldVNode.type) console.log('vnode type mismatch: ', oldVNode.type, vnode.type);
