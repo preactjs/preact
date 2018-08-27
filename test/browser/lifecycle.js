@@ -2366,11 +2366,12 @@ describe('Lifecycle methods', () => {
 					return <div>{this.state.error ? String(this.state.error) : this.props.children}</div>;
 				}
 			}
-			function throwError() {
-				throw new Error("Error!");
-			}
 			function ErrorGeneratorComponent() {
-				return <div ref={throwError}/>
+				return <div ref={(element) => {
+					if (element) {
+						throw new Error("Error");
+					}
+				}}/>
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
 			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
