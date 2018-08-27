@@ -212,11 +212,12 @@ describe('Components', () => {
 		}
 		sinon.spy(Comp.prototype, 'componentWillMount');
 
+		let good, bad;
 		class GoodContainer extends Component {
-
 			constructor(props) {
 				super(props);
 				this.state.alt = false;
+				good = this;
 			}
 
 			render(_, { alt }) {
@@ -231,10 +232,10 @@ describe('Components', () => {
 		}
 
 		class BadContainer extends Component {
-
 			constructor(props) {
 				super(props);
 				this.state.alt = false;
+				bad = this;
 			}
 
 			render(_, { alt }) {
@@ -248,8 +249,7 @@ describe('Components', () => {
 			}
 		}
 
-		let good, bad;
-		let root = render(<GoodContainer ref={c => good=c} />, scratch);
+		render(<GoodContainer />, scratch);
 		expect(scratch.textContent, 'new component with key present').to.equal('AB');
 		expect(Comp.prototype.componentWillMount).to.have.been.calledTwice;
 		expect(sideEffect).to.have.been.calledTwice;
@@ -257,7 +257,7 @@ describe('Components', () => {
 		sideEffect.resetHistory();
 		Comp.prototype.componentWillMount.resetHistory();
 		good.setState({ alt: true });
-		good.forceUpdate();
+		rerender();
 		expect(scratch.textContent, 'new component with key present re-rendered').to.equal('C');
 		//we are recycling the first 2 components already rendered, just need a new one
 		expect(Comp.prototype.componentWillMount).to.have.been.calledOnce;
@@ -265,7 +265,7 @@ describe('Components', () => {
 
 		sideEffect.resetHistory();
 		Comp.prototype.componentWillMount.resetHistory();
-		render(<BadContainer ref={c => bad=c} />, scratch, root);
+		render(<BadContainer />, scratch);
 		expect(scratch.textContent, 'new component without key').to.equal('DE');
 		expect(Comp.prototype.componentWillMount).to.have.been.calledTwice;
 		expect(sideEffect).to.have.been.calledTwice;
@@ -273,12 +273,10 @@ describe('Components', () => {
 		sideEffect.resetHistory();
 		Comp.prototype.componentWillMount.resetHistory();
 		bad.setState({ alt: true });
-		bad.forceUpdate();
+		rerender();
 		expect(scratch.textContent, 'new component without key re-rendered').to.equal('D');
 		expect(Comp.prototype.componentWillMount).to.not.have.been.called;
 		expect(sideEffect).to.not.have.been.called;
-
-
 	});
 
 	describe('Fragment', () => {
@@ -474,7 +472,6 @@ describe('Components', () => {
 			});
 		});
 	});
-
 
 	describe('High-Order Components', () => {
 		it('should render nested functional components', () => {
@@ -706,7 +703,7 @@ describe('Components', () => {
 					return <Func />;
 				}
 			}
-			const Func = sinon.spy( () => <Inner /> );
+			const Func = () => <Inner />;
 			class Inner extends Component {
 				componentWillMount() {}
 				componentDidMount() {}
@@ -718,13 +715,13 @@ describe('Components', () => {
 
 			spyAll(Inner.prototype);
 
-			let root = render(<Root />, scratch);
+			render(<Root />, scratch);
 
 			expect(Inner.prototype.componentWillMount).to.have.been.calledOnce;
 			expect(Inner.prototype.componentDidMount).to.have.been.calledOnce;
 			expect(Inner.prototype.componentWillMount).to.have.been.calledBefore(Inner.prototype.componentDidMount);
 
-			render(<asdf />, scratch, root);
+			render(<asdf />, scratch);
 
 			expect(Inner.prototype.componentWillUnmount).to.have.been.calledOnce;
 		});
@@ -828,19 +825,19 @@ describe('Components', () => {
 				<div class="inner-func">bar</div>
 			);
 
-			let root = render(<Outer child={Inner} />, scratch, root);
+			render(<Outer child={Inner} />, scratch);
 
 			expect(Inner.prototype.componentWillMount, 'initial mount').to.have.been.calledOnce;
 			expect(Inner.prototype.componentWillUnmount, 'initial mount').not.to.have.been.called;
 
 			Inner.prototype.componentWillMount.resetHistory();
-			root = render(<Outer child={InnerFunc} />, scratch, root);
+			render(<Outer child={InnerFunc} />, scratch);
 
 			expect(Inner.prototype.componentWillMount, 'unmount').not.to.have.been.called;
 			expect(Inner.prototype.componentWillUnmount, 'unmount').to.have.been.calledOnce;
 
 			Inner.prototype.componentWillUnmount.resetHistory();
-			root = render(<Outer child={Inner} />, scratch, root);
+			render(<Outer child={Inner} />, scratch);
 
 			expect(Inner.prototype.componentWillMount, 'remount').to.have.been.calledOnce;
 			expect(Inner.prototype.componentWillUnmount, 'remount').not.to.have.been.called;
