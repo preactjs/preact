@@ -165,7 +165,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 					// while ((sib=sib.nextSibling) && j++<oldChildrenLength/2) {
 					while ((sib=sib.nextSibling) && j++<oldChildrenLength/2) {
 						if (sib===newEl) {
-							oldChildren[index] = childNode;
+							oldChildren[index] = childNode._previousVTree;
 							break outer;
 						}
 					}
