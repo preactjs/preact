@@ -285,7 +285,7 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('');
 		});
 
-		it.skip('should just render children for fragments', () => {
+		it('should just render children for fragments', () => {
 			class Comp extends Component {
 				render() {
 					return (

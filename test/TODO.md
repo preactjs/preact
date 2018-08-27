@@ -2,7 +2,6 @@
 
 - Components
 	- Fragment
-		- ✖ should just render children for fragments
 		- ✖ should render nested Fragments
 - Lifecycle methods
 	- ✖ should call nested new lifecycle methods in the right order

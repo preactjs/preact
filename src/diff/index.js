@@ -269,7 +269,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		}
 
 		if (vnode instanceof Array) {
-			diffChildren(parent, vnode, prev, EMPTY_OBJ, isSvg, excessChildren, false, mounts);
+			diffChildren(parent, vnode, prev==null ? EMPTY_ARR : getVNodeChildren(prev), EMPTY_OBJ, isSvg, excessChildren, false, mounts);
 		}
 		else {
 			c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, false, mounts);
