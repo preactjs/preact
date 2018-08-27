@@ -269,10 +269,10 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		}
 
 		if (vnode instanceof Array) {
-			diffChildren(parent, vnode, prev, EMPTY_OBJ, isSvg, excessChildren, 0, mounts);
+			diffChildren(parent, vnode, prev, EMPTY_OBJ, isSvg, excessChildren, false, mounts);
 		}
 		else {
-			c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, 0, mounts);
+			c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, false, mounts);
 		}
 		// context = assign({}, context);
 		// context.__depth = (context.__depth || 0) + 1;
@@ -330,7 +330,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		// }
 	}
 	else {
-		dom = newTree._el = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren, 0, mounts);
+		dom = newTree._el = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren, false, mounts);
 	}
 
 	if (isRootDiff) {
