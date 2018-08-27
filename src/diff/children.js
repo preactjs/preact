@@ -244,7 +244,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 	if (excessChildren!=null) for (i=excessChildren.length; i--; ) if (excessChildren[i]!=null) excessChildren[i].remove();
 
 	// for (let i in seen) if (seen[i] != null && (c = seen[i]._el)) c.remove();
-	for (i=oldChildren.length; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i]);
+	for (i=oldChildren.length; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
 	// for (let i in seen) {
 	// 	if (seen[i]!=null) {
 	// 		// console.log(seen[i]._el);

@@ -85,8 +85,8 @@ import { assign } from '../util';
 
 export function diff(dom, parent, newTree, oldTree, context, isSvg, append, excessChildren, diffLevel, mounts, ancestorComponent) {
 	if (newTree==null) {
-		if (oldTree!=null) {
-			unmount(oldTree);
+		if (oldTree != null) {
+			unmount(oldTree, ancestorComponent);
 		}
 		return null;
 	}
@@ -301,7 +301,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		// }
 
 		if (c.base==null) {
-			if (prev) unmount(prev);
+			if (prev) unmount(prev, ancestorComponent);
 		}
 		else if (parent && append!==false) {
 			// if (insertBefore && c.base.nextSibling!==insertBefore) parent.insertBefore(c.base, insertBefore);
@@ -510,11 +510,11 @@ export function unmount(vnode, ancestorComponent) {
 		// }
 
 		r.base = null;
-		if (r = r._previousVTree) unmount(r);
+		if (r._previousTree) unmount(r._previousVTree, ancestorComponent);
 	}
 	else if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {
-			unmount(r[i]);
+			unmount(r[i], ancestorComponent);
 		}
 	}
 
@@ -650,7 +650,9 @@ function flattenChildren(children, flattened) {
 		// if (flattened.indexOf(children)!==-1) {
 		// 	children = assign({}, children);
 		// }
-		flattened.push(children);
+		if (children != null) {
+			flattened.push(children);
+		}
 	}
 }
 
