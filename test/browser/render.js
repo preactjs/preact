@@ -505,7 +505,7 @@ describe('render()', () => {
 		});
 	});
 
-	describe.skip('dangerouslySetInnerHTML', () => {
+	describe('dangerouslySetInnerHTML', () => {
 		it('should support dangerouslySetInnerHTML', () => {
 			let html = '<b>foo &amp; bar</b>';
 			// eslint-disable-next-line react/no-danger

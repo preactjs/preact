@@ -17,5 +17,4 @@
 - render
 	- ✖ should merge new elements when called twice
 	- ✖ should skip non-preact elements
-	- dangerouslySetInnerHTML (***`SKIPPED`***)
 
