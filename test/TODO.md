@@ -1,26 +1,13 @@
 # Tests skipped to get CI to pass
 
 - Components
-	- ✖ should not recycle common class children with different keys
 	- Fragment
 		- ✖ should just render children for fragments
 		- ✖ should render nested Fragments
-	- High-Order Components
-		- ✖ should resolve intermediary functional component
 - Lifecycle methods
 	- ✖ should call nested new lifecycle methods in the right order
 	- static getDerivedStateFromProps
 		- ✖ should NOT mutate state on mount, only create new versions
-	- \#constructor and component(Did|Will)(Mount|Unmount)
-		- inner components
-			- ✖ should be invoked for components on re-render
-		- innermost components
-			- ✖ should be invoked for components on unmount
-			- ✖ should be invoked for components on re-render
-		- when shouldComponentUpdate() returns false
-			- ✖ should be invoked normally on unmount
-			- ✖ should still invoke mount for shouldComponentUpdate():false
-			- ✖ should still invoke unmount for shouldComponentUpdate():false
 	- \#shouldComponentUpdate
 		- ✖ should be passed next props and state
 	- Lifecycle DOM Timing
@@ -30,6 +17,5 @@
 - render
 	- ✖ should merge new elements when called twice
 	- ✖ should skip non-preact elements
-	- ✖ should not execute append operation when child is at last
 	- dangerouslySetInnerHTML (***`SKIPPED`***)
 
