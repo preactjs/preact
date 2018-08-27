@@ -196,7 +196,7 @@ describe('Components', () => {
 	});
 
 	// Test for Issue developit/preact#254
-	it.skip('should not recycle common class children with different keys', () => {
+	it('should not recycle common class children with different keys', () => {
 		let idx = 0;
 		let msgs = ['A','B','C','D','E','F','G','H'];
 		let sideEffect = sinon.spy();
@@ -693,7 +693,7 @@ describe('Components', () => {
 			expect(sortAttributes(scratch.innerHTML)).to.equal(sortAttributes('<div foo="bar" j="4" i="5">inner</div>'));
 		});
 
-		it.skip('should resolve intermediary functional component', () => {
+		it('should resolve intermediary functional component', () => {
 			let ctx = {};
 			class Root extends Component {
 				getChildContext() {

@@ -1237,7 +1237,7 @@ describe('Lifecycle methods', () => {
 				expect(proto.componentDidMount).to.have.been.called;
 			});
 
-			it.skip('should be invoked for components on unmount', () => {
+			it('should be invoked for components on unmount', () => {
 				reset();
 				setState({ show: false });
 				rerender();
@@ -1245,7 +1245,7 @@ describe('Lifecycle methods', () => {
 				expect(proto.componentWillUnmount).to.have.been.called;
 			});
 
-			it.skip('should be invoked for components on re-render', () => {
+			it('should be invoked for components on re-render', () => {
 				reset();
 				setState({ show: true });
 				rerender();
@@ -1312,14 +1312,14 @@ describe('Lifecycle methods', () => {
 				expect(proto.componentDidMount).to.have.been.called;
 			});
 
-			it.skip('should be invoked normally on unmount', () => {
+			it('should be invoked normally on unmount', () => {
 				setState({ show: false });
 				rerender();
 
 				expect(proto.componentWillUnmount).to.have.been.called;
 			});
 
-			it.skip('should still invoke mount for shouldComponentUpdate():false', () => {
+			it('should still invoke mount for shouldComponentUpdate():false', () => {
 				setState({ show: true });
 				rerender();
 
@@ -1328,7 +1328,7 @@ describe('Lifecycle methods', () => {
 				expect(proto.componentDidMount).to.have.been.called;
 			});
 
-			it.skip('should still invoke unmount for shouldComponentUpdate():false', () => {
+			it('should still invoke unmount for shouldComponentUpdate():false', () => {
 				setState({ show: false });
 				rerender();
 

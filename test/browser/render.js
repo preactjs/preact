@@ -704,7 +704,7 @@ describe('render()', () => {
 		expect(sortAttributes(html)).to.equal(sortAttributes('<input type="range" min="0" max="100" list="steplist">'));
 	});
 
-	it.skip('should not execute append operation when child is at last', () => {
+	it('should not execute append operation when child is at last', () => {
 		// See developit/preact#717 for discussion about the issue this addresses
 
 		let todoText = 'new todo that I should complete';
