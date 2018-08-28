@@ -297,12 +297,7 @@ describe('Components', () => {
 				}
 			}
 
-			let root;
-			function test(content) {
-				root = render(content, scratch, root);
-			}
-
-			test(<Comp />);
+			render(<Comp />, scratch);
 			expect(scratch.innerHTML).to.equal('<div>Child1</div><div>Child2</div>');
 		});
 
