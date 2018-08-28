@@ -1,4 +1,4 @@
-import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
+import { EMPTY_OBJ, EMPTY_ARR, FORCE_RENDER } from '../constants';
 // import { assign } from '../util';
 import { Component, enqueueRender } from '../component';
 import { coerceToVNode /*, reclaimVNode*/ } from '../create-element';
@@ -254,7 +254,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				// console.log('updating component in-place', c._nextState);
 				// if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, c.state)===false) {
 				// 	c.state = nextState;
-				if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, s, context)===false) {
+				if (c.mode!=FORCE_RENDER && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, s, context)===false) {
 					dom = c.base;
 					break outer;
 					// return newTree._el = c.base;

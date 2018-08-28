@@ -24,7 +24,7 @@ describe('Lifecycle methods', () => {
 		teardown(scratch);
 	});
 
-	it.skip('should call nested new lifecycle methods in the right order', () => {
+	it('should call nested new lifecycle methods in the right order', () => {
 		let updateOuterState;
 		let updateInnerState;
 		let forceUpdateOuter;
@@ -115,7 +115,7 @@ describe('Lifecycle methods', () => {
 
 		// Outer & Inner props update
 		log = [];
-		render(<Outer x={2} />, scratch, scratch.firstChild);
+		render(<Outer x={2} />, scratch);
 		// Note: we differ from react here in that we apply changes to the dom
 		// as we find them while diffing. React on the other hand separates this
 		// into specific phases, meaning changes to the dom are only flushed
@@ -193,7 +193,7 @@ describe('Lifecycle methods', () => {
 
 		// Unmounting Outer & Inner
 		log = [];
-		render(<table />, scratch, scratch.firstChild);
+		render(<table />, scratch);
 		expect(log).to.deep.equal([
 			'outer componentWillUnmount',
 			'inner componentWillUnmount'
