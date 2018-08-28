@@ -1,4 +1,4 @@
-import { createElement as h, render, Component } from '../../src/index';
+import { createElement as h, render, Component, Fragment } from '../../src/index';
 import { setupScratch, teardown } from './helpers';
 
 /** @jsx h */
@@ -162,5 +162,29 @@ describe('context', () => {
 
 		expect(Inner.prototype.render).to.have.been.calledWith({}, {}, { outerContext });
 		expect(InnerMost.prototype.render).to.have.been.calledWith({}, {}, { outerContext, innerContext });
+	});
+
+	it('should pass context through Fragments', () => {
+		const context = { foo: 'bar' };
+
+		const Foo = sinon.spy(() => <div />);
+
+		class Wrapper extends Component {
+			getChildContext() {
+				return context;
+			}
+
+			render() {
+				return (
+					<Fragment>
+						<Foo />
+						<Foo />
+					</Fragment>
+				);
+			}
+		}
+
+		render(<Wrapper />, scratch);
+		expect(Foo.args[0][1]).to.deep.equal(context);
 	});
 });
