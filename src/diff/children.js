@@ -1,4 +1,4 @@
-import { diff, unmount } from './index';
+import { diff, unmount, flushMounts } from './index';
 import { coerceToVNode } from '../create-element';
 // import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 // import { diff, unmount, getVNodeChildren } from './index';
@@ -142,7 +142,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 
 		next = childNode!=null && childNode.nextSibling;
 
-		newEl = diff(old==null ? null : old._el, node, child, old, context, isSvg, false, excessChildren, isRootDiff, mounts, ancestorComponent);
+		newEl = diff(old==null ? null : old._el, node, child, old, context, isSvg, false, excessChildren, false, mounts, ancestorComponent);
 		if (newEl!=null) {
 			// let childNode;
 			// childNode = null;
@@ -238,6 +238,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 		// childNode = nextChild;
 		// childNode = newEl.nextSibling;
 	}
+	if (isRootDiff) flushMounts(mounts);
 
 	// console.log(oldChildren.slice(), children.slice());
 
