@@ -285,7 +285,7 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('');
 		});
 
-		it('should just render children for fragments', () => {
+		it.skip('should just render children for fragments', () => {
 			class Comp extends Component {
 				render() {
 					return (
@@ -306,7 +306,7 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div>Child1</div><div>Child2</div>');
 		});
 
-		it('should render nested Fragments', () => {
+		it.skip('should render nested Fragments', () => {
 			render((
 				<Fragment>
 					<Fragment>foo</Fragment>
@@ -384,7 +384,7 @@ describe('Components', () => {
 				'123',
 				456
 			]}
-						 />, scratch);
+			       />, scratch);
 
 			expect(scratch.innerHTML).to.equal('<div a="b"><span class="bar">bar</span>123456</div>');
 		});

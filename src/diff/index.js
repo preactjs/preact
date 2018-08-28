@@ -83,7 +83,7 @@ import { assign } from '../util';
 // }
 
 
-export function diff(dom, parent, newTree, oldTree, context, isSvg, append, excessChildren, diffLevel, mounts, ancestorComponent) {
+export function diff(dom, parent, newTree, oldTree, context, isSvg, append, excessChildren, isRootDiff, mounts, ancestorComponent) {
 	if (newTree==null) {
 		if (oldTree != null) {
 			unmount(oldTree, ancestorComponent);
@@ -155,7 +155,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		clearProcessingException;
 
 	// root of a diff:
-	if (diffLevel++ === 0) {
+	if (isRootDiff) {
 		isSvg = parent!=null && parent.ownerSVGElement!==undefined;
 	}
 
@@ -238,8 +238,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			// if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, c.state)===false) {
 			// 	c.state = nextState;
 			if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, s, context)===false) {
-				// diffLevel--;
-				dom = c.base;
+				dom = newTree._el = c.base;
 				break outer;
 				// return newTree._el = c.base;
 			}
@@ -275,10 +274,10 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		}
 
 		if (vnode instanceof Array) {
-			diffChildren(parent, vnode, prev, EMPTY_OBJ, isSvg, excessChildren, diffLevel, mounts, c);
+			diffChildren(parent, vnode, prev, EMPTY_OBJ, isSvg, excessChildren, false, mounts, c);
 		}
 		else {
-			c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, diffLevel, mounts, c);
+			c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, false, mounts, c);
 		}
 		// context = assign({}, context);
 		// context.__depth = (context.__depth || 0) + 1;
@@ -294,7 +293,6 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		// }
 		// newTree.tag.$precache = c.base;
 		c._vnode = newTree;
-		//c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, diffLevel, mounts, c);
 
 		// if (dom!=null && c.base!=null && c.base!==dom) {
 		// 	parent.replaceChild(c.base, dom);
@@ -336,7 +334,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		// }
 	}
 	else {
-		dom = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren, diffLevel, mounts, ancestorComponent);
+		dom = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren, false, mounts, ancestorComponent);
 	}
 
 	if (clearProcessingException) {
@@ -353,7 +351,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 
 	newTree._el = dom;
 
-	if (--diffLevel===0) {
+	if (isRootDiff) {
 		// processQueue();
 		// console.log('firing '+mounts.length+' mounts');
 		while ((c = mounts.pop())) {
@@ -367,7 +365,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		}
 	}
 
-	// console.log(diffLevel);
+	// console.log(isRootDiff);
 
 	// if (oldTree!=null && oldTree!==newTree) unmount(oldTree, true, oldTree._el!==dom);
 
@@ -382,7 +380,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	return dom;
 }
 
-function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessChildren, diffLevel, mounts, ancestorComponent) {
+function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessChildren, isRootDiff, mounts, ancestorComponent) {
 	// if (vnode==null) {
 	// 	let c = document.createComment('empty');
 	// 	if (parent!=null) {
@@ -396,7 +394,7 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 	let d = dom;
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
-	isSvg = vnode.tag === 'svg' ? true : vnode.tag === 'foreignObject' ? false : isSvg;
+	isSvg = isSvg ? vnode.tag !== 'foreignObject' : vnode.tag === 'svg';
 
 	// if (oldVNode!=null) {
 	// 	if (vnode.type!==oldVNode.type) console.log('vnode type mismatch: ', oldVNode.type, vnode.type);
@@ -467,7 +465,7 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 		// console.log('diffChildren(', getVNodeChildren(vnode).map( p => Object.assign({}, p) ), getVNodeChildren(oldVNode).map( p => Object.assign({}, p) ), ')');
 		// let newChildren = getVNodeChildren(vnode);
 		// diffChildren(dom, newChildren, vnode===oldVNode ? newChildren : oldVNode==null ? [] : getVNodeChildren(oldVNode), context, isSvg, excessChildren);
-		diffChildren(dom, getVNodeChildren(vnode), oldVNode==null ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessChildren, diffLevel, mounts, ancestorComponent);
+		diffChildren(dom, getVNodeChildren(vnode), oldVNode==null ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessChildren, isRootDiff, mounts, ancestorComponent);
 		if (vnode!==oldVNode) {
 			diffProps(dom, vnode.props, oldVNode==null ? EMPTY_OBJ : oldVNode.props, isSvg);
 		}
@@ -510,7 +508,7 @@ export function unmount(vnode, ancestorComponent) {
 		// }
 
 		r.base = null;
-		if (r._previousTree) unmount(r._previousVTree, ancestorComponent);
+		if (r = r._previousTree) unmount(r, ancestorComponent);
 	}
 	else if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {

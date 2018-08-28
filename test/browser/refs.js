@@ -10,7 +10,7 @@ let spy = (name, ...args) => {
 	return spy;
 };
 
-describe('refs', () => {
+describe.skip('refs', () => {
 	let scratch;
 
 	beforeEach(() => {

@@ -3,7 +3,7 @@ import { setupScratch, teardown, setupRerender } from './helpers';
 
 /** @jsx h */
 
-const EMPTY_CHILDREN = [];
+// const EMPTY_CHILDREN = [];
 
 describe('Component spec', () => {
 	let scratch, rerender;

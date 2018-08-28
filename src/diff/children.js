@@ -5,7 +5,7 @@ import { diff, unmount } from './index';
 // import { cloneElement } from '../clone-element';
 
 
-export function diffChildren(node, children, oldChildren, context, isSvg, excessChildren, diffLevel, mounts, ancestorComponent) {
+export function diffChildren(node, children, oldChildren, context, isSvg, excessChildren, isRootDiff, mounts, ancestorComponent) {
 	// if (oldChildren==null) oldChildren = EMPTY_ARR;
 
 	// let __children = oldChildren.map(cloneElement);
@@ -141,7 +141,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 
 		next = childNode!=null && childNode.nextSibling;
 
-		newEl = diff(old==null ? null : old._el, node, child, old, context, isSvg, false, excessChildren, diffLevel, mounts, ancestorComponent);
+		newEl = diff(old==null ? null : old._el, node, child, old, context, isSvg, false, excessChildren, isRootDiff, mounts, ancestorComponent);
 		if (newEl!=null) {
 			// let childNode;
 			// childNode = null;
@@ -165,7 +165,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 					// while ((sib=sib.nextSibling) && j++<oldChildrenLength/2) {
 					while ((sib=sib.nextSibling) && j++<oldChildrenLength/2) {
 						if (sib===newEl) {
-							oldChildren[index] = childNode;
+							oldChildren[index] = childNode._previousVTree;
 							break outer;
 						}
 					}
