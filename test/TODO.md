@@ -12,7 +12,6 @@
 		- ✖ should be passed next props and state
 	- Lifecycle DOM Timing
 		- ✖ should be invoked when dom does (DidMount, WillUnmount) or does not (WillMount, DidUnmount) exist
-		- ✖ should remove this.base for HOC
 - refs (***`SKIPPED`***)
 - render
 	- ✖ should merge new elements when called twice
