@@ -344,7 +344,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	} catch (e) {
 		if (c && !dom) {
 			// Create an "anchor" into which we can rerender upon recovery even though the component doesn't have a proper tree to render
-			parent.appendChild(c.base = dom = document.createTextNode(""));
+			parent.appendChild(c.base = dom = document.createTextNode(''));
 		}
 		catchErrorInComponent(e, ancestorComponent);
 	}
