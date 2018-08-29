@@ -12,8 +12,8 @@ export function createElement(tag, props, children) {
 	// return createVNode(ELEMENT_NODE, tag, props==null ? EMPTY_OBJ : props, children, null, props!=null ? props.key : null);
 }
 
-export function Fragment(vnode, props) {
-	return vnode.children;
+export function Fragment(props) {
+	return props.children;
 }
 
 // const RECYCLED_VNODES = [];
