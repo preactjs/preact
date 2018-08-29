@@ -2,7 +2,6 @@
 
 - Components
 	- Fragment
-		- ✖ should just render children for fragments
 		- ✖ should render nested Fragments
 - Lifecycle methods
 	- ✖ should call nested new lifecycle methods in the right order
@@ -12,10 +11,8 @@
 		- ✖ should be passed next props and state
 	- Lifecycle DOM Timing
 		- ✖ should be invoked when dom does (DidMount, WillUnmount) or does not (WillMount, DidUnmount) exist
-		- ✖ should remove this.base for HOC
 - refs (***`SKIPPED`***)
 - render
 	- ✖ should merge new elements when called twice
 	- ✖ should skip non-preact elements
-	- dangerouslySetInnerHTML (***`SKIPPED`***)
 

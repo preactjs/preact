@@ -505,30 +505,31 @@ describe('render()', () => {
 		});
 	});
 
-	describe.skip('dangerouslySetInnerHTML', () => {
+	describe('dangerouslySetInnerHTML', () => {
 		it('should support dangerouslySetInnerHTML', () => {
 			let html = '<b>foo &amp; bar</b>';
 			// eslint-disable-next-line react/no-danger
-			let root = render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
+			render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
 
 			expect(scratch.firstChild, 'set').to.have.property('innerHTML', html);
 			expect(scratch.innerHTML).to.equal('<div>'+html+'</div>');
 
-			root = render(<div>a<strong>b</strong></div>, scratch, root);
+			render(<div>a<strong>b</strong></div>, scratch);
 
 			expect(scratch, 'unset').to.have.property('innerHTML', `<div>a<strong>b</strong></div>`);
 
 			// eslint-disable-next-line react/no-danger
-			render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, root);
-
+			render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
 			expect(scratch.innerHTML, 're-set').to.equal('<div>'+html+'</div>');
 		});
 
 		it('should apply proper mutation for VNodes with dangerouslySetInnerHTML attr', () => {
+			let thing;
 			class Thing extends Component {
 				constructor(props, context) {
 					super(props, context);
 					this.state.html = this.props.html;
+					thing = this;
 				}
 				render(props, { html }) {
 					// eslint-disable-next-line react/no-danger
@@ -536,20 +537,15 @@ describe('render()', () => {
 				}
 			}
 
-			let thing;
-
-			render(<Thing ref={c => thing=c} html="<b><i>test</i></b>" />, scratch);
-
+			render(<Thing html="<b><i>test</i></b>" />, scratch);
 			expect(scratch.innerHTML).to.equal('<div><b><i>test</i></b></div>');
 
 			thing.setState({ html: false });
-			thing.forceUpdate();
-
+			rerender();
 			expect(scratch.innerHTML).to.equal('<div></div>');
 
 			thing.setState({ html: '<foo><bar>test</bar></foo>' });
-			thing.forceUpdate();
-
+			rerender();
 			expect(scratch.innerHTML).to.equal('<div><foo><bar>test</bar></foo></div>');
 		});
 
@@ -557,7 +553,7 @@ describe('render()', () => {
 			let html = '<b>foo &amp; bar</b>';
 			scratch.innerHTML = `<div>${html}</div>`;
 			// eslint-disable-next-line react/no-danger
-			render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch, scratch.lastChild);
+			render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
 
 			expect(scratch.firstChild).to.have.property('innerHTML', html);
 			expect(scratch.innerHTML).to.equal(`<div>${html}</div>`);

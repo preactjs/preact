@@ -238,7 +238,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			// if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, c.state)===false) {
 			// 	c.state = nextState;
 			if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, s, context)===false) {
-				dom = newTree._el = c.base;
+				dom = c.base;
 				break outer;
 				// return newTree._el = c.base;
 			}
@@ -274,7 +274,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		}
 
 		if (vnode instanceof Array) {
-			diffChildren(parent, vnode, prev, EMPTY_OBJ, isSvg, excessChildren, false, mounts, c);
+			diffChildren(parent, vnode, prev==null ? EMPTY_ARR : prev, EMPTY_OBJ, isSvg, excessChildren, false, mounts, c);
 		}
 		else {
 			c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, false, mounts, c);
@@ -465,10 +465,10 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 		// console.log('diffChildren(', getVNodeChildren(vnode).map( p => Object.assign({}, p) ), getVNodeChildren(oldVNode).map( p => Object.assign({}, p) ), ')');
 		// let newChildren = getVNodeChildren(vnode);
 		// diffChildren(dom, newChildren, vnode===oldVNode ? newChildren : oldVNode==null ? [] : getVNodeChildren(oldVNode), context, isSvg, excessChildren);
-		diffChildren(dom, getVNodeChildren(vnode), oldVNode==null ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessChildren, isRootDiff, mounts, ancestorComponent);
 		if (vnode!==oldVNode) {
 			diffProps(dom, vnode.props, oldVNode==null ? EMPTY_OBJ : oldVNode.props, isSvg);
 		}
+		diffChildren(dom, getVNodeChildren(vnode), oldVNode==null ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessChildren, isRootDiff, mounts, ancestorComponent);
 	}
 
 	// if (oldVNode!=null && dom!==d) unmount(oldVNode);
@@ -508,7 +508,7 @@ export function unmount(vnode, ancestorComponent) {
 		// }
 
 		r.base = null;
-		if (r = r._previousTree) unmount(r, ancestorComponent);
+		if (r = r._previousVTree) unmount(r, ancestorComponent);
 	}
 	else if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {

@@ -2401,8 +2401,8 @@ describe('Lifecycle methods', () => {
 	});
 
 
-	describe.skip('Lifecycle DOM Timing', () => {
-		it('should be invoked when dom does (DidMount, WillUnmount) or does not (WillMount, DidUnmount) exist', () => {
+	describe('Lifecycle DOM Timing', () => {
+		it.skip('should be invoked when dom does (DidMount, WillUnmount) or does not (WillMount, DidUnmount) exist', () => {
 			let setState;
 			class Outer extends Component {
 				constructor() {
@@ -2484,7 +2484,7 @@ describe('Lifecycle methods', () => {
 			expect(proto.componentDidMount).to.have.been.called;
 		});
 
-		it.skip('should remove this.base for HOC', () => {
+		it('should remove this.base for HOC', () => {
 			let createComponent = (name, fn) => {
 				class C extends Component {
 					componentWillUnmount() {
@@ -2516,14 +2516,19 @@ describe('Lifecycle methods', () => {
 				return Child && <Child />;
 			});
 
+			let app;
 			class App extends Component {
+				constructor() {
+					super();
+					app = this;
+				}
+
 				render(_, { page }) {
 					return <Selector page={page} />;
 				}
 			}
 
-			let app;
-			render(<App ref={c => app=c} />, scratch);
+			render(<App />, scratch);
 
 			for (let i=0; i<20; i++) {
 				app.setState({ page: i%components.length });
