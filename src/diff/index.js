@@ -355,22 +355,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 
 	newTree._el = dom;
 
-	if (isRootDiff) {
-		// processQueue();
-		// console.log('firing '+mounts.length+' mounts');
-		while ((c = mounts.pop())) {
-			if (c.componentDidMount!=null) {
-				try {
-					c.componentDidMount();
-				}
-				catch (e) {
-					catchErrorInComponent(e, c._ancestorComponent);
-				}
-			}
-		}
-	}
-	// FIXME
-	// if (isRootDiff) flushMounts(mounts);
+	if (isRootDiff) flushMounts(mounts);
 
 	// console.log(isRootDiff);
 
@@ -390,7 +375,14 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 export function flushMounts(mounts) {
 	let c;
 	while ((c = mounts.pop())) {
-		if (c.componentDidMount!=null) c.componentDidMount();
+		if (c.componentDidMount!=null) {
+			try {
+				c.componentDidMount();
+			}
+			catch (e) {
+				catchErrorInComponent(e, c._ancestorComponent);
+			}
+		}
 	}
 }
 
