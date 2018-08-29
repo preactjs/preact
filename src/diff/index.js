@@ -1,6 +1,6 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 // import { assign } from '../util';
-import { Component /* , enqueueRender */ } from '../component';
+import { Component, enqueueRender } from '../component';
 import { coerceToVNode /*, reclaimVNode*/ } from '../create-element';
 import { diffChildren /*, create */ } from './children';
 import { diffProps } from './props';
@@ -83,10 +83,10 @@ import { assign } from '../util';
 // }
 
 
-export function diff(dom, parent, newTree, oldTree, context, isSvg, append, excessChildren, isRootDiff, mounts) {
+export function diff(dom, parent, newTree, oldTree, context, isSvg, append, excessChildren, isRootDiff, mounts, ancestorComponent) {
 	if (newTree==null) {
-		if (oldTree!=null) {
-			unmount(oldTree);
+		if (oldTree != null) {
+			unmount(oldTree, ancestorComponent);
 		}
 		return null;
 	}
@@ -151,7 +151,8 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 
 	let c, p, isNew = false, oldProps, oldState, oldContext,
 		newTag = newTree.tag,
-		oldTag = oldTree!=null ? oldTree.tag : null;
+		oldTag = oldTree!=null ? oldTree.tag : null,
+		clearProcessingException;
 
 	// root of a diff:
 	if (isRootDiff) {
@@ -169,175 +170,201 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	// 	}
 	// }
 
-	outer: if (typeof newTag==='function') {
-		if (typeof oldTag==='function' && oldTag!==newTag) {
-			// unmount(oldTree);
-			oldTree = null;
-			// oldTree._component.componentWillUnmount();
-			// oldTree._component.base = null;
-			// if (oldTree.props.ref!=null) {
-			// 	oldTree.props.ref(null);
-			// }
-		}
+	try {
 
-		// Get component and set it to `c`
-		if (oldTree!=null && oldTree._component) {
-			c = newTree._component = oldTree._component;
-		}
-		else {
-			isNew = true;
-			// c = newTree._component = new newTree.tag(newTree.props, context);
-			c = newTree._component = createComponent(newTree.tag, newTree.props, context);
+		outer: if (typeof newTag==='function') {
+			if (typeof oldTag==='function' && oldTag!==newTag) {
+				// unmount(oldTree);
+				oldTree = null;
+				// oldTree._component.componentWillUnmount();
+				// oldTree._component.base = null;
+				// if (oldTree.props.ref!=null) {
+				// 	oldTree.props.ref(null);
+				// }
+			}
+
+			// Get component and set it to `c`
+			if (oldTree!=null && oldTree._component) {
+				c = newTree._component = oldTree._component;
+				clearProcessingException = c._processingException;
+			}
+			else {
+				isNew = true;
+				// c = newTree._component = new newTree.tag(newTree.props, context);
+				c = newTree._component = createComponent(newTree.tag, newTree.props, context, ancestorComponent);
+				c.props = newTree.props;
+				if (!c.state) c.state = {};
+				c.context = context;
+			}
+
+			// Invoke getDerivedStateFromProps
+			let s = c._nextState || c.state;
+			if (newTag.getDerivedStateFromProps!=null) {
+				oldState = assign({}, c.state);
+				assign(s, newTag.getDerivedStateFromProps(newTree.props, s));
+			}
+
+			// Invoke pre-render lifecycle methods
+			if (isNew) {
+				if (newTag.getDerivedStateFromProps==null && c.componentWillMount!=null) c.componentWillMount();
+				mounts.push(c);
+
+				// if (dom==null && newTree.tag.recycle===true && newTree.tag.__cache!=null) {
+				// 	console.log('using recycled DOM');
+				// 	c._previousVTree = newTree.tag.__cache.pop();
+				// 	c.base = c._previousVTree._el;
+				// }
+
+				// if (dom == null && newTree.tag.$cache!=null) {
+				// 	dom = newTree.tag.$cache.pop();
+				// }
+				// if (dom==null && newTree.tag.$precache!=null) {
+				// 	if (newTree.tag.$cache==null) {
+				// 		let t = document.createElement('template');
+				// 		newTree.tag.$cache = newTree.tag.$precache.cloneNode(true);
+				// 		t.appendChild(newTree.tag.$cache);
+				// 	}
+				// 	dom = newTree.tag.$cache.cloneNode(true);
+				// }
+			}
+			else {
+				// let nextState = c.state;
+				// if (c.prevState!=null) {
+				// 	c.state = c.prevState;
+				// 	c.prevState = null;
+				// }
+
+				// console.log('updating component in-place', c._nextState);
+				// if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, c.state)===false) {
+				// 	c.state = nextState;
+				if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, s, context)===false) {
+					dom = c.base;
+					break outer;
+					// return newTree._el = c.base;
+				}
+				if (newTag.getDerivedStateFromProps==null && c.componentWillReceiveProps!=null) {
+					c.componentWillReceiveProps(newTree.props, context);
+				}
+
+				if (c.componentWillUpdate!=null) {
+					c.componentWillUpdate(newTree.props, s, context);
+				}
+				// c.state = nextState;
+			}
+
+			oldProps = c.props;
+			if (!oldState) oldState = c.state;
+
+			oldContext = c.context = context;
 			c.props = newTree.props;
-			if (!c.state) c.state = {};
-			c.context = context;
-		}
+			if (c._nextState!=null) {
+				c.state = c._nextState;
+				c._nextState = null;
+			}
+			let prev = c._previousVTree;
+			let vnode = c._previousVTree = coerceToVNode(c.render(c.props, c.state, c.context));
+			c._dirty = false;
 
-		// Invoke getDerivedStateFromProps
-		let s = c._nextState || c.state;
-		if (newTag.getDerivedStateFromProps!=null) {
-			oldState = assign({}, c.state);
-			assign(s, newTag.getDerivedStateFromProps(newTree.props, s));
-		}
+			if (c.getChildContext!=null) {
+				context = assign(assign({}, context), c.getChildContext());
+			}
 
-		// Invoke pre-render lifecycle methods
-		if (isNew) {
-			if (newTag.getDerivedStateFromProps==null && c.componentWillMount!=null) c.componentWillMount();
-			mounts.push(c);
+			if (!isNew && c.getSnapshotBeforeUpdate!=null) {
+				oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
+			}
 
-			// if (dom==null && newTree.tag.recycle===true && newTree.tag.__cache!=null) {
-			// 	console.log('using recycled DOM');
-			// 	c._previousVTree = newTree.tag.__cache.pop();
-			// 	c.base = c._previousVTree._el;
+			if (vnode instanceof Array) {
+				diffChildren(parent, vnode, prev==null ? EMPTY_ARR : prev, context, isSvg, excessChildren, false, mounts, c);
+			}
+			else {
+				c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, false, mounts, c);
+			}
+			// context = assign({}, context);
+			// context.__depth = (context.__depth || 0) + 1;
+			// context = assign({
+			// 	__depth: (context.__depth || 0) + 1
+			// }, context);
+			// if (c.getChildContext!=null) {
+			// 	assign(context, c.getChildContext());
+			// }
+			// if (c.id==20) {
+			// 	// console.trace('diffing '+c.id);
+			// 	console.log('diffing '+c.id, vnode, prev);
+			// }
+			// newTree.tag.$precache = c.base;
+			c._vnode = newTree;
+
+			// if (dom!=null && c.base!=null && c.base!==dom) {
+			// 	parent.replaceChild(c.base, dom);
 			// }
 
-			// if (dom == null && newTree.tag.$cache!=null) {
-			// 	dom = newTree.tag.$cache.pop();
+			if (c.base==null) {
+				if (prev) unmount(prev, ancestorComponent);
+			}
+			else if (parent && append!==false) {
+				// if (insertBefore && c.base.nextSibling!==insertBefore) parent.insertBefore(c.base, insertBefore);
+				if (dom==null || dom.parentNode!==parent) parent.appendChild(c.base);
+				else if (c.base!==dom) {
+					// console.log('replace', dom, c.base);
+					parent.replaceChild(c.base, dom);
+				}
+			}
+
+			// if (dom!=null && (c.base!==dom || !dom.parentNode)) {
+			// 	if (c.base==null) unmount(prev);
+			// 	else if (dom.parentNode!==parent) parent.appendChild(c.base);
+			// 	else parent.replaceChild(c.base, dom);
 			// }
-			// if (dom==null && newTree.tag.$precache!=null) {
-			// 	if (newTree.tag.$cache==null) {
-			// 		let t = document.createElement('template');
-			// 		newTree.tag.$cache = newTree.tag.$precache.cloneNode(true);
-			// 		t.appendChild(newTree.tag.$cache);
-			// 	}
-			// 	dom = newTree.tag.$cache.cloneNode(true);
+
+			dom = c.base;
+			while (p=c._renderCallbacks.pop()) p();
+
+			// if (c!=null) {
+			// c.base = newTree._el;
+			if (!isNew && c.componentDidUpdate!=null) {
+				c.componentDidUpdate(oldProps, oldState, oldContext);
+			}
+			// if (isNew) {
+			// 	mounts.push(c);
+			// 	// if (c.componentDidMount!=null) c.componentDidMount();
+			// }
+			// else if (c.componentDidUpdate!=null) {
+			// 	c.componentDidUpdate(oldProps, oldState, oldContext);
+			// }
 			// }
 		}
 		else {
-			// let nextState = c.state;
-			// if (c.prevState!=null) {
-			// 	c.state = c.prevState;
-			// 	c.prevState = null;
-			// }
-
-			// console.log('updating component in-place', c._nextState);
-			// if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, c.state)===false) {
-			// 	c.state = nextState;
-			if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, s, context)===false) {
-				dom = newTree._el = c.base;
-				break outer;
-				// return newTree._el = c.base;
-			}
-			if (newTag.getDerivedStateFromProps==null && c.componentWillReceiveProps!=null) {
-				c.componentWillReceiveProps(newTree.props, context);
-			}
-
-			if (c.componentWillUpdate!=null) {
-				c.componentWillUpdate(newTree.props, s, context);
-			}
-			// c.state = nextState;
+			dom = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren, false, mounts, ancestorComponent);
 		}
 
-		oldProps = c.props;
-		if (!oldState) oldState = c.state;
-
-		oldContext = c.context = context;
-		c.props = newTree.props;
-		if (c._nextState!=null) {
-			c.state = c._nextState;
-			c._nextState = null;
-		}
-		let prev = c._previousVTree;
-		let vnode = c._previousVTree = coerceToVNode(c.render(c.props, c.state, c.context));
-
-		if (c.getChildContext!=null) {
-			context = assign(assign({}, context), c.getChildContext());
+		if (clearProcessingException) {
+			c._processingException = null;
 		}
 
-		if (!isNew && c.getSnapshotBeforeUpdate!=null) {
-			oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
-		}
-
-		if (vnode instanceof Array) {
-			diffChildren(parent, vnode, prev==null ? EMPTY_ARR : prev, context, isSvg, excessChildren, false, mounts);
-		}
-		else {
-			c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, false, mounts);
-		}
-		// context = assign({}, context);
-		// context.__depth = (context.__depth || 0) + 1;
-		// context = assign({
-		// 	__depth: (context.__depth || 0) + 1
-		// }, context);
-		// if (c.getChildContext!=null) {
-		// 	assign(context, c.getChildContext());
-		// }
-		// if (c.id==20) {
-		// 	// console.trace('diffing '+c.id);
-		// 	console.log('diffing '+c.id, vnode, prev);
-		// }
-		c._dirty = false;
-		// newTree.tag.$precache = c.base;
-		c._vnode = newTree;
-
-		// if (dom!=null && c.base!=null && c.base!==dom) {
-		// 	parent.replaceChild(c.base, dom);
-		// }
-
-		if (c.base==null) {
-			if (prev) unmount(prev);
-		}
-		else if (parent && append!==false) {
-			// if (insertBefore && c.base.nextSibling!==insertBefore) parent.insertBefore(c.base, insertBefore);
-			if (dom==null || dom.parentNode!==parent) parent.appendChild(c.base);
-			else if (c.base!==dom) {
-				// console.log('replace', dom, c.base);
-				parent.replaceChild(c.base, dom);
-			}
-		}
-
-		// if (dom!=null && (c.base!==dom || !dom.parentNode)) {
-		// 	if (c.base==null) unmount(prev);
-		// 	else if (dom.parentNode!==parent) parent.appendChild(c.base);
-		// 	else parent.replaceChild(c.base, dom);
-		// }
-
-		dom = newTree._el = c.base;
-		while (p=c._renderCallbacks.pop()) p();
-
-		// if (c!=null) {
-		// c.base = newTree._el;
-		if (!isNew && c.componentDidUpdate!=null) {
-			c.componentDidUpdate(oldProps, oldState, oldContext);
-		}
-		// if (isNew) {
-		// 	mounts.push(c);
-		// 	// if (c.componentDidMount!=null) c.componentDidMount();
-		// }
-		// else if (c.componentDidUpdate!=null) {
-		// 	c.componentDidUpdate(oldProps, oldState, oldContext);
-		// }
-		// }
 	}
-	else {
-		dom = newTree._el = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren, false, mounts);
+	catch (e) {
+		if (c && !dom) {
+			// Create an "anchor" into which we can rerender upon recovery even though the component doesn't have a proper tree to render
+			// This is required because forceUpdate doesn't diff if c.base is null
+			parent.appendChild(c.base = dom = document.createTextNode(''));
+		}
+		catchErrorInComponent(e, ancestorComponent);
 	}
+
+	newTree._el = dom;
 
 	if (isRootDiff) {
 		// processQueue();
 		// console.log('firing '+mounts.length+' mounts');
 		while ((c = mounts.pop())) {
-			if (c.componentDidMount!=null) c.componentDidMount();
+			if (c.componentDidMount!=null) {
+				try {
+					c.componentDidMount();
+				}
+				catch (e) {
+					catchErrorInComponent(e, c._ancestorComponent);
+				}
+			}
 		}
 	}
 
@@ -350,13 +377,13 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	// }
 	if (originalOldTree!=null && originalOldTree.tag!==newTag) {
 		// console.trace('unmount', originalOldTree._el);
-		unmount(originalOldTree);
+		unmount(originalOldTree, ancestorComponent);
 	}
 
 	return dom;
 }
 
-function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessChildren, isRootDiff, mounts) {
+function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessChildren, isRootDiff, mounts, ancestorComponent) {
 	// if (vnode==null) {
 	// 	let c = document.createComment('empty');
 	// 	if (parent!=null) {
@@ -444,7 +471,7 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 		if (vnode!==oldVNode) {
 			diffProps(dom, vnode.props, oldVNode==null ? EMPTY_OBJ : oldVNode.props, isSvg);
 		}
-		diffChildren(dom, getVNodeChildren(vnode), oldVNode==null ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessChildren, isRootDiff, mounts);
+		diffChildren(dom, getVNodeChildren(vnode), oldVNode==null ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessChildren, isRootDiff, mounts, ancestorComponent);
 	}
 
 	// if (oldVNode!=null && dom!==d) unmount(oldVNode);
@@ -453,14 +480,28 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 }
 
 
-export function unmount(vnode) {
+export function unmount(vnode, ancestorComponent) {
 	let r;
-	if (vnode.props!=null && (r = vnode.props.ref)) r(null);
+	if (vnode.props!=null && (r = vnode.props.ref)) {
+		try {
+			r(null);
+		}
+		catch (e) {
+			catchErrorInComponent(e, ancestorComponent);
+		}
+	}
 	if ((r = vnode._el)!=null) r.remove();
 	vnode._el = null;
 
 	if ((r = vnode._component)!=null) {
-		if (r.componentWillUnmount) r.componentWillUnmount();
+		if (r.componentWillUnmount) {
+			try {
+				r.componentWillUnmount();
+			}
+			catch (e) {
+				catchErrorInComponent(e, ancestorComponent);
+			}
+		}
 		// let ctor = r.constructor;
 		// let cache = ctor.$cache || (ctor.$cache = []);
 		// cache.push(r.base);
@@ -472,11 +513,11 @@ export function unmount(vnode) {
 		// }
 
 		r.base = null;
-		if (r = r._previousVTree) unmount(r);
+		if (r = r._previousVTree) unmount(r, ancestorComponent);
 	}
 	else if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {
-			unmount(r[i]);
+			unmount(r[i], ancestorComponent);
 		}
 	}
 
@@ -653,7 +694,7 @@ function flattenChildren(children, flattened) {
 // }
 
 
-function createComponent(Ctor, props, context) {
+function createComponent(Ctor, props, context, ancestorComponent) {
 	let inst;
 	if (Ctor.prototype && Ctor.prototype.render) {
 		inst = new Ctor(props, context);
@@ -665,10 +706,26 @@ function createComponent(Ctor, props, context) {
 		inst._constructor = Ctor;
 		inst.render = doRender;
 	}
+	inst._ancestorComponent = ancestorComponent;
 	return inst;
 }
 
 /** The `.render()` method for a PFC backing instance. */
 function doRender(props, state, context) {
 	return this._constructor(props, context);
+}
+
+function catchErrorInComponent(error, component) {
+	for (; component; component = component._ancestorComponent) {
+		if (component.componentDidCatch && !component._processingException) {
+			try {
+				component.componentDidCatch(error);
+				return enqueueRender(component._processingException = component);
+			}
+			catch (e) {
+				error = e;
+			}
+		}
+	}
+	throw error;
 }

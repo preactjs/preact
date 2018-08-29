@@ -5,7 +5,7 @@ import { diff, unmount } from './index';
 // import { cloneElement } from '../clone-element';
 
 
-export function diffChildren(node, children, oldChildren, context, isSvg, excessChildren, isRootDiff, mounts) {
+export function diffChildren(node, children, oldChildren, context, isSvg, excessChildren, isRootDiff, mounts, ancestorComponent) {
 	// if (oldChildren==null) oldChildren = EMPTY_ARR;
 
 	// let __children = oldChildren.map(cloneElement);
@@ -141,7 +141,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 
 		next = childNode!=null && childNode.nextSibling;
 
-		newEl = diff(old==null ? null : old._el, node, child, old, context, isSvg, false, excessChildren, isRootDiff, mounts);
+		newEl = diff(old==null ? null : old._el, node, child, old, context, isSvg, false, excessChildren, isRootDiff, mounts, ancestorComponent);
 		if (newEl!=null) {
 			// let childNode;
 			// childNode = null;
@@ -244,7 +244,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 	if (excessChildren!=null) for (i=excessChildren.length; i--; ) if (excessChildren[i]!=null) excessChildren[i].remove();
 
 	// for (let i in seen) if (seen[i] != null && (c = seen[i]._el)) c.remove();
-	for (i=oldChildren.length; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i]);
+	for (i=oldChildren.length; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
 	// for (let i in seen) {
 	// 	if (seen[i]!=null) {
 	// 		// console.log(seen[i]._el);
