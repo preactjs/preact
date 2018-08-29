@@ -648,9 +648,7 @@ function flattenChildren(children, flattened) {
 		// if (flattened.indexOf(children)!==-1) {
 		// 	children = assign({}, children);
 		// }
-		if (children != null) {
-			flattened.push(children);
-		}
+		flattened.push(children);
 	}
 }
 
