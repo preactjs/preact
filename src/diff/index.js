@@ -172,174 +172,174 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 
 	try {
 
-	outer: if (typeof newTag==='function') {
-		if (typeof oldTag==='function' && oldTag!==newTag) {
-			// unmount(oldTree);
-			oldTree = null;
-			// oldTree._component.componentWillUnmount();
-			// oldTree._component.base = null;
-			// if (oldTree.props.ref!=null) {
-			// 	oldTree.props.ref(null);
-			// }
-		}
+		outer: if (typeof newTag==='function') {
+			if (typeof oldTag==='function' && oldTag!==newTag) {
+				// unmount(oldTree);
+				oldTree = null;
+				// oldTree._component.componentWillUnmount();
+				// oldTree._component.base = null;
+				// if (oldTree.props.ref!=null) {
+				// 	oldTree.props.ref(null);
+				// }
+			}
 
-		// Get component and set it to `c`
-		if (oldTree!=null && oldTree._component) {
-			c = newTree._component = oldTree._component;
-			clearProcessingException = c._processingException;
-		}
-		else {
-			isNew = true;
-			// c = newTree._component = new newTree.tag(newTree.props, context);
-			c = newTree._component = createComponent(newTree.tag, newTree.props, context, ancestorComponent);
+			// Get component and set it to `c`
+			if (oldTree!=null && oldTree._component) {
+				c = newTree._component = oldTree._component;
+				clearProcessingException = c._processingException;
+			}
+			else {
+				isNew = true;
+				// c = newTree._component = new newTree.tag(newTree.props, context);
+				c = newTree._component = createComponent(newTree.tag, newTree.props, context, ancestorComponent);
+				c.props = newTree.props;
+				if (!c.state) c.state = {};
+				c.context = context;
+			}
+
+			// Invoke getDerivedStateFromProps
+			let s = c._nextState || c.state;
+			if (newTag.getDerivedStateFromProps!=null) {
+				oldState = assign({}, c.state);
+				assign(s, newTag.getDerivedStateFromProps(newTree.props, s));
+			}
+
+			// Invoke pre-render lifecycle methods
+			if (isNew) {
+				if (newTag.getDerivedStateFromProps==null && c.componentWillMount!=null) c.componentWillMount();
+				mounts.push(c);
+
+				// if (dom==null && newTree.tag.recycle===true && newTree.tag.__cache!=null) {
+				// 	console.log('using recycled DOM');
+				// 	c._previousVTree = newTree.tag.__cache.pop();
+				// 	c.base = c._previousVTree._el;
+				// }
+
+				// if (dom == null && newTree.tag.$cache!=null) {
+				// 	dom = newTree.tag.$cache.pop();
+				// }
+				// if (dom==null && newTree.tag.$precache!=null) {
+				// 	if (newTree.tag.$cache==null) {
+				// 		let t = document.createElement('template');
+				// 		newTree.tag.$cache = newTree.tag.$precache.cloneNode(true);
+				// 		t.appendChild(newTree.tag.$cache);
+				// 	}
+				// 	dom = newTree.tag.$cache.cloneNode(true);
+				// }
+			}
+			else {
+				// let nextState = c.state;
+				// if (c.prevState!=null) {
+				// 	c.state = c.prevState;
+				// 	c.prevState = null;
+				// }
+
+				// console.log('updating component in-place', c._nextState);
+				// if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, c.state)===false) {
+				// 	c.state = nextState;
+				if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, s, context)===false) {
+					dom = c.base;
+					break outer;
+					// return newTree._el = c.base;
+				}
+				if (newTag.getDerivedStateFromProps==null && c.componentWillReceiveProps!=null) {
+					c.componentWillReceiveProps(newTree.props, context);
+				}
+
+				if (c.componentWillUpdate!=null) {
+					c.componentWillUpdate(newTree.props, s, context);
+				}
+				// c.state = nextState;
+			}
+
+			oldProps = c.props;
+			if (!oldState) oldState = c.state;
+
+			oldContext = c.context = context;
 			c.props = newTree.props;
-			if (!c.state) c.state = {};
-			c.context = context;
-		}
+			if (c._nextState!=null) {
+				c.state = c._nextState;
+				c._nextState = null;
+			}
+			let prev = c._previousVTree;
+			let vnode = c._previousVTree = coerceToVNode(c.render(c.props, c.state, c.context));
+			c._dirty = false;
 
-		// Invoke getDerivedStateFromProps
-		let s = c._nextState || c.state;
-		if (newTag.getDerivedStateFromProps!=null) {
-			oldState = assign({}, c.state);
-			assign(s, newTag.getDerivedStateFromProps(newTree.props, s));
-		}
+			if (c.getChildContext!=null) {
+				context = assign(assign({}, context), c.getChildContext());
+			}
 
-		// Invoke pre-render lifecycle methods
-		if (isNew) {
-			if (newTag.getDerivedStateFromProps==null && c.componentWillMount!=null) c.componentWillMount();
-			mounts.push(c);
+			if (!isNew && c.getSnapshotBeforeUpdate!=null) {
+				oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
+			}
 
-			// if (dom==null && newTree.tag.recycle===true && newTree.tag.__cache!=null) {
-			// 	console.log('using recycled DOM');
-			// 	c._previousVTree = newTree.tag.__cache.pop();
-			// 	c.base = c._previousVTree._el;
+			if (vnode instanceof Array) {
+				diffChildren(parent, vnode, prev==null ? EMPTY_ARR : prev, context, isSvg, excessChildren, false, mounts, c);
+			}
+			else {
+				c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, false, mounts, c);
+			}
+			// context = assign({}, context);
+			// context.__depth = (context.__depth || 0) + 1;
+			// context = assign({
+			// 	__depth: (context.__depth || 0) + 1
+			// }, context);
+			// if (c.getChildContext!=null) {
+			// 	assign(context, c.getChildContext());
+			// }
+			// if (c.id==20) {
+			// 	// console.trace('diffing '+c.id);
+			// 	console.log('diffing '+c.id, vnode, prev);
+			// }
+			// newTree.tag.$precache = c.base;
+			c._vnode = newTree;
+
+			// if (dom!=null && c.base!=null && c.base!==dom) {
+			// 	parent.replaceChild(c.base, dom);
 			// }
 
-			// if (dom == null && newTree.tag.$cache!=null) {
-			// 	dom = newTree.tag.$cache.pop();
+			if (c.base==null) {
+				if (prev) unmount(prev, ancestorComponent);
+			}
+			else if (parent && append!==false) {
+				// if (insertBefore && c.base.nextSibling!==insertBefore) parent.insertBefore(c.base, insertBefore);
+				if (dom==null || dom.parentNode!==parent) parent.appendChild(c.base);
+				else if (c.base!==dom) {
+					// console.log('replace', dom, c.base);
+					parent.replaceChild(c.base, dom);
+				}
+			}
+
+			// if (dom!=null && (c.base!==dom || !dom.parentNode)) {
+			// 	if (c.base==null) unmount(prev);
+			// 	else if (dom.parentNode!==parent) parent.appendChild(c.base);
+			// 	else parent.replaceChild(c.base, dom);
 			// }
-			// if (dom==null && newTree.tag.$precache!=null) {
-			// 	if (newTree.tag.$cache==null) {
-			// 		let t = document.createElement('template');
-			// 		newTree.tag.$cache = newTree.tag.$precache.cloneNode(true);
-			// 		t.appendChild(newTree.tag.$cache);
-			// 	}
-			// 	dom = newTree.tag.$cache.cloneNode(true);
+
+			dom = c.base;
+			while (p=c._renderCallbacks.pop()) p();
+
+			// if (c!=null) {
+			// c.base = newTree._el;
+			if (!isNew && c.componentDidUpdate!=null) {
+				c.componentDidUpdate(oldProps, oldState, oldContext);
+			}
+			// if (isNew) {
+			// 	mounts.push(c);
+			// 	// if (c.componentDidMount!=null) c.componentDidMount();
+			// }
+			// else if (c.componentDidUpdate!=null) {
+			// 	c.componentDidUpdate(oldProps, oldState, oldContext);
+			// }
 			// }
 		}
 		else {
-			// let nextState = c.state;
-			// if (c.prevState!=null) {
-			// 	c.state = c.prevState;
-			// 	c.prevState = null;
-			// }
-
-			// console.log('updating component in-place', c._nextState);
-			// if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, c.state)===false) {
-			// 	c.state = nextState;
-			if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, s, context)===false) {
-				dom = c.base;
-				break outer;
-				// return newTree._el = c.base;
-			}
-			if (newTag.getDerivedStateFromProps==null && c.componentWillReceiveProps!=null) {
-				c.componentWillReceiveProps(newTree.props, context);
-			}
-
-			if (c.componentWillUpdate!=null) {
-				c.componentWillUpdate(newTree.props, s, context);
-			}
-			// c.state = nextState;
+			dom = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren, false, mounts, ancestorComponent);
 		}
 
-		oldProps = c.props;
-		if (!oldState) oldState = c.state;
-
-		oldContext = c.context = context;
-		c.props = newTree.props;
-		if (c._nextState!=null) {
-			c.state = c._nextState;
-			c._nextState = null;
+		if (clearProcessingException) {
+			c._processingException = null;
 		}
-		let prev = c._previousVTree;
-		let vnode = c._previousVTree = coerceToVNode(c.render(c.props, c.state, c.context));
-		c._dirty = false;
-
-		if (c.getChildContext!=null) {
-			context = assign(assign({}, context), c.getChildContext());
-		}
-
-		if (!isNew && c.getSnapshotBeforeUpdate!=null) {
-			oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
-		}
-
-		if (vnode instanceof Array) {
-			diffChildren(parent, vnode, prev==null ? EMPTY_ARR : prev, context, isSvg, excessChildren, false, mounts, c);
-		}
-		else {
-			c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, false, mounts, c);
-		}
-		// context = assign({}, context);
-		// context.__depth = (context.__depth || 0) + 1;
-		// context = assign({
-		// 	__depth: (context.__depth || 0) + 1
-		// }, context);
-		// if (c.getChildContext!=null) {
-		// 	assign(context, c.getChildContext());
-		// }
-		// if (c.id==20) {
-		// 	// console.trace('diffing '+c.id);
-		// 	console.log('diffing '+c.id, vnode, prev);
-		// }
-		// newTree.tag.$precache = c.base;
-		c._vnode = newTree;
-
-		// if (dom!=null && c.base!=null && c.base!==dom) {
-		// 	parent.replaceChild(c.base, dom);
-		// }
-
-		if (c.base==null) {
-			if (prev) unmount(prev, ancestorComponent);
-		}
-		else if (parent && append!==false) {
-			// if (insertBefore && c.base.nextSibling!==insertBefore) parent.insertBefore(c.base, insertBefore);
-			if (dom==null || dom.parentNode!==parent) parent.appendChild(c.base);
-			else if (c.base!==dom) {
-				// console.log('replace', dom, c.base);
-				parent.replaceChild(c.base, dom);
-			}
-		}
-
-		// if (dom!=null && (c.base!==dom || !dom.parentNode)) {
-		// 	if (c.base==null) unmount(prev);
-		// 	else if (dom.parentNode!==parent) parent.appendChild(c.base);
-		// 	else parent.replaceChild(c.base, dom);
-		// }
-
-		dom = c.base;
-		while (p=c._renderCallbacks.pop()) p();
-
-		// if (c!=null) {
-		// c.base = newTree._el;
-		if (!isNew && c.componentDidUpdate!=null) {
-			c.componentDidUpdate(oldProps, oldState, oldContext);
-		}
-		// if (isNew) {
-		// 	mounts.push(c);
-		// 	// if (c.componentDidMount!=null) c.componentDidMount();
-		// }
-		// else if (c.componentDidUpdate!=null) {
-		// 	c.componentDidUpdate(oldProps, oldState, oldContext);
-		// }
-		// }
-	}
-	else {
-		dom = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren, false, mounts, ancestorComponent);
-	}
-
-	if (clearProcessingException) {
-		c._processingException = null;
-	}
 
 	}
 	catch (e) {
@@ -360,7 +360,8 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			if (c.componentDidMount!=null) {
 				try {
 					c.componentDidMount();
-				} catch (e) {
+				}
+				catch (e) {
 					catchErrorInComponent(e, c._ancestorComponent);
 				}
 			}
