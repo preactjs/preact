@@ -52,11 +52,7 @@ function setProperty(node, name, value, oldValue, isSvg) {
 
 	// if (name==='children' || name==='key') {}
 	// else
-	if (name==='ref') {
-		if (oldValue) oldValue(null);
-		if (value) value(node);
-	}
-	else if (name==='style') {
+	if (name==='style') {
 		// setStyle(node, value, oldValue);
 
 		/* Possible golfing activities for setting styles:

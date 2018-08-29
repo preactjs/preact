@@ -401,6 +401,7 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 	if (oldVNode==null || vnode.tag!==oldVNode.tag) {
 		// if (oldVNode) unmount(oldVNode);
 		dom = null;
+		oldVNode = EMPTY_OBJ;
 	}
 
 	// if (dom==null && excessChildren!=null) {
@@ -463,9 +464,14 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 		// let newChildren = getVNodeChildren(vnode);
 		// diffChildren(dom, newChildren, vnode===oldVNode ? newChildren : oldVNode==null ? [] : getVNodeChildren(oldVNode), context, isSvg, excessChildren);
 		if (vnode!==oldVNode) {
-			diffProps(dom, vnode.props, oldVNode==null ? EMPTY_OBJ : oldVNode.props, isSvg);
+			diffProps(dom, vnode.props, oldVNode==EMPTY_OBJ ? EMPTY_OBJ : oldVNode.props, isSvg);
+			if (vnode.ref!==oldVNode.ref) {
+				let ref;
+				if (ref = oldVNode.ref) ref(null);
+				if (ref = vnode.ref) ref(dom);
+			}
 		}
-		diffChildren(dom, getVNodeChildren(vnode), oldVNode==null ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessChildren, mounts, ancestorComponent);
+		diffChildren(dom, getVNodeChildren(vnode), oldVNode==EMPTY_OBJ ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessChildren, mounts, ancestorComponent);
 	}
 
 	// if (oldVNode!=null && dom!==d) unmount(oldVNode);
@@ -476,7 +482,7 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 
 export function unmount(vnode, ancestorComponent) {
 	let r;
-	if (r = vnode.props.ref) {
+	if (r = vnode.ref) {
 		try {
 			r(null);
 		}
