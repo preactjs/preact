@@ -1618,10 +1618,10 @@ describe('Lifecycle methods', () => {
 					return <div>{this.state.error ? String(this.state.error) : this.props.children}</div>;
 				}
 			}
+			// eslint-disable-next-line react/require-render-return
 			class ErrorGeneratorComponent extends Component {
 				render() {
 					throw new Error('Error!');
-					return <div />;
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
@@ -1638,10 +1638,10 @@ describe('Lifecycle methods', () => {
 					return this.state.error ? String(this.state.error) : this.props.children;
 				}
 			}
+			// eslint-disable-next-line react/require-render-return
 			class ErrorGeneratorComponent extends Component {
 				render() {
 					throw new Error('Error!');
-					return <div />;
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
@@ -2375,11 +2375,13 @@ describe('Lifecycle methods', () => {
 				}
 			}
 			function ErrorGeneratorComponent() {
+				// eslint-disable-next-line react/jsx-wrap-multilines
 				return <div ref={(element) => {
 					if (element) {
 						throw new Error('Error');
 					}
-				}} />
+					// eslint-disable-next-line react/jsx-closing-bracket-location
+				}} />;
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
 			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
@@ -2399,7 +2401,7 @@ describe('Lifecycle methods', () => {
 				throw new Error('Error!');
 			}
 			function ErrorGeneratorComponent() {
-				return <div ref={throwError} />
+				return <div ref={throwError} />;
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
 			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
