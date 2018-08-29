@@ -301,7 +301,7 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div>Child1</div><div>Child2</div>');
 		});
 
-		it.skip('should render nested Fragments', () => {
+		it('should render nested Fragments', () => {
 			render((
 				<Fragment>
 					<Fragment>foo</Fragment>
