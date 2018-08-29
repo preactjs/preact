@@ -1529,13 +1529,14 @@ describe('Lifecycle methods', () => {
 			class ErrorGeneratorComponent extends Component {
 				constructor(props, context) {
 					super(props, context);
-					throw new Error("Error!");
+					throw new Error('Error!');
 				}
 				render() {
+					return <div />;
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
 			rerender();
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
@@ -1552,13 +1553,14 @@ describe('Lifecycle methods', () => {
 			class ErrorGeneratorComponent extends Component {
 				constructor(props, context) {
 					super(props, context);
-					throw new Error("Error!");
+					throw new Error('Error!');
 				}
 				render() {
+					return <div />;
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
 			rerender();
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
@@ -1574,13 +1576,14 @@ describe('Lifecycle methods', () => {
 			}
 			class ErrorGeneratorComponent extends Component {
 				componentWillMount() {
-					throw new Error("Error!");
+					throw new Error('Error!');
 				}
 				render() {
+					return <div />;
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
 
@@ -1595,13 +1598,14 @@ describe('Lifecycle methods', () => {
 			}
 			class ErrorGeneratorComponent extends Component {
 				componentWillMount() {
-					throw new Error("Error!");
+					throw new Error('Error!');
 				}
 				render() {
+					return <div />;
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
 
@@ -1616,11 +1620,12 @@ describe('Lifecycle methods', () => {
 			}
 			class ErrorGeneratorComponent extends Component {
 				render() {
-					throw new Error("Error!");
+					throw new Error('Error!');
+					return <div />;
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
 
@@ -1635,11 +1640,12 @@ describe('Lifecycle methods', () => {
 			}
 			class ErrorGeneratorComponent extends Component {
 				render() {
-					throw new Error("Error!");
+					throw new Error('Error!');
+					return <div />;
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
 
@@ -1654,13 +1660,14 @@ describe('Lifecycle methods', () => {
 			}
 			class ErrorGeneratorComponent extends Component {
 				componentDidMount() {
-					throw new Error("Error!");
+					throw new Error('Error!');
 				}
 				render() {
+					return <div />;
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
 
@@ -1675,13 +1682,14 @@ describe('Lifecycle methods', () => {
 			}
 			class ErrorGeneratorComponent extends Component {
 				componentDidMount() {
-					throw new Error("Error!");
+					throw new Error('Error!');
 				}
 				render() {
+					return <div />;
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
 
@@ -1696,7 +1704,7 @@ describe('Lifecycle methods', () => {
 			}
 			class ErrorGeneratorComponent extends Component {
 				static getDerivedStateFromProps() {
-					throw new Error("Error!");
+					throw new Error('Error!');
 				}
 				render() {
 					return <span>Should not get here</span>;
@@ -1704,7 +1712,7 @@ describe('Lifecycle methods', () => {
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
 			sinon.spy(ErrorGeneratorComponent.prototype, 'render');
-			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 			expect(ErrorGeneratorComponent.prototype.render).not.to.have.been.called;
 		});
@@ -1725,14 +1733,14 @@ describe('Lifecycle methods', () => {
 			}
 			class ErrorGeneratorComponent extends Component {
 				getSnapshotBeforeUpdate() {
-					throw new Error("Error!");
+					throw new Error('Error!');
 				}
 				render() {
-					return <span/>;
+					return <span />;
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
 			receiver.forceUpdate();
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
@@ -1753,14 +1761,14 @@ describe('Lifecycle methods', () => {
 			}
 			class ErrorGeneratorComponent extends Component {
 				getSnapshotBeforeUpdate() {
-					throw new Error("Error!");
+					throw new Error('Error!');
 				}
 				render() {
-					return <span/>;
+					return <span />;
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
 			receiver.forceUpdate();
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
@@ -1781,14 +1789,14 @@ describe('Lifecycle methods', () => {
 			}
 			class ErrorGeneratorComponent extends Component {
 				componentDidUpdate() {
-					throw new Error("Error!");
+					throw new Error('Error!');
 				}
 				render() {
-					return <span/>;
+					return <span />;
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
 			receiver.forceUpdate();
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
@@ -1809,14 +1817,14 @@ describe('Lifecycle methods', () => {
 			}
 			class ErrorGeneratorComponent extends Component {
 				componentDidUpdate() {
-					throw new Error("Error!");
+					throw new Error('Error!');
 				}
 				render() {
-					return <span/>;
+					return <span />;
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
 			receiver.forceUpdate();
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
@@ -1837,14 +1845,14 @@ describe('Lifecycle methods', () => {
 			}
 			class ErrorGeneratorComponent extends Component {
 				componentWillUpdate() {
-					throw new Error("Error!");
+					throw new Error('Error!');
 				}
 				render() {
-					return <span/>;
+					return <span />;
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
 			receiver.forceUpdate();
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
@@ -1865,14 +1873,14 @@ describe('Lifecycle methods', () => {
 			}
 			class ErrorGeneratorComponent extends Component {
 				componentWillUpdate() {
-					throw new Error("Error!");
+					throw new Error('Error!');
 				}
 				render() {
-					return <span/>;
+					return <span />;
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
 			receiver.forceUpdate();
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
@@ -1882,27 +1890,27 @@ describe('Lifecycle methods', () => {
 			class ErrorReceiverComponent extends Component {
 				constructor() {
 					super();
-					this.state = { foo: "bar" };
+					this.state = { foo: 'bar' };
 					receiver = this;
 				}
 				componentDidCatch(error) {
 					this.setState({ error });
 				}
 				render() {
-					return <div>{this.state.error ? String(this.state.error) : <ErrorGeneratorComponent foo={this.state.foo}/>}</div>;
+					return <div>{this.state.error ? String(this.state.error) : <ErrorGeneratorComponent foo={this.state.foo} />}</div>;
 				}
 			}
 			class ErrorGeneratorComponent extends Component {
 				componentWillReceiveProps() {
-					throw new Error("Error!");
+					throw new Error('Error!');
 				}
 				render() {
-					return <span/>;
+					return <span />;
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent/>, scratch);
-			receiver.setState({ foo: "baz" });
+			render(<ErrorReceiverComponent />, scratch);
+			receiver.setState({ foo: 'baz' });
 			rerender();
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
@@ -1912,27 +1920,27 @@ describe('Lifecycle methods', () => {
 			class ErrorReceiverComponent extends Component {
 				constructor() {
 					super();
-					this.state = { foo: "bar" };
+					this.state = { foo: 'bar' };
 					receiver = this;
 				}
 				componentDidCatch(error) {
 					this.setState({ error });
 				}
 				render() {
-					return this.state.error ? String(this.state.error) : <ErrorGeneratorComponent foo={this.state.foo}/>;
+					return this.state.error ? String(this.state.error) : <ErrorGeneratorComponent foo={this.state.foo} />;
 				}
 			}
 			class ErrorGeneratorComponent extends Component {
 				componentWillReceiveProps() {
-					throw new Error("Error!");
+					throw new Error('Error!');
 				}
 				render() {
-					return <span/>;
+					return <span />;
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent/>, scratch);
-			receiver.setState({ foo: "baz" });
+			render(<ErrorReceiverComponent />, scratch);
+			receiver.setState({ foo: 'baz' });
 			rerender();
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
@@ -1942,27 +1950,27 @@ describe('Lifecycle methods', () => {
 			class ErrorReceiverComponent extends Component {
 				constructor() {
 					super();
-					this.state = { foo: "bar" };
+					this.state = { foo: 'bar' };
 					receiver = this;
 				}
 				componentDidCatch(error) {
 					this.setState({ error });
 				}
 				render() {
-					return <div>{this.state.error ? String(this.state.error) : <ErrorGeneratorComponent foo={this.state.foo}/>}</div>;
+					return <div>{this.state.error ? String(this.state.error) : <ErrorGeneratorComponent foo={this.state.foo} />}</div>;
 				}
 			}
 			class ErrorGeneratorComponent extends Component {
 				shouldComponentUpdate() {
-					throw new Error("Error!");
+					throw new Error('Error!');
 				}
 				render() {
-					return <span/>;
+					return <span />;
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent/>, scratch);
-			receiver.setState({ foo: "baz" });
+			render(<ErrorReceiverComponent />, scratch);
+			receiver.setState({ foo: 'baz' });
 			rerender();
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
@@ -1972,27 +1980,27 @@ describe('Lifecycle methods', () => {
 			class ErrorReceiverComponent extends Component {
 				constructor() {
 					super();
-					this.state = { foo: "bar" };
+					this.state = { foo: 'bar' };
 					receiver = this;
 				}
 				componentDidCatch(error) {
 					this.setState({ error });
 				}
 				render() {
-					return this.state.error ? String(this.state.error) : <ErrorGeneratorComponent foo={this.state.foo}/>;
+					return this.state.error ? String(this.state.error) : <ErrorGeneratorComponent foo={this.state.foo} />;
 				}
 			}
 			class ErrorGeneratorComponent extends Component {
 				shouldComponentUpdate() {
-					throw new Error("Error!");
+					throw new Error('Error!');
 				}
 				render() {
-					return <span/>;
+					return <span />;
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent/>, scratch);
-			receiver.setState({ foo: "baz" });
+			render(<ErrorReceiverComponent />, scratch);
+			receiver.setState({ foo: 'baz' });
 			rerender();
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
@@ -2007,10 +2015,10 @@ describe('Lifecycle methods', () => {
 				}
 			}
 			function ErrorGeneratorComponent() {
-				throw new Error("Error!");
+				throw new Error('Error!');
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
 
@@ -2024,10 +2032,10 @@ describe('Lifecycle methods', () => {
 				}
 			}
 			function ErrorGeneratorComponent() {
-				throw new Error("Error!");
+				throw new Error('Error!');
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
 
@@ -2042,13 +2050,13 @@ describe('Lifecycle methods', () => {
 			}
 			class ErrorGeneratorComponent extends Component {
 				render() {
-					return "No error!?!?";
+					return 'No error!?!?';
 				}
 				componentWillMount() {
-					throw new Error("Error contents");
+					throw new Error('Error contents');
 				}
 			}
-			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
 			rerender();
 			expect(scratch).to.have.property('textContent', 'Error: Error contents');
 		});
@@ -2064,13 +2072,13 @@ describe('Lifecycle methods', () => {
 			}
 			class ErrorGeneratorComponent extends Component {
 				render() {
-					return "No error!?!?";
+					return 'No error!?!?';
 				}
 				componentWillMount() {
-					throw new Error("Error contents");
+					throw new Error('Error contents');
 				}
 			}
-			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
 			rerender();
 			expect(scratch).to.have.property('textContent', 'Error: Error contents');
 		});
@@ -2086,18 +2094,18 @@ describe('Lifecycle methods', () => {
 			}
 			class ErrorAdapterComponent extends Component {
 				componentDidCatch(error) {
-					throw new Error("Adapted " + String(error && "message" in error ? error.message : error));
+					throw new Error('Adapted ' + String(error && 'message' in error ? error.message : error));
 				}
 				render() {
 					return <div>{this.props.children}</div>;
 				}
 			}
 			function ErrorGeneratorComponent() {
-				throw new Error("Error!");
+				throw new Error('Error!');
 			}
 			sinon.spy(ErrorAdapterComponent.prototype, 'componentDidCatch');
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorAdapterComponent><ErrorGeneratorComponent/></ErrorAdapterComponent></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorAdapterComponent><ErrorGeneratorComponent /></ErrorAdapterComponent></ErrorReceiverComponent>, scratch);
 			expect(ErrorAdapterComponent.prototype.componentDidCatch).to.have.been.called;
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 			rerender();
@@ -2115,18 +2123,18 @@ describe('Lifecycle methods', () => {
 			}
 			class ErrorAdapterComponent extends Component {
 				componentDidCatch(error) {
-					throw new Error("Adapted " + String(error && "message" in error ? error.message : error));
+					throw new Error('Adapted ' + String(error && 'message' in error ? error.message : error));
 				}
 				render() {
 					return this.props.children;
 				}
 			}
 			function ErrorGeneratorComponent() {
-				throw new Error("Error!");
+				throw new Error('Error!');
 			}
 			sinon.spy(ErrorAdapterComponent.prototype, 'componentDidCatch');
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorAdapterComponent><ErrorGeneratorComponent/></ErrorAdapterComponent></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorAdapterComponent><ErrorGeneratorComponent /></ErrorAdapterComponent></ErrorReceiverComponent>, scratch);
 			expect(ErrorAdapterComponent.prototype.componentDidCatch).to.have.been.called;
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 			rerender();
@@ -2156,11 +2164,11 @@ describe('Lifecycle methods', () => {
 				}
 			}
 			function ErrorGeneratorComponent() {
-				throw new Error("Error!");
+				throw new Error('Error!');
 			}
 			sinon.spy(ErrorAdapterComponent.prototype, 'componentDidCatch');
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorAdapterComponent><ErrorGeneratorComponent/></ErrorAdapterComponent></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorAdapterComponent><ErrorGeneratorComponent /></ErrorAdapterComponent></ErrorReceiverComponent>, scratch);
 			rerender();
 			expect(ErrorAdapterComponent.prototype.componentDidCatch).to.have.been.called;
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
@@ -2190,11 +2198,11 @@ describe('Lifecycle methods', () => {
 				}
 			}
 			function ErrorGeneratorComponent() {
-				throw new Error("Error!");
+				throw new Error('Error!');
 			}
 			sinon.spy(ErrorAdapterComponent.prototype, 'componentDidCatch');
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorAdapterComponent><ErrorGeneratorComponent/></ErrorAdapterComponent></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorAdapterComponent><ErrorGeneratorComponent /></ErrorAdapterComponent></ErrorReceiverComponent>, scratch);
 			rerender();
 			expect(ErrorAdapterComponent.prototype.componentDidCatch).to.have.been.called;
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
@@ -2219,11 +2227,11 @@ describe('Lifecycle methods', () => {
 				}
 			}
 			function ErrorGeneratorComponent() {
-				throw new Error("Error!");
+				throw new Error('Error!');
 			}
 			sinon.spy(ErrorAdapterComponent.prototype, 'componentDidCatch');
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorAdapterComponent><ErrorGeneratorComponent/></ErrorAdapterComponent></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorAdapterComponent><ErrorGeneratorComponent /></ErrorAdapterComponent></ErrorReceiverComponent>, scratch);
 			rerender();
 			expect(ErrorAdapterComponent.prototype.componentDidCatch).to.have.been.called;
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
@@ -2248,11 +2256,11 @@ describe('Lifecycle methods', () => {
 				}
 			}
 			function ErrorGeneratorComponent() {
-				throw new Error("Error!");
+				throw new Error('Error!');
 			}
 			sinon.spy(ErrorAdapterComponent.prototype, 'componentDidCatch');
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorAdapterComponent><ErrorGeneratorComponent/></ErrorAdapterComponent></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorAdapterComponent><ErrorGeneratorComponent /></ErrorAdapterComponent></ErrorReceiverComponent>, scratch);
 			rerender();
 			expect(ErrorAdapterComponent.prototype.componentDidCatch).to.have.been.called;
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
@@ -2277,11 +2285,11 @@ describe('Lifecycle methods', () => {
 				}
 			}
 			function ErrorGeneratorComponent() {
-				throw new Error("Error!");
+				throw new Error('Error!');
 			}
 			sinon.spy(TopLevelReceiverComponent.prototype, 'componentDidCatch');
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<TopLevelReceiverComponent><ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent></TopLevelReceiverComponent>, scratch);
+			render(<TopLevelReceiverComponent><ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent></TopLevelReceiverComponent>, scratch);
 			rerender();
 			expect(TopLevelReceiverComponent.prototype.componentDidCatch).not.to.have.been.called;
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
@@ -2306,11 +2314,11 @@ describe('Lifecycle methods', () => {
 				}
 			}
 			function ErrorGeneratorComponent() {
-				throw new Error("Error!");
+				throw new Error('Error!');
 			}
 			sinon.spy(TopLevelReceiverComponent.prototype, 'componentDidCatch');
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<TopLevelReceiverComponent><ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent></TopLevelReceiverComponent>, scratch);
+			render(<TopLevelReceiverComponent><ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent></TopLevelReceiverComponent>, scratch);
 			rerender();
 			expect(TopLevelReceiverComponent.prototype.componentDidCatch).not.to.have.been.called;
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
@@ -2329,11 +2337,11 @@ describe('Lifecycle methods', () => {
 			class ErrorGeneratorComponent extends Component {
 				constructor(props, context) {
 					super(props, context);
-					throw new Error("Error!");
+					throw new Error('Error!');
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><div><ErrorGeneratorComponent/></div></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><div><ErrorGeneratorComponent /></div></ErrorReceiverComponent>, scratch);
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
 
@@ -2349,11 +2357,11 @@ describe('Lifecycle methods', () => {
 			class ErrorGeneratorComponent extends Component {
 				constructor(props, context) {
 					super(props, context);
-					throw new Error("Error!");
+					throw new Error('Error!');
 				}
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><div><ErrorGeneratorComponent/></div></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><div><ErrorGeneratorComponent /></div></ErrorReceiverComponent>, scratch);
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
 
@@ -2369,12 +2377,12 @@ describe('Lifecycle methods', () => {
 			function ErrorGeneratorComponent() {
 				return <div ref={(element) => {
 					if (element) {
-						throw new Error("Error");
+						throw new Error('Error');
 					}
-				}}/>
+				}} />
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
 
@@ -2388,13 +2396,13 @@ describe('Lifecycle methods', () => {
 				}
 			}
 			function throwError() {
-				throw new Error("Error!");
+				throw new Error('Error!');
 			}
 			function ErrorGeneratorComponent() {
-				return <div ref={throwError}/>
+				return <div ref={throwError} />
 			}
 			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
-			render(<ErrorReceiverComponent><ErrorGeneratorComponent/></ErrorReceiverComponent>, scratch);
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
 
