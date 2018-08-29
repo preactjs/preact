@@ -341,7 +341,8 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		c._processingException = null;
 	}
 
-	} catch (e) {
+	}
+	catch (e) {
 		if (c && !dom) {
 			// Create an "anchor" into which we can rerender upon recovery even though the component doesn't have a proper tree to render
 			// This is required because forceUpdate doesn't diff if c.base is null
@@ -483,7 +484,8 @@ export function unmount(vnode, ancestorComponent) {
 	if (vnode.props!=null && (r = vnode.props.ref)) {
 		try {
 			r(null);
-		} catch (e) {
+		}
+		catch (e) {
 			catchErrorInComponent(e, ancestorComponent);
 		}
 	}
@@ -494,7 +496,8 @@ export function unmount(vnode, ancestorComponent) {
 		if (r.componentWillUnmount) {
 			try {
 				r.componentWillUnmount();
-			} catch (e) {
+			}
+			catch (e) {
 				catchErrorInComponent(e, ancestorComponent);
 			}
 		}
@@ -717,7 +720,8 @@ function catchErrorInComponent(error, component) {
 			try {
 				component.componentDidCatch(error);
 				return enqueueRender(component._processingException = component);
-			} catch (e) {
+			}
+			catch (e) {
 				error = e;
 			}
 		}
