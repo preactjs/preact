@@ -1699,7 +1699,7 @@ describe('Lifecycle methods', () => {
 					this.setState({ error });
 				}
 				render() {
-					return <div>this.state.error ? String(this.state.error) : this.props.children</div>;
+					return <div>{this.state.error ? String(this.state.error) : this.props.children}</div>;
 				}
 			}
 			class ErrorGeneratorComponent extends Component {
