@@ -338,7 +338,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	}
 
 	if (clearProcessingException) {
-		c._processingException = 0;
+		c._processingException = null;
 	}
 
 	} catch (e) {
