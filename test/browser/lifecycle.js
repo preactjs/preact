@@ -1693,6 +1693,30 @@ describe('Lifecycle methods', () => {
 			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
 		});
 
+		it('should be called when child fails in getDerivedStateFromProps', () => {
+			class ErrorReceiverComponent extends Component {
+				componentDidCatch(error) {
+					this.setState({ error });
+				}
+				render() {
+					return <div>this.state.error ? String(this.state.error) : this.props.children</div>;
+				}
+			}
+			class ErrorGeneratorComponent extends Component {
+				static getDerivedStateFromProps() {
+					throw new Error('Error!');
+				}
+				render() {
+					return <span>Should not get here</span>;
+				}
+			}
+			sinon.spy(ErrorReceiverComponent.prototype, 'componentDidCatch');
+			sinon.spy(ErrorGeneratorComponent.prototype, 'render');
+			render(<ErrorReceiverComponent><ErrorGeneratorComponent /></ErrorReceiverComponent>, scratch);
+			expect(ErrorReceiverComponent.prototype.componentDidCatch).to.have.been.called;
+			expect(ErrorGeneratorComponent.prototype.render).not.to.have.been.called;
+		});
+
 		it('should be called when array child fails in getDerivedStateFromProps', () => {
 			class ErrorReceiverComponent extends Component {
 				componentDidCatch(error) {
