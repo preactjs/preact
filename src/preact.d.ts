@@ -122,6 +122,8 @@ declare namespace preact {
 		vnode?: (vnode: VNode<any>) => void;
 		event?: (event: Event) => Event;
 	};
+
+	function Fragment(props: RenderableProps<{}>): ComponentChildren;
 }
 
 declare global {

@@ -8,6 +8,7 @@ describe('build artifact', () => {
 		expect(preact).to.be.an('object');
 		expect(preact).to.have.property('h');
 		expect(preact).to.have.property('Component');
+		expect(preact).to.have.property('Fragment');
 		expect(preact).to.have.property('render');
 		expect(preact).to.have.property('rerender');
 		expect(preact).to.have.property('options');

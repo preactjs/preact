@@ -1,4 +1,5 @@
 import { h, cloneElement, render, rerender, Component } from '../../src/preact';
+import { Fragment } from '../../src/component';
 /** @jsx h */
 
 let spyAll = obj => Object.keys(obj).forEach( key => sinon.spy(obj,key) );
@@ -877,6 +878,66 @@ describe('Components', () => {
 			expect(C1.prototype.componentWillMount, 'inject between, C1 w/ intermediary div').not.to.have.been.called;
 			expect(C2.prototype.componentWillMount, 'inject between, C2 w/ intermediary div').to.have.been.calledOnce;
 			expect(C3.prototype.componentWillMount, 'inject between, C3 w/ intermediary div').to.have.been.calledOnce;
+		});
+	});
+
+	describe("Fragments", () => {
+		it("should render child fragment", () => {
+			let root;
+			function test(content) {
+				root = render(content, scratch, root);
+			}
+
+			function Comp() {
+				return <div>
+					<Fragment><span>foo</span>bar</Fragment>
+				</div>;
+			}
+
+			test(<Comp />);
+
+			expect(scratch.innerHTML).to.equal('<div><span>foo</span>bar</div>');
+		});
+
+		it("should render with root fragment", () => {
+			let root;
+			function test(content) {
+				root = render(content, scratch, root);
+			}
+
+			function Comp() {
+				return <Fragment><span>foo</span>bar</Fragment>;
+			}
+
+			test(<Comp />);
+
+			expect(scratch.innerHTML).to.equal('<span>foo</span>bar');
+		});
+
+		it("should render fragments 2", () => {
+			let root;
+			function test(content) {
+				root = render(content, scratch, root);
+			}
+
+			function Comp() {
+				return <Fragment><span>foo</span>bar</Fragment>;
+			}
+
+			test(<div><Comp /></div>);
+
+			expect(scratch.innerHTML).to.equal('<div><span>foo</span>bar</div>');
+		});
+
+		it("should Fragments with siblings", () => {
+			let root;
+			function test(content) {
+				root = render(content, scratch, root);
+			}
+
+			test(<div>foo,<Fragment>bar,</Fragment>baz,</div>);
+
+			expect(scratch.innerHTML).to.equal('<div>foo,bar,baz,</div>');
 		});
 	});
 });

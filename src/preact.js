@@ -1,6 +1,6 @@
 import { h, h as createElement } from './h';
 import { cloneElement } from './clone-element';
-import { Component } from './component';
+import { Component, Fragment } from './component';
 import { render } from './render';
 import { rerender } from './render-queue';
 import options from './options';
@@ -15,6 +15,7 @@ export default {
 	cloneElement,
 	createRef,
 	Component,
+	Fragment,
 	render,
 	rerender,
 	options
@@ -26,6 +27,7 @@ export {
 	cloneElement,
 	createRef,
 	Component,
+	Fragment,
 	render,
 	rerender,
 	options
