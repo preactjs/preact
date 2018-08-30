@@ -4,8 +4,8 @@
 
 import { setupScratch, teardown } from '../_util/helpers';
 import bench from '../_util/bench';
-const { createElement, render } = require(NODE_ENV==='production' ? '../../dist/ceviche.min.js' : '../../dist/ceviche');
 const preact = require('../fixtures/preact');
+const ceviche = require('../../dist/ceviche');
 const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
 
 describe('benchmarks', function() {
@@ -29,45 +29,59 @@ describe('benchmarks', function() {
 	});
 
 	it('in-place text update', done => {
-		const parent = document.createElement('div');
-		parent.id = 'preact';
-		scratch.appendChild(parent);
+		function createTest({ createElement, render }) {
+			const parent = document.createElement('div');
+			scratch.appendChild(parent);
 
-		function component(createElement, randomValue) {
-			return (
-				<div>
-					<h2>Preact {randomValue}</h2>
-					<h1>==={randomValue}===</h1>
-				</div>
-			);
+			function component(randomValue) {
+				return (
+					<div>
+						<h2>Test {randomValue}</h2>
+						<h1>==={randomValue}===</h1>
+					</div>
+				);
+			}
+
+			return (value) => {
+				const t = value%100;
+				render(component(t), parent);
+			};
 		}
-		render(component(createElement, 0), parent);
 
-		const parent2 = document.createElement('div');
-		parent2.id = 'vanilla';
-		let div, h1, h2, text1, text2;
-		parent2.appendChild(div = document.createElement('div'));
-		div.appendChild(h2 = document.createElement('h2'));
-		h2.appendChild(document.createTextNode('Vanilla '));
-		h2.appendChild(text1 = document.createTextNode('0'));
-		div.appendChild(h1 = document.createElement('h1'));
-		h1.appendChild(document.createTextNode('==='));
-		h1.appendChild(text2 = document.createTextNode('0'));
-		h1.appendChild(document.createTextNode('==='));
-		scratch.appendChild(parent2);
+		function createVanillaTest() {
+			const parent = document.createElement('div');
+			let div, h1, h2, text1, text2;
+			parent.appendChild(div = document.createElement('div'));
+			div.appendChild(h2 = document.createElement('h2'));
+			h2.appendChild(document.createTextNode('Vanilla '));
+			h2.appendChild(text1 = document.createTextNode('0'));
+			div.appendChild(h1 = document.createElement('h1'));
+			h1.appendChild(document.createTextNode('==='));
+			h1.appendChild(text2 = document.createTextNode('0'));
+			h1.appendChild(document.createTextNode('==='));
+			scratch.appendChild(parent);
 
-		bench({
-			vanilla(i) {
-				const t = i%1000;
+			return (value) => {
+				const t = value%100;
 				text1.data = '' + t;
 				text2.data = '' + t;
-			},
-			preact(i) {
-				preact.render(component(preact.h, i % 1000), parent);
-			},
-			ceviche(i) {
-				render(component(createElement, i % 1000), parent);
-			}
+			};
+		}
+
+		const preactTest = createTest(preact);
+		const cevicheTest = createTest(ceviche);
+		const vanillaTest = createVanillaTest();
+
+		for (let i=100; i--; ) {
+			preactTest(i);
+			cevicheTest(i);
+			vanillaTest(i);
+		}
+
+		bench({
+			vanilla: vanillaTest,
+			preact: preactTest,
+			ceviche: cevicheTest
 		}, ({ text, results }) => {
 			const THRESHOLD = 10 * MULTIPLIER;
 			// const slowdown = Math.sqrt(results.ceviche.hz * results.vanilla.hz);
