@@ -299,7 +299,9 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			// }
 
 			if (c.base==null) {
-				if (prev) unmount(prev, ancestorComponent);
+				if (prev && !(prev instanceof Array)) {
+					unmount(prev, ancestorComponent);
+				}
 			}
 			else if (parent && append!==false) {
 				// if (insertBefore && c.base.nextSibling!==insertBefore) parent.insertBefore(c.base, insertBefore);
