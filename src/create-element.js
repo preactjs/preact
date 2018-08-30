@@ -1,4 +1,4 @@
-import { ELEMENT_NODE, TEXT_NODE } from './constants';
+import { EMPTY_OBJ } from './constants';
 
 export function createElement(tag, props, children) {
 	if (props==null) props = {};
@@ -8,48 +8,25 @@ export function createElement(tag, props, children) {
 			children.push(arguments[i]);
 		}
 	}
-	return createVNode(ELEMENT_NODE, tag, props, children, null, props.key);
-	// return createVNode(ELEMENT_NODE, tag, props==null ? EMPTY_OBJ : props, children, null, props!=null ? props.key : null);
+	if (children!=null) {
+		props.children = children;
+	}
+	if (tag.defaultProps!=null) {
+		for (let i in tag.defaultProps) {
+			if (props[i]===undefined) props[i] = tag.defaultProps[i];
+		}
+	}
+	return createVNode(tag, props, null, props.key);
+}
+
+function createVNode(tag, props, text, key) {
+	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
+	// Do not inline into createElement and coerceToVNode!
+	return { tag, props, text, key, _children: null, _el: null, _component: null };
 }
 
 export function Fragment(props) {
 	return props.children;
-}
-
-// const RECYCLED_VNODES = [];
-
-// export function reclaimVNode(vnode) {
-// 	vnode.index = vnode._children = vnode._el = vnode._component = null;
-// 	RECYCLED_VNODES.push(vnode);
-// }
-
-export function createVNode(type, tag, props, children, text, key) {
-
-	// @TODO this is likely better off in createElement():
-	if (type===ELEMENT_NODE) {
-		// if (props==null) props = {};
-		if (children!=null) props.children = children;
-		// children = props.children || (props.children = children);
-		if (tag.defaultProps!=null) {
-			for (let i in tag.defaultProps) {
-				if (props[i]===undefined) props[i] = tag.defaultProps[i];
-			}
-		}
-	}
-
-	// let r = RECYCLED_VNODES.pop();
-	// if (r!=null) {
-	// 	r.type = type;
-	// 	r.tag = tag;
-	// 	r.props = props;
-	// 	r.children = children;
-	// 	r.text = text;
-	// 	r.key = key;
-	// 	return r;
-	// }
-	// return { type, tag, props, attributes: props, /*children,*/ text, key, index: null, _children: null, _el: null, _component: null };
-	return { type, tag, props, /*children,*/ text, key, index: null, _children: null, _el: null, _component: null };
-	// return { type, tag, props, children, text, key, index: null, _children: null, _el: null, _component: null };
 }
 
 /**
@@ -62,7 +39,7 @@ export function createVNode(type, tag, props, children, text, key) {
 export function coerceToVNode(possibleVNode) {
 	if (typeof possibleVNode === 'boolean') return null;
 	if (typeof possibleVNode === 'string' || typeof possibleVNode === 'number') {
-		return createVNode(TEXT_NODE, null, null, null, possibleVNode, null);
+		return createVNode(null, EMPTY_OBJ, possibleVNode, null);
 	}
 
 	return possibleVNode;

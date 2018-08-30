@@ -17,7 +17,7 @@ export function cloneElement(vnode, props) {
 	// if (arguments.length>2) out.props.children = EMPTY_ARR.slice.call(arguments, 2);
 	if (arguments.length>2) out.props.children = EMPTY_ARR.slice.call(arguments, 2);
 	return out;
-	// return createVNode(vnode.type, vnode.tag, assign(assign({}, vnode.props), props), i>2 ? children : null, vnode.text, vnode.key);
+	// return createVNode(vnode.tag, assign(assign({}, vnode.props), props), i>2 ? children : null, vnode.text, vnode.key);
 
 
 	// return createElement(

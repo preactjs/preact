@@ -28,7 +28,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 	// 		// let vnode = oldChildren[i];
 	// 		// let key = vnode.key;
 	// 		// if (key==null) {
-	// 		// 	key = `${vnode.type}_${vnode.tag}`;
+	// 		// 	key = `${vnode.tag}`;
 	// 		// 	key += '_' + (types[key] = (types[key] || 0) + 1);
 	// 		// }
 	// 		// seen[key] = vnode;
@@ -59,7 +59,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 
 		// let key = children[i].key;
 		// if (key==null) {
-		// 	key = `${children[i].type}_${children[i].tag}`;
+		// 	key = `${children[i].tag}`;
 		// 	key += '_' + (types[key] = (types[key] || 0) + 1);
 		// }
 
@@ -71,14 +71,14 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 		// __operation += '\n';
 		// let index;
 		p = oldChildren[i];
-		if (p != null && (child.key==null ? (child.type === p.type && child.tag === p.tag) : (child.key === p.key))) {
+		if (p != null && (child.key==null ? (child.tag === p.tag) : (child.key === p.key))) {
 			index = i;
 		}
 		else {
 			for (j=0; j<oldChildrenLength; j++) {
 				p = oldChildren[j];
 				if (p!=null) {
-					if (child.key==null ? (child.type === p.type && child.tag === p.tag) : (child.key === p.key)) {
+					if (child.key==null ? (child.tag === p.tag) : (child.key === p.key)) {
 						index = j;
 						break;
 					}
@@ -260,7 +260,7 @@ export function create(node, parent, vnode, context, isSvg) {
 	if (typeof vnode.tag==='function') {
 		return diff(node, parent, vnode, null, context, isSvg);
 	}
-	else if (vnode.type===3) {
+	else if (vnode.tag===null) {
 		if (node==null || node.nodeType!==3) {
 			node = document.createTextNode(vnode.text);
 		}

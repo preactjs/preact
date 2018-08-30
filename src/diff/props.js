@@ -2,25 +2,21 @@ import { IS_NON_DIMENSIONAL } from '../constants';
 
 export function diffProps(node, props, oldProps, isSvg) {
 	// if (props!=null) {
-	if (props) {
-		for (let i in props) {
-			if (i!=='children' && i!=='key' && (!oldProps || oldProps[i]!=props[i])) {
-			// if (i!=='children' && i!=='key' && (oldProps==null || oldProps[i]!=props[i])) {
-			// if (oldProps==null || oldProps[i]!=props[i]) {
-				setProperty(node, i, props[i], oldProps[i], isSvg);
-				// node[i] = props[i];
-			}
+	for (let i in props) {
+		if (i!=='children' && i!=='key' && (!oldProps || oldProps[i]!=props[i])) {
+		// if (i!=='children' && i!=='key' && (oldProps==null || oldProps[i]!=props[i])) {
+		// if (oldProps==null || oldProps[i]!=props[i]) {
+			setProperty(node, i, props[i], oldProps[i], isSvg);
+			// node[i] = props[i];
 		}
 	}
 	// if (oldProps!=null) {
-	if (oldProps) {
-		for (let i in oldProps) {
-			if (i!=='children' && i!=='key' && (!props || !(i in props))) {
-			// if (i!=='children' && i!=='key' && (props==null || !(i in props))) {
-			// if (props==null || !(i in props)) {
-				// delete node[i];
-				setProperty(node, i, null, oldProps[i], isSvg);
-			}
+	for (let i in oldProps) {
+		if (i!=='children' && i!=='key' && (!props || !(i in props))) {
+		// if (i!=='children' && i!=='key' && (props==null || !(i in props))) {
+		// if (props==null || !(i in props)) {
+			// delete node[i];
+			setProperty(node, i, null, oldProps[i], isSvg);
 		}
 	}
 }

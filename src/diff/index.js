@@ -400,24 +400,23 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 	isSvg = isSvg ? vnode.tag !== 'foreignObject' : vnode.tag === 'svg';
 
 	// if (oldVNode!=null) {
-	// 	if (vnode.type!==oldVNode.type) console.log('vnode type mismatch: ', oldVNode.type, vnode.type);
 	// 	if (vnode.tag!==oldVNode.tag) console.log('vnode tag mismatch: ', oldVNode.tag, vnode.tag);
 	// }
 
-	if (oldVNode==null || vnode.type!==oldVNode.type || vnode.tag!==oldVNode.tag) {
+	if (oldVNode==null || vnode.tag!==oldVNode.tag) {
 		// if (oldVNode) unmount(oldVNode);
 		dom = null;
 	}
 
 	// if (dom==null && excessChildren!=null) {
-	// 	console.log('hydrating from '+excessChildren.length+' excess children', excessChildren.map( c => c && `${c.nodeType} @ ${c.localName}`), vnode.type, vnode.tag);
+	// 	console.log('hydrating from '+excessChildren.length+' excess children', excessChildren.map( c => c && `${c.nodeType} @ ${c.localName}`), vnode.tag);
 	// 	for (let j=0; j<excessChildren.length; j++) {
 	// 		let c = excessChildren[j];
-	// 		if (c!=null && c.nodeType==vnode.type && c.localName==vnode.tag) {
+	// 		if (c!=null && c.localName==vnode.tag) {
 	// 			// oldVNode = toVNode(dom = d = c);
 	// 			// console.log(vnode, oldVNode, dom);
 	// 			excessChildren[j] = null;
-	// 			// console.log('found hydration match for '+vnode.tag+' ('+vnode.type+')', oldVNode);
+	// 			// console.log('found hydration match for '+vnode.tag, oldVNode);
 	// 			// console.log(oldVNode, vnode);
 	// 			// dom = toVNode(c);
 	// 			break;
@@ -426,11 +425,11 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 	// }
 
 	if (dom==null) {
-	// if (dom==null || vnode.type!==(oldVNode==null?null:oldVNode.type) || vnode.tag!==(oldVNode==null?null:oldVNode.tag)) {
+	// if (dom==null || vnode.tag!==(oldVNode==null?null:oldVNode.tag)) {
 		// return create(dom, parent, vnode, context, isSvg);
 		//dom = create(dom, parent, vnode, context, isSvg);
 
-		// if (vnode.type===3) {
+		// if (vnode.tag===null) {
 		// 	dom = document.createTextNode(vnode.text);
 		// }
 		// else if (isSvg) {
@@ -446,9 +445,9 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 		// vnode._el = dom;
 
 		// vnode._el = dom = typeof vnode==='string' || typeof vnode==='number' ? document.createTextNode(vnode) : isSvg ? document.createElementNS('http://www.w3.org/2000/svg', vnode.tag) : document.createElement(vnode.tag);
-		vnode._el = dom = vnode.type===3 ? document.createTextNode(vnode.text) : isSvg ? document.createElementNS('http://www.w3.org/2000/svg', vnode.tag) : document.createElement(vnode.tag);
+		vnode._el = dom = vnode.tag===null ? document.createTextNode(vnode.text) : isSvg ? document.createElementNS('http://www.w3.org/2000/svg', vnode.tag) : document.createElement(vnode.tag);
 
-		// dom = vnode.type===3 ? document.createTextNode(vnode.text) : document.createElement(vnode.tag);
+		// dom = vnode.tag===null ? document.createTextNode(vnode.text) : document.createElement(vnode.tag);
 		// if (d) {
 		// 	parent.replaceChild(dom, d);
 		// 	while (d.firstChild) dom.appendChild(d.firstChild);
@@ -456,7 +455,7 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 	}
 
 	// if (typeof vnode==='string' || typeof vnode==='number') {
-	if (vnode.type===3) {
+	if (vnode.tag===null) {
 		if (dom===d && vnode.text!==oldVNode.text) {
 			dom.data = vnode.text;
 		}
@@ -482,7 +481,7 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 
 export function unmount(vnode, ancestorComponent) {
 	let r;
-	if (vnode.props!=null && (r = vnode.props.ref)) {
+	if (r = vnode.props.ref) {
 		try {
 			r(null);
 		}
@@ -574,7 +573,7 @@ export function getVNodeChildren(vnode) {
 	if (vnode._children==null) {
 		// flattenChildren(vnode.children, vnode._children=[], '', 0);
 		// flattenChildren(vnode.props.children, vnode._children=[], '', 0);
-		flattenChildren(vnode.props && vnode.props.children, vnode._children=[]);
+		flattenChildren(vnode.props.children, vnode._children=[]);
 	}
 	return vnode._children;
 

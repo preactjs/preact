@@ -21,7 +21,7 @@
     "lint": "eslint src test"
   },
   "mangle": {
-    "regex": "^(_|(type|text|key|index)$)"
+    "regex": "^_"
   },
   "eslintConfig": {
     "extends": "developit",
