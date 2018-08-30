@@ -1,7 +1,7 @@
 /*global coverage, ENABLE_PERFORMANCE, NODE_ENV*/
 /*eslint no-console:0*/
 /** @jsx h */
-import { setupScratch, teardown } from './helpers';
+import { setupScratch, teardown } from '../_util/helpers';
 let { createElement: h, Component, render } = require(NODE_ENV==='production' ? '../../dist/ceviche.min.js' : '../../dist/ceviche');
 
 const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;

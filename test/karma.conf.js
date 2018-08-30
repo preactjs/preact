@@ -94,7 +94,7 @@ module.exports = function(config) {
 
 		files: [
 			{ pattern: 'polyfills.js', watched: false },
-			{ pattern: '{browser,shared}/**.js', watched: false }
+			{ pattern: config.grep || '{browser,shared}/**.js', watched: false }
 		],
 
 		preprocessors: {
