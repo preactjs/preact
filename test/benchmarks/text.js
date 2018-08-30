@@ -1,4 +1,4 @@
-/*global coverage, ENABLE_PERFORMANCE, NODE_ENV*/
+/*global coverage, ENABLE_PERFORMANCE */
 /*eslint no-console:0*/
 /** @jsx createElement */
 
