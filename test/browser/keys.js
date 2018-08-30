@@ -58,8 +58,15 @@ describe('keys', () => {
 		expect(<div key="1" />).to.have.property('key', '1');
 	});
 
+	it('should set VNode#ref property', () => {
+		expect(<div />).to.have.property('ref').that.is.undefined;
+		expect(<div a="a" />).to.have.property('ref').that.is.undefined;
+		const emptyFunction = () => {};
+		expect(<div ref={emptyFunction} />).to.have.property('ref', emptyFunction);
+	});
+
 	it('should have ordered VNode properties', () => {
-		expect(Object.keys(<div />).filter(key => !/^_/.test(key))).to.deep.equal(['tag', 'props', 'text', 'key']);
+		expect(Object.keys(<div />).filter(key => !/^_/.test(key))).to.deep.equal(['tag', 'props', 'text', 'key', 'ref']);
 	});
 
 	it('should remove keyed nodes (#232)', () => {
