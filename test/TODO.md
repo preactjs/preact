@@ -1,8 +1,5 @@
 # Tests skipped to get CI to pass
 
-- Components
-	- Fragment
-		- ✖ should render nested Fragments
 - Lifecycle methods
 	- ✖ should call nested new lifecycle methods in the right order
 	- static getDerivedStateFromProps

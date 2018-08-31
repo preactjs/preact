@@ -77,6 +77,15 @@ describe('render()', () => {
 		expect(scratch.firstChild).to.have.property('nodeName', 'X-BAR');
 	});
 
+	it('should allow element reuse', () => {
+		let reused = <div>Hello World!</div>;
+		render(<div>{reused}<span />{reused}/></div>, scratch);
+		render(<div><span />{reused}</div>, scratch);
+		expect(scratch.innerHTML).to.eql(
+			`<div><span></span><div>Hello World!</div></div>`
+		);
+	});
+
 	// Not supported currently
 	xit('should append new elements when called without a merge argument', () => {
 		render(<div />, scratch);

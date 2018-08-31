@@ -42,5 +42,10 @@ export function coerceToVNode(possibleVNode) {
 		return createVNode(null, EMPTY_OBJ, possibleVNode, null);
 	}
 
+	// Clone vnode if it has already been used. ceviche/#57
+	if (possibleVNode!=null && possibleVNode._el!=null) {
+		return createVNode(possibleVNode.tag, possibleVNode.props, possibleVNode.text, possibleVNode.key);
+	}
+
 	return possibleVNode;
 }
