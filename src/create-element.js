@@ -29,6 +29,10 @@ function createVNode(tag, props, text, key, ref) {
 	return { tag, props, text, key, ref, _children: null, _el: null, _component: null };
 }
 
+export function createRef() {
+	return {};
+}
+
 export function Fragment(props) {
 	return props.children;
 }
