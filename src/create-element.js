@@ -8,7 +8,7 @@ import { EMPTY_OBJ } from './constants';
  * @typedef VNode
  * @property {VNodeTag} tag
  * @property {*} props
- * @property {string} text
+ * @property {string | number} text
  * @property {string} key
  * @property {*} _children
  * @property {*} _el
@@ -45,7 +45,7 @@ export function createElement(tag, props, children) {
  * Create a VNode
  * @param {VNodeTag} tag
  * @param {*} props
- * @param {string} text
+ * @param {string | number} text
  * @param {string} key
  * @returns {VNode}
  */
