@@ -416,7 +416,7 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 	// 	}
 	// }
 
-	if (dom==null && vnode!=null) {
+	if (dom==null) {
 	// if (dom==null || vnode.type!==(oldVNode==null?null:oldVNode.type) || vnode.tag!==(oldVNode==null?null:oldVNode.tag)) {
 		// return create(dom, parent, vnode, context, isSvg);
 		//dom = create(dom, parent, vnode, context, isSvg);
