@@ -286,15 +286,6 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 					unmount(prev, ancestorComponent);
 				}
 			}
-			// else if (parent && append!==false) {
-			// 	console.log("replace?")
-			// 	// if (insertBefore && c.base.nextSibling!==insertBefore) parent.insertBefore(c.base, insertBefore);
-			// 	if (dom==null || dom.parentNode!==parent) parent.appendChild(c.base);
-			// 	else if (c.base!==dom) {
-			// 		// console.log('replace', dom, c.base);
-			// 		parent.replaceChild(c.base, dom);
-			// 	}
-			// }
 
 			// if (dom!=null && (c.base!==dom || !dom.parentNode)) {
 			// 	if (c.base==null) unmount(prev);
@@ -328,8 +319,6 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			dom = c.base;
 			while (p=c._renderCallbacks.pop()) p();
 
-			// if (c!=null) {
-			// c.base = newTree._el;
 			if (!isNew && c.componentDidUpdate!=null) {
 				c.componentDidUpdate(oldProps, oldState, oldContext);
 			}
@@ -357,11 +346,6 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 
 	// if (originalOldTree && originalOldTree._el && originalOldTree._el!==dom) {
 	// 	unmount(originalOldTree);
-	// }
-	// if (originalOldTree!=null && originalOldTree.tag!==newTag) {
-	// 	// console.trace('unmount', originalOldTree._el);
-	// 	console.log("diff unmount end diff")
-	// 	unmount(originalOldTree, ancestorComponent);
 	// }
 
 	return dom;
@@ -417,7 +401,7 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 	// }
 
 	if (dom==null) {
-	// if (dom==null || vnode.type!==(oldVNode==null?null:oldVNode.type) || vnode.tag!==(oldVNode==null?null:oldVNode.tag)) {
+	// if (dom==null || vnode.tag!==(oldVNode==null?null:oldVNode.tag)) {
 		// return create(dom, parent, vnode, context, isSvg);
 		//dom = create(dom, parent, vnode, context, isSvg);
 
