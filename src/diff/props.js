@@ -75,30 +75,32 @@ function setProperty(node, name, value, oldValue, isSvg) {
 		// 	}
 
 		let s = node.style;
-		s.cssText = typeof value === 'string' ? value : '';
 
-		if (s.cssText=='') {
+		if (typeof value==='string') return s.cssText = value;
+		if (typeof oldValue==='string') s.cssText = '';
+		else {
 			// remove values not in the new list
 			for (let i in oldValue) {
 				if (value==null || !(i in value)) s[i] = '';
 			}
-			for (let i in value) {
-				let v = value[i];
-				if (oldValue==null || v!==oldValue[i]) {
-					s[i] = typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v;
-					// obj[i] = v;
+		}
 
-					// if (typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false) v += 'px';
-					// obj[i] = v;
+		for (let i in value) {
+			let v = value[i];
+			if (oldValue==null || v!==oldValue[i]) {
+				s[i] = typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v;
+				// obj[i] = v;
 
-					// node.style[i] = typeof v==='number' && isDimensionalProp(i) ? `${v}px` : v;
-					// node.style[i] = v;
+				// if (typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false) v += 'px';
+				// obj[i] = v;
 
-					// if (typeof v==='number' && (DIMENSION_PROPS[i] === true || (DIMENSION_PROPS[i] = IS_NON_DIMENSIONAL.test(i)===false))) {
-					// 	v += 'px';
-					// }
-					// node.style[i] = v;
-				}
+				// node.style[i] = typeof v==='number' && isDimensionalProp(i) ? `${v}px` : v;
+				// node.style[i] = v;
+
+				// if (typeof v==='number' && (DIMENSION_PROPS[i] === true || (DIMENSION_PROPS[i] = IS_NON_DIMENSIONAL.test(i)===false))) {
+				// 	v += 'px';
+				// }
+				// node.style[i] = v;
 			}
 		}
 		// }
