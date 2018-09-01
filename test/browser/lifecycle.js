@@ -1904,7 +1904,7 @@ describe('Lifecycle methods', () => {
 	});
 
 	describe('Lifecycle DOM Timing', () => {
-		it.skip('should be invoked when dom does (DidMount, WillUnmount) or does not (WillMount, DidUnmount) exist', () => {
+		it('should be invoked when dom does (DidMount, WillUnmount) or does not (WillMount, DidUnmount) exist', () => {
 			let setState;
 			class Outer extends Component {
 				constructor() {

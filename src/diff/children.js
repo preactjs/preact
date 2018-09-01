@@ -6,7 +6,7 @@ import { coerceToVNode } from '../create-element';
 // import { cloneElement } from '../clone-element';
 
 
-export function diffChildren(node, children, oldChildren, context, isSvg, excessChildren, isRootDiff, mounts, ancestorComponent) {
+export function diffChildren(node, children, oldChildren, context, isSvg, excessChildren, mounts, ancestorComponent) {
 	// if (oldChildren==null) oldChildren = EMPTY_ARR;
 
 	// let __children = oldChildren.map(cloneElement);
@@ -142,7 +142,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 
 		next = childNode!=null && childNode.nextSibling;
 
-		newEl = diff(old==null ? null : old._el, node, child, old, context, isSvg, false, excessChildren, isRootDiff, mounts, ancestorComponent);
+		newEl = diff(old==null ? null : old._el, node, child, old, context, isSvg, false, excessChildren, mounts, ancestorComponent);
 		if (newEl!=null) {
 			// let childNode;
 			// childNode = null;

@@ -1,5 +1,5 @@
 import { assign } from './util';
-import { diff } from './diff/index';
+import { diff, flushMounts, nodeIsSvg } from './diff/index';
 // import { diff, diffLevel } from './diff/index';
 
 export function Component(props, context) {
@@ -39,7 +39,9 @@ Component.prototype.setState = function(update, callback) {
 
 Component.prototype.forceUpdate = function(callback) {
 	if (this.base!=null) {
-		diff(this.base, this.base.parentNode, this._vnode, this._vnode, this.context, false, true, null, true, [], this._ancestorComponent);
+		let mounts = [];
+		diff(this.base, this.base.parentNode, this._vnode, this._vnode, this.context, nodeIsSvg(this.base.parentNode), true, null, mounts, this._ancestorComponent);
+		flushMounts(mounts);
 	}
 	if (callback!=null) callback();
 };
