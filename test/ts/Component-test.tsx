@@ -3,7 +3,8 @@ import { expect } from "chai";
 import {
 	createElement,
 	Component,
-	RenderableProps
+	RenderableProps,
+	Fragment
 } from "../../src/";
 
 export class ContextComponent extends Component<{ foo: string }> {
@@ -130,6 +131,17 @@ describe("Component", () => {
 			const actual = comp.render();
 
 			expect(actual).to.eq(null);
+		});
+	});
+
+	describe("Fragment", () => {
+		it('should render nested Fragments', () => {
+			var vnode = <Fragment>
+					<Fragment>foo</Fragment>
+					bar
+				</Fragment>
+
+			expect(vnode.tag).to.be.equal(Fragment);
 		});
 	});
 });

@@ -80,6 +80,7 @@ declare namespace preact {
 
 		static displayName?: string;
 		static defaultProps?: any;
+		static getDerivedStateFromProps?<P, S>(props: P, state: S): Partial<S>;
 
 		state: Readonly<S>;
 		props: RenderableProps<P>;
@@ -116,6 +117,12 @@ declare namespace preact {
 	function render(vnode: ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment): void
 	function hydrate(vnode: ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment): void
 	function cloneElement(vnode: JSX.Element, props: any, ...children: ComponentChildren[]): JSX.Element;
+
+	//
+	// Preact Built-in Components
+	// -----------------------------------
+
+	const Fragment: ComponentConstructor<{}, {}>;
 
 	//
 	// Preact options
