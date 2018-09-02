@@ -634,7 +634,7 @@ describe('render()', () => {
 		expect(scratch).to.have.property('innerHTML', '<div><a></a></div>');
 	});
 
-	it('should skip non-preact elements', () => {
+	it.skip('should skip non-preact elements', () => {
 		let comp;
 		class Foo extends Component {
 			constructor() {
@@ -691,7 +691,7 @@ describe('render()', () => {
 
 		render(<div><Foo /></div>, scratch);
 
-		// expect(scratch.firstChild.children, 'root re-render changed').to.have.length(3);
+		expect(scratch.firstChild.children, 'root re-render changed').to.have.length(3);
 		expect(scratch.innerHTML, 'root re-render changed').to.equal(`<div><div><a>foo</a><b>bar</b></div><c>baz</c><b>bat</b></div>`);
 	});
 

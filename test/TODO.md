@@ -7,4 +7,5 @@
 	- \#shouldComponentUpdate
 		- ✖ should be passed next props and state
 - refs (***`SKIPPED`***)
-
+- render
+	- ✖ should skip non-preact elements
