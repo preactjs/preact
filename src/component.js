@@ -75,6 +75,11 @@ let q = [];
 
 // const defer = typeof Promise=='function' ? Promise.resolve().then.bind(Promise.resolve()) : setTimeout;
 // Component.debounce = typeof Promise=='function' ? Promise.resolve().then.bind(Promise.resolve()) : setTimeout;
+
+/**
+ * Asynchronously schedule a callback
+ * @type {(cb) => void}
+ */
 const defer = typeof Promise=='function' ? Promise.resolve().then.bind(Promise.resolve()) : setTimeout;
 // Component.debounce = setTimeout;
 

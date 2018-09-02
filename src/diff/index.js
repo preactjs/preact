@@ -82,10 +82,33 @@ import { assign } from '../util';
 // 	// }
 // }
 
+/**
+ * Determine whether or not an element is an SVG element
+ * @param {import('../internal').PreactElement} node The node to test whether
+ * or not it is an SVG element
+ */
 export function nodeIsSvg(node) {
 	return node!=null && node.ownerSVGElement!==undefined;
 }
 
+/**
+ * Diff two virtual nodes and apply proper changes to the DOM
+ * @param {import('../internal').PreactElement} dom The DOM element representing
+ * the virtual nodes under diff
+ * @param {import('../internal').PreactElement} parent The parent of the DOM element
+ * @param {import('../internal').VNode | null} newTree The new virtual node
+ * @param {import('../internal').VNode | null} oldTree The old virtual node
+ * @param {object} context The current context object
+ * @param {boolean} isSvg Whether or not this element is an SVG node
+ * @param {boolean} append Whether or not to immediately append the new DOM
+ * element after diffing
+ * @param {Array<import('../internal').PreactElement>} excessChildren
+ * @param {Array<import('../internal').Component>} mounts A list of newly
+ * mounted components
+ * @param {import('../internal').Component | null} ancestorComponent The direct
+ * parent component
+ * @returns {import('../internal').PreactElement | null}
+ */
 export function diff(dom, parent, newTree, oldTree, context, isSvg, append, excessChildren, mounts, ancestorComponent) {
 	if (newTree==null) {
 		if (oldTree != null) {
@@ -382,6 +405,22 @@ export function flushMounts(mounts) {
 	}
 }
 
+/**
+ * Diff two virtual nodes representing DOM element
+ * @param {import('../internal').PreactElement} dom The DOM element representing
+ * the virtual nodes being diffed
+ * @param {import('../internal').PreactElement} parent The parent DOM element
+ * @param {import('../internal').VNode} vnode The new virtual node
+ * @param {import('../internal').VNode} oldVNode The old virtual node
+ * @param {object} context The current context object
+ * @param {boolean} isSvg Whether or not this DOM node is an SVG node
+ * @param {*} excessChildren
+ * @param {Array<import('../internal').Component>} mounts An array of newly
+ * mounted components
+ * @param {Array<import('../internal').Component>} ancestorComponent The parent
+ * component to the ones being diffed
+ * @returns {import('../internal').PreactElement}
+ */
 function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessChildren, mounts, ancestorComponent) {
 	// if (vnode==null) {
 	// 	let c = document.createComment('empty');
@@ -478,6 +517,12 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 }
 
 
+/**
+ * Unmount a virtual node from the tree and apply DOM changes
+ * @param {import('../internal').VNode} vnode The virtual node to unmount
+ * @param {import('../internal').Component} ancestorComponent The parent
+ * component to this virtual node
+ */
 export function unmount(vnode, ancestorComponent) {
 	let r;
 	if (r = vnode.props.ref) {
@@ -568,6 +613,12 @@ function getVNodeChildren(vnode) {
 
 // const ARR = [];
 
+/**
+ * Get the children of a virtual node as a flat array
+ * @param {import('../internal').VNode} vnode The virtual node to get the
+ * children of
+ * @returns {Array<import('../internal').VNode>} The virtual node's children
+ */
 export function getVNodeChildren(vnode) {
 	if (vnode._children==null) {
 		// flattenChildren(vnode.children, vnode._children=[], '', 0);
@@ -593,6 +644,12 @@ export function getVNodeChildren(vnode) {
 
 // function flattenChildren(children, flattened, path, index) {
 // function flattenChildren(children, flattened, key, index) {
+/**
+ * Flatten a virtual nodes children to a single dimensional array
+ * @param {import('../index').ComponentChildren} children The unflattened
+ * children of a virtual node
+ * @param {Array<import('../index').ComponentChild>} flattened An flat array of children to modify
+ */
 function flattenChildren(children, flattened) {
 	// let i = 0;
 	//	key = path+'.'+index,	//key = path.length===0 ? index : `${path}.${index}`,
@@ -698,8 +755,8 @@ function flattenChildren(children, flattened) {
  * @param {function} Ctor The constructor of the component to create
  * @param {object} props The initial props of the component
  * @param {object} context The initial context of the component
- * @param {import('../component').Component} ancestorComponent The direct parent component of this component
- * @returns {import('../component').Component}
+ * @param {import('../internal').Component} ancestorComponent The direct parent component of this component
+ * @returns {import('../internal').Component}
  */
 function createComponent(Ctor, props, context, ancestorComponent) {
 	let inst;
@@ -722,6 +779,12 @@ function doRender(props, state, context) {
 	return this._constructor(props, context);
 }
 
+/**
+ * Find the closest error boundary to a thrown error and call it
+ * @param {object} error The thrown value
+ * @param {import('../internal').Component} component The first ancestor
+ * component check for error boundary behaviors
+ */
 function catchErrorInComponent(error, component) {
 	for (; component; component = component._ancestorComponent) {
 		if (component.componentDidCatch && !component._processingException) {

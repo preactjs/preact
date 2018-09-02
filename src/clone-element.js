@@ -4,9 +4,9 @@ import { EMPTY_ARR } from './constants';
 
 /**
  * Clones the given VNode, optionally adding attributes/props and replacing its children.
- * @param {VNode} vnode		The virutal DOM element to clone
- * @param {Object} props	Attributes/props to add when cloning
- * @param {VNode} rest		Any additional arguments will be used as replacement children.
+ * @param {import('./internal').VNode} vnode The virutal DOM element to clone
+ * @param {object} props Attributes/props to add when cloning
+ * @param {Array<import('./index').ComponentChildren>} rest Any additional arguments will be used as replacement children.
  */
 export function cloneElement(vnode, props) {
 	// let children = [], i = 2;

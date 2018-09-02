@@ -1,26 +1,12 @@
 import { EMPTY_OBJ } from './constants';
 
 /**
- * @typedef {string | function} VNodeTag
- */
-
-/**
- * @typedef VNode
- * @property {VNodeTag} tag
- * @property {*} props
- * @property {string | number} text
- * @property {string} key
- * @property {*} _children
- * @property {*} _el
- * @property {*} _component
- */
-
-/**
-  * Create an Element type Virtual Node
-  * @param {VNodeTag} tag
-  * @param {*} props
-  * @param {Array<*>} children
-  * @returns {VNode}
+  * Create an virtual node (used for JSX)
+  * @param {import('./internal').VNode["tag"]} tag The node name or Component
+  * constructor for this virutal node
+  * @param {object | null | undefined} [props] The properties of the virtual node
+  * @param {Array<import('.').ComponentChild>} [children] The children of the virtual node
+  * @returns {import('./internal').VNode}
   */
 export function createElement(tag, props, children) {
 	if (props==null) props = {};
@@ -42,12 +28,15 @@ export function createElement(tag, props, children) {
 }
 
 /**
- * Create a VNode
- * @param {VNodeTag} tag
- * @param {*} props
- * @param {string | number} text
- * @param {string} key
- * @returns {VNode}
+ * Create a VNode (used internally by Preact)
+ * @param {import('./internal').VNode["tag"]} tag The node name or Component
+ * Constructor for this virutal node
+ * @param {object} props The properites of this virtual node
+ * @param {string | number} text If this virtual node represents a text node,
+ * this is the text of the node
+ * @param {string |number | null} key The key for this virtual node, used when
+ * diffing it against its children
+ * @returns {import('./internal').VNode}
  */
 function createVNode(tag, props, text, key) {
 	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
@@ -63,8 +52,8 @@ export function Fragment(props) {
  * Coerce an untrusted value into a VNode
  * Specifically, this should be used anywhere a user could provide a boolean, string, or number where
  * a VNode or Component is desired instead
- * @param {boolean | string | number | function | object} possibleVNode A possible VNode
- * @returns {object | function}
+ * @param {boolean | string | number | import('./internal').VNode} possibleVNode A possible VNode
+ * @returns {import('./internal').VNode}
  */
 export function coerceToVNode(possibleVNode) {
 	if (typeof possibleVNode === 'boolean') return null;
