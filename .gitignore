@@ -3,3 +3,4 @@ npm-debug.log
 dist
 package-lock.json
 .vscode
+.idea
