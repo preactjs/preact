@@ -1,12 +1,11 @@
 import "mocha";
 import { expect } from "chai";
 import {
-	h,
+	createElement,
 	Component,
 	FunctionalComponent,
-	ComponentConstructor,
-	VNode
-} from "../../src/preact";
+	ComponentConstructor
+} from "../../src";
 
 class SimpleComponent extends Component<{}, {}> {
 	render() {
@@ -21,27 +20,27 @@ const SimpleFunctionalComponent = () => <div />;
 describe("VNode", () => {
 	it("is returned by h", () => {
 		const actual = <div className="wow"/>;
-		expect(Object.keys(actual)).to.have.members([
-			"nodeName", "attributes", "children", "key"
-		]);
+		expect(actual).to.include.all.keys(
+			"tag", "props", "text", "key"
+		);
 	});
 
 	it("has a nodeName of string when html element", () => {
 		const div = <div>Hi!</div>;
-		expect(div.nodeName).to.equal("div");
+		expect(div.tag).to.equal("div");
 	});
 
 	it("has a nodeName equal to the construction function when SFC", () => {
 		const sfc = <SimpleFunctionalComponent />;
-		expect(sfc.nodeName).to.be.instanceOf(Function);
-		const constructor = sfc.nodeName as FunctionalComponent<any>;
+		expect(sfc.tag).to.be.instanceOf(Function);
+		const constructor = sfc.tag as FunctionalComponent<any>;
 		expect(constructor.name).to.eq("SimpleFunctionalComponent");
 	});
 
 	it("has a nodeName equal to the constructor of a componet", () => {
 		const sfc = <SimpleComponent />;
-		expect(sfc.nodeName).to.be.instanceOf(Function);
-		const constructor = sfc.nodeName as ComponentConstructor<any>;
+		expect(sfc.tag).to.be.instanceOf(Function);
+		const constructor = sfc.tag as ComponentConstructor<any>;
 		expect(constructor.name).to.eq("SimpleComponent");
 	});
 
@@ -52,8 +51,7 @@ describe("VNode", () => {
 				child2
 			</SimpleComponent>
 		);
-		expect(comp.children).to.be.instanceOf(Array);
-		expect(comp.children[0].constructor.name).to.eq("VNode");
-		expect(comp.children[1]).to.be.a("string");
+		expect(comp.props.children).to.be.instanceOf(Array);
+		expect(comp.props.children[1]).to.be.a("string");
 	});
 });

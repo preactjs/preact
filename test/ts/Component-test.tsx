@@ -1,13 +1,10 @@
 import "mocha";
 import { expect } from "chai";
 import {
-	h,
+	createElement,
 	Component,
-	FunctionalComponent,
-	ComponentConstructor,
-	RenderableProps,
-	render
-} from "../../src/preact";
+	RenderableProps
+} from "../../src/";
 
 export class ContextComponent extends Component<{ foo: string }> {
 	getChildContext() {

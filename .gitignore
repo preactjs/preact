@@ -4,3 +4,4 @@ dist
 package-lock.json
 .vscode
 .idea
+test/ts/**/*.js

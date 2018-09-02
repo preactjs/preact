@@ -1,4 +1,4 @@
-import { h, render, Component, ComponentProps, FunctionalComponent, AnyComponent } from "../../src/preact";
+import { createElement, render, Component, FunctionalComponent, AnyComponent } from "../../src";
 
 interface DummyProps {
 	initialInput: string;
@@ -39,7 +39,7 @@ function DummerComponent({ input, initialInput }: DummerComponentProps) {
 	return <div>Input: {input}, initial: {initialInput}</div>;
 }
 
-render(h(DummerComponent, { initialInput: "The input", input: "New input", key: "1"}), document);
+render(createElement(DummerComponent, { initialInput: "The input", input: "New input", key: "1"}), document);
 
 // Accessing children
 const ComponentWithChildren: FunctionalComponent<DummerComponentProps> = (
