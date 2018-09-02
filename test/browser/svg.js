@@ -117,4 +117,18 @@ describe('svg', () => {
 			.to.have.property('0')
 			.that.is.a('HTMLAnchorElement');
 	});
+
+	it('should transition from DOM to SVG and back', () => {
+		render((
+			<div>
+				<svg id="svg1923" width="700" xmlns="http://www.w3.org/2000/svg" height="700">
+					<circle cy="333" cx="333" r="333" />
+					<circle cy="333" cx="333" r="333" fill="#fede58" />
+				</svg>
+			</div>
+		), scratch);
+
+		expect(scratch.firstChild).to.be.an('HTMLDivElement');
+		expect(scratch.firstChild.firstChild).to.be.an('SVGSVGElement');
+	});
 });
