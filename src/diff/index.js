@@ -82,10 +82,6 @@ import { assign } from '../util';
 // 	// }
 // }
 
-export function nodeIsSvg(node) {
-	return node!=null && node.ownerSVGElement!==undefined;
-}
-
 export function diff(dom, parent, newTree, oldTree, context, isSvg, append, excessChildren, mounts, ancestorComponent) {
 	if (newTree==null) {
 		if (oldTree != null) {
