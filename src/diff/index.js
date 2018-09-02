@@ -83,15 +83,6 @@ import { assign } from '../util';
 // }
 
 /**
- * Determine whether or not an element is an SVG element
- * @param {import('../internal').PreactElement} node The node to test whether
- * or not it is an SVG element
- */
-export function nodeIsSvg(node) {
-	return node!=null && node.ownerSVGElement!==undefined;
-}
-
-/**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').PreactElement} dom The DOM element representing
  * the virtual nodes under diff
