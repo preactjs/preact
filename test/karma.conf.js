@@ -102,6 +102,9 @@ module.exports = function(config) {
 		},
 
 		webpack: {
+			output: {
+				filename: '[name]'
+			},
 			mode: 'development',
 			devtool: 'inline-source-map',
 			module: {
