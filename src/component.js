@@ -69,7 +69,7 @@ Component.prototype.forceUpdate = function(callback) {
 
 /**
  * The render queue
- * @type {Array<Component>}
+ * @type {Array<import('./internal').Component>}
  */
 let q = [];
 
@@ -85,7 +85,7 @@ const defer = typeof Promise=='function' ? Promise.resolve().then.bind(Promise.r
 
 /**
  * Enqueue a rerender of a component
- * @param {Component} c The component to rerender
+ * @param {import('./internal').Component} c The component to rerender
  */
 export function enqueueRender(c) {
 	// console.log('enqueueRender', c.id, q.length===0, c._dirty);

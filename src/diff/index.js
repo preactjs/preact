@@ -177,8 +177,10 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 
 	let c, p, isNew = false, oldProps, oldState, oldContext,
 		newTag = newTree.tag,
-		oldTag = oldTree!=null ? oldTree.tag : null,
-		clearProcessingException;
+		oldTag = oldTree!=null ? oldTree.tag : null;
+
+	/** @type {import('../internal').Component | null} */
+	let clearProcessingException;
 
 	// @TODO unmounting here removes the dom pointer
 	// if (newTree.tag!==oldTag) {
@@ -212,7 +214,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			else {
 				isNew = true;
 				// c = newTree._component = new newTree.tag(newTree.props, context);
-				c = newTree._component = createComponent(newTree.tag, newTree.props, context, ancestorComponent);
+				c = newTree._component = createComponent(newTag, newTree.props, context, ancestorComponent);
 				c.props = newTree.props;
 				if (!c.state) c.state = {};
 				c.context = context;
@@ -417,7 +419,7 @@ export function flushMounts(mounts) {
  * @param {*} excessChildren
  * @param {Array<import('../internal').Component>} mounts An array of newly
  * mounted components
- * @param {Array<import('../internal').Component>} ancestorComponent The parent
+ * @param {import('../internal').Component} ancestorComponent The parent
  * component to the ones being diffed
  * @returns {import('../internal').PreactElement}
  */
@@ -752,7 +754,7 @@ function flattenChildren(children, flattened) {
 /**
  * Create a component. Normalizes differences between PFC's and classful
  * Components.
- * @param {function} Ctor The constructor of the component to create
+ * @param {import('../index').ComponentFactory<any>} Ctor The constructor of the component to create
  * @param {object} props The initial props of the component
  * @param {object} context The initial context of the component
  * @param {import('../internal').Component} ancestorComponent The direct parent component of this component
