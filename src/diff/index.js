@@ -144,8 +144,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	if (oldTree==null || newTree==null || oldTree.tag!==newTree.tag) {
 		if (oldTree!=null) unmount(oldTree, ancestorComponent);
 		if (newTree==null) return null;
-		oldTree = null;
-		dom = null;
+		oldTree = dom = null;
 	}
 
 	let c, p, isNew = false, oldProps, oldState, oldContext,
