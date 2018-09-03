@@ -144,7 +144,8 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	if (oldTree==null || newTree==null || oldTree.tag!==newTree.tag) {
 		if (oldTree!=null) unmount(oldTree, ancestorComponent);
 		if (newTree==null) return null;
-		oldTree = dom = null;
+		dom = null;
+		oldTree = EMPTY_OBJ;
 	}
 
 	let c, p, isNew = false, oldProps, oldState, oldContext,
@@ -166,7 +167,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		outer: if (typeof newTag==='function') {
 
 			// Get component and set it to `c`
-			if (oldTree!=null && oldTree._component) {
+			if (oldTree._component) {
 				c = newTree._component = oldTree._component;
 				clearProcessingException = c._processingException;
 			}
