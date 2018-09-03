@@ -48,6 +48,14 @@ describe('render()', () => {
 		expect(c[0].nodeName).to.equal('#text');
 	});
 
+	it('should allow node type change with content', () => {
+		render(<span>Bad</span>, scratch);
+		render(<div>Good</div>, scratch);
+		expect(scratch.innerHTML).to.eql(
+			`<div>Good</div>`
+		);
+	});
+
 	it('should create empty nodes (<* />)', () => {
 		render(<div />, scratch);
 		expect(scratch.childNodes).to.have.length(1);
