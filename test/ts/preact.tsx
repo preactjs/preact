@@ -125,3 +125,12 @@ class ComponentWithLifecycle extends Component<DummyProps, DummyState> {
 		console.log("componentDidUpdate", previousProps, previousState, previousContext);
 	}
 }
+
+class ComponentWithDefaultProps extends Component<{ value: string }> {
+	static defaultProps = { value: "" };
+	render() {
+		return <div>{this.props.value}</div>;
+	}
+}
+
+const withDefaultProps = <ComponentWithDefaultProps />;

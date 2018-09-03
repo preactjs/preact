@@ -1,4 +1,7 @@
 declare namespace JSX {
+
+	type LibraryManagedAttributes<C, P> = C extends { defaultProps: infer D } ? Pick<P, Exclude<keyof P, keyof D>> & Partial<Pick<P, Extract<keyof P, keyof D>>> : P;
+
 	interface Element extends preact.VNode<any> {
 	}
 
