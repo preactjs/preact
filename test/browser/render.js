@@ -295,16 +295,14 @@ describe('render()', () => {
 	});
 
 	describe('style attribute', () => {
-		// Not supported currently
-		xit('should apply style as String', () => {
+		it('should apply style as String', () => {
 			render(<div style="top:5px; position:relative;" />, scratch);
 			expect(scratch.childNodes[0].style.cssText)
 				.that.matches(/top\s*:\s*5px\s*/)
 				.and.matches(/position\s*:\s*relative\s*/);
 		});
 
-		// Not supported currently
-		xit('should properly switch from string styles to object styles and back', () => {
+		it('should properly switch from string styles to object styles and back', () => {
 			render((
 				<div style="display: inline;">test</div>
 			), scratch);
