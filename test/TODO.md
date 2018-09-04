@@ -8,6 +8,4 @@
 		- ✖ should be passed next props and state
 - refs (***`SKIPPED`***)
 - render
-	- ✖ should merge new elements when called twice
 	- ✖ should skip non-preact elements
-

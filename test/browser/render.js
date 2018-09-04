@@ -48,6 +48,14 @@ describe('render()', () => {
 		expect(c[0].nodeName).to.equal('#text');
 	});
 
+	it('should allow node type change with content', () => {
+		render(<span>Bad</span>, scratch);
+		render(<div>Good</div>, scratch);
+		expect(scratch.innerHTML).to.eql(
+			`<div>Good</div>`
+		);
+	});
+
 	it('should create empty nodes (<* />)', () => {
 		render(<div />, scratch);
 		expect(scratch.childNodes).to.have.length(1);
@@ -98,7 +106,7 @@ describe('render()', () => {
 		expect(scratch.childNodes[1]).to.have.property('nodeName', 'SPAN');
 	});
 
-	it.skip('should merge new elements when called twice', () => {
+	it('should merge new elements when called twice', () => {
 		render(<div />, scratch);
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.firstChild).to.have.property('nodeName', 'DIV');
@@ -635,7 +643,13 @@ describe('render()', () => {
 	});
 
 	it.skip('should skip non-preact elements', () => {
+		let comp;
 		class Foo extends Component {
+			constructor() {
+				super();
+				comp = this;
+			}
+
 			render() {
 				let alt = this.props.alt || this.state.alt || this.alt;
 				let c = [
@@ -647,8 +661,7 @@ describe('render()', () => {
 			}
 		}
 
-		let comp;
-		let root = render(<Foo ref={c => comp = c} />, scratch, root);
+		render(<Foo />, scratch);
 
 		let c = document.createElement('c');
 		c.textContent = 'baz';
@@ -673,18 +686,18 @@ describe('render()', () => {
 
 		// Re-rendering from the root is non-destructive if the root was a previous render:
 		comp.alt = false;
-		root = render(<Foo ref={c => comp = c} />, scratch, root);
+		render(<Foo />, scratch);
 
 		expect(scratch.firstChild.children, 'root re-render').to.have.length(4);
 		expect(scratch.innerHTML, 'root re-render').to.equal(`<div><a>foo</a><b>bar</b><c>baz</c><b>bat</b></div>`);
 
 		comp.alt = true;
-		root = render(<Foo ref={c => comp = c} />, scratch, root);
+		render(<Foo />, scratch);
 
 		expect(scratch.firstChild.children, 'root re-render 2').to.have.length(4);
 		expect(scratch.innerHTML, 'root re-render 2').to.equal(`<div><b>alt</b><a>foo</a><c>baz</c><b>bat</b></div>`);
 
-		root = render(<div><Foo ref={c => comp = c} /></div>, scratch, root);
+		render(<div><Foo /></div>, scratch);
 
 		expect(scratch.firstChild.children, 'root re-render changed').to.have.length(3);
 		expect(scratch.innerHTML, 'root re-render changed').to.equal(`<div><div><a>foo</a><b>bar</b></div><c>baz</c><b>bat</b></div>`);
