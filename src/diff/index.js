@@ -306,7 +306,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		else {
 			dom = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren, mounts, ancestorComponent);
 
-			if (newTree.ref && (oldTree==EMPTY_OBJ || (oldTree.ref !== newTree.ref))) {
+			if (newTree.ref && (oldTree.ref !== newTree.ref)) {
 				applyRef(newTree.ref, dom);
 			}
 		}
