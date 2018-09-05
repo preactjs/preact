@@ -9,5 +9,17 @@ declare function render(vnode: Node, parent: Element, toReplace?: Element): Elem
 export { h, createElement, cloneElement, Component, render };
 export default { h, createElement, cloneElement, Component, render };
 
+declare type VNode<P> = {
+    nodeName: string | Function,
+    children: Array<VNode<P> | string>,
+    key?: string | number | void,
+    attributes: P,
+};
+
 declare export function rerender(): void;
-declare export var options: Object;
+declare export var options: {
+    syncComponentUpdates?: boolean,
+    vnode?: (vnode: VNode<any>) => void,
+    debounceRendering?: (rerender: () => void) => void,
+    event?: (event: Event) => Event | void,
+};
