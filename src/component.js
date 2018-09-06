@@ -1,6 +1,6 @@
 import { assign } from './util';
 import { diff, flushMounts } from './diff/index';
-import { FORCE_RENDER, SET_STATE_RENDER } from './constants';
+import { DEFAULT_RENDER, FORCE_RENDER, SET_STATE_RENDER } from './constants';
 // import { diff, diffLevel } from './diff/index';
 
 /**
@@ -83,7 +83,7 @@ Component.prototype.forceUpdate = function(callback) {
 		flushMounts(mounts);
 
 		// Reset mode to its initial value for the next render
-		this.mode = 0;
+		this.mode = DEFAULT_RENDER;
 	}
 	if (callback!=null) callback();
 };
