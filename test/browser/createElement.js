@@ -3,7 +3,7 @@ import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx h */
 
-describe('VNode', () => {
+describe('createElement', () => {
 	let scratch;
 
 	beforeEach(() => {
