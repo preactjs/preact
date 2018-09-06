@@ -17,10 +17,11 @@ export function createElement(tag, props, children) {
 		}
 	}
 	let ref = props.ref;
-	if (ref) {
-		delete props.ref;
-	}
-	return createVNode(tag, props, null, props.key, ref);
+	if (ref) delete props.ref;
+	let key = props.key;
+	if (key) delete props.key;
+
+	return createVNode(tag, props, null, key, ref);
 }
 
 function createVNode(tag, props, text, key, ref) {

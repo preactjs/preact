@@ -1,5 +1,6 @@
 import { createElement as h, Component, render } from '../../src/index';
 import { setupScratch, teardown } from '../_util/helpers';
+import { spy } from 'sinon';
 
 /** @jsx h */
 
@@ -12,6 +13,13 @@ describe('keys', () => {
 
 	afterEach(() => {
 		teardown(scratch);
+	});
+
+	// https://fb.me/react-special-props
+	it('should not pass key in props', () => {
+		const Foo = spy(() => null);
+		render(<Foo key="foo" />, scratch);
+		expect(Foo.args[0][0]).to.deep.equal({});
 	});
 
 	// See developit/preact-compat#21
