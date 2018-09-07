@@ -185,6 +185,12 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('Testing, huh! How is it going?');
 	});
 
+	it('should render arrays of mixed elements', () => {
+		const Bar = () => 'd';
+		render([0, 'a', 'b', <span>c</span>, <Bar />, null, undefined, 1, false], scratch);
+		expect(scratch.innerHTML).to.equal('0ab<span>c</span>d1');
+	});
+
 	it('should clear falsy attributes', () => {
 		render((
 			<div anull="anull" aundefined="aundefined" afalse="afalse" anan="aNaN" a0="a0" />
