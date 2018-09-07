@@ -284,6 +284,19 @@ describe('Components', () => {
 	});
 
 	describe('array children', () => {
+
+		/** @type {any[]} */
+		let mixedArray;
+
+		/** @type {string} */
+		let mixedArrayHTML;
+
+		beforeEach(() => {
+			const Bar = () => 'd';
+			mixedArray = [0, 'a', 'b', <span>c</span>, <Bar />, null, undefined, false, ['e', 'f'], 1];
+			mixedArrayHTML = '0ab<span>c</span>def1';
+		});
+
 		it('should render DOM element\'s array children', () => {
 			const Todo = () => (
 				<ul>
@@ -301,25 +314,23 @@ describe('Components', () => {
 		});
 
 		it('should render Component\'s array children', () => {
-			const Bar = () => 'd';
-			const Foo = () => [0, 'a', 'b', <span>c</span>, <Bar />, null, undefined, 1, false];
+			const Foo = () => mixedArray;
 
 			render(<Foo />, scratch);
 
-			expect(scratch.innerHTML).to.equal('0ab<span>c</span>d1');
+			expect(scratch.innerHTML).to.equal(mixedArrayHTML);
 		});
 
 		it('should render Fragment\'s array children', () => {
-			const Bar = () => 'd';
 			const Foo = () => (
 				<Fragment>
-					{[0, 'a', 'b', <span>c</span>, <Bar />, null, undefined, 1, false]}
+					{mixedArray}
 				</Fragment>
 			);
 
 			render(<Foo />, scratch);
 
-			expect(scratch.innerHTML).to.equal('0ab<span>c</span>d1');
+			expect(scratch.innerHTML).to.equal(mixedArrayHTML);
 		});
 
 		it('should render sibling array children', () => {
@@ -344,22 +355,6 @@ describe('Components', () => {
 			expect(ul.childNodes[4].textContent).to.equal('c');
 			expect(ul.childNodes[5].textContent).to.equal('d');
 			expect(ul.childNodes[6].textContent).to.equal('A footer');
-		});
-
-		it('should render holey arrays', () => {
-			const values = [];
-			values[1] = 'a';
-			values[3] = 'b';
-			values[4] = false;
-			values[5] = null;
-
-			const ArrayReturn = () => values;
-
-			render(<ArrayReturn />, scratch);
-
-			expect(scratch.children.length).to.equal(2);
-			expect(scratch.firstChild.textContent).to.equal('a');
-			expect(scratch.lastChild.textContent).to.equal('b');
 		});
 	});
 
