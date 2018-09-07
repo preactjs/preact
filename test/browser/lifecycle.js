@@ -1498,6 +1498,34 @@ describe('Lifecycle methods', () => {
 			expect(componentState).to.deep.equal({ key: 'value' });
 			expect(stateConstant).to.deep.equal({});
 		});
+
+		// This feature is not mentioned in the docs, but is part of the release
+		// notes for react v16.0.0: https://reactjs.org/blog/2017/09/26/react-v16.0.html#breaking-changes
+		it('should abort if updater function returns null', () => {
+			let updateState;
+			class Foo extends Component {
+				constructor() {
+					super();
+					this.state = { value: 0 };
+					updateState = () => this.setState(prev => {
+						prev.value++;
+						return null;
+					});
+				}
+
+				render() {
+					return 'value: ' + this.state.value;
+				}
+			}
+
+			let renderSpy = sinon.spy(Foo.prototype, 'render');
+			render(<Foo />, scratch);
+			renderSpy.resetHistory();
+
+			updateState();
+			rerender();
+			expect(renderSpy).to.not.be.called;
+		});
 	});
 
 	describe('#componentDidCatch', () => {
