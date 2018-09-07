@@ -1,4 +1,6 @@
-import { Component } from '../../src';
+import { createElement as h, Component } from '../../src';
+
+/** @jsx h */
 
 /**
  * Setup the test environment
@@ -39,3 +41,8 @@ export function teardown(scratch) {
 		delete Component.__test__previousDebounce;
 	}
 }
+
+export const mixedArray = Object.freeze(
+	[0, 'a', 'b', <span>c</span>, () => 'd', null, undefined, false, ['e', 'f'], 1]
+);
+export const mixedArrayHTML = '0ab<span>c</span>def1';
