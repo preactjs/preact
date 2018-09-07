@@ -1,5 +1,5 @@
-import { createElement as h, render, Component } from '../../src/index';
-import { setupScratch, teardown } from '../_util/helpers';
+import { createElement as h, render, Component, createRef } from '../../src/index';
+import { setupScratch, teardown, setupRerender } from '../_util/helpers';
 
 /** @jsx h */
 
@@ -10,11 +10,13 @@ let spy = (name, ...args) => {
 	return spy;
 };
 
-describe.skip('refs', () => {
+describe('refs', () => {
 	let scratch;
+	let rerender;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		rerender = setupRerender();
 	});
 
 	afterEach(() => {
@@ -25,6 +27,14 @@ describe.skip('refs', () => {
 		let ref = spy('ref');
 		render(<div ref={ref} />, scratch);
 		expect(ref).to.have.been.calledOnce.and.calledWith(scratch.firstChild);
+	});
+
+	it('should support createRef', () => {
+		const r = createRef();
+		expect(r.current).to.equal(undefined);
+
+		render(<div ref={r} />, scratch);
+		expect(r.current).to.equal(scratch.firstChild);
 	});
 
 	it('should invoke refs in Component.render()', () => {
@@ -67,15 +77,15 @@ describe.skip('refs', () => {
 
 		const Foo = () => <div />;
 
-		let root = render(<Foo ref={ref} />, scratch);
+		render(<Foo ref={ref} />, scratch);
 		expect(ref).to.have.been.calledOnce;
 
 		ref.resetHistory();
-		render(<Foo ref={ref} />, scratch, root);
+		render(<Foo ref={ref} />, scratch);
 		expect(ref).to.have.been.calledOnce;
 
 		ref.resetHistory();
-		render(<span />, scratch, root);
+		render(<span />, scratch);
 		expect(ref).to.have.been.calledOnce.and.calledWith(null);
 	});
 
@@ -83,11 +93,11 @@ describe.skip('refs', () => {
 		let outer = spy('outer'),
 			inner = spy('inner'),
 			InnermostComponent = 'span',
-			rerender, inst;
+			update, inst;
 		class Outer extends Component {
 			constructor() {
 				super();
-				rerender = () => this.forceUpdate();
+				update = () => this.forceUpdate();
 			}
 			render() {
 				return (
@@ -107,31 +117,30 @@ describe.skip('refs', () => {
 			}
 		}
 
-		let root = render(<Outer />, scratch);
+		render(<Outer />, scratch);
 
 		expect(outer).to.have.been.calledOnce.and.calledWith(inst);
 		expect(inner).to.have.been.calledOnce.and.calledWith(inst.base);
 
 		outer.resetHistory();
 		inner.resetHistory();
-
-		rerender();
+		update();
 
 		expect(outer, 're-render').to.have.been.calledOnce.and.calledWith(inst);
 		expect(inner, 're-render').not.to.have.been.called;
 
 		inner.resetHistory();
 		InnermostComponent = 'x-span';
-		rerender();
+		update();
+
 		expect(inner, 're-render swap');
 		expect(inner.firstCall, 're-render swap').to.have.been.calledWith(null);
 		expect(inner.secondCall, 're-render swap').to.have.been.calledWith(inst.base);
-		InnermostComponent = 'span';
 
+		InnermostComponent = 'span';
 		outer.resetHistory();
 		inner.resetHistory();
-
-		render(<div />, scratch, root);
+		render(<div />, scratch);
 
 		expect(outer, 'unrender').to.have.been.calledOnce.and.calledWith(null);
 		expect(inner, 'unrender').to.have.been.calledOnce.and.calledWith(null);
@@ -163,7 +172,7 @@ describe.skip('refs', () => {
 			}
 		}
 
-		let root = render(<Outer ref={outer} />, scratch);
+		render(<Outer ref={outer} />, scratch);
 
 		expect(outer, 'outer initial').to.have.been.calledOnce.and.calledWith(outerInst);
 		expect(inner, 'inner initial').to.have.been.calledOnce.and.calledWith(innerInst);
@@ -172,7 +181,7 @@ describe.skip('refs', () => {
 		outer.resetHistory();
 		inner.resetHistory();
 		innermost.resetHistory();
-		root = render(<Outer ref={outer} />, scratch, root);
+		render(<Outer ref={outer} />, scratch);
 
 		expect(outer, 'outer update').to.have.been.calledOnce.and.calledWith(outerInst);
 		expect(inner, 'inner update').to.have.been.calledOnce.and.calledWith(innerInst);
@@ -180,7 +189,8 @@ describe.skip('refs', () => {
 
 		innermost.resetHistory();
 		InnermostComponent = 'x-span';
-		root = render(<Outer ref={outer} />, scratch, root);
+		render(<Outer ref={outer} />, scratch);
+
 		expect(innermost, 'innerMost swap');
 		expect(innermost.firstCall, 'innerMost swap').to.have.been.calledWith(null);
 		expect(innermost.secondCall, 'innerMost swap').to.have.been.calledWith(innerInst.base);
@@ -189,19 +199,22 @@ describe.skip('refs', () => {
 		outer.resetHistory();
 		inner.resetHistory();
 		innermost.resetHistory();
-		render(<div />, scratch, root);
+		render(<div />, scratch);
 
 		expect(outer, 'outer unmount').to.have.been.calledOnce.and.calledWith(null);
 		expect(inner, 'inner unmount').to.have.been.calledOnce.and.calledWith(null);
 		expect(innermost, 'innerMost unmount').to.have.been.calledOnce.and.calledWith(null);
 	});
 
+	// Test for #1143
 	it('should not pass ref into component as a prop', () => {
 		let foo = spy('foo'),
 			bar = spy('bar');
 
 		class Foo extends Component {
-			render(){ return <div />; }
+			render() {
+				return <div />;
+			}
 		}
 		const Bar = spy('Bar', () => <div />);
 
@@ -220,7 +233,7 @@ describe.skip('refs', () => {
 
 	// Test for #232
 	it('should only null refs after unmount', () => {
-		let root, outer, inner;
+		let outer, inner;
 
 		class TestUnmount extends Component {
 			componentWillUnmount() {
@@ -244,14 +257,13 @@ describe.skip('refs', () => {
 
 		sinon.spy(TestUnmount.prototype, 'componentWillUnmount');
 
-		root = render(<div><TestUnmount /></div>, scratch, root);
+		render(<div><TestUnmount /></div>, scratch);
 		outer = scratch.querySelector('#outer');
 		inner = scratch.querySelector('#inner');
 
 		expect(TestUnmount.prototype.componentWillUnmount).not.to.have.been.called;
 
-		render(<div />, scratch, root);
-
+		render(<div />, scratch);
 		expect(TestUnmount.prototype.componentWillUnmount).to.have.been.calledOnce;
 	});
 
@@ -283,14 +295,14 @@ describe.skip('refs', () => {
 		inst.handleMount.resetHistory();
 
 		inst.setState({ show: true });
-		inst.forceUpdate();
+		rerender();
 		expect(inst.handleMount).to.have.been.calledTwice;
 		expect(inst.handleMount.firstCall).to.have.been.calledWith(null);
 		expect(inst.handleMount.secondCall).to.have.been.calledWith(scratch.querySelector('#span'));
 		inst.handleMount.resetHistory();
 
 		inst.setState({ show: false });
-		inst.forceUpdate();
+		rerender();
 		expect(inst.handleMount).to.have.been.calledTwice;
 		expect(inst.handleMount.firstCall).to.have.been.calledWith(null);
 		expect(inst.handleMount.secondCall).to.have.been.calledWith(scratch.querySelector('#div'));
@@ -306,13 +318,33 @@ describe.skip('refs', () => {
 
 		let ref = spy('ref');
 
-		class Wrapper {
+		class Wrapper extends Component {
 			render() {
 				return <div />;
 			}
 		}
 
-		render(<div><Wrapper ref={c => ref(c.base)} /></div>, scratch, scratch.firstChild);
+		render(<div><Wrapper ref={c => ref(c.base)} /></div>, scratch);
 		expect(ref).to.have.been.calledOnce.and.calledWith(scratch.firstChild.firstChild);
+	});
+
+	// Test for #1177
+	it('should call ref after children are rendered', done => {
+		let input;
+		function autoFocus(el) {
+			if (el) {
+				input = el;
+
+				// Chrome bug: It will somehow drop the focus event if it fires too soon.
+				// See https://stackoverflow.com/questions/17384464/
+				setTimeout(() => {
+					el.focus();
+					done();
+				}, 1);
+			}
+		}
+
+		render(<input type="text" ref={autoFocus} value="foo" />, scratch);
+		expect(input.value).to.equal('foo');
 	});
 });

@@ -262,6 +262,8 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			else {
 				c.base = dom = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, mounts, c);
 			}
+
+			if (newTree.ref) applyRef(newTree.ref, c);
 			// context = assign({}, context);
 			// context.__depth = (context.__depth || 0) + 1;
 			// context = assign({
@@ -303,6 +305,10 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		}
 		else {
 			dom = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren, mounts, ancestorComponent);
+
+			if (newTree.ref && (oldTree.ref !== newTree.ref)) {
+				applyRef(newTree.ref, dom);
+			}
 		}
 
 		if (parent && append!==false) {
@@ -327,7 +333,6 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		if (clearProcessingException) {
 			c._processingException = null;
 		}
-
 	}
 	catch (e) {
 		if (c && !dom) {
@@ -445,26 +450,29 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 		// diffChildren(dom, newChildren, vnode===oldVNode ? newChildren : oldVNode==null ? [] : getVNodeChildren(oldVNode), context, isSvg, excessChildren);
 		if (vnode!==oldVNode) {
 			diffProps(dom, vnode.props, oldVNode==EMPTY_OBJ ? EMPTY_OBJ : oldVNode.props, isSvg);
-			if (vnode.ref!==oldVNode.ref) {
-				let ref;
-				if (ref = oldVNode.ref) ref(null);
-				if (ref = vnode.ref) ref(dom);
-			}
 		}
 		diffChildren(dom, getVNodeChildren(vnode), oldVNode==EMPTY_OBJ ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessChildren, mounts, ancestorComponent);
 	}
-
 	// if (oldVNode!=null && dom!==d) unmount(oldVNode);
 
 	return dom;
 }
 
+/**
+ * Invoke or update a ref, depending on whether it is a function or object ref.
+ * @param {object|function} [ref=null]
+ * @param {any} [value]
+ */
+export function applyRef(ref, value) {
+	if (typeof ref=='function') ref(value);
+	else ref.current = value;
+}
 
 export function unmount(vnode, ancestorComponent) {
 	let r;
 	if (r = vnode.ref) {
 		try {
-			r(null);
+			applyRef(r, null);
 		}
 		catch (e) {
 			catchErrorInComponent(e, ancestorComponent);
