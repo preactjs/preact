@@ -512,7 +512,7 @@ describe('Lifecycle methods', () => {
 		});
 
 		// From developit/preact#1170
-		it.skip('should NOT mutate state on mount, only create new versions', () => {
+		it('should NOT mutate state on mount, only create new versions', () => {
 			const stateConstant = {};
 			let componentState;
 
@@ -1385,7 +1385,7 @@ describe('Lifecycle methods', () => {
 			expect(ShouldNot.prototype.render).to.have.been.calledOnce;
 		});
 
-		it.skip('should be passed next props and state', () => {
+		it('should be passed next props and state', () => {
 
 			/** @type {() => void} */
 			let updateState;
@@ -1434,8 +1434,8 @@ describe('Lifecycle methods', () => {
 
 			// Initial render
 			// state.value: initialized to 0 in constructor, 0 -> 1 in gDSFP
-			let element = render(<Foo foo="foo" />, scratch);
-			expect(element.textContent).to.be.equal('1');
+			render(<Foo foo="foo" />, scratch);
+			expect(scratch.firstChild.textContent).to.be.equal('1');
 			expect(curProps).to.be.undefined;
 			expect(curState).to.be.undefined;
 			expect(nextPropsArg).to.be.undefined;
@@ -1443,42 +1443,23 @@ describe('Lifecycle methods', () => {
 
 			// New props
 			// state.value: 1 -> 2 in gDSFP
-			element = render(<Foo foo="bar" />, scratch, scratch.firstChild);
-			expect(element.textContent).to.be.equal('2');
-			expect(curProps).to.deep.equal({
-				foo: 'foo',
-				children: []
-			});
-			expect(curState).to.deep.equal({
-				value: 1
-			});
-			expect(nextPropsArg).to.deep.equal({
-				foo: 'bar',
-				children: []
-			});
-			expect(nextStateArg).to.deep.equal({
-				value: 2
-			});
+			render(<Foo foo="bar" />, scratch);
+			expect(scratch.firstChild.textContent).to.be.equal('2');
+			expect(curProps).to.deep.equal({ foo: 'foo' });
+			expect(curState).to.deep.equal({ value: 1 });
+			expect(nextPropsArg).to.deep.equal({ foo: 'bar' });
+			expect(nextStateArg).to.deep.equal({ value: 2 });
 
 			// New state
 			// state.value: 2 -> 3 in updateState, 3 -> 4 in gDSFP
 			updateState();
 			rerender();
-			expect(element.textContent).to.be.equal('4');
-			expect(curProps).to.deep.equal({
-				foo: 'bar',
-				children: []
-			});
-			expect(curState).to.deep.equal({
-				value: 2
-			});
-			expect(nextPropsArg).to.deep.equal({
-				foo: 'bar',
-				children: []
-			});
-			expect(nextStateArg).to.deep.equal({
-				value: 4
-			});
+
+			expect(scratch.firstChild.textContent).to.be.equal('4');
+			expect(curProps).to.deep.equal({ foo: 'bar' });
+			expect(curState).to.deep.equal({ value: 2 });
+			expect(nextPropsArg).to.deep.equal({ foo: 'bar' });
+			expect(nextStateArg).to.deep.equal({ value: 4 });
 		});
 	});
 
