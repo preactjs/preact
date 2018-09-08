@@ -1,4 +1,6 @@
-import { Component } from '../../src';
+import { createElement as h, Component } from '../../src';
+
+/** @jsx h */
 
 /**
  * Setup the test environment
@@ -39,3 +41,10 @@ export function teardown(scratch) {
 		delete Component.__test__previousDebounce;
 	}
 }
+
+const Foo = () => 'd';
+export const getMixedArray = () => (
+	// Make it a function so each test gets a new copy of the array
+	[0, 'a', 'b', <span>c</span>, <Foo />, null, undefined, false, ['e', 'f'], 1]
+);
+export const mixedArrayHTML = '0ab<span>c</span>def1';

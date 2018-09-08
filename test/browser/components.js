@@ -1,5 +1,5 @@
 import { createElement as h, cloneElement, render, Component, Fragment } from '../../src/index';
-import { setupScratch, teardown, setupRerender } from '../_util/helpers';
+import { setupScratch, teardown, setupRerender, getMixedArray, mixedArrayHTML } from '../_util/helpers';
 
 /** @jsx h */
 
@@ -25,7 +25,11 @@ function sortAttributes(html) {
 }
 
 describe('Components', () => {
+
+	/** @type {HTMLDivElement} */
 	let scratch;
+
+	/** @type {() => void} */
 	let rerender;
 
 	beforeEach(() => {
@@ -279,6 +283,57 @@ describe('Components', () => {
 		expect(sideEffect).to.not.have.been.called;
 	});
 
+	describe('array children', () => {
+		it('should render DOM element\'s array children', () => {
+			render(<div>{getMixedArray()}</div>, scratch);
+			expect(scratch.firstChild.innerHTML).to.equal(mixedArrayHTML);
+		});
+
+		it.skip('should render Component\'s array children', () => {
+			const Foo = () => getMixedArray();
+
+			render(<Foo />, scratch);
+
+			expect(scratch.innerHTML).to.equal(mixedArrayHTML);
+		});
+
+		it.skip('should render Fragment\'s array children', () => {
+			const Foo = () => (
+				<Fragment>
+					{getMixedArray()}
+				</Fragment>
+			);
+
+			render(<Foo />, scratch);
+
+			expect(scratch.innerHTML).to.equal(mixedArrayHTML);
+		});
+
+		it('should render sibling array children', () => {
+			const Todo = () => (
+				<ul>
+					<li>A header</li>
+					{['a','b'].map(value => <li>{value}</li>)}
+					<li>A divider</li>
+					{['c', 'd'].map(value => <li>{value}</li>)}
+					<li>A footer</li>
+				</ul>
+			);
+
+			render(<Todo />, scratch);
+
+			let ul = scratch.firstChild;
+			expect(ul.childNodes.length).to.equal(7);
+			expect(ul.childNodes[0].textContent).to.equal('A header');
+			expect(ul.childNodes[1].textContent).to.equal('a');
+			expect(ul.childNodes[2].textContent).to.equal('b');
+			expect(ul.childNodes[3].textContent).to.equal('A divider');
+			expect(ul.childNodes[4].textContent).to.equal('c');
+			expect(ul.childNodes[5].textContent).to.equal('d');
+			expect(ul.childNodes[6].textContent).to.equal('A footer');
+		});
+	});
+
 	describe('Fragment', () => {
 		it('should not render empty Fragment', () => {
 			render(<Fragment />, scratch);
@@ -304,11 +359,13 @@ describe('Components', () => {
 		it('should render nested Fragments', () => {
 			render((
 				<Fragment>
+					spam
 					<Fragment>foo</Fragment>
+					<Fragment />
 					bar
 				</Fragment>
 			), scratch);
-			expect(scratch.innerHTML).to.equal('foobar');
+			expect(scratch.innerHTML).to.equal('spamfoobar');
 
 			render((
 				<Fragment>
@@ -320,7 +377,10 @@ describe('Components', () => {
 		});
 
 		it('should respect keyed Fragments', () => {
+
+			/** @type {() => void} */
 			let update;
+
 			class Comp extends Component {
 
 				constructor() {
@@ -342,14 +402,17 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('foo');
 		});
 
-		it('should work with holey arrays', () => {
+		it.skip('should support conditionally rendered children', () => {
+
+			/** @type {() => void} */
 			let update;
+
 			class Comp extends Component {
 
 				constructor() {
 					super();
 					this.state = { value: true };
-					update = () => this.setState({ value: false });
+					update = () => this.setState({ value: !this.state.value });
 				}
 
 				render() {
@@ -360,6 +423,7 @@ describe('Components', () => {
 					);
 				}
 			}
+
 			render(<Comp />, scratch);
 			expect(scratch.innerHTML).to.equal('foo');
 
@@ -367,6 +431,79 @@ describe('Components', () => {
 			rerender();
 
 			expect(scratch.innerHTML).to.equal('');
+
+			update();
+			rerender();
+			expect(scratch.innerHTML).to.equal('foo');
+		});
+
+		it.skip('can modify the children of a Fragment', () => {
+
+			/** @type {() => void} */
+			let push;
+
+			class List extends Component {
+				constructor() {
+					super();
+					this.state = { values: [0, 1, 2] };
+					push = () =>
+						this.setState({
+							values: [...this.state.values, this.state.values.length]
+						});
+				}
+
+				render() {
+					return (
+						<Fragment>
+							{this.state.values.map(value => (
+								<div>{value}</div>
+							))}
+						</Fragment>
+					);
+				}
+			}
+
+			render(<List />, scratch);
+			expect(scratch.textContent).to.equal('012');
+
+			push();
+			rerender();
+
+			expect(scratch.textContent).to.equal('0123');
+
+			push();
+			rerender();
+
+			expect(scratch.textContent).to.equal('01234');
+		});
+
+		it.skip('should render sibling array children', () => {
+			const Group = ({ title, values }) => (
+				<Fragment>
+					<li class="divider">{title}</li>
+					{values.map(value => <li>{value}</li>)}
+				</Fragment>
+			);
+
+			const Todo = () => (
+				<ul>
+					<Group title={'A header'} values={['a', 'b']} />
+					<Group title={'A divider'} values={['c', 'd']} />
+					<li>A footer</li>
+				</ul>
+			);
+
+			render(<Todo />, scratch);
+
+			let ul = scratch.firstChild;
+			expect(ul.childNodes.length).to.equal(7);
+			expect(ul.childNodes[0].textContent).to.equal('A header');
+			expect(ul.childNodes[1].textContent).to.equal('a');
+			expect(ul.childNodes[2].textContent).to.equal('b');
+			expect(ul.childNodes[3].textContent).to.equal('A divider');
+			expect(ul.childNodes[4].textContent).to.equal('c');
+			expect(ul.childNodes[5].textContent).to.equal('d');
+			expect(ul.childNodes[6].textContent).to.equal('A footer');
 		});
 	});
 
