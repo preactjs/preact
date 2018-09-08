@@ -2,7 +2,6 @@
 
 - Components
 	- array children
-		- ✖ should render DOM element's array children
 		- ✖ should render Component's array children
 		- ✖ should render Fragment's array children
 	- Fragment

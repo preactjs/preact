@@ -42,7 +42,9 @@ export function teardown(scratch) {
 	}
 }
 
-export const mixedArray = Object.freeze(
-	[0, 'a', 'b', <span>c</span>, () => 'd', null, undefined, false, ['e', 'f'], 1]
+const Foo = () => 'd';
+export const getMixedArray = () => (
+	// Make it a function so each test gets a new copy of the array
+	[0, 'a', 'b', <span>c</span>, <Foo />, null, undefined, false, ['e', 'f'], 1]
 );
 export const mixedArrayHTML = '0ab<span>c</span>def1';

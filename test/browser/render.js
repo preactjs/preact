@@ -1,7 +1,7 @@
 /* global DISABLE_FLAKEY */
 
 import { createElement as h, render, Component } from '../../src/index';
-import { setupScratch, setupRerender, teardown, mixedArray, mixedArrayHTML } from '../_util/helpers';
+import { setupScratch, setupRerender, teardown, getMixedArray, mixedArrayHTML } from '../_util/helpers';
 
 /** @jsx h */
 
@@ -186,7 +186,7 @@ describe('render()', () => {
 	});
 
 	it.skip('should render arrays of mixed elements', () => {
-		render(mixedArray, scratch);
+		render(getMixedArray(), scratch);
 		expect(scratch.innerHTML).to.equal(mixedArrayHTML);
 	});
 

@@ -1,5 +1,5 @@
 import { createElement as h, cloneElement, render, Component, Fragment } from '../../src/index';
-import { setupScratch, teardown, setupRerender, mixedArray, mixedArrayHTML } from '../_util/helpers';
+import { setupScratch, teardown, setupRerender, getMixedArray, mixedArrayHTML } from '../_util/helpers';
 
 /** @jsx h */
 
@@ -284,13 +284,13 @@ describe('Components', () => {
 	});
 
 	describe('array children', () => {
-		it.skip('should render DOM element\'s array children', () => {
-			render(<div>{mixedArray}</div>, scratch);
+		it('should render DOM element\'s array children', () => {
+			render(<div>{getMixedArray()}</div>, scratch);
 			expect(scratch.firstChild.innerHTML).to.equal(mixedArrayHTML);
 		});
 
 		it.skip('should render Component\'s array children', () => {
-			const Foo = () => mixedArray;
+			const Foo = () => getMixedArray();
 
 			render(<Foo />, scratch);
 
@@ -300,7 +300,7 @@ describe('Components', () => {
 		it.skip('should render Fragment\'s array children', () => {
 			const Foo = () => (
 				<Fragment>
-					{mixedArray}
+					{getMixedArray()}
 				</Fragment>
 			);
 
