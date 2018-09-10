@@ -505,6 +505,53 @@ describe('Components', () => {
 			expect(ul.childNodes[5].textContent).to.equal('d');
 			expect(ul.childNodes[6].textContent).to.equal('A footer');
 		});
+
+		it.skip('should reorder Fragment children', () => {
+			let updateState;
+			class App extends Component {
+				constructor() {
+					super();
+					this.state = { active: false };
+					updateState = () => this.setState(prev => ({ active: !prev.active }));
+				}
+
+				render() {
+					return (
+						<div>
+							<h1>Heading</h1>
+							{!this.state.active ? (
+								<Fragment>
+									foobar
+									<Fragment>
+										Hello World
+										<h2>yo</h2>
+									</Fragment>
+									<input type="text" />
+								</Fragment>
+							) : (
+								<Fragment>
+									<Fragment>
+										Hello World
+										<h2>yo</h2>
+									</Fragment>
+									foobar
+									<input type="text" />
+								</Fragment>
+							)}
+						</div>
+					);
+				}
+			}
+
+			render(<App />, scratch);
+
+			expect(scratch.innerHTML).to.equal('<div><h1>Heading</h1>foobarHello World<h2>yo</h2><input type="text"></div>');
+
+			updateState();
+			rerender();
+
+			expect(scratch.innerHTML).to.equal('<div><h1>Heading</h1>Hello World<h2>yo</h2>foobar<input type="text"></div>');
+		});
 	});
 
 	describe('props.children', () => {
