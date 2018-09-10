@@ -192,7 +192,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 		len = originalChildren.length,
 		childrenLen = 0,
 		vlen = vchildren ? vchildren.length : 0,
-		j, c, f, vchild, child;
+		j, c, f, l, vchild, child;
 
 	// Build up a map of keyed children and an Array of unkeyed children:
 	if (len!==0) {
@@ -208,6 +208,7 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 				children[childrenLen++] = child;
 			}
 		}
+		l = keyedLen - vlen;
 	}
 
 	if (vlen!==0) {
@@ -248,8 +249,11 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 				else if (child===f.nextSibling) {
 					removeNode(f);
 				}
+				else if (l > 0 && child===originalChildren[i + l]) {
+				}
 				else {
 					dom.insertBefore(child, f);
+					l++;
 				}
 			}
 		}
