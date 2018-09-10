@@ -48,3 +48,15 @@ export const getMixedArray = () => (
 	[0, 'a', 'b', <span>c</span>, <Foo />, null, undefined, false, ['e', 'f'], 1]
 );
 export const mixedArrayHTML = '0ab<span>c</span>def1';
+
+/**
+ * Serialize an object
+ * @param {Object} obj
+ * @return {string}
+ */
+export function serialize(obj) {
+	if (obj instanceof Text) return '#text';
+	if (obj instanceof Element) return `<${obj.localName}>${obj.textContent}`;
+	if (obj === document) return 'document';
+	return Object.prototype.toString.call(obj).replace(/(^\[object |\]$)/g, '');
+}
