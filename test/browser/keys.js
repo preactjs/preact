@@ -208,7 +208,7 @@ describe('keys', () => {
 		expect(calls).to.deep.equal({ '<li>.appendChild(#text)': 1, '<ol>ac.insertBefore(<li>b, <li>c)': 1 });
 	});
 
-	it('should remove keyed child from the middle', () => {
+	it('should remove keyed children from the middle', () => {
 		const values = ['a', 'b', 'x', 'y', 'z', 'c', 'd'];
 
 		render(<List values={values} />, scratch);
