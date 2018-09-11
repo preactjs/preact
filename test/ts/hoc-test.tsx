@@ -1,10 +1,10 @@
 import { expect } from "chai";
 import {
-	h,
+	createElement,
 	ComponentFactory,
 	ComponentConstructor,
 	Component
-} from "../../src/preact";
+} from "../../src";
 import {
 	SimpleComponent,
 	SimpleComponentProps

@@ -3,6 +3,12 @@ import { diff, flushMounts } from './diff/index';
 import { diffChildren } from './diff/children';
 import { coerceToVNode } from './create-element';
 
+/**
+ * Render a Preact virtual node into a DOM element
+ * @param {import('./index').ComponentChild} vnode The virtual node to render
+ * @param {import('./internal').PreactElement} parent The DOM element to
+ * render into
+ */
 export function render(vnode, parent) {
 	let oldTree = parent._previousVTree;
 	if (oldTree) {
@@ -13,6 +19,12 @@ export function render(vnode, parent) {
 	else hydrate(vnode, parent);
 }
 
+/**
+ * Update an existing DOM element with data from a Preact virtual node
+ * @param {import('./index').ComponentChild} vnode The virtual node to render
+ * @param {import('./internal').PreactElement} parent The DOM element to
+ * update
+ */
 export function hydrate(vnode, parent) {
 	parent._previousVTree = vnode = coerceToVNode(vnode);
 	let mounts = [];

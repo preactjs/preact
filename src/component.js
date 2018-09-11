@@ -2,6 +2,13 @@ import { assign } from './util';
 import { diff, flushMounts } from './diff/index';
 // import { diff, diffLevel } from './diff/index';
 
+/**
+ * Base Component class. Provides `setState()` and `forceUpdate()`, which
+ * trigger rendering
+ * @param {object} props The initial component props
+ * @param {object} context The initial context from parent components'
+ * getChildContext
+ */
 export function Component(props, context) {
 	this.props = props;
 	this.context = context;
@@ -12,6 +19,14 @@ export function Component(props, context) {
 	this._ancestorComponent = null;
 }
 
+/**
+ * Update component state and schedule a re-render.
+ * @param {object | ((s: object, p: object) => object)} update A hash of state
+ * properties to update with new values or a function that given the current
+ * state and props returns a new partial state
+ * @param {() => void} [callback] A function to be called once component state is
+ * updated
+ */
 Component.prototype.setState = function(update, callback) {
 	// if (this.prevState==null) this.prevState = assign({}, this.state);
 	// let s = this._nextState || this.state;
@@ -40,6 +55,11 @@ Component.prototype.setState = function(update, callback) {
 	// if (!this._dirty && (this._dirty = true) && q.push(this)===1) (0, Component.debounce)(process);
 };
 
+/**
+ * Immediately perform a synchronous re-render of the component
+ * @param {() => void} [callback] A function to be called after component is
+ * re-renderd
+ */
 Component.prototype.forceUpdate = function(callback) {
 	if (this.base!=null) {
 		let mounts = [];
@@ -50,13 +70,26 @@ Component.prototype.forceUpdate = function(callback) {
 };
 
 
+/**
+ * The render queue
+ * @type {Array<import('./internal').Component>}
+ */
 let q = [];
 
 // const defer = typeof Promise=='function' ? Promise.resolve().then.bind(Promise.resolve()) : setTimeout;
 // Component.debounce = typeof Promise=='function' ? Promise.resolve().then.bind(Promise.resolve()) : setTimeout;
+
+/**
+ * Asynchronously schedule a callback
+ * @type {(cb) => void}
+ */
 const defer = typeof Promise=='function' ? Promise.resolve().then.bind(Promise.resolve()) : setTimeout;
 // Component.debounce = setTimeout;
 
+/**
+ * Enqueue a rerender of a component
+ * @param {import('./internal').Component} c The component to rerender
+ */
 export function enqueueRender(c) {
 	// console.log('enqueueRender', c.id, q.length===0, c._dirty);
 	if (!c._dirty && (c._dirty = true) && q.push(c) === 1) {
@@ -84,6 +117,7 @@ export function enqueueRender(c) {
 	// if (q.push(c) === 1) setTimeout(process);
 }
 
+/** Flush the render queue by rerendering all queued components */
 function process() {
 	// console.log('process queue', q.map(c => c.context.__depth)+' ');
 

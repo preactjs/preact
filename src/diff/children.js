@@ -6,6 +6,22 @@ import { coerceToVNode } from '../create-element';
 // import { cloneElement } from '../clone-element';
 
 
+/**
+ * Diff the children of a virtual node
+ * @param {import('../internal').PreactElement} node The DOM element whose
+ * children are being diffed
+ * @param {Array<import('../internal').VNode>} children The new virtual
+ * children
+ * @param {Array<import('../internal').VNode>} oldChildren The old virtual
+ * children
+ * @param {object} context The current context object
+ * @param {boolean} isSvg Whether or not this DOM node is an SVG node
+ * @param {Array<import('../internal').PreactElement>} excessChildren
+ * @param {Array<import('../internal').Component>} mounts The list of components
+ * which have mounted
+ * @param {import('../internal').Component} ancestorComponent The direct parent
+ * component to the ones being diffed
+ */
 export function diffChildren(node, children, oldChildren, context, isSvg, excessChildren, mounts, ancestorComponent) {
 	// if (oldChildren==null) oldChildren = EMPTY_ARR;
 

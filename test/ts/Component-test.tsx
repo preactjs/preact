@@ -1,13 +1,11 @@
 import "mocha";
 import { expect } from "chai";
 import {
-	h,
+	createElement,
 	Component,
-	FunctionalComponent,
-	ComponentConstructor,
 	RenderableProps,
-	render
-} from "../../src/preact";
+	Fragment
+} from "../../src/";
 
 export class ContextComponent extends Component<{ foo: string }> {
 	getChildContext() {
@@ -133,6 +131,17 @@ describe("Component", () => {
 			const actual = comp.render();
 
 			expect(actual).to.eq(null);
+		});
+	});
+
+	describe("Fragment", () => {
+		it('should render nested Fragments', () => {
+			var vnode = <Fragment>
+					<Fragment>foo</Fragment>
+					bar
+				</Fragment>
+
+			expect(vnode.tag).to.be.equal(Fragment);
 		});
 	});
 });

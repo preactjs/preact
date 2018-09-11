@@ -7,10 +7,11 @@
   "module": "dist/ceviche.mjs",
   "main": "dist/ceviche.js",
   "umd:main": "dist/ceviche.umd.js",
+  "types": "src/index.d.ts",
   "scripts": {
     "build": "microbundle build",
     "dev": "microbundle watch --format cjs,umd",
-    "test": "npm-run-all lint build --parallel test:mocha test:karma",
+    "test": "npm-run-all lint build --parallel test:mocha test:karma test:ts",
     "test:flow": "flow check",
     "test:ts": "tsc -p test/ts/ && mocha --require babel-register test/ts/**/*-test.js",
     "test:mocha": "mocha --recursive --require babel-register test/shared test/node",
