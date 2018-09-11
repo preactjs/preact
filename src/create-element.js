@@ -5,7 +5,7 @@ import { EMPTY_OBJ } from './constants';
   * @param {import('./internal').VNode["tag"]} tag The node name or Component
   * constructor for this virutal node
   * @param {object | null | undefined} [props] The properties of the virtual node
-  * @param {Array<import('.').ComponentChild>} [children] The children of the virtual node
+  * @param {Array<import('.').ComponentChildren>} [children] The children of the virtual node
   * @returns {import('./internal').VNode}
   */
 export function createElement(tag, props, children) {
@@ -41,6 +41,8 @@ export function createElement(tag, props, children) {
  * this is the text of the node
  * @param {string |number | null} key The key for this virtual node, used when
  * diffing it against its children
+ * @param {import('./internal').VNode["ref"]} ref The ref property that will
+ * receive a reference to its created child
  * @returns {import('./internal').VNode}
  */
 function createVNode(tag, props, text, key, ref) {
@@ -72,7 +74,7 @@ export function coerceToVNode(possibleVNode) {
 
 	// Clone vnode if it has already been used. ceviche/#57
 	if (possibleVNode!=null && possibleVNode._el!=null) {
-		return createVNode(possibleVNode.tag, possibleVNode.props, possibleVNode.text, possibleVNode.key);
+		return createVNode(possibleVNode.tag, possibleVNode.props, possibleVNode.text, possibleVNode.key, null);
 	}
 
 	return possibleVNode;

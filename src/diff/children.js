@@ -16,7 +16,7 @@ import { coerceToVNode } from '../create-element';
  * children
  * @param {object} context The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
- * @param {*} excessChildren
+ * @param {Array<import('../internal').PreactElement>} excessChildren
  * @param {Array<import('../internal').Component>} mounts The list of components
  * which have mounted
  * @param {import('../internal').Component} ancestorComponent The direct parent

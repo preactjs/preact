@@ -13,6 +13,7 @@ declare namespace preact {
 		props: P & { children: ComponentChildren };
 		text?: string | number | null;
 		key?: Key;
+		ref?: Ref<any>;
 	}
 
 	//

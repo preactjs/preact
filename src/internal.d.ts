@@ -35,4 +35,5 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	_previousVTree?: VNode;
 	_ancestorComponent?: Component<any, any>;
 	_processingException?: Component<any, any>;
+	_constructor: preact.ComponentFactory;
 }

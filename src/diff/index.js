@@ -167,7 +167,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 
 	let c, p, isNew = false, oldProps, oldState, oldContext,
 		newTag = newTree.tag;
-	
+
 	/** @type {import('../internal').Component | null} */
 	let clearProcessingException;
 
@@ -744,7 +744,10 @@ function flattenChildren(children, flattened) {
  * @returns {import('../internal').Component}
  */
 function createComponent(Ctor, props, context, ancestorComponent) {
+
+	/** @type {import('../internal').Component} */
 	let inst;
+
 	if (Ctor.prototype && Ctor.prototype.render) {
 		inst = new Ctor(props, context);
 		// @TODO this really shouldn't be necessary and people shouldn't rely on it!
