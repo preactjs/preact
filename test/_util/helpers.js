@@ -60,3 +60,45 @@ export function serialize(obj) {
 	if (obj === document) return 'document';
 	return Object.prototype.toString.call(obj).replace(/(^\[object |\]$)/g, '');
 }
+
+let log = {};
+
+/**
+ * Modify obj's original method to log calls and arguments on logger object
+ * @param {object} obj
+ * @param {string} method
+ */
+export function logCall(obj, method) {
+	let old = obj[method];
+	obj[method] = function() {
+		let c = '';
+		for (let i=0; i<arguments.length; i++) {
+			if (c) c += ', ';
+			c += serialize(arguments[i]);
+		}
+		const key = `${serialize(this)}.${method}(${c})`;
+		log[key] = (log[key] || 0) + 1;
+		return old.apply(this, arguments);
+	};
+}
+
+/**
+ * Return log object
+ * @return {object} log
+ */
+export function getLog() {
+	return log;
+}
+
+/** Clear log object */
+export function clearLog() {
+	log = {};
+}
+
+/**
+ * Reset obj to empty to keep reference
+ * @param {object} obj
+ */
+export function clear(obj) {
+	Object.keys(obj).forEach(key => delete obj[key]);
+}
