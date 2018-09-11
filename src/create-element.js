@@ -3,7 +3,7 @@ import { EMPTY_OBJ } from './constants';
 /**
   * Create an virtual node (used for JSX)
   * @param {import('./internal').VNode["tag"]} tag The node name or Component
-  * constructor for this virutal node
+  * constructor for this virtual node
   * @param {object | null | undefined} [props] The properties of the virtual node
   * @param {Array<import('.').ComponentChildren>} [children] The children of the virtual node
   * @returns {import('./internal').VNode}
@@ -35,7 +35,7 @@ export function createElement(tag, props, children) {
 /**
  * Create a VNode (used internally by Preact)
  * @param {import('./internal').VNode["tag"]} tag The node name or Component
- * Constructor for this virutal node
+ * Constructor for this virtual node
  * @param {object} props The properites of this virtual node
  * @param {string | number} text If this virtual node represents a text node,
  * this is the text of the node

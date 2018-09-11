@@ -5,7 +5,7 @@ import { coerceToVNode } from './create-element';
 
 /**
  * Render a Preact virtual node into a DOM element
- * @param {import('./index').ComponentChild} vnode The virutal node to render
+ * @param {import('./index').ComponentChild} vnode The virtual node to render
  * @param {import('./internal').PreactElement} parent The DOM element to
  * render into
  */
@@ -21,7 +21,7 @@ export function render(vnode, parent) {
 
 /**
  * Update an existing DOM element with data from a Preact virtual node
- * @param {import('./index').ComponentChild} vnode The virutal node to render
+ * @param {import('./index').ComponentChild} vnode The virtual node to render
  * @param {import('./internal').PreactElement} parent The DOM element to
  * update
  */

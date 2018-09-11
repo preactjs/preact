@@ -5,7 +5,7 @@ import "./jsx";
 
 declare namespace preact {
 	//
-	// Preact Virutal DOM
+	// Preact Virtual DOM
 	// -----------------------------------
 
 	interface VNode<P = {}> {
