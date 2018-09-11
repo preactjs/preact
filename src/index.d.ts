@@ -12,7 +12,7 @@ declare namespace preact {
 		tag: ComponentFactory<P> | string | null;
 		props: P & { children: ComponentChildren };
 		text?: string | number | null;
-		key?: string | number;
+		key?: Key;
 	}
 
 	//
@@ -56,7 +56,7 @@ declare namespace preact {
 		new (props: P, context?: any): Component<P, S>;
 		displayName?: string;
 		defaultProps?: Partial<P>;
-		getDerivedStateFromProps?(props: P, state: S): Partial<S>;
+		getDerivedStateFromProps?(props: Readonly<P>, state: Readonly<S>): Partial<S>;
 	}
 
 	// Type alias for a component considered generally, whether stateless or stateful.
