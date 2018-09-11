@@ -1,5 +1,5 @@
 import { createElement as h, Component, render } from '../../src/index';
-import { setupScratch, teardown } from '../_util/helpers';
+import { setupScratch, teardown, logCall, getLog, clearLog } from '../_util/helpers';
 import { spy } from 'sinon';
 
 /** @jsx h */
@@ -28,12 +28,19 @@ describe('keys', () => {
 		values.splice(to, 0, value);
 	}
 
+	before(() => {
+		logCall(Element.prototype, 'appendChild');
+		logCall(Element.prototype, 'insertBefore');
+		logCall(Element.prototype, 'remove');
+	});
+
 	beforeEach(() => {
 		scratch = setupScratch();
 	});
 
 	afterEach(() => {
 		teardown(scratch);
+		clearLog();
 	});
 
 	// https://fb.me/react-special-props
@@ -109,9 +116,11 @@ describe('keys', () => {
 		expect(scratch.textContent).to.equal('ab');
 
 		values.push('c');
+		clearLog();
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abc');
+		expect(getLog()).to.deep.equal({ '<li>.appendChild(#text)': 1, '<ol>ab.appendChild(<li>c)': 1 });
 	});
 
 	it('should remove keyed elements from the end', () => {
@@ -121,9 +130,11 @@ describe('keys', () => {
 		expect(scratch.textContent).to.equal('abcd');
 
 		values.pop();
+		clearLog();
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abc');
+		expect(getLog()).to.deep.equal({ '<li>d.remove()': 1 });
 	});
 
 	it('should prepend keyed elements to the beginning', () => {
@@ -133,9 +144,11 @@ describe('keys', () => {
 		expect(scratch.textContent).to.equal('bc');
 
 		values.unshift('a');
+		clearLog();
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abc');
+		expect(getLog()).to.deep.equal({ '<li>.appendChild(#text)': 1, '<ol>bc.insertBefore(<li>a, <li>b)': 1 });
 	});
 
 	it('should remove keyed elements from the beginning', () => {
@@ -145,9 +158,11 @@ describe('keys', () => {
 		expect(scratch.textContent).to.equal('zabc');
 
 		values.shift();
+		clearLog();
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abc');
+		expect(getLog()).to.deep.equal({ '<li>z.remove()': 1 });
 	});
 
 	it('should insert new keyed children in the middle', () => {
@@ -157,21 +172,25 @@ describe('keys', () => {
 		expect(scratch.textContent).to.equal('ac');
 
 		values.splice(1, 0, 'b');
+		clearLog();
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abc');
+		expect(getLog()).to.deep.equal({ '<li>.appendChild(#text)': 1, '<ol>ac.insertBefore(<li>b, <li>c)': 1 });
 	});
 
 	it('should remove keyed children from the middle', () => {
-		const values = ['a', 'b', 'z', 'c', 'd'];
+		const values = ['a', 'b', 'x', 'y', 'z', 'c', 'd'];
 
 		render(<List values={values} />, scratch);
-		expect(scratch.textContent).to.equal('abzcd');
+		expect(scratch.textContent).to.equal('abxyzcd');
 
-		values.splice(2, 1);
+		values.splice(2, 3);
+		clearLog();
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd');
+		expect(getLog()).to.deep.equal({ '<li>z.remove()': 1, '<li>y.remove()': 1, '<li>x.remove()': 1 });
 	});
 
 	it('should swap existing keyed children', () => {
@@ -182,15 +201,19 @@ describe('keys', () => {
 
 		// swap
 		move(values, 1, 2);
+		clearLog();
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('acbd');
+		expect(getLog()).to.deep.equal({ '<ol>abcd.insertBefore(<li>b, <li>d)': 1 });
 
 		// swap back
 		move(values, 2, 1);
+		clearLog();
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd');
+		expect(getLog()).to.deep.equal({ '<ol>acbd.insertBefore(<li>c, <li>d)': 1 });
 	});
 
 	it('should move keyed children to the end of the list', () => {
@@ -201,14 +224,18 @@ describe('keys', () => {
 
 		// move to end
 		move(values, 0, values.length - 1);
+		clearLog();
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('bcda');
+		expect(getLog()).to.deep.equal({ '<ol>abcd.appendChild(<li>a)': 1 });
 
 		// move to beginning
 		move(values, values.length - 1, 0);
+		clearLog();
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd');
+		expect(getLog()).to.deep.equal({ '<ol>bcda.insertBefore(<li>a, <li>b)': 1 });
 	});
 });
