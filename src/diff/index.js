@@ -288,7 +288,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			if (vnode instanceof Array) {
+			if ('pop' in vnode) {
 				diffChildren(parent, vnode, prev==null ? EMPTY_ARR : prev, context, isSvg, excessChildren, mounts, c);
 			}
 			else {
@@ -316,7 +316,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			// }
 
 			if (c.base==null) {
-				if (prev && !(prev instanceof Array)) {
+				if (prev && !('pop' in prev)) {
 					unmount(prev, ancestorComponent);
 				}
 			}
