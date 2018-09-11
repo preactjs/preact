@@ -109,7 +109,7 @@ describe("Component", () => {
 	});
 
 	it("has no base when not mounted", () => {
-		expect(component).to.not.haveOwnProperty("base");
+		expect(component.base).to.be.null;
 	});
 
 	describe("setState", () => {
