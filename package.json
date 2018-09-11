@@ -37,8 +37,11 @@
       "prefer-rest-params": 0,
       "prefer-spread": 0,
       "no-cond-assign": 0,
+      "react/jsx-no-bind": 0,
       "react/prefer-stateless-function": 0,
-      "jest/valid-expect": 0
+      "react/sort-comp": 0,
+      "jest/valid-expect": 0,
+      "jest/no-disabled-tests": 0
     }
   },
   "files": [

@@ -68,11 +68,7 @@ function setProperty(node, name, value, oldValue, isSvg) {
 
 	// if (name==='children' || name==='key') {}
 	// else
-	if (name==='ref') {
-		if (oldValue) oldValue(null);
-		if (value) value(node);
-	}
-	else if (name==='style') {
+	if (name==='style') {
 		// setStyle(node, value, oldValue);
 
 		/* Possible golfing activities for setting styles:
@@ -92,10 +88,15 @@ function setProperty(node, name, value, oldValue, isSvg) {
 
 		let s = node.style;
 
-		// remove values not in the new list
-		for (let i in oldValue) {
-			if (value==null || !(i in value)) s[i] = '';
+		if (typeof value==='string') return s.cssText = value;
+		if (typeof oldValue==='string') s.cssText = '';
+		else {
+			// remove values not in the new list
+			for (let i in oldValue) {
+				if (value==null || !(i in value)) s[i] = '';
+			}
 		}
+
 		for (let i in value) {
 			let v = value[i];
 			if (oldValue==null || v!==oldValue[i]) {
@@ -114,7 +115,6 @@ function setProperty(node, name, value, oldValue, isSvg) {
 				// node.style[i] = v;
 			}
 		}
-
 		// }
 	}
 	else if (name==='dangerouslySetInnerHTML') {

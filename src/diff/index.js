@@ -101,13 +101,6 @@ import { assign } from '../util';
  * @returns {import('../internal').PreactElement | null}
  */
 export function diff(dom, parent, newTree, oldTree, context, isSvg, append, excessChildren, mounts, ancestorComponent) {
-	if (newTree==null) {
-		if (oldTree != null) {
-			unmount(oldTree, ancestorComponent);
-		}
-		return null;
-	}
-
 	// if (dom!=null && now!==true) {
 	// 	// console.log('queueing');
 
@@ -149,8 +142,6 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	// 	// return newTree._el = dom;
 	// }
 
-	let originalOldTree = oldTree;
-
 	// if (newTree==null) {
 	// 	newTree = createVNode(3, null, null, null, '', null);
 	// 	// return;
@@ -166,10 +157,17 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	// assertIsPureVNode(newTree);
 	// console.log(oldTree, newTree);
 
-	let c, p, isNew = false, oldProps, oldState, oldContext,
-		newTag = newTree.tag,
-		oldTag = oldTree!=null ? oldTree.tag : null;
+	// If the previous tag doesn't match the new tag we drop the whole subtree
+	if (oldTree==null || newTree==null || oldTree.tag!==newTree.tag) {
+		if (oldTree!=null) unmount(oldTree, ancestorComponent);
+		if (newTree==null) return null;
+		dom = null;
+		oldTree = EMPTY_OBJ;
+	}
 
+	let c, p, isNew = false, oldProps, oldState, oldContext,
+		newTag = newTree.tag;
+	
 	/** @type {import('../internal').Component | null} */
 	let clearProcessingException;
 
@@ -185,20 +183,10 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	// }
 
 	try {
-
 		outer: if (typeof newTag==='function') {
-			if (typeof oldTag==='function' && oldTag!==newTag) {
-				// unmount(oldTree);
-				oldTree = null;
-				// oldTree._component.componentWillUnmount();
-				// oldTree._component.base = null;
-				// if (oldTree.props.ref!=null) {
-				// 	oldTree.props.ref(null);
-				// }
-			}
 
 			// Get component and set it to `c`
-			if (oldTree!=null && oldTree._component) {
+			if (oldTree._component) {
 				c = newTree._component = oldTree._component;
 				clearProcessingException = c._processingException;
 			}
@@ -215,6 +203,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			let s = c._nextState || c.state;
 			if (newTag.getDerivedStateFromProps!=null) {
 				oldState = assign({}, c.state);
+				if (s===c.state) s = assign({}, s);
 				assign(s, newTag.getDerivedStateFromProps(newTree.props, s));
 			}
 
@@ -271,10 +260,8 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 
 			oldContext = c.context = context;
 			c.props = newTree.props;
-			if (c._nextState!=null) {
-				c.state = c._nextState;
-				c._nextState = null;
-			}
+			c.state = s;
+
 			let prev = c._previousVTree;
 			let vnode = c._previousVTree = coerceToVNode(c.render(c.props, c.state, c.context));
 			c._dirty = false;
@@ -291,8 +278,10 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				diffChildren(parent, vnode, prev==null ? EMPTY_ARR : prev, context, isSvg, excessChildren, mounts, c);
 			}
 			else {
-				c.base = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, mounts, c);
+				c.base = dom = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, mounts, c);
 			}
+
+			if (newTree.ref) applyRef(newTree.ref, c);
 			// context = assign({}, context);
 			// context.__depth = (context.__depth || 0) + 1;
 			// context = assign({
@@ -317,29 +306,12 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 					unmount(prev, ancestorComponent);
 				}
 			}
-			else if (parent && append!==false) {
-				// if (insertBefore && c.base.nextSibling!==insertBefore) parent.insertBefore(c.base, insertBefore);
-				if (dom==null || dom.parentNode!==parent) parent.appendChild(c.base);
-				else if (c.base!==dom) {
-					// console.log('replace', dom, c.base);
-					parent.replaceChild(c.base, dom);
-				}
-			}
 
 			// if (dom!=null && (c.base!==dom || !dom.parentNode)) {
 			// 	if (c.base==null) unmount(prev);
 			// 	else if (dom.parentNode!==parent) parent.appendChild(c.base);
 			// 	else parent.replaceChild(c.base, dom);
 			// }
-
-			dom = c.base;
-			while (p=c._renderCallbacks.pop()) p();
-
-			// if (c!=null) {
-			// c.base = newTree._el;
-			if (!isNew && c.componentDidUpdate!=null) {
-				c.componentDidUpdate(oldProps, oldState, oldContext);
-			}
 			// if (isNew) {
 			// 	mounts.push(c);
 			// 	// if (c.componentDidMount!=null) c.componentDidMount();
@@ -351,12 +323,34 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		}
 		else {
 			dom = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren, mounts, ancestorComponent);
+
+			if (newTree.ref && (oldTree.ref !== newTree.ref)) {
+				applyRef(newTree.ref, dom);
+			}
+		}
+
+		if (parent && append!==false) {
+			// if (insertBefore && c.base.nextSibling!==insertBefore) parent.insertBefore(c.base, insertBefore);
+			if (dom!=null && dom.parentNode!==parent) {
+				parent.appendChild(dom);
+			}
+			else if ((c!=null && c.base!==dom)) {
+				parent.replaceChild(c.base, dom);
+			}
+		}
+
+		if (c!=null) {
+			dom = c.base;
+			while (p=c._renderCallbacks.pop()) p();
+
+			if (!isNew && c.componentDidUpdate!=null) {
+				c.componentDidUpdate(oldProps, oldState, oldContext);
+			}
 		}
 
 		if (clearProcessingException) {
 			c._processingException = null;
 		}
-
 	}
 	catch (e) {
 		if (c && !dom) {
@@ -376,10 +370,6 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	// if (originalOldTree && originalOldTree._el && originalOldTree._el!==dom) {
 	// 	unmount(originalOldTree);
 	// }
-	if (originalOldTree!=null && originalOldTree.tag!==newTag) {
-		// console.trace('unmount', originalOldTree._el);
-		unmount(originalOldTree, ancestorComponent);
-	}
 
 	return dom;
 }
@@ -433,12 +423,6 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 	// if (oldVNode!=null) {
 	// 	if (vnode.tag!==oldVNode.tag) console.log('vnode tag mismatch: ', oldVNode.tag, vnode.tag);
 	// }
-
-	if (oldVNode==null || vnode.tag!==oldVNode.tag) {
-		// if (oldVNode) unmount(oldVNode);
-		dom = null;
-	}
-
 	// if (dom==null && excessChildren!=null) {
 	// 	console.log('hydrating from '+excessChildren.length+' excess children', excessChildren.map( c => c && `${c.nodeType} @ ${c.localName}`), vnode.tag);
 	// 	for (let j=0; j<excessChildren.length; j++) {
@@ -499,16 +483,24 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 		// let newChildren = getVNodeChildren(vnode);
 		// diffChildren(dom, newChildren, vnode===oldVNode ? newChildren : oldVNode==null ? [] : getVNodeChildren(oldVNode), context, isSvg, excessChildren);
 		if (vnode!==oldVNode) {
-			diffProps(dom, vnode.props, oldVNode==null ? EMPTY_OBJ : oldVNode.props, isSvg);
+			diffProps(dom, vnode.props, oldVNode==EMPTY_OBJ ? EMPTY_OBJ : oldVNode.props, isSvg);
 		}
-		diffChildren(dom, getVNodeChildren(vnode), oldVNode==null ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessChildren, mounts, ancestorComponent);
+		diffChildren(dom, getVNodeChildren(vnode), oldVNode==EMPTY_OBJ ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessChildren, mounts, ancestorComponent);
 	}
-
 	// if (oldVNode!=null && dom!==d) unmount(oldVNode);
 
 	return dom;
 }
 
+/**
+ * Invoke or update a ref, depending on whether it is a function or object ref.
+ * @param {object|function} [ref=null]
+ * @param {any} [value]
+ */
+export function applyRef(ref, value) {
+	if (typeof ref=='function') ref(value);
+	else ref.current = value;
+}
 
 /**
  * Unmount a virtual node from the tree and apply DOM changes
@@ -518,9 +510,9 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
  */
 export function unmount(vnode, ancestorComponent) {
 	let r;
-	if (r = vnode.props.ref) {
+	if (r = vnode.ref) {
 		try {
-			r(null);
+			applyRef(r, null);
 		}
 		catch (e) {
 			catchErrorInComponent(e, ancestorComponent);

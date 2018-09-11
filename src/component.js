@@ -41,6 +41,9 @@ Component.prototype.setState = function(update, callback) {
 		assign(s, update);
 	}
 
+	// Skip update if updater function returned null
+	if (update==null) return;
+
 	// let s = this._nextState || this.state;
 	// this._nextState = assign(assign({}, s), typeof update==='function' && update(s, this.props) || s);
 

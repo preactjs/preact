@@ -24,7 +24,12 @@ export function createElement(tag, props, children) {
 			if (props[i]===undefined) props[i] = tag.defaultProps[i];
 		}
 	}
-	return createVNode(tag, props, null, props.key);
+	let ref = props.ref;
+	if (ref) delete props.ref;
+	let key = props.key;
+	if (key) delete props.key;
+
+	return createVNode(tag, props, null, key, ref);
 }
 
 /**
@@ -38,10 +43,14 @@ export function createElement(tag, props, children) {
  * diffing it against its children
  * @returns {import('./internal').VNode}
  */
-function createVNode(tag, props, text, key) {
+function createVNode(tag, props, text, key, ref) {
 	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
 	// Do not inline into createElement and coerceToVNode!
-	return { tag, props, text, key, _children: null, _el: null, _component: null };
+	return { tag, props, text, key, ref, _children: null, _el: null, _component: null };
+}
+
+export function createRef() {
+	return {};
 }
 
 export function Fragment(props) {
@@ -58,7 +67,7 @@ export function Fragment(props) {
 export function coerceToVNode(possibleVNode) {
 	if (typeof possibleVNode === 'boolean') return null;
 	if (typeof possibleVNode === 'string' || typeof possibleVNode === 'number') {
-		return createVNode(null, EMPTY_OBJ, possibleVNode, null);
+		return createVNode(null, EMPTY_OBJ, possibleVNode, null, null);
 	}
 
 	// Clone vnode if it has already been used. ceviche/#57
