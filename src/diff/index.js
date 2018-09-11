@@ -288,7 +288,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			if ('pop' in vnode) {
+			if (Array.isArray(vnode)) {
 				diffChildren(parent, vnode, prev==null ? EMPTY_ARR : prev, context, isSvg, excessChildren, mounts, c);
 			}
 			else {
@@ -316,7 +316,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			// }
 
 			if (c.base==null) {
-				if (prev && !('pop' in prev)) {
+				if (prev && !Array.isArray(prev)) {
 					unmount(prev, ancestorComponent);
 				}
 			}
@@ -667,7 +667,7 @@ function flattenChildren(children, flattened) {
 	// if (children==null) {}
 	if (children==null || typeof children === 'boolean') {}
 	// else if (isObject && 'pop' in children) {
-	else if (typeof children==='object' && ('pop' in children || Symbol.iterator in children && (children = Array.from(children)))) {
+	else if (Array.isArray(children) || (typeof children==='object' && Symbol.iterator in children && (children = Array.from(children)))) {
 	// else if (type==='object' && 'pop' in children) {
 		for (let i=0; i < children.length; i++) {
 			// let child = children[i];
