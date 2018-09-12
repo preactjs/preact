@@ -109,7 +109,7 @@ describe("Component", () => {
 	});
 
 	it("has no base when not mounted", () => {
-		expect(component.base).to.be.null;
+		expect(component.base).to.not.exist;
 	});
 
 	describe("setState", () => {
