@@ -667,7 +667,7 @@ function flattenChildren(children, flattened) {
 	// if (children==null) {}
 	if (children==null || typeof children === 'boolean') {}
 	// else if (isObject && 'pop' in children) {
-	else if (Array.isArray(children) || (typeof children==='object' && Symbol.iterator in children && (children = Array.from(children)))) {
+	else if (Array.isArray(children)) {
 	// else if (type==='object' && 'pop' in children) {
 		for (let i=0; i < children.length; i++) {
 			// let child = children[i];
