@@ -197,7 +197,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 
 				// Instantiate the new component
 				if (newTag.prototype && newTag.prototype.render) {
-					newTree._component = c = new newTag(newTree.props, context);
+					newTree._component = c = new newTag(newTree.props, context); // eslint-disable-line new-cap
 					// @TODO this really shouldn't be necessary and people shouldn't rely on it!
 					// Component.call(c, newTree.props, context);
 				}
