@@ -748,34 +748,6 @@ function flattenChildren(children, flattened) {
 // }
 
 
-// /**
-//  * Create a component. Normalizes differences between PFC's and classful
-//  * Components.
-//  * @param {import('../index').ComponentFactory<any>} Ctor The constructor of the component to create
-//  * @param {object} props The initial props of the component
-//  * @param {object} context The initial context of the component
-//  * @param {import('../internal').Component} ancestorComponent The direct parent component of this component
-//  * @returns {import('../internal').Component}
-//  */
-// function createComponent(Ctor, props, context, ancestorComponent) {
-//
-// 	/** @type {import('../internal').Component} */
-// 	let inst;
-//
-// 	if (Ctor.prototype && Ctor.prototype.render) {
-// 		inst = new Ctor(props, context);
-// 		// @TODO this really shouldn't be necessary and people shouldn't rely on it!
-// 		// Component.call(inst, props, context);
-// 	}
-// 	else {
-// 		inst = new Component(props, context);
-// 		inst._constructor = Ctor;
-// 		inst.render = doRender;
-// 	}
-// 	inst._ancestorComponent = ancestorComponent;
-// 	return inst;
-// }
-
 /** The `.render()` method for a PFC backing instance. */
 function doRender(props, state, context) {
 	return this._constructor(props, context);
