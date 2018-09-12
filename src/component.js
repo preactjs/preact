@@ -14,11 +14,14 @@ export function Component(props, context) {
 	this.context = context;
 	// if (this.state==null) this.state = {};
 	this.state = {};
-	this.base = null;
 	this._dirty = true;
 	this._renderCallbacks = []; // Only class components
-	this._ancestorComponent = null; // Always set right after instantiation
-	this._vnode = null;
+
+	// Other properties that Component will have set later,
+	// shown here as commented out for quick reference
+	// this.base = null;
+	// this._ancestorComponent = null; // Always set right after instantiation
+	// this._vnode = null;
 	// this._nextState = null; // Only class components
 	// this._previousVTree = null;
 	// this._processingException = null; // Always read, set only when handling error
