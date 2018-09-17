@@ -193,7 +193,21 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			else {
 				isNew = true;
 				// c = newTree._component = new newTree.tag(newTree.props, context);
-				c = newTree._component = createComponent(newTag, newTree.props, context, ancestorComponent);
+				// c = newTree._component = createComponent(newTag, newTree.props, context, ancestorComponent);
+
+				// Instantiate the new component
+				if (newTag.prototype && newTag.prototype.render) {
+					newTree._component = c = new newTag(newTree.props, context); // eslint-disable-line new-cap
+					// @TODO this really shouldn't be necessary and people shouldn't rely on it!
+					// Component.call(c, newTree.props, context);
+				}
+				else {
+					newTree._component = c = new Component(newTree.props, context);
+					c._constructor = newTag;
+					c.render = doRender;
+				}
+				c._ancestorComponent = ancestorComponent;
+
 				c.props = newTree.props;
 				if (!c.state) c.state = {};
 				c.context = context;
@@ -274,7 +288,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			if (vnode instanceof Array) {
+			if (Array.isArray(vnode)) {
 				diffChildren(parent, vnode, prev==null ? EMPTY_ARR : prev, context, isSvg, excessChildren, mounts, c);
 			}
 			else {
@@ -302,7 +316,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			// }
 
 			if (c.base==null) {
-				if (prev && !(prev instanceof Array)) {
+				if (prev && !Array.isArray(prev)) {
 					unmount(prev, ancestorComponent);
 				}
 			}
@@ -653,7 +667,7 @@ function flattenChildren(children, flattened) {
 	// if (children==null) {}
 	if (children==null || typeof children === 'boolean') {}
 	// else if (isObject && 'pop' in children) {
-	else if (typeof children==='object' && ('pop' in children || Symbol.iterator in children && (children = Array.from(children)))) {
+	else if (Array.isArray(children)) {
 	// else if (type==='object' && 'pop' in children) {
 		for (let i=0; i < children.length; i++) {
 			// let child = children[i];
@@ -733,34 +747,6 @@ function flattenChildren(children, flattened) {
 // 	return result.reverse();
 // }
 
-
-/**
- * Create a component. Normalizes differences between PFC's and classful
- * Components.
- * @param {import('../index').ComponentFactory<any>} Ctor The constructor of the component to create
- * @param {object} props The initial props of the component
- * @param {object} context The initial context of the component
- * @param {import('../internal').Component} ancestorComponent The direct parent component of this component
- * @returns {import('../internal').Component}
- */
-function createComponent(Ctor, props, context, ancestorComponent) {
-
-	/** @type {import('../internal').Component} */
-	let inst;
-
-	if (Ctor.prototype && Ctor.prototype.render) {
-		inst = new Ctor(props, context);
-		// @TODO this really shouldn't be necessary and people shouldn't rely on it!
-		// Component.call(inst, props, context);
-	}
-	else {
-		inst = new Component(props, context);
-		inst._constructor = Ctor;
-		inst.render = doRender;
-	}
-	inst._ancestorComponent = ancestorComponent;
-	return inst;
-}
 
 /** The `.render()` method for a PFC backing instance. */
 function doRender(props, state, context) {
