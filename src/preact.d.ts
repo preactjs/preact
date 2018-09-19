@@ -101,14 +101,14 @@ declare namespace preact {
 		abstract render(props?: RenderableProps<P>, state?: Readonly<S>, context?: any): ComponentChild;
 	}
 
-	function h<P>(
-		node: ComponentFactory<P>,
-		params: Attributes & P | null,
-		...children: ComponentChildren[]
-	): VNode<any>;
 	function h(
 		node: string,
 		params: JSX.HTMLAttributes & JSX.SVGAttributes & Record<string, any> | null,
+		...children: ComponentChildren[]
+	): VNode<any>;
+	function h<P>(
+		node: ComponentFactory<P>,
+		params: Attributes & P | null,
 		...children: ComponentChildren[]
 	): VNode<any>;
 
