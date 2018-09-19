@@ -124,9 +124,11 @@ function setProperty(node, name, value, oldValue, isSvg) {
 	// else if (name.charCodeAt(0)===111 && name.charCodeAt(1)===110) {
 	else if (name[0]==='o' && name[1]==='n') {
 		let useCapture = name !== (name=name.replace(/Capture$/, ''));
-		let listenerName = name.toLowerCase().substring(2);
-		node.removeEventListener(listenerName, oldValue, useCapture);
-		node.addEventListener(listenerName, value, useCapture);
+		let nameLower = name.toLowerCase();
+		name = (nameLower in node ? nameLower : name).substring(2);
+
+		node.removeEventListener(name, oldValue, useCapture);
+		node.addEventListener(name, value, useCapture);
 	}
 	// else if (isProperty===true) {
 	// else if (name in node) {
