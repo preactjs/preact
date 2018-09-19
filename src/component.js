@@ -60,6 +60,7 @@ Component.prototype.setState = function(update, callback) {
 	// this._nextState = Object.assign({}, s, update);
 	if (callback!=null) this._renderCallbacks.push(callback);
 
+	this._force = false;
 	enqueueRender(this);
 	// if (!this._dirty && (this._dirty = true) && q.push(this)===1) (0, Component.debounce)(process);
 };
@@ -71,9 +72,17 @@ Component.prototype.setState = function(update, callback) {
  */
 Component.prototype.forceUpdate = function(callback) {
 	if (this.base!=null) {
+		// Set render mode so that we can differantiate where the render request
+		// is coming from. We need this because forceUpdate should never call
+		// shouldComponentUpdate
+		if (this._force==null) this._force = true;
+
 		let mounts = [];
 		diff(this.base, this.base.parentNode, this._vnode, this._vnode, this.context, this.base.parentNode.ownerSVGElement!==undefined, true, null, mounts, this._ancestorComponent);
 		flushMounts(mounts);
+
+		// Reset mode to its initial value for the next render
+		this._force = null;
 	}
 	if (callback!=null) callback();
 };

@@ -254,7 +254,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				// console.log('updating component in-place', c._nextState);
 				// if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, c.state)===false) {
 				// 	c.state = nextState;
-				if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, s, context)===false) {
+				if (!c._force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, s, context)===false) {
 					dom = c.base;
 					break outer;
 					// return newTree._el = c.base;
