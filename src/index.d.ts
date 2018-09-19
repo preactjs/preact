@@ -124,14 +124,14 @@ declare namespace preact {
 	// Preact createElement
 	// -----------------------------------
 
-	function createElement<P>(
-		type: ComponentFactory<P>,
-		props: Attributes & P | null,
-		...children: ComponentChildren[]
-	): VNode<any>;
 	function createElement(
 		type: string,
 		props: JSX.HTMLAttributes & JSX.SVGAttributes & Record<string, any> | null,
+		...children: ComponentChildren[]
+	): VNode<any>;
+	function createElement<P>(
+		type: ComponentFactory<P>,
+		props: Attributes & P | null,
 		...children: ComponentChildren[]
 	): VNode<any>;
 
