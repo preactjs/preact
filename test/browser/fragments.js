@@ -12,9 +12,21 @@ describe('Fragment', () => {
 	/** @type {() => void} */
 	let rerender;
 
+	let ops = [];
+
+	class Stateful extends Component {
+		componentDidUpdate() {
+			ops.push('Update Stateful');
+		}
+		render() {
+			return <div>Hello</div>;
+		}
+	}
+
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
+		ops = [];
 	});
 
 	afterEach(() => {
@@ -25,6 +37,161 @@ describe('Fragment', () => {
 		it('should not render empty Fragment', () => {
 			render(<Fragment />, scratch);
 			expect(scratch.innerHTML).to.equal('');
+		});
+
+		it('should render a single child', () => {
+			render((
+				<Fragment>
+					<span>foo</span>
+				</Fragment>
+			), scratch);
+
+			expect(scratch.innerHTML).to.equal('<span>foo</span>');
+		});
+
+		 it('should render multiple children via noop renderer', () => {
+			render((
+				<Fragment>
+					hello <span>world</span>
+				</Fragment>
+			), scratch);
+
+			expect(scratch.innerHTML).to.equal('hello <span>world</span>');
+		});
+
+		 it('should preserve state of children with 1 level nesting', () => {
+			function Foo({ condition }) {
+				return condition ? (
+					<Stateful key="a" />
+				) : (
+					<Fragment>
+						<Stateful key="a" />
+						<div key="b">World</div>
+					</Fragment>
+				);
+			}
+
+			render(<Foo condition={true} />, scratch);
+			render(<Foo condition={false} />, scratch);
+
+			expect(ops).to.equal(['Update Stateful']);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div><div>World</div>');
+
+			render(<Foo condition={true} />, scratch);
+
+			expect(ops).to.equal(['Update Stateful', 'Update Stateful']);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		});
+
+		 it('should preserve state between top-level fragments', () => {
+			function Foo({ condition }) {
+				return condition ? (
+					<Fragment>
+						<Stateful />
+					</Fragment>
+				) : (
+					<Fragment>
+						<Stateful />
+					</Fragment>
+				);
+			}
+
+			render(<Foo condition={true} />, scratch);
+			render(<Foo condition={false} />, scratch);
+
+			expect(ops).to.equal(['Update Stateful']);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+
+			render(<Foo condition={true} />, scratch);
+
+			expect(ops).to.equal(['Update Stateful', 'Update Stateful']);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		});
+
+		 it('should preserve state of children nested at same level', () => {
+			function Foo({ condition }) {
+				return condition ? (
+					<Fragment>
+						<Fragment>
+							<Fragment>
+								<Stateful key="a" />
+							</Fragment>
+						</Fragment>
+					</Fragment>
+				) : (
+					<Fragment>
+						<Fragment>
+							<Fragment>
+								<div />
+								<Stateful key="a" />
+							</Fragment>
+						</Fragment>
+					</Fragment>
+				);
+			}
+
+			render(<Foo condition={true} />, scratch);
+			render(<Foo condition={false} />, scratch);
+
+			expect(ops).to.equal(['Update Stateful']);
+			expect(scratch.innerHTML).to.equal('<div></div><div>Hello</div>');
+
+			render(<Foo condition={true} />, scratch);
+
+			expect(ops).to.equal(['Update Stateful', 'Update Stateful']);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		});
+
+		 it('should not preserve state in non-top-level fragment nesting', () => {
+			function Foo({ condition }) {
+				return condition ? (
+					<Fragment>
+						<Fragment>
+							<Stateful key="a" />
+						</Fragment>
+					</Fragment>
+				) : (
+					<Fragment>
+						<Stateful key="a" />
+					</Fragment>
+				);
+			}
+
+			render(<Foo condition={true} />, scratch);
+			render(<Foo condition={false} />, scratch);
+
+			expect(ops).to.equal([]);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+
+			render(<Foo condition={true} />, scratch);
+
+			expect(ops).to.equal([]);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		});
+
+		 it('should not preserve state of children if nested 2 levels without siblings', () => {
+			function Foo({ condition }) {
+				return condition ? (
+					<Stateful key="a" />
+				) : (
+					<Fragment>
+						<Fragment>
+							<Stateful key="a" />
+						</Fragment>
+					</Fragment>
+				);
+			}
+
+			render(<Foo condition={true} />, scratch);
+			render(<Foo condition={false} />, scratch);
+
+			expect(ops).to.equal([]);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+
+			render(<Foo condition={true} />, scratch);
+
+			expect(ops).to.equal([]);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 		});
 
 		it('should just render children for fragments', () => {
@@ -41,6 +208,297 @@ describe('Fragment', () => {
 
 			render(<Comp />, scratch);
 			expect(scratch.innerHTML).to.equal('<div>Child1</div><div>Child2</div>');
+		});
+
+		it('should not preserve state of children if nested 2 levels with siblings', () => {
+			function Foo({ condition }) {
+				return condition ? (
+					<Stateful key="a" />
+				) : (
+					<Fragment>
+						<Fragment>
+							<Stateful key="a" />
+						</Fragment>
+						<div />
+					</Fragment>
+				);
+			}
+
+			render(<Foo condition={true} />, scratch);
+			render(<Foo condition={false} />, scratch);
+
+			expect(ops).to.equal([]);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div><div></div>');
+
+			render(<Foo condition={true} />, scratch);
+
+			expect(ops).to.equal([]);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		});
+
+		 it('should preserve state between array nested in fragment and fragment', () => {
+			function Foo({ condition }) {
+				return condition ? (
+					<Fragment>
+						<Stateful key="a" />
+					</Fragment>
+				) : (
+					<Fragment>{[<Stateful key="a" />]}</Fragment>
+				);
+			}
+
+			render(<Foo condition={true} />, scratch);
+			render(<Foo condition={false} />, scratch);
+
+			expect(ops).to.equal(['Update Stateful']);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+
+			render(<Foo condition={true} />, scratch);
+
+			expect(ops).to.equal(['Update Stateful', 'Update Stateful']);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		});
+
+		 it('should preserve state between top level fragment and array', () => {
+			function Foo({ condition }) {
+				return condition ? (
+					[<Stateful key="a" />]
+				) : (
+					<Fragment>
+						<Stateful key="a" />
+					</Fragment>
+				);
+			}
+
+			render(<Foo condition={true} />, scratch);
+			render(<Foo condition={false} />, scratch);
+
+			expect(ops).to.equal(['Update Stateful']);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+
+			render(<Foo condition={true} />, scratch);
+
+			expect(ops).to.equal(['Update Stateful', 'Update Stateful']);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		});
+
+		 it('should not preserve state between array nested in fragment and double nested fragment', () => {
+			function Foo({ condition }) {
+				return condition ? (
+					<Fragment>{[<Stateful key="a" />]}</Fragment>
+				) : (
+					<Fragment>
+						<Fragment>
+							<Stateful key="a" />
+						</Fragment>
+					</Fragment>
+				);
+			}
+
+			render(<Foo condition={true} />, scratch);
+			render(<Foo condition={false} />, scratch);
+
+			expect(ops).to.equal([]);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+
+			render(<Foo condition={true} />, scratch);
+
+			expect(ops).to.equal([]);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		});
+
+		 it('should not preserve state between array nested in fragment and double nested array', () => {
+			function Foo({ condition }) {
+				return condition ? (
+					<Fragment>{[<Stateful key="a" />]}</Fragment>
+				) : (
+					[[<Stateful key="a" />]]
+				);
+			}
+
+			render(<Foo condition={true} />, scratch);
+			render(<Foo condition={false} />, scratch);
+
+			expect(ops).to.equal([]);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+
+			render(<Foo condition={true} />, scratch);
+
+			expect(ops).to.equal([]);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		});
+
+		 it('should preserve state between double nested fragment and double nested array', () => {
+			function Foo({ condition }) {
+				return condition ? (
+					<Fragment>
+						<Fragment>
+							<Stateful key="a" />
+						</Fragment>
+					</Fragment>
+				) : (
+					[[<Stateful key="a" />]]
+				);
+			}
+
+			render(<Foo condition={true} />, scratch);
+			render(<Foo condition={false} />, scratch);
+
+			expect(ops).to.equal(['Update Stateful']);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+
+			render(<Foo condition={true} />, scratch);
+
+			expect(ops).to.equal(['Update Stateful', 'Update Stateful']);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		});
+
+		 it('should not preserve state of children when the keys are different', () => {
+			function Foo({ condition }) {
+				return condition ? (
+					<Fragment key="a">
+						<Stateful />
+					</Fragment>
+				) : (
+					<Fragment key="b">
+						<Stateful />
+						<span>World</span>
+					</Fragment>
+				);
+			}
+
+			render(<Foo condition={true} />, scratch);
+			render(<Foo condition={false} />, scratch);
+
+			expect(ops).to.equal([]);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div><span></span>');
+
+			render(<Foo condition={true} />, scratch);
+
+			expect(ops).to.equal([]);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		});
+
+		 it('should not preserve state between unkeyed and keyed fragment', () => {
+			function Foo({ condition }) {
+				return condition ? (
+					<Fragment key="a">
+						<Stateful />
+					</Fragment>
+				) : (
+					<Fragment>
+						<Stateful />
+					</Fragment>
+				);
+			}
+
+			render(<Foo condition={true} />, scratch);
+			render(<Foo condition={false} />, scratch);
+
+			expect(ops).to.equal([]);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+
+			render(<Foo condition={true} />, scratch);
+
+			expect(ops).to.equal([]);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		});
+
+		 it('should preserve state with reordering in multiple levels', () => {
+			function Foo({ condition }) {
+				return condition ? (
+					<div>
+						<Fragment key="c">
+							<span>foo</span>
+							<div key="b">
+								<Stateful key="a" />
+							</div>
+						</Fragment>
+						<span>boop</span>
+					</div>
+				) : (
+					<div>
+						<span>beep</span>
+						<Fragment key="c">
+							<div key="b">
+								<Stateful key="a" />
+							</div>
+							<span>bar</span>
+						</Fragment>
+					</div>
+				);
+			}
+
+			render(<Foo condition={true} />, scratch);
+			render(<Foo condition={false} />, scratch);
+
+			expect(ops).to.equal(['Update Stateful']);
+			expect(scratch.innerHTML).to.equal('<div><span>beep</span><div><div>Hello</div></div><span>bar</span></div>');
+
+			render(<Foo condition={true} />, scratch);
+
+			expect(ops).to.equal(['Update Stateful', 'Update Stateful']);
+			expect(scratch.innerHTML).to.equal('<div><span>foo</span><div><div>Hello</div></div><span>boop</span></div>');
+		});
+
+		 it('should not preserve state when switching to a keyed fragment to an array', () => {
+			function Foo({ condition }) {
+				return condition ? (
+					<div>
+						{
+							<Fragment key="foo">
+								<Stateful />
+							</Fragment>
+						}
+						<span />
+					</div>
+				) : (
+					<div>
+						{[<Stateful />]}
+						<span />
+					</div>
+				);
+			}
+
+			render(<Foo condition={true} />, scratch);
+			render(<Foo condition={false} />,  scratch);
+
+			expect(ops).to.equal([]);
+			expect(scratch.innerHTML).to.equal('<div><div>Hello</div><span></span></div>');
+
+			render(<Foo condition={true} />, scratch);
+
+			expect(ops).to.equal([]);
+			expect(scratch.innerHTML).to.equal('<div><div>Hello</div><span></span></div>');
+		});
+
+		 it('should preserve state when it does not change positions', () => {
+			function Foo({ condition }) {
+				return condition
+					? [
+						<span />,
+						<Fragment>
+							<Stateful />
+						</Fragment>
+					]
+					: [
+						<span />,
+						<Fragment>
+							<Stateful />
+						</Fragment>
+					];
+			}
+
+			render(<Foo condition={true} />, scratch);
+			render(<Foo condition={false} />, scratch);
+
+			expect(ops).to.equal(['Update Stateful']);
+			expect(scratch.innerHTML).to.equal('<span></span><div>Hello</div>');
+
+			render(<Foo condition={true} />, scratch);
+
+			expect(ops).to.equal(['Update Stateful', 'Update Stateful']);
+			expect(scratch.innerHTML).to.equal('<span></span><div>Hello</div>');
 		});
 
 		it('should render nested Fragments', () => {
