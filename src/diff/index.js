@@ -288,8 +288,18 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			if (Array.isArray(vnode)) {
-				diffChildren(parent, vnode, prev==null ? EMPTY_ARR : prev, context, isSvg, excessChildren, mounts, c);
+			// Normalize old and new trees when either one returned an array
+			let prevArr;
+			if ((prevArr = Array.isArray(prev)) || Array.isArray(vnode)) {
+				// Flatten children because coerceToVNode doesn't support arrays
+				let normalized = [];
+				flattenChildren(vnode, normalized);
+				newTree._children = vnode = c._previousVTree = normalized;
+
+				prev = prev==null ? EMPTY_ARR : !prevArr ? [prev] : prev;
+				diffChildren(parent, vnode, prev, context, isSvg, excessChildren, mounts, c, newTree);
+
+				dom = null;
 			}
 			else {
 				c.base = dom = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, mounts, c);
