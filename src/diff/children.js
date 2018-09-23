@@ -168,10 +168,10 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 		next = childNode!=null && childNode.nextSibling;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		newEl = diff(old==null ? null : old._el, node, child, old, context, isSvg, false, excessChildren, mounts, ancestorComponent, parentVNode);
+		diff(old==null ? null : old._el, node, child, old, context, isSvg, false, excessChildren, mounts, ancestorComponent, parentVNode);
 
 		// Only proceed if the vnode has not been unmounted by `diff()` above.
-		if (newEl!=null) {
+		if (child!=null && (newEl = child._el)!=null) {
 			last = child._lastSibling;
 
 			// let childNode;
@@ -180,7 +180,10 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 			// if (old==null || newEl!=childNode || newEl.parentNode==null) {
 			// if (newEl!=null && (old==null || old.index!==i)) {
 			// if (old==null || newEl.parentNode==null || newEl!=(childNode = node.childNodes[i])) {
-			if (old==null || newEl!=childNode || newEl.parentNode==null) {
+
+			// Fragments or similar components have already been diffed at this point.
+			if (newEl!==last) {}
+			else if (old==null || newEl!=childNode || newEl.parentNode==null) {
 				// node.insertBefore(newEl, node.childNodes[i]);
 				// node.insertBefore(newEl, childNode);
 				// let nextChild;
@@ -202,8 +205,6 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 					}
 					node.insertBefore(newEl, childNode);
 				}
-
-				next = newEl.nextSibling;
 			}
 			// else {
 			// 	// __operation += ` -> unchanged`;

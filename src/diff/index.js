@@ -167,7 +167,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	}
 
 	let c, p, isNew = false, oldProps, oldState, oldContext,
-		newTag = newTree.tag, lastSibling;
+		newTag = newTree.tag, firstSibling, lastSibling;
 
 	/** @type {import('../internal').Component | null} */
 	let clearProcessingException;
@@ -258,7 +258,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				// if (c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, c.state)===false) {
 				// 	c.state = nextState;
 				if (!c._force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, s, context)===false) {
-					dom = c.base;
+					// dom = c.base;
 					break outer;
 					// return newTree._el = c.base;
 				}
@@ -305,14 +305,15 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				// Needed when `c.forceUpdate()` will be called
 				c._parentVNode = parentVNode;
 
-				dom = newTree._el;
+				firstSibling = newTree._el;
 				lastSibling = newTree._lastSibling;
+				dom = null;
 			}
 			else {
 				// Only necessary to set `_children`
 				if (vnode!=null) newTree._children = getVNodeChildren(vnode);
 
-				c.base = dom = lastSibling = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, mounts, c, newTree, parentVNode);
+				c.base = dom = firstSibling = lastSibling = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, mounts, c, newTree, parentVNode);
 
 				if (vnode!=null) {
 					vnode._el = vnode._lastSibling = dom;
@@ -361,21 +362,22 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				applyRef(newTree.ref, dom);
 			}
 
-			lastSibling = newTree._lastSibling = dom;
+			firstSibling = lastSibling = newTree._lastSibling = dom;
 		}
+
+
+		// Update sibling pointers
+		if (parentVNode._el==null) {
+			parentVNode._el = firstSibling;
+		}
+
+		parentVNode._lastSibling = lastSibling;
 
 		if (parent && append!==false && dom!=null && dom.parentNode!==parent) {
 			parent.appendChild(dom);
 		}
 
-		// Update sibling pointers
-		if (parentVNode._el==null) {
-			parentVNode._el = dom;
-		}
-
-		parentVNode._lastSibling = lastSibling;
-
-		newTree._el = dom;
+		newTree._el = firstSibling;
 
 		if (c!=null) {
 			while (p=c._renderCallbacks.pop()) p();
