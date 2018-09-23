@@ -393,7 +393,7 @@ describe('Fragment', () => {
 
 			// TODO: Normalize lifecycle calls when children are moved around
 			// expect(ops).to.equal([]);
-			expect(scratch.innerHTML).to.equal('<div>Hello</div><span></span>');
+			expect(scratch.innerHTML).to.equal('<div>Hello</div><span>World</span>');
 
 			render(<Foo condition={true} />, scratch);
 
