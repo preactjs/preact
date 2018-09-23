@@ -8,6 +8,7 @@ import { createElement as h, Component } from '../../src';
  */
 export function setupScratch() {
 	const scratch = document.createElement('div');
+	scratch.id = 'scratch';
 	(document.body || document.documentElement).appendChild(scratch);
 	return scratch;
 }
