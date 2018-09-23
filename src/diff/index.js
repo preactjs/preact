@@ -502,13 +502,20 @@ export function applyRef(ref, value) {
 
 /**
  * Unmount a virtual node from the tree and apply DOM changes
- * @param {import('../internal').VNode} vnode The virtual node to unmount
+ * @param {import('../internal').VNode | import('../internal').VNode[]} vnode The virtual node to unmount
  * @param {import('../internal').Component} ancestorComponent The parent
  * component to this virtual node
  * @param {boolean} skipRemove Optionally skip removing elements from dom when
  * the parent node has been removed already.
  */
 export function unmount(vnode, ancestorComponent, skipRemove) {
+	if (Array.isArray(vnode)) {
+		for (let i = 0; i < vnode.length; i++) {
+			unmount(vnode[i], ancestorComponent, skipRemove);
+		}
+		return;
+	}
+
 	let r;
 	if (r = vnode.ref) {
 		try {
