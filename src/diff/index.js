@@ -378,7 +378,6 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		newTree._el = dom;
 
 		if (c!=null) {
-			dom = c.base;
 			while (p=c._renderCallbacks.pop()) p();
 
 			if (!isNew && c.componentDidUpdate!=null) {
