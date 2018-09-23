@@ -293,6 +293,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			}
 			else {
 				c.base = dom = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, mounts, c);
+				c._parent = parent;
 			}
 
 			if (newTree.ref) applyRef(newTree.ref, c);
@@ -554,7 +555,7 @@ export function unmount(vnode, ancestorComponent) {
 		// 	return;
 		// }
 
-		r.base = null;
+		r.base = r._parent = null;
 		if (r = r._previousVTree) unmount(r, ancestorComponent);
 	}
 	else if (r = vnode._children) {

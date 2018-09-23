@@ -71,14 +71,14 @@ Component.prototype.setState = function(update, callback) {
  * re-renderd
  */
 Component.prototype.forceUpdate = function(callback) {
-	if (this.base!=null) {
+	if (this._parent!=null) {
 		// Set render mode so that we can differantiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
 		if (this._force==null) this._force = true;
 
 		let mounts = [];
-		diff(this.base, this.base.parentNode, this._vnode, this._vnode, this.context, this.base.parentNode.ownerSVGElement!==undefined, true, null, mounts, this._ancestorComponent);
+		diff(this.base, this._parent, this._vnode, this._vnode, this.context, this._parent.ownerSVGElement!==undefined, true, null, mounts, this._ancestorComponent);
 		flushMounts(mounts);
 
 		// Reset mode to its initial value for the next render
