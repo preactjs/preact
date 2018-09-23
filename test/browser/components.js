@@ -289,7 +289,7 @@ describe('Components', () => {
 			expect(scratch.firstChild.innerHTML).to.equal(mixedArrayHTML);
 		});
 
-		it.skip('should render Component\'s array children', () => {
+		it('should render Component\'s array children', () => {
 			const Foo = () => getMixedArray();
 
 			render(<Foo />, scratch);
@@ -297,7 +297,7 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal(mixedArrayHTML);
 		});
 
-		it.skip('should render Fragment\'s array children', () => {
+		it('should render Fragment\'s array children', () => {
 			const Foo = () => (
 				<Fragment>
 					{getMixedArray()}
