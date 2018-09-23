@@ -87,6 +87,9 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 
 		// __operation += '\n';
 		// let index;
+
+		// Check if we find a corresponding element in oldChildren and store the
+		// index where the element was found.
 		p = oldChildren[i];
 		if (p != null && (child.key==null ? (child.tag === p.tag) : (child.key === p.key))) {
 			index = i;
@@ -102,6 +105,10 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 				}
 			}
 		}
+
+		// If we have found a corresponding old element we store it in a variable
+		// and delete it from the array. That way the next iteration can skip this
+		// element.
 		if (index!=null) {
 			old = oldChildren[index];
 			oldChildren[index] = null;
@@ -158,7 +165,10 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 
 		next = childNode!=null && childNode.nextSibling;
 
+		// Morph the old element into the new one, but don't append it to the dom yet
 		newEl = diff(old==null ? null : old._el, node, child, old, context, isSvg, false, excessChildren, mounts, ancestorComponent);
+
+		// Only proceed if the vnode has not been unmounted by `diff()` above.
 		if (newEl!=null) {
 			// let childNode;
 			// childNode = null;
@@ -258,9 +268,13 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 	// console.log(oldChildren.slice(), children.slice());
 
 	// console.log(excessChildren!=null && excessChildren.slice());
+
+	// Remove children that are not part of any vnode. Only used by `hydrate`
 	if (excessChildren!=null) for (i=excessChildren.length; i--; ) if (excessChildren[i]!=null) excessChildren[i].remove();
 
 	// for (let i in seen) if (seen[i] != null && (c = seen[i]._el)) c.remove();
+
+	// Remove remaining oldChildren if there are any.
 	for (i=oldChildren.length; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
 	// for (let i in seen) {
 	// 	if (seen[i]!=null) {
