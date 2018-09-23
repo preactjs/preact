@@ -547,7 +547,7 @@ describe('Fragment', () => {
 			expect(scratch.innerHTML).to.equal('foo');
 		});
 
-		it.skip('should support conditionally rendered children', () => {
+		it('should support conditionally rendered children', () => {
 
 			/** @type {() => void} */
 			let update;
@@ -582,7 +582,7 @@ describe('Fragment', () => {
 			expect(scratch.innerHTML).to.equal('foo');
 		});
 
-		it.skip('can modify the children of a Fragment', () => {
+		it('can modify the children of a Fragment', () => {
 
 			/** @type {() => void} */
 			let push;
@@ -622,7 +622,7 @@ describe('Fragment', () => {
 			expect(scratch.textContent).to.equal('01234');
 		});
 
-		it.skip('should render sibling array children', () => {
+		it('should render sibling array children', () => {
 			const Group = ({ title, values }) => (
 				<Fragment>
 					<li class="divider">{title}</li>
@@ -651,7 +651,7 @@ describe('Fragment', () => {
 			expect(ul.childNodes[6].textContent).to.equal('A footer');
 		});
 
-		it.skip('should reorder Fragment children', () => {
+		it('should reorder Fragment children', () => {
 			let updateState;
 			class App extends Component {
 				constructor() {
