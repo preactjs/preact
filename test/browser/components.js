@@ -1,4 +1,5 @@
 import { h, cloneElement, render, rerender, Component } from '../../src/preact';
+
 /** @jsx h */
 
 let spyAll = obj => Object.keys(obj).forEach( key => sinon.spy(obj,key) );
@@ -25,6 +26,8 @@ function sortAttributes(html) {
 const Empty = () => null;
 
 describe('Components', () => {
+
+	/** @type {HTMLDivElement} */
 	let scratch;
 
 	before( () => {
@@ -286,6 +289,24 @@ describe('Components', () => {
 
 
 	describe('props.children', () => {
+		let children;
+
+		let SetChildren = props => {
+			children = props.children;
+			return <div>{props.children}</div>;
+		};
+
+		let SetFunctionChild = props => {
+			children = props.children;
+			return <div>{props.children[0](2)}</div>;
+		};
+
+		let Bar = () => <span>Bar</span>;
+
+		beforeEach(() => {
+			children = undefined;
+		});
+
 		it('should support passing children as a prop', () => {
 			const Foo = props => <div {...props} />;
 
@@ -306,27 +327,52 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div>a</div>');
 		});
 
+		it('should convert non-renderable children to null', () => {
+			render(<SetChildren>{null}{false}{true}{undefined}</SetChildren>, scratch);
+
+			expect(children).to.deep.equal([null, null, null, undefined]);
+			expect(scratch.innerHTML).to.equal('<div></div>');
+		});
+
+		it('should convert non-renderable children in an array to null', () => {
+			render(<SetChildren>{[null, false, true, undefined]}</SetChildren>, scratch);
+
+			expect(children).to.deep.equal([null, null, null, undefined]);
+			expect(scratch.innerHTML).to.equal('<div></div>');
+		});
+
+		it('should flatten sibling arrays', () => {
+			let child1 = [<span>a</span>, 'b'];
+			let child2 = [<span>c</span>, 'd'];
+
+			render((
+				<SetChildren>
+					{child1}
+					{child2}
+				</SetChildren>
+			), scratch);
+
+			expect(children).to.deep.equal(child1.concat(child2));
+			expect(scratch.innerHTML).to.equal('<div><span>a</span>b<span>c</span>d</div>');
+		});
+
+		it('should flatten nested arrays', () => {
+			let child1 = [<span>a</span>, 'b'];
+			let child2 = [<span>c</span>, 'd'];
+
+			render((
+				<SetChildren>
+					{[child1, child2]}
+				</SetChildren>
+			), scratch);
+
+			expect(children).to.deep.equal(child1.concat(child2));
+			expect(scratch.innerHTML).to.equal('<div><span>a</span>b<span>c</span>d</div>');
+		});
+
 		describe('should always be an array', () => {
-			let children;
-
-			let Foo = props => {
-				children = props.children;
-				return <div>{props.children}</div>;
-			};
-
-			let FunctionFoo = props => {
-				children = props.children;
-				return <div>{props.children[0](2)}</div>;
-			};
-
-			let Bar = () => <span>Bar</span>;
-
-			beforeEach(() => {
-				children = undefined;
-			});
-
 			it('with no child', () => {
-				render(<Foo></Foo>, scratch);
+				render(<SetChildren></SetChildren>, scratch);
 
 				expect(children).to.be.an('array');
 				expect(children).to.have.lengthOf(0);
@@ -334,7 +380,7 @@ describe('Components', () => {
 			});
 
 			it('with a text child', () => {
-				render(<Foo>text</Foo>, scratch);
+				render(<SetChildren>text</SetChildren>, scratch);
 
 				expect(children).to.be.an('array');
 				expect(children).to.have.lengthOf(1);
@@ -343,7 +389,7 @@ describe('Components', () => {
 			});
 
 			it('with a DOM node child', () => {
-				render(<Foo><span /></Foo>, scratch);
+				render(<SetChildren><span /></SetChildren>, scratch);
 
 				expect(children).to.be.an('array');
 				expect(children).to.have.lengthOf(1);
@@ -352,7 +398,7 @@ describe('Components', () => {
 			});
 
 			it('with a Component child', () => {
-				render(<Foo><Bar /></Foo>, scratch);
+				render(<SetChildren><Bar /></SetChildren>, scratch);
 
 				expect(children).to.be.an('array');
 				expect(children).to.have.lengthOf(1);
@@ -361,7 +407,7 @@ describe('Components', () => {
 			});
 
 			it('with a function child', () => {
-				render(<FunctionFoo>{num => num.toFixed(2)}</FunctionFoo>, scratch);
+				render(<SetFunctionChild>{num => num.toFixed(2)}</SetFunctionChild>, scratch);
 
 				expect(children).to.be.an('array');
 				expect(children).to.have.lengthOf(1);
@@ -370,7 +416,7 @@ describe('Components', () => {
 			});
 
 			it('with multiple children', () => {
-				render(<Foo><span /><Bar /><span /></Foo>, scratch);
+				render(<SetChildren><span /><Bar /><span /></SetChildren>, scratch);
 
 				expect(children).to.be.an('array');
 				expect(children).to.have.lengthOf(3);
