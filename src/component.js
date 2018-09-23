@@ -78,7 +78,7 @@ Component.prototype.forceUpdate = function(callback) {
 		if (this._force==null) this._force = true;
 
 		let mounts = [];
-		diff(this.base, this._parent, this._vnode, this._vnode, this.context, this._parent.ownerSVGElement!==undefined, true, null, mounts, this._ancestorComponent);
+		diff(this.base, this._parent, this._vnode, this._vnode, this.context, this._parent.ownerSVGElement!==undefined, true, null, mounts, this._ancestorComponent, this._parentVNode || {});
 		flushMounts(mounts);
 
 		// Reset mode to its initial value for the next render

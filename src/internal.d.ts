@@ -21,7 +21,16 @@ export interface PreactElement extends Element {
 export interface VNode<P> extends preact.VNode<P> {
 	tag: string | ComponentFactory<P> | null;
 	_children?: Array<VNode> | null;
+	/**
+	 * Only set when the vnode has a single child, even for Fragments. For vnodes
+	 * with more children this property will remain `null`.
+	 */
 	_el?: PreactElement | null;
+	/**
+	 * The last dom sibling, if the vnode returned more than one child. This
+	 * property is also used as a cursor when diffing children.
+	 */
+	_lastSibling?: PreactElement | null;
 	_component?: Component | null;
 }
 
@@ -37,6 +46,12 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	 * components or array returns.
 	 */
 	_parent?: PreactElement;
+	/**
+	 * Pointer to the parent vnode. During child reconciliation and ordering we
+	 * use the parent vnodes `_lastSibling` as the current position among sibling
+	 * vnodes.
+	 */
+	_parentVNode?: VNode;
 	_previousVTree?: VNode;
 	_ancestorComponent?: Component<any, any>;
 	_processingException?: Component<any, any>;

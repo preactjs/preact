@@ -21,8 +21,10 @@ import { coerceToVNode } from '../create-element';
  * which have mounted
  * @param {import('../internal').Component} ancestorComponent The direct parent
  * component to the ones being diffed
+ * @param {import('../internal').VNode} parentVNode Used to set `_lastSibling`
+ * pointer to keep track of our current position
  */
-export function diffChildren(node, children, oldChildren, context, isSvg, excessChildren, mounts, ancestorComponent) {
+export function diffChildren(node, children, oldChildren, context, isSvg, excessChildren, mounts, ancestorComponent, parentVNode) {
 	// if (oldChildren==null) oldChildren = EMPTY_ARR;
 
 	// let __children = oldChildren.map(cloneElement);
@@ -67,8 +69,8 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 
 	let child, i, j, p, index, old, newEl,
 		oldChildrenLength = oldChildren.length,
-		childNode = node.firstChild,
-		next, sib;
+		childNode = typeof parentVNode.tag=='function' ? parentVNode._el : node.firstChild,
+		next, last, sib;
 
 	// types = {};
 	for (i=0; i<children.length; i++) {
@@ -166,10 +168,12 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 		next = childNode!=null && childNode.nextSibling;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		newEl = diff(old==null ? null : old._el, node, child, old, context, isSvg, false, excessChildren, mounts, ancestorComponent);
+		newEl = diff(old==null ? null : old._el, node, child, old, context, isSvg, false, excessChildren, mounts, ancestorComponent, parentVNode);
 
 		// Only proceed if the vnode has not been unmounted by `diff()` above.
 		if (newEl!=null) {
+			last = child._lastSibling;
+
 			// let childNode;
 			// childNode = null;
 			// let childNode = node.childNodes[i];
@@ -206,7 +210,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 			// 	childNode = next;
 			// }
 
-			childNode = next;
+			childNode = last!=null ? last.nextSibling : next;
 
 			// childNode = newEl.nextSibling;
 		}
