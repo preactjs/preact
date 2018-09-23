@@ -316,12 +316,6 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			// 	parent.replaceChild(c.base, dom);
 			// }
 
-			if (c.base==null) {
-				if (prev && !Array.isArray(prev)) {
-					unmount(prev, ancestorComponent);
-				}
-			}
-
 			// if (dom!=null && (c.base!==dom || !dom.parentNode)) {
 			// 	if (c.base==null) unmount(prev);
 			// 	else if (dom.parentNode!==parent) parent.appendChild(c.base);
@@ -344,14 +338,8 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			}
 		}
 
-		if (parent && append!==false) {
-			// if (insertBefore && c.base.nextSibling!==insertBefore) parent.insertBefore(c.base, insertBefore);
-			if (dom!=null && dom.parentNode!==parent) {
-				parent.appendChild(dom);
-			}
-			else if ((c!=null && c.base!==dom)) {
-				parent.replaceChild(c.base, dom);
-			}
+		if (parent && append!==false && dom!=null && dom.parentNode!==parent) {
+			parent.appendChild(dom);
 		}
 
 		if (c!=null) {
@@ -368,11 +356,6 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		}
 	}
 	catch (e) {
-		if (c && !dom) {
-			// Create an "anchor" into which we can rerender upon recovery even though the component doesn't have a proper tree to render
-			// This is required because forceUpdate doesn't diff if c.base is null
-			parent.appendChild(c.base = dom = document.createTextNode(''));
-		}
 		catchErrorInComponent(e, ancestorComponent);
 	}
 
