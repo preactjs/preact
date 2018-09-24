@@ -5,7 +5,6 @@ import {
 	Component,
 	FunctionalComponent,
 	ComponentConstructor,
-	VNode
 } from "../../src/preact";
 
 class SimpleComponent extends Component<{}, {}> {
@@ -58,8 +57,38 @@ describe("VNode", () => {
 	});
 });
 
-class TypedChildren extends Component<{children: (num: number) => string}> {
-	render() { return null }
+class ComponentWithFunctionChild extends Component<{ children: (num: number) => string; }> {
+	render() { return null; }
 }
 
-const typedChild = <TypedChildren>{num => num.toFixed(2)}</TypedChildren>
+<ComponentWithFunctionChild>{num => num.toFixed(2)}</ComponentWithFunctionChild>;
+
+class ComponentWithStringChild extends Component<{ children: string; }> {
+	render() { return null; }
+}
+
+<ComponentWithStringChild>child</ComponentWithStringChild>;
+
+class ComponentWithNumberChild extends Component<{ children: number; }> {
+	render() { return null; }
+}
+
+<ComponentWithNumberChild>{1}</ComponentWithNumberChild>;
+
+class ComponentWithBooleanChild extends Component<{ children: boolean; }> {
+	render() { return null; }
+}
+
+<ComponentWithBooleanChild>{false}</ComponentWithBooleanChild>;
+
+class ComponentWithNullChild extends Component<{ children: null; }> {
+	render() { return null; }
+}
+
+<ComponentWithNullChild>{null}</ComponentWithNullChild>;
+
+class ComponentWithNumberChildren extends Component<{ children: number[]; }> {
+	render() { return null; }
+}
+
+<ComponentWithNumberChildren>{1}{2}</ComponentWithNumberChildren>;

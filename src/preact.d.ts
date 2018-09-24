@@ -4,8 +4,8 @@ export as namespace preact;
 declare namespace preact {
 	type Key = string | number;
 	type Ref<T> = (instance: T) => void;
-	type ComponentChild = VNode<any> | string | number | null;
-	type ComponentChildren = ComponentChild[] | ComponentChild | object | string | number | null;
+	type ComponentChild = VNode<any> | object | string | number | boolean | null;
+	type ComponentChildren = ComponentChild[] | ComponentChild;
 
 	/**
 	 * @deprecated
