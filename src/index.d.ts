@@ -37,8 +37,8 @@ declare namespace preact {
 	type RefCallback<T> = (instance: T | null) => void;
 	type Ref<T> = RefObject<T> | RefCallback<T>;
 
-	type ComponentChild = VNode<any> | string | number | null | undefined;
-	type ComponentChildren = ComponentChild[] | object | VNode<any> | string | number | null | undefined;
+	type ComponentChild = VNode<any> | object | string | number | boolean | null | undefined;
+	type ComponentChildren = ComponentChild[] | ComponentChild;
 
 	interface Attributes {
 		key?: string | number | any;
