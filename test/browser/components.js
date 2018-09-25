@@ -590,8 +590,7 @@ describe('Components', () => {
 			rerender();
 
 			expect(Inner.prototype.componentWillUnmount).to.have.been.calledOnce;
-
-			expect(scratch.innerHTML).to.equal('<div is-alt="true"></div>');
+			expect(scratch.innerHTML).to.equal('<div is-alt=""></div>');
 
 			// update & flush
 			alt = false;
