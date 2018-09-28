@@ -1,5 +1,6 @@
 import { assign } from './util';
 import { diff, flushMounts } from './diff/index';
+import options from './options';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -74,6 +75,7 @@ Component.prototype.forceUpdate = function(callback) {
 		this._force = null;
 	}
 	if (callback!=null) callback();
+	if (options.commitRoot) options.commitRoot(this._vnode);
 };
 
 /**

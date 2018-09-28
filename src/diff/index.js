@@ -4,6 +4,7 @@ import { coerceToVNode, Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps } from './props';
 import { assign } from '../util';
+import options from '../options';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -261,6 +262,8 @@ export function applyRef(ref, value, ancestorComponent) {
  */
 export function unmount(vnode, ancestorComponent) {
 	let r;
+	if (options.beforeUnmount) options.beforeUnmount(vnode);
+
 	if (r = vnode.ref) {
 		applyRef(r, null, ancestorComponent);
 	}

@@ -2,6 +2,7 @@ import { EMPTY_OBJ, EMPTY_ARR } from './constants';
 import { diff, flushMounts } from './diff/index';
 import { diffChildren } from './diff/children';
 import { coerceToVNode } from './create-element';
+import options from './options';
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -15,6 +16,7 @@ export function render(vnode, parent) {
 		let mounts = [];
 		diff(oldTree._el, parent, parent._previousVTree = coerceToVNode(vnode), oldTree, EMPTY_OBJ, parent.ownerSVGElement!==undefined, true, null, mounts, null, {});
 		flushMounts(mounts);
+		if (options.commitRoot) options.commitRoot(parent._previousVTree);
 	}
 	else hydrate(vnode, parent);
 }
@@ -30,4 +32,5 @@ export function hydrate(vnode, parent) {
 	let mounts = [];
 	diffChildren(parent, [vnode], EMPTY_ARR, EMPTY_OBJ, parent.ownerSVGElement!==undefined, EMPTY_ARR.slice.call(parent.childNodes), mounts, null, {});
 	flushMounts(mounts);
+	if (options.commitRoot) options.commitRoot(vnode);
 }

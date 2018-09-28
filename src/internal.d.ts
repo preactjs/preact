@@ -58,3 +58,11 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	_processingException?: Component<any, any>;
 	_constructor: preact.ComponentFactory<P>;
 }
+
+/**
+ * Global hooks into our renderer
+ */
+export interface Options {
+	commitRoot?(vnode: VNode): void;
+	beforeUnmount?(vnode: VNode): void;
+}
