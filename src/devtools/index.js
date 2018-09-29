@@ -1,0 +1,98 @@
+import options from '../options';
+import { Renderer } from './Renderer';
+
+/**
+ * Wrap function with generic error logging
+ *
+ * @param {*} fn
+ * @returns
+ */
+function catchErrors(fn) {
+	return function(arg) {
+		try {
+			return fn(arg);
+		}
+		catch (e) {
+			console.error('The react devtools encountered an error');
+			console.log(e); // eslint-disable-line no-console
+		}
+	};
+}
+
+export function initDevTools() {
+	// This global variable is injected by the devtools
+	const hook = /** @type {import('../internal').DevtoolsWindow} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
+	if (hook==null) return;
+
+	/** @type {(vnode: import('../internal').VNode) => void} */
+	let onCommitRoot = (vnode) => {};
+
+	/** @type {(vnode: import('../internal').VNode) => void} */
+	let onCommitUnmount = (vnode) => {};
+
+	catchErrors(() => {
+		let isDev = false;
+		try {
+			isDev = process.env.NODE_ENV!=='production';
+		}
+		catch (e) {}
+
+		let rid = Math.random().toString(16).slice(2);
+		let cevicheRenderer = new Renderer(hook, rid);
+
+		let renderer = {
+			bundleType: isDev ? 1 : 0,
+			version: '16.5.2',
+			rendererPackageName: 'preact',
+			findHostInstanceByFiber(vnode) {
+				return vnode._el;
+			},
+			findFiberByHostInstance(instance) {
+				return cevicheRenderer.dom2vnode.get(instance) || null;
+			}
+		};
+
+		hook._renderers[rid] = renderer;
+		// TODO: Show correct bundle type
+
+		// We can't bring our own `attachRenderer` function therefore we simply
+		// prevent the devtools from overwriting our custom renderer by creating
+		// a noop setter.
+		Object.defineProperty(hook.helpers, rid, {
+			get: () => cevicheRenderer,
+			set: () => {}
+		});
+
+		let helpers = hook.helpers[rid];
+
+		// Tell the devtools that we are ready to start
+		hook.emit('renderer-attached', {
+			id: rid,
+			renderer,
+			helpers
+		});
+
+		onCommitRoot = catchErrors(root => {
+			let roots = hook.getFiberRoots(rid);
+			if (!roots.has(root)) roots.add(root);
+			if (helpers) helpers.handleCommitFiberRoot(root);
+		});
+
+		onCommitUnmount = catchErrors(vnode => {
+			hook.onCommitFiberUnmount(rid, vnode);
+		});
+	})();
+
+	// The actual integration. There is no way to know weather the profiler is
+	// actually recording or not. There is some discussion in this issue:
+	// https://github.com/facebook/react-devtools/issues/1106
+	options.enableProfiling = true;
+
+	options.commitRoot = (vnode) => {
+		onCommitRoot(vnode);
+	};
+
+	options.beforeUnmount = (vnode) => {
+		onCommitUnmount(vnode);
+	};
+}
