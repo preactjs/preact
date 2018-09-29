@@ -162,7 +162,30 @@ export class Renderer {
 	 * Unmount a vnode recursively
 	 * @param {import('../internal').VNode} vnode
 	 */
-	handleCommitFiberUnmount(vnode) {}
+	handleCommitFiberUnmount(vnode) {
+		if (vnode._el!=null) {
+			this.dom2vnode.delete(vnode._el);
+		}
+		this.seen.delete(vnode);
+
+		const isRoot = getRoot(vnode) === vnode;
+		const event = {
+			internalInstance: vnode,
+			renderer: this.rid,
+			type: 'unmount'
+		};
+
+		if (isRoot) {
+			this.pending.push(event);
+		}
+		else {
+			// Non-root fibers are deleted during the commit phase.
+			// They are deleted in the child-first order. However
+			// DevTools currently expects deletions to be parent-first.
+			// This is why we unshift deletions rather than push them.
+			this.pending.unshift(event);
+		}
+	}
 
 	/**
 	 * Get the dom element by a vnode
