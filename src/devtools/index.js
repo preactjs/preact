@@ -75,6 +75,11 @@ export function initDevTools() {
 
 		onCommitRoot = catchErrors(root => {
 			let roots = hook.getFiberRoots(rid);
+
+			// To enable profiling the devtools check if this property exists on
+			// the given root node.
+			root.treeBaseDuration = null;
+
 			if (!roots.has(root)) roots.add(root);
 			if (helpers) helpers.handleCommitFiberRoot(root);
 		});
