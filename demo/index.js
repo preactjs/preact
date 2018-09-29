@@ -1,4 +1,4 @@
-import { createElement, render, hydrate, Component } from 'ceviche';
+import { createElement, render, hydrate, Component, options } from 'ceviche';
 import './style.scss';
 import { Router } from 'preact-router';
 import { Link } from 'preact-router/match';
@@ -8,8 +8,12 @@ import Reorder from './reorder';
 import Todo from './todo';
 import Fragments from './fragments';
 import installLogger from './logger';
+import ProfilerDemo from './profiler';
 
-window.ceviche = { createElement, render, hydrate, Component };
+import { initDevTools } from 'ceviche/devtools';
+initDevTools();
+
+window.ceviche = { createElement, render, hydrate, Component, options };
 
 class Home extends Component {
 	a = 1;
@@ -34,6 +38,7 @@ class App extends Component {
 						<Link href="/pythagoras" activeClassName="active">Pythagoras</Link>
 						<Link href="/todo" activeClassName="active">ToDo</Link>
 						<Link href="/fragments" activeClassName="active">Fragments</Link>
+						<Link href="/profiler" activeClassName="active">Profiler</Link>
 					</nav>
 				</header>
 				<main>
@@ -44,6 +49,7 @@ class App extends Component {
 						<Pythagoras path="/pythagoras" />
 						<Todo path="/todo" />
 						<Fragments path="/fragments" />
+						<ProfilerDemo path="/profiler" />
 					</Router>
 				</main>
 			</div>
@@ -61,13 +67,14 @@ document.body._previousVTree = (
 				<a href="/pythagoras">Pythagoras SSR</a>
 				<a href="/todo">ToDo</a>
 				<a href="/fragments">Fragments</a>
+				<a href="/profiler">Profiler</a>
 			</nav>
 		</header>
 		<main>
 			<h1>SSR Content</h1>
 		</main>
 	</div>
-)
+);
 
 // skip hydrate
 render(<App />, document.body);
