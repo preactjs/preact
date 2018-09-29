@@ -12,12 +12,24 @@ export class Renderer {
 		this.pending = [];
 		this.seen = new WeakSet();
 		this.dom2vnode = new WeakMap();
+		this.connected = false;
+	}
+
+	/**
+	 * Mark the connection status as ready so that we can proceed
+	 * to actually flush events.
+	 */
+	markConnected() {
+		this.connected = true;
+		this.flushPendingEvents();
 	}
 
 	/**
 	 * Flush all queued events
 	 */
 	flushPendingEvents() {
+		if (!this.connected) return;
+
 		let events = this.pending;
 		this.pending = [];
 		for (let i = 0; i < events.length; i++) {

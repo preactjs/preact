@@ -30,15 +30,16 @@ export function initDevTools() {
 	/** @type {(vnode: import('../internal').VNode) => void} */
 	let onCommitUnmount = (vnode) => {};
 
+	// Initialize our custom renderer
+	let rid = Math.random().toString(16).slice(2);
+	let cevicheRenderer = new Renderer(hook, rid);
+
 	catchErrors(() => {
 		let isDev = false;
 		try {
 			isDev = process.env.NODE_ENV!=='production';
 		}
 		catch (e) {}
-
-		let rid = Math.random().toString(16).slice(2);
-		let cevicheRenderer = new Renderer(hook, rid);
 
 		let renderer = {
 			bundleType: isDev ? 1 : 0,
@@ -60,7 +61,7 @@ export function initDevTools() {
 		// a noop setter.
 		Object.defineProperty(hook.helpers, rid, {
 			get: () => cevicheRenderer,
-			set: () => {}
+			set: () => helpers.markConnected()
 		});
 
 		let helpers = hook.helpers[rid];
