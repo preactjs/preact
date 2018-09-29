@@ -35,6 +35,10 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		oldTree = EMPTY_OBJ;
 	}
 
+	if (options.enableProfiling) {
+		newTree.startTime = Date.now();
+	}
+
 	let c, p, isNew = false, oldProps, oldState, oldContext,
 		newType = newTree.type, lastSibling;
 
@@ -173,6 +177,10 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 
 		if (clearProcessingException) {
 			c._processingException = null;
+		}
+
+		if (options.enableProfiling) {
+			newTree.duration = Date.now() - newTree.startTime;
 		}
 	}
 	catch (e) {
