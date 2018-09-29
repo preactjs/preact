@@ -38,6 +38,10 @@ export class Renderer {
 		}
 	}
 
+	/**
+	 * Mark the reconciliation of a root tree as done
+	 * @param {import('../internal').VNode} vnode
+	 */
 	markRootCommitted(vnode) {
 		this.pending.push({
 			internalInstance: vnode,
@@ -56,6 +60,10 @@ export class Renderer {
 		this.dom2vnode.set(vnode._el, vnode);
 		let data = getData(vnode);
 
+		// The Profiler throws if this is not present
+		// TODO: Don't patch vnode directly
+		vnode.stateNode = {};
+
 		let work = [{
 			internalInstance: vnode,
 			data,
@@ -72,6 +80,10 @@ export class Renderer {
 				stack.push(...children);
 
 				this.dom2vnode.set(item._el, item);
+
+				// The Profiler throws if this is not present
+				// TODO: Don't patch vnode directly
+				item.stateNode = {};
 
 				work.push({
 					internalInstance: item,
@@ -111,6 +123,15 @@ export class Renderer {
 			});
 		}
 
+		if (vnode.startTime!=-1) {
+			this.pending.push({
+				internalInstance: vnode,
+				data,
+				renderer: this.rid,
+				type: 'updateProfileTimes'
+			});
+		}
+
 		this.pending.push({
 			internalInstance: vnode,
 			data,
@@ -146,7 +167,7 @@ export class Renderer {
 	/**
 	 * Get the dom element by a vnode
 	 * @param {import('../internal').VNode} vnode
-	 * @returns {import('../internal').PreactElement | Text}
+	 * @returns {import('../internal').PreactElement | HTMLElement | Text}
 	 */
 	getNativeFromReactElement(vnode) {
 		return vnode._el;
@@ -154,11 +175,11 @@ export class Renderer {
 
 	/**
 	 * Get a vnode by a dom element
-	 * @param {import('../internal').PreactElement | Text} dom
+	 * @param {import('../internal').PreactElement | HTMLElement | Text} dom
 	 * @returns {import('../internal').VNode | null}
 	 */
-	getReactElementFromNative(dom, b) {
-		return this.dom2vnode.get(dom);
+	getReactElementFromNative(dom) {
+		return this.dom2vnode.get(dom) || null;
 	}
 
 	// Unused, but devtools expects it to be there

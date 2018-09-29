@@ -95,8 +95,10 @@ export interface DevtoolsUpdater {
 	setInContext(): void;
 }
 
+export type NodeType = "Composite" | "Native" | "Wrapper" | "Text";
+
 export interface DevtoolData {
-	nodeType: "Composite" | "Native" | "Wrapper" | "Text";
+	nodeType: NodeType;
 	// Component tag
 	type: any;
 	name: string;
@@ -108,6 +110,10 @@ export interface DevtoolData {
 	props: any;
 	children: VNode[] | string | number | null;
 	publicInstance: PreactElement | HTMLElement | Text;
+
+	actualDuration: number,
+	actualStartTime: number,
+	treeBaseDuration: number,
 }
 
 export interface DevtoolsWindow extends Window {

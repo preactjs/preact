@@ -3,6 +3,7 @@ import { Fragment } from '../create-element';
 /**
  * Get the type/category of a vnode
  * @param {import('../internal').VNode} vnode
+ * @returns {import('../internal').NodeType}
  */
 export function getNodeType(vnode) {
 	if (vnode.type===Fragment) return 'Wrapper';
@@ -14,6 +15,7 @@ export function getNodeType(vnode) {
 /**
  * Get human readable name of the component/dom element
  * @param {import('../internal').VNode} vnode
+ * @returns {string}
  */
 export function getDisplayName(vnode) {
 	if (typeof vnode.type==='function') return vnode.type.name;
@@ -21,6 +23,12 @@ export function getDisplayName(vnode) {
 	return '#text';
 }
 
+/**
+ * Deeply mutate a property by walking down an array of property keys
+ * @param {object} obj
+ * @param {Array<string | number>} path
+ * @param {any} value
+ */
 export function setIn(obj, path, value) {
 	let last = path.pop();
 	let parent = path.reduce((acc, attr) => acc ? acc[attr] : null, obj);
@@ -77,11 +85,17 @@ export function getData(vnode) {
 				? children[0].text
 				: children
 			: null,
-		publicInstance: vnode._el
+		publicInstance: vnode._el,
+
+		// Profiler data
+		actualDuration: vnode.duration,
+		actualStartTime: vnode.startTime,
+		treeBaseDuration: 0
 	};
 }
 
 /**
+ * Get all rendered vnode children as an array
  * @param {import('../internal').VNode} vnode
  * @returns {import('../internal').VNode[]}
  */
