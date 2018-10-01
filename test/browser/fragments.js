@@ -260,7 +260,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it('? should preserve state between top level fragment and array', () => {
+	it('✖ should preserve state between top level fragment and array', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				[<Stateful key="a" />]
@@ -272,6 +272,12 @@ describe('Fragment', () => {
 		}
 
 		render(<Foo condition={true} />, scratch);
+		// TODO: With this test, the Fragment with just one child will invoke
+		// node.appendChild on a DOM element that is already appened to the `node`.
+		// I think we need the oldParentVNode to get the old first DOM child to
+		// effectively diff the children, because the parentVNode (the Fragment)
+		// comes from the newTree and so won't ever have ._el set before diffing
+		// children.
 		render(<Foo condition={false} />, scratch);
 
 		expect(ops).to.deep.equal(['Update Stateful']);

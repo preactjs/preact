@@ -13,4 +13,5 @@
 Also:
 
 - Extend Fragment preserving state tests to track unmounting lifecycle callbacks to verify
-  components are properly unmounted
+  components are properly unmounted. I think all 'should not preserve' tests are the ones
+  that will have unmount operations.
