@@ -727,4 +727,21 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.equal('<div><h1>Heading</h1>Hello World<h2>yo</h2>foobar<input type="text"></div>');
 	});
+
+	it('should render sibling fragments with multiple children in the correct order', () => {
+		render((
+			<ol>
+				<Fragment>
+					<li>0</li>
+					<li>1</li>
+				</Fragment>
+				<Fragment>
+					<li>2</li>
+					<li>3</li>
+				</Fragment>
+			</ol>
+		), scratch);
+
+		expect(scratch.textContent).to.equal('0123');
+	});
 });
