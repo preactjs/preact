@@ -333,7 +333,6 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 
 				// c.base = dom = firstSibling = lastSibling = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, mounts, c, newTree, parentVNode);
 				diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, mounts, c, newTree, parentVNode);
-				c.base = dom = firstSibling = lastSibling = vnode && vnode._el;
 
 				if (vnode!=null) {
 					// vnode._el = vnode._lastSibling = dom;
