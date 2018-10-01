@@ -33,12 +33,12 @@ describe('Fragment', () => {
 		teardown(scratch);
 	});
 
-	it('should not render empty Fragment', () => {
+	it('✔ should not render empty Fragment', () => {
 		render(<Fragment />, scratch);
 		expect(scratch.innerHTML).to.equal('');
 	});
 
-	it('should render a single child', () => {
+	it('✔ should render a single child', () => {
 		render((
 			<Fragment>
 				<span>foo</span>
@@ -48,7 +48,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<span>foo</span>');
 	});
 
-	it('should render multiple children via noop renderer', () => {
+	it('✔ should render multiple children via noop renderer', () => {
 		render((
 			<Fragment>
 				hello <span>world</span>
@@ -58,7 +58,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('hello <span>world</span>');
 	});
 
-	it.skip('should preserve state of children with 1 level nesting', () => {
+	it('✖ should preserve state of children with 1 level nesting', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Stateful key="a" />
@@ -73,16 +73,16 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		expect(ops).to.deep.equal(['Update Stateful']);
+		// expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.deep.equal('<div>Hello</div><div>World</div>');
 
 		render(<Foo condition={true} />, scratch);
 
-		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
+		// expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.deep.equal('<div>Hello</div>');
 	});
 
-	it('should preserve state between top-level fragments', () => {
+	it('✔ should preserve state between top-level fragments', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Fragment>
@@ -107,7 +107,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it('should preserve state of children nested at same level', () => {
+	it('✔ should preserve state of children nested at same level', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Fragment>
@@ -141,7 +141,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it('should not preserve state in non-top-level fragment nesting', () => {
+	it('✔ should not preserve state in non-top-level fragment nesting', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Fragment>
@@ -168,7 +168,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it('should not preserve state of children if nested 2 levels without siblings', () => {
+	it('✔ should not preserve state of children if nested 2 levels without siblings', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Stateful key="a" />
@@ -193,7 +193,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it('should just render children for fragments', () => {
+	it('✔ should just render children for fragments', () => {
 		class Comp extends Component {
 			render() {
 				return (
@@ -209,7 +209,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div>Child1</div><div>Child2</div>');
 	});
 
-	it('should not preserve state of children if nested 2 levels with siblings', () => {
+	it('✔ should not preserve state of children if nested 2 levels with siblings', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Stateful key="a" />
@@ -235,7 +235,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it('should preserve state between array nested in fragment and fragment', () => {
+	it('? should preserve state between array nested in fragment and fragment', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Fragment>
@@ -260,7 +260,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it('should preserve state between top level fragment and array', () => {
+	it('? should preserve state between top level fragment and array', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				[<Stateful key="a" />]
@@ -283,7 +283,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it('should not preserve state between array nested in fragment and double nested fragment', () => {
+	it('? should not preserve state between array nested in fragment and double nested fragment', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Fragment>{[<Stateful key="a" />]}</Fragment>
@@ -310,7 +310,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it.skip('should not preserve state between array nested in fragment and double nested array', () => {
+	it('✖ should not preserve state between array nested in fragment and double nested array', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Fragment>{[<Stateful key="a" />]}</Fragment>
@@ -322,16 +322,16 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		expect(ops).to.deep.equal([]);
+		// expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
 		render(<Foo condition={true} />, scratch);
 
-		expect(ops).to.deep.equal([]);
+		// expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it.skip('should preserve state between double nested fragment and double nested array', () => {
+	it('✖ should preserve state between double nested fragment and double nested array', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Fragment>
@@ -347,16 +347,16 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		expect(ops).to.deep.equal(['Update Stateful']);
+		// expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
 		render(<Foo condition={true} />, scratch);
 
-		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
+		// expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it.skip('should not preserve state of children when the keys are different', () => {
+	it('✖ should not preserve state of children when the keys are different', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Fragment key="a">
@@ -373,16 +373,16 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		expect(ops).to.deep.equal([]);
+		// expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div><span>World</span>');
 
 		render(<Foo condition={true} />, scratch);
 
-		expect(ops).to.deep.equal([]);
+		// expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it.skip('should not preserve state between unkeyed and keyed fragment', () => {
+	it('✖ should not preserve state between unkeyed and keyed fragment', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Fragment key="a">
@@ -398,16 +398,16 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		expect(ops).to.deep.equal([]);
+		// expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
 		render(<Foo condition={true} />, scratch);
 
-		expect(ops).to.deep.equal([]);
+		// expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it('should preserve state with reordering in multiple levels', () => {
+	it('? should preserve state with reordering in multiple levels', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<div>
@@ -444,7 +444,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div><span>foo</span><div><div>Hello</div></div><span>boop</span></div>');
 	});
 
-	it('should not preserve state when switching to a keyed fragment to an array', () => {
+	it('? should not preserve state when switching to a keyed fragment to an array', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<div>
@@ -475,7 +475,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div><div>Hello</div><span></span></div>');
 	});
 
-	it('should preserve state when it does not change positions', () => {
+	it('✔ should preserve state when it does not change positions', () => {
 		function Foo({ condition }) {
 			return condition
 				? [
@@ -504,7 +504,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<span></span><div>Hello</div>');
 	});
 
-	it('should render nested Fragments', () => {
+	it('✔ should render nested Fragments', () => {
 		render((
 			<Fragment>
 				spam
@@ -524,7 +524,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('foobar');
 	});
 
-	it('should respect keyed Fragments', () => {
+	it('✔ should respect keyed Fragments', () => {
 
 		/** @type {() => void} */
 		let update;
@@ -550,7 +550,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('foo');
 	});
 
-	it('should support conditionally rendered children', () => {
+	it('✔ should support conditionally rendered children', () => {
 
 		/** @type {() => void} */
 		let update;
@@ -585,7 +585,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('foo');
 	});
 
-	it('can modify the children of a Fragment', () => {
+	it('✔ can modify the children of a Fragment', () => {
 
 		/** @type {() => void} */
 		let push;
@@ -625,7 +625,7 @@ describe('Fragment', () => {
 		expect(scratch.textContent).to.equal('01234');
 	});
 
-	it('should render sibling array children', () => {
+	it('✔ should render sibling array children', () => {
 		const Group = ({ title, values }) => (
 			<Fragment>
 				<li class="divider">{title}</li>
@@ -654,7 +654,7 @@ describe('Fragment', () => {
 		expect(ul.childNodes[6].textContent).to.equal('A footer');
 	});
 
-	it('should reorder Fragment children', () => {
+	it('? should reorder Fragment children', () => {
 		let updateState;
 		class App extends Component {
 			constructor() {
@@ -698,10 +698,12 @@ describe('Fragment', () => {
 		updateState();
 		rerender();
 
+		// TODO: Investigate keeping focus? Might need to key <input /> so that the diffing algorithm can re-use it.
+		// Perhaps rename test to "should reorder **keyed** Fragment children"
 		expect(scratch.innerHTML).to.equal('<div><h1>Heading</h1>Hello World<h2>yo</h2>foobar<input type="text"></div>');
 	});
 
-	it('should render sibling fragments with multiple children in the correct order', () => {
+	it('✔ should render sibling fragments with multiple children in the correct order', () => {
 		render((
 			<ol>
 				<Fragment>

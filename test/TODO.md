@@ -9,3 +9,8 @@
 - render
 	- ✖ should skip non-preact elements
 	- ✖ should render arrays of mixed elements
+
+Also:
+
+- Extend Fragment preserving state tests to track unmounting lifecycle callbacks to verify
+  components are properly unmounted
