@@ -1,5 +1,5 @@
 import { diff, unmount } from './index';
-import { coerceToVNode } from '../create-element';
+import { coerceToVNode, Fragment } from '../create-element';
 // import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 // import { diff, unmount, getVNodeChildren } from './index';
 // import { diffProps } from './props';
@@ -69,7 +69,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 
 	let child, i, j, p, index, old, newEl,
 		oldChildrenLength = oldChildren.length,
-		childNode = typeof parentVNode.tag=='function' ? parentVNode._el : node.firstChild,
+		childNode = typeof parentVNode.tag=='number' ? parentVNode._el : node.firstChild,
 		next, last, sib;
 
 	// types = {};

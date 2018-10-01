@@ -19,7 +19,6 @@ export interface PreactElement extends Element {
 }
 
 export interface VNode<P> extends preact.VNode<P> {
-	tag: string | ComponentFactory<P> | null;
 	_children?: Array<VNode> | null;
 	/**
 	 * Only set when the vnode has a single child, even for Fragments. For vnodes

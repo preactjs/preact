@@ -1,7 +1,7 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 // import { assign } from '../util';
 import { Component, enqueueRender } from '../component';
-import { coerceToVNode /*, reclaimVNode*/ } from '../create-element';
+import { coerceToVNode, Fragment } from '../create-element';
 import { diffChildren /*, create */ } from './children';
 import { diffProps } from './props';
 import { assign } from '../util';
@@ -184,20 +184,19 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	// }
 
 	try {
-		let prevArr;
-		outer: if ((prevArr = Array.isArray(oldTree)) || Array.isArray(newTree)) {
+		let isOldTreeFragment;
+		outer: if ((isOldTreeFragment = oldTree.tag === Fragment) || newTag === Fragment) {
 			// Flatten children because coerceToVNode doesn't support arrays
-			let normalized = [];
-			flattenChildren(newTree, normalized);
-			newTree._children /*= vnode = c._previousVTree*/ = normalized;
+			// let normalized = [];
+			// flattenChildren(newTree, normalized);
+			// newTree._children /*= vnode = c._previousVTree*/ = normalized;
 
-			oldTree = oldTree==null ? EMPTY_ARR : !prevArr ? [oldTree] : oldTree;
-			diffChildren(parent, newTree, oldTree, context, isSvg, excessChildren, mounts, c, newTree);
+			oldTree = oldTree==null ? EMPTY_ARR : !isOldTreeFragment ? [oldTree] : getVNodeChildren(oldTree);
+			diffChildren(parent, getVNodeChildren(newTree), oldTree, context, isSvg, excessChildren, mounts, c, newTree);
 
 			// Needed when `c.forceUpdate()` will be called
 			// c._parentVNode = parentVNode;
 
-			// TODO: Problem!!! newTree is an array...
 			firstSibling = newTree._el;
 			lastSibling = newTree._lastSibling;
 			dom = null;
@@ -427,7 +426,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	// 	unmount(originalOldTree);
 	// }
 
-	return dom;
+	// return dom;
 }
 
 export function flushMounts(mounts) {
