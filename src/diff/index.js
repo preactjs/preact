@@ -562,20 +562,11 @@ export function applyRef(ref, value) {
 
 /**
  * Unmount a virtual node from the tree and apply DOM changes
- * @param {import('../internal').VNode | import('../internal').VNode[]} vnode The virtual node to unmount
+ * @param {import('../internal').VNode} vnode The virtual node to unmount
  * @param {import('../internal').Component} ancestorComponent The parent
  * component to this virtual node
- * @param {boolean} skipRemove Optionally skip removing elements from dom when
- * the parent node has been removed already.
  */
-export function unmount(vnode, ancestorComponent, skipRemove) {
-	if (Array.isArray(vnode)) {
-		for (let i = 0; i < vnode.length; i++) {
-			unmount(vnode[i], ancestorComponent, skipRemove);
-		}
-		return;
-	}
-
+export function unmount(vnode, ancestorComponent) {
 	let r;
 	if (r = vnode.ref) {
 		try {
@@ -586,18 +577,7 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 		}
 	}
 
-	if (!skipRemove && (r = vnode._el)!=null) {
-		let tmp;
-		while (r!=null) {
-			tmp = r;
-			r = r.nextSibling;
-			tmp.remove();
-
-			if (tmp===vnode._lastSibling) break;
-		}
-
-		skipRemove = true;
-	}
+	if ((r = vnode._el)!=null) r.remove();
 
 	vnode._el = vnode._lastSibling = null;
 
@@ -621,11 +601,11 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 		// }
 
 		r.base = r._parent = null;
-		if (r = r._previousVTree) unmount(r, ancestorComponent, skipRemove);
+		if (r = r._previousVTree) unmount(r, ancestorComponent);
 	}
 	else if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {
-			unmount(r[i], ancestorComponent, skipRemove);
+			unmount(r[i], ancestorComponent);
 		}
 	}
 
