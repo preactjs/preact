@@ -1,4 +1,5 @@
-import { getData, getChildren, getRoot } from './custom';
+import { getData, getChildren, getRoot, getInstance, hasProfileDataChanged, hasDataChanged } from './custom';
+import { assign } from '../util';
 
 /**
  * Custom renderer tailored for Preact. It converts updated vnode trees
@@ -7,11 +8,22 @@ import { getData, getChildren, getRoot } from './custom';
  */
 export class Renderer {
 	constructor(hook, rid) {
+
+		/** @type {string} */
 		this.rid = rid;
 		this.hook = hook;
+
+		/** @type {Array<import('../internal').DevtoolsEvent>} */
 		this.pending = [];
-		this.seen = new WeakSet();
-		this.dom2vnode = new WeakMap();
+
+		/**
+		 * Store the instance of a vnode. This will be later used to decide if a
+		 * vnode needs to be mounted or updated. For components the instance refers
+		 * to the actuall class instance whereas for dom nodes it refers to the
+		 * underlying dom element.
+		 * @type {WeakMap<import('../internal').Component | import('../internal').PreactElement | HTMLElement | Text, import('../internal').VNode>}
+		 */
+		this.inst2vnode = new WeakMap();
 		this.connected = false;
 	}
 
@@ -31,6 +43,7 @@ export class Renderer {
 		if (!this.connected) return;
 
 		let events = this.pending;
+		console.log(events)
 		this.pending = [];
 		for (let i = 0; i < events.length; i++) {
 			let event = events[i];
@@ -57,13 +70,14 @@ export class Renderer {
 	 * @param {import('../internal').VNode} vnode
 	 */
 	mount(vnode) {
-		this.dom2vnode.set(vnode._el, vnode);
+		this.inst2vnode.set(getInstance(vnode), vnode);
 		let data = getData(vnode);
 
 		// The Profiler throws if this is not present
 		// TODO: Don't patch vnode directly
-		vnode.stateNode = {};
+		vnode.stateNode = vnode._component!=null ? vnode._component.state : {};
 
+		/** @type {Array<import('../internal').DevtoolsEvent>} */
 		let work = [{
 			internalInstance: vnode,
 			data,
@@ -79,11 +93,11 @@ export class Renderer {
 				let children = getChildren(item);
 				stack.push(...children);
 
-				this.dom2vnode.set(item._el, item);
+				this.inst2vnode.set(getInstance(item), item);
 
 				// The Profiler throws if this is not present
 				// TODO: Don't patch vnode directly
-				item.stateNode = {};
+				item.stateNode = item._component!=null ? item._component.state : {};
 
 				work.push({
 					internalInstance: item,
@@ -118,26 +132,30 @@ export class Renderer {
 		// Children must be updated first
 		if (Array.isArray(data.children)) {
 			data.children.forEach(child => {
-				if (!this.seen.has(vnode)) this.mount(vnode);
+				let prevChild = this.inst2vnode.get(getInstance(child));
+				if (prevChild==null) this.mount(child);
 				else this.update(child);
 			});
 		}
 
-		if (vnode.startTime!=-1) {
+		let prev = this.inst2vnode.get(getInstance(vnode));
+
+		if (!hasDataChanged(prev, vnode) && hasProfileDataChanged(prev, vnode)) {
 			this.pending.push({
-				internalInstance: vnode,
+				internalInstance: assign(prev, vnode),
 				data,
 				renderer: this.rid,
 				type: 'updateProfileTimes'
 			});
 		}
-
-		this.pending.push({
-			internalInstance: vnode,
-			data,
-			renderer: this.rid,
-			type: 'update'
-		});
+		else {
+			this.pending.push({
+				internalInstance: assign(prev, vnode),
+				data,
+				renderer: this.rid,
+				type: 'update'
+			});
+		}
 	}
 
 	/**
@@ -147,13 +165,16 @@ export class Renderer {
 	 * @param {import('../internal').VNode} root
 	 */
 	handleCommitFiberRoot(root) {
-		if (this.seen.has(root)) this.update(root);
+		if (this.inst2vnode.has(getInstance(root))) this.update(root);
 		else this.mount(root);
 
 		// find the actual root
 		root = getRoot(root) || root;
 
-		this.seen.add(root);
+		let inst = getInstance(root);
+		if (!this.inst2vnode.has(inst)) {
+			this.inst2vnode.set(inst, root);
+		}
 		this.markRootCommitted(root);
 		this.flushPendingEvents();
 	}
@@ -163,12 +184,13 @@ export class Renderer {
 	 * @param {import('../internal').VNode} vnode
 	 */
 	handleCommitFiberUnmount(vnode) {
-		if (vnode._el!=null) {
-			this.dom2vnode.delete(vnode._el);
-		}
-		this.seen.delete(vnode);
+		let inst = getInstance(vnode);
+		if (!this.inst2vnode.has(inst)) return;
 
+		this.inst2vnode.delete(inst);
 		const isRoot = getRoot(vnode) === vnode;
+
+		/** @type {import('../internal').DevtoolsEvent} */
 		const event = {
 			internalInstance: vnode,
 			renderer: this.rid,
@@ -190,7 +212,7 @@ export class Renderer {
 	/**
 	 * Get the dom element by a vnode
 	 * @param {import('../internal').VNode} vnode
-	 * @returns {import('../internal').PreactElement | HTMLElement | Text}
+	 * @returns {import('../internal').PreactElement | Text}
 	 */
 	getNativeFromReactElement(vnode) {
 		return vnode._el;
@@ -198,11 +220,11 @@ export class Renderer {
 
 	/**
 	 * Get a vnode by a dom element
-	 * @param {import('../internal').PreactElement | HTMLElement | Text} dom
+	 * @param {import('../internal').PreactElement | Text} dom
 	 * @returns {import('../internal').VNode | null}
 	 */
 	getReactElementFromNative(dom) {
-		return this.dom2vnode.get(dom) || null;
+		return this.inst2vnode.get(dom) || null;
 	}
 
 	// Unused, but devtools expects it to be there

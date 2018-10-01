@@ -1,4 +1,5 @@
 import { Fragment } from '../create-element';
+import { assign } from '../util';
 
 /**
  * Get the type/category of a vnode
@@ -77,7 +78,7 @@ export function getData(vnode) {
 		key: vnode.key || null,
 		updater,
 		text: vnode.text,
-		state: c!=null ? c.state : {},
+		state: c!=null ? c.state : null,
 		props: vnode.props,
 		// The devtools inline text children if they are the only child
 		children: vnode.text==null
@@ -85,7 +86,7 @@ export function getData(vnode) {
 				? children[0].text
 				: children
 			: null,
-		publicInstance: vnode._el,
+		publicInstance: getInstance(vnode),
 
 		// Profiler data
 		actualDuration: vnode.duration,
@@ -129,4 +130,44 @@ export function getRoot(vnode) {
 	}
 
 	return last;
+}
+
+/**
+ * Cache a vnode by its instance and retrieve previous vnodes by the next
+ * instance.
+ *
+ * We need this to be able to identify the previous vnode of a given instance.
+ * For components we want to check if we already rendered it and use the class
+ * instance as key. For html elements we use the dom node as key.
+ *
+ * @param {import('../internal').VNode} vnode
+ * @returns {import('../internal').Component | import('../internal').PreactElement | Text | null}
+ */
+export function getInstance(vnode) {
+	if (vnode._component!=null) return vnode._component;
+	return vnode._el;
+}
+
+/**
+ * Check if a vnode was actually updated
+ * @param {import('../internal').VNode} next
+ * @param {import('../internal').VNode} prev
+ * @returns {boolean}
+ */
+export function hasDataChanged(prev, next) {
+	return prev.props!==next.props
+		|| ((prev._component!=null && prev._component.state)
+			!== (next._component!=null && next._component.state))
+		|| prev._el !== next._el
+		|| prev.ref !== next.ref;
+}
+
+/**
+ * Check if a the profiling data ahs changed between vnodes
+ * @param {import('../internal').VNode} next
+ * @param {import('../internal').VNode} prev
+ * @returns {boolean}
+ */
+export function hasProfileDataChanged(prev, next) {
+	return prev.duration!==next.duration || prev.startTime!==next.startTime;
 }

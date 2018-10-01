@@ -109,11 +109,20 @@ export interface DevtoolData {
 	state: any;
 	props: any;
 	children: VNode[] | string | number | null;
-	publicInstance: PreactElement | HTMLElement | Text;
+	publicInstance: PreactElement | Text | Component;
 
 	actualDuration: number,
 	actualStartTime: number,
 	treeBaseDuration: number,
+}
+
+export type EventType = 'unmount' | 'rootCommitted' | 'root' | 'mount' | 'update' | 'updateProfileTimes';
+
+export interface DevtoolsEvent {
+	data?: DevtoolData;
+	internalInstance: VNode;
+	renderer: string;
+	type: EventType;
 }
 
 export interface DevtoolsWindow extends Window {
