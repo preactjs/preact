@@ -58,7 +58,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('hello <span>world</span>');
 	});
 
-	it('should preserve state of children with 1 level nesting', () => {
+	it.skip('should preserve state of children with 1 level nesting', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Stateful key="a" />
@@ -73,14 +73,13 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal(['Update Stateful']);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div><div>World</div>');
+		expect(ops).to.deep.equal(['Update Stateful']);
+		expect(scratch.innerHTML).to.deep.equal('<div>Hello</div><div>World</div>');
 
 		render(<Foo condition={true} />, scratch);
 
-		// expect(ops).to.equal(['Update Stateful', 'Update Stateful']);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
+		expect(scratch.innerHTML).to.deep.equal('<div>Hello</div>');
 	});
 
 	it('should preserve state between top-level fragments', () => {
@@ -99,14 +98,12 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal(['Update Stateful']);
+		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
 		render(<Foo condition={true} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal(['Update Stateful', 'Update Stateful']);
+		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
@@ -135,14 +132,12 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal(['Update Stateful']);
+		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div></div><div>Hello</div>');
 
 		render(<Foo condition={true} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal(['Update Stateful', 'Update Stateful']);
+		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
@@ -164,14 +159,12 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal([]);
+		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
 		render(<Foo condition={true} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal([]);
+		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
@@ -191,14 +184,12 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal([]);
+		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
 		render(<Foo condition={true} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal([]);
+		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
@@ -235,14 +226,12 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal([]);
+		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div><div></div>');
 
 		render(<Foo condition={true} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal([]);
+		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
@@ -260,14 +249,14 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal(['Update Stateful']);
+		// TODO: WAT???
+		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
 		render(<Foo condition={true} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal(['Update Stateful', 'Update Stateful']);
+		// TODO: WAT???
+		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
@@ -285,14 +274,12 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal(['Update Stateful']);
+		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
 		render(<Foo condition={true} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal(['Update Stateful', 'Update Stateful']);
+		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
@@ -312,18 +299,18 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal([]);
+		// TODO: WAT?
+		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
 		render(<Foo condition={true} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal([]);
+		// TODO: WAT?
+		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it('should not preserve state between array nested in fragment and double nested array', () => {
+	it.skip('should not preserve state between array nested in fragment and double nested array', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Fragment>{[<Stateful key="a" />]}</Fragment>
@@ -335,18 +322,16 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal([]);
+		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
 		render(<Foo condition={true} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal([]);
+		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it('should preserve state between double nested fragment and double nested array', () => {
+	it.skip('should preserve state between double nested fragment and double nested array', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Fragment>
@@ -362,18 +347,16 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal(['Update Stateful']);
+		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
 		render(<Foo condition={true} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal(['Update Stateful', 'Update Stateful']);
+		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it('should not preserve state of children when the keys are different', () => {
+	it.skip('should not preserve state of children when the keys are different', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Fragment key="a">
@@ -390,18 +373,16 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal([]);
+		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div><span>World</span>');
 
 		render(<Foo condition={true} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal([]);
+		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it('should not preserve state between unkeyed and keyed fragment', () => {
+	it.skip('should not preserve state between unkeyed and keyed fragment', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Fragment key="a">
@@ -417,14 +398,12 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal([]);
+		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
 		render(<Foo condition={true} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal([]);
+		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
@@ -456,14 +435,12 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal(['Update Stateful']);
+		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div><span>beep</span><div><div>Hello</div></div><span>bar</span></div>');
 
 		render(<Foo condition={true} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal(['Update Stateful', 'Update Stateful']);
+		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div><span>foo</span><div><div>Hello</div></div><span>boop</span></div>');
 	});
 
@@ -489,14 +466,12 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />,  scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal([]);
+		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div><div>Hello</div><span></span></div>');
 
 		render(<Foo condition={true} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal([]);
+		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div><div>Hello</div><span></span></div>');
 	});
 
@@ -520,14 +495,12 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal(['Update Stateful']);
+		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<span></span><div>Hello</div>');
 
 		render(<Foo condition={true} />, scratch);
 
-		// TODO: Normalize lifecycle calls when children are moved around
-		// expect(ops).to.equal(['Update Stateful', 'Update Stateful']);
+		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<span></span><div>Hello</div>');
 	});
 
