@@ -24,11 +24,13 @@ let hydrating = false;
 
 /** Invoke queued componentDidMount lifecycle methods */
 export function flushMounts() {
-	let c;
-	while ((c=mounts.pop())) {
+	let c, i;
+	for (i=0; i<mounts.length; ++i) {
+		c = mounts[i];
 		if (options.afterMount) options.afterMount(c);
 		if (c.componentDidMount) c.componentDidMount();
 	}
+	mounts.length = 0;
 }
 
 

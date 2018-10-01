@@ -189,7 +189,7 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 	}
 
 	if (!isUpdate || mountAll) {
-		mounts.unshift(component);
+		mounts.push(component);
 	}
 	else if (!skip) {
 		// Ensure that pending componentDidMount() hooks of child components

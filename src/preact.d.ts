@@ -421,6 +421,7 @@ declare global {
 		interface DOMAttributes extends preact.PreactDOMAttributes {
 			// Image Events
 			onLoad?: GenericEventHandler;
+			onError?: GenericEventHandler;
 			onLoadCapture?: GenericEventHandler;
 
 			// Clipboard Events
