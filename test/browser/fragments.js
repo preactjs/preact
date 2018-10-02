@@ -235,7 +235,17 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it('? should preserve state between array nested in fragment and fragment', () => {
+	it('✔ should preserve state between array nested in fragment and fragment', () => {
+		// In this test case, the children of the Fragment in Foo end up being the same when flatened.
+		//
+		// When condition == true, the children of the Fragment are a Stateful VNode.
+		// When condition == false, the children of the Fragment are an Array containing a single
+		// Stateful VNode.
+		//
+		// However, when each of these are flattened (in flattenChildren), they both become
+		// an Array containing a single Stateful VNode. So when diff'ed they are compared together
+		// and the state of Stateful is preserved
+
 		function Foo({ condition }) {
 			return condition ? (
 				<Fragment>
@@ -249,13 +259,11 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		// TODO: WAT???
 		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
 		render(<Foo condition={true} />, scratch);
 
-		// TODO: WAT???
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
@@ -289,7 +297,18 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it('? should not preserve state between array nested in fragment and double nested fragment', () => {
+	it('✔ should not preserve state between array nested in fragment and double nested fragment', () => {
+		// In this test case, the children of the Fragment in Foo end up being the different when flatened.
+		//
+		// When condition == true, the children of the Fragment are an Array of Stateful VNode.
+		// When condition == false, the children of the Fragment are another Fragment whose children are
+		// a single Stateful VNode.
+		//
+		// When each of these are flattened (in flattenChildren), the first Fragment stays the same
+		// (Fragment -> [Stateful]). The second Fragment also doesn't change (flatenning doesn't erase
+		// Fragments) so it remains Fragment -> Fragment -> Stateful. Therefore when diff'ed these Fragments
+		// separate the two Stateful VNodes into different trees and state is not preserved between them.
+
 		function Foo({ condition }) {
 			return condition ? (
 				<Fragment>{[<Stateful key="a" />]}</Fragment>
@@ -305,13 +324,11 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		// TODO: WAT?
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
 		render(<Foo condition={true} />, scratch);
 
-		// TODO: WAT?
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
