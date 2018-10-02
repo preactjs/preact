@@ -1,5 +1,5 @@
 import { createElement as h, render, Component, Fragment } from '../../src/index';
-import { setupScratch, teardown, setupRerender } from '../_util/helpers';
+import { setupScratch, teardown, setupRerender, span, div } from '../_util/helpers';
 
 /** @jsx h */
 /* eslint-disable react/jsx-boolean-value */
@@ -725,4 +725,53 @@ describe('Fragment', () => {
 
 		expect(scratch.textContent).to.equal('0123');
 	});
+
+	it('✔ should support HOCs that return children', () => {
+		const text = 'Don\'t forget to tell these special people in your life just how special they are to you.';
+
+		class BobRossProvider extends Component {
+			getChildContext() {
+				return { text };
+			}
+
+			render(props) {
+				return props.children;
+			}
+		}
+
+		function BobRossConsumer(props, context) {
+			return props.children(context.text);
+		}
+
+		const Say = props => <div>{props.text}</div>;
+
+		const Speak = () => (
+			<Fragment>
+				<span>the top</span>
+				<BobRossProvider>
+					<span>a span</span>
+					<BobRossConsumer>
+						{ text => [
+							<Say text={text} />,
+							<Say text={text} />
+						] }
+					</BobRossConsumer>
+					<span>another span</span>
+				</BobRossProvider>
+				<span>a final span</span>
+			</Fragment>
+		);
+
+		render(<Speak />, scratch);
+
+		expect(scratch.innerHTML).to.equal([
+			span('the top'),
+			span('a span'),
+			div(text),
+			div(text),
+			span('another span'),
+			span('a final span')
+		].join(''));
+	});
+
 });
