@@ -66,13 +66,12 @@ export function renderComponent(component, props, context, renderMode, mountAll,
 	let state = component._nextState,
 		previousState = component.state,
 		previousProps = component.props || props,
-		previousContext = component.context || context,
+		snapshot = component.context || context,
 		isUpdate = component.base,
 		nextBase = component.nextBase,
 		initialBase = isUpdate || nextBase,
 		initialChildComponent = component._component,
 		skip = false,
-		snapshot = previousContext,
 		rendered, inst, cbase;
 
 	const getDerived = component.constructor.getDerivedStateFromProps;
