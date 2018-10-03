@@ -418,6 +418,10 @@ describe('Fragment', () => {
 			);
 		}
 
+		// TODO: Investigate if we should support this. Does Preact v8 preserve state
+		// when switching between a keyed and non-keyed component? Does React? If so,
+		// should Fragments be a special case? Or if not, how does this work and why
+		// doesn't that logic apply to fragments
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
@@ -430,7 +434,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it('? should preserve state with reordering in multiple levels', () => {
+	it('✔ should preserve state with reordering in multiple levels', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<div>
@@ -677,8 +681,12 @@ describe('Fragment', () => {
 		expect(ul.childNodes[6].textContent).to.equal('A footer');
 	});
 
-	it('? should reorder Fragment children', () => {
+	it('✖ should reorder Fragment children', () => {
+
+		/** @type {HTMLInputElement} */
+		let input;
 		let updateState;
+
 		class App extends Component {
 			constructor() {
 				super();
@@ -697,7 +705,7 @@ describe('Fragment', () => {
 									Hello World
 									<h2>yo</h2>
 								</Fragment>
-								<input type="text" />
+								<input type="text" ref={i => input = i} />
 							</Fragment>
 						) : (
 							<Fragment>
@@ -706,7 +714,7 @@ describe('Fragment', () => {
 									<h2>yo</h2>
 								</Fragment>
 								foobar
-								<input type="text" />
+								<input type="text" ref={i => input = i} />
 							</Fragment>
 						)}
 					</div>
@@ -718,11 +726,22 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.equal('<div><h1>Heading</h1>foobarHello World<h2>yo</h2><input type="text"></div>');
 
+		input.focus();
 		updateState();
-		rerender();
+
+		// See "should preserve state between top level fragment and array"
+		// TODO: Fragments always re-append all of their children since parentVNode._el
+		// is null in `diffChildren`. Because of this, any element that has focus will lose
+		// it when it is re-appended.
 
 		// TODO: Investigate keeping focus? Might need to key <input /> so that the diffing algorithm can re-use it.
 		// Perhaps rename test to "should reorder **keyed** Fragment children"
+
+		// expect(document.activeElement).to.equal(input, 'Before rerender');
+
+		rerender();
+
+		// expect(document.activeElement).to.equal(input, 'After rerender');
 		expect(scratch.innerHTML).to.equal('<div><h1>Heading</h1>Hello World<h2>yo</h2>foobar<input type="text"></div>');
 	});
 
