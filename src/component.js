@@ -55,7 +55,7 @@ extend(Component.prototype, {
 	setState(state, callback) {
 		if (callback) this._renderCallbacks.push(callback);
 		this._nextState = extend(extend({},this._nextState), typeof state==='function' ? state(this._nextState, this.props) : state);
-		enqueueRender(this);
+		enqueueRender(this, this.props, this.context);
 	},
 
 
@@ -67,7 +67,7 @@ extend(Component.prototype, {
 	 */
 	forceUpdate(callback) {
 		if (callback) this._renderCallbacks.push(callback);
-		renderComponent(this, FORCE_RENDER);
+		renderComponent(this, this.props, this.context, FORCE_RENDER);
 	},
 
 

@@ -33,26 +33,18 @@ export function setComponentProps(component, props, renderMode, context, mountAl
 		}
 	}
 
-	if (context && context!==component.context) {
-		if (!component.prevContext) component.prevContext = component.context;
-		component.context = context;
-	}
-
-	if (!component.prevProps) component.prevProps = component.props;
-	component.props = props;
-
 	component._disable = false;
 
 	if (renderMode!==NO_RENDER) {
 		if (renderMode===SYNC_RENDER || options.syncComponentUpdates!==false || !component.base) {
-			renderComponent(component, SYNC_RENDER, mountAll);
+			renderComponent(component, props, context, SYNC_RENDER, mountAll);
 		}
 		else {
-			enqueueRender(component);
+			enqueueRender(component, props, context);
 		}
 	}
 
-	applyRef(component.__ref, component);
+	applyRef(component.__ref, component); // kvndy TODO: props and context may not be correct here
 }
 
 
@@ -61,20 +53,20 @@ export function setComponentProps(component, props, renderMode, context, mountAl
  * Render a Component, triggering necessary lifecycle events and taking
  * High-Order Components into account.
  * @param {import('../component').Component} component The component to render
+ * @param {object} props The next props
+ * @param {object} context The next context
  * @param {number} [renderMode] render mode, see constants.js for available options.
  * @param {boolean} [mountAll] Whether or not to immediately mount all components
  * @param {boolean} [isChild] ?
  * @private
  */
-export function renderComponent(component, renderMode, mountAll, isChild) {
+export function renderComponent(component, props, context, renderMode, mountAll, isChild) {
 	if (component._disable) return;
 
-	let props = component.props,
-		state = component._nextState,
-		context = component.context,
-		previousProps = component.prevProps || props,
+	let state = component._nextState,
 		previousState = component.state,
-		previousContext = component.prevContext || context,
+		previousProps = component.props || props,
+		previousContext = component.context || context,
 		isUpdate = component.base,
 		nextBase = component.nextBase,
 		initialBase = isUpdate || nextBase,
@@ -88,8 +80,6 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 
 	// if updating
 	if (isUpdate) {
-		component.props = previousProps;
-		component.context = previousContext;
 		if (renderMode!==FORCE_RENDER
 			&& component.shouldComponentUpdate
 			&& component.shouldComponentUpdate(props, state, context) === false) {
@@ -103,7 +93,6 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 		component.context = context;
 	} else if (getDerived) component.state = state;
 	component._nextState = state;
-	component.prevProps = component.prevContext = component.nextBase = null;
 	component._dirty = false;
 
 	if (!skip) {
@@ -137,7 +126,7 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 				inst.nextBase = inst.nextBase || nextBase;
 				inst._parentComponent = component;
 				setComponentProps(inst, childProps, NO_RENDER, context, false);
-				renderComponent(inst, SYNC_RENDER, mountAll, true);
+				renderComponent(inst, childProps, context, SYNC_RENDER, mountAll, true);
 			}
 
 			base = inst.base;
