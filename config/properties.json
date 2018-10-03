@@ -1,6 +1,6 @@
 {
   "props": {
-    "cname": 16,
+    "cname": 17,
     "props": {
       "$_dirty": "__d",
       "$_disable": "__x",
@@ -17,7 +17,8 @@
       "$_componentConstructor": "_componentConstructor",
       "$__html": "__html",
       "$_component": "_component",
-      "$__preactattr_": "__preactattr_"
+      "$__preactattr_": "__preactattr_",
+      "$_nextState": "r"
     }
   },
   "vars": {

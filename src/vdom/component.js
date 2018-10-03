@@ -70,10 +70,10 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 	if (component._disable) return;
 
 	let props = component.props,
-		state = component.state,
+		state = component._nextState,
 		context = component.context,
 		previousProps = component.prevProps || props,
-		previousState = component.prevState || state,
+		previousState = component.state,
 		previousContext = component.prevContext || context,
 		isUpdate = component.base,
 		nextBase = component.nextBase,
@@ -83,15 +83,12 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 		snapshot = previousContext,
 		rendered, inst, cbase;
 
-	if (component.constructor.getDerivedStateFromProps) {
-		state = extend(extend({}, state), component.constructor.getDerivedStateFromProps(props, state));
-		component.state = state;
-	}
+	const getDerived = component.constructor.getDerivedStateFromProps;
+	if (getDerived) state = extend(extend({}, state), getDerived(props, state));
 
 	// if updating
 	if (isUpdate) {
 		component.props = previousProps;
-		component.state = previousState;
 		component.context = previousContext;
 		if (renderMode!==FORCE_RENDER
 			&& component.shouldComponentUpdate
@@ -104,9 +101,9 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 		component.props = props;
 		component.state = state;
 		component.context = context;
-	}
-
-	component.prevProps = component.prevState = component.prevContext = component.nextBase = null;
+	} else if (getDerived) component.state = state;
+	component._nextState = state;
+	component.prevProps = component.prevContext = component.nextBase = null;
 	component._dirty = false;
 
 	if (!skip) {
