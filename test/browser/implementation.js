@@ -56,7 +56,7 @@ describe('implementation', () => {
 			});
 		});
 
-		it('after setState, should only set state once, not set then unset for lifecycle methods then set again', (done) => { // kvndy
+		it('after setState, should only set state once, not set then unset for lifecycle methods then set again', (done) => {
 			let instance;
 
 			class Inner extends Component {
@@ -101,7 +101,7 @@ describe('implementation', () => {
 			instance.setState({ value: instance.state.value + 1 });
 		});
 
-		it('after forced render, should only set state once, not set then unset for lifecycle methods then set again', () => { // kvndy
+		it('after forced render, should only set state once, not set then unset for lifecycle methods then set again', () => {
 			let instance;
 
 			class Inner extends Component {
