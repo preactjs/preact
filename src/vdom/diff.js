@@ -287,7 +287,10 @@ export function recollectNodeTree(node, unmountOnly) {
 	else {
 		// If the node's VNode had a ref function, invoke it with null here.
 		// (this is part of the React spec, and smart for unsetting references)
-		if (node[ATTR_KEY]!=null) applyRef(node[ATTR_KEY].ref, null);
+		if (node[ATTR_KEY]!=null) {
+			applyRef(node[ATTR_KEY].ref, null);
+			delete node[ATTR_KEY].ref;
+		}
 
 		if (unmountOnly===false || node[ATTR_KEY]==null) {
 			removeNode(node);

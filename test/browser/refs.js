@@ -83,6 +83,54 @@ describe('refs', () => {
 		expect(ref).to.have.been.calledOnce.and.calledWith(null);
 	});
 
+	it('should be executed when the element which has a ref attribute is created', () => {
+		let setRef = spy('setRef'),
+			outer, inner;
+		class Outer extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { show:false };
+				this.setRef = this.setRef.bind(this);
+				outer = this;
+			}
+			setRef(el) {
+				setRef(el);
+			}
+			render(_, {show}) {
+				const content = show ? <Inner><p ref={this.setRef}></p></Inner> : null;
+				return <div>{content}</div>;
+			}
+		}
+		class Inner extends Component {
+			constructor(props) {
+				super(props);
+				inner = this;
+			}
+			render({children}) {
+				return <div>{children}</div>;
+			}
+		}
+
+		render(<Outer />, scratch);
+		expect(setRef.notCalled).to.be.true;
+
+		outer.setState({ show:true });
+		outer.forceUpdate();
+		expect(setRef).to.have.been.calledOnce.and.calledWith(inner.base.firstChild);
+
+		setRef.resetHistory();
+
+		outer.setState({ show:false });
+		outer.forceUpdate();
+		expect(setRef).to.have.been.calledOnce.and.calledWith(null);
+
+		setRef.resetHistory();
+
+		outer.setState({ show:true });
+		outer.forceUpdate();
+		expect(setRef).to.have.been.calledOnce.and.calledWith(inner.base.firstChild);
+	});
+
 	it('should pass children to ref functions', () => {
 		let outer = spy('outer'),
 			inner = spy('inner'),
