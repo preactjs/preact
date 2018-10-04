@@ -93,6 +93,7 @@ export function renderComponent(component, props, context, renderMode, mountAll,
 	} else if (getDerived) component.state = state;
 
 	component._nextState = state;
+	component.nextBase = null;
 	component._dirty = false;
 
 	if (!skip) {
