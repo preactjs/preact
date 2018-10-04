@@ -32,11 +32,13 @@ export function Component(props, context) {
 	 */
 	this.props = props;
 
+	this._nextState =
+
 	/**
 	 * @public
 	 * @type {object}
 	 */
-	this._nextState = this.state = this.state || {};
+	this.state = this.state || {};
 
 	this._renderCallbacks = [];
 }
