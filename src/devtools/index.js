@@ -49,7 +49,7 @@ export function initDevTools() {
 				return vnode._el;
 			},
 			findFiberByHostInstance(instance) {
-				return cevicheRenderer.dom2vnode.get(instance) || null;
+				return cevicheRenderer.inst2vnode.get(instance) || null;
 			}
 		};
 

@@ -141,6 +141,11 @@ export class Renderer {
 		let prev = this.inst2vnode.get(getInstance(vnode));
 
 		if (!hasDataChanged(prev, vnode) && hasProfileDataChanged(prev, vnode)) {
+			// Mutate node to keep referential equality intact
+			if (Array.isArray(data.children)) {
+				data.children = data.children.map(child => this.inst2vnode.get(getInstance(child)));
+			}
+
 			this.pending.push({
 				internalInstance: assign(prev, vnode),
 				data,
@@ -149,6 +154,11 @@ export class Renderer {
 			});
 		}
 		else {
+			// Mutate node to keep referential equality intact
+			if (Array.isArray(data.children)) {
+				data.children = data.children.map(child => this.inst2vnode.get(getInstance(child)));
+			}
+
 			this.pending.push({
 				internalInstance: assign(prev, vnode),
 				data,

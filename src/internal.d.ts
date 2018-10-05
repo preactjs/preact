@@ -125,20 +125,22 @@ export interface DevtoolsEvent {
 	type: EventType;
 }
 
+export interface DevtoolsHook {
+	_renderers: Record<string, object>;
+	on(ev: string, listener: () => void): void;
+	emit(ev: string, object): void;
+	helpers: Record<string, any>;
+	getFiberRoots(rendererId: string): any;
+	inject(config: DevtoolsInjectOptions): string;
+	onCommitFiberRoot(rendererId: string, root: VNode): void;
+	onCommitFiberUnmount(rendererId: string, vnode: VNode): void;
+}
+
 export interface DevtoolsWindow extends Window {
 	/**
 	 * If the devtools extension is installed it will inject this object into
 	 * the dom. This hook handles all communications between preact and the
 	 * devtools panel.
 	 */
-	__REACT_DEVTOOLS_GLOBAL_HOOK__?: {
-		_renderers: Record<string, object>;
-		on(ev: string, listener: () => void): void;
-		emit(ev: string, object): void;
-		helpers: Record<string, any>;
-		getFiberRoots(rendererId: string): any;
-		inject(config: DevtoolsInjectOptions): string;
-		onCommitFiberRoot(rendererId: string, root: VNode): void;
-		onCommitFiberUnmount(rendererId: string, fiber: VNode): void;
-	}
+	__REACT_DEVTOOLS_GLOBAL_HOOK__?: DevtoolsHook;
 }
