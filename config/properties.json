@@ -10,12 +10,12 @@
       "$__ref": "__r",
       "$normalizedNodeName": "__n",
       "$nextBase": "__b",
+      "$_nextState": "__s",
       "$_parentComponent": "__u",
       "$_componentConstructor": "_componentConstructor",
       "$__html": "__html",
       "$_component": "_component",
-      "$__preactattr_": "__preactattr_",
-      "$_nextState": "__s"
+      "$__preactattr_": "__preactattr_"
     }
   },
   "vars": {
