@@ -4,6 +4,76 @@ import { h, render, Component } from '../../src/preact';
 const Empty = () => null;
 
 describe('implementation', () => {
+
+	describe('refs', () => {
+		let scratch;
+
+		before( () => {
+			scratch = document.createElement('div');
+			(document.body || document.documentElement).appendChild(scratch);
+		});
+
+		beforeEach( () => {
+			scratch.innerHTML = '';
+		});
+
+		after( () => {
+			scratch.parentNode.removeChild(scratch);
+			scratch = null;
+		});
+
+		it('props have been applied to DOM nodes', (done) => {
+			const ref = (c) => {
+				expect(c.type).to.equal("range");
+				done();
+			};
+			render(<input type="range" ref={ref} />, scratch);
+		});
+
+		it('props and context have been applied to components', (done) => {
+			const context = { works:true };
+			class Inner extends Component {
+				render() {
+					return <input />;
+				}
+			}
+			class Outer extends Component {
+				getChildContext() {
+					return context;
+				}
+				render() {
+					const ref = (c) => {
+						expect(c.props.type).to.equal("range");
+						expect(c.context.works).to.equal(true);
+						done();
+					};
+					return <Inner type="range" ref={ref} />;
+				}
+			}
+			render(<Outer />, scratch);
+		});
+
+		it('props and context have been applied to functional components', (done) => {
+			const context = { works:true };
+			const Inner = (props) => {
+				return <input type={props.type} />;
+			};
+			class Outer extends Component {
+				getChildContext() {
+					return context;
+				}
+				render() {
+					const ref = (c) => {
+						expect(c.props.type).to.equal("range");
+						done();
+					};
+					return <Inner type="range" ref={ref} />;
+				}
+			}
+			render(<Outer />, scratch);
+		});
+	});
+
 	describe('state', () => {
 		let scratch;
 

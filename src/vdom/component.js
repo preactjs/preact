@@ -44,7 +44,7 @@ export function setComponentProps(component, props, renderMode, context, mountAl
 		}
 	}
 
-	applyRef(component.__ref, component); // kvndy TODO: props and context may not be correct here
+	applyRef(component.__ref, component);
 }
 
 
