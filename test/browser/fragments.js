@@ -418,10 +418,9 @@ describe('Fragment', () => {
 			);
 		}
 
-		// TODO: Investigate if we should support this. Does Preact v8 preserve state
-		// when switching between a keyed and non-keyed component? Does React? If so,
-		// should Fragments be a special case? Or if not, how does this work and why
-		// doesn't that logic apply to fragments
+		// React: has the same behavior for components
+		// Preact: Sees the unkeyed and keyed elements as different and adds all of them
+		// https://codesandbox.io/s/57prmy5mx
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
