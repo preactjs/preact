@@ -12,13 +12,12 @@
       "$nextBase": "__b",
       "$prevContext": "__c",
       "$prevProps": "__p",
-      "$prevState": "__s",
       "$_parentComponent": "__u",
       "$_componentConstructor": "_componentConstructor",
       "$__html": "__html",
       "$_component": "_component",
       "$__preactattr_": "__preactattr_",
-      "$_nextState": "r"
+      "$_nextState": "__s"
     }
   },
   "vars": {
