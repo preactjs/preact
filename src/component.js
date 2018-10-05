@@ -56,7 +56,10 @@ extend(Component.prototype, {
 	 */
 	setState(state, callback) {
 		if (callback) this._renderCallbacks.push(callback);
-		this._nextState = extend(extend({},this._nextState), typeof state==='function' ? state(this._nextState, this.props) : state);
+		this._nextState = extend(
+			extend({},this._nextState),
+			typeof state==='function' ? state(this._nextState, this.props) : state
+		);
 		enqueueRender(this);
 	},
 
