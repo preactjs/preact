@@ -10,7 +10,7 @@ import options from '../../src/options';
 /** @jsx h */
 
 /**
- * @returns {import('../../src/internal').DevtoolsHook}
+ * @returns {import('../../src/internal').DevtoolsHook & { log: any[], clear: () => void }}
  */
 function createMockHook() {
 	let roots = new Set();
@@ -30,6 +30,10 @@ function createMockHook() {
 	}
 
 	return {
+		on() {},
+		inject() { return 'abc'; },
+		onCommitFiberRoot() {},
+		onCommitFiberUnmount() {},
 		_roots: roots,
 		log: events,
 		_renderers: {},
@@ -117,7 +121,9 @@ describe('devtools', () => {
 			oldOptions = assign({}, options);
 
 			hook = createMockHook();
-			window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = hook;
+
+			/** @type {import('../../src/internal').DevtoolsWindow} */
+			(window).__REACT_DEVTOOLS_GLOBAL_HOOK__ = hook;
 
 			initDevTools();
 			let rid = Object.keys(hook._renderers)[0];
@@ -185,11 +191,24 @@ describe('devtools', () => {
 				'rootCommitted'
 			]);
 
+			// Previous `internalInstance` from mount must be referentially equal to
+			// `internalInstance` from update
 			hook.log.filter(x => x.type === 'update').forEach(next => {
-				let update = prev.find(old => old.type === 'mount' && old.internalInstance === next.internalInstance);
+				let update = prev.find(old =>
+					old.type === 'mount' && old.internalInstance === next.internalInstance);
 
 				expect(update).to.not.equal(undefined);
 				expect(update.data.state).to.not.equal(next.data.state);
+
+				// ...and the same rules apply for `data.children`. Note that
+				// `data.children` is not always an array.
+				let children = update.data.children;
+				if (Array.isArray(children)) {
+					children.forEach(child => {
+						let prevChild = prev.find(x => x.internalInstance === child);
+						expect(prevChild).to.not.equal(undefined);
+					});
+				}
 			});
 		});
 	});

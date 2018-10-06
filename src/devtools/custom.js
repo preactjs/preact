@@ -70,6 +70,7 @@ export function getData(vnode) {
 
 	let children = getChildren(vnode);
 
+	let duration = vnode.endTime - vnode.startTime;
 	return {
 		nodeType: getNodeType(vnode),
 		type: vnode.type,
@@ -89,9 +90,9 @@ export function getData(vnode) {
 		publicInstance: getInstance(vnode),
 
 		// Profiler data
-		actualDuration: vnode.endTime - vnode.startTime,
+		actualDuration: duration,
 		actualStartTime: vnode.startTime,
-		treeBaseDuration: vnode.startTime - 4
+		treeBaseDuration: duration
 	};
 }
 

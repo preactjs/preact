@@ -140,32 +140,22 @@ export class Renderer {
 
 		let prev = this.inst2vnode.get(getInstance(vnode));
 
-		if (!hasDataChanged(prev, vnode) && hasProfileDataChanged(prev, vnode)) {
-			// Mutate node to keep referential equality intact
-			if (Array.isArray(data.children)) {
-				data.children = data.children.map(child => this.inst2vnode.get(getInstance(child)));
-			}
+		/** @type {import('../internal').EventType} */
+		let type = !hasDataChanged(prev, vnode) && hasProfileDataChanged(prev, vnode)
+			? 'updateProfileTimes'
+			: 'update';
 
-			this.pending.push({
-				internalInstance: assign(prev, vnode),
-				data,
-				renderer: this.rid,
-				type: 'updateProfileTimes'
-			});
+		// Mutate node to keep referential equality intact
+		if (Array.isArray(data.children)) {
+			data.children = data.children.map(child => this.inst2vnode.get(getInstance(child)));
 		}
-		else {
-			// Mutate node to keep referential equality intact
-			if (Array.isArray(data.children)) {
-				data.children = data.children.map(child => this.inst2vnode.get(getInstance(child)));
-			}
 
-			this.pending.push({
-				internalInstance: assign(prev, vnode),
-				data,
-				renderer: this.rid,
-				type: 'update'
-			});
-		}
+		this.pending.push({
+			internalInstance: assign(prev, vnode),
+			data,
+			renderer: this.rid,
+			type
+		});
 	}
 
 	/**
