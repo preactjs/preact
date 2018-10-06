@@ -238,4 +238,77 @@ describe('keys', () => {
 		expect(scratch.textContent).to.equal('abcd');
 		expect(getLog()).to.deep.equal({ '<ol>bcda.insertBefore(<li>a, <li>b)': 1 });
 	});
+
+	it('should not preserve state when the keys are different', () => {
+
+		/** @type {string[]} */
+		let ops = [];
+
+		class Stateful extends Component {
+			componentDidUpdate() {
+				ops.push('Update Stateful');
+			}
+			componentDidMount() {
+				ops.push('Mount Stateful');
+			}
+			componentWillUnmount() {
+				ops.push('Unmount Stateful');
+			}
+			render() {
+				return <div>Hello</div>;
+			}
+		}
+
+		function Foo({ condition }) {
+			return condition ? <Stateful key="a" /> : <Stateful key="b" />;
+		}
+
+		ops = [];
+		render(<Foo condition />, scratch);
+		expect(ops).to.deep.equal(['Mount Stateful'], 'initial mount');
+
+		ops = [];
+		render(<Foo condition={false} />, scratch);
+		expect(ops).to.deep.equal(['Unmount Stateful', 'Mount Stateful'], 'switching keys 1');
+
+		ops = [];
+		render(<Foo condition />, scratch);
+		expect(ops).to.deep.equal(['Unmount Stateful', 'Mount Stateful'], 'switching keys 2');
+	});
+
+	it('should not preserve state between unkeyed and keyed component', () => {
+		/** @type {string[]} */
+		let ops = [];
+
+		class Stateful extends Component {
+			componentDidUpdate() {
+				ops.push('Update Stateful');
+			}
+			componentDidMount() {
+				ops.push('Mount Stateful');
+			}
+			componentWillUnmount() {
+				ops.push('Unmount Stateful');
+			}
+			render() {
+				return <div>Hello</div>;
+			}
+		}
+
+		function Foo({ keyed }) {
+			return keyed ? <Stateful key="a" /> : <Stateful />;
+		}
+
+		ops = [];
+		render(<Foo keyed />, scratch);
+		expect(ops).to.deep.equal(['Mount Stateful'], 'initial mount with key');
+
+		ops = [];
+		render(<Foo keyed={false} />, scratch);
+		expect(ops).to.deep.equal(['Unmount Stateful', 'Mount Stateful'], 'switching from keyed to unkeyed');
+
+		ops = [];
+		render(<Foo keyed />, scratch);
+		expect(ops).to.deep.equal(['Unmount Stateful', 'Mount Stateful'], 'switching from unkeyed to keyed');
+	});
 });
