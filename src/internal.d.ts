@@ -36,7 +36,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 
 	// Profiling
 	startTime: number;
-	duration: number;
+	endTime: number;
 }
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
@@ -127,6 +127,7 @@ export interface DevtoolsEvent {
 
 export interface DevtoolsHook {
 	_renderers: Record<string, object>;
+	_roots: Set<VNode>;
 	on(ev: string, listener: () => void): void;
 	emit(ev: string, object): void;
 	helpers: Record<string, any>;

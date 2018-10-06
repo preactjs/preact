@@ -55,7 +55,7 @@ describe('createElement(jsx)', () => {
 	});
 
 	it('should have ordered VNode properties', () => {
-		expect(Object.keys(<div />).filter(key => !/^_/.test(key))).to.deep.equal(['type', 'props', 'text', 'key', 'ref', 'duration', 'startTime']);
+		expect(Object.keys(<div />).filter(key => !/^_/.test(key))).to.deep.equal(['type', 'props', 'text', 'key', 'ref', 'startTime', 'endTime']);
 	});
 
 	it('should preserve raw props', () => {

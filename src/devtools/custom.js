@@ -89,9 +89,9 @@ export function getData(vnode) {
 		publicInstance: getInstance(vnode),
 
 		// Profiler data
-		actualDuration: vnode.duration,
+		actualDuration: vnode.endTime - vnode.startTime,
 		actualStartTime: vnode.startTime,
-		treeBaseDuration: 0
+		treeBaseDuration: vnode.startTime - 4
 	};
 }
 
@@ -169,5 +169,5 @@ export function hasDataChanged(prev, next) {
  * @returns {boolean}
  */
 export function hasProfileDataChanged(prev, next) {
-	return prev.duration!==next.duration || prev.startTime!==next.startTime;
+	return prev.startTime!==next.startTime || prev.endTime!==next.endTime;
 }

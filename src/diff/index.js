@@ -180,7 +180,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		}
 
 		if (options.enableProfiling) {
-			newTree.duration = Date.now() - newTree.startTime;
+			newTree.endTime = Date.now();
 		}
 	}
 	catch (e) {
