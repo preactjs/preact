@@ -9,3 +9,9 @@ export function assign(obj, props) {
 	for (let i in props) obj[i] = props[i];
 	return /** @type {O & P} */ (obj);
 }
+
+/**
+ * Get current timestamp in ms. Used for profiling.
+ * @returns {number}
+ */
+export const now = 'performance' in window ? window.performance.now.bind(window.performance) : Date.now;

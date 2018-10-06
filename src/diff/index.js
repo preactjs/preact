@@ -3,7 +3,7 @@ import { Component, enqueueRender } from '../component';
 import { coerceToVNode, Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps } from './props';
-import { assign } from '../util';
+import { assign, now } from '../util';
 import options from '../options';
 
 /**
@@ -36,7 +36,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	}
 
 	if (options.enableProfiling) {
-		newTree.startTime = Date.now();
+		newTree.startTime = now();
 	}
 
 	let c, p, isNew = false, oldProps, oldState, oldContext,
@@ -180,7 +180,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		}
 
 		if (options.enableProfiling) {
-			newTree.endTime = Date.now();
+			newTree.endTime = now();
 		}
 	}
 	catch (e) {
