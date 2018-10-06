@@ -1,5 +1,5 @@
 import options from '../options';
-import { Renderer } from './Renderer';
+import { Renderer } from './renderer';
 
 /**
  * Wrap function with generic error logging
