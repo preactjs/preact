@@ -1580,7 +1580,6 @@ describe('Lifecycle methods', () => {
 		it('should be asynchronous', (done) => {
 			let putState;
 			let getState;
-
 			class Async extends Component {
 				constructor(props) {
 					super(props);
