@@ -1576,6 +1576,40 @@ describe('Lifecycle methods', () => {
 			expect(componentState).to.deep.equal({key: 'value'});
 			expect(stateConstant).to.deep.equal({});
 		});
+
+		it('should be asynchronous', (done) => {
+			let putState;
+			let getState;
+
+			class Async extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { test:false };
+					putState = this.putState = this.putState.bind(this);
+					getState = this.getState = this.getState.bind(this);
+				}
+				putState() {
+					this.setState({ test:true });
+				}
+				getState() {
+					return this.state;
+				}
+				render() {
+					return (
+						<div></div>
+					);
+				}
+			}
+			render(<Async />, scratch);
+			expect(getState().test).to.equal(false);
+			putState();
+			expect(getState().test).to.equal(false);
+			setTimeout(() => {
+				expect(getState().test).to.equal(true);
+				done();
+			});
+		});
+
 	}),
 
 

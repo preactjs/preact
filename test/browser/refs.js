@@ -1,4 +1,4 @@
-import { h, render, Component } from '../../src/preact';
+import { h, render, Component, rerender as renderAgain } from '../../src/preact';
 /** @jsx h */
 
 // gives call count and argument errors names (otherwise sinon just uses "spy"):
@@ -319,4 +319,114 @@ describe('refs', () => {
 		render(<div><Wrapper ref={ c => ref(c.base) } /></div>, scratch, scratch.firstChild);
 		expect(ref).to.have.been.calledOnce.and.calledWith(scratch.firstChild.firstChild);
 	});
+
+
+	it('should have correct props in DOM nodes', (done) => {
+		let updateState;
+		class Outer extends Component {
+			constructor() {
+				super();
+				this.state = { type: "button" };
+				updateState = this.updateState.bind(this);
+			}
+			updateState() {
+				this.setState({
+					type: "range"
+				});
+			}
+			componentDidUpdate() {
+				done();
+			}
+			render() {
+				const ref = (c) => {
+					if (c) expect(c.type).to.equal(this.state.type);
+				};
+				return <input type={this.state.type} ref={ref} />;
+			}
+		}
+		const ref = (c) => {
+			expect(c.type).to.equal("range");
+		};
+		render(<input type="range" ref={ref} />, scratch);
+		render(<Outer />, scratch);
+		updateState();
+		renderAgain();
+	});
+
+	it('should have correct props and context in components', (done) => {
+		let updateState;
+		const context = { type:"button" };
+		class Inner extends Component {
+			render() {
+				return <input />;
+			}
+		}
+		class Outer extends Component {
+			constructor() {
+				super();
+				this.state = { type: "button" };
+				updateState = this.updateState.bind(this);
+			}
+			getChildContext() {
+				return context;
+			}
+			updateState() {
+				context.type = "range";
+				this.setState({
+					type: "range"
+				});
+			}
+			componentDidUpdate() {
+				done();
+			}
+			render() {
+				const ref = (c) => {
+					if (c) expect(c.props.type).to.equal(this.state.type);
+					if (c) expect(c.context.type).to.equal(this.state.type);
+				};
+				return <Inner type={this.state.type} ref={ref} />;
+			}
+		}
+		render(<Outer />, scratch);
+		updateState();
+		renderAgain();
+	});
+
+	it('should have correct props and context in functional components', (done) => {
+		let updateState;
+		const context = { type:"button" };
+		const Inner = (props) => {
+			return <input type={props.type} />;
+		};
+		class Outer extends Component {
+			constructor() {
+				super();
+				this.state = { type: "button" };
+				updateState = this.updateState.bind(this);
+			}
+			getChildContext() {
+				return context;
+			}
+			updateState() {
+				context.type = "range";
+				this.setState({
+					type: "range"
+				});
+			}
+			componentDidUpdate() {
+				done();
+			}
+			render() {
+				const ref = (c) => {
+					if (c) expect(c.props.type).to.equal(this.state.type);
+					if (c) expect(c.context.type).to.equal(this.state.type);
+				};
+				return <Inner type={this.state.type} ref={ref} />;
+			}
+		}
+		render(<Outer />, scratch);
+		updateState();
+		renderAgain();
+	});
+
 });
