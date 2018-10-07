@@ -80,7 +80,7 @@ export class Renderer {
 		// https://github.com/facebook/react-devtools/pull/1178/
 		vnode.stateNode = { memoizedInteractions: data.memoizedInteractions };
 
-		/** @type {Array<import('../internal').DevtoolsEvent>} */
+		/** @type {Array<import('../internal').DevtoolsEvent>} */
 		let work = [{
 			internalInstance: vnode,
 			data,
