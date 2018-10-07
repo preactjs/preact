@@ -81,9 +81,9 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 		initialChildComponent = component._component,
 		skip = false,
 		snapshot = previousContext,
-		rendered, inst, cbase;
+		rendered, inst, cbase,
+		getDerived = component.constructor.getDerivedStateFromProps;
 
-	const getDerived = component.constructor.getDerivedStateFromProps;
 	if (getDerived) state = extend(
 		extend({}, state),
 		getDerived(props, state)
@@ -107,10 +107,10 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 	}
 	else if (getDerived) component.state = state;
 
-	component._nextState = state;
 	component.prevProps = component.prevContext = component.nextBase = null;
 	component._dirty = false;
-
+	component._nextState = state;
+	
 	if (!skip) {
 		rendered = component.render(props, state, context);
 
