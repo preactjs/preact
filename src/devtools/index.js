@@ -41,6 +41,12 @@ export function initDevTools() {
 		}
 		catch (e) {}
 
+		// Tell devtools which bundle type we run in
+		window.parent.postMessage({
+			source: 'react-devtools-detector',
+			reactBuildType: isDev ? 'development' : 'production'
+		}, '*');
+
 		let renderer = {
 			bundleType: isDev ? 1 : 0,
 			version: '16.5.2',
@@ -54,7 +60,6 @@ export function initDevTools() {
 		};
 
 		hook._renderers[rid] = renderer;
-		// TODO: Show correct bundle type
 
 		// We can't bring our own `attachRenderer` function therefore we simply
 		// prevent the devtools from overwriting our custom renderer by creating
