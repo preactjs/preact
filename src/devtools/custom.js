@@ -50,6 +50,8 @@ export function getData(vnode) {
 	let updater = null;
 
 	if (c!=null) {
+		// These functions will be called when the user changes state, props or
+		// context values via the devtools ui panel
 		updater = {
 			setState: c.setState.bind(c),
 			forceUpdate: c.forceUpdate.bind(c),
