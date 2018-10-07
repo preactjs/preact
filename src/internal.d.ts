@@ -91,7 +91,7 @@ export interface DevtoolsUpdater {
 	setState(objOrFn: any): void;
 	forceUpdate(): void;
 	setInState(path: Array<string | number>, value: any): void;
-	setInProps(): void;
+	setInProps(path: Array<string, | number>, value: any): void;
 	setInContext(): void;
 }
 

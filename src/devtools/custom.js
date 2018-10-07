@@ -1,4 +1,5 @@
 import { Fragment } from '../create-element';
+import { enqueueRender } from '../component';
 
 /**
  * Get the type/category of a vnode
@@ -54,15 +55,15 @@ export function getData(vnode) {
 			forceUpdate: c.forceUpdate.bind(c),
 			setInState(path, value) {
 				setIn(c.state, path, value);
-				c.forceUpdate();
+				enqueueRender(c);
 			},
-			setInProps() {
-				// TODO
-				c.forceUpdate();
+			setInProps(path, value) {
+				setIn(vnode.props, path, value);
+				enqueueRender(c);
 			},
-			setInContext() {
-				// TODO
-				c.forceUpdate();
+			setInContext(path, value) {
+				setIn(c.context, path, value);
+				enqueueRender(c);
 			}
 		};
 	}
