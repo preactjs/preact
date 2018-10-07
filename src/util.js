@@ -14,4 +14,11 @@ export function assign(obj, props) {
  * Get current timestamp in ms. Used for profiling.
  * @returns {number}
  */
-export const now = 'performance' in window ? window.performance.now.bind(window.performance) : Date.now;
+export let now = Date.now;
+
+try {
+	if ('performance' in window) {
+		now = window.performance.now.bind(window.performance);
+	}
+}
+catch (e) {}
