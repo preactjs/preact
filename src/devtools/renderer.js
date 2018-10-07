@@ -58,6 +58,8 @@ export class Renderer {
 		this.pending.push({
 			internalInstance: vnode,
 			renderer: this.rid,
+			// In preparation for https://github.com/facebook/react-devtools/pull/1178/
+			data: getData(vnode),
 			type: 'rootCommitted'
 		});
 	}
@@ -73,8 +75,10 @@ export class Renderer {
 		let data = getData(vnode);
 
 		// The Profiler throws if this is not present
-		// TODO: Don't patch vnode directly
-		vnode.stateNode = vnode._component!=null ? vnode._component.state : {};
+		// Workaround until this PR the following PR is merged. The profiler will
+		// throw if this property is not present
+		// https://github.com/facebook/react-devtools/pull/1178/
+		vnode.stateNode = { memoizedInteractions: data.memoizedInteractions };
 
 		/** @type {Array<import('../internal').DevtoolsEvent>} */
 		let work = [{
@@ -94,13 +98,14 @@ export class Renderer {
 
 				this.inst2vnode.set(getInstance(item), item);
 
-				// The Profiler throws if this is not present
-				// TODO: Don't patch vnode directly
-				item.stateNode = item._component!=null ? item._component.state : {};
+				let data = getData(item);
+
+				// In preparation for https://github.com/facebook/react-devtools/pull/1178/
+				item.stateNode = { memoizedInteractions: data.memoizedInteractions };
 
 				work.push({
 					internalInstance: item,
-					data: getData(item),
+					data,
 					renderer: this.rid,
 					type: 'mount'
 				});
@@ -115,6 +120,8 @@ export class Renderer {
 		if (isRoot(vnode)) {
 			this.pending.push({
 				internalInstance: vnode,
+				// In preparation for https://github.com/facebook/react-devtools/pull/1178/
+				data,
 				renderer: this.rid,
 				type: 'root'
 			});

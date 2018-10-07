@@ -1,5 +1,4 @@
 import { Fragment } from '../create-element';
-import { assign } from '../util';
 
 /**
  * Get the type/category of a vnode
@@ -88,6 +87,7 @@ export function getData(vnode) {
 				: children
 			: null,
 		publicInstance: getInstance(vnode),
+		memoizedInteractions: [],
 
 		// Profiler data
 		actualDuration: duration,
