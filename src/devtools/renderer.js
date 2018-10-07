@@ -1,4 +1,4 @@
-import { getData, getChildren, getRoot, getInstance, hasProfileDataChanged, hasDataChanged } from './custom';
+import { getData, getChildren, getRoot, getInstance, hasProfileDataChanged, hasDataChanged, isRoot } from './custom';
 import { assign } from '../util';
 
 /**
@@ -43,7 +43,6 @@ export class Renderer {
 		if (!this.connected) return;
 
 		let events = this.pending;
-		console.log(events)
 		this.pending = [];
 		for (let i = 0; i < events.length; i++) {
 			let event = events[i];
@@ -87,7 +86,7 @@ export class Renderer {
 
 		// Children must be mounted first
 		if (Array.isArray(data.children)) {
-			let stack = [...data.children];
+			let stack = data.children.slice();
 			let item;
 			while ((item = stack.pop())!=null) {
 				let children = getChildren(item);
@@ -113,7 +112,7 @@ export class Renderer {
 		}
 
 		// Special event if we have a root
-		if (getRoot(vnode) === vnode) {
+		if (isRoot(vnode)) {
 			this.pending.push({
 				internalInstance: vnode,
 				renderer: this.rid,
@@ -131,24 +130,25 @@ export class Renderer {
 
 		// Children must be updated first
 		if (Array.isArray(data.children)) {
-			data.children.forEach(child => {
-				let prevChild = this.inst2vnode.get(getInstance(child));
+			for (let i = 0; i < data.children.length; i++) {
+				let child = data.children[i];
+				let inst = getInstance(child);
+
+				let prevChild = this.inst2vnode.get(inst);
 				if (prevChild==null) this.mount(child);
 				else this.update(child);
-			});
+
+				// Mutate child to keep referential equality intact
+				data.children[i] = this.inst2vnode.get(inst);
+			}
 		}
 
-		let prev = this.inst2vnode.get(getInstance(vnode));
+		let prev = this.inst2vnode.get(data.publicInstance);
 
 		/** @type {import('../internal').EventType} */
 		let type = !hasDataChanged(prev, vnode) && hasProfileDataChanged(prev, vnode)
 			? 'updateProfileTimes'
 			: 'update';
-
-		// Mutate node to keep referential equality intact
-		if (Array.isArray(data.children)) {
-			data.children = data.children.map(child => this.inst2vnode.get(getInstance(child)));
-		}
 
 		this.pending.push({
 			internalInstance: assign(prev, vnode),
@@ -165,13 +165,16 @@ export class Renderer {
 	 * @param {import('../internal').VNode} root
 	 */
 	handleCommitFiberRoot(root) {
-		if (this.inst2vnode.has(getInstance(root))) this.update(root);
+		let inst = getInstance(root);
+		if (this.inst2vnode.has(inst)) this.update(root);
 		else this.mount(root);
 
 		// find the actual root
-		root = getRoot(root) || root;
+		if (!isRoot(root)) {
+			root = getRoot(root);
+			inst = getInstance(root);
+		}
 
-		let inst = getInstance(root);
 		if (!this.inst2vnode.has(inst)) {
 			this.inst2vnode.set(inst, root);
 		}
@@ -188,25 +191,12 @@ export class Renderer {
 		if (!this.inst2vnode.has(inst)) return;
 
 		this.inst2vnode.delete(inst);
-		const isRoot = getRoot(vnode) === vnode;
 
-		/** @type {import('../internal').DevtoolsEvent} */
-		const event = {
+		this.pending.push({
 			internalInstance: vnode,
 			renderer: this.rid,
 			type: 'unmount'
-		};
-
-		if (isRoot) {
-			this.pending.push(event);
-		}
-		else {
-			// Non-root fibers are deleted during the commit phase.
-			// They are deleted in the child-first order. However
-			// DevTools currently expects deletions to be parent-first.
-			// This is why we unshift deletions rather than push them.
-			this.pending.unshift(event);
-		}
+		});
 	}
 
 	/**

@@ -81,7 +81,7 @@ export function initDevTools() {
 			root.treeBaseDuration = null;
 
 			if (!roots.has(root)) roots.add(root);
-			if (helpers) helpers.handleCommitFiberRoot(root);
+			helpers.handleCommitFiberRoot(root);
 		});
 
 		onCommitUnmount = catchErrors(vnode => {

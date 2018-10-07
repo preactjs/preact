@@ -134,6 +134,15 @@ export function getRoot(vnode) {
 }
 
 /**
+ * Check if a vnode is a root node
+ * @param {import('../internal').VNode} vnode
+ * @returns {boolean}
+ */
+export function isRoot(vnode) {
+	return vnode._el!=null && vnode._el.parentNode!=null && vnode._el.parentNode._previousVTree!=null;
+}
+
+/**
  * Cache a vnode by its instance and retrieve previous vnodes by the next
  * instance.
  *
@@ -156,9 +165,11 @@ export function getInstance(vnode) {
  * @returns {boolean}
  */
 export function hasDataChanged(prev, next) {
-	return prev.props!==next.props
-		|| ((prev._component!=null && prev._component.state)
-			!== (next._component!=null && next._component.state))
+	return prev.startTime!==next.startTime
+		|| prev.endTime!==next.endTime
+		|| prev.props!==next.props
+		|| (prev._component!=null && (prev._component.state
+			!== next._component.state))
 		|| prev._el !== next._el
 		|| prev.ref !== next.ref;
 }
