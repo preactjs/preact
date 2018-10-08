@@ -1,5 +1,5 @@
 import { diff, unmount } from './index';
-import { coerceToVNode, Fragment } from '../create-element';
+import { coerceToVNode } from '../create-element';
 // import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 // import { diff, unmount, getVNodeChildren } from './index';
 // import { diffProps } from './props';
