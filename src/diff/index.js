@@ -417,8 +417,6 @@ export function flushMounts(mounts) {
  * mounted components
  * @param {import('../internal').Component} ancestorComponent The parent
  * component to the ones being diffed
- * @param {import('../internal').VNode} parentVNode Used to set `_lastSibling`
- * pointer to keep track of our current position
  * @returns {import('../internal').PreactElement}
  */
 function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessChildren, mounts, ancestorComponent) {
