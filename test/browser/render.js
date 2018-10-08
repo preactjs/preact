@@ -185,7 +185,7 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('Testing, huh! How is it going?');
 	});
 
-	it.skip('should render arrays of mixed elements', () => {
+	it('should render arrays of mixed elements', () => {
 		render(getMixedArray(), scratch);
 		expect(scratch.innerHTML).to.equal(mixedArrayHTML);
 	});

@@ -433,6 +433,62 @@ describe('Components', () => {
 	});
 
 	describe('High-Order Components', () => {
+		it('should render wrapper HOCs', () => {
+			const text = 'We\'ll throw some happy little limbs on this tree.';
+
+			function withBobRoss(ChildComponent) {
+				return class BobRossIpsum extends Component {
+					getChildContext() {
+						return { text };
+					}
+
+					render(props) {
+						return <ChildComponent {...props} />;
+					}
+				};
+			}
+
+			const PaintSomething = (props, context) => <div>{context.text}</div>;
+			const Paint = withBobRoss(PaintSomething);
+
+			render(<Paint />, scratch);
+			expect(scratch.innerHTML).to.equal(`<div>${text}</div>`);
+		});
+
+		it('should render HOCs with generic children', () => {
+			const text = 'Let your imagination just wonder around when you\'re doing these things.';
+
+			class BobRossProvider extends Component {
+				getChildContext() {
+					return { text };
+				}
+
+				render(props) {
+					return props.children;
+				}
+			}
+
+			function BobRossConsumer(props, context) {
+				return props.children(context.text);
+			}
+
+			const Say = props => <div>{props.text}</div>;
+
+			const Speak = () => (
+				<BobRossProvider>
+					<span>A span</span>
+					<BobRossConsumer>
+						{ text => <Say text={text} /> }
+					</BobRossConsumer>
+					<span>A final span</span>
+				</BobRossProvider>
+			);
+
+			render(<Speak />, scratch);
+
+			expect(scratch.innerHTML).to.equal(`<span>A span</span><div>${text}</div><span>A final span</span>`);
+		});
+
 		it('should render nested functional components', () => {
 			const PROPS = { foo: 'bar', onBaz: () => {} };
 

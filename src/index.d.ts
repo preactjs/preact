@@ -9,7 +9,7 @@ declare namespace preact {
 	// -----------------------------------
 
 	interface VNode<P = {}> {
-		tag: ComponentFactory<P> | string | null;
+		tag: ComponentFactory<P> | string | number | null;
 		props: P & { children: ComponentChildren };
 		text?: string | number | null;
 		key?: Key;
@@ -123,6 +123,7 @@ declare namespace preact {
 	// Preact Built-in Components
 	// -----------------------------------
 
+	// TODO: Revisit what the public type of this is...
 	const Fragment: ComponentConstructor<{}, {}>;
 
 	//

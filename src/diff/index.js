@@ -1,7 +1,7 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 // import { assign } from '../util';
 import { Component, enqueueRender } from '../component';
-import { coerceToVNode /*, reclaimVNode*/ } from '../create-element';
+import { coerceToVNode, Fragment } from '../create-element';
 import { diffChildren /*, create */ } from './children';
 import { diffProps } from './props';
 import { assign } from '../util';
@@ -167,7 +167,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	}
 
 	let c, p, isNew = false, oldProps, oldState, oldContext,
-		newTag = newTree.tag, firstSibling, lastSibling;
+		newTag = newTree.tag, lastSibling;
 
 	/** @type {import('../internal').Component | null} */
 	let clearProcessingException;
@@ -184,7 +184,19 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	// }
 
 	try {
-		outer: if (typeof newTag==='function') {
+		let isOldTreeFragment;
+		outer: if ((isOldTreeFragment = oldTree.tag === Fragment) || newTag === Fragment) {
+			oldTree = oldTree==null ? EMPTY_ARR : !isOldTreeFragment ? [oldTree] : getVNodeChildren(oldTree);
+			diffChildren(parent, getVNodeChildren(newTree), oldTree, context, isSvg, excessChildren, mounts, c, newTree);
+
+			// The new dom element for fragments is the first child of the new tree
+			// When the first child of a Fragment is passed through `diff()`, it sets its dom
+			// element to the parentVNode._el property (that assignment is near the bottom of
+			// this function), which is read here.
+			dom = newTree._el;
+			lastSibling = newTree._lastSibling;
+		}
+		else if (typeof newTag==='function') {
 
 			// Get component and set it to `c`
 			if (oldTree._component) {
@@ -291,36 +303,14 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			// Normalize old and new trees when either one returned an array
-			let prevArr;
-			if ((prevArr = Array.isArray(prev)) || Array.isArray(vnode)) {
-				// Flatten children because coerceToVNode doesn't support arrays
-				let normalized = [];
-				flattenChildren(vnode, normalized);
-				newTree._children = vnode = c._previousVTree = normalized;
+			c.base = dom = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, mounts, c, newTree);
 
-				prev = prev==null ? EMPTY_ARR : !prevArr ? [prev] : prev;
-				diffChildren(parent, vnode, prev, context, isSvg, excessChildren, mounts, c, newTree);
-
-				// Needed when `c.forceUpdate()` will be called
-				c._parentVNode = parentVNode;
-
-				firstSibling = newTree._el;
-				lastSibling = newTree._lastSibling;
-				dom = null;
+			if (vnode!=null) {
+				lastSibling = vnode._lastSibling;
 			}
-			else {
-				// Only necessary to set `_children`
-				if (vnode!=null) newTree._children = getVNodeChildren(vnode);
 
-				c.base = dom = firstSibling = lastSibling = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, mounts, c, newTree, parentVNode);
-
-				if (vnode!=null) {
-					vnode._el = vnode._lastSibling = dom;
-				}
-
-				c._parent = parent;
-			}
+			c._parent = parent;
+			c._parentVNode = parentVNode;
 
 			if (newTree.ref) applyRef(newTree.ref, c);
 			// context = assign({}, context);
@@ -356,19 +346,16 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			// }
 		}
 		else {
-			dom = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren, mounts, ancestorComponent);
+			dom = lastSibling = newTree._lastSibling = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren, mounts, ancestorComponent);
 
 			if (newTree.ref && (oldTree.ref !== newTree.ref)) {
 				applyRef(newTree.ref, dom);
 			}
-
-			firstSibling = lastSibling = newTree._lastSibling = dom;
 		}
-
 
 		// Update sibling pointers
 		if (parentVNode._el==null) {
-			parentVNode._el = firstSibling;
+			parentVNode._el = dom;
 		}
 
 		parentVNode._lastSibling = lastSibling;
@@ -377,7 +364,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			parent.appendChild(dom);
 		}
 
-		newTree._el = firstSibling;
+		newTree._el = dom;
 
 		if (c!=null) {
 			while (p=c._renderCallbacks.pop()) p();
@@ -434,8 +421,6 @@ export function flushMounts(mounts) {
  * mounted components
  * @param {import('../internal').Component} ancestorComponent The parent
  * component to the ones being diffed
- * @param {import('../internal').VNode} parentVNode Used to set `_lastSibling`
- * pointer to keep track of our current position
  * @returns {import('../internal').PreactElement}
  */
 function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessChildren, mounts, ancestorComponent) {
@@ -539,20 +524,11 @@ export function applyRef(ref, value) {
 
 /**
  * Unmount a virtual node from the tree and apply DOM changes
- * @param {import('../internal').VNode | import('../internal').VNode[]} vnode The virtual node to unmount
+ * @param {import('../internal').VNode} vnode The virtual node to unmount
  * @param {import('../internal').Component} ancestorComponent The parent
  * component to this virtual node
- * @param {boolean} skipRemove Optionally skip removing elements from dom when
- * the parent node has been removed already.
  */
-export function unmount(vnode, ancestorComponent, skipRemove) {
-	if (Array.isArray(vnode)) {
-		for (let i = 0; i < vnode.length; i++) {
-			unmount(vnode[i], ancestorComponent, skipRemove);
-		}
-		return;
-	}
-
+export function unmount(vnode, ancestorComponent) {
 	let r;
 	if (r = vnode.ref) {
 		try {
@@ -563,18 +539,7 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 		}
 	}
 
-	if (!skipRemove && (r = vnode._el)!=null) {
-		let tmp;
-		while (r!=null) {
-			tmp = r;
-			r = r.nextSibling;
-			tmp.remove();
-
-			if (tmp===vnode._lastSibling) break;
-		}
-
-		skipRemove = true;
-	}
+	if ((r = vnode._el)!=null) r.remove();
 
 	vnode._el = vnode._lastSibling = null;
 
@@ -598,11 +563,11 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 		// }
 
 		r.base = r._parent = null;
-		if (r = r._previousVTree) unmount(r, ancestorComponent, skipRemove);
+		if (r = r._previousVTree) unmount(r, ancestorComponent);
 	}
 	else if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {
-			unmount(r[i], ancestorComponent, skipRemove);
+			unmount(r[i], ancestorComponent);
 		}
 	}
 
