@@ -300,7 +300,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, mounts, c, newTree, parentVNode);
+			diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, mounts, c, newTree);
 
 			if (vnode!=null) {
 				c.base = firstSibling = dom = vnode._el;
@@ -344,15 +344,12 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			// }
 		}
 		else {
-			dom = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren, mounts, ancestorComponent);
+			dom = firstSibling = lastSibling = newTree._lastSibling = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren, mounts, ancestorComponent);
 
 			if (newTree.ref && (oldTree.ref !== newTree.ref)) {
 				applyRef(newTree.ref, dom);
 			}
-
-			firstSibling = lastSibling = newTree._lastSibling = dom;
 		}
-
 
 		// Update sibling pointers
 		if (parentVNode._el==null) {
