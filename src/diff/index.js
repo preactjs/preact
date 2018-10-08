@@ -167,7 +167,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	}
 
 	let c, p, isNew = false, oldProps, oldState, oldContext,
-		newTag = newTree.tag, firstSibling, lastSibling;
+		newTag = newTree.tag, lastSibling;
 
 	/** @type {import('../internal').Component | null} */
 	let clearProcessingException;
@@ -189,9 +189,12 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			oldTree = oldTree==null ? EMPTY_ARR : !isOldTreeFragment ? [oldTree] : getVNodeChildren(oldTree);
 			diffChildren(parent, getVNodeChildren(newTree), oldTree, context, isSvg, excessChildren, mounts, c, newTree);
 
-			firstSibling = newTree._el;
+			// The new dom element for fragments is the first child of the new tree
+			// When the first child of a Fragment is passed through `diff()`, it sets its dom
+			// element to the parentVNode._el property (that assignment is near the bottom of
+			// this function), which is read here.
+			dom = newTree._el;
 			lastSibling = newTree._lastSibling;
-			dom = null;
 		}
 		else if (typeof newTag==='function') {
 
@@ -300,7 +303,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			c.base = firstSibling = dom = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, mounts, c, newTree);
+			c.base = dom = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, mounts, c, newTree);
 
 			if (vnode!=null) {
 				lastSibling = vnode._lastSibling;
@@ -343,7 +346,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			// }
 		}
 		else {
-			dom = firstSibling = lastSibling = newTree._lastSibling = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren, mounts, ancestorComponent);
+			dom = lastSibling = newTree._lastSibling = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren, mounts, ancestorComponent);
 
 			if (newTree.ref && (oldTree.ref !== newTree.ref)) {
 				applyRef(newTree.ref, dom);
@@ -352,7 +355,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 
 		// Update sibling pointers
 		if (parentVNode._el==null) {
-			parentVNode._el = firstSibling;
+			parentVNode._el = dom;
 		}
 
 		parentVNode._lastSibling = lastSibling;
@@ -361,7 +364,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			parent.appendChild(dom);
 		}
 
-		newTree._el = firstSibling;
+		newTree._el = dom;
 
 		if (c!=null) {
 			while (p=c._renderCallbacks.pop()) p();
@@ -387,7 +390,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	// 	unmount(originalOldTree);
 	// }
 
-	return newTree._el;
+	return dom;
 }
 
 export function flushMounts(mounts) {
