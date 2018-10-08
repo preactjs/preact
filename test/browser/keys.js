@@ -281,6 +281,8 @@ describe('keys', () => {
 	});
 
 	it.skip('should not preserve state between unkeyed and keyed component', () => {
+		// React and Preact v8 behavior: https://codesandbox.io/s/57prmy5mx
+
 		const Stateful = createStateful('Stateful');
 
 		function Foo({ keyed }) {
@@ -301,6 +303,8 @@ describe('keys', () => {
 	});
 
 	it('should not preserve state when keys change with multiple children', () => {
+		// React & Preact v8 behavior: https://codesandbox.io/s/8l3p6lz9kj
+
 		const Stateful1 = createStateful('Stateful1');
 		const Stateful2 = createStateful('Stateful2');
 
@@ -350,6 +354,8 @@ describe('keys', () => {
 	});
 
 	it('should preserve state when moving keyed components', () => {
+		// React & Preact v8 behavior: https://codesandbox.io/s/8l3p6lz9kj
+
 		const Stateful1 = createStateful('Stateful1');
 		const Stateful2 = createStateful('Stateful2');
 
