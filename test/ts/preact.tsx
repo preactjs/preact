@@ -125,3 +125,68 @@ class ComponentWithLifecycle extends Component<DummyProps, DummyState> {
 		console.log("componentDidUpdate", previousProps, previousState, previousContext);
 	}
 }
+
+// Default props: JSX.LibraryManagedAttributes
+
+class DefaultProps extends Component<{text: string, bool: boolean}> {
+	static defaultProps = {
+		text: "hello"
+	};
+
+	render() {
+		return <div>{this.props.text}</div>;
+	}
+}
+
+const d1 = <DefaultProps bool={false} text="foo" />;
+const d2 = <DefaultProps bool={false} />;
+
+class DefaultPropsWithUnion extends Component<
+	{ default: boolean } & (
+		| {
+				type: "string";
+				str: string;
+		  }
+		| {
+				type: "number";
+				num: number;
+		  })
+> {
+	static defaultProps = {
+		default: true
+	};
+
+	render() {
+		return <div />;
+	}
+}
+
+const d3 = <DefaultPropsWithUnion type="string" str={"foo"} />;
+const d4 = <DefaultPropsWithUnion type="number" num={0xf00} />;
+const d5 = <DefaultPropsWithUnion type="string" str={"foo"} default={false} />;
+const d6 = <DefaultPropsWithUnion type="number" num={0xf00} default={false} />;
+
+class DefaultUnion extends Component<
+	| {
+			type: "number";
+			num: number;
+	  }
+	| {
+			type: "string";
+			str: string;
+	  }
+> {
+	static defaultProps = {
+		type: "number",
+		num: 1
+	};
+
+	render() {
+		return <div />;
+	}
+}
+
+const d7 = <DefaultUnion />;
+const d8 = <DefaultUnion num={1} />;
+const d9 = <DefaultUnion type="number" />;
+const d10 = <DefaultUnion type="string" str="foo" />;

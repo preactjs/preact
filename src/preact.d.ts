@@ -4,8 +4,8 @@ export as namespace preact;
 declare namespace preact {
 	type Key = string | number;
 	type Ref<T> = (instance: T) => void;
-	type ComponentChild = VNode<any> | string | number | null;
-	type ComponentChildren = ComponentChild[] | ComponentChild | object | string | number | null;
+	type ComponentChild = VNode<any> | object | string | number | boolean | null;
+	type ComponentChildren = ComponentChild[] | ComponentChild;
 
 	/**
 	 * @deprecated
@@ -124,6 +124,15 @@ declare namespace preact {
 	};
 }
 
+type Defaultize<Props, Defaults> =
+	// Distribute over unions
+	Props extends any
+		? 	// Make any properties included in Default optional
+			& Partial<Pick<Props, Extract<keyof Props, keyof Defaults>>>
+			// Include the remaining properties from Props
+			& Pick<Props, Exclude<keyof Props, keyof Defaults>>
+		: never;
+
 declare global {
 	namespace JSX {
 		interface Element extends preact.VNode<any> {
@@ -139,6 +148,11 @@ declare global {
 		interface ElementChildrenAttribute {
 			children: any;
 		}
+
+		type LibraryManagedAttributes<Component, Props> =
+			Component extends { defaultProps: infer Defaults }
+				? Defaultize<Props, Defaults>
+				: Props;
 
 		interface SVGAttributes extends HTMLAttributes {
 			accentHeight?: number | string;
@@ -407,6 +421,7 @@ declare global {
 		interface DOMAttributes extends preact.PreactDOMAttributes {
 			// Image Events
 			onLoad?: GenericEventHandler;
+			onError?: GenericEventHandler;
 			onLoadCapture?: GenericEventHandler;
 
 			// Clipboard Events
