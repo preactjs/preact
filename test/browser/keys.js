@@ -9,6 +9,26 @@ describe('keys', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
+	/** @type {string[]} */
+	let ops;
+
+	function createStateful(name) {
+		return class Stateful extends Component {
+			componentDidUpdate() {
+				ops.push(`Update ${name}`);
+			}
+			componentDidMount() {
+				ops.push(`Mount ${name}`);
+			}
+			componentWillUnmount() {
+				ops.push(`Unmount ${name}`);
+			}
+			render() {
+				return <div>{name}</div>;
+			}
+		};
+	}
+
 	/** @type {(props: {values: any[]}) => any} */
 	const List = props => (
 		<ol>
@@ -36,6 +56,7 @@ describe('keys', () => {
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		ops = [];
 	});
 
 	afterEach(() => {
@@ -239,25 +260,8 @@ describe('keys', () => {
 		expect(getLog()).to.deep.equal({ '<ol>bcda.insertBefore(<li>a, <li>b)': 1 });
 	});
 
-	it('should not preserve state when the keys are different', () => {
-
-		/** @type {string[]} */
-		let ops = [];
-
-		class Stateful extends Component {
-			componentDidUpdate() {
-				ops.push('Update Stateful');
-			}
-			componentDidMount() {
-				ops.push('Mount Stateful');
-			}
-			componentWillUnmount() {
-				ops.push('Unmount Stateful');
-			}
-			render() {
-				return <div>Hello</div>;
-			}
-		}
+	it.skip('should not preserve state when the keys are different', () => {
+		const Stateful = createStateful('Stateful');
 
 		function Foo({ condition }) {
 			return condition ? <Stateful key="a" /> : <Stateful key="b" />;
@@ -276,24 +280,8 @@ describe('keys', () => {
 		expect(ops).to.deep.equal(['Unmount Stateful', 'Mount Stateful'], 'switching keys 2');
 	});
 
-	it('should not preserve state between unkeyed and keyed component', () => {
-		/** @type {string[]} */
-		let ops = [];
-
-		class Stateful extends Component {
-			componentDidUpdate() {
-				ops.push('Update Stateful');
-			}
-			componentDidMount() {
-				ops.push('Mount Stateful');
-			}
-			componentWillUnmount() {
-				ops.push('Unmount Stateful');
-			}
-			render() {
-				return <div>Hello</div>;
-			}
-		}
+	it.skip('should not preserve state between unkeyed and keyed component', () => {
+		const Stateful = createStateful('Stateful');
 
 		function Foo({ keyed }) {
 			return keyed ? <Stateful key="a" /> : <Stateful />;
@@ -310,5 +298,103 @@ describe('keys', () => {
 		ops = [];
 		render(<Foo keyed />, scratch);
 		expect(ops).to.deep.equal(['Unmount Stateful', 'Mount Stateful'], 'switching from unkeyed to keyed');
+	});
+
+	it('should not preserve state when keys change with multiple children', () => {
+		const Stateful1 = createStateful('Stateful1');
+		const Stateful2 = createStateful('Stateful2');
+
+		let Stateful1Ref;
+		let Stateful2Ref;
+		let Stateful1MovedRef;
+		let Stateful2MovedRef;
+
+		function Foo({ moved }) {
+			return moved ? (
+				<div>
+					<div>1</div>
+					<Stateful1 key='c' ref={c => Stateful1MovedRef = c} />
+					<div>2</div>
+					<Stateful2 key='d' ref={c => Stateful2MovedRef = c} />
+				</div>
+			) : (
+				<div>
+					<div>1</div>
+					<Stateful1 key='a' ref={c => Stateful1Ref = c} />
+					<div>2</div>
+					<Stateful2 key='b' ref={c => Stateful2Ref = c} />
+				</div>
+			);
+		}
+
+		ops = [];
+		render(<Foo moved={false} />, scratch);
+
+		expect(ops).to.deep.equal(['Mount Stateful2', 'Mount Stateful1']);
+		expect(Stateful1Ref).to.exist;
+		expect(Stateful2Ref).to.exist;
+
+		ops = [];
+		render(<Foo moved />, scratch);
+
+		expect(ops).to.deep.equal(['Unmount Stateful2', 'Unmount Stateful1', 'Mount Stateful2', 'Mount Stateful1']);
+		expect(Stateful1MovedRef).to.not.equal(Stateful1Ref);
+		expect(Stateful2MovedRef).to.not.equal(Stateful2Ref);
+
+		ops = [];
+		render(<Foo moved={false} />, scratch);
+
+		expect(ops).to.deep.equal(['Unmount Stateful2', 'Unmount Stateful1', 'Mount Stateful2', 'Mount Stateful1']);
+		expect(Stateful1Ref).to.not.equal(Stateful1MovedRef);
+		expect(Stateful2Ref).to.not.equal(Stateful2MovedRef);
+	});
+
+	it('should preserve state when moving keyed components', () => {
+		const Stateful1 = createStateful('Stateful1');
+		const Stateful2 = createStateful('Stateful2');
+
+		let Stateful1Ref;
+		let Stateful2Ref;
+		let Stateful1MovedRef;
+		let Stateful2MovedRef;
+
+		function Foo({ moved }) {
+			return moved ? (
+				<div>
+					<div>1</div>
+					<Stateful2 key='b' ref={c => Stateful2MovedRef = c} />
+					<div>2</div>
+					<Stateful1 key='a' ref={c => Stateful1MovedRef = c} />
+				</div>
+			) : (
+				<div>
+					<div>1</div>
+					<Stateful1 key='a' ref={c => Stateful1Ref = c} />
+					<div>2</div>
+					<Stateful2 key='b' ref={c => Stateful2Ref = c} />
+				</div>
+			);
+		}
+
+		ops = [];
+		render(<Foo moved={false} />, scratch);
+
+		expect(ops).to.deep.equal(['Mount Stateful2', 'Mount Stateful1']);
+		expect(Stateful1Ref).to.exist;
+		expect(Stateful2Ref).to.exist;
+
+		ops = [];
+		render(<Foo moved />, scratch);
+
+		expect(ops).to.deep.equal(['Update Stateful2', 'Update Stateful1']);
+		expect(Stateful1MovedRef).to.equal(Stateful1Ref);
+		expect(Stateful2MovedRef).to.equal(Stateful2Ref);
+
+		ops = [];
+		render(<Foo moved={false} />, scratch);
+
+		expect(ops).to.deep.equal(['Update Stateful1', 'Update Stateful2']);
+		expect(Stateful1Ref).to.equal(Stateful1MovedRef);
+		expect(Stateful2Ref).to.equal(Stateful2MovedRef);
 	});
 });
