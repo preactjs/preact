@@ -300,10 +300,9 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, mounts, c, newTree);
+			c.base = firstSibling = dom = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, mounts, c, newTree);
 
 			if (vnode!=null) {
-				c.base = firstSibling = dom = vnode._el;
 				lastSibling = vnode._lastSibling;
 			}
 
@@ -387,6 +386,8 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	// if (originalOldTree && originalOldTree._el && originalOldTree._el!==dom) {
 	// 	unmount(originalOldTree);
 	// }
+
+	return newTree._el;
 }
 
 export function flushMounts(mounts) {
