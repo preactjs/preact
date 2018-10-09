@@ -9,11 +9,16 @@ function createRef() {
 	return {};
 }
 
+function forwardRef(render) {
+	return { $$typeof: Symbol.for('react.forward_ref'), render };
+}
+
 export default {
 	h,
 	createElement,
 	cloneElement,
 	createRef,
+	forwardRef,
 	Component,
 	render,
 	rerender,
@@ -25,6 +30,7 @@ export {
 	createElement,
 	cloneElement,
 	createRef,
+	forwardRef,
 	Component,
 	render,
 	rerender,
