@@ -1,4 +1,4 @@
-import { getData, getChildren, getRoot, getInstance, hasProfileDataChanged, hasDataChanged, isRoot } from './custom';
+import { getData, getChildren, getRoot, getInstance, hasProfileDataChanged, hasDataChanged, isRoot, patchRoot } from './custom';
 import { assign } from '../util';
 
 /**
@@ -48,20 +48,6 @@ export class Renderer {
 			let event = events[i];
 			this.hook.emit(event.type, event);
 		}
-	}
-
-	/**
-	 * Mark the reconciliation of a root tree as done
-	 * @param {import('../internal').VNode} vnode
-	 */
-	markRootCommitted(vnode) {
-		this.pending.push({
-			internalInstance: vnode,
-			renderer: this.rid,
-			// In preparation for https://github.com/facebook/react-devtools/pull/1178/
-			data: getData(vnode),
-			type: 'rootCommitted'
-		});
 	}
 
 	/**
@@ -172,21 +158,30 @@ export class Renderer {
 	 * @param {import('../internal').VNode} root
 	 */
 	handleCommitFiberRoot(root) {
+		if (isRoot(root)) {
+			root = patchRoot(root);
+		}
+
 		let inst = getInstance(root);
+
 		if (this.inst2vnode.has(inst)) this.update(root);
 		else this.mount(root);
-
-		// find the actual root
-		if (!isRoot(root)) {
-			root = getRoot(root);
-			inst = getInstance(root);
-		}
 
 		if (!this.inst2vnode.has(inst)) {
 			this.inst2vnode.set(inst, root);
 		}
-		this.markRootCommitted(root);
+
+		root = getRoot(root);
+		this.pending.push({
+			internalInstance: root,
+			renderer: this.rid,
+			// In preparation for https://github.com/facebook/react-devtools/pull/1178/
+			data: getData(root),
+			type: 'rootCommitted'
+		});
+
 		this.flushPendingEvents();
+		return root;
 	}
 
 	/**

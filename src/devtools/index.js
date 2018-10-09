@@ -66,7 +66,11 @@ export function initDevTools() {
 		// a noop setter.
 		Object.defineProperty(hook.helpers, rid, {
 			get: () => cevicheRenderer,
-			set: () => helpers.markConnected()
+			set: () => {
+				if (!cevicheRenderer.connected) {
+					helpers.markConnected();
+				}
+			}
 		});
 
 		let helpers = hook.helpers[rid];
@@ -80,13 +84,8 @@ export function initDevTools() {
 
 		onCommitRoot = catchErrors(root => {
 			let roots = hook.getFiberRoots(rid);
-
-			// To enable profiling the devtools check if this property exists on
-			// the given root node.
-			root.treeBaseDuration = null;
-
+			root = helpers.handleCommitFiberRoot(root);
 			if (!roots.has(root)) roots.add(root);
-			helpers.handleCommitFiberRoot(root);
 		});
 
 		onCommitUnmount = catchErrors(vnode => {

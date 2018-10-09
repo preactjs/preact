@@ -1,4 +1,4 @@
-import { Fragment } from '../create-element';
+import { Fragment, createElement } from '../create-element';
 import { enqueueRender } from '../component';
 
 /**
@@ -133,6 +133,10 @@ export function getRoot(vnode) {
 		}
 	}
 
+	if (last!=null) {
+		last = roots.get(getInstance(last));
+	}
+
 	return last;
 }
 
@@ -142,7 +146,10 @@ export function getRoot(vnode) {
  * @returns {boolean}
  */
 export function isRoot(vnode) {
-	return vnode._el!=null && vnode._el.parentNode!=null && vnode._el.parentNode._previousVTree!=null;
+	return vnode._el!=null && vnode._el.parentNode!=null &&
+
+	/** @type {import('../internal').PreactElement} */
+	vnode._el.parentNode._previousVTree!=null;
 }
 
 /**
@@ -185,4 +192,45 @@ export function hasDataChanged(prev, next) {
  */
 export function hasProfileDataChanged(prev, next) {
 	return prev.startTime!==next.startTime || prev.endTime!==next.endTime;
+}
+
+/**
+ * @type {WeakMap<import('../internal').Component | import('../internal').PreactElement | HTMLElement | Text, import('../internal').VNode>}
+ */
+let roots = new WeakMap();
+
+let noop = () => {};
+
+/**
+ * Add a wrapper node around the root. React internally has an additional
+ * special `HostRoot` node at the top of each root. Because of that the Profiler
+ * always skips the first vnode. To fix that we insert a virtual wrapper just
+ * for the devtools.
+ * @param {import('../internal').VNode} vnode
+ */
+export function patchRoot(vnode) {
+	let inst = getInstance(vnode);
+	let root = roots.get(inst);
+	if (root==null) {
+		root = createElement(Fragment, { children: vnode });
+
+		root._el = vnode._el;
+		root.startTime = vnode.startTime;
+		root.endTime = vnode.endTime;
+		root._children = [vnode];
+		root._component = {
+			_previousVTree: vnode,
+			setState: noop,
+			forceUpdate: noop
+		};
+
+		// To enable profiling the devtools check if this property exists on
+		// the given root node.
+		root.treeBaseDuration = 0;
+		root.stateNode = { memoizedInteractions: [] };
+
+		roots.set(inst, root);
+	}
+
+	return root;
 }
