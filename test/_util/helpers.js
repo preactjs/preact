@@ -8,6 +8,7 @@ import { createElement as h, Component } from '../../src';
  */
 export function setupScratch() {
 	const scratch = document.createElement('div');
+	scratch.id = 'scratch';
 	(document.body || document.documentElement).appendChild(scratch);
 	return scratch;
 }
@@ -41,6 +42,18 @@ export function teardown(scratch) {
 		delete Component.__test__previousDebounce;
 	}
 }
+
+/**
+ * A helper to generate innerHTML validation strings containing spans
+ * @param {string} contents The contents of the span, as a string
+ */
+export const span = contents => `<span>${contents}</span>`;
+
+/**
+ * A helper to generate innerHTML validation strings containing divs
+ * @param {string} contents The contents of the div, as a string
+ */
+export const div = contents => `<div>${contents}</div>`;
 
 const Foo = () => 'd';
 export const getMixedArray = () => (

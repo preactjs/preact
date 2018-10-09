@@ -48,16 +48,14 @@ export function createElement(tag, props, children) {
 function createVNode(tag, props, text, key, ref) {
 	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
 	// Do not inline into createElement and coerceToVNode!
-	return { tag, props, text, key, ref, _children: null, _el: null, _component: null };
+	return { tag, props, text, key, ref, _children: null, _el: null, _lastSibling: null, _component: null };
 }
 
 export function createRef() {
 	return {};
 }
 
-export function Fragment(props) {
-	return props.children;
-}
+export const Fragment = 9;
 
 /**
  * Coerce an untrusted value into a VNode
@@ -70,6 +68,10 @@ export function coerceToVNode(possibleVNode) {
 	if (typeof possibleVNode === 'boolean') return null;
 	if (typeof possibleVNode === 'string' || typeof possibleVNode === 'number') {
 		return createVNode(null, EMPTY_OBJ, possibleVNode, null, null);
+	}
+
+	if (Array.isArray(possibleVNode)) {
+		return createVNode(Fragment, { children: possibleVNode }, null, null, null);
 	}
 
 	// Clone vnode if it has already been used. ceviche/#57

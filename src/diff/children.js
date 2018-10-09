@@ -21,8 +21,10 @@ import { coerceToVNode } from '../create-element';
  * which have mounted
  * @param {import('../internal').Component} ancestorComponent The direct parent
  * component to the ones being diffed
+ * @param {import('../internal').VNode} parentVNode Used to set `_lastSibling`
+ * pointer to keep track of our current position
  */
-export function diffChildren(node, children, oldChildren, context, isSvg, excessChildren, mounts, ancestorComponent) {
+export function diffChildren(node, children, oldChildren, context, isSvg, excessChildren, mounts, ancestorComponent, parentVNode) {
 	// if (oldChildren==null) oldChildren = EMPTY_ARR;
 
 	// let __children = oldChildren.map(cloneElement);
@@ -67,8 +69,8 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 
 	let child, i, j, p, index, old, newEl,
 		oldChildrenLength = oldChildren.length,
-		childNode = node.firstChild,
-		next, sib;
+		childNode = typeof parentVNode.tag=='number' ? parentVNode._el : node.firstChild,
+		next, last, sib;
 
 	// types = {};
 	for (i=0; i<children.length; i++) {
@@ -87,6 +89,9 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 
 		// __operation += '\n';
 		// let index;
+
+		// Check if we find a corresponding element in oldChildren and store the
+		// index where the element was found.
 		p = oldChildren[i];
 		if (p != null && (child.key==null ? (child.tag === p.tag) : (child.key === p.key))) {
 			index = i;
@@ -102,6 +107,10 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 				}
 			}
 		}
+
+		// If we have found a corresponding old element we store it in a variable
+		// and delete it from the array. That way the next iteration can skip this
+		// element.
 		if (index!=null) {
 			old = oldChildren[index];
 			oldChildren[index] = null;
@@ -158,15 +167,23 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 
 		next = childNode!=null && childNode.nextSibling;
 
-		newEl = diff(old==null ? null : old._el, node, child, old, context, isSvg, false, excessChildren, mounts, ancestorComponent);
-		if (newEl!=null) {
+		// Morph the old element into the new one, but don't append it to the dom yet
+		newEl = diff(old==null ? null : old._el, node, child, old, context, isSvg, false, excessChildren, mounts, ancestorComponent, parentVNode);
+
+		// Only proceed if the vnode has not been unmounted by `diff()` above.
+		if (child!=null && newEl !=null) {
+			last = child._lastSibling;
+
 			// let childNode;
 			// childNode = null;
 			// let childNode = node.childNodes[i];
 			// if (old==null || newEl!=childNode || newEl.parentNode==null) {
 			// if (newEl!=null && (old==null || old.index!==i)) {
 			// if (old==null || newEl.parentNode==null || newEl!=(childNode = node.childNodes[i])) {
-			if (old==null || newEl!=childNode || newEl.parentNode==null) {
+
+			// Fragments or similar components have already been diffed at this point.
+			if (newEl!==last) {}
+			else if (old==null || newEl!=childNode || newEl.parentNode==null) {
 				// node.insertBefore(newEl, node.childNodes[i]);
 				// node.insertBefore(newEl, childNode);
 				// let nextChild;
@@ -188,15 +205,13 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 					}
 					node.insertBefore(newEl, childNode);
 				}
-
-				next = newEl.nextSibling;
 			}
 			// else {
 			// 	// __operation += ` -> unchanged`;
 			// 	childNode = next;
 			// }
 
-			childNode = next;
+			childNode = last!=null ? last.nextSibling : next;
 
 			// childNode = newEl.nextSibling;
 		}
@@ -258,9 +273,13 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 	// console.log(oldChildren.slice(), children.slice());
 
 	// console.log(excessChildren!=null && excessChildren.slice());
+
+	// Remove children that are not part of any vnode. Only used by `hydrate`
 	if (excessChildren!=null) for (i=excessChildren.length; i--; ) if (excessChildren[i]!=null) excessChildren[i].remove();
 
 	// for (let i in seen) if (seen[i] != null && (c = seen[i]._el)) c.remove();
+
+	// Remove remaining oldChildren if there are any.
 	for (i=oldChildren.length; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
 	// for (let i in seen) {
 	// 	if (seen[i]!=null) {
