@@ -699,7 +699,7 @@ describe('render()', () => {
 		expect(sortAttributes(html)).to.equal(sortAttributes('<input type="range" min="0" max="100" list="steplist">'));
 	});
 
-	it('should not execute append operation when child is at last', () => {
+	it('should not execute append operation when child is at last', (done) => {
 		// See developit/preact#717 for discussion about the issue this addresses
 
 		let todoText = 'new todo that I should complete';
@@ -750,18 +750,21 @@ describe('render()', () => {
 			target: input
 		});
 
-		// Simulate user pressing enter
-		addTodo({
-			keyCode: ENTER
+		setTimeout(() => {
+			// Simulate user pressing enter
+			addTodo({
+				keyCode: ENTER
+			});
+
+			// Before Preact rerenders, focus should be on the input
+			expect(document.activeElement).to.equal(input);
+
+			rerender();
+
+			// After Preact rerenders, focus should remain on the input
+			expect(document.activeElement).to.equal(input);
+			expect(scratch.innerHTML).to.contain(`<span>${todoText}</span>`);
+			done();
 		});
-
-		// Before Preact rerenders, focus should be on the input
-		expect(document.activeElement).to.equal(input);
-
-		rerender();
-
-		// After Preact rerenders, focus should remain on the input
-		expect(document.activeElement).to.equal(input);
-		expect(scratch.innerHTML).to.contain(`<span>${todoText}</span>`);
 	});
 });
