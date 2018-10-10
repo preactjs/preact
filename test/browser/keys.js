@@ -415,8 +415,8 @@ describe('keys', () => {
 		let Stateful1MovedRef;
 		let Stateful2MovedRef;
 
-		function Foo({ moved }) {
-			return moved ? (
+		function Foo({ unkeyed }) {
+			return unkeyed ? (
 				<div>
 					<div>1</div>
 					<Stateful1 ref={c => Stateful2MovedRef = c} />
@@ -434,21 +434,21 @@ describe('keys', () => {
 		}
 
 		ops = [];
-		render(<Foo moved={false} />, scratch);
+		render(<Foo unkeyed={false} />, scratch);
 
 		expect(ops).to.deep.equal(['Mount Stateful2', 'Mount Stateful1']);
 		expect(Stateful1Ref).to.exist;
 		expect(Stateful2Ref).to.exist;
 
 		ops = [];
-		render(<Foo moved />, scratch);
+		render(<Foo unkeyed />, scratch);
 
 		expect(ops).to.deep.equal(['Unmount Stateful2', 'Unmount Stateful1', 'Mount Stateful2', 'Mount Stateful1']);
 		expect(Stateful1MovedRef).to.not.equal(Stateful1Ref);
 		expect(Stateful2MovedRef).to.not.equal(Stateful2Ref);
 
 		ops = [];
-		render(<Foo moved={false} />, scratch);
+		render(<Foo unkeyed={false} />, scratch);
 
 		expect(ops).to.deep.equal(['Unmount Stateful2', 'Unmount Stateful1', 'Mount Stateful2', 'Mount Stateful1']);
 		expect(Stateful1Ref).to.not.equal(Stateful1MovedRef);
