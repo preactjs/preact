@@ -21,6 +21,7 @@ export function getNodeType(vnode) {
 export function getDisplayName(vnode) {
 	if (typeof vnode.type==='function') return vnode.type.name;
 	else if (typeof vnode.type==='string') return vnode.type;
+	else if (vnode.type===Fragment) return 'Fragment';
 	return '#text';
 }
 
@@ -100,19 +101,25 @@ export function getData(vnode) {
 }
 
 /**
- * Get all rendered vnode children as an array
+ * Get all rendered vnode children as an array. Moreover we need to filter
+ * out `null` or other falsy children.
  * @param {import('../internal').VNode} vnode
  * @returns {import('../internal').VNode[]}
  */
 export function getChildren(vnode) {
 	let c = vnode._component;
-	return c!=null
-		? Array.isArray(c._previousVTree)
-			? c._previousVTree
-			: [c._previousVTree]
-		: vnode._children!=null
-			? vnode._children
-			: [];
+
+	if (c==null) {
+		return vnode._children!=null ? vnode._children.filter(Boolean) : [];
+	}
+
+	if (!Array.isArray(c._previousVTree)) {
+		return c._previousVTree!=null ? [c._previousVTree] : null;
+	}
+
+	// Filter out falsy children
+	let children = c._previousVTree.filter(Boolean);
+	return children.length > 0 ? children : null;
 }
 
 /**
@@ -120,7 +127,7 @@ export function getChildren(vnode) {
  * @param {import('../internal').VNode} vnode
  * @returns {import('../internal').VNode | null}
  */
-export function getRoot(vnode) {
+export function getPatchedRoot(vnode) {
 
 	/** @type {any} */
 	let dom = vnode._el;

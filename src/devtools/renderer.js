@@ -1,4 +1,4 @@
-import { getData, getChildren, getRoot, getInstance, hasProfileDataChanged, hasDataChanged, isRoot, patchRoot } from './custom';
+import { getData, getChildren, getPatchedRoot, getInstance, hasProfileDataChanged, hasDataChanged, isRoot, patchRoot } from './custom';
 import { assign } from '../util';
 
 /**
@@ -172,7 +172,7 @@ export class Renderer {
 			this.inst2vnode.set(inst, root);
 		}
 
-		root = getRoot(root);
+		root = getPatchedRoot(root);
 		this.pending.push({
 			internalInstance: root,
 			renderer: this.rid,

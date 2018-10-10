@@ -2,7 +2,7 @@ import { createElement as h } from '../../src/create-element';
 import { render } from '../../src/render';
 import { assign } from '../../src/util';
 import { Component } from '../../src/component';
-import { getDisplayName, setIn, isRoot, getRoot, getData } from '../../src/devtools/custom';
+import { getDisplayName, setIn, isRoot, getPatchedRoot, getData, patchRoot } from '../../src/devtools/custom';
 import { setupScratch, setupRerender, teardown } from '../_util/helpers';
 import { initDevTools } from '../../src/devtools';
 import options from '../../src/options';
@@ -30,6 +30,7 @@ function createMockHook() {
 	}
 
 	function clear() {
+		roots.clear();
 		events.length = 0;
 	}
 
@@ -54,20 +55,90 @@ function createMockHook() {
 	};
 }
 
+/**
+ * Verify the references in the events passed to the devtools. Component have to
+ * be traversed in a child-depth-first order for the devtools to work.
+ * @param {Array<import('../../src/internal').DevtoolsEvent>} events
+ */
+function checkEventReferences(events) {
+	let seen = new Set();
+
+	events.forEach((event, i) => {
+		if (i > 0 && Array.isArray(event.data.children)) {
+			event.data.children.forEach(child => {
+				if (!seen.has(child)) {
+					throw new Error(`Event at index ${i} has a child that could not be found in a preceeding event ${getDisplayName(child)}`);
+				}
+			});
+		}
+
+		let inst = event.internalInstance;
+		if (event.type=='mount') {
+			seen.add(inst);
+		}
+		else if (!seen.has(inst)) {
+			throw new Error(`Event at index ${i} for component ${inst!=null ? getDisplayName(inst) : inst} is not mounted. Perhaps you forgot to send a "mount" event prior to this?`);
+		}
+
+		// A "root" event must be a `Wrapper`, otherwise the
+		// Profiler tree view will be messed up.
+		if (event.type=='root' && event.data.nodeType!='Wrapper') {
+			throw new Error(`Event of type "root" must be a "Wrapper". Found "${event.data.nodeType}" instead.`);
+		}
+
+		if (i==events.length - 1) {
+
+			// Assert that the last child is of type `rootCommitted`
+			if (event.type!='rootCommitted') {
+				throw new Error(`The last event must be of type 'rootCommitted' for every committed tree`);
+			}
+
+			// Assert that the root node is a wrapper node (=Fragment). Otherwise the
+			// Profiler tree view will be messed up.
+			if (event.data.nodeType!=='Wrapper') {
+				throw new Error(`The root node must be a "Wrapper" node (like a Fragment) for the Profiler to display correctly. Found "${event.data.nodeType}" instead.`);
+			}
+		}
+	});
+}
+
 describe('devtools', () => {
 
 	/** @type {import('../../src/internal').PreactElement} */
 	let scratch;
 
+	/** @type {() => void} */
 	let rerender;
+
+	/** @type {MockHook} */
+	let hook;
+
+	let oldOptions;
 
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
+
+		oldOptions = assign({}, options);
+
+		hook = createMockHook();
+
+		/** @type {import('../../src/internal').DevtoolsWindow} */
+		(window).__REACT_DEVTOOLS_GLOBAL_HOOK__ = hook;
+
+		initDevTools();
+		let rid = Object.keys(hook._renderers)[0];
+
+		// Trigger setter.
+		hook.helpers[rid] = {};
+		hook.clear();
 	});
 
 	afterEach(() => {
 		teardown(scratch);
+
+		delete /** @type {import('../../src/internal').DevtoolsWindow} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
+		assign(options, oldOptions);
 	});
 
 	describe('getDisplayName', () => {
@@ -130,13 +201,15 @@ describe('devtools', () => {
 		});
 	});
 
-	describe('getRoot', () => {
+	describe('getPatchedRoot', () => {
 		it('should get the root of a vnode', () => {
 			render(<div>Hello World</div>, scratch);
 			let root = scratch._previousVTree;
 
-			expect(getRoot(root)).to.equal(root);
-			expect(getRoot(root._children[0])).to.equal(root);
+			let wrapped = patchRoot(root);
+
+			expect(getPatchedRoot(root)).to.equal(wrapped);
+			expect(getPatchedRoot(wrapped._children[0])).to.equal(wrapped);
 		});
 	});
 
@@ -199,36 +272,13 @@ describe('devtools', () => {
 	});
 
 	describe('renderer', () => {
-
-		/** @type {MockHook} */
-		let hook;
-
-		let oldOptions;
-
-		beforeEach(() => {
-			oldOptions = assign({}, options);
-
-			hook = createMockHook();
-
-			/** @type {import('../../src/internal').DevtoolsWindow} */
-			(window).__REACT_DEVTOOLS_GLOBAL_HOOK__ = hook;
-
-			initDevTools();
-			let rid = Object.keys(hook._renderers)[0];
-
-			// Trigger setter.
-			hook.helpers[rid] = {};
-			hook.clear();
-		});
-
-		afterEach(() => {
-			delete /** @type {import('../../src/internal').DevtoolsWindow} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
-			assign(options, oldOptions);
-		});
-
 		it('should mount a root', () => {
 			render(<div>Hello World</div>, scratch);
+			checkEventReferences(hook.log);
+
 			expect(hook.log.map(x => x.type)).to.deep.equal([
+				'mount',
+				'mount',
 				'mount',
 				'root',
 				'rootCommitted'
@@ -237,20 +287,27 @@ describe('devtools', () => {
 
 		it('should detect when a root is updated', () => {
 			render(<div>Hello World</div>, scratch);
-			let mount = hook.log.find(x => x.type==='mount');
+			checkEventReferences(hook.log);
 
+			let prev = hook.log.slice();
 			hook.clear();
-			render(<div>Foo</div>, scratch);
-			expect(hook.log.map(x => x.type)).to.deep.equal([
-				'update',
-				'rootCommitted'
-			]);
 
-			expect(mount.internalInstance===hook.log[0].internalInstance).to.equal(true);
+			render(<div>Foo</div>, scratch);
+			checkEventReferences(prev.concat(hook.log));
+
+			expect(hook.log.map(x => ({
+				type: x.type,
+				component: getDisplayName(x.internalInstance)
+			}))).to.deep.equal([
+				{ type: 'update', component: 'div' },
+				{ type: 'update', component: 'Fragment' },
+				{ type: 'rootCommitted', component: 'Fragment' }
+			]);
 		});
 
 		it('should detect when a component is unmounted', () => {
 			render(<div><span>Hello World</span></div>, scratch);
+			checkEventReferences(hook.log);
 
 			hook.clear();
 			render(<div />, scratch);
@@ -282,6 +339,8 @@ describe('devtools', () => {
 
 			updateState();
 			rerender();
+
+			checkEventReferences(hook.log);
 
 			// Previous `internalInstance` from mount must be referentially equal to
 			// `internalInstance` from update
@@ -321,6 +380,8 @@ describe('devtools', () => {
 				let event = hook.log.find(x => x.data.publicInstance instanceof App);
 				event.data.updater.setInState(['active'], false);
 				rerender();
+
+				checkEventReferences(hook.log);
 
 				expect(scratch.textContent).to.equal('bar');
 			});
@@ -366,6 +427,8 @@ describe('devtools', () => {
 				let event = hook.log.find(x => x.data.publicInstance instanceof App);
 				event.data.updater.setInContext(['active'], false);
 				rerender();
+
+				checkEventReferences(hook.log);
 
 				expect(scratch.textContent).to.equal('bar');
 			});
