@@ -206,6 +206,16 @@ import preact from 'preact';
 >   ]
 > }
 > ```
+>
+> **For Babel 7:**
+>
+> ```json
+> {
+>   "plugins": [
+>     ["@babel/plugin-transform-react-jsx", { "pragma":"h" }]
+>   ]
+> }
+> ```
 > **For using Preact along with TypeScript add to `tsconfig.json`:**
 >
 > ```json
