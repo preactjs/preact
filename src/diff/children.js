@@ -93,14 +93,14 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 		// Check if we find a corresponding element in oldChildren and store the
 		// index where the element was found.
 		p = oldChildren[i];
-		if (p != null && (child.key==null ? (child.tag === p.tag) : (child.key === p.key))) {
+		if (p != null && (child.key==null && p.key==null ? (child.tag === p.tag) : (child.key === p.key))) {
 			index = i;
 		}
 		else {
 			for (j=0; j<oldChildrenLength; j++) {
 				p = oldChildren[j];
 				if (p!=null) {
-					if (child.key==null ? (child.tag === p.tag) : (child.key === p.key)) {
+					if (child.key==null && p.key==null ? (child.tag === p.tag) : (child.key === p.key)) {
 						index = j;
 						break;
 					}
