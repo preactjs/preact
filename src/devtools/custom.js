@@ -149,7 +149,7 @@ export function isRoot(vnode) {
 	return vnode._el!=null && vnode._el.parentNode!=null &&
 
 	/** @type {import('../internal').PreactElement} */
-	vnode._el.parentNode._previousVTree!=null;
+	(vnode._el.parentNode)._previousVTree!=null;
 }
 
 /**
@@ -214,11 +214,15 @@ export function patchRoot(vnode) {
 	if (root==null) {
 		root = createElement(Fragment, { children: vnode });
 
+		// We haven't actually rendered this node so we need to fill out the
+		// properties that the devtools rely upon ourselves.
 		root._el = vnode._el;
 		root.startTime = vnode.startTime;
 		root.endTime = vnode.endTime;
 		root._children = [vnode];
-		root._component = {
+
+		/** @type {*} */
+		(root)._component = {
 			_previousVTree: vnode,
 			setState: noop,
 			forceUpdate: noop
@@ -226,8 +230,11 @@ export function patchRoot(vnode) {
 
 		// To enable profiling the devtools check if this property exists on
 		// the given root node.
-		root.treeBaseDuration = 0;
-		root.stateNode = { memoizedInteractions: [] };
+		/** @type {*} */
+		(root).treeBaseDuration = 0;
+
+		/** @type {*} */
+		(root).stateNode = { memoizedInteractions: [] };
 
 		roots.set(inst, root);
 	}

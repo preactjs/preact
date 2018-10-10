@@ -64,7 +64,8 @@ export class Renderer {
 		// Workaround until this PR the following PR is merged. The profiler will
 		// throw if this property is not present
 		// https://github.com/facebook/react-devtools/pull/1178/
-		vnode.stateNode = { memoizedInteractions: data.memoizedInteractions };
+		/** @type {*} */
+		(vnode).stateNode = { memoizedInteractions: data.memoizedInteractions };
 
 		/** @type {Array<import('../internal').DevtoolsEvent>} */
 		let work = [{
