@@ -1,4 +1,4 @@
-import { createElement as h, cloneElement, render, Component, Fragment } from '../../src/index';
+import { createElement as h, render, Component, Fragment } from '../../src/index';
 import { setupScratch, teardown, setupRerender, getMixedArray, mixedArrayHTML } from '../_util/helpers';
 
 /** @jsx h */
@@ -106,14 +106,6 @@ describe('Components', () => {
 			}));
 
 		expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
-	});
-
-
-	it('should clone components', () => {
-		function Comp () {}
-		let instance = <Comp />;
-		let clone = cloneElement(instance);
-		expect(clone.prototype).to.equal(instance.prototype);
 	});
 
 	it('should render string', () => {
