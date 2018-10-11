@@ -5,7 +5,7 @@ var coverage = String(process.env.COVERAGE) === 'true',
 	pullRequest = !String(process.env.TRAVIS_PULL_REQUEST).match(/^(0|false|undefined)$/gi),
 	masterBranch = String(process.env.TRAVIS_BRANCH).match(/^master$/gi),
 	sauceLabs = ci && !pullRequest && masterBranch,
-	performance = !coverage && String(process.env.PERFORMANCE)!=='false',
+	performance = !coverage && String(process.env.PERFORMANCE) !== 'false',
 	webpack = require('webpack');
 
 var sauceLabsLaunchers = {
@@ -65,7 +65,7 @@ module.exports = function(config) {
 		),
 
 		coverageReporter: {
-			dir: __dirname+'/../coverage',
+			dir: __dirname + '/../coverage',
 			reporters: [
 				{ type: 'text-summary' },
 				{ type: 'html' },
@@ -121,16 +121,10 @@ module.exports = function(config) {
 						loader: 'babel-loader',
 						options: {
 							comments: false,
-							compact: true
+							compact: true,
+							plugins: [].concat(coverage ? 'istanbul' : [])
 						}
-					},
-
-					/* Only Instrument our source files for coverage */
-					coverage ? {
-						test: /\.jsx?$/,
-						loader: 'istanbul-instrumenter-loader',
-						include: /src/
-					} : {}
+					}
 				]
 			},
 			resolve: {
