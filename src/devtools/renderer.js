@@ -156,23 +156,23 @@ export class Renderer {
 	 * Pass a rendered tree to the devtools. At this point elements have already
 	 * unmounted, so we don't need to check for removals and only update vs mount
 	 * instead.
-	 * @param {import('../internal').VNode} root
+	 * @param {import('../internal').VNode} vnode
 	 */
-	handleCommitFiberRoot(root) {
-		if (isRoot(root)) {
-			root = patchRoot(root);
+	handleCommitFiberRoot(vnode) {
+		if (isRoot(vnode)) {
+			vnode = patchRoot(vnode);
 		}
 
-		let inst = getInstance(root);
+		let inst = getInstance(vnode);
 
-		if (this.inst2vnode.has(inst)) this.update(root);
-		else this.mount(root);
+		if (this.inst2vnode.has(inst)) this.update(vnode);
+		else this.mount(vnode);
 
 		if (!this.inst2vnode.has(inst)) {
-			this.inst2vnode.set(inst, root);
+			this.inst2vnode.set(inst, vnode);
 		}
 
-		root = getPatchedRoot(root);
+		let root = getPatchedRoot(vnode);
 		this.pending.push({
 			internalInstance: root,
 			renderer: this.rid,

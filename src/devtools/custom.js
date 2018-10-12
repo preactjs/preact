@@ -226,11 +226,9 @@ export function patchRoot(vnode) {
 		root._el = vnode._el;
 		root.startTime = vnode.startTime;
 		root.endTime = vnode.endTime;
-		root._children = [vnode];
 
 		/** @type {*} */
 		(root)._component = {
-			_previousVTree: vnode,
 			setState: noop,
 			forceUpdate: noop
 		};
@@ -245,6 +243,10 @@ export function patchRoot(vnode) {
 
 		roots.set(inst, root);
 	}
+
+	// Must always be refreshed for updates
+	root._children = [vnode];
+	root._component._previousVTree = vnode;
 
 	return root;
 }

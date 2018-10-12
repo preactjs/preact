@@ -308,12 +308,13 @@ describe('devtools', () => {
 		it('should detect when a component is unmounted', () => {
 			render(<div><span>Hello World</span></div>, scratch);
 			checkEventReferences(hook.log);
-
 			hook.clear();
+
 			render(<div />, scratch);
 			expect(hook.log.map(x => x.type)).to.deep.equal([
 				'unmount',
 				'unmount',
+				'update',
 				'update',
 				'rootCommitted'
 			]);
