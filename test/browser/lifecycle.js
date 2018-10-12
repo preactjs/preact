@@ -1762,6 +1762,21 @@ describe('Lifecycle methods', () => {
 			expect(Receiver.prototype.componentDidCatch).to.have.been.called;
 		});
 
+		it('should be called when child fails in componentWillUnmount', () => {
+			class ThrowErr extends Component {
+				componentWillUnmount() {
+					throw new Error('Error!');
+				}
+				render() {
+					return <div />;
+				}
+			}
+
+			render(<Receiver><ThrowErr /></Receiver>, scratch);
+			render(<Receiver><div /></Receiver>, scratch);
+			expect(Receiver.prototype.componentDidCatch).to.have.been.called;
+		});
+
 		it('should be called when functional child fails', () => {
 			function ThrowErr() {
 				throw new Error('Error!');
