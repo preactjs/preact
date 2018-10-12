@@ -1777,6 +1777,74 @@ describe('Lifecycle methods', () => {
 			expect(Receiver.prototype.componentDidCatch).to.have.been.called;
 		});
 
+		it('should be called when applying a Component ref', () => {
+			const Foo = () => <div />;
+
+			class ThrowRef extends Component {
+				ref() {
+					throw new Error('Error!');
+				}
+
+				render() {
+					return <Foo ref={this.ref.bind(this)} />;
+				}
+			}
+
+			render(<Receiver><ThrowRef /></Receiver>, scratch);
+			expect(Receiver.prototype.componentDidCatch).to.have.been.called;
+
+			// Flush rerender queue ignoring susbsequent errors thrown by ref
+			try {
+				rerender();
+			}
+			catch (e) {}
+		});
+
+		it('should be called when applying a DOM ref', () => {
+			class ThrowRef extends Component {
+				ref() {
+					throw new Error('Error!');
+				}
+
+				render() {
+					return <div ref={this.ref.bind(this)} />;
+				}
+			}
+
+			render(<Receiver><ThrowRef /></Receiver>, scratch);
+			expect(Receiver.prototype.componentDidCatch).to.have.been.called;
+
+			// Flush rerender queue ignoring susbsequent errors thrown by ref
+			try {
+				rerender();
+			}
+			catch (e) {}
+		});
+
+		it('should be called when unmounting a ref', () => {
+			class ThrowRef extends Component {
+				ref(value) {
+					if (value == null) {
+						throw new Error('Error!');
+					}
+				}
+
+				render() {
+					return <div ref={this.ref.bind(this)} />;
+				}
+			}
+
+			render(<Receiver><ThrowRef /></Receiver>, scratch);
+			render(<Receiver><div /></Receiver>, scratch);
+			expect(Receiver.prototype.componentDidCatch).to.have.been.calledOnce;
+
+			// Flush rerender queue ignoring susbsequent errors thrown by ref
+			try {
+				rerender();
+			}
+			catch (e) {}
+		});
+
 		it('should be called when functional child fails', () => {
 			function ThrowErr() {
 				throw new Error('Error!');
