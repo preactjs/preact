@@ -141,6 +141,50 @@ describe('Components', () => {
 		expect(scratch.innerHTML).to.equal('');
 	});
 
+	it('should render Component classes that don\'t pass props into the Component constructor', () => {
+
+		/** @type {object} */
+		let instance;
+		const props = { text: 'Hello' };
+
+		function Foo () {
+			Component.call(this);
+			instance = this;
+		}
+		Foo.prototype.render = sinon.spy((props, state, context) => <div>{props.text}</div>);
+
+		render(h(Foo, props), scratch);
+
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(Foo.prototype.render).to.have.been.calledOnceWith(props, {}, {});
+		expect(instance.props).to.deep.equal(props);
+		expect(instance.state).to.deep.equal({});
+		expect(instance.context).to.deep.equal({});
+	});
+
+	it('should render Component classes that don\'t the Component constructor but initialize state', () => {
+
+		/** @type {object} */
+		let instance;
+		const props = { text: 'Hello' };
+		const initialState = { text: 'World!' };
+
+		function Foo() {
+			Component.call(this);
+			instance = this;
+			this.state = { text: 'World!' };
+		}
+		Foo.prototype.render = sinon.spy((props, state, context) => <div>{props.text + ' ' + state.text}</div>);
+
+		render(h(Foo, props), scratch);
+
+		expect(scratch.innerHTML).to.equal('<div>Hello World!</div>');
+		expect(Foo.prototype.render).to.have.been.calledOnceWith(props, initialState, {});
+		expect(instance.props).to.deep.equal(props);
+		expect(instance.state).to.deep.equal(initialState);
+		expect(instance.context).to.deep.equal({});
+	});
+
 	// Test for Issue #73
 	it('should remove orphaned elements replaced by Components', () => {
 		class Comp extends Component {
