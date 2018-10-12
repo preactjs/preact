@@ -142,6 +142,9 @@ export function getPatchedRoot(vnode) {
 
 	if (last!=null) {
 		last = roots.get(getInstance(last));
+		// Must always be refreshed for updates
+		last._children = [vnode];
+		last._component._previousVTree = vnode;
 	}
 
 	return last;

@@ -67,7 +67,7 @@ function checkEventReferences(events) {
 		if (i > 0 && Array.isArray(event.data.children)) {
 			event.data.children.forEach(child => {
 				if (!seen.has(child)) {
-					throw new Error(`Event at index ${i} has a child that could not be found in a preceeding event ${getDisplayName(child)}`);
+					throw new Error(`Event at index ${i} has a child that could not be found in a preceeding event for component "${getDisplayName(child)}"`);
 				}
 			});
 		}
@@ -341,7 +341,7 @@ describe('devtools', () => {
 			updateState();
 			rerender();
 
-			checkEventReferences(hook.log);
+			checkEventReferences(prev.concat(hook.log));
 
 			// Previous `internalInstance` from mount must be referentially equal to
 			// `internalInstance` from update
