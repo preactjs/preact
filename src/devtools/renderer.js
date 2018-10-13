@@ -168,10 +168,6 @@ export class Renderer {
 		if (this.inst2vnode.has(inst)) this.update(vnode);
 		else this.mount(vnode);
 
-		if (!this.inst2vnode.has(inst)) {
-			this.inst2vnode.set(inst, vnode);
-		}
-
 		let root = getPatchedRoot(vnode);
 		this.pending.push({
 			internalInstance: root,
@@ -191,7 +187,6 @@ export class Renderer {
 	 */
 	handleCommitFiberUnmount(vnode) {
 		let inst = getInstance(vnode);
-		if (!this.inst2vnode.has(inst)) return;
 
 		this.inst2vnode.delete(inst);
 
@@ -221,8 +216,10 @@ export class Renderer {
 	}
 
 	// Unused, but devtools expects it to be there
+	/* istanbul ignore next */
 	walkTree() {}
 
 	// Unused, but devtools expects it to be there
+	/* istanbul ignore next */
 	cleanup() {}
 }

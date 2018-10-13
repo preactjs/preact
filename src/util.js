@@ -17,6 +17,7 @@ export function assign(obj, props) {
 export let now = Date.now;
 
 try {
+	/* istanbul ignore else */
 	if ('performance' in window) {
 		now = window.performance.now.bind(window.performance);
 	}

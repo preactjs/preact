@@ -2,10 +2,11 @@ import { createElement as h } from '../../src/create-element';
 import { render } from '../../src/render';
 import { assign } from '../../src/util';
 import { Component } from '../../src/component';
-import { getDisplayName, setIn, isRoot, getPatchedRoot, getData, patchRoot } from '../../src/devtools/custom';
+import { getDisplayName, setIn, isRoot, getPatchedRoot, getData, patchRoot, shallowEqual } from '../../src/devtools/custom';
 import { setupScratch, setupRerender, teardown } from '../_util/helpers';
 import { initDevTools } from '../../src/devtools';
 import options from '../../src/options';
+import { Renderer } from '../../src/devtools/renderer';
 
 /** @jsx h */
 
@@ -64,7 +65,7 @@ function checkEventReferences(events) {
 	let seen = new Set();
 
 	events.forEach((event, i) => {
-		if (i > 0 && Array.isArray(event.data.children)) {
+		if (i > 0 && event.type!=='unmount' && Array.isArray(event.data.children)) {
 			event.data.children.forEach(child => {
 				if (!seen.has(child)) {
 					throw new Error(`Event at index ${i} has a child that could not be found in a preceeding event for component "${getDisplayName(child)}"`);
@@ -165,6 +166,20 @@ describe('devtools', () => {
 		});
 	});
 
+	describe('shallowEqual', () => {
+		it('should compare objects', () => {
+			expect(shallowEqual({ foo: 1 }, { foo: 2 })).to.equal(false);
+			expect(shallowEqual({ foo: 1 }, { foo: 1 })).to.equal(true);
+			expect(shallowEqual({ foo: 1, bar: 1 }, { foo: 1, bar: '2' })).to.equal(false);
+
+			expect(shallowEqual({ foo: 1 }, { foo: 1, bar: '2' })).to.equal(false);
+		});
+
+		it('should skip children for props', () => {
+			expect(shallowEqual({ foo: 1, children: 1 }, { foo: 1, children: '2' }, true)).to.equal(true);
+		});
+	});
+
 	describe('setIn', () => {
 		it('should set top property', () => {
 			let obj = {};
@@ -189,6 +204,10 @@ describe('devtools', () => {
 			setIn(obj, ['foo', 0], 'bar');
 			expect(obj).to.deep.equal({ foo: ['bar'] });
 		});
+
+		it('should return null on invalid obj', () => {
+			expect(setIn(null, ['foo', 'bar'], 'bar')).to.equal(undefined);
+		});
 	});
 
 	describe('isRoot', () => {
@@ -210,6 +229,14 @@ describe('devtools', () => {
 
 			expect(getPatchedRoot(root)).to.equal(wrapped);
 			expect(getPatchedRoot(wrapped._children[0])).to.equal(wrapped);
+		});
+
+		it('should return null if unable to find the root', () => {
+			render(<div>Hello World</div>, scratch);
+			let root = scratch._previousVTree;
+			root._el = document.body;
+
+			expect(getPatchedRoot(root)).to.equal(null);
 		});
 	});
 
@@ -271,7 +298,32 @@ describe('devtools', () => {
 		});
 	});
 
+	it('should not initialize hook if __REACT_DEVTOOLS_GLOBAL_HOOK__ is not set', () => {
+		options.enableProfiling = false;
+		delete window.__REACT_DEVTOOLS_GLOBAL_HOOK__;
+
+		initDevTools();
+		expect(options.enableProfiling).to.equal(false);
+	});
+
+	it('should connect only once', () => {
+		let rid = Object.keys(hook._renderers)[0];
+		let spy = sinon.spy(hook.helpers[rid], 'markConnected');
+		hook.helpers[rid] = {};
+		hook.helpers[rid] = {};
+
+		expect(spy).to.be.not.called;
+	});
+
 	describe('renderer', () => {
+		it('should not flush events if not connected', () => {
+			let spy = sinon.spy(hook, 'emit');
+			let renderer = new Renderer(hook, 'abc');
+			renderer.flushPendingEvents();
+
+			expect(spy).to.not.be.called;
+		});
+
 		it('should mount a root', () => {
 			render(<div>Hello World</div>, scratch);
 			checkEventReferences(hook.log);
@@ -283,6 +335,42 @@ describe('devtools', () => {
 				'root',
 				'rootCommitted'
 			]);
+		});
+
+		it('should find dom node by vnode', () => {
+			render(<div />, scratch);
+			let vnode = scratch._previousVTree;
+			let rid = Object.keys(hook._renderers)[0];
+			let renderer = hook._renderers[rid];
+			expect(renderer.findHostInstanceByFiber(vnode)).to.equal(vnode._el);
+		});
+
+		it('should find vnode by dom node', () => {
+			render(<div />, scratch);
+			let vnode = scratch._previousVTree;
+			let rid = Object.keys(hook._renderers)[0];
+			let renderer = hook._renderers[rid];
+			expect(renderer.findFiberByHostInstance(scratch.firstChild)).to.equal(vnode);
+
+			expect(renderer.findFiberByHostInstance(scratch)).to.equal(null);
+		});
+
+		it('should getNativeFromReactElement', () => {
+			render(<div />, scratch);
+			let vnode = scratch._previousVTree;
+			let rid = Object.keys(hook._renderers)[0];
+			let helpers = hook.helpers[rid];
+			expect(helpers.getNativeFromReactElement(vnode)).to.equal(vnode._el);
+		});
+
+		it('should getReactElementFromNative', () => {
+			render(<div />, scratch);
+			let vnode = scratch._previousVTree;
+			let rid = Object.keys(hook._renderers)[0];
+			let helpers = hook.helpers[rid];
+			expect(helpers.getReactElementFromNative(vnode._el)).to.equal(vnode);
+
+			expect(helpers.getReactElementFromNative(document.body)).to.equal(null);
 		});
 
 		it('should detect when a root is updated', () => {
@@ -299,7 +387,93 @@ describe('devtools', () => {
 				type: x.type,
 				component: getDisplayName(x.internalInstance)
 			}))).to.deep.equal([
-				{ type: 'update', component: 'div' },
+				{ type: 'updateProfileTimes', component: 'div' },
+				{ type: 'update', component: 'Fragment' },
+				{ type: 'rootCommitted', component: 'Fragment' }
+			]);
+		});
+
+		it('should be able to swap children', () => {
+			render(<div>Hello World</div>, scratch);
+			checkEventReferences(hook.log);
+
+			let prev = hook.log.slice();
+			hook.clear();
+
+			render(<div><span>Foo</span></div>, scratch);
+			checkEventReferences(prev.concat(hook.log));
+
+			expect(hook.log.map(x => ({
+				type: x.type,
+				component: getDisplayName(x.internalInstance)
+			}))).to.deep.equal([
+				{ type: 'unmount', component: '#text' },
+				{ type: 'mount', component: 'span' },
+				{ type: 'updateProfileTimes', component: 'div' },
+				{ type: 'update', component: 'Fragment' },
+				{ type: 'rootCommitted', component: 'Fragment' }
+			]);
+		});
+
+		it('should be able to swap children #2', () => {
+			let updateState;
+			class App extends Component {
+				constructor() {
+					super();
+					this.state = { active: false };
+					updateState = () => this.setState(prev => ({ active: !prev.active }));
+				}
+
+				render() {
+					return (
+						<div>
+							{this.state.active && <h1>Hello World</h1>}
+							<span>Foo</span>
+						</div>
+					);
+				}
+			}
+
+			render(<App />, scratch);
+			checkEventReferences(hook.log);
+
+			let prev = hook.log.slice();
+			hook.clear();
+
+			updateState();
+			rerender();
+			checkEventReferences(prev.concat(hook.log));
+
+			expect(hook.log.map(x => ({
+				type: x.type,
+				component: getDisplayName(x.internalInstance)
+			}))).to.deep.equal([
+				{ type: 'mount', component: 'h1' },
+				{ type: 'updateProfileTimes', component: 'span' },
+				{ type: 'updateProfileTimes', component: 'div' },
+				{ type: 'update', component: 'App' },
+				{ type: 'update', component: 'Fragment' },
+				{ type: 'rootCommitted', component: 'Fragment' }
+			]);
+		});
+
+		it('should only update profile times when nothing else changed', () => {
+			render(<div><div><span>Hello World</span></div></div>, scratch);
+			checkEventReferences(hook.log);
+
+			let prev = hook.log.slice();
+			hook.clear();
+
+			render(<div><div><span>Foo</span></div></div>, scratch);
+			checkEventReferences(prev.concat(hook.log));
+
+			expect(hook.log.map(x => ({
+				type: x.type,
+				component: getDisplayName(x.internalInstance)
+			}))).to.deep.equal([
+				{ type: 'updateProfileTimes', component: 'span' },
+				{ type: 'updateProfileTimes', component: 'div' },
+				{ type: 'updateProfileTimes', component: 'div' },
 				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);

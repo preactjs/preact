@@ -128,7 +128,7 @@ export interface DevtoolsEvent {
 }
 
 export interface DevtoolsHook {
-	_renderers: Record<string, object>;
+	_renderers: Record<string, any>;
 	_roots: Set<VNode>;
 	on(ev: string, listener: () => void): void;
 	emit(ev: string, object): void;

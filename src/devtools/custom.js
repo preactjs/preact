@@ -113,13 +113,9 @@ export function getChildren(vnode) {
 		return vnode._children!=null ? vnode._children.filter(Boolean) : [];
 	}
 
-	if (!Array.isArray(c._previousVTree)) {
-		return c._previousVTree!=null ? [c._previousVTree] : null;
-	}
-
-	// Filter out falsy children
-	let children = c._previousVTree.filter(Boolean);
-	return children.length > 0 ? children : null;
+	return !Array.isArray(c._previousVTree) && c._previousVTree!=null
+		? [c._previousVTree]
+		: null;
 }
 
 /**
@@ -131,7 +127,6 @@ export function getPatchedRoot(vnode) {
 
 	/** @type {any} */
 	let dom = vnode._el;
-	if (dom==null) return null;
 
 	let last = null;
 	while ((dom = dom.parentNode)!=null) {
@@ -179,17 +174,34 @@ export function getInstance(vnode) {
 }
 
 /**
+ * Compare to objects
+ * @param {object} a
+ * @param {object} b
+ * @param {boolean} [isProps]
+ * @returns {boolean}
+ */
+export function shallowEqual(a, b, isProps) {
+	if (a==null || b==null) return false;
+
+	for (let key in a) {
+		if (isProps && key=='children' && b[key]!=null) continue;
+		if (a[key]!==b[key]) return false;
+	}
+
+	if (Object.keys(a).length!==Object.keys(b).length) return false;
+	return true;
+}
+
+/**
  * Check if a vnode was actually updated
  * @param {import('../internal').VNode} next
  * @param {import('../internal').VNode} prev
  * @returns {boolean}
  */
 export function hasDataChanged(prev, next) {
-	return prev.startTime!==next.startTime
-		|| prev.endTime!==next.endTime
-		|| prev.props!==next.props
-		|| (prev._component!=null && (prev._component.state
-			!== next._component.state))
+	return (prev.props !== next.props && !shallowEqual(prev.props, next.props, true))
+		|| (prev._component!=null &&
+			!shallowEqual(prev._component.state, next._component.state))
 		|| prev._el !== next._el
 		|| prev.ref !== next.ref;
 }
@@ -209,7 +221,8 @@ export function hasProfileDataChanged(prev, next) {
  */
 let roots = new WeakMap();
 
-let noop = () => {};
+/* istanbul ignore next */
+let noop = () => undefined;
 
 /**
  * Add a wrapper node around the root. React internally has an additional

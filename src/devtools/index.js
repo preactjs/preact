@@ -13,22 +13,27 @@ function catchErrors(fn) {
 			return fn(arg);
 		}
 		catch (e) {
+			/* istanbul ignore next */
 			console.error('The react devtools encountered an error');
+			/* istanbul ignore next */
 			console.log(e); // eslint-disable-line no-console
 		}
 	};
 }
 
+/* istanbul ignore next */
+let noop = () => undefined;
+
 export function initDevTools() {
 	// This global variable is injected by the devtools
-	const hook = /** @type {import('../internal').DevtoolsWindow} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
+	let hook = /** @type {import('../internal').DevtoolsWindow} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
 	if (hook==null) return;
 
 	/** @type {(vnode: import('../internal').VNode) => void} */
-	let onCommitRoot = (vnode) => {};
+	let onCommitRoot = noop;
 
 	/** @type {(vnode: import('../internal').VNode) => void} */
-	let onCommitUnmount = (vnode) => {};
+	let onCommitUnmount = noop;
 
 	// Initialize our custom renderer
 	let rid = Math.random().toString(16).slice(2);
@@ -44,16 +49,22 @@ export function initDevTools() {
 		// Tell devtools which bundle type we run in
 		window.parent.postMessage({
 			source: 'react-devtools-detector',
-			reactBuildType: isDev ? 'development' : 'production'
+			reactBuildType: /* istanbul ignore next */  isDev
+				? 'development'
+				: 'production'
 		}, '*');
 
 		let renderer = {
-			bundleType: isDev ? 1 : 0,
+			bundleType: /* istanbul ignore next */  isDev ? 1 : 0,
 			version: '16.5.2',
 			rendererPackageName: 'preact',
+			// We don't need this, but the devtools `attachRenderer` function relys
+			// it being there.
 			findHostInstanceByFiber(vnode) {
 				return vnode._el;
 			},
+			// We don't need this, but the devtools `attachRenderer` function relys
+			// it being there.
 			findFiberByHostInstance(instance) {
 				return cevicheRenderer.inst2vnode.get(instance) || null;
 			}
