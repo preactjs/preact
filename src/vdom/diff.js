@@ -1,7 +1,7 @@
 import { ATTR_KEY } from '../constants';
 import { isSameNodeType, isNamedNode } from './index';
 import { buildComponentFromVNode } from './component';
-import { createNode, setAccessor } from '../dom/index';
+import { createNode, setAccessor, setRefs } from '../dom/index';
 import { unmountComponent } from './component';
 import options from '../options';
 import { applyRef } from '../util';
@@ -25,6 +25,7 @@ let hydrating = false;
 /** Invoke queued componentDidMount lifecycle methods */
 export function flushMounts() {
 	let c, i;
+	setRefs();
 	for (i=0; i<mounts.length; ++i) {
 		c = mounts[i];
 		if (options.afterMount) options.afterMount(c);

@@ -200,6 +200,46 @@ describe('refs', () => {
 		expect(innermost, 'innerMost unmount').to.have.been.calledOnce.and.calledWith(null);
 	});
 
+	it('should execute ref functions after the component is mounted', () => {
+		let setRef = spy('setRef'),
+			app;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { show:false };
+				this.setRef = this.setRef.bind(this);
+				app = this;
+			}
+			componentDidMount() {
+				expect(setRef).to.have.been.calledOnce.and.calledWith('foo');
+			}
+			componentDidUpdate() {
+				expect(setRef).to.have.been.calledOnce.and.calledWith('bar');
+			}
+			setRef(el) {
+				setRef(el.id);
+				expect(!!(el.compareDocumentPosition(scratch) & Node.DOCUMENT_POSITION_CONTAINS)).to.be.true;
+			}
+			render(_, {show}) {
+				return (
+					<div>
+						<p id="foo" ref={this.setRef}></p>
+						{show && <h1 id="bar" ref={this.setRef}></h1>}
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(setRef).to.have.been.calledOnce.and.calledWith('foo');
+
+		setRef.resetHistory();
+
+		app.setState({ show:true });
+		app.forceUpdate();
+		expect(setRef).to.have.been.calledOnce.and.calledWith('bar');
+	});
+
 	it('should not pass ref into component as a prop', () => {
 		let foo = spy('foo'),
 			bar = spy('bar');

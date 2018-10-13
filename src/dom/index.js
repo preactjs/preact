@@ -51,6 +51,20 @@ export function removeNode(node) {
 }
 
 
+const refs = [];
+
+
+/**
+ * Execute ref functions
+ */
+export function setRefs() {
+	for (let i = 0, max = refs.length; i < max; i++) {
+		refs[i][0](refs[i][1]);
+	}
+	refs.length = 0;
+}
+
+
 /**
  * Set a named attribute on the given Node, with special behavior for some names
  * and event handlers. If `value` is `null`, the attribute/handler will be
@@ -72,7 +86,12 @@ export function setAccessor(node, name, old, value, isSvg) {
 	}
 	else if (name==='ref') {
 		applyRef(old, null);
-		applyRef(value, node);
+		if (typeof value=='function') {
+			refs.push([value, node]);
+		}
+		else {
+			applyRef(value, node);
+		}
 	}
 	else if (name==='class' && !isSvg) {
 		node.className = value || '';

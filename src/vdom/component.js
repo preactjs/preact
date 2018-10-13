@@ -5,7 +5,7 @@ import { enqueueRender } from '../render-queue';
 import { getNodeProps } from './index';
 import { diff, mounts, diffLevel, flushMounts, recollectNodeTree, removeChildren } from './diff';
 import { createComponent, recyclerComponents } from './component-recycler';
-import { removeNode } from '../dom/index';
+import { removeNode, setRefs } from '../dom/index';
 
 /**
  * Set a component's `props` and possibly re-render the component
@@ -192,6 +192,8 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 		mounts.push(component);
 	}
 	else if (!skip) {
+		setRefs();
+
 		// Ensure that pending componentDidMount() hooks of child components
 		// are called before the componentDidUpdate() hook in the parent.
 		// Note: disabled as it causes duplicate hooks, see https://github.com/developit/preact/issues/750
