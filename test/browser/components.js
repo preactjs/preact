@@ -41,71 +41,119 @@ describe('Components', () => {
 		teardown(scratch);
 	});
 
-	it('should render components', () => {
-		class C1 extends Component {
-			render() {
-				return <div>C1</div>;
+	describe('Component construction', () => {
+
+		it('should render components', () => {
+			class C1 extends Component {
+				render() {
+					return <div>C1</div>;
+				}
 			}
-		}
-		sinon.spy(C1.prototype, 'render');
-		render(<C1 />, scratch);
+			sinon.spy(C1.prototype, 'render');
+			render(<C1 />, scratch);
 
-		expect(C1.prototype.render)
-			.to.have.been.calledOnce
-			.and.to.have.been.calledWithMatch({}, {})
-			.and.to.have.returned(sinon.match({ tag: 'div' }));
+			expect(C1.prototype.render)
+				.to.have.been.calledOnce
+				.and.to.have.been.calledWithMatch({}, {})
+				.and.to.have.returned(sinon.match({ tag: 'div' }));
 
-		expect(scratch.innerHTML).to.equal('<div>C1</div>');
-	});
-
-
-	it('should render functional components', () => {
-		const PROPS = { foo: 'bar', onBaz: () => {} };
-
-		const C3 = sinon.spy( props => <div {...props} /> );
-
-		render(<C3 {...PROPS} />, scratch);
-
-		expect(C3)
-			.to.have.been.calledOnce
-			.and.to.have.been.calledWithMatch(PROPS)
-			.and.to.have.returned(sinon.match({
-				tag: 'div',
-				props: PROPS
-			}));
-
-		expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
-	});
+			expect(scratch.innerHTML).to.equal('<div>C1</div>');
+		});
 
 
-	it('should render components with props', () => {
-		const PROPS = { foo: 'bar', onBaz: () => {} };
-		let constructorProps;
+		it('should render functional components', () => {
+			const PROPS = { foo: 'bar', onBaz: () => {} };
 
-		class C2 extends Component {
-			constructor(props) {
-				super(props);
-				constructorProps = props;
+			const C3 = sinon.spy( props => <div {...props} /> );
+
+			render(<C3 {...PROPS} />, scratch);
+
+			expect(C3)
+				.to.have.been.calledOnce
+				.and.to.have.been.calledWithMatch(PROPS)
+				.and.to.have.returned(sinon.match({
+					tag: 'div',
+					props: PROPS
+				}));
+
+			expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
+		});
+
+
+		it('should render components with props', () => {
+			const PROPS = { foo: 'bar', onBaz: () => {} };
+			let constructorProps;
+
+			class C2 extends Component {
+				constructor(props) {
+					super(props);
+					constructorProps = props;
+				}
+				render(props) {
+					return <div {...props} />;
+				}
 			}
-			render(props) {
-				return <div {...props} />;
+			sinon.spy(C2.prototype, 'render');
+
+			render(<C2 {...PROPS} />, scratch);
+
+			expect(constructorProps).to.deep.equal(PROPS);
+
+			expect(C2.prototype.render)
+				.to.have.been.calledOnce
+				.and.to.have.been.calledWithMatch(PROPS, {})
+				.and.to.have.returned(sinon.match({
+					tag: 'div',
+					props: PROPS
+				}));
+
+			expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
+		});
+
+
+		it('should render Component classes that don\'t pass args into the Component constructor', () => {
+
+			/** @type {object} */
+			let instance;
+			const props = { text: 'Hello' };
+
+			function Foo () {
+				Component.call(this);
+				instance = this;
 			}
-		}
-		sinon.spy(C2.prototype, 'render');
+			Foo.prototype.render = sinon.spy((props, state, context) => <div>{props.text}</div>);
 
-		render(<C2 {...PROPS} />, scratch);
+			render(h(Foo, props), scratch);
 
-		expect(constructorProps).to.deep.equal(PROPS);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+			expect(Foo.prototype.render).to.have.been.calledOnceWith(props, {}, {});
+			expect(instance.props).to.deep.equal(props);
+			expect(instance.state).to.deep.equal({});
+			expect(instance.context).to.deep.equal({});
+		});
 
-		expect(C2.prototype.render)
-			.to.have.been.calledOnce
-			.and.to.have.been.calledWithMatch(PROPS, {})
-			.and.to.have.returned(sinon.match({
-				tag: 'div',
-				props: PROPS
-			}));
+		it('should render Component classes that don\'t pass args into the Component constructor and initialize state', () => {
 
-		expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
+			/** @type {object} */
+			let instance;
+			const props = { text: 'Hello' };
+			const initialState = { text: 'World!' };
+
+			function Foo() {
+				Component.call(this);
+				instance = this;
+				this.state = { text: 'World!' };
+			}
+			Foo.prototype.render = sinon.spy((props, state, context) => <div>{props.text + ' ' + state.text}</div>);
+
+			render(h(Foo, props), scratch);
+
+			expect(scratch.innerHTML).to.equal('<div>Hello World!</div>');
+			expect(Foo.prototype.render).to.have.been.calledOnceWith(props, initialState, {});
+			expect(instance.props).to.deep.equal(props);
+			expect(instance.state).to.deep.equal(initialState);
+			expect(instance.context).to.deep.equal({});
+		});
 	});
 
 	it('should render string', () => {
