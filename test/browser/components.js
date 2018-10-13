@@ -110,7 +110,6 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
 		});
 
-
 		it('should render Component classes that don\'t pass args into the Component constructor', () => {
 
 			/** @type {object} */
@@ -132,9 +131,26 @@ describe('Components', () => {
 			expect(instance.context).to.deep.equal({});
 		});
 
+		it('should render components that don\'t pass args into the Component constructor (unistore pattern)', () => {
+
+			/** @type {object} */
+			let instance;
+			const props = { text: 'Hello' };
+			const initialState = { text: 'World!' };
+
+			// Pattern unistore uses for connect: https://git.io/fxRqu
+			function Wrapper() {
+				this.render = sinon.spy(props => <div />);
+			}
+			(Wrapper.prototype = new Component()).constructor  = Wrapper;
+
+			render(<Wrapper />, scratch);
+		});
+
 		it('should render Component classes that don\'t pass args into the Component constructor and initialize state', () => {
 
 			/** @type {object} */
+			// TODO: Share this setup with this describe block
 			let instance;
 			const props = { text: 'Hello' };
 			const initialState = { text: 'World!' };
@@ -153,6 +169,40 @@ describe('Components', () => {
 			expect(instance.props).to.deep.equal(props);
 			expect(instance.state).to.deep.equal(initialState);
 			expect(instance.context).to.deep.equal({});
+		});
+
+		it('should render components that don\'t call Component constructor', () => {
+
+			/** @type {object} */
+			let instance;
+			const props = { text: 'Hello' };
+			const initialState = { text: 'World!' };
+
+			function Foo() {}
+			Foo.prototype = Object.create(Component);
+			Foo.prototype.render = sinon.spy(() => <div />);
+
+			render(<Foo />, scratch);
+		});
+
+		it('should render components that don\'t inherit from Component', () => {
+			class Foo {
+				render() {
+					return <div />;
+				}
+			}
+
+			render(<Foo />, scratch);
+		})
+
+		it('should render components that don\'t inherit from Component (unistore pattern)', () => {
+			// Pattern unistore uses for Provider: https://git.io/fxRqR
+			function Provider(props) {
+				this.getChildContext = () => ({ store: props.store });
+			}
+			Provider.prototype.render = props => props.children;
+
+			render(<Provider />, scratch);
 		});
 	});
 
