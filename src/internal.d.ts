@@ -131,9 +131,9 @@ export interface DevtoolsHook {
 	_renderers: Record<string, any>;
 	_roots: Set<VNode>;
 	on(ev: string, listener: () => void): void;
-	emit(ev: string, object): void;
+	emit(ev: string, data?: object): void;
 	helpers: Record<string, any>;
-	getFiberRoots(rendererId: string): any;
+	getFiberRoots(rendererId: string): Set<any>;
 	inject(config: DevtoolsInjectOptions): string;
 	onCommitFiberRoot(rendererId: string, root: VNode): void;
 	onCommitFiberUnmount(rendererId: string, vnode: VNode): void;
