@@ -1,4 +1,4 @@
-import { createElement as h } from '../../src/create-element';
+import { createElement as h, Fragment } from '../../src/create-element';
 import { render } from '../../src/render';
 import { assign } from '../../src/util';
 import { Component } from '../../src/component';
@@ -492,6 +492,11 @@ describe('devtools', () => {
 				'update',
 				'rootCommitted'
 			]);
+		});
+
+		it('should be able to render Fragments', () => {
+			render(<div><Fragment>foo{'bar'}</Fragment></div>, scratch);
+			checkEventReferences(hook.log);
 		});
 
 		it('should detect setState update', () => {
