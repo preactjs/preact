@@ -13,6 +13,17 @@ import { Renderer } from '../../src/devtools/renderer';
 /** @typedef {import('../../src/internal').DevtoolsHook & { log: any[], clear: () => void }} MockHook */
 
 /**
+ * Serialize a devtool event
+ * @param {import('../../src/internal').DevtoolsEvent} event
+ */
+function serialize(event) {
+	return {
+		type: event.type,
+		component: getDisplayName(event.internalInstance)
+	};
+}
+
+/**
  * @returns {MockHook}
  */
 function createMockHook() {
@@ -383,10 +394,7 @@ describe('devtools', () => {
 			render(<div>Foo</div>, scratch);
 			checkEventReferences(prev.concat(hook.log));
 
-			expect(hook.log.map(x => ({
-				type: x.type,
-				component: getDisplayName(x.internalInstance)
-			}))).to.deep.equal([
+			expect(hook.log.map(serialize)).to.deep.equal([
 				{ type: 'updateProfileTimes', component: 'div' },
 				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
@@ -403,16 +411,18 @@ describe('devtools', () => {
 			render(<div><span>Foo</span></div>, scratch);
 			checkEventReferences(prev.concat(hook.log));
 
-			expect(hook.log.map(x => ({
-				type: x.type,
-				component: getDisplayName(x.internalInstance)
-			}))).to.deep.equal([
+			expect(hook.log.map(serialize)).to.deep.equal([
 				{ type: 'unmount', component: '#text' },
 				{ type: 'mount', component: 'span' },
 				{ type: 'updateProfileTimes', component: 'div' },
 				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
+		});
+
+		it('should render multiple text children', () => {
+			render(<div>foo{'bar'}</div>, scratch);
+			checkEventReferences(hook.log);
 		});
 
 		it('should be able to swap children #2', () => {
@@ -485,12 +495,12 @@ describe('devtools', () => {
 			hook.clear();
 
 			render(<div />, scratch);
-			expect(hook.log.map(x => x.type)).to.deep.equal([
-				'unmount',
-				'unmount',
-				'update',
-				'update',
-				'rootCommitted'
+			expect(hook.log.map(serialize)).to.deep.equal([
+				{ type: 'unmount', component: 'span' },
+				{ type: 'unmount', component: '#text' },
+				{ type: 'update', component: 'div' },
+				{ type: 'update', component: 'Fragment' },
+				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
 
