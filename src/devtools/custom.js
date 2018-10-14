@@ -170,6 +170,7 @@ export function isRoot(vnode) {
  */
 export function getInstance(vnode) {
 	if (vnode._component!=null) return vnode._component;
+	if (vnode.type===Fragment) return vnode.props;
 	return vnode._el;
 }
 
