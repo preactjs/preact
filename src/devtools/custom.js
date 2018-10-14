@@ -86,7 +86,7 @@ export function getData(vnode) {
 		props: vnode.props,
 		// The devtools inline text children if they are the only child
 		children: vnode.text==null
-			? children.length==1 && children[0].text!=null
+			? children!=null && children.length==1 && children[0].text!=null
 				? children[0].text
 				: children
 			: null,
