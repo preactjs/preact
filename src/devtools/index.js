@@ -110,6 +110,9 @@ export function initDevTools() {
 	options.enableProfiling = true;
 
 	options.commitRoot = (vnode) => {
+		// There are rare cases where this happens. I'm not sure why, but it seems
+		// to be triggered by quickly switching routes in our demo app
+		if (vnode._el==null) return;
 		onCommitRoot(vnode);
 	};
 
