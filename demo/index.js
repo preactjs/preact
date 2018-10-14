@@ -9,9 +9,14 @@ import Todo from './todo';
 import Fragments from './fragments';
 import installLogger from './logger';
 import ProfilerDemo from './profiler';
-
 import { initDevTools } from 'ceviche/devtools';
-initDevTools();
+
+let isBenchmark = /(\/spiral|\/pythagoras)/g.test(window.location.href);
+if (!isBenchmark) {
+	// eslint-disable-next-line no-console
+	console.log('Enabling devtools');
+	initDevTools();
+}
 
 window.ceviche = { createElement, render, hydrate, Component, options };
 
@@ -22,6 +27,18 @@ class Home extends Component {
 			<div>
 				<h1>Hello</h1>
 			</div>
+		);
+	}
+}
+
+class DevtoolsWarning extends Component {
+	onClick = () => {
+		window.location.reload();
+	}
+
+	render() {
+		return (
+			<button onClick={this.onClick}>Start Benchmark (disables devtools)</button>
 		);
 	}
 }
@@ -45,8 +62,18 @@ class App extends Component {
 					<Router>
 						<Home path="/" />
 						<Reorder path="/reorder" />
-						<Spiral path="/spiral" />
-						<Pythagoras path="/pythagoras" />
+						<div path="/spiral">
+							{!isBenchmark
+								? <DevtoolsWarning />
+								: <Spiral />
+							}
+						</div>
+						<div path="/pythagoras">
+							{!isBenchmark
+								? <DevtoolsWarning />
+								: <Pythagoras />
+							}
+						</div>
 						<Todo path="/todo" />
 						<Fragments path="/fragments" />
 						<ProfilerDemo path="/profiler" />
