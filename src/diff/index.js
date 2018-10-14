@@ -312,7 +312,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			c._parent = parent;
 			c._parentVNode = parentVNode;
 
-			if (newTree.ref) applyRef(newTree.ref, c);
+			if (newTree.ref) applyRef(newTree.ref, c, ancestorComponent);
 			// context = assign({}, context);
 			// context.__depth = (context.__depth || 0) + 1;
 			// context = assign({
@@ -349,7 +349,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			dom = lastSibling = newTree._lastSibling = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren, mounts, ancestorComponent);
 
 			if (newTree.ref && (oldTree.ref !== newTree.ref)) {
-				applyRef(newTree.ref, dom);
+				applyRef(newTree.ref, dom, ancestorComponent);
 			}
 		}
 
@@ -517,9 +517,14 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
  * @param {object|function} [ref=null]
  * @param {any} [value]
  */
-export function applyRef(ref, value) {
-	if (typeof ref=='function') ref(value);
-	else ref.current = value;
+export function applyRef(ref, value, ancestorComponent) {
+	try {
+		if (typeof ref=='function') ref(value);
+		else ref.current = value;
+	}
+	catch (e) {
+		catchErrorInComponent(e, ancestorComponent);
+	}
 }
 
 /**
@@ -531,12 +536,7 @@ export function applyRef(ref, value) {
 export function unmount(vnode, ancestorComponent) {
 	let r;
 	if (r = vnode.ref) {
-		try {
-			applyRef(r, null);
-		}
-		catch (e) {
-			catchErrorInComponent(e, ancestorComponent);
-		}
+		applyRef(r, null, ancestorComponent);
 	}
 
 	if ((r = vnode._el)!=null) r.remove();

@@ -10,7 +10,6 @@
 	- ✖ should reorder Fragment children
 - render
 	- ✖ should skip non-preact elements
-	- ✖ should render arrays of mixed elements
 
 Also:
 
