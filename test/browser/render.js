@@ -85,12 +85,16 @@ describe('render()', () => {
 		expect(scratch.firstChild).to.have.property('nodeName', 'X-BAR');
 	});
 
-	it('should allow element reuse', () => {
-		let reused = <div>Hello World!</div>;
-		render(<div>{reused}<span />{reused}/></div>, scratch);
+	it('should allow VNode reuse', () => {
+		let reused = <div class="reuse">Hello World!</div>;
+		render(<div>{reused}<span />{reused}</div>, scratch);
+		expect(scratch.innerHTML).to.eql(
+			`<div><div class="reuse">Hello World!</div><span></span><div class="reuse">Hello World!</div></div>`
+		);
+
 		render(<div><span />{reused}</div>, scratch);
 		expect(scratch.innerHTML).to.eql(
-			`<div><span></span><div>Hello World!</div></div>`
+			`<div><span></span><div class="reuse">Hello World!</div></div>`
 		);
 	});
 
