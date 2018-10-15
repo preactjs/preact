@@ -94,26 +94,21 @@ describe('render()', () => {
 		);
 	});
 
-	// Not supported currently
-	xit('should append new elements when called without a merge argument', () => {
+	it('should merge new elements when called multiple times', () => {
 		render(<div />, scratch);
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.firstChild).to.have.property('nodeName', 'DIV');
-
-		render(<span />, scratch);
-		expect(scratch.childNodes).to.have.length(2);
-		expect(scratch.childNodes[0]).to.have.property('nodeName', 'DIV');
-		expect(scratch.childNodes[1]).to.have.property('nodeName', 'SPAN');
-	});
-
-	it('should merge new elements when called twice', () => {
-		render(<div />, scratch);
-		expect(scratch.childNodes).to.have.length(1);
-		expect(scratch.firstChild).to.have.property('nodeName', 'DIV');
+		expect(scratch.innerHTML).to.equal('<div></div>');
 
 		render(<span />, scratch);
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.firstChild).to.have.property('nodeName', 'SPAN');
+		expect(scratch.innerHTML).to.equal('<span></span>');
+
+		render(<span class="hello">Hello!</span>, scratch);
+		expect(scratch.childNodes).to.have.length(1);
+		expect(scratch.firstChild).to.have.property('nodeName', 'SPAN');
+		expect(scratch.innerHTML).to.equal('<span class="hello">Hello!</span>');
 	});
 
 	it('should nest empty nodes', () => {
