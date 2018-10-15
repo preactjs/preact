@@ -663,6 +663,7 @@ describe('render()', () => {
 
 		render(<Foo />, scratch);
 
+		// Append some DOM elements from outside of Preact
 		let c = document.createElement('c');
 		c.textContent = 'baz';
 		comp.base.appendChild(c);
@@ -673,17 +674,20 @@ describe('render()', () => {
 
 		expect(scratch.firstChild.children, 'append').to.have.length(4);
 
+		// Normal force update
 		comp.forceUpdate();
 
 		expect(scratch.firstChild.children, 'forceUpdate').to.have.length(4);
 		expect(scratch.innerHTML, 'forceUpdate').to.equal(`<div><a>foo</a><b>bar</b><c>baz</c><b>bat</b></div>`);
 
+		// Alternate force Update
 		comp.alt = true;
 		comp.forceUpdate();
 
 		expect(scratch.firstChild.children, 'forceUpdate alt').to.have.length(4);
 		expect(scratch.innerHTML, 'forceUpdate alt').to.equal(`<div><b>alt</b><a>foo</a><c>baz</c><b>bat</b></div>`);
 
+		// Normal root re-render
 		// Re-rendering from the root is non-destructive if the root was a previous render:
 		comp.alt = false;
 		render(<Foo />, scratch);
@@ -691,12 +695,14 @@ describe('render()', () => {
 		expect(scratch.firstChild.children, 'root re-render').to.have.length(4);
 		expect(scratch.innerHTML, 'root re-render').to.equal(`<div><a>foo</a><b>bar</b><c>baz</c><b>bat</b></div>`);
 
+		// Alternate root re-render
 		comp.alt = true;
 		render(<Foo />, scratch);
 
 		expect(scratch.firstChild.children, 'root re-render 2').to.have.length(4);
 		expect(scratch.innerHTML, 'root re-render 2').to.equal(`<div><b>alt</b><a>foo</a><c>baz</c><b>bat</b></div>`);
 
+		// Root re-render with different root
 		render(<div><Foo /></div>, scratch);
 
 		expect(scratch.firstChild.children, 'root re-render changed').to.have.length(3);
