@@ -21,6 +21,9 @@
 6. `setState` no longer modifies `this.state` synchronously
 7. Falsy attributes values are no longer removed from the DOM. For some attributes (e.g. `spellcheck`)
    the values `false` and `''` have different meaning so being able to render `false` is important
+8. The Component constructor no longer initializes state to an empty object. If state has not been
+   previously set, it will be set to an empty object the first time the component is rendered, after
+   the constructor has been called
 
 ### Minor changes
 

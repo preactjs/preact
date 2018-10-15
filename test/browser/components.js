@@ -118,20 +118,35 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
 		});
 
-		it('should initialize props, context, and state in Component constructor', () => {
+		it('should initialize props & context but not state in Component constructor', () => {
+			// Not initializing state matches React behavior: https://codesandbox.io/s/rml19v8o2q
 			class Foo extends Component {
 				constructor(props, context) {
 					super(props, context);
 					expect(this.props).to.equal(props);
-					expect(this.state).to.deep.equal({});
+					expect(this.state).to.deep.equal(undefined);
 					expect(this.context).to.equal(context);
+
+					instance = this;
 				}
-				render() {
-					return <div />;
+				render(props) {
+					return <div {...props}>Hello</div>;
 				}
 			}
 
-			render(<Foo />, scratch);
+			sinon.spy(Foo.prototype, 'render');
+
+			render(<Foo {...PROPS} />, scratch);
+
+			expect(Foo.prototype.render)
+				.to.have.been.calledOnce
+				.and.to.have.been.calledWithMatch(PROPS, {}, {})
+				.and.to.have.returned(sinon.match({ tag: 'div', props: PROPS }));
+			expect(instance.props).to.deep.equal(PROPS);
+			expect(instance.state).to.deep.equal({});
+			expect(instance.context).to.deep.equal({});
+
+			expect(scratch.innerHTML).to.equal('<div foo="bar">Hello</div>');
 		});
 
 		it('should render Component classes that don\'t pass args into the Component constructor', () => {
@@ -391,7 +406,7 @@ describe('Components', () => {
 		class GoodContainer extends Component {
 			constructor(props) {
 				super(props);
-				this.state.alt = false;
+				this.state = { alt: false };
 				good = this;
 			}
 
@@ -409,7 +424,7 @@ describe('Components', () => {
 		class BadContainer extends Component {
 			constructor(props) {
 				super(props);
-				this.state.alt = false;
+				this.state = { alt: false };
 				bad = this;
 			}
 

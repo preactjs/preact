@@ -13,7 +13,7 @@ export function Component(props, context) {
 	this.props = props;
 	this.context = context;
 	// if (this.state==null) this.state = {};
-	this.state = {}; // TODO: Consider removing
+	// this.state = {};
 	// this._dirty = true;
 	// this._renderCallbacks = []; // Only class components
 
