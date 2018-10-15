@@ -13,9 +13,9 @@ export function Component(props, context) {
 	this.props = props;
 	this.context = context;
 	// if (this.state==null) this.state = {};
-	this.state = {};
-	this._dirty = true;
-	this._renderCallbacks = []; // Only class components
+	this.state = {}; // TODO: Consider removing
+	// this._dirty = true;
+	// this._renderCallbacks = []; // Only class components
 
 	// Other properties that Component will have set later,
 	// shown here as commented out for quick reference

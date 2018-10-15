@@ -224,6 +224,8 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				c.props = newTree.props;
 				if (!c.state) c.state = {};
 				c.context = context;
+				c._dirty = true;
+				c._renderCallbacks = [];
 			}
 
 			c._vnode = newTree;

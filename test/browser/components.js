@@ -144,8 +144,8 @@ describe('Components', () => {
 			// Pattern unistore uses for connect: https://git.io/fxRqu
 			function Wrapper() {
 				instance = this;
-				this.render = sinon.spy((props, state) => <div {...props} >{state.text}</div>);
 				this.state = STATE;
+				this.render = sinon.spy((props, state) => <div {...props} >{state.text}</div>);
 			}
 			(Wrapper.prototype = new Component()).constructor = Wrapper;
 
@@ -156,7 +156,7 @@ describe('Components', () => {
 				.and.to.have.been.calledWithMatch(PROPS, STATE, {})
 				.and.to.have.returned(sinon.match({ tag: 'div', props: PROPS }));
 			expect(instance.props).to.deep.equal(PROPS);
-			expect(instance.state).to.deep.equal({});
+			expect(instance.state).to.deep.equal(STATE);
 			expect(instance.context).to.deep.equal({});
 
 			expect(scratch.innerHTML).to.equal('<div foo="bar">Hello</div>');
@@ -189,10 +189,11 @@ describe('Components', () => {
 					instance = this;
 					this.state = STATE;
 				}
-				render() {
-					return <div />;
+				render(props, state) {
+					return <div {...props}>{state.text}</div>;
 				}
 			}
+			sinon.spy(Foo.prototype, 'render');
 
 			render(<Foo {...PROPS} />, scratch);
 
