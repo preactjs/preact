@@ -600,14 +600,6 @@ describe('render()', () => {
 		expect(value()).to.equal(true);
 	});
 
-	it('should ignore props.children if children are manually specified', () => {
-		expect(
-			<div a children={['a', 'b']}>c</div>
-		).to.eql(
-			<div a>c</div>
-		);
-	});
-
 	it('should reorder child pairs', () => {
 		render((
 			<div>

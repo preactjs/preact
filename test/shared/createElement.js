@@ -245,4 +245,12 @@ describe('createElement(jsx)', () => {
 			.with.nested.property('props.children')
 			.that.deep.equals(['x', 'y']);
 	});
+
+	it('should ignore props.children if children are manually specified', () => {
+		expect(
+			<div a children={['a', 'b']}>c</div>
+		).to.eql(
+			<div a>c</div>
+		);
+	});
 });
