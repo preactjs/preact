@@ -1,4 +1,4 @@
-import preact, { createElement, Component, Fragment, render, hydrate, cloneElement } from '../../src/index';
+import preact, { createElement, createContext, Component, Fragment, render, hydrate, cloneElement } from '../../src/index';
 import { expect } from 'chai';
 
 describe('preact', () => {
@@ -10,6 +10,7 @@ describe('preact', () => {
 		expect(preact).to.have.property('render', render);
 		expect(preact).to.have.property('hydrate', hydrate);
 		expect(preact).to.have.property('cloneElement', cloneElement);
+		expect(preact).to.have.property('createElement', createElement);
 		// expect(preact).to.have.property('rerender', rerender);
 		// expect(preact).to.have.property('options', options);
 	});
@@ -21,6 +22,7 @@ describe('preact', () => {
 		expect(render).to.be.a('function');
 		expect(hydrate).to.be.a('function');
 		expect(cloneElement).to.be.a('function');
+		expect(createContext).to.be.a('function');
 		// expect(rerender).to.be.a('function');
 		// expect(options).to.exist.and.be.an('object');
 	});

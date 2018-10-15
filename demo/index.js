@@ -7,6 +7,7 @@ import Spiral from './spiral';
 import Reorder from './reorder';
 import Todo from './todo';
 import Fragments from './fragments';
+import Context from './context';
 import installLogger from './logger';
 
 window.ceviche = { createElement, render, hydrate, Component };
@@ -34,6 +35,7 @@ class App extends Component {
 						<Link href="/pythagoras" activeClassName="active">Pythagoras</Link>
 						<Link href="/todo" activeClassName="active">ToDo</Link>
 						<Link href="/fragments" activeClassName="active">Fragments</Link>
+						<Link href="/context" activeClassName="active">Context</Link>
 					</nav>
 				</header>
 				<main>
@@ -44,6 +46,7 @@ class App extends Component {
 						<Pythagoras path="/pythagoras" />
 						<Todo path="/todo" />
 						<Fragments path="/fragments" />
+						<Context path="/context" />
 					</Router>
 				</main>
 			</div>

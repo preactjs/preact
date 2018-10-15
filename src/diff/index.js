@@ -82,6 +82,8 @@ import { assign } from '../util';
 // 	// }
 // }
 
+const providerData = {};
+
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').PreactElement} dom The DOM element representing
@@ -238,6 +240,12 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				assign(s, newTag.getDerivedStateFromProps(newTree.props, s));
 			}
 
+			// isProvider
+			if (newTag.context) {
+				providerData[newTag] = providerData[newTag] || [];
+				providerData[newTag].push(newTree.props.value);
+			}
+
 			// Invoke pre-render lifecycle methods
 			if (isNew) {
 				if (newTag.getDerivedStateFromProps==null && c.componentWillMount!=null) c.componentWillMount();
@@ -293,6 +301,16 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			c.props = newTree.props;
 			c.state = s;
 
+			// isConsumer
+			if (newTag.Provider) {
+				let context = providerData[newTag.Provider];
+				context = context[context.length - 1] || newTag.defaultValue;
+				c.props = {
+					children: c.props.children,
+					value: context
+				};
+			}
+
 			let prev = c._previousVTree;
 			let vnode = c._previousVTree = coerceToVNode(c.render(c.props, c.state, c.context));
 			c._dirty = false;
@@ -315,6 +333,12 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			c._parentVNode = parentVNode;
 
 			if (newTree.ref) applyRef(newTree.ref, c, ancestorComponent);
+
+			// isProvider
+			if (newTag.context) {
+				providerData[newTag].pop();
+			}
+
 			// context = assign({}, context);
 			// context.__depth = (context.__depth || 0) + 1;
 			// context = assign({

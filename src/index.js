@@ -2,11 +2,13 @@ import { render, hydrate } from './render';
 import { createElement, Fragment } from './create-element';
 import { Component } from './component';
 import { cloneElement } from './clone-element';
+import { createContext } from './create-context';
 
 export { render, hydrate } from './render';
 export { createElement, Fragment, createRef } from './create-element';
 export { Component } from './component';
 export { cloneElement } from './clone-element';
+export { createContext } from './create-context';
 
 export default {
 	render,
@@ -14,5 +16,6 @@ export default {
 	createElement,
 	Fragment,
 	Component,
-	cloneElement
+	cloneElement,
+	createContext
 };
