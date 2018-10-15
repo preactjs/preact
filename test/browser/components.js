@@ -43,7 +43,6 @@ describe('Components', () => {
 
 	describe('Component construction', () => {
 
-
 		/** @type {object} */
 		let instance;
 		let PROPS;
@@ -300,6 +299,29 @@ describe('Components', () => {
 			expect(instance.context).to.deep.equal({});
 
 			expect(scratch.innerHTML).to.equal('<div foo="bar">Hello</div>');
+		});
+
+		it('should render class components that inherit from Component without a render method', () => {
+			class Foo extends Component {
+				constructor(props, context) {
+					super(props, context);
+					instance = this;
+				}
+			}
+
+			sinon.spy(Foo.prototype, 'render');
+
+			render(<Foo {...PROPS} />, scratch);
+
+			expect(Foo.prototype.render)
+				.to.have.been.calledOnce
+				.and.to.have.been.calledWithMatch(PROPS, {}, {})
+				.and.to.have.returned(undefined);
+			expect(instance.props).to.deep.equal(PROPS);
+			expect(instance.state).to.deep.equal({});
+			expect(instance.context).to.deep.equal({});
+
+			expect(scratch.innerHTML).to.equal('');
 		});
 	});
 
