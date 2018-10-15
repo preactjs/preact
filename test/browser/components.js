@@ -89,7 +89,6 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
 		});
 
-
 		it('should render components with props', () => {
 			let constructorProps;
 
@@ -117,6 +116,22 @@ describe('Components', () => {
 				}));
 
 			expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
+		});
+
+		it('should initialize props, context, and state in Component constructor', () => {
+			class Foo extends Component {
+				constructor(props, context) {
+					super(props, context);
+					expect(this.props).to.equal(props);
+					expect(this.state).to.deep.equal({});
+					expect(this.context).to.equal(context);
+				}
+				render() {
+					return <div />;
+				}
+			}
+
+			render(<Foo />, scratch);
 		});
 
 		it('should render Component classes that don\'t pass args into the Component constructor', () => {
@@ -183,6 +198,25 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div foo="bar">Hello</div>');
 		});
 
+		it('should render components that don\'t call Component constructor and don\'t initialize state', () => {
+			function Foo () {
+				instance = this;
+			}
+			Foo.prototype.render = sinon.spy((props) => <div {...props}>Hello</div>);
+
+			render(<Foo {...PROPS} />, scratch);
+
+			expect(Foo.prototype.render)
+				.to.have.been.calledOnce
+				.and.to.have.been.calledWithMatch(PROPS, {}, {})
+				.and.to.have.returned(sinon.match({ tag: 'div', props: PROPS }));
+			expect(instance.props).to.deep.equal(PROPS);
+			expect(instance.state).to.deep.equal({});
+			expect(instance.context).to.deep.equal({});
+
+			expect(scratch.innerHTML).to.equal('<div foo="bar">Hello</div>');
+		});
+
 		it('should render components that don\'t inherit from Component', () => {
 			class Foo {
 				constructor() {
@@ -224,6 +258,30 @@ describe('Components', () => {
 				.and.to.have.returned(sinon.match({ tag: 'div', props: PROPS }));
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal(STATE);
+			expect(instance.context).to.deep.equal({});
+
+			expect(scratch.innerHTML).to.equal('<div foo="bar">Hello</div>');
+		});
+
+		it('should render components that don\'t inherit from Component and don\'t initialize state', () => {
+			class Foo {
+				constructor() {
+					instance = this;
+				}
+				render(props, state) {
+					return <div {...props}>Hello</div>;
+				}
+			}
+			sinon.spy(Foo.prototype, 'render');
+
+			render(<Foo {...PROPS} />, scratch);
+
+			expect(Foo.prototype.render)
+				.to.have.been.calledOnce
+				.and.to.have.been.calledWithMatch(PROPS, {}, {})
+				.and.to.have.returned(sinon.match({ tag: 'div', props: PROPS }));
+			expect(instance.props).to.deep.equal(PROPS);
+			expect(instance.state).to.deep.equal({});
 			expect(instance.context).to.deep.equal({});
 
 			expect(scratch.innerHTML).to.equal('<div foo="bar">Hello</div>');
