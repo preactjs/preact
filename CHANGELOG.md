@@ -21,6 +21,7 @@
        function to hydrate a server rendered DOM tree
     3. Calling `render` multiple times on the same element merges the trees together. It no longer
        appends just appends to the DOM
+    4. Preact no longer guarantees elements not created by Preact will preserved
 4. Setting the DOM `style` attribute to a string is not supported
 5. `setState` no longer modifies `this.state` synchronously
 6. Falsy attributes values are no longer removed from the DOM. For some attributes (e.g. `spellcheck`)
