@@ -576,7 +576,7 @@ describe('render()', () => {
 	});
 
 	it('should reconcile mutated DOM attributes', () => {
-		let check = p => render(<input type="checkbox" checked={p} />, scratch, scratch.lastChild),
+		let check = p => render(<input type="checkbox" checked={p} />, scratch),
 			value = () => scratch.lastChild.checked,
 			setValue = p => scratch.lastChild.checked = p;
 		check(true);
@@ -602,12 +602,12 @@ describe('render()', () => {
 	});
 
 	it('should reorder child pairs', () => {
-		let root = render((
+		render((
 			<div>
 				<a>a</a>
 				<b>b</b>
 			</div>
-		), scratch, root);
+		), scratch);
 
 		let a = scratch.firstChild.firstChild;
 		let b = scratch.firstChild.lastChild;
@@ -615,12 +615,12 @@ describe('render()', () => {
 		expect(a).to.have.property('nodeName', 'A');
 		expect(b).to.have.property('nodeName', 'B');
 
-		root = render((
+		render((
 			<div>
 				<b>b</b>
 				<a>a</a>
 			</div>
-		), scratch, root);
+		), scratch);
 
 		expect(scratch.firstChild.firstChild).to.have.property('nodeName', 'B');
 		expect(scratch.firstChild.lastChild).to.have.property('nodeName', 'A');
@@ -636,9 +636,11 @@ describe('render()', () => {
 		};
 
 		const DOMElement = html`<div><a foo="bar"></a></div>`;
+		scratch.appendChild(DOMElement);
+
 		const preactElement = <div><a /></div>;
 
-		render(preactElement, scratch, DOMElement);
+		render(preactElement, scratch);
 		expect(scratch).to.have.property('innerHTML', '<div><a></a></div>');
 	});
 
