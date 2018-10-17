@@ -96,7 +96,7 @@ export function setAccessor(node, name, old, value, isSvg) {
 	else if (name[0]=='o' && name[1]=='n') {
 		const opts = {
 			capture: name !== (name=name.replace(/Capture$/, '')),
-      passive: name.toLowerCase().indexOf('touch')!==-1
+			passive: name.toLowerCase().indexOf('touch')!==-1
 		};
 		name = name.toLowerCase().substring(2);
 		if (value) {
