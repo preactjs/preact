@@ -94,13 +94,16 @@ export function setAccessor(node, name, old, value, isSvg) {
 		if (value) node.innerHTML = value.__html || '';
 	}
 	else if (name[0]=='o' && name[1]=='n') {
-		let useCapture = name !== (name=name.replace(/Capture$/, ''));
+		const opts = {
+			capture: name !== (name=name.replace(/Capture$/, '')),
+      passive: name.toLowerCase().indexOf('touch')!==-1
+		};
 		name = name.toLowerCase().substring(2);
 		if (value) {
-			if (!old) node.addEventListener(name, eventProxy, useCapture);
+			if (!old) node.addEventListener(name, eventProxy, opts);
 		}
 		else {
-			node.removeEventListener(name, eventProxy, useCapture);
+			node.removeEventListener(name, eventProxy, opts);
 		}
 		(node._listeners || (node._listeners = {}))[name] = value;
 	}
