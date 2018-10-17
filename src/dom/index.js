@@ -94,11 +94,9 @@ export function setAccessor(node, name, old, value, isSvg) {
 		if (value) node.innerHTML = value.__html || '';
 	}
 	else if (name[0]=='o' && name[1]=='n') {
-		const opts = {
-			capture: name !== (name=name.replace(/Capture$/, '')),
-			passive: name.toLowerCase().indexOf('touch')!==-1
-		};
+		const capture = name !== (name=name.replace(/Capture$/, ''));
 		name = name.toLowerCase().substring(2);
+		const opts = name.toLowerCase().indexOf('touch') === -1 ? capture : {capture, passive: true};
 		if (value) {
 			if (!old) node.addEventListener(name, eventProxy, opts);
 		}
