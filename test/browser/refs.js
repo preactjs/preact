@@ -84,20 +84,25 @@ describe('refs', () => {
 	});
 
 	it('should be executed when the element which has a ref attribute is created', () => {
-		let setRef = spy('setRef'),
+		let setBase = spy('setBase'),
+			setChildren = spy('setChildren'),
 			outer, inner;
 		class Outer extends Component {
 			constructor(props) {
 				super(props);
 				this.state = { show:false };
-				this.setRef = this.setRef.bind(this);
+				this.setBase = this.setBase.bind(this);
+				this.setChildren = this.setChildren.bind(this);
 				outer = this;
 			}
-			setRef(el) {
-				setRef(el);
+			setBase(el) {
+				setBase(el);
+			}
+			setChildren(el) {
+				setChildren(el);
 			}
 			render(_, {show}) {
-				const content = show ? <Inner><p ref={this.setRef}></p></Inner> : null;
+				const content = show ? <Inner setBase={this.setBase}><p ref={this.setChildren}></p></Inner> : null;
 				return <div>{content}</div>;
 			}
 		}
@@ -106,29 +111,34 @@ describe('refs', () => {
 				super(props);
 				inner = this;
 			}
-			render({children}) {
-				return <div>{children}</div>;
+			render({children, setBase}) {
+				return <div ref={setBase}>{children}</div>;
 			}
 		}
 
 		render(<Outer />, scratch);
-		expect(setRef.notCalled).to.be.true;
+		expect(setChildren.notCalled).to.be.true;
 
 		outer.setState({ show:true });
 		outer.forceUpdate();
-		expect(setRef).to.have.been.calledOnce.and.calledWith(inner.base.firstChild);
+		expect(setBase).to.have.been.calledOnce.and.calledWith(inner.base);
+		expect(setChildren).to.have.been.calledOnce.and.calledWith(inner.base.firstChild);
 
-		setRef.resetHistory();
+		setBase.resetHistory();
+		setChildren.resetHistory();
 
 		outer.setState({ show:false });
 		outer.forceUpdate();
-		expect(setRef).to.have.been.calledOnce.and.calledWith(null);
+		expect(setBase).to.have.been.calledOnce.and.calledWith(null);
+		expect(setChildren).to.have.been.calledOnce.and.calledWith(null);
 
-		setRef.resetHistory();
+		setBase.resetHistory();
+		setChildren.resetHistory();
 
 		outer.setState({ show:true });
 		outer.forceUpdate();
-		expect(setRef).to.have.been.calledOnce.and.calledWith(inner.base.firstChild);
+		expect(setBase).to.have.been.calledOnce.and.calledWith(inner.base);
+		expect(setChildren).to.have.been.calledOnce.and.calledWith(inner.base.firstChild);
 	});
 
 	it('should pass children to ref functions', () => {

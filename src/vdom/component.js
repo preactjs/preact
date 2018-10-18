@@ -282,7 +282,10 @@ export function unmountComponent(component) {
 		unmountComponent(inner);
 	}
 	else if (base) {
-		if (base[ATTR_KEY]!=null) applyRef(base[ATTR_KEY].ref, null);
+		if (base[ATTR_KEY]!=null) {
+			applyRef(base[ATTR_KEY].ref, null);
+			delete base[ATTR_KEY].ref;
+		}
 
 		component.nextBase = base;
 
