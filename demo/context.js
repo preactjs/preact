@@ -3,18 +3,19 @@ const { Provider, Consumer } = createContext();
 
 class ThemeProvider extends Component {
 	state = {
-		value: this.props.value,
+		value: this.props.value
 	};
 
 	componentDidMount() {
 		setTimeout(() => {
 			this.setState({
-				value: this.props.next,
+				value: this.props.next
 			});
 		}, 3000);
 	}
 
 	render() {
+		console.log(this.state);
 		return <Provider value={this.state.value}>
 			{this.props.children}
 		</Provider>

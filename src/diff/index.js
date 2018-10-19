@@ -228,6 +228,11 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				c._renderCallbacks = [];
 			}
 
+			// isProvider
+			if (newTag.context) {
+				newTag.context.Provider = c;
+			}
+
 			c._vnode = newTree;
 
 			// Invoke getDerivedStateFromProps
@@ -260,11 +265,6 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				// 	}
 				// 	dom = newTree.tag.$cache.cloneNode(true);
 				// }
-
-				// isProvider
-				if (newTag.context) {
-					newTag.context.Provider = newTree;
-				}
 			}
 			else {
 				// let nextState = c.state;
