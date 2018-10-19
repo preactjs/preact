@@ -270,6 +270,17 @@ function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
 }
 
 
+/**
+ * Remove ref if ref exists in props.
+ * @param {import('../dom').PreactElement} node DOM node
+ */
+export function removeRef(node) {
+	if (node[ATTR_KEY]!=null) {
+		applyRef(node[ATTR_KEY].ref, null);
+		delete node[ATTR_KEY].ref;
+	}
+}
+
 
 /**
  * Recursively recycle (or just unmount) a node and its descendants.
@@ -287,10 +298,7 @@ export function recollectNodeTree(node, unmountOnly) {
 	else {
 		// If the node's VNode had a ref function, invoke it with null here.
 		// (this is part of the React spec, and smart for unsetting references)
-		if (node[ATTR_KEY]!=null) {
-			applyRef(node[ATTR_KEY].ref, null);
-			delete node[ATTR_KEY].ref;
-		}
+		removeRef(node);
 
 		if (unmountOnly===false || node[ATTR_KEY]==null) {
 			removeNode(node);

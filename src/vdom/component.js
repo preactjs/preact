@@ -1,9 +1,9 @@
-import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER, ATTR_KEY } from '../constants';
+import { SYNC_RENDER, NO_RENDER, FORCE_RENDER, ASYNC_RENDER } from '../constants';
 import options from '../options';
 import { extend, applyRef } from '../util';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from './index';
-import { diff, mounts, diffLevel, flushMounts, recollectNodeTree, removeChildren } from './diff';
+import { diff, mounts, diffLevel, flushMounts, recollectNodeTree, removeChildren, removeRef } from './diff';
 import { createComponent, recyclerComponents } from './component-recycler';
 import { removeNode } from '../dom/index';
 
@@ -282,10 +282,7 @@ export function unmountComponent(component) {
 		unmountComponent(inner);
 	}
 	else if (base) {
-		if (base[ATTR_KEY]!=null) {
-			applyRef(base[ATTR_KEY].ref, null);
-			delete base[ATTR_KEY].ref;
-		}
+		removeRef(base);
 
 		component.nextBase = base;
 
