@@ -1,4 +1,4 @@
-import { createElement as h, createContext, Fragment } from '../../src/index';
+import { createElement as h, createContext } from '../../src/index';
 // import { VNode } from '../../src/vnode';
 import { expect } from 'chai';
 
