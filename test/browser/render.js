@@ -543,7 +543,7 @@ describe('render()', () => {
 			class Thing extends Component {
 				constructor(props, context) {
 					super(props, context);
-					this.state.html = this.props.html;
+					this.state = { html: this.props.html };
 					thing = this;
 				}
 				render(props, { html }) {
