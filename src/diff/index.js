@@ -301,7 +301,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			if (newTag.Provider) {
 				c.props = {
 					children: c.props.children,
-					value: newTag.Provider.props.value || newTag.defaultValue
+					value: newTag.Provider.props ? newTag.Provider.props.value : newTag.defaultValue
 				};
 			}
 

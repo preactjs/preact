@@ -39,7 +39,7 @@ describe('context', () => {
 		expect(scratch.innerHTML).to.equal('<div><div>a</div></div>');
 	});
 
-	it('should preserve provider context through nesting', () => {
+	it('should preserve provider context through nesting providers', () => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { a: 'a' };
 		const CHILD_CONTEXT = { b: 'b' };
@@ -96,5 +96,32 @@ describe('context', () => {
 		// initial render does not invoke anything but render():
 		expect(Inner.prototype.render).to.have.been.calledWith({ ...THEME_CONTEXT, ...DATA_CONTEXT }, {}, {});
 		expect(scratch.innerHTML).to.equal('<div>black - a</div>');
+	});
+
+	it('should preserve provider context through nesting consumers', () => {
+		const { Provider, Consumer } = createContext();
+		const CONTEXT = { a: 'a' };
+
+		class Inner extends Component {
+			render(props) {
+				return <div>{props.a}</div>;
+			}
+		}
+
+		sinon.spy(Inner.prototype, 'render');
+
+		render(<Provider value={CONTEXT}>
+			<Consumer>
+				{data =>
+					(<Consumer>
+						{childData => <Inner {...data} {...childData} />}
+					</Consumer>)
+				}
+			</Consumer>
+		</Provider>, scratch);
+
+		// initial render does not invoke anything but render():
+		expect(Inner.prototype.render).to.have.been.calledWith({ ...CONTEXT }, {}, {});
+		expect(scratch.innerHTML).to.equal('<div>a</div>');
 	});
 });
