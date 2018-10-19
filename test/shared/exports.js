@@ -10,7 +10,7 @@ describe('preact', () => {
 		expect(preact).to.have.property('render', render);
 		expect(preact).to.have.property('hydrate', hydrate);
 		expect(preact).to.have.property('cloneElement', cloneElement);
-		expect(preact).to.have.property('createElement', createElement);
+		expect(preact).to.have.property('createContext', createContext);
 		// expect(preact).to.have.property('rerender', rerender);
 		// expect(preact).to.have.property('options', options);
 	});
