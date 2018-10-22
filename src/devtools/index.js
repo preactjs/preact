@@ -104,7 +104,7 @@ export function initDevTools() {
 		});
 	})();
 
-	// The actual integration. There is no way to know weather the profiler is
+	// The actual integration. There is no way to know whether the profiler is
 	// actually recording or not. There is some discussion in this issue:
 	// https://github.com/facebook/react-devtools/issues/1106
 	options.enableProfiling = true;
