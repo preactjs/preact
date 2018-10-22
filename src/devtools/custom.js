@@ -175,7 +175,7 @@ export function getInstance(vnode) {
 }
 
 /**
- * Compare to objects
+ * Compare two objects
  * @param {object} a
  * @param {object} b
  * @param {boolean} [isProps]
