@@ -18,8 +18,6 @@ export let now = Date.now;
 
 try {
 	/* istanbul ignore else */
-	if ('performance' in window) {
-		now = window.performance.now.bind(window.performance);
-	}
+	now = performance.now.bind(performance);
 }
 catch (e) {}
