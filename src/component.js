@@ -13,9 +13,9 @@ export function Component(props, context) {
 	this.props = props;
 	this.context = context;
 	// if (this.state==null) this.state = {};
-	this.state = {};
-	this._dirty = true;
-	this._renderCallbacks = []; // Only class components
+	// this.state = {};
+	// this._dirty = true;
+	// this._renderCallbacks = []; // Only class components
 
 	// Other properties that Component will have set later,
 	// shown here as commented out for quick reference
@@ -87,6 +87,17 @@ Component.prototype.forceUpdate = function(callback) {
 	if (callback!=null) callback();
 };
 
+/**
+ * Accepts `props` and `state`, and returns a new Virtual DOM tree to build.
+ * Virtual DOM is generally constructed via [JSX](http://jasonformat.com/wtf-is-jsx).
+ * @param {object} props Props (eg: JSX attributes) received from parent
+ * element/component
+ * @param {object} state The component's current state
+ * @param {object} context Context object, as returned by the nearest
+ * ancestor's `getChildContext()`
+ * @returns {import('./index').ComponentChildren | void}
+ */
+Component.prototype.render = function () {};
 
 /**
  * The render queue

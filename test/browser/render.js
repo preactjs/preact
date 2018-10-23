@@ -94,26 +94,21 @@ describe('render()', () => {
 		);
 	});
 
-	// Not supported currently
-	xit('should append new elements when called without a merge argument', () => {
+	it('should merge new elements when called multiple times', () => {
 		render(<div />, scratch);
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.firstChild).to.have.property('nodeName', 'DIV');
-
-		render(<span />, scratch);
-		expect(scratch.childNodes).to.have.length(2);
-		expect(scratch.childNodes[0]).to.have.property('nodeName', 'DIV');
-		expect(scratch.childNodes[1]).to.have.property('nodeName', 'SPAN');
-	});
-
-	it('should merge new elements when called twice', () => {
-		render(<div />, scratch);
-		expect(scratch.childNodes).to.have.length(1);
-		expect(scratch.firstChild).to.have.property('nodeName', 'DIV');
+		expect(scratch.innerHTML).to.equal('<div></div>');
 
 		render(<span />, scratch);
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.firstChild).to.have.property('nodeName', 'SPAN');
+		expect(scratch.innerHTML).to.equal('<span></span>');
+
+		render(<span class="hello">Hello!</span>, scratch);
+		expect(scratch.childNodes).to.have.length(1);
+		expect(scratch.firstChild).to.have.property('nodeName', 'SPAN');
+		expect(scratch.innerHTML).to.equal('<span class="hello">Hello!</span>');
 	});
 
 	it('should nest empty nodes', () => {
@@ -548,7 +543,7 @@ describe('render()', () => {
 			class Thing extends Component {
 				constructor(props, context) {
 					super(props, context);
-					this.state.html = this.props.html;
+					this.state = { html: this.props.html };
 					thing = this;
 				}
 				render(props, { html }) {
@@ -581,7 +576,7 @@ describe('render()', () => {
 	});
 
 	it('should reconcile mutated DOM attributes', () => {
-		let check = p => render(<input type="checkbox" checked={p} />, scratch, scratch.lastChild),
+		let check = p => render(<input type="checkbox" checked={p} />, scratch),
 			value = () => scratch.lastChild.checked,
 			setValue = p => scratch.lastChild.checked = p;
 		check(true);
@@ -607,12 +602,12 @@ describe('render()', () => {
 	});
 
 	it('should reorder child pairs', () => {
-		let root = render((
+		render((
 			<div>
 				<a>a</a>
 				<b>b</b>
 			</div>
-		), scratch, root);
+		), scratch);
 
 		let a = scratch.firstChild.firstChild;
 		let b = scratch.firstChild.lastChild;
@@ -620,12 +615,12 @@ describe('render()', () => {
 		expect(a).to.have.property('nodeName', 'A');
 		expect(b).to.have.property('nodeName', 'B');
 
-		root = render((
+		render((
 			<div>
 				<b>b</b>
 				<a>a</a>
 			</div>
-		), scratch, root);
+		), scratch);
 
 		expect(scratch.firstChild.firstChild).to.have.property('nodeName', 'B');
 		expect(scratch.firstChild.lastChild).to.have.property('nodeName', 'A');
@@ -641,71 +636,12 @@ describe('render()', () => {
 		};
 
 		const DOMElement = html`<div><a foo="bar"></a></div>`;
+		scratch.appendChild(DOMElement);
+
 		const preactElement = <div><a /></div>;
 
-		render(preactElement, scratch, DOMElement);
+		render(preactElement, scratch);
 		expect(scratch).to.have.property('innerHTML', '<div><a></a></div>');
-	});
-
-	it.skip('should skip non-preact elements', () => {
-		let comp;
-		class Foo extends Component {
-			constructor() {
-				super();
-				comp = this;
-			}
-
-			render() {
-				let alt = this.props.alt || this.state.alt || this.alt;
-				let c = [
-					<a>foo</a>,
-					<b>{ alt?'alt':'bar' }</b>
-				];
-				if (alt) c.reverse();
-				return <div>{c}</div>;
-			}
-		}
-
-		render(<Foo />, scratch);
-
-		let c = document.createElement('c');
-		c.textContent = 'baz';
-		comp.base.appendChild(c);
-
-		let b = document.createElement('b');
-		b.textContent = 'bat';
-		comp.base.appendChild(b);
-
-		expect(scratch.firstChild.children, 'append').to.have.length(4);
-
-		comp.forceUpdate();
-
-		expect(scratch.firstChild.children, 'forceUpdate').to.have.length(4);
-		expect(scratch.innerHTML, 'forceUpdate').to.equal(`<div><a>foo</a><b>bar</b><c>baz</c><b>bat</b></div>`);
-
-		comp.alt = true;
-		comp.forceUpdate();
-
-		expect(scratch.firstChild.children, 'forceUpdate alt').to.have.length(4);
-		expect(scratch.innerHTML, 'forceUpdate alt').to.equal(`<div><b>alt</b><a>foo</a><c>baz</c><b>bat</b></div>`);
-
-		// Re-rendering from the root is non-destructive if the root was a previous render:
-		comp.alt = false;
-		render(<Foo />, scratch);
-
-		expect(scratch.firstChild.children, 'root re-render').to.have.length(4);
-		expect(scratch.innerHTML, 'root re-render').to.equal(`<div><a>foo</a><b>bar</b><c>baz</c><b>bat</b></div>`);
-
-		comp.alt = true;
-		render(<Foo />, scratch);
-
-		expect(scratch.firstChild.children, 'root re-render 2').to.have.length(4);
-		expect(scratch.innerHTML, 'root re-render 2').to.equal(`<div><b>alt</b><a>foo</a><c>baz</c><b>bat</b></div>`);
-
-		render(<div><Foo /></div>, scratch);
-
-		expect(scratch.firstChild.children, 'root re-render changed').to.have.length(3);
-		expect(scratch.innerHTML, 'root re-render changed').to.equal(`<div><div><a>foo</a><b>bar</b></div><c>baz</c><b>bat</b></div>`);
 	});
 
 	// Discussion: https://github.com/developit/preact/issues/287

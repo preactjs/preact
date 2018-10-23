@@ -8,9 +8,6 @@
 	- ✖ should not preserve state of children when the keys are different
 	- ✖ should not preserve state between unkeyed and keyed fragment
 	- ✖ should reorder Fragment children
-- render
-	- ✖ should skip non-preact elements
-	- ✖ should render arrays of mixed elements
 - keys
 	- ✖ should not preserve state when the keys are different
 	- ✖ should not preserve state between unkeyed and keyed component

@@ -38,15 +38,15 @@ export default function logger() {
 	logCall(Element.prototype, 'setAttributeNS');
 	logCall(Element.prototype, 'removeAttribute');
 	logCall(Element.prototype, 'removeAttributeNS');
-	let d = Object.getOwnPropertyDescriptor(Node.prototype, 'nodeValue');
-	Object.defineProperty(Text.prototype, 'nodeValue', {
+	let d = Object.getOwnPropertyDescriptor(Node.prototype, 'data');
+	Object.defineProperty(Text.prototype, 'data', {
 		get() {
 			let value = d.get.call(this);
-			count(`get #text.nodeValue`);
+			count(`get #text.data`);
 			return value;
 		},
 		set(v) {
-			count(`set #text.nodeValue`);
+			count(`set #text.data`);
 			return d.set.call(this, v);
 		}
 	});
