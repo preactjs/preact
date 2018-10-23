@@ -190,7 +190,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	return dom;
 }
 
-export function flushMounts(mounts) {
+export function commitRoot(mounts, root) {
 	let c;
 	while ((c = mounts.pop())) {
 		try {
@@ -200,6 +200,8 @@ export function flushMounts(mounts) {
 			catchErrorInComponent(e, c._ancestorComponent);
 		}
 	}
+
+	if (options.commitRoot) options.commitRoot(root);
 }
 
 /**

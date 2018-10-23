@@ -1,6 +1,5 @@
 import { assign } from './util';
-import { diff, flushMounts } from './diff/index';
-import options from './options';
+import { diff, commitRoot } from './diff/index';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -68,14 +67,13 @@ Component.prototype.forceUpdate = function(callback) {
 		if (this._force==null) this._force = true;
 
 		let mounts = [];
-		diff(this._vnode._el, this._parent, this._vnode, this._vnode, this.context, this._parent.ownerSVGElement!==undefined, true, null, mounts, this._ancestorComponent, this._parentVNode);
-		flushMounts(mounts);
+		diff(this._vnode._el, this._parent, this._vnode, this._vnode, this.context, this._parent.ownerSVGElement!==undefined, true, null, mounts, this._ancestorComponent, this._parentVNode || {});
+		commitRoot(mounts, this._vnode);
 
 		// Reset mode to its initial value for the next render
 		this._force = null;
 	}
 	if (callback!=null) callback();
-	if (options.commitRoot) options.commitRoot(this._vnode);
 };
 
 /**
