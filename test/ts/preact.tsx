@@ -39,6 +39,8 @@ function DummerComponent({ input, initialInput }: DummerComponentProps) {
 	return <div>Input: {input}, initial: {initialInput}</div>;
 }
 
+render(h('div', { key: "1" }), document);
+render(h(DummyComponent, { initialInput: "The input", input: "New input", key: "1" }), document);
 render(h(DummerComponent, { initialInput: "The input", input: "New input", key: "1"}), document);
 
 // Accessing children
