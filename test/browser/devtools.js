@@ -134,6 +134,8 @@ describe('devtools', () => {
 		oldOptions = assign({}, options);
 
 		hook = createMockHook();
+		delete options.commitRoot;
+		delete options.beforeUnmount;
 
 		/** @type {import('../../src/internal').DevtoolsWindow} */
 		(window).__REACT_DEVTOOLS_GLOBAL_HOOK__ = hook;
@@ -315,6 +317,25 @@ describe('devtools', () => {
 
 		initDevTools();
 		expect(options.enableProfiling).to.equal(false);
+	});
+
+	it('should not throw if the root is null', () => {
+		expect(() => render(null, scratch)).to.not.throw();
+	});
+
+	it('should not overwrite existing commitRoot hook', () => {
+		let spy = sinon.spy();
+		let spy2 = sinon.spy();
+		options.commitRoot = spy;
+		options.beforeUnmount = spy2;
+
+		initDevTools();
+		render(<div />, scratch);
+
+		expect(spy).to.be.calledOnce;
+
+		render(<span />, scratch);
+		expect(spy2).to.be.calledOnce;
 	});
 
 	it('should connect only once', () => {

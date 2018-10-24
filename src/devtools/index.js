@@ -109,14 +109,23 @@ export function initDevTools() {
 	// https://github.com/facebook/react-devtools/issues/1106
 	options.enableProfiling = true;
 
+	// Store (possible) previous hooks so that we don't overwrite them
+	let prevCommitRoot = options.commitRoot;
+	let prevBeforeUnmount = options.beforeUnmount;
+
 	options.commitRoot = (vnode) => {
+		// Call previously defined hook
+		if (prevCommitRoot!=null) prevCommitRoot(vnode);
+
 		// There are rare cases where this happens. I'm not sure why, but it seems
 		// to be triggered by quickly switching routes in our demo app
-		if (vnode._el==null) return;
+		if (vnode==null || vnode._el==null) return;
 		onCommitRoot(vnode);
 	};
 
 	options.beforeUnmount = (vnode) => {
+		// Call previously defined hook
+		if (prevBeforeUnmount!=null) prevBeforeUnmount(vnode);
 		onCommitUnmount(vnode);
 	};
 }
