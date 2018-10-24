@@ -113,19 +113,21 @@ export function initDevTools() {
 	let prevCommitRoot = options.commitRoot;
 	let prevBeforeUnmount = options.beforeUnmount;
 
-	options.commitRoot = (vnode) => {
-		// Call previously defined hook
-		if (prevCommitRoot!=null) prevCommitRoot(vnode);
+	catchErrors(() => {
+		options.commitRoot = (vnode) => {
+			// Call previously defined hook
+			if (prevCommitRoot!=null) prevCommitRoot(vnode);
 
-		// There are rare cases where this happens. I'm not sure why, but it seems
-		// to be triggered by quickly switching routes in our demo app
-		if (vnode==null || vnode._el==null) return;
-		onCommitRoot(vnode);
-	};
+			// There are rare cases where this happens. I'm not sure why, but it seems
+			// to be triggered by quickly switching routes in our demo app
+			if (vnode==null || vnode._el==null) return;
+			onCommitRoot(vnode);
+		};
 
-	options.beforeUnmount = (vnode) => {
-		// Call previously defined hook
-		if (prevBeforeUnmount!=null) prevBeforeUnmount(vnode);
-		onCommitUnmount(vnode);
-	};
+		options.beforeUnmount = (vnode) => {
+			// Call previously defined hook
+			if (prevBeforeUnmount!=null) prevBeforeUnmount(vnode);
+			onCommitUnmount(vnode);
+		};
+	})();
 }
