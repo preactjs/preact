@@ -309,9 +309,10 @@ export function getVNodeChildren(vnode) {
  * Flatten a virtual nodes children to a single dimensional array
  * @param {import('../index').ComponentChildren} children The unflattened
  * children of a virtual node
- * @param {Array<import('../index').ComponentChild>} flattened An flat array of children to modify
+ * @param {Array<import('../index').ComponentChild>} [flattened] An flat array of children to modify
  */
-function flattenChildren(children, flattened) {
+export function flattenChildren(children, flattened) {
+	flattened = flattened || [];
 	if (children==null || typeof children === 'boolean' || typeof children === 'function') {}
 	else if (Array.isArray(children)) {
 		for (let i=0; i < children.length; i++) {
@@ -322,6 +323,8 @@ function flattenChildren(children, flattened) {
 		children = coerceToVNode(children);
 		flattened.push(children);
 	}
+
+	return flattened;
 }
 
 /** The `.render()` method for a PFC backing instance. */

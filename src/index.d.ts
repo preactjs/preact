@@ -136,4 +136,9 @@ declare namespace preact {
 	// 	vnode?: (vnode: VNode<any>) => void;
 	// 	event?: (event: Event) => Event;
 	// };
+
+	//
+	// Preact helpers
+	// -----------------------------------
+	function flattenChildren(children: ComponentChildren): ComponentChild[];
 }
