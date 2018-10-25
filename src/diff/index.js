@@ -312,7 +312,7 @@ export function getVNodeChildren(vnode) {
  * @param {Array<import('../index').ComponentChild>} flattened An flat array of children to modify
  */
 function flattenChildren(children, flattened) {
-	if (children==null || typeof children === 'boolean') {}
+	if (children==null || typeof children === 'boolean' || typeof children === 'function') {}
 	else if (Array.isArray(children)) {
 		for (let i=0; i < children.length; i++) {
 			flattenChildren(children[i], flattened);
