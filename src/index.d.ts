@@ -31,7 +31,7 @@ declare namespace preact {
 	// Preact Component interface
 	// -----------------------------------
 
-	type Key = string | number;
+	type Key = string | number | any;
 
 	type RefObject<T> = { current?: T | null }
 	type RefCallback<T> = (instance: T | null) => void;
@@ -41,7 +41,7 @@ declare namespace preact {
 	type ComponentChildren = ComponentChild[] | ComponentChild;
 
 	interface Attributes {
-		key?: string | number | any;
+		key?: Key;
 		jsx?: boolean;
 	}
 
