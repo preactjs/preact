@@ -186,7 +186,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	try {
 		let isOldTreeFragment;
 		outer: if ((isOldTreeFragment = oldTree.tag === Fragment) || newTag === Fragment) {
-			oldTree = !isOldTreeFragment ? [oldTree] : getVNodeChildren(oldTree);
+			oldTree = oldTree===EMPTY_OBJ ? EMPTY_ARR : !isOldTreeFragment ? [oldTree] : getVNodeChildren(oldTree);
 			diffChildren(parent, getVNodeChildren(newTree), oldTree, context, isSvg, excessChildren, mounts, c, newTree);
 
 			// The new dom element for fragments is the first child of the new tree
