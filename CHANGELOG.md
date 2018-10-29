@@ -28,6 +28,7 @@
 8. The Component constructor no longer initializes state to an empty object. If state has not been
    previously set, it will be set to an empty object the first time the component is rendered, after
    the constructor has been called
+9. We no longer have a default export. Use `import * as preact from "preact"` for similar behavior.
 
 ### Minor changes
 
