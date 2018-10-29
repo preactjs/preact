@@ -85,12 +85,16 @@ describe('render()', () => {
 		expect(scratch.firstChild).to.have.property('nodeName', 'X-BAR');
 	});
 
-	it('should allow element reuse', () => {
-		let reused = <div>Hello World!</div>;
-		render(<div>{reused}<span />{reused}/></div>, scratch);
+	it('should allow VNode reuse', () => {
+		let reused = <div class="reuse">Hello World!</div>;
+		render(<div>{reused}<span />{reused}</div>, scratch);
+		expect(scratch.innerHTML).to.eql(
+			`<div><div class="reuse">Hello World!</div><span></span><div class="reuse">Hello World!</div></div>`
+		);
+
 		render(<div><span />{reused}</div>, scratch);
 		expect(scratch.innerHTML).to.eql(
-			`<div><span></span><div>Hello World!</div></div>`
+			`<div><span></span><div class="reuse">Hello World!</div></div>`
 		);
 	});
 
@@ -304,10 +308,9 @@ describe('render()', () => {
 
 	describe('style attribute', () => {
 		it('should apply style as String', () => {
-			render(<div style="top:5px; position:relative;" />, scratch);
+			render(<div style="top: 5px; position: relative;" />, scratch);
 			expect(scratch.childNodes[0].style.cssText)
-				.that.matches(/top\s*:\s*5px\s*/)
-				.and.matches(/position\s*:\s*relative\s*/);
+				.to.equal('top: 5px; position: relative;');
 		});
 
 		it('should properly switch from string styles to object styles and back', () => {
@@ -344,20 +347,17 @@ describe('render()', () => {
 		});
 
 		it('should serialize style objects', () => {
-			render((
-				<div style={{
-					color: 'rgb(255, 255, 255)',
-					background: 'rgb(255, 100, 0)',
-					backgroundPosition: '10px 10px',
-					'background-size': 'cover',
-					padding: 5,
-					top: 100,
-					left: '100%'
-				}}
-				>
-					test
-				</div>
-			), scratch);
+			const styleObj = {
+				color: 'rgb(255, 255, 255)',
+				background: 'rgb(255, 100, 0)',
+				backgroundPosition: '10px 10px',
+				'background-size': 'cover',
+				padding: 5,
+				top: 100,
+				left: '100%'
+			};
+
+			render(<div style={styleObj}>test</div>, scratch);
 
 			let root = scratch.firstChild;
 			let { style } = root;
@@ -368,18 +368,29 @@ describe('render()', () => {
 			expect(style).to.have.property('padding', '5px');
 			expect(style).to.have.property('top', '100px');
 			expect(style).to.have.property('left', '100%');
+		});
 
-			render((
-				<div style={{ color: 'rgb(0, 255, 255)' }}>test</div>
-			), scratch);
+		it('should replace previous style objects', () => {
+			render(<div style={{ display: 'inline' }}>test</div>, scratch);
 
-			expect(root.style.cssText).to.equal('color: rgb(0, 255, 255);');
+			let style = scratch.firstChild.style;
+			expect(style.cssText).to.equal('display: inline;');
+			expect(style).to.have.property('display').that.equals('inline');
+			expect(style).to.have.property('color').that.equals('');
 
-			render((
-				<div style={{ backgroundColor: 'rgb(0, 255, 255)' }}>test</div>
-			), scratch);
+			render(<div style={{ color: 'rgb(0, 255, 255)' }}>test</div>, scratch);
 
-			expect(root.style.cssText).to.equal('background-color: rgb(0, 255, 255);');
+			style = scratch.firstChild.style;
+			expect(style.cssText).to.equal('color: rgb(0, 255, 255);');
+			expect(style).to.have.property('display').that.equals('');
+			expect(style).to.have.property('color').that.equals('rgb(0, 255, 255)');
+
+			render(<div style={{ color: 'rgb(0, 255, 255)', display: 'inline' }}>test</div>, scratch);
+
+			style = scratch.firstChild.style;
+			expect(style.cssText).to.equal('color: rgb(0, 255, 255); display: inline;');
+			expect(style).to.have.property('display').that.equals('inline');
+			expect(style).to.have.property('color').that.equals('rgb(0, 255, 255)');
 		});
 
 	});
@@ -591,14 +602,6 @@ describe('render()', () => {
 		setValue(false);
 		check(true);
 		expect(value()).to.equal(true);
-	});
-
-	it('should ignore props.children if children are manually specified', () => {
-		expect(
-			<div a children={['a', 'b']}>c</div>
-		).to.eql(
-			<div a>c</div>
-		);
 	});
 
 	it('should reorder child pairs', () => {

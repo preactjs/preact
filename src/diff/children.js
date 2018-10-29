@@ -275,7 +275,7 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 	// console.log(excessChildren!=null && excessChildren.slice());
 
 	// Remove children that are not part of any vnode. Only used by `hydrate`
-	if (excessChildren!=null) for (i=excessChildren.length; i--; ) if (excessChildren[i]!=null) excessChildren[i].remove();
+	if (excessChildren!=null) for (i=excessChildren.length; i--; ) excessChildren[i].remove();
 
 	// for (let i in seen) if (seen[i] != null && (c = seen[i]._el)) c.remove();
 
