@@ -297,9 +297,9 @@ export function unmount(vnode, ancestorComponent) {
  * children of
  * @returns {Array<import('../internal').VNode>} The virtual node's children
  */
-export function getVNodeChildren(vnode) {
+function getVNodeChildren(vnode) {
 	if (vnode._children==null) {
-		flattenChildren(vnode.props.children, vnode._children=[]);
+		toChildArray(vnode.props.children, vnode._children=[]);
 	}
 	return vnode._children;
 }
@@ -311,12 +311,12 @@ export function getVNodeChildren(vnode) {
  * children of a virtual node
  * @param {Array<import('../index').ComponentChild>} [flattened] An flat array of children to modify
  */
-export function flattenChildren(children, flattened) {
+export function toChildArray(children, flattened) {
 	flattened = flattened || [];
 	if (children==null || typeof children === 'boolean' || typeof children === 'function') {}
 	else if (Array.isArray(children)) {
 		for (let i=0; i < children.length; i++) {
-			flattenChildren(children[i], flattened);
+			toChildArray(children[i], flattened);
 		}
 	}
 	else {

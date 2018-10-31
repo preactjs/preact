@@ -140,5 +140,5 @@ declare namespace preact {
 	//
 	// Preact helpers
 	// -----------------------------------
-	function flattenChildren(children: ComponentChildren): ComponentChild[];
+	function toChildArray(children: ComponentChildren): ComponentChild[];
 }

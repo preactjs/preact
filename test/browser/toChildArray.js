@@ -1,4 +1,4 @@
-import { createElement, render, flattenChildren } from '../../src/index';
+import { createElement, render, toChildArray } from '../../src/index';
 import { setupScratch, teardown, getMixedArray, mixedArrayHTML } from '../_util/helpers';
 
 /** @jsx createElement */
@@ -11,7 +11,7 @@ describe('props.children', () => {
 	let children;
 
 	let Foo = props => {
-		children = flattenChildren(props.children);
+		children = toChildArray(props.children);
 		return <div>{children}</div>;
 	};
 
@@ -140,7 +140,7 @@ describe('props.children', () => {
 			return acc;
 		}
 
-		let renderableArray = filterAndReduceChildren([], mixedArray)
+		let renderableArray = filterAndReduceChildren([], mixedArray);
 
 		expect(children).to.have.lengthOf(renderableArray.length);
 
