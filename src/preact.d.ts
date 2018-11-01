@@ -22,7 +22,7 @@ declare namespace preact {
 	type PreactHTMLAttributes = ClassAttributes<any>;
 
 	interface Attributes {
-		key?: string | number | any;
+		key?: Key;
 		jsx?: boolean;
 	}
 
