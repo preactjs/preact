@@ -62,11 +62,12 @@ export default class ProfilerDemo extends Component {
 	render() {
 		return (
 			<div class="foo">
-				<h1>⚛ Preact v9</h1>
+				<h1>⚛ Preact</h1>
 				<p><b>Devtools Profiler integration 🕒</b></p>
 				<Foo><PrimeNumber><Foo>I'm a fast component</Foo><Bar /></PrimeNumber></Foo>
 				<Foo>I'm the fastest component   🎉</Foo>
 				<span>Counter: {this.state.counter}</span>
+				<br />
 				<br />
 				<button onClick={this.onClick}>Force re-render</button>
 			</div>
