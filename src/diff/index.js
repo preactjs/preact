@@ -96,7 +96,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			// Invoke pre-render lifecycle methods
 			if (isNew) {
 				if (newTag.getDerivedStateFromProps==null && c.componentWillMount!=null) c.componentWillMount();
-				mounts.push(c);
+				if (c.componentDidMount!=null) mounts.push(c);
 			}
 			else {
 				if (!c._force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, s, context)===false) {
@@ -184,13 +184,11 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 export function flushMounts(mounts) {
 	let c;
 	while ((c = mounts.pop())) {
-		if (c.componentDidMount!=null) {
-			try {
-				c.componentDidMount();
-			}
-			catch (e) {
-				catchErrorInComponent(e, c._ancestorComponent);
-			}
+		try {
+			c.componentDidMount();
+		}
+		catch (e) {
+			catchErrorInComponent(e, c._ancestorComponent);
 		}
 	}
 }
