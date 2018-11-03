@@ -2,25 +2,27 @@ import { createElement as h, Fragment } from '../../src/create-element';
 import { render } from '../../src/render';
 import { assign } from '../../src/util';
 import { Component } from '../../src/component';
-import { getDisplayName, setIn, isRoot, getPatchedRoot, getData, patchRoot, shallowEqual } from '../../src/devtools/custom';
+import { getDisplayName, setIn, isRoot, getPatchedRoot, getData, patchRoot, shallowEqual, hasDataChanged, hasProfileDataChanged, getChildren } from '../../src/devtools/custom';
 import { setupScratch, setupRerender, teardown } from '../_util/helpers';
 import { initDevTools } from '../../src/devtools';
 import options from '../../src/options';
 import { Renderer } from '../../src/devtools/renderer';
+import { createElement } from '../../src';
 
 /** @jsx h */
 
 /** @typedef {import('../../src/internal').DevtoolsHook & { log: any[], clear: () => void }} MockHook */
 
 /**
- * Serialize a devtool event
- * @param {import('../../src/internal').DevtoolsEvent} event
+ * Serialize a devtool events and filter out `updateProfilerTimes` because it
+ * relies on timings which would lead to flaky tests.
+ * @param {import('../../src/internal').DevtoolsEvent[]} events
  */
-function serialize(event) {
-	return {
-		type: event.type,
-		component: getDisplayName(event.internalInstance)
-	};
+function serialize(events) {
+	return events.filter(x => x.type!='updateProfileTimes').map(x => ({
+		type: x.type,
+		component: getDisplayName(x.internalInstance)
+	}));
 }
 
 /**
@@ -176,6 +178,56 @@ describe('devtools', () => {
 			}
 
 			expect(getDisplayName(h(Bar))).to.equal('Bar');
+		});
+	});
+
+	describe('hasDataChanged', () => {
+		it('should detect prop updates', () => {
+			let a = createElement('div', { foo: 1 });
+			let b = createElement('div', { foo: 2 });
+			expect(hasDataChanged(a, a)).to.equal(false);
+			expect(hasDataChanged(a, b)).to.equal(true);
+		});
+
+		it('should detect state changes', () => {
+			let a = createElement('div', { foo: 1 });
+			let b = createElement('div', { foo: 1 });
+
+			b._component = a._component = { state: { foo: 1 }, _nextState: { foo: 1 } };
+			expect(hasDataChanged(a, b)).to.equal(false);
+
+			b._component = { state: { foo: 2 }, _nextState: { foo: 1 } };
+			expect(hasDataChanged(a, b)).to.equal(true);
+		});
+	});
+
+	describe('hasProfileDataChanged', () => {
+		it('should check if data has changed', () => {
+			let a = createElement('div', { foo: 1 });
+			let b = createElement('div', { foo: 1 });
+			a.startTime = 1;
+			b.startTime = 2;
+
+			expect(hasProfileDataChanged(a, a)).to.equal(false);
+			expect(hasProfileDataChanged(a, b)).to.equal(true);
+		});
+	});
+
+	describe('getChildren', () => {
+		it('should get component children', () => {
+			let a = createElement('div', { foo: 1 });
+
+			a._component = { _previousVTree: null };
+			expect(getChildren(a)).to.equal(null);
+
+			a._component._previousVTree = {};
+			expect(getChildren(a)).to.deep.equal([{}]);
+		});
+
+		it('should get native element children', () => {
+			let a = createElement('div', { foo: 1 }, 'foo');
+			a._children = ['foo'];
+			expect(getChildren(a)).to.deep.equal(['foo']);
 		});
 	});
 
@@ -348,6 +400,16 @@ describe('devtools', () => {
 	});
 
 	describe('renderer', () => {
+		let performance = window.performance;
+
+		beforeEach(() => {
+			window.performance.now = Date.now;
+		});
+
+		afterEach(() => {
+			window.performance.now = performance.now;
+		});
+
 		it('should not flush events if not connected', () => {
 			let spy = sinon.spy(hook, 'emit');
 			let renderer = new Renderer(hook, 'abc');
@@ -415,8 +477,7 @@ describe('devtools', () => {
 			render(<div>Foo</div>, scratch);
 			checkEventReferences(prev.concat(hook.log));
 
-			expect(hook.log.map(serialize)).to.deep.equal([
-				{ type: 'updateProfileTimes', component: 'div' },
+			expect(serialize(hook.log)).to.deep.equal([
 				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
@@ -432,10 +493,9 @@ describe('devtools', () => {
 			render(<div><span>Foo</span></div>, scratch);
 			checkEventReferences(prev.concat(hook.log));
 
-			expect(hook.log.map(serialize)).to.deep.equal([
+			expect(serialize(hook.log)).to.deep.equal([
 				{ type: 'unmount', component: '#text' },
 				{ type: 'mount', component: 'span' },
-				{ type: 'updateProfileTimes', component: 'div' },
 				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
@@ -475,13 +535,8 @@ describe('devtools', () => {
 			rerender();
 			checkEventReferences(prev.concat(hook.log));
 
-			expect(hook.log.map(x => ({
-				type: x.type,
-				component: getDisplayName(x.internalInstance)
-			}))).to.deep.equal([
+			expect(serialize(hook.log)).to.deep.equal([
 				{ type: 'mount', component: 'h1' },
-				{ type: 'updateProfileTimes', component: 'span' },
-				{ type: 'updateProfileTimes', component: 'div' },
 				{ type: 'update', component: 'App' },
 				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
@@ -498,13 +553,7 @@ describe('devtools', () => {
 			render(<div><div><span>Foo</span></div></div>, scratch);
 			checkEventReferences(prev.concat(hook.log));
 
-			expect(hook.log.map(x => ({
-				type: x.type,
-				component: getDisplayName(x.internalInstance)
-			}))).to.deep.equal([
-				{ type: 'updateProfileTimes', component: 'span' },
-				{ type: 'updateProfileTimes', component: 'div' },
-				{ type: 'updateProfileTimes', component: 'div' },
+			expect(serialize(hook.log)).to.deep.equal([
 				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
@@ -516,7 +565,7 @@ describe('devtools', () => {
 			hook.clear();
 
 			render(<div />, scratch);
-			expect(hook.log.map(serialize)).to.deep.equal([
+			expect(serialize(hook.log)).to.deep.equal([
 				{ type: 'unmount', component: 'span' },
 				{ type: 'unmount', component: '#text' },
 				{ type: 'update', component: 'div' },
