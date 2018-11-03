@@ -335,9 +335,17 @@ function doRender(props, state, context) {
  */
 function catchErrorInComponent(error, component) {
 	for (; component; component = component._ancestorComponent) {
-		if (component.componentDidCatch && !component._processingException) {
+		if (!component._processingException) {
 			try {
-				component.componentDidCatch(error);
+				if (component.constructor.getDerivedStateFromError!=null) {
+					component.setState(component.constructor.getDerivedStateFromError(error));
+				}
+				else if (component.componentDidCatch!=null) {
+					component.componentDidCatch(error);
+				}
+				else {
+					continue;
+				}
 				return enqueueRender(component._processingException = component);
 			}
 			catch (e) {

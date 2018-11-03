@@ -58,6 +58,7 @@ declare namespace preact {
 		displayName?: string;
 		defaultProps?: Partial<P>;
 		getDerivedStateFromProps?(props: Readonly<P>, state: Readonly<S>): Partial<S>;
+		getDerivedStateFromError?(error: any): Partial<S>;
 	}
 
 	// Type alias for a component considered generally, whether stateless or stateful.
@@ -82,6 +83,7 @@ declare namespace preact {
 		static displayName?: string;
 		static defaultProps?: any;
 		static getDerivedStateFromProps?<P, S>(props: P, state: S): Partial<S>;
+		static getDerivedStateFromError?<S>(error: any): Partial<S>;
 
 		state: Readonly<S>;
 		props: RenderableProps<P>;
