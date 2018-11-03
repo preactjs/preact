@@ -255,9 +255,6 @@ export function patchRoot(vnode) {
 		/** @type {*} */
 		(root).treeBaseDuration = 0;
 
-		/** @type {*} */
-		(root).stateNode = { memoizedInteractions: [] };
-
 		roots.set(inst, root);
 	}
 

@@ -60,13 +60,6 @@ export class Renderer {
 		this.inst2vnode.set(getInstance(vnode), vnode);
 		let data = getData(vnode);
 
-		// The Profiler throws if this is not present
-		// Workaround until this PR the following PR is merged. The profiler will
-		// throw if this property is not present
-		// https://github.com/facebook/react-devtools/pull/1178/
-		/** @type {*} */
-		(vnode).stateNode = { memoizedInteractions: data.memoizedInteractions };
-
 		/** @type {Array<import('../internal').DevtoolsEvent>} */
 		let work = [{
 			internalInstance: vnode,
@@ -86,9 +79,6 @@ export class Renderer {
 				this.inst2vnode.set(getInstance(item), item);
 
 				let data = getData(item);
-
-				// In preparation for https://github.com/facebook/react-devtools/pull/1178/
-				item.stateNode = { memoizedInteractions: data.memoizedInteractions };
 
 				work.push({
 					internalInstance: item,

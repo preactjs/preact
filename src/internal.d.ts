@@ -112,7 +112,6 @@ export interface DevtoolData {
 	props: any;
 	children: VNode[] | string | number | null;
 	publicInstance: PreactElement | Text | Component;
-	// In preparation for https://github.com/facebook/react-devtools/pull/1178/
 	memoizedInteractions: any[];
 
 	actualDuration: number,
