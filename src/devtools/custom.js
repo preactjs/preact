@@ -19,7 +19,7 @@ export function getNodeType(vnode) {
  * @returns {string}
  */
 export function getDisplayName(vnode) {
-	if (typeof vnode.type==='function') return vnode.type.name;
+	if (typeof vnode.type==='function') return vnode.type.displayName || vnode.type.name;
 	else if (typeof vnode.type==='string') return vnode.type;
 	else if (vnode.type===Fragment) return 'Fragment';
 	return '#text';
