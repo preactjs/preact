@@ -202,7 +202,7 @@ export function shallowEqual(a, b, isProps) {
 export function hasDataChanged(prev, next) {
 	return (prev.props !== next.props && !shallowEqual(prev.props, next.props, true))
 		|| (prev._component!=null &&
-			!shallowEqual(prev._component.state, next._component.state))
+			!shallowEqual(next._component._prevState, next._component.state))
 		|| prev._el !== next._el
 		|| prev.ref !== next.ref;
 }

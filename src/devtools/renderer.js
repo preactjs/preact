@@ -139,16 +139,29 @@ export class Renderer {
 
 		let prev = this.inst2vnode.get(data.publicInstance);
 
-		/** @type {import('../internal').EventType} */
-		let type = !hasDataChanged(prev, vnode) && hasProfileDataChanged(prev, vnode)
-			? 'updateProfileTimes'
-			: 'update';
+		// Potentially skip creating a event when the vnode hasn't changed
+		if (!hasDataChanged(prev, vnode)) {
+
+			// Even if the vnode is the same we need to check if profiler times have
+			// changed. The `updateProfileTimes` event is a faster version of `update`
+			// and is processed much quicker in the devtools.
+			/* istanbul ignore else */
+			if (hasProfileDataChanged(prev, vnode)) {
+				this.pending.push({
+					internalInstance: assign(prev, vnode),
+					data,
+					renderer: this.rid,
+					type: 'updateProfileTimes'
+				});
+			}
+			return;
+		}
 
 		this.pending.push({
 			internalInstance: assign(prev, vnode),
 			data,
 			renderer: this.rid,
-			type
+			type: 'update'
 		});
 	}
 

@@ -40,6 +40,10 @@ Component.prototype.setState = function(update, callback) {
 	// only clone state when copying to nextState the first time.
 	let s = this._nextState || (this._nextState = assign({}, this.state));
 
+	// Needed for the devtools to check if state has changed after the tree
+	// has been committed
+	this._prevState = assign({}, s);
+
 	// if update() mutates state in-place, skip the copy:
 	if (typeof update!=='function' || (update = update(s, this.props))) {
 		assign(s, update);

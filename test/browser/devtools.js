@@ -193,10 +193,10 @@ describe('devtools', () => {
 			let a = createElement('div', { foo: 1 });
 			let b = createElement('div', { foo: 1 });
 
-			b._component = a._component = { state: { foo: 1 }, _nextState: { foo: 1 } };
+			b._component = a._component = { state: { foo: 1 }, _prevState: { foo: 1 } };
 			expect(hasDataChanged(a, b)).to.equal(false);
 
-			b._component = { state: { foo: 2 }, _nextState: { foo: 1 } };
+			b._component = { state: { foo: 2 }, _prevState: { foo: 1 } };
 			expect(hasDataChanged(a, b)).to.equal(true);
 		});
 	});
