@@ -106,10 +106,9 @@ declare namespace preact {
 		params: JSX.HTMLAttributes & JSX.SVGAttributes & Record<string, any> | null,
 		...children: ComponentChildren[]
 	): VNode<any>;
-
 	function h<P>(
 		node: ComponentFactory<P>,
-		params: Attributes & P & Record<string, any> | null,
+		params: Attributes & P | null,
 		...children: ComponentChildren[]
 	): VNode<any>;
 
