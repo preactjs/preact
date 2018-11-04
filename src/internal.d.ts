@@ -27,10 +27,10 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	 */
 	_dom?: PreactElement | Text | null;
 	/**
-	 * The last dom sibling, if the vnode returned more than one child. This
-	 * property is also used as a cursor when diffing children.
+	 * The last dom child of a Fragment. This property is also used as a cursor
+	 * when diffing children. Is the same as `_dom` for other kinds of VNodes.
 	 */
-	_lastSibling?: PreactElement | null;
+	_lastDomChild?: PreactElement | null;
 	_component?: Component | null;
 
 	// Profiling
@@ -54,7 +54,7 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	_parentDom?: PreactElement;
 	/**
 	 * Pointer to the parent vnode. During child reconciliation and ordering we
-	 * use the parent vnodes `_lastSibling` as the current position among sibling
+	 * use the parent vnodes `_lastDomChild` as the current position among sibling
 	 * vnodes.
 	 */
 	_parentVNode?: VNode;

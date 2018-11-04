@@ -48,7 +48,7 @@ export function createElement(type, props, children) {
 function createVNode(type, props, text, key, ref) {
 	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
 	// Do not inline into createElement and coerceToVNode!
-	return { type, props, text, key, ref, _children: null, _dom: null, _lastSibling: null, _component: null, startTime: 0, endTime: -1  };
+	return { type, props, text, key, ref, _children: null, _dom: null, _lastDomChild: null, _component: null, startTime: 0, endTime: -1  };
 }
 
 export function createRef() {

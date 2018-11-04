@@ -16,7 +16,7 @@ import { coerceToVNode } from '../create-element';
  * which have mounted
  * @param {import('../internal').Component} ancestorComponent The direct parent
  * component to the ones being diffed
- * @param {import('../internal').VNode} parentVNode Used to set `_lastSibling`
+ * @param {import('../internal').VNode} parentVNode Used to set `_lastDomChild`
  * pointer to keep track of our current position
  */
 export function diffChildren(dom, newVNodeChildren, oldVNodeChildren, context, isSvg, excessDomChildren, mounts, ancestorComponent, parentVNode) {
@@ -62,7 +62,7 @@ export function diffChildren(dom, newVNodeChildren, oldVNodeChildren, context, i
 
 		// Only proceed if the vnode has not been unmounted by `diff()` above.
 		if (childVNode!=null && newDom !=null) {
-			lastDom = childVNode._lastSibling;
+			lastDom = childVNode._lastDomChild;
 
 			// Fragments or similar components have already been diffed at this point.
 			if (newDom!==lastDom) {}
