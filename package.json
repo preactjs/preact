@@ -91,7 +91,7 @@
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^3.0.5",
     "lodash": "^4.17.10",
-    "microbundle": "^0.6.0",
+    "microbundle": "^0.7.0",
     "mocha": "^5.2.0",
     "npm-run-all": "^4.0.0",
     "sinon": "^6.1.3",
