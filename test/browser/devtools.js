@@ -148,10 +148,20 @@ describe('devtools', () => {
 		// Trigger setter.
 		hook.helpers[rid] = {};
 		hook.clear();
+
+		// Syp on catchError wrapper in devtools hook
+		sinon.spy(console, 'error');
 	});
 
 	afterEach(() => {
 		teardown(scratch);
+
+		if (/** @type {*} */ (console.error).callCount > 1) {
+			throw new Error('Uncaught error in devtools');
+		}
+
+		/** @type {*} */
+		(console.error).restore();
 
 		delete /** @type {import('../../src/internal').DevtoolsWindow} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
 		assign(options, oldOptions);
