@@ -19,17 +19,17 @@ describe('createElement(jsx)', () => {
 		expect( () => r = h('foo') ).not.to.throw();
 		expect(r).to.be.an('object');
 		// expect(r).to.be.an.instanceof(VNode);
-		expect(r).to.have.property('tag', 'foo');
+		expect(r).to.have.property('type', 'foo');
 		expect(r).to.have.property('props').that.eql({});
 		// expect(r).to.have.deep.property('props.children').that.eql(null);
 	});
 
-	it('should set VNode#tag property', () => {
-		expect(<div />).to.have.property('tag', 'div');
+	it('should set VNode#type property', () => {
+		expect(<div />).to.have.property('type', 'div');
 		function Test() {
 			return <div />;
 		}
-		expect(<Test />).to.have.property('tag', Test);
+		expect(<Test />).to.have.property('type', Test);
 	});
 
 	it('should set VNode#props property', () => {
@@ -55,7 +55,7 @@ describe('createElement(jsx)', () => {
 	});
 
 	it('should have ordered VNode properties', () => {
-		expect(Object.keys(<div />).filter(key => !/^_/.test(key))).to.deep.equal(['tag', 'props', 'text', 'key', 'ref']);
+		expect(Object.keys(<div />).filter(key => !/^_/.test(key))).to.deep.equal(['type', 'props', 'text', 'key', 'ref']);
 	});
 
 	it('should preserve raw props', () => {

@@ -21,26 +21,26 @@ describe("VNode", () => {
 	it("is returned by h", () => {
 		const actual = <div className="wow"/>;
 		expect(actual).to.include.all.keys(
-			"tag", "props", "text", "key"
+			"type", "props", "text", "key"
 		);
 	});
 
 	it("has a nodeName of string when html element", () => {
 		const div = <div>Hi!</div>;
-		expect(div.tag).to.equal("div");
+		expect(div.type).to.equal("div");
 	});
 
 	it("has a nodeName equal to the construction function when SFC", () => {
 		const sfc = <SimpleFunctionalComponent />;
-		expect(sfc.tag).to.be.instanceOf(Function);
-		const constructor = sfc.tag as FunctionalComponent<any>;
+		expect(sfc.type).to.be.instanceOf(Function);
+		const constructor = sfc.type as FunctionalComponent<any>;
 		expect(constructor.name).to.eq("SimpleFunctionalComponent");
 	});
 
 	it("has a nodeName equal to the constructor of a componet", () => {
 		const sfc = <SimpleComponent />;
-		expect(sfc.tag).to.be.instanceOf(Function);
-		const constructor = sfc.tag as ComponentConstructor<any>;
+		expect(sfc.type).to.be.instanceOf(Function);
+		const constructor = sfc.type as ComponentConstructor<any>;
 		expect(constructor.name).to.eq("SimpleComponent");
 	});
 

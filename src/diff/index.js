@@ -26,8 +26,8 @@ import { assign } from '../util';
  */
 export function diff(dom, parent, newTree, oldTree, context, isSvg, append, excessChildren, mounts, ancestorComponent, parentVNode) {
 
-	// If the previous tag doesn't match the new tag we drop the whole subtree
-	if (oldTree==null || newTree==null || oldTree.tag!==newTree.tag) {
+	// If the previous type doesn't match the new type we drop the whole subtree
+	if (oldTree==null || newTree==null || oldTree.type!==newTree.type) {
 		if (oldTree!=null) unmount(oldTree, ancestorComponent);
 		if (newTree==null) return null;
 		dom = null;
@@ -35,14 +35,14 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	}
 
 	let c, p, isNew = false, oldProps, oldState, oldContext,
-		newTag = newTree.tag, lastSibling;
+		newType = newTree.type, lastSibling;
 
 	/** @type {import('../internal').Component | null} */
 	let clearProcessingException;
 
 	try {
 		let isOldTreeFragment;
-		outer: if ((isOldTreeFragment = oldTree.tag === Fragment) || newTag === Fragment) {
+		outer: if ((isOldTreeFragment = oldTree.type === Fragment) || newType === Fragment) {
 			oldTree = oldTree===EMPTY_OBJ ? EMPTY_ARR : !isOldTreeFragment ? [oldTree] : getVNodeChildren(oldTree);
 			diffChildren(parent, getVNodeChildren(newTree), oldTree, context, isSvg, excessChildren, mounts, c, newTree);
 
@@ -53,7 +53,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			dom = newTree._el;
 			lastSibling = newTree._lastSibling;
 		}
-		else if (typeof newTag==='function') {
+		else if (typeof newType==='function') {
 
 			// Get component and set it to `c`
 			if (oldTree._component) {
@@ -64,14 +64,14 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				isNew = true;
 
 				// Instantiate the new component
-				if (newTag.prototype && newTag.prototype.render) {
-					newTree._component = c = new newTag(newTree.props, context); // eslint-disable-line new-cap
+				if (newType.prototype && newType.prototype.render) {
+					newTree._component = c = new newType(newTree.props, context); // eslint-disable-line new-cap
 					// @TODO this really shouldn't be necessary and people shouldn't rely on it!
 					// Component.call(c, newTree.props, context);
 				}
 				else {
 					newTree._component = c = new Component(newTree.props, context);
-					c._constructor = newTag;
+					c._constructor = newType;
 					c.render = doRender;
 				}
 				c._ancestorComponent = ancestorComponent;
@@ -87,22 +87,22 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 
 			// Invoke getDerivedStateFromProps
 			let s = c._nextState || c.state;
-			if (newTag.getDerivedStateFromProps!=null) {
+			if (newType.getDerivedStateFromProps!=null) {
 				oldState = assign({}, c.state);
 				if (s===c.state) s = assign({}, s);
-				assign(s, newTag.getDerivedStateFromProps(newTree.props, s));
+				assign(s, newType.getDerivedStateFromProps(newTree.props, s));
 			}
 
 			// Invoke pre-render lifecycle methods
 			if (isNew) {
-				if (newTag.getDerivedStateFromProps==null && c.componentWillMount!=null) c.componentWillMount();
+				if (newType.getDerivedStateFromProps==null && c.componentWillMount!=null) c.componentWillMount();
 				if (c.componentDidMount!=null) mounts.push(c);
 			}
 			else {
 				if (!c._force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, s, context)===false) {
 					break outer;
 				}
-				if (newTag.getDerivedStateFromProps==null && c.componentWillReceiveProps!=null) {
+				if (newType.getDerivedStateFromProps==null && c.componentWillReceiveProps!=null) {
 					c.componentWillReceiveProps(newTree.props, context);
 				}
 
@@ -213,13 +213,13 @@ function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessCh
 	let d = dom;
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
-	isSvg = isSvg ? vnode.tag !== 'foreignObject' : vnode.tag === 'svg';
+	isSvg = isSvg ? vnode.type !== 'foreignObject' : vnode.type === 'svg';
 
 	if (dom==null) {
-		vnode._el = dom = vnode.tag===null ? document.createTextNode(vnode.text) : isSvg ? document.createElementNS('http://www.w3.org/2000/svg', vnode.tag) : document.createElement(vnode.tag);
+		vnode._el = dom = vnode.type===null ? document.createTextNode(vnode.text) : isSvg ? document.createElementNS('http://www.w3.org/2000/svg', vnode.type) : document.createElement(vnode.type);
 	}
 
-	if (vnode.tag===null) {
+	if (vnode.type===null) {
 		if (dom===d && vnode.text!==oldVNode.text) {
 			dom.data = vnode.text;
 		}

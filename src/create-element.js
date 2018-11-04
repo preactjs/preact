@@ -2,13 +2,13 @@ import { EMPTY_OBJ } from './constants';
 
 /**
   * Create an virtual node (used for JSX)
-  * @param {import('./internal').VNode["tag"]} tag The node name or Component
+  * @param {import('./internal').VNode["type"]} type The node name or Component
   * constructor for this virtual node
   * @param {object | null | undefined} [props] The properties of the virtual node
   * @param {Array<import('.').ComponentChildren>} [children] The children of the virtual node
   * @returns {import('./internal').VNode}
   */
-export function createElement(tag, props, children) {
+export function createElement(type, props, children) {
 	if (props==null) props = {};
 	if (arguments.length>3) {
 		children = [children];
@@ -19,9 +19,9 @@ export function createElement(tag, props, children) {
 	if (children!=null) {
 		props.children = children;
 	}
-	if (tag.defaultProps!=null) {
-		for (let i in tag.defaultProps) {
-			if (props[i]===undefined) props[i] = tag.defaultProps[i];
+	if (type.defaultProps!=null) {
+		for (let i in type.defaultProps) {
+			if (props[i]===undefined) props[i] = type.defaultProps[i];
 		}
 	}
 	let ref = props.ref;
@@ -29,12 +29,12 @@ export function createElement(tag, props, children) {
 	let key = props.key;
 	if (key) delete props.key;
 
-	return createVNode(tag, props, null, key, ref);
+	return createVNode(type, props, null, key, ref);
 }
 
 /**
  * Create a VNode (used internally by Preact)
- * @param {import('./internal').VNode["tag"]} tag The node name or Component
+ * @param {import('./internal').VNode["type"]} type The node name or Component
  * Constructor for this virtual node
  * @param {object} props The properites of this virtual node
  * @param {string | number} text If this virtual node represents a text node,
@@ -45,10 +45,10 @@ export function createElement(tag, props, children) {
  * receive a reference to its created child
  * @returns {import('./internal').VNode}
  */
-function createVNode(tag, props, text, key, ref) {
+function createVNode(type, props, text, key, ref) {
 	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
 	// Do not inline into createElement and coerceToVNode!
-	return { tag, props, text, key, ref, _children: null, _el: null, _lastSibling: null, _component: null };
+	return { type, props, text, key, ref, _children: null, _el: null, _lastSibling: null, _component: null };
 }
 
 export function createRef() {
@@ -76,7 +76,7 @@ export function coerceToVNode(possibleVNode) {
 
 	// Clone vnode if it has already been used. ceviche/#57
 	if (possibleVNode!=null && possibleVNode._el!=null) {
-		return createVNode(possibleVNode.tag, possibleVNode.props, possibleVNode.text, possibleVNode.key, null);
+		return createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.text, possibleVNode.key, null);
 	}
 
 	return possibleVNode;

@@ -9,7 +9,7 @@ declare namespace preact {
 	// -----------------------------------
 
 	interface VNode<P = {}> {
-		tag: ComponentFactory<P> | string | number | null;
+		type: ComponentFactory<P> | string | number | null;
 		props: P & { children: ComponentChildren };
 		text?: string | number | null;
 		key?: Key;
@@ -103,12 +103,12 @@ declare namespace preact {
 	// -----------------------------------
 
 	function createElement<P>(
-		tag: ComponentFactory<P>,
+		type: ComponentFactory<P>,
 		props: Attributes & P | null,
 		...children: ComponentChildren[]
 	): VNode<any>;
 	function createElement(
-		tag: string,
+		type: string,
 		props: JSX.HTMLAttributes & JSX.SVGAttributes & Record<string, any> | null,
 		...children: ComponentChildren[]
 	): VNode<any>;

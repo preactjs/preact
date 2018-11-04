@@ -20,7 +20,7 @@ function normalize(obj) {
 	if (Array.isArray(obj)) {
 		return obj.map(normalize);
 	}
-	if ('tag' in obj && !('attributes' in obj)) {
+	if ('type' in obj && !('attributes' in obj)) {
 		Object.defineProperty(obj, 'attributes', ATTRS_DESCRIPTOR);
 	}
 	return obj;
