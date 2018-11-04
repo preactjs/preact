@@ -679,10 +679,7 @@ describe('Fragment', () => {
 		expect(ul.childNodes[6].textContent).to.equal('A footer');
 	});
 
-	it.skip('should reorder Fragment children', () => {
-
-		/** @type {HTMLInputElement} */
-		let input;
+	it('should reorder Fragment children', () => {
 		let updateState;
 
 		class App extends Component {
@@ -703,7 +700,7 @@ describe('Fragment', () => {
 									Hello World
 									<h2>yo</h2>
 								</Fragment>
-								<input type="text" ref={i => input = i} />
+								<input type="text" />
 							</Fragment>
 						) : (
 							<Fragment>
@@ -712,7 +709,7 @@ describe('Fragment', () => {
 									<h2>yo</h2>
 								</Fragment>
 								foobar
-								<input type="text" ref={i => input = i} />
+								<input type="text" />
 							</Fragment>
 						)}
 					</div>
@@ -724,22 +721,11 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.equal('<div><h1>Heading</h1>foobarHello World<h2>yo</h2><input type="text"></div>');
 
-		input.focus();
 		updateState();
 
 		// See "should preserve state between top level fragment and array"
-		// TODO: Fragments always re-append all of their children since parentVNode._dom
-		// is null in `diffChildren`. Because of this, any element that has focus will lose
-		// it when it is re-appended.
-
-		// TODO: Investigate keeping focus? Might need to key <input /> so that the diffing algorithm can re-use it.
 		// Perhaps rename test to "should reorder **keyed** Fragment children"
-
-		// expect(document.activeElement).to.equal(input, 'Before rerender');
-
 		rerender();
-
-		// expect(document.activeElement).to.equal(input, 'After rerender');
 		expect(scratch.innerHTML).to.equal('<div><h1>Heading</h1>Hello World<h2>yo</h2>foobar<input type="text"></div>');
 	});
 
