@@ -189,7 +189,7 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 	}
 
 	if (!isUpdate || mountAll) {
-		mounts.unshift(component);
+		mounts.push(component);
 	}
 	else if (!skip) {
 		// Ensure that pending componentDidMount() hooks of child components
@@ -282,7 +282,7 @@ export function unmountComponent(component) {
 		unmountComponent(inner);
 	}
 	else if (base) {
-		if (base[ATTR_KEY] && base[ATTR_KEY].ref) base[ATTR_KEY].ref(null);
+		if (base[ATTR_KEY]!=null) applyRef(base[ATTR_KEY].ref, null);
 
 		component.nextBase = base;
 

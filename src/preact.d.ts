@@ -4,8 +4,8 @@ export as namespace preact;
 declare namespace preact {
 	type Key = string | number;
 	type Ref<T> = (instance: T) => void;
-	type ComponentChild = VNode<any> | string | number | null;
-	type ComponentChildren = ComponentChild[] | ComponentChild | object | string | number | null;
+	type ComponentChild = VNode<any> | object | string | number | boolean | null;
+	type ComponentChildren = ComponentChild[] | ComponentChild;
 
 	/**
 	 * @deprecated
@@ -22,7 +22,7 @@ declare namespace preact {
 	type PreactHTMLAttributes = ClassAttributes<any>;
 
 	interface Attributes {
-		key?: string | number | any;
+		key?: Key;
 		jsx?: boolean;
 	}
 
@@ -69,7 +69,7 @@ declare namespace preact {
 	}
 
 	// Type alias for a component considered generally, whether stateless or stateful.
-	type AnyComponent<P = {}, S = {}> = FunctionalComponent<P> | Component<P, S>;
+	type AnyComponent<P = {}, S = {}> = FunctionalComponent<P> | ComponentConstructor<P, S>;
 
 	interface Component<P = {}, S = {}> {
 		componentWillMount?(): void;
@@ -421,6 +421,7 @@ declare global {
 		interface DOMAttributes extends preact.PreactDOMAttributes {
 			// Image Events
 			onLoad?: GenericEventHandler;
+			onError?: GenericEventHandler;
 			onLoadCapture?: GenericEventHandler;
 
 			// Clipboard Events
