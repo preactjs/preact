@@ -92,7 +92,7 @@ export type NodeType = "Composite" | "Native" | "Wrapper" | "Text";
 
 export interface DevtoolData {
 	nodeType: NodeType;
-	// Component tag
+	// Component type
 	type: any;
 	name: string;
 	ref: any;

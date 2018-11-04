@@ -10,14 +10,14 @@ import options from '../options';
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').PreactElement} dom The DOM element representing
  * the virtual nodes under diff
- * @param {import('../internal').PreactElement} parent The parent of the DOM element
- * @param {import('../internal').VNode | null} newTree The new virtual node
- * @param {import('../internal').VNode | null} oldTree The old virtual node
+ * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
+ * @param {import('../internal').VNode | null} newVNode The new virtual node
+ * @param {import('../internal').VNode | null} oldVNode The old virtual node
  * @param {object} context The current context object
  * @param {boolean} isSvg Whether or not this element is an SVG node
  * @param {boolean} append Whether or not to immediately append the new DOM
  * element after diffing
- * @param {Array<import('../internal').PreactElement>} excessChildren
+ * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} mounts A list of newly
  * mounted components
  * @param {import('../internal').Component | null} ancestorComponent The direct
@@ -25,42 +25,42 @@ import options from '../options';
  * @param {import('../internal').VNode} parentVNode Used to set `_lastSibling`
  * pointer to keep track of our current position
  */
-export function diff(dom, parent, newTree, oldTree, context, isSvg, append, excessChildren, mounts, ancestorComponent, parentVNode) {
+export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append, excessDomChildren, mounts, ancestorComponent, parentVNode) {
 
 	// If the previous type doesn't match the new type we drop the whole subtree
-	if (oldTree==null || newTree==null || oldTree.type!==newTree.type) {
-		if (oldTree!=null) unmount(oldTree, ancestorComponent);
-		if (newTree==null) return null;
+	if (oldVNode==null || newVNode==null || oldVNode.type!==newVNode.type) {
+		if (oldVNode!=null) unmount(oldVNode, ancestorComponent);
+		if (newVNode==null) return null;
 		dom = null;
-		oldTree = EMPTY_OBJ;
+		oldVNode = EMPTY_OBJ;
 	}
 
-	if (options.beforeDiff) options.beforeDiff(newTree);
+	if (options.beforeDiff) options.beforeDiff(newVNode);
 
 	let c, p, isNew = false, oldProps, oldState, oldContext,
-		newType = newTree.type, lastSibling;
+		newType = newVNode.type, lastSibling;
 
 	/** @type {import('../internal').Component | null} */
 	let clearProcessingException;
 
 	try {
-		let isOldTreeFragment;
-		outer: if ((isOldTreeFragment = oldTree.type === Fragment) || newType === Fragment) {
-			oldTree = oldTree===EMPTY_OBJ ? EMPTY_ARR : !isOldTreeFragment ? [oldTree] : getVNodeChildren(oldTree);
-			diffChildren(parent, getVNodeChildren(newTree), oldTree, context, isSvg, excessChildren, mounts, c, newTree);
+		let isOldVNodeFragment;
+		outer: if ((isOldVNodeFragment = oldVNode.type === Fragment) || newType === Fragment) {
+			oldVNode = oldVNode===EMPTY_OBJ ? EMPTY_ARR : !isOldVNodeFragment ? [oldVNode] : getVNodeChildren(oldVNode);
+			diffChildren(parentDom, getVNodeChildren(newVNode), oldVNode, context, isSvg, excessDomChildren, mounts, c, newVNode);
 
 			// The new dom element for fragments is the first child of the new tree
 			// When the first child of a Fragment is passed through `diff()`, it sets its dom
 			// element to the parentVNode._el property (that assignment is near the bottom of
 			// this function), which is read here.
-			dom = newTree._el;
-			lastSibling = newTree._lastSibling;
+			dom = newVNode._el;
+			lastSibling = newVNode._lastSibling;
 		}
 		else if (typeof newType==='function') {
 
 			// Get component and set it to `c`
-			if (oldTree._component) {
-				c = newTree._component = oldTree._component;
+			if (oldVNode._component) {
+				c = newVNode._component = oldVNode._component;
 				clearProcessingException = c._processingException;
 			}
 			else {
@@ -68,32 +68,32 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 
 				// Instantiate the new component
 				if (newType.prototype && newType.prototype.render) {
-					newTree._component = c = new newType(newTree.props, context); // eslint-disable-line new-cap
+					newVNode._component = c = new newType(newVNode.props, context); // eslint-disable-line new-cap
 					// @TODO this really shouldn't be necessary and people shouldn't rely on it!
 					// Component.call(c, newTree.props, context);
 				}
 				else {
-					newTree._component = c = new Component(newTree.props, context);
+					newVNode._component = c = new Component(newVNode.props, context);
 					c._constructor = newType;
 					c.render = doRender;
 				}
 				c._ancestorComponent = ancestorComponent;
 
-				c.props = newTree.props;
+				c.props = newVNode.props;
 				if (!c.state) c.state = {};
 				c.context = context;
 				c._dirty = true;
 				c._renderCallbacks = [];
 			}
 
-			c._vnode = newTree;
+			c._vnode = newVNode;
 
 			// Invoke getDerivedStateFromProps
 			let s = c._nextState || c.state;
 			if (newType.getDerivedStateFromProps!=null) {
 				oldState = assign({}, c.state);
 				if (s===c.state) s = assign({}, s);
-				assign(s, newType.getDerivedStateFromProps(newTree.props, s));
+				assign(s, newType.getDerivedStateFromProps(newVNode.props, s));
 			}
 
 			// Invoke pre-render lifecycle methods
@@ -102,15 +102,15 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				if (c.componentDidMount!=null) mounts.push(c);
 			}
 			else {
-				if (!c._force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newTree.props, s, context)===false) {
+				if (!c._force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newVNode.props, s, context)===false) {
 					break outer;
 				}
 				if (newType.getDerivedStateFromProps==null && c.componentWillReceiveProps!=null) {
-					c.componentWillReceiveProps(newTree.props, context);
+					c.componentWillReceiveProps(newVNode.props, context);
 				}
 
 				if (c.componentWillUpdate!=null) {
-					c.componentWillUpdate(newTree.props, s, context);
+					c.componentWillUpdate(newVNode.props, s, context);
 				}
 			}
 
@@ -118,7 +118,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			if (!oldState) oldState = c.state;
 
 			oldContext = c.context = context;
-			c.props = newTree.props;
+			c.props = newVNode.props;
 			c.state = s;
 
 			let prev = c._previousVTree;
@@ -133,22 +133,22 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 				oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			c.base = dom = diff(dom, parent, vnode, prev, context, isSvg, append, excessChildren, mounts, c, newTree);
+			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, append, excessDomChildren, mounts, c, newVNode);
 
 			if (vnode!=null) {
 				lastSibling = vnode._lastSibling;
 			}
 
-			c._parent = parent;
+			c._parent = parentDom;
 			c._parentVNode = parentVNode;
 
-			if (newTree.ref) applyRef(newTree.ref, c, ancestorComponent);
+			if (newVNode.ref) applyRef(newVNode.ref, c, ancestorComponent);
 		}
 		else {
-			dom = lastSibling = newTree._lastSibling = diffElementNodes(dom, parent, newTree, oldTree, context, isSvg, excessChildren, mounts, ancestorComponent);
+			dom = lastSibling = newVNode._lastSibling = diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
 
-			if (newTree.ref && (oldTree.ref !== newTree.ref)) {
-				applyRef(newTree.ref, dom, ancestorComponent);
+			if (newVNode.ref && (oldVNode.ref !== newVNode.ref)) {
+				applyRef(newVNode.ref, dom, ancestorComponent);
 			}
 		}
 
@@ -159,11 +159,11 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 
 		parentVNode._lastSibling = lastSibling;
 
-		if (parent && append!==false && dom!=null && dom.parentNode!==parent) {
-			parent.appendChild(dom);
+		if (parentDom && append!==false && dom!=null && dom.parentNode!==parentDom) {
+			parentDom.appendChild(dom);
 		}
 
-		newTree._el = dom;
+		newVNode._el = dom;
 
 		if (c!=null) {
 			while (p=c._renderCallbacks.pop()) p();
@@ -177,7 +177,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			c._processingException = null;
 		}
 
-		if (options.afterDiff) options.afterDiff(newTree);
+		if (options.afterDiff) options.afterDiff(newVNode);
 	}
 	catch (e) {
 		catchErrorInComponent(e, ancestorComponent);
@@ -204,42 +204,41 @@ export function commitRoot(mounts, root) {
  * Diff two virtual nodes representing DOM element
  * @param {import('../internal').PreactElement} dom The DOM element representing
  * the virtual nodes being diffed
- * @param {import('../internal').PreactElement} parent The parent DOM element
- * @param {import('../internal').VNode} vnode The new virtual node
+ * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').VNode} oldVNode The old virtual node
  * @param {object} context The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
- * @param {*} excessChildren
+ * @param {*} excessDomChildren
  * @param {Array<import('../internal').Component>} mounts An array of newly
  * mounted components
  * @param {import('../internal').Component} ancestorComponent The parent
  * component to the ones being diffed
  * @returns {import('../internal').PreactElement}
  */
-function diffElementNodes(dom, parent, vnode, oldVNode, context, isSvg, excessChildren, mounts, ancestorComponent) {
+function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent) {
 	let d = dom;
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
-	isSvg = isSvg ? vnode.type !== 'foreignObject' : vnode.type === 'svg';
+	isSvg = isSvg ? newVNode.type !== 'foreignObject' : newVNode.type === 'svg';
 
 	if (dom==null) {
-		vnode._el = dom = vnode.type===null ? document.createTextNode(vnode.text) : isSvg ? document.createElementNS('http://www.w3.org/2000/svg', vnode.type) : document.createElement(vnode.type);
+		newVNode._el = dom = newVNode.type===null ? document.createTextNode(newVNode.text) : isSvg ? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type) : document.createElement(newVNode.type);
 	}
 
-	if (vnode.type===null) {
-		if (dom===d && vnode.text!==oldVNode.text) {
-			dom.data = vnode.text;
+	if (newVNode.type===null) {
+		if (dom===d && newVNode.text!==oldVNode.text) {
+			dom.data = newVNode.text;
 		}
 	}
 	else {
-		if (excessChildren!=null && dom.childNodes!=null) {
-			excessChildren = EMPTY_ARR.slice.call(dom.childNodes);
+		if (excessDomChildren!=null && dom.childNodes!=null) {
+			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
-		if (vnode!==oldVNode) {
-			diffProps(dom, vnode.props, oldVNode==EMPTY_OBJ ? EMPTY_OBJ : oldVNode.props, isSvg);
+		if (newVNode!==oldVNode) {
+			diffProps(dom, newVNode.props, oldVNode==EMPTY_OBJ ? EMPTY_OBJ : oldVNode.props, isSvg);
 		}
 
-		diffChildren(dom, getVNodeChildren(vnode), oldVNode==EMPTY_OBJ ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessChildren, mounts, ancestorComponent, vnode);
+		diffChildren(dom, getVNodeChildren(newVNode), oldVNode==EMPTY_OBJ ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessDomChildren, mounts, ancestorComponent, newVNode);
 	}
 
 	return dom;

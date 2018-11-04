@@ -2,34 +2,34 @@ import { IS_NON_DIMENSIONAL } from '../constants';
 
 /**
  * Diff the old and new properties of a VNode and apply changes to the DOM node
- * @param {import('../internal').PreactElement} node The DOM node to apply
+ * @param {import('../internal').PreactElement} dom The DOM node to apply
  * changes to
- * @param {object} props The new props
+ * @param {object} newProps The new props
  * @param {object} oldProps The old props
  * @param {boolean} isSvg Whether or not this node is an SVG node
  */
-export function diffProps(node, props, oldProps, isSvg) {
-	for (let i in props) {
-		if (i!=='children' && i!=='key' && (!oldProps || oldProps[i]!=props[i])) {
-			setProperty(node, i, props[i], oldProps[i], isSvg);
+export function diffProps(dom, newProps, oldProps, isSvg) {
+	for (let i in newProps) {
+		if (i!=='children' && i!=='key' && (!oldProps || oldProps[i]!=newProps[i])) {
+			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
 		}
 	}
 	for (let i in oldProps) {
-		if (i!=='children' && i!=='key' && (!props || !(i in props))) {
-			setProperty(node, i, null, oldProps[i], isSvg);
+		if (i!=='children' && i!=='key' && (!newProps || !(i in newProps))) {
+			setProperty(dom, i, null, oldProps[i], isSvg);
 		}
 	}
 }
 
 /**
  * Set a property value on a DOM node
- * @param {import('../internal').PreactElement} node The DOM node to modify
+ * @param {import('../internal').PreactElement} dom The DOM node to modify
  * @param {string} name The name of the property to set
  * @param {*} value The value to set the property to
  * @param {*} oldValue The old value the property had
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
-function setProperty(node, name, value, oldValue, isSvg) {
+function setProperty(dom, name, value, oldValue, isSvg) {
 	if (name==='class' || name==='className') name = isSvg ? 'class' : 'className';
 
 	if (name==='style') {
@@ -39,7 +39,7 @@ function setProperty(node, name, value, oldValue, isSvg) {
 		 *   - assigning to .style sets .style.cssText - TODO: benchmark this, might not be worth the bytes.
 		 *   - assigning also casts to String, and ignores invalid values. This means assigning an Object clears all styles.
 		 */
-		let s = node.style;
+		let s = dom.style;
 
 		if (typeof value==='string') return s.cssText = value;
 		if (typeof oldValue==='string') s.cssText = '';
@@ -58,24 +58,24 @@ function setProperty(node, name, value, oldValue, isSvg) {
 		}
 	}
 	else if (name==='dangerouslySetInnerHTML') {
-		node.innerHTML = value && value.__html || '';
+		dom.innerHTML = value && value.__html || '';
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0]==='o' && name[1]==='n') {
 		let useCapture = name !== (name=name.replace(/Capture$/, ''));
 		let nameLower = name.toLowerCase();
-		name = (nameLower in node ? nameLower : name).substring(2);
+		name = (nameLower in dom ? nameLower : name).substring(2);
 
-		node.removeEventListener(name, oldValue, useCapture);
-		node.addEventListener(name, value, useCapture);
+		dom.removeEventListener(name, oldValue, useCapture);
+		dom.addEventListener(name, value, useCapture);
 	}
-	else if (name!=='list' && !isSvg && (name in node)) {
-		node[name] = value==null ? '' : value;
+	else if (name!=='list' && !isSvg && (name in dom)) {
+		dom[name] = value==null ? '' : value;
 	}
 	else if (value==null || value===false) {
-		node.removeAttribute(name);
+		dom.removeAttribute(name);
 	}
 	else if (typeof value!=='function') {
-		node.setAttribute(name, value);
+		dom.setAttribute(name, value);
 	}
 }
