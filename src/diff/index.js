@@ -313,7 +313,7 @@ function getVNodeChildren(vnode) {
  */
 export function toChildArray(children, flattened) {
 	flattened = flattened || [];
-	if (children==null || typeof children === 'boolean' || typeof children === 'function') {}
+	if (children==null || typeof children === 'boolean') {}
 	else if (Array.isArray(children)) {
 		for (let i=0; i < children.length; i++) {
 			toChildArray(children[i], flattened);

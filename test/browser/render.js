@@ -164,9 +164,10 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('');
 	});
 
-	it('should not render function children', () => {
-		render(<div>{() => {}}</div>, scratch);
-		expect(scratch.innerHTML).to.equal('<div></div>');
+	it('should throw an error on function children', () => {
+		expect(
+			() => render(<div>{() => {}}</div>, scratch)
+		).to.throw();
 	});
 
 	it('should render NaN as text content', () => {
