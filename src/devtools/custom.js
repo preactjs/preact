@@ -113,8 +113,8 @@ export function getChildren(vnode) {
 		return vnode._children!=null ? vnode._children.filter(Boolean) : [];
 	}
 
-	return !Array.isArray(c._previousVTree) && c._previousVTree!=null
-		? [c._previousVTree]
+	return !Array.isArray(c._previousVNode) && c._previousVNode!=null
+		? [c._previousVNode]
 		: null;
 }
 
@@ -126,12 +126,12 @@ export function getChildren(vnode) {
 export function getPatchedRoot(vnode) {
 
 	/** @type {any} */
-	let dom = vnode._el;
+	let dom = vnode._dom;
 
 	let last = null;
 	while ((dom = dom.parentNode)!=null) {
-		if (dom._previousVTree!=null) {
-			last = dom._previousVTree;
+		if (dom._previousVNode!=null) {
+			last = dom._previousVNode;
 		}
 	}
 
@@ -139,7 +139,7 @@ export function getPatchedRoot(vnode) {
 		last = roots.get(getInstance(last));
 		// Must always be refreshed for updates
 		last._children = [vnode];
-		last._component._previousVTree = vnode;
+		last._component._previousVNode = vnode;
 	}
 
 	return last;
@@ -151,10 +151,10 @@ export function getPatchedRoot(vnode) {
  * @returns {boolean}
  */
 export function isRoot(vnode) {
-	return vnode._el!=null && vnode._el.parentNode!=null &&
+	return vnode._dom!=null && vnode._dom.parentNode!=null &&
 
 	/** @type {import('../internal').PreactElement} */
-	(vnode._el.parentNode)._previousVTree!=null;
+	(vnode._dom.parentNode)._previousVNode!=null;
 }
 
 /**
@@ -171,7 +171,7 @@ export function isRoot(vnode) {
 export function getInstance(vnode) {
 	if (vnode._component!=null) return vnode._component;
 	if (vnode.type===Fragment) return vnode.props;
-	return vnode._el;
+	return vnode._dom;
 }
 
 /**
@@ -203,7 +203,7 @@ export function hasDataChanged(prev, next) {
 	return (prev.props !== next.props && !shallowEqual(prev.props, next.props, true))
 		|| (prev._component!=null &&
 			!shallowEqual(next._component._prevState, next._component.state))
-		|| prev._el !== next._el
+		|| prev._dom !== next._dom
 		|| prev.ref !== next.ref;
 }
 
@@ -240,7 +240,7 @@ export function patchRoot(vnode) {
 
 		// We haven't actually rendered this node so we need to fill out the
 		// properties that the devtools rely upon ourselves.
-		root._el = vnode._el;
+		root._dom = vnode._dom;
 		root.startTime = vnode.startTime;
 		root.endTime = vnode.endTime;
 
@@ -260,7 +260,7 @@ export function patchRoot(vnode) {
 
 	// Must always be refreshed for updates
 	root._children = [vnode];
-	root._component._previousVTree = vnode;
+	root._component._previousVNode = vnode;
 
 	return root;
 }

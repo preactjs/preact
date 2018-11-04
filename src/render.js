@@ -10,11 +10,11 @@ import { coerceToVNode } from './create-element';
  * render into
  */
 export function render(vnode, parentDom) {
-	let oldTree = parentDom._previousVTree;
-	if (oldTree) {
+	let oldVNode = parentDom._previousVNode;
+	if (oldVNode) {
 		let mounts = [];
-		diff(oldTree._el, parentDom, parentDom._previousVTree = coerceToVNode(vnode), oldTree, EMPTY_OBJ, parentDom.ownerSVGElement!==undefined, true, null, mounts, null, {});
-		commitRoot(mounts, parentDom._previousVTree);
+		diff(oldVNode._dom, parentDom, parentDom._previousVNode = coerceToVNode(vnode), oldVNode, EMPTY_OBJ, parentDom.ownerSVGElement!==undefined, true, null, mounts, null, {});
+		commitRoot(mounts, parentDom._previousVNode);
 	}
 	else hydrate(vnode, parentDom);
 }
@@ -26,7 +26,7 @@ export function render(vnode, parentDom) {
  * update
  */
 export function hydrate(vnode, parentDom) {
-	parentDom._previousVTree = vnode = coerceToVNode(vnode);
+	parentDom._previousVNode = vnode = coerceToVNode(vnode);
 	let mounts = [];
 	diffChildren(parentDom, [vnode], EMPTY_ARR, EMPTY_OBJ, parentDom.ownerSVGElement!==undefined, EMPTY_ARR.slice.call(parentDom.childNodes), mounts, null, {});
 	commitRoot(mounts, vnode);

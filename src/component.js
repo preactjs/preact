@@ -22,7 +22,7 @@ export function Component(props, context) {
 	// this._ancestorComponent = null; // Always set right after instantiation
 	// this._vnode = null;
 	// this._nextState = null; // Only class components
-	// this._previousVTree = null;
+	// this._previousVNode = null;
 	// this._processingException = null; // Always read, set only when handling error
 	// this._constructor = null; // Only functional components, always set right after instantiation
 }
@@ -64,14 +64,14 @@ Component.prototype.setState = function(update, callback) {
  * re-renderd
  */
 Component.prototype.forceUpdate = function(callback) {
-	if (this._parent!=null) {
+	if (this._parentDom!=null) {
 		// Set render mode so that we can differantiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
 		if (this._force==null) this._force = true;
 
 		let mounts = [];
-		diff(this._vnode._el, this._parent, this._vnode, this._vnode, this.context, this._parent.ownerSVGElement!==undefined, true, null, mounts, this._ancestorComponent, this._parentVNode || {});
+		diff(this._vnode._dom, this._parentDom, this._vnode, this._vnode, this.context, this._parentDom.ownerSVGElement!==undefined, true, null, mounts, this._ancestorComponent, this._parentVNode || {});
 		commitRoot(mounts, this._vnode);
 
 		// Reset mode to its initial value for the next render

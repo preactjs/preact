@@ -284,7 +284,7 @@ describe('Fragment', () => {
 		// node.appendChild on a DOM element that is already appened to the `node`.
 		// I think we need the oldParentVNode to get the old first DOM child to
 		// effectively diff the children, because the parentVNode (the Fragment)
-		// comes from the newTree and so won't ever have ._el set before diffing
+		// comes from the newTree and so won't ever have ._dom set before diffing
 		// children.
 		render(<Foo condition={false} />, scratch);
 
@@ -728,7 +728,7 @@ describe('Fragment', () => {
 		updateState();
 
 		// See "should preserve state between top level fragment and array"
-		// TODO: Fragments always re-append all of their children since parentVNode._el
+		// TODO: Fragments always re-append all of their children since parentVNode._dom
 		// is null in `diffChildren`. Because of this, any element that has focus will lose
 		// it when it is re-appended.
 

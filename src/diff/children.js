@@ -22,7 +22,7 @@ import { coerceToVNode } from '../create-element';
 export function diffChildren(dom, newVNodeChildren, oldVNodeChildren, context, isSvg, excessDomChildren, mounts, ancestorComponent, parentVNode) {
 	let childVNode, i, j, p, index, oldVNode, newDom,
 		oldChildrenLength = oldVNodeChildren.length,
-		childDom = typeof parentVNode.type=='number' ? parentVNode._el : dom.firstChild,
+		childDom = typeof parentVNode.type=='number' ? parentVNode._dom : dom.firstChild,
 		nextDom, lastDom, sibDom;
 
 	for (i=0; i<newVNodeChildren.length; i++) {
@@ -58,7 +58,7 @@ export function diffChildren(dom, newVNodeChildren, oldVNodeChildren, context, i
 		nextDom = childDom!=null && childDom.nextSibling;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		newDom = diff(oldVNode==null ? null : oldVNode._el, dom, childVNode, oldVNode, context, isSvg, false, excessDomChildren, mounts, ancestorComponent, parentVNode);
+		newDom = diff(oldVNode==null ? null : oldVNode._dom, dom, childVNode, oldVNode, context, isSvg, false, excessDomChildren, mounts, ancestorComponent, parentVNode);
 
 		// Only proceed if the vnode has not been unmounted by `diff()` above.
 		if (childVNode!=null && newDom !=null) {
@@ -75,7 +75,7 @@ export function diffChildren(dom, newVNodeChildren, oldVNodeChildren, context, i
 					j = 0;
 					while ((sibDom=sibDom.nextSibling) && j++<oldChildrenLength/2) {
 						if (sibDom===newDom) {
-							oldVNodeChildren[index] = childDom._previousVTree;
+							oldVNodeChildren[index] = childDom._previousVNode;
 							break outer;
 						}
 					}

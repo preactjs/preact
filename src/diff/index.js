@@ -51,9 +51,9 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 
 			// The new dom element for fragments is the first child of the new tree
 			// When the first child of a Fragment is passed through `diff()`, it sets its dom
-			// element to the parentVNode._el property (that assignment is near the bottom of
+			// element to the parentVNode._dom property (that assignment is near the bottom of
 			// this function), which is read here.
-			dom = newVNode._el;
+			dom = newVNode._dom;
 			lastSibling = newVNode._lastSibling;
 		}
 		else if (typeof newType==='function') {
@@ -69,8 +69,6 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 				// Instantiate the new component
 				if (newType.prototype && newType.prototype.render) {
 					newVNode._component = c = new newType(newVNode.props, context); // eslint-disable-line new-cap
-					// @TODO this really shouldn't be necessary and people shouldn't rely on it!
-					// Component.call(c, newTree.props, context);
 				}
 				else {
 					newVNode._component = c = new Component(newVNode.props, context);
@@ -121,8 +119,8 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			c.props = newVNode.props;
 			c.state = s;
 
-			let prev = c._previousVTree;
-			let vnode = c._previousVTree = coerceToVNode(c.render(c.props, c.state, c.context));
+			let prev = c._previousVNode;
+			let vnode = c._previousVNode = coerceToVNode(c.render(c.props, c.state, c.context));
 			c._dirty = false;
 
 			if (c.getChildContext!=null) {
@@ -139,7 +137,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 				lastSibling = vnode._lastSibling;
 			}
 
-			c._parent = parentDom;
+			c._parentDom = parentDom;
 			c._parentVNode = parentVNode;
 
 			if (newVNode.ref) applyRef(newVNode.ref, c, ancestorComponent);
@@ -153,8 +151,8 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 		}
 
 		// Update sibling pointers
-		if (parentVNode._el==null) {
-			parentVNode._el = dom;
+		if (parentVNode._dom==null) {
+			parentVNode._dom = dom;
 		}
 
 		parentVNode._lastSibling = lastSibling;
@@ -163,7 +161,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			parentDom.appendChild(dom);
 		}
 
-		newVNode._el = dom;
+		newVNode._dom = dom;
 
 		if (c!=null) {
 			while (p=c._renderCallbacks.pop()) p();
@@ -222,7 +220,7 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 	isSvg = isSvg ? newVNode.type !== 'foreignObject' : newVNode.type === 'svg';
 
 	if (dom==null) {
-		newVNode._el = dom = newVNode.type===null ? document.createTextNode(newVNode.text) : isSvg ? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type) : document.createElement(newVNode.type);
+		newVNode._dom = dom = newVNode.type===null ? document.createTextNode(newVNode.text) : isSvg ? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type) : document.createElement(newVNode.type);
 	}
 
 	if (newVNode.type===null) {
@@ -273,9 +271,9 @@ export function unmount(vnode, ancestorComponent) {
 		applyRef(r, null, ancestorComponent);
 	}
 
-	if ((r = vnode._el)!=null) r.remove();
+	if ((r = vnode._dom)!=null) r.remove();
 
-	vnode._el = vnode._lastSibling = null;
+	vnode._dom = vnode._lastSibling = null;
 
 	if ((r = vnode._component)!=null) {
 		if (r.componentWillUnmount) {
@@ -287,8 +285,8 @@ export function unmount(vnode, ancestorComponent) {
 			}
 		}
 
-		r.base = r._parent = null;
-		if (r = r._previousVTree) unmount(r, ancestorComponent);
+		r.base = r._parentDom = null;
+		if (r = r._previousVNode) unmount(r, ancestorComponent);
 	}
 	else if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {

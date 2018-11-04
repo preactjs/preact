@@ -8,7 +8,7 @@ export interface FunctionalComponent<P = {}> extends preact.FunctionalComponent<
 export type ComponentFactory<P> = preact.ComponentConstructor<P> | FunctionalComponent<P>;
 
 export interface PreactElement extends Element {
-	_previousVTree?: VNode<any>
+	_previousVNode?: VNode<any>
 
 	// Preact uses this attribute to detect SVG nodes
 	ownerSVGElement?: SVGElement;
@@ -23,10 +23,9 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	type: string | ComponentFactory<P> | number | null;
 	_children?: Array<VNode> | null;
 	/**
-	 * Only set when the vnode has a single child, even for Fragments. For vnodes
-	 * with more children this property will remain `null`.
+	 * The [first (for Fragments)] DOM child of a VNode
 	 */
-	_el?: PreactElement | Text | null;
+	_dom?: PreactElement | Text | null;
 	/**
 	 * The last dom sibling, if the vnode returned more than one child. This
 	 * property is also used as a cursor when diffing children.
@@ -52,14 +51,14 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	 * Pointer to the parent dom node. This is only needed for top-level Fragment
 	 * components or array returns.
 	 */
-	_parent?: PreactElement;
+	_parentDom?: PreactElement;
 	/**
 	 * Pointer to the parent vnode. During child reconciliation and ordering we
 	 * use the parent vnodes `_lastSibling` as the current position among sibling
 	 * vnodes.
 	 */
 	_parentVNode?: VNode;
-	_previousVTree?: VNode;
+	_previousVNode?: VNode;
 	_ancestorComponent?: Component<any, any>;
 	_processingException?: Component<any, any>;
 	_constructor: preact.ComponentFactory<P>;

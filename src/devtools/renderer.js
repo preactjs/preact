@@ -206,7 +206,7 @@ export class Renderer {
 	 * @returns {import('../internal').PreactElement | Text}
 	 */
 	getNativeFromReactElement(vnode) {
-		return vnode._el;
+		return vnode._dom;
 	}
 
 	/**
