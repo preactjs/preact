@@ -75,7 +75,7 @@ export function diffChildren(dom, newVNodeChildren, oldVNodeChildren, context, i
 					j = 0;
 					while ((sibDom=sibDom.nextSibling) && j++<oldChildrenLength/2) {
 						if (sibDom===newDom) {
-							oldVNodeChildren[index] = childDom._previousVNode;
+							oldVNodeChildren[index] = childDom._prevVNode;
 							break outer;
 						}
 					}

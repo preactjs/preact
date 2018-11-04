@@ -119,8 +119,8 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			c.props = newVNode.props;
 			c.state = s;
 
-			let prev = c._previousVNode;
-			let vnode = c._previousVNode = coerceToVNode(c.render(c.props, c.state, c.context));
+			let prev = c._prevVNode;
+			let vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
 			c._dirty = false;
 
 			if (c.getChildContext!=null) {
@@ -286,7 +286,7 @@ export function unmount(vnode, ancestorComponent) {
 		}
 
 		r.base = r._parentDom = null;
-		if (r = r._previousVNode) unmount(r, ancestorComponent);
+		if (r = r._prevVNode) unmount(r, ancestorComponent);
 	}
 	else if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {

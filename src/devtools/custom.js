@@ -113,8 +113,8 @@ export function getChildren(vnode) {
 		return vnode._children!=null ? vnode._children.filter(Boolean) : [];
 	}
 
-	return !Array.isArray(c._previousVNode) && c._previousVNode!=null
-		? [c._previousVNode]
+	return !Array.isArray(c._prevVNode) && c._prevVNode!=null
+		? [c._prevVNode]
 		: null;
 }
 
@@ -130,8 +130,8 @@ export function getPatchedRoot(vnode) {
 
 	let last = null;
 	while ((dom = dom.parentNode)!=null) {
-		if (dom._previousVNode!=null) {
-			last = dom._previousVNode;
+		if (dom._prevVNode!=null) {
+			last = dom._prevVNode;
 		}
 	}
 
@@ -139,7 +139,7 @@ export function getPatchedRoot(vnode) {
 		last = roots.get(getInstance(last));
 		// Must always be refreshed for updates
 		last._children = [vnode];
-		last._component._previousVNode = vnode;
+		last._component._prevVNode = vnode;
 	}
 
 	return last;
@@ -154,7 +154,7 @@ export function isRoot(vnode) {
 	return vnode._dom!=null && vnode._dom.parentNode!=null &&
 
 	/** @type {import('../internal').PreactElement} */
-	(vnode._dom.parentNode)._previousVNode!=null;
+	(vnode._dom.parentNode)._prevVNode!=null;
 }
 
 /**
@@ -260,7 +260,7 @@ export function patchRoot(vnode) {
 
 	// Must always be refreshed for updates
 	root._children = [vnode];
-	root._component._previousVNode = vnode;
+	root._component._prevVNode = vnode;
 
 	return root;
 }

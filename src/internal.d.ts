@@ -8,7 +8,7 @@ export interface FunctionalComponent<P = {}> extends preact.FunctionalComponent<
 export type ComponentFactory<P> = preact.ComponentConstructor<P> | FunctionalComponent<P>;
 
 export interface PreactElement extends Element {
-	_previousVNode?: VNode<any>
+	_prevVNode?: VNode<any>
 
 	// Preact uses this attribute to detect SVG nodes
 	ownerSVGElement?: SVGElement;
@@ -58,7 +58,7 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	 * vnodes.
 	 */
 	_parentVNode?: VNode;
-	_previousVNode?: VNode;
+	_prevVNode?: VNode;
 	_ancestorComponent?: Component<any, any>;
 	_processingException?: Component<any, any>;
 	_constructor: preact.ComponentFactory<P>;

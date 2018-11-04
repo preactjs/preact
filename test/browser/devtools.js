@@ -227,10 +227,10 @@ describe('devtools', () => {
 		it('should get component children', () => {
 			let a = createElement('div', { foo: 1 });
 
-			a._component = { _previousVNode: null };
+			a._component = { _prevVNode: null };
 			expect(getChildren(a)).to.equal(null);
 
-			a._component._previousVNode = {};
+			a._component._prevVNode = {};
 			expect(getChildren(a)).to.deep.equal([{}]);
 		});
 
@@ -288,7 +288,7 @@ describe('devtools', () => {
 	describe('isRoot', () => {
 		it('should check if a vnode is a root', () => {
 			render(<div>Hello World</div>, scratch);
-			let root = scratch._previousVNode;
+			let root = scratch._prevVNode;
 
 			expect(isRoot(root)).to.equal(true);
 			expect(isRoot(root._children[0])).to.equal(false);
@@ -298,7 +298,7 @@ describe('devtools', () => {
 	describe('getPatchedRoot', () => {
 		it('should get the root of a vnode', () => {
 			render(<div>Hello World</div>, scratch);
-			let root = scratch._previousVNode;
+			let root = scratch._prevVNode;
 
 			let wrapped = patchRoot(root);
 
@@ -308,7 +308,7 @@ describe('devtools', () => {
 
 		it('should return null if unable to find the root', () => {
 			render(<div>Hello World</div>, scratch);
-			let root = scratch._previousVNode;
+			let root = scratch._prevVNode;
 			root._dom = document.body;
 
 			expect(getPatchedRoot(root)).to.equal(null);
@@ -324,7 +324,7 @@ describe('devtools', () => {
 			}
 
 			render(<App key="foo" active />, scratch);
-			let vnode = scratch._previousVNode;
+			let vnode = scratch._prevVNode;
 			vnode.startTime = 10;
 			vnode.endTime = 12;
 
@@ -358,7 +358,7 @@ describe('devtools', () => {
 
 		it('should inline single text child', () => {
 			render(<h1>Hello World</h1>, scratch);
-			let data = getData(scratch._previousVNode);
+			let data = getData(scratch._prevVNode);
 
 			expect(data.children).to.equal('Hello World');
 			expect(data.text).to.equal(null);
@@ -366,7 +366,7 @@ describe('devtools', () => {
 
 		it('should convert text nodes', () => {
 			render('Hello World', scratch);
-			let data = getData(scratch._previousVNode);
+			let data = getData(scratch._prevVNode);
 
 			expect(data.children).to.equal(null);
 			expect(data.text).to.equal('Hello World');
@@ -445,7 +445,7 @@ describe('devtools', () => {
 
 		it('should find dom node by vnode', () => {
 			render(<div />, scratch);
-			let vnode = scratch._previousVNode;
+			let vnode = scratch._prevVNode;
 			let rid = Object.keys(hook._renderers)[0];
 			let renderer = hook._renderers[rid];
 			expect(renderer.findHostInstanceByFiber(vnode)).to.equal(vnode._dom);
@@ -453,7 +453,7 @@ describe('devtools', () => {
 
 		it('should find vnode by dom node', () => {
 			render(<div />, scratch);
-			let vnode = scratch._previousVNode;
+			let vnode = scratch._prevVNode;
 			let rid = Object.keys(hook._renderers)[0];
 			let renderer = hook._renderers[rid];
 			expect(renderer.findFiberByHostInstance(scratch.firstChild)).to.equal(vnode);
@@ -463,7 +463,7 @@ describe('devtools', () => {
 
 		it('should getNativeFromReactElement', () => {
 			render(<div />, scratch);
-			let vnode = scratch._previousVNode;
+			let vnode = scratch._prevVNode;
 			let rid = Object.keys(hook._renderers)[0];
 			let helpers = hook.helpers[rid];
 			expect(helpers.getNativeFromReactElement(vnode)).to.equal(vnode._dom);
@@ -471,7 +471,7 @@ describe('devtools', () => {
 
 		it('should getReactElementFromNative', () => {
 			render(<div />, scratch);
-			let vnode = scratch._previousVNode;
+			let vnode = scratch._prevVNode;
 			let rid = Object.keys(hook._renderers)[0];
 			let helpers = hook.helpers[rid];
 			expect(helpers.getReactElementFromNative(vnode._dom)).to.equal(vnode);

@@ -14,7 +14,7 @@
       "$_dom": "__e",
       "$_component": "__c",
       "$_constructor": "__c",
-      "$_previousVNode": "__t",
+      "$_prevVNode": "__t",
       "$__html": "__html",
       "$_ancestorComponent": "__a",
       "$_processingException": "__p",
