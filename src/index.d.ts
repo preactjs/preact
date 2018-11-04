@@ -14,6 +14,17 @@ declare namespace preact {
 		text?: string | number | null;
 		key?: Key;
 		ref?: Ref<any>;
+		/**
+		 * The time this `vnode` started rendering. Will only be filled when
+		 * `options.enableProfiler` is set tot `true`. Default value: `-1`
+		 */
+		startTime: number;
+		/**
+		 * The time that the rendering of this `vnode` was completed. Will only be
+		 * filled when `options.enableProfiler` is set tot `true`.
+		 * Default value: `0`
+		 */
+		endTime: number;
 	}
 
 	//
