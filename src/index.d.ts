@@ -132,12 +132,19 @@ declare namespace preact {
 	// Preact options
 	// -----------------------------------
 
-	// var options: {
-	// 	syncComponentUpdates?: boolean;
-	// 	debounceRendering?: (render: () => void) => void;
-	// 	vnode?: (vnode: VNode<any>) => void;
-	// 	event?: (event: Event) => Event;
-	// };
+	/**
+	 * Global options for preact
+	 */
+	interface Options {
+		/** Collect profiling data for each `vnode` if enabled */
+		enableProfiling?: boolean;
+		/** Attach a hook that is invoked after a tree was mounted or was updated. */
+		commitRoot?(vnode: VNode): void;
+		/** Attach a hook that is invoked immediately before a component is unmounted. */
+		beforeUnmount?(vnode: VNode): void;
+	}
+
+	const options: Options;
 
 	//
 	// Preact helpers

@@ -65,15 +65,6 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	_constructor: preact.ComponentFactory<P>;
 }
 
-/**
- * Global hooks into our renderer
- */
-export interface Options {
-	enableProfiling?: boolean;
-	commitRoot?(vnode: VNode): void;
-	beforeUnmount?(vnode: VNode): void;
-}
-
 // DEVTOOLS
 
 export interface DevtoolsInjectOptions {
