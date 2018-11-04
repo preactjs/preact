@@ -9,6 +9,7 @@ import Todo from './todo';
 import Fragments from './fragments';
 import installLogger from './logger';
 import ProfilerDemo from './profiler';
+import KeyBug from './key_bug';
 import { initDevTools } from 'ceviche/devtools';
 
 let isBenchmark = /(\/spiral|\/pythagoras)/g.test(window.location.href);
@@ -55,6 +56,7 @@ class App extends Component {
 						<Link href="/pythagoras" activeClassName="active">Pythagoras</Link>
 						<Link href="/todo" activeClassName="active">ToDo</Link>
 						<Link href="/fragments" activeClassName="active">Fragments</Link>
+						<Link href="/key_bug" activeClassName="active">Key Bug</Link>
 						<Link href="/profiler" activeClassName="active">Profiler</Link>
 					</nav>
 				</header>
@@ -77,6 +79,7 @@ class App extends Component {
 						<Todo path="/todo" />
 						<Fragments path="/fragments" />
 						<ProfilerDemo path="/profiler" />
+						<KeyBug path="/key_bug" />
 					</Router>
 				</main>
 			</div>
@@ -94,6 +97,7 @@ document.body._previousVTree = (
 				<a href="/pythagoras">Pythagoras SSR</a>
 				<a href="/todo">ToDo</a>
 				<a href="/fragments">Fragments</a>
+				<a href="/key_bug">Key Bugs</a>
 				<a href="/profiler">Profiler</a>
 			</nav>
 		</header>
