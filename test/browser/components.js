@@ -543,6 +543,24 @@ describe('Components', () => {
 	});
 
 	describe('props.children', () => {
+		let children;
+
+		let Foo = props => {
+			children = props.children;
+			return <div>{props.children}</div>;
+		};
+
+		let FunctionFoo = props => {
+			children = props.children;
+			return <div>{props.children(2)}</div>;
+		};
+
+		let Bar = () => <span>Bar</span>;
+
+		beforeEach(() => {
+			children = undefined;
+		});
+
 		it('should support passing children as a prop', () => {
 			const Foo = props => <div {...props} />;
 
@@ -564,79 +582,112 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div>a</div>');
 		});
 
-		// TODO: Not currently supported. Redefine these tests once we settle
-		// on children normalization
-		xdescribe('should always be an array', () => {
-			let children;
+		it('should be undefined with no child', () => {
+			render(<Foo />, scratch);
 
-			let Foo = props => {
-				children = props.children;
-				return <div>{props.children}</div>;
-			};
+			expect(children).to.be.undefined;
+			expect(scratch.innerHTML).to.equal('<div></div>');
+		});
 
-			let FunctionFoo = props => {
-				children = props.children;
-				return <div>{props.children[0](2)}</div>;
-			};
+		it('should be undefined with null as a child', () => {
+			render(<Foo>{null}</Foo>, scratch);
 
-			let Bar = () => <span>Bar</span>;
+			expect(children).to.be.undefined;
+			expect(scratch.innerHTML).to.equal('<div></div>');
+		});
 
-			beforeEach(() => {
-				children = undefined;
-			});
+		it('should be false with false as a child', () => {
+			render(<Foo>{false}</Foo>, scratch);
 
-			it('with no child', () => {
-				render(<Foo />, scratch);
+			expect(children).to.be.false;
+			expect(scratch.innerHTML).to.equal('<div></div>');
+		});
 
-				expect(children).to.be.an('array');
-				expect(children).to.have.lengthOf(0);
-				expect(scratch.innerHTML).to.equal('<div></div>');
-			});
+		it('should be true with true as a child', () => {
+			render(<Foo>{true}</Foo>, scratch);
 
-			it('with a text child', () => {
-				render(<Foo>text</Foo>, scratch);
+			expect(children).to.be.true;
+			expect(scratch.innerHTML).to.equal('<div></div>');
+		});
 
-				expect(children).to.be.an('array');
-				expect(children).to.have.lengthOf(1);
-				expect(children[0]).to.be.a('string');
-				expect(scratch.innerHTML).to.equal('<div>text</div>');
-			});
+		it('should be a string with a text child', () => {
+			render(<Foo>text</Foo>, scratch);
 
-			it('with a DOM node child', () => {
-				render(<Foo><span /></Foo>, scratch);
+			expect(children).to.be.a('string');
+			expect(children).to.equal('text');
+			expect(scratch.innerHTML).to.equal('<div>text</div>');
+		});
 
-				expect(children).to.be.an('array');
-				expect(children).to.have.lengthOf(1);
-				expect(children[0]).to.be.an('object');
-				expect(scratch.innerHTML).to.equal('<div><span></span></div>');
-			});
+		it('should be a string with a number child', () => {
+			render(<Foo>1</Foo>, scratch);
 
-			it('with a Component child', () => {
-				render(<Foo><Bar /></Foo>, scratch);
+			expect(children).to.be.a('string');
+			expect(children).to.equal('1');
+			expect(scratch.innerHTML).to.equal('<div>1</div>');
+		});
 
-				expect(children).to.be.an('array');
-				expect(children).to.have.lengthOf(1);
-				expect(children[0]).to.be.an('object');
-				expect(scratch.innerHTML).to.equal('<div><span>Bar</span></div>');
-			});
+		it('should be a VNode with a DOM node child', () => {
+			render(<Foo><span /></Foo>, scratch);
 
-			it('with a function child', () => {
-				render(<FunctionFoo>{num => num.toFixed(2)}</FunctionFoo>, scratch);
+			expect(children).to.be.an('object');
+			expect(children.tag).to.equal('span');
+			expect(scratch.innerHTML).to.equal('<div><span></span></div>');
+		});
 
-				expect(children).to.be.an('array');
-				expect(children).to.have.lengthOf(1);
-				expect(children[0]).to.be.a('function');
-				expect(scratch.innerHTML).to.equal('<div>2.00</div>');
-			});
+		it('should be a VNode with a Component child', () => {
+			render(<Foo><Bar /></Foo>, scratch);
 
-			it('with multiple children', () => {
-				render(<Foo><span /><Bar /><span /></Foo>, scratch);
+			expect(children).to.be.an('object');
+			expect(children.tag).to.equal(Bar);
+			expect(scratch.innerHTML).to.equal('<div><span>Bar</span></div>');
+		});
 
-				expect(children).to.be.an('array');
-				expect(children).to.have.lengthOf(3);
-				expect(children[0]).to.be.an('object');
-				expect(scratch.innerHTML).to.equal('<div><span></span><span>Bar</span><span></span></div>');
-			});
+		it('should be a function with a function child', () => {
+			const child = num => num.toFixed(2);
+			render(<FunctionFoo>{child}</FunctionFoo>, scratch);
+
+			expect(children).to.be.an('function');
+			expect(children).to.equal(child);
+			expect(scratch.innerHTML).to.equal('<div>2.00</div>');
+		});
+
+		it('should be an array with multiple children', () => {
+			render(<Foo>0<span /><input /><div />1</Foo>, scratch);
+
+			expect(children).to.be.an('array');
+			expect(children[0]).to.equal('0');
+			expect(children[1].tag).to.equal('span');
+			expect(children[2].tag).to.equal('input');
+			expect(children[3].tag).to.equal('div');
+			expect(children[4]).to.equal('1');
+			expect(scratch.innerHTML).to.equal(`<div>0<span></span><input><div></div>1</div>`);
+		});
+
+		it('should be an array with an array as children', () => {
+			const mixedArray = getMixedArray();
+			render(<Foo>{mixedArray}</Foo>, scratch);
+
+			expect(children).to.be.an('array');
+			expect(children).to.deep.equal(mixedArray);
+			expect(scratch.innerHTML).to.equal(`<div>${mixedArrayHTML}</div>`);
+		});
+
+		it('should not flatten sibling and nested arrays', () => {
+			const list1 = [0, 1];
+			const list2 = [2, 3];
+			const list3 = [4, 5];
+			const list4 = [6, 7];
+			const list5 = [8, 9];
+
+			render(<Foo>{[list1, list2]}{[list3, list4]}{list5}</Foo>, scratch);
+
+			expect(children).to.be.an('array');
+			expect(children).to.deep.equal([
+				[list1, list2],
+				[list3, list4],
+				list5
+			]);
+			expect(scratch.innerHTML).to.equal('<div>0123456789</div>');
 		});
 	});
 

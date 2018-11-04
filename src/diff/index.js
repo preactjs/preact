@@ -295,9 +295,9 @@ export function unmount(vnode, ancestorComponent) {
  * children of
  * @returns {Array<import('../internal').VNode>} The virtual node's children
  */
-export function getVNodeChildren(vnode) {
+function getVNodeChildren(vnode) {
 	if (vnode._children==null) {
-		flattenChildren(vnode.props.children, vnode._children=[]);
+		toChildArray(vnode.props.children, vnode._children=[]);
 	}
 	return vnode._children;
 }
@@ -307,19 +307,22 @@ export function getVNodeChildren(vnode) {
  * Flatten a virtual nodes children to a single dimensional array
  * @param {import('../index').ComponentChildren} children The unflattened
  * children of a virtual node
- * @param {Array<import('../index').ComponentChild>} flattened An flat array of children to modify
+ * @param {Array<import('../index').ComponentChild>} [flattened] An flat array of children to modify
  */
-function flattenChildren(children, flattened) {
+export function toChildArray(children, flattened) {
+	flattened = flattened || [];
 	if (children==null || typeof children === 'boolean') {}
 	else if (Array.isArray(children)) {
 		for (let i=0; i < children.length; i++) {
-			flattenChildren(children[i], flattened);
+			toChildArray(children[i], flattened);
 		}
 	}
 	else {
 		children = coerceToVNode(children);
 		flattened.push(children);
 	}
+
+	return flattened;
 }
 
 /** The `.render()` method for a PFC backing instance. */
