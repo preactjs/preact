@@ -1,4 +1,4 @@
-import { createElement, render, hydrate, Component } from 'ceviche';
+import { createElement, render, hydrate, Component, options } from 'ceviche';
 import './style.scss';
 import { Router } from 'preact-router';
 import { Link } from 'preact-router/match';
@@ -8,8 +8,18 @@ import Reorder from './reorder';
 import Todo from './todo';
 import Fragments from './fragments';
 import installLogger from './logger';
+import ProfilerDemo from './profiler';
+import KeyBug from './key_bug';
+import { initDevTools } from 'ceviche/devtools';
 
-window.ceviche = { createElement, render, hydrate, Component };
+let isBenchmark = /(\/spiral|\/pythagoras)/g.test(window.location.href);
+if (!isBenchmark) {
+	// eslint-disable-next-line no-console
+	console.log('Enabling devtools');
+	initDevTools();
+}
+
+window.ceviche = { createElement, render, hydrate, Component, options };
 
 class Home extends Component {
 	a = 1;
@@ -18,6 +28,18 @@ class Home extends Component {
 			<div>
 				<h1>Hello</h1>
 			</div>
+		);
+	}
+}
+
+class DevtoolsWarning extends Component {
+	onClick = () => {
+		window.location.reload();
+	}
+
+	render() {
+		return (
+			<button onClick={this.onClick}>Start Benchmark (disables devtools)</button>
 		);
 	}
 }
@@ -34,16 +56,30 @@ class App extends Component {
 						<Link href="/pythagoras" activeClassName="active">Pythagoras</Link>
 						<Link href="/todo" activeClassName="active">ToDo</Link>
 						<Link href="/fragments" activeClassName="active">Fragments</Link>
+						<Link href="/key_bug" activeClassName="active">Key Bug</Link>
+						<Link href="/profiler" activeClassName="active">Profiler</Link>
 					</nav>
 				</header>
 				<main>
 					<Router>
 						<Home path="/" />
 						<Reorder path="/reorder" />
-						<Spiral path="/spiral" />
-						<Pythagoras path="/pythagoras" />
+						<div path="/spiral">
+							{!isBenchmark
+								? <DevtoolsWarning />
+								: <Spiral />
+							}
+						</div>
+						<div path="/pythagoras">
+							{!isBenchmark
+								? <DevtoolsWarning />
+								: <Pythagoras />
+							}
+						</div>
 						<Todo path="/todo" />
 						<Fragments path="/fragments" />
+						<ProfilerDemo path="/profiler" />
+						<KeyBug path="/key_bug" />
 					</Router>
 				</main>
 			</div>
@@ -61,13 +97,15 @@ document.body._previousVTree = (
 				<a href="/pythagoras">Pythagoras SSR</a>
 				<a href="/todo">ToDo</a>
 				<a href="/fragments">Fragments</a>
+				<a href="/key_bug">Key Bugs</a>
+				<a href="/profiler">Profiler</a>
 			</nav>
 		</header>
 		<main>
 			<h1>SSR Content</h1>
 		</main>
 	</div>
-)
+);
 
 // skip hydrate
 render(<App />, document.body);

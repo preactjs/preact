@@ -14,6 +14,17 @@ declare namespace preact {
 		text?: string | number | null;
 		key?: Key;
 		ref?: Ref<any>;
+		/**
+		 * The time this `vnode` started rendering. Will only be filled when
+		 * `options.enableProfiler` is set tot `true`. Default value: `-1`
+		 */
+		startTime: number;
+		/**
+		 * The time that the rendering of this `vnode` was completed. Will only be
+		 * filled when `options.enableProfiler` is set tot `true`.
+		 * Default value: `0`
+		 */
+		endTime: number;
 	}
 
 	//
@@ -132,12 +143,21 @@ declare namespace preact {
 	// Preact options
 	// -----------------------------------
 
-	// var options: {
-	// 	syncComponentUpdates?: boolean;
-	// 	debounceRendering?: (render: () => void) => void;
-	// 	vnode?: (vnode: VNode<any>) => void;
-	// 	event?: (event: Event) => Event;
-	// };
+	/**
+	 * Global options for preact
+	 */
+	interface Options {
+		/** Attach a hook that is invoked after a tree was mounted or was updated. */
+		commitRoot?(vnode: VNode): void;
+		/** Attach a hook that is invoked immediately before a component is unmounted. */
+		beforeUnmount?(vnode: VNode): void;
+		/** Attach a hook that is invoked before a vnode is diffed */
+		beforeDiff?(vnode: VNode): void;
+		/** Attach a hook that is invoked after a vnode has rendered */
+		afterDiff?(vnode: VNode): void;
+	}
+
+	const options: Options;
 
 	//
 	// Preact helpers

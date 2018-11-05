@@ -1,14 +1,8 @@
 import { createElement, cloneElement, Component as CevicheComponent, render } from 'ceviche';
-const ATTRS_DESCRIPTOR = {
-	configurable: true,
-	enumerable: true,
-	get() {
-		return this.props;
-	}
-};
+
 export function h(...args) {
 	let vnode = createElement(...args);
-	Object.defineProperty(vnode, 'attributes', ATTRS_DESCRIPTOR);
+	vnode.attributes = vnode.props;
 	return vnode;
 }
 
@@ -21,7 +15,7 @@ function normalize(obj) {
 		return obj.map(normalize);
 	}
 	if ('type' in obj && !('attributes' in obj)) {
-		Object.defineProperty(obj, 'attributes', ATTRS_DESCRIPTOR);
+		obj.attributes = obj.props;
 	}
 	return obj;
 }

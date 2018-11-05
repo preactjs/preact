@@ -4,6 +4,7 @@ import { coerceToVNode, Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps } from './props';
 import { assign } from '../util';
+import options from '../options';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -33,6 +34,8 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		dom = null;
 		oldTree = EMPTY_OBJ;
 	}
+
+	if (options.beforeDiff) options.beforeDiff(newTree);
 
 	let c, p, isNew = false, oldProps, oldState, oldContext,
 		newType = newTree.type, lastSibling;
@@ -173,6 +176,8 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		if (clearProcessingException) {
 			c._processingException = null;
 		}
+
+		if (options.afterDiff) options.afterDiff(newTree);
 	}
 	catch (e) {
 		catchErrorInComponent(e, ancestorComponent);
@@ -181,7 +186,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 	return dom;
 }
 
-export function flushMounts(mounts) {
+export function commitRoot(mounts, root) {
 	let c;
 	while ((c = mounts.pop())) {
 		try {
@@ -191,6 +196,8 @@ export function flushMounts(mounts) {
 			catchErrorInComponent(e, c._ancestorComponent);
 		}
 	}
+
+	if (options.commitRoot) options.commitRoot(root);
 }
 
 /**
@@ -261,6 +268,8 @@ export function applyRef(ref, value, ancestorComponent) {
  */
 export function unmount(vnode, ancestorComponent) {
 	let r;
+	if (options.beforeUnmount) options.beforeUnmount(vnode);
+
 	if (r = vnode.ref) {
 		applyRef(r, null, ancestorComponent);
 	}
