@@ -6,7 +6,7 @@
 
 1. The VNode shape has changed
     1. `attributes` has been renamed to `props`
-    2. `nodeName` is now `tag`
+    2. `nodeName` is now `type`
     3. `props.children`
         1. The children of a VNode are no longer guaranteed to be a flat array. It could be `undefined`
            or it could be a nested array of children.

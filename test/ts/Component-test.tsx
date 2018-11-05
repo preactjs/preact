@@ -141,7 +141,7 @@ describe("Component", () => {
 					bar
 				</Fragment>
 
-			expect(vnode.tag).to.be.equal(Fragment);
+			expect(vnode.type).to.be.equal(Fragment);
 		});
 	});
 });

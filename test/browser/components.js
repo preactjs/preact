@@ -66,7 +66,7 @@ describe('Components', () => {
 			expect(C1.prototype.render)
 				.to.have.been.calledOnce
 				.and.to.have.been.calledWithMatch({}, {})
-				.and.to.have.returned(sinon.match({ tag: 'div' }));
+				.and.to.have.returned(sinon.match({ type: 'div' }));
 
 			expect(scratch.innerHTML).to.equal('<div>C1</div>');
 		});
@@ -81,7 +81,7 @@ describe('Components', () => {
 				.to.have.been.calledOnce
 				.and.to.have.been.calledWithMatch(PROPS)
 				.and.to.have.returned(sinon.match({
-					tag: 'div',
+					type: 'div',
 					props: PROPS
 				}));
 
@@ -110,7 +110,7 @@ describe('Components', () => {
 				.to.have.been.calledOnce
 				.and.to.have.been.calledWithMatch(PROPS, {})
 				.and.to.have.returned(sinon.match({
-					tag: 'div',
+					type: 'div',
 					props: PROPS
 				}));
 
@@ -140,7 +140,7 @@ describe('Components', () => {
 			expect(Foo.prototype.render)
 				.to.have.been.calledOnce
 				.and.to.have.been.calledWithMatch(PROPS, {}, {})
-				.and.to.have.returned(sinon.match({ tag: 'div', props: PROPS }));
+				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal({});
 			expect(instance.context).to.deep.equal({});
@@ -161,7 +161,7 @@ describe('Components', () => {
 			expect(Foo.prototype.render)
 				.to.have.been.calledOnce
 				.and.to.have.been.calledWithMatch(PROPS, STATE, {})
-				.and.to.have.returned(sinon.match({ tag: 'div', props: PROPS }));
+				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal(STATE);
 			expect(instance.context).to.deep.equal({});
@@ -183,7 +183,7 @@ describe('Components', () => {
 			expect(instance.render)
 				.to.have.been.calledOnce
 				.and.to.have.been.calledWithMatch(PROPS, STATE, {})
-				.and.to.have.returned(sinon.match({ tag: 'div', props: PROPS }));
+				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal(STATE);
 			expect(instance.context).to.deep.equal({});
@@ -204,7 +204,7 @@ describe('Components', () => {
 			expect(Foo.prototype.render)
 				.to.have.been.calledOnce
 				.and.to.have.been.calledWithMatch(PROPS, STATE, {})
-				.and.to.have.returned(sinon.match({ tag: 'div', props: PROPS }));
+				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal(STATE);
 			expect(instance.context).to.deep.equal({});
@@ -223,7 +223,7 @@ describe('Components', () => {
 			expect(Foo.prototype.render)
 				.to.have.been.calledOnce
 				.and.to.have.been.calledWithMatch(PROPS, {}, {})
-				.and.to.have.returned(sinon.match({ tag: 'div', props: PROPS }));
+				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal({});
 			expect(instance.context).to.deep.equal({});
@@ -248,7 +248,7 @@ describe('Components', () => {
 			expect(Foo.prototype.render)
 				.to.have.been.calledOnce
 				.and.to.have.been.calledWithMatch(PROPS, STATE, {})
-				.and.to.have.returned(sinon.match({ tag: 'div', props: PROPS }));
+				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal(STATE);
 			expect(instance.context).to.deep.equal({});
@@ -269,7 +269,7 @@ describe('Components', () => {
 			expect(Provider.prototype.render)
 				.to.have.been.calledOnce
 				.and.to.have.been.calledWithMatch(PROPS, STATE, {})
-				.and.to.have.returned(sinon.match({ tag: 'div', props: PROPS }));
+				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal(STATE);
 			expect(instance.context).to.deep.equal({});
@@ -293,7 +293,7 @@ describe('Components', () => {
 			expect(Foo.prototype.render)
 				.to.have.been.calledOnce
 				.and.to.have.been.calledWithMatch(PROPS, {}, {})
-				.and.to.have.returned(sinon.match({ tag: 'div', props: PROPS }));
+				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal({});
 			expect(instance.context).to.deep.equal({});
@@ -766,7 +766,7 @@ describe('Components', () => {
 				.to.have.been.calledOnce
 				.and.to.have.been.calledWithMatch(PROPS)
 				.and.to.have.returned(sinon.match({
-					tag: Inner,
+					type: Inner,
 					props: PROPS
 				}));
 
@@ -774,7 +774,7 @@ describe('Components', () => {
 				.to.have.been.calledOnce
 				.and.to.have.been.calledWithMatch(PROPS)
 				.and.to.have.returned(sinon.match({
-					tag: 'div',
+					type: 'div',
 					props: { ...PROPS, children: 'inner' }
 				}));
 
