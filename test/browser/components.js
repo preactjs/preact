@@ -630,7 +630,7 @@ describe('Components', () => {
 			render(<Foo><span /></Foo>, scratch);
 
 			expect(children).to.be.an('object');
-			expect(children.tag).to.equal('span');
+			expect(children.type).to.equal('span');
 			expect(scratch.innerHTML).to.equal('<div><span></span></div>');
 		});
 
@@ -638,7 +638,7 @@ describe('Components', () => {
 			render(<Foo><Bar /></Foo>, scratch);
 
 			expect(children).to.be.an('object');
-			expect(children.tag).to.equal(Bar);
+			expect(children.type).to.equal(Bar);
 			expect(scratch.innerHTML).to.equal('<div><span>Bar</span></div>');
 		});
 
@@ -656,9 +656,9 @@ describe('Components', () => {
 
 			expect(children).to.be.an('array');
 			expect(children[0]).to.equal('0');
-			expect(children[1].tag).to.equal('span');
-			expect(children[2].tag).to.equal('input');
-			expect(children[3].tag).to.equal('div');
+			expect(children[1].type).to.equal('span');
+			expect(children[2].type).to.equal('input');
+			expect(children[3].type).to.equal('div');
 			expect(children[4]).to.equal('1');
 			expect(scratch.innerHTML).to.equal(`<div>0<span></span><input><div></div>1</div>`);
 		});
