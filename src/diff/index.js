@@ -3,7 +3,7 @@ import { Component, enqueueRender } from '../component';
 import { coerceToVNode, Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps } from './props';
-import { assign, now } from '../util';
+import { assign } from '../util';
 import options from '../options';
 
 /**
@@ -35,9 +35,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 		oldTree = EMPTY_OBJ;
 	}
 
-	if (options.enableProfiling) {
-		newTree.startTime = now();
-	}
+	if (options.beforeDiff) options.beforeDiff(newTree);
 
 	let c, p, isNew = false, oldProps, oldState, oldContext,
 		newType = newTree.type, lastSibling;
@@ -179,9 +177,7 @@ export function diff(dom, parent, newTree, oldTree, context, isSvg, append, exce
 			c._processingException = null;
 		}
 
-		if (options.enableProfiling) {
-			newTree.endTime = now();
-		}
+		if (options.afterDiff) options.afterDiff(newTree);
 	}
 	catch (e) {
 		catchErrorInComponent(e, ancestorComponent);

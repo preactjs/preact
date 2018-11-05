@@ -104,14 +104,21 @@ export function initDevTools() {
 		});
 	})();
 
-	// The actual integration. There is no way to know whether the profiler is
-	// actually recording or not. There is some discussion in this issue:
-	// https://github.com/facebook/react-devtools/issues/1106
-	options.enableProfiling = true;
-
 	// Store (possible) previous hooks so that we don't overwrite them
 	let prevCommitRoot = options.commitRoot;
 	let prevBeforeUnmount = options.beforeUnmount;
+	let prevBeforeDiff = options.beforeDiff;
+	let prevAfterDiff = options.afterDiff;
+
+	options.beforeDiff = (vnode) => {
+		vnode.startTime = now();
+		if (prevBeforeDiff!=null) prevBeforeDiff(vnode);
+	};
+
+	options.afterDiff = (vnode) => {
+		vnode.endTime = now();
+		if (prevAfterDiff!=null) prevAfterDiff(vnode);
+	};
 
 	options.commitRoot = catchErrors((vnode) => {
 		// Call previously defined hook
@@ -129,3 +136,15 @@ export function initDevTools() {
 		onCommitUnmount(vnode);
 	});
 }
+
+/**
+ * Get current timestamp in ms. Used for profiling.
+ * @returns {number}
+ */
+export let now = Date.now;
+
+try {
+	/* istanbul ignore else */
+	now = performance.now.bind(performance);
+}
+catch (e) {}

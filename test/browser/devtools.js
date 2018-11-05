@@ -374,11 +374,13 @@ describe('devtools', () => {
 	});
 
 	it('should not initialize hook if __REACT_DEVTOOLS_GLOBAL_HOOK__ is not set', () => {
-		options.enableProfiling = false;
+		delete options.beforeDiff;
+		delete options.afterDiff;
 		delete window.__REACT_DEVTOOLS_GLOBAL_HOOK__;
 
 		initDevTools();
-		expect(options.enableProfiling).to.equal(false);
+		expect(options.beforeDiff).to.equal(undefined);
+		expect(options.afterDiff).to.equal(undefined);
 	});
 
 	it('should not throw if the root is null', () => {

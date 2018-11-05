@@ -147,12 +147,14 @@ declare namespace preact {
 	 * Global options for preact
 	 */
 	interface Options {
-		/** Collect profiling data for each `vnode` if enabled */
-		enableProfiling?: boolean;
 		/** Attach a hook that is invoked after a tree was mounted or was updated. */
 		commitRoot?(vnode: VNode): void;
 		/** Attach a hook that is invoked immediately before a component is unmounted. */
 		beforeUnmount?(vnode: VNode): void;
+		/** Attach a hook that is invoked before a vnode is diffed */
+		beforeDiff?(vnode: VNode): void;
+		/** Attach a hook that is invoked after a vnode has rendered */
+		afterDiff?(vnode: VNode): void;
 	}
 
 	const options: Options;
