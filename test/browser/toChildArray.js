@@ -71,7 +71,7 @@ describe('props.children', () => {
 
 		expect(children).to.be.an('array');
 		expect(children).to.have.lengthOf(1);
-		expect(children[0].tag).to.be.null;
+		expect(children[0].type).to.be.null;
 		expect(children[0].text).to.equal('text');
 		expect(scratch.innerHTML).to.equal('<div>text</div>');
 	});
@@ -81,7 +81,7 @@ describe('props.children', () => {
 
 		expect(children).to.be.an('array');
 		expect(children).to.have.lengthOf(1);
-		expect(children[0].tag).to.be.null;
+		expect(children[0].type).to.be.null;
 		expect(children[0].text).to.equal('1');
 		expect(scratch.innerHTML).to.equal('<div>1</div>');
 	});
@@ -91,7 +91,7 @@ describe('props.children', () => {
 
 		expect(children).to.be.an('array');
 		expect(children).to.have.lengthOf(1);
-		expect(children[0].tag).to.equal('span');
+		expect(children[0].type).to.equal('span');
 		expect(scratch.innerHTML).to.equal('<div><span></span></div>');
 	});
 
@@ -100,7 +100,7 @@ describe('props.children', () => {
 
 		expect(children).to.be.an('array');
 		expect(children).to.have.lengthOf(1);
-		expect(children[0].tag).to.equal(Bar);
+		expect(children[0].type).to.equal(Bar);
 		expect(scratch.innerHTML).to.equal('<div><span>Bar</span></div>');
 	});
 
@@ -108,12 +108,12 @@ describe('props.children', () => {
 		render(<Foo>0<span /><input /><div />1</Foo>, scratch);
 
 		expect(children).to.be.an('array');
-		expect(children[0].tag).to.equal(null);
+		expect(children[0].type).to.equal(null);
 		expect(children[0].text).to.equal('0');
-		expect(children[1].tag).to.equal('span');
-		expect(children[2].tag).to.equal('input');
-		expect(children[3].tag).to.equal('div');
-		expect(children[4].tag).to.equal(null);
+		expect(children[1].type).to.equal('span');
+		expect(children[2].type).to.equal('input');
+		expect(children[3].type).to.equal('div');
+		expect(children[4].type).to.equal(null);
 		expect(children[4].text).to.equal('1');
 		expect(scratch.innerHTML).to.equal(`<div>0<span></span><input><div></div>1</div>`);
 	});
@@ -147,11 +147,11 @@ describe('props.children', () => {
 			let actualChild = children[i];
 
 			if (typeof originalChild == 'string' || typeof originalChild == 'number') {
-				expect(actualChild.tag).to.be.null;
+				expect(actualChild.type).to.be.null;
 				expect(actualChild.text).to.equal(originalChild);
 			}
 			else {
-				expect(actualChild.tag).to.equal(originalChild.tag);
+				expect(actualChild.type).to.equal(originalChild.type);
 			}
 		}
 	});
@@ -177,7 +177,7 @@ describe('props.children', () => {
 		expect(scratch.innerHTML).to.equal('<div>0123456789</div>');
 
 		for (let i = 0; i < flatList.length; i++) {
-			expect(children[i].tag).to.be.null;
+			expect(children[i].type).to.be.null;
 			expect(children[i].text).to.equal(flatList[i]);
 		}
 	});
