@@ -5,9 +5,9 @@ import { coerceToVNode } from '../create-element';
  * Diff the children of a virtual node
  * @param {import('../internal').PreactElement} dom The DOM element whose
  * children are being diffed
- * @param {Array<import('../internal').VNode>} newVNodeChildren The new virtual
+ * @param {Array<import('../internal').VNode>} children The new virtual
  * children
- * @param {Array<import('../internal').VNode>} oldVNodeChildren The old virtual
+ * @param {Array<import('../internal').VNode>} oldChildren The old virtual
  * children
  * @param {object} context The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
@@ -19,25 +19,25 @@ import { coerceToVNode } from '../create-element';
  * @param {import('../internal').VNode} parentVNode Used to set `_lastDomChild`
  * pointer to keep track of our current position
  */
-export function diffChildren(dom, newVNodeChildren, oldVNodeChildren, context, isSvg, excessDomChildren, mounts, ancestorComponent, parentVNode) {
+export function diffChildren(dom, children, oldChildren, context, isSvg, excessDomChildren, mounts, ancestorComponent, parentVNode) {
 	let childVNode, i, j, p, index, oldVNode, newDom,
-		oldChildrenLength = oldVNodeChildren.length,
+		oldChildrenLength = oldChildren.length,
 		childDom = typeof parentVNode.type=='number' ? parentVNode._dom : dom.firstChild,
 		nextDom, lastDom, sibDom;
 
-	for (i=0; i<newVNodeChildren.length; i++) {
-		childVNode = newVNodeChildren[i] = coerceToVNode(newVNodeChildren[i]);
+	for (i=0; i<children.length; i++) {
+		childVNode = children[i] = coerceToVNode(children[i]);
 		oldVNode = index = null;
 
 		// Check if we find a corresponding element in oldChildren and store the
 		// index where the element was found.
-		p = oldVNodeChildren[i];
+		p = oldChildren[i];
 		if (p != null && (childVNode.key==null && p.key==null ? (childVNode.type === p.type) : (childVNode.key === p.key))) {
 			index = i;
 		}
 		else {
 			for (j=0; j<oldChildrenLength; j++) {
-				p = oldVNodeChildren[j];
+				p = oldChildren[j];
 				if (p!=null) {
 					if (childVNode.key==null && p.key==null ? (childVNode.type === p.type) : (childVNode.key === p.key)) {
 						index = j;
@@ -51,8 +51,8 @@ export function diffChildren(dom, newVNodeChildren, oldVNodeChildren, context, i
 		// and delete it from the array. That way the next iteration can skip this
 		// element.
 		if (index!=null) {
-			oldVNode = oldVNodeChildren[index];
-			oldVNodeChildren[index] = null;
+			oldVNode = oldChildren[index];
+			oldChildren[index] = null;
 		}
 
 		nextDom = childDom!=null && childDom.nextSibling;
@@ -75,7 +75,7 @@ export function diffChildren(dom, newVNodeChildren, oldVNodeChildren, context, i
 					j = 0;
 					while ((sibDom=sibDom.nextSibling) && j++<oldChildrenLength/2) {
 						if (sibDom===newDom) {
-							oldVNodeChildren[index] = childDom._prevVNode;
+							oldChildren[index] = childDom._prevVNode;
 							break outer;
 						}
 					}
@@ -91,5 +91,5 @@ export function diffChildren(dom, newVNodeChildren, oldVNodeChildren, context, i
 	if (excessDomChildren!=null) for (i=excessDomChildren.length; i--; ) excessDomChildren[i].remove();
 
 	// Remove remaining oldChildren if there are any.
-	for (i=oldVNodeChildren.length; i--; ) if (oldVNodeChildren[i]!=null) unmount(oldVNodeChildren[i], ancestorComponent);
+	for (i=oldChildren.length; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
 }
