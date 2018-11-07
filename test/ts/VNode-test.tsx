@@ -5,6 +5,7 @@ import {
 	Component,
 	FunctionalComponent,
 	ComponentConstructor,
+	AnyComponent
 } from "../../src/preact";
 
 class SimpleComponent extends Component<{}, {}> {
@@ -16,6 +17,9 @@ class SimpleComponent extends Component<{}, {}> {
 }
 
 const SimpleFunctionalComponent = () => <div />;
+
+const a: AnyComponent = SimpleComponent;
+const b: AnyComponent = SimpleFunctionalComponent;
 
 describe("VNode", () => {
 	it("is returned by h", () => {

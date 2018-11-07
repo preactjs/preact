@@ -69,7 +69,7 @@ declare namespace preact {
 	}
 
 	// Type alias for a component considered generally, whether stateless or stateful.
-	type AnyComponent<P = {}, S = {}> = FunctionalComponent<P> | Component<P, S>;
+	type AnyComponent<P = {}, S = {}> = FunctionalComponent<P> | ComponentConstructor<P, S>;
 
 	interface Component<P = {}, S = {}> {
 		componentWillMount?(): void;
@@ -101,14 +101,14 @@ declare namespace preact {
 		abstract render(props?: RenderableProps<P>, state?: Readonly<S>, context?: any): ComponentChild;
 	}
 
-	function h<P>(
-		node: ComponentFactory<P>,
-		params: Attributes & P | null,
-		...children: ComponentChildren[]
-	): VNode<any>;
 	function h(
 		node: string,
 		params: JSX.HTMLAttributes & JSX.SVGAttributes & Record<string, any> | null,
+		...children: ComponentChildren[]
+	): VNode<any>;
+	function h<P>(
+		node: ComponentFactory<P>,
+		params: Attributes & P | null,
 		...children: ComponentChildren[]
 	): VNode<any>;
 
