@@ -4,7 +4,7 @@ import { extend, applyRef } from '../util';
 import { enqueueRender } from '../render-queue';
 import { getNodeProps } from './index';
 import { diff, mounts, diffLevel, flushMounts, recollectNodeTree, removeChildren } from './diff';
-import { createComponent, recyclerComponents } from './component-recycler';
+import { createComponent, recycle } from './component-recycler';
 import { removeNode } from '../dom/index';
 
 /**
@@ -284,10 +284,9 @@ export function unmountComponent(component) {
 	else if (base) {
 		if (base[ATTR_KEY]!=null) applyRef(base[ATTR_KEY].ref, null);
 
-		component.nextBase = base;
-
 		removeNode(base);
-		recyclerComponents.push(component);
+
+		(options.recycle || recycle)(component, base);
 
 		removeChildren(base);
 	}

@@ -14,6 +14,8 @@
  * @property {(component: Component) => void} [beforeUnmount] Hook invoked immediately before a component is unmounted.
  * @property {(rerender: function) => void} [debounceRendering] Hook invoked whenever a rerender is requested. Can be used to debounce rerenders.
  * @property {(event: Event) => Event | void} [event] Hook invoked before any Preact event listeners. The return value (if any) replaces the native browser event given to event listeners
+ * @property {(component: Component, base: HTMLElement) => void} [recycle] Stores a component's base (element) for later reuse. Default implementation reuses per component type.
+ * @property {(component: Component) => HTMLElement | void} [reclaimRecycledBase] Finds a base (element) for a component type if available, and removes it from the pool of recycled component bases.
  */
 
 /** @type {Options}  */

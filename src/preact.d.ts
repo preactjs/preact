@@ -119,6 +119,8 @@ declare namespace preact {
 	var options: {
 		syncComponentUpdates?: boolean;
 		debounceRendering?: (render: () => void) => void;
+		recycle?: (component: Component<any, any>, base: HTMLElement) => void;
+		reclaimRecycledBase?: (component: ComponentFactory<any>) => HTMLElement|void|null;
 		vnode?: (vnode: VNode<any>) => void;
 		event?: (event: Event) => Event;
 	};

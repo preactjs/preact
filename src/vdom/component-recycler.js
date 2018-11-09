@@ -1,11 +1,39 @@
-import { Component } from '../component';
+import {Component} from '../component';
+import options from '../options';
 
 /**
  * Retains a pool of Components for re-use.
  * @type {Component[]}
  * @private
  */
-export const recyclerComponents = [];
+const recyclerComponents = [];
+
+/**
+ * Stores a component's base (element) for later reuse. Default implementation reuses per component type. Overridable via options.recycle
+ * @param {Component} component
+ * @param {HTMLElement} base
+ */
+export function recycle(component, base) {
+	component.nextBase = base;
+	recyclerComponents.push(component);
+}
+
+/**
+ * Finds a base (element) for a component type if available, and removes it from the pool of recycled component bases.. Otherwise null.
+ * Overridable iva options.findRecycledBase
+ * @param {function} component constructor
+ * @returns {HTMLElement|void}
+ */
+export function reclaimRecycledBase(componentCtor) {
+	let i = recyclerComponents.length;
+	while (i--) {
+		if (recyclerComponents[i].constructor===componentCtor) {
+			const base = recyclerComponents[i].nextBase;
+			recyclerComponents.splice(i, 1);
+			return base;
+		}
+	}
+}
 
 
 /**
@@ -17,7 +45,7 @@ export const recyclerComponents = [];
  * @returns {import('../component').Component}
  */
 export function createComponent(Ctor, props, context) {
-	let inst, i = recyclerComponents.length;
+	let inst;
 
 	if (Ctor.prototype && Ctor.prototype.render) {
 		inst = new Ctor(props, context);
@@ -30,13 +58,7 @@ export function createComponent(Ctor, props, context) {
 	}
 
 
-	while (i--) {
-		if (recyclerComponents[i].constructor===Ctor) {
-			inst.nextBase = recyclerComponents[i].nextBase;
-			recyclerComponents.splice(i, 1);
-			return inst;
-		}
-	}
+	inst.nextBase = (options.reclaimRecycledBase || reclaimRecycledBase)(Ctor);
 
 	return inst;
 }
