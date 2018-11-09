@@ -3,7 +3,7 @@ import { coerceToVNode } from '../create-element';
 
 /**
  * Diff the children of a virtual node
- * @param {import('../internal').PreactElement} node The DOM element whose
+ * @param {import('../internal').PreactElement} dom The DOM element whose
  * children are being diffed
  * @param {Array<import('../internal').VNode>} children The new virtual
  * children
@@ -11,35 +11,35 @@ import { coerceToVNode } from '../create-element';
  * children
  * @param {object} context The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
- * @param {Array<import('../internal').PreactElement>} excessChildren
+ * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} mounts The list of components
  * which have mounted
  * @param {import('../internal').Component} ancestorComponent The direct parent
  * component to the ones being diffed
- * @param {import('../internal').VNode} parentVNode Used to set `_lastSibling`
+ * @param {import('../internal').VNode} parentVNode Used to set `_lastDomChild`
  * pointer to keep track of our current position
  */
-export function diffChildren(node, children, oldChildren, context, isSvg, excessChildren, mounts, ancestorComponent, parentVNode) {
-	let child, i, j, p, index, old, newEl,
+export function diffChildren(dom, children, oldChildren, context, isSvg, excessDomChildren, mounts, ancestorComponent, parentVNode) {
+	let childVNode, i, j, p, index, oldVNode, newDom,
 		oldChildrenLength = oldChildren.length,
-		childNode = typeof parentVNode.type=='number' ? parentVNode._el : node.firstChild,
-		next, last, sib;
+		childDom = typeof parentVNode.type=='number' ? parentVNode._dom : dom.firstChild,
+		nextDom, lastDom, sibDom;
 
 	for (i=0; i<children.length; i++) {
-		child = children[i] = coerceToVNode(children[i]);
-		old = index = null;
+		childVNode = children[i] = coerceToVNode(children[i]);
+		oldVNode = index = null;
 
 		// Check if we find a corresponding element in oldChildren and store the
 		// index where the element was found.
 		p = oldChildren[i];
-		if (p != null && (child.key==null && p.key==null ? (child.type === p.type) : (child.key === p.key))) {
+		if (p != null && (childVNode.key==null && p.key==null ? (childVNode.type === p.type) : (childVNode.key === p.key))) {
 			index = i;
 		}
 		else {
 			for (j=0; j<oldChildrenLength; j++) {
 				p = oldChildren[j];
 				if (p!=null) {
-					if (child.key==null && p.key==null ? (child.type === p.type) : (child.key === p.key)) {
+					if (childVNode.key==null && p.key==null ? (childVNode.type === p.type) : (childVNode.key === p.key)) {
 						index = j;
 						break;
 					}
@@ -51,44 +51,44 @@ export function diffChildren(node, children, oldChildren, context, isSvg, excess
 		// and delete it from the array. That way the next iteration can skip this
 		// element.
 		if (index!=null) {
-			old = oldChildren[index];
+			oldVNode = oldChildren[index];
 			oldChildren[index] = null;
 		}
 
-		next = childNode!=null && childNode.nextSibling;
+		nextDom = childDom!=null && childDom.nextSibling;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		newEl = diff(old==null ? null : old._el, node, child, old, context, isSvg, false, excessChildren, mounts, ancestorComponent, parentVNode);
+		newDom = diff(oldVNode==null ? null : oldVNode._dom, dom, childVNode, oldVNode, context, isSvg, false, excessDomChildren, mounts, ancestorComponent, parentVNode);
 
 		// Only proceed if the vnode has not been unmounted by `diff()` above.
-		if (child!=null && newEl !=null) {
-			last = child._lastSibling;
+		if (childVNode!=null && newDom !=null) {
+			lastDom = childVNode._lastDomChild;
 
 			// Fragments or similar components have already been diffed at this point.
-			if (newEl!==last) {}
-			else if (old==null || newEl!=childNode || newEl.parentNode==null) {
-				outer: if (childNode==null || childNode.parentNode!==node) {
-					node.appendChild(newEl);
+			if (newDom!==lastDom) {}
+			else if (oldVNode==null || newDom!=childDom || newDom.parentNode==null) {
+				outer: if (childDom==null || childDom.parentNode!==dom) {
+					dom.appendChild(newDom);
 				}
 				else {
-					sib = childNode;
+					sibDom = childDom;
 					j = 0;
-					while ((sib=sib.nextSibling) && j++<oldChildrenLength/2) {
-						if (sib===newEl) {
-							oldChildren[index] = childNode._previousVTree;
+					while ((sibDom=sibDom.nextSibling) && j++<oldChildrenLength/2) {
+						if (sibDom===newDom) {
+							oldChildren[index] = childDom._prevVNode;
 							break outer;
 						}
 					}
-					node.insertBefore(newEl, childNode);
+					dom.insertBefore(newDom, childDom);
 				}
 			}
 
-			childNode = last!=null ? last.nextSibling : next;
+			childDom = lastDom!=null ? lastDom.nextSibling : nextDom;
 		}
 	}
 
 	// Remove children that are not part of any vnode. Only used by `hydrate`
-	if (excessChildren!=null) for (i=excessChildren.length; i--; ) excessChildren[i].remove();
+	if (excessDomChildren!=null) for (i=excessDomChildren.length; i--; ) excessDomChildren[i].remove();
 
 	// Remove remaining oldChildren if there are any.
 	for (i=oldChildren.length; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);

@@ -61,7 +61,7 @@ export function initDevTools() {
 			// We don't need this, but the devtools `attachRenderer` function relys
 			// it being there.
 			findHostInstanceByFiber(vnode) {
-				return vnode._el;
+				return vnode._dom;
 			},
 			// We don't need this, but the devtools `attachRenderer` function relys
 			// it being there.
@@ -126,7 +126,7 @@ export function initDevTools() {
 
 		// There are rare cases where this happens. I'm not sure why, but it seems
 		// to be triggered by quickly switching routes in our demo app
-		if (vnode==null || vnode._el==null) return;
+		if (vnode==null || vnode._dom==null) return;
 		onCommitRoot(vnode);
 	});
 
