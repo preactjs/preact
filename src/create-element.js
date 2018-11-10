@@ -19,7 +19,10 @@ export function createElement(type, props, children) {
 	if (children!=null) {
 		props.children = children;
 	}
-	if (type.defaultProps!=null) {
+
+	// "type" may be undefined during development. The check is needed so that
+	// we can display a nice error message with our debug helpers
+	if (type && type.defaultProps!=null) {
 		for (let i in type.defaultProps) {
 			if (props[i]===undefined) props[i] = type.defaultProps[i];
 		}
