@@ -23,7 +23,7 @@ export function diffChildren(dom, children, oldChildren, context, isSvg, excessD
 	let childVNode, i, j, p, index, oldVNode, newDom,
 		oldChildrenLength = oldChildren.length,
 		childDom = typeof parentVNode.type=='number' ? parentVNode._dom : dom.firstChild,
-		nextDom, lastDom, sibDom;
+		nextDom, lastDom, sibDom, focus;
 
 	for (i=0; i<children.length; i++) {
 		childVNode = children[i] = coerceToVNode(children[i]);
@@ -64,6 +64,12 @@ export function diffChildren(dom, children, oldChildren, context, isSvg, excessD
 		if (childVNode!=null && newDom !=null) {
 			lastDom = childVNode._lastDomChild;
 
+			// Store focus in case moving children around changes it. Note that we
+			// can't just check once for every tree, because we have no way to
+			// differentiate wether the focus was reset by the user in a lifecycle
+			// hook or by reordering dom nodes.
+			focus = document.activeElement;
+
 			// Fragments or similar components have already been diffed at this point.
 			if (newDom!==lastDom) {}
 			else if (oldVNode==null || newDom!=childDom || newDom.parentNode==null) {
@@ -81,6 +87,11 @@ export function diffChildren(dom, children, oldChildren, context, isSvg, excessD
 					}
 					dom.insertBefore(newDom, childDom);
 				}
+			}
+
+			// Restore focus if it was changed
+			if (focus!==document.activeElement) {
+				focus.focus();
 			}
 
 			childDom = lastDom!=null ? lastDom.nextSibling : nextDom;
