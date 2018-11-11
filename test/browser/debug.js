@@ -1,6 +1,7 @@
 import { createElement as h, options, render, createRef } from '../../src/index';
 import { setupScratch, teardown } from '../_util/helpers';
 import { serializeVNode } from '../../src/debug/debug';
+import * as PropTypes from 'prop-types';
 
 /** @jsx h */
 
@@ -86,6 +87,36 @@ describe('debug', () => {
 
 			expect(serializeVNode(<Foo foo={[1, 2, 3]} />))
 				.to.equal('<Foo foo="1,2,3" />');
+		});
+	});
+
+	describe('PropTypes', () => {
+		it('should fail if props don\'t match prop-types', () => {
+			function Foo(props) {
+				return <h1>{props.text}</h1>;
+			}
+
+			Foo.propTypes = {
+				text: PropTypes.string.isRequired
+			};
+
+			render(<Foo />, scratch);
+
+			expect(console.error).to.be.calledOnce;
+			expect(errors[0].includes('required')).to.equal(true);
+		});
+
+		it('should not print to console when types are correct', () => {
+			function Bar(props) {
+				return <h1>{props.text}</h1>;
+			}
+
+			Bar.propTypes = {
+				text: PropTypes.string.isRequired
+			};
+
+			render(<Bar text="foo" />, scratch);
+			expect(console.error).to.not.be.called;
 		});
 	});
 });

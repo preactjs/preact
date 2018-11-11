@@ -1,3 +1,5 @@
+import { checkPropTypes } from 'prop-types';
+import { getDisplayName } from '../devtools/custom';
 import { options } from '../index';
 
 /* eslint-disable no-console */
@@ -22,6 +24,11 @@ options.beforeDiff = vnode => {
 			`by createRef(), but got [${typeof vnode.ref}] instead\n` +
 			serializeVNode(vnode)
 		);
+	}
+
+	// Check prop-types if available
+	if (typeof vnode.type==='function' && vnode.type.propTypes) {
+		checkPropTypes(vnode.type.propTypes, vnode.props, getDisplayName(vnode), serializeVNode(vnode));
 	}
 
 	let keys = {};
