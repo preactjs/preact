@@ -330,6 +330,8 @@ declare namespace JSX {
 		onSearchCapture?: GenericEventHandler;
 		onSubmit?: GenericEventHandler;
 		onSubmitCapture?: GenericEventHandler;
+		onInvalid?: GenericEventHandler;
+		onInvalidCapture?: GenericEventHandler;
 
 		// Keyboard Events
 		onKeyDown?: KeyboardEventHandler;
