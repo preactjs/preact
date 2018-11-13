@@ -54,7 +54,7 @@ declare namespace preact {
 
 	type RenderableProps<P, RefType = any> = Readonly<
 		P & Attributes & { children?: ComponentChildren; ref?: Ref<RefType> }
-	>;
+		>;
 
 	interface FunctionalComponent<P = {}> {
 		(props: RenderableProps<P>, context?: any): VNode<any> | null;
@@ -63,7 +63,7 @@ declare namespace preact {
 	}
 
 	interface ComponentConstructor<P = {}, S = {}> {
-		new (props: P, context?: any): Component<P, S>;
+		new(props: P, context?: any): Component<P, S>;
 		displayName?: string;
 		defaultProps?: Partial<P>;
 	}
@@ -127,11 +127,11 @@ declare namespace preact {
 type Defaultize<Props, Defaults> =
 	// Distribute over unions
 	Props extends any
-		? 	// Make any properties included in Default optional
-			& Partial<Pick<Props, Extract<keyof Props, keyof Defaults>>>
-			// Include the remaining properties from Props
-			& Pick<Props, Exclude<keyof Props, keyof Defaults>>
-		: never;
+	? 	// Make any properties included in Default optional
+	& Partial<Pick<Props, Extract<keyof Props, keyof Defaults>>>
+	// Include the remaining properties from Props
+	& Pick<Props, Exclude<keyof Props, keyof Defaults>>
+	: never;
 
 declare global {
 	namespace JSX {
@@ -151,8 +151,8 @@ declare global {
 
 		type LibraryManagedAttributes<Component, Props> =
 			Component extends { defaultProps: infer Defaults }
-				? Defaultize<Props, Defaults>
-				: Props;
+			? Defaultize<Props, Defaults>
+			: Props;
 
 		interface SVGAttributes extends HTMLAttributes {
 			accentHeight?: number | string;
@@ -455,7 +455,7 @@ declare global {
 			onSearchCapture?: GenericEventHandler;
 			onSubmit?: GenericEventHandler;
 			onSubmitCapture?: GenericEventHandler;
-	                onInvalid?: GenericEventHandler;
+			onInvalid?: GenericEventHandler;
 
 			// Keyboard Events
 			onKeyDown?: KeyboardEventHandler;
