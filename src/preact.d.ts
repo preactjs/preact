@@ -99,6 +99,16 @@ declare namespace preact {
 		forceUpdate(callback?: () => void): void;
 
 		abstract render(props?: RenderableProps<P>, state?: Readonly<S>, context?: any): ComponentChild;
+
+		// Add these variables to avoid descendants shadowing them
+		private prevProps;
+		private prevContext;
+		private _dirty;
+		private _disable;
+		private nextBase;
+		private _component;
+		private __ref;
+		private __key;
 	}
 
 	function h(
