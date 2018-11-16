@@ -120,7 +120,7 @@ declare namespace preact {
 		syncComponentUpdates?: boolean;
 		debounceRendering?: (render: () => void) => void;
 		recycle?: (component: Component<any, any>, base: HTMLElement) => void;
-		reclaimRecycledBase?: (component: ComponentFactory<any>) => HTMLElement|void|null;
+		reclaimRecycledBase?: <P>(component: ComponentFactory<P>, props: Readonly<P>, context: any) => HTMLElement|void|null;
 		vnode?: (vnode: VNode<any>) => void;
 		event?: (event: Event) => Event;
 	};
