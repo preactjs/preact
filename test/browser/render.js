@@ -185,6 +185,27 @@ describe('render()', () => {
 			.and.matches(/position\s*:\s*relative\s*/);
 	});
 
+	it('string style should call setAttribute', () => {
+		const style = 'background-color: red;';
+		const spy = sinon.spy(Element.prototype, 'setAttribute');
+		render(<div style={style} />, scratch);
+		
+		expect(spy.firstCall.args).to
+			.deep.equal(['style', style]);
+		expect(scratch.childNodes[0]).to.have.deep.property('style.cssText')
+			.that.equals(style);
+		spy.restore()
+	});
+
+	it('object style prop should not call setAttribute', () => {
+		const style = { backgroundColor: 'papayawhip' };
+		const spy = sinon.spy(Element.prototype, 'setAttribute');
+		render(<div style={style} />, scratch);
+		
+		expect(spy).not.to.have.been.called;
+		spy.restore()
+	});
+
 	it('should only register on* functions as handlers', () => {
 		let click = () => {},
 			onclick = () => {};
