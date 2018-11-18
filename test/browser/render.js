@@ -194,7 +194,7 @@ describe('render()', () => {
 			.deep.equal(['style', style]);
 		expect(scratch.childNodes[0]).to.have.deep.property('style.cssText')
 			.that.equals(style);
-		spy.restore()
+		spy.restore();
 	});
 
 	it('object style prop should not call setAttribute', () => {
@@ -203,7 +203,7 @@ describe('render()', () => {
 		render(<div style={style} />, scratch);
 		
 		expect(spy).not.to.have.been.called;
-		spy.restore()
+		spy.restore();
 	});
 
 	it('should only register on* functions as handlers', () => {
