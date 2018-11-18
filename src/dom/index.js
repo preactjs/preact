@@ -35,7 +35,7 @@ export function setAccessor(node, name, old, value, isSvg) {
 		node.className = value || '';
 	}
 	else if (name==='style') {
-		if (!value || typeof value==='string' || typeof old==='string') {
+		if (!value || isString(value) || isString(old)) {
 			node.setAttribute('style', value || '');
 		}
 		if (value && typeof value==='object') {
