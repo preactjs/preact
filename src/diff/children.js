@@ -22,7 +22,7 @@ import { coerceToVNode } from '../create-element';
 export function diffChildren(dom, children, oldChildren, context, isSvg, excessDomChildren, mounts, ancestorComponent, parentVNode) {
 	let childVNode, i, j, p, index, oldVNode, newDom,
 		oldChildrenLength = oldChildren.length,
-		childDom = typeof parentVNode.type=='number' ? parentVNode._dom : dom.firstChild,
+		childDom = parentVNode.type===Fragment ? parentVNode._dom : dom.firstChild,
 		nextDom, lastDom, sibDom, focus;
 
 	for (i=0; i<children.length; i++) {

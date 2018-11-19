@@ -76,7 +76,7 @@ export function createRef() {
 	return {};
 }
 
-export const Fragment = 9;
+export function Fragment() {}
 
 /**
  * Coerce an untrusted value into a VNode
