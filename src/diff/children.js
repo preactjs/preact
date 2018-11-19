@@ -19,10 +19,9 @@ import { coerceToVNode } from '../create-element';
  * @param {import('../internal').VNode} parentVNode Used to set `_lastDomChild`
  * pointer to keep track of our current position
  */
-export function diffChildren(dom, children, oldChildren, context, isSvg, excessDomChildren, mounts, ancestorComponent, parentVNode) {
+export function diffChildren(dom, children, oldChildren, context, isSvg, excessDomChildren, mounts, ancestorComponent, parentVNode, childDom) {
 	let childVNode, i, j, p, index, oldVNode, newDom,
 		oldChildrenLength = oldChildren.length,
-		childDom = parentVNode.type===Fragment ? parentVNode._dom : dom.firstChild,
 		nextDom, lastDom, sibDom, focus;
 
 	for (i=0; i<children.length; i++) {
