@@ -1,10 +1,11 @@
-import { createElement, cloneElement, Component as CevicheComponent, render } from 'ceviche';
+import { options, createElement, cloneElement, Component as CevicheComponent, render } from 'ceviche';
 
-export function h(...args) {
-	let vnode = createElement(...args);
+options.vnode = vnode => {
+	vnode.nodeName = vnode.type;
 	vnode.attributes = vnode.props;
-	return vnode;
-}
+	vnode.children = vnode._children || [].concat(vnode.props.children || []);
+};
+
 
 function asArray(arr) {
 	return Array.isArray(arr) ? arr : [arr];
@@ -30,4 +31,4 @@ export function Component (props, context) {
 }
 Component.prototype = new CevicheComponent();
 
-export { createElement, cloneElement, render };
+export { createElement, createElement as h, cloneElement, render };
