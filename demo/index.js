@@ -47,7 +47,7 @@ class DevtoolsWarning extends Component {
 }
 
 class App extends Component {
-	render() {
+	render({ url }) {
 		return (
 			<div class="app">
 				<header>
@@ -63,7 +63,7 @@ class App extends Component {
 					</nav>
 				</header>
 				<main>
-					<Router>
+					<Router url={url}>
 						<Home path="/" />
 						<Reorder path="/reorder" />
 						<div path="/spiral">
@@ -90,9 +90,8 @@ class App extends Component {
 }
 
 
-// skip hydrate
-
-document.body.innerHTML = renderToString(<App />);
+document.body.innerHTML = renderToString(<App url={location.href.match(/[#&]ssr/) ? undefined : '/'} />);
+// document.body.firstChild.setAttribute('is-ssr', 'true');
 
 if (String(localStorage.LOG)==='true' || location.href.match(/logger/)){
 	installLogger();

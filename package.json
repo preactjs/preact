@@ -97,6 +97,7 @@
     "microbundle": "^0.7.0",
     "mocha": "^5.2.0",
     "npm-run-all": "^4.0.0",
+    "preact-render-to-string": "^4.1.0",
     "sinon": "^6.1.3",
     "sinon-chai": "^3.0.0",
     "typescript": "^3.0.1",
