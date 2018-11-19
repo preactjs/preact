@@ -38,7 +38,7 @@ export default function logger() {
 	logCall(Element.prototype, 'setAttributeNS');
 	logCall(Element.prototype, 'removeAttribute');
 	logCall(Element.prototype, 'removeAttributeNS');
-	let d = Object.getOwnPropertyDescriptor(Node.prototype, 'data');
+	let d = Object.getOwnPropertyDescriptor(CharacterData.prototype, 'data') || Object.getOwnPropertyDescriptor(Node.prototype, 'data');
 	Object.defineProperty(Text.prototype, 'data', {
 		get() {
 			let value = d.get.call(this);
