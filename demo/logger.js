@@ -61,7 +61,7 @@ export default function logger() {
 		root.tableBody = document.createElement('tbody');
 		root.appendChild(root.tableBody);
 		root.appendChild(header);
-		document.body.appendChild(root);
+		document.documentElement.appendChild(root);
 		lock = false;
 	}
 
