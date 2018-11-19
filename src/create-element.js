@@ -86,7 +86,7 @@ export const Fragment = 9;
  * @returns {import('./internal').VNode}
  */
 export function coerceToVNode(possibleVNode) {
-	if (typeof possibleVNode === 'boolean') return null;
+	if (possibleVNode == null || typeof possibleVNode === 'boolean') return null;
 	if (typeof possibleVNode === 'string' || typeof possibleVNode === 'number') {
 		return createVNode(null, EMPTY_OBJ, possibleVNode, null, null);
 	}
@@ -96,7 +96,7 @@ export function coerceToVNode(possibleVNode) {
 	}
 
 	// Clone vnode if it has already been used. ceviche/#57
-	if (possibleVNode!=null && possibleVNode._dom!=null) {
+	if (possibleVNode._dom!=null) {
 		return createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.text, possibleVNode.key, null);
 	}
 
