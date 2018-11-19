@@ -71,7 +71,11 @@ export function diffChildren(dom, children, oldChildren, context, isSvg, excessD
 
 			// Fragments or similar components have already been diffed at this point.
 			if (newDom!==lastDom) {}
-			else if (oldVNode==null || newDom!=childDom || newDom.parentNode==null) {
+			else if (excessDomChildren==oldVNode || newDom!=childDom || newDom.parentNode==null) {
+				// NOTE: excessDomChildren==oldVNode above:
+				// This is a compression of excessDomChildren==null && oldVNode==null!
+				// The values only have the same type when `null`.
+
 				outer: if (childDom==null || childDom.parentNode!==dom) {
 					dom.appendChild(newDom);
 				}
