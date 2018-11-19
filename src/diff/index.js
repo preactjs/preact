@@ -329,7 +329,7 @@ function getVNodeChildren(vnode) {
  * @param {Array<import('../index').ComponentChild>} [flattened] An flat array of children to modify
  */
 export function toChildArray(children, flattened) {
-	flattened = flattened || [];
+	if (flattened === undefined) flattened = [];
 	if (children==null || typeof children === 'boolean') {}
 	else if (Array.isArray(children)) {
 		for (let i=0; i < children.length; i++) {
@@ -337,8 +337,7 @@ export function toChildArray(children, flattened) {
 		}
 	}
 	else {
-		children = coerceToVNode(children);
-		flattened.push(children);
+		flattened.push(coerceToVNode(children));
 	}
 
 	return flattened;
