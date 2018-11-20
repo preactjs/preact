@@ -156,11 +156,11 @@ describe('hydrate()', () => {
 
 		hydrate((
 			<List>
+				<ListItem>1</ListItem>
 				<Fragment>
-					<ListItem>1</ListItem>
 					<ListItem>2</ListItem>
+					<ListItem>3</ListItem>
 				</Fragment>
-				<ListItem>3</ListItem>
 				<ListItem>4</ListItem>
 			</List>
 		), scratch);
