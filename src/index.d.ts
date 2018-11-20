@@ -147,6 +147,8 @@ declare namespace preact {
 	 * Global options for preact
 	 */
 	interface Options {
+		/** Attach a hook that is invoked whenever a VNode is created */
+		vnode(vnode: VNode): void;
 		/** Attach a hook that is invoked after a tree was mounted or was updated. */
 		commitRoot?(vnode: VNode): void;
 		/** Attach a hook that is invoked immediately before a component is unmounted. */
