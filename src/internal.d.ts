@@ -8,7 +8,9 @@ export interface FunctionalComponent<P = {}> extends preact.FunctionalComponent<
 export type ComponentFactory<P> = preact.ComponentConstructor<P> | FunctionalComponent<P>;
 
 export interface PreactElement extends Element {
-	_prevVNode?: VNode<any>
+	_prevVNode?: VNode<any>;
+	/** Event listeners to support event delegation */
+	_listeners: Record<string, (e: Event) => void>;
 
 	// Preact uses this attribute to detect SVG nodes
 	ownerSVGElement?: SVGElement;
