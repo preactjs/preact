@@ -18,6 +18,8 @@ import { coerceToVNode, Fragment } from '../create-element';
  * component to the ones being diffed
  * @param {import('../internal').VNode} parentVNode Used to set `_lastDomChild`
  * pointer to keep track of our current position
+ * @param {import('../internal').PreactElement} childDom The DOM element to use when
+ * diffing the current vnode child
  */
 export function diffChildren(dom, children, oldChildren, context, isSvg, excessDomChildren, mounts, ancestorComponent, parentVNode, childDom) {
 	let childVNode, i, j, p, index, oldVNode, newDom,
