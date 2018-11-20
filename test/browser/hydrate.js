@@ -4,7 +4,7 @@ import { ul, li, div } from '../_util/dom';
 
 /** @jsx createElement */
 
-describe.only('hydrate()', () => {
+describe('hydrate()', () => {
 	let scratch;
 
 	const List = ({ children }) => <ul>{children}</ul>;
@@ -147,7 +147,8 @@ describe.only('hydrate()', () => {
 		const html = ul([
 			li('1'),
 			li('2'),
-			li('3')
+			li('3'),
+			li('4')
 		].join(''));
 
 		scratch.innerHTML = html;
@@ -160,6 +161,7 @@ describe.only('hydrate()', () => {
 					<ListItem>2</ListItem>
 				</Fragment>
 				<ListItem>3</ListItem>
+				<ListItem>4</ListItem>
 			</List>
 		), scratch);
 
@@ -172,7 +174,8 @@ describe.only('hydrate()', () => {
 			ul([
 				li('1'),
 				li('2'),
-				li('3')
+				li('3'),
+				li('4')
 			].join('')),
 			div('sibling')
 		].join('');
@@ -188,6 +191,7 @@ describe.only('hydrate()', () => {
 						<ListItem>2</ListItem>
 					</Fragment>
 					<ListItem>3</ListItem>
+					<ListItem>4</ListItem>
 				</List>
 				<div>sibling</div>
 			</Fragment>
