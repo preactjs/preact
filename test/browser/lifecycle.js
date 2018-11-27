@@ -537,6 +537,7 @@ describe('Lifecycle methods', () => {
 
 			render(<Stateful />, scratch);
 
+			// Verify captured object references didn't get mutated
 			expect(componentState).to.deep.equal({ key: 'value' });
 			expect(stateConstant).to.deep.equal({});
 		});
@@ -578,6 +579,7 @@ describe('Lifecycle methods', () => {
 			setState({ value: 10 });
 			rerender();
 
+			// Verify captured object references didn't get mutated
 			expect(capturedStates).to.deep.equal([
 				{},
 				{ value: 1 },
