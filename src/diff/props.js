@@ -66,8 +66,13 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		let nameLower = name.toLowerCase();
 		name = (nameLower in dom ? nameLower : name).substring(2);
 
-		dom.removeEventListener(name, oldValue, useCapture);
-		dom.addEventListener(name, value, useCapture);
+		if (value) {
+			if (!oldValue) dom.addEventListener(name, eventProxy, useCapture);
+		}
+		else {
+			dom.removeEventListener(name, eventProxy, useCapture);
+		}
+		(dom._listeners || (dom._listeners = {}))[name] = value;
 	}
 	else if (name!=='list' && !isSvg && (name in dom)) {
 		dom[name] = value==null ? '' : value;
@@ -78,4 +83,13 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	else if (typeof value!=='function') {
 		dom.setAttribute(name, value);
 	}
+}
+
+/**
+ * Proxy an event to hooked event handlers
+ * @param {Event} e The event object from the browser
+ * @private
+ */
+function eventProxy(e) {
+	return this._listeners[e.type](e);
 }
