@@ -21,6 +21,7 @@
     "transpile": "npm-run-all transpile:main transpile:esm transpile:devtools transpile:debug",
     "optimize": "uglifyjs dist/preact.dev.js -c conditionals=false,sequences=false,loops=false,join_vars=false,collapse_vars=false --pure-funcs=Object.defineProperty --mangle-props --mangle-regex=\"/^(_|normalizedNodeName|nextBase|prev[CPS]|_parentC)/\" --name-cache config/properties.json -b width=120,quote_style=3 -o dist/preact.js -p relative --in-source-map dist/preact.dev.js.map --source-map dist/preact.js.map",
     "minify": "uglifyjs dist/preact.js -c collapse_vars,evaluate,screw_ie8,unsafe,loops=false,keep_fargs=false,pure_getters,unused,dead_code -m -o dist/preact.min.js -p relative --in-source-map dist/preact.js.map --source-map dist/preact.min.js.map",
+    "prepare": "npm run build",
     "strip:main": "jscodeshift --run-in-band -s -t config/codemod-strip-tdz.js dist/preact.dev.js && jscodeshift --run-in-band -s -t config/codemod-const.js dist/preact.dev.js && jscodeshift --run-in-band -s -t config/codemod-let-name.js dist/preact.dev.js",
     "strip:esm": "jscodeshift --run-in-band -s -t config/codemod-strip-tdz.js dist/preact.mjs && jscodeshift --run-in-band -s -t config/codemod-const.js dist/preact.mjs && jscodeshift --run-in-band -s -t config/codemod-let-name.js dist/preact.mjs",
     "strip": "npm-run-all strip:main strip:esm",
