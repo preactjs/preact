@@ -72,12 +72,11 @@ export function renderComponent(component, props, context, renderMode, mountAll,
 		initialBase = isUpdate || nextBase,
 		initialChildComponent = component._component,
 		skip = false,
-		rendered, inst, cbase,
-		getDerived = component.constructor.getDerivedStateFromProps;
+		rendered, inst, cbase;
 
-	if (getDerived) state = extend(
+	if (component.constructor.getDerivedStateFromProps) state = extend(
 		extend({}, state),
-		getDerived(props, state)
+		component.constructor.getDerivedStateFromProps(props, state)
 	);
 
 	// if updating
@@ -94,7 +93,7 @@ export function renderComponent(component, props, context, renderMode, mountAll,
 		component.state = state;
 		component.context = context;
 	}
-	else if (getDerived) component.state = state;
+	else if (component.constructor.getDerivedStateFromProps) component.state = state;
 
 	component.nextBase = null;
 	component._dirty = false;
