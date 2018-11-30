@@ -81,12 +81,11 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 		initialChildComponent = component._component,
 		skip = false,
 		snapshot = previousContext,
-		rendered, inst, cbase,
-		getDerived = component.constructor.getDerivedStateFromProps;
+		rendered, inst, cbase;
 
-	if (getDerived) state = extend(
+	if (component.constructor.getDerivedStateFromProps) state = extend(
 		extend({}, state),
-		getDerived(props, state)
+		component.constructor.getDerivedStateFromProps(props, state)
 	);
 
 	// if updating
@@ -105,12 +104,12 @@ export function renderComponent(component, renderMode, mountAll, isChild) {
 		component.state = state;
 		component.context = context;
 	}
-	else if (getDerived) component.state = state;
+	else if (component.constructor.getDerivedStateFromProps) component.state = state;
 
 	component.prevProps = component.prevContext = component.nextBase = null;
 	component._dirty = false;
 	component._nextState = state;
-	
+
 	if (!skip) {
 		rendered = component.render(props, state, context);
 
