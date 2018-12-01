@@ -1,6 +1,8 @@
 <p align="center">
 <a href="https://preactjs.com" target="_blank">
-<img alt="Preact" title="Preact" src="https://cdn.rawgit.com/developit/b4416d5c92b743dbaec1e68bc4c27cda/raw/3235dc508f7eb834ebf48418aea212a05df13db1/preact-logo-trans.svg" width="550">
+	
+![Preact](/logo.svg "Preact")
+
 </a>
 </p>
 <p align="center">Fast <b>3kB</b> alternative to React with the same modern API.</p>
@@ -66,6 +68,7 @@ Preact supports modern browsers and IE9+:
 - [**Preact Hacker News**](https://hn.kristoferbaxter.com) _([GitHub Project](https://github.com/kristoferbaxter/preact-hn))_
 - [**Play.cash**](https://play.cash) :notes: _([GitHub Project](https://github.com/feross/play.cash))_
 - [**BitMidi**](https://bitmidi.com/) 🎹 Wayback machine for free MIDI files _([GitHub Project](https://github.com/feross/bitmidi.com))_
+- [**Ultimate Guitar**](https://www.ultimate-guitar.com) 🎸speed boosted by Preact.
 - [**ESBench**](http://esbench.com) is built using Preact.
 - [**BigWebQuiz**](https://bigwebquiz.com) _([GitHub Project](https://github.com/jakearchibald/big-web-quiz))_
 - [**Nectarine.rocks**](http://nectarine.rocks) _([GitHub Project](https://github.com/developit/nectarine))_ :peach:
