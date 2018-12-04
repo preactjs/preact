@@ -44,15 +44,15 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 	let clearProcessingException;
 
 	try {
-		const isOldVNodeFragment = oldVNode.type === Fragment;
+		const isOldVNodeFragment = oldVNode.type===Fragment;
 
-		outer: if (isOldVNodeFragment || newType === Fragment) {
+		outer: if (isOldVNodeFragment || newType===Fragment) {
 			const oldVNodeChildren = oldVNode===EMPTY_OBJ ? EMPTY_ARR : !isOldVNodeFragment ? [oldVNode] : getVNodeChildren(oldVNode);
 
 			let childDom = oldVNode._dom;
-			if (excessDomChildren != null) {
+			if (excessDomChildren!=null) {
 				for (let i = 0; i < excessDomChildren.length; i++) {
-					if (excessDomChildren[i] != null) {
+					if (excessDomChildren[i]!=null) {
 						childDom = excessDomChildren[i];
 						break;
 					}
@@ -353,7 +353,7 @@ function getVNodeChildren(vnode) {
  * @param {Array<import('../index').ComponentChild>} [flattened] An flat array of children to modify
  */
 export function toChildArray(children, flattened) {
-	if (flattened === undefined) flattened = [];
+	if (flattened===undefined) flattened = [];
 	if (children==null || typeof children === 'boolean') {}
 	else if (Array.isArray(children)) {
 		for (let i=0; i < children.length; i++) {
