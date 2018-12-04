@@ -67,7 +67,7 @@ function createVNode(type, props, text, key, ref) {
 		endTime: -1
 	};
 
-	if (options && options.vnode) options.vnode(vnode);
+	if (options.vnode) options.vnode(vnode);
 
 	return vnode;
 }
