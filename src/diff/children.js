@@ -1,5 +1,5 @@
 import { diff, unmount } from './index';
-import { coerceToVNode } from '../create-element';
+import { coerceToVNode, Fragment } from '../create-element';
 
 /**
  * Diff the children of a virtual node
@@ -18,6 +18,8 @@ import { coerceToVNode } from '../create-element';
  * component to the ones being diffed
  * @param {import('../internal').VNode} parentVNode Used to set `_lastDomChild`
  * pointer to keep track of our current position
+ * @param {import('../internal').PreactElement} childDom The DOM element to use when
+ * diffing the current vnode child
  */
 export function diffChildren(dom, children, oldChildren, context, isSvg, excessDomChildren, mounts, ancestorComponent, parentVNode, childDom) {
 	let childVNode, i, j, p, index, oldVNode, newDom,
@@ -102,7 +104,7 @@ export function diffChildren(dom, children, oldChildren, context, isSvg, excessD
 	}
 
 	// Remove children that are not part of any vnode. Only used by `hydrate`
-	if (excessDomChildren!=null) for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) excessDomChildren[i].remove();
+	if (excessDomChildren!=null && parentVNode.type !== Fragment) for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) excessDomChildren[i].remove();
 
 	// Remove remaining oldChildren if there are any.
 	for (i=oldChildren.length; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);

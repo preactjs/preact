@@ -8,7 +8,7 @@ import options from '../options';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
- * @param {import('../internal').PreactElement} dom The DOM element representing
+ * @param {import('../internal').PreactElement | Text} dom The DOM element representing
  * the virtual nodes under diff
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
  * @param {import('../internal').VNode | null} newVNode The new virtual node
@@ -48,7 +48,18 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 
 		outer: if (isOldVNodeFragment || newType === Fragment) {
 			const oldVNodeChildren = oldVNode===EMPTY_OBJ ? EMPTY_ARR : !isOldVNodeFragment ? [oldVNode] : getVNodeChildren(oldVNode);
-			diffChildren(parentDom, getVNodeChildren(newVNode), oldVNodeChildren, context, isSvg, excessDomChildren, mounts, c, newVNode, oldVNode._dom);
+
+			let childDom = oldVNode._dom;
+			if (excessDomChildren != null) {
+				for (let i = 0; i < excessDomChildren.length; i++) {
+					if (excessDomChildren[i] != null) {
+						childDom = excessDomChildren[i];
+						break;
+					}
+				}
+			}
+
+			diffChildren(parentDom, getVNodeChildren(newVNode), oldVNodeChildren, context, isSvg, excessDomChildren, mounts, c, newVNode, childDom);
 
 			// The new dom element for fragments is the first child of the new tree
 			// When the first child of a Fragment is passed through `diff()`, it sets its dom

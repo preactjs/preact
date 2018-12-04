@@ -1,5 +1,6 @@
 import { createElement as h, render, Component, Fragment } from '../../src/index';
-import { setupScratch, teardown, setupRerender, span, div } from '../_util/helpers';
+import { setupScratch, teardown, setupRerender } from '../_util/helpers';
+import { span, div } from '../_util/dom';
 
 /** @jsx h */
 /* eslint-disable react/jsx-boolean-value */
