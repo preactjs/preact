@@ -1458,7 +1458,7 @@ describe('Lifecycle methods', () => {
 			expect(Foo.prototype.render).to.have.been.calledTwice;
 		});
 
-		it.skip('should be passed next props and state', () => {
+		it('should be passed next props and state', () => {
 
 			/** @type {() => void} */
 			let updateState;
