@@ -7,12 +7,13 @@ let { createElement: h, Component, render } = require(NODE_ENV==='production' ? 
 const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
 
 
-let now = typeof performance!=='undefined' && performance.now ? () => performance.now() : () => +new Date();
+// let now = typeof performance!=='undefined' && performance.now ? () => performance.now() : () => +new Date();
+if (typeof performance === 'undefined') window.performance = { now: () => +new Date() };
 
 function loop(iter, time) {
-	let start = now(),
+	let start = performance.now(),
 		count = 0;
-	while ( now()-start < time ) {
+	while ( performance.now()-start < time ) {
 		count++;
 		iter();
 	}
@@ -30,7 +31,7 @@ function benchmark(iter, callback) {
 	// warm
 	for (let i=100; i--; ) noop(), iter();
 
-	let count = 2,
+	let count = 4,
 		time = 500,
 		passes = 0,
 		noops = loop(noop, time),

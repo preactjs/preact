@@ -43,18 +43,6 @@ export function teardown(scratch) {
 	}
 }
 
-/**
- * A helper to generate innerHTML validation strings containing spans
- * @param {string} contents The contents of the span, as a string
- */
-export const span = contents => `<span>${contents}</span>`;
-
-/**
- * A helper to generate innerHTML validation strings containing divs
- * @param {string} contents The contents of the div, as a string
- */
-export const div = contents => `<div>${contents}</div>`;
-
 const Foo = () => 'd';
 export const getMixedArray = () => (
 	// Make it a function so each test gets a new copy of the array
@@ -71,6 +59,7 @@ export function serialize(obj) {
 	if (obj instanceof Text) return '#text';
 	if (obj instanceof Element) return `<${obj.localName}>${obj.textContent}`;
 	if (obj === document) return 'document';
+	if (typeof obj === 'string') return obj;
 	return Object.prototype.toString.call(obj).replace(/(^\[object |\]$)/g, '');
 }
 
@@ -78,8 +67,9 @@ let log = {};
 
 /**
  * Modify obj's original method to log calls and arguments on logger object
- * @param {object} obj
- * @param {string} method
+ * @template T
+ * @param {T} obj
+ * @param {keyof T} method
  */
 export function logCall(obj, method) {
 	let old = obj[method];

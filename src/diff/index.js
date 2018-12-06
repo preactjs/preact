@@ -8,7 +8,7 @@ import options from '../options';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
- * @param {import('../internal').PreactElement} dom The DOM element representing
+ * @param {import('../internal').PreactElement | Text} dom The DOM element representing
  * the virtual nodes under diff
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
  * @param {import('../internal').VNode | null} newVNode The new virtual node
@@ -44,10 +44,22 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 	let clearProcessingException;
 
 	try {
-		let isOldVNodeFragment;
-		outer: if ((isOldVNodeFragment = oldVNode.type === Fragment) || newType === Fragment) {
-			oldVNode = oldVNode===EMPTY_OBJ ? EMPTY_ARR : !isOldVNodeFragment ? [oldVNode] : getVNodeChildren(oldVNode);
-			diffChildren(parentDom, getVNodeChildren(newVNode), oldVNode, context, isSvg, excessDomChildren, mounts, c, newVNode);
+		const isOldVNodeFragment = oldVNode.type===Fragment;
+
+		outer: if (isOldVNodeFragment || newType===Fragment) {
+			const oldVNodeChildren = oldVNode===EMPTY_OBJ ? EMPTY_ARR : !isOldVNodeFragment ? [oldVNode] : getVNodeChildren(oldVNode);
+
+			let childDom = oldVNode._dom;
+			if (excessDomChildren!=null) {
+				for (let i = 0; i < excessDomChildren.length; i++) {
+					if (excessDomChildren[i]!=null) {
+						childDom = excessDomChildren[i];
+						break;
+					}
+				}
+			}
+
+			diffChildren(parentDom, getVNodeChildren(newVNode), oldVNodeChildren, context, isSvg, excessDomChildren, mounts, c, newVNode, childDom);
 
 			// The new dom element for fragments is the first child of the new tree
 			// When the first child of a Fragment is passed through `diff()`, it sets its dom
@@ -219,9 +231,24 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	isSvg = isSvg ? newVNode.type !== 'foreignObject' : newVNode.type === 'svg';
 
-	if (dom==null) {
-		newVNode._dom = dom = newVNode.type===null ? document.createTextNode(newVNode.text) : isSvg ? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type) : document.createElement(newVNode.type);
+	if (dom==null && excessDomChildren!=null) {
+		for (let i=0; i<excessDomChildren.length; i++) {
+			const child = excessDomChildren[i];
+			if (child!=null && (newVNode.type===null ? child.nodeType===3 : child.localName===newVNode.type)) {
+				dom = child;
+				excessDomChildren[i] = null;
+				break;
+			}
+		}
 	}
+
+	if (dom==null) {
+		dom = newVNode.type===null ? document.createTextNode(newVNode.text) : isSvg ? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type) : document.createElement(newVNode.type);
+
+		// we created a new parent, so none of the previously attached children can be reused:
+		excessDomChildren = null;
+	}
+	newVNode._dom = dom;
 
 	if (newVNode.type===null) {
 		if (dom===d && newVNode.text!==oldVNode.text) {
@@ -233,10 +260,20 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 		if (newVNode!==oldVNode) {
-			diffProps(dom, newVNode.props, oldVNode==EMPTY_OBJ ? EMPTY_OBJ : oldVNode.props, isSvg);
+			let oldProps = oldVNode.props;
+			// if we're hydrating, use the element's attributes as its current props:
+			if (oldProps==null) {
+				oldProps = {};
+				if (excessDomChildren!=null) {
+					for (let i=0; i<dom.attributes.length; i++) {
+						oldProps[dom.attributes[i].name] = dom.attributes[i].value;
+					}
+				}
+			}
+			diffProps(dom, newVNode.props, oldProps, isSvg);
 		}
 
-		diffChildren(dom, getVNodeChildren(newVNode), oldVNode==EMPTY_OBJ ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessDomChildren, mounts, ancestorComponent, newVNode);
+		diffChildren(dom, getVNodeChildren(newVNode), oldVNode==EMPTY_OBJ ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessDomChildren, mounts, ancestorComponent, newVNode, dom.firstChild);
 	}
 
 	return dom;
@@ -316,7 +353,7 @@ function getVNodeChildren(vnode) {
  * @param {Array<import('../index').ComponentChild>} [flattened] An flat array of children to modify
  */
 export function toChildArray(children, flattened) {
-	flattened = flattened || [];
+	if (flattened===undefined) flattened = [];
 	if (children==null || typeof children === 'boolean') {}
 	else if (Array.isArray(children)) {
 		for (let i=0; i < children.length; i++) {
@@ -324,8 +361,7 @@ export function toChildArray(children, flattened) {
 		}
 	}
 	else {
-		children = coerceToVNode(children);
-		flattened.push(children);
+		flattened.push(coerceToVNode(children));
 	}
 
 	return flattened;

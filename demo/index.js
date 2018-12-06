@@ -1,4 +1,6 @@
 import { createElement, render, hydrate, Component, options } from 'ceviche';
+import * as preact from 'preact';
+import renderToString from 'preact-render-to-string';
 import './style.scss';
 import { Router } from 'preact-router';
 import { Link } from 'preact-router/match';
@@ -12,7 +14,7 @@ import ProfilerDemo from './profiler';
 import KeyBug from './key_bug';
 import { initDevTools } from 'ceviche/devtools';
 
-let isBenchmark = /(\/spiral|\/pythagoras)/g.test(window.location.href);
+let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(window.location.href);
 if (!isBenchmark) {
 	// eslint-disable-next-line no-console
 	console.log('Enabling devtools');
@@ -45,7 +47,7 @@ class DevtoolsWarning extends Component {
 }
 
 class App extends Component {
-	render() {
+	render({ url }) {
 		return (
 			<div class="app">
 				<header>
@@ -61,7 +63,7 @@ class App extends Component {
 					</nav>
 				</header>
 				<main>
-					<Router>
+					<Router url={url}>
 						<Home path="/" />
 						<Reorder path="/reorder" />
 						<div path="/spiral">
@@ -87,29 +89,12 @@ class App extends Component {
 	}
 }
 
-document.body._previousVTree = (
-	<div class="app">
-		<header>
-			<nav>
-				<a href="/">Home SSR</a>
-				<a href="/reorder">Reorder</a>
-				<a href="/spiral">Spiral SSR</a>
-				<a href="/pythagoras">Pythagoras SSR</a>
-				<a href="/todo">ToDo</a>
-				<a href="/fragments">Fragments</a>
-				<a href="/key_bug">Key Bugs</a>
-				<a href="/profiler">Profiler</a>
-			</nav>
-		</header>
-		<main>
-			<h1>SSR Content</h1>
-		</main>
-	</div>
-);
 
-// skip hydrate
-render(<App />, document.body);
+document.body.innerHTML = renderToString(<App url={location.href.match(/[#&]ssr/) ? undefined : '/'} />);
+// document.body.firstChild.setAttribute('is-ssr', 'true');
 
-if (String(localStorage.LOG)==='true' || location.href.match(/logger/)) {
+if (String(localStorage.LOG)==='true' || location.href.match(/logger/)){
 	installLogger();
 }
+
+render(<App />, document.body);

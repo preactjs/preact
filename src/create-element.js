@@ -1,4 +1,5 @@
 import { EMPTY_OBJ } from './constants';
+import options from './options';
 
 /**
   * Create an virtual node (used for JSX)
@@ -51,14 +52,31 @@ export function createElement(type, props, children) {
 function createVNode(type, props, text, key, ref) {
 	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
 	// Do not inline into createElement and coerceToVNode!
-	return { type, props, text, key, ref, _children: null, _dom: null, _lastDomChild: null, _component: null, startTime: 0, endTime: -1  };
+	const vnode = {
+		type,
+		props,
+		text,
+		key,
+		ref,
+		_children: null,
+		_dom: null,
+		_lastDomChild: null,
+		_component: null,
+		// @todo - leading underscore here + custom mapping + devtools detection
+		startTime: 0,
+		endTime: -1
+	};
+
+	if (options.vnode) options.vnode(vnode);
+
+	return vnode;
 }
 
 export function createRef() {
 	return {};
 }
 
-export const Fragment = 9;
+export function Fragment() {}
 
 /**
  * Coerce an untrusted value into a VNode
@@ -68,7 +86,7 @@ export const Fragment = 9;
  * @returns {import('./internal').VNode}
  */
 export function coerceToVNode(possibleVNode) {
-	if (typeof possibleVNode === 'boolean') return null;
+	if (possibleVNode == null || typeof possibleVNode === 'boolean') return null;
 	if (typeof possibleVNode === 'string' || typeof possibleVNode === 'number') {
 		return createVNode(null, EMPTY_OBJ, possibleVNode, null, null);
 	}
@@ -78,7 +96,7 @@ export function coerceToVNode(possibleVNode) {
 	}
 
 	// Clone vnode if it has already been used. ceviche/#57
-	if (possibleVNode!=null && possibleVNode._dom!=null) {
+	if (possibleVNode._dom!=null) {
 		return createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.text, possibleVNode.key, null);
 	}
 
