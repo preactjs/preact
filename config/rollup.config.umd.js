@@ -1,8 +1,8 @@
 import config from './rollup.config';
 
-// ES output
-config.output.format = 'es';
-config.output.file = 'dist/preact.esm.js';
+// UMD output
+config.output.format = 'umd';
+config.output.file = 'dist/preact.umd.js';
 
 // remove memory() plugin
 config.plugins.splice(0, 1);
