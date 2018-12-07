@@ -1,7 +1,7 @@
 <p align="center">
 <a href="https://preactjs.com" target="_blank">
 	
-![Preact](/logo.svg "Preact")
+![Preact](https://raw.githubusercontent.com/developit/preact/8b0bcc927995c188eca83cba30fbc83491cc0b2f/logo.svg?sanitize=true "Preact")
 
 </a>
 </p>
