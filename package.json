@@ -7,6 +7,7 @@
   "module": "dist/preact.mjs",
   "dev:main": "dist/preact.dev.js",
   "minified:main": "dist/preact.min.js",
+  "unpkg": "dist/preact.min.js",
   "types": "dist/preact.d.ts",
   "scripts": {
     "clean": "rimraf dist/ devtools.js devtools.js.map debug.js debug.js.map test/ts/**/*.js",
