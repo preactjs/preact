@@ -5,7 +5,7 @@ import { useState } from '../../src';
 /** @jsx h */
 
 
-describe('useState', () => {
+describe('combinations', () => {
 
 	/** @type {HTMLDivElement} */
 	let scratch;
