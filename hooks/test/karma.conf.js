@@ -1,5 +1,7 @@
 /*eslint no-var:0, object-shorthand:0 */
 
+var path = require('path');
+
 var coverage = String(process.env.COVERAGE) === 'true',
 	ci = String(process.env.CI).match(/^(1|true)$/gi),
 	pullRequest = !String(process.env.TRAVIS_PULL_REQUEST).match(/^(0|false|undefined)$/gi),
@@ -93,8 +95,7 @@ module.exports = function(config) {
 		customLaunchers: sauceLabs ? sauceLabsLaunchers : localLaunchers,
 
 		files: [
-			{ pattern: 'polyfills.js', watched: false },
-			{ pattern: config.grep || '{browser,shared}/**.js', watched: false }
+			{ pattern: config.grep || '{browser,shared}/**.js' }
 		],
 
 		preprocessors: {
@@ -108,10 +109,6 @@ module.exports = function(config) {
 			mode: 'development',
 			devtool: 'inline-source-map',
 			module: {
-				noParse: [
-					/benchmark\.js$/
-				],
-
 				/* Transpile source and test files */
 				rules: [
 					{
@@ -128,7 +125,7 @@ module.exports = function(config) {
 				]
 			},
 			resolve: {
-				alias: { preact: '../../' },
+				alias: { preact: path.resolve(__dirname, '../../src') },
 				modules: [__dirname, 'node_modules']
 			},
 			plugins: [
