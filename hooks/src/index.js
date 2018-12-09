@@ -2,10 +2,12 @@ import { options } from 'preact';
 
 let currentIndex;
 let component;
+let oldBeforeRender = options.beforeRender;
 
-options.beforeRender = function (vnode) {
+options.beforeRender = vnode => {
 	component = vnode._component;
 	currentIndex = 0;
+	if (oldBeforeRender) oldBeforeRender(vnode)
 }
 
 const createHook = (create) => (...args) => {
