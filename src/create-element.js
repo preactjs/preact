@@ -61,10 +61,7 @@ function createVNode(type, props, text, key, ref) {
 		_children: null,
 		_dom: null,
 		_lastDomChild: null,
-		_component: null,
-		// @todo - leading underscore here + custom mapping + devtools detection
-		startTime: 0,
-		endTime: -1
+		_component: null
 	};
 
 	if (options.vnode) options.vnode(vnode);
