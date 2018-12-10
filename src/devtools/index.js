@@ -105,10 +105,17 @@ export function initDevTools() {
 	})();
 
 	// Store (possible) previous hooks so that we don't overwrite them
+	let prevVNodeHook = options.vnode;
 	let prevCommitRoot = options.commitRoot;
 	let prevBeforeUnmount = options.beforeUnmount;
 	let prevBeforeDiff = options.beforeDiff;
 	let prevAfterDiff = options.afterDiff;
+
+	options.vnode = (vnode) => {
+		vnode.startTime = 0;
+		vnode.endTime = -1;
+		if (prevVNodeHook) prevVNodeHook(vnode);
+	};
 
 	options.beforeDiff = (vnode) => {
 		vnode.startTime = now();
