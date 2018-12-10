@@ -10,7 +10,7 @@
   "types": "src/index.d.ts",
   "scripts": {
     "build": "microbundle build --raw",
-    "dev": "microbundle watch --format cjs,umd",
+    "dev": "microbundle watch --raw --format cjs,umd",
     "test": "npm-run-all lint build --parallel test:mocha test:karma test:ts",
     "test:flow": "flow check",
     "test:ts": "tsc -p test/ts/ && mocha --require babel-register test/ts/**/*-test.js",
