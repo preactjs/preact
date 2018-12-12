@@ -119,6 +119,9 @@ export default function logger(logStats, logConsole) {
 }
 
 /**
+ * Logging to the console significantly affects performance.
+ * Buffer calls to console and replay them at the end of the
+ * current stack
  * @extends {Console}
  */
 class ConsoleBuffer {
