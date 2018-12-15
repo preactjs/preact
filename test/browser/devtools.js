@@ -180,6 +180,15 @@ describe('devtools', () => {
 			expect(getDisplayName(h(Foo))).to.equal('Foo');
 		});
 
+		it('should prefer a function Component\'s displayName property', () => {
+			function Foo() {
+				return <div />;
+			}
+			Foo.displayName = 'Bar';
+
+			expect(getDisplayName(h(Foo))).to.equal('Bar');
+		});
+
 		it('should get class name', () => {
 			class Bar extends Component {
 				render() {
@@ -188,6 +197,29 @@ describe('devtools', () => {
 			}
 
 			expect(getDisplayName(h(Bar))).to.equal('Bar');
+		});
+
+		it('should prefer a class Component\'s displayName property', () => {
+			class Bar extends Component {
+				render() {
+					return <div />;
+				}
+			}
+			Bar.displayName = 'Foo';
+
+			expect(getDisplayName(h(Bar))).to.equal('Foo');
+		});
+
+		it('should get a Fragment\'s name', () => {
+			expect(getDisplayName(h(Fragment))).to.equal('Fragment');
+		});
+
+		it('should get text VNode name', () => {
+			let vnode = h('div', {}, ['text']);
+			let textVNode = vnode.props.children[0];
+
+			expect(textVNode).to.be.exist;
+			expect(getDisplayName(textVNode)).to.equal('#text');
 		});
 	});
 
@@ -409,6 +441,33 @@ describe('devtools', () => {
 		hook.helpers[rid] = {};
 
 		expect(spy).to.be.not.called;
+	});
+
+	it('should not override existing options', () => {
+		let vnodeSpy = sinon.spy();
+		let beforeDiffSpy = sinon.spy();
+		let afterDiffSpy = sinon.spy();
+		let commitRootSpy = sinon.spy();
+		let beforeUnmountSpy = sinon.spy();
+
+		options.vnode = vnodeSpy;
+		options.beforeDiff = beforeDiffSpy;
+		options.afterDiff = afterDiffSpy;
+		options.commitRoot = commitRootSpy;
+		options.beforeUnmount = beforeUnmountSpy;
+
+		initDevTools();
+
+		render(<div />, scratch);
+
+		expect(vnodeSpy, 'vnode').to.have.been.called;
+		expect(beforeDiffSpy, 'beforeDiff').to.have.been.called;
+		expect(afterDiffSpy, 'afterDiff').to.have.been.called;
+		expect(commitRootSpy, 'commitRoot').to.have.been.called;
+
+		render(null, scratch);
+
+		expect(beforeUnmountSpy, 'beforeUnmount').to.have.been.called;
 	});
 
 	describe('renderer', () => {
