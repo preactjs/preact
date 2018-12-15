@@ -68,14 +68,12 @@ function inspectChildren(children, inspect) {
 
 /**
  * Serialize a vnode tree to a string
- * @param {import('../index').VNode} vnode
+ * @param {import('../internal').VNode} vnode
  * @returns {string}
  */
 export function serializeVNode(vnode) {
-	let { type, props } = vnode;
-	if (typeof type==='function') {
-		type = type.name || type.displayName;
-	}
+	let { props } = vnode;
+	let name = getDisplayName(vnode);
 
 	let attrs = '';
 	if (props) {
@@ -98,7 +96,7 @@ export function serializeVNode(vnode) {
 	}
 
 	let children = props.children;
-	return `<${type}${attrs}${children && children.length
-		? '>..</'+type+'>'
+	return `<${name}${attrs}${children && children.length
+		? '>..</'+name+'>'
 		: ' />'}`;
 }

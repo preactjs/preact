@@ -1,4 +1,4 @@
-import { createElement as h, options, render, createRef } from '../../src/index';
+import { createElement as h, options, render, createRef, Component } from '../../src/index';
 import { setupScratch, teardown } from '../_util/helpers';
 import { serializeVNode } from '../../src/debug/debug';
 import * as PropTypes from 'prop-types';
@@ -59,6 +59,26 @@ describe('debug', () => {
 	});
 
 	describe('serializeVNode', () => {
+		it('should prefer a function component\'s displayName', () => {
+			function Foo() {
+				return <div />;
+			}
+			Foo.displayName = 'Bar';
+
+			expect(serializeVNode(<Foo />)).to.equal('<Bar />');
+		});
+
+		it('should prefer a class component\'s displayName', () => {
+			class Bar extends Component {
+				render() {
+					return <div />;
+				}
+			}
+			Bar.displayName = 'Foo';
+
+			expect(serializeVNode(<Bar />)).to.equal('<Foo />');
+		});
+
 		it('should serialize vnodes without children', () => {
 			expect(serializeVNode(<br />)).to.equal('<br />');
 		});
