@@ -93,8 +93,9 @@ class App extends Component {
 document.body.innerHTML = renderToString(<App url={location.href.match(/[#&]ssr/) ? undefined : '/'} />);
 // document.body.firstChild.setAttribute('is-ssr', 'true');
 
-if (String(localStorage.LOG)==='true' || location.href.match(/logger/)){
-	installLogger();
-}
+installLogger(
+	String(localStorage.LOG)==='true' || location.href.match(/logger/),
+	String(localStorage.CONSOLE)==='true' || location.href.match(/console/)
+);
 
 render(<App />, document.body);
