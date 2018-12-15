@@ -73,7 +73,7 @@ export function createRef() {
 	return {};
 }
 
-export function Fragment() {}
+export /* istanbul ignore next */ function Fragment() { }
 
 /**
  * Coerce an untrusted value into a VNode
