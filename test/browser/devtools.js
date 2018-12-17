@@ -1,9 +1,8 @@
 import { createElement as h, Fragment } from '../../src/create-element';
 import { render } from '../../src/render';
-import { assign } from '../../src/util';
 import { Component } from '../../src/component';
 import { getDisplayName, setIn, isRoot, getPatchedRoot, getData, patchRoot, shallowEqual, hasDataChanged, hasProfileDataChanged, getChildren } from '../../src/devtools/custom';
-import { setupScratch, setupRerender, teardown } from '../_util/helpers';
+import { setupScratch, setupRerender, teardown, clearOptions } from '../_util/helpers';
 import { initDevTools } from '../../src/devtools';
 import options from '../../src/options';
 import { Renderer } from '../../src/devtools/renderer';
@@ -127,17 +126,12 @@ describe('devtools', () => {
 	/** @type {MockHook} */
 	let hook;
 
-	let oldOptions;
-
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
-
-		oldOptions = assign({}, options);
+		clearOptions();
 
 		hook = createMockHook();
-		delete options.commitRoot;
-		delete options.beforeUnmount;
 
 		/** @type {import('../../src/internal').DevtoolsWindow} */
 		(window).__REACT_DEVTOOLS_GLOBAL_HOOK__ = hook;
@@ -164,7 +158,6 @@ describe('devtools', () => {
 		(console.error).restore();
 
 		delete /** @type {import('../../src/internal').DevtoolsWindow} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
-		assign(options, oldOptions);
 	});
 
 	describe('getDisplayName', () => {

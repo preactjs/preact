@@ -1,8 +1,7 @@
 import { createElement as h, options, render, createRef, Component } from '../../src/index';
-import { setupScratch, teardown } from '../_util/helpers';
+import { setupScratch, teardown, clearOptions } from '../_util/helpers';
 import { serializeVNode, initDebug } from '../../src/debug/debug';
 import * as PropTypes from 'prop-types';
-import { assign } from '../../src/util';
 
 /** @jsx h */
 
@@ -10,7 +9,6 @@ describe('debug', () => {
 	let scratch;
 	let errors = [];
 
-	let oldOptions;
 	let beforeDiffSpy;
 
 	beforeEach(() => {
@@ -18,8 +16,7 @@ describe('debug', () => {
 		scratch = setupScratch();
 		sinon.stub(console, 'error').callsFake(e => errors.push(e));
 
-		oldOptions = assign({}, options);
-
+		clearOptions();
 		beforeDiffSpy = sinon.spy();
 		options.beforeDiff = beforeDiffSpy;
 
@@ -31,8 +28,6 @@ describe('debug', () => {
 		/** @type {*} */
 		(console.error).restore();
 		teardown(scratch);
-
-		assign(options, oldOptions);
 	});
 
 	it('should call previous options', () => {
