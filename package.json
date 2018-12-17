@@ -9,6 +9,7 @@
   "minified:main": "dist/preact.min.js",
   "unpkg": "dist/preact.min.js",
   "types": "dist/preact.d.ts",
+  "browser": "dist/preact.umd.js",
   "scripts": {
     "clean": "rimraf dist/ devtools.js devtools.js.map debug.js debug.js.map test/ts/**/*.js",
     "copy-flow-definition": "copyfiles -f src/preact.js.flow dist",
