@@ -260,6 +260,31 @@ describe('keys', () => {
 		expect(getLog()).to.deep.equal({ '<ol>bcda.insertBefore(<li>a, <li>b)': 1 });
 	});
 
+	it('should reverse children effectively', () => {
+		const values = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal(values.join(''));
+
+		// reverse list
+		values.reverse();
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal(values.join(''));
+		expect(getLog()).to.deep.equal({
+			'<ol>abcdefghij.insertBefore(<li>j, <li>a)': 1,
+			'<ol>jabcdefghi.insertBefore(<li>i, <li>a)': 1,
+			'<ol>jiabcdefgh.insertBefore(<li>h, <li>a)': 1,
+			'<ol>jihabcdefg.insertBefore(<li>g, <li>a)': 1,
+			'<ol>jihgabcdef.appendChild(<li>e)': 1,
+			'<ol>jihgabcdfe.appendChild(<li>d)': 1,
+			'<ol>jihgabcfed.appendChild(<li>c)': 1,
+			'<ol>jihgabfedc.appendChild(<li>b)': 1,
+			'<ol>jihgafedcb.appendChild(<li>a)': 1
+		});
+	});
+
 	it.skip('should not preserve state when a component\'s keys are different', () => {
 		const Stateful = createStateful('Stateful');
 
