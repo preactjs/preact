@@ -1,4 +1,5 @@
-import { createElement as h, Component } from '../../src';
+import { createElement as h, Component, options } from '../../src';
+import { assign } from '../../src/util';
 
 /** @jsx h */
 
@@ -24,12 +25,27 @@ export function setupRerender() {
 	return () => Component.__test__drainQueue && Component.__test__drainQueue();
 }
 
+let oldOptions = null;
+export function clearOptions() {
+	oldOptions = assign({}, options);
+	delete options.vnode;
+	delete options.beforeDiff;
+	delete options.afterDiff;
+	delete options.commitRoot;
+	delete options.beforeUnmount;
+}
+
 /**
  * Teardown test environment and reset preact's internal state
  * @param {HTMLDivElement} scratch
  */
 export function teardown(scratch) {
 	scratch.parentNode.removeChild(scratch);
+
+	if (oldOptions != null) {
+		assign(options, oldOptions);
+		oldOptions = null;
+	}
 
 	if (Component.__test__drainQueue) {
 		// Flush any pending updates leftover by test

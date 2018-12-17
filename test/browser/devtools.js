@@ -1,9 +1,8 @@
 import { createElement as h, Fragment } from '../../src/create-element';
 import { render } from '../../src/render';
-import { assign } from '../../src/util';
 import { Component } from '../../src/component';
 import { getDisplayName, setIn, isRoot, getPatchedRoot, getData, patchRoot, shallowEqual, hasDataChanged, hasProfileDataChanged, getChildren } from '../../src/devtools/custom';
-import { setupScratch, setupRerender, teardown } from '../_util/helpers';
+import { setupScratch, setupRerender, teardown, clearOptions } from '../_util/helpers';
 import { initDevTools } from '../../src/devtools';
 import options from '../../src/options';
 import { Renderer } from '../../src/devtools/renderer';
@@ -127,17 +126,12 @@ describe('devtools', () => {
 	/** @type {MockHook} */
 	let hook;
 
-	let oldOptions;
-
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
-
-		oldOptions = assign({}, options);
+		clearOptions();
 
 		hook = createMockHook();
-		delete options.commitRoot;
-		delete options.beforeUnmount;
 
 		/** @type {import('../../src/internal').DevtoolsWindow} */
 		(window).__REACT_DEVTOOLS_GLOBAL_HOOK__ = hook;
@@ -164,7 +158,6 @@ describe('devtools', () => {
 		(console.error).restore();
 
 		delete /** @type {import('../../src/internal').DevtoolsWindow} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
-		assign(options, oldOptions);
 	});
 
 	describe('getDisplayName', () => {
@@ -180,6 +173,15 @@ describe('devtools', () => {
 			expect(getDisplayName(h(Foo))).to.equal('Foo');
 		});
 
+		it('should prefer a function Component\'s displayName property', () => {
+			function Foo() {
+				return <div />;
+			}
+			Foo.displayName = 'Bar';
+
+			expect(getDisplayName(h(Foo))).to.equal('Bar');
+		});
+
 		it('should get class name', () => {
 			class Bar extends Component {
 				render() {
@@ -188,6 +190,29 @@ describe('devtools', () => {
 			}
 
 			expect(getDisplayName(h(Bar))).to.equal('Bar');
+		});
+
+		it('should prefer a class Component\'s displayName property', () => {
+			class Bar extends Component {
+				render() {
+					return <div />;
+				}
+			}
+			Bar.displayName = 'Foo';
+
+			expect(getDisplayName(h(Bar))).to.equal('Foo');
+		});
+
+		it('should get a Fragment\'s name', () => {
+			expect(getDisplayName(h(Fragment))).to.equal('Fragment');
+		});
+
+		it('should get text VNode name', () => {
+			let vnode = h('div', {}, ['text']);
+			let textVNode = vnode.props.children[0];
+
+			expect(textVNode).to.be.exist;
+			expect(getDisplayName(textVNode)).to.equal('#text');
 		});
 	});
 
@@ -387,19 +412,31 @@ describe('devtools', () => {
 		expect(() => render(null, scratch)).to.not.throw();
 	});
 
-	it('should not overwrite existing commitRoot hook', () => {
-		let spy = sinon.spy();
-		let spy2 = sinon.spy();
-		options.commitRoot = spy;
-		options.beforeUnmount = spy2;
+	it('should not overwrite existing options', () => {
+		let vnodeSpy = sinon.spy();
+		let beforeDiffSpy = sinon.spy();
+		let afterDiffSpy = sinon.spy();
+		let commitRootSpy = sinon.spy();
+		let beforeUnmountSpy = sinon.spy();
+
+		options.vnode = vnodeSpy;
+		options.beforeDiff = beforeDiffSpy;
+		options.afterDiff = afterDiffSpy;
+		options.commitRoot = commitRootSpy;
+		options.beforeUnmount = beforeUnmountSpy;
 
 		initDevTools();
+
 		render(<div />, scratch);
 
-		expect(spy).to.be.calledOnce;
+		expect(vnodeSpy, 'vnode').to.have.been.called;
+		expect(beforeDiffSpy, 'beforeDiff').to.have.been.calledOnce;
+		expect(afterDiffSpy, 'afterDiff').to.have.been.calledOnce;
+		expect(commitRootSpy, 'commitRoot').to.have.been.calledOnce;
 
-		render(<span />, scratch);
-		expect(spy2).to.be.calledOnce;
+		render(null, scratch);
+
+		expect(beforeUnmountSpy, 'beforeUnmount').to.have.been.calledOnce;
 	});
 
 	it('should connect only once', () => {
