@@ -412,31 +412,7 @@ describe('devtools', () => {
 		expect(() => render(null, scratch)).to.not.throw();
 	});
 
-	it('should not overwrite existing commitRoot hook', () => {
-		let spy = sinon.spy();
-		let spy2 = sinon.spy();
-		options.commitRoot = spy;
-		options.beforeUnmount = spy2;
-
-		initDevTools();
-		render(<div />, scratch);
-
-		expect(spy).to.be.calledOnce;
-
-		render(<span />, scratch);
-		expect(spy2).to.be.calledOnce;
-	});
-
-	it('should connect only once', () => {
-		let rid = Object.keys(hook._renderers)[0];
-		let spy = sinon.spy(hook.helpers[rid], 'markConnected');
-		hook.helpers[rid] = {};
-		hook.helpers[rid] = {};
-
-		expect(spy).to.be.not.called;
-	});
-
-	it('should not override existing options', () => {
+	it('should not overwrite existing options', () => {
 		let vnodeSpy = sinon.spy();
 		let beforeDiffSpy = sinon.spy();
 		let afterDiffSpy = sinon.spy();
@@ -453,14 +429,23 @@ describe('devtools', () => {
 
 		render(<div />, scratch);
 
-		expect(vnodeSpy, 'vnode').to.have.been.called;
-		expect(beforeDiffSpy, 'beforeDiff').to.have.been.called;
-		expect(afterDiffSpy, 'afterDiff').to.have.been.called;
-		expect(commitRootSpy, 'commitRoot').to.have.been.called;
+		expect(vnodeSpy, 'vnode').to.have.been.calledOnce;
+		expect(beforeDiffSpy, 'beforeDiff').to.have.been.calledOnce;
+		expect(afterDiffSpy, 'afterDiff').to.have.been.calledOnce;
+		expect(commitRootSpy, 'commitRoot').to.have.been.calledOnce;
 
 		render(null, scratch);
 
-		expect(beforeUnmountSpy, 'beforeUnmount').to.have.been.called;
+		expect(beforeUnmountSpy, 'beforeUnmount').to.have.been.calledOnce;
+	});
+
+	it('should connect only once', () => {
+		let rid = Object.keys(hook._renderers)[0];
+		let spy = sinon.spy(hook.helpers[rid], 'markConnected');
+		hook.helpers[rid] = {};
+		hook.helpers[rid] = {};
+
+		expect(spy).to.be.not.called;
 	});
 
 	describe('renderer', () => {

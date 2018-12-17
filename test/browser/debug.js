@@ -32,7 +32,7 @@ describe('debug', () => {
 
 	it('should call previous options', () => {
 		render(<div />, scratch);
-		expect(beforeDiffSpy).to.have.been.called;
+		expect(beforeDiffSpy, 'beforeDiff').to.have.been.called;
 	});
 
 	it('should print an error on undefined component', () => {
