@@ -429,7 +429,7 @@ describe('devtools', () => {
 
 		render(<div />, scratch);
 
-		expect(vnodeSpy, 'vnode').to.have.been.calledOnce;
+		expect(vnodeSpy, 'vnode').to.have.been.called;
 		expect(beforeDiffSpy, 'beforeDiff').to.have.been.calledOnce;
 		expect(afterDiffSpy, 'afterDiff').to.have.been.calledOnce;
 		expect(commitRootSpy, 'commitRoot').to.have.been.calledOnce;
