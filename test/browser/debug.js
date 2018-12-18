@@ -1,6 +1,6 @@
-import { createElement as h, options, render, createRef } from '../../src/index';
-import { setupScratch, teardown } from '../_util/helpers';
-import { serializeVNode } from '../../src/debug/debug';
+import { createElement as h, options, render, createRef, Component } from '../../src/index';
+import { setupScratch, teardown, clearOptions } from '../_util/helpers';
+import { serializeVNode, initDebug } from '../../src/debug/debug';
 import * as PropTypes from 'prop-types';
 
 /** @jsx h */
@@ -9,10 +9,18 @@ describe('debug', () => {
 	let scratch;
 	let errors = [];
 
+	let beforeDiffSpy;
+
 	beforeEach(() => {
 		errors = [];
 		scratch = setupScratch();
 		sinon.stub(console, 'error').callsFake(e => errors.push(e));
+
+		clearOptions();
+		beforeDiffSpy = sinon.spy();
+		options.beforeDiff = beforeDiffSpy;
+
+		initDebug();
 	});
 
 	afterEach(() => {
@@ -22,8 +30,9 @@ describe('debug', () => {
 		teardown(scratch);
 	});
 
-	after(() => {
-		delete options.beforeDiff;
+	it('should call previous options', () => {
+		render(<div />, scratch);
+		expect(beforeDiffSpy, 'beforeDiff').to.have.been.called;
 	});
 
 	it('should print an error on undefined component', () => {
@@ -59,6 +68,26 @@ describe('debug', () => {
 	});
 
 	describe('serializeVNode', () => {
+		it('should prefer a function component\'s displayName', () => {
+			function Foo() {
+				return <div />;
+			}
+			Foo.displayName = 'Bar';
+
+			expect(serializeVNode(<Foo />)).to.equal('<Bar />');
+		});
+
+		it('should prefer a class component\'s displayName', () => {
+			class Bar extends Component {
+				render() {
+					return <div />;
+				}
+			}
+			Bar.displayName = 'Foo';
+
+			expect(serializeVNode(<Bar />)).to.equal('<Foo />');
+		});
+
 		it('should serialize vnodes without children', () => {
 			expect(serializeVNode(<br />)).to.equal('<br />');
 		});

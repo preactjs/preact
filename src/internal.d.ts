@@ -34,10 +34,6 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	 */
 	_lastDomChild?: PreactElement | null;
 	_component?: Component | null;
-
-	// Profiling
-	startTime: number;
-	endTime: number;
 }
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
