@@ -350,7 +350,7 @@ function getVNodeChildren(vnode) {
  * Flatten a virtual nodes children to a single dimensional array
  * @param {import('../index').ComponentChildren} children The unflattened
  * children of a virtual node
- * @param {Array<import('../index').ComponentChild>} [flattened] An flat array of children to modify
+ * @param {Array<import('../index').VNode | null>} [flattened] An flat array of children to modify
  */
 export function toChildArray(children, flattened) {
 	if (flattened===undefined) flattened = [];

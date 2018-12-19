@@ -1,4 +1,4 @@
-import { createElement as h, options, render, createRef, Component } from '../../src/index';
+import { createElement as h, options, render, createRef, Component, Fragment } from '../../src/index';
 import { setupScratch, teardown, clearOptions } from '../_util/helpers';
 import { serializeVNode, initDebug } from '../../src/debug/debug';
 import * as PropTypes from 'prop-types';
@@ -62,9 +62,58 @@ describe('debug', () => {
 		expect(console.error).to.not.be.called;
 	});
 
-	it('should print an error on duplicate keys', () => {
-		render(<div><span key="a" /><span key="a" /></div>, scratch);
-		expect(console.error).to.be.calledOnce;
+	describe('duplicate keys', () => {
+		const List = props => <ul>{props.children}</ul>;
+		const ListItem = props => <li>{props.children}</li>;
+
+		it('should print an error on duplicate keys with DOM nodes', () => {
+			render(<div><span key="a" /><span key="a" /></div>, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('should print an error on duplicate keys with Components', () => {
+			function App() {
+				return (
+					<List>
+						<ListItem key="a">a</ListItem>
+						<ListItem key="b">b</ListItem>
+						<ListItem key="b">d</ListItem>
+						<ListItem key="d">d</ListItem>
+					</List>
+				);
+			}
+
+			render(<App />, scratch);
+			// The error is printed twice. Once for children of <List>
+			// and again for children of <ul> (since List returns props.children)
+			expect(console.error).to.be.calledTwice;
+		});
+
+		it('should print an error on duplicate keys with Fragments', () => {
+			function App() {
+				return (
+					<Fragment>
+						<List key="list">
+							<ListItem key="a">a</ListItem>
+							<ListItem key="b">b</ListItem>
+							<Fragment key="b">
+								{/* Should be okay to dupliate keys since these are inside a Fragment */}
+								<ListItem key="a">c</ListItem>
+								<ListItem key="b">d</ListItem>
+								<ListItem key="c">e</ListItem>
+							</Fragment>
+							<ListItem key="f">f</ListItem>
+						</List>,
+						<div key="list">sibling</div>
+					</Fragment>
+				);
+			}
+
+			render(<App />, scratch);
+			// One error is printed twice. Once for children of <List>
+			// and again for children of <ul> (since List returns props.children)
+			expect(console.error).to.be.calledThrice;
+		});
 	});
 
 	describe('serializeVNode', () => {

@@ -9,7 +9,7 @@ declare namespace preact {
 	// -----------------------------------
 
 	interface VNode<P = {}> {
-		type: ComponentFactory<P> | string | number | null;
+		type: ComponentFactory<P> | string | null;
 		props: P & { children: ComponentChildren };
 		text?: string | number | null;
 		key?: Key;
@@ -169,5 +169,5 @@ declare namespace preact {
 	// Preact helpers
 	// -----------------------------------
 	function createRef<T = any>(): RefObject<T>;
-	function toChildArray(children: ComponentChildren): ComponentChild[];
+	function toChildArray(children: ComponentChildren): Array<VNode | null>;
 }
