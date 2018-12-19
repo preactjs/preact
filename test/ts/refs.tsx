@@ -8,8 +8,6 @@ import {
 	RefCallback
 } from '../../src';
 
-/* @jsx createElement */
-
 // Test Fixtures
 const Foo: FunctionalComponent = () => <span>Foo</span>;
 class Bar extends Component {
@@ -21,13 +19,19 @@ class Bar extends Component {
 // Using Refs
 class CallbackRef extends Component {
 	divRef: RefCallback<HTMLDivElement> = div => {
-		console.log(div.tagName);
+		if (div !== null) {
+			console.log(div.tagName);
+		}
 	};
 	fooRef: RefCallback<Component> = foo => {
-		console.log(foo.base);
+		if (foo !== null) {
+			console.log(foo.base);
+		}
 	};
 	barRef: RefCallback<Bar> = bar => {
-		console.log(bar.base);
+		if (bar !== null) {
+			console.log(bar.base);
+		}
 	};
 
 	render() {
@@ -47,9 +51,17 @@ class CreateRefComponent extends Component {
 	private barRef: RefObject<Bar> = createRef();
 
 	componentDidMount() {
-		console.log(this.divRef.current.tagName);
-		console.log(this.fooRef.current.);
-		console.log(this.barRef.current.base);
+		if (this.divRef.current != null) {
+			console.log(this.divRef.current.tagName);
+		}
+
+		if (this.fooRef.current != null) {
+			console.log(this.fooRef.current.base);
+		}
+
+		if (this.barRef.current != null) {
+			console.log(this.barRef.current.base);
+		}
 	}
 
 	render() {
