@@ -202,4 +202,52 @@ describe('hydrate()', () => {
 		expect(scratch.innerHTML).to.equal(html);
 		expect(getLog()).to.deep.equal([]);
 	});
+
+	// Failing because the following condition in diffElementNodes doesn't evaluate to true
+	// when hydrating a dom node which is not correct
+	//		dom===d && newVNode.text!==oldVNode.text
+	// We don't set `d` when hydrating. If we did, then newVNode.text would never equal
+	// oldVNode.text since oldVNode is always EMPTY_OBJ when hydrating
+	it.skip('should override incorrect pre-existing DOM with VNodes passed into render', () => {
+		const initialHtml = [
+			div('sibling'),
+			ul([
+				li('1'),
+				li('4'),
+				li('3'),
+				li('2')
+			].join(''))
+		].join('');
+
+		scratch.innerHTML = initialHtml;
+		clearLog();
+
+		hydrate((
+			<Fragment>
+				<List>
+					<Fragment>
+						<ListItem>1</ListItem>
+						<ListItem>2</ListItem>
+					</Fragment>
+					<ListItem>3</ListItem>
+					<ListItem>4</ListItem>
+				</List>
+				<div>sibling</div>
+			</Fragment>
+		), scratch);
+
+		const finalHtml = [
+			ul([
+				li('1'),
+				li('2'),
+				li('3'),
+				li('4')
+			].join('')),
+			div('sibling')
+		].join('');
+
+		expect(scratch.innerHTML).to.equal(finalHtml);
+		// TODO: Fill in with proper log once this test is passing
+		expect(getLog()).to.deep.equal([]);
+	});
 });
