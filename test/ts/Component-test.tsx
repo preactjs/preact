@@ -81,7 +81,7 @@ interface RandomChildrenComponenProps {
 	span?: boolean;
 }
 
-class RandomChildrenComponen extends Component<RandomChildrenComponenProps> {
+class RandomChildrenComponent extends Component<RandomChildrenComponenProps> {
 	render() {
 		const { num, val, span } = this.props;
 		if (num) {
