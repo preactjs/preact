@@ -57,8 +57,10 @@ export function getData(vnode) {
 			setState: c.setState.bind(c),
 			forceUpdate: c.forceUpdate.bind(c),
 			setInState(path, value) {
-				setIn(c.state, path, value);
-				enqueueRender(c);
+				c.setState(prev => {
+					setIn(prev, path, value);
+					return prev;
+				});
 			},
 			setInProps(path, value) {
 				setIn(vnode.props, path, value);
