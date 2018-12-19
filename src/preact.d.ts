@@ -122,9 +122,6 @@ declare namespace preact {
 		private __p;
 		private __s;
 		private __u;
-		private _componentConstructor;
-		private __html;
-		private __preactattr_;
 	}
 
 	function h(
