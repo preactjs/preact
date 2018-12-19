@@ -15,7 +15,7 @@ export function extend(obj, props) {
  *  @param {any} [value]
  */
 export function applyRef(ref, value) {
-	if (ref!=null) {
+	if (ref) {
 		if (typeof ref=='function') ref(value);
 		else ref.current = value;
 	}
