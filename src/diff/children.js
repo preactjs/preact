@@ -22,31 +22,38 @@ import { coerceToVNode, Fragment } from '../create-element';
  * diffing the current vnode child
  */
 export function diffChildren(dom, children, oldChildren, context, isSvg, excessDomChildren, mounts, ancestorComponent, parentVNode, childDom) {
-	let childVNode, i, j, p, oldVNode, newDom,
+	let childVNode, i, j, p, index, oldVNode, newDom,
 		oldChildrenLength = oldChildren.length,
 		nextDom, lastDom, sibDom, focus;
 
 	for (i=0; i<children.length; i++) {
 		childVNode = children[i] = coerceToVNode(children[i]);
-		oldVNode = null;
+		oldVNode = index = null;
 
-		// Find the corresponding oldVNode for childVNode in oldChildren if it exists
+		// Check if we find a corresponding element in oldChildren and store the
+		// index where the element was found.
 		p = oldChildren[i];
 		if (p != null && (childVNode.key==null && p.key==null ? (childVNode.type === p.type) : (childVNode.key === p.key))) {
-			oldVNode = oldChildren[i];
-			oldChildren[i] = null;
+			index = i;
 		}
 		else {
 			for (j=0; j<oldChildrenLength; j++) {
 				p = oldChildren[j];
 				if (p!=null) {
 					if (childVNode.key==null && p.key==null ? (childVNode.type === p.type) : (childVNode.key === p.key)) {
-						oldVNode = oldChildren[j];
-						oldChildren[j] = null;
+						index = j;
 						break;
 					}
 				}
 			}
+		}
+
+		// If we have found a corresponding old element we store it in a variable
+		// and delete it from the array. That way the next iteration can skip this
+		// element.
+		if (index!=null) {
+			oldVNode = oldChildren[index];
+			oldChildren[index] = null;
 		}
 
 		nextDom = childDom!=null && childDom.nextSibling;
