@@ -1,6 +1,6 @@
 import { checkPropTypes } from 'prop-types';
 import { getDisplayName } from '../devtools/custom';
-import { options } from '../index';
+import { options, toChildArray } from '../index';
 
 export function initDebug() {
 	/* eslint-disable no-console */
@@ -33,9 +33,8 @@ export function initDebug() {
 		}
 
 		let keys = {};
-
-		inspectChildren(children, deepChild => {
-			if (!deepChild || deepChild.key==null) return;
+		for (let deepChild of toChildArray(children)) {
+			if (!deepChild || deepChild.key==null) continue;
 
 			// In Preact, all keys are stored as object values, i.e. being strings
 			let key = deepChild.key + '';
@@ -43,29 +42,20 @@ export function initDebug() {
 			if (keys.hasOwnProperty(key)) {
 				console.error(
 					'Following component has two or more children with the ' +
-					'same "key" attribute. This may cause glitches and misbehavior ' +
+					`same key attribute: "${key}". This may cause glitches and misbehavior ` +
 					'in rendering process. Component: \n\n' +
 					serializeVNode(vnode)
 				);
 
-				// Return early to not spam the console
-				return true;
+				// Break early to not spam the console
+				break;
 			}
 
 			keys[key] = true;
-		});
+		}
 
 		if (oldBeforeDiff) oldBeforeDiff(vnode);
 	};
-}
-
-function inspectChildren(children, inspect) {
-	if (!Array.isArray(children)) children = [children];
-
-	return children.some((child, i) => Array.isArray(child)
-		? inspectChildren(child, inspect)
-		: inspect(child, i)
-	);
 }
 
 /**
