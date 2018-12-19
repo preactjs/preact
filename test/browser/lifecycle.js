@@ -530,6 +530,24 @@ describe('Lifecycle methods', () => {
 			expect(componentState).to.deep.equal({key: 'value'});
 			expect(stateConstant).to.deep.equal({});
 		});
+
+		it('should use the constructor for `this`', () => {
+			let that = null;
+			class Foo extends Component {
+				constructor(props, context) {
+					super(props, context);
+				}
+				static getDerivedStateFromProps() {
+					that = this;
+					return {};
+				}
+				render() {
+					return <div />;
+				}
+			}
+			render(<Foo />, scratch);
+			expect(that).to.equal(Foo);
+		});
 	});
 
 	describe("#getSnapshotBeforeUpdate", () => {
