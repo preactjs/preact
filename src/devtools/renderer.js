@@ -96,7 +96,6 @@ export class Renderer {
 		if (isRoot(vnode)) {
 			this.pending.push({
 				internalInstance: vnode,
-				// In preparation for https://github.com/facebook/react-devtools/pull/1178/
 				data,
 				renderer: this.rid,
 				type: 'root'
@@ -184,7 +183,6 @@ export class Renderer {
 		this.pending.push({
 			internalInstance: root,
 			renderer: this.rid,
-			// In preparation for https://github.com/facebook/react-devtools/pull/1178/
 			data: getData(root),
 			type: 'rootCommitted'
 		});
