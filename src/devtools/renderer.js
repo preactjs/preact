@@ -1,5 +1,4 @@
 import { getData, getChildren, getPatchedRoot, getInstance, hasProfileDataChanged, hasDataChanged, isRoot, patchRoot } from './custom';
-import { assign } from '../util';
 
 /**
  * Custom renderer tailored for Preact. It converts updated vnode trees
@@ -97,7 +96,6 @@ export class Renderer {
 		if (isRoot(vnode)) {
 			this.pending.push({
 				internalInstance: vnode,
-				// In preparation for https://github.com/facebook/react-devtools/pull/1178/
 				data,
 				renderer: this.rid,
 				type: 'root'
@@ -138,7 +136,12 @@ export class Renderer {
 			/* istanbul ignore else */
 			if (hasProfileDataChanged(prev, vnode)) {
 				this.pending.push({
-					internalInstance: assign(prev, vnode),
+					// This property is only used as an id inside the devtools. The
+					// relevant data will be read from `.data` instead which is a
+					// normalized structure that every react release adheres to. This
+					// makes backwards-compatibility easier instead of relying on internal
+					// vnode/fiber shape.
+					internalInstance: prev,
 					data,
 					renderer: this.rid,
 					type: 'updateProfileTimes'
@@ -148,7 +151,12 @@ export class Renderer {
 		}
 
 		this.pending.push({
-			internalInstance: assign(prev, vnode),
+			// This property is only used as an id inside the devtools. The
+			// relevant data will be read from `.data` instead which is a
+			// normalized structure that every react release adheres to. This
+			// makes backwards-compatibility easier instead of relying on internal
+			// vnode/fiber shape.
+			internalInstance: prev,
 			data,
 			renderer: this.rid,
 			type: 'update'
@@ -175,7 +183,6 @@ export class Renderer {
 		this.pending.push({
 			internalInstance: root,
 			renderer: this.rid,
-			// In preparation for https://github.com/facebook/react-devtools/pull/1178/
 			data: getData(root),
 			type: 'rootCommitted'
 		});
