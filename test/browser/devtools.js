@@ -20,7 +20,9 @@ import { createElement } from '../../src';
 function serialize(events) {
 	return events.filter(x => x.type!='updateProfileTimes').map(x => ({
 		type: x.type,
-		component: getDisplayName(x.internalInstance)
+		component: x.internalInstance.type!=null
+			? getDisplayName(x.internalInstance)
+			: '#text: ' + x.internalInstance.text
 	}));
 }
 
@@ -543,7 +545,7 @@ describe('devtools', () => {
 			checkEventReferences(prev.concat(hook.log));
 
 			expect(serialize(hook.log)).to.deep.equal([
-				{ type: 'unmount', component: '#text' },
+				{ type: 'unmount', component: '#text: Hello World' },
 				{ type: 'mount', component: 'span' },
 				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
@@ -592,6 +594,64 @@ describe('devtools', () => {
 			]);
 		});
 
+		it('should swap children #3', () => {
+			function Foo(props) {
+				return <div>{props.children}</div>;
+			}
+
+			let updateState;
+			class App extends Component {
+				constructor() {
+					super();
+					updateState = () => this.setState(prev => ({ active: !prev.active }));
+					this.state = { active: false };
+				}
+
+				render() {
+					return (
+						<div>
+							{this.state.active && <Foo>foo</Foo>}
+							<Foo>bar</Foo>
+						</div>
+					);
+				}
+			}
+
+			render(<App />, scratch);
+			checkEventReferences(hook.log);
+
+			expect(serialize(hook.log)).to.deep.equal([
+				{ type: 'mount', component: '#text: bar' },
+				{ type: 'mount', component: 'div' },
+				{ type: 'mount', component: 'Foo' },
+				{ type: 'mount', component: 'div' },
+				{ type: 'mount', component: 'App' },
+				{ type: 'mount', component: 'Fragment' },
+				{ type: 'root', component: 'Fragment' },
+				{ type: 'rootCommitted', component: 'Fragment' }
+			]);
+
+			let prev = hook.log.slice();
+			hook.clear();
+
+			updateState();
+			rerender();
+			checkEventReferences(prev.concat(hook.log));
+
+			// We swap unkeyed children if the match by type. In this case we'll
+			// use `<Foo>bar</Foo>` as the old child to diff against for
+			// `<Foo>foo</Foo>`. That's why `<Foo>bar</Foo>` needs to be remounted.
+			expect(serialize(hook.log)).to.deep.equal([
+				{ type: 'update', component: 'Foo' },
+				{ type: 'mount', component: '#text: bar' },
+				{ type: 'mount', component: 'div' },
+				{ type: 'mount', component: 'Foo' },
+				{ type: 'update', component: 'App' },
+				{ type: 'update', component: 'Fragment' },
+				{ type: 'rootCommitted', component: 'Fragment' }
+			]);
+		});
+
 		it('should only update profile times when nothing else changed', () => {
 			render(<div><div><span>Hello World</span></div></div>, scratch);
 			checkEventReferences(hook.log);
@@ -616,7 +676,7 @@ describe('devtools', () => {
 			render(<div />, scratch);
 			expect(serialize(hook.log)).to.deep.equal([
 				{ type: 'unmount', component: 'span' },
-				{ type: 'unmount', component: '#text' },
+				{ type: 'unmount', component: '#text: Hello World' },
 				{ type: 'update', component: 'div' },
 				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
