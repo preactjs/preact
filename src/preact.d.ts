@@ -138,6 +138,7 @@ declare namespace preact {
 	function render(node: ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment, mergeWith?: Element): Element;
 	function rerender(): void;
 	function cloneElement(element: JSX.Element, props: any, ...children: ComponentChildren[]): JSX.Element;
+	function createRef(): {};
 
 	var options: {
 		syncComponentUpdates?: boolean;
