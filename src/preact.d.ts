@@ -3,7 +3,9 @@ export as namespace preact;
 
 declare namespace preact {
 	type Key = string | number;
-	type Ref<T> = (instance: T) => void;
+	type RefObject<T> = { current?: T | null };
+	type RefCallback<T> = (instance: T | null) => void;
+	type Ref<T> = RefObject<T> | RefCallback<T>;
 	type ComponentChild = VNode<any> | object | string | number | boolean | null;
 	type ComponentChildren = ComponentChild[] | ComponentChild;
 
@@ -99,6 +101,29 @@ declare namespace preact {
 		forceUpdate(callback?: () => void): void;
 
 		abstract render(props?: RenderableProps<P>, state?: Readonly<S>, context?: any): ComponentChild;
+
+		// Add these variables to avoid descendants shadowing them (some from properties.json for minification)
+		private __key;
+		private __ref;
+		private _component;
+		private _dirty;
+		private _disable;
+		private nextBase;
+		private prevContext;
+		private prevProps;
+		private prevState;
+		private __d;
+		private __x;
+		private __l;
+		private __h;
+		private __k;
+		private __r;
+		private __n;
+		private __b;
+		private __c;
+		private __p;
+		private __s;
+		private __u;
 	}
 
 	function h(
@@ -115,6 +140,7 @@ declare namespace preact {
 	function render(node: ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment, mergeWith?: Element): Element;
 	function rerender(): void;
 	function cloneElement(element: JSX.Element, props: any, ...children: ComponentChildren[]): JSX.Element;
+	function createRef<T=any>(): RefObject<T>;
 
 	var options: {
 		syncComponentUpdates?: boolean;
