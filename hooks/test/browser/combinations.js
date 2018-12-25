@@ -1,6 +1,8 @@
 import { createElement as h, render } from 'preact';
+import { spy } from 'sinon';
 import { setupScratch, teardown, setupRerender } from '../../../test/_util/helpers';
-import { useState } from '../../src';
+import { useState, useEffect, useLayoutEffect } from '../../src';
+import { scheduleEffectAssert } from './useEffectUtil';
 
 /** @jsx h */
 
@@ -55,5 +57,48 @@ describe('combinations', () => {
 		rerender();
 		expect(states).to.deep.equal({ state1: 1, state2: 20, state3: 30, state4: 4 });
 	});
+
+	it('can rerender asynchronously from within an effect', done => {
+		const didRender = spy();
+
+		function Comp() {
+			const [counter, setCounter] = useState(0);
+
+			useEffect(() => { if (counter === 0) setCounter(1) });
+
+			didRender(counter);
+			return null;
+		}
+
+		render(<Comp/>, scratch);
+
+		scheduleEffectAssert(() => {
+			rerender();
+			expect(didRender).to.have.been.calledTwice.and.calledWith(1)
+		})
+		.then(done)
+		.catch(done);
+	});
+
+	it('can rerender synchronously from within a layout effect', () => {
+		const didRender = spy();
+
+		function Comp() {
+			const [counter, setCounter] = useState(0);
+
+			useLayoutEffect(() => { if (counter === 0) setCounter(1) });
+
+			didRender(counter);
+			return null;
+		}
+
+		render(<Comp/>, scratch);
+
+		expect(didRender).to.have.been.calledTwice.and.calledWith(1)
+	});
+
+	// it('can access refs from within a layout effect callback', () => {
+				// TODO: once useRef is implemented.
+	// });
 
 });

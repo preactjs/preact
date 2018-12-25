@@ -11,8 +11,7 @@
   "scripts": {
     "build": "microbundle build --raw",
     "test": "npm-run-all build --parallel test:karma",
-    "test:karma": "karma start test/karma.conf.js --single-run",
-    "test:karma:watch": "npm run test:karma -- no-single-run"
+    "test:karma": "karma start test/karma.conf.js --single-run"
   },
   "devDependencies": {
     "karma": "^3.0.0",
