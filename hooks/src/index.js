@@ -1,4 +1,4 @@
-import { options } from 'preact';
+import { options, createRef } from 'preact';
 
 let currentIndex;
 let component;
@@ -62,7 +62,7 @@ options.beforeUnmount = vnode => {
 	}
 };
 
-const createHook = (create, hasPropFilter) => (...args) => {
+const createHook = (create, hasPropFilter = false) => (...args) => {
 	if (component == null) return;
 
 	const hooks = component.__hooks || (component.__hooks = { list: [], pendingEffects: [], pendingLayoutEffects: [] });
@@ -107,7 +107,7 @@ export const useState = createHook((hook, inst, initialValue) => {
 	}
 
 	return () => [value, set];
-}, false);
+});
 
 export const useEffect = createHook((hook, inst) => {
 	return callback => {
@@ -123,6 +123,12 @@ export const useLayoutEffect = createHook((hook, inst) => {
 		inst.__hooks.pendingLayoutEffects.push(effect);
 	};
 }, true);
+
+export const useRef = createHook((hook, inst, initialValue) => {
+	const ref = createRef();
+	ref.current = initialValue;
+	return () => ref;
+});
 
 const hasWindow = typeof window !== 'undefined';
 const afterPaint = hasWindow ? windowAfterPaint : () => {};

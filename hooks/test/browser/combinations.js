@@ -1,7 +1,7 @@
 import { createElement as h, render } from 'preact';
 import { spy } from 'sinon';
 import { setupScratch, teardown, setupRerender } from '../../../test/_util/helpers';
-import { useState, useEffect, useLayoutEffect } from '../../src';
+import { useState, useEffect, useLayoutEffect, useRef } from '../../src';
 import { scheduleEffectAssert } from './useEffectUtil';
 
 /** @jsx h */
@@ -97,8 +97,22 @@ describe('combinations', () => {
 		expect(didRender).to.have.been.calledTwice.and.calledWith(1)
 	});
 
-	// it('can access refs from within a layout effect callback', () => {
-				// TODO: once useRef is implemented.
-	// });
+	it('can access refs from within a layout effect callback', () => {
+		let refAtLayoutTime;
+
+		function Comp() {
+			const input = useRef();
+
+			useLayoutEffect(() => {
+				refAtLayoutTime = input.current;
+			});
+
+			return <input ref={ input } value="hello" />;
+		}
+
+		render(<Comp/>, scratch);
+
+		expect(refAtLayoutTime.value).to.equal('hello');
+	});
 
 });
