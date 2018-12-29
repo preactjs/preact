@@ -48,7 +48,8 @@
       "react/prefer-stateless-function": 0,
       "react/sort-comp": 0,
       "jest/valid-expect": 0,
-      "jest/no-disabled-tests": 0
+      "jest/no-disabled-tests": 0,
+      "react/no-find-dom-node": 0
     }
   },
   "files": [
