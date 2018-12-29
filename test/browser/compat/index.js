@@ -210,10 +210,10 @@ describe('preact-compat', () => {
 			expect(vnode).to.have.property('type', 'div');
 			expect(vnode).to.have.property('props').that.is.an('object');
 			expect(vnode.props).to.have.property('children');
-			expect(vnode.props.children[0]).to.have.property('$$typeof', $$typeof);
-			expect(vnode.props.children[0]).to.have.property('type', 'a');
-			expect(vnode.props.children[0]).to.have.property('props').that.is.an('object');
-			expect(vnode.props.children[0].props).to.eql({ children:['t'] });
+			expect(vnode.props.children).to.have.property('$$typeof', $$typeof);
+			expect(vnode.props.children).to.have.property('type', 'a');
+			expect(vnode.props.children).to.have.property('props').that.is.an('object');
+			expect(vnode.props.children.props).to.eql({ children: 't' });
 		});
 
 		it('should normalize onChange', () => {
@@ -274,14 +274,14 @@ describe('preact-compat', () => {
 			let element = <foo children={<span>c</span>}><div>b</div></foo>;
 			let clone = cloneElement(element);
 			expect(clone).to.eql(element);
-			expect(clone.children[0].type).to.eql('div');
+			expect(clone.props.children.type).to.eql('div');
 		});
 
 		it('should support children in prop argument', () => {
 			let element = <foo></foo>;
 			let children = [<span>b</span>];
 			let clone = cloneElement(element, { children });
-			expect(clone.children).to.eql(children);
+			expect(clone.props.children).to.eql(children);
 		});
 
 		it('children argument takes precedence over props.children', () => {
@@ -289,7 +289,7 @@ describe('preact-compat', () => {
 			let childrenA = [<span>b</span>];
 			let childrenB = [<div>c</div>];
 			let clone = cloneElement(element, { children: childrenA }, ...childrenB);
-			expect(clone.children).to.eql(childrenB);
+			expect(clone.props.children).to.eql(childrenB);
 		});
 
 		it('children argument takes precedence over props.children even if falsey', () => {

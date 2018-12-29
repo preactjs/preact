@@ -274,24 +274,9 @@ function normalizeVNode(vnode) {
 	return vnode;
 }
 
-function cloneElement(element, props, ...children) {
+function cloneElement(element) {
 	if (!isValidElement(element)) return element;
-	let elementProps = element.props;
-	let node = h(
-		element.type,
-		extend({}, elementProps),
-		element.children || elementProps && elementProps.children
-	);
-	// Only provide the 3rd argument if needed.
-	// Arguments 3+ overwrite element.children in preactCloneElement
-	let cloneArgs = [node, props];
-	if (children && children.length) {
-		cloneArgs.push(children);
-	}
-	else if (props && props.children) {
-		cloneArgs.push(props.children);
-	}
-	return normalizeVNode(preactCloneElement(...cloneArgs));
+	return preactCloneElement.apply(null, arguments);
 }
 
 function isValidElement(element) {
