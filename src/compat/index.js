@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { render as preactRender, cloneElement as preactCloneElement, createRef, createElement as h, Component as PreactComponent, options } from 'ceviche';
+import { render as preactRender, cloneElement as preactCloneElement, createRef, createElement as h, Component as PreactComponent, options, toChildArray } from 'ceviche';
 
 const version = '15.1.0'; // trick libraries to think we are react
 
@@ -171,16 +171,15 @@ let Children = {
 		children.forEach(fn);
 	},
 	count(children) {
-		return children && children.length || 0;
+		return children && toChildArray(children).length || 0;
 	},
 	only(children) {
-		children = Children.toArray(children);
+		children = toChildArray(children);
 		if (children.length!==1) throw new Error('Children.only() expects only one child.');
 		return children[0];
 	},
 	toArray(children) {
-		if (children == null) return [];
-		return ARR.concat(children);
+		return toChildArray(children);
 	}
 };
 
