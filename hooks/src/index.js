@@ -108,6 +108,23 @@ export const useState = createHook((hook, inst, initialValue) => {
 	return () => [value, set];
 });
 
+export const useReducer = createHook((hook, inst, reducer, initialState, initialAction) => {
+	const stateId = 'hookreducer$' + hook.id;
+
+	const setter = {};
+	let state = initialAction ? reducer(initialState, initialAction) : initialState;
+	setter[stateId] = state;
+
+	return () => [
+		state,
+		action => {
+			setter[stateId] = state = reducer(state, action);
+			stateChanged = true;
+			inst.setState(setter);
+		}
+	];
+});
+
 export const useEffect = createHook((hook, inst) => {
 	return callback => {
 		const effect = [hook, callback, inst];
