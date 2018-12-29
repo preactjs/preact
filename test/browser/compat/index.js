@@ -309,9 +309,7 @@ describe('preact-compat', () => {
 			}
 		}
 
-		it('should return DOM Node if render is not false nor null', () => {
-			let scratch = document.createElement('div');
-			(document.body || document.documentElement).appendChild(scratch);
+		it.skip('should return DOM Node if render is not false nor null', () => {
 			const helper = React.render(<Helper />, scratch);
 			expect(findDOMNode(helper)).to.be.instanceof(Node);
 		});
