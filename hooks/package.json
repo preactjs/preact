@@ -29,6 +29,9 @@
   "peerDependencies": {
     "preact": "../"
   },
+  "mangle": {
+    "regex": "^_"
+  },
   "eslintConfig": {
     "extends": "developit",
     "settings": {

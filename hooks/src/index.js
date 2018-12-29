@@ -11,13 +11,14 @@ options.beforeRender = vnode => {
 
 	component = vnode._component;
 	currentIndex = 0;
-	const pendingEffects = component.__hooks && component.__hooks.pendingEffects;
 
-	if (pendingEffects && pendingEffects.length) {
-		for (let i=0; i<pendingEffects.length; i++) {
-			invokeEffect(pendingEffects[i]);
+	const hooks = component.__hooks;
+
+	if (hooks) {
+		let item;
+		while (item=hooks._pendingEffects.shift()) {
+			invokeEffect(item);
 		}
-		pendingEffects.length = 0;
 	}
 };
 
@@ -30,16 +31,15 @@ options.commitRoot = vnode => {
 	if (!vnode) return;
 
 	const c = vnode._component;
-	const pendingLayoutEffects = c.__hooks && c.__hooks.pendingLayoutEffects;
+	const hooks = c.__hooks;
 
-	if (pendingLayoutEffects && pendingLayoutEffects.length) {
+	if (hooks) {
 		stateChanged = false;
 
-		for (let i=0; i<pendingLayoutEffects.length; i++) {
-			invokeEffect(pendingLayoutEffects[i]);
+		let item;
+		while (item=hooks._pendingLayoutEffects.shift()) {
+			invokeEffect(item);
 		}
-
-		pendingLayoutEffects.length = 0;
 
 		if (stateChanged) c.forceUpdate();
 	}
@@ -53,11 +53,11 @@ options.beforeUnmount = vnode => {
 	const c = vnode._component;
 	const hooks = c.__hooks;
 
-	if (!hooks) return;
-
-	for (let i=0; i<hooks.list.length; i++) {
-		if (hooks.list[i].cleanup) {
-			hooks.list[i].cleanup();
+	if (hooks) {
+		for (let i=0; i<hooks._list.length; i++) {
+			if (hooks._list[i].cleanup) {
+				hooks._list[i].cleanup();
+			}
 		}
 	}
 };
@@ -65,15 +65,14 @@ options.beforeUnmount = vnode => {
 const createHook = (create, hasPropFilter = false) => (...args) => {
 	if (component == null) return;
 
-	const hooks = component.__hooks || (component.__hooks = { list: [], pendingEffects: [], pendingLayoutEffects: [] });
-	const list = hooks.list;
+	const hooks = component.__hooks || (component.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [] });
 	const last = args[args.length - 1];
 	const props = hasPropFilter && Array.isArray(last) ? last : undefined;
 	let index = currentIndex++;
-	let hook = list[index];
+	let hook = hooks._list[index];
 
 	if (!hook) {
-		hook = list[index] = { index, props, value: undefined };
+		hook = hooks._list[index] = { index, props, value: undefined };
 		hook.run = create(hook, component, ...args);
 	}
 	else if (props) {
@@ -112,7 +111,7 @@ export const useState = createHook((hook, inst, initialValue) => {
 export const useEffect = createHook((hook, inst) => {
 	return callback => {
 		const effect = [hook, callback, inst];
-		inst.__hooks.pendingEffects.push(effect);
+		inst.__hooks._pendingEffects.push(effect);
 		afterPaint(effect);
 	};
 }, true);
@@ -120,7 +119,7 @@ export const useEffect = createHook((hook, inst) => {
 export const useLayoutEffect = createHook((hook, inst) => {
 	return callback => {
 		const effect = [hook, callback];
-		inst.__hooks.pendingLayoutEffects.push(effect);
+		inst.__hooks._pendingLayoutEffects.push(effect);
 	};
 }, true);
 
@@ -130,8 +129,7 @@ export const useRef = createHook((hook, inst, initialValue) => {
 	return () => ref;
 });
 
-const hasWindow = typeof window !== 'undefined';
-const afterPaint = hasWindow ? windowAfterPaint : () => {};
+const afterPaint = window ? windowAfterPaint : () => {};
 
 // Note: if someone used Component.debounce = requestAnimationFrame,
 // then effects will ALWAYS run on the NEXT frame instead of the current one, incurring a ~16ms delay.
@@ -143,14 +141,14 @@ function windowAfterPaint(args) {
 }
 
 function onPaint() {
-  setTimeout(fire, 0);
+  setTimeout(fire);
 }
 
 function fire() {
-  for (let i=0; i<afterPaintEffects.length; i++) {
-		const effect = afterPaintEffects[i];
+	let effect;
+	while (effect=afterPaintEffects.shift()) {
 		const inst = effect[2];
-		const effects = inst.__hooks.pendingEffects;
+		const effects = inst.__hooks._pendingEffects;
 
 		for (let j=0; j<effects.length; j++) {
 			if (effects[j] === effect) {
@@ -160,7 +158,6 @@ function fire() {
 			}
 		}
   }
-  afterPaintEffects.length = 0;
 }
 
 function invokeEffect(effect) {
