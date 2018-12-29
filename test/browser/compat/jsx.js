@@ -25,6 +25,6 @@ describe('jsx', () => {
 		expect(jsx.props).to.have.property('className', 'foo bar');
 
 		React.render(jsx, scratch);
-		expect(scratch.innerHTML).to.equal('<div data-foo="bar" class="foo bar"><span id="some_id">inner!</span>ab</div>');
+		expect(scratch.innerHTML).to.equal('<div class="foo bar" data-foo="bar"><span id="some_id">inner!</span>ab</div>');
 	});
 });

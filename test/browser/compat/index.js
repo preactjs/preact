@@ -274,7 +274,7 @@ describe('preact-compat', () => {
 			let element = <foo children={<span>c</span>}><div>b</div></foo>;
 			let clone = cloneElement(element);
 			expect(clone).to.eql(element);
-			expect(clone.children[0].nodeName).to.eql('div');
+			expect(clone.children[0].type).to.eql('div');
 		});
 
 		it('should support children in prop argument', () => {

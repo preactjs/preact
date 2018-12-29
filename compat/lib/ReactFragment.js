@@ -8,11 +8,11 @@ exports.create = function(obj) {
 			for (var i=0; i<child.length; i++) {
 				var c = child[i];
 				// if unkeyed, clone attrs and inject key
-				if (preact.isValidElement(c) && !(c.attributes && c.attributes.key)) {
+				if (preact.isValidElement(c) && !(c.props && c.props.key)) {
 					var a = {};
-					if (c.attributes) for (var j in c.attributes) a[j] = c.attributes[j];
+					if (c.props) for (var j in c.props) a[j] = c.props[j];
 					a.key = key+'.'+i;
-					c = preact.createElement(c.nodeName, a, c.children);
+					c = preact.createElement(c.type, a, c.children);
 				}
 				if (c!=null) children.push(c);
 			}

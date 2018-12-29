@@ -1,5 +1,5 @@
 /* eslint-disable */
-var compat = dep(require('.'));
+var compat = dep(require('../dist/compat'));
 var server = dep(require('./server'));
 
 function dep(obj) { return obj['default'] || obj; }

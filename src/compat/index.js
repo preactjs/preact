@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { render as preactRender, cloneElement as preactCloneElement, createRef, h, Component as PreactComponent, options } from 'preact';
+import { render as preactRender, cloneElement as preactCloneElement, createRef, createElement as h, Component as PreactComponent, options } from 'ceviche';
 
 const version = '15.1.0'; // trick libraries to think we are react
 
@@ -23,43 +23,12 @@ const AUTOBIND_BLACKLIST = {
 	componentDidUnmount: 1
 };
 
-
 const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip|color|fill|flood|font|glyph|horiz|marker|overline|paint|stop|strikethrough|stroke|text|underline|unicode|units|v|vector|vert|word|writing|x)[A-Z]/;
-
 
 const BYPASS_HOOK = {};
 
-/*global process*/
-let DEV = false;
-try {
-	DEV = process.env.NODE_ENV!=='production';
-}
-catch (e) {}
-
 // a component that renders nothing. Used to replace components for unmountComponentAtNode.
 function EmptyComponent() { return null; }
-
-
-
-// make react think we're react.
-let VNode = h('a', null).constructor;
-VNode.prototype.$$typeof = REACT_ELEMENT_TYPE;
-VNode.prototype.preactCompatUpgraded = false;
-VNode.prototype.preactCompatNormalized = false;
-
-Object.defineProperty(VNode.prototype, 'type', {
-	get() { return this.nodeName; },
-	set(v) { this.nodeName = v; },
-	configurable:true
-});
-
-Object.defineProperty(VNode.prototype, 'props', {
-	get() { return this.attributes; },
-	set(v) { this.attributes = v; },
-	configurable:true
-});
-
-
 
 let oldEventHook = options.event;
 options.event = e => {
@@ -69,14 +38,13 @@ options.event = e => {
 	return e;
 };
 
-
 let oldVnodeHook = options.vnode;
 options.vnode = vnode => {
 	if (!vnode.preactCompatUpgraded) {
 		vnode.preactCompatUpgraded = true;
 
-		let tag = vnode.nodeName,
-			attrs = vnode.attributes = vnode.attributes==null ? {} : extend({}, vnode.attributes);
+		let tag = vnode.type,
+			attrs = vnode.props = vnode.props==null ? {} : extend({}, vnode.props);
 
 		if (typeof tag==='function') {
 			if (tag[COMPONENT_WRAPPER_KEY]===true || (tag.prototype && 'isReactComponent' in tag.prototype)) {
@@ -108,12 +76,12 @@ options.vnode = vnode => {
 };
 
 function handleComponentVNode(vnode) {
-	let tag = vnode.nodeName,
-		a = vnode.attributes;
+	let tag = vnode.type,
+		a = vnode.props;
 
-	vnode.attributes = {};
-	if (tag.defaultProps) extend(vnode.attributes, tag.defaultProps);
-	if (a) extend(vnode.attributes, a);
+	vnode.props = {};
+	if (tag.defaultProps) extend(vnode.props, tag.defaultProps);
+	if (a) extend(vnode.props, a);
 }
 
 function handleElementVNode(vnode, a) {
@@ -121,7 +89,7 @@ function handleElementVNode(vnode, a) {
 	if (a) {
 		for (i in a) if ((shouldSanitize = CAMEL_PROPS.test(i))) break;
 		if (shouldSanitize) {
-			attrs = vnode.attributes = {};
+			attrs = vnode.props = {};
 			for (i in a) {
 				if (a.hasOwnProperty(i)) {
 					attrs[ CAMEL_PROPS.test(i) ? i.replace(/([A-Z0-9])/, '-$1').toLowerCase() : i ] = a[i];
@@ -130,8 +98,6 @@ function handleElementVNode(vnode, a) {
 		}
 	}
 }
-
-
 
 // proxy render() since React returns a Component reference.
 function render(vnode, parent, callback) {
@@ -150,12 +116,13 @@ function render(vnode, parent, callback) {
 		}
 	}
 
-	let out = preactRender(vnode, parent, prev);
+	preactRender(vnode, parent);
+
+	let out = vnode;
 	if (parent) parent._preactCompatRendered = out && (out._component || { base: out });
 	if (typeof callback==='function') callback();
 	return out && out._component || out;
 }
-
 
 class ContextProvider {
 	getChildContext() {
@@ -168,7 +135,8 @@ class ContextProvider {
 
 function renderSubtreeIntoContainer(parentComponent, vnode, container, callback) {
 	let wrap = h(ContextProvider, { context: parentComponent.context }, vnode);
-	let renderContainer = render(wrap, container);
+	render(wrap, container);
+	let renderContainer = container._prevVNode;
 	let component = renderContainer._component || renderContainer.base;
 	if (callback) callback.call(component, renderContainer);
 	return component;
@@ -191,7 +159,6 @@ function unmountComponentAtNode(container) {
 	}
 	return false;
 }
-
 
 
 const ARR = [];
@@ -224,15 +191,12 @@ let Children = {
 	}
 };
 
-
 /** Track current render() component for ref assignment */
 let currentComponent;
-
 
 function createFactory(type) {
 	return createElement.bind(null, type);
 }
-
 
 let DOM = {};
 for (let i=ELEMENTS.length; i--; ) {
@@ -245,8 +209,8 @@ function upgradeToVNodes(arr, offset) {
 		if (Array.isArray(obj)) {
 			upgradeToVNodes(obj);
 		}
-		else if (obj && typeof obj==='object' && !isValidElement(obj) && ((obj.props && obj.type) || (obj.attributes && obj.nodeName) || obj.children)) {
-			arr[i] = createElement(obj.type || obj.nodeName, obj.props || obj.attributes, obj.children);
+		else if (obj && typeof obj==='object' && !isValidElement(obj) && ((obj.props && obj.type) || obj.props || obj.children)) {
+			arr[i] = createElement(obj.type, obj.props, obj.children);
 		}
 	}
 }
@@ -254,7 +218,6 @@ function upgradeToVNodes(arr, offset) {
 function isStatelessComponent(c) {
 	return typeof c==='function' && !(c.prototype && c.prototype.render);
 }
-
 
 // wraps stateless functional components in a PropTypes validator
 function wrapStatelessComponent(WrappedComponent) {
@@ -266,43 +229,44 @@ function wrapStatelessComponent(WrappedComponent) {
 	});
 }
 
-
 function statelessComponentHook(Ctor) {
 	let Wrapped = Ctor[COMPONENT_WRAPPER_KEY];
 	if (Wrapped) return Wrapped===true ? Ctor : Wrapped;
 
 	Wrapped = wrapStatelessComponent(Ctor);
 
-	Object.defineProperty(Wrapped, COMPONENT_WRAPPER_KEY, { configurable:true, value:true });
+	Object.defineProperty(Wrapped, COMPONENT_WRAPPER_KEY, { configurable: true, value: true });
 	Wrapped.displayName = Ctor.displayName;
 	Wrapped.propTypes = Ctor.propTypes;
 	Wrapped.defaultProps = Ctor.defaultProps;
 
-	Object.defineProperty(Ctor, COMPONENT_WRAPPER_KEY, { configurable:true, value:Wrapped });
+	Object.defineProperty(Ctor, COMPONENT_WRAPPER_KEY, { configurable: true, value: Wrapped });
 
 	return Wrapped;
 }
 
-
 function createElement(...args) {
 	upgradeToVNodes(args, 2);
-	return normalizeVNode(h(...args));
+	let vnode = h(...args);
+	vnode.$$typeof = REACT_ELEMENT_TYPE;
+	vnode.preactCompatUpgraded = false;
+	vnode.preactCompatNormalized = false;
+	return normalizeVNode(vnode);
 }
-
 
 function normalizeVNode(vnode) {
 	vnode.preactCompatNormalized = true;
 
 	applyClassName(vnode);
 
-	if (isStatelessComponent(vnode.nodeName)) {
-		vnode.nodeName = statelessComponentHook(vnode.nodeName);
+	if (isStatelessComponent(vnode.type)) {
+		vnode.type = statelessComponentHook(vnode.type);
 	}
 
-	let ref = vnode.attributes.ref,
+	let ref = vnode.props.ref,
 		type = ref && typeof ref;
 	if (currentComponent && (type==='string' || type==='number')) {
-		vnode.attributes.ref = createStringRefProxy(ref, currentComponent);
+		vnode.props.ref = createStringRefProxy(ref, currentComponent);
 	}
 
 	applyEventNormalization(vnode);
@@ -310,12 +274,11 @@ function normalizeVNode(vnode) {
 	return vnode;
 }
 
-
 function cloneElement(element, props, ...children) {
 	if (!isValidElement(element)) return element;
-	let elementProps = element.attributes || element.props;
+	let elementProps = element.props;
 	let node = h(
-		element.nodeName || element.type,
+		element.type,
 		extend({}, elementProps),
 		element.children || elementProps && elementProps.children
 	);
@@ -331,11 +294,9 @@ function cloneElement(element, props, ...children) {
 	return normalizeVNode(preactCloneElement(...cloneArgs));
 }
 
-
 function isValidElement(element) {
-	return element && ((element instanceof VNode) || element.$$typeof===REACT_ELEMENT_TYPE);
+	return element && element.$$typeof===REACT_ELEMENT_TYPE;
 }
-
 
 function createStringRefProxy(name, component) {
 	return component._refProxies[name] || (component._refProxies[name] = resolved => {
@@ -348,7 +309,6 @@ function createStringRefProxy(name, component) {
 		}
 	});
 }
-
 
 function applyEventNormalization({ nodeName, attributes }) {
 	if (!attributes || typeof nodeName!=='string') return;
@@ -370,14 +330,12 @@ function applyEventNormalization({ nodeName, attributes }) {
 	}
 }
 
-
 function applyClassName(vnode) {
-	let a = vnode.attributes || (vnode.attributes = {});
+	let a = vnode.props || (vnode.props = {});
 	classNameDescriptor.enumerable = 'className' in a;
 	if (a.className) a.class = a.className;
 	Object.defineProperty(a, 'className', classNameDescriptor);
 }
-
 
 let classNameDescriptor = {
 	configurable: true,
@@ -398,18 +356,15 @@ function extend(base, props) {
 	return base;
 }
 
-
 function shallowDiffers(a, b) {
 	for (let i in a) if (!(i in b)) return true;
 	for (let i in b) if (a[i]!==b[i]) return true;
 	return false;
 }
 
-
 function findDOMNode(component) {
 	return component && (component.base || component.nodeType === 1 && component) || null;
 }
-
 
 function F(){}
 
@@ -447,7 +402,6 @@ function createClass(obj) {
 	return cl;
 }
 
-
 // Flatten an Array of mixins to a map of method name to mixin implementations
 function collateMixins(mixins) {
 	let keyed = {};
@@ -462,7 +416,6 @@ function collateMixins(mixins) {
 	return keyed;
 }
 
-
 // apply a mapping of Arrays of mixin methods to a component prototype
 function applyMixins(proto, mixins) {
 	for (let key in mixins) if (mixins.hasOwnProperty(key)) {
@@ -473,7 +426,6 @@ function applyMixins(proto, mixins) {
 	}
 }
 
-
 function bindAll(ctx) {
 	for (let i in ctx) {
 		let v = ctx[i];
@@ -482,7 +434,6 @@ function bindAll(ctx) {
 		}
 	}
 }
-
 
 function callMethod(ctx, m, args) {
 	if (typeof m==='string') {
@@ -511,41 +462,10 @@ function multihook(hooks, skipDuplicates) {
 	};
 }
 
-
 function newComponentHook(props, context) {
-	propsHook.call(this, props, context);
-	this.componentWillReceiveProps = multihook([propsHook, this.componentWillReceiveProps || 'componentWillReceiveProps']);
-	this.render = multihook([propsHook, beforeRender, this.render || 'render', afterRender]);
+	this.componentWillReceiveProps = multihook([this.componentWillReceiveProps || 'componentWillReceiveProps']);
+	this.render = multihook([ beforeRender, this.render || 'render', afterRender]);
 }
-
-
-function propsHook(props, context) {
-	if (!props) return;
-
-	// React annoyingly special-cases single children, and some react components are ridiculously strict about this.
-	let c = props.children;
-	if (c && Array.isArray(c) && c.length===1 && (typeof c[0]==='string' || typeof c[0]==='function' || c[0] instanceof VNode)) {
-		props.children = c[0];
-
-		// but its totally still going to be an Array.
-		if (props.children && typeof props.children==='object') {
-			props.children.length = 1;
-			props.children[0] = props.children;
-		}
-	}
-
-	// add proptype checking
-	if (DEV) {
-		let ctor = typeof this==='function' ? this : this.constructor,
-			propTypes = this.propTypes || ctor.propTypes;
-		const displayName = this.displayName || ctor.name;
-
-		if (propTypes) {
-			PropTypes.checkPropTypes(propTypes, props, 'prop', displayName);
-		}
-	}
-}
-
 
 function beforeRender(props) {
 	currentComponent = this;
@@ -557,8 +477,6 @@ function afterRender() {
 	}
 }
 
-
-
 function Component(props, context, opts) {
 	PreactComponent.call(this, props, context);
 	this.state = this.getInitialState ? this.getInitialState() : {};
@@ -568,18 +486,18 @@ function Component(props, context, opts) {
 		newComponentHook.call(this, props, context);
 	}
 }
-extend(Component.prototype = new PreactComponent(), {
+extend(Component.prototype = Object.create(PreactComponent.prototype), {
 	constructor: Component,
 
 	isReactComponent: {},
 
 	replaceState(state, callback) {
-		this.setState(state, callback);
 		for (let i in this.state) {
 			if (!(i in state)) {
 				delete this.state[i];
 			}
 		}
+		this.setState(state, callback);
 	},
 
 	getDOMNode() {
@@ -591,18 +509,16 @@ extend(Component.prototype = new PreactComponent(), {
 	}
 });
 
-
-
 function PureComponent(props, context) {
-	Component.call(this, props, context);
+	PreactComponent.call(this, props, context);
 }
-F.prototype = Component.prototype;
-PureComponent.prototype = new F();
+PureComponent.prototype = Object.create(PreactComponent.prototype);
 PureComponent.prototype.isPureReactComponent = true;
 PureComponent.prototype.shouldComponentUpdate = function(props, state) {
 	return shallowDiffers(this.props, props) || shallowDiffers(this.state, state);
 };
 
+// eslint-disable-next-line camelcase
 function unstable_batchedUpdates(callback) {
 	callback();
 }
@@ -625,7 +541,9 @@ export {
 	unmountComponentAtNode,
 	Component,
 	PureComponent,
+	// eslint-disable-next-line camelcase
 	renderSubtreeIntoContainer as unstable_renderSubtreeIntoContainer,
+	// eslint-disable-next-line camelcase
 	unstable_batchedUpdates,
 	extend as __spread
 };

@@ -1,4 +1,4 @@
-import React from '../../../compat/legacy';
+import React from '../../compat/legacy';
 
 describe('legacy', () => {
 	it('should export server', () => {

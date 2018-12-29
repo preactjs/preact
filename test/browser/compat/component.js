@@ -1,5 +1,6 @@
 import { setupScratch, teardown, setupRerender } from '../../_util/helpers';
 import React from '../../../src/compat';
+import { Component } from '../../../src/index';
 
 describe('components', () => {
 
@@ -28,7 +29,7 @@ describe('components', () => {
 			}
 		}
 
-		let html = React.render(
+		React.render(
 			<Demo a="b" c="d">inner</Demo>,
 			scratch
 		);
@@ -39,7 +40,7 @@ describe('components', () => {
 			children: 'inner'
 		});
 
-		expect(html).to.equal('<div id="demo">inner</div>');
+		expect(scratch.innerHTML).to.equal('<div id="demo">inner</div>');
 	});
 
 	it('should support replaceState()', done => {
@@ -54,6 +55,7 @@ describe('components', () => {
 		let inst;
 		React.render(<Demo ref={ c => inst=c } />, scratch);
 		inst.setState({ foo: 'bar', baz: 'bat' });
+		rerender();
 
 		setTimeout(() => {
 			expect(inst.state).to.eql({ foo: 'bar', baz: 'bat' });
@@ -63,6 +65,7 @@ describe('components', () => {
 				callbackState = inst.state;
 			});
 			inst.replaceState({}, callback);
+			rerender();
 
 			setTimeout(() => {
 				expect(callback).to.have.been.calledOnce;
@@ -100,6 +103,7 @@ describe('components', () => {
 				props = newProps;
 			}
 		}
+
 		class Parent extends React.Component {
 			render() {
 				return <Child>second</Child>;
