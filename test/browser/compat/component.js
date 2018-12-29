@@ -407,10 +407,12 @@ describe('components', () => {
 			const Inner = React.createClass({
 				render() {
 					inner = this;
+
+					let only = React.Children.only(this.props.children);
 					return (
 						<div>
-							{React.cloneElement(React.Children.only(this.props.children), { id:'one' })}
-							{React.cloneElement(React.Children.only(this.props.children), { id:'two', ref:'two' })}
+							{React.cloneElement(only, { id: 'one' })}
+							{React.cloneElement(only, { id: 'two', ref: 'two' })}
 						</div>
 					);
 				}

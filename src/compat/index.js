@@ -221,10 +221,10 @@ function normalizeVNode(vnode) {
 
 	applyClassName(vnode);
 
-	let ref = vnode.props.ref,
+	let ref = vnode.props.ref || vnode.ref,
 		type = ref && typeof ref;
 	if (currentComponent && (type==='string' || type==='number')) {
-		vnode.props.ref = createStringRefProxy(ref, currentComponent);
+		vnode.ref = createStringRefProxy(ref, currentComponent);
 	}
 
 	applyEventNormalization(vnode);
@@ -234,7 +234,7 @@ function normalizeVNode(vnode) {
 
 function cloneElement(element) {
 	if (!isValidElement(element)) return element;
-	return preactCloneElement.apply(null, arguments);
+	return normalizeVNode(preactCloneElement.apply(null, arguments));
 }
 
 function isValidElement(element) {
