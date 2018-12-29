@@ -207,36 +207,6 @@ function upgradeToVNodes(arr, offset) {
 	}
 }
 
-function isStatelessComponent(c) {
-	return typeof c==='function' && !(c.prototype && c.prototype.render);
-}
-
-// wraps stateless functional components in a PropTypes validator
-function wrapStatelessComponent(WrappedComponent) {
-	return createClass({
-		displayName: WrappedComponent.displayName || WrappedComponent.name,
-		render() {
-			return WrappedComponent(this.props, this.context);
-		}
-	});
-}
-
-function statelessComponentHook(Ctor) {
-	let Wrapped = Ctor[COMPONENT_WRAPPER_KEY];
-	if (Wrapped) return Wrapped===true ? Ctor : Wrapped;
-
-	Wrapped = wrapStatelessComponent(Ctor);
-
-	Object.defineProperty(Wrapped, COMPONENT_WRAPPER_KEY, { configurable: true, value: true });
-	Wrapped.displayName = Ctor.displayName;
-	Wrapped.propTypes = Ctor.propTypes;
-	Wrapped.defaultProps = Ctor.defaultProps;
-
-	Object.defineProperty(Ctor, COMPONENT_WRAPPER_KEY, { configurable: true, value: Wrapped });
-
-	return Wrapped;
-}
-
 function createElement(...args) {
 	upgradeToVNodes(args, 2);
 	let vnode = h(...args);
@@ -250,10 +220,6 @@ function normalizeVNode(vnode) {
 	vnode.preactCompatNormalized = true;
 
 	applyClassName(vnode);
-
-	if (isStatelessComponent(vnode.type)) {
-		vnode.type = statelessComponentHook(vnode.type);
-	}
 
 	let ref = vnode.props.ref,
 		type = ref && typeof ref;
