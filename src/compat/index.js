@@ -129,17 +129,16 @@ class ContextProvider {
 		return this.props.context;
 	}
 	render(props) {
-		return props.children[0];
+		return props.children;
 	}
 }
 
 function renderSubtreeIntoContainer(parentComponent, vnode, container, callback) {
 	let wrap = h(ContextProvider, { context: parentComponent.context }, vnode);
-	render(wrap, container);
-	let renderContainer = container._prevVNode;
-	let component = renderContainer._component || renderContainer.base;
-	if (callback) callback.call(component, renderContainer);
-	return component;
+	let rendered = render(wrap, container);
+	let c = rendered.props.children._component;
+	if (callback) callback.call(c, rendered);
+	return c;
 }
 
 function Portal(props) {
