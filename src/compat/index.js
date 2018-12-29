@@ -294,22 +294,22 @@ function createStringRefProxy(name, component) {
 	});
 }
 
-function applyEventNormalization({ nodeName, attributes }) {
-	if (!attributes || typeof nodeName!=='string') return;
-	let props = {};
-	for (let i in attributes) {
-		props[i.toLowerCase()] = i;
+function applyEventNormalization({ type, props }) {
+	if (!props || typeof type!=='string') return;
+	let newProps = {};
+	for (let i in props) {
+		newProps[i.toLowerCase()] = i;
 	}
-	if (props.ondoubleclick) {
-		attributes.ondblclick = attributes[props.ondoubleclick];
-		delete attributes[props.ondoubleclick];
+	if (newProps.ondoubleclick) {
+		props.ondblclick = props[newProps.ondoubleclick];
+		delete props[newProps.ondoubleclick];
 	}
 	// for *textual inputs* (incl textarea), normalize `onChange` -> `onInput`:
-	if (props.onchange && (nodeName==='textarea' || (nodeName.toLowerCase()==='input' && !/^fil|che|rad/i.test(attributes.type)))) {
-		let normalized = props.oninput || 'oninput';
-		if (!attributes[normalized]) {
-			attributes[normalized] = multihook([attributes[normalized], attributes[props.onchange]]);
-			delete attributes[props.onchange];
+	if (newProps.onchange && (type==='textarea' || (type.toLowerCase()==='input' && !/^fil|che|rad/i.test(props.type)))) {
+		let normalized = newProps.oninput || 'oninput';
+		if (!props[normalized]) {
+			props[normalized] = multihook([props[normalized], props[newProps.onchange]]);
+			delete props[newProps.onchange];
 		}
 	}
 }
