@@ -1,4 +1,5 @@
 import { IS_NON_DIMENSIONAL } from '../constants';
+import options from '../options';
 
 /**
  * Diff the old and new properties of a VNode and apply changes to the DOM node
@@ -93,5 +94,5 @@ function setProperty(dom, name, value, oldValue, isSvg) {
  * @private
  */
 function eventProxy(e) {
-	return this._listeners[e.type](e);
+	return this._listeners[e.type](options.event ? options.event(e) : e);
 }
