@@ -48,9 +48,6 @@ options.vnode = vnode => {
 
 		if (typeof tag==='function') {
 			if (tag[COMPONENT_WRAPPER_KEY]===true || (tag.prototype && 'isReactComponent' in tag.prototype)) {
-				if (vnode.children && String(vnode.children)==='') vnode.children = undefined;
-				if (vnode.children) attrs.children = vnode.children;
-
 				if (!vnode.preactCompatNormalized) {
 					normalizeVNode(vnode);
 				}
@@ -58,9 +55,6 @@ options.vnode = vnode => {
 			}
 		}
 		else {
-			if (vnode.children && String(vnode.children)==='') vnode.children = undefined;
-			if (vnode.children) attrs.children = vnode.children;
-
 			if (attrs.defaultValue) {
 				if (!attrs.value && attrs.value!==0) {
 					attrs.value = attrs.defaultValue;
