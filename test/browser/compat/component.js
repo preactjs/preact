@@ -1,6 +1,5 @@
 import { setupScratch, teardown, setupRerender } from '../../_util/helpers';
 import React from '../../../src/compat';
-import { Component } from '../../../src/index';
 
 describe('components', () => {
 
@@ -187,73 +186,6 @@ describe('components', () => {
 			Foo.resetHistory();
 			React.render(<Foo bar="bar" />, scratch);
 			expect(Foo).to.have.been.calledWithMatch({ foo:'default foo', bar:'bar' });
-		});
-	});
-
-	describe('propTypes', () => {
-		function checkPropTypes(Foo, name = 'Foo') {
-			sinon.stub(console, 'error');
-			React.render(<Foo />, scratch);
-			expect(console.error).to.have.been.calledWithMatch(
-				'Warning: Failed prop type: The prop `func` is marked as required in `' + name + '`, but its value is `undefined`.'
-			);
-			expect(console.error).to.have.been.called;
-
-			console.error.resetHistory();
-
-			let noop = () => undefined;
-			React.render(<Foo func={noop} />, scratch);
-			expect(console.error).not.to.have.been.called;
-
-			React.render(<Foo func={noop} bool="one" />, scratch);
-			expect(console.error).to.have.been.calledWithMatch(
-				'Warning: Failed prop type: Invalid prop `bool` of type `string` supplied to `' + name + '`, expected `boolean`.'
-			);
-
-			console.error.restore();
-		}
-
-		it('should support propTypes for ES Class components', () => {
-			class Foo extends React.Component {
-				static propTypes = {
-					func: React.PropTypes.func.isRequired,
-					bool: React.PropTypes.bool
-				};
-				render() {
-					return <div />;
-				}
-			}
-
-			checkPropTypes(Foo);
-		});
-
-		it('should support propTypes for createClass components', () => {
-			const Bar = React.createClass({
-				propTypes: {
-					func: React.PropTypes.func.isRequired,
-					bool: React.PropTypes.bool
-				},
-				render: function Bar() { return <div />; }
-			});
-
-			checkPropTypes(Bar, 'Bar');
-		});
-
-		it('should support propTypes for pure components', () => {
-			function Baz() { return <div />; }
-			Baz.propTypes = {
-				func: React.PropTypes.func.isRequired,
-				bool: React.PropTypes.bool
-			};
-			checkPropTypes(Baz, 'Baz');
-
-			const Bip = () => <div />;
-			Bip.displayName = 'Bip';
-			Bip.propTypes = {
-				func: React.PropTypes.func.isRequired,
-				bool: React.PropTypes.bool
-			};
-			checkPropTypes(Bip, 'Bip');
 		});
 	});
 
