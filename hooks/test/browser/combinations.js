@@ -1,7 +1,7 @@
 import { createElement as h, render } from 'preact';
 import { spy } from 'sinon';
 import { setupScratch, teardown, setupRerender } from '../../../test/_util/helpers';
-import { useState, useEffect, useLayoutEffect, useRef } from '../../src';
+import { useState, useReducer, useEffect, useLayoutEffect, useRef } from '../../src';
 import { scheduleEffectAssert } from './useEffectUtil';
 
 /** @jsx h */
@@ -113,6 +113,46 @@ describe('combinations', () => {
 		render(<Comp/>, scratch);
 
 		expect(refAtLayoutTime.value).to.equal('hello');
+	});
+
+	it('can use multiple useState and useReducer hooks', () => {
+		let states = [];
+		let dispatchState4;
+
+		function reducer1(state, action) {
+      switch (action.type) {
+        case 'increment': return state + action.count;
+      }
+		}
+		
+		function reducer2(state, action) {
+      switch (action.type) {
+        case 'increment': return state + action.count * 2;
+      }
+    }
+
+		function Comp() {
+			const [state1] = useState(0);
+			const [state2] = useReducer(reducer1, 10);
+			const [state3] = useState(1);
+			const [state4, dispatch] = useReducer(reducer2, 20);
+
+			dispatchState4 = dispatch;
+			states.push(state1, state2, state3, state4);
+
+			return null;
+		}
+
+		render(<Comp/>, scratch);
+
+		expect(states).to.deep.equal([0, 10, 1, 20]);
+
+		states = [];
+
+		dispatchState4({ type: 'increment', count: 10 });
+		rerender();
+
+		expect(states).to.deep.equal([0, 10, 1, 40]);
 	});
 
 });

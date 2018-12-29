@@ -62,38 +62,29 @@ options.beforeUnmount = vnode => {
 	}
 };
 
-const createHook = (create, hasPropFilter = false) => (...args) => {
+const createHook = (create, shouldRun) => (...args) => {
 	if (component == null) return;
 
 	const hooks = component.__hooks || (component.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [] });
-	const last = args[args.length - 1];
-	const props = hasPropFilter && Array.isArray(last) ? last : undefined;
-	let index = currentIndex++;
-	let hook = hooks._list[index];
+
+	let _index = currentIndex++;
+	let hook = hooks._list[_index];
 
 	if (!hook) {
-		hook = hooks._list[index] = { index, props, value: undefined };
+		hook = hooks._list[_index] = { _index };
 		hook.run = create(hook, component, ...args);
 	}
-	else if (props) {
-		let changed = false;
-		for (let i=0; i<props.length; i++) {
-			if (props[i] !== hook.props[i]) {
-				changed = true;
-				break;
-			}
-		}
-
-		hook.props = props;
-
-		if (changed === false) return hook.value;
+	else if (shouldRun && !shouldRun(hook._args, args)) {
+		return hook._value;
 	}
 
-	return (hook.value = hook.run(...args));
+	hook._args = args;
+
+	return (hook._value = hook.run(...args));
 };
 
 export const useState = createHook((hook, inst, initialValue) => {
-	const stateId = 'hookstate$' + hook.index;
+	const stateId = 'hookstate$' + hook._index;
 
 	let value = typeof initialValue === 'function' ? initialValue() : initialValue;
 	const setter = {};
@@ -109,7 +100,7 @@ export const useState = createHook((hook, inst, initialValue) => {
 });
 
 export const useReducer = createHook((hook, inst, reducer, initialState, initialAction) => {
-	const stateId = 'hookreducer$' + hook.id;
+	const stateId = 'hookreducer$' + hook._index;
 
 	const setter = {};
 	let state = initialAction ? reducer(initialState, initialAction) : initialState;
@@ -131,20 +122,21 @@ export const useEffect = createHook((hook, inst) => {
 		inst.__hooks._pendingEffects.push(effect);
 		afterPaint(effect);
 	};
-}, true);
+}, propsChanged);
 
 export const useLayoutEffect = createHook((hook, inst) => {
-	return callback => {
-		const effect = [hook, callback];
-		inst.__hooks._pendingLayoutEffects.push(effect);
-	};
-}, true);
+	return callback => inst.__hooks._pendingLayoutEffects.push([hook, callback]);
+}, propsChanged);
 
 export const useRef = createHook((hook, inst, initialValue) => {
 	const ref = createRef();
 	ref.current = initialValue;
 	return () => ref;
 });
+
+export const useMemo = createHook(() => callback => callback(), memoChanged);
+export const useCallback = createHook(() => callback => callback, propsChanged);
+
 
 const afterPaint = window ? windowAfterPaint : () => {};
 
@@ -182,4 +174,34 @@ function invokeEffect(effect) {
 	if (hook.cleanup) hook.cleanup();
 	const result = callback();
 	if (typeof result === 'function') hook.cleanup = result;
+}
+
+function getProps(args) {
+	const last = args[args.length - 1];
+	return Array.isArray(last) ? last : undefined;
+}
+
+const notApplicable = {};
+
+function propsChanged(oldArgs, newArgs) {
+	const props = getProps(newArgs);
+	if (!props) return notApplicable;
+
+	const oldProps = getProps(oldArgs);
+
+	for (let i=0; i<props.length; i++) {
+		if (props[i] !== oldProps[i]) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+function memoChanged(oldArgs, newArgs) {
+	const rerun = propsChanged(oldArgs, newArgs);
+
+	return rerun !== notApplicable
+		? rerun
+		: newArgs[0] !== oldArgs[0];
 }
