@@ -55,8 +55,8 @@ options.beforeUnmount = vnode => {
 
 	if (hooks) {
 		for (let i=0; i<hooks._list.length; i++) {
-			if (hooks._list[i].cleanup) {
-				hooks._list[i].cleanup();
+			if (hooks._list[i]._cleanup) {
+				hooks._list[i]._cleanup();
 			}
 		}
 	}
@@ -72,7 +72,7 @@ const createHook = (create, shouldRun) => (...args) => {
 
 	if (!hook) {
 		hook = hooks._list[_index] = { _index };
-		hook.run = create(hook, component, ...args);
+		hook._run = create(hook, component, ...args);
 	}
 	else if (shouldRun && !shouldRun(hook._args, args)) {
 		return hook._value;
@@ -80,7 +80,7 @@ const createHook = (create, shouldRun) => (...args) => {
 
 	hook._args = args;
 
-	return (hook._value = hook.run(...args));
+	return (hook._value = hook._run(...args));
 };
 
 export const useState = createHook((hook, inst, initialValue) => {
@@ -171,9 +171,9 @@ function fire() {
 
 function invokeEffect(effect) {
 	const [hook, callback] = effect;
-	if (hook.cleanup) hook.cleanup();
+	if (hook._cleanup) hook._cleanup();
 	const result = callback();
-	if (typeof result === 'function') hook.cleanup = result;
+	if (typeof result === 'function') hook._cleanup = result;
 }
 
 function getProps(args) {
