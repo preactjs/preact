@@ -24,7 +24,7 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 	});
 
 
-  it('performs the effect after every render by default', done => {
+  it('performs the effect after every render by default', () => {
     const callback = spy();
 
     function Comp() {
@@ -34,15 +34,13 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 
     render(<Comp />, scratch);
 
-    scheduleEffectAssert(() => expect(callback).to.be.calledOnce)
+    return scheduleEffectAssert(() => expect(callback).to.be.calledOnce)
       .then(() => scheduleEffectAssert(() => expect(callback).to.be.calledOnce))
       .then(() => render(<Comp />, scratch))
-      .then(() => scheduleEffectAssert(() => expect(callback).to.be.calledTwice))
-      .then(done)
-      .catch(done);
+      .then(() => scheduleEffectAssert(() => expect(callback).to.be.calledTwice));
   });
 
-  it('performs the effect only if one of the inputs changed', done => {
+  it('performs the effect only if one of the inputs changed', () => {
     const callback = spy();
 
     function Comp(props) {
@@ -52,18 +50,16 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 
     render(<Comp a={1} b={2} />, scratch);
 
-    scheduleEffectAssert(() => expect(callback).to.be.calledOnce)
+    return scheduleEffectAssert(() => expect(callback).to.be.calledOnce)
       .then(() => render(<Comp a={1} b={2} />, scratch))
       .then(() => scheduleEffectAssert(() => expect(callback).to.be.calledOnce))
       .then(() => render(<Comp a={2} b={2} />, scratch))
       .then(() => scheduleEffectAssert(() => expect(callback).to.be.calledTwice))
       .then(() => render(<Comp a={2} b={2} />, scratch))
-      .then(() => scheduleEffectAssert(() => expect(callback).to.be.calledTwice))
-      .then(done)
-      .catch(done);
+      .then(() => scheduleEffectAssert(() => expect(callback).to.be.calledTwice));
   });
 
-  it('performs the effect at mount time and never again if an empty input Array is passed', done => {
+  it('performs the effect at mount time and never again if an empty input Array is passed', () => {
     const callback = spy();
 
     function Comp() {
@@ -76,14 +72,12 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 
     expect(callback).to.be.calledOnce;
 
-    scheduleEffectAssert(() => expect(callback).to.be.calledOnce)
+    return scheduleEffectAssert(() => expect(callback).to.be.calledOnce)
       .then(() => render(<Comp />, scratch))
-      .then(() => scheduleEffectAssert(() => expect(callback).to.be.calledOnce))
-      .then(done)
-      .catch(done);
+      .then(() => scheduleEffectAssert(() => expect(callback).to.be.calledOnce));
   });
 
-  it('calls the cleanup function followed by the effect after each render', done => {
+  it('calls the cleanup function followed by the effect after each render', () => {
     const cleanupFunction = spy();
     const callback = spy(() => cleanupFunction);
 
@@ -94,7 +88,7 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 
     render(<Comp />, scratch);
 
-    scheduleEffectAssert(() => {
+    return scheduleEffectAssert(() => {
       expect(cleanupFunction).to.be.not.called;
       expect(callback).to.be.calledOnce;
     })
@@ -104,12 +98,10 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
       expect(cleanupFunction).to.be.calledOnce;
       expect(callback).to.be.calledTwice;
       expect(callback.lastCall.calledAfter(cleanupFunction.lastCall));
-    }))
-    .then(done)
-    .catch(done);
+    }));
   });
 
-  it('cleanups the effect when the component get unmounted if the effect was called before', done => {
+  it('cleanups the effect when the component get unmounted if the effect was called before', () => {
     const cleanupFunction = spy();
     const callback = spy(() => cleanupFunction);
 
@@ -120,16 +112,14 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 
     render(<Comp />, scratch);
 
-    scheduleEffectAssert(() => {
+    return scheduleEffectAssert(() => {
       render(null, scratch);
       rerender();
       expect(cleanupFunction).to.be.calledOnce;
-    })
-    .then(done)
-    .catch(done);
+    });
   });
 
-  it('works with closure effect callbacks capturing props', done => {
+  it('works with closure effect callbacks capturing props', () => {
     const values = [];
 
     function Comp(props) {
@@ -140,8 +130,6 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
     render(<Comp value={1} />, scratch);
     render(<Comp value={2} />, scratch);
 
-    scheduleEffectAssert(() => expect(values).to.deep.equal([1, 2]))
-      .then(done)
-      .catch(done);
+    return scheduleEffectAssert(() => expect(values).to.deep.equal([1, 2]));
   });
 }

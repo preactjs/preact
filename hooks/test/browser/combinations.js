@@ -58,7 +58,7 @@ describe('combinations', () => {
 		expect(states).to.deep.equal({ state1: 1, state2: 20, state3: 30, state4: 4 });
 	});
 
-	it('can rerender asynchronously from within an effect', done => {
+	it('can rerender asynchronously from within an effect', () => {
 		const didRender = spy();
 
 		function Comp() {
@@ -72,12 +72,10 @@ describe('combinations', () => {
 
 		render(<Comp/>, scratch);
 
-		scheduleEffectAssert(() => {
+		return scheduleEffectAssert(() => {
 			rerender();
 			expect(didRender).to.have.been.calledTwice.and.calledWith(1)
-		})
-		.then(done)
-		.catch(done);
+		});
 	});
 
 	it('can rerender synchronously from within a layout effect', () => {

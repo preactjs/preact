@@ -58,7 +58,7 @@ describe('useEffect', () => {
     expect(callback).to.be.calledTwice;
   });
 
-  it('cancels the effect when the component get unmounted before it had the chance to run it', done => {
+  it('cancels the effect when the component get unmounted before it had the chance to run it', () => {
     const cleanupFunction = spy();
     const callback = spy(() => cleanupFunction);
 
@@ -70,11 +70,9 @@ describe('useEffect', () => {
     render(<Comp />, scratch);
     render(null, scratch);
 
-    scheduleEffectAssert(() => {
+    return scheduleEffectAssert(() => {
       expect(cleanupFunction).to.not.be.called;
       expect(callback).to.not.be.called;
-    })
-    .then(done)
-    .catch(done);
+    });
   });
 });
