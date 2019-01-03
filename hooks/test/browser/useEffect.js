@@ -3,6 +3,8 @@ import { spy } from 'sinon';
 import { setupScratch, teardown, setupRerender } from '../../../test/_util/helpers';
 import { useEffect } from '../../src';
 import { useEffectAssertions } from './useEffectAssertions';
+import { scheduleEffectAssert } from './useEffectUtil';
+
 
 /** @jsx h */
 
@@ -22,17 +24,6 @@ describe('useEffect', () => {
 	afterEach(() => {
 		teardown(scratch);
 	});
-
-  function scheduleEffectAssert(assertFn) {
-    return new Promise(resolve => {
-      requestAnimationFrame(() =>
-        setTimeout(() => {
-          assertFn();
-          resolve();
-        }, 0)
-      );
-    })
-  }
 
   useEffectAssertions(useEffect, scheduleEffectAssert);
 

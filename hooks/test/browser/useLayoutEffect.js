@@ -23,6 +23,7 @@ describe('useLayoutEffect', () => {
 		teardown(scratch);
 	});
 
+  // Layout effects fire synchronously
   const scheduleEffectAssert = assertFn => new Promise(resolve => {
     assertFn();
     resolve();
