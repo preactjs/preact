@@ -116,17 +116,17 @@ export const useReducer = createHook((hook, inst, reducer, initialState, initial
 	];
 });
 
-export const useEffect = createHook((hook, inst) => {
+export const useEffect = window ? createHook((hook, inst) => {
 	return callback => {
 		const effect = [hook, callback, inst];
 		inst.__hooks._pendingEffects.push(effect);
 		afterPaint(effect);
 	};
-}, propsChanged);
+}, propsChanged) : noop;
 
-export const useLayoutEffect = createHook((hook, inst) => {
+export const useLayoutEffect = window ? createHook((hook, inst) => {
 	return callback => inst.__hooks._pendingLayoutEffects.push([hook, callback]);
-}, propsChanged);
+}, propsChanged) : noop;
 
 export const useRef = createHook((hook, inst, initialValue) => {
 	const ref = { current: initialValue };
@@ -137,12 +137,10 @@ export const useMemo = createHook(() => callback => callback(), memoChanged);
 export const useCallback = createHook(() => callback => callback, propsChanged);
 
 
-const afterPaint = window ? windowAfterPaint : () => {};
-
 // Note: if someone used Component.debounce = requestAnimationFrame,
 // then effects will ALWAYS run on the NEXT frame instead of the current one, incurring a ~16ms delay.
 // Perhaps this is not such a big deal.
-function windowAfterPaint(args) {
+function afterPaint(args) {
 	if (afterPaintEffects.push(args) === 1) {
 		requestAnimationFrame(onPaint);
 	}
@@ -204,3 +202,5 @@ function memoChanged(oldArgs, newArgs) {
 		? rerun
 		: newArgs[0] !== oldArgs[0];
 }
+
+function noop() {};
