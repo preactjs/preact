@@ -1,4 +1,4 @@
-import { options, createRef } from 'preact';
+import { options } from 'preact';
 
 let currentIndex;
 let component;
@@ -129,8 +129,7 @@ export const useLayoutEffect = createHook((hook, inst) => {
 }, propsChanged);
 
 export const useRef = createHook((hook, inst, initialValue) => {
-	const ref = createRef();
-	ref.current = initialValue;
+	const ref = { current: initialValue };
 	return () => ref;
 });
 
