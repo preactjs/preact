@@ -174,8 +174,7 @@ function invokeEffect(effect) {
 }
 
 function getProps(args) {
-	const last = args[args.length - 1];
-	return Array.isArray(last) ? last : undefined;
+	return args.length > 1 ? args[1] : undefined;
 }
 
 const notApplicable = {};
