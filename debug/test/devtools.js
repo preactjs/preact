@@ -2,7 +2,7 @@ import { createElement as h, Fragment } from '../../src/create-element';
 import { render } from '../../src/render';
 import { Component } from '../../src/component';
 import { getDisplayName, setIn, isRoot, getPatchedRoot, getData, patchRoot, shallowEqual, hasDataChanged, hasProfileDataChanged, getChildren } from '../../src/devtools/custom';
-import { setupScratch, setupRerender, teardown, clearOptions } from '../_util/helpers';
+import { setupScratch, setupRerender, teardown, clearOptions } from '../../test/_util/helpers';
 import { initDevTools } from '../../src/devtools';
 import options from '../../src/options';
 import { Renderer } from '../../src/devtools/renderer';

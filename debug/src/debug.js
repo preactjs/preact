@@ -1,6 +1,6 @@
 import { checkPropTypes } from 'prop-types';
-import { getDisplayName } from '../devtools/custom';
-import { options, toChildArray } from '../index';
+import { getDisplayName } from '../../src/devtools/custom';
+import { options, toChildArray } from '../../src/index';
 
 export function initDebug() {
 	/* eslint-disable no-console */
@@ -60,7 +60,7 @@ export function initDebug() {
 
 /**
  * Serialize a vnode tree to a string
- * @param {import('../internal').VNode} vnode
+ * @param {import('../../src/internal').VNode} vnode
  * @returns {string}
  */
 export function serializeVNode(vnode) {
