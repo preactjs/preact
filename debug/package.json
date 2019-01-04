@@ -12,7 +12,7 @@
   "scripts": {
     "build": "microbundle --raw",
     "test": "yarn test:karma",
-    "test:karma": "karma start ../karma.conf.js --single-run",
+    "test:karma": "karma start test/karma.conf.js --single-run",
     "test:karma:watch": "npm run test:karma -- no-single-run"
   },
   "mangle": {

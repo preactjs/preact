@@ -1,21 +1,17 @@
-import { createElement as h, Fragment } from '../../src/create-element';
-import { render } from '../../src/render';
-import { Component } from '../../src/component';
+import { createElement, createElement as h, Fragment, options, Component, render } from 'ceviche';
 import { getDisplayName, setIn, isRoot, getPatchedRoot, getData, patchRoot, shallowEqual, hasDataChanged, hasProfileDataChanged, getChildren } from '../../src/devtools/custom';
-import { setupScratch, setupRerender, teardown, clearOptions } from '../../test/_util/helpers';
+import { setupScratch, setupRerender, teardown, clearOptions } from '../../../test/_util/helpers';
 import { initDevTools } from '../../src/devtools';
-import options from '../../src/options';
 import { Renderer } from '../../src/devtools/renderer';
-import { createElement } from '../../src';
 
 /** @jsx h */
 
-/** @typedef {import('../../src/internal').DevtoolsHook & { log: any[], clear: () => void }} MockHook */
+/** @typedef {import('../../../src/internal').DevtoolsHook & { log: any[], clear: () => void }} MockHook */
 
 /**
  * Serialize a devtool events and filter out `updateProfilerTimes` because it
  * relies on timings which would lead to flaky tests.
- * @param {import('../../src/internal').DevtoolsEvent[]} events
+ * @param {import('../../../src/internal').DevtoolsEvent[]} events
  */
 function serialize(events) {
 	return events.filter(x => x.type!='updateProfileTimes').map(x => ({
@@ -32,7 +28,7 @@ function serialize(events) {
 function createMockHook() {
 	let roots = new Set();
 
-	/** @type {Array<import('../../src/internal').DevtoolsEvent>} */
+	/** @type {Array<import('../../../src/internal').DevtoolsEvent>} */
 	let events = [];
 
 	function emit(ev, data) {
@@ -73,7 +69,7 @@ function createMockHook() {
 /**
  * Verify the references in the events passed to the devtools. Component have to
  * be traversed in a child-depth-first order for the devtools to work.
- * @param {Array<import('../../src/internal').DevtoolsEvent>} events
+ * @param {Array<import('../../../src/internal').DevtoolsEvent>} events
  */
 function checkEventReferences(events) {
 	let seen = new Set();
@@ -119,7 +115,7 @@ function checkEventReferences(events) {
 
 describe('devtools', () => {
 
-	/** @type {import('../../src/internal').PreactElement} */
+	/** @type {import('../../../src/internal').PreactElement} */
 	let scratch;
 
 	/** @type {() => void} */
@@ -135,7 +131,7 @@ describe('devtools', () => {
 
 		hook = createMockHook();
 
-		/** @type {import('../../src/internal').DevtoolsWindow} */
+		/** @type {import('../../../src/internal').DevtoolsWindow} */
 		(window).__REACT_DEVTOOLS_GLOBAL_HOOK__ = hook;
 
 		initDevTools();
@@ -159,7 +155,7 @@ describe('devtools', () => {
 		/** @type {*} */
 		(console.error).restore();
 
-		delete /** @type {import('../../src/internal').DevtoolsWindow} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
+		delete /** @type {import('../../../src/internal').DevtoolsWindow} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
 	});
 
 	describe('getDisplayName', () => {
