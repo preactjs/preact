@@ -173,17 +173,13 @@ function invokeEffect(effect) {
 	if (typeof result === 'function') hook._cleanup = result;
 }
 
-function getProps(args) {
-	return args.length > 1 ? args[1] : undefined;
-}
-
 const notApplicable = {};
 
 function propsChanged(oldArgs, newArgs) {
-	const props = getProps(newArgs);
+	const props = newArgs.length > 1 ? newArgs[1] : undefined;
 	if (!props) return notApplicable;
 
-	const oldProps = getProps(oldArgs);
+	const oldProps = oldArgs[1];
 
 	for (let i=0; i<props.length; i++) {
 		if (props[i] !== oldProps[i]) {
