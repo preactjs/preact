@@ -1,5 +1,6 @@
 import { createElement as h, Component, render } from '../../src/index';
-import { setupScratch, teardown, logCall, getLog, clearLog } from '../_util/helpers';
+import { setupScratch, teardown } from '../_util/helpers';
+import { logCall, clearLog, getLog } from '../_util/logCall';
 import { spy } from 'sinon';
 
 /** @jsx h */

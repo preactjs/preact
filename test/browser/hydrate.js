@@ -1,6 +1,7 @@
 import { createElement, hydrate, Fragment } from '../../src/index';
-import { setupScratch, teardown, logCall, clearLog, getLog } from '../_util/helpers';
+import { setupScratch, teardown } from '../_util/helpers';
 import { ul, li, div } from '../_util/dom';
+import { logCall, clearLog, getLog } from '../_util/logCall';
 
 /** @jsx createElement */
 
