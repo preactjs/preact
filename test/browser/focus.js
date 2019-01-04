@@ -1,5 +1,6 @@
-import { createElement as h, render, Component, Fragment } from '../../src/index';
+import { createElement as h, render, Component, Fragment, hydrate } from '../../src/index';
 import { setupScratch, teardown, setupRerender } from '../_util/helpers';
+import { div, span, input as inputStr } from '../_util/dom';
 /* eslint-disable react/jsx-boolean-value */
 
 /** @jsx h */
@@ -11,6 +12,34 @@ describe('focus', () => {
 	/** @type {() => void} */
 	let rerender;
 
+	const List = ({ children }) => <div>{children}</div>;
+	const ListItem = ({ children }) => <span>{children}</span>;
+	const Input = () => <input type="text" />;
+
+	function focusInput() {
+		if (!scratch) return;
+
+		const input = scratch.querySelector('input');
+		input.value = 'a word';
+		input.focus();
+		input.setSelectionRange(2, 5);
+
+		expect(document.activeElement).to.equal(input);
+
+		return input;
+	}
+
+	/**
+	 * Validate an input tag has maintained focus
+	 * @param {HTMLInputElement} input The input to validate
+	 */
+	function validateFocus(input, message = undefined) {
+		expect(document.activeElement).to.equal(input, message);
+		expect(input.selectionStart).to.equal(2);
+		expect(input.selectionEnd).to.equal(5);
+
+	}
+
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
@@ -20,30 +49,282 @@ describe('focus', () => {
 		teardown(scratch);
 	});
 
-	it('should not lose focus', () => {
-		function Foo({ condition }) {
-			return (
-				<div>
-					{condition ? <input /> : <span>fooo</span>}
-					{condition ? <span>fooo</span> : <input />}
-				</div>
-			);
-		}
+	it('should maintain focus when swapping elements', () => {
+		render((
+			<List>
+				<Input />
+				<ListItem>fooo</ListItem>
+			</List>
+		), scratch);
 
-		render(<Foo condition={true} />, scratch);
-		let input = scratch.querySelector('input');
+		const input = focusInput();
 
-		input.focus();
-		expect(document.activeElement).to.equal(input);
+		render((
+			<List>
+				<ListItem>fooo</ListItem>
+				<Input />
+			</List>
+		), scratch);
+		validateFocus(input);
+	});
 
-		render(<Foo condition={false} />, scratch);
-		expect(document.activeElement).to.equal(input);
+	it('should maintain focus when moving input to beginning, end, and middle of children', () => {
+		render((
+			<List>
+				<ListItem>1</ListItem>
+				<ListItem>2</ListItem>
+				<ListItem>3</ListItem>
+				<ListItem>4</ListItem>
+				<Input />
+			</List>
+		), scratch);
+
+		let input = focusInput();
+
+		render((
+			<List>
+				<Input />
+				<ListItem>1</ListItem>
+				<ListItem>2</ListItem>
+				<ListItem>3</ListItem>
+				<ListItem>4</ListItem>
+			</List>
+		), scratch);
+		validateFocus(input, 'Moving from end to beginning');
+
+		input = focusInput();
+
+		render((
+			<List>
+				<ListItem>1</ListItem>
+				<ListItem>2</ListItem>
+				<ListItem>3</ListItem>
+				<ListItem>4</ListItem>
+				<Input />
+			</List>
+		), scratch);
+		validateFocus(input, 'Moving from beginning to end');
+
+		input = focusInput();
+
+		render((
+			<List>
+				<ListItem>1</ListItem>
+				<ListItem>2</ListItem>
+				<Input />
+				<ListItem>3</ListItem>
+				<ListItem>4</ListItem>
+			</List>
+		), scratch);
+		validateFocus(input, 'Moving from end to middle');
+
+		input = focusInput();
+
+		render((
+			<List>
+				<Input />
+				<ListItem>1</ListItem>
+				<ListItem>2</ListItem>
+				<ListItem>3</ListItem>
+				<ListItem>4</ListItem>
+			</List>
+		), scratch);
+		validateFocus(input, 'Moving from middle to beginning');
+
+		input = focusInput();
+
+		render((
+			<List>
+				<ListItem>1</ListItem>
+				<ListItem>2</ListItem>
+				<Input />
+				<ListItem>3</ListItem>
+				<ListItem>4</ListItem>
+			</List>
+		), scratch);
+		validateFocus(input, 'Moving from beginning to middle');
+
+		input = focusInput();
+
+		render((
+			<List>
+				<ListItem>1</ListItem>
+				<ListItem>2</ListItem>
+				<ListItem>3</ListItem>
+				<ListItem>4</ListItem>
+				<Input />
+			</List>
+		), scratch);
+		validateFocus(input, 'Moving from middle to end');
+	});
+
+	it('should maintain focus when adding and removing children around input', () => {
+		render((
+			<List>
+				<Input />
+			</List>
+		), scratch);
+
+		let input = focusInput();
+
+		render((
+			<List>
+				<ListItem>1</ListItem>
+				<Input />
+			</List>
+		), scratch);
+		validateFocus(input, 'insert sibling before 1');
+
+		input = focusInput();
+
+		render((
+			<List>
+				<ListItem>1</ListItem>
+				<Input />
+				<ListItem>2</ListItem>
+			</List>
+		), scratch);
+		validateFocus(input, 'insert sibling after 1');
+
+		input = focusInput();
+
+		render((
+			<List>
+				<Input />
+				<ListItem>2</ListItem>
+			</List>
+		), scratch);
+		validateFocus(input, 'remove sibling before');
+
+		input = focusInput();
+
+		render((
+			<List>
+				<Input />
+			</List>
+		), scratch);
+		validateFocus(input, 'remove sibling after');
+
+		input = focusInput();
+
+		render((
+			<List>
+				<Input />
+				<ListItem>2</ListItem>
+			</List>
+		), scratch);
+		validateFocus(input, 'insert sibling after 2');
+
+		input = focusInput();
+
+		render((
+			<List>
+				<ListItem>1</ListItem>
+				<Input />
+				<ListItem>2</ListItem>
+			</List>
+		), scratch);
+		validateFocus(input, 'insert sibling before 2');
+	});
+
+	it('should maintain focus when hydrating', () => {
+		const html = div([
+			span('1'),
+			span('2'),
+			span('3'),
+			inputStr()
+		].join(''));
+
+		scratch.innerHTML = html;
+		const input = focusInput();
+
+		hydrate((
+			<List>
+				<ListItem>1</ListItem>
+				<ListItem>2</ListItem>
+				<ListItem>3</ListItem>
+				<Input />
+			</List>
+		), scratch);
+
+		expect(scratch.innerHTML).to.equal(html);
+		validateFocus(input);
+	});
+
+	it('does not maintain focus when re-parenting an element', () => {
+		render((
+			<List>
+				<ListItem>1</ListItem>
+				<ListItem><Input /></ListItem>
+				<ListItem>2</ListItem>
+			</List>
+		), scratch);
+
+		let input = focusInput();
+
+		render((
+			<List>
+				<ListItem>1</ListItem>
+				<Input />
+				<ListItem>2</ListItem>
+			</List>
+		), scratch);
+		expect(document.activeElement).not.to.equal(input, 'removing parent');
+
+		input = focusInput();
+
+		render((
+			<List>
+				<ListItem>1</ListItem>
+				<ListItem><Input /></ListItem>
+				<ListItem>2</ListItem>
+			</List>
+		), scratch);
+		expect(document.activeElement).not.to.equal(input, 'adding parent');
+	});
+
+	it('does not keep focus when moving an element in and out of a Fragment', () => {
+		// Hmmm, possibly re-evaluate this behavior. Would require re-working Fragment child diffing
+		render((
+			<List>
+				<Input />
+				<Fragment>
+					<ListItem>fooo</ListItem>
+				</Fragment>
+			</List>
+		), scratch);
+
+		let input = focusInput();
+
+		render((
+			<List>
+				<Fragment>
+					<ListItem>fooo</ListItem>
+					<Input />
+				</Fragment>
+			</List>
+		), scratch);
+		expect(document.activeElement).not.to.equal(input, 'Moving into a Fragment');
+
+		input = focusInput();
+
+		render((
+			<List>
+				<Fragment>
+					<ListItem>fooo</ListItem>
+				</Fragment>
+				<Input />
+			</List>
+		), scratch);
+		expect(document.activeElement).not.to.equal(input, 'Moving out of a Fragment');
 	});
 
 	it('should keep focus in Fragments', () => {
 
 		/** @type {HTMLInputElement} */
 		let input;
+
+		/** @type {() => void} */
 		let updateState;
 
 		class App extends Component {
@@ -96,6 +377,8 @@ describe('focus', () => {
 
 		/** @type {HTMLInputElement} */
 		let input;
+
+		/** @type {() => void} */
 		let updateState;
 
 		class App extends Component {
