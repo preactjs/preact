@@ -84,7 +84,7 @@ const createHook = (create, shouldRun) => (...args) => {
 };
 
 export const useState = createHook((hook, inst, initialValue) => {
-	const stateId = 'hookstate$' + hook._index;
+	const stateId = 'hs' + hook._index;
 
 	let value = typeof initialValue === 'function' ? initialValue() : initialValue;
 	const setter = {};
@@ -100,7 +100,7 @@ export const useState = createHook((hook, inst, initialValue) => {
 });
 
 export const useReducer = createHook((hook, inst, reducer, initialState, initialAction) => {
-	const stateId = 'hookreducer$' + hook._index;
+	const stateId = 'hr' + hook._index;
 
 	const setter = {};
 	let state = initialAction ? reducer(initialState, initialAction) : initialState;
