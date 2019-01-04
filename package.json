@@ -10,6 +10,7 @@
   "types": "src/index.d.ts",
   "scripts": {
     "build": "microbundle build --raw",
+    "build:package": "npm run build && cd debug && npm run build && cd -",
     "dev": "microbundle watch --raw --format cjs,umd",
     "test": "npm-run-all lint build --parallel test:mocha test:karma test:ts",
     "test:flow": "flow check",
@@ -46,7 +47,10 @@
   },
   "files": [
     "src",
-    "dist"
+    "dist",
+    "debug/dist",
+    "debug/src",
+    "debug/package.json"
   ],
   "keywords": [
     "ceviche",

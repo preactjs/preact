@@ -1,4 +1,4 @@
-import options from '../options';
+import { options } from 'ceviche';
 import { Renderer } from './renderer';
 
 /**

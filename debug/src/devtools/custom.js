@@ -1,5 +1,4 @@
-import { Fragment, createElement } from '../create-element';
-import { enqueueRender } from '../component';
+import { Fragment, createElement } from 'ceviche';
 
 /**
  * Get the type/category of a vnode
@@ -64,11 +63,11 @@ export function getData(vnode) {
 			},
 			setInProps(path, value) {
 				setIn(vnode.props, path, value);
-				enqueueRender(c);
+				c.setState({});
 			},
 			setInContext(path, value) {
 				setIn(c.context, path, value);
-				enqueueRender(c);
+				c.setState({});
 			}
 		};
 	}

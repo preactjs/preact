@@ -4,9 +4,9 @@
   "version": "1.0.0",
   "private": true,
   "description": "Preact extensions for development",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "umd:main": "dist/index.umd.js",
+  "main": "dist/debug.js",
+  "module": "dist/debug.mjs",
+  "umd:main": "dist/debug.umd.js",
   "source": "./src/index.js",
   "license": "MIT",
   "scripts": {
@@ -17,6 +17,10 @@
   },
   "mangle": {
     "regex": "^_"
+  },
+  "dependencies": {
+    "ceviche": "*",
+    "prop-types": "^15.6.2"
   },
   "devDependencies": {
     "@types/chai": "^4.1.2",
