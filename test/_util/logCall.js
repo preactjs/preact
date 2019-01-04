@@ -11,7 +11,8 @@ function serialize(obj) {
 	return Object.prototype.toString.call(obj).replace(/(^\[object |\]$)/g, '');
 }
 
-let log = {};
+/** @type {string[]} */
+let log = [];
 
 /**
  * Modify obj's original method to log calls and arguments on logger object
@@ -21,21 +22,21 @@ let log = {};
  */
 export function logCall(obj, method) {
 	let old = obj[method];
-	obj[method] = function() {
+	obj[method] = function(...args) {
 		let c = '';
-		for (let i=0; i<arguments.length; i++) {
+		for (let i=0; i<args.length; i++) {
 			if (c) c += ', ';
-			c += serialize(arguments[i]);
+			c += serialize(args[i]);
 		}
-		const key = `${serialize(this)}.${method}(${c})`;
-		log[key] = (log[key] || 0) + 1;
-		return old.apply(this, arguments);
+		const operation = `${serialize(this)}.${method}(${c})`;
+		log.push(operation);
+		return old.apply(this, args);
 	};
 }
 
 /**
  * Return log object
- * @return {object} log
+ * @return {string[]} log
  */
 export function getLog() {
 	return log;
@@ -43,5 +44,17 @@ export function getLog() {
 
 /** Clear log object */
 export function clearLog() {
-	log = {};
+	log = [];
+}
+
+export function getLogSummary() {
+
+	/** @type {{ [key: string]: number }} */
+	const summary = {};
+
+	for (let entry of log) {
+		summary[entry] = (summary[entry] || 0) + 1;
+	}
+
+	return summary;
 }
