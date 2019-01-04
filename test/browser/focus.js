@@ -158,7 +158,7 @@ describe('focus', () => {
 		validateFocus(input, 'Moving from middle to end');
 	});
 
-	it('should maintain focus when adding and removing children around input', () => {
+	it('should maintain focus when adding children around input', () => {
 		render((
 			<List>
 				<Input />
@@ -173,7 +173,7 @@ describe('focus', () => {
 				<Input />
 			</List>
 		), scratch);
-		validateFocus(input, 'insert sibling before 1');
+		validateFocus(input, 'insert sibling before');
 
 		input = focusInput();
 
@@ -184,14 +184,55 @@ describe('focus', () => {
 				<ListItem>2</ListItem>
 			</List>
 		), scratch);
-		validateFocus(input, 'insert sibling after 1');
+		validateFocus(input, 'insert sibling after');
 
 		input = focusInput();
 
 		render((
 			<List>
+				<ListItem>1</ListItem>
 				<Input />
 				<ListItem>2</ListItem>
+				<ListItem>3</ListItem>
+			</List>
+		), scratch);
+		validateFocus(input, 'insert sibling after again');
+
+		input = focusInput();
+
+		render((
+			<List>
+				<ListItem>0</ListItem>
+				<ListItem>1</ListItem>
+				<Input />
+				<ListItem>2</ListItem>
+				<ListItem>3</ListItem>
+			</List>
+		), scratch);
+		validateFocus(input, 'insert sibling before again');
+	});
+
+	it('should maintain focus when removing elements around input', () => {
+		render((
+			<List>
+				<ListItem>0</ListItem>
+				<ListItem>1</ListItem>
+				<Input />
+				<ListItem>2</ListItem>
+				<ListItem>3</ListItem>
+			</List>
+		), scratch);
+
+		let input = focusInput();
+
+		input = focusInput();
+
+		render((
+			<List>
+				<ListItem>1</ListItem>
+				<Input />
+				<ListItem>2</ListItem>
+				<ListItem>3</ListItem>
 			</List>
 		), scratch);
 		validateFocus(input, 'remove sibling before');
@@ -200,7 +241,9 @@ describe('focus', () => {
 
 		render((
 			<List>
+				<ListItem>1</ListItem>
 				<Input />
+				<ListItem>2</ListItem>
 			</List>
 		), scratch);
 		validateFocus(input, 'remove sibling after');
@@ -209,22 +252,20 @@ describe('focus', () => {
 
 		render((
 			<List>
+				<ListItem>1</ListItem>
 				<Input />
-				<ListItem>2</ListItem>
 			</List>
 		), scratch);
-		validateFocus(input, 'insert sibling after 2');
+		validateFocus(input, 'remove sibling after 2');
 
 		input = focusInput();
 
 		render((
 			<List>
-				<ListItem>1</ListItem>
 				<Input />
-				<ListItem>2</ListItem>
 			</List>
 		), scratch);
-		validateFocus(input, 'insert sibling before 2');
+		validateFocus(input, 'remove sibling before 2');
 	});
 
 	it('should maintain focus when hydrating', () => {
