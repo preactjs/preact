@@ -9,8 +9,9 @@
   "umd:main": "dist/ceviche.umd.js",
   "types": "src/index.d.ts",
   "scripts": {
-    "build": "microbundle build --raw",
-    "build:package": "npm run build && cd debug && npm run build && cd -",
+    "build": "npm-run-all --parallel build:core build:debug",
+    "build:core": "microbundle build --raw",
+    "build:debug": "microbundle build --raw --cwd debug",
     "dev": "microbundle watch --raw --format cjs,umd",
     "test": "npm-run-all lint build --parallel test:mocha test:karma test:ts",
     "test:flow": "flow check",
