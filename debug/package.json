@@ -10,7 +10,7 @@
   "source": "./src/index.js",
   "license": "MIT",
   "mangle": {
-    "regex": "^_"
+    "regex": "^(?!_renderer)^_"
   },
   "dependencies": {
     "ceviche": "*",
