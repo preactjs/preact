@@ -1431,6 +1431,37 @@ describe('Lifecycle methods', () => {
 			expect(ShouldNot.prototype.render).to.have.been.calledOnce;
 		});
 
+		it('should rerender when sCU returned false before', () => {
+			let c;
+			let spy = sinon.spy();
+
+			class App extends Component {
+				constructor() {
+					super();
+					c = this;
+				}
+
+				shouldComponentUpdate(_, nextState) {
+					return !!nextState.update;
+				}
+
+				render() {
+					spy();
+					return <div>foo</div>;
+				}
+			}
+
+			render(<App />, scratch);
+
+			c.setState({});
+			rerender();
+			spy.resetHistory();
+
+			c.setState({ update: true });
+			rerender();
+			expect(spy).to.be.calledOnce;
+		});
+
 		it('should not be called on forceUpdate', () => {
 			let Comp;
 			class Foo extends Component {

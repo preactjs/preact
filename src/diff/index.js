@@ -113,6 +113,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			}
 			else {
 				if (!c._force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newVNode.props, s, context)===false) {
+					c._dirty = false;
 					break outer;
 				}
 				if (newType.getDerivedStateFromProps==null && c.componentWillReceiveProps!=null) {
