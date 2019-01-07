@@ -86,35 +86,30 @@ const createHook = (create, shouldRun) => (...args) => {
 
 export const useState = createHook((hook, inst, initialValue) => {
 	const stateId = 'hs' + hook._index;
-
-	let value = typeof initialValue === 'function' ? initialValue() : initialValue;
-	const setter = {};
-	setter[stateId] = inst.state[stateId] = value;
-
-	function set(v) {
-		value = setter[stateId] = typeof v === 'function' ? v(value) : v;
-		stateChanged = true;
-		inst.setState(setter);
-	}
-
-	return () => [value, set];
+	const ret = [
+    inst.state[stateId] = typeof initialValue == 'function' ? initialValue() : initialValue,
+    value => {
+      const setter = {};
+			ret[0] = setter[stateId] = typeof value == 'function' ? value(ret[0]) : value;
+			stateChanged = true;
+      inst.setState(setter);
+    }
+  ];
+	return () => ret;
 });
 
 export const useReducer = createHook((hook, inst, reducer, initialState, initialAction) => {
 	const stateId = 'hr' + hook._index;
-
-	const setter = {};
-	let state = initialAction ? reducer(initialState, initialAction) : initialState;
-	setter[stateId] = state;
-
-	return () => [
-		state,
-		action => {
-			setter[stateId] = state = reducer(state, action);
+	const ret = [
+    inst.state[stateId] = initialAction ? reducer(initialState, initialAction) : initialState,
+    action => {
+      const setter = {};
+			ret[0] = setter[stateId] = reducer(ret[0], action);
 			stateChanged = true;
-			inst.setState(setter);
-		}
+      inst.setState(setter);
+    }
 	];
+	return () => ret;
 });
 
 export const useEffect = hasWindow ? createHook((hook, inst) => {
