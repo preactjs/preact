@@ -48,7 +48,7 @@ options.commitRoot = vnode => {
 
 let oldBeforeUnmount = options.beforeUnmount;
 options.beforeUnmount = vnode => {
-	if (oldBeforeUnmount) oldBeforeUnmount();
+	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
 
 	const c = vnode._component;
 	const hooks = c.__hooks;
