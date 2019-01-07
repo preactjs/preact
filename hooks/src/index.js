@@ -1,5 +1,6 @@
 import { options } from 'preact';
 
+const hasWindow = typeof window !== 'undefined';
 let currentIndex;
 let component;
 let afterPaintEffects = [];
@@ -116,7 +117,7 @@ export const useReducer = createHook((hook, inst, reducer, initialState, initial
 	];
 });
 
-export const useEffect = window ? createHook((hook, inst) => {
+export const useEffect = hasWindow ? createHook((hook, inst) => {
 	return callback => {
 		const effect = [hook, callback, inst];
 		inst.__hooks._pendingEffects.push(effect);
@@ -124,7 +125,7 @@ export const useEffect = window ? createHook((hook, inst) => {
 	};
 }, propsChanged) : noop;
 
-export const useLayoutEffect = window ? createHook((hook, inst) => {
+export const useLayoutEffect = hasWindow ? createHook((hook, inst) => {
 	return callback => inst.__hooks._pendingLayoutEffects.push([hook, callback]);
 }, propsChanged) : noop;
 
