@@ -74,7 +74,7 @@ const createHook = (create, shouldRun) => (...args) => {
 		hook = hooks._list[_index] = { _index };
 		hook._run = create(hook, component, ...args);
 	}
-	else if (shouldRun && !shouldRun(hook._args, args)) {
+	else if (shouldRun && shouldRun(hook._args, args) === false) {
 		return hook._value;
 	}
 
@@ -173,11 +173,9 @@ function invokeEffect(effect) {
 	if (typeof result === 'function') hook._cleanup = result;
 }
 
-const notApplicable = {};
-
 function propsChanged(oldArgs, newArgs) {
-	const props = newArgs.length > 1 ? newArgs[1] : undefined;
-	if (!props) return notApplicable;
+	const props = newArgs[1];
+	if (!props) return undefined;
 
 	const oldProps = oldArgs[1];
 
@@ -193,7 +191,7 @@ function propsChanged(oldArgs, newArgs) {
 function memoChanged(oldArgs, newArgs) {
 	const rerun = propsChanged(oldArgs, newArgs);
 
-	return rerun !== notApplicable
+	return rerun !== undefined
 		? rerun
 		: newArgs[0] !== oldArgs[0];
 }
