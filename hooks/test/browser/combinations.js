@@ -153,4 +153,25 @@ describe('combinations', () => {
 		expect(states).to.deep.equal([0, 10, 1, 40]);
 	});
 
+	it('ensures useEffect always schedule after the next paint following a redraw effect', () => {
+		let effectCount = 0;
+
+    function Comp() {
+      const [counter, setCounter] = useState(0);
+
+			useEffect(() => {
+				if (counter === 0) setCounter(1);
+				effectCount++;
+			});
+
+			return null;
+		}
+
+		render(<Comp/>, scratch);
+
+		return scheduleEffectAssert(() => {
+			expect(effectCount).to.equal(1);
+		})
+	});
+
 });
