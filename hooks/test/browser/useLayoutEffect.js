@@ -52,4 +52,25 @@ describe('useLayoutEffect', () => {
     expect(cleanupFunction).to.be.calledTwice;
     expect(callback).to.be.calledThrice;
   });
+
+  it('works on a nested component', () => {
+    const callback = spy();
+
+    function Parent() {
+      return (
+        <div>
+          <Child/>
+        </div>
+      )
+    }
+
+    function Child() {
+      useLayoutEffect(callback);
+      return null;
+    }
+
+    render(<Parent/>, scratch);
+
+    expect(callback).to.be.calledOnce;
+  });
 });
