@@ -18,7 +18,7 @@ options.beforeRender = vnode => {
 
 	if (hooks) {
 		let item;
-		while (item=hooks._pendingEffects.shift()) {
+		while (item = hooks._pendingEffects.shift()) {
 			invokeEffect(item);
 		}
 	}
@@ -38,7 +38,7 @@ options.afterDiff = vnode => {
 		stateChanged = false;
 
 		let item;
-		while (item=hooks._pendingLayoutEffects.shift()) {
+		while (item = hooks._pendingLayoutEffects.shift()) {
 			invokeEffect(item);
 		}
 
@@ -55,7 +55,7 @@ options.beforeUnmount = vnode => {
 	const hooks = c.__hooks;
 
 	if (hooks) {
-		for (let i=0; i<hooks._list.length; i++) {
+		for (let i = 0; i < hooks._list.length; i++) {
 			if (hooks._list[i]._cleanup) {
 				hooks._list[i]._cleanup();
 			}
@@ -87,27 +87,27 @@ const createHook = (create, shouldRun) => (...args) => {
 export const useState = createHook((hook, inst, initialValue) => {
 	const stateId = 'hs' + hook._index;
 	const ret = [
-    inst.state[stateId] = typeof initialValue == 'function' ? initialValue() : initialValue,
-    value => {
-      const setter = {};
+		inst.state[stateId] = typeof initialValue == 'function' ? initialValue() : initialValue,
+		value => {
+			const setter = {};
 			ret[0] = setter[stateId] = typeof value == 'function' ? value(ret[0]) : value;
 			stateChanged = true;
-      inst.setState(setter);
-    }
-  ];
+			inst.setState(setter);
+		}
+	];
 	return () => ret;
 });
 
 export const useReducer = createHook((hook, inst, reducer, initialState, initialAction) => {
 	const stateId = 'hr' + hook._index;
 	const ret = [
-    inst.state[stateId] = initialAction ? reducer(initialState, initialAction) : initialState,
-    action => {
-      const setter = {};
+		inst.state[stateId] = initialAction ? reducer(initialState, initialAction) : initialState,
+		action => {
+			const setter = {};
 			ret[0] = setter[stateId] = reducer(ret[0], action);
 			stateChanged = true;
-      inst.setState(setter);
-    }
+			inst.setState(setter);
+		}
 	];
 	return () => ret;
 });
@@ -143,7 +143,7 @@ function afterPaint(args) {
 }
 
 function onPaint() {
-  mc.port1.postMessage(0);
+	mc.port1.postMessage(0);
 }
 
 mc.port2.onmessage = () => {
@@ -151,14 +151,14 @@ mc.port2.onmessage = () => {
 		const inst = effect[2];
 		const effects = inst.__hooks._pendingEffects;
 
-		for (let j=0; j<effects.length; j++) {
+		for (let j = 0; j < effects.length; j++) {
 			if (effects[j] === effect) {
 				effects.splice(j, 1);
 				if (inst._parentDom) invokeEffect(effect);
 				break;
 			}
 		}
-  });
+	});
 }
 
 function invokeEffect(effect) {
@@ -174,7 +174,7 @@ function propsChanged(oldArgs, newArgs) {
 
 	const oldProps = oldArgs[1];
 
-	for (let i=0; i<props.length; i++) {
+	for (let i = 0; i < props.length; i++) {
 		if (props[i] !== oldProps[i]) {
 			return true;
 		}
@@ -191,4 +191,4 @@ function memoChanged(oldArgs, newArgs) {
 		: newArgs[0] !== oldArgs[0];
 }
 
-function noop() {};
+function noop() { };

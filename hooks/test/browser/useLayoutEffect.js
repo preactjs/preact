@@ -8,7 +8,7 @@ import { useLayoutEffect } from '../../src';
 
 describe('useLayoutEffect', () => {
 
-  /** @type {HTMLDivElement} */
+	/** @type {HTMLDivElement} */
 	let scratch;
 
 	/** @type {() => void} */
@@ -23,54 +23,54 @@ describe('useLayoutEffect', () => {
 		teardown(scratch);
 	});
 
-  // Layout effects fire synchronously
-  const scheduleEffectAssert = assertFn => new Promise(resolve => {
-    assertFn();
-    resolve();
-  });
+	// Layout effects fire synchronously
+	const scheduleEffectAssert = assertFn => new Promise(resolve => {
+		assertFn();
+		resolve();
+	});
 
-  useEffectAssertions(useLayoutEffect, scheduleEffectAssert);
+	useEffectAssertions(useLayoutEffect, scheduleEffectAssert);
 
 
-  it('calls the effect immediately after render', () => {
-    const cleanupFunction = spy();
-    const callback = spy(() => cleanupFunction);
+	it('calls the effect immediately after render', () => {
+		const cleanupFunction = spy();
+		const callback = spy(() => cleanupFunction);
 
-    function Comp() {
-      useLayoutEffect(callback);
-      return null;
-    }
+		function Comp() {
+			useLayoutEffect(callback);
+			return null;
+		}
 
-    render(<Comp />, scratch);
-    render(<Comp />, scratch);
+		render(<Comp />, scratch);
+		render(<Comp />, scratch);
 
-    expect(cleanupFunction).to.be.calledOnce;
-    expect(callback).to.be.calledTwice;
+		expect(cleanupFunction).to.be.calledOnce;
+		expect(callback).to.be.calledTwice;
 
-    render(<Comp />, scratch);
+		render(<Comp />, scratch);
 
-    expect(cleanupFunction).to.be.calledTwice;
-    expect(callback).to.be.calledThrice;
-  });
+		expect(cleanupFunction).to.be.calledTwice;
+		expect(callback).to.be.calledThrice;
+	});
 
-  it('works on a nested component', () => {
-    const callback = spy();
+	it('works on a nested component', () => {
+		const callback = spy();
 
-    function Parent() {
-      return (
-        <div>
-          <Child/>
-        </div>
-      )
-    }
+		function Parent() {
+			return (
+				<div>
+					<Child />
+				</div>
+			)
+		}
 
-    function Child() {
-      useLayoutEffect(callback);
-      return null;
-    }
+		function Child() {
+			useLayoutEffect(callback);
+			return null;
+		}
 
-    render(<Parent/>, scratch);
+		render(<Parent />, scratch);
 
-    expect(callback).to.be.calledOnce;
-  });
+		expect(callback).to.be.calledOnce;
+	});
 });

@@ -70,7 +70,7 @@ describe('combinations', () => {
 			return null;
 		}
 
-		render(<Comp/>, scratch);
+		render(<Comp />, scratch);
 
 		return scheduleEffectAssert(() => {
 			rerender();
@@ -90,7 +90,7 @@ describe('combinations', () => {
 			return null;
 		}
 
-		render(<Comp/>, scratch);
+		render(<Comp />, scratch);
 
 		expect(didRender).to.have.been.calledTwice.and.calledWith(1)
 	});
@@ -105,10 +105,10 @@ describe('combinations', () => {
 				refAtLayoutTime = input.current;
 			});
 
-			return <input ref={ input } value="hello" />;
+			return <input ref={input} value="hello" />;
 		}
 
-		render(<Comp/>, scratch);
+		render(<Comp />, scratch);
 
 		expect(refAtLayoutTime.value).to.equal('hello');
 	});
@@ -118,16 +118,16 @@ describe('combinations', () => {
 		let dispatchState4;
 
 		function reducer1(state, action) {
-      switch (action.type) {
-        case 'increment': return state + action.count;
-      }
+			switch (action.type) {
+				case 'increment': return state + action.count;
+			}
 		}
-		
+
 		function reducer2(state, action) {
-      switch (action.type) {
-        case 'increment': return state + action.count * 2;
-      }
-    }
+			switch (action.type) {
+				case 'increment': return state + action.count * 2;
+			}
+		}
 
 		function Comp() {
 			const [state1] = useState(0);
@@ -141,7 +141,7 @@ describe('combinations', () => {
 			return null;
 		}
 
-		render(<Comp/>, scratch);
+		render(<Comp />, scratch);
 
 		expect(states).to.deep.equal([0, 10, 1, 20]);
 
@@ -156,8 +156,8 @@ describe('combinations', () => {
 	it('ensures useEffect always schedule after the next paint following a redraw effect, when using the default debounce strategy', () => {
 		let effectCount = 0;
 
-    function Comp() {
-      const [counter, setCounter] = useState(0);
+		function Comp() {
+			const [counter, setCounter] = useState(0);
 
 			useEffect(() => {
 				if (counter === 0) setCounter(1);
@@ -167,7 +167,7 @@ describe('combinations', () => {
 			return null;
 		}
 
-		render(<Comp/>, scratch);
+		render(<Comp />, scratch);
 
 		return scheduleEffectAssert(() => {
 			expect(effectCount).to.equal(1);
@@ -177,8 +177,8 @@ describe('combinations', () => {
 	it('ensures useEffect always schedule after the next paint following a redraw effect, when using a no debounce strategy', () => {
 		let effectCount = 0;
 
-    function Comp() {
-      const [counter, setCounter] = useState(0);
+		function Comp() {
+			const [counter, setCounter] = useState(0);
 
 			useEffect(() => {
 				if (counter === 0) setCounter(1);
@@ -190,7 +190,7 @@ describe('combinations', () => {
 
 		Component.debounce = cb => cb();
 
-		render(<Comp/>, scratch);
+		render(<Comp />, scratch);
 
 		return scheduleEffectAssert(() => {
 			expect(effectCount).to.equal(1);

@@ -24,58 +24,58 @@ describe('useReducer', () => {
 
 
 	it('rerenders when dispatching an action', () => {
-    const states = [];
-    let _dispatch;
+		const states = [];
+		let _dispatch;
 
-    const initState = { count: 0 }
+		const initState = { count: 0 }
 
-    function reducer(state, action) {
-      switch (action.type) {
-        case 'increment': return { count: state.count + action.by };
-      }
-    }
+		function reducer(state, action) {
+			switch (action.type) {
+				case 'increment': return { count: state.count + action.by };
+			}
+		}
 
-    function Comp() {
-      const [state, dispatch] = useReducer(reducer, initState);
-      _dispatch = dispatch;
-      states.push(state);
-      return null;
-    }
+		function Comp() {
+			const [state, dispatch] = useReducer(reducer, initState);
+			_dispatch = dispatch;
+			states.push(state);
+			return null;
+		}
 
-    render(<Comp/>, scratch);
+		render(<Comp />, scratch);
 
-    _dispatch({ type: 'increment', by: 10 });
-    rerender();
+		_dispatch({ type: 'increment', by: 10 });
+		rerender();
 
-    expect(states).to.deep.equal([{ count: 0 }, { count: 10 }]);
-  });
+		expect(states).to.deep.equal([{ count: 0 }, { count: 10 }]);
+	});
 
-  it('can lazily initialize its state with an action', () => {
-    const states = [];
-    let _dispatch;
+	it('can lazily initialize its state with an action', () => {
+		const states = [];
+		let _dispatch;
 
-    const initState = { count: 0 }
+		const initState = { count: 0 }
 
-    function reducer(state, action) {
-      switch (action.type) {
-        case 'init': return { count: action.count };
-        case 'increment': return { count: state.count + action.by };
-      }
-    }
+		function reducer(state, action) {
+			switch (action.type) {
+				case 'init': return { count: action.count };
+				case 'increment': return { count: state.count + action.by };
+			}
+		}
 
-    function Comp({ initCount }) {
-      const [state, dispatch] = useReducer(reducer, initState, { type: 'init', count: initCount });
-      _dispatch = dispatch;
-      states.push(state);
-      return null;
-    }
+		function Comp({ initCount }) {
+			const [state, dispatch] = useReducer(reducer, initState, { type: 'init', count: initCount });
+			_dispatch = dispatch;
+			states.push(state);
+			return null;
+		}
 
-    render(<Comp initCount={10} />, scratch);
+		render(<Comp initCount={10} />, scratch);
 
-    _dispatch({ type: 'increment', by: 10 });
-    rerender();
+		_dispatch({ type: 'increment', by: 10 });
+		rerender();
 
-    expect(states).to.deep.equal([{ count: 10 }, { count: 20 }]);
-  });
+		expect(states).to.deep.equal([{ count: 10 }, { count: 20 }]);
+	});
 
 });
