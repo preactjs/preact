@@ -144,7 +144,7 @@ function afterPaint(args) {
 }
 
 function onPaint() {
-  mc.port1.postMessage(null);
+  mc.port1.postMessage(0);
 }
 
 mc.port2.onmessage = () => {
