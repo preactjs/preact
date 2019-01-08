@@ -25,14 +25,13 @@ options.beforeRender = vnode => {
 };
 
 
-let oldCommitRoot = options.commitRoot;
-options.commitRoot = vnode => {
-	if (oldCommitRoot) oldCommitRoot(vnode);
-
-	// TODO: Find out why vnode can be null
-	if (!vnode) return;
+let oldAfterDiff = options.afterDiff;
+options.afterDiff = vnode => {
+	if (oldAfterDiff) oldAfterDiff(vnode);
 
 	const c = vnode._component;
+	if (!c) return;
+
 	const hooks = c.__hooks;
 
 	if (hooks) {
