@@ -1,6 +1,7 @@
 import { options } from 'preact';
 
 const hasWindow = typeof window !== 'undefined';
+const mc = new MessageChannel();
 let currentIndex;
 let component;
 let afterPaintEffects = [];
@@ -143,10 +144,10 @@ function afterPaint(args) {
 }
 
 function onPaint() {
-  setTimeout(fire);
+  mc.port1.postMessage(null);
 }
 
-function fire() {
+mc.port2.onmessage = () => {
 	let effect;
 	while (effect=afterPaintEffects.shift()) {
 		const inst = effect[2];
