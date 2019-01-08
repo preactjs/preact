@@ -1,4 +1,4 @@
-import { createElement as h, render } from 'preact';
+import { createElement as h, render, Component } from 'preact';
 import { spy } from 'sinon';
 import { setupScratch, teardown, setupRerender } from '../../../test/_util/helpers';
 import { useState, useReducer, useEffect, useLayoutEffect, useRef } from '../../src';
@@ -153,7 +153,7 @@ describe('combinations', () => {
 		expect(states).to.deep.equal([0, 10, 1, 40]);
 	});
 
-	it('ensures useEffect always schedule after the next paint following a redraw effect', () => {
+	it('ensures useEffect always schedule after the next paint following a redraw effect, when using the default debounce strategy', () => {
 		let effectCount = 0;
 
     function Comp() {
@@ -166,6 +166,29 @@ describe('combinations', () => {
 
 			return null;
 		}
+
+		render(<Comp/>, scratch);
+
+		return scheduleEffectAssert(() => {
+			expect(effectCount).to.equal(1);
+		})
+	});
+
+	it('ensures useEffect always schedule after the next paint following a redraw effect, when using a no debounce strategy', () => {
+		let effectCount = 0;
+
+    function Comp() {
+      const [counter, setCounter] = useState(0);
+
+			useEffect(() => {
+				if (counter === 0) setCounter(1);
+				effectCount++;
+			});
+
+			return null;
+		}
+
+		Component.debounce = cb => cb();
 
 		render(<Comp/>, scratch);
 

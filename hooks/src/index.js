@@ -147,8 +147,7 @@ function onPaint() {
 }
 
 mc.port2.onmessage = () => {
-	let effect;
-	while (effect=afterPaintEffects.shift()) {
+	afterPaintEffects.splice(0, afterPaintEffects.length).forEach(effect => {
 		const inst = effect[2];
 		const effects = inst.__hooks._pendingEffects;
 
@@ -159,7 +158,7 @@ mc.port2.onmessage = () => {
 				break;
 			}
 		}
-  }
+  });
 }
 
 function invokeEffect(effect) {
