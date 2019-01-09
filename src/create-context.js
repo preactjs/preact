@@ -15,7 +15,7 @@ export function createContext(defaultValue = {}) {
 	Consumer.Provider.context = Consumer;
 
 	return {
-		Provider: Consumer.Provider,
+		Provider,
 		Consumer
 	};
 }
