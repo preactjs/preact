@@ -41,13 +41,17 @@ export default class extends Component {
       <ThemeProvider value="blue" next="red">
 				<Child>
 					<Consumer>
-						{data => <p>current theme: {data}</p>}
+						{data => (
+							<div>
+								<p>current theme: {data}</p>
+								<ThemeProvider value="black" next="white">
+									<Consumer>
+										{data => <p>current sub theme: {data}</p>}
+									</Consumer>
+								</ThemeProvider>
+							</div>
+						)}
 					</Consumer>
-      		<ThemeProvider value="black" next="white">
-						<Consumer>
-							{data => <p>current sub theme: {data}</p>}
-						</Consumer>
-					</ThemeProvider>
 				</Child>
       </ThemeProvider>
     )
