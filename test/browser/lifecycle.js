@@ -1057,6 +1057,32 @@ describe('Lifecycle methods', () => {
 			expect(curState).to.deep.equal({ value: 4 });
 		});
 
+		it('cDU should not be called when sDU returned false', () => {
+			let spy = sinon.spy();
+			let c;
+
+			class App extends Component {
+				constructor() {
+					super();
+					c = this;
+				}
+
+				shouldComponentUpdate() {
+					return false;
+				}
+
+				componentDidUpdate(prevProps) {
+					spy(prevProps);
+				}
+			}
+
+			render(<App />, scratch);
+			c.setState({});
+			rerender();
+
+			expect(spy).to.not.be.called;
+		});
+
 		it('prevState argument should be the same object if state doesn\'t change', () => {
 			let changeProps, cduPrevState, cduCurrentState;
 

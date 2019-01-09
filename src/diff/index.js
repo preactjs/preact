@@ -179,7 +179,9 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 		if (c!=null) {
 			while (p=c._renderCallbacks.pop()) p();
 
-			if (!isNew && c.componentDidUpdate!=null) {
+			// Don't call componentDidUpdate on mount or when we bailed out via
+			// `shouldComponentUpdate`
+			if (!isNew && oldProps!=null && c.componentDidUpdate!=null) {
 				c.componentDidUpdate(oldProps, oldState, oldContext);
 			}
 		}
