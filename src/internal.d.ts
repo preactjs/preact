@@ -1,3 +1,5 @@
+import * as preact from './index';
+
 export interface FunctionalComponent<P = {}> extends preact.FunctionalComponent<P> {
 	// Define getDerivedStateFromProps as undefined on FunctionalComponent
 	// to get rid of some errors in `diff()`
@@ -37,6 +39,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 }
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
+	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
 	base?: PreactElement;
 
 	_dirty: boolean;
