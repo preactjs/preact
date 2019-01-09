@@ -84,47 +84,47 @@ const createHook = (create, shouldRun) => (...args) => {
 	return (hook._value = hook._run(...args));
 };
 
-export const useState = createHook((hook, inst, initialValue) => {
+export const useState = createHook((hook, component, initialValue) => {
 	const stateId = 'hs' + hook._index;
 	const ret = [
-		inst.state[stateId] = typeof initialValue == 'function' ? initialValue() : initialValue,
+		component.state[stateId] = typeof initialValue == 'function' ? initialValue() : initialValue,
 		value => {
 			const setter = {};
 			ret[0] = setter[stateId] = typeof value == 'function' ? value(ret[0]) : value;
 			stateChanged = true;
-			inst.setState(setter);
+			component.setState(setter);
 		}
 	];
 	return () => ret;
 });
 
-export const useReducer = createHook((hook, inst, reducer, initialState, initialAction) => {
+export const useReducer = createHook((hook, component, reducer, initialState, initialAction) => {
 	const stateId = 'hr' + hook._index;
 	const ret = [
-		inst.state[stateId] = initialAction ? reducer(initialState, initialAction) : initialState,
+		component.state[stateId] = initialAction ? reducer(initialState, initialAction) : initialState,
 		action => {
 			const setter = {};
 			ret[0] = setter[stateId] = reducer(ret[0], action);
 			stateChanged = true;
-			inst.setState(setter);
+			component.setState(setter);
 		}
 	];
 	return () => ret;
 });
 
-export const useEffect = hasWindow ? createHook((hook, inst) => {
+export const useEffect = hasWindow ? createHook((hook, component) => {
 	return callback => {
-		const effect = [hook, callback, inst];
-		inst.__hooks._pendingEffects.push(effect);
+		const effect = [hook, callback, component];
+		component.__hooks._pendingEffects.push(effect);
 		afterPaint(effect);
 	};
 }, propsChanged) : noop;
 
-export const useLayoutEffect = hasWindow ? createHook((hook, inst) => {
-	return callback => inst.__hooks._pendingLayoutEffects.push([hook, callback]);
+export const useLayoutEffect = hasWindow ? createHook((hook, component) => {
+	return callback => component.__hooks._pendingLayoutEffects.push([hook, callback]);
 }, propsChanged) : noop;
 
-export const useRef = createHook((hook, inst, initialValue) => {
+export const useRef = createHook((hook, component, initialValue) => {
 	const ref = { current: initialValue };
 	return () => ref;
 });
@@ -148,13 +148,13 @@ function onPaint() {
 
 mc.port2.onmessage = () => {
 	afterPaintEffects.splice(0, afterPaintEffects.length).forEach(effect => {
-		const inst = effect[2];
-		const effects = inst.__hooks._pendingEffects;
+		const component = effect[2];
+		const effects = component.__hooks._pendingEffects;
 
 		for (let j = 0; j < effects.length; j++) {
 			if (effects[j] === effect) {
 				effects.splice(j, 1);
-				if (inst._parentDom) invokeEffect(effect);
+				if (component._parentDom) invokeEffect(effect);
 				break;
 			}
 		}
