@@ -17,9 +17,9 @@ options.beforeRender = vnode => {
 	const hooks = component.__hooks;
 
 	if (hooks) {
-		let item;
-		while (item = hooks._pendingEffects.shift()) {
-			invokeEffect(item);
+		let effect;
+		while (effect = hooks._pendingEffects.shift()) {
+			invokeEffect(effect);
 		}
 	}
 };
@@ -37,9 +37,9 @@ options.afterDiff = vnode => {
 	if (hooks) {
 		stateChanged = false;
 
-		let item;
-		while (item = hooks._pendingLayoutEffects.shift()) {
-			invokeEffect(item);
+		let effect;
+		while (effect = hooks._pendingLayoutEffects.shift()) {
+			invokeEffect(effect);
 		}
 
 		if (stateChanged) c.forceUpdate();
