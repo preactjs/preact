@@ -156,20 +156,18 @@ function propsChanged(oldArgs, newArgs) {
 	const oldProps = oldArgs[1];
 
 	for (let i = 0; i < props.length; i++) {
-		if (props[i] !== oldProps[i]) {
-			return true;
-		}
+		if (props[i] !== oldProps[i]) return true;
 	}
 
 	return false;
 }
 
 function memoChanged(oldArgs, newArgs) {
-	const rerun = propsChanged(oldArgs, newArgs);
+	const propsDidChange = propsChanged(oldArgs, newArgs);
 
-	return rerun !== undefined
-		? rerun
+	return propsDidChange !== undefined
+		? propsDidChange
 		: newArgs[0] !== oldArgs[0];
 }
 
-function noop() { };
+function noop() {};
