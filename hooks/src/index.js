@@ -84,11 +84,11 @@ const createHook = (create, shouldRun) => (...args) => {
 	return (hook._value = hook._run(...args));
 };
 
-const useStateReducer = (state, newState) => typeof newState == 'function' ? newState(state) : newState;
+const useStateReducer = (state, newState) => typeof newState === 'function' ? newState(state) : newState;
 export const useState = initialState => useReducer(useStateReducer, initialState);
 
 export const useReducer = createHook((hook, component, reducer, initialState, initialAction) => {
-	const initState = typeof initialState == 'function' ? initialState() : initialState;
+	const initState = typeof initialState === 'function' ? initialState() : initialState;
 	const ret = [
 		component.state[hook._index] = initialAction ? reducer(initState, initialAction) : initState,
 		action => {
