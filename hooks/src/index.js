@@ -114,9 +114,8 @@ export const useReducer = createHook((hook, component, reducer, initialState, in
 
 export const useEffect = hasWindow ? createHook((hook, component) => {
 	return callback => {
-		const effect = [hook, callback, component];
-		component.__hooks._pendingEffects.push(effect);
-		afterPaint(effect);
+		component.__hooks._pendingEffects.push([hook, callback]);
+		afterPaint(component);
 	};
 }, propsChanged) : noop;
 
@@ -147,17 +146,10 @@ function onPaint() {
 }
 
 mc.port2.onmessage = () => {
-	afterPaintEffects.splice(0, afterPaintEffects.length).forEach(effect => {
-		const component = effect[2];
+	afterPaintEffects.splice(0, afterPaintEffects.length).forEach(component => {
+		if (!component._parentDom) return;
 		const effects = component.__hooks._pendingEffects;
-
-		for (let j = 0; j < effects.length; j++) {
-			if (effects[j] === effect) {
-				effects.splice(j, 1);
-				if (component._parentDom) invokeEffect(effect);
-				break;
-			}
-		}
+		effects.splice(0, effects.length).forEach(invokeEffect);
 	});
 }
 
