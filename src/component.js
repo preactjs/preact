@@ -38,7 +38,7 @@ export function Component(props, context) {
 Component.prototype.setState = function(update, callback) {
 
 	// only clone state when copying to nextState the first time.
-	let s = this._nextState || (this._nextState = assign({}, this.state));
+	let s = (this._nextState!==this.state && this._nextState) || (this._nextState = assign({}, this.state));
 
 	// Needed for the devtools to check if state has changed after the tree
 	// has been committed
