@@ -64,7 +64,7 @@ options.beforeUnmount = vnode => {
 };
 
 const createHook = (create, shouldRun) => (...args) => {
-	if (component == null) return;
+	if (!component) return;
 
 	const hooks = component.__hooks || (component.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [] });
 
