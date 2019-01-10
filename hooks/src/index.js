@@ -16,11 +16,11 @@ options.beforeRender = vnode => {
 
 	const hooks = component.__hooks;
 
-	if (hooks) {
-		let effect;
-		while (effect = hooks._pendingEffects.shift()) {
-			invokeEffect(effect);
-		}
+	if (!hooks) return;
+
+	let effect;
+	while (effect = hooks._pendingEffects.shift()) {
+		invokeEffect(effect);
 	}
 };
 
@@ -34,16 +34,16 @@ options.afterDiff = vnode => {
 
 	const hooks = c.__hooks;
 
-	if (hooks) {
-		stateChanged = false;
+	if (!hooks) return;
 
-		let effect;
-		while (effect = hooks._pendingLayoutEffects.shift()) {
-			invokeEffect(effect);
-		}
+	stateChanged = false;
 
-		if (stateChanged) c.forceUpdate();
+	let effect;
+	while (effect = hooks._pendingLayoutEffects.shift()) {
+		invokeEffect(effect);
 	}
+
+	if (stateChanged) c.forceUpdate();
 };
 
 
@@ -54,11 +54,11 @@ options.beforeUnmount = vnode => {
 	const c = vnode._component;
 	const hooks = c.__hooks;
 
-	if (hooks) {
-		for (let i = 0; i < hooks._list.length; i++) {
-			if (hooks._list[i]._cleanup) {
-				hooks._list[i]._cleanup();
-			}
+	if (!hooks) return;
+
+	for (let i = 0; i < hooks._list.length; i++) {
+		if (hooks._list[i]._cleanup) {
+			hooks._list[i]._cleanup();
 		}
 	}
 };
