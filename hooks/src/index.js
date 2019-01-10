@@ -84,27 +84,16 @@ const createHook = (create, shouldRun) => (...args) => {
 	return (hook._value = hook._run(...args));
 };
 
-export const useState = createHook((hook, component, initialValue) => {
-	const stateId = 'hs' + hook._index;
-	const ret = [
-		component.state[stateId] = typeof initialValue == 'function' ? initialValue() : initialValue,
-		value => {
-			const setter = {};
-			ret[0] = setter[stateId] = typeof value == 'function' ? value(ret[0]) : value;
-			stateChanged = true;
-			component.setState(setter);
-		}
-	];
-	return () => ret;
-});
+const useStateReducer = (state, newState) => typeof newState == 'function' ? newState(state) : newState;
+export const useState = initialState => useReducer(useStateReducer, initialState);
 
 export const useReducer = createHook((hook, component, reducer, initialState, initialAction) => {
-	const stateId = 'hr' + hook._index;
+	const initState = typeof initialState == 'function' ? initialState() : initialState;
 	const ret = [
-		component.state[stateId] = initialAction ? reducer(initialState, initialAction) : initialState,
+		component.state[hook._index] = initialAction ? reducer(initState, initialAction) : initState,
 		action => {
 			const setter = {};
-			ret[0] = setter[stateId] = reducer(ret[0], action);
+			ret[0] = setter[hook._index] = reducer(ret[0], action);
 			stateChanged = true;
 			component.setState(setter);
 		}
