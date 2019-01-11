@@ -15,6 +15,9 @@ let afterPaintEffects = [];
 /** @type {boolean} */
 let stateChanged;
 
+// Temp variables used by for loop
+// let i, j;
+
 let oldBeforeRender = options.beforeRender;
 options.beforeRender = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
@@ -22,14 +25,52 @@ options.beforeRender = vnode => {
 	currentComponent = vnode._component;
 	currentIndex = 0;
 
-	const hooks = currentComponent.__hooks;
+	// !Drain queue
 
-	if (!hooks) return;
+	// ORIGINAL: 874 B
+	// const hooks = currentComponent.__hooks;
+	// if (!hooks) return;
+	// let effect;
+	// while (effect = hooks._pendingEffects.shift()) {
+	// 	invokeEffect(effect);
+	// }
 
-	let effect;
-	while (effect = hooks._pendingEffects.shift()) {
-		invokeEffect(effect);
-	}
+	// WHILE (SHIFT): 855 B
+	// const hooks = currentComponent.__hooks;
+	// if (!hooks) return;
+	// let effect;
+	// while (effect = hooks._pendingEffects.shift()) {
+	// 	invokeEffect(effect);
+	// }
+
+	// WHILE (POP): 853 B
+	// const hooks = currentComponent.__hooks;
+	// if (!hooks) return;
+	// let effect;
+	// while (effect=hooks._pendingEffects.pop()) {
+	// 	invokeEffect(effect);
+	// }
+
+	// FOR (TEMP): 886 B
+	// if (!currentComponent.__hooks) return;
+	// let list = currentComponent.__hooks._pendingEffects; currentComponent.__hooks._pendingEffects = [];
+	// for (i = 0; i < list.length; i++) {
+	// 	invokeEffect(list[i]);
+	// }
+
+	// FOREACH (SPLICE): 837 B
+	// if (!currentComponent.__hooks) return;
+	// currentComponent.__hooks._pendingEffects.splice(0, currentComponent.__hooks._pendingEffects.length).forEach(invokeEffect);
+
+	// FOREACH (TEMP): 832 B
+	if (!currentComponent.__hooks) return;
+	let effects = currentComponent.__hooks._pendingEffects; currentComponent.__hooks._pendingEffects = [];
+	effects.forEach(invokeEffect);
+
+	// FOREACH (RESET AFTER): 829 B
+	// if (!currentComponent.__hooks) return;
+	// currentComponent.__hooks._pendingEffects.forEach(invokeEffect);
+	// currentComponent.__hooks._pendingEffects = [];
 };
 
 
@@ -41,15 +82,48 @@ options.afterDiff = vnode => {
 	if (!c) return;
 
 	const hooks = c.__hooks;
-
 	if (!hooks) return;
 
 	stateChanged = false;
 
-	let effect;
-	while (effect = hooks._pendingLayoutEffects.shift()) {
-		invokeEffect(effect);
-	}
+	// !Drain queue
+
+	// ORIGINAL: 874 B
+	// let effect;
+	// while (effect = hooks._pendingLayoutEffects.shift()) {
+	// 	invokeEffect(effect);
+	// }
+
+	// WHILE (SHIFT): 855 B
+	// let effect;
+	// while (effect = hooks._pendingLayoutEffects.shift()) {
+	// 	invokeEffect(effect);
+	// }
+
+	// WHILE (POP): 853 B
+	// let effect;
+	// while (effect=hooks._pendingLayoutEffects.pop()) {
+	// 	invokeEffect(effect);
+	// }
+
+	// FOR (TEMP): 886 B
+	// let list = hooks._pendingLayoutEffects; hooks._pendingLayoutEffects = [];
+	// for (i = 0; i < list.length; i++) {
+	// 	invokeEffect(list[i]);
+	// }
+
+	// FOREACH (SPLICE): 837 B
+	// hooks._pendingLayoutEffects.splice(0, hooks._pendingLayoutEffects.length).forEach(invokeEffect);
+
+	// FOREACH (TEMP): 832 B
+	// NOTE: Tests pass without neding to store effects in a temp variable when
+	// using forEach, so using RESET AFTER strategy here
+	hooks._pendingLayoutEffects.forEach(invokeEffect);
+	hooks._pendingLayoutEffects = [];
+
+	// FOREACH (RESET AFTER): 829 B
+	// hooks._pendingLayoutEffects.forEach(invokeEffect);
+	// hooks._pendingLayoutEffects = [];
 
 	if (stateChanged) c.forceUpdate();
 };
@@ -59,16 +133,41 @@ let oldBeforeUnmount = options.beforeUnmount;
 options.beforeUnmount = vnode => {
 	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
 
-	const c = vnode._component;
-	const hooks = c.__hooks;
-
+	const hooks = vnode._component.__hooks;
 	if (!hooks) return;
 
-	for (let i = 0; i < hooks._list.length; i++) {
-		if (hooks._list[i]._cleanup) {
-			hooks._list[i]._cleanup();
-		}
-	}
+	// ORIGINAL: 874 B
+	// for (let i = 0; i < hooks._list.length; i++) {
+	// 	if (hooks._list[i]._cleanup) {
+	// 		hooks._list[i]._cleanup();
+	// 	}
+	// }
+
+	// WHILE (SHIFT): 855 B
+	// let hook;
+	// while (hook = hooks._list.shift()) {
+	// 	if (hook._cleanup) {
+	// 		hook._cleanup();
+	// 	}
+	// }
+
+	// WHILE (POP): 853 B
+	// let hook;
+	// while (hook = hooks._list.pop()) {
+	// 	if (hook._cleanup) {
+	// 		hook._cleanup();
+	// 	}
+	// }
+
+	// FOR: 886 B
+	// for (let i = 0; i < hooks._list.length; i++) {
+	// 	if (hooks._list[i]._cleanup) {
+	// 		hooks._list[i]._cleanup();
+	// 	}
+	// }
+
+	// FOREACH: 837 B, 832 B, 829 B
+	hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
 };
 
 /**
@@ -156,11 +255,68 @@ function onPaint() {
 }
 
 mc.port2.onmessage = () => {
-	afterPaintEffects.splice(0, afterPaintEffects.length).forEach(component => {
+	// !Drain Queue
+
+	// ORIGINAL: 874 B
+	// afterPaintEffects.splice(0, afterPaintEffects.length).forEach(component => {
+	// 	if (!component._parentDom) return;
+	// 	const effects = component.__hooks._pendingEffects;
+	// 	// !Drain Queue 2
+	// 	effects.splice(0, effects.length).forEach(invokeEffect);
+	// });
+
+	// WHILE (SHIFT): 855 B  ❌ if we don't support sync Component.debounce. See 852 B comment below.
+	// let c, effect;
+	// while (c = afterPaintEffects.shift()) {
+	// 	if (!c._parentDom) continue;
+	// 	while (effect = c.__hooks._pendingEffects.shift()) {
+	// 		invokeEffect(effect);
+	// 	}
+	// }
+
+	// WHILE (POP): 853 B  ❌ if we don't support sync Component.debounce. See 852 B comment below.
+	// let c, effect;
+	// while (c = afterPaintEffects.pop()) {
+	// 	if (!c._parentDom) continue;
+	// 	while (effect = c.__hooks._pendingEffects.pop()) {
+	// 		invokeEffect(effect);
+	// 	}
+	// }
+
+	// FOR (TEMP): 886 B
+	// let list1 = afterPaintEffects; afterPaintEffects = [];
+	// for (j = 0; j < list1.length; j++) {
+	// 	currentComponent = list1[j];
+	// 	if (!currentComponent._parentDom) continue;
+	// 	let list2 = currentComponent.__hooks._pendingEffects; currentComponent.__hooks._pendingEffects = [];
+	// 	for (i = 0; i < list2.length; i++) {
+	// 		invokeEffect(list2[i]);
+	// 	}
+	// }
+
+	// FOREACH (SPLICE): 837 B
+	// afterPaintEffects.splice(0, afterPaintEffects.length).forEach(component => {
+	// 	if (!component._parentDom) return;
+	// 	component.__hooks._pendingEffects.splice(0, component.__hooks._pendingEffects.length).forEach(invokeEffect);
+	// });
+
+	// FOREACH (TEMP): 832 B
+	afterPaintEffects.forEach(component => {
 		if (!component._parentDom) return;
-		const effects = component.__hooks._pendingEffects;
-		effects.splice(0, effects.length).forEach(invokeEffect);
+		let effects = component.__hooks._pendingEffects; component.__hooks._pendingEffects = [];
+		effects.forEach(invokeEffect);
 	});
+	afterPaintEffects = [];
+
+	// FOREACH (RESET AFTER): 829 B ❌
+	// Doesn't pass sync debounce test cuz we need to clear the _pendingEffects
+	// list before traversing it to avoid re-entering effects in the beforeRender loop
+	// afterPaintEffects.forEach(component => {
+	// 	if (!component._parentDom) return;
+	// 	component.__hooks._pendingEffects.forEach(invokeEffect);
+	// 	component.__hooks._pendingEffects = [];
+	// });
+	// afterPaintEffects = [];
 };
 
 /**
@@ -176,15 +332,34 @@ function invokeEffect(effect) {
 
 function propsChanged(oldArgs, newArgs) {
 	const props = newArgs[1];
-	if (!props) return undefined;
+	if (!props) return;
 
-	const oldProps = oldArgs[1];
+	// ORIGINAL: 874 B
+	// const oldProps = oldArgs[1];
+	// for (let i = 0; i < props.length; i++) {
+	// 	if (props[i] !== oldProps[i]) return true;
+	// }
+	// return false;
 
-	for (let i = 0; i < props.length; i++) {
-		if (props[i] !== oldProps[i]) return true;
-	}
+	// WHILE: 855 B (shift) or 853 B (pop)
+	// NOTE: Terser rewrites while loop as for loop
+	// const oldProps = oldArgs[1];
+	// let i = 0;
+	// while (i < props.length) {
+	// 	if (props[i] !== oldProps[i]) return true;
+	// 	i++;
+	// }
+	// return false;
 
-	return false;
+	// FOR: 886 B
+	// const oldProps = oldArgs[1];
+	// for (let i = 0; i < props.length; i++) {
+	// 	if (props[i] !== oldProps[i]) return true;
+	// }
+	// return false;
+
+	// FOREACH: 837 B, 832 B, 829 B
+	return props.some((prop, index) => prop !== oldArgs[1][index]);
 }
 
 function memoChanged(oldArgs, newArgs) {
