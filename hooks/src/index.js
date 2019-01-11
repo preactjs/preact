@@ -195,10 +195,15 @@ const createHook = (create, shouldRun) => (...args) => {
 	return (hook._value = hook._run(...args));
 };
 
+// TODO: Do we merge state or always replace it?
 // const useStateReducer = (state, newState) => typeof newState === 'function' ? newState(state) : newState;
 export const useState = initialState => useReducer(invokeOrReturn, initialState);
 
 export const useReducer = createHook((hook, component, reducer, initialState, initialAction) => {
+	// TODO: Investigate reusing the `setState(state => newState)` callback signature to
+	// remove the intermediate `setter` object
+	// TODO: Investigate returning `() => [component.state, reduce]` as a golf technique to get rid
+	// of intermediate `ret` array
 	// const initState = typeof initialState === 'function' ? initialState() : initialState;
 	const initState = invokeOrReturn(undefined, initialState);
 	const ret = [
@@ -238,6 +243,14 @@ export const useRef = createHook((hook, component, initialValue) => {
 export const useMemo = createHook(() => callback => callback(), memoChanged);
 export const useCallback = createHook(() => callback => callback, propsChanged);
 
+
+// TODO: Possibly reconsider exposing Component.debounce due to the comment
+// with the "❌" below. People shouldn't be able to make Component.debounce
+// synchronous because then functions like `setState` are ambiguously sync or
+// async. See links below for a discussion about building async APIs
+// https://blog.izs.me/2013/08/designing-apis-for-asynchrony
+// https://blog.ometer.com/2011/07/24/callbacks-synchronous-and-asynchronous/
+// https://github.com/kriskowal/q/wiki/Coming-from-jQuery
 
 // Note: if someone used Component.debounce = requestAnimationFrame,
 // then effects will ALWAYS run on the NEXT frame instead of the current one, incurring a ~16ms delay.
