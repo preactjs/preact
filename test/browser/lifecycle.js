@@ -897,6 +897,46 @@ describe('Lifecycle methods', () => {
 			expect(ReceivePropsComponent.prototype.componentWillReceiveProps).not.to.have.been.called;
 		});
 
+		// See last paragraph of cWRP section https://reactjs.org/docs/react-component.html#unsafe_componentwillreceiveprops
+		it('should not be called on setState', () => {
+			let spy = sinon.spy();
+			let spyInner = sinon.spy();
+			let c;
+
+			class Inner extends Component {
+				componentWillReceiveProps() {
+					spyInner();
+				}
+
+				render() {
+					return <div>foo</div>;
+				}
+			}
+
+			class Outer extends Component {
+				constructor() {
+					super();
+					c = this;
+				}
+
+				componentWillReceiveProps() {
+					spy();
+				}
+
+				render() {
+					return <Inner />;
+				}
+			}
+
+			render(<Outer />, scratch);
+			expect(spy).to.not.be.called;
+
+			c.setState({});
+			rerender();
+			expect(spy).to.not.be.called;
+			expect(spyInner).to.be.calledOnce;
+		});
+
 		it('should be called when rerender with new props from parent', () => {
 			let doRender;
 			class Outer extends Component {
