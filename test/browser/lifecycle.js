@@ -1488,6 +1488,38 @@ describe('Lifecycle methods', () => {
 			expect(spy).to.be.calledOnce;
 		});
 
+		it('should be called with nextState', () => {
+			let c;
+			let spy = sinon.spy();
+
+			class App extends Component {
+				constructor() {
+					super();
+					c = this;
+					this.state = { a: false };
+				}
+
+				shouldComponentUpdate(_, nextState) {
+					return this.state!==nextState;
+				}
+
+				render() {
+					spy();
+					return <div>foo</div>;
+				}
+			}
+
+			render(<App />, scratch);
+
+			c.setState({});
+			rerender();
+			spy.resetHistory();
+
+			c.setState({ a: true });
+			rerender();
+			expect(spy).to.be.calledOnce;
+		});
+
 		it('should not be called on forceUpdate', () => {
 			let Comp;
 			class Foo extends Component {
