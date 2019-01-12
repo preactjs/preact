@@ -898,7 +898,7 @@ describe('Lifecycle methods', () => {
 		});
 
 		// See last paragraph of cWRP section https://reactjs.org/docs/react-component.html#unsafe_componentwillreceiveprops
-		it('should not be called on setState', () => {
+		it('should not be called on setState or forceUpdate', () => {
 			let spy = sinon.spy();
 			let spyInner = sinon.spy();
 			let c;
@@ -933,6 +933,12 @@ describe('Lifecycle methods', () => {
 
 			c.setState({});
 			rerender();
+			expect(spy).to.not.be.called;
+			expect(spyInner).to.be.calledOnce;
+			spy.resetHistory();
+			spyInner.resetHistory();
+
+			c.forceUpdate();
 			expect(spy).to.not.be.called;
 			expect(spyInner).to.be.calledOnce;
 		});
