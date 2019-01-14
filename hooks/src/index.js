@@ -3,7 +3,7 @@ import { options } from 'preact';
 const hasWindow = typeof window !== 'undefined';
 const mc = new MessageChannel();
 let currentIndex;
-let component;
+let currentComponent;
 let afterPaintEffects = [];
 let stateChanged;
 
@@ -11,10 +11,10 @@ let oldBeforeRender = options.beforeRender;
 options.beforeRender = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
 
-	component = vnode._component;
+	currentComponent = vnode._component;
 	currentIndex = 0;
 
-	const hooks = component.__hooks;
+	const hooks = currentComponent.__hooks;
 
 	if (!hooks) return;
 
@@ -64,16 +64,16 @@ options.beforeUnmount = vnode => {
 };
 
 const createHook = (create, shouldRun) => (...args) => {
-	if (!component) return;
+	if (!currentComponent) return;
 
-	const hooks = component.__hooks || (component.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [] });
+	const hooks = currentComponent.__hooks || (currentComponent.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [] });
 
 	let _index = currentIndex++;
 	let hook = hooks._list[_index];
 
 	if (!hook) {
 		hook = hooks._list[_index] = { _index };
-		hook._run = create(hook, component, ...args);
+		hook._run = create(hook, currentComponent, ...args);
 	}
 	else if (shouldRun && shouldRun(hook._args, args) === false) {
 		return hook._value;
