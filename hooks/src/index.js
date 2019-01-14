@@ -218,14 +218,18 @@ export const useReducer = createHook((hook, component, reducer, initialState, in
 // eslint-disable-next-line arrow-body-style
 export const useEffect = hasWindow ? createHook((hook, component) => {
 	return callback => {
-		component.__hooks._pendingEffects.push([hook, callback]);
+		component.__hooks._pendingEffects.push(hook);
 		afterPaint(component);
+		return callback;
 	};
 }, propsChanged) : noop;
 
 // eslint-disable-next-line arrow-body-style
 export const useLayoutEffect = hasWindow ? createHook((hook, component) => {
-	return callback => component.__hooks._pendingLayoutEffects.push([hook, callback]);
+	return callback => {
+		component.__hooks._pendingLayoutEffects.push(hook);
+		return callback;
+	};
 }, propsChanged) : noop;
 
 export const useRef = createHook((hook, component, initialValue) => {
@@ -321,12 +325,11 @@ mc.port2.onmessage = () => {
 
 /**
  * Invoke a Hook's effect
- * @param {import('./internal').Effect} effect
+ * @param {import('./internal').HookInstance} hook
  */
-function invokeEffect(effect) {
-	const [hook, callback] = effect;
+function invokeEffect(hook) {
 	if (hook._cleanup) hook._cleanup();
-	const result = callback();
+	const result = hook._value();
 	if (typeof result === 'function') hook._cleanup = result;
 }
 
