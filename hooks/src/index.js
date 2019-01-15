@@ -2,9 +2,17 @@ import { options } from 'preact';
 
 const hasWindow = typeof window !== 'undefined';
 const mc = new MessageChannel();
+
+/** @type {number} */
 let currentIndex;
+
+/** @type {import('./internal').Component} */
 let currentComponent;
+
+/** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
+
+/** @type {boolean} */
 let stateChanged;
 
 let oldBeforeRender = options.beforeRender;
@@ -63,6 +71,13 @@ options.beforeUnmount = vnode => {
 	}
 };
 
+/**
+ * Create a Hook instance and invoke its implementation as determined by
+ * the `shouldRun` parameter
+ * @param {import('./internal').HookImplementationFactory} create
+ * @param {import('./internal').HookShouldRun} [shouldRun]
+ * @returns {import('./internal').Hook}
+ */
 const createHook = (create, shouldRun) => (...args) => {
 	if (!currentComponent) return;
 
@@ -101,6 +116,7 @@ export const useReducer = createHook((hook, component, reducer, initialState, in
 	return () => ret;
 });
 
+// eslint-disable-next-line arrow-body-style
 export const useEffect = hasWindow ? createHook((hook, component) => {
 	return callback => {
 		component.__hooks._pendingEffects.push([hook, callback]);
@@ -108,6 +124,7 @@ export const useEffect = hasWindow ? createHook((hook, component) => {
 	};
 }, propsChanged) : noop;
 
+// eslint-disable-next-line arrow-body-style
 export const useLayoutEffect = hasWindow ? createHook((hook, component) => {
 	return callback => component.__hooks._pendingLayoutEffects.push([hook, callback]);
 }, propsChanged) : noop;
@@ -124,6 +141,10 @@ export const useCallback = createHook(() => callback => callback, propsChanged);
 // Note: if someone used Component.debounce = requestAnimationFrame,
 // then effects will ALWAYS run on the NEXT frame instead of the current one, incurring a ~16ms delay.
 // Perhaps this is not such a big deal.
+/**
+ * Invoke a component's pending effects after the next frame renders
+ * @param {import('./internal').Component} args
+ */
 function afterPaint(args) {
 	if (afterPaintEffects.push(args) === 1) {
 		requestAnimationFrame(onPaint);
@@ -140,8 +161,12 @@ mc.port2.onmessage = () => {
 		const effects = component.__hooks._pendingEffects;
 		effects.splice(0, effects.length).forEach(invokeEffect);
 	});
-}
+};
 
+/**
+ * Invoke a Hook's effect
+ * @param {import('./internal').Effect} effect
+ */
 function invokeEffect(effect) {
 	const [hook, callback] = effect;
 	if (hook._cleanup) hook._cleanup();
@@ -170,4 +195,4 @@ function memoChanged(oldArgs, newArgs) {
 		: newArgs[0] !== oldArgs[0];
 }
 
-function noop() {};
+function noop() {}
