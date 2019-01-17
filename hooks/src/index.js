@@ -198,11 +198,12 @@ const createHook = (create, shouldRun) => (...args) => {
 	return (hook._value = hook._run(...args));
 };
 
-const useStateReducer = (state, newState) => typeof newState === 'function' ? newState(state) : newState;
-export const useState = initialState => useReducer(useStateReducer, initialState);
+// const useStateReducer = (state, newState) => typeof newState === 'function' ? newState(state) : newState;
+export const useState = initialState => useReducer(invokeOrReturn, initialState);
 
 export const useReducer = createHook((hook, component, reducer, initialState, initialAction) => {
-	const initState = typeof initialState === 'function' ? initialState() : initialState;
+	// const initState = typeof initialState === 'function' ? initialState() : initialState;
+	const initState = invokeOrReturn(undefined, initialState);
 	const ret = [
 		component.state[hook._index] = initialAction ? reducer(initState, initialAction) : initState,
 		action => {
@@ -376,6 +377,10 @@ function memoChanged(oldArgs, newArgs) {
 	// return propsDidChange !== undefined
 	// 	? propsDidChange
 	// 	: newArgs[0] !== oldArgs[0];
+}
+
+function invokeOrReturn(arg, f) {
+	return typeof f === 'function' ? f(arg) : f;
 }
 
 function noop() {}
