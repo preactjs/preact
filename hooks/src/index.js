@@ -199,18 +199,12 @@ const createHook = (create, shouldRun) => (...args) => {
 export const useState = initialState => useReducer(invokeOrReturn, initialState);
 
 export const useReducer = createHook((hook, component, reducer, initialState, initialAction) => {
-	// TODO: Investigate reusing the `setState(state => newState)` callback signature to
-	// remove the intermediate `setter` object
-	// TODO: Investigate returning `() => [component.state, reduce]` as a golf technique to get rid
-	// of intermediate `ret` array
 	const initState = invokeOrReturn(undefined, initialState);
 	const ret = [
 		component.state[hook._index] = initialAction ? reducer(initState, initialAction) : initState,
 		action => {
-			const setter = {};
-			ret[0] = setter[hook._index] = reducer(ret[0], action);
 			stateChanged = true;
-			component.setState(setter);
+			component.setState(state => ret[0] = state[hook._index] = reducer(ret[0], action));
 		}
 	];
 	return () => ret;
