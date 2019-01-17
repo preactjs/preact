@@ -196,7 +196,6 @@ const createHook = (create, shouldRun) => (...args) => {
 };
 
 // TODO: Do we merge state or always replace it?
-// const useStateReducer = (state, newState) => typeof newState === 'function' ? newState(state) : newState;
 export const useState = initialState => useReducer(invokeOrReturn, initialState);
 
 export const useReducer = createHook((hook, component, reducer, initialState, initialAction) => {
@@ -204,7 +203,6 @@ export const useReducer = createHook((hook, component, reducer, initialState, in
 	// remove the intermediate `setter` object
 	// TODO: Investigate returning `() => [component.state, reduce]` as a golf technique to get rid
 	// of intermediate `ret` array
-	// const initState = typeof initialState === 'function' ? initialState() : initialState;
 	const initState = invokeOrReturn(undefined, initialState);
 	const ret = [
 		component.state[hook._index] = initialAction ? reducer(initState, initialAction) : initState,
@@ -391,13 +389,7 @@ function propsChanged(oldArgs, newArgs) {
 }
 
 function memoChanged(oldArgs, newArgs) {
-	// 816 B
 	return newArgs[1] !== undefined ? propsChanged(oldArgs, newArgs) : newArgs[0] !== oldArgs[0];
-
-	// const propsDidChange = propsChanged(oldArgs, newArgs);
-	// return propsDidChange !== undefined
-	// 	? propsDidChange
-	// 	: newArgs[0] !== oldArgs[0];
 }
 
 function invokeOrReturn(arg, f) {
