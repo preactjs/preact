@@ -334,8 +334,8 @@ function invokeEffect(hook) {
 }
 
 function propsChanged(oldArgs, newArgs) {
-	const props = newArgs[1];
-	if (!props) return;
+	// const props = newArgs[1];
+	// if (!props) return;
 
 	// ORIGINAL: 874 B
 	// const oldProps = oldArgs[1];
@@ -362,15 +362,20 @@ function propsChanged(oldArgs, newArgs) {
 	// return false;
 
 	// FOREACH: 837 B, 832 B, 829 B
-	return props.some((prop, index) => prop !== oldArgs[1][index]);
+	// return props.some((prop, index) => prop !== oldArgs[1][index]);
+
+	// FOREACH (SIMPLIFIED): 816 B
+	return newArgs[1] === undefined || newArgs[1].some((prop, index) => prop !== oldArgs[1][index]);
 }
 
 function memoChanged(oldArgs, newArgs) {
-	const propsDidChange = propsChanged(oldArgs, newArgs);
+	// 816 B
+	return newArgs[1] !== undefined ? propsChanged(oldArgs, newArgs) : newArgs[0] !== oldArgs[0];
 
-	return propsDidChange !== undefined
-		? propsDidChange
-		: newArgs[0] !== oldArgs[0];
+	// const propsDidChange = propsChanged(oldArgs, newArgs);
+	// return propsDidChange !== undefined
+	// 	? propsDidChange
+	// 	: newArgs[0] !== oldArgs[0];
 }
 
 function noop() {}
