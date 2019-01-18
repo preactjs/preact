@@ -70,94 +70,34 @@ describe('focus', () => {
 		validateFocus(input);
 	});
 
-	it('should maintain focus when moving input to beginning, end, and middle of children', () => {
-		render((
-			<List>
-				<ListItem>1</ListItem>
-				<ListItem>2</ListItem>
-				<ListItem>3</ListItem>
-				<ListItem>4</ListItem>
-				<Input />
-			</List>
-		), scratch);
+	it('should maintain focus when moving the input around', () => {
+		function App({ showFirst, showLast }) {
+			return (
+				<List>
+					{ showFirst ? <ListItem>1</ListItem> : null }
+					<Input />
+					{ showLast ? <ListItem>2</ListItem> : null }
+				</List>
+			);
+		}
+
+		render(<App showFirst={true} showLast={true} />, scratch);
 
 		let input = focusInput();
-
-		render((
-			<List>
-				<Input />
-				<ListItem>1</ListItem>
-				<ListItem>2</ListItem>
-				<ListItem>3</ListItem>
-				<ListItem>4</ListItem>
-			</List>
-		), scratch);
-		validateFocus(input, 'Moving from end to beginning');
+		render(<App showFirst={false} showLast={true} />, scratch);
+		validateFocus(input, 'move from middle to beginning');
 
 		input = focusInput();
-
-		render((
-			<List>
-				<ListItem>1</ListItem>
-				<ListItem>2</ListItem>
-				<ListItem>3</ListItem>
-				<ListItem>4</ListItem>
-				<Input />
-			</List>
-		), scratch);
-		validateFocus(input, 'Moving from beginning to end');
+		render(<App showFirst={true} showLast={true} />, scratch);
+		validateFocus(input, 'move from beginning to middle');
 
 		input = focusInput();
-
-		render((
-			<List>
-				<ListItem>1</ListItem>
-				<ListItem>2</ListItem>
-				<Input />
-				<ListItem>3</ListItem>
-				<ListItem>4</ListItem>
-			</List>
-		), scratch);
-		validateFocus(input, 'Moving from end to middle');
+		render(<App showFirst={true} showLast={false} />, scratch);
+		validateFocus(input, 'move from middle to end');
 
 		input = focusInput();
-
-		render((
-			<List>
-				<Input />
-				<ListItem>1</ListItem>
-				<ListItem>2</ListItem>
-				<ListItem>3</ListItem>
-				<ListItem>4</ListItem>
-			</List>
-		), scratch);
-		validateFocus(input, 'Moving from middle to beginning');
-
-		input = focusInput();
-
-		render((
-			<List>
-				<ListItem>1</ListItem>
-				<ListItem>2</ListItem>
-				<Input />
-				<ListItem>3</ListItem>
-				<ListItem>4</ListItem>
-			</List>
-		), scratch);
-		validateFocus(input, 'Moving from beginning to middle');
-
-		input = focusInput();
-
-		render((
-			<List>
-				<ListItem>1</ListItem>
-				<ListItem>2</ListItem>
-				<ListItem>3</ListItem>
-				<ListItem>4</ListItem>
-				<Input />
-			</List>
-		), scratch);
-		validateFocus(input, 'Moving from middle to end');
+		render(<App showFirst={true} showLast={true} />, scratch);
+		validateFocus(input, 'move from end to middle');
 	});
 
 	it('should maintain focus when adding children around input', () => {
