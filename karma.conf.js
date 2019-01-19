@@ -66,7 +66,7 @@ module.exports = function(config) {
 		),
 
 		coverageReporter: {
-			dir: path.join(__dirname, '../coverage'),
+			dir: path.join(__dirname, 'coverage'),
 			reporters: [
 				{ type: 'text-summary' },
 				{ type: 'html' },
@@ -94,12 +94,12 @@ module.exports = function(config) {
 		customLaunchers: sauceLabs ? sauceLabsLaunchers : localLaunchers,
 
 		files: [
-			{ pattern: 'polyfills.js', watched: false },
-			{ pattern: config.grep || '{browser,shared}/**.js', watched: false }
+			{ pattern: 'test/polyfills.js', watched: false },
+			{ pattern: config.grep || '{debug,}/test/{browser,shared}/**.js', watched: false }
 		],
 
 		preprocessors: {
-			'**/*': ['webpack', 'sourcemap']
+			'{debug,}/test/**/*': ['webpack', 'sourcemap']
 		},
 
 		webpack: {
@@ -123,7 +123,20 @@ module.exports = function(config) {
 						options: {
 							comments: false,
 							compact: true,
-							plugins: [].concat(coverage ? 'istanbul' : [])
+							plugins: coverage ?
+								[['istanbul', {
+									exclude: [
+										// Default config
+										'coverage/**',
+										'test/**',
+										'test{,-*}.js',
+										'**/*.test.js',
+										'**/__tests__/**',
+										'**/node_modules/**',
+										// Our custom extension
+										'{debug,}/test/**/*'
+									]
+								}]] : []
 						}
 					}
 				]
@@ -132,8 +145,7 @@ module.exports = function(config) {
 				// The React DevTools integration requires preact as a module
 				// rather than referencing source files inside the module
 				// directly
-				alias: { preact: path.join(__dirname, './src') },
-				modules: [__dirname, 'node_modules']
+				alias: { preact: path.join(__dirname, './src') }
 			},
 			plugins: [
 				new webpack.DefinePlugin({
