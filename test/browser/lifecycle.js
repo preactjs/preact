@@ -897,6 +897,52 @@ describe('Lifecycle methods', () => {
 			expect(ReceivePropsComponent.prototype.componentWillReceiveProps).not.to.have.been.called;
 		});
 
+		// See last paragraph of cWRP section https://reactjs.org/docs/react-component.html#unsafe_componentwillreceiveprops
+		it('should not be called on setState or forceUpdate', () => {
+			let spy = sinon.spy();
+			let spyInner = sinon.spy();
+			let c;
+
+			class Inner extends Component {
+				componentWillReceiveProps() {
+					spyInner();
+				}
+
+				render() {
+					return <div>foo</div>;
+				}
+			}
+
+			class Outer extends Component {
+				constructor() {
+					super();
+					c = this;
+				}
+
+				componentWillReceiveProps() {
+					spy();
+				}
+
+				render() {
+					return <Inner />;
+				}
+			}
+
+			render(<Outer />, scratch);
+			expect(spy).to.not.be.called;
+
+			c.setState({});
+			rerender();
+			expect(spy).to.not.be.called;
+			expect(spyInner).to.be.calledOnce;
+			spy.resetHistory();
+			spyInner.resetHistory();
+
+			c.forceUpdate();
+			expect(spy).to.not.be.called;
+			expect(spyInner).to.be.calledOnce;
+		});
+
 		it('should be called when rerender with new props from parent', () => {
 			let doRender;
 			class Outer extends Component {
@@ -1055,6 +1101,32 @@ describe('Lifecycle methods', () => {
 			expect(prevStateArg).to.deep.equal({ value: 2 });
 			expect(curProps).to.deep.equal({ foo: 'bar' });
 			expect(curState).to.deep.equal({ value: 4 });
+		});
+
+		it('cDU should not be called when sDU returned false', () => {
+			let spy = sinon.spy();
+			let c;
+
+			class App extends Component {
+				constructor() {
+					super();
+					c = this;
+				}
+
+				shouldComponentUpdate() {
+					return false;
+				}
+
+				componentDidUpdate(prevProps) {
+					spy(prevProps);
+				}
+			}
+
+			render(<App />, scratch);
+			c.setState({});
+			rerender();
+
+			expect(spy).to.not.be.called;
 		});
 
 		it('prevState argument should be the same object if state doesn\'t change', () => {
@@ -1429,6 +1501,69 @@ describe('Lifecycle methods', () => {
 
 			expect(ShouldNot.prototype.shouldComponentUpdate).to.have.been.calledOnce;
 			expect(ShouldNot.prototype.render).to.have.been.calledOnce;
+		});
+
+		it('should rerender when sCU returned false before', () => {
+			let c;
+			let spy = sinon.spy();
+
+			class App extends Component {
+				constructor() {
+					super();
+					c = this;
+				}
+
+				shouldComponentUpdate(_, nextState) {
+					return !!nextState.update;
+				}
+
+				render() {
+					spy();
+					return <div>foo</div>;
+				}
+			}
+
+			render(<App />, scratch);
+
+			c.setState({});
+			rerender();
+			spy.resetHistory();
+
+			c.setState({ update: true });
+			rerender();
+			expect(spy).to.be.calledOnce;
+		});
+
+		it('should be called with nextState', () => {
+			let c;
+			let spy = sinon.spy();
+
+			class App extends Component {
+				constructor() {
+					super();
+					c = this;
+					this.state = { a: false };
+				}
+
+				shouldComponentUpdate(_, nextState) {
+					return this.state!==nextState;
+				}
+
+				render() {
+					spy();
+					return <div>foo</div>;
+				}
+			}
+
+			render(<App />, scratch);
+
+			c.setState({});
+			rerender();
+			spy.resetHistory();
+
+			c.setState({ a: true });
+			rerender();
+			expect(spy).to.be.calledOnce;
 		});
 
 		it('should not be called on forceUpdate', () => {

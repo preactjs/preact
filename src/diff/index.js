@@ -113,9 +113,10 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			}
 			else {
 				if (!c._force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newVNode.props, s, context)===false) {
+					c._dirty = false;
 					break outer;
 				}
-				if (newType.getDerivedStateFromProps==null && c.componentWillReceiveProps!=null) {
+				if (newType.getDerivedStateFromProps==null && c._force==null && c.componentWillReceiveProps!=null) {
 					c.componentWillReceiveProps(newVNode.props, context);
 				}
 
@@ -180,7 +181,9 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 		if (c!=null) {
 			while (p=c._renderCallbacks.pop()) p();
 
-			if (!isNew && c.componentDidUpdate!=null) {
+			// Don't call componentDidUpdate on mount or when we bailed out via
+			// `shouldComponentUpdate`
+			if (!isNew && oldProps!=null && c.componentDidUpdate!=null) {
 				c.componentDidUpdate(oldProps, oldState, oldContext);
 			}
 		}

@@ -37,4 +37,28 @@ describe('cloneElement', () => {
 		expect(clone.props).not.to.equal(instance.props);
 		expect(clone.props.children).to.deep.equal(['world', '!']);
 	});
+
+	it('should override key if specified', () => {
+		function Foo() {}
+		const instance = <Foo key="1">hello</Foo>;
+
+		let clone = cloneElement(instance);
+		expect(clone.key).to.equal('1');
+
+		clone = cloneElement(instance, { key: '2' });
+		expect(clone.key).to.equal('2');
+	});
+
+	it('should override ref if specified', () => {
+		function a() {}
+		function b() {}
+		function Foo() {}
+		const instance = <Foo ref={a}>hello</Foo>;
+
+		let clone = cloneElement(instance);
+		expect(clone.ref).to.equal(a);
+
+		clone = cloneElement(instance, { ref: b });
+		expect(clone.ref).to.equal(b);
+	});
 });
