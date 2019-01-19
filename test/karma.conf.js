@@ -6,7 +6,8 @@ var coverage = String(process.env.COVERAGE) === 'true',
 	masterBranch = String(process.env.TRAVIS_BRANCH).match(/^master$/gi),
 	sauceLabs = ci && !pullRequest && masterBranch,
 	performance = !coverage && String(process.env.PERFORMANCE) !== 'false',
-	webpack = require('webpack');
+	webpack = require('webpack'),
+	path = require('path');
 
 var sauceLabsLaunchers = {
 	sl_chrome: {
@@ -65,7 +66,7 @@ module.exports = function(config) {
 		),
 
 		coverageReporter: {
-			dir: __dirname + '/../coverage',
+			dir: path.join(__dirname, '../coverage'),
 			reporters: [
 				{ type: 'text-summary' },
 				{ type: 'html' },
@@ -131,7 +132,7 @@ module.exports = function(config) {
 				// The React DevTools integration requires preact as a module
 				// rather than referencing source files inside the module
 				// directly
-				alias: { preact: '../src/preact' },
+				alias: { preact: path.join(__dirname, './src') },
 				modules: [__dirname, 'node_modules']
 			},
 			plugins: [
