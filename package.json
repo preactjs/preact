@@ -17,7 +17,7 @@
     "test:flow": "flow check",
     "test:ts": "tsc -p test/ts/ && mocha --require babel-register test/ts/**/*-test.js",
     "test:mocha": "mocha --recursive --require babel-register test/shared test/node",
-    "test:karma": "karma start karma.conf.js --single-run",
+    "test:karma": "cross-env COVERAGE=true karma start karma.conf.js --single-run",
     "test:mocha:watch": "npm run test:mocha -- --watch",
     "test:karma:watch": "npm run test:karma -- no-single-run",
     "test:karma:bench": "cross-env PERFORMANCE=true COVERAGE=false karma start karma.conf.js --grep=test/benchmarks/**.js --single-run",
