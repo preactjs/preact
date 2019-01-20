@@ -2,7 +2,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-const ceviche = path.resolve(__dirname, '../src');
+const ceviche = path.join(__dirname, '../');
 
 module.exports = {
 	context: __dirname,
