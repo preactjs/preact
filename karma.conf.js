@@ -145,7 +145,10 @@ module.exports = function(config) {
 				// The React DevTools integration requires preact as a module
 				// rather than referencing source files inside the module
 				// directly
-				alias: { preact: path.join(__dirname, './src') }
+				alias: {
+					preact: path.join(__dirname, './src'),
+					ceviche: path.join(__dirname, './src')
+				}
 			},
 			plugins: [
 				new webpack.DefinePlugin({
