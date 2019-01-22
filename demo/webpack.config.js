@@ -2,7 +2,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-const ceviche = path.join(__dirname, '../');
+const ceviche = path.join(__dirname, '..', 'src');
 
 module.exports = {
 	context: __dirname,
@@ -12,6 +12,7 @@ module.exports = {
 	},
 	resolve: {
 		alias: {
+			["ceviche/debug"]: path.join(__dirname, '..', 'debug'),
 			ceviche: ceviche,
 			preact: path.resolve(__dirname, './preact'),
 			react: ceviche,
