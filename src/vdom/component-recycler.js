@@ -17,7 +17,7 @@ export const recyclerComponents = [];
  * @returns {import('../component').Component}
  */
 export function createComponent(Ctor, props, context) {
-	let inst, i = recyclerComponents.length;
+	let inst;
 
 	if (Ctor.prototype && Ctor.prototype.render) {
 		inst = new Ctor(props, context);
@@ -29,6 +29,7 @@ export function createComponent(Ctor, props, context) {
 		inst.render = doRender;
 	}
 
+	let i = recyclerComponents.length;
 
 	while (i--) {
 		if (recyclerComponents[i].constructor===Ctor) {
