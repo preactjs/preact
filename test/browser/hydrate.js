@@ -1,6 +1,7 @@
 import { createElement, hydrate, Fragment } from '../../src/index';
-import { setupScratch, teardown, logCall, clearLog, getLog } from '../_util/helpers';
+import { setupScratch, teardown } from '../_util/helpers';
 import { ul, li, div } from '../_util/dom';
+import { logCall, clearLog, getLog } from '../_util/logCall';
 
 /** @jsx createElement */
 
@@ -46,7 +47,7 @@ describe('hydrate()', () => {
 		), scratch);
 
 		expect(scratch.innerHTML).to.equal(html);
-		expect(getLog()).to.deep.equal({});
+		expect(getLog()).to.deep.equal([]);
 	});
 
 	it('should reuse existing DOM when given components', () => {
@@ -68,7 +69,7 @@ describe('hydrate()', () => {
 		), scratch);
 
 		expect(scratch.innerHTML).to.equal(html);
-		expect(getLog()).to.deep.equal({});
+		expect(getLog()).to.deep.equal([]);
 	});
 
 	it('should add missing nodes to existing DOM when hydrating', () => {
@@ -92,11 +93,12 @@ describe('hydrate()', () => {
 			li('2'),
 			li('3')
 		].join('')));
-		expect(getLog()).to.deep.equal({
-			'<li>.appendChild(#text)': 2,
-			'<ul>1.appendChild(<li>2)': 1,
-			'<ul>12.appendChild(<li>3)': 1
-		});
+		expect(getLog()).to.deep.equal([
+			'<li>.appendChild(#text)',
+			'<ul>1.appendChild(<li>2)',
+			'<li>.appendChild(#text)',
+			'<ul>12.appendChild(<li>3)'
+		]);
 	});
 
 	it('should remove extra nodes from existing DOM when hydrating', () => {
@@ -123,9 +125,9 @@ describe('hydrate()', () => {
 			li('2'),
 			li('3')
 		].join('')));
-		expect(getLog()).to.deep.equal({
-			'<li>4.remove()': 1
-		});
+		expect(getLog()).to.deep.equal([
+			'<li>4.remove()'
+		]);
 	});
 
 	it('should update attributes on existing DOM', () => {
@@ -136,11 +138,11 @@ describe('hydrate()', () => {
 		hydrate(vnode, scratch);
 
 		expect(scratch.innerHTML).to.equal('<div><span same-value="foo" different-value="b" new-value="c">Test</span></div>');
-		expect(getLog()).to.deep.equal({
-			'<span>Test.removeAttribute(doesnt-exist)': 1,
-			'<span>Test.setAttribute(different-value, b)': 1,
-			'<span>Test.setAttribute(new-value, c)': 1
-		});
+		expect(getLog()).to.deep.equal([
+			'<span>Test.setAttribute(different-value, b)',
+			'<span>Test.setAttribute(new-value, c)',
+			'<span>Test.removeAttribute(doesnt-exist)'
+		]);
 	});
 
 	it('should correctly hydrate with Fragments', () => {
@@ -166,7 +168,7 @@ describe('hydrate()', () => {
 		), scratch);
 
 		expect(scratch.innerHTML).to.equal(html);
-		expect(getLog()).to.deep.equal({});
+		expect(getLog()).to.deep.equal([]);
 	});
 
 	it('should correctly hydrate root Fragments', () => {
@@ -198,6 +200,6 @@ describe('hydrate()', () => {
 		), scratch);
 
 		expect(scratch.innerHTML).to.equal(html);
-		expect(getLog()).to.deep.equal({});
+		expect(getLog()).to.deep.equal([]);
 	});
 });

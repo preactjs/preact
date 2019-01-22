@@ -103,7 +103,7 @@ module.exports = function(config) {
 
 		webpack: {
 			output: {
-				filename: '[name]'
+				filename: '[name].js'
 			},
 			mode: 'development',
 			devtool: 'inline-source-map',
