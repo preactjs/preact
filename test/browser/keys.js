@@ -215,7 +215,19 @@ describe('keys', () => {
 		expect(getLog()).to.deep.equal([ '<li>z.remove()', '<li>y.remove()', '<li>x.remove()' ]);
 	});
 
-	it('should swap existing keyed children', () => {
+	it('should swap children efficiently', () => {
+		render(<List values={['a', 'b']} />, scratch);
+		expect(scratch.textContent).to.equal('ab');
+
+		clearLog();
+
+		render(<List values={['b', 'a']} />, scratch);
+		expect(scratch.textContent).to.equal('ba');
+
+		expect(getLog()).to.deep.equal([ '<ol>ab.appendChild(<li>a)' ]);
+	});
+
+	it('should swap existing keyed children in the middle of a list efficiently', () => {
 		const values = ['a', 'b', 'c', 'd'];
 
 		render(<List values={values} />, scratch);
