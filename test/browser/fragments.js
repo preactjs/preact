@@ -1,6 +1,6 @@
 import { createElement as h, render, Component, Fragment } from '../../src/index';
 import { setupScratch, teardown, setupRerender } from '../_util/helpers';
-import { span, div } from '../_util/dom';
+import { span, div, ol, li } from '../_util/dom';
 
 /** @jsx h */
 /* eslint-disable react/jsx-boolean-value */
@@ -281,6 +281,7 @@ describe('Fragment', () => {
 		}
 
 		render(<Foo condition={true} />, scratch);
+		// Issue #193: Improve Fragment diff performance
 		// TODO: With this test, the Fragment with just one child will invoke
 		// node.appendChild on a DOM element that is already appened to the `node`.
 		// I think we need the oldParentVNode to get the old first DOM child to
@@ -407,30 +408,48 @@ describe('Fragment', () => {
 	});
 
 	it.skip('should not preserve state between unkeyed and keyed fragment', () => {
-		function Foo({ condition }) {
-			return condition ? (
+		const Foo = ({ condition }) => [
+			<div>0</div>,
+			condition ? (
 				<Fragment key="a">
+					<div>1</div>
 					<Stateful />
+					<div>2</div>
 				</Fragment>
 			) : (
 				<Fragment>
+					<div>1</div>
 					<Stateful />
+					<div>2</div>
 				</Fragment>
-			);
-		}
+			),
+			<div>3</div>
+		];
+
+		const html = [
+			div(0),
+			div(1),
+			div('Hello'),
+			div(2),
+			div(3)
+		].join('');
 
 		// React & Preact: has the same behavior for components
 		// https://codesandbox.io/s/57prmy5mx
 		render(<Foo condition={true} />, scratch);
+
+		expect(ops).to.deep.equal([]);
+		expect(scratch.innerHTML).to.equal(html);
+
 		render(<Foo condition={false} />, scratch);
 
 		expect(ops).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(scratch.innerHTML).to.equal(html);
 
 		render(<Foo condition={true} />, scratch);
 
 		expect(ops).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(scratch.innerHTML).to.equal(html);
 	});
 
 	it('should preserve state with reordering in multiple levels', () => {
@@ -476,29 +495,39 @@ describe('Fragment', () => {
 				<div>
 					{
 						<Fragment key="foo">
+							<span>1</span>
 							<Stateful />
 						</Fragment>
 					}
-					<span />
+					<span>2</span>
 				</div>
 			) : (
 				<div>
-					{[<Stateful />]}
-					<span />
+					{[
+						<span>1</span>,
+						<Stateful />
+					]}
+					<span>2</span>
 				</div>
 			);
 		}
+
+		const html = div([
+			span('1'),
+			div('Hello'),
+			span('2')
+		].join(''));
 
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />,  scratch);
 
 		expect(ops).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal('<div><div>Hello</div><span></span></div>');
+		expect(scratch.innerHTML).to.equal(html);
 
 		render(<Foo condition={true} />, scratch);
 
 		expect(ops).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal('<div><div>Hello</div><span></span></div>');
+		expect(scratch.innerHTML).to.equal(html);
 	});
 
 	it('should preserve state when it does not change positions', () => {
@@ -592,23 +621,27 @@ describe('Fragment', () => {
 			render() {
 				return (
 					<Fragment>
+						<span>0</span>
 						{this.state.value && 'foo'}
+						<span>1</span>
 					</Fragment>
 				);
 			}
 		}
 
+		const html = contents => span('0') + contents + span('1');
+
 		render(<Comp />, scratch);
-		expect(scratch.innerHTML).to.equal('foo');
+		expect(scratch.innerHTML).to.equal(html('foo'));
 
 		update();
 		rerender();
 
-		expect(scratch.innerHTML).to.equal('');
+		expect(scratch.innerHTML).to.equal(html(''));
 
 		update();
 		rerender();
-		expect(scratch.innerHTML).to.equal('foo');
+		expect(scratch.innerHTML).to.equal(html('foo'));
 	});
 
 	it('can modify the children of a Fragment', () => {
@@ -733,18 +766,22 @@ describe('Fragment', () => {
 	it('should render sibling fragments with multiple children in the correct order', () => {
 		render((
 			<ol>
+				<li>0</li>
 				<Fragment>
-					<li>0</li>
 					<li>1</li>
-				</Fragment>
-				<Fragment>
 					<li>2</li>
-					<li>3</li>
 				</Fragment>
+				<li>3</li>
+				<li>4</li>
+				<Fragment>
+					<li>5</li>
+					<li>6</li>
+				</Fragment>
+				<li>7</li>
 			</ol>
 		), scratch);
 
-		expect(scratch.textContent).to.equal('0123');
+		expect(scratch.textContent).to.equal('01234567');
 	});
 
 	it('should support HOCs that return children', () => {
@@ -793,5 +830,39 @@ describe('Fragment', () => {
 			span('another span'),
 			span('a final span')
 		].join(''));
+	});
+
+	it('should support conditionally rendered Fragment', () => {
+		const Foo = ({ condition }) => (
+			<ol>
+				<li>0</li>
+				{condition ? (
+					<Fragment>
+						<li>1</li>
+						<li>2</li>
+					</Fragment>
+				) : ([
+					<li>1</li>,
+					<li>2</li>
+				])}
+				<li>3</li>
+			</ol>
+		);
+
+		const html = ol([
+			li('0'),
+			li('1'),
+			li('2'),
+			li('3')
+		].join(''));
+
+		render(<Foo condition={true} />, scratch);
+		expect(scratch.innerHTML).to.equal(html);
+
+		render(<Foo condition={false} />,  scratch);
+		expect(scratch.innerHTML).to.equal(html);
+
+		render(<Foo condition={true} />, scratch);
+		expect(scratch.innerHTML).to.equal(html);
 	});
 });
