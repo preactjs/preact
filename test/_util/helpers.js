@@ -1,5 +1,6 @@
 import { createElement as h, Component, options } from '../../src';
 import { assign } from '../../src/util';
+import { clearLog, getLog } from './logCall';
 
 /** @jsx h */
 
@@ -56,6 +57,10 @@ export function teardown(scratch) {
 	if (typeof Component.__test__previousDebounce !== 'undefined') {
 		Component.debounce = Component.__test__previousDebounce;
 		delete Component.__test__previousDebounce;
+	}
+
+	if (getLog().length > 0) {
+		clearLog();
 	}
 }
 
