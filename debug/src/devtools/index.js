@@ -26,13 +26,13 @@ let noop = () => undefined;
 
 export function initDevTools() {
 	// This global variable is injected by the devtools
-	let hook = /** @type {import('../internal').DevtoolsWindow} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
+	let hook = /** @type {import('../../../src/internal').DevtoolsWindow} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
 	if (hook==null) return;
 
-	/** @type {(vnode: import('../internal').VNode) => void} */
+	/** @type {(vnode: import('../../../src/internal').VNode) => void} */
 	let onCommitRoot = noop;
 
-	/** @type {(vnode: import('../internal').VNode) => void} */
+	/** @type {(vnode: import('../../../src/internal').VNode) => void} */
 	let onCommitUnmount = noop;
 
 	// Initialize our custom renderer
