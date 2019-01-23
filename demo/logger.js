@@ -1,4 +1,10 @@
-export default function logger() {
+export default function logger(logStats, logConsole) {
+	if (!logStats && !logConsole) {
+		return;
+	}
+
+	const consoleBuffer = new ConsoleBuffer();
+
 	let calls = {};
 	let lock = true;
 
@@ -12,6 +18,10 @@ export default function logger() {
 	function count(key) {
 		if (lock===true) return;
 		calls[key] = (calls[key] || 0) + 1;
+
+		if (logConsole) {
+			consoleBuffer.log(key);
+		}
 	}
 
 	function logCall(obj, method, name) {
@@ -38,7 +48,7 @@ export default function logger() {
 	logCall(Element.prototype, 'setAttributeNS');
 	logCall(Element.prototype, 'removeAttribute');
 	logCall(Element.prototype, 'removeAttributeNS');
-	let d = Object.getOwnPropertyDescriptor(Node.prototype, 'data');
+	let d = Object.getOwnPropertyDescriptor(CharacterData.prototype, 'data') || Object.getOwnPropertyDescriptor(Node.prototype, 'data');
 	Object.defineProperty(Text.prototype, 'data', {
 		get() {
 			let value = d.get.call(this);
@@ -53,6 +63,8 @@ export default function logger() {
 
 	let root;
 	function setup() {
+		if (!logStats) return;
+
 		lock = true;
 		root = document.createElement('table');
 		root.style.cssText = 'position: fixed; right: 0; top: 0; z-index:999; background: #000; font-size: 12px; color: #FFF; opacity: 0.9; white-space: nowrap; pointer-events: none;';
@@ -61,7 +73,7 @@ export default function logger() {
 		root.tableBody = document.createElement('tbody');
 		root.appendChild(root.tableBody);
 		root.appendChild(header);
-		document.body.appendChild(root);
+		document.documentElement.appendChild(root);
 		lock = false;
 	}
 
@@ -87,6 +99,8 @@ export default function logger() {
 	}
 
 	function update() {
+		if (!logStats) return;
+
 		lock = true;
 		for (let i in calls) {
 			if (calls.hasOwnProperty(i)) {
@@ -100,5 +114,48 @@ export default function logger() {
 	let updateTimer = setInterval(update, 50);
 
 	setup();
+	lock = false;
 	return { insertInto, update, remove };
+}
+
+/**
+ * Logging to the console significantly affects performance.
+ * Buffer calls to console and replay them at the end of the
+ * current stack
+ * @extends {Console}
+ */
+class ConsoleBuffer {
+	constructor() {
+
+		/** @type {Array<[string, any[]]>} */
+		this.buffer = [];
+		this.deferred = null;
+
+		for (let methodName of Object.keys(console)) {
+			this[methodName] = this.proxy(methodName);
+		}
+	}
+
+	proxy(methodName) {
+		return (...args) => {
+			this.buffer.push([methodName, args]);
+			this.deferFlush();
+		};
+	}
+
+	deferFlush() {
+		if (this.deferred == null) {
+			this.deferred = Promise.resolve()
+				.then(() => this.flush())
+				.then(() => (this.deferred = null));
+		}
+	}
+
+	flush() {
+		let method;
+		while ((method = this.buffer.shift())) {
+			let [name, args] = method;
+			console[name](...args);
+		}
+	}
 }

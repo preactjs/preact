@@ -9,7 +9,7 @@ describe('cloneElement', () => {
 		const clone = cloneElement(instance);
 
 		expect(clone.prototype).to.equal(instance.prototype);
-		expect(clone.tag).to.equal(instance.tag);
+		expect(clone.type).to.equal(instance.type);
 		expect(clone.props).not.to.equal(instance.props); // Should be a different object...
 		expect(clone.props).to.deep.equal(instance.props); // with the same properties
 	});
@@ -20,7 +20,7 @@ describe('cloneElement', () => {
 		const clone = cloneElement(instance, { prop1: -1, newProp: -2 });
 
 		expect(clone.prototype).to.equal(instance.prototype);
-		expect(clone.tag).to.equal(instance.tag);
+		expect(clone.type).to.equal(instance.type);
 		expect(clone.props).not.to.equal(instance.props);
 		expect(clone.props.prop1).to.equal(-1);
 		expect(clone.props.prop2).to.equal(2);
@@ -33,8 +33,32 @@ describe('cloneElement', () => {
 		const clone = cloneElement(instance, null, 'world', '!');
 
 		expect(clone.prototype).to.equal(instance.prototype);
-		expect(clone.tag).to.equal(instance.tag);
+		expect(clone.type).to.equal(instance.type);
 		expect(clone.props).not.to.equal(instance.props);
 		expect(clone.props.children).to.deep.equal(['world', '!']);
+	});
+
+	it('should override key if specified', () => {
+		function Foo() {}
+		const instance = <Foo key="1">hello</Foo>;
+
+		let clone = cloneElement(instance);
+		expect(clone.key).to.equal('1');
+
+		clone = cloneElement(instance, { key: '2' });
+		expect(clone.key).to.equal('2');
+	});
+
+	it('should override ref if specified', () => {
+		function a() {}
+		function b() {}
+		function Foo() {}
+		const instance = <Foo ref={a}>hello</Foo>;
+
+		let clone = cloneElement(instance);
+		expect(clone.ref).to.equal(a);
+
+		clone = cloneElement(instance, { ref: b });
+		expect(clone.ref).to.equal(b);
 	});
 });

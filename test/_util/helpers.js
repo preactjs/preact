@@ -1,4 +1,6 @@
-import { createElement as h, Component } from '../../src';
+import { createElement as h, Component, options } from '../../src';
+import { assign } from '../../src/util';
+import { clearLog, getLog } from './logCall';
 
 /** @jsx h */
 
@@ -24,12 +26,27 @@ export function setupRerender() {
 	return () => Component.__test__drainQueue && Component.__test__drainQueue();
 }
 
+let oldOptions = null;
+export function clearOptions() {
+	oldOptions = assign({}, options);
+	delete options.vnode;
+	delete options.beforeDiff;
+	delete options.afterDiff;
+	delete options.commitRoot;
+	delete options.beforeUnmount;
+}
+
 /**
  * Teardown test environment and reset preact's internal state
  * @param {HTMLDivElement} scratch
  */
 export function teardown(scratch) {
 	scratch.parentNode.removeChild(scratch);
+
+	if (oldOptions != null) {
+		assign(options, oldOptions);
+		oldOptions = null;
+	}
 
 	if (Component.__test__drainQueue) {
 		// Flush any pending updates leftover by test
@@ -41,19 +58,11 @@ export function teardown(scratch) {
 		Component.debounce = Component.__test__previousDebounce;
 		delete Component.__test__previousDebounce;
 	}
+
+	if (getLog().length > 0) {
+		clearLog();
+	}
 }
-
-/**
- * A helper to generate innerHTML validation strings containing spans
- * @param {string} contents The contents of the span, as a string
- */
-export const span = contents => `<span>${contents}</span>`;
-
-/**
- * A helper to generate innerHTML validation strings containing divs
- * @param {string} contents The contents of the div, as a string
- */
-export const div = contents => `<div>${contents}</div>`;
 
 const Foo = () => 'd';
 export const getMixedArray = () => (
@@ -61,52 +70,6 @@ export const getMixedArray = () => (
 	[0, 'a', 'b', <span>c</span>, <Foo />, null, undefined, false, ['e', 'f'], 1]
 );
 export const mixedArrayHTML = '0ab<span>c</span>def1';
-
-/**
- * Serialize an object
- * @param {Object} obj
- * @return {string}
- */
-export function serialize(obj) {
-	if (obj instanceof Text) return '#text';
-	if (obj instanceof Element) return `<${obj.localName}>${obj.textContent}`;
-	if (obj === document) return 'document';
-	return Object.prototype.toString.call(obj).replace(/(^\[object |\]$)/g, '');
-}
-
-let log = {};
-
-/**
- * Modify obj's original method to log calls and arguments on logger object
- * @param {object} obj
- * @param {string} method
- */
-export function logCall(obj, method) {
-	let old = obj[method];
-	obj[method] = function() {
-		let c = '';
-		for (let i=0; i<arguments.length; i++) {
-			if (c) c += ', ';
-			c += serialize(arguments[i]);
-		}
-		const key = `${serialize(this)}.${method}(${c})`;
-		log[key] = (log[key] || 0) + 1;
-		return old.apply(this, arguments);
-	};
-}
-
-/**
- * Return log object
- * @return {object} log
- */
-export function getLog() {
-	return log;
-}
-
-/** Clear log object */
-export function clearLog() {
-	log = {};
-}
 
 /**
  * Reset obj to empty to keep reference

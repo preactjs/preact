@@ -6,13 +6,17 @@
 
 1. The VNode shape has changed
     1. `attributes` has been renamed to `props`
-    2. `nodeName` is now `tag`
+    2. `nodeName` is now `type`
     3. `props.children`
         1. The children of a VNode are no longer guaranteed to be a flat array. It could be `undefined`
-           or it could be a nested array of children.
-        2. A Component with no children will not have a `children` prop defined on `props`. Preact
-           instead guaranteed an empty list would always be there. That can no longer be relied on.
+           or it could be a nested array of children. use newly exported helper `toChildArray` to
+           always get an array back. It takes `props.children` as an argument and always returns an array
+        2. A Component with no children will not have a `children` prop defined on `props`. Preact v8
+           guaranteed an empty list would always be there. That can no longer be relied on.
         3. `children` is only stored as a property on the `props` property (i.e. `props.children`).
+           `vnode.children` no longer exists
+        4. `null`, `undefined`, `true`, and `false` are not removed from the children array stored as
+		      props. Use the newly exported helper `toChildArray` to flatten and remove non-renderables.
 2. `h` has been renamed to `createElement`. To continue to use `h`, alias `createElement` to `h` in
    your import statement to h: `import { createElement as h } from 'preact';`.
 3. The root `render` function (the one you import from `preact`) has changed:
@@ -25,9 +29,10 @@
 4. `setState` no longer modifies `this.state` synchronously
 5. Falsy attributes values are no longer removed from the DOM. For some attributes (e.g. `spellcheck`)
    the values `false` and `''` have different meaning so being able to render `false` is important
-8. The Component constructor no longer initializes state to an empty object. If state has not been
+6. The Component constructor no longer initializes state to an empty object. If state has not been
    previously set, it will be set to an empty object the first time the component is rendered, after
    the constructor has been called
+7. We no longer have a default export. Use `import * as preact from "preact"` for similar behavior.
 
 ### Minor changes
 
@@ -37,4 +42,4 @@
 ### For contributors
 
 1. `scratch.innerHTML = ''` no longer is an effective technique to clear the DOM during testing. If you think you need to
-   clear the DOM during a test, consider breaking your tests into multiple individual tests to cover your function.
+   clear the DOM during a test, consider breaking your tests into multiple individual tests to cover your feature.

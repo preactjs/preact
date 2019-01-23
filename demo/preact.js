@@ -1,16 +1,11 @@
-import { createElement, cloneElement, Component as CevicheComponent, render } from 'ceviche';
-const ATTRS_DESCRIPTOR = {
-	configurable: true,
-	enumerable: true,
-	get() {
-		return this.props;
-	}
+import { options, createElement, cloneElement, Component as CevicheComponent, render } from 'ceviche';
+
+options.vnode = vnode => {
+	vnode.nodeName = vnode.type;
+	vnode.attributes = vnode.props;
+	vnode.children = vnode._children || [].concat(vnode.props.children || []);
 };
-export function h(...args) {
-	let vnode = createElement(...args);
-	Object.defineProperty(vnode, 'attributes', ATTRS_DESCRIPTOR);
-	return vnode;
-}
+
 
 function asArray(arr) {
 	return Array.isArray(arr) ? arr : [arr];
@@ -20,8 +15,8 @@ function normalize(obj) {
 	if (Array.isArray(obj)) {
 		return obj.map(normalize);
 	}
-	if ('tag' in obj && !('attributes' in obj)) {
-		Object.defineProperty(obj, 'attributes', ATTRS_DESCRIPTOR);
+	if ('type' in obj && !('attributes' in obj)) {
+		obj.attributes = obj.props;
 	}
 	return obj;
 }
@@ -36,4 +31,4 @@ export function Component (props, context) {
 }
 Component.prototype = new CevicheComponent();
 
-export { createElement, cloneElement, render };
+export { createElement, createElement as h, cloneElement, render };

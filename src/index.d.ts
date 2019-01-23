@@ -9,11 +9,22 @@ declare namespace preact {
 	// -----------------------------------
 
 	interface VNode<P = {}> {
-		tag: ComponentFactory<P> | string | number | null;
+		type: ComponentFactory<P> | string | null;
 		props: P & { children: ComponentChildren };
 		text?: string | number | null;
 		key?: Key;
 		ref?: Ref<any>;
+		/**
+		 * The time this `vnode` started rendering. Will only be filled when
+		 * `options.enableProfiler` is set to `true`. Default value: `-1`
+		 */
+		startTime?: number;
+		/**
+		 * The time that the rendering of this `vnode` was completed. Will only be
+		 * filled when `options.enableProfiler` is set tot `true`.
+		 * Default value: `0`
+		 */
+		endTime?: number;
 	}
 
 	//
@@ -21,7 +32,11 @@ declare namespace preact {
 	// -----------------------------------
 
 	type Key = string | number;
-	type Ref<T> = (instance: T) => void;
+
+	type RefObject<T> = { current?: T | null }
+	type RefCallback<T> = (instance: T | null) => void;
+	type Ref<T> = RefObject<T> | RefCallback<T>;
+
 	type ComponentChild = VNode<any> | string | number | null | undefined;
 	type ComponentChildren = ComponentChild[] | object | VNode<any> | string | number | null | undefined;
 
@@ -58,6 +73,7 @@ declare namespace preact {
 		displayName?: string;
 		defaultProps?: Partial<P>;
 		getDerivedStateFromProps?(props: Readonly<P>, state: Readonly<S>): Partial<S>;
+		getDerivedStateFromError?(error: any): Partial<S>;
 	}
 
 	// Type alias for a component considered generally, whether stateless or stateful.
@@ -73,7 +89,7 @@ declare namespace preact {
 		componentWillUpdate?(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): void;
 		getSnapshotBeforeUpdate?(oldProps: Readonly<P>, oldState: Readonly<S>): any;
 		componentDidUpdate?(previousProps: Readonly<P>, previousState: Readonly<S>, previousContext: any): void;
-		componentDidCatch(error: any): void;
+		componentDidCatch?(error: any): void;
 	}
 
 	abstract class Component<P, S> {
@@ -82,6 +98,7 @@ declare namespace preact {
 		static displayName?: string;
 		static defaultProps?: any;
 		static getDerivedStateFromProps?<P, S>(props: P, state: S): Partial<S>;
+		static getDerivedStateFromError?<S>(error: any): Partial<S>;
 
 		state: Readonly<S>;
 		props: RenderableProps<P>;
@@ -101,15 +118,17 @@ declare namespace preact {
 	// -----------------------------------
 
 	function createElement<P>(
-		tag: ComponentFactory<P>,
+		type: ComponentFactory<P>,
 		props: Attributes & P | null,
 		...children: ComponentChildren[]
 	): VNode<any>;
 	function createElement(
-		tag: string,
+		type: string,
 		props: JSX.HTMLAttributes & JSX.SVGAttributes & Record<string, any> | null,
 		...children: ComponentChildren[]
 	): VNode<any>;
+
+	const h: typeof createElement;
 
 	//
 	// Preact render
@@ -130,10 +149,27 @@ declare namespace preact {
 	// Preact options
 	// -----------------------------------
 
-	// var options: {
-	// 	syncComponentUpdates?: boolean;
-	// 	debounceRendering?: (render: () => void) => void;
-	// 	vnode?: (vnode: VNode<any>) => void;
-	// 	event?: (event: Event) => Event;
-	// };
+	/**
+	 * Global options for preact
+	 */
+	interface Options {
+		/** Attach a hook that is invoked whenever a VNode is created */
+		vnode(vnode: VNode): void;
+		/** Attach a hook that is invoked after a tree was mounted or was updated. */
+		commitRoot?(vnode: VNode): void;
+		/** Attach a hook that is invoked immediately before a component is unmounted. */
+		beforeUnmount?(vnode: VNode): void;
+		/** Attach a hook that is invoked before a vnode is diffed */
+		beforeDiff?(vnode: VNode): void;
+		/** Attach a hook that is invoked after a vnode has rendered */
+		afterDiff?(vnode: VNode): void;
+	}
+
+	const options: Options;
+
+	//
+	// Preact helpers
+	// -----------------------------------
+	function createRef<T = any>(): RefObject<T>;
+	function toChildArray(children: ComponentChildren): Array<VNode | null>;
 }

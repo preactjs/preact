@@ -204,9 +204,9 @@ describe('Lifecycle methods', () => {
 	describe('static getDerivedStateFromProps', () => {
 		it('should set initial state with value returned from getDerivedStateFromProps', () => {
 			class Foo extends Component {
-				static getDerivedStateFromProps(nextProps) {
+				static getDerivedStateFromProps(props) {
 					return {
-						foo: nextProps.foo,
+						foo: props.foo,
 						bar: 'bar'
 					};
 				}
@@ -228,9 +228,9 @@ describe('Lifecycle methods', () => {
 						bar: 'bar'
 					};
 				}
-				static getDerivedStateFromProps(nextProps, prevState) {
+				static getDerivedStateFromProps(props, state) {
 					return {
-						foo: `not-${prevState.foo}`
+						foo: `not-${state.foo}`
 					};
 				}
 				render() {
@@ -250,8 +250,8 @@ describe('Lifecycle methods', () => {
 						value: 'initial'
 					};
 				}
-				static getDerivedStateFromProps(nextProps) {
-					if (nextProps.update) {
+				static getDerivedStateFromProps(props) {
+					if (props.update) {
 						return {
 							value: 'updated'
 						};
@@ -291,14 +291,14 @@ describe('Lifecycle methods', () => {
 						value: 'initial'
 					};
 				}
-				static getDerivedStateFromProps(nextProps, prevState) {
+				static getDerivedStateFromProps(props, state) {
 					// Don't change state for call that happens after the constructor
-					if (prevState.value === 'initial') {
+					if (state.value === 'initial') {
 						return null;
 					}
 
 					return {
-						value: prevState.value + ' derived'
+						value: state.value + ' derived'
 					};
 				}
 				componentDidMount() {
@@ -399,9 +399,9 @@ describe('Lifecycle methods', () => {
 					this.state = { parentRenders: 0 };
 				}
 
-				static getDerivedStateFromProps(props, prevState) {
+				static getDerivedStateFromProps(props, state) {
 					logs.push('parent getDerivedStateFromProps');
-					return prevState.parentRenders + 1;
+					return state.parentRenders + 1;
 				}
 
 				render() {
@@ -537,8 +537,54 @@ describe('Lifecycle methods', () => {
 
 			render(<Stateful />, scratch);
 
+			// Verify captured object references didn't get mutated
 			expect(componentState).to.deep.equal({ key: 'value' });
 			expect(stateConstant).to.deep.equal({});
+		});
+
+		it('should NOT mutate state on update, only create new versions', () => {
+			const initialState = {};
+			const capturedStates = [];
+
+			let setState;
+
+			class Stateful extends Component {
+				static getDerivedStateFromProps(props, state) {
+					return { value: (state.value || 0) + 1 };
+				}
+
+				constructor() {
+					super(...arguments);
+					this.state = initialState;
+					capturedStates.push(this.state);
+
+					setState = this.setState.bind(this);
+				}
+
+				componentDidMount() {
+					capturedStates.push(this.state);
+				}
+
+				componentDidUpdate() {
+					capturedStates.push(this.state);
+				}
+
+				render() {
+					return <div />;
+				}
+			}
+
+			render(<Stateful />, scratch);
+
+			setState({ value: 10 });
+			rerender();
+
+			// Verify captured object references didn't get mutated
+			expect(capturedStates).to.deep.equal([
+				{},
+				{ value: 1 },
+				{ value: 11 }
+			]);
 		});
 	});
 
@@ -851,6 +897,52 @@ describe('Lifecycle methods', () => {
 			expect(ReceivePropsComponent.prototype.componentWillReceiveProps).not.to.have.been.called;
 		});
 
+		// See last paragraph of cWRP section https://reactjs.org/docs/react-component.html#unsafe_componentwillreceiveprops
+		it('should not be called on setState or forceUpdate', () => {
+			let spy = sinon.spy();
+			let spyInner = sinon.spy();
+			let c;
+
+			class Inner extends Component {
+				componentWillReceiveProps() {
+					spyInner();
+				}
+
+				render() {
+					return <div>foo</div>;
+				}
+			}
+
+			class Outer extends Component {
+				constructor() {
+					super();
+					c = this;
+				}
+
+				componentWillReceiveProps() {
+					spy();
+				}
+
+				render() {
+					return <Inner />;
+				}
+			}
+
+			render(<Outer />, scratch);
+			expect(spy).to.not.be.called;
+
+			c.setState({});
+			rerender();
+			expect(spy).to.not.be.called;
+			expect(spyInner).to.be.calledOnce;
+			spy.resetHistory();
+			spyInner.resetHistory();
+
+			c.forceUpdate();
+			expect(spy).to.not.be.called;
+			expect(spyInner).to.be.calledOnce;
+		});
+
 		it('should be called when rerender with new props from parent', () => {
 			let doRender;
 			class Outer extends Component {
@@ -1009,6 +1101,32 @@ describe('Lifecycle methods', () => {
 			expect(prevStateArg).to.deep.equal({ value: 2 });
 			expect(curProps).to.deep.equal({ foo: 'bar' });
 			expect(curState).to.deep.equal({ value: 4 });
+		});
+
+		it('cDU should not be called when sDU returned false', () => {
+			let spy = sinon.spy();
+			let c;
+
+			class App extends Component {
+				constructor() {
+					super();
+					c = this;
+				}
+
+				shouldComponentUpdate() {
+					return false;
+				}
+
+				componentDidUpdate(prevProps) {
+					spy(prevProps);
+				}
+			}
+
+			render(<App />, scratch);
+			c.setState({});
+			rerender();
+
+			expect(spy).to.not.be.called;
 		});
 
 		it('prevState argument should be the same object if state doesn\'t change', () => {
@@ -1385,6 +1503,69 @@ describe('Lifecycle methods', () => {
 			expect(ShouldNot.prototype.render).to.have.been.calledOnce;
 		});
 
+		it('should rerender when sCU returned false before', () => {
+			let c;
+			let spy = sinon.spy();
+
+			class App extends Component {
+				constructor() {
+					super();
+					c = this;
+				}
+
+				shouldComponentUpdate(_, nextState) {
+					return !!nextState.update;
+				}
+
+				render() {
+					spy();
+					return <div>foo</div>;
+				}
+			}
+
+			render(<App />, scratch);
+
+			c.setState({});
+			rerender();
+			spy.resetHistory();
+
+			c.setState({ update: true });
+			rerender();
+			expect(spy).to.be.calledOnce;
+		});
+
+		it('should be called with nextState', () => {
+			let c;
+			let spy = sinon.spy();
+
+			class App extends Component {
+				constructor() {
+					super();
+					c = this;
+					this.state = { a: false };
+				}
+
+				shouldComponentUpdate(_, nextState) {
+					return this.state!==nextState;
+				}
+
+				render() {
+					spy();
+					return <div>foo</div>;
+				}
+			}
+
+			render(<App />, scratch);
+
+			c.setState({});
+			rerender();
+			spy.resetHistory();
+
+			c.setState({ a: true });
+			rerender();
+			expect(spy).to.be.calledOnce;
+		});
+
 		it('should not be called on forceUpdate', () => {
 			let Comp;
 			class Foo extends Component {
@@ -1412,7 +1593,7 @@ describe('Lifecycle methods', () => {
 			expect(Foo.prototype.render).to.have.been.calledTwice;
 		});
 
-		it.skip('should be passed next props and state', () => {
+		it('should be passed next props and state', () => {
 
 			/** @type {() => void} */
 			let updateState;
@@ -2019,6 +2200,475 @@ describe('Lifecycle methods', () => {
 
 			render(<Receiver><ThrowErr /></Receiver>, scratch);
 			expect(Receiver.prototype.componentDidCatch).to.have.been.called;
+		});
+	});
+
+	describe('#getDerivedStateFromError', () => {
+		let receiver;
+		class Receiver extends Component {
+			constructor() {
+				super();
+				receiver = this;
+			}
+
+			static getDerivedStateFromError(error) {
+				return { error };
+			}
+			render() {
+				return <div>{this.state.error ? String(this.state.error) : this.props.children}</div>;
+			}
+		}
+
+		spyAll(Receiver.prototype);
+		spyAll(Receiver);
+
+		beforeEach(() => {
+			receiver = undefined;
+			resetAllSpies(Receiver.prototype);
+			resetAllSpies(Receiver);
+		});
+
+		it('should be called when child fails in constructor', () => {
+			class ThrowErr extends Component {
+				constructor(props, context) {
+					super(props, context);
+					throw new Error('Error!');
+				}
+				render() {
+					return <div />;
+				}
+			}
+
+			render(<Receiver><ThrowErr /></Receiver>, scratch);
+			rerender();
+
+			expect(Receiver.getDerivedStateFromError).to.have.been.called;
+		});
+
+		it('should be called when child fails in componentWillMount', () => {
+			class ThrowErr extends Component {
+				componentWillMount() {
+					throw new Error('Error!');
+				}
+				render() {
+					return <div />;
+				}
+			}
+
+			render(<Receiver><ThrowErr /></Receiver>, scratch);
+			expect(Receiver.getDerivedStateFromError).to.have.been.called;
+		});
+
+		it('should be called when child fails in render', () => {
+			// eslint-disable-next-line react/require-render-return
+			class ThrowErr extends Component {
+				render() {
+					throw new Error('Error!');
+				}
+			}
+
+			render(<Receiver><ThrowErr /></Receiver>, scratch);
+			expect(Receiver.getDerivedStateFromError).to.have.been.called;
+		});
+
+		it('should be called when child fails in componentDidMount', () => {
+			class ThrowErr extends Component {
+				componentDidMount() {
+					throw new Error('Error!');
+				}
+				render() {
+					return <div />;
+				}
+			}
+
+			render(<Receiver><ThrowErr /></Receiver>, scratch);
+			expect(Receiver.getDerivedStateFromError).to.have.been.called;
+		});
+
+		it('should be called when child fails in getDerivedStateFromProps', () => {
+			class ThrowErr extends Component {
+				static getDerivedStateFromProps() {
+					throw new Error('Error!');
+				}
+				render() {
+					return <span>Should not get here</span>;
+				}
+			}
+
+			sinon.spy(ThrowErr.prototype, 'render');
+			render(<Receiver><ThrowErr /></Receiver>, scratch);
+
+			expect(Receiver.getDerivedStateFromError).to.have.been.called;
+			expect(ThrowErr.prototype.render).not.to.have.been.called;
+		});
+
+		it('should be called when child fails in getSnapshotBeforeUpdate', () => {
+			class ThrowErr extends Component {
+				getSnapshotBeforeUpdate() {
+					throw new Error('Error!');
+				}
+				render() {
+					return <span />;
+				}
+			}
+
+			render(<Receiver><ThrowErr /></Receiver>, scratch);
+			receiver.forceUpdate();
+
+			expect(Receiver.getDerivedStateFromError).to.have.been.called;
+		});
+
+		it('should be called when child fails in componentDidUpdate', () => {
+			class ThrowErr extends Component {
+				componentDidUpdate() {
+					throw new Error('Error!');
+				}
+				render() {
+					return <span />;
+				}
+			}
+
+			render(<Receiver><ThrowErr /></Receiver>, scratch);
+
+			receiver.forceUpdate();
+			expect(Receiver.getDerivedStateFromError).to.have.been.called;
+		});
+
+		it('should be called when child fails in componentWillUpdate', () => {
+			class ThrowErr extends Component {
+				componentWillUpdate() {
+					throw new Error('Error!');
+				}
+				render() {
+					return <span />;
+				}
+			}
+
+			render(<Receiver><ThrowErr /></Receiver>, scratch);
+
+			receiver.forceUpdate();
+			expect(Receiver.getDerivedStateFromError).to.have.been.called;
+		});
+
+		it('should be called when child fails in componentWillReceiveProps', () => {
+			let receiver;
+			class Receiver extends Component {
+				constructor() {
+					super();
+					this.state = { foo: 'bar' };
+					receiver = this;
+				}
+				static getDerivedStateFromError(error) {
+					return { error };
+				}
+				render() {
+					return <div>{this.state.error ? String(this.state.error) : <ThrowErr foo={this.state.foo} />}</div>;
+				}
+			}
+			class ThrowErr extends Component {
+				componentWillReceiveProps() {
+					throw new Error('Error!');
+				}
+				render() {
+					return <span />;
+				}
+			}
+			sinon.spy(Receiver, 'getDerivedStateFromError');
+			render(<Receiver />, scratch);
+
+			receiver.setState({ foo: 'baz' });
+			rerender();
+			expect(Receiver.getDerivedStateFromError).to.have.been.called;
+		});
+
+		it('should be called when child fails in shouldComponentUpdate', () => {
+			let receiver;
+			class Receiver extends Component {
+				constructor() {
+					super();
+					this.state = { foo: 'bar' };
+					receiver = this;
+				}
+				static getDerivedStateFromError(error) {
+					return { error };
+				}
+				render() {
+					return <div>{this.state.error ? String(this.state.error) : <ThrowErr foo={this.state.foo} />}</div>;
+				}
+			}
+
+			class ThrowErr extends Component {
+				shouldComponentUpdate() {
+					throw new Error('Error!');
+				}
+				render() {
+					return <span />;
+				}
+			}
+			sinon.spy(Receiver, 'getDerivedStateFromError');
+			render(<Receiver />, scratch);
+			receiver.setState({ foo: 'baz' });
+			rerender();
+			expect(Receiver.getDerivedStateFromError).to.have.been.called;
+		});
+
+		it('should be called when child fails in componentWillUnmount', () => {
+			class ThrowErr extends Component {
+				componentWillUnmount() {
+					throw new Error('Error!');
+				}
+				render() {
+					return <div />;
+				}
+			}
+
+			render(<Receiver><ThrowErr /></Receiver>, scratch);
+			render(<Receiver><div /></Receiver>, scratch);
+			expect(Receiver.getDerivedStateFromError).to.have.been.called;
+		});
+
+		it('should be called when applying a Component ref', () => {
+			const Foo = () => <div />;
+
+			class ThrowRef extends Component {
+				ref() {
+					throw new Error('Error!');
+				}
+
+				render() {
+					return <Foo ref={this.ref.bind(this)} />;
+				}
+			}
+
+			render(<Receiver><ThrowRef /></Receiver>, scratch);
+			expect(Receiver.getDerivedStateFromError).to.have.been.called;
+
+			// Flush rerender queue ignoring susbsequent errors thrown by ref
+			try {
+				rerender();
+			}
+			catch (e) {}
+		});
+
+		it('should be called when applying a DOM ref', () => {
+			class ThrowRef extends Component {
+				ref() {
+					throw new Error('Error!');
+				}
+
+				render() {
+					return <div ref={this.ref.bind(this)} />;
+				}
+			}
+
+			render(<Receiver><ThrowRef /></Receiver>, scratch);
+			expect(Receiver.getDerivedStateFromError).to.have.been.called;
+
+			// Flush rerender queue ignoring susbsequent errors thrown by ref
+			try {
+				rerender();
+			}
+			catch (e) {}
+		});
+
+		it('should be called when unmounting a ref', () => {
+			class ThrowRef extends Component {
+				ref(value) {
+					if (value == null) {
+						throw new Error('Error!');
+					}
+				}
+
+				render() {
+					return <div ref={this.ref.bind(this)} />;
+				}
+			}
+
+			render(<Receiver><ThrowRef /></Receiver>, scratch);
+			render(<Receiver><div /></Receiver>, scratch);
+			expect(Receiver.getDerivedStateFromError).to.have.been.calledOnce;
+
+			// Flush rerender queue ignoring susbsequent errors thrown by ref
+			try {
+				rerender();
+			}
+			catch (e) {}
+		});
+
+		it('should be called when functional child fails', () => {
+			function ThrowErr() {
+				throw new Error('Error!');
+			}
+
+			render(<Receiver><ThrowErr /></Receiver>, scratch);
+			expect(Receiver.getDerivedStateFromError).to.have.been.called;
+		});
+
+		it('should re-render with new content', () => {
+			class ThrowErr extends Component {
+				componentWillMount() {
+					throw new Error('Error contents');
+				}
+				render() {
+					return 'No error!?!?';
+				}
+			}
+
+			render(<Receiver><ThrowErr /></Receiver>, scratch);
+			rerender();
+			expect(scratch).to.have.property('textContent', 'Error: Error contents');
+		});
+
+		it('should be able to adapt and rethrow errors', () => {
+			class Adapter extends Component {
+				static getDerivedStateFromError(error) {
+					throw new Error('Adapted ' + String(error && 'message' in error ? error.message : error));
+				}
+				render() {
+					return <div>{this.props.children}</div>;
+				}
+			}
+
+			function ThrowErr() {
+				throw new Error('Error!');
+			}
+
+			sinon.spy(Adapter, 'getDerivedStateFromError');
+			render((
+				<Receiver>
+					<Adapter>
+						<ThrowErr />
+					</Adapter>
+				</Receiver>
+			), scratch);
+
+			expect(Adapter.getDerivedStateFromError).to.have.been.called;
+			expect(Receiver.getDerivedStateFromError).to.have.been.called;
+
+			rerender();
+			expect(scratch).to.have.property('textContent', 'Error: Adapted Error!');
+		});
+
+		it('should bubble on repeated errors', () => {
+			class Adapter extends Component {
+				static getDerivedStateFromError(error) {
+					return { error };
+				}
+				render() {
+					// But fail at doing so
+					if (this.state.error) {
+						throw this.state.error;
+					}
+					return <div>{this.props.children}</div>;
+				}
+			}
+
+			function ThrowErr() {
+				throw new Error('Error!');
+			}
+
+			sinon.spy(Adapter, 'getDerivedStateFromError');
+
+			render((
+				<Receiver>
+					<Adapter>
+						<ThrowErr />
+					</Adapter>
+				</Receiver>
+			), scratch);
+			rerender();
+
+			expect(Adapter.getDerivedStateFromError).to.have.been.called;
+			expect(Receiver.getDerivedStateFromError).to.have.been.called;
+			expect(scratch).to.have.property('textContent', 'Error: Error!');
+		});
+
+		it('should bubble on ignored errors', () => {
+			class Adapter extends Component {
+				static getDerivedStateFromError(error) {
+					// Ignore the error
+					return null;
+				}
+				render() {
+					return <div>{this.props.children}</div>;
+				}
+			}
+
+			function ThrowErr() {
+				throw new Error('Error!');
+			}
+
+			sinon.spy(Adapter, 'getDerivedStateFromError');
+
+			render((
+				<Receiver>
+					<Adapter>
+						<ThrowErr />
+					</Adapter>
+				</Receiver>
+			), scratch);
+			rerender();
+
+			expect(Adapter.getDerivedStateFromError).to.have.been.called;
+			expect(Receiver.getDerivedStateFromError).to.have.been.called;
+			expect(scratch).to.have.property('textContent', 'Error: Error!');
+		});
+
+		it('should not bubble on caught errors', () => {
+			class TopReceiver extends Component {
+				static getDerivedStateFromError(error) {
+					return { error };
+				}
+				render() {
+					return <div>{this.state.error ? String(this.state.error) : this.props.children}</div>;
+				}
+			}
+
+			function ThrowErr() {
+				throw new Error('Error!');
+			}
+
+			sinon.spy(TopReceiver, 'getDerivedStateFromError');
+
+			render((
+				<TopReceiver>
+					<Receiver>
+						<ThrowErr />
+					</Receiver>
+				</TopReceiver>
+			), scratch);
+			rerender();
+
+			expect(TopReceiver.getDerivedStateFromError).not.to.have.been.called;
+			expect(Receiver.getDerivedStateFromError).to.have.been.called;
+			expect(scratch).to.have.property('textContent', 'Error: Error!');
+		});
+
+		it('should be called through non-component parent elements', () => {
+			class ThrowErr extends Component {
+				constructor(props, context) {
+					super(props, context);
+					throw new Error('Error!');
+				}
+			}
+
+			render(<Receiver><div><ThrowErr /></div></Receiver>, scratch);
+			expect(Receiver.getDerivedStateFromError).to.have.been.called;
+		});
+
+		it('should be called when ref throws', () => {
+			function ThrowErr() {
+				// eslint-disable-next-line react/jsx-wrap-multilines
+				return <div ref={(element) => {
+					if (element) {
+						throw new Error('Error');
+					}
+					// eslint-disable-next-line react/jsx-closing-bracket-location
+				}} />;
+			}
+
+			render(<Receiver><ThrowErr /></Receiver>, scratch);
+			expect(Receiver.getDerivedStateFromError).to.have.been.called;
 		});
 	});
 
