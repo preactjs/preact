@@ -1,6 +1,7 @@
 import { createElement as h, render, Component, Fragment } from '../../src/index';
 import { setupScratch, teardown, setupRerender } from '../_util/helpers';
 import { span, div, ol, li } from '../_util/dom';
+import { logCall, clearLog, getLog } from '../_util/logCall';
 
 /** @jsx h */
 /* eslint-disable react/jsx-boolean-value */
@@ -24,6 +25,12 @@ describe('Fragment', () => {
 		}
 	}
 
+	before(() => {
+		logCall(Element.prototype, 'insertBefore');
+		logCall(Element.prototype, 'appendChild');
+		logCall(Element.prototype, 'remove');
+	});
+
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
@@ -32,6 +39,7 @@ describe('Fragment', () => {
 
 	afterEach(() => {
 		teardown(scratch);
+		scratch = null;
 	});
 
 	it('should not render empty Fragment', () => {
@@ -40,13 +48,28 @@ describe('Fragment', () => {
 	});
 
 	it('should render a single child', () => {
+		clearLog();
 		render((
 			<Fragment>
 				<span>foo</span>
 			</Fragment>
 		), scratch);
 
+		// Issue #193: Improve Fragment diff performance
+		// TODO: With this test, the Fragment with just one child will invoke
+		// node.appendChild on a DOM element that is already appened to the `node`.
+		// I think we need the oldParentVNode to get the old first DOM child to
+		// effectively diff the children, because the parentVNode (the Fragment)
+		// comes from the newTree and so won't ever have ._dom set before diffing
+		// children.
+
 		expect(scratch.innerHTML).to.equal('<span>foo</span>');
+		expect(getLog()).to.deep.equal([
+			'<span>.appendChild(#text)',
+			'<div>.appendChild(<span>foo)',
+			// See issue #193 - redundant operations
+			'<div>foo.appendChild(<span>foo)'
+		]);
 	});
 
 	it('should render multiple children via noop renderer', () => {
@@ -97,15 +120,20 @@ describe('Fragment', () => {
 		}
 
 		render(<Foo condition={true} />, scratch);
+
+		clearLog();
 		render(<Foo condition={false} />, scratch);
 
 		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(getLog()).to.deep.equal([]);
 
+		clearLog();
 		render(<Foo condition={true} />, scratch);
 
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(getLog()).to.deep.equal([]);
 	});
 
 	it('should preserve state of children nested at same level', () => {
@@ -131,15 +159,27 @@ describe('Fragment', () => {
 		}
 
 		render(<Foo condition={true} />, scratch);
+
+		clearLog();
 		render(<Foo condition={false} />, scratch);
 
 		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div></div><div>Hello</div>');
+		expect(getLog()).to.deep.equal([
+			'<div>Hello.insertBefore(<div>, <div>Hello)'
+		]);
 
+		clearLog();
 		render(<Foo condition={true} />, scratch);
 
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(getLog()).to.deep.equal([
+			'<div>.remove()',
+			// See issue #193 - redundant operations (multiple Fragments)
+			'<div>Hello.appendChild(<div>Hello)',
+			'<div>Hello.appendChild(<div>Hello)'
+		]);
 	});
 
 	it('should not preserve state in non-top-level fragment nesting', () => {
@@ -158,15 +198,33 @@ describe('Fragment', () => {
 		}
 
 		render(<Foo condition={true} />, scratch);
+
+		clearLog();
 		render(<Foo condition={false} />, scratch);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(getLog()).to.deep.equal([
+			'<div>.appendChild(#text)',
+			'<div>Hello.insertBefore(<div>Hello, <div>Hello)',
+			// See issue #193 - redundant operations (remove)
+			'<div>Hello.remove()',
+			'<div>Hello.remove()',
+			'<div>Hello.remove()'
+		]);
 
+		clearLog();
 		render(<Foo condition={true} />, scratch);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(getLog()).to.deep.equal([
+			'<div>.appendChild(#text)',
+			'<div>Hello.appendChild(<div>Hello)',
+			// See issue #193
+			'<div>Hello.remove()',
+			'<div>Hello.remove()'
+		]);
 	});
 
 	it('should not preserve state of children if nested 2 levels without siblings', () => {
@@ -183,15 +241,35 @@ describe('Fragment', () => {
 		}
 
 		render(<Foo condition={true} />, scratch);
+
+		clearLog();
 		render(<Foo condition={false} />, scratch);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(getLog()).to.deep.equal([
+			// See issue #193 - redundant operations (remove)
+			'<div>Hello.remove()',
+			'<div>Hello.remove()',
+			'<div>.appendChild(#text)',
+			'<div>.appendChild(<div>Hello)',
+			'<div>Hello.appendChild(<div>Hello)'
+		]);
 
+		clearLog();
 		render(<Foo condition={true} />, scratch);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(getLog()).to.deep.equal([
+			// See issue #193
+			'<div>Hello.remove()',
+			'<div>Hello.remove()',
+			'<div>Hello.remove()',
+			'<div>Hello.remove()',
+			'<div>.appendChild(#text)',
+			'<div>.appendChild(<div>Hello)'
+		]);
 	});
 
 	it('should just render children for fragments', () => {
@@ -281,13 +359,6 @@ describe('Fragment', () => {
 		}
 
 		render(<Foo condition={true} />, scratch);
-		// Issue #193: Improve Fragment diff performance
-		// TODO: With this test, the Fragment with just one child will invoke
-		// node.appendChild on a DOM element that is already appened to the `node`.
-		// I think we need the oldParentVNode to get the old first DOM child to
-		// effectively diff the children, because the parentVNode (the Fragment)
-		// comes from the newTree and so won't ever have ._dom set before diffing
-		// children.
 		render(<Foo condition={false} />, scratch);
 
 		expect(ops).to.deep.equal(['Update Stateful']);
@@ -477,16 +548,42 @@ describe('Fragment', () => {
 			);
 		}
 
+		const htmlForTrue = div([
+			span('foo'),
+			div(div('Hello')),
+			span('boop')
+		].join(''));
+
+		const htmlForFalse = div([
+			span('beep'),
+			div(div('Hello')),
+			span('bar')
+		].join(''));
+
+		clearLog();
 		render(<Foo condition={true} />, scratch);
+
+		expect(scratch.innerHTML).to.equal(htmlForTrue);
+
+		clearLog();
 		render(<Foo condition={false} />, scratch);
 
 		expect(ops).to.deep.equal(['Update Stateful']);
-		expect(scratch.innerHTML).to.equal('<div><span>beep</span><div><div>Hello</div></div><span>bar</span></div>');
+		expect(scratch.innerHTML).to.equal(htmlForFalse);
+		expect(getLog()).to.deep.equal([
+			'<div>fooHellobeep.insertBefore(<span>beep, <span>foo)',
+			'<div>beepbarHello.appendChild(<span>bar)'
+		]);
 
+		clearLog();
 		render(<Foo condition={true} />, scratch);
 
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
-		expect(scratch.innerHTML).to.equal('<div><span>foo</span><div><div>Hello</div></div><span>boop</span></div>');
+		expect(scratch.innerHTML).to.equal(htmlForTrue);
+		expect(getLog()).to.deep.equal([
+			'<div>beepHellofoo.appendChild(<div>Hello)',
+			'<div>boopfooHello.appendChild(<span>boop)'
+		]);
 	});
 
 	it('should not preserve state when switching to a keyed fragment to an array', () => {
@@ -518,16 +615,43 @@ describe('Fragment', () => {
 			span('2')
 		].join(''));
 
+		clearLog();
 		render(<Foo condition={true} />, scratch);
+
+		clearLog();
 		render(<Foo condition={false} />,  scratch);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal(html);
+		expect(getLog()).to.deep.equal([
+			'<div>1Hello1.insertBefore(<span>1, <span>1)',
+			'<div>.appendChild(#text)',
+			'<div>11Hello.insertBefore(<div>Hello, <span>1)',
+			'<span>.appendChild(#text)',
+			'<div>1Hello1Hello.insertBefore(<span>2, <span>1)',
+			// See issue #193
+			'<span>1.remove()',
+			'<span>1.remove()',
+			'<div>Hello.remove()',
+			'<div>Hello.remove()'
+		]);
 
+		clearLog();
 		render(<Foo condition={true} />, scratch);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal(html);
+		expect(getLog()).to.deep.equal([
+			'<span>.appendChild(#text)',
+			'<div>1Hello2.appendChild(<span>1)',
+			'<div>.appendChild(#text)',
+			'<div>1Hello21.appendChild(<div>Hello)',
+			'<div>2Hello21Hello.appendChild(<span>2)',
+			'<span>2.remove()',
+			// See issue #193
+			'<div>Hello.remove()',
+			'<div>Hello.remove()'
+		]);
 	});
 
 	it('should preserve state when it does not change positions', () => {
@@ -560,6 +684,7 @@ describe('Fragment', () => {
 	});
 
 	it('should render nested Fragments', () => {
+		clearLog();
 		render((
 			<Fragment>
 				spam
@@ -568,15 +693,27 @@ describe('Fragment', () => {
 				bar
 			</Fragment>
 		), scratch);
-		expect(scratch.innerHTML).to.equal('spamfoobar');
 
+		expect(scratch.innerHTML).to.equal('spamfoobar');
+		expect(getLog()).to.deep.equal([
+			'<div>.appendChild(#text)',
+			'<div>spam.appendChild(#text)',
+			'<div>spamfoo.appendChild(#text)',
+			'<div>spamfoo.appendChild(#text)'
+		]);
+
+		clearLog();
 		render((
 			<Fragment>
 				<Fragment>foo</Fragment>
 				<Fragment>bar</Fragment>
 			</Fragment>
 		), scratch);
+
 		expect(scratch.innerHTML).to.equal('foobar');
+		expect(getLog()).to.deep.equal([
+			'<div>spamfoobar.appendChild(#text)'
+		]);
 	});
 
 	it('should respect keyed Fragments', () => {
@@ -856,13 +993,196 @@ describe('Fragment', () => {
 			li('3')
 		].join(''));
 
+		clearLog();
 		render(<Foo condition={true} />, scratch);
 		expect(scratch.innerHTML).to.equal(html);
+		expect(getLog()).to.deep.equal([
+			'<li>.appendChild(#text)',
+			'<ol>.appendChild(<li>0)',
+			'<li>.appendChild(#text)',
+			'<ol>0.appendChild(<li>1)',
+			'<li>.appendChild(#text)',
+			'<ol>01.appendChild(<li>2)',
+			'<li>.appendChild(#text)',
+			'<ol>012.appendChild(<li>3)',
+			'<div>.appendChild(<ol>0123)'
+		]);
 
+		clearLog();
 		render(<Foo condition={false} />,  scratch);
 		expect(scratch.innerHTML).to.equal(html);
+		expect(getLog()).to.deep.equal([
+			// see issue #193.
+			'<li>.appendChild(#text)',
+			'<ol>0121.appendChild(<li>2)',
+			'<li>.appendChild(#text)',
+			'<ol>01212.appendChild(<li>3)',
+			'<li>1.remove()',
+			'<li>1.remove()',
+			'<li>2.remove()'
+		]);
 
+		clearLog();
 		render(<Foo condition={true} />, scratch);
 		expect(scratch.innerHTML).to.equal(html);
+		expect(getLog()).to.deep.equal([
+			'<li>.appendChild(#text)',
+			'<ol>0123.appendChild(<li>1)',
+			'<li>.appendChild(#text)',
+			'<ol>01231.appendChild(<li>2)',
+			'<ol>013312.appendChild(<li>3)',
+			'<li>3.remove()',
+			'<li>1.remove()'
+		]);
+	});
+
+	it('should support conditionally rendered Fragment or null', () => {
+		const Foo = ({ condition }) => (
+			<ol>
+				<li>0</li>
+				{condition ? (
+					<Fragment>
+						<li>1</li>
+						<li>2</li>
+					</Fragment>
+				) : null }
+				<li>3</li>
+				<li>4</li>
+			</ol>
+		);
+
+		const htmlForTrue = ol([
+			li('0'),
+			li('1'),
+			li('2'),
+			li('3'),
+			li('4')
+		].join(''));
+
+		const htmlForFalse = ol([
+			li('0'),
+			li('3'),
+			li('4')
+		].join(''));
+
+		clearLog();
+		render(<Foo condition={true} />, scratch);
+		expect(scratch.innerHTML).to.equal(htmlForTrue);
+		expect(getLog()).to.deep.equal([
+			'<li>.appendChild(#text)',
+			'<ol>.appendChild(<li>0)',
+			'<li>.appendChild(#text)',
+			'<ol>0.appendChild(<li>1)',
+			'<li>.appendChild(#text)',
+			'<ol>01.appendChild(<li>2)',
+			'<li>.appendChild(#text)',
+			'<ol>012.appendChild(<li>3)',
+			'<li>.appendChild(#text)',
+			'<ol>0123.appendChild(<li>4)',
+			'<div>.appendChild(<ol>01234)'
+		]);
+
+		clearLog();
+		render(<Foo condition={false} />,  scratch);
+		expect(scratch.innerHTML).to.equal(htmlForFalse);
+		expect(getLog()).to.deep.equal([
+			// see issue #193.
+			'<li>1.remove()',
+			'<li>1.remove()',
+			'<li>2.remove()'
+		]);
+
+		clearLog();
+		render(<Foo condition={true} />, scratch);
+		expect(scratch.innerHTML).to.equal(htmlForTrue);
+		expect(getLog()).to.deep.equal([
+			'<li>.appendChild(#text)',
+			'<ol>034.appendChild(<li>1)',
+			'<li>.appendChild(#text)',
+			'<ol>0341.appendChild(<li>2)',
+			// see issue #193
+			'<ol>03312.appendChild(<li>3)',
+			'<ol>04123.appendChild(<li>4)'
+		]);
+	});
+
+	it('should support moving Fragments between beginning and end', () => {
+		const Foo = ({ condition }) => (
+			<ol>
+				{condition ? [
+					<li>2</li>,
+					<li>3</li>,
+					<li>4</li>,
+					<Fragment>
+						<li>0</li>
+						<li>1</li>
+					</Fragment>
+				 ] : [
+					<Fragment>
+						<li>0</li>
+						<li>1</li>
+					</Fragment>,
+					<li>2</li>,
+					<li>3</li>,
+					<li>4</li>
+				 ]}
+			</ol>
+		);
+
+		const htmlForTrue = ol([
+			li('2'),
+			li('3'),
+			li('4'),
+			li('0'),
+			li('1')
+		].join(''));
+
+		const htmlForFalse = ol([
+			li('0'),
+			li('1'),
+			li('2'),
+			li('3'),
+			li('4')
+		].join(''));
+
+		clearLog();
+		render(<Foo condition={true} />, scratch);
+		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true');
+		// expect(getLog()).to.deep.equal([
+		// 	'<li>.appendChild(#text)',
+		// 	'<ol>.appendChild(<li>0)',
+		// 	'<li>.appendChild(#text)',
+		// 	'<ol>0.appendChild(<li>1)',
+		// 	'<li>.appendChild(#text)',
+		// 	'<ol>01.appendChild(<li>2)',
+		// 	'<li>.appendChild(#text)',
+		// 	'<ol>012.appendChild(<li>3)',
+		// 	'<li>.appendChild(#text)',
+		// 	'<ol>0123.appendChild(<li>4)',
+		// 	'<div>.appendChild(<ol>01234)'
+		// ]);
+
+		clearLog();
+		render(<Foo condition={false} />,  scratch);
+		expect(scratch.innerHTML).to.equal(htmlForFalse, 'rendering from true to false');
+		// expect(getLog()).to.deep.equal([
+		// 	// see issue #193.
+		// 	'<li>1.remove()',
+		// 	'<li>1.remove()',
+		// 	'<li>2.remove()'
+		// ]);
+
+		clearLog();
+		render(<Foo condition={true} />, scratch);
+		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
+		// expect(getLog()).to.deep.equal([
+		// 	'<li>.appendChild(#text)',
+		// 	'<ol>034.appendChild(<li>1)',
+		// 	'<li>.appendChild(#text)',
+		// 	'<ol>0341.appendChild(<li>2)',
+		// 	// see issue #193
+		// 	'<ol>03312.appendChild(<li>3)',
+		// 	'<ol>04123.appendChild(<li>4)'
+		// ]);
 	});
 });
