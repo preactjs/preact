@@ -161,6 +161,8 @@ declare namespace preact {
 		beforeUnmount?(vnode: VNode): void;
 		/** Attach a hook that is invoked before a vnode is diffed */
 		beforeDiff?(vnode: VNode): void;
+		/** Attach a hook that is invoked before a vnode has rendered */
+		beforeRender?(vnode: VNode): void;
 		/** Attach a hook that is invoked after a vnode has rendered */
 		afterDiff?(vnode: VNode): void;
 	}

@@ -137,6 +137,8 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			c.props = newVNode.props;
 			c.state = s;
 
+			if (options.beforeRender) options.beforeRender(newVNode);
+
 			if (newType._provider)
 				c.props.value = newType._provider.props.value || newType._defaultValue;
 

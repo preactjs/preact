@@ -7,7 +7,7 @@
   "main": "dist/debug.js",
   "module": "dist/debug.mjs",
   "umd:main": "dist/debug.umd.js",
-  "source": "./src/index.js",
+  "source": "src/index.js",
   "license": "MIT",
   "mangle": {
     "regex": "^(?!_renderer)^_"
