@@ -12,7 +12,7 @@ export class Renderer {
 		this.rid = rid;
 		this.hook = hook;
 
-		/** @type {Array<import('../../../src/internal').DevtoolsEvent>} */
+		/** @type {Array<import('../internal').DevtoolsEvent>} */
 		this.pending = [];
 
 		/**
@@ -20,7 +20,7 @@ export class Renderer {
 		 * vnode needs to be mounted or updated. For components the instance refers
 		 * to the actuall class instance whereas for dom nodes it refers to the
 		 * underlying dom element.
-		 * @type {WeakMap<import('../../../src/internal').Component | import('../../../src/internal').PreactElement | HTMLElement | Text, import('../../../src/internal').VNode>}
+		 * @type {WeakMap<import('../internal').Component | import('../internal').PreactElement | HTMLElement | Text, import('../internal').VNode>}
 		 */
 		this.inst2vnode = new WeakMap();
 		this.connected = false;
@@ -53,13 +53,13 @@ export class Renderer {
 	 * Recursively mount a vnode tree. Note that the devtools expectes the tree to
 	 * be mounted from the bottom up, otherwise the order will be messed up.
 	 * Therefore we mount children prior to mounting the vnode itself.
-	 * @param {import('../../../src/internal').VNode} vnode
+	 * @param {import('../internal').VNode} vnode
 	 */
 	mount(vnode) {
 		this.inst2vnode.set(getInstance(vnode), vnode);
 		let data = getData(vnode);
 
-		/** @type {Array<import('../../../src/internal').DevtoolsEvent>} */
+		/** @type {Array<import('../internal').DevtoolsEvent>} */
 		let work = [{
 			internalInstance: vnode,
 			data,
@@ -105,7 +105,7 @@ export class Renderer {
 
 	/**
 	 * Update a vnode tree
-	 * @param {import('../../../src/internal').VNode} vnode
+	 * @param {import('../internal').VNode} vnode
 	 */
 	update(vnode) {
 		let data = getData(vnode);
@@ -167,7 +167,7 @@ export class Renderer {
 	 * Pass a rendered tree to the devtools. At this point elements have already
 	 * unmounted, so we don't need to check for removals and only update vs mount
 	 * instead.
-	 * @param {import('../../../src/internal').VNode} vnode
+	 * @param {import('../internal').VNode} vnode
 	 */
 	handleCommitFiberRoot(vnode) {
 		if (isRoot(vnode)) {
@@ -193,7 +193,7 @@ export class Renderer {
 
 	/**
 	 * Unmount a vnode recursively
-	 * @param {import('../../../src/internal').VNode} vnode
+	 * @param {import('../internal').VNode} vnode
 	 */
 	handleCommitFiberUnmount(vnode) {
 		let inst = getInstance(vnode);
@@ -209,8 +209,8 @@ export class Renderer {
 
 	/**
 	 * Get the dom element by a vnode
-	 * @param {import('../../../src/internal').VNode} vnode
-	 * @returns {import('../../../src/internal').PreactElement | Text}
+	 * @param {import('../internal').VNode} vnode
+	 * @returns {import('../internal').PreactElement | Text}
 	 */
 	getNativeFromReactElement(vnode) {
 		return vnode._dom;
@@ -218,8 +218,8 @@ export class Renderer {
 
 	/**
 	 * Get a vnode by a dom element
-	 * @param {import('../../../src/internal').PreactElement | Text} dom
-	 * @returns {import('../../../src/internal').VNode | null}
+	 * @param {import('../internal').PreactElement | Text} dom
+	 * @returns {import('../internal').VNode | null}
 	 */
 	getReactElementFromNative(dom) {
 		return this.inst2vnode.get(dom) || null;

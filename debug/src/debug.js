@@ -60,7 +60,7 @@ export function initDebug() {
 
 /**
  * Serialize a vnode tree to a string
- * @param {import('../../src/internal').VNode} vnode
+ * @param {import('./internal').VNode} vnode
  * @returns {string}
  */
 export function serializeVNode(vnode) {

@@ -2,8 +2,8 @@ import { Fragment, createElement } from 'ceviche';
 
 /**
  * Get the type/category of a vnode
- * @param {import('../../../src/../../src/internal').VNode} vnode
- * @returns {import('../../../src/../../src/internal').NodeType}
+ * @param {import('../internal').VNode} vnode
+ * @returns {import('../internal').NodeType}
  */
 export function getNodeType(vnode) {
 	if (vnode.type===Fragment) return 'Wrapper';
@@ -14,7 +14,7 @@ export function getNodeType(vnode) {
 
 /**
  * Get human readable name of the component/dom element
- * @param {import('../../../src/../../src/internal').VNode} vnode
+ * @param {import('../internal').VNode} vnode
  * @returns {string}
  */
 export function getDisplayName(vnode) {
@@ -40,13 +40,13 @@ export function setIn(obj, path, value) {
 
 /**
  * Get devtools compatible data from vnode
- * @param {import('../../../src/internal').VNode} vnode
- * @returns {import('../../../src/internal').DevtoolData}
+ * @param {import('../internal').VNode} vnode
+ * @returns {import('../internal').DevtoolData}
  */
 export function getData(vnode) {
 	let c = vnode._component;
 
-	/** @type {import('../../../src/internal').DevtoolsUpdater | null} */
+	/** @type {import('../internal').DevtoolsUpdater | null} */
 	let updater = null;
 
 	if (c!=null) {
@@ -104,8 +104,8 @@ export function getData(vnode) {
 /**
  * Get all rendered vnode children as an array. Moreover we need to filter
  * out `null` or other falsy children.
- * @param {import('../../../src/internal').VNode} vnode
- * @returns {import('../../../src/internal').VNode[]}
+ * @param {import('../internal').VNode} vnode
+ * @returns {import('../internal').VNode[]}
  */
 export function getChildren(vnode) {
 	let c = vnode._component;
@@ -121,8 +121,8 @@ export function getChildren(vnode) {
 
 /**
  * Get the topmost vnode in a tree
- * @param {import('../../../src/internal').VNode} vnode
- * @returns {import('../../../src/internal').VNode | null}
+ * @param {import('../internal').VNode} vnode
+ * @returns {import('../internal').VNode | null}
  */
 export function getPatchedRoot(vnode) {
 
@@ -148,13 +148,13 @@ export function getPatchedRoot(vnode) {
 
 /**
  * Check if a vnode is a root node
- * @param {import('../../../src/internal').VNode} vnode
+ * @param {import('../internal').VNode} vnode
  * @returns {boolean}
  */
 export function isRoot(vnode) {
 	return vnode._dom!=null && vnode._dom.parentNode!=null &&
 
-	/** @type {import('../../../src/internal').PreactElement} */
+	/** @type {import('../internal').PreactElement} */
 	(vnode._dom.parentNode)._prevVNode!=null;
 }
 
@@ -166,8 +166,8 @@ export function isRoot(vnode) {
  * For components we want to check if we already rendered it and use the class
  * instance as key. For html elements we use the dom node as key.
  *
- * @param {import('../../../src/internal').VNode} vnode
- * @returns {import('../../../src/internal').Component | import('../../../src/internal').PreactElement | Text | null}
+ * @param {import('../internal').VNode} vnode
+ * @returns {import('../internal').Component | import('../internal').PreactElement | Text | null}
  */
 export function getInstance(vnode) {
 	if (vnode._component!=null) return vnode._component;
@@ -196,8 +196,8 @@ export function shallowEqual(a, b, isProps) {
 
 /**
  * Check if a vnode was actually updated
- * @param {import('../../../src/internal').VNode} next
- * @param {import('../../../src/internal').VNode} prev
+ * @param {import('../internal').VNode} next
+ * @param {import('../internal').VNode} prev
  * @returns {boolean}
  */
 export function hasDataChanged(prev, next) {
@@ -210,8 +210,8 @@ export function hasDataChanged(prev, next) {
 
 /**
  * Check if a the profiling data ahs changed between vnodes
- * @param {import('../../../src/internal').VNode} next
- * @param {import('../../../src/internal').VNode} prev
+ * @param {import('../internal').VNode} next
+ * @param {import('../internal').VNode} prev
  * @returns {boolean}
  */
 export function hasProfileDataChanged(prev, next) {
@@ -219,7 +219,7 @@ export function hasProfileDataChanged(prev, next) {
 }
 
 /**
- * @type {WeakMap<import('../../../src/internal').Component | import('../../../src/internal').PreactElement | HTMLElement | Text, import('../../../src/internal').VNode>}
+ * @type {WeakMap<import('../internal').Component | import('../internal').PreactElement | HTMLElement | Text, import('../internal').VNode>}
  */
 let roots = new WeakMap();
 
