@@ -97,8 +97,8 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			}
 
 			// isProvider
-			if (newType.context) {
-				newType.context.Provider = c;
+			if (newType._context) {
+				newType._context._provider = c;
 			}
 
 			c._vnode = newVNode;
@@ -137,12 +137,8 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			c.props = newVNode.props;
 			c.state = s;
 
-			if (newType.Provider) {
-				c.props = {
-					children: c.props.children,
-					value: newType.Provider.props ? newType.Provider.props.value : newType.defaultValue
-				};
-			}
+			if (newType._provider)
+				c.props.value = newType._provider.props.value || newType._defaultValue;
 
 			let prev = c._prevVNode;
 			let vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));

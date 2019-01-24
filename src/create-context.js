@@ -10,9 +10,9 @@ export function createContext(defaultValue = {}) {
 		return props.children;
 	}
 
-	Consumer.defaultValue = defaultValue;
-	Consumer.Provider = Provider;
-	Consumer.Provider.context = Consumer;
+	Consumer._defaultValue = defaultValue;
+	Consumer._provider = Provider;
+	Provider._context = Consumer;
 
 	return {
 		Provider,

@@ -1,9 +1,10 @@
 import { createElement as h, render, Component, createContext } from '../../src/index';
 import { setupScratch, teardown } from '../_util/helpers';
+import { Fragment } from '../../src';
 
 /** @jsx h */
 
-describe('context', () => {
+describe('createContext', () => {
 	let scratch;
 
 	beforeEach(() => {
@@ -123,5 +124,56 @@ describe('context', () => {
 		// initial render does not invoke anything but render():
 		expect(Inner.prototype.render).to.have.been.calledWith({ ...CONTEXT }, {}, {});
 		expect(scratch.innerHTML).to.equal('<div>a</div>');
+	});
+
+	it('should preserve provider context through nested components', () => {
+		const { Provider, Consumer } = createContext();
+		const CONTEXT = { a: 'a' };
+
+		class Consumed extends Component {
+			render(props) {
+				return <strong>{props.a}</strong>;
+			}
+		}
+
+		sinon.spy(Consumed.prototype, 'render');
+
+		class Outer extends Component {
+			render() {
+				return <div><Inner /></div>;
+			}
+		}
+
+		class Inner extends Component {
+			render() {
+				return (
+					<Fragment>
+						<InnerMost />
+					</Fragment>
+				);
+			}
+		}
+
+		class InnerMost extends Component {
+			render() {
+				return (
+					<div>
+						<Consumer>
+							{data => <Consumed {...data} />}
+						</Consumer>
+					</div>
+				);
+			}
+		}
+
+		render((
+			<Provider value={CONTEXT}>
+				<Outer />
+			</Provider>
+		), scratch);
+
+		// initial render does not invoke anything but render():
+		expect(Consumed.prototype.render).to.have.been.calledWith({ ...CONTEXT }, {}, {});
+		expect(scratch.innerHTML).to.equal('<div><div><strong>a</strong></div></div>');
 	});
 });

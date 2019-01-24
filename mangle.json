@@ -17,7 +17,10 @@
       "$_prevVNode": "__t",
       "$__html": "__html",
       "$_ancestorComponent": "__a",
-      "$_processingException": "__p"
+      "$_processingException": "__p",
+      "$_context": "__c",
+      "$_defaultValue": "__d",
+      "$_provider": "__p"
     }
   }
 }
