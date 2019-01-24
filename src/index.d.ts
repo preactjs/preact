@@ -172,4 +172,23 @@ declare namespace preact {
 	// -----------------------------------
 	function createRef<T = any>(): RefObject<T>;
 	function toChildArray(children: ComponentChildren): Array<VNode | null>;
+
+	//
+	// Context
+	// -----------------------------------
+	interface PreactConsumer<T> extends FunctionalComponent<{
+		children: (value: T) => ComponentChildren
+	}> {}
+
+	interface PreactProvider<T> extends FunctionalComponent<{
+		value: T,
+		children: ComponentChildren
+	}> {}
+
+	interface PreactContext<T> {
+		Consumer: PreactConsumer<T>;
+		Provider: PreactProvider<T>;
+	}
+
+	function createContext<T>(defaultValue: T): PreactContext<T>;
 }
