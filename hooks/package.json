@@ -3,10 +3,12 @@
   "amdName": "preactHooks",
   "version": "0.1.0",
   "private": true,
-  "source": "src/index.js",
-  "module": "dist/hooks.mjs",
+  "description": "Preact hooks",
   "main": "dist/hooks.js",
+  "module": "dist/hooks.mjs",
   "umd:main": "dist/hooks.umd.js",
+  "source": "src/index.js",
+  "license": "MIT",
   "types": "src/index.d.ts",
   "scripts": {
     "build": "microbundle build --raw",
@@ -15,52 +17,10 @@
     "test:karma": "karma start test/karma.conf.js --single-run",
     "test:karma:watch": "karma start test/karma.conf.js --no-single-run"
   },
-  "devDependencies": {
-    "karma": "^3.0.0",
-    "karma-sourcemap-loader": "^0.3.7",
-    "karma-source-map-support": "^1.3.0",
-    "karma-chai-sinon": "^0.1.5",
-    "karma-mocha": "^1.3.0",
-    "karma-webpack": "^3.0.5",
-    "karma-mocha-reporter": "^2.2.5",
-    "karma-sauce-launcher": "^1.2.0",
-    "karma-chrome-launcher": "^2.2.0",
-    "karma-coverage": "^1.1.2",
-    "npm-run-all": "^4.1.5",
-    "microbundle": "^0.8.0"
-  },
   "peerDependencies": {
     "preact": "../"
   },
   "mangle": {
     "regex": "^_"
-  },
-  "eslintConfig": {
-    "extends": "developit",
-    "settings": {
-      "react": {
-        "pragma": "createElement"
-      }
-    },
-    "rules": {
-      "prefer-rest-params": 0,
-      "prefer-spread": 0,
-      "no-cond-assign": 0,
-      "react/jsx-no-bind": 0,
-      "react/prefer-stateless-function": 0,
-      "react/sort-comp": 0,
-      "jest/valid-expect": 0,
-      "jest/no-disabled-tests": 0
-    }
-  },
-  "files": [
-    "src",
-    "dist"
-  ],
-  "bundlesize": [
-    {
-      "path": "./dist/hooks.js",
-      "threshold": "500b"
-    }
-  ]
+  }
 }
