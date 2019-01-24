@@ -116,11 +116,7 @@
   "bundlesize": [
     {
       "path": "./dist/ceviche.js",
-      "threshold": "3Kb"
-    },
-    {
-      "path": "./hooks/dist/hooks.js",
-      "threshold": "500b"
+      "maxSize": "3Kb"
     }
   ]
 }
