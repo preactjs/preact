@@ -1,4 +1,4 @@
-import options from '../options';
+import { options } from 'ceviche';
 import { Renderer } from './renderer';
 
 /**
@@ -26,7 +26,8 @@ let noop = () => undefined;
 
 export function initDevTools() {
 	// This global variable is injected by the devtools
-	let hook = /** @type {import('../internal').DevtoolsWindow} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
+	/** @type {import('../internal').DevtoolsWindow} */
+	let hook = (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
 	if (hook==null) return;
 
 	/** @type {(vnode: import('../internal').VNode) => void} */

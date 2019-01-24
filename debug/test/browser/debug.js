@@ -1,6 +1,6 @@
-import { createElement as h, options, render, createRef, Component, Fragment } from '../../src/index';
-import { setupScratch, teardown, clearOptions } from '../_util/helpers';
-import { serializeVNode, initDebug } from '../../src/debug/debug';
+import { createElement as h, options, render, createRef, Component, Fragment } from 'ceviche';
+import { setupScratch, teardown, clearOptions } from '../../../test/_util/helpers';
+import { serializeVNode, initDebug } from '../../src/debug';
 import * as PropTypes from 'prop-types';
 
 /** @jsx h */

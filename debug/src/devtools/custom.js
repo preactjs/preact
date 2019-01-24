@@ -1,5 +1,4 @@
-import { Fragment, createElement } from '../create-element';
-import { enqueueRender } from '../component';
+import { Fragment, createElement } from 'ceviche';
 
 /**
  * Get the type/category of a vnode
@@ -64,11 +63,11 @@ export function getData(vnode) {
 			},
 			setInProps(path, value) {
 				setIn(vnode.props, path, value);
-				enqueueRender(c);
+				c.setState({});
 			},
 			setInContext(path, value) {
 				setIn(c.context, path, value);
-				enqueueRender(c);
+				c.setState({});
 			}
 		};
 	}
@@ -232,7 +231,7 @@ let noop = () => undefined;
  * special `HostRoot` node at the top of each root. Because of that the Profiler
  * always skips the first vnode. To fix that we insert a virtual wrapper just
  * for the devtools.
- * @param {import('../internal').VNode} vnode
+ * @param {import('../../../src/internal').VNode} vnode
  */
 export function patchRoot(vnode) {
 	let inst = getInstance(vnode);

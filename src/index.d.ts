@@ -128,6 +128,8 @@ declare namespace preact {
 		...children: ComponentChildren[]
 	): VNode<any>;
 
+	const h: typeof createElement;
+
 	//
 	// Preact render
 	// -----------------------------------
