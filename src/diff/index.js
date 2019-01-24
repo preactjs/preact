@@ -132,6 +132,8 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			c.props = newVNode.props;
 			c.state = s;
 
+			if (options.beforeRender) options.beforeRender(newVNode);
+
 			let prev = c._prevVNode;
 			let vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
 			c._dirty = false;

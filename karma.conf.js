@@ -95,11 +95,11 @@ module.exports = function(config) {
 
 		files: [
 			{ pattern: 'test/polyfills.js', watched: false },
-			{ pattern: config.grep || '{debug,}/test/{browser,shared}/**.js', watched: false }
+			{ pattern: config.grep || '{debug,hooks,}/test/{browser,shared}/**.js', watched: false }
 		],
 
 		preprocessors: {
-			'{debug,}/test/**/*': ['webpack', 'sourcemap']
+			'{debug,hooks,}/test/**/*': ['webpack', 'sourcemap']
 		},
 
 		webpack: {
@@ -134,7 +134,7 @@ module.exports = function(config) {
 										'**/__tests__/**',
 										'**/node_modules/**',
 										// Our custom extension
-										'{debug,}/test/**/*'
+										'{debug,hooks,}/test/**/*'
 									]
 								}]] : []
 						}

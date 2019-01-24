@@ -39,6 +39,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 }
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
+	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
 	base?: PreactElement;
 
 	_dirty: boolean;
@@ -63,5 +64,3 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	_processingException?: Component<any, any>;
 	_constructor: preact.ComponentFactory<P>;
 }
-
-// DEVTOOLS
