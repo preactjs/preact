@@ -72,7 +72,7 @@ describe('context', () => {
 	it('should preserve provider context between different providers', () => {
 		const { Provider: ThemeProvider, Consumer: ThemeConsumer } = createContext();
 		const { Provider: DataProvider, Consumer: DataConsumer } = createContext();
-		const THEME_CONTEXT = { theme: 'black'};
+		const THEME_CONTEXT = { theme: 'black' };
 		const DATA_CONTEXT = { global: 'a' };
 
 		class Inner extends Component {

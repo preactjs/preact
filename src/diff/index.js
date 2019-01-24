@@ -97,8 +97,8 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			}
 
 			// isProvider
-			if (newTag.context) {
-				newTag.context.Provider = c;
+			if (newType.context) {
+				newType.context.Provider = c;
 			}
 
 			c._vnode = newVNode;
@@ -137,10 +137,10 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			c.props = newVNode.props;
 			c.state = s;
 
-			if (newTag.Provider) {
+			if (newType.Provider) {
 				c.props = {
 					children: c.props.children,
-					value: newTag.Provider.props ? newTag.Provider.props.value : newTag.defaultValue
+					value: newType.Provider.props ? newType.Provider.props.value : newType.defaultValue
 				};
 			}
 
