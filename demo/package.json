@@ -24,7 +24,6 @@
   "dependencies": {
     "d3-scale": "^1.0.7",
     "d3-selection": "^1.2.0",
-    "preact-render-to-string": "^4.1.0",
-    "preact-router": "^2.6.0"
+    "preact-render-to-string": "^4.1.0"
   }
 }
