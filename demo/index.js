@@ -13,7 +13,7 @@ import Context from './context';
 import installLogger from './logger';
 import ProfilerDemo from './profiler';
 import KeyBug from './key_bug';
-import { initDevTools } from 'ceviche/devtools';
+import { initDevTools } from 'ceviche/debug/src/devtools';
 
 let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(window.location.href);
 if (!isBenchmark) {

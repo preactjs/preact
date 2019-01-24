@@ -6,7 +6,8 @@ var coverage = String(process.env.COVERAGE) === 'true',
 	masterBranch = String(process.env.TRAVIS_BRANCH).match(/^master$/gi),
 	sauceLabs = ci && !pullRequest && masterBranch,
 	performance = !coverage && String(process.env.PERFORMANCE) !== 'false',
-	webpack = require('webpack');
+	webpack = require('webpack'),
+	path = require('path');
 
 var sauceLabsLaunchers = {
 	sl_chrome: {
@@ -65,7 +66,7 @@ module.exports = function(config) {
 		),
 
 		coverageReporter: {
-			dir: __dirname + '/../coverage',
+			dir: path.join(__dirname, 'coverage'),
 			reporters: [
 				{ type: 'text-summary' },
 				{ type: 'html' },
@@ -93,12 +94,12 @@ module.exports = function(config) {
 		customLaunchers: sauceLabs ? sauceLabsLaunchers : localLaunchers,
 
 		files: [
-			{ pattern: 'polyfills.js', watched: false },
-			{ pattern: config.grep || '{browser,shared}/**.js', watched: false }
+			{ pattern: 'test/polyfills.js', watched: false },
+			{ pattern: config.grep || '{debug,}/test/{browser,shared}/**.js', watched: false }
 		],
 
 		preprocessors: {
-			'**/*': ['webpack', 'sourcemap']
+			'{debug,}/test/**/*': ['webpack', 'sourcemap']
 		},
 
 		webpack: {
@@ -122,7 +123,20 @@ module.exports = function(config) {
 						options: {
 							comments: false,
 							compact: true,
-							plugins: [].concat(coverage ? 'istanbul' : [])
+							plugins: coverage ?
+								[['istanbul', {
+									exclude: [
+										// Default config
+										'coverage/**',
+										'test/**',
+										'test{,-*}.js',
+										'**/*.test.js',
+										'**/__tests__/**',
+										'**/node_modules/**',
+										// Our custom extension
+										'{debug,}/test/**/*'
+									]
+								}]] : []
 						}
 					}
 				]
@@ -131,8 +145,10 @@ module.exports = function(config) {
 				// The React DevTools integration requires preact as a module
 				// rather than referencing source files inside the module
 				// directly
-				alias: { preact: '../src/preact' },
-				modules: [__dirname, 'node_modules']
+				alias: {
+					preact: path.join(__dirname, './src'),
+					ceviche: path.join(__dirname, './src')
+				}
 			},
 			plugins: [
 				new webpack.DefinePlugin({
