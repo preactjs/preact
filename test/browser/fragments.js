@@ -528,36 +528,36 @@ describe('Fragment', () => {
 			return condition ? (
 				<div>
 					<Fragment key="c">
-						<span>foo</span>
+						<div>foo</div>
 						<div key="b">
 							<Stateful key="a" />
 						</div>
 					</Fragment>
-					<span>boop</span>
+					<div>boop</div>
 				</div>
 			) : (
 				<div>
-					<span>beep</span>
+					<div>beep</div>
 					<Fragment key="c">
 						<div key="b">
 							<Stateful key="a" />
 						</div>
-						<span>bar</span>
+						<div>bar</div>
 					</Fragment>
 				</div>
 			);
 		}
 
 		const htmlForTrue = div([
-			span('foo'),
+			div('foo'),
 			div(div('Hello')),
-			span('boop')
+			div('boop')
 		].join(''));
 
 		const htmlForFalse = div([
-			span('beep'),
+			div('beep'),
 			div(div('Hello')),
-			span('bar')
+			div('bar')
 		].join(''));
 
 		clearLog();
@@ -571,8 +571,8 @@ describe('Fragment', () => {
 		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
 		expect(getLog()).to.deep.equal([
-			'<div>fooHellobeep.insertBefore(<span>beep, <span>foo)',
-			'<div>beepbarHello.appendChild(<span>bar)'
+			'<div>fooHellobeep.insertBefore(<div>beep, <div>foo)',
+			'<div>beepbarHello.appendChild(<div>bar)'
 		]);
 
 		clearLog();
@@ -582,7 +582,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForTrue);
 		expect(getLog()).to.deep.equal([
 			'<div>beepHellofoo.appendChild(<div>Hello)',
-			'<div>boopfooHello.appendChild(<span>boop)'
+			'<div>boopfooHello.appendChild(<div>boop)'
 		]);
 	});
 
@@ -1110,70 +1110,63 @@ describe('Fragment', () => {
 		const Foo = ({ condition }) => (
 			<ol>
 				{condition ? [
+					<li>0</li>,
+					<li>1</li>,
 					<li>2</li>,
 					<li>3</li>,
-					<li>4</li>,
 					<Fragment>
-						<li>0</li>
-						<li>1</li>
+						<li>4</li>
+						<li>5</li>
 					</Fragment>
 				 ] : [
 					<Fragment>
-						<li>0</li>
-						<li>1</li>
+						<li>4</li>
+						<li>5</li>
 					</Fragment>,
+					<li>0</li>,
+					<li>1</li>,
 					<li>2</li>,
-					<li>3</li>,
-					<li>4</li>
+					<li>3</li>
 				 ]}
 			</ol>
 		);
 
 		const htmlForTrue = ol([
-			li('2'),
-			li('3'),
-			li('4'),
-			li('0'),
-			li('1')
-		].join(''));
-
-		const htmlForFalse = ol([
 			li('0'),
 			li('1'),
 			li('2'),
 			li('3'),
-			li('4')
+			li('4'),
+			li('5')
+		].join(''));
+
+		const htmlForFalse = ol([
+			li('4'),
+			li('5'),
+			li('0'),
+			li('1'),
+			li('2'),
+			li('3')
 		].join(''));
 
 		clearLog();
 		render(<Foo condition={true} />, scratch);
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true');
-		// expect(getLog()).to.deep.equal([
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>.appendChild(<li>0)',
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>0.appendChild(<li>1)',
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>01.appendChild(<li>2)',
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>012.appendChild(<li>3)',
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>0123.appendChild(<li>4)',
-		// 	'<div>.appendChild(<ol>01234)'
-		// ]);
 
 		clearLog();
 		render(<Foo condition={false} />,  scratch);
 		expect(scratch.innerHTML).to.equal(htmlForFalse, 'rendering from true to false');
-		// expect(getLog()).to.deep.equal([
-		// 	// see issue #193.
-		// 	'<li>1.remove()',
-		// 	'<li>1.remove()',
-		// 	'<li>2.remove()'
-		// ]);
+		expect(getLog()).to.deep.equal([
+			// see issue #193 - re-appends all children after Fragment
+			'<ol>002345.appendChild(<li>0)',
+			'<ol>013450.appendChild(<li>1)',
+			'<ol>024501.appendChild(<li>2)',
+			'<ol>345012.appendChild(<li>3)'
+		]);
 
 		clearLog();
 		render(<Foo condition={true} />, scratch);
+		// TODO: Fails here...
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
 		// expect(getLog()).to.deep.equal([
 		// 	'<li>.appendChild(#text)',
@@ -1184,5 +1177,167 @@ describe('Fragment', () => {
 		// 	'<ol>03312.appendChild(<li>3)',
 		// 	'<ol>04123.appendChild(<li>4)'
 		// ]);
+	});
+
+	it('should support conditional beginning and end Fragments', () => {
+		const Foo = ({ condition }) => (
+			<ol>
+				{condition ?
+					<Fragment>
+						<li>0</li>
+						<li>1</li>
+					</Fragment>
+					: null
+				}
+				<li>2</li>
+				<li>2</li>
+				{condition ?
+					null :
+					<Fragment>
+						<li>3</li>
+						<li>4</li>
+					</Fragment>
+				}
+			</ol>
+		);
+
+		const htmlForTrue = ol([
+			li(0),
+			li(1),
+			li(2),
+			li(2)
+		].join(''));
+
+		const htmlForFalse = ol([
+			li(2),
+			li(2),
+			li(3),
+			li(4)
+		].join(''));
+
+		clearLog();
+		render(<Foo condition={true} />, scratch);
+		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true');
+
+		clearLog();
+		render(<Foo condition={false} />, scratch);
+		// TODO: Fails here...
+		expect(scratch.innerHTML).to.equal(htmlForFalse, 'rendering from true to false');
+
+		clearLog();
+		render(<Foo condition={true} />, scratch);
+		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
+	});
+
+	it('should preserve state with reordering in multiple levels with mixed # of Fragment siblings', () => {
+		// Also fails if the # of divs outside the Fragment equals or exceeds
+		// the # inside the Fragment for both conditions
+		function Foo({ condition }) {
+			return condition ? (
+				<div>
+					<Fragment key="c">
+						<div>foo</div>
+						<div key="b">
+							<Stateful key="a" />
+						</div>
+					</Fragment>
+					<div>boop</div>
+					<div>boop</div>
+				</div>
+			) : (
+				<div>
+					<div>beep</div>
+					<Fragment key="c">
+						<div key="b">
+							<Stateful key="a" />
+						</div>
+						<div>bar</div>
+					</Fragment>
+				</div>
+			);
+		}
+
+		const htmlForTrue = div([
+			div('foo'),
+			div(div('Hello')),
+			div('boop'),
+			div('boop'),
+		].join(''));
+
+		const htmlForFalse = div([
+			div('beep'),
+			div(div('Hello')),
+			div('bar')
+		].join(''));
+
+		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={false} />, scratch);
+
+		expect(ops).to.deep.equal(['Update Stateful']);
+		expect(scratch.innerHTML).to.equal(htmlForFalse, 'rendering from true to false');
+
+		render(<Foo condition={true} />, scratch);
+
+		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
+		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
+	});
+
+	it('should preserve state with reordering in multiple levels with lots of Fragment siblings', () => {
+		// Also fails if the # of divs outside the Fragment equals or exceeds
+		// the # inside the Fragment for both conditions
+		function Foo({ condition }) {
+			return condition ? (
+				<div>
+					<Fragment key="c">
+						<div>foo</div>
+						<div key="b">
+							<Stateful key="a" />
+						</div>
+					</Fragment>
+					<div>boop</div>
+					<div>boop</div>
+					<div>boop</div>
+				</div>
+			) : (
+				<div>
+					<div>beep</div>
+					<div>beep</div>
+					<div>beep</div>
+					<Fragment key="c">
+						<div key="b">
+							<Stateful key="a" />
+						</div>
+						<div>bar</div>
+					</Fragment>
+				</div>
+			);
+		}
+
+		const htmlForTrue = div([
+			div('foo'),
+			div(div('Hello')),
+			div('boop'),
+			div('boop'),
+			div('boop'),
+		].join(''));
+
+		const htmlForFalse = div([
+			div('beep'),
+			div('beep'),
+			div('beep'),
+			div(div('Hello')),
+			div('bar')
+		].join(''));
+
+		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={false} />, scratch);
+
+		expect(ops).to.deep.equal(['Update Stateful']);
+		expect(scratch.innerHTML).to.equal(htmlForFalse, 'rendering from true to false');
+
+		render(<Foo condition={true} />, scratch);
+
+		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
+		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
 	});
 });
