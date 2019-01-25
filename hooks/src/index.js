@@ -60,14 +60,14 @@ options.beforeRender = vnode => {
 	// currentComponent.__hooks._pendingEffects.splice(0, currentComponent.__hooks._pendingEffects.length).forEach(invokeEffect);
 
 	// FOREACH (TEMP): 832 B
-	if (!currentComponent.__hooks) return;
-	let effects = currentComponent.__hooks._pendingEffects; currentComponent.__hooks._pendingEffects = [];
-	effects.forEach(invokeEffect);
+	// if (!currentComponent.__hooks) return;
+	// let effects = currentComponent.__hooks._pendingEffects; currentComponent.__hooks._pendingEffects = [];
+	// effects.forEach(invokeEffect);
 
 	// FOREACH (RESET AFTER): 829 B
-	// if (!currentComponent.__hooks) return;
-	// currentComponent.__hooks._pendingEffects.forEach(invokeEffect);
-	// currentComponent.__hooks._pendingEffects = [];
+	if (!currentComponent.__hooks) return;
+	currentComponent.__hooks._pendingEffects.forEach(invokeEffect);
+	currentComponent.__hooks._pendingEffects = [];
 };
 
 
@@ -115,12 +115,12 @@ options.afterDiff = vnode => {
 	// FOREACH (TEMP): 832 B
 	// NOTE: Tests pass without neding to store effects in a temp variable when
 	// using forEach, so using RESET AFTER strategy here
-	hooks._pendingLayoutEffects.forEach(invokeEffect);
-	hooks._pendingLayoutEffects = [];
-
-	// FOREACH (RESET AFTER): 829 B
 	// hooks._pendingLayoutEffects.forEach(invokeEffect);
 	// hooks._pendingLayoutEffects = [];
+
+	// FOREACH (RESET AFTER): 829 B
+	hooks._pendingLayoutEffects.forEach(invokeEffect);
+	hooks._pendingLayoutEffects = [];
 
 	if (stateChanged) c.forceUpdate();
 };
@@ -308,22 +308,22 @@ if (typeof window !== 'undefined') {
 		// });
 
 		// FOREACH (TEMP): 832 B
-		afterPaintEffects.forEach(component => {
-			if (!component._parentDom) return;
-			let effects = component.__hooks._pendingEffects; component.__hooks._pendingEffects = [];
-			effects.forEach(invokeEffect);
-		});
-		afterPaintEffects = [];
+		// afterPaintEffects.forEach(component => {
+		// 	if (!component._parentDom) return;
+		// 	let effects = component.__hooks._pendingEffects; component.__hooks._pendingEffects = [];
+		// 	effects.forEach(invokeEffect);
+		// });
+		// afterPaintEffects = [];
 
 		// FOREACH (RESET AFTER): 829 B ❌
 		// Doesn't pass sync debounce test cuz we need to clear the _pendingEffects
 		// list before traversing it to avoid re-entering effects in the beforeRender loop
-		// afterPaintEffects.forEach(component => {
-		// 	if (!component._parentDom) return;
-		// 	component.__hooks._pendingEffects.forEach(invokeEffect);
-		// 	component.__hooks._pendingEffects = [];
-		// });
-		// afterPaintEffects = [];
+		afterPaintEffects.forEach(component => {
+			if (!component._parentDom) return;
+			component.__hooks._pendingEffects.forEach(invokeEffect);
+			component.__hooks._pendingEffects = [];
+		});
+		afterPaintEffects = [];
 	};
 }
 
