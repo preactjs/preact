@@ -61,6 +61,7 @@ function createVNode(type, props, text, key, ref) {
 		_children: null,
 		_dom: null,
 		_lastDomChild: null,
+		_wrapsFragment: false,
 		_component: null
 	};
 

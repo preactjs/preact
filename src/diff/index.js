@@ -149,6 +149,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, append, excessDomChildren, mounts, c, newVNode);
 
 			if (vnode!=null) {
+				newVNode._wrapsFragment = vnode.type === Fragment || vnode._wrapsFragment;
 				lastDomChild = vnode._lastDomChild;
 			}
 
