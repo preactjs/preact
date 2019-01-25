@@ -33,11 +33,19 @@
    previously set, it will be set to an empty object the first time the component is rendered, after
    the constructor has been called
 7. We no longer have a default export. Use `import * as preact from "preact"` for similar behavior.
+8. `options.debounceRendering` has been moved to `Component.debounce`
 
 ### Minor changes
 
 1. `addEventListener` and `removeEventListner` are called every time an event handler is changed
 2. `render(null, container)` no longer renders an empty text node but instead renders nothing
+3. We longer support a synchronous `Component.debounce` (formerly `options.debounceRendering`).
+   The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
+	important that contributors to Preact can consistenly reason about what calls to `setState`, etc.
+	do, and when their effects will be applied. See the links below for some further reading on designing
+	asynchronous APIs.
+		* [Designing APIs for Asynchrony](https://blog.izs.me/2013/08/designing-apis-for-asynchrony)
+		* [Callbacks synchronous and asynchronous](https://blog.ometer.com/2011/07/24/callbacks-synchronous-and-asynchronous/)
 
 ### For contributors
 

@@ -23,9 +23,9 @@ interface ComponentHooks {
 	/** The list of hooks a component uses */
 	_list: HookInstance[];
 	/** List of Effects to be invoked after the next frame is rendered */
-	_pendingEffects: Effect[];
+	_pendingEffects: HookInstance[];
 	/** List of Effects to be invoked at the end of the current render */
-	_pendingLayoutEffects: Effect[];
+	_pendingLayoutEffects: HookInstance[];
 }
 
 interface Component extends PreactComponent<any, any> {
@@ -34,9 +34,6 @@ interface Component extends PreactComponent<any, any> {
 
 // Hook implementation
 type Cleanup = () => void;
-
-/** A queued function to be invoked at a later point */
-type Effect = [HookInstance, () => (Cleanup | void), Component?];
 
 /** A instance of a hook assigned to a component */
 interface HookInstance {
