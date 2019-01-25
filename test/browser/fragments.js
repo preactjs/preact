@@ -1340,4 +1340,43 @@ describe('Fragment', () => {
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
 	});
+
+	it('should correctly append children with siblings', () => {
+
+		/**
+		 * @type {(props: { values: Array<string | number>}) => JSX.Element}
+		 */
+		const Foo = ({ values }) => (
+			<ol>
+				<li>a</li>
+				<Fragment>
+					{values.map(value => <li>{value}</li>)}
+				</Fragment>
+				<li>b</li>
+			</ol>
+		);
+
+		const getHtml = values => ol([
+			li('a'),
+			...values.map(value => li(value)),
+			li('b')
+		].join(''));
+
+		let values = [0,1,2];
+		clearLog();
+		render(<Foo values={values} />, scratch);
+		expect(scratch.innerHTML).to.equal(getHtml(values), `original list: [${values.join(',')}]`);
+
+		values.push(3);
+
+		clearLog();
+		render(<Foo values={values} />, scratch);
+		expect(scratch.innerHTML).to.equal(getHtml(values), `push 3: [${values.join(',')}]`);
+
+		values.push(4);
+
+		clearLog();
+		render(<Foo values={values} />, scratch);
+		expect(scratch.innerHTML).to.equal(getHtml(values), `push 4: [${values.join(',')}]`);
+	});
 });
