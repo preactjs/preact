@@ -104,6 +104,15 @@ let q = [];
  */
 const defer = typeof Promise=='function' ? Promise.resolve().then.bind(Promise.resolve()) : setTimeout;
 
+/*
+ * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
+ * important that contributors to Preact can consistenly reason about what calls to `setState`, etc.
+ * do, and when their effects will be applied. See the links below for some further reading on designing
+ * asynchronous APIs.
+ * * [Designing APIs for Asynchrony](https://blog.izs.me/2013/08/designing-apis-for-asynchrony)
+ * * [Callbacks synchronous and asynchronous](https://blog.ometer.com/2011/07/24/callbacks-synchronous-and-asynchronous/)
+ */
+
 /**
  * Enqueue a rerender of a component
  * @param {import('./internal').Component} c The component to rerender
