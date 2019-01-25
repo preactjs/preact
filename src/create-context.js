@@ -2,7 +2,7 @@
  *
  * @param {any} defaultValue
  */
-export function createContext(defaultValue = {}) {
+export function createContext(defaultValue) {
 	function Consumer(props) {
 		return props.children(props.value);
 	}

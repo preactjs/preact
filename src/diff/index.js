@@ -137,6 +137,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			c.props = newVNode.props;
 			c.state = s;
 
+			// isConsumer
 			if (newType._provider)
 				c.props.value = newType._provider.props.value || newType._defaultValue;
 
