@@ -194,8 +194,14 @@ export class Renderer {
 	 */
 	handleCommitFiberUnmount(vnode) {
 		let inst = getInstance(vnode);
-
 		this.inst2vnode.delete(inst);
+
+		// Special case when unmounting a root (most prominently caused by webpack's
+		// `hot-module-reloading`). If this happens we need to unmount the virtual
+		// `Fragment` we're wrapping around each root just for the devtools.
+		if (isRoot(vnode)) {
+			vnode = patchRoot(vnode);
+		}
 
 		this.pending.push({
 			internalInstance: vnode,
