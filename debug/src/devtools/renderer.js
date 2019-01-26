@@ -127,26 +127,21 @@ export class Renderer {
 
 		let prev = this.inst2vnode.get(data.publicInstance);
 
-		// Potentially skip creating a event when the vnode hasn't changed
-		if (!hasDataChanged(prev, vnode)) {
-
-			// Even if the vnode is the same we need to check if profiler times have
-			// changed. The `updateProfileTimes` event is a faster version of `update`
-			// and is processed much quicker in the devtools.
-			/* istanbul ignore else */
-			if (hasProfileDataChanged(prev, vnode)) {
-				this.pending.push({
-					// This property is only used as an id inside the devtools. The
-					// relevant data will be read from `.data` instead which is a
-					// normalized structure that every react release adheres to. This
-					// makes backwards-compatibility easier instead of relying on internal
-					// vnode/fiber shape.
-					internalInstance: prev,
-					data,
-					renderer: this.rid,
-					type: 'updateProfileTimes'
-				});
-			}
+		// Potentially skip creating a event when the vnode hasn't changed.
+		// The `updateProfileTimes` event is a faster version of `updated` and
+		// is processed much quicker inside the devtools extension.
+		if (!hasDataChanged(prev, vnode) && hasProfileDataChanged(prev, vnode)) {
+			this.pending.push({
+				// This property is only used as an id inside the devtools. The
+				// relevant data will be read from `.data` instead which is a
+				// normalized structure that every react release adheres to. This
+				// makes backwards-compatibility easier instead of relying on internal
+				// vnode/fiber shape.
+				internalInstance: prev,
+				data,
+				renderer: this.rid,
+				type: 'updateProfileTimes'
+			});
 			return;
 		}
 
@@ -192,7 +187,9 @@ export class Renderer {
 	}
 
 	/**
-	 * Unmount a vnode recursively
+	 * Unmount a vnode recursively. Contrary to mounting or updating unmounting needs
+	 * to push the events in parent-first order. Because `options.beforeUnmount` is
+	 * already fired in parent-first order we don't need to traverse anything here.
 	 * @param {import('../internal').VNode} vnode
 	 */
 	handleCommitFiberUnmount(vnode) {
