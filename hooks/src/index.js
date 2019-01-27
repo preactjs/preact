@@ -101,6 +101,7 @@ function getHookState(index, initialState) {
 
 	// 503 B
 	if (index >= hooks._list.length) {
+		// TODO: Consider removing initial State argument
 		hooks._list.push(initialState);
 	}
 	return hooks._list[index];
@@ -137,6 +138,49 @@ function getHookState(index, initialState) {
 // 	];
 // 	return () => ret;
 // });
+
+export function useState(initialState) {
+	return useReducer(invokeOrReturn, initialState);
+}
+
+export function useReducer(reducer, initialState, initialAction) {
+	// 717 B
+	// /** @type {import('./internal').ReducerHookState} */
+	// const state = getHookState(currentIndex++, { _component: currentComponent });
+	// if (!('_value' in state)) {
+	// 	// state._value = typeof initialState === 'function' ? initialState(): initialState;
+	// 	// state._value = initialAction ? reducer(invokeOrReturn(null, initialState), initialAction) : invokeOrReturn(null, initialState);
+	// 	state._value = invokeOrReturn(null, initialState);
+	// 	if (initialAction) {
+	// 		state._value = reducer(state._value, initialAction);
+	// 	}
+	// }
+	// return [
+	// 	state._value,
+	// 	action => {
+	// 		state._value = reducer(state._value, action);
+	// 		stateChanged = true; // +(15-18) B!!
+	// 		state._component.setState({});
+	// 	}
+	// ];
+
+	// 723 B
+	/** @type {import('./internal').ReducerHookState} */
+	const hookState = getHookState(currentIndex++, { _component: currentComponent });
+	if (!('_value' in hookState)) {
+		hookState._value = [
+			initialAction
+				? reducer(invokeOrReturn(null, initialState), initialAction)
+				: invokeOrReturn(null, initialState),
+			action => {
+				hookState._value[0] = reducer(hookState._value[0], action);
+				stateChanged = true;
+				hookState._component.setState({});
+			}
+		];
+	}
+	return hookState._value;
+}
 
 // // eslint-disable-next-line arrow-body-style
 // export const useEffect = createHook((hook, component) => {
@@ -227,6 +271,7 @@ export function useMemo(callback, args) {
  * @param {any[]} args
  */
 export function useCallback(callback, args) {
+	// TODO: Does this implementation work when args is null?
 	return useMemo(() => callback, args);
 }
 
@@ -285,6 +330,6 @@ function argsChanged(oldArgs, newArgs) {
 // 	return newArgs[1] !== undefined ? propsChanged(oldArgs, newArgs) : newArgs[0] !== oldArgs[0];
 // }
 
-// function invokeOrReturn(arg, f) {
-// 	return typeof f === 'function' ? f(arg) : f;
-// }
+function invokeOrReturn(arg, f) {
+	return typeof f === 'function' ? f(arg) : f;
+}

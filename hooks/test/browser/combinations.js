@@ -7,7 +7,7 @@ import { scheduleEffectAssert } from './useEffectUtil';
 /** @jsx h */
 
 
-xdescribe('combinations', () => {
+describe('combinations', () => {
 
 	/** @type {HTMLDivElement} */
 	let scratch;

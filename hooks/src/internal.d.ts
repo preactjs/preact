@@ -49,3 +49,8 @@ interface MemoHookState {
 	_args?: any[];
 	_callback?: () => any;
 }
+
+interface ReducerHookState {
+	_value?: any;
+	_component?: Component;
+}

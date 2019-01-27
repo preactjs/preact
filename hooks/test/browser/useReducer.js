@@ -5,7 +5,7 @@ import { useReducer } from '../../src';
 /** @jsx h */
 
 
-xdescribe('useReducer', () => {
+describe('useReducer', () => {
 
 	/** @type {HTMLDivElement} */
 	let scratch;
