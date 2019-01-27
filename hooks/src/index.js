@@ -204,6 +204,10 @@ export function useRef(initialValue) {
 // export const useMemo = createHook(() => callback => callback(), memoChanged);
 // export const useCallback = createHook(() => callback => callback, propsChanged);
 
+/**
+ * @param {() => any} callback
+ * @param {any[]} args
+ */
 export function useMemo(callback, args) {
 
 	/** @type {import('./internal').MemoHookState} */
@@ -216,6 +220,14 @@ export function useMemo(callback, args) {
 	}
 
 	return state._value;
+}
+
+/**
+ * @param {() => void} callback
+ * @param {any[]} args
+ */
+export function useCallback(callback, args) {
+	return useMemo(() => callback, args);
 }
 
 // Note: if someone used Component.debounce = requestAnimationFrame,

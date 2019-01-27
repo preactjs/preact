@@ -6,7 +6,7 @@ import { useCallback } from '../../src';
 /** @jsx h */
 
 
-xdescribe('useCallback', () => {
+describe('useCallback', () => {
 
 	/** @type {HTMLDivElement} */
 	let scratch;
