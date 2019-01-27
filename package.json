@@ -15,6 +15,7 @@
     "build:core": "microbundle build --raw",
     "build:debug": "microbundle build --raw --cwd debug",
     "build:hooks": "microbundle build --raw --cwd hooks",
+    "build:compat": "microbundle build --raw --cwd compat",
     "dev": "microbundle watch --raw --format cjs,umd",
     "dev:hooks": "microbundle watch --raw --format cjs --cwd hooks",
     "test": "npm-run-all lint build --parallel test:mocha test:karma test:ts",
