@@ -132,8 +132,7 @@ export function initDevTools() {
 		// Call previously defined hook
 		if (prevCommitRoot!=null) prevCommitRoot(vnode);
 
-		// There are rare cases where this happens. I'm not sure why, but it seems
-		// to be triggered by quickly switching routes in our demo app
+		// These cases are already handled by `beforeUnmount`
 		if (vnode==null || vnode._dom==null) return;
 		onCommitRoot(vnode);
 	});
