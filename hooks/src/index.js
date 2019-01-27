@@ -100,10 +100,11 @@ export function useState(initialState) {
 }
 
 export function useReducer(reducer, initialState, initialAction) {
-	// 717 B
+	// 710 B
 	// /** @type {import('./internal').ReducerHookState} */
-	// const state = getHookState(currentIndex++, { _component: currentComponent });
-	// if (!('_value' in state)) {
+	// const state = getHookState(currentIndex++, {});
+	// if (state._component == null) {
+	// 	state._component = currentComponent;
 	// 	// state._value = typeof initialState === 'function' ? initialState(): initialState;
 	// 	// state._value = initialAction ? reducer(invokeOrReturn(null, initialState), initialAction) : invokeOrReturn(null, initialState);
 	// 	state._value = invokeOrReturn(null, initialState);
@@ -120,10 +121,11 @@ export function useReducer(reducer, initialState, initialAction) {
 	// 	}
 	// ];
 
-	// 723 B
+	// 716 B
 	/** @type {import('./internal').ReducerHookState} */
-	const hookState = getHookState(currentIndex++, { _component: currentComponent });
-	if (!('_value' in hookState)) {
+	const hookState = getHookState(currentIndex++, {});
+	if (hookState._component == null) {
+		hookState._component = currentComponent
 		hookState._value = [
 			initialAction
 				? reducer(invokeOrReturn(null, initialState), initialAction)
