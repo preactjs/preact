@@ -727,6 +727,32 @@ describe('devtools', () => {
 			});
 		});
 
+		it('must send an update event for the component setState/forceUpdate was called on', () => {
+			let updateState;
+
+			class Foo extends Component {
+				constructor() {
+					super();
+					this.state = { active: true };
+					updateState = () => this.setState(prev => ({ active: !prev.active }));
+				}
+				render() {
+					return <h1>{this.state.active ? 'foo' : 'bar'}</h1>;
+				}
+			}
+
+			render(<div><Foo /></div>, scratch);
+			hook.clear();
+
+			updateState();
+			rerender();
+
+			expect(serialize(hook.log)).to.deep.equal([
+				{ type: 'update', component: 'Foo' },
+				{ type: 'rootCommitted', component: 'Fragment' }
+			]);
+		});
+
 		describe('updater', () => {
 			it('should update state', () => {
 				class App extends Component {
