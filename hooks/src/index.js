@@ -54,34 +54,6 @@ options.beforeUnmount = vnode => {
 	hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
 };
 
-// /**
-//  * Create a Hook instance and invoke its implementation as determined by
-//  * the `shouldRun` parameter
-//  * @param {import('./internal').HookImplementationFactory} create
-//  * @param {import('./internal').HookShouldRun} [shouldRun]
-//  * @returns {import('./internal').Hook}
-//  */
-// const createHook = (create, shouldRun) => (...args) => {
-// 	if (!currentComponent) return;
-//
-// 	const hooks = currentComponent.__hooks || (currentComponent.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [] });
-//
-// 	let _index = currentIndex++;
-// 	let hook = hooks._list[_index];
-//
-// 	if (!hook) {
-// 		hook = hooks._list[_index] = { _index };
-// 		hook._run = create(hook, currentComponent, ...args);
-// 	}
-// 	else if (shouldRun && shouldRun(hook._args, args) === false) {
-// 		return hook._value;
-// 	}
-//
-// 	hook._args = args;
-//
-// 	return (hook._value = hook._run(...args));
-// };
-
 /**
  * Get a hook's state from the currentComponent
  * @template State
@@ -124,20 +96,6 @@ function getHookState(index, initialState) {
 	// 	return initialState;
 	// }
 }
-
-// export const useState = initialState => useReducer(invokeOrReturn, initialState);
-//
-// export const useReducer = createHook((hook, component, reducer, initialState, initialAction) => {
-// 	const initState = invokeOrReturn(undefined, initialState);
-// 	const ret = [
-// 		component.state[hook._index] = initialAction ? reducer(initState, initialAction) : initState,
-// 		action => {
-// 			stateChanged = true;
-// 			component.setState(state => ret[0] = state[hook._index] = reducer(ret[0], action));
-// 		}
-// 	];
-// 	return () => ret;
-// });
 
 export function useState(initialState) {
 	return useReducer(invokeOrReturn, initialState);
@@ -182,15 +140,6 @@ export function useReducer(reducer, initialState, initialAction) {
 	return hookState._value;
 }
 
-// // eslint-disable-next-line arrow-body-style
-// export const useEffect = createHook((hook, component) => {
-// 	return callback => {
-// 		component.__hooks._pendingEffects.push(hook);
-// 		afterPaint(component);
-// 		return callback;
-// 	};
-// }, propsChanged);
-
 /**
  * @param {import('./internal').Effect} callback
  * @param {any[]} args
@@ -210,14 +159,6 @@ export function useEffect(callback, args) {
 	}
 }
 
-// // eslint-disable-next-line arrow-body-style
-// export const useLayoutEffect = createHook((hook, component) => {
-// 	return callback => {
-// 		component.__hooks._pendingLayoutEffects.push(hook);
-// 		return callback;
-// 	};
-// }, propsChanged);
-
 /**
  * @param {import('./internal').Effect} callback
  * @param {any[]} args
@@ -236,17 +177,9 @@ export function useLayoutEffect(callback, args) {
 	}
 }
 
-// export const useRef = createHook((hook, component, initialValue) => {
-// 	const ref = { current: initialValue };
-// 	return () => ref;
-// });
-
 export function useRef(initialValue) {
 	return getHookState(currentIndex++, { current: initialValue });
 }
-
-// export const useMemo = createHook(() => callback => callback(), memoChanged);
-// export const useCallback = createHook(() => callback => callback, propsChanged);
 
 /**
  * @param {() => any} callback
@@ -325,10 +258,6 @@ function invokeEffect(hook) {
 function argsChanged(oldArgs, newArgs) {
 	return oldArgs == null || newArgs.some((arg, index) => arg !== oldArgs[index]);
 }
-
-// function memoChanged(oldArgs, newArgs) {
-// 	return newArgs[1] !== undefined ? propsChanged(oldArgs, newArgs) : newArgs[0] !== oldArgs[0];
-// }
 
 function invokeOrReturn(arg, f) {
 	return typeof f === 'function' ? f(arg) : f;
