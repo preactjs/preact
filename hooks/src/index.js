@@ -54,128 +54,128 @@ options.beforeUnmount = vnode => {
 	hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
 };
 
-/**
- * Create a Hook instance and invoke its implementation as determined by
- * the `shouldRun` parameter
- * @param {import('./internal').HookImplementationFactory} create
- * @param {import('./internal').HookShouldRun} [shouldRun]
- * @returns {import('./internal').Hook}
- */
-const createHook = (create, shouldRun) => (...args) => {
-	if (!currentComponent) return;
+// /**
+//  * Create a Hook instance and invoke its implementation as determined by
+//  * the `shouldRun` parameter
+//  * @param {import('./internal').HookImplementationFactory} create
+//  * @param {import('./internal').HookShouldRun} [shouldRun]
+//  * @returns {import('./internal').Hook}
+//  */
+// const createHook = (create, shouldRun) => (...args) => {
+// 	if (!currentComponent) return;
+//
+// 	const hooks = currentComponent.__hooks || (currentComponent.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [] });
+//
+// 	let _index = currentIndex++;
+// 	let hook = hooks._list[_index];
+//
+// 	if (!hook) {
+// 		hook = hooks._list[_index] = { _index };
+// 		hook._run = create(hook, currentComponent, ...args);
+// 	}
+// 	else if (shouldRun && shouldRun(hook._args, args) === false) {
+// 		return hook._value;
+// 	}
+//
+// 	hook._args = args;
+//
+// 	return (hook._value = hook._run(...args));
+// };
 
-	const hooks = currentComponent.__hooks || (currentComponent.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [] });
+// export const useState = initialState => useReducer(invokeOrReturn, initialState);
+//
+// export const useReducer = createHook((hook, component, reducer, initialState, initialAction) => {
+// 	const initState = invokeOrReturn(undefined, initialState);
+// 	const ret = [
+// 		component.state[hook._index] = initialAction ? reducer(initState, initialAction) : initState,
+// 		action => {
+// 			stateChanged = true;
+// 			component.setState(state => ret[0] = state[hook._index] = reducer(ret[0], action));
+// 		}
+// 	];
+// 	return () => ret;
+// });
 
-	let _index = currentIndex++;
-	let hook = hooks._list[_index];
+// // eslint-disable-next-line arrow-body-style
+// export const useEffect = createHook((hook, component) => {
+// 	return callback => {
+// 		component.__hooks._pendingEffects.push(hook);
+// 		afterPaint(component);
+// 		return callback;
+// 	};
+// }, propsChanged);
 
-	if (!hook) {
-		hook = hooks._list[_index] = { _index };
-		hook._run = create(hook, currentComponent, ...args);
-	}
-	else if (shouldRun && shouldRun(hook._args, args) === false) {
-		return hook._value;
-	}
+// // eslint-disable-next-line arrow-body-style
+// export const useLayoutEffect = createHook((hook, component) => {
+// 	return callback => {
+// 		component.__hooks._pendingLayoutEffects.push(hook);
+// 		return callback;
+// 	};
+// }, propsChanged);
 
-	hook._args = args;
+// export const useRef = createHook((hook, component, initialValue) => {
+// 	const ref = { current: initialValue };
+// 	return () => ref;
+// });
 
-	return (hook._value = hook._run(...args));
-};
+// export const useMemo = createHook(() => callback => callback(), memoChanged);
+// export const useCallback = createHook(() => callback => callback, propsChanged);
 
-export const useState = initialState => useReducer(invokeOrReturn, initialState);
+// // Note: if someone used Component.debounce = requestAnimationFrame,
+// // then effects will ALWAYS run on the NEXT frame instead of the current one, incurring a ~16ms delay.
+// // Perhaps this is not such a big deal.
+// /**
+//  * Invoke a component's pending effects after the next frame renders
+//  * @type {(component: import('./internal').Component) => void}
+//  */
+// let afterPaint = () => {};
 
-export const useReducer = createHook((hook, component, reducer, initialState, initialAction) => {
-	const initState = invokeOrReturn(undefined, initialState);
-	const ret = [
-		component.state[hook._index] = initialAction ? reducer(initState, initialAction) : initState,
-		action => {
-			stateChanged = true;
-			component.setState(state => ret[0] = state[hook._index] = reducer(ret[0], action));
-		}
-	];
-	return () => ret;
-});
+// /** @type {MessageChannel} */
+// let mc;
 
-// eslint-disable-next-line arrow-body-style
-export const useEffect = createHook((hook, component) => {
-	return callback => {
-		component.__hooks._pendingEffects.push(hook);
-		afterPaint(component);
-		return callback;
-	};
-}, propsChanged);
+// function onPaint() {
+// 	mc.port1.postMessage(undefined);
+// }
 
-// eslint-disable-next-line arrow-body-style
-export const useLayoutEffect = createHook((hook, component) => {
-	return callback => {
-		component.__hooks._pendingLayoutEffects.push(hook);
-		return callback;
-	};
-}, propsChanged);
+// if (typeof window !== 'undefined') {
+// 	mc = new MessageChannel();
 
-export const useRef = createHook((hook, component, initialValue) => {
-	const ref = { current: initialValue };
-	return () => ref;
-});
+// 	afterPaint = (component) => {
+// 		// TODO: Consider ways to avoid queuing a component multiple times
+// 		// due to multiple `useEffect`s
+// 		if (afterPaintEffects.push(component) === 1) {
+// 			requestAnimationFrame(onPaint);
+// 		}
+// 	};
 
-export const useMemo = createHook(() => callback => callback(), memoChanged);
-export const useCallback = createHook(() => callback => callback, propsChanged);
+// 	mc.port2.onmessage = () => {
+// 		afterPaintEffects.forEach(component => {
+// 			if (!component._parentDom) return;
+// 			component.__hooks._pendingEffects.forEach(invokeEffect);
+// 			component.__hooks._pendingEffects = [];
+// 		});
+// 		afterPaintEffects = [];
+// 	};
+// }
 
-// Note: if someone used Component.debounce = requestAnimationFrame,
-// then effects will ALWAYS run on the NEXT frame instead of the current one, incurring a ~16ms delay.
-// Perhaps this is not such a big deal.
-/**
- * Invoke a component's pending effects after the next frame renders
- * @type {(component: import('./internal').Component) => void}
- */
-let afterPaint = () => {};
+// /**
+//  * Invoke a Hook's effect
+//  * @param {import('./internal').HookInstance} hook
+//  */
+// function invokeEffect(hook) {
+// 	if (hook._cleanup) hook._cleanup();
+// 	const result = hook._value();
+// 	if (typeof result === 'function') hook._cleanup = result;
+// }
 
-/** @type {MessageChannel} */
-let mc;
+// function propsChanged(oldArgs, newArgs) {
+// 	return newArgs[1] === undefined || newArgs[1].some((prop, index) => prop !== oldArgs[1][index]);
+// }
 
-function onPaint() {
-	mc.port1.postMessage(undefined);
-}
+// function memoChanged(oldArgs, newArgs) {
+// 	return newArgs[1] !== undefined ? propsChanged(oldArgs, newArgs) : newArgs[0] !== oldArgs[0];
+// }
 
-if (typeof window !== 'undefined') {
-	mc = new MessageChannel();
-
-	afterPaint = (component) => {
-		// TODO: Consider ways to avoid queuing a component multiple times
-		// due to multiple `useEffect`s
-		if (afterPaintEffects.push(component) === 1) {
-			requestAnimationFrame(onPaint);
-		}
-	};
-
-	mc.port2.onmessage = () => {
-		afterPaintEffects.forEach(component => {
-			if (!component._parentDom) return;
-			component.__hooks._pendingEffects.forEach(invokeEffect);
-			component.__hooks._pendingEffects = [];
-		});
-		afterPaintEffects = [];
-	};
-}
-
-/**
- * Invoke a Hook's effect
- * @param {import('./internal').HookInstance} hook
- */
-function invokeEffect(hook) {
-	if (hook._cleanup) hook._cleanup();
-	const result = hook._value();
-	if (typeof result === 'function') hook._cleanup = result;
-}
-
-function propsChanged(oldArgs, newArgs) {
-	return newArgs[1] === undefined || newArgs[1].some((prop, index) => prop !== oldArgs[1][index]);
-}
-
-function memoChanged(oldArgs, newArgs) {
-	return newArgs[1] !== undefined ? propsChanged(oldArgs, newArgs) : newArgs[0] !== oldArgs[0];
-}
-
-function invokeOrReturn(arg, f) {
-	return typeof f === 'function' ? f(arg) : f;
-}
+// function invokeOrReturn(arg, f) {
+// 	return typeof f === 'function' ? f(arg) : f;
+// }
