@@ -68,12 +68,10 @@ function getHookState(index, initialState) {
 	// Other implementations to look at:
 	// * https://codesandbox.io/s/mnox05qp8
 
-	// TODO: Consider initializing in beforeRender hook
 	const hooks = currentComponent.__hooks || (currentComponent.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [] });
 
 	// 503 B
 	if (index >= hooks._list.length) {
-		// TODO: Consider removing initial State argument
 		hooks._list.push(initialState);
 	}
 	return hooks._list[index];
@@ -149,7 +147,7 @@ export function useEffect(callback, args) {
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(currentIndex++, {});
 	// const state = getHookState(currentIndex++, { _value: callback, _args: null, _cleanup: null }); // +11 B
-	// if (args == null || state._args == null || args.some((prop, index) => prop !== state._args[index])) {
+	// if (args == null || state._args == null || args.some((prop, index) => prop !== state._args[index])) { // -1 B
 	if (argsChanged(state._args, args)) {
 		state._value = callback;
 		state._args = args;
@@ -168,7 +166,7 @@ export function useLayoutEffect(callback, args) {
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(currentIndex++, {});
 	// const state = getHookState(currentIndex++, { _value: callback, _args: null, _cleanup: null }); // +11 B
-	// if (args == null || state._args == null || args.some((prop, index) => prop !== state._args[index])) {
+	// if (args == null || state._args == null || args.some((prop, index) => prop !== state._args[index])) { // -1 B
 	if (argsChanged(state._args, args)) {
 		state._value = callback;
 		state._args = args;
@@ -189,7 +187,7 @@ export function useMemo(callback, args) {
 
 	/** @type {import('./internal').MemoHookState} */
 	const state = getHookState(currentIndex++, {});
-	// if (args == null ? callback !== state._callback : state._args == null || args.some((prop, index) => prop !== state._args[index])) {
+	// if (args == null ? callback !== state._callback : state._args == null || args.some((prop, index) => prop !== state._args[index])) { // -1 B
 	if (args == null ? callback !== state._callback : argsChanged(state._args, args)) {
 		state._args = args;
 		state._callback = callback;
@@ -204,7 +202,6 @@ export function useMemo(callback, args) {
  * @param {any[]} args
  */
 export function useCallback(callback, args) {
-	// TODO: Does this implementation work when args is null?
 	return useMemo(() => callback, args);
 }
 

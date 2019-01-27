@@ -40,7 +40,6 @@ type Cleanup = () => void;
 interface EffectHookState {
 	_value?: Effect;
 	_args?: any[];
-	// TODO: Perhaps rename to _callback like in MemoHookState
 	_cleanup?: Cleanup;
 }
 
