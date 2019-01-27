@@ -21,48 +21,24 @@ type Hook = (...args: HookArgs[]) => HookReturnValue;
 
 interface ComponentHooks {
 	/** The list of hooks a component uses */
-	_list: HookInstance[];
+	_list: State[];
 	/** List of Effects to be invoked after the next frame is rendered */
-	_pendingEffects: HookInstance[];
+	_pendingEffects: EffectHookState[];
 	/** List of Effects to be invoked at the end of the current render */
-	_pendingLayoutEffects: HookInstance[];
+	_pendingLayoutEffects: EffectHookState[];
 }
 
 interface Component extends PreactComponent<any, any> {
 	__hooks: ComponentHooks;
 }
 
-// Hook implementation
+type State = EffectHookState;
+
+type Effect = () => (void | Cleanup);
 type Cleanup = () => void;
 
-/** A instance of a hook assigned to a component */
-interface HookInstance {
-	_index: number;
-
-	/** Previous args Hook was invoked with */
-	_args?: HookArgs[];
-
-	/** The implementation of a Hook */
-	_run?: Hook;
-
-	/** The value the Hook returns to the user */
-	_value?: HookReturnValue;
-
-	_cleanup?(): void;
+interface EffectHookState {
+	_value?: Effect;
+	_args?: any[];
+	_cleanup?: Cleanup;
 }
-
-/** A function to determine if a Hook's implementation should be invoked */
-type HookShouldRun = (oldArgs: HookArgs[], newArgs: HookArgs[]) => boolean;
-
-/**
- * A function that creates Hook instances. It wraps the Hook implementation and only invokes
- * the implementation if it should run (as determined by the `shouldRun` parameter).
- */
-type HookFactory = (create: HookImplementationFactory, shouldRun?: HookShouldRun) => Hook;
-
-/**
- * A function that creates the implementation for a Hook. It is invoked once the first time
- * a hook is called. The returned function is the actual Hook implementation that is invoked
- * on the first and subsequent calls to a Hook.
- */
-type HookImplementationFactory = (hookInstance: HookInstance, component: Component, ...initialArgs: HookArgs[]) => Hook;
