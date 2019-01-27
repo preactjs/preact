@@ -155,7 +155,7 @@ export function useEffect(callback, args) {
 
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(currentIndex++, {});
-	// const state = getHookState(currentIndex++, { _value: callback, _args: null, _cleanup: null }); // +10 B
+	// const state = getHookState(currentIndex++, { _value: callback, _args: null, _cleanup: null }); // +11 B
 	// if (args == null || state._args == null || args.some((prop, index) => prop !== state._args[index])) {
 	if (argsChanged(state._args, args)) {
 		state._value = callback;
@@ -173,6 +173,24 @@ export function useEffect(callback, args) {
 // 		return callback;
 // 	};
 // }, propsChanged);
+
+/**
+ * @param {import('./internal').Effect} callback
+ * @param {any[]} args
+ */
+export function useLayoutEffect(callback, args) {
+
+	/** @type {import('./internal').EffectHookState} */
+	const state = getHookState(currentIndex++, {});
+	// const state = getHookState(currentIndex++, { _value: callback, _args: null, _cleanup: null }); // +11 B
+	// if (args == null || state._args == null || args.some((prop, index) => prop !== state._args[index])) {
+	if (argsChanged(state._args, args)) {
+		state._value = callback;
+		state._args = args;
+
+		currentComponent.__hooks._pendingLayoutEffects.push(state);
+	}
+}
 
 // export const useRef = createHook((hook, component, initialValue) => {
 // 	const ref = { current: initialValue };

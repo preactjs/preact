@@ -6,7 +6,7 @@ import { useLayoutEffect } from '../../src';
 
 /** @jsx h */
 
-xdescribe('useLayoutEffect', () => {
+describe('useLayoutEffect', () => {
 
 	/** @type {HTMLDivElement} */
 	let scratch;
