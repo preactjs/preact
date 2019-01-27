@@ -127,7 +127,6 @@ export class Renderer {
 
 		let prev = this.inst2vnode.get(data.publicInstance);
 
-		// Potentially skip creating a event when the vnode hasn't changed.
 		// The `updateProfileTimes` event is a faster version of `updated` and
 		// is processed much quicker inside the devtools extension.
 		if (!hasDataChanged(prev, vnode) && hasProfileDataChanged(prev, vnode)) {
