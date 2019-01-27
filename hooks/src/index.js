@@ -197,6 +197,10 @@ export function useLayoutEffect(callback, args) {
 // 	return () => ref;
 // });
 
+export function useRef(initialValue) {
+	return getHookState(currentIndex++, { current: initialValue });
+}
+
 // export const useMemo = createHook(() => callback => callback(), memoChanged);
 // export const useCallback = createHook(() => callback => callback, propsChanged);
 
