@@ -679,6 +679,16 @@ describe('devtools', () => {
 			]);
 		});
 
+		it('should unmount wrapped Fragment if root will be unmounted', () => {
+			render(<div />, scratch);
+			render('foo', scratch);
+
+			expect(serialize(hook.log).filter(x => x.type === 'unmount')).to.deep.equal([{
+				component: 'Fragment',
+				type: 'unmount'
+			}]);
+		});
+
 		it('should be able to render Fragments', () => {
 			render(<div><Fragment>foo{'bar'}</Fragment></div>, scratch);
 			checkEventReferences(hook.log);
