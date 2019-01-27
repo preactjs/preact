@@ -204,6 +204,20 @@ export function useRef(initialValue) {
 // export const useMemo = createHook(() => callback => callback(), memoChanged);
 // export const useCallback = createHook(() => callback => callback, propsChanged);
 
+export function useMemo(callback, args) {
+
+	/** @type {import('./internal').MemoHookState} */
+	const state = getHookState(currentIndex++, {});
+	// if (args == null ? callback !== state._callback : state._args == null || args.some((prop, index) => prop !== state._args[index])) {
+	if (args == null ? callback !== state._callback : argsChanged(state._args, args)) {
+		state._args = args;
+		state._callback = callback;
+		return state._value = callback();
+	}
+
+	return state._value;
+}
+
 // Note: if someone used Component.debounce = requestAnimationFrame,
 // then effects will ALWAYS run on the NEXT frame instead of the current one, incurring a ~16ms delay.
 // Perhaps this is not such a big deal.
