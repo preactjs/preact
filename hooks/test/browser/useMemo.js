@@ -6,7 +6,7 @@ import { useMemo } from '../../src';
 /** @jsx h */
 
 
-describe('useMemo', () => {
+xdescribe('useMemo', () => {
 
 	/** @type {HTMLDivElement} */
 	let scratch;

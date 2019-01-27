@@ -5,7 +5,7 @@ import { useRef } from '../../src';
 /** @jsx h */
 
 
-describe('useRef', () => {
+xdescribe('useRef', () => {
 
 	/** @type {HTMLDivElement} */
 	let scratch;
