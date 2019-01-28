@@ -125,7 +125,7 @@ export function useReducer(reducer, initialState, initialAction) {
 	/** @type {import('./internal').ReducerHookState} */
 	const hookState = getHookState(currentIndex++, {});
 	if (hookState._component == null) {
-		hookState._component = currentComponent
+		hookState._component = currentComponent;
 		hookState._value = [
 			initialAction
 				? reducer(invokeOrReturn(null, initialState), initialAction)

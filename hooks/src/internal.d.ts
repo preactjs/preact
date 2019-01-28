@@ -21,7 +21,7 @@ type Hook = (...args: HookArgs[]) => HookReturnValue;
 
 interface ComponentHooks {
 	/** The list of hooks a component uses */
-	_list: State[];
+	_list: HookState[];
 	/** List of Effects to be invoked after the next frame is rendered */
 	_pendingEffects: EffectHookState[];
 	/** List of Effects to be invoked at the end of the current render */
@@ -32,7 +32,7 @@ interface Component extends PreactComponent<any, any> {
 	__hooks: ComponentHooks;
 }
 
-type State = EffectHookState;
+type HookState = EffectHookState | MemoHookState | ReducerHookState;
 
 type Effect = () => (void | Cleanup);
 type Cleanup = () => void;
