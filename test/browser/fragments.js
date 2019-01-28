@@ -8,7 +8,7 @@ import { logCall, clearLog, getLog } from '../_util/logCall';
 
 describe('Fragment', () => {
 
-	let expectDomLog = true;
+	let expectDomLog = false;
 
 	/** @type {HTMLDivElement} */
 	let scratch;
