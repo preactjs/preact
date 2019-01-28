@@ -95,27 +95,10 @@ function handleElementVNode(vnode, a) {
 
 // proxy render() since React returns a Component reference.
 function render(vnode, parent, callback) {
-	let prev = parent && parent._preactCompatRendered && parent._preactCompatRendered.base;
-
-	// ignore impossible previous renders
-	if (prev && prev.parentNode!==parent) prev = null;
-
-	// default to first Element child
-	if (!prev && parent) prev = parent.firstElementChild;
-
-	// remove unaffected siblings
-	for (let i=parent.childNodes.length; i--; ) {
-		if (parent.childNodes[i]!==prev) {
-			parent.removeChild(parent.childNodes[i]);
-		}
-	}
-
 	preactRender(vnode, parent);
-
-	let out = vnode;
-	if (parent) parent._preactCompatRendered = out && (out._component || { base: out });
 	if (typeof callback==='function') callback();
-	return out && out._component || out;
+
+	return vnode!=null ? vnode._component : null;
 }
 
 class ContextProvider {
