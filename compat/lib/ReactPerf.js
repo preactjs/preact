@@ -1,6 +1,1 @@
-function noop(){}
-
-'getLastMeasurements getExclusive getInclusive getWasted getOperations printExclusive printInclusive printWasted printOperations start stop isRunning'
-	.split(' ').forEach(function(key) {
-		module.exports[key]=noop;
-	});
+exports.getLastMeasurements=exports.getExclusive=exports.getInclusive=exports.getWasted=exports.getOperations=exports.printExclusive=exports.printInclusive=exports.printWasted=exports.printOperations=exports.start=exports.stop=exports.isRunning=function() {}
