@@ -47,7 +47,6 @@ describe('Fragment', () => {
 
 	afterEach(() => {
 		teardown(scratch);
-		scratch = null;
 	});
 
 	it('should not render empty Fragment', () => {
