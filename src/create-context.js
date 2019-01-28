@@ -1,5 +1,3 @@
-import { Component } from './component';
-
 export let i = 0;
 
 /**
@@ -14,7 +12,7 @@ export function createContext(defaultValue) {
 		return props.children(value);
 	}
 
-	class Provider extends Component {
+	class Provider {
 		getChildContext() {
 			return { [id]: this };
 		}
