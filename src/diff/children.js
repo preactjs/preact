@@ -62,7 +62,7 @@ export function diffChildren(dom, children, oldChildren, context, isSvg, excessD
 		newDom = diff(oldVNode==null ? null : oldVNode._dom, dom, childVNode, oldVNode, context, isSvg, false, excessDomChildren, mounts, ancestorComponent, parentVNode);
 
 		// Only proceed if the vnode has not been unmounted by `diff()` above.
-		if (childVNode!=null && newDom !=null && (parentVNode.type !== Fragment || childVNode._wrapsFragment)) {
+		if (childVNode!=null && newDom !=null) {
 			lastDom = childVNode._lastDomChild;
 
 			// Store focus in case moving children around changes it. Note that we
@@ -72,16 +72,14 @@ export function diffChildren(dom, children, oldChildren, context, isSvg, excessD
 			focus = document.activeElement;
 
 			// Fragments or similar components have already been diffed at this point.
-			// if (newDom!==lastDom) {}
-			// else if (excessDomChildren==oldVNode || newDom!=childDom || newDom.parentNode==null) {
-			if (excessDomChildren==oldVNode || newDom!=childDom || newDom.parentNode==null) {
+			if (newDom!==lastDom) {}
+			else if (excessDomChildren==oldVNode || newDom!=childDom || newDom.parentNode==null) {
 				// NOTE: excessDomChildren==oldVNode above:
 				// This is a compression of excessDomChildren==null && oldVNode==null!
 				// The values only have the same type when `null`.
 
 				outer: if (childDom==null || childDom.parentNode!==dom) {
-					// dom.appendChild(newDom);
-					appendChild(childVNode, dom, newDom);
+					dom.appendChild(newDom);
 				}
 				else {
 					sibDom = childDom;
@@ -91,8 +89,7 @@ export function diffChildren(dom, children, oldChildren, context, isSvg, excessD
 							break outer;
 						}
 					}
-					// dom.insertBefore(newDom, childDom);
-					insertBefore(childVNode, dom, newDom, childDom);
+					dom.insertBefore(newDom, childDom);
 				}
 			}
 
@@ -110,43 +107,4 @@ export function diffChildren(dom, children, oldChildren, context, isSvg, excessD
 
 	// Remove remaining oldChildren if there are any.
 	for (i=oldChildren.length; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
-}
-
-/**
- *
- * @param {import('../internal').VNode} childVNode
- * @param {import('../internal').PreactElement} dom
- * @param {import('../internal').PreactElement | Text} newDom
- * @param {import('../internal').PreactElement} childDom
- */
-function insertBefore(childVNode, dom, newDom, childDom) {
-	if (childVNode._wrapsFragment) {
-		insertBefore(childVNode._component._prevVNode, dom, newDom, childDom);
-	}
-	else if (childVNode.type === Fragment) {
-		// This algorithm doesn't diff Fragment children...
-		childVNode._children.forEach(vnode => insertBefore(vnode, dom, vnode._dom, childDom));
-	}
-	else {
-		dom.insertBefore(newDom, childDom);
-	}
-}
-
-/**
- *
- * @param {import('../internal').VNode} childVNode
- * @param {import('../internal').PreactElement} dom
- * @param {import('../internal').PreactElement | Text} newDom
- */
-function appendChild(childVNode, dom, newDom) {
-	if (childVNode._wrapsFragment) {
-		appendChild(childVNode._component._prevVNode, dom, newDom);
-	}
-	else if (childVNode.type === Fragment) {
-		// This algorithm doesn't diff Fragment children...
-		childVNode._children.forEach(vnode => appendChild(vnode, dom, vnode._dom));
-	}
-	else {
-		dom.appendChild(newDom);
-	}
 }
