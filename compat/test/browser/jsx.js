@@ -1,5 +1,5 @@
-import { setupScratch, teardown } from '../../_util/helpers';
-import React from '../../../src/compat';
+import { setupScratch, teardown } from '../../../test/_util/helpers';
+import React from '../../src';
 
 describe('jsx', () => {
 

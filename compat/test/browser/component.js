@@ -1,5 +1,5 @@
-import { setupScratch, teardown, setupRerender } from '../../_util/helpers';
-import React from '../../../src/compat';
+import { setupScratch, teardown, setupRerender } from '../../../test/_util/helpers';
+import React from '../../src';
 
 describe('components', () => {
 

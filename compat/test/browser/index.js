@@ -9,8 +9,8 @@ import React, {
 	// eslint-disable-next-line camelcase
 	unstable_renderSubtreeIntoContainer,
 	__spread
-} from '../../../src/compat';
-import { setupScratch, teardown } from '../../_util/helpers';
+} from '../../src';
+import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 let ce = type => document.createElement(type);
 let text = text => document.createTextNode(text);

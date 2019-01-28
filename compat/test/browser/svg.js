@@ -1,5 +1,5 @@
-import React from '../../../src/compat';
-import { setupScratch, teardown } from '../../_util/helpers';
+import React from '../../src';
+import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 describe('svg', () => {
 
