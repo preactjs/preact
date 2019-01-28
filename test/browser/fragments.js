@@ -75,7 +75,7 @@ describe('Fragment', () => {
 		expectDomLogToBe([
 			'<span>.appendChild(#text)',
 			'<div>.appendChild(<span>foo)',
-			// See issue #193 - redundant operations
+			// See issue #193 - redundant operations (append)
 			'<div>foo.appendChild(<span>foo)'
 		]);
 	});
@@ -229,7 +229,7 @@ describe('Fragment', () => {
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
 			'<div>Hello.appendChild(<div>Hello)',
-			// See issue #193
+			// See issue #193 - redudant operations (remove)
 			'<div>Hello.remove()',
 			'<div>Hello.remove()'
 		]);
@@ -270,7 +270,7 @@ describe('Fragment', () => {
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 		expectDomLogToBe([
-			// See issue #193
+			// See issue #193 - redudant operations (remove)
 			'<div>Hello.remove()',
 			'<div>Hello.remove()',
 			'<div>Hello.remove()',
@@ -637,7 +637,7 @@ describe('Fragment', () => {
 			'<div>11Hello.insertBefore(<div>Hello, <span>1)',
 			'<span>.appendChild(#text)',
 			'<div>1Hello1Hello.insertBefore(<span>2, <span>1)',
-			// See issue #193
+			// See issue #193 - redundant operations (remove)
 			'<span>1.remove()',
 			'<span>1.remove()',
 			'<div>Hello.remove()',
@@ -656,7 +656,7 @@ describe('Fragment', () => {
 			'<div>1Hello21.appendChild(<div>Hello)',
 			'<div>2Hello21Hello.appendChild(<span>2)',
 			'<span>2.remove()',
-			// See issue #193
+			// See issue #193 - redundant operations (remove)
 			'<div>Hello.remove()',
 			'<div>Hello.remove()'
 		]);
@@ -1020,7 +1020,7 @@ describe('Fragment', () => {
 		render(<Foo condition={false} />,  scratch);
 		expect(scratch.innerHTML).to.equal(html);
 		expectDomLogToBe([
-			// see issue #193.
+			// see issue #193 - redundant ops (remove) and move non-optimal moves?
 			'<li>.appendChild(#text)',
 			'<ol>0121.appendChild(<li>2)',
 			'<li>.appendChild(#text)',
@@ -1094,7 +1094,7 @@ describe('Fragment', () => {
 		render(<Foo condition={false} />,  scratch);
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
 		expectDomLogToBe([
-			// see issue #193.
+			// see issue #193 - redundant operations (remove)
 			'<li>1.remove()',
 			'<li>1.remove()',
 			'<li>2.remove()'
@@ -1108,7 +1108,7 @@ describe('Fragment', () => {
 			'<ol>034.appendChild(<li>1)',
 			'<li>.appendChild(#text)',
 			'<ol>0341.appendChild(<li>2)',
-			// see issue #193
+			// see issue #193 - re-appends Fragment siblings
 			'<ol>03312.appendChild(<li>3)',
 			'<ol>04123.appendChild(<li>4)'
 		]);
@@ -1181,13 +1181,12 @@ describe('Fragment', () => {
 			'<ol>034.appendChild(<li>1)',
 			'<li>.appendChild(#text)',
 			'<ol>0341.appendChild(<li>2)',
-			// see issue #193
+			// see issue #193 - re-appends Fragment siblings
 			'<ol>03312.appendChild(<li>3)',
 			'<ol>04123.appendChild(<li>4)'
 		]);
 	});
 
-	// TODO: Add dom log expectation
 	it('should support conditional beginning and end Fragments', () => {
 		const Foo = ({ condition }) => (
 			<ol>
@@ -1232,13 +1231,20 @@ describe('Fragment', () => {
 		render(<Foo condition={false} />, scratch);
 		// TODO: Fails here...
 		expect(scratch.innerHTML).to.equal(htmlForFalse, 'rendering from true to false');
+		expectDomLogToBe([
+			'<ol>3422.appendChild(<li>3)',
+			'<ol>4223.appendChild(<li>4)'
+		]);
 
 		clearLog();
 		render(<Foo condition={true} />, scratch);
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
+		expectDomLogToBe([
+			'<ol>2201.appendChild(<li>2)',
+			'<ol>2012.appendChild(<li>2)'
+		]);
 	});
 
-	// TODO: Add dom log expectation
 	it('should preserve state with reordering in multiple levels with mixed # of Fragment siblings', () => {
 		// Also fails if the # of divs outside the Fragment equals or exceeds
 		// the # inside the Fragment for both conditions
@@ -1271,7 +1277,7 @@ describe('Fragment', () => {
 			div('foo'),
 			div(div('Hello')),
 			div('boop'),
-			div('boop'),
+			div('boop')
 		].join(''));
 
 		const htmlForFalse = div([
@@ -1285,14 +1291,15 @@ describe('Fragment', () => {
 
 		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal(htmlForFalse, 'rendering from true to false');
+		expectDomLogToBe([]); // TODO: Investigate what this should be. Test output doesn't make sense...
 
 		render(<Foo condition={true} />, scratch);
 
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
+		expectDomLogToBe([]); // TODO: Investigate what this should be. Test output doesn't make sense...
 	});
 
-	// TODO: Add dom log expectation
 	it('should preserve state with reordering in multiple levels with lots of Fragment siblings', () => {
 		// Also fails if the # of divs outside the Fragment equals or exceeds
 		// the # inside the Fragment for both conditions
@@ -1345,14 +1352,15 @@ describe('Fragment', () => {
 
 		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal(htmlForFalse, 'rendering from true to false');
+		expectDomLogToBe([]); // TODO: Investigate what this should be. Test output doesn't make sense...
 
 		render(<Foo condition={true} />, scratch);
 
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
+		expectDomLogToBe([]); // TODO: Investigate what this should be. Test output doesn't make sense...
 	});
 
-	// TODO: Add dom log expectation
 	it('should correctly append children with siblings', () => {
 
 		/**
@@ -1384,11 +1392,13 @@ describe('Fragment', () => {
 		clearLog();
 		render(<Foo values={values} />, scratch);
 		expect(scratch.innerHTML).to.equal(getHtml(values), `push 3: [${values.join(',')}]`);
+		expectDomLogToBe([]); // TODO: Fill this out when this test passes
 
 		values.push(4);
 
 		clearLog();
 		render(<Foo values={values} />, scratch);
 		expect(scratch.innerHTML).to.equal(getHtml(values), `push 4: [${values.join(',')}]`);
+		expectDomLogToBe([]); // TODO: Fill this out when this test passes
 	});
 });
