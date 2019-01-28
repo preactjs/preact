@@ -8,6 +8,8 @@ import { logCall, clearLog, getLog } from '../_util/logCall';
 
 describe('Fragment', () => {
 
+	let expectDomLog = false;
+
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -15,6 +17,12 @@ describe('Fragment', () => {
 	let rerender;
 
 	let ops = [];
+
+	function expectDomLogToBe(expectedOperations) {
+		if (expectDomLog) {
+			expect(getLog()).to.deep.equal(expectedOperations);
+		}
+	}
 
 	class Stateful extends Component {
 		componentDidUpdate() {
@@ -64,12 +72,12 @@ describe('Fragment', () => {
 		// children.
 
 		expect(scratch.innerHTML).to.equal('<span>foo</span>');
-		// expect(getLog()).to.deep.equal([
-		// 	'<span>.appendChild(#text)',
-		// 	'<div>.appendChild(<span>foo)',
-		// 	// See issue #193 - redundant operations
-		// 	'<div>foo.appendChild(<span>foo)'
-		// ]);
+		expectDomLogToBe([
+			'<span>.appendChild(#text)',
+			'<div>.appendChild(<span>foo)',
+			// See issue #193 - redundant operations
+			'<div>foo.appendChild(<span>foo)'
+		]);
 	});
 
 	it('should render multiple children via noop renderer', () => {
@@ -126,14 +134,14 @@ describe('Fragment', () => {
 
 		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
-		expect(getLog()).to.deep.equal([]);
+		expectDomLogToBe([]);
 
 		clearLog();
 		render(<Foo condition={true} />, scratch);
 
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
-		expect(getLog()).to.deep.equal([]);
+		expectDomLogToBe([]);
 	});
 
 	it('should preserve state of children nested at same level', () => {
@@ -165,21 +173,21 @@ describe('Fragment', () => {
 
 		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div></div><div>Hello</div>');
-		// expect(getLog()).to.deep.equal([
-		// 	'<div>Hello.insertBefore(<div>, <div>Hello)'
-		// ]);
+		expectDomLogToBe([
+			'<div>Hello.insertBefore(<div>, <div>Hello)'
+		]);
 
 		clearLog();
 		render(<Foo condition={true} />, scratch);
 
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
-		// expect(getLog()).to.deep.equal([
-		// 	'<div>.remove()',
-		// 	// See issue #193 - redundant operations (multiple Fragments)
-		// 	'<div>Hello.appendChild(<div>Hello)',
-		// 	'<div>Hello.appendChild(<div>Hello)'
-		// ]);
+		expectDomLogToBe([
+			'<div>.remove()',
+			// See issue #193 - redundant operations (multiple Fragments)
+			'<div>Hello.appendChild(<div>Hello)',
+			'<div>Hello.appendChild(<div>Hello)'
+		]);
 	});
 
 	it('should not preserve state in non-top-level fragment nesting', () => {
@@ -204,27 +212,27 @@ describe('Fragment', () => {
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
-		// expect(getLog()).to.deep.equal([
-		// 	'<div>.appendChild(#text)',
-		// 	'<div>Hello.insertBefore(<div>Hello, <div>Hello)',
-		// 	// See issue #193 - redundant operations (remove)
-		// 	'<div>Hello.remove()',
-		// 	'<div>Hello.remove()',
-		// 	'<div>Hello.remove()'
-		// ]);
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>Hello.insertBefore(<div>Hello, <div>Hello)',
+			// See issue #193 - redundant operations (remove)
+			'<div>Hello.remove()',
+			'<div>Hello.remove()',
+			'<div>Hello.remove()'
+		]);
 
 		clearLog();
 		render(<Foo condition={true} />, scratch);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
-		// expect(getLog()).to.deep.equal([
-		// 	'<div>.appendChild(#text)',
-		// 	'<div>Hello.appendChild(<div>Hello)',
-		// 	// See issue #193
-		// 	'<div>Hello.remove()',
-		// 	'<div>Hello.remove()'
-		// ]);
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>Hello.appendChild(<div>Hello)',
+			// See issue #193
+			'<div>Hello.remove()',
+			'<div>Hello.remove()'
+		]);
 	});
 
 	it('should not preserve state of children if nested 2 levels without siblings', () => {
@@ -247,29 +255,29 @@ describe('Fragment', () => {
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
-		// expect(getLog()).to.deep.equal([
-		// 	// See issue #193 - redundant operations (remove)
-		// 	'<div>Hello.remove()',
-		// 	'<div>Hello.remove()',
-		// 	'<div>.appendChild(#text)',
-		// 	'<div>.appendChild(<div>Hello)',
-		// 	'<div>Hello.appendChild(<div>Hello)'
-		// ]);
+		expectDomLogToBe([
+			// See issue #193 - redundant operations (remove)
+			'<div>Hello.remove()',
+			'<div>Hello.remove()',
+			'<div>.appendChild(#text)',
+			'<div>.appendChild(<div>Hello)',
+			'<div>Hello.appendChild(<div>Hello)'
+		]);
 
 		clearLog();
 		render(<Foo condition={true} />, scratch);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
-		// expect(getLog()).to.deep.equal([
-		// 	// See issue #193
-		// 	'<div>Hello.remove()',
-		// 	'<div>Hello.remove()',
-		// 	'<div>Hello.remove()',
-		// 	'<div>Hello.remove()',
-		// 	'<div>.appendChild(#text)',
-		// 	'<div>.appendChild(<div>Hello)'
-		// ]);
+		expectDomLogToBe([
+			// See issue #193
+			'<div>Hello.remove()',
+			'<div>Hello.remove()',
+			'<div>Hello.remove()',
+			'<div>Hello.remove()',
+			'<div>.appendChild(#text)',
+			'<div>.appendChild(<div>Hello)'
+		]);
 	});
 
 	it('should just render children for fragments', () => {
@@ -570,20 +578,20 @@ describe('Fragment', () => {
 
 		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
-		// expect(getLog()).to.deep.equal([
-		// 	'<div>fooHellobeep.insertBefore(<div>beep, <div>foo)',
-		// 	'<div>beepbarHello.appendChild(<div>bar)'
-		// ]);
+		expectDomLogToBe([
+			'<div>fooHellobeep.insertBefore(<div>beep, <div>foo)',
+			'<div>beepbarHello.appendChild(<div>bar)'
+		]);
 
 		clearLog();
 		render(<Foo condition={true} />, scratch);
 
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal(htmlForTrue);
-		// expect(getLog()).to.deep.equal([
-		// 	'<div>beepHellofoo.appendChild(<div>Hello)',
-		// 	'<div>boopfooHello.appendChild(<div>boop)'
-		// ]);
+		expectDomLogToBe([
+			'<div>beepHellofoo.appendChild(<div>Hello)',
+			'<div>boopfooHello.appendChild(<div>boop)'
+		]);
 	});
 
 	it('should not preserve state when switching to a keyed fragment to an array', () => {
@@ -623,35 +631,35 @@ describe('Fragment', () => {
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal(html);
-		// expect(getLog()).to.deep.equal([
-		// 	'<div>1Hello1.insertBefore(<span>1, <span>1)',
-		// 	'<div>.appendChild(#text)',
-		// 	'<div>11Hello.insertBefore(<div>Hello, <span>1)',
-		// 	'<span>.appendChild(#text)',
-		// 	'<div>1Hello1Hello.insertBefore(<span>2, <span>1)',
-		// 	// See issue #193
-		// 	'<span>1.remove()',
-		// 	'<span>1.remove()',
-		// 	'<div>Hello.remove()',
-		// 	'<div>Hello.remove()'
-		// ]);
+		expectDomLogToBe([
+			'<div>1Hello1.insertBefore(<span>1, <span>1)',
+			'<div>.appendChild(#text)',
+			'<div>11Hello.insertBefore(<div>Hello, <span>1)',
+			'<span>.appendChild(#text)',
+			'<div>1Hello1Hello.insertBefore(<span>2, <span>1)',
+			// See issue #193
+			'<span>1.remove()',
+			'<span>1.remove()',
+			'<div>Hello.remove()',
+			'<div>Hello.remove()'
+		]);
 
 		clearLog();
 		render(<Foo condition={true} />, scratch);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal(html);
-		// expect(getLog()).to.deep.equal([
-		// 	'<span>.appendChild(#text)',
-		// 	'<div>1Hello2.appendChild(<span>1)',
-		// 	'<div>.appendChild(#text)',
-		// 	'<div>1Hello21.appendChild(<div>Hello)',
-		// 	'<div>2Hello21Hello.appendChild(<span>2)',
-		// 	'<span>2.remove()',
-		// 	// See issue #193
-		// 	'<div>Hello.remove()',
-		// 	'<div>Hello.remove()'
-		// ]);
+		expectDomLogToBe([
+			'<span>.appendChild(#text)',
+			'<div>1Hello2.appendChild(<span>1)',
+			'<div>.appendChild(#text)',
+			'<div>1Hello21.appendChild(<div>Hello)',
+			'<div>2Hello21Hello.appendChild(<span>2)',
+			'<span>2.remove()',
+			// See issue #193
+			'<div>Hello.remove()',
+			'<div>Hello.remove()'
+		]);
 	});
 
 	it('should preserve state when it does not change positions', () => {
@@ -695,12 +703,12 @@ describe('Fragment', () => {
 		), scratch);
 
 		expect(scratch.innerHTML).to.equal('spamfoobar');
-		// expect(getLog()).to.deep.equal([
-		// 	'<div>.appendChild(#text)',
-		// 	'<div>spam.appendChild(#text)',
-		// 	'<div>spamfoo.appendChild(#text)',
-		// 	'<div>spamfoo.appendChild(#text)'
-		// ]);
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>spam.appendChild(#text)',
+			'<div>spamfoo.appendChild(#text)',
+			'<div>spamfoo.appendChild(#text)'
+		]);
 
 		clearLog();
 		render((
@@ -711,9 +719,9 @@ describe('Fragment', () => {
 		), scratch);
 
 		expect(scratch.innerHTML).to.equal('foobar');
-		// expect(getLog()).to.deep.equal([
-		// 	'<div>spamfoobar.appendChild(#text)'
-		// ]);
+		expectDomLogToBe([
+			'<div>spamfoobar.appendChild(#text)'
+		]);
 	});
 
 	it('should respect keyed Fragments', () => {
@@ -996,44 +1004,44 @@ describe('Fragment', () => {
 		clearLog();
 		render(<Foo condition={true} />, scratch);
 		expect(scratch.innerHTML).to.equal(html);
-		// expect(getLog()).to.deep.equal([
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>.appendChild(<li>0)',
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>0.appendChild(<li>1)',
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>01.appendChild(<li>2)',
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>012.appendChild(<li>3)',
-		// 	'<div>.appendChild(<ol>0123)'
-		// ]);
+		expectDomLogToBe([
+			'<li>.appendChild(#text)',
+			'<ol>.appendChild(<li>0)',
+			'<li>.appendChild(#text)',
+			'<ol>0.appendChild(<li>1)',
+			'<li>.appendChild(#text)',
+			'<ol>01.appendChild(<li>2)',
+			'<li>.appendChild(#text)',
+			'<ol>012.appendChild(<li>3)',
+			'<div>.appendChild(<ol>0123)'
+		]);
 
 		clearLog();
 		render(<Foo condition={false} />,  scratch);
 		expect(scratch.innerHTML).to.equal(html);
-		// expect(getLog()).to.deep.equal([
-		// 	// see issue #193.
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>0121.appendChild(<li>2)',
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>01212.appendChild(<li>3)',
-		// 	'<li>1.remove()',
-		// 	'<li>1.remove()',
-		// 	'<li>2.remove()'
-		// ]);
+		expectDomLogToBe([
+			// see issue #193.
+			'<li>.appendChild(#text)',
+			'<ol>0121.appendChild(<li>2)',
+			'<li>.appendChild(#text)',
+			'<ol>01212.appendChild(<li>3)',
+			'<li>1.remove()',
+			'<li>1.remove()',
+			'<li>2.remove()'
+		]);
 
 		clearLog();
 		render(<Foo condition={true} />, scratch);
 		expect(scratch.innerHTML).to.equal(html);
-		// expect(getLog()).to.deep.equal([
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>0123.appendChild(<li>1)',
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>01231.appendChild(<li>2)',
-		// 	'<ol>013312.appendChild(<li>3)',
-		// 	'<li>3.remove()',
-		// 	'<li>1.remove()'
-		// ]);
+		expectDomLogToBe([
+			'<li>.appendChild(#text)',
+			'<ol>0123.appendChild(<li>1)',
+			'<li>.appendChild(#text)',
+			'<ol>01231.appendChild(<li>2)',
+			'<ol>013312.appendChild(<li>3)',
+			'<li>3.remove()',
+			'<li>1.remove()'
+		]);
 	});
 
 	it('should support conditionally rendered Fragment or null', () => {
@@ -1068,42 +1076,42 @@ describe('Fragment', () => {
 		clearLog();
 		render(<Foo condition={true} />, scratch);
 		expect(scratch.innerHTML).to.equal(htmlForTrue);
-		// expect(getLog()).to.deep.equal([
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>.appendChild(<li>0)',
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>0.appendChild(<li>1)',
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>01.appendChild(<li>2)',
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>012.appendChild(<li>3)',
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>0123.appendChild(<li>4)',
-		// 	'<div>.appendChild(<ol>01234)'
-		// ]);
+		expectDomLogToBe([
+			'<li>.appendChild(#text)',
+			'<ol>.appendChild(<li>0)',
+			'<li>.appendChild(#text)',
+			'<ol>0.appendChild(<li>1)',
+			'<li>.appendChild(#text)',
+			'<ol>01.appendChild(<li>2)',
+			'<li>.appendChild(#text)',
+			'<ol>012.appendChild(<li>3)',
+			'<li>.appendChild(#text)',
+			'<ol>0123.appendChild(<li>4)',
+			'<div>.appendChild(<ol>01234)'
+		]);
 
 		clearLog();
 		render(<Foo condition={false} />,  scratch);
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
-		// expect(getLog()).to.deep.equal([
-		// 	// see issue #193.
-		// 	'<li>1.remove()',
-		// 	'<li>1.remove()',
-		// 	'<li>2.remove()'
-		// ]);
+		expectDomLogToBe([
+			// see issue #193.
+			'<li>1.remove()',
+			'<li>1.remove()',
+			'<li>2.remove()'
+		]);
 
 		clearLog();
 		render(<Foo condition={true} />, scratch);
 		expect(scratch.innerHTML).to.equal(htmlForTrue);
-		// expect(getLog()).to.deep.equal([
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>034.appendChild(<li>1)',
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>0341.appendChild(<li>2)',
-		// 	// see issue #193
-		// 	'<ol>03312.appendChild(<li>3)',
-		// 	'<ol>04123.appendChild(<li>4)'
-		// ]);
+		expectDomLogToBe([
+			'<li>.appendChild(#text)',
+			'<ol>034.appendChild(<li>1)',
+			'<li>.appendChild(#text)',
+			'<ol>0341.appendChild(<li>2)',
+			// see issue #193
+			'<ol>03312.appendChild(<li>3)',
+			'<ol>04123.appendChild(<li>4)'
+		]);
 	});
 
 	it('should support moving Fragments between beginning and end', () => {
@@ -1156,29 +1164,30 @@ describe('Fragment', () => {
 		clearLog();
 		render(<Foo condition={false} />,  scratch);
 		expect(scratch.innerHTML).to.equal(htmlForFalse, 'rendering from true to false');
-		// expect(getLog()).to.deep.equal([
-		// 	// see issue #193 - re-appends all children after Fragment
-		// 	'<ol>002345.appendChild(<li>0)',
-		// 	'<ol>013450.appendChild(<li>1)',
-		// 	'<ol>024501.appendChild(<li>2)',
-		// 	'<ol>345012.appendChild(<li>3)'
-		// ]);
+		expectDomLogToBe([
+			// see issue #193 - re-appends all children after Fragment
+			'<ol>002345.appendChild(<li>0)',
+			'<ol>013450.appendChild(<li>1)',
+			'<ol>024501.appendChild(<li>2)',
+			'<ol>345012.appendChild(<li>3)'
+		]);
 
 		clearLog();
 		render(<Foo condition={true} />, scratch);
 		// TODO: Fails here...
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
-		// expect(getLog()).to.deep.equal([
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>034.appendChild(<li>1)',
-		// 	'<li>.appendChild(#text)',
-		// 	'<ol>0341.appendChild(<li>2)',
-		// 	// see issue #193
-		// 	'<ol>03312.appendChild(<li>3)',
-		// 	'<ol>04123.appendChild(<li>4)'
-		// ]);
+		expectDomLogToBe([
+			'<li>.appendChild(#text)',
+			'<ol>034.appendChild(<li>1)',
+			'<li>.appendChild(#text)',
+			'<ol>0341.appendChild(<li>2)',
+			// see issue #193
+			'<ol>03312.appendChild(<li>3)',
+			'<ol>04123.appendChild(<li>4)'
+		]);
 	});
 
+	// TODO: Add dom log expectation
 	it('should support conditional beginning and end Fragments', () => {
 		const Foo = ({ condition }) => (
 			<ol>
@@ -1229,6 +1238,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
 	});
 
+	// TODO: Add dom log expectation
 	it('should preserve state with reordering in multiple levels with mixed # of Fragment siblings', () => {
 		// Also fails if the # of divs outside the Fragment equals or exceeds
 		// the # inside the Fragment for both conditions
@@ -1282,6 +1292,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
 	});
 
+	// TODO: Add dom log expectation
 	it('should preserve state with reordering in multiple levels with lots of Fragment siblings', () => {
 		// Also fails if the # of divs outside the Fragment equals or exceeds
 		// the # inside the Fragment for both conditions
@@ -1341,6 +1352,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
 	});
 
+	// TODO: Add dom log expectation
 	it('should correctly append children with siblings', () => {
 
 		/**
