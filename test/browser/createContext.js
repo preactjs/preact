@@ -176,4 +176,71 @@ describe('createContext', () => {
 		expect(Consumed.prototype.render).to.have.been.calledWith({ ...CONTEXT }, {}, {});
 		expect(scratch.innerHTML).to.equal('<div><div><strong>a</strong></div></div>');
 	});
+
+	it('should propagates through shouldComponentUpdate false', () => {
+		const { Provider, Consumer } = createContext();
+		const CONTEXT = { a: 'a' };
+		const UPDATED_CONTEXT = { a: 'b' };
+
+		class Consumed extends Component {
+			render(props) {
+				return <strong>{props.a}</strong>;
+			}
+		}
+
+		sinon.spy(Consumed.prototype, 'render');
+
+		class Outer extends Component {
+			render() {
+				return <div><Inner /></div>;
+			}
+		}
+
+		class Inner extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+
+			render() {
+				return (
+					<Fragment>
+						<InnerMost />
+					</Fragment>
+				);
+			}
+		}
+
+		class InnerMost extends Component {
+			render() {
+				return (
+					<div>
+						<Consumer>
+							{data => <Consumed {...data} />}
+						</Consumer>
+					</div>
+				);
+			}
+		}
+
+		class App extends Component {
+			render() {
+				return (<Provider value={this.props.value}>
+					<Outer />
+				</Provider>)
+			}
+		}
+
+		render((
+			<App value={CONTEXT} />
+		), scratch);
+
+		render((
+			<App value={UPDATED_CONTEXT} />
+		), scratch);
+
+		// initial render does not invoke anything but render():
+		expect(Consumed.prototype.render).to.have.been.calledTwice;
+		expect(Consumed.prototype.render).to.have.been.calledWith({ ...UPDATED_CONTEXT }, {}, {});
+		expect(scratch.innerHTML).to.equal('<div><div><strong>b</strong></div></div>');
+	});
 });
