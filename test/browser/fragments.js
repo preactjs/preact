@@ -487,48 +487,30 @@ describe('Fragment', () => {
 	});
 
 	it.skip('should not preserve state between unkeyed and keyed fragment', () => {
-		const Foo = ({ condition }) => [
-			<div>0</div>,
-			condition ? (
+		function Foo({ condition }) {
+			return condition ? (
 				<Fragment key="a">
-					<div>1</div>
 					<Stateful />
-					<div>2</div>
 				</Fragment>
 			) : (
 				<Fragment>
-					<div>1</div>
 					<Stateful />
-					<div>2</div>
 				</Fragment>
-			),
-			<div>3</div>
-		];
-
-		const html = [
-			div(0),
-			div(1),
-			div('Hello'),
-			div(2),
-			div(3)
-		].join('');
+			);
+		}
 
 		// React & Preact: has the same behavior for components
 		// https://codesandbox.io/s/57prmy5mx
 		render(<Foo condition={true} />, scratch);
-
-		expect(ops).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal(html);
-
 		render(<Foo condition={false} />, scratch);
 
 		expect(ops).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal(html);
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
 		render(<Foo condition={true} />, scratch);
 
 		expect(ops).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal(html);
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
 	it('should preserve state with reordering in multiple levels', () => {
