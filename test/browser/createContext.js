@@ -243,4 +243,43 @@ describe('createContext', () => {
 		expect(Consumed.prototype.render).to.have.been.calledWith({ ...UPDATED_CONTEXT }, {}, {});
 		expect(scratch.innerHTML).to.equal('<div><div><strong>b</strong></div></div>');
 	});
+
+	it('should keep the right context at the right "depth"', () => {
+		const { Provider, Consumer } = createContext();
+		const CONTEXT = { thing: 'a' };
+		const NESTED_CONTEXT = { thing: 'b' };
+
+		class Inner extends Component {
+			render(props) {
+				return <div>{props.theme} - {props.global}</div>;
+			}
+		}
+		class Nested extends Component {
+			render(props) {
+				return <div>{props.theme} - {props.global}</div>;
+			}
+		}
+
+		sinon.spy(Inner.prototype, 'render');
+		sinon.spy(Nested.prototype, 'render');
+
+		render((
+			<Provider value={CONTEXT}>
+				<Provider value={NESTED_CONTEXT}>
+					<Consumer>
+						{data => <Nested {...data} />}
+					</Consumer>
+				</Provider>
+				<Consumer>
+					{data => <Inner {...data} />}
+				</Consumer>
+			</Provider>
+		), scratch);
+
+		// initial render does not invoke anything but render():
+		expect(Nested.prototype.render).to.have.been.calledWith({ ...NESTED_CONTEXT }, {}, {});
+		expect(Inner.prototype.render).to.have.been.calledWith({ ...CONTEXT }, {}, {});
+
+		expect(scratch.innerHTML).to.equal('<div> - </div><div> - </div><div> - </div>');
+	});
 });
