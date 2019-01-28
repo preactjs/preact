@@ -5,7 +5,6 @@ import React, {
 	cloneElement,
 	findDOMNode,
 	Component,
-	PropTypes,
 	// eslint-disable-next-line camelcase
 	unstable_renderSubtreeIntoContainer,
 	__spread
@@ -245,15 +244,6 @@ describe('preact-compat', () => {
 				.to.have.property('Component')
 				.that.is.a('function')
 				.that.equals(Component);
-		});
-	});
-
-	describe('PropTypes', () => {
-		it('should be exported', () => {
-			expect(React)
-				.to.have.property('PropTypes')
-				.that.is.an('object')
-				.that.equals(PropTypes);
 		});
 	});
 

@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { render as preactRender, cloneElement as preactCloneElement, createRef, createElement as h, Component as PreactComponent, options, toChildArray } from 'ceviche';
 
 const version = '15.1.0'; // trick libraries to think we are react
@@ -435,7 +434,6 @@ function unstable_batchedUpdates(callback) {
 
 export {
 	version,
-	PropTypes,
 	Children,
 	render,
 	render as hydrate,
@@ -458,7 +456,6 @@ export {
 
 export default {
 	version,
-	PropTypes,
 	Children,
 	render,
 	hydrate: render,

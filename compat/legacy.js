@@ -1,4 +1,5 @@
 /* eslint-disable */
+var PropTypes = dep(require('prop-types'));
 var compat = dep(require('../dist/compat'));
 var server = dep(require('./server'));
 
@@ -18,5 +19,6 @@ function createFactory(type) {
 	return createElement.bind(null, type);
 }
 
+module.exports.PropTypes = PropTypes;
 module.exports.DOM = DOM;
 module.exports.createFactory = createFactory;
