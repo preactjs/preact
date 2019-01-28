@@ -139,31 +139,26 @@ function unmountComponentAtNode(container) {
 
 const ARR = [];
 
+const mapFn = (children, fn, ctx) => {
+	if (children == null) return null;
+	children = toChildArray(children);
+	if (ctx && ctx!==children) fn = fn.bind(ctx);
+	return children.map(fn);
+};
+
 // This API is completely unnecessary for Preact, so it's basically passthrough.
 let Children = {
-	map(children, fn, ctx) {
-		if (children == null) return null;
-		children = Children.toArray(children);
-		if (ctx && ctx!==children) fn = fn.bind(ctx);
-		return children.map(fn);
-	},
-	forEach(children, fn, ctx) {
-		if (children == null) return null;
-		children = Children.toArray(children);
-		if (ctx && ctx!==children) fn = fn.bind(ctx);
-		children.forEach(fn);
-	},
+	map: mapFn,
+	forEach: mapFn,
 	count(children) {
-		return children && toChildArray(children).length || 0;
+		return children ? toChildArray(children).length : 0;
 	},
 	only(children) {
 		children = toChildArray(children);
 		if (children.length!==1) throw new Error('Children.only() expects only one child.');
 		return children[0];
 	},
-	toArray(children) {
-		return toChildArray(children);
-	}
+	toArray: toChildArray
 };
 
 /** Track current render() component for ref assignment */
