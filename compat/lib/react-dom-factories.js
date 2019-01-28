@@ -1,1 +1,1 @@
-module.exports = require('preact-compat').DOM;
+module.exports = require('../legacy').DOM;
