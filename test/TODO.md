@@ -7,7 +7,10 @@
 	- ✖ should preserve state between double nested fragment and double nested array
 	- ✖ should not preserve state of children when the keys are different
 	- ✖ should not preserve state between unkeyed and keyed fragment
-	- ✖ should reorder Fragment children
+	- ✖ should support moving Fragments between beginning and end
+	- ✖ should support conditional beginning and end Fragments
+	- ✖ should preserve state with reordering in multiple levels with mixed # of Fragment siblings
+	- ✖ should preserve state with reordering in multiple levels with lots of Fragment siblings
 - keys
 	- ✖ should not preserve state when the keys are different
 	- ✖ should not preserve state between unkeyed and keyed component
