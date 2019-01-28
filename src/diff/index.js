@@ -96,11 +96,6 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 				c._renderCallbacks = [];
 			}
 
-			// isProvider
-			if (newType._context) {
-				newType._context._provider = c;
-			}
-
 			c._vnode = newVNode;
 
 			// Invoke getDerivedStateFromProps
@@ -136,10 +131,6 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			oldContext = c.context = context;
 			c.props = newVNode.props;
 			c.state = s;
-
-			// isConsumer
-			if (newType._provider)
-				c.props.value = newType._provider.props.value || newType._defaultValue;
 
 			let prev = c._prevVNode;
 			let vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));

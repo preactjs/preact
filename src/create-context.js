@@ -1,18 +1,28 @@
+import { Component } from './component';
+
+export let i = 0;
+
 /**
  *
  * @param {any} defaultValue
  */
 export function createContext(defaultValue) {
-	function Consumer(props) {
-		return props.children(props.value);
-	}
-	function Provider(props) {
-		return props.children;
+	let id = i++;
+
+	function Consumer(props, context) {
+		let value = context[id] ? context[id].props.value : defaultValue;
+		return props.children(value);
 	}
 
-	Consumer._defaultValue = defaultValue;
-	Consumer._provider = Provider;
-	Provider._context = Consumer;
+	class Provider extends Component {
+		getChildContext() {
+			return { [id]: this };
+		}
+
+		render() {
+			return this.props.children;
+		}
+	}
 
 	return {
 		Provider,

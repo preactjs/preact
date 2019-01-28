@@ -1,6 +1,7 @@
 import { createElement as h, render, Component, createContext } from '../../src/index';
 import { setupScratch, teardown } from '../_util/helpers';
 import { Fragment } from '../../src';
+import { i as ctxId } from '../../src/create-context';
 
 /** @jsx h */
 
@@ -36,7 +37,7 @@ describe('createContext', () => {
 		</Provider>, scratch);
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWith(CONTEXT, {}, {});
+		expect(Inner.prototype.render).to.have.been.calledWithMatch(CONTEXT, {},  { [ctxId - 1]: {} });
 		expect(scratch.innerHTML).to.equal('<div><div>a</div></div>');
 	});
 
@@ -66,7 +67,7 @@ describe('createContext', () => {
 		</Provider>, scratch);
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWith({ ...CONTEXT, ...CHILD_CONTEXT }, {}, {});
+		expect(Inner.prototype.render).to.have.been.calledWithMatch({ ...CONTEXT, ...CHILD_CONTEXT }, {}, { [ctxId - 1]: {} });
 		expect(scratch.innerHTML).to.equal('<div>a - b</div>');
 	});
 
@@ -95,7 +96,7 @@ describe('createContext', () => {
 		</ThemeProvider>, scratch);
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWith({ ...THEME_CONTEXT, ...DATA_CONTEXT }, {}, {});
+		expect(Inner.prototype.render).to.have.been.calledWithMatch({ ...THEME_CONTEXT, ...DATA_CONTEXT }, {}, { [ctxId - 1]: {} });
 		expect(scratch.innerHTML).to.equal('<div>black - a</div>');
 	});
 
@@ -122,7 +123,7 @@ describe('createContext', () => {
 		</Provider>, scratch);
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWith({ ...CONTEXT }, {}, {});
+		expect(Inner.prototype.render).to.have.been.calledWithMatch({ ...CONTEXT }, {}, { [ctxId - 1]: {} });
 		expect(scratch.innerHTML).to.equal('<div>a</div>');
 	});
 
@@ -173,14 +174,14 @@ describe('createContext', () => {
 		), scratch);
 
 		// initial render does not invoke anything but render():
-		expect(Consumed.prototype.render).to.have.been.calledWith({ ...CONTEXT }, {}, {});
+		expect(Consumed.prototype.render).to.have.been.calledWithMatch({ ...CONTEXT }, {}, { [ctxId - 1]: {} });
 		expect(scratch.innerHTML).to.equal('<div><div><strong>a</strong></div></div>');
 	});
 
 	it('should keep the right context at the right "depth"', () => {
 		const { Provider, Consumer } = createContext();
-		const CONTEXT = { thing: 'a' };
-		const NESTED_CONTEXT = { thing: 'b' };
+		const CONTEXT = { theme: 'a', global: 1 };
+		const NESTED_CONTEXT = { theme: 'b', global: 1 };
 
 		class Inner extends Component {
 			render(props) {
@@ -210,9 +211,9 @@ describe('createContext', () => {
 		), scratch);
 
 		// initial render does not invoke anything but render():
-		expect(Nested.prototype.render).to.have.been.calledWith({ ...NESTED_CONTEXT }, {}, {});
-		expect(Inner.prototype.render).to.have.been.calledWith({ ...CONTEXT }, {}, {});
+		expect(Nested.prototype.render).to.have.been.calledWithMatch({ ...NESTED_CONTEXT }, {}, { [ctxId - 1]: {} });
+		expect(Inner.prototype.render).to.have.been.calledWithMatch({ ...CONTEXT }, {}, { [ctxId - 1]: {} });
 
-		expect(scratch.innerHTML).to.equal('<div> - </div><div> - </div><div> - </div>');
+		expect(scratch.innerHTML).to.equal('<div>b - 1</div><div>a - 1</div>');
 	});
 });
