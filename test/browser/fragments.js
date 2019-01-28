@@ -8,7 +8,7 @@ import { logCall, clearLog, getLog } from '../_util/logCall';
 
 describe('Fragment', () => {
 
-	let expectDomLog = false;
+	let expectDomLog = true;
 
 	/** @type {HTMLDivElement} */
 	let scratch;
@@ -1291,13 +1291,13 @@ describe('Fragment', () => {
 
 		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal(htmlForFalse, 'rendering from true to false');
-		expectDomLogToBe([]); // TODO: Investigate what this should be. Test output doesn't make sense...
+		expectDomLogToBe([]); // TODO: Fill in when this test passes
 
 		render(<Foo condition={true} />, scratch);
 
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
-		expectDomLogToBe([]); // TODO: Investigate what this should be. Test output doesn't make sense...
+		expectDomLogToBe([]); // TODO: Fill in when this test passes
 	});
 
 	it('should preserve state with reordering in multiple levels with lots of Fragment siblings', () => {
@@ -1352,13 +1352,13 @@ describe('Fragment', () => {
 
 		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal(htmlForFalse, 'rendering from true to false');
-		expectDomLogToBe([]); // TODO: Investigate what this should be. Test output doesn't make sense...
+		expectDomLogToBe([]); // TODO: Fill in when this test passes
 
 		render(<Foo condition={true} />, scratch);
 
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
-		expectDomLogToBe([]); // TODO: Investigate what this should be. Test output doesn't make sense...
+		expectDomLogToBe([]); // TODO: Fill in when this test passes
 	});
 
 	it('should correctly append children with siblings', () => {
@@ -1392,13 +1392,19 @@ describe('Fragment', () => {
 		clearLog();
 		render(<Foo values={values} />, scratch);
 		expect(scratch.innerHTML).to.equal(getHtml(values), `push 3: [${values.join(',')}]`);
-		expectDomLogToBe([]); // TODO: Fill this out when this test passes
+		expectDomLogToBe([
+			'<li>.appendChild(#text)',
+			'<ol>a012b.insertBefore(<li>3, <li>b)'
+		]);
 
 		values.push(4);
 
 		clearLog();
 		render(<Foo values={values} />, scratch);
 		expect(scratch.innerHTML).to.equal(getHtml(values), `push 4: [${values.join(',')}]`);
-		expectDomLogToBe([]); // TODO: Fill this out when this test passes
+		expectDomLogToBe([
+			'<li>.appendChild(#text)',
+			'<ol>a0123b.insertBefore(<li>4, <li>b)'
+		]);
 	});
 });
