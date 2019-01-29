@@ -20,9 +20,7 @@ import { removeNode } from '../util';
  * component to the ones being diffed
  */
 export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent) {
-	let childVNode, i, j, p, index, oldVNode, newDom,
-		nextDom, sibDom, focus,
-		childDom;
+	let childVNode, i, oldVNode, newDom, childDom;
 
 	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode);
 	let oldChildren = oldParentVNode!=null && oldParentVNode!=EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR;
@@ -47,8 +45,6 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 	for (i=0; i<newChildren.length; i++) {
 		childVNode = newChildren[i] = coerceToVNode(newChildren[i]);
-		oldVNode = index = null;
-
 		oldVNode = getOldVNode(oldChildren, i, childVNode);
 
 		// Morph the old element into the new one, but don't append it to the dom yet
