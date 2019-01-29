@@ -153,7 +153,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 				oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, append, excessDomChildren, mounts, c, newVNode);
+			c.base = dom = diff(dom, parentDom, vnode, prev, c._context || context, isSvg, append, excessDomChildren, mounts, c, newVNode);
 
 			if (vnode!=null) {
 				lastDomChild = vnode._lastDomChild;

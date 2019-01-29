@@ -258,5 +258,47 @@ describe('createContext', () => {
 			), scratch);
 			expect(actual).to.deep.equal('bob');
 		});
+
+		it('should restore legacy context for children', () => {
+			const Foo = createContext('foo');
+			const spy = sinon.spy();
+
+			class NewContext extends Component {
+				render() {
+					return <div>{this.props.children}</div>;
+				}
+			}
+
+			class OldContext extends Component {
+				getChildContext() {
+					return { foo: 'foo' };
+				}
+
+				render() {
+					return <div>{this.props.children}</div>;
+				}
+			}
+
+			class Inner extends Component {
+				render() {
+					spy(this.context);
+					return <div>Inner</div>;
+				}
+			}
+
+			NewContext.contextType = Foo;
+
+			render((
+				<Foo.Provider value="bar">
+					<OldContext>
+						<NewContext>
+							<Inner />
+						</NewContext>
+					</OldContext>
+				</Foo.Provider>
+			), scratch);
+
+			expect(spy).to.be.calledWithMatch({ foo: 'foo' });
+		});
 	});
 });
