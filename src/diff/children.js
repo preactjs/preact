@@ -41,7 +41,6 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	for (i=0; i<newChildren.length; i++) {
 		childVNode = newChildren[i] = coerceToVNode(newChildren[i]);
 		oldVNode = index = null;
-		nextDom = childDom!=null && childDom.nextSibling;
 
 		oldVNode = getOldVNode(oldChildren, i, childVNode);
 
@@ -50,7 +49,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 		// Only proceed if the vnode has not been unmounted by `diff()` above.
 		if (childVNode!=null && newDom !=null) {
-			childDom = placeChild(parentDom, oldVNode, childVNode, childDom, newDom, excessDomChildren, oldChildrenLength, nextDom);
+			childDom = placeChild(parentDom, oldVNode, childVNode, childDom, newDom, excessDomChildren, oldChildrenLength);
 		}
 	}
 
@@ -61,7 +60,9 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	for (i=oldChildren.length; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
 }
 
-function placeChild(parentDom, oldVNode, childVNode, childDom, newDom, excessDomChildren, oldChildrenLength, nextDom) {
+function placeChild(parentDom, oldVNode, childVNode, childDom, newDom, excessDomChildren, oldChildrenLength) {
+	let nextDom = childDom!=null && childDom.nextSibling;
+
 	// Store focus in case moving children around changes it. Note that we
 	// can't just check once for every tree, because we have no way to
 	// differentiate wether the focus was reset by the user in a lifecycle
