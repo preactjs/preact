@@ -216,4 +216,47 @@ describe('createContext', () => {
 
 		expect(scratch.innerHTML).to.equal('<div>b - 1</div><div>a - 1</div>');
 	});
+
+	describe('class.contextType', () => {
+		it('should use default value', () => {
+			const ctx = createContext('foo');
+
+			let actual;
+			class App extends Component {
+				render() {
+					actual = this.context;
+					return <div>bar</div>;
+				}
+			}
+
+			App.contextType = ctx;
+
+			render(<App />, scratch);
+			expect(actual).to.deep.equal('foo');
+		});
+
+		it('should use the value of the nearest Provider', () => {
+			const ctx = createContext('foo');
+
+			let actual;
+			class App extends Component {
+				render() {
+					actual = this.context;
+					return <div>bar</div>;
+				}
+			}
+
+			App.contextType = ctx;
+			const Provider = ctx.Provider;
+
+			render((
+				<Provider value="bar">
+					<Provider value="bob">
+						<App />
+					</Provider>
+				</Provider>
+			), scratch);
+			expect(actual).to.deep.equal('bob');
+		});
+	});
 });

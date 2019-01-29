@@ -26,6 +26,8 @@ export function createContext(defaultValue) {
 	}
 
 	return {
+		_id: id,
+		_defaultValue: defaultValue,
 		Provider,
 		Consumer
 	};
