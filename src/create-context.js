@@ -12,9 +12,12 @@ export function createContext(defaultValue) {
 		return props.children(value);
 	}
 
+	let ctx = { [id]: null };
+
 	class Provider {
 		getChildContext() {
-			return { [id]: this };
+			ctx[id] = this;
+			return ctx;
 		}
 
 		render() {
