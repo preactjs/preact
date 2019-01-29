@@ -37,7 +37,7 @@ describe('createContext', () => {
 		</Provider>, scratch);
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWithMatch(CONTEXT, {},  { [ctxId - 1]: {} });
+		expect(Inner.prototype.render).to.have.been.calledWithMatch(CONTEXT, {},  { ['__cC' + (ctxId - 1)]: {} });
 		expect(scratch.innerHTML).to.equal('<div><div>a</div></div>');
 	});
 
@@ -67,7 +67,7 @@ describe('createContext', () => {
 		</Provider>, scratch);
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWithMatch({ ...CONTEXT, ...CHILD_CONTEXT }, {}, { [ctxId - 1]: {} });
+		expect(Inner.prototype.render).to.have.been.calledWithMatch({ ...CONTEXT, ...CHILD_CONTEXT }, {}, { ['__cC' + (ctxId - 1)]: {} });
 		expect(scratch.innerHTML).to.equal('<div>a - b</div>');
 	});
 
@@ -96,7 +96,7 @@ describe('createContext', () => {
 		</ThemeProvider>, scratch);
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWithMatch({ ...THEME_CONTEXT, ...DATA_CONTEXT }, {}, { [ctxId - 1]: {} });
+		expect(Inner.prototype.render).to.have.been.calledWithMatch({ ...THEME_CONTEXT, ...DATA_CONTEXT }, {}, { ['__cC' + (ctxId - 1)]: {} });
 		expect(scratch.innerHTML).to.equal('<div>black - a</div>');
 	});
 
@@ -123,7 +123,7 @@ describe('createContext', () => {
 		</Provider>, scratch);
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWithMatch({ ...CONTEXT }, {}, { [ctxId - 1]: {} });
+		expect(Inner.prototype.render).to.have.been.calledWithMatch({ ...CONTEXT }, {}, { ['__cC' + (ctxId - 1)]: {} });
 		expect(scratch.innerHTML).to.equal('<div>a</div>');
 	});
 
@@ -174,7 +174,7 @@ describe('createContext', () => {
 		), scratch);
 
 		// initial render does not invoke anything but render():
-		expect(Consumed.prototype.render).to.have.been.calledWithMatch({ ...CONTEXT }, {}, { [ctxId - 1]: {} });
+		expect(Consumed.prototype.render).to.have.been.calledWithMatch({ ...CONTEXT }, {}, { ['__cC' + (ctxId - 1)]: {} });
 		expect(scratch.innerHTML).to.equal('<div><div><strong>a</strong></div></div>');
 	});
 
@@ -211,8 +211,8 @@ describe('createContext', () => {
 		), scratch);
 
 		// initial render does not invoke anything but render():
-		expect(Nested.prototype.render).to.have.been.calledWithMatch({ ...NESTED_CONTEXT }, {}, { [ctxId - 1]: {} });
-		expect(Inner.prototype.render).to.have.been.calledWithMatch({ ...CONTEXT }, {}, { [ctxId - 1]: {} });
+		expect(Nested.prototype.render).to.have.been.calledWithMatch({ ...NESTED_CONTEXT }, {}, { ['__cC' + (ctxId - 1)]: {} });
+		expect(Inner.prototype.render).to.have.been.calledWithMatch({ ...CONTEXT }, {}, { ['__cC' + (ctxId - 1)]: {} });
 
 		expect(scratch.innerHTML).to.equal('<div>b - 1</div><div>a - 1</div>');
 	});

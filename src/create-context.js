@@ -5,7 +5,7 @@ export let i = 0;
  * @param {any} defaultValue
  */
 export function createContext(defaultValue) {
-	let id = i++;
+	let id = '__cC' + i++;
 
 	function Consumer(props, context) {
 		let value = context[id] ? context[id].props.value : defaultValue;
