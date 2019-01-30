@@ -24,8 +24,6 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	let newChildren = getVNodeChildren(newParentVNode);
 	let oldChildren = oldParentVNode==null || oldParentVNode==EMPTY_OBJ ? EMPTY_ARR : getVNodeChildren(oldParentVNode);
 
-	let oldChildrenLength = oldChildren.length;
-
 	childDom = oldChildren.length ? oldChildren[0] && oldChildren[0]._dom : null;
 	if (excessDomChildren!=null) {
 		for (i = 0; i < excessDomChildren.length; i++) {
@@ -54,7 +52,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 				// Only proceed if the vnode has not been unmounted by `diff()` above.
 				if (childVNode!=null && newDom !=null) {
-					childDom = placeChild(parentDom, oldVNode, childVNode, childDom, newDom, excessDomChildren, oldChildrenLength);
+					childDom = placeChild(parentDom, oldVNode, childVNode, childDom, newDom, excessDomChildren, oldChildren.length);
 				}
 			}
 		}
@@ -64,7 +62,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 			// Only proceed if the vnode has not been unmounted by `diff()` above.
 			if (childVNode!=null && newDom !=null) {
-				childDom = placeChild(parentDom, oldVNode, childVNode, childDom, newDom, excessDomChildren, oldChildrenLength);
+				childDom = placeChild(parentDom, oldVNode, childVNode, childDom, newDom, excessDomChildren, oldChildren.length);
 			}
 		}
 	}
