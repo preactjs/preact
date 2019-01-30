@@ -1219,7 +1219,7 @@ describe('Fragment', () => {
 		]);
 	});
 
-	it.skip('should support nested conditional beginning and end Fragments', () => {
+	it('should support nested conditional beginning and end Fragments', () => {
 		const Foo = ({ condition }) => (
 			<ol>
 				{condition ?
