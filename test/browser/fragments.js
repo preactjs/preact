@@ -1226,6 +1226,72 @@ describe('Fragment', () => {
 		]);
 	});
 
+	it.skip('should support nested conditional beginning and end Fragments', () => {
+		const Foo = ({ condition }) => (
+			<ol>
+				{condition ?
+					<Fragment>
+						<Fragment>
+							<Fragment>
+								<li>0</li>
+								<li>1</li>
+							</Fragment>
+						</Fragment>
+					</Fragment>
+					: null
+				}
+				<li>2</li>
+				<li>2</li>
+				{condition ?
+					null :
+					<Fragment>
+						<Fragment>
+							<Fragment>
+								<li>3</li>
+								<li>4</li>
+							</Fragment>
+						</Fragment>
+					</Fragment>
+				}
+			</ol>
+		);
+
+		const htmlForTrue = ol([
+			li(0),
+			li(1),
+			li(2),
+			li(2)
+		].join(''));
+
+		const htmlForFalse = ol([
+			li(2),
+			li(2),
+			li(3),
+			li(4)
+		].join(''));
+
+		clearLog();
+		render(<Foo condition={true} />, scratch);
+		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true');
+
+		clearLog();
+		render(<Foo condition={false} />, scratch);
+		// TODO: Fails here...
+		expect(scratch.innerHTML).to.equal(htmlForFalse, 'rendering from true to false');
+		expectDomLogToBe([
+			'<ol>3422.appendChild(<li>3)',
+			'<ol>4223.appendChild(<li>4)'
+		]);
+
+		clearLog();
+		render(<Foo condition={true} />, scratch);
+		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
+		expectDomLogToBe([
+			'<ol>2201.appendChild(<li>2)',
+			'<ol>2012.appendChild(<li>2)'
+		]);
+	});
+
 	it.skip('should preserve state with reordering in multiple levels with mixed # of Fragment siblings', () => {
 		// Also fails if the # of divs outside the Fragment equals or exceeds
 		// the # inside the Fragment for both conditions
