@@ -25,9 +25,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode);
 	let oldChildren = oldParentVNode!=null && oldParentVNode!=EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR;
 
-	let oldChildrenLength = oldChildren.length;
-
-	for (i = 0; i < oldChildrenLength; i++) {
+	for (i = 0; i < oldChildren.length; i++) {
 		if (oldChildren[i] && oldChildren[i]._dom) {
 			childDom = oldChildren[i]._dom;
 			break;
@@ -52,7 +50,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 		// Only proceed if the vnode has not been unmounted by `diff()` above.
 		if (childVNode!=null && newDom !=null) {
-			childDom = placeChild(parentDom, oldVNode, childVNode, childDom, newDom, excessDomChildren, oldChildrenLength);
+			childDom = placeChild(parentDom, oldVNode, childVNode, childDom, newDom, excessDomChildren, oldChildren.length);
 		}
 	}
 
@@ -60,7 +58,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	if (excessDomChildren!=null && newParentVNode.type!==Fragment) for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
 
 	// Remove remaining oldChildren if there are any.
-	for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
+	for (i=oldChildren.length; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
 }
 
 function placeChild(parentDom, oldVNode, childVNode, childDom, newDom, excessDomChildren, oldChildrenLength) {
