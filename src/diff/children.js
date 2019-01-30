@@ -23,6 +23,9 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 	let newChildren = getVNodeChildren(newParentVNode);
 	let oldChildren = oldParentVNode==null || oldParentVNode==EMPTY_OBJ ? EMPTY_ARR : getVNodeChildren(oldParentVNode);
+	let newChildrenTodo = [newChildren];
+	let oldChildrenTodo = [oldChildren];
+	let indexesToResume = [0];
 
 	childDom = oldChildren.length ? oldChildren[0] && oldChildren[0]._dom : null;
 	if (excessDomChildren!=null) {
@@ -34,19 +37,25 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		}
 	}
 
-	for (i=0; i<newChildren.length; i++) {
-		childVNode = newChildren[i] = coerceToVNode(newChildren[i]);
-		oldVNode = getOldVNode(oldChildren, i, childVNode);
+	while (newChildrenTodo.length) {
+		newChildren = newChildrenTodo.pop();
+		oldChildren = oldChildrenTodo.pop();
+		i = indexesToResume.pop();
 
-		if (childVNode != null && childVNode.type === Fragment) {
-			const fragmentChildren = getVNodeChildren(childVNode);
-			const oldFragmentChildren = oldVNode == null ? EMPTY_ARR : oldVNode.type !== Fragment ? [oldVNode] : getVNodeChildren(oldVNode);
+		for (; i<newChildren.length; i++) {
+			childVNode = newChildren[i] = coerceToVNode(newChildren[i]);
+			oldVNode = getOldVNode(oldChildren, i, childVNode);
 
-			// TODO: Consider how to recurse...
-			for (let j = 0; j<fragmentChildren.length; j++) {
-				childVNode = fragmentChildren[j] = coerceToVNode(fragmentChildren[j]);
-				oldVNode = getOldVNode(oldFragmentChildren, j, childVNode);
+			if (childVNode != null && childVNode.type === Fragment) {
+				newChildrenTodo.push(newChildren);
+				oldChildrenTodo.push(oldChildren);
+				indexesToResume.push(i + 1);
 
+				newChildren = getVNodeChildren(childVNode);
+				oldChildren = oldVNode == null ? EMPTY_ARR : oldVNode.type !== Fragment ? [oldVNode] : getVNodeChildren(oldVNode);
+				i = -1; // Restart for loop at the beginning (the `i++` will make this 0 before the next iteration)
+			}
+			else {
 				// Morph the old element into the new one, but don't append it to the dom yet
 				newDom = diff(oldVNode==null ? null : oldVNode._dom, parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
 
@@ -56,22 +65,49 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 				}
 			}
 		}
-		else {
-			// Morph the old element into the new one, but don't append it to the dom yet
-			newDom = diff(oldVNode==null ? null : oldVNode._dom, parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
 
-			// Only proceed if the vnode has not been unmounted by `diff()` above.
-			if (childVNode!=null && newDom !=null) {
-				childDom = placeChild(parentDom, oldVNode, childVNode, childDom, newDom, excessDomChildren, oldChildren.length);
-			}
-		}
+		// Remove remaining oldChildren if there are any.
+		for (i=oldChildren.length; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
 	}
+
+	// for (i=0; i<children.length; i++) {
+	// 	childVNode = children[i] = coerceToVNode(children[i]);
+	// 	oldVNode = getOldVNode(oldChildren, i, childVNode);
+	//
+	// 	if (childVNode != null && childVNode.type === Fragment) {
+	// 		const fragmentChildren = getVNodeChildren(childVNode);
+	// 		const oldFragmentChildren = oldVNode == null ? EMPTY_ARR : oldVNode.type !== Fragment ? [oldVNode] : getVNodeChildren(oldVNode);
+	//
+	// 		// TOOD: Consider how to recurse...
+	// 		for (let j = 0; j<fragmentChildren.length; j++) {
+	// 			childVNode = fragmentChildren[j] = coerceToVNode(fragmentChildren[j]);
+	// 			oldVNode = getOldVNode(oldFragmentChildren, j, childVNode);
+	//
+	// 			// Morph the old element into the new one, but don't append it to the dom yet
+	// 			newDom = diff(oldVNode==null ? null : oldVNode._dom, dom, childVNode, oldVNode, context, isSvg, false, excessDomChildren, mounts, ancestorComponent, parentVNode);
+	//
+	// 			// Only proceed if the vnode has not been unmounted by `diff()` above.
+	// 			if (childVNode!=null && newDom !=null) {
+	// 				childDom = placeChild(dom, oldVNode, childVNode, childDom, newDom, excessDomChildren, oldChildren.length);
+	// 			}
+	// 		}
+	// 	}
+	// 	else {
+	// 		// Morph the old element into the new one, but don't append it to the dom yet
+	// 		newDom = diff(oldVNode==null ? null : oldVNode._dom, dom, childVNode, oldVNode, context, isSvg, false, excessDomChildren, mounts, ancestorComponent, parentVNode);
+	//
+	// 		// Only proceed if the vnode has not been unmounted by `diff()` above.
+	// 		if (childVNode!=null && newDom !=null) {
+	// 			childDom = placeChild(dom, oldVNode, childVNode, childDom, newDom, excessDomChildren, oldChildren.length);
+	// 		}
+	// 	}
+	// }
 
 	// Remove children that are not part of any vnode. Only used by `hydrate`
 	if (excessDomChildren!=null && newParentVNode.type!==Fragment) for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) excessDomChildren[i].remove();
 
 	// Remove remaining oldChildren if there are any.
-	for (i=oldChildren.length; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
+	// for (i=oldChildren.length; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
 }
 
 function placeChild(parentDom, oldVNode, childVNode, childDom, newDom, excessDomChildren, oldChildrenLength) {
