@@ -152,10 +152,10 @@ export function getPatchedRoot(vnode) {
  * @returns {boolean}
  */
 export function isRoot(vnode) {
-	return vnode._dom!=null && vnode._dom.parentNode!=null &&
-
-	/** @type {import('../internal').PreactElement} */
-	(vnode._dom.parentNode)._prevVNode!=null;
+	return vnode._dom==null &&
+		vnode._children &&
+		vnode._children.length > 0 &&
+		vnode._children[0]._dom!=null;
 }
 
 /**
