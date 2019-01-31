@@ -41,6 +41,11 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		}
 	}
 
+	// TODO: Consider removing `toChildArray`, integrating it's logic in this loop here,
+	// and relying only on this loop here?
+
+	// TODO: Consider inlining the `getOldVNode` and `placeChild` functions
+
 	for (i=0; i<newChildren.length; i++) {
 		childVNode = newChildren[i] = coerceToVNode(newChildren[i]);
 		oldVNode = getOldVNode(oldChildren, i, childVNode);
