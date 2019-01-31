@@ -18,9 +18,9 @@ describe('Fragment', () => {
 
 	let ops = [];
 
-	function expectDomLogToBe(expectedOperations) {
+	function expectDomLogToBe(expectedOperations, message) {
 		if (expectDomLog) {
-			expect(getLog()).to.deep.equal(expectedOperations);
+			expect(getLog()).to.deep.equal(expectedOperations, message);
 		}
 	}
 
@@ -1453,5 +1453,65 @@ describe('Fragment', () => {
 			'<li>.appendChild(#text)',
 			'<ol>a0123b.insertBefore(<li>4, <li>b)'
 		]);
+	});
+
+	it('should render components that conditionally return Fragments', () => {
+		const Foo = ({ condition }) => (
+			condition ? (
+				<Fragment>
+					<div>1</div>
+					<div>2</div>
+				</Fragment>
+			) : (
+				<div>
+					<div>3</div>
+					<div>4</div>
+				</div>
+			)
+		);
+
+		const htmlForTrue = [
+			div(1),
+			div(2)
+		].join('');
+
+		const htmlForFalse = div([
+			div(3),
+			div(4)
+		].join(''));
+
+		clearLog();
+		render(<Foo condition={true} />, scratch);
+
+		expect(scratch.innerHTML).to.equal(htmlForTrue);
+
+		clearLog();
+		render(<Foo condition={false} />, scratch);
+
+		expect(scratch.innerHTML).to.equal(htmlForFalse);
+		expectDomLogToBe([
+			'<div>1.remove()',
+			'<div>1.remove()',
+			'<div>2.remove()',
+			'<div>.appendChild(#text)',
+			'<div>.appendChild(<div>3)',
+			'<div>.appendChild(#text)',
+			'<div>3.appendChild(<div>4)',
+			'<div>.appendChild(<div>34)'
+		], 'rendering from true to false');
+
+		clearLog();
+		render(<Foo condition={true} />, scratch);
+
+		expect(scratch.innerHTML).to.equal(htmlForTrue);
+		expectDomLogToBe([
+			'<div>34.remove()',
+			'<div>3.remove()',
+			'<div>4.remove()',
+			'<div>.appendChild(#text)',
+			'<div>.appendChild(<div>1)',
+			'<div>.appendChild(#text)',
+			'<div>1.appendChild(<div>2)'
+		], 'rendering from false to true');
 	});
 });
