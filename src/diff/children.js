@@ -118,8 +118,23 @@ export function diffChildren(dom, children, oldChildren, context, isSvg, excessD
 			// hook or by reordering dom nodes.
 			focus = document.activeElement;
 
+			const oldCondition = newDom!==lastDom;
+			// const newCondition = childVNode.type === Fragment || childVNode._containsFragment;
+			// const newCondition = childVNode.type === Fragment;
+			const newCondition = childVNode.type === Fragment || childVNode._wrapsFragment;
+			// Single child Fragment check - more closely resembles oldCondition but doesn't improve diff'ing any
+			// const newCondition = (childVNode.type === Fragment && childVNode._children.length > 1) || childVNode._wrapsFragment;
+			if (newCondition !== oldCondition) {
+				const childVNodeName = childVNode.type == null || typeof childVNode.type === 'string' ? childVNode.type : childVNode.type.name;
+				// console.log('oldCondition:', oldCondition, 'childVNode.type:', childVNodeName, 'childVNode._containsFragment:', childVNode._containsFragment, 'result:', newCondition);
+				// console.log('oldCondition:', oldCondition, 'childVNode.type:', childVNodeName, 'result:', newCondition);
+				console.log('oldCondition:', oldCondition, 'childVNode.type:', childVNodeName, 'childVNode._wrapsFragment:', childVNode._wrapsFragment, 'result:', newCondition);
+			}
+
 			// Fragments or similar components have already been diffed at this point.
-			if (newDom!==lastDom) {}
+			// if (newDom!==lastDom) {}
+			if (oldCondition) {}
+			// if (newCondition) {}
 			else if (excessDomChildren==oldVNode || newDom!=childDom || newDom.parentNode==null) {
 				// NOTE: excessDomChildren==oldVNode above:
 				// This is a compression of excessDomChildren==null && oldVNode==null!
