@@ -8,7 +8,7 @@ import { logCall, clearLog, getLog } from '../_util/logCall';
 
 describe('Fragment', () => {
 
-	let expectDomLog = false;
+	let expectDomLog = true;
 
 	/** @type {HTMLDivElement} */
 	let scratch;
@@ -813,7 +813,7 @@ describe('Fragment', () => {
 	it('should render sibling array children', () => {
 		const Group = ({ title, values }) => (
 			<Fragment>
-				<li class="divider">{title}</li>
+				<li>{title}</li>
 				{values.map(value => <li>{value}</li>)}
 			</Fragment>
 		);
@@ -828,15 +828,15 @@ describe('Fragment', () => {
 
 		render(<Todo />, scratch);
 
-		let ul = scratch.firstChild;
-		expect(ul.childNodes.length).to.equal(7);
-		expect(ul.childNodes[0].textContent).to.equal('A header');
-		expect(ul.childNodes[1].textContent).to.equal('a');
-		expect(ul.childNodes[2].textContent).to.equal('b');
-		expect(ul.childNodes[3].textContent).to.equal('A divider');
-		expect(ul.childNodes[4].textContent).to.equal('c');
-		expect(ul.childNodes[5].textContent).to.equal('d');
-		expect(ul.childNodes[6].textContent).to.equal('A footer');
+		expect(scratch.innerHTML).to.equal(ul([
+			li('A header'),
+			li('a'),
+			li('b'),
+			li('A divider'),
+			li('c'),
+			li('d'),
+			li('A footer')
+		].join('')));
 	});
 
 	it('should reorder Fragment children', () => {
