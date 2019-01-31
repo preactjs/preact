@@ -1,5 +1,5 @@
 import { createElement, createElement as h, Fragment, options, Component, render } from 'ceviche';
-import { getDisplayName, setIn, isRoot, getPatchedRoot, getData, patchRoot, shallowEqual, hasDataChanged, hasProfileDataChanged, getChildren } from '../../src/devtools/custom';
+import { getDisplayName, setIn, isRoot, getData, shallowEqual, hasDataChanged, hasProfileDataChanged, getChildren } from '../../src/devtools/custom';
 import { setupScratch, setupRerender, teardown, clearOptions } from '../../../test/_util/helpers';
 import { initDevTools } from '../../src/devtools';
 import { Renderer } from '../../src/devtools/renderer';
@@ -113,7 +113,7 @@ function checkEventReferences(events) {
 	});
 }
 
-describe.skip('devtools', () => {
+describe('devtools', () => {
 
 	/** @type {import('../../../src/internal').PreactElement} */
 	let scratch;
@@ -318,26 +318,6 @@ describe.skip('devtools', () => {
 		});
 	});
 
-	describe('getPatchedRoot', () => {
-		it('should get the root of a vnode', () => {
-			render(<div>Hello World</div>, scratch);
-			let root = scratch._prevVNode;
-
-			let wrapped = patchRoot(root);
-
-			expect(getPatchedRoot(root)).to.equal(wrapped);
-			expect(getPatchedRoot(wrapped._children[0])).to.equal(wrapped);
-		});
-
-		it('should return null if unable to find the root', () => {
-			render(<div>Hello World</div>, scratch);
-			let root = scratch._prevVNode;
-			root._dom = document.body;
-
-			expect(getPatchedRoot(root)).to.equal(null);
-		});
-	});
-
 	describe('getData', () => {
 		it('should convert vnode to DevtoolsData', () => {
 			class App extends Component {
@@ -347,7 +327,7 @@ describe.skip('devtools', () => {
 			}
 
 			render(<App key="foo" active />, scratch);
-			let vnode = scratch._prevVNode;
+			let vnode = scratch._prevVNode._children[0];
 			vnode.startTime = 10;
 			vnode.endTime = 12;
 
@@ -381,7 +361,7 @@ describe.skip('devtools', () => {
 
 		it('should inline single text child', () => {
 			render(<h1>Hello World</h1>, scratch);
-			let data = getData(scratch._prevVNode);
+			let data = getData(scratch._prevVNode._children[0]);
 
 			expect(data.children).to.equal('Hello World');
 			expect(data.text).to.equal(null);
@@ -389,7 +369,7 @@ describe.skip('devtools', () => {
 
 		it('should convert text nodes', () => {
 			render('Hello World', scratch);
-			let data = getData(scratch._prevVNode);
+			let data = getData(scratch._prevVNode._children[0]);
 
 			expect(data.children).to.equal(null);
 			expect(data.text).to.equal('Hello World');

@@ -1,4 +1,4 @@
-import { getData, getChildren, getPatchedRoot, getInstance, hasProfileDataChanged, hasDataChanged, isRoot, patchRoot } from './custom';
+import { getData, getChildren, getInstance, hasProfileDataChanged, hasDataChanged, isRoot } from './custom';
 
 /**
  * Custom renderer tailored for Preact. It converts updated vnode trees
@@ -164,25 +164,20 @@ export class Renderer {
 	 * @param {import('../internal').VNode} vnode
 	 */
 	handleCommitFiberRoot(vnode) {
-		if (isRoot(vnode)) {
-			vnode = patchRoot(vnode);
-		}
-
 		let inst = getInstance(vnode);
 
 		if (this.inst2vnode.has(inst)) this.update(vnode);
 		else this.mount(vnode);
 
-		let root = getPatchedRoot(vnode);
 		this.pending.push({
-			internalInstance: root,
+			internalInstance: vnode,
 			renderer: this.rid,
-			data: getData(root),
+			data: getData(vnode),
 			type: 'rootCommitted'
 		});
 
 		this.flushPendingEvents();
-		return root;
+		return vnode;
 	}
 
 	/**
@@ -198,9 +193,6 @@ export class Renderer {
 		// Special case when unmounting a root (most prominently caused by webpack's
 		// `hot-module-reloading`). If this happens we need to unmount the virtual
 		// `Fragment` we're wrapping around each root just for the devtools.
-		if (isRoot(vnode)) {
-			vnode = patchRoot(vnode);
-		}
 
 		this.pending.push({
 			internalInstance: vnode,
