@@ -49,17 +49,18 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 		outer: if (isOldVNodeFragment || newType===Fragment) {
 			const oldVNodeChildren = oldVNode===EMPTY_OBJ ? EMPTY_ARR : !isOldVNodeFragment ? [oldVNode] : getVNodeChildren(oldVNode);
 
-			let childDom = oldVNode._dom;
-			if (excessDomChildren!=null) {
-				for (let i = 0; i < excessDomChildren.length; i++) {
-					if (excessDomChildren[i]!=null) {
-						childDom = excessDomChildren[i];
-						break;
-					}
-				}
-			}
+			// let childDom = oldVNode._dom;
+			// if (excessDomChildren!=null) {
+			// 	for (let i = 0; i < excessDomChildren.length; i++) {
+			// 		if (excessDomChildren[i]!=null) {
+			// 			childDom = excessDomChildren[i];
+			// 			break;
+			// 		}
+			// 	}
+			// }
 
-			diffChildren(parentDom, getVNodeChildren(newVNode), oldVNodeChildren, context, isSvg, excessDomChildren, mounts, c, newVNode, childDom);
+			// diffChildren(parentDom, getVNodeChildren(newVNode), oldVNodeChildren, context, isSvg, excessDomChildren, mounts, c, newVNode, childDom);
+			diffChildren(parentDom, getVNodeChildren(newVNode), oldVNodeChildren, context, isSvg, excessDomChildren, mounts, c, newVNode);
 
 			// The new dom element for fragments is the first child of the new tree
 			// When the first child of a Fragment is passed through `diff()`, it sets its dom
@@ -278,7 +279,7 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 			diffProps(dom, newVNode.props, oldProps, isSvg);
 		}
 
-		diffChildren(dom, getVNodeChildren(newVNode), oldVNode==EMPTY_OBJ ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessDomChildren, mounts, ancestorComponent, newVNode, dom.firstChild);
+		diffChildren(dom, getVNodeChildren(newVNode), oldVNode==EMPTY_OBJ ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessDomChildren, mounts, ancestorComponent, newVNode);
 	}
 
 	return dom;

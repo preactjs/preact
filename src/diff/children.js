@@ -18,13 +18,60 @@ import { coerceToVNode, Fragment } from '../create-element';
  * component to the ones being diffed
  * @param {import('../internal').VNode} parentVNode Used to set `_lastDomChild`
  * pointer to keep track of our current position
- * @param {import('../internal').PreactElement} childDom The DOM element to use when
- * diffing the current vnode child
  */
-export function diffChildren(dom, children, oldChildren, context, isSvg, excessDomChildren, mounts, ancestorComponent, parentVNode, childDom) {
+export function diffChildren(dom, children, oldChildren, context, isSvg, excessDomChildren, mounts, ancestorComponent, parentVNode) {
 	let childVNode, i, j, p, index, oldVNode, newDom,
 		oldChildrenLength = oldChildren.length,
-		nextDom, lastDom, sibDom, focus;
+		nextDom, lastDom, sibDom, focus,
+		childDom;
+
+	// 3163 B
+	// if (parentVNode.type === Fragment) {
+	// 	if (excessDomChildren!=null) {
+	// 		for (i = 0; i < excessDomChildren.length; i++) {
+	// 			if (excessDomChildren[i]!=null) {
+	// 				childDom = excessDomChildren[i];
+	// 				break;
+	// 			}
+	// 		}
+	// 	}
+	// 	else if (oldChildren[0] != null) {
+	// 		childDom = oldChildren[0]._dom;
+	// 	}
+	// 	else {
+	// 		childDom = null;
+	// 	}
+	// }
+	// else {
+	// 	childDom = dom.firstChild;
+	// }
+
+	// 3161 B
+	// if (parentVNode.type !== Fragment) {
+	// 	childDom = dom.firstChild;
+	// }
+	// else if (oldChildren[0] != null) {
+	// 	childDom = oldChildren[0]._dom;
+	// }
+	// else if (excessDomChildren!=null) {
+	// 	for (i = 0; i < excessDomChildren.length; i++) {
+	// 		if (excessDomChildren[i]!=null) {
+	// 			childDom = excessDomChildren[i];
+	// 			break;
+	// 		}
+	// 	}
+	// }
+
+	// 3149 B
+	childDom = oldChildren.length ? oldChildren[0] && oldChildren[0]._dom : null;
+	if (excessDomChildren!=null) {
+		for (i = 0; i < excessDomChildren.length; i++) {
+			if (excessDomChildren[i]!=null) {
+				childDom = excessDomChildren[i];
+				break;
+			}
+		}
+	}
 
 	for (i=0; i<children.length; i++) {
 		childVNode = children[i] = coerceToVNode(children[i]);
