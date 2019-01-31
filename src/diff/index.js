@@ -179,6 +179,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			}
 		}
 
+		// TODO: Look to remove...
 		if (parentDom && append!==false && dom!=null && dom.parentNode!==parentDom) {
 			parentDom.appendChild(dom);
 		}

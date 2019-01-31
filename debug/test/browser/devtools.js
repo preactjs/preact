@@ -113,7 +113,7 @@ function checkEventReferences(events) {
 	});
 }
 
-describe('devtools', () => {
+describe.skip('devtools', () => {
 
 	/** @type {import('../../../src/internal').PreactElement} */
 	let scratch;
