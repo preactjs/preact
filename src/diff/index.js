@@ -15,15 +15,13 @@ import options from '../options';
  * @param {import('../internal').VNode | null} oldVNode The old virtual node
  * @param {object} context The current context object
  * @param {boolean} isSvg Whether or not this element is an SVG node
- * @param {boolean} append Whether or not to immediately append the new DOM
- * element after diffing
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} mounts A list of newly
  * mounted components
  * @param {import('../internal').Component | null} ancestorComponent The direct
  * parent component
  */
-export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append, excessDomChildren, mounts, ancestorComponent) {
+export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent) {
 
 	// If the previous type doesn't match the new type we drop the whole subtree
 	if (oldVNode==null || newVNode==null || oldVNode.type!==newVNode.type) {
@@ -161,7 +159,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 				oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, append, excessDomChildren, mounts, c);
+			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c);
 
 			if (vnode!=null) {
 				newVNode._lastDomChild = vnode._lastDomChild;
@@ -177,11 +175,6 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			if (newVNode.ref && (oldVNode.ref !== newVNode.ref)) {
 				applyRef(newVNode.ref, dom, ancestorComponent);
 			}
-		}
-
-		// TODO: Look to remove...
-		if (parentDom && append!==false && dom!=null && dom.parentNode!==parentDom) {
-			parentDom.appendChild(dom);
 		}
 
 		newVNode._dom = dom;

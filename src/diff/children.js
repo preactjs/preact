@@ -23,8 +23,6 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		nextDom, sibDom, focus,
 		childDom;
 
-	// TODO: Ideally be consistent with the oldParentVNode. We should only check for null or EMPTY_OBJ
-
 	// 3117 B
 	let newChildren = getVNodeChildren(newParentVNode);
 	let oldChildren = oldParentVNode==null || oldParentVNode==EMPTY_OBJ ? EMPTY_ARR : getVNodeChildren(oldParentVNode);
@@ -120,7 +118,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		nextDom = childDom!=null && childDom.nextSibling;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		newDom = diff(oldVNode==null ? null : oldVNode._dom, parentDom, childVNode, oldVNode, context, isSvg, false, excessDomChildren, mounts, ancestorComponent);
+		newDom = diff(oldVNode==null ? null : oldVNode._dom, parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
 
 		// Only proceed if the vnode has not been unmounted by `diff()` above.
 		if (childVNode!=null && newDom !=null) {
