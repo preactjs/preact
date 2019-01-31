@@ -105,7 +105,7 @@ export function diffChildren(dom, children, oldChildren, context, isSvg, excessD
 		nextDom = childDom!=null && childDom.nextSibling;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		newDom = diff(oldVNode==null ? null : oldVNode._dom, dom, childVNode, oldVNode, context, isSvg, false, excessDomChildren, mounts, ancestorComponent, parentVNode);
+		newDom = diff(oldVNode==null ? null : oldVNode._dom, dom, childVNode, oldVNode, context, isSvg, false, excessDomChildren, mounts, ancestorComponent);
 
 		// Only proceed if the vnode has not been unmounted by `diff()` above.
 		if (childVNode!=null && newDom !=null) {

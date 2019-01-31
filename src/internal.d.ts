@@ -52,10 +52,6 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	 * components or array returns.
 	 */
 	_parentDom?: PreactElement;
-	/**
-	 * Pointer to the parent vnode.
-	 */
-	_parentVNode?: VNode; // TODO: Is this still needed?
 	_prevVNode?: VNode;
 	_ancestorComponent?: Component<any, any>;
 	_processingException?: Component<any, any>;

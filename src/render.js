@@ -13,7 +13,7 @@ export function render(vnode, parentDom) {
 	let oldVNode = parentDom._prevVNode;
 	if (oldVNode) {
 		let mounts = [];
-		diff(oldVNode._dom, parentDom, parentDom._prevVNode = coerceToVNode(vnode), oldVNode, EMPTY_OBJ, parentDom.ownerSVGElement!==undefined, true, null, mounts, null, {});
+		diff(oldVNode._dom, parentDom, parentDom._prevVNode = coerceToVNode(vnode), oldVNode, EMPTY_OBJ, parentDom.ownerSVGElement!==undefined, true, null, mounts, null);
 		commitRoot(mounts, parentDom._prevVNode);
 	}
 	else hydrate(vnode, parentDom);

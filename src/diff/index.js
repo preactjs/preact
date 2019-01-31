@@ -22,9 +22,8 @@ import options from '../options';
  * mounted components
  * @param {import('../internal').Component | null} ancestorComponent The direct
  * parent component
- * @param {import('../internal').VNode} parentVNode TODO: Is this still needed?
  */
-export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append, excessDomChildren, mounts, ancestorComponent, parentVNode) {
+export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append, excessDomChildren, mounts, ancestorComponent) {
 
 	// If the previous type doesn't match the new type we drop the whole subtree
 	if (oldVNode==null || newVNode==null || oldVNode.type!==newVNode.type) {
@@ -61,12 +60,26 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			// diffChildren(parentDom, getVNodeChildren(newVNode), oldVNodeChildren, context, isSvg, excessDomChildren, mounts, c, newVNode, childDom);
 			diffChildren(parentDom, getVNodeChildren(newVNode), oldVNodeChildren, context, isSvg, excessDomChildren, mounts, c, newVNode);
 
-			// The new dom element for fragments is the first child of the new tree
-			// When the first child of a Fragment is passed through `diff()`, it sets its dom
-			// element to the parentVNode._dom property (that assignment is near the bottom of
-			// this function), which is read here.
-			dom = newVNode._dom;
-			newVNode._lastDomChild = newVNode._children.length ? newVNode._children[newVNode._children.length - 1]._dom : null;
+			// 3133 B
+			if (newVNode._children.length) {
+				dom = newVNode._children[0]._dom;
+				newVNode._lastDomChild = newVNode._children[newVNode._children.length - 1]._dom;
+			}
+
+			// 3133 B
+			// dom = newVNode._children.length ? newVNode._children[0]._dom : null;
+			// newVNode._lastDomChild = newVNode._children.length ? newVNode._children[newVNode._children.length - 1]._dom : null;
+
+			// 3136 B
+			// p = newVNode._children;
+			// dom = p.length ? p[0]._dom : null;
+			// newVNode._lastDomChild = p.length ? p[p.length - 1]._dom : null;
+
+			// 3135 B
+			// if ((p = newVNode._children).length) {
+			// 	dom = p[0]._dom;
+			// 	newVNode._lastDomChild = p[p.length - 1]._dom;
+			// }
 		}
 		else if (typeof newType==='function') {
 
@@ -146,14 +159,13 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 				oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, append, excessDomChildren, mounts, c, newVNode);
+			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, append, excessDomChildren, mounts, c);
 
 			if (vnode!=null) {
 				newVNode._lastDomChild = vnode._lastDomChild;
 			}
 
 			c._parentDom = parentDom;
-			c._parentVNode = parentVNode;
 
 			if (newVNode.ref) applyRef(newVNode.ref, c, ancestorComponent);
 		}
@@ -163,11 +175,6 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			if (newVNode.ref && (oldVNode.ref !== newVNode.ref)) {
 				applyRef(newVNode.ref, dom, ancestorComponent);
 			}
-		}
-
-		// Update dom pointers
-		if (parentVNode._dom==null) {
-			parentVNode._dom = dom;
 		}
 
 		if (parentDom && append!==false && dom!=null && dom.parentNode!==parentDom) {
