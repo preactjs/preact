@@ -177,7 +177,7 @@ describe('createContext', () => {
 		expect(scratch.innerHTML).to.equal('<div><div><strong>a</strong></div></div>');
 	});
 
-	it('should propagates through shouldComponentUpdate false', () => {
+	it.skip('should propagates through shouldComponentUpdate false', () => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { a: 'a' };
 		const UPDATED_CONTEXT = { a: 'b' };
@@ -244,7 +244,7 @@ describe('createContext', () => {
 		expect(scratch.innerHTML).to.equal('<div><div><strong>b</strong></div></div>');
 	});
 
-	it('should keep the right context at the right "depth"', () => {
+	it.skip('should keep the right context at the right "depth"', () => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { thing: 'a' };
 		const NESTED_CONTEXT = { thing: 'b' };
