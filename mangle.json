@@ -19,8 +19,8 @@
       "$_ancestorComponent": "__a",
       "$_processingException": "__p",
       "$_context": "__c",
-      "$_defaultValue": "__d",
-      "$_provider": "__p"
+      "$_defaultValue": "__p",
+      "$_id": "__c"
     }
   }
 }
