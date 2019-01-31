@@ -1,7 +1,7 @@
 import { EMPTY_OBJ, EMPTY_ARR } from './constants';
 import { diff, commitRoot } from './diff/index';
 import { diffChildren } from './diff/children';
-import { coerceToVNode } from './create-element';
+import { coerceToVNode, createElement, Fragment } from './create-element';
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -28,6 +28,6 @@ export function render(vnode, parentDom) {
 export function hydrate(vnode, parentDom) {
 	parentDom._prevVNode = vnode = coerceToVNode(vnode);
 	let mounts = [];
-	diffChildren(parentDom, [vnode], EMPTY_ARR, EMPTY_OBJ, parentDom.ownerSVGElement!==undefined, EMPTY_ARR.slice.call(parentDom.childNodes), mounts, null, {});
+	diffChildren(parentDom, createElement(Fragment, null, [vnode]), null, EMPTY_OBJ, parentDom.ownerSVGElement!==undefined, EMPTY_ARR.slice.call(parentDom.childNodes), mounts, null);
 	commitRoot(mounts, vnode);
 }

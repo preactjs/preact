@@ -42,10 +42,11 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 	let clearProcessingException;
 
 	try {
-		const isOldVNodeFragment = oldVNode.type===Fragment;
+		// const isOldVNodeFragment = oldVNode.type===Fragment;
 
-		outer: if (isOldVNodeFragment || newType===Fragment) {
-			const oldVNodeChildren = oldVNode===EMPTY_OBJ ? EMPTY_ARR : !isOldVNodeFragment ? [oldVNode] : getVNodeChildren(oldVNode);
+		// outer: if (isOldVNodeFragment || newType===Fragment) {
+		outer: if (oldVNode.type===Fragment || newType===Fragment) {
+			// const oldVNodeChildren = oldVNode===EMPTY_OBJ ? EMPTY_ARR : !isOldVNodeFragment ? [oldVNode] : getVNodeChildren(oldVNode);
 
 			// let childDom = oldVNode._dom;
 			// if (excessDomChildren!=null) {
@@ -58,7 +59,8 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			// }
 
 			// diffChildren(parentDom, getVNodeChildren(newVNode), oldVNodeChildren, context, isSvg, excessDomChildren, mounts, c, newVNode, childDom);
-			diffChildren(parentDom, getVNodeChildren(newVNode), oldVNodeChildren, context, isSvg, excessDomChildren, mounts, c, newVNode);
+			// diffChildren(parentDom, getVNodeChildren(newVNode), oldVNodeChildren, context, isSvg, excessDomChildren, mounts, c, newVNode);
+			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, c);
 
 			// 3133 B
 			if (newVNode._children.length) {
@@ -283,7 +285,8 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 			diffProps(dom, newVNode.props, oldProps, isSvg);
 		}
 
-		diffChildren(dom, getVNodeChildren(newVNode), oldVNode==EMPTY_OBJ ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessDomChildren, mounts, ancestorComponent, newVNode);
+		// diffChildren(dom, getVNodeChildren(newVNode), oldVNode==EMPTY_OBJ ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessDomChildren, mounts, ancestorComponent, newVNode);
+		diffChildren(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
 	}
 
 	return dom;
@@ -340,41 +343,6 @@ export function unmount(vnode, ancestorComponent) {
 			unmount(r[i], ancestorComponent);
 		}
 	}
-}
-
-/**
- * Get the children of a virtual node as a flat array
- * @param {import('../internal').VNode} vnode The virtual node to get the
- * children of
- * @returns {Array<import('../internal').VNode>} The virtual node's children
- */
-function getVNodeChildren(vnode) {
-	if (vnode._children==null) {
-		toChildArray(vnode.props.children, vnode._children=[]);
-	}
-	return vnode._children;
-}
-
-
-/**
- * Flatten a virtual nodes children to a single dimensional array
- * @param {import('../index').ComponentChildren} children The unflattened
- * children of a virtual node
- * @param {Array<import('../index').VNode | null>} [flattened] An flat array of children to modify
- */
-export function toChildArray(children, flattened) {
-	if (flattened===undefined) flattened = [];
-	if (children==null || typeof children === 'boolean') {}
-	else if (Array.isArray(children)) {
-		for (let i=0; i < children.length; i++) {
-			toChildArray(children[i], flattened);
-		}
-	}
-	else {
-		flattened.push(coerceToVNode(children));
-	}
-
-	return flattened;
 }
 
 /** The `.render()` method for a PFC backing instance. */

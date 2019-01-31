@@ -1,14 +1,15 @@
 import { diff, unmount } from './index';
 import { coerceToVNode, Fragment } from '../create-element';
+import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 
 /**
  * Diff the children of a virtual node
- * @param {import('../internal').PreactElement} dom The DOM element whose
+ * @param {import('../internal').PreactElement} parentDom The DOM element whose
  * children are being diffed
- * @param {Array<import('../internal').VNode>} children The new virtual
- * children
- * @param {Array<import('../internal').VNode>} oldChildren The old virtual
- * children
+ * @param {import('../internal').VNode} newParentVNode The new virtual
+ * node whose children should be diff'ed against oldParentVNode
+ * @param {import('../internal').VNode} oldParentVNode The old virtual
+ * node whose children should be diff'ed against newParentVNode
  * @param {object} context The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
@@ -16,13 +17,27 @@ import { coerceToVNode, Fragment } from '../create-element';
  * which have mounted
  * @param {import('../internal').Component} ancestorComponent The direct parent
  * component to the ones being diffed
- * @param {import('../internal').VNode} parentVNode TODO: Is this still needed?
  */
-export function diffChildren(dom, children, oldChildren, context, isSvg, excessDomChildren, mounts, ancestorComponent, parentVNode) {
+export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent) {
 	let childVNode, i, j, p, index, oldVNode, newDom,
-		oldChildrenLength = oldChildren.length,
 		nextDom, sibDom, focus,
 		childDom;
+
+	// TODO: Ideally be consistent with the oldParentVNode. We should only check for null or EMPTY_OBJ
+
+	// 3117 B
+	let newChildren = getVNodeChildren(newParentVNode);
+	let oldChildren = oldParentVNode==null || oldParentVNode==EMPTY_OBJ ? EMPTY_ARR : getVNodeChildren(oldParentVNode);
+
+	// 3117 B
+	// let newChildren = newParentVNode._children == null ? newParentVNode._children = toChildArray(newParentVNode.props.children) : newParentVNode._children;
+	// let oldChildren = oldParentVNode==null || oldParentVNode==EMPTY_OBJ ? EMPTY_ARR : oldParentVNode._children == null ? oldParentVNode._children = toChildArray(oldParentVNode.props.children) : oldParentVNode._children;
+
+	// 3119 B
+	// let newChildren = newParentVNode._children == null ? toChildArray(newParentVNode.props.children, newParentVNode._children = []) : newParentVNode._children;
+	// let oldChildren = oldParentVNode==null || oldParentVNode==EMPTY_OBJ ? EMPTY_ARR : oldParentVNode._children == null ? toChildArray(oldParentVNode.props.children, oldParentVNode._children = []) : oldParentVNode._children;
+
+	let oldChildrenLength = oldChildren.length;
 
 	// 3163 B
 	// if (parentVNode.type === Fragment) {
@@ -72,8 +87,8 @@ export function diffChildren(dom, children, oldChildren, context, isSvg, excessD
 		}
 	}
 
-	for (i=0; i<children.length; i++) {
-		childVNode = children[i] = coerceToVNode(children[i]);
+	for (i=0; i<newChildren.length; i++) {
+		childVNode = newChildren[i] = coerceToVNode(newChildren[i]);
 		oldVNode = index = null;
 
 		// Check if we find a corresponding element in oldChildren and store the
@@ -105,7 +120,7 @@ export function diffChildren(dom, children, oldChildren, context, isSvg, excessD
 		nextDom = childDom!=null && childDom.nextSibling;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		newDom = diff(oldVNode==null ? null : oldVNode._dom, dom, childVNode, oldVNode, context, isSvg, false, excessDomChildren, mounts, ancestorComponent);
+		newDom = diff(oldVNode==null ? null : oldVNode._dom, parentDom, childVNode, oldVNode, context, isSvg, false, excessDomChildren, mounts, ancestorComponent);
 
 		// Only proceed if the vnode has not been unmounted by `diff()` above.
 		if (childVNode!=null && newDom !=null) {
@@ -124,8 +139,8 @@ export function diffChildren(dom, children, oldChildren, context, isSvg, excessD
 				// This is a compression of excessDomChildren==null && oldVNode==null!
 				// The values only have the same type when `null`.
 
-				outer: if (childDom==null || childDom.parentNode!==dom) {
-					dom.appendChild(newDom);
+				outer: if (childDom==null || childDom.parentNode!==parentDom) {
+					parentDom.appendChild(newDom);
 				}
 				else {
 					sibDom = childDom;
@@ -135,7 +150,7 @@ export function diffChildren(dom, children, oldChildren, context, isSvg, excessD
 							break outer;
 						}
 					}
-					dom.insertBefore(newDom, childDom);
+					parentDom.insertBefore(newDom, childDom);
 				}
 			}
 
@@ -149,8 +164,42 @@ export function diffChildren(dom, children, oldChildren, context, isSvg, excessD
 	}
 
 	// Remove children that are not part of any vnode. Only used by `hydrate`
-	if (excessDomChildren!=null && parentVNode.type!==Fragment) for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) excessDomChildren[i].remove();
+	if (excessDomChildren!=null && newParentVNode.type!==Fragment) for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) excessDomChildren[i].remove();
 
 	// Remove remaining oldChildren if there are any.
 	for (i=oldChildren.length; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
+}
+
+/**
+ * Get the children of a virtual node as a flat array
+ * @param {import('../internal').VNode} vnode The virtual node to get the
+ * children of
+ * @returns {Array<import('../internal').VNode>} The virtual node's children
+ */
+function getVNodeChildren(vnode) {
+	if (vnode._children==null) {
+		toChildArray(vnode.props.children, vnode._children=[]);
+	}
+	return vnode._children;
+}
+
+/**
+ * Flatten a virtual nodes children to a single dimensional array
+ * @param {import('../index').ComponentChildren} children The unflattened
+ * children of a virtual node
+ * @param {Array<import('../internal').VNode | null>} [flattened] An flat array of children to modify
+ */
+export function toChildArray(children, flattened) {
+	if (flattened===undefined) flattened = [];
+	if (children==null || typeof children === 'boolean') {}
+	else if (Array.isArray(children)) {
+		for (let i=0; i < children.length; i++) {
+			toChildArray(children[i], flattened);
+		}
+	}
+	else {
+		flattened.push(coerceToVNode(children));
+	}
+
+	return flattened;
 }
