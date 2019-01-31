@@ -1,6 +1,6 @@
 import { createElement as h, render, Component, Fragment } from '../../src/index';
 import { setupScratch, teardown, setupRerender } from '../_util/helpers';
-import { span, div, ol, li } from '../_util/dom';
+import { span, div, ul, ol, li } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 
 /** @jsx h */
@@ -73,9 +73,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<span>foo</span>');
 		expectDomLogToBe([
 			'<span>.appendChild(#text)',
-			'<div>.appendChild(<span>foo)',
-			// See issue #193 - redundant operations (append)
-			'<div>foo.appendChild(<span>foo)'
+			'<div>.appendChild(<span>foo)'
 		]);
 	});
 
@@ -182,10 +180,7 @@ describe('Fragment', () => {
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 		expectDomLogToBe([
-			'<div>.remove()',
-			// See issue #193 - redundant operations (multiple Fragments)
-			'<div>Hello.appendChild(<div>Hello)',
-			'<div>Hello.appendChild(<div>Hello)'
+			'<div>.remove()'
 		]);
 	});
 
@@ -259,8 +254,7 @@ describe('Fragment', () => {
 			'<div>Hello.remove()',
 			'<div>Hello.remove()',
 			'<div>.appendChild(#text)',
-			'<div>.appendChild(<div>Hello)',
-			'<div>Hello.appendChild(<div>Hello)'
+			'<div>.appendChild(<div>Hello)'
 		]);
 
 		clearLog();
@@ -687,7 +681,6 @@ describe('Fragment', () => {
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
 			'<div>spam.appendChild(#text)',
-			'<div>spamfoo.appendChild(#text)',
 			'<div>spamfoo.appendChild(#text)'
 		]);
 

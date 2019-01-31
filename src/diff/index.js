@@ -22,8 +22,7 @@ import options from '../options';
  * mounted components
  * @param {import('../internal').Component | null} ancestorComponent The direct
  * parent component
- * @param {import('../internal').VNode} parentVNode Used to set `_lastDomChild`
- * pointer to keep track of our current position
+ * @param {import('../internal').VNode} parentVNode TODO: Is this still needed?
  */
 export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append, excessDomChildren, mounts, ancestorComponent, parentVNode) {
 
@@ -38,7 +37,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 	if (options.beforeDiff) options.beforeDiff(newVNode);
 
 	let c, p, isNew = false, oldProps, oldState, oldContext,
-		newType = newVNode.type, lastDomChild;
+		newType = newVNode.type;
 
 	/** @type {import('../internal').Component | null} */
 	let clearProcessingException;
@@ -67,7 +66,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			// element to the parentVNode._dom property (that assignment is near the bottom of
 			// this function), which is read here.
 			dom = newVNode._dom;
-			lastDomChild = newVNode._lastDomChild;
+			newVNode._lastDomChild = newVNode._children.length ? newVNode._children[newVNode._children.length - 1]._dom : null;
 		}
 		else if (typeof newType==='function') {
 
@@ -150,8 +149,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, append, excessDomChildren, mounts, c, newVNode);
 
 			if (vnode!=null) {
-				newVNode._wrapsFragment = vnode.type === Fragment || vnode._wrapsFragment;
-				lastDomChild = vnode._lastDomChild;
+				newVNode._lastDomChild = vnode._lastDomChild;
 			}
 
 			c._parentDom = parentDom;
@@ -160,7 +158,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			if (newVNode.ref) applyRef(newVNode.ref, c, ancestorComponent);
 		}
 		else {
-			dom = lastDomChild = newVNode._lastDomChild = diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
+			dom = diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
 
 			if (newVNode.ref && (oldVNode.ref !== newVNode.ref)) {
 				applyRef(newVNode.ref, dom, ancestorComponent);
@@ -171,8 +169,6 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 		if (parentVNode._dom==null) {
 			parentVNode._dom = dom;
 		}
-
-		parentVNode._lastDomChild = lastDomChild;
 
 		if (parentDom && append!==false && dom!=null && dom.parentNode!==parentDom) {
 			parentDom.appendChild(dom);

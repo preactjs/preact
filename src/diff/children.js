@@ -16,13 +16,12 @@ import { coerceToVNode, Fragment } from '../create-element';
  * which have mounted
  * @param {import('../internal').Component} ancestorComponent The direct parent
  * component to the ones being diffed
- * @param {import('../internal').VNode} parentVNode Used to set `_lastDomChild`
- * pointer to keep track of our current position
+ * @param {import('../internal').VNode} parentVNode TODO: Is this still needed?
  */
 export function diffChildren(dom, children, oldChildren, context, isSvg, excessDomChildren, mounts, ancestorComponent, parentVNode) {
 	let childVNode, i, j, p, index, oldVNode, newDom,
 		oldChildrenLength = oldChildren.length,
-		nextDom, lastDom, sibDom, focus,
+		nextDom, sibDom, focus,
 		childDom;
 
 	// 3163 B
@@ -110,31 +109,16 @@ export function diffChildren(dom, children, oldChildren, context, isSvg, excessD
 
 		// Only proceed if the vnode has not been unmounted by `diff()` above.
 		if (childVNode!=null && newDom !=null) {
-			lastDom = childVNode._lastDomChild;
-
 			// Store focus in case moving children around changes it. Note that we
 			// can't just check once for every tree, because we have no way to
 			// differentiate wether the focus was reset by the user in a lifecycle
 			// hook or by reordering dom nodes.
 			focus = document.activeElement;
 
-			const oldCondition = newDom!==lastDom;
-			// const newCondition = childVNode.type === Fragment || childVNode._containsFragment;
-			// const newCondition = childVNode.type === Fragment;
-			const newCondition = childVNode.type === Fragment || childVNode._wrapsFragment;
-			// Single child Fragment check - more closely resembles oldCondition but doesn't improve diff'ing any
-			// const newCondition = (childVNode.type === Fragment && childVNode._children.length > 1) || childVNode._wrapsFragment;
-			if (newCondition !== oldCondition) {
-				const childVNodeName = childVNode.type == null || typeof childVNode.type === 'string' ? childVNode.type : childVNode.type.name;
-				// console.log('oldCondition:', oldCondition, 'childVNode.type:', childVNodeName, 'childVNode._containsFragment:', childVNode._containsFragment, 'result:', newCondition);
-				// console.log('oldCondition:', oldCondition, 'childVNode.type:', childVNodeName, 'result:', newCondition);
-				console.log('oldCondition:', oldCondition, 'childVNode.type:', childVNodeName, 'childVNode._wrapsFragment:', childVNode._wrapsFragment, 'result:', newCondition);
-			}
-
 			// Fragments or similar components have already been diffed at this point.
-			// if (newDom!==lastDom) {}
-			if (oldCondition) {}
-			// if (newCondition) {}
+			if (childVNode._lastDomChild != null) {
+				newDom = childVNode._lastDomChild;
+			}
 			else if (excessDomChildren==oldVNode || newDom!=childDom || newDom.parentNode==null) {
 				// NOTE: excessDomChildren==oldVNode above:
 				// This is a compression of excessDomChildren==null && oldVNode==null!
@@ -160,7 +144,7 @@ export function diffChildren(dom, children, oldChildren, context, isSvg, excessD
 				focus.focus();
 			}
 
-			childDom = lastDom!=null ? lastDom.nextSibling : nextDom;
+			childDom = newDom!=null ? newDom.nextSibling : nextDom;
 		}
 	}
 
