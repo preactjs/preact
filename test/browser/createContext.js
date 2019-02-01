@@ -178,7 +178,7 @@ describe('createContext', () => {
 		expect(scratch.innerHTML).to.equal('<div><div><strong>a</strong></div></div>');
 	});
 
-	it.skip('should propagates through shouldComponentUpdate false', () => {
+	it('should propagates through shouldComponentUpdate false', () => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { a: 'a' };
 		const UPDATED_CONTEXT = { a: 'b' };
@@ -243,11 +243,11 @@ describe('createContext', () => {
 
 		// initial render does not invoke anything but render():
 		expect(Consumed.prototype.render).to.have.been.calledTwice;
-		expect(Consumed.prototype.render).to.have.been.calledWith({ ...UPDATED_CONTEXT }, {}, {});
+		expect(Consumed.prototype.render).to.have.been.calledWith({ ...UPDATED_CONTEXT }, {}, { ['__cC' + (ctxId - 1)]: {} });
 		expect(scratch.innerHTML).to.equal('<div><div><strong>b</strong></div></div>');
 	});
 
-	it.skip('should keep the right context at the right "depth"', () => {
+	it('should keep the right context at the right "depth"', () => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { theme: 'a', global: 1 };
 		const NESTED_CONTEXT = { theme: 'b', global: 1 };
