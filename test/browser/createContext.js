@@ -225,9 +225,11 @@ describe('createContext', () => {
 
 		class App extends Component {
 			render() {
-				return (<Provider value={this.props.value}>
-					<Outer />
-				</Provider>)
+				return (
+					<Provider value={this.props.value}>
+						<Outer />
+					</Provider>
+				);
 			}
 		}
 
