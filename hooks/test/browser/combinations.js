@@ -173,28 +173,4 @@ describe('combinations', () => {
 			expect(effectCount).to.equal(1);
 		})
 	});
-
-	it('ensures useEffect always schedule after the next paint following a redraw effect, when using a no debounce strategy', () => {
-		let effectCount = 0;
-
-		function Comp() {
-			const [counter, setCounter] = useState(0);
-
-			useEffect(() => {
-				if (counter === 0) setCounter(1);
-				effectCount++;
-			});
-
-			return null;
-		}
-
-		Component.debounce = cb => cb();
-
-		render(<Comp />, scratch);
-
-		return scheduleEffectAssert(() => {
-			expect(effectCount).to.equal(1);
-		})
-	});
-
 });
