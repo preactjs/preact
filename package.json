@@ -2,16 +2,19 @@
   "name": "ceviche",
   "amdName": "ceviche",
   "version": "0.1.0",
+  "private": false,
   "description": "Something something virtual DOM.",
-  "source": "src/index.js",
-  "module": "dist/ceviche.mjs",
   "main": "dist/ceviche.js",
+  "module": "dist/ceviche.mjs",
   "umd:main": "dist/ceviche.umd.js",
+  "source": "src/index.js",
+  "license": "MIT",
   "types": "src/index.d.ts",
   "scripts": {
-    "build": "npm-run-all --parallel build:core build:debug",
+    "build": "npm-run-all --parallel build:*",
     "build:core": "microbundle build --raw",
     "build:debug": "microbundle build --raw --cwd debug",
+    "build:hooks": "microbundle build --raw --cwd hooks",
     "dev": "microbundle watch --raw --format cjs,umd",
     "test": "npm-run-all lint build --parallel test:mocha test:karma test:ts",
     "test:flow": "flow check",
@@ -51,7 +54,10 @@
     "dist",
     "debug/dist",
     "debug/src",
-    "debug/package.json"
+    "debug/package.json",
+    "hooks/dist",
+    "hooks/src",
+    "hooks/package.json"
   ],
   "keywords": [
     "ceviche",
@@ -62,7 +68,6 @@
   "authors": [
     "Jason Miller <jason@developit.ca>"
   ],
-  "license": "MIT",
   "repository": "developit/ceviche",
   "dependencies": {
     "prop-types": "^15.6.2"
@@ -111,7 +116,7 @@
   "bundlesize": [
     {
       "path": "./dist/ceviche.js",
-      "threshold": "3Kb"
+      "maxSize": "3Kb"
     }
   ]
 }
