@@ -5,10 +5,10 @@ export let i = 0;
  * @param {any} defaultValue
  */
 export function createContext(defaultValue) {
-	let id = '__cC' + i++;
+	const id = '__cC' + i++;
 
 	function Consumer(props, context) {
-		let value = context[id] ? context[id].props.value : defaultValue;
+		let value = id in context ? context[id] : defaultValue;
 		return props.children(value);
 	}
 
@@ -16,7 +16,7 @@ export function createContext(defaultValue) {
 
 	class Provider {
 		getChildContext() {
-			ctx[id] = this;
+			ctx[id] = this.props.value;
 			return ctx;
 		}
 
