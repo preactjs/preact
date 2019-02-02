@@ -172,23 +172,31 @@ export class Renderer {
 		// The devtools checks via the existance of this property if the devtools
 		// profiler should be enabled or not. If it is missing from the first root
 		// node the "Profiler" tab won't show up.
-		if (isRoot(vnode)) vnode.treeBaseDuration = 0;
+		/** @type {import('../internal').VNode} */
+		let root = null;
+		if (isRoot(vnode)) {
+
+			/** @type {*} */
+			(vnode).treeBaseDuration = 0;
+			root = vnode;
+		}
 		else {
 			// "rootCommitted" always needs the actual root node for the profiler
 			// to be able to collect timings.
+			/** @type {*} */
 			let dom = vnode._dom;
 
 			while ((dom = dom.parentNode)!=null) {
 				if (dom._prevVNode!=null) {
-					vnode = dom._prevVNode;
+					root = dom._prevVNode;
 				}
 			}
 		}
 
 		this.pending.push({
-			internalInstance: vnode,
+			internalInstance: root,
 			renderer: this.rid,
-			data: getData(vnode),
+			data: getData(root),
 			type: 'rootCommitted'
 		});
 

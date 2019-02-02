@@ -77,7 +77,7 @@ function checkEventReferences(events) {
 	events.forEach((event, i) => {
 		if (i > 0 && event.type!=='unmount' && Array.isArray(event.data.children)) {
 			event.data.children.forEach(child => {
-				if (!seen.has(child)) {
+				if (!seen.has(child) && event.type!=='rootCommitted') {
 					throw new Error(`Event at index ${i} has a child that could not be found in a preceeding event for component "${getDisplayName(child)}"`);
 				}
 			});
@@ -87,7 +87,7 @@ function checkEventReferences(events) {
 		if (event.type=='mount') {
 			seen.add(inst);
 		}
-		else if (!seen.has(inst)) {
+		else if (!seen.has(inst) && event.type!=='rootCommitted') {
 			throw new Error(`Event at index ${i} for component ${inst!=null ? getDisplayName(inst) : inst} is not mounted. Perhaps you forgot to send a "mount" event prior to this?`);
 		}
 
@@ -434,6 +434,7 @@ describe('devtools', () => {
 		});
 
 		afterEach(() => {
+			hook.clear();
 			window.performance.now = performance.now;
 		});
 
@@ -468,12 +469,11 @@ describe('devtools', () => {
 
 		it('should find vnode by dom node', () => {
 			render(<div />, scratch);
-			let vnode = scratch._prevVNode;
+			let vnode = scratch._prevVNode._children[0];
 			let rid = Object.keys(hook._renderers)[0];
 			let renderer = hook._renderers[rid];
-			expect(renderer.findFiberByHostInstance(scratch.firstChild)).to.equal(vnode);
 
-			expect(renderer.findFiberByHostInstance(scratch)).to.equal(null);
+			expect(renderer.findFiberByHostInstance(scratch.firstChild)).to.equal(vnode);
 		});
 
 		it('should getNativeFromReactElement', () => {
@@ -486,7 +486,7 @@ describe('devtools', () => {
 
 		it('should getReactElementFromNative', () => {
 			render(<div />, scratch);
-			let vnode = scratch._prevVNode;
+			let vnode = scratch._prevVNode._children[0];
 			let rid = Object.keys(hook._renderers)[0];
 			let helpers = hook.helpers[rid];
 			expect(helpers.getReactElementFromNative(vnode._dom)).to.equal(vnode);
@@ -565,7 +565,6 @@ describe('devtools', () => {
 			expect(serialize(hook.log)).to.deep.equal([
 				{ type: 'mount', component: 'h1' },
 				{ type: 'update', component: 'App' },
-				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -623,7 +622,6 @@ describe('devtools', () => {
 				{ type: 'mount', component: 'div' },
 				{ type: 'mount', component: 'Foo' },
 				{ type: 'update', component: 'App' },
-				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -657,16 +655,6 @@ describe('devtools', () => {
 				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
-		});
-
-		it('should unmount wrapped Fragment if root will be unmounted', () => {
-			render(<div />, scratch);
-			render('foo', scratch);
-
-			expect(serialize(hook.log).filter(x => x.type === 'unmount')).to.deep.equal([{
-				component: 'Fragment',
-				type: 'unmount'
-			}]);
 		});
 
 		it('should be able to render Fragments', () => {
@@ -819,7 +807,11 @@ describe('devtools', () => {
 			it('should collect timings', () => {
 				render(<div>Hello World</div>, scratch);
 
-				hook.log.forEach(ev => {
+				// Filter out root node which doesn't need to have timings
+				const events = hook.log.filter(x => x.type=='mount');
+				events.splice(-1, 1);
+
+				events.forEach(ev => {
 					expect(ev.data.actualStartTime > 0).to.equal(true);
 				});
 			});
@@ -827,7 +819,11 @@ describe('devtools', () => {
 			it('should calculate treeBaseDuration', () => {
 				render(<div>Hello World</div>, scratch);
 
-				hook.log.forEach(ev => {
+				// Filter out root node which doesn't need to have timings
+				const events = hook.log.filter(x => x.type=='mount');
+				events.splice(-1, 1);
+
+				events.forEach(ev => {
 					expect(ev.data.treeBaseDuration > -1).to.equal(true);
 				});
 			});

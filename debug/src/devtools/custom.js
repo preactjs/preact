@@ -126,7 +126,7 @@ export function getChildren(vnode) {
  */
 export function isRoot(vnode) {
 	return vnode._dom==null &&
-		vnode._children &&
+		Array.isArray(vnode._children) &&
 		vnode._children.length > 0 &&
 		vnode._children[0]._dom!=null;
 }
@@ -143,6 +143,13 @@ export function isRoot(vnode) {
  * @returns {import('../internal').Component | import('../internal').PreactElement | Text | null}
  */
 export function getInstance(vnode) {
+	// Use the parent element as instance for root nodes
+	if (isRoot(vnode)) {
+		return vnode._children.length > 0
+			? /** @type {import('../internal').PreactElement | null} */
+			(vnode._children[0]._dom.parentNode)
+			: null;
+	}
 	if (vnode._component!=null) return vnode._component;
 	if (vnode.type===Fragment) return vnode.props;
 	return vnode._dom;
