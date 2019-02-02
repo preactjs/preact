@@ -40,7 +40,7 @@ export function createContext(defaultValue) {
 	};
 	Provider.prototype.componentDidUpdate = function() {
 		let v = this.props.value;
-		this._subscribers.forEach(c => v!==c.state.value && c.setState({ value: this.props.value }));
+		this._subscribers.forEach(c => v!==c.state.value && c.setState({ value: v }));
 	};
 	Provider.prototype.render = function(props) {
 		return props.children;
