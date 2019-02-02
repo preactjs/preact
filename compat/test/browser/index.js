@@ -5,8 +5,7 @@ import React, {
 	findDOMNode,
 	Component,
 	// eslint-disable-next-line camelcase
-	unstable_renderSubtreeIntoContainer,
-	__spread
+	unstable_renderSubtreeIntoContainer
 } from '../../src';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
@@ -277,19 +276,6 @@ describe('preact-compat', () => {
 			}
 			const app = render(<App />, scratch);
 			expect(typeof app.inner.getNode === 'function').to.equal(true);
-		});
-	});
-
-	describe('Unsupported hidden internal __spread API', () => {
-		it('should work with multiple objects', () => {
-			const start = {};
-			const result = React.__spread(start, { one: 1, two: 3 }, { two: 2 });
-			expect(result).to.equal(start);
-			expect(start).to.deep.equal({ one: 1, two: 2 });
-		});
-
-		it('should be exported on default and as __spread', () => {
-			expect(__spread).to.equal(React.__spread);
 		});
 	});
 });

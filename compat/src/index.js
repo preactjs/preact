@@ -190,19 +190,6 @@ let classNameDescriptor = {
 	set(v) { this.class = v; }
 };
 
-function extend(base, props) {
-	for (let i=1, obj; i<arguments.length; i++) {
-		if ((obj = arguments[i])) {
-			for (let key in obj) {
-				if (obj.hasOwnProperty(key)) {
-					base[key] = obj[key];
-				}
-			}
-		}
-	}
-	return base;
-}
-
 function shallowDiffers(a, b) {
 	for (let i in a) if (!(i in b)) return true;
 	for (let i in b) if (a[i]!==b[i]) return true;
@@ -244,8 +231,7 @@ export {
 	// eslint-disable-next-line camelcase
 	renderSubtreeIntoContainer as unstable_renderSubtreeIntoContainer,
 	// eslint-disable-next-line camelcase
-	unstable_batchedUpdates,
-	extend as __spread
+	unstable_batchedUpdates
 };
 
 export default {
@@ -263,6 +249,5 @@ export default {
 	Component,
 	PureComponent,
 	unstable_renderSubtreeIntoContainer: renderSubtreeIntoContainer,
-	unstable_batchedUpdates,
-	__spread: extend
+	unstable_batchedUpdates
 };
