@@ -158,9 +158,6 @@ let Children = {
 	toArray: toChildArray
 };
 
-/** Track current render() component for ref assignment */
-let currentComponent;
-
 function upgradeToVNodes(arr, offset) {
 	for (let i=offset || 0; i<arr.length; i++) {
 		let obj = arr[i];
@@ -184,17 +181,8 @@ function createElement(...args) {
 
 function normalizeVNode(vnode) {
 	vnode.preactCompatNormalized = true;
-
 	applyClassName(vnode);
-
-	let ref = vnode.props.ref || vnode.ref,
-		type = ref && typeof ref;
-	if (currentComponent && (type==='string' || type==='number')) {
-		vnode.ref = createStringRefProxy(ref, currentComponent);
-	}
-
 	applyEventNormalization(vnode);
-
 	return vnode;
 }
 
@@ -205,18 +193,6 @@ function cloneElement(element) {
 
 function isValidElement(element) {
 	return element && element.$$typeof===REACT_ELEMENT_TYPE;
-}
-
-function createStringRefProxy(name, component) {
-	return component._refProxies[name] || (component._refProxies[name] = resolved => {
-		if (component && component.refs) {
-			component.refs[name] = resolved;
-			if (resolved===null) {
-				delete component._refProxies[name];
-				component = null;
-			}
-		}
-	});
 }
 
 function applyEventNormalization({ type, props }) {
@@ -373,24 +349,12 @@ function multihook(hooks, skipDuplicates) {
 
 function newComponentHook(props, context) {
 	this.componentWillReceiveProps = multihook([this.componentWillReceiveProps || 'componentWillReceiveProps']);
-	this.render = multihook([ beforeRender, this.render || 'render', afterRender]);
-}
-
-function beforeRender(props) {
-	currentComponent = this;
-}
-
-function afterRender() {
-	if (currentComponent===this) {
-		currentComponent = null;
-	}
+	this.render = multihook([this.render || 'render']);
 }
 
 function Component(props, context, opts) {
 	PreactComponent.call(this, props, context);
 	this.state = this.getInitialState ? this.getInitialState() : {};
-	this.refs = {};
-	this._refProxies = {};
 	if (opts!==BYPASS_HOOK) {
 		newComponentHook.call(this, props, context);
 	}
