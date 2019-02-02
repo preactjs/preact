@@ -8,9 +8,6 @@ const COMPONENT_WRAPPER_KEY = (typeof Symbol!=='undefined' && Symbol.for) ? Symb
 
 const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip|color|fill|flood|font|glyph|horiz|marker|overline|paint|stop|strikethrough|stroke|text|underline|unicode|units|v|vector|vert|word|writing|x)[A-Z]/;
 
-// a component that renders nothing. Used to replace components for unmountComponentAtNode.
-function EmptyComponent() { return null; }
-
 let oldEventHook = options.event;
 options.event = e => {
 	if (oldEventHook) e = oldEventHook(e);
@@ -65,16 +62,6 @@ function Portal(props) {
 
 function createPortal(vnode, container) {
 	return h(Portal, { vnode, container });
-}
-
-
-function unmountComponentAtNode(container) {
-	let existing = container._preactCompatRendered && container._preactCompatRendered.base;
-	if (existing && existing.parentNode===container) {
-		preactRender(h(EmptyComponent), container, existing);
-		return true;
-	}
-	return false;
 }
 
 const mapFn = (children, fn, ctx) => {
@@ -220,7 +207,6 @@ export {
 	createRef,
 	isValidElement,
 	findDOMNode,
-	unmountComponentAtNode,
 	Component,
 	PureComponent
 };
@@ -236,7 +222,6 @@ export default {
 	createRef,
 	isValidElement,
 	findDOMNode,
-	unmountComponentAtNode,
 	Component,
 	PureComponent
 };
