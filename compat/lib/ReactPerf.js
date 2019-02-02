@@ -1,1 +1,0 @@
-exports.getLastMeasurements=exports.getExclusive=exports.getInclusive=exports.getWasted=exports.getOperations=exports.printExclusive=exports.printInclusive=exports.printWasted=exports.printOperations=exports.start=exports.stop=exports.isRunning=function() {}
