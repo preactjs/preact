@@ -46,16 +46,10 @@ class ContextProvider {
 	}
 }
 
-function renderSubtreeIntoContainer(parentComponent, vnode, container, callback) {
-	let wrap = h(ContextProvider, { context: parentComponent.context }, vnode);
-	let rendered = render(wrap, container);
-	let c = rendered.props.children._component;
-	if (callback) callback.call(c, rendered);
-	return c;
-}
-
 function Portal(props) {
-	renderSubtreeIntoContainer(this, props.vnode, props.container);
+	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
+	let rendered = render(wrap, props.container);
+	return rendered.props.children._component;
 }
 
 function createPortal(vnode, container) {
