@@ -30,9 +30,7 @@ export function createContext(defaultValue) {
 
 	let ctx = { [id]: null };
 
-	function Provider() {
-		Component.call(this);
-	}
+	function Provider() {}
 	Provider.prototype._subscribers = [];
 	Provider.prototype.getChildContext = function() {
 		ctx[id] = this;
