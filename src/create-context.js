@@ -1,4 +1,5 @@
 import { Component } from './component';
+import { assign } from './util';
 
 export let i = 0;
 
@@ -13,36 +14,39 @@ export function createContext(defaultValue) {
 		let value = id in context ? context[id].props.value : defaultValue;
 		this.state = { value };
 	}
-	Consumer.prototype = new Component();
-	Consumer.prototype.componentDidMount = function() {
-		if (id in this.context) this.context[id]._subscribers.push(this);
-	};
-	Component.prototype.componentWillUnmount = function() {
-		let ctx = this.context;
-		if (id in ctx) {
-			let s = ctx[id]._subscribers;
-			s.splice(s.indexOf(this), 1);
+	assign(Consumer.prototype = new Component(), {
+		componentDidMount() {
+			if (id in this.context) this.context[id]._subscribers.push(this);
+		},
+		componentWillUnmount() {
+			let ctx = this.context;
+			if (id in ctx) {
+				let s = ctx[id]._subscribers;
+				s.splice(s.indexOf(this), 1);
+			}
+		},
+		render(props, state) {
+			return props.children(state.value);
 		}
-	};
-	Consumer.prototype.render = function(props, state) {
-		return props.children(state.value);
-	};
+	});
 
 	let ctx = { [id]: null };
 
 	function Provider() {}
-	Provider.prototype._subscribers = [];
-	Provider.prototype.getChildContext = function() {
-		ctx[id] = this;
-		return ctx;
-	};
-	Provider.prototype.componentDidUpdate = function() {
-		let v = this.props.value;
-		this._subscribers.forEach(c => v!==c.state.value && c.setState({ value: v }));
-	};
-	Provider.prototype.render = function(props) {
-		return props.children;
-	};
+	assign(Provider.prototype, {
+		_subscribers: [],
+		getChildContext() {
+			ctx[id] = this;
+			return ctx;
+		},
+		componentDidUpdate() {
+			let v = this.props.value;
+			this._subscribers.forEach(c => v!==c.state.value && c.setState({ value: v }));
+		},
+		render(props) {
+			return props.children;
+		}
+	});
 
 	return {
 		_id: id,
