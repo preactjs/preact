@@ -133,7 +133,6 @@ function createElement(...args) {
 		handleElementVNode(vnode, props);
 	}
 
-	vnode.preactCompatUpgraded = false;
 	vnode.preactCompatNormalized = false;
 	return normalizeVNode(vnode);
 }
@@ -147,7 +146,9 @@ function normalizeVNode(vnode) {
 
 function cloneElement(element) {
 	if (!isValidElement(element)) return element;
-	return normalizeVNode(preactCloneElement.apply(null, arguments));
+	let vnode = normalizeVNode(preactCloneElement.apply(null, arguments));
+	vnode.$$typeof = REACT_ELEMENT_TYPE;
+	return vnode;
 }
 
 function isValidElement(element) {
