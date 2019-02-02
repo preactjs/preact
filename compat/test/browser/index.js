@@ -3,9 +3,7 @@ import React, {
 	createElement,
 	cloneElement,
 	findDOMNode,
-	Component,
-	// eslint-disable-next-line camelcase
-	unstable_renderSubtreeIntoContainer
+	Component
 } from '../../src';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
@@ -228,54 +226,6 @@ describe('preact-compat', () => {
 		xit('should return null if render returns null', () => {
 			const helper = React.render(<Helper something={null} />, scratch);
 			expect(findDOMNode(helper)).to.be.null;
-		});
-	});
-
-	describe('unstable_renderSubtreeIntoContainer', () => {
-		class Inner extends Component {
-			render() {
-				return null;
-			}
-			getNode() {
-				return 'inner';
-			}
-		}
-
-		it('should export instance', () => {
-			class App extends Component {
-				render() {
-					return null;
-				}
-				componentDidMount() {
-					this.renderInner();
-				}
-				renderInner() {
-					const wrapper = document.createElement('div');
-					this.inner = unstable_renderSubtreeIntoContainer(this, <Inner />, wrapper);
-				}
-			}
-			const app = render(<App />, scratch);
-			expect(typeof app.inner.getNode === 'function').to.equal(true);
-		});
-
-		it('should there must be a context in callback', () => {
-			class App extends Component {
-				render() {
-					return null;
-				}
-				componentDidMount() {
-					this.renderInner();
-				}
-				renderInner() {
-					const wrapper = document.createElement('div');
-					const self = this;
-					unstable_renderSubtreeIntoContainer(this, <Inner />, wrapper, function() {
-						self.inner = this;
-					});
-				}
-			}
-			const app = render(<App />, scratch);
-			expect(typeof app.inner.getNode === 'function').to.equal(true);
 		});
 	});
 });

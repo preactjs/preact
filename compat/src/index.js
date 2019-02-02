@@ -209,11 +209,6 @@ PureComponent.prototype.shouldComponentUpdate = function(props, state) {
 	return shallowDiffers(this.props, props) || shallowDiffers(this.state, state);
 };
 
-// eslint-disable-next-line camelcase
-function unstable_batchedUpdates(callback) {
-	callback();
-}
-
 export {
 	version,
 	Children,
@@ -227,11 +222,7 @@ export {
 	findDOMNode,
 	unmountComponentAtNode,
 	Component,
-	PureComponent,
-	// eslint-disable-next-line camelcase
-	renderSubtreeIntoContainer as unstable_renderSubtreeIntoContainer,
-	// eslint-disable-next-line camelcase
-	unstable_batchedUpdates
+	PureComponent
 };
 
 export default {
@@ -247,7 +238,5 @@ export default {
 	findDOMNode,
 	unmountComponentAtNode,
 	Component,
-	PureComponent,
-	unstable_renderSubtreeIntoContainer: renderSubtreeIntoContainer,
-	unstable_batchedUpdates
+	PureComponent
 };
