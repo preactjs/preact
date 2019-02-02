@@ -76,7 +76,7 @@ describe('preact-compat', () => {
 		});
 
 		it('should support defaultValue', () => {
-			render(<input defaultValue="foo"></input>, scratch);
+			render(<input defaultValue="foo" />, scratch);
 			expect(scratch.firstElementChild).to.have.property('value', 'foo');
 		});
 	});
@@ -155,7 +155,7 @@ describe('preact-compat', () => {
 		});
 
 		it('should support props.children', () => {
-			let element = <foo children={<span>b</span>}></foo>;
+			let element = <foo children={<span>b</span>} />;
 			let clone = cloneElement(element);
 			expect(clone).to.eql(element);
 			expect(cloneElement(clone).props.children).to.eql(element.props.children);
@@ -169,14 +169,14 @@ describe('preact-compat', () => {
 		});
 
 		it('should support children in prop argument', () => {
-			let element = <foo></foo>;
+			let element = <foo />;
 			let children = [<span>b</span>];
 			let clone = cloneElement(element, { children });
 			expect(clone.props.children).to.eql(children);
 		});
 
 		it('children argument takes precedence over props.children', () => {
-			let element = <foo></foo>;
+			let element = <foo />;
 			let childrenA = [<span>b</span>];
 			let childrenB = [<div>c</div>];
 			let clone = cloneElement(element, { children: childrenA }, ...childrenB);
@@ -184,7 +184,7 @@ describe('preact-compat', () => {
 		});
 
 		it('children argument takes precedence over props.children even if falsey', () => {
-			let element = <foo></foo>;
+			let element = <foo />;
 			let childrenA = [<span>b</span>];
 			let clone = cloneElement(element, { children: childrenA }, undefined);
 			expect(clone.children).to.eql(undefined);
