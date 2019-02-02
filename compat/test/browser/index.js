@@ -1,6 +1,5 @@
 import React, {
 	render,
-	createClass,
 	createElement,
 	cloneElement,
 	findDOMNode,
@@ -82,107 +81,6 @@ describe('preact-compat', () => {
 		it('should support defaultValue', () => {
 			render(<input defaultValue="foo"></input>, scratch);
 			expect(scratch.firstElementChild).to.have.property('value', 'foo');
-		});
-	});
-
-
-	describe('createClass()', () => {
-		it('should be exported', () => {
-			expect(React)
-				.to.have.property('createClass')
-				.that.is.a('function')
-				.that.equals(createClass);
-		});
-
-		it('should create a Component', () => {
-			let specState = { something: 1 };
-			let spec = {
-				foo: 'bar',
-				getInitialState() {
-					return specState;
-				},
-				method: sinon.spy()
-			};
-			const C = createClass(spec);
-			let inst = new C();
-			expect(inst).to.have.property('foo', 'bar');
-			expect(inst).to.have.property('state', specState);
-			expect(inst).to.have.property('method').that.is.a('function');
-			expect(inst).to.be.an.instanceof(Component);
-			inst.method('a','b');
-			expect(spec.method)
-				.to.have.been.calledOnce
-				.and.calledOn(inst)
-				.and.calledWithExactly('a', 'b');
-		});
-
-		it('should not bind blacklisted methods', () => {
-			let constructor = () => {};
-			let render = () => null;
-			const C = createClass({
-				constructor,
-				render
-			});
-			let c = new C();
-			expect(c).to.have.property('constructor').that.equals(constructor);
-			expect(c).to.have.property('render').not.with.property('__bound');
-		});
-
-		it('should copy statics', () => {
-			let def = {
-				statics: {
-					foo: 'bar',
-					baz() {}
-				}
-			};
-			let c = createClass(def);
-			expect(c).to.have.property('foo', def.statics.foo);
-			expect(c).to.have.property('baz', def.statics.baz);
-		});
-
-		it('should support mixins', () => {
-			let def = {
-				mixins: [
-					{
-						foo: sinon.spy(),
-						bar: sinon.spy()
-					},
-					{
-						bar: sinon.spy(),
-						componentWillMount: sinon.spy(),
-						render: 'nothing here'
-					},
-					{
-						componentWillMount: sinon.spy()
-					}
-				],
-				foo: sinon.spy(),
-				componentWillMount: sinon.spy(),
-				render: sinon.stub().returns(null)
-			};
-			let C = createClass(def);
-			let inst = new C();
-
-			inst.foo();
-			expect(def.foo).to.have.been.calledOnce;
-			expect(def.mixins[0].foo).to.have.been.calledOnce.and.calledBefore(def.foo);
-
-			inst.bar();
-			expect(def.mixins[0].bar).to.have.been.calledOnce;
-			expect(def.mixins[1].bar).to.have.been.calledOnce.and.calledAfter(def.mixins[0].bar);
-
-			let props = {},
-				state = {};
-			inst.componentWillMount(props, state);
-			expect(def.mixins[1].componentWillMount)
-				.to.have.been.calledOnce
-				.and.calledWithExactly(props, state);
-			expect(def.mixins[2].componentWillMount)
-				.to.have.been.calledOnce
-				.and.calledWithExactly(props, state)
-				.and.calledAfter(def.mixins[1].componentWillMount);
-
-			expect(inst.render(props, state)).to.equal(null);
 		});
 	});
 

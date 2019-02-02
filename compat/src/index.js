@@ -1,4 +1,4 @@
-import { render as preactRender, cloneElement as preactCloneElement, createRef, createElement as h, Component as PreactComponent, options, toChildArray } from 'ceviche';
+import { render as preactRender, cloneElement as preactCloneElement, createRef, createElement as h, Component, options, toChildArray } from 'ceviche';
 
 const version = '15.1.0'; // trick libraries to think we are react
 
@@ -6,23 +6,7 @@ const REACT_ELEMENT_TYPE = (typeof Symbol!=='undefined' && Symbol.for && Symbol.
 
 const COMPONENT_WRAPPER_KEY = (typeof Symbol!=='undefined' && Symbol.for) ? Symbol.for('__preactCompatWrapper') : '__preactCompatWrapper';
 
-// don't autobind these methods since they already have guaranteed context.
-const AUTOBIND_BLACKLIST = {
-	constructor: 1,
-	render: 1,
-	shouldComponentUpdate: 1,
-	componentWillReceiveProps: 1,
-	componentWillUpdate: 1,
-	componentDidUpdate: 1,
-	componentWillMount: 1,
-	componentDidMount: 1,
-	componentWillUnmount: 1,
-	componentDidUnmount: 1
-};
-
 const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip|color|fill|flood|font|glyph|horiz|marker|overline|paint|stop|strikethrough|stroke|text|underline|unicode|units|v|vector|vert|word|writing|x)[A-Z]/;
-
-const BYPASS_HOOK = {};
 
 // a component that renders nothing. Used to replace components for unmountComponentAtNode.
 function EmptyComponent() { return null; }
@@ -132,9 +116,6 @@ function unmountComponentAtNode(container) {
 	}
 	return false;
 }
-
-
-const ARR = [];
 
 const mapFn = (children, fn, ctx) => {
 	if (children == null) return null;
@@ -251,75 +232,6 @@ function findDOMNode(component) {
 	return component && (component.base || component.nodeType === 1 && component) || null;
 }
 
-function F(){}
-
-function createClass(obj) {
-	function cl(props, context) {
-		bindAll(this);
-		Component.call(this, props, context, BYPASS_HOOK);
-		newComponentHook.call(this, props, context);
-	}
-
-	obj = extend({ constructor: cl }, obj);
-
-	// We need to apply mixins here so that getDefaultProps is correctly mixed
-	if (obj.mixins) {
-		applyMixins(obj, collateMixins(obj.mixins));
-	}
-	if (obj.statics) {
-		extend(cl, obj.statics);
-	}
-	if (obj.propTypes) {
-		cl.propTypes = obj.propTypes;
-	}
-	if (obj.defaultProps) {
-		cl.defaultProps = obj.defaultProps;
-	}
-	if (obj.getDefaultProps) {
-		cl.defaultProps = obj.getDefaultProps.call(cl);
-	}
-
-	F.prototype = Component.prototype;
-	cl.prototype = extend(new F(), obj);
-
-	cl.displayName = obj.displayName || 'Component';
-
-	return cl;
-}
-
-// Flatten an Array of mixins to a map of method name to mixin implementations
-function collateMixins(mixins) {
-	let keyed = {};
-	for (let i=0; i<mixins.length; i++) {
-		let mixin = mixins[i];
-		for (let key in mixin) {
-			if (mixin.hasOwnProperty(key) && typeof mixin[key]==='function') {
-				(keyed[key] || (keyed[key]=[])).push(mixin[key]);
-			}
-		}
-	}
-	return keyed;
-}
-
-// apply a mapping of Arrays of mixin methods to a component prototype
-function applyMixins(proto, mixins) {
-	for (let key in mixins) if (mixins.hasOwnProperty(key)) {
-		proto[key] = multihook(
-			mixins[key].concat(proto[key] || ARR),
-			key==='getDefaultProps' || key==='getInitialState' || key==='getChildContext'
-		);
-	}
-}
-
-function bindAll(ctx) {
-	for (let i in ctx) {
-		let v = ctx[i];
-		if (typeof v==='function' && !v.__bound && !AUTOBIND_BLACKLIST.hasOwnProperty(i)) {
-			(ctx[i] = v.bind(ctx)).__bound = true;
-		}
-	}
-}
-
 function callMethod(ctx, m, args) {
 	if (typeof m==='string') {
 		m = ctx.constructor.prototype[m];
@@ -347,45 +259,10 @@ function multihook(hooks, skipDuplicates) {
 	};
 }
 
-function newComponentHook(props, context) {
-	this.componentWillReceiveProps = multihook([this.componentWillReceiveProps || 'componentWillReceiveProps']);
-	this.render = multihook([this.render || 'render']);
-}
-
-function Component(props, context, opts) {
-	PreactComponent.call(this, props, context);
-	this.state = this.getInitialState ? this.getInitialState() : {};
-	if (opts!==BYPASS_HOOK) {
-		newComponentHook.call(this, props, context);
-	}
-}
-extend(Component.prototype = Object.create(PreactComponent.prototype), {
-	constructor: Component,
-
-	isReactComponent: {},
-
-	replaceState(state, callback) {
-		for (let i in this.state) {
-			if (!(i in state)) {
-				delete this.state[i];
-			}
-		}
-		this.setState(state, callback);
-	},
-
-	getDOMNode() {
-		return this.base;
-	},
-
-	isMounted() {
-		return !!this.base;
-	}
-});
-
 function PureComponent(props, context) {
-	PreactComponent.call(this, props, context);
+	Component.call(this, props, context);
 }
-PureComponent.prototype = Object.create(PreactComponent.prototype);
+PureComponent.prototype = Object.create(Component.prototype);
 PureComponent.prototype.isPureReactComponent = true;
 PureComponent.prototype.shouldComponentUpdate = function(props, state) {
 	return shallowDiffers(this.props, props) || shallowDiffers(this.state, state);
@@ -401,7 +278,6 @@ export {
 	Children,
 	render,
 	render as hydrate,
-	createClass,
 	createPortal,
 	createElement,
 	cloneElement,
@@ -423,7 +299,6 @@ export default {
 	Children,
 	render,
 	hydrate: render,
-	createClass,
 	createPortal,
 	createElement,
 	cloneElement,
