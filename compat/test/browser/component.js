@@ -42,24 +42,6 @@ describe('components', () => {
 		expect(scratch.innerHTML).to.equal('<div id="demo">inner</div>');
 	});
 
-	it('should alias props.children', () => {
-		class Foo extends React.Component {
-			render() {
-				return <div>{this.props.children}</div>;
-			}
-		}
-
-		let children = ['a', <span>b</span>, <b>c</b>],
-			foo;
-
-		React.render((
-			<Foo ref={ c => foo=c }>
-				{ children }
-			</Foo>
-		), scratch);
-		expect(foo.props).to.exist.and.have.property('children').eql(children);
-	});
-
 	it('should single out children before componentWillReceiveProps', () => {
 		let props;
 
@@ -81,22 +63,6 @@ describe('components', () => {
 		expect(props).to.exist.and.deep.equal({
 			children: 'second'
 		});
-	});
-
-	it('should support array[object] children', () => {
-		let children;
-
-		class Foo extends React.Component {
-			render() {
-				children = this.props.children;
-				return <div />;
-			}
-		}
-
-		const data = [{ a: '' }];
-		React.render(<Foo>{ data }</Foo>, scratch);
-
-		expect(children).to.exist.and.deep.equal(data);
 	});
 
 	describe('PureComponent', () => {
