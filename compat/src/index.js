@@ -28,11 +28,8 @@ options.vnode = vnode => {
 			attrs = vnode.props = vnode.props==null ? {} : extend({}, vnode.props);
 
 		if (typeof tag==='function') {
-			if (tag[COMPONENT_WRAPPER_KEY]===true || (tag.prototype && 'isReactComponent' in tag.prototype)) {
-				if (!vnode.preactCompatNormalized) {
-					normalizeVNode(vnode);
-				}
-				handleComponentVNode(vnode);
+			if ((tag[COMPONENT_WRAPPER_KEY]===true || (tag.prototype && 'isReactComponent' in tag.prototype)) && !vnode.preactCompatNormalized) {
+				normalizeVNode(vnode);
 			}
 		}
 		else {
@@ -49,15 +46,6 @@ options.vnode = vnode => {
 
 	if (oldVnodeHook) oldVnodeHook(vnode);
 };
-
-function handleComponentVNode(vnode) {
-	let tag = vnode.type,
-		a = vnode.props;
-
-	vnode.props = {};
-	if (tag.defaultProps) extend(vnode.props, tag.defaultProps);
-	if (a) extend(vnode.props, a);
-}
 
 function handleElementVNode(vnode, a) {
 	let shouldSanitize, attrs, i;
