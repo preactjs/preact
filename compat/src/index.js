@@ -19,34 +19,6 @@ options.event = e => {
 	return e;
 };
 
-let oldVnodeHook = options.vnode;
-options.vnode = vnode => {
-	if (!vnode.preactCompatUpgraded) {
-		vnode.preactCompatUpgraded = true;
-
-		let tag = vnode.type,
-			attrs = vnode.props = vnode.props==null ? {} : extend({}, vnode.props);
-
-		if (typeof tag==='function') {
-			if ((tag[COMPONENT_WRAPPER_KEY]===true || (tag.prototype && 'isReactComponent' in tag.prototype)) && !vnode.preactCompatNormalized) {
-				normalizeVNode(vnode);
-			}
-		}
-		else {
-			if (attrs.defaultValue) {
-				if (!attrs.value && attrs.value!==0) {
-					attrs.value = attrs.defaultValue;
-				}
-				delete attrs.defaultValue;
-			}
-
-			handleElementVNode(vnode, attrs);
-		}
-	}
-
-	if (oldVnodeHook) oldVnodeHook(vnode);
-};
-
 function handleElementVNode(vnode, a) {
 	let shouldSanitize, attrs, i;
 	if (a) {
@@ -143,6 +115,24 @@ function createElement(...args) {
 	upgradeToVNodes(args, 2);
 	let vnode = h(...args);
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
+
+	let type = vnode.type, props = vnode.props;
+	if (typeof type==='function') {
+		if ((type[COMPONENT_WRAPPER_KEY]===true || (type.prototype && 'isReactComponent' in type.prototype)) && !vnode.preactCompatNormalized) {
+			normalizeVNode(vnode);
+		}
+	}
+	else {
+		if (props.defaultValue) {
+			if (!props.value && props.value!==0) {
+				props.value = props.defaultValue;
+			}
+			delete props.defaultValue;
+		}
+
+		handleElementVNode(vnode, props);
+	}
+
 	vnode.preactCompatUpgraded = false;
 	vnode.preactCompatNormalized = false;
 	return normalizeVNode(vnode);
@@ -185,10 +175,12 @@ function applyEventNormalization({ type, props }) {
 }
 
 function applyClassName(vnode) {
-	let a = vnode.props || (vnode.props = {});
-	classNameDescriptor.enumerable = 'className' in a;
-	if (a.className) a.class = a.className;
-	Object.defineProperty(a, 'className', classNameDescriptor);
+	let a = vnode.props;
+	if (a.class || a.className) {
+		classNameDescriptor.enumerable = 'className' in a;
+		if (a.className) a.class = a.className;
+		Object.defineProperty(a, 'className', classNameDescriptor);
+	}
 }
 
 let classNameDescriptor = {

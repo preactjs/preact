@@ -117,11 +117,17 @@ describe('preact-compat', () => {
 			let props = { onChange(){} };
 
 			function expectToBeNormalized(vnode, desc) {
-				expect(vnode, desc).to.have.property('props').with.all.keys(['oninput'].concat(vnode.props.type ? 'type' : [])).and.property('oninput').that.is.a('function');
+				expect(vnode, desc)
+					.to.have.property('props')
+					.with.all.keys(['oninput'].concat(vnode.props.type ? 'type' : []))
+					.and.property('oninput').that.is.a('function');
 			}
 
 			function expectToBeUnmodified(vnode, desc) {
-				expect(vnode, desc).to.have.property('props').eql({ ...props, ...(vnode.props.type ? { type: vnode.props.type } : {}) });
+				expect(vnode, desc).to.have.property('props').eql({
+					...props,
+					...(vnode.props.type ? { type: vnode.props.type } : {})
+				});
 			}
 
 			expectToBeUnmodified(<div {...props} />, '<div>');
