@@ -190,7 +190,7 @@ function applyEventNormalization({ type, props }) {
 	if (newProps.onchange && (type==='textarea' || (type.toLowerCase()==='input' && !/^fil|che|rad/i.test(props.type)))) {
 		let normalized = newProps.oninput || 'oninput';
 		if (!props[normalized]) {
-			props[normalized] = multihook([props[normalized], props[newProps.onchange]]);
+			props[normalized] = props[newProps.onchange];
 			delete props[newProps.onchange];
 		}
 	}
@@ -230,33 +230,6 @@ function shallowDiffers(a, b) {
 
 function findDOMNode(component) {
 	return component && (component.base || component.nodeType === 1 && component) || null;
-}
-
-function callMethod(ctx, m, args) {
-	if (typeof m==='string') {
-		m = ctx.constructor.prototype[m];
-	}
-	if (typeof m==='function') {
-		return m.apply(ctx, args);
-	}
-}
-
-function multihook(hooks, skipDuplicates) {
-	return function() {
-		let ret;
-		for (let i=0; i<hooks.length; i++) {
-			let r = callMethod(this, hooks[i], arguments);
-
-			if (skipDuplicates && r!=null) {
-				if (!ret) ret = {};
-				for (let key in r) if (r.hasOwnProperty(key)) {
-					ret[key] = r[key];
-				}
-			}
-			else if (typeof r!=='undefined') ret = r;
-		}
-		return ret;
-	};
 }
 
 function PureComponent(props, context) {
