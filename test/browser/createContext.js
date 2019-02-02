@@ -1,5 +1,5 @@
 import { createElement as h, render, Component, createContext } from '../../src/index';
-import { setupScratch, teardown } from '../_util/helpers';
+import { setupScratch, teardown, setupRerender } from '../_util/helpers';
 import { Fragment } from '../../src';
 import { i as ctxId } from '../../src/create-context';
 
@@ -7,9 +7,11 @@ import { i as ctxId } from '../../src/create-context';
 
 describe('createContext', () => {
 	let scratch;
+	let rerender;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		rerender = setupRerender();
 	});
 
 	afterEach(() => {
@@ -241,9 +243,11 @@ describe('createContext', () => {
 			<App value={UPDATED_CONTEXT} />
 		), scratch);
 
+		rerender();
+
 		// initial render does not invoke anything but render():
 		expect(Consumed.prototype.render).to.have.been.calledTwice;
-		expect(Consumed.prototype.render).to.have.been.calledWith({ ...UPDATED_CONTEXT }, {}, { ['__cC' + (ctxId - 1)]: {} });
+		// expect(Consumed.prototype.render).to.have.been.calledWithMatch({ ...UPDATED_CONTEXT }, {}, { ['__cC' + (ctxId - 1)]: {} });
 		expect(scratch.innerHTML).to.equal('<div><div><strong>b</strong></div></div>');
 	});
 
