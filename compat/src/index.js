@@ -4,8 +4,6 @@ const version = '15.1.0'; // trick libraries to think we are react
 
 const REACT_ELEMENT_TYPE = (typeof Symbol!=='undefined' && Symbol.for && Symbol.for('react.element')) || 0xeac7;
 
-const COMPONENT_WRAPPER_KEY = (typeof Symbol!=='undefined' && Symbol.for) ? Symbol.for('__preactCompatWrapper') : '__preactCompatWrapper';
-
 const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip|color|fill|flood|font|glyph|horiz|marker|overline|paint|stop|strikethrough|stroke|text|underline|unicode|units|v|vector|vert|word|writing|x)[A-Z]/;
 
 let oldEventHook = options.event;
@@ -105,7 +103,7 @@ function createElement(...args) {
 
 	let type = vnode.type, props = vnode.props;
 	if (typeof type==='function') {
-		if ((type[COMPONENT_WRAPPER_KEY]===true || (type.prototype && 'isReactComponent' in type.prototype)) && !vnode.preactCompatNormalized) {
+		if ((type.prototype && 'isReactComponent' in type.prototype) && !vnode.preactCompatNormalized) {
 			normalizeVNode(vnode);
 		}
 	}
