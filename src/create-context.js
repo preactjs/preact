@@ -11,8 +11,8 @@ export function createContext(defaultValue) {
 	let id = '__cC' + i++;
 
 	function Consumer(props, context) {
-		let value = id in context ? context[id].props.value : defaultValue;
-		this.state = { value };
+		let _value = id in context ? context[id].props.value : defaultValue;
+		this.state = { _value };
 	}
 	assign(Consumer.prototype = new Component(), {
 		componentDidMount() {
@@ -26,7 +26,7 @@ export function createContext(defaultValue) {
 			}
 		},
 		render(props, state) {
-			return props.children(state.value);
+			return props.children(state._value);
 		}
 	});
 
@@ -41,7 +41,7 @@ export function createContext(defaultValue) {
 		},
 		componentDidUpdate() {
 			let v = this.props.value;
-			this._subscribers.forEach(c => v!==c.state.value && c.setState({ value: v }));
+			this._subscribers.forEach(c => v!==c.state._value && c.setState({ _value: v }));
 		},
 		render(props) {
 			return props.children;
