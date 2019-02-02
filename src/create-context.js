@@ -19,9 +19,8 @@ export function createContext(defaultValue) {
 			if (id in this.context) this.context[id]._subscribers.push(this);
 		},
 		componentWillUnmount() {
-			let ctx = this.context;
-			if (id in ctx) {
-				let s = ctx[id]._subscribers;
+			if (id in this.context) {
+				let s = this.context[id]._subscribers;
 				s.splice(s.indexOf(this), 1);
 			}
 		},
