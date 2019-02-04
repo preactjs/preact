@@ -679,6 +679,16 @@ describe('devtools', () => {
 			]);
 		});
 
+		it('should unmount wrapped Fragment if root will be unmounted', () => {
+			render(<div />, scratch);
+			render('foo', scratch);
+
+			expect(serialize(hook.log).filter(x => x.type === 'unmount')).to.deep.equal([{
+				component: 'Fragment',
+				type: 'unmount'
+			}]);
+		});
+
 		it('should be able to render Fragments', () => {
 			render(<div><Fragment>foo{'bar'}</Fragment></div>, scratch);
 			checkEventReferences(hook.log);
@@ -725,6 +735,32 @@ describe('devtools', () => {
 					});
 				}
 			});
+		});
+
+		it('must send an update event for the component setState/forceUpdate was called on', () => {
+			let updateState;
+
+			class Foo extends Component {
+				constructor() {
+					super();
+					this.state = { active: true };
+					updateState = () => this.setState(prev => ({ active: !prev.active }));
+				}
+				render() {
+					return <h1>{this.state.active ? 'foo' : 'bar'}</h1>;
+				}
+			}
+
+			render(<div><Foo /></div>, scratch);
+			hook.clear();
+
+			updateState();
+			rerender();
+
+			expect(serialize(hook.log)).to.deep.equal([
+				{ type: 'update', component: 'Foo' },
+				{ type: 'rootCommitted', component: 'Fragment' }
+			]);
 		});
 
 		describe('updater', () => {

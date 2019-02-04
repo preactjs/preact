@@ -127,26 +127,20 @@ export class Renderer {
 
 		let prev = this.inst2vnode.get(data.publicInstance);
 
-		// Potentially skip creating a event when the vnode hasn't changed
-		if (!hasDataChanged(prev, vnode)) {
-
-			// Even if the vnode is the same we need to check if profiler times have
-			// changed. The `updateProfileTimes` event is a faster version of `update`
-			// and is processed much quicker in the devtools.
-			/* istanbul ignore else */
-			if (hasProfileDataChanged(prev, vnode)) {
-				this.pending.push({
-					// This property is only used as an id inside the devtools. The
-					// relevant data will be read from `.data` instead which is a
-					// normalized structure that every react release adheres to. This
-					// makes backwards-compatibility easier instead of relying on internal
-					// vnode/fiber shape.
-					internalInstance: prev,
-					data,
-					renderer: this.rid,
-					type: 'updateProfileTimes'
-				});
-			}
+		// The `updateProfileTimes` event is a faster version of `updated` and
+		// is processed much quicker inside the devtools extension.
+		if (!hasDataChanged(prev, vnode) && hasProfileDataChanged(prev, vnode)) {
+			this.pending.push({
+				// This property is only used as an id inside the devtools. The
+				// relevant data will be read from `.data` instead which is a
+				// normalized structure that every react release adheres to. This
+				// makes backwards-compatibility easier instead of relying on internal
+				// vnode/fiber shape.
+				internalInstance: prev,
+				data,
+				renderer: this.rid,
+				type: 'updateProfileTimes'
+			});
 			return;
 		}
 
@@ -192,13 +186,21 @@ export class Renderer {
 	}
 
 	/**
-	 * Unmount a vnode recursively
+	 * Unmount a vnode recursively. Contrary to mounting or updating unmounting needs
+	 * to push the events in parent-first order. Because `options.beforeUnmount` is
+	 * already fired in parent-first order we don't need to traverse anything here.
 	 * @param {import('../internal').VNode} vnode
 	 */
 	handleCommitFiberUnmount(vnode) {
 		let inst = getInstance(vnode);
-
 		this.inst2vnode.delete(inst);
+
+		// Special case when unmounting a root (most prominently caused by webpack's
+		// `hot-module-reloading`). If this happens we need to unmount the virtual
+		// `Fragment` we're wrapping around each root just for the devtools.
+		if (isRoot(vnode)) {
+			vnode = patchRoot(vnode);
+		}
 
 		this.pending.push({
 			internalInstance: vnode,
