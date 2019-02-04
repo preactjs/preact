@@ -1,4 +1,4 @@
-import { Fragment, createElement } from 'ceviche';
+import { Fragment } from 'ceviche';
 
 /**
  * Get the type/category of a vnode
@@ -120,42 +120,15 @@ export function getChildren(vnode) {
 }
 
 /**
- * Get the topmost vnode in a tree
- * @param {import('../internal').VNode} vnode
- * @returns {import('../internal').VNode | null}
- */
-export function getPatchedRoot(vnode) {
-
-	/** @type {any} */
-	let dom = vnode._dom;
-
-	let last = null;
-	while ((dom = dom.parentNode)!=null) {
-		if (dom._prevVNode!=null) {
-			last = dom._prevVNode;
-		}
-	}
-
-	if (last!=null) {
-		last = roots.get(getInstance(last));
-		// Must always be refreshed for updates
-		last._children = [vnode];
-		last._component._prevVNode = vnode;
-	}
-
-	return last;
-}
-
-/**
  * Check if a vnode is a root node
  * @param {import('../internal').VNode} vnode
  * @returns {boolean}
  */
 export function isRoot(vnode) {
-	return vnode._dom!=null && vnode._dom.parentNode!=null &&
-
-	/** @type {import('../internal').PreactElement} */
-	(vnode._dom.parentNode)._prevVNode!=null;
+	return vnode._dom==null &&
+		Array.isArray(vnode._children) &&
+		vnode._children.length > 0 &&
+		vnode._children[0]._dom!=null;
 }
 
 /**
@@ -170,6 +143,13 @@ export function isRoot(vnode) {
  * @returns {import('../internal').Component | import('../internal').PreactElement | Text | null}
  */
 export function getInstance(vnode) {
+	// Use the parent element as instance for root nodes
+	if (isRoot(vnode)) {
+		return vnode._children.length > 0
+			? /** @type {import('../internal').PreactElement | null} */
+			(vnode._children[0]._dom.parentNode)
+			: null;
+	}
 	if (vnode._component!=null) return vnode._component;
 	if (vnode.type===Fragment) return vnode.props;
 	return vnode._dom;
@@ -216,52 +196,4 @@ export function hasDataChanged(prev, next) {
  */
 export function hasProfileDataChanged(prev, next) {
 	return prev.startTime!==next.startTime || prev.endTime!==next.endTime;
-}
-
-/**
- * @type {WeakMap<import('../internal').Component | import('../internal').PreactElement | HTMLElement | Text, import('../internal').VNode>}
- */
-let roots = new WeakMap();
-
-/* istanbul ignore next */
-let noop = () => undefined;
-
-/**
- * Add a wrapper node around the root. React internally has an additional
- * special `HostRoot` node at the top of each root. Because of that the Profiler
- * always skips the first vnode. To fix that we insert a virtual wrapper just
- * for the devtools.
- * @param {import('../../../src/internal').VNode} vnode
- */
-export function patchRoot(vnode) {
-	let inst = getInstance(vnode);
-	let root = roots.get(inst);
-	if (root==null) {
-		root = createElement(Fragment, { children: vnode });
-
-		// We haven't actually rendered this node so we need to fill out the
-		// properties that the devtools rely upon ourselves.
-		root._dom = vnode._dom;
-		root.startTime = vnode.startTime;
-		root.endTime = vnode.endTime;
-
-		/** @type {*} */
-		(root)._component = {
-			setState: noop,
-			forceUpdate: noop
-		};
-
-		// To enable profiling the devtools check if this property exists on
-		// the given root node.
-		/** @type {*} */
-		(root).treeBaseDuration = 0;
-
-		roots.set(inst, root);
-	}
-
-	// Must always be refreshed for updates
-	root._children = [vnode];
-	root._component._prevVNode = vnode;
-
-	return root;
 }

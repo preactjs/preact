@@ -1,17 +1,17 @@
 import { createElement, createElement as h, Fragment, options, Component, render } from 'ceviche';
-import { getDisplayName, setIn, isRoot, getPatchedRoot, getData, patchRoot, shallowEqual, hasDataChanged, hasProfileDataChanged, getChildren } from '../../src/devtools/custom';
+import { getDisplayName, setIn, isRoot, getData, shallowEqual, hasDataChanged, hasProfileDataChanged, getChildren } from '../../src/devtools/custom';
 import { setupScratch, setupRerender, teardown, clearOptions } from '../../../test/_util/helpers';
 import { initDevTools } from '../../src/devtools';
 import { Renderer } from '../../src/devtools/renderer';
 
 /** @jsx h */
 
-/** @typedef {import('../../../src/internal').DevtoolsHook & { log: any[], clear: () => void }} MockHook */
+/** @typedef {import('../../src/internal').DevtoolsHook & { log: any[], clear: () => void }} MockHook */
 
 /**
  * Serialize a devtool events and filter out `updateProfilerTimes` because it
  * relies on timings which would lead to flaky tests.
- * @param {import('../../../src/internal').DevtoolsEvent[]} events
+ * @param {import('../../src/internal').DevtoolsEvent[]} events
  */
 function serialize(events) {
 	return events.filter(x => x.type!='updateProfileTimes').map(x => ({
@@ -28,7 +28,7 @@ function serialize(events) {
 function createMockHook() {
 	let roots = new Set();
 
-	/** @type {Array<import('../../../src/internal').DevtoolsEvent>} */
+	/** @type {Array<import('../../src/internal').DevtoolsEvent>} */
 	let events = [];
 
 	function emit(ev, data) {
@@ -69,7 +69,7 @@ function createMockHook() {
 /**
  * Verify the references in the events passed to the devtools. Component have to
  * be traversed in a child-depth-first order for the devtools to work.
- * @param {Array<import('../../../src/internal').DevtoolsEvent>} events
+ * @param {Array<import('../../src/internal').DevtoolsEvent>} events
  */
 function checkEventReferences(events) {
 	let seen = new Set();
@@ -77,7 +77,7 @@ function checkEventReferences(events) {
 	events.forEach((event, i) => {
 		if (i > 0 && event.type!=='unmount' && Array.isArray(event.data.children)) {
 			event.data.children.forEach(child => {
-				if (!seen.has(child)) {
+				if (!seen.has(child) && event.type!=='rootCommitted') {
 					throw new Error(`Event at index ${i} has a child that could not be found in a preceeding event for component "${getDisplayName(child)}"`);
 				}
 			});
@@ -87,7 +87,7 @@ function checkEventReferences(events) {
 		if (event.type=='mount') {
 			seen.add(inst);
 		}
-		else if (!seen.has(inst)) {
+		else if (!seen.has(inst) && event.type!=='rootCommitted') {
 			throw new Error(`Event at index ${i} for component ${inst!=null ? getDisplayName(inst) : inst} is not mounted. Perhaps you forgot to send a "mount" event prior to this?`);
 		}
 
@@ -113,9 +113,9 @@ function checkEventReferences(events) {
 	});
 }
 
-describe.skip('devtools', () => {
+describe('devtools', () => {
 
-	/** @type {import('../../../src/internal').PreactElement} */
+	/** @type {import('../../src/internal').PreactElement} */
 	let scratch;
 
 	/** @type {() => void} */
@@ -131,7 +131,7 @@ describe.skip('devtools', () => {
 
 		hook = createMockHook();
 
-		/** @type {import('../../../src/internal').DevtoolsWindow} */
+		/** @type {import('../../src/internal').DevtoolsWindow} */
 		(window).__REACT_DEVTOOLS_GLOBAL_HOOK__ = hook;
 
 		initDevTools();
@@ -155,7 +155,7 @@ describe.skip('devtools', () => {
 		/** @type {*} */
 		(console.error).restore();
 
-		delete /** @type {import('../../../src/internal').DevtoolsWindow} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
+		delete /** @type {import('../../src/internal').DevtoolsWindow} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
 	});
 
 	describe('getDisplayName', () => {
@@ -318,26 +318,6 @@ describe.skip('devtools', () => {
 		});
 	});
 
-	describe('getPatchedRoot', () => {
-		it('should get the root of a vnode', () => {
-			render(<div>Hello World</div>, scratch);
-			let root = scratch._prevVNode;
-
-			let wrapped = patchRoot(root);
-
-			expect(getPatchedRoot(root)).to.equal(wrapped);
-			expect(getPatchedRoot(wrapped._children[0])).to.equal(wrapped);
-		});
-
-		it('should return null if unable to find the root', () => {
-			render(<div>Hello World</div>, scratch);
-			let root = scratch._prevVNode;
-			root._dom = document.body;
-
-			expect(getPatchedRoot(root)).to.equal(null);
-		});
-	});
-
 	describe('getData', () => {
 		it('should convert vnode to DevtoolsData', () => {
 			class App extends Component {
@@ -347,7 +327,7 @@ describe.skip('devtools', () => {
 			}
 
 			render(<App key="foo" active />, scratch);
-			let vnode = scratch._prevVNode;
+			let vnode = scratch._prevVNode._children[0];
 			vnode.startTime = 10;
 			vnode.endTime = 12;
 
@@ -381,7 +361,7 @@ describe.skip('devtools', () => {
 
 		it('should inline single text child', () => {
 			render(<h1>Hello World</h1>, scratch);
-			let data = getData(scratch._prevVNode);
+			let data = getData(scratch._prevVNode._children[0]);
 
 			expect(data.children).to.equal('Hello World');
 			expect(data.text).to.equal(null);
@@ -389,7 +369,7 @@ describe.skip('devtools', () => {
 
 		it('should convert text nodes', () => {
 			render('Hello World', scratch);
-			let data = getData(scratch._prevVNode);
+			let data = getData(scratch._prevVNode._children[0]);
 
 			expect(data.children).to.equal(null);
 			expect(data.text).to.equal('Hello World');
@@ -399,7 +379,7 @@ describe.skip('devtools', () => {
 	it('should not initialize hook if __REACT_DEVTOOLS_GLOBAL_HOOK__ is not set', () => {
 		delete options.beforeDiff;
 		delete options.afterDiff;
-		delete window.__REACT_DEVTOOLS_GLOBAL_HOOK__;
+		delete /** @type {*} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
 
 		initDevTools();
 		expect(options.beforeDiff).to.equal(undefined);
@@ -454,6 +434,7 @@ describe.skip('devtools', () => {
 		});
 
 		afterEach(() => {
+			hook.clear();
 			window.performance.now = performance.now;
 		});
 
@@ -488,12 +469,11 @@ describe.skip('devtools', () => {
 
 		it('should find vnode by dom node', () => {
 			render(<div />, scratch);
-			let vnode = scratch._prevVNode;
+			let vnode = scratch._prevVNode._children[0];
 			let rid = Object.keys(hook._renderers)[0];
 			let renderer = hook._renderers[rid];
-			expect(renderer.findFiberByHostInstance(scratch.firstChild)).to.equal(vnode);
 
-			expect(renderer.findFiberByHostInstance(scratch)).to.equal(null);
+			expect(renderer.findFiberByHostInstance(scratch.firstChild)).to.equal(vnode);
 		});
 
 		it('should getNativeFromReactElement', () => {
@@ -506,7 +486,7 @@ describe.skip('devtools', () => {
 
 		it('should getReactElementFromNative', () => {
 			render(<div />, scratch);
-			let vnode = scratch._prevVNode;
+			let vnode = scratch._prevVNode._children[0];
 			let rid = Object.keys(hook._renderers)[0];
 			let helpers = hook.helpers[rid];
 			expect(helpers.getReactElementFromNative(vnode._dom)).to.equal(vnode);
@@ -585,7 +565,6 @@ describe.skip('devtools', () => {
 			expect(serialize(hook.log)).to.deep.equal([
 				{ type: 'mount', component: 'h1' },
 				{ type: 'update', component: 'App' },
-				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -643,7 +622,6 @@ describe.skip('devtools', () => {
 				{ type: 'mount', component: 'div' },
 				{ type: 'mount', component: 'Foo' },
 				{ type: 'update', component: 'App' },
-				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -677,16 +655,6 @@ describe.skip('devtools', () => {
 				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
-		});
-
-		it('should unmount wrapped Fragment if root will be unmounted', () => {
-			render(<div />, scratch);
-			render('foo', scratch);
-
-			expect(serialize(hook.log).filter(x => x.type === 'unmount')).to.deep.equal([{
-				component: 'Fragment',
-				type: 'unmount'
-			}]);
 		});
 
 		it('should be able to render Fragments', () => {
@@ -839,7 +807,11 @@ describe.skip('devtools', () => {
 			it('should collect timings', () => {
 				render(<div>Hello World</div>, scratch);
 
-				hook.log.forEach(ev => {
+				// Filter out root node which doesn't need to have timings
+				const events = hook.log.filter(x => x.type=='mount');
+				events.splice(-1, 1);
+
+				events.forEach(ev => {
 					expect(ev.data.actualStartTime > 0).to.equal(true);
 				});
 			});
@@ -847,7 +819,11 @@ describe.skip('devtools', () => {
 			it('should calculate treeBaseDuration', () => {
 				render(<div>Hello World</div>, scratch);
 
-				hook.log.forEach(ev => {
+				// Filter out root node which doesn't need to have timings
+				const events = hook.log.filter(x => x.type=='mount');
+				events.splice(-1, 1);
+
+				events.forEach(ev => {
 					expect(ev.data.treeBaseDuration > -1).to.equal(true);
 				});
 			});
