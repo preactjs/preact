@@ -188,6 +188,18 @@ PureComponent.prototype.shouldComponentUpdate = function(props, state) {
 	return shallowDiffers(this.props, props) || shallowDiffers(this.state, state);
 };
 
+function setUnsafeDescriptor(obj, key) {
+	Object.defineProperty(obj.prototype, 'UNSAFE_' + key, {
+		configurable: true,
+		get() { return this[key]; },
+		set(v) { this[key] = v; }
+	});
+}
+
+setUnsafeDescriptor(Component, 'componentWillMount');
+setUnsafeDescriptor(Component, 'componentWillReceiveProps');
+setUnsafeDescriptor(Component, 'componentWillUpdate');
+
 export {
 	version,
 	Children,

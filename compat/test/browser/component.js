@@ -107,4 +107,65 @@ describe('components', () => {
 			expect(spy).not.to.have.been.called;
 		});
 	});
+
+	describe('UNSAFE_* lifecycle methods', () => {
+		it('should support UNSAFE_componentWillMount', () => {
+			let spy = sinon.spy();
+
+			class Foo extends React.Component {
+				// eslint-disable-next-line camelcase
+				UNSAFE_componentWillMount() {
+					spy();
+				}
+
+				render() {
+					return <h1>foo</h1>;
+				}
+			}
+
+			React.render(<Foo />, scratch);
+
+			expect(spy).to.be.calledOnce;
+		});
+
+		it('should support UNSAFE_componentWillReceiveProps', () => {
+			let spy = sinon.spy();
+
+			class Foo extends React.Component {
+				// eslint-disable-next-line camelcase
+				UNSAFE_componentWillReceiveProps() {
+					spy();
+				}
+
+				render() {
+					return <h1>foo</h1>;
+				}
+			}
+
+			React.render(<Foo />, scratch);
+			// Trigger an update
+			React.render(<Foo />, scratch);
+			expect(spy).to.be.calledOnce;
+		});
+
+		it('should support UNSAFE_componentWillUpdate', () => {
+			let spy = sinon.spy();
+
+			class Foo extends React.Component {
+				// eslint-disable-next-line camelcase
+				UNSAFE_componentWillUpdate() {
+					spy();
+				}
+
+				render() {
+					return <h1>foo</h1>;
+				}
+			}
+
+			React.render(<Foo />, scratch);
+			// Trigger an update
+			React.render(<Foo />, scratch);
+			expect(spy).to.be.calledOnce;
+		});
+	});
 });
