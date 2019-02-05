@@ -1,6 +1,6 @@
 import { render as preactRender, cloneElement as preactCloneElement, createRef, createElement as h, Component, options, toChildArray } from 'ceviche';
 
-const version = '15.1.0'; // trick libraries to think we are react
+const version = '16.8.0'; // trick libraries to think we are react
 
 const REACT_ELEMENT_TYPE = (typeof Symbol!=='undefined' && Symbol.for && Symbol.for('react.element')) || 0xeac7;
 
