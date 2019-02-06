@@ -121,6 +121,12 @@ export const useRef = createHook((hook, component, initialValue) => {
 export const useMemo = createHook(() => callback => callback(), memoChanged);
 export const useCallback = createHook(() => callback => callback, propsChanged);
 
+export const useContext = createHook((hook, component, context) => {
+	let provider = component.context[context._id];
+	provider && provider.sub(component);
+	return () => provider ? (provider.props.value) : context._defaultValue;
+});
+
 // Note: if someone used Component.debounce = requestAnimationFrame,
 // then effects will ALWAYS run on the NEXT frame instead of the current one, incurring a ~16ms delay.
 // Perhaps this is not such a big deal.
