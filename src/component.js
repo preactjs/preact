@@ -71,7 +71,7 @@ Component.prototype.forceUpdate = function(callback) {
 		if (this._force==null) this._force = true;
 
 		let mounts = [];
-		diff(this._vnode._dom, this._parentDom, this._vnode, this._vnode, this.context, this._parentDom.ownerSVGElement!==undefined, true, null, mounts, this._ancestorComponent, this._parentVNode || {});
+		diff(this._vnode._dom, this._parentDom, this._vnode, this._vnode, this._context, this._parentDom.ownerSVGElement!==undefined, true, null, mounts, this._ancestorComponent, this._parentVNode || {});
 		commitRoot(mounts, this._vnode);
 
 		// Reset mode to its initial value for the next render

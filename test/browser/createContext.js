@@ -238,6 +238,7 @@ describe('createContext', () => {
 		render((
 			<App value={CONTEXT} />
 		), scratch);
+		expect(scratch.innerHTML).to.equal('<div><div><strong>a</strong></div></div>');
 
 		render((
 			<App value={UPDATED_CONTEXT} />
