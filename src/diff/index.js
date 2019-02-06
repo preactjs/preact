@@ -73,8 +73,8 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
 			let cxType = newType.contextType;
-			let cctx = cxType != null ? (cxType._id in context ? context[cxType._id] : cxType._defaultValue) : context;
-			//                           ^ provider              ^ exists              ^ doesn't exist
+			let provider = cxType && context[cxType._id];
+			let cctx = cxType != null ? (provider ? provider.props.value : cxType._defaultValue) : context;
 
 			// Get component and set it to `c`
 			if (oldVNode._component) {
@@ -94,10 +94,12 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 					c.render = doRender;
 				}
 				c._ancestorComponent = ancestorComponent;
+				provider && provider.sub(c);
 
 				c.props = newVNode.props;
 				if (!c.state) c.state = {};
 				c.context = cctx;
+				c._context = context;
 				c._dirty = true;
 				c._renderCallbacks = [];
 			}

@@ -1,3 +1,5 @@
+import { enqueueRender } from './component';
+
 export let i = 0;
 
 /**
@@ -7,28 +9,44 @@ export let i = 0;
 export function createContext(defaultValue) {
 	const id = '__cC' + i++;
 
+	let context = {
+		_id: id,
+		_defaultValue: defaultValue
+	};
+
 	function Consumer(props, context) {
-		let value = id in context ? context[id] : defaultValue;
-		return props.children(value);
+		return props.children(context);
 	}
+	Consumer.contextType = context;
+	context.Consumer = Consumer;
 
 	let ctx = { [id]: null };
 
-	class Provider {
-		getChildContext() {
-			ctx[id] = this.props.value;
+	function initProvider (comp) {
+		let subs = [];
+		comp.getChildContext = () => {
+			ctx[id] = comp;
 			return ctx;
-		}
-
-		render() {
-			return this.props.children;
-		}
+		};
+		comp.componentDidUpdate = () => {
+			let v = comp.props.value;
+			subs.map(c => v !== c.context && (c.context = v,enqueueRender(c)));
+		};
+		comp.sub = (c) => {
+			subs.push(c);
+			let old = c.componentWillUnmount;
+			c.componentWillUnmount = () => {
+				subs.splice(subs.indexOf(c), 1);
+				old && old();
+			};
+		};
 	}
 
-	return {
-		_id: id,
-		_defaultValue: defaultValue,
-		Provider,
-		Consumer
-	};
+	function Provider(props) {
+		if (!this.getChildContext) initProvider(this);
+		return props.children;
+	}
+	context.Provider = Provider;
+
+	return context;
 }
