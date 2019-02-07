@@ -58,10 +58,9 @@ options.beforeUnmount = vnode => {
  * Get a hook's state from the currentComponent
  * @template State
  * @param {number} index The index of the hook to get
- * @param {State} initialState The initial state of the hook
  * @returns {State}
  */
-function getHookState(index, initialState) {
+function getHookState(index) {
 	// Largely inspired by:
 	// * https://github.com/michael-klein/funcy.js/blob/master/src/hooks/core_hooks.mjs
 	// * https://github.com/michael-klein/funcy.js/blob/master/src/lib/renderer.mjs
@@ -72,7 +71,7 @@ function getHookState(index, initialState) {
 
 	// 503 B
 	if (index >= hooks._list.length) {
-		hooks._list.push(initialState);
+		hooks._list.push({});
 	}
 	return hooks._list[index];
 
@@ -123,7 +122,7 @@ export function useReducer(reducer, initialState, initialAction) {
 
 	// 716 B
 	/** @type {import('./internal').ReducerHookState} */
-	const hookState = getHookState(currentIndex++, {});
+	const hookState = getHookState(currentIndex++);
 	if (hookState._component == null) {
 		hookState._component = currentComponent;
 		hookState._value = [
@@ -147,7 +146,7 @@ export function useReducer(reducer, initialState, initialAction) {
 export function useEffect(callback, args) {
 
 	/** @type {import('./internal').EffectHookState} */
-	const state = getHookState(currentIndex++, {});
+	const state = getHookState(currentIndex++);
 	// const state = getHookState(currentIndex++, { _value: callback, _args: null, _cleanup: null }); // +11 B
 	// if (args == null || state._args == null || args.some((prop, index) => prop !== state._args[index])) { // -1 B
 	if (argsChanged(state._args, args)) {
@@ -166,7 +165,7 @@ export function useEffect(callback, args) {
 export function useLayoutEffect(callback, args) {
 
 	/** @type {import('./internal').EffectHookState} */
-	const state = getHookState(currentIndex++, {});
+	const state = getHookState(currentIndex++);
 	// const state = getHookState(currentIndex++, { _value: callback, _args: null, _cleanup: null }); // +11 B
 	// if (args == null || state._args == null || args.some((prop, index) => prop !== state._args[index])) { // -1 B
 	if (argsChanged(state._args, args)) {
@@ -178,7 +177,12 @@ export function useLayoutEffect(callback, args) {
 }
 
 export function useRef(initialValue) {
-	return getHookState(currentIndex++, { current: initialValue });
+	const state = getHookState(currentIndex++);
+	if (state._value == null) {
+		state._value = { current: initialValue };
+	}
+
+	return state._value;
 }
 
 /**
@@ -188,7 +192,7 @@ export function useRef(initialValue) {
 export function useMemo(callback, args) {
 
 	/** @type {import('./internal').MemoHookState} */
-	const state = getHookState(currentIndex++, {});
+	const state = getHookState(currentIndex++);
 	// if (args == null ? callback !== state._callback : state._args == null || args.some((prop, index) => prop !== state._args[index])) { // -1 B
 	if (args == null ? callback !== state._callback : argsChanged(state._args, args)) {
 		state._args = args;
