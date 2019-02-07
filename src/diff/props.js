@@ -40,23 +40,17 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		 *   - assigning to .style sets .style.cssText - TODO: benchmark this, might not be worth the bytes.
 		 *   - assigning also casts to String, and ignores invalid values. This means assigning an Object clears all styles.
 		 */
-		let s = dom.style;
 
-		if (typeof value==='string') return s.cssText = value;
-		if (typeof oldValue==='string') s.cssText = '';
+		let s = '';
+		if (typeof value==='string') s = value;
 		else {
-			// remove values not in the new list
-			for (let i in oldValue) {
-				if (value==null || !(i in value)) s[i] = '';
+			for (let i in value) {
+				let v = value[i];
+				let normalized = typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v;
+				s += ';' + i.replace(/-?([A-Z])/g, '-$1') + ':' + normalized;
 			}
 		}
-
-		for (let i in value) {
-			let v = value[i];
-			if (oldValue==null || v!==oldValue[i]) {
-				s[i] = typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v;
-			}
-		}
+		dom.style.cssText = s;
 	}
 	else if (name==='dangerouslySetInnerHTML') {
 		// Avoid re-applying the same '__html' if it did not changed between re-render
