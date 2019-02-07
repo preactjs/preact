@@ -22,6 +22,8 @@ export function diffProps(dom, newProps, oldProps, isSvg) {
 	}
 }
 
+let cssReg = /-?([A-Z])/g;
+
 /**
  * Set a property value on a DOM node
  * @param {import('../internal').PreactElement} dom The DOM node to modify
@@ -47,7 +49,8 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 			for (let i in value) {
 				let v = value[i];
 				let normalized = typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v;
-				s += ';' + i.replace(/-?([A-Z])/g, '-$1') + ':' + normalized;
+				cssReg.lastIndex = 0;
+				s += ';' + i.replace(cssReg, '-$1') + ':' + normalized;
 			}
 		}
 		dom.style.cssText = s;
