@@ -741,6 +741,7 @@ declare namespace JSX {
 		circle: SVGAttributes;
 		clipPath: SVGAttributes;
 		defs: SVGAttributes;
+		desc: SVGAttributes;
 		ellipse: SVGAttributes;
 		feBlend: SVGAttributes;
 		feColorMatrix: SVGAttributes;
