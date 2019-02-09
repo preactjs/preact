@@ -6,7 +6,9 @@
   "props": {
     "cname": 6,
     "props": {
-      "$__hooks": "__H"
+      "$__hooks": "__H",
+      "$_defaultValue": "__p",
+      "$_id": "__c"
     }
   }
 }
