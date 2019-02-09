@@ -594,7 +594,8 @@ describe('render()', () => {
 		it('should avoid reapplying innerHTML when __html property of dangerouslySetInnerHTML attr remains unchanged', () => {
 			class Thing extends Component {
 				render() {
-					return <div dangerouslySetInnerHTML={{ __html: "<span>same</span>" }} />;
+					// eslint-disable-next-line react/no-danger
+					return <div dangerouslySetInnerHTML={{ __html: '<span>same</span>' }} />;
 				}
 			}
 
