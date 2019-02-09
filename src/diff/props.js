@@ -58,6 +58,8 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		}
 	}
 	else if (name==='dangerouslySetInnerHTML') {
+		// Avoid re-applying the same '__html' if it did not changed between re-render
+		if (value && oldValue && value.__html == oldValue.__html) return;
 		dom.innerHTML = value && value.__html || '';
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6

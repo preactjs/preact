@@ -590,6 +590,24 @@ describe('render()', () => {
 			expect(scratch.firstChild).to.have.property('innerHTML', html);
 			expect(scratch.innerHTML).to.equal(`<div>${html}</div>`);
 		});
+
+		it('should avoid reapplying innerHTML when __html property of dangerouslySetInnerHTML attr remains unchanged', () => {
+			class Thing extends Component {
+				render() {
+					return <div dangerouslySetInnerHTML={{ __html: "<span>same</span>" }} />;
+				}
+			}
+
+			let thing;
+			render(<Thing ref={r => thing = r} />, scratch);
+
+			let firstInnerHTMLChild = scratch.firstChild.firstChild;
+
+			// Re-render
+			thing.forceUpdate();
+
+			expect(firstInnerHTMLChild).to.equal(scratch.firstChild.firstChild);
+		});
 	});
 
 	it('should reconcile mutated DOM attributes', () => {
