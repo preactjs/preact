@@ -124,7 +124,7 @@ export const useCallback = createHook(() => callback => callback, propsChanged);
 export const useContext = createHook((hook, component, context) => {
 	let provider = component.context[context._id];
 	provider && provider.sub(component);
-	return () => provider ? (provider.props.value) : context._defaultValue;
+	return () => provider ? provider.props.value : context._defaultValue;
 });
 
 // Note: if someone used Component.debounce = requestAnimationFrame,
