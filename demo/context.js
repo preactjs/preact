@@ -1,4 +1,5 @@
-import { createElement, Component, createContext, Fragment } from 'ceviche';
+// eslint-disable-next-line no-unused-vars
+import { createElement, Component, createContext, Fragment } from "ceviche";
 const { Provider, Consumer } = createContext();
 
 class ThemeProvider extends Component {
@@ -15,30 +16,25 @@ class ThemeProvider extends Component {
 	}
 
 	render() {
-		console.log(this.state);
-		return <Provider value={this.state.value}>
-			{this.props.children}
-		</Provider>
+		return <Provider value={this.state.value}>{this.props.children}</Provider>;
 	}
 }
 
 class Child extends Component {
-	shouldComponentUpdate() {
-		//return false;
-	}
-
 	render() {
-		return <>
-			<p>ok this is cool</p>
-			{this.props.children}
-		</>
+		return (
+			<>
+				<p>ok this is cool</p>
+				{this.props.children}
+			</>
+		);
 	}
 }
 
-export default class extends Component {
-  render(props, state) {
-    return (
-      <ThemeProvider value="blue" next="red">
+export default class ContextDemo extends Component {
+	render(props, state) {
+		return (
+			<ThemeProvider value="blue" next="red">
 				<Child>
 					<Consumer>
 						{data => (
@@ -53,7 +49,7 @@ export default class extends Component {
 						)}
 					</Consumer>
 				</Child>
-      </ThemeProvider>
-    )
-  }
+			</ThemeProvider>
+		);
+	}
 }
