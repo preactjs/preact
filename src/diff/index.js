@@ -94,7 +94,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 					c.render = doRender;
 				}
 				c._ancestorComponent = ancestorComponent;
-				provider && provider.sub(c);
+				if (provider) provider.sub(c);
 
 				c.props = newVNode.props;
 				if (!c.state) c.state = {};

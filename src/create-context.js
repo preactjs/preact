@@ -22,7 +22,7 @@ export function createContext(defaultValue) {
 
 	let ctx = { [id]: null };
 
-	function initProvider (comp) {
+	function initProvider(comp) {
 		let subs = [];
 		comp.getChildContext = () => {
 			ctx[id] = comp;
@@ -30,7 +30,7 @@ export function createContext(defaultValue) {
 		};
 		comp.componentDidUpdate = () => {
 			let v = comp.props.value;
-			subs.map(c => v !== c.context && (c.context = v, enqueueRender(c)));
+			subs.map(c => v!==c.context && (c.context = v, enqueueRender(c)));
 		};
 		comp.sub = (c) => {
 			subs.push(c);
