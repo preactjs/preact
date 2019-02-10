@@ -1,4 +1,4 @@
-import { createElement, createElement as h, Fragment, options, Component, render } from 'ceviche';
+import { createElement, createElement as h, Fragment, options, Component, render } from 'preact';
 import { getDisplayName, setIn, isRoot, getPatchedRoot, getData, patchRoot, shallowEqual, hasDataChanged, hasProfileDataChanged, getChildren } from '../../src/devtools/custom';
 import { setupScratch, setupRerender, teardown, clearOptions } from '../../../test/_util/helpers';
 import { initDevTools } from '../../src/devtools';

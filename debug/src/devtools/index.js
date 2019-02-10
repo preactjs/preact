@@ -1,4 +1,4 @@
-import { options } from 'ceviche';
+import { options } from 'preact';
 import { Renderer } from './renderer';
 
 /**

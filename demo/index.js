@@ -1,6 +1,5 @@
-import { createElement, render, hydrate, Component, options } from 'ceviche';
-import * as preact from 'preact';
-import renderToString from 'preact-render-to-string';
+import { createElement, render, hydrate, Component, options } from 'preact';
+// import renderToString from 'preact-render-to-string';
 import './style.scss';
 import { Router, Link } from './router';
 import Pythagoras from './pythagoras';
@@ -12,7 +11,7 @@ import Context from './context';
 import installLogger from './logger';
 import ProfilerDemo from './profiler';
 import KeyBug from './key_bug';
-import { initDevTools } from 'ceviche/debug/src/devtools';
+import { initDevTools } from 'preact/debug/src/devtools';
 
 let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(window.location.href);
 if (!isBenchmark) {
@@ -21,7 +20,7 @@ if (!isBenchmark) {
 	initDevTools();
 }
 
-window.ceviche = { createElement, render, hydrate, Component, options };
+window.preact = { createElement, render, hydrate, Component, options };
 
 class Home extends Component {
 	a = 1;
@@ -92,7 +91,7 @@ class App extends Component {
 }
 
 
-document.body.innerHTML = renderToString(<App url={location.href.match(/[#&]ssr/) ? undefined : '/'} />);
+// document.body.innerHTML = renderToString(<App url={location.href.match(/[#&]ssr/) ? undefined : '/'} />);
 // document.body.firstChild.setAttribute('is-ssr', 'true');
 
 installLogger(
