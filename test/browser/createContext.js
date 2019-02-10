@@ -374,5 +374,32 @@ describe('createContext', () => {
 
 			expect(spy).to.be.calledWithMatch({ foo: 'foo' });
 		});
+
+		it('should call componentWillUnmount', () => {
+			let Foo = createContext('foo');
+			let spy = sinon.spy();
+
+			class App extends Component {
+				componentWillUnmount() {
+					spy();
+				}
+
+				render() {
+					return <div />;
+				}
+			}
+
+			App.contextType = Foo;
+
+			render((
+				<Foo.Provider value="foo">
+					<App />
+				</Foo.Provider>
+			), scratch);
+
+			render(null, scratch);
+
+			expect(spy).to.be.calledOnce;
+		});
 	});
 });
