@@ -7,24 +7,31 @@ class ThemeProvider extends Component {
 		value: this.props.value
 	};
 
-	componentDidMount() {
-		setTimeout(() => {
-			this.setState({
-				value: this.props.next
-			});
-		}, 3000);
+	onClick = () => {
+		this.setState(prev => ({
+			value: prev.value===this.props.value ? this.props.next : this.props.value
+		}));
 	}
 
 	render() {
-		return <Provider value={this.state.value}>{this.props.children}</Provider>;
+		return (
+			<div>
+				<button onClick={this.onClick}>Toggle</button>
+				<Provider value={this.state.value}>{this.props.children}</Provider>
+			</div>
+		);
 	}
 }
 
 class Child extends Component {
+	shouldComponentUpdate() {
+		return false;
+	}
+
 	render() {
 		return (
 			<>
-				<p>ok this is cool</p>
+				<p>(blocked update)</p>
 				{this.props.children}
 			</>
 		);
@@ -32,17 +39,17 @@ class Child extends Component {
 }
 
 export default class ContextDemo extends Component {
-	render(props, state) {
+	render() {
 		return (
 			<ThemeProvider value="blue" next="red">
 				<Child>
 					<Consumer>
 						{data => (
 							<div>
-								<p>current theme: {data}</p>
+								<p>current theme: <b>{data}</b></p>
 								<ThemeProvider value="black" next="white">
 									<Consumer>
-										{data => <p>current sub theme: {data}</p>}
+										{data => <p>current sub theme: <b>{data}</b></p>}
 									</Consumer>
 								</ThemeProvider>
 							</div>
