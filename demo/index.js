@@ -8,6 +8,7 @@ import Spiral from './spiral';
 import Reorder from './reorder';
 import Todo from './todo';
 import Fragments from './fragments';
+import Context from './context';
 import installLogger from './logger';
 import ProfilerDemo from './profiler';
 import KeyBug from './key_bug';
@@ -59,6 +60,7 @@ class App extends Component {
 						<Link href="/fragments" activeClassName="active">Fragments</Link>
 						<Link href="/key_bug" activeClassName="active">Key Bug</Link>
 						<Link href="/profiler" activeClassName="active">Profiler</Link>
+						<Link href="/context" activeClassName="active">Context</Link>
 					</nav>
 				</header>
 				<main>
@@ -81,6 +83,7 @@ class App extends Component {
 						<Fragments path="/fragments" />
 						<ProfilerDemo path="/profiler" />
 						<KeyBug path="/key_bug" />
+						<Context path="/context" />
 					</Router>
 				</main>
 			</div>
