@@ -64,3 +64,8 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	_processingException?: Component<any, any>;
 	_constructor: preact.ComponentFactory<P>;
 }
+
+export interface PreactContext extends preact.PreactContext<any> {
+	_id: string;
+	_defaultValue: any;
+}

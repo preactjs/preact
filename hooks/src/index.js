@@ -56,9 +56,8 @@ options.beforeUnmount = vnode => {
 
 /**
  * Get a hook's state from the currentComponent
- * @template State
  * @param {number} index The index of the hook to get
- * @returns {State}
+ * @returns {import('./internal').HookState}
  */
 function getHookState(index) {
 	// Largely inspired by:
@@ -211,11 +210,37 @@ export function useCallback(callback, args) {
 	return useMemo(() => callback, args);
 }
 
-export const useContext = createHook((hook, component, context) => {
-	let provider = component.context[context._id];
-	provider && provider.sub(component);
-	return () => provider ? provider.props.value : context._defaultValue;
-});
+/**
+ * @param {import('./internal').PreactContext} context
+ */
+export function useContext(context) {
+	// const provider = currentComponent.context[context._id];
+	// return provider ? provider.props.value : context._defaultValue;
+
+
+	// 785 B
+	const provider = currentComponent.context[context._id];
+	if (provider == null) return context._defaultValue;
+	const state = getHookState(currentIndex++);
+	if (state._value == null) {
+		state._value = true;
+		provider.sub(currentComponent);
+	}
+	return provider.props.value;
+
+	// 783 B
+	// const provider = currentComponent.context[context._id];
+	// const state = getHookState(currentIndex++);
+	// if (state._value == null) {
+	// 	state._value = true;
+	// 	provider && provider.sub(currentComponent);
+	// }
+	// return provider ? provider.props.value : context._defaultValue;
+
+	// TODO: Unmounting this component (and Consumers) should clean up subscription
+	// Perhaps use a [layout] effect to model this? Will want to make sure a Provider
+	// that sets a value on mount triggers a re-render of all useContexts...
+}
 
 // Note: if someone used Component.debounce = requestAnimationFrame,
 // then effects will ALWAYS run on the NEXT frame instead of the current one, incurring a ~16ms delay.

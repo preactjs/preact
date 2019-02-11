@@ -1,25 +1,27 @@
 import { Component as PreactComponent } from '../../src/internal';
 
+export { PreactContext } from '../../src/internal';
+
 /**
  * The type of arguments passed to a Hook function. While this type is not
  * strictly necessary, they are given a type name to make it easier to read
  * the following types and trace the flow of data.
  */
-type HookArgs = any;
+export type HookArgs = any;
 
 /**
  * The return type of a Hook function. While this type is not
  * strictly necessary, they are given a type name to make it easier to read
  * the following types and trace the flow of data.
  */
-type HookReturnValue = any;
+export type HookReturnValue = any;
 
 /** The public function a user invokes to use a Hook */
-type Hook = (...args: HookArgs[]) => HookReturnValue;
+export type Hook = (...args: HookArgs[]) => HookReturnValue;
 
 // Hook tracking
 
-interface ComponentHooks {
+export interface ComponentHooks {
 	/** The list of hooks a component uses */
 	_list: HookState[];
 	/** List of Effects to be invoked after the next frame is rendered */
@@ -28,28 +30,28 @@ interface ComponentHooks {
 	_pendingLayoutEffects: EffectHookState[];
 }
 
-interface Component extends PreactComponent<any, any> {
+export interface Component extends PreactComponent<any, any> {
 	__hooks: ComponentHooks;
 }
 
-type HookState = EffectHookState | MemoHookState | ReducerHookState;
+export type HookState = EffectHookState | MemoHookState | ReducerHookState;
 
-type Effect = () => (void | Cleanup);
-type Cleanup = () => void;
+export type Effect = () => (void | Cleanup);
+export type Cleanup = () => void;
 
-interface EffectHookState {
+export interface EffectHookState {
 	_value?: Effect;
 	_args?: any[];
 	_cleanup?: Cleanup;
 }
 
-interface MemoHookState {
+export interface MemoHookState {
 	_value?: any;
 	_args?: any[];
 	_callback?: () => any;
 }
 
-interface ReducerHookState {
+export interface ReducerHookState {
 	_value?: any;
 	_component?: Component;
 }
