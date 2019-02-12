@@ -214,10 +214,6 @@ export function useCallback(callback, args) {
  * @param {import('./internal').PreactContext} context
  */
 export function useContext(context) {
-	// const provider = currentComponent.context[context._id];
-	// return provider ? provider.props.value : context._defaultValue;
-
-
 	// 785 B
 	const provider = currentComponent.context[context._id];
 	if (provider == null) return context._defaultValue;
@@ -236,10 +232,6 @@ export function useContext(context) {
 	// 	provider && provider.sub(currentComponent);
 	// }
 	// return provider ? provider.props.value : context._defaultValue;
-
-	// TODO: Unmounting this component (and Consumers) should clean up subscription
-	// Perhaps use a [layout] effect to model this? Will want to make sure a Provider
-	// that sets a value on mount triggers a re-render of all useContexts...
 }
 
 // Note: if someone used Component.debounce = requestAnimationFrame,
