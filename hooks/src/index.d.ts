@@ -1,3 +1,5 @@
+import { PreactContext } from "preact";
+
 type Inputs = ReadonlyArray<unknown>;
 
 
@@ -72,3 +74,11 @@ export function useCallback<T extends Function>(callback: T, inputs: Inputs): T;
  * If no array is provided, a new value will be computed whenever a new function instance is passed as the first argument.
  */
 export function useMemo<T>(factory: () => T, inputs?: Inputs): T;
+
+/**
+ * Returns the current context value, as given by the nearest context provider for the given context.
+ * When the provider updates, this Hook will trigger a rerender with the latest context value.
+ *
+ * @param context The context you want to use
+ */
+export function useContext<T>(context: PreactContext<T>): T;
