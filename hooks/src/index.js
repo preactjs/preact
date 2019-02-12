@@ -9,9 +9,6 @@ let currentComponent;
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
-/** @type {boolean} */
-let stateChanged;
-
 let oldBeforeRender = options.beforeRender;
 options.beforeRender = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
@@ -35,12 +32,10 @@ options.afterDiff = vnode => {
 	const hooks = c.__hooks;
 	if (!hooks) return;
 
-	stateChanged = false;
-
+	// TODO: Consider moving to a global queue. May need to move
+	// this to the `commitRoot` option
 	hooks._pendingLayoutEffects.forEach(invokeEffect);
 	hooks._pendingLayoutEffects = [];
-
-	if (stateChanged) c.forceUpdate();
 };
 
 
@@ -92,7 +87,6 @@ export function useReducer(reducer, initialState, initialAction) {
 
 			action => {
 				hookState._value[0] = reducer(hookState._value[0], action);
-				stateChanged = true;
 				hookState._component.setState({});
 			}
 		];
