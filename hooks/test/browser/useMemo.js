@@ -23,32 +23,6 @@ describe('useMemo', () => {
 		teardown(scratch);
 	});
 
-
-	it('only recomputes the result if a new function instance is passed, when no inputs are specified', () => {
-		let memoFunction = spy(() => 1);
-		const results = [];
-
-		function Comp() {
-			const result = useMemo(memoFunction);
-			results.push(result);
-			return null;
-		}
-
-		render(<Comp />, scratch);
-		render(<Comp />, scratch);
-
-		expect(results).to.deep.equal([1, 1]);
-		expect(memoFunction).to.have.been.calledOnce;
-
-		memoFunction = spy(() => 2);
-
-		render(<Comp />, scratch);
-		render(<Comp />, scratch);
-
-		expect(results).to.deep.equal([1, 1, 2, 2]);
-		expect(memoFunction).to.have.been.calledOnce;
-	});
-
 	it('only recomputes the result when inputs change', () => {
 		let memoFunction = spy((a, b) => a + b);
 		const results = [];

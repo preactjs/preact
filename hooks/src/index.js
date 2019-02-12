@@ -145,7 +145,7 @@ export function useMemo(callback, args) {
 
 	/** @type {import('./internal').MemoHookState} */
 	const state = getHookState(currentIndex++);
-	if (args == null ? callback !== state._callback : argsChanged(state._args, args)) {
+	if (argsChanged(state._args, args)) {
 		state._args = args;
 		state._callback = callback;
 		return state._value = callback();
