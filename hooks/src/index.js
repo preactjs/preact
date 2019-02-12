@@ -68,29 +68,10 @@ function getHookState(index) {
 
 	const hooks = currentComponent.__hooks || (currentComponent.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [] });
 
-	// 503 B
 	if (index >= hooks._list.length) {
 		hooks._list.push({});
 	}
 	return hooks._list[index];
-
-	// 506 B
-	// if (index >= hooks._list.length) {
-	// 	hooks._list.push(initialState);
-	// 	return initialState;
-	// }
-	// else {
-	// 	return hooks._list[index];
-	// }
-
-	// 505 B
-	// if (index < hooks._list.length) {
-	// 	return hooks._list[index];
-	// }
-	// else {
-	// 	hooks._list.push(initialState);
-	// 	return initialState;
-	// }
 }
 
 export function useState(initialState) {
@@ -98,36 +79,17 @@ export function useState(initialState) {
 }
 
 export function useReducer(reducer, initialState, initialAction) {
-	// 710 B
-	// /** @type {import('./internal').ReducerHookState} */
-	// const state = getHookState(currentIndex++, {});
-	// if (state._component == null) {
-	// 	state._component = currentComponent;
-	// 	// state._value = typeof initialState === 'function' ? initialState(): initialState;
-	// 	// state._value = initialAction ? reducer(invokeOrReturn(null, initialState), initialAction) : invokeOrReturn(null, initialState);
-	// 	state._value = invokeOrReturn(null, initialState);
-	// 	if (initialAction) {
-	// 		state._value = reducer(state._value, initialAction);
-	// 	}
-	// }
-	// return [
-	// 	state._value,
-	// 	action => {
-	// 		state._value = reducer(state._value, action);
-	// 		stateChanged = true; // +(15-18) B!!
-	// 		state._component.setState({});
-	// 	}
-	// ];
 
-	// 716 B
 	/** @type {import('./internal').ReducerHookState} */
 	const hookState = getHookState(currentIndex++);
 	if (hookState._component == null) {
 		hookState._component = currentComponent;
+
 		hookState._value = [
 			initialAction
 				? reducer(invokeOrReturn(null, initialState), initialAction)
 				: invokeOrReturn(null, initialState),
+
 			action => {
 				hookState._value[0] = reducer(hookState._value[0], action);
 				stateChanged = true;
@@ -135,6 +97,7 @@ export function useReducer(reducer, initialState, initialAction) {
 			}
 		];
 	}
+
 	return hookState._value;
 }
 
@@ -146,8 +109,6 @@ export function useEffect(callback, args) {
 
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(currentIndex++);
-	// const state = getHookState(currentIndex++, { _value: callback, _args: null, _cleanup: null }); // +11 B
-	// if (args == null || state._args == null || args.some((prop, index) => prop !== state._args[index])) { // -1 B
 	if (argsChanged(state._args, args)) {
 		state._value = callback;
 		state._args = args;
@@ -165,8 +126,6 @@ export function useLayoutEffect(callback, args) {
 
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(currentIndex++);
-	// const state = getHookState(currentIndex++, { _value: callback, _args: null, _cleanup: null }); // +11 B
-	// if (args == null || state._args == null || args.some((prop, index) => prop !== state._args[index])) { // -1 B
 	if (argsChanged(state._args, args)) {
 		state._value = callback;
 		state._args = args;
@@ -192,7 +151,6 @@ export function useMemo(callback, args) {
 
 	/** @type {import('./internal').MemoHookState} */
 	const state = getHookState(currentIndex++);
-	// if (args == null ? callback !== state._callback : state._args == null || args.some((prop, index) => prop !== state._args[index])) { // -1 B
 	if (args == null ? callback !== state._callback : argsChanged(state._args, args)) {
 		state._args = args;
 		state._callback = callback;
@@ -214,7 +172,6 @@ export function useCallback(callback, args) {
  * @param {import('./internal').PreactContext} context
  */
 export function useContext(context) {
-	// 785 B
 	const provider = currentComponent.context[context._id];
 	if (provider == null) return context._defaultValue;
 	const state = getHookState(currentIndex++);
@@ -223,15 +180,6 @@ export function useContext(context) {
 		provider.sub(currentComponent);
 	}
 	return provider.props.value;
-
-	// 783 B
-	// const provider = currentComponent.context[context._id];
-	// const state = getHookState(currentIndex++);
-	// if (state._value == null) {
-	// 	state._value = true;
-	// 	provider && provider.sub(currentComponent);
-	// }
-	// return provider ? provider.props.value : context._defaultValue;
 }
 
 // Note: if someone used Component.debounce = requestAnimationFrame,
