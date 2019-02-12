@@ -6,7 +6,8 @@ type Inputs = ReadonlyArray<unknown>;
 export type StateUpdater<S> = (value: S | ((prevState: S) => S)) => void;
 /**
  * Returns a stateful value, and a function to update it.
- **/
+ * @param initialState The initial value (or a function that returns the initial value)
+ */
 export function useState<S>(initialState: S | (() => S)): [S, StateUpdater<S>];
 
 
@@ -17,8 +18,22 @@ export type Reducer<S, A> = (prevState: S, action: A) => S;
  * `useReducer` is usually preferable to `useState` when you have complex state logic that involves
  * multiple sub-values. It also lets you optimize performance for components that trigger deep
  * updates because you can pass `dispatch` down instead of callbacks.
+ * @param reducer Given the current state and an action, returns the new state
+ * @param initialState The initial value to store as state
  */
-export function useReducer<S, A>(reducer: Reducer<S, A>, initialState: S, initialAction?: A): [S, (action: A) => void];
+export function useReducer<S, A>(reducer: Reducer<S, A>, initialState: S): [S, (action: A) => void];
+
+/**
+ * An alternative to `useState`.
+ *
+ * `useReducer` is usually preferable to `useState` when you have complex state logic that involves
+ * multiple sub-values. It also lets you optimize performance for components that trigger deep
+ * updates because you can pass `dispatch` down instead of callbacks.
+ * @param reducer Given the current state and an action, returns the new state
+ * @param initialArg The initial argument to pass to the `init` function
+ * @param init A function that, given the `initialArg`, returns the initial value to store as state
+ */
+export function useReducer<S, A, I>(reducer: Reducer<S, A>, initialArg: I, init: (arg: I) => S): [S, (action: A) => void];
 
 
 type PropRef<T> = { readonly current?: T; }
@@ -50,6 +65,7 @@ type EffectCallback = () => (void | (() => void));
  * @param inputs If present, effect will only activate if the values in the list change (using ===).
  */
 export function useEffect(effect: EffectCallback, inputs?: Inputs): void;
+
 /**
  * Accepts a function that contains imperative, possibly effectful code.
  * Use this to read layout from the DOM and synchronously re-render.
