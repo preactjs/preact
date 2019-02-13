@@ -1,4 +1,4 @@
-import { createElement, Component, Fragment } from 'ceviche';
+import { createElement, Component, Fragment } from 'preact';
 
 export default class extends Component {
 

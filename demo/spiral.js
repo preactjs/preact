@@ -1,4 +1,4 @@
-import { createElement, Component } from 'ceviche';
+import { createElement, Component } from 'preact';
 
 const COUNT = 500;
 const LOOPS = 6;
