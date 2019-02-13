@@ -15,17 +15,13 @@ import options from '../options';
  * @param {import('../internal').VNode | null} oldVNode The old virtual node
  * @param {object} context The current context object
  * @param {boolean} isSvg Whether or not this element is an SVG node
- * @param {boolean} append Whether or not to immediately append the new DOM
- * element after diffing
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} mounts A list of newly
  * mounted components
  * @param {import('../internal').Component | null} ancestorComponent The direct
  * parent component
- * @param {import('../internal').VNode} parentVNode Used to set `_lastDomChild`
- * pointer to keep track of our current position
  */
-export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append, excessDomChildren, mounts, ancestorComponent, parentVNode) {
+export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent) {
 
 	// If the previous type doesn't match the new type we drop the whole subtree
 	if (oldVNode==null || newVNode==null || oldVNode.type!==newVNode.type) {
@@ -38,35 +34,19 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 	if (options.beforeDiff) options.beforeDiff(newVNode);
 
 	let c, p, isNew = false, oldProps, oldState, oldContext,
-		newType = newVNode.type, lastDomChild;
+		newType = newVNode.type;
 
 	/** @type {import('../internal').Component | null} */
 	let clearProcessingException;
 
 	try {
-		const isOldVNodeFragment = oldVNode.type===Fragment;
+		outer: if (oldVNode.type===Fragment || newType===Fragment) {
+			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, c);
 
-		outer: if (isOldVNodeFragment || newType===Fragment) {
-			const oldVNodeChildren = oldVNode===EMPTY_OBJ ? EMPTY_ARR : !isOldVNodeFragment ? [oldVNode] : getVNodeChildren(oldVNode);
-
-			let childDom = oldVNode._dom;
-			if (excessDomChildren!=null) {
-				for (let i = 0; i < excessDomChildren.length; i++) {
-					if (excessDomChildren[i]!=null) {
-						childDom = excessDomChildren[i];
-						break;
-					}
-				}
+			if (newVNode._children.length) {
+				dom = newVNode._children[0]._dom;
+				newVNode._lastDomChild = newVNode._children[newVNode._children.length - 1]._dom;
 			}
-
-			diffChildren(parentDom, getVNodeChildren(newVNode), oldVNodeChildren, context, isSvg, excessDomChildren, mounts, c, newVNode, childDom);
-
-			// The new dom element for fragments is the first child of the new tree
-			// When the first child of a Fragment is passed through `diff()`, it sets its dom
-			// element to the parentVNode._dom property (that assignment is near the bottom of
-			// this function), which is read here.
-			dom = newVNode._dom;
-			lastDomChild = newVNode._lastDomChild;
 		}
 		else if (typeof newType==='function') {
 
@@ -154,34 +134,25 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, append,
 				oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, append, excessDomChildren, mounts, c, newVNode);
+			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c);
 
 			if (vnode!=null) {
-				lastDomChild = vnode._lastDomChild;
+				// If this component returns a Fragment (or another component that
+				// returns a Fragment), then _lastDomChild will be non-null,
+				// informing `diffChildren` to diff this component's VNode like a Fragemnt
+				newVNode._lastDomChild = vnode._lastDomChild;
 			}
 
 			c._parentDom = parentDom;
-			c._parentVNode = parentVNode;
 
 			if (newVNode.ref) applyRef(newVNode.ref, c, ancestorComponent);
 		}
 		else {
-			dom = lastDomChild = newVNode._lastDomChild = diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
+			dom = diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
 
 			if (newVNode.ref && (oldVNode.ref !== newVNode.ref)) {
 				applyRef(newVNode.ref, dom, ancestorComponent);
 			}
-		}
-
-		// Update dom pointers
-		if (parentVNode._dom==null) {
-			parentVNode._dom = dom;
-		}
-
-		parentVNode._lastDomChild = lastDomChild;
-
-		if (parentDom && append!==false && dom!=null && dom.parentNode!==parentDom) {
-			parentDom.appendChild(dom);
 		}
 
 		newVNode._dom = dom;
@@ -286,7 +257,7 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 			diffProps(dom, newVNode.props, oldProps, isSvg);
 		}
 
-		diffChildren(dom, getVNodeChildren(newVNode), oldVNode==EMPTY_OBJ ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessDomChildren, mounts, ancestorComponent, newVNode, dom.firstChild);
+		diffChildren(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
 	}
 
 	return dom;
@@ -343,41 +314,6 @@ export function unmount(vnode, ancestorComponent) {
 			unmount(r[i], ancestorComponent);
 		}
 	}
-}
-
-/**
- * Get the children of a virtual node as a flat array
- * @param {import('../internal').VNode} vnode The virtual node to get the
- * children of
- * @returns {Array<import('../internal').VNode>} The virtual node's children
- */
-function getVNodeChildren(vnode) {
-	if (vnode._children==null) {
-		toChildArray(vnode.props.children, vnode._children=[]);
-	}
-	return vnode._children;
-}
-
-
-/**
- * Flatten a virtual nodes children to a single dimensional array
- * @param {import('../index').ComponentChildren} children The unflattened
- * children of a virtual node
- * @param {Array<import('../index').VNode | null>} [flattened] An flat array of children to modify
- */
-export function toChildArray(children, flattened) {
-	if (flattened===undefined) flattened = [];
-	if (children==null || typeof children === 'boolean') {}
-	else if (Array.isArray(children)) {
-		for (let i=0; i < children.length; i++) {
-			toChildArray(children[i], flattened);
-		}
-	}
-	else {
-		flattened.push(coerceToVNode(children));
-	}
-
-	return flattened;
 }
 
 /** The `.render()` method for a PFC backing instance. */

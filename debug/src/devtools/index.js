@@ -1,4 +1,4 @@
-import { options } from 'ceviche';
+import { options } from 'preact';
 import { Renderer } from './renderer';
 
 /**
@@ -133,7 +133,7 @@ export function initDevTools() {
 		if (prevCommitRoot!=null) prevCommitRoot(vnode);
 
 		// These cases are already handled by `beforeUnmount`
-		if (vnode==null || vnode._dom==null) return;
+		if (vnode==null) return;
 		onCommitRoot(vnode);
 	});
 

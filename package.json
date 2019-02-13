@@ -1,12 +1,12 @@
 {
-  "name": "ceviche",
-  "amdName": "ceviche",
+  "name": "preact",
+  "amdName": "preact",
   "version": "0.1.0",
   "private": false,
   "description": "Something something virtual DOM.",
-  "main": "dist/ceviche.js",
-  "module": "dist/ceviche.mjs",
-  "umd:main": "dist/ceviche.umd.js",
+  "main": "dist/preact.js",
+  "module": "dist/preact.mjs",
+  "umd:main": "dist/preact.umd.js",
   "source": "src/index.js",
   "license": "MIT",
   "types": "src/index.d.ts",
@@ -117,7 +117,7 @@
   },
   "bundlesize": [
     {
-      "path": "./dist/ceviche.js",
+      "path": "./dist/preact.js",
       "maxSize": "3Kb"
     }
   ]

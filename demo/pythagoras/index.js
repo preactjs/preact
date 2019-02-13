@@ -1,4 +1,4 @@
-import { Component } from 'ceviche';
+import { Component } from 'preact';
 import { select as d3select, mouse as d3mouse } from 'd3-selection';
 import { scaleLinear } from 'd3-scale';
 import Pythagoras from './pythagoras';

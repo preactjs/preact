@@ -1,6 +1,6 @@
 import { createElement as h, render, Component, Fragment } from '../../src/index';
 import { setupScratch, teardown, setupRerender } from '../_util/helpers';
-import { span, div, ol, li } from '../_util/dom';
+import { span, div, ul, ol, li } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 
 /** @jsx h */
@@ -18,9 +18,9 @@ describe('Fragment', () => {
 
 	let ops = [];
 
-	function expectDomLogToBe(expectedOperations) {
+	function expectDomLogToBe(expectedOperations, message) {
 		if (expectDomLog) {
-			expect(getLog()).to.deep.equal(expectedOperations);
+			expect(getLog()).to.deep.equal(expectedOperations, message);
 		}
 	}
 
@@ -73,9 +73,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<span>foo</span>');
 		expectDomLogToBe([
 			'<span>.appendChild(#text)',
-			'<div>.appendChild(<span>foo)',
-			// See issue #193 - redundant operations (append)
-			'<div>foo.appendChild(<span>foo)'
+			'<div>.appendChild(<span>foo)'
 		]);
 	});
 
@@ -182,10 +180,7 @@ describe('Fragment', () => {
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 		expectDomLogToBe([
-			'<div>.remove()',
-			// See issue #193 - redundant operations (multiple Fragments)
-			'<div>Hello.appendChild(<div>Hello)',
-			'<div>Hello.appendChild(<div>Hello)'
+			'<div>.remove()'
 		]);
 	});
 
@@ -259,8 +254,7 @@ describe('Fragment', () => {
 			'<div>Hello.remove()',
 			'<div>Hello.remove()',
 			'<div>.appendChild(#text)',
-			'<div>.appendChild(<div>Hello)',
-			'<div>Hello.appendChild(<div>Hello)'
+			'<div>.appendChild(<div>Hello)'
 		]);
 
 		clearLog();
@@ -687,7 +681,6 @@ describe('Fragment', () => {
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
 			'<div>spam.appendChild(#text)',
-			'<div>spamfoo.appendChild(#text)',
 			'<div>spamfoo.appendChild(#text)'
 		]);
 
@@ -813,7 +806,7 @@ describe('Fragment', () => {
 	it('should render sibling array children', () => {
 		const Group = ({ title, values }) => (
 			<Fragment>
-				<li class="divider">{title}</li>
+				<li>{title}</li>
 				{values.map(value => <li>{value}</li>)}
 			</Fragment>
 		);
@@ -828,15 +821,15 @@ describe('Fragment', () => {
 
 		render(<Todo />, scratch);
 
-		let ul = scratch.firstChild;
-		expect(ul.childNodes.length).to.equal(7);
-		expect(ul.childNodes[0].textContent).to.equal('A header');
-		expect(ul.childNodes[1].textContent).to.equal('a');
-		expect(ul.childNodes[2].textContent).to.equal('b');
-		expect(ul.childNodes[3].textContent).to.equal('A divider');
-		expect(ul.childNodes[4].textContent).to.equal('c');
-		expect(ul.childNodes[5].textContent).to.equal('d');
-		expect(ul.childNodes[6].textContent).to.equal('A footer');
+		expect(scratch.innerHTML).to.equal(ul([
+			li('A header'),
+			li('a'),
+			li('b'),
+			li('A divider'),
+			li('c'),
+			li('d'),
+			li('A footer')
+		].join('')));
 	});
 
 	it('should reorder Fragment children', () => {
@@ -1453,5 +1446,65 @@ describe('Fragment', () => {
 			'<li>.appendChild(#text)',
 			'<ol>a0123b.insertBefore(<li>4, <li>b)'
 		]);
+	});
+
+	it('should render components that conditionally return Fragments', () => {
+		const Foo = ({ condition }) => (
+			condition ? (
+				<Fragment>
+					<div>1</div>
+					<div>2</div>
+				</Fragment>
+			) : (
+				<div>
+					<div>3</div>
+					<div>4</div>
+				</div>
+			)
+		);
+
+		const htmlForTrue = [
+			div(1),
+			div(2)
+		].join('');
+
+		const htmlForFalse = div([
+			div(3),
+			div(4)
+		].join(''));
+
+		clearLog();
+		render(<Foo condition={true} />, scratch);
+
+		expect(scratch.innerHTML).to.equal(htmlForTrue);
+
+		clearLog();
+		render(<Foo condition={false} />, scratch);
+
+		expect(scratch.innerHTML).to.equal(htmlForFalse);
+		expectDomLogToBe([
+			'<div>1.remove()',
+			'<div>1.remove()',
+			'<div>2.remove()',
+			'<div>.appendChild(#text)',
+			'<div>.appendChild(<div>3)',
+			'<div>.appendChild(#text)',
+			'<div>3.appendChild(<div>4)',
+			'<div>.appendChild(<div>34)'
+		], 'rendering from true to false');
+
+		clearLog();
+		render(<Foo condition={true} />, scratch);
+
+		expect(scratch.innerHTML).to.equal(htmlForTrue);
+		expectDomLogToBe([
+			'<div>34.remove()',
+			'<div>3.remove()',
+			'<div>4.remove()',
+			'<div>.appendChild(#text)',
+			'<div>.appendChild(<div>1)',
+			'<div>.appendChild(#text)',
+			'<div>1.appendChild(<div>2)'
+		], 'rendering from false to true');
 	});
 });

@@ -1,4 +1,4 @@
-import { createElement, Component } from 'ceviche';
+import { createElement, Component } from 'preact';
 
 function createItems(count=10) {
 	let items = [];
