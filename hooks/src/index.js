@@ -48,7 +48,10 @@ let oldBeforeUnmount = options.beforeUnmount;
 options.beforeUnmount = vnode => {
 	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
 
-	const hooks = vnode._component.__hooks;
+	const c = vnode._component;
+	if (!c) return;
+
+	const hooks = c.__hooks;
 	if (!hooks) return;
 
 	hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
