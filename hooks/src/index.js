@@ -194,15 +194,14 @@ if (typeof window !== 'undefined') {
 	mc = new MessageChannel();
 
 	afterPaint = (component) => {
-		// TODO: Consider ways to avoid queuing a component multiple times
-		// due to multiple `useEffect`s
-		if (afterPaintEffects.push(component) === 1) {
+		if (!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) {
 			requestAnimationFrame(onPaint);
 		}
 	};
 
 	mc.port2.onmessage = () => {
 		afterPaintEffects.forEach(component => {
+			component._afterPaintQueued = false;
 			if (!component._parentDom) return;
 			component.__hooks._pendingEffects.forEach(invokeEffect);
 			component.__hooks._pendingEffects = [];
