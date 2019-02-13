@@ -1,4 +1,4 @@
-import { getData, getChildren, getPatchedRoot, getInstance, hasProfileDataChanged, hasDataChanged, isRoot, patchRoot } from './custom';
+import { getData, getChildren, getInstance, hasProfileDataChanged, hasDataChanged, isRoot } from './custom';
 
 /**
  * Custom renderer tailored for Preact. It converts updated vnode trees
@@ -164,16 +164,35 @@ export class Renderer {
 	 * @param {import('../internal').VNode} vnode
 	 */
 	handleCommitFiberRoot(vnode) {
-		if (isRoot(vnode)) {
-			vnode = patchRoot(vnode);
-		}
-
 		let inst = getInstance(vnode);
 
 		if (this.inst2vnode.has(inst)) this.update(vnode);
 		else this.mount(vnode);
 
-		let root = getPatchedRoot(vnode);
+		// The devtools checks via the existance of this property if the devtools
+		// profiler should be enabled or not. If it is missing from the first root
+		// node the "Profiler" tab won't show up.
+		/** @type {import('../internal').VNode} */
+		let root = null;
+		if (isRoot(vnode)) {
+
+			/** @type {*} */
+			(vnode).treeBaseDuration = 0;
+			root = vnode;
+		}
+		else {
+			// "rootCommitted" always needs the actual root node for the profiler
+			// to be able to collect timings.
+			/** @type {*} */
+			let dom = vnode._dom;
+
+			while ((dom = dom.parentNode)!=null) {
+				if (dom._prevVNode!=null) {
+					root = dom._prevVNode;
+				}
+			}
+		}
+
 		this.pending.push({
 			internalInstance: root,
 			renderer: this.rid,
@@ -182,7 +201,7 @@ export class Renderer {
 		});
 
 		this.flushPendingEvents();
-		return root;
+		return vnode;
 	}
 
 	/**
@@ -198,9 +217,6 @@ export class Renderer {
 		// Special case when unmounting a root (most prominently caused by webpack's
 		// `hot-module-reloading`). If this happens we need to unmount the virtual
 		// `Fragment` we're wrapping around each root just for the devtools.
-		if (isRoot(vnode)) {
-			vnode = patchRoot(vnode);
-		}
 
 		this.pending.push({
 			internalInstance: vnode,
