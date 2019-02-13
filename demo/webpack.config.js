@@ -2,7 +2,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-const ceviche = path.join(__dirname, '..', 'src');
+const preact = path.join(__dirname, '..', 'src');
 
 module.exports = {
 	context: __dirname,
@@ -12,11 +12,10 @@ module.exports = {
 	},
 	resolve: {
 		alias: {
-			["ceviche/debug"]: path.join(__dirname, '..', 'debug'),
-			ceviche: ceviche,
-			preact: path.resolve(__dirname, './preact'),
-			react: ceviche,
-			'react-dom': ceviche
+			["preact/debug"]: path.join(__dirname, '..', 'debug'),
+			preact: preact,
+			react: preact,
+			'react-dom': preact
 		}
 	},
 	module: {
@@ -41,7 +40,7 @@ module.exports = {
 						require.resolve('@babel/plugin-proposal-class-properties'),
 						require.resolve('@babel/plugin-transform-react-constant-elements'),
 						[require.resolve('babel-plugin-jsx-pragmatic'), {
-							module: 'ceviche',
+							module: 'preact',
 							export: 'createElement',
 							import: 'createElement'
 						}]

@@ -1,4 +1,4 @@
-import { options, createElement, cloneElement, Component as CevicheComponent, render } from 'ceviche';
+import { options, createElement, cloneElement, Component as CevicheComponent, render } from 'preact';
 
 options.vnode = vnode => {
 	vnode.nodeName = vnode.type;

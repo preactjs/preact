@@ -1,4 +1,4 @@
-import { createElement as h, options, render, createRef, Component, Fragment } from 'ceviche';
+import { createElement as h, options, render, createRef, Component, Fragment } from 'preact';
 import { setupScratch, teardown, clearOptions } from '../../../test/_util/helpers';
 import { serializeVNode, initDebug } from '../../src/debug';
 import * as PropTypes from 'prop-types';

@@ -85,17 +85,18 @@ describe('useReducer', () => {
 		const states = [];
 		let _dispatch;
 
-		const initState = { count: 0 }
+		function init(initialCount) {
+			return { count: initialCount };
+		}
 
 		function reducer(state, action) {
 			switch (action.type) {
-				case 'init': return { count: action.count };
 				case 'increment': return { count: state.count + action.by };
 			}
 		}
 
 		function Comp({ initCount }) {
-			const [state, dispatch] = useReducer(reducer, initState, { type: 'init', count: initCount });
+			const [state, dispatch] = useReducer(reducer, initCount, init);
 			_dispatch = dispatch;
 			states.push(state);
 			return null;

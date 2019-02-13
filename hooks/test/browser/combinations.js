@@ -91,6 +91,7 @@ describe('combinations', () => {
 		}
 
 		render(<Comp />, scratch);
+		rerender();
 
 		expect(didRender).to.have.been.calledTwice.and.calledWith(1)
 	});

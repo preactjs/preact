@@ -1,4 +1,4 @@
-import { Fragment } from 'ceviche';
+import { Fragment } from 'preact';
 
 /**
  * Get the type/category of a vnode

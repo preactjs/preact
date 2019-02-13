@@ -5,7 +5,7 @@
 import { setupScratch, teardown } from '../_util/helpers';
 import bench from '../_util/bench';
 const preact = require('../fixtures/preact');
-const ceviche = require('../../dist/ceviche');
+const ceviche = require('../../dist/preact');
 const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
 
 describe('benchmarks', function() {

@@ -9,9 +9,6 @@ let currentComponent;
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
-/** @type {boolean} */
-let stateChanged;
-
 let oldBeforeRender = options.beforeRender;
 options.beforeRender = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
@@ -35,12 +32,10 @@ options.afterDiff = vnode => {
 	const hooks = c.__hooks;
 	if (!hooks) return;
 
-	stateChanged = false;
-
+	// TODO: Consider moving to a global queue. May need to move
+	// this to the `commitRoot` option
 	hooks._pendingLayoutEffects.forEach(invokeEffect);
 	hooks._pendingLayoutEffects = [];
-
-	if (stateChanged) c.forceUpdate();
 };
 
 
@@ -78,7 +73,7 @@ export function useState(initialState) {
 	return useReducer(invokeOrReturn, initialState);
 }
 
-export function useReducer(reducer, initialState, initialAction) {
+export function useReducer(reducer, initialState, init) {
 
 	/** @type {import('./internal').ReducerHookState} */
 	const hookState = getHookState(currentIndex++);
@@ -86,13 +81,10 @@ export function useReducer(reducer, initialState, initialAction) {
 		hookState._component = currentComponent;
 
 		hookState._value = [
-			initialAction
-				? reducer(invokeOrReturn(null, initialState), initialAction)
-				: invokeOrReturn(null, initialState),
+			init == null ? invokeOrReturn(null, initialState) : init(initialState),
 
 			action => {
 				hookState._value[0] = reducer(hookState._value[0], action);
-				stateChanged = true;
 				hookState._component.setState({});
 			}
 		];
@@ -151,7 +143,7 @@ export function useMemo(callback, args) {
 
 	/** @type {import('./internal').MemoHookState} */
 	const state = getHookState(currentIndex++);
-	if (args == null ? callback !== state._callback : argsChanged(state._args, args)) {
+	if (argsChanged(state._args, args)) {
 		state._args = args;
 		state._callback = callback;
 		return state._value = callback();
@@ -202,15 +194,14 @@ if (typeof window !== 'undefined') {
 	mc = new MessageChannel();
 
 	afterPaint = (component) => {
-		// TODO: Consider ways to avoid queuing a component multiple times
-		// due to multiple `useEffect`s
-		if (afterPaintEffects.push(component) === 1) {
+		if (!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) {
 			requestAnimationFrame(onPaint);
 		}
 	};
 
 	mc.port2.onmessage = () => {
 		afterPaintEffects.forEach(component => {
+			component._afterPaintQueued = false;
 			if (!component._parentDom) return;
 			component.__hooks._pendingEffects.forEach(invokeEffect);
 			component.__hooks._pendingEffects = [];
