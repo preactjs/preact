@@ -23,58 +23,11 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		nextDom, sibDom, focus,
 		childDom;
 
-	// 3117 B
 	let newChildren = getVNodeChildren(newParentVNode);
 	let oldChildren = oldParentVNode==null || oldParentVNode==EMPTY_OBJ ? EMPTY_ARR : getVNodeChildren(oldParentVNode);
 
-	// 3117 B
-	// let newChildren = newParentVNode._children == null ? newParentVNode._children = toChildArray(newParentVNode.props.children) : newParentVNode._children;
-	// let oldChildren = oldParentVNode==null || oldParentVNode==EMPTY_OBJ ? EMPTY_ARR : oldParentVNode._children == null ? oldParentVNode._children = toChildArray(oldParentVNode.props.children) : oldParentVNode._children;
-
-	// 3119 B
-	// let newChildren = newParentVNode._children == null ? toChildArray(newParentVNode.props.children, newParentVNode._children = []) : newParentVNode._children;
-	// let oldChildren = oldParentVNode==null || oldParentVNode==EMPTY_OBJ ? EMPTY_ARR : oldParentVNode._children == null ? toChildArray(oldParentVNode.props.children, oldParentVNode._children = []) : oldParentVNode._children;
-
 	let oldChildrenLength = oldChildren.length;
 
-	// 3163 B
-	// if (parentVNode.type === Fragment) {
-	// 	if (excessDomChildren!=null) {
-	// 		for (i = 0; i < excessDomChildren.length; i++) {
-	// 			if (excessDomChildren[i]!=null) {
-	// 				childDom = excessDomChildren[i];
-	// 				break;
-	// 			}
-	// 		}
-	// 	}
-	// 	else if (oldChildren[0] != null) {
-	// 		childDom = oldChildren[0]._dom;
-	// 	}
-	// 	else {
-	// 		childDom = null;
-	// 	}
-	// }
-	// else {
-	// 	childDom = dom.firstChild;
-	// }
-
-	// 3161 B
-	// if (parentVNode.type !== Fragment) {
-	// 	childDom = dom.firstChild;
-	// }
-	// else if (oldChildren[0] != null) {
-	// 	childDom = oldChildren[0]._dom;
-	// }
-	// else if (excessDomChildren!=null) {
-	// 	for (i = 0; i < excessDomChildren.length; i++) {
-	// 		if (excessDomChildren[i]!=null) {
-	// 			childDom = excessDomChildren[i];
-	// 			break;
-	// 		}
-	// 	}
-	// }
-
-	// 3149 B
 	childDom = oldChildren.length ? oldChildren[0] && oldChildren[0]._dom : null;
 	if (excessDomChildren!=null) {
 		for (i = 0; i < excessDomChildren.length; i++) {

@@ -66,26 +66,11 @@ Component.prototype.setState = function(update, callback) {
 Component.prototype.forceUpdate = function(callback) {
 	let vnode = this._vnode, dom = this._vnode._dom, parentDom = this._parentDom;
 	if (parentDom!=null) {
-	// if (this._parentDom!=null) {
 		// Set render mode so that we can differantiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
 		if (this._force==null) this._force = true;
 
-		// 3090 B
-		// let mounts = [];
-		// diff(this._vnode._dom, this._parentDom, this._vnode, this._vnode, this.context, this._parentDom.ownerSVGElement!==undefined, true, null, mounts, this._ancestorComponent);
-		// commitRoot(mounts, this._vnode);
-
-		// 3078 B
-		// let mounts = [];
-		// diff(this._vnode._dom, this._parentDom, this._vnode, this._vnode, this.context, this._parentDom.ownerSVGElement!==undefined, null, mounts, this._ancestorComponent);
-		// if (this._vnode._dom!=null && this._vnode._dom.parentNode!==this._parentDom) {
-		// 	this._parentDom.appendChild(this._vnode._dom);
-		// }
-		// commitRoot(mounts, this._vnode);
-
-		// 3077 B
 		let mounts = [];
 		dom = diff(dom, parentDom, vnode, vnode, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, this._ancestorComponent);
 		if (dom!=null && dom.parentNode!==parentDom) {

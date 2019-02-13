@@ -40,46 +40,13 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 	let clearProcessingException;
 
 	try {
-		// const isOldVNodeFragment = oldVNode.type===Fragment;
-
-		// outer: if (isOldVNodeFragment || newType===Fragment) {
 		outer: if (oldVNode.type===Fragment || newType===Fragment) {
-			// const oldVNodeChildren = oldVNode===EMPTY_OBJ ? EMPTY_ARR : !isOldVNodeFragment ? [oldVNode] : getVNodeChildren(oldVNode);
-
-			// let childDom = oldVNode._dom;
-			// if (excessDomChildren!=null) {
-			// 	for (let i = 0; i < excessDomChildren.length; i++) {
-			// 		if (excessDomChildren[i]!=null) {
-			// 			childDom = excessDomChildren[i];
-			// 			break;
-			// 		}
-			// 	}
-			// }
-
-			// diffChildren(parentDom, getVNodeChildren(newVNode), oldVNodeChildren, context, isSvg, excessDomChildren, mounts, c, newVNode, childDom);
-			// diffChildren(parentDom, getVNodeChildren(newVNode), oldVNodeChildren, context, isSvg, excessDomChildren, mounts, c, newVNode);
 			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, c);
 
-			// 3133 B
 			if (newVNode._children.length) {
 				dom = newVNode._children[0]._dom;
 				newVNode._lastDomChild = newVNode._children[newVNode._children.length - 1]._dom;
 			}
-
-			// 3133 B
-			// dom = newVNode._children.length ? newVNode._children[0]._dom : null;
-			// newVNode._lastDomChild = newVNode._children.length ? newVNode._children[newVNode._children.length - 1]._dom : null;
-
-			// 3136 B
-			// p = newVNode._children;
-			// dom = p.length ? p[0]._dom : null;
-			// newVNode._lastDomChild = p.length ? p[p.length - 1]._dom : null;
-
-			// 3135 B
-			// if ((p = newVNode._children).length) {
-			// 	dom = p[0]._dom;
-			// 	newVNode._lastDomChild = p[p.length - 1]._dom;
-			// }
 		}
 		else if (typeof newType==='function') {
 
@@ -290,7 +257,6 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 			diffProps(dom, newVNode.props, oldProps, isSvg);
 		}
 
-		// diffChildren(dom, getVNodeChildren(newVNode), oldVNode==EMPTY_OBJ ? EMPTY_ARR : getVNodeChildren(oldVNode), context, isSvg, excessDomChildren, mounts, ancestorComponent, newVNode);
 		diffChildren(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
 	}
 

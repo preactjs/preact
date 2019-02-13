@@ -10,23 +10,11 @@ import { createElement, Fragment } from './create-element';
  * render into
  */
 export function render(vnode, parentDom) {
-	// let oldVNode = parentDom._prevVNode;
-	// if (oldVNode) {
-	// 	let mounts = [];
-	// 	diff(oldVNode._dom, parentDom, parentDom._prevVNode = coerceToVNode(vnode), oldVNode, EMPTY_OBJ, parentDom.ownerSVGElement!==undefined, true, null, mounts, null);
-	// 	commitRoot(mounts, parentDom._prevVNode);
-	// }
-	// else hydrate(vnode, parentDom);
-
 	let oldVNode = parentDom._prevVNode;
 	vnode = createElement(Fragment, null, [vnode]);
 
 	let mounts = [];
-
-	// diff(oldVNode._dom, parentDom,   parentDom._prevVNode = coerceToVNode(vnode),   oldVNode,   EMPTY_OBJ,   parentDom.ownerSVGElement!==undefined,   true,   null,                                                           mounts,  null);
-	// diffChildren(       parentDom,   createElement(Fragment, null, [vnode]),        null,       EMPTY_OBJ,   parentDom.ownerSVGElement!==undefined,           EMPTY_ARR.slice.call(parentDom.childNodes),                     mounts,  null);
-	diffChildren(          parentDom,   parentDom._prevVNode = vnode,                  oldVNode,   EMPTY_OBJ,   parentDom.ownerSVGElement!==undefined,           oldVNode ? null : EMPTY_ARR.slice.call(parentDom.childNodes),   mounts,  null);
-
+	diffChildren(parentDom, parentDom._prevVNode = vnode, oldVNode, EMPTY_OBJ, parentDom.ownerSVGElement!==undefined, oldVNode ? null : EMPTY_ARR.slice.call(parentDom.childNodes), mounts, null);
 	commitRoot(mounts, vnode);
 }
 
@@ -37,11 +25,6 @@ export function render(vnode, parentDom) {
  * update
  */
 export function hydrate(vnode, parentDom) {
-	// parentDom._prevVNode = vnode = coerceToVNode(vnode);
-	// let mounts = [];
-	// diffChildren(parentDom, createElement(Fragment, null, [vnode]), null, EMPTY_OBJ, parentDom.ownerSVGElement!==undefined, EMPTY_ARR.slice.call(parentDom.childNodes), mounts, null);
-	// commitRoot(mounts, vnode);
-
 	parentDom._prevVNode = null;
 	render(vnode, parentDom);
 }
