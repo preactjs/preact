@@ -23,7 +23,12 @@ export const ul = contents => `<ul>${contents}</ul>`;
 export const ol = contents => `<ol>${contents}</ol>`;
 
 /**
- * A helper to generate innerHTML validation strings containing uls
- * @param {string | number} contents The contents of the ul, as a string
+ * A helper to generate innerHTML validation strings containing lis
+ * @param {string | number} contents The contents of the li, as a string
  */
 export const li = contents => `<li>${contents}</li>`;
+
+/**
+ * A helper to generate innerHTML validation strings containing inputs
+ */
+export const input = () => `<input type="text">`;
