@@ -20,8 +20,6 @@ if (!isBenchmark) {
 	initDevTools();
 }
 
-window.preact = { createElement, render, hydrate, Component, options };
-
 class Home extends Component {
 	a = 1;
 	render() {
