@@ -87,7 +87,7 @@ Component.prototype.forceUpdate = function(callback) {
 
 		// 3077 B
 		let mounts = [];
-		dom = diff(dom, parentDom, vnode, vnode, this.context, parentDom.ownerSVGElement!==undefined, null, mounts, this._ancestorComponent);
+		dom = diff(dom, parentDom, vnode, vnode, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, this._ancestorComponent);
 		if (dom!=null && dom.parentNode!==parentDom) {
 			parentDom.appendChild(dom);
 		}

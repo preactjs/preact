@@ -55,71 +55,132 @@ options.beforeUnmount = vnode => {
 };
 
 /**
- * Create a Hook instance and invoke its implementation as determined by
- * the `shouldRun` parameter
- * @param {import('./internal').HookImplementationFactory} create
- * @param {import('./internal').HookShouldRun} [shouldRun]
- * @returns {import('./internal').Hook}
+ * Get a hook's state from the currentComponent
+ * @param {number} index The index of the hook to get
+ * @returns {import('./internal').HookState}
  */
-const createHook = (create, shouldRun) => (...args) => {
-	if (!currentComponent) return;
+function getHookState(index) {
+	// Largely inspired by:
+	// * https://github.com/michael-klein/funcy.js/blob/master/src/hooks/core_hooks.mjs
+	// * https://github.com/michael-klein/funcy.js/blob/master/src/lib/renderer.mjs
+	// Other implementations to look at:
+	// * https://codesandbox.io/s/mnox05qp8
 
 	const hooks = currentComponent.__hooks || (currentComponent.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [] });
 
-	let _index = currentIndex++;
-	let hook = hooks._list[_index];
-
-	if (!hook) {
-		hook = hooks._list[_index] = { _index };
-		hook._run = create(hook, currentComponent, ...args);
+	if (index >= hooks._list.length) {
+		hooks._list.push({});
 	}
-	else if (shouldRun && shouldRun(hook._args, args) === false) {
-		return hook._value;
+	return hooks._list[index];
+}
+
+export function useState(initialState) {
+	return useReducer(invokeOrReturn, initialState);
+}
+
+export function useReducer(reducer, initialState, initialAction) {
+
+	/** @type {import('./internal').ReducerHookState} */
+	const hookState = getHookState(currentIndex++);
+	if (hookState._component == null) {
+		hookState._component = currentComponent;
+
+		hookState._value = [
+			initialAction
+				? reducer(invokeOrReturn(null, initialState), initialAction)
+				: invokeOrReturn(null, initialState),
+
+			action => {
+				hookState._value[0] = reducer(hookState._value[0], action);
+				stateChanged = true;
+				hookState._component.setState({});
+			}
+		];
 	}
 
-	hook._args = args;
+	return hookState._value;
+}
 
-	return (hook._value = hook._run(...args));
-};
+/**
+ * @param {import('./internal').Effect} callback
+ * @param {any[]} args
+ */
+export function useEffect(callback, args) {
 
-export const useState = initialState => useReducer(invokeOrReturn, initialState);
+	/** @type {import('./internal').EffectHookState} */
+	const state = getHookState(currentIndex++);
+	if (argsChanged(state._args, args)) {
+		state._value = callback;
+		state._args = args;
 
-export const useReducer = createHook((hook, component, reducer, initialState, initialAction) => {
-	const initState = invokeOrReturn(undefined, initialState);
-	const ret = [
-		component.state[hook._index] = initialAction ? reducer(initState, initialAction) : initState,
-		action => {
-			stateChanged = true;
-			component.setState(state => ret[0] = state[hook._index] = reducer(ret[0], action));
-		}
-	];
-	return () => ret;
-});
+		currentComponent.__hooks._pendingEffects.push(state);
+		afterPaint(currentComponent);
+	}
+}
 
-// eslint-disable-next-line arrow-body-style
-export const useEffect = createHook((hook, component) => {
-	return callback => {
-		component.__hooks._pendingEffects.push(hook);
-		afterPaint(component);
-		return callback;
-	};
-}, propsChanged);
+/**
+ * @param {import('./internal').Effect} callback
+ * @param {any[]} args
+ */
+export function useLayoutEffect(callback, args) {
 
-// eslint-disable-next-line arrow-body-style
-export const useLayoutEffect = createHook((hook, component) => {
-	return callback => {
-		component.__hooks._pendingLayoutEffects.push(hook);
-		return callback;
-	};
-}, propsChanged);
+	/** @type {import('./internal').EffectHookState} */
+	const state = getHookState(currentIndex++);
+	if (argsChanged(state._args, args)) {
+		state._value = callback;
+		state._args = args;
 
-export const useRef = createHook((hook, component, initialValue) => {
-	const ref = { current: initialValue };
-	return () => ref;
-});
+		currentComponent.__hooks._pendingLayoutEffects.push(state);
+	}
+}
 
-export const useMemo = createHook(() => callback => callback(), memoChanged);
-export const useCallback = createHook(() => callback => callback, propsChanged);
+export function useRef(initialValue) {
+	const state = getHookState(currentIndex++);
+	if (state._value == null) {
+		state._value = { current: initialValue };
+	}
+
+	return state._value;
+}
+
+/**
+ * @param {() => any} callback
+ * @param {any[]} args
+ */
+export function useMemo(callback, args) {
+
+	/** @type {import('./internal').MemoHookState} */
+	const state = getHookState(currentIndex++);
+	if (args == null ? callback !== state._callback : argsChanged(state._args, args)) {
+		state._args = args;
+		state._callback = callback;
+		return state._value = callback();
+	}
+
+	return state._value;
+}
+
+/**
+ * @param {() => void} callback
+ * @param {any[]} args
+ */
+export function useCallback(callback, args) {
+	return useMemo(() => callback, args);
+}
+
+/**
+ * @param {import('./internal').PreactContext} context
+ */
+export function useContext(context) {
+	const provider = currentComponent.context[context._id];
+	if (provider == null) return context._defaultValue;
+	const state = getHookState(currentIndex++);
+	if (state._value == null) {
+		state._value = true;
+		provider.sub(currentComponent);
+	}
+	return provider.props.value;
+}
 
 // Note: if someone used Component.debounce = requestAnimationFrame,
 // then effects will ALWAYS run on the NEXT frame instead of the current one, incurring a ~16ms delay.
@@ -160,7 +221,7 @@ if (typeof window !== 'undefined') {
 
 /**
  * Invoke a Hook's effect
- * @param {import('./internal').HookInstance} hook
+ * @param {import('./internal').EffectHookState} hook
  */
 function invokeEffect(hook) {
 	if (hook._cleanup) hook._cleanup();
@@ -168,12 +229,8 @@ function invokeEffect(hook) {
 	if (typeof result === 'function') hook._cleanup = result;
 }
 
-function propsChanged(oldArgs, newArgs) {
-	return newArgs[1] === undefined || newArgs[1].some((prop, index) => prop !== oldArgs[1][index]);
-}
-
-function memoChanged(oldArgs, newArgs) {
-	return newArgs[1] !== undefined ? propsChanged(oldArgs, newArgs) : newArgs[0] !== oldArgs[0];
+function argsChanged(oldArgs, newArgs) {
+	return oldArgs == null || newArgs.some((arg, index) => arg !== oldArgs[index]);
 }
 
 function invokeOrReturn(arg, f) {

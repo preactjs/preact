@@ -81,4 +81,28 @@ describe('useState', () => {
 		expect(Comp).to.be.calledThrice;
 	});
 
+	it('can be set by another component', () => {
+		const initState = { count: 0 }
+
+		function StateContainer() {
+			const [count, setCount] = useState(0);
+			return <div>
+				<p>Count: {count}</p>
+				<Increment increment={() => setCount(c => c + 10)} />
+			</div>;
+		}
+
+		function Increment(props) {
+			return <button onClick={props.increment}>Increment</button>
+		}
+
+		render(<StateContainer />, scratch);
+		expect(scratch.textContent).to.include('Count: 0');
+
+		const button = scratch.querySelector('button');
+		button.click();
+
+		rerender();
+		expect(scratch.textContent).to.include('Count: 10');
+	});
 });

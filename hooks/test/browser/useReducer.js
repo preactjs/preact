@@ -50,6 +50,37 @@ describe('useReducer', () => {
 		expect(states).to.deep.equal([{ count: 0 }, { count: 10 }]);
 	});
 
+	it('can be dispatched by another component', () => {
+		const initState = { count: 0 }
+
+		function reducer(state, action) {
+			switch (action.type) {
+				case 'increment': return { count: state.count + action.by };
+			}
+		}
+
+		function ReducerComponent() {
+			const [state, dispatch] = useReducer(reducer, initState);
+			return <div>
+				<p>Count: {state.count}</p>
+				<DispatchComponent dispatch={dispatch} />
+			</div>;
+		}
+
+		function DispatchComponent(props) {
+			return <button onClick={() => props.dispatch({ type: 'increment', by: 10 })}>Increment</button>
+		}
+
+		render(<ReducerComponent />, scratch);
+		expect(scratch.textContent).to.include('Count: 0');
+
+		const button = scratch.querySelector('button');
+		button.click();
+
+		rerender();
+		expect(scratch.textContent).to.include('Count: 10');
+	});
+
 	it('can lazily initialize its state with an action', () => {
 		const states = [];
 		let _dispatch;

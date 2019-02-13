@@ -83,6 +83,12 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 		}
 		else if (typeof newType==='function') {
 
+			// Necessary for createContext api. Setting this property will pass
+			// the context value as `this.context` just for this component.
+			let cxType = newType.contextType;
+			let provider = cxType && context[cxType._id];
+			let cctx = cxType != null ? (provider ? provider.props.value : cxType._defaultValue) : context;
+
 			// Get component and set it to `c`
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
@@ -93,18 +99,20 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 
 				// Instantiate the new component
 				if (newType.prototype && newType.prototype.render) {
-					newVNode._component = c = new newType(newVNode.props, context); // eslint-disable-line new-cap
+					newVNode._component = c = new newType(newVNode.props, cctx); // eslint-disable-line new-cap
 				}
 				else {
-					newVNode._component = c = new Component(newVNode.props, context);
+					newVNode._component = c = new Component(newVNode.props, cctx);
 					c._constructor = newType;
 					c.render = doRender;
 				}
 				c._ancestorComponent = ancestorComponent;
+				if (provider) provider.sub(c);
 
 				c.props = newVNode.props;
 				if (!c.state) c.state = {};
-				c.context = context;
+				c.context = cctx;
+				c._context = context;
 				c._dirty = true;
 				c._renderCallbacks = [];
 			}
@@ -125,23 +133,23 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 				if (c.componentDidMount!=null) mounts.push(c);
 			}
 			else {
-				if (!c._force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newVNode.props, s, context)===false) {
+				if (!c._force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newVNode.props, s, cctx)===false) {
 					c._dirty = false;
 					break outer;
 				}
 				if (newType.getDerivedStateFromProps==null && c._force==null && c.componentWillReceiveProps!=null) {
-					c.componentWillReceiveProps(newVNode.props, context);
+					c.componentWillReceiveProps(newVNode.props, cctx);
 				}
 
 				if (c.componentWillUpdate!=null) {
-					c.componentWillUpdate(newVNode.props, s, context);
+					c.componentWillUpdate(newVNode.props, s, cctx);
 				}
 			}
 
 			oldProps = c.props;
 			if (!oldState) oldState = c.state;
 
-			oldContext = c.context = context;
+			oldContext = c.context = cctx;
 			c.props = newVNode.props;
 			c.state = s;
 
