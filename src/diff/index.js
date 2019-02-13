@@ -170,6 +170,9 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c);
 
 			if (vnode!=null) {
+				// If this component returns a Fragment (or another component that
+				// returns a Fragment), then _lastDomChild will be non-null,
+				// informing `diffChildren` to diff this component's VNode like a Fragemnt
 				newVNode._lastDomChild = vnode._lastDomChild;
 			}
 

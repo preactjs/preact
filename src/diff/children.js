@@ -128,8 +128,10 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			// hook or by reordering dom nodes.
 			focus = document.activeElement;
 
-			// Fragments or similar components have already been diffed at this point.
 			if (childVNode._lastDomChild != null) {
+				// Only Fragments or components that return Fragment like VNodes will
+				// have a non-null _lastDomChild. Continue the diff from the end of
+				// this Fragment's DOM tree.
 				newDom = childVNode._lastDomChild;
 			}
 			else if (excessDomChildren==oldVNode || newDom!=childDom || newDom.parentNode==null) {
