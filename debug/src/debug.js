@@ -1,6 +1,6 @@
 import { checkPropTypes } from 'prop-types';
 import { getDisplayName } from './devtools/custom';
-import { options, toChildArray } from 'ceviche';
+import { options, toChildArray } from 'preact';
 
 export function initDebug() {
 	/* eslint-disable no-console */

@@ -1,4 +1,4 @@
-import { Component, toChildArray } from "ceviche";
+import { Component, toChildArray } from "preact";
 
 let updateRouter;
 

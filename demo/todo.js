@@ -1,4 +1,4 @@
-import { createElement, Component } from 'ceviche';
+import { createElement, Component } from 'preact';
 
 let counter = 0;
 
