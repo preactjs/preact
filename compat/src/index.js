@@ -1,4 +1,4 @@
-import { render as preactRender, cloneElement as preactCloneElement, createRef, createElement as h, Component, options, toChildArray } from 'preact';
+import { render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray } from 'preact';
 
 const version = '16.8.0'; // trick libraries to think we are react
 
