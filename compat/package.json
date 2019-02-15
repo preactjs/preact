@@ -13,7 +13,7 @@
     "regex": "^_"
   },
   "dependencies": {
-    "ceviche": "*",
+    "preact": "*",
     "prop-types": "^15.6.2"
   }
 }
