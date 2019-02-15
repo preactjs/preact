@@ -179,14 +179,16 @@ function findDOMNode(component) {
 	return component && (component.base || component.nodeType === 1 && component) || null;
 }
 
-function PureComponent(props, context) {
-	Component.call(this, props, context);
+class PureComponent extends Component {
+	constructor() {
+		super();
+		this.isPureReactComponent = true;
+	}
+
+	shouldComponentUpdate(props, state) {
+		return shallowDiffers(this.props, props) || shallowDiffers(this.state, state);
+	}
 }
-PureComponent.prototype = Object.create(Component.prototype);
-PureComponent.prototype.isPureReactComponent = true;
-PureComponent.prototype.shouldComponentUpdate = function(props, state) {
-	return shallowDiffers(this.props, props) || shallowDiffers(this.state, state);
-};
 
 function setUnsafeDescriptor(obj, key) {
 	Object.defineProperty(obj.prototype, 'UNSAFE_' + key, {
