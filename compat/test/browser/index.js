@@ -216,14 +216,14 @@ describe('preact-compat', () => {
 
 		// NOTE: React.render() returning false or null has the component pointing
 		// 			to no DOM Node, in contrast, Preact always render an empty Text DOM Node.
-		xit('should return null if render returns false', () => {
+		it('should return null if render returns false', () => {
 			const helper = React.render(<Helper something={false} />, scratch);
 			expect(findDOMNode(helper)).to.be.null;
 		});
 
 		// NOTE: React.render() returning false or null has the component pointing
 		// 			to no DOM Node, in contrast, Preact always render an empty Text DOM Node.
-		xit('should return null if render returns null', () => {
+		it('should return null if render returns null', () => {
 			const helper = React.render(<Helper something={null} />, scratch);
 			expect(findDOMNode(helper)).to.be.null;
 		});
