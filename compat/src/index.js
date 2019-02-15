@@ -1,4 +1,4 @@
-import { render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray } from 'preact';
+import { render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext } from 'preact';
 
 const version = '16.8.0'; // trick libraries to think we are react
 
@@ -209,6 +209,7 @@ export {
 	render as hydrate,
 	createPortal,
 	createElement,
+	createContext,
 	cloneElement,
 	createRef,
 	isValidElement,
@@ -224,6 +225,7 @@ export default {
 	hydrate: render,
 	createPortal,
 	createElement,
+	createContext,
 	cloneElement,
 	createRef,
 	isValidElement,
