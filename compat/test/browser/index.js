@@ -62,11 +62,15 @@ describe('preact-compat', () => {
 				.that.equals('dynamic content');
 		});
 
+		// Note: Replacing text nodes inside the root itself is currently unsupported.
+		// We do replace them everywhere else, though.
 		it('should remove text nodes', () => {
 			let root = ce('div');
 
-			root.appendChild(text('Text Content in the root'));
-			root.appendChild(text('More Text Content'));
+			let div = ce('div');
+			root.appendChild(div);
+			div.appendChild(text('Text Content'));
+			div.appendChild(text('More Text Content'));
 
 			render(<div>dynamic content</div>, root);
 			expect(root)
