@@ -46,14 +46,17 @@ describe('preact-compat', () => {
 
 		it('should remove extra elements', () => {
 			let root = ce('div');
+			let inner = ce('div');
+
+			root.appendChild(inner);
 
 			let c1 = ce('div');
 			c1.appendChild(text('isomorphic content'));
-			root.appendChild(c1);
+			inner.appendChild(c1);
 
 			let c2 = ce('div');
 			c2.appendChild(text('extra content'));
-			root.appendChild(c2);
+			inner.appendChild(c2);
 
 			render(<div>dynamic content</div>, root);
 			expect(root)
