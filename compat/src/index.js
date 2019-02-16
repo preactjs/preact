@@ -1,4 +1,4 @@
-import { render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext } from 'preact';
+import { render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
 
 const version = '16.8.0'; // trick libraries to think we are react
 
@@ -283,6 +283,7 @@ export {
 	createContext,
 	cloneElement,
 	createRef,
+	Fragment,
 	isValidElement,
 	findDOMNode,
 	Component,
@@ -300,6 +301,7 @@ export default {
 	createContext,
 	cloneElement,
 	createRef,
+	Fragment,
 	isValidElement,
 	findDOMNode,
 	Component,
