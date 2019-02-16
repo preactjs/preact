@@ -59,8 +59,7 @@ function createPortal(vnode, container) {
 const mapFn = (children, fn, ctx) => {
 	if (children == null) return null;
 	children = toChildArray(children);
-	if (ctx && ctx!==children) fn = fn.bind(ctx);
-	return children.map(fn);
+	return children.map(fn, ctx && ctx!==children ? ctx : children);
 };
 
 // This API is completely unnecessary for Preact, so it's basically passthrough.
