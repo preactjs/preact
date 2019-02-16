@@ -14,22 +14,33 @@ options.event = e => {
 	return e;
 };
 
-function handleElementVNode(vnode, a) {
+/**
+ * Normalize DOM vnode properties.
+ * @param {import('./internal').VNode} vnode The vnode to normalize props of
+ * @param {object | null | undefined} props props to normalize
+ */
+function handleElementVNode(vnode, props) {
 	let shouldSanitize, attrs, i;
-	if (a) {
-		for (i in a) if ((shouldSanitize = CAMEL_PROPS.test(i))) break;
+	if (props) {
+		for (i in props) if ((shouldSanitize = CAMEL_PROPS.test(i))) break;
 		if (shouldSanitize) {
 			attrs = vnode.props = {};
-			for (i in a) {
-				if (a.hasOwnProperty(i)) {
-					attrs[ CAMEL_PROPS.test(i) ? i.replace(/([A-Z0-9])/, '-$1').toLowerCase() : i ] = a[i];
+			for (i in props) {
+				if (props.hasOwnProperty(i)) {
+					attrs[CAMEL_PROPS.test(i) ? i.replace(/([A-Z0-9])/, '-$1').toLowerCase() : i] = props[i];
 				}
 			}
 		}
 	}
 }
 
-// proxy render() since React returns a Component reference.
+/**
+ * Proxy render() since React returns a Component reference.
+ * @param {import('./internal').VNode} vnode VNode tree to render
+ * @param {import('./internal').PreactElement} parent DOM node to render vnode tree into
+ * @param {() => void} [callback] Optional callback that will be called after rendering
+ * @returns {import('./internal').Component | null} The root component reference or null
+ */
 function render(vnode, parent, callback) {
 	preactRender(vnode, parent);
 	if (typeof callback==='function') callback();
@@ -46,12 +57,21 @@ class ContextProvider {
 	}
 }
 
+/**
+ * Portal component
+ * @param {object | null | undefined} props
+ */
 function Portal(props) {
 	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
 	let rendered = render(wrap, props.container);
 	return rendered.props.children._component;
 }
 
+/**
+ * Create a `Portal` to continue rendering the vnode tree at a different DOM node
+ * @param {import('./internal').VNode} vnode The vnode to render
+ * @param {import('./internal').PreactElement} container The DOM node to continue rendering in to.
+ */
 function createPortal(vnode, container) {
 	return h(Portal, { vnode, container });
 }
@@ -77,6 +97,11 @@ let Children = {
 	toArray: toChildArray
 };
 
+/**
+ * Upgrade all found vnodes recursively
+ * @param {Array} arr
+ * @param {number} offset
+ */
 function upgradeToVNodes(arr, offset) {
 	for (let i=offset || 0; i<arr.length; i++) {
 		let obj = arr[i];
@@ -89,6 +114,13 @@ function upgradeToVNodes(arr, offset) {
 	}
 }
 
+/**
+ * Wrap `createElement` to apply various vnode normalizations.
+ * @param {import('./internal').VNode["type"]} type The node name or Component constructor
+ * @param {object | null | undefined} [props] The vnode's properties
+ * @param {Array<import('./internal').ComponentChildren>} [children] The vnode's children
+ * @returns {import('./internal').VNode}
+ */
 function createElement(...args) {
 	upgradeToVNodes(args, 2);
 	let vnode = h(...args);
@@ -115,6 +147,10 @@ function createElement(...args) {
 	return normalizeVNode(vnode);
 }
 
+/**
+ * Normalize a vnode
+ * @param {import('./internal').VNode} vnode
+ */
 function normalizeVNode(vnode) {
 	vnode.preactCompatNormalized = true;
 	applyClassName(vnode);
@@ -122,6 +158,13 @@ function normalizeVNode(vnode) {
 	return vnode;
 }
 
+/**
+ * Wrap `cloneElement` to abort if the passed element is not a valid element and apply
+ * all vnode normalizations.
+ * @param {import('./internal').VNode} element The vnode to clone
+ * @param {object} props Props to add when cloning
+ * @param {Array<import('./internal').ComponentChildren} rest Optional component children
+ */
 function cloneElement(element) {
 	if (!isValidElement(element)) return element;
 	let vnode = normalizeVNode(preactCloneElement.apply(null, arguments));
@@ -129,10 +172,19 @@ function cloneElement(element) {
 	return vnode;
 }
 
+/**
+ * Check if the passed element is a valid (p)react node.
+ * @param {*} element The element to check
+ * @returns {boolean}
+ */
 function isValidElement(element) {
 	return element && element.$$typeof===REACT_ELEMENT_TYPE;
 }
 
+/**
+ * Normalize event handlers like react does. Most famously it uses `onChange` for any input element.
+ * @param {import('./internal').VNode} vnode The vnode to normalize events on
+ */
 function applyEventNormalization({ type, props }) {
 	if (!props || typeof type!=='string') return;
 	let newProps = {};
@@ -153,6 +205,10 @@ function applyEventNormalization({ type, props }) {
 	}
 }
 
+/**
+ * Alias `class` prop to `className` if available
+ * @param {import('./internal').VNode} vnode
+ */
 function applyClassName(vnode) {
 	let a = vnode.props;
 	if (a.class || a.className) {
@@ -168,19 +224,34 @@ let classNameDescriptor = {
 	set(v) { this.class = v; }
 };
 
+/**
+ * Check if two objects have a different shape
+ * @param {object} a
+ * @param {object} b
+ * @returns {boolean}
+ */
 function shallowDiffers(a, b) {
 	for (let i in a) if (!(i in b)) return true;
 	for (let i in b) if (a[i]!==b[i]) return true;
 	return false;
 }
 
+/**
+ * Get the matching DOM node for a component
+ * @param {import('./internal').Component} component
+ * @returns {import('./internal').PreactElement | null}
+ */
 function findDOMNode(component) {
 	return component && (component.base || component.nodeType === 1 && component) || null;
 }
 
+/**
+ * Component class with a predefined `shouldComponentUpdate` implementation
+ */
 class PureComponent extends Component {
 	constructor() {
 		super();
+		// Some third-party libraries check if this property is present
 		this.isPureReactComponent = true;
 	}
 
@@ -189,6 +260,7 @@ class PureComponent extends Component {
 	}
 }
 
+// Patch in `UNSTABLE_*` lifecycle hooks
 function setUnsafeDescriptor(obj, key) {
 	Object.defineProperty(obj.prototype, 'UNSAFE_' + key, {
 		configurable: true,
@@ -217,6 +289,7 @@ export {
 	PureComponent
 };
 
+// React copies the named exports to the default one.
 export default {
 	version,
 	Children,
