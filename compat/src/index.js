@@ -277,6 +277,7 @@ function memo(c, comparer) {
 	// Class based components, not supported by react
 	if (c.prototype!=null && c.prototype.render!=null) {
 		c.prototype.shouldComponentUpdate = shouldUpdate;
+		// Tag component for devtools
 		c._memo = true;
 		return c;
 	}
@@ -288,6 +289,7 @@ function memo(c, comparer) {
 		return c(props, context);
 	}
 	Memoed.displayName = c.displayName || c.name;
+	// Tag component for devtools
 	Memoed._memo = true;
 	return Memoed;
 }
