@@ -3,6 +3,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const preact = path.join(__dirname, '..', 'src');
+const compat = path.join(__dirname, '..', 'compat', 'src');
 
 module.exports = {
 	context: __dirname,
@@ -14,8 +15,8 @@ module.exports = {
 		alias: {
 			["preact/debug"]: path.join(__dirname, '..', 'debug'),
 			preact: preact,
-			react: preact,
-			'react-dom': preact
+			react: compat,
+			'react-dom': compat
 		}
 	},
 	module: {

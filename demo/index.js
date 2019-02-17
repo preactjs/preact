@@ -12,6 +12,7 @@ import installLogger from './logger';
 import ProfilerDemo from './profiler';
 import KeyBug from './key_bug';
 import { initDevTools } from 'preact/debug/src/devtools';
+import DevtoolsDemo from './devtools';
 
 let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(window.location.href);
 if (!isBenchmark) {
@@ -58,6 +59,7 @@ class App extends Component {
 						<Link href="/key_bug" activeClassName="active">Key Bug</Link>
 						<Link href="/profiler" activeClassName="active">Profiler</Link>
 						<Link href="/context" activeClassName="active">Context</Link>
+						<Link href="/devtools" activeClassName="active">Devtools</Link>
 					</nav>
 				</header>
 				<main>
@@ -81,6 +83,7 @@ class App extends Component {
 						<ProfilerDemo path="/profiler" />
 						<KeyBug path="/key_bug" />
 						<Context path="/context" />
+						<DevtoolsDemo path="/devtools" />
 					</Router>
 				</main>
 			</div>
