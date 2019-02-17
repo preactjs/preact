@@ -277,15 +277,19 @@ function memo(c, comparer) {
 	// Class based components, not supported by react
 	if (c.prototype!=null && c.prototype.render!=null) {
 		c.prototype.shouldComponentUpdate = shouldUpdate;
+		c._memo = true;
 		return c;
 	}
 
-	return function Memoed(props, context) {
+	function Memoed(props, context) {
 		if (!this.shouldComponentUpdate) {
 			this.shouldComponentUpdate = shouldUpdate;
 		}
 		return c(props, context);
-	};
+	}
+	Memoed.displayName = c.displayName || c.name;
+	Memoed._memo = true;
+	return Memoed;
 }
 
 // Patch in `UNSTABLE_*` lifecycle hooks
