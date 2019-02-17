@@ -2,7 +2,7 @@ import { createElement as h, render, Component } from 'preact';
 import { spy } from 'sinon';
 import { setupScratch, teardown, setupRerender } from '../../../test/_util/helpers';
 import { useState, useReducer, useEffect, useLayoutEffect, useRef } from '../../src';
-import { scheduleEffectAssert } from './useEffectUtil';
+import { scheduleEffectAssert } from '../_util/useEffectUtil';
 
 /** @jsx h */
 
