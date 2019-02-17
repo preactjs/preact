@@ -260,6 +260,34 @@ class PureComponent extends Component {
 	}
 }
 
+/**
+ * Memoize a component, so that it only updates when the props actually have
+ * changed. This was previously known as `React.pure`.
+ * @param {import('./internal').ComponentFactory<any>} c The component constructor
+ * @param {(prev: object, next: object) => boolean} [comparer] Custom equality function
+ * @returns {import('./internal').ComponentFactory<any>}
+ */
+function memo(c, comparer) {
+	function shouldUpdate(nextProps) {
+		return comparer!=null
+			? !comparer(this.props, nextProps)
+			: shallowDiffers(this.props, nextProps);
+	}
+
+	// Class based components, not supported by react
+	if (c.prototype!=null && c.prototype.render!=null) {
+		c.prototype.shouldComponentUpdate = shouldUpdate;
+		return c;
+	}
+
+	return function Memoed(props, context) {
+		if (!this.shouldComponentUpdate) {
+			this.shouldComponentUpdate = shouldUpdate;
+		}
+		return c(props, context);
+	};
+}
+
 // Patch in `UNSTABLE_*` lifecycle hooks
 function setUnsafeDescriptor(obj, key) {
 	Object.defineProperty(obj.prototype, 'UNSAFE_' + key, {
@@ -287,7 +315,8 @@ export {
 	isValidElement,
 	findDOMNode,
 	Component,
-	PureComponent
+	PureComponent,
+	memo
 };
 
 // React copies the named exports to the default one.
@@ -305,5 +334,6 @@ export default {
 	isValidElement,
 	findDOMNode,
 	Component,
-	PureComponent
+	PureComponent,
+	memo
 };
