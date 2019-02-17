@@ -280,9 +280,7 @@ function memo(c, comparer) {
 		}
 		return c(props, context);
 	}
-	Memoed.displayName = c.displayName || c.name;
-	// Tag component for devtools
-	Memoed._memo = true;
+	Memoed.displayName = 'Memo(' + (c.displayName || c.name) + ')';
 	return Memoed;
 }
 
