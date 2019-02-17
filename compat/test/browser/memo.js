@@ -140,4 +140,19 @@ describe('memo()', () => {
 		render(<App foo="bar" />, scratch);
 		expect(spy).to.be.calledTwice;
 	});
+
+	it('should pass props and nextProps to comparer fn', () => {
+		const spy = sinon.spy(() => false);
+		function Foo() {
+			return <div>foo</div>;
+		}
+
+		const props = { foo: true };
+		const nextProps = { foo: false };
+		const App = memo(Foo, spy);
+		render(h(App, props), scratch);
+		render(h(App, nextProps), scratch);
+
+		expect(spy).to.be.calledWith(props, nextProps);
+	});
 });
