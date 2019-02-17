@@ -16,38 +16,6 @@ describe('memo()', () => {
 		teardown(scratch);
 	});
 
-	it('should work with class components', () => {
-		let spy = sinon.spy();
-
-		class Foo extends Component {
-			render() {
-				spy();
-				return <h1>Hello World</h1>;
-			}
-		}
-
-		let Memoized = memo(Foo);
-
-		let update;
-		class App extends Component {
-			constructor() {
-				super();
-				update = () => this.setState({});
-			}
-			render() {
-				return <Memoized />;
-			}
-		}
-		render(<App />, scratch);
-
-		expect(spy).to.be.calledOnce;
-
-		update();
-		rerender();
-
-		expect(spy).to.be.calledOnce;
-	});
-
 	it('should work with function components', () => {
 		let spy = sinon.spy();
 
@@ -110,27 +78,6 @@ describe('memo()', () => {
 		function Foo() {
 			spy();
 			return <h1>Hello World</h1>;
-		}
-
-		const App = memo(Foo, () => false);
-		render(<App />, scratch);
-		expect(spy).to.be.calledOnce;
-
-		render(<App foo="bar" />, scratch);
-		expect(spy).to.be.calledTwice;
-	});
-
-	it('should ignore shouldComponentUpdate', () => {
-		const spy = sinon.spy();
-		class Foo extends Component {
-			shouldComponentUpdate() {
-				return false;
-			}
-
-			render() {
-				spy();
-				return <h1>Hello World</h1>;
-			}
 		}
 
 		const App = memo(Foo, () => false);

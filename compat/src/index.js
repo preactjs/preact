@@ -269,22 +269,14 @@ class PureComponent extends Component {
  */
 function memo(c, comparer) {
 	function shouldUpdate(nextProps) {
-		return comparer!=null
-			? !comparer(this.props, nextProps)
-			: shallowDiffers(this.props, nextProps);
-	}
-
-	// Class based components, not supported by react
-	if (c.prototype!=null && c.prototype.render!=null) {
-		c.prototype.shouldComponentUpdate = shouldUpdate;
-		// Tag component for devtools
-		c._memo = true;
-		return c;
+		return !comparer(this.props, nextProps);
 	}
 
 	function Memoed(props, context) {
 		if (!this.shouldComponentUpdate) {
-			this.shouldComponentUpdate = shouldUpdate;
+			this.shouldComponentUpdate = comparer!=null
+				? shouldUpdate
+				: PureComponent.prototype.shouldComponentUpdate;
 		}
 		return c(props, context);
 	}
