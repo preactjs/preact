@@ -235,7 +235,7 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 	newVNode._dom = dom;
 
 	if (newVNode.type===null) {
-		if (dom===d && newVNode.text!==oldVNode.text) {
+		if ((d===null || dom===d) && newVNode.text!==oldVNode.text) {
 			dom.data = newVNode.text;
 		}
 	}

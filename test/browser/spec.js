@@ -87,36 +87,6 @@ describe('Component spec', () => {
 			expect(proto.componentWillReceiveProps).to.have.been.calledWithMatch(PROPS2);
 			expect(proto.render).to.have.been.calledWithMatch(PROPS2);
 		});
-
-		// @TODO: migrate this to preact-compat
-		xit('should cache default props', () => {
-			class WithDefaultProps extends Component {
-				constructor(props, context) {
-					super(props, context);
-					expect(props).to.be.deep.equal({
-						fieldA: 1, fieldB: 2,
-						fieldC: 1, fieldD: 2,
-						fieldX: 10
-					});
-				}
-				getDefaultProps() {
-					return { fieldA: 1, fieldB: 1 };
-				}
-				render() {
-					return <div />;
-				}
-			}
-			WithDefaultProps.defaultProps = { fieldC: 1, fieldD: 1 };
-			sinon.spy(WithDefaultProps.prototype, 'getDefaultProps');
-			render((
-				<div>
-					<WithDefaultProps fieldB={2} fieldD={2} fieldX={10} />
-					<WithDefaultProps fieldB={2} fieldD={2} fieldX={10} />
-					<WithDefaultProps fieldB={2} fieldD={2} fieldX={10} />
-				</div>
-			), scratch);
-			expect(WithDefaultProps.prototype.getDefaultProps).to.be.calledOnce;
-		});
 	});
 
 	describe('forceUpdate', () => {
