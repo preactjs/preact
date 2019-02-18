@@ -1,4 +1,3 @@
-
 export function scheduleEffectAssert(assertFn) {
 	return new Promise(resolve => {
 		requestAnimationFrame(() =>

@@ -1,7 +1,7 @@
 import { createElement as h, render } from 'preact';
 import { spy } from 'sinon';
 import { setupScratch, teardown, setupRerender } from '../../../test/_util/helpers';
-import { useEffectAssertions } from './useEffectAssertions';
+import { useEffectAssertions } from './useEffectAssertions.test';
 import { useLayoutEffect } from '../../src';
 
 /** @jsx h */
