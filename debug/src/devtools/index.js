@@ -1,4 +1,4 @@
-import { options } from 'preact';
+import { options, Fragment } from 'preact';
 import { Renderer } from './renderer';
 
 /**
@@ -95,6 +95,9 @@ export function initDevTools() {
 		});
 
 		onCommitRoot = catchErrors(root => {
+			// Empty root
+			if (root.type===Fragment && root._children.length==0) return;
+
 			let roots = hook.getFiberRoots(rid);
 			root = helpers.handleCommitFiberRoot(root);
 			if (!roots.has(root)) roots.add(root);
