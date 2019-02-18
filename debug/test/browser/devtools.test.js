@@ -148,7 +148,7 @@ describe('devtools', () => {
 	afterEach(() => {
 		teardown(scratch);
 
-		if (/** @type {*} */ (console.error).callCount > 1) {
+		if (/** @type {*} */ (console.error).callCount > 0) {
 			throw new Error('Uncaught error in devtools');
 		}
 
