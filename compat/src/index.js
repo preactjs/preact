@@ -314,17 +314,12 @@ function forwardRef(fn) {
 	return Forwarded;
 }
 
-/**
- * Detect if a component is a forwardRef function
- * @param {import('./internal').VNode} vnode
- */
-function isForwardRef(vnode) {
-	return typeof vnode.type=='function' && vnode.type.displayName && vnode.type.displayName.substring(0, 10)=='ForwardRef';
-}
-
 let oldBeforeDiff = options.beforeDiff;
 options.beforeDiff = vnode => {
-	if (isForwardRef(vnode)) {
+	if (typeof vnode.type=='function' &&
+		vnode.type.displayName &&
+		vnode.type.displayName.substring(0, 10)=='ForwardRef'
+	) {
 		vnode.props.ref = vnode.ref;
 		vnode.ref = null;
 	}
