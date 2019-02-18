@@ -297,6 +297,48 @@ setUnsafeDescriptor(Component, 'componentWillMount');
 setUnsafeDescriptor(Component, 'componentWillReceiveProps');
 setUnsafeDescriptor(Component, 'componentWillUpdate');
 
+/**
+ * Pass ref down to a child. This is mainly used in libraries with HOCs that
+ * wrap components. Using `forwardRef` there is an easy way to get a reference
+ * of the wrapped component instead of one of the wrapper itself.
+ * @param {import('./internal').ForwardFn} fn
+ * @returns {import('./internal').FunctionalComponent}
+ */
+function forwardRef(fn) {
+	function Forwarded(props) {
+		let ref = props.ref;
+		delete props.ref;
+		return fn(props, ref);
+	}
+	Forwarded.displayName = 'ForwardRef(' + (fn.displayName || fn.name) + ')';
+	return Forwarded;
+}
+
+/**
+ * Detect if a component is a forwardRef function
+ * @param {import('./internal').VNode} vnode
+ */
+function isForwardRef(vnode) {
+	return typeof vnode.type=='function' && vnode.type.displayName.substring(0, 10)=='ForwardRef';
+}
+
+let oldBeforeDiff = options.beforeDiff;
+options.beforeDiff = vnode => {
+	if (isForwardRef(vnode)) {
+		vnode.props.ref = vnode.ref;
+		vnode.ref = null;
+	}
+	if (oldBeforeDiff) oldBeforeDiff(vnode);
+};
+
+let oldAfterDiff = options.afterDiff;
+options.afterDiff = vnode => {
+	if (isForwardRef(vnode)) {
+		vnode.ref = null;
+	}
+	if (oldAfterDiff) oldAfterDiff(vnode);
+};
+
 export {
 	version,
 	Children,
@@ -312,7 +354,8 @@ export {
 	findDOMNode,
 	Component,
 	PureComponent,
-	memo
+	memo,
+	forwardRef
 };
 
 // React copies the named exports to the default one.
@@ -332,5 +375,6 @@ export default {
 	findDOMNode,
 	Component,
 	PureComponent,
-	memo
+	memo,
+	forwardRef
 };
