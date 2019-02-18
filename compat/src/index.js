@@ -314,16 +314,17 @@ function forwardRef(fn) {
 	return Forwarded;
 }
 
-let oldBeforeDiff = options.beforeDiff;
-options.beforeDiff = vnode => {
-	if (typeof vnode.type=='function' &&
-		vnode.type.displayName &&
-		vnode.type.displayName.substring(0, 10)=='ForwardRef'
+let oldVNodeHook = options.vnode;
+options.vnode = vnode => {
+	let type = vnode.type;
+	if (typeof type=='function' &&
+		type.displayName &&
+		type.displayName.substring(0, 10)=='ForwardRef'
 	) {
 		vnode.props.ref = vnode.ref;
 		vnode.ref = null;
 	}
-	if (oldBeforeDiff) oldBeforeDiff(vnode);
+	if (oldVNodeHook) oldVNodeHook(vnode);
 };
 
 export {
