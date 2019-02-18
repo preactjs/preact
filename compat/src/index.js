@@ -319,7 +319,7 @@ function forwardRef(fn) {
  * @param {import('./internal').VNode} vnode
  */
 function isForwardRef(vnode) {
-	return typeof vnode.type=='function' && vnode.type.displayName.substring(0, 10)=='ForwardRef';
+	return typeof vnode.type=='function' && vnode.type.displayName && vnode.type.displayName.substring(0, 10)=='ForwardRef';
 }
 
 let oldBeforeDiff = options.beforeDiff;
