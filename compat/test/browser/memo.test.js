@@ -1,6 +1,5 @@
 import { setupScratch, setupRerender, teardown } from '../../../test/_util/helpers';
-import { Component, render } from '../../src';
-import { createElement as h, memo } from '../../src';
+import { Component, render, createElement as h, memo } from '../../src';
 
 /** @jsx h */
 
