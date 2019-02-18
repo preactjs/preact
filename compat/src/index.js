@@ -331,14 +331,6 @@ options.beforeDiff = vnode => {
 	if (oldBeforeDiff) oldBeforeDiff(vnode);
 };
 
-let oldAfterDiff = options.afterDiff;
-options.afterDiff = vnode => {
-	if (isForwardRef(vnode)) {
-		vnode.ref = null;
-	}
-	if (oldAfterDiff) oldAfterDiff(vnode);
-};
-
 export {
 	version,
 	Children,
