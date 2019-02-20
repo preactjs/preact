@@ -38,7 +38,7 @@ export function initDevTools() {
 
 	// Initialize our custom renderer
 	let rid = Math.random().toString(16).slice(2);
-	let cevicheRenderer = new Renderer(hook, rid);
+	let preactRenderer = new Renderer(hook, rid);
 
 	catchErrors(() => {
 		let isDev = false;
@@ -67,7 +67,7 @@ export function initDevTools() {
 			// We don't need this, but the devtools `attachRenderer` function relys
 			// it being there.
 			findFiberByHostInstance(instance) {
-				return cevicheRenderer.inst2vnode.get(instance) || null;
+				return preactRenderer.inst2vnode.get(instance) || null;
 			}
 		};
 
@@ -77,9 +77,9 @@ export function initDevTools() {
 		// prevent the devtools from overwriting our custom renderer by creating
 		// a noop setter.
 		Object.defineProperty(hook.helpers, rid, {
-			get: () => cevicheRenderer,
+			get: () => preactRenderer,
 			set: () => {
-				if (!cevicheRenderer.connected) {
+				if (!preactRenderer.connected) {
 					helpers.markConnected();
 				}
 			}
