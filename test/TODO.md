@@ -14,6 +14,8 @@
 - keys
 	- ✖ should not preserve state when the keys are different
 	- ✖ should not preserve state between unkeyed and keyed component
+- hydrate
+	- ✖ should override incorrect pre-existing DOM with VNodes passed into render
 
 Also:
 
