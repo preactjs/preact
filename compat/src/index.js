@@ -1,4 +1,6 @@
 import { render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
+import * as hooks from 'preact/hooks';
+export * from 'preact/hooks';
 
 const version = '16.8.0'; // trick libraries to think we are react
 
@@ -315,6 +317,7 @@ export {
 
 // React copies the named exports to the default one.
 export default {
+	...hooks,
 	version,
 	Children,
 	render,

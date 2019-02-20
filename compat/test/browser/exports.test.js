@@ -13,6 +13,16 @@ describe('exports', () => {
 		expect(Compat.createContext).to.be.a('function');
 		expect(Compat.createRef).to.be.a('function');
 
+		// Hooks
+		expect(Compat.useState).to.be.a('function');
+		expect(Compat.useReducer).to.be.a('function');
+		expect(Compat.useEffect).to.be.a('function');
+		expect(Compat.useLayoutEffect).to.be.a('function');
+		expect(Compat.useRef).to.be.a('function');
+		expect(Compat.useMemo).to.be.a('function');
+		expect(Compat.useCallback).to.be.a('function');
+		expect(Compat.useContext).to.be.a('function');
+
 		// Compat specific
 		expect(Compat.PureComponent).to.exist.and.be.a('function');
 		expect(Compat.createPortal).to.exist.and.be.a('function');
@@ -35,6 +45,16 @@ describe('exports', () => {
 		expect(Named.cloneElement).to.be.a('function');
 		expect(Named.createContext).to.be.a('function');
 		expect(Named.createRef).to.be.a('function');
+
+		// Hooks
+		expect(Compat.useState).to.be.a('function');
+		expect(Compat.useReducer).to.be.a('function');
+		expect(Compat.useEffect).to.be.a('function');
+		expect(Compat.useLayoutEffect).to.be.a('function');
+		expect(Compat.useRef).to.be.a('function');
+		expect(Compat.useMemo).to.be.a('function');
+		expect(Compat.useCallback).to.be.a('function');
+		expect(Compat.useContext).to.be.a('function');
 
 		// Compat specific
 		expect(Named.PureComponent).to.exist.and.be.a('function');
