@@ -97,6 +97,7 @@ declare namespace preact {
 
 		static displayName?: string;
 		static defaultProps?: any;
+		static contextType?: PreactContext<any>;
 		static getDerivedStateFromProps?<P, S>(props: P, state: S): Partial<S>;
 		static getDerivedStateFromError?<S>(error: any): Partial<S>;
 
