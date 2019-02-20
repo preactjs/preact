@@ -64,7 +64,7 @@
     "hooks/package.json"
   ],
   "keywords": [
-    "ceviche",
+    "preact",
     "virtual dom",
     "vdom",
     "dom"
