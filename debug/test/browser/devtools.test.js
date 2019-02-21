@@ -68,6 +68,21 @@ function createMockHook() {
 }
 
 /**
+ * Check if the event has been seen (=mounted in most cases) before.
+ * @param {import('../../src/internal').VNode} event
+ * @param {Set<import('../../src/internal').VNode>} seen
+ * @returns {boolean}
+ */
+function checkPreceding(vnode, seen) {
+	if (vnode==null) return true;
+
+	// If a leaf node is a Fragment and has no children it will be skipped
+	if (vnode.type===Fragment && vnode._children==0) return true;
+
+	return seen.has(vnode);
+}
+
+/**
  * Verify the references in the events passed to the devtools. Component have to
  * be traversed in a child-depth-first order for the devtools to work.
  * @param {Array<import('../../src/internal').DevtoolsEvent>} events
@@ -78,7 +93,7 @@ function checkEventReferences(events) {
 	events.forEach((event, i) => {
 		if (i > 0 && event.type!=='unmount' && Array.isArray(event.data.children)) {
 			event.data.children.forEach(child => {
-				if (!seen.has(child) && event.type!=='rootCommitted') {
+				if (!checkPreceding(child, seen) && event.type!=='rootCommitted') {
 					throw new Error(`Event at index ${i} has a child that could not be found in a preceeding event for component "${getDisplayName(child)}"`);
 				}
 			});
@@ -88,7 +103,7 @@ function checkEventReferences(events) {
 		if (event.type=='mount') {
 			seen.add(inst);
 		}
-		else if (!seen.has(inst) && event.type!=='rootCommitted') {
+		else if (!checkPreceding(event.internalInstance, seen) && event.type!=='rootCommitted') {
 			throw new Error(`Event at index ${i} for component ${inst!=null ? getDisplayName(inst) : inst} is not mounted. Perhaps you forgot to send a "mount" event prior to this?`);
 		}
 
@@ -483,6 +498,46 @@ describe('devtools', () => {
 				'root',
 				'rootCommitted'
 			]);
+		});
+
+		it('should not throw on empty Fragments on mount', () => {
+			render(<Fragment />, scratch);
+			checkEventReferences(hook.log);
+
+			render(<div><Fragment /></div>, scratch);
+			checkEventReferences(hook.log);
+		});
+
+		it('should not throw on empty Fragments on update', () => {
+			let setState;
+			class App extends Component {
+				constructor() {
+					super();
+					setState = this.setState.bind(this);
+				}
+
+				render() {
+					return <Fragment />;
+				}
+			}
+
+			class App2 extends App {
+				render() {
+					return <div><Fragment /></div>;
+				}
+			}
+
+			render(<App />, scratch);
+			setState({});
+			rerender();
+
+			checkEventReferences(hook.log);
+
+			hook.clear();
+
+			render(<App2 />, scratch);
+			setState({});
+			rerender();
 		});
 
 		it('should find dom node by vnode', () => {

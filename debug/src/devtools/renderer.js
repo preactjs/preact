@@ -183,13 +183,9 @@ export class Renderer {
 		else {
 			// "rootCommitted" always needs the actual root node for the profiler
 			// to be able to collect timings.
-			/** @type {*} */
-			let dom = vnode._dom;
-
-			while ((dom = dom.parentNode)!=null) {
-				if (dom._prevVNode!=null) {
-					root = dom._prevVNode;
-				}
+			root = vnode._component;
+			while (root._ancestorComponent!=null) {
+				root = root._ancestorComponent;
 			}
 		}
 
