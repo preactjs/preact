@@ -50,7 +50,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		else {
 			// remove values not in the new list
 			for (let i in oldValue) {
-				if (value==null || !(i in value)) s.removeProperty(i);
+				if (value==null || !(i in value)) s.setProperty(i, '');
 			}
 		}
 
