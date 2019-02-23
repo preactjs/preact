@@ -310,6 +310,7 @@ function forwardRef(fn) {
 		delete props.ref;
 		return fn(props, ref);
 	}
+	Forwarded._forwarded = true;
 	Forwarded.displayName = 'ForwardRef(' + (fn.displayName || fn.name) + ')';
 	return Forwarded;
 }
@@ -317,10 +318,7 @@ function forwardRef(fn) {
 let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
 	let type = vnode.type;
-	if (typeof type=='function' &&
-		type.displayName &&
-		type.displayName.substring(0, 10)=='ForwardRef'
-	) {
+	if (type!=null && type._forwarded) {
 		vnode.props.ref = vnode.ref;
 		vnode.ref = null;
 	}
