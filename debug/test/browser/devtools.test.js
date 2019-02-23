@@ -3,7 +3,7 @@ import { getDisplayName, setIn, isRoot, getData, shallowEqual, hasDataChanged, h
 import { setupScratch, setupRerender, teardown, clearOptions } from '../../../test/_util/helpers';
 import { initDevTools } from '../../src/devtools';
 import { Renderer } from '../../src/devtools/renderer';
-import { memo } from '../../../compat/src';
+import { memo, forwardRef } from '../../../compat/src';
 
 /** @jsx h */
 
@@ -229,6 +229,14 @@ describe('devtools', () => {
 
 			vnode = h(memo(Foo));
 			expect(getDisplayName(vnode)).to.equal('Memo(Foo)');
+		});
+
+		it('should get name for forwardRef', () => {
+			// eslint-disable-next-line prefer-arrow-callback
+			let App = forwardRef(function App(_, ref) {
+				return <div ref={ref}>foo</div>;
+			});
+			expect(getDisplayName(h(App))).to.equal('ForwardRef(App)');
 		});
 	});
 
