@@ -22,8 +22,6 @@ export function diffProps(dom, newProps, oldProps, isSvg) {
 	}
 }
 
-let cssReg = /-?([A-Z])/g;
-
 /**
  * Set a property value on a DOM node
  * @param {import('../internal').PreactElement} dom The DOM node to modify
@@ -42,7 +40,6 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		 *   - assigning to .style sets .style.cssText - TODO: benchmark this, might not be worth the bytes.
 		 *   - assigning also casts to String, and ignores invalid values. This means assigning an Object clears all styles.
 		 */
-
 		let s = dom.style;
 
 		if (typeof value==='string') return s.cssText = value;
@@ -57,7 +54,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		for (let i in value) {
 			let v = value[i];
 			if (oldValue==null || v!==oldValue[i]) {
-				s.setProperty(i.replace(cssReg, '-$1'), typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v);
+				s.setProperty(i.replace(/-?([A-Z])/g, '-$1'), typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v);
 			}
 		}
 	}
