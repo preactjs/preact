@@ -1006,7 +1006,7 @@ describe('Fragment', () => {
 
 		clearLog();
 		render(<Foo condition={true} />, scratch);
-		expect(scratch.innerHTML).to.equal(html);
+		expect(scratch.innerHTML).to.equal(html, 'initial render of true');
 		expectDomLogToBe([
 			'<li>.appendChild(#text)',
 			'<ol>.appendChild(<li>0)',
@@ -1021,7 +1021,7 @@ describe('Fragment', () => {
 
 		clearLog();
 		render(<Foo condition={false} />,  scratch);
-		expect(scratch.innerHTML).to.equal(html);
+		expect(scratch.innerHTML).to.equal(html, 'rendering from true to false');
 		expectDomLogToBe([
 			'<li>.appendChild(#text)',
 			'<ol>0121.appendChild(<li>2)',
@@ -1033,7 +1033,7 @@ describe('Fragment', () => {
 
 		clearLog();
 		render(<Foo condition={true} />, scratch);
-		expect(scratch.innerHTML).to.equal(html);
+		expect(scratch.innerHTML).to.equal(html, 'rendering from false to true');
 		expectDomLogToBe([
 			'<li>.appendChild(#text)',
 			'<ol>0123.appendChild(<li>1)',
@@ -1076,7 +1076,7 @@ describe('Fragment', () => {
 
 		clearLog();
 		render(<Foo condition={true} />, scratch);
-		expect(scratch.innerHTML).to.equal(htmlForTrue);
+		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true');
 		expectDomLogToBe([
 			'<li>.appendChild(#text)',
 			'<ol>.appendChild(<li>0)',
@@ -1093,7 +1093,7 @@ describe('Fragment', () => {
 
 		clearLog();
 		render(<Foo condition={false} />,  scratch);
-		expect(scratch.innerHTML).to.equal(htmlForFalse);
+		expect(scratch.innerHTML).to.equal(htmlForFalse, 'rendering from true to false');
 		expectDomLogToBe([
 			'<li>1.remove()',
 			'<li>2.remove()'
@@ -1101,7 +1101,7 @@ describe('Fragment', () => {
 
 		clearLog();
 		render(<Foo condition={true} />, scratch);
-		expect(scratch.innerHTML).to.equal(htmlForTrue);
+		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
 		expectDomLogToBe([
 			'<li>.appendChild(#text)',
 			'<ol>034.appendChild(<li>1)',
@@ -1562,5 +1562,94 @@ describe('Fragment', () => {
 
 		render(<Foo condition={false} />, scratch);
 		expect(scratch.textContent).to.equal('');
+	});
+
+	it('should support conditionally rendered nested Fragments or null with siblings', () => {
+		const Foo = ({ condition }) => (
+			<ol>
+				<li>0</li>
+				<Fragment>
+					<li>1</li>
+					{condition ? (
+						<Fragment>
+							<li>2</li>
+							<li>3</li>
+						</Fragment>
+					) : null }
+					<li>4</li>
+				</Fragment>
+				<li>5</li>
+			</ol>
+		);
+
+		const htmlForTrue = ol([
+			li('0'),
+			li('1'),
+			li('2'),
+			li('3'),
+			li('4'),
+			li('5')
+		].join(''));
+
+		const htmlForFalse = ol([
+			li('0'),
+			li('1'),
+			li('4'),
+			li('5')
+		].join(''));
+
+		clearLog();
+		render(<Foo condition={true} />, scratch);
+		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true');
+		expectDomLogToBe([
+			'<li>.appendChild(#text)',
+			'<ol>.appendChild(<li>0)',
+			'<li>.appendChild(#text)',
+			'<ol>0.appendChild(<li>1)',
+			'<li>.appendChild(#text)',
+			'<ol>01.appendChild(<li>2)',
+			'<li>.appendChild(#text)',
+			'<ol>012.appendChild(<li>3)',
+			'<li>.appendChild(#text)',
+			'<ol>0123.appendChild(<li>4)',
+			'<li>.appendChild(#text)',
+			'<ol>01234.appendChild(<li>5)',
+			'<div>.appendChild(<ol>012345)'
+		], 'initial render of true');
+
+		clearLog();
+		render(<Foo condition={false} />,  scratch);
+		expect(scratch.innerHTML).to.equal(htmlForFalse, 'rendering from true to false');
+		expectDomLogToBe([
+			'<li>2.remove()',
+			'<li>3.remove()'
+		], 'rendering from true to false');
+
+		clearLog();
+		render(<Foo condition={true} />, scratch);
+		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
+		expectDomLogToBe([
+			'<li>.appendChild(#text)',
+			'<ol>0145.insertBefore(<li>2, <li>4)',
+			'<li>.appendChild(#text)',
+			'<ol>01245.insertBefore(<li>3, <li>4)'
+		], 'rendering from false to true');
+	});
+
+	it('should render first child Fragment that wrap null components', () => {
+		const Empty = () => null;
+		const Foo = () => (
+			<ol>
+				<Fragment>
+					<Empty />
+				</Fragment>
+				<li>1</li>
+			</ol>
+		);
+
+		render(<Foo />, scratch);
+		expect(scratch.innerHTML).to.equal(ol([
+			li(1)
+		].join('')));
 	});
 });
