@@ -27,7 +27,13 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	let oldChildrenTodo = [oldChildren];
 	let indexesToResume = [0];
 
-	childDom = oldChildren.length ? oldChildren[0] && oldChildren[0]._dom : null;
+	// TODO: Investigate -> oldChildren[0]._dom is null for nested Fragments because
+	// Fragments that get "flattened" in the loops below don't get their _dom and _lastDomChild
+	// pointers set, so oldChildren[0]._dom will always be null for Fragments.
+	// Also, will this break some devtool functionalities if not all VNodes have a ._dom pointer?
+
+	// childDom = oldChildren.length ? oldChildren[0] && oldChildren[0]._dom : null;
+	childDom = oldChildren.length ? parentDom.firstChild : null;
 	if (excessDomChildren!=null) {
 		for (i = 0; i < excessDomChildren.length; i++) {
 			if (excessDomChildren[i]!=null) {

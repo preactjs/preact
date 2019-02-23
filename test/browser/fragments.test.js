@@ -8,7 +8,7 @@ import { logCall, clearLog, getLog } from '../_util/logCall';
 
 describe('Fragment', () => {
 
-	let expectDomLog = false;
+	let expectDomLog = true;
 
 	/** @type {HTMLDivElement} */
 	let scratch;
@@ -272,8 +272,7 @@ describe('Fragment', () => {
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 		expectDomLogToBe([
-			// See issue #193 - redudant operations (remove)
-			'<div>Hello.remove()',
+			// See issue #193 - redundant operations (remove)
 			'<div>Hello.remove()',
 			'<div>Hello.remove()',
 			'<div>.appendChild(#text)',
@@ -699,8 +698,7 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.equal('foobar');
 		expectDomLogToBe([
-			'<div>spamfoobar.appendChild(#text)',
-			'<div>spambarfoo.appendChild(#text)'
+			'<div>spamfoobar.insertBefore(#text, #text)'
 		]);
 	});
 
