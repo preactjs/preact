@@ -47,14 +47,14 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		else {
 			// remove values not in the new list
 			for (let i in oldValue) {
-				if (value==null || !(i in value)) s[i] = '';
+				if (value==null || !(i in value)) s.setProperty(i, '');
 			}
 		}
 
 		for (let i in value) {
 			let v = value[i];
 			if (oldValue==null || v!==oldValue[i]) {
-				s[i] = typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v;
+				s.setProperty(i.replace(/-?(?=[A-Z])/g, '-'), typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v);
 			}
 		}
 	}
