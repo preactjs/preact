@@ -71,6 +71,19 @@ describe('debug', () => {
 			expect(console.error).to.be.calledOnce;
 		});
 
+		it('should allow distinct object keys', () => {
+			const A = { is: 'A' };
+			const B = { is: 'B' };
+			render(<div><span key={A} /><span key={B} /></div>, scratch);
+			expect(console.error).not.to.be.called;
+		});
+
+		it('should print an error for duplicate object keys', () => {
+			const A = { is: 'A' };
+			render(<div><span key={A} /><span key={A} /></div>, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
 		it('should print an error on duplicate keys with Components', () => {
 			function App() {
 				return (
