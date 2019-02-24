@@ -54,7 +54,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		for (let i in value) {
 			let v = value[i];
 			if (oldValue==null || v!==oldValue[i]) {
-				s.setProperty(i.replace(/-?([A-Z])/g, '-$1'), typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v);
+				s.setProperty(i.replace(/-?(?=[A-Z])/g, '-'), typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v);
 			}
 		}
 	}
