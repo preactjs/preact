@@ -208,6 +208,19 @@ function applyEventNormalization({ type, props }) {
 }
 
 /**
+ * Remove a component tree from the DOM, including state and event handlers.
+ * @param {Element | Document | ShadowRoot | DocumentFragment} container
+ * @returns {boolean}
+ */
+function unmountComponentAtNode(container) {
+	if (container._prevVNode!=null) {
+		preactRender(null, container);
+		return true;
+	}
+	return false;
+}
+
+/**
  * Alias `class` prop to `className` if available
  * @param {import('./internal').VNode} vnode
  */
@@ -330,6 +343,7 @@ export {
 	Children,
 	render,
 	render as hydrate,
+	unmountComponentAtNode,
 	createPortal,
 	createElement,
 	createContext,
@@ -351,6 +365,7 @@ export default {
 	Children,
 	render,
 	hydrate: render,
+	unmountComponentAtNode,
 	createPortal,
 	createElement,
 	createContext,

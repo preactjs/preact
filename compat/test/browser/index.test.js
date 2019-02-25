@@ -3,7 +3,8 @@ import React, {
 	createElement,
 	cloneElement,
 	findDOMNode,
-	Component
+	Component,
+	unmountComponentAtNode
 } from '../../src';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
@@ -233,6 +234,21 @@ describe('preact-compat', () => {
 		it('should return null if render returns null', () => {
 			const helper = React.render(<Helper something={null} />, scratch);
 			expect(findDOMNode(helper)).to.be.null;
+		});
+	});
+
+	describe('unmountComponentAtNode', () => {
+		it('should unmount a root node', () => {
+			const App = () => <div>foo</div>;
+			render(<App />, scratch);
+
+			expect(unmountComponentAtNode(scratch)).to.equal(true);
+			expect(scratch.innerHTML).to.equal('');
+		});
+
+		it('should do nothing if root is not mounted', () => {
+			expect(unmountComponentAtNode(scratch)).to.equal(false);
+			expect(scratch.innerHTML).to.equal('');
 		});
 	});
 });
