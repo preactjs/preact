@@ -32,14 +32,13 @@ export function initDebug() {
 			checkPropTypes(vnode.type.propTypes, vnode.props, getDisplayName(vnode), serializeVNode(vnode));
 		}
 
-		let keys = {};
+		let keys = [];
 		for (let deepChild of toChildArray(children)) {
 			if (!deepChild || deepChild.key==null) continue;
 
-			// In Preact, all keys are stored as object values, i.e. being strings
-			let key = deepChild.key + '';
+			let key = deepChild.key;
 
-			if (keys.hasOwnProperty(key)) {
+			if (keys.indexOf(key) !== -1) {
 				console.error(
 					'Following component has two or more children with the ' +
 					`same key attribute: "${key}". This may cause glitches and misbehavior ` +
@@ -51,7 +50,7 @@ export function initDebug() {
 				break;
 			}
 
-			keys[key] = true;
+			keys.push(key);
 		}
 
 		if (oldBeforeDiff) oldBeforeDiff(vnode);

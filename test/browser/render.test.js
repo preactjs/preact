@@ -399,6 +399,11 @@ describe('render()', () => {
 			expect(style).to.have.property('color').that.equals('rgb(0, 255, 255)');
 		});
 
+		it('should support css custom properties', () => {
+			render(<div style={{ '--foo': 'red', color: 'var(--foo)' }}>test</div>, scratch);
+			expect(scratch.firstChild.style.cssText).to.equal('--foo:red; color: var(--foo);');
+			expect(window.getComputedStyle(scratch.firstChild).color).to.equal('rgb(255, 0, 0)');
+		});
 	});
 
 	describe('event handling', () => {
