@@ -101,4 +101,14 @@ describe('memo()', () => {
 
 		expect(spy).to.be.calledWith(props, nextProps);
 	});
+
+	it('should nest without errors', () => {
+		const Foo = () => <div>foo</div>;
+		const App = memo(memo(Foo));
+
+		// eslint-disable-next-line prefer-arrow-callback
+		expect(function() {
+			render(<App />, scratch);
+		}).to.not.throw();
+	});
 });
