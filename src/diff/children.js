@@ -27,9 +27,13 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	let oldChildrenTodo = [oldChildren];
 	let indexesToResume = [0];
 
-	// TODO: Investigate -> oldChildren[0]._dom is null for nested Fragments because
+	// Exploration to get oldChildren[0]._dom to work...
+	// let firstDomChild = null;
+	// let lastDomChild = null;
+
+	// TODO: Investigate -> oldChildren[i]._dom is null for nested Fragments because
 	// Fragments that get "flattened" in the loops below don't get their _dom and _lastDomChild
-	// pointers set, so oldChildren[0]._dom will always be null for Fragments.
+	// pointers set, so oldChildren[i]._dom will always be null for those nested Fragments.
 	// Also, will this break some devtool functionalities if not all VNodes have a ._dom pointer?
 
 	// childDom = oldChildren.length ? oldChildren[0] && oldChildren[0]._dom : null;
@@ -73,6 +77,11 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 				// Only proceed if the vnode has not been unmounted by `diff()` above.
 				if (childVNode!=null && newDom !=null) {
 					childDom = placeChild(parentDom, oldVNode, childVNode, childDom, newDom, excessDomChildren, oldChildren.length);
+
+					// lastDomChild = newDom;
+					// if (firstDomChild == null) {
+					// 	firstDomChild = newDom;
+					// }
 				}
 			}
 		}
@@ -80,6 +89,11 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		// Remove remaining oldChildren if there are any.
 		for (i=oldChildren.length; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
 	}
+
+	// if (newChildren.length && newChildren[0] != null && newChildren[0].type == Fragment) {
+	// 	newChildren[0]._dom = firstDomChild;
+	// 	newChildren[0]._lastDomChild = lastDomChild;
+	// }
 
 	// for (i=0; i<children.length; i++) {
 	// 	childVNode = children[i] = coerceToVNode(children[i]);
