@@ -1,4 +1,4 @@
-import { createElement as h, render, createRef, forwardRef } from '../../src';
+import { createElement as h, render, createRef, forwardRef, hydrate, memo } from '../../src';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 
@@ -79,5 +79,186 @@ describe('forwardRef', () => {
 		render(null, scratch);
 
 		expect(passedRef.current).to.equal(null);
+	});
+
+	it('should be able to render and hydrate forwardRef components', () => {
+		const Foo = ({ label, forwardedRef }) => (
+			<div ref={forwardedRef}>{label}</div>
+		);
+		const App = forwardRef((props, ref) => (
+			<Foo {...props} forwardedRef={ref} />
+		));
+
+		const ref = createRef();
+		const markup = <App ref={ref} label="Hi" />;
+
+		const element = document.createElement('div');
+		element.innerHTML = '<div>Hi</div>';
+		expect(element.textContent).to.equal('Hi');
+		expect(ref.current==null).to.equal(true);
+
+		hydrate(markup, element);
+		expect(element.textContent).to.equal('Hi');
+		expect(ref.current.tagName).to.equal('DIV');
+	});
+
+	it('should update refs when switching between children', () => {
+		function Foo({ forwardedRef, setRefOnDiv }) {
+			return (
+				<section>
+					<div ref={setRefOnDiv ? forwardedRef : null}>First</div>
+					<span ref={setRefOnDiv ? null : forwardedRef}>Second</span>
+				</section>
+			);
+		}
+
+		const App = forwardRef((props, ref) => (
+			<Foo {...props} forwardedRef={ref} />
+		));
+
+		const ref = createRef();
+
+		render(<App ref={ref} setRefOnDiv={true} />, scratch);
+		expect(ref.current.nodeName).to.equal('DIV');
+
+		render(<App ref={ref} setRefOnDiv={false} />, scratch);
+		expect(ref.current.nodeName).to.equal('SPAN');
+	});
+
+	it('should support rendering null', () => {
+		const App = forwardRef(() => null);
+		const ref = createRef();
+
+		render(<App ref={ref} />, scratch);
+		expect(ref.current==null).to.equal(true);
+	});
+
+	it('should support rendering null for multiple children', () => {
+		const Foo = forwardRef(() => null);
+		const ref = createRef();
+
+		render(
+			<div>
+				<div />
+				<Foo ref={ref} />
+				<div />
+			</div>,
+			scratch
+		);
+		expect(ref.current==null).to.equal(true);
+	});
+
+	it('should not bailout if forwardRef is not wrapped in memo', () => {
+		const Component = props => <div {...props} />;
+
+		let renderCount = 0;
+
+		const App = forwardRef((props, ref) => {
+			renderCount++;
+			return <Component {...props} forwardedRef={ref} />;
+		});
+
+		const ref = createRef();
+
+		render(<App ref={ref} optional="foo" />, scratch);
+		expect(renderCount).to.equal(1);
+
+		render(<App ref={ref} optional="foo" />, scratch);
+		expect(renderCount).to.equal(2);
+	});
+
+	it.skip('should bailout if forwardRef is wrapped in memo', () => {
+		const Component = props => <div ref={props.forwardedRef} />;
+
+		let renderCount = 0;
+
+		const App = memo(
+			forwardRef((props, ref) => {
+				renderCount++;
+				return <Component {...props} forwardedRef={ref} />;
+			}),
+		);
+
+		const ref = createRef();
+
+		render(<App ref={ref} optional="foo" />, scratch);
+		expect(renderCount).to.equal(1);
+
+		expect(ref.current.nodeName).to.equal('DIV');
+
+		render(<App ref={ref} optional="foo" />, scratch);
+		expect(renderCount).to.equal(1);
+
+		const differentRef = createRef();
+
+		render(
+			<App ref={differentRef} optional="foo" />,
+			scratch
+		);
+		expect(renderCount).to.equal(2);
+
+		expect(ref.current==null).to.equal(true);
+		expect(differentRef.current.nodeName).to.equal('DIV');
+
+		render(<App ref={ref} optional="bar" />, scratch);
+		expect(renderCount).to.equal(3);
+	});
+
+	it.skip('should custom memo comparisons to compose', () => {
+		const Foo = props => <div ref={props.forwardedRef} />;
+
+		let renderCount = 0;
+
+		const App = memo(
+			forwardRef((props, ref) => {
+				renderCount++;
+				return <Foo {...props} forwardedRef={ref} />;
+			}),
+			(o, p) => o.a === p.a && o.b === p.b,
+		);
+
+		const ref = createRef();
+
+		render(<App ref={ref} a="0" b="0" c="1" />, scratch);
+		expect(renderCount).to.equal(1);
+
+		expect(ref.current.nodeName).to.equal('DIV');
+
+		// Changing either a or b rerenders
+		render(<App ref={ref} a="0" b="1" c="1" />, scratch);
+		expect(renderCount).to.equal(2);
+
+		// Changing c doesn't rerender
+		render(<App ref={ref} a="0" b="1" c="2" />, scratch);
+		expect(renderCount).to.equal(2);
+
+		const App2 = memo(
+			App,
+			(o, p) => o.a === p.a && o.c === p.c,
+		);
+
+		render(<App2 ref={ref} a="0" b="0" c="0" />, scratch);
+		expect(renderCount).to.equal(3);
+
+		// Changing just b no longer updates
+		render(<App2 ref={ref} a="0" b="1" c="0" />, scratch);
+		expect(renderCount).to.equal(3);
+
+		// Changing just a and c updates
+		render(<App2 ref={ref} a="2" b="2" c="2" />, scratch);
+		expect(renderCount).to.equal(4);
+
+		// Changing just c does not update
+		render(<App2 ref={ref} a="2" b="2" c="3" />, scratch);
+		expect(renderCount).to.equal(4);
+
+		// Changing ref still rerenders
+		const differentRef = createRef();
+
+		render(<App2 ref={differentRef} a="2" b="2" c="3" />, scratch);
+		expect(renderCount).to.equal(5);
+
+		expect(ref.current==null).to.equal(true);
+		expect(differentRef.current.nodeName).to.equal('DIV');
 	});
 });
