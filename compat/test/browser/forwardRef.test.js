@@ -204,7 +204,7 @@ describe('forwardRef', () => {
 		expect(renderCount).to.equal(3);
 	});
 
-	it('should custom memo comparisons to compose', () => {
+	it('should pass ref through memo() with custom comparer function', () => {
 		const Foo = props => <div ref={props.forwardedRef} />;
 
 		let renderCount = 0;
