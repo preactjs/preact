@@ -125,7 +125,8 @@ export function getChildren(vnode) {
  * @returns {boolean}
  */
 export function isRoot(vnode) {
-	return vnode.type===Fragment && vnode._dom==null && Array.isArray(vnode._children);
+	// Timings of root vnodes will never be set
+	return vnode.type===Fragment && vnode.endTime==-1;
 }
 
 /**
