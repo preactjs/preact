@@ -125,10 +125,8 @@ export function getChildren(vnode) {
  * @returns {boolean}
  */
 export function isRoot(vnode) {
-	return vnode._dom==null &&
-		Array.isArray(vnode._children) &&
-		vnode._children.length > 0 &&
-		vnode._children[0]._dom!=null;
+	// Timings of root vnodes will never be set
+	return vnode.type===Fragment && vnode.endTime==-1;
 }
 
 /**
@@ -145,10 +143,12 @@ export function isRoot(vnode) {
 export function getInstance(vnode) {
 	// Use the parent element as instance for root nodes
 	if (isRoot(vnode)) {
-		return vnode._children.length > 0
+		// Edge case: When the tree only consists of components that have not rendered
+		// anything into the DOM we revert to using the vnode as instance.
+		return vnode._children.length > 0 && vnode._children[0]._dom!=null
 			? /** @type {import('../internal').PreactElement | null} */
 			(vnode._children[0]._dom.parentNode)
-			: null;
+			: vnode;
 	}
 	if (vnode._component!=null) return vnode._component;
 	if (vnode.type===Fragment) return vnode.props;

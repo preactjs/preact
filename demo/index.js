@@ -1,4 +1,4 @@
-import { createElement, render, hydrate, Component, options } from 'preact';
+import { createElement, render, hydrate, Component, options, Fragment } from 'preact';
 // import renderToString from 'preact-render-to-string';
 import './style.scss';
 import { Router, Link } from './router';
@@ -60,6 +60,7 @@ class App extends Component {
 						<Link href="/profiler" activeClassName="active">Profiler</Link>
 						<Link href="/context" activeClassName="active">Context</Link>
 						<Link href="/devtools" activeClassName="active">Devtools</Link>
+						<Link href="/empty-fragment" activeClassName="active">Empty Fragment</Link>
 					</nav>
 				</header>
 				<main>
@@ -84,6 +85,7 @@ class App extends Component {
 						<KeyBug path="/key_bug" />
 						<Context path="/context" />
 						<DevtoolsDemo path="/devtools" />
+						<EmptyFragment path="/empty-fragment" />
 					</Router>
 				</main>
 			</div>
@@ -91,6 +93,9 @@ class App extends Component {
 	}
 }
 
+function EmptyFragment() {
+	return <Fragment />;
+}
 
 // document.body.innerHTML = renderToString(<App url={location.href.match(/[#&]ssr/) ? undefined : '/'} />);
 // document.body.firstChild.setAttribute('is-ssr', 'true');
