@@ -1,6 +1,6 @@
 {
   "name": "preact-compat",
-  "amdName": "preact-compat",
+  "amdName": "preactCompat",
   "version": "4.0.0",
   "private": true,
   "description": "A React compatibility layer for Preact",
