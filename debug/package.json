@@ -13,7 +13,9 @@
     "regex": "^(?!_renderer)^_"
   },
   "dependencies": {
-    "preact": "*",
     "prop-types": "^15.6.2"
+  },
+  "peerDependencies": {
+    "preact": "10.0.0-alpha.0"
   }
 }
