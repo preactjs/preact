@@ -3,7 +3,7 @@
   "amdName": "preactHooks",
   "version": "0.1.0",
   "private": true,
-  "description": "Preact hooks",
+  "description": "Hook addon for Preact",
   "main": "dist/hooks.js",
   "module": "dist/hooks.mjs",
   "umd:main": "dist/hooks.umd.js",
