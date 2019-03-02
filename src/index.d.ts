@@ -106,8 +106,14 @@ declare namespace preact {
 		context: any;
 		base?: HTMLElement;
 
-		setState<K extends keyof S>(state: Pick<S, K>, callback?: () => void): void;
-		setState<K extends keyof S>(fn: (prevState: S, props: P) => Pick<S, K>, callback?: () => void): void;
+				// From https://github.com/DefinitelyTyped/DefinitelyTyped/blob/e836acc75a78cf0655b5dfdbe81d69fdd4d8a252/types/react/index.d.ts#L402
+		// // We MUST keep setState() as a unified signature because it allows proper checking of the method return type.
+		// // See: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/18365#issuecomment-351013257
+		// // Also, the ` | S` allows intellisense to not be dumbisense
+		setState<K extends keyof S>(
+			state: ((prevState: Readonly<S>, props: Readonly<P>) => (Pick<S, K> | S | null)) | (Pick<S, K> | S | null),
+			callback?: () => void
+		): void;
 
 		forceUpdate(callback?: () => void): void;
 
