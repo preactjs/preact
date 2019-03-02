@@ -1,9 +1,9 @@
 {
   "name": "preact",
   "amdName": "preact",
-  "version": "0.1.0",
+  "version": "10.0.0-alpha.0",
   "private": false,
-  "description": "Something something virtual DOM.",
+  "description": "Fast 3kb React-compatible Virtual DOM library.",
   "main": "dist/preact.js",
   "module": "dist/preact.mjs",
   "umd:main": "dist/preact.umd.js",

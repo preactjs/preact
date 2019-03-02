@@ -1,6 +1,6 @@
 {
   "name": "preact-compat",
-  "amdName": "preact-compat",
+  "amdName": "preactCompat",
   "version": "4.0.0",
   "private": true,
   "description": "A React compatibility layer for Preact",
@@ -12,8 +12,7 @@
   "mangle": {
     "regex": "^_"
   },
-  "dependencies": {
-    "preact": "*",
-    "prop-types": "^15.6.2"
+  "peerDependencies": {
+    "preact": "10.0.0-alpha.0"
   }
 }
