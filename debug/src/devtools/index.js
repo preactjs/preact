@@ -116,6 +116,13 @@ export function initDevTools() {
 	let prevAfterDiff = options.afterDiff;
 
 	options.vnode = (vnode) => {
+		// Tiny performance improvement by initializing fields as doubles
+		// from the start. `performance.now()` will always return a double.
+		// See https://github.com/facebook/react/issues/14365
+		// and https://slidr.io/bmeurer/javascript-engine-fundamentals-the-good-the-bad-and-the-ugly
+		vnode.startTime = NaN;
+		vnode.endTime = NaN;
+
 		vnode.startTime = 0;
 		vnode.endTime = -1;
 		if (prevVNodeHook) prevVNodeHook(vnode);
