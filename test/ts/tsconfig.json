@@ -17,12 +17,10 @@
 		"types": [],
 		"forceConsistentCasingInFileNames": true,
 		"jsx": "react",
-		"jsxFactory": "h"
+		"jsxFactory": "createElement"
 	},
-	"files": [
-		"VNode-test.tsx",
-		"Component-test.tsx",
-		"hoc-test.tsx",
-		"preact.tsx"
+	"include": [
+		"./**/*.ts",
+		"./**/*.tsx"
 	]
 }

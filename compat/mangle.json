@@ -1,0 +1,23 @@
+{
+  "help": {
+    "what is this file?": "It controls protected/private property mangling so that minified builds have consistent property names.",
+    "why are there duplicate minified properties?": "Most properties are only used on one type of objects, so they can have the same name since they will never collide. Doing this reduces size."
+  },
+  "props": {
+    "cname": 6,
+    "props": {
+      "$_dirty": "__d",
+      "$_nextState": "__s",
+      "$_renderCallbacks": "__h",
+      "$_vnode": "__v",
+      "$_children": "__k",
+      "$_dom": "__e",
+      "$_component": "__c",
+      "$_constructor": "__c",
+      "$_prevVNode": "__t",
+      "$__html": "__html",
+      "$_ancestorComponent": "__a",
+      "$_processingException": "__p"
+    }
+  }
+}

@@ -1,22 +1,30 @@
-import { diff } from './vdom/diff';
+import { EMPTY_OBJ, EMPTY_ARR } from './constants';
+import { commitRoot } from './diff/index';
+import { diffChildren } from './diff/children';
+import { createElement, Fragment } from './create-element';
 
 /**
- * Render JSX into a `parent` Element.
- * @param {import('./vnode').VNode} vnode A (JSX) VNode to render
- * @param {import('./dom').PreactElement} parent DOM element to render into
- * @param {import('./dom').PreactElement} [merge] Attempt to re-use an existing DOM tree rooted at
- *  `merge`
- * @public
- *
- * @example
- * // render a div into <body>:
- * render(<div id="hello">hello!</div>, document.body);
- *
- * @example
- * // render a "Thing" component into #foo:
- * const Thing = ({ name }) => <span>{ name }</span>;
- * render(<Thing name="one" />, document.querySelector('#foo'));
+ * Render a Preact virtual node into a DOM element
+ * @param {import('./index').ComponentChild} vnode The virtual node to render
+ * @param {import('./internal').PreactElement} parentDom The DOM element to
+ * render into
  */
-export function render(vnode, parent, merge) {
-	return diff(merge, vnode, {}, false, parent, false);
+export function render(vnode, parentDom) {
+	let oldVNode = parentDom._prevVNode;
+	vnode = createElement(Fragment, null, [vnode]);
+
+	let mounts = [];
+	diffChildren(parentDom, parentDom._prevVNode = vnode, oldVNode, EMPTY_OBJ, parentDom.ownerSVGElement!==undefined, oldVNode ? null : EMPTY_ARR.slice.call(parentDom.childNodes), mounts, vnode);
+	commitRoot(mounts, vnode);
+}
+
+/**
+ * Update an existing DOM element with data from a Preact virtual node
+ * @param {import('./index').ComponentChild} vnode The virtual node to render
+ * @param {import('./internal').PreactElement} parentDom The DOM element to
+ * update
+ */
+export function hydrate(vnode, parentDom) {
+	parentDom._prevVNode = null;
+	render(vnode, parentDom);
 }
