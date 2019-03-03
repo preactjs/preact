@@ -106,6 +106,20 @@ describe('components', () => {
 			rerender();
 			expect(spy).not.to.have.been.called;
 		});
+
+		it('should update when props are removed', () => {
+			let spy = sinon.spy();
+			class App extends React.PureComponent {
+				render() {
+					spy();
+					return <div>foo</div>;
+				}
+			}
+
+			React.render(<App a="foo" />, scratch);
+			React.render(<App />, scratch);
+			expect(spy).to.be.calledTwice;
+		});
 	});
 
 	describe('UNSAFE_* lifecycle methods', () => {
