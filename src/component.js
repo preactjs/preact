@@ -1,5 +1,6 @@
 import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
+import options from './options';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -123,7 +124,7 @@ const defer = typeof Promise=='function' ? Promise.resolve().then.bind(Promise.r
  */
 export function enqueueRender(c) {
 	if (!c._dirty && (c._dirty = true) && q.push(c) === 1) {
-		(Component.debounce || defer)(process);
+		(options.debounceRendering || defer)(process);
 	}
 }
 
