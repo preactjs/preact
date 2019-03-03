@@ -113,11 +113,14 @@ describe("Component", () => {
 	});
 
 	describe("setState", () => {
-		it("can be used with an object", () => {
+		// No need to execute these tests. because we only need to check if
+		// the types are working. Executing them would require the DOM.
+		// TODO: Run TS tests in our standard karma setup
+		it.skip("can be used with an object", () => {
 			component.setState({ name: "another name" });
 		});
 
-		it("can be used with a function", () => {
+		it.skip("can be used with a function", () => {
 			const updater = (state: any, props: any) => ({
 				name: `${state.name} - ${props.initialName}`
 			});
