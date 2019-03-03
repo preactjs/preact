@@ -29,9 +29,7 @@ function handleElementVNode(vnode, props) {
 	if (shouldSanitize) {
 		attrs = vnode.props = {};
 		for (i in props) {
-			if (props.hasOwnProperty(i)) {
-				attrs[CAMEL_PROPS.test(i) ? i.replace(/([A-Z0-9])/, '-$1').toLowerCase() : i] = props[i];
-			}
+			attrs[CAMEL_PROPS.test(i) ? i.replace(/([A-Z0-9])/, '-$1').toLowerCase() : i] = props[i];
 		}
 	}
 }
