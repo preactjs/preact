@@ -87,6 +87,13 @@ describe('preact-compat', () => {
 			render(<input defaultValue="foo" />, scratch);
 			expect(scratch.firstElementChild).to.have.property('value', 'foo');
 		});
+
+		it('should call the callback', () => {
+			let spy = sinon.spy();
+			render(<div />, scratch, spy);
+			expect(spy).to.be.calledOnce;
+			expect(spy).to.be.calledWithExactly();
+		});
 	});
 
 	describe('createElement()', () => {
@@ -197,6 +204,12 @@ describe('preact-compat', () => {
 			let clone = cloneElement(element, { children: childrenA }, undefined);
 			expect(clone.children).to.eql(undefined);
 		});
+
+		it('should skip cloning on invalid element', () => {
+			let element = { foo: 42 };
+			let clone = cloneElement(element);
+			expect(clone).to.eql(element);
+		});
 	});
 
 	describe('findDOMNode()', () => {
@@ -250,5 +263,30 @@ describe('preact-compat', () => {
 			expect(unmountComponentAtNode(scratch)).to.equal(false);
 			expect(scratch.innerHTML).to.equal('');
 		});
+	});
+
+	it('should patch events', () => {
+		let spy = sinon.spy();
+		render(<div onClick={spy} />, scratch);
+		scratch.firstChild.click();
+
+		expect(spy).to.be.calledOnce;
+		expect(spy.args[0][0]).to.haveOwnProperty('persist');
+		expect(spy.args[0][0]).to.haveOwnProperty('nativeEvent');
+	});
+
+	it('should normalize ondoubleclick event', () => {
+		let vnode = <div onDoubleClick={() => null} />;
+		expect(vnode.props).to.haveOwnProperty('ondblclick');
+	});
+
+	it('should normalize onChange for textarea', () => {
+		let vnode = <textarea onChange={() => null} />;
+		expect(vnode.props).to.haveOwnProperty('oninput');
+		expect(vnode.props).to.not.haveOwnProperty('onchange');
+
+		vnode = <textarea oninput={() => null} onChange={() => null} />;
+		expect(vnode.props).to.haveOwnProperty('oninput');
+		expect(vnode.props).to.not.haveOwnProperty('onchange');
 	});
 });

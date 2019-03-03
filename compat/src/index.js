@@ -4,12 +4,14 @@ export * from 'preact/hooks';
 
 const version = '16.8.0'; // trick libraries to think we are react
 
+/* istanbul ignore next */
 const REACT_ELEMENT_TYPE = (typeof Symbol!=='undefined' && Symbol.for && Symbol.for('react.element')) || 0xeac7;
 
 const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip|color|fill|flood|font|glyph|horiz|marker|overline|paint|stop|strikethrough|stroke|text|underline|unicode|units|v|vector|vert|word|writing|x)[A-Z]/;
 
 let oldEventHook = options.event;
 options.event = e => {
+	/* istanbul ignore next */
 	if (oldEventHook) e = oldEventHook(e);
 	e.persist = Object;
 	e.nativeEvent = e;
