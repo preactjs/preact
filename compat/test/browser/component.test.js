@@ -181,5 +181,27 @@ describe('components', () => {
 			React.render(<Foo />, scratch);
 			expect(spy).to.be.calledOnce;
 		});
+
+		it('should alias UNSAFE_* method to non-prefixed variant', () => {
+			let inst;
+			class Foo extends React.Component {
+				// eslint-disable-next-line camelcase
+				UNSAFE_componentWillMount() {}
+				// eslint-disable-next-line camelcase
+				UNSAFE_componentWillReceiveProps() {}
+				// eslint-disable-next-line camelcase
+				UNSAFE_componentWillUpdate() {}
+				render() {
+					inst = this;
+					return <div>foo</div>;
+				}
+			}
+
+			React.render(<Foo />, scratch);
+
+			expect(inst.UNSAFE_componentWillMount).to.equal(inst.componentWillMount);
+			expect(inst.UNSAFE_componentWillReceiveProps).to.equal(inst.UNSAFE_componentWillReceiveProps);
+			expect(inst.UNSAFE_componentWillUpdate).to.equal(inst.UNSAFE_componentWillUpdate);
+		});
 	});
 });
