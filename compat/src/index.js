@@ -295,7 +295,7 @@ function memo(c, comparer) {
 	return Memoed;
 }
 
-// Patch in `UNSTABLE_*` lifecycle hooks
+// Patch in `UNSAFE_*` lifecycle hooks
 function setUnsafeDescriptor(obj, key) {
 	Object.defineProperty(obj.prototype, 'UNSAFE_' + key, {
 		configurable: true,
