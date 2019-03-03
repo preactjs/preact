@@ -1,4 +1,3 @@
-import { EMPTY_OBJ } from './constants';
 import options from './options';
 
 /**
@@ -85,7 +84,7 @@ export /* istanbul ignore next */ function Fragment() { }
 export function coerceToVNode(possibleVNode) {
 	if (possibleVNode == null || typeof possibleVNode === 'boolean') return null;
 	if (typeof possibleVNode === 'string' || typeof possibleVNode === 'number') {
-		return createVNode(null, EMPTY_OBJ, possibleVNode, null, null);
+		return createVNode(null, null, possibleVNode, null, null);
 	}
 
 	if (Array.isArray(possibleVNode)) {
