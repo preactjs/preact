@@ -297,9 +297,13 @@ describe('preact-compat', () => {
 
 	it('should normalize class+className even on components', () => {
 		function Foo(props) {
-			return <div class={props.class}>foo</div>;
+			return <div class={props.class} className={props.className}>foo</div>;
 		}
 		render(<Foo class="foo" />, scratch);
+		expect(scratch.firstChild.className).to.equal('foo');
+		render(null, scratch);
+
+		render(<Foo className="foo" />, scratch);
 		expect(scratch.firstChild.className).to.equal('foo');
 	});
 });

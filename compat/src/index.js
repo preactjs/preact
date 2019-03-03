@@ -233,8 +233,7 @@ function applyClassName(vnode) {
 
 let classNameDescriptor = {
 	configurable: true,
-	get() { return this.class; },
-	set(v) { this.class = v; }
+	get() { return this.class; }
 };
 
 /**
