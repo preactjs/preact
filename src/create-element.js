@@ -88,7 +88,7 @@ export function coerceToVNode(possibleVNode) {
 	}
 
 	if (Array.isArray(possibleVNode)) {
-		return createVNode(Fragment, { children: possibleVNode }, null, null, null);
+		return createElement(Fragment, null, possibleVNode);
 	}
 
 	// Clone vnode if it has already been used. ceviche/#57
