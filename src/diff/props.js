@@ -31,6 +31,7 @@ export function diffProps(dom, newProps, oldProps, isSvg) {
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
 function setProperty(dom, name, value, oldValue, isSvg) {
+	let v;
 	if (name==='class' || name==='className') name = isSvg ? 'class' : 'className';
 
 	if (name==='style') {
@@ -42,9 +43,11 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		 */
 		let s = dom.style;
 
-		if (typeof value==='string') return s.cssText = value;
-		if (typeof oldValue==='string') s.cssText = '';
+		if (typeof value==='string') {
+			s.cssText = value;
+		}
 		else {
+			if (typeof oldValue==='string') s.cssText = '';
 			// remove values not in the new list
 			for (let i in oldValue) {
 				if (value==null || !(i in value)) s.setProperty(i, '');
@@ -52,7 +55,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		}
 
 		for (let i in value) {
-			let v = value[i];
+			v = value[i];
 			if (oldValue==null || v!==oldValue[i]) {
 				s.setProperty(i.replace(/-?(?=[A-Z])/g, '-'), typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v);
 			}
