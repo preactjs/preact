@@ -60,7 +60,7 @@ declare namespace preact {
 		P & Attributes & { children?: ComponentChildren; ref?: Ref<RefType> }
 	>;
 
-	type ComponentFactory<P> = ComponentConstructor<P> | FunctionalComponent<P>;
+	type ComponentFactory<P = {}> = ComponentConstructor<P> | FunctionalComponent<P>;
 
 	interface FunctionalComponent<P = {}> {
 		(props: RenderableProps<P>, context?: any): VNode<any> | null;
@@ -76,7 +76,7 @@ declare namespace preact {
 		getDerivedStateFromError?(error: any): Partial<S>;
 	}
 
-	// Type alias for a component considered generally, whether stateless or stateful.
+	// Type alias for a component instance considered generally, whether stateless or stateful.
 	type AnyComponent<P = {}, S = {}> = FunctionalComponent<P> | Component<P, S>;
 
 	interface Component<P = {}, S = {}> {

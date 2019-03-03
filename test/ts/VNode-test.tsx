@@ -4,7 +4,8 @@ import {
 	createElement,
 	Component,
 	FunctionalComponent,
-	ComponentConstructor
+	ComponentConstructor,
+	ComponentFactory
 } from "../../src";
 
 class SimpleComponent extends Component<{}, {}> {
@@ -16,6 +17,9 @@ class SimpleComponent extends Component<{}, {}> {
 }
 
 const SimpleFunctionalComponent = () => <div />;
+
+const a: ComponentFactory = SimpleComponent;
+const b: ComponentFactory = SimpleFunctionalComponent;
 
 describe("VNode", () => {
 	it("is returned by h", () => {
