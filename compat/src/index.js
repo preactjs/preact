@@ -108,7 +108,7 @@ function upgradeToVNodes(arr, offset) {
 		if (Array.isArray(obj)) {
 			upgradeToVNodes(obj);
 		}
-		else if (obj && typeof obj==='object' && !isValidElement(obj) && ((obj.props && obj.type) || obj.props || obj.children)) {
+		else if (obj && typeof obj==='object' && !isValidElement(obj) && ((obj.props && obj.type) || obj.props)) {
 			arr[i] = createElement(obj.type, obj.props, obj.children);
 		}
 	}
