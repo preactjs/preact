@@ -335,6 +335,7 @@ options.vnode = vnode => {
 		vnode.props.ref = vnode.ref;
 		vnode.ref = null;
 	}
+	/* istanbul ignore next */
 	if (oldVNodeHook) oldVNodeHook(vnode);
 };
 
