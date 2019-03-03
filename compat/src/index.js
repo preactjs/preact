@@ -25,14 +25,12 @@ options.event = e => {
  */
 function handleElementVNode(vnode, props) {
 	let shouldSanitize, attrs, i;
-	if (props) {
-		for (i in props) if ((shouldSanitize = CAMEL_PROPS.test(i))) break;
-		if (shouldSanitize) {
-			attrs = vnode.props = {};
-			for (i in props) {
-				if (props.hasOwnProperty(i)) {
-					attrs[CAMEL_PROPS.test(i) ? i.replace(/([A-Z0-9])/, '-$1').toLowerCase() : i] = props[i];
-				}
+	for (i in props) if ((shouldSanitize = CAMEL_PROPS.test(i))) break;
+	if (shouldSanitize) {
+		attrs = vnode.props = {};
+		for (i in props) {
+			if (props.hasOwnProperty(i)) {
+				attrs[CAMEL_PROPS.test(i) ? i.replace(/([A-Z0-9])/, '-$1').toLowerCase() : i] = props[i];
 			}
 		}
 	}
