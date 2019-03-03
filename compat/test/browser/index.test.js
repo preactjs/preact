@@ -88,6 +88,11 @@ describe('preact-compat', () => {
 			expect(scratch.firstElementChild).to.have.property('value', 'foo');
 		});
 
+		it('should ignore defaultValue when value is 0', () => {
+			render(<input defaultValue={2} value={0} />, scratch);
+			expect(scratch.firstElementChild.value).to.equal('0');
+		});
+
 		it('should call the callback', () => {
 			let spy = sinon.spy();
 			render(<div />, scratch, spy);
