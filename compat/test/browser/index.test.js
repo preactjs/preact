@@ -294,4 +294,12 @@ describe('preact-compat', () => {
 		expect(vnode.props).to.haveOwnProperty('oninput');
 		expect(vnode.props).to.not.haveOwnProperty('onchange');
 	});
+
+	it('should normalize class+className even on components', () => {
+		function Foo(props) {
+			return <div class={props.class}>foo</div>;
+		}
+		render(<Foo class="foo" />, scratch);
+		expect(scratch.firstChild.className).to.equal('foo');
+	});
 });
