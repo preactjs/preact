@@ -61,14 +61,14 @@ describe('Children', () => {
 		});
 	});
 
-	describe.skip('.map', () => {
+	describe('.map', () => {
 		function Foo(props) {
 			let children = Children.map(props.children, child => <span>{child}</span>);
 			return <div>{children}</div>;
 		}
 
 		it('should iterate over children', () => {
-			render(<Foo>foo<div /></Foo>, scratch);
+			render(<Foo>foo<div>bar</div></Foo>, scratch);
 			let expected = div([
 				span('foo'),
 				span(div('bar'))
@@ -82,7 +82,7 @@ describe('Children', () => {
 		});
 	});
 
-	describe.skip('.forEach', () => {
+	describe('.forEach', () => {
 		function Foo(props) {
 			let children = [];
 			Children.forEach(props.children, child => children.push(<span>{child}</span>));
@@ -90,7 +90,7 @@ describe('Children', () => {
 		}
 
 		it('should iterate over children', () => {
-			render(<Foo>foo<div /></Foo>, scratch);
+			render(<Foo>foo<div>bar</div></Foo>, scratch);
 			let expected = div([
 				span('foo'),
 				span(div('bar'))
