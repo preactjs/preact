@@ -76,10 +76,10 @@ function createPortal(vnode, container) {
 	return h(Portal, { vnode, container });
 }
 
-const mapFn = (children, fn, ctx) => {
+const mapFn = (children, fn) => {
 	if (children == null) return null;
 	children = toChildArray(children);
-	return children.map(fn, ctx && ctx!==children ? ctx : children);
+	return children.map(fn);
 };
 
 // This API is completely unnecessary for Preact, so it's basically passthrough.
