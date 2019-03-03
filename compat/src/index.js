@@ -127,12 +127,7 @@ function createElement(...args) {
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
 
 	let type = vnode.type, props = vnode.props;
-	if (typeof type==='function') {
-		if ((type.prototype && 'isReactComponent' in type.prototype) && !vnode.preactCompatNormalized) {
-			normalizeVNode(vnode);
-		}
-	}
-	else {
+	if (typeof type!='function') {
 		if (props.defaultValue) {
 			if (!props.value && props.value!==0) {
 				props.value = props.defaultValue;
