@@ -19,6 +19,14 @@ options.event = e => {
 };
 
 /**
+ * Legacy version of createElement.
+ * @param {import('./internal').VNode["type"]} type The node name or Component constructor
+ */
+function createFactory(type) {
+	return createElement.bind(null, type);
+}
+
+/**
  * Normalize DOM vnode properties.
  * @param {import('./internal').VNode} vnode The vnode to normalize props of
  * @param {object | null | undefined} props props to normalize
@@ -341,6 +349,7 @@ export {
 	createPortal,
 	createElement,
 	createContext,
+	createFactory,
 	cloneElement,
 	createRef,
 	Fragment,
@@ -363,6 +372,7 @@ export default {
 	createPortal,
 	createElement,
 	createContext,
+	createFactory,
 	cloneElement,
 	createRef,
 	Fragment,

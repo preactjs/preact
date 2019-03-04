@@ -4,7 +4,8 @@ import React, {
 	cloneElement,
 	findDOMNode,
 	Component,
-	unmountComponentAtNode
+	unmountComponentAtNode,
+	createFactory
 } from '../../src';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
@@ -98,6 +99,19 @@ describe('preact-compat', () => {
 			render(<div />, scratch, spy);
 			expect(spy).to.be.calledOnce;
 			expect(spy).to.be.calledWithExactly();
+		});
+	});
+
+	describe('createFactory', () => {
+		it('should create a DOM element', () => {
+			render(createFactory('span', null)(), scratch);
+			expect(scratch.firstChild.nodeName).to.equal('SPAN');
+		});
+
+		it('should create a component', () => {
+			const Foo = () => <div>foo</div>;
+			render(createFactory(Foo, null)(), scratch);
+			expect(scratch.textContent).to.equal('foo');
 		});
 	});
 
