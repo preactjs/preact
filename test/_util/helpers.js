@@ -4,6 +4,77 @@ import { clearLog, getLog } from './logCall';
 
 /** @jsx h */
 
+
+const VOID_ELEMENTS = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
+
+const el = document.createElement('div');
+const innerHtmlDef = Object.getOwnPropertyDescriptor(el.ownerDocument.defaultView.Element.prototype, 'innerHTML');
+function encodeEntities(str) {
+	el.textContent = str;
+	return innerHtmlDef.get.call(el);
+}
+
+/**
+ * Serialize a DOM tree.
+ * Uses deterministic sorting where necessary to ensure consistent tests.
+ * @param {Element|Node} node	The root node to serialize
+ * @returns {String} html
+ */
+function serializeDomTree(node) {
+	if (node.nodeType === 3) {
+		return encodeEntities(node.data);
+	}
+	else if (node.nodeType === 8) {
+		return '<!--' + encodeEntities(node.data) + '-->';
+	}
+	else if (node.nodeType === 1 || node.nodeType === 9) {
+		let str = '<' + node.localName;
+		const attrs = [];
+		for (let i=0; i<node.attributes.length; i++) {
+			attrs.push(node.attributes[i].name);
+		}
+		attrs.sort();
+		for (let i=0; i<attrs.length; i++) {
+			const name = attrs[i];
+			const value = node.getAttribute(name);
+			if (value == null) continue;
+			if (!value && name==='class') continue;
+			str += ' ' + name;
+			str += '="' + encodeEntities(value) + '"';
+		}
+		str += '>';
+		if (!VOID_ELEMENTS.test(node.localName)) {
+			let child = node.firstChild;
+			while (child) {
+				str += serializeDomTree(child);
+				child = child.nextSibling;
+			}
+			str += '</' + node.localName + '>';
+		}
+		return str;
+	}
+}
+
+function getInnerHTML() {
+	let str = '';
+	let child = this.firstChild;
+	while (child) {
+		str += serializeDomTree(child);
+		child = child.nextSibling;
+	}
+	return str;
+}
+
+function setupDeterministicInnerHTML(element) {
+	const doc = element.ownerDocument || window.document;
+	const elementProto = doc.defaultView.Element.prototype;
+	let def = Object.getOwnPropertyDescriptor(elementProto, 'innerHTML');
+	if (def.get !== getInnerHTML) {
+		def = Object.assign({}, def, { get: getInnerHTML });
+		Object.defineProperty(elementProto, 'innerHTML', def);
+	}
+}
+
 /**
  * Setup the test environment
  * @returns {HTMLDivElement}
@@ -12,6 +83,7 @@ export function setupScratch() {
 	const scratch = document.createElement('div');
 	scratch.id = 'scratch';
 	(document.body || document.documentElement).appendChild(scratch);
+	setupDeterministicInnerHTML(scratch);
 	return scratch;
 }
 
