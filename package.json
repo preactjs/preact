@@ -57,6 +57,9 @@
   "files": [
     "src",
     "dist",
+    "compat/dist",
+    "compat/src",
+    "compat/package.json",
     "debug/dist",
     "debug/src",
     "debug/package.json",
