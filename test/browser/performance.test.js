@@ -2,7 +2,7 @@
 /*eslint no-console:0*/
 /** @jsx h */
 import { setupScratch, teardown } from '../_util/helpers';
-let { createElement: h, Component, render } = require(NODE_ENV==='production' ? '../../dist/preact.min.js' : '../../dist/preact');
+let { createElement: h, Component, render, hydrate } = require(NODE_ENV==='production' ? '../../dist/preact.min.js' : '../../dist/preact');
 
 const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
 
@@ -348,12 +348,12 @@ describe('performance', function() {
 			}
 		}
 
-		render(<App />, scratch, scratch.firstChild);
+		render(<App />, scratch);
 		let html = scratch.innerHTML;
 
 		benchmark( () => {
 			scratch.innerHTML = html;
-			render(<App />, scratch, scratch.firstChild);
+			hydrate(<App />, scratch);
 		}, ({ ticks, message }) => {
 			console.log(`PERF: SSR Hydrate: ${message}`);
 			expect(ticks).to.be.below(3000 * MULTIPLIER);
