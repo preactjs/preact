@@ -26,6 +26,7 @@ describe('exports', () => {
 		// Compat specific
 		expect(Compat.PureComponent).to.exist.and.be.a('function');
 		expect(Compat.createPortal).to.exist.and.be.a('function');
+		expect(Compat.createFactory).to.exist.and.be.a('function');
 		expect(Compat.isValidElement).to.exist.and.be.a('function');
 		expect(Compat.findDOMNode).to.exist.and.be.a('function');
 		expect(Compat.Children.map).to.exist.and.be.a('function');
@@ -60,6 +61,7 @@ describe('exports', () => {
 		// Compat specific
 		expect(Named.PureComponent).to.exist.and.be.a('function');
 		expect(Named.createPortal).to.exist.and.be.a('function');
+		expect(Named.createFactory).to.exist.and.be.a('function');
 		expect(Named.isValidElement).to.exist.and.be.a('function');
 		expect(Named.findDOMNode).to.exist.and.be.a('function');
 		expect(Named.Children.map).to.exist.and.be.a('function');
