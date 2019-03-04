@@ -70,7 +70,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 				}
 				else {
 					newVNode._component = c = new Component(newVNode.props, cctx);
-					c._constructor = newType;
+					c.constructor = newType;
 					c.render = doRender;
 				}
 				c._ancestorComponent = ancestorComponent;
@@ -318,7 +318,7 @@ export function unmount(vnode, ancestorComponent) {
 
 /** The `.render()` method for a PFC backing instance. */
 function doRender(props, state, context) {
-	return this._constructor(props, context);
+	return this.constructor(props, context);
 }
 
 /**
