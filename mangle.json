@@ -18,6 +18,7 @@
       "$__html": "__html",
       "$_ancestorComponent": "__a",
       "$_processingException": "__p",
+      "$_context": "__n",
       "$_defaultValue": "__p",
       "$_id": "__c"
     }
