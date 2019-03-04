@@ -4,9 +4,9 @@ import { options, toChildArray } from 'preact';
 
 export function initDebug() {
 	/* eslint-disable no-console */
-	let oldBeforeDiff = options.beforeDiff;
+	let oldBeforeDiff = options.diff;
 
-	options.beforeDiff = vnode => {
+	options.diff = vnode => {
 		let { type, props } = vnode;
 		let children = props && props.children;
 

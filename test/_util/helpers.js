@@ -30,10 +30,10 @@ let oldOptions = null;
 export function clearOptions() {
 	oldOptions = assign({}, options);
 	delete options.vnode;
-	delete options.beforeDiff;
-	delete options.afterDiff;
-	delete options.commitRoot;
-	delete options.beforeUnmount;
+	delete options.diff;
+	delete options.diffed;
+	delete options.commit;
+	delete options.unmount;
 }
 
 /**
