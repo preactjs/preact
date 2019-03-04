@@ -48,7 +48,7 @@ export function createElement(type, props, children) {
  * receive a reference to its created child
  * @returns {import('./internal').VNode}
  */
-function createVNode(type, props, text, key, ref) {
+export function createVNode(type, props, text, key, ref) {
 	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
 	// Do not inline into createElement and coerceToVNode!
 	const vnode = {
