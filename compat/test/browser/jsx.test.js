@@ -1,4 +1,4 @@
-import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { setupScratch, teardown, sortAttributes } from '../../../test/_util/helpers';
 import React from '../../src';
 
 describe('jsx', () => {
@@ -25,6 +25,6 @@ describe('jsx', () => {
 		expect(jsx.props).to.have.property('className', 'foo bar');
 
 		React.render(jsx, scratch);
-		expect(scratch.innerHTML).to.equal('<div class="foo bar" data-foo="bar"><span id="some_id">inner!</span>ab</div>');
+		expect(scratch.innerHTML).to.equal(sortAttributes('<div class="foo bar" data-foo="bar"><span id="some_id">inner!</span>ab</div>'));
 	});
 });
