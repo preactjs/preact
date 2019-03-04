@@ -20,8 +20,8 @@ export function setupScratch() {
  * @returns {() => void}
  */
 export function setupRerender() {
-	Component.__test__previousDebounce = Component.debounce;
-	Component.debounce = cb => Component.__test__drainQueue = cb;
+	Component.__test__previousDebounce = options.debounceRendering;
+	options.debounceRendering = cb => Component.__test__drainQueue = cb;
 
 	return () => Component.__test__drainQueue && Component.__test__drainQueue();
 }
@@ -55,7 +55,7 @@ export function teardown(scratch) {
 	}
 
 	if (typeof Component.__test__previousDebounce !== 'undefined') {
-		Component.debounce = Component.__test__previousDebounce;
+		options.debounceRendering = Component.__test__previousDebounce;
 		delete Component.__test__previousDebounce;
 	}
 
