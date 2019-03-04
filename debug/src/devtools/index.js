@@ -110,10 +110,10 @@ export function initDevTools() {
 
 	// Store (possible) previous hooks so that we don't overwrite them
 	let prevVNodeHook = options.vnode;
-	let prevCommitRoot = options.commitRoot;
-	let prevBeforeUnmount = options.beforeUnmount;
-	let prevBeforeDiff = options.beforeDiff;
-	let prevAfterDiff = options.afterDiff;
+	let prevCommitRoot = options.commit;
+	let prevBeforeUnmount = options.unmount;
+	let prevBeforeDiff = options.diff;
+	let prevAfterDiff = options.diffed;
 
 	options.vnode = (vnode) => {
 		// Tiny performance improvement by initializing fields as doubles
@@ -128,26 +128,26 @@ export function initDevTools() {
 		if (prevVNodeHook) prevVNodeHook(vnode);
 	};
 
-	options.beforeDiff = (vnode) => {
+	options.diff = (vnode) => {
 		vnode.startTime = now();
 		if (prevBeforeDiff!=null) prevBeforeDiff(vnode);
 	};
 
-	options.afterDiff = (vnode) => {
+	options.diffed = (vnode) => {
 		vnode.endTime = now();
 		if (prevAfterDiff!=null) prevAfterDiff(vnode);
 	};
 
-	options.commitRoot = catchErrors((vnode) => {
+	options.commit = catchErrors((vnode) => {
 		// Call previously defined hook
 		if (prevCommitRoot!=null) prevCommitRoot(vnode);
 
-		// These cases are already handled by `beforeUnmount`
+		// These cases are already handled by `unmount`
 		if (vnode==null) return;
 		onCommitRoot(vnode);
 	});
 
-	options.beforeUnmount = catchErrors((vnode) => {
+	options.unmount = catchErrors((vnode) => {
 		// Call previously defined hook
 		if (prevBeforeUnmount!=null) prevBeforeUnmount(vnode);
 		onCommitUnmount(vnode);

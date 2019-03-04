@@ -418,13 +418,13 @@ describe('devtools', () => {
 	});
 
 	it('should not initialize hook if __REACT_DEVTOOLS_GLOBAL_HOOK__ is not set', () => {
-		delete options.beforeDiff;
-		delete options.afterDiff;
+		delete options.diff;
+		delete options.diffed;
 		delete /** @type {*} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
 
 		initDevTools();
-		expect(options.beforeDiff).to.equal(undefined);
-		expect(options.afterDiff).to.equal(undefined);
+		expect(options.diff).to.equal(undefined);
+		expect(options.diffed).to.equal(undefined);
 	});
 
 	it('should not throw if the root is null', () => {
@@ -433,29 +433,29 @@ describe('devtools', () => {
 
 	it('should not overwrite existing options', () => {
 		let vnodeSpy = sinon.spy();
-		let beforeDiffSpy = sinon.spy();
-		let afterDiffSpy = sinon.spy();
-		let commitRootSpy = sinon.spy();
-		let beforeUnmountSpy = sinon.spy();
+		let diffSpy = sinon.spy();
+		let diffedSpy = sinon.spy();
+		let commitSpy = sinon.spy();
+		let unmountSpy = sinon.spy();
 
 		options.vnode = vnodeSpy;
-		options.beforeDiff = beforeDiffSpy;
-		options.afterDiff = afterDiffSpy;
-		options.commitRoot = commitRootSpy;
-		options.beforeUnmount = beforeUnmountSpy;
+		options.diff = diffSpy;
+		options.diffed = diffedSpy;
+		options.commit = commitSpy;
+		options.unmount = unmountSpy;
 
 		initDevTools();
 
 		render(<div />, scratch);
 
 		expect(vnodeSpy, 'vnode').to.have.been.called;
-		expect(beforeDiffSpy, 'beforeDiff').to.have.been.calledOnce;
-		expect(afterDiffSpy, 'afterDiff').to.have.been.calledOnce;
-		expect(commitRootSpy, 'commitRoot').to.have.been.calledOnce;
+		expect(diffSpy, 'diff').to.have.been.calledOnce;
+		expect(diffedSpy, 'diffed').to.have.been.calledOnce;
+		expect(commitSpy, 'commit').to.have.been.calledOnce;
 
 		render(null, scratch);
 
-		expect(beforeUnmountSpy, 'beforeUnmount').to.have.been.calledOnce;
+		expect(unmountSpy, 'unmount').to.have.been.calledOnce;
 	});
 
 	it('should connect only once', () => {
