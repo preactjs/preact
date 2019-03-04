@@ -1,18 +1,7 @@
 import { createElement as h, render } from '../../src/index';
-import { setupScratch, teardown } from '../_util/helpers';
+import { setupScratch, teardown, sortAttributes } from '../_util/helpers';
 
 /** @jsx h */
-
-
-// hacky normalization of attribute order across browsers.
-function sortAttributes(html) {
-	return html.replace(/<([a-z0-9-]+)((?:\s[a-z0-9:_.-]+=".*?")+)((?:\s*\/)?>)/gi, (s, pre, attrs, after) => {
-		let list = attrs.match(/\s[a-z0-9:_.-]+=".*?"/gi).sort( (a, b) => a>b ? 1 : -1 );
-		if (~after.indexOf('/')) after = '></'+pre+'>';
-		return '<' + pre + list.join('') + after;
-	});
-}
-
 
 describe('svg', () => {
 	let scratch;
