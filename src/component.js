@@ -1,5 +1,6 @@
 import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
+import { Fragment } from './create-element';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -94,7 +95,7 @@ Component.prototype.forceUpdate = function(callback) {
  * ancestor's `getChildContext()`
  * @returns {import('./index').ComponentChildren | void}
  */
-Component.prototype.render = function () {};
+Component.prototype.render = Fragment;
 
 /**
  * The render queue
