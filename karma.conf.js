@@ -90,7 +90,7 @@ module.exports = function(config) {
 
 		sauceLabs: {
 			build: 'CI #' + process.env.TRAVIS_BUILD_NUMBER + ' (' + process.env.TRAVIS_BUILD_ID + ')',
-			tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER || ('local'+require('../package.json').version),
+			tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER || ('local'+require('./package.json').version),
 			connectLocationForSERelay: 'localhost',
 			connectPortForSERelay: 4445,
 			startConnect: false
