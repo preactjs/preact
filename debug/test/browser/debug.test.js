@@ -9,7 +9,7 @@ describe('debug', () => {
 	let scratch;
 	let errors = [];
 
-	let beforeDiffSpy;
+	let diffSpy;
 
 	beforeEach(() => {
 		errors = [];
@@ -17,8 +17,8 @@ describe('debug', () => {
 		sinon.stub(console, 'error').callsFake(e => errors.push(e));
 
 		clearOptions();
-		beforeDiffSpy = sinon.spy();
-		options.beforeDiff = beforeDiffSpy;
+		diffSpy = sinon.spy();
+		options.diff = diffSpy;
 
 		initDebug();
 	});
@@ -32,7 +32,7 @@ describe('debug', () => {
 
 	it('should call previous options', () => {
 		render(<div />, scratch);
-		expect(beforeDiffSpy, 'beforeDiff').to.have.been.called;
+		expect(diffSpy, 'diff').to.have.been.called;
 	});
 
 	it('should print an error on undefined component', () => {

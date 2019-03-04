@@ -9,8 +9,8 @@ let currentComponent;
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
-let oldBeforeRender = options.beforeRender;
-options.beforeRender = vnode => {
+let oldBeforeRender = options.render;
+options.render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
 
 	currentComponent = vnode._component;
@@ -22,8 +22,8 @@ options.beforeRender = vnode => {
 };
 
 
-let oldAfterDiff = options.afterDiff;
-options.afterDiff = vnode => {
+let oldAfterDiff = options.diffed;
+options.diffed = vnode => {
 	if (oldAfterDiff) oldAfterDiff(vnode);
 
 	const c = vnode._component;
@@ -33,14 +33,14 @@ options.afterDiff = vnode => {
 	if (!hooks) return;
 
 	// TODO: Consider moving to a global queue. May need to move
-	// this to the `commitRoot` option
+	// this to the `commit` option
 	hooks._pendingLayoutEffects.forEach(invokeEffect);
 	hooks._pendingLayoutEffects = [];
 };
 
 
-let oldBeforeUnmount = options.beforeUnmount;
-options.beforeUnmount = vnode => {
+let oldBeforeUnmount = options.unmount;
+options.unmount = vnode => {
 	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
 
 	const c = vnode._component;
