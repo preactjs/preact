@@ -32,9 +32,6 @@
     "lint": "eslint src test",
     "postinstall": "node -e \"console.log('\\u001b[35m\\u001b[1mLove Preact? You can now donate to our open collective:\\u001b[22m\\u001b[39m\\n > \\u001b[34mhttps://opencollective.com/preact/donate\\u001b[0m')\""
   },
-  "mangle": {
-    "regex": "^_"
-  },
   "eslintConfig": {
     "extends": "developit",
     "settings": {
@@ -123,7 +120,7 @@
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^3.0.5",
     "lodash": "^4.17.10",
-    "microbundle": "^0.10.1",
+    "microbundle": "^0.11.0",
     "mocha": "^5.2.0",
     "npm-run-all": "^4.0.0",
     "sinon": "^6.1.3",
