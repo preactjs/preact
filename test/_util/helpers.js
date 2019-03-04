@@ -67,3 +67,15 @@ export const mixedArrayHTML = '0ab<span>c</span>def1';
 export function clear(obj) {
 	Object.keys(obj).forEach(key => delete obj[key]);
 }
+
+/**
+ * Hacky normalization of attribute order across browsers.
+ * @param {string} html
+ */
+export function sortAttributes(html) {
+	return html.replace(/<([a-z0-9-]+)((?:\s[a-z0-9:_.-]+=".*?")+)((?:\s*\/)?>)/gi, (s, pre, attrs, after) => {
+		let list = attrs.match(/\s[a-z0-9:_.-]+=".*?"/gi).sort( (a, b) => a>b ? 1 : -1 );
+		if (~after.indexOf('/')) after = '></'+pre+'>';
+		return '<' + pre + list.join('') + after;
+	});
+}
