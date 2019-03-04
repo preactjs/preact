@@ -9,6 +9,7 @@
   "umd:main": "dist/debug.umd.js",
   "source": "src/index.js",
   "license": "MIT",
+  "types": "src/index.d.ts",
   "mangle": {
     "regex": "^(?!_renderer)^_"
   },
