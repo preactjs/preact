@@ -203,7 +203,7 @@ export class Renderer {
 
 	/**
 	 * Unmount a vnode recursively. Contrary to mounting or updating unmounting needs
-	 * to push the events in parent-first order. Because `options.beforeUnmount` is
+	 * to push the events in parent-first order. Because `options.unmount` is
 	 * already fired in parent-first order we don't need to traverse anything here.
 	 * @param {import('../internal').VNode} vnode
 	 */

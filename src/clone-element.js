@@ -1,6 +1,6 @@
 import { assign } from './util';
 import { EMPTY_ARR } from './constants';
-import { createElement } from './create-element';
+import { createVNode } from './create-element';
 
 /**
  * Clones the given VNode, optionally adding attributes/props and replacing its children.
@@ -9,9 +9,7 @@ import { createElement } from './create-element';
  * @param {Array<import('./index').ComponentChildren>} rest Any additional arguments will be used as replacement children.
  */
 export function cloneElement(vnode, props) {
-	let out = createElement(vnode.type, assign(assign({}, vnode.props), props));
-	out.key = out.key || vnode.key;
-	out.ref = out.ref || vnode.ref;
-	if (arguments.length>2) out.props.children = EMPTY_ARR.slice.call(arguments, 2);
-	return out;
+	props = assign(assign({}, vnode.props), props);
+	if (arguments.length>2) props.children = EMPTY_ARR.slice.call(arguments, 2);
+	return createVNode(vnode.type, props, null, props.key || vnode.key, props.ref || vnode.ref);
 }

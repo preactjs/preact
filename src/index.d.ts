@@ -164,15 +164,15 @@ declare namespace preact {
 		/** Attach a hook that is invoked whenever a VNode is created */
 		vnode(vnode: VNode): void;
 		/** Attach a hook that is invoked after a tree was mounted or was updated. */
-		commitRoot?(vnode: VNode): void;
+		commit?(vnode: VNode): void;
 		/** Attach a hook that is invoked immediately before a component is unmounted. */
-		beforeUnmount?(vnode: VNode): void;
+		unmount?(vnode: VNode): void;
 		/** Attach a hook that is invoked before a vnode is diffed */
-		beforeDiff?(vnode: VNode): void;
+		diff?(vnode: VNode): void;
 		/** Attach a hook that is invoked before a vnode has rendered */
-		beforeRender?(vnode: VNode): void;
+		render?(vnode: VNode): void;
 		/** Attach a hook that is invoked after a vnode has rendered */
-		afterDiff?(vnode: VNode): void;
+		diffed?(vnode: VNode): void;
 		event?(e: Event): void;
 	}
 

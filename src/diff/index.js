@@ -31,7 +31,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 		oldVNode = EMPTY_OBJ;
 	}
 
-	if (options.beforeDiff) options.beforeDiff(newVNode);
+	if (options.diff) options.diff(newVNode);
 
 	let c, p, isNew = false, oldProps, oldState, oldContext,
 		newType = newVNode.type;
@@ -120,7 +120,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			c.props = newVNode.props;
 			c.state = s;
 
-			if (options.beforeRender) options.beforeRender(newVNode);
+			if (options.render) options.render(newVNode);
 
 			let prev = c._prevVNode;
 			let vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
@@ -171,7 +171,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			c._processingException = null;
 		}
 
-		if (options.afterDiff) options.afterDiff(newVNode);
+		if (options.diffed) options.diffed(newVNode);
 	}
 	catch (e) {
 		catchErrorInComponent(e, ancestorComponent);
@@ -191,7 +191,7 @@ export function commitRoot(mounts, root) {
 		}
 	}
 
-	if (options.commitRoot) options.commitRoot(root);
+	if (options.commit) options.commit(root);
 }
 
 /**
@@ -286,7 +286,7 @@ export function applyRef(ref, value, ancestorComponent) {
  */
 export function unmount(vnode, ancestorComponent) {
 	let r;
-	if (options.beforeUnmount) options.beforeUnmount(vnode);
+	if (options.unmount) options.unmount(vnode);
 
 	if (r = vnode.ref) {
 		applyRef(r, null, ancestorComponent);
