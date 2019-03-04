@@ -7,9 +7,15 @@ charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 
-[{*.json,.*rc,*.yml}]
+[{package.json,.*rc,*.yml}]
 indent_style = space
 indent_size = 2
 
 [*.md]
 trim_trailing_whitespace = false
+
+# Uglify (or some other tool) always rewrites this file
+# without a final newline on build, so disabling that
+# editorconfig feature specifically for this file
+[mangle.json]
+insert_final_newline = false

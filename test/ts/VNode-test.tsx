@@ -1,12 +1,12 @@
 import "mocha";
 import { expect } from "chai";
 import {
-	h,
+	createElement,
 	Component,
 	FunctionalComponent,
 	ComponentConstructor,
-	AnyComponent
-} from "../../src/preact";
+	ComponentFactory
+} from "../../src";
 
 class SimpleComponent extends Component<{}, {}> {
 	render() {
@@ -18,33 +18,33 @@ class SimpleComponent extends Component<{}, {}> {
 
 const SimpleFunctionalComponent = () => <div />;
 
-const a: AnyComponent = SimpleComponent;
-const b: AnyComponent = SimpleFunctionalComponent;
+const a: ComponentFactory = SimpleComponent;
+const b: ComponentFactory = SimpleFunctionalComponent;
 
 describe("VNode", () => {
 	it("is returned by h", () => {
 		const actual = <div className="wow"/>;
-		expect(Object.keys(actual)).to.have.members([
-			"nodeName", "attributes", "children", "key"
-		]);
+		expect(actual).to.include.all.keys(
+			"type", "props", "text", "key"
+		);
 	});
 
 	it("has a nodeName of string when html element", () => {
 		const div = <div>Hi!</div>;
-		expect(div.nodeName).to.equal("div");
+		expect(div.type).to.equal("div");
 	});
 
 	it("has a nodeName equal to the construction function when SFC", () => {
 		const sfc = <SimpleFunctionalComponent />;
-		expect(sfc.nodeName).to.be.instanceOf(Function);
-		const constructor = sfc.nodeName as FunctionalComponent<any>;
+		expect(sfc.type).to.be.instanceOf(Function);
+		const constructor = sfc.type as FunctionalComponent<any>;
 		expect(constructor.name).to.eq("SimpleFunctionalComponent");
 	});
 
 	it("has a nodeName equal to the constructor of a componet", () => {
 		const sfc = <SimpleComponent />;
-		expect(sfc.nodeName).to.be.instanceOf(Function);
-		const constructor = sfc.nodeName as ComponentConstructor<any>;
+		expect(sfc.type).to.be.instanceOf(Function);
+		const constructor = sfc.type as ComponentConstructor<any>;
 		expect(constructor.name).to.eq("SimpleComponent");
 	});
 
@@ -55,9 +55,9 @@ describe("VNode", () => {
 				child2
 			</SimpleComponent>
 		);
-		expect(comp.children).to.be.instanceOf(Array);
-		expect(comp.children[0].constructor.name).to.eq("VNode");
-		expect(comp.children[1]).to.be.a("string");
+
+		expect(comp.props.children).to.be.instanceOf(Array);
+		expect(comp.props.children[1]).to.be.a("string");
 	});
 });
 

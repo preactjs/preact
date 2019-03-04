@@ -1,66 +1,71 @@
 {
   "name": "preact",
-  "version": "8.4.2",
-  "description": "Fast 3kb React alternative with the same modern API. Components & Virtual DOM.",
+  "amdName": "preact",
+  "version": "10.0.0-alpha.0",
+  "private": false,
+  "description": "Fast 3kb React-compatible Virtual DOM library.",
   "main": "dist/preact.js",
-  "jsnext:main": "dist/preact.mjs",
   "module": "dist/preact.mjs",
-  "dev:main": "dist/preact.dev.js",
-  "minified:main": "dist/preact.min.js",
-  "unpkg": "dist/preact.min.js",
-  "types": "dist/preact.d.ts",
-  "browser": "dist/preact.umd.js",
+  "umd:main": "dist/preact.umd.js",
+  "source": "src/index.js",
+  "license": "MIT",
+  "types": "src/index.d.ts",
   "scripts": {
-    "clean": "rimraf dist/ devtools.js devtools.js.map debug.js debug.js.map test/ts/**/*.js",
-    "copy-flow-definition": "copyfiles -f src/preact.js.flow dist",
-    "copy-typescript-definition": "copyfiles -f src/preact.d.ts dist",
-    "build": "npm-run-all --silent clean transpile copy-flow-definition copy-typescript-definition strip optimize minify size",
-    "flow": "flow",
-    "transpile:main": "rollup -c config/rollup.config.js",
-    "transpile:devtools": "rollup -c config/rollup.config.devtools.js",
-    "transpile:esm": "rollup -c config/rollup.config.module.js",
-    "transpile:umd": "rollup -c config/rollup.config.umd.js",
-    "transpile:debug": "babel debug/ -o debug.js -s",
-    "transpile": "npm-run-all transpile:main transpile:esm transpile:umd transpile:devtools transpile:debug",
-    "optimize": "uglifyjs dist/preact.dev.js -c conditionals=false,sequences=false,loops=false,join_vars=false,collapse_vars=false --pure-funcs=Object.defineProperty --mangle-props --mangle-regex=\"/^(_|normalizedNodeName|nextBase|prev[CPS]|_parentC)/\" --name-cache config/properties.json -b width=120,quote_style=3 -o dist/preact.js -p relative --in-source-map dist/preact.dev.js.map --source-map dist/preact.js.map",
-    "minify": "uglifyjs dist/preact.js -c collapse_vars,evaluate,screw_ie8,unsafe,loops=false,keep_fargs=false,pure_getters,unused,dead_code -m -o dist/preact.min.js -p relative --in-source-map dist/preact.js.map --source-map dist/preact.min.js.map",
-    "prepare": "npm run build",
-    "strip:main": "jscodeshift --run-in-band -s -t config/codemod-strip-tdz.js dist/preact.dev.js && jscodeshift --run-in-band -s -t config/codemod-const.js dist/preact.dev.js && jscodeshift --run-in-band -s -t config/codemod-let-name.js dist/preact.dev.js",
-    "strip:esm": "jscodeshift --run-in-band -s -t config/codemod-strip-tdz.js dist/preact.mjs && jscodeshift --run-in-band -s -t config/codemod-const.js dist/preact.mjs && jscodeshift --run-in-band -s -t config/codemod-let-name.js dist/preact.mjs",
-    "strip": "npm-run-all strip:main strip:esm",
-    "size": "node -e \"process.stdout.write('gzip size: ')\" && gzip-size --raw dist/preact.min.js",
-    "test": "npm-run-all lint --parallel test:mocha test:karma test:ts test:flow test:size",
+    "build": "npm-run-all --parallel build:*",
+    "build:core": "microbundle build --raw",
+    "build:debug": "microbundle build --raw --cwd debug",
+    "build:hooks": "microbundle build --raw --cwd hooks",
+    "build:compat": "microbundle build --raw --cwd compat --globals 'preact/hooks=preactHooks'",
+    "dev": "microbundle watch --raw --format cjs,umd",
+    "dev:hooks": "microbundle watch --raw --format cjs --cwd hooks",
+    "test": "npm-run-all lint build --parallel test:mocha test:karma test:ts",
     "test:flow": "flow check",
     "test:ts": "tsc -p test/ts/ && mocha --require babel-register test/ts/**/*-test.js",
     "test:mocha": "mocha --recursive --require babel-register test/shared test/node",
-    "test:karma": "karma start test/karma.conf.js --single-run",
+    "test:karma": "cross-env COVERAGE=true karma start karma.conf.js --single-run",
     "test:mocha:watch": "npm run test:mocha -- --watch",
-    "test:karma:watch": "npm run test:karma -- no-single-run",
+    "test:karma:watch": "karma start karma.conf.js --no-single-run",
+    "test:karma:hooks": "cross-env COVERAGE=false karma start karma.conf.js --grep=hooks/test/browser/**.js --no-single-run",
+    "test:karma:bench": "cross-env PERFORMANCE=true COVERAGE=false karma start karma.conf.js --grep=test/benchmarks/**.js --single-run",
+    "benchmark": "npm run test:karma:bench -- no-single-run",
     "test:size": "bundlesize",
-    "lint": "eslint debug devtools src test",
-    "prepublishOnly": "npm run build",
-    "smart-release": "npm run build && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish",
-    "release": "cross-env npm run smart-release",
+    "lint": "eslint src test",
     "postinstall": "node -e \"console.log('\\u001b[35m\\u001b[1mLove Preact? You can now donate to our open collective:\\u001b[22m\\u001b[39m\\n > \\u001b[34mhttps://opencollective.com/preact/donate\\u001b[0m')\""
   },
-  "eslintConfig": {
-    "extends": "./config/eslint-config.js"
+  "mangle": {
+    "regex": "^_"
   },
-  "typings": "./dist/preact.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/developit/preact.git"
+  "eslintConfig": {
+    "extends": "developit",
+    "settings": {
+      "react": {
+        "pragma": "createElement"
+      }
+    },
+    "rules": {
+      "prefer-rest-params": 0,
+      "prefer-spread": 0,
+      "no-cond-assign": 0,
+      "react/jsx-no-bind": 0,
+      "react/prefer-stateless-function": 0,
+      "react/sort-comp": 0,
+      "jest/valid-expect": 0,
+      "jest/no-disabled-tests": 0,
+      "react/no-find-dom-node": 0
+    }
   },
   "files": [
-    "devtools",
-    "debug",
     "src",
     "dist",
-    "devtools.js",
-    "devtools.js.map",
-    "debug.js",
-    "debug.js.map",
-    "typings.json"
+    "compat/dist",
+    "compat/src",
+    "compat/package.json",
+    "debug/dist",
+    "debug/src",
+    "debug/package.json",
+    "hooks/dist",
+    "hooks/src",
+    "hooks/package.json"
   ],
   "keywords": [
     "preact",
@@ -71,37 +76,41 @@
     "virtual",
     "dom"
   ],
-  "author": "Jason Miller <jason@developit.ca>",
-  "license": "MIT",
+  "authors": [
+    "Jason Miller <jason@developit.ca>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/developit/preact.git"
+  },
   "bugs": {
     "url": "https://github.com/developit/preact/issues"
   },
   "homepage": "https://github.com/developit/preact",
+  "dependencies": {
+    "prop-types": "^15.6.2"
+  },
   "devDependencies": {
-    "@types/chai": "^4.1.7",
-    "@types/mocha": "^5.2.5",
-    "@types/node": "^9.6.40",
+    "@types/chai": "^4.1.2",
+    "@types/mocha": "^5.0.0",
+    "@types/node": "^10.5.2",
     "babel-cli": "^6.24.1",
-    "babel-core": "^6.24.1",
-    "babel-eslint": "^8.2.6",
-    "babel-loader": "^7.0.0",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-plugin-istanbul": "^5.0.1",
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-preset-env": "^1.6.1",
+    "benchmark": "^2.1.4",
     "bundlesize": "^0.17.0",
-    "chai": "^4.2.0",
-    "copyfiles": "^2.1.0",
-    "core-js": "^2.6.0",
+    "chai": "^4.1.2",
     "coveralls": "^3.0.0",
-    "cross-env": "^5.1.4",
-    "diff": "^3.0.0",
-    "eslint": "^4.18.2",
-    "eslint-plugin-react": "^7.11.1",
-    "flow-bin": "^0.89.0",
-    "gzip-size-cli": "^2.0.0",
-    "istanbul-instrumenter-loader": "^3.0.0",
-    "jscodeshift": "^0.5.0",
-    "karma": "^3.1.3",
+    "cross-env": "^5.2.0",
+    "diff": "^3.5.0",
+    "eslint": "^5.1.0",
+    "eslint-config-developit": "^1.1.1",
+    "flow-bin": "^0.79.1",
+    "karma": "^3.0.0",
     "karma-babel-preprocessor": "^7.0.0",
     "karma-chai-sinon": "^0.1.5",
     "karma-chrome-launcher": "^2.2.0",
@@ -111,36 +120,21 @@
     "karma-sauce-launcher": "^1.2.0",
     "karma-sinon": "^1.0.5",
     "karma-source-map-support": "^1.3.0",
-    "karma-sourcemap-loader": "^0.3.6",
+    "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^3.0.5",
-    "mocha": "^5.0.4",
-    "npm-run-all": "^4.1.5",
-    "puppeteer": "^1.11.0",
-    "rimraf": "^2.5.3",
-    "rollup": "^0.57.1",
-    "rollup-plugin-babel": "^3.0.2",
-    "rollup-plugin-memory": "^3.0.0",
-    "rollup-plugin-node-resolve": "^3.4.0",
-    "sinon": "^4.4.2",
-    "sinon-chai": "^3.3.0",
+    "lodash": "^4.17.10",
+    "microbundle": "^0.9.0",
+    "mocha": "^5.2.0",
+    "npm-run-all": "^4.0.0",
+    "sinon": "^6.1.3",
+    "sinon-chai": "^3.0.0",
     "typescript": "^3.0.1",
-    "uglify-js": "^2.7.5",
-    "webpack": "^4.27.1"
-  },
-  "greenkeeper": {
-    "ignore": [
-      "babel-cli",
-      "babel-core",
-      "babel-eslint",
-      "babel-loader",
-      "jscodeshift",
-      "rollup-plugin-babel"
-    ]
+    "webpack": "^4.3.0"
   },
   "bundlesize": [
     {
-      "path": "./dist/preact.min.js",
-      "threshold": "4Kb"
+      "path": "./dist/preact.js",
+      "maxSize": "3Kb"
     }
   ]
 }

@@ -1,4 +1,4 @@
-import { h, render, Component, ComponentProps, FunctionalComponent, AnyComponent } from "../../src/preact";
+import { createElement, render, Component, FunctionalComponent, AnyComponent } from "../../src";
 
 interface DummyProps {
 	initialInput: string;
@@ -39,9 +39,9 @@ function DummerComponent({ input, initialInput }: DummerComponentProps) {
 	return <div>Input: {input}, initial: {initialInput}</div>;
 }
 
-render(h('div', { title: "test", key: "1" }), document);
-render(h(DummyComponent, { initialInput: "The input", key: "1" }), document);
-render(h(DummerComponent, { initialInput: "The input", input: "New input", key: "1"}), document);
+render(createElement('div', { title: "test", key: "1" }), document);
+render(createElement(DummyComponent, { initialInput: "The input", key: "1" }), document);
+render(createElement(DummerComponent, { initialInput: "The input", input: "New input", key: "1"}), document);
 
 // Accessing children
 const ComponentWithChildren: FunctionalComponent<DummerComponentProps> = (
@@ -192,3 +192,12 @@ const d7 = <DefaultUnion />;
 const d8 = <DefaultUnion num={1} />;
 const d9 = <DefaultUnion type="number" />;
 const d10 = <DefaultUnion type="string" str="foo" />;
+
+class ComponentWithDefaultProps extends Component<{ value: string }> {
+	static defaultProps = { value: "" };
+	render() {
+		return <div>{this.props.value}</div>;
+	}
+}
+
+const withDefaultProps = <ComponentWithDefaultProps />;

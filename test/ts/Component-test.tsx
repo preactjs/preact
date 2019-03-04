@@ -1,13 +1,11 @@
 import "mocha";
 import { expect } from "chai";
 import {
-	h,
+	createElement,
 	Component,
-	FunctionalComponent,
-	ComponentConstructor,
 	RenderableProps,
-	render
-} from "../../src/preact";
+	Fragment
+} from "../../src/";
 
 export class ContextComponent extends Component<{ foo: string }> {
 	getChildContext() {
@@ -83,7 +81,7 @@ interface RandomChildrenComponenProps {
 	span?: boolean;
 }
 
-class RandomChildrenComponen extends Component<RandomChildrenComponenProps> {
+class RandomChildrenComponent extends Component<RandomChildrenComponenProps> {
 	render() {
 		const { num, val, span } = this.props;
 		if (num) {
@@ -111,15 +109,18 @@ describe("Component", () => {
 	});
 
 	it("has no base when not mounted", () => {
-		expect(component).to.not.haveOwnProperty("base");
+		expect(component.base).to.not.exist;
 	});
 
 	describe("setState", () => {
-		it("can be used with an object", () => {
+		// No need to execute these tests. because we only need to check if
+		// the types are working. Executing them would require the DOM.
+		// TODO: Run TS tests in our standard karma setup
+		it.skip("can be used with an object", () => {
 			component.setState({ name: "another name" });
 		});
 
-		it("can be used with a function", () => {
+		it.skip("can be used with a function", () => {
 			const updater = (state: any, props: any) => ({
 				name: `${state.name} - ${props.initialName}`
 			});
@@ -133,6 +134,17 @@ describe("Component", () => {
 			const actual = comp.render();
 
 			expect(actual).to.eq(null);
+		});
+	});
+
+	describe("Fragment", () => {
+		it('should render nested Fragments', () => {
+			var vnode = <Fragment>
+					<Fragment>foo</Fragment>
+					bar
+				</Fragment>
+
+			expect(vnode.type).to.be.equal(Fragment);
 		});
 	});
 });

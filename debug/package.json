@@ -1,0 +1,21 @@
+{
+  "name": "preact-debug",
+  "amdName": "preactDebug",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Preact extensions for development",
+  "main": "dist/debug.js",
+  "module": "dist/debug.mjs",
+  "umd:main": "dist/debug.umd.js",
+  "source": "src/index.js",
+  "license": "MIT",
+  "mangle": {
+    "regex": "^(?!_renderer)^_"
+  },
+  "dependencies": {
+    "prop-types": "^15.6.2"
+  },
+  "peerDependencies": {
+    "preact": "10.0.0-alpha.0"
+  }
+}
