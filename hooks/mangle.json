@@ -9,7 +9,8 @@
       "$__hooks": "__H",
       "$_component": "__c",
       "$_defaultValue": "__p",
-      "$_id": "__c"
+      "$_id": "__c",
+      "$_parentDom": "__P"
     }
   }
 }

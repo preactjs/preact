@@ -30,7 +30,8 @@
       "$_processingException": "__p",
       "$_context": "__n",
       "$_defaultValue": "__p",
-      "$_id": "__c"
+      "$_id": "__c",
+      "$_parentDom": "__P"
     }
   }
 }
