@@ -76,6 +76,14 @@ function setupDeterministicInnerHTML(element) {
 }
 
 /**
+ * Sort a cssText alphabetically.
+ * @param {string} cssText
+ */
+export function sortCss(cssText) {
+	return cssText.split(';').sort((a, b) => a[0]==='-' ? a : a - b).join(';');
+}
+
+/**
  * Setup the test environment
  * @returns {HTMLDivElement}
  */
