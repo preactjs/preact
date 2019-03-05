@@ -18,6 +18,14 @@ describe('components', () => {
 		teardown(scratch);
 	});
 
+	it('should have "isReactComponent" property', () => {
+		let Comp = new React.Component();
+		expect(Comp.isReactComponent).to.deep.equal({});
+
+		let Pure = new React.PureComponent();
+		expect(Pure.isReactComponent).to.deep.equal({});
+	});
+
 	it('should be sane', () => {
 		let props;
 
