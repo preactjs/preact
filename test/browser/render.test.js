@@ -276,15 +276,7 @@ describe('render()', () => {
 
 	it('should apply string attributes', () => {
 		render(<div foo="bar" data-foo="databar" />, scratch);
-
-		let div = scratch.childNodes[0];
-		expect(div.attributes.length).to.equal(2);
-
-		expect(div.attributes[0].name).to.equal('foo');
-		expect(div.attributes[0].value).to.equal('bar');
-
-		expect(div.attributes[1].name).to.equal('data-foo');
-		expect(div.attributes[1].value).to.equal('databar');
+		expect(scratch.innerHTML).to.equal('<div data-foo="databar" foo="bar"></div>');
 	});
 
 	it('should not serialize function props as attributes', () => {
