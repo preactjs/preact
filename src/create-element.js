@@ -9,30 +9,30 @@ import options from './options';
  * @returns {import('./internal').VNode}
  */
 export function createElement(type, props, children) {
-	if (props == null) props = {};
-	if (arguments.length > 3) {
-		children = [children];
-		for (let i = 3; i < arguments.length; i++) {
-			children.push(arguments[i]);
-		}
-	}
-	if (children != null) {
-		props.children = children;
-	}
+  if (props == null) props = {};
+  if (arguments.length > 3) {
+    children = [children];
+    for (let i = 3; i < arguments.length; i++) {
+      children.push(arguments[i]);
+    }
+  }
+  if (children != null) {
+    props.children = children;
+  }
 
-	// "type" may be undefined during development. The check is needed so that
-	// we can display a nice error message with our debug helpers
-	if (type != null && type.defaultProps != null) {
-		for (let i in type.defaultProps) {
-			if (props[i] === undefined) props[i] = type.defaultProps[i];
-		}
-	}
-	let ref = props.ref;
-	if (ref) delete props.ref;
-	let key = props.key;
-	if (key) delete props.key;
+  // "type" may be undefined during development. The check is needed so that
+  // we can display a nice error message with our debug helpers
+  if (type != null && type.defaultProps != null) {
+    for (let i in type.defaultProps) {
+      if (props[i] === undefined) props[i] = type.defaultProps[i];
+    }
+  }
+  let ref = props.ref;
+  if (ref) delete props.ref;
+  let key = props.key;
+  if (key) delete props.key;
 
-	return createVNode(type, props, null, key, ref);
+  return createVNode(type, props, null, key, ref);
 }
 
 /**
@@ -49,27 +49,27 @@ export function createElement(type, props, children) {
  * @returns {import('./internal').VNode}
  */
 export function createVNode(type, props, text, key, ref) {
-	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
-	// Do not inline into createElement and coerceToVNode!
-	const vnode = {
-		type,
-		props,
-		text,
-		key,
-		ref,
-		_children: null,
-		_dom: null,
-		_lastDomChild: null,
-		_component: null,
-	};
+  // V8 seems to be better at detecting type shapes if the object is allocated from the same call site
+  // Do not inline into createElement and coerceToVNode!
+  const vnode = {
+    type,
+    props,
+    text,
+    key,
+    ref,
+    _children: null,
+    _dom: null,
+    _lastDomChild: null,
+    _component: null,
+  };
 
-	if (options.vnode) options.vnode(vnode);
+  if (options.vnode) options.vnode(vnode);
 
-	return vnode;
+  return vnode;
 }
 
 export function createRef() {
-	return {};
+  return {};
 }
 
 export /* istanbul ignore next */ function Fragment() {}
@@ -82,19 +82,19 @@ export /* istanbul ignore next */ function Fragment() {}
  * @returns {import('./internal').VNode}
  */
 export function coerceToVNode(possibleVNode) {
-	if (possibleVNode == null || typeof possibleVNode === 'boolean') return null;
-	if (typeof possibleVNode === 'string' || typeof possibleVNode === 'number') {
-		return createVNode(null, null, possibleVNode, null, null);
-	}
+  if (possibleVNode == null || typeof possibleVNode === 'boolean') return null;
+  if (typeof possibleVNode === 'string' || typeof possibleVNode === 'number') {
+    return createVNode(null, null, possibleVNode, null, null);
+  }
 
-	if (Array.isArray(possibleVNode)) {
-		return createElement(Fragment, null, possibleVNode);
-	}
+  if (Array.isArray(possibleVNode)) {
+    return createElement(Fragment, null, possibleVNode);
+  }
 
-	// Clone vnode if it has already been used. ceviche/#57
-	if (possibleVNode._dom != null) {
-		return createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.text, possibleVNode.key, null);
-	}
+  // Clone vnode if it has already been used. ceviche/#57
+  if (possibleVNode._dom != null) {
+    return createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.text, possibleVNode.key, null);
+  }
 
-	return possibleVNode;
+  return possibleVNode;
 }

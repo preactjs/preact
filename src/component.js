@@ -11,22 +11,22 @@ import { Fragment } from './create-element';
  * getChildContext
  */
 export function Component(props, context) {
-	this.props = props;
-	this.context = context;
-	// if (this.state==null) this.state = {};
-	// this.state = {};
-	// this._dirty = true;
-	// this._renderCallbacks = []; // Only class components
+  this.props = props;
+  this.context = context;
+  // if (this.state==null) this.state = {};
+  // this.state = {};
+  // this._dirty = true;
+  // this._renderCallbacks = []; // Only class components
 
-	// Other properties that Component will have set later,
-	// shown here as commented out for quick reference
-	// this.base = null;
-	// this._ancestorComponent = null; // Always set right after instantiation
-	// this._vnode = null;
-	// this._nextState = null; // Only class components
-	// this._prevVNode = null;
-	// this._processingException = null; // Always read, set only when handling error
-	// this._constructor = null; // Only functional components, always set right after instantiation
+  // Other properties that Component will have set later,
+  // shown here as commented out for quick reference
+  // this.base = null;
+  // this._ancestorComponent = null; // Always set right after instantiation
+  // this._vnode = null;
+  // this._nextState = null; // Only class components
+  // this._prevVNode = null;
+  // this._processingException = null; // Always read, set only when handling error
+  // this._constructor = null; // Only functional components, always set right after instantiation
 }
 
 /**
@@ -38,25 +38,25 @@ export function Component(props, context) {
  * updated
  */
 Component.prototype.setState = function(update, callback) {
-	// only clone state when copying to nextState the first time.
-	let s = (this._nextState !== this.state && this._nextState) || (this._nextState = assign({}, this.state));
+  // only clone state when copying to nextState the first time.
+  let s = (this._nextState !== this.state && this._nextState) || (this._nextState = assign({}, this.state));
 
-	// Needed for the devtools to check if state has changed after the tree
-	// has been committed
-	this._prevState = assign({}, s);
+  // Needed for the devtools to check if state has changed after the tree
+  // has been committed
+  this._prevState = assign({}, s);
 
-	// if update() mutates state in-place, skip the copy:
-	if (typeof update !== 'function' || (update = update(s, this.props))) {
-		assign(s, update);
-	}
+  // if update() mutates state in-place, skip the copy:
+  if (typeof update !== 'function' || (update = update(s, this.props))) {
+    assign(s, update);
+  }
 
-	// Skip update if updater function returned null
-	if (update == null) return;
+  // Skip update if updater function returned null
+  if (update == null) return;
 
-	if (callback != null) this._renderCallbacks.push(callback);
+  if (callback != null) this._renderCallbacks.push(callback);
 
-	this._force = false;
-	enqueueRender(this);
+  this._force = false;
+  enqueueRender(this);
 };
 
 /**
@@ -65,36 +65,36 @@ Component.prototype.setState = function(update, callback) {
  * re-renderd
  */
 Component.prototype.forceUpdate = function(callback) {
-	let vnode = this._vnode,
-		dom = this._vnode._dom,
-		parentDom = this._parentDom;
-	if (parentDom != null) {
-		// Set render mode so that we can differantiate where the render request
-		// is coming from. We need this because forceUpdate should never call
-		// shouldComponentUpdate
-		if (this._force == null) this._force = true;
+  let vnode = this._vnode,
+    dom = this._vnode._dom,
+    parentDom = this._parentDom;
+  if (parentDom != null) {
+    // Set render mode so that we can differantiate where the render request
+    // is coming from. We need this because forceUpdate should never call
+    // shouldComponentUpdate
+    if (this._force == null) this._force = true;
 
-		let mounts = [];
-		dom = diff(
-			dom,
-			parentDom,
-			vnode,
-			vnode,
-			this._context,
-			parentDom.ownerSVGElement !== undefined,
-			null,
-			mounts,
-			this._ancestorComponent,
-		);
-		if (dom != null && dom.parentNode !== parentDom) {
-			parentDom.appendChild(dom);
-		}
-		commitRoot(mounts, vnode);
+    let mounts = [];
+    dom = diff(
+      dom,
+      parentDom,
+      vnode,
+      vnode,
+      this._context,
+      parentDom.ownerSVGElement !== undefined,
+      null,
+      mounts,
+      this._ancestorComponent,
+    );
+    if (dom != null && dom.parentNode !== parentDom) {
+      parentDom.appendChild(dom);
+    }
+    commitRoot(mounts, vnode);
 
-		// Reset mode to its initial value for the next render
-		this._force = null;
-	}
-	if (callback != null) callback();
+    // Reset mode to its initial value for the next render
+    this._force = null;
+  }
+  if (callback != null) callback();
 };
 
 /**
@@ -135,15 +135,15 @@ const defer = typeof Promise == 'function' ? Promise.resolve().then.bind(Promise
  * @param {import('./internal').Component} c The component to rerender
  */
 export function enqueueRender(c) {
-	if (!c._dirty && (c._dirty = true) && q.push(c) === 1) {
-		(options.debounceRendering || defer)(process);
-	}
+  if (!c._dirty && (c._dirty = true) && q.push(c) === 1) {
+    (options.debounceRendering || defer)(process);
+  }
 }
 
 /** Flush the render queue by rerendering all queued components */
 function process() {
-	let p;
-	while ((p = q.pop())) {
-		if (p._dirty) p.forceUpdate();
-	}
+  let p;
+  while ((p = q.pop())) {
+    if (p._dirty) p.forceUpdate();
+  }
 }

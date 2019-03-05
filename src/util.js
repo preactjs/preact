@@ -6,6 +6,6 @@
  * @returns {O & P}
  */
 export function assign(obj, props) {
-	for (let i in props) obj[i] = props[i];
-	return /** @type {O & P} */ (obj);
+  for (let i in props) obj[i] = props[i];
+  return /** @type {O & P} */ (obj);
 }

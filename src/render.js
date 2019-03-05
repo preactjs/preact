@@ -10,21 +10,21 @@ import { createElement, Fragment } from './create-element';
  * render into
  */
 export function render(vnode, parentDom) {
-	let oldVNode = parentDom._prevVNode;
-	vnode = createElement(Fragment, null, [vnode]);
+  let oldVNode = parentDom._prevVNode;
+  vnode = createElement(Fragment, null, [vnode]);
 
-	let mounts = [];
-	diffChildren(
-		parentDom,
-		(parentDom._prevVNode = vnode),
-		oldVNode,
-		EMPTY_OBJ,
-		parentDom.ownerSVGElement !== undefined,
-		oldVNode ? null : EMPTY_ARR.slice.call(parentDom.childNodes),
-		mounts,
-		vnode,
-	);
-	commitRoot(mounts, vnode);
+  let mounts = [];
+  diffChildren(
+    parentDom,
+    (parentDom._prevVNode = vnode),
+    oldVNode,
+    EMPTY_OBJ,
+    parentDom.ownerSVGElement !== undefined,
+    oldVNode ? null : EMPTY_ARR.slice.call(parentDom.childNodes),
+    mounts,
+    vnode,
+  );
+  commitRoot(mounts, vnode);
 }
 
 /**
@@ -34,6 +34,6 @@ export function render(vnode, parentDom) {
  * update
  */
 export function hydrate(vnode, parentDom) {
-	parentDom._prevVNode = null;
-	render(vnode, parentDom);
+  parentDom._prevVNode = null;
+  render(vnode, parentDom);
 }
