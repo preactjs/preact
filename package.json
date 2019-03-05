@@ -56,6 +56,7 @@
     "dist",
     "compat/dist",
     "compat/src",
+    "compat/server.js",
     "compat/package.json",
     "debug/dist",
     "debug/src",
