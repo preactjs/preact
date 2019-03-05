@@ -276,6 +276,9 @@ class PureComponent extends Component {
 	}
 }
 
+// Some libraries like `react-virtualized` explicitely check for this.
+Component.prototype.isReactComponent = {};
+
 /**
  * Memoize a component, so that it only updates when the props actually have
  * changed. This was previously known as `React.pure`.
