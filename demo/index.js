@@ -35,12 +35,10 @@ class Home extends Component {
 class DevtoolsWarning extends Component {
 	onClick = () => {
 		window.location.reload();
-	}
+	};
 
 	render() {
-		return (
-			<button onClick={this.onClick}>Start Benchmark (disables devtools)</button>
-		);
+		return <button onClick={this.onClick}>Start Benchmark (disables devtools)</button>;
 	}
 }
 
@@ -50,35 +48,47 @@ class App extends Component {
 			<div class="app">
 				<header>
 					<nav>
-						<Link href="/" activeClassName="active">Home</Link>
-						<Link href="/reorder" activeClassName="active">Reorder</Link>
-						<Link href="/spiral" activeClassName="active">Spiral</Link>
-						<Link href="/pythagoras" activeClassName="active">Pythagoras</Link>
-						<Link href="/todo" activeClassName="active">ToDo</Link>
-						<Link href="/fragments" activeClassName="active">Fragments</Link>
-						<Link href="/key_bug" activeClassName="active">Key Bug</Link>
-						<Link href="/profiler" activeClassName="active">Profiler</Link>
-						<Link href="/context" activeClassName="active">Context</Link>
-						<Link href="/devtools" activeClassName="active">Devtools</Link>
-						<Link href="/empty-fragment" activeClassName="active">Empty Fragment</Link>
+						<Link href="/" activeClassName="active">
+							Home
+						</Link>
+						<Link href="/reorder" activeClassName="active">
+							Reorder
+						</Link>
+						<Link href="/spiral" activeClassName="active">
+							Spiral
+						</Link>
+						<Link href="/pythagoras" activeClassName="active">
+							Pythagoras
+						</Link>
+						<Link href="/todo" activeClassName="active">
+							ToDo
+						</Link>
+						<Link href="/fragments" activeClassName="active">
+							Fragments
+						</Link>
+						<Link href="/key_bug" activeClassName="active">
+							Key Bug
+						</Link>
+						<Link href="/profiler" activeClassName="active">
+							Profiler
+						</Link>
+						<Link href="/context" activeClassName="active">
+							Context
+						</Link>
+						<Link href="/devtools" activeClassName="active">
+							Devtools
+						</Link>
+						<Link href="/empty-fragment" activeClassName="active">
+							Empty Fragment
+						</Link>
 					</nav>
 				</header>
 				<main>
 					<Router url={url}>
 						<Home path="/" />
 						<Reorder path="/reorder" />
-						<div path="/spiral">
-							{!isBenchmark
-								? <DevtoolsWarning />
-								: <Spiral />
-							}
-						</div>
-						<div path="/pythagoras">
-							{!isBenchmark
-								? <DevtoolsWarning />
-								: <Pythagoras />
-							}
-						</div>
+						<div path="/spiral">{!isBenchmark ? <DevtoolsWarning /> : <Spiral />}</div>
+						<div path="/pythagoras">{!isBenchmark ? <DevtoolsWarning /> : <Pythagoras />}</div>
 						<Todo path="/todo" />
 						<Fragments path="/fragments" />
 						<ProfilerDemo path="/profiler" />
@@ -101,8 +111,8 @@ function EmptyFragment() {
 // document.body.firstChild.setAttribute('is-ssr', 'true');
 
 installLogger(
-	String(localStorage.LOG)==='true' || location.href.match(/logger/),
-	String(localStorage.CONSOLE)==='true' || location.href.match(/console/)
+	String(localStorage.LOG) === 'true' || location.href.match(/logger/),
+	String(localStorage.CONSOLE) === 'true' || location.href.match(/console/),
 );
 
 render(<App />, document.body);

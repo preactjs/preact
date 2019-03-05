@@ -11,7 +11,7 @@ export function createContext(defaultValue) {
 
 	let context = {
 		_id: id,
-		_defaultValue: defaultValue
+		_defaultValue: defaultValue,
 	};
 
 	function Consumer(props, context) {
@@ -30,9 +30,9 @@ export function createContext(defaultValue) {
 		};
 		comp.componentDidUpdate = () => {
 			let v = comp.props.value;
-			subs.map(c => v!==c.context && (c.context = v, enqueueRender(c)));
+			subs.map(c => v !== c.context && ((c.context = v), enqueueRender(c)));
 		};
-		comp.sub = (c) => {
+		comp.sub = c => {
 			subs.push(c);
 			let old = c.componentWillUnmount;
 			c.componentWillUnmount = () => {

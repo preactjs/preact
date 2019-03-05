@@ -17,29 +17,29 @@ export default class TodoList extends Component {
 
 	removeTodo = e => {
 		let id = e.target.getAttribute('data-id');
-		this.setState({ todos: this.state.todos.filter( t => t.id!=id ) });
+		this.setState({ todos: this.state.todos.filter(t => t.id != id) });
 	};
 
-	render({ }, { todos, text }) {
+	render({}, { todos, text }) {
 		return (
 			<form onSubmit={this.addTodo} action="javascript:">
 				<input value={text} onInput={this.setText} />
 				<button type="submit">Add</button>
 				<ul>
-					<TodoItems todos={todos} removeTodo={this.removeTodo}/>
+					<TodoItems todos={todos} removeTodo={this.removeTodo} />
 				</ul>
 			</form>
 		);
 	}
 }
 
-
 class TodoItems extends Component {
 	render({ todos, removeTodo }) {
-		return todos.map( todo => (
+		return todos.map(todo => (
 			<li key={todo.id}>
-				<button onClick={removeTodo} data-id={todo.id}>&times;</button>
-				{' '}
+				<button onClick={removeTodo} data-id={todo.id}>
+					&times;
+				</button>{' '}
 				{todo.text}
 			</li>
 		));

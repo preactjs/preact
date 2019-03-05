@@ -38,23 +38,22 @@ export function Component(props, context) {
  * updated
  */
 Component.prototype.setState = function(update, callback) {
-
 	// only clone state when copying to nextState the first time.
-	let s = (this._nextState!==this.state && this._nextState) || (this._nextState = assign({}, this.state));
+	let s = (this._nextState !== this.state && this._nextState) || (this._nextState = assign({}, this.state));
 
 	// Needed for the devtools to check if state has changed after the tree
 	// has been committed
 	this._prevState = assign({}, s);
 
 	// if update() mutates state in-place, skip the copy:
-	if (typeof update!=='function' || (update = update(s, this.props))) {
+	if (typeof update !== 'function' || (update = update(s, this.props))) {
 		assign(s, update);
 	}
 
 	// Skip update if updater function returned null
-	if (update==null) return;
+	if (update == null) return;
 
-	if (callback!=null) this._renderCallbacks.push(callback);
+	if (callback != null) this._renderCallbacks.push(callback);
 
 	this._force = false;
 	enqueueRender(this);
@@ -66,16 +65,28 @@ Component.prototype.setState = function(update, callback) {
  * re-renderd
  */
 Component.prototype.forceUpdate = function(callback) {
-	let vnode = this._vnode, dom = this._vnode._dom, parentDom = this._parentDom;
-	if (parentDom!=null) {
+	let vnode = this._vnode,
+		dom = this._vnode._dom,
+		parentDom = this._parentDom;
+	if (parentDom != null) {
 		// Set render mode so that we can differantiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
-		if (this._force==null) this._force = true;
+		if (this._force == null) this._force = true;
 
 		let mounts = [];
-		dom = diff(dom, parentDom, vnode, vnode, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, this._ancestorComponent);
-		if (dom!=null && dom.parentNode!==parentDom) {
+		dom = diff(
+			dom,
+			parentDom,
+			vnode,
+			vnode,
+			this._context,
+			parentDom.ownerSVGElement !== undefined,
+			null,
+			mounts,
+			this._ancestorComponent,
+		);
+		if (dom != null && dom.parentNode !== parentDom) {
 			parentDom.appendChild(dom);
 		}
 		commitRoot(mounts, vnode);
@@ -83,7 +94,7 @@ Component.prototype.forceUpdate = function(callback) {
 		// Reset mode to its initial value for the next render
 		this._force = null;
 	}
-	if (callback!=null) callback();
+	if (callback != null) callback();
 };
 
 /**
@@ -108,7 +119,7 @@ let q = [];
  * Asynchronously schedule a callback
  * @type {(cb) => void}
  */
-const defer = typeof Promise=='function' ? Promise.resolve().then.bind(Promise.resolve()) : setTimeout;
+const defer = typeof Promise == 'function' ? Promise.resolve().then.bind(Promise.resolve()) : setTimeout;
 
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
@@ -132,7 +143,7 @@ export function enqueueRender(c) {
 /** Flush the render queue by rerendering all queued components */
 function process() {
 	let p;
-	while ((p=q.pop())) {
+	while ((p = q.pop())) {
 		if (p._dirty) p.forceUpdate();
 	}
 }

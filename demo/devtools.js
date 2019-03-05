@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-import { createElement, Component, memo, Fragment } from "react";
+import { createElement, Component, memo, Fragment } from 'react';
 
 function Foo() {
 	return <div>I'm memoed</div>;
@@ -12,7 +12,9 @@ export default class DevtoolsDemo extends Component {
 		return (
 			<div>
 				<h1>memo()</h1>
-				<p><b>functional component:</b></p>
+				<p>
+					<b>functional component:</b>
+				</p>
 				<Memoed />
 			</div>
 		);

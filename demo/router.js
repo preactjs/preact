@@ -1,4 +1,4 @@
-import { Component, toChildArray } from "preact";
+import { Component, toChildArray } from 'preact';
 
 let updateRouter;
 
@@ -27,7 +27,7 @@ export class Link extends Component {
 	}
 
 	onClick(e) {
-		if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey || e.button!==0) return;
+		if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey || e.button !== 0) return;
 		history.pushState(null, null, this.props.href);
 		updateRouter();
 		e.preventDefault();
@@ -36,11 +36,7 @@ export class Link extends Component {
 	render() {
 		this.props.class = this.props.activeClassName;
 		return (
-			<a
-				href={this.props.href}
-				onClick={this.onClick}
-				{...this.props}
-			>
+			<a href={this.props.href} onClick={this.onClick} {...this.props}>
 				{this.props.children}
 			</a>
 		);

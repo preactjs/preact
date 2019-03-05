@@ -1,30 +1,30 @@
 import options from './options';
 
 /**
-  * Create an virtual node (used for JSX)
-  * @param {import('./internal').VNode["type"]} type The node name or Component
-  * constructor for this virtual node
-  * @param {object | null | undefined} [props] The properties of the virtual node
-  * @param {Array<import('.').ComponentChildren>} [children] The children of the virtual node
-  * @returns {import('./internal').VNode}
-  */
+ * Create an virtual node (used for JSX)
+ * @param {import('./internal').VNode["type"]} type The node name or Component
+ * constructor for this virtual node
+ * @param {object | null | undefined} [props] The properties of the virtual node
+ * @param {Array<import('.').ComponentChildren>} [children] The children of the virtual node
+ * @returns {import('./internal').VNode}
+ */
 export function createElement(type, props, children) {
-	if (props==null) props = {};
-	if (arguments.length>3) {
+	if (props == null) props = {};
+	if (arguments.length > 3) {
 		children = [children];
-		for (let i=3; i<arguments.length; i++) {
+		for (let i = 3; i < arguments.length; i++) {
 			children.push(arguments[i]);
 		}
 	}
-	if (children!=null) {
+	if (children != null) {
 		props.children = children;
 	}
 
 	// "type" may be undefined during development. The check is needed so that
 	// we can display a nice error message with our debug helpers
-	if (type!=null && type.defaultProps!=null) {
+	if (type != null && type.defaultProps != null) {
 		for (let i in type.defaultProps) {
-			if (props[i]===undefined) props[i] = type.defaultProps[i];
+			if (props[i] === undefined) props[i] = type.defaultProps[i];
 		}
 	}
 	let ref = props.ref;
@@ -60,7 +60,7 @@ export function createVNode(type, props, text, key, ref) {
 		_children: null,
 		_dom: null,
 		_lastDomChild: null,
-		_component: null
+		_component: null,
 	};
 
 	if (options.vnode) options.vnode(vnode);
@@ -72,7 +72,7 @@ export function createRef() {
 	return {};
 }
 
-export /* istanbul ignore next */ function Fragment() { }
+export /* istanbul ignore next */ function Fragment() {}
 
 /**
  * Coerce an untrusted value into a VNode
@@ -92,7 +92,7 @@ export function coerceToVNode(possibleVNode) {
 	}
 
 	// Clone vnode if it has already been used. ceviche/#57
-	if (possibleVNode._dom!=null) {
+	if (possibleVNode._dom != null) {
 		return createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.text, possibleVNode.key, null);
 	}
 
