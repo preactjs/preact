@@ -668,6 +668,7 @@ declare namespace JSX {
 		h6: HTMLAttributes;
 		head: HTMLAttributes;
 		header: HTMLAttributes;
+		hgroup: HTMLAttributes;
 		hr: HTMLAttributes;
 		html: HTMLAttributes;
 		i: HTMLAttributes;
