@@ -199,10 +199,14 @@ function onPaint() {
 	afterPaintEffects = [];
 }
 
+function scheduleOnPaint() {
+	setTimeout(onPaint, 0);
+}
+
 if (typeof window !== 'undefined') {
 	afterPaint = (component) => {
 		if (!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) {
-			requestAnimationFrame(() => setTimeout(onPaint, 0));
+			requestAnimationFrame(scheduleOnPaint);
 		}
 	};
 }
