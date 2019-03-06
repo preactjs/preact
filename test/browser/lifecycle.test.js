@@ -1676,6 +1676,35 @@ describe('Lifecycle methods', () => {
 			expect(nextPropsArg).to.deep.equal({ foo: 'bar' });
 			expect(nextStateArg).to.deep.equal({ value: 4 });
 		});
+
+		it('should update props reference when sCU reutrns false', () => {
+			let spy = sinon.spy();
+
+			let updateState;
+			class Foo extends Component {
+				constructor() {
+					super();
+					updateState = () => this.setState({});
+				}
+
+				shouldComponentUpdate(nextProps) {
+					if (nextProps !== this.props) {
+						spy();
+						return false;
+					}
+					return true;
+				}
+			}
+
+			render(<Foo foo="foo" />, scratch);
+			render(<Foo foo="bar" />, scratch);
+			expect(spy).to.be.calledOnce;
+
+			updateState();
+			rerender();
+
+			expect(spy).to.be.calledOnce;
+		});
 	});
 
 
