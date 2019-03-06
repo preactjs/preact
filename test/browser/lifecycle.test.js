@@ -1734,6 +1734,27 @@ describe('Lifecycle methods', () => {
 			rerender();
 			expect(renderSpy).to.not.be.called;
 		});
+
+		it('should call callback with correct this binding', () => {
+			let inst;
+			let updateState;
+			class Foo extends Component {
+				constructor() {
+					super();
+					updateState = () => this.setState({}, this.onUpdate);
+				}
+
+				onUpdate() {
+					inst = this;
+				}
+			}
+
+			render(<Foo />, scratch);
+			updateState();
+			rerender();
+
+			expect(inst).to.be.instanceOf(Foo);
+		});
 	});
 
 	describe('#componentDidCatch', () => {
