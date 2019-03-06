@@ -158,7 +158,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 		newVNode._dom = dom;
 
 		if (c!=null) {
-			while (p=c._renderCallbacks.pop()) p();
+			while (p=c._renderCallbacks.pop()) p.call(c);
 
 			// Don't call componentDidUpdate on mount or when we bailed out via
 			// `shouldComponentUpdate`
