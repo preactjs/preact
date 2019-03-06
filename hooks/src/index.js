@@ -186,30 +186,24 @@ export function useContext(context) {
  */
 let afterPaint = () => {};
 
-/** @type {MessageChannel} */
-let mc;
-
+/**
+ * Pending effects consumer.
+ */
 function onPaint() {
-	mc.port1.postMessage(undefined);
+	afterPaintEffects.forEach(component => {
+		component._afterPaintQueued = false;
+		if (!component._parentDom) return;
+		component.__hooks._pendingEffects.forEach(invokeEffect);
+		component.__hooks._pendingEffects = [];
+	});
+	afterPaintEffects = [];
 }
 
 if (typeof window !== 'undefined') {
-	mc = new MessageChannel();
-
 	afterPaint = (component) => {
 		if (!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) {
-			requestAnimationFrame(onPaint);
+			requestAnimationFrame(() => setTimeout(onPaint, 0));
 		}
-	};
-
-	mc.port2.onmessage = () => {
-		afterPaintEffects.forEach(component => {
-			component._afterPaintQueued = false;
-			if (!component._parentDom) return;
-			component.__hooks._pendingEffects.forEach(invokeEffect);
-			component.__hooks._pendingEffects = [];
-		});
-		afterPaintEffects = [];
 	};
 }
 
