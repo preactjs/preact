@@ -100,12 +100,13 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 				if (c.componentDidMount!=null) mounts.push(c);
 			}
 			else {
+				if (newType.getDerivedStateFromProps==null && c._force==null && c.componentWillReceiveProps!=null) {
+					c.componentWillReceiveProps(newVNode.props, cctx);
+				}
+
 				if (!c._force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newVNode.props, s, cctx)===false) {
 					c._dirty = false;
 					break outer;
-				}
-				if (newType.getDerivedStateFromProps==null && c._force==null && c.componentWillReceiveProps!=null) {
-					c.componentWillReceiveProps(newVNode.props, cctx);
 				}
 
 				if (c.componentWillUpdate!=null) {
@@ -158,7 +159,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 		newVNode._dom = dom;
 
 		if (c!=null) {
-			while (p=c._renderCallbacks.pop()) p();
+			while (p=c._renderCallbacks.pop()) p.call(c);
 
 			// Don't call componentDidUpdate on mount or when we bailed out via
 			// `shouldComponentUpdate`

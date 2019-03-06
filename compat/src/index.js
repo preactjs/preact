@@ -292,9 +292,9 @@ function memo(c, comparer) {
 	}
 
 	function Memoed(props, context) {
-		this.shouldComponentUpdate = this.shouldComponentUpdate || comparer!=null
-			? shouldUpdate
-			: PureComponent.prototype.shouldComponentUpdate;
+		this.shouldComponentUpdate =
+			this.shouldComponentUpdate ||
+			(comparer ? shouldUpdate : PureComponent.prototype.shouldComponentUpdate);
 		return c.call(this, props, context);
 	}
 	Memoed.displayName = 'Memo(' + (c.displayName || c.name) + ')';

@@ -1008,6 +1008,11 @@ describe('Lifecycle methods', () => {
 					expect(Inner.prototype.componentWillReceiveProps).to.have.been.called;
 					expect(Inner.prototype.componentDidUpdate).not.to.have.been.called;
 				}
+				shouldComponentUpdate() {
+					expect(Inner.prototype.componentWillReceiveProps).to.have.been.called;
+					expect(Inner.prototype.componentWillUpdate).not.to.have.been.called;
+					return true;
+				}
 				render() {
 					return <div />;
 				}
@@ -1015,6 +1020,7 @@ describe('Lifecycle methods', () => {
 			sinon.spy(Inner.prototype, 'componentWillReceiveProps');
 			sinon.spy(Inner.prototype, 'componentDidUpdate');
 			sinon.spy(Inner.prototype, 'componentWillUpdate');
+			sinon.spy(Inner.prototype, 'shouldComponentUpdate');
 			sinon.spy(Outer.prototype, 'componentDidMount');
 
 			render(<Outer />, scratch);
@@ -1022,6 +1028,7 @@ describe('Lifecycle methods', () => {
 			rerender();
 
 			expect(Inner.prototype.componentWillReceiveProps).to.have.been.calledBefore(Inner.prototype.componentWillUpdate);
+			expect(Inner.prototype.componentWillReceiveProps).to.have.been.calledBefore(Inner.prototype.shouldComponentUpdate);
 			expect(Inner.prototype.componentWillUpdate).to.have.been.calledBefore(Inner.prototype.componentDidUpdate);
 		});
 	});
@@ -1733,6 +1740,27 @@ describe('Lifecycle methods', () => {
 			updateState();
 			rerender();
 			expect(renderSpy).to.not.be.called;
+		});
+
+		it('should call callback with correct this binding', () => {
+			let inst;
+			let updateState;
+			class Foo extends Component {
+				constructor() {
+					super();
+					updateState = () => this.setState({}, this.onUpdate);
+				}
+
+				onUpdate() {
+					inst = this;
+				}
+			}
+
+			render(<Foo />, scratch);
+			updateState();
+			rerender();
+
+			expect(inst).to.be.instanceOf(Foo);
 		});
 	});
 
