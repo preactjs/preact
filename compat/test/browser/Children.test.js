@@ -43,7 +43,7 @@ describe('Children', () => {
 
 		it('should only allow 1 child', () => {
 			render(<Foo>foo</Foo>, scratch);
-			expect(actual.text).to.equal('foo');
+			expect(actual).to.equal('foo');
 		});
 
 		it('should throw if no children are passed', () => {
