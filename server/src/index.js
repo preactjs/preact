@@ -1,4 +1,5 @@
-import { encodeEntities, indent, isLargeString, styleObjToCss, assign, getNodeProps } from './util';
+// import { toChildArray } from 'preact';
+import { encodeEntities, indent, isLargeString, styleObjToCss, assign, getChildren /*, getNodeProps*/ } from './util';
 import { ENABLE_PRETTY } from '../env';
 
 const SHALLOW = { shallow: true };
@@ -38,8 +39,8 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 		return '';
 	}
 
-	let nodeName = vnode.nodeName,
-		attributes = vnode.attributes,
+	let nodeName = vnode.type,
+		attributes = vnode.props,
 		isComponent = false;
 	context = context || {};
 	opts = opts || {};
@@ -59,7 +60,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 			nodeName = getComponentName(nodeName);
 		}
 		else {
-			let props = getNodeProps(vnode),
+			let props = vnode.props, //props = getNodeProps(vnode),
 				rendered;
 
 			if (!nodeName.prototype || typeof nodeName.prototype.render!=='function') {
@@ -70,7 +71,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 				// class-based components
 				let c = new nodeName(props, context);
 				// turn off stateful re-rendering:
-				c._disable = c.__x = true;
+				c._dirty = c.__d = true;
 				c.props = props;
 				c.context = context;
 				if (nodeName.getDerivedStateFromProps) c.state = assign(assign({}, c.state), nodeName.getDerivedStateFromProps(c.props, c.state));
@@ -153,6 +154,8 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 	if (isVoid) s = s.replace(/>$/, ' />');
 
 	let pieces = [];
+
+	let children;
 	if (html) {
 		// if multiline, indent.
 		if (pretty && isLargeString(html)) {
@@ -160,10 +163,10 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 		}
 		s += html;
 	}
-	else if (vnode.children) {
+	else if (vnode.props && getChildren(children = [], vnode.props.children).length) {
 		let hasLarge = pretty && ~s.indexOf('\n');
-		for (let i=0; i<vnode.children.length; i++) {
-			let child = vnode.children[i];
+		for (let i=0; i<children.length; i++) {
+			let child = children[i];
 			if (child!=null && child!==false) {
 				let childSvgMode = nodeName==='svg' ? true : nodeName==='foreignObject' ? false : isSvgMode,
 					ret = renderToString(child, context, opts, true, childSvgMode);

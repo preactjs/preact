@@ -7,7 +7,7 @@ import prettyFormat from 'pretty-format';
 // we have to patch in Array support, Possible issue in npm.im/pretty-format
 let preactPlugin = {
 	test(object) {
-		return object && typeof object==='object' && 'nodeName' in object && 'attributes' in object && 'children' in object && !('nodeType' in object);
+		return object && typeof object==='object' && 'type' in object && 'props' in object && 'key' in object;
 	},
 	print(val, print, indent) {
 		return renderToString(val, preactPlugin.context, preactPlugin.opts, true);
