@@ -187,9 +187,9 @@ export function useContext(context) {
 let afterPaint = () => {};
 
 /**
- * Pending effects consumer.
+ * After paint effects consumer.
  */
-function onPaint() {
+function flushAfterPaintEffects() {
 	afterPaintEffects.forEach(component => {
 		component._afterPaintQueued = false;
 		if (!component._parentDom) return;
@@ -199,14 +199,14 @@ function onPaint() {
 	afterPaintEffects = [];
 }
 
-function scheduleOnPaint() {
-	setTimeout(onPaint, 0);
+function scheduleFlushAfterPaint() {
+	setTimeout(flushAfterPaintEffects, 0);
 }
 
 if (typeof window !== 'undefined') {
 	afterPaint = (component) => {
 		if (!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) {
-			requestAnimationFrame(scheduleOnPaint);
+			requestAnimationFrame(scheduleFlushAfterPaint);
 		}
 	};
 }
