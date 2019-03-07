@@ -1,7 +1,7 @@
 {
   "name": "preact-render-to-string",
   "amdName": "preactRenderToString",
-  "version": "4.1.0",
+  "version": "5.0.0",
   "description": "Render JSX to an HTML string, with support for Preact components.",
   "main": "dist/index.js",
   "umd:main": "dist/index.js",
@@ -59,7 +59,7 @@
   "bugs": "https://github.com/developit/preact-render-to-string/issues",
   "homepage": "https://github.com/developit/preact-render-to-string",
   "peerDependencies": {
-    "preact": "*"
+    "preact": ">=10 || ^10.0.0-alpha.0"
   },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
