@@ -1,5 +1,3 @@
-// import { toChildArray } from 'preact';
-
 // DOM properties that should NOT have "px" added when numeric
 export const IS_NON_DIMENSIONAL = /acit|ex(?:s|g|n|p|$)|rph|ows|mnc|ntw|ine[ch]|zoo|^ord/i;
 
@@ -47,6 +45,13 @@ export function assign(obj, props) {
 	return obj;
 }
 
+/**
+ * Get flattened children from the children prop
+ * @param {Array} accumulator
+ * @param {any} children A `props.children` opaque object.
+ * @returns {Array} accumulator
+ * @private
+ */
 export function getChildren(accumulator, children) {
 	if (Array.isArray(children)) {
 		children.reduce(getChildren, accumulator);
@@ -56,26 +61,3 @@ export function getChildren(accumulator, children) {
 	}
 	return accumulator;
 }
-
-/**
- * Reconstruct Component-style `props` from a VNode.
- * Ensures default/fallback values from `defaultProps`:
- * Own-properties of `defaultProps` not present in `vnode.props` are added.
- * @param {import('preact').VNode} vnode The VNode to get props for
- * @returns {object} The props to use for this VNode
- */
-// export function getNodeProps(vnode) {
-// 	let props = assign({}, vnode.props);
-// 	props.children = toChildArray(vnode);
-
-// 	let defaultProps = vnode.type.defaultProps;
-// 	if (defaultProps!==undefined) {
-// 		for (let i in defaultProps) {
-// 			if (props[i]===undefined) {
-// 				props[i] = defaultProps[i];
-// 			}
-// 		}
-// 	}
-
-// 	return props;
-// }
