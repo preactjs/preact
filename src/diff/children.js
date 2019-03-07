@@ -39,7 +39,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	}
 
 	for (i=0; i<newChildren.length; i++) {
-		childVNode = newChildren[i] = coerceToVNode(newChildren[i]);
+		childVNode = newChildren[i];
 		oldVNode = index = null;
 
 		// Check if we find a corresponding element in oldChildren and store the
