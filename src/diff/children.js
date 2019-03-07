@@ -131,7 +131,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
  */
 function getVNodeChildren(vnode) {
 	if (vnode._children==null) {
-		toChildArray(vnode.props.children, vnode._children=[]);
+		toChildArray(vnode.props.children, vnode._children=[], coerceToVNode);
 	}
 	return vnode._children;
 }
@@ -142,7 +142,7 @@ function getVNodeChildren(vnode) {
  * children of a virtual node
  * @param {Array<import('../internal').VNode | null>} [flattened] An flat array of children to modify
  */
-export function toChildArray(children, flattened) {
+export function toChildArray(children, flattened, map) {
 	if (flattened == null) flattened = [];
 	if (children==null || typeof children === 'boolean') {}
 	else if (Array.isArray(children)) {
@@ -151,7 +151,7 @@ export function toChildArray(children, flattened) {
 		}
 	}
 	else {
-		flattened.push(coerceToVNode(children));
+		flattened.push(map ? map(children) : children);
 	}
 
 	return flattened;
