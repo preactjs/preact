@@ -9,11 +9,7 @@
         "regex": "^_",
         "reserved": [
           "__REACT_DEVTOOLS_GLOBAL_HOOK__",
-          "_renderers",
-          "emit",
-          "onCommitFiberUnmount",
-          "getFiberRoots",
-          "helpers"
+          "_renderers"
         ]
       }
     }
