@@ -1676,6 +1676,69 @@ describe('Lifecycle methods', () => {
 			expect(nextPropsArg).to.deep.equal({ foo: 'bar' });
 			expect(nextStateArg).to.deep.equal({ value: 4 });
 		});
+
+		it('should update props reference when sCU reutrns false', () => {
+			let spy = sinon.spy();
+
+			let updateState;
+			class Foo extends Component {
+				constructor() {
+					super();
+					updateState = () => this.setState({});
+				}
+
+				shouldComponentUpdate(nextProps) {
+					if (nextProps !== this.props) {
+						spy();
+						return false;
+					}
+					return true;
+				}
+			}
+
+			render(<Foo foo="foo" />, scratch);
+			render(<Foo foo="bar" />, scratch);
+			expect(spy).to.be.calledOnce;
+
+			updateState();
+			rerender();
+
+			expect(spy).to.be.calledOnce;
+		});
+
+		it('should update state reference when sCU returns false', () => {
+			let spy = sinon.spy();
+
+			let updateState;
+			class Foo extends Component {
+				constructor() {
+					super();
+					this.state = { foo: 1 };
+					updateState = () => this.setState({ foo: 2 });
+				}
+
+				shouldComponentUpdate(_, nextState) {
+					if (nextState !== this.state) {
+						spy(this.state, nextState);
+						return false;
+					}
+					return true;
+				}
+			}
+
+			render(<Foo />, scratch);
+			updateState();
+			rerender();
+
+			expect(spy).to.be.calledOnce;
+			expect(spy).to.be.calledWithMatch({ foo: 1 }, { foo: 2 });
+
+			updateState();
+			rerender();
+
+			expect(spy).to.be.calledWithMatch({ foo: 2 }, { foo: 2 });
+			expect(spy).to.be.calledTwice;
+		});
 	});
 
 
