@@ -108,7 +108,7 @@ let q = [];
  * Asynchronously schedule a callback
  * @type {(cb) => void}
  */
-const defer = typeof Promise=='function' ? Promise.resolve().then.bind(Promise.resolve()) : setTimeout;
+const defer = typeof Promise=='function' ? Promise.prototype.then.bind(Promise.resolve()) : setTimeout;
 
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
