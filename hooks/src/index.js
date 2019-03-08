@@ -109,7 +109,7 @@ export function useEffect(callback, args) {
 		state._args = args;
 
 		currentComponent.__hooks._pendingEffects.push(state);
-		afterPaint(currentComponent);
+		options.afterPaint(currentComponent);
 	}
 }
 
@@ -184,7 +184,7 @@ export function useContext(context) {
  * Invoke a component's pending effects after the next frame renders
  * @type {(component: import('./internal').Component) => void}
  */
-let afterPaint = () => {};
+options.afterPaint = () => {};
 
 /**
  * After paint effects consumer.
@@ -199,30 +199,30 @@ function flushAfterPaintEffects() {
 	afterPaintEffects = [];
 }
 
-let scheduleFlushAfterPaint = () => {
+options.scheduleFlushAfterPaint = () => {
 	setTimeout(flushAfterPaintEffects, 0);
 };
 
 export function act(cb) {
 	Component.__test__previousDebounce = options.debounceRendering;
 	options.debounceRendering = cb => Component.__test__drainQueue = cb;
-	const oldSchedule = scheduleFlushAfterPaint;
-	scheduleFlushAfterPaint = () => flushAfterPaintEffects();
-	const oldAfterPaint = afterPaint;
-	afterPaint = (component) => {
+	const oldSchedule = options.scheduleFlushAfterPaint;
+	options.scheduleFlushAfterPaint = () => flushAfterPaintEffects();
+	const oldAfterPaint = options.afterPaint;
+	options.afterPaint = (component) => {
 		if (!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) {
-			scheduleFlushAfterPaint();
+			options.scheduleFlushAfterPaint();
 		}
 	};
 	cb();
-	afterPaint = oldAfterPaint;
-	scheduleFlushAfterPaint = oldSchedule;
+	options.afterPaint = oldAfterPaint;
+	options.scheduleFlushAfterPaint = oldSchedule;
 }
 
 if (typeof window !== 'undefined') {
-	afterPaint = (component) => {
+	options.afterPaint = (component) => {
 		if (!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) {
-			requestAnimationFrame(scheduleFlushAfterPaint);
+			requestAnimationFrame(options.scheduleFlushAfterPaint);
 		}
 	};
 }
