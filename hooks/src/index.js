@@ -1,4 +1,4 @@
-import { options } from 'preact';
+import { Component, options } from 'preact';
 
 /** @type {number} */
 let currentIndex;
@@ -199,8 +199,24 @@ function flushAfterPaintEffects() {
 	afterPaintEffects = [];
 }
 
-function scheduleFlushAfterPaint() {
+let scheduleFlushAfterPaint = () => {
 	setTimeout(flushAfterPaintEffects, 0);
+};
+
+export function act(cb) {
+	Component.__test__previousDebounce = options.debounceRendering;
+	options.debounceRendering = cb => Component.__test__drainQueue = cb;
+	const oldSchedule = scheduleFlushAfterPaint;
+	scheduleFlushAfterPaint = () => flushAfterPaintEffects();
+	const oldAfterPaint = afterPaint;
+	afterPaint = (component) => {
+		if (!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) {
+			scheduleFlushAfterPaint();
+		}
+	};
+	cb();
+	afterPaint = oldAfterPaint;
+	scheduleFlushAfterPaint = oldSchedule;
 }
 
 if (typeof window !== 'undefined') {
