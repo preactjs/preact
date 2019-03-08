@@ -126,8 +126,10 @@
     "npm-run-all": "^4.0.0",
     "sinon": "^6.1.3",
     "sinon-chai": "^3.0.0",
+    "terser-webpack-plugin": "^1.2.3",
     "typescript": "^3.0.1",
-    "webpack": "^4.3.0"
+    "webpack": "^4.3.0",
+    "webpack-modules": "^1.0.0"
   },
   "bundlesize": [
     {

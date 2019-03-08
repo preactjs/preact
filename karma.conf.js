@@ -1,13 +1,39 @@
 /*eslint no-var:0, object-shorthand:0 */
 
 var coverage = String(process.env.COVERAGE) === 'true',
+	prod = String(process.env.PRODUCTION) === 'true',
 	ci = String(process.env.CI).match(/^(1|true)$/gi),
 	pullRequest = !String(process.env.TRAVIS_PULL_REQUEST).match(/^(0|false|undefined)$/gi),
 	masterBranch = String(process.env.TRAVIS_BRANCH).match(/^master$/gi),
 	sauceLabs = ci && !pullRequest && masterBranch,
 	performance = !coverage && String(process.env.PERFORMANCE) !== 'false',
 	webpack = require('webpack'),
+	WebpackModules = require('webpack-modules'),
+	TerserPlugin = require('terser-webpack-plugin'),
 	path = require('path');
+
+let nameCache = null;
+let minifyOptions = {};
+
+[
+	require('./mangle.json'),
+	require('./compat/mangle.json'),
+	require('./debug/mangle.json'),
+	require('./hooks/mangle.json')
+].forEach(config => {
+	if (config.minify) {
+		minifyOptions = config.minify;
+	}
+
+	if (config.props) {
+		if (nameCache==null) {
+			nameCache = { props: config.props };
+		}
+		else {
+			Object.assign(nameCache.props.props, config.props.props);
+		}
+	}
+});
 
 var sauceLabsLaunchers = {
 	sl_chrome: {
@@ -151,18 +177,37 @@ module.exports = function(config) {
 				// rather than referencing source files inside the module
 				// directly
 				alias: {
-					'preact/hooks': path.join(__dirname, './hooks/src'),
-					preact: path.join(__dirname, './src')
+					'preact/compat': prod
+						? path.join(__dirname, './compat/dist/compat.mjs')
+						: path.join(__dirname, './compat/src'),
+					'preact/debug': prod
+						? path.join(__dirname, './debug/dist/debug.mjs')
+						: path.join(__dirname, './debug/src'),
+					'preact/hooks': prod
+						? path.join(__dirname, './hooks/dist/hooks.mjs')
+						: path.join(__dirname, './hooks/src'),
+					preact: prod
+						? path.join(__dirname, './dist/preact.mjs')
+						: path.join(__dirname, './src')
 				}
 			},
 			plugins: [
+				prod && new TerserPlugin({
+					sourceMap: true,
+					exclude: /(dist|node_modules)/,
+					terserOptions: {
+						nameCache,
+						mangle: minifyOptions.mangle
+					}
+				}),
+				new WebpackModules(),
 				new webpack.DefinePlugin({
 					coverage: coverage,
 					NODE_ENV: JSON.stringify(process.env.NODE_ENV || ''),
 					ENABLE_PERFORMANCE: performance,
 					DISABLE_FLAKEY: !!String(process.env.FLAKEY).match(/^(0|false)$/gi)
 				})
-			],
+			].filter(Boolean),
 			performance: {
 				hints: false
 			}
