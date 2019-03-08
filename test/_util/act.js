@@ -1,5 +1,5 @@
 import { options } from 'preact';
-import { setupRerender } from './setupRerender';
+import { setupRerender } from './helpers';
 
 export function act(cb) {
 	const rerender = setupRerender();
