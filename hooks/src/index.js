@@ -1,4 +1,4 @@
-import { Component, options } from 'preact';
+import { options } from 'preact';
 
 /** @type {number} */
 let currentIndex;
