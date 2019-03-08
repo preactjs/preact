@@ -192,14 +192,6 @@ module.exports = function(config) {
 				}
 			},
 			plugins: [
-				prod && new TerserPlugin({
-					sourceMap: true,
-					exclude: /(dist|node_modules)/,
-					terserOptions: {
-						nameCache,
-						mangle: minifyOptions.mangle
-					}
-				}),
 				new WebpackModules(),
 				new webpack.DefinePlugin({
 					coverage: coverage,
@@ -210,6 +202,18 @@ module.exports = function(config) {
 			].filter(Boolean),
 			performance: {
 				hints: false
+			},
+			optimization: {
+				minimizer: prod
+					? [new TerserPlugin({
+						sourceMap: true,
+						exclude: /(dist|node_modules)/,
+						terserOptions: {
+							nameCache,
+							mangle: minifyOptions.mangle
+						}
+					})]
+					: undefined
 			}
 		},
 
