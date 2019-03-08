@@ -203,21 +203,6 @@ function scheduleFlushAfterPaint() {
 	setTimeout(flushAfterPaintEffects, 0);
 }
 
-export function setupRerender() {
-	Component.__test__previousDebounce = options.debounceRendering;
-	options.debounceRendering = cb => Component.__test__drainQueue = cb;
-
-	return () => Component.__test__drainQueue && Component.__test__drainQueue();
-}
-
-export function act(cb) {
-	const rerender = setupRerender();
-	options.afterPaint = (fc) => fc();
-	cb();
-	rerender();
-	options.afterPaint = undefined;
-}
-
 if (typeof window !== 'undefined') {
 	afterPaint = (component) => {
 		if (!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) {
