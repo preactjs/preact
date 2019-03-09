@@ -269,13 +269,6 @@ describe('render()', () => {
 		expect(scratch.firstChild.spellcheck).to.equal(false);
 	});
 
-	it('should attach beforeinput event listener', () => {
-		let spy = sinon.spy();
-		render(<input onBeforeInput={spy} />, scratch);
-		scratch.firstChild.dispatchEvent(new Event('beforeinput'));
-		expect(spy).to.be.calledOnce;
-	});
-
 	it('should apply string attributes', () => {
 		render(<div foo="bar" data-foo="databar" />, scratch);
 

@@ -199,6 +199,10 @@ function applyEventNormalization({ type, props }) {
 		props.ondblclick = props[newProps.ondoubleclick];
 		delete props[newProps.ondoubleclick];
 	}
+	if (newProps.onbeforeinput) {
+		props.onbeforeinput = props[newProps.onbeforeinput];
+		delete props[newProps.onbeforeinput];
+	}
 	// for *textual inputs* (incl textarea), normalize `onChange` -> `onInput`:
 	if (newProps.onchange && (type==='textarea' || (type.toLowerCase()==='input' && !/^fil|che|rad/i.test(props.type)))) {
 		let normalized = newProps.oninput || 'oninput';
