@@ -116,10 +116,6 @@ function upgradeToVNodes(arr, offset) {
 		if (Array.isArray(obj)) {
 			upgradeToVNodes(obj);
 		}
-		else if (obj && typeof obj==='object' && !isValidElement(obj) && ((obj.props && obj.type) || obj.text!=null)) {
-			if (obj.text) continue;
-			arr[i] = createElement(obj.type, obj.props, obj.props.children);
-		}
 	}
 }
 
@@ -133,7 +129,6 @@ function upgradeToVNodes(arr, offset) {
 function createElement(...args) {
 	upgradeToVNodes(args, 2);
 	let vnode = h(...args);
-	vnode.$$typeof = REACT_ELEMENT_TYPE;
 
 	let type = vnode.type, props = vnode.props;
 	if (typeof type!='function') {
@@ -182,7 +177,7 @@ function cloneElement(element) {
  * @returns {boolean}
  */
 function isValidElement(element) {
-	return element && element.$$typeof===REACT_ELEMENT_TYPE;
+	return element!=null && element.$$typeof===REACT_ELEMENT_TYPE;
 }
 
 /**
@@ -338,6 +333,8 @@ function forwardRef(fn) {
 
 let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
+	vnode.$$typeof = REACT_ELEMENT_TYPE;
+
 	let type = vnode.type;
 	if (type!=null && type._forwarded) {
 		vnode.props.ref = vnode.ref;
