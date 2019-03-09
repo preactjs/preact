@@ -1,4 +1,4 @@
-import { Component, options } from '../../src';
+import { Component, options } from 'preact';
 
 /**
  * Setup a rerender function that will drain the queue of pending renders
