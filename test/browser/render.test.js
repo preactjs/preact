@@ -383,13 +383,15 @@ describe('render()', () => {
 			expect(style.cssText).to.equal('display: inline;');
 			expect(style).to.have.property('display').that.equals('inline');
 			expect(style).to.have.property('color').that.equals('');
+			expect(style).to.have.property('zIndex').that.equals('');
 
-			render(<div style={{ color: 'rgb(0, 255, 255)' }}>test</div>, scratch);
+			render(<div style={{ color: 'rgb(0, 255, 255)', zIndex: '3' }}>test</div>, scratch);
 
 			style = scratch.firstChild.style;
-			expect(style.cssText).to.equal('color: rgb(0, 255, 255);');
+			expect(style.cssText).to.equal('color: rgb(0, 255, 255); z-index: 3;');
 			expect(style).to.have.property('display').that.equals('');
 			expect(style).to.have.property('color').that.equals('rgb(0, 255, 255)');
+			expect(style).to.have.property('zIndex').that.equals('3');
 
 			render(<div style={{ color: 'rgb(0, 255, 255)', display: 'inline' }}>test</div>, scratch);
 
@@ -397,6 +399,7 @@ describe('render()', () => {
 			expect(style.cssText).to.equal('color: rgb(0, 255, 255); display: inline;');
 			expect(style).to.have.property('display').that.equals('inline');
 			expect(style).to.have.property('color').that.equals('rgb(0, 255, 255)');
+			expect(style).to.have.property('zIndex').that.equals('');
 		});
 
 		it('should support css custom properties', () => {
