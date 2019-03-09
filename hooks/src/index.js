@@ -170,11 +170,10 @@ export function useContext(context) {
 	const provider = currentComponent.context[context._id];
 	if (provider == null) return context._defaultValue;
 	const state = getHookState(currentIndex++);
-	if (state._value == null) {
-		state._value = true;
-		provider.sub(currentComponent);
-	}
-	return provider.props.value;
+	state.type = 1;
+	state._id = context._id;
+	if (state._value == null) provider.sub(currentComponent);
+	return state._value = provider.props.value;
 }
 
 // Note: if someone used Component.debounce = requestAnimationFrame,

@@ -30,7 +30,19 @@ export function createContext(defaultValue) {
 		};
 		comp.componentDidUpdate = () => {
 			let v = comp.props.value;
-			subs.map(c => v!==c.context && (c.context = v, enqueueRender(c)));
+			subs.map(c => {
+				// A component can have multiple `useContext` hooks
+				if (c.contextType==null && c.__hooks) {
+					c.__hooks._list.forEach(state => {
+						if (state.type==1 && state._id==id && v!==state._value) {
+							enqueueRender(c);
+						}
+					});
+				}
+				else {
+					v!==c.context && (c.context = v, enqueueRender(c));
+				}
+			});
 		};
 		comp.sub = (c) => {
 			subs.push(c);
