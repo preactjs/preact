@@ -50,7 +50,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 			if (typeof oldValue==='string') s.cssText = '';
 			// remove values not in the new list
 			for (let i in oldValue) {
-				if (value==null || !(i in value)) s.setProperty(i, '');
+				if (value==null || !(i in value)) s.setProperty(i.replace(/-?(?=[A-Z])/g, '-'), '');
 			}
 		}
 
