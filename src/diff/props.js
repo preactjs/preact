@@ -22,6 +22,8 @@ export function diffProps(dom, newProps, oldProps, isSvg) {
 	}
 }
 
+let CAMEL_REG = /-?(?=[A-Z])/g;
+
 /**
  * Set a property value on a DOM node
  * @param {import('../internal').PreactElement} dom The DOM node to modify
@@ -50,14 +52,14 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 			if (typeof oldValue==='string') s.cssText = '';
 			// remove values not in the new list
 			for (let i in oldValue) {
-				if (value==null || !(i in value)) s.setProperty(i.replace(/-?(?=[A-Z])/g, '-'), '');
+				if (value==null || !(i in value)) s.setProperty(i.replace(CAMEL_REG, '-'), '');
 			}
 		}
 
 		for (let i in value) {
 			v = value[i];
 			if (oldValue==null || v!==oldValue[i]) {
-				s.setProperty(i.replace(/-?(?=[A-Z])/g, '-'), typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v);
+				s.setProperty(i.replace(CAMEL_REG, '-'), typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v);
 			}
 		}
 	}
