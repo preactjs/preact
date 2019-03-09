@@ -99,8 +99,15 @@ declare namespace preact {
 		static displayName?: string;
 		static defaultProps?: any;
 		static contextType?: PreactContext<any>;
-		static getDerivedStateFromProps?<P, S>(props: P, state: S): Partial<S>;
-		static getDerivedStateFromError?<S>(error: any): Partial<S>;
+
+		// Static members cannot reference class type parameters. This is not
+		// supported in TypeScript. Reusing the same type arguments from `Component`
+		// will lead to an impossible state where one cannot satisfy the type
+		// constraint under no circumstances, see #1356.In general type arguments
+		// seem to be a bit buggy and not supported well at the time of this
+		// writing with TS 3.3.3333.
+		static getDerivedStateFromProps?(props: Readonly<object>, state: Readonly<object>): object;
+		static getDerivedStateFromError?(error: any): object;
 
 		state: Readonly<S>;
 		props: RenderableProps<P>;
