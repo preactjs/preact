@@ -67,7 +67,8 @@
     "hooks/src",
     "hooks/package.json",
     "test-utils/src",
-    "test-utils/package.json"
+    "test-utils/package.json",
+    "test-utils/dist"
   ],
   "keywords": [
     "preact",

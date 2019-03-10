@@ -1,4 +1,5 @@
 import { options, createElement as h, render } from 'preact';
+import { spy } from 'sinon';
 import { useState } from 'preact/hooks';
 
 import { setupScratch, teardown } from '../../../test/_util/helpers';
@@ -43,5 +44,15 @@ describe('act', () => {
 			expect(scratch.textContent).to.include('Count: 0');
 		});
 		expect(scratch.textContent).to.include('Count: 1');
+	});
+
+	it('should restore options.afterPaint', () => {
+		const spy = sinon.spy();
+
+		options.afterPaint = spy;
+		act(() => null);
+
+		expect(options.afterPaint).to.equal(spy);
+		expect(spy).to.not.be.called;
 	});
 });
