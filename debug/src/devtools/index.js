@@ -16,7 +16,7 @@ function catchErrors(fn) {
 			/* istanbul ignore next */
 			console.error('The react devtools encountered an error');
 			/* istanbul ignore next */
-			console.log(e); // eslint-disable-line no-console
+			console.error(e); // eslint-disable-line no-console
 		}
 	};
 }
