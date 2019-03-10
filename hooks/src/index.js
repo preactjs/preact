@@ -208,7 +208,6 @@ if (typeof window !== 'undefined') {
 		if (!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) {
 			/* istanbul ignore next */
 			if (options.requestAnimationFrame) {
-				/* istanbul ignore next */
 				options.requestAnimationFrame(flushAfterPaintEffects);
 			}
 			else {
