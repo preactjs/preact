@@ -12,6 +12,7 @@ export function setupRerender() {
 
 export function act(cb) {
 	const previousDebounce = options.debounceRendering;
+	const previousAfterPaint = options.afterPaint;
 	const rerender = setupRerender();
 	let flush;
 	options.afterPaint = (fc) => flush = fc;
@@ -21,5 +22,5 @@ export function act(cb) {
 	}
 	rerender();
 	options.debounceRendering = previousDebounce;
-	options.afterPaint = undefined;
+	options.afterPaint = previousAfterPaint;
 }
