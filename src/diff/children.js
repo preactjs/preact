@@ -28,7 +28,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 	let oldChildrenLength = oldChildren.length;
 
-	childDom = oldChildren.length ? oldChildren[0] && oldChildren[0]._dom : null;
+	childDom = oldChildrenLength ? oldChildren[0] && oldChildren[0]._dom : null;
 	if (excessDomChildren!=null) {
 		for (i = 0; i < excessDomChildren.length; i++) {
 			if (excessDomChildren[i]!=null) {
@@ -120,7 +120,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	if (excessDomChildren!=null && newParentVNode.type!==Fragment) for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) excessDomChildren[i].remove();
 
 	// Remove remaining oldChildren if there are any.
-	for (i=oldChildren.length; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
+	for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
 }
 
 /**
