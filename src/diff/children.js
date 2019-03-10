@@ -23,8 +23,8 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		nextDom, sibDom, focus,
 		childDom;
 
-	let newChildren = getVNodeChildren(newParentVNode);
-	let oldChildren = oldParentVNode==null || oldParentVNode==EMPTY_OBJ ? EMPTY_ARR : getVNodeChildren(oldParentVNode);
+	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode);
+	let oldChildren = oldParentVNode!=null && oldParentVNode!=EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR;
 
 	let oldChildrenLength = oldChildren.length;
 
@@ -121,19 +121,6 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 	// Remove remaining oldChildren if there are any.
 	for (i=oldChildren.length; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
-}
-
-/**
- * Get the children of a virtual node as a flat array
- * @param {import('../internal').VNode} vnode The virtual node to get the
- * children of
- * @returns {Array<import('../internal').VNode>} The virtual node's children
- */
-function getVNodeChildren(vnode) {
-	if (vnode._children==null) {
-		toChildArray(vnode.props.children, vnode._children=[], coerceToVNode);
-	}
-	return vnode._children;
 }
 
 /**
