@@ -13,6 +13,7 @@ import ProfilerDemo from './profiler';
 import KeyBug from './key_bug';
 import { initDevTools } from 'preact/debug/src/devtools';
 import DevtoolsDemo from './devtools';
+import Hooks from './hooks';
 
 let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(window.location.href);
 if (!isBenchmark) {
@@ -61,6 +62,7 @@ class App extends Component {
 						<Link href="/context" activeClassName="active">Context</Link>
 						<Link href="/devtools" activeClassName="active">Devtools</Link>
 						<Link href="/empty-fragment" activeClassName="active">Empty Fragment</Link>
+						<Link href="/hooks" activeClassName="active">Hooks</Link>
 					</nav>
 				</header>
 				<main>
@@ -86,6 +88,7 @@ class App extends Component {
 						<Context path="/context" />
 						<DevtoolsDemo path="/devtools" />
 						<EmptyFragment path="/empty-fragment" />
+						<Hooks path="/hooks" />
 					</Router>
 				</main>
 			</div>
