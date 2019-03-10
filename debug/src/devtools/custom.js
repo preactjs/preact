@@ -97,7 +97,12 @@ export function getData(vnode) {
 		// Profiler data
 		actualDuration: duration,
 		actualStartTime: vnode.startTime,
-		treeBaseDuration: duration
+		treeBaseDuration: duration,
+
+		// Hooks inspection
+		containsHooks: vnode._component!=null &&
+			vnode._component.__hooks!=null &&
+			vnode._component.__hooks._list.length > 0
 	};
 }
 
