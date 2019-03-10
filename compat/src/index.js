@@ -106,20 +106,6 @@ let Children = {
 };
 
 /**
- * Upgrade all found vnodes recursively
- * @param {Array} arr
- * @param {number} offset
- */
-function upgradeToVNodes(arr, offset) {
-	for (let i=offset || 0; i<arr.length; i++) {
-		let obj = arr[i];
-		if (Array.isArray(obj)) {
-			upgradeToVNodes(obj);
-		}
-	}
-}
-
-/**
  * Wrap `createElement` to apply various vnode normalizations.
  * @param {import('./internal').VNode["type"]} type The node name or Component constructor
  * @param {object | null | undefined} [props] The vnode's properties
@@ -127,7 +113,6 @@ function upgradeToVNodes(arr, offset) {
  * @returns {import('./internal').VNode}
  */
 function createElement(...args) {
-	upgradeToVNodes(args, 2);
 	let vnode = h(...args);
 
 	let type = vnode.type, props = vnode.props;
