@@ -265,8 +265,8 @@ function findDOMNode(component) {
  * Component class with a predefined `shouldComponentUpdate` implementation
  */
 class PureComponent extends Component {
-	constructor() {
-		super();
+	constructor(props) {
+		super(props);
 		// Some third-party libraries check if this property is present
 		this.isPureReactComponent = true;
 	}
