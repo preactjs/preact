@@ -44,6 +44,19 @@ describe('act', () => {
 		expect(scratch.textContent).to.include('Count: 1');
 	});
 
+	it('should call flush pending effects', () => {
+		function StateContainer() {
+			const [count, setCount] = useState(0);
+			return (<div>
+				<p>Count: {count}</p>
+				<button onClick={() => setCount(c => c + 11)} />
+			</div>);
+		}
+
+		act(() => render(<StateContainer />, scratch));
+		expect(scratch.textContent).to.include('Count: 0');
+	});
+
 	it('should restore options.requestAnimationFrame', () => {
 		const spy = sinon.spy();
 
