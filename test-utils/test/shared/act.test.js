@@ -1,9 +1,9 @@
 import { options, createElement as h, render } from 'preact';
-import { spy } from 'sinon';
+import sinon from 'sinon';
 import { useState } from 'preact/hooks';
 
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { act } from '../../src';
+import { act, setupRerender } from '../../src';
 
 /** @jsx h */
 describe('act', () => {
@@ -57,10 +57,9 @@ describe('act', () => {
 	});
 
 	it('should restore options.debounceRendering after act', () => {
-		const spy = spy();
+		const spy = sinon.spy();
 
 		options.debounceRendering = spy;
-		rerender = setupRerender();
 		act(() => null);
 
 		expect(options.debounceRendering).to.equal(spy);
