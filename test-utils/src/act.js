@@ -6,7 +6,9 @@ export function act(cb) {
 	let flush;
 	options.afterPaint = (fc) => flush = fc;
 	cb();
-	flush();
+	if (flush) {
+		flush();
+	}
 	rerender();
 	options.afterPaint = undefined;
 }
