@@ -206,8 +206,8 @@ function scheduleFlushAfterPaint() {
 if (typeof window !== 'undefined') {
 	afterPaint = (component) => {
 		if (!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) {
-			if (options.afterPaint) {
-				options.afterPaint(flushAfterPaintEffects);
+			if (options.requestAnimationFrame) {
+				options.requestAnimationFrame(flushAfterPaintEffects);
 			}
 			else {
 				requestAnimationFrame(scheduleFlushAfterPaint);

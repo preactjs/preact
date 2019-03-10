@@ -61,7 +61,7 @@ describe('useLayoutEffect', () => {
 				<div>
 					<Child />
 				</div>
-			)
+			);
 		}
 
 		function Child() {
