@@ -56,7 +56,6 @@ Component.prototype.setState = function(update, callback) {
 
 	if (callback!=null) this._renderCallbacks.push(callback);
 
-	this._force = false;
 	enqueueRender(this);
 };
 
@@ -71,7 +70,7 @@ Component.prototype.forceUpdate = function(callback) {
 		// Set render mode so that we can differantiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
-		if (this._force==null) this._force = true;
+		this._force = callback!==false;
 
 		let mounts = [];
 		dom = diff(dom, parentDom, vnode, vnode, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, this._ancestorComponent);
@@ -83,7 +82,7 @@ Component.prototype.forceUpdate = function(callback) {
 		// Reset mode to its initial value for the next render
 		this._force = null;
 	}
-	if (callback!=null) callback();
+	if (callback) callback();
 };
 
 /**
@@ -133,6 +132,7 @@ export function enqueueRender(c) {
 function process() {
 	let p;
 	while ((p=q.pop())) {
-		if (p._dirty) p.forceUpdate();
+		// forceUpdate's callback argument is reused here to indicate a non-forced update.
+		if (p._dirty) p.forceUpdate(false);
 	}
 }
