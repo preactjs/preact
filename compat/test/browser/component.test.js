@@ -78,6 +78,21 @@ describe('components', () => {
 			expect(React).to.have.property('PureComponent').that.is.a('function');
 		});
 
+		it('should pass props in constructor', () => {
+			let spy = sinon.spy();
+			class Foo extends React.PureComponent {
+				constructor(props) {
+					super(props);
+					spy(this.props, props);
+				}
+			}
+
+			React.render(<Foo foo="bar" />, scratch);
+
+			let expected = { foo: 'bar' };
+			expect(spy).to.be.calledWithMatch(expected, expected);
+		});
+
 		it('should only re-render when props or state change', () => {
 			class C extends React.PureComponent {
 				render() {

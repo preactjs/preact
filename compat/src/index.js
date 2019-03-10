@@ -71,8 +71,8 @@ class ContextProvider {
  */
 function Portal(props) {
 	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
-	let rendered = render(wrap, props.container);
-	return rendered.props.children._component;
+	render(wrap, props.container);
+	return null;
 }
 
 /**
@@ -265,8 +265,8 @@ function findDOMNode(component) {
  * Component class with a predefined `shouldComponentUpdate` implementation
  */
 class PureComponent extends Component {
-	constructor() {
-		super();
+	constructor(props) {
+		super(props);
 		// Some third-party libraries check if this property is present
 		this.isPureReactComponent = true;
 	}
