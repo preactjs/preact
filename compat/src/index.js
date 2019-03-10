@@ -71,8 +71,8 @@ class ContextProvider {
  */
 function Portal(props) {
 	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
-	let rendered = render(wrap, props.container);
-	return rendered.props.children._component;
+	render(wrap, props.container);
+	return null;
 }
 
 /**
