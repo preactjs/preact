@@ -1,13 +1,13 @@
-import { options } from 'preact';
+import { Component, options } from 'preact';
 
 /**
  * Setup a rerender function that will drain the queue of pending renders
  * @returns {() => void}
  */
 export function setupRerender() {
-	let prev = options.debounceRendering;
-	options.debounceRendering = cb => prev = cb;
-	return () => prev && prev();
+	Component.__test__previousDebounce = options.debounceRendering;
+	options.debounceRendering = cb => Component.__test__drainQueue = cb;
+	return () => Component.__test__drainQueue && Component.__test__drainQueue();
 }
 
 export function act(cb) {
