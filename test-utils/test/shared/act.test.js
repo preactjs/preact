@@ -20,11 +20,9 @@ describe('act', () => {
 	});
 
 	it('should reset options after act finishes', () => {
-		expect(options.afterPaint).to.equal(undefined);
-		act(() => {
-			console.log('testing');
-		});
-		expect(options.afterPaint).to.equal(undefined);
+		expect(options.requestAnimationFrame).to.equal(undefined);
+		act(() => null);
+		expect(options.requestAnimationFrame).to.equal(undefined);
 	});
 
 	it('should drain the queue of hooks', () => {
@@ -46,13 +44,13 @@ describe('act', () => {
 		expect(scratch.textContent).to.include('Count: 1');
 	});
 
-	it('should restore options.afterPaint', () => {
+	it('should restore options.requestAnimationFrame', () => {
 		const spy = sinon.spy();
 
-		options.afterPaint = spy;
+		options.requestAnimationFrame = spy;
 		act(() => null);
 
-		expect(options.afterPaint).to.equal(spy);
+		expect(options.requestAnimationFrame).to.equal(spy);
 		expect(spy).to.not.be.called;
 	});
 
