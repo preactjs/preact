@@ -3,7 +3,7 @@ import { spy } from 'sinon';
 import { useState } from 'preact/hooks';
 
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { setupRerender } from '../../src';
+import { setupRerender, act } from '../../src';
 
 /** @jsx h */
 describe('setupRerender', () => {
@@ -14,7 +14,7 @@ describe('setupRerender', () => {
 	let rerender;
 
 	beforeEach(() => {
-		rerender = setupRerender();
+
 		scratch = setupScratch();
 	});
 
@@ -32,7 +32,8 @@ describe('setupRerender', () => {
 		const spy = sinon.spy();
 
 		options.debounceRendering = spy;
-		rerender();
+		rerender = setupRerender();
+		act(() => null);
 
 		expect(options.debounceRendering).to.equal(spy);
 		expect(spy).to.not.be.called;
