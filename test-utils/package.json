@@ -10,13 +10,6 @@
   "source": "src/index.js",
   "license": "MIT",
   "types": "src/index.d.ts",
-  "scripts": {
-    "build": "microbundle build --raw",
-    "dev": "microbundle watch --raw --format cjs",
-    "test": "npm-run-all build --parallel test:karma",
-    "test:karma": "karma start test/karma.conf.js --single-run",
-    "test:karma:watch": "karma start test/karma.conf.js --no-single-run"
-  },
   "peerDependencies": {
     "preact": "^10.0.0-alpha.0"
   },
