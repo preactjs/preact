@@ -55,4 +55,15 @@ describe('act', () => {
 		expect(options.afterPaint).to.equal(spy);
 		expect(spy).to.not.be.called;
 	});
+
+	it('should restore options.debounceRendering after act', () => {
+		const spy = spy();
+
+		options.debounceRendering = spy;
+		rerender = setupRerender();
+		act(() => null);
+
+		expect(options.debounceRendering).to.equal(spy);
+		expect(spy).to.not.be.called;
+	});
 });
