@@ -1,4 +1,4 @@
-import { options, Fragment } from 'preact';
+import { options, Component, Fragment } from 'preact';
 import { Renderer } from './renderer';
 
 /**
@@ -152,6 +152,18 @@ export function initDevTools() {
 		if (prevBeforeUnmount!=null) prevBeforeUnmount(vnode);
 		onCommitUnmount(vnode);
 	});
+
+	// Inject tracking into setState
+	const setState = Component.prototype.setState;
+	Component.prototype.setState = function(update, callback) {
+		// Duplicated in setState() but doesn't matter due to the guard.
+		let s = (this._nextState!==this.state && this._nextState) || (this._nextState = Object.assign({}, this.state));
+
+		// Needed in order to check if state has changed after the tree has been committed:
+		this._prevState = Object.assign({}, s);
+
+		return setState.call(this, update, callback);
+	};
 }
 
 /**
