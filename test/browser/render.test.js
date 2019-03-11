@@ -319,6 +319,13 @@ describe('render()', () => {
 				.to.equal('top: 5px; position: relative;');
 		});
 
+		it('should not call CSSStyleDeclaration.setProperty for style strings', () => {
+			render(<div style="top: 5px; position: relative;" />, scratch);
+			sinon.stub(scratch.firstChild.style, 'setProperty');
+			render(<div style="top: 10px; position: absolute;" />, scratch);
+			expect(scratch.firstChild.style.setProperty).to.not.be.called;
+		});
+
 		it('should properly switch from string styles to object styles and back', () => {
 			render((
 				<div style="display: inline;">test</div>
