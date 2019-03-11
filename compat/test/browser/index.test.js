@@ -171,6 +171,13 @@ describe('preact-compat', () => {
 			expectToBeNormalized(<input {...props} type="text" />, '<input type="text">');
 
 		});
+
+		it('should normalize beforeinput event listener', () => {
+			let spy = sinon.spy();
+			render(<input onBeforeInput={spy} />, scratch);
+			scratch.firstChild.dispatchEvent(new Event('beforeinput'));
+			expect(spy).to.be.calledOnce;
+		});
 	});
 
 	describe('Component', () => {
