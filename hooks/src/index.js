@@ -206,7 +206,13 @@ function scheduleFlushAfterPaint() {
 if (typeof window !== 'undefined') {
 	afterPaint = (component) => {
 		if (!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) {
-			requestAnimationFrame(scheduleFlushAfterPaint);
+			/* istanbul ignore next */
+			if (options.requestAnimationFrame) {
+				options.requestAnimationFrame(flushAfterPaintEffects);
+			}
+			else {
+				requestAnimationFrame(scheduleFlushAfterPaint);
+			}
 		}
 	};
 }

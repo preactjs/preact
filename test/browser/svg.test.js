@@ -118,6 +118,20 @@ describe('svg', () => {
 			.that.is.a('HTMLAnchorElement');
 	});
 
+	it('should render foreignObject as an svg element', () => {
+		render((
+			<svg>
+				<g>
+					<foreignObject>
+						<a href="#foo">test</a>
+					</foreignObject>
+				</g>
+			</svg>
+		), scratch);
+
+		expect(scratch.querySelector('foreignObject').localName).to.equal('foreignObject');
+	});
+
 	it('should transition from DOM to SVG and back', () => {
 		render((
 			<div>

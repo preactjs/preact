@@ -885,6 +885,45 @@ describe('Lifecycle methods', () => {
 	});
 
 	describe('#componentWillReceiveProps', () => {
+		it('should update state when called setState in componentWillReceiveProps', () => {
+			let componentState;
+
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						dummy: 0
+					};
+				}
+				componentDidMount() {
+					// eslint-disable-next-line react/no-did-mount-set-state
+					this.setState({ dummy: 1 });
+				}
+				render() {
+					return <Bar dummy={this.state.dummy} />;
+				}
+			}
+			class Bar extends Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						value: 0
+					};
+				}
+				componentWillReceiveProps() {
+					this.setState({ value: 1 });
+				}
+				render() {
+					componentState = this.state;
+					return <div />;
+				}
+			}
+
+			render(<Foo />, scratch);
+			rerender();
+			expect(componentState).to.deep.equal({ value: 1 });
+		});
+
 		it('should NOT be called on initial render', () => {
 			class ReceivePropsComponent extends Component {
 				componentWillReceiveProps() {}
