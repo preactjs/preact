@@ -4,6 +4,7 @@ import { setupScratch, setupRerender, teardown, clearOptions } from '../../../te
 import { initDevTools } from '../../src/devtools';
 import { Renderer } from '../../src/devtools/renderer';
 import { memo, forwardRef } from '../../../compat/src';
+import { useState } from '../../../hooks/src';
 
 /** @jsx h */
 
@@ -396,7 +397,8 @@ describe('devtools', () => {
 				actualStartTime: 10,
 				actualDuration: 2,
 				treeBaseDuration: 2,
-				memoizedInteractions: []
+				memoizedInteractions: [],
+				containsHooks: false
 			});
 		});
 
@@ -414,6 +416,16 @@ describe('devtools', () => {
 
 			expect(data.children).to.equal(null);
 			expect(data.text).to.equal('Hello World');
+		});
+
+		it('should detect component hooks', () => {
+			function Foo() {
+				let [v, setter] = useState(0);
+				return <button onClick={() => setter(++v)}>count: {v}</button>;
+			}
+			render(<Foo />, scratch);
+			let data = getData(scratch._prevVNode._children[0]);
+			expect(data.containsHooks).to.equal(true);
 		});
 	});
 
