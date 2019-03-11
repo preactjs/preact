@@ -7,6 +7,7 @@ import React, {
 	unmountComponentAtNode,
 	createFactory
 } from '../../src';
+import { createElement as preactH } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 let ce = type => document.createElement(type);
@@ -171,6 +172,13 @@ describe('preact-compat', () => {
 			expectToBeNormalized(<input {...props} type="text" />, '<input type="text">');
 
 		});
+
+		it('should normalize beforeinput event listener', () => {
+			let spy = sinon.spy();
+			render(<input onBeforeInput={spy} />, scratch);
+			scratch.firstChild.dispatchEvent(new Event('beforeinput'));
+			expect(spy).to.be.calledOnce;
+		});
 	});
 
 	describe('Component', () => {
@@ -228,6 +236,16 @@ describe('preact-compat', () => {
 			let element = { foo: 42 };
 			let clone = cloneElement(element);
 			expect(clone).to.eql(element);
+		});
+
+		it('should work with jsx constructor from core', () => {
+			function Foo(props) {
+				return <div>{props.value}</div>;
+			}
+
+			let clone = cloneElement(preactH(Foo), { value: 'foo' });
+			render(clone, scratch);
+			expect(scratch.textContent).to.equal('foo');
 		});
 	});
 
