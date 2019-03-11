@@ -494,6 +494,8 @@ declare namespace JSX {
 		async?: boolean;
 		autocomplete?: string;
 		autoComplete?: string;
+		autocorrect?: string;
+		autoCorrect?: string;
 		autofocus?: boolean;
 		autoFocus?: boolean;
 		autoPlay?: boolean;
