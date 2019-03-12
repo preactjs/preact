@@ -218,7 +218,6 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	isSvg = newVNode.type==='svg' || isSvg;
-	const isSelect = newVNode.type==='select';
 
 	if (dom==null && excessDomChildren!=null) {
 		for (let i=0; i<excessDomChildren.length; i++) {
@@ -259,14 +258,18 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 					}
 				}
 			}
-			if (isSelect) {
-				diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent);
+			if (newVNode.props.dangerouslySetInnerHTML) {
+				console.log(newVNode.props.dangerouslySetInnerHTML, oldProps.dangerouslySetInnerHTML);
+				// Avoid re-applying the same '__html' if it did not changed between re-render
+				if (!newVNode.props.dangerouslySetInnerHTML || !oldProps.dangerouslySetInnerHTML || newVNode.props.dangerouslySetInnerHTML.__html!=oldProps.dangerouslySetInnerHTML.__html) {
+					dom.innerHTML = newVNode.props.dangerouslySetInnerHTML && newVNode.props.dangerouslySetInnerHTML.__html || '';
+				}
 			}
-			diffProps(dom, newVNode.props, oldProps, isSvg);
-		}
-		if (!isSelect) {
 			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent);
+			diffProps(dom, newVNode.props, oldProps, isSvg);
+			return dom;
 		}
+		diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent);
 	}
 
 	return dom;
