@@ -1,6 +1,7 @@
+import { setupRerender } from '../../../test-utils/src';
 import { createElement as h, render } from 'preact';
 import { spy } from 'sinon';
-import { setupScratch, teardown, setupRerender } from '../../../test/_util/helpers';
+import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 
 /** @jsx h */

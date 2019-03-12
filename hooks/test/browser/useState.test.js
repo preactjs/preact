@@ -1,6 +1,7 @@
+import { setupRerender } from '../../../test-utils/src';
 import { createElement as h, render } from 'preact';
 import { spy } from 'sinon';
-import { setupScratch, teardown, setupRerender } from '../../../test/_util/helpers';
+import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useState } from '../../src';
 
 /** @jsx h */
@@ -41,7 +42,7 @@ describe('useState', () => {
 	});
 
 	it('can initialize the state via a function', () => {
-		const initState = spy(() => { a: 1 })
+		const initState = spy(() => { 1; });
 
 		function Comp() {
 			useState(initState);
@@ -82,18 +83,18 @@ describe('useState', () => {
 	});
 
 	it('can be set by another component', () => {
-		const initState = { count: 0 }
+		const initState = { count: 0 };
 
 		function StateContainer() {
 			const [count, setCount] = useState(0);
-			return <div>
+			return (<div>
 				<p>Count: {count}</p>
 				<Increment increment={() => setCount(c => c + 10)} />
-			</div>;
+			</div>);
 		}
 
 		function Increment(props) {
-			return <button onClick={props.increment}>Increment</button>
+			return <button onClick={props.increment}>Increment</button>;
 		}
 
 		render(<StateContainer />, scratch);

@@ -1,5 +1,6 @@
+import { setupRerender } from '../../../test-utils/src';
 import { createElement as h, render } from 'preact';
-import { setupScratch, teardown, setupRerender } from '../../../test/_util/helpers';
+import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useReducer } from '../../src';
 
 /** @jsx h */
@@ -27,7 +28,7 @@ describe('useReducer', () => {
 		const states = [];
 		let _dispatch;
 
-		const initState = { count: 0 }
+		const initState = { count: 0 };
 
 		function reducer(state, action) {
 			switch (action.type) {
@@ -51,7 +52,7 @@ describe('useReducer', () => {
 	});
 
 	it('can be dispatched by another component', () => {
-		const initState = { count: 0 }
+		const initState = { count: 0 };
 
 		function reducer(state, action) {
 			switch (action.type) {
@@ -61,14 +62,14 @@ describe('useReducer', () => {
 
 		function ReducerComponent() {
 			const [state, dispatch] = useReducer(reducer, initState);
-			return <div>
+			return (<div>
 				<p>Count: {state.count}</p>
 				<DispatchComponent dispatch={dispatch} />
-			</div>;
+			</div>);
 		}
 
 		function DispatchComponent(props) {
-			return <button onClick={() => props.dispatch({ type: 'increment', by: 10 })}>Increment</button>
+			return <button onClick={() => props.dispatch({ type: 'increment', by: 10 })}>Increment</button>;
 		}
 
 		render(<ReducerComponent />, scratch);

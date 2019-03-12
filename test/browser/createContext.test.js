@@ -1,5 +1,6 @@
+import { setupRerender } from '../../test-utils/src';
 import { createElement as h, render, Component, createContext } from '../../src/index';
-import { setupScratch, teardown, setupRerender } from '../_util/helpers';
+import { setupScratch, teardown } from '../_util/helpers';
 import { Fragment } from '../../src';
 import { i as ctxId } from '../../src/create-context';
 

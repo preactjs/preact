@@ -1,5 +1,6 @@
+import { setupRerender } from '../../test-utils/src';
 import { createElement as h, render, Component, Fragment } from '../../src/index';
-import { setupScratch, teardown, setupRerender } from '../_util/helpers';
+import { setupScratch, teardown } from '../_util/helpers';
 import { span, div, ul, ol, li } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 
