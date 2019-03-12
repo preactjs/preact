@@ -218,6 +218,7 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	isSvg = newVNode.type==='svg' || isSvg;
+	const isSelect = newVNode.type==='select';
 
 	if (dom==null && excessDomChildren!=null) {
 		for (let i=0; i<excessDomChildren.length; i++) {
@@ -258,10 +259,14 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 					}
 				}
 			}
+			if (isSelect) {
+				diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent);
+			}
 			diffProps(dom, newVNode.props, oldProps, isSvg);
 		}
-
-		diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent);
+		if (!isSelect) {
+			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent);
+		}
 	}
 
 	return dom;
