@@ -3,7 +3,7 @@ import { Component, enqueueRender } from '../component';
 import { coerceToVNode, Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps } from './props';
-import { assign } from '../util';
+import { assign, removeNode } from '../util';
 import options from '../options';
 
 /**
@@ -306,7 +306,7 @@ export function unmount(vnode, ancestorComponent) {
 		applyRef(r, null, ancestorComponent);
 	}
 
-	if ((r = vnode._dom)!=null) r.remove();
+	if ((r = vnode._dom)!=null) removeNode(r);
 
 	vnode._dom = vnode._lastDomChild = null;
 

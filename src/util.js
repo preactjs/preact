@@ -9,3 +9,12 @@ export function assign(obj, props) {
 	for (let i in props) obj[i] = props[i];
 	return /** @type {O & P} */ (obj);
 }
+
+/**
+ * Remove a child node from its parent if attached.
+ * @param {Node} node The node to remove
+ */
+export function removeNode(node) {
+	let parentNode = node.parentNode;
+	if (parentNode) parentNode.removeChild(node);
+}
