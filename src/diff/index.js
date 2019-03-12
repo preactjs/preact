@@ -259,7 +259,6 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 				}
 			}
 			if (newVNode.props.dangerouslySetInnerHTML) {
-				console.log(newVNode.props.dangerouslySetInnerHTML, oldProps.dangerouslySetInnerHTML);
 				// Avoid re-applying the same '__html' if it did not changed between re-render
 				if (!newVNode.props.dangerouslySetInnerHTML || !oldProps.dangerouslySetInnerHTML || newVNode.props.dangerouslySetInnerHTML.__html!=oldProps.dangerouslySetInnerHTML.__html) {
 					dom.innerHTML = newVNode.props.dangerouslySetInnerHTML && newVNode.props.dangerouslySetInnerHTML.__html || '';
