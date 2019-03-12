@@ -14,6 +14,7 @@ describe('hydrate()', () => {
 	before(() => {
 		logCall(Element.prototype, 'appendChild');
 		logCall(Element.prototype, 'insertBefore');
+		logCall(Element.prototype, 'removeChild');
 		logCall(Element.prototype, 'remove');
 		logCall(Element.prototype, 'setAttribute');
 		logCall(Element.prototype, 'removeAttribute');
