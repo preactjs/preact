@@ -60,17 +60,18 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 			nodeName = getComponentName(nodeName);
 		}
 		else {
-			vnode.__c = { __v: vnode };
-			if (options.render) options.render(vnode);
 			let rendered;
+			
+			let c = vnode.__c = { __v: vnode, context, props: vnode.props };
+			if (options.render) options.render(vnode);
 
 			if (!nodeName.prototype || typeof nodeName.prototype.render!=='function') {
 				// stateless functional components
-				rendered = nodeName.apply(vnode.__c, props, context);
+				rendered = nodeName.call(vnode.__c, props, context);
 			}
 			else {
 				// class-based components
-				let c = new nodeName(props, context);
+				c = new nodeName(props, context);
 				// turn off stateful re-rendering:
 				c._dirty = c.__d = true;
 				c.props = props;
@@ -78,10 +79,10 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 				if (nodeName.getDerivedStateFromProps) c.state = assign(assign({}, c.state), nodeName.getDerivedStateFromProps(c.props, c.state));
 				else if (c.componentWillMount) c.componentWillMount();
 				rendered = c.render(c.props, c.state, c.context);
-
-				if (c.getChildContext) {
-					context = assign(assign({}, context), c.getChildContext());
-				}
+			}
+			
+			if (c.getChildContext) {
+				context = assign(assign({}, context), c.getChildContext());
 			}
 
 			return renderToString(rendered, context, opts, opts.shallowHighOrder!==false);

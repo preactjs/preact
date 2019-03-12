@@ -1,6 +1,6 @@
 import { render, shallowRender } from '../src';
 import { h, Component, createContext } from 'preact';
-import { useState, useContext } from 'preact/hooks';
+import { useState, useContext, useEffect } from 'preact/hooks';
 import chai, { expect } from 'chai';
 import { spy, stub, match } from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -621,7 +621,19 @@ describe('render', () => {
 			}).to.not.throw();
 		});
 
-		it('should work with useContext', () => {
+		it('should work with useContext and default value', () => {
+			let Ctx = createContext('foo');
+			function Foo() {
+				let v = useContext(Ctx);
+				return <div>{v}</div>;
+			}
+
+			let res = render(<Foo />);
+
+			expect(res).to.equal('<div>foo</div>');
+		});
+
+		it('should work with useContext + custom value', () => {
 			let Ctx = createContext('foo');
 			function Foo() {
 				let v = useContext(Ctx);
@@ -629,12 +641,32 @@ describe('render', () => {
 			}
 
 			let res = render(
-				<Ctx.Provider value="foo">
+				<Ctx.Provider value="bar">
 					<Foo />
 				</Ctx.Provider>
 			);
 
-			expect(res).to.equal('<div>foo</div>');
+			expect(res).to.equal('<div>bar</div>');
+		});
+
+		it('should work with useState', () => {
+			function Foo() {
+				let [v] = useState(0);
+				return <div>{v}</div>;
+			}
+
+			expect(render(<Foo />)).to.equal('<div>0</div>');
+		});
+
+		it('should not trigger useEffect callbacks', () => {
+			let called = false;
+			function Foo() {
+				useEffect(() => called = true);
+				return <div />;
+			}
+
+			render(<Foo />);
+			expect(called).to.equal(false);
 		});
 	});
 });
