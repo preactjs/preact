@@ -1,5 +1,6 @@
 import { render, shallowRender } from '../src';
-import { h, Component } from 'preact';
+import { h, Component, createContext } from 'preact';
+import { useState, useContext } from 'preact/hooks';
 import chai, { expect } from 'chai';
 import { spy, stub, match } from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -604,6 +605,36 @@ describe('render', () => {
 			expect(render(<Foo />)).to.equal('<div></div>');
 			
 			expect(Bar).to.have.been.calledOnce.and.calledWithMatch({ count: 1 });
+		});
+	});
+
+	describe('hooks', () => {
+		it('should not crash with hooks', () => {
+			function Foo() {
+				let [v, setter] = useState(0);
+				return <button onClick={() => setter(++v)}>count: {v}</button>;
+			}
+
+			// eslint-disable-next-line prefer-arrow-callback
+			expect(function() {
+				render(<Foo />);
+			}).to.not.throw();
+		});
+
+		it('should work with useContext', () => {
+			let Ctx = createContext('foo');
+			function Foo() {
+				let v = useContext(Ctx);
+				return <div>{v}</div>;
+			}
+
+			let res = render(
+				<Ctx.Provider value="foo">
+					<Foo />
+				</Ctx.Provider>
+			);
+
+			expect(res).to.equal('<div>foo</div>');
 		});
 	});
 });

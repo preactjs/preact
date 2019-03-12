@@ -1,5 +1,6 @@
 import { encodeEntities, indent, isLargeString, styleObjToCss, assign, getChildren } from './util';
 import { ENABLE_PRETTY } from '../env';
+import { options } from 'preact';
 
 const SHALLOW = { shallow: true };
 
@@ -59,11 +60,13 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 			nodeName = getComponentName(nodeName);
 		}
 		else {
+			vnode.__c = { __v: vnode };
+			if (options.render) options.render(vnode);
 			let rendered;
 
 			if (!nodeName.prototype || typeof nodeName.prototype.render!=='function') {
 				// stateless functional components
-				rendered = nodeName(props, context);
+				rendered = nodeName.apply(vnode.__c, props, context);
 			}
 			else {
 				// class-based components
