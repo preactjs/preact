@@ -1,6 +1,7 @@
+import { setupRerender } from '../../../test-utils/src';
 import { createElement, createElement as h, Fragment, options, Component, render } from 'preact';
 import { getDisplayName, setIn, isRoot, getData, shallowEqual, hasDataChanged, hasProfileDataChanged, getChildren } from '../../src/devtools/custom';
-import { setupScratch, setupRerender, teardown, clearOptions } from '../../../test/_util/helpers';
+import { setupScratch, teardown, clearOptions } from '../../../test/_util/helpers';
 import { initDevTools } from '../../src/devtools';
 import { Renderer } from '../../src/devtools/renderer';
 import { memo, forwardRef } from '../../../compat/src';
