@@ -1,4 +1,4 @@
-import { setupRerender } from '../../test-utils/src';
+import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component, Fragment } from '../../src/index';
 import { setupScratch, teardown } from '../_util/helpers';
 import { span, div, ul, ol, li } from '../_util/dom';

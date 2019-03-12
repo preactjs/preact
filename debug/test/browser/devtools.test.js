@@ -1,4 +1,4 @@
-import { setupRerender } from '../../../test-utils/src';
+import { setupRerender } from 'preact/test-utils';
 import { createElement, createElement as h, Fragment, options, Component, render } from 'preact';
 import { getDisplayName, setIn, isRoot, getData, shallowEqual, hasDataChanged, hasProfileDataChanged, getChildren } from '../../src/devtools/custom';
 import { setupScratch, teardown, clearOptions } from '../../../test/_util/helpers';

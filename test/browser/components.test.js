@@ -1,5 +1,5 @@
 import { createElement as h, render, Component, Fragment } from '../../src/index';
-import { setupRerender } from '../../test-utils/src';
+import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown, getMixedArray, mixedArrayHTML } from '../_util/helpers';
 
 /** @jsx h */

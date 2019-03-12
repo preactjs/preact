@@ -1,4 +1,4 @@
-import { setupRerender } from '../../../test-utils/src';
+import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import React from '../../src';
 
