@@ -298,7 +298,7 @@ export function applyRef(ref, value, ancestorComponent) {
  * @param {import('../internal').Component} ancestorComponent The parent
  * component to this virtual node
  */
-export function unmount(vnode, ancestorComponent) {
+export function unmount(vnode, ancestorComponent, skipRemove) {
 	let r;
 	if (options.unmount) options.unmount(vnode);
 
@@ -306,7 +306,7 @@ export function unmount(vnode, ancestorComponent) {
 		applyRef(r, null, ancestorComponent);
 	}
 
-	if ((r = vnode._dom)!=null) removeNode(r);
+	if (!skipRemove && (skipRemove = ((r = vnode._dom)!=null))) removeNode(r);
 
 	vnode._dom = vnode._lastDomChild = null;
 
@@ -321,11 +321,11 @@ export function unmount(vnode, ancestorComponent) {
 		}
 
 		r.base = r._parentDom = null;
-		if (r = r._prevVNode) unmount(r, ancestorComponent);
+		if (r = r._prevVNode) unmount(r, ancestorComponent, skipRemove);
 	}
 	else if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {
-			unmount(r[i], ancestorComponent);
+			unmount(r[i], ancestorComponent, skipRemove && vnode.type!==Fragment);
 		}
 	}
 }
