@@ -1,6 +1,7 @@
+import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render } from 'preact';
 import { spy } from 'sinon';
-import { setupScratch, teardown, setupRerender } from '../../../test/_util/helpers';
+import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useEffect } from '../../src';
 import { useEffectAssertions } from './useEffectAssertions.test';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';

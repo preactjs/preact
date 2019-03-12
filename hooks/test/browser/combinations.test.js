@@ -1,6 +1,7 @@
-import { createElement as h, render, Component } from 'preact';
+import { setupRerender } from 'preact/test-utils';
+import { createElement as h, render } from 'preact';
 import { spy } from 'sinon';
-import { setupScratch, teardown, setupRerender } from '../../../test/_util/helpers';
+import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useState, useReducer, useEffect, useLayoutEffect, useRef } from '../../src';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
 
@@ -64,7 +65,7 @@ describe('combinations', () => {
 		function Comp() {
 			const [counter, setCounter] = useState(0);
 
-			useEffect(() => { if (counter === 0) setCounter(1) });
+			useEffect(() => { if (counter === 0) setCounter(1); });
 
 			didRender(counter);
 			return null;
@@ -74,7 +75,7 @@ describe('combinations', () => {
 
 		return scheduleEffectAssert(() => {
 			rerender();
-			expect(didRender).to.have.been.calledTwice.and.calledWith(1)
+			expect(didRender).to.have.been.calledTwice.and.calledWith(1);
 		});
 	});
 
@@ -84,7 +85,7 @@ describe('combinations', () => {
 		function Comp() {
 			const [counter, setCounter] = useState(0);
 
-			useLayoutEffect(() => { if (counter === 0) setCounter(1) });
+			useLayoutEffect(() => { if (counter === 0) setCounter(1); });
 
 			didRender(counter);
 			return null;
@@ -93,7 +94,7 @@ describe('combinations', () => {
 		render(<Comp />, scratch);
 		rerender();
 
-		expect(didRender).to.have.been.calledTwice.and.calledWith(1)
+		expect(didRender).to.have.been.calledTwice.and.calledWith(1);
 	});
 
 	it('can access refs from within a layout effect callback', () => {
@@ -172,6 +173,6 @@ describe('combinations', () => {
 
 		return scheduleEffectAssert(() => {
 			expect(effectCount).to.equal(1);
-		})
+		});
 	});
 });

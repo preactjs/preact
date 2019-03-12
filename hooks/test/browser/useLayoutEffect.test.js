@@ -1,6 +1,7 @@
-import { createElement as h, render, options } from 'preact';
+import { setupRerender } from 'preact/test-utils';
+import { createElement as h, render } from 'preact';
 import { spy } from 'sinon';
-import { setupScratch, teardown, setupRerender } from '../../../test/_util/helpers';
+import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useEffectAssertions } from './useEffectAssertions.test';
 import { useLayoutEffect } from '../../src';
 
