@@ -306,7 +306,7 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 		applyRef(r, null, ancestorComponent);
 	}
 
-	if (!skipRemove && (skipRemove = ((r = vnode._dom)!=null))) removeNode(r);
+	if (!skipRemove && vnode._lastDomChild==null && (skipRemove = ((r = vnode._dom)!=null))) removeNode(r);
 
 	vnode._dom = vnode._lastDomChild = null;
 
@@ -325,7 +325,7 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 	}
 	else if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {
-			unmount(r[i], ancestorComponent, skipRemove && vnode.type!==Fragment);
+			unmount(r[i], ancestorComponent, skipRemove);
 		}
 	}
 }
