@@ -1,4 +1,3 @@
-import { checkPropTypes } from 'prop-types';
 import { getDisplayName } from './devtools/custom';
 import { options, toChildArray } from 'preact';
 
@@ -29,7 +28,7 @@ export function initDebug() {
 
 		// Check prop-types if available
 		if (typeof vnode.type==='function' && vnode.type.propTypes) {
-			checkPropTypes(vnode.type.propTypes, vnode.props, getDisplayName(vnode), serializeVNode(vnode));
+			require('prop-types').checkPropTypes(vnode.type.propTypes, vnode.props, getDisplayName(vnode), serializeVNode(vnode));
 		}
 
 		let keys = [];
