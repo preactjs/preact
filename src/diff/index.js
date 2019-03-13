@@ -258,10 +258,12 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 					}
 				}
 			}
-			if (newVNode.props.dangerouslySetInnerHTML || oldProps.dangerouslySetInnerHTML) {
+			let oldHtml = oldProps.dangerouslySetInnerHTML;
+			let newHtml = newVNode.props.dangerouslySetInnerHTML;
+			if (newHtml || oldHtml) {
 				// Avoid re-applying the same '__html' if it did not changed between re-render
-				if (!newVNode.props.dangerouslySetInnerHTML || !oldProps.dangerouslySetInnerHTML || newVNode.props.dangerouslySetInnerHTML.__html!=oldProps.dangerouslySetInnerHTML.__html) {
-					dom.innerHTML = newVNode.props.dangerouslySetInnerHTML && newVNode.props.dangerouslySetInnerHTML.__html || '';
+				if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
+					dom.innerHTML = newHtml && newHtml.__html || '';
 				}
 			}
 			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent);
