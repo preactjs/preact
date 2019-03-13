@@ -266,9 +266,7 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 			}
 			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent);
 			diffProps(dom, newVNode.props, oldProps, isSvg);
-			return dom;
 		}
-		diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent);
 	}
 
 	return dom;
