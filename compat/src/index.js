@@ -106,24 +106,6 @@ let Children = {
 };
 
 /**
- * Upgrade all found vnodes recursively
- * @param {Array} arr
- * @param {number} offset
- */
-function upgradeToVNodes(arr, offset) {
-	for (let i=offset || 0; i<arr.length; i++) {
-		let obj = arr[i];
-		if (Array.isArray(obj)) {
-			upgradeToVNodes(obj);
-		}
-		else if (obj && typeof obj==='object' && !isValidElement(obj) && ((obj.props && obj.type) || obj.text!=null)) {
-			if (obj.text) continue;
-			arr[i] = createElement(obj.type, obj.props, obj.props.children);
-		}
-	}
-}
-
-/**
  * Wrap `createElement` to apply various vnode normalizations.
  * @param {import('./internal').VNode["type"]} type The node name or Component constructor
  * @param {object | null | undefined} [props] The vnode's properties
@@ -131,9 +113,7 @@ function upgradeToVNodes(arr, offset) {
  * @returns {import('./internal').VNode}
  */
 function createElement(...args) {
-	upgradeToVNodes(args, 2);
 	let vnode = h(...args);
-	vnode.$$typeof = REACT_ELEMENT_TYPE;
 
 	let type = vnode.type, props = vnode.props;
 	if (typeof type!='function') {
@@ -182,7 +162,7 @@ function cloneElement(element) {
  * @returns {boolean}
  */
 function isValidElement(element) {
-	return element && element.$$typeof===REACT_ELEMENT_TYPE;
+	return element!=null && element.$$typeof===REACT_ELEMENT_TYPE;
 }
 
 /**
@@ -198,6 +178,10 @@ function applyEventNormalization({ type, props }) {
 	if (newProps.ondoubleclick) {
 		props.ondblclick = props[newProps.ondoubleclick];
 		delete props[newProps.ondoubleclick];
+	}
+	if (newProps.onbeforeinput) {
+		props.onbeforeinput = props[newProps.onbeforeinput];
+		delete props[newProps.onbeforeinput];
 	}
 	// for *textual inputs* (incl textarea), normalize `onChange` -> `onInput`:
 	if (newProps.onchange && (type==='textarea' || (type.toLowerCase()==='input' && !/^fil|che|rad/i.test(props.type)))) {
@@ -334,6 +318,8 @@ function forwardRef(fn) {
 
 let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
+	vnode.$$typeof = REACT_ELEMENT_TYPE;
+
 	let type = vnode.type;
 	if (type!=null && type._forwarded) {
 		vnode.props.ref = vnode.ref;

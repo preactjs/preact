@@ -1,7 +1,8 @@
 /* global DISABLE_FLAKEY */
 
+import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component } from '../../src/index';
-import { setupScratch, setupRerender, teardown, getMixedArray, mixedArrayHTML } from '../_util/helpers';
+import { setupScratch, teardown, getMixedArray, mixedArrayHTML } from '../_util/helpers';
 
 /** @jsx h */
 
@@ -317,6 +318,13 @@ describe('render()', () => {
 			render(<div style="top: 5px; position: relative;" />, scratch);
 			expect(scratch.childNodes[0].style.cssText)
 				.to.equal('top: 5px; position: relative;');
+		});
+
+		it('should not call CSSStyleDeclaration.setProperty for style strings', () => {
+			render(<div style="top: 5px; position: relative;" />, scratch);
+			sinon.stub(scratch.firstChild.style, 'setProperty');
+			render(<div style="top: 10px; position: absolute;" />, scratch);
+			expect(scratch.firstChild.style.setProperty).to.not.be.called;
 		});
 
 		it('should properly switch from string styles to object styles and back', () => {

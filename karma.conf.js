@@ -152,6 +152,7 @@ module.exports = function(config) {
 				// directly
 				alias: {
 					'preact/hooks': path.join(__dirname, './hooks/src'),
+					'preact/test-utils': path.join(__dirname, './test-utils/src'),
 					preact: path.join(__dirname, './src')
 				}
 			},

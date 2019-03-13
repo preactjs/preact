@@ -54,12 +54,11 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 			for (let i in oldValue) {
 				if (value==null || !(i in value)) s.setProperty(i.replace(CAMEL_REG, '-'), '');
 			}
-		}
-
-		for (let i in value) {
-			v = value[i];
-			if (oldValue==null || v!==oldValue[i]) {
-				s.setProperty(i.replace(CAMEL_REG, '-'), typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v);
+			for (let i in value) {
+				v = value[i];
+				if (oldValue==null || v!==oldValue[i]) {
+					s.setProperty(i.replace(CAMEL_REG, '-'), typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v);
+				}
 			}
 		}
 	}
