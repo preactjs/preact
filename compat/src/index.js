@@ -114,6 +114,7 @@ let Children = {
  */
 function createElement(...args) {
 	let vnode = h(...args);
+
 	let type = vnode.type, props = vnode.props;
 	if (typeof type!='function') {
 		if (props.defaultValue) {

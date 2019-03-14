@@ -3,7 +3,7 @@ import { render, createElement as h } from '../../src';
 
 /** @jsx h */
 
-describe.only('Select', () => {
+describe('Select', () => {
 	let scratch;
 
 	beforeEach(() => {
