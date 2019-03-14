@@ -474,8 +474,7 @@ You can inspect and modify the state of your Preact UI components at runtime usi
 import { h, Component, render } from 'preact';
 
 // Enable debug mode. You can reduce the size of your app by only including this
-// module in development builds. eg. In Webpack, wrap this with an `if (module.hot) {...}`
-// check.
+// module in development builds.
 if (process.env.NODE_ENV !== 'production') {
 	require('preact/debug');
 }
