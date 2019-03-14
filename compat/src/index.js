@@ -114,7 +114,6 @@ let Children = {
  */
 function createElement(...args) {
 	let vnode = h(...args);
-
 	let type = vnode.type, props = vnode.props;
 	if (typeof type!='function') {
 		if (props.defaultValue) {
@@ -124,6 +123,14 @@ function createElement(...args) {
 			delete props.defaultValue;
 		}
 
+		if (Array.isArray(props.value) && props.multiple && type==='select') {
+			props.children.forEach((child) => {
+				if (props.value.includes(child.props.value)) {
+					child.props.selected = true;
+				}
+			});
+			delete props.value;
+		}
 		handleElementVNode(vnode, props);
 	}
 
