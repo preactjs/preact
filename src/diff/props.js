@@ -66,7 +66,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		return;
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
-	else if (name[0]==='o' && name[1]==='n') {
+	else if (name[0]==='o' && name[1]==='n' && (typeof value==='function' || typeof oldValue==='function')) {
 		let useCapture = name !== (name=name.replace(/Capture$/, ''));
 		let nameLower = name.toLowerCase();
 		name = (nameLower in dom ? nameLower : name).substring(2);
