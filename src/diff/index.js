@@ -266,6 +266,9 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 					dom.innerHTML = newHtml && newHtml.__html || '';
 				}
 			}
+			if (newVNode.props.multiple) {
+				dom.multiple = newVNode.props.multiple;
+			}
 			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent);
 			diffProps(dom, newVNode.props, oldProps, isSvg);
 		}
