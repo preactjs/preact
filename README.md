@@ -476,7 +476,9 @@ import { h, Component, render } from 'preact';
 // Enable debug mode. You can reduce the size of your app by only including this
 // module in development builds. eg. In Webpack, wrap this with an `if (module.hot) {...}`
 // check.
-require('preact/debug');
+if (process.env.NODE_ENV !== 'production') {
+	require('preact/debug');
+}
 ```
 
 ### Runtime Error Checking

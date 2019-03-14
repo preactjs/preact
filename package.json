@@ -13,7 +13,7 @@
   "scripts": {
     "build": "npm-run-all --parallel build:*",
     "build:core": "microbundle build --raw",
-    "build:debug": "microbundle build --raw --cwd debug --format cjs,umd",
+    "build:debug": "microbundle build --raw --cwd debug",
     "build:hooks": "microbundle build --raw --cwd hooks",
     "build:test-utils": "microbundle build --raw --cwd test-utils",
     "build:compat": "microbundle build --raw --cwd compat --globals 'preact/hooks=preactHooks'",
