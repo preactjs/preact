@@ -28,7 +28,7 @@ export function initDebug() {
 		}
 
 		Object.keys(vnode.props).forEach((key) => {
-			if (key[0]==='o' && key[1]==='n' && vnode.props[key]!=='function') {
+			if (key[0]==='o' && key[1]==='n' && typeof vnode.props[key]!=='function') {
 				throw new Error(
 					`Component's "${key}" property should be a function,
 					but got [${typeof vnode.props[key]}] instead\n` +
