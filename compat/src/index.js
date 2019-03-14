@@ -125,8 +125,8 @@ function createElement(...args) {
 		}
 
 		if (Array.isArray(props.value) && props.multiple && type==='select') {
-			props.children.forEach((child) => {
-				if (props.value.includes(child.props.value)) {
+			toChildArray(props.children).forEach((child) => {
+				if (props.value.indexOf(child.props.value)!==-1) {
 					child.props.selected = true;
 				}
 			});

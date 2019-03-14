@@ -15,7 +15,7 @@ describe('Select', () => {
 	});
 
 
-	it.only('should work with multiple selected (array of values)', () => {
+	it('should work with multiple selected (array of values)', () => {
 		function App() {
 			return (
 				<select multiple value={['B', 'C']}>
