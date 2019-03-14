@@ -297,6 +297,8 @@ export function applyRef(ref, value, ancestorComponent) {
  * @param {import('../internal').VNode} vnode The virtual node to unmount
  * @param {import('../internal').Component} ancestorComponent The parent
  * component to this virtual node
+ * @param {boolean} skipRemove Flag that indicates that a parent node of the
+ * current element is already detached from the DOM.
  */
 export function unmount(vnode, ancestorComponent, skipRemove) {
 	let r;
