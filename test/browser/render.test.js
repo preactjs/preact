@@ -368,6 +368,7 @@ describe('render()', () => {
 				'background-size': 'cover',
 				padding: 5,
 				top: 100,
+				gridRowStart: 1,
 				left: '100%'
 			};
 
@@ -379,6 +380,7 @@ describe('render()', () => {
 			expect(style).to.have.property('background').that.contains('rgb(255, 100, 0)');
 			expect(style).to.have.property('backgroundPosition').that.equals('10px 10px');
 			expect(style).to.have.property('backgroundSize', 'cover');
+			expect(style).to.have.property('gridRowStart', '1');
 			expect(style).to.have.property('padding', '5px');
 			expect(style).to.have.property('top', '100px');
 			expect(style).to.have.property('left', '100%');
