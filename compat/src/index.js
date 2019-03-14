@@ -283,8 +283,7 @@ function memo(c, comparer) {
 		let ref = this.props.ref;
 		let updateRef = ref==nextProps.ref;
 		if (!updateRef) {
-			if (typeof ref=='function') ref(null);
-			else ref.current = null;
+			ref.call ? ref(null) : (ref.current = null);
 		}
 		return (comparer==null
 			? shallowDiffers(this.props, nextProps)
