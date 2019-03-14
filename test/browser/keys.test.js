@@ -52,6 +52,7 @@ describe('keys', () => {
 	before(() => {
 		logCall(Element.prototype, 'appendChild');
 		logCall(Element.prototype, 'insertBefore');
+		logCall(Element.prototype, 'removeChild');
 		logCall(Element.prototype, 'remove');
 	});
 
