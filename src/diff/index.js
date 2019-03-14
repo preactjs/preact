@@ -258,10 +258,17 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 					}
 				}
 			}
+			let oldHtml = oldProps.dangerouslySetInnerHTML;
+			let newHtml = newVNode.props.dangerouslySetInnerHTML;
+			if (newHtml || oldHtml) {
+				// Avoid re-applying the same '__html' if it did not changed between re-render
+				if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
+					dom.innerHTML = newHtml && newHtml.__html || '';
+				}
+			}
+			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent);
 			diffProps(dom, newVNode.props, oldProps, isSvg);
 		}
-
-		diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent);
 	}
 
 	return dom;

@@ -54,20 +54,16 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 			for (let i in oldValue) {
 				if (value==null || !(i in value)) s.setProperty(i.replace(CAMEL_REG, '-'), '');
 			}
-		}
-
-		for (let i in value) {
-			v = value[i];
-			if (oldValue==null || v!==oldValue[i]) {
-				s.setProperty(i.replace(CAMEL_REG, '-'), typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v);
+			for (let i in value) {
+				v = value[i];
+				if (oldValue==null || v!==oldValue[i]) {
+					s.setProperty(i.replace(CAMEL_REG, '-'), typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v);
+				}
 			}
 		}
 	}
 	else if (name==='dangerouslySetInnerHTML') {
-		// Avoid re-applying the same '__html' if it did not changed between re-render
-		if (!value || !oldValue || value.__html!=oldValue.__html) {
-			dom.innerHTML = value && value.__html || '';
-		}
+		return;
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0]==='o' && name[1]==='n') {

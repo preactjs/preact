@@ -1,5 +1,6 @@
+import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component } from '../../src/index';
-import { setupScratch, teardown, setupRerender } from '../_util/helpers';
+import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx h */
 
@@ -921,7 +922,28 @@ describe('Lifecycle methods', () => {
 
 			render(<Foo />, scratch);
 			rerender();
+
 			expect(componentState).to.deep.equal({ value: 1 });
+
+			const cWRP = Foo.prototype.componentWillReceiveProps;
+			delete Foo.prototype.componentWillReceiveProps;
+
+			Foo.prototype.shouldComponentUpdate = cWRP;
+
+			render(null, scratch);
+			render(<Foo />, scratch);
+			rerender();
+
+			expect(componentState, 'via shouldComponentUpdate').to.deep.equal({ value: 1 });
+
+			delete Foo.prototype.shouldComponentUpdate;
+			Foo.prototype.componentWillUpdate = cWRP;
+
+			render(null, scratch);
+			render(<Foo />, scratch);
+			rerender();
+
+			expect(componentState, 'via componentWillUpdate').to.deep.equal({ value: 1 });
 		});
 
 		it('should NOT be called on initial render', () => {
