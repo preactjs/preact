@@ -56,6 +56,11 @@ describe('Select', () => {
 		}
 
 		render(<App />, scratch);
+		Array.prototype.slice.call(scratch.firstChild.childNodes).forEach(node => {
+			if (node.value === 'B' || node.value === 'C') {
+				expect(node.selected).to.equal(true);
+			}
+		});
 		expect(scratch.firstChild.value).to.equal('B');
 	});
 });

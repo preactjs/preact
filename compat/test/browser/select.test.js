@@ -15,7 +15,7 @@ describe('Select', () => {
 	});
 
 
-	it('should work with multiple selected (array of values)', () => {
+	it.only('should work with multiple selected (array of values)', () => {
 		function App() {
 			return (
 				<select multiple value={['B', 'C']}>
@@ -27,6 +27,11 @@ describe('Select', () => {
 		}
 
 		render(<App />, scratch);
+		Array.prototype.slice.call(scratch.firstChild.childNodes).forEach(node => {
+			if (node.value === 'B' || node.value === 'C') {
+				expect(node.selected).to.equal(true);
+			}
+		});
 		expect(scratch.firstChild.value).to.equal('B');
 	});
 });
