@@ -71,7 +71,9 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 			}
 			else {
 				// class-based components
-				c = new nodeName(props, context);
+				// c = new nodeName(props, context);
+				c = vnode.__c = new nodeName(props, context);
+				c.__v = vnode;
 				// turn off stateful re-rendering:
 				c._dirty = c.__d = true;
 				c.props = props;
