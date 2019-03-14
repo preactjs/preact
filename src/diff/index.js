@@ -3,7 +3,7 @@ import { Component, enqueueRender } from '../component';
 import { coerceToVNode, Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps } from './props';
-import { assign } from '../util';
+import { assign, removeNode } from '../util';
 import options from '../options';
 
 /**
@@ -297,8 +297,10 @@ export function applyRef(ref, value, ancestorComponent) {
  * @param {import('../internal').VNode} vnode The virtual node to unmount
  * @param {import('../internal').Component} ancestorComponent The parent
  * component to this virtual node
+ * @param {boolean} skipRemove Flag that indicates that a parent node of the
+ * current element is already detached from the DOM.
  */
-export function unmount(vnode, ancestorComponent) {
+export function unmount(vnode, ancestorComponent, skipRemove) {
 	let r;
 	if (options.unmount) options.unmount(vnode);
 
@@ -306,7 +308,7 @@ export function unmount(vnode, ancestorComponent) {
 		applyRef(r, null, ancestorComponent);
 	}
 
-	if ((r = vnode._dom)!=null) r.remove();
+	if (!skipRemove && vnode._lastDomChild==null && (skipRemove = ((r = vnode._dom)!=null))) removeNode(r);
 
 	vnode._dom = vnode._lastDomChild = null;
 
@@ -321,11 +323,11 @@ export function unmount(vnode, ancestorComponent) {
 		}
 
 		r.base = r._parentDom = null;
-		if (r = r._prevVNode) unmount(r, ancestorComponent);
+		if (r = r._prevVNode) unmount(r, ancestorComponent, skipRemove);
 	}
 	else if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {
-			unmount(r[i], ancestorComponent);
+			unmount(r[i], ancestorComponent, skipRemove);
 		}
 	}
 }
