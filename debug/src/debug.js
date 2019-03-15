@@ -27,7 +27,7 @@ export function initDebug() {
 			);
 		}
 
-		Object.keys(vnode.props).forEach((key) => {
+		for (const key in vnode.props) {
 			if (key[0]==='o' && key[1]==='n' && typeof vnode.props[key]!=='function') {
 				throw new Error(
 					`Component's "${key}" property should be a function,
@@ -35,7 +35,7 @@ export function initDebug() {
 					serializeVNode(vnode)
 				);
 			}
-		});
+		}
 
 		// Check prop-types if available
 		if (typeof vnode.type==='function' && vnode.type.propTypes) {
