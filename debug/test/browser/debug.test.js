@@ -53,6 +53,11 @@ describe('debug', () => {
 		expect(console.error).to.not.be.called;
 	});
 
+	it('should print an error on invalid handler', () => {
+		let fn = () => render(<div onclick="a" />, scratch);
+		expect(fn).to.throw(/"onclick" property should be a function/);
+	});
+
 	it('should NOT print an error on valid refs', () => {
 		let noop = () => {};
 		render(<div ref={noop} />, scratch);
