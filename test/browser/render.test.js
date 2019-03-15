@@ -450,6 +450,13 @@ describe('render()', () => {
 				.and.to.have.been.calledWithExactly('click', sinon.match.func, false);
 		});
 
+		it('should not crash when on* is not a function', () => {
+			const onClick = 'onClick';
+			render(<div onclick={onClick} />, scratch);
+			expect(proto.addEventListener).not.to.have.been.called;
+			fireEvent(scratch.childNodes[0], 'click');
+		});
+
 		it('should support native event names', () => {
 			let click = sinon.spy(),
 				mousedown = sinon.spy();
