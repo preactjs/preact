@@ -16,9 +16,6 @@
 	- ✖ should not preserve state between unkeyed and keyed component
 - hydrate
 	- ✖ should override incorrect pre-existing DOM with VNodes passed into render
-- compat/forwardRef
-	- ✖ should bailout if forwardRef is wrapped in memo 
-	- ✖ should custom memo comparisons to compose
 
 Also:
 
