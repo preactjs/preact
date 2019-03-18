@@ -270,6 +270,10 @@ describe('render()', () => {
 		expect(scratch.firstChild.spellcheck).to.equal(false);
 	});
 
+	it('should not set tagName', () => {
+		expect(() => render(<input tagName="div" />, scratch)).not.to.throw();
+	});
+
 	it('should apply string attributes', () => {
 		render(<div foo="bar" data-foo="databar" />, scratch);
 
@@ -366,6 +370,7 @@ describe('render()', () => {
 				background: 'rgb(255, 100, 0)',
 				backgroundPosition: '10px 10px',
 				'background-size': 'cover',
+				gridRowStart: 1,
 				padding: 5,
 				top: 100,
 				left: '100%'
@@ -376,6 +381,7 @@ describe('render()', () => {
 			let root = scratch.firstChild;
 			let { style } = root;
 			expect(style).to.have.property('color').that.equals('rgb(255, 255, 255)');
+			expect(style).to.have.property('gridRowStart', '1');
 			expect(style).to.have.property('background').that.contains('rgb(255, 100, 0)');
 			expect(style).to.have.property('backgroundPosition').that.equals('10px 10px');
 			expect(style).to.have.property('backgroundSize', 'cover');
