@@ -270,6 +270,10 @@ describe('render()', () => {
 		expect(scratch.firstChild.spellcheck).to.equal(false);
 	});
 
+	it('should not set tagName', () => {
+		expect(() => render(<input tagName="div" />, scratch)).not.to.throw();
+	});
+
 	it('should apply string attributes', () => {
 		render(<div foo="bar" data-foo="databar" />, scratch);
 
