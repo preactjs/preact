@@ -249,28 +249,32 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 		}
 		if (newVNode!==oldVNode) {
 			let oldProps = oldVNode.props;
+			let newProps = newVNode.props;
+
 			// if we're hydrating, use the element's attributes as its current props:
 			if (oldProps==null) {
 				oldProps = {};
 				if (excessDomChildren!=null) {
+					let name;
 					for (let i=0; i<dom.attributes.length; i++) {
-						oldProps[dom.attributes[i].name] = dom.attributes[i].value;
+						name = dom.attributes[i].name;
+						oldProps[name=='class' && newProps.className ? 'className' : name] = dom.attributes[i].value;
 					}
 				}
 			}
 			let oldHtml = oldProps.dangerouslySetInnerHTML;
-			let newHtml = newVNode.props.dangerouslySetInnerHTML;
+			let newHtml = newProps.dangerouslySetInnerHTML;
 			if (newHtml || oldHtml) {
 				// Avoid re-applying the same '__html' if it did not changed between re-render
 				if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
 					dom.innerHTML = newHtml && newHtml.__html || '';
 				}
 			}
-			if (newVNode.props.multiple) {
-				dom.multiple = newVNode.props.multiple;
+			if (newProps.multiple) {
+				dom.multiple = newProps.multiple;
 			}
 			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent);
-			diffProps(dom, newVNode.props, oldProps, isSvg);
+			diffProps(dom, newProps, oldProps, isSvg);
 		}
 	}
 
