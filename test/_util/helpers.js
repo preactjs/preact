@@ -7,11 +7,8 @@ import { clearLog, getLog } from './logCall';
 
 const VOID_ELEMENTS = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
 
-const el = document.createElement('div');
-const innerHtmlDef = Object.getOwnPropertyDescriptor(el.ownerDocument.defaultView.Element.prototype, 'innerHTML');
 function encodeEntities(str) {
-	el.textContent = str;
-	return innerHtmlDef.get.call(el);
+	return str.replace(/&/g, '&amp;');
 }
 
 /**
@@ -36,11 +33,21 @@ function normalizePath(str) {
 	return out.replace(/\s\s+/g, ' ').replace(/z/g, 'Z');
 }
 
+export function serializeHtml(node) {
+	let str = '';
+	let child = node.firstChild;
+	while (child) {
+		str += serializeDomTree(child);
+		child = child.nextSibling;
+	}
+	return str;
+}
+
 /**
  * Serialize a DOM tree.
  * Uses deterministic sorting where necessary to ensure consistent tests.
  * @param {Element|Node} node	The root node to serialize
- * @returns {String} html
+ * @returns {string} html
  */
 function serializeDomTree(node) {
 	if (node.nodeType === 3) {
@@ -83,26 +90,6 @@ function serializeDomTree(node) {
 	}
 }
 
-function getInnerHTML() {
-	let str = '';
-	let child = this.firstChild;
-	while (child) {
-		str += serializeDomTree(child);
-		child = child.nextSibling;
-	}
-	return str;
-}
-
-function setupDeterministicInnerHTML(element) {
-	const doc = element.ownerDocument || window.document;
-	const elementProto = doc.defaultView.Element.prototype;
-	let def = Object.getOwnPropertyDescriptor(elementProto, 'innerHTML');
-	if (def.get !== getInnerHTML) {
-		def = Object.assign({}, def, { get: getInnerHTML });
-		Object.defineProperty(elementProto, 'innerHTML', def);
-	}
-}
-
 /**
  * Sort a cssText alphabetically.
  * @param {string} cssText
@@ -122,7 +109,6 @@ export function setupScratch() {
 	const scratch = document.createElement('div');
 	scratch.id = 'scratch';
 	(document.body || document.documentElement).appendChild(scratch);
-	setupDeterministicInnerHTML(scratch);
 	return scratch;
 }
 

@@ -2,7 +2,7 @@
 
 import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component } from '../../src/index';
-import { setupScratch, teardown, getMixedArray, mixedArrayHTML, sortCss } from '../_util/helpers';
+import { setupScratch, teardown, getMixedArray, mixedArrayHTML, sortCss, serializeHtml } from '../_util/helpers';
 
 /** @jsx h */
 
@@ -276,7 +276,7 @@ describe('render()', () => {
 
 	it('should apply string attributes', () => {
 		render(<div foo="bar" data-foo="databar" />, scratch);
-		expect(scratch.innerHTML).to.equal('<div data-foo="databar" foo="bar"></div>');
+		expect(serializeHtml(scratch)).to.equal('<div data-foo="databar" foo="bar"></div>');
 	});
 
 	it('should not serialize function props as attributes', () => {

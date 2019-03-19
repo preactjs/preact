@@ -1,5 +1,5 @@
 import { createElement, hydrate, Fragment } from '../../src/index';
-import { setupScratch, teardown, sortAttributes } from '../_util/helpers';
+import { setupScratch, teardown, sortAttributes, serializeHtml } from '../_util/helpers';
 import { ul, li, div } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 
@@ -138,7 +138,7 @@ describe('hydrate()', () => {
 		clearLog();
 		hydrate(vnode, scratch);
 
-		expect(scratch.innerHTML).to.equal(sortAttributes('<div><span same-value="foo" different-value="b" new-value="c">Test</span></div>'));
+		expect(serializeHtml(scratch)).to.equal(sortAttributes('<div><span same-value="foo" different-value="b" new-value="c">Test</span></div>'));
 		expect(getLog()).to.deep.equal([
 			'<span>Test.setAttribute(different-value, b)',
 			'<span>Test.setAttribute(new-value, c)',
