@@ -23,6 +23,11 @@ export function supportsPassiveEvents() {
 	return supported;
 }
 
+export function supportsDataList() {
+	return 'list' in document.createElement('input') &&
+		Boolean(document.createElement('datalist') &&
+		'HTMLDataListElement' in window);
+}
 
 const VOID_ELEMENTS = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
 

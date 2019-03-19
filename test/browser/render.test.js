@@ -2,7 +2,7 @@
 
 import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component } from '../../src/index';
-import { setupScratch, teardown, getMixedArray, mixedArrayHTML, sortCss, serializeHtml, supportsPassiveEvents } from '../_util/helpers';
+import { setupScratch, teardown, getMixedArray, mixedArrayHTML, sortCss, serializeHtml, supportsPassiveEvents, supportsDataList } from '../_util/helpers';
 
 /** @jsx h */
 
@@ -701,21 +701,25 @@ describe('render()', () => {
 	});
 
 	// Discussion: https://github.com/developit/preact/issues/287
-	('HTMLDataListElement' in window ? it : xit)('should allow <input list /> to pass through as an attribute', () => {
-		render((
-			<div>
-				<input type="range" min="0" max="100" list="steplist" />
-				<datalist id="steplist">
-					<option>0</option>
-					<option>50</option>
-					<option>100</option>
-				</datalist>
-			</div>
-		), scratch);
+	// <datalist> is not supported in Safari, even though the element
+	// constructor is present
+	if (supportsDataList()) {
+		it('should allow <input list /> to pass through as an attribute', () => {
+			render((
+				<div>
+					<input type="range" min="0" max="100" list="steplist" />
+					<datalist id="steplist">
+						<option>0</option>
+						<option>50</option>
+						<option>100</option>
+					</datalist>
+				</div>
+			), scratch);
 
-		let html = scratch.firstElementChild.firstElementChild.outerHTML;
-		expect(sortAttributes(html)).to.equal(sortAttributes('<input type="range" min="0" max="100" list="steplist">'));
-	});
+			let html = scratch.firstElementChild.firstElementChild.outerHTML;
+			expect(sortAttributes(html)).to.equal(sortAttributes('<input type="range" min="0" max="100" list="steplist">'));
+		});
+	}
 
 	it('should not execute append operation when child is at last', () => {
 		// See developit/preact#717 for discussion about the issue this addresses
