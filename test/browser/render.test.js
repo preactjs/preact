@@ -253,15 +253,15 @@ describe('render()', () => {
 
 		test('2');
 		test(false);
-		expect(scratch).to.have.property('innerHTML', '<div><input><table border="false"></table></div>', 'for false');
+		expect(scratch.innerHTML).to.equal('<div><input><table border="false"></table></div>', 'for false');
 
 		test('3');
 		test(null);
-		expect(scratch).to.have.property('innerHTML', '<div><input><table border=""></table></div>', 'for null');
+		expect(scratch.innerHTML).to.equal('<div><input><table border=""></table></div>', 'for null');
 
 		test('4');
 		test(undefined);
-		expect(scratch).to.have.property('innerHTML', '<div><input><table border=""></table></div>', 'for undefined');
+		expect(scratch.innerHTML).to.equal('<div><input><table border=""></table></div>', 'for undefined');
 	});
 
 	// Test for developit/preact#651
@@ -372,14 +372,14 @@ describe('render()', () => {
 
 			let root = scratch.firstChild;
 			let { style } = root;
-			expect(style).to.have.property('color').that.equals('rgb(255, 255, 255)');
-			expect(style).to.have.property('gridRowStart', '1');
-			expect(style).to.have.property('background').that.contains('rgb(255, 100, 0)');
-			expect(style).to.have.property('backgroundPosition').that.equals('10px 10px');
-			expect(style).to.have.property('backgroundSize', 'cover');
-			expect(style).to.have.property('padding', '5px');
-			expect(style).to.have.property('top', '100px');
-			expect(style).to.have.property('left', '100%');
+			expect(style.color).to.equal('rgb(255, 255, 255)');
+			expect(style.gridRowStart).to.equal('1');
+			expect(style.background).to.contain('rgb(255, 100, 0)');
+			expect(style.backgroundPosition).to.equal('10px 10px');
+			expect(style.backgroundSize).to.equal('cover');
+			expect(style.padding).to.equal('5px');
+			expect(style.top).to.equal('100px');
+			expect(style.left).to.equal('100%');
 		});
 
 		it('should replace previous style objects', () => {
