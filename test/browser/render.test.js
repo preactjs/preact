@@ -393,7 +393,7 @@ describe('render()', () => {
 			expect(style.cssText).to.equal('display: inline;');
 			expect(style).to.have.property('display').that.equals('inline');
 			expect(style).to.have.property('color').that.equals('');
-			expect(style).to.have.property('zIndex').that.equals('');
+			expect(style.zIndex.toString()).to.equal('');
 
 			render(<div style={{ color: 'rgb(0, 255, 255)', zIndex: '3' }}>test</div>, scratch);
 
@@ -401,7 +401,9 @@ describe('render()', () => {
 			expect(style.cssText).to.equal('color: rgb(0, 255, 255); z-index: 3;');
 			expect(style).to.have.property('display').that.equals('');
 			expect(style).to.have.property('color').that.equals('rgb(0, 255, 255)');
-			expect(style).to.have.property('zIndex').that.equals('3');
+
+			// IE stores numeric z-index values as a number
+			expect(style.zIndex.toString()).to.equal('3');
 
 			render(<div style={{ color: 'rgb(0, 255, 255)', display: 'inline' }}>test</div>, scratch);
 
@@ -409,7 +411,7 @@ describe('render()', () => {
 			expect(style.cssText).to.equal('color: rgb(0, 255, 255); display: inline;');
 			expect(style).to.have.property('display').that.equals('inline');
 			expect(style).to.have.property('color').that.equals('rgb(0, 255, 255)');
-			expect(style).to.have.property('zIndex').that.equals('');
+			expect(style.zIndex.toString()).to.equal('');
 		});
 
 		// Skip test if the currently running browser doesn't support CSS Custom Properties
