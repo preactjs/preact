@@ -15,6 +15,29 @@ function encodeEntities(str) {
 }
 
 /**
+ * Normalize svg paths spacing. Some browsers insert spaces around letters,
+ * others do not.
+ * @param {string} str
+ * @returns {string}
+ */
+function normalizePath(str) {
+	let len = str.length;
+	let out = '';
+	for (let i = 0; i < len; i++) {
+		const char = str[i];
+		if (/[A-Za-z]/.test(char)) {
+			if (i==0) out+= char + ' ';
+			else out+= (str[i-1]==' ' ? '' : ' ') + char + (i < len -1 ? ' ' : '');
+		}
+		else {
+			out += char;
+		}
+	}
+
+	return out.replace(/\s\s+/g, ' ');
+}
+
+/**
  * Serialize a DOM tree.
  * Uses deterministic sorting where necessary to ensure consistent tests.
  * @param {Element|Node} node	The root node to serialize
@@ -36,11 +59,17 @@ function serializeDomTree(node) {
 		attrs.sort();
 		for (let i=0; i<attrs.length; i++) {
 			const name = attrs[i];
-			const value = node.getAttribute(name);
+			let value = node.getAttribute(name);
 			if (value == null) continue;
 			if (!value && name==='class') continue;
 			str += ' ' + name;
-			str += '="' + encodeEntities(value) + '"';
+			value = encodeEntities(value);
+
+			// normalize svg <path d="value">
+			if (node.localName==='path' && name==='d') {
+				value = normalizePath(value);
+			}
+			str += '="' + value + '"';
 		}
 		str += '>';
 		if (!VOID_ELEMENTS.test(node.localName)) {
