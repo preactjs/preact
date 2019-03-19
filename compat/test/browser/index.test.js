@@ -8,7 +8,7 @@ import React, {
 	createFactory
 } from '../../src';
 import { createElement as preactH } from 'preact';
-import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { setupScratch, teardown, createEvent } from '../../../test/_util/helpers';
 
 let ce = type => document.createElement(type);
 let text = text => document.createTextNode(text);
@@ -176,7 +176,7 @@ describe('preact-compat', () => {
 		it('should normalize beforeinput event listener', () => {
 			let spy = sinon.spy();
 			render(<input onBeforeInput={spy} />, scratch);
-			scratch.firstChild.dispatchEvent(new Event('beforeinput'));
+			scratch.firstChild.dispatchEvent(createEvent('beforeinput'));
 			expect(spy).to.be.calledOnce;
 		});
 	});

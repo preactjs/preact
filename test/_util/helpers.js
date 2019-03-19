@@ -110,6 +110,23 @@ function serializeDomTree(node) {
 }
 
 /**
+ * Normalize event creation in browsers
+ * @param {string} name
+ * @returns {Event}
+ */
+export function createEvent(name) {
+	// Modern browsers
+	if (typeof Event==='function') {
+		return new Event(name);
+	}
+
+	// IE 11...
+	let event = document.createEvent('Event');
+	event.initEvent(name, true, true);
+	return event;
+}
+
+/**
  * Sort a cssText alphabetically.
  * @param {string} cssText
  */
