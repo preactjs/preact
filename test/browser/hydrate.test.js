@@ -138,7 +138,7 @@ describe('hydrate()', () => {
 		clearLog();
 		hydrate(vnode, scratch);
 
-		expect(sortAttributes(scratch.innerHTML)).to.equal(sortAttributes('<div><span same-value="foo" different-value="b" new-value="c">Test</span></div>'));
+		expect(scratch.innerHTML).to.equal(sortAttributes('<div><span same-value="foo" different-value="b" new-value="c">Test</span></div>'));
 		expect(getLog()).to.deep.equal([
 			'<span>Test.setAttribute(different-value, b)',
 			'<span>Test.setAttribute(new-value, c)',
