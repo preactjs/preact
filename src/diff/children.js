@@ -1,6 +1,7 @@
 import { diff, unmount } from './index';
 import { coerceToVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
+import { removeNode } from '../util';
 
 /**
  * Diff the children of a virtual node
@@ -21,8 +22,8 @@ import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent) {
 	let childVNode, i, oldVNode, newDom, childDom;
 
-	let newChildren = getVNodeChildren(newParentVNode);
-	let oldChildren = oldParentVNode==null || oldParentVNode==EMPTY_OBJ ? EMPTY_ARR : getVNodeChildren(oldParentVNode);
+	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode);
+	let oldChildren = oldParentVNode!=null && oldParentVNode!=EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR;
 	let newChildrenTodo = [newChildren];
 	let oldChildrenTodo = [oldChildren];
 	let indexesToResume = [0];
@@ -47,7 +48,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		}
 	}
 
-	// TODO: Consider removing `getVNodeChildren` (& maybe `toChildArray`), integrating it's logic in this loop here,
+	// TODO: Consider removing `toChildArray`, integrating it's logic in this loop here,
 	// and relying only on this loop here?
 
 	// TODO: Consider inlining the `getOldVNode` and `placeChild` functions
@@ -66,13 +67,14 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 				oldChildrenTodo.push(oldChildren);
 				indexesToResume.push(i + 1);
 
-				newChildren = getVNodeChildren(childVNode);
-				oldChildren = oldVNode == null ? EMPTY_ARR : oldVNode.type !== Fragment ? [oldVNode] : getVNodeChildren(oldVNode);
+				newChildren = childVNode._children || toChildArray(childVNode.props.children, childVNode._children=[], coerceToVNode);
+				// TODO: Can we reuse the same logic as the oldChildren assignment above: oldVNode!=null && oldVNode!=EMPTY_OBJ && oldVNode._children || EMPTY_ARR;
+				oldChildren = oldVNode == null ? EMPTY_ARR : oldVNode.type !== Fragment ? [oldVNode] : oldVNode._children || EMPTY_ARR;
 				i = -1; // Restart for loop at the beginning (the `i++` will make this 0 before the next iteration)
 			}
 			else {
 				// Morph the old element into the new one, but don't append it to the dom yet
-				newDom = diff(oldVNode==null ? null : oldVNode._dom, parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
+				newDom = diff(oldVNode==null ? null : oldVNode._dom, parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, null);
 
 				// Only proceed if the vnode has not been unmounted by `diff()` above.
 				if (childVNode!=null && newDom !=null) {
@@ -129,7 +131,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	// }
 
 	// Remove children that are not part of any vnode. Only used by `hydrate`
-	if (excessDomChildren!=null && newParentVNode.type!==Fragment) for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) excessDomChildren[i].remove();
+	if (excessDomChildren!=null && newParentVNode.type!==Fragment) for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
 
 	// Remove remaining oldChildren if there are any.
 	// for (i=oldChildren.length; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
@@ -211,25 +213,12 @@ function getOldVNode(oldChildren, i, childVNode) {
 }
 
 /**
- * Get the children of a virtual node as a flat array
- * @param {import('../internal').VNode} vnode The virtual node to get the
- * children of
- * @returns {Array<import('../internal').VNode>} The virtual node's children
- */
-function getVNodeChildren(vnode) {
-	if (vnode._children==null) {
-		toChildArray(vnode.props.children, vnode._children=[]);
-	}
-	return vnode._children;
-}
-
-/**
  * Flatten a virtual nodes children to a single dimensional array
  * @param {import('../index').ComponentChildren} children The unflattened
  * children of a virtual node
  * @param {Array<import('../internal').VNode | null>} [flattened] An flat array of children to modify
  */
-export function toChildArray(children, flattened) {
+export function toChildArray(children, flattened, map) {
 	if (flattened == null) flattened = [];
 	if (children==null || typeof children === 'boolean') {}
 	else if (Array.isArray(children)) {
@@ -238,7 +227,7 @@ export function toChildArray(children, flattened) {
 		}
 	}
 	else {
-		flattened.push(coerceToVNode(children));
+		flattened.push(map ? map(children) : children);
 	}
 
 	return flattened;

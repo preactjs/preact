@@ -1,5 +1,6 @@
+import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component } from '../../src/index';
-import { setupScratch, teardown, setupRerender } from '../_util/helpers';
+import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx h */
 
@@ -885,6 +886,66 @@ describe('Lifecycle methods', () => {
 	});
 
 	describe('#componentWillReceiveProps', () => {
+		it('should update state when called setState in componentWillReceiveProps', () => {
+			let componentState;
+
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						dummy: 0
+					};
+				}
+				componentDidMount() {
+					// eslint-disable-next-line react/no-did-mount-set-state
+					this.setState({ dummy: 1 });
+				}
+				render() {
+					return <Bar dummy={this.state.dummy} />;
+				}
+			}
+			class Bar extends Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						value: 0
+					};
+				}
+				componentWillReceiveProps() {
+					this.setState({ value: 1 });
+				}
+				render() {
+					componentState = this.state;
+					return <div />;
+				}
+			}
+
+			render(<Foo />, scratch);
+			rerender();
+
+			expect(componentState).to.deep.equal({ value: 1 });
+
+			const cWRP = Foo.prototype.componentWillReceiveProps;
+			delete Foo.prototype.componentWillReceiveProps;
+
+			Foo.prototype.shouldComponentUpdate = cWRP;
+
+			render(null, scratch);
+			render(<Foo />, scratch);
+			rerender();
+
+			expect(componentState, 'via shouldComponentUpdate').to.deep.equal({ value: 1 });
+
+			delete Foo.prototype.shouldComponentUpdate;
+			Foo.prototype.componentWillUpdate = cWRP;
+
+			render(null, scratch);
+			render(<Foo />, scratch);
+			rerender();
+
+			expect(componentState, 'via componentWillUpdate').to.deep.equal({ value: 1 });
+		});
+
 		it('should NOT be called on initial render', () => {
 			class ReceivePropsComponent extends Component {
 				componentWillReceiveProps() {}
@@ -1675,6 +1736,69 @@ describe('Lifecycle methods', () => {
 			expect(curState).to.deep.equal({ value: 2 });
 			expect(nextPropsArg).to.deep.equal({ foo: 'bar' });
 			expect(nextStateArg).to.deep.equal({ value: 4 });
+		});
+
+		it('should update props reference when sCU reutrns false', () => {
+			let spy = sinon.spy();
+
+			let updateState;
+			class Foo extends Component {
+				constructor() {
+					super();
+					updateState = () => this.setState({});
+				}
+
+				shouldComponentUpdate(nextProps) {
+					if (nextProps !== this.props) {
+						spy();
+						return false;
+					}
+					return true;
+				}
+			}
+
+			render(<Foo foo="foo" />, scratch);
+			render(<Foo foo="bar" />, scratch);
+			expect(spy).to.be.calledOnce;
+
+			updateState();
+			rerender();
+
+			expect(spy).to.be.calledOnce;
+		});
+
+		it('should update state reference when sCU returns false', () => {
+			let spy = sinon.spy();
+
+			let updateState;
+			class Foo extends Component {
+				constructor() {
+					super();
+					this.state = { foo: 1 };
+					updateState = () => this.setState({ foo: 2 });
+				}
+
+				shouldComponentUpdate(_, nextState) {
+					if (nextState !== this.state) {
+						spy(this.state, nextState);
+						return false;
+					}
+					return true;
+				}
+			}
+
+			render(<Foo />, scratch);
+			updateState();
+			rerender();
+
+			expect(spy).to.be.calledOnce;
+			expect(spy).to.be.calledWithMatch({ foo: 1 }, { foo: 2 });
+
+			updateState();
+			rerender();
+
+			expect(spy).to.be.calledWithMatch({ foo: 2 }, { foo: 2 });
+			expect(spy).to.be.calledTwice;
 		});
 	});
 

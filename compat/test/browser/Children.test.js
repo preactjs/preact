@@ -1,4 +1,4 @@
-import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { setupScratch, teardown, serializeHtml } from '../../../test/_util/helpers';
 // eslint-disable-next-line no-unused-vars
 import React, { Children, render } from '../../src';
 import { div, span } from '../../../test/_util/dom';
@@ -43,7 +43,7 @@ describe('Children', () => {
 
 		it('should only allow 1 child', () => {
 			render(<Foo>foo</Foo>, scratch);
-			expect(actual.text).to.equal('foo');
+			expect(actual).to.equal('foo');
 		});
 
 		it('should throw if no children are passed', () => {
@@ -73,12 +73,12 @@ describe('Children', () => {
 				span('foo'),
 				span(div('bar'))
 			].join(''));
-			expect(scratch.innerHTML).to.equal(expected);
+			expect(serializeHtml(scratch)).to.equal(expected);
 		});
 
 		it('should work with no children', () => {
 			render(<Foo />, scratch);
-			expect(scratch.innerHTML).to.equal('<div></div>');
+			expect(serializeHtml(scratch)).to.equal('<div></div>');
 		});
 	});
 
@@ -95,7 +95,7 @@ describe('Children', () => {
 				span('foo'),
 				span(div('bar'))
 			].join(''));
-			expect(scratch.innerHTML).to.equal(expected);
+			expect(serializeHtml(scratch)).to.equal(expected);
 		});
 	});
 });

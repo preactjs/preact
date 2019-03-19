@@ -59,8 +59,8 @@ options.unmount = vnode => {
  */
 function getHookState(index) {
 	// Largely inspired by:
-	// * https://github.com/michael-klein/funcy.js/blob/master/src/hooks/core_hooks.mjs
-	// * https://github.com/michael-klein/funcy.js/blob/master/src/lib/renderer.mjs
+	// * https://github.com/michael-klein/funcy.js/blob/f6be73468e6ec46b0ff5aa3cc4c9baf72a29025a/src/hooks/core_hooks.mjs
+	// * https://github.com/michael-klein/funcy.js/blob/650beaa58c43c33a74820a3c98b3c7079cf2e333/src/renderer.mjs
 	// Other implementations to look at:
 	// * https://codesandbox.io/s/mnox05qp8
 
@@ -186,30 +186,34 @@ export function useContext(context) {
  */
 let afterPaint = () => {};
 
-/** @type {MessageChannel} */
-let mc;
+/**
+ * After paint effects consumer.
+ */
+function flushAfterPaintEffects() {
+	afterPaintEffects.forEach(component => {
+		component._afterPaintQueued = false;
+		if (!component._parentDom) return;
+		component.__hooks._pendingEffects.forEach(invokeEffect);
+		component.__hooks._pendingEffects = [];
+	});
+	afterPaintEffects = [];
+}
 
-function onPaint() {
-	mc.port1.postMessage(undefined);
+function scheduleFlushAfterPaint() {
+	setTimeout(flushAfterPaintEffects, 0);
 }
 
 if (typeof window !== 'undefined') {
-	mc = new MessageChannel();
-
 	afterPaint = (component) => {
 		if (!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) {
-			requestAnimationFrame(onPaint);
+			/* istanbul ignore next */
+			if (options.requestAnimationFrame) {
+				options.requestAnimationFrame(flushAfterPaintEffects);
+			}
+			else {
+				requestAnimationFrame(scheduleFlushAfterPaint);
+			}
 		}
-	};
-
-	mc.port2.onmessage = () => {
-		afterPaintEffects.forEach(component => {
-			component._afterPaintQueued = false;
-			if (!component._parentDom) return;
-			component.__hooks._pendingEffects.forEach(invokeEffect);
-			component.__hooks._pendingEffects = [];
-		});
-		afterPaintEffects = [];
 	};
 }
 

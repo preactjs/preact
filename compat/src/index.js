@@ -71,8 +71,8 @@ class ContextProvider {
  */
 function Portal(props) {
 	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
-	let rendered = render(wrap, props.container);
-	return rendered.props.children._component;
+	render(wrap, props.container);
+	return null;
 }
 
 /**
@@ -106,24 +106,6 @@ let Children = {
 };
 
 /**
- * Upgrade all found vnodes recursively
- * @param {Array} arr
- * @param {number} offset
- */
-function upgradeToVNodes(arr, offset) {
-	for (let i=offset || 0; i<arr.length; i++) {
-		let obj = arr[i];
-		if (Array.isArray(obj)) {
-			upgradeToVNodes(obj);
-		}
-		else if (obj && typeof obj==='object' && !isValidElement(obj) && ((obj.props && obj.type) || obj.text!=null)) {
-			if (obj.text) continue;
-			arr[i] = createElement(obj.type, obj.props, obj.props.children);
-		}
-	}
-}
-
-/**
  * Wrap `createElement` to apply various vnode normalizations.
  * @param {import('./internal').VNode["type"]} type The node name or Component constructor
  * @param {object | null | undefined} [props] The vnode's properties
@@ -131,9 +113,7 @@ function upgradeToVNodes(arr, offset) {
  * @returns {import('./internal').VNode}
  */
 function createElement(...args) {
-	upgradeToVNodes(args, 2);
 	let vnode = h(...args);
-	vnode.$$typeof = REACT_ELEMENT_TYPE;
 
 	let type = vnode.type, props = vnode.props;
 	if (typeof type!='function') {
@@ -144,6 +124,14 @@ function createElement(...args) {
 			delete props.defaultValue;
 		}
 
+		if (Array.isArray(props.value) && props.multiple && type==='select') {
+			toChildArray(props.children).forEach((child) => {
+				if (props.value.indexOf(child.props.value)!==-1) {
+					child.props.selected = true;
+				}
+			});
+			delete props.value;
+		}
 		handleElementVNode(vnode, props);
 	}
 
@@ -182,7 +170,7 @@ function cloneElement(element) {
  * @returns {boolean}
  */
 function isValidElement(element) {
-	return element && element.$$typeof===REACT_ELEMENT_TYPE;
+	return element!=null && element.$$typeof===REACT_ELEMENT_TYPE;
 }
 
 /**
@@ -198,6 +186,10 @@ function applyEventNormalization({ type, props }) {
 	if (newProps.ondoubleclick) {
 		props.ondblclick = props[newProps.ondoubleclick];
 		delete props[newProps.ondoubleclick];
+	}
+	if (newProps.onbeforeinput) {
+		props.onbeforeinput = props[newProps.onbeforeinput];
+		delete props[newProps.onbeforeinput];
 	}
 	// for *textual inputs* (incl textarea), normalize `onChange` -> `onInput`:
 	if (newProps.onchange && (type==='textarea' || (type.toLowerCase()==='input' && !/^fil|che|rad/i.test(props.type)))) {
@@ -265,8 +257,8 @@ function findDOMNode(component) {
  * Component class with a predefined `shouldComponentUpdate` implementation
  */
 class PureComponent extends Component {
-	constructor() {
-		super();
+	constructor(props) {
+		super(props);
 		// Some third-party libraries check if this property is present
 		this.isPureReactComponent = true;
 	}
@@ -288,16 +280,22 @@ Component.prototype.isReactComponent = {};
  */
 function memo(c, comparer) {
 	function shouldUpdate(nextProps) {
-		return !comparer(this.props, nextProps);
+		let ref = this.props.ref;
+		let updateRef = ref==nextProps.ref;
+		if (!updateRef) {
+			ref.call ? ref(null) : (ref.current = null);
+		}
+		return (comparer==null
+			? shallowDiffers(this.props, nextProps)
+			: !comparer(this.props, nextProps)) || !updateRef;
 	}
 
-	function Memoed(props, context) {
-		this.shouldComponentUpdate =
-			this.shouldComponentUpdate ||
-			(comparer ? shouldUpdate : PureComponent.prototype.shouldComponentUpdate);
-		return c.call(this, props, context);
+	function Memoed(props) {
+		this.shouldComponentUpdate = shouldUpdate;
+		return h(c, { ...props });
 	}
 	Memoed.displayName = 'Memo(' + (c.displayName || c.name) + ')';
+	Memoed._forwarded = true;
 	return Memoed;
 }
 
@@ -334,8 +332,10 @@ function forwardRef(fn) {
 
 let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
+	vnode.$$typeof = REACT_ELEMENT_TYPE;
+
 	let type = vnode.type;
-	if (type!=null && type._forwarded) {
+	if (type!=null && type._forwarded && vnode.ref!=null) {
 		vnode.props.ref = vnode.ref;
 		vnode.ref = null;
 	}

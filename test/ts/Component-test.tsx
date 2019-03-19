@@ -97,6 +97,25 @@ class RandomChildrenComponent extends Component<RandomChildrenComponenProps> {
 	}
 }
 
+class StaticComponent extends Component<SimpleComponentProps, SimpleState> {
+	static getDerivedStateFromProps(props: SimpleComponentProps, state: SimpleState): Partial<SimpleState> {
+		return {
+			...props,
+			...state
+		}
+	}
+
+	static getDerivedStateFromError(err: Error) {
+		return {
+			name: err.message
+		};
+	}
+
+	render() {
+		return null;
+	}
+}
+
 describe("Component", () => {
 	const component = new SimpleComponent({ initialName: "da name" });
 

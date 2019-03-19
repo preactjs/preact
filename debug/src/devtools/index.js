@@ -1,4 +1,4 @@
-import { options, Fragment } from 'preact';
+import { options, Component, Fragment } from 'preact';
 import { Renderer } from './renderer';
 
 /**
@@ -16,7 +16,7 @@ function catchErrors(fn) {
 			/* istanbul ignore next */
 			console.error('The react devtools encountered an error');
 			/* istanbul ignore next */
-			console.log(e); // eslint-disable-line no-console
+			console.error(e); // eslint-disable-line no-console
 		}
 	};
 }
@@ -152,6 +152,18 @@ export function initDevTools() {
 		if (prevBeforeUnmount!=null) prevBeforeUnmount(vnode);
 		onCommitUnmount(vnode);
 	});
+
+	// Inject tracking into setState
+	const setState = Component.prototype.setState;
+	Component.prototype.setState = function(update, callback) {
+		// Duplicated in setState() but doesn't matter due to the guard.
+		let s = (this._nextState!==this.state && this._nextState) || (this._nextState = Object.assign({}, this.state));
+
+		// Needed in order to check if state has changed after the tree has been committed:
+		this._prevState = Object.assign({}, s);
+
+		return setState.call(this, update, callback);
+	};
 }
 
 /**

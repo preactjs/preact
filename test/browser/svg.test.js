@@ -1,18 +1,7 @@
 import { createElement as h, render } from '../../src/index';
-import { setupScratch, teardown } from '../_util/helpers';
+import { setupScratch, teardown, sortAttributes } from '../_util/helpers';
 
 /** @jsx h */
-
-
-// hacky normalization of attribute order across browsers.
-function sortAttributes(html) {
-	return html.replace(/<([a-z0-9-]+)((?:\s[a-z0-9:_.-]+=".*?")+)((?:\s*\/)?>)/gi, (s, pre, attrs, after) => {
-		let list = attrs.match(/\s[a-z0-9:_.-]+=".*?"/gi).sort( (a, b) => a>b ? 1 : -1 );
-		if (~after.indexOf('/')) after = '></'+pre+'>';
-		return '<' + pre + list.join('') + after;
-	});
-}
-
 
 describe('svg', () => {
 	let scratch;
@@ -116,6 +105,20 @@ describe('svg', () => {
 		expect(scratch.getElementsByTagName('a'))
 			.to.have.property('0')
 			.that.is.a('HTMLAnchorElement');
+	});
+
+	it('should render foreignObject as an svg element', () => {
+		render((
+			<svg>
+				<g>
+					<foreignObject>
+						<a href="#foo">test</a>
+					</foreignObject>
+				</g>
+			</svg>
+		), scratch);
+
+		expect(scratch.querySelector('foreignObject').localName).to.equal('foreignObject');
 	});
 
 	it('should transition from DOM to SVG and back', () => {

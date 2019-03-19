@@ -16,6 +16,6 @@
     "prop-types": "^15.6.2"
   },
   "peerDependencies": {
-    "preact": "10.0.0-alpha.0"
+    "preact": "^10.0.0-alpha.0"
   }
 }

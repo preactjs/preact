@@ -1,6 +1,6 @@
+import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render } from 'preact';
-import { spy } from 'sinon';
-import { setupScratch, teardown, setupRerender } from '../../../test/_util/helpers';
+import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useCallback } from '../../src';
 
 /** @jsx h */
