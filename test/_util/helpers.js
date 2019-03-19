@@ -29,9 +29,8 @@ function normalizePath(str) {
 			if (i==0) out+= char + ' ';
 			else out+= (str[i-1]==' ' ? '' : ' ') + char + (i < len -1 ? ' ' : '');
 		}
-		else {
-			out += char;
-		}
+		else if (char=='-' && str[i-1]!==' ') out+= ' ' + char;
+		else out += char;
 	}
 
 	return out.replace(/\s\s+/g, ' ');
