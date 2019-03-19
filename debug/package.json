@@ -5,7 +5,7 @@
   "private": true,
   "description": "Preact extensions for development",
   "main": "dist/debug.js",
-  "module": "dist/debug.mjs",
+  "module": "dist/debug.module.js",
   "umd:main": "dist/debug.umd.js",
   "source": "src/index.js",
   "license": "MIT",
