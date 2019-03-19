@@ -33,7 +33,7 @@ function normalizePath(str) {
 		else out += char;
 	}
 
-	return out.replace(/\s\s+/g, ' ');
+	return out.replace(/\s\s+/g, ' ').replace(/z/g, 'Z');
 }
 
 /**
