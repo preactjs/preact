@@ -373,13 +373,17 @@ describe('render()', () => {
 			let root = scratch.firstChild;
 			let { style } = root;
 			expect(style.color).to.equal('rgb(255, 255, 255)');
-			expect(style.gridRowStart).to.equal('1');
 			expect(style.background).to.contain('rgb(255, 100, 0)');
 			expect(style.backgroundPosition).to.equal('10px 10px');
 			expect(style.backgroundSize).to.equal('cover');
 			expect(style.padding).to.equal('5px');
 			expect(style.top).to.equal('100px');
 			expect(style.left).to.equal('100%');
+
+			// Only check for this in browsers that support css grids
+			if (typeof scratch.style.grid=='string') {
+				expect(style.gridRowStart).to.equal('1');
+			}
 		});
 
 		it('should replace previous style objects', () => {
