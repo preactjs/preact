@@ -554,8 +554,10 @@ describe('render()', () => {
 					expect(focus, 'focus').to.have.been.calledOnce;
 
 					// IE doesn't set it
-					expect(click).to.have.been.calledWithMatch({ eventPhase: 0 });		// capturing
-					expect(focus).to.have.been.calledWithMatch({ eventPhase: 0 });		// capturing
+					if (!/Edge/.test(navigator.userAgent)) {
+						expect(click).to.have.been.calledWithMatch({ eventPhase: 0 });		// capturing
+						expect(focus).to.have.been.calledWithMatch({ eventPhase: 0 });		// capturing
+					}
 				}
 			});
 		}
