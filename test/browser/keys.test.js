@@ -1,7 +1,6 @@
 import { createElement as h, Component, render } from '../../src/index';
 import { setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
-import { spy } from 'sinon';
 
 /** @jsx h */
 
@@ -68,7 +67,7 @@ describe('keys', () => {
 
 	// https://fb.me/react-special-props
 	it('should not pass key in props', () => {
-		const Foo = spy(() => null);
+		const Foo = sinon.spy(() => null);
 		render(<Foo key="foo" />, scratch);
 		expect(Foo.args[0][0]).to.deep.equal({});
 	});
