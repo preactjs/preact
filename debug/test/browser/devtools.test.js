@@ -1,6 +1,6 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, createElement as h, Fragment, options, Component, render } from 'preact';
-import { getDisplayName, setIn, isRoot, getData, shallowEqual, hasDataChanged, hasProfileDataChanged, getChildren } from '../../src/devtools/custom';
+import { getDisplayName, setIn, isRoot, getData, shallowEqual, hasDataChanged, getChildren } from '../../src/devtools/custom';
 import { setupScratch, teardown, clearOptions } from '../../../test/_util/helpers';
 import { initDevTools } from '../../src/devtools';
 import { Renderer } from '../../src/devtools/renderer';
@@ -273,18 +273,6 @@ describe('devtools', () => {
 
 			b._component = { state: { foo: 2 }, _prevState: { foo: 1 } };
 			expect(hasDataChanged(a, b)).to.equal(true);
-		});
-	});
-
-	describe('hasProfileDataChanged', () => {
-		it('should check if data has changed', () => {
-			let a = createElement('div', { foo: 1 });
-			let b = createElement('div', { foo: 1 });
-			a.startTime = 1;
-			b.startTime = 2;
-
-			expect(hasProfileDataChanged(a, a)).to.equal(false);
-			expect(hasProfileDataChanged(a, b)).to.equal(true);
 		});
 	});
 
@@ -587,7 +575,6 @@ describe('devtools', () => {
 			checkEventReferences(prev.concat(hook.log));
 
 			expect(serialize(hook.log)).to.deep.equal([
-				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -605,7 +592,6 @@ describe('devtools', () => {
 			expect(serialize(hook.log)).to.deep.equal([
 				{ type: 'unmount', component: '#text: Hello World' },
 				{ type: 'mount', component: 'span' },
-				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -719,7 +705,6 @@ describe('devtools', () => {
 			checkEventReferences(prev.concat(hook.log));
 
 			expect(serialize(hook.log)).to.deep.equal([
-				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -734,7 +719,6 @@ describe('devtools', () => {
 				{ type: 'unmount', component: 'span' },
 				{ type: 'unmount', component: '#text: Hello World' },
 				{ type: 'update', component: 'div' },
-				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
