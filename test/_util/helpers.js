@@ -116,8 +116,9 @@ function serializeDomTree(node) {
 export function sortCss(cssText) {
 	return cssText.split(';')
 		.filter(Boolean)
-		.sort((a, b) => a[0]==='-' ? -1 : b[0]==='-' ? 1 : a - b)
-		.join(';') + ';';
+		.map(s => s.replace(/^\s+|\s+$/g, '').replace(/(\s*:\s*)/g, ': '))
+		.sort((a, b) => a[0]==='-' ? -1 : b[0]==='-' ? 1 : a.localeCompare(b))
+		.join('; ') + ';';
 }
 
 /**

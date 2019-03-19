@@ -418,7 +418,7 @@ describe('render()', () => {
 		if (window.CSS && CSS.supports('color', 'var(--fake-var)')) {
 			it('should support css custom properties', () => {
 				render(<div style={{ '--foo': 'red', color: 'var(--foo)' }}>test</div>, scratch);
-				expect(sortCss(scratch.firstChild.style.cssText)).to.equal('--foo:red; color: var(--foo);');
+				expect(sortCss(scratch.firstChild.style.cssText)).to.equal('--foo: red; color: var(--foo);');
 				expect(window.getComputedStyle(scratch.firstChild).color).to.equal('rgb(255, 0, 0)');
 			});
 		}
