@@ -241,28 +241,32 @@ describe('render()', () => {
 		expect(root.children[3]).to.have.property('value', '');
 	});
 
-	it('should not clear falsy DOM properties', () => {
-		function test(val) {
-			render((
-				<div>
-					<input value={val} />
-					<table border={val} />
-				</div>
-			), scratch);
-		}
+	// IE or IE Edge will throw when attribute values don't conform to the
+	// spec. That's the correct behaviour, but bad for this test...
+	if (!/(Edge|MSIE|Trident)/.test(navigator.userAgent)) {
+		it('should not clear falsy DOM properties', () => {
+			function test(val) {
+				render((
+					<div>
+						<input value={val} />
+						<table border={val} />
+					</div>
+				), scratch);
+			}
 
-		test('2');
-		test(false);
-		expect(scratch.innerHTML).to.equal('<div><input><table border="false"></table></div>', 'for false');
+			test('2');
+			test(false);
+			expect(scratch.innerHTML).to.equal('<div><input><table border="false"></table></div>', 'for false');
 
-		test('3');
-		test(null);
-		expect(scratch.innerHTML).to.equal('<div><input><table border=""></table></div>', 'for null');
+			test('3');
+			test(null);
+			expect(scratch.innerHTML).to.equal('<div><input><table border=""></table></div>', 'for null');
 
-		test('4');
-		test(undefined);
-		expect(scratch.innerHTML).to.equal('<div><input><table border=""></table></div>', 'for undefined');
-	});
+			test('4');
+			test(undefined);
+			expect(scratch.innerHTML).to.equal('<div><input><table border=""></table></div>', 'for undefined');
+		});
+	}
 
 	// Test for developit/preact#651
 	it('should set enumerable boolean attribute', () => {
