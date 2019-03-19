@@ -425,6 +425,11 @@ describe('render()', () => {
 				expect(sortCss(scratch.firstChild.style.cssText)).to.equal('--foo: red; color: var(--foo);');
 				expect(window.getComputedStyle(scratch.firstChild).color).to.equal('rgb(255, 0, 0)');
 			});
+
+			it('should not add "px" suffix for custom properties', () => {
+				render(<div style={{ '--foo': 2, animationDelay: 'calc(var(--foo) * 20ms)' }}>test</div>, scratch);
+				expect(sortCss(scratch.firstChild.style.cssText)).to.equal('--foo: 2; animation-delay: calc(var(--foo) * 20ms);');
+			});
 		}
 	});
 
