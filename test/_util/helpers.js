@@ -4,6 +4,25 @@ import { clearLog, getLog } from './logCall';
 
 /** @jsx h */
 
+export function supportsPassiveEvents() {
+	let supported = false;
+	try {
+		let options = {
+			get passive() {
+				supported = true;
+				return undefined;
+			}
+		};
+
+		window.addEventListener('test', options, options);
+		window.removeEventListener('test', options, options);
+	}
+	catch (err) {
+		supported = false;
+	}
+	return supported;
+}
+
 
 const VOID_ELEMENTS = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
 

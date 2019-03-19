@@ -2,7 +2,7 @@
 
 import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component } from '../../src/index';
-import { setupScratch, teardown, getMixedArray, mixedArrayHTML, sortCss, serializeHtml } from '../_util/helpers';
+import { setupScratch, teardown, getMixedArray, mixedArrayHTML, sortCss, serializeHtml, supportsPassiveEvents } from '../_util/helpers';
 
 /** @jsx h */
 
@@ -531,31 +531,34 @@ describe('render()', () => {
 			expect(click).not.to.have.been.called;
 		});
 
-		it('should use capturing for event props ending with *Capture', () => {
-			let click = sinon.spy(),
-				focus = sinon.spy();
+		// Skip test if browser doesn't support passive events
+		if (supportsPassiveEvents()) {
+			it('should use capturing for event props ending with *Capture', () => {
+				let click = sinon.spy(),
+					focus = sinon.spy();
 
-			render((
-				<div onClickCapture={click} onFocusCapture={focus}>
-					<button />
-				</div>
-			), scratch);
+				render((
+					<div onClickCapture={click} onFocusCapture={focus}>
+						<button />
+					</div>
+				), scratch);
 
-			let root = scratch.firstChild;
-			root.firstElementChild.click();
-			root.firstElementChild.focus();
+				let root = scratch.firstChild;
+				root.firstElementChild.click();
+				root.firstElementChild.focus();
 
-			expect(click, 'click').to.have.been.calledOnce;
+				expect(click, 'click').to.have.been.calledOnce;
 
-			if (DISABLE_FLAKEY!==true) {
-				// Focus delegation requires a 50b hack I'm not sure we want to incur
-				expect(focus, 'focus').to.have.been.calledOnce;
+				if (DISABLE_FLAKEY!==true) {
+					// Focus delegation requires a 50b hack I'm not sure we want to incur
+					expect(focus, 'focus').to.have.been.calledOnce;
 
-				// IE doesn't set it
-				expect(click).to.have.been.calledWithMatch({ eventPhase: 0 });		// capturing
-				expect(focus).to.have.been.calledWithMatch({ eventPhase: 0 });		// capturing
-			}
-		});
+					// IE doesn't set it
+					expect(click).to.have.been.calledWithMatch({ eventPhase: 0 });		// capturing
+					expect(focus).to.have.been.calledWithMatch({ eventPhase: 0 });		// capturing
+				}
+			});
+		}
 	});
 
 	describe('dangerouslySetInnerHTML', () => {
