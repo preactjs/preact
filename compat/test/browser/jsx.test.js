@@ -1,4 +1,4 @@
-import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { setupScratch, teardown, serializeHtml } from '../../../test/_util/helpers';
 import React, { isValidElement } from '../../src';
 import { h as preactH } from 'preact';
 
@@ -26,7 +26,7 @@ describe('jsx', () => {
 		expect(jsx.props).to.have.property('className', 'foo bar');
 
 		React.render(jsx, scratch);
-		expect(scratch.innerHTML).to.equal('<div class="foo bar" data-foo="bar"><span id="some_id">inner!</span>ab</div>');
+		expect(serializeHtml(scratch)).to.equal('<div class="foo bar" data-foo="bar"><span id="some_id">inner!</span>ab</div>');
 	});
 
 	describe('isValidElement', () => {

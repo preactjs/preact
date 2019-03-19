@@ -1,6 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render } from 'preact';
-import { spy } from 'sinon';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useState } from '../../src';
 
@@ -42,7 +41,7 @@ describe('useState', () => {
 	});
 
 	it('can initialize the state via a function', () => {
-		const initState = spy(() => { 1; });
+		const initState = sinon.spy(() => { 1; });
 
 		function Comp() {
 			useState(initState);
@@ -59,7 +58,7 @@ describe('useState', () => {
 		let lastState;
 		let doSetState;
 
-		const Comp = spy(() => {
+		const Comp = sinon.spy(() => {
 			const [state, setState] = useState(0);
 			lastState = state;
 			doSetState = setState;
@@ -83,8 +82,6 @@ describe('useState', () => {
 	});
 
 	it('can be set by another component', () => {
-		const initState = { count: 0 };
-
 		function StateContainer() {
 			const [count, setCount] = useState(0);
 			return (<div>

@@ -1,6 +1,6 @@
 import { createElement as h, render, Component, Fragment } from '../../src/index';
 import { setupRerender } from 'preact/test-utils';
-import { setupScratch, teardown, getMixedArray, mixedArrayHTML } from '../_util/helpers';
+import { setupScratch, teardown, getMixedArray, mixedArrayHTML, serializeHtml } from '../_util/helpers';
 
 /** @jsx h */
 
@@ -923,7 +923,7 @@ describe('Components', () => {
 				foo: 'bar'
 			});
 
-			expect(sortAttributes(scratch.innerHTML)).to.equal(sortAttributes('<div foo="bar" j="2" i="2">inner</div>'));
+			expect(serializeHtml(scratch)).to.equal(sortAttributes('<div foo="bar" j="2" i="2">inner</div>'));
 
 			// update & flush
 			doRender();
@@ -965,7 +965,7 @@ describe('Components', () => {
 			doRender();
 			rerender();
 
-			expect(sortAttributes(scratch.innerHTML)).to.equal(sortAttributes('<div foo="bar" j="4" i="5">inner</div>'));
+			expect(serializeHtml(scratch)).to.equal(sortAttributes('<div foo="bar" j="4" i="5">inner</div>'));
 		});
 
 		it('should resolve intermediary functional component', () => {
