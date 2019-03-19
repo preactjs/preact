@@ -141,7 +141,9 @@ export function clearOptions() {
  * @param {HTMLDivElement} scratch
  */
 export function teardown(scratch) {
-	scratch.parentNode.removeChild(scratch);
+	if (scratch) {
+		scratch.parentNode.removeChild(scratch);
+	}
 
 	if (oldOptions != null) {
 		assign(options, oldOptions);
