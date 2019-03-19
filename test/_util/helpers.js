@@ -108,7 +108,10 @@ function setupDeterministicInnerHTML(element) {
  * @param {string} cssText
  */
 export function sortCss(cssText) {
-	return cssText.split(';').sort((a, b) => a[0]==='-' ? a : a - b).join(';');
+	return cssText.split(';')
+		.filter(Boolean)
+		.sort((a, b) => a[0]==='-' ? -1 : b[0]==='-' ? 1 : a - b)
+		.join(';') + ';';
 }
 
 /**
