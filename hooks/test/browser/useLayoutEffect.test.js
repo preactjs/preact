@@ -1,6 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render } from 'preact';
-import { spy } from 'sinon';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useEffectAssertions } from './useEffectAssertions.test';
 import { useLayoutEffect } from '../../src';
@@ -12,12 +11,8 @@ describe('useLayoutEffect', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
-	/** @type {() => void} */
-	let rerender;
-
 	beforeEach(() => {
 		scratch = setupScratch();
-		rerender = setupRerender();
 	});
 
 	afterEach(() => {
@@ -34,8 +29,8 @@ describe('useLayoutEffect', () => {
 
 
 	it('calls the effect immediately after render', () => {
-		const cleanupFunction = spy();
-		const callback = spy(() => cleanupFunction);
+		const cleanupFunction = sinon.spy();
+		const callback = sinon.spy(() => cleanupFunction);
 
 		function Comp() {
 			useLayoutEffect(callback);
@@ -55,7 +50,7 @@ describe('useLayoutEffect', () => {
 	});
 
 	it('works on a nested component', () => {
-		const callback = spy();
+		const callback = sinon.spy();
 
 		function Parent() {
 			return (

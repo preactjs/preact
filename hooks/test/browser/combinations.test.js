@@ -1,6 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render } from 'preact';
-import { spy } from 'sinon';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useState, useReducer, useEffect, useLayoutEffect, useRef } from '../../src';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
@@ -60,7 +59,7 @@ describe('combinations', () => {
 	});
 
 	it('can rerender asynchronously from within an effect', () => {
-		const didRender = spy();
+		const didRender = sinon.spy();
 
 		function Comp() {
 			const [counter, setCounter] = useState(0);
@@ -80,7 +79,7 @@ describe('combinations', () => {
 	});
 
 	it('can rerender synchronously from within a layout effect', () => {
-		const didRender = spy();
+		const didRender = sinon.spy();
 
 		function Comp() {
 			const [counter, setCounter] = useState(0);
