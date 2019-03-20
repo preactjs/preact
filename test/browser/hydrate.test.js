@@ -146,6 +146,12 @@ describe('hydrate()', () => {
 		]);
 	});
 
+	it('should update class attribute via className prop', () => {
+		scratch.innerHTML = '<div class="foo">bar</div>';
+		hydrate(<div className="foo">bar</div>, scratch);
+		expect(scratch.innerHTML).to.equal('<div class="foo">bar</div>');
+	});
+
 	it('should correctly hydrate with Fragments', () => {
 		const html = ul([
 			li('1'),
