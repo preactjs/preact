@@ -1,6 +1,6 @@
 import { encodeEntities, indent, isLargeString, styleObjToCss, assign, getChildren } from './util';
 import { ENABLE_PRETTY } from '../env';
-import { options } from 'preact';
+import { options, Fragment } from 'preact';
 
 const SHALLOW = { shallow: true };
 
@@ -58,6 +58,16 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 		isComponent = true;
 		if (opts.shallow && (inner || opts.renderRootComponent===false)) {
 			nodeName = getComponentName(nodeName);
+		}
+		else if (nodeName===Fragment) {
+			let rendered = '';
+			let children = [];
+			getChildren(children, vnode.props.children);
+
+			for (let i = 0; i < children.length; i++) {
+				rendered += renderToString(children[i], context, opts, opts.shallowHighOrder!==false, isSvgMode);
+			}
+			return rendered;
 		}
 		else {
 			let rendered;

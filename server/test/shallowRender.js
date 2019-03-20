@@ -1,5 +1,5 @@
 import { shallowRender } from '../src';
-import { h } from 'preact';
+import { h, Fragment } from 'preact';
 import chai, { expect } from 'chai';
 import { spy } from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -32,5 +32,14 @@ describe('shallowRender()', () => {
 
 		expect(rendered).to.equal(`<div bar="1"><b>test child</b><span>asdf</span></div>`);
 		expect(Test).to.have.been.calledOnce;
+	});
+
+	it('should ignore Fragments', () => {
+		let rendered = shallowRender(
+			<Fragment>
+				<div>foo</div>
+			</Fragment>
+		);
+		expect(rendered).to.equal(`<div>foo</div>`);
 	});
 });

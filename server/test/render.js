@@ -1,5 +1,5 @@
 import { render, shallowRender } from '../src';
-import { h, Component, createContext } from 'preact';
+import { h, Component, createContext, Fragment } from 'preact';
 import { useState, useContext, useEffect } from 'preact/hooks';
 import chai, { expect } from 'chai';
 import { spy, stub, match } from 'sinon';
@@ -605,6 +605,67 @@ describe('render', () => {
 			expect(render(<Foo />)).to.equal('<div></div>');
 			
 			expect(Bar).to.have.been.calledOnce.and.calledWithMatch({ count: 1 });
+		});
+	});
+
+	describe('Fragments', () => {
+		it('should skip Fragment node', () => {
+			let html = render(<div><Fragment>foo</Fragment></div>);
+			expect(html).to.equal('<div>foo</div>');
+		});
+
+		it('should skip Fragment node with multiple children', () => {
+			let html = render(
+				<div>
+					<Fragment>
+						foo
+						<span>bar</span>
+					</Fragment>
+				</div>
+			);
+			expect(html).to.equal('<div>foo<span>bar</span></div>');
+		});
+
+		it('should skip Fragment node with multiple children #2', () => {
+			let html = render(
+				<div>
+					<Fragment>
+						<div>foo</div>
+						<div>bar</div>
+					</Fragment>
+				</div>
+			);
+			expect(html).to.equal('<div><div>foo</div><div>bar</div></div>');
+		});
+
+		it('should skip Fragment even if it has props', () => {
+			let html = render(
+				<div>
+					<Fragment key="2">foo</Fragment>
+				</div>
+			);
+			expect(html).to.equal('<div>foo</div>');
+		});
+
+		it('should skip sibling Fragments', () => {
+			let html = render(
+				<div>
+					<Fragment>foo</Fragment>
+					<Fragment>bar</Fragment>
+				</div>
+			);
+			expect(html).to.equal('<div>foobar</div>');
+		});
+
+		it('should skip nested Fragments', () => {
+			let html = render(
+				<div>
+					<Fragment>
+						<Fragment>foo</Fragment>
+					</Fragment>
+				</div>
+			);
+			expect(html).to.equal('<div>foo</div>');
 		});
 	});
 
