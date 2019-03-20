@@ -21,6 +21,7 @@ export function Component(props, context) {
 	// Other properties that Component will have set later,
 	// shown here as commented out for quick reference
 	// this.base = null;
+	// this._context = null;
 	// this._ancestorComponent = null; // Always set right after instantiation
 	// this._vnode = null;
 	// this._nextState = null; // Only class components
