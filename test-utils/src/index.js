@@ -22,7 +22,6 @@ export function act(cb) {
 	if (flush) {
 		flush();
 	}
-	// Rerender
 	rerender();
 	// If rerendering with new state has triggered effects
 	// flush them aswell since options.raf will have repopulated this.
