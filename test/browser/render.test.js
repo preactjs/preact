@@ -254,6 +254,14 @@ describe('render()', () => {
 		expect(root.children[3]).to.have.property('value', '');
 	});
 
+	it('should set value inside the specified range', () => {
+		render(
+			<input type="range" value={0.5} min="0" max="1" step="0.05" />,
+			scratch
+		);
+		expect(scratch.firstChild.value).to.equal('0.5');
+	});
+
 	// IE or IE Edge will throw when attribute values don't conform to the
 	// spec. That's the correct behaviour, but bad for this test...
 	if (!/(Edge|MSIE|Trident)/.test(navigator.userAgent)) {

@@ -15,8 +15,13 @@ export function diffProps(dom, newProps, oldProps, isSvg) {
 			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
 		}
 	}
+
+	// `value` needs to be applied after an input's `min`, `max` and `step`
+	// attribute are set. See preact/#850
+	if (newProps.value!=null) dom.value = newProps.value;
+
 	for (let i in oldProps) {
-		if (i!=='children' && i!=='key' && (!newProps || !(i in newProps))) {
+		if (i!=='children' && i!=='key' && !(i in newProps)) {
 			setProperty(dom, i, null, oldProps[i], isSvg);
 		}
 	}
