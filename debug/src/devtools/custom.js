@@ -187,13 +187,3 @@ export function hasDataChanged(prev, next) {
 		|| prev._dom !== next._dom
 		|| prev.ref !== next.ref;
 }
-
-/**
- * Check if a the profiling data ahs changed between vnodes
- * @param {import('../internal').VNode} next
- * @param {import('../internal').VNode} prev
- * @returns {boolean}
- */
-export function hasProfileDataChanged(prev, next) {
-	return prev.startTime!==next.startTime || prev.endTime!==next.endTime;
-}

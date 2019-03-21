@@ -5,7 +5,7 @@
   "private": true,
   "description": "Test-utils for Preact",
   "main": "dist/testUtils.js",
-  "module": "dist/testUtils.mjs",
+  "module": "dist/testUtils.module.js",
   "umd:main": "dist/testUtils.umd.js",
   "source": "src/index.js",
   "license": "MIT",
