@@ -1,3 +1,3 @@
-if (process.env!=='production') {
-	require('./dist/debug');
+if (process.env.NODE_ENV!=='production') {
+	require('./dist/preact-debug');
 }
