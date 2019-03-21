@@ -17,7 +17,6 @@
     "build:hooks": "microbundle build --raw --cwd hooks",
     "build:test-utils": "microbundle build --raw --cwd test-utils",
     "build:compat": "microbundle build --raw --cwd compat --globals 'preact/hooks=preactHooks'",
-    "postbuild": "cp -R test-utils/ compat/test-utils",
     "dev": "microbundle watch --raw --format cjs,umd",
     "dev:hooks": "microbundle watch --raw --format cjs --cwd hooks",
     "test": "npm-run-all lint build --parallel test:mocha test:karma test:ts",

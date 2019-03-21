@@ -7,4 +7,3 @@ package-lock.json
 .idea
 test/ts/**/*.js
 coverage
-compat/test-utils
