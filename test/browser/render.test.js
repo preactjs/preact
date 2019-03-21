@@ -418,12 +418,25 @@ describe('render()', () => {
 			expect(style.zIndex.toString()).to.equal('');
 		});
 
+		it('should remove old styles', () => {
+			render(<div style="color: red;" />, scratch);
+			let s = scratch.firstChild.style;
+			sinon.spy(s, 'setProperty');
+			render(<div style={{ background: 'blue' }} />, scratch);
+			expect(s.setProperty).to.be.calledOnce;
+		});
+
 		// Skip test if the currently running browser doesn't support CSS Custom Properties
 		if (window.CSS && CSS.supports('color', 'var(--fake-var)')) {
 			it('should support css custom properties', () => {
 				render(<div style={{ '--foo': 'red', color: 'var(--foo)' }}>test</div>, scratch);
 				expect(sortCss(scratch.firstChild.style.cssText)).to.equal('--foo: red; color: var(--foo);');
 				expect(window.getComputedStyle(scratch.firstChild).color).to.equal('rgb(255, 0, 0)');
+			});
+
+			it('should not add "px" suffix for custom properties', () => {
+				render(<div style={{ '--foo': '100px', width: 'var(--foo)' }}>test</div>, scratch);
+				expect(sortCss(scratch.firstChild.style.cssText)).to.equal('--foo: 100px; width: var(--foo);');
 			});
 		}
 	});
