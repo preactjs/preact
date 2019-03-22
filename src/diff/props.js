@@ -11,7 +11,7 @@ import options from '../options';
  */
 export function diffProps(dom, newProps, oldProps, isSvg) {
 	for (let i in newProps) {
-		if (i!=='children' && i!=='key' && (!oldProps || oldProps[i]!=newProps[i])) {
+		if (i!=='children' && i!=='key' && (!oldProps || ((i==='value' || i==='checked') ? dom : oldProps)[i]!==newProps[i])) {
 			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
 		}
 	}
