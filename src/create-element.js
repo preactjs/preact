@@ -84,7 +84,7 @@ export /* istanbul ignore next */ function Fragment() { }
 export function coerceToVNode(possibleVNode) {
 	if (possibleVNode == null || typeof possibleVNode === 'boolean') return null;
 	if (typeof possibleVNode === 'string' || typeof possibleVNode === 'number') {
-		return createVNode(null, null, possibleVNode, null, null);
+		return createVNode(null, null, possibleVNode);
 	}
 
 	if (Array.isArray(possibleVNode)) {
@@ -93,7 +93,7 @@ export function coerceToVNode(possibleVNode) {
 
 	// Clone vnode if it has already been used. ceviche/#57
 	if (possibleVNode._dom!=null) {
-		return createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.text, possibleVNode.key, null);
+		return createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.text, possibleVNode.key);
 	}
 
 	return possibleVNode;
