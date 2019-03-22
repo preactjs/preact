@@ -787,8 +787,8 @@ describe('Fragment', () => {
 		clearLog();
 		render((
 			<Fragment>
-				<Fragment>foo</Fragment>
-				<Fragment>bar</Fragment>
+				<Fragment key="a">foo</Fragment>
+				<Fragment key="b">bar</Fragment>
 			</Fragment>
 		), scratch);
 

@@ -63,14 +63,15 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		// Check if we find a corresponding element in oldChildren and store the
 		// index where the element was found.
 		p = oldChildren[i];
-		if (p != null && (childVNode.key==null && p.key==null ? (childVNode.type === p.type) : (childVNode.key === p.key))) {
-			index = i;
-		}
-		else {
-			for (j=0; j<oldChildrenLength; j++) {
-				p = oldChildren[j];
-				if (p!=null) {
-					if (childVNode.key==null && p.key==null ? (childVNode.type === p.type) : (childVNode.key === p.key)) {
+
+		if (childVNode!=null) {
+			if (p != null && (childVNode.key==null && p.key==null ? (childVNode.type === p.type) : (childVNode.key === p.key))) {
+				index = i;
+			}
+			else if (childVNode.key!=null) {
+				for (j=0; j<oldChildrenLength; j++) {
+					p = oldChildren[j];
+					if (p!=null && childVNode.key === p.key) {
 						index = j;
 						break;
 					}
@@ -138,7 +139,8 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
  */
 export function toChildArray(children, flattened, map) {
 	if (flattened == null) flattened = [];
-	if (children==null || typeof children === 'boolean') {}
+	if (children===undefined) {}
+	else if (children==null || typeof children === 'boolean') flattened.push(null);
 	else if (Array.isArray(children)) {
 		for (let i=0; i < children.length; i++) {
 			toChildArray(children[i], flattened);

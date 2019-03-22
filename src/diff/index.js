@@ -50,7 +50,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			// we'll set `dom` to the correct value just a few lines later.
 			dom = null;
 
-			if (newVNode._children.length) {
+			if (newVNode._children.length && newVNode._children[0]!=null) {
 				dom = newVNode._children[0]._dom;
 
 				// If the last child is a Fragment, use _lastDomChild, else use _dom
@@ -137,7 +137,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 
 			if (options.render) options.render(newVNode);
 
-			let prev = c._prevVNode;
+			let prev = c._prevVNode || null;
 			let vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
 			c._dirty = false;
 
@@ -362,7 +362,7 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 	}
 	else if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {
-			unmount(r[i], ancestorComponent, skipRemove);
+			if (r[i]!=null) unmount(r[i], ancestorComponent, skipRemove);
 		}
 	}
 
