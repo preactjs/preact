@@ -24,9 +24,47 @@ describe('act', () => {
 		expect(options.requestAnimationFrame).to.equal(undefined);
 	});
 
-	it('should drain the queue of hooks', () => {
+	it('should flush pending effects', () => {
+		let spy = sinon.spy();
+		function StateContainer() {
+			useEffect(spy);
+			return <div />;
+		}
+		act(() => render(<StateContainer />, scratch));
+		expect(spy).to.be.calledOnce;
+	});
+
+	it('should flush pending and initial effects', () => {
+		const spy = sinon.spy();
 		function StateContainer() {
 			const [count, setCount] = useState(0);
+			useEffect(() => spy(), [count]);
+			return (
+				<div>
+					<p>Count: {count}</p>
+					<button onClick={() => setCount(c => c + 11)} />
+				</div>
+			);
+		}
+
+		act(() => render(<StateContainer />, scratch));
+		expect(spy).to.be.calledOnce;
+		expect(scratch.textContent).to.include('Count: 0');
+		act(() => {
+			const button = scratch.querySelector('button');
+			button.click();
+			expect(spy).to.be.calledOnce;
+			expect(scratch.textContent).to.include('Count: 0');
+		});
+		expect(spy).to.be.calledTwice;
+		expect(scratch.textContent).to.include('Count: 1');
+	});
+
+	it('should drain the queue of hooks', () => {
+		const spy = sinon.spy();
+		function StateContainer() {
+			const [count, setCount] = useState(0);
+			useEffect(() => spy());
 			return (<div>
 				<p>Count: {count}</p>
 				<button onClick={() => setCount(c => c + 11)} />
@@ -41,17 +79,6 @@ describe('act', () => {
 			expect(scratch.textContent).to.include('Count: 0');
 		});
 		expect(scratch.textContent).to.include('Count: 1');
-	});
-
-	it('should flush pending effects', () => {
-		let spy = sinon.spy();
-		function StateContainer() {
-			useEffect(spy);
-			return <div />;
-		}
-
-		act(() => render(<StateContainer />, scratch));
-		expect(spy).to.be.calledOnce;
 	});
 
 	it('should restore options.requestAnimationFrame', () => {

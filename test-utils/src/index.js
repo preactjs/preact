@@ -11,16 +11,23 @@ export function setupRerender() {
 }
 
 export function act(cb) {
-	const previousDebounce = options.debounceRendering;
 	const previousRequestAnimationFrame = options.requestAnimationFrame;
 	const rerender = setupRerender();
 	let flush;
+	// Override requestAnimationFrame so we can flush pending hooks.
 	options.requestAnimationFrame = (fc) => flush = fc;
+	// Execute the callback we were passed.
 	cb();
+	// State COULD be built up flush it.
 	if (flush) {
 		flush();
 	}
 	rerender();
-	options.debounceRendering = previousDebounce;
+	// If rerendering with new state has triggered effects
+	// flush them aswell since options.raf will have repopulated this.
+	if (flush) {
+		flush();
+	}
+	options.debounceRendering = Component.__test__previousDebounce;
 	options.requestAnimationFrame = previousRequestAnimationFrame;
 }
