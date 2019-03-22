@@ -806,4 +806,36 @@ describe('render()', () => {
 		expect(document.activeElement).to.equal(input);
 		expect(scratch.innerHTML).to.contain(`<span>${todoText}</span>`);
 	});
+
+	it('should always diff `checked` and `value` properties against the DOM', () => {
+		// See https://github.com/developit/preact/issues/1324
+
+		let inputs;
+		let text;
+		let checkbox;
+
+		class Inputs extends Component {
+			render() {
+				return (
+					<div>
+						<input value={'Hello'} ref={el => text = el} />
+						<input type="checkbox" checked ref={el => checkbox = el} />
+					</div>
+				);
+			}
+		}
+
+		render(<Inputs ref={x => inputs = x} />, scratch);
+
+		expect(text.value).to.equal('Hello');
+		expect(checkbox.checked).to.equal(true);
+
+		text.value = 'World';
+		checkbox.checked = false;
+
+		inputs.forceUpdate();
+
+		expect(text.value).to.equal('Hello');
+		expect(checkbox.checked).to.equal(true);
+	});
 });
