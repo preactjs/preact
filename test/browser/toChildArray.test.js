@@ -114,7 +114,7 @@ describe('props.children', () => {
 		expect(scratch.innerHTML).to.equal(`<div>0<span></span><input><div></div>1</div>`);
 	});
 
-	it.skip('returns an array with non-renderables removed with a mixed array as children', () => {
+	it('returns an array with non-renderables removed with a mixed array as children', () => {
 		const mixedArray = getMixedArray();
 		render(<Foo>{mixedArray}</Foo>, scratch);
 
@@ -127,7 +127,7 @@ describe('props.children', () => {
 				return child.reduce(filterAndReduceChildren, acc);
 			}
 
-			if (child != null && typeof child != 'boolean' && typeof child != 'function') {
+			if (child !== undefined && typeof child != 'function') {
 				acc.push(child);
 			}
 
@@ -144,6 +144,9 @@ describe('props.children', () => {
 
 			if (typeof originalChild == 'string' || typeof originalChild == 'number') {
 				expect(actualChild).to.equal(originalChild);
+			}
+			else if (typeof originalChild == 'boolean' || originalChild == null) {
+				expect(actualChild).to.equal(null);
 			}
 			else {
 				expect(actualChild.type).to.equal(originalChild.type);
