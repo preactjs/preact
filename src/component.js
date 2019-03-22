@@ -1,5 +1,5 @@
 import { assign } from './util';
-import { diff, commitRoot } from './diff/index';
+import { diff, commitRoot, saveFocus } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
 
@@ -62,6 +62,7 @@ Component.prototype.setState = function(update, callback) {
  * re-renderd
  */
 Component.prototype.forceUpdate = function(callback) {
+	saveFocus();
 	let vnode = this._vnode, dom = this._vnode._dom, parentDom = this._parentDom;
 	if (parentDom) {
 		// Set render mode so that we can differantiate where the render request

@@ -25,7 +25,7 @@ import { removeNode } from '../util';
  */
 export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, oldDom) {
 	let childVNode, i, j, p, index, oldVNode, newDom,
-		nextDom, sibDom, focus;
+		nextDom, sibDom;
 
 	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode);
 	let oldChildren = oldParentVNode!=null && oldParentVNode!=EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR;
@@ -93,12 +93,6 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 		// Only proceed if the vnode has not been unmounted by `diff()` above.
 		if (childVNode!=null && newDom !=null) {
-			// Store focus in case moving children around changes it. Note that we
-			// can't just check once for every tree, because we have no way to
-			// differentiate wether the focus was reset by the user in a lifecycle
-			// hook or by reordering dom nodes.
-			focus = document.activeElement;
-
 			if (childVNode._lastDomChild != null) {
 				// Only Fragments or components that return Fragment like VNodes will
 				// have a non-null _lastDomChild. Continue the diff from the end of
@@ -123,11 +117,6 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 					}
 					parentDom.insertBefore(newDom, oldDom);
 				}
-			}
-
-			// Restore focus if it was changed
-			if (focus!==document.activeElement) {
-				focus.focus();
 			}
 
 			oldDom = newDom!=null ? newDom.nextSibling : nextDom;
