@@ -196,13 +196,9 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 	return dom;
 }
 
+// Store focus in case moving children around changes it.
 let focus;
-
 export function saveFocus() {
-	// Store focus in case moving children around changes it. Note that we
-	// can't just check once for every tree, because we have no way to
-	// differentiate wether the focus was reset by the user in a lifecycle
-	// hook or by reordering dom nodes.
 	focus = document.activeElement;
 }
 
