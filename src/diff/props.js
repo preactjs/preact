@@ -35,6 +35,7 @@ let CAMEL_REG = /-?(?=[A-Z])/g;
 function setProperty(dom, name, value, oldValue, isSvg) {
 	let v;
 	if (name==='class' || name==='className') name = isSvg ? 'class' : 'className';
+	const ns = isSvg && (name !== (name = name.replace(/^xlink:?/, '')));
 
 	if (name==='style') {
 
@@ -85,10 +86,12 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		dom[name] = value==null ? '' : value;
 	}
 	else if (value==null || value===false) {
-		dom.removeAttribute(name);
+		if (ns) dom.removeAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase());
+		else dom.removeAttribute(name);
 	}
 	else if (typeof value!=='function') {
-		dom.setAttribute(name, value);
+		if (ns) dom.setAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase(), value);
+		else dom.setAttribute(name, value);
 	}
 }
 
