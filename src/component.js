@@ -13,6 +13,7 @@ import { Fragment } from './create-element';
 export function Component(props, context) {
 	this.props = props;
 	this.context = context;
+	// this.constructor // When component is functional component, this is reset to functional component
 	// if (this.state==null) this.state = {};
 	// this.state = {};
 	// this._dirty = true;
@@ -27,7 +28,6 @@ export function Component(props, context) {
 	// this._nextState = null; // Only class components
 	// this._prevVNode = null;
 	// this._processingException = null; // Always read, set only when handling error
-	// this._constructor = null; // Only functional components, always set right after instantiation
 }
 
 /**
