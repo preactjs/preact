@@ -13,7 +13,7 @@ import { Fragment } from './create-element';
 export function Component(props, context) {
 	this.props = props;
 	this.context = context;
-	// this.constructor // When component is functional component, this is reseted to functional component
+	// this.constructor // When component is functional component, this is reset to functional component
 	// if (this.state==null) this.state = {};
 	// this.state = {};
 	// this._dirty = true;
