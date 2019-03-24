@@ -875,9 +875,7 @@ describe('Components', () => {
 			class Inner extends Component {
 				constructor(...args) {
 					super();
-					this._constructor(...args);
 				}
-				_constructor() {}
 				componentWillMount() {}
 				componentDidMount() {}
 				componentWillUnmount() {}
@@ -885,7 +883,6 @@ describe('Components', () => {
 					return <div j={++j} {...props}>inner</div>;
 				}
 			}
-			sinon.spy(Inner.prototype, '_constructor');
 			sinon.spy(Inner.prototype, 'render');
 			sinon.spy(Inner.prototype, 'componentWillMount');
 			sinon.spy(Inner.prototype, 'componentDidMount');
@@ -901,7 +898,6 @@ describe('Components', () => {
 
 			expect(Outer.prototype.componentWillUnmount).not.to.have.been.called;
 
-			expect(Inner.prototype._constructor).to.have.been.calledOnce;
 			expect(Inner.prototype.componentWillUnmount).not.to.have.been.called;
 			expect(Inner.prototype.componentWillMount).to.have.been.calledOnce;
 			expect(Inner.prototype.componentDidMount).to.have.been.calledOnce;
