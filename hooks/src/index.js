@@ -88,7 +88,7 @@ export function useReducer(reducer, initialState, init) {
 
 			action => {
 				const nextValue = reducer(hookState._value[0], action);
-				if (!Object.is(hookState._value[0], nextValue)) {
+				if (hookState._value[0]!==nextValue) {
 					hookState._value[0] = nextValue;
 					hookState._component.setState({});
 				}
