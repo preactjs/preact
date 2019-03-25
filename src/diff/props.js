@@ -11,7 +11,7 @@ import options from '../options';
  */
 export function diffProps(dom, newProps, oldProps, isSvg) {
 	for (let i in newProps) {
-		if (i!=='children' && i!=='key' && (!oldProps || oldProps[i]!=newProps[i])) {
+		if (i!=='children' && i!=='key' && (!oldProps || ((i==='value' || i==='checked') ? dom : oldProps)[i]!==newProps[i])) {
 			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
 		}
 	}
@@ -50,9 +50,11 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		}
 		else {
 			if (typeof oldValue==='string') s.cssText = '';
-			// remove values not in the new list
-			for (let i in oldValue) {
-				if (value==null || !(i in value)) s.setProperty(i.replace(CAMEL_REG, '-'), '');
+			else {
+				// remove values not in the new list
+				for (let i in oldValue) {
+					if (value==null || !(i in value)) s.setProperty(i.replace(CAMEL_REG, '-'), '');
+				}
 			}
 			for (let i in value) {
 				v = value[i];
@@ -63,10 +65,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		}
 	}
 	else if (name==='dangerouslySetInnerHTML') {
-		// Avoid re-applying the same '__html' if it did not changed between re-render
-		if (!value || !oldValue || value.__html!=oldValue.__html) {
-			dom.innerHTML = value && value.__html || '';
-		}
+		return;
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0]==='o' && name[1]==='n') {
@@ -82,7 +81,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		}
 		(dom._listeners || (dom._listeners = {}))[name] = value;
 	}
-	else if (name!=='list' && !isSvg && (name in dom)) {
+	else if (name!=='list' && name!=='tagName' && !isSvg && (name in dom)) {
 		dom[name] = value==null ? '' : value;
 	}
 	else if (value==null || value===false) {

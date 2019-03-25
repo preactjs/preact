@@ -922,7 +922,28 @@ describe('Lifecycle methods', () => {
 
 			render(<Foo />, scratch);
 			rerender();
+
 			expect(componentState).to.deep.equal({ value: 1 });
+
+			const cWRP = Foo.prototype.componentWillReceiveProps;
+			delete Foo.prototype.componentWillReceiveProps;
+
+			Foo.prototype.shouldComponentUpdate = cWRP;
+
+			render(null, scratch);
+			render(<Foo />, scratch);
+			rerender();
+
+			expect(componentState, 'via shouldComponentUpdate').to.deep.equal({ value: 1 });
+
+			delete Foo.prototype.shouldComponentUpdate;
+			Foo.prototype.componentWillUpdate = cWRP;
+
+			render(null, scratch);
+			render(<Foo />, scratch);
+			rerender();
+
+			expect(componentState, 'via componentWillUpdate').to.deep.equal({ value: 1 });
 		});
 
 		it('should NOT be called on initial render', () => {
@@ -1369,8 +1390,6 @@ describe('Lifecycle methods', () => {
 		}
 
 		class LifecycleTestComponent extends Component {
-			constructor(p, c) { super(p, c); this._constructor(); }
-			_constructor() {}
 			componentWillMount() {}
 			componentDidMount() {}
 			componentWillUnmount() {}
@@ -1391,7 +1410,7 @@ describe('Lifecycle methods', () => {
 			render() { return <div />; }
 		}
 
-		let spies = ['_constructor', 'componentWillMount', 'componentDidMount', 'componentWillUnmount'];
+		let spies = ['componentWillMount', 'componentDidMount', 'componentWillUnmount'];
 
 		let verifyLifecycleMethods = (TestComponent) => {
 			let proto = TestComponent.prototype;
@@ -1401,7 +1420,6 @@ describe('Lifecycle methods', () => {
 			it('should be invoked for components on initial render', () => {
 				reset();
 				render(<Outer />, scratch);
-				expect(proto._constructor).to.have.been.called;
 				expect(proto.componentDidMount).to.have.been.called;
 				expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
 				expect(proto.componentDidMount).to.have.been.called;
@@ -1420,7 +1438,6 @@ describe('Lifecycle methods', () => {
 				setState({ show: true });
 				rerender();
 
-				expect(proto._constructor).to.have.been.called;
 				expect(proto.componentDidMount).to.have.been.called;
 				expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
 				expect(proto.componentDidMount).to.have.been.called;

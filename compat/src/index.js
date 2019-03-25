@@ -1,6 +1,7 @@
 import { render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
 import * as hooks from 'preact/hooks';
 export * from 'preact/hooks';
+import { assign } from '../../src/util';
 
 const version = '16.8.0'; // trick libraries to think we are react
 
@@ -124,6 +125,14 @@ function createElement(...args) {
 			delete props.defaultValue;
 		}
 
+		if (Array.isArray(props.value) && props.multiple && type==='select') {
+			toChildArray(props.children).forEach((child) => {
+				if (props.value.indexOf(child.props.value)!==-1) {
+					child.props.selected = true;
+				}
+			});
+			delete props.value;
+		}
 		handleElementVNode(vnode, props);
 	}
 
@@ -138,7 +147,6 @@ function createElement(...args) {
 function normalizeVNode(vnode) {
 	vnode.preactCompatNormalized = true;
 	applyClassName(vnode);
-	applyEventNormalization(vnode);
 	return vnode;
 }
 
@@ -272,16 +280,22 @@ Component.prototype.isReactComponent = {};
  */
 function memo(c, comparer) {
 	function shouldUpdate(nextProps) {
-		return !comparer(this.props, nextProps);
+		let ref = this.props.ref;
+		let updateRef = ref==nextProps.ref;
+		if (!updateRef) {
+			ref.call ? ref(null) : (ref.current = null);
+		}
+		return (comparer==null
+			? shallowDiffers(this.props, nextProps)
+			: !comparer(this.props, nextProps)) || !updateRef;
 	}
 
-	function Memoed(props, context) {
-		this.shouldComponentUpdate =
-			this.shouldComponentUpdate ||
-			(comparer ? shouldUpdate : PureComponent.prototype.shouldComponentUpdate);
-		return c.call(this, props, context);
+	function Memoed(props) {
+		this.shouldComponentUpdate = shouldUpdate;
+		return h(c, assign({}, props));
 	}
 	Memoed.displayName = 'Memo(' + (c.displayName || c.name) + ')';
+	Memoed._forwarded = true;
 	return Memoed;
 }
 
@@ -320,8 +334,9 @@ let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
 
+	applyEventNormalization(vnode);
 	let type = vnode.type;
-	if (type!=null && type._forwarded) {
+	if (type!=null && type._forwarded && vnode.ref!=null) {
 		vnode.props.ref = vnode.ref;
 		vnode.ref = null;
 	}
@@ -351,8 +366,7 @@ export {
 };
 
 // React copies the named exports to the default one.
-export default {
-	...hooks,
+export default assign({
 	version,
 	Children,
 	render,
@@ -371,4 +385,4 @@ export default {
 	PureComponent,
 	memo,
 	forwardRef
-};
+}, hooks);

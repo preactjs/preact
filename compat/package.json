@@ -5,7 +5,7 @@
   "private": true,
   "description": "A React compatibility layer for Preact",
   "main": "dist/compat.js",
-  "module": "dist/compat.mjs",
+  "module": "dist/compat.module.js",
   "umd:main": "dist/compat.umd.js",
   "source": "src/index.js",
   "license": "MIT",

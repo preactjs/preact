@@ -59,8 +59,8 @@ options.unmount = vnode => {
  */
 function getHookState(index) {
 	// Largely inspired by:
-	// * https://github.com/michael-klein/funcy.js/blob/master/src/hooks/core_hooks.mjs
-	// * https://github.com/michael-klein/funcy.js/blob/master/src/lib/renderer.mjs
+	// * https://github.com/michael-klein/funcy.js/blob/f6be73468e6ec46b0ff5aa3cc4c9baf72a29025a/src/hooks/core_hooks.mjs
+	// * https://github.com/michael-klein/funcy.js/blob/650beaa58c43c33a74820a3c98b3c7079cf2e333/src/renderer.mjs
 	// Other implementations to look at:
 	// * https://codesandbox.io/s/mnox05qp8
 
@@ -87,8 +87,11 @@ export function useReducer(reducer, initialState, init) {
 			init == null ? invokeOrReturn(null, initialState) : init(initialState),
 
 			action => {
-				hookState._value[0] = reducer(hookState._value[0], action);
-				hookState._component.setState({});
+				const nextValue = reducer(hookState._value[0], action);
+				if (hookState._value[0]!==nextValue) {
+					hookState._value[0] = nextValue;
+					hookState._component.setState({});
+				}
 			}
 		];
 	}

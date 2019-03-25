@@ -13,6 +13,7 @@ import { Fragment } from './create-element';
 export function Component(props, context) {
 	this.props = props;
 	this.context = context;
+	// this.constructor // When component is functional component, this is reset to functional component
 	// if (this.state==null) this.state = {};
 	// this.state = {};
 	// this._dirty = true;
@@ -21,12 +22,12 @@ export function Component(props, context) {
 	// Other properties that Component will have set later,
 	// shown here as commented out for quick reference
 	// this.base = null;
+	// this._context = null;
 	// this._ancestorComponent = null; // Always set right after instantiation
 	// this._vnode = null;
 	// this._nextState = null; // Only class components
 	// this._prevVNode = null;
 	// this._processingException = null; // Always read, set only when handling error
-	// this._constructor = null; // Only functional components, always set right after instantiation
 }
 
 /**
@@ -50,9 +51,8 @@ Component.prototype.setState = function(update, callback) {
 	// Skip update if updater function returned null
 	if (update==null) return;
 
-	if (callback!=null) this._renderCallbacks.push(callback);
+	if (callback) this._renderCallbacks.push(callback);
 
-	this._force = false;
 	enqueueRender(this);
 };
 
@@ -63,23 +63,20 @@ Component.prototype.setState = function(update, callback) {
  */
 Component.prototype.forceUpdate = function(callback) {
 	let vnode = this._vnode, dom = this._vnode._dom, parentDom = this._parentDom;
-	if (parentDom!=null) {
+	if (parentDom) {
 		// Set render mode so that we can differantiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
-		if (this._force==null) this._force = true;
+		const force = callback!==false;
 
 		let mounts = [];
-		dom = diff(dom, parentDom, vnode, vnode, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, this._ancestorComponent);
+		dom = diff(dom, parentDom, vnode, vnode, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, this._ancestorComponent, force);
 		if (dom!=null && dom.parentNode!==parentDom) {
 			parentDom.appendChild(dom);
 		}
 		commitRoot(mounts, vnode);
-
-		// Reset mode to its initial value for the next render
-		this._force = null;
 	}
-	if (callback!=null) callback();
+	if (callback) callback();
 };
 
 /**
@@ -129,6 +126,7 @@ export function enqueueRender(c) {
 function process() {
 	let p;
 	while ((p=q.pop())) {
-		if (p._dirty) p.forceUpdate();
+		// forceUpdate's callback argument is reused here to indicate a non-forced update.
+		if (p._dirty) p.forceUpdate(false);
 	}
 }

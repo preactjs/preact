@@ -1,6 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render } from 'preact';
-import { spy } from 'sinon';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 
@@ -26,7 +25,7 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 
 
 	it('performs the effect after every render by default', () => {
-		const callback = spy();
+		const callback = sinon.spy();
 
 		function Comp() {
 			useEffect(callback);
@@ -42,7 +41,7 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 	});
 
 	it('performs the effect only if one of the inputs changed', () => {
-		const callback = spy();
+		const callback = sinon.spy();
 
 		function Comp(props) {
 			useEffect(callback, [props.a, props.b]);
@@ -61,7 +60,7 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 	});
 
 	it('performs the effect at mount time and never again if an empty input Array is passed', () => {
-		const callback = spy();
+		const callback = sinon.spy();
 
 		function Comp() {
 			useEffect(callback, []);
@@ -79,8 +78,8 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 	});
 
 	it('calls the cleanup function followed by the effect after each render', () => {
-		const cleanupFunction = spy();
-		const callback = spy(() => cleanupFunction);
+		const cleanupFunction = sinon.spy();
+		const callback = sinon.spy(() => cleanupFunction);
 
 		function Comp() {
 			useEffect(callback);
@@ -103,8 +102,8 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 	});
 
 	it('cleanups the effect when the component get unmounted if the effect was called before', () => {
-		const cleanupFunction = spy();
-		const callback = spy(() => cleanupFunction);
+		const cleanupFunction = sinon.spy();
+		const callback = sinon.spy(() => cleanupFunction);
 
 		function Comp() {
 			useEffect(callback);
