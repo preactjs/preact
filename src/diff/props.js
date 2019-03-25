@@ -11,7 +11,7 @@ import options from '../options';
  */
 export function diffProps(dom, newProps, oldProps, isSvg) {
 	for (let i in newProps) {
-		if (i!=='children' && i!=='key' && (!oldProps || oldProps[i]!=newProps[i])) {
+		if (i!=='children' && i!=='key' && (!oldProps || ((i==='value' || i==='checked') ? dom : oldProps)[i]!==newProps[i])) {
 			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
 		}
 	}
@@ -85,10 +85,12 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		dom[name] = value==null ? '' : value;
 	}
 	else if (value==null || value===false) {
-		dom.removeAttribute(name);
+		if (name!==(name = name.replace(/^xlink:?/, ''))) dom.removeAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase());
+		else dom.removeAttribute(name);
 	}
 	else if (typeof value!=='function') {
-		dom.setAttribute(name, value);
+		if (name!==(name = name.replace(/^xlink:?/, ''))) dom.setAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase(), value);
+		else dom.setAttribute(name, value);
 	}
 }
 

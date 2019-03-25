@@ -87,8 +87,11 @@ export function useReducer(reducer, initialState, init) {
 			init == null ? invokeOrReturn(null, initialState) : init(initialState),
 
 			action => {
-				hookState._value[0] = reducer(hookState._value[0], action);
-				hookState._component.setState({});
+				const nextValue = reducer(hookState._value[0], action);
+				if (hookState._value[0]!==nextValue) {
+					hookState._value[0] = nextValue;
+					hookState._component.setState({});
+				}
 			}
 		];
 	}

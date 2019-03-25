@@ -25,25 +25,26 @@ export interface PreactElement extends HTMLElement {
 export interface VNode<P = {}> extends preact.VNode<P> {
 	// Redefine type here using our internal ComponentFactory type
 	type: string | ComponentFactory<P> | null;
-	_children?: Array<VNode> | null;
+	_children: Array<VNode> | null;
 	/**
 	 * The [first (for Fragments)] DOM child of a VNode
 	 */
-	_dom?: PreactElement | Text | null;
+	_dom: PreactElement | Text | null;
 	/**
 	 * The last dom child of a Fragment, or components that return a Fragment
 	 */
-	_lastDomChild?: PreactElement | Text | null;
-	_component?: Component | null;
+	_lastDomChild: PreactElement | Text | null;
+	_component: Component | null;
 }
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
+	constructor: preact.ComponentFactory<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
 	base?: PreactElement;
 
-	_context: any;
 	_dirty: boolean;
 	_renderCallbacks: Array<() => void>;
+	_context?: any;
 	_vnode?: VNode<P> | null;
 	_nextState?: S | null;
 	/** Only used in the devtools to later dirty check if state has changed */
@@ -56,7 +57,6 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	_prevVNode?: VNode;
 	_ancestorComponent?: Component<any, any>;
 	_processingException?: Component<any, any>;
-	_constructor: preact.ComponentFactory<P>;
 }
 
 export interface PreactContext extends preact.PreactContext<any> {

@@ -13,6 +13,7 @@ import { Fragment } from './create-element';
 export function Component(props, context) {
 	this.props = props;
 	this.context = context;
+	// this.constructor // When component is functional component, this is reset to functional component
 	// if (this.state==null) this.state = {};
 	// this.state = {};
 	// this._dirty = true;
@@ -27,7 +28,6 @@ export function Component(props, context) {
 	// this._nextState = null; // Only class components
 	// this._prevVNode = null;
 	// this._processingException = null; // Always read, set only when handling error
-	// this._constructor = null; // Only functional components, always set right after instantiation
 }
 
 /**
@@ -39,7 +39,6 @@ export function Component(props, context) {
  * updated
  */
 Component.prototype.setState = function(update, callback) {
-
 	// only clone state when copying to nextState the first time.
 	let s = (this._nextState!==this.state && this._nextState) || (this._nextState = assign({}, this.state));
 
@@ -51,9 +50,10 @@ Component.prototype.setState = function(update, callback) {
 	// Skip update if updater function returned null
 	if (update==null) return;
 
-	if (callback) this._renderCallbacks.push(callback);
-
-	enqueueRender(this);
+	if (this._vnode) {
+		if (callback) this._renderCallbacks.push(callback);
+		enqueueRender(this);
+	}
 };
 
 /**
