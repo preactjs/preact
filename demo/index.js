@@ -11,6 +11,7 @@ import Context from './context';
 import installLogger from './logger';
 import ProfilerDemo from './profiler';
 import KeyBug from './key_bug';
+import PeopleBrowser from './people';
 import { initDevTools } from 'preact/debug/src/devtools';
 import DevtoolsDemo from './devtools';
 
@@ -61,6 +62,7 @@ class App extends Component {
 						<Link href="/context" activeClassName="active">Context</Link>
 						<Link href="/devtools" activeClassName="active">Devtools</Link>
 						<Link href="/empty-fragment" activeClassName="active">Empty Fragment</Link>
+						<Link href="/people" activeClassName="active">People Browser</Link>
 					</nav>
 				</header>
 				<main>
@@ -86,6 +88,7 @@ class App extends Component {
 						<Context path="/context" />
 						<DevtoolsDemo path="/devtools" />
 						<EmptyFragment path="/empty-fragment" />
+						<PeopleBrowser path="/people" />
 					</Router>
 				</main>
 			</div>
