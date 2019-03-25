@@ -147,7 +147,6 @@ function createElement(...args) {
 function normalizeVNode(vnode) {
 	vnode.preactCompatNormalized = true;
 	applyClassName(vnode);
-	applyEventNormalization(vnode);
 	return vnode;
 }
 
@@ -335,6 +334,7 @@ let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
 
+	applyEventNormalization(vnode);
 	let type = vnode.type;
 	if (type!=null && type._forwarded && vnode.ref!=null) {
 		vnode.props.ref = vnode.ref;

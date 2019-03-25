@@ -10,10 +10,10 @@ declare namespace preact {
 
 	interface VNode<P = {}> {
 		type: ComponentFactory<P> | string | null;
-		props: P & { children: ComponentChildren };
-		text?: string | number | null;
-		key?: Key;
-		ref?: Ref<any>;
+		props: P & { children: ComponentChildren } | null;
+		text: string | number | null;
+		key: Key;
+		ref: Ref<any> | null;
 		/**
 		 * The time this `vnode` started rendering. Will only be set when
 		 * the devtools are attached.
