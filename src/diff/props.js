@@ -89,7 +89,6 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		else dom.removeAttribute(name);
 	}
 	else if (typeof value!=='function') {
-		console.log(isSvg, typeof value, name, name.replace(/^xlink:?/, ''), name !== name.replace(/^xlink:?/, '')); // eslint-disable-line
 		if (name!==(name = name.replace(/^xlink:?/, ''))) dom.setAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase(), value);
 		else dom.setAttribute(name, value);
 	}
