@@ -22,6 +22,9 @@ if (!isBenchmark) {
 	initDevTools();
 }
 
+// mobx-state-tree fix
+window.setImmediate = setTimeout;
+
 class Home extends Component {
 	a = 1;
 	render() {

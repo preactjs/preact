@@ -15,7 +15,7 @@ export default class App extends Component {
   render() {
     return (
       <Router>
-        <div id="app">
+        <div id="people-app">
           <nav>
             <div style={{ margin: 16, textAlign: "center" }}>
               Sort by{" "}
@@ -47,11 +47,11 @@ export default class App extends Component {
               ))}
             </ul>
           </nav>
-          <main>
+          <section id="people-main">
             <Route match="people">
               <Route match="*" component={Profile} />
             </Route>
-          </main>
+          </section>
         </div>
       </Router>
     )

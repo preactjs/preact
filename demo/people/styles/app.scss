@@ -1,4 +1,4 @@
-#app {
+#people-app {
 	position: relative;
 	overflow: hidden;
 	min-height: 100vh;
@@ -6,97 +6,95 @@
 	background: var(--app-background);
 	--menu-width: 260px;
 	--menu-item-height: 50px;
-}
 
-@media (min-width: 1280px) {
-	#app {
+	@media (min-width: 1280px) {
 		max-width: 1280px;
 		min-height: calc(100vh - 64px);
 		margin: 32px auto;
 		border-radius: 10px;
 	}
-}
 
-#app > nav {
-	position: absolute;
-	display: flow-root;
-	width: var(--menu-width);
-	height: 100%;
-	background-color: var(--app-background-secondary);
-	overflow-x: hidden;
-	overflow-y: auto;
-}
+	> nav {
+		position: absolute;
+		display: flow-root;
+		width: var(--menu-width);
+		height: 100%;
+		background-color: var(--app-background-secondary);
+		overflow-x: hidden;
+		overflow-y: auto;
+	}
 
-#app > nav h4 {
-	padding-left: 16px;
-	font-weight: normal;
-	text-transform: uppercase;
-}
+	> nav h4 {
+		padding-left: 16px;
+		font-weight: normal;
+		text-transform: uppercase;
+	}
 
-#app > nav ul {
-	position: relative;
-}
+	> nav ul {
+		position: relative;
+	}
 
-#app > nav li {
-	position: absolute;
-	width: 100%;
-	animation: zoom 200ms forwards;
-	opacity: 0;
-	transition: top 200ms;
-}
+	> nav li {
+		position: absolute;
+		width: 100%;
+		animation: zoom 200ms forwards;
+		opacity: 0;
+		transition: top 200ms;
+	}
 
-#app > nav li > a {
-	position: relative;
-	display: flex;
-	overflow: hidden;
-	flex-flow: row;
-	align-items: center;
-	margin-left: 16px;
-	border-right: 2px solid transparent;
-	border-bottom-left-radius: 48px;
-	border-top-left-radius: 48px;
-	text-transform: capitalize;
-	transition: border 500ms;
-}
+	> nav li > a {
+		position: relative;
+		display: flex;
+		overflow: hidden;
+		flex-flow: row;
+		align-items: center;
+		margin-left: 16px;
+		border-right: 2px solid transparent;
+		border-bottom-left-radius: 48px;
+		border-top-left-radius: 48px;
+		text-transform: capitalize;
+		transition: border 500ms;
+	}
 
-#app > nav li > a:hover {
-	background-color: var(--app-highlight);
-}
+	> nav li > a:hover {
+		background-color: var(--app-highlight);
+	}
 
-#app > nav li > a::after {
-	position: absolute;
-	top: 0;
-	right: -2px;
-	bottom: 0;
-	left: 0;
-	background-image: radial-gradient(
-		circle,
-		var(--app-ripple) 1%,
-		transparent 1%
-	);
-	background-position: center;
-	background-repeat: no-repeat;
-	background-size: 10000%;
-	content: '';
-	opacity: 0;
-	transition: opacity 700ms, background 300ms;
-}
+	> nav li > a::after {
+		position: absolute;
+		top: 0;
+		right: -2px;
+		bottom: 0;
+		left: 0;
+		background-image: radial-gradient(
+			circle,
+			var(--app-ripple) 1%,
+			transparent 1%
+		);
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: 10000%;
+		content: '';
+		opacity: 0;
+		transition: opacity 700ms, background 300ms;
+	}
 
-#app > nav li > a:active::after {
-	background-size: 100%;
-	opacity: 0.5;
-	transition: none;
-}
+	> nav li > a:active::after {
+		background-size: 100%;
+		opacity: 0.5;
+		transition: none;
+	}
 
-#app > nav li > a.active {
-	border-color: var(--app-primary);
-	background-color: var(--app-highlight);
-}
+	> nav li > a.active {
+		border-color: var(--app-primary);
+		background-color: var(--app-highlight);
+	}
 
-#app > nav li > a > * {
-	margin: 8px;
-}
+	> nav li > a > * {
+		margin: 8px;
+	}
 
-main {
-	padding-left: var(--menu-width);
+	#people-main {
+		padding-left: var(--menu-width);
+	}
 }
