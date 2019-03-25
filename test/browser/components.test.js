@@ -118,6 +118,19 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
 		});
 
+		it('should not crash when setting state with cb in constructor', () => {
+			let spy = sinon.spy();
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.setState({ preact: 'awesome' }, spy);
+				}
+			}
+
+			expect(() => render(<Foo foo="bar" />, scratch)).not.to.throw();
+			expect(spy).to.not.be.called;
+		});
+
 		it('should initialize props & context but not state in Component constructor', () => {
 			// Not initializing state matches React behavior: https://codesandbox.io/s/rml19v8o2q
 			class Foo extends Component {
