@@ -118,7 +118,7 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
 		});
 
-		it.only('should not crash when setting state with cb in constructor', () => {
+		it('should not crash when setting state with cb in constructor', () => {
 			let spy = sinon.spy();
 			class Foo extends Component {
 				constructor(props) {
