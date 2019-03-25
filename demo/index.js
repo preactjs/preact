@@ -1,7 +1,7 @@
 import { createElement, render, hydrate, Component, options, Fragment } from 'preact';
 // import renderToString from 'preact-render-to-string';
 import './style.scss';
-import { Router, Link } from './router';
+import { Router, Link } from 'preact-router';
 import Pythagoras from './pythagoras';
 import Spiral from './spiral';
 import Reorder from './reorder';
@@ -91,7 +91,7 @@ class App extends Component {
 						<Context path="/context" />
 						<DevtoolsDemo path="/devtools" />
 						<EmptyFragment path="/empty-fragment" />
-						<PeopleBrowser path="/people" />
+						<PeopleBrowser path="/people/:user?" />
 					</Router>
 				</main>
 			</div>
