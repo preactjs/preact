@@ -39,7 +39,6 @@ export function Component(props, context) {
  * updated
  */
 Component.prototype.setState = function(update, callback) {
-
 	// only clone state when copying to nextState the first time.
 	let s = (this._nextState!==this.state && this._nextState) || (this._nextState = assign({}, this.state));
 
@@ -51,9 +50,10 @@ Component.prototype.setState = function(update, callback) {
 	// Skip update if updater function returned null
 	if (update==null) return;
 
-	if (callback) this._renderCallbacks.push(callback);
-
-	enqueueRender(this);
+	if (this._vnode) {
+		if (callback) this._renderCallbacks.push(callback);
+		enqueueRender(this);
+	}
 };
 
 /**
