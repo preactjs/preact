@@ -4,7 +4,7 @@ import { Profile } from "./profile"
 import { Link, Route, Router } from "./router"
 import { store } from "./store"
 
-import "./styles/index.css";
+import "./styles/index.scss";
 
 @observer
 export default class App extends Component {
