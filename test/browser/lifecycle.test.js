@@ -510,6 +510,22 @@ describe('Lifecycle methods', () => {
 			expect(stateArg).to.deep.equal({
 				value: 3
 			});
+			
+			// New Props (see #1446)
+			// 4 -> 5 in gDSFP
+			render(<Foo foo="baz" />, scratch);
+			expect(element.textContent).to.be.equal('5');
+			expect(stateArg).to.deep.equal({
+				value: 4
+			});
+
+			// New Props (see #1446)
+			// 5 -> 6 in gDSFP
+			render(<Foo foo="qux" />, scratch);
+			expect(element.textContent).to.be.equal('6');
+			expect(stateArg).to.deep.equal({
+				value: 5
+			});
 		});
 
 		// From developit/preact#1170
@@ -1102,6 +1118,7 @@ describe('Lifecycle methods', () => {
 
 			let prevPropsArg;
 			let prevStateArg;
+			let snapshotArg;
 			let curProps;
 			let curState;
 
@@ -1122,11 +1139,12 @@ describe('Lifecycle methods', () => {
 						value: state.value + 1
 					};
 				}
-				componentDidUpdate(prevProps, prevState) {
+				componentDidUpdate(prevProps, prevState, snapshot) {
 					// These object references might be updated later so copy
 					// object so we can assert their values at this snapshot in time
 					prevPropsArg = { ...prevProps };
 					prevStateArg = { ...prevState };
+					snapshotArg = snapshot;
 
 					curProps = { ...this.props };
 					curState = { ...this.state };
@@ -1148,6 +1166,7 @@ describe('Lifecycle methods', () => {
 			expect(scratch.firstChild.textContent).to.be.equal('1');
 			expect(prevPropsArg).to.be.undefined;
 			expect(prevStateArg).to.be.undefined;
+			expect(snapshotArg).to.be.undefined;
 			expect(curProps).to.be.undefined;
 			expect(curState).to.be.undefined;
 
@@ -1157,6 +1176,7 @@ describe('Lifecycle methods', () => {
 			expect(scratch.firstChild.textContent).to.be.equal('2');
 			expect(prevPropsArg).to.deep.equal({ foo: 'foo' });
 			expect(prevStateArg).to.deep.equal({ value: 1 });
+			expect(snapshotArg).to.be.undefined;
 			expect(curProps).to.deep.equal({ foo: 'bar' });
 			expect(curState).to.deep.equal({ value: 2 });
 
@@ -1167,6 +1187,7 @@ describe('Lifecycle methods', () => {
 			expect(scratch.firstChild.textContent).to.be.equal('4');
 			expect(prevPropsArg).to.deep.equal({ foo: 'bar' });
 			expect(prevStateArg).to.deep.equal({ value: 2 });
+			expect(snapshotArg).to.be.undefined;
 			expect(curProps).to.deep.equal({ foo: 'bar' });
 			expect(curState).to.deep.equal({ value: 4 });
 		});

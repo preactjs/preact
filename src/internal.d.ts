@@ -10,12 +10,12 @@ export interface FunctionalComponent<P = {}> extends preact.FunctionalComponent<
 export type ComponentFactory<P> = preact.ComponentConstructor<P> | FunctionalComponent<P>;
 
 export interface PreactElement extends HTMLElement {
-	_prevVNode?: VNode<any>;
+	_prevVNode?: VNode<any> | null;
 	/** Event listeners to support event delegation */
 	_listeners: Record<string, (e: Event) => void>;
 
 	// Preact uses this attribute to detect SVG nodes
-	ownerSVGElement?: SVGElement;
+	ownerSVGElement?: SVGElement | null;
 
 	// style: HTMLElement["style"]; // From HTMLElement
 
@@ -40,7 +40,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	constructor: preact.ComponentFactory<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
-	base?: PreactElement;
+	base?: PreactElement | null;
 
 	_dirty: boolean;
 	_renderCallbacks: Array<() => void>;
@@ -53,10 +53,10 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	 * Pointer to the parent dom node. This is only needed for top-level Fragment
 	 * components or array returns.
 	 */
-	_parentDom?: PreactElement;
-	_prevVNode?: VNode;
+	_parentDom?: PreactElement | null;
+	_prevVNode?: VNode | null;
 	_ancestorComponent?: Component<any, any>;
-	_processingException?: Component<any, any>;
+	_processingException?: Component<any, any> | null;
 }
 
 export interface PreactContext extends preact.PreactContext<any> {
