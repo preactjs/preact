@@ -1,4 +1,4 @@
-const { setupScratch } = require('../../src');
+const { setupScratch } = require('../../../test/_util/helpers');
 
 describe('setupScratch', () => {
 	it('should return a div', () => {

@@ -28,30 +28,13 @@ export function act(cb) {
 	if (flush) {
 		flush();
 	}
-	options.debounceRendering = Component.__test__previousDebounce;
 	options.requestAnimationFrame = previousRequestAnimationFrame;
 }
 
 /**
- * Setup the test environment
- * @returns {HTMLDivElement}
- */
-export function setupScratch() {
-	const scratch = document.createElement('div');
-	scratch.id = 'scratch';
-	(document.body || document.documentElement).appendChild(scratch);
-	return scratch;
-}
-
-/**
  * Teardown test environment and reset preact's internal state
- * @param {HTMLDivElement} scratch
  */
-export function teardown(scratch) {
-	if (scratch) {
-		scratch.parentNode.removeChild(scratch);
-	}
-
+export function teardown() {
 	if (Component.__test__drainQueue) {
 		// Flush any pending updates leftover by test
 		Component.__test__drainQueue();
