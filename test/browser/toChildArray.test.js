@@ -119,7 +119,7 @@ describe('props.children', () => {
 		render(<Foo>{mixedArray}</Foo>, scratch);
 
 		expect(children).to.be.an('array');
-		expect(children).to.have.lengthOf(10); // Length of flattened mixedArray with non-renderables removed
+		expect(children).to.have.lengthOf(11); // Length of flattened mixedArray with non-renderables removed
 		expect(scratch.innerHTML).to.equal(`<div>${mixedArrayHTML}</div>`);
 
 		function filterAndReduceChildren(acc, child) {
@@ -127,7 +127,7 @@ describe('props.children', () => {
 				return child.reduce(filterAndReduceChildren, acc);
 			}
 
-			if (child !== undefined && typeof child != 'function') {
+			if (typeof child != 'function') {
 				acc.push(child);
 			}
 
@@ -136,7 +136,7 @@ describe('props.children', () => {
 
 		let renderableArray = filterAndReduceChildren([], mixedArray);
 
-		expect(children).to.have.lengthOf(10);
+		expect(children).to.have.lengthOf(11);
 
 		for (let i = 0; i < renderableArray.length; i++) {
 			let originalChild = renderableArray[i];

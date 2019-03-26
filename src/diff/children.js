@@ -136,14 +136,18 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
  * @param {import('../index').ComponentChildren} children The unflattened
  * children of a virtual node
  * @param {Array<import('../internal').VNode | null>} [flattened] An flat array of children to modify
+ * @param {typeof import('../create-element').coerceToVNode} [map] Function that
+ * will be applied on each child if the `vnode` is not `null`
+ * @param {boolean} [coerceUndef] wether to coerce `undefined` to `null` or not.
+ * This is needed for Components without children like `<Foo />`.
  */
-export function toChildArray(children, flattened, map) {
+export function toChildArray(children, flattened, map, coerceUndef) {
 	if (flattened == null) flattened = [];
-	if (children===undefined) {}
+	if (!coerceUndef && children===undefined) {}
 	else if (children==null || typeof children === 'boolean') flattened.push(null);
 	else if (Array.isArray(children)) {
 		for (let i=0; i < children.length; i++) {
-			toChildArray(children[i], flattened);
+			toChildArray(children[i], flattened, map, true);
 		}
 	}
 	else {
