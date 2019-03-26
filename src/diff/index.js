@@ -90,7 +90,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			let s = c._nextState || c.state;
 			if (newType.getDerivedStateFromProps!=null) {
 				oldState = assign({}, c.state);
-				if (s===c.state) s = assign({}, s);
+				if (s===c.state) s = c._nextState = assign({}, s);
 				assign(s, newType.getDerivedStateFromProps(newVNode.props, s));
 			}
 
