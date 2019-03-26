@@ -510,6 +510,22 @@ describe('Lifecycle methods', () => {
 			expect(stateArg).to.deep.equal({
 				value: 3
 			});
+			
+			// New Props (see #1446)
+			// 4 -> 5 in gDSFP
+			render(<Foo foo="baz" />, scratch);
+			expect(element.textContent).to.be.equal('5');
+			expect(stateArg).to.deep.equal({
+				value: 4
+			});
+
+			// New Props (see #1446)
+			// 5 -> 6 in gDSFP
+			render(<Foo foo="qux" />, scratch);
+			expect(element.textContent).to.be.equal('6');
+			expect(stateArg).to.deep.equal({
+				value: 5
+			});
 		});
 
 		// From developit/preact#1170
