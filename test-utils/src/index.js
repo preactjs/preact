@@ -52,11 +52,6 @@ export function teardown(scratch) {
 		scratch.parentNode.removeChild(scratch);
 	}
 
-	if (oldOptions != null) {
-		assign(options, oldOptions);
-		oldOptions = null;
-	}
-
 	if (Component.__test__drainQueue) {
 		// Flush any pending updates leftover by test
 		Component.__test__drainQueue();
@@ -66,9 +61,5 @@ export function teardown(scratch) {
 	if (typeof Component.__test__previousDebounce !== 'undefined') {
 		options.debounceRendering = Component.__test__previousDebounce;
 		delete Component.__test__previousDebounce;
-	}
-
-	if (getLog().length > 0) {
-		clearLog();
 	}
 }
