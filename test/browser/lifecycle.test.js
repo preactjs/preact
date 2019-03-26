@@ -1118,6 +1118,7 @@ describe('Lifecycle methods', () => {
 
 			let prevPropsArg;
 			let prevStateArg;
+			let snapshotArg;
 			let curProps;
 			let curState;
 
@@ -1138,11 +1139,12 @@ describe('Lifecycle methods', () => {
 						value: state.value + 1
 					};
 				}
-				componentDidUpdate(prevProps, prevState) {
+				componentDidUpdate(prevProps, prevState, snapshot) {
 					// These object references might be updated later so copy
 					// object so we can assert their values at this snapshot in time
 					prevPropsArg = { ...prevProps };
 					prevStateArg = { ...prevState };
+					snapshotArg = snapshot;
 
 					curProps = { ...this.props };
 					curState = { ...this.state };
@@ -1164,6 +1166,7 @@ describe('Lifecycle methods', () => {
 			expect(scratch.firstChild.textContent).to.be.equal('1');
 			expect(prevPropsArg).to.be.undefined;
 			expect(prevStateArg).to.be.undefined;
+			expect(snapshotArg).to.be.undefined;
 			expect(curProps).to.be.undefined;
 			expect(curState).to.be.undefined;
 
@@ -1173,6 +1176,7 @@ describe('Lifecycle methods', () => {
 			expect(scratch.firstChild.textContent).to.be.equal('2');
 			expect(prevPropsArg).to.deep.equal({ foo: 'foo' });
 			expect(prevStateArg).to.deep.equal({ value: 1 });
+			expect(snapshotArg).to.be.undefined;
 			expect(curProps).to.deep.equal({ foo: 'bar' });
 			expect(curState).to.deep.equal({ value: 2 });
 
@@ -1183,6 +1187,7 @@ describe('Lifecycle methods', () => {
 			expect(scratch.firstChild.textContent).to.be.equal('4');
 			expect(prevPropsArg).to.deep.equal({ foo: 'bar' });
 			expect(prevStateArg).to.deep.equal({ value: 2 });
+			expect(snapshotArg).to.be.undefined;
 			expect(curProps).to.deep.equal({ foo: 'bar' });
 			expect(curState).to.deep.equal({ value: 4 });
 		});
@@ -1406,8 +1411,6 @@ describe('Lifecycle methods', () => {
 		}
 
 		class LifecycleTestComponent extends Component {
-			constructor(p, c) { super(p, c); this._constructor(); }
-			_constructor() {}
 			componentWillMount() {}
 			componentDidMount() {}
 			componentWillUnmount() {}
@@ -1428,7 +1431,7 @@ describe('Lifecycle methods', () => {
 			render() { return <div />; }
 		}
 
-		let spies = ['_constructor', 'componentWillMount', 'componentDidMount', 'componentWillUnmount'];
+		let spies = ['componentWillMount', 'componentDidMount', 'componentWillUnmount'];
 
 		let verifyLifecycleMethods = (TestComponent) => {
 			let proto = TestComponent.prototype;
@@ -1438,7 +1441,6 @@ describe('Lifecycle methods', () => {
 			it('should be invoked for components on initial render', () => {
 				reset();
 				render(<Outer />, scratch);
-				expect(proto._constructor).to.have.been.called;
 				expect(proto.componentDidMount).to.have.been.called;
 				expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
 				expect(proto.componentDidMount).to.have.been.called;
@@ -1457,7 +1459,6 @@ describe('Lifecycle methods', () => {
 				setState({ show: true });
 				rerender();
 
-				expect(proto._constructor).to.have.been.called;
 				expect(proto.componentDidMount).to.have.been.called;
 				expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
 				expect(proto.componentDidMount).to.have.been.called;

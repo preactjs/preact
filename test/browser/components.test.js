@@ -118,6 +118,19 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
 		});
 
+		it('should not crash when setting state with cb in constructor', () => {
+			let spy = sinon.spy();
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.setState({ preact: 'awesome' }, spy);
+				}
+			}
+
+			expect(() => render(<Foo foo="bar" />, scratch)).not.to.throw();
+			expect(spy).to.not.be.called;
+		});
+
 		it('should initialize props & context but not state in Component constructor', () => {
 			// Not initializing state matches React behavior: https://codesandbox.io/s/rml19v8o2q
 			class Foo extends Component {
@@ -875,9 +888,7 @@ describe('Components', () => {
 			class Inner extends Component {
 				constructor(...args) {
 					super();
-					this._constructor(...args);
 				}
-				_constructor() {}
 				componentWillMount() {}
 				componentDidMount() {}
 				componentWillUnmount() {}
@@ -885,7 +896,6 @@ describe('Components', () => {
 					return <div j={++j} {...props}>inner</div>;
 				}
 			}
-			sinon.spy(Inner.prototype, '_constructor');
 			sinon.spy(Inner.prototype, 'render');
 			sinon.spy(Inner.prototype, 'componentWillMount');
 			sinon.spy(Inner.prototype, 'componentDidMount');
@@ -901,7 +911,6 @@ describe('Components', () => {
 
 			expect(Outer.prototype.componentWillUnmount).not.to.have.been.called;
 
-			expect(Inner.prototype._constructor).to.have.been.calledOnce;
 			expect(Inner.prototype.componentWillUnmount).not.to.have.been.called;
 			expect(Inner.prototype.componentWillMount).to.have.been.calledOnce;
 			expect(Inner.prototype.componentDidMount).to.have.been.calledOnce;
