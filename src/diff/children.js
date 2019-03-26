@@ -29,12 +29,10 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 	let oldChildrenLength = oldChildren.length;
 
-	if (oldChildrenLength) {
-		for (i = 0; i< oldChildrenLength; i++) {
-			if (oldChildren[i] && oldChildren[i]._dom) {
-				childDom = oldChildren[i]._dom;
-				break;
-			}
+	for (i = 0; i < oldChildrenLength; i++) {
+		if (oldChildren[i] && oldChildren[i]._dom) {
+			childDom = oldChildren[i]._dom;
+			break;
 		}
 	}
 
