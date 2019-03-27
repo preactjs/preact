@@ -915,8 +915,8 @@ describe('Lifecycle methods', () => {
 					this.setState({ value: 1 });
 				}
 				render() {
-					componentState = this.state
-					return <div/>;
+					componentState = this.state;
+					return <div />;
 				}
 			}
 
@@ -925,7 +925,7 @@ describe('Lifecycle methods', () => {
 			rerender();
 
 			expect(componentState).to.deep.equal({ value: 1 });
-		})
+		});
 	});
 
 	describe('#componentWillReceiveProps', () => {
