@@ -1,5 +1,3 @@
-import { enqueueRender } from './component';
-
 export let i = 0;
 
 /**
@@ -42,7 +40,7 @@ export function createContext(defaultValue) {
 		if (!this.getChildContext) initProvider(this);
 		return props.children;
 	}
-	Provider._id = 'Provider'
+	Provider._id = 'Provider';
 	context.Provider = Provider;
 
 	return context;

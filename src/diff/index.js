@@ -112,10 +112,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 
 				if (isProvider && c.props.value!==newVNode.props.value) {
 					const v = newVNode.props.value;
-					newVNode._component.subs.map(sub => {
-						console.log('broadcasting', v, { ...sub.context })
-						v!==sub.context && (sub.context = v, enqueueRender(sub))
-					});
+					newVNode._component.subs.map(sub => v!==sub.context && (sub.context = v, enqueueRender(sub)));
 				}
 
 				if (c.componentWillUpdate!=null) {
