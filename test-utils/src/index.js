@@ -5,9 +5,9 @@ import { Component, options } from 'preact';
  * @returns {() => void}
  */
 export function setupRerender() {
-	Component.__test__previousDebounce = options.debounceRendering;
-	options.debounceRendering = cb => Component.__test__drainQueue = cb;
-	return () => Component.__test__drainQueue && Component.__test__drainQueue();
+	options.__test__previousDebounce = options.debounceRendering;
+	options.debounceRendering = cb => options.__test__drainQueue = cb;
+	return () => options.__test__drainQueue && options.__test__drainQueue();
 }
 
 export function act(cb) {
@@ -35,14 +35,14 @@ export function act(cb) {
  * Teardown test environment and reset preact's internal state
  */
 export function teardown() {
-	if (Component.__test__drainQueue) {
+	if (options.__test__drainQueue) {
 		// Flush any pending updates leftover by test
-		Component.__test__drainQueue();
-		delete Component.__test__drainQueue;
+		options.__test__drainQueue();
+		delete options.__test__drainQueue;
 	}
 
-	if (typeof Component.__test__previousDebounce !== 'undefined') {
-		options.debounceRendering = Component.__test__previousDebounce;
-		delete Component.__test__previousDebounce;
+	if (typeof options.__test__previousDebounce !== 'undefined') {
+		options.debounceRendering = options.__test__previousDebounce;
+		delete options.__test__previousDebounce;
 	}
 }

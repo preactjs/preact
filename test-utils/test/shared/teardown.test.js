@@ -1,4 +1,4 @@
-const { Component, render } = require('preact');
+const { options, render } = require('preact');
 const { teardown, setupRerender } = require('../../src');
 const { setupScratch } = require('../../../test/_util/helpers');
 
@@ -11,12 +11,12 @@ describe('teardown', () => {
 
 	it('should restore debounce', () => {
 		teardown(scratch);
-		expect(Component.__test__previousDebounce).to.be.undefined;
+		expect(options.__test__previousDebounce).to.be.undefined;
 	});
 
 	it('should flush the queue', () => {
 		const spy = sinon.spy();
-		Component.__test__drainQueue = spy;
+		options.__test__drainQueue = spy;
 		teardown(scratch);
 		expect(spy).to.be.calledOnce;
 	});
