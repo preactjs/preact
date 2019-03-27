@@ -922,7 +922,6 @@ describe('Lifecycle methods', () => {
 			}
 
 			render(<Foo />, scratch);
-			rerender();
 
 			expect(componentState).to.deep.equal({ value: 1 });
 		});
