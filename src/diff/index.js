@@ -33,7 +33,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 
 	if (options.diff) options.diff(newVNode);
 
-	let c, p, isNew = false, oldProps, oldState, oldContext,
+	let c, p, isNew = false, oldProps, oldState, snapshot,
 		newType = newVNode.type;
 
 	/** @type {import('../internal').Component | null} */
@@ -90,7 +90,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			let s = c._nextState || c.state;
 			if (newType.getDerivedStateFromProps!=null) {
 				oldState = assign({}, c.state);
-				if (s===c.state) s = assign({}, s);
+				if (s===c.state) s = c._nextState = assign({}, s);
 				assign(s, newType.getDerivedStateFromProps(newVNode.props, s));
 			}
 
@@ -120,7 +120,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			oldProps = c.props;
 			if (!oldState) oldState = c.state;
 
-			oldContext = c.context = cctx;
+			c.context = cctx;
 			c.props = newVNode.props;
 			c.state = s;
 
@@ -135,7 +135,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			}
 
 			if (!isNew && c.getSnapshotBeforeUpdate!=null) {
-				oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
+				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
 			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null);
@@ -167,7 +167,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			// Don't call componentDidUpdate on mount or when we bailed out via
 			// `shouldComponentUpdate`
 			if (!isNew && oldProps!=null && c.componentDidUpdate!=null) {
-				c.componentDidUpdate(oldProps, oldState, oldContext);
+				c.componentDidUpdate(oldProps, oldState, snapshot);
 			}
 		}
 
