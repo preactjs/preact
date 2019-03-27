@@ -3,6 +3,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component } from '../../src/index';
 import { setupScratch, teardown, getMixedArray, mixedArrayHTML, sortCss, serializeHtml, supportsPassiveEvents, supportsDataList } from '../_util/helpers';
+import { clearLog, getLog, logCall } from '../_util/logCall';
 
 /** @jsx h */
 
@@ -33,6 +34,13 @@ describe('render()', () => {
 
 	afterEach(() => {
 		teardown(scratch);
+	});
+
+	before(() => {
+		logCall(Element.prototype, 'appendChild');
+		logCall(Element.prototype, 'insertBefore');
+		logCall(Element.prototype, 'removeChild');
+		logCall(Element.prototype, 'remove');
 	});
 
 	it('should render nothing node given null', () => {
@@ -838,4 +846,34 @@ describe('render()', () => {
 		expect(text.value).to.equal('Hello');
 		expect(checkbox.checked).to.equal(true);
 	});
+
+	it('should not re-render when a component returns undefined', () => {
+		let Dialog = () => undefined;
+		let updateState;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { name: '' };
+				updateState = () => this.setState({ name: ', friend' });
+			}
+
+			render(props, { name }) {
+				return (
+					<div>
+						<Dialog />
+						<h1 class="fade-down">Hi{name}</h1>
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		clearLog();
+
+		updateState();
+		rerender();
+
+		// We don't log text updates
+		expect(getLog()).to.deep.equal([]);
+	  });
 });
