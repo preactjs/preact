@@ -96,7 +96,10 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 
 			// Invoke pre-render lifecycle methods
 			if (isNew) {
-				if (newType.getDerivedStateFromProps==null && c.componentWillMount!=null) c.componentWillMount();
+				if (newType.getDerivedStateFromProps==null && c.componentWillMount!=null) {
+					c.componentWillMount();
+					s = c._nextState || c.state;
+				}
 				if (c.componentDidMount!=null) mounts.push(c);
 			}
 			else {
