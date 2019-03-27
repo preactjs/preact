@@ -901,6 +901,33 @@ describe('Lifecycle methods', () => {
 		});
 	});
 
+	describe('#componentWillMount', () => {
+		it('should update state when called setState in componentWillMount', () => {
+			let componentState;
+
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						value: 0
+					};
+				}
+				componentWillMount() {
+					this.setState({ value: 1 });
+				}
+				render() {
+					componentState = this.state;
+					return <div />;
+				}
+			}
+
+			render(<Foo />, scratch);
+			rerender();
+
+			expect(componentState).to.deep.equal({ value: 1 });
+		});
+	});
+
 	describe('#componentWillReceiveProps', () => {
 		it('should update state when called setState in componentWillReceiveProps', () => {
 			let componentState;
