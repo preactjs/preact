@@ -90,14 +90,4 @@ describe('act', () => {
 		expect(options.requestAnimationFrame).to.equal(spy);
 		expect(spy).to.not.be.called;
 	});
-
-	it('should restore options.debounceRendering after act', () => {
-		const spy = sinon.spy();
-
-		options.debounceRendering = spy;
-		act(() => null);
-
-		expect(options.debounceRendering).to.equal(spy);
-		expect(spy).to.not.be.called;
-	});
 });
