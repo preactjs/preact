@@ -23,20 +23,16 @@ export function createContext(defaultValue) {
 	let ctx = { [id]: null };
 
 	function initProvider(comp) {
-		let subs = [];
+		comp.subs = [];
 		comp.getChildContext = () => {
 			ctx[id] = comp;
 			return ctx;
 		};
-		comp.componentDidUpdate = () => {
-			let v = comp.props.value;
-			subs.map(c => v!==c.context && (c.context = v, enqueueRender(c)));
-		};
 		comp.sub = (c) => {
-			subs.push(c);
+			comp.subs.push(c);
 			let old = c.componentWillUnmount;
 			c.componentWillUnmount = () => {
-				subs.splice(subs.indexOf(c), 1);
+				comp.subs.splice(comp.subs.indexOf(c), 1);
 				old && old();
 			};
 		};
@@ -46,6 +42,7 @@ export function createContext(defaultValue) {
 		if (!this.getChildContext) initProvider(this);
 		return props.children;
 	}
+	Provider._id = 'Provider'
 	context.Provider = Provider;
 
 	return context;
