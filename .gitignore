@@ -7,3 +7,4 @@ package-lock.json
 .idea
 test/ts/**/*.js
 coverage
+*.sw[op]

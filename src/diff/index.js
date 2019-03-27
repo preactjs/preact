@@ -62,8 +62,6 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 				clearProcessingException = c._processingException;
 			}
 			else {
-				isNew = true;
-
 				// Instantiate the new component
 				if (newType.prototype && newType.prototype.render) {
 					newVNode._component = c = new newType(newVNode.props, cctx); // eslint-disable-line new-cap
@@ -80,7 +78,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 				if (!c.state) c.state = {};
 				c.context = cctx;
 				c._context = context;
-				c._dirty = true;
+				isNew = c._dirty = true;
 				c._renderCallbacks = [];
 			}
 
