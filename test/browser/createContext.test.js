@@ -44,7 +44,7 @@ describe('createContext', () => {
 		expect(scratch.innerHTML).to.equal('<div><div>a</div></div>');
 	});
 
-	it('should preserve provider context through nesting providers', () => {
+	it('should preserve provider context through nesting providers', (done) => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { a: 'a' };
 		const CHILD_CONTEXT = { b: 'b' };
@@ -71,7 +71,12 @@ describe('createContext', () => {
 
 		// initial render does not invoke anything but render():
 		expect(Inner.prototype.render).to.have.been.calledWithMatch({ ...CONTEXT, ...CHILD_CONTEXT }, {}, { ['__cC' + (ctxId - 1)]: {} });
+		expect(Inner.prototype.render).to.be.calledOnce;
 		expect(scratch.innerHTML).to.equal('<div>a - b</div>');
+		setTimeout(() => {
+			expect(Inner.prototype.render).to.be.calledOnce;
+			done();
+		}, 0);
 	});
 
 	it('should preserve provider context between different providers', () => {
@@ -181,7 +186,7 @@ describe('createContext', () => {
 		expect(scratch.innerHTML).to.equal('<div><div><strong>a</strong></div></div>');
 	});
 
-	it('should propagates through shouldComponentUpdate false', () => {
+	it('should propagates through shouldComponentUpdate false', done => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { a: 'a' };
 		const UPDATED_CONTEXT = { a: 'b' };
@@ -240,6 +245,7 @@ describe('createContext', () => {
 			<App value={CONTEXT} />
 		), scratch);
 		expect(scratch.innerHTML).to.equal('<div><div><strong>a</strong></div></div>');
+		expect(Consumed.prototype.render).to.have.been.calledOnce;
 
 		render((
 			<App value={UPDATED_CONTEXT} />
@@ -251,6 +257,10 @@ describe('createContext', () => {
 		expect(Consumed.prototype.render).to.have.been.calledTwice;
 		// expect(Consumed.prototype.render).to.have.been.calledWithMatch({ ...UPDATED_CONTEXT }, {}, { ['__cC' + (ctxId - 1)]: {} });
 		expect(scratch.innerHTML).to.equal('<div><div><strong>b</strong></div></div>');
+		setTimeout(() => {
+			expect(Consumed.prototype.render).to.have.been.calledTwice;
+			done();
+		});
 	});
 
 	it('should keep the right context at the right "depth"', () => {
