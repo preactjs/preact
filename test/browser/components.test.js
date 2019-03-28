@@ -501,7 +501,7 @@ describe('Components', () => {
 		bad.setState({ alt: true });
 		rerender();
 
-		expect(scratch.textContent, 'new component without key re-rendered').to.equal('F');
+		expect(scratch.textContent, 'use null placeholders to detect new component is appended').to.equal('F');
 		expect(Comp.prototype.componentWillMount).to.be.calledOnce;
 		expect(sideEffect).to.be.calledOnce;
 	});
