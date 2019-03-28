@@ -136,7 +136,7 @@ describe('props.children', () => {
 
 		let renderableArray = filterAndReduceChildren([], mixedArray);
 
-		expect(children).to.have.lengthOf(8);
+		expect(children).to.have.lengthOf(renderableArray.length);
 
 		for (let i = 0; i < renderableArray.length; i++) {
 			let originalChild = renderableArray[i];
@@ -144,9 +144,6 @@ describe('props.children', () => {
 
 			if (typeof originalChild == 'string' || typeof originalChild == 'number') {
 				expect(actualChild).to.equal(originalChild);
-			}
-			else if (typeof originalChild == 'boolean' || originalChild == null) {
-				expect(actualChild).to.equal(null);
 			}
 			else {
 				expect(actualChild.type).to.equal(originalChild.type);
