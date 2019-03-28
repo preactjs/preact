@@ -53,7 +53,6 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
 			let cxType = newType.contextType;
-			let isProvider = newType._id==='Provider';
 			let provider = cxType && context[cxType._id];
 			let cctx = cxType != null ? (provider ? provider.props.value : cxType._defaultValue) : context;
 			// Get component and set it to `c`
@@ -110,7 +109,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 					break outer;
 				}
 
-				if (isProvider && c.props.value!==newVNode.props.value) {
+				if (newType._id==='_P' && c.props.value!==newVNode.props.value) {
 					const v = newVNode.props.value;
 					newVNode._component.subs.map(sub => v!==sub.context && (sub.context = v, enqueueRender(sub)));
 				}

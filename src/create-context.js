@@ -40,7 +40,7 @@ export function createContext(defaultValue) {
 		if (!this.getChildContext) initProvider(this);
 		return props.children;
 	}
-	Provider._id = 'Provider';
+	Provider._id = '_P';
 	context.Provider = Provider;
 
 	return context;
