@@ -685,8 +685,8 @@ describe('render()', () => {
 	it('should reorder child pairs', () => {
 		render((
 			<div>
-				<a key="a">a</a>
-				<b key="b">b</b>
+				<a>a</a>
+				<b>b</b>
 			</div>
 		), scratch);
 
@@ -698,8 +698,8 @@ describe('render()', () => {
 
 		render((
 			<div>
-				<b key="b">b</b>
-				<a key="a">a</a>
+				<b>b</b>
+				<a>a</a>
 			</div>
 		), scratch);
 
@@ -782,7 +782,7 @@ describe('render()', () => {
 							<span> [ <a href="javascript:;">Delete</a> ]</span>,
 							<br />
 						])) }
-						<input key="a" value={text} onInput={this.setText} ref={(i) => input = i} />
+						<input value={text} onInput={this.setText} ref={(i) => input = i} />
 					</div>
 				);
 			}

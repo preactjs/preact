@@ -681,14 +681,14 @@ describe('devtools', () => {
 			rerender();
 			checkEventReferences(prev.concat(hook.log));
 
-			// We swap unkeyed children if the match by type. In this case we'll
+			// We swap unkeyed children if they match by type. In this case we'll
 			// use `<Foo>bar</Foo>` as the old child to diff against for
 			// `<Foo>foo</Foo>`. That's why `<Foo>bar</Foo>` needs to be remounted.
 			expect(serialize(hook.log)).to.deep.equal([
-				{ type: 'mount', component: '#text: foo' },
+				{ type: 'update', component: 'Foo' },
+				{ type: 'mount', component: '#text: bar' },
 				{ type: 'mount', component: 'div' },
 				{ type: 'mount', component: 'Foo' },
-				{ type: 'update', component: 'Foo' },
 				{ type: 'update', component: 'App' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);

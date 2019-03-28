@@ -68,16 +68,19 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			if (p != null && (childVNode.key==null && p.key==null ? (childVNode.type === p.type) : (childVNode.key === p.key))) {
 				index = i;
 			}
-			else if (childVNode.key!=null) {
+			else {
 				for (j=0; j<oldChildrenLength; j++) {
 					p = oldChildren[j];
-					if (p!=null && childVNode.key === p.key) {
-						index = j;
-						break;
+					if (p!=null) {
+						if (childVNode.key==null && p.key==null ? ((typeof childVNode.type!=='function' || !childVNode.type.prototype.render) && childVNode.type === p.type) : (childVNode.key === p.key)) {
+							index = j;
+							break;
+						}
 					}
 				}
 			}
 		}
+
 
 		// If we have found a corresponding old element we store it in a variable
 		// and delete it from the array. That way the next iteration can skip this
