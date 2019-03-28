@@ -110,8 +110,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 				}
 
 				if (newType._id==='_P' && c.props.value!==newVNode.props.value) {
-					const v = newVNode.props.value;
-					newVNode._component.subs.map(sub => v!==sub.context && (sub.context = v, enqueueRender(sub)));
+					newVNode._component.subs.map(sub => (sub.context = newVNode.props.value, enqueueRender(sub)));
 				}
 
 				if (c.componentWillUpdate!=null) {
