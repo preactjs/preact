@@ -1188,6 +1188,20 @@ describe('Components', () => {
 			expect(C3.prototype.componentWillMount, 'inject between, C3').to.have.been.calledOnce;
 		});
 
+		it('should handle unmounting correctly', () => {
+			class Foo extends Component {
+				componentWillUnmount() {
+					expect(document.getElementById('foo')).to.not.equal(null);
+				}
+
+				render() {
+					return <div id="foo" />;
+				}
+			}
+
+			render(<Foo />, scratch);
+			render(null, scratch);
+		});
 
 		it('should handle lifecycle for nested intermediary functional components', () => {
 			useIntermediary = true;

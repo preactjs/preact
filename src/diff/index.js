@@ -310,10 +310,6 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 		applyRef(r, null, ancestorComponent);
 	}
 
-	if (!skipRemove && vnode._lastDomChild==null && (skipRemove = ((r = vnode._dom)!=null))) removeNode(r);
-
-	vnode._dom = vnode._lastDomChild = null;
-
 	if ((r = vnode._component)!=null) {
 		if (r.componentWillUnmount) {
 			try {
@@ -327,7 +323,12 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 		r.base = r._parentDom = null;
 		if (r = r._prevVNode) unmount(r, ancestorComponent, skipRemove);
 	}
-	else if (r = vnode._children) {
+
+	if (!skipRemove && vnode._lastDomChild==null && (skipRemove = ((r = vnode._dom)!=null))) removeNode(r);
+
+	vnode._dom = vnode._lastDomChild = null;
+
+	if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {
 			unmount(r[i], ancestorComponent, skipRemove);
 		}
