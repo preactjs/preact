@@ -57,7 +57,7 @@ describe('focus', () => {
 	it('should maintain focus when swapping elements', () => {
 		render((
 			<List>
-				<Input key="a" />
+				<Input />
 				<ListItem>fooo</ListItem>
 			</List>
 		), scratch);
@@ -67,7 +67,7 @@ describe('focus', () => {
 		render((
 			<List>
 				<ListItem>fooo</ListItem>
-				<Input key="a" />
+				<Input />
 			</List>
 		), scratch);
 		validateFocus(input);
