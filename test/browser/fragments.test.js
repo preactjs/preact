@@ -37,7 +37,7 @@ describe('Fragment', () => {
 	before(() => {
 		logCall(Element.prototype, 'insertBefore');
 		logCall(Element.prototype, 'appendChild');
-		logCall(Element.prototype, 'remove');
+		logCall(Element.prototype, 'removeChild');
 	});
 
 	beforeEach(() => {
@@ -242,9 +242,6 @@ describe('Fragment', () => {
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
 			'<div>Hello.insertBefore(<div>Hello, <div>Hello)',
-			// See issue #193 - redundant operations (remove)
-			'<div>Hello.remove()',
-			'<div>Hello.remove()',
 			'<div>Hello.remove()'
 		]);
 
@@ -256,8 +253,6 @@ describe('Fragment', () => {
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
 			'<div>Hello.appendChild(<div>Hello)',
-			// See issue #193 - redudant operations (remove)
-			'<div>Hello.remove()',
 			'<div>Hello.remove()'
 		]);
 	});
@@ -283,8 +278,6 @@ describe('Fragment', () => {
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 		expectDomLogToBe([
-			// See issue #193 - redundant operations (remove)
-			'<div>Hello.remove()',
 			'<div>Hello.remove()',
 			'<div>.appendChild(#text)',
 			'<div>.appendChild(<div>Hello)'
@@ -296,10 +289,6 @@ describe('Fragment', () => {
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 		expectDomLogToBe([
-			// See issue #193 - redudant operations (remove)
-			'<div>Hello.remove()',
-			'<div>Hello.remove()',
-			'<div>Hello.remove()',
 			'<div>Hello.remove()',
 			'<div>.appendChild(#text)',
 			'<div>.appendChild(<div>Hello)'
@@ -645,10 +634,7 @@ describe('Fragment', () => {
 			'<div>11Hello.insertBefore(<div>Hello, <span>1)',
 			'<span>.appendChild(#text)',
 			'<div>1Hello1Hello.insertBefore(<span>2, <span>1)',
-			// See issue #193 - redundant operations (remove)
 			'<span>1.remove()',
-			'<span>1.remove()',
-			'<div>Hello.remove()',
 			'<div>Hello.remove()'
 		]);
 
@@ -664,8 +650,6 @@ describe('Fragment', () => {
 			'<div>1Hello21.appendChild(<div>Hello)',
 			'<div>2Hello21Hello.appendChild(<span>2)',
 			'<span>2.remove()',
-			// See issue #193 - redundant operations (remove)
-			'<div>Hello.remove()',
 			'<div>Hello.remove()'
 		]);
 	});
@@ -727,7 +711,9 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.equal('foobar');
 		expectDomLogToBe([
-			'<div>spamfoobar.appendChild(#text)'
+			'<div>spamfoobar.appendChild(#text)',
+			'#text.remove()',
+			'#text.remove()'
 		]);
 	});
 
@@ -1033,7 +1019,6 @@ describe('Fragment', () => {
 			'<li>.appendChild(#text)',
 			'<ol>01212.appendChild(<li>3)',
 			'<li>1.remove()',
-			'<li>1.remove()',
 			'<li>2.remove()'
 		]);
 
@@ -1101,8 +1086,6 @@ describe('Fragment', () => {
 		render(<Foo condition={false} />,  scratch);
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
 		expectDomLogToBe([
-			// see issue #193 - redundant operations (remove)
-			'<li>1.remove()',
 			'<li>1.remove()',
 			'<li>2.remove()'
 		]);
@@ -1517,7 +1500,6 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
 		expectDomLogToBe([
 			'<div>1.remove()',
-			'<div>1.remove()',
 			'<div>2.remove()',
 			'<div>.appendChild(#text)',
 			'<div>.appendChild(<div>3)',
@@ -1532,8 +1514,6 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForTrue);
 		expectDomLogToBe([
 			'<div>34.remove()',
-			'<div>3.remove()',
-			'<div>4.remove()',
 			'<div>.appendChild(#text)',
 			'<div>.appendChild(<div>1)',
 			'<div>.appendChild(#text)',
