@@ -91,7 +91,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 				c._nextState = c.state;
 			}
 			if (newType.getDerivedStateFromProps!=null) {
-				c.setState(newType.getDerivedStateFromProps(newVNode.props, c._nextState));
+				assign(c._nextState==c.state ? (c._nextState = assign({}, c._nextState)) : c._nextState, newType.getDerivedStateFromProps(newVNode.props, c._nextState));
 			}
 
 			// Invoke pre-render lifecycle methods
