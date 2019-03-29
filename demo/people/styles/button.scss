@@ -1,0 +1,115 @@
+#people-app {
+	button {
+		position: relative;
+		overflow: hidden;
+		min-width: 36px;
+		height: 36px;
+		padding: 0 16px;
+		border: none;
+		background-color: transparent;
+		border-radius: 4px;
+		color: var(--app-text);
+		font-family: 'Montserrat', sans-serif;
+		font-size: 14px;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		transition: background 300ms, color 200ms;
+		white-space: nowrap;
+	}
+
+	button::before {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		background-color: var(--app-ripple);
+		content: '';
+		opacity: 0;
+		transition: opacity 200ms;
+	}
+
+	button:hover:not(:disabled)::before {
+		opacity: 0.3;
+		transition: opacity 100ms;
+	}
+
+	button:active:not(:disabled)::before {
+		opacity: 0.7;
+		transition: none;
+	}
+
+	button::after {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		background-image: radial-gradient(
+			circle,
+			var(--app-ripple) 1%,
+			transparent 1%
+		);
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: 20000%;
+		content: '';
+		opacity: 0;
+		transition: opacity 700ms, background 400ms;
+	}
+
+	button:active:not(:disabled)::after {
+		background-size: 100%;
+		opacity: 1;
+		transition: none;
+	}
+
+	button.primary {
+		background-color: var(--app-primary);
+		box-shadow: 0 2px 6px var(--app-shadow);
+	}
+
+	button.secondary {
+		background-color: var(--app-secondary);
+		box-shadow: 0 2px 6px var(--app-shadow);
+	}
+
+	button:disabled {
+		color: var(--app-text-secondary);
+	}
+
+	button.busy {
+		animation: stripes 500ms linear infinite;
+		background-image: repeating-linear-gradient(
+			45deg,
+			var(--app-shadow) 0%,
+			var(--app-shadow) 25%,
+			transparent 25%,
+			transparent 50%,
+			var(--app-shadow) 50%,
+			var(--app-shadow) 75%,
+			transparent 75%,
+			transparent 100%
+		);
+		color: var(--app-text);
+		/* letter-spacing: -.7em; */
+	}
+
+	button:disabled:not(.primary):not(.secondary).busy,
+	button:disabled.primary:not(.busy),
+	button:disabled.secondary:not(.busy) {
+		background-color: var(--app-background-disabled);
+	}
+
+	@keyframes stripes {
+		from {
+			background-position-x: 0;
+			background-size: 16px 16px;
+		}
+		to {
+			background-position-x: 16px;
+			background-size: 16px 16px;
+		}
+	}
+}

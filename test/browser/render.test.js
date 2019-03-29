@@ -3,6 +3,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component } from '../../src/index';
 import { setupScratch, teardown, getMixedArray, mixedArrayHTML, sortCss, serializeHtml, supportsPassiveEvents, supportsDataList } from '../_util/helpers';
+import { clearLog, getLog, logCall } from '../_util/logCall';
 
 /** @jsx h */
 
@@ -33,6 +34,13 @@ describe('render()', () => {
 
 	afterEach(() => {
 		teardown(scratch);
+	});
+
+	before(() => {
+		logCall(Element.prototype, 'appendChild');
+		logCall(Element.prototype, 'insertBefore');
+		logCall(Element.prototype, 'removeChild');
+		logCall(Element.prototype, 'remove');
 	});
 
 	it('should render nothing node given null', () => {
@@ -418,12 +426,25 @@ describe('render()', () => {
 			expect(style.zIndex.toString()).to.equal('');
 		});
 
+		it('should remove old styles', () => {
+			render(<div style="color: red;" />, scratch);
+			let s = scratch.firstChild.style;
+			sinon.spy(s, 'setProperty');
+			render(<div style={{ background: 'blue' }} />, scratch);
+			expect(s.setProperty).to.be.calledOnce;
+		});
+
 		// Skip test if the currently running browser doesn't support CSS Custom Properties
 		if (window.CSS && CSS.supports('color', 'var(--fake-var)')) {
 			it('should support css custom properties', () => {
 				render(<div style={{ '--foo': 'red', color: 'var(--foo)' }}>test</div>, scratch);
 				expect(sortCss(scratch.firstChild.style.cssText)).to.equal('--foo: red; color: var(--foo);');
 				expect(window.getComputedStyle(scratch.firstChild).color).to.equal('rgb(255, 0, 0)');
+			});
+
+			it('should not add "px" suffix for custom properties', () => {
+				render(<div style={{ '--foo': '100px', width: 'var(--foo)' }}>test</div>, scratch);
+				expect(sortCss(scratch.firstChild.style.cssText)).to.equal('--foo: 100px; width: var(--foo);');
 			});
 		}
 	});
@@ -793,4 +814,66 @@ describe('render()', () => {
 		expect(document.activeElement).to.equal(input);
 		expect(scratch.innerHTML).to.contain(`<span>${todoText}</span>`);
 	});
+
+	it('should always diff `checked` and `value` properties against the DOM', () => {
+		// See https://github.com/developit/preact/issues/1324
+
+		let inputs;
+		let text;
+		let checkbox;
+
+		class Inputs extends Component {
+			render() {
+				return (
+					<div>
+						<input value={'Hello'} ref={el => text = el} />
+						<input type="checkbox" checked ref={el => checkbox = el} />
+					</div>
+				);
+			}
+		}
+
+		render(<Inputs ref={x => inputs = x} />, scratch);
+
+		expect(text.value).to.equal('Hello');
+		expect(checkbox.checked).to.equal(true);
+
+		text.value = 'World';
+		checkbox.checked = false;
+
+		inputs.forceUpdate();
+
+		expect(text.value).to.equal('Hello');
+		expect(checkbox.checked).to.equal(true);
+	});
+
+	it('should not re-render when a component returns undefined', () => {
+		let Dialog = () => undefined;
+		let updateState;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { name: '' };
+				updateState = () => this.setState({ name: ', friend' });
+			}
+
+			render(props, { name }) {
+				return (
+					<div>
+						<Dialog />
+						<h1 class="fade-down">Hi{name}</h1>
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		clearLog();
+
+		updateState();
+		rerender();
+
+		// We don't log text updates
+		expect(getLog()).to.deep.equal([]);
+	  });
 });

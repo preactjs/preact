@@ -5,7 +5,7 @@
   "private": false,
   "description": "Fast 3kb React-compatible Virtual DOM library.",
   "main": "dist/preact.js",
-  "module": "dist/preact.mjs",
+  "module": "dist/preact.module.js",
   "umd:main": "dist/preact.umd.js",
   "source": "src/index.js",
   "license": "MIT",

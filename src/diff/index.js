@@ -33,7 +33,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 
 	if (options.diff) options.diff(newVNode);
 
-	let c, p, isNew = false, oldProps, oldState, oldContext,
+	let c, p, isNew = false, oldProps, oldState, snapshot,
 		newType = newVNode.type;
 
 	/** @type {import('../internal').Component | null} */
@@ -62,8 +62,6 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 				clearProcessingException = c._processingException;
 			}
 			else {
-				isNew = true;
-
 				// Instantiate the new component
 				if (newType.prototype && newType.prototype.render) {
 					newVNode._component = c = new newType(newVNode.props, cctx); // eslint-disable-line new-cap
@@ -80,7 +78,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 				if (!c.state) c.state = {};
 				c.context = cctx;
 				c._context = context;
-				c._dirty = true;
+				isNew = c._dirty = true;
 				c._renderCallbacks = [];
 			}
 
@@ -90,7 +88,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			let s = c._nextState || c.state;
 			if (newType.getDerivedStateFromProps!=null) {
 				oldState = assign({}, c.state);
-				if (s===c.state) s = assign({}, s);
+				if (s===c.state) s = c._nextState = assign({}, s);
 				assign(s, newType.getDerivedStateFromProps(newVNode.props, s));
 			}
 
@@ -120,7 +118,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			oldProps = c.props;
 			if (!oldState) oldState = c.state;
 
-			oldContext = c.context = cctx;
+			c.context = cctx;
 			c.props = newVNode.props;
 			c.state = s;
 
@@ -135,7 +133,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			}
 
 			if (!isNew && c.getSnapshotBeforeUpdate!=null) {
-				oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
+				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
 			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null);
@@ -167,7 +165,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			// Don't call componentDidUpdate on mount or when we bailed out via
 			// `shouldComponentUpdate`
 			if (!isNew && oldProps!=null && c.componentDidUpdate!=null) {
-				c.componentDidUpdate(oldProps, oldState, oldContext);
+				c.componentDidUpdate(oldProps, oldState, snapshot);
 			}
 		}
 
@@ -249,28 +247,32 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 		}
 		if (newVNode!==oldVNode) {
 			let oldProps = oldVNode.props;
+			let newProps = newVNode.props;
+
 			// if we're hydrating, use the element's attributes as its current props:
 			if (oldProps==null) {
 				oldProps = {};
 				if (excessDomChildren!=null) {
+					let name;
 					for (let i=0; i<dom.attributes.length; i++) {
-						oldProps[dom.attributes[i].name] = dom.attributes[i].value;
+						name = dom.attributes[i].name;
+						oldProps[name=='class' && newProps.className ? 'className' : name] = dom.attributes[i].value;
 					}
 				}
 			}
 			let oldHtml = oldProps.dangerouslySetInnerHTML;
-			let newHtml = newVNode.props.dangerouslySetInnerHTML;
+			let newHtml = newProps.dangerouslySetInnerHTML;
 			if (newHtml || oldHtml) {
 				// Avoid re-applying the same '__html' if it did not changed between re-render
 				if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
 					dom.innerHTML = newHtml && newHtml.__html || '';
 				}
 			}
-			if (newVNode.props.multiple) {
-				dom.multiple = newVNode.props.multiple;
+			if (newProps.multiple) {
+				dom.multiple = newProps.multiple;
 			}
 			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent);
-			diffProps(dom, newVNode.props, oldProps, isSvg);
+			diffProps(dom, newProps, oldProps, isSvg);
 		}
 	}
 

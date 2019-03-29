@@ -37,6 +37,14 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	// pointers set, so oldChildren[i]._dom will always be null for those nested Fragments.
 	// Also, will this break some devtool functionalities if not all VNodes have a ._dom pointer?
 
+	// TODO: this change causes lots of re-appends
+	// for (i = 0; i < oldChildren.length; i++) {
+	// 	if (oldChildren[i] && oldChildren[i]._dom) {
+	// 		childDom = oldChildren[i]._dom;
+	// 		break;
+	// 	}
+	// }
+
 	// childDom = oldChildren.length ? oldChildren[0] && oldChildren[0]._dom : null;
 	childDom = oldChildren.length ? parentDom.firstChild : null;
 	if (excessDomChildren!=null) {

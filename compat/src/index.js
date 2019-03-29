@@ -1,6 +1,7 @@
 import { render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
 import * as hooks from 'preact/hooks';
 export * from 'preact/hooks';
+import { assign } from '../../src/util';
 
 const version = '16.8.0'; // trick libraries to think we are react
 
@@ -146,7 +147,6 @@ function createElement(...args) {
 function normalizeVNode(vnode) {
 	vnode.preactCompatNormalized = true;
 	applyClassName(vnode);
-	applyEventNormalization(vnode);
 	return vnode;
 }
 
@@ -292,7 +292,7 @@ function memo(c, comparer) {
 
 	function Memoed(props) {
 		this.shouldComponentUpdate = shouldUpdate;
-		return h(c, { ...props });
+		return h(c, assign({}, props));
 	}
 	Memoed.displayName = 'Memo(' + (c.displayName || c.name) + ')';
 	Memoed._forwarded = true;
@@ -334,6 +334,7 @@ let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
 
+	applyEventNormalization(vnode);
 	let type = vnode.type;
 	if (type!=null && type._forwarded && vnode.ref!=null) {
 		vnode.props.ref = vnode.ref;
@@ -365,8 +366,7 @@ export {
 };
 
 // React copies the named exports to the default one.
-export default {
-	...hooks,
+export default assign({
 	version,
 	Children,
 	render,
@@ -385,4 +385,4 @@ export default {
 	PureComponent,
 	memo,
 	forwardRef
-};
+}, hooks);

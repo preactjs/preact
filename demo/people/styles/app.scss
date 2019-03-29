@@ -1,0 +1,100 @@
+#people-app {
+	position: relative;
+	overflow: hidden;
+	min-height: 100vh;
+	animation: popup 300ms cubic-bezier(0.3, 0.7, 0.3, 1) forwards;
+	background: var(--app-background);
+	--menu-width: 260px;
+	--menu-item-height: 50px;
+
+	@media (min-width: 1280px) {
+		max-width: 1280px;
+		min-height: calc(100vh - 64px);
+		margin: 32px auto;
+		border-radius: 10px;
+	}
+
+	> nav {
+		position: absolute;
+		display: flow-root;
+		width: var(--menu-width);
+		height: 100%;
+		background-color: var(--app-background-secondary);
+		overflow-x: hidden;
+		overflow-y: auto;
+	}
+
+	> nav h4 {
+		padding-left: 16px;
+		font-weight: normal;
+		text-transform: uppercase;
+	}
+
+	> nav ul {
+		position: relative;
+	}
+
+	> nav li {
+		position: absolute;
+		width: 100%;
+		animation: zoom 200ms forwards;
+		opacity: 0;
+		transition: top 200ms;
+	}
+
+	> nav li > a {
+		position: relative;
+		display: flex;
+		overflow: hidden;
+		flex-flow: row;
+		align-items: center;
+		margin-left: 16px;
+		border-right: 2px solid transparent;
+		border-bottom-left-radius: 48px;
+		border-top-left-radius: 48px;
+		text-transform: capitalize;
+		transition: border 500ms;
+	}
+
+	> nav li > a:hover {
+		background-color: var(--app-highlight);
+	}
+
+	> nav li > a::after {
+		position: absolute;
+		top: 0;
+		right: -2px;
+		bottom: 0;
+		left: 0;
+		background-image: radial-gradient(
+			circle,
+			var(--app-ripple) 1%,
+			transparent 1%
+		);
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: 10000%;
+		content: '';
+		opacity: 0;
+		transition: opacity 700ms, background 300ms;
+	}
+
+	> nav li > a:active::after {
+		background-size: 100%;
+		opacity: 0.5;
+		transition: none;
+	}
+
+	> nav li > a.active {
+		border-color: var(--app-primary);
+		background-color: var(--app-highlight);
+	}
+
+	> nav li > a > * {
+		margin: 8px;
+	}
+
+	#people-main {
+		padding-left: var(--menu-width);
+	}
+}

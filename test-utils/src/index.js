@@ -5,22 +5,44 @@ import { Component, options } from 'preact';
  * @returns {() => void}
  */
 export function setupRerender() {
-	Component.__test__previousDebounce = options.debounceRendering;
-	options.debounceRendering = cb => Component.__test__drainQueue = cb;
-	return () => Component.__test__drainQueue && Component.__test__drainQueue();
+	options.__test__previousDebounce = options.debounceRendering;
+	options.debounceRendering = cb => options.__test__drainQueue = cb;
+	return () => options.__test__drainQueue && options.__test__drainQueue();
 }
 
 export function act(cb) {
-	const previousDebounce = options.debounceRendering;
 	const previousRequestAnimationFrame = options.requestAnimationFrame;
 	const rerender = setupRerender();
 	let flush;
+	// Override requestAnimationFrame so we can flush pending hooks.
 	options.requestAnimationFrame = (fc) => flush = fc;
+	// Execute the callback we were passed.
 	cb();
+	// State COULD be built up flush it.
 	if (flush) {
 		flush();
 	}
 	rerender();
-	options.debounceRendering = previousDebounce;
+	// If rerendering with new state has triggered effects
+	// flush them aswell since options.raf will have repopulated this.
+	if (flush) {
+		flush();
+	}
 	options.requestAnimationFrame = previousRequestAnimationFrame;
+}
+
+/**
+ * Teardown test environment and reset preact's internal state
+ */
+export function teardown() {
+	if (options.__test__drainQueue) {
+		// Flush any pending updates leftover by test
+		options.__test__drainQueue();
+		delete options.__test__drainQueue;
+	}
+
+	if (typeof options.__test__previousDebounce !== 'undefined') {
+		options.debounceRendering = options.__test__previousDebounce;
+		delete options.__test__previousDebounce;
+	}
 }
