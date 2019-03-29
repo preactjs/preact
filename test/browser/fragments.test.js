@@ -88,6 +88,38 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('hello <span>world</span>');
 	});
 
+	it.skip('should handle reordering', () => {
+		class X extends Component {
+			render() {
+				return <Fragment>{this.props.children}</Fragment>;
+			}
+		}
+
+		class App extends Component {
+			render(props) {
+				if (this.props.i === 0) {
+					return (
+						<div>
+							<X key={1}>1</X>
+							<X key={2}>2</X>
+						</div>
+					);
+				}
+				return (
+					<div>
+						<X key={2}>2</X>
+						<X key={1}>1</X>
+					</div>
+				);
+			}
+		}
+
+		render(<App i={0} />, scratch);
+		expect(scratch.textContent).to.equal('12');
+		render(<App i={1} />, scratch);
+		expect(scratch.textContent).to.equal('21');
+	});
+
 	it.skip('should preserve state of children with 1 level nesting', () => {
 		function Foo({ condition }) {
 			return condition ? (
