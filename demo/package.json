@@ -15,14 +15,14 @@
     "@babel/preset-react": "^7.0.0-beta.55",
     "@babel/preset-typescript": "^7.3.3",
     "babel-loader": "^8.0.0-beta.0",
-    "babel-plugin-jsx-pragmatic": "1.0.2",
-    "css-loader": "0.28.7",
-    "html-webpack-plugin": "2.30.1",
+    "css-loader": "2.1.1",
+    "html-webpack-plugin": "3.2.0",
     "node-sass": "^4.10.0",
-    "sass-loader": "6.0.6",
-    "style-loader": "0.19.0",
-    "webpack": "3.6.0",
-    "webpack-dev-server": "2.11.2"
+    "sass-loader": "7.1.0",
+    "style-loader": "0.23.1",
+    "webpack": "4.29.6",
+    "webpack-cli": "^3.3.0",
+    "webpack-dev-server": "3.2.1"
   },
   "dependencies": {
     "d3-scale": "^1.0.7",

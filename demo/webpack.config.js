@@ -66,11 +66,6 @@ module.exports = {
 						[require.resolve('@babel/plugin-transform-react-jsx'), { pragma: 'createElement', pragmaFrag: 'Fragment' }],
 						[require.resolve('@babel/plugin-proposal-class-properties')],
 						[require.resolve('@babel/plugin-transform-react-constant-elements')],
-						[require.resolve('babel-plugin-jsx-pragmatic'), {
-							module: 'preact',
-							export: 'createElement',
-							import: 'createElement'
-						}]
 					]
 				}
 			},
