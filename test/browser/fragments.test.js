@@ -98,7 +98,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('hello <span>world</span>');
 	});
 
-	it.skip('should handle reordering', () => {
+	it('should handle reordering components that return Fragments', () => {
 		class X extends Component {
 			render() {
 				return <Fragment>{this.props.children}</Fragment>;
@@ -1113,7 +1113,7 @@ describe('Fragment', () => {
 		], 'rendering from false to true');
 	});
 
-	it.skip('should support moving Fragments between beginning and end', () => {
+	it('should support moving Fragments between beginning and end', () => {
 		const Foo = ({ condition }) => (
 			<ol>
 				{condition ? [
@@ -1179,7 +1179,7 @@ describe('Fragment', () => {
 		]);
 	});
 
-	it.skip('should support conditional beginning and end Fragments', () => {
+	it('should support conditional beginning and end Fragments', () => {
 		const Foo = ({ condition }) => (
 			<ol>
 				{condition ?
@@ -1238,7 +1238,7 @@ describe('Fragment', () => {
 		]);
 	});
 
-	it.skip('should support nested conditional beginning and end Fragments', () => {
+	it('should support nested conditional beginning and end Fragments', () => {
 		const Foo = ({ condition }) => (
 			<ol>
 				{condition ?
@@ -1305,7 +1305,7 @@ describe('Fragment', () => {
 		]);
 	});
 
-	it.skip('should preserve state with reordering in multiple levels with mixed # of Fragment siblings', () => {
+	it('should preserve state with reordering in multiple levels with mixed # of Fragment siblings', () => {
 		// Also fails if the # of divs outside the Fragment equals or exceeds
 		// the # inside the Fragment for both conditions
 		function Foo({ condition }) {
@@ -1373,7 +1373,7 @@ describe('Fragment', () => {
 		], 'rendering from false to true');
 	});
 
-	it.skip('should preserve state with reordering in multiple levels with lots of Fragment siblings', () => {
+	it('should preserve state with reordering in multiple levels with lots of Fragment siblings', () => {
 		// Also fails if the # of divs outside the Fragment equals or exceeds
 		// the # inside the Fragment for both conditions
 		function Foo({ condition }) {
