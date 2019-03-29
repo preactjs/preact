@@ -88,7 +88,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('hello <span>world</span>');
 	});
 
-	it.only('should handle reordering', () => {
+	it.skip('should handle reordering', () => {
 		class X extends Component {
 			render() {
 				return <Fragment>{this.props.children}</Fragment>;
