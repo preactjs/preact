@@ -115,10 +115,10 @@ describe('Fragment', () => {
 		}
 
 		render(<App i={0} />, scratch);
-		expect(scratch.firstChild.innerHTML).to.equal('12');
+		expect(scratch.textContent).to.equal('12');
 		render(<App i={1} />, scratch);
-		expect(scratch.firstChild.innerHTML).to.equal('21');
-	})
+		expect(scratch.textContent).to.equal('21');
+	});
 
 	it.skip('should preserve state of children with 1 level nesting', () => {
 		function Foo({ condition }) {
