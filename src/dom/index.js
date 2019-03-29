@@ -76,6 +76,7 @@ export function setAccessor(node, name, old, value, isSvg) {
 	}
 	else if (name==='class' && !isSvg) {
 		node.className = value || '';
+		if (value==null || value===false) node.removeAttribute(name);
 	}
 	else if (name==='style') {
 		if (!value || typeof value==='string' || typeof old==='string') {
