@@ -1,3 +1,4 @@
+import { enqueueRender } from './component';
 export let i = 0;
 
 /**
@@ -21,16 +22,27 @@ export function createContext(defaultValue) {
 	let ctx = { [id]: null };
 
 	function initProvider(comp) {
-		comp.subs = [];
+		const subs = [];
 		comp.getChildContext = () => {
 			ctx[id] = comp;
 			return ctx;
 		};
+		comp.shouldComponentUpdate = props => {
+			if (props.value!==comp.value) {
+				subs.map(c => {
+					// Check if still mounted
+					if (c._parentDom) {
+						c.context = props.value;
+						enqueueRender(c);
+					}
+				});
+			}
+		};
 		comp.sub = (c) => {
-			comp.subs.push(c);
+			subs.push(c);
 			let old = c.componentWillUnmount;
 			c.componentWillUnmount = () => {
-				comp.subs.splice(comp.subs.indexOf(c), 1);
+				subs.splice(subs.indexOf(c), 1);
 				old && old();
 			};
 		};
@@ -40,7 +52,7 @@ export function createContext(defaultValue) {
 		if (!this.getChildContext) initProvider(this);
 		return props.children;
 	}
-	Provider._id = '_P';
+	// Provider._id = '_P';
 	context.Provider = Provider;
 
 	return context;
