@@ -510,7 +510,7 @@ describe('Lifecycle methods', () => {
 			expect(stateArg).to.deep.equal({
 				value: 3
 			});
-			
+
 			// New Props (see #1446)
 			// 4 -> 5 in gDSFP
 			render(<Foo foo="baz" />, scratch);
@@ -1383,6 +1383,21 @@ describe('Lifecycle methods', () => {
 
 			render(<div />, scratch);
 			expect(Bar.prototype.componentWillUnmount, 'when removed').to.have.been.calledOnce;
+		});
+
+		it('should only remove dom after componentWillUnmount was called', () => {
+			class Foo extends Component {
+				componentWillUnmount() {
+					expect(document.getElementById('foo')).to.not.equal(null);
+				}
+
+				render() {
+					return <div id="foo" />;
+				}
+			}
+
+		 render(<Foo />, scratch);
+		 render(null, scratch);
 		});
 	});
 
