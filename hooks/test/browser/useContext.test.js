@@ -1,6 +1,6 @@
 import { h, render, createContext, Component } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useContext } from '../../src';
+import { useContext, useEffect } from '../../src';
 
 /** @jsx h */
 
@@ -130,11 +130,17 @@ describe('useContext', () => {
 		const Foo = createContext(0);
 		const Bar = createContext(10);
 		const spy = sinon.spy();
+		const unmountspy = sinon.spy();
 
  		function Comp() {
 			const foo = useContext(Foo);
 			const bar = useContext(Bar);
 			spy(foo, bar);
+			useEffect(() => {
+				() => {
+					unmountspy();
+				}
+			})
 
  			return <div />;
 		}
@@ -158,6 +164,7 @@ describe('useContext', () => {
 			</Foo.Provider>
 		), scratch);
 
- 		expect(spy).to.be.calledTwice;
+		 expect(spy).to.be.calledTwice;
+		 expect(unmountspy).not.to.be.called;
 	});
 });
