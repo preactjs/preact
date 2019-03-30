@@ -274,9 +274,9 @@ Component.prototype.isReactComponent = {};
 /**
  * Memoize a component, so that it only updates when the props actually have
  * changed. This was previously known as `React.pure`.
- * @param {import('./internal').ComponentFactory<any>} c The component constructor
+ * @param {import('./internal').FunctionalComponent} c functional component
  * @param {(prev: object, next: object) => boolean} [comparer] Custom equality function
- * @returns {import('./internal').ComponentFactory<any>}
+ * @returns {import('./internal').FunctionalComponent}
  */
 function memo(c, comparer) {
 	function shouldUpdate(nextProps) {
