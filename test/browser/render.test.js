@@ -426,13 +426,12 @@ describe('render()', () => {
 			expect(style.zIndex.toString()).to.equal('');
 		});
 
-		it.skip('should remove old styles', () => {
-			render(<div style="color: red;" />, scratch);
+		it('should remove old custom variables', () => {
+			render(<div style="'--foo': 'red';" />, scratch);
 			let s = scratch.firstChild.style;
 			sinon.spy(s, 'setProperty');
-			render(<div style={{ background: 'blue' }} />, scratch);
-			// this won't call setProperty...
-			// expect(s.setProperty).to.be.calledOnce;
+			render(<div style={{ '--foo': 'blue' }} />, scratch);
+			expect(s.setProperty).to.be.calledOnce;
 		});
 
 		it.skip('should add important', () => {
