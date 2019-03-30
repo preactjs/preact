@@ -29,15 +29,13 @@ export function createContext(defaultValue) {
 			return ctx;
 		};
 		comp.shouldComponentUpdate = props => {
-			if (props.value!==comp.value) {
-				subs.map(c => {
-					// Check if still mounted
-					if (c._parentDom) {
-						c.context = props.value;
-						enqueueRender(c);
-					}
-				});
-			}
+			subs.map(c => {
+				// Check if still mounted
+				if (c._parentDom) {
+					c.context = props.value;
+					enqueueRender(c);
+				}
+			});
 		};
 		comp.sub = (c) => {
 			subs.push(c);

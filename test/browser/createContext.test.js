@@ -135,6 +135,55 @@ describe('createContext', () => {
 		expect(scratch.innerHTML).to.equal('<div>a</div>');
 	});
 
+	it('should not emit when value does not update', () => {
+		const { Provider, Consumer } = createContext();
+		const CONTEXT = { a: 'a' };
+
+		class NoUpdate extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+
+			render() {
+				return this.props.children;
+			}
+		}
+
+		class Inner extends Component {
+			render(props) {
+				return <div>{props.a}</div>;
+			}
+		}
+
+		sinon.spy(Inner.prototype, 'render');
+
+		render(
+			<div>
+				<Provider value={CONTEXT}>
+					<NoUpdate>
+						<Consumer>
+							{data => <Inner {...data} />}
+						</Consumer>
+					</NoUpdate>
+				</Provider>
+			</div>, scratch);
+
+		expect(Inner.prototype.render).to.have.been.calledOnce;
+
+		render(
+			<div>
+				<Provider value={CONTEXT}>
+					<NoUpdate>
+						<Consumer>
+							{data => <Inner {...data} />}
+						</Consumer>
+					</NoUpdate>
+				</Provider>
+			</div>, scratch);
+
+		expect(Inner.prototype.render).to.have.been.calledOnce;
+	});
+
 	it('should preserve provider context through nested components', () => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { a: 'a' };
