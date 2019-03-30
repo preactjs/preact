@@ -59,7 +59,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 			for (let i in value) {
 				v = value[i];
 				if (oldValue==null || v!==oldValue[i]) {
-					if (i.indexOf('--')===0) {
+					if (!i.indexOf('--')) {
 						s.setProperty(i.replace(CAMEL_REG, '-'), v);
 					}
 					else {
