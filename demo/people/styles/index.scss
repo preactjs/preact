@@ -1,0 +1,168 @@
+@import 'app.scss';
+@import 'animations.scss';
+@import 'avatar.scss';
+@import 'profile.scss';
+@import 'button.scss';
+
+// :root {
+#people-app {
+	--app-background: #2f2b43;
+	--app-background-secondary: #353249;
+	--app-background-disabled: #555366;
+	--app-highlight: rgba(255, 255, 255, 0.1);
+	--app-ripple: rgba(255, 255, 255, 0.5);
+	--app-shadow: rgba(0, 0, 0, 0.15);
+	--app-text: #fff;
+	--app-text-secondary: #807e97;
+	--app-primary: #ff0087;
+	--app-secondary: #4d7cfe;
+	--app-tertiary: #00ec97;
+	--app-danger: #f3c835;
+	--spinner-size: 200px;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+// body {
+#people-app {
+	// display: flow-root;
+	// overflow: auto;
+	// min-height: 100vh;
+	// margin: 0;
+	// animation: background-light 5s ease-out forwards;
+	// /* very fancy background */
+	// background: radial-gradient(
+	// 		circle 15px at 150px 90vh,
+	// 		rgba(255, 255, 255, 0.35),
+	// 		rgba(255, 255, 255, 0.35) 90%,
+	// 		transparent
+	// 	),
+	// 	radial-gradient(
+	// 		circle 9px at 60px 50vh,
+	// 		rgba(255, 255, 255, 0.55),
+	// 		rgba(255, 255, 255, 0.55) 90%,
+	// 		transparent
+	// 	),
+	// 	radial-gradient(
+	// 		circle 19px at 40vw 70px,
+	// 		rgba(255, 255, 255, 0.3),
+	// 		rgba(255, 255, 255, 0.3) 90%,
+	// 		transparent
+	// 	),
+	// 	radial-gradient(
+	// 		circle 12px at 80vw 80px,
+	// 		rgba(255, 255, 255, 0.4),
+	// 		rgba(255, 255, 255, 0.4) 90%,
+	// 		transparent
+	// 	),
+	// 	radial-gradient(
+	// 		circle 7px at 55vw calc(100vh - 95px),
+	// 		rgba(255, 255, 255, 0.6),
+	// 		rgba(255, 255, 255, 0.6) 90%,
+	// 		transparent
+	// 	),
+	// 	radial-gradient(
+	// 		circle 14px at 25vw calc(100vh - 35px),
+	// 		rgba(255, 255, 255, 0.4),
+	// 		rgba(255, 255, 255, 0.4) 90%,
+	// 		transparent
+	// 	),
+	// 	radial-gradient(
+	// 		circle 11px at calc(100vw - 95px) 55vh,
+	// 		rgba(255, 255, 255, 0.45),
+	// 		rgba(255, 255, 255, 0.45) 90%,
+	// 		transparent
+	// 	),
+	// 	radial-gradient(
+	// 		circle 13px at calc(100vw - 35px) 85vh,
+	// 		rgba(255, 255, 255, 0.4),
+	// 		rgba(255, 255, 255, 0.4) 90%,
+	// 		transparent
+	// 	),
+	// 	radial-gradient(
+	// 		circle 50vw at 0 -25%,
+	// 		rgba(255, 255, 255, 0.07),
+	// 		rgba(255, 255, 255, 0.07) 100%,
+	// 		transparent
+	// 	),
+	// 	radial-gradient(
+	// 		circle 80vw at top left,
+	// 		rgba(255, 255, 255, 0.07),
+	// 		rgba(255, 255, 255, 0.07) 100%,
+	// 		transparent
+	// 	),
+	// 	radial-gradient(circle at bottom right, #ef2fb8, transparent),
+	// 	radial-gradient(circle at top right, #c45af3, transparent),
+	// 	linear-gradient(#ee66ca, #ff47a6);
+	color: var(--app-text);
+	font-family: 'Montserrat', sans-serif;
+}
+
+#people-app {
+	.spinner {
+		position: absolute;
+		top: 200px;
+		left: calc(50% - var(--spinner-size) / 2);
+		width: var(--spinner-size);
+		height: var(--spinner-size);
+		animation: zoom 250ms 500ms forwards ease-out;
+		opacity: 0;
+		transition: opacity 200ms, transform 200ms ease-in;
+	}
+
+	.spinner.exit {
+		opacity: 0;
+		transform: scale(0.5);
+	}
+
+	.spinner::before,
+	.spinner::after {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: calc(var(--spinner-size) / 3);
+		height: calc(var(--spinner-size) / 3);
+		animation: spinner 2s infinite ease-in-out;
+		background-color: rgba(255, 255, 255, 0.6);
+		content: '';
+	}
+
+	.spinner::after {
+		animation-delay: -1s;
+	}
+
+	@keyframes spinner {
+		25% {
+			transform: translateX(calc(var(--spinner-size) / 3 * 2 - 1px))
+				rotate(-90deg) scale(0.5);
+		}
+		50% {
+			transform: translateX(calc(var(--spinner-size) / 3 * 2 - 1px))
+				translateY(calc(var(--spinner-size) / 3 * 2 - 1px)) rotate(-179deg);
+		}
+		50.1% {
+			transform: translateX(calc(var(--spinner-size) / 3 * 2 - 1px))
+				translateY(calc(var(--spinner-size) / 3 * 2 - 1px)) rotate(-180deg);
+		}
+		75% {
+			transform: translateX(0) translateY(calc(var(--spinner-size) / 3 * 2 - 1px))
+				rotate(-270deg) scale(0.5);
+		}
+		100% {
+			transform: rotate(-360deg);
+		}
+	}
+
+	ul,
+	ol {
+		padding-left: 0;
+		list-style: none;
+	}
+
+	a {
+		color: inherit;
+		text-decoration: none;
+	}
+}

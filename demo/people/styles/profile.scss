@@ -1,0 +1,26 @@
+#people-app {
+	.profile {
+		display: flex;
+		flex-flow: column;
+		align-items: center;
+		margin: 32px 0;
+		animation: appear-from-left 0.5s forwards;
+		--avatar-size: 80px;
+	}
+
+	.profile h2 {
+		text-transform: capitalize;
+	}
+
+	.profile .details {
+		display: flex;
+		flex-flow: column;
+		align-items: stretch;
+		margin: 16px auto;
+	}
+
+	.profile .details p {
+		margin-top: 8px;
+		margin-bottom: 8px;
+	}
+}

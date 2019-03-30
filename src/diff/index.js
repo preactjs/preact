@@ -313,7 +313,10 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 		applyRef(r, null, ancestorComponent);
 	}
 
-	if (!skipRemove && vnode._lastDomChild==null && (skipRemove = ((r = vnode._dom)!=null))) removeNode(r);
+	let dom;
+	if (!skipRemove && vnode._lastDomChild==null) {
+		skipRemove = (dom = vnode._dom)!=null;
+	}
 
 	vnode._dom = vnode._lastDomChild = null;
 
@@ -335,6 +338,8 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 			unmount(r[i], ancestorComponent, skipRemove);
 		}
 	}
+
+	if (dom!=null) removeNode(dom);
 }
 
 /** The `.render()` method for a PFC backing instance. */
