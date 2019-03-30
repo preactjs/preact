@@ -344,6 +344,17 @@ options.vnode = vnode => {
 	if (oldVNodeHook) oldVNodeHook(vnode);
 };
 
+/**
+ * Deprecated way to control batched rendering inside the reconciler, but we
+ * already schedule in batches inside our rendering code
+ * @param {(a) => void} callback function that triggers the updatd
+ * @param {*} [arg] Optional argument that can be passed to the callback
+ */
+// eslint-disable-next-line camelcase
+function unstable_batchedUpdates(callback, arg) {
+	callback(arg);
+}
+
 export {
 	version,
 	Children,
@@ -362,7 +373,9 @@ export {
 	Component,
 	PureComponent,
 	memo,
-	forwardRef
+	forwardRef,
+	// eslint-disable-next-line camelcase
+	unstable_batchedUpdates
 };
 
 // React copies the named exports to the default one.
@@ -384,5 +397,6 @@ export default assign({
 	Component,
 	PureComponent,
 	memo,
-	forwardRef
+	forwardRef,
+	unstable_batchedUpdates
 }, hooks);

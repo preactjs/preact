@@ -1,4 +1,4 @@
-import { observer } from "mobx-preact"
+import { observer } from "mobx-react"
 import { Component, h } from "preact"
 import { Profile } from "./profile"
 import { Link, Route, Router } from "./router"
