@@ -59,7 +59,12 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 			for (let i in value) {
 				v = value[i];
 				if (oldValue==null || v!==oldValue[i]) {
-					s.setProperty(i.replace(CAMEL_REG, '-'), typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v);
+					if (i.indexOf('--')===0) {
+						s.setProperty(i.replace(CAMEL_REG, '-'), v);
+					}
+					else {
+						s[i] = typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v;
+					}
 				}
 			}
 		}
