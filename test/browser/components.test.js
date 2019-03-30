@@ -1271,7 +1271,7 @@ describe('Components', () => {
 			}
 			render() {
 				child = this;
-				if (!condition) return false;
+				if (!condition) return null;
 				return <div class="child" />;
 			}
 		}
