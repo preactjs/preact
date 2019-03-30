@@ -5,7 +5,8 @@ import React, {
 	findDOMNode,
 	Component,
 	unmountComponentAtNode,
-	createFactory
+	createFactory,
+	unstable_batchedUpdates
 } from '../../src';
 import { createElement as preactH } from 'preact';
 import { setupScratch, teardown, createEvent } from '../../../test/_util/helpers';
@@ -299,6 +300,20 @@ describe('preact-compat', () => {
 		it('should do nothing if root is not mounted', () => {
 			expect(unmountComponentAtNode(scratch)).to.equal(false);
 			expect(scratch.innerHTML).to.equal('');
+		});
+	});
+
+	describe('unstable_batchedUpdates', () => {
+		it('should call the callback', () => {
+			const spy = sinon.spy();
+			unstable_batchedUpdates(spy);
+			expect(spy).to.be.calledOnce;
+		});
+
+		it('should call callback with only one arg', () => {
+			const spy = sinon.spy();
+			unstable_batchedUpdates(spy, 'foo', 'bar');
+			expect(spy).to.be.calledWithExactly('foo');
 		});
 	});
 
