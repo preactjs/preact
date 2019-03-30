@@ -55,6 +55,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			let cxType = newType.contextType;
 			let provider = cxType && context[cxType._id];
 			let cctx = cxType != null ? (provider ? provider.props.value : cxType._defaultValue) : context;
+
 			// Get component and set it to `c`
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
