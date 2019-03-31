@@ -8,8 +8,18 @@ export function initDebug() {
 
 	options.checkRenderParent = parentNode => {
 		if (!parentNode) {
-			throw new Error('Undefined parent passed to render(), this is the second argument.\nCheck if the element is available in the DOM/has the correct id.')
+			throw new Error('Undefined parent passed to render(), this is the second argument.\nCheck if the element is available in the DOM/has the correct id.');
 		}
+		let isValid;
+		switch (parentNode.nodeType) {
+			case 1:
+			case 3:
+			case 8:
+			case 9:
+			case 11: isValid = true; break;
+			default: isValid = false;
+		}
+		if (!isValid) throw new Error('Expected a valid HTML node as a second argument to render.');
 		return parentNode._prevVNode
 	}
 

@@ -40,6 +40,11 @@ describe('debug', () => {
 		expect(fn).to.throw(/render/);
 	});
 
+	it('should print an error on rendering on invalid parent', () => {
+		let fn = () => render(<div />, 6);
+		expect(fn).to.throw(/valid HTML node/);
+	});
+
 	it('should print an error on undefined component', () => {
 		let fn = () => render(h(undefined), scratch);
 		expect(fn).to.throw(/createElement/);
