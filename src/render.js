@@ -2,6 +2,7 @@ import { EMPTY_OBJ, EMPTY_ARR } from './constants';
 import { commitRoot } from './diff/index';
 import { diffChildren } from './diff/children';
 import { createElement, Fragment } from './create-element';
+import options from './options';
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -10,6 +11,7 @@ import { createElement, Fragment } from './create-element';
  * render into
  */
 export function render(vnode, parentDom) {
+	if (options.root) options.root(vnode, parentDom);
 	let oldVNode = parentDom._prevVNode;
 	vnode = createElement(Fragment, null, [vnode]);
 
