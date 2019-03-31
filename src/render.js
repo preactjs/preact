@@ -11,7 +11,7 @@ import options from './options';
  * render into
  */
 export function render(vnode, parentDom) {
-	let oldVNode = options.checkRenderParent ? options.checkRenderParent(parentDom) : parentDom._prevVNode;
+	let oldVNode = options.checkParent ? options.checkParent(parentDom) : parentDom._prevVNode;
 	vnode = createElement(Fragment, null, [vnode]);
 
 	let mounts = [];

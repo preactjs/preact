@@ -6,7 +6,7 @@ export function initDebug() {
 	/* eslint-disable no-console */
 	let oldBeforeDiff = options.diff;
 
-	options.checkRenderParent = parentNode => {
+	options.checkParent = parentNode => {
 		if (!parentNode) {
 			throw new Error('Undefined parent passed to render(), this is the second argument.\nCheck if the element is available in the DOM/has the correct id.');
 		}
