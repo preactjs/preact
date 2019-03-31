@@ -23,14 +23,19 @@ export function createContext(defaultValue) {
 	let ctx = { [id]: null };
 
 	function initProvider(comp) {
-		let subs = [];
+		const subs = [];
 		comp.getChildContext = () => {
 			ctx[id] = comp;
 			return ctx;
 		};
-		comp.componentDidUpdate = () => {
-			let v = comp.props.value;
-			subs.map(c => v!==c.context && (c.context = v, enqueueRender(c)));
+		comp.shouldComponentUpdate = props => {
+			subs.map(c => {
+				// Check if still mounted
+				if (c._parentDom) {
+					c.context = props.value;
+					enqueueRender(c);
+				}
+			});
 		};
 		comp.sub = (c) => {
 			subs.push(c);

@@ -31,7 +31,7 @@ export interface ComponentHooks {
 }
 
 export interface Component extends PreactComponent<any, any> {
-	__hooks: ComponentHooks;
+	__hooks?: ComponentHooks;
 }
 
 export type HookState = EffectHookState | MemoHookState | ReducerHookState;
