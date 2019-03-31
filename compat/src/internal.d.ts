@@ -1,5 +1,5 @@
-{ Ref } from '../../src/index';
-{
+import { Ref } from '../../src/index';
+import {
   Component as PreactComponent,
   VNode as PreactVNode,
   FunctionalComponent as PreactFunctionalComponent
