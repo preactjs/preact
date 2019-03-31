@@ -38,7 +38,7 @@ class TodoItems extends Component {
 	render({ todos, removeTodo }) {
 		return todos.map( todo => (
 			<li key={todo.id}>
-				<button onClick={removeTodo} data-id={todo.id}>&times;</button>
+				<button type="button" onClick={removeTodo} data-id={todo.id}>&times;</button>
 				{' '}
 				{todo.text}
 			</li>
