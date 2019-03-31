@@ -35,6 +35,11 @@ describe('debug', () => {
 		expect(diffSpy, 'diff').to.have.been.called;
 	});
 
+	it('should print an error on rendering on undefined parent', () => {
+		let fn = () => render(<div />, undefined);
+		expect(fn).to.throw(/render/);
+	});
+
 	it('should print an error on undefined component', () => {
 		let fn = () => render(h(undefined), scratch);
 		expect(fn).to.throw(/createElement/);

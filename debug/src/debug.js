@@ -6,6 +6,13 @@ export function initDebug() {
 	/* eslint-disable no-console */
 	let oldBeforeDiff = options.diff;
 
+	options.checkRenderParent = parentNode => {
+		if (!parentNode) {
+			throw new Error('Undefined parent passed to render(), this is the second argument.\nCheck if the element is available in the DOM/has the correct id.')
+		}
+		return parentNode._prevVNode
+	}
+
 	options.diff = vnode => {
 		let { type, props } = vnode;
 		let children = props && props.children;
