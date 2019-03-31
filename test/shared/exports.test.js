@@ -12,6 +12,5 @@ describe('preact', () => {
 		expect(cloneElement).to.be.a('function');
 		expect(createContext).to.be.a('function');
 		expect(options).to.exist.and.be.an('object');
-		// expect(rerender).to.be.a('function');
 	});
 });
