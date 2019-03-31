@@ -1,7 +1,7 @@
 import { checkPropTypes } from 'prop-types';
 import { getDisplayName } from './devtools/custom';
 import { options, toChildArray } from 'preact';
-import { ELEMENT_NODE, TEXT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants';
+import { ELEMENT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants';
 
 export function initDebug() {
 	/* eslint-disable no-console */
@@ -22,8 +22,7 @@ export function initDebug() {
 			Expected a valid HTML node as a second argument to render.
 			Received ${parentNode} instead: render(<${vnode.type.name || vnode.type} />, ${parentNode});
 		`);
-		return parentNode._prevVNode
-	}
+	};
 
 	options.diff = vnode => {
 		let { type, props } = vnode;
