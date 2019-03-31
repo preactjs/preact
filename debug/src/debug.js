@@ -1,7 +1,7 @@
 import { checkPropTypes } from 'prop-types';
 import { getDisplayName } from './devtools/custom';
 import { options, toChildArray } from 'preact';
-import { ELEMENT_NODE, TEXT_NODE, DOCUMENT_NODE } from './constants';
+import { ELEMENT_NODE, TEXT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants';
 
 export function initDebug() {
 	/* eslint-disable no-console */
@@ -14,12 +14,14 @@ export function initDebug() {
 		let isValid;
 		switch (parentNode.nodeType) {
 			case ELEMENT_NODE:
+			case DOCUMENT_FRAGMENT_NODE:
 			case DOCUMENT_NODE: isValid = true; break;
 			default: isValid = false;
 		}
+		const value = typeof parentNode === 'object' ? JSON.stringify(parentNode) : parentNode;
 		if (!isValid) throw new Error(`
 			Expected a valid HTML node as a second argument to render.
-			Received VALUE instead: render(<${vnode.type.name || vnode.type} />, VALUE);
+			Received ${value} instead: render(<${vnode.type.name || vnode.type} />, ${value});
 		`);
 		return parentNode._prevVNode
 	}
