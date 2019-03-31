@@ -46,8 +46,18 @@ describe('debug', () => {
 		expect(fn).to.throw(/<div/);
 	});
 
-	it('should print an error with component name when available', () => {
+	it('should print an error with (function) component name when available', () => {
 		const App = () => <div />
+		let fn = () => render(<App />, 6);
+		expect(fn).to.throw(/<App/);
+	});
+
+	it('should print an error with (class) component name when available', () => {
+		class App extends Component {
+			render() {
+				return <div />
+			}
+		}
 		let fn = () => render(<App />, 6);
 		expect(fn).to.throw(/<App/);
 	});
