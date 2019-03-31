@@ -1,25 +1,26 @@
 import { checkPropTypes } from 'prop-types';
 import { getDisplayName } from './devtools/custom';
 import { options, toChildArray } from 'preact';
+import { ELEMENT_NODE, TEXT_NODE, DOCUMENT_NODE } from './constants';
 
 export function initDebug() {
 	/* eslint-disable no-console */
 	let oldBeforeDiff = options.diff;
 
-	options.checkParent = parentNode => {
+	options.root = (vnode, parentNode) => {
 		if (!parentNode) {
 			throw new Error('Undefined parent passed to render(), this is the second argument.\nCheck if the element is available in the DOM/has the correct id.');
 		}
 		let isValid;
 		switch (parentNode.nodeType) {
-			case 1:
-			case 3:
-			case 8:
-			case 9:
-			case 11: isValid = true; break;
+			case ELEMENT_NODE:
+			case DOCUMENT_NODE: isValid = true; break;
 			default: isValid = false;
 		}
-		if (!isValid) throw new Error('Expected a valid HTML node as a second argument to render.');
+		if (!isValid) throw new Error(`
+			Expected a valid HTML node as a second argument to render.
+			Received VALUE instead: render(<${vnode.type.name || vnode.type} />, VALUE);
+		`);
 		return parentNode._prevVNode
 	}
 

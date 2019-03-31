@@ -43,6 +43,13 @@ describe('debug', () => {
 	it('should print an error on rendering on invalid parent', () => {
 		let fn = () => render(<div />, 6);
 		expect(fn).to.throw(/valid HTML node/);
+		expect(fn).to.throw(/<div/);
+	});
+
+	it('should print an error with component name when available', () => {
+		const App = () => <div />
+		let fn = () => render(<App />, 6);
+		expect(fn).to.throw(/<App/);
 	});
 
 	it('should print an error on undefined component', () => {
