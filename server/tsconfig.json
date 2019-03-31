@@ -13,7 +13,7 @@
         "typeRoots": [
             "../"
         ],
-        "jsx": "preserve",
+        "jsx": "react",
         "jsxFactory": "h",
         "experimentalDecorators": true,
         "types": [],

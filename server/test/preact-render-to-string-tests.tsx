@@ -1,5 +1,5 @@
 import render from '../src';
-import { VNode } from 'preact';
+import { VNode, h } from 'preact';
 
 let vdom: VNode = <div class="foo">content</div>;
 
