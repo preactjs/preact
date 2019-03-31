@@ -35,6 +35,37 @@ describe('debug', () => {
 		expect(diffSpy, 'diff').to.have.been.called;
 	});
 
+	it('should print an error on rendering on undefined parent', () => {
+		let fn = () => render(<div />, undefined);
+		expect(fn).to.throw(/render/);
+	});
+
+	it('should print an error on rendering on invalid parent', () => {
+		let fn = () => render(<div />, 6);
+		expect(fn).to.throw(/valid HTML node/);
+		expect(fn).to.throw(/<div/);
+	});
+
+	it('should print an error with (function) component name when available', () => {
+		const App = () => <div />
+		let fn = () => render(<App />, 6);
+		expect(fn).to.throw(/<App/);
+		expect(fn).to.throw(/6/);
+		fn = () => render(<App />, {});
+		expect(fn).to.throw(/<App/);
+		expect(fn).to.throw(/[object Object]/);
+	});
+
+	it('should print an error with (class) component name when available', () => {
+		class App extends Component {
+			render() {
+				return <div />
+			}
+		}
+		let fn = () => render(<App />, 6);
+		expect(fn).to.throw(/<App/);
+	});
+
 	it('should print an error on undefined component', () => {
 		let fn = () => render(h(undefined), scratch);
 		expect(fn).to.throw(/createElement/);

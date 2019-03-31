@@ -43,6 +43,10 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 		outer: if (oldVNode.type===Fragment || newType===Fragment) {
 			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, c);
 
+			// Mark dom as empty in case `_children` is any empty array. If it isn't
+			// we'll set `dom` to the correct value just a few lines later.
+			dom = null;
+
 			if (newVNode._children.length) {
 				dom = newVNode._children[0]._dom;
 				newVNode._lastDomChild = newVNode._children[newVNode._children.length - 1]._dom;

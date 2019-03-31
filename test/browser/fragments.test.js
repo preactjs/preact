@@ -1540,4 +1540,19 @@ describe('Fragment', () => {
 			'<div>1.appendChild(<div>2)'
 		], 'rendering from false to true');
 	});
+
+	it('should clear empty Fragments', () => {
+		function Foo(props) {
+			if (props.condition) {
+				return <Fragment>foo</Fragment>;
+			}
+			return <Fragment />;
+		}
+
+		render(<Foo condition={true} />, scratch);
+		expect(scratch.textContent).to.equal('foo');
+
+		render(<Foo condition={false} />, scratch);
+		expect(scratch.textContent).to.equal('');
+	});
 });
