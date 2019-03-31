@@ -168,17 +168,19 @@ declare namespace preact {
 	 * Global options for preact
 	 */
 	interface Options {
-		/** Attach a hook that is invoked whenever a VNode is created */
+		/** Attach a hook that is invoked before render, mainly to check the arguments. */
+		root?(vnode: ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment): void;
+		/** Attach a hook that is invoked whenever a VNode is created. */
 		vnode(vnode: VNode): void;
 		/** Attach a hook that is invoked after a tree was mounted or was updated. */
 		commit?(vnode: VNode): void;
 		/** Attach a hook that is invoked immediately before a component is unmounted. */
 		unmount?(vnode: VNode): void;
-		/** Attach a hook that is invoked before a vnode is diffed */
+		/** Attach a hook that is invoked before a vnode is diffed. */
 		diff?(vnode: VNode): void;
-		/** Attach a hook that is invoked before a vnode has rendered */
+		/** Attach a hook that is invoked before a vnode has rendered. */
 		render?(vnode: VNode): void;
-		/** Attach a hook that is invoked after a vnode has rendered */
+		/** Attach a hook that is invoked after a vnode has rendered. */
 		diffed?(vnode: VNode): void;
 		event?(e: Event): void;
 	}

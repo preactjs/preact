@@ -4,7 +4,7 @@ import { getDisplayName, setIn, isRoot, getData, shallowEqual, hasDataChanged, g
 import { setupScratch, teardown, clearOptions } from '../../../test/_util/helpers';
 import { initDevTools } from '../../src/devtools';
 import { Renderer } from '../../src/devtools/renderer';
-import { memo, forwardRef } from '../../../compat/src';
+import { memo, forwardRef, createPortal } from '../../../compat/src';
 
 /** @jsx h */
 
@@ -893,6 +893,13 @@ describe('devtools', () => {
 					expect(ev.data.treeBaseDuration > -1).to.equal(true);
 				});
 			});
+		});
+
+		// preact/#1490
+		it('should not crash on a Portal node', () => {
+			const div = document.createElement('div');
+			render(createPortal('foo', div), scratch);
+			expect(console.error).to.not.be.called;
 		});
 	});
 });
