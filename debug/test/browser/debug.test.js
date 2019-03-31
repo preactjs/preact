@@ -50,6 +50,10 @@ describe('debug', () => {
 		const App = () => <div />
 		let fn = () => render(<App />, 6);
 		expect(fn).to.throw(/<App/);
+		expect(fn).to.throw(/6/);
+		fn = () => render(<App />, {});
+		expect(fn).to.throw(/<App/);
+		expect(fn).to.throw(/{}/);
 	});
 
 	it('should print an error with (class) component name when available', () => {
