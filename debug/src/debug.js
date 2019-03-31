@@ -18,10 +18,9 @@ export function initDebug() {
 			case DOCUMENT_NODE: isValid = true; break;
 			default: isValid = false;
 		}
-		const value = typeof parentNode === 'object' ? JSON.stringify(parentNode) : parentNode;
 		if (!isValid) throw new Error(`
 			Expected a valid HTML node as a second argument to render.
-			Received ${value} instead: render(<${vnode.type.name || vnode.type} />, ${value});
+			Received ${parentNode} instead: render(<${vnode.type.name || vnode.type} />, ${parentNode});
 		`);
 		return parentNode._prevVNode
 	}

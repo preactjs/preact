@@ -53,7 +53,7 @@ describe('debug', () => {
 		expect(fn).to.throw(/6/);
 		fn = () => render(<App />, {});
 		expect(fn).to.throw(/<App/);
-		expect(fn).to.throw(/{}/);
+		expect(fn).to.throw(/[object Object]/);
 	});
 
 	it('should print an error with (class) component name when available', () => {
