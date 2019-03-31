@@ -1,4 +1,4 @@
-import { Fragment } from 'preact';
+import { Component, Fragment } from 'preact';
 
 /**
  * Get the type/category of a vnode
@@ -49,7 +49,7 @@ export function getData(vnode) {
 	/** @type {import('../internal').DevtoolsUpdater | null} */
 	let updater = null;
 
-	if (c!=null) {
+	if (c!=null && c instanceof Component) {
 		// These functions will be called when the user changes state, props or
 		// context values via the devtools ui panel
 		updater = {
@@ -83,7 +83,7 @@ export function getData(vnode) {
 		key: vnode.key || null,
 		updater,
 		text: vnode.text,
-		state: c!=null ? c.state : null,
+		state: c!=null && c instanceof Component ? c.state : null,
 		props: vnode.props,
 		// The devtools inline text children if they are the only child
 		children: vnode.text==null
