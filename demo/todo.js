@@ -26,7 +26,7 @@ export default class TodoList extends Component {
 				<input value={text} onInput={this.setText} />
 				<button type="submit">Add</button>
 				<ul>
-					<TodoItems todos={todos} removeTodo={this.removeTodo}/>
+					<TodoItems todos={todos} removeTodo={this.removeTodo} />
 				</ul>
 			</form>
 		);
