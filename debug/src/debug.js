@@ -6,6 +6,7 @@ import { ELEMENT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants
 export function initDebug() {
 	/* eslint-disable no-console */
 	let oldBeforeDiff = options.diff;
+	let oldDiffed = options.diffed;
 
 	options.root = (vnode, parentNode) => {
 		if (!parentNode) {
@@ -82,6 +83,32 @@ export function initDebug() {
 		}
 
 		if (oldBeforeDiff) oldBeforeDiff(vnode);
+	};
+
+	options.diffed = (vnode) => {
+		if (vnode._component && vnode._component.__hooks && vnode._component.__hooks._pendingEffects.length > 0) {
+			vnode._component.__hooks._pendingEffects.forEach((x) => {
+				if (!x._args || !Array.isArray(x._args)) {
+					throw new Error(`
+						You should provide an array of arguments as the second argument to the "useEffect" hook.
+						Not doing so will invoke this effect on every render.
+						This effect can be found in the render of ${vnode.type.name || vnode.type}.
+					`);
+				}
+			});
+		}
+		if (vnode._component && vnode._component.__hooks && vnode._component.__hooks._pendingLayoutEffects.length > 0) {
+			vnode._component.__hooks._pendingLayoutEffects.forEach((x) => {
+				if (!x._args || !Array.isArray(x._args)) {
+					throw new Error(`
+						You should provide an array of arguments as the second argument to the "useEffect" hook.
+						Not doing so will invoke this effect on every render.
+						This effect can be found in the render of ${vnode.type.name || vnode.type}.
+					`);
+				}
+			});
+		}
+		if (oldDiffed) oldDiffed(vnode);
 	};
 }
 
