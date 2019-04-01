@@ -35,8 +35,11 @@ export function initDebug() {
 		}
 		else if (type!=null && typeof type==='object') {
 			if (type._lastDomChild!==undefined && type._dom!==undefined) {
-				let info = 'Did you accidentally passed a JSX Literal as JSX twice?';
-				throw new Error('Invalid type passed to createElement(): '+type+'\n\n'+info+'\n\n'+serializeVNode(type));
+				let info = 'Did you accidentally pass a JSX literal as JSX twice?\n\n'+
+				'  let My'+getDisplayName(type)+' = '+serializeVNode(type)+';\n'+
+				'  let vnode = <My'+getDisplayName(type)+' />;\n\n'+
+				'This usually happens when you export a JSX literal and not the component.';
+				throw new Error('Invalid type passed to createElement(): '+type+'\n\n'+info+'\n');
 			}
 
 			throw new Error('Invalid type passed to createElement(): '+(Array.isArray(type) ? 'array' : type));
