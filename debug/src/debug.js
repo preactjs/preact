@@ -35,7 +35,7 @@ export function initDebug() {
 		}
 		else if (type!=null && typeof type==='object') {
 			if (type._lastDomChild!==undefined && type._dom!==undefined) {
-				let info = 'Did you accidentilly passed a JSX Literal as JSX twice?';
+				let info = 'Did you accidentally passed a JSX Literal as JSX twice?';
 				throw new Error('Invalid type passed to createElement(): '+type+'\n\n'+info+'\n\n'+serializeVNode(type));
 			}
 
