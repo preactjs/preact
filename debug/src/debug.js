@@ -1,17 +1,48 @@
 import { checkPropTypes } from 'prop-types';
 import { getDisplayName } from './devtools/custom';
 import { options, toChildArray } from 'preact';
+import { ELEMENT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants';
 
 export function initDebug() {
 	/* eslint-disable no-console */
 	let oldBeforeDiff = options.diff;
+
+	options.root = (vnode, parentNode) => {
+		if (!parentNode) {
+			throw new Error('Undefined parent passed to render(), this is the second argument.\nCheck if the element is available in the DOM/has the correct id.');
+		}
+		let isValid;
+		switch (parentNode.nodeType) {
+			case ELEMENT_NODE:
+			case DOCUMENT_FRAGMENT_NODE:
+			case DOCUMENT_NODE: isValid = true; break;
+			default: isValid = false;
+		}
+		if (!isValid) throw new Error(`
+			Expected a valid HTML node as a second argument to render.
+			Received ${parentNode} instead: render(<${vnode.type.name || vnode.type} />, ${parentNode});
+		`);
+	};
 
 	options.diff = vnode => {
 		let { type, props } = vnode;
 		let children = props && props.children;
 
 		if (type===undefined) {
-			throw new Error('Undefined component passed to createElement()\n'+serializeVNode(vnode));
+			throw new Error('Undefined component passed to createElement()\n\n'+
+			'You likely forgot to export your component or might have mixed up default and named imports'+
+			serializeVNode(vnode));
+		}
+		else if (type!=null && typeof type==='object') {
+			if (type._lastDomChild!==undefined && type._dom!==undefined) {
+				let info = 'Did you accidentally pass a JSX literal as JSX twice?\n\n'+
+				'  let My'+getDisplayName(type)+' = '+serializeVNode(type)+';\n'+
+				'  let vnode = <My'+getDisplayName(type)+' />;\n\n'+
+				'This usually happens when you export a JSX literal and not the component.';
+				throw new Error('Invalid type passed to createElement(): '+type+'\n\n'+info+'\n');
+			}
+
+			throw new Error('Invalid type passed to createElement(): '+(Array.isArray(type) ? 'array' : type));
 		}
 
 		if (

@@ -1,7 +1,7 @@
 import { createElement, render, hydrate, Component, options, Fragment } from 'preact';
 // import renderToString from 'preact-render-to-string';
 import './style.scss';
-import { Router, Link } from './router';
+import { Router, Link } from 'preact-router';
 import Pythagoras from './pythagoras';
 import Spiral from './spiral';
 import Reorder from './reorder';
@@ -11,15 +11,21 @@ import Context from './context';
 import installLogger from './logger';
 import ProfilerDemo from './profiler';
 import KeyBug from './key_bug';
+import PeopleBrowser from './people';
 import { initDevTools } from 'preact/debug/src/devtools';
+import { initDebug } from 'preact/debug/src/debug';
 import DevtoolsDemo from './devtools';
 
 let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(window.location.href);
 if (!isBenchmark) {
 	// eslint-disable-next-line no-console
-	console.log('Enabling devtools');
+	console.log('Enabling devtools and debug');
 	initDevTools();
+	initDebug();
 }
+
+// mobx-state-tree fix
+window.setImmediate = setTimeout;
 
 class Home extends Component {
 	a = 1;
@@ -61,6 +67,7 @@ class App extends Component {
 						<Link href="/context" activeClassName="active">Context</Link>
 						<Link href="/devtools" activeClassName="active">Devtools</Link>
 						<Link href="/empty-fragment" activeClassName="active">Empty Fragment</Link>
+						<Link href="/people" activeClassName="active">People Browser</Link>
 					</nav>
 				</header>
 				<main>
@@ -86,6 +93,7 @@ class App extends Component {
 						<Context path="/context" />
 						<DevtoolsDemo path="/devtools" />
 						<EmptyFragment path="/empty-fragment" />
+						<PeopleBrowser path="/people/:user?" />
 					</Router>
 				</main>
 			</div>

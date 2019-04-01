@@ -43,6 +43,10 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 		outer: if (oldVNode.type===Fragment || newType===Fragment) {
 			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, c);
 
+			// Mark dom as empty in case `_children` is any empty array. If it isn't
+			// we'll set `dom` to the correct value just a few lines later.
+			dom = null;
+
 			if (newVNode._children.length) {
 				dom = newVNode._children[0]._dom;
 				newVNode._lastDomChild = newVNode._children[newVNode._children.length - 1]._dom;
@@ -62,8 +66,6 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 				clearProcessingException = c._processingException;
 			}
 			else {
-				isNew = true;
-
 				// Instantiate the new component
 				if (newType.prototype && newType.prototype.render) {
 					newVNode._component = c = new newType(newVNode.props, cctx); // eslint-disable-line new-cap
@@ -80,7 +82,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 				if (!c.state) c.state = {};
 				c.context = cctx;
 				c._context = context;
-				c._dirty = true;
+				isNew = c._dirty = true;
 				c._renderCallbacks = [];
 			}
 
@@ -315,7 +317,10 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 		applyRef(r, null, ancestorComponent);
 	}
 
-	if (!skipRemove && vnode._lastDomChild==null && (skipRemove = ((r = vnode._dom)!=null))) removeNode(r);
+	let dom;
+	if (!skipRemove && vnode._lastDomChild==null) {
+		skipRemove = (dom = vnode._dom)!=null;
+	}
 
 	vnode._dom = vnode._lastDomChild = null;
 
@@ -337,6 +342,8 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 			unmount(r[i], ancestorComponent, skipRemove);
 		}
 	}
+
+	if (dom!=null) removeNode(dom);
 }
 
 /** The `.render()` method for a PFC backing instance. */
