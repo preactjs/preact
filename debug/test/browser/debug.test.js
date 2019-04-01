@@ -109,6 +109,17 @@ describe('debug', () => {
 		expect(fn).to.not.throw();
 	});
 
+	it('should print an error on double jsx conversion', () => {
+		let Foo = <div />;
+		let fn = () => render(h(<Foo />), scratch);
+		expect(fn).to.throw(/createElement/);
+	});
+
+	it('should print an error when component is an array', () => {
+		let fn = () => render(h([<div />]), scratch);
+		expect(fn).to.throw(/createElement/);
+	});
+
 	it('should print an error on invalid refs', () => {
 		let fn = () => render(<div ref="a" />, scratch);
 		expect(fn).to.throw(/createRef/);
