@@ -14,7 +14,7 @@ let oldEventHook = options.event;
 options.event = e => {
 	/* istanbul ignore next */
 	if (oldEventHook) e = oldEventHook(e);
-	e.persist = Object;
+	e.persist = () => {};
 	e.nativeEvent = e;
 	return e;
 };
