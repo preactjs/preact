@@ -22,6 +22,7 @@ describe('imported compat in preact', () => {
 
 		expect(spy).to.be.calledOnce;
 		expect(spy.args[0][0]).to.haveOwnProperty('persist');
+		expect(typeof spy.args[0][0].persist).to.equal('function');
 		expect(spy.args[0][0]).to.haveOwnProperty('nativeEvent');
 	});
 
