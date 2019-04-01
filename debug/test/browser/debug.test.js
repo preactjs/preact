@@ -47,7 +47,7 @@ describe('debug', () => {
 	});
 
 	it('should print an error with (function) component name when available', () => {
-		const App = () => <div />
+		const App = () => <div />;
 		let fn = () => render(<App />, 6);
 		expect(fn).to.throw(/<App/);
 		expect(fn).to.throw(/6/);
@@ -59,7 +59,7 @@ describe('debug', () => {
 	it('should print an error with (class) component name when available', () => {
 		class App extends Component {
 			render() {
-				return <div />
+				return <div />;
 			}
 		}
 		let fn = () => render(<App />, 6);
@@ -68,6 +68,17 @@ describe('debug', () => {
 
 	it('should print an error on undefined component', () => {
 		let fn = () => render(h(undefined), scratch);
+		expect(fn).to.throw(/createElement/);
+	});
+
+	it('should print an error on double jsx conversion', () => {
+		let Foo = <div />;
+		let fn = () => render(h(<Foo />), scratch);
+		expect(fn).to.throw(/createElement/);
+	});
+
+	it('should print an error when component is an array', () => {
+		let fn = () => render(h([<div />]), scratch);
 		expect(fn).to.throw(/createElement/);
 	});
 

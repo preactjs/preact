@@ -29,7 +29,17 @@ export function initDebug() {
 		let children = props && props.children;
 
 		if (type===undefined) {
-			throw new Error('Undefined component passed to createElement()\n'+serializeVNode(vnode));
+			throw new Error('Undefined component passed to createElement()\n\n'+
+			'You likely forgot to export your component or might have mixed up default and named imports'+
+			serializeVNode(vnode));
+		}
+		else if (type!=null && typeof type==='object') {
+			if (type._lastDomChild!==undefined && type._dom!==undefined) {
+				let info = 'Did you accidentilly passed a JSX Literal as JSX twice?';
+				throw new Error('Invalid type passed to createElement(): '+type+'\n\n'+info+'\n\n'+serializeVNode(type));
+			}
+
+			throw new Error('Invalid type passed to createElement(): '+(Array.isArray(type) ? 'array' : type));
 		}
 
 		if (
