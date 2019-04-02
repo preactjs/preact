@@ -61,14 +61,14 @@ export function initDebug() {
 
 		for (const key in vnode.props) {
 			if (key[0]==='o' && key[1]==='n' && typeof vnode.props[key]!=='function') {
-				throw new Error(
+				console.error(
 					`Component's "${key}" property should be a function, ` +
 					`but got [${typeof vnode.props[key]}] instead\n` +
 					serializeVNode(vnode)
 				);
 			}
 			//return props in case of transient error for ux to continue rendering
-			return vnode.props
+			//return vnode.props
 		}
 
 		// Check prop-types if available
