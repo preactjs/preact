@@ -126,7 +126,7 @@ describe('debug', () => {
 
 	it('should warn for useless useMemo calls', () => {
 		const App = () => {
-			const [people] = useState([40, 20,60, 80]);
+			const [people] = useState([40, 20, 60, 80]);
 			const retiredPeople = useMemo(() => people.filter(x => x >= 60));
 			const cb = useCallback(() => () => 'test');
 			return <p onClick={cb}>{retiredPeople.map(x => x)}</p>;
