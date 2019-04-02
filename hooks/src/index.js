@@ -17,8 +17,7 @@ options.render = vnode => {
 	currentIndex = 0;
 
 	if (!currentComponent.__hooks) return;
-	handleEffects(currentComponent.__hooks._pendingEffects);
-	currentComponent.__hooks._pendingEffects = [];
+	currentComponent.__hooks._pendingEffects = handleEffects(currentComponent.__hooks._pendingEffects);
 };
 
 
@@ -34,8 +33,7 @@ options.diffed = vnode => {
 
 	// TODO: Consider moving to a global queue. May need to move
 	// this to the `commit` option
-	handleEffects(hooks._pendingLayoutEffects);
-	hooks._pendingLayoutEffects = [];
+	hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
 };
 
 
@@ -196,8 +194,7 @@ function flushAfterPaintEffects() {
 	afterPaintEffects.forEach(component => {
 		component._afterPaintQueued = false;
 		if (!component._parentDom) return;
-		handleEffects(component.__hooks._pendingEffects);
-		component.__hooks._pendingEffects = [];
+		component.__hooks._pendingEffects = handleEffects(component.__hooks._pendingEffects);
 	});
 	afterPaintEffects = [];
 }
@@ -223,6 +220,7 @@ if (typeof window !== 'undefined') {
 function handleEffects(effects) {
 	effects.forEach(invokeCleanup);
 	effects.forEach(invokeEffect);
+	return [];
 }
 
 function invokeCleanup(hook) {
