@@ -67,6 +67,8 @@ export function initDebug() {
 					serializeVNode(vnode)
 				);
 			}
+			//return props in case of transient error for ux to continue rendering
+			return vnode.props
 		}
 
 		// Check prop-types if available
