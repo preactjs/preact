@@ -6,6 +6,7 @@ import { ELEMENT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants
 export function initDebug() {
 	/* eslint-disable no-console */
 	let oldBeforeDiff = options.diff;
+	let oldDiffed = options.diffed;
 
 	options.root = (vnode, parentNode) => {
 		if (!parentNode) {
@@ -61,8 +62,8 @@ export function initDebug() {
 		for (const key in vnode.props) {
 			if (key[0]==='o' && key[1]==='n' && typeof vnode.props[key]!=='function') {
 				throw new Error(
-					`Component's "${key}" property should be a function,
-					but got [${typeof vnode.props[key]}] instead\n` +
+					`Component's "${key}" property should be a function, ` +
+					`but got [${typeof vnode.props[key]}] instead\n` +
 					serializeVNode(vnode)
 				);
 			}
@@ -95,6 +96,32 @@ export function initDebug() {
 		}
 
 		if (oldBeforeDiff) oldBeforeDiff(vnode);
+	};
+
+	options.diffed = (vnode) => {
+		if (vnode._component && vnode._component.__hooks) {
+			let hooks = vnode._component.__hooks;
+			if (hooks._pendingEffects.length > 0) {
+				hooks._pendingEffects.forEach((x) => {
+					if (!x._args || !Array.isArray(x._args)) {
+						throw new Error('You should provide an array of arguments as the second argument to the "useEffect" hook.\n\n' +
+							'Not doing so will invoke this effect on every render.\n\n' +
+							'This effect can be found in the render of ' + (vnode.type.name || vnode.type) + '.');
+					}
+				});
+			}
+			if (hooks._pendingLayoutEffects.length > 0) {
+				hooks._pendingLayoutEffects.forEach((x) => {
+					if (!x._args || !Array.isArray(x._args)) {
+						throw new Error('You should provide an array of arguments as the second argument to the "useEffect" hook.\n\n' +
+							'Not doing so will invoke this effect on every render.\n\n' +
+							'This effect can be found in the render of ' + (vnode.type.name || vnode.type) + '.');
+					}
+				});
+			}
+		}
+
+		if (oldDiffed) oldDiffed(vnode);
 	};
 }
 
