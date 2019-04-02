@@ -5,9 +5,11 @@ import React, {
 	findDOMNode,
 	Component,
 	unmountComponentAtNode,
-	createFactory
+	createFactory,
+	unstable_batchedUpdates
 } from '../../src';
-import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { createElement as preactH } from 'preact';
+import { setupScratch, teardown, createEvent } from '../../../test/_util/helpers';
 
 let ce = type => document.createElement(type);
 let text = text => document.createTextNode(text);
@@ -171,6 +173,13 @@ describe('preact-compat', () => {
 			expectToBeNormalized(<input {...props} type="text" />, '<input type="text">');
 
 		});
+
+		it('should normalize beforeinput event listener', () => {
+			let spy = sinon.spy();
+			render(<input onBeforeInput={spy} />, scratch);
+			scratch.firstChild.dispatchEvent(createEvent('beforeinput'));
+			expect(spy).to.be.calledOnce;
+		});
 	});
 
 	describe('Component', () => {
@@ -229,6 +238,16 @@ describe('preact-compat', () => {
 			let clone = cloneElement(element);
 			expect(clone).to.eql(element);
 		});
+
+		it('should work with jsx constructor from core', () => {
+			function Foo(props) {
+				return <div>{props.value}</div>;
+			}
+
+			let clone = cloneElement(preactH(Foo), { value: 'foo' });
+			render(clone, scratch);
+			expect(scratch.textContent).to.equal('foo');
+		});
 	});
 
 	describe('findDOMNode()', () => {
@@ -281,6 +300,20 @@ describe('preact-compat', () => {
 		it('should do nothing if root is not mounted', () => {
 			expect(unmountComponentAtNode(scratch)).to.equal(false);
 			expect(scratch.innerHTML).to.equal('');
+		});
+	});
+
+	describe('unstable_batchedUpdates', () => {
+		it('should call the callback', () => {
+			const spy = sinon.spy();
+			unstable_batchedUpdates(spy);
+			expect(spy).to.be.calledOnce;
+		});
+
+		it('should call callback with only one arg', () => {
+			const spy = sinon.spy();
+			unstable_batchedUpdates(spy, 'foo', 'bar');
+			expect(spy).to.be.calledWithExactly('foo');
 		});
 	});
 

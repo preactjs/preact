@@ -1,5 +1,6 @@
+import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component, Fragment } from '../../src/index';
-import { setupScratch, teardown, setupRerender } from '../_util/helpers';
+import { setupScratch, teardown } from '../_util/helpers';
 import { span, div, ul, ol, li } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 
@@ -85,6 +86,38 @@ describe('Fragment', () => {
 		), scratch);
 
 		expect(scratch.innerHTML).to.equal('hello <span>world</span>');
+	});
+
+	it.skip('should handle reordering', () => {
+		class X extends Component {
+			render() {
+				return <Fragment>{this.props.children}</Fragment>;
+			}
+		}
+
+		class App extends Component {
+			render(props) {
+				if (this.props.i === 0) {
+					return (
+						<div>
+							<X key={1}>1</X>
+							<X key={2}>2</X>
+						</div>
+					);
+				}
+				return (
+					<div>
+						<X key={2}>2</X>
+						<X key={1}>1</X>
+					</div>
+				);
+			}
+		}
+
+		render(<App i={0} />, scratch);
+		expect(scratch.textContent).to.equal('12');
+		render(<App i={1} />, scratch);
+		expect(scratch.textContent).to.equal('21');
 	});
 
 	it.skip('should preserve state of children with 1 level nesting', () => {
@@ -1506,5 +1539,20 @@ describe('Fragment', () => {
 			'<div>.appendChild(#text)',
 			'<div>1.appendChild(<div>2)'
 		], 'rendering from false to true');
+	});
+
+	it('should clear empty Fragments', () => {
+		function Foo(props) {
+			if (props.condition) {
+				return <Fragment>foo</Fragment>;
+			}
+			return <Fragment />;
+		}
+
+		render(<Foo condition={true} />, scratch);
+		expect(scratch.textContent).to.equal('foo');
+
+		render(<Foo condition={false} />, scratch);
+		expect(scratch.textContent).to.equal('');
 	});
 });

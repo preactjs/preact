@@ -1,5 +1,5 @@
 import { createElement, hydrate, Fragment } from '../../src/index';
-import { setupScratch, teardown } from '../_util/helpers';
+import { setupScratch, teardown, sortAttributes, serializeHtml } from '../_util/helpers';
 import { ul, li, div } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 
@@ -14,6 +14,7 @@ describe('hydrate()', () => {
 	before(() => {
 		logCall(Element.prototype, 'appendChild');
 		logCall(Element.prototype, 'insertBefore');
+		logCall(Element.prototype, 'removeChild');
 		logCall(Element.prototype, 'remove');
 		logCall(Element.prototype, 'setAttribute');
 		logCall(Element.prototype, 'removeAttribute');
@@ -137,12 +138,18 @@ describe('hydrate()', () => {
 		clearLog();
 		hydrate(vnode, scratch);
 
-		expect(scratch.innerHTML).to.equal('<div><span same-value="foo" different-value="b" new-value="c">Test</span></div>');
+		expect(serializeHtml(scratch)).to.equal(sortAttributes('<div><span same-value="foo" different-value="b" new-value="c">Test</span></div>'));
 		expect(getLog()).to.deep.equal([
 			'<span>Test.setAttribute(different-value, b)',
 			'<span>Test.setAttribute(new-value, c)',
 			'<span>Test.removeAttribute(doesnt-exist)'
 		]);
+	});
+
+	it('should update class attribute via className prop', () => {
+		scratch.innerHTML = '<div class="foo">bar</div>';
+		hydrate(<div className="foo">bar</div>, scratch);
+		expect(scratch.innerHTML).to.equal('<div class="foo">bar</div>');
 	});
 
 	it('should correctly hydrate with Fragments', () => {

@@ -1,4 +1,5 @@
 import { createElement as h, options, render, createRef, Component, Fragment } from 'preact';
+import { useState, useEffect, useLayoutEffect } from 'preact/hooks';
 import { setupScratch, teardown, clearOptions } from '../../../test/_util/helpers';
 import { serializeVNode, initDebug } from '../../src/debug';
 import * as PropTypes from 'prop-types';
@@ -35,8 +36,87 @@ describe('debug', () => {
 		expect(diffSpy, 'diff').to.have.been.called;
 	});
 
+	it('should print an error on rendering on undefined parent', () => {
+		let fn = () => render(<div />, undefined);
+		expect(fn).to.throw(/render/);
+	});
+
+	it('should print an error on rendering on invalid parent', () => {
+		let fn = () => render(<div />, 6);
+		expect(fn).to.throw(/valid HTML node/);
+		expect(fn).to.throw(/<div/);
+	});
+
+	it('should print an error with (function) component name when available', () => {
+		const App = () => <div />;
+		let fn = () => render(<App />, 6);
+		expect(fn).to.throw(/<App/);
+		expect(fn).to.throw(/6/);
+		fn = () => render(<App />, {});
+		expect(fn).to.throw(/<App/);
+		expect(fn).to.throw(/[object Object]/);
+	});
+
+	it('should print an error with (class) component name when available', () => {
+		class App extends Component {
+			render() {
+				return <div />;
+			}
+		}
+		let fn = () => render(<App />, 6);
+		expect(fn).to.throw(/<App/);
+	});
+
 	it('should print an error on undefined component', () => {
 		let fn = () => render(h(undefined), scratch);
+		expect(fn).to.throw(/createElement/);
+	});
+
+	it('should throw an error for argumentless useEffect hooks', () => {
+		const App = () => {
+			const [state] = useState('test');
+			useEffect(() => 'test');
+			return (
+				<p>{state}</p>
+			);
+		};
+		const fn = () => render(<App />, scratch);
+		expect(fn).to.throw(/You should provide an array of arguments/);
+	});
+
+	it('should throw an error for argumentless useLayoutEffect hooks', () => {
+		const App = () => {
+			const [state] = useState('test');
+			useLayoutEffect(() => 'test');
+			return (
+				<p>{state}</p>
+			);
+		};
+		const fn = () => render(<App />, scratch);
+		expect(fn).to.throw(/You should provide an array of arguments/);
+	});
+
+	it('should not throw an error for argumented effect hooks', () => {
+		const App = () => {
+			const [state] = useState('test');
+			useLayoutEffect(() => 'test', []);
+			useEffect(() => 'test', [state]);
+			return (
+				<p>{state}</p>
+			);
+		};
+		const fn = () => render(<App />, scratch);
+		expect(fn).to.not.throw();
+	});
+
+	it('should print an error on double jsx conversion', () => {
+		let Foo = <div />;
+		let fn = () => render(h(<Foo />), scratch);
+		expect(fn).to.throw(/createElement/);
+	});
+
+	it('should print an error when component is an array', () => {
+		let fn = () => render(h([<div />]), scratch);
 		expect(fn).to.throw(/createElement/);
 	});
 
@@ -51,6 +131,11 @@ describe('debug', () => {
 		(vnode).$$typeof = 'foo';
 		render(vnode, scratch);
 		expect(console.error).to.not.be.called;
+	});
+
+	it('should print an error on invalid handler', () => {
+		let fn = () => render(<div onclick="a" />, scratch);
+		expect(fn).to.throw(/"onclick" property should be a function/);
 	});
 
 	it('should NOT print an error on valid refs', () => {

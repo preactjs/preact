@@ -1,4 +1,5 @@
-import { setupScratch, teardown, setupRerender } from '../../../test/_util/helpers';
+import { setupRerender } from 'preact/test-utils';
+import { setupScratch, teardown } from '../../../test/_util/helpers';
 import React from '../../src';
 
 describe('components', () => {
@@ -76,6 +77,21 @@ describe('components', () => {
 	describe('PureComponent', () => {
 		it('should be a class', () => {
 			expect(React).to.have.property('PureComponent').that.is.a('function');
+		});
+
+		it('should pass props in constructor', () => {
+			let spy = sinon.spy();
+			class Foo extends React.PureComponent {
+				constructor(props) {
+					super(props);
+					spy(this.props, props);
+				}
+			}
+
+			React.render(<Foo foo="bar" />, scratch);
+
+			let expected = { foo: 'bar' };
+			expect(spy).to.be.calledWithMatch(expected, expected);
 		});
 
 		it('should only re-render when props or state change', () => {

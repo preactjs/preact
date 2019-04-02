@@ -10,10 +10,10 @@ declare namespace preact {
 
 	interface VNode<P = {}> {
 		type: ComponentFactory<P> | string | null;
-		props: P & { children: ComponentChildren };
-		text?: string | number | null;
-		key?: Key;
-		ref?: Ref<any>;
+		props: P & { children: ComponentChildren } | null;
+		text: string | number | null;
+		key: Key;
+		ref: Ref<any> | null;
 		/**
 		 * The time this `vnode` started rendering. Will only be set when
 		 * the devtools are attached.
@@ -89,7 +89,7 @@ declare namespace preact {
 		shouldComponentUpdate?(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): boolean;
 		componentWillUpdate?(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): void;
 		getSnapshotBeforeUpdate?(oldProps: Readonly<P>, oldState: Readonly<S>): any;
-		componentDidUpdate?(previousProps: Readonly<P>, previousState: Readonly<S>, previousContext: any): void;
+		componentDidUpdate?(previousProps: Readonly<P>, previousState: Readonly<S>, snapshot: any): void;
 		componentDidCatch?(error: any): void;
 	}
 
@@ -168,17 +168,19 @@ declare namespace preact {
 	 * Global options for preact
 	 */
 	interface Options {
-		/** Attach a hook that is invoked whenever a VNode is created */
+		/** Attach a hook that is invoked before render, mainly to check the arguments. */
+		root?(vnode: ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment): void;
+		/** Attach a hook that is invoked whenever a VNode is created. */
 		vnode(vnode: VNode): void;
 		/** Attach a hook that is invoked after a tree was mounted or was updated. */
 		commit?(vnode: VNode): void;
 		/** Attach a hook that is invoked immediately before a component is unmounted. */
 		unmount?(vnode: VNode): void;
-		/** Attach a hook that is invoked before a vnode is diffed */
+		/** Attach a hook that is invoked before a vnode is diffed. */
 		diff?(vnode: VNode): void;
-		/** Attach a hook that is invoked before a vnode has rendered */
+		/** Attach a hook that is invoked before a vnode has rendered. */
 		render?(vnode: VNode): void;
-		/** Attach a hook that is invoked after a vnode has rendered */
+		/** Attach a hook that is invoked after a vnode has rendered. */
 		diffed?(vnode: VNode): void;
 		event?(e: Event): void;
 	}

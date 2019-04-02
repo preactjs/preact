@@ -7,9 +7,6 @@
 			"es6",
 			"dom"
 		],
-		"noImplicitAny": true,
-		"noImplicitThis": true,
-		"strictNullChecks": true,
 		"strict": true,
 		"typeRoots": [
 			"../../"

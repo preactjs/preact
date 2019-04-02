@@ -1,5 +1,6 @@
 import { createElement as h, render, Component, Fragment } from '../../src/index';
-import { setupScratch, teardown, setupRerender, getMixedArray, mixedArrayHTML } from '../_util/helpers';
+import { setupRerender } from 'preact/test-utils';
+import { setupScratch, teardown, getMixedArray, mixedArrayHTML, serializeHtml } from '../_util/helpers';
 
 /** @jsx h */
 
@@ -115,6 +116,19 @@ describe('Components', () => {
 				}));
 
 			expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
+		});
+
+		it('should not crash when setting state with cb in constructor', () => {
+			let spy = sinon.spy();
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.setState({ preact: 'awesome' }, spy);
+				}
+			}
+
+			expect(() => render(<Foo foo="bar" />, scratch)).not.to.throw();
+			expect(spy).to.not.be.called;
 		});
 
 		it('should initialize props & context but not state in Component constructor', () => {
@@ -874,9 +888,7 @@ describe('Components', () => {
 			class Inner extends Component {
 				constructor(...args) {
 					super();
-					this._constructor(...args);
 				}
-				_constructor() {}
 				componentWillMount() {}
 				componentDidMount() {}
 				componentWillUnmount() {}
@@ -884,7 +896,6 @@ describe('Components', () => {
 					return <div j={++j} {...props}>inner</div>;
 				}
 			}
-			sinon.spy(Inner.prototype, '_constructor');
 			sinon.spy(Inner.prototype, 'render');
 			sinon.spy(Inner.prototype, 'componentWillMount');
 			sinon.spy(Inner.prototype, 'componentDidMount');
@@ -900,7 +911,6 @@ describe('Components', () => {
 
 			expect(Outer.prototype.componentWillUnmount).not.to.have.been.called;
 
-			expect(Inner.prototype._constructor).to.have.been.calledOnce;
 			expect(Inner.prototype.componentWillUnmount).not.to.have.been.called;
 			expect(Inner.prototype.componentWillMount).to.have.been.calledOnce;
 			expect(Inner.prototype.componentDidMount).to.have.been.calledOnce;
@@ -922,7 +932,7 @@ describe('Components', () => {
 				foo: 'bar'
 			});
 
-			expect(sortAttributes(scratch.innerHTML)).to.equal(sortAttributes('<div foo="bar" j="2" i="2">inner</div>'));
+			expect(serializeHtml(scratch)).to.equal(sortAttributes('<div foo="bar" j="2" i="2">inner</div>'));
 
 			// update & flush
 			doRender();
@@ -964,7 +974,7 @@ describe('Components', () => {
 			doRender();
 			rerender();
 
-			expect(sortAttributes(scratch.innerHTML)).to.equal(sortAttributes('<div foo="bar" j="4" i="5">inner</div>'));
+			expect(serializeHtml(scratch)).to.equal(sortAttributes('<div foo="bar" j="4" i="5">inner</div>'));
 		});
 
 		it('should resolve intermediary functional component', () => {

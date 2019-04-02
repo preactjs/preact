@@ -493,7 +493,11 @@ declare namespace JSX {
 		alt?: string;
 		async?: boolean;
 		autocomplete?: string;
+		autoComplete?: string;
+		autocorrect?: string;
+		autoCorrect?: string;
 		autofocus?: boolean;
+		autoFocus?: boolean;
 		autoPlay?: boolean;
 		capture?: boolean;
 		cellPadding?: number | string;
@@ -535,6 +539,7 @@ declare namespace JSX {
 		href?: string;
 		hrefLang?: string;
 		for?: string;
+		htmlFor?: string;
 		httpEquiv?: string;
 		icon?: string;
 		id?: string;

@@ -1,18 +1,7 @@
 import { createElement as h, render } from '../../src/index';
-import { setupScratch, teardown } from '../_util/helpers';
+import { setupScratch, teardown, sortAttributes } from '../_util/helpers';
 
 /** @jsx h */
-
-
-// hacky normalization of attribute order across browsers.
-function sortAttributes(html) {
-	return html.replace(/<([a-z0-9-]+)((?:\s[a-z0-9:_.-]+=".*?")+)((?:\s*\/)?>)/gi, (s, pre, attrs, after) => {
-		let list = attrs.match(/\s[a-z0-9:_.-]+=".*?"/gi).sort( (a, b) => a>b ? 1 : -1 );
-		if (~after.indexOf('/')) after = '></'+pre+'>';
-		return '<' + pre + list.join('') + after;
-	});
-}
-
 
 describe('svg', () => {
 	let scratch;
@@ -33,6 +22,32 @@ describe('svg', () => {
 		), scratch);
 
 		let html = sortAttributes(String(scratch.innerHTML).replace(' xmlns="http://www.w3.org/2000/svg"', ''));
+		expect(html).to.equal(sortAttributes(`
+			<svg viewBox="0 0 360 360">
+				<path d="M 347.1 357.9 L 183.3 256.5 L 13 357.9 V 1.7 h 334.1 v 356.2 Z M 58.5 47.2 v 231.4 l 124.8 -74.1 l 118.3 72.8 V 47.2 H 58.5 Z" fill="black" stroke="white"></path>
+			</svg>
+		`.replace(/[\n\t]+/g,'')));
+	});
+
+	it('should support svg attributes', () => {
+		const Demo = ({ url }) => (
+			<svg viewBox="0 0 360 360" xlinkHref={url}>
+				<path d="M 347.1 357.9 L 183.3 256.5 L 13 357.9 V 1.7 h 334.1 v 356.2 Z M 58.5 47.2 v 231.4 l 124.8 -74.1 l 118.3 72.8 V 47.2 H 58.5 Z" fill="black" stroke="white" />
+			</svg>
+		);
+		render(<Demo url="www.preact.com" />, scratch);
+
+		let html = String(scratch.innerHTML).replace(' xmlns="http://www.w3.org/2000/svg"', '');
+		html = sortAttributes(html.replace(' xmlns:xlink="http://www.w3.org/1999/xlink"', ''));
+		expect(html).to.equal(sortAttributes(`
+			<svg viewBox="0 0 360 360" xlink:href="www.preact.com">
+				<path d="M 347.1 357.9 L 183.3 256.5 L 13 357.9 V 1.7 h 334.1 v 356.2 Z M 58.5 47.2 v 231.4 l 124.8 -74.1 l 118.3 72.8 V 47.2 H 58.5 Z" fill="black" stroke="white"></path>
+			</svg>
+		`.replace(/[\n\t]+/g,'')));
+		render(<Demo />, scratch);
+
+		html = String(scratch.innerHTML).replace(' xmlns="http://www.w3.org/2000/svg"', '');
+		html = sortAttributes(html.replace(' xmlns:xlink="http://www.w3.org/1999/xlink"', ''));
 		expect(html).to.equal(sortAttributes(`
 			<svg viewBox="0 0 360 360">
 				<path d="M 347.1 357.9 L 183.3 256.5 L 13 357.9 V 1.7 h 334.1 v 356.2 Z M 58.5 47.2 v 231.4 l 124.8 -74.1 l 118.3 72.8 V 47.2 H 58.5 Z" fill="black" stroke="white"></path>
@@ -116,6 +131,20 @@ describe('svg', () => {
 		expect(scratch.getElementsByTagName('a'))
 			.to.have.property('0')
 			.that.is.a('HTMLAnchorElement');
+	});
+
+	it('should render foreignObject as an svg element', () => {
+		render((
+			<svg>
+				<g>
+					<foreignObject>
+						<a href="#foo">test</a>
+					</foreignObject>
+				</g>
+			</svg>
+		), scratch);
+
+		expect(scratch.querySelector('foreignObject').localName).to.equal('foreignObject');
 	});
 
 	it('should transition from DOM to SVG and back', () => {

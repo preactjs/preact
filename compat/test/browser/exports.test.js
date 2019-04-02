@@ -35,6 +35,7 @@ describe('exports', () => {
 		expect(Compat.Children.toArray).to.exist.and.be.a('function');
 		expect(Compat.Children.only).to.exist.and.be.a('function');
 		expect(Compat.unmountComponentAtNode).to.exist.and.be.a('function');
+		expect(Compat.unstable_batchedUpdates).to.exist.and.be.a('function');
 		expect(Compat.version).to.exist.and.be.a('string');
 	});
 
@@ -70,6 +71,7 @@ describe('exports', () => {
 		expect(Named.Children.toArray).to.exist.and.be.a('function');
 		expect(Named.Children.only).to.exist.and.be.a('function');
 		expect(Compat.unmountComponentAtNode).to.exist.and.be.a('function');
+		expect(Compat.unstable_batchedUpdates).to.exist.and.be.a('function');
 		expect(Named.version).to.exist.and.be.a('string');
 	});
 });

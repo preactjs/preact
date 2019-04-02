@@ -3,7 +3,7 @@ import { Component, enqueueRender } from '../component';
 import { coerceToVNode, Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps } from './props';
-import { assign } from '../util';
+import { assign, removeNode } from '../util';
 import options from '../options';
 
 /**
@@ -21,7 +21,7 @@ import options from '../options';
  * @param {import('../internal').Component | null} ancestorComponent The direct
  * parent component
  */
-export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent) {
+export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force) {
 
 	// If the previous type doesn't match the new type we drop the whole subtree
 	if (oldVNode==null || newVNode==null || oldVNode.type!==newVNode.type) {
@@ -33,7 +33,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 
 	if (options.diff) options.diff(newVNode);
 
-	let c, p, isNew = false, oldProps, oldState, oldContext,
+	let c, p, isNew = false, oldProps, oldState, snapshot,
 		newType = newVNode.type;
 
 	/** @type {import('../internal').Component | null} */
@@ -42,6 +42,10 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 	try {
 		outer: if (oldVNode.type===Fragment || newType===Fragment) {
 			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, c);
+
+			// Mark dom as empty in case `_children` is any empty array. If it isn't
+			// we'll set `dom` to the correct value just a few lines later.
+			dom = null;
 
 			if (newVNode._children.length) {
 				dom = newVNode._children[0]._dom;
@@ -62,8 +66,6 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 				clearProcessingException = c._processingException;
 			}
 			else {
-				isNew = true;
-
 				// Instantiate the new component
 				if (newType.prototype && newType.prototype.render) {
 					newVNode._component = c = new newType(newVNode.props, cctx); // eslint-disable-line new-cap
@@ -80,7 +82,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 				if (!c.state) c.state = {};
 				c.context = cctx;
 				c._context = context;
-				c._dirty = true;
+				isNew = c._dirty = true;
 				c._renderCallbacks = [];
 			}
 
@@ -90,7 +92,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			let s = c._nextState || c.state;
 			if (newType.getDerivedStateFromProps!=null) {
 				oldState = assign({}, c.state);
-				if (s===c.state) s = assign({}, s);
+				if (s===c.state) s = c._nextState = assign({}, s);
 				assign(s, newType.getDerivedStateFromProps(newVNode.props, s));
 			}
 
@@ -100,11 +102,12 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 				if (c.componentDidMount!=null) mounts.push(c);
 			}
 			else {
-				if (newType.getDerivedStateFromProps==null && c._force==null && c.componentWillReceiveProps!=null) {
+				if (newType.getDerivedStateFromProps==null && force==null && c.componentWillReceiveProps!=null) {
 					c.componentWillReceiveProps(newVNode.props, cctx);
+					s = c._nextState || c.state;
 				}
 
-				if (!c._force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newVNode.props, s, cctx)===false) {
+				if (!force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newVNode.props, s, cctx)===false) {
 					c.props = newVNode.props;
 					c.state = s;
 					c._dirty = false;
@@ -119,7 +122,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			oldProps = c.props;
 			if (!oldState) oldState = c.state;
 
-			oldContext = c.context = cctx;
+			c.context = cctx;
 			c.props = newVNode.props;
 			c.state = s;
 
@@ -134,10 +137,10 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			}
 
 			if (!isNew && c.getSnapshotBeforeUpdate!=null) {
-				oldContext = c.getSnapshotBeforeUpdate(oldProps, oldState);
+				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c);
+			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null);
 
 			if (vnode!=null) {
 				// If this component returns a Fragment (or another component that
@@ -166,7 +169,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			// Don't call componentDidUpdate on mount or when we bailed out via
 			// `shouldComponentUpdate`
 			if (!isNew && oldProps!=null && c.componentDidUpdate!=null) {
-				c.componentDidUpdate(oldProps, oldState, oldContext);
+				c.componentDidUpdate(oldProps, oldState, snapshot);
 			}
 		}
 
@@ -216,7 +219,7 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 	let d = dom;
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
-	isSvg = isSvg ? newVNode.type !== 'foreignObject' : newVNode.type === 'svg';
+	isSvg = newVNode.type==='svg' || isSvg;
 
 	if (dom==null && excessDomChildren!=null) {
 		for (let i=0; i<excessDomChildren.length; i++) {
@@ -248,19 +251,33 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 		}
 		if (newVNode!==oldVNode) {
 			let oldProps = oldVNode.props;
+			let newProps = newVNode.props;
+
 			// if we're hydrating, use the element's attributes as its current props:
 			if (oldProps==null) {
 				oldProps = {};
 				if (excessDomChildren!=null) {
+					let name;
 					for (let i=0; i<dom.attributes.length; i++) {
-						oldProps[dom.attributes[i].name] = dom.attributes[i].value;
+						name = dom.attributes[i].name;
+						oldProps[name=='class' && newProps.className ? 'className' : name] = dom.attributes[i].value;
 					}
 				}
 			}
-			diffProps(dom, newVNode.props, oldProps, isSvg);
+			let oldHtml = oldProps.dangerouslySetInnerHTML;
+			let newHtml = newProps.dangerouslySetInnerHTML;
+			if (newHtml || oldHtml) {
+				// Avoid re-applying the same '__html' if it did not changed between re-render
+				if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
+					dom.innerHTML = newHtml && newHtml.__html || '';
+				}
+			}
+			if (newProps.multiple) {
+				dom.multiple = newProps.multiple;
+			}
+			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent);
+			diffProps(dom, newProps, oldProps, isSvg);
 		}
-
-		diffChildren(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
 	}
 
 	return dom;
@@ -286,8 +303,10 @@ export function applyRef(ref, value, ancestorComponent) {
  * @param {import('../internal').VNode} vnode The virtual node to unmount
  * @param {import('../internal').Component} ancestorComponent The parent
  * component to this virtual node
+ * @param {boolean} skipRemove Flag that indicates that a parent node of the
+ * current element is already detached from the DOM.
  */
-export function unmount(vnode, ancestorComponent) {
+export function unmount(vnode, ancestorComponent, skipRemove) {
 	let r;
 	if (options.unmount) options.unmount(vnode);
 
@@ -295,7 +314,10 @@ export function unmount(vnode, ancestorComponent) {
 		applyRef(r, null, ancestorComponent);
 	}
 
-	if ((r = vnode._dom)!=null) r.remove();
+	let dom;
+	if (!skipRemove && vnode._lastDomChild==null) {
+		skipRemove = (dom = vnode._dom)!=null;
+	}
 
 	vnode._dom = vnode._lastDomChild = null;
 
@@ -310,13 +332,15 @@ export function unmount(vnode, ancestorComponent) {
 		}
 
 		r.base = r._parentDom = null;
-		if (r = r._prevVNode) unmount(r, ancestorComponent);
+		if (r = r._prevVNode) unmount(r, ancestorComponent, skipRemove);
 	}
 	else if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {
-			unmount(r[i], ancestorComponent);
+			unmount(r[i], ancestorComponent, skipRemove);
 		}
 	}
+
+	if (dom!=null) removeNode(dom);
 }
 
 /** The `.render()` method for a PFC backing instance. */

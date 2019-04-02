@@ -1,6 +1,6 @@
+import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render } from 'preact';
-import { spy } from 'sinon';
-import { setupScratch, teardown, setupRerender } from '../../../test/_util/helpers';
+import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useState } from '../../src';
 
 /** @jsx h */
@@ -41,7 +41,7 @@ describe('useState', () => {
 	});
 
 	it('can initialize the state via a function', () => {
-		const initState = spy(() => { a: 1 })
+		const initState = sinon.spy(() => { 1; });
 
 		function Comp() {
 			useState(initState);
@@ -54,11 +54,37 @@ describe('useState', () => {
 		expect(initState).to.be.calledOnce;
 	});
 
+	it('does not rerender on equal state', () => {
+		let lastState;
+		let doSetState;
+
+		const Comp = sinon.spy(() => {
+			const [state, setState] = useState(0);
+			lastState = state;
+			doSetState = setState;
+			return null;
+		});
+
+		render(<Comp />, scratch);
+		expect(lastState).to.equal(0);
+		expect(Comp).to.be.calledOnce;
+
+		doSetState(0);
+		rerender();
+		expect(lastState).to.equal(0);
+		expect(Comp).to.be.calledOnce;
+
+		doSetState(() => 0);
+		rerender();
+		expect(lastState).to.equal(0);
+		expect(Comp).to.be.calledOnce;
+	});
+
 	it('rerenders when setting the state', () => {
 		let lastState;
 		let doSetState;
 
-		const Comp = spy(() => {
+		const Comp = sinon.spy(() => {
 			const [state, setState] = useState(0);
 			lastState = state;
 			doSetState = setState;
@@ -82,18 +108,16 @@ describe('useState', () => {
 	});
 
 	it('can be set by another component', () => {
-		const initState = { count: 0 }
-
 		function StateContainer() {
 			const [count, setCount] = useState(0);
-			return <div>
+			return (<div>
 				<p>Count: {count}</p>
 				<Increment increment={() => setCount(c => c + 10)} />
-			</div>;
+			</div>);
 		}
 
 		function Increment(props) {
-			return <button onClick={props.increment}>Increment</button>
+			return <button onClick={props.increment}>Increment</button>;
 		}
 
 		render(<StateContainer />, scratch);

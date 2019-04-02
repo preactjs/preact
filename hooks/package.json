@@ -5,7 +5,7 @@
   "private": true,
   "description": "Hook addon for Preact",
   "main": "dist/hooks.js",
-  "module": "dist/hooks.mjs",
+  "module": "dist/hooks.module.js",
   "umd:main": "dist/hooks.umd.js",
   "source": "src/index.js",
   "license": "MIT",
