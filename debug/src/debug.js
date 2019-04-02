@@ -101,9 +101,19 @@ export function initDebug() {
 	options.diffed = (vnode) => {
 		if (vnode._component && vnode._component.__hooks) {
 			let hooks = vnode._component.__hooks;
+			if (hooks._list.length > 0) {
+				hooks._list.forEach(hook => {
+					if (hook._callback && (!hook._args || !Array.isArray(hook._args))) {
+						console.warn(
+							`In ${vnode.type.name || vnode.type} you are calling useMemo/useCallback without passing arguments.\n` +
+							`This is a noop since it will not be able to memoize, it will execute it every render.`
+						);
+					}
+				});
+			}
 			if (hooks._pendingEffects.length > 0) {
-				hooks._pendingEffects.forEach((x) => {
-					if (!x._args || !Array.isArray(x._args)) {
+				hooks._pendingEffects.forEach((effect) => {
+					if (!effect._args || !Array.isArray(effect._args)) {
 						throw new Error('You should provide an array of arguments as the second argument to the "useEffect" hook.\n\n' +
 							'Not doing so will invoke this effect on every render.\n\n' +
 							'This effect can be found in the render of ' + (vnode.type.name || vnode.type) + '.');
@@ -111,8 +121,8 @@ export function initDebug() {
 				});
 			}
 			if (hooks._pendingLayoutEffects.length > 0) {
-				hooks._pendingLayoutEffects.forEach((x) => {
-					if (!x._args || !Array.isArray(x._args)) {
+				hooks._pendingLayoutEffects.forEach((layoutEffect) => {
+					if (!layoutEffect._args || !Array.isArray(layoutEffect._args)) {
 						throw new Error('You should provide an array of arguments as the second argument to the "useEffect" hook.\n\n' +
 							'Not doing so will invoke this effect on every render.\n\n' +
 							'This effect can be found in the render of ' + (vnode.type.name || vnode.type) + '.');
