@@ -132,6 +132,8 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			let vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
 			c._dirty = false;
 
+			if (options.afterRender) options.afterRender(vnode);
+
 			if (c.getChildContext!=null) {
 				context = assign(assign({}, context), c.getChildContext());
 			}

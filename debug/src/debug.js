@@ -98,6 +98,12 @@ export function initDebug() {
 		if (oldBeforeDiff) oldBeforeDiff(vnode);
 	};
 
+	options.preHook = (comp) => {
+		if (!comp) {
+			throw new Error('Hook can only be invoked from render methods.');
+		}
+	};
+
 	options.diffed = (vnode) => {
 		if (vnode._component && vnode._component.__hooks) {
 			let hooks = vnode._component.__hooks;
