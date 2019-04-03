@@ -13,13 +13,15 @@ import ProfilerDemo from './profiler';
 import KeyBug from './key_bug';
 import PeopleBrowser from './people';
 import { initDevTools } from 'preact/debug/src/devtools';
+import { initDebug } from 'preact/debug/src/debug';
 import DevtoolsDemo from './devtools';
 
 let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(window.location.href);
 if (!isBenchmark) {
 	// eslint-disable-next-line no-console
-	console.log('Enabling devtools');
+	console.log('Enabling devtools and debug');
 	initDevTools();
+	initDebug();
 }
 
 // mobx-state-tree fix
