@@ -112,6 +112,11 @@ let q = [];
  */
 export function enqueueRender(c) {
 	if (!c._dirty && (c._dirty = true) && q.push(c) === 1) {
+		// This was changed from:
+		// Promise.prototype.then.bind(Promise.resolve())
+		// Since this broke event bubbling.
+		// The test "should propagate events correctly"
+		// is the use case this was fixed for.
 		(options.debounceRendering || setTimeout)(process);
 	}
 }
