@@ -97,12 +97,6 @@ Component.prototype.render = Fragment;
  */
 let q = [];
 
-/**
- * Asynchronously schedule a callback
- * @type {(cb) => void}
- */
-const defer = typeof Promise=='function' ? Promise.prototype.then.bind(Promise.resolve()) : setTimeout;
-
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
  * important that contributors to Preact can consistenly reason about what calls to `setState`, etc.
@@ -118,7 +112,7 @@ const defer = typeof Promise=='function' ? Promise.prototype.then.bind(Promise.r
  */
 export function enqueueRender(c) {
 	if (!c._dirty && (c._dirty = true) && q.push(c) === 1) {
-		(options.debounceRendering || defer)(process);
+		(options.debounceRendering || setTimeout)(process);
 	}
 }
 

@@ -1,7 +1,7 @@
 /* global DISABLE_FLAKEY */
 
 import { setupRerender } from 'preact/test-utils';
-import { createElement as h, render, Component } from '../../src/index';
+import { createElement as h, render, Component, options } from '../../src/index';
 import { setupScratch, teardown, getMixedArray, mixedArrayHTML, sortCss, serializeHtml, supportsPassiveEvents, supportsDataList } from '../_util/helpers';
 import { clearLog, getLog, logCall } from '../_util/logCall';
 
@@ -65,22 +65,70 @@ describe('render()', () => {
 		);
 	});
 
-	it.only('should propagate events correctly', () => {
+	it('should propagate events correctly', () => {
+		const oldDebounce = options.debounceRendering;
+		options.debounceRendering = options.__test__previousDebounce;
+		function fireEvent(on, type) {
+			let e = document.createEvent('Event');
+			e.initEvent(type, true, true);
+			on.dispatchEvent(e);
+		}
+
 		let buttonRef;
 		let button2Ref;
 		const spy1 = sinon.spy();
 		const spy2 = sinon.spy();
-		const App = () => {
-			return (
-				<div>
-					<div ref={(ref) => { buttonRef = ref }} onClick={spy1}>Button 1</div>
-					<div ref={(ref) => { button2Ref = ref }} onClick={spy2}>Button 2</div>
-				</div>
-			)
+		class App extends Component {
+
+			constructor(props) {
+				super(props);
+				this.state = { show: true };
+				this.onClick = this.onClick.bind(this);
+				this.onClick2 = this.onClick2.bind(this);
+			}
+
+			onClick() {
+				spy1();
+				this.setState({ show: false });
+			}
+
+			onClick2() {
+				spy2();
+			}
+
+			render() {
+				const section = (
+					<div>
+						<div />
+						<div>
+							<div ref={(ref) => { buttonRef = ref; }} onClick={this.onClick}>Button 1</div>
+						</div>
+					</div>
+				);
+
+				return (
+					<div>
+						{this.state.show && section}
+						<div>
+							<div>
+								<div />
+							</div>
+							<div ref={(ref) => { button2Ref = ref; }} onClick={this.onClick2}>Button 2</div>
+						</div>
+					</div>
+				);
+			}
 		}
-		render(<span>Bad</span>, scratch);
-		buttonRef.click();
-		console.log('hi')
+		render(<App />, scratch);
+		fireEvent(button2Ref, 'click');
+		rerender();
+		expect(spy2).to.be.calledOnce;
+		expect(spy1).to.not.be.called;
+		fireEvent(buttonRef, 'click');
+		rerender();
+		expect(spy1).to.be.calledOnce;
+		expect(spy2).to.be.calledOnce;
+		options.debounceRendering = oldDebounce;
 	});
 
 	it('should create empty nodes (<* />)', () => {
