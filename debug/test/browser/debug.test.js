@@ -1,4 +1,5 @@
 import { createElement as h, options, render, createRef, Component, Fragment } from 'preact';
+import { useState, useEffect, useLayoutEffect, useMemo, useCallback } from 'preact/hooks';
 import { setupScratch, teardown, clearOptions } from '../../../test/_util/helpers';
 import { serializeVNode, initDebug } from '../../src/debug';
 import * as PropTypes from 'prop-types';
@@ -8,13 +9,16 @@ import * as PropTypes from 'prop-types';
 describe('debug', () => {
 	let scratch;
 	let errors = [];
+	let warnings = [];
 
 	let diffSpy;
 
 	beforeEach(() => {
 		errors = [];
+		warnings = [];
 		scratch = setupScratch();
 		sinon.stub(console, 'error').callsFake(e => errors.push(e));
+		sinon.stub(console, 'warn').callsFake(w => warnings.push(w));
 
 		clearOptions();
 		diffSpy = sinon.spy();
@@ -27,6 +31,7 @@ describe('debug', () => {
 
 		/** @type {*} */
 		(console.error).restore();
+		(console.warn).restore();
 		teardown(scratch);
 	});
 
@@ -47,7 +52,7 @@ describe('debug', () => {
 	});
 
 	it('should print an error with (function) component name when available', () => {
-		const App = () => <div />
+		const App = () => <div />;
 		let fn = () => render(<App />, 6);
 		expect(fn).to.throw(/<App/);
 		expect(fn).to.throw(/6/);
@@ -59,7 +64,7 @@ describe('debug', () => {
 	it('should print an error with (class) component name when available', () => {
 		class App extends Component {
 			render() {
-				return <div />
+				return <div />;
 			}
 		}
 		let fn = () => render(<App />, 6);
@@ -69,6 +74,65 @@ describe('debug', () => {
 	it('should print an error on undefined component', () => {
 		let fn = () => render(h(undefined), scratch);
 		expect(fn).to.throw(/createElement/);
+	});
+
+	it('should throw an error for argumentless useEffect hooks', () => {
+		const App = () => {
+			const [state] = useState('test');
+			useEffect(() => 'test');
+			return (
+				<p>{state}</p>
+			);
+		};
+		const fn = () => render(<App />, scratch);
+		expect(fn).to.throw(/You should provide an array of arguments/);
+	});
+
+	it('should throw an error for argumentless useLayoutEffect hooks', () => {
+		const App = () => {
+			const [state] = useState('test');
+			useLayoutEffect(() => 'test');
+			return (
+				<p>{state}</p>
+			);
+		};
+		const fn = () => render(<App />, scratch);
+		expect(fn).to.throw(/You should provide an array of arguments/);
+	});
+
+	it('should not throw an error for argumented effect hooks', () => {
+		const App = () => {
+			const [state] = useState('test');
+			useLayoutEffect(() => 'test', []);
+			useEffect(() => 'test', [state]);
+			return (
+				<p>{state}</p>
+			);
+		};
+		const fn = () => render(<App />, scratch);
+		expect(fn).to.not.throw();
+	});
+
+	it('should print an error on double jsx conversion', () => {
+		let Foo = <div />;
+		let fn = () => render(h(<Foo />), scratch);
+		expect(fn).to.throw(/createElement/);
+	});
+
+	it('should print an error when component is an array', () => {
+		let fn = () => render(h([<div />]), scratch);
+		expect(fn).to.throw(/createElement/);
+	});
+
+	it('should warn for useless useMemo calls', () => {
+		const App = () => {
+			const [people] = useState([40, 20, 60, 80]);
+			const retiredPeople = useMemo(() => people.filter(x => x >= 60));
+			const cb = useCallback(() => () => 'test');
+			return <p onClick={cb}>{retiredPeople.map(x => x)}</p>;
+		};
+		render(<App />, scratch);
+		expect(warnings.length).to.equal(2);
 	});
 
 	it('should print an error on invalid refs', () => {
@@ -82,6 +146,16 @@ describe('debug', () => {
 		(vnode).$$typeof = 'foo';
 		render(vnode, scratch);
 		expect(console.error).to.not.be.called;
+	});
+
+	it('should not print for null as a handler', () => {
+		let fn = () => render(<div onclick={null} />, scratch);
+		expect(fn).not.to.throw();
+	});
+
+	it('should not print for undefined as a handler', () => {
+		let fn = () => render(<div onclick={undefined} />, scratch);
+		expect(fn).not.to.throw();
 	});
 
 	it('should print an error on invalid handler', () => {
