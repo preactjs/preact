@@ -18,28 +18,13 @@ import { removeNode } from '../util';
  * which have mounted
  * @param {import('../internal').Component} ancestorComponent The direct parent
  * component to the ones being diffed
+ * @param {import('../internal').PreactElement} childDom
  */
-export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent) {
-	let childVNode, i, oldVNode, newDom, childDom;
+export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, childDom) {
+	let childVNode, i, oldVNode, newDom;
 
 	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode);
 	let oldChildren = oldParentVNode!=null && oldParentVNode!=EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR;
-
-	for (i = 0; i < oldChildren.length; i++) {
-		if (oldChildren[i] && oldChildren[i]._dom) {
-			childDom = oldChildren[i]._dom;
-			break;
-		}
-	}
-
-	if (excessDomChildren!=null) {
-		for (i = 0; i < excessDomChildren.length; i++) {
-			if (excessDomChildren[i]!=null) {
-				childDom = excessDomChildren[i];
-				break;
-			}
-		}
-	}
 
 	// TODO: Consider removing `toChildArray`, integrating it's logic in this loop here,
 	// and relying only on this loop here?
@@ -51,7 +36,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		oldVNode = getOldVNode(oldChildren, i, childVNode);
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		newDom = diff(oldVNode==null ? null : oldVNode._dom, parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, null);
+		newDom = diff(oldVNode==null ? null : oldVNode._dom, parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, null, childDom);
 
 		// Only proceed if the vnode has not been unmounted by `diff()` above.
 		if (childVNode!=null && newDom !=null) {

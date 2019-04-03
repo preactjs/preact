@@ -20,8 +20,9 @@ import options from '../options';
  * mounted components
  * @param {import('../internal').Component | null} ancestorComponent The direct
  * parent component
+ * @param {import('../internal').PreactElement} childDom
  */
-export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force) {
+export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force, childDom) {
 
 	// If the previous type doesn't match the new type we drop the whole subtree
 	if (oldVNode==null || newVNode==null || oldVNode.type!==newVNode.type) {
@@ -41,7 +42,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 
 	try {
 		outer: if (oldVNode.type===Fragment || newType===Fragment) {
-			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, c);
+			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, c, childDom);
 
 			// Mark dom as empty in case `_children` is any empty array. If it isn't
 			// we'll set `dom` to the correct value just a few lines later.
@@ -140,7 +141,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null);
+			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null, childDom);
 
 			if (vnode!=null) {
 				// If this component returns a Fragment (or another component that
@@ -275,7 +276,9 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 			if (newProps.multiple) {
 				dom.multiple = newProps.multiple;
 			}
-			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent);
+
+			const childDom = getFirstChildDom(oldVNode, excessDomChildren);
+			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent, childDom);
 			diffProps(dom, newProps, oldProps, isSvg);
 		}
 	}
@@ -303,7 +306,7 @@ export function applyRef(ref, value, ancestorComponent) {
  * @param {import('../internal').VNode} vnode The virtual node to unmount
  * @param {import('../internal').Component} ancestorComponent The parent
  * component to this virtual node
- * @param {boolean} skipRemove Flag that indicates that a parent node of the
+ * @param {boolean} [skipRemove] Flag that indicates that a parent node of the
  * current element is already detached from the DOM.
  */
 export function unmount(vnode, ancestorComponent, skipRemove) {
@@ -375,4 +378,22 @@ function catchErrorInComponent(error, component) {
 		}
 	}
 	throw error;
+}
+
+export function getFirstChildDom(oldVNode, excessDomChildren) {
+	let i, oldChildren = oldVNode!=null && oldVNode!=EMPTY_OBJ && oldVNode._children || EMPTY_ARR;
+	if (excessDomChildren!=null) {
+		for (i = 0; i < excessDomChildren.length; i++) {
+			if (excessDomChildren[i]!=null) {
+				return excessDomChildren[i];
+			}
+		}
+	}
+	else {
+		for (i = 0; i < oldChildren.length; i++) {
+			if (oldChildren[i] && oldChildren[i]._dom) {
+				return oldChildren[i]._dom;
+			}
+		}
+	}
 }
