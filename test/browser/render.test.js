@@ -65,6 +65,24 @@ describe('render()', () => {
 		);
 	});
 
+	it.only('should propagate events correctly', () => {
+		let buttonRef;
+		let button2Ref;
+		const spy1 = sinon.spy();
+		const spy2 = sinon.spy();
+		const App = () => {
+			return (
+				<div>
+					<div ref={(ref) => { buttonRef = ref }} onClick={spy1}>Button 1</div>
+					<div ref={(ref) => { button2Ref = ref }} onClick={spy2}>Button 2</div>
+				</div>
+			)
+		}
+		render(<span>Bad</span>, scratch);
+		buttonRef.click();
+		console.log('hi')
+	});
+
 	it('should create empty nodes (<* />)', () => {
 		render(<div />, scratch);
 		expect(scratch.childNodes).to.have.length(1);
