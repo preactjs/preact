@@ -98,7 +98,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('hello <span>world</span>');
 	});
 
-	it('should handle reordering components that return Fragments', () => {
+	it('should handle reordering components that return Fragments #1325', () => {
 		class X extends Component {
 			render() {
 				return <Fragment>{this.props.children}</Fragment>;
@@ -128,6 +128,79 @@ describe('Fragment', () => {
 		expect(scratch.textContent).to.equal('12');
 		render(<App i={1} />, scratch);
 		expect(scratch.textContent).to.equal('21');
+	});
+
+	it('should handle changing node type within a Component that returns a Fragment #1326', () => {
+		class X extends Component {
+			render() {
+				return this.props.children;
+			}
+		}
+
+		/** @type {(newState: any) => void} */
+		let setState;
+		class App extends Component {
+			constructor(props, context) {
+				super(props, context);
+
+				this.state = { i: 0 };
+				setState = this.setState.bind(this);
+			}
+
+			render() {
+				if (this.state.i === 0) {
+					return (
+						<div>
+							<X>
+								<span>1</span>
+							</X>
+							<X>
+								<span>2</span>
+								<span>2</span>
+							</X>
+						</div>
+					);
+				}
+
+				return (
+					<div>
+						<X>
+							<div>1</div>
+						</X>
+						<X>
+							<span>2</span>
+							<span>2</span>
+						</X>
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(div([
+			span(1),
+			span(2),
+			span(2)
+		].join('')));
+
+		setState({ i: 1 });
+
+		clearLog();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(div([
+			div(1),
+			span(2),
+			span(2)
+		].join('')));
+		expectDomLogToBe([
+			'<span>1.remove()',
+			// TODO: Why is it re-appending all the children 😢
+			'<div>.appendChild(#text)',
+			'<div>22.appendChild(<div>1)',
+			'<div>221.appendChild(<span>2)',
+			'<div>212.appendChild(<span>2)'
+		]);
 	});
 
 	it.skip('should preserve state of children with 1 level nesting', () => {
