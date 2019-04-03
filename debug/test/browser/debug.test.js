@@ -148,6 +148,16 @@ describe('debug', () => {
 		expect(console.error).to.not.be.called;
 	});
 
+	it('should not print for null as a handler', () => {
+		let fn = () => render(<div onclick={null} />, scratch);
+		expect(fn).not.to.throw();
+	});
+
+	it('should not print for undefined as a handler', () => {
+		let fn = () => render(<div onclick={undefined} />, scratch);
+		expect(fn).not.to.throw();
+	});
+
 	it('should print an error on invalid handler', () => {
 		let fn = () => render(<div onclick="a" />, scratch);
 		expect(fn).to.throw(/"onclick" property should be a function/);
