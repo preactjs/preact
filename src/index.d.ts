@@ -1,9 +1,11 @@
 export = preact;
 export as namespace preact;
 
-import "./jsx";
+import { JSXInternal } from "./jsx";
 
 declare namespace preact {
+	export import JSX = JSXInternal;
+
 	//
 	// Preact Virtual DOM
 	// -----------------------------------
@@ -134,7 +136,7 @@ declare namespace preact {
 
 	function createElement(
 		type: string,
-		props: JSX.HTMLAttributes & JSX.SVGAttributes & Record<string, any> | null,
+		props: JSXInternal.HTMLAttributes & JSXInternal.SVGAttributes & Record<string, any> | null,
 		...children: ComponentChildren[]
 	): VNode<any>;
 	function createElement<P>(
@@ -142,8 +144,14 @@ declare namespace preact {
 		props: Attributes & P | null,
 		...children: ComponentChildren[]
 	): VNode<any>;
+	namespace createElement {
+		export import JSX = JSXInternal;
+	}
 
-	const h: typeof createElement;
+	type h = typeof createElement;
+	namespace h {
+		export import JSX = JSXInternal;
+	}
 
 	//
 	// Preact render
