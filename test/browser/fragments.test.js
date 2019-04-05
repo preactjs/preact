@@ -1326,14 +1326,14 @@ describe('Fragment', () => {
 					: null
 				}
 				<li>2</li>
-				<li>2</li>
+				<li>3</li>
 				{condition ?
 					null :
 					<Fragment>
 						<Fragment>
 							<Fragment>
-								<li>3</li>
 								<li>4</li>
+								<li>5</li>
 							</Fragment>
 						</Fragment>
 					</Fragment>
@@ -1345,14 +1345,14 @@ describe('Fragment', () => {
 			li(0),
 			li(1),
 			li(2),
-			li(2)
+			li(3)
 		].join(''));
 
 		const htmlForFalse = ol([
 			li(2),
-			li(2),
 			li(3),
-			li(4)
+			li(4),
+			li(5)
 		].join(''));
 
 		clearLog();
@@ -1363,18 +1363,18 @@ describe('Fragment', () => {
 		render(<Foo condition={false} />, scratch);
 		expect(scratch.innerHTML).to.equal(htmlForFalse, 'rendering from true to false');
 		expectDomLogToBe([
-			'<ol>3122.appendChild(<li>3)',
-			'<ol>4223.appendChild(<li>4)'
+			'<ol>4123.appendChild(<li>4)',
+			'<ol>5234.appendChild(<li>5)'
 		]);
 
 		clearLog();
 		render(<Foo condition={true} />, scratch);
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
 		expectDomLogToBe([
-			'<ol>2204.insertBefore(<li>0, <li>2)',
-			'<ol>0221.insertBefore(<li>1, <li>2)',
+			'<ol>2305.insertBefore(<li>0, <li>2)',
+			'<ol>0231.insertBefore(<li>1, <li>2)',
 			// TODO: See issue #193 - seems redundant...
-			'<ol>0122.appendChild(<li>2)'
+			'<ol>0132.appendChild(<li>3)'
 		]);
 	});
 
