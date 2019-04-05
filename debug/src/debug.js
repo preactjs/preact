@@ -7,6 +7,7 @@ export function initDebug() {
 	/* eslint-disable no-console */
 	let oldBeforeDiff = options.diff;
 	let oldDiffed = options.diffed;
+	let oldVnode = options.vnode;
 
 	options.root = (vnode, parentNode) => {
 		if (!parentNode) {
@@ -102,6 +103,26 @@ export function initDebug() {
 		if (!comp) {
 			throw new Error('Hook can only be invoked from render methods.');
 		}
+  };
+
+	const warn = (property, err) => ({
+		get() {
+			throw new Error(`getting vnode.${property} is deprecated, ${err}`);
+		},
+		set() {
+			throw new Error(`setting vnode.${property} is not allowed, ${err}`);
+		}
+	});
+
+	const deprecatedAttributes = {
+		nodeName: warn('nodeName', 'use vnode.type'),
+		attributes: warn('attributes', 'use vnode.props'),
+		children: warn('children', 'use vnode.props.children')
+	};
+
+	options.vnode = (vnode) => {
+		Object.defineProperties(vnode, deprecatedAttributes);
+		if (oldVnode) oldVnode(vnode);
 	};
 
 	options.diffed = (vnode) => {
@@ -139,7 +160,6 @@ export function initDebug() {
 
 		if (oldDiffed) oldDiffed(vnode);
 	};
-}
 
 /**
  * Serialize a vnode tree to a string
