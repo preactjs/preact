@@ -53,7 +53,10 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 
 			if (newVNode._children.length) {
 				dom = newVNode._children[0]._dom;
-				newVNode._lastDomChild = newVNode._children[newVNode._children.length - 1]._dom;
+
+				// If lastChild is a Fragment, use _lastDomChild, else use _dom
+				let lastChild = newVNode._children[newVNode._children.length - 1];
+				newVNode._lastDomChild = lastChild._lastDomChild || lastChild._dom;
 			}
 		}
 		else if (typeof newType==='function') {
