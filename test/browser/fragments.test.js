@@ -75,7 +75,7 @@ describe('Fragment', () => {
 
 		// Issue #193: Improve Fragment diff performance
 		// TODO: With this test, the Fragment with just one child will invoke
-		// node.appendChild on a DOM element that is already appened to the `node`.
+		// node.appendChild on a DOM element that is already appended to the `node`.
 		// I think we need the oldParentVNode to get the old first DOM child to
 		// effectively diff the children, because the parentVNode (the Fragment)
 		// comes from the newTree and so won't ever have ._dom set before diffing
