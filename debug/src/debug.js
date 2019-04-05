@@ -2,7 +2,6 @@ import { checkPropTypes } from 'prop-types';
 import { getDisplayName } from './devtools/custom';
 import { options, toChildArray } from 'preact';
 import { ELEMENT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants';
-import debugTable from './debugTable';
 
 export function initDebug() {
 	/* eslint-disable no-console */
@@ -26,7 +25,7 @@ export function initDebug() {
 		`);
 	};
 
-	options.diff = vnode => {
+	options.diff = (vnode) => {
 		let { type, props } = vnode;
 		let children = props && props.children;
 
@@ -47,8 +46,46 @@ export function initDebug() {
 			throw new Error('Invalid type passed to createElement(): '+(Array.isArray(type) ? 'array' : type));
 		}
 
-		if (type==='table') {
-			debugTable(children);
+		if (type==='thead' || type==='tfoot' || type==='thead') {
+			const parentType = '';
+			if (parentType!=='table') {
+				console.warn(
+					'Improper nesting of table.' +
+					'Your <thead/tbody/tfoot> should have a table parent.'
+					+ serializeVNode(vnode)
+				);
+			}
+		}
+		else if (type==='tr') {
+			const parentType = '';
+			if (parentType!=='thead' && parentType!=='tfoot' && parentType!=='tbody') {
+				console.warn(
+					'Improper nesting of table.' +
+					'Your <tr> should have a <thead/tbody/tfoot> parent.'
+					+ serializeVNode(vnode)
+				);
+			}
+		}
+		else if (type==='td') {
+			const parentType = '';
+			if (parentType!=='tr') {
+				console.warn(
+					'Improper nesting of table.' +
+					'Your <td> should have a <tr> parent with a <tbody/tfoot> parent.'
+					+ serializeVNode(vnode)
+				);
+			}
+		}
+		else if (type==='th') {
+			const parentType = '';
+			// TODO: for this we need to check if we're not under a thead aswell.
+			if (parentType!=='tr') {
+				console.warn(
+					'Improper nesting of table.' +
+					'Your <th> should have a <tr> parent with a <thead> parent.'
+					+ serializeVNode(vnode)
+				);
+			}
 		}
 
 		if (

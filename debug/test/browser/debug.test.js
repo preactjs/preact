@@ -291,8 +291,8 @@ describe('debug', () => {
 		});
 	});
 
-	describe('table markup', () => {
-		it('missing <tbody>/<thead>/<tfoot>', () => {
+	describe.only('table markup', () => {
+		it.only('missing <tbody>/<thead>/<tfoot>', () => {
 			const Table = () => (
 				<table>
 					<td>Hi</td>
@@ -340,6 +340,31 @@ describe('debug', () => {
 			);
 			render(<Table />, scratch);
 			expect(console.error).to.be.calledOnce;
+		});
+
+		it('Accepts well formed table with TD components', () => {
+			const Cell = ({ children }) => <td>{children}</td>;
+			const Table = () => (
+				<table>
+					<thead>
+						<tr>
+							<th>Head</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Body</td>
+						</tr>
+					</tbody>
+					<tfoot>
+						<tr>
+							<Cell>Body</Cell>
+						</tr>
+					</tfoot>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
 		});
 
 		it('Accepts well formed table', () => {
