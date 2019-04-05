@@ -52,7 +52,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 }
 
 function placeChild(parentDom, oldVNode, childVNode, childDom, newDom, excessDomChildren, oldChildrenLength) {
-	let nextDom = childDom!=null && childDom.nextSibling;
+	// let nextDom = newDom.nextSibling;
 
 	// Store focus in case moving children around changes it. Note that we
 	// can't just check once for every tree, because we have no way to
@@ -65,6 +65,7 @@ function placeChild(parentDom, oldVNode, childVNode, childDom, newDom, excessDom
 		// have a non-null _lastDomChild. Continue the diff from the end of
 		// this Fragment's DOM tree.
 		newDom = childVNode._lastDomChild;
+		// nextDom = childVNode._lastDomChild.nextSibling;
 	}
 	else if (excessDomChildren==oldVNode || newDom!=childDom || newDom.parentNode==null) {
 		// NOTE: excessDomChildren==oldVNode above:
@@ -73,6 +74,7 @@ function placeChild(parentDom, oldVNode, childVNode, childDom, newDom, excessDom
 
 		outer: if (childDom==null || childDom.parentNode!==parentDom) {
 			parentDom.appendChild(newDom);
+			// nextDom = null;
 		}
 		else {
 			let sibDom = childDom;
@@ -83,6 +85,7 @@ function placeChild(parentDom, oldVNode, childVNode, childDom, newDom, excessDom
 				}
 			}
 			parentDom.insertBefore(newDom, childDom);
+			// nextDom = childDom;
 		}
 	}
 
@@ -91,7 +94,8 @@ function placeChild(parentDom, oldVNode, childVNode, childDom, newDom, excessDom
 		focus.focus();
 	}
 
-	return newDom!=null ? newDom.nextSibling : nextDom;
+	return newDom.nextSibling;
+	// return nextDom;
 }
 
 function getOldVNode(oldChildren, i, childVNode) {
