@@ -1252,4 +1252,74 @@ describe('Components', () => {
 			expect(C3.prototype.componentWillMount, 'inject between, C3 w/ intermediary div').to.have.been.calledOnce;
 		});
 	});
+
+	it('should set component._vnode._dom when sCU returns false', () => {
+		let parent;
+		 class Parent extends Component {
+			 render() {
+				parent = this;
+				return <Child />;
+			}
+		}
+
+		let condition = false;
+
+		let child;
+		class Child extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+			render() {
+				child = this;
+				if (!condition) return null;
+				return <div class="child" />;
+			}
+		}
+
+		let app;
+		class App extends Component {
+			render() {
+				app = this;
+				return <Parent />;
+			}
+		}
+
+		render(<App />, scratch);
+		expect(child._vnode._dom).to.equal(child.base);
+
+		app.forceUpdate();
+		expect(child._vnode._dom).to.equal(child.base);
+
+		parent.setState({});
+		condition = true;
+		child.forceUpdate();
+		expect(child._vnode._dom).to.equal(child.base);
+		rerender();
+
+		expect(child._vnode._dom).to.equal(child.base);
+
+		condition = false;
+		app.setState({});
+		child.forceUpdate();
+		rerender();
+		expect(child._vnode._dom).to.equal(child.base);
+	});
+
+	it('should update old dom on forceUpdate in a lifecycle', () => {
+		let i = 0;
+		class App extends Component {
+			componentWillReceiveProps() {
+				this.forceUpdate();
+			}
+			render() {
+				if (i++==0) return <div>foo</div>;
+				return <div>bar</div>;
+			}
+		}
+
+		render(<App />, scratch);
+		render(<App />, scratch);
+
+		expect(scratch.innerHTML).to.equal('<div>bar</div>');
+	});
 });
