@@ -103,7 +103,7 @@ export function initDebug() {
 		if (!comp) {
 			throw new Error('Hook can only be invoked from render methods.');
 		}
-  };
+	};
 
 	const warn = (property, err) => ({
 		get() {
@@ -160,6 +160,7 @@ export function initDebug() {
 
 		if (oldDiffed) oldDiffed(vnode);
 	};
+}
 
 /**
  * Serialize a vnode tree to a string
