@@ -1304,4 +1304,22 @@ describe('Components', () => {
 		rerender();
 		expect(child._vnode._dom).to.equal(child.base);
 	});
+
+	it('should update old dom on forceUpdate in a lifecycle', () => {
+		let i = 0;
+		class App extends Component {
+			componentWillReceiveProps() {
+				this.forceUpdate();
+			}
+			render() {
+				if (i++==0) return <div>foo</div>;
+				return <div>bar</div>;
+			}
+		}
+
+		render(<App />, scratch);
+		render(<App />, scratch);
+
+		expect(scratch.innerHTML).to.equal('<div>bar</div>');
+	});
 });
