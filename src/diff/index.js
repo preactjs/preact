@@ -118,6 +118,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 					c.props = newVNode.props;
 					c.state = s;
 					c._dirty = false;
+					newVNode._lastDomChild = oldVNode._lastDomChild;
 					break outer;
 				}
 

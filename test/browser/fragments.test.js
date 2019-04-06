@@ -1725,4 +1725,73 @@ describe('Fragment', () => {
 			li(1)
 		].join('')));
 	});
+
+	it('should properly render Components that return Fragments and use shouldComponentUpdate #1415', () => {
+		class SubList extends Component {
+			shouldComponentUpdate(nextProps) {
+				return nextProps.prop1 !== this.props.prop1;
+			}
+			render() {
+				return (
+					<Fragment>
+						<div>2</div>
+						<div>3</div>
+					</Fragment>
+				);
+			}
+		}
+
+		/** @type {(update: any) => void} */
+		let setState;
+		class App extends Component {
+			constructor() {
+				super();
+				setState = update => this.setState(update);
+
+				this.state = { error: false };
+			}
+
+			render() {
+				return (
+					<div>
+						{this.state.error ? (
+							<div>Error!</div>
+						) : (
+							<div>
+								<div>1</div>
+								<SubList prop1={this.state.error} />
+							</div>
+						)}
+					</div>
+				);
+			}
+		}
+
+		const successHtml = div(div([
+			div(1),
+			div(2),
+			div(3)
+		].join('')));
+
+		const errorHtml = div(div('Error!'));
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(successHtml);
+
+		setState({}); // Trigger sCU
+		rerender();
+		expect(scratch.innerHTML).to.equal(successHtml);
+
+		setState({ error: true });
+		rerender();
+		expect(scratch.innerHTML).to.equal(errorHtml);
+
+		setState({ error: false });
+		rerender();
+		expect(scratch.innerHTML).to.equal(successHtml);
+
+		setState({}); // Trigger sCU again
+		rerender();
+		expect(scratch.innerHTML).to.equal(successHtml);
+	});
 });
