@@ -1,4 +1,4 @@
-import { setupRerender } from 'preact/test-utils';
+import { act } from 'preact/test-utils';
 import { createElement as h, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useEffect } from '../../src';
@@ -61,5 +61,24 @@ describe('useEffect', () => {
 			expect(cleanupFunction).to.not.be.called;
 			expect(callback).to.not.be.called;
 		});
+	});
+
+	it('Should execute effects in the right order', () => {
+		let executionOrder = [];
+		const App = ({ i }) => {
+			executionOrder = [];
+			useEffect(() => {
+				executionOrder.push('action1');
+				return () => executionOrder.push('cleanup1');
+			}, [i]);
+			useEffect(() => {
+				executionOrder.push('action2');
+				return () => executionOrder.push('cleanup2');
+			}, [i]);
+			return <p>Test</p>;
+		};
+		act(() => render(<App i={0} />, scratch));
+		act(() => render(<App i={2} />, scratch));
+		expect(executionOrder).to.deep.equal(['cleanup1', 'cleanup2', 'action1', 'action2']);
 	});
 });
