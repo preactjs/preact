@@ -1,4 +1,4 @@
-import { setupRerender } from 'preact/test-utils';
+import { act } from 'preact/test-utils';
 import { createElement as h, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useEffectAssertions } from './useEffectAssertions.test';
@@ -68,5 +68,24 @@ describe('useLayoutEffect', () => {
 		render(<Parent />, scratch);
 
 		expect(callback).to.be.calledOnce;
+	});
+
+	it('Should execute layout effects in the right order', () => {
+		let executionOrder = [];
+		const App = ({ i }) => {
+			executionOrder = [];
+			useLayoutEffect(() => {
+				executionOrder.push('action1');
+				return () => executionOrder.push('cleanup1');
+			}, [i]);
+			useLayoutEffect(() => {
+				executionOrder.push('action2');
+				return () => executionOrder.push('cleanup2');
+			}, [i]);
+			return <p>Test</p>;
+		};
+		act(() => render(<App i={0} />, scratch));
+		act(() => render(<App i={2} />, scratch));
+		expect(executionOrder).to.deep.equal(['cleanup1', 'cleanup2', 'action1', 'action2']);
 	});
 });
