@@ -21,12 +21,11 @@ export function act(cb) {
 	// Execute the callback we were passed.
 	cb();
 	if (flush) {
-	// State COULD be built up flush it.
-		let tempEffects = [];
+		// State COULD be built up flush it.
+		console.log(options.effects);
 		while(options.effects.length > 0) {
-			const tempEffects =
-			flush();
 			options.effects = [];
+			flush();
 			rerender();
 		}
 	}
