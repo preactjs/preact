@@ -64,12 +64,14 @@ declare namespace preact {
 	>;
 
 	type ComponentType<P = {}> = ComponentClass<P> | FunctionComponent<P>;
+	type ComponentFactory<P = {}> = ComponentType<P>;
 
 	interface FunctionComponent<P = {}> {
 		(props: RenderableProps<P>, context?: any): VNode<any> | null;
 		displayName?: string;
 		defaultProps?: Partial<P>;
 	}
+	interface FunctionalComponent<P = {}> extends FunctionComponent<P> {}
 
 	interface ComponentClass<P = {}, S = {}> {
 		new (props: P, context?: any): Component<P, S>;
@@ -78,6 +80,7 @@ declare namespace preact {
 		getDerivedStateFromProps?(props: Readonly<P>, state: Readonly<S>): Partial<S>;
 		getDerivedStateFromError?(error: any): Partial<S>;
 	}
+	interface ComponentConstructor<P = {}, S = {}> extends ComponentClass<P, S> {}
 
 	// Type alias for a component instance considered generally, whether stateless or stateful.
 	type AnyComponent<P = {}, S = {}> = FunctionComponent<P> | Component<P, S>;
@@ -207,16 +210,19 @@ declare namespace preact {
 	interface Consumer<T> extends FunctionComponent<{
 		children: (value: T) => ComponentChildren
 	}> {}
+	interface PreactConsumer<T> extends Consumer<T> {}
 
 	interface Provider<T> extends FunctionComponent<{
 		value: T,
 		children: ComponentChildren
 	}> {}
+	interface PreactProvider<T> extends Provider<T> {}
 
 	interface Context<T> {
 		Consumer: Consumer<T>;
 		Provider: Provider<T>;
 	}
+	interface PreactContext<T> extends Context<T> {}
 
 	function createContext<T>(defaultValue: T): Context<T>;
 }
