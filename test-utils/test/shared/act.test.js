@@ -66,14 +66,16 @@ describe('act', () => {
 		function StateContainer() {
 			const [count, setCount] = useState(0);
 			useEffect(() => {
+				spy();
 				if (count===1) {
-					spy();
 					setCount(() => 2);
 				}
 			}, [count]);
 			useEffect(() => {
 				if (count === 2) {
 					spy2();
+					setCount(() => 4)
+					return () => setCount(() => 3)
 				}
 			}, [count]);
 			return (
@@ -83,7 +85,6 @@ describe('act', () => {
 				</div>
 			);
 		}
-
 		act(() => render(<StateContainer />, scratch));
 		expect(spy).to.be.calledOnce;
 		expect(scratch.textContent).to.include('Count: 0');
@@ -91,9 +92,9 @@ describe('act', () => {
 			const button = scratch.querySelector('button');
 			button.click();
 		});
-		expect(spy).to.be.calledTwice;
+		expect(spy.callCount).to.equal(5);
 		expect(spy2).to.be.calledOnce;
-		expect(scratch.textContent).to.include('Count: 2');
+		expect(scratch.textContent).to.include('Count: 3');
 	});
 
 	it('should drain the queue of hooks', () => {

@@ -220,12 +220,14 @@ if (typeof window !== 'undefined') {
 function handleEffects(effects) {
 	effects.forEach(invokeCleanup);
 	effects.forEach(invokeEffect);
+	if (options.effects) {
+		effects.forEach(hook => options.effects = options.effects.filter(h => h!==hook));
+	}
 	return [];
 }
 
 function invokeCleanup(hook) {
 	if (hook._cleanup) hook._cleanup();
-	if (options.effects) options.effects = options.effects.filter(h => h!==hook)
 }
 
 /**
