@@ -60,7 +60,7 @@ describe('act', () => {
 		expect(scratch.textContent).to.include('Count: 1');
 	});
 
-	it.only('should flush series of hooks', () => {
+	it('should flush series of hooks', () => {
 		const spy = sinon.spy();
 		const spy2 = sinon.spy();
 		function StateContainer() {
