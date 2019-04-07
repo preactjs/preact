@@ -65,7 +65,6 @@ describe('act', () => {
 		const spy2 = sinon.spy();
 		function StateContainer() {
 			const [count, setCount] = useState(0);
-			console.log('render', count);
 			useEffect(() => {
 				if (count===1) {
 					spy();

@@ -1,5 +1,7 @@
 import { options } from 'preact';
 
+options.effects = [];
+
 /**
  * Setup a rerender function that will drain the queue of pending renders
  * @returns {() => void}
@@ -18,15 +20,15 @@ export function act(cb) {
 	options.requestAnimationFrame = (fc) => flush = fc;
 	// Execute the callback we were passed.
 	cb();
+	if (flush) {
 	// State COULD be built up flush it.
-	if (flush) {
-		flush();
-	}
-	rerender();
-	// If rerendering with new state has triggered effects
-	// flush them aswell since options.raf will have repopulated this.
-	if (flush) {
-		flush();
+		let tempEffects = [];
+		while(options.effects.length > 0) {
+			const tempEffects =
+			flush();
+			options.effects = [];
+			rerender();
+		}
 	}
 	options.requestAnimationFrame = previousRequestAnimationFrame;
 }
