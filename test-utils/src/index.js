@@ -22,9 +22,7 @@ export function act(cb) {
 	cb();
 	if (flush) {
 		// State COULD be built up flush it.
-		console.log(options.effects);
 		while(options.effects.length > 0) {
-			options.effects = [];
 			flush();
 			rerender();
 		}

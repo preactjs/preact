@@ -102,7 +102,6 @@ export function useReducer(reducer, initialState, init) {
  * @param {any[]} args
  */
 export function useEffect(callback, args) {
-
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(currentIndex++);
 	if (argsChanged(state._args, args)) {
@@ -226,6 +225,7 @@ function handleEffects(effects) {
 
 function invokeCleanup(hook) {
 	if (hook._cleanup) hook._cleanup();
+	if (options.effects) options.effects = options.effects.filter(h => h!==hook)
 }
 
 /**
