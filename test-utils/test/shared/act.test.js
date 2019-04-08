@@ -74,8 +74,8 @@ describe('act', () => {
 			useEffect(() => {
 				if (count === 2) {
 					spy2();
-					setCount(() => 4)
-					return () => setCount(() => 3)
+					setCount(() => 4);
+					return () => setCount(() => 3);
 				}
 			}, [count]);
 			return (

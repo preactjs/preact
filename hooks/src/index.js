@@ -102,6 +102,7 @@ export function useReducer(reducer, initialState, init) {
  * @param {any[]} args
  */
 export function useEffect(callback, args) {
+
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(currentIndex++);
 	if (argsChanged(state._args, args)) {
@@ -109,7 +110,7 @@ export function useEffect(callback, args) {
 		state._args = args;
 
 		currentComponent.__hooks._pendingEffects.push(state);
-		if (Array.isArray(options.effects)) options.effects.push(state)
+		if (Array.isArray(options.effects)) options.effects.push(state);
 		afterPaint(currentComponent);
 	}
 }
@@ -125,7 +126,7 @@ export function useLayoutEffect(callback, args) {
 	if (argsChanged(state._args, args)) {
 		state._value = callback;
 		state._args = args;
-		if (Array.isArray(options.effects)) options.effects.push(state)
+		if (Array.isArray(options.effects)) options.effects.push(state);
 		currentComponent.__hooks._pendingLayoutEffects.push(state);
 	}
 }

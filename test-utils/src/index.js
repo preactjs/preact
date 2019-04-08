@@ -16,13 +16,13 @@ export function act(cb) {
 	const rerender = setupRerender();
 	let flush;
 	// Override requestAnimationFrame so we can flush pending hooks.
-	options.requestAnimationFrame = (fc) => flush = fc
+	options.requestAnimationFrame = (fc) => flush = fc;
 	// Execute the callback we were passed.
 	cb();
 	rerender();
 	if (flush) {
 		// State COULD be built up flush it.
-		while(options.effects.length > 0) {
+		while (options.effects.length > 0) {
 			flush();
 			rerender();
 		}
