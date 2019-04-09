@@ -179,7 +179,7 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('');
 	});
 
-	it('should throw an error on function children', () => {
+	it.skip('should throw an error on function children', () => {
 		expect(
 			() => render(<div>{() => {}}</div>, scratch)
 		).to.throw();

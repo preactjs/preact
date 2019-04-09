@@ -59,7 +59,7 @@ describe('props.children', () => {
 		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 
-	it('throws an error if given a function child', () => {
+	it.skip('throws an error if given a function child', () => {
 		const child = num => num.toFixed(2);
 		expect(
 			() => render(<Foo>{child}</Foo>, scratch)
