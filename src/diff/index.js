@@ -22,7 +22,6 @@ import options from '../options';
  * parent component
  */
 export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force) {
-
 	// If the previous type doesn't match the new type we drop the whole subtree
 	if (oldVNode==null || newVNode==null || oldVNode.type!==newVNode.type) {
 		if (oldVNode!=null) unmount(oldVNode, ancestorComponent);
@@ -30,6 +29,11 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 		dom = null;
 		oldVNode = EMPTY_OBJ;
 	}
+
+	// When passing through createElement it assignes the object
+	// ref on _, to prevent JSON Injection we check if this attribute
+	// is equal.
+	if (newVNode._!==newVNode) return null;
 
 	if (options.diff) options.diff(newVNode);
 
