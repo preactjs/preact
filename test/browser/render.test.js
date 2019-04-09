@@ -65,6 +65,12 @@ describe('render()', () => {
 		);
 	});
 
+	it('should not render when detecting JSON-injection', () => {
+		const vnode = JSON.parse('{"type":"span","children":"Malicious"}');
+		render(vnode, scratch);
+		expect(scratch.firstChild).to.be.null;
+	});
+
 	it('should create empty nodes (<* />)', () => {
 		render(<div />, scratch);
 		expect(scratch.childNodes).to.have.length(1);
