@@ -34,7 +34,10 @@ let CAMEL_REG = /-?(?=[A-Z])/g;
  */
 function setProperty(dom, name, value, oldValue, isSvg) {
 	let v;
-	if (name==='class' || name==='className') name = isSvg ? 'class' : 'className';
+	if (name==='class' || name==='className') {
+		name = isSvg ? 'class' : 'className';
+		value = Array.isArray(value) ? value.filter(i => !!i).join(' ') : value;
+	}
 
 	if (name==='style') {
 
