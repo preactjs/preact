@@ -1,4 +1,4 @@
-import { checkPropTypes } from 'prop-types';
+import { checkPropTypes } from './check-props';
 import { getDisplayName } from './devtools/custom';
 import { options, toChildArray } from 'preact';
 import { ELEMENT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants';
