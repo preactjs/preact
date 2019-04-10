@@ -149,6 +149,17 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 						continue;
 					}
 				}
+
+				if (name==='value') {
+					if (nodeName==='select') {
+						context = assign({}, context);
+						context.__preactSelect__ = v;
+						continue;
+					}
+					else if (context.__preactSelect__!==undefined && nodeName==='option' && context.__preactSelect__===v) {
+						s += ` selected`;
+					}
+				}
 				s += ` ${name}="${encodeEntities(v)}"`;
 			}
 		}
