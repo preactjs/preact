@@ -12,13 +12,7 @@ export function checkPropTypes(typeSpecs, values, location, componentName, getSt
     }
     if (error && !(error.message in loggedTypeFailures)) {
       loggedTypeFailures[error.message] = true;
-      
-      let errorReport = `Failed ${location} type: ${error.message}${getStack && getStack() || ''}`;
-      if (typeof console !== 'undefined') {
-        console.error(errorReport);
-      } else {
-        throw new Error(errorReport);
-      }
+      console.error(`Failed ${location} type: ${error.message}${getStack && getStack() || ''}`);
     }
   });
 }
