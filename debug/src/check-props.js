@@ -1,6 +1,6 @@
+const ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
 
-var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED',
-    loggedTypeFailures = {};
+let loggedTypeFailures = {};
 
 export function checkPropTypes(typeSpecs, values, location, componentName, getStack) {
   Object.keys(typeSpecs).forEach((typeSpecName) => {
