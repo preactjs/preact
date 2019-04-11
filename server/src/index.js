@@ -34,7 +34,7 @@ let shallowRender = (vnode, context) => renderToString(vnode, context, SHALLOW);
 
 
 /** The default export is an alias of `render()`. */
-function renderToString(vnode, context, opts, inner, isSvgMode) {
+function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 	if (vnode==null || typeof vnode==='boolean') {
 		return '';
 	}
@@ -65,7 +65,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 			getChildren(children, vnode.props.children);
 
 			for (let i = 0; i < children.length; i++) {
-				rendered += renderToString(children[i], context, opts, opts.shallowHighOrder!==false, isSvgMode);
+				rendered += renderToString(children[i], context, opts, opts.shallowHighOrder!==false, isSvgMode, selectValue);
 			}
 			return rendered;
 		}
@@ -97,7 +97,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 				context = assign(assign({}, context), c.getChildContext());
 			}
 
-			return renderToString(rendered, context, opts, opts.shallowHighOrder!==false);
+			return renderToString(rendered, context, opts, opts.shallowHighOrder!==false, isSvgMode, selectValue);
 		}
 	}
 
@@ -149,6 +149,16 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 						continue;
 					}
 				}
+
+				if (name==='value') {
+					if (nodeName==='select') {
+						selectValue = v;
+						continue;
+					}
+					else if (nodeName==='option' && selectValue==v) {
+						s += ` selected`;
+					}
+				}
 				s += ` ${name}="${encodeEntities(v)}"`;
 			}
 		}
@@ -183,7 +193,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 			let child = children[i];
 			if (child!=null && child!==false) {
 				let childSvgMode = nodeName==='svg' ? true : nodeName==='foreignObject' ? false : isSvgMode,
-					ret = renderToString(child, context, opts, true, childSvgMode);
+					ret = renderToString(child, context, opts, true, childSvgMode, selectValue);
 				if (pretty && !hasLarge && isLargeString(ret)) hasLarge = true;
 				if (ret) pieces.push(ret);
 			}
