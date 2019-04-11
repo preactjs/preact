@@ -1,6 +1,6 @@
 import { createElement as h, options, render, createRef, Component, Fragment } from 'preact';
 import { useState, useEffect, useLayoutEffect, useMemo, useCallback } from 'preact/hooks';
-import { setupScratch, teardown, clearOptions } from '../../../test/_util/helpers';
+import { setupScratch, teardown, clearOptions, serializeHtml } from '../../../test/_util/helpers';
 import { serializeVNode, initDebug } from '../../src/debug';
 import * as PropTypes from 'prop-types';
 
@@ -323,6 +323,22 @@ describe('debug', () => {
 
 			expect(console.error).to.be.calledOnce;
 			expect(errors[0].includes('required')).to.equal(true);
+		});
+
+		it('should render with error logged when validator gets signal and throws exception', () => {
+			function Baz(props) {
+				return <h1>{props.unhappy}</h1>;
+			}
+
+			Baz.propTypes = {
+				unhappy: function alwaysThrows(obj, key) { if (obj[key] === 'signal') throw Error("got prop"); }
+			};
+
+			render(<Baz unhappy={'signal'} />, scratch);
+
+			expect(console.error).to.be.calledOnce;
+			expect(errors[0].includes('got prop')).to.equal(true);
+			expect(serializeHtml(scratch)).to.equal('<h1>signal</h1>');
 		});
 
 		it('should not print to console when types are correct', () => {
