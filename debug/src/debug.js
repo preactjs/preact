@@ -60,13 +60,15 @@ export function initDebug() {
 			);
 		}
 
-		for (const key in vnode.props) {
-			if (key[0]==='o' && key[1]==='n' && typeof vnode.props[key]!=='function' && vnode.props[key]!=null && typeof vnode.type!=='function') {
-				throw new Error(
-					`Component's "${key}" property should be a function, ` +
-					`but got [${typeof vnode.props[key]}] instead\n` +
-					serializeVNode(vnode)
-				);
+		if (typeof vnode.type!=='function') {
+			for (const key in vnode.props) {
+				if (key[0]==='o' && key[1]==='n' && typeof vnode.props[key]!=='function' && vnode.props[key]!=null) {
+					throw new Error(
+						`Component's "${key}" property should be a function, ` +
+						`but got [${typeof vnode.props[key]}] instead\n` +
+						serializeVNode(vnode)
+					);
+				}
 			}
 		}
 
