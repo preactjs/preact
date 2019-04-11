@@ -61,7 +61,7 @@ export function initDebug() {
 		}
 
 		for (const key in vnode.props) {
-			if (key[0]==='o' && key[1]==='n' && typeof vnode.props[key]!=='function' && vnode.props[key]!=null) {
+			if (key[0]==='o' && key[1]==='n' && typeof vnode.props[key]!=='function' && vnode.props[key]!=null && typeof vnode.type!=='function') {
 				throw new Error(
 					`Component's "${key}" property should be a function, ` +
 					`but got [${typeof vnode.props[key]}] instead\n` +

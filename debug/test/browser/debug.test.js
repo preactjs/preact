@@ -119,7 +119,6 @@ describe('debug', () => {
 		expect(fn).to.throw(/createElement/);
 	});
 
-
 	it('Should throw errors when accessing certain attributes', () => {
 		let Foo = () => <div />;
 		const oldOptionsVnode = options.vnode;
@@ -173,6 +172,12 @@ describe('debug', () => {
 
 	it('should not print for undefined as a handler', () => {
 		let fn = () => render(<div onclick={undefined} />, scratch);
+		expect(fn).not.to.throw();
+	});
+
+	it('should not print for attributes starting with on for Components', () => {
+		const Comp = () => <p>online</p>;
+		let fn = () => render(<Comp online={false} />, scratch);
 		expect(fn).not.to.throw();
 	});
 
