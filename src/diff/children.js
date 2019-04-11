@@ -26,6 +26,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode);
 	let oldChildren = oldParentVNode!=null && oldParentVNode!=EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR;
+	// console.log(newChildren, oldChildren);
 
 	let oldChildrenLength = oldChildren.length;
 
@@ -78,6 +79,9 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		nextDom = childDom!=null && childDom.nextSibling;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
+		if (childVNode.type==='input') {
+			console.log(oldVNode && oldVNode._dom, childVNode, oldVNode);
+		}
 		newDom = diff(oldVNode==null ? null : oldVNode._dom, parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, null);
 
 		// Only proceed if the vnode has not been unmounted by `diff()` above.

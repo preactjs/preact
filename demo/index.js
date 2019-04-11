@@ -1,4 +1,4 @@
-import { createElement, render, hydrate, Component, options, Fragment } from 'preact';
+import { createElement, render, Component, Fragment } from 'preact';
 // import renderToString from 'preact-render-to-string';
 import './style.scss';
 import { Router, Link } from 'preact-router';
@@ -11,6 +11,7 @@ import Context from './context';
 import installLogger from './logger';
 import ProfilerDemo from './profiler';
 import KeyBug from './key_bug';
+import HooksDemo from './hooksDemo';
 import PeopleBrowser from './people';
 import { initDevTools } from 'preact/debug/src/devtools';
 import { initDebug } from 'preact/debug/src/debug';
@@ -57,6 +58,7 @@ class App extends Component {
 				<header>
 					<nav>
 						<Link href="/" activeClassName="active">Home</Link>
+						<Link href="/hooksDemo" activeClassName="active">Hooks Demo</Link>
 						<Link href="/reorder" activeClassName="active">Reorder</Link>
 						<Link href="/spiral" activeClassName="active">Spiral</Link>
 						<Link href="/pythagoras" activeClassName="active">Pythagoras</Link>
@@ -73,6 +75,7 @@ class App extends Component {
 				<main>
 					<Router url={url}>
 						<Home path="/" />
+						<HooksDemo path="/hooksDemo" />
 						<Reorder path="/reorder" />
 						<div path="/spiral">
 							{!isBenchmark
