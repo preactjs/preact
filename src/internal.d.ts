@@ -1,13 +1,13 @@
 import * as preact from "./index";
 
-export interface FunctionalComponent<P = {}> extends preact.FunctionalComponent<P> {
+export interface FunctionalComponent<P = {}> extends preact.FunctionComponent<P> {
 	// Define getDerivedStateFromProps as undefined on FunctionalComponent
 	// to get rid of some errors in `diff()`
 	getDerivedStateFromProps?: undefined;
 }
 
 // Redefine ComponentFactory using our new internal FunctionalComponent interface above
-export type ComponentFactory<P> = preact.ComponentConstructor<P> | FunctionalComponent<P>;
+export type ComponentFactory<P> = preact.ComponentClass<P> | FunctionalComponent<P>;
 
 export interface PreactElement extends HTMLElement {
 	_prevVNode?: VNode<any> | null;
@@ -38,7 +38,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 }
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
-	constructor: preact.ComponentFactory<P>;
+	constructor: preact.ComponentType<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
 	base?: PreactElement | null;
 
@@ -59,7 +59,7 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	_processingException?: Component<any, any> | null;
 }
 
-export interface PreactContext extends preact.PreactContext<any> {
+export interface PreactContext extends preact.Context<any> {
 	_id: string;
 	_defaultValue: any;
 }
