@@ -65,7 +65,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 			getChildren(children, vnode.props.children);
 
 			for (let i = 0; i < children.length; i++) {
-				rendered += renderToString(children[i], context, opts, opts.shallowHighOrder!==false, isSvgMode);
+				rendered += renderToString(children[i], context, opts, opts.shallowHighOrder!==false, isSvgMode, selectValue);
 			}
 			return rendered;
 		}
@@ -97,7 +97,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				context = assign(assign({}, context), c.getChildContext());
 			}
 
-			return renderToString(rendered, context, opts, opts.shallowHighOrder!==false);
+			return renderToString(rendered, context, opts, opts.shallowHighOrder!==false, isSvgMode, selectValue);
 		}
 	}
 

@@ -740,4 +740,33 @@ describe('render', () => {
 		);
 		expect(res).to.equal('<select><option value="A">A</option><option selected value="B">B</option></select>');
 	});
+
+	it('should render select value on option with a Fragment', () => {
+		let res = render(
+			<select value="B">
+				<Fragment>
+					<option value="A">A</option>
+					<option value="B">B</option>
+				</Fragment>
+			</select>
+		);
+		expect(res).to.equal('<select><option value="A">A</option><option selected value="B">B</option></select>');
+	});
+
+	it('should render select value on option through a component', () => {
+		function Foo() {
+			return (
+				<optgroup label="foo">
+					<option value="A">A</option>
+					<option value="B">B</option>
+				</optgroup>
+			);
+		}
+		let res = render(
+			<select value="B">
+				<Foo />
+			</select>
+		);
+		expect(res).to.equal('<select><optgroup label="foo"><option value="A">A</option><option selected value="B">B</option></optgroup></select>');
+	});
 });
