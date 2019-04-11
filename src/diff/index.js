@@ -20,12 +20,12 @@ import options from '../options';
  * mounted components
  * @param {import('../internal').Component | null} ancestorComponent The direct
  * parent component
- * @param {Node | Text} childDom The current attached DOM
+ * @param {Node | Text} oldDom The current attached DOM
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
-export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force, childDom) {
+export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force, oldDom) {
 
 	// If the previous type doesn't match the new type we drop the whole subtree
 	if (oldVNode==null || newVNode==null || oldVNode.type!==newVNode.type) {
@@ -45,7 +45,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 
 	try {
 		outer: if (oldVNode.type===Fragment || newType===Fragment) {
-			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, c, childDom);
+			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, c, oldDom);
 
 			// Mark dom as empty in case `_children` is any empty array. If it isn't
 			// we'll set `dom` to the correct value just a few lines later.
@@ -148,7 +148,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null, childDom);
+			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null, oldDom);
 
 			if (vnode!=null) {
 				// If this component returns a Fragment (or another component that
@@ -284,8 +284,8 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 				dom.multiple = newProps.multiple;
 			}
 
-			const childDom = getFirstChildDom(oldVNode, excessDomChildren);
-			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent, childDom);
+			const oldDom = getFirstOldDom(oldVNode, excessDomChildren);
+			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent, oldDom);
 			diffProps(dom, newProps, oldProps, isSvg);
 		}
 	}
@@ -396,7 +396,7 @@ function catchErrorInComponent(error, component) {
  * the currently attached DOM elements that are being hydrated
  * @returns {import('../internal').PreactElement | Text | undefined}
  */
-export function getFirstChildDom(oldVNode, excessDomChildren) {
+export function getFirstOldDom(oldVNode, excessDomChildren) {
 
 	/** @type {import('../internal').VNode[]} */
 	let oldChildren = oldVNode!=null && oldVNode!=EMPTY_OBJ && oldVNode._children || EMPTY_ARR;
