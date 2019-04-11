@@ -34,7 +34,7 @@ let shallowRender = (vnode, context) => renderToString(vnode, context, SHALLOW);
 
 
 /** The default export is an alias of `render()`. */
-function renderToString(vnode, context, opts, inner, isSvgMode) {
+function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 	if (vnode==null || typeof vnode==='boolean') {
 		return '';
 	}
@@ -152,11 +152,10 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 
 				if (name==='value') {
 					if (nodeName==='select') {
-						context = assign({}, context);
-						context.__preactSelect__ = v;
+						selectValue = v;
 						continue;
 					}
-					else if (context.__preactSelect__!==undefined && nodeName==='option' && context.__preactSelect__===v) {
+					else if (nodeName==='option' && selectValue===v) {
 						s += ` selected`;
 					}
 				}
@@ -194,7 +193,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode) {
 			let child = children[i];
 			if (child!=null && child!==false) {
 				let childSvgMode = nodeName==='svg' ? true : nodeName==='foreignObject' ? false : isSvgMode,
-					ret = renderToString(child, context, opts, true, childSvgMode);
+					ret = renderToString(child, context, opts, true, childSvgMode, selectValue);
 				if (pretty && !hasLarge && isLargeString(ret)) hasLarge = true;
 				if (ret) pieces.push(ret);
 			}

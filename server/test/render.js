@@ -740,32 +740,4 @@ describe('render', () => {
 		);
 		expect(res).to.equal('<select><option value="A">A</option><option selected value="B">B</option></select>');
 	});
-
-	it('should not leak select value into parent context', () => {
-		let fn = spy();
-		function Bar(_, context) {
-			fn(context);
-			return null;
-		}
-
-		class Foo extends Component {
-			getChildContext() {
-				return { foo: 'bar' };
-			}
-
-			render() {
-				return (
-					<div>
-						<select value="A">
-							<option value="A">A</option>
-						</select>
-						<Bar />
-					</div>
-				);
-			}
-		}
-
-		render(<Foo />);
-		expect(fn.args[0][0]).to.deep.equal({ foo: 'bar' });
-	});
 });
