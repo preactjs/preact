@@ -155,7 +155,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 						selectValue = v;
 						continue;
 					}
-					else if (nodeName==='option' && selectValue===v) {
+					else if (nodeName==='option' && selectValue==v) {
 						s += ` selected`;
 					}
 				}

@@ -769,4 +769,13 @@ describe('render', () => {
 		);
 		expect(res).to.equal('<select><optgroup label="foo"><option value="A">A</option><option selected value="B">B</option></optgroup></select>');
 	});
+
+	it('should render select value with loose equality', () => {
+		let res = render(
+			<select value={2}>
+				<option value="2">2</option>
+			</select>
+		);
+		expect(res).to.equal('<select><option selected value="2">2</option></select>');
+	});
 });
