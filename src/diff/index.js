@@ -20,7 +20,7 @@ import options from '../options';
  * mounted components
  * @param {import('../internal').Component | null} ancestorComponent The direct
  * parent component
- * @param {Node | Text} oldDom The current attached DOM
+ * @param {Node | Text} [oldDom] The current attached DOM
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
@@ -54,7 +54,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			if (newVNode._children.length) {
 				dom = newVNode._children[0]._dom;
 
-				// If lastChild is a Fragment, use _lastDomChild, else use _dom
+				// If the last child is a Fragment, use _lastDomChild, else use _dom
 				p = newVNode._children[newVNode._children.length - 1];
 				newVNode._lastDomChild = p._lastDomChild || p._dom;
 			}
@@ -286,8 +286,7 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 				dom.multiple = newProps.multiple;
 			}
 
-			const oldDom = getFirstOldDom(oldVNode, excessDomChildren);
-			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent, oldDom);
+			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent, EMPTY_OBJ);
 			diffProps(dom, newProps, oldProps, isSvg);
 		}
 	}
@@ -387,35 +386,4 @@ function catchErrorInComponent(error, component) {
 		}
 	}
 	throw error;
-}
-
-/**
- * Determine which currently attached DOM node to use when beginning to
- * diff the children of a VNode
- * @param {import('../internal').VNode} oldVNode The old VNode whose children
- * are about to be diffed
- * @param {import('../internal').PreactElement[]} excessDomChildren If hydrating,
- * the currently attached DOM elements that are being hydrated
- * @returns {import('../internal').PreactElement | Text | undefined}
- */
-export function getFirstOldDom(oldVNode, excessDomChildren) {
-
-	/** @type {import('../internal').VNode[]} */
-	let oldChildren = oldVNode!=null && oldVNode!=EMPTY_OBJ && oldVNode._children || EMPTY_ARR;
-
-	let i;
-	if (excessDomChildren!=null) {
-		for (i = 0; i < excessDomChildren.length; i++) {
-			if (excessDomChildren[i]!=null) {
-				return excessDomChildren[i];
-			}
-		}
-	}
-	else {
-		for (i = 0; i < oldChildren.length; i++) {
-			if (oldChildren[i] && oldChildren[i]._dom) {
-				return oldChildren[i]._dom;
-			}
-		}
-	}
 }

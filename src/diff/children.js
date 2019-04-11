@@ -32,6 +32,26 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 	let oldChildrenLength = oldChildren.length;
 
+	if (oldDom == EMPTY_OBJ) {
+		oldDom = null;
+		if (excessDomChildren!=null) {
+			for (i = 0; i < excessDomChildren.length; i++) {
+				if (excessDomChildren[i]!=null) {
+					oldDom = excessDomChildren[i];
+					break;
+				}
+			}
+		}
+		else {
+			for (i = 0; i < oldChildrenLength; i++) {
+				if (oldChildren[i] && oldChildren[i]._dom) {
+					oldDom = oldChildren[i]._dom;
+					break;
+				}
+			}
+		}
+	}
+
 	for (i=0; i<newChildren.length; i++) {
 		childVNode = newChildren[i] = coerceToVNode(newChildren[i]);
 		oldVNode = index = null;
