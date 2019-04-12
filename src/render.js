@@ -1,5 +1,5 @@
 import { EMPTY_OBJ, EMPTY_ARR } from './constants';
-import { commitRoot, getFirstOldDom } from './diff/index';
+import { commitRoot } from './diff/index';
 import { diffChildren } from './diff/children';
 import { createElement, Fragment } from './create-element';
 import options from './options';
@@ -15,11 +15,8 @@ export function render(vnode, parentDom) {
 	let oldVNode = parentDom._prevVNode;
 	vnode = createElement(Fragment, null, [vnode]);
 
-	const excessDomChildren = oldVNode ? null : EMPTY_ARR.slice.call(parentDom.childNodes);
-	const oldDom = getFirstOldDom(oldVNode, excessDomChildren);
-
 	let mounts = [];
-	diffChildren(parentDom, parentDom._prevVNode = vnode, oldVNode, EMPTY_OBJ, parentDom.ownerSVGElement!==undefined, excessDomChildren, mounts, vnode, oldDom);
+	diffChildren(parentDom, parentDom._prevVNode = vnode, oldVNode, EMPTY_OBJ, parentDom.ownerSVGElement!==undefined, oldVNode ? null : EMPTY_ARR.slice.call(parentDom.childNodes), mounts, vnode, EMPTY_OBJ);
 	commitRoot(mounts, vnode);
 }
 
