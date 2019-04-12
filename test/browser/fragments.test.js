@@ -558,7 +558,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it.skip('should not preserve state of children when the keys are different', () => {
+	it('should not preserve state of children when the keys are different', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Fragment key="a">
@@ -584,7 +584,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it.skip('should not preserve state between unkeyed and keyed fragment', () => {
+	it('should not preserve state between unkeyed and keyed fragment', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Fragment key="a">
