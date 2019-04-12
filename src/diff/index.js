@@ -20,7 +20,7 @@ import options from '../options';
  * mounted components
  * @param {import('../internal').Component | null} ancestorComponent The direct
  * parent component
- * @param {Node | Text} [oldDom] The current attached DOM
+ * @param {Node | Text} oldDom The current attached DOM
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
