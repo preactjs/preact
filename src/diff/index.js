@@ -28,7 +28,7 @@ import options from '../options';
 export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force, oldDom) {
 
 	// If the previous type doesn't match the new type we drop the whole subtree
-	if (oldVNode==null || newVNode==null || oldVNode.type!==newVNode.type) {
+	if (oldVNode==null || newVNode==null || oldVNode.type!==newVNode.type || oldVNode.key!==newVNode.key) {
 		if (oldVNode!=null) unmount(oldVNode, ancestorComponent);
 		if (newVNode==null) return null;
 		dom = null;
