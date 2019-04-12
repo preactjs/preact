@@ -127,7 +127,6 @@ function process() {
 	let p;
 	q.sort((a, b) => a._depth - b._depth);
 	while ((p=q.pop())) {
-		console.log('popping', { ...p });
 		// forceUpdate's callback argument is reused here to indicate a non-forced update.
 		if (p._dirty) p.forceUpdate(false);
 	}
