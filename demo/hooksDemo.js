@@ -8,7 +8,7 @@ import { useCallback } from '../hooks/src';
 
 
 // configuration used to show behavior vs. workaround
-let childFirst = false;
+let childFirst = true;
 
 const Child = ({ items,setItems }) => {
 	let [pendingId, setPendingId] = useState(null);

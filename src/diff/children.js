@@ -18,11 +18,14 @@ import { removeNode } from '../util';
  * which have mounted
  * @param {import('../internal').Component} ancestorComponent The direct parent
  * component to the ones being diffed
+ * @param {Node | Text} oldDom The current attached DOM
+ * element any new dom elements should be placed around. Likely `null` on first
+ * render (except when hydrating). Can be a sibling DOM element when diffing
+ * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
-export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent) {
+export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, oldDom) {
 	let childVNode, i, j, p, index, oldVNode, newDom,
-		nextDom, sibDom, focus,
-		childDom;
+		nextDom, sibDom, focus;
 
 	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode);
 	let oldChildren = oldParentVNode!=null && oldParentVNode!=EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR;
@@ -30,18 +33,26 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 	let oldChildrenLength = oldChildren.length;
 
-	for (i = 0; i < oldChildrenLength; i++) {
-		if (oldChildren[i] && oldChildren[i]._dom) {
-			childDom = oldChildren[i]._dom;
-			break;
+	// Only in very specific places should this logic be invoked (top level `render` and `diffElementNodes`).
+	// I'm using `EMPTY_OBJ` to signal when `diffChildren` is invoked in these situations. I can't use `null`
+	// for this purpose, because `null` is a valid value for `oldDom` which can mean to skip to this logic
+	// (e.g. if mounting a new tree in which the old DOM should be ignored (usually for Fragments).
+	if (oldDom == EMPTY_OBJ) {
+		oldDom = null;
+		if (excessDomChildren!=null) {
+			for (i = 0; i < excessDomChildren.length; i++) {
+				if (excessDomChildren[i]!=null) {
+					oldDom = excessDomChildren[i];
+					break;
+				}
+			}
 		}
-	}
-
-	if (excessDomChildren!=null) {
-		for (i = 0; i < excessDomChildren.length; i++) {
-			if (excessDomChildren[i]!=null) {
-				childDom = excessDomChildren[i];
-				break;
+		else {
+			for (i = 0; i < oldChildrenLength; i++) {
+				if (oldChildren[i] && oldChildren[i]._dom) {
+					oldDom = oldChildren[i]._dom;
+					break;
+				}
 			}
 		}
 	}
@@ -76,13 +87,10 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			oldChildren[index] = null;
 		}
 
-		nextDom = childDom!=null && childDom.nextSibling;
+		nextDom = oldDom!=null && oldDom.nextSibling;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		if (childVNode.type==='input') {
-			console.log(oldVNode && oldVNode._dom, childVNode, oldVNode);
-		}
-		newDom = diff(oldVNode==null ? null : oldVNode._dom, parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, null);
+		newDom = diff(oldVNode==null ? null : oldVNode._dom, parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, null, oldDom);
 
 		// Only proceed if the vnode has not been unmounted by `diff()` above.
 		if (childVNode!=null && newDom !=null) {
@@ -98,23 +106,23 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 				// this Fragment's DOM tree.
 				newDom = childVNode._lastDomChild;
 			}
-			else if (excessDomChildren==oldVNode || newDom!=childDom || newDom.parentNode==null) {
+			else if (excessDomChildren==oldVNode || newDom!=oldDom || newDom.parentNode==null) {
 				// NOTE: excessDomChildren==oldVNode above:
 				// This is a compression of excessDomChildren==null && oldVNode==null!
 				// The values only have the same type when `null`.
 
-				outer: if (childDom==null || childDom.parentNode!==parentDom) {
+				outer: if (oldDom==null || oldDom.parentNode!==parentDom) {
 					parentDom.appendChild(newDom);
 				}
 				else {
-					sibDom = childDom;
+					sibDom = oldDom;
 					j = 0;
 					while ((sibDom=sibDom.nextSibling) && j++<oldChildrenLength/2) {
 						if (sibDom===newDom) {
 							break outer;
 						}
 					}
-					parentDom.insertBefore(newDom, childDom);
+					parentDom.insertBefore(newDom, oldDom);
 				}
 			}
 
@@ -123,7 +131,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 				focus.focus();
 			}
 
-			childDom = newDom!=null ? newDom.nextSibling : nextDom;
+			oldDom = newDom!=null ? newDom.nextSibling : nextDom;
 		}
 	}
 

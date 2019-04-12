@@ -70,7 +70,7 @@ Component.prototype.forceUpdate = function(callback) {
 		const force = callback!==false;
 
 		let mounts = [];
-		dom = diff(dom, parentDom, vnode, vnode, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, this._ancestorComponent, force);
+		dom = diff(dom, parentDom, vnode, vnode, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, this._ancestorComponent, force, dom, this._depth);
 		if (dom!=null && dom.parentNode!==parentDom) {
 			parentDom.appendChild(dom);
 		}
@@ -125,7 +125,9 @@ export function enqueueRender(c) {
 /** Flush the render queue by rerendering all queued components */
 function process() {
 	let p;
+	q.sort((a, b) => a._depth - b._depth);
 	while ((p=q.pop())) {
+		console.log('popping', { ...p });
 		// forceUpdate's callback argument is reused here to indicate a non-forced update.
 		if (p._dirty) p.forceUpdate(false);
 	}
