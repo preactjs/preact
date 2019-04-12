@@ -1,11 +1,8 @@
 import htm from 'htm';
 import { h } from 'preact';
+import { useState, useCallback } from 'preact/hooks';
+
 const html = htm.bind(h);
-
-import { render } from 'preact';
-import { useState } from 'preact/hooks';
-import { useCallback } from '../hooks/src';
-
 
 // configuration used to show behavior vs. workaround
 let childFirst = true;
@@ -19,7 +16,6 @@ const Child = ({ items,setItems }) => {
 	const onInput = useCallback(evt => {
 		let val = evt.target.value,
 			_items = [...items, { _id: pendingId, val }];
-		// TODO: why is this order important???!
 		if (childFirst) {
 			setPendingId(null);
 			setItems(_items);

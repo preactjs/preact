@@ -11,7 +11,7 @@ import Context from './context';
 import installLogger from './logger';
 import ProfilerDemo from './profiler';
 import KeyBug from './key_bug';
-import HooksDemo from './hooksDemo';
+import StateOrderBug from './stateOrderBug';
 import PeopleBrowser from './people';
 import { initDevTools } from 'preact/debug/src/devtools';
 import { initDebug } from 'preact/debug/src/debug';
@@ -58,7 +58,6 @@ class App extends Component {
 				<header>
 					<nav>
 						<Link href="/" activeClassName="active">Home</Link>
-						<Link href="/hooksDemo" activeClassName="active">Hooks Demo</Link>
 						<Link href="/reorder" activeClassName="active">Reorder</Link>
 						<Link href="/spiral" activeClassName="active">Spiral</Link>
 						<Link href="/pythagoras" activeClassName="active">Pythagoras</Link>
@@ -70,12 +69,13 @@ class App extends Component {
 						<Link href="/devtools" activeClassName="active">Devtools</Link>
 						<Link href="/empty-fragment" activeClassName="active">Empty Fragment</Link>
 						<Link href="/people" activeClassName="active">People Browser</Link>
+						<Link href="/state-order" activeClassName="active">State Order</Link>
 					</nav>
 				</header>
 				<main>
 					<Router url={url}>
 						<Home path="/" />
-						<HooksDemo path="/hooksDemo" />
+						<StateOrderBug path="/state-order" />
 						<Reorder path="/reorder" />
 						<div path="/spiral">
 							{!isBenchmark
