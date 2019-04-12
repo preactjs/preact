@@ -60,7 +60,7 @@ export function initDebug() {
 			);
 		}
 
-		if (typeof vnode.type!=='function') {
+		if (typeof vnode.type==='string') {
 			for (const key in vnode.props) {
 				if (key[0]==='o' && key[1]==='n' && typeof vnode.props[key]!=='function' && vnode.props[key]!=null) {
 					throw new Error(
