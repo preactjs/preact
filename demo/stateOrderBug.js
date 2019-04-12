@@ -6,6 +6,15 @@ const html = htm.bind(h);
 
 // configuration used to show behavior vs. workaround
 let childFirst = true;
+const Config = () => html`<label>
+	<input type="checkbox"
+    checked=${childFirst}
+    onchange=${evt => {
+		childFirst = evt.target.checked;
+	}}
+  />
+		Set child state before parent state.
+	</label>`;
 
 const Child = ({ items,setItems }) => {
 	let [pendingId, setPendingId] = useState(null);
@@ -46,7 +55,7 @@ const Child = ({ items,setItems }) => {
 
 const Parent = () => {
 	let [items, setItems] = useState([]);
-	return html`<div><${Child} items=${items} setItems=${setItems} /></div>`;
+	return html`<div><${Config} /><${Child} items=${items} setItems=${setItems} /></div>`;
 };
 
 export default Parent;
