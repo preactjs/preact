@@ -192,6 +192,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 	catch (e) {
 		catchErrorInComponent(e, ancestorComponent);
 	}
+
 	return dom;
 }
 
@@ -243,6 +244,7 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 
 	if (dom==null) {
 		dom = newVNode.type===null ? document.createTextNode(newVNode.text) : isSvg ? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type) : document.createElement(newVNode.type);
+
 		// we created a new parent, so none of the previously attached children can be reused:
 		excessDomChildren = null;
 	}
