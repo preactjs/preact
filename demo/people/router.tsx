@@ -1,4 +1,4 @@
-import { ComponentChild, ComponentFactory, createContext, FunctionalComponent, h } from "preact"
+import { ComponentChild, ComponentFactory, createContext, FunctionalComponent, h, JSX } from "preact"
 import { useCallback, useContext, useEffect, useMemo, useState } from "preact/hooks"
 
 export type RouterData = {

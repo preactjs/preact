@@ -298,7 +298,7 @@ describe('keys', () => {
 		]);
 	});
 
-	it.skip('should not preserve state when a component\'s keys are different', () => {
+	it('should not preserve state when a component\'s keys are different', () => {
 		const Stateful = createStateful('Stateful');
 
 		function Foo({ condition }) {
@@ -318,7 +318,7 @@ describe('keys', () => {
 		expect(ops).to.deep.equal(['Unmount Stateful', 'Mount Stateful'], 'switching keys 2');
 	});
 
-	it.skip('should not preserve state between an unkeyed and keyed component', () => {
+	it('should not preserve state between an unkeyed and keyed component', () => {
 		// React and Preact v8 behavior: https://codesandbox.io/s/57prmy5mx
 
 		const Stateful = createStateful('Stateful');

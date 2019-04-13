@@ -60,6 +60,43 @@ describe('act', () => {
 		expect(scratch.textContent).to.include('Count: 1');
 	});
 
+	it('should flush series of hooks', () => {
+		const spy = sinon.spy();
+		const spy2 = sinon.spy();
+		function StateContainer() {
+			const [count, setCount] = useState(0);
+			useEffect(() => {
+				spy();
+				if (count===1) {
+					setCount(() => 2);
+				}
+			}, [count]);
+			useEffect(() => {
+				if (count === 2) {
+					spy2();
+					setCount(() => 4);
+					return () => setCount(() => 3);
+				}
+			}, [count]);
+			return (
+				<div>
+					<p>Count: {count}</p>
+					<button onClick={() => setCount(c => c + 1)} />
+				</div>
+			);
+		}
+		act(() => render(<StateContainer />, scratch));
+		expect(spy).to.be.calledOnce;
+		expect(scratch.textContent).to.include('Count: 0');
+		act(() => {
+			const button = scratch.querySelector('button');
+			button.click();
+		});
+		expect(spy.callCount).to.equal(5);
+		expect(spy2).to.be.calledOnce;
+		expect(scratch.textContent).to.include('Count: 3');
+	});
+
 	it('should drain the queue of hooks', () => {
 		const spy = sinon.spy();
 		function StateContainer() {

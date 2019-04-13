@@ -1,0 +1,15 @@
+{
+	"compilerOptions": {
+		"experimentalDecorators": true,
+		"jsx": "react",
+		"jsxFactory": "h",
+		"baseUrl": ".",
+		"target": "es2018",
+		"module": "es2015",
+		"moduleResolution": "node",
+		"paths": {
+			"preact/hooks": ["../hooks/src/index.js"],
+			"preact": ["../src/index.js"],
+		}
+	}
+}
