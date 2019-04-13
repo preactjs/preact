@@ -1220,6 +1220,40 @@ describe('Components', () => {
 			expect(C3.prototype.componentWillMount, 'inject between, C3 w/ intermediary fn').to.have.been.calledOnce;
 		});
 
+		it('should render components by depth', () => {
+			let spy = sinon.spy();
+			let update;
+			class Child extends Component {
+				constructor(props) {
+					super(props);
+					update = () => {
+						this.props.update();
+						this.setState({});
+					};
+				}
+
+				render() {
+					spy();
+					let items = [];
+					for (let i = 0; i < this.props.items; i++) items.push(i);
+					return <div>{items.join(',')}</div>;
+				}
+			}
+
+			let i = 0;
+			class Parent extends Component {
+				render() {
+					return <Child items={++i} update={() => this.setState({})} />;
+				}
+			}
+
+			render(<Parent />, scratch);
+			expect(spy).to.be.calledOnce;
+
+			update();
+			rerender();
+			expect(spy).to.be.calledTwice;
+		});
 
 		it('should handle lifecycle for nested intermediary elements', () => {
 			useIntermediary = 'div';

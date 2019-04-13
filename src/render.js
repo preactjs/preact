@@ -16,7 +16,7 @@ export function render(vnode, parentDom) {
 	vnode = createElement(Fragment, null, [vnode]);
 
 	let mounts = [];
-	diffChildren(parentDom, parentDom._prevVNode = vnode, oldVNode, EMPTY_OBJ, parentDom.ownerSVGElement!==undefined, oldVNode ? null : EMPTY_ARR.slice.call(parentDom.childNodes), mounts, vnode);
+	diffChildren(parentDom, parentDom._prevVNode = vnode, oldVNode, EMPTY_OBJ, parentDom.ownerSVGElement!==undefined, oldVNode ? null : EMPTY_ARR.slice.call(parentDom.childNodes), mounts, vnode, EMPTY_OBJ);
 	commitRoot(mounts, vnode);
 }
 
