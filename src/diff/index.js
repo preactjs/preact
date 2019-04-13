@@ -30,7 +30,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 		oldVNode = EMPTY_OBJ;
 	}
 
-	// When passing through createElement it assignes the object
+	// When passing through createElement it assigns the object
 	// ref on _, to prevent JSON Injection we check if this attribute
 	// is equal.
 	if (newVNode._!==newVNode) return null;
