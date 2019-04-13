@@ -5,8 +5,7 @@
             "es6",
             "dom"
         ],
-        "noImplicitAny": true,
-        "noImplicitThis": true,
+        "strict": true,
         "strictNullChecks": true,
         "strictFunctionTypes": true,
         "baseUrl": "../",
@@ -15,7 +14,6 @@
         ],
         "jsx": "react",
         "jsxFactory": "h",
-        "experimentalDecorators": true,
         "types": [],
         "noEmit": true,
         "forceConsistentCasingInFileNames": true
