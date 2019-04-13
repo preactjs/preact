@@ -196,18 +196,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 	return dom;
 }
 
-// Store focus in case moving children around changes it.
-let focus;
-export function saveFocus() {
-	focus = document.activeElement;
-}
-
 export function commitRoot(mounts, root) {
-	// Restore focus if it was changed
-	if (focus!==document.activeElement) {
-		focus.focus();
-	}
-
 	let c;
 	while ((c = mounts.pop())) {
 		try {
