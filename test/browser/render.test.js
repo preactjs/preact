@@ -845,9 +845,9 @@ describe('render()', () => {
 
 		render(<App />, scratch);
 		expect(spy).to.be.calledOnce;
-		expect(scratch.firstChild.firstChild.innerHTML).to.equal('1');
+		expect(scratch.textContent).to.equal('1');
 		rerender();
-		expect(scratch.firstChild.firstChild.innerHTML).to.equal('1');
+		expect(scratch.textContent).to.equal('1');
 		expect(spy).to.be.calledOnce;
 	});
 
