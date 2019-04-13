@@ -1,4 +1,4 @@
-import { checkPropTypes } from 'prop-types';
+import { checkPropTypes } from './check-props';
 import { getDisplayName } from './devtools/custom';
 import { options, toChildArray } from 'preact';
 import { ELEMENT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants';
@@ -60,13 +60,15 @@ export function initDebug() {
 			);
 		}
 
-		for (const key in vnode.props) {
-			if (key[0]==='o' && key[1]==='n' && typeof vnode.props[key]!=='function' && vnode.props[key]!=null) {
-				throw new Error(
-					`Component's "${key}" property should be a function, ` +
-					`but got [${typeof vnode.props[key]}] instead\n` +
-					serializeVNode(vnode)
-				);
+		if (typeof vnode.type==='string') {
+			for (const key in vnode.props) {
+				if (key[0]==='o' && key[1]==='n' && typeof vnode.props[key]!=='function' && vnode.props[key]!=null) {
+					throw new Error(
+						`Component's "${key}" property should be a function, ` +
+						`but got [${typeof vnode.props[key]}] instead\n` +
+						serializeVNode(vnode)
+					);
+				}
 			}
 		}
 

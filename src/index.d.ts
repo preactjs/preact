@@ -11,7 +11,7 @@ declare namespace preact {
 	// -----------------------------------
 
 	interface VNode<P = {}> {
-		type: ComponentFactory<P> | string | null;
+		type: ComponentType<P> | string | null;
 		props: P & { children: ComponentChildren } | null;
 		text: string | number | null;
 		key: Key;
@@ -63,24 +63,27 @@ declare namespace preact {
 		P & Attributes & { children?: ComponentChildren; ref?: Ref<RefType> }
 	>;
 
-	type ComponentFactory<P = {}> = ComponentConstructor<P> | FunctionalComponent<P>;
+	type ComponentType<P = {}> = ComponentClass<P> | FunctionComponent<P>;
+	type ComponentFactory<P = {}> = ComponentType<P>;
 
-	interface FunctionalComponent<P = {}> {
+	interface FunctionComponent<P = {}> {
 		(props: RenderableProps<P>, context?: any): VNode<any> | null;
 		displayName?: string;
 		defaultProps?: Partial<P>;
 	}
+	interface FunctionalComponent<P = {}> extends FunctionComponent<P> {}
 
-	interface ComponentConstructor<P = {}, S = {}> {
+	interface ComponentClass<P = {}, S = {}> {
 		new (props: P, context?: any): Component<P, S>;
 		displayName?: string;
 		defaultProps?: Partial<P>;
 		getDerivedStateFromProps?(props: Readonly<P>, state: Readonly<S>): Partial<S>;
 		getDerivedStateFromError?(error: any): Partial<S>;
 	}
+	interface ComponentConstructor<P = {}, S = {}> extends ComponentClass<P, S> {}
 
 	// Type alias for a component instance considered generally, whether stateless or stateful.
-	type AnyComponent<P = {}, S = {}> = FunctionalComponent<P> | Component<P, S>;
+	type AnyComponent<P = {}, S = {}> = FunctionComponent<P> | Component<P, S>;
 
 	interface Component<P = {}, S = {}> {
 		componentWillMount?(): void;
@@ -100,7 +103,7 @@ declare namespace preact {
 
 		static displayName?: string;
 		static defaultProps?: any;
-		static contextType?: PreactContext<any>;
+		static contextType?: Context<any>;
 
 		// Static members cannot reference class type parameters. This is not
 		// supported in TypeScript. Reusing the same type arguments from `Component`
@@ -140,7 +143,7 @@ declare namespace preact {
 		...children: ComponentChildren[]
 	): VNode<any>;
 	function createElement<P>(
-		type: ComponentFactory<P>,
+		type: ComponentType<P>,
 		props: Attributes & P | null,
 		...children: ComponentChildren[]
 	): VNode<any>;
@@ -166,7 +169,7 @@ declare namespace preact {
 	// -----------------------------------
 
 	// TODO: Revisit what the public type of this is...
-	const Fragment: ComponentConstructor<{}, {}>;
+	const Fragment: ComponentClass<{}, {}>;
 
 	//
 	// Preact options
@@ -189,7 +192,7 @@ declare namespace preact {
 		/** Attach a hook that is invoked before a vnode has rendered. */
 		render?(vnode: VNode): void;
 		/** Attach a hook that is invoked before a hook's state is queried. */
-		preHook?(component: VNode): void;
+		preHook?(component: Component): void;
 		/** Attach a hook that is invoked after a vnode has rendered. */
 		diffed?(vnode: VNode): void;
 		event?(e: Event): void;
@@ -206,19 +209,22 @@ declare namespace preact {
 	//
 	// Context
 	// -----------------------------------
-	interface PreactConsumer<T> extends FunctionalComponent<{
+	interface Consumer<T> extends FunctionComponent<{
 		children: (value: T) => ComponentChildren
 	}> {}
+	interface PreactConsumer<T> extends Consumer<T> {}
 
-	interface PreactProvider<T> extends FunctionalComponent<{
+	interface Provider<T> extends FunctionComponent<{
 		value: T,
 		children: ComponentChildren
 	}> {}
+	interface PreactProvider<T> extends Provider<T> {}
 
-	interface PreactContext<T> {
-		Consumer: PreactConsumer<T>;
-		Provider: PreactProvider<T>;
+	interface Context<T> {
+		Consumer: Consumer<T>;
+		Provider: Provider<T>;
 	}
+	interface PreactContext<T> extends Context<T> {}
 
-	function createContext<T>(defaultValue: T): PreactContext<T>;
+	function createContext<T>(defaultValue: T): Context<T>;
 }
