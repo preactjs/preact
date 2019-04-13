@@ -84,7 +84,6 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			}
 		}
 
-
 		// If we have found a corresponding old element we store it in a variable
 		// and delete it from the array. That way the next iteration can skip this
 		// element.
