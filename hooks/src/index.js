@@ -21,9 +21,9 @@ options.render = vnode => {
 };
 
 
-let oldAfterRender = options.afterRender;
-options.afterRender = () => {
-	if (oldAfterRender) oldAfterRender();
+let oldDiffed = options.diffed;
+options.diffed = () => {
+	if (oldDiffed) oldDiffed();
 	currentComponent = undefined;
 };
 
