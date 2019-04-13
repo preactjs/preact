@@ -20,13 +20,6 @@ options.render = vnode => {
 	currentComponent.__hooks._pendingEffects = handleEffects(currentComponent.__hooks._pendingEffects);
 };
 
-
-let oldDiffed = options.diffed;
-options.diffed = () => {
-	if (oldDiffed) oldDiffed();
-	currentComponent = undefined;
-};
-
 let oldAfterDiff = options.diffed;
 options.diffed = vnode => {
 	if (oldAfterDiff) oldAfterDiff(vnode);
@@ -40,6 +33,7 @@ options.diffed = vnode => {
 	// TODO: Consider moving to a global queue. May need to move
 	// this to the `commit` option
 	hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
+	currentComponent = undefined;
 };
 
 
