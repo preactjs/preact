@@ -192,7 +192,7 @@ declare namespace preact {
 		/** Attach a hook that is invoked before a vnode has rendered. */
 		render?(vnode: VNode): void;
 		/** Attach a hook that is invoked before a hook's state is queried. */
-		preHook?(component: VNode): void;
+		preHook?(component: Component): void;
 		/** Attach a hook that is invoked after a vnode has rendered. */
 		diffed?(vnode: VNode): void;
 		event?(e: Event): void;
