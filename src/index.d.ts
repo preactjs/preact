@@ -28,7 +28,6 @@ declare namespace preact {
 		 * Default value: `-1`
 		 */
 		endTime?: number;
-		_: VNode;
 	}
 
 	//
