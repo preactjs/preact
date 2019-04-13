@@ -815,6 +815,42 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.contain(`<span>${todoText}</span>`);
 	});
 
+	it.skip('equal vnodes should short-circuit diffing', () => {
+		let i = 0;
+		const spy = sinon.spy();
+
+		class X extends Component {
+			render(props) {
+				i++;
+				spy();
+				return <div>{i}</div>;
+			}
+		}
+		const A = <X />;
+		class App extends Component {
+			componentDidMount() {
+				this.setState({}); // eslint-disable-line
+			}
+
+			componentDidUpdate() {
+				if (i===1) {
+					this.setState({}); // eslint-disable-line
+				}
+			}
+
+			render(props) {
+				return <div>{A}</div>;
+			}
+		}
+
+		render(<App />, scratch);
+		expect(spy).to.be.calledOnce;
+		expect(scratch.firstChild.firstChild.innerHTML).to.equal('1');
+		rerender();
+		expect(scratch.firstChild.firstChild.innerHTML).to.equal('1');
+		expect(spy).to.be.calledOnce;
+	});
+
 	it('should always diff `checked` and `value` properties against the DOM', () => {
 		// See https://github.com/developit/preact/issues/1324
 
