@@ -67,13 +67,19 @@ export default function logger(logStats, logConsole) {
 
 		lock = true;
 		root = document.createElement('table');
-		root.style.cssText = 'position: fixed; right: 0; top: 0; z-index:999; background: #000; font-size: 12px; color: #FFF; opacity: 0.9; white-space: nowrap; pointer-events: none;';
+		root.style.cssText = 'position: fixed; right: 0; top: 0; z-index:999; background: #000; font-size: 12px; color: #FFF; opacity: 0.9; white-space: nowrap;';
 		let header = document.createElement('thead');
-		header.innerHTML = '<tr><td colspan="2">Stats</td></tr>';
+		header.innerHTML = '<tr><td colspan="2">Stats <button id="clear-logs">clear</button></td></tr>';
 		root.tableBody = document.createElement('tbody');
 		root.appendChild(root.tableBody);
 		root.appendChild(header);
 		document.documentElement.appendChild(root);
+		let btn = document.getElementById('clear-logs');
+		btn.addEventListener('click', () => {
+			for (let key in calls) {
+				calls[key] = 0;
+			}
+		});
 		lock = false;
 	}
 
