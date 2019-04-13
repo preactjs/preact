@@ -26,7 +26,6 @@ import options from '../options';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
 export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force, oldDom) {
-
 	// If the previous type doesn't match the new type we drop the whole subtree
 	if (oldVNode==null || newVNode==null || oldVNode.type!==newVNode.type || oldVNode.key!==newVNode.key) {
 		if (oldVNode!=null) unmount(oldVNode, ancestorComponent);
@@ -150,6 +149,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
+			c._depth = ancestorComponent ? (ancestorComponent._depth || 0) + 1 : 0;
 			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null, oldDom);
 
 			if (vnode!=null) {
