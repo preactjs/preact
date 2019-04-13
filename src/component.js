@@ -125,8 +125,8 @@ export function enqueueRender(c) {
 /** Flush the render queue by rerendering all queued components */
 function process() {
 	let p;
-	q.sort((a, b) => a._depth - b._depth);
-	while ((p=q.pop())) {
+	let toRender = q.splice(0).sort((a, b) => a._depth - b._depth);
+	while ((p=toRender.pop())) {
 		// forceUpdate's callback argument is reused here to indicate a non-forced update.
 		if (p._dirty) p.forceUpdate(false);
 	}
