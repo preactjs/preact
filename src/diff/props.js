@@ -81,7 +81,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		}
 		(dom._listeners || (dom._listeners = {}))[name] = value;
 	}
-	else if (name!=='list' && name!=='tagName' && !isSvg && (name in dom)) {
+	else if (name!=='list' && name!=='tagName' && name!=='width' && name!=='height' && !isSvg && (name in dom)) {
 		dom[name] = value==null ? '' : value;
 	}
 	else if (value==null || value===false) {

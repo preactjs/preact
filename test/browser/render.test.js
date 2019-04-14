@@ -321,6 +321,17 @@ describe('render()', () => {
 		expect(scratch.childNodes[0]).to.have.property('className', 'bar');
 	});
 
+	it('should render width correctly', done => {
+		render(<img width="100%" height="100%" src="data:,Hello%2C%20World" />, scratch);
+
+		// Wait for layout
+		setTimeout(() => {
+			expect(scratch.firstChild.width).to.not.equal(0);
+			expect(scratch.firstChild.height).to.not.equal(0);
+			done();
+		}, 0);
+	});
+
 	describe('style attribute', () => {
 		it('should apply style as String', () => {
 			render(<div style="top: 5px; position: relative;" />, scratch);
