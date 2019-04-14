@@ -875,5 +875,36 @@ describe('render()', () => {
 
 		// We don't log text updates
 		expect(getLog()).to.deep.equal([]);
-	  });
+	});
+
+	it('should not lead to stale DOM nodes', () => {
+		let i = 0;
+		let updateApp;
+		class App extends Component {
+			render() {
+				updateApp = () => this.forceUpdate();
+				return <Parent />;
+			}
+		}
+
+		let updateParent;
+		function Parent() {
+			updateParent = () => this.forceUpdate();
+			i++;
+			return <Child i={i} />;
+		}
+
+		function Child({ i }) {
+			return i < 3 ? null : <div>foo</div>;
+		}
+
+		render(<App />, scratch);
+
+		updateApp();
+		updateParent();
+		updateApp();
+
+		// Without a fix it would render: `<div>foo</div><div></div>`
+		expect(scratch.innerHTML).to.equal('<div>foo</div>');
+	});
 });
