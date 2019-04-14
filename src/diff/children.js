@@ -65,17 +65,14 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		p = oldChildren[i];
 
 		if (childVNode!=null) {
-			if (p != null && (childVNode.key==null && p.key==null ? (childVNode.type === p.type) : (childVNode.key === p.key))) {
+			if (p===null || (p != null && (childVNode.key==null && p.key==null ? (childVNode.type === p.type) : (childVNode.key === p.key)))) {
 				index = i;
 			}
 			else {
 				for (j=0; j<oldChildrenLength; j++) {
 					p = oldChildren[j];
 					if (p!=null) {
-						if (childVNode.key==null && p.key==null
-							? (childVNode.type === p.type && (p._component==null || (p.type.prototype.render==null && p._component.__hooks==null)))
-							: (childVNode.key === p.key)
-						) {
+						if (childVNode.key==null && p.key==null ? (childVNode.type === p.type) : (childVNode.key === p.key)) {
 							index = j;
 							break;
 						}
@@ -89,7 +86,9 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		// element.
 		if (index!=null) {
 			oldVNode = oldChildren[index];
-			oldChildren[index] = null;
+			// We can't use `null` here because that is reserved for empty
+			// placeholders (holes)
+			oldChildren[index] = undefined;
 		}
 
 		nextDom = oldDom!=null && oldDom.nextSibling;

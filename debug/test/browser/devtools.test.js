@@ -685,10 +685,10 @@ describe('devtools', () => {
 			// use `<Foo>bar</Foo>` as the old child to diff against for
 			// `<Foo>foo</Foo>`. That's why `<Foo>bar</Foo>` needs to be remounted.
 			expect(serialize(hook.log)).to.deep.equal([
-				{ type: 'update', component: 'Foo' },
-				{ type: 'mount', component: '#text: bar' },
+				{ type: 'mount', component: '#text: foo' },
 				{ type: 'mount', component: 'div' },
 				{ type: 'mount', component: 'Foo' },
+				{ type: 'update', component: 'Foo' },
 				{ type: 'update', component: 'App' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
