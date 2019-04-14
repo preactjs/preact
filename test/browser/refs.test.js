@@ -349,7 +349,7 @@ describe('refs', () => {
 		expect(input.value).to.equal('foo');
 	});
 
-	it.skip('should correctly call child refs for un-keyed children on re-render', () => {
+	it('should correctly call child refs for un-keyed children on re-render', () => {
 		let el = null;
 		let ref = e => { el = e; };
 

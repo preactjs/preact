@@ -159,8 +159,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
  */
 export function toChildArray(children, flattened, map, keepHoles) {
 	if (flattened == null) flattened = [];
-	if (keepHoles && children===undefined) {}
-	else if (children==null || typeof children === 'boolean') {
+	if (children==null || typeof children === 'boolean') {
 		if (keepHoles) flattened.push(null);
 	}
 	else if (Array.isArray(children)) {
