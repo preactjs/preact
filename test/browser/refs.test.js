@@ -348,4 +348,26 @@ describe('refs', () => {
 		render(<input type="text" ref={autoFocus} value="foo" />, scratch);
 		expect(input.value).to.equal('foo');
 	});
+
+	it.skip('should correctly call child refs for un-keyed children on re-render', () => {
+		let el = null;
+		let ref = e => { el = e; };
+
+		class App extends Component {
+			render({ headerVisible }) {
+				return (
+					<div>
+						{headerVisible && <div>foo</div>}
+						<div ref={ref}>bar</div>
+					</div>
+				);
+			}
+		}
+
+		render(<App headerVisible />, scratch);
+		expect(el).to.not.be.equal(null);
+
+		render(<App />, scratch);
+		expect(el).to.not.be.equal(null);
+	});
 });
