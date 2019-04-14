@@ -1,7 +1,6 @@
-import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useMemo, useState } from '../../src';
+import { useMemo } from '../../src';
 
 /** @jsx h */
 
@@ -9,11 +8,10 @@ import { useMemo, useState } from '../../src';
 describe('useMemo', () => {
 
 	/** @type {HTMLDivElement} */
-	let scratch, rerender;
+	let scratch;
 
 	beforeEach(() => {
 		scratch = setupScratch();
-		rerender = setupRerender();
 	});
 
 	afterEach(() => {
