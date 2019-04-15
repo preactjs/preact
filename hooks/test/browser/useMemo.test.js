@@ -41,7 +41,7 @@ describe('useMemo', () => {
 		expect(memoFunction).to.have.been.calledTwice;
 	});
 
-	it.skip('short circuits diffing for memoized components', () => {
+	it('short circuits diffing for memoized components', () => {
 		let spy = sinon.spy();
 		let spy2 = sinon.spy();
 		const X = ({ count }) => {

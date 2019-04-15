@@ -43,6 +43,11 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 	/** @type {import('../internal').Component | null} */
 	let clearProcessingException;
 
+	if (newVNode._original===oldVNode) {
+		dom = oldVNode._dom;
+		return dom;
+	}
+
 	try {
 		outer: if (oldVNode.type===Fragment || newType===Fragment) {
 			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, c, oldDom);
