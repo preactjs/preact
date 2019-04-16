@@ -31,8 +31,7 @@
       "$_context": "__n",
       "$_defaultValue": "__p",
       "$_id": "__c",
-      "$_parentDom": "__P",
-      "$__hooks": "__H"
+      "$_parentDom": "__P"
     }
   }
 }
