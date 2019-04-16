@@ -347,7 +347,7 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 	}
 	else if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {
-			if (r[i]!=null) unmount(r[i], ancestorComponent, skipRemove);
+			if (r[i]) unmount(r[i], ancestorComponent, skipRemove);
 		}
 	}
 
