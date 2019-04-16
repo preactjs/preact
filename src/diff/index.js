@@ -138,11 +138,8 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			if (options.render) options.render(newVNode);
 
 			let prev = c._prevVNode;
-			let vnode;
-			if (newVNode._original===oldVNode) {
-				vnode = c._prevVNode;
-			}
-			else {
+			let vnode = c._prevVNode;
+			if (newVNode._original!==oldVNode) {
 				vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
 			}
 			c._dirty = false;
