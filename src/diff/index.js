@@ -42,11 +42,6 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 	/** @type {import('../internal').Component | null} */
 	let clearProcessingException;
 
-	if (newVNode._original===oldVNode) {
-		dom = oldVNode._dom;
-		return dom;
-	}
-
 	try {
 		outer: if (oldVNode.type===Fragment || newType===Fragment) {
 			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, c, oldDom);
@@ -143,7 +138,13 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			if (options.render) options.render(newVNode);
 
 			let prev = c._prevVNode;
-			let vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
+			let vnode;
+			if (newVNode._original===oldVNode) {
+				vnode = c._prevVNode;
+			}
+			else {
+				vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
+			}
 			c._dirty = false;
 
 			if (c.getChildContext!=null) {
