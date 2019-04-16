@@ -41,12 +41,12 @@ describe('useMemo', () => {
 		expect(memoFunction).to.have.been.calledTwice;
 	});
 
-	it('short circuits diffing for memoized components', () => {
+	it.only('short circuits diffing for memoized components', () => {
 		let spy = sinon.spy();
 		let spy2 = sinon.spy();
 		const X = ({ count }) => {
 			spy();
-			return <p>{count}</p>;
+			return <span>{count}</span>;
 		};
 
 		const Y = ({ count }) => {
@@ -73,6 +73,6 @@ describe('useMemo', () => {
 		render(<App x={1} />, scratch);
 		expect(spy2).to.be.calledTwice;
 		expect(spy).to.be.calledThrice;
+		expect(scratch.innerHTML).to.equal('<div><span>1</span><p>1</p></div>');
 	});
-
 });
