@@ -203,9 +203,11 @@ describe('combinations', () => {
 
 		render(<App />, scratch);
 		act(() => updater.second());
+		expect(scratch.textContent).to.equal('01');
 
 		updateParent();
 		rerender();
+		expect(scratch.textContent).to.equal('1');
 
 		updateParent();
 		rerender();
