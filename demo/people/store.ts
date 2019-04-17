@@ -51,7 +51,8 @@ const Store = types
 
 export type StoreType = Instance<typeof Store>
 export const store = Store.create({
-  usersOrder: "name",
+	usersOrder: "name",
+	users: []
 })
 
 // const { Provider, Consumer } = createContext<StoreType>(undefined as any)

@@ -1,5 +1,5 @@
-import { setupRerender } from 'preact/test-utils';
-import { createElement as h, render } from 'preact';
+import { setupRerender, act } from 'preact/test-utils';
+import { createElement as h, render, Component } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useState, useReducer, useEffect, useLayoutEffect, useRef } from '../../src';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
@@ -173,5 +173,45 @@ describe('combinations', () => {
 		return scheduleEffectAssert(() => {
 			expect(effectCount).to.equal(1);
 		});
+	});
+
+	it('should not reuse functional components with hooks', () => {
+		let updater = { first: undefined, second: undefined };
+		function Foo(props) {
+			let [v, setter] = useState(0);
+			updater[props.id] = () => setter(++v);
+			return <div>{v}</div>;
+		}
+
+		let updateParent;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { active: true };
+				updateParent = () => this.setState(p => ({ active: !p.active }));
+			}
+
+			render() {
+				return (
+					<div>
+						{this.state.active && <Foo id="first" />}
+						<Foo id="second" />
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		act(() => updater.second());
+		expect(scratch.textContent).to.equal('01');
+
+		updateParent();
+		rerender();
+		expect(scratch.textContent).to.equal('1');
+
+		updateParent();
+		rerender();
+
+		expect(scratch.textContent).to.equal('01');
 	});
 });

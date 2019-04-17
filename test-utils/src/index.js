@@ -10,24 +10,32 @@ export function setupRerender() {
 	return () => options.__test__drainQueue && options.__test__drainQueue();
 }
 
+/**
+ * Run a test function, and flush all effects and rerenders after invoking it
+ * @param {() => void} cb The function under test
+ */
 export function act(cb) {
 	const previousRequestAnimationFrame = options.requestAnimationFrame;
 	const rerender = setupRerender();
-	let flush;
+
+	/** @type {() => void} */
+	let flush, toFlush;
+
 	// Override requestAnimationFrame so we can flush pending hooks.
 	options.requestAnimationFrame = (fc) => flush = fc;
+
 	// Execute the callback we were passed.
 	cb();
-	// State COULD be built up flush it.
-	if (flush) {
-		flush();
-	}
 	rerender();
-	// If rerendering with new state has triggered effects
-	// flush them aswell since options.raf will have repopulated this.
-	if (flush) {
-		flush();
+
+	while (flush) {
+		toFlush = flush;
+		flush = null;
+
+		toFlush();
+		rerender();
 	}
+
 	options.requestAnimationFrame = previousRequestAnimationFrame;
 }
 

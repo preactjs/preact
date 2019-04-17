@@ -298,7 +298,7 @@ describe('keys', () => {
 		]);
 	});
 
-	it.skip('should not preserve state when a component\'s keys are different', () => {
+	it('should not preserve state when a component\'s keys are different', () => {
 		const Stateful = createStateful('Stateful');
 
 		function Foo({ condition }) {
@@ -318,7 +318,7 @@ describe('keys', () => {
 		expect(ops).to.deep.equal(['Unmount Stateful', 'Mount Stateful'], 'switching keys 2');
 	});
 
-	it.skip('should not preserve state between an unkeyed and keyed component', () => {
+	it('should not preserve state between an unkeyed and keyed component', () => {
 		// React and Preact v8 behavior: https://codesandbox.io/s/57prmy5mx
 
 		const Stateful = createStateful('Stateful');
@@ -491,5 +491,31 @@ describe('keys', () => {
 		expect(ops).to.deep.equal(['Unmount Stateful2', 'Unmount Stateful1', 'Mount Stateful2', 'Mount Stateful1']);
 		expect(Stateful1Ref).to.not.equal(Stateful1MovedRef);
 		expect(Stateful2Ref).to.not.equal(Stateful2MovedRef);
+	});
+
+	it('should treat undefined as a hole', () => {
+		let Bar = () => <div>bar</div>;
+
+		function Foo(props) {
+			let sibling;
+			if (props.condition) {
+				sibling = <Bar />;
+			}
+
+			return (
+				<div>
+					<div>Hello</div>
+					{sibling}
+				</div>
+			);
+		}
+
+		render(<Foo condition />, scratch);
+		clearLog();
+
+		render(<Foo />, scratch);
+		expect(getLog()).to.deep.equal([
+			'<div>bar.remove()'
+		]);
 	});
 });

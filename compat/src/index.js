@@ -73,6 +73,9 @@ class ContextProvider {
 function Portal(props) {
 	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
 	render(wrap, props.container);
+	this.componentWillUnmount = () => {
+		render(null, props.container);
+	};
 	return null;
 }
 

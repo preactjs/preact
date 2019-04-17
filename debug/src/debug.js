@@ -1,4 +1,4 @@
-import { checkPropTypes } from 'prop-types';
+import { checkPropTypes } from './check-props';
 import { getDisplayName } from './devtools/custom';
 import { options, toChildArray } from 'preact';
 import { ELEMENT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants';
@@ -7,6 +7,7 @@ export function initDebug() {
 	/* eslint-disable no-console */
 	let oldBeforeDiff = options.diff;
 	let oldDiffed = options.diffed;
+	let oldVnode = options.vnode;
 
 	options.root = (vnode, parentNode) => {
 		if (!parentNode) {
@@ -59,13 +60,15 @@ export function initDebug() {
 			);
 		}
 
-		for (const key in vnode.props) {
-			if (key[0]==='o' && key[1]==='n' && typeof vnode.props[key]!=='function' && vnode.props[key]!=null) {
-				throw new Error(
-					`Component's "${key}" property should be a function, ` +
-					`but got [${typeof vnode.props[key]}] instead\n` +
-					serializeVNode(vnode)
-				);
+		if (typeof vnode.type==='string') {
+			for (const key in vnode.props) {
+				if (key[0]==='o' && key[1]==='n' && typeof vnode.props[key]!=='function' && vnode.props[key]!=null) {
+					throw new Error(
+						`Component's "${key}" property should be a function, ` +
+						`but got [${typeof vnode.props[key]}] instead\n` +
+						serializeVNode(vnode)
+					);
+				}
 			}
 		}
 
@@ -96,6 +99,26 @@ export function initDebug() {
 		}
 
 		if (oldBeforeDiff) oldBeforeDiff(vnode);
+	};
+
+	const warn = (property, err) => ({
+		get() {
+			throw new Error(`getting vnode.${property} is deprecated, ${err}`);
+		},
+		set() {
+			throw new Error(`setting vnode.${property} is not allowed, ${err}`);
+		}
+	});
+
+	const deprecatedAttributes = {
+		nodeName: warn('nodeName', 'use vnode.type'),
+		attributes: warn('attributes', 'use vnode.props'),
+		children: warn('children', 'use vnode.props.children')
+	};
+
+	options.vnode = (vnode) => {
+		Object.defineProperties(vnode, deprecatedAttributes);
+		if (oldVnode) oldVnode(vnode);
 	};
 
 	options.diffed = (vnode) => {
