@@ -110,7 +110,6 @@ export function useEffect(callback, args) {
 		state._args = args;
 
 		currentComponent.__hooks._pendingEffects.push(state);
-		if (Array.isArray(options.effects)) options.effects.push(state);
 		afterPaint(currentComponent);
 	}
 }
@@ -126,7 +125,6 @@ export function useLayoutEffect(callback, args) {
 	if (argsChanged(state._args, args)) {
 		state._value = callback;
 		state._args = args;
-		if (Array.isArray(options.effects)) options.effects.push(state);
 		currentComponent.__hooks._pendingLayoutEffects.push(state);
 	}
 }
@@ -221,9 +219,6 @@ if (typeof window !== 'undefined') {
 function handleEffects(effects) {
 	effects.forEach(invokeCleanup);
 	effects.forEach(invokeEffect);
-	if (options.effects) {
-		effects.forEach(hook => options.effects = options.effects.filter(h => h!==hook));
-	}
 	return [];
 }
 

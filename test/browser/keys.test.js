@@ -492,4 +492,30 @@ describe('keys', () => {
 		expect(Stateful1Ref).to.not.equal(Stateful1MovedRef);
 		expect(Stateful2Ref).to.not.equal(Stateful2MovedRef);
 	});
+
+	it('should treat undefined as a hole', () => {
+		let Bar = () => <div>bar</div>;
+
+		function Foo(props) {
+			let sibling;
+			if (props.condition) {
+				sibling = <Bar />;
+			}
+
+			return (
+				<div>
+					<div>Hello</div>
+					{sibling}
+				</div>
+			);
+		}
+
+		render(<Foo condition />, scratch);
+		clearLog();
+
+		render(<Foo />, scratch);
+		expect(getLog()).to.deep.equal([
+			'<div>bar.remove()'
+		]);
+	});
 });

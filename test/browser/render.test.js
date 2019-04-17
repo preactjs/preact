@@ -912,4 +912,58 @@ describe('render()', () => {
 		// Without a fix it would render: `<div>foo</div><div></div>`
 		expect(scratch.innerHTML).to.equal('<div>foo</div>');
 	});
+
+	// see preact/#1327
+	it('should not reuse unkeyed components', () => {
+		class X extends Component {
+			constructor() {
+				super();
+				this.state = { i: 0 };
+			}
+
+			update() {
+				this.setState(prev => ({ i: prev.i + 1 }));
+			}
+
+			componentWillUnmount() {
+				clearTimeout(this.id);
+			}
+
+			render() {
+				return <div>{this.state.i}</div>;
+			}
+		}
+
+		let ref;
+		let updateApp;
+		class App extends Component {
+			constructor() {
+				super();
+				this.state = { i: 0 };
+				updateApp = () => this.setState(prev => ({ i: prev.i ^ 1 }));
+			}
+
+			render() {
+				return (
+					<div>
+						{this.state.i === 0 && <X />}
+						<X ref={node => ref = node} />
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.textContent).to.equal('00');
+
+		ref.update();
+		updateApp();
+		rerender();
+		expect(scratch.textContent).to.equal('1');
+
+		updateApp();
+		rerender();
+
+		expect(scratch.textContent).to.equal('01');
+	});
 });
