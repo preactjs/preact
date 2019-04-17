@@ -37,6 +37,8 @@ describe('focus', () => {
 	 * eqaul to the `input` parameter
 	 */
 	function validateFocus(input, message) {
+		// Check `nodeName` first to make cli output less spammy
+		expect(document.activeElement.nodeName).to.equal(input.nodeName, message);
 		expect(document.activeElement).to.equal(input, message);
 		expect(input.selectionStart).to.equal(2);
 		expect(input.selectionEnd).to.equal(5);
@@ -167,8 +169,6 @@ describe('focus', () => {
 		), scratch);
 
 		let input = focusInput();
-
-		input = focusInput();
 
 		render((
 			<List>
