@@ -29,7 +29,6 @@ if (!isBenchmark) {
 window.setImmediate = setTimeout;
 
 class Home extends Component {
-	a = 1;
 	render() {
 		return (
 			<div>
