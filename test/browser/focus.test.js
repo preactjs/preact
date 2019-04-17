@@ -54,7 +54,7 @@ describe('focus', () => {
 		teardown(scratch);
 	});
 
-	it('should maintain focus when swapping elements', () => {
+	it.skip('should maintain focus when swapping elements', () => {
 		render((
 			<List>
 				<Input />
