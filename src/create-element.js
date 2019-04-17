@@ -95,7 +95,7 @@ export function coerceToVNode(possibleVNode) {
 	if (possibleVNode._dom!=null) {
 		let vnode = createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.text, possibleVNode.key, null);
 		vnode._dom = possibleVNode._dom;
-		vnode._original = possibleVNode;
+		vnode._original = possibleVNode._original || possibleVNode;
 		return vnode;
 	}
 

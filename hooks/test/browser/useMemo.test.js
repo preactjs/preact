@@ -78,5 +78,9 @@ describe('useMemo', () => {
 		expect(spy).to.be.calledThrice;
 		expect(spy2).to.be.calledTwice;
 		expect(scratch.innerHTML).to.equal('<div><span>1</span><p>1</p></div>');
+
+		render(<App x={1} />, scratch);
+		expect(spy2).to.be.calledTwice;
+		expect(scratch.innerHTML).to.equal('<div><span>1</span><p>1</p></div>');
 	});
 });
