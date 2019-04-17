@@ -17,6 +17,7 @@
   "props": {
     "cname": 6,
     "props": {
+      "$_depth": "__D",
       "$_dirty": "__d",
       "$_nextState": "__s",
       "$_renderCallbacks": "__h",
