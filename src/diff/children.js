@@ -27,7 +27,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	let childVNode, i, j, p, index, oldVNode, newDom,
 		nextDom, sibDom, focus;
 
-	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode);
+	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode, true);
 	let oldChildren = oldParentVNode!=null && oldParentVNode!=EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR;
 
 	let oldChildrenLength = oldChildren.length;
@@ -63,16 +63,19 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		// Check if we find a corresponding element in oldChildren and store the
 		// index where the element was found.
 		p = oldChildren[i];
-		if (p != null && (childVNode.key==null && p.key==null ? (childVNode.type === p.type) : (childVNode.key === p.key))) {
-			index = i;
-		}
-		else {
-			for (j=0; j<oldChildrenLength; j++) {
-				p = oldChildren[j];
-				if (p!=null) {
-					if (childVNode.key==null && p.key==null ? (childVNode.type === p.type) : (childVNode.key === p.key)) {
-						index = j;
-						break;
+
+		if (childVNode!=null) {
+			if (p===null || (p != null && (childVNode.key==null && p.key==null ? (childVNode.type === p.type) : (childVNode.key === p.key)))) {
+				index = i;
+			}
+			else {
+				for (j=0; j<oldChildrenLength; j++) {
+					p = oldChildren[j];
+					if (p!=null) {
+						if (childVNode.key==null && p.key==null ? (childVNode.type === p.type) : (childVNode.key === p.key)) {
+							index = j;
+							break;
+						}
 					}
 				}
 			}
@@ -83,7 +86,9 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		// element.
 		if (index!=null) {
 			oldVNode = oldChildren[index];
-			oldChildren[index] = null;
+			// We can't use `null` here because that is reserved for empty
+			// placeholders (holes)
+			oldChildren[index] = undefined;
 		}
 
 		nextDom = oldDom!=null && oldDom.nextSibling;
@@ -146,13 +151,19 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
  * @param {import('../index').ComponentChildren} children The unflattened
  * children of a virtual node
  * @param {Array<import('../internal').VNode | null>} [flattened] An flat array of children to modify
+ * @param {typeof import('../create-element').coerceToVNode} [map] Function that
+ * will be applied on each child if the `vnode` is not `null`
+ * @param {boolean} [keepHoles] wether to coerce `undefined` to `null` or not.
+ * This is needed for Components without children like `<Foo />`.
  */
-export function toChildArray(children, flattened, map) {
+export function toChildArray(children, flattened, map, keepHoles) {
 	if (flattened == null) flattened = [];
-	if (children==null || typeof children === 'boolean') {}
+	if (children==null || typeof children === 'boolean') {
+		if (keepHoles) flattened.push(null);
+	}
 	else if (Array.isArray(children)) {
 		for (let i=0; i < children.length; i++) {
-			toChildArray(children[i], flattened);
+			toChildArray(children[i], flattened, map, keepHoles);
 		}
 	}
 	else {
