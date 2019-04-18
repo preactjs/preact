@@ -58,7 +58,7 @@ export function initDevTools() {
 
 		let renderer = {
 			bundleType: /* istanbul ignore next */  isDev ? 1 : 0,
-			version: '16.5.2',
+			version: '16.8.4',
 			rendererPackageName: 'preact',
 			// We don't need this, but the devtools `attachRenderer` function relys
 			// it being there.
