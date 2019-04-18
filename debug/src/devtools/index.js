@@ -1,6 +1,7 @@
 /* istanbul ignore file */
 import { options, Component, Fragment } from 'preact';
 import { Renderer } from './renderer';
+import { assign } from '../../../src/util';
 
 /**
  * Wrap function with generic error logging
@@ -29,7 +30,8 @@ export function initDevTools() {
 	// This global variable is injected by the devtools
 	/** @type {import('../internal').DevtoolsWindow} */
 	let hook = (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
-	if (hook==null) return;
+
+	if (hook==null || hook.isDisabled) return;
 
 	/** @type {(vnode: import('../internal').VNode) => void} */
 	let onCommitRoot = noop;
@@ -56,43 +58,34 @@ export function initDevTools() {
 				: 'production'
 		}, '*');
 
-		let renderer = {
+		let config = {
 			bundleType: /* istanbul ignore next */  isDev ? 1 : 0,
 			version: '16.8.4',
 			rendererPackageName: 'preact',
-			// We don't need this, but the devtools `attachRenderer` function relys
-			// it being there.
-			findHostInstanceByFiber(vnode) {
-				return vnode._dom;
-			},
-			// We don't need this, but the devtools `attachRenderer` function relys
-			// it being there.
 			findFiberByHostInstance(instance) {
 				return preactRenderer.inst2vnode.get(instance) || null;
 			}
 		};
 
-		hook._renderers[rid] = renderer;
-
-		// We can't bring our own `attachRenderer` function therefore we simply
-		// prevent the devtools from overwriting our custom renderer by creating
-		// a noop setter.
-		Object.defineProperty(hook.helpers, rid, {
-			get: () => preactRenderer,
-			set: () => {
-				if (!preactRenderer.connected) {
-					helpers.markConnected();
-				}
-			}
-		});
-
-		let helpers = hook.helpers[rid];
+		/** @type {import('../internal').DevtoolsWindow} */
+		// eslint-disable-next-line arrow-body-style
+		(window).__REACT_DEVTOOLS_ATTACH__ = (hook, id, renderer, target) => {
+			return assign(config, {
+				flushInitialOperations() {
+					// TODO
+				},
+				overrideProps() {
+					// TODO
+				},
+				currentDispatcherRef: { current: null }
+			});
+		};
 
 		// Tell the devtools that we are ready to start
-		hook.emit('renderer-attached', {
+		hook.inject({
 			id: rid,
-			renderer,
-			helpers
+			renderer: config,
+			reactBuildType: config.bundleType
 		});
 
 		onCommitRoot = catchErrors(root => {
@@ -100,7 +93,7 @@ export function initDevTools() {
 			if (root.type===Fragment && root._children.length==0) return;
 
 			let roots = hook.getFiberRoots(rid);
-			root = helpers.handleCommitFiberRoot(root);
+			// root = helpers.handleCommitFiberRoot(root);
 			if (!roots.has(root)) roots.add(root);
 		});
 
