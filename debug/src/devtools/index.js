@@ -83,7 +83,6 @@ export function initDevTools() {
 
 		// Tell the devtools that we are ready to start
 		hook.inject({
-			id: rid,
 			renderer: config,
 			reactBuildType: config.bundleType
 		});
