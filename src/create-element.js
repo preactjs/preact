@@ -46,9 +46,11 @@ export function createElement(type, props, children) {
  * diffing it against its children
  * @param {import('./internal').VNode["ref"]} ref The ref property that will
  * receive a reference to its created child
+ * @param {import('./internal').VNode} original The original vnode
+ * this instance was created from
  * @returns {import('./internal').VNode}
  */
-export function createVNode(type, props, text, key, ref) {
+export function createVNode(type, props, text, key, ref, original) {
 	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
 	// Do not inline into createElement and coerceToVNode!
 	const vnode = {
@@ -57,6 +59,7 @@ export function createVNode(type, props, text, key, ref) {
 		text,
 		key,
 		ref,
+		_original: original,
 		_children: null,
 		_dom: null,
 		_lastDomChild: null,
@@ -93,9 +96,8 @@ export function coerceToVNode(possibleVNode) {
 
 	// Clone vnode if it has already been used. ceviche/#57
 	if (possibleVNode._dom!=null) {
-		let vnode = createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.text, possibleVNode.key, null);
+		let vnode = createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.text, possibleVNode.key, null, possibleVNode._original || possibleVNode);
 		vnode._dom = possibleVNode._dom;
-		vnode._original = possibleVNode._original || possibleVNode;
 		return vnode;
 	}
 
