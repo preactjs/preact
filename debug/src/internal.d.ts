@@ -73,4 +73,8 @@ export interface DevtoolsWindow extends Window {
 	 * devtools panel.
 	 */
 	__REACT_DEVTOOLS_GLOBAL_HOOK__?: DevtoolsHook;
+	/**
+	 * Custom attach function to supply a custom renderer
+	 */
+	__REACT_DEVTOOLS_ATTACH__?: (hook: DevtoolsHook, id: string, renderer: any, target: Window) => any;
 }
