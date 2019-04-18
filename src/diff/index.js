@@ -163,6 +163,14 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			c._parentDom = parentDom;
 
 			if (newVNode.ref) applyRef(newVNode.ref, c, ancestorComponent);
+
+			while (p=c._renderCallbacks.pop()) p.call(c);
+
+			// Don't call componentDidUpdate on mount or when we bailed out via
+			// `shouldComponentUpdate`
+			if (!isNew && oldProps!=null && c.componentDidUpdate!=null) {
+				c.componentDidUpdate(oldProps, oldState, snapshot);
+			}
 		}
 		else {
 			dom = diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
@@ -173,16 +181,6 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 		}
 
 		newVNode._dom = dom;
-
-		if (c!=null) {
-			while (p=c._renderCallbacks.pop()) p.call(c);
-
-			// Don't call componentDidUpdate on mount or when we bailed out via
-			// `shouldComponentUpdate`
-			if (!isNew && oldProps!=null && c.componentDidUpdate!=null) {
-				c.componentDidUpdate(oldProps, oldState, snapshot);
-			}
-		}
 
 		if (clearProcessingException) {
 			c._pendingError = c._processingException = null;
