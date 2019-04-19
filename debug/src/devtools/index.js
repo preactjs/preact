@@ -69,6 +69,9 @@ export function initDevTools() {
 			selectElement(id) {
 				// TODO
 			},
+			cleanup() {
+				// noop
+			},
 			inspectElement
 		};
 
