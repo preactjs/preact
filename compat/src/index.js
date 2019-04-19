@@ -259,7 +259,6 @@ export {
 	render,
 	render as hydrate,
 	unmountComponentAtNode,
-	createPortal,
 	createElement,
 	createContext,
 	createFactory,
@@ -269,9 +268,6 @@ export {
 	isValidElement,
 	findDOMNode,
 	Component,
-	PureComponent,
-	memo,
-	forwardRef,
 	// eslint-disable-next-line camelcase
 	unstable_batchedUpdates
 };
