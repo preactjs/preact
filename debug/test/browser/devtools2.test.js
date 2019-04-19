@@ -1,5 +1,6 @@
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { render, h, Component } from 'preact';
+import { setupRerender } from 'preact/test-utils';
 import { createMockDevtoolsHook, convertEmit } from './mock-hook';
 import { initDevTools } from '../../src/devtools';
 import { clearState } from '../../src/devtools/cache';
@@ -11,11 +12,15 @@ describe('devtools', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
+	/** @type {() => void} */
+	let rerender;
+
 	/** @type {import('../../src/internal').DevtoolsMock} */
 	let mock;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		rerender = setupRerender();
 		mock = createMockDevtoolsHook();
 
 		/** @type {import('../../src/internal').DevtoolsWindow} */
@@ -153,6 +158,38 @@ describe('devtools', () => {
 				cleaned: [],
 				data: {
 					foo: 1
+				}
+			});
+		});
+
+		it('should edit state', () => {
+			mock.connect();
+			class App extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { foo: 1 };
+				}
+				render() {
+					return <div />;
+				}
+			}
+
+			render(<App />, scratch);
+
+			expect(mock.inspect(2).state).to.deep.equal({
+				cleaned: [],
+				data: {
+					foo: 1
+				}
+			});
+
+			mock.setState(2, ['foo'], 42);
+			rerender();
+
+			expect(mock.inspect(2).state).to.deep.equal({
+				cleaned: [],
+				data: {
+					foo: 42
 				}
 			});
 		});

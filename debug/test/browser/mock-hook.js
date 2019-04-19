@@ -4,6 +4,8 @@
  */
 export function createMockDevtoolsHook() {
 	let roots = new Set();
+
+	/** @type {Map<number, import('../../src/internal').Renderer>} */
 	let renderers = new Map();
 
 	let hook = {
@@ -28,10 +30,14 @@ export function createMockDevtoolsHook() {
 		return renderers.get(1).inspectElement(id);
 	}
 
+	function setState(id, path, value) {
+		return renderers.get(1).setInState(id, path, value);
+	}
+
 	/** @type {*} */
 	(window).__REACT_DEVTOOLS_GLOBAL_HOOK__ = hook;
 
-	return { hook, connect, inspect };
+	return { hook, connect, inspect, setState };
 }
 
 export function convertEmit(args) {
