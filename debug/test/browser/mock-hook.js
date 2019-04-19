@@ -1,6 +1,6 @@
 
 /**
- * @returns {{ hook: import('../../src/internal').DevtoolsHookMock, connect: () => void}}
+ * @returns {import('../../src/internal').DevtoolsMock}
  */
 export function createMockDevtoolsHook() {
 	let roots = new Set();
@@ -24,10 +24,14 @@ export function createMockDevtoolsHook() {
 		attached.flushInitialOperations();
 	}
 
+	function inspect(id) {
+		return renderers.get(1).inspectElement(id);
+	}
+
 	/** @type {*} */
 	(window).__REACT_DEVTOOLS_GLOBAL_HOOK__ = hook;
 
-	return { hook, connect };
+	return { hook, connect, inspect };
 }
 
 export function convertEmit(args) {

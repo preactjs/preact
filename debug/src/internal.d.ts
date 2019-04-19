@@ -95,6 +95,7 @@ export interface DevtoolsHookMock extends DevtoolsHook {
 export interface DevtoolsMock {
 	hook: DevtoolsHookMock;
 	connect(): void;
+	inspect(id: number): InspectData;
 }
 
 export interface DevtoolsWindow extends Window {

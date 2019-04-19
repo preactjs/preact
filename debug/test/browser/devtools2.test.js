@@ -1,12 +1,12 @@
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { render, h } from 'preact';
+import { render, h, Component } from 'preact';
 import { createMockDevtoolsHook, convertEmit } from './mock-hook';
 import { initDevTools } from '../../src/devtools';
 import { clearState } from '../../src/devtools/cache';
 
 /** @jsx h */
 
-describe.only('devtools', () => {
+describe('devtools', () => {
 
 	/** @type {HTMLDivElement} */
 	let scratch;
@@ -106,5 +106,55 @@ describe.only('devtools', () => {
 			111,
 			0
 		]);
+	});
+
+	describe('inspectElement', () => {
+		it('should provide props', () => {
+			mock.connect();
+			let App = props => <div />;
+			render(<App foo bar="bar" bob={2} baz={{ foo: 1 }} boof={[1]} />, scratch);
+
+			expect(mock.inspect(2).props).to.deep.equal({
+				cleaned: [],
+				data: {
+					foo: true,
+					bar: 'bar',
+					baz: {
+						foo: 1
+					},
+					bob: 2,
+					boof: [1]
+				}
+			});
+		});
+
+		it('should not provide state for functional components', () => {
+			mock.connect();
+			let App = () => <div />;
+			render(<App />, scratch);
+			expect(mock.inspect(2).state).to.equal(null);
+		});
+
+		it('should provide state for class components', () => {
+			mock.connect();
+			class App extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { foo: 1 };
+				}
+				render() {
+					return <div />;
+				}
+			}
+
+			render(<App />, scratch);
+
+			expect(mock.inspect(2).state).to.deep.equal({
+				cleaned: [],
+				data: {
+					foo: 1
+				}
+			});
+		});
 	});
 });
