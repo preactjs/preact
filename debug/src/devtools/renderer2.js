@@ -1,7 +1,8 @@
 import { Fragment } from 'preact';
-import { getVNodeId } from './cache';
+import { getVNodeId, getVNode } from './cache';
 import { TREE_OPERATION_ADD, ElementTypeRoot, ElementTypeClass, ElementTypeFunction, ElementTypeOtherOrUnknown } from './constants';
 import { getChildren, getDisplayName } from './custom';
+import { cleanForBridge } from './pretty';
 
 // TODO: Use a proper LRU cache?
 /** @type {Map<string, Uint32Array>} */
@@ -142,3 +143,27 @@ export function flushPendingEvents(hook, state) {
 export function shouldFilter(vnode) {
 	return typeof vnode.type!=='function' || vnode.type===Fragment;
 }
+
+/**
+ * Provide detailed information about the current vnode
+ * @param {number} id
+ */
+export function inspectElement(id) {
+	let vnode = getVNode(id);
+	let hasHooks = vnode._component!=null && vnode._component.__hooks!=null;
+	return {
+		id,
+		canEditHooks: false, // TODO
+		canEditFunctionProps: false, // TODO
+		canToggleSuspense: false, // TODO
+		canViewSource: false, // TODO
+		displayName: getDisplayName(vnode),
+		context: cleanForBridge({}), // TODO
+		hooks: null, // TODO
+		props: cleanForBridge(vnode.props),
+		state: hasHooks || vnode._component==null ? null : vnode._component.state,
+		owners: [], // TODO
+		source: null // TODO
+	};
+}
+
