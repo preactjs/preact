@@ -167,7 +167,7 @@ export function inspectElement(id) {
 		props: vnode.props!=null && Object.keys(vnode.props).length > 0
 			? cleanForBridge(vnode.props)
 			: null,
-		state: hasHooks || (vnode._component==null && Object.keys(vnode._component.state).length > 0)
+		state: hasHooks || vnode._component==null || !Object.keys(vnode._component.state).length
 			? null
 			: cleanForBridge(vnode._component.state),
 		owners: null, // TODO
