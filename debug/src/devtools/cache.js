@@ -25,3 +25,9 @@ export function getVNodeId(vnode) {
 	if (!cache.has(inst)) cache.set(inst, genUuid());
 	return cache.get(inst);
 }
+
+// Only used for testing
+export function clearState() {
+	uid = 0;
+	cache = null;
+}

@@ -28,7 +28,7 @@ export function utfEncode(input) {
  * @param {Uint32Array} input
  */
 export function append(arr, input) {
-	arr[arr.length] = input.length + 1;
+	arr[arr.length] = input.length;
 	let len = arr.length;
 	for (let i = 0; i < input.length; i++) {
 		arr[len + i] = input[i];
@@ -60,7 +60,7 @@ export function onCommitFiberRoot(hook, state, vnode) {
 	// TODO: Profiling
 	mount(state, vnode, true);
 
-	flushPendingEvents(hook, state, vnode);
+	flushPendingEvents(hook, state);
 	state.currentRootId = -1;
 }
 
