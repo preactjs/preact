@@ -1,6 +1,7 @@
 import { options, Component } from 'preact';
-import { onCommitFiberRoot, flushPendingEvents } from './renderer2';
+import { onCommitFiberRoot, flushPendingEvents, inspectElement } from './renderer2';
 import { assign } from '../../../src/util';
+import { getVNode } from './cache';
 
 /**
  * Wrap function with generic error logging
@@ -60,24 +61,15 @@ export function initDevTools() {
 		let config = {
 			bundleType: /* istanbul ignore next */  isDev ? 1 : 0,
 			version: '16.8.4',
-			rendererPackageName: 'react-dom',
-			// TODO: Check if needed
-			findHostInstanceByFiber(vnode) {
-				return vnode._dom;
-			},
-			// TODO: Check if needed
-			findFiberByHostInstance(instance) {
-				// return preactRenderer.inst2vnode.get(instance) || null;
-			},
+			rendererPackageName: 'preact',
 			findNativeByFiberID(id) {
-				// TODO
+				let vnode = getVNode(id);
+				return vnode!=null ? vnode._dom : null;
 			},
 			selectElement(id) {
 				// TODO
 			},
-			inspectElement(id) {
-				// TODO
-			}
+			inspectElement
 		};
 
 		/** @type {import('../internal').AdapterState} */
