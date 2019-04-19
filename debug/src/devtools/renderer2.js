@@ -158,11 +158,16 @@ export function inspectElement(id) {
 		canToggleSuspense: false, // TODO
 		canViewSource: false, // TODO
 		displayName: getDisplayName(vnode),
-		context: cleanForBridge({}), // TODO
+		// context: cleanForBridge({}), // TODO
+		context: null, // TODO
 		hooks: null, // TODO
-		props: cleanForBridge(vnode.props),
-		state: hasHooks || vnode._component==null ? null : vnode._component.state,
-		owners: [], // TODO
+		props: vnode.props!=null && Object.keys(vnode.props).length > 0
+			? cleanForBridge(vnode.props)
+			: null,
+		state: hasHooks || (vnode._component==null && Object.keys(vnode._component.state).length > 0)
+			? null
+			: cleanForBridge(vnode._component.state),
+		owners: null, // TODO
 		source: null // TODO
 	};
 }
