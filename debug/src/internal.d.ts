@@ -1,6 +1,25 @@
 import { Component, PreactElement, VNode } from "../../src/internal";
-
 export { Component, PreactElement, VNode };
+
+export interface InspectData {
+	id: number;
+	canEditHooks: boolean;
+	canEditFunctionProps: boolean;
+	canToggleSuspense: boolean;
+	canViewSource: boolean;
+	displayName: string;
+	context: object;
+	hooks: object;
+	props: PrettyData | null;
+	state: PrettyData | null;
+	owners: any[] | null; // TODO
+	source: null; // TODO
+}
+
+export interface PrettyData {
+	data: any; // TODO
+	cleaned: string[];
+}
 
 export interface RendererConfig {
 	/** 1 = DEV, 0 = production */
@@ -9,10 +28,13 @@ export interface RendererConfig {
 	version: string;
 	/** Informative string, currently unused in the devtools  */
 	rendererPackageName: string;
-	/** Find the root dom node of a vnode */
-	findHostInstanceByFiber(vnode: VNode): HTMLElement | Text | null;
-	/** Find the closest vnode given a dom node */
-	findFiberByHostInstance(instance: HTMLElement): VNode | null;
+	/** Find the closest DOM element given an id */
+	findNativeByFiberID(id: number): PreactElement | HTMLElement | Text | null;
+	inspectElement(id: number): InspectData;
+	/** Called when the user clicks on an element inside the devtools */
+	selectElement(id: number): void;
+	/** Called when the devtools panel is closed */
+	cleanup(): void;
 }
 
 export interface DevtoolsUpdater {

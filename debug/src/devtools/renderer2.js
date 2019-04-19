@@ -138,6 +138,8 @@ export function flushPendingEvents(hook, state) {
 }
 
 /**
+ * Whether the element should be visible in the devtools panel. Currently only
+ * Components are shown.
  * @param {import('../internal').VNode} vnode
  */
 export function shouldFilter(vnode) {
@@ -147,6 +149,7 @@ export function shouldFilter(vnode) {
 /**
  * Provide detailed information about the current vnode
  * @param {number} id
+ * @returns {import('../internal').InspectData}
  */
 export function inspectElement(id) {
 	let vnode = getVNode(id);
