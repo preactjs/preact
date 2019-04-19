@@ -1,5 +1,5 @@
 import { options, Component } from 'preact';
-import { onCommitFiberRoot, flushPendingEvents, inspectElement } from './renderer2';
+import { onCommitFiberRoot, flushPendingEvents, inspectElement, setInState } from './renderer2';
 import { assign } from '../../../src/util';
 import { getVNode } from './cache';
 
@@ -99,6 +99,7 @@ export function initDevTools() {
 
 					state.pending = [];
 				},
+				setInState,
 
 				/** @type {(vnode: import('../internal').VNode, path: Array<string | number>, value: any) => void} */
 				overrideProps(vnode, path, value) {

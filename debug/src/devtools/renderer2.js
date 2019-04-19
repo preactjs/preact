@@ -1,7 +1,7 @@
 import { Fragment } from 'preact';
 import { getVNodeId, getVNode } from './cache';
 import { TREE_OPERATION_ADD, ElementTypeRoot, ElementTypeClass, ElementTypeFunction, ElementTypeOtherOrUnknown } from './constants';
-import { getChildren, getDisplayName } from './custom';
+import { getChildren, getDisplayName, setIn } from './custom';
 import { cleanForBridge } from './pretty';
 
 // TODO: Use a proper LRU cache?
@@ -175,3 +175,19 @@ export function inspectElement(id) {
 	};
 }
 
+/**
+ * Update a vnode's state
+ * @param {number} id
+ * @param {string[]} path
+ * @param {*} value
+ */
+export function setInState(id, path, value) {
+	let vnode = getVNode(id);
+	if (vnode._component==null) {
+		throw new Error(`Can't set state. Component ${getDisplayName(vnode)} is not a class`)
+	}
+	vnode._component.setState(prev => {
+		setIn(prev, path, value);
+		return prev;
+	});
+}
