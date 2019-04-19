@@ -37,6 +37,10 @@ export interface RendererConfig {
 	cleanup(): void;
 }
 
+export interface Renderer extends RendererConfig {
+	setInState(id: number, path: string[], value: any): void;
+}
+
 export interface DevtoolsUpdater {
 	setState(objOrFn: any): void;
 	forceUpdate(): void;
@@ -77,7 +81,7 @@ export interface DevtoolsEvent {
 }
 
 export interface DevtoolsHook {
-	renderers: Map<string, any>;
+	renderers: Map<number, any>;
 	isDisabled?: boolean;
 	on(ev: string, listener: () => void): void;
 	emit(ev: string, data?: object): void;
@@ -96,6 +100,7 @@ export interface DevtoolsMock {
 	hook: DevtoolsHookMock;
 	connect(): void;
 	inspect(id: number): InspectData;
+	setState(id: number, path: string[], value: any): void;
 }
 
 export interface DevtoolsWindow extends Window {
