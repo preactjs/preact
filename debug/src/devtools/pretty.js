@@ -1,4 +1,4 @@
-import { getDisplayName } from "./custom";
+import { getDisplayName } from './custom';
 
 export function getType(data) {
 	switch (typeof data) {
@@ -11,13 +11,15 @@ export function getType(data) {
 			if (data==null) return null;
 			if (data._dom!==undefined) return 'vnode';
 			if (typeof data.getMonth=='function') return 'date';
+			if (Array.isArray(data)) return 'array';
 			return 'object';
 		}
 		default:
-			if (Array.isArray(data)) return 'array';
 			return null;
 	}
 }
+
+let LEVEL_LIMIT = 6;
 
 export function prettify(data, cleaned, path, level) {
 	let type = getType(data);
@@ -37,7 +39,27 @@ export function prettify(data, cleaned, path, level) {
 				name: data.toString(),
 				type: 'symbol'
 			};
+		case 'array':
+		case 'typed_array':
+			if (level > LEVEL_LIMIT) {
+				cleaned.push(path);
+				return {
+					name: data.constructor.name,
+					type,
+					meta: { length: data.length, readOnly: type=='typed_array' }
+				};
+			}
+
+			return data.map((x, i) => prettify(x, cleaned, path.concat([i])), level++)
 		case 'object': {
+			if (level > LEVEL_LIMIT) {
+				cleaned.push(path);
+				return {
+					name: 'Object',
+					type: 'object'
+				};
+			}
+
 			let res = {};
 			for (let name in data) {
 				res[name] = prettify(
@@ -54,6 +76,15 @@ export function prettify(data, cleaned, path, level) {
 			return {
 				name: getDisplayName(data),
 				type: 'react_element'
+			};
+		case 'date':
+			cleaned.push(path);
+			return {
+				name: data.toString(),
+				type: 'date',
+				meta: {
+					uninspectable: true
+				}
 			};
 		default:
 			return data;
