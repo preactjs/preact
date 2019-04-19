@@ -14,6 +14,7 @@
     "build": "npm-run-all --parallel build:*",
     "build:core": "microbundle build --raw",
     "build:debug": "microbundle build --raw --cwd debug",
+    "build:utils": "microbundle build --raw --cwd utils",
     "build:hooks": "microbundle build --raw --cwd hooks",
     "build:test-utils": "microbundle build --raw --cwd test-utils",
     "build:compat": "microbundle build --raw --cwd compat --globals 'preact/hooks=preactHooks'",

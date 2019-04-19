@@ -139,7 +139,7 @@ module.exports = function(config) {
 										'**/__tests__/**',
 										'**/node_modules/**',
 										// Our custom extension
-										'{debug,hooks,compat,test-utils}/test/**/*'
+										'{debug,hooks,compat,test-utils,}/test/**/*'
 									]
 								}]] : []
 						}
@@ -153,6 +153,7 @@ module.exports = function(config) {
 				alias: {
 					'preact/compat': path.join(__dirname, './compat/src'),
 					'preact/hooks': path.join(__dirname, './hooks/src'),
+					'preact/utils': path.join(__dirname, './utils/src'),
 					'preact/test-utils': path.join(__dirname, './test-utils/src'),
 					preact: path.join(__dirname, './src')
 				}

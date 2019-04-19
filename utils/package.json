@@ -1,0 +1,19 @@
+{
+  "name": "utils",
+  "amdName": "preactUtils",
+  "version": "0.1.0",
+  "private": true,
+  "description": "utils for Preact",
+  "main": "dist/utils.js",
+  "module": "dist/utils.module.js",
+  "umd:main": "dist/utils.umd.js",
+  "source": "src/index.js",
+  "license": "MIT",
+  "types": "src/index.d.ts",
+  "peerDependencies": {
+    "preact": "^10.0.0-alpha.0"
+  },
+  "mangle": {
+    "regex": "^_"
+  }
+}

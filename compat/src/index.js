@@ -1,6 +1,8 @@
 import { render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
+import { createPortal, PureComponent, memo, forwardRef } from 'preact/utils';
 import * as hooks from 'preact/hooks';
 export * from 'preact/hooks';
+export * from 'preact/utils';
 import { assign } from '../../src/util';
 
 const version = '16.8.0'; // trick libraries to think we are react
@@ -55,37 +57,6 @@ function render(vnode, parent, callback) {
 	if (typeof callback==='function') callback();
 
 	return vnode!=null ? vnode._component : null;
-}
-
-class ContextProvider {
-	getChildContext() {
-		return this.props.context;
-	}
-	render(props) {
-		return props.children;
-	}
-}
-
-/**
- * Portal component
- * @param {object | null | undefined} props
- */
-function Portal(props) {
-	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
-	render(wrap, props.container);
-	this.componentWillUnmount = () => {
-		render(null, props.container);
-	};
-	return null;
-}
-
-/**
- * Create a `Portal` to continue rendering the vnode tree at a different DOM node
- * @param {import('./internal').VNode} vnode The vnode to render
- * @param {import('./internal').PreactElement} container The DOM node to continue rendering in to.
- */
-function createPortal(vnode, container) {
-	return h(Portal, { vnode, container });
 }
 
 const mapFn = (children, fn) => {
@@ -236,70 +207,12 @@ let classNameDescriptor = {
 };
 
 /**
- * Check if two objects have a different shape
- * @param {object} a
- * @param {object} b
- * @returns {boolean}
- */
-function shallowDiffers(a, b) {
-	for (let i in a) if (!(i in b)) return true;
-	for (let i in b) if (a[i]!==b[i]) return true;
-	return false;
-}
-
-/**
  * Get the matching DOM node for a component
  * @param {import('./internal').Component} component
  * @returns {import('./internal').PreactElement | null}
  */
 function findDOMNode(component) {
 	return component && (component.base || component.nodeType === 1 && component) || null;
-}
-
-/**
- * Component class with a predefined `shouldComponentUpdate` implementation
- */
-class PureComponent extends Component {
-	constructor(props) {
-		super(props);
-		// Some third-party libraries check if this property is present
-		this.isPureReactComponent = true;
-	}
-
-	shouldComponentUpdate(props, state) {
-		return shallowDiffers(this.props, props) || shallowDiffers(this.state, state);
-	}
-}
-
-// Some libraries like `react-virtualized` explicitely check for this.
-Component.prototype.isReactComponent = {};
-
-/**
- * Memoize a component, so that it only updates when the props actually have
- * changed. This was previously known as `React.pure`.
- * @param {import('./internal').FunctionalComponent} c functional component
- * @param {(prev: object, next: object) => boolean} [comparer] Custom equality function
- * @returns {import('./internal').FunctionalComponent}
- */
-function memo(c, comparer) {
-	function shouldUpdate(nextProps) {
-		let ref = this.props.ref;
-		let updateRef = ref==nextProps.ref;
-		if (!updateRef) {
-			ref.call ? ref(null) : (ref.current = null);
-		}
-		return (comparer==null
-			? shallowDiffers(this.props, nextProps)
-			: !comparer(this.props, nextProps)) || !updateRef;
-	}
-
-	function Memoed(props) {
-		this.shouldComponentUpdate = shouldUpdate;
-		return h(c, assign({}, props));
-	}
-	Memoed.displayName = 'Memo(' + (c.displayName || c.name) + ')';
-	Memoed._forwarded = true;
-	return Memoed;
 }
 
 // Patch in `UNSAFE_*` lifecycle hooks
@@ -314,24 +227,6 @@ function setUnsafeDescriptor(obj, key) {
 setUnsafeDescriptor(Component, 'componentWillMount');
 setUnsafeDescriptor(Component, 'componentWillReceiveProps');
 setUnsafeDescriptor(Component, 'componentWillUpdate');
-
-/**
- * Pass ref down to a child. This is mainly used in libraries with HOCs that
- * wrap components. Using `forwardRef` there is an easy way to get a reference
- * of the wrapped component instead of one of the wrapper itself.
- * @param {import('./internal').ForwardFn} fn
- * @returns {import('./internal').FunctionalComponent}
- */
-function forwardRef(fn) {
-	function Forwarded(props) {
-		let ref = props.ref;
-		delete props.ref;
-		return fn(props, ref);
-	}
-	Forwarded._forwarded = true;
-	Forwarded.displayName = 'ForwardRef(' + (fn.displayName || fn.name) + ')';
-	return Forwarded;
-}
 
 let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
