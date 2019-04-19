@@ -177,6 +177,16 @@ export function useContext(context) {
 	return provider.props.value;
 }
 
+/**
+ * Display a custom label for a custom hook for the devtools panel
+ * @type {<T>(value: T, cb?: (value: T) => string | number) => void}
+ */
+export function useDebugValue(value, formatter) {
+	if (options.useDebugValue) {
+		options.useDebugValue(formatter ? formatter(value) : value);
+	}
+}
+
 // Note: if someone used Component.debounce = requestAnimationFrame,
 // then effects will ALWAYS run on the NEXT frame instead of the current one, incurring a ~16ms delay.
 // Perhaps this is not such a big deal.
