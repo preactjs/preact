@@ -101,6 +101,12 @@ export function initDebug() {
 		if (oldBeforeDiff) oldBeforeDiff(vnode);
 	};
 
+	options.hook = (comp) => {
+		if (!comp) {
+			throw new Error('Hook can only be invoked from render methods.');
+		}
+	};
+
 	const warn = (property, err) => ({
 		get() {
 			throw new Error(`getting vnode.${property} is deprecated, ${err}`);

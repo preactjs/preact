@@ -32,6 +32,11 @@ describe('createElement(jsx)', () => {
 		expect(<Test />).to.have.property('type', Test);
 	});
 
+	it('should set VNode._self property to prevent json injection', () => {
+		const vnode = <span />;
+		expect(vnode._self).to.equal(vnode);
+	});
+
 	it('should set VNode#props property', () => {
 		const props = {};
 		expect(h('div', props)).to.have.property('props', props);

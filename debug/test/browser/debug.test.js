@@ -1,5 +1,6 @@
 import { createElement as h, options, render, createRef, Component, Fragment } from 'preact';
 import { useState, useEffect, useLayoutEffect, useMemo, useCallback } from 'preact/hooks';
+import { act } from 'preact/test-utils';
 import { setupScratch, teardown, clearOptions, serializeHtml } from '../../../test/_util/helpers';
 import { serializeVNode, initDebug } from '../../src/debug';
 import * as PropTypes from 'prop-types';
@@ -76,6 +77,25 @@ describe('debug', () => {
 		expect(fn).to.throw(/createElement/);
 	});
 
+	it('should throw an error when using a hook outside a render', () => {
+		class App extends Component {
+			componentWillMount() {
+				useState();
+			}
+
+			render() {
+				return <p>test</p>;
+			}
+		}
+		const fn = () => act(() => render(<App />, scratch));
+		expect(fn).to.throw(/Hook can only be invoked from render/);
+	});
+
+	it('should throw an error when invoked outside of a component', () => {
+		const fn = () => act(() => useState());
+		expect(fn).to.throw(/Hook can only be invoked from render/);
+	});
+
 	it('should throw an error for argumentless useEffect hooks', () => {
 		const App = () => {
 			const [state] = useState('test');
@@ -84,7 +104,7 @@ describe('debug', () => {
 				<p>{state}</p>
 			);
 		};
-		const fn = () => render(<App />, scratch);
+		const fn = () => act(() => render(<App />, scratch));
 		expect(fn).to.throw(/You should provide an array of arguments/);
 	});
 
@@ -96,7 +116,7 @@ describe('debug', () => {
 				<p>{state}</p>
 			);
 		};
-		const fn = () => render(<App />, scratch);
+		const fn = () => act(() => render(<App />, scratch));
 		expect(fn).to.throw(/You should provide an array of arguments/);
 	});
 
@@ -109,7 +129,7 @@ describe('debug', () => {
 				<p>{state}</p>
 			);
 		};
-		const fn = () => render(<App />, scratch);
+		const fn = () => act(() => render(<App />, scratch));
 		expect(fn).to.not.throw();
 	});
 

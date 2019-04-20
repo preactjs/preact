@@ -59,11 +59,10 @@ describe('props.children', () => {
 		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 
-	it('throws an error if given a function child', () => {
+	it('should skip a function child', () => {
 		const child = num => num.toFixed(2);
-		expect(
-			() => render(<Foo>{child}</Foo>, scratch)
-		).to.throw();
+		render(<Foo>{child}</Foo>, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 
 	it('returns an array containing a VNode with a text child', () => {
