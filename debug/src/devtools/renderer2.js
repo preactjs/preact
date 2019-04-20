@@ -163,7 +163,7 @@ export function inspectElement(id) {
 	return {
 		id,
 		canEditHooks: hasHooks,
-		canEditFunctionProps: false, // TODO
+		canEditFunctionProps: true, // TODO
 		canToggleSuspense: false, // TODO
 		canViewSource: false, // TODO
 		displayName: getDisplayName(vnode),
@@ -196,5 +196,20 @@ export function setInState(id, path, value) {
 		setIn(prev, path, value);
 		return prev;
 	});
+}
+
+/**
+ * Update component props
+ * @param {number} id
+ * @param {string[]} path
+ * @param {*} value
+ */
+export function setInProps(id, path, value) {
+	let vnode = getVNode(id);
+	if (vnode._component==null) {
+		throw new Error(`Can't set props. Component ${getDisplayName(vnode)} is not a class`)
+	}
+	setIn(vnode.props, path, value);
+	vnode._component.setState({});
 }
 
