@@ -9,7 +9,9 @@ import ErrorStackParser from 'error-stack-parser';
  */
 export function inspectHooks(vnode) {
 	let prevHooked = options.hooked;
-	let result = [];
+
+	/** @type {import('error-stack-parser').StackFrame[]} */
+	let traces = [];
 
 	let ignore = 0;
 	options.hooked = fn => {
@@ -19,7 +21,7 @@ export function inspectHooks(vnode) {
 
 		let stack = ErrorStackParser.parse(new Error());
 		let cleaned = stack.slice(2, stack.findIndex(x => x.functionName===fn.name) + 1);
-		result.push(cleaned);
+		traces.push(cleaned.reverse());
 	};
 
 	let c = vnode._component;
@@ -28,8 +30,21 @@ export function inspectHooks(vnode) {
 
 	// Group results by depth because a custom hook may call multiple other ones
 	// under the hood
-	// TODO
+	// TODO: Walk recursively
+	/** @type {import('../internal').HookInspectData[]} */
+	let result = [];
+	for (let i = 0; i < traces.length; i++) {
+		let trace = traces[i];
+		let editable = trace[0].functionName===useState.name;
 
+		result.push({
+			id: i,
+			value: editable ? vnode._component.__hooks._list[i]._value[0] : null,
+			isStateEditable: editable,
+			name: trace[0].functionName,
+			subHooks: []
+		});
+	}
 	return result;
 }
 
