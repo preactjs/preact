@@ -33,7 +33,6 @@ options.diffed = vnode => {
 	// TODO: Consider moving to a global queue. May need to move
 	// this to the `commit` option
 	hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
-	currentComponent = undefined;
 };
 
 
@@ -56,7 +55,7 @@ options.unmount = vnode => {
  * @returns {import('./internal').HookState}
  */
 function getHookState(index) {
-	if (options.preHook) options.preHook(currentComponent);
+	if (options.hook) options.hook(currentComponent);
 	// Largely inspired by:
 	// * https://github.com/michael-klein/funcy.js/blob/f6be73468e6ec46b0ff5aa3cc4c9baf72a29025a/src/hooks/core_hooks.mjs
 	// * https://github.com/michael-klein/funcy.js/blob/650beaa58c43c33a74820a3c98b3c7079cf2e333/src/renderer.mjs

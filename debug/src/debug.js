@@ -101,7 +101,7 @@ export function initDebug() {
 		if (oldBeforeDiff) oldBeforeDiff(vnode);
 	};
 
-	options.preHook = (comp) => {
+	options.hook = (comp) => {
 		if (!comp) {
 			throw new Error('Hook can only be invoked from render methods.');
 		}
