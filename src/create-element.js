@@ -62,6 +62,7 @@ export function createVNode(type, props, text, key, ref) {
 		_lastDomChild: null,
 		_component: null
 	};
+	vnode._self = vnode;
 
 	if (options.vnode) options.vnode(vnode);
 
@@ -93,7 +94,9 @@ export function coerceToVNode(possibleVNode) {
 
 	// Clone vnode if it has already been used. ceviche/#57
 	if (possibleVNode._dom!=null) {
-		return createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.text, possibleVNode.key, null);
+		let vnode = createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.text, possibleVNode.key, null);
+		vnode._dom = possibleVNode._dom;
+		return vnode;
 	}
 
 	return possibleVNode;

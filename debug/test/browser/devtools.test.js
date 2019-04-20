@@ -4,7 +4,7 @@ import { getDisplayName, setIn, isRoot, getData, shallowEqual, hasDataChanged, g
 import { setupScratch, teardown, clearOptions } from '../../../test/_util/helpers';
 import { initDevTools } from '../../src/devtools';
 import { Renderer } from '../../src/devtools/renderer';
-import { memo, forwardRef } from '../../../compat/src';
+import { memo, forwardRef, createPortal } from '../../../compat/src';
 
 /** @jsx h */
 
@@ -681,14 +681,14 @@ describe('devtools', () => {
 			rerender();
 			checkEventReferences(prev.concat(hook.log));
 
-			// We swap unkeyed children if the match by type. In this case we'll
+			// We swap unkeyed children if they match by type. In this case we'll
 			// use `<Foo>bar</Foo>` as the old child to diff against for
 			// `<Foo>foo</Foo>`. That's why `<Foo>bar</Foo>` needs to be remounted.
 			expect(serialize(hook.log)).to.deep.equal([
-				{ type: 'update', component: 'Foo' },
-				{ type: 'mount', component: '#text: bar' },
+				{ type: 'mount', component: '#text: foo' },
 				{ type: 'mount', component: 'div' },
 				{ type: 'mount', component: 'Foo' },
+				{ type: 'update', component: 'Foo' },
 				{ type: 'update', component: 'App' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
@@ -893,6 +893,13 @@ describe('devtools', () => {
 					expect(ev.data.treeBaseDuration > -1).to.equal(true);
 				});
 			});
+		});
+
+		// preact/#1490
+		it('should not crash on a Portal node', () => {
+			const div = document.createElement('div');
+			render(createPortal('foo', div), scratch);
+			expect(console.error).to.not.be.called;
 		});
 	});
 });

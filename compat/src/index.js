@@ -14,7 +14,7 @@ let oldEventHook = options.event;
 options.event = e => {
 	/* istanbul ignore next */
 	if (oldEventHook) e = oldEventHook(e);
-	e.persist = Object;
+	e.persist = () => {};
 	e.nativeEvent = e;
 	return e;
 };
@@ -73,6 +73,9 @@ class ContextProvider {
 function Portal(props) {
 	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
 	render(wrap, props.container);
+	this.componentWillUnmount = () => {
+		render(null, props.container);
+	};
 	return null;
 }
 
@@ -274,9 +277,9 @@ Component.prototype.isReactComponent = {};
 /**
  * Memoize a component, so that it only updates when the props actually have
  * changed. This was previously known as `React.pure`.
- * @param {import('./internal').ComponentFactory<any>} c The component constructor
+ * @param {import('./internal').FunctionalComponent} c functional component
  * @param {(prev: object, next: object) => boolean} [comparer] Custom equality function
- * @returns {import('./internal').ComponentFactory<any>}
+ * @returns {import('./internal').FunctionalComponent}
  */
 function memo(c, comparer) {
 	function shouldUpdate(nextProps) {
@@ -344,6 +347,17 @@ options.vnode = vnode => {
 	if (oldVNodeHook) oldVNodeHook(vnode);
 };
 
+/**
+ * Deprecated way to control batched rendering inside the reconciler, but we
+ * already schedule in batches inside our rendering code
+ * @param {(a) => void} callback function that triggers the updatd
+ * @param {*} [arg] Optional argument that can be passed to the callback
+ */
+// eslint-disable-next-line camelcase
+function unstable_batchedUpdates(callback, arg) {
+	callback(arg);
+}
+
 export {
 	version,
 	Children,
@@ -362,7 +376,9 @@ export {
 	Component,
 	PureComponent,
 	memo,
-	forwardRef
+	forwardRef,
+	// eslint-disable-next-line camelcase
+	unstable_batchedUpdates
 };
 
 // React copies the named exports to the default one.
@@ -384,5 +400,6 @@ export default assign({
 	Component,
 	PureComponent,
 	memo,
-	forwardRef
+	forwardRef,
+	unstable_batchedUpdates
 }, hooks);

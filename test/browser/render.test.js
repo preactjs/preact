@@ -65,6 +65,12 @@ describe('render()', () => {
 		);
 	});
 
+	it('should not render when detecting JSON-injection', () => {
+		const vnode = JSON.parse('{"type":"span","children":"Malicious"}');
+		render(vnode, scratch);
+		expect(scratch.firstChild).to.be.null;
+	});
+
 	it('should create empty nodes (<* />)', () => {
 		render(<div />, scratch);
 		expect(scratch.childNodes).to.have.length(1);
@@ -173,10 +179,9 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('');
 	});
 
-	it('should throw an error on function children', () => {
-		expect(
-			() => render(<div>{() => {}}</div>, scratch)
-		).to.throw();
+	it('should not render children when using function children', () => {
+		render(<div>{() => {}}</div>, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 
 	it('should render NaN as text content', () => {
@@ -875,5 +880,90 @@ describe('render()', () => {
 
 		// We don't log text updates
 		expect(getLog()).to.deep.equal([]);
-	  });
+	});
+
+	it('should not lead to stale DOM nodes', () => {
+		let i = 0;
+		let updateApp;
+		class App extends Component {
+			render() {
+				updateApp = () => this.forceUpdate();
+				return <Parent />;
+			}
+		}
+
+		let updateParent;
+		function Parent() {
+			updateParent = () => this.forceUpdate();
+			i++;
+			return <Child i={i} />;
+		}
+
+		function Child({ i }) {
+			return i < 3 ? null : <div>foo</div>;
+		}
+
+		render(<App />, scratch);
+
+		updateApp();
+		updateParent();
+		updateApp();
+
+		// Without a fix it would render: `<div>foo</div><div></div>`
+		expect(scratch.innerHTML).to.equal('<div>foo</div>');
+	});
+
+	// see preact/#1327
+	it('should not reuse unkeyed components', () => {
+		class X extends Component {
+			constructor() {
+				super();
+				this.state = { i: 0 };
+			}
+
+			update() {
+				this.setState(prev => ({ i: prev.i + 1 }));
+			}
+
+			componentWillUnmount() {
+				clearTimeout(this.id);
+			}
+
+			render() {
+				return <div>{this.state.i}</div>;
+			}
+		}
+
+		let ref;
+		let updateApp;
+		class App extends Component {
+			constructor() {
+				super();
+				this.state = { i: 0 };
+				updateApp = () => this.setState(prev => ({ i: prev.i ^ 1 }));
+			}
+
+			render() {
+				return (
+					<div>
+						{this.state.i === 0 && <X />}
+						<X ref={node => ref = node} />
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.textContent).to.equal('00');
+
+		ref.update();
+		updateApp();
+		rerender();
+		expect(scratch.textContent).to.equal('1');
+
+		updateApp();
+		rerender();
+
+		expect(scratch.textContent).to.equal('01');
+	});
 });

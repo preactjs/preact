@@ -12,9 +12,6 @@
   "mangle": {
     "regex": "^(?!_renderer)^_"
   },
-  "dependencies": {
-    "prop-types": "^15.6.2"
-  },
   "peerDependencies": {
     "preact": "^10.0.0-alpha.0"
   }

@@ -20,16 +20,24 @@ import options from '../options';
  * mounted components
  * @param {import('../internal').Component | null} ancestorComponent The direct
  * parent component
+ * @param {Node | Text} oldDom The current attached DOM
+ * element any new dom elements should be placed around. Likely `null` on first
+ * render (except when hydrating). Can be a sibling DOM element when diffing
+ * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
-export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force) {
-
+export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force, oldDom) {
 	// If the previous type doesn't match the new type we drop the whole subtree
-	if (oldVNode==null || newVNode==null || oldVNode.type!==newVNode.type) {
+	if (oldVNode==null || newVNode==null || oldVNode.type!==newVNode.type || oldVNode.key!==newVNode.key) {
 		if (oldVNode!=null) unmount(oldVNode, ancestorComponent);
 		if (newVNode==null) return null;
 		dom = null;
 		oldVNode = EMPTY_OBJ;
 	}
+
+	// When passing through createElement it assigns the object
+	// ref on _self, to prevent JSON Injection we check if this attribute
+	// is equal.
+	if (newVNode._self!==newVNode) return null;
 
 	if (options.diff) options.diff(newVNode);
 
@@ -41,11 +49,18 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 
 	try {
 		outer: if (oldVNode.type===Fragment || newType===Fragment) {
-			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, c);
+			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, c, oldDom);
 
-			if (newVNode._children.length) {
+			// Mark dom as empty in case `_children` is any empty array. If it isn't
+			// we'll set `dom` to the correct value just a few lines later.
+			dom = null;
+
+			if (newVNode._children.length && newVNode._children[0]!=null) {
 				dom = newVNode._children[0]._dom;
-				newVNode._lastDomChild = newVNode._children[newVNode._children.length - 1]._dom;
+
+				// If the last child is a Fragment, use _lastDomChild, else use _dom
+				p = newVNode._children[newVNode._children.length - 1];
+				newVNode._lastDomChild = p._lastDomChild || p._dom;
 			}
 		}
 		else if (typeof newType==='function') {
@@ -60,10 +75,9 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
 				clearProcessingException = c._processingException;
+				dom = newVNode._dom = oldVNode._dom;
 			}
 			else {
-				isNew = true;
-
 				// Instantiate the new component
 				if (newType.prototype && newType.prototype.render) {
 					newVNode._component = c = new newType(newVNode.props, cctx); // eslint-disable-line new-cap
@@ -80,7 +94,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 				if (!c.state) c.state = {};
 				c.context = cctx;
 				c._context = context;
-				c._dirty = true;
+				isNew = c._dirty = true;
 				c._renderCallbacks = [];
 			}
 
@@ -105,9 +119,11 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 				}
 
 				if (!force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newVNode.props, c._nextState, cctx)===false) {
+					dom = newVNode._dom;
 					c.props = newVNode.props;
 					c.state = c._nextState;
 					c._dirty = false;
+					newVNode._lastDomChild = oldVNode._lastDomChild;
 					break outer;
 				}
 
@@ -125,7 +141,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 
 			if (options.render) options.render(newVNode);
 
-			let prev = c._prevVNode;
+			let prev = c._prevVNode || null;
 			let vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
 			c._dirty = false;
 
@@ -137,7 +153,8 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null);
+			c._depth = ancestorComponent ? (ancestorComponent._depth || 0) + 1 : 0;
+			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null, oldDom);
 
 			if (vnode!=null) {
 				// If this component returns a Fragment (or another component that
@@ -272,7 +289,8 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 			if (newProps.multiple) {
 				dom.multiple = newProps.multiple;
 			}
-			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent);
+
+			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent, EMPTY_OBJ);
 			diffProps(dom, newProps, oldProps, isSvg);
 		}
 	}
@@ -300,7 +318,7 @@ export function applyRef(ref, value, ancestorComponent) {
  * @param {import('../internal').VNode} vnode The virtual node to unmount
  * @param {import('../internal').Component} ancestorComponent The parent
  * component to this virtual node
- * @param {boolean} skipRemove Flag that indicates that a parent node of the
+ * @param {boolean} [skipRemove] Flag that indicates that a parent node of the
  * current element is already detached from the DOM.
  */
 export function unmount(vnode, ancestorComponent, skipRemove) {
@@ -311,7 +329,10 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 		applyRef(r, null, ancestorComponent);
 	}
 
-	if (!skipRemove && vnode._lastDomChild==null && (skipRemove = ((r = vnode._dom)!=null))) removeNode(r);
+	let dom;
+	if (!skipRemove && vnode._lastDomChild==null) {
+		skipRemove = (dom = vnode._dom)!=null;
+	}
 
 	vnode._dom = vnode._lastDomChild = null;
 
@@ -330,9 +351,11 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 	}
 	else if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {
-			unmount(r[i], ancestorComponent, skipRemove);
+			if (r[i]) unmount(r[i], ancestorComponent, skipRemove);
 		}
 	}
+
+	if (dom!=null) removeNode(dom);
 }
 
 /** The `.render()` method for a PFC backing instance. */

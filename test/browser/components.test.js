@@ -500,9 +500,10 @@ describe('Components', () => {
 		Comp.prototype.componentWillMount.resetHistory();
 		bad.setState({ alt: true });
 		rerender();
-		expect(scratch.textContent, 'new component without key re-rendered').to.equal('D');
-		expect(Comp.prototype.componentWillMount).to.not.have.been.called;
-		expect(sideEffect).to.not.have.been.called;
+
+		expect(scratch.textContent, 'use null placeholders to detect new component is appended').to.equal('F');
+		expect(Comp.prototype.componentWillMount).to.be.calledOnce;
+		expect(sideEffect).to.be.calledOnce;
 	});
 
 	describe('array children', () => {
@@ -1220,6 +1221,40 @@ describe('Components', () => {
 			expect(C3.prototype.componentWillMount, 'inject between, C3 w/ intermediary fn').to.have.been.calledOnce;
 		});
 
+		it('should render components by depth', () => {
+			let spy = sinon.spy();
+			let update;
+			class Child extends Component {
+				constructor(props) {
+					super(props);
+					update = () => {
+						this.props.update();
+						this.setState({});
+					};
+				}
+
+				render() {
+					spy();
+					let items = [];
+					for (let i = 0; i < this.props.items; i++) items.push(i);
+					return <div>{items.join(',')}</div>;
+				}
+			}
+
+			let i = 0;
+			class Parent extends Component {
+				render() {
+					return <Child items={++i} update={() => this.setState({})} />;
+				}
+			}
+
+			render(<Parent />, scratch);
+			expect(spy).to.be.calledOnce;
+
+			update();
+			rerender();
+			expect(spy).to.be.calledTwice;
+		});
 
 		it('should handle lifecycle for nested intermediary elements', () => {
 			useIntermediary = 'div';
@@ -1251,5 +1286,75 @@ describe('Components', () => {
 			expect(C2.prototype.componentWillMount, 'inject between, C2 w/ intermediary div').to.have.been.calledOnce;
 			expect(C3.prototype.componentWillMount, 'inject between, C3 w/ intermediary div').to.have.been.calledOnce;
 		});
+	});
+
+	it('should set component._vnode._dom when sCU returns false', () => {
+		let parent;
+		 class Parent extends Component {
+			 render() {
+				parent = this;
+				return <Child />;
+			}
+		}
+
+		let condition = false;
+
+		let child;
+		class Child extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+			render() {
+				child = this;
+				if (!condition) return null;
+				return <div class="child" />;
+			}
+		}
+
+		let app;
+		class App extends Component {
+			render() {
+				app = this;
+				return <Parent />;
+			}
+		}
+
+		render(<App />, scratch);
+		expect(child._vnode._dom).to.equal(child.base);
+
+		app.forceUpdate();
+		expect(child._vnode._dom).to.equal(child.base);
+
+		parent.setState({});
+		condition = true;
+		child.forceUpdate();
+		expect(child._vnode._dom).to.equal(child.base);
+		rerender();
+
+		expect(child._vnode._dom).to.equal(child.base);
+
+		condition = false;
+		app.setState({});
+		child.forceUpdate();
+		rerender();
+		expect(child._vnode._dom).to.equal(child.base);
+	});
+
+	it('should update old dom on forceUpdate in a lifecycle', () => {
+		let i = 0;
+		class App extends Component {
+			componentWillReceiveProps() {
+				this.forceUpdate();
+			}
+			render() {
+				if (i++==0) return <div>foo</div>;
+				return <div>bar</div>;
+			}
+		}
+
+		render(<App />, scratch);
+		render(<App />, scratch);
+
+		expect(scratch.innerHTML).to.equal('<div>bar</div>');
 	});
 });
