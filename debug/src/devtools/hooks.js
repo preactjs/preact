@@ -3,6 +3,8 @@ import { useState, useReducer, useCallback } from 'preact/hooks';
 import ErrorStackParser from 'error-stack-parser';
 import { getVNode } from './cache';
 
+let usePrefix = /^use/;
+
 /**
  * Collect detailed information about all hooks attached to a component
  * @param {import('../internal').VNode} vnode
@@ -42,7 +44,7 @@ export function inspectHooks(vnode) {
 			id: i,
 			value: editable ? vnode._component.__hooks._list[i]._value[0] : null,
 			isStateEditable: editable,
-			name: trace[0].functionName,
+			name: trace[0].functionName.replace(usePrefix, ''),
 			subHooks: []
 		});
 	}
