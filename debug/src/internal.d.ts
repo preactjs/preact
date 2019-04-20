@@ -9,11 +9,19 @@ export interface InspectData {
 	canViewSource: boolean;
 	displayName: string;
 	context: object;
-	hooks: object;
+	hooks: HookInspectData[] | null;
 	props: PrettyData | null;
 	state: PrettyData | null;
 	owners: any[] | null; // TODO
 	source: null; // TODO
+}
+
+export interface HookInspectData {
+	name: string;
+	value: any;
+	id: number | null;
+	isStateEditable: boolean;
+	subHooks: HookInspectData[];
 }
 
 export interface PrettyData {

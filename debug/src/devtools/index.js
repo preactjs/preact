@@ -2,6 +2,7 @@ import { options, Component } from 'preact';
 import { onCommitFiberRoot, flushPendingEvents, inspectElement, setInState } from './renderer2';
 import { assign } from '../../../src/util';
 import { getVNode } from './cache';
+import './hooks';
 
 /**
  * Wrap function with generic error logging
