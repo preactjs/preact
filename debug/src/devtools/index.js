@@ -1,5 +1,5 @@
 import { options, Component } from 'preact';
-import { onCommitFiberRoot, flushPendingEvents, inspectElement, setInState } from './renderer2';
+import { onCommitFiberRoot, flushPendingEvents, inspectElement, setInState, setInProps } from './renderer2';
 import { assign } from '../../../src/util';
 import { getVNode } from './cache';
 import { setInHook } from './hooks';
@@ -100,6 +100,7 @@ export function initDevTools() {
 
 					state.pending = [];
 				},
+				setInProps,
 				setInState,
 				setInHook,
 
