@@ -34,6 +34,11 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 		oldVNode = EMPTY_OBJ;
 	}
 
+	// When passing through createElement it assigns the object
+	// ref on _self, to prevent JSON Injection we check if this attribute
+	// is equal.
+	if (newVNode._self!==newVNode) return null;
+
 	if (options.diff) options.diff(newVNode);
 
 	let c, p, isNew = false, oldProps, oldState, snapshot,
@@ -50,7 +55,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			// we'll set `dom` to the correct value just a few lines later.
 			dom = null;
 
-			if (newVNode._children.length) {
+			if (newVNode._children.length && newVNode._children[0]!=null) {
 				dom = newVNode._children[0]._dom;
 
 				// If the last child is a Fragment, use _lastDomChild, else use _dom
@@ -70,7 +75,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
 				clearProcessingException = c._processingException;
-				newVNode._dom = oldVNode._dom;
+				dom = newVNode._dom = oldVNode._dom;
 			}
 			else {
 				// Instantiate the new component
@@ -137,7 +142,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 
 			if (options.render) options.render(newVNode);
 
-			let prev = c._prevVNode;
+			let prev = c._prevVNode || null;
 			let vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
 			c._dirty = false;
 
@@ -347,7 +352,7 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 	}
 	else if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {
-			unmount(r[i], ancestorComponent, skipRemove);
+			if (r[i]) unmount(r[i], ancestorComponent, skipRemove);
 		}
 	}
 

@@ -196,6 +196,7 @@ declare namespace preact {
 		/** Attach a hook that is invoked after a vnode has rendered. */
 		diffed?(vnode: VNode): void;
 		event?(e: Event): void;
+		useDebugValue?(value: string | number): void;
 	}
 
 	const options: Options;

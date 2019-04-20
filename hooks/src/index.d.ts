@@ -98,3 +98,11 @@ export function useMemo<T>(factory: () => T, inputs?: Inputs): T;
  * @param context The context you want to use
  */
 export function useContext<T>(context: PreactContext<T>): T;
+
+/**
+ * Customize the displayed value in the devtools panel.
+ *
+ * @param value Custom hook name or object that is passed to formatter
+ * @param formatter Formatter to modify value before sending it to the devtools
+ */
+export function useDebugValue<T>(value: T, formatter?: (value: T) => string | number): void;

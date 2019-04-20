@@ -109,7 +109,6 @@ export function useEffect(callback, args) {
 		state._args = args;
 
 		currentComponent.__hooks._pendingEffects.push(state);
-		if (Array.isArray(options.effects)) options.effects.push(state);
 		afterPaint(currentComponent);
 	}
 }
@@ -125,7 +124,6 @@ export function useLayoutEffect(callback, args) {
 	if (argsChanged(state._args, args)) {
 		state._value = callback;
 		state._args = args;
-		if (Array.isArray(options.effects)) options.effects.push(state);
 		currentComponent.__hooks._pendingLayoutEffects.push(state);
 	}
 }
@@ -178,6 +176,16 @@ export function useContext(context) {
 	return provider.props.value;
 }
 
+/**
+ * Display a custom label for a custom hook for the devtools panel
+ * @type {<T>(value: T, cb?: (value: T) => string | number) => void}
+ */
+export function useDebugValue(value, formatter) {
+	if (options.useDebugValue) {
+		options.useDebugValue(formatter ? formatter(value) : value);
+	}
+}
+
 // Note: if someone used Component.debounce = requestAnimationFrame,
 // then effects will ALWAYS run on the NEXT frame instead of the current one, incurring a ~16ms delay.
 // Perhaps this is not such a big deal.
@@ -220,9 +228,6 @@ if (typeof window !== 'undefined') {
 function handleEffects(effects) {
 	effects.forEach(invokeCleanup);
 	effects.forEach(invokeEffect);
-	if (options.effects) {
-		effects.forEach(hook => options.effects = options.effects.filter(h => h!==hook));
-	}
 	return [];
 }
 
