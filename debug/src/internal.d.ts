@@ -9,7 +9,7 @@ export interface InspectData {
 	canViewSource: boolean;
 	displayName: string;
 	context: object;
-	hooks: HookInspectData[] | null;
+	hooks: PrettyData | null;
 	props: PrettyData | null;
 	state: PrettyData | null;
 	owners: any[] | null; // TODO

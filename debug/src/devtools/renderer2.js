@@ -169,7 +169,7 @@ export function inspectElement(id) {
 		displayName: getDisplayName(vnode),
 		// context: cleanForBridge({}), // TODO
 		context: null, // TODO
-		hooks: hasHooks ? inspectHooks(vnode) : null,
+		hooks: hasHooks ? cleanForBridge(inspectHooks(vnode)) : null,
 		props: vnode.props!=null && Object.keys(vnode.props).length > 0
 			? cleanForBridge(vnode.props)
 			: null,
