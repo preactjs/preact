@@ -48,6 +48,10 @@ options.unmount = vnode => {
 	}
 };
 
+function dispatchHook(hook) {
+	if (options.hooked) options.hooked(hook);
+}
+
 /**
  * Get a hook's state from the currentComponent
  * @param {number} index The index of the hook to get
@@ -69,10 +73,12 @@ function getHookState(index) {
 }
 
 export function useState(initialState) {
+	dispatchHook(useState);
 	return useReducer(invokeOrReturn, initialState);
 }
 
 export function useReducer(reducer, initialState, init) {
+	dispatchHook(useReducer);
 
 	/** @type {import('./internal').ReducerHookState} */
 	const hookState = getHookState(currentIndex++);
@@ -100,6 +106,7 @@ export function useReducer(reducer, initialState, init) {
  * @param {any[]} args
  */
 export function useEffect(callback, args) {
+	dispatchHook(useEffect);
 
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(currentIndex++);
@@ -117,6 +124,7 @@ export function useEffect(callback, args) {
  * @param {any[]} args
  */
 export function useLayoutEffect(callback, args) {
+	dispatchHook(useLayoutEffect);
 
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(currentIndex++);
@@ -128,6 +136,7 @@ export function useLayoutEffect(callback, args) {
 }
 
 export function useRef(initialValue) {
+	dispatchHook(useRef);
 	return useMemo(() => ({ current: initialValue }), []);
 }
 
@@ -146,6 +155,7 @@ export function useImperativeHandle(ref, createHandle, args) {
  * @param {any[]} args
  */
 export function useMemo(callback, args) {
+	dispatchHook(useMemo);
 
 	/** @type {import('./internal').MemoHookState} */
 	const state = getHookState(currentIndex++);
@@ -163,6 +173,7 @@ export function useMemo(callback, args) {
  * @param {any[]} args
  */
 export function useCallback(callback, args) {
+	dispatchHook(useCallback);
 	return useMemo(() => callback, args);
 }
 
@@ -170,6 +181,8 @@ export function useCallback(callback, args) {
  * @param {import('./internal').PreactContext} context
  */
 export function useContext(context) {
+	dispatchHook(useContext);
+
 	const provider = currentComponent.context[context._id];
 	if (!provider) return context._defaultValue;
 	const state = getHookState(currentIndex++);

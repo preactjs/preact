@@ -200,6 +200,7 @@ declare namespace preact {
 		requestAnimationFrame?: typeof requestAnimationFrame;
 		debounceRendering?(cb: () => void): void;
 		useDebugValue?(value: string | number): void;
+		hooked?(hook: any): void;
 	}
 
 	const options: Options;

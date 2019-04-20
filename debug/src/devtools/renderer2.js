@@ -3,6 +3,7 @@ import { getVNodeId, getVNode } from './cache';
 import { TREE_OPERATION_ADD, ElementTypeRoot, ElementTypeClass, ElementTypeFunction, ElementTypeOtherOrUnknown } from './constants';
 import { getChildren, getDisplayName, setIn } from './custom';
 import { cleanForBridge } from './pretty';
+import { inspectHooks } from './hooks';
 
 // TODO: Use a proper LRU cache?
 /** @type {Map<string, Uint32Array>} */
@@ -41,6 +42,8 @@ export function append(arr, input) {
  */
 export function getVNodeType(vnode) {
 	if (typeof vnode.type=='function' && vnode.type!==Fragment) {
+		// TODO: Memo and ForwardRef
+		// TODO: Provider and Consumer
 		return vnode.type.prototype && vnode.type.prototype.render
 			? ElementTypeClass
 			: ElementTypeFunction;
@@ -58,6 +61,8 @@ export function onCommitFiberRoot(hook, state, vnode) {
 	// Empty root
 	// if (root.type===Fragment && root._children.length==0) return;
 
+	// TODO: Update
+	// TODO: Unmount
 	// TODO: Profiling
 	mount(state, vnode, true);
 
@@ -154,6 +159,7 @@ export function shouldFilter(vnode) {
 export function inspectElement(id) {
 	let vnode = getVNode(id);
 	let hasHooks = vnode._component!=null && vnode._component.__hooks!=null;
+
 	return {
 		id,
 		canEditHooks: false, // TODO
@@ -163,7 +169,7 @@ export function inspectElement(id) {
 		displayName: getDisplayName(vnode),
 		// context: cleanForBridge({}), // TODO
 		context: null, // TODO
-		hooks: null, // TODO
+		hooks: hasHooks ? inspectHooks(vnode) : null,
 		props: vnode.props!=null && Object.keys(vnode.props).length > 0
 			? cleanForBridge(vnode.props)
 			: null,
@@ -191,3 +197,4 @@ export function setInState(id, path, value) {
 		return prev;
 	});
 }
+

@@ -147,5 +147,8 @@
     "travis-size-report": "^1.0.1",
     "typescript": "^3.0.1",
     "webpack": "^4.3.0"
+  },
+  "dependencies": {
+    "error-stack-parser": "^2.0.2"
   }
 }
