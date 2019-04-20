@@ -65,6 +65,12 @@ describe('render()', () => {
 		);
 	});
 
+	it('should not render when detecting JSON-injection', () => {
+		const vnode = JSON.parse('{"type":"span","children":"Malicious"}');
+		render(vnode, scratch);
+		expect(scratch.firstChild).to.be.null;
+	});
+
 	it('should create empty nodes (<* />)', () => {
 		render(<div />, scratch);
 		expect(scratch.childNodes).to.have.length(1);
@@ -173,10 +179,9 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('');
 	});
 
-	it('should throw an error on function children', () => {
-		expect(
-			() => render(<div>{() => {}}</div>, scratch)
-		).to.throw();
+	it('should not render children when using function children', () => {
+		render(<div>{() => {}}</div>, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 
 	it('should render NaN as text content', () => {
