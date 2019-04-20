@@ -162,7 +162,7 @@ export function inspectElement(id) {
 
 	return {
 		id,
-		canEditHooks: false, // TODO
+		canEditHooks: hasHooks,
 		canEditFunctionProps: false, // TODO
 		canToggleSuspense: false, // TODO
 		canViewSource: false, // TODO

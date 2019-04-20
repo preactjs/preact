@@ -2,7 +2,7 @@ import { options, Component } from 'preact';
 import { onCommitFiberRoot, flushPendingEvents, inspectElement, setInState } from './renderer2';
 import { assign } from '../../../src/util';
 import { getVNode } from './cache';
-import './hooks';
+import { setInHook } from './hooks';
 
 /**
  * Wrap function with generic error logging
@@ -101,6 +101,7 @@ export function initDevTools() {
 					state.pending = [];
 				},
 				setInState,
+				setInHook,
 
 				/** @type {(vnode: import('../internal').VNode, path: Array<string | number>, value: any) => void} */
 				overrideProps(vnode, path, value) {

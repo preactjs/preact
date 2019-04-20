@@ -1,6 +1,7 @@
 import { options } from 'preact';
 import { useState, useReducer, useCallback } from 'preact/hooks';
 import ErrorStackParser from 'error-stack-parser';
+import { getVNode } from './cache';
 
 /**
  * Collect detailed information about all hooks attached to a component
@@ -46,6 +47,18 @@ export function inspectHooks(vnode) {
 		});
 	}
 	return result;
+}
+
+/**
+ * Update `useState` hook value
+ * @param {number} id
+ * @param {number} index
+ * @param {Array<string | number>} path
+ * @param {*} value
+ */
+export function setInHook(id, index, path, value) {
+	let vnode = getVNode(id);
+	vnode._component.__hooks._list[index]._value[1](value);
 }
 
 export function getHookName(fn) {
