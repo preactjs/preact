@@ -7,7 +7,8 @@ var coverage = String(process.env.COVERAGE) === 'true',
 	sauceLabs = ci && !pullRequest && masterBranch,
 	performance = !coverage && String(process.env.PERFORMANCE) !== 'false',
 	webpack = require('webpack'),
-	path = require('path');
+	path = require('path'),
+	fs = require('fs');
 
 var sauceLabsLaunchers = {
 	sl_chrome: {
@@ -52,6 +53,8 @@ var localLaunchers = {
 		]
 	}
 };
+
+let babelRc = JSON.parse(fs.readFileSync('./.babelrc', 'utf8'));
 
 module.exports = function(config) {
 	config.set({
@@ -129,8 +132,8 @@ module.exports = function(config) {
 						options: {
 							comments: false,
 							compact: true,
-							plugins: coverage ?
-								[['istanbul', {
+							plugins: [
+								coverage && ['istanbul', {
 									exclude: [
 										// Default config
 										'coverage/**',
@@ -142,7 +145,10 @@ module.exports = function(config) {
 										// Our custom extension
 										'{debug,hooks,compat,test-utils}/test/**/*'
 									]
-								}]] : []
+								}],
+								...babelRc.plugins
+							].filter(Boolean),
+							presets: babelRc.presets
 						}
 					}
 				]
