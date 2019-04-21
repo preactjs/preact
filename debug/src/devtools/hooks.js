@@ -1,5 +1,5 @@
 import { options } from 'preact';
-import { useLayoutEffect, useDebugValue, useState, useCallback, useContext, useEffect, useMemo, useReducer, useRef } from 'preact/hooks';
+import { USE_STATE, USE_CALLBACK } from 'preact/hooks/constants';
 import ErrorStackParser from 'error-stack-parser';
 import { getVNode } from './cache';
 
@@ -16,11 +16,17 @@ export function inspectHooks(vnode) {
 	/** @type {import('error-stack-parser').StackFrame[]} */
 	let traces = [];
 
+	/** @type {Set<number>} */
+	let editHooks = new Set();
+
 	let ignore = 0;
-	options.hooked = fn => {
+	let hookIdx = 0;
+	options.hooked = type => {
 		if (ignore > 0) return ignore--;
 		// Ignore primitive hooks that call other primitive hooks
-		if (fn===useState || fn===useCallback) ignore++;
+		if (type===USE_STATE || type===USE_CALLBACK) ignore++;
+		if (type===USE_STATE) editHooks.add(hookIdx);
+		hookIdx++;
 
 		let stack = ErrorStackParser.parse(new Error());
 		let cleaned = stack
@@ -51,11 +57,12 @@ export function inspectHooks(vnode) {
 			continue;
 		}
 
-		let editable = trace.functionName===useState.name;
+		let isNative = i==traces.length || traces[i+1]==null;
+		let editable = isNative && editHooks.has(native);
 
 		/** @type {import('../internal').HookInspectData} */
 		let data = {
-			id: isHookPrimitive(trace.functionName) ? native++ : null,
+			id: isNative ? native++ : null,
 			// Must be `undefined` if not set. `null` is a valid value.
 			value: editable ? vnode._component.__hooks._list[i]._value[0] : undefined,
 			isStateEditable: editable,
@@ -85,26 +92,4 @@ export function inspectHooks(vnode) {
 export function setInHook(id, index, path, value) {
 	let vnode = getVNode(id);
 	vnode._component.__hooks._list[index]._value[1](value);
-}
-
-/**
- * Check if a hook function is one of the native hooks
- * @param {string} name The hook function name
- */
-export function isHookPrimitive(name) {
-	switch (name) {
-		case useState.name:
-		case useRef.name:
-		case useCallback.name:
-		case useMemo.name:
-		case useEffect.name:
-		case useLayoutEffect.name:
-		case useDebugValue.name:
-		case useReducer.name:
-		case useContext.name:
-			return true;
-		default: {
-			return false;
-		}
-	}
 }
