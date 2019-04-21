@@ -9,6 +9,8 @@ import options from './options';
  * @param {import('./index').ComponentChild} vnode The virtual node to render
  * @param {import('./internal').PreactElement} parentDom The DOM element to
  * render into
+ * @param {import('./dom').PreactElement} [replaceNode] Attempt to re-use an
+ * existing DOM tree rooted at `replaceNode`
  */
 export function render(vnode, parentDom, replaceNode) {
 	if (options.root) options.root(vnode, parentDom);
