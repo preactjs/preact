@@ -10,13 +10,27 @@ import options from './options';
  * @param {import('./internal').PreactElement} parentDom The DOM element to
  * render into
  */
-export function render(vnode, parentDom) {
+export function render(vnode, parentDom, replaceNode) {
 	if (options.root) options.root(vnode, parentDom);
 	let oldVNode = parentDom._prevVNode;
 	vnode = createElement(Fragment, null, [vnode]);
 
 	let mounts = [];
-	diffChildren(parentDom, parentDom._prevVNode = vnode, oldVNode, EMPTY_OBJ, parentDom.ownerSVGElement!==undefined, oldVNode ? null : EMPTY_ARR.slice.call(parentDom.childNodes), mounts, vnode, EMPTY_OBJ);
+	diffChildren(
+		parentDom,
+		replaceNode ? vnode : (parentDom._prevVNode = vnode),
+		replaceNode ? undefined : oldVNode,
+		EMPTY_OBJ,
+		parentDom.ownerSVGElement !== undefined,
+		replaceNode
+			? [replaceNode]
+			: oldVNode
+				? null
+				: EMPTY_ARR.slice.call(parentDom.childNodes),
+		mounts,
+		vnode,
+		replaceNode || EMPTY_OBJ
+	);
 	commitRoot(mounts, vnode);
 }
 
