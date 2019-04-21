@@ -913,7 +913,6 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('<div>foo</div>');
 	});
 
-<<<<<<< HEAD
 	// see preact/#1327
 	it('should not reuse unkeyed components', () => {
 		class X extends Component {
@@ -967,7 +966,7 @@ describe('render()', () => {
 
 		expect(scratch.textContent).to.equal('01');
 	});
-=======
+
 	describe('replaceNode parameter', () => {
 
 		function appendChildToScratch(id) {
@@ -1007,5 +1006,4 @@ describe('render()', () => {
 		});
 	});
 
->>>>>>> Adds 8.x replaceNode to render api
 });
