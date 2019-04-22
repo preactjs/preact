@@ -1,5 +1,5 @@
 import { render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
-import { createPortal, PureComponent, memo, forwardRef } from 'preact/utils';
+import { createPortal, PureComponent, memo } from 'preact/utils';
 import * as hooks from 'preact/hooks';
 export * from 'preact/hooks';
 export * from 'preact/utils';
@@ -253,12 +253,31 @@ function unstable_batchedUpdates(callback, arg) {
 	callback(arg);
 }
 
+/**
+ * Pass ref down to a child. This is mainly used in libraries with HOCs that
+ * wrap components. Using `forwardRef` there is an easy way to get a reference
+ * of the wrapped component instead of one of the wrapper itself.
+ * @param {import('./internal').ForwardFn} fn
+ * @returns {import('./internal').FunctionalComponent}
+ */
+function forwardRef(fn) {
+	function Forwarded(props) {
+		let ref = props.ref;
+		delete props.ref;
+		return fn(props, ref);
+	}
+	Forwarded._forwarded = true;
+	Forwarded.displayName = 'ForwardRef(' + (fn.displayName || fn.name) + ')';
+	return Forwarded;
+}
+
 export {
 	version,
 	Children,
 	render,
 	render as hydrate,
 	unmountComponentAtNode,
+	forwardRef,
 	createElement,
 	createContext,
 	createFactory,
