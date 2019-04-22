@@ -23,12 +23,19 @@ var sauceLabsLaunchers = {
 		browserName: 'firefox',
 		platform: 'Windows 10'
 	},
-	sl_safari: {
+	slSafari9: {
 		base: 'SauceLabs',
-		browserName: 'Safari',
-		version: '11',
-		platform: 'OS X 10.13'
+		browserName: 'safari',
+		platform: 'OS X 10.11'
 	},
+	// Safari 11 always fails due to a timeout. Maybe that's
+	// a webdriver issue?
+	// sl_safari: {
+	// 	base: 'SauceLabs',
+	// 	browserName: 'Safari',
+	// 	version: '11',
+	// 	platform: 'OS X 10.13'
+	// },
 	sl_edge: {
 		base: 'SauceLabs',
 		browserName: 'MicrosoftEdge',
