@@ -45,6 +45,9 @@ function handleElementVNode(vnode, props) {
 	}
 }
 
+// Some libraries like `react-virtualized` explicitely check for this.
+Component.prototype.isReactComponent = {};
+
 /**
  * Proxy render() since React returns a Component reference.
  * @param {import('./internal').VNode} vnode VNode tree to render
