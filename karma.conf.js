@@ -134,6 +134,7 @@ module.exports = function(config) {
 									exclude: [
 										// Default config
 										'coverage/**',
+										'dist/**',
 										'test/**',
 										'test{,-*}.js',
 										'**/*.test.js',
