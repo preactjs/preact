@@ -34,6 +34,11 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 		oldVNode = EMPTY_OBJ;
 	}
 
+	// When passing through createElement it assigns the object
+	// ref on _self, to prevent JSON Injection we check if this attribute
+	// is equal.
+	if (newVNode._self!==newVNode) return null;
+
 	if (options.diff) options.diff(newVNode);
 
 	let c, p, isNew = false, oldProps, oldState, snapshot,
@@ -96,11 +101,11 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			c._vnode = newVNode;
 
 			// Invoke getDerivedStateFromProps
-			let s = c._nextState || c.state;
+			if (c._nextState==null) {
+				c._nextState = c.state;
+			}
 			if (newType.getDerivedStateFromProps!=null) {
-				oldState = assign({}, c.state);
-				if (s===c.state) s = c._nextState = assign({}, s);
-				assign(s, newType.getDerivedStateFromProps(newVNode.props, s));
+				assign(c._nextState==c.state ? (c._nextState = assign({}, c._nextState)) : c._nextState, newType.getDerivedStateFromProps(newVNode.props, c._nextState));
 			}
 
 			// Invoke pre-render lifecycle methods
@@ -111,29 +116,28 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			else {
 				if (newType.getDerivedStateFromProps==null && force==null && c.componentWillReceiveProps!=null) {
 					c.componentWillReceiveProps(newVNode.props, cctx);
-					s = c._nextState || c.state;
 				}
 
-				if (!force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newVNode.props, s, cctx)===false) {
+				if (!force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newVNode.props, c._nextState, cctx)===false) {
 					dom = newVNode._dom;
 					c.props = newVNode.props;
-					c.state = s;
+					c.state = c._nextState;
 					c._dirty = false;
 					newVNode._lastDomChild = oldVNode._lastDomChild;
 					break outer;
 				}
 
 				if (c.componentWillUpdate!=null) {
-					c.componentWillUpdate(newVNode.props, s, cctx);
+					c.componentWillUpdate(newVNode.props, c._nextState, cctx);
 				}
 			}
 
 			oldProps = c.props;
-			if (!oldState) oldState = c.state;
+			oldState = c.state;
 
 			c.context = cctx;
 			c.props = newVNode.props;
-			c.state = s;
+			c.state = c._nextState;
 
 			if (options.render) options.render(newVNode);
 
