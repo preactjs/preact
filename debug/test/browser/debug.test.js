@@ -77,6 +77,11 @@ describe('debug', () => {
 		expect(fn).to.throw(/createElement/);
 	});
 
+	it('should print an error on invalid object component', () => {
+		let fn = () => render(h({}), scratch);
+		expect(fn).to.throw(/createElement/);
+	});
+
 	it('should throw an error when using a hook outside a render', () => {
 		class App extends Component {
 			componentWillMount() {
@@ -170,6 +175,15 @@ describe('debug', () => {
 		};
 		render(<App />, scratch);
 		expect(warnings.length).to.equal(2);
+	});
+
+	it('should warn when non-array args is passed', () => {
+		const App = () => {
+			const foo = useMemo(() => 'foo', 12);
+			return <p>{foo}</p>;
+		};
+		render(<App />, scratch);
+		expect(warnings[0]).to.match(/without passing arguments/);
 	});
 
 	it('should print an error on invalid refs', () => {

@@ -201,6 +201,7 @@ export function useDebugValue(value, formatter) {
  * Invoke a component's pending effects after the next frame renders
  * @type {(component: import('./internal').Component) => void}
  */
+/* istanbul ignore next */
 let afterPaint = () => {};
 
 /**
@@ -219,6 +220,7 @@ function scheduleFlushAfterPaint() {
 	setTimeout(flushAfterPaintEffects, 0);
 }
 
+/* istanbul ignore else */
 if (typeof window !== 'undefined') {
 	afterPaint = (component) => {
 		if (!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) {

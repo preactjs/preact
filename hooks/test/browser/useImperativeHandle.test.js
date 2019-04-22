@@ -49,4 +49,20 @@ describe('useImperativeHandle', () => {
 		expect(ref.current).to.have.property('test');
 		expect(ref.current.test()).to.equal('test1');
 	});
+
+	it('should not update ref when args have not changed', () => {
+		let ref;
+
+		function Comp() {
+			ref = useRef({});
+			useImperativeHandle(ref, () => ({ test: () => 'test' }), [1]);
+			return <p>Test</p>;
+		}
+
+		render(<Comp />, scratch);
+		expect(ref.current.test()).to.equal('test');
+
+		render(<Comp />, scratch);
+		expect(ref.current.test()).to.equal('test');
+	});
 });
