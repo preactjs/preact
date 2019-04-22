@@ -95,7 +95,7 @@ module.exports = function(config) {
 		browserNoActivityTimeout: 5 * 60 * 1000,
 
 		// Use only two browsers concurrently, works better with open source Sauce Labs remote testing
-		concurrency: 1,
+		concurrency: 2,
 
 		captureTimeout: 600000,
 		browserDisconnectTolerance: 2,
@@ -107,7 +107,7 @@ module.exports = function(config) {
 			tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER || ('local'+require('./package.json').version),
 			connectLocationForSERelay: 'localhost',
 			connectPortForSERelay: 4445,
-			startConnect: false,
+			startConnect: true,
 			recordVideo: false,
 			recordScreenshots: false,
 			videoUploadOnPass: false,
