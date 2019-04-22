@@ -25,8 +25,8 @@ function Portal(props) {
 
 /**
  * Create a `Portal` to continue rendering the vnode tree at a different DOM node
- * @param {import('./internal').VNode} vnode The vnode to render
- * @param {import('./internal').PreactElement} container The DOM node to continue rendering in to.
+ * @param {import('../../compat/src/internal').VNode} vnode The vnode to render
+ * @param {import('../../compat/src/internal').PreactElement} container The DOM node to continue rendering in to.
  */
 export function createPortal(vnode, container) {
 	return h(Portal, { vnode, container });
@@ -65,9 +65,9 @@ Component.prototype.isReactComponent = {};
 /**
  * Memoize a component, so that it only updates when the props actually have
  * changed. This was previously known as `React.pure`.
- * @param {import('./internal').FunctionalComponent} c functional component
+ * @param {import('../../compat/src/internal').FunctionalComponent} c functional component
  * @param {(prev: object, next: object) => boolean} [comparer] Custom equality function
- * @returns {import('./internal').FunctionalComponent}
+ * @returns {import('../../compat/src/internal').FunctionalComponent}
  */
 export function memo(c, comparer) {
 	function shouldUpdate(nextProps) {
