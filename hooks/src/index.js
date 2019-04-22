@@ -20,7 +20,6 @@ options.render = vnode => {
 	currentComponent.__hooks._pendingEffects = handleEffects(currentComponent.__hooks._pendingEffects);
 };
 
-
 let oldAfterDiff = options.diffed;
 options.diffed = vnode => {
 	if (oldAfterDiff) oldAfterDiff(vnode);
@@ -56,12 +55,12 @@ options.unmount = vnode => {
  * @returns {import('./internal').HookState}
  */
 function getHookState(index) {
+	if (options.hook) options.hook(currentComponent);
 	// Largely inspired by:
 	// * https://github.com/michael-klein/funcy.js/blob/f6be73468e6ec46b0ff5aa3cc4c9baf72a29025a/src/hooks/core_hooks.mjs
 	// * https://github.com/michael-klein/funcy.js/blob/650beaa58c43c33a74820a3c98b3c7079cf2e333/src/renderer.mjs
 	// Other implementations to look at:
 	// * https://codesandbox.io/s/mnox05qp8
-
 	const hooks = currentComponent.__hooks || (currentComponent.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [] });
 
 	if (index >= hooks._list.length) {
@@ -136,6 +135,14 @@ export function useRef(initialValue) {
 	}
 
 	return state._value;
+}
+
+export function useImperativeHandle(ref, createHandle, args) {
+	const state = getHookState(currentIndex++);
+	if (argsChanged(state._args, args)) {
+		state._args = args;
+		ref.current = createHandle();
+	}
 }
 
 /**
