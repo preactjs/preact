@@ -98,6 +98,8 @@ module.exports = function(config) {
 			connectLocationForSERelay: 'localhost',
 			connectPortForSERelay: 4445,
 			startConnect: false,
+			verbose: true,
+			verboseDebugging: true,
 			connectRetries: 1,
 			connectRetryTimeout: 20000 // 20s
 		},
