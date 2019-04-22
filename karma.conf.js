@@ -103,10 +103,10 @@ module.exports = function(config) {
 			vv: true,
 			doctor: true,
 			connectRetries: 1,
-			maxDuration: 20000,
-			commandTimeout: 20000,
-			idleTimeout: 20000,
-			connectRetryTimeout: 20000, // 20s
+			maxDuration: 10000,
+			commandTimeout: 10000,
+			idleTimeout: 10000,
+			connectRetryTimeout: 10000,
 			'record-video': false,
 			'record-screenshots': false
 		},
