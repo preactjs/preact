@@ -9,6 +9,9 @@ var coverage = String(process.env.COVERAGE) === 'true',
 	webpack = require('webpack'),
 	path = require('path');
 
+// Temporary
+sauceLabs = true;
+
 var sauceLabsLaunchers = {
 	sl_chrome: {
 		base: 'SauceLabs',
@@ -94,7 +97,9 @@ module.exports = function(config) {
 			tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER || ('local'+require('./package.json').version),
 			connectLocationForSERelay: 'localhost',
 			connectPortForSERelay: 4445,
-			startConnect: false
+			startConnect: false,
+			connectRetries: 1,
+			connectRetryTimeout: 20000 // 20s
 		},
 
 		customLaunchers: sauceLabs ? sauceLabsLaunchers : localLaunchers,
