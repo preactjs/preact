@@ -103,7 +103,12 @@ module.exports = function(config) {
 			vv: true,
 			doctor: true,
 			connectRetries: 1,
-			connectRetryTimeout: 20000 // 20s
+			maxDuration: 20000,
+			commandTimeout: 20000,
+			idleTimeout: 20000,
+			connectRetryTimeout: 20000, // 20s
+			'record-video': false,
+			'record-screenshots': false
 		},
 
 		customLaunchers: sauceLabs ? sauceLabsLaunchers : localLaunchers,
