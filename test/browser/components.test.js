@@ -1357,4 +1357,62 @@ describe('Components', () => {
 
 		expect(scratch.innerHTML).to.equal('<div>bar</div>');
 	});
+
+	// preact/#1323
+	it('should handle hoisted component vnodes without DOM', () => {
+		let x = 0;
+		let mounted = '';
+		let unmounted = '';
+
+		class X extends Component {
+			constructor(props) {
+				super(props);
+				this.name = `${x++}`;
+			}
+
+			componentDidMount() {
+				mounted += `,${this.name}`;
+			}
+
+			componentWillUnmount() {
+				unmounted += `,${this.name}`;
+			}
+
+			render() {
+				return null;
+			}
+		}
+
+		const A = <X />;
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { i: 0 };
+			}
+
+			componentDidMount() {
+				// eslint-disable-next-line react/no-did-mount-set-state
+				this.setState({ i: this.state.i + 1 });
+				rerender();
+				// eslint-disable-next-line react/no-did-mount-set-state
+				this.setState({ i: this.state.i + 1 });
+				rerender();
+			}
+
+			render() {
+				return (
+					<div key={this.state.i}>
+						{A}
+						{A}
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+
+		expect(mounted).to.equal(',1,0,3,2,5,4');
+		expect(unmounted).to.equal(',0,1,2,3');
+	});
 });
