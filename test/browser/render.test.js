@@ -966,4 +966,44 @@ describe('render()', () => {
 
 		expect(scratch.textContent).to.equal('01');
 	});
+
+	describe('replaceNode parameter', () => {
+
+		function appendChildToScratch(id) {
+			const child = document.createElement('div');
+			child.id = id;
+			scratch.appendChild(child);
+		}
+
+		beforeEach(() => {
+			['a', 'b', 'c'].forEach(id => appendChildToScratch(id));
+		});
+
+		it('should use replaceNode as render root and not inject into it', () => {
+			const childA = scratch.querySelector('#a');
+			render(<div id="a">contents</div>, scratch, childA);
+			expect(scratch.querySelector('#a')).to.equal(childA);
+			expect(childA.innerHTML).to.equal('contents');
+		});
+
+		it('should not remove siblings of replaceNode', () => {
+			const childA = scratch.querySelector('#a');
+			render(<div id="a" />, scratch, childA);
+			expect(scratch.innerHTML).to.equal('<div id="a"></div><div id="b"></div><div id="c"></div>');
+		});
+		
+		it('should render multiple render roots in one parentDom', () => {
+			const childA = scratch.querySelector('#a');
+			const childB = scratch.querySelector('#b');
+			const childC = scratch.querySelector('#c');
+			const expectedA = '<div id="a">childA</div>';
+			const expectedB = '<div id="b">childB</div>';
+			const expectedC = '<div id="c">childC</div>';
+			render(<div id="a">childA</div>, scratch, childA);
+			render(<div id="b">childB</div>, scratch, childB);
+			render(<div id="c">childC</div>, scratch, childC);
+			expect(scratch.innerHTML).to.equal(`${expectedA}${expectedB}${expectedC}`);
+		});
+	});
+
 });
