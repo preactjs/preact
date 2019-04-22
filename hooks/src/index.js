@@ -137,6 +137,14 @@ export function useRef(initialValue) {
 	return state._value;
 }
 
+export function useImperativeHandle(ref, createHandle, args) {
+	const state = getHookState(currentIndex++);
+	if (argsChanged(state._args, args)) {
+		state._args = args;
+		ref.current = createHandle();
+	}
+}
+
 /**
  * @param {() => any} callback
  * @param {any[]} args

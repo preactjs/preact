@@ -66,6 +66,16 @@ type EffectCallback = () => (void | (() => void));
  */
 export function useEffect(effect: EffectCallback, inputs?: Inputs): void;
 
+type CreateHandle = () => object;
+
+/**
+ * @param ref The ref that will be mutated
+ * @param create The function that will be executed to get the value that will be attached to
+ * ref.current
+ * @param inputs If present, effect will only activate if the values in the list change (using ===).
+ */
+export function useImperativeHandle(ref: Ref, create: CreateHandle, inputs?: Inputs): void;
+
 /**
  * Accepts a function that contains imperative, possibly effectful code.
  * Use this to read layout from the DOM and synchronously re-render.
