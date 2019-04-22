@@ -1,9 +1,11 @@
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { render, h, Component } from 'preact';
 import { setupRerender } from 'preact/test-utils';
+import { useState } from 'preact/hooks';
 import { createMockDevtoolsHook, convertEmit } from './mock-hook';
 import { initDevTools } from '../../src/devtools';
 import { clearState } from '../../src/devtools/cache';
+import { inspectHooks } from '../../src/devtools/hooks';
 
 /** @jsx h */
 
@@ -191,6 +193,27 @@ describe('devtools', () => {
 				data: {
 					foo: 42
 				}
+			});
+		});
+	});
+
+	// Any stack traces are mapped wrongly with our setup. This seems to be a bug
+	// in babel. We rely on correct stack traces to detect user defined hooks.
+	// See this issue: https://github.com/babel/babel/issues/9883
+	describe.skip('inspectHooks', () => {
+		it('should detect hook', () => {
+			function Foo() {
+				let [v] = useState(0);
+				return <div>{v}</div>;
+			}
+
+			render(<Foo />, scratch);
+			let vnode = scratch._prevVNode._children[0];
+			expect(inspectHooks(vnode)).to.deep.equal({
+				id: 0,
+				name: 'state',
+				value: 0,
+				subHooks: []
 			});
 		});
 	});
