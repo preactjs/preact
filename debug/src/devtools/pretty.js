@@ -1,4 +1,4 @@
-import { getDisplayName } from './custom';
+import { getDisplayName } from './vnode';
 
 export function getType(data) {
 	switch (typeof data) {
@@ -50,7 +50,7 @@ export function prettify(data, cleaned, path, level) {
 				};
 			}
 
-			return data.map((x, i) => prettify(x, cleaned, path.concat([i])), level++)
+			return data.map((x, i) => prettify(x, cleaned, path.concat([i])), level++);
 		case 'object': {
 			if (level > LEVEL_LIMIT) {
 				cleaned.push(path);

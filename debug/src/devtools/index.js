@@ -1,8 +1,10 @@
 import { options, Component } from 'preact';
-import { onCommitFiberRoot, flushPendingEvents, inspectElement, setInState, setInProps } from './renderer2';
+import { onCommitFiberRoot, flushPendingEvents, inspectElement } from './renderer2';
+import { setInProps, setInState } from './update';
 import { assign } from '../../../src/util';
 import { getVNode } from './cache';
 import { setInHook } from './hooks';
+import { now } from './util';
 
 /**
  * Wrap function with generic error logging
@@ -191,15 +193,3 @@ export function initDevTools() {
 		return setState.call(this, update, callback);
 	};
 }
-
-/**
- * Get current timestamp in ms. Used for profiling.
- * @returns {number}
- */
-export let now = Date.now;
-
-try {
-	/* istanbul ignore else */
-	now = performance.now.bind(performance);
-}
-catch (e) {}
