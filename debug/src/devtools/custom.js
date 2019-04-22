@@ -1,5 +1,7 @@
 /* istanbul ignore file */
 import { Component, Fragment } from 'preact';
+import { setIn } from './util';
+import { getDisplayName } from './vnode';
 
 /**
  * Get the type/category of a vnode
@@ -11,32 +13,6 @@ export function getNodeType(vnode) {
 	else if (typeof vnode.type==='function') return 'Composite';
 	else if (typeof vnode.type==='string') return 'Native';
 	return 'Text';
-}
-
-/**
- * Get human readable name of the component/dom element
- * @param {import('../internal').VNode} vnode
- * @returns {string}
- */
-export function getDisplayName(vnode) {
-	if (vnode.type===Fragment) return 'Fragment';
-	else if (typeof vnode.type==='function') return vnode.type.displayName || vnode.type.name;
-	else if (typeof vnode.type==='string') return vnode.type;
-	return '#text';
-}
-
-/**
- * Deeply mutate a property by walking down an array of property keys
- * @param {object} obj
- * @param {Array<string | number>} path
- * @param {any} value
- */
-export function setIn(obj, path, value) {
-	let last = path.pop();
-	let parent = path.reduce((acc, attr) => acc ? acc[attr] : null, obj);
-	if (parent) {
-		parent[last] = value;
-	}
 }
 
 /**
@@ -100,20 +76,6 @@ export function getData(vnode) {
 		actualStartTime: vnode.startTime,
 		treeBaseDuration: duration
 	};
-}
-
-/**
- * Get all rendered vnode children as an array. Moreover we need to filter
- * out `null` or other falsy children.
- * @param {import('../internal').VNode} vnode
- * @returns {import('../internal').VNode[]}
- */
-export function getChildren(vnode) {
-	if (vnode._component==null) {
-		return vnode._children!=null ? vnode._children.filter(Boolean) : [];
-	}
-
-	return vnode._children != null ? vnode._children.filter(Boolean) : null;
 }
 
 /**

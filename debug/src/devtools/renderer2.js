@@ -1,55 +1,10 @@
 import { Fragment } from 'preact';
 import { getVNodeId, getVNode } from './cache';
-import { TREE_OPERATION_ADD, ElementTypeRoot, ElementTypeClass, ElementTypeFunction, ElementTypeOtherOrUnknown } from './constants';
-import { getChildren, getDisplayName, setIn } from './custom';
+import { TREE_OPERATION_ADD, ElementTypeRoot } from './constants';
+import { getChildren, getVNodeType, getDisplayName } from './vnode';
 import { cleanForBridge } from './pretty';
 import { inspectHooks } from './hooks';
-
-// TODO: Use a proper LRU cache?
-/** @type {Map<string, Uint32Array>} */
-let encoded = new Map();
-
-// Hoisted for perf
-const toCodePoint = s => s.codePointAt(0);
-
-/**
- * Convert a string to an Uint32Array
- * @param {string} input
- * @returns {Uint32Array}
- */
-export function utfEncode(input) {
-	if (!encoded.has(input)) {
-		encoded.set(input, Uint32Array.from(input, toCodePoint));
-	}
-	return encoded.get(input);
-}
-
-/**
- * Append an encoded string to an array
- * @param {number[]} arr
- * @param {Uint32Array} input
- */
-export function append(arr, input) {
-	arr[arr.length] = input.length;
-	let len = arr.length;
-	for (let i = 0; i < input.length; i++) {
-		arr[len + i] = input[i];
-	}
-}
-
-/**
- * @param {import('../internal').VNode} vnode
- */
-export function getVNodeType(vnode) {
-	if (typeof vnode.type=='function' && vnode.type!==Fragment) {
-		// TODO: Memo and ForwardRef
-		// TODO: Provider and Consumer
-		return vnode.type.prototype && vnode.type.prototype.render
-			? ElementTypeClass
-			: ElementTypeFunction;
-	}
-	return ElementTypeOtherOrUnknown;
-}
+import { encode, append } from './util';
 
 /**
  * Called when a tree has completed rendering
@@ -91,7 +46,7 @@ export function mount(state, vnode, isRoot, parentId) {
 			);
 		}
 		else {
-			let displayName = utfEncode(getDisplayName(vnode));
+			let displayName = encode(getDisplayName(vnode));
 
 			let owner = vnode._component!=null && vnode._component._ancestorComponent!=null
 				&& vnode._component._ancestorComponent._vnode!=null
@@ -109,7 +64,7 @@ export function mount(state, vnode, isRoot, parentId) {
 			append(next, displayName);
 
 			if (vnode.key!=null) {
-				append(next, utfEncode(vnode.key + ''));
+				append(next, encode(vnode.key + ''));
 			}
 			else {
 				next[next.length] = 0;
@@ -181,35 +136,4 @@ export function inspectElement(id) {
 	};
 }
 
-/**
- * Update a vnode's state
- * @param {number} id
- * @param {string[]} path
- * @param {*} value
- */
-export function setInState(id, path, value) {
-	let vnode = getVNode(id);
-	if (vnode._component==null) {
-		throw new Error(`Can't set state. Component ${getDisplayName(vnode)} is not a class`)
-	}
-	vnode._component.setState(prev => {
-		setIn(prev, path, value);
-		return prev;
-	});
-}
-
-/**
- * Update component props
- * @param {number} id
- * @param {string[]} path
- * @param {*} value
- */
-export function setInProps(id, path, value) {
-	let vnode = getVNode(id);
-	if (vnode._component==null) {
-		throw new Error(`Can't set props. Component ${getDisplayName(vnode)} is not a class`)
-	}
-	setIn(vnode.props, path, value);
-	vnode._component.setState({});
-}
 
