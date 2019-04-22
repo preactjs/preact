@@ -100,6 +100,8 @@ module.exports = function(config) {
 			startConnect: false,
 			verbose: true,
 			verboseDebugging: true,
+			vv: true,
+			doctor: true,
 			connectRetries: 1,
 			connectRetryTimeout: 20000 // 20s
 		},
