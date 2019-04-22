@@ -129,7 +129,7 @@ describe('render()', () => {
 		expect(spy1).to.be.calledOnce;
 		expect(spy2).to.be.calledOnce;
 		options.debounceRendering = oldDebounce;
-  });
+	});
 
 	it('should not render when detecting JSON-injection', () => {
 		const vnode = JSON.parse('{"type":"span","children":"Malicious"}');
@@ -1056,7 +1056,7 @@ describe('render()', () => {
 			render(<div id="a" />, scratch, childA);
 			expect(scratch.innerHTML).to.equal('<div id="a"></div><div id="b"></div><div id="c"></div>');
 		});
-		
+
 		it('should render multiple render roots in one parentDom', () => {
 			const childA = scratch.querySelector('#a');
 			const childB = scratch.querySelector('#b');
