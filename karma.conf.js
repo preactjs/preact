@@ -23,13 +23,9 @@ var sauceLabsLaunchers = {
 		browserName: 'firefox',
 		platform: 'Windows 10'
 	},
-	slSafari9: {
-		base: 'SauceLabs',
-		browserName: 'safari',
-		platform: 'OS X 10.11'
-	},
 	// Safari 11 always fails due to a timeout. Maybe that's
-	// a webdriver issue?
+	// a webdriver issue? Tried older safari version but they all
+	// have timeout issues too...
 	// sl_safari: {
 	// 	base: 'SauceLabs',
 	// 	browserName: 'Safari',
@@ -107,7 +103,7 @@ module.exports = function(config) {
 			tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER || ('local'+require('./package.json').version),
 			connectLocationForSERelay: 'localhost',
 			connectPortForSERelay: 4445,
-			startConnect: true,
+			startConnect: false,
 			recordVideo: false,
 			recordScreenshots: false,
 			videoUploadOnPass: false,
