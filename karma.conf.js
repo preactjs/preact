@@ -88,9 +88,12 @@ module.exports = function(config) {
 		browserNoActivityTimeout: 5 * 60 * 1000,
 
 		// Use only two browsers concurrently, works better with open source Sauce Labs remote testing
-		concurrency: 2,
+		concurrency: 1,
 
-		captureTimeout: 0,
+		captureTimeout: 600000,
+		browserDisconnectTolerance: 2,
+		processKillTimeout: 20000,
+		browserDisconnectTimeout: 10000,
 
 		sauceLabs: {
 			build: 'CI #' + process.env.TRAVIS_BUILD_NUMBER + ' (' + process.env.TRAVIS_BUILD_ID + ')',
@@ -98,17 +101,12 @@ module.exports = function(config) {
 			connectLocationForSERelay: 'localhost',
 			connectPortForSERelay: 4445,
 			startConnect: false,
-			verbose: true,
-			verboseDebugging: true,
-			vv: true,
-			doctor: true,
-			connectRetries: 1,
-			maxDuration: 600,
-			commandTimeout: 600,
-			idleTimeout: 600,
-			connectRetryTimeout: 600,
-			'record-video': false,
-			'record-screenshots': false
+			recordVideo: false,
+			recordScreenshots: false,
+			videoUploadOnPass: false,
+			recordLogs: false,
+			captureHtml: false,
+			commandTimeout: 400
 		},
 
 		customLaunchers: sauceLabs ? sauceLabsLaunchers : localLaunchers,
