@@ -12,9 +12,8 @@ import options from '../options';
 export function diffProps(dom, newProps, oldProps, isSvg) {
 	let keys = Object.keys(newProps).sort();
 	for (let i = 0; i < keys.length; i++) {
-		let k = keys[i];
-		if (k!=='children' && k!=='key' && (!oldProps || ((k==='value' || k==='checked') ? dom : oldProps)[k]!==newProps[k])) {
-			setProperty(dom, k, newProps[k], oldProps[k], isSvg);
+		if (keys[i]!=='children' && keys[i]!=='key' && (!oldProps || ((keys[i]==='value' || keys[i]==='checked') ? dom : oldProps)[keys[i]]!==newProps[keys[i]])) {
+			setProperty(dom, keys[i], newProps[keys[i]], oldProps[keys[i]], isSvg);
 		}
 	}
 
