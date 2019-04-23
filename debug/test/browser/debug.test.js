@@ -334,6 +334,12 @@ describe('debug', () => {
 
 		it('should serialize vnode without props', () => {
 			const vnode = {
+				type: null,
+				props: null,
+				text: 'hello world',
+				key: null,
+				ref: null
+			};
 				type: 'string',
 				attributes: {},
 			}
