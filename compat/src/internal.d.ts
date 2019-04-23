@@ -1,11 +1,11 @@
-import { Ref } from '../../src/index';
+import { Ref } from '../..';
 import {
   Component as PreactComponent,
   VNode as PreactVNode,
   FunctionalComponent as PreactFunctionalComponent
 } from '../../src/internal';
 
-export { ComponentChildren } from '../../src/index';
+export { ComponentChildren } from '../..';
 
 export { PreactElement } from '../../src/internal';
 
