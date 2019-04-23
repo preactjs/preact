@@ -332,7 +332,7 @@ describe('debug', () => {
 			expect(serializeVNode(<Foo />)).to.equal('<Foo />');
 		});
 
-		it('should serialize vnode without props', () => {
+		it('should serialize a text vnode', () => {
 			const vnode = {
 				type: null,
 				props: null,
@@ -340,11 +340,8 @@ describe('debug', () => {
 				key: null,
 				ref: null
 			};
-				type: 'string',
-				attributes: {},
-			}
 
-			expect(serializeVNode(vnode)).to.equal('<string />');
+			expect(serializeVNode(vnode)).to.equal('<#text />');
 		});
 
 		it('should serialize props', () => {
