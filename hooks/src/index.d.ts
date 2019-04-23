@@ -1,4 +1,4 @@
-import { PreactContext } from "preact";
+import { PreactContext } from "../..";
 
 type Inputs = ReadonlyArray<unknown>;
 
