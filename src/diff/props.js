@@ -12,7 +12,7 @@ import { assign } from '../util';
  */
 export function diffProps(dom, newProps, oldProps, isSvg) {
 	let i;
-	
+
 	const keys = Object.keys(newProps).sort();
 	for (i = 0; i < keys.length; i++) {
 		const k = keys[i];
