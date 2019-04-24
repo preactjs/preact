@@ -98,7 +98,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('hello <span>world</span>');
 	});
 
-	it.only('should not crash with null as last child', () => {
+	it('should not crash with null as last child', () => {
 		let fn = () => {
 			render((
 				<Fragment>
