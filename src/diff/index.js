@@ -371,22 +371,20 @@ function doRender(props, state, context) {
  */
 function catchErrorInComponent(error, component) {
 	for (; component; component = component._ancestorComponent) {
-		if (!component._processingException) {
-			try {
-				if (component.constructor.getDerivedStateFromError!=null) {
-					component.setState(component.constructor.getDerivedStateFromError(error));
-				}
-				else if (component.componentDidCatch!=null) {
-					component.componentDidCatch(error);
-				}
-				else {
-					continue;
-				}
-				return enqueueRender(component._processingException = component);
+		try {
+			if (component.constructor.getDerivedStateFromError!=null) {
+				component.setState(component.constructor.getDerivedStateFromError(error));
 			}
-			catch (e) {
-				error = e;
+			else if (component.componentDidCatch!=null) {
+				component.componentDidCatch(error);
 			}
+			else {
+				continue;
+			}
+			return enqueueRender(component._processingException = component);
+		}
+		catch (e) {
+			error = e;
 		}
 	}
 	throw error;
