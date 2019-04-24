@@ -109,6 +109,7 @@ describe('Fragment', () => {
 		};
 		expect(fn).not.to.throw();
 		expect(scratch.innerHTML).to.equal('<span>world</span>');
+
 		render((
 			<Fragment>
 				<span>world</span>
@@ -117,6 +118,15 @@ describe('Fragment', () => {
 			</Fragment>
 		), scratch);
 		expect(scratch.innerHTML).to.equal('<span>world</span><span>world</span>');
+
+		render((
+			<Fragment>
+				<span>world</span>
+				Hello
+				<span>world</span>
+			</Fragment>
+		), scratch);
+		expect(scratch.innerHTML).to.equal('<span>world</span>Hello<span>world</span>');
 	});
 
 	it('should handle reordering components that return Fragments #1325', () => {
