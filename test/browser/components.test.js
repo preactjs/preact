@@ -1358,49 +1358,6 @@ describe('Components', () => {
 		expect(scratch.innerHTML).to.equal('<div>bar</div>');
 	});
 
-	it('should handle double child throws', () => {
-		const Child = () => {
-			throw new Error('oi!');
-		};
-
-		class TopErrorBoundary extends Component {
-
-			static getDerivedStateFromError(error, info) {
-				return { error: true };
-			}
-
-			render() {
-				return this.state.error ? (
-					<h1>Something went wrong.</h1>
-				) : (
-					this.props.children
-				);
-			}
-		}
-
-		let fn = () => render(
-			<TopErrorBoundary>
-				<div>
-					<Child />
-					<Child />
-				</div>
-			</TopErrorBoundary>,
-			scratch
-		);
-
-		expect(fn).to.not.throw();
-
-		fn = () => render(
-			<TopErrorBoundary>
-				<div>
-					{[1, 2].map(i => <Child key={i} />)}
-				</div>
-			</TopErrorBoundary>,
-			scratch
-		);
-		expect(fn).to.not.throw();
-	});
-
 	// preact/#1323
 	it('should handle hoisted component vnodes without DOM', () => {
 		let x = 0;
