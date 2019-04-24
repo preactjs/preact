@@ -57,7 +57,6 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	_parentDom?: PreactElement | null;
 	_prevVNode?: VNode | null;
 	_ancestorComponent?: Component<any, any>;
-	_processingException?: Component<any, any> | null;
 }
 
 export interface PreactContext extends preact.Context<any> {

@@ -27,7 +27,6 @@ export function Component(props, context) {
 	// this._vnode = null;
 	// this._nextState = null; // Only class components
 	// this._prevVNode = null;
-	// this._processingException = null; // Always read, set only when handling error
 }
 
 /**
