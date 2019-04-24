@@ -365,15 +365,13 @@ function catchErrorInComponent(error, component) {
 	for (; component; component = component._ancestorComponent) {
 		try {
 			if (component.constructor.getDerivedStateFromError!=null) {
-				component.setState(component.constructor.getDerivedStateFromError(error));
+				return component.setState(component.constructor.getDerivedStateFromError(error));
 			}
 			else if (component.componentDidCatch!=null) {
 				component.componentDidCatch(error);
+				return enqueueRender(component);
 			}
-			else {
-				continue;
-			}
-			return enqueueRender(component);
+			continue;
 		}
 		catch (e) {
 			error = e;
