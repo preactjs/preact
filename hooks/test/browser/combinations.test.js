@@ -1,6 +1,6 @@
-import { setupRerender, act, teardown } from 'preact/test-utils';
+import { setupRerender, act } from 'preact/test-utils';
 import { createElement as h, render, Component } from 'preact';
-import { setupScratch } from '../../../test/_util/helpers';
+import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useState, useReducer, useEffect, useLayoutEffect, useRef } from '../../src';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
 

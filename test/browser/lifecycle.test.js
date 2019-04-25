@@ -1,6 +1,6 @@
-import { setupRerender, teardown } from 'preact/test-utils';
+import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component } from '../../src/index';
-import { setupScratch } from '../_util/helpers';
+import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx h */
 
@@ -2424,7 +2424,6 @@ describe('Lifecycle methods', () => {
 			static getDerivedStateFromError(error) {
 				return { error };
 			}
-
 			render() {
 				return <div>{this.state.error ? String(this.state.error) : this.props.children}</div>;
 			}

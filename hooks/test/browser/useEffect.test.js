@@ -23,6 +23,7 @@ describe('useEffect', () => {
 
 	useEffectAssertions(useEffect, scheduleEffectAssert);
 
+
 	it('calls the effect immediately if another render is about to start', () => {
 		const cleanupFunction = sinon.spy();
 		const callback = sinon.spy(() => cleanupFunction);
