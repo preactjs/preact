@@ -8,8 +8,6 @@ import options from '../options';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
- * @param {import('../internal').PreactElement | Text} dom The DOM element representing
- * the virtual nodes under diff
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
  * @param {import('../internal').VNode | null} newVNode The new virtual node
  * @param {import('../internal').VNode | null} oldVNode The old virtual node
@@ -25,12 +23,11 @@ import options from '../options';
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
-export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force, oldDom) {
+export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force, oldDom) {
 	// If the previous type doesn't match the new type we drop the whole subtree
 	if (oldVNode==null || newVNode==null || oldVNode.type!==newVNode.type || oldVNode.key!==newVNode.key) {
 		if (oldVNode!=null) unmount(oldVNode, ancestorComponent);
 		if (newVNode==null) return null;
-		dom = null;
 		oldVNode = EMPTY_OBJ;
 	}
 
@@ -50,10 +47,9 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 
 			// Mark dom as empty in case `_children` is any empty array. If it isn't
 			// we'll set `dom` to the correct value just a few lines later.
-			dom = null;
 
 			if (newVNode._children.length && newVNode._children[0]!=null) {
-				dom = newVNode._children[0]._dom;
+				newVNode._dom = newVNode._children[0]._dom;
 
 				// If the last child is a Fragment, use _lastDomChild, else use _dom
 				p = newVNode._children[newVNode._children.length - 1];
@@ -72,7 +68,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
 				clearProcessingException = c._processingException = c._pendingError;
-				dom = newVNode._dom = oldVNode._dom;
+				newVNode._dom = oldVNode._dom;
 			}
 			else {
 				// Instantiate the new component
@@ -116,7 +112,6 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 				}
 
 				if (!force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newVNode.props, c._nextState, cctx)===false) {
-					dom = newVNode._dom;
 					c.props = newVNode.props;
 					c.state = c._nextState;
 					c._dirty = false;
@@ -151,7 +146,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			}
 
 			c._depth = ancestorComponent ? (ancestorComponent._depth || 0) + 1 : 0;
-			c.base = dom = diff(dom, parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null, oldDom);
+			c.base = newVNode._dom = diff(parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null, oldDom);
 
 			if (vnode!=null) {
 				// If this component returns a Fragment (or another component that
@@ -173,14 +168,12 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			}
 		}
 		else {
-			dom = diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
+			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
 
 			if (newVNode.ref && (oldVNode.ref !== newVNode.ref)) {
-				applyRef(newVNode.ref, dom, ancestorComponent);
+				applyRef(newVNode.ref, newVNode._dom, ancestorComponent);
 			}
 		}
-
-		newVNode._dom = dom;
 
 		if (clearProcessingException) {
 			c._pendingError = c._processingException = null;
@@ -192,7 +185,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 		catchErrorInComponent(e, ancestorComponent);
 	}
 
-	return dom;
+	return newVNode._dom;
 }
 
 export function commitRoot(mounts, root) {
@@ -211,8 +204,6 @@ export function commitRoot(mounts, root) {
 
 /**
  * Diff two virtual nodes representing DOM element
- * @param {import('../internal').PreactElement} dom The DOM element representing
- * the virtual nodes being diffed
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').VNode} oldVNode The old virtual node
  * @param {object} context The current context object
@@ -225,7 +216,7 @@ export function commitRoot(mounts, root) {
  * @returns {import('../internal').PreactElement}
  */
 function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent) {
-	let d = dom;
+	let originalDom = dom;
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	isSvg = newVNode.type==='svg' || isSvg;
@@ -247,10 +238,9 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 		// we created a new parent, so none of the previously attached children can be reused:
 		excessDomChildren = null;
 	}
-	newVNode._dom = dom;
 
 	if (newVNode.type===null) {
-		if ((d===null || dom===d) && newVNode.text!==oldVNode.text) {
+		if ((originalDom==null || dom===originalDom) && newVNode.text!==oldVNode.text) {
 			dom.data = newVNode.text;
 		}
 	}
