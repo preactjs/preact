@@ -74,8 +74,8 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	}
 	else if (name!=='list' && name!=='tagName' && !isSvg && (name in dom)) {
 		if (Array.isArray(value)) {
-			for (let i = 0; i < dom.length; i++) {
-				dom[i].selected = value.indexOf(dom[i].value) > -1;
+			for (name = dom.length; name--;) {
+				dom[name].selected = value.indexOf(dom[name].value) > -1;
 			}
 		}
 		else {
