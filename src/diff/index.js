@@ -69,7 +69,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			let cctx = cxType != null ? (provider ? provider.props.value : cxType._defaultValue) : context;
 
 			// Get component and set it to `c`
-			if (oldVNode._component!=null) {
+			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
 				dom = newVNode._dom = oldVNode._dom;
 				if (c._pendingError) {
@@ -367,20 +367,22 @@ function doRender(props, state, context) {
  */
 function catchErrorInComponent(error, component) {
 	for (; component; component = component._ancestorComponent) {
-		try {
-			if (component._processingError==null) {
+		if (!component._processingError) {
+			try {
 				if (component.constructor.getDerivedStateFromError!=null) {
 					component.setState(component.constructor.getDerivedStateFromError(error));
 				}
 				else if (component.componentDidCatch!=null) {
 					component.componentDidCatch(error);
 				}
-				else continue;
+				else {
+					continue;
+				}
 				return enqueueRender(component._pendingError = component);
 			}
-		}
-		catch (e) {
-			error = e;
+			catch (e) {
+				error = e;
+			}
 		}
 	}
 	throw error;
