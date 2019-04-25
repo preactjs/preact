@@ -13,6 +13,7 @@ import ProfilerDemo from './profiler';
 import KeyBug from './key_bug';
 import StateOrderBug from './stateOrderBug';
 import PeopleBrowser from './people';
+import StyledComp from './styled-components';
 import { initDevTools } from 'preact/debug/src/devtools';
 import { initDebug } from 'preact/debug/src/debug';
 import DevtoolsDemo from './devtools';
@@ -69,6 +70,7 @@ class App extends Component {
 						<Link href="/empty-fragment" activeClassName="active">Empty Fragment</Link>
 						<Link href="/people" activeClassName="active">People Browser</Link>
 						<Link href="/state-order" activeClassName="active">State Order</Link>
+						<Link href="/styled-components" activeClassName="active">Styled Components</Link>
 					</nav>
 				</header>
 				<main>
@@ -96,6 +98,7 @@ class App extends Component {
 						<DevtoolsDemo path="/devtools" />
 						<EmptyFragment path="/empty-fragment" />
 						<PeopleBrowser path="/people/:user?" />
+						<StyledComp path="/styled-components" />
 					</Router>
 				</main>
 			</div>
