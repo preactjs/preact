@@ -2424,6 +2424,7 @@ describe('Lifecycle methods', () => {
 			static getDerivedStateFromError(error) {
 				return { error };
 			}
+
 			render() {
 				return <div>{this.state.error ? String(this.state.error) : this.props.children}</div>;
 			}
@@ -2457,17 +2458,20 @@ describe('Lifecycle methods', () => {
 
 		// https://github.com/developit/preact/issues/1570
 		it('should handle double child throws', () => {
-			const Child = () => {
-				throw new Error('error!');
+			const Child = ({ i }) => {
+				throw new Error(`error! ${i}`);
 			};
 
 			const fn = () => render(
 				<Receiver>
-					{[1, 2].map(i => <Child key={i} />)}
+					{[1, 2].map(i => <Child key={i} i={i} />)}
 				</Receiver>,
 				scratch
 			);
 			expect(fn).to.not.throw();
+
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Error: error! 2</div>');
 		});
 
 		it('should be called when child fails in componentWillMount', () => {

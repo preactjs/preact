@@ -72,7 +72,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
 				if (c._pendingError) {
-					clearProcessingException = c._processingError = c._pendingError;
+					clearProcessingException = c._processingException = c._pendingError;
 				}
 				dom = newVNode._dom = oldVNode._dom;
 			}
@@ -186,8 +186,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 		}
 
 		if (clearProcessingException) {
-			c._processingError = null;
-			c._pendingError = null;
+			c._pendingError = c._processingException = null;
 		}
 
 		if (options.diffed) options.diffed(newVNode);
@@ -370,7 +369,7 @@ function doRender(props, state, context) {
  */
 function catchErrorInComponent(error, component) {
 	for (; component; component = component._ancestorComponent) {
-		if (!component._processingError) {
+		if (!component._processingException) {
 			try {
 				if (component.constructor.getDerivedStateFromError!=null) {
 					component.setState(component.constructor.getDerivedStateFromError(error));
