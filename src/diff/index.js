@@ -69,11 +69,11 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			let cctx = cxType != null ? (provider ? provider.props.value : cxType._defaultValue) : context;
 
 			// Get component and set it to `c`
-			if (oldVNode._component) {
+			if (oldVNode._component!=null) {
 				c = newVNode._component = oldVNode._component;
 				dom = newVNode._dom = oldVNode._dom;
 				if (c._pendingError) {
-					c._pendingError = false;
+					c._pendingError = undefined;
 					c._processingError = true;
 				}
 			}
@@ -179,12 +179,12 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 
 		if (c!=null) {
 			while (p=c._renderCallbacks.pop()) p.call(c);
-			c._processingError = false;
 			// Don't call componentDidUpdate on mount or when we bailed out via
 			// `shouldComponentUpdate`
 			if (!isNew && oldProps!=null && c.componentDidUpdate!=null) {
 				c.componentDidUpdate(oldProps, oldState, snapshot);
 			}
+			c._processingError = undefined;
 		}
 
 		if (options.diffed) options.diffed(newVNode);
@@ -368,7 +368,7 @@ function doRender(props, state, context) {
 function catchErrorInComponent(error, component) {
 	for (; component; component = component._ancestorComponent) {
 		try {
-			if (!component._processingError) {
+			if (component._processingError==null) {
 				if (component.constructor.getDerivedStateFromError!=null) {
 					component.setState(component.constructor.getDerivedStateFromError(error));
 				}
@@ -376,8 +376,7 @@ function catchErrorInComponent(error, component) {
 					component.componentDidCatch(error);
 				}
 				else continue;
-				component._pendingError = true;
-				return enqueueRender(component);
+				return enqueueRender(component._pendingError = component);
 			}
 		}
 		catch (e) {

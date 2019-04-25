@@ -48,6 +48,7 @@ Component.prototype.setState = function(update, callback) {
 
 	// Skip update if updater function returned null
 	if (update==null) return;
+
 	if (this._vnode) {
 		if (callback) this._renderCallbacks.push(callback);
 		enqueueRender(this);
