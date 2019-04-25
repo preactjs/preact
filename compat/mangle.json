@@ -15,9 +15,7 @@
       "$_component": "__c",
       "$_prevVNode": "__t",
       "$__html": "__html",
-      "$_ancestorComponent": "__a",
-			"$_pendingError ": "__ce",
-			"$_processingError": "__pe"
+      "$_ancestorComponent": "__a"
     }
   }
 }

@@ -71,11 +71,11 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			// Get component and set it to `c`
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
-				dom = newVNode._dom = oldVNode._dom;
 				if (c._pendingError) {
-					c._pendingError = undefined;
+					c._pendingError = null;
 					c._processingError = true;
 				}
+				dom = newVNode._dom = oldVNode._dom;
 			}
 			else {
 				// Instantiate the new component
@@ -184,7 +184,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			if (!isNew && oldProps!=null && c.componentDidUpdate!=null) {
 				c.componentDidUpdate(oldProps, oldState, snapshot);
 			}
-			c._processingError = undefined;
+			c._processingError = null;
 		}
 
 		if (options.diffed) options.diffed(newVNode);
