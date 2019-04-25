@@ -84,7 +84,14 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		(dom._listeners || (dom._listeners = {}))[name] = value;
 	}
 	else if (name!=='list' && name!=='tagName' && !isSvg && (name in dom)) {
-		dom[name] = value==null ? '' : value;
+		if (Array.isArray(value)) {
+			for (let i = 0; i < dom.length; i++) {
+				dom[i].selected = value.indexOf(dom[i].value) > -1;
+			}
+		}
+		else {
+			dom[name] = value==null ? '' : value;
+		}
 	}
 	else if (value==null || value===false) {
 		if (name!==(name = name.replace(/^xlink:?/, ''))) dom.removeAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase());
