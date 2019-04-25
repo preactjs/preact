@@ -32,6 +32,7 @@
     "mobx-react": "^5.4.3",
     "mobx-state-tree": "^3.12.2",
     "preact-render-to-string": "^5.0.2",
-    "preact-router": "^3.0.0"
+    "preact-router": "^3.0.0",
+    "styled-components": "^4.2.0"
   }
 }
