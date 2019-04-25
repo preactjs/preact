@@ -72,6 +72,10 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
 				dom = newVNode._dom = oldVNode._dom;
+				if (c._pendingError) {
+					c._pendingError = false;
+					c._processingError = true;
+				}
 			}
 			else {
 				// Instantiate the new component
@@ -175,7 +179,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 
 		if (c!=null) {
 			while (p=c._renderCallbacks.pop()) p.call(c);
-
+			c._processingError = false;
 			// Don't call componentDidUpdate on mount or when we bailed out via
 			// `shouldComponentUpdate`
 			if (!isNew && oldProps!=null && c.componentDidUpdate!=null) {
@@ -364,14 +368,17 @@ function doRender(props, state, context) {
 function catchErrorInComponent(error, component) {
 	for (; component; component = component._ancestorComponent) {
 		try {
-			if (component.constructor.getDerivedStateFromError!=null) {
-				return component.setState(component.constructor.getDerivedStateFromError(error));
-			}
-			else if (component.componentDidCatch!=null) {
-				component.componentDidCatch(error);
+			if (!component._processingError) {
+				if (component.constructor.getDerivedStateFromError!=null) {
+					component.setState(component.constructor.getDerivedStateFromError(error));
+				}
+				else if (component.componentDidCatch!=null) {
+					component.componentDidCatch(error);
+				}
+				else continue;
+				component._pendingError = true;
 				return enqueueRender(component);
 			}
-			continue;
 		}
 		catch (e) {
 			error = e;

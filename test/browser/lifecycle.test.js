@@ -1,6 +1,6 @@
-import { setupRerender } from 'preact/test-utils';
+import { setupRerender, teardown } from 'preact/test-utils';
 import { createElement as h, render, Component } from '../../src/index';
-import { setupScratch, teardown } from '../_util/helpers';
+import { setupScratch } from '../_util/helpers';
 
 /** @jsx h */
 
@@ -2458,7 +2458,7 @@ describe('Lifecycle methods', () => {
 		// https://github.com/developit/preact/issues/1570
 		it('should handle double child throws', () => {
 			const Child = () => {
-				throw new Error('oi!');
+				throw new Error('error!');
 			};
 
 			const fn = () => render(
