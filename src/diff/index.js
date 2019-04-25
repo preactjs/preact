@@ -71,9 +71,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			// Get component and set it to `c`
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
-				if (c._pendingError) {
-					clearProcessingException = c._processingException = c._pendingError;
-				}
+				clearProcessingException = c._processingException = c._pendingError;
 				dom = newVNode._dom = oldVNode._dom;
 			}
 			else {
