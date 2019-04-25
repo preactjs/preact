@@ -96,7 +96,7 @@ export function coerceToVNode(possibleVNode) {
 	}
 
 	// Clone vnode if it has already been used. ceviche/#57
-	if (possibleVNode._dom!=null) {
+	if (possibleVNode._dom!=null || possibleVNode._component!=null) {
 		let vnode = createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.text, possibleVNode.key, null, possibleVNode._original || possibleVNode);
 		vnode._dom = possibleVNode._dom;
 		return vnode;

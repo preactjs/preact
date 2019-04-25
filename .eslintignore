@@ -1,2 +1,3 @@
 test/fixtures
 test/ts/
+*.ts

@@ -98,6 +98,48 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('hello <span>world</span>');
 	});
 
+	it('should not crash with null as last child', () => {
+		let fn = () => {
+			render((
+				<Fragment>
+					<span>world</span>
+					{null}
+				</Fragment>
+			), scratch);
+		};
+		expect(fn).not.to.throw();
+		expect(scratch.innerHTML).to.equal('<span>world</span>');
+
+		render((
+			<Fragment>
+				<span>world</span>
+				<p>Hello</p>
+			</Fragment>
+		), scratch);
+		expect(scratch.innerHTML).to.equal('<span>world</span><p>Hello</p>');
+
+		expect(fn).not.to.throw();
+		expect(scratch.innerHTML).to.equal('<span>world</span>');
+
+		render((
+			<Fragment>
+				<span>world</span>
+				{null}
+				<span>world</span>
+			</Fragment>
+		), scratch);
+		expect(scratch.innerHTML).to.equal('<span>world</span><span>world</span>');
+
+		render((
+			<Fragment>
+				<span>world</span>
+				Hello
+				<span>world</span>
+			</Fragment>
+		), scratch);
+		expect(scratch.innerHTML).to.equal('<span>world</span>Hello<span>world</span>');
+	});
+
 	it('should handle reordering components that return Fragments #1325', () => {
 		class X extends Component {
 			render() {

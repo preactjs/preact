@@ -1,4 +1,4 @@
-import { PreactContext } from "preact";
+import { PreactContext } from "../..";
 
 type Inputs = ReadonlyArray<unknown>;
 
@@ -65,6 +65,16 @@ type EffectCallback = () => (void | (() => void));
  * @param inputs If present, effect will only activate if the values in the list change (using ===).
  */
 export function useEffect(effect: EffectCallback, inputs?: Inputs): void;
+
+type CreateHandle = () => object;
+
+/**
+ * @param ref The ref that will be mutated
+ * @param create The function that will be executed to get the value that will be attached to
+ * ref.current
+ * @param inputs If present, effect will only activate if the values in the list change (using ===).
+ */
+export function useImperativeHandle<T>(ref: Ref<T>, create: CreateHandle, inputs?: Inputs): void;
 
 /**
  * Accepts a function that contains imperative, possibly effectful code.
