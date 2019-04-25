@@ -73,7 +73,14 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		}
 	}
 	else if (name!=='list' && name!=='tagName' && !isSvg && (name in dom)) {
-		dom[name] = value==null ? '' : value;
+		if (Array.isArray(value)) {
+			for (let i = 0; i < dom.length; i++) {
+				dom[i].selected = value.indexOf(dom[i].value) > -1;
+			}
+		}
+		else {
+			dom[name] = value==null ? '' : value;
+		}
 	}
 	else if (typeof value!=='function' && name!=='dangerouslySetInnerHTML') {
 		if (name!==(name = name.replace(/^xlink:?/, ''))) {

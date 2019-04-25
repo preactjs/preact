@@ -63,4 +63,44 @@ describe('Select', () => {
 		});
 		expect(scratch.firstChild.value).to.equal('B');
 	});
+
+	it('should select multiple elements', () => {
+		function App() {
+			return (
+				<select multiple value={['A', 'C']}>
+					<option value="A">A</option>
+					<option value="B">B</option>
+					<option value="C">C</option>
+				</select>
+			);
+		}
+
+		render(<App />, scratch);
+		Array.prototype.slice.call(scratch.firstChild.childNodes).forEach(node => {
+			if (node.value === 'A' || node.value === 'C') {
+				expect(node.selected).to.equal(true);
+			}
+		});
+	});
+
+	it('should select multiple with optgroups in-between', () => {
+		function App() {
+			return (
+				<select multiple value={['A', 'C']}>
+					<optgroup label="foo">
+						<option value="A">A</option>
+					</optgroup>
+					<option value="B">B</option>
+					<option value="C">C</option>
+				</select>
+			);
+		}
+
+		render(<App />, scratch);
+		Array.prototype.slice.call(scratch.firstChild.childNodes).forEach(node => {
+			if (node.value === 'A' || node.value === 'C') {
+				expect(node.selected).to.equal(true);
+			}
+		});
+	});
 });
