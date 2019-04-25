@@ -83,6 +83,30 @@ describe('Select', () => {
 		});
 	});
 
+	it('should reset multiple value', () => {
+		function App({ condition }) {
+			return (
+				<select multiple value={condition ? ['A', 'C'] : []}>
+					<option value="A">A</option>
+					<option value="B">B</option>
+					<option value="C">C</option>
+				</select>
+			);
+		}
+
+		render(<App condition />, scratch);
+		Array.prototype.slice.call(scratch.firstChild.childNodes).forEach(node => {
+			if (node.value === 'A' || node.value === 'C') {
+				expect(node.selected).to.equal(true);
+			}
+		});
+
+		render(<App condition={false} />, scratch);
+		Array.prototype.slice.call(scratch.firstChild.childNodes).forEach(node => {
+			expect(node.selected).to.equal(false);
+		});
+	});
+
 	it('should select multiple with optgroups in-between', () => {
 		function App() {
 			return (
