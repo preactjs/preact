@@ -5,7 +5,7 @@ import { div, span, input as inputStr } from '../_util/dom';
 /* eslint-disable react/jsx-boolean-value */
 
 /** @jsx h */
-describe.only('focus', () => {
+describe('focus', () => {
 
 	/** @type {HTMLDivElement} */
 	let scratch;
@@ -144,8 +144,6 @@ describe.only('focus', () => {
 		validateFocus(input, 'insert sibling after again');
 
 		input = focusInput();
-
-		console.log('last test');
 
 		render((
 			<List>
