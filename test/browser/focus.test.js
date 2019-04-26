@@ -5,7 +5,7 @@ import { div, span, input as inputStr } from '../_util/dom';
 /* eslint-disable react/jsx-boolean-value */
 
 /** @jsx h */
-describe('focus', () => {
+describe.only('focus', () => {
 
 	/** @type {HTMLDivElement} */
 	let scratch;
@@ -106,7 +106,7 @@ describe('focus', () => {
 	it('should maintain focus when adding children around input', () => {
 		render((
 			<List>
-				<Input />
+				<Input key="5" />
 			</List>
 		), scratch);
 
@@ -114,8 +114,8 @@ describe('focus', () => {
 
 		render((
 			<List>
-				<ListItem>1</ListItem>
-				<Input />
+				<ListItem key="1">1</ListItem>
+				<Input key="5" />
 			</List>
 		), scratch);
 		validateFocus(input, 'insert sibling before');
@@ -124,9 +124,9 @@ describe('focus', () => {
 
 		render((
 			<List>
-				<ListItem>1</ListItem>
-				<Input />
-				<ListItem>2</ListItem>
+				<ListItem key="1">1</ListItem>
+				<Input key="5" />
+				<ListItem key="2">2</ListItem>
 			</List>
 		), scratch);
 		validateFocus(input, 'insert sibling after');
@@ -135,23 +135,25 @@ describe('focus', () => {
 
 		render((
 			<List>
-				<ListItem>1</ListItem>
-				<Input />
-				<ListItem>2</ListItem>
-				<ListItem>3</ListItem>
+				<ListItem key="1">1</ListItem>
+				<Input key="5" />
+				<ListItem key="2">2</ListItem>
+				<ListItem key="3">3</ListItem>
 			</List>
 		), scratch);
 		validateFocus(input, 'insert sibling after again');
 
 		input = focusInput();
 
+		console.log('last test');
+
 		render((
 			<List>
-				<ListItem>0</ListItem>
-				<ListItem>1</ListItem>
-				<Input />
-				<ListItem>2</ListItem>
-				<ListItem>3</ListItem>
+				<ListItem key="0">0</ListItem>
+				<ListItem key="1">1</ListItem>
+				<Input key="5" />
+				<ListItem key="2">2</ListItem>
+				<ListItem key="3">3</ListItem>
 			</List>
 		), scratch);
 		validateFocus(input, 'insert sibling before again');
