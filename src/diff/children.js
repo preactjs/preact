@@ -58,13 +58,14 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 	for (i=0; i<newChildren.length; i++) {
 		childVNode = newChildren[i] = coerceToVNode(newChildren[i]);
-		oldVNode = index = null;
-
-		// Check if we find a corresponding element in oldChildren and store the
-		// index where the element was found.
-		p = oldChildren[i];
-
+		
 		if (childVNode!=null) {
+			oldVNode = index = null;
+
+			// Check if we find a corresponding element in oldChildren and store the
+			// index where the element was found.
+			p = oldChildren[i];
+
 			if (p===null || (p != null && (childVNode.key==null && p.key==null ? (childVNode.type === p.type) : (childVNode.key === p.key)))) {
 				index = i;
 			}
@@ -79,63 +80,63 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 					}
 				}
 			}
-		}
 
-		// If we have found a corresponding old element we store it in a variable
-		// and delete it from the array. That way the next iteration can skip this
-		// element.
-		if (index!=null) {
-			oldVNode = oldChildren[index];
-			// We can't use `null` here because that is reserved for empty
-			// placeholders (holes)
-			oldChildren[index] = undefined;
-		}
-
-		nextDom = oldDom!=null && oldDom.nextSibling;
-
-		// Morph the old element into the new one, but don't append it to the dom yet
-		newDom = diff(oldVNode==null ? null : oldVNode._dom, parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, null, oldDom);
-
-		// Only proceed if the vnode has not been unmounted by `diff()` above.
-		if (childVNode!=null && newDom !=null) {
-			// Store focus in case moving children around changes it. Note that we
-			// can't just check once for every tree, because we have no way to
-			// differentiate wether the focus was reset by the user in a lifecycle
-			// hook or by reordering dom nodes.
-			focus = document.activeElement;
-
-			if (childVNode._lastDomChild != null) {
-				// Only Fragments or components that return Fragment like VNodes will
-				// have a non-null _lastDomChild. Continue the diff from the end of
-				// this Fragment's DOM tree.
-				newDom = childVNode._lastDomChild;
+			// If we have found a corresponding old element we store it in a variable
+			// and delete it from the array. That way the next iteration can skip this
+			// element.
+			if (index!=null) {
+				oldVNode = oldChildren[index];
+				// We can't use `null` here because that is reserved for empty
+				// placeholders (holes)
+				oldChildren[index] = undefined;
 			}
-			else if (excessDomChildren==oldVNode || newDom!=oldDom || newDom.parentNode==null) {
-				// NOTE: excessDomChildren==oldVNode above:
-				// This is a compression of excessDomChildren==null && oldVNode==null!
-				// The values only have the same type when `null`.
 
-				outer: if (oldDom==null || oldDom.parentNode!==parentDom) {
-					parentDom.appendChild(newDom);
+			nextDom = oldDom!=null && oldDom.nextSibling;
+
+			// Morph the old element into the new one, but don't append it to the dom yet
+			newDom = diff(oldVNode==null ? null : oldVNode._dom, parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, null, oldDom);
+
+			// Only proceed if the vnode has not been unmounted by `diff()` above.
+			if (newDom!=null) {
+				// Store focus in case moving children around changes it. Note that we
+				// can't just check once for every tree, because we have no way to
+				// differentiate wether the focus was reset by the user in a lifecycle
+				// hook or by reordering dom nodes.
+				focus = document.activeElement;
+
+				if (childVNode._lastDomChild != null) {
+					// Only Fragments or components that return Fragment like VNodes will
+					// have a non-null _lastDomChild. Continue the diff from the end of
+					// this Fragment's DOM tree.
+					newDom = childVNode._lastDomChild;
 				}
-				else {
-					sibDom = oldDom;
-					j = 0;
-					while ((sibDom=sibDom.nextSibling) && j++<oldChildrenLength/2) {
-						if (sibDom===newDom) {
-							break outer;
-						}
+				else if (excessDomChildren==oldVNode || newDom!=oldDom || newDom.parentNode==null) {
+					// NOTE: excessDomChildren==oldVNode above:
+					// This is a compression of excessDomChildren==null && oldVNode==null!
+					// The values only have the same type when `null`.
+
+					outer: if (oldDom==null || oldDom.parentNode!==parentDom) {
+						parentDom.appendChild(newDom);
 					}
-					parentDom.insertBefore(newDom, oldDom);
+					else {
+						sibDom = oldDom;
+						j = 0;
+						while ((sibDom=sibDom.nextSibling) && j++<oldChildrenLength/2) {
+							if (sibDom===newDom) {
+								break outer;
+							}
+						}
+						parentDom.insertBefore(newDom, oldDom);
+					}
 				}
-			}
 
-			// Restore focus if it was changed
-			if (focus!==document.activeElement) {
-				focus.focus();
-			}
+				// Restore focus if it was changed
+				if (focus!==document.activeElement) {
+					focus.focus();
+				}
 
-			oldDom = newDom!=null ? newDom.nextSibling : nextDom;
+				oldDom = newDom!=null ? newDom.nextSibling : nextDom;
+			}
 		}
 	}
 
