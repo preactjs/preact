@@ -42,10 +42,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 	if (options.diff) options.diff(newVNode);
 
 	let c, p, isNew = false, oldProps, oldState, snapshot,
-		newType = newVNode.type;
-
-	/** @type {import('../internal').Component | null} */
-	let clearProcessingException;
+		newType = newVNode.type, clearProcessingException;
 
 	try {
 		outer: if (oldVNode.type===Fragment || newType===Fragment) {
@@ -74,7 +71,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			// Get component and set it to `c`
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
-				clearProcessingException = c._processingException;
+				clearProcessingException = c._processingException = c._pendingError;
 				dom = newVNode._dom = oldVNode._dom;
 			}
 			else {
@@ -188,7 +185,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 		}
 
 		if (clearProcessingException) {
-			c._processingException = null;
+			c._pendingError = c._processingException = null;
 		}
 
 		if (options.diffed) options.diffed(newVNode);
@@ -382,7 +379,7 @@ function catchErrorInComponent(error, component) {
 				else {
 					continue;
 				}
-				return enqueueRender(component._processingException = component);
+				return enqueueRender(component._pendingError = component);
 			}
 			catch (e) {
 				error = e;

@@ -2455,6 +2455,24 @@ describe('Lifecycle methods', () => {
 			expect(Receiver.getDerivedStateFromError).to.have.been.called;
 		});
 
+		// https://github.com/developit/preact/issues/1570
+		it('should handle double child throws', () => {
+			const Child = ({ i }) => {
+				throw new Error(`error! ${i}`);
+			};
+
+			const fn = () => render(
+				<Receiver>
+					{[1, 2].map(i => <Child key={i} i={i} />)}
+				</Receiver>,
+				scratch
+			);
+			expect(fn).to.not.throw();
+
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Error: error! 2</div>');
+		});
+
 		it('should be called when child fails in componentWillMount', () => {
 			class ThrowErr extends Component {
 				componentWillMount() {
