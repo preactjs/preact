@@ -24,7 +24,7 @@ import { removeNode } from '../util';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
 export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, oldDom) {
-	let childVNode, i, j, p, index, oldVNode, newDom,
+	let childVNode, i, j, oldVNode, newDom,
 		nextDom, sibDom, focus;
 
 	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode, true);
@@ -54,35 +54,26 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		childVNode = newChildren[i] = coerceToVNode(newChildren[i]);
 		
 		if (childVNode!=null) {
-			oldVNode = index = null;
+			// Check if we find a corresponding element in oldChildren.
+			// If found, delete the array item by setting to `undefined`.
+			// We use `undefined`, as `null` is reserved for empty placeholders
+			// (holes).
+			oldVNode = oldChildren[i];
 
-			// Check if we find a corresponding element in oldChildren and store the
-			// index where the element was found.
-			p = oldChildren[i];
-
-			if (p===null || (p != null && (childVNode.key==null && p.key==null ? (childVNode.type === p.type) : (childVNode.key === p.key)))) {
-				index = i;
+			if (oldVNode===null || (oldVNode != null && (childVNode.key==null && oldVNode.key==null ? (childVNode.type === oldVNode.type) : (childVNode.key === oldVNode.key)))) {
+				oldChildren[i] = undefined;
 			}
 			else {
+				// Either oldVNode === undefined or oldChildrenLength > 0,
+				// so after this loop oldVNode == null or oldVNode is a valid value.
 				for (j=0; j<oldChildrenLength; j++) {
-					p = oldChildren[j];
-					if (p!=null) {
-						if (childVNode.key==null && p.key==null ? (childVNode.type === p.type) : (childVNode.key === p.key)) {
-							index = j;
-							break;
-						}
+					oldVNode = oldChildren[j];
+					if (oldVNode!=null && (childVNode.key==null && oldVNode.key==null ? (childVNode.type === oldVNode.type) : (childVNode.key === oldVNode.key))) {
+						oldChildren[j] = undefined;
+						break;
 					}
+					oldVNode = null;
 				}
-			}
-
-			// If we have found a corresponding old element we store it in a variable
-			// and delete it from the array. That way the next iteration can skip this
-			// element.
-			if (index!=null) {
-				oldVNode = oldChildren[index];
-				// We can't use `null` here because that is reserved for empty
-				// placeholders (holes)
-				oldChildren[index] = undefined;
 			}
 
 			nextDom = oldDom!=null && oldDom.nextSibling;
