@@ -4,6 +4,7 @@ import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component } from '../../src/index';
 import { setupScratch, teardown, getMixedArray, mixedArrayHTML, sortCss, serializeHtml, supportsPassiveEvents, supportsDataList } from '../_util/helpers';
 import { clearLog, getLog, logCall } from '../_util/logCall';
+import options from '../../src/options';
 
 /** @jsx h */
 
@@ -973,6 +974,29 @@ describe('render()', () => {
 		rerender();
 
 		expect(scratch.textContent).to.equal('01');
+	});
+
+	it('should not cause infinite loop with referentially equal props', () => {
+		let i = 0;
+		let prevDiff = options.diff;
+		options.diff = () => {
+			if (++i > 10) {
+				options.diff = prevDiff;
+				throw new Error('Infinite loop');
+			}
+		};
+
+		function App({ children, ...rest }) {
+			return (
+				<div {...rest}>
+					<div {...rest}>{children}</div>
+				</div>
+			);
+		}
+
+		render(<App>10</App>, scratch);
+		expect(scratch.textContent).to.equal('10');
+		options.diff = prevDiff;
 	});
 
 	describe('replaceNode parameter', () => {

@@ -39,7 +39,7 @@ describe('createElement(jsx)', () => {
 
 	it('should set VNode#props property', () => {
 		const props = {};
-		expect(h('div', props)).to.have.property('props', props);
+		expect(h('div', props).props).to.deep.equal(props);
 	});
 
 	it('should set VNode#text property', () => {
