@@ -273,24 +273,30 @@ export namespace JSXInternal {
 	interface PathAttributes {
 		d: string;
 	}
+	
+	type EventHandlers<E extends Event> = EventHandler<E> | UnistoreEventHandler<any, E>;
 
 	interface EventHandler<E extends Event> {
 		(event: E): void;
 	}
 
-	type ClipboardEventHandler = EventHandler<ClipboardEvent>;
-	type CompositionEventHandler = EventHandler<CompositionEvent>;
-	type DragEventHandler = EventHandler<DragEvent>;
-	type FocusEventHandler = EventHandler<FocusEvent>;
-	type KeyboardEventHandler = EventHandler<KeyboardEvent>;
-	type MouseEventHandler = EventHandler<MouseEvent>;
-	type TouchEventHandler = EventHandler<TouchEvent>;
-	type UIEventHandler = EventHandler<UIEvent>;
-	type WheelEventHandler = EventHandler<WheelEvent>;
-	type AnimationEventHandler = EventHandler<AnimationEvent>;
-	type TransitionEventHandler = EventHandler<TransitionEvent>;
-	type GenericEventHandler = EventHandler<Event>;
-	type PointerEventHandler = EventHandler<PointerEvent>;
+	interface UnistoreEventHandler<K extends any, E extends Event> {
+		(state: K, event: E) : Promise<Partial<K>> | Partial<K> | void;
+	}
+
+	type ClipboardEventHandler = EventHandlers<ClipboardEvent>;
+	type CompositionEventHandler = EventHandlers<CompositionEvent>;
+	type DragEventHandler = EventHandlers<DragEvent>;
+	type FocusEventHandler = EventHandlers<FocusEvent>;
+	type KeyboardEventHandler = EventHandlers<KeyboardEvent>;
+	type MouseEventHandler = EventHandlers<MouseEvent>;
+	type TouchEventHandler = EventHandlers<TouchEvent>;
+	type UIEventHandler = EventHandlers<UIEvent>;
+	type WheelEventHandler = EventHandlers<WheelEvent>;
+	type AnimationEventHandler = EventHandlers<AnimationEvent>;
+	type TransitionEventHandler = EventHandlers<TransitionEvent>;
+	type GenericEventHandler = EventHandlers<Event>;
+	type PointerEventHandler = EventHandlers<PointerEvent>;
 
 	interface DOMAttributes extends preact.PreactDOMAttributes {
 		// Image Events
