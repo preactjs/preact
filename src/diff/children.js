@@ -39,19 +39,13 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	if (oldDom == EMPTY_OBJ) {
 		oldDom = null;
 		if (excessDomChildren!=null) {
-			for (i = 0; i < excessDomChildren.length; i++) {
-				if (excessDomChildren[i]!=null) {
-					oldDom = excessDomChildren[i];
-					break;
-				}
+			for (i = 0; oldDom==null && i < excessDomChildren.length; i++) {
+				oldDom = excessDomChildren[i];
 			}
 		}
 		else {
-			for (i = 0; i < oldChildrenLength; i++) {
-				if (oldChildren[i] && oldChildren[i]._dom) {
-					oldDom = oldChildren[i]._dom;
-					break;
-				}
+			for (i = 0; oldDom==null && i < oldChildrenLength; i++) {
+				oldDom = oldChildren[i] && oldChildren[i]._dom;
 			}
 		}
 	}
