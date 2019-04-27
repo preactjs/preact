@@ -41,7 +41,7 @@ export function getVNodeId(vnode) {
  * @param {import('../internal').VNode} vnode
  */
 export function hasVNodeId(vnode) {
-	return vnodeToId!=null && vnodeToId.has(vnode);
+	return vnodeToId!=null && vnodeToId.has(getInstance(vnode));
 }
 
 /**

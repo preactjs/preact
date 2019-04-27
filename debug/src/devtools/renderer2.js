@@ -1,6 +1,6 @@
 import { Fragment } from 'preact';
 import { getVNodeId, getVNode, clearVNode, hasVNodeId } from './cache';
-import { TREE_OPERATION_ADD, ElementTypeRoot, TREE_OPERATION_REMOVE } from './constants';
+import { TREE_OPERATION_ADD, ElementTypeRoot, TREE_OPERATION_REMOVE, TREE_OPERATION_REORDER_CHILDREN } from './constants';
 import { getChildren, getVNodeType, getDisplayName } from './vnode';
 import { cleanForBridge } from './pretty';
 import { inspectHooks } from './hooks';
@@ -19,8 +19,7 @@ export function onCommitFiberRoot(hook, state, vnode) {
 
 	// TODO: Profiling
 	if (hasVNodeId(vnode)) {
-		// TODO
-		// let id = getVNodeId(vnode);
+		update(state, vnode, true);
 	}
 	else {
 		// TODO: Unmount
@@ -38,25 +37,55 @@ export function onCommitFiberRoot(hook, state, vnode) {
  * @param {import('../internal').VNode} vnode
  */
 export function onCommitFiberUnmount(hook, state, vnode) {
-	unmount(state, vnode, false);
+	unmount(state, vnode, true);
+	flushPendingEvents(hook, state);
+	state.currentRootId = -1;
 }
 
 /**
  * @param {import('../internal').AdapterState} state
  * @param {import('../internal').VNode} vnode
+ * @param {boolean} isRoot
+ * @returns {boolean}
  */
-export function update(state, vnode) {
-	if (!shouldFilter) {
-		let id = getVNodeId(vnode);
-		if (id==null) mount(state, vnode, false);
-		else {
-			//
-		}
+export function update(state, vnode, isRoot) {
+	if (!shouldFilter(vnode) && !hasVNodeId(vnode)) {
+		mount(state, vnode, isRoot);
+		return true;
 	}
 
 	let children = getChildren(vnode);
 	for (let i = 0; i < children.length; i++) {
-		update(state, children[i]);
+		if (update(state, children[i], false)) {
+			resetChildren(state, vnode);
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Reset child ordering of a vnode
+ * @param {import('../internal').AdapterState} state
+ * @param {import('../internal').VNode} vnode
+ */
+export function resetChildren(state, vnode) {
+
+	/** @type {number[]} */
+	let next = [];
+
+	// TODO: Find filtered children
+
+	if (next.length < 2) return;
+
+	state.pending.push(
+		TREE_OPERATION_REORDER_CHILDREN,
+		getVNodeId(vnode),
+		next.length
+	);
+
+	for (let i = 0; i < next.length; i++) {
+		state.pending.push(next[i]);
 	}
 }
 
@@ -71,14 +100,12 @@ export function unmount(state, vnode, isRoot) {
 	if (isRoot) {
 		state.pending.push([
 			TREE_OPERATION_REMOVE,
+			1, // Remove 1 item
 			id
 		]);
 	}
 	else if (!shouldFilter(vnode)) {
-		state.pending.push([
-			TREE_OPERATION_REMOVE,
-			id
-		]);
+		state.pendingUnmountIds.push(id);
 	}
 
 	clearVNode(vnode);
@@ -142,10 +169,10 @@ export function flushPendingEvents(hook, state) {
 	// We _must_ set the length on initialization
 	let ops = new Uint32Array(
 		2 + // Renderer id + root vnode id
-		1 + // string table length
+		1 + // string table length field
 		allStrLengths +
 		2 + // TREE_OPERATION_REMOVE + removed id length
-		// TODO: Pending unmounts
+		state.pendingUnmountIds.length +
 		state.pending.length
 	);
 
@@ -164,7 +191,10 @@ export function flushPendingEvents(hook, state) {
 	// All unmounts
 	ops[i++] = TREE_OPERATION_REMOVE;
 	// Total number of unmount ids
-	ops[i++] = 0; // TODO
+	ops[i++] = state.pendingUnmountIds.length;
+	for (let j = 0; j < state.pendingUnmountIds.length; j++) {
+		ops[i + j] = state.pendingUnmountIds[j];
+	}
 
 	// Finally add all pending operations
 	ops.set(state.pending, i);
