@@ -1,7 +1,8 @@
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { h, Component, Fragment } from 'preact';
 import { forwardRef, memo } from 'preact/compat';
-import { setIn, getDisplayName } from '../../src/devtools/util';
+import { setIn } from '../../src/devtools/util';
+import { getDisplayName } from '../../src/devtools/vnode';
 
 /** @jsx h */
 

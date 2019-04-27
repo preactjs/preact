@@ -1,5 +1,5 @@
 import { options, Component } from 'preact';
-import { onCommitFiberRoot, flushPendingEvents, inspectElement } from './renderer2';
+import { onCommitFiberRoot, flushPendingEvents, inspectElement, onCommitFiberUnmount } from './renderer2';
 import { setInProps, setInState } from './update';
 import { assign } from '../../../src/util';
 import { getVNode } from './cache';
@@ -110,6 +110,16 @@ export function initDevTools() {
 				overrideProps(vnode, path, value) {
 					// TODO
 				},
+				setTrackedPath() {
+					// TODO
+				},
+				getPathForElement() {
+					// TODO
+				},
+				getBestMatchForTrackedPath() {
+					// TODO
+					return null;
+				},
 				currentDispatcherRef: { current: null }
 			});
 		};
@@ -127,7 +137,7 @@ export function initDevTools() {
 
 		// eslint-disable-next-line arrow-body-style
 		onCommitUnmount = catchErrors(vnode => {
-			return hook.onCommitFiberUnmount(rid, vnode);
+			return onCommitFiberUnmount(hook, state, vnode);
 		});
 	})();
 

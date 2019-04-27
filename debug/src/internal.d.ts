@@ -45,8 +45,22 @@ export interface RendererConfig {
 	cleanup(): void;
 }
 
+export interface PathFrame {
+	key: string | null,
+  index: number,
+  displayName: string | null,
+}
+
+export interface PathMatch {
+	id: number;
+	isFullMatch: boolean;
+}
+
 export interface Renderer extends RendererConfig {
 	setInState(id: number, path: string[], value: any): void;
+	setTrackedPath(path: PathFrame[] | null): void;
+	getPathForElement(id: number): PathFrame[] | null;
+	getBestMatchForTrackedPath(): PathMatch | null;
 }
 
 export interface DevtoolsUpdater {
