@@ -1,4 +1,5 @@
 import { getInstance } from './custom';
+import { getChildren } from './vnode';
 
 let uid = 0;
 
@@ -8,10 +9,10 @@ export function genUuid() {
 }
 
 /** @type {WeakMap<any, number> | null} */
-let cache = null;
+let vnodeToId = null;
 
 /** @type {Map<number, import('../internal').VNode> | null} */
-let cacheVNode = null;
+let idToVNode = null;
 
 /**
  * Get the unique id of a vnode
@@ -20,19 +21,27 @@ let cacheVNode = null;
 export function getVNodeId(vnode) {
 	// Lazily initialize cache so that IE11 won't crash when `preact/debug` was
 	// imported somewhere
-	if (cache==null) {
-		cache = new WeakMap();
+	if (vnodeToId==null) {
+		vnodeToId = new WeakMap();
 	}
-	if (cacheVNode==null) {
-		cacheVNode = new Map();
+	if (idToVNode==null) {
+		idToVNode = new Map();
 	}
 
 	let inst = getInstance(vnode);
-	if (!cache.has(inst)) cache.set(inst, genUuid());
+	if (!vnodeToId.has(inst)) vnodeToId.set(inst, genUuid());
 
-	let id = cache.get(inst);
-	cacheVNode.set(id, vnode);
+	let id = vnodeToId.get(inst);
+	idToVNode.set(id, vnode);
 	return id;
+}
+
+/**
+ * Check if a vnode was seen before
+ * @param {import('../internal').VNode} vnode
+ */
+export function hasVNodeId(vnode) {
+	return vnodeToId!=null && vnodeToId.has(vnode);
 }
 
 /**
@@ -41,12 +50,25 @@ export function getVNodeId(vnode) {
  * @returns {import('../internal').VNode | null}
  */
 export function getVNode(id) {
-	return cacheVNode.get(id) || null;
+	return idToVNode.get(id) || null;
+}
+
+/**
+ * Remove a vnode from all caches
+ * @param {import('../internal').VNode} vnode The vnode to remove
+ */
+export function clearVNode(vnode) {
+	let children = getChildren(vnode);
+	for (let i = 0; i < children.length; i++) {
+		clearVNode(children[i]);
+	}
+	idToVNode.delete(getVNodeId(vnode));
+	vnodeToId.delete(vnode);
 }
 
 // Only used for testing
 export function clearState() {
 	uid = 0;
-	cache = null;
-	cacheVNode = null;
+	vnodeToId = null;
+	idToVNode = null;
 }
