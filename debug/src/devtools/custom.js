@@ -97,8 +97,8 @@ export function isRoot(vnode) {
  * instance as key. For html elements we use the dom node as key.
  *
  * @param {import('../internal').VNode} vnode
- * @param {boolean} isRoot
- * @returns {import('../internal').Component | import('../internal').PreactElement | Text | null}
+ * @param {boolean} [isRoot]
+ * @returns {*}
  */
 export function getInstance(vnode, isRoot) {
 	// Use the parent element as instance for root nodes
