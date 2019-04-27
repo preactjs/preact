@@ -143,5 +143,6 @@ export interface AdapterState {
 	rendererId: number;
 	currentRootId: number;
 	pending: any[];
+	pendingUnmountIds: number[];
 	isProfiling: boolean;
 }

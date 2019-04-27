@@ -84,6 +84,7 @@ export function initDevTools() {
 			currentRootId: -1,
 			isProfiling: false,
 			pending: [],
+			pendingUnmountIds: [],
 			rendererId: -1
 		};
 
