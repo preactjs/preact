@@ -24,3 +24,8 @@ export function getStringId(input) {
 
 	return stringTable.get(input);
 }
+
+export function clearStringTable() {
+	allStrLengths = 0;
+	if (stringTable) stringTable.clear();
+}

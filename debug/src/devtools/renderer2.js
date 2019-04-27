@@ -5,7 +5,7 @@ import { getChildren, getVNodeType, getDisplayName } from './vnode';
 import { cleanForBridge } from './pretty';
 import { inspectHooks } from './hooks';
 import { encode } from './util';
-import { getStringId, stringTable, allStrLengths } from './string-table';
+import { getStringId, stringTable, allStrLengths, clearStringTable } from './string-table';
 
 /**
  * Called when a tree has completed rendering
@@ -19,7 +19,9 @@ export function onCommitFiberRoot(hook, state, vnode) {
 
 	// TODO: Profiling
 	if (hasVNodeId(vnode)) {
-		update(state, vnode, true);
+		if (update(state, vnode, true, 0)) {
+			resetChildren(state, vnode);
+		}
 	}
 	else {
 		// TODO: Unmount
@@ -37,28 +39,35 @@ export function onCommitFiberRoot(hook, state, vnode) {
  * @param {import('../internal').VNode} vnode
  */
 export function onCommitFiberUnmount(hook, state, vnode) {
-	unmount(state, vnode, true);
-	flushPendingEvents(hook, state);
-	state.currentRootId = -1;
+	// Check if is root
+	unmount(state, vnode, false);
 }
 
 /**
  * @param {import('../internal').AdapterState} state
  * @param {import('../internal').VNode} vnode
  * @param {boolean} isRoot
+ * @param {number} parentId
  * @returns {boolean}
  */
-export function update(state, vnode, isRoot) {
+export function update(state, vnode, isRoot, parentId) {
+	let shouldReset = false;
 	if (!shouldFilter(vnode) && !hasVNodeId(vnode)) {
-		mount(state, vnode, isRoot);
-		return true;
+		mount(state, vnode, isRoot, parentId);
+		shouldReset = true;
+	}
+	else {
+		let children = getChildren(vnode);
+		for (let i = 0; i < children.length; i++) {
+			if (update(state, children[i], false, shouldFilter(vnode) ? parentId : getVNodeId(vnode))) {
+				shouldReset = true;
+			}
+		}
 	}
 
-	let children = getChildren(vnode);
-	for (let i = 0; i < children.length; i++) {
-		if (update(state, children[i], false)) {
-			resetChildren(state, vnode);
-		}
+	if (shouldReset) {
+		resetChildren(state, vnode);
+		return true;
 	}
 
 	return false;
@@ -74,7 +83,16 @@ export function resetChildren(state, vnode) {
 	/** @type {number[]} */
 	let next = [];
 
-	// TODO: Find filtered children
+	let stack = getChildren(vnode);
+	let child;
+	while ((child = stack.pop())!=null) {
+		if (!shouldFilter(child)) {
+			next.push(getVNodeId(child));
+		}
+		else {
+			stack.push(...getChildren(child));
+		}
+	}
 
 	if (next.length < 2) return;
 
@@ -106,6 +124,12 @@ export function unmount(state, vnode, isRoot) {
 	}
 	else if (!shouldFilter(vnode)) {
 		state.pendingUnmountIds.push(id);
+	}
+	else {
+		let children = getChildren(vnode);
+		for (let i = 0; i < children.length; i++) {
+			unmount(state, children[i], false);
+		}
 	}
 
 	clearVNode(vnode);
@@ -144,14 +168,14 @@ export function mount(state, vnode, isRoot, parentId) {
 				parentId || 0,
 				owner,
 				getStringId(getDisplayName(vnode)),
-				vnode.key ? getStringId(vnode.key+ '') : 0
+				vnode.key ? getStringId(vnode.key + '') : 0
 			);
 		}
 	}
 
 	const children = getChildren(vnode);
 	for (let i = 0; i < children.length; i++) {
-		mount(state, children[i], false, id || parentId);
+		mount(state, children[i], false, !isRoot && shouldFilter(vnode) ? parentId : id);
 	}
 }
 
@@ -161,7 +185,7 @@ export function mount(state, vnode, isRoot, parentId) {
  * @param {import('../internal').AdapterState} state
  */
 export function flushPendingEvents(hook, state) {
-	if (state.pending.length==0) return;
+	if (state.pending.length==0 && state.pendingUnmountIds.length==0) return;
 
 	// TODO: Profiling
 	if (!state.connected) return;
@@ -200,7 +224,10 @@ export function flushPendingEvents(hook, state) {
 	ops.set(state.pending, i);
 
 	hook.emit('operations', ops);
+
 	state.pending = [];
+	state.pendingUnmountIds = [];
+	clearStringTable();
 }
 
 /**
