@@ -1,10 +1,11 @@
 import { Fragment } from 'preact';
-import { getVNodeId, getVNode } from './cache';
-import { TREE_OPERATION_ADD, ElementTypeRoot } from './constants';
+import { getVNodeId, getVNode, clearVNode, hasVNodeId } from './cache';
+import { TREE_OPERATION_ADD, ElementTypeRoot, TREE_OPERATION_REMOVE } from './constants';
 import { getChildren, getVNodeType, getDisplayName } from './vnode';
 import { cleanForBridge } from './pretty';
 import { inspectHooks } from './hooks';
-import { encode, append } from './util';
+import { encode } from './util';
+import { getStringId, stringTable, allStrLengths } from './string-table';
 
 /**
  * Called when a tree has completed rendering
@@ -16,13 +17,71 @@ export function onCommitFiberRoot(hook, state, vnode) {
 	// Empty root
 	// if (root.type===Fragment && root._children.length==0) return;
 
-	// TODO: Update
-	// TODO: Unmount
 	// TODO: Profiling
-	mount(state, vnode, true);
+	if (hasVNodeId(vnode)) {
+		// TODO
+		// let id = getVNodeId(vnode);
+	}
+	else {
+		// TODO: Unmount
+		mount(state, vnode, true);
+	}
 
 	flushPendingEvents(hook, state);
 	state.currentRootId = -1;
+}
+
+/**
+ * Called when a tree will be unmounted
+ * @param {import('../internal').DevtoolsHook} hook
+ * @param {import('../internal').AdapterState} state
+ * @param {import('../internal').VNode} vnode
+ */
+export function onCommitFiberUnmount(hook, state, vnode) {
+	unmount(state, vnode, false);
+}
+
+/**
+ * @param {import('../internal').AdapterState} state
+ * @param {import('../internal').VNode} vnode
+ */
+export function update(state, vnode) {
+	if (!shouldFilter) {
+		let id = getVNodeId(vnode);
+		if (id==null) mount(state, vnode, false);
+		else {
+			//
+		}
+	}
+
+	let children = getChildren(vnode);
+	for (let i = 0; i < children.length; i++) {
+		update(state, children[i]);
+	}
+}
+
+/**
+ * @param {import('../internal').AdapterState} state
+ * @param {import('../internal').VNode} vnode
+ * @param {boolean} isRoot Mark a root as they need to be mounted differently
+ */
+export function unmount(state, vnode, isRoot) {
+	let id = getVNodeId(vnode);
+
+	if (isRoot) {
+		state.pending.push([
+			TREE_OPERATION_REMOVE,
+			id
+		]);
+	}
+	else if (!shouldFilter(vnode)) {
+		state.pending.push([
+			TREE_OPERATION_REMOVE,
+			id
+		]);
+	}
+
+	clearVNode(vnode);
 }
 
 /**
@@ -46,31 +105,20 @@ export function mount(state, vnode, isRoot, parentId) {
 			);
 		}
 		else {
-			let displayName = encode(getDisplayName(vnode));
-
 			let owner = vnode._component!=null && vnode._component._ancestorComponent!=null
 				&& vnode._component._ancestorComponent._vnode!=null
 				? getVNodeId(vnode._component._ancestorComponent._vnode)
 				: 0;
 
-			let next = [
+			state.pending.push(
 				TREE_OPERATION_ADD,
 				id,
 				getVNodeType(vnode),
 				parentId || 0,
-				owner
-			];
-
-			append(next, displayName);
-
-			if (vnode.key!=null) {
-				append(next, encode(vnode.key + ''));
-			}
-			else {
-				next[next.length] = 0;
-			}
-
-			state.pending.push(...next);
+				owner,
+				getStringId(getDisplayName(vnode)),
+				vnode.key ? getStringId(vnode.key+ '') : 0
+			);
 		}
 	}
 
@@ -91,9 +139,37 @@ export function flushPendingEvents(hook, state) {
 	// TODO: Profiling
 	if (!state.connected) return;
 
-	let rootRef = 1; // TODO
-	state.pending.splice(0, 0, state.rendererId, rootRef);
-	hook.emit('operations', Uint32Array.from(state.pending));
+	// We _must_ set the length on initialization
+	let ops = new Uint32Array(
+		2 + // Renderer id + root vnode id
+		1 + // string table length
+		allStrLengths +
+		2 + // TREE_OPERATION_REMOVE + removed id length
+		// TODO: Pending unmounts
+		state.pending.length
+	);
+
+	let i = 0;
+	ops[i++] = state.rendererId;
+	ops[i++] = 1; // TODO
+
+	// Add string table
+	ops[i++] = allStrLengths;
+	stringTable.forEach((_, k) => {
+		ops[i++] = k.length;
+		ops.set(encode(k), i);
+		i += k.length;
+	});
+
+	// All unmounts
+	ops[i++] = TREE_OPERATION_REMOVE;
+	// Total number of unmount ids
+	ops[i++] = 0; // TODO
+
+	// Finally add all pending operations
+	ops.set(state.pending, i);
+
+	hook.emit('operations', ops);
 	state.pending = [];
 }
 
@@ -122,8 +198,7 @@ export function inspectElement(id) {
 		canToggleSuspense: false, // TODO
 		canViewSource: false, // TODO
 		displayName: getDisplayName(vnode),
-		// context: cleanForBridge({}), // TODO
-		context: null, // TODO
+		context: vnode._component ? cleanForBridge(vnode._component.context) : null, // TODO
 		hooks: hasHooks ? cleanForBridge(inspectHooks(vnode)) : null,
 		props: vnode.props!=null && Object.keys(vnode.props).length > 0
 			? cleanForBridge(vnode.props)
@@ -135,5 +210,4 @@ export function inspectElement(id) {
 		source: null // TODO
 	};
 }
-
 

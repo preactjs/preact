@@ -44,5 +44,5 @@ export function getChildren(vnode) {
 
 	return !Array.isArray(c._prevVNode) && c._prevVNode!=null
 		? [c._prevVNode]
-		: null;
+		: [];
 }
