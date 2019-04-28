@@ -31,6 +31,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	let oldChildren = oldParentVNode!=null && oldParentVNode!=EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR;
 
 	let oldChildrenLength = oldChildren.length;
+	let oldChild;
 
 	// Only in very specific places should this logic be invoked (top level `render` and `diffElementNodes`).
 	// I'm using `EMPTY_OBJ` to signal when `diffChildren` is invoked in these situations. I can't use `null`
@@ -42,6 +43,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			for (i = 0; i < excessDomChildren.length; i++) {
 				if (excessDomChildren[i]!=null) {
 					oldDom = excessDomChildren[i];
+					oldChild = excessDomChildren[i];
 					break;
 				}
 			}
@@ -50,6 +52,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			for (i = 0; i < oldChildrenLength; i++) {
 				if (oldChildren[i] && oldChildren[i]._dom) {
 					oldDom = oldChildren[i]._dom;
+					oldChild = oldChildren[i];
 					break;
 				}
 			}
@@ -74,6 +77,9 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 					if (p!=null) {
 						if (childVNode.key==null && p.key==null ? (childVNode.type === p.type) : (childVNode.key === p.key)) {
 							index = j;
+							if (oldChildrenLength !== newChildren.length && p.type !== (oldChild && oldChild.type)) {
+								oldDom = p._dom;
+							}
 							break;
 						}
 					}
@@ -92,7 +98,6 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		}
 
 		nextDom = oldDom!=null && oldDom.nextSibling;
-
 		// Morph the old element into the new one, but don't append it to the dom yet
 		newDom = diff(oldVNode==null ? null : oldVNode._dom, parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, null, oldDom);
 
@@ -108,7 +113,6 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 				// NOTE: excessDomChildren==oldVNode above:
 				// This is a compression of excessDomChildren==null && oldVNode==null!
 				// The values only have the same type when `null`.
-
 				outer: if (oldDom==null || oldDom.parentNode!==parentDom) {
 					parentDom.appendChild(newDom);
 				}
@@ -123,7 +127,6 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 					parentDom.insertBefore(newDom, oldDom);
 				}
 			}
-
 			oldDom = newDom!=null ? newDom.nextSibling : nextDom;
 		}
 	}

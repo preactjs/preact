@@ -106,7 +106,7 @@ describe('focus', () => {
 	it('should maintain focus when adding children around input', () => {
 		render((
 			<List>
-				<Input key="5" />
+				<Input />
 			</List>
 		), scratch);
 
@@ -114,8 +114,8 @@ describe('focus', () => {
 
 		render((
 			<List>
-				<ListItem key="1">1</ListItem>
-				<Input key="5" />
+				<ListItem>1</ListItem>
+				<Input />
 			</List>
 		), scratch);
 		validateFocus(input, 'insert sibling before');
@@ -124,9 +124,9 @@ describe('focus', () => {
 
 		render((
 			<List>
-				<ListItem key="1">1</ListItem>
-				<Input key="5" />
-				<ListItem key="2">2</ListItem>
+				<ListItem>1</ListItem>
+				<Input />
+				<ListItem>2</ListItem>
 			</List>
 		), scratch);
 		validateFocus(input, 'insert sibling after');
@@ -135,10 +135,10 @@ describe('focus', () => {
 
 		render((
 			<List>
-				<ListItem key="1">1</ListItem>
-				<Input key="5" />
-				<ListItem key="2">2</ListItem>
-				<ListItem key="3">3</ListItem>
+				<ListItem>1</ListItem>
+				<Input />
+				<ListItem>2</ListItem>
+				<ListItem>3</ListItem>
 			</List>
 		), scratch);
 		validateFocus(input, 'insert sibling after again');
@@ -147,11 +147,11 @@ describe('focus', () => {
 
 		render((
 			<List>
-				<ListItem key="0">0</ListItem>
-				<ListItem key="1">1</ListItem>
-				<Input key="5" />
-				<ListItem key="2">2</ListItem>
-				<ListItem key="3">3</ListItem>
+				<ListItem>0</ListItem>
+				<ListItem>1</ListItem>
+				<Input />
+				<ListItem>2</ListItem>
+				<ListItem>3</ListItem>
 			</List>
 		), scratch);
 		validateFocus(input, 'insert sibling before again');
