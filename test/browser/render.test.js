@@ -4,6 +4,7 @@ import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component } from '../../src/index';
 import { setupScratch, teardown, getMixedArray, mixedArrayHTML, sortCss, serializeHtml, supportsPassiveEvents, supportsDataList } from '../_util/helpers';
 import { clearLog, getLog, logCall } from '../_util/logCall';
+import options from '../../src/options';
 
 /** @jsx h */
 
@@ -63,6 +64,12 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.eql(
 			`<div>Good</div>`
 		);
+	});
+
+	it('should not render when detecting JSON-injection', () => {
+		const vnode = JSON.parse('{"type":"span","children":"Malicious"}');
+		render(vnode, scratch);
+		expect(scratch.firstChild).to.be.null;
 	});
 
 	it('should create empty nodes (<* />)', () => {
@@ -173,10 +180,9 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('');
 	});
 
-	it('should throw an error on function children', () => {
-		expect(
-			() => render(<div>{() => {}}</div>, scratch)
-		).to.throw();
+	it('should not render children when using function children', () => {
+		render(<div>{() => {}}</div>, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 
 	it('should render NaN as text content', () => {
@@ -249,6 +255,14 @@ describe('render()', () => {
 		expect(root.children[3]).to.have.property('value', '');
 	});
 
+	it('should set value inside the specified range', () => {
+		render(
+			<input type="range" value={0.5} min="0" max="1" step="0.05" />,
+			scratch
+		);
+		expect(scratch.firstChild.value).to.equal('0.5');
+	});
+
 	// IE or IE Edge will throw when attribute values don't conform to the
 	// spec. That's the correct behaviour, but bad for this test...
 	if (!/(Edge|MSIE|Trident)/.test(navigator.userAgent)) {
@@ -304,11 +318,11 @@ describe('render()', () => {
 		let div = scratch.childNodes[0];
 		expect(div.attributes.length).to.equal(2);
 
-		expect(div.attributes[0].name).equal('foo');
-		expect(div.attributes[0].value).equal('[object Object]');
+		expect(div.attributes[0].name).equal('bar');
+		expect(div.attributes[0].value).equal('abc');
 
-		expect(div.attributes[1].name).equal('bar');
-		expect(div.attributes[1].value).equal('abc');
+		expect(div.attributes[1].name).equal('foo');
+		expect(div.attributes[1].value).equal('[object Object]');
 	});
 
 	it('should apply class as String', () => {
@@ -961,4 +975,67 @@ describe('render()', () => {
 
 		expect(scratch.textContent).to.equal('01');
 	});
+
+	it('should not cause infinite loop with referentially equal props', () => {
+		let i = 0;
+		let prevDiff = options.diff;
+		options.diff = () => {
+			if (++i > 10) {
+				options.diff = prevDiff;
+				throw new Error('Infinite loop');
+			}
+		};
+
+		function App({ children, ...rest }) {
+			return (
+				<div {...rest}>
+					<div {...rest}>{children}</div>
+				</div>
+			);
+		}
+
+		render(<App>10</App>, scratch);
+		expect(scratch.textContent).to.equal('10');
+		options.diff = prevDiff;
+	});
+
+	describe('replaceNode parameter', () => {
+
+		function appendChildToScratch(id) {
+			const child = document.createElement('div');
+			child.id = id;
+			scratch.appendChild(child);
+		}
+
+		beforeEach(() => {
+			['a', 'b', 'c'].forEach(id => appendChildToScratch(id));
+		});
+
+		it('should use replaceNode as render root and not inject into it', () => {
+			const childA = scratch.querySelector('#a');
+			render(<div id="a">contents</div>, scratch, childA);
+			expect(scratch.querySelector('#a')).to.equal(childA);
+			expect(childA.innerHTML).to.equal('contents');
+		});
+
+		it('should not remove siblings of replaceNode', () => {
+			const childA = scratch.querySelector('#a');
+			render(<div id="a" />, scratch, childA);
+			expect(scratch.innerHTML).to.equal('<div id="a"></div><div id="b"></div><div id="c"></div>');
+		});
+
+		it('should render multiple render roots in one parentDom', () => {
+			const childA = scratch.querySelector('#a');
+			const childB = scratch.querySelector('#b');
+			const childC = scratch.querySelector('#c');
+			const expectedA = '<div id="a">childA</div>';
+			const expectedB = '<div id="b">childB</div>';
+			const expectedC = '<div id="c">childC</div>';
+			render(<div id="a">childA</div>, scratch, childA);
+			render(<div id="b">childB</div>, scratch, childB);
+			render(<div id="c">childC</div>, scratch, childC);
+			expect(scratch.innerHTML).to.equal(`${expectedA}${expectedB}${expectedC}`);
+		});
+	});
+
 });

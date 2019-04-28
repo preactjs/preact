@@ -20,7 +20,7 @@ import options from '../options';
  * mounted components
  * @param {import('../internal').Component | null} ancestorComponent The direct
  * parent component
- * @param {Node | Text} oldDom The current attached DOM
+ * @param {Element | Text} oldDom The current attached DOM
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
@@ -34,13 +34,15 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 		oldVNode = EMPTY_OBJ;
 	}
 
+	// When passing through createElement it assigns the object
+	// ref on _self, to prevent JSON Injection we check if this attribute
+	// is equal.
+	if (newVNode._self!==newVNode) return null;
+
 	if (options.diff) options.diff(newVNode);
 
 	let c, p, isNew = false, oldProps, oldState, snapshot,
-		newType = newVNode.type;
-
-	/** @type {import('../internal').Component | null} */
-	let clearProcessingException;
+		newType = newVNode.type, clearProcessingException;
 
 	try {
 		outer: if (oldVNode.type===Fragment || newType===Fragment) {
@@ -55,7 +57,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 
 				// If the last child is a Fragment, use _lastDomChild, else use _dom
 				p = newVNode._children[newVNode._children.length - 1];
-				newVNode._lastDomChild = p._lastDomChild || p._dom;
+				newVNode._lastDomChild = p && (p._lastDomChild || p._dom);
 			}
 		}
 		else if (typeof newType==='function') {
@@ -69,7 +71,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			// Get component and set it to `c`
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
-				clearProcessingException = c._processingException;
+				clearProcessingException = c._processingException = c._pendingError;
 				dom = newVNode._dom = oldVNode._dom;
 			}
 			else {
@@ -96,11 +98,11 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			c._vnode = newVNode;
 
 			// Invoke getDerivedStateFromProps
-			let s = c._nextState || c.state;
+			if (c._nextState==null) {
+				c._nextState = c.state;
+			}
 			if (newType.getDerivedStateFromProps!=null) {
-				oldState = assign({}, c.state);
-				if (s===c.state) s = c._nextState = assign({}, s);
-				assign(s, newType.getDerivedStateFromProps(newVNode.props, s));
+				assign(c._nextState==c.state ? (c._nextState = assign({}, c._nextState)) : c._nextState, newType.getDerivedStateFromProps(newVNode.props, c._nextState));
 			}
 
 			// Invoke pre-render lifecycle methods
@@ -111,29 +113,28 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 			else {
 				if (newType.getDerivedStateFromProps==null && force==null && c.componentWillReceiveProps!=null) {
 					c.componentWillReceiveProps(newVNode.props, cctx);
-					s = c._nextState || c.state;
 				}
 
-				if (!force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newVNode.props, s, cctx)===false) {
+				if (!force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newVNode.props, c._nextState, cctx)===false) {
 					dom = newVNode._dom;
 					c.props = newVNode.props;
-					c.state = s;
+					c.state = c._nextState;
 					c._dirty = false;
 					newVNode._lastDomChild = oldVNode._lastDomChild;
 					break outer;
 				}
 
 				if (c.componentWillUpdate!=null) {
-					c.componentWillUpdate(newVNode.props, s, cctx);
+					c.componentWillUpdate(newVNode.props, c._nextState, cctx);
 				}
 			}
 
 			oldProps = c.props;
-			if (!oldState) oldState = c.state;
+			oldState = c.state;
 
 			c.context = cctx;
 			c.props = newVNode.props;
-			c.state = s;
+			c.state = c._nextState;
 
 			if (options.render) options.render(newVNode);
 
@@ -184,7 +185,7 @@ export function diff(dom, parentDom, newVNode, oldVNode, context, isSvg, excessD
 		}
 
 		if (clearProcessingException) {
-			c._processingException = null;
+			c._pendingError = c._processingException = null;
 		}
 
 		if (options.diffed) options.diffed(newVNode);
@@ -378,7 +379,7 @@ function catchErrorInComponent(error, component) {
 				else {
 					continue;
 				}
-				return enqueueRender(component._processingException = component);
+				return enqueueRender(component._pendingError = component);
 			}
 			catch (e) {
 				error = e;

@@ -28,6 +28,7 @@
       "$_prevVNode": "__t",
       "$__html": "__html",
       "$_ancestorComponent": "__a",
+      "$_pendingError": "__E",
       "$_processingException": "__p"
     }
   }

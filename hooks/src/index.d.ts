@@ -1,4 +1,4 @@
-import { PreactContext } from "preact";
+import { PreactContext } from "../..";
 
 type Inputs = ReadonlyArray<unknown>;
 
@@ -66,6 +66,16 @@ type EffectCallback = () => (void | (() => void));
  */
 export function useEffect(effect: EffectCallback, inputs?: Inputs): void;
 
+type CreateHandle = () => object;
+
+/**
+ * @param ref The ref that will be mutated
+ * @param create The function that will be executed to get the value that will be attached to
+ * ref.current
+ * @param inputs If present, effect will only activate if the values in the list change (using ===).
+ */
+export function useImperativeHandle<T>(ref: Ref<T>, create: CreateHandle, inputs?: Inputs): void;
+
 /**
  * Accepts a function that contains imperative, possibly effectful code.
  * Use this to read layout from the DOM and synchronously re-render.
@@ -98,3 +108,11 @@ export function useMemo<T>(factory: () => T, inputs?: Inputs): T;
  * @param context The context you want to use
  */
 export function useContext<T>(context: PreactContext<T>): T;
+
+/**
+ * Customize the displayed value in the devtools panel.
+ *
+ * @param value Custom hook name or object that is passed to formatter
+ * @param formatter Formatter to modify value before sending it to the devtools
+ */
+export function useDebugValue<T>(value: T, formatter?: (value: T) => string | number): void;

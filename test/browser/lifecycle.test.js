@@ -901,6 +901,32 @@ describe('Lifecycle methods', () => {
 		});
 	});
 
+	describe('#componentWillMount', () => {
+		it('should update state when called setState in componentWillMount', () => {
+			let componentState;
+
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						value: 0
+					};
+				}
+				componentWillMount() {
+					this.setState({ value: 1 });
+				}
+				render() {
+					componentState = this.state;
+					return <div />;
+				}
+			}
+
+			render(<Foo />, scratch);
+
+			expect(componentState).to.deep.equal({ value: 1 });
+		});
+	});
+
 	describe('#componentWillReceiveProps', () => {
 		it('should update state when called setState in componentWillReceiveProps', () => {
 			let componentState;
@@ -2427,6 +2453,24 @@ describe('Lifecycle methods', () => {
 			rerender();
 
 			expect(Receiver.getDerivedStateFromError).to.have.been.called;
+		});
+
+		// https://github.com/developit/preact/issues/1570
+		it('should handle double child throws', () => {
+			const Child = ({ i }) => {
+				throw new Error(`error! ${i}`);
+			};
+
+			const fn = () => render(
+				<Receiver>
+					{[1, 2].map(i => <Child key={i} i={i} />)}
+				</Receiver>,
+				scratch
+			);
+			expect(fn).to.not.throw();
+
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Error: error! 2</div>');
 		});
 
 		it('should be called when child fails in componentWillMount', () => {
