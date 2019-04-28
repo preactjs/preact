@@ -29,7 +29,9 @@ export function getVNodeId(vnode) {
 	}
 
 	let inst = getInstance(vnode);
-	if (!vnodeToId.has(inst)) vnodeToId.set(inst, genUuid());
+	if (!vnodeToId.has(inst)) {
+		vnodeToId.set(inst, genUuid());
+	}
 
 	let id = vnodeToId.get(inst);
 	idToVNode.set(id, vnode);
@@ -62,7 +64,9 @@ export function clearVNode(vnode) {
 	for (let i = 0; i < children.length; i++) {
 		clearVNode(children[i]);
 	}
-	idToVNode.delete(getVNodeId(vnode));
+	if (hasVNodeId(vnode)) {
+		idToVNode.delete(getVNodeId(vnode));
+	}
 	vnodeToId.delete(vnode);
 }
 
