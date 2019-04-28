@@ -21,7 +21,7 @@ export function getType(data) {
 
 let LEVEL_LIMIT = 6;
 
-export function prettify(data, cleaned, path, level) {
+export function prettify(data, cleaned, path, level = 0) {
 	let type = getType(data);
 
 	switch (type) {
@@ -50,7 +50,7 @@ export function prettify(data, cleaned, path, level) {
 				};
 			}
 
-			return data.map((x, i) => prettify(x, cleaned, path.concat([i])), level++);
+			return data.map((x, i) => prettify(x, cleaned, path.concat([i])), level + 1);
 		case 'object': {
 			if (level > LEVEL_LIMIT) {
 				cleaned.push(path);
