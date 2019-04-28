@@ -117,7 +117,7 @@ declare namespace preact {
 		state: Readonly<S>;
 		props: RenderableProps<P>;
 		context: any;
-		base?: HTMLElement;
+		base?: Element | Text;
 
 		// From https://github.com/DefinitelyTyped/DefinitelyTyped/blob/e836acc75a78cf0655b5dfdbe81d69fdd4d8a252/types/react/index.d.ts#L402
 		// // We MUST keep setState() as a unified signature because it allows proper checking of the method return type.
@@ -160,8 +160,12 @@ declare namespace preact {
 	// Preact render
 	// -----------------------------------
 
-	function render(vnode: ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment): void
-	function hydrate(vnode: ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment): void
+	function render(
+		vnode: ComponentChild,
+		parent: Element | Document | ShadowRoot | DocumentFragment,
+		replaceNode?: Element | Text
+	): void;
+	function hydrate(vnode: ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment): void;
 	function cloneElement(vnode: JSX.Element, props: any, ...children: ComponentChildren[]): JSX.Element;
 
 	//
