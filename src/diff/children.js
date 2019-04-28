@@ -44,7 +44,6 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		if (excessDomChildren!=null) {
 			for (i = 0; oldDom==null && i < excessDomChildren.length; i++) {
 				oldDom = excessDomChildren[i];
-				oldChild = excessDomChildren[i];
 			}
 		}
 		else {
