@@ -25,6 +25,7 @@ export interface PreactElement extends HTMLElement {
 export interface VNode<P = {}> extends preact.VNode<P> {
 	// Redefine type here using our internal ComponentFactory type
 	type: string | ComponentFactory<P> | null;
+	_self: this;
 	_children: Array<VNode> | null;
 	/**
 	 * The [first (for Fragments)] DOM child of a VNode
