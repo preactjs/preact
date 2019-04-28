@@ -30,7 +30,7 @@ export function parseMessage(msg) {
 	let unmounts = [];
 	let expectedUnmounts = msg[++pos];
 	for (let i = 0; i < expectedUnmounts; i++) {
-		unmounts.push(msg[pos + i]);
+		unmounts.push(msg[pos + i + 1]);
 	}
 	pos += expectedUnmounts + 1;
 
