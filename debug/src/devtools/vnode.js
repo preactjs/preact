@@ -46,3 +46,15 @@ export function getChildren(vnode) {
 		? [c._prevVNode]
 		: [];
 }
+
+/**
+ * Get the vnode of the ancestor component
+ * @param {import('../internal').VNode} vnode
+ * @returns {import('../internal').VNode | null}
+ */
+export function getAncestorComponentVNode(vnode) {
+	if (vnode._component && vnode._component._ancestorComponent) {
+		return vnode._component._ancestorComponent._vnode;
+	}
+	return null;
+}

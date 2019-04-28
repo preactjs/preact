@@ -1,3 +1,4 @@
+import { parseMessage } from '../../src/devtools/message';
 
 /**
  * @returns {import('../../src/internal').DevtoolsMock}
@@ -47,5 +48,5 @@ export function convertEmit(args) {
 	if (args[0]!='operations') {
 		throw new Error('Event type must be "operations"');
 	}
-	return Array.from(args[1]);
+	return parseMessage(args[1]);
 }

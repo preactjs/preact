@@ -1,7 +1,7 @@
 import { Fragment } from 'preact';
 import { getVNodeId, getVNode, clearVNode, hasVNodeId } from './cache';
 import { TREE_OPERATION_ADD, ElementTypeRoot, TREE_OPERATION_REMOVE, TREE_OPERATION_REORDER_CHILDREN } from './constants';
-import { getChildren, getVNodeType, getDisplayName } from './vnode';
+import { getChildren, getVNodeType, getDisplayName, getAncestorComponentVNode } from './vnode';
 import { cleanForBridge } from './pretty';
 import { inspectHooks } from './hooks';
 import { encode } from './util';
@@ -18,14 +18,17 @@ export function onCommitFiberRoot(hook, state, vnode) {
 	// if (root.type===Fragment && root._children.length==0) return;
 
 	// TODO: Profiling
+	let parentId = 0;
+	let ancestor = getAncestorComponentVNode(vnode);
+	if (ancestor!=null && hasVNodeId(ancestor)) {
+		parentId = getVNodeId(ancestor);
+	}
+
 	if (hasVNodeId(vnode)) {
-		if (update(state, vnode, true, 0)) {
-			resetChildren(state, vnode);
-		}
+		update(state, vnode, false, parentId);
 	}
 	else {
-		// TODO: Unmount
-		mount(state, vnode, true);
+		mount(state, vnode, true, parentId);
 	}
 
 	flushPendingEvents(hook, state);
@@ -67,10 +70,10 @@ export function update(state, vnode, isRoot, parentId) {
 
 	if (shouldReset) {
 		resetChildren(state, vnode);
-		return true;
+		return false;
 	}
 
-	return false;
+	return true;
 }
 
 /**
@@ -113,22 +116,22 @@ export function resetChildren(state, vnode) {
  * @param {boolean} isRoot Mark a root as they need to be mounted differently
  */
 export function unmount(state, vnode, isRoot) {
-	let id = getVNodeId(vnode);
-
-	if (isRoot) {
+	if (hasVNodeId(vnode) && isRoot) {
 		state.pending.push([
 			TREE_OPERATION_REMOVE,
 			1, // Remove 1 item
-			id
+			getVNodeId(vnode)
 		]);
-	}
-	else if (!shouldFilter(vnode)) {
-		state.pendingUnmountIds.push(id);
 	}
 	else {
 		let children = getChildren(vnode);
 		for (let i = 0; i < children.length; i++) {
 			unmount(state, children[i], false);
+		}
+
+		if (!shouldFilter(vnode)) {
+			let id = getVNodeId(vnode);
+			state.pendingUnmountIds.push(id);
 		}
 	}
 
@@ -143,24 +146,23 @@ export function unmount(state, vnode, isRoot) {
  */
 export function mount(state, vnode, isRoot, parentId) {
 	let id;
+	let ancestor = getAncestorComponentVNode(vnode);
+	let owner = ancestor!=null ? getVNodeId(ancestor) : 0;
+
 	if (isRoot || !shouldFilter(vnode)) {
 		id = getVNodeId(vnode);
 
-		if (isRoot) {
+		// FIXME: Add proper root detection
+		if (isRoot && id < 30) {
 			state.pending.push(
 				TREE_OPERATION_ADD,
 				id,
 				ElementTypeRoot,
 				1, // Flag to signal that the vnode supports profiling
-				0 // We have no special owner meta data for roots
+				owner // We have no special owner meta data for roots
 			);
 		}
 		else {
-			let owner = vnode._component!=null && vnode._component._ancestorComponent!=null
-				&& vnode._component._ancestorComponent._vnode!=null
-				? getVNodeId(vnode._component._ancestorComponent._vnode)
-				: 0;
-
 			state.pending.push(
 				TREE_OPERATION_ADD,
 				id,
@@ -219,6 +221,7 @@ export function flushPendingEvents(hook, state) {
 	for (let j = 0; j < state.pendingUnmountIds.length; j++) {
 		ops[i + j] = state.pendingUnmountIds[j];
 	}
+	i += state.pendingUnmountIds.length;
 
 	// Finally add all pending operations
 	ops.set(state.pending, i);
