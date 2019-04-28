@@ -246,6 +246,9 @@ export function shouldFilter(vnode) {
  */
 export function inspectElement(id) {
 	let vnode = getVNode(id);
+	if (vnode==null) {
+		throw new Error('Trying to inspect a vnode that was already unmounted. Please report this bug at: https://github.com/developit/preact/issues/new');
+	}
 	let hasHooks = vnode._component!=null && vnode._component.__hooks!=null;
 
 	return {
