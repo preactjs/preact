@@ -43,7 +43,7 @@ describe('devtools', () => {
 		// TODO
 	});
 
-	it('should mount a functional component', () => {
+	it.skip('should mount a functional component', () => {
 		mock.connect();
 
 		function App() {
@@ -52,29 +52,33 @@ describe('devtools', () => {
 
 		render(<App />, scratch);
 		expect(mock.hook.emit).to.be.calledOnce;
-		expect(convertEmit(mock.hook.emit.args[0])).to.deep.equal([
-			1,
-			1,
-			4,
-			3,
-			65,
-			112,
-			112,
-			2,
-			0,
-			1,
-			1,
-			10,
-			1,
-			0, // TODO: Owner
-			1,
-			2,
-			4,
-			1,
-			0,
-			1,
-			0
-		]);
+		expect(convertEmit(mock.hook.emit.args[0])).to.deep.equal({
+			rendererId: 1,
+			rootVNodeId: 1,
+			stringTable: {
+				length: 4,
+				items: ['App']
+			},
+			unmounts: [],
+			operations: [
+				{
+					type: 'ADD',
+					kind: 'Root',
+					id: 1,
+					supportsProfiling: true,
+					hasOwnerMetadata: false
+				},
+				{
+					type: 'ADD',
+					kind: 'FunctionalComponent',
+					id: 2,
+					name: 'App',
+					parentId: 1,
+					owner: 0,
+					key: null
+				}
+			]
+		});
 	});
 
 	// Works when singled out, options environment is not cleaned up properly
@@ -222,6 +226,244 @@ describe('devtools', () => {
 			1,
 			0
 		]);
+	});
+
+	// Works when singled out, options environment is not cleaned up properly
+	it.skip('should replace component', () => {
+		mock.connect();
+
+		function Foo() {
+			return 'foo';
+		}
+
+		function Bar() {
+			return <div>bar</div>;
+		}
+
+		let update;
+		function App() {
+			let [v, setter] = useState(true);
+			update = () => setter(!v);
+			return (
+				<div>
+					<button>toggle</button>
+					{v ? <Foo /> : <Bar />}
+				</div>
+			);
+		}
+		render(<App />, scratch);
+
+		expect(mock.hook.emit).to.be.calledOnce;
+		expect(convertEmit(mock.hook.emit.args[0])).to.deep.equal([
+			1,
+			1,
+			8,
+			3,
+			65,
+			112,
+			112,
+			3,
+			70,
+			111,
+			111,
+			2,
+			0,
+			1,
+			1,
+			10,
+			1,
+			0, // TODO: owner
+			1,
+			2,
+			4,
+			1,
+			0,
+			1,
+			0,
+			1,
+			3,
+			4,
+			2,
+			2,
+			2,
+			0
+		]);
+
+		console.log();
+		console.log();
+		console.log();
+
+		// unmount
+		update();
+		rerender();
+
+		expect(mock.hook.emit).to.be.calledTwice;
+		expect(convertEmit(mock.hook.emit.args[1])).to.deep.equal([
+			1,
+			1,
+			4,
+			3,
+			66,
+			97,
+			114,
+			2,
+			1,
+			3,
+			1,
+			4,
+			4,
+			2,
+			2,
+			1,
+			0 // TODO: Owner
+		]);
+
+		// Update again
+		update();
+		rerender();
+
+		expect(mock.hook.emit).to.be.called.calledThrice;
+		expect(convertEmit(mock.hook.emit.args[2])).to.deep.equal([
+			1,
+			1,
+			4,
+			3,
+			70,
+			111,
+			111,
+			2,
+			1,
+			4,
+			1,
+			5,
+			4,
+			2,
+			2,
+			1,
+			0
+		]);
+	});
+
+	it.skip('should work with router', () => {
+		mock.connect();
+
+		function Foo() {
+			return <Bob />;
+		}
+
+		function Bar() {
+			return <Bob />;
+		}
+
+		let i = 0;
+		function Bob() {
+			return <div>bob {++i}</div>;
+		}
+
+		function FakeRouter(props) {
+			return props.active ? props.children[0] : props.children[1];
+		}
+
+		let update;
+		function App2() {
+			let [v, setValue] = useState(true);
+			update = () => setValue(!v);
+
+			return (
+				<FakeRouter active={v}>
+					<Foo />
+					<Bar />
+				</FakeRouter>
+			);
+		}
+
+		render(<App2 />, scratch);
+		update();
+		rerender();
+
+		// let mount = [1, 1, 28, 4, 65, 112, 112, 50, 4, 76, 105, 110, 107, 6, 82, 111, 117, 116, 101, 114, 3, 70, 111, 111, 2, 46, 48, 3, 66, 111, 98, 2, 0, 1, 1, 10, 1, 1, 1, 2, 4, 1, 0, 1, 0, 1, 3, 4, 2, 2, 2, 0, 1, 4, 4, 2, 2, 2, 0, 1, 5, 1, 2, 2, 3, 0, 1, 6, 4, 5, 2, 4, 5, 1, 7, 4, 6, 6, 6, 0];
+		// let update = [1, 1, 11, 3, 66, 97, 114, 2, 46, 49, 3, 66, 111, 98, 2, 2, 7, 6, 1, 8, 4, 5, 2, 1, 2, 1, 9, 4, 8, 8, 3, 0];
+		expect(convertEmit(mock.hook.emit.args[0])).to.deep.equal({
+			rendererId: 1,
+			rootVNodeId: 1,
+			stringTable: {
+				length: 24,
+				items: ['App2', 'FakeRouter', 'Foo', 'Bob']
+			},
+			unmounts: [],
+			operations: [
+				{
+					type: 'ADD',
+					id: 1,
+					kind: 'Root',
+					supportsProfiling: true,
+					hasOwnerMetadata: false
+				},
+				{
+					type: 'ADD',
+					id: 2,
+					kind: 'FunctionalComponent',
+					parentId: 1,
+					owner: 0,
+					name: 'App2',
+					key: null
+				},
+				{
+					type: 'ADD',
+					id: 3,
+					kind: 'FunctionalComponent',
+					parentId: 2,
+					owner: 2,
+					name: 'FakeRouter',
+					key: null
+				},
+				{
+					type: 'ADD',
+					id: 4,
+					kind: 'FunctionalComponent',
+					parentId: 3,
+					owner: 3, // FIXME: should be 2
+					name: 'Foo',
+					key: null
+				},
+				{
+					type: 'ADD',
+					id: 5,
+					kind: 'FunctionalComponent',
+					parentId: 4,
+					owner: 4,
+					name: 'Bob',
+					key: null
+				}
+			]
+		});
+
+		expect(convertEmit(mock.hook.emit.args[1])).to.deep.equal({
+			rendererId: 1,
+			rootVNodeId: 1,
+			stringTable: { length: 8, items: ['Bar', 'Bob'] },
+			unmounts: [5, 4],
+			operations: [
+				{
+					type: 'ADD',
+					id: 6,
+					kind: 'FunctionalComponent',
+					parentId: 3,
+					owner: 3, // FIXME: Should be 2
+					name: 'Bar',
+					key: null
+				},
+				{
+					type: 'ADD',
+					id: 7,
+					kind: 'FunctionalComponent',
+					parentId: 6,
+					owner: 6,
+					name: 'Bob',
+					key: null
+				}
+			]
+		});
 	});
 
 	describe('inspectElement', () => {
