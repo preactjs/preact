@@ -25,7 +25,7 @@ import { removeNode } from '../util';
  */
 export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, oldDom) {
 	let childVNode, i, j, oldVNode, newDom,
-		nextDom, sibDom, focus;
+		nextDom, sibDom;
 
 	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode, true);
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
@@ -33,6 +33,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	let oldChildren = oldParentVNode!=null && oldParentVNode._children || EMPTY_ARR;
 
 	let oldChildrenLength = oldChildren.length;
+	let oldChild;
 
 	// Only in very specific places should this logic be invoked (top level `render` and `diffElementNodes`).
 	// I'm using `EMPTY_OBJ` to signal when `diffChildren` is invoked in these situations. I can't use `null`
@@ -48,13 +49,14 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		else {
 			for (i = 0; oldDom==null && i < oldChildrenLength; i++) {
 				oldDom = oldChildren[i] && oldChildren[i]._dom;
+				oldChild = oldChildren[i];
 			}
 		}
 	}
 
 	for (i=0; i<newChildren.length; i++) {
 		childVNode = newChildren[i] = coerceToVNode(newChildren[i]);
-		
+
 		if (childVNode!=null) {
 			// Check if we find a corresponding element in oldChildren.
 			// If found, delete the array item by setting to `undefined`.
@@ -72,6 +74,9 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 					oldVNode = oldChildren[j];
 					if (oldVNode!=null && (childVNode.key==null && oldVNode.key==null ? (childVNode.type === oldVNode.type) : (childVNode.key === oldVNode.key))) {
 						oldChildren[j] = undefined;
+						if (oldChildrenLength !== newChildren.length && oldVNode.type !== (oldChild && oldChild.type)) {
+							oldDom = oldVNode._dom;
+						}
 						break;
 					}
 					oldVNode = null;
@@ -85,12 +90,6 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 			// Only proceed if the vnode has not been unmounted by `diff()` above.
 			if (newDom!=null) {
-				// Store focus in case moving children around changes it. Note that we
-				// can't just check once for every tree, because we have no way to
-				// differentiate wether the focus was reset by the user in a lifecycle
-				// hook or by reordering dom nodes.
-				focus = document.activeElement;
-
 				if (childVNode._lastDomChild != null) {
 					// Only Fragments or components that return Fragment like VNodes will
 					// have a non-null _lastDomChild. Continue the diff from the end of
@@ -115,11 +114,6 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 						}
 						parentDom.insertBefore(newDom, oldDom);
 					}
-				}
-
-				// Restore focus if it was changed
-				if (focus!==document.activeElement) {
-					focus.focus();
 				}
 
 				oldDom = newDom!=null ? newDom.nextSibling : nextDom;
