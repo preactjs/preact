@@ -624,11 +624,11 @@ export namespace JSXInternal {
 		vocab?: string;
 
 		// Microdata Attributes
-        itemProp?: string;
-        itemScope?: boolean;
-        itemType?: string;
-        itemID?: string;
-        itemRef?: string;
+		itemProp?: string;
+		itemScope?: boolean;
+		itemType?: string;
+		itemID?: string;
+		itemRef?: string;
 	}
 
 	interface IntrinsicElements {
