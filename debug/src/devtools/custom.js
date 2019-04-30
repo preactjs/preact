@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 import { Component, Fragment } from 'preact';
 import { setIn } from './util';
-import { getDisplayName } from './vnode';
+import { getDisplayName, getChildren } from './vnode';
 
 /**
  * Get the type/category of a vnode
