@@ -7,10 +7,8 @@ export let i = 0;
  * @param {any} defaultValue
  */
 export function createContext(defaultValue) {
-	const id = '__cC' + i++;
-
 	let context = {
-		_id: id,
+		_id: '__cC' + i++,
 		_defaultValue: defaultValue
 	};
 
@@ -20,12 +18,12 @@ export function createContext(defaultValue) {
 	Consumer.contextType = context;
 	context.Consumer = Consumer;
 
-	let ctx = { [id]: null };
+	let ctx = {};
 
 	function initProvider(comp) {
 		const subs = [];
 		comp.getChildContext = () => {
-			ctx[id] = comp;
+			ctx[context._id] = comp;
 			return ctx;
 		};
 		comp.shouldComponentUpdate = props => {

@@ -24,8 +24,7 @@ import { removeNode } from '../util';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
 export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, oldDom) {
-	let childVNode, i, j, oldVNode, newDom,
-		nextDom, sibDom;
+	let childVNode, i, j, oldVNode, newDom, sibDom;
 
 	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode, true);
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
@@ -83,10 +82,8 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 				}
 			}
 
-			nextDom = oldDom!=null && oldDom.nextSibling;
-
 			// Morph the old element into the new one, but don't append it to the dom yet
-			newDom = diff(oldVNode && oldVNode._dom, parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, null, oldDom);
+			newDom = diff(parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, null, oldDom);
 
 			// Only proceed if the vnode has not been unmounted by `diff()` above.
 			if (newDom!=null) {
@@ -116,7 +113,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 					}
 				}
 
-				oldDom = newDom!=null ? newDom.nextSibling : nextDom;
+				oldDom = newDom.nextSibling;
 			}
 		}
 	}
