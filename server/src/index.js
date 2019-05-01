@@ -83,7 +83,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				let cctx = cxType != null ? (provider ? provider.props.value : cxType._defaultValue) : context;
 
 				// stateless functional components
-				rendered = nodeName.call(vnode.__c, props, cctx || context);
+				rendered = nodeName.call(vnode.__c, props, cctx);
 			}
 			else {
 				// class-based components

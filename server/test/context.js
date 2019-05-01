@@ -30,4 +30,23 @@ describe('context', () => {
 			<section>value is: correct</section>
 		`);
 	});
+
+	it('should support falsy context value', () => {
+		const { Provider, Consumer } = createContext();
+		let rendered = renderJsx(
+			<Provider value={null}>
+				<Consumer>
+					{(value) => (
+						<section>
+							value is: {value}
+						</section>
+					)}
+				</Consumer>
+			</Provider>
+		);
+
+		expect(rendered).to.equal(dedent`
+			<section>value is: </section>
+		`);
+	});
 });
