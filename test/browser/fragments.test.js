@@ -1836,4 +1836,38 @@ describe('Fragment', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal(successHtml);
 	});
+
+	it('should use the last dom node for _lastDomChild', () => {
+		let Noop = () => null;
+		let update;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				update = () => this.setState({ items: ['A', 'B', 'C'] });
+				this.state = {
+					items: null
+				};
+			}
+
+			render() {
+				return (
+					<div>
+						{this.state.items && (
+							<Fragment>
+								{this.state.items.map(v => <div>{v}</div>)}
+								<Noop />
+							</Fragment>
+						)}
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.textContent).to.equal('');
+
+		update();
+		rerender();
+		expect(scratch.textContent).to.equal('ABC');
+	});
 });
