@@ -140,12 +140,10 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			let prev = c._prevVNode || null;
 			let vnode = c._prevVNode;
-			if (newVNode._original!==oldVNode) {
+			if (newVNode._original!==oldVNode || oldVNode._component._processingException) {
+				c._dirty = false;
 				vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
 			}
-
-			c._dirty = false;
-			let vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
 
 			if (c.getChildContext!=null) {
 				context = assign(assign({}, context), c.getChildContext());
