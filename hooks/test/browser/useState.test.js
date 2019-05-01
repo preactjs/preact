@@ -129,4 +129,40 @@ describe('useState', () => {
 		rerender();
 		expect(scratch.textContent).to.include('Count: 10');
 	});
+
+	it('should handle queued useState', () => {
+		function Message({ message, onClose }) {
+			const [isVisible, setVisible] = useState(Boolean(message));
+			const [prevMessage, setPrevMessage] = useState(message);
+
+			if (message !== prevMessage) {
+				setPrevMessage(message);
+				setVisible(Boolean(message));
+			}
+
+			if (!isVisible) {
+				return null;
+			}
+			return <p onClick={onClose}>{message}</p>;
+		}
+
+		function App() {
+			const [message, setMessage] = useState('Click Here!!');
+			return (
+				<Message
+					onClose={() => {
+						setMessage('');
+					}}
+					message={message}
+				/>
+			);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.textContent).to.equal('Click Here!!');
+		const text = scratch.querySelector('p');
+		text.click();
+		rerender();
+		expect(scratch.innerHTML).to.equal('');
+	});
 });

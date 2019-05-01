@@ -622,6 +622,13 @@ export namespace JSXInternal {
 		resource?: string;
 		typeof?: string;
 		vocab?: string;
+
+		// Microdata Attributes
+		itemProp?: string;
+		itemScope?: boolean;
+		itemType?: string;
+		itemID?: string;
+		itemRef?: string;
 	}
 
 	interface IntrinsicElements {

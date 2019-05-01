@@ -1,4 +1,5 @@
 import options from './options';
+import { assign } from './util';
 
 /**
   * Create an virtual node (used for JSX)
@@ -9,7 +10,8 @@ import options from './options';
   * @returns {import('./internal').VNode}
   */
 export function createElement(type, props, children) {
-	if (props==null) props = {};
+	props = assign({}, props);
+
 	if (arguments.length>3) {
 		children = [children];
 		for (let i=3; i<arguments.length; i++) {
@@ -83,7 +85,7 @@ export /* istanbul ignore next */ function Fragment() { }
  * Specifically, this should be used anywhere a user could provide a boolean, string, or number where
  * a VNode or Component is desired instead
  * @param {boolean | string | number | import('./internal').VNode} possibleVNode A possible VNode
- * @returns {import('./internal').VNode}
+ * @returns {import('./internal').VNode | null}
  */
 export function coerceToVNode(possibleVNode) {
 	if (possibleVNode == null || typeof possibleVNode === 'boolean') return null;
