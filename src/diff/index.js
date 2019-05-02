@@ -36,7 +36,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 	// is equal.
 	if (newVNode._self!==newVNode) return null;
 
-	if (options.diff) options.diff(newVNode);
+	if (options.diff) options.diff(newVNode, oldVNode);
 
 	let c, p, isNew = false, oldProps, oldState, snapshot,
 		newType = newVNode.type, clearProcessingException;
