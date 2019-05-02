@@ -572,6 +572,13 @@ describe('render()', () => {
 			expect(click).not.to.have.been.called;
 		});
 
+		it('should register events not appearing on dom nodes', () => {
+			let onAnimationEnd = () => {};
+
+			render(<div onAnimationEnd={onAnimationEnd} />, scratch);
+			expect(proto.addEventListener).to.have.been.calledOnce.and.to.have.been.calledWithExactly('animationend', sinon.match.func, false);
+		});
+
 		// Skip test if browser doesn't support passive events
 		if (supportsPassiveEvents()) {
 			it('should use capturing for event props ending with *Capture', () => {
