@@ -125,7 +125,7 @@ export function initDebug() {
 		return (
 			Function.prototype.toString.call(a) == Function.prototype.toString.call(b) &&
 			Object.keys(a.prototype).join() == Object.keys(b.prototype).join()
-		};
+		);
 	}
 	  
 	options.hook = (comp) => {
