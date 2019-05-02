@@ -77,7 +77,7 @@ export function initDebug() {
 		// on every render, since it can't infer semantic equivalence.
 		if (
 			// it's a component vnode
-			typeof type=='function' &&
+			typeof type=='function' && typeof oldVnode.type==='function' &&
 			// and the constructor reference got changed
 			type !== oldVnode.type &&
 			// ... but they seem to be the same source
@@ -123,8 +123,8 @@ export function initDebug() {
 	// two different component references are likely to be the same.
 	function componentsAreEquivalent(a, b) {
 		return (
-			Function.prototype.toString.call(a) == Function.prototype.toString.call(b) &&
-			Object.keys(a.prototype).join() == Object.keys(b.prototype).join()
+			Function.prototype.toString.call(a) === Function.prototype.toString.call(b) &&
+			Object.keys(a.prototype).join() === Object.keys(b.prototype).join()
 		);
 	}
 	  
