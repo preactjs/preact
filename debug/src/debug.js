@@ -26,7 +26,7 @@ export function initDebug() {
 		`);
 	};
 
-	options.diff = vnode => {
+	options.diff = (vnode, oldVnode) => {
 		let { type, props } = vnode;
 		let children = props && props.children;
 
@@ -71,6 +71,24 @@ export function initDebug() {
 				}
 			}
 		}
+		
+		// Detect component thrashing.
+		// This is a common problem where the diff sees a component reference
+		// on every render, since it can't infer semantic equivalence.
+		if (
+			// it's a component vnode
+			typeof type=='function' &&
+			// and the constructor reference got changed
+			type !== oldVnode.type &&
+			// ... but they seem to be the same source
+			componentsAreEquivalent(type, oldVnode.type)
+		) {
+			console.error(
+				`🚨It looks like ${getDisplayName(vnode)} is being recreated on every render, causing serious performance problems.\n` +
+				`This usually means the component is being defined within another component or render function.\n` +
+				`For more information, see http://preactjs.com/errors/1`
+			);
+		}
 
 		// Check prop-types if available
 		if (typeof vnode.type==='function' && vnode.type.propTypes) {
@@ -98,9 +116,18 @@ export function initDebug() {
 			keys.push(key);
 		}
 
-		if (oldBeforeDiff) oldBeforeDiff(vnode);
+		if (oldBeforeDiff) oldBeforeDiff(vnode, oldVnode);
 	};
 
+	// If the constructor source text and prototype properties match,
+	// two different component references are likely to be the same.
+	function componentsAreEquivalent(a, b) {
+		return (
+			Function.prototype.toString.call(a) == Function.prototype.toString.call(b) &&
+			Object.keys(a.prototype).join() == Object.keys(b.prototype).join()
+		};
+	}
+	  
 	options.hook = (comp) => {
 		if (!comp) {
 			throw new Error('Hook can only be invoked from render methods.');
