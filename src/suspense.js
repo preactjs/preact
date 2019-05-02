@@ -4,10 +4,15 @@ import { createElement } from './create-element';
 // TODO: react warns in dev mode about defaultProps and propTypes not being supported on lazy
 // loaded components
 
+export const sym = Symbol.for('Suspense');
+
 export class Suspense extends Component {
 	constructor(props) {
 		// TODO: should we add propTypes in DEV mode?
 		super(props);
+
+		// mark this component as a handler of suspension (thrown Promises)
+		this[sym] = sym;
 
 		this.state = {
 			l: false

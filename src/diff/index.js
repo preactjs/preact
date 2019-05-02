@@ -5,6 +5,7 @@ import { diffChildren } from './children';
 import { diffProps } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
+import { sym as suspenseSymbol } from '../suspense';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -362,10 +363,24 @@ function doRender(props, state, context) {
  * component check for error boundary behaviors
  */
 function catchErrorInComponent(error, component) {
+	// thrown Promises are meant to suspend...
+	let isSuspend = typeof error.then === 'function';
+	let suspendingComponent = component;
+
 	for (; component; component = component._ancestorComponent) {
 		if (!component._processingException) {
 			try {
-				if (component.constructor.getDerivedStateFromError!=null) {
+				if (isSuspend) {
+					// console.log('catchErrorInComponent component[suspenseSymbol]', component[suspenseSymbol]);
+					if (component[suspenseSymbol] === suspenseSymbol && component.componentDidCatch!=null) {
+						// console.log('hitting suspense...');
+						component.componentDidCatch(error);
+					}
+					else {
+						continue;
+					}
+				}
+				else if (component.constructor.getDerivedStateFromError!=null) {
 					component.setState(component.constructor.getDerivedStateFromError(error));
 				}
 				else if (component.componentDidCatch!=null) {
@@ -378,8 +393,21 @@ function catchErrorInComponent(error, component) {
 			}
 			catch (e) {
 				error = e;
+				isSuspend = typeof error.then === 'function';
+				suspendingComponent = component;
 			}
 		}
 	}
+
+	if (isSuspend && suspendingComponent) {
+		// TODO: what is the preact way to determine the component name?
+		const componentName = suspendingComponent.displayName || (suspendingComponent._vnode && suspendingComponent._vnode.type
+			&& suspendingComponent._vnode.type.name);
+
+		return catchErrorInComponent(new Error(`${componentName} suspended while rendering, but no fallback UI was specified.
+
+Add a <Suspense fallback=...> component higher in the tree to provide a loading indicator or placeholder to display.`), suspendingComponent);
+	}
+
 	throw error;
 }
