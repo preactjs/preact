@@ -26,9 +26,7 @@ export class Suspense extends Component {
 				() => {
 					this.setState({ l: false });
 				},
-				// TODO: what to do in error case?!
-				// we could store the error to the state and then throw it during render
-				// should have a look what react does in these cases...
+				// Suspense ignores errors thrown in Promises as this should be handled by user land code
 				() => {
 					this.setState({ l: false });
 				}

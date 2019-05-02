@@ -18,16 +18,39 @@ class CustomSuspense extends Component {
 	render() {
 		if (!this.state.done) {
 			throw new Promise((res) => {
-				setTimeout(() => {
+				setImmediate(() => {
 					this.setState({ done: true });
 					res();
-				}, 0);
+				});
 			});
 		}
 
 		return (
 			<div>
 				Hello CustomSuspense
+			</div>
+		);
+	}
+}
+
+class ThrowingSuspense extends Component {
+	constructor(props) {
+		super(props);
+		this.state = { done: false };
+	}
+	render() {
+		if (!this.state.done) {
+			throw new Promise((res, rej) => {
+				setImmediate(() => {
+					this.setState({ done: true });
+					rej(new Error('I\'m a throwing Suspense!'));
+				});
+			});
+		}
+
+		return (
+			<div>
+				Hello ThrowingSuspense
 			</div>
 		);
 	}
@@ -53,12 +76,25 @@ class Catcher extends Component {
 }
 
 const Lazy = lazy(() => new Promise((res) => {
-	setTimeout(() => {
+	setImmediate(() => {
 		res({ default: LazyComp });
-	}, 0);
+	});
+}));
+
+const ThrowingLazy = lazy(() => new Promise((res, rej) => {
+	setImmediate(() => {
+		rej(new Error('Thrown in lazy\'s loader...'));
+	});
 }));
 
 /** @jsx h */
+
+function tick(fn) {
+	return new Promise((res) => {
+		setTimeout(res, 10);
+	})
+		.then(fn);
+}
 
 describe('suspense', () => {
 	let scratch, rerender;
@@ -80,6 +116,13 @@ describe('suspense', () => {
 		expect(scratch.innerHTML).to.eql(
 			`<div>Suspended...</div>`
 		);
+
+		return tick(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div>Hello Lazy</div>`
+			);
+		});
 	});
 
 	it('should suspend when a promise is throw', () => {
@@ -90,6 +133,13 @@ describe('suspense', () => {
 		expect(scratch.innerHTML).to.eql(
 			`<div>Suspended...</div>`
 		);
+
+		return tick(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div>Hello CustomSuspense...</div>`
+			);
+		});
 	});
 
 	it('should suspend with custom error boundary', () => {
@@ -102,6 +152,32 @@ describe('suspense', () => {
 		expect(scratch.innerHTML).to.eql(
 			`<div>Suspended...</div>`
 		);
+
+		return tick(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div>Hello CustomSuspense...</div>`
+			);
+		});
+	});
+
+	it('should support throwing suspense', () => {
+		render(<Suspense fallback={<div>Suspended...</div>}>
+			<Catcher>
+				<CustomSuspense />
+			</Catcher>
+		</Suspense>, scratch);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspended...</div>`
+		);
+
+		return tick(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div>Hello ThrowingSuspense...</div>`
+			);
+		});
 	});
 
 	it('should only suspend the most inner Suspend', () => {
@@ -117,6 +193,13 @@ describe('suspense', () => {
 		expect(scratch.innerHTML).to.eql(
 			`Not suspended...<div>Suspended... 2</div>`
 		);
+
+		return tick(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`Not suspended...<div>Hello CustomSuspend</div>`
+			);
+		});
 	});
 
 	it('should throw when missing Suspense', () => {
@@ -129,5 +212,24 @@ describe('suspense', () => {
 
 Add a &lt;Suspense fallback=...&gt; component higher in the tree to provide a loading indicator or placeholder to display.</div>`
 		);
+	});
+
+	it('should throw when lazy\'s loader throws', () => {
+		render(<Suspense fallback={<div>Suspended...</div>}>
+			<Catcher>
+				<ThrowingLazy />
+			</Catcher>
+		</Suspense>, scratch);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspended...</div>`
+		);
+
+		return tick(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div>Hello ThrowingSuspense...</div>`
+			);
+		});
 	});
 });
