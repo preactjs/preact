@@ -31,6 +31,27 @@ describe('context', () => {
 		`);
 	});
 
+	it('should support nested Providers', () => {
+		const { Provider, Consumer } = createContext();
+		let rendered = renderJsx(
+			<Provider value="wrong">
+				<Provider value="correct">
+					<Consumer>
+						{(value) => (
+							<section>
+								value is: {value}
+							</section>
+						)}
+					</Consumer>
+				</Provider>
+			</Provider>
+		);
+
+		expect(rendered).to.equal(dedent`
+			<section>value is: correct</section>
+		`);
+	});
+
 	it('should support falsy context value', () => {
 		const { Provider, Consumer } = createContext();
 		let rendered = renderJsx(
