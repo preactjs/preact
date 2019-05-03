@@ -4,7 +4,9 @@ import { createElement } from './create-element';
 // TODO: react warns in dev mode about defaultProps and propTypes not being supported on lazy
 // loaded components
 
-export const sym = Symbol.for('Suspense');
+export const sym = '_s';
+
+export const Suspense2 = 'suspense';
 
 export class Suspense extends Component {
 	constructor(props) {
@@ -22,15 +24,10 @@ export class Suspense extends Component {
 	componentDidCatch(e) {
 		if (e && typeof e.then === 'function') {
 			this.setState({ l: true });
-			e.then(
-				() => {
-					this.setState({ l: false });
-				},
-				// Suspense ignores errors thrown in Promises as this should be handled by user land code
-				() => {
-					this.setState({ l: false });
-				}
-			);
+			const cb = () => { this.setState({ l: false }); };
+
+			// Suspense ignores errors thrown in Promises as this should be handled by user land code
+			e.then(cb, cb);
 		}
 		else {
 			throw e;

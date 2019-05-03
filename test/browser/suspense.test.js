@@ -4,6 +4,11 @@ import { expect } from 'chai';
 import { createElement as h, render, Component, Suspense, lazy } from '../../src/index';
 import { setupScratch, teardown } from '../_util/helpers';
 
+function schedule(cb) {
+	setImmediate(cb);
+	// setTimeout(cb, 0);
+}
+
 class LazyComp extends Component {
 	render() {
 		return <div>Hello Lazy</div>;
@@ -18,7 +23,7 @@ class CustomSuspense extends Component {
 	render() {
 		if (!this.state.done) {
 			throw new Promise((res) => {
-				setImmediate(() => {
+				schedule(() => {
 					this.setState({ done: true });
 					res();
 				});
@@ -41,7 +46,7 @@ class ThrowingSuspense extends Component {
 	render() {
 		if (!this.state.done) {
 			throw new Promise((res, rej) => {
-				setImmediate(() => {
+				schedule(() => {
 					this.setState({ done: true });
 					rej(new Error('I\'m a throwing Suspense!'));
 				});
@@ -76,16 +81,22 @@ class Catcher extends Component {
 }
 
 const Lazy = lazy(() => new Promise((res) => {
-	setImmediate(() => {
+	schedule(() => {
 		res({ default: LazyComp });
 	});
 }));
 
 const ThrowingLazy = lazy(() => new Promise((res, rej) => {
-	setImmediate(() => {
+	schedule(() => {
 		rej(new Error('Thrown in lazy\'s loader...'));
 	});
 }));
+
+class WrapperOne extends Component {
+	render() {
+		return this.props.children;
+	}
+}
 
 /** @jsx h */
 
@@ -127,8 +138,11 @@ describe('suspense', () => {
 
 	it('should suspend when a promise is throw', () => {
 		render(<Suspense fallback={<div>Suspended...</div>}>
-			<CustomSuspense />
+			<WrapperOne>
+				<CustomSuspense />
+			</WrapperOne>
 		</Suspense>, scratch);
+		// TODO: why a rerender needed here. Will this even work in the browser?!
 		rerender();
 		expect(scratch.innerHTML).to.eql(
 			`<div>Suspended...</div>`
@@ -137,7 +151,7 @@ describe('suspense', () => {
 		return tick(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
-				`<div>Hello CustomSuspense...</div>`
+				`<div>Hello CustomSuspense</div>`
 			);
 		});
 	});
@@ -156,7 +170,7 @@ describe('suspense', () => {
 		return tick(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
-				`<div>Hello CustomSuspense...</div>`
+				`<div>Hello CustomSuspense</div>`
 			);
 		});
 	});
@@ -164,7 +178,7 @@ describe('suspense', () => {
 	it('should support throwing suspense', () => {
 		render(<Suspense fallback={<div>Suspended...</div>}>
 			<Catcher>
-				<CustomSuspense />
+				<ThrowingSuspense />
 			</Catcher>
 		</Suspense>, scratch);
 		rerender();
@@ -175,7 +189,7 @@ describe('suspense', () => {
 		return tick(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
-				`<div>Hello ThrowingSuspense...</div>`
+				`<div>Hello ThrowingSuspense</div>`
 			);
 		});
 	});
@@ -197,7 +211,7 @@ describe('suspense', () => {
 		return tick(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
-				`Not suspended...<div>Hello CustomSuspend</div>`
+				`Not suspended...<div>Hello CustomSuspense</div>`
 			);
 		});
 	});
@@ -208,9 +222,7 @@ describe('suspense', () => {
 		</Catcher>, scratch);
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<div>Catcher did catch: CustomSuspense suspended while rendering, but no fallback UI was specified.
-
-Add a &lt;Suspense fallback=...&gt; component higher in the tree to provide a loading indicator or placeholder to display.</div>`
+			`<div>Catcher did catch: Missing Suspense</div>`
 		);
 	});
 
@@ -228,7 +240,7 @@ Add a &lt;Suspense fallback=...&gt; component higher in the tree to provide a lo
 		return tick(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
-				`<div>Hello ThrowingSuspense...</div>`
+				`<div>Catcher did catch: Thrown in lazy's loader...</div>`
 			);
 		});
 	});

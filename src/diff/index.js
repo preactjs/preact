@@ -27,7 +27,19 @@ import { sym as suspenseSymbol } from '../suspense';
 export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force, oldDom) {
 	// If the previous type doesn't match the new type we drop the whole subtree
 	if (oldVNode==null || newVNode==null || oldVNode.type!==newVNode.type || oldVNode.key!==newVNode.key) {
-		if (oldVNode!=null) unmount(oldVNode, ancestorComponent);
+		if (oldVNode!=null) {
+			const ancestor = oldVNode._component && oldVNode._component._ancestorComponent;
+			if (ancestor && ancestor[suspenseSymbol]) {
+				ancestor._vnode.suspendedContent = oldVNode;
+				// TODO: check whether parent was already removed from DOM...
+				if (oldVNode._dom) {
+					removeNode(oldVNode._dom);
+				}
+			}
+			else {
+				unmount(oldVNode, ancestorComponent);
+			}
+		}
 		if (newVNode==null) return null;
 		oldVNode = EMPTY_OBJ;
 	}
@@ -141,6 +153,11 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			let prev = c._prevVNode || null;
 			c._dirty = false;
+
+			if (c[suspenseSymbol] === suspenseSymbol && c._vnode.suspendedContent) {
+				if (prev) { unmount(prev); }
+				prev = c._vnode.suspendedContent;
+			}
 			let vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
 
 			if (c.getChildContext!=null) {
@@ -152,6 +169,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 
 			c._depth = ancestorComponent ? (ancestorComponent._depth || 0) + 1 : 0;
+			// this creates a new WrapperOne / new CustomSuspense
 			c.base = newVNode._dom = diff(parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null, oldDom);
 
 			if (vnode!=null) {
@@ -399,14 +417,14 @@ function catchErrorInComponent(error, component) {
 		}
 	}
 
-	if (isSuspend && suspendingComponent) {
-		// TODO: what is the preact way to determine the component name?
-		const componentName = suspendingComponent.displayName || (suspendingComponent._vnode && suspendingComponent._vnode.type
-			&& suspendingComponent._vnode.type.name);
+	// TODO: Add a react-like error message to preact/debug
+	/*
+		[componentName] suspended while rendering, but no fallback UI was specified.
 
-		return catchErrorInComponent(new Error(`${componentName} suspended while rendering, but no fallback UI was specified.
-
-Add a <Suspense fallback=...> component higher in the tree to provide a loading indicator or placeholder to display.`), suspendingComponent);
+		Add a <Suspense fallback=...> component higher in the tree to provide a loading indicator or placeholder to display.
+ 	*/
+	if (isSuspend) {
+		return catchErrorInComponent(new Error('Missing Suspense'), suspendingComponent);
 	}
 
 	throw error;
