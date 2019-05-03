@@ -102,10 +102,9 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 						parentDom.appendChild(newDom);
 					}
 					else {
-						sibDom = oldDom;
-						j = 0;
-						while ((sibDom=sibDom.nextSibling) && j++<oldChildrenLength/2) {
-							if (sibDom===newDom) {
+						// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
+						for (sibDom=oldDom, j=0; (sibDom=sibDom.nextSibling) && j<oldChildrenLength; j+=2) {
+							if (sibDom==newDom) {
 								break outer;
 							}
 						}
