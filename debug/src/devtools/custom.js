@@ -82,13 +82,13 @@ export function getData(vnode) {
 		ref: vnode.ref || null,
 		key: vnode.key || null,
 		updater,
-		text: vnode.text,
+		text: vnode.type===null ? vnode.props.data : null,
 		state: c!=null && c instanceof Component ? c.state : null,
 		props: vnode.props,
 		// The devtools inline text children if they are the only child
-		children: vnode.text==null
-			? children!=null && children.length==1 && children[0].text!=null
-				? children[0].text
+		children: vnode.type!==null
+			? children!=null && children.length==1 && children[0].type===null
+				? children[0].props.data
 				: children
 			: null,
 		publicInstance: getInstance(vnode),

@@ -34,29 +34,26 @@ export function createElement(type, props, children) {
 	let key = props.key;
 	if (key) delete props.key;
 
-	return createVNode(type, props, null, key, ref);
+	return createVNode(type, props, key, ref);
 }
 
 /**
  * Create a VNode (used internally by Preact)
  * @param {import('./internal').VNode["type"]} type The node name or Component
  * Constructor for this virtual node
- * @param {object | null} props The properites of this virtual node
- * @param {string | number} text If this virtual node represents a text node,
- * this is the text of the node
- * @param {string |number | null} key The key for this virtual node, used when
+ * @param {object | null} props The properites of this virtual node.
+ * @param {string | number | null} key The key for this virtual node, used when
  * diffing it against its children
  * @param {import('./internal').VNode["ref"]} ref The ref property that will
  * receive a reference to its created child
  * @returns {import('./internal').VNode}
  */
-export function createVNode(type, props, text, key, ref) {
+export function createVNode(type, props, key, ref) {
 	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
 	// Do not inline into createElement and coerceToVNode!
 	const vnode = {
 		type,
 		props,
-		text,
 		key,
 		ref,
 		_children: null,
@@ -87,7 +84,7 @@ export /* istanbul ignore next */ function Fragment() { }
 export function coerceToVNode(possibleVNode) {
 	if (possibleVNode == null || typeof possibleVNode === 'boolean') return null;
 	if (typeof possibleVNode === 'string' || typeof possibleVNode === 'number') {
-		return createVNode(null, null, possibleVNode, null, null);
+		return createVNode(null, { data: possibleVNode }, null, null);
 	}
 
 	if (Array.isArray(possibleVNode)) {
@@ -96,7 +93,7 @@ export function coerceToVNode(possibleVNode) {
 
 	// Clone vnode if it has already been used. ceviche/#57
 	if (possibleVNode._dom!=null || possibleVNode._component!=null) {
-		let vnode = createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.text, possibleVNode.key, null);
+		let vnode = createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.key, null);
 		vnode._dom = possibleVNode._dom;
 		return vnode;
 	}
