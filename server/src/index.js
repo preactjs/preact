@@ -76,8 +76,14 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 			if (options.render) options.render(vnode);
 
 			if (!nodeName.prototype || typeof nodeName.prototype.render!=='function') {
+				// Necessary for createContext api. Setting this property will pass
+				// the context value as `this.context` just for this component.
+				let cxType = nodeName.contextType;
+				let provider = cxType && context[cxType.__c];
+				let cctx = cxType != null ? (provider ? provider.props.value : cxType._defaultValue) : context;
+
 				// stateless functional components
-				rendered = nodeName.call(vnode.__c, props, context);
+				rendered = nodeName.call(vnode.__c, props, cctx);
 			}
 			else {
 				// class-based components
