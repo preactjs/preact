@@ -16,8 +16,9 @@ options.render = vnode => {
 	currentComponent = vnode._component;
 	currentIndex = 0;
 
-	if (!currentComponent.__hooks) return;
-	currentComponent.__hooks._pendingEffects = handleEffects(currentComponent.__hooks._pendingEffects);
+	if (currentComponent.__hooks) {
+		currentComponent.__hooks._pendingEffects = handleEffects(currentComponent.__hooks._pendingEffects);
+	}
 };
 
 let oldAfterDiff = options.diffed;
@@ -28,11 +29,9 @@ options.diffed = vnode => {
 	if (!c) return;
 
 	const hooks = c.__hooks;
-	if (!hooks) return;
-
-	// TODO: Consider moving to a global queue. May need to move
-	// this to the `commit` option
-	hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
+	if (hooks) {
+		hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
+	}
 };
 
 
@@ -44,9 +43,9 @@ options.unmount = vnode => {
 	if (!c) return;
 
 	const hooks = c.__hooks;
-	if (!hooks) return;
-
-	hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
+	if (hooks) {
+		hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
+	}
 };
 
 /**
@@ -210,14 +209,15 @@ let afterPaint = () => {};
 function flushAfterPaintEffects() {
 	afterPaintEffects.forEach(component => {
 		component._afterPaintQueued = false;
-		if (!component._parentDom) return;
-		component.__hooks._pendingEffects = handleEffects(component.__hooks._pendingEffects);
+		if (component._parentDom) {
+			component.__hooks._pendingEffects = handleEffects(component.__hooks._pendingEffects);
+		}
 	});
 	afterPaintEffects = [];
 }
 
 function scheduleFlushAfterPaint() {
-	setTimeout(flushAfterPaintEffects, 0);
+	setTimeout(flushAfterPaintEffects);
 }
 
 /* istanbul ignore else */
@@ -259,5 +259,5 @@ function argsChanged(oldArgs, newArgs) {
 }
 
 function invokeOrReturn(arg, f) {
-	return typeof f === 'function' ? f(arg) : f;
+	return typeof f == 'function' ? f(arg) : f;
 }
