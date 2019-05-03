@@ -24,7 +24,8 @@ export function diffProps(dom, newProps, oldProps, isSvg) {
 	}
 }
 
-let CAMEL_REG = /-?(?=[A-Z])/g;
+const CAMEL_REG = /-?(?=[A-Z])/g;
+const XLINK_NS = 'http://www.w3.org/1999/xlink';
 
 /**
  * Set a property value on a DOM node
@@ -86,13 +87,21 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	else if (name!=='list' && name!=='tagName' && !isSvg && (name in dom)) {
 		dom[name] = value==null ? '' : value;
 	}
-	else if (value==null || value===false) {
-		if (name!==(name = name.replace(/^xlink:?/, ''))) dom.removeAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase());
-		else dom.removeAttribute(name);
-	}
 	else if (typeof value!=='function') {
-		if (name!==(name = name.replace(/^xlink:?/, ''))) dom.setAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase(), value);
-		else dom.setAttribute(name, value);
+		if (name!==(name = name.replace(/^xlink:?/, ''))) {
+			if (value==null || value===false) {
+				dom.removeAttributeNS(XLINK_NS, name.toLowerCase());
+			}
+			else {
+				dom.setAttributeNS(XLINK_NS, name.toLowerCase(), value);
+			}
+		}
+		else if (value==null || value===false) {
+			dom.removeAttribute(name);
+		}
+		else {
+			dom.setAttribute(name, value);
+		}
 	}
 }
 
