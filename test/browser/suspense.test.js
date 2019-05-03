@@ -5,8 +5,7 @@ import { createElement as h, render, Component, Suspense, lazy } from '../../src
 import { setupScratch, teardown } from '../_util/helpers';
 
 function schedule(cb) {
-	setImmediate(cb);
-	// setTimeout(cb, 0);
+	setTimeout(cb, 0);
 }
 
 class LazyComp extends Component {
