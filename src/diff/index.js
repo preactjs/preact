@@ -31,7 +31,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		oldVNode = EMPTY_OBJ;
 	}
 
-	let c, tmp, isNew = false, oldProps, oldState, snapshot,
+	let c, tmp, isNew, oldProps, oldState, snapshot,
 		newType = newVNode.type, clearProcessingException;
 
 	// When passing through createElement it assigns the object
