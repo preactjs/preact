@@ -259,5 +259,5 @@ function argsChanged(oldArgs, newArgs) {
 }
 
 function invokeOrReturn(arg, f) {
-	return typeof f == 'function' ? f(arg) : f;
+	return typeof f === 'function' ? f(arg) : f;
 }
