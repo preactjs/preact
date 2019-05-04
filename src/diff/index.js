@@ -223,13 +223,15 @@ export function commitRoot(mounts, root) {
  * @returns {import('../internal').PreactElement}
  */
 function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent) {
-	let originalDom = dom;
+	let i;
+	let oldProps = oldVNode.props;
+	let newProps = newVNode.props;
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	isSvg = newVNode.type==='svg' || isSvg;
 
 	if (dom==null && excessDomChildren!=null) {
-		for (let i=0; i<excessDomChildren.length; i++) {
+		for (i=0; i<excessDomChildren.length; i++) {
 			const child = excessDomChildren[i];
 			if (child!=null && (newVNode.type===null ? child.nodeType===3 : child.localName===newVNode.type)) {
 				dom = child;
@@ -240,15 +242,17 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 	}
 
 	if (dom==null) {
-		dom = newVNode.type===null ? document.createTextNode(newVNode.text) : isSvg ? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type) : document.createElement(newVNode.type);
-
+		if (newVNode.type===null) {
+			return document.createTextNode(newProps);
+		}
+		dom = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type) : document.createElement(newVNode.type);
 		// we created a new parent, so none of the previously attached children can be reused:
 		excessDomChildren = null;
 	}
 
 	if (newVNode.type===null) {
-		if ((originalDom==null || dom===originalDom) && newVNode.text!==oldVNode.text) {
-			dom.data = newVNode.text;
+		if (oldProps !== newProps) {
+			dom.data = newProps;
 		}
 	}
 	else {
@@ -256,15 +260,12 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 		if (newVNode!==oldVNode) {
-			let oldProps = oldVNode.props;
-			let newProps = newVNode.props;
-
 			// if we're hydrating, use the element's attributes as its current props:
 			if (oldProps==null) {
 				oldProps = {};
 				if (excessDomChildren!=null) {
 					let name;
-					for (let i=0; i<dom.attributes.length; i++) {
+					for (i=0; i<dom.attributes.length; i++) {
 						name = dom.attributes[i].name;
 						oldProps[name=='class' && newProps.className ? 'className' : name] = dom.attributes[i].value;
 					}

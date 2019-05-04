@@ -18,9 +18,9 @@ import { memo, forwardRef, createPortal } from '../../../compat/src';
 function serialize(events) {
 	return events.filter(x => x.type!='updateProfileTimes').map(x => ({
 		type: x.type,
-		component: x.internalInstance.type!=null
+		component: x.internalInstance.type!==null
 			? getDisplayName(x.internalInstance)
-			: '#text: ' + x.internalInstance.text
+			: '#text: ' + x.internalInstance.props
 	}));
 }
 
