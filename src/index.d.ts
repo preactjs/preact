@@ -12,7 +12,7 @@ declare namespace preact {
 
 	interface VNode<P = {}> {
 		type: ComponentType<P> | string | null;
-		props: P & { children: ComponentChildren } | null;
+		props: P & { children: ComponentChildren } | string | number | null;
 		key: Key;
 		ref: Ref<any> | null;
 		/**

@@ -20,7 +20,7 @@ function serialize(events) {
 		type: x.type,
 		component: x.internalInstance.type!==null
 			? getDisplayName(x.internalInstance)
-			: '#text: ' + x.internalInstance.props.data
+			: '#text: ' + x.internalInstance.props
 	}));
 }
 

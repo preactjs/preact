@@ -224,6 +224,8 @@ export function commitRoot(mounts, root) {
  */
 function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent) {
 	let i;
+	let oldProps = oldVNode.props;
+	let newProps = newVNode.props;
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	isSvg = newVNode.type==='svg' || isSvg;
@@ -240,47 +242,50 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 	}
 
 	if (dom==null) {
-		dom = newVNode.type===null ? document.createTextNode(newVNode.props.data) : isSvg ? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type) : document.createElement(newVNode.type);
-
+		if (newVNode.type===null) {
+			return document.createTextNode(newProps);
+		}
+		dom = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type) : document.createElement(newVNode.type);
 		// we created a new parent, so none of the previously attached children can be reused:
 		excessDomChildren = null;
 	}
 
-	if (excessDomChildren!=null && dom.childNodes!=null) {
-		excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
+	if (newVNode.type===null) {
+		if (oldProps !== newProps) {
+			dom.data = newProps;
+		}
 	}
-	if (newVNode!==oldVNode) {
-		let oldProps = oldVNode.props;
-		let newProps = newVNode.props;
-
-		// if we're hydrating, use the element's attributes as its current props:
-		if (oldProps==null) {
-			oldProps = {};
-			if (dom.nodeType==3) {
-				oldProps.data = dom.data;
-			}
-			else if (excessDomChildren!=null) {
-				let name;
-				for (i=0; i<dom.attributes.length; i++) {
-					name = dom.attributes[i].name;
-					oldProps[name=='class' && newProps.className ? 'className' : name] = dom.attributes[i].value;
+	else {
+		if (excessDomChildren!=null && dom.childNodes!=null) {
+			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
+		}
+		if (newVNode!==oldVNode) {
+			// if we're hydrating, use the element's attributes as its current props:
+			if (oldProps==null) {
+				oldProps = {};
+				if (excessDomChildren!=null) {
+					let name;
+					for (i=0; i<dom.attributes.length; i++) {
+						name = dom.attributes[i].name;
+						oldProps[name=='class' && newProps.className ? 'className' : name] = dom.attributes[i].value;
+					}
 				}
 			}
-		}
-		let oldHtml = oldProps.dangerouslySetInnerHTML;
-		let newHtml = newProps.dangerouslySetInnerHTML;
-		if (newHtml || oldHtml) {
-			// Avoid re-applying the same '__html' if it did not changed between re-render
-			if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
-				dom.innerHTML = newHtml && newHtml.__html || '';
+			let oldHtml = oldProps.dangerouslySetInnerHTML;
+			let newHtml = newProps.dangerouslySetInnerHTML;
+			if (newHtml || oldHtml) {
+				// Avoid re-applying the same '__html' if it did not changed between re-render
+				if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
+					dom.innerHTML = newHtml && newHtml.__html || '';
+				}
 			}
-		}
-		if (newProps.multiple) {
-			dom.multiple = newProps.multiple;
-		}
+			if (newProps.multiple) {
+				dom.multiple = newProps.multiple;
+			}
 
-		diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent, EMPTY_OBJ);
-		diffProps(dom, newProps, oldProps, isSvg);
+			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent, EMPTY_OBJ);
+			diffProps(dom, newProps, oldProps, isSvg);
+		}
 	}
 
 	return dom;

@@ -41,7 +41,8 @@ export function createElement(type, props, children) {
  * Create a VNode (used internally by Preact)
  * @param {import('./internal').VNode["type"]} type The node name or Component
  * Constructor for this virtual node
- * @param {object | null} props The properites of this virtual node.
+ * @param {object | string | number | null} props The properites of this virtual node.
+ * If this virtual node represents a text node, this is the text of the node (string or number).
  * @param {string | number | null} key The key for this virtual node, used when
  * diffing it against its children
  * @param {import('./internal').VNode["ref"]} ref The ref property that will
@@ -84,7 +85,7 @@ export /* istanbul ignore next */ function Fragment() { }
 export function coerceToVNode(possibleVNode) {
 	if (possibleVNode == null || typeof possibleVNode === 'boolean') return null;
 	if (typeof possibleVNode === 'string' || typeof possibleVNode === 'number') {
-		return createVNode(null, { data: possibleVNode }, null, null);
+		return createVNode(null, possibleVNode, null, null);
 	}
 
 	if (Array.isArray(possibleVNode)) {
