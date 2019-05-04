@@ -67,9 +67,9 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
-			let cxType = newType.contextType;
-			let provider = cxType && context[cxType._id];
-			let cctx = cxType != null ? (provider ? provider.props.value : cxType._defaultValue) : context;
+			tmp = newType.contextType;
+			let provider = tmp && context[tmp._id];
+			let cctx = tmp ? (provider ? provider.props.value : tmp._defaultValue) : context;
 
 			// Get component and set it to `c`
 			if (oldVNode._component) {
