@@ -27,7 +27,7 @@ export function createContext(defaultValue) {
 			return ctx;
 		};
 		comp.shouldComponentUpdate = props => {
-			subs.map(c => {
+			subs.some(c => {
 				// Check if still mounted
 				if (c._parentDom) {
 					c.context = props.value;
