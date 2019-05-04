@@ -10,9 +10,9 @@ class LazyComp extends Component {
 	}
 }
 
-function CustomSuspense({ isDone, prom, name }) {
+function CustomSuspense({ isDone, start, name }) {
 	if (!isDone()) {
-		throw prom;
+		throw start();
 	}
 
 	return (
@@ -39,48 +39,36 @@ class Catcher extends Component {
 
 function createSuspension(name, timeout, t) {
 	let done = false;
-	const prom = new Promise((res, rej) => {
-		setTimeout(() => {
-			done = true;
-			if (t) {
-				rej(t);
-			}
-			else {
-				res();
-			}
-		}, timeout);
-	});
+	let prom;
 
 	return {
 		name,
-		prom,
+		start: () => {
+			if (!prom) {
+				prom = new Promise((res, rej) => {
+					setTimeout(() => {
+						done = true;
+						if (t) {
+							rej(t);
+						}
+						else {
+							res();
+						}
+					}, timeout);
+				});
+			}
+
+			return prom;
+		},
+		getPromise: () => prom,
 		isDone: () => done
 	};
 }
-
-const Lazy = lazy(() => new Promise((res) => {
-	setTimeout(() => {
-		res({ default: LazyComp });
-	}, 0);
-}));
-
-const ThrowingLazy = lazy(() => new Promise((res, rej) => {
-	setTimeout(() => {
-		rej(new Error('Thrown in lazy\'s loader...'));
-	}, 0);
-}));
 
 class WrapperOne extends Component {
 	render() {
 		return this.props.children;
 	}
-}
-
-function tick(fn) {
-	return new Promise((res) => {
-		setTimeout(res, 10);
-	})
-		.then(fn);
 }
 
 describe('suspense', () => {
@@ -96,6 +84,18 @@ describe('suspense', () => {
 	});
 
 	it('should suspend when using lazy', () => {
+		let prom;
+
+		const Lazy = lazy(() => {
+			prom = new Promise((res) => {
+				setTimeout(() => {
+					res({ default: LazyComp });
+				}, 0);
+			});
+
+			return prom;
+		});
+
 		render(
 			<Suspense fallback={<div>Suspended...</div>}>
 				<Lazy />
@@ -107,7 +107,7 @@ describe('suspense', () => {
 			`<div>Suspended...</div>`
 		);
 
-		return tick(() => {
+		return prom.then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
 				`<div>Hello from LazyComp</div>`
@@ -132,7 +132,7 @@ describe('suspense', () => {
 			`<div>Suspended...</div>`
 		);
 
-		return tick(() => {
+		return s.getPromise().then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
 				`<div>Hello from CustomSuspense regular case</div>`
@@ -156,7 +156,7 @@ describe('suspense', () => {
 			`<div>Suspended...</div>`
 		);
 
-		return tick(() => {
+		return s.getPromise().then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
 				`<div>Hello from CustomSuspense within error boundary</div>`
@@ -180,7 +180,7 @@ describe('suspense', () => {
 			`<div>Suspended...</div>`
 		);
 
-		return tick(() => {
+		return s.getPromise().catch(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
 				`<div>Hello from CustomSuspense throwing</div>`
@@ -210,7 +210,7 @@ describe('suspense', () => {
 			`<div>Suspended...</div>`
 		);
 
-		return tick(() => {
+		return s1.getPromise().then(s2.getPromise).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
 				`<div>Hello from CustomSuspense first</div><div>Hello from CustomSuspense second</div>`
@@ -219,8 +219,8 @@ describe('suspense', () => {
 	});
 
 	it('should call multiple nested suspending components render in one go', () => {
-		const s1 = createSuspension('first', 0, null);
-		const s2 = createSuspension('second', 0, null);
+		const s1 = createSuspension('first', 5, null);
+		const s2 = createSuspension('second', 5, null);
 		const LoggedCustomSuspense = sinon.spy(CustomSuspense);
 
 		render(
@@ -242,7 +242,7 @@ describe('suspense', () => {
 			`<div>Suspended...</div>`
 		);
 
-		return tick(() => {
+		return s1.getPromise().then(s2.getPromise).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
 				`<div>Hello from CustomSuspense first</div><div><div>Hello from CustomSuspense second</div></div>`
@@ -269,7 +269,7 @@ describe('suspense', () => {
 			`<div>Suspended...</div>`
 		);
 
-		return tick(() => {
+		return s.getPromise().then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
 				`<div>Hello from CustomSuspense nested in a Fragment</div>`
@@ -278,7 +278,7 @@ describe('suspense', () => {
 	});
 
 	it('should only suspend the most inner Suspend', () => {
-		const s = createSuspension('1', 0, new Error('Thrown in suspense'));
+		const s = createSuspension('1', 0, null);
 
 		render(
 			<Suspense fallback={<div>Suspended... 1</div>}>
@@ -296,7 +296,7 @@ describe('suspense', () => {
 			`Not suspended...<div>Suspended... 2</div>`
 		);
 
-		return tick(() => {
+		return s.getPromise().then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
 				`Not suspended...<div>Hello from CustomSuspense 1</div>`
@@ -320,6 +320,17 @@ describe('suspense', () => {
 	});
 
 	it('should throw when lazy\'s loader throws', () => {
+		let prom;
+
+		const ThrowingLazy = lazy(() => {
+			prom = new Promise((res, rej) => {
+				setTimeout(() => {
+					rej(new Error('Thrown in lazy\'s loader...'));
+				}, 0);
+			});
+			return prom;
+		});
+
 		render(
 			<Suspense fallback={<div>Suspended...</div>}>
 				<Catcher>
@@ -333,7 +344,7 @@ describe('suspense', () => {
 			`<div>Suspended...</div>`
 		);
 
-		return tick(() => {
+		return prom.catch(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
 				`<div>Catcher did catch: Thrown in lazy's loader...</div>`
