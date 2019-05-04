@@ -57,8 +57,9 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				// dom, so we iterate backwards to find the last child with a dom node.
 				while (i--) {
 					tmp = newVNode._children[i];
-					newVNode._lastDomChild = tmp && (tmp._lastDomChild || tmp._dom);
-					if (newVNode._lastDomChild) break;
+					if (newVNode._lastDomChild = (tmp && (tmp._lastDomChild || tmp._dom))) {
+						break;
+					}
 				}
 			}
 		}
@@ -163,7 +164,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			c._parentDom = parentDom;
 
-			if (newVNode.ref) applyRef(newVNode.ref, c, ancestorComponent);
+			if (tmp = newVNode.ref) applyRef(tmp, c, ancestorComponent);
 
 			while (tmp=c._renderCallbacks.pop()) tmp.call(c);
 
@@ -176,8 +177,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		else {
 			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
 
-			if (newVNode.ref && (oldVNode.ref !== newVNode.ref)) {
-				applyRef(newVNode.ref, newVNode._dom, ancestorComponent);
+			if ((tmp = newVNode.ref) && (oldVNode.ref !== tmp)) {
+				applyRef(tmp, newVNode._dom, ancestorComponent);
 			}
 		}
 
