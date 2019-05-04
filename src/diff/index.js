@@ -31,15 +31,15 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		oldVNode = EMPTY_OBJ;
 	}
 
+	let c, tmp, isNew = false, oldProps, oldState, snapshot,
+		newType = newVNode.type, clearProcessingException;
+
 	// When passing through createElement it assigns the object
 	// ref on _self, to prevent JSON Injection we check if this attribute
 	// is equal.
 	if (newVNode._self!==newVNode) return null;
 
-	if (options.diff) options.diff(newVNode);
-
-	let c, p, isNew = false, oldProps, oldState, snapshot,
-		newType = newVNode.type, clearProcessingException;
+	if (tmp = options.diff) tmp(newVNode);
 
 	try {
 		outer: if (oldVNode.type===Fragment || newType===Fragment) {
@@ -55,8 +55,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				// We have no guarantee that the last child rendered something into the
 				// dom, so we iterate backwards to find the last child with a dom node.
 				for (let i = newVNode._children.length; i--;) {
-					p = newVNode._children[i];
-					newVNode._lastDomChild = p && (p._lastDomChild || p._dom);
+					tmp = newVNode._children[i];
+					newVNode._lastDomChild = tmp && (tmp._lastDomChild || tmp._dom);
 					if (newVNode._lastDomChild) break;
 				}
 			}
@@ -136,7 +136,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c.props = newVNode.props;
 			c.state = c._nextState;
 
-			if (options.render) options.render(newVNode);
+			if (tmp = options.render) tmp(newVNode);
 
 			let prev = c._prevVNode || null;
 			c._dirty = false;
@@ -164,7 +164,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			if (newVNode.ref) applyRef(newVNode.ref, c, ancestorComponent);
 
-			while (p=c._renderCallbacks.pop()) p.call(c);
+			while (tmp=c._renderCallbacks.pop()) tmp.call(c);
 
 			// Don't call componentDidUpdate on mount or when we bailed out via
 			// `shouldComponentUpdate`
@@ -184,7 +184,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c._pendingError = c._processingException = null;
 		}
 
-		if (options.diffed) options.diffed(newVNode);
+		if (tmp = options.diffed) tmp(newVNode);
 	}
 	catch (e) {
 		catchErrorInComponent(e, ancestorComponent);
