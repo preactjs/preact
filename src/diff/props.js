@@ -21,7 +21,7 @@ export function diffProps(dom, newProps, oldProps, isSvg) {
 	}
 
 	for (i in oldProps) {
-		if (i!=='children' && i!=='key' && (!newProps || !(i in newProps))) {
+		if (i!=='children' && i!=='key' && !(i in newProps)) {
 			setProperty(dom, i, null, oldProps[i], isSvg);
 		}
 	}
