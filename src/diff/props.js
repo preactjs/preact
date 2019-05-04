@@ -36,8 +36,7 @@ const XLINK_NS = 'http://www.w3.org/1999/xlink';
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
 function setProperty(dom, name, value, oldValue, isSvg) {
-	let v;
-	if (name==='class' || name==='className') name = isSvg ? 'class' : 'className';
+	name = isSvg ? (name==='className' ? 'class' : name) : (name==='class' ? 'className' : name);
 
 	if (name==='style') {
 
@@ -60,7 +59,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 				}
 			}
 			for (let i in value) {
-				v = value[i];
+				const v = value[i];
 				if (oldValue==null || v!==oldValue[i]) {
 					s.setProperty(i.replace(CAMEL_REG, '-'), typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v);
 				}
