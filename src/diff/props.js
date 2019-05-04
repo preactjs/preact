@@ -10,14 +10,17 @@ import options from '../options';
  * @param {boolean} isSvg Whether or not this node is an SVG node
  */
 export function diffProps(dom, newProps, oldProps, isSvg) {
-	let keys = Object.keys(newProps).sort();
-	for (let i = 0; i < keys.length; i++) {
-		if (keys[i]!=='children' && keys[i]!=='key' && (!oldProps || ((keys[i]==='value' || keys[i]==='checked') ? dom : oldProps)[keys[i]]!==newProps[keys[i]])) {
-			setProperty(dom, keys[i], newProps[keys[i]], oldProps[keys[i]], isSvg);
+	let i;
+	
+	const keys = Object.keys(newProps).sort();
+	for (i = 0; i < keys.length; i++) {
+		const k = keys[i];
+		if (k!=='children' && k!=='key' && (!oldProps || ((k==='value' || k==='checked') ? dom : oldProps)[k]!==newProps[k])) {
+			setProperty(dom, k, newProps[k], oldProps[k], isSvg);
 		}
 	}
 
-	for (let i in oldProps) {
+	for (i in oldProps) {
 		if (i!=='children' && i!=='key' && (!newProps || !(i in newProps))) {
 			setProperty(dom, i, null, oldProps[i], isSvg);
 		}
