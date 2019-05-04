@@ -48,13 +48,14 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			// Mark dom as empty in case `_children` is any empty array. If it isn't
 			// we'll set `dom` to the correct value just a few lines later.
 
-			if (newVNode._children.length && newVNode._children[0]!=null) {
-				newVNode._dom = newVNode._children[0]._dom;
+			let i = newVNode._children.length;
+			if (i && (tmp=newVNode._children[0]) != null) {
+				newVNode._dom = tmp._dom;
 
 				// If the last child is a Fragment, use _lastDomChild, else use _dom
 				// We have no guarantee that the last child rendered something into the
 				// dom, so we iterate backwards to find the last child with a dom node.
-				for (let i = newVNode._children.length; i--;) {
+				while (i--) {
 					tmp = newVNode._children[i];
 					newVNode._lastDomChild = tmp && (tmp._lastDomChild || tmp._dom);
 					if (newVNode._lastDomChild) break;
