@@ -5,7 +5,6 @@ import { diffChildren } from './children';
 import { diffProps } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
-import { sym as suspenseSymbol } from '../suspense';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -27,19 +26,7 @@ import { sym as suspenseSymbol } from '../suspense';
 export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force, oldDom) {
 	// If the previous type doesn't match the new type we drop the whole subtree
 	if (oldVNode==null || newVNode==null || oldVNode.type!==newVNode.type || oldVNode.key!==newVNode.key) {
-		if (oldVNode!=null) {
-			const ancestor = oldVNode._component && oldVNode._component._ancestorComponent;
-			if (ancestor && ancestor[suspenseSymbol]) {
-				ancestor._vnode.suspendedContent = oldVNode;
-				// TODO: check whether parent was already removed from DOM...
-				if (oldVNode._dom) {
-					removeNode(oldVNode._dom);
-				}
-			}
-			else {
-				unmount(oldVNode, ancestorComponent);
-			}
-		}
+		if (oldVNode!=null) unmount(oldVNode, ancestorComponent);
 		if (newVNode==null) return null;
 		oldVNode = EMPTY_OBJ;
 	}
@@ -56,6 +43,9 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 	try {
 		outer: if (oldVNode.type===Fragment || newType===Fragment) {
+			// Passing the ancestorComponent here is needed for catchErrorInComponent to properly traverse upwards through fragments
+			// to find a parent Suspense
+			c = { _ancestorComponent: ancestorComponent };
 			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, c, oldDom);
 
 			// Mark dom as empty in case `_children` is any empty array. If it isn't
@@ -153,11 +143,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			let prev = c._prevVNode || null;
 			c._dirty = false;
-
-			if (c[suspenseSymbol] === suspenseSymbol && c._vnode.suspendedContent) {
-				if (prev) { unmount(prev); }
-				prev = c._vnode.suspendedContent;
-			}
 			let vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
 
 			if (c.getChildContext!=null) {
@@ -169,7 +154,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 
 			c._depth = ancestorComponent ? (ancestorComponent._depth || 0) + 1 : 0;
-			// this creates a new WrapperOne / new CustomSuspense
 			c.base = newVNode._dom = diff(parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null, oldDom);
 
 			if (vnode!=null) {
@@ -389,10 +373,8 @@ function catchErrorInComponent(error, component) {
 		if (!component._processingException) {
 			try {
 				if (isSuspend) {
-					// console.log('catchErrorInComponent component[suspenseSymbol]', component[suspenseSymbol]);
-					if (component[suspenseSymbol] === suspenseSymbol && component.componentDidCatch!=null) {
-						// console.log('hitting suspense...');
-						component.componentDidCatch(error);
+					if (component.__s) {
+						component.__s(error);
 					}
 					else {
 						continue;

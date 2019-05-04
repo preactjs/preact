@@ -1,30 +1,17 @@
 import { Component } from './component';
 import { createElement } from './create-element';
 
-// TODO: react warns in dev mode about defaultProps and propTypes not being supported on lazy
-// loaded components
-
-export const sym = '_s';
-
-export const Suspense2 = 'suspense';
-
 export class Suspense extends Component {
 	constructor(props) {
-		// TODO: should we add propTypes in DEV mode?
 		super(props);
 
-		// mark this component as a handler of suspension (thrown Promises)
-		this[sym] = sym;
-
-		this.state = {
-			l: false
-		};
+		this.state = {};
 	}
 
-	componentDidCatch(e) {
-		if (e && typeof e.then === 'function') {
-			this.setState({ l: true });
-			const cb = () => { this.setState({ l: false }); };
+	__s(e) {
+		if (typeof e.then == 'function') {
+			this.setState({ l: 1 });
+			const cb = () => { this.setState({ l: 0 }); };
 
 			// Suspense ignores errors thrown in Promises as this should be handled by user land code
 			e.then(cb, cb);
@@ -34,8 +21,8 @@ export class Suspense extends Component {
 		}
 	}
 
-	render() {
-		return this.state.l ? this.props.fallback : this.props.children;
+	render(props, state) {
+		return state.l ? props.fallback : props.children;
 	}
 }
 
@@ -43,7 +30,7 @@ export function lazy(loader) {
 	let prom;
 	let component;
 	let error;
-	return function Lazy(props) {
+	return function L(props) {
 		if (!prom) {
 			prom = loader();
 			prom.then(
