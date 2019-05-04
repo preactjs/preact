@@ -29,7 +29,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode, true);
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
-	let oldChildren = oldParentVNode!=null && oldParentVNode._children || EMPTY_ARR;
+	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
 
 	let oldChildrenLength = oldChildren.length;
 	let oldChild;
@@ -41,12 +41,12 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	if (oldDom == EMPTY_OBJ) {
 		oldDom = null;
 		if (excessDomChildren!=null) {
-			for (i = 0; oldDom==null && i < excessDomChildren.length; i++) {
+			for (i = 0; !oldDom && i < excessDomChildren.length; i++) {
 				oldDom = excessDomChildren[i];
 			}
 		}
 		else {
-			for (i = 0; oldDom==null && i < oldChildrenLength; i++) {
+			for (i = 0; !oldDom && i < oldChildrenLength; i++) {
 				oldDom = oldChildren[i] && oldChildren[i]._dom;
 				oldChild = oldChildren[i];
 			}
