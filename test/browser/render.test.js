@@ -442,10 +442,9 @@ describe('render()', () => {
 
 		it('should remove old styles', () => {
 			render(<div style="color: red;" />, scratch);
-			let s = scratch.firstChild.style;
-			sinon.spy(s, 'setProperty');
 			render(<div style={{ background: 'blue' }} />, scratch);
-			expect(s.setProperty).to.be.calledOnce;
+			expect(scratch.firstChild.style).to.have.property('color').that.equals('');
+			expect(scratch.firstChild.style).to.have.property('background').that.equals('blue');
 		});
 
 		// Skip test if the currently running browser doesn't support CSS Custom Properties

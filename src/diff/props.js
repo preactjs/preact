@@ -1,4 +1,4 @@
-import { IS_NON_DIMENSIONAL } from '../constants';
+import { IS_NON_DIMENSIONAL, EMPTY_OBJ } from '../constants';
 import options from '../options';
 
 /**
@@ -23,8 +23,6 @@ export function diffProps(dom, newProps, oldProps, isSvg) {
 		}
 	}
 }
-
-let CAMEL_REG = /-?(?=[A-Z])/g;
 
 /**
  * Set a property value on a DOM node
@@ -51,23 +49,23 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 			s.cssText = value;
 		}
 		else {
-			if (typeof oldValue==='string') s.cssText = '';
-			else {
-				// remove values not in the new list
-				for (let i in oldValue) {
-					if (value==null || !(i in value)) s.setProperty(i.replace(CAMEL_REG, '-'), '');
-				}
-			}
+
+			// Always clear the previous styles
+			s.cssText = EMPTY_OBJ;
+
 			for (let i in value) {
 				v = value[i];
-				if (oldValue==null || v!==oldValue[i]) {
-					s.setProperty(i.replace(CAMEL_REG, '-'), typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v);
+				v = typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v;
+
+				// For css vars, just define them with `setProperty`;
+				if (/^--/.test(i)) {
+					s.setProperty(i, v);
+				}
+				else {
+					s[i] = v;
 				}
 			}
 		}
-	}
-	else if (name==='dangerouslySetInnerHTML') {
-		return;
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0]==='o' && name[1]==='n') {
@@ -90,7 +88,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		if (name!==(name = name.replace(/^xlink:?/, ''))) dom.removeAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase());
 		else dom.removeAttribute(name);
 	}
-	else if (typeof value!=='function') {
+	else if (typeof value!=='function' && name != 'dangerouslySetInnerHTML') {
 		if (name!==(name = name.replace(/^xlink:?/, ''))) dom.setAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase(), value);
 		else dom.setAttribute(name, value);
 	}
