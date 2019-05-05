@@ -217,6 +217,10 @@ function flushAfterPaintEffects() {
 	afterPaintEffects = [];
 }
 
+function scheduleFlushAfterPaint() {
+	setTimeout(flushAfterPaintEffects);
+}
+
 /* istanbul ignore else */
 if (typeof window !== 'undefined') {
 	afterPaint = (component) => {
@@ -226,7 +230,7 @@ if (typeof window !== 'undefined') {
 				options.requestAnimationFrame(flushAfterPaintEffects);
 			}
 			else {
-				requestAnimationFrame(setTimeout(flushAfterPaintEffects));
+				requestAnimationFrame(scheduleFlushAfterPaint);
 			}
 		}
 	};
