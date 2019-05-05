@@ -37,7 +37,7 @@ class Catcher extends Component {
 	}
 }
 
-function createSuspension(name, timeout, t) {
+function createSuspension(name, timeout, error) {
 	let done = false;
 	let prom;
 
@@ -48,8 +48,8 @@ function createSuspension(name, timeout, t) {
 				prom = new Promise((res, rej) => {
 					setTimeout(() => {
 						done = true;
-						if (t) {
-							rej(t);
+						if (error) {
+							rej(error);
 						}
 						else {
 							res();
