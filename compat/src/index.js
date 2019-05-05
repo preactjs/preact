@@ -53,7 +53,7 @@ function render(vnode, parent, callback) {
 	preactRender(vnode, parent);
 	if (typeof callback==='function') callback();
 
-	return vnode!=null ? vnode._component : null;
+	return vnode ? vnode._component : null;
 }
 
 class ContextProvider {
@@ -128,7 +128,7 @@ function createElement(...args) {
 
 		if (Array.isArray(props.value) && props.multiple && type==='select') {
 			toChildArray(props.children).forEach((child) => {
-				if (props.value.indexOf(child.props.value)!==-1) {
+				if (props.value.indexOf(child.props.value)!=-1) {
 					child.props.selected = true;
 				}
 			});
@@ -171,7 +171,7 @@ function cloneElement(element) {
  * @returns {boolean}
  */
 function isValidElement(element) {
-	return element!=null && element.$$typeof===REACT_ELEMENT_TYPE;
+	return element && element.$$typeof===REACT_ELEMENT_TYPE;
 }
 
 /**
@@ -179,7 +179,7 @@ function isValidElement(element) {
  * @param {import('./internal').VNode} vnode The vnode to normalize events on
  */
 function applyEventNormalization({ type, props }) {
-	if (!props || typeof type!=='string') return;
+	if (!props || typeof type!='string') return;
 	let newProps = {};
 	for (let i in props) {
 		newProps[i.toLowerCase()] = i;
@@ -208,7 +208,7 @@ function applyEventNormalization({ type, props }) {
  * @returns {boolean}
  */
 function unmountComponentAtNode(container) {
-	if (container._prevVNode!=null) {
+	if (container._prevVNode) {
 		preactRender(null, container);
 		return true;
 	}
@@ -337,7 +337,7 @@ options.vnode = vnode => {
 
 	applyEventNormalization(vnode);
 	let type = vnode.type;
-	if (type!=null && type._forwarded && vnode.ref!=null) {
+	if (type && type._forwarded && vnode.ref) {
 		vnode.props.ref = vnode.ref;
 		vnode.ref = null;
 	}
