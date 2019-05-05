@@ -44,7 +44,7 @@ options.unmount = vnode => {
 
 	const hooks = c.__hooks;
 	if (hooks) {
-		hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
+		hooks._list.some(hook => hook._cleanup && hook._cleanup());
 	}
 };
 
@@ -207,7 +207,7 @@ let afterPaint = () => {};
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
-	afterPaintEffects.forEach(component => {
+	afterPaintEffects.some(component => {
 		component._afterPaintQueued = false;
 		if (component._parentDom) {
 			component.__hooks._pendingEffects = handleEffects(component.__hooks._pendingEffects);
@@ -236,8 +236,8 @@ if (typeof window !== 'undefined') {
 }
 
 function handleEffects(effects) {
-	effects.forEach(invokeCleanup);
-	effects.forEach(invokeEffect);
+	effects.some(invokeCleanup);
+	effects.some(invokeEffect);
 	return [];
 }
 
