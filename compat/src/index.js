@@ -171,7 +171,7 @@ function cloneElement(element) {
  * @returns {boolean}
  */
 function isValidElement(element) {
-	return element && element.$$typeof===REACT_ELEMENT_TYPE;
+	return !!element && element.$$typeof===REACT_ELEMENT_TYPE;
 }
 
 /**
