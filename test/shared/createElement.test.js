@@ -42,10 +42,6 @@ describe('createElement(jsx)', () => {
 		expect(h('div', props).props).to.deep.equal(props);
 	});
 
-	it('should set VNode#text property', () => {
-		expect(<div />).to.have.property('text', null);
-	});
-
 	it('should set VNode#key property', () => {
 		expect(<div />).to.have.property('key').that.is.undefined;
 		expect(<div a="a" />).to.have.property('key').that.is.undefined;
@@ -60,7 +56,7 @@ describe('createElement(jsx)', () => {
 	});
 
 	it('should have ordered VNode properties', () => {
-		expect(Object.keys(<div />).filter(key => !/^_/.test(key))).to.deep.equal(['type', 'props', 'text', 'key', 'ref']);
+		expect(Object.keys(<div />).filter(key => !/^_/.test(key))).to.deep.equal(['type', 'props', 'key', 'ref']);
 	});
 
 	it('should preserve raw props', () => {
