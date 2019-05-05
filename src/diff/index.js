@@ -393,8 +393,7 @@ function catchErrorInComponent(error, component) {
 			}
 			catch (e) {
 				error = e;
-				isSuspend = typeof error.then === 'function';
-				suspendingComponent = component;
+				isSuspend = false;
 			}
 		}
 	}
