@@ -29,10 +29,7 @@ export function lazy(loader) {
 		if (!prom) {
 			prom = loader();
 			prom.then(
-				(exports) => {
-					component = exports.default;
-					Lazy.displayName = 'Lazy(' + (component.displayName || component.name) + ')';
-				},
+				(exports) => { component = exports.default; },
 				(e) => { error = e; },
 			);
 		}
@@ -47,6 +44,8 @@ export function lazy(loader) {
 
 		return createElement(component, props);
 	}
+
+	Lazy.displayName = 'Lazy';
 
 	return Lazy;
 }
