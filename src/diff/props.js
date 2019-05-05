@@ -10,19 +10,24 @@ import options from '../options';
  * @param {boolean} isSvg Whether or not this node is an SVG node
  */
 export function diffProps(dom, newProps, oldProps, isSvg) {
-	let keys = Object.keys(newProps).sort();
-	for (let i = 0; i < keys.length; i++) {
-		if (keys[i]!=='children' && keys[i]!=='key' && (!oldProps || ((keys[i]==='value' || keys[i]==='checked') ? dom : oldProps)[keys[i]]!==newProps[keys[i]])) {
-			setProperty(dom, keys[i], newProps[keys[i]], oldProps[keys[i]], isSvg);
+	let i;
+	
+	const keys = Object.keys(newProps).sort();
+	for (i = 0; i < keys.length; i++) {
+		const k = keys[i];
+		if (k!=='children' && k!=='key' && (!oldProps || ((k==='value' || k==='checked') ? dom : oldProps)[k]!==newProps[k])) {
+			setProperty(dom, k, newProps[k], oldProps[k], isSvg);
 		}
 	}
 
-	for (let i in oldProps) {
-		if (i!=='children' && i!=='key' && (!newProps || !(i in newProps))) {
+	for (i in oldProps) {
+		if (i!=='children' && i!=='key' && !(i in newProps)) {
 			setProperty(dom, i, null, oldProps[i], isSvg);
 		}
 	}
 }
+
+const XLINK_NS = 'http://www.w3.org/1999/xlink';
 
 /**
  * Set a property value on a DOM node
@@ -33,8 +38,7 @@ export function diffProps(dom, newProps, oldProps, isSvg) {
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
 function setProperty(dom, name, value, oldValue, isSvg) {
-	let v;
-	if (name==='class' || name==='className') name = isSvg ? 'class' : 'className';
+	name = isSvg ? (name==='className' ? 'class' : name) : (name==='class' ? 'className' : name);
 
 	if (name==='style') {
 
@@ -84,13 +88,21 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	else if (name!=='list' && name!=='tagName' && !isSvg && (name in dom)) {
 		dom[name] = value==null ? '' : value;
 	}
-	else if (value==null || value===false) {
-		if (name!==(name = name.replace(/^xlink:?/, ''))) dom.removeAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase());
-		else dom.removeAttribute(name);
-	}
 	else if (typeof value!=='function' && name != 'dangerouslySetInnerHTML') {
-		if (name!==(name = name.replace(/^xlink:?/, ''))) dom.setAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase(), value);
-		else dom.setAttribute(name, value);
+		if (name!==(name = name.replace(/^xlink:?/, ''))) {
+			if (value==null || value===false) {
+				dom.removeAttributeNS(XLINK_NS, name.toLowerCase());
+			}
+			else {
+				dom.setAttributeNS(XLINK_NS, name.toLowerCase(), value);
+			}
+		}
+		else if (value==null || value===false) {
+			dom.removeAttribute(name);
+		}
+		else {
+			dom.setAttribute(name, value);
+		}
 	}
 }
 

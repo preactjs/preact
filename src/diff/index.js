@@ -31,15 +31,15 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		oldVNode = EMPTY_OBJ;
 	}
 
+	let c, tmp, isNew, oldProps, oldState, snapshot,
+		newType = newVNode.type, clearProcessingException;
+
 	// When passing through createElement it assigns the object
 	// ref on _self, to prevent JSON Injection we check if this attribute
 	// is equal.
 	if (newVNode._self!==newVNode) return null;
 
-	if (options.diff) options.diff(newVNode);
-
-	let c, p, isNew = false, oldProps, oldState, snapshot,
-		newType = newVNode.type, clearProcessingException;
+	if (tmp = options.diff) tmp(newVNode);
 
 	try {
 		outer: if (oldVNode.type===Fragment || newType===Fragment) {
@@ -48,16 +48,18 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			// Mark dom as empty in case `_children` is any empty array. If it isn't
 			// we'll set `dom` to the correct value just a few lines later.
 
-			if (newVNode._children.length && newVNode._children[0]!=null) {
-				newVNode._dom = newVNode._children[0]._dom;
+			let i = newVNode._children.length;
+			if (i && (tmp=newVNode._children[0]) != null) {
+				newVNode._dom = tmp._dom;
 
 				// If the last child is a Fragment, use _lastDomChild, else use _dom
 				// We have no guarantee that the last child rendered something into the
 				// dom, so we iterate backwards to find the last child with a dom node.
-				for (let i = newVNode._children.length; i--;) {
-					p = newVNode._children[i];
-					newVNode._lastDomChild = p && (p._lastDomChild || p._dom);
-					if (newVNode._lastDomChild) break;
+				while (i--) {
+					tmp = newVNode._children[i];
+					if (newVNode._lastDomChild = (tmp && (tmp._lastDomChild || tmp._dom))) {
+						break;
+					}
 				}
 			}
 		}
@@ -65,9 +67,9 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
-			let cxType = newType.contextType;
-			let provider = cxType && context[cxType._id];
-			let cctx = cxType != null ? (provider ? provider.props.value : cxType._defaultValue) : context;
+			tmp = newType.contextType;
+			let provider = tmp && context[tmp._id];
+			let cctx = tmp ? (provider ? provider.props.value : tmp._defaultValue) : context;
 
 			// Get component and set it to `c`
 			if (oldVNode._component) {
@@ -136,7 +138,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c.props = newVNode.props;
 			c.state = c._nextState;
 
-			if (options.render) options.render(newVNode);
+			if (tmp = options.render) tmp(newVNode);
 
 			let prev = c._prevVNode || null;
 			c._dirty = false;
@@ -162,9 +164,9 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			c._parentDom = parentDom;
 
-			if (newVNode.ref) applyRef(newVNode.ref, c, ancestorComponent);
+			if (tmp = newVNode.ref) applyRef(tmp, c, ancestorComponent);
 
-			while (p=c._renderCallbacks.pop()) p.call(c);
+			while (tmp=c._renderCallbacks.pop()) tmp.call(c);
 
 			// Don't call componentDidUpdate on mount or when we bailed out via
 			// `shouldComponentUpdate`
@@ -175,8 +177,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		else {
 			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
 
-			if (newVNode.ref && (oldVNode.ref !== newVNode.ref)) {
-				applyRef(newVNode.ref, newVNode._dom, ancestorComponent);
+			if ((tmp = newVNode.ref) && (oldVNode.ref !== tmp)) {
+				applyRef(tmp, newVNode._dom, ancestorComponent);
 			}
 		}
 
@@ -184,7 +186,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c._pendingError = c._processingException = null;
 		}
 
-		if (options.diffed) options.diffed(newVNode);
+		if (tmp = options.diffed) tmp(newVNode);
 	}
 	catch (e) {
 		catchErrorInComponent(e, ancestorComponent);
