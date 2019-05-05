@@ -43,10 +43,9 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 	try {
 		outer: if (oldVNode.type===Fragment || newType===Fragment) {
-			// Passing the ancestorComponent here is needed for catchErrorInComponent to properly traverse upwards through fragments
-			// to find a parent Suspense
-			c = { _ancestorComponent: ancestorComponent };
-			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, c, oldDom);
+			// Passing the ancestorComponent instead of c here is needed for catchErrorInComponent
+			// to properly traverse upwards through fragments to find a parent Suspense
+			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, oldDom);
 
 			// Mark dom as empty in case `_children` is any empty array. If it isn't
 			// we'll set `dom` to the correct value just a few lines later.
