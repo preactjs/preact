@@ -290,6 +290,70 @@ describe('suspense', () => {
 		});
 	});
 
+	it('should support multiple non-nested Suspense', () => {
+		const s1 = createSuspension('1', 0, null);
+		const s2 = createSuspension('2', 0, null);
+
+		render(
+			<div>
+				<div>
+					<Suspense fallback={<div>Suspended 1...</div>}>
+						<CustomSuspense {...s1} />
+					</Suspense>
+				</div>
+				<div>
+					<Suspense fallback={<div>Suspended 2...</div>}>
+						<CustomSuspense {...s2} />
+					</Suspense>
+				</div>
+			</div>
+			,
+			scratch,
+		);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<div><div><div>Suspended 1...</div></div><div><div>Suspended 2...</div></div></div>`
+		);
+
+		return s1.getPromise().then(s2.getPromise).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div><div><div>Hello from CustomSuspense 1</div></div><div><div>Hello from CustomSuspense 2</div></div></div>`
+			);
+		});
+	});
+
+	it('should support multiple Suspense inside a Fragment', () => {
+		const s1 = createSuspension('1', 0, null);
+		const s2 = createSuspension('2', 0, null);
+
+		render(
+			<div>
+				<Fragment>
+					<Suspense fallback={<div>Suspended 1...</div>}>
+						<CustomSuspense {...s1} />
+					</Suspense>
+					<Suspense fallback={<div>Suspended 2...</div>}>
+						<CustomSuspense {...s2} />
+					</Suspense>
+				</Fragment>
+			</div>
+			,
+			scratch,
+		);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>Suspended 1...</div><div>Suspended 2...</div></div>`
+		);
+
+		return s1.getPromise().then(s2.getPromise).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div><div>Hello from CustomSuspense 1</div><div>Hello from CustomSuspense 2</div></div>`
+			);
+		});
+	});
+
 	it('should only suspend the most inner Suspend', () => {
 		const s = createSuspension('1', 0, null);
 
