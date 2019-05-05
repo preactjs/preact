@@ -1871,49 +1871,109 @@ describe('Fragment', () => {
 		expect(scratch.textContent).to.equal('ABC');
 	});
 
-	it('setState should work inside a fragment when changing vnode.type returned by render', () => {
-		let s;
-
+	it('should replace node in-between children', () => {
+		let update;
 		class SetState extends Component {
 			constructor(props) {
 				super(props);
-				s = new Promise((res) => {
-					setTimeout(() => {
-						this.setState({ change: true });
-						res();
-					}, 0);
-				});
+				update = () => this.setState({ active: true });
 			}
 
 			render() {
-				return this.state.change ? (
-					<section>I'm a section now</section>
-				) : (
-					<div>I'm a div</div>
-				);
+				return this.state.active
+					? <section>I'm a section now</section>
+					: <div>I'm a div</div>;
 			}
-
 		}
 
 		render(
 			<div>
-				<div>START</div>
+				<div>A</div>
 				<SetState />
-				<div>END</div>
-			</div>
-			,
+				<div>C</div>
+			</div>,
 			scratch,
 		);
 
 		expect(scratch.innerHTML).to.eql(
-			`<div><div>START</div><div>I'm a div</div><div>END</div></div>`
+			`<div><div>A</div><div>I'm a div</div><div>C</div></div>`
 		);
 
-		return s.then(() => {
-			rerender();
-			expect(scratch.innerHTML).to.eql(
-				`<div><div>START</div><section>I'm a section now</section><div>END</div></div>`
-			);
-		});
+		update();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><section>I'm a section now</section><div>C</div></div>`
+		);
+	});
+
+	it('should insert in-between children', () => {
+		let update;
+		class SetState extends Component {
+			constructor(props) {
+				super(props);
+				update = () => this.setState({ active: true });
+			}
+
+			render() {
+				return this.state.active ? <div>B</div> : null;
+			}
+		}
+
+		render(
+			<div>
+				<div>A</div>
+				<SetState />
+				<div>C</div>
+			</div>,
+			scratch,
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>C</div></div>`
+		);
+
+		update();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>B</div><div>C</div></div>`
+		);
+	});
+
+	it('should insert in-between null children', () => {
+		let update;
+		class SetState extends Component {
+			constructor(props) {
+				super(props);
+				update = () => this.setState({ active: true });
+			}
+
+			render() {
+				return this.state.active ? <div>B</div> : null;
+			}
+		}
+
+		render(
+			<div>
+				<div>A</div>
+				{null}
+				<SetState />
+				{null}
+				<div>C</div>
+			</div>,
+			scratch,
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>C</div></div>`
+		);
+
+		update();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>B</div><div>C</div></div>`
+		);
 	});
 });
