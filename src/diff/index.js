@@ -373,8 +373,8 @@ function catchErrorInComponent(error, component) {
 		if (!component._processingException) {
 			try {
 				if (isSuspend) {
-					if (component.__s) {
-						component.__s(error);
+					if (component._childDidSuspend) {
+						component._childDidSuspend(error);
 					}
 					else {
 						continue;

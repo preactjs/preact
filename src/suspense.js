@@ -1,30 +1,23 @@
 import { Component } from './component';
 import { createElement } from './create-element';
 
-export class Suspense extends Component {
-	constructor(props) {
-		super(props);
+// having a "custom class" here saves 50bytes gzipped
+export function s(props) {}
+s.prototype = new Component();
+s.prototype._childDidSuspend = function(e) {
+	this.setState({ _loading: true });
+	const cb = () => { this.setState({ _loading: false }); };
 
-		this.state = {};
-	}
+	// Suspense ignores errors thrown in Promises as this should be handled by user land code
+	e.then(cb, cb);
+};
+s.prototype.render = function(props, state) {
+	return state._loading ? props.fallback : props.children;
+};
 
-	__s(e) {
-		if (typeof e.then == 'function') {
-			this.setState({ l: 1 });
-			const cb = () => { this.setState({ l: 0 }); };
-
-			// Suspense ignores errors thrown in Promises as this should be handled by user land code
-			e.then(cb, cb);
-		}
-		else {
-			throw e;
-		}
-	}
-
-	render(props, state) {
-		return state.l ? props.fallback : props.children;
-	}
-}
+// exporting s as Suspense instead of naming the class iself Suspense saves 4 bytes gzipped
+// TODO: does this add the need of a displayName?
+export const Suspense = s;
 
 export function lazy(loader) {
 	let prom;
