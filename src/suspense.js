@@ -32,8 +32,8 @@ export function lazy(loader) {
 		if (!prom) {
 			prom = loader();
 			prom.then(
-				({ default: c }) => { component = c; },
-				e => error = e,
+				(exports) => { component = exports.default; },
+				(e) => { error = e; },
 			);
 		}
 
