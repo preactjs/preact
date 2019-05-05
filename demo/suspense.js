@@ -49,6 +49,7 @@ function CustomSuspense({ isDone, start, timeout, name }) {
 }
 
 function init() {
+	console.log('init');
 	return {
 		s1: createSuspension('1', 1000, null),
 		s2: createSuspension('2', 2000, null),
@@ -60,6 +61,7 @@ export default class DevtoolsDemo extends Component {
 	constructor(props) {
 		super(props);
 		this.state = init();
+		this.onRerun = this.onRerun.bind(this)
 	}
 
 	onRerun() {
@@ -74,6 +76,9 @@ export default class DevtoolsDemo extends Component {
 					<Lazy />
 				</Suspense>
 				<h1>Suspense</h1>
+				<div>
+					<button onClick={this.onRerun} >Rerun</button>
+				</div>
 				<Suspense fallback={<div>Fallback 1</div>}>
 					<CustomSuspense {...state.s1} />
 					<Suspense fallback={<div>Fallback 2</div>}>
