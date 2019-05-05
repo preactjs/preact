@@ -73,7 +73,21 @@ Component.prototype.forceUpdate = function(callback) {
 		let mounts = [];
 		dom = diff(parentDom, vnode, vnode, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, this._ancestorComponent, force, dom);
 		if (dom!=null && dom.parentNode!==parentDom) {
-			parentDom.appendChild(dom);
+			// The component may be rendered somewhere in the middle of the parent's
+			// children. We need to find the nearest DOM sibling to insert our
+			// newly rendered node into.
+			let nextDom;
+			let sibling = this._siblingVNode;
+			while (sibling && !(nextDom = sibling._dom)) {
+				sibling = sibling._component && sibling._component._siblingVNode;
+			}
+
+			if (nextDom) {
+				parentDom.insertBefore(dom, nextDom);
+			}
+			else {
+				parentDom.appendChild(dom);
+			}
 		}
 		commitRoot(mounts, vnode);
 	}
