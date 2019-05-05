@@ -76,11 +76,11 @@ export function useReducer(reducer, initialState, init) {
 
 	/** @type {import('./internal').ReducerHookState} */
 	const hookState = getHookState(currentIndex++);
-	if (hookState._component == null) {
+	if (!hookState._component) {
 		hookState._component = currentComponent;
 
 		hookState._value = [
-			init == null ? invokeOrReturn(null, initialState) : init(initialState),
+			!init ? invokeOrReturn(null, initialState) : init(initialState),
 
 			action => {
 				const nextValue = reducer(hookState._value[0], action);
@@ -129,7 +129,7 @@ export function useLayoutEffect(callback, args) {
 
 export function useRef(initialValue) {
 	const state = getHookState(currentIndex++);
-	if (state._value == null) {
+	if (!state._value) {
 		state._value = { current: initialValue };
 	}
 
@@ -174,8 +174,9 @@ export function useCallback(callback, args) {
  */
 export function useContext(context) {
 	const provider = currentComponent.context[context._id];
-	if (provider == null) return context._defaultValue;
+	if (!provider) return context._defaultValue;
 	const state = getHookState(currentIndex++);
+	// This is probably not safe to convert to "!"
 	if (state._value == null) {
 		state._value = true;
 		provider.sub(currentComponent);
@@ -255,7 +256,7 @@ function invokeEffect(hook) {
 }
 
 function argsChanged(oldArgs, newArgs) {
-	return oldArgs == null || newArgs.some((arg, index) => arg !== oldArgs[index]);
+	return !oldArgs || newArgs.some((arg, index) => arg !== oldArgs[index]);
 }
 
 function invokeOrReturn(arg, f) {
