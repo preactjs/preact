@@ -65,10 +65,22 @@ function createSuspension(name, timeout, t) {
 	};
 }
 
-class WrapperOne extends Component {
-	render() {
-		return this.props.children;
+class ClassWrapper extends Component {
+	render(props) {
+		return (
+			<div id="class-wrapper">
+				{props.children}
+			</div>
+		);
 	}
+}
+
+function FuncWrapper(props) {
+	return (
+		<div id="func-wrapper">
+			{props.children}
+		</div>
+	);
 }
 
 describe('suspense', () => {
@@ -120,13 +132,14 @@ describe('suspense', () => {
 
 		render(
 			<Suspense fallback={<div>Suspended...</div>}>
-				<WrapperOne>
-					<CustomSuspense {...s} />
-				</WrapperOne>
+				<ClassWrapper>
+					<FuncWrapper>
+						<CustomSuspense {...s} />
+					</FuncWrapper>
+				</ClassWrapper>
 			</Suspense>,
 			scratch,
 		);
-		// TODO: why a rerender needed here. Will this even work in the browser?!
 		rerender();
 		expect(scratch.innerHTML).to.eql(
 			`<div>Suspended...</div>`
@@ -135,7 +148,7 @@ describe('suspense', () => {
 		return s.getPromise().then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
-				`<div>Hello from CustomSuspense regular case</div>`
+				`<div id="class-wrapper"><div id="func-wrapper"><div>Hello from CustomSuspense regular case</div></div></div>`
 			);
 		});
 	});
