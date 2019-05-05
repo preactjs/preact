@@ -28,11 +28,15 @@ export function lazy(loader) {
 	let prom;
 	let component;
 	let error;
-	return function L(props) {
+
+	function Lazy(props) {
 		if (!prom) {
 			prom = loader();
 			prom.then(
-				(exports) => { component = exports.default; },
+				(exports) => {
+					component = exports.default;
+					Lazy.displayName = 'Lazy(' + (component.displayName || component.name) + ')';
+				},
 				(e) => { error = e; },
 			);
 		}
@@ -46,5 +50,7 @@ export function lazy(loader) {
 		}
 
 		return createElement(component, props);
-	};
+	}
+
+	return Lazy;
 }
