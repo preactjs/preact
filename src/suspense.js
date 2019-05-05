@@ -4,13 +4,18 @@ import { createElement } from './create-element';
 // having a "custom class" here saves 50bytes gzipped
 export function s(props) {}
 s.prototype = new Component();
-s.prototype._childDidSuspend = function(e) {
+
+/**
+ * @param {Promise} promise The thrown promise
+ */
+s.prototype._childDidSuspend = function(promise) {
 	this.setState({ _loading: true });
 	const cb = () => { this.setState({ _loading: false }); };
 
 	// Suspense ignores errors thrown in Promises as this should be handled by user land code
-	e.then(cb, cb);
+	promise.then(cb, cb);
 };
+
 s.prototype.render = function(props, state) {
 	return state._loading ? props.fallback : props.children;
 };
