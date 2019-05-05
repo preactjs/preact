@@ -60,7 +60,7 @@ export default class DevtoolsDemo extends Component {
 	constructor(props) {
 		super(props);
 		this.state = init();
-		this.onRerun = this.onRerun.bind(this)
+		this.onRerun = this.onRerun.bind(this);
 	}
 
 	onRerun() {
