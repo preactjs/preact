@@ -88,7 +88,7 @@ function createPortal(vnode, container) {
 }
 
 const mapFn = (children, fn) => {
-	if (children == null) return null;
+	if (!children) return null;
 	return toChildArray(children).map(fn);
 };
 
@@ -286,7 +286,7 @@ function memo(c, comparer) {
 		if (!updateRef) {
 			ref.call ? ref(null) : (ref.current = null);
 		}
-		return (comparer==null
+		return (!comparer
 			? shallowDiffers(this.props, nextProps)
 			: !comparer(this.props, nextProps)) || !updateRef;
 	}
