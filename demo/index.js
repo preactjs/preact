@@ -17,6 +17,7 @@ import StyledComp from './styled-components';
 import { initDevTools } from 'preact/debug/src/devtools';
 import { initDebug } from 'preact/debug/src/debug';
 import DevtoolsDemo from './devtools';
+import SuspenseDemo from './suspense';
 
 let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(window.location.href);
 if (!isBenchmark) {
@@ -71,6 +72,7 @@ class App extends Component {
 						<Link href="/people" activeClassName="active">People Browser</Link>
 						<Link href="/state-order" activeClassName="active">State Order</Link>
 						<Link href="/styled-components" activeClassName="active">Styled Components</Link>
+						<Link href="/suspense" activeClassName="active">Suspense / lazy</Link>
 					</nav>
 				</header>
 				<main>
@@ -96,6 +98,7 @@ class App extends Component {
 						<KeyBug path="/key_bug" />
 						<Context path="/context" />
 						<DevtoolsDemo path="/devtools" />
+						<SuspenseDemo path="/suspense" />
 						<EmptyFragment path="/empty-fragment" />
 						<PeopleBrowser path="/people/:user?" />
 						<StyledComp path="/styled-components" />
