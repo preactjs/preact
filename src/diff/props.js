@@ -38,36 +38,25 @@ const XLINK_NS = 'http://www.w3.org/1999/xlink';
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
 function setProperty(dom, name, value, oldValue, isSvg) {
+	let v;
+
 	name = isSvg ? (name==='className' ? 'class' : name) : (name==='class' ? 'className' : name);
 
 	if (name==='style') {
+		// Always clear the previous styles
+		dom.style.cssText = EMPTY_OBJ;
 
-		/* Possible golfing activities for setting styles:
-		 *   - we could just drop String style values. They're not supported in other VDOM libs.
-		 *   - assigning to .style sets .style.cssText - TODO: benchmark this, might not be worth the bytes.
-		 *   - assigning also casts to String, and ignores invalid values. This means assigning an Object clears all styles.
-		 */
-		let s = dom.style;
+		for (let i in value) {
+			v = value[i];
+			v = typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v;
 
-		if (typeof value==='string') {
-			s.cssText = value;
-		}
-		else {
-
-			// Always clear the previous styles
-			s.cssText = EMPTY_OBJ;
-
-			for (let i in value) {
-				v = value[i];
-				v = typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v;
-
-				// For css vars, just define them with `setProperty`;
-				if (/^--/.test(i)) {
-					s.setProperty(i, v);
-				}
-				else {
-					s[i] = v;
-				}
+			// For css vars, just define them with `setProperty`;
+			if (/^--/.test(i)) {
+				dom.style.setProperty(i, v);
+			}
+			else {
+				// Bench for setter vs (setProperty + regex) https://esbench.com/bench/5ccb5a284cd7e6009ef6232e
+				dom.style[i] = v;
 			}
 		}
 	}
