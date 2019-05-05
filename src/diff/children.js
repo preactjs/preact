@@ -63,7 +63,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			// (holes).
 			oldVNode = oldChildren[i];
 
-			if (oldVNode===null || (oldVNode != null && (childVNode.key==null && oldVNode.key==null ? (childVNode.type === oldVNode.type) : (childVNode.key === oldVNode.key)))) {
+			if (oldVNode===null || (oldVNode && (oldVNode.key!=null ? (childVNode.key === oldVNode.key) : (childVNode.key==null && childVNode.type === oldVNode.type)))) {
 				oldChildren[i] = undefined;
 			}
 			else {
@@ -71,7 +71,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 				// so after this loop oldVNode == null or oldVNode is a valid value.
 				for (j=0; j<oldChildrenLength; j++) {
 					oldVNode = oldChildren[j];
-					if (oldVNode!=null && (childVNode.key==null && oldVNode.key==null ? (childVNode.type === oldVNode.type) : (childVNode.key === oldVNode.key))) {
+					if (oldVNode && (oldVNode.key!=null ? (childVNode.key === oldVNode.key) : (childVNode.key==null && childVNode.type === oldVNode.type))) {
 						oldChildren[j] = undefined;
 						if (oldChildrenLength !== newChildren.length && oldVNode.type !== (oldChild && oldChild.type)) {
 							oldDom = oldVNode._dom;
