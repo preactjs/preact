@@ -9,7 +9,6 @@ function LazyComp() {
 	return <div>I'm (fake) lazy loaded</div>;
 }
 
-console.log(lazy);
 const Lazy = lazy(() => Promise.resolve({ default: LazyComp }));
 
 const Memoed = memo(Foo);
