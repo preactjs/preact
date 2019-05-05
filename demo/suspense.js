@@ -49,7 +49,6 @@ function CustomSuspense({ isDone, start, timeout, name }) {
 }
 
 function init() {
-	console.log('init');
 	return {
 		s1: createSuspension('1', 1000, null),
 		s2: createSuspension('2', 2000, null),
