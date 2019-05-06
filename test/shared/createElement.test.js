@@ -48,11 +48,23 @@ describe('createElement(jsx)', () => {
 		expect(<div key="1" />).to.have.property('key', '1');
 	});
 
+	it('should not set VNode#props.key property', () => {
+		expect(<div />).to.not.have.nested.property('props.key');
+		expect(<div key="1" />).to.not.have.nested.property('props.key');
+		expect(<div key={0} />).to.not.have.nested.property('props.key');
+		expect(<div key={''} />).to.not.have.nested.property('props.key');
+	});
+
 	it('should set VNode#ref property', () => {
 		expect(<div />).to.have.property('ref').that.is.undefined;
 		expect(<div a="a" />).to.have.property('ref').that.is.undefined;
 		const emptyFunction = () => {};
 		expect(<div ref={emptyFunction} />).to.have.property('ref', emptyFunction);
+	});
+
+	it('should not set VNode#props.ref property', () => {
+		expect(<div />).to.not.have.nested.property('props.ref');
+		expect(<div ref={() => {}} />).to.not.have.nested.property('props.ref');
 	});
 
 	it('should have ordered VNode properties', () => {
