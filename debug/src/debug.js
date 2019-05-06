@@ -74,7 +74,7 @@ export function initDebug() {
 
 		// Check prop-types if available
 		if (typeof vnode.type==='function' && vnode.type.propTypes) {
-			if (vnode.type.name === 'Lazy') {
+			if (vnode.type.displayName === 'Lazy') {
 				const m = 'PropTypes are not supported on lazy(). Use propTypes on the wrapped component itself. ';
 				try {
 					const lazied = vnode.type();
