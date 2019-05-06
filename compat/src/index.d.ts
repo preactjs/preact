@@ -1,6 +1,6 @@
 import * as hooks from '../../hooks';
 import { VNode, PreactElement } from '../../src/internal';
-import { Component, createContext, createRef, Fragment, toChildArray, ComponentChildren, ComponentChild } from '../../src';
+import { Component, createContext, createRef, Fragment, ComponentChildren, ComponentChild } from '../../src';
 import { FunctionalComponent } from 'preact';
 import { ForwardFn } from './internal';
 
@@ -25,10 +25,10 @@ export function isValidElement (element: any): boolean;
 
 export function findDOMNode (component: Component): PreactElement | null;
 
-export class PureComponent extends Component<P, S> {
-  public isPureReactComponenet: boolean;
+export interface PureComponent<P = {}, S = {}> extends Component {
+  isPureReactComponenet: boolean;
 
-  public shouldComponentUpdate (props: P, state: S): boolean;
+  shouldComponentUpdate?(props: Readonly<P>, state: Readonly<S>): boolean;
 }
 
 export function memo (c: FunctionalComponent, comparer: (prev: any, next: any) => boolean): FunctionalComponent;
@@ -37,14 +37,14 @@ export function forwardRef (fn: ForwardFn): FunctionalComponent;
 
 export function unstable_batchedUpdates (callback: () => void, arg?: any): void;
 
-function mapFn (children: ComponentChildren, fn: (d: any, i: number) => any): Array<VNode | null> | null;
+type mapFn = (children: ComponentChildren, fn: (d: any, i: number) => any) => Array<VNode | null> | null;
 
 export interface Children {
   map: mapFn;
   forEach: mapFn;
   count: (children: ComponentChildren) => boolean;
   only: (children: ComponentChildren) => ComponentChild;
-  toArray: toChildArray;
+  toArray: (children: ComponentChildren) => VNode<{}>[];
 }
 
 export default {
