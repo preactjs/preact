@@ -1,5 +1,4 @@
 import * as _hooks from '../../hooks';
-import { PreactElement } from '../../src/internal';
 import * as preact from '../../src';
 import { ForwardFn } from './internal';
 
@@ -16,11 +15,11 @@ declare namespace compat {
 
   export const version: string;
 
-  export function createPortal(vnode: preact.VNode, container: PreactElement | Element): preact.VNode<any>;
+  export function createPortal(vnode: preact.VNode, container: Element): preact.VNode<any>;
 
-  function render(vnode: preact.VNode<any>, parent: PreactElement, callback?: () => void): Component | null;
+  function render(vnode: preact.VNode<any>, parent: Element, callback?: () => void): Component | null;
 
-  function hydrate(vnode: preact.VNode<any>, parent: PreactElement, callback?: () => void): Component | null;
+  function hydrate(vnode: preact.VNode<any>, parent: Element, callback?: () => void): Component | null;
 
   function unmountComponentAtNode(container: Element | Document | ShadowRoot | DocumentFragment): boolean;
 
@@ -28,7 +27,7 @@ declare namespace compat {
 
   function isValidElement(element: any): boolean;
 
-  function findDOMNode(component: preact.Component): PreactElement | null;
+  function findDOMNode(component: preact.Component): Element | null;
 
   interface PureComponent<P = {}, S = {}> extends preact.Component {
     isPureReactComponenet: boolean;
