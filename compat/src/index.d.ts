@@ -1,6 +1,6 @@
 import * as hooksRoot from '../../hooks';
 import { VNode, PreactElement } from '../../src/internal';
-import { Component, createContext, createRef, Fragment, ComponentChildren, ComponentChild } from '../../src';
+import { Component, createContext, createRef, Fragment, ComponentChildren, ComponentChild, FunctionComponent } from '../../src';
 import { FunctionalComponent } from 'preact';
 import { ForwardFn } from './internal';
 
@@ -13,21 +13,21 @@ declare namespace compat {
 
   const version: string;
 
-  function createPortal (vnode: VNode, container: PreactElement): VNode<any>;
+  function createPortal(vnode: VNode, container: PreactElement): VNode<any>;
 
-  function createElement (type: VNode["type"], props?: any, Children?: ComponentChildren): VNode<any>;
+  function createElement(type: VNode["type"], props?: any, Children?: ComponentChildren): VNode<any>;
 
   function cloneElement (element: VNode<any>): VNode<any>;
 
-  function render (vnode: VNode<any>, parent: PreactElement, callback?: () => void): Component | null;
+  function render(vnode: VNode<any>, parent: PreactElement, callback?: () => void): Component | null;
 
-  function unmountComponentAtNode (container: Element | Document | ShadowRoot | DocumentFragment): boolean;
+  function unmountComponentAtNode(container: Element | Document | ShadowRoot | DocumentFragment): boolean;
 
-  function createFactory (type: VNode["type"]): VNode<any>;
+  function createFactory(type: VNode["type"]): VNode<{}>;
 
-  function isValidElement (element: any): boolean;
+  function isValidElement(element: any): boolean;
 
-  function findDOMNode (component: Component): PreactElement | null;
+  function findDOMNode(component: Component): PreactElement | null;
 
   interface PureComponent<P = {}, S = {}> extends Component {
     isPureReactComponenet: boolean;
@@ -35,11 +35,11 @@ declare namespace compat {
     shouldComponentUpdate?(props: Readonly<P>, state: Readonly<S>): boolean;
   }
 
-  function memo (c: FunctionalComponent, comparer: (prev: any, next: any) => boolean): FunctionalComponent;
+  function memo<P = {}>(component: FunctionalComponent<P>, comparer?: (prev: P, next: P) => boolean): FunctionComponent<P>;
 
-  function forwardRef (fn: ForwardFn): FunctionalComponent;
+  function forwardRef(fn: ForwardFn): FunctionalComponent;
 
-  function unstable_batchedUpdates (callback: (arg?: any) => void, arg?: any): void;
+  function unstable_batchedUpdates(callback: (arg?: any) => void, arg?: any): void;
 
 
   interface Children {
