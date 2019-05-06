@@ -37,14 +37,14 @@ declare namespace compat {
 
   function memo<P = {}>(component: FunctionalComponent<P>, comparer?: (prev: P, next: P) => boolean): FunctionComponent<P>;
 
-  function forwardRef(fn: ForwardFn): FunctionalComponent;
+  function forwardRef<P = {}>(fn: ForwardFn<P, any>): FunctionalComponent<P>;
 
   function unstable_batchedUpdates(callback: (arg?: any) => void, arg?: any): void;
 
 
   interface Children {
     map<T extends ComponentChild, R>(children: T | T[], fn: (child: T, i: number, array: T[]) => R): R[];
-    forEach<T extends ComponentChild, R>(children: T | T[], fn: (child: T, i: number, array: T[]) => void): void;
+    forEach<T extends ComponentChild>(children: T | T[], fn: (child: T, i: number, array: T[]) => void): void;
     count: (children: ComponentChildren) => number;
     only: (children: ComponentChildren) => ComponentChild;
     toArray: (children: ComponentChildren) => VNode<{}>[];
