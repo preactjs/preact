@@ -1,71 +1,52 @@
-import * as hooks from '../../hooks';
+import * as hooksRoot from '../../hooks';
 import { VNode, PreactElement } from '../../src/internal';
 import { Component, createContext, createRef, Fragment, ComponentChildren, ComponentChild } from '../../src';
 import { FunctionalComponent } from 'preact';
 import { ForwardFn } from './internal';
 
-export { Component, createContext, createRef, Fragment } from '../../src';
-export * from '../../hooks';
+export = compat;
+export as namespace compat;
 
-export const version: string;
+declare namespace compat {
+  export import hooks = hooksRoot;
+  // export import Component = _Component;
 
-export function createPortal (vnode: VNode, container: PreactElement): VNode<any>;
+  const version: string;
 
-export function createElement (type: VNode["type"], props?: any, Children?: ComponentChildren): VNode<any>;
+  function createPortal (vnode: VNode, container: PreactElement): VNode<any>;
 
-export function cloneElement (element: VNode<any>): VNode<any>;
+  function createElement (type: VNode["type"], props?: any, Children?: ComponentChildren): VNode<any>;
 
-export function render (vnode: VNode<any>, parent: PreactElement, callback?: () => void): Component | null;
+  function cloneElement (element: VNode<any>): VNode<any>;
 
-export function unmountComponentAtNode (container: Element | Document | ShadowRoot | DocumentFragment): boolean;
+  function render (vnode: VNode<any>, parent: PreactElement, callback?: () => void): Component | null;
 
-export function createFactory (type: VNode["type"]): VNode<any>;
+  function unmountComponentAtNode (container: Element | Document | ShadowRoot | DocumentFragment): boolean;
 
-export function isValidElement (element: any): boolean;
+  function createFactory (type: VNode["type"]): VNode<any>;
 
-export function findDOMNode (component: Component): PreactElement | null;
+  function isValidElement (element: any): boolean;
 
-export interface PureComponent<P = {}, S = {}> extends Component {
-  isPureReactComponenet: boolean;
+  function findDOMNode (component: Component): PreactElement | null;
 
-  shouldComponentUpdate?(props: Readonly<P>, state: Readonly<S>): boolean;
-}
+  interface PureComponent<P = {}, S = {}> extends Component {
+    isPureReactComponenet: boolean;
 
-export function memo (c: FunctionalComponent, comparer: (prev: any, next: any) => boolean): FunctionalComponent;
+    shouldComponentUpdate?(props: Readonly<P>, state: Readonly<S>): boolean;
+  }
 
-export function forwardRef (fn: ForwardFn): FunctionalComponent;
+  function memo (c: FunctionalComponent, comparer: (prev: any, next: any) => boolean): FunctionalComponent;
 
-export function unstable_batchedUpdates (callback: () => void, arg?: any): void;
+  function forwardRef (fn: ForwardFn): FunctionalComponent;
 
-type mapFn = (children: ComponentChildren, fn: (d: any, i: number) => any) => Array<VNode | null> | null;
+  function unstable_batchedUpdates (callback: () => void, arg?: any): void;
 
-export interface Children {
-  map: mapFn;
-  forEach: mapFn;
-  count: (children: ComponentChildren) => boolean;
-  only: (children: ComponentChildren) => ComponentChild;
-  toArray: (children: ComponentChildren) => VNode<{}>[];
-}
 
-export default {
-  Children,
-  hooks,
-  version,
-  createPortal,
-  createElement,
-  cloneElement,
-  render,
-  hydrate: render,
-  unmountComponentAtNode,
-  createContext,
-  createFactory,
-  createRef,
-  Fragment,
-  isValidElement,
-  findDOMNode,
-  Component,
-  PureComponent,
-  memo,
-  forwardRef,
-  unstable_batchedUpdates,
+  interface Children {
+    map<T extends ComponentChild, R>(children: T | T[], fn: (child: T, i: number, array: T[]) => R): R[];
+    forEach<T extends ComponentChild, R>(children: T | T[], fn: (child: T, i: number, array: T[]) => void): void;
+    count: (children: ComponentChildren) => number;
+    only: (children: ComponentChildren) => ComponentChild;
+    toArray: (children: ComponentChildren) => VNode<{}>[];
+  }
 }
