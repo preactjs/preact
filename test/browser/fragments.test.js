@@ -1976,4 +1976,45 @@ describe('Fragment', () => {
 			`<div><div>A</div><div>B</div><div>C</div></div>`
 		);
 	});
+
+	// TODO: This test is failing
+	it.skip('should insert in-between nested null children', () => {
+		let update;
+		class SetState extends Component {
+			constructor(props) {
+				super(props);
+				update = () => this.setState({ active: true });
+			}
+
+			render() {
+				return this.state.active ? <div>B</div> : null;
+			}
+		}
+
+		function Outer() {
+			return <SetState />;
+		}
+
+		render(
+			<div>
+				<div>A</div>
+				{null}
+				<Outer />
+				{null}
+				<div>C</div>
+			</div>,
+			scratch,
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>C</div></div>`
+		);
+
+		update();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>B</div><div>C</div></div>`
+		);
+	});
 });
