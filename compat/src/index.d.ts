@@ -11,7 +11,7 @@ export const version: string;
 
 export function createPortal (vnode: VNode, container: PreactElement): VNode<any>;
 
-export function createElement (...args: VNode<any>): VNode<any>;
+export function createElement (type: VNode["type"], props?: any, Children?: ComponentChildren): VNode<any>;
 
 export function cloneElement (element: VNode<any>): VNode<any>;
 
