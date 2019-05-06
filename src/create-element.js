@@ -30,9 +30,9 @@ export function createElement(type, props, children) {
 		}
 	}
 	let ref = props.ref;
-	if (ref) delete props.ref;
 	let key = props.key;
-	if (key) delete props.key;
+	if (ref!=null) delete props.ref;
+	if (key!=null) delete props.key;
 
 	return createVNode(type, props, key, ref);
 }
