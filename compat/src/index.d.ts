@@ -39,7 +39,7 @@ declare namespace compat {
 
   function forwardRef (fn: ForwardFn): FunctionalComponent;
 
-  function unstable_batchedUpdates (callback: () => void, arg?: any): void;
+  function unstable_batchedUpdates (callback: (arg?: any) => void, arg?: any): void;
 
 
   interface Children {
