@@ -1,21 +1,26 @@
 import * as _hooks from '../../hooks';
 import { VNode, PreactElement } from '../../src/internal';
-import { Component, createContext, createRef, Fragment, ComponentChildren, ComponentChild, FunctionComponent, createElement, cloneElement } from '../../src';
-import { FunctionalComponent } from 'preact';
+import * as preact from '../../src';
 import { ForwardFn } from './internal';
 
 export = compat;
 export as namespace compat;
-
 declare namespace compat {
   export import hooks = _hooks;
-  // export import Component = _Component;
+  export import Component = preact.Component;
+  export import createContext = preact.createContext;
+  export import createRef = preact.createRef;
+  export import Fragment = preact.Fragment;
+  export import createElement = preact.createElement
+  export import cloneElement = preact.cloneElement
 
-  const version: string;
+  export const version: string;
 
-  function createPortal(vnode: VNode, container: PreactElement): VNode<any>;
+  export function createPortal(vnode: VNode, container: PreactElement): VNode<any>;
 
   function render(vnode: VNode<any>, parent: PreactElement, callback?: () => void): Component | null;
+
+  function hydrate(vnode: VNode<any>, parent: PreactElement, callback?: () => void): Component | null;
 
   function unmountComponentAtNode(container: Element | Document | ShadowRoot | DocumentFragment): boolean;
 
@@ -23,24 +28,24 @@ declare namespace compat {
 
   function isValidElement(element: any): boolean;
 
-  function findDOMNode(component: Component): PreactElement | null;
+  function findDOMNode(component: preact.Component): PreactElement | null;
 
-  interface PureComponent<P = {}, S = {}> extends Component {
+  interface PureComponent<P = {}, S = {}> extends preact.Component {
     isPureReactComponenet: boolean;
   }
 
-  function memo<P = {}>(component: FunctionalComponent<P>, comparer?: (prev: P, next: P) => boolean): FunctionComponent<P>;
+  function memo<P = {}>(component: preact.FunctionalComponent<P>, comparer?: (prev: P, next: P) => boolean): preact.FunctionComponent<P>;
 
-  function forwardRef<P = {}>(fn: ForwardFn<P, any>): FunctionalComponent<P>;
+  function forwardRef<P = {}>(fn: ForwardFn<P, any>): preact.FunctionalComponent<P>;
 
   function unstable_batchedUpdates(callback: (arg?: any) => void, arg?: any): void;
 
 
   interface Children {
-    map<T extends ComponentChild, R>(children: T | T[], fn: (child: T, i: number, array: T[]) => R): R[];
-    forEach<T extends ComponentChild>(children: T | T[], fn: (child: T, i: number, array: T[]) => void): void;
-    count: (children: ComponentChildren) => number;
-    only: (children: ComponentChildren) => ComponentChild;
-    toArray: (children: ComponentChildren) => VNode<{}>[];
+    map<T extends preact.ComponentChild, R>(children: T | T[], fn: (child: T, i: number, array: T[]) => R): R[];
+    forEach<T extends preact.ComponentChild>(children: T | T[], fn: (child: T, i: number, array: T[]) => void): void;
+    count: (children: preact.ComponentChildren) => number;
+    only: (children: preact.ComponentChildren) => preact.ComponentChild;
+    toArray: (children: preact.ComponentChildren) => VNode<{}>[];
   }
 }
