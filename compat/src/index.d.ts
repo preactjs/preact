@@ -1,6 +1,6 @@
-import * as hooksRoot from '../../hooks';
+import * as _hooks from '../../hooks';
 import { VNode, PreactElement } from '../../src/internal';
-import { Component, createContext, createRef, Fragment, ComponentChildren, ComponentChild, FunctionComponent } from '../../src';
+import { Component, createContext, createRef, Fragment, ComponentChildren, ComponentChild, FunctionComponent, createElement, cloneElement } from '../../src';
 import { FunctionalComponent } from 'preact';
 import { ForwardFn } from './internal';
 
@@ -8,16 +8,12 @@ export = compat;
 export as namespace compat;
 
 declare namespace compat {
-  export import hooks = hooksRoot;
+  export import hooks = _hooks;
   // export import Component = _Component;
 
   const version: string;
 
   function createPortal(vnode: VNode, container: PreactElement): VNode<any>;
-
-  function createElement(type: VNode["type"], props?: any, Children?: ComponentChildren): VNode<any>;
-
-  function cloneElement (element: VNode<any>): VNode<any>;
 
   function render(vnode: VNode<any>, parent: PreactElement, callback?: () => void): Component | null;
 
