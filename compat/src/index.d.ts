@@ -1,5 +1,5 @@
 import * as _hooks from '../../hooks';
-import { VNode, PreactElement } from '../../src/internal';
+import { PreactElement } from '../../src/internal';
 import * as preact from '../../src';
 import { ForwardFn } from './internal';
 
@@ -16,15 +16,15 @@ declare namespace compat {
 
   export const version: string;
 
-  export function createPortal(vnode: VNode, container: PreactElement): VNode<any>;
+  export function createPortal(vnode: preact.VNode, container: PreactElement): preact.VNode<any>;
 
-  function render(vnode: VNode<any>, parent: PreactElement, callback?: () => void): Component | null;
+  function render(vnode: preact.VNode<any>, parent: PreactElement, callback?: () => void): Component | null;
 
-  function hydrate(vnode: VNode<any>, parent: PreactElement, callback?: () => void): Component | null;
+  function hydrate(vnode: preact.VNode<any>, parent: PreactElement, callback?: () => void): Component | null;
 
   function unmountComponentAtNode(container: Element | Document | ShadowRoot | DocumentFragment): boolean;
 
-  function createFactory(type: VNode["type"]): VNode<{}>;
+  function createFactory(type: preact.VNode["type"]): preact.VNode<{}>;
 
   function isValidElement(element: any): boolean;
 
@@ -46,6 +46,6 @@ declare namespace compat {
     forEach<T extends preact.ComponentChild>(children: T | T[], fn: (child: T, i: number, array: T[]) => void): void;
     count: (children: preact.ComponentChildren) => number;
     only: (children: preact.ComponentChildren) => preact.ComponentChild;
-    toArray: (children: preact.ComponentChildren) => VNode<{}>[];
+    toArray: (children: preact.ComponentChildren) => preact.VNode<{}>[];
   }
 }
