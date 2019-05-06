@@ -31,8 +31,6 @@ declare namespace compat {
 
   interface PureComponent<P = {}, S = {}> extends Component {
     isPureReactComponenet: boolean;
-
-    shouldComponentUpdate?(props: Readonly<P>, state: Readonly<S>): boolean;
   }
 
   function memo<P = {}>(component: FunctionalComponent<P>, comparer?: (prev: P, next: P) => boolean): FunctionComponent<P>;
