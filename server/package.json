@@ -5,8 +5,8 @@
   "description": "Render JSX to an HTML string, with support for Preact components.",
   "main": "dist/index.js",
   "umd:main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "jsnext:main": "dist/index.mjs",
+  "module": "dist/index.module.js",
+  "jsnext:main": "dist/index.module.js",
   "scripts": {
     "build": "npm run -s transpile && npm run -s transpile:jsx && npm run -s copy-typescript-definition",
     "transpile": "echo 'export const ENABLE_PRETTY = false;'>env.js && microbundle src/index.js -f es,umd --target web --external preact",
