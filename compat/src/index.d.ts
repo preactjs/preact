@@ -16,7 +16,7 @@ declare namespace compat {
 
   export const version: string;
 
-  export function createPortal(vnode: preact.VNode, container: PreactElement): preact.VNode<any>;
+  export function createPortal(vnode: preact.VNode, container: PreactElement | Element): preact.VNode<any>;
 
   function render(vnode: preact.VNode<any>, parent: PreactElement, callback?: () => void): Component | null;
 
