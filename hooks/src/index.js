@@ -44,7 +44,7 @@ options.unmount = vnode => {
 
 	const hooks = c.__hooks;
 	if (hooks) {
-		hooks._list.some(hook => hook._cleanup && hook._cleanup());
+		hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
 	}
 };
 
@@ -237,8 +237,8 @@ if (typeof window !== 'undefined') {
 }
 
 function handleEffects(effects) {
-	effects.some(invokeCleanup);
-	effects.some(invokeEffect);
+	effects.forEach(invokeCleanup);
+	effects.forEach(invokeEffect);
 	return [];
 }
 
