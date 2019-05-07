@@ -1,5 +1,6 @@
-import { IS_NON_DIMENSIONAL } from '../constants';
+import { IS_NON_DIMENSIONAL, EMPTY_OBJ } from '../constants';
 import options from '../options';
+import { assign } from '../util';
 
 /**
  * Diff the old and new properties of a VNode and apply changes to the DOM node
@@ -27,8 +28,7 @@ export function diffProps(dom, newProps, oldProps, isSvg) {
 	}
 }
 
-const CSS_VAR_PREFIX = /^--/;
-const CAMEL_REG = /-?(?=[A-Z])/g;
+const CAMEL_REG = /[A-Z]/g;
 const XLINK_NS = 'http://www.w3.org/1999/xlink';
 
 /**
@@ -40,22 +40,29 @@ const XLINK_NS = 'http://www.w3.org/1999/xlink';
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
 function setProperty(dom, name, value, oldValue, isSvg) {
-	let v;
-
 	name = isSvg ? (name==='className' ? 'class' : name) : (name==='class' ? 'className' : name);
 
 	if (name==='style') {
-		let s = dom.style;
-
+			
+		/* Possible golfing activities for setting styles:
+		 *   - we could just drop String style values. They're not supported in other VDOM libs.
+		 *   - assigning to .style sets .style.cssText - TODO: benchmark this, might not be worth the bytes.
+		 *   - assigning also casts to String, and ignores invalid values. This means assigning an Object clears all styles.
+		 */
 		// remove values not in the new list
-		for (let i in oldValue) {
-			if (value==null || !(i in value)) s.setProperty(i.replace(CAMEL_REG, '-'), '');
-		}
-		for (let i in value) {
-			v = value[i];
-			if (oldValue==null || v!==oldValue[i]) {
-				s.setProperty(CSS_VAR_PREFIX.test(i) ? i : i.replace(CAMEL_REG, '-'), typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v);
+		const set = assign(assign({}, oldValue), value);
+		for (let i in set) {
+			if ((value || EMPTY_OBJ)[i] === (oldValue || EMPTY_OBJ)[i]) {
+				continue;
 			}
+			dom.style.setProperty(
+				(i[0] === '-' && i[1] === '-') ? i : i.replace(CAMEL_REG, '-$&'),
+				(value && (i in value))
+					? (typeof set[i]==='number' && IS_NON_DIMENSIONAL.test(i)===false)
+						? set[i] + 'px'
+						: set[i]
+					: ''
+			);
 		}
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
@@ -75,7 +82,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	else if (name!=='list' && name!=='tagName' && !isSvg && (name in dom)) {
 		dom[name] = value==null ? '' : value;
 	}
-	else if (typeof value!=='function' && name != 'dangerouslySetInnerHTML') {
+	else if (typeof value!=='function' && name!=='dangerouslySetInnerHTML') {
 		if (name!==(name = name.replace(/^xlink:?/, ''))) {
 			if (value==null || value===false) {
 				dom.removeAttributeNS(XLINK_NS, name.toLowerCase());
