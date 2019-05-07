@@ -1,4 +1,4 @@
-import { IS_NON_DIMENSIONAL, EMPTY_OBJ } from '../constants';
+import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
 
 /**
@@ -27,6 +27,8 @@ export function diffProps(dom, newProps, oldProps, isSvg) {
 	}
 }
 
+const CSS_VAR_PREFIX = /^--/;
+const CAMEL_REG = /-?(?=[A-Z])/g;
 const XLINK_NS = 'http://www.w3.org/1999/xlink';
 
 /**
@@ -43,20 +45,16 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	name = isSvg ? (name==='className' ? 'class' : name) : (name==='class' ? 'className' : name);
 
 	if (name==='style') {
-		// Always clear the previous styles
-		dom.style.cssText = EMPTY_OBJ;
+		let s = dom.style;
 
+		// remove values not in the new list
+		for (let i in oldValue) {
+			if (value==null || !(i in value)) s.setProperty(i.replace(CAMEL_REG, '-'), '');
+		}
 		for (let i in value) {
 			v = value[i];
-			v = typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v;
-
-			// For css vars, just define them with `setProperty`;
-			if (/^--/.test(i)) {
-				dom.style.setProperty(i, v);
-			}
-			else {
-				// Bench for setter vs (setProperty + regex) https://esbench.com/bench/5ccb5a284cd7e6009ef6232e
-				dom.style[i] = v;
+			if (oldValue==null || v!==oldValue[i]) {
+				s.setProperty(CSS_VAR_PREFIX.test(i) ? i : i.replace(CAMEL_REG, '-'), typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v);
 			}
 		}
 	}
