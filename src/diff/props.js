@@ -43,13 +43,6 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	name = isSvg ? (name==='className' ? 'class' : name) : (name==='class' ? 'className' : name);
 
 	if (name==='style') {
-			
-		/* Possible golfing activities for setting styles:
-		 *   - we could just drop String style values. They're not supported in other VDOM libs.
-		 *   - assigning to .style sets .style.cssText - TODO: benchmark this, might not be worth the bytes.
-		 *   - assigning also casts to String, and ignores invalid values. This means assigning an Object clears all styles.
-		 */
-		// remove values not in the new list
 		const set = assign(assign({}, oldValue), value);
 		for (let i in set) {
 			if ((value || EMPTY_OBJ)[i] === (oldValue || EMPTY_OBJ)[i]) {
