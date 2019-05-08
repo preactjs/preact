@@ -421,6 +421,85 @@ describe('Components', () => {
 		expect(scratch.innerHTML, 'switching to textnode 2').to.equal('asdf');
 	});
 
+	// Test for Issue developit/preact#1616
+	it('should maintain order when setting state', () => {
+		let add, addTwice, reset;
+		const Entry = props => (
+			<div>
+				{props.children}
+				<button onClick={props.add}>Add</button>
+			</div>
+		);
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+
+				this.state = { values: ['abc'] };
+
+				add = this.add = this.add.bind(this);
+				addTwice = this.addTwice = this.addTwice.bind(this);
+				reset = this.reset = this.reset.bind(this);
+			}
+
+			add() {
+				this.setState({ values: [...this.state.values, 'def'] });
+			}
+
+			addTwice() {
+				this.setState({ values: [...this.state.values, 'def', 'ghi'] });
+			}
+
+			reset() {
+				this.setState({ values: ['abc'] });
+			}
+
+			update() {
+				this.setState({ i: this.state.i + 1 });
+			}
+
+			render() {
+				return (
+					<div>
+						{this.state.values.map(v => (
+							<Entry>
+								{v}
+							</Entry>
+						))}
+						<button>First Button</button>
+						<button>Second Button</button>
+						<button>Third Button</button>
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.firstChild.innerHTML).to.equal('<div>abc<button>Add</button></div>' +
+			'<button>First Button</button><button>Second Button</button><button>Third Button</button>');
+
+		add();
+		rerender();
+		expect(scratch.firstChild.innerHTML).to.equal('<div>abc<button>Add</button></div><div>def<button>Add</button>' +
+			'</div><button>First Button</button><button>Second Button</button><button>Third Button</button>');
+
+		add();
+		rerender();
+		expect(scratch.firstChild.innerHTML).to.equal('<div>abc<button>Add</button></div><div>def<button>Add</button></div><div>def<button>Add</button>' +
+			'</div><button>First Button</button><button>Second Button</button><button>Third Button</button>');
+
+		reset();
+		rerender();
+		expect(scratch.firstChild.innerHTML).to.equal('<div>abc<button>Add</button></div>' +
+			'<button>First Button</button><button>Second Button</button><button>Third Button</button>');
+
+		addTwice();
+		rerender();
+		expect(scratch.firstChild.innerHTML).to.equal('<div>abc<button>Add</button></div><div>def<button>Add</button></div><div>ghi<button>Add</button>' +
+			'</div><button>First Button</button><button>Second Button</button><button>Third Button</button>');
+	});
+
+
 	// Test for Issue developit/preact#254
 	it('should not recycle common class children with different keys', () => {
 		let idx = 0;
