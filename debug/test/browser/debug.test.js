@@ -425,19 +425,57 @@ describe('debug', () => {
 			});
 		});
 
-		it('should warn for PropTypes on lazy()', () => {
-			const loader = Promise.resolve({ default: function MyLazyLoadedComponent() { return <div>Hi there</div> } });
-			const FakeLazy = lazy(() => loader);
-			FakeLazy.propTypes = {};
-			render(
-				<Suspense fallback={<div>fallback...</div>} >
-					<FakeLazy />
-				</Suspense>,
-				scratch
-			);
-			return loader.then(() => {
-				expect(console.warn).to.be.calledTwice;
-				expect(warnings[1].includes('MyLazyLoadedComponent')).to.equal(true);
+		describe('warn for PropTypes on lazy()', () => {
+			it('should log the function name', () => {
+				const loader = Promise.resolve({ default: function MyLazyLoadedComponent() { return <div>Hi there</div>; } });
+				const FakeLazy = lazy(() => loader);
+				FakeLazy.propTypes = {};
+				render(
+					<Suspense fallback={<div>fallback...</div>} >
+						<FakeLazy />
+					</Suspense>,
+					scratch
+				);
+
+				return loader.then(() => {
+					expect(console.warn).to.be.calledTwice;
+					expect(warnings[1].includes('MyLazyLoadedComponent')).to.equal(true);
+				});
+			});
+
+			it('should log the displayName', () => {
+				function MyLazyLoadedComponent() { return <div>Hi there</div>; }
+				MyLazyLoadedComponent.displayName = 'HelloLazy';
+				const loader = Promise.resolve({ default: MyLazyLoadedComponent });
+				const FakeLazy = lazy(() => loader);
+				FakeLazy.propTypes = {};
+				render(
+					<Suspense fallback={<div>fallback...</div>} >
+						<FakeLazy />
+					</Suspense>,
+					scratch
+				);
+
+				return loader.then(() => {
+					expect(console.warn).to.be.calledTwice;
+					expect(warnings[1].includes('HelloLazy')).to.equal(true);
+				});
+			});
+
+			it('should not log a component if lazy throws', () => {
+				const loader = Promise.reject(new Error('Hey there'));
+				const FakeLazy = lazy(() => loader);
+				FakeLazy.propTypes = {};
+				render(
+					<Suspense fallback={<div>fallback...</div>} >
+						<FakeLazy />
+					</Suspense>,
+					scratch
+				);
+
+				return loader.catch(() => {
+					expect(console.warn).to.be.calledOnce;
+				});
 			});
 		});
 	});
