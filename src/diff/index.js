@@ -400,12 +400,6 @@ function catchErrorInComponent(error, component) {
 		}
 	}
 
-	// TODO: Add a react-like error message to preact/debug
-	/*
-		[componentName] suspended while rendering, but no fallback UI was specified.
-
-		Add a <Suspense fallback=...> component higher in the tree to provide a loading indicator or placeholder to display.
- 	*/
 	if (isSuspend) {
 		return catchErrorInComponent(new Error('Missing Suspense'), suspendingComponent);
 	}
