@@ -323,7 +323,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should support multiple Suspense inside a Fragment', () => {
+	it.skip('should support multiple Suspense inside a Fragment', () => {
 		const s1 = createSuspension('1', 0, null);
 		const s2 = createSuspension('2', 0, null);
 
