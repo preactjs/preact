@@ -15,7 +15,8 @@ describe('focus', () => {
 
 	const List = ({ children }) => <div>{children}</div>;
 	const ListItem = ({ children }) => <span>{children}</span>;
-	const Input = ({ i }) => <input id={`input-${i}`} type="text" />;
+	const InputWithId = ({ i }) => <input id={`input-${i}`} type="text" />;
+	const Input = () => <input type="text" />;
 
 	function focusInput() {
 		if (!scratch) return;
@@ -227,7 +228,7 @@ describe('focus', () => {
 	it.only('should maintain focus when adding input next to the current input', () => {
 		render((
 			<List>
-				<Input i={0} />
+				<InputWithId i={0} />
 			</List>
 		), scratch);
 
@@ -235,8 +236,8 @@ describe('focus', () => {
 
 		render((
 			<List>
-				<Input i={1} />
-				<Input i={0} />
+				<Input />
+				<InputWithId i={0} />
 			</List>
 		), scratch);
 		validateFocus(input, 'add input before');
@@ -245,9 +246,9 @@ describe('focus', () => {
 
 		render((
 			<List>
-				<Input i={1} />
-				<Input i={0} />
-				<Input i={2} />
+				<Input />
+				<InputWithId i={0} />
+				<Input />
 			</List>
 		), scratch);
 		validateFocus(input, 'add input after');
@@ -256,10 +257,10 @@ describe('focus', () => {
 
 		render((
 			<List>
-				<Input i={3} />
-				<Input i={1} />
-				<Input i={0} />
-				<Input i={2} />
+				<Input />
+				<Input />
+				<InputWithId i={0} />
+				<Input />
 			</List>
 		), scratch);
 		validateFocus(input, 'add input first place');
@@ -268,11 +269,11 @@ describe('focus', () => {
 
 		render((
 			<List>
-				<Input i={3} />
-				<Input i={1} />
-				<Input i={4} />
-				<Input i={0} />
-				<Input i={2} />
+				<Input />
+				<Input />
+				<Input />
+				<InputWithId i={0} />
+				<Input />
 			</List>
 		), scratch);
 		validateFocus(input, 'add input before');
