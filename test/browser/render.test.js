@@ -416,7 +416,7 @@ describe('render()', () => {
 
 			it('css vars should not be transformed into dash-separated', () => {
 				render(<div style={{ '--fooBar': 1, '--foo-baz': 2, opacity: 'var(--fooBar)', zIndex: 'var(--foo-baz)' }}>test</div>, scratch);
-				expect(sortCss(scratch.firstChild.style.cssText)).to.equal('--fooBar: 1; opacity: var(--fooBar); z-Index: var(--foo-baz)');
+				expect(sortCss(scratch.firstChild.style.cssText)).to.equal('--foo-baz: 2; --fooBar: 1; opacity: var(--fooBar); z-index: var(--foo-baz);');
 			});
 
 			it('should call CSSStyleDeclaration.setProperty for css vars', () => {
