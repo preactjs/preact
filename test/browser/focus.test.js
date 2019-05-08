@@ -15,12 +15,25 @@ describe('focus', () => {
 
 	const List = ({ children }) => <div>{children}</div>;
 	const ListItem = ({ children }) => <span>{children}</span>;
-	const Input = () => <input type="text" />;
+	const Input = ({ i }) => <input id={`input-${i}`} type="text" />;
 
 	function focusInput() {
 		if (!scratch) return;
 
 		const input = scratch.querySelector('input');
+		input.value = 'a word';
+		input.focus();
+		input.setSelectionRange(2, 5);
+
+		expect(document.activeElement).to.equal(input);
+
+		return input;
+	}
+
+	function focusInputById() {
+		if (!scratch) return;
+
+		const input = scratch.querySelector('#input-0');
 		input.value = 'a word';
 		input.focus();
 		input.setSelectionRange(2, 5);
@@ -209,6 +222,60 @@ describe('focus', () => {
 			</List>
 		), scratch);
 		validateFocus(input, 'remove sibling before 2');
+	});
+
+	it.only('should maintain focus when adding input next to the current input', () => {
+		render((
+			<List>
+				<Input i={0} />
+			</List>
+		), scratch);
+
+		let input = focusInputById();
+
+		render((
+			<List>
+				<Input i={1} />
+				<Input i={0} />
+			</List>
+		), scratch);
+		validateFocus(input, 'add input before');
+
+		input = focusInputById();
+
+		render((
+			<List>
+				<Input i={1} />
+				<Input i={0} />
+				<Input i={2} />
+			</List>
+		), scratch);
+		validateFocus(input, 'add input after');
+
+		input = focusInputById();
+
+		render((
+			<List>
+				<Input i={3} />
+				<Input i={1} />
+				<Input i={0} />
+				<Input i={2} />
+			</List>
+		), scratch);
+		validateFocus(input, 'add input first place');
+
+		input = focusInputById();
+
+		render((
+			<List>
+				<Input i={3} />
+				<Input i={1} />
+				<Input i={4} />
+				<Input i={0} />
+				<Input i={2} />
+			</List>
+		), scratch);
+		validateFocus(input, 'add input before');
 	});
 
 	it('should maintain focus when hydrating', () => {
