@@ -427,6 +427,8 @@ describe('debug', () => {
 
 		describe('warn for PropTypes on lazy()', () => {
 			it('should log the function name', () => {
+				const rerender = setupRerender();
+
 				const loader = Promise.resolve({ default: function MyLazyLoadedComponent() { return <div>Hi there</div>; } });
 				const FakeLazy = lazy(() => loader);
 				FakeLazy.propTypes = {};
@@ -440,10 +442,15 @@ describe('debug', () => {
 				return loader.then(() => {
 					expect(console.warn).to.be.calledTwice;
 					expect(warnings[1].includes('MyLazyLoadedComponent')).to.equal(true);
+					rerender();
+					expect(console.warn).to.be.calledThrice;
+					expect(warnings[2].includes('MyLazyLoadedComponent')).to.equal(true);
 				});
 			});
 
 			it('should log the displayName', () => {
+				const rerender = setupRerender();
+
 				function MyLazyLoadedComponent() { return <div>Hi there</div>; }
 				MyLazyLoadedComponent.displayName = 'HelloLazy';
 				const loader = Promise.resolve({ default: MyLazyLoadedComponent });
@@ -459,6 +466,9 @@ describe('debug', () => {
 				return loader.then(() => {
 					expect(console.warn).to.be.calledTwice;
 					expect(warnings[1].includes('HelloLazy')).to.equal(true);
+					rerender();
+					expect(console.warn).to.be.calledThrice;
+					expect(warnings[2].includes('HelloLazy')).to.equal(true);
 				});
 			});
 
