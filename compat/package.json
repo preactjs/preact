@@ -8,6 +8,7 @@
   "module": "dist/compat.module.js",
   "umd:main": "dist/compat.umd.js",
   "source": "src/index.js",
+  "types": "src/index.d.ts",
   "license": "MIT",
   "mangle": {
     "regex": "^_"
