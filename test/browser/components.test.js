@@ -422,7 +422,7 @@ describe('Components', () => {
 	});
 
 	// Test for Issue developit/preact#1616
-	it('should maintain order when setting state', () => {
+	it('should maintain order when setting state (that inserts dom-elements)', () => {
 		let add, addTwice, reset;
 		const Entry = props => (
 			<div>
@@ -452,10 +452,6 @@ describe('Components', () => {
 
 			reset() {
 				this.setState({ values: ['abc'] });
-			}
-
-			update() {
-				this.setState({ i: this.state.i + 1 });
 			}
 
 			render() {
