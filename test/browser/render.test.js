@@ -414,6 +414,11 @@ describe('render()', () => {
 				expect(sortCss(scratch.firstChild.style.cssText)).to.equal('--foo: 100px; width: var(--foo);');
 			});
 
+			it('css vars should not be transformed into dash-separated', () => {
+				render(<div style={{ '--fooBar': 1, '--foo-baz': 2, opacity: 'var(--fooBar)', zIndex: 'var(--foo-baz)' }}>test</div>, scratch);
+				expect(sortCss(scratch.firstChild.style.cssText)).to.equal('--fooBar: 1; opacity: var(--fooBar); z-Index: var(--foo-baz)');
+			});
+
 			it('should call CSSStyleDeclaration.setProperty for css vars', () => {
 				render(<div style={{ padding: '10px' }} />, scratch);
 				sinon.stub(scratch.firstChild.style, 'setProperty');
