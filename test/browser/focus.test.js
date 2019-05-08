@@ -225,7 +225,7 @@ describe('focus', () => {
 		validateFocus(input, 'remove sibling before 2');
 	});
 
-	it.only('should maintain focus when adding input next to the current input', () => {
+	it('should maintain focus when adding input next to the current input', () => {
 		render((
 			<List>
 				<InputWithId i={0} />
