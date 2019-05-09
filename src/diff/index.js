@@ -43,7 +43,9 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 	try {
 		outer: if (oldVNode.type===Fragment || newType===Fragment) {
-			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, c, oldDom);
+			// Passing the ancestorComponent instead of c here is needed for catchErrorInComponent
+			// to properly traverse upwards through fragments to find a parent Suspense
+			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, oldDom);
 
 			// Mark dom as empty in case `_children` is any empty array. If it isn't
 			// we'll set `dom` to the correct value just a few lines later.
@@ -365,10 +367,22 @@ function doRender(props, state, context) {
  * component check for error boundary behaviors
  */
 function catchErrorInComponent(error, component) {
+	// thrown Promises are meant to suspend...
+	let isSuspend = typeof error.then === 'function';
+	let suspendingComponent = component;
+
 	for (; component; component = component._ancestorComponent) {
 		if (!component._processingException) {
 			try {
-				if (component.constructor.getDerivedStateFromError!=null) {
+				if (isSuspend) {
+					if (component._childDidSuspend) {
+						component._childDidSuspend(error);
+					}
+					else {
+						continue;
+					}
+				}
+				else if (component.constructor.getDerivedStateFromError!=null) {
 					component.setState(component.constructor.getDerivedStateFromError(error));
 				}
 				else if (component.componentDidCatch!=null) {
@@ -381,8 +395,14 @@ function catchErrorInComponent(error, component) {
 			}
 			catch (e) {
 				error = e;
+				isSuspend = false;
 			}
 		}
 	}
+
+	if (isSuspend) {
+		return catchErrorInComponent(new Error('Missing Suspense'), suspendingComponent);
+	}
+
 	throw error;
 }

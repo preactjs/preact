@@ -74,6 +74,22 @@ export function initDebug() {
 
 		// Check prop-types if available
 		if (typeof vnode.type==='function' && vnode.type.propTypes) {
+			if (vnode.type.displayName === 'Lazy') {
+				const m = 'PropTypes are not supported on lazy(). Use propTypes on the wrapped component itself. ';
+				try {
+					const lazyVNode = vnode.type();
+					console.warn(m + 'Component wrapped in lazy() is ' + (lazyVNode.type.displayName || lazyVNode.type.name));
+				}
+				catch (promise) {
+					console.warn(m + 'We will log the wrapped component\'s name once it is loaded.');
+					if (promise.then) {
+						promise.then((exports) => {
+							console.warn('Component wrapped in lazy() is ' + (exports.default.displayName || exports.default.name));
+						});
+					}
+
+				}
+			}
 			checkPropTypes(vnode.type.propTypes, vnode.props, getDisplayName(vnode), serializeVNode(vnode));
 		}
 
