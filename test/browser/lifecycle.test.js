@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement as h, render, Component } from '../../src/index';
+import { createElement as h, render, Component, Fragment } from '../../src/index';
 import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx h */
@@ -2242,6 +2242,15 @@ describe('Lifecycle methods', () => {
 			}
 
 			render(<Receiver><ThrowErr /></Receiver>, scratch);
+			expect(Receiver.prototype.componentDidCatch).to.have.been.called;
+		});
+
+		it('should be called when child inside a Fragment fails', () => {
+			function ThrowErr() {
+				throw new Error('Error!');
+			}
+
+			render(<Receiver><Fragment><ThrowErr /></Fragment></Receiver>, scratch);
 			expect(Receiver.prototype.componentDidCatch).to.have.been.called;
 		});
 
