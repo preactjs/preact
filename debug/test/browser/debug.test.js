@@ -487,6 +487,27 @@ describe('debug', () => {
 					expect(console.warn).to.be.calledOnce;
 				});
 			});
+
+			it('should not log a component if lazy\'s loader throws', () => {
+				const FakeLazy = lazy(() => { throw new Error('Hello'); });
+				FakeLazy.propTypes = {};
+				let error;
+				try {
+					render(
+						<Suspense fallback={<div>fallback...</div>} >
+							<FakeLazy />
+						</Suspense>,
+						scratch
+					);
+				}
+				catch (e) {
+					error = e;
+				}
+
+				expect(console.warn).to.be.calledOnce;
+				expect(error).not.to.be.undefined;
+				expect(error.message).to.eql('Hello');
+			});
 		});
 	});
 });
