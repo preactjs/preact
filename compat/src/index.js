@@ -1,4 +1,4 @@
-import { render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
+import { render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment, Suspense, lazy } from 'preact';
 import * as hooks from 'preact/hooks';
 export * from 'preact/hooks';
 import { assign } from '../../src/util';
@@ -376,7 +376,9 @@ export {
 	memo,
 	forwardRef,
 	// eslint-disable-next-line camelcase
-	unstable_batchedUpdates
+	unstable_batchedUpdates,
+	Suspense,
+	lazy
 };
 
 // React copies the named exports to the default one.
@@ -399,5 +401,7 @@ export default assign({
 	PureComponent,
 	memo,
 	forwardRef,
-	unstable_batchedUpdates
+	unstable_batchedUpdates,
+	Suspense,
+	lazy
 }, hooks);
