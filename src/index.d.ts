@@ -230,5 +230,9 @@ declare namespace preact {
 	}
 	interface PreactContext<T> extends Context<T> {}
 
-	function createContext<T>(defaultValue: T): Context<T>;
+  function createContext<T>(defaultValue: T): Context<T>;
+
+  function lazy<T, P>(loader: () => Promise<typeof T>): (props: P) => VNode<any>;
+
+  abstract class Suspense<P, S> extends Component {}
 }
