@@ -1,5 +1,6 @@
-import { IS_NON_DIMENSIONAL } from '../constants';
+import { IS_NON_DIMENSIONAL, EMPTY_OBJ } from '../constants';
 import options from '../options';
+import { assign } from '../util';
 
 /**
  * Diff the old and new properties of a VNode and apply changes to the DOM node
@@ -27,7 +28,7 @@ export function diffProps(dom, newProps, oldProps, isSvg) {
 	}
 }
 
-const CAMEL_REG = /-?(?=[A-Z])/g;
+const CAMEL_REG = /[A-Z]/g;
 const XLINK_NS = 'http://www.w3.org/1999/xlink';
 
 /**
@@ -42,35 +43,20 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	name = isSvg ? (name==='className' ? 'class' : name) : (name==='class' ? 'className' : name);
 
 	if (name==='style') {
-
-		/* Possible golfing activities for setting styles:
-		 *   - we could just drop String style values. They're not supported in other VDOM libs.
-		 *   - assigning to .style sets .style.cssText - TODO: benchmark this, might not be worth the bytes.
-		 *   - assigning also casts to String, and ignores invalid values. This means assigning an Object clears all styles.
-		 */
-		let s = dom.style;
-
-		if (typeof value==='string') {
-			s.cssText = value;
-		}
-		else {
-			if (typeof oldValue==='string') s.cssText = '';
-			else {
-				// remove values not in the new list
-				for (let i in oldValue) {
-					if (value==null || !(i in value)) s.setProperty(i.replace(CAMEL_REG, '-'), '');
-				}
+		const set = assign(assign({}, oldValue), value);
+		for (let i in set) {
+			if ((value || EMPTY_OBJ)[i] === (oldValue || EMPTY_OBJ)[i]) {
+				continue;
 			}
-			for (let i in value) {
-				const v = value[i];
-				if (oldValue==null || v!==oldValue[i]) {
-					s.setProperty(i.replace(CAMEL_REG, '-'), typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v);
-				}
-			}
+			dom.style.setProperty(
+				(i[0] === '-' && i[1] === '-') ? i : i.replace(CAMEL_REG, '-$&'),
+				(value && (i in value))
+					? (typeof set[i]==='number' && IS_NON_DIMENSIONAL.test(i)===false)
+						? set[i] + 'px'
+						: set[i]
+					: ''
+			);
 		}
-	}
-	else if (name==='dangerouslySetInnerHTML') {
-		return;
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0]==='o' && name[1]==='n') {
@@ -89,7 +75,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	else if (name!=='list' && name!=='tagName' && !isSvg && (name in dom)) {
 		dom[name] = value==null ? '' : value;
 	}
-	else if (typeof value!=='function') {
+	else if (typeof value!=='function' && name!=='dangerouslySetInnerHTML') {
 		if (name!==(name = name.replace(/^xlink:?/, ''))) {
 			if (value==null || value===false) {
 				dom.removeAttributeNS(XLINK_NS, name.toLowerCase());
