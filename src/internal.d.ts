@@ -10,7 +10,7 @@ export interface FunctionalComponent<P = {}> extends preact.FunctionComponent<P>
 export type ComponentFactory<P> = preact.ComponentClass<P> | FunctionalComponent<P>;
 
 export interface PreactElement extends HTMLElement {
-	_prevVNode?: VNode<any> | null;
+	_children?: VNode<any> | null;
 	/** Event listeners to support event delegation */
 	_listeners: Record<string, (e: Event) => void>;
 
@@ -55,7 +55,6 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	 * components or array returns.
 	 */
 	_parentDom?: PreactElement | null;
-	_prevVNode?: VNode | null;
 	_ancestorComponent?: Component<any, any>;
 	_processingException?: Component<any, any> | null;
 	_pendingError?: Component<any, any> | null;

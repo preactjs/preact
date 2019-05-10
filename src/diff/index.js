@@ -123,6 +123,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 					c._vnode = newVNode;
 					newVNode._dom = oldVNode._dom;
 					newVNode._lastDomChild = oldVNode._lastDomChild;
+					newVNode._children = oldVNode._children;
 					break outer;
 				}
 
@@ -140,9 +141,10 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			if (tmp = options.render) tmp(newVNode);
 
-			let prev = c._prevVNode || null;
+			oldVNode = oldVNode._children ? oldVNode._children[0] : null;
 			c._dirty = false;
-			let vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
+			let vnode = coerceToVNode(c.render(c.props, c.state, c.context));
+			newVNode._children = [vnode];
 
 			if (c.getChildContext!=null) {
 				context = assign(assign({}, context), c.getChildContext());
@@ -153,7 +155,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 
 			c._depth = ancestorComponent ? (ancestorComponent._depth || 0) + 1 : 0;
-			c.base = newVNode._dom = diff(parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null, oldDom);
+			c.base = newVNode._dom = diff(parentDom, vnode, oldVNode, context, isSvg, excessDomChildren, mounts, c, null, oldDom);
 
 			if (vnode!=null) {
 				// If this component returns a Fragment (or another component that
@@ -344,9 +346,9 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 		}
 
 		r.base = r._parentDom = null;
-		if (r = r._prevVNode) unmount(r, ancestorComponent, skipRemove);
 	}
-	else if (r = vnode._children) {
+
+	if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {
 			if (r[i]) unmount(r[i], ancestorComponent, skipRemove);
 		}
