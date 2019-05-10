@@ -232,15 +232,16 @@ declare namespace preact {
 
 	function createContext<T>(defaultValue: T): Context<T>;
 
-	function lazy<P>(loader: () => Promise<{default: AnyComponent<P>}>): (props: P) => VNode<any>;
+	//
+	// Suspense/lazy
+	// -----------------------------------
+
+	function lazy<T, P>(loader: () => Promise<T>): (props: P) => VNode<P>;
 
 	interface SuspenseProps {
 		children?: ComponentChildren;
 		fallback: ComponentChildren;
 	}
 
-	interface SuspenseState {
-		_loading: boolean;
-	}
-	abstract class Suspense extends Component<SuspenseProps, SuspenseState> {}
+	abstract class Suspense extends Component<SuspenseProps> {}
 }
