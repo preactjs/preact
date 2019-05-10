@@ -1,25 +1,23 @@
 import {
-	createElement, Component,
-} from "../../src/";
+	createElement,
+	Component,
+} from "../..";
 
 export interface LazyProps {
-        isProp: boolean;
+	isProp: boolean;
 }
-// class IsLazy extends Component<LazyProps> {
-//         render ({ isProp }: LazyProps) {
-//                 return (
-//                         <div>{
-//                                 isProp ?
-//                                 'Super Lazy TRUE' :
-//                                 'Super Lazy FALSE'
-//                         }</div>
-//                 )
-//         }
-// }
 
-export const IsLazyComponent = (props: LazyProps) =>
-        <div>{
-                props.isProp ?
-                'Super Lazy TRUE' :
-                'Super Lazy FALSE'
-        }</div>
+interface LazyState {
+	forState: string;
+}
+export default class IsLazyComponent extends Component<LazyProps, LazyState> {
+	render ({ isProp }: LazyProps) {
+		return (
+			<div>{
+				isProp ?
+				'Super Lazy TRUE' :
+				'Super Lazy FALSE'
+			}</div>
+		)
+	}
+}
