@@ -22,17 +22,17 @@ const FallBack = () => <div>Still working...</div>;
 /**
  * Have to mock dynamic import as import() throws a syntax error in the test runner
  */
-const componentPromise = new Promise<typeof IsLazyFunctional>(resolve=>{
+const componentPromise = new Promise<{default: typeof IsLazyFunctional}>(resolve=>{
 	setTimeout(()=>{
-		resolve(IsLazyFunctional);
+		resolve({ default: IsLazyFunctional});
 	},800);
 });
 
 /**
  * For usage with import:
- * const IsLazyComp = lazy<typeof import('./lazy'), LazyProps>(() => import('./lazy'));
+ * const IsLazyComp = lazy(() => import('./lazy'));
 */
-const IsLazyFunc = lazy<typeof IsLazyFunctional, LazyProps>(() => componentPromise)
+const IsLazyFunc = lazy(() => componentPromise);
 
 // Suspense using lazy component
 class SuspensefulFunc extends Component {

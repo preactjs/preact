@@ -235,8 +235,7 @@ declare namespace preact {
 	//
 	// Suspense/lazy
 	// -----------------------------------
-
-	function lazy<T, P>(loader: () => Promise<T>): (props: P) => VNode<P>;
+	function lazy<T>(loader: () => Promise<{default: T}>): T;
 
 	interface SuspenseProps {
 		children?: ComponentChildren;
