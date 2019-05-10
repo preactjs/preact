@@ -1,6 +1,7 @@
-import { createElement as h, Component, options } from '../../src';
+import { createElement as h, options } from '../../src';
 import { assign } from '../../src/util';
 import { clearLog, getLog } from './logCall';
+import { teardown as testUtilTeardown } from 'preact/test-utils';
 
 /** @jsx h */
 
@@ -189,16 +190,7 @@ export function teardown(scratch) {
 		oldOptions = null;
 	}
 
-	if (Component.__test__drainQueue) {
-		// Flush any pending updates leftover by test
-		Component.__test__drainQueue();
-		delete Component.__test__drainQueue;
-	}
-
-	if (typeof Component.__test__previousDebounce !== 'undefined') {
-		options.debounceRendering = Component.__test__previousDebounce;
-		delete Component.__test__previousDebounce;
-	}
+	testUtilTeardown();
 
 	if (getLog().length > 0) {
 		clearLog();
