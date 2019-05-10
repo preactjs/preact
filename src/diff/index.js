@@ -76,7 +76,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
 				clearProcessingException = c._processingException = c._pendingError;
-				newVNode._dom = oldVNode._dom;
 			}
 			else {
 				// Instantiate the new component
@@ -98,8 +97,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				isNew = c._dirty = true;
 				c._renderCallbacks = [];
 			}
-
-			c._vnode = newVNode;
 
 			// Invoke getDerivedStateFromProps
 			if (c._nextState==null) {
@@ -123,6 +120,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 					c.props = newVNode.props;
 					c.state = c._nextState;
 					c._dirty = false;
+					c._vnode = newVNode;
+					newVNode._dom = oldVNode._dom;
 					newVNode._lastDomChild = oldVNode._lastDomChild;
 					break outer;
 				}
@@ -159,10 +158,12 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			if (vnode!=null) {
 				// If this component returns a Fragment (or another component that
 				// returns a Fragment), then _lastDomChild will be non-null,
-				// informing `diffChildren` to diff this component's VNode like a Fragemnt
+				// informing `diffChildren` to diff this component's VNode like a Fragment
 				newVNode._lastDomChild = vnode._lastDomChild;
 			}
 
+			// Only change the fields on the component once they represent the new state of the DOM
+			c._vnode = newVNode;
 			c._parentDom = parentDom;
 
 			if (tmp = newVNode.ref) applyRef(tmp, c, ancestorComponent);
