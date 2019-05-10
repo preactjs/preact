@@ -10,17 +10,6 @@ import {
 interface LazyProps {
 	isProp: boolean;
 }
-class IsLazyComponent extends Component<LazyProps> {
-	render ({ isProp }: LazyProps) {
-		return (
-			<div>{
-				isProp ?
-				'Super Lazy TRUE' :
-				'Super Lazy FALSE'
-			}</div>
-		)
-	}
-}
 
 const IsLazyFunctional = (props: LazyProps) =>
 	<div>{
