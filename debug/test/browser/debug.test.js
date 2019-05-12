@@ -111,6 +111,8 @@ describe('debug', () => {
 		};
 		render(<App />, scratch);
 		expect(warnings[0]).to.match(/You should provide an array of arguments/);
+		render(<App />, scratch);
+		expect(warnings[1]).to.be.undefined;
 	});
 
 	it('should warn for argumentless useLayoutEffect hooks', () => {
@@ -123,6 +125,8 @@ describe('debug', () => {
 		};
 		render(<App />, scratch);
 		expect(warnings[0]).to.match(/You should provide an array of arguments/);
+		render(<App />, scratch);
+		expect(warnings[1]).to.be.undefined;
 	});
 
 	it('should not warn for argumented effect hooks', () => {
@@ -370,7 +374,7 @@ describe('debug', () => {
 			}
 
 			Baz.propTypes = {
-				unhappy: function alwaysThrows(obj, key) { if (obj[key] === 'signal') throw Error("got prop"); }
+				unhappy: function alwaysThrows(obj, key) { if (obj[key] === 'signal') throw Error('got prop'); }
 			};
 
 			render(<Baz unhappy={'signal'} />, scratch);
