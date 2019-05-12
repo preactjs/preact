@@ -1,6 +1,7 @@
 import { createElement as h } from '../../src/index';
 // import { VNode } from '../../src/vnode';
 import { expect } from 'chai';
+import { EMPTY_OBJ } from '../../src/constants';
 
 /*eslint-env browser, mocha */
 
@@ -34,7 +35,7 @@ describe('createElement(jsx)', () => {
 
 	it('should set VNode._self property to prevent json injection', () => {
 		const vnode = <span />;
-		expect(vnode._self).to.equal(vnode.__self);
+		expect(vnode._self).to.equal(EMPTY_OBJ);
 	});
 
 	it('should set VNode#props property', () => {
