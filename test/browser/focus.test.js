@@ -128,7 +128,7 @@ describe('focus', () => {
 
 		render((
 			<List>
-				<ListItem>1</ListItem>
+				<ListItem key="1">1</ListItem>
 				<Input />
 			</List>
 		), scratch);
@@ -138,9 +138,9 @@ describe('focus', () => {
 
 		render((
 			<List>
-				<ListItem>1</ListItem>
+				<ListItem key="1">1</ListItem>
 				<Input />
-				<ListItem>2</ListItem>
+				<ListItem key="2">2</ListItem>
 			</List>
 		), scratch);
 		validateFocus(input, 'insert sibling after');
@@ -149,10 +149,10 @@ describe('focus', () => {
 
 		render((
 			<List>
-				<ListItem>1</ListItem>
+				<ListItem key="1">1</ListItem>
 				<Input />
-				<ListItem>2</ListItem>
-				<ListItem>3</ListItem>
+				<ListItem key="2">2</ListItem>
+				<ListItem key="3">3</ListItem>
 			</List>
 		), scratch);
 		validateFocus(input, 'insert sibling after again');
@@ -161,11 +161,11 @@ describe('focus', () => {
 
 		render((
 			<List>
-				<ListItem>0</ListItem>
-				<ListItem>1</ListItem>
+				<ListItem key="0">0</ListItem>
+				<ListItem key="1">1</ListItem>
 				<Input />
-				<ListItem>2</ListItem>
-				<ListItem>3</ListItem>
+				<ListItem key="2">2</ListItem>
+				<ListItem key="3">3</ListItem>
 			</List>
 		), scratch);
 		validateFocus(input, 'insert sibling before again');
@@ -173,7 +173,7 @@ describe('focus', () => {
 		expect(scratch.innerHTML).to.equal('<div><span>0</span><span>1</span><input type="text"><span>2</span><span>3</span></div>');
 	});
 
-	it('should maintain focus when removing elements around input', () => {
+	it('should maintain focus when conditional elements around input', () => {
 		render((
 			<List>
 				<ListItem>0</ListItem>
@@ -188,6 +188,7 @@ describe('focus', () => {
 
 		render((
 			<List>
+				{false && <ListItem>0</ListItem>}
 				<ListItem>1</ListItem>
 				<Input />
 				<ListItem>2</ListItem>
@@ -200,9 +201,11 @@ describe('focus', () => {
 
 		render((
 			<List>
+				{false && <ListItem>0</ListItem>}
 				<ListItem>1</ListItem>
 				<Input />
 				<ListItem>2</ListItem>
+				{false && <ListItem>3</ListItem>}
 			</List>
 		), scratch);
 		validateFocus(input, 'remove sibling after');
@@ -211,7 +214,67 @@ describe('focus', () => {
 
 		render((
 			<List>
+				{false && <ListItem>0</ListItem>}
 				<ListItem>1</ListItem>
+				<Input />
+				{false && <ListItem>2</ListItem>}
+				{false && <ListItem>3</ListItem>}
+			</List>
+		), scratch);
+		validateFocus(input, 'remove sibling after 2');
+
+		input = focusInput();
+		render((
+			<List>
+				{false && <ListItem>0</ListItem>}
+				{false && <ListItem>1</ListItem>}
+				<Input />
+				{false && <ListItem>2</ListItem>}
+				{false && <ListItem>3</ListItem>}
+			</List>
+		), scratch);
+		validateFocus(input, 'remove sibling before 2');
+	});
+
+	it('should maintain focus when removing elements around input', () => {
+		render((
+			<List>
+				<ListItem key="0">0</ListItem>
+				<ListItem key="1">1</ListItem>
+				<Input />
+				<ListItem key="2">2</ListItem>
+				<ListItem key="3">3</ListItem>
+			</List>
+		), scratch);
+
+		let input = focusInput();
+
+		render((
+			<List>
+				<ListItem key="1">1</ListItem>
+				<Input />
+				<ListItem key="2">2</ListItem>
+				<ListItem key="3">3</ListItem>
+			</List>
+		), scratch);
+		validateFocus(input, 'remove sibling before');
+
+		input = focusInput();
+
+		render((
+			<List>
+				<ListItem key="1">1</ListItem>
+				<Input />
+				<ListItem key="2">2</ListItem>
+			</List>
+		), scratch);
+		validateFocus(input, 'remove sibling after');
+
+		input = focusInput();
+
+		render((
+			<List>
+				<ListItem key="1">1</ListItem>
 				<Input />
 			</List>
 		), scratch);
@@ -238,7 +301,7 @@ describe('focus', () => {
 
 		render((
 			<List>
-				<Input />
+				<Input key="1" />
 				<InputWithId i={0} />
 			</List>
 		), scratch);
@@ -248,9 +311,9 @@ describe('focus', () => {
 
 		render((
 			<List>
-				<Input />
+				<Input key="1" />
 				<InputWithId i={0} />
-				<Input />
+				<Input key="2" />
 			</List>
 		), scratch);
 		validateFocus(input, 'add input after');
@@ -259,10 +322,10 @@ describe('focus', () => {
 
 		render((
 			<List>
-				<Input />
-				<Input />
+				<Input key="0" />
+				<Input key="1" />
 				<InputWithId i={0} />
-				<Input />
+				<Input key="2" />
 			</List>
 		), scratch);
 		validateFocus(input, 'add input first place');
@@ -271,11 +334,11 @@ describe('focus', () => {
 
 		render((
 			<List>
-				<Input />
-				<Input />
-				<Input />
+				<Input key="-1" />
+				<Input key="0" />
+				<Input key="1" />
 				<InputWithId i={0} />
-				<Input />
+				<Input key="2" />
 			</List>
 		), scratch);
 		validateFocus(input, 'add input before');
