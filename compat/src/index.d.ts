@@ -9,6 +9,8 @@ export import createRef = preact.createRef;
 export import Fragment = preact.Fragment;
 export import createElement = preact.createElement
 export import cloneElement = preact.cloneElement
+export import Suspense = preact.Suspense;
+export import lazy = preact.lazy;
 
 export declare const version: string;
 
@@ -66,6 +68,8 @@ declare const _default: {
   forwardRef: typeof forwardRef,
   unstable_batchedUpdates: typeof unstable_batchedUpdates,
   Children: Children,
+  Suspense: typeof Suspense,
+  lazy: typeof lazy,
 };
 
 export default _default;

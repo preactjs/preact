@@ -8,6 +8,7 @@ export function initDebug() {
 	let oldBeforeDiff = options.diff;
 	let oldDiffed = options.diffed;
 	let oldVnode = options.vnode;
+	const warnedComponents = { useEffect: {}, useLayoutEffect: {} };
 
 	options.root = (vnode, parentNode) => {
 		if (!parentNode) {
@@ -157,9 +158,10 @@ export function initDebug() {
 			});
 			if (hooks._pendingEffects.length > 0) {
 				hooks._pendingEffects.forEach((effect) => {
-					if (!effect._args || !Array.isArray(effect._args)) {
+					if ((!effect._args || !Array.isArray(effect._args)) && !warnedComponents.useEffect[vnode.type]) {
+						warnedComponents.useEffect[vnode.type] = true;
 						/* istanbul ignore next */
-						throw new Error('You should provide an array of arguments as the second argument to the "useEffect" hook.\n\n' +
+						console.warn('You should provide an array of arguments as the second argument to the "useEffect" hook.\n\n' +
 							'Not doing so will invoke this effect on every render.\n\n' +
 							'This effect can be found in the render of ' + (vnode.type.name || vnode.type) + '.');
 					}
@@ -167,9 +169,10 @@ export function initDebug() {
 			}
 			if (hooks._pendingLayoutEffects.length > 0) {
 				hooks._pendingLayoutEffects.forEach((layoutEffect) => {
-					if (!layoutEffect._args || !Array.isArray(layoutEffect._args)) {
+					if ((!layoutEffect._args || !Array.isArray(layoutEffect._args)) && !warnedComponents.useLayoutEffect[vnode.type]) {
+						warnedComponents.useLayoutEffect[vnode.type] = true;
 						/* istanbul ignore next */
-						throw new Error('You should provide an array of arguments as the second argument to the "useEffect" hook.\n\n' +
+						console.warn('You should provide an array of arguments as the second argument to the "useLayoutEffect" hook.\n\n' +
 							'Not doing so will invoke this effect on every render.\n\n' +
 							'This effect can be found in the render of ' + (vnode.type.name || vnode.type) + '.');
 					}
