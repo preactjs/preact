@@ -101,7 +101,7 @@ describe('debug', () => {
 		expect(fn).to.throw(/Hook can only be invoked from render/);
 	});
 
-	it('should throw an error for argumentless useEffect hooks', () => {
+	it('should warn for argumentless useEffect hooks', () => {
 		const App = () => {
 			const [state] = useState('test');
 			useEffect(() => 'test');
@@ -109,11 +109,11 @@ describe('debug', () => {
 				<p>{state}</p>
 			);
 		};
-		const fn = () => act(() => render(<App />, scratch));
-		expect(fn).to.throw(/You should provide an array of arguments/);
+		render(<App />, scratch);
+		expect(warnings[0]).to.match(/You should provide an array of arguments/);
 	});
 
-	it('should throw an error for argumentless useLayoutEffect hooks', () => {
+	it('should warn for argumentless useLayoutEffect hooks', () => {
 		const App = () => {
 			const [state] = useState('test');
 			useLayoutEffect(() => 'test');
@@ -121,11 +121,11 @@ describe('debug', () => {
 				<p>{state}</p>
 			);
 		};
-		const fn = () => act(() => render(<App />, scratch));
-		expect(fn).to.throw(/You should provide an array of arguments/);
+		render(<App />, scratch);
+		expect(warnings[0]).to.match(/You should provide an array of arguments/);
 	});
 
-	it('should not throw an error for argumented effect hooks', () => {
+	it('should not warn for argumented effect hooks', () => {
 		const App = () => {
 			const [state] = useState('test');
 			useLayoutEffect(() => 'test', []);
