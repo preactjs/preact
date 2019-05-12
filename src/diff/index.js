@@ -34,10 +34,10 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 	let c, tmp, isNew, oldProps, oldState, snapshot,
 		newType = newVNode.type, clearProcessingException;
 
-	// When passing through createElement it assigns the object
-	// ref on _self, to prevent JSON Injection we check if this attribute
+	// When passing through createElement it assigns an object
+	// ref on _self and __self, to prevent JSON Injection we check if this attribute
 	// is equal.
-	if (newVNode._self!==newVNode) return null;
+	if (newVNode._self!==newVNode.__self) return null;
 
 	if (tmp = options.diff) tmp(newVNode);
 

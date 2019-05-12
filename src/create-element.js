@@ -62,7 +62,7 @@ export function createVNode(type, props, key, ref) {
 		_lastDomChild: null,
 		_component: null
 	};
-	vnode._self = vnode;
+	vnode._self = vnode.__self = {};
 
 	if (options.vnode) options.vnode(vnode);
 

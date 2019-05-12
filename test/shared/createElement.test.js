@@ -34,7 +34,7 @@ describe('createElement(jsx)', () => {
 
 	it('should set VNode._self property to prevent json injection', () => {
 		const vnode = <span />;
-		expect(vnode._self).to.equal(vnode);
+		expect(vnode._self).to.equal(vnode.__self);
 	});
 
 	it('should set VNode#props property', () => {
