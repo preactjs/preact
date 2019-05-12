@@ -425,10 +425,7 @@ describe('Components', () => {
 	it('should maintain order when setting state (that inserts dom-elements)', () => {
 		let add, addTwice, reset;
 		const Entry = props => (
-			<div>
-				{props.children}
-				<button onClick={props.add}>Add</button>
-			</div>
+			<div>{props.children}</div>
 		);
 
 		class App extends Component {
