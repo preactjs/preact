@@ -170,7 +170,7 @@ describe('focus', () => {
 		), scratch);
 		validateFocus(input, 'insert sibling before again');
 
-		expect(scratch.innerHTML).to.equal('<span>0</span><span>1</span><input type="text"><span>2</span><span>3</span>');
+		expect(scratch.innerHTML).to.equal('<div><span>0</span><span>1</span><input type="text"><span>2</span><span>3</span></div>');
 	});
 
 	it('should maintain focus when removing elements around input', () => {

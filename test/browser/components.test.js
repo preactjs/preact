@@ -468,27 +468,27 @@ describe('Components', () => {
 		}
 
 		render(<App />, scratch);
-		expect(scratch.firstChild.innerHTML).to.equal('<div>abc<button>Add</button></div>' +
+		expect(scratch.firstChild.innerHTML).to.equal('<div>abc</div>' +
 			'<button>First Button</button><button>Second Button</button><button>Third Button</button>');
 
 		add();
 		rerender();
-		expect(scratch.firstChild.innerHTML).to.equal('<div>abc<button>Add</button></div><div>def<button>Add</button>' +
+		expect(scratch.firstChild.innerHTML).to.equal('<div>abc</div><div>def' +
 			'</div><button>First Button</button><button>Second Button</button><button>Third Button</button>');
 
 		add();
 		rerender();
-		expect(scratch.firstChild.innerHTML).to.equal('<div>abc<button>Add</button></div><div>def<button>Add</button></div><div>def<button>Add</button>' +
+		expect(scratch.firstChild.innerHTML).to.equal('<div>abc</div><div>def</div><div>def' +
 			'</div><button>First Button</button><button>Second Button</button><button>Third Button</button>');
 
 		reset();
 		rerender();
-		expect(scratch.firstChild.innerHTML).to.equal('<div>abc<button>Add</button></div>' +
+		expect(scratch.firstChild.innerHTML).to.equal('<div>abc</div>' +
 			'<button>First Button</button><button>Second Button</button><button>Third Button</button>');
 
 		addTwice();
 		rerender();
-		expect(scratch.firstChild.innerHTML).to.equal('<div>abc<button>Add</button></div><div>def<button>Add</button></div><div>ghi<button>Add</button>' +
+		expect(scratch.firstChild.innerHTML).to.equal('<div>abc</div><div>def</div><div>ghi' +
 			'</div><button>First Button</button><button>Second Button</button><button>Third Button</button>');
 	});
 
