@@ -1,5 +1,6 @@
 import options from './options';
 import { assign } from './util';
+import { EMPTY_OBJ } from './constants';
 
 /**
   * Create an virtual node (used for JSX)
@@ -62,7 +63,7 @@ export function createVNode(type, props, key, ref) {
 		_lastDomChild: null,
 		_component: null
 	};
-	vnode._self = vnode.__self = {};
+	vnode._self = EMPTY_OBJ;
 
 	if (options.vnode) options.vnode(vnode);
 

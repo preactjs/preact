@@ -34,8 +34,7 @@
       "$_defaultValue": "__p",
       "$_id": "__c",
       "$_parentDom": "__P",
-      "$_self": "_",
-      "$__self": "__"
+      "$_self": "_"
     }
   }
 }
