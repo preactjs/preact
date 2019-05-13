@@ -140,6 +140,10 @@ export function initDebug() {
 	};
 
 	options.vnode = (vnode) => {
+		if (vnode.props && vnode.props.__source) {
+			vnode.__source = vnode.props.__source;
+			delete vnode.props.__source;
+		}
 		Object.defineProperties(vnode, deprecatedAttributes);
 		if (oldVnode) oldVnode(vnode);
 	};
