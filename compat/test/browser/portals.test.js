@@ -28,6 +28,19 @@ describe('Portal', () => {
 		expect(root.innerHTML).to.equal('foobar');
 	});
 
+	it('should insert the portal', () => {
+		function Foo(props) {
+			return (
+				<div>
+					<p>Hello</p>
+					{createPortal(props.children, scratch)}
+				</div>
+			);
+		}
+		render(<Foo>foobar</Foo>, scratch);
+		expect(scratch.innerHTML).to.equal('foobar<div><p>Hello</p></div>');
+	});
+
 	it('should not render <undefined> for Portal nodes', () => {
 		let root = document.createElement('div');
 		let dialog = document.createElement('div');
@@ -73,7 +86,7 @@ describe('Portal', () => {
 		}
 
 		render(<App />, root);
-		expect(dialog.childNodes.length).to.equal(1);
+		expect(dialog.childNodes.length).to.equal(2);
 		render(null, root);
 		expect(dialog.childNodes.length).to.equal(0);
 	});
