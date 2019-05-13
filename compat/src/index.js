@@ -1,4 +1,4 @@
-import { render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment, Suspense, lazy } from 'preact';
+import { hydrate, render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment, Suspense, lazy } from 'preact';
 import * as hooks from 'preact/hooks';
 export * from 'preact/hooks';
 import { assign } from '../../src/util';
@@ -74,9 +74,6 @@ function Portal(props) {
 	let container = props.container;
 	let temp = props.container.appendChild(document.createTextNode(''));
 	hydrate(wrap, container);
-	let temp = document.createTextNode('');
-	container.appendChild(temp);
-	render(wrap, container);
 	this.componentWillUnmount = () => {
 		container.removeChild(temp);
 		render(null, container);
