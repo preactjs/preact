@@ -72,7 +72,8 @@ class ContextProvider {
 function Portal(props) {
 	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
 	let container = props.container;
-	container._prevVNode = null;
+	let temp = props.container.appendChild(document.createTextNode(''));
+	hydrate(wrap, container);
 	let temp = document.createTextNode('');
 	container.appendChild(temp);
 	render(wrap, container);
