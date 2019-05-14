@@ -1,5 +1,6 @@
 import { Component } from './component';
-import { createElement } from './create-element';
+import { createElement as h, Fragment } from './create-element';
+/** @jsx h */
 
 // having a "custom class" here saves 50bytes gzipped
 export function Suspense(props) {}
@@ -8,16 +9,22 @@ Suspense.prototype = new Component();
 /**
  * @param {Promise} promise The thrown promise
  */
-Suspense.prototype._childDidSuspend = function(promise) {
+Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
+	suspendingComponent._suspended = true;
 	this.setState({ _loading: true });
-	const cb = () => { this.setState({ _loading: false }); };
+	const cb = () => { suspendingComponent._suspended = false; this.setState({ _loading: false }); };
 
 	// Suspense ignores errors thrown in Promises as this should be handled by user land code
 	promise.then(cb, cb);
 };
 
 Suspense.prototype.render = function(props, state) {
-	return state._loading ? props.fallback : props.children;
+	return (
+		<Fragment>
+			{props.children}
+			{state._loading && props.fallback}
+		</Fragment>
+	);
 };
 
 export function lazy(loader) {
@@ -42,7 +49,7 @@ export function lazy(loader) {
 			throw prom;
 		}
 
-		return createElement(component, props);
+		return h(component, props);
 	}
 
 	Lazy.displayName = 'Lazy';

@@ -23,7 +23,8 @@ import { removeNode } from '../util';
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
-export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, oldDom) {
+export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, oldDom, isSuspended, indent) {
+	console.log(indent, 'diffChildren of ', newParentVNode && newParentVNode.type && (newParentVNode.type.displayName || newParentVNode.type.name || newParentVNode.type));
 	let childVNode, i, j, oldVNode, newDom, sibDom;
 
 	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode, true);
@@ -83,7 +84,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			}
 
 			// Morph the old element into the new one, but don't append it to the dom yet
-			newDom = diff(parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, null, oldDom);
+			newDom = diff(parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, null, oldDom, isSuspended, indent + '  ');
 
 			// Only proceed if the vnode has not been unmounted by `diff()` above.
 			if (newDom!=null) {

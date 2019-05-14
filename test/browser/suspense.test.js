@@ -95,7 +95,7 @@ describe('suspense', () => {
 		teardown(scratch);
 	});
 
-	it('should suspend when using lazy', () => {
+	xit('should suspend when using lazy', () => {
 		let prom;
 
 		const Lazy = lazy(() => {
@@ -127,7 +127,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should suspend when a promise is throw', () => {
+	xit('should suspend when a promise is throw', () => {
 		const s = createSuspension('regular case', 0, null);
 
 		render(
@@ -153,7 +153,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should suspend with custom error boundary', () => {
+	xit('should suspend with custom error boundary', () => {
 		const s = createSuspension('within error boundary', 0, null);
 
 		render(
@@ -177,7 +177,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should support throwing suspense', () => {
+	xit('should support throwing suspense', () => {
 		const s = createSuspension('throwing', 0, new Error('Thrown in suspense'));
 
 		render(
@@ -201,7 +201,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should call multiple suspending components render in one go', () => {
+	xit('should call multiple suspending components render in one go', () => {
 		const s1 = createSuspension('first', 0, null);
 		const s2 = createSuspension('second', 0, null);
 		const LoggedCustomSuspense = sinon.spy(CustomSuspense);
@@ -231,7 +231,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should call multiple nested suspending components render in one go', () => {
+	xit('should call multiple nested suspending components render in one go', () => {
 		const s1 = createSuspension('first', 5, null);
 		const s2 = createSuspension('second', 5, null);
 		const LoggedCustomSuspense = sinon.spy(CustomSuspense);
@@ -263,7 +263,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should support suspension nested in a Fragment', () => {
+	xit('should support suspension nested in a Fragment', () => {
 		const s = createSuspension('nested in a Fragment', 0, null);
 
 		render(
@@ -290,7 +290,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should support multiple non-nested Suspense', () => {
+	xit('should support multiple non-nested Suspense', () => {
 		const s1 = createSuspension('1', 0, null);
 		const s2 = createSuspension('2', 0, null);
 
@@ -354,7 +354,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should only suspend the most inner Suspend', () => {
+	xit('should only suspend the most inner Suspend', () => {
 		const s = createSuspension('1', 0, null);
 
 		render(
@@ -381,7 +381,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should throw when missing Suspense', () => {
+	xit('should throw when missing Suspense', () => {
 		const s = createSuspension('1', 0, null);
 
 		render(
@@ -396,7 +396,7 @@ describe('suspense', () => {
 		);
 	});
 
-	it('should throw when lazy\'s loader throws', () => {
+	xit('should throw when lazy\'s loader throws', () => {
 		let prom;
 
 		const ThrowingLazy = lazy(() => {
@@ -427,5 +427,104 @@ describe('suspense', () => {
 				`<div>Catcher did catch: Thrown in lazy's loader...</div>`
 			);
 		});
+	});
+
+	it('should keep state when suspending', () => {
+		let suspend, suspension;
+
+		class Suspender extends Component {
+			constructor(props) {
+				super(props);
+				suspend = () => {
+					let resolve;
+					// console.log('suspend()');
+					suspension = new Promise((res) => {
+						resolve = () => {
+							suspension = null;
+							res();
+						};
+					});
+
+					this.forceUpdate();
+
+					return resolve;
+				};
+				// console.log('Suspender()');
+				this.state = { done: false };
+			}
+			componentWillUnmount() {
+				// console.log('Suspender.unmount');
+			}
+			componentWillMount() {
+				// console.log('Suspender.mount');
+			}
+			render() {
+				// console.log('Suspender.render()', suspension);
+				if (suspension) {
+					throw suspension;
+				}
+
+				return (
+					<div>
+						Hello Suspender
+						{this.props.children}
+					</div>
+				);
+			}
+		}
+
+		class Logger extends Component {
+			constructor(props) {
+				super(props);
+				// console.log('Logger()', props.id);
+			}
+			componentWillUnmount() {
+				// console.log('Logger.unmount', this.props.id);
+			}
+			componentWillMount() {
+				// console.log('Logger.mount', this.props.id);
+			}
+			render() {
+				// console.log('Logger.render()', this.props.id);
+				return (
+					<div>
+						<p>Logger {this.props.id}</p>
+						{this.props.children}
+					</div>);
+			}
+		}
+
+		console.log('#1 BEGIN ------------------------------');
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Logger id="outer">
+					<Suspender>
+						<Logger id="inner" />
+					</Suspender>
+				</Logger>
+			</Suspense>,
+			scratch,
+		);
+		console.log('#1 END --------------------------------');
+		console.log(scratch);
+		console.log('---------------------------------------');
+
+		const resolve = suspend();
+		console.log('#2 BEGIN ------------------------------');
+		rerender();
+		console.log('#2 END --------------------------------');
+		console.log(scratch);
+		console.log('---------------------------------------');
+
+		const final = suspension.then(() => {
+			console.log('#3 BEGIN ------------------------------');
+			rerender();
+			console.log('#3 END --------------------------------');
+			console.log(scratch);
+			console.log('---------------------------------------');
+		});
+		resolve();
+
+		return final;
 	});
 });
