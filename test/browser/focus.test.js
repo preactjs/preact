@@ -1,7 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component, Fragment, hydrate } from '../../src/index';
 import { setupScratch, teardown } from '../_util/helpers';
-import { div, span, input as inputStr } from '../_util/dom';
+import { div, span, input as inputStr, h1, h2 } from '../_util/dom';
 /* eslint-disable react/jsx-boolean-value */
 
 /** @jsx h */
@@ -59,6 +59,18 @@ describe('focus', () => {
 
 	}
 
+	/**
+	 * @param {Array<number | string>} before
+	 * @param {Array<number | string>} after
+	 */
+	function getListHtml(before, after) {
+		return div([
+			...before.map(i => span(i)),
+			inputStr(),
+			...after.map(i => span(i))
+		].join(''));
+	}
+
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
@@ -77,6 +89,7 @@ describe('focus', () => {
 		), scratch);
 
 		const input = focusInput();
+		expect(scratch.innerHTML).to.equal(getListHtml([], ['fooo']));
 
 		render((
 			<List>
@@ -85,6 +98,7 @@ describe('focus', () => {
 			</List>
 		), scratch);
 		validateFocus(input);
+		expect(scratch.innerHTML).to.equal(getListHtml(['fooo'], []));
 	});
 
 	it('should maintain focus when moving the input around', () => {
@@ -102,18 +116,22 @@ describe('focus', () => {
 
 		let input = focusInput();
 		render(<App showFirst={false} showLast={true} />, scratch);
+		expect(scratch.innerHTML).to.equal(getListHtml([], [2]));
 		validateFocus(input, 'move from middle to beginning');
 
 		input = focusInput();
 		render(<App showFirst={true} showLast={true} />, scratch);
+		expect(scratch.innerHTML).to.equal(getListHtml([1], [2]));
 		validateFocus(input, 'move from beginning to middle');
 
 		input = focusInput();
 		render(<App showFirst={true} showLast={false} />, scratch);
+		expect(scratch.innerHTML).to.equal(getListHtml([1], []));
 		validateFocus(input, 'move from middle to end');
 
 		input = focusInput();
 		render(<App showFirst={true} showLast={true} />, scratch);
+		expect(scratch.innerHTML).to.equal(getListHtml([1], [2]));
 		validateFocus(input, 'move from end to middle');
 	});
 
@@ -125,6 +143,7 @@ describe('focus', () => {
 		), scratch);
 
 		let input = focusInput();
+		expect(scratch.innerHTML).to.equal(getListHtml([], []));
 
 		render((
 			<List>
@@ -132,9 +151,9 @@ describe('focus', () => {
 				<Input />
 			</List>
 		), scratch);
-		validateFocus(input, 'insert sibling before');
 
-		input = focusInput();
+		expect(scratch.innerHTML).to.equal(getListHtml([1], []));
+		validateFocus(input, 'insert sibling before');
 
 		render((
 			<List>
@@ -143,9 +162,9 @@ describe('focus', () => {
 				<ListItem key="2">2</ListItem>
 			</List>
 		), scratch);
-		validateFocus(input, 'insert sibling after');
 
-		input = focusInput();
+		expect(scratch.innerHTML).to.equal(getListHtml([1], [2]));
+		validateFocus(input, 'insert sibling after');
 
 		render((
 			<List>
@@ -155,9 +174,9 @@ describe('focus', () => {
 				<ListItem key="3">3</ListItem>
 			</List>
 		), scratch);
-		validateFocus(input, 'insert sibling after again');
 
-		input = focusInput();
+		expect(scratch.innerHTML).to.equal(getListHtml([1], [2, 3]));
+		validateFocus(input, 'insert sibling after again');
 
 		render((
 			<List>
@@ -168,9 +187,9 @@ describe('focus', () => {
 				<ListItem key="3">3</ListItem>
 			</List>
 		), scratch);
-		validateFocus(input, 'insert sibling before again');
 
-		expect(scratch.innerHTML).to.equal('<div><span>0</span><span>1</span><input type="text"><span>2</span><span>3</span></div>');
+		expect(scratch.innerHTML).to.equal(getListHtml([0, 1], [2, 3]));
+		validateFocus(input, 'insert sibling before again');
 	});
 
 	it('should maintain focus when conditional elements around input', () => {
@@ -185,6 +204,7 @@ describe('focus', () => {
 		), scratch);
 
 		let input = focusInput();
+		expect(scratch.innerHTML).to.equal(getListHtml([0, 1], [2, 3]));
 
 		render((
 			<List>
@@ -195,9 +215,9 @@ describe('focus', () => {
 				<ListItem>3</ListItem>
 			</List>
 		), scratch);
-		validateFocus(input, 'remove sibling before');
 
-		input = focusInput();
+		expect(scratch.innerHTML).to.equal(getListHtml([1], [2, 3]));
+		validateFocus(input, 'remove sibling before');
 
 		render((
 			<List>
@@ -208,9 +228,9 @@ describe('focus', () => {
 				{false && <ListItem>3</ListItem>}
 			</List>
 		), scratch);
-		validateFocus(input, 'remove sibling after');
 
-		input = focusInput();
+		expect(scratch.innerHTML).to.equal(getListHtml([1], [2]));
+		validateFocus(input, 'remove sibling after');
 
 		render((
 			<List>
@@ -221,9 +241,10 @@ describe('focus', () => {
 				{false && <ListItem>3</ListItem>}
 			</List>
 		), scratch);
+
+		expect(scratch.innerHTML).to.equal(getListHtml([1], []));
 		validateFocus(input, 'remove sibling after 2');
 
-		input = focusInput();
 		render((
 			<List>
 				{false && <ListItem>0</ListItem>}
@@ -233,6 +254,8 @@ describe('focus', () => {
 				{false && <ListItem>3</ListItem>}
 			</List>
 		), scratch);
+
+		expect(scratch.innerHTML).to.equal(getListHtml([], []));
 		validateFocus(input, 'remove sibling before 2');
 	});
 
@@ -248,6 +271,7 @@ describe('focus', () => {
 		), scratch);
 
 		let input = focusInput();
+		expect(scratch.innerHTML).to.equal(getListHtml([0, 1], [2, 3]));
 
 		render((
 			<List>
@@ -257,9 +281,9 @@ describe('focus', () => {
 				<ListItem key="3">3</ListItem>
 			</List>
 		), scratch);
-		validateFocus(input, 'remove sibling before');
 
-		input = focusInput();
+		expect(scratch.innerHTML).to.equal(getListHtml([1], [2, 3]));
+		validateFocus(input, 'remove sibling before');
 
 		render((
 			<List>
@@ -268,9 +292,9 @@ describe('focus', () => {
 				<ListItem key="2">2</ListItem>
 			</List>
 		), scratch);
-		validateFocus(input, 'remove sibling after');
 
-		input = focusInput();
+		expect(scratch.innerHTML).to.equal(getListHtml([1], [2]));
+		validateFocus(input, 'remove sibling after');
 
 		render((
 			<List>
@@ -278,15 +302,17 @@ describe('focus', () => {
 				<Input />
 			</List>
 		), scratch);
-		validateFocus(input, 'remove sibling after 2');
 
-		input = focusInput();
+		expect(scratch.innerHTML).to.equal(getListHtml([1], []));
+		validateFocus(input, 'remove sibling after 2');
 
 		render((
 			<List>
 				<Input />
 			</List>
 		), scratch);
+
+		expect(scratch.innerHTML).to.equal(getListHtml([], []));
 		validateFocus(input, 'remove sibling before 2');
 	});
 
@@ -419,6 +445,13 @@ describe('focus', () => {
 		expect(document.activeElement).to.equal(input, 'Before rerender');
 		rerender();
 
+		expect(scratch.innerHTML).to.equal(div([
+			h1('Heading'),
+			'Hello World',
+			h2('yo'),
+			'foobar',
+			inputStr()
+		].join('')));
 		expect(document.activeElement).to.equal(input, 'After rerender');
 	});
 
@@ -474,6 +507,13 @@ describe('focus', () => {
 		expect(document.activeElement).to.equal(input, 'Before rerender');
 		rerender();
 
+		expect(scratch.innerHTML).to.equal(div([
+			h1('Heading'),
+			'Hello World',
+			h2('yo'),
+			'foobar',
+			inputStr()
+		].join('')));
 		expect(input.selectionStart).to.equal(2);
 		expect(input.selectionEnd).to.equal(5);
 		expect(document.activeElement).to.equal(input, 'After rerender');
