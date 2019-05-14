@@ -1,7 +1,7 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component, enqueueRender } from '../component';
 import { coerceToVNode, Fragment } from '../create-element';
-import { diffChildren } from './children';
+import { diffChildren, toChildArray } from './children';
 import { diffProps } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
@@ -141,10 +141,9 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			if (tmp = options.render) tmp(newVNode);
 
-			oldVNode = oldVNode._children ? oldVNode._children[0] : null;
 			c._dirty = false;
-			let vnode = coerceToVNode(c.render(c.props, c.state, c.context));
-			newVNode._children = [vnode];
+			newVNode._children = toChildArray(coerceToVNode(c.render(c.props, c.state, c.context)), [], coerceToVNode, true);
+			let vnode = newVNode._children[0];
 
 			if (c.getChildContext!=null) {
 				context = assign(assign({}, context), c.getChildContext());
@@ -155,7 +154,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 
 			c._depth = ancestorComponent ? (ancestorComponent._depth || 0) + 1 : 0;
-			c.base = newVNode._dom = diff(parentDom, vnode, oldVNode, context, isSvg, excessDomChildren, mounts, c, null, oldDom);
+			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, c, oldDom);
 
 			if (vnode!=null) {
 				// If this component returns a Fragment (or another component that
@@ -165,6 +164,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 
 			// Only change the fields on the component once they represent the new state of the DOM
+			c.base = newVNode._dom;
 			c._vnode = newVNode;
 			c._parentDom = parentDom;
 
