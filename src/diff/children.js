@@ -1,4 +1,4 @@
-import { diff, unmount } from './index';
+import { diff, unmount, applyRef } from './index';
 import { coerceToVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { removeNode } from '../util';
@@ -130,6 +130,15 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	// Remove remaining oldChildren if there are any.
 	// TODO: Consider inlining the implementation of unmount here
 	for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
+
+	// TODO: Sigh... Doesn't work for case where ref changes nodeName
+	// Refs need to happen after unmount (so that `null` is passed in first),
+	// but they also need to have a matching oldVNode to determine if the ref has changed...
+	for (i=newChildren.length; i--; ) {
+		if (newChildren[i]!=null && (j = newChildren[i].ref)) {
+			applyRef(j, newChildren[i]._component || newChildren[i]._dom, ancestorComponent);
+		}
+	}
 }
 
 /**

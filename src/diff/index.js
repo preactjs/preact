@@ -163,7 +163,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c._vnode = newVNode;
 			c._parentDom = parentDom;
 
-			if (tmp = newVNode.ref) applyRef(tmp, c, ancestorComponent);
+			// if (tmp = newVNode.ref) applyRef(tmp, c, ancestorComponent);
 
 			while (tmp=c._renderCallbacks.pop()) tmp.call(c);
 
@@ -176,9 +176,9 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		else {
 			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
 
-			if ((tmp = newVNode.ref) && (oldVNode.ref !== tmp)) {
-				applyRef(tmp, newVNode._dom, ancestorComponent);
-			}
+			// if ((tmp = newVNode.ref) && (oldVNode.ref !== tmp)) {
+			// 	applyRef(tmp, newVNode._dom, ancestorComponent);
+			// }
 		}
 
 		if (clearProcessingException) {
