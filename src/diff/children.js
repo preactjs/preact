@@ -121,8 +121,8 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	// newParentVNode._lastDomChild = newDom; // ?
 	newParentVNode._dom = firstChildDom;
 
-	// Remove children that are not part of any vnode. Only used by `hydrate`
-	if (excessDomChildren!=null && newParentVNode.type!==Fragment) for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
+	// Remove children that are not part of any vnode.
+	if (excessDomChildren!=null && typeof newParentVNode.type == 'string') for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
 
 	// Remove remaining oldChildren if there are any.
 	for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
