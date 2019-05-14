@@ -24,7 +24,7 @@ import { removeNode } from '../util';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
 export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, oldDom) {
-	let childVNode, i, j, oldVNode, newDom, sibDom;
+	let childVNode, i, j, oldVNode, newDom, sibDom, firstChildDom;
 
 	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode, true);
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
@@ -110,9 +110,16 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 				}
 
 				oldDom = newDom.nextSibling;
+
+				if (firstChildDom == null) {
+					firstChildDom = newDom;
+				}
 			}
 		}
 	}
+
+	// newParentVNode._lastDomChild = newDom; // ?
+	newParentVNode._dom = firstChildDom;
 
 	// Remove children that are not part of any vnode. Only used by `hydrate`
 	if (excessDomChildren!=null && newParentVNode.type!==Fragment) for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
