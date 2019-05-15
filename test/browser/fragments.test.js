@@ -2017,4 +2017,60 @@ describe('Fragment', () => {
 			`<div><div>A</div><div>B</div><div>C</div></div>`
 		);
 	});
+
+	it('should update at correct place', () => {
+		let updateA;
+		class A extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { active: true };
+				updateA = () => this.setState(prev => ({ active: !prev }));
+			}
+
+			render() {
+				return this.state.active ? <div>A</div> : <span>A2</span>;
+			}
+		}
+
+		function B() {
+			return <div>B</div>;
+		}
+
+		function X(props) {
+			return props.children;
+		}
+
+		function App(props) {
+			let b = props.condition ? <B /> : null;
+			return (
+				<div>
+					<X>
+						<A />
+					</X>
+					<X>
+						{b}
+						<div>C</div>
+					</X>
+				</div>
+			);
+		}
+
+		render(<App condition={true} />, scratch);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>B</div><div>C</div></div>`
+		);
+
+		render(<App condition={false} />, scratch);
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>C</div></div>`
+		);
+
+		updateA();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><span>A2</span><div>C</div></div>`
+		);
+	});
 });
