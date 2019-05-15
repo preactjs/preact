@@ -151,3 +151,16 @@ export function toChildArray(children, flattened, map, keepHoles) {
 
 	return flattened;
 }
+
+export function forEachDomVNodeChild(children, callback) {
+	// Assume children is already flat
+	if (typeof children.type === 'string' || children.type === null) {
+		callback(children);
+	}
+	else {
+		let newChildren = children._children;
+		for (let j=0; j < newChildren.length; j++) {
+			forEachDomVNodeChild(newChildren[j], callback);
+		}
+	}
+}
