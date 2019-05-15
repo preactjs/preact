@@ -36,7 +36,7 @@ export function createContext(defaultValue) {
 					let old = c.componentWillUnmount;
 					c.componentWillUnmount = () => {
 						subs.splice(subs.indexOf(c), 1);
-						old && old();
+						old && old.call(c);
 					};
 				};
 			}

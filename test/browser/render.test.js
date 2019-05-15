@@ -540,7 +540,7 @@ describe('render()', () => {
 		it('should register events not appearing on dom nodes', () => {
 			let onAnimationEnd = () => {};
 
-			render(<div onAnimationEnd={onAnimationEnd} />, scratch);
+			render(<div onanimationend={onAnimationEnd} />, scratch);
 			expect(proto.addEventListener).to.have.been.calledOnce.and.to.have.been.calledWithExactly('animationend', sinon.match.func, false);
 		});
 
