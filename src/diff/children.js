@@ -24,7 +24,7 @@ import { removeNode } from '../util';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
 export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, oldDom) {
-	let childVNode, i, j, oldVNode, newDom, sibDom;
+	let childVNode, i, j, oldVNode, newDom;
 
 	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode, true);
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
@@ -84,32 +84,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 			// Only proceed if the vnode has not been unmounted by `diff()` above.
 			if (newDom!=null) {
-				if (childVNode._lastDomChild != null) {
-					// Only Fragments or components that return Fragment like VNodes will
-					// have a non-null _lastDomChild. Continue the diff from the end of
-					// this Fragment's DOM tree.
-					newDom = childVNode._lastDomChild;
-				}
-				else if (excessDomChildren==oldVNode || newDom!=oldDom || newDom.parentNode==null) {
-					// NOTE: excessDomChildren==oldVNode above:
-					// This is a compression of excessDomChildren==null && oldVNode==null!
-					// The values only have the same type when `null`.
-
-					outer: if (oldDom==null || oldDom.parentNode!==parentDom) {
-						parentDom.appendChild(newDom);
-					}
-					else {
-						// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
-						for (sibDom=oldDom, j=0; (sibDom=sibDom.nextSibling) && j<oldChildrenLength; j+=2) {
-							if (sibDom==newDom) {
-								break outer;
-							}
-						}
-						parentDom.insertBefore(newDom, oldDom);
-					}
-				}
-
-				oldDom = newDom.nextSibling;
+				oldDom = placeChild(parentDom, oldVNode, childVNode, oldDom, newDom, excessDomChildren, oldChildrenLength);
 			}
 		}
 	}
@@ -119,6 +94,35 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 	// Remove remaining oldChildren if there are any.
 	for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
+}
+
+function placeChild(parentDom, oldVNode, childVNode, oldDom, newDom, excessDomChildren, oldChildrenLength) {
+	if (childVNode._lastDomChild != null) {
+		// Only Fragments or components that return Fragment like VNodes will
+		// have a non-null _lastDomChild. Continue the diff from the end of
+		// this Fragment's DOM tree.
+		newDom = childVNode._lastDomChild;
+	}
+	else if (excessDomChildren==oldVNode || newDom!=oldDom || newDom.parentNode==null) {
+		// NOTE: excessDomChildren==oldVNode above:
+		// This is a compression of excessDomChildren==null && oldVNode==null!
+		// The values only have the same type when `null`.
+
+		outer: if (oldDom==null || oldDom.parentNode!==parentDom) {
+			parentDom.appendChild(newDom);
+		}
+		else {
+			// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
+			for (let sibDom=oldDom, j=0; (sibDom=sibDom.nextSibling) && j<oldChildrenLength; j+=2) {
+				if (sibDom==newDom) {
+					break outer;
+				}
+			}
+			parentDom.insertBefore(newDom, oldDom);
+		}
+	}
+
+	return newDom.nextSibling;
 }
 
 /**
