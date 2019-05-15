@@ -2001,8 +2001,8 @@ describe('Lifecycle methods', () => {
 		});
 
 		it('should be called when child fails in render', () => {
-			// eslint-disable-next-line react/require-render-return
 			class ThrowErr extends Component {
+				// eslint-disable-next-line react/require-render-return
 				render() {
 					throw new Error('Error!');
 				}
@@ -2497,8 +2497,8 @@ describe('Lifecycle methods', () => {
 		});
 
 		it('should be called when child fails in render', () => {
-			// eslint-disable-next-line react/require-render-return
 			class ThrowErr extends Component {
+				// eslint-disable-next-line react/require-render-return
 				render() {
 					throw new Error('Error!');
 				}
