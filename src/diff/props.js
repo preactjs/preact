@@ -62,7 +62,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	else if (name[0]==='o' && name[1]==='n') {
 		let useCapture = name !== (name=name.replace(/Capture$/, ''));
 		let nameLower = name.toLowerCase();
-		name = (nameLower in dom.ownerDocument.defaultView ? nameLower : name).slice(2);
+		name = (nameLower in dom ? nameLower : name).slice(2);
 
 		if (value) {
 			if (!oldValue) dom.addEventListener(name, eventProxy, useCapture);
