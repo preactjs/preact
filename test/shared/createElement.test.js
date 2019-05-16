@@ -42,14 +42,17 @@ describe('createElement(jsx)', () => {
 		expect(h('div', props).props).to.deep.equal(props);
 	});
 
-	it('should set VNode#text property', () => {
-		expect(<div />).to.have.property('text', null);
-	});
-
 	it('should set VNode#key property', () => {
 		expect(<div />).to.have.property('key').that.is.undefined;
 		expect(<div a="a" />).to.have.property('key').that.is.undefined;
 		expect(<div key="1" />).to.have.property('key', '1');
+	});
+
+	it('should not set VNode#props.key property', () => {
+		expect(<div />).to.not.have.nested.property('props.key');
+		expect(<div key="1" />).to.not.have.nested.property('props.key');
+		expect(<div key={0} />).to.not.have.nested.property('props.key');
+		expect(<div key={''} />).to.not.have.nested.property('props.key');
 	});
 
 	it('should set VNode#ref property', () => {
@@ -59,8 +62,13 @@ describe('createElement(jsx)', () => {
 		expect(<div ref={emptyFunction} />).to.have.property('ref', emptyFunction);
 	});
 
+	it('should not set VNode#props.ref property', () => {
+		expect(<div />).to.not.have.nested.property('props.ref');
+		expect(<div ref={() => {}} />).to.not.have.nested.property('props.ref');
+	});
+
 	it('should have ordered VNode properties', () => {
-		expect(Object.keys(<div />).filter(key => !/^_/.test(key))).to.deep.equal(['type', 'props', 'text', 'key', 'ref']);
+		expect(Object.keys(<div />).filter(key => !/^_/.test(key))).to.deep.equal(['type', 'props', 'key', 'ref']);
 	});
 
 	it('should preserve raw props', () => {

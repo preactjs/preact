@@ -439,9 +439,15 @@ describe('createContext', () => {
 			let Foo = createContext('foo');
 			let spy = sinon.spy();
 
+			let instance;
 			class App extends Component {
+				constructor(props) {
+					super(props);
+					instance = this;
+				}
+
 				componentWillUnmount() {
-					spy();
+					spy(this);
 				}
 
 				render() {
@@ -460,6 +466,7 @@ describe('createContext', () => {
 			render(null, scratch);
 
 			expect(spy).to.be.calledOnce;
+			expect(spy.getCall(0).args[0]).to.equal(instance);
 		});
 	});
 });

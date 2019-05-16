@@ -139,7 +139,18 @@ export function sortCss(cssText) {
 	return cssText.split(';')
 		.filter(Boolean)
 		.map(s => s.replace(/^\s+|\s+$/g, '').replace(/(\s*:\s*)/g, ': '))
-		.sort((a, b) => a[0]==='-' ? -1 : b[0]==='-' ? 1 : a.localeCompare(b))
+		.sort((a, b) => {
+			// CSS Variables are typically positioned at the start
+			if (a[0]==='-') {
+				// If both are a variable we just compare them
+				if (b[0]==='-') return a.localeCompare(b);
+				return -1;
+			}
+			// b is a css var
+			if (b[0]==='-') return 1;
+
+			return a.localeCompare(b);
+		})
 		.join('; ') + ';';
 }
 
