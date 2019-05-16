@@ -1,28 +1,118 @@
-import { Component } from './component';
+import { Component, enqueueRender } from './component';
 import { createElement as h, Fragment } from './create-element';
+import { toChildArray } from './diff/children';
 /** @jsx h */
 
 // having a "custom class" here saves 50bytes gzipped
-export function Suspense(props) {}
+export function Suspense(props) {
+	this.shouldRenderFallback = this.shouldRenderFallback.bind(this);
+	this.shouldRenderTextNode = this.shouldRenderTextNode.bind(this);
+	this.suspendedDom = [];
+	this.$$children = toChildArray(props.children).map(child => {
+		if (typeof child === 'string') {
+			return <SuspenseTextChild shouldRender={this.shouldRenderTextNode}>{child}</SuspenseTextChild>;
+		}
+
+		return child;
+	});
+}
 Suspense.prototype = new Component();
 
 /**
  * @param {Promise} promise The thrown promise
  */
 Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
+	// TODO: support multiple suspensions under one Suspense
 	suspendingComponent._suspended = true;
-	this.setState({ _loading: true });
-	const cb = () => { suspendingComponent._suspended = false; this.setState({ _loading: false }); };
+	this._loading = true;
+	enqueueRender(this.fallback._component);
+	// TODO: when the component producing the dom node changes DOM, the display: none is reset
+	toChildArray(this.$$children).forEach(vnode => {
+		if (vnode.type === SuspenseTextChild) {
+			enqueueRender(vnode._component);
+		}
+		else if (vnode._dom) {
+			if (vnode._dom.style) {
+				vnode._displayBeforeSuspend = vnode._dom.style.display;
+				vnode._dom.style.display = 'none';
+				if (vnode._component) {
+					vnode._component._suspendChildDom = true;
+				}
+				else {
+					// This happens for Fragments
+					// TODO: handle these Fragments here?!
+					console.log('⚠️  Missing _component on', vnode);
+				}
+			}
+			else {
+				// This happens for text nodes
+				// We use <SuspenseTextChild> to wrap them, we can ignore them
+				// eslint-disable-next-line no-lonely-if
+				if (vnode.type !== SuspenseTextChild) {
+					console.log('☢️  Missing style prop on ', vnode._dom, vnode);
+				}
+			}
+		}
+		else {
+			console.log('☢️  Missing _dom on', c);
+		}
+	});
+	const cb = () => {
+		this._loading = false;
+		suspendingComponent._suspended = false;
+		enqueueRender(suspendingComponent);
+		enqueueRender(this.fallback._component);
+		toChildArray(this.$$children).forEach(vnode => {
+			if (vnode.type === SuspenseTextChild) {
+				enqueueRender(vnode._component);
+			}
+			else if (vnode._dom) {
+				if (vnode._dom.style && '_displayBeforeSuspend' in vnode) {
+					if (vnode._component) {
+						vnode._component._suspendChildDom = false;
+					}
+					else {
+						console.log('⚠️ Missing _component on', vnode);
+					}
+					vnode._dom.style.display = vnode._displayBeforeSuspend;
+				}
+			}
+		});
+	};
 
 	// Suspense ignores errors thrown in Promises as this should be handled by user land code
 	promise.then(cb, cb);
 };
 
-Suspense.prototype.render = function(props, state) {
+Suspense.prototype.shouldRenderTextNode = function() {
+	return !this._loading;
+};
+
+Suspense.prototype.shouldRenderFallback = function() {
+	return this._loading;
+};
+
+function Fallback({ shouldRenderFallback, children }) {
+	console.log('Fallback()', shouldRenderFallback());
+	return shouldRenderFallback() ? children : null;
+}
+
+function SuspenseTextChild({ shouldRender, children })  {
+	console.log('SuspenseTextChild()', shouldRender(), children);
+	return shouldRender() ? children : null;
+}
+
+Suspense.prototype.render = function(props) {
+	this.fallback =	(
+		<Fallback shouldRenderFallback={this.shouldRenderFallback}>
+			{props.fallback}
+		</Fallback>
+	);
+
 	return (
 		<Fragment>
-			{props.children}
-			{state._loading && props.fallback}
+			{this.$$children}
+			{this.fallback}
 		</Fragment>
 	);
 };

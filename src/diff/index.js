@@ -23,7 +23,7 @@ import options from '../options';
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
-export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force, oldDom, _isSuspended, indent = '>') {
+export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force, oldDom, _, indent = '>', _needsToSuspendChildDom) {
 	// If the previous type doesn't match the new type we drop the whole subtree
 	if (oldVNode==null || newVNode==null || oldVNode.type!==newVNode.type || oldVNode.key!==newVNode.key) {
 		if (oldVNode!=null) unmount(oldVNode, ancestorComponent);
@@ -33,14 +33,14 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 	let c, tmp, isNew, oldProps, oldState, snapshot,
 		newType = newVNode.type, clearProcessingException,
-		isSuspended = _isSuspended;
+		needsToSuspendChildDom = _needsToSuspendChildDom;
 
 	// When passing through createElement it assigns the object
 	// ref on _self, to prevent JSON Injection we check if this attribute
 	// is equal.
 	if (newVNode._self!==newVNode) return null;
 
-	console.log(indent, 'diff', newVNode && newVNode.type && (newVNode.type.displayName || newVNode.type.name || newVNode.type), isSuspended);
+	console.log(indent, 'diff', newVNode && newVNode.type && (newVNode.type.displayName || newVNode.type.name || newVNode.type), needsToSuspendChildDom);
 
 	if (tmp = options.diff) tmp(newVNode);
 
@@ -48,7 +48,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		outer: if (oldVNode.type===Fragment || newType===Fragment) {
 			// Passing the ancestorComponent instead of c here is needed for catchErrorInComponent
 			// to properly traverse upwards through fragments to find a parent Suspense
-			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, oldDom, isSuspended, indent + '  ');
+			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, oldDom, needsToSuspendChildDom, indent + '  ');
 
 			// Mark dom as empty in case `_children` is any empty array. If it isn't
 			// we'll set `dom` to the correct value just a few lines later.
@@ -106,7 +106,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c._vnode = newVNode;
 
 			if (c._childDidSuspend) {
-				isSuspended = c.state._loading;
+				console.log('setting needsToSuspendChildDom from', needsToSuspendChildDom, 'to', c.state._loading);
+				needsToSuspendChildDom = c.state._loading;
 			}
 
 			// Invoke getDerivedStateFromProps
@@ -151,8 +152,30 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			let prev = c._prevVNode || null;
 			c._dirty = false;
+			// c._suspended marks whether the component did throw during the last render and thus is suspended
 			console.log(indent, 'render', c.displayName || c.name || c.constructor.displayName || c.constructor.name, c._suspended);
-			let vnode = c._prevVNode = c._suspended ? null : coerceToVNode(c.render(c.props, c.state, c.context));
+			let vnode;
+			try {
+				vnode = c._prevVNode = c._suspended ? null : coerceToVNode(c.render(c.props, c.state, c.context));
+			}
+			catch (e) {
+				console.log(indent, 'render threw', e);
+				if (typeof e.then === 'function') {
+					let component = c;
+					for (; component; component = component._ancestorComponent) {
+						if (component._childDidSuspend) {
+							component._childDidSuspend(e, c);
+							break;
+						}
+					}
+					// TODO: suspense should queue promises instead of keeping just the latest one
+					// that means we also need to "unsubscribe" from promises thrown from unmounted 
+					// components
+				}
+				else {
+					throw e;
+				}
+			}
 
 			if (c.getChildContext!=null) {
 				context = assign(assign({}, context), c.getChildContext());
@@ -163,7 +186,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 
 			c._depth = ancestorComponent ? (ancestorComponent._depth || 0) + 1 : 0;
-			c.base = newVNode._dom = diff(parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null, oldDom, isSuspended, indent + '  ');
+			c.base = newVNode._dom = diff(parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null, oldDom, null, indent + '  ', needsToSuspendChildDom);
 
 			if (vnode!=null) {
 				// If this component returns a Fragment (or another component that
@@ -185,7 +208,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 		}
 		else {
-			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, isSuspended, indent + '  ');
+			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, null, indent + '  ', needsToSuspendChildDom);
 
 			if ((tmp = newVNode.ref) && (oldVNode.ref !== tmp)) {
 				applyRef(tmp, newVNode._dom, ancestorComponent);
@@ -234,8 +257,8 @@ export function commitRoot(mounts, root) {
  * component to the ones being diffed
  * @returns {import('../internal').PreactElement}
  */
-function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, isSuspended, indent) {
-	console.log(indent, 'diffElementNodes', newVNode && newVNode.type && (newVNode.type.displayName || newVNode.type.name || newVNode.type), isSuspended);
+function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, _, indent, needsToSuspendChildDom) {
+	console.log(indent, 'diffElementNodes', newVNode && newVNode.type && (newVNode.type.displayName || newVNode.type.name || newVNode.type), _, needsToSuspendChildDom);
 	let i;
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
@@ -256,7 +279,8 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 
 	if (dom==null) {
 		if (newVNode.type===null) {
-			return isSuspended ? null : document.createTextNode(newProps);
+			// TODO: when suspension is done, we need to re-mount these text nodes
+			return needsToSuspendChildDom ? null : document.createTextNode(newProps);
 		}
 		dom = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type) : document.createElement(newVNode.type);
 		// we created a new parent, so none of the previously attached children can be reused:
@@ -296,13 +320,18 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 				dom.multiple = newProps.multiple;
 			}
 
-			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent, EMPTY_OBJ, false, indent + '  ');
+			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent, EMPTY_OBJ, null, indent + '  ', false);
 			diffProps(dom, newProps, oldProps, isSvg, false, indent + '  ');
 		}
 	}
 
-	if (isSuspended) {
-		dom.style.display = 'none';
+	if (needsToSuspendChildDom) {
+		if (dom.style) {
+			dom.style.display = 'none';
+		}
+		else {
+			console.log('Missing dom.style when needing to suspend', dom);
+		}
 	}
 
 	return dom;
@@ -380,22 +409,10 @@ function doRender(props, state, context) {
  * component check for error boundary behaviors
  */
 function catchErrorInComponent(error, component) {
-	// thrown Promises are meant to suspend...
-	let isSuspend = typeof error.then === 'function';
-	let suspendingComponent = component;
-
 	for (; component; component = component._ancestorComponent) {
 		if (!component._processingException) {
 			try {
-				if (isSuspend) {
-					if (component._childDidSuspend) {
-						component._childDidSuspend(error, suspendingComponent);
-					}
-					else {
-						continue;
-					}
-				}
-				else if (component.constructor.getDerivedStateFromError!=null) {
+				if (component.constructor.getDerivedStateFromError!=null) {
 					component.setState(component.constructor.getDerivedStateFromError(error));
 				}
 				else if (component.componentDidCatch!=null) {
@@ -408,13 +425,8 @@ function catchErrorInComponent(error, component) {
 			}
 			catch (e) {
 				error = e;
-				isSuspend = false;
 			}
 		}
-	}
-
-	if (isSuspend) {
-		return catchErrorInComponent(new Error('Missing Suspense'), suspendingComponent);
 	}
 
 	throw error;

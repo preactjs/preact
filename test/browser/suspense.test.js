@@ -2,7 +2,7 @@
 /** @jsx h */
 import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component, Suspense, lazy, Fragment } from '../../src/index';
-import { setupScratch, teardown } from '../_util/helpers';
+import { setupScratch, teardown, dedent } from '../_util/helpers';
 
 class LazyComp extends Component {
 	render() {
@@ -494,34 +494,161 @@ describe('suspense', () => {
 			}
 		}
 
-		console.log('#1 BEGIN ------------------------------');
+		class Stateful extends Component {
+			render(props, state) {
+				const Tag = state && state.tag || 'div';
+				return (
+					<Tag>
+						<h1>stateful</h1>
+						{JSON.stringify(state)}
+					</Tag>
+				);
+			}
+		}
+
+		class StatefulWithChildren extends Component {
+			render(props) {
+				return props.children;
+			}
+		}
+
+		function dedent(strs) {
+			return strs
+				.map(str => str
+					.split('\n')
+					.map(line => line.trim())
+					.join(''))
+				.join('');
+		}
+
+		console.log('initial render ---------------------------------');
+		const stateful = <Stateful />;
+		const statefulWithChildren = <StatefulWithChildren><div>stateful with children</div></StatefulWithChildren>;
 		render(
 			<Suspense fallback={<div>Suspended...</div>}>
+				Test
+				<Fragment>
+					<Logger id="before" />
+				</Fragment>
 				<Logger id="outer">
 					<Suspender>
 						<Logger id="inner" />
 					</Suspender>
 				</Logger>
+				{stateful}
+				{statefulWithChildren}
 			</Suspense>,
 			scratch,
 		);
-		console.log('#1 END --------------------------------');
-		console.log(scratch);
-		console.log('---------------------------------------');
+		console.log('initial render done ----------------------------');
+		expect(scratch.innerHTML).to.eql(dedent`
+			Test
+			<div>
+				<p>Logger before</p>
+			</div>
+			<div>
+				<p>Logger outer</p>
+				<div>
+					Hello Suspender
+					<div>
+						<p>Logger inner</p>
+					</div>
+				</div>
+			</div>
+			<div>
+				<h1>stateful</h1>{}
+			</div>
+			<div>stateful with children</div>
+		`);
+		console.log('------------------------------------------------');
 
 		const resolve = suspend();
-		console.log('#2 BEGIN ------------------------------');
+		console.log('render suspended -------------------------------');
 		rerender();
-		console.log('#2 END --------------------------------');
+		console.log('render suspended done --------------------------');
 		console.log(scratch);
-		console.log('---------------------------------------');
+		expect(scratch.innerHTML).to.eql(dedent`
+			<div style="display: none;">
+				<p>Logger before</p>
+			</div>
+			<div style="display: none;">
+				<p>Logger outer</p>
+			</div>
+			<div style="display: none;">
+				<h1>stateful</h1>{}
+			</div>
+			<div style="display: none;">stateful with children</div>
+			<div>Suspended...</div>
+		`);
+		console.log('------------------------------------------------');
+
+		stateful._component.setState({ tag: 'article' });
+		console.log('render after setState --------------------------');
+		rerender();
+		console.log('render after setState done ---------------------');
+		console.log(scratch);
+		// TODO: article is moved to the end because of the ordering issue with Fragments
+		expect(scratch.innerHTML).to.eql(dedent`
+			<div style="display: none;">
+				<p>Logger before</p>
+			</div>
+			<div style="display: none;">
+				<p>Logger outer</p>
+			</div>
+			<div style="display: none;">stateful with children</div>
+			<div>Suspended...</div>
+			<article style="display: none;">
+				<h1>stateful</h1>{"tag":"article"}
+			</article>
+		`);
+		console.log('------------------------------------------------');
+
+		statefulWithChildren._component.setState({ foo: 'bar' });
+		console.log('render after setState2 -------------------------');
+		rerender();
+		console.log('render after setState2 done --------------------');
+		console.log(scratch);
+		expect(scratch.innerHTML).to.eql(dedent`
+			<div style="display: none;">
+				<p>Logger before</p>
+			</div>
+			<div style="display: none;">
+				<p>Logger outer</p>
+			</div>
+			<div style="display: none;">stateful with children</div>
+			<div>Suspended...</div>
+			<article style="display: none;">
+				<h1>stateful</h1>{"tag":"article"}
+			</article>
+		`);
+		console.log('------------------------------------------------');
 
 		const final = suspension.then(() => {
-			console.log('#3 BEGIN ------------------------------');
+			console.log('render suspension resolved -----------------');
 			rerender();
-			console.log('#3 END --------------------------------');
+			console.log('render suspension resolved done ------------');
 			console.log(scratch);
-			console.log('---------------------------------------');
+			// TODO: The text node `Test` is moved to the end because of the ordering issue with Fragments
+			expect(scratch.innerHTML).to.eql(dedent`
+				<div style="">
+					<p>Logger before</p>
+				</div>
+				<div style="">
+					<p>Logger outer</p>
+					<div>
+						Hello Suspender
+						<div>
+							<p>Logger inner</p>
+						</div>
+					</div>
+				</div>
+				<div style="">stateful with children</div>
+				<article style="">
+					<h1>stateful</h1>{"tag":"article"}
+				</article>
+				Test
+			`);
+			console.log('--------------------------------------------');
 		});
 		resolve();
 
