@@ -7,13 +7,18 @@ import { toChildArray } from './diff/children';
 export function Suspense(props) {
 	this.shouldRenderFallback = this.shouldRenderFallback.bind(this);
 	this.shouldRenderTextNode = this.shouldRenderTextNode.bind(this);
-	this.$$children = toChildArray(props.children).map(child => {
+	const mapChildren = child => {
 		if (typeof child === 'string') {
 			return <SuspenseTextChild shouldRender={this.shouldRenderTextNode}>{child}</SuspenseTextChild>;
 		}
+		
+		if (child.type === Fragment) {
+			child.props.children = toChildArray(child.props.children).map(mapChildren);
+		}
 
 		return child;
-	});
+	};
+	this.$$children = toChildArray(props.children).map(mapChildren);
 	this.pendingSuspensions = [];
 }
 Suspense.prototype = new Component();
@@ -30,6 +35,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 	enqueueRender(this.fallback._component);
 	// TODO: when the component producing the dom node changes DOM, the display: none is reset
 	this.$$children.forEach(vnode => {
+		// TODO: detect SuspenseTextChild in a way to support multi copies of preact
 		if (vnode.type === SuspenseTextChild) {
 			enqueueRender(vnode._component);
 		}
@@ -42,19 +48,18 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 				if (vnode._component) {
 					vnode._component._suspendChildDom = true;
 				}
+				// TODO: detect fragment in a way to support multi copies of preact
+				else if (vnode.type ===  Fragment) {
+					console.log('⚠️  Fragment', vnode);
+				}
 				else {
-					// This happens for Fragments
-					// TODO: handle these Fragments here?!
-					console.log('⚠️  Missing _component on', vnode);
+					// TODO: does this happen?
+					console.log('☢️  Missing _component on node', vnode);
 				}
 			}
 			else {
 				// This happens for text nodes
-				// We use <SuspenseTextChild> to wrap them, we can ignore them
-				// eslint-disable-next-line no-lonely-if
-				if (vnode.type !== SuspenseTextChild) {
-					console.log('☢️  Missing style prop on ', vnode._dom, vnode);
-				}
+				console.log('☢️  Missing style prop on ', vnode._dom, vnode);
 			}
 		}
 		else {

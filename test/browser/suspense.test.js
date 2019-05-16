@@ -95,7 +95,7 @@ describe('suspense', () => {
 		teardown(scratch);
 	});
 
-	xit('should suspend when using lazy', () => {
+	it('should suspend when using lazy', () => {
 		let prom;
 
 		const Lazy = lazy(() => {
@@ -127,7 +127,7 @@ describe('suspense', () => {
 		});
 	});
 
-	xit('should suspend when a promise is throw', () => {
+	it('should suspend when a promise is throw', () => {
 		const s = createSuspension('regular case', 0, null);
 
 		render(
@@ -153,7 +153,7 @@ describe('suspense', () => {
 		});
 	});
 
-	xit('should suspend with custom error boundary', () => {
+	it('should suspend with custom error boundary', () => {
 		const s = createSuspension('within error boundary', 0, null);
 
 		render(
@@ -177,7 +177,7 @@ describe('suspense', () => {
 		});
 	});
 
-	xit('should support throwing suspense', () => {
+	it('should support throwing suspense', () => {
 		const s = createSuspension('throwing', 0, new Error('Thrown in suspense'));
 
 		render(
@@ -201,7 +201,7 @@ describe('suspense', () => {
 		});
 	});
 
-	xit('should call multiple suspending components render in one go', () => {
+	it('should call multiple suspending components render in one go', () => {
 		const s1 = createSuspension('first', 0, null);
 		const s2 = createSuspension('second', 0, null);
 		const LoggedCustomSuspense = sinon.spy(CustomSuspense);
@@ -231,7 +231,7 @@ describe('suspense', () => {
 		});
 	});
 
-	xit('should call multiple nested suspending components render in one go', () => {
+	it('should call multiple nested suspending components render in one go', () => {
 		const s1 = createSuspension('first', 5, null);
 		const s2 = createSuspension('second', 5, null);
 		const LoggedCustomSuspense = sinon.spy(CustomSuspense);
@@ -263,7 +263,7 @@ describe('suspense', () => {
 		});
 	});
 
-	xit('should support suspension nested in a Fragment', () => {
+	it('should support suspension nested in a Fragment', () => {
 		const s = createSuspension('nested in a Fragment', 0, null);
 
 		render(
@@ -290,7 +290,7 @@ describe('suspense', () => {
 		});
 	});
 
-	xit('should support multiple non-nested Suspense', () => {
+	it('should support multiple non-nested Suspense', () => {
 		const s1 = createSuspension('1', 0, null);
 		const s2 = createSuspension('2', 0, null);
 
@@ -354,7 +354,7 @@ describe('suspense', () => {
 		});
 	});
 
-	xit('should only suspend the most inner Suspend', () => {
+	it('should only suspend the most inner Suspend', () => {
 		const s = createSuspension('1', 0, null);
 
 		render(
@@ -381,7 +381,7 @@ describe('suspense', () => {
 		});
 	});
 
-	xit('should throw when missing Suspense', () => {
+	it('should throw when missing Suspense', () => {
 		const s = createSuspension('1', 0, null);
 
 		render(
@@ -396,7 +396,7 @@ describe('suspense', () => {
 		);
 	});
 
-	xit('should throw when lazy\'s loader throws', () => {
+	it('should throw when lazy\'s loader throws', () => {
 		let prom;
 
 		const ThrowingLazy = lazy(() => {
@@ -429,7 +429,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should keep state when suspending', () => {
+	it.only('should keep state when suspending', () => {
 		class Suspender extends Component {
 			suspend() {
 				let resolve;
@@ -520,6 +520,9 @@ describe('suspense', () => {
 			<Suspense fallback={<div>Suspended...</div>}>
 				Test
 				<Fragment>
+					Text in Fragment
+				</Fragment>
+				<Fragment>
 					<Logger id="before" />
 				</Fragment>
 				<WrappedTextNode />
@@ -536,11 +539,12 @@ describe('suspense', () => {
 		console.log('initial render done ----------------------------');
 		expect(scratch.innerHTML).to.eql(dedent`
 			Test
+			Text in Fragment
 			<div>
 				<p>Logger before</p>
 			</div>
 			wrapped text
-			<section id="wrapped" />
+			<section id="wrapped"></section>
 			<div>
 				<p>Logger outer</p>
 				<div>
