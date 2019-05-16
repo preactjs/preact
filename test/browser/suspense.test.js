@@ -486,6 +486,14 @@ describe('suspense', () => {
 			}
 		}
 
+		function WrappedTextNode() {
+			return 'wrapped text';
+		}
+
+		function WrappedDomNode() {
+			return <section id="wrapped" />;
+		}
+
 		function dedent(strs) {
 			return strs
 				.map(str => str
@@ -514,6 +522,8 @@ describe('suspense', () => {
 				<Fragment>
 					<Logger id="before" />
 				</Fragment>
+				<WrappedTextNode />
+				<WrappedDomNode />
 				<Logger id="outer">
 					{suspender1}
 					{suspender2}
@@ -529,6 +539,8 @@ describe('suspense', () => {
 			<div>
 				<p>Logger before</p>
 			</div>
+			wrapped text
+			<section id="wrapped" />
 			<div>
 				<p>Logger outer</p>
 				<div>
@@ -560,6 +572,7 @@ describe('suspense', () => {
 			<div style="display: none;">
 				<p>Logger before</p>
 			</div>
+			<section id="wrapped" style="display: none;" />
 			<div style="display: none;">
 				<p>Logger outer</p>
 				<div>
@@ -587,6 +600,7 @@ describe('suspense', () => {
 			<div style="display: none;">
 				<p>Logger before</p>
 			</div>
+			<section id="wrapped" style="display: none;" />
 			<div style="display: none;">
 				<p>Logger outer</p>
 				<div>
@@ -613,6 +627,7 @@ describe('suspense', () => {
 			<div style="display: none;">
 				<p>Logger before</p>
 			</div>
+			<section id="wrapped" style="display: none;" />
 			<div style="display: none;">
 				<p>Logger outer</p>
 				<div>
@@ -639,6 +654,7 @@ describe('suspense', () => {
 			<div style="display: none;">
 				<p>Logger before</p>
 			</div>
+			<section id="wrapped" style="display: none;" />
 			<div style="display: none;">
 				<p>Logger outer</p>
 			</div>
@@ -660,6 +676,7 @@ describe('suspense', () => {
 				<div style="display: none;">
 					<p>Logger before</p>
 				</div>
+				<section id="wrapped" style="display: none;" />
 				<div style="display: none;">
 					<p>Logger outer</p>
 					<div>
@@ -682,11 +699,12 @@ describe('suspense', () => {
 				rerender();
 				console.log('render suspension resolved done ------------');
 				console.log(scratch);
-				// TODO: The text node `Test` is moved to the end because of the ordering issue with Fragments
+				// TODO: The text nodes `Test` and `wrapped text` are moved to the end because of the ordering issue with Fragments. See #1605
 				expect(scratch.innerHTML).to.eql(dedent`
 					<div style="">
 						<p>Logger before</p>
 					</div>
+					<section id="wrapped" style="" />
 					<div style="">
 						<p>Logger outer</p>
 						<div>
@@ -706,6 +724,7 @@ describe('suspense', () => {
 					<article style="">
 						<h1>stateful</h1>{"tag":"article"}
 					</article>
+					wrapped text
 					Test
 				`);
 				console.log('--------------------------------------------');
