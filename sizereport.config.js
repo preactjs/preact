@@ -1,5 +1,5 @@
 module.exports = {
 	repo: 'developit/preact',
-	path: ['./{compat,debug,hooks,}/dist/**/!(*.js.map)'],
+	path: ['./{compat,debug,hooks,}/dist/**/!(*.map)'],
 	branch: 'master'
 };
