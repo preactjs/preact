@@ -1977,8 +1977,7 @@ describe('Fragment', () => {
 		);
 	});
 
-	// TODO: This test is failing
-	it.skip('should insert in-between nested null children', () => {
+	it('should insert in-between nested null children', () => {
 		let update;
 		class SetState extends Component {
 			constructor(props) {

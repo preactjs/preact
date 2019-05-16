@@ -71,22 +71,17 @@ Component.prototype.forceUpdate = function(callback) {
 		const force = callback!==false;
 
 		let mounts = [];
-		dom = diff(parentDom, vnode, vnode, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, this._ancestorComponent, force, dom);
+		dom = diff(parentDom, vnode, vnode, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, this._ancestorComponent, force, dom, this._parentVNode);
 		if (dom!=null && dom.parentNode!==parentDom) {
 			// The component may be rendered somewhere in the middle of the parent's
 			// children. We need to find the nearest DOM sibling to insert our
 			// newly rendered node into.
-			let nextDom;
-			let sibling = this._siblingVNode;
-			while (sibling && !(nextDom = sibling._dom)) {
-				sibling = sibling._component && sibling._component._siblingVNode;
-			}
-
-			if (nextDom) {
-				parentDom.insertBefore(dom, nextDom);
+			let nextDom = getDomSibling(vnode);
+			if (nextDom==null || nextDom.parentNode!==parentDom) {
+				parentDom.appendChild(dom);
 			}
 			else {
-				parentDom.appendChild(dom);
+				parentDom.insertBefore(dom, nextDom);
 			}
 		}
 		commitRoot(mounts, vnode);
@@ -105,6 +100,44 @@ Component.prototype.forceUpdate = function(callback) {
  * @returns {import('./index').ComponentChildren | void}
  */
 Component.prototype.render = Fragment;
+
+/**
+ * Get the nearest dom sibling
+ * @param {import('./internal').VNode} vnode
+ */
+export function getDomSibling(vnode) {
+	let item;
+	let stack = [vnode];
+	while (stack.length > 0) {
+		if (item = stack.pop()) {
+
+			// Bail out if vnode is a DOM node or has a `_dom` pointer
+			if (typeof item.type=='string' && item._dom!==vnode._dom) {
+				return item._dom;
+			}
+
+			let parent = item._parent;
+			if (parent && typeof parent.type!=='string') {
+				if (parent._sibling) {
+					stack.push(item._parent._sibling);
+				}
+				else if (item._parent._parent && typeof item._parent._parent.type==='string') {
+					stack.push(item._parent._parent);
+				}
+			}
+			if (item._sibling) {
+				stack.push(item._sibling);
+			}
+
+			let children = item._children || [item._component._prevVNode];
+			if (item!==vnode && children) {
+				stack.push(...children);
+			}
+		}
+	}
+
+	return null;
+}
 
 /**
  * The render queue

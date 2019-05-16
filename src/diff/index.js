@@ -22,8 +22,9 @@ import options from '../options';
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
+ * @param {import('../internal').VNode} parentVNode
  */
-export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force, oldDom) {
+export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force, oldDom, parentVNode) {
 	// If the previous type doesn't match the new type we drop the whole subtree
 	if (oldVNode==null || newVNode==null || oldVNode.type!==newVNode.type || oldVNode.key!==newVNode.key) {
 		if (oldVNode!=null) unmount(oldVNode, ancestorComponent);
@@ -100,6 +101,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				c._renderCallbacks = [];
 			}
 
+			c._parentVNode = parentVNode;
 			c._vnode = newVNode;
 
 			// Invoke getDerivedStateFromProps
@@ -145,6 +147,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			let prev = c._prevVNode || null;
 			c._dirty = false;
 			let vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
+			if (vnode) vnode._parent = newVNode;
 
 			if (c.getChildContext!=null) {
 				context = assign(assign({}, context), c.getChildContext());
@@ -155,7 +158,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 
 			c._depth = ancestorComponent ? (ancestorComponent._depth || 0) + 1 : 0;
-			c.base = newVNode._dom = diff(parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null, oldDom);
+			c.base = newVNode._dom = diff(parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null, oldDom, newVNode);
 
 			if (vnode!=null) {
 				// If this component returns a Fragment (or another component that
