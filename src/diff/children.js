@@ -32,7 +32,6 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
 
 	let oldChildrenLength = oldChildren.length;
-	let oldChild;
 
 	// Only in very specific places should this logic be invoked (top level `render` and `diffElementNodes`).
 	// I'm using `EMPTY_OBJ` to signal when `diffChildren` is invoked in these situations. I can't use `null`
@@ -48,7 +47,6 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		else {
 			for (i = 0; !oldDom && i < oldChildrenLength; i++) {
 				oldDom = oldChildren[i] && oldChildren[i]._dom;
-				oldChild = oldChildren[i];
 			}
 		}
 	}
@@ -73,9 +71,6 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 					oldVNode = oldChildren[j];
 					if (oldVNode && (oldVNode.key!=null ? (childVNode.key === oldVNode.key) : (childVNode.key==null && childVNode.type === oldVNode.type))) {
 						oldChildren[j] = undefined;
-						if (oldChildrenLength !== newChildren.length && oldVNode.type !== (oldChild && oldChild.type)) {
-							oldDom = oldVNode._dom;
-						}
 						break;
 					}
 					oldVNode = null;

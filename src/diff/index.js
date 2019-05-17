@@ -277,7 +277,7 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 			}
 			let oldHtml = oldProps.dangerouslySetInnerHTML;
 			let newHtml = newProps.dangerouslySetInnerHTML;
-			if (newHtml || oldHtml) {
+			if ((newHtml || oldHtml) && excessDomChildren==null) {
 				// Avoid re-applying the same '__html' if it did not changed between re-render
 				if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
 					dom.innerHTML = newHtml && newHtml.__html || '';

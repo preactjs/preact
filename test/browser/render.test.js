@@ -540,7 +540,7 @@ describe('render()', () => {
 		it('should register events not appearing on dom nodes', () => {
 			let onAnimationEnd = () => {};
 
-			render(<div onAnimationEnd={onAnimationEnd} />, scratch);
+			render(<div onanimationend={onAnimationEnd} />, scratch);
 			expect(proto.addEventListener).to.have.been.calledOnce.and.to.have.been.calledWithExactly('animationend', sinon.match.func, false);
 		});
 
@@ -620,14 +620,14 @@ describe('render()', () => {
 			expect(scratch.innerHTML).to.equal('<div><foo><bar>test</bar></foo></div>');
 		});
 
-		it('should hydrate with dangerouslySetInnerHTML', () => {
+		it('should not hydrate with dangerouslySetInnerHTML', () => {
 			let html = '<b>foo &amp; bar</b>';
 			scratch.innerHTML = `<div>${html}</div>`;
 			// eslint-disable-next-line react/no-danger
 			render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
 
-			expect(scratch.firstChild).to.have.property('innerHTML', html);
-			expect(scratch.innerHTML).to.equal(`<div>${html}</div>`);
+			expect(scratch.firstChild).to.have.property('innerHTML', '');
+			expect(scratch.innerHTML).to.equal(`<div></div>`);
 		});
 
 		it('should avoid reapplying innerHTML when __html property of dangerouslySetInnerHTML attr remains unchanged', () => {
