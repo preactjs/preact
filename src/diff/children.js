@@ -24,7 +24,7 @@ import { removeNode } from '../util';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
 export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, oldDom) {
-	let childVNode, i, j, oldVNode, newDom;
+	let childVNode, i, j, oldVNode;
 
 	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode, true);
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
@@ -80,13 +80,25 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			}
 
 			// Morph the old element into the new one, but don't append it to the dom yet
-			newDom = diff(parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, null, oldDom);
+			diff(parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, null, oldDom);
 
-			// Only proceed if the vnode has not been unmounted by `diff()` above.
-			if (newDom!=null) {
-				oldDom = placeChild(parentDom, oldVNode, childVNode, oldDom, newDom, excessDomChildren, oldChildrenLength);
-			}
+			childVNode._old = oldVNode;
+
+			// // Only proceed if the vnode has not been unmounted by `diff()` above.
+			// if (childVNode._dom!=null) {
+			// 	oldDom = placeChild(parentDom, childVNode._old, childVNode, oldDom, childVNode._dom, excessDomChildren, oldChildrenLength);
+			// }
 		}
+	}
+
+	if (newParentVNode && (typeof newParentVNode.type === 'string' || newParentVNode._root == true)) {
+		forEachDomVNodeChild(newParentVNode._children, childVNode => {
+			// Only proceed if the vnode has not been unmounted by `diff()` above.
+			if (childVNode._dom!=null) {
+				oldDom = placeChild(parentDom, childVNode._old, childVNode, oldDom, childVNode._dom, excessDomChildren, oldChildrenLength);
+			}
+			childVNode._old = null;
+		});
 	}
 
 	// Remove children that are not part of any vnode. Only used by `hydrate`
@@ -152,15 +164,31 @@ export function toChildArray(children, flattened, map, keepHoles) {
 	return flattened;
 }
 
+/**
+ * @param {import('../internal').VNode} children
+ * @param {(vnode: import('../internal').VNode) => void} callback
+ */
 export function forEachDomVNodeChild(children, callback) {
-	// Assume children is already flat
-	if (typeof children.type === 'string' || children.type === null) {
+	if (!children) {}
+	else if (typeof children.type === 'string' || children.type === null) {
 		callback(children);
 	}
 	else {
-		let newChildren = children._children;
-		for (let j=0; j < newChildren.length; j++) {
-			forEachDomVNodeChild(newChildren[j], callback);
+		let newChildren;
+		if (Array.isArray(children)) {
+			newChildren = children;
+		}
+		else if (children._component) {
+			newChildren = [children._component._prevVNode];
+		}
+		else {
+			newChildren = children._children;
+		}
+
+		if (newChildren) {
+			for (let j=0; j < newChildren.length; j++) {
+				forEachDomVNodeChild(newChildren[j], callback);
+			}
 		}
 	}
 }

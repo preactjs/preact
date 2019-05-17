@@ -16,6 +16,7 @@ export function render(vnode, parentDom, replaceNode) {
 	if (options.root) options.root(vnode, parentDom);
 	let oldVNode = parentDom._prevVNode;
 	vnode = createElement(Fragment, null, [vnode]);
+	vnode._root = true; // TODO: Feels like a dirty hack...
 
 	let mounts = [];
 	diffChildren(
