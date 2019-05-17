@@ -183,6 +183,92 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div foo="bar">Hello</div>');
 		});
 
+		it('should also update the current dom', () => {
+			let trigger;
+
+			class A extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { show: false };
+					trigger = this.set = this.set.bind(this);
+				}
+
+				set() {
+					this.setState({ show: true });
+				}
+
+				render() {
+					return this.state.show ? <div>A</div> : null;
+				}
+			}
+
+			const B = () => <p>B</p>;
+
+			render(
+				<div>
+					<A />
+					<B />
+				</div>,
+				scratch
+			);
+			expect(scratch.innerHTML).to.equal('<div><p>B</p></div>');
+
+			trigger();
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div><div>A</div><p>B</p></div>');
+		});
+
+		it('should not orphan children', () => {
+			let triggerC, triggerA;
+			const B = () => <p>B</p>;
+
+			// Component with state which swaps its returned element type
+			class C extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { show: false };
+					triggerC = this.set = this.set.bind(this);
+				}
+
+				set() {
+					this.setState({ show: true });
+				}
+
+				render() {
+					return this.state.show ? <div>data</div> : <p>Loading</p>;
+				}
+			}
+
+			const WrapC = () => <C />;
+
+			class A extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { show: false };
+					triggerA = this.set = this.set.bind(this);
+				}
+
+				set() {
+					this.setState({ show: true });
+				}
+
+				render() {
+					return this.state.show ? <B /> : <WrapC />;
+				}
+			}
+
+			render(<A />, scratch);
+			expect(scratch.innerHTML).to.equal('<p>Loading</p>');
+
+			triggerC();
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>data</div>');
+
+			triggerA();
+			rerender();
+			expect(scratch.innerHTML).to.equal('<p>B</p>');
+		});
+
 		it('should render components that don\'t pass args into the Component constructor (unistore pattern)', () => {
 			// Pattern unistore uses for connect: https://git.io/fxRqu
 			function Wrapper() {
