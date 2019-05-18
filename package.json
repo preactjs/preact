@@ -102,7 +102,6 @@
     "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-preset-env": "^1.6.1",
     "benchmark": "^2.1.4",
-    "bundlesize": "^0.17.0",
     "chai": "^4.1.2",
     "coveralls": "^3.0.0",
     "cross-env": "^5.2.0",
