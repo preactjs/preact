@@ -13,26 +13,10 @@ Suspense.prototype = new Component();
  * @param {Promise} promise The thrown promise
  */
 Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
-	if (!this._timeout) {
-		if (typeof this.props.maxDuration === 'number') {
-			this._timeoutCompleted = false;
-			this._timeout = new Promise((res) => {
-				setTimeout(() => {
-					this._timeoutCompleted = true;
-				}, this.props.maxDuration);
-			});
-		}
-		else {
-			this._timeoutCompleted = false;
-			this._timeout = Promise.resolve({})
-				.then(() => {
-					this._timeoutCompleted = true;
-				});
-		}
-	}
-
 	this._suspensions.push(promise);
 	let len = this._suspensions.length;
+
+	console.log('_childDidSuspend');
 
 	const promiseCompleted = () => {
 		// make sure we did not add any more suspensions
@@ -74,11 +58,39 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 			const mounts = [];
 			const dom = this._fallbackDom = diff(this._vnode._dom, this.props.fallback, null, assign({}, this._context), false, null, [], this, null, null);
 			if (dom!=null) {
+				Object.keys(this).forEach((key) => {
+					console.log('this', key, this[key]);
+				})
+				Object.keys(this._vnode).forEach((key) => {
+					console.log('_vnode', key, this._vnode[key]);
+				})
+				Object.keys(this._ancestorComponent).forEach((key) => {
+					console.log('ancestor', key, this._ancestorComponent[key]);
+				})
 				this._parentDom.appendChild(dom);
 			}
 			commitRoot(mounts, this._vnode);
 		}
 	};
+
+	if (this.props.maxDuration == null || this.props.maxDuration == 0) {
+		this._timeoutCompleted = true;
+		timeoutOrPromiseCompleted();
+
+		// Suspense ignores errors thrown in Promises as this should be handled by user land code
+		promise.then(promiseCompleted, promiseCompleted);
+
+		return;
+	}
+
+	if (!this._timeout) {
+		this._timeoutCompleted = false;
+		this._timeout = new Promise((res) => {
+			setTimeout(() => {
+				this._timeoutCompleted = true;
+			}, this.props.maxDuration);
+		});
+	}
 
 	// _p is assigned here to let tests await this...
 	this._p = Promise.race([
