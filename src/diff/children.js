@@ -69,7 +69,9 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 				// so after this loop oldVNode == null or oldVNode is a valid value.
 				for (j=0; j<oldChildrenLength; j++) {
 					oldVNode = oldChildren[j];
-					if (oldVNode && (oldVNode.key!=null ? (childVNode.key === oldVNode.key) : (childVNode.key==null && childVNode.type === oldVNode.type))) {
+					// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
+					// We always match by type (in either case).
+					if (oldVNode && childVNode.key == oldVNode.key && childVNode.type === oldVNode.type) {
 						oldChildren[j] = undefined;
 						break;
 					}
