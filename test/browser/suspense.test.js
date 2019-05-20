@@ -82,7 +82,7 @@ function FuncWrapper(props) {
 	);
 }
 
-describe.only('suspense', () => {
+describe('suspense', () => {
 	let scratch, rerender;
 
 	beforeEach(() => {
