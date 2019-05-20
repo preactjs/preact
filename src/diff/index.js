@@ -146,16 +146,16 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c._dirty = false;
 			let vnode;
 			
-			tryRender: try {
+			try {
 				vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
 			}
 			catch (e) {
 				// thrown Promises are meant to suspend...
 				if (typeof e.then === 'function') {
-					for (let component = c; component; component = component._ancestorComponent) {
-						if (component._childDidSuspend) {
-							component._childDidSuspend(e);
-							break tryRender;
+					for (tmp = c; tmp; tmp = tmp._ancestorComponent) {
+						if (tmp._childDidSuspend) {
+							tmp._childDidSuspend(e);
+							return;
 						}
 					}
 				}
