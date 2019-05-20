@@ -72,10 +72,8 @@ class ContextProvider {
 function Portal(props) {
 	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
 	let container = props.container;
-	let temp = props.container.appendChild(document.createTextNode(''));
 	hydrate(wrap, container);
 	this.componentWillUnmount = () => {
-		container.removeChild(temp);
 		render(null, container);
 	};
 	return null;
