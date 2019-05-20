@@ -35,8 +35,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		newType = newVNode.type, clearProcessingException;
 
 	// When passing through createElement it assigns the object
-	// ref on _self, to prevent JSON Injection we check if this attribute
-	// is equal.
+	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== undefined) return null;
 
 	if (tmp = options.diff) tmp(newVNode);
