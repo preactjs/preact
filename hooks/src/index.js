@@ -16,8 +16,9 @@ options.render = vnode => {
 	currentComponent = vnode._component;
 	currentIndex = 0;
 
-	if (!currentComponent.__hooks) return;
-	currentComponent.__hooks._pendingEffects = handleEffects(currentComponent.__hooks._pendingEffects);
+	if (currentComponent.__hooks) {
+		currentComponent.__hooks._pendingEffects = handleEffects(currentComponent.__hooks._pendingEffects);
+	}
 };
 
 let oldAfterDiff = options.diffed;
@@ -28,11 +29,9 @@ options.diffed = vnode => {
 	if (!c) return;
 
 	const hooks = c.__hooks;
-	if (!hooks) return;
-
-	// TODO: Consider moving to a global queue. May need to move
-	// this to the `commit` option
-	hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
+	if (hooks) {
+		hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
+	}
 };
 
 
@@ -44,9 +43,9 @@ options.unmount = vnode => {
 	if (!c) return;
 
 	const hooks = c.__hooks;
-	if (!hooks) return;
-
-	hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
+	if (hooks) {
+		hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
+	}
 };
 
 /**
@@ -77,11 +76,11 @@ export function useReducer(reducer, initialState, init) {
 
 	/** @type {import('./internal').ReducerHookState} */
 	const hookState = getHookState(currentIndex++);
-	if (hookState._component == null) {
+	if (!hookState._component) {
 		hookState._component = currentComponent;
 
 		hookState._value = [
-			init == null ? invokeOrReturn(null, initialState) : init(initialState),
+			!init ? invokeOrReturn(null, initialState) : init(initialState),
 
 			action => {
 				const nextValue = reducer(hookState._value[0], action);
@@ -130,7 +129,7 @@ export function useLayoutEffect(callback, args) {
 
 export function useRef(initialValue) {
 	const state = getHookState(currentIndex++);
-	if (state._value == null) {
+	if (!state._value) {
 		state._value = { current: initialValue };
 	}
 
@@ -175,8 +174,9 @@ export function useCallback(callback, args) {
  */
 export function useContext(context) {
 	const provider = currentComponent.context[context._id];
-	if (provider == null) return context._defaultValue;
+	if (!provider) return context._defaultValue;
 	const state = getHookState(currentIndex++);
+	// This is probably not safe to convert to "!"
 	if (state._value == null) {
 		state._value = true;
 		provider.sub(currentComponent);
@@ -208,16 +208,17 @@ let afterPaint = () => {};
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
-	afterPaintEffects.forEach(component => {
+	afterPaintEffects.some(component => {
 		component._afterPaintQueued = false;
-		if (!component._parentDom) return;
-		component.__hooks._pendingEffects = handleEffects(component.__hooks._pendingEffects);
+		if (component._parentDom) {
+			component.__hooks._pendingEffects = handleEffects(component.__hooks._pendingEffects);
+		}
 	});
 	afterPaintEffects = [];
 }
 
 function scheduleFlushAfterPaint() {
-	setTimeout(flushAfterPaintEffects, 0);
+	setTimeout(flushAfterPaintEffects);
 }
 
 /* istanbul ignore else */
@@ -255,7 +256,7 @@ function invokeEffect(hook) {
 }
 
 function argsChanged(oldArgs, newArgs) {
-	return oldArgs == null || newArgs.some((arg, index) => arg !== oldArgs[index]);
+	return !oldArgs || newArgs.some((arg, index) => arg !== oldArgs[index]);
 }
 
 function invokeOrReturn(arg, f) {

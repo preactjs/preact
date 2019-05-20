@@ -32,3 +32,15 @@ export const li = contents => `<li>${contents}</li>`;
  * A helper to generate innerHTML validation strings containing inputs
  */
 export const input = () => `<input type="text">`;
+
+/**
+ * A helper to generate innerHTML validation strings containing inputs
+ * @param {string | number} contents The contents of the h1
+ */
+export const h1 = contents => `<h1>${contents}</h1>`;
+
+/**
+ * A helper to generate innerHTML validation strings containing inputs
+ * @param {string | number} contents The contents of the h2
+ */
+export const h2 = contents => `<h2>${contents}</h2>`;

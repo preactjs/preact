@@ -25,7 +25,7 @@ describe("VNode", () => {
 	it("is returned by h", () => {
 		const actual = <div className="wow"/>;
 		expect(actual).to.include.all.keys(
-			"type", "props", "text", "key"
+			"type", "props", "key"
 		);
 	});
 
