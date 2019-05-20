@@ -58,7 +58,7 @@ Suspense.prototype._childDidSuspend = function(promise) {
 	};
 
 	const timeoutOrSuspensionsCompleted = () => {
-		if (this._timeoutCompleted && !this._parkedVnode) {
+		if (this._timeoutCompleted && this._suspensions.length && !this._parkedVnode) {
 			// park old vnode & remove dom
 			removeDom(this._parkedVnode = this._prevVNode);
 			this._prevVNode = null;
