@@ -1,7 +1,24 @@
-import { Component, enqueueRender } from './component';
-import { diff, commitRoot } from './diff/index';
-import { removeNode, assign } from './util';
+import { Component } from './component';
+import { unmount } from './diff/index';
+import { removeNode } from './util';
 import { createElement } from './create-element';
+
+function removeDom(vnode, indent = '') {
+	let r = vnode._component;
+	if (r != null) {
+		if (r = r._prevVNode) removeDom(r, indent + '  ');
+	}
+	else if ((r = vnode._children) && typeof vnode.type === 'function') {
+		for (let i = 0; i < r.length; i++) {
+			if (r[i]) removeDom(r[i], indent + '  ');
+		}
+	}
+
+	const dom = vnode._dom;
+	if (dom) {
+		removeNode(dom);
+	}
+}
 
 // having a "custom class" here saves 50bytes gzipped
 export function Suspense(props) {
@@ -16,8 +33,6 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 	this._suspensions.push(promise);
 	let len = this._suspensions.length;
 
-	console.log('_childDidSuspend');
-
 	const promiseCompleted = () => {
 		// make sure we did not add any more suspensions
 		if (len === this._suspensions.length) {
@@ -27,19 +42,16 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 			if (this._suspended) {
 				this._suspended = false;
 				
-				// remove fallback dom
-				if (this._fallbackDom) {
-					removeNode(this._fallbackDom);
-					this._fallbackDom = null;
-				}
+				// remove fallback
+				unmount(this.props.fallback);
 
-				// append parked dom
-				if (this._parkedVnode._dom) {
-					this._parentDom.appendChild(this._parkedVnode._dom);
-				}
+				// make preact think we had mounted the parkedVNode previously...
+				this._prevVNode = this._parkedVnode;
 				this._parkedVnode = null;
 
-				enqueueRender(suspendingComponent);
+				this.forceUpdate();
+
+				// enqueueRender(suspendingComponent);
 			}
 		}
 	};
@@ -50,26 +62,12 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 			
 			// park old vnode & remove dom
 			this._parkedVnode = this._prevVNode;
-			if (this._parkedVnode._dom) {
-				removeNode(this._parkedVnode._dom);
-			}
+			this._prevVNode = null;
+
+			removeDom(this._parkedVnode);
 
 			// render and mount fallback
-			const mounts = [];
-			const dom = this._fallbackDom = diff(this._vnode._dom, this.props.fallback, null, assign({}, this._context), false, null, [], this, null, null);
-			if (dom!=null) {
-				Object.keys(this).forEach((key) => {
-					console.log('this', key, this[key]);
-				})
-				Object.keys(this._vnode).forEach((key) => {
-					console.log('_vnode', key, this._vnode[key]);
-				})
-				Object.keys(this._ancestorComponent).forEach((key) => {
-					console.log('ancestor', key, this._ancestorComponent[key]);
-				})
-				this._parentDom.appendChild(dom);
-			}
-			commitRoot(mounts, this._vnode);
+			this.forceUpdate();
 		}
 	};
 
@@ -102,6 +100,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 };
 
 Suspense.prototype.render = function(props, state) {
+	console.log('Suspense.render()', this._suspended);
 	return this._suspended ? props.fallback : props.children;
 };
 

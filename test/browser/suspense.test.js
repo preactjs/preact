@@ -3,6 +3,13 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component, Suspense, lazy, Fragment } from '../../src/index';
 import { setupScratch, teardown } from '../_util/helpers';
+import { enqueueRender } from '../../src/component';
+
+function delay(timeout) {
+	return new Promise((res) => {
+		setTimeout(res, timeout);
+	});
+}
 
 class LazyComp extends Component {
 	render() {
@@ -10,16 +17,35 @@ class LazyComp extends Component {
 	}
 }
 
-function CustomSuspense({ isDone, promise, name }) {
-	if (!isDone()) {
-		throw promise;
+class Suspendable extends Component {
+	suspend(update) {
+		this.promise = new Promise((res, rej) => {
+			this.resolve = () => {
+				const promise = this.promise;
+				this.promise = null;
+				res();
+				return promise;
+			};
+			this.reject = (err) => {
+				const promise = this.promise;
+				this.promise = null;
+				rej(err);
+				return promise;
+			};
+		});
+
+		if (update === true || update === undefined) {
+			this.forceUpdate();
+		}
 	}
 
-	return (
-		<div>
-			Hello from CustomSuspense {name}
-		</div>
-	);
+	render(props) {
+		if (this.promise) {
+			throw this.promise;
+		}
+
+		return props.render(props);
+	}
 }
 
 class Catcher extends Component {
@@ -35,27 +61,6 @@ class Catcher extends Component {
 	render(props, state) {
 		return state.error ? <div>Catcher did catch: {state.error.message}</div> : props.children;
 	}
-}
-
-function createSuspension(name, error) {
-	let done = false;
-	let resolve;
-	let promise = new Promise((res) => {
-		resolve = () => {
-			res();
-			return promise;
-		};
-	})
-		.then(() => {
-			done = true;
-		});
-
-	return {
-		name,
-		promise,
-		isDone: () => done,
-		resolve
-	};
 }
 
 class ClassWrapper extends Component {
@@ -88,345 +93,592 @@ describe('suspense', () => {
 		teardown(scratch);
 	});
 
-	it('should suspend when using lazy', () => {
+	it('should support lazy', () => {
 		let resolve;
 
-		const Lazy = lazy(() => new Promise((res) => {
-			resolve = () => {
-				res({ default: LazyComp });
-			};
-		}));
+		const Lazy = lazy(() => {
+			const p = new Promise((res) => {
+				resolve = () => {
+					res({ default: LazyComp });
+					return p;
+				};
+			});
 
-		const suspense = (
+			return p;
+		});
+
+		render(
 			<Suspense fallback={<div>Suspended...</div>}>
 				<Lazy />
-			</Suspense>
+			</Suspense>,
+			scratch
 		);
-		render(suspense, scratch);
 
-		return suspense._component._p.then(() => {
+		// TODO: this assertion is broken :(
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspended...</div>`
+		);
+
+		return resolve().then(() => {
+			rerender();
 			expect(scratch.innerHTML).to.eql(
-				`<div>Suspended...</div>`
+				`<div>Hello from LazyComp</div>`
 			);
-
-			const p = Promise.all(suspense._component._suspensions)
-				.then(() => {
-					rerender();
-					expect(scratch.innerHTML).to.eql(
-						`<div>Hello from LazyComp</div>`
-					);
-				});
-			resolve();
-			return p;
 		});
 	});
 
 	it('should suspend when a promise is throw', () => {
-		const s = createSuspension('regular case', 0, null);
+		const s = <Suspendable render={() => <div>Hello</div>} />;
 
-		const suspense = (
+		render(
 			<Suspense fallback={<div>Suspended...</div>}>
 				<ClassWrapper>
 					<FuncWrapper>
-						<CustomSuspense {...s} />
+						{s}
 					</FuncWrapper>
 				</ClassWrapper>
-			</Suspense>
+			</Suspense>,
+			scratch
 		);
 
-		render(suspense, scratch);
+		expect(scratch.innerHTML).to.eql(
+			`<div id="class-wrapper"><div id="func-wrapper"><div>Hello</div></div></div>`
+		);
 
-		return suspense._component._p.then(() => {
+		s._component.suspend();
+
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspended...</div>`
+		);
+
+		return s._component.resolve().then(() => {
+			rerender();
 			expect(scratch.innerHTML).to.eql(
-				`<div>Suspended...</div>`
+				`<div id="class-wrapper"><div id="func-wrapper"><div>Hello</div></div></div>`
 			);
+		});
+	});
 
-			return s.resolve().then(() => {
-				rerender();
-				expect(scratch.innerHTML).to.eql(
-					`<div id="class-wrapper"><div id="func-wrapper"><div>Hello from CustomSuspense regular case</div></div></div>`
-				);
-			});
+	it('should not call lifecycle methods when suspending', () => {
+		class LifecycleLogger extends Component {
+			render() {
+				return <div>Lifecycle</div>;
+			}
+			componentWillMount() {}
+			componentDidMount() {}
+			componentWillUnmount() {}
+		}
+
+		const componentWillMount = sinon.spy(LifecycleLogger.prototype, 'componentWillMount');
+		const componentDidMount = sinon.spy(LifecycleLogger.prototype, 'componentDidMount');
+		const componentWillUnmount = sinon.spy(LifecycleLogger.prototype, 'componentWillUnmount');
+
+		const s = <Suspendable render={() => <div>Suspense</div>} />;
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				{s}
+				<LifecycleLogger />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspense</div><div>Lifecycle</div>`
+		);
+		expect(componentWillMount).to.have.been.calledOnce;
+		expect(componentDidMount).to.have.been.calledOnce;
+		expect(componentWillUnmount).to.not.have.been.called;
+
+		s._component.suspend();
+
+		rerender();
+	
+		expect(componentWillMount).to.have.been.calledOnce;
+		expect(componentDidMount).to.have.been.calledOnce;
+		expect(componentWillUnmount).to.not.have.been.called;
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspended...</div>`
+		);
+
+		return s._component.resolve().then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div>Suspense</div><div>Lifecycle</div>`
+			);
+	
+			expect(componentWillMount).to.have.been.calledOnce;
+			expect(componentDidMount).to.have.been.calledOnce;
+			expect(componentWillUnmount).to.not.have.been.called;
+		});
+	});
+
+	it('should call fallback\'s lifecycle methods when suspending', () => {
+		class LifecycleLogger extends Component {
+			render() {
+				return <div>Lifecycle</div>;
+			}
+			componentWillMount() {}
+			componentDidMount() {}
+			componentWillUnmount() {}
+		}
+
+		const componentWillMount = sinon.spy(LifecycleLogger.prototype, 'componentWillMount');
+		const componentDidMount = sinon.spy(LifecycleLogger.prototype, 'componentDidMount');
+		const componentWillUnmount = sinon.spy(LifecycleLogger.prototype, 'componentWillUnmount');
+
+		const s = <Suspendable render={() => <div>Suspense</div>} />;
+
+		render(
+			<Suspense fallback={<LifecycleLogger />}>
+				{s}
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspense</div>`
+		);
+		expect(componentWillMount).to.not.have.been.called;
+		expect(componentDidMount).to.not.have.been.called;
+		expect(componentWillUnmount).to.not.have.been.called;
+
+		s._component.suspend();
+
+		rerender();
+	
+		expect(componentWillMount).to.have.been.calledOnce;
+		expect(componentDidMount).to.have.been.calledOnce;
+		expect(componentWillUnmount).to.not.have.been.called;
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Lifecycle</div>`
+		);
+
+		return s._component.resolve().then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div>Suspense</div>`
+			);
+	
+			expect(componentWillMount).to.have.been.calledOnce;
+			expect(componentDidMount).to.have.been.calledOnce;
+			expect(componentWillUnmount).to.have.been.calledOnce;
+		});
+	});
+
+	it('should keep state of children when suspending', () => {
+		let setState;
+
+		class Stateful extends Component {
+			constructor(props) {
+				super(props);
+				setState = this.setState.bind(this);
+				this.state = { s: 'initial' };
+			}
+			render(props, state) {
+				return <div>Stateful: {state.s}</div>;
+			}
+		}
+
+		const s = <Suspendable render={() => <div>Suspense</div>} />;
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				{s}
+				<Stateful />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspense</div><div>Stateful: initial</div>`
+		);
+
+		setState({ s: 'first' });
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspense</div><div>Stateful: first</div>`
+		);
+
+		s._component.suspend();
+
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspended...</div>`
+		);
+
+		return s._component.resolve().then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div>Suspense</div><div>Stateful: first</div>`
+			);
+		});
+	});
+
+	it('should allow siblings to update state while suspending', () => {
+		let setState;
+
+		class Stateful extends Component {
+			constructor(props) {
+				super(props);
+				setState = this.setState.bind(this);
+				this.state = { s: 'initial' };
+			}
+			render(props, state) {
+				return <div>Stateful: {state.s}</div>;
+			}
+		}
+
+		const s = <Suspendable render={() => <div>Suspense</div>} />;
+
+		render(
+			<Fragment>
+				{/* TODO: This div is needed because of #1605 */}
+				<div>
+					<Suspense fallback={<div>Suspended...</div>}>
+						{s}
+					</Suspense>
+				</div>
+				<Stateful />
+			</Fragment>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>Suspense</div></div><div>Stateful: initial</div>`
+		);
+
+		setState({ s: 'first' });
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>Suspense</div></div><div>Stateful: first</div>`
+		);
+
+		s._component.suspend();
+
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>Suspended...</div></div><div>Stateful: first</div>`
+		);
+
+		setState({ s: 'second' });
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>Suspended...</div></div><div>Stateful: second</div>`
+		);
+
+		return s._component.resolve().then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div><div>Suspense</div></div><div>Stateful: second</div>`
+			);
 		});
 	});
 
 	it('should suspend with custom error boundary', () => {
-		const s = createSuspension('within error boundary', 0, null);
+		const s = <Suspendable render={() => <div>within error boundary</div>} />;
 
-		const suspense = (
+		render(
 			<Suspense fallback={<div>Suspended...</div>}>
 				<Catcher>
-					<CustomSuspense {...s} />
+					{s}
 				</Catcher>
-			</Suspense>
+			</Suspense>,
+			scratch
 		);
 
-		render(suspense, scratch);
+		expect(scratch.innerHTML).to.eql(
+			`<div>within error boundary</div>`
+		);
 
-		return suspense._component._p.then(() => {
+		s._component.suspend();
+
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspended...</div>`
+		);
+
+		return s._component.resolve().then(() => {
+			rerender();
 			expect(scratch.innerHTML).to.eql(
-				`<div>Suspended...</div>`
+				`<div>within error boundary</div>`
 			);
-
-			return s.resolve().then(() => {
-				rerender();
-				expect(scratch.innerHTML).to.eql(
-					`<div>Hello from CustomSuspense within error boundary</div>`
-				);
-			});
 		});
 	});
 
 	it('should support throwing suspense', () => {
-		const s = createSuspension('throwing', 0, new Error('Thrown in suspense'));
+		const s = <Suspendable render={() => <div>Hello</div>} />;
 
-		const suspense = (
+		render(
 			<Suspense fallback={<div>Suspended...</div>}>
 				<Catcher>
-					<CustomSuspense {...s} />
+					{s}
 				</Catcher>
-			</Suspense>
+			</Suspense>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.eql(
+			`<div>Hello</div>`
 		);
 
-		render(suspense, scratch);
+		s._component.suspend();
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspended...</div>`
+		);
 
-		return suspense._component._p.then(() => {
-			expect(scratch.innerHTML).to.eql(
-				`<div>Suspended...</div>`
-			);
-
-			return s.resolve().catch(() => {
+		return s._component.reject(new Error('Thrown suspension'))
+			.then(() => {
+				expect(true).to.eql(false);
+			}, () => {
 				rerender();
 				expect(scratch.innerHTML).to.eql(
-					`<div>Hello from CustomSuspense throwing</div>`
+					`<div>Hello</div>`
 				);
 			});
-		});
 	});
 
-	// TODO: this one is failing. I guess because we just park/re-mount a single node instead of
-	// all in the fragment
-	it('should call multiple suspending components render in one go', () => {
-		const s1 = createSuspension('first', 0, null);
-		const s2 = createSuspension('second', 0, null);
-		const LoggedCustomSuspense = sinon.spy(CustomSuspense);
+	it('should allow multiple children to suspend', () => {
+		const s1 = <Suspendable render={() => <div>Hello first</div>} />;
+		const s2 = <Suspendable render={() => <div>Hello second</div>} />;
 
 		const suspense = (
 			<Suspense fallback={<div>Suspended...</div>}>
 				<Catcher>
-					{/* Adding a <div> here will make things work... */}
-					<LoggedCustomSuspense {...s1} />
-					<LoggedCustomSuspense {...s2} />
+					{s1}
+					{s2}
 				</Catcher>
 			</Suspense>
 		);
 		render(suspense, scratch);
-		expect(LoggedCustomSuspense).to.have.been.calledTwice;
+		expect(scratch.innerHTML).to.eql(
+			`<div>Hello first</div><div>Hello second</div>`
+		);
 
-		return suspense._component._p.then(() => {
+		const s1renderSpy = sinon.spy(s1._component, 'render');
+		const s2renderSpy = sinon.spy(s2._component, 'render');
+
+		s1._component.suspend(false);
+		s2._component.suspend(false);
+		expect(s1renderSpy).to.not.have.been.called;
+		expect(s2renderSpy).to.not.have.been.called;
+
+		enqueueRender(suspense._component);
+		rerender();
+		expect(s1renderSpy).to.have.been.calledOnce;
+		expect(s2renderSpy).to.have.been.calledOnce;
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspended...</div>`
+		);
+
+		return s1._component.resolve().then(() => {
+			rerender();
+			expect(s1renderSpy).to.have.been.calledOnce;
+			expect(s2renderSpy).to.have.been.calledOnce;
 			expect(scratch.innerHTML).to.eql(
 				`<div>Suspended...</div>`
 			);
 
-			return s1.resolve().then(() => {
-				rerender(); // this rerender is not strictly needed as Suspense doesn't wait but
-				// it is here to make sure we don't change anything else
+			return s2._component.resolve().then(() => {
+				rerender();
+				expect(s1renderSpy).to.have.been.calledTwice;
+				expect(s2renderSpy).to.have.been.calledTwice;
 				expect(scratch.innerHTML).to.eql(
-					`<div>Suspended...</div>`
+					`<div>Hello first</div><div>Hello second</div>`
 				);
-
-				return s2.resolve().then(() => {
-					rerender();
-					expect(scratch.innerHTML).to.eql(
-						`<div>Hello from CustomSuspense first</div><div>Hello from CustomSuspense second</div>`
-					);
-				});
 			});
 		});
 	});
 
-	// TODO: This one is failing as we are not properly unmounting dom nodes.
-	// we just unmount the first one...
 	it('should call multiple nested suspending components render in one go', () => {
-		const s1 = createSuspension('first', 5, null);
-		const s2 = createSuspension('second', 5, null);
-		const LoggedCustomSuspense = sinon.spy(CustomSuspense);
+		const s1 = <Suspendable render={() => <div>Hello first</div>} />;
+		const s2 = <Suspendable render={() => <div>Hello second</div>} />;
 
 		const suspense = (
 			<Suspense fallback={<div>Suspended...</div>}>
 				<Catcher>
-					{/* Adding a <div> here will make things work... */}
-					<LoggedCustomSuspense {...s1} />
+					{s1}
 					<div>
-						<LoggedCustomSuspense {...s2} />
+						{s2}
 					</div>
 				</Catcher>
 			</Suspense>
 		);
-
 		render(suspense, scratch);
-		expect(LoggedCustomSuspense).to.have.been.calledTwice;
+		expect(scratch.innerHTML).to.eql(
+			`<div>Hello first</div><div><div>Hello second</div></div>`
+		);
 
-		return suspense._component._p.then(() => {
+		const s1renderSpy = sinon.spy(s1._component, 'render');
+		const s2renderSpy = sinon.spy(s2._component, 'render');
+
+		s1._component.suspend(false);
+		s2._component.suspend(false);
+		expect(s1renderSpy).to.not.have.been.called;
+		expect(s2renderSpy).to.not.have.been.called;
+
+		suspense._component.forceUpdate();
+		rerender();
+		expect(s1renderSpy).to.have.been.calledOnce;
+		expect(s2renderSpy).to.have.been.calledOnce;
+		// TODO: This assertion is currently failing.
+		// Actual result is: <div>Suspended...</div><div></div>
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspended...</div>`
+		);
+
+		return s1._component.resolve().then(() => {
+			rerender();
+			expect(s1renderSpy).to.have.been.calledOnce;
+			expect(s2renderSpy).to.have.been.calledOnce;
 			expect(scratch.innerHTML).to.eql(
 				`<div>Suspended...</div>`
 			);
 
-			return s1.resolve().then(s2.resolve()).then(() => {
+			return s2._component.resolve().then(() => {
 				rerender();
+				expect(s1renderSpy).to.have.been.calledTwice;
+				expect(s2renderSpy).to.have.been.calledTwice;
 				expect(scratch.innerHTML).to.eql(
-					`<div>Hello from CustomSuspense first</div><div><div>Hello from CustomSuspense second</div></div>`
+					`<div>Hello first</div><div><div>Hello second</div></div>`
 				);
 			});
 		});
 	});
 
-	it('should support suspension nested in a Fragment', () => {
-		const s = createSuspension('nested in a Fragment', 0, null);
-
-		const suspense = (
-			<Suspense fallback={<div>Suspended...</div>}>
-				<Catcher>
-					<Fragment>
-						<CustomSuspense {...s} />
-					</Fragment>
-				</Catcher>
-			</Suspense>
-		);
-		render(suspense, scratch);
-
-		return suspense._component._p.then(() => {
-			expect(scratch.innerHTML).to.eql(
-				`<div>Suspended...</div>`
-			);
-
-			return s.resolve().then(() => {
-				rerender();
-				expect(scratch.innerHTML).to.eql(
-					`<div>Hello from CustomSuspense nested in a Fragment</div>`
-				);
-			});
-		});
-	});
-
-	it('should support multiple non-nested Suspense', () => {
-		const s1 = createSuspension('1', 0, null);
-		const s2 = createSuspension('2', 0, null);
-
-		const suspense1 = (
-			<Suspense fallback={<div>Suspended 1...</div>}>
-				<CustomSuspense {...s1} />
-			</Suspense>
-		);
-		const suspense2 = (
-			<Suspense fallback={<div>Suspended 2...</div>}>
-				<CustomSuspense {...s2} />
-			</Suspense>
-		);
-
-		render((
-			<div>
-				<div>{suspense1}</div>
-				<div>{suspense2}</div>
-			</div>
-		), scratch);
-
-		return suspense1._component._p.then(() => suspense2._component._p).then(() => {
-			expect(scratch.innerHTML).to.eql(
-				`<div><div><div>Suspended 1...</div></div><div><div>Suspended 2...</div></div></div>`
-			);
-
-			return s1.resolve().then(s2.resolve()).then(() => {
-				rerender();
-				expect(scratch.innerHTML).to.eql(
-					`<div><div><div>Hello from CustomSuspense 1</div></div><div><div>Hello from CustomSuspense 2</div></div></div>`
-				);
-			});
-		});
-	});
-
-	// TODO: this one is failing due to #1605
-	it.skip('should support multiple Suspense inside a Fragment', () => {
-		const s1 = createSuspension('1', 0, null);
-		const s2 = createSuspension('2', 0, null);
-
-		const suspense1 = (
-			<Suspense fallback={<div>Suspended 1...</div>}>
-				<CustomSuspense {...s1} />
-			</Suspense>
-		);
-		const suspense2 = (
-			<Suspense fallback={<div>Suspended 2...</div>}>
-				<CustomSuspense {...s2} />
-			</Suspense>
-		);
+	it('should support text directly under Suspense', () => {
+		const s = <Suspendable render={() => <div>Hello</div>} />;
 
 		render(
-			<div>
-				<Fragment>
-					{suspense1}
-					{suspense2}
-				</Fragment>
-			</div>
-			,
-			scratch,
+			<Suspense fallback={<div>Suspended...</div>}>
+				Text
+				{/* Adding a <div> here will make things work... */}
+				{s}
+			</Suspense>,
+			scratch
 		);
 
-		return suspense1._component._p.then(() => suspense2._component._p).then(() => {
-			expect(scratch.innerHTML).to.eql(
-				`<div><div>Suspended 1...</div><div>Suspended 2...</div></div>`
-			);
+		expect(scratch.innerHTML).to.eql(
+			`Text<div>Hello</div>`
+		);
 
-			return s1.resolve().then(s2.resolve()).then(() => {
-				rerender();
-				expect(scratch.innerHTML).to.eql(
-					`<div><div>Hello from CustomSuspense 1</div><div>Hello from CustomSuspense 2</div></div>`
+		s._component.suspend();
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspended...</div>`
+		);
+
+		return s._component.resolve().then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`Text<div>Hello</div>`
+			);
+		});
+	});
+
+	it('should support to change DOM tag directly under suspense', () => {
+		let setState;
+		class StatefulComp extends Component {
+			constructor(props) {
+				super(props);
+				setState = this.setState.bind(this);
+				this.state = {
+					tag: props.defaultTag
+				};
+			}
+			render(props, { tag: Tag }) {
+				return (
+					<Tag>Stateful</Tag>
 				);
-			});
+			}
+		}
+
+		const s = <Suspendable render={() => <div>Hello</div>} />;
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<StatefulComp defaultTag="div" />
+				{s}
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Stateful</div><div>Hello</div>`
+		);
+
+		s._component.suspend();
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspended...</div>`
+		);
+
+		setState({ tag: 'article' });
+
+		return s._component.resolve().then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<article>Stateful</article><div>Hello</div>`
+			);
 		});
 	});
 
 	it('should only suspend the most inner Suspend', () => {
-		const s = createSuspension('1', 0, null);
-
-		const suspense = (
-			<Suspense fallback={<div>Suspended... 2</div>}>
-				<Catcher>
-					<CustomSuspense {...s} />
-				</Catcher>
-			</Suspense>
-		);
+		const s = <Suspendable render={() => <div>Hello</div>} />;
 
 		render((
 			<Suspense fallback={<div>Suspended... 1</div>}>
 				Not suspended...
-				{suspense}
+				<Suspense fallback={<div>Suspended... 2</div>}>
+					<Catcher>
+						{s}
+					</Catcher>
+				</Suspense>
 			</Suspense>
 		), scratch);
 
-		return suspense._component._p.then(() => {
-			expect(scratch.innerHTML).to.eql(
-				`Not suspended...<div>Suspended... 2</div>`
-			);
+		expect(scratch.innerHTML).to.eql(
+			`Not suspended...<div>Hello</div>`
+		);
 
-			return s.resolve().then(() => {
-				rerender();
-				expect(scratch.innerHTML).to.eql(
-					`Not suspended...<div>Hello from CustomSuspense 1</div>`
-				);
-			});
+		s._component.suspend();
+		expect(scratch.innerHTML).to.eql(
+			`Not suspended...<div>Suspended... 2</div>`
+		);
+		
+		return s._component.resolve().then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`Not suspended...<div>Hello</div>`
+			);
 		});
 	});
 
 	it('should throw when missing Suspense', () => {
-		const s = createSuspension('1', 0, null);
+		const s = <Suspendable render={() => <div>Hello</div>} />;
 
 		render(
 			<Catcher>
-				<CustomSuspense {...s} />
+				{s}
 			</Catcher>,
 			scratch,
 		);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<div>Hello</div>`
+		);
+
+		s._component.suspend();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
 			`<div>Catcher did catch: Missing Suspense</div>`
@@ -447,28 +699,25 @@ describe('suspense', () => {
 			return prom;
 		});
 
-		const suspense = (
+		render(
 			<Suspense fallback={<div>Suspended...</div>}>
 				<Catcher>
 					<ThrowingLazy />
 				</Catcher>
-			</Suspense>
+			</Suspense>,
+			scratch
 		);
-		
-		render(suspense, scratch);
 
+		// TODO: this assertion doesn't work... We seem to have a timing issue here
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspended...</div>`
+		);
 
-		return suspense._component._p.then(() => {
+		return reject().catch(() => {
+			rerender();
 			expect(scratch.innerHTML).to.eql(
-				`<div>Suspended...</div>`
+				`<div>Catcher did catch: Thrown in lazy's loader...</div>`
 			);
-
-			return reject().catch(() => {
-				rerender();
-				expect(scratch.innerHTML).to.eql(
-					`<div>Catcher did catch: Thrown in lazy's loader...</div>`
-				);
-			});
 		});
 	});
 });
