@@ -83,7 +83,7 @@ describe('debug', () => {
 	});
 
 	it('should add __source to the vnode in debug mode.', () => {
-		const vnode = h("div", {
+		const vnode = h('div', {
 			__source: {
 				fileName: 'div.jsx',
 				lineNumber: 3
@@ -92,8 +92,8 @@ describe('debug', () => {
 		expect(vnode.__source).to.deep.equal({
 			fileName: 'div.jsx',
 			lineNumber: 3
-		})
-		expect(vnode.props.__source).to.be.undefined
+		});
+		expect(vnode.props.__source).to.be.undefined;
 	});
 
 	it('should throw an error when using a hook outside a render', () => {
