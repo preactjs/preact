@@ -3,14 +3,14 @@ import { unmount } from './diff/index';
 import { removeNode } from './util';
 import { createElement } from './create-element';
 
-function removeDom(vnode, indent = '') {
+function removeDom(vnode) {
 	let r = vnode._component;
 	if (r != null) {
-		if (r = r._prevVNode) removeDom(r, indent + '  ');
+		if (r = r._prevVNode) removeDom(r);
 	}
 	else if ((r = vnode._children) && typeof vnode.type === 'function') {
 		for (let i = 0; i < r.length; i++) {
-			if (r[i]) removeDom(r[i], indent + '  ');
+			if (r[i]) removeDom(r[i]);
 		}
 	}
 
@@ -22,18 +22,22 @@ function removeDom(vnode, indent = '') {
 
 // having a "custom class" here saves 50bytes gzipped
 export function Suspense(props) {
+	// we do not call super here to golf some bytes...
 	this._suspensions = [];
 }
+// when doing proper inheritance we should not call new Component() here. See https://stackoverflow.com/a/4389429
 Suspense.prototype = new Component();
+// we do not set the constructor here to golf some bytes:
+// Suspense.prototype.constructor = Suspense
 
 /**
  * @param {Promise} promise The thrown promise
  */
-Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
+Suspense.prototype._childDidSuspend = function(promise) {
 	this._suspensions.push(promise);
 	let len = this._suspensions.length;
 
-	const promiseCompleted = () => {
+	const suspensionsCompleted = () => {
 		// make sure we did not add any more suspensions
 		if (len === this._suspensions.length) {
 			// clear old suspensions
@@ -50,57 +54,52 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 				this._parkedVnode = null;
 
 				this.forceUpdate();
-
-				// enqueueRender(suspendingComponent);
 			}
 		}
 	};
 
-	const timeoutOrPromiseCompleted = () => {
+	const timeoutOrSuspensionsCompleted = () => {
 		if (this._timeoutCompleted && this._suspensions.length > 0 && !this._suspended) {
 			this._suspended = true;
 			
 			// park old vnode & remove dom
-			this._parkedVnode = this._prevVNode;
+			removeDom(this._parkedVnode = this._prevVNode);
 			this._prevVNode = null;
-
-			removeDom(this._parkedVnode);
 
 			// render and mount fallback
 			this.forceUpdate();
 		}
 	};
 
-	if (this.props.maxDuration == null || this.props.maxDuration == 0) {
-		this._timeoutCompleted = true;
-		timeoutOrPromiseCompleted();
-
-		// Suspense ignores errors thrown in Promises as this should be handled by user land code
-		promise.then(promiseCompleted, promiseCompleted);
-
-		return;
-	}
-
 	if (!this._timeout) {
 		this._timeoutCompleted = false;
-		this._timeout = new Promise((res) => {
-			setTimeout(() => {
-				this._timeoutCompleted = true;
-			}, this.props.maxDuration);
+
+		if (this.props.maxDuration == null || this.props.maxDuration == 0) {
+			// even tough there is not maxDuration configured we will defer the suspension
+			// as we want the rendering/diffing to finish as it might yield other suspensions
+			this._timeout = Promise.resolve();
+		}
+		else {
+			this._timeout = new Promise((res) => {
+				setTimeout(res, this.props.maxDuration);
+			});
+		}
+
+		this._timeout = this._timeout.then(() => {
+			this._timeoutCompleted = true;
 		});
 	}
 
-	// _p is assigned here to let tests await this...
-	this._p = Promise.race([
+	// __test__suspensions_timeout_race is assigned here to let tests await this...
+	this.__test__suspensions_timeout_race = Promise.race([
 		this._timeout,
 		// Suspense ignores errors thrown in Promises as this should be handled by user land code
-		promise.then(promiseCompleted, promiseCompleted)
+		Promise.all(this._suspensions).then(suspensionsCompleted, suspensionsCompleted)
 	])
-		.then(timeoutOrPromiseCompleted);
+		.then(timeoutOrSuspensionsCompleted);
 };
 
 Suspense.prototype.render = function(props, state) {
-	console.log('Suspense.render()', this._suspended);
 	return this._suspended ? props.fallback : props.children;
 };
 

@@ -154,9 +154,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				if (typeof e.then === 'function') {
 					for (let component = c; component; component = component._ancestorComponent) {
 						if (component._childDidSuspend) {
-							component._childDidSuspend(e, c);
-							// TODO: is this reset needed?
-							c._prevVNode = null;
+							component._childDidSuspend(e);
 							break tryRender;
 						}
 					}
