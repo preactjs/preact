@@ -28,9 +28,9 @@ var sauceLabsLaunchers = {
 	// have timeout issues too...
 	sl_safari: {
 		base: 'SauceLabs',
-		browserName: 'Safari'
-		// version: '11',
-		// platform: 'OS X 10.13'
+		browserName: 'Safari',
+		version: '11',
+		platform: 'OS X 10.13'
 	},
 	sl_edge: {
 		base: 'SauceLabs',
