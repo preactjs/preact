@@ -26,12 +26,12 @@ var sauceLabsLaunchers = {
 	// Safari 11 always fails due to a timeout. Maybe that's
 	// a webdriver issue? Tried older safari version but they all
 	// have timeout issues too...
-	sl_safari: {
-		base: 'SauceLabs',
-		browserName: 'Safari',
-		version: '11',
-		platform: 'OS X 10.13'
-	},
+	// sl_safari: {
+	// 	base: 'SauceLabs',
+	// 	browserName: 'Safari',
+	// 	version: '11',
+	// 	platform: 'OS X 10.13'
+	// },
 	sl_edge: {
 		base: 'SauceLabs',
 		browserName: 'MicrosoftEdge',
