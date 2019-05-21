@@ -26,12 +26,11 @@ var sauceLabsLaunchers = {
 	// Safari 11 always fails due to a timeout. Maybe that's
 	// a webdriver issue? Tried older safari version but they all
 	// have timeout issues too...
-	// sl_safari: {
-	// 	base: 'SauceLabs',
-	// 	browserName: 'Safari',
-	// 	version: '11',
-	// 	platform: 'OS X 10.13'
-	// },
+	sl_safari: {
+		base: 'SauceLabs',
+		browserName: 'Safari',
+		version: 'latest'
+	},
 	sl_edge: {
 		base: 'SauceLabs',
 		browserName: 'MicrosoftEdge',
@@ -93,10 +92,12 @@ module.exports = function(config) {
 		// Use only two browsers concurrently, works better with open source Sauce Labs remote testing
 		concurrency: 2,
 
-		captureTimeout: 600000,
+
+		// Allocating a browser can take pretty long (eg. if we are out of capacity and need to wait
+		// for another build to finish) and so the `captureTimeout` typically kills
+		// an in-queue-pending request, which makes no sense.
+		captureTimeout: 0,
 		browserDisconnectTolerance: 2,
-		processKillTimeout: 20000,
-		browserDisconnectTimeout: 10000,
 
 		sauceLabs: {
 			build: 'CI #' + process.env.TRAVIS_BUILD_NUMBER + ' (' + process.env.TRAVIS_BUILD_ID + ')',
