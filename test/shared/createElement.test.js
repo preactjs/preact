@@ -34,7 +34,6 @@ describe('createElement(jsx)', () => {
 
 	it('should set VNode.constructor property to prevent json injection', () => {
 		const vnode = <span />;
-		// eslint-disable-next-line no-proto
 		expect(vnode.constructor).to.equal(undefined);
 	});
 
