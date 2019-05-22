@@ -8,7 +8,7 @@ export function initDebug() {
 	let oldBeforeDiff = options.diff;
 	let oldDiffed = options.diffed;
 	let oldVnode = options.vnode;
-	const warnedComponents = { useEffect: {}, useLayoutEffect: {} };
+	const warnedComponents = { useEffect: {}, useLayoutEffect: {}, lazyPropTypes: {} };
 
 	options.catchError = (error, component) => {
 		if (typeof error.then === 'function') {
@@ -81,11 +81,11 @@ export function initDebug() {
 
 		// Check prop-types if available
 		if (typeof vnode.type==='function' && vnode.type.propTypes) {
-			if (vnode.type.displayName === 'Lazy' && !vnode.__lazyPropTypesWarned) {
-				vnode.__lazyPropTypesWarned = true;
+			if (vnode.type.displayName === 'Lazy' && !warnedComponents.lazyPropTypes[vnode.type]) {
 				const m = 'PropTypes are not supported on lazy(). Use propTypes on the wrapped component itself. ';
 				try {
 					const lazyVNode = vnode.type();
+					warnedComponents.lazyPropTypes[vnode.type] = true;
 					console.warn(m + 'Component wrapped in lazy() is ' + (lazyVNode.type.displayName || lazyVNode.type.name));
 				}
 				catch (promise) {

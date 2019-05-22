@@ -1,4 +1,5 @@
-import { createElement as h, options, render, createRef, Component, Fragment, lazy, Suspense } from 'preact';
+import { createElement as h, options, render, createRef, Component, Fragment } from 'preact';
+import { lazy, Suspense } from 'preact/compat';
 import { useState, useEffect, useLayoutEffect, useMemo, useCallback } from 'preact/hooks';
 import { act, setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown, clearOptions, serializeHtml } from '../../../test/_util/helpers';
