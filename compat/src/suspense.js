@@ -1,5 +1,4 @@
-import { Component, createElement } from 'preact';
-import { unmount } from '../../src/diff/index';
+import { Component, createElement, unmount } from 'preact';
 import { removeNode } from '../../src/util';
 
 export function catchRender(error, component) {
