@@ -333,7 +333,7 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 
 	vnode._dom = vnode._lastDomChild = null;
 
-	if ((r = vnode._component)) {
+	if (r = vnode._component) {
 		if (r.componentWillUnmount) {
 			try {
 				r.componentWillUnmount();
