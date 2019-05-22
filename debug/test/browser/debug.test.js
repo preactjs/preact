@@ -82,6 +82,20 @@ describe('debug', () => {
 		expect(fn).to.throw(/createElement/);
 	});
 
+	it('should add __source to the vnode in debug mode.', () => {
+		const vnode = h('div', {
+			__source: {
+				fileName: 'div.jsx',
+				lineNumber: 3
+			}
+		});
+		expect(vnode.__source).to.deep.equal({
+			fileName: 'div.jsx',
+			lineNumber: 3
+		});
+		expect(vnode.props.__source).to.be.undefined;
+	});
+
 	it('should throw an error when using a hook outside a render', () => {
 		class App extends Component {
 			componentWillMount() {
