@@ -41,7 +41,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	constructor: preact.ComponentType<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
-	base?: PreactElement | null;
+	base?: PreactElement;
 
 	_dirty: boolean;
 	_renderCallbacks: Array<() => void>;

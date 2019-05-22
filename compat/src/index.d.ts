@@ -48,14 +48,14 @@ export declare interface Children {
 //
 // Suspense/lazy
 // -----------------------------------
-function lazy<T>(loader: () => Promise<{default: T}>): T;
+export function lazy<T>(loader: () => Promise<{default: T}>): T;
 
 interface SuspenseProps {
-  children?: ComponentChildren;
-  fallback: ComponentChildren;
+  children?: preact.ComponentChildren;
+  fallback: preact.ComponentChildren;
 }
 
-abstract class Suspense extends Component<SuspenseProps> {}
+export abstract class Suspense extends Component<SuspenseProps> {}
 
 declare const _default: {
   hooks: typeof _hooks,
