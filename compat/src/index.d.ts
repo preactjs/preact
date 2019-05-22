@@ -1,6 +1,8 @@
 import * as _hooks from '../../hooks';
 import * as preact from '../../src';
 import { ForwardFn } from './internal';
+export * from './suspense';
+import { Suspense, lazy } from './suspense';
 
 export * from '../../hooks';
 export import Component = preact.Component;
@@ -44,18 +46,6 @@ export declare interface Children {
   only: (children: preact.ComponentChildren) => preact.ComponentChild;
   toArray: (children: preact.ComponentChildren) => preact.VNode<{}>[];
 }
-
-//
-// Suspense/lazy
-// -----------------------------------
-export function lazy<T>(loader: () => Promise<{default: T}>): T;
-
-interface SuspenseProps {
-  children?: preact.ComponentChildren;
-  fallback: preact.ComponentChildren;
-}
-
-export abstract class Suspense extends Component<SuspenseProps> {}
 
 declare const _default: {
   hooks: typeof _hooks,
