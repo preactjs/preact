@@ -81,7 +81,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 			else {
 				// Instantiate the new component
-				if (newType.prototype && newType.prototype.render) {
+				if ((tmp = newType.prototype) && tmp.render) {
 					newVNode._component = c = new newType(newVNode.props, cctx); // eslint-disable-line new-cap
 				}
 				else {
@@ -103,24 +103,24 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c._vnode = newVNode;
 
 			// Invoke getDerivedStateFromProps
-			if (c._nextState==null) {
+			if (!c._nextState) {
 				c._nextState = c.state;
 			}
-			if (newType.getDerivedStateFromProps!=null) {
+			if (newType.getDerivedStateFromProps) {
 				assign(c._nextState==c.state ? (c._nextState = assign({}, c._nextState)) : c._nextState, newType.getDerivedStateFromProps(newVNode.props, c._nextState));
 			}
 
 			// Invoke pre-render lifecycle methods
 			if (isNew) {
-				if (newType.getDerivedStateFromProps==null && c.componentWillMount!=null) c.componentWillMount();
-				if (c.componentDidMount!=null) mounts.push(c);
+				if (!newType.getDerivedStateFromProps && c.componentWillMount) c.componentWillMount();
+				if (c.componentDidMount) mounts.push(c);
 			}
 			else {
-				if (newType.getDerivedStateFromProps==null && force==null && c.componentWillReceiveProps!=null) {
+				if (!newType.getDerivedStateFromProps && force==null && c.componentWillReceiveProps) {
 					c.componentWillReceiveProps(newVNode.props, cctx);
 				}
 
-				if (!force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newVNode.props, c._nextState, cctx)===false) {
+				if (!force && c.shouldComponentUpdate && c.shouldComponentUpdate(newVNode.props, c._nextState, cctx)===false) {
 					c.props = newVNode.props;
 					c.state = c._nextState;
 					c._dirty = false;
@@ -128,7 +128,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 					break outer;
 				}
 
-				if (c.componentWillUpdate!=null) {
+				if (c.componentWillUpdate) {
 					c.componentWillUpdate(newVNode.props, c._nextState, cctx);
 				}
 			}
@@ -146,18 +146,18 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c._dirty = false;
 			let vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
 
-			if (c.getChildContext!=null) {
+			if (c.getChildContext) {
 				context = assign(assign({}, context), c.getChildContext());
 			}
 
-			if (!isNew && c.getSnapshotBeforeUpdate!=null) {
+			if (!isNew && c.getSnapshotBeforeUpdate) {
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
 			c._depth = ancestorComponent ? (ancestorComponent._depth || 0) + 1 : 0;
 			c.base = newVNode._dom = diff(parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null, oldDom);
 
-			if (vnode!=null) {
+			if (vnode) {
 				// If this component returns a Fragment (or another component that
 				// returns a Fragment), then _lastDomChild will be non-null,
 				// informing `diffChildren` to diff this component's VNode like a Fragemnt
@@ -234,10 +234,10 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	isSvg = newVNode.type==='svg' || isSvg;
 
-	if (dom==null && excessDomChildren!=null) {
+	if (dom==null && excessDomChildren) {
 		for (i=0; i<excessDomChildren.length; i++) {
 			const child = excessDomChildren[i];
-			if (child!=null && (newVNode.type===null ? child.nodeType===3 : child.localName===newVNode.type)) {
+			if (child && (newVNode.type===null ? child.nodeType===3 : child.localName===newVNode.type)) {
 				dom = child;
 				excessDomChildren[i] = null;
 				break;
@@ -260,14 +260,14 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 		}
 	}
 	else {
-		if (excessDomChildren!=null && dom.childNodes!=null) {
+		if (excessDomChildren && dom.childNodes) {
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 		if (newVNode!==oldVNode) {
 			// if we're hydrating, use the element's attributes as its current props:
 			if (oldProps==null) {
 				oldProps = {};
-				if (excessDomChildren!=null) {
+				if (excessDomChildren) {
 					let name;
 					for (i=0; i<dom.attributes.length; i++) {
 						name = dom.attributes[i].name;
@@ -328,12 +328,12 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 
 	let dom;
 	if (!skipRemove && vnode._lastDomChild==null) {
-		skipRemove = (dom = vnode._dom)!=null;
+		skipRemove = (dom = vnode._dom);
 	}
 
 	vnode._dom = vnode._lastDomChild = null;
 
-	if ((r = vnode._component)!=null) {
+	if ((r = vnode._component)) {
 		if (r.componentWillUnmount) {
 			try {
 				r.componentWillUnmount();
@@ -352,7 +352,7 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 		}
 	}
 
-	if (dom!=null) removeNode(dom);
+	if (dom) removeNode(dom);
 }
 
 /** The `.render()` method for a PFC backing instance. */
