@@ -384,9 +384,7 @@ function doRender(props, state, context) {
  * component check for error boundary behaviors
  */
 function catchErrorInComponent(error, component) {
-	if (typeof error.then === 'function') {
-		error = new Error('Missing Suspense');
-	}
+	if (options.catchError) { options.catchError(error, component); }
 
 	for (; component; component = component._ancestorComponent) {
 		if (!component._processingException) {

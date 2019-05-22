@@ -56,7 +56,12 @@ class Catcher extends Component {
 	}
 
 	componentDidCatch(e) {
-		this.setState({ error: e });
+		if (e.then) {
+			this.setState({ error: { message: '<Promise>' } });
+		}
+		else {
+			this.setState({ error: e });
+		}
 	}
 
 	render(props, state) {
@@ -750,7 +755,7 @@ describe('suspense', () => {
 		s._component.suspend();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<div>Catcher did catch: Missing Suspense</div>`
+			`<div>Catcher did catch: <Promise></div>`
 		);
 	});
 

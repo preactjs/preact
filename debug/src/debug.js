@@ -10,6 +10,12 @@ export function initDebug() {
 	let oldVnode = options.vnode;
 	const warnedComponents = { useEffect: {}, useLayoutEffect: {} };
 
+	options.catchError = (error, component) => {
+		if (typeof error.then === 'function') {
+			error = new Error('Missing Suspense. The throwing component was: ' + (component.displayName || component.name));
+		}
+	};
+
 	options.root = (vnode, parentNode) => {
 		if (!parentNode) {
 			throw new Error('Undefined parent passed to render(), this is the second argument.\nCheck if the element is available in the DOM/has the correct id.');
