@@ -150,16 +150,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
 			}
 			catch (e) {
-				// thrown Promises are meant to suspend...
-				if (typeof e.then === 'function') {
-					for (tmp = c; tmp; tmp = tmp._ancestorComponent) {
-						if (tmp._childDidSuspend) {
-							tmp._childDidSuspend(e);
-							return;
-						}
-					}
-				}
-
+				if ((tmp = options.catchRender) && tmp(e, c)) return;
 				throw e;
 			}
 

@@ -1,7 +1,20 @@
-import { Component } from './component';
-import { unmount } from './diff/index';
-import { removeNode } from './util';
-import { createElement } from './create-element';
+import { Component, createElement } from 'preact';
+import { unmount } from '../../src/diff/index';
+import { removeNode } from '../../src/util';
+
+export function catchRender(error, component) {
+	// thrown Promises are meant to suspend...
+	if (typeof error.then === 'function') {
+		for (; component; component = component._ancestorComponent) {
+			if (component._childDidSuspend) {
+				component._childDidSuspend(error);
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
 
 function removeDom(vnode) {
 	let tmp = vnode._component;

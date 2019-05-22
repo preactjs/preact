@@ -9,8 +9,6 @@ export import createRef = preact.createRef;
 export import Fragment = preact.Fragment;
 export import createElement = preact.createElement
 export import cloneElement = preact.cloneElement
-export import Suspense = preact.Suspense;
-export import lazy = preact.lazy;
 
 export declare const version: string;
 
@@ -46,6 +44,18 @@ export declare interface Children {
   only: (children: preact.ComponentChildren) => preact.ComponentChild;
   toArray: (children: preact.ComponentChildren) => preact.VNode<{}>[];
 }
+
+//
+// Suspense/lazy
+// -----------------------------------
+function lazy<T>(loader: () => Promise<{default: T}>): T;
+
+interface SuspenseProps {
+  children?: ComponentChildren;
+  fallback: ComponentChildren;
+}
+
+abstract class Suspense extends Component<SuspenseProps> {}
 
 declare const _default: {
   hooks: typeof _hooks,

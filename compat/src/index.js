@@ -1,6 +1,8 @@
-import { render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment, Suspense, lazy } from 'preact';
+import { render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
 import * as hooks from 'preact/hooks';
 export * from 'preact/hooks';
+export * from './suspense';
+import { catchRender } from './suspense';
 import { assign } from '../../src/util';
 
 const version = '16.8.0'; // trick libraries to think we are react
@@ -16,6 +18,15 @@ options.event = e => {
 	if (oldEventHook) e = oldEventHook(e);
 	e.persist = () => {};
 	return e.nativeEvent = e;
+};
+
+let oldCatchRender = options.catchRender;
+options.catchRender = (error, component) => {
+	if (oldCatchRender && oldCatchRender(error, component)) {
+		return true;
+	}
+
+	return catchRender(error, component);
 };
 
 /**
@@ -376,9 +387,7 @@ export {
 	memo,
 	forwardRef,
 	// eslint-disable-next-line camelcase
-	unstable_batchedUpdates,
-	Suspense,
-	lazy
+	unstable_batchedUpdates
 };
 
 // React copies the named exports to the default one.
@@ -401,7 +410,5 @@ export default assign({
 	PureComponent,
 	memo,
 	forwardRef,
-	unstable_batchedUpdates,
-	Suspense,
-	lazy
+	unstable_batchedUpdates
 }, hooks);

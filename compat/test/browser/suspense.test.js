@@ -2,8 +2,8 @@
 /** @jsx h */
 import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component, Suspense, lazy, Fragment } from '../../src/index';
-import { setupScratch, teardown } from '../_util/helpers';
-import { enqueueRender } from '../../src/component';
+import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { enqueueRender } from '../../../src/component';
 
 class LazyComp extends Component {
 	render() {
