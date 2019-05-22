@@ -30,9 +30,9 @@ export function createElement(type, props, children) {
 		}
 	}
 	let ref = props.ref;
-	if (ref) delete props.ref;
 	let key = props.key;
-	if (key) delete props.key;
+	if (ref!=null) delete props.ref;
+	if (key!=null) delete props.key;
 
 	return createVNode(type, props, key, ref);
 }
@@ -60,6 +60,8 @@ export function createVNode(type, props, key, ref) {
 		_children: null,
 		_dom: null,
 		_lastDomChild: null,
+		_sibling: null,
+		_parent: null,
 		_component: null
 	};
 	vnode._self = vnode;

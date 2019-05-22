@@ -35,6 +35,14 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	 * The last dom child of a Fragment, or components that return a Fragment
 	 */
 	_lastDomChild: PreactElement | Text | null;
+	/**
+	 * The next non-null sibling vnode
+	 */
+	_sibling: VNode | null;
+	/**
+	 * The parent vnode
+	 */
+	_parent: VNode | null;
 	_component: Component | null;
 }
 
@@ -47,6 +55,7 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	_renderCallbacks: Array<() => void>;
 	_context?: any;
 	_vnode?: VNode<P> | null;
+	_parentVNode?: VNode<P> | null;
 	_nextState?: S | null;
 	/** Only used in the devtools to later dirty check if state has changed */
 	_prevState?: S | null;

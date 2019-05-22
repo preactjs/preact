@@ -336,52 +336,6 @@ describe('render()', () => {
 	});
 
 	describe('style attribute', () => {
-		it('should apply style as String', () => {
-			render(<div style="top: 5px; position: relative;" />, scratch);
-			expect(scratch.childNodes[0].style.cssText)
-				.to.equal('top: 5px; position: relative;');
-		});
-
-		it('should not call CSSStyleDeclaration.setProperty for style strings', () => {
-			render(<div style="top: 5px; position: relative;" />, scratch);
-			sinon.stub(scratch.firstChild.style, 'setProperty');
-			render(<div style="top: 10px; position: absolute;" />, scratch);
-			expect(scratch.firstChild.style.setProperty).to.not.be.called;
-		});
-
-		it('should properly switch from string styles to object styles and back', () => {
-			render((
-				<div style="display: inline;">test</div>
-			), scratch);
-
-			let root = scratch.firstChild;
-			expect(root.style.cssText).to.equal('display: inline;');
-
-			render((
-				<div style={{ color: 'red' }} />
-			), scratch);
-
-			expect(root.style.cssText).to.equal('color: red;');
-
-			render((
-				<div style="color: blue" />
-			), scratch);
-
-			expect(root.style.cssText).to.equal('color: blue;');
-
-			render((
-				<div style={{ color: 'yellow' }} />
-			), scratch);
-
-			expect(root.style.cssText).to.equal('color: yellow;');
-
-			render((
-				<div style="display: block" />
-			), scratch);
-
-			expect(root.style.cssText).to.equal('display: block;');
-		});
-
 		it('should serialize style objects', () => {
 			const styleObj = {
 				color: 'rgb(255, 255, 255)',
@@ -441,11 +395,10 @@ describe('render()', () => {
 		});
 
 		it('should remove old styles', () => {
-			render(<div style="color: red;" />, scratch);
-			let s = scratch.firstChild.style;
-			sinon.spy(s, 'setProperty');
+			render(<div style={{ color: 'red' }} />, scratch);
 			render(<div style={{ background: 'blue' }} />, scratch);
-			expect(s.setProperty).to.be.calledOnce;
+			expect(scratch.firstChild.style).to.have.property('color').that.equals('');
+			expect(scratch.firstChild.style).to.have.property('background').that.equals('blue');
 		});
 
 		// Skip test if the currently running browser doesn't support CSS Custom Properties
@@ -459,6 +412,18 @@ describe('render()', () => {
 			it('should not add "px" suffix for custom properties', () => {
 				render(<div style={{ '--foo': '100px', width: 'var(--foo)' }}>test</div>, scratch);
 				expect(sortCss(scratch.firstChild.style.cssText)).to.equal('--foo: 100px; width: var(--foo);');
+			});
+
+			it('css vars should not be transformed into dash-separated', () => {
+				render(<div style={{ '--fooBar': 1, '--foo-baz': 2, opacity: 'var(--fooBar)', zIndex: 'var(--foo-baz)' }}>test</div>, scratch);
+				expect(sortCss(scratch.firstChild.style.cssText)).to.equal('--foo-baz: 2; --fooBar: 1; opacity: var(--fooBar); z-index: var(--foo-baz);');
+			});
+
+			it('should call CSSStyleDeclaration.setProperty for css vars', () => {
+				render(<div style={{ padding: '10px' }} />, scratch);
+				sinon.stub(scratch.firstChild.style, 'setProperty');
+				render(<div style={{ '--foo': '10px', padding: 'var(--foo)' }} />, scratch);
+				expect(scratch.firstChild.style.setProperty).to.be.calledWith('--foo', '10px');
 			});
 		}
 	});
@@ -575,7 +540,7 @@ describe('render()', () => {
 		it('should register events not appearing on dom nodes', () => {
 			let onAnimationEnd = () => {};
 
-			render(<div onAnimationEnd={onAnimationEnd} />, scratch);
+			render(<div onanimationend={onAnimationEnd} />, scratch);
 			expect(proto.addEventListener).to.have.been.calledOnce.and.to.have.been.calledWithExactly('animationend', sinon.match.func, false);
 		});
 
