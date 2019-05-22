@@ -34,62 +34,63 @@ Suspense.prototype = new Component();
  * @param {Promise} promise The thrown promise
  */
 Suspense.prototype._childDidSuspend = function(promise) {
-	this._suspensions.push(promise);
-	let len = this._suspensions.length;
+	// saves 5B
+	const _this = this;
+
+	_this._suspensions.push(promise);
+	let len = _this._suspensions.length;
 
 	const suspensionsCompleted = () => {
 		// make sure we did not add any more suspensions
-		if (len === this._suspensions.length) {
+		if (len === _this._suspensions.length) {
 			// clear old suspensions
-			this._suspensions = [];
-
-			// reset the timeout
-			this._timeout = null;
+			_this._suspensions = [];
 
 			// remove fallback
-			unmount(this.props.fallback);
+			unmount(_this.props.fallback);
 
-			// make preact think we had mounted the parkedVNode previously...
-			this._prevVNode = this._parkedVNode;
-			this._parkedVNode = null;
+			// make preact think we had mounted the _parkedVNode previously...
+			_this._prevVNode = _this._parkedVNode;
+			// reset the timeout & clear the now no longer parked vnode
+			_this._timeout = _this._parkedVNode = null;
 
-			this.forceUpdate();
+			_this.forceUpdate();
 		}
 	};
 
 	const timeoutOrSuspensionsCompleted = () => {
-		if (this._timeoutCompleted && this._suspensions.length && !this._parkedVNode) {
+		if (_this._timeoutCompleted && _this._suspensions.length && !_this._parkedVNode) {
 			// park old vnode & remove dom
-			removeDom(this._parkedVNode = this._prevVNode);
-			this._prevVNode = null;
+			removeDom(_this._parkedVNode = _this._prevVNode);
+			_this._prevVNode = null;
 
 			// render and mount fallback
-			this.forceUpdate();
+			_this.forceUpdate();
 		}
 	};
 
-	if (!this._timeout) {
-		this._timeoutCompleted = false;
+	if (!_this._timeout) {
+		_this._timeoutCompleted = false;
 
-		this._timeout = (
-			this.props.maxDuration
+		_this._timeout = (
+			_this.props.maxDuration
 				? new Promise((res) => {
-					setTimeout(res, this.props.maxDuration);
+					setTimeout(res, _this.props.maxDuration);
 				})
 				// even tough there is not maxDuration configured we will defer the suspension
 				// as we want the rendering/diffing to finish as it might yield other suspensions
 				: Promise.resolve()
 		)
 			.then(() => {
-				this._timeoutCompleted = true;
+				_this._timeoutCompleted = true;
 			});
 	}
 
-	// __test__suspensions_timeout_race is assigned here to let tests await this...
-	this.__test__suspensions_timeout_race = Promise.race([
-		this._timeout,
-		// Suspense ignores errors thrown in Promises as this should be handled by user land code
-		Promise.all(this._suspensions).then(suspensionsCompleted, suspensionsCompleted)
+	// __test__suspensions_timeout_race is assigned here to let tests await _this...
+	_this.__test__suspensions_timeout_race = Promise.race([
+		_this._timeout,
+		// Suspense ignores errors thrown in Promises as _this should be handled by user land code
+		Promise.all(_this._suspensions).then(suspensionsCompleted, suspensionsCompleted)
 	])
 		.then(timeoutOrSuspensionsCompleted);
 };
