@@ -50,17 +50,17 @@ Suspense.prototype._childDidSuspend = function(promise) {
 			unmount(this.props.fallback);
 
 			// make preact think we had mounted the parkedVNode previously...
-			this._prevVNode = this._parkedVnode;
-			this._parkedVnode = null;
+			this._prevVNode = this._parkedVNode;
+			this._parkedVNode = null;
 
 			this.forceUpdate();
 		}
 	};
 
 	const timeoutOrSuspensionsCompleted = () => {
-		if (this._timeoutCompleted && this._suspensions.length && !this._parkedVnode) {
+		if (this._timeoutCompleted && this._suspensions.length && !this._parkedVNode) {
 			// park old vnode & remove dom
-			removeDom(this._parkedVnode = this._prevVNode);
+			removeDom(this._parkedVNode = this._prevVNode);
 			this._prevVNode = null;
 
 			// render and mount fallback
@@ -95,8 +95,8 @@ Suspense.prototype._childDidSuspend = function(promise) {
 };
 
 Suspense.prototype.render = function(props, state) {
-	// When _parkedVnode is set, we are in suspension state
-	return this._parkedVnode ? props.fallback : props.children;
+	// When _parkedVNode is set, we are in suspension state
+	return this._parkedVNode ? props.fallback : props.children;
 };
 
 export function lazy(loader) {
