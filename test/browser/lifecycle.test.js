@@ -528,7 +528,7 @@ describe('Lifecycle methods', () => {
 			});
 		});
 
-		// From developit/preact#1170
+		// From preactjs/preact#1170
 		it('should NOT mutate state on mount, only create new versions', () => {
 			const stateConstant = {};
 			let componentState;
@@ -1862,7 +1862,7 @@ describe('Lifecycle methods', () => {
 
 
 	describe('#setState', () => {
-		// From developit/preact#1170
+		// From preactjs/preact#1170
 		it('should NOT mutate state, only create new versions', () => {
 			const stateConstant = {};
 			let didMount = false;
@@ -2464,7 +2464,7 @@ describe('Lifecycle methods', () => {
 			expect(Receiver.getDerivedStateFromError).to.have.been.called;
 		});
 
-		// https://github.com/developit/preact/issues/1570
+		// https://github.com/preactjs/preact/issues/1570
 		it('should handle double child throws', () => {
 			const Child = ({ i }) => {
 				throw new Error(`error! ${i}`);

@@ -72,7 +72,7 @@ describe('keys', () => {
 		expect(Foo.args[0][0]).to.deep.equal({});
 	});
 
-	// See developit/preact-compat#21
+	// See preactjs/preact-compat#21
 	it('should remove orphaned keyed nodes', () => {
 		render((
 			<div>
