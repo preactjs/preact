@@ -198,7 +198,7 @@ declare namespace preact {
 		hook?(component: Component): void;
 		/** Attach a hook that is invoked after a vnode has rendered. */
 		diffed?(vnode: VNode): void;
-		/** Attach a hook that is invoked after an error is catched in a component but before calling lifecycle hooks */
+		/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
 		catchError?(error: any, component: Component): void;
 		/** 
 		 * Attach a hook that is invoked after an error is catched while executing render.
