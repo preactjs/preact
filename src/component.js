@@ -1,7 +1,8 @@
 import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
 import options from './options';
-import { Fragment } from './create-element';
+import { Fragment, createElement } from './create-element';
+import { diffChildren } from './diff/children';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -70,19 +71,32 @@ Component.prototype.forceUpdate = function(callback) {
 		const force = callback!==false;
 
 		let mounts = [];
-		dom = diff(parentDom, vnode, vnode, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, vnode._parent, force, dom);
-		if (dom!=null && dom.parentNode!==parentDom) {
-			// The component may be rendered somewhere in the middle of the parent's
-			// children. We need to find the nearest DOM sibling to insert our
-			// newly rendered node into.
-			let nextDom = getDomSibling(vnode);
-			if (nextDom==null || nextDom.parentNode!==parentDom) {
-				parentDom.appendChild(dom);
-			}
-			else {
-				parentDom.insertBefore(dom, nextDom);
-			}
-		}
+		// dom = diff(parentDom, vnode, vnode, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, vnode._parent, force, dom);
+		// if (dom!=null && dom.parentNode!==parentDom) {
+		// 	// The component may be rendered somewhere in the middle of the parent's
+		// 	// children. We need to find the nearest DOM sibling to insert our
+		// 	// newly rendered node into.
+		// 	let nextDom = getDomSibling(vnode);
+		// 	if (nextDom==null || nextDom.parentNode!==parentDom) {
+		// 		parentDom.appendChild(dom);
+		// 	}
+		// 	else {
+		// 		parentDom.insertBefore(dom, nextDom);
+		// 	}
+		// }
+
+		// TODO: Challenges
+		// 	* diffChildren copies vnodes with _dom (by calling coerceToVNode), breaking the referential
+		//		connection between this component's vnode and it's parent's _children array (or _prevVNode
+		//		if parent is component)
+		//	* Changing from `null` to `div` breaks cuz `vnode._dom` and therefore `oldDom` is null :'(. It needs
+		//		to be the next dom sibling of this VNode
+		//	* Something isn't right with error handling when using diffChildren & new _parent pointer on VNodes.
+		//		Likely need a try/catch handler inside of diffChildren. Should be cheap to do once vnode-prop-explorations
+		//		branch is in
+		const root = createElement(Fragment, {}, vnode);
+		diffChildren(parentDom, root, root, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, dom, force);
+
 		commitRoot(mounts, vnode);
 	}
 	if (callback) callback();
