@@ -264,7 +264,7 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 		if (newVNode!==oldVNode) {
-			let oldProps = oldVNode.props || null;
+			let oldProps = oldVNode.props || EMPTY_OBJ;
 			let newProps = newVNode.props;
 
 			let oldHtml = oldProps.dangerouslySetInnerHTML;
