@@ -69,6 +69,7 @@ Component.prototype.forceUpdate = function(callback) {
 		// shouldComponentUpdate
 		const force = callback!==false;
 
+		// TODO: Consider combining with `forceUpdate-diffChildren` branch to officially make `diffChildren` the entry point for all diff's
 		let mounts = [];
 		dom = diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, this._ancestorComponent, force, dom);
 		if (dom!=null && dom.parentNode!==parentDom) {

@@ -37,6 +37,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 	if (tmp = options.diff) tmp(newVNode);
 
 	try {
+		// TODO: Consider making all components behave like Fragments and removing this line. Likely need to move
+		// _lastDomChild setting to diffChildren for this to work
 		outer: if (oldVNode.type===Fragment || newType===Fragment) {
 			// Passing the ancestorComponent instead of c here is needed for catchErrorInComponent
 			// to properly traverse upwards through fragments to find a parent Suspense
@@ -134,6 +136,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			if (tmp = options.render) tmp(newVNode);
 
 			c._dirty = false;
+			// TODO: don't coerce before passing into toChildArray
 			newVNode._children = toChildArray(coerceToVNode(c.render(c.props, c.state, c.context)), [], coerceToVNode, true);
 			let vnode = newVNode._children[0];
 

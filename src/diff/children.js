@@ -26,6 +26,8 @@ import { removeNode } from '../util';
 export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, oldDom) {
 	let childVNode, i, j, oldVNode, newDom, sibDom, firstChildDom;
 
+	// TODO: Consider moving the setting of _children to the caller. Component's will predefine _children, and once Fragments collapse to just be
+	// Component's (will need Fragment to return props.children), only DOM VNodes won't predefine _children
 	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode, true);
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
@@ -37,6 +39,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	// I'm using `EMPTY_OBJ` to signal when `diffChildren` is invoked in these situations. I can't use `null`
 	// for this purpose, because `null` is a valid value for `oldDom` which can mean to skip to this logic
 	// (e.g. if mounting a new tree in which the old DOM should be ignored (usually for Fragments).
+	// TODO: Consider moving this logic into callers of `diffChildren`.
 	if (oldDom == EMPTY_OBJ) {
 		oldDom = null;
 		if (excessDomChildren!=null) {
@@ -125,6 +128,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	if (excessDomChildren!=null && typeof newParentVNode.type == 'string') for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
 
 	// Remove remaining oldChildren if there are any.
+	// TODO: Consider inlining the implementation of unmount here
 	for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
 }
 
