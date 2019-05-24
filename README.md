@@ -1,7 +1,7 @@
 <p align="center">
 <a href="https://preactjs.com" target="_blank">
 	
-![Preact](https://raw.githubusercontent.com/developit/preact/8b0bcc927995c188eca83cba30fbc83491cc0b2f/logo.svg?sanitize=true "Preact")
+![Preact](https://raw.githubusercontent.com/preactjs/preact/8b0bcc927995c188eca83cba30fbc83491cc0b2f/logo.svg?sanitize=true "Preact")
 
 </a>
 </p>
@@ -14,7 +14,7 @@
 - Everything you need: JSX, <abbr title="Virtual DOM">VDOM</abbr>, React DevTools, <abbr title="Hot Module Replacement">HMR</abbr>, <abbr title="Server-Side Rendering">SSR</abbr>..
 - A highly optimized diff algorithm and seamless Server Side Rendering
 - Transparent asynchronous rendering with a pluggable scheduler
-- 🆕💥 **Instant no-config app bundling with [Preact CLI](https://github.com/developit/preact-cli)**
+- 🆕💥 **Instant no-config app bundling with [Preact CLI](https://github.com/preactjs/preact-cli)**
 
 ### 💁 More information at the [Preact Website ➞](https://preactjs.com)
 
@@ -48,8 +48,8 @@
 [![Preact Slack Community](https://preact-slack.now.sh/badge.svg)](https://preact-slack.now.sh)
 [![OpenCollective Backers](https://opencollective.com/preact/backers/badge.svg)](#backers)
 [![OpenCollective Sponsors](https://opencollective.com/preact/sponsors/badge.svg)](#sponsors)
-[![travis](https://travis-ci.org/developit/preact.svg?branch=master)](https://travis-ci.org/developit/preact)
-[![coveralls](https://img.shields.io/coveralls/developit/preact/master.svg)](https://coveralls.io/github/developit/preact)
+[![travis](https://travis-ci.org/preactjs/preact.svg?branch=master)](https://travis-ci.org/preactjs/preact)
+[![coveralls](https://img.shields.io/coveralls/preactjs/preact/master.svg)](https://coveralls.io/github/preactjs/preact)
 [![gzip size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=gzip)](https://unpkg.com/preact/dist/preact.min.js)
 [![install size](https://packagephobia.now.sh/badge?p=preact)](https://packagephobia.now.sh/result?p=preact)
 
@@ -161,7 +161,7 @@ Preact supports modern browsers and IE9+:
 
 > 💁 _**Note:** You [don't need ES2015 to use Preact](https://github.com/developit/preact-in-es3)... but give it a try!_
 
-The easiest way to get started with Preact is to install [Preact CLI](https://github.com/developit/preact-cli). This simple command-line tool wraps up the best possible Webpack and Babel setup for you, and even keeps you up-to-date as the underlying tools change. Best of all, it's easy to understand! It builds your app in a single command (`preact build`), doesn't need any configuration, and bakes in best-practises 🙌.
+The easiest way to get started with Preact is to install [Preact CLI](https://github.com/preactjs/preact-cli). This simple command-line tool wraps up the best possible Webpack and Babel setup for you, and even keeps you up-to-date as the underlying tools change. Best of all, it's easy to understand! It builds your app in a single command (`preact build`), doesn't need any configuration, and bakes in best-practises 🙌.
 
 The following guide assumes you have some sort of ES2015 build set up using babel and/or webpack/browserify/gulp/grunt/etc.
 
