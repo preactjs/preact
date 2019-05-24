@@ -61,7 +61,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			// (holes).
 			oldVNode = oldChildren[i];
 
-			if (oldVNode===null || (oldVNode && (oldVNode.key!=null ? (childVNode.key === oldVNode.key) : (childVNode.key==null && childVNode.type === oldVNode.type)))) {
+			if (oldVNode===null || (oldVNode && childVNode.key == oldVNode.key && childVNode.type === oldVNode.type)) {
 				oldChildren[i] = undefined;
 			}
 			else {
