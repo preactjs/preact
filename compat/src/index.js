@@ -22,11 +22,7 @@ options.event = e => {
 
 let oldCatchRender = options.catchRender;
 options.catchRender = (error, component) => {
-	if (oldCatchRender && oldCatchRender(error, component)) {
-		return true;
-	}
-
-	return catchRender(error, component);
+	return oldCatchRender && oldCatchRender(error, component) || catchRender(error, component);
 };
 
 /**
