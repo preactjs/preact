@@ -163,8 +163,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c._vnode = newVNode;
 			c._parentDom = parentDom;
 
-			// if (tmp = newVNode.ref) applyRef(tmp, c, ancestorComponent);
-
 			while (tmp=c._renderCallbacks.pop()) tmp.call(c);
 
 			// Don't call componentDidUpdate on mount or when we bailed out via
@@ -175,10 +173,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		}
 		else {
 			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
-
-			// if ((tmp = newVNode.ref) && (oldVNode.ref !== tmp)) {
-			// 	applyRef(tmp, newVNode._dom, ancestorComponent);
-			// }
 		}
 
 		if (clearProcessingException) {
@@ -294,8 +288,9 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 
 /**
  * Invoke or update a ref, depending on whether it is a function or object ref.
- * @param {object|function} [ref=null]
- * @param {any} [value]
+ * @param {object|function} ref
+ * @param {any} value
+ * @param {import('../internal').Component} ancestorComponent
  */
 export function applyRef(ref, value, ancestorComponent) {
 	try {

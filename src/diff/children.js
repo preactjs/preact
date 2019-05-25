@@ -24,7 +24,7 @@ import { removeNode } from '../util';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
 export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, oldDom) {
-	let childVNode, i, j, oldVNode, newDom, sibDom, firstChildDom;
+	let childVNode, i, j, oldVNode, newDom, sibDom, firstChildDom, refs;
 
 	// TODO: Consider moving the setting of _children to the caller. Component's will predefine _children, and once Fragments collapse to just be
 	// Component's (will need Fragment to return props.children), only DOM VNodes won't predefine _children
@@ -85,6 +85,12 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			// Morph the old element into the new one, but don't append it to the dom yet
 			newDom = diff(parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, null, oldDom);
 
+			// TODO: Consider combining this with the mounts array (i.e. convert the mounts
+			// array to an effects array that operates similarly to this refs array)
+			if ((j = childVNode.ref) && (oldVNode || EMPTY_OBJ).ref != j) {
+				(refs || (refs=[])).push(j, childVNode._component || newDom);
+			}
+
 			// Only proceed if the vnode has not been unmounted by `diff()` above.
 			if (newDom!=null) {
 				if (childVNode._lastDomChild != null) {
@@ -131,12 +137,10 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	// TODO: Consider inlining the implementation of unmount here
 	for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
 
-	// TODO: Sigh... Doesn't work for case where ref changes nodeName
-	// Refs need to happen after unmount (so that `null` is passed in first),
-	// but they also need to have a matching oldVNode to determine if the ref has changed...
-	for (i=newChildren.length; i--; ) {
-		if (newChildren[i]!=null && (j = newChildren[i].ref)) {
-			applyRef(j, newChildren[i]._component || newChildren[i]._dom, ancestorComponent);
+	// Set refs only after unmount
+	if (refs) {
+		for (i = 0; i < refs.length; i++) {
+			applyRef(refs[i], refs[++i], ancestorComponent);
 		}
 	}
 }

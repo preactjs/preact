@@ -11,3 +11,7 @@
 	* One place to mount and unmount DOM: `diffChildren` (could inline?)
 
 * Perhaps in a later branch consider moving more internal fields from Component to VNode to make VNode structure the master structure for our Virtual DOM
+
+## Breaking change
+
+* Component refs aren't re-invoked after each render
