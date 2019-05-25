@@ -392,7 +392,7 @@ describe('Components', () => {
 		expect(scratch.innerHTML).to.equal('<span>span in a component</span>');
 	});
 
-	// Test for Issue developit/preact#176
+	// Test for Issue preactjs/preact#176
 	it('should remove children when root changes to text node', () => {
 		let comp;
 
@@ -421,7 +421,7 @@ describe('Components', () => {
 		expect(scratch.innerHTML, 'switching to textnode 2').to.equal('asdf');
 	});
 
-	// Test for Issue developit/preact#1616
+	// Test for Issue preactjs/preact#1616
 	it('should maintain order when setting state (that inserts dom-elements)', () => {
 		let add, addTwice, reset;
 		const Entry = props => (
@@ -493,7 +493,7 @@ describe('Components', () => {
 	});
 
 
-	// Test for Issue developit/preact#254
+	// Test for Issue preactjs/preact#254
 	it('should not recycle common class children with different keys', () => {
 		let idx = 0;
 		let msgs = ['A','B','C','D','E','F','G','H'];
