@@ -1383,6 +1383,58 @@ describe('Lifecycle methods', () => {
 
 			expect(cduPrevProps).to.not.equal(cduCurrentProps);
 		});
+
+		it('is invoked after refs are set', () => {
+			const spy = sinon.spy();
+			let inst;
+			let i = 0;
+
+			class App extends Component {
+				componentDidUpdate() {
+					expect(spy).to.have.been.calledOnceWith(scratch.firstChild);
+				}
+
+				render() {
+					let ref = null;
+
+					if (i > 0) {
+						// Add ref after mount (i > 0)
+						ref = spy;
+					}
+
+					i++;
+					inst = this;
+					return <div ref={ref} />;
+				}
+			}
+
+			render(<App />, scratch);
+			expect(spy).not.to.have.been.called;
+
+			inst.setState({});
+			rerender();
+
+			expect(spy).to.have.been.calledOnceWith(scratch.firstChild);
+		});
+	});
+
+	describe('#componentDidMount', () => {
+		it('is invoked after refs are set', () => {
+			const spy = sinon.spy();
+
+			class App extends Component {
+				componentDidMount() {
+					expect(spy).to.have.been.calledOnceWith(scratch.firstChild);
+				}
+
+				render() {
+					return <div ref={spy} />;
+				}
+			}
+
+			render(<App />, scratch);
+			expect(spy).to.have.been.calledOnceWith(scratch.firstChild);
+		});
 	});
 
 	describe('top-level componentWillUnmount', () => {
