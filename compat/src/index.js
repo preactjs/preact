@@ -1,8 +1,7 @@
 import { render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
 import * as hooks from 'preact/hooks';
 export * from 'preact/hooks';
-export * from './suspense';
-import { catchRender } from './suspense';
+import { Suspense as _Suspense, lazy as _lazy, catchRender } from './suspense';
 import { assign } from '../../src/util';
 
 const version = '16.8.0'; // trick libraries to think we are react
@@ -385,6 +384,9 @@ export {
 	// eslint-disable-next-line camelcase
 	unstable_batchedUpdates
 };
+
+export const Suspense = _Suspense;
+export const lazy = _lazy;
 
 // React copies the named exports to the default one.
 export default assign({
