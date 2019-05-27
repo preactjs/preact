@@ -3,7 +3,7 @@ import { removeNode } from '../../src/util';
 
 export function catchRender(error, component) {
 	// thrown Promises are meant to suspend...
-	if (typeof error.then === 'function') {
+	if (error.then) {
 		for (; component; component = component._ancestorComponent) {
 			if (component._childDidSuspend) {
 				component._childDidSuspend(error);
