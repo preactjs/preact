@@ -90,11 +90,6 @@ export function coerceToVNode(possibleVNode) {
 		return createVNode(null, possibleVNode, null, null);
 	}
 
-	// TODO: Add a test about nested arrays that get converted to Fragments
-	if (Array.isArray(possibleVNode)) {
-		return createElement(Fragment, null, possibleVNode);
-	}
-
 	// Clone vnode if it has already been used. ceviche/#57
 	if (possibleVNode._dom!=null || possibleVNode._component!=null) {
 		let vnode = createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.key, null);
