@@ -1,6 +1,6 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component, enqueueRender } from '../component';
-import { coerceToVNode, Fragment } from '../create-element';
+import { coerceToVNode } from '../create-element';
 import { diffChildren, toChildArray } from './children';
 import { diffProps } from './props';
 import { assign, removeNode } from '../util';
