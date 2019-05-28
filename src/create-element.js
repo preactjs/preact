@@ -73,7 +73,9 @@ export function createRef() {
 	return {};
 }
 
-export /* istanbul ignore next */ function Fragment() { }
+export function Fragment(props) {
+	return props.children;
+}
 
 /**
  * Coerce an untrusted value into a VNode

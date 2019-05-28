@@ -123,15 +123,18 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 				if (firstChildDom == null) {
 					firstChildDom = newDom;
 				}
+
+				if (typeof newParentVNode.type == 'function') {
+					newParentVNode._lastDomChild = newDom; // ?
+				}
 			}
 		}
 	}
 
-	// newParentVNode._lastDomChild = newDom; // ?
 	newParentVNode._dom = firstChildDom;
 
 	// Remove children that are not part of any vnode.
-	if (excessDomChildren!=null && typeof newParentVNode.type == 'string') for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
+	if (excessDomChildren!=null && typeof newParentVNode.type !== 'function') for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
 
 	// Remove remaining oldChildren if there are any.
 	// TODO: Consider inlining the implementation of unmount here

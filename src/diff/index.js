@@ -37,28 +37,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 	if (tmp = options.diff) tmp(newVNode);
 
 	try {
-		// TODO: Consider making all components behave like Fragments and removing this line. Likely need to move
-		// _lastDomChild setting to diffChildren for this to work
-		outer: if (oldVNode.type===Fragment || newType===Fragment) {
-			// Passing the ancestorComponent instead of c here is needed for catchErrorInComponent
-			// to properly traverse upwards through fragments to find a parent Suspense
-			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, oldDom);
-
-			// Mark dom as empty in case `_children` is any empty array. If it isn't
-			// we'll set `dom` to the correct value just a few lines later.
-
-			let i = newVNode._children.length;
-			// If the last child is a Fragment, use _lastDomChild, else use _dom
-			// We have no guarantee that the last child rendered something into the
-			// dom, so we iterate backwards to find the last child with a dom node.
-			while (i--) {
-				tmp = newVNode._children[i];
-				if (newVNode._lastDomChild = (tmp && (tmp._lastDomChild || tmp._dom))) {
-					break;
-				}
-			}
-		}
-		else if (typeof newType==='function') {
+		outer: if (typeof newType==='function') {
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
@@ -136,9 +115,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			if (tmp = options.render) tmp(newVNode);
 
 			c._dirty = false;
-			// TODO: don't coerce before passing into toChildArray
-			newVNode._children = toChildArray(coerceToVNode(c.render(c.props, c.state, c.context)), [], coerceToVNode, true);
-			let vnode = newVNode._children[0];
+			toChildArray(c.render(c.props, c.state, c.context), newVNode._children=[], coerceToVNode, true);
 
 			if (c.getChildContext!=null) {
 				context = assign(assign({}, context), c.getChildContext());
@@ -150,13 +127,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			c._depth = ancestorComponent ? (ancestorComponent._depth || 0) + 1 : 0;
 			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, c, oldDom);
-
-			if (vnode!=null) {
-				// If this component returns a Fragment (or another component that
-				// returns a Fragment), then _lastDomChild will be non-null,
-				// informing `diffChildren` to diff this component's VNode like a Fragment
-				newVNode._lastDomChild = vnode._lastDomChild;
-			}
 
 			// Only change the fields on the component once they represent the new state of the DOM
 			c.base = newVNode._dom;
