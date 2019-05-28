@@ -90,6 +90,7 @@ export function coerceToVNode(possibleVNode) {
 		return createVNode(null, possibleVNode, null, null);
 	}
 
+	// TODO: Add a test about nested arrays that get converted to Fragments
 	if (Array.isArray(possibleVNode)) {
 		return createElement(Fragment, null, possibleVNode);
 	}

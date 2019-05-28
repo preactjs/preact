@@ -24,6 +24,7 @@ import options from '../options';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
 export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force, oldDom) {
+	// TODO: Perhaps move these checks to diffChildren once diff is only called by diffChildren (see comment in forceUpdate)
 	if (newVNode==null) return null;
 	if (oldVNode==null) oldVNode = EMPTY_OBJ;
 
