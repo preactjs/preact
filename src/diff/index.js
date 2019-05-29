@@ -145,7 +145,10 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			let prev = c._prevVNode || null;
 			c._dirty = false;
 			let vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
-			if (vnode) vnode._parent = newVNode;
+			if (vnode) {
+				vnode._parent = newVNode;
+				vnode._depth = newVNode._depth + 1;
+			}
 
 			if (c.getChildContext!=null) {
 				context = assign(assign({}, context), c.getChildContext());
@@ -155,7 +158,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			c._depth = parentVNode ? (parentVNode._depth || 0) + 1 : 0;
 			c.base = newVNode._dom = diff(parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, newVNode, null, oldDom);
 
 			if (vnode!=null) {

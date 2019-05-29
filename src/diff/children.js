@@ -80,6 +80,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			}
 			lastRendered = childVNode;
 			childVNode._parent = newParentVNode;
+			childVNode._depth = newParentVNode._depth + 1;
 
 			// Morph the old element into the new one, but don't append it to the dom yet
 			newDom = diff(parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, newParentVNode, null, oldDom);
