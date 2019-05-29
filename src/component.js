@@ -95,7 +95,7 @@ Component.prototype.forceUpdate = function(callback) {
 		//		Likely need a try/catch handler inside of diffChildren. Should be cheap to do once vnode-prop-explorations
 		//		branch is in
 		const root = createElement(Fragment, {}, vnode);
-		diffChildren(parentDom, root, root, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, dom, force);
+		diffChildren(parentDom, root, root, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, getDomSibling(vnode), force);
 
 		commitRoot(mounts, vnode);
 	}
