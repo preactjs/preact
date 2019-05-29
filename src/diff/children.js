@@ -120,7 +120,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 				}
 
 				if (typeof newParentVNode.type == 'function') {
-					newParentVNode._lastDomChild = newDom; // ?
+					newParentVNode._lastDomChild = newDom;
 				}
 			}
 		}
