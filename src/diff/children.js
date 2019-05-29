@@ -16,14 +16,12 @@ import { removeNode } from '../util';
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} mounts The list of components
  * which have mounted
- * @param {import('../internal').Component} ancestorComponent The direct parent
- * component to the ones being diffed
  * @param {Node | Text} oldDom The current attached DOM
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
-export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, oldDom) {
+export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, oldDom) {
 	let childVNode, i, j, oldVNode, newDom, sibDom, lastRendered;
 
 	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode, true);
@@ -84,7 +82,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			childVNode._parent = newParentVNode;
 
 			// Morph the old element into the new one, but don't append it to the dom yet
-			newDom = diff(parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, null, oldDom, newParentVNode);
+			newDom = diff(parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, newParentVNode, null, oldDom);
 
 			// Only proceed if the vnode has not been unmounted by `diff()` above.
 			if (newDom!=null) {
@@ -122,7 +120,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	if (excessDomChildren!=null && newParentVNode.type!==Fragment) for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
 
 	// Remove remaining oldChildren if there are any.
-	for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
+	for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], newParentVNode);
 }
 
 /**

@@ -23,7 +23,6 @@ export function Component(props, context) {
 	// shown here as commented out for quick reference
 	// this.base = null;
 	// this._context = null;
-	// this._ancestorComponent = null; // Always set right after instantiation
 	// this._vnode = null;
 	// this._nextState = null; // Only class components
 	// this._prevVNode = null;
@@ -71,7 +70,7 @@ Component.prototype.forceUpdate = function(callback) {
 		const force = callback!==false;
 
 		let mounts = [];
-		dom = diff(parentDom, vnode, vnode, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, this._ancestorComponent, force, dom, this._parentVNode);
+		dom = diff(parentDom, vnode, vnode, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, vnode._parent, force, dom);
 		if (dom!=null && dom.parentNode!==parentDom) {
 			// The component may be rendered somewhere in the middle of the parent's
 			// children. We need to find the nearest DOM sibling to insert our

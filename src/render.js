@@ -30,7 +30,6 @@ export function render(vnode, parentDom, replaceNode) {
 				? null
 				: EMPTY_ARR.slice.call(parentDom.childNodes),
 		mounts,
-		vnode,
 		replaceNode || EMPTY_OBJ
 	);
 	commitRoot(mounts, vnode);

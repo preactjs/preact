@@ -16,7 +16,7 @@ import options from '../options';
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} mounts A list of newly
  * mounted components
- * @param {import('../internal').Component | null} ancestorComponent The direct
+ * @param {import('../internal').VNode} parentVNode The direct
  * parent component
  * @param {Element | Text} oldDom The current attached DOM
  * element any new dom elements should be placed around. Likely `null` on first
@@ -24,10 +24,10 @@ import options from '../options';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {import('../internal').VNode} parentVNode
  */
-export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force, oldDom, parentVNode) {
+export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, parentVNode, force, oldDom) {
 	// If the previous type doesn't match the new type we drop the whole subtree
 	if (oldVNode==null || newVNode==null || oldVNode.type!==newVNode.type || oldVNode.key!==newVNode.key) {
-		if (oldVNode!=null) unmount(oldVNode, ancestorComponent);
+		if (oldVNode!=null) unmount(oldVNode, parentVNode);
 		if (newVNode==null) return null;
 		oldVNode = EMPTY_OBJ;
 	}
@@ -46,7 +46,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		outer: if (oldVNode.type===Fragment || newType===Fragment) {
 			// Passing the ancestorComponent instead of c here is needed for catchErrorInComponent
 			// to properly traverse upwards through fragments to find a parent Suspense
-			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, oldDom);
+			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, oldDom);
 
 			// Mark dom as empty in case `_children` is any empty array. If it isn't
 			// we'll set `dom` to the correct value just a few lines later.
@@ -90,7 +90,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 					c.constructor = newType;
 					c.render = doRender;
 				}
-				c._ancestorComponent = ancestorComponent;
 				if (provider) provider.sub(c);
 
 				c.props = newVNode.props;
@@ -101,7 +100,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				c._renderCallbacks = [];
 			}
 
-			c._parentVNode = parentVNode;
 			c._vnode = newVNode;
 
 			// Invoke getDerivedStateFromProps
@@ -157,8 +155,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			c._depth = ancestorComponent ? (ancestorComponent._depth || 0) + 1 : 0;
-			c.base = newVNode._dom = diff(parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null, oldDom, newVNode);
+			c._depth = parentVNode ? (parentVNode._depth || 0) + 1 : 0;
+			c.base = newVNode._dom = diff(parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, newVNode, null, oldDom);
 
 			if (vnode!=null) {
 				// If this component returns a Fragment (or another component that
@@ -169,7 +167,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			c._parentDom = parentDom;
 
-			if (tmp = newVNode.ref) applyRef(tmp, c, ancestorComponent);
+			if (tmp = newVNode.ref) applyRef(tmp, c, parentVNode);
 
 			while (tmp=c._renderCallbacks.pop()) tmp.call(c);
 
@@ -180,10 +178,10 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 		}
 		else {
-			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
+			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts);
 
 			if ((tmp = newVNode.ref) && (oldVNode.ref !== tmp)) {
-				applyRef(tmp, newVNode._dom, ancestorComponent);
+				applyRef(tmp, newVNode._dom, parentVNode);
 			}
 		}
 
@@ -194,7 +192,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		if (tmp = options.diffed) tmp(newVNode);
 	}
 	catch (e) {
-		catchErrorInComponent(e, ancestorComponent);
+		catchErrorInComponent(e, parentVNode);
 	}
 
 	return newVNode._dom;
@@ -207,7 +205,7 @@ export function commitRoot(mounts, root) {
 			c.componentDidMount();
 		}
 		catch (e) {
-			catchErrorInComponent(e, c._ancestorComponent);
+			catchErrorInComponent(e, c._vnode);
 		}
 	}
 
@@ -225,11 +223,9 @@ export function commitRoot(mounts, root) {
  * @param {*} excessDomChildren
  * @param {Array<import('../internal').Component>} mounts An array of newly
  * mounted components
- * @param {import('../internal').Component} ancestorComponent The parent
- * component to the ones being diffed
  * @returns {import('../internal').PreactElement}
  */
-function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent) {
+function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts) {
 	let i;
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
@@ -290,7 +286,7 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 				dom.multiple = newProps.multiple;
 			}
 
-			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent, EMPTY_OBJ);
+			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, EMPTY_OBJ);
 			diffProps(dom, newProps, oldProps, isSvg);
 		}
 	}
@@ -303,30 +299,30 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
  * @param {object|function} [ref=null]
  * @param {any} [value]
  */
-export function applyRef(ref, value, ancestorComponent) {
+export function applyRef(ref, value, parentVNode) {
 	try {
 		if (typeof ref=='function') ref(value);
 		else ref.current = value;
 	}
 	catch (e) {
-		catchErrorInComponent(e, ancestorComponent);
+		catchErrorInComponent(e, parentVNode);
 	}
 }
 
 /**
  * Unmount a virtual node from the tree and apply DOM changes
  * @param {import('../internal').VNode} vnode The virtual node to unmount
- * @param {import('../internal').Component} ancestorComponent The parent
+ * @param {import('../internal').VNode} parentVNode The parent
  * component to this virtual node
  * @param {boolean} [skipRemove] Flag that indicates that a parent node of the
  * current element is already detached from the DOM.
  */
-export function unmount(vnode, ancestorComponent, skipRemove) {
+export function unmount(vnode, parentVNode, skipRemove) {
 	let r;
 	if (options.unmount) options.unmount(vnode);
 
 	if (r = vnode.ref) {
-		applyRef(r, null, ancestorComponent);
+		applyRef(r, null, parentVNode);
 	}
 
 	let dom;
@@ -342,16 +338,16 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 				r.componentWillUnmount();
 			}
 			catch (e) {
-				catchErrorInComponent(e, ancestorComponent);
+				catchErrorInComponent(e, parentVNode);
 			}
 		}
 
 		r.base = r._parentDom = null;
-		if (r = r._prevVNode) unmount(r, ancestorComponent, skipRemove);
+		if (r = r._prevVNode) unmount(r, parentVNode, skipRemove);
 	}
 	else if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {
-			if (r[i]) unmount(r[i], ancestorComponent, skipRemove);
+			if (r[i]) unmount(r[i], parentVNode, skipRemove);
 		}
 	}
 
@@ -366,16 +362,19 @@ function doRender(props, state, context) {
 /**
  * Find the closest error boundary to a thrown error and call it
  * @param {object} error The thrown value
- * @param {import('../internal').Component} component The first ancestor
- * component check for error boundary behaviors
+ * @param {import('../internal').VNode} vnode The first parent
+ * vnode check for error boundary behaviors
  */
-function catchErrorInComponent(error, component) {
+function catchErrorInComponent(error, vnode) {
 	// thrown Promises are meant to suspend...
 	let isSuspend = typeof error.then === 'function';
-	let suspendingComponent = component;
+	let suspendingVNode = vnode;
 
-	for (; component; component = component._ancestorComponent) {
-		if (!component._processingException) {
+	/** @type {import('../internal').Component} */
+	let component;
+
+	for (; vnode; vnode = vnode._parent) {
+		if ((component = vnode._component) && !component._processingException) {
 			try {
 				if (isSuspend) {
 					if (component._childDidSuspend) {
@@ -404,7 +403,7 @@ function catchErrorInComponent(error, component) {
 	}
 
 	if (isSuspend) {
-		return catchErrorInComponent(new Error('Missing Suspense'), suspendingComponent);
+		return catchErrorInComponent(new Error('Missing Suspense'), suspendingVNode);
 	}
 
 	throw error;

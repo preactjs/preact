@@ -55,7 +55,6 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	_renderCallbacks: Array<() => void>;
 	_context?: any;
 	_vnode?: VNode<P> | null;
-	_parentVNode?: VNode<P> | null;
 	_nextState?: S | null;
 	/** Only used in the devtools to later dirty check if state has changed */
 	_prevState?: S | null;
@@ -66,7 +65,6 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	 */
 	_parentDom?: PreactElement | null;
 	_prevVNode?: VNode | null;
-	_ancestorComponent?: Component<any, any>;
 	_processingException?: Component<any, any> | null;
 	_pendingError?: Component<any, any> | null;
 }
