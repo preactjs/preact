@@ -95,7 +95,7 @@ Component.prototype.forceUpdate = function(callback) {
 		//		Likely need a try/catch handler inside of diffChildren. Should be cheap to do once vnode-prop-explorations
 		//		branch is in
 		const root = createElement(Fragment, {}, vnode);
-		diffChildren(parentDom, root, root, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, getDomSibling(vnode), force);
+		diffChildren(parentDom, root, root, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, getDomSibling3(vnode), force);
 
 		commitRoot(mounts, vnode);
 	}
@@ -150,6 +150,160 @@ export function getDomSibling(vnode) {
 	}
 
 	return null;
+}
+
+/**
+ * @param {import('./internal').VNode} vnode
+ * @param {number | null} [childIndex]
+ */
+export function getDomSibling3(vnode, childIndex) {
+	console.group('entering', vnode && vnode.key, childIndex);
+	// console.log('entering', vnode && vnode.key, childIndex);
+
+	if (childIndex == null) {
+		// return getDomSibling3(vnode._parent, vnode._parent._children.indexOf(vnode) + 1);
+
+		// Use childIndex==null as a signal to resume the search from the vnode's sibling
+		if (vnode._parent) {
+			let result = getDomSibling3(vnode._parent, vnode._parent._children.indexOf(vnode) + 1);
+			console.groupEnd();
+			return result;
+		}
+		else {
+			console.log('topped o');
+			console.groupEnd();
+			return null;
+		}
+	}
+
+	let dom, sibling;
+	for (; childIndex < vnode._children.length; childIndex++) {
+		console.log('iteratin', vnode && vnode.key, childIndex, `${childIndex+1}/${vnode._children.length}`);
+		sibling = vnode._children[childIndex];
+
+		if (sibling != null) {
+			console.log('going down');
+			dom = typeof sibling.type !== 'function'
+				? sibling._dom
+				: getDomSibling3(sibling, 0);
+
+			console.log('returning from', sibling && sibling.key);
+			console.groupEnd();
+			return dom;
+		}
+	}
+
+	// If we get here, we have not found a DOM node in this vnode's children.
+	// We must resume from this vnode's sibling (in it's parent _children array)
+
+	let result = getDomSibling3(vnode);
+	console.log('exiting', vnode && vnode.key, childIndex);
+	console.groupEnd();
+	return result;
+
+
+	// // 3724 B
+	// if (childIndex == null) {
+	// 	// Use childIndex==null as a signal to resume the search from the vnode's sibling
+	// 	// return getDomSibling3(vnode._parent, vnode._parent._children.indexOf(vnode) + 1);
+
+	// 	if (vnode._parent) {
+	// 		return getDomSibling3(vnode._parent, vnode._parent._children.indexOf(vnode) + 1);
+	// 	}
+	// 	else {
+	// 		return null;
+	// 	}
+	// }
+
+	// let sibling;
+	// for (; childIndex < vnode._children.length; childIndex++) {
+	// 	sibling = vnode._children[childIndex];
+
+	// 	if (sibling != null) {
+	// 		return typeof sibling.type !== 'function'
+	// 			? sibling._dom
+	// 			: getDomSibling3(sibling, 0);
+	// 	}
+	// }
+
+	// // If we get here, we have not found a DOM node in this vnode's children.
+	// // We must resume from this vnode's sibling (in it's parent _children array)
+	// return getDomSibling3(vnode);
+}
+
+/**
+ * @param {import('./internal').VNode} vnode
+ * @param {number | null} [childIndex]
+ */
+export function getDomSibling4(vnode, childIndex) {
+	// 3730 B
+
+	if (childIndex == null) {
+		if (vnode._parent != null) {
+			return getDomSibling4(vnode._parent, vnode._parent._children.indexOf(vnode) + 1);
+		}
+		else {
+			return null;
+		}
+	}
+
+	let sibling;
+	while ((sibling = vnode._children[childIndex]) == null && childIndex < vnode._children.length) {
+		childIndex++;
+	}
+
+	if (sibling != null) {
+		return typeof sibling.type !== 'function'
+			? sibling._dom
+			: getDomSibling4(sibling, 0);
+	}
+	else {
+		return getDomSibling4(vnode);
+	}
+
+	// console.group('entering', vnode && vnode.key, childIndex);
+	// // console.log('entering', vnode && vnode.key, childIndex);
+
+	// if (childIndex == null) {
+	// 	if (vnode._parent != null) {
+	// 		let result = getDomSibling4(vnode._parent, vnode._parent._children.indexOf(vnode) + 1);
+	// 		console.groupEnd();
+	// 		return result;
+	// 	}
+	// 	else {
+	// 		console.log('topped o');
+	// 		console.groupEnd();
+	// 		return null;
+	// 	}
+	// }
+
+	// let dom, sibling;
+	// while ((sibling = vnode._children[childIndex]) == null && childIndex < vnode._children.length) {
+	// 	childIndex++;
+	// }
+
+	// if (sibling != null) {
+	// 	console.log('go down');
+	// 	dom = typeof sibling.type !== 'function'
+	// 		? sibling._dom
+	// 		: getDomSibling4(sibling, 0);
+
+	// 	if (dom != null) {
+	// 		console.log('returning from', sibling && sibling.key);
+	// 		console.groupEnd();
+	// 		return dom;
+	// 	}
+	// }
+	// else {
+	// 	console.log('go up');
+	// 	dom = getDomSibling4(vnode);
+	// 	console.log('exiting', vnode && vnode.key, childIndex);
+	// 	console.groupEnd();
+	// 	return dom;
+	// }
+
+	// console.log('falling out');
+	// console.groupEnd();
 }
 
 /**
