@@ -32,7 +32,6 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
 
 	let oldChildrenLength = oldChildren.length;
-	let oldChild;
 
 	// Only in very specific places should this logic be invoked (top level `render` and `diffElementNodes`).
 	// I'm using `EMPTY_OBJ` to signal when `diffChildren` is invoked in these situations. I can't use `null`
@@ -48,7 +47,6 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		else {
 			for (i = 0; !oldDom && i < oldChildrenLength; i++) {
 				oldDom = oldChildren[i] && oldChildren[i]._dom;
-				oldChild = oldChildren[i];
 			}
 		}
 	}
@@ -63,7 +61,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			// (holes).
 			oldVNode = oldChildren[i];
 
-			if (oldVNode===null || (oldVNode && (oldVNode.key!=null ? (childVNode.key === oldVNode.key) : (childVNode.key==null && childVNode.type === oldVNode.type)))) {
+			if (oldVNode===null || (oldVNode && childVNode.key == oldVNode.key && childVNode.type === oldVNode.type)) {
 				oldChildren[i] = undefined;
 			}
 			else {
@@ -71,11 +69,10 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 				// so after this loop oldVNode == null or oldVNode is a valid value.
 				for (j=0; j<oldChildrenLength; j++) {
 					oldVNode = oldChildren[j];
-					if (oldVNode && (oldVNode.key!=null ? (childVNode.key === oldVNode.key) : (childVNode.key==null && childVNode.type === oldVNode.type))) {
+					// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
+					// We always match by type (in either case).
+					if (oldVNode && childVNode.key == oldVNode.key && childVNode.type === oldVNode.type) {
 						oldChildren[j] = undefined;
-						if (oldChildrenLength !== newChildren.length && oldVNode.type !== (oldChild && oldChild.type)) {
-							oldDom = oldVNode._dom;
-						}
 						break;
 					}
 					oldVNode = null;

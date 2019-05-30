@@ -35,9 +35,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		newType = newVNode.type, clearProcessingException;
 
 	// When passing through createElement it assigns the object
-	// ref on _self, to prevent JSON Injection we check if this attribute
-	// is equal.
-	if (newVNode._self!==newVNode) return null;
+	// constructor as undefined. This to prevent JSON-injection.
+	if (newVNode.constructor !== undefined) return null;
 
 	if (tmp = options.diff) tmp(newVNode);
 
@@ -264,20 +263,12 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 		if (newVNode!==oldVNode) {
-			// if we're hydrating, use the element's attributes as its current props:
-			if (oldProps==null) {
-				oldProps = {};
-				if (excessDomChildren!=null) {
-					let name;
-					for (i=0; i<dom.attributes.length; i++) {
-						name = dom.attributes[i].name;
-						oldProps[name=='class' && newProps.className ? 'className' : name] = dom.attributes[i].value;
-					}
-				}
-			}
+			let oldProps = oldVNode.props || EMPTY_OBJ;
+			let newProps = newVNode.props;
+
 			let oldHtml = oldProps.dangerouslySetInnerHTML;
 			let newHtml = newProps.dangerouslySetInnerHTML;
-			if (newHtml || oldHtml) {
+			if ((newHtml || oldHtml) && excessDomChildren==null) {
 				// Avoid re-applying the same '__html' if it did not changed between re-render
 				if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
 					dom.innerHTML = newHtml && newHtml.__html || '';
@@ -382,7 +373,7 @@ function catchErrorInComponent(error, component) {
 						continue;
 					}
 				}
-				else if (component.constructor.getDerivedStateFromError!=null) {
+				else if (component.constructor && component.constructor.getDerivedStateFromError!=null) {
 					component.setState(component.constructor.getDerivedStateFromError(error));
 				}
 				else if (component.componentDidCatch!=null) {
