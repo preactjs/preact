@@ -140,9 +140,9 @@ export function useImperativeHandle(ref, createHandle, args) {
 	const state = getHookState(currentIndex++);
 	if (argsChanged(state._args, args)) {
 		state._args = args;
-			if (ref) {
-				ref.current = createHandle();
-			}
+		if (ref) {
+			ref.current = createHandle();
+		}
 	}
 }
 

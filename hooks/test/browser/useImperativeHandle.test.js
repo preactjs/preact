@@ -67,8 +67,6 @@ describe('useImperativeHandle', () => {
 	});
 
 	it('should not throw with nullish ref', () => {
-		let ref;
-
 		function Comp() {
 			useImperativeHandle(null, () => ({ test: () => 'test' }), [1]);
 			return <p>Test</p>;
