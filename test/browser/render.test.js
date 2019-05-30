@@ -996,6 +996,31 @@ describe('render()', () => {
 			expect(scratch.innerHTML).to.equal('<div id="a"></div><div id="b"></div><div id="c"></div>');
 		});
 
+		it('should unmount existing components', () => {
+			const newScratch = setupScratch();
+			const unmount = sinon.spy();
+			const mount = sinon.spy();
+			class App extends Component {
+				componentDidMount() {
+					mount();
+				}
+
+				componentWillUnmount() {
+					unmount();
+				}
+
+				render() {
+					return <div>App</div>;
+				}
+			}
+			render(<div id="a"><App /></div>, newScratch);
+			expect(newScratch.innerHTML).to.equal('<div id="a"><div>App</div></div>');
+			expect(mount).to.be.calledOnce;
+			render(<div id="a">new</div>, newScratch, newScratch.querySelector('#a'));
+			expect(newScratch.innerHTML).to.equal('<div id="a">new</div>');
+			expect(unmount).to.be.calledOnce;
+		});
+
 		it('should render multiple render roots in one parentDom', () => {
 			const childA = scratch.querySelector('#a');
 			const childB = scratch.querySelector('#b');
