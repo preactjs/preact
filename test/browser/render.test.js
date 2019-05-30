@@ -290,7 +290,7 @@ describe('render()', () => {
 		});
 	}
 
-	// Test for developit/preact#651
+	// Test for preactjs/preact#651
 	it('should set enumerable boolean attribute', () => {
 		render(<input spellcheck={false} />, scratch);
 		expect(scratch.firstChild.spellcheck).to.equal(false);
@@ -708,10 +708,10 @@ describe('render()', () => {
 		const preactElement = <div><a /></div>;
 
 		render(preactElement, scratch);
-		expect(scratch).to.have.property('innerHTML', '<div><a></a></div>');
+		expect(scratch).to.have.property('innerHTML', '<div><a foo="bar"></a></div>');
 	});
 
-	// Discussion: https://github.com/developit/preact/issues/287
+	// Discussion: https://github.com/preactjs/preact/issues/287
 	// <datalist> is not supported in Safari, even though the element
 	// constructor is present
 	if (supportsDataList()) {
@@ -733,7 +733,7 @@ describe('render()', () => {
 	}
 
 	it('should not execute append operation when child is at last', () => {
-		// See developit/preact#717 for discussion about the issue this addresses
+		// See preactjs/preact#717 for discussion about the issue this addresses
 
 		let todoText = 'new todo that I should complete';
 		let input;
@@ -802,7 +802,7 @@ describe('render()', () => {
 	});
 
 	it('should always diff `checked` and `value` properties against the DOM', () => {
-		// See https://github.com/developit/preact/issues/1324
+		// See https://github.com/preactjs/preact/issues/1324
 
 		let inputs;
 		let text;
@@ -994,6 +994,31 @@ describe('render()', () => {
 			const childA = scratch.querySelector('#a');
 			render(<div id="a" />, scratch, childA);
 			expect(scratch.innerHTML).to.equal('<div id="a"></div><div id="b"></div><div id="c"></div>');
+		});
+
+		it('should unmount existing components', () => {
+			const newScratch = setupScratch();
+			const unmount = sinon.spy();
+			const mount = sinon.spy();
+			class App extends Component {
+				componentDidMount() {
+					mount();
+				}
+
+				componentWillUnmount() {
+					unmount();
+				}
+
+				render() {
+					return <div>App</div>;
+				}
+			}
+			render(<div id="a"><App /></div>, newScratch);
+			expect(newScratch.innerHTML).to.equal('<div id="a"><div>App</div></div>');
+			expect(mount).to.be.calledOnce;
+			render(<div id="a">new</div>, newScratch, newScratch.querySelector('#a'));
+			expect(newScratch.innerHTML).to.equal('<div id="a">new</div>');
+			expect(unmount).to.be.calledOnce;
 		});
 
 		it('should render multiple render roots in one parentDom', () => {

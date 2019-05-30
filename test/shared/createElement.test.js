@@ -32,9 +32,9 @@ describe('createElement(jsx)', () => {
 		expect(<Test />).to.have.property('type', Test);
 	});
 
-	it('should set VNode._self property to prevent json injection', () => {
+	it('should set VNode.constructor property to prevent json injection', () => {
 		const vnode = <span />;
-		expect(vnode._self).to.equal(vnode);
+		expect(vnode.constructor).to.equal(undefined);
 	});
 
 	it('should set VNode#props property', () => {
@@ -68,7 +68,7 @@ describe('createElement(jsx)', () => {
 	});
 
 	it('should have ordered VNode properties', () => {
-		expect(Object.keys(<div />).filter(key => !/^_/.test(key))).to.deep.equal(['type', 'props', 'key', 'ref']);
+		expect(Object.keys(<div />).filter(key => !/^_/.test(key))).to.deep.equal(['type', 'props', 'key', 'ref', 'constructor']);
 	});
 
 	it('should preserve raw props', () => {
