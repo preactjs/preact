@@ -21,7 +21,7 @@ export function render(vnode, parentDom, replaceNode) {
 	diffChildren(
 		parentDom,
 		replaceNode ? vnode : (parentDom._prevVNode = vnode),
-		replaceNode ? undefined : oldVNode,
+		oldVNode,
 		EMPTY_OBJ,
 		parentDom.ownerSVGElement !== undefined,
 		replaceNode

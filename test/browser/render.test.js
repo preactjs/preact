@@ -708,7 +708,7 @@ describe('render()', () => {
 		const preactElement = <div><a /></div>;
 
 		render(preactElement, scratch);
-		expect(scratch).to.have.property('innerHTML', '<div><a></a></div>');
+		expect(scratch).to.have.property('innerHTML', '<div><a foo="bar"></a></div>');
 	});
 
 	// Discussion: https://github.com/preactjs/preact/issues/287
@@ -994,6 +994,31 @@ describe('render()', () => {
 			const childA = scratch.querySelector('#a');
 			render(<div id="a" />, scratch, childA);
 			expect(scratch.innerHTML).to.equal('<div id="a"></div><div id="b"></div><div id="c"></div>');
+		});
+
+		it('should unmount existing components', () => {
+			const newScratch = setupScratch();
+			const unmount = sinon.spy();
+			const mount = sinon.spy();
+			class App extends Component {
+				componentDidMount() {
+					mount();
+				}
+
+				componentWillUnmount() {
+					unmount();
+				}
+
+				render() {
+					return <div>App</div>;
+				}
+			}
+			render(<div id="a"><App /></div>, newScratch);
+			expect(newScratch.innerHTML).to.equal('<div id="a"><div>App</div></div>');
+			expect(mount).to.be.calledOnce;
+			render(<div id="a">new</div>, newScratch, newScratch.querySelector('#a'));
+			expect(newScratch.innerHTML).to.equal('<div id="a">new</div>');
+			expect(unmount).to.be.calledOnce;
 		});
 
 		it('should render multiple render roots in one parentDom', () => {

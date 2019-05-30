@@ -271,17 +271,9 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 		if (newVNode!==oldVNode) {
-			// if we're hydrating, use the element's attributes as its current props:
-			if (oldProps==null) {
-				oldProps = {};
-				if (excessDomChildren!=null) {
-					let name;
-					for (i=0; i<dom.attributes.length; i++) {
-						name = dom.attributes[i].name;
-						oldProps[name=='class' && newProps.className ? 'className' : name] = dom.attributes[i].value;
-					}
-				}
-			}
+			let oldProps = oldVNode.props || EMPTY_OBJ;
+			let newProps = newVNode.props;
+
 			let oldHtml = oldProps.dangerouslySetInnerHTML;
 			let newHtml = newProps.dangerouslySetInnerHTML;
 			if ((newHtml || oldHtml) && excessDomChildren==null) {
