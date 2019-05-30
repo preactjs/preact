@@ -4,5 +4,5 @@ export { Component } from './component';
 export { cloneElement } from './clone-element';
 export { createContext } from './create-context';
 export { toChildArray } from './diff/children';
-export { Suspense, lazy } from './suspense';
+export { unmount } from './diff';
 export { default as options } from './options';

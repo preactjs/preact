@@ -143,7 +143,15 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			let prev = c._prevVNode || null;
 			c._dirty = false;
-			let vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
+			let vnode;
+			
+			try {
+				vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
+			}
+			catch (e) {
+				if ((tmp = options.catchRender) && tmp(e, c)) return;
+				throw e;
+			}
 
 			if (c.getChildContext!=null) {
 				context = assign(assign({}, context), c.getChildContext());
@@ -358,22 +366,12 @@ function doRender(props, state, context) {
  * component check for error boundary behaviors
  */
 function catchErrorInComponent(error, component) {
-	// thrown Promises are meant to suspend...
-	let isSuspend = typeof error.then === 'function';
-	let suspendingComponent = component;
+	if (options.catchError) { options.catchError(error, component); }
 
 	for (; component; component = component._ancestorComponent) {
 		if (!component._processingException) {
 			try {
-				if (isSuspend) {
-					if (component._childDidSuspend) {
-						component._childDidSuspend(error);
-					}
-					else {
-						continue;
-					}
-				}
-				else if (component.constructor && component.constructor.getDerivedStateFromError!=null) {
+				if (component.constructor && component.constructor.getDerivedStateFromError!=null) {
 					component.setState(component.constructor.getDerivedStateFromError(error));
 				}
 				else if (component.componentDidCatch!=null) {
@@ -386,13 +384,8 @@ function catchErrorInComponent(error, component) {
 			}
 			catch (e) {
 				error = e;
-				isSuspend = false;
 			}
 		}
-	}
-
-	if (isSuspend) {
-		return catchErrorInComponent(new Error('Missing Suspense'), suspendingComponent);
 	}
 
 	throw error;
