@@ -4,7 +4,7 @@ import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx h */
 
-describe.only('getDomSibling', () => {
+describe('getDomSibling', () => {
 
 	chai.use((chai, util) => {
 		const Assertion = chai.Assertion;
