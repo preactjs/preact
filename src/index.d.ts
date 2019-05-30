@@ -198,6 +198,17 @@ declare namespace preact {
 		hook?(component: Component): void;
 		/** Attach a hook that is invoked after a vnode has rendered. */
 		diffed?(vnode: VNode): void;
+		/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
+		catchError?(error: any, component: Component): void;
+		/** 
+		 * Attach a hook that is invoked after an error is caught while executing render.
+		 * 
+		 * When this hook returns true, the diffing on the affected vnode will be stopped.
+		 * When this hook returns false, the error will be thrown (and thus passed to catchError or lifecycle hooks)
+		 * 
+		 * @return Return a boolean indicating whether the error was handled by the hook or not
+		 */
+		catchRender?(error: any, component: Component): boolean;
 		event?(e: Event): void;
 		useDebugValue?(value: string | number): void;
 	}
@@ -231,16 +242,4 @@ declare namespace preact {
 	interface PreactContext<T> extends Context<T> {}
 
 	function createContext<T>(defaultValue: T): Context<T>;
-
-	//
-	// Suspense/lazy
-	// -----------------------------------
-	function lazy<T>(loader: () => Promise<{default: T}>): T;
-
-	interface SuspenseProps {
-		children?: ComponentChildren;
-		fallback: ComponentChildren;
-	}
-
-	abstract class Suspense extends Component<SuspenseProps> {}
 }

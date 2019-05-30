@@ -1,11 +1,12 @@
 import "mocha";
-import { expect } from "chai";
 import {
 	createElement,
 	Component,
+} from "../..";
+import {
 	Suspense,
 	lazy,
-} from "../..";
+} from "../../compat";
 
 interface LazyProps {
 	isProp: boolean;

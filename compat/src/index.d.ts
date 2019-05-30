@@ -1,6 +1,8 @@
 import * as _hooks from '../../hooks';
 import * as preact from '../../src';
 import { ForwardFn } from './internal';
+export * from './suspense';
+import { Suspense, lazy } from './suspense';
 
 export * from '../../hooks';
 export import Component = preact.Component;
@@ -9,8 +11,6 @@ export import createRef = preact.createRef;
 export import Fragment = preact.Fragment;
 export import createElement = preact.createElement
 export import cloneElement = preact.cloneElement
-export import Suspense = preact.Suspense;
-export import lazy = preact.lazy;
 
 export declare const version: string;
 
