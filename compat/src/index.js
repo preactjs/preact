@@ -1,4 +1,4 @@
-import { render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
+import { hydrate, render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
 import * as hooks from 'preact/hooks';
 export * from 'preact/hooks';
 import { Suspense as _Suspense, lazy as _lazy, catchRender } from './suspense';
@@ -77,9 +77,10 @@ class ContextProvider {
  */
 function Portal(props) {
 	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
-	render(wrap, props.container);
+	let container = props.container;
+	hydrate(wrap, container);
 	this.componentWillUnmount = () => {
-		render(null, props.container);
+		render(null, container);
 	};
 	return null;
 }
