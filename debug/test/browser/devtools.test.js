@@ -285,20 +285,29 @@ describe('devtools', () => {
 
 	describe('getChildren', () => {
 		it('should get component children', () => {
-			const Foo = () => <div>foo</div>;
-			let a = createElement(Foo, { foo: 1 });
+			const Foo = () => <div>foo{null}bar</div>;
+			render(<Foo />, scratch);
 
-			a._children = null;
-			expect(getChildren(a)).to.equal(null);
+			const fooVNode = getRoot(scratch)._children[0];
+			const expectedChildren = fooVNode._children;
+			expect(getChildren(fooVNode)).to.deep.equal(expectedChildren);
+		});
 
-			a._children = [{}];
-			expect(getChildren(a)).to.deep.equal([{}]);
+		it('should get component children for empty component', () => {
+			const Foo = () => {};
+			render(<Foo />, scratch);
+
+			const fooVNode = getRoot(scratch)._children[0];
+			expect(getChildren(fooVNode)).to.deep.equal([]);
 		});
 
 		it('should get native element children', () => {
-			let a = createElement('div', { foo: 1 }, 'foo');
-			a._children = ['foo'];
-			expect(getChildren(a)).to.deep.equal(['foo']);
+			render(<div>foo</div>, scratch);
+
+			const fooVNode = getRoot(scratch)._children[0];
+			const children = getChildren(fooVNode);
+			expect(children).to.have.lengthOf(1);
+			expect(children[0].props).to.equal('foo');
 		});
 	});
 
