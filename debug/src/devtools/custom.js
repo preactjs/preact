@@ -108,6 +108,7 @@ export function getData(vnode) {
  * @returns {import('../internal').VNode[]}
  */
 export function getChildren(vnode) {
+	// TODO: Update this function
 	let c = vnode._component;
 
 	if (c==null) {
