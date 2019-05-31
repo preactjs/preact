@@ -117,6 +117,9 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				toChildArray(c.render(c.props, c.state, c.context), newVNode._children=[], coerceToVNode, true);
 			}
 			catch (e) {
+				// TODO: Consider modeling this like sCU early exit instead of a direct return.
+				// Might be good to copy over some oldVNode properties since the intention of
+				// this early exit to say "the DOM hasn't changed" like sCU
 				if ((tmp = options.catchRender) && tmp(e, c)) return;
 				throw e;
 			}

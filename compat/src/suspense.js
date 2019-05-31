@@ -15,19 +15,20 @@ export function catchRender(error, component) {
 	return false;
 }
 
-function removeDom(vnode) {
-	let tmp = vnode._component;
-	if (tmp != null) {
-		if (tmp = tmp._prevVNode) removeDom(tmp);
-	}
-	else if ((tmp = vnode._children) && vnode._lastDomChild) {
-		for (let i = 0; i < tmp.length; i++) {
-			if (tmp[i]) removeDom(tmp[i]);
+function removeDom(children) {
+	// TODO: We need to recurse down the tree cuz _dom pointers aren't bubbled up
+	// when a component suspends. See comment about "early exit" in diff/index.js
+	// for a possible resolution
+	for (let i = 0; i < children.length; i++) {
+		let child = children[i];
+		if (child != null) {
+			if (child._children) {
+				removeDom(child._children);
+			}
+			if (child._dom) {
+				removeNode(child._dom);
+			}
 		}
-	}
-
-	if (tmp = vnode._dom) {
-		removeNode(tmp);
 	}
 }
 
@@ -61,20 +62,20 @@ Suspense.prototype._childDidSuspend = function(promise) {
 			// remove fallback
 			unmount(_this.props.fallback);
 
-			// make preact think we had mounted the _parkedVNode previously...
-			_this._prevVNode = _this._parkedVNode;
+			// make preact think we had mounted the _parkedChildren previously...
+			_this._vnode._children = _this._parkedChildren;
 			// reset the timeout & clear the now no longer parked vnode
-			_this._timeout = _this._parkedVNode = null;
+			_this._timeout = _this._parkedChildren = null;
 
 			_this.forceUpdate();
 		}
 	};
 
 	const timeoutOrSuspensionsCompleted = () => {
-		if (_this._timeoutCompleted && _this._suspensions.length && !_this._parkedVNode) {
+		if (_this._timeoutCompleted && _this._suspensions.length && !_this._parkedChildren) {
 			// park old vnode & remove dom
-			removeDom(_this._parkedVNode = _this._prevVNode);
-			_this._prevVNode = null;
+			removeDom(_this._parkedChildren = _this._vnode._children);
+			_this._vnode._children = [];
 
 			// render and mount fallback
 			_this.forceUpdate();
@@ -108,8 +109,8 @@ Suspense.prototype._childDidSuspend = function(promise) {
 };
 
 Suspense.prototype.render = function(props, state) {
-	// When _parkedVNode is set, we are in suspension state
-	return this._parkedVNode ? props.fallback : props.children;
+	// When _parkedChildren is set, we are in suspension state
+	return this._parkedChildren ? props.fallback : props.children;
 };
 
 export function lazy(loader) {
