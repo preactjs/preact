@@ -73,14 +73,6 @@ describe('Fragment', () => {
 			</Fragment>
 		), scratch);
 
-		// Issue #193: Improve Fragment diff performance
-		// TODO: With this test, the Fragment with just one child will invoke
-		// node.appendChild on a DOM element that is already appended to the `node`.
-		// I think we need the oldParentVNode to get the old first DOM child to
-		// effectively diff the children, because the parentVNode (the Fragment)
-		// comes from the newTree and so won't ever have ._dom set before diffing
-		// children.
-
 		expect(scratch.innerHTML).to.equal('<span>foo</span>');
 		expectDomLogToBe([
 			'<span>.appendChild(#text)',
@@ -377,7 +369,8 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
-			'<div>Hello.appendChild(<div>Hello)',
+			// Re-append the Stateful DOM since it has been re-parented
+			'<div>Hello.insertBefore(<div>Hello, <div>Hello)',
 			'<div>Hello.remove()'
 		]);
 	});
@@ -711,8 +704,8 @@ describe('Fragment', () => {
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal(htmlForTrue);
 		expectDomLogToBe([
-			'<div>beepHellofoo.appendChild(<div>Hello)',
-			'<div>boopfooHello.appendChild(<div>boop)'
+			'<div>beepHellofoo.insertBefore(<div>foo, <div>beep)',
+			'<div>fooboopHello.appendChild(<div>boop)'
 		], 'rendering false to true');
 	});
 
@@ -770,10 +763,9 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(html);
 		expectDomLogToBe([
 			'<span>.appendChild(#text)',
-			'<div>1Hello2.appendChild(<span>1)',
+			'<div>1Hello2.insertBefore(<span>1, <span>1)',
 			'<div>.appendChild(#text)',
-			'<div>1Hello21.appendChild(<div>Hello)',
-			'<div>2Hello21Hello.appendChild(<span>2)',
+			'<div>11Hello2.insertBefore(<div>Hello, <span>1)',
 			'<span>2.remove()',
 			'<div>Hello.remove()'
 		]);
@@ -836,7 +828,7 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.equal('foobar');
 		expectDomLogToBe([
-			'<div>spamfoobar.appendChild(#text)',
+			'<div>spamfoobar.insertBefore(#text, #text)',
 			'#text.remove()',
 			'#text.remove()'
 		]);
@@ -1151,10 +1143,9 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(html, 'rendering from false to true');
 		expectDomLogToBe([
 			'<li>.appendChild(#text)',
-			'<ol>0123.appendChild(<li>1)',
+			'<ol>0123.insertBefore(<li>1, <li>1)',
 			'<li>.appendChild(#text)',
-			'<ol>01231.appendChild(<li>2)',
-			'<ol>013312.appendChild(<li>3)',
+			'<ol>01123.insertBefore(<li>2, <li>1)',
 			'<li>3.remove()',
 			'<li>1.remove()'
 		], 'rendering from false to true');
@@ -1219,12 +1210,9 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
 		expectDomLogToBe([
 			'<li>.appendChild(#text)',
-			'<ol>034.appendChild(<li>1)',
+			'<ol>034.insertBefore(<li>1, <li>3)',
 			'<li>.appendChild(#text)',
-			'<ol>0341.appendChild(<li>2)',
-			// see issue #193 - re-appends Fragment siblings
-			'<ol>03312.appendChild(<li>3)',
-			'<ol>04123.appendChild(<li>4)'
+			'<ol>0134.insertBefore(<li>2, <li>3)'
 		], 'rendering from false to true');
 	});
 
@@ -1338,18 +1326,28 @@ describe('Fragment', () => {
 		render(<Foo condition={false} />, scratch);
 		expect(scratch.innerHTML).to.equal(htmlForFalse, 'rendering from true to false');
 		expectDomLogToBe([
-			'<ol>3122.appendChild(<li>3)',
-			'<ol>4223.appendChild(<li>4)'
+			// Mount 3 & 4
+			'<li>.appendChild(#text)',
+			'<ol>0122.appendChild(<li>3)',
+			'<li>.appendChild(#text)',
+			'<ol>01223.appendChild(<li>4)',
+			// Remove 1 & 2 (replaced with null)
+			'<li>0.remove()',
+			'<li>1.remove()'
 		]);
 
 		clearLog();
 		render(<Foo condition={true} />, scratch);
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
 		expectDomLogToBe([
-			'<ol>2204.insertBefore(<li>0, <li>2)',
-			'<ol>0221.insertBefore(<li>1, <li>2)',
-			// TODO: See issue #193 - seems redundant
-			'<ol>0122.appendChild(<li>2)'
+			// Insert 0 and 1
+			'<li>.appendChild(#text)',
+			'<ol>2234.insertBefore(<li>0, <li>2)',
+			'<li>.appendChild(#text)',
+			'<ol>02234.insertBefore(<li>1, <li>2)',
+			// Remove 3 & 4 (replaced by null)
+			'<li>3.remove()',
+			'<li>4.remove()'
 		]);
 	});
 
@@ -1405,18 +1403,28 @@ describe('Fragment', () => {
 		render(<Foo condition={false} />, scratch);
 		expect(scratch.innerHTML).to.equal(htmlForFalse, 'rendering from true to false');
 		expectDomLogToBe([
-			'<ol>4123.appendChild(<li>4)',
-			'<ol>5234.appendChild(<li>5)'
+			// Mount 4 & 5
+			'<li>.appendChild(#text)',
+			'<ol>0123.appendChild(<li>4)',
+			'<li>.appendChild(#text)',
+			'<ol>01234.appendChild(<li>5)',
+			// Remove 1 & 2 (replaced with null)
+			'<li>0.remove()',
+			'<li>1.remove()'
 		]);
 
 		clearLog();
 		render(<Foo condition={true} />, scratch);
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'rendering from false to true');
 		expectDomLogToBe([
-			'<ol>2305.insertBefore(<li>0, <li>2)',
-			'<ol>0231.insertBefore(<li>1, <li>2)',
-			// TODO: See issue #193 - seems redundant...
-			'<ol>0132.appendChild(<li>3)'
+			// Insert 0 and 1 back into the DOM
+			'<li>.appendChild(#text)',
+			'<ol>2345.insertBefore(<li>0, <li>2)',
+			'<li>.appendChild(#text)',
+			'<ol>02345.insertBefore(<li>1, <li>2)',
+			// Remove 4 & 5 (replaced by null)
+			'<li>4.remove()',
+			'<li>5.remove()'
 		]);
 	});
 
