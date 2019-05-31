@@ -112,7 +112,14 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			if (tmp = options.render) tmp(newVNode);
 
 			c._dirty = false;
-			toChildArray(c.render(c.props, c.state, c.context), newVNode._children=[], coerceToVNode, true);
+
+			try {
+				toChildArray(c.render(c.props, c.state, c.context), newVNode._children=[], coerceToVNode, true);
+			}
+			catch (e) {
+				if ((tmp = options.catchRender) && tmp(e, c)) return;
+				throw e;
+			}
 
 			if (c.getChildContext!=null) {
 				context = assign(assign({}, context), c.getChildContext());
@@ -222,17 +229,9 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 		if (newVNode!==oldVNode) {
-			// if we're hydrating, use the element's attributes as its current props:
-			if (oldProps==null) {
-				oldProps = {};
-				if (excessDomChildren!=null) {
-					let name;
-					for (i=0; i<dom.attributes.length; i++) {
-						name = dom.attributes[i].name;
-						oldProps[name=='class' && newProps.className ? 'className' : name] = dom.attributes[i].value;
-					}
-				}
-			}
+			let oldProps = oldVNode.props || EMPTY_OBJ;
+			let newProps = newVNode.props;
+
 			let oldHtml = oldProps.dangerouslySetInnerHTML;
 			let newHtml = newProps.dangerouslySetInnerHTML;
 			if ((newHtml || oldHtml) && excessDomChildren==null) {
@@ -326,22 +325,12 @@ function doRender(props, state, context) {
  * component check for error boundary behaviors
  */
 function catchErrorInComponent(error, component) {
-	// thrown Promises are meant to suspend...
-	let isSuspend = typeof error.then === 'function';
-	let suspendingComponent = component;
+	if (options.catchError) { options.catchError(error, component); }
 
 	for (; component; component = component._ancestorComponent) {
 		if (!component._processingException) {
 			try {
-				if (isSuspend) {
-					if (component._childDidSuspend) {
-						component._childDidSuspend(error);
-					}
-					else {
-						continue;
-					}
-				}
-				else if (component.constructor && component.constructor.getDerivedStateFromError!=null) {
+				if (component.constructor && component.constructor.getDerivedStateFromError!=null) {
 					component.setState(component.constructor.getDerivedStateFromError(error));
 				}
 				else if (component.componentDidCatch!=null) {
@@ -354,13 +343,8 @@ function catchErrorInComponent(error, component) {
 			}
 			catch (e) {
 				error = e;
-				isSuspend = false;
 			}
 		}
-	}
-
-	if (isSuspend) {
-		return catchErrorInComponent(new Error('Missing Suspense'), suspendingComponent);
 	}
 
 	throw error;

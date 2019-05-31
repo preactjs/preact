@@ -708,7 +708,7 @@ describe('render()', () => {
 		const preactElement = <div><a /></div>;
 
 		render(preactElement, scratch);
-		expect(scratch).to.have.property('innerHTML', '<div><a></a></div>');
+		expect(scratch).to.have.property('innerHTML', '<div><a foo="bar"></a></div>');
 	});
 
 	// Discussion: https://github.com/preactjs/preact/issues/287

@@ -65,4 +65,13 @@ describe('useImperativeHandle', () => {
 		render(<Comp />, scratch);
 		expect(ref.current.test()).to.equal('test');
 	});
+
+	it('should not throw with nullish ref', () => {
+		function Comp() {
+			useImperativeHandle(null, () => ({ test: () => 'test' }), [1]);
+			return <p>Test</p>;
+		}
+
+		expect(() => render(<Comp />, scratch)).to.not.throw();
+	});
 });

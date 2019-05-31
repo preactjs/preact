@@ -131,18 +131,18 @@ describe('hydrate()', () => {
 		]);
 	});
 
-	it('should update attributes on existing DOM', () => {
-		scratch.innerHTML = '<div><span doesnt-exist="test" same-value="foo" different-value="a">Test</span></div>';
+	it('should not update attributes on existing DOM', () => {
+		scratch.innerHTML = '<div><span before-hydrate="test" same-value="foo" different-value="a">Test</span></div>';
 		let vnode = <div><span same-value="foo" different-value="b" new-value="c">Test</span></div>;
 
 		clearLog();
 		hydrate(vnode, scratch);
 
-		expect(serializeHtml(scratch)).to.equal(sortAttributes('<div><span same-value="foo" different-value="b" new-value="c">Test</span></div>'));
+		expect(serializeHtml(scratch)).to.equal(sortAttributes('<div><span before-hydrate="test" same-value="foo" different-value="b" new-value="c">Test</span></div>'));
 		expect(getLog()).to.deep.equal([
 			'<span>Test.setAttribute(different-value, b)',
 			'<span>Test.setAttribute(new-value, c)',
-			'<span>Test.removeAttribute(doesnt-exist)'
+			'<span>Test.setAttribute(same-value, foo)'
 		]);
 	});
 

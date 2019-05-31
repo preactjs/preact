@@ -1,4 +1,5 @@
-import { createElement as h, options, render, createRef, Component, Fragment, lazy, Suspense } from 'preact';
+import { createElement as h, options, render, createRef, Component, Fragment } from 'preact';
+import { lazy, Suspense } from 'preact/compat';
 import { useState, useEffect, useLayoutEffect, useMemo, useCallback } from 'preact/hooks';
 import { act, setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown, clearOptions, serializeHtml } from '../../../test/_util/helpers';
@@ -426,68 +427,64 @@ describe('debug', () => {
 			const loader = Promise.resolve({ default: Baz });
 			const LazyBaz = lazy(() => loader);
 
-			render(
+			const suspense = (
 				<Suspense fallback={<div>fallback...</div>}>
 					<LazyBaz unhappy="signal" />
-				</Suspense>,
-				scratch
+				</Suspense>
 			);
+			render(suspense, scratch);
 
 			expect(console.error).to.not.be.called;
 
-			return loader.then(() => {
-				rerender();
-				expect(errors.length).to.equal(1);
-				expect(errors[0].includes('got prop')).to.equal(true);
-				expect(serializeHtml(scratch)).to.equal('<h1>signal</h1>');
-			});
+			return loader
+				.then(() => Promise.all(suspense._component._suspensions))
+				.then(() => {
+					rerender();
+					expect(errors.length).to.equal(1);
+					expect(errors[0].includes('got prop')).to.equal(true);
+					expect(serializeHtml(scratch)).to.equal('<h1>signal</h1>');
+				});
 		});
 
 		describe('warn for PropTypes on lazy()', () => {
 			it('should log the function name', () => {
-				const rerender = setupRerender();
-
 				const loader = Promise.resolve({ default: function MyLazyLoadedComponent() { return <div>Hi there</div>; } });
 				const FakeLazy = lazy(() => loader);
 				FakeLazy.propTypes = {};
-				render(
+				const suspense = (
 					<Suspense fallback={<div>fallback...</div>} >
 						<FakeLazy />
-					</Suspense>,
-					scratch
+					</Suspense>
 				);
+				render(suspense, scratch);
 
-				return loader.then(() => {
-					expect(console.warn).to.be.calledTwice;
-					expect(warnings[1].includes('MyLazyLoadedComponent')).to.equal(true);
-					rerender();
-					expect(console.warn).to.be.calledThrice;
-					expect(warnings[2].includes('MyLazyLoadedComponent')).to.equal(true);
-				});
+				return loader
+					.then(() => Promise.all(suspense._component._suspensions))
+					.then(() => {
+						expect(console.warn).to.be.calledTwice;
+						expect(warnings[1].includes('MyLazyLoadedComponent')).to.equal(true);
+					});
 			});
 
 			it('should log the displayName', () => {
-				const rerender = setupRerender();
-
 				function MyLazyLoadedComponent() { return <div>Hi there</div>; }
 				MyLazyLoadedComponent.displayName = 'HelloLazy';
 				const loader = Promise.resolve({ default: MyLazyLoadedComponent });
 				const FakeLazy = lazy(() => loader);
 				FakeLazy.propTypes = {};
-				render(
+				const suspense = (
 					<Suspense fallback={<div>fallback...</div>} >
 						<FakeLazy />
-					</Suspense>,
-					scratch
+					</Suspense>
 				);
+				render(suspense, scratch);
 
-				return loader.then(() => {
-					expect(console.warn).to.be.calledTwice;
-					expect(warnings[1].includes('HelloLazy')).to.equal(true);
-					rerender();
-					expect(console.warn).to.be.calledThrice;
-					expect(warnings[2].includes('HelloLazy')).to.equal(true);
-				});
+				return loader
+					.then(() => Promise.all(suspense._component._suspensions))
+					.then(() => {
+						expect(console.warn).to.be.calledTwice;
+						expect(warnings[1].includes('HelloLazy')).to.equal(true);
+					});
 			});
 
 			it('should not log a component if lazy throws', () => {
