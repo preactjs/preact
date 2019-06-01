@@ -1,6 +1,6 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component, enqueueRender } from '../component';
-import { coerceToVNode } from '../create-element';
+import { coerceToVNode, Fragment } from '../create-element';
 import { diffChildren, toChildArray } from './children';
 import { diffProps } from './props';
 import { assign, removeNode } from '../util';
@@ -114,7 +114,9 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c._dirty = false;
 
 			try {
-				toChildArray(c.render(c.props, c.state, c.context), newVNode._children=[], coerceToVNode, true);
+				tmp = c.render(c.props, c.state, c.context);
+				let isTopLevelFragment = tmp != null && tmp.type == Fragment && tmp.key == null;
+				toChildArray(isTopLevelFragment ? tmp.props.children : tmp, newVNode._children=[], coerceToVNode, true);
 			}
 			catch (e) {
 				// TODO: Consider modeling this like sCU early exit instead of a direct return.

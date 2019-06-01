@@ -1,7 +1,6 @@
 # Tests skipped to get CI to pass
 
 - Fragment
-	- ✖ should preserve state of children with 1 level nesting
 	- ✖ should not preserve state between array nested in fragment and double nested array
 	- ✖ should preserve state between double nested fragment and double nested array
 - hydrate

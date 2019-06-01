@@ -234,7 +234,7 @@ describe('Fragment', () => {
 		]);
 	});
 
-	it.skip('should preserve state of children with 1 level nesting', () => {
+	it('should preserve state of children with 1 level nesting', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Stateful key="a" />
