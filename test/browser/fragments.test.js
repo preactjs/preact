@@ -485,7 +485,6 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	// TODO: Investigate
 	it('should preserve state between top level fragment and array', () => {
 		function Foo({ condition }) {
 			return condition ? (

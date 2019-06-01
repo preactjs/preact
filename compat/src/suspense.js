@@ -16,9 +16,6 @@ export function catchRender(error, component) {
 }
 
 function removeDom(children) {
-	// TODO: We need to recurse down the tree cuz _dom pointers aren't bubbled up
-	// when a component suspends. See comment about "early exit" in diff/index.js
-	// for a possible resolution
 	for (let i = 0; i < children.length; i++) {
 		let child = children[i];
 		if (child != null) {
