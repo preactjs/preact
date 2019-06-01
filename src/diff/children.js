@@ -75,14 +75,16 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 						oldChildren[j] = undefined;
 						break;
 					}
-					oldVNode = EMPTY_OBJ;
+					oldVNode = null;
 				}
 			}
 
-			// Morph the old element into the new one, but don't append it to the dom yet
-			newDom = diff(parentDom, childVNode, oldVNode || EMPTY_OBJ, context, isSvg, excessDomChildren, mounts, ancestorComponent, null, oldDom);
+			oldVNode = oldVNode || EMPTY_OBJ;
 
-			if ((j = childVNode.ref) && (oldVNode || EMPTY_OBJ).ref != j) {
+			// Morph the old element into the new one, but don't append it to the dom yet
+			newDom = diff(parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, null, oldDom);
+
+			if ((j = childVNode.ref) && oldVNode.ref != j) {
 				(refs || (refs=[])).push(j, childVNode._component || newDom);
 			}
 
