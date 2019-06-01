@@ -832,6 +832,33 @@ describe('Fragment', () => {
 		]);
 	});
 
+	it('should render nested Fragments with siblings', () => {
+		clearLog();
+		render((
+			<div>
+				<div>0</div>
+				<div>1</div>
+				<Fragment>
+					<Fragment>
+						<div>2</div>
+						<div>3</div>
+					</Fragment>
+				</Fragment>
+				<div>4</div>
+				<div>5</div>
+			</div>
+		), scratch);
+
+		expect(scratch.innerHTML).to.equal(div([
+			div(0),
+			div(1),
+			div(2),
+			div(3),
+			div(4),
+			div(5)
+		].join('')));
+	});
+
 	it('should respect keyed Fragments', () => {
 
 		/** @type {() => void} */
@@ -1652,7 +1679,7 @@ describe('Fragment', () => {
 			'<div>.appendChild(<div>3)',
 			'<div>.appendChild(#text)',
 			'<div>3.appendChild(<div>4)',
-			'<div>12.insertBefore(<div>34, <div>2)',
+			'<div>12.insertBefore(<div>34, <div>1)',
 			'<div>1.remove()',
 			'<div>2.remove()'
 		], 'rendering from true to false');

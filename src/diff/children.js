@@ -90,6 +90,10 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 			// Only proceed if the vnode has not been unmounted by `diff()` above.
 			if (newDom!=null) {
+				if (firstChildDom == null) {
+					firstChildDom = newDom;
+				}
+
 				if (childVNode._lastDomChild != null) {
 					// Only Fragments or components that return Fragment like VNodes will
 					// have a non-null _lastDomChild. Continue the diff from the end of
@@ -117,12 +121,10 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 				oldDom = newDom.nextSibling;
 
-				if (firstChildDom == null) {
-					firstChildDom = newDom;
-				}
-
 				if (typeof newParentVNode.type == 'function') {
-					newParentVNode._lastDomChild = childVNode._lastDomChild != null ? childVNode._lastDomChild : newDom;
+					// At this point, if childVNode._lastDomChild existed, then
+					// newDom = childVNode._lastDomChild per line 101
+					newParentVNode._lastDomChild = newDom;
 				}
 			}
 		}
