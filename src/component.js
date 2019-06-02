@@ -71,9 +71,6 @@ Component.prototype.forceUpdate = function(callback) {
 
 		let mounts = [];
 		dom = diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, this._ancestorComponent, force, dom);
-		if (dom!=null && dom.parentNode!==parentDom) {
-			parentDom.appendChild(dom);
-		}
 		commitRoot(mounts, vnode);
 	}
 	if (callback) callback();
