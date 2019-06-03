@@ -88,6 +88,39 @@ Component.prototype.forceUpdate = function(callback) {
 Component.prototype.render = Fragment;
 
 /**
+ * @param {import('./internal').VNode} vnode
+ * @param {number | null} [childIndex]
+ */
+export function getDomSibling(vnode, childIndex) {
+	if (childIndex == null) {
+		// Use childIndex==null as a signal to resume the search from the vnode's sibling
+		if (vnode._parent) {
+			// TODO: assumes all vnodes have _children. Add tests using real components that
+			// may not have _children
+			return getDomSibling(vnode._parent, vnode._parent._children.indexOf(vnode) + 1);
+		}
+		else {
+			return null;
+		}
+	}
+
+	let sibling;
+	for (; childIndex < vnode._children.length; childIndex++) {
+		sibling = vnode._children[childIndex];
+
+		if (sibling != null) {
+			return typeof sibling.type !== 'function'
+				? sibling._dom
+				: getDomSibling(sibling, 0);
+		}
+	}
+
+	// If we get here, we have not found a DOM node in this vnode's children.
+	// We must resume from this vnode's sibling (in it's parent _children array)
+	return getDomSibling(vnode);
+}
+
+/**
  * The render queue
  * @type {Array<import('./internal').Component>}
  */
