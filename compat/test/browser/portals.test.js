@@ -51,6 +51,54 @@ describe('Portal', () => {
 		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div>');
 	});
 
+	it('should toggle the portal', () => {
+		let toggle;
+
+		function Foo(props) {
+			const [mounted, setMounted] = useState(true);
+			toggle = () => setMounted((s) => !s);
+			return (
+				<div>
+					<p>Hello</p>
+					{mounted && createPortal(props.children, scratch)}
+				</div>
+			);
+		}
+
+		render(<Foo><div>foobar</div></Foo>, scratch);
+		expect(scratch.innerHTML).to.equal('<div>foobar</div><div><p>Hello</p></div>');
+
+		toggle();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div>');
+
+		toggle();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>foobar</div><div><p>Hello</p></div>');
+	});
+
+	it('should notice prop changes on the portal', () => {
+		let set;
+
+		function Foo(props) {
+			const [additionalProps, setProps] = useState({ style: { background: 'red' } });
+			set = (c) => setProps(c);
+			return (
+				<div>
+					<p>Hello</p>
+					{createPortal(<p {...additionalProps}>Foo</p>, scratch)}
+				</div>
+			);
+		}
+
+		render(<Foo />, scratch);
+		expect(scratch.firstChild.style.background).to.equal('red');
+
+		set({});
+		rerender();
+		expect(scratch.firstChild.style.background).to.equal('');
+	});
+
 	it('should not render <undefined> for Portal nodes', () => {
 		let root = document.createElement('div');
 		let dialog = document.createElement('div');
