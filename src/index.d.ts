@@ -172,7 +172,7 @@ declare namespace preact {
 	// -----------------------------------
 
 	// TODO: Revisit what the public type of this is...
-	const Fragment: ComponentClass<{}, {}>;
+	const Fragment: ComponentClass<Attributes, {}>;
 
 	//
 	// Preact options
