@@ -54,6 +54,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 		if (childVNode!=null) {
 			childVNode._parent = newParentVNode;
+			childVNode._depth = newParentVNode._depth + 1;
 
 			// Check if we find a corresponding element in oldChildren.
 			// If found, delete the array item by setting to `undefined`.

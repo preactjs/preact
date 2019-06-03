@@ -128,8 +128,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			// TODO: Fix
-			c._depth = newVNode._depth ? (newVNode._depth || 0) + 1 : 0;
 			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, oldDom);
 
 			// Only change the fields on the component once they represent the new state of the DOM
