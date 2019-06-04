@@ -1,4 +1,4 @@
-import { createElement, render, Component, FunctionalComponent, AnyComponent } from "../../src";
+import { createElement, render, Component, FunctionalComponent, AnyComponent, h } from "../../src";
 
 interface DummyProps {
 	initialInput: string;
@@ -42,6 +42,9 @@ function DummerComponent({ input, initialInput }: DummerComponentProps) {
 render(createElement('div', { title: "test", key: "1" }), document);
 render(createElement(DummyComponent, { initialInput: "The input", key: "1" }), document);
 render(createElement(DummerComponent, { initialInput: "The input", input: "New input", key: "1"}), document);
+render(h('div', { title: "test", key: "1" }), document);
+render(h(DummyComponent, { initialInput: "The input", key: "1" }), document);
+render(h(DummerComponent, { initialInput: "The input", input: "New input", key: "1"}), document);
 
 // Accessing children
 const ComponentWithChildren: FunctionalComponent<DummerComponentProps> = (

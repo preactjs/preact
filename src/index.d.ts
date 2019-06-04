@@ -150,7 +150,16 @@ declare namespace preact {
 		export import JSX = JSXInternal;
 	}
 
-	type h = typeof createElement;
+	function h(
+		type: string,
+		props: JSXInternal.HTMLAttributes & JSXInternal.SVGAttributes & Record<string, any> | null,
+		...children: ComponentChildren[]
+	): VNode<any>;
+	function h<P>(
+		type: ComponentType<P>,
+		props: Attributes & P | null,
+		...children: ComponentChildren[]
+	): VNode<any>;
 	namespace h {
 		export import JSX = JSXInternal;
 	}
@@ -200,12 +209,12 @@ declare namespace preact {
 		diffed?(vnode: VNode): void;
 		/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
 		catchError?(error: any, component: Component): void;
-		/** 
+		/**
 		 * Attach a hook that is invoked after an error is caught while executing render.
-		 * 
+		 *
 		 * When this hook returns true, the diffing on the affected vnode will be stopped.
 		 * When this hook returns false, the error will be thrown (and thus passed to catchError or lifecycle hooks)
-		 * 
+		 *
 		 * @return Return a boolean indicating whether the error was handled by the hook or not
 		 */
 		catchRender?(error: any, component: Component): boolean;
