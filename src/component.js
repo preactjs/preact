@@ -94,14 +94,9 @@ Component.prototype.render = Fragment;
 export function getDomSibling(vnode, childIndex) {
 	if (childIndex == null) {
 		// Use childIndex==null as a signal to resume the search from the vnode's sibling
-		if (vnode._parent) {
-			// TODO: assumes all vnodes have _children. Add tests using real components that
-			// may not have _children
-			return getDomSibling(vnode._parent, vnode._parent._children.indexOf(vnode) + 1);
-		}
-		else {
-			return null;
-		}
+		return vnode._parent
+			? getDomSibling(vnode._parent, vnode._parent._children.indexOf(vnode) + 1)
+			: null;
 	}
 
 	let sibling;
@@ -117,7 +112,10 @@ export function getDomSibling(vnode, childIndex) {
 
 	// If we get here, we have not found a DOM node in this vnode's children.
 	// We must resume from this vnode's sibling (in it's parent _children array)
-	return getDomSibling(vnode);
+	// Only climb up and search the parent if we aren't searching through a DOM
+	// VNode (meaning we reached the DOM parent of the original vnode that began
+	// the search)
+	return typeof vnode.type === 'function' ? getDomSibling(vnode) : null;
 }
 
 /**

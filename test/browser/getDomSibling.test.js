@@ -330,4 +330,24 @@ describe('getDomSibling', () => {
 		let divAVNode = getRoot(scratch)._children[0]._children[0]._children[0]._children[0]._children[0];
 		expect(getDomSibling(divAVNode)).to.equal(null);
 	});
+
+	it('should return null if current parent has no siblings (even if parent has siblings at same level)', () => {
+		let divAVNode = <div key="A">A</div>;
+
+		render((
+			<div key="0">
+				<div key="0.0">
+					<div key="0.0.0" />
+					{divAVNode}
+					<Fragment key="0.1.2" />
+				</div>
+				<div key="0.1">
+					<Fragment key="0.1.0" />
+					<div key="B">B</div>
+				</div>
+			</div>
+		), scratch);
+
+		expect(getDomSibling(divAVNode)).to.equal(null);
+	});
 });
