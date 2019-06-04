@@ -270,7 +270,7 @@ describe('preact-compat', () => {
 
 		it('should return a regular DOM Element if given a regular DOM Element', () => {
 			let scratch = document.createElement('div');
-			expect(findDOMNode(scratch)).to.equal(scratch);
+			expect(findDOMNode(scratch)).to.equalNode(scratch);
 		}),
 
 		// NOTE: React.render() returning false or null has the component pointing
