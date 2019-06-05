@@ -215,7 +215,7 @@ function applyEventNormalization({ type, props }) {
  * @returns {boolean}
  */
 function unmountComponentAtNode(container) {
-	if (container._prevVNode) {
+	if (container._children) {
 		preactRender(null, container);
 		return true;
 	}

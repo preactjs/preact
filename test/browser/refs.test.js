@@ -83,7 +83,7 @@ describe('refs', () => {
 
 		ref.resetHistory();
 		render(<Foo ref={ref} />, scratch);
-		expect(ref).to.have.been.calledOnce;
+		expect(ref).not.to.have.been.called;
 
 		ref.resetHistory();
 		render(<span />, scratch);
@@ -127,7 +127,7 @@ describe('refs', () => {
 		inner.resetHistory();
 		update();
 
-		expect(outer, 're-render').to.have.been.calledOnce.and.calledWith(inst);
+		expect(outer, 're-render').not.to.have.been.called;
 		expect(inner, 're-render').not.to.have.been.called;
 
 		inner.resetHistory();
@@ -184,8 +184,8 @@ describe('refs', () => {
 		innermost.resetHistory();
 		render(<Outer ref={outer} />, scratch);
 
-		expect(outer, 'outer update').to.have.been.calledOnce.and.calledWith(outerInst);
-		expect(inner, 'inner update').to.have.been.calledOnce.and.calledWith(innerInst);
+		expect(outer, 'outer update').not.to.have.been.called;
+		expect(inner, 'inner update').not.to.have.been.called;
 		expect(innermost, 'innerMost update').not.to.have.been.called;
 
 		innermost.resetHistory();

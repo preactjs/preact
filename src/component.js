@@ -26,7 +26,6 @@ export function Component(props, context) {
 	// this._ancestorComponent = null; // Always set right after instantiation
 	// this._vnode = null;
 	// this._nextState = null; // Only class components
-	// this._prevVNode = null;
 	// this._processingException = null; // Always read, set only when handling error
 	// this._pendingError = null; // Always read, set only when handling error. This is used to indicate at diffTime to set _processingException
 }
@@ -71,10 +70,7 @@ Component.prototype.forceUpdate = function(callback) {
 		const force = callback!==false;
 
 		let mounts = [];
-		dom = diff(parentDom, vnode, vnode, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, this._ancestorComponent, force, dom);
-		if (dom!=null && dom.parentNode!==parentDom) {
-			parentDom.appendChild(dom);
-		}
+		diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, this._ancestorComponent, force, dom);
 		commitRoot(mounts, vnode);
 	}
 	if (callback) callback();

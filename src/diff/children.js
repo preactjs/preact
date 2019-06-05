@@ -1,5 +1,5 @@
-import { diff, unmount } from './index';
-import { coerceToVNode, Fragment } from '../create-element';
+import { diff, unmount, applyRef } from './index';
+import { coerceToVNode } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { removeNode } from '../util';
 
@@ -24,7 +24,7 @@ import { removeNode } from '../util';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
 export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, oldDom) {
-	let childVNode, i, j, oldVNode, newDom, sibDom;
+	let childVNode, i, j, oldVNode, newDom, sibDom, firstChildDom, refs;
 
 	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode, true);
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
@@ -79,11 +79,21 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 				}
 			}
 
+			oldVNode = oldVNode || EMPTY_OBJ;
+
 			// Morph the old element into the new one, but don't append it to the dom yet
 			newDom = diff(parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, null, oldDom);
 
+			if ((j = childVNode.ref) && oldVNode.ref != j) {
+				(refs || (refs=[])).push(j, childVNode._component || newDom);
+			}
+
 			// Only proceed if the vnode has not been unmounted by `diff()` above.
 			if (newDom!=null) {
+				if (firstChildDom == null) {
+					firstChildDom = newDom;
+				}
+
 				if (childVNode._lastDomChild != null) {
 					// Only Fragments or components that return Fragment like VNodes will
 					// have a non-null _lastDomChild. Continue the diff from the end of
@@ -110,15 +120,30 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 				}
 
 				oldDom = newDom.nextSibling;
+
+				if (typeof newParentVNode.type == 'function') {
+					// At this point, if childVNode._lastDomChild existed, then
+					// newDom = childVNode._lastDomChild per line 101
+					newParentVNode._lastDomChild = newDom;
+				}
 			}
 		}
 	}
 
-	// Remove children that are not part of any vnode. Only used by `hydrate`
-	if (excessDomChildren!=null && newParentVNode.type!==Fragment) for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
+	newParentVNode._dom = firstChildDom;
+
+	// Remove children that are not part of any vnode.
+	if (excessDomChildren!=null && typeof newParentVNode.type !== 'function') for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
 
 	// Remove remaining oldChildren if there are any.
 	for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], ancestorComponent);
+
+	// Set refs only after unmount
+	if (refs) {
+		for (i = 0; i < refs.length; i++) {
+			applyRef(refs[i], refs[++i], ancestorComponent);
+		}
+	}
 }
 
 /**
