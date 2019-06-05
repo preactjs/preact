@@ -1,9 +1,7 @@
 import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
 import options from './options';
-import { Fragment, createElement } from './create-element';
-import { diffChildren } from './diff/children';
-import { cloneElement } from './clone-element';
+import { Fragment } from './create-element';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -63,50 +61,16 @@ Component.prototype.setState = function(update, callback) {
  * re-renderd
  */
 Component.prototype.forceUpdate = function(callback) {
-	let oldVNode = this._vnode, parentDom = this._parentDom;
+	let vnode = this._vnode, dom = this._vnode._dom, parentDom = this._parentDom;
 	if (parentDom) {
 		// Set render mode so that we can differantiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
 		const force = callback!==false;
 
-		// // let oldRoot = createElement(Fragment, {}, vnode);
-		// // oldRoot._children = [vnode];
-		// // let newRoot = createElement(Fragment, {}, cloneElement(vnode));
-
-		// // let oldVNodeCopy = assign({}, oldVNode);
-		// // let oldRoot = createElement(Fragment, {}, oldVNodeCopy);
-		// // oldRoot._children = [oldVNodeCopy];
-		// // let newRoot = createElement(Fragment, {}, oldVNode);
-
-		// let oldRoot = { _children: [assign({}, oldVNode)] };
-		// let newRoot = { _children: [oldVNode] };
-
-		// // TODO: Consider passing in vnode._parent and the index to start and stop at:
-		// // start (i): vnode._parent._children.indexOf(vnode)
-		// // end (newChildrenLength): vnode._parent._children.indexOf(vnode) + 1
-		// let oldDom = oldVNode._dom !== oldVNode._lastDomChild ? getDomSibling(oldVNode) : oldVNode._dom;
-		// let mounts = [];
-		// diffChildren(parentDom, newRoot, oldRoot, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, oldDom, force);
-		// commitRoot(mounts, oldVNode);
-
-		// let newVNode = newRoot._children[0];
-		// if (newVNode !== oldVNode) {
-		// 	oldVNode._parent._children.splice(oldVNode._parent._children.indexOf(oldVNode), 1, newVNode);
-		// }
-
-
-		let parentVNode = oldVNode._parent;
-		let parentIndex = parentVNode._children.indexOf(oldVNode);
-
-		let oldParentVNode = assign({}, parentVNode);
-		// TODO: Could I skip this if I bring back coerceToVNode in diffChildren? Might need to bring back splice then
-		oldParentVNode._children = oldParentVNode._children.map((value) => assign({}, value));
-
-		let oldDom = oldVNode._dom !== oldVNode._lastDomChild ? getDomSibling(oldVNode) : oldVNode._dom;
 		let mounts = [];
-		diffChildren(parentDom, parentVNode, oldParentVNode, this._context, parentDom.ownerSVGElement!==undefined, null, mounts, oldDom, force, parentIndex, parentIndex + 1);
-		commitRoot(mounts, oldVNode);
+		diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, force, dom);
+		commitRoot(mounts, vnode);
 	}
 	if (callback) callback();
 };

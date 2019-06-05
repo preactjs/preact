@@ -20,19 +20,15 @@ import { removeNode } from '../util';
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
- * @param {boolean} [force]
- * @param {number} [resumeIndex]
- * @param {number} [newChildrenLength]
  */
-export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, oldDom, force, resumeIndex, newChildrenLength) {
+export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, oldDom) {
 	let childVNode, i, j, oldVNode, newDom, sibDom, firstChildDom, refs;
 
-	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], force == null ? coerceToVNode : null, true);
+	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode, true);
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
 
-	newChildrenLength = newChildrenLength == null ? newChildren.length : newChildrenLength;
 	let oldChildrenLength = oldChildren.length;
 
 	// Only in very specific places should this logic be invoked (top level `render` and `diffElementNodes`).
@@ -53,8 +49,8 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		}
 	}
 
-	for (i = resumeIndex == null ? 0 : resumeIndex; i<newChildren.length; i++) {
-		childVNode = newChildren[i] = force == null ? coerceToVNode(newChildren[i]) : newChildren[i];
+	for (i=0; i<newChildren.length; i++) {
+		childVNode = newChildren[i] = coerceToVNode(newChildren[i]);
 
 		if (childVNode!=null) {
 			childVNode._parent = newParentVNode;
@@ -87,7 +83,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			oldVNode = oldVNode || EMPTY_OBJ;
 
 			// Morph the old element into the new one, but don't append it to the dom yet
-			newDom = diff(parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, force, oldDom);
+			newDom = diff(parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, null, oldDom);
 
 			if ((j = childVNode.ref) && oldVNode.ref != j) {
 				(refs || (refs=[])).push(j, childVNode._component || newDom);
@@ -141,7 +137,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	if (excessDomChildren!=null && typeof newParentVNode.type !== 'function') for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
 
 	// Remove remaining oldChildren if there are any.
-	if (resumeIndex == null) for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], newParentVNode);
+	for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], newParentVNode);
 
 	// Set refs only after unmount
 	if (refs) {
