@@ -10,8 +10,9 @@ export function initDebug() {
 	let oldVnode = options.vnode;
 	const warnedComponents = { useEffect: {}, useLayoutEffect: {}, lazyPropTypes: {} };
 
-	options.catchError = (error, component) => {
-		if (typeof error.then === 'function') {
+	options.catchError = (error, vnode) => {
+		let component = vnode._component;
+		if (component && typeof error.then === 'function') {
 			error = new Error('Missing Suspense. The throwing component was: ' + (component.displayName || component.name));
 		}
 	};
