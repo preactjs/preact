@@ -84,6 +84,7 @@ Preact supports modern browsers and IE9+:
 - [**YASCC**](https://carlosqsilva.github.io/YASCC/#/) Yet Another SoundCloud Client _([Github project](https://github.com/carlosqsilva/YASCC))_.
 - [**Journalize**](https://preact-journal.herokuapp.com/) 14k offline-capable journaling PWA using preact. _([Github project](https://github.com/jpodwys/preact-journal))_.
 - [**Proxx**](https://proxx.app) A game of proximity by GoogleChromeLabs using preact. _([Github project](https://github.com/GoogleChromeLabs/proxx))_.
+- [**LimeApp**](https://libremesh.github.io/lime-app/#/) Simple, lightweight and scalable PWA for diagnosis of LibreMesh nodes _([Github project](https://github.com/libremesh/lime-app))_.
 
 
 #### Runnable Examples
