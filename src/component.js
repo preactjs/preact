@@ -23,7 +23,6 @@ export function Component(props, context) {
 	// shown here as commented out for quick reference
 	// this.base = null;
 	// this._context = null;
-	// this._ancestorComponent = null; // Always set right after instantiation
 	// this._vnode = null;
 	// this._nextState = null; // Only class components
 	// this._processingException = null; // Always read, set only when handling error
@@ -70,7 +69,7 @@ Component.prototype.forceUpdate = function(callback) {
 		const force = callback!==false;
 
 		let mounts = [];
-		diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, this._ancestorComponent, force, dom);
+		diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, force, dom);
 		commitRoot(mounts, vnode);
 	}
 	if (callback) callback();

@@ -26,6 +26,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	// Redefine type here using our internal ComponentFactory type
 	type: string | ComponentFactory<P> | null;
 	_children: Array<VNode> | null;
+	_parent: VNode | null;
 	/**
 	 * The [first (for Fragments)] DOM child of a VNode
 	 */
@@ -55,7 +56,6 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	 * components or array returns.
 	 */
 	_parentDom?: PreactElement | null;
-	_ancestorComponent?: Component<any, any>;
 	_processingException?: Component<any, any> | null;
 	_pendingError?: Component<any, any> | null;
 }
