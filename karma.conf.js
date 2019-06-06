@@ -127,8 +127,8 @@ module.exports = function(config) {
 						exclude: /node_modules/,
 						loader: 'babel-loader',
 						options: {
-							comments: false,
-							compact: true,
+							// comments: false,
+							// compact: true,
 							plugins: coverage ?
 								[['istanbul', {
 									exclude: [

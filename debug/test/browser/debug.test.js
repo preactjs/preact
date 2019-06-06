@@ -283,9 +283,7 @@ describe('debug', () => {
 			}
 
 			render(<App />, scratch);
-			// The error is printed twice. Once for children of <List>
-			// and again for children of <ul> (since List returns props.children)
-			expect(console.error).to.be.calledTwice;
+			expect(console.error).to.be.calledOnce;
 		});
 
 		it('should print an error on duplicate keys with Fragments', () => {
@@ -302,16 +300,14 @@ describe('debug', () => {
 								<ListItem key="c">e</ListItem>
 							</Fragment>
 							<ListItem key="f">f</ListItem>
-						</List>,
+						</List>
 						<div key="list">sibling</div>
 					</Fragment>
 				);
 			}
 
 			render(<App />, scratch);
-			// One error is printed twice. Once for children of <List>
-			// and again for children of <ul> (since List returns props.children)
-			expect(console.error).to.be.calledThrice;
+			expect(console.error).to.be.calledTwice;
 		});
 	});
 
