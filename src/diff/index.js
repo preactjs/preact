@@ -1,7 +1,7 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component, enqueueRender } from '../component';
 import { coerceToVNode, Fragment } from '../create-element';
-import { diffChildren } from './children';
+import { diffChildren, toChildArray } from './children';
 import { diffProps } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
@@ -24,13 +24,6 @@ import options from '../options';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
 export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force, oldDom) {
-	// If the previous type doesn't match the new type we drop the whole subtree
-	if (oldVNode==null || newVNode==null || oldVNode.type!==newVNode.type || oldVNode.key!==newVNode.key) {
-		if (oldVNode!=null) unmount(oldVNode, ancestorComponent);
-		if (newVNode==null) return null;
-		oldVNode = EMPTY_OBJ;
-	}
-
 	let c, tmp, isNew, oldProps, oldState, snapshot,
 		newType = newVNode.type, clearProcessingException;
 
@@ -41,30 +34,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 	if (tmp = options.diff) tmp(newVNode);
 
 	try {
-		outer: if (oldVNode.type===Fragment || newType===Fragment) {
-			// Passing the ancestorComponent instead of c here is needed for catchErrorInComponent
-			// to properly traverse upwards through fragments to find a parent Suspense
-			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, oldDom);
-
-			// Mark dom as empty in case `_children` is any empty array. If it isn't
-			// we'll set `dom` to the correct value just a few lines later.
-
-			let i = newVNode._children.length;
-			if (i && (tmp=newVNode._children[0]) != null) {
-				newVNode._dom = tmp._dom;
-
-				// If the last child is a Fragment, use _lastDomChild, else use _dom
-				// We have no guarantee that the last child rendered something into the
-				// dom, so we iterate backwards to find the last child with a dom node.
-				while (i--) {
-					tmp = newVNode._children[i];
-					if (newVNode._lastDomChild = (tmp && (tmp._lastDomChild || tmp._dom))) {
-						break;
-					}
-				}
-			}
-		}
-		else if (typeof newType==='function') {
+		outer: if (typeof newType==='function') {
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
@@ -76,7 +46,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
 				clearProcessingException = c._processingException = c._pendingError;
-				newVNode._dom = oldVNode._dom;
 			}
 			else {
 				// Instantiate the new component
@@ -98,8 +67,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				isNew = c._dirty = true;
 				c._renderCallbacks = [];
 			}
-
-			c._vnode = newVNode;
 
 			// Invoke getDerivedStateFromProps
 			if (c._nextState==null) {
@@ -123,7 +90,10 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 					c.props = newVNode.props;
 					c.state = c._nextState;
 					c._dirty = false;
+					c._vnode = newVNode;
+					newVNode._dom = oldVNode._dom;
 					newVNode._lastDomChild = oldVNode._lastDomChild;
+					newVNode._children = oldVNode._children;
 					break outer;
 				}
 
@@ -141,12 +111,12 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			if (tmp = options.render) tmp(newVNode);
 
-			let prev = c._prevVNode || null;
 			c._dirty = false;
-			let vnode;
-			
+
 			try {
-				vnode = c._prevVNode = coerceToVNode(c.render(c.props, c.state, c.context));
+				tmp = c.render(c.props, c.state, c.context);
+				let isTopLevelFragment = tmp != null && tmp.type == Fragment && tmp.key == null;
+				toChildArray(isTopLevelFragment ? tmp.props.children : tmp, newVNode._children=[], coerceToVNode, true);
 			}
 			catch (e) {
 				if ((tmp = options.catchRender) && tmp(e, c)) return;
@@ -162,18 +132,12 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 
 			c._depth = ancestorComponent ? (ancestorComponent._depth || 0) + 1 : 0;
-			c.base = newVNode._dom = diff(parentDom, vnode, prev, context, isSvg, excessDomChildren, mounts, c, null, oldDom);
+			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, c, oldDom);
 
-			if (vnode!=null) {
-				// If this component returns a Fragment (or another component that
-				// returns a Fragment), then _lastDomChild will be non-null,
-				// informing `diffChildren` to diff this component's VNode like a Fragemnt
-				newVNode._lastDomChild = vnode._lastDomChild;
-			}
-
+			// Only change the fields on the component once they represent the new state of the DOM
+			c.base = newVNode._dom;
+			c._vnode = newVNode;
 			c._parentDom = parentDom;
-
-			if (tmp = newVNode.ref) applyRef(tmp, c, ancestorComponent);
 
 			while (tmp=c._renderCallbacks.pop()) tmp.call(c);
 
@@ -185,10 +149,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		}
 		else {
 			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
-
-			if ((tmp = newVNode.ref) && (oldVNode.ref !== tmp)) {
-				applyRef(tmp, newVNode._dom, ancestorComponent);
-			}
 		}
 
 		if (clearProcessingException) {
@@ -296,8 +256,9 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 
 /**
  * Invoke or update a ref, depending on whether it is a function or object ref.
- * @param {object|function} [ref=null]
- * @param {any} [value]
+ * @param {object|function} ref
+ * @param {any} value
+ * @param {import('../internal').Component} ancestorComponent
  */
 export function applyRef(ref, value, ancestorComponent) {
 	try {
@@ -343,9 +304,9 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 		}
 
 		r.base = r._parentDom = null;
-		if (r = r._prevVNode) unmount(r, ancestorComponent, skipRemove);
 	}
-	else if (r = vnode._children) {
+
+	if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {
 			if (r[i]) unmount(r[i], ancestorComponent, skipRemove);
 		}
