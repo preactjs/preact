@@ -20,9 +20,9 @@ options.event = e => {
 };
 
 let oldCatchRender = options.catchRender;
-options.catchRender = (error, component) => {
-	return oldCatchRender && oldCatchRender(error, component) || catchRender(error, component);
-};
+options.catchRender = (error, component) => (
+	oldCatchRender && oldCatchRender(error, component) || catchRender(error, component)
+);
 
 /**
  * Legacy version of createElement.
