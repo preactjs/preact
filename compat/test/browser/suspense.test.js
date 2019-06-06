@@ -1,7 +1,7 @@
 /*eslint-env browser, mocha */
 /** @jsx h */
 import { setupRerender } from 'preact/test-utils';
-import { createElement as h, render, Component, Suspense, lazy, Fragment } from '../../src/index';
+import { createElement as h, render, Component, Suspense, lazy, Fragment, createContext } from '../../src/index';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { enqueueRender } from '../../../src/component';
 
@@ -18,6 +18,10 @@ class Suspendable extends Component {
 		['render'].forEach((method) => {
 			this.spies[method] = sinon.spy(this, method);
 		});
+
+		if (props.suspend) {
+			this.suspend(false);
+		}
 	}
 	suspend(update) {
 		this.promise = new Promise((res, rej) => {
@@ -118,7 +122,7 @@ describe('suspense', () => {
 				<Lazy />
 			</Suspense>
 		);
-		
+
 		render(suspense, scratch);
 
 		return suspense._component.__test__suspensions_timeout_race.then(() => {
@@ -149,7 +153,7 @@ describe('suspense', () => {
 				</ClassWrapper>
 			</Suspense>
 		);
-		
+
 		render(suspense, scratch);
 
 		expect(scratch.innerHTML).to.eql(
@@ -171,6 +175,188 @@ describe('suspense', () => {
 					rerender();
 					expect(scratch.innerHTML).to.eql(
 						`<div id="class-wrapper"><div id="func-wrapper"><div>Hello</div></div></div>`
+					);
+				});
+		});
+	});
+
+	it('should support lazy throughout createContext', () => {
+		const ctx = createContext();
+
+		let resolve;
+
+		const Lazy = lazy(() => {
+			const p = new Promise((res) => {
+				resolve = () => {
+					res({ default: LazyComp });
+					return p;
+				};
+			});
+
+			return p;
+		});
+
+		const suspense = (
+			<Suspense fallback={<div>Suspended...</div>}>
+				<ctx.Provider value="123">
+					<ctx.Consumer>
+						{() => (
+							<Lazy />
+						)}
+					</ctx.Consumer>
+				</ctx.Provider>
+			</Suspense>
+		);
+
+		render(suspense, scratch);
+
+		return suspense._component.__test__suspensions_timeout_race.then(() => {
+			expect(scratch.innerHTML).to.eql(
+				`<div>Suspended...</div>`
+			);
+
+			return resolve()
+				.then(() => Promise.all(suspense._component._suspensions))
+				.then(() => {
+					rerender();
+					expect(scratch.innerHTML).to.eql(
+						`<div>Hello from LazyComp</div>`
+					);
+				});
+		});
+	});
+
+	it('should work throughout createContext', () => {
+		const s = <Suspendable render={() => <div>Hello</div>} />;
+		const ctx = createContext();
+
+		const suspense = (
+			<Suspense fallback={<div>Suspended...</div>}>
+				<ctx.Provider value="123">
+					<ctx.Consumer>
+						{() => s}
+					</ctx.Consumer>
+				</ctx.Provider>
+			</Suspense>
+		);
+
+		render(suspense, scratch);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Hello</div>`
+		);
+
+		s._component.suspend();
+
+		rerender();
+
+		return suspense._component.__test__suspensions_timeout_race.then(() => {
+			expect(scratch.innerHTML).to.eql(
+				`<div>Suspended...</div>`
+			);
+
+			return s._component.resolve()
+				.then(() => Promise.all(suspense._component._suspensions))
+				.then(() => {
+					rerender();
+					expect(scratch.innerHTML).to.eql(
+						`<div>Hello</div>`
+					);
+				});
+		});
+	});
+
+	it('should work throughout sCU', () => {
+		class Scu extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+
+			render(props) {
+				return (
+					<div>
+						{props.children}
+					</div>
+				);
+			}
+		}
+		const s = <Suspendable render={() => <div>Hello</div>} />;
+
+		const suspense = (
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Scu>
+					{s}
+				</Scu>
+			</Suspense>
+		);
+
+		render(suspense, scratch);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>Hello</div></div>`
+		);
+
+		s._component.suspend();
+
+		rerender();
+
+		return suspense._component.__test__suspensions_timeout_race.then(() => {
+			expect(scratch.innerHTML).to.eql(
+				`<div>Suspended...</div>`
+			);
+
+			return s._component.resolve()
+				.then(() => Promise.all(suspense._component._suspensions))
+				.then(() => {
+					rerender();
+					expect(scratch.innerHTML).to.eql(
+						`<div><div>Hello</div></div>`
+					);
+				});
+		});
+	});
+
+	it('should work throughout sCU when initially being suspended', () => {
+		class Scu extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+
+			render(props) {
+				return (
+					<div>
+						{props.children}
+					</div>
+				);
+			}
+		}
+		const s = <Suspendable suspend render={() => <div>Hello</div>} />;
+
+		const suspense = (
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Scu>
+					<article>
+						{s}
+					</article>
+				</Scu>
+			</Suspense>
+		);
+
+		render(suspense, scratch);
+
+		rerender();
+
+		return suspense._component.__test__suspensions_timeout_race.then(() => {
+			expect(scratch.innerHTML).to.eql(
+				`<div>Suspended...</div>`
+			);
+
+			return s._component.resolve()
+				.then(() => Promise.all(suspense._component._suspensions))
+				.then(() => {
+					rerender();
+					expect(scratch.innerHTML).to.eql(
+						`<div><article><div>Hello</div></article></div>`
 					);
 				});
 		});
@@ -198,7 +384,7 @@ describe('suspense', () => {
 				<LifecycleLogger />
 			</Suspense>
 		);
-		
+
 		render(suspense, scratch);
 
 		expect(scratch.innerHTML).to.eql(
@@ -211,7 +397,7 @@ describe('suspense', () => {
 		s._component.suspend();
 
 		rerender();
-	
+
 		return suspense._component.__test__suspensions_timeout_race.then(() => {
 			expect(scratch.innerHTML).to.eql(
 				`<div>Suspended...</div>`
@@ -227,7 +413,7 @@ describe('suspense', () => {
 					expect(scratch.innerHTML).to.eql(
 						`<div>Suspense</div><div>Lifecycle</div>`
 					);
-			
+
 					expect(componentWillMount).to.have.been.calledOnce;
 					expect(componentDidMount).to.have.been.calledOnce;
 					expect(componentWillUnmount).to.not.have.been.called;
@@ -256,7 +442,7 @@ describe('suspense', () => {
 				{s}
 			</Suspense>
 		);
-		
+
 		render(suspense, scratch);
 
 		expect(scratch.innerHTML).to.eql(
@@ -269,7 +455,7 @@ describe('suspense', () => {
 		s._component.suspend();
 
 		rerender();
-	
+
 		return suspense._component.__test__suspensions_timeout_race.then(() => {
 			expect(scratch.innerHTML).to.eql(
 				`<div>Lifecycle</div>`
@@ -285,7 +471,7 @@ describe('suspense', () => {
 					expect(scratch.innerHTML).to.eql(
 						`<div>Suspense</div>`
 					);
-			
+
 					expect(componentWillMount).to.have.been.calledOnce;
 					expect(componentDidMount).to.have.been.calledOnce;
 					expect(componentWillUnmount).to.have.been.calledOnce;
@@ -315,7 +501,7 @@ describe('suspense', () => {
 				<Stateful />
 			</Suspense>
 		);
-		
+
 		render(suspense, scratch);
 
 		expect(scratch.innerHTML).to.eql(
@@ -586,7 +772,7 @@ describe('suspense', () => {
 			expect(s1._component.spies.render).to.have.been.calledTwice;
 			expect(s1._component.spies.render).to.have.been.calledTwice;
 			expect(suspense._component._suspensions.length).to.eql(2);
-	
+
 			return s1._component.resolve()
 				.then(() => {
 					rerender();
@@ -721,12 +907,12 @@ describe('suspense', () => {
 
 		s._component.suspend();
 		rerender();
-		
+
 		return suspense._component.__test__suspensions_timeout_race.then(() => {
 			expect(scratch.innerHTML).to.eql(
 				`Not suspended...<div>Suspended... 2</div>`
 			);
-			
+
 			return s._component.resolve()
 				.then(() => Promise.all(suspense._component._suspensions))
 				.then(() => {

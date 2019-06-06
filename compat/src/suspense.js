@@ -3,10 +3,11 @@ import { removeNode } from '../../src/util';
 
 export function catchRender(error, component) {
 	// thrown Promises are meant to suspend...
+	let suspendingComponent = component;
 	if (error.then) {
 		for (; component; component = component._ancestorComponent) {
 			if (component._childDidSuspend) {
-				component._childDidSuspend(error);
+				component._childDidSuspend(error, suspendingComponent);
 				return true;
 			}
 		}
@@ -34,6 +35,7 @@ export function Suspense(props) {
 	// we do not call super here to golf some bytes...
 	this._suspensions = [];
 }
+Suspense.displayName = 'Suspense';
 
 // Things we do here to save some bytes but are not proper JS inheritance:
 // - call `new Component()` as the prototype
@@ -43,7 +45,7 @@ Suspense.prototype = new Component();
 /**
  * @param {Promise} promise The thrown promise
  */
-Suspense.prototype._childDidSuspend = function(promise) {
+Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 	// saves 5B
 	const _this = this;
 
@@ -51,6 +53,14 @@ Suspense.prototype._childDidSuspend = function(promise) {
 	let len = _this._suspensions.length;
 
 	const suspensionsCompleted = () => {
+		// The following would allow us to call forceUpdate() on the comp itself but then
+		// we would need to delay _this forceUpdate() until all suspensions cleared as otherwise
+		// the component might get visible too soon
+		// suspendingComponent._parentDom = suspendingComponent._ancestorComponent.base
+		//                                  || suspendingComponent._ancestorComponent._parentDom;
+
+		suspendingComponent._ancestorComponent.forceUpdate();
+
 		// make sure we did not add any more suspensions
 		if (len === _this._suspensions.length) {
 			// clear old suspensions
@@ -117,8 +127,7 @@ export function lazy(loader) {
 
 	function Lazy(props) {
 		if (!prom) {
-			prom = loader();
-			prom.then(
+			prom = loader().then(
 				(exports) => { component = exports.default; },
 				(e) => { error = e; },
 			);
