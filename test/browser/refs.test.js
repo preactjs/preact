@@ -35,7 +35,7 @@ describe('refs', () => {
 		expect(r.current).to.equal(undefined);
 
 		render(<div ref={r} />, scratch);
-		expect(r.current).to.equal(scratch.firstChild);
+		expect(r.current).to.equalNode(scratch.firstChild);
 	});
 
 	it('should invoke refs in Component.render()', () => {

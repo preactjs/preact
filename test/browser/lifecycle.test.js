@@ -876,7 +876,7 @@ describe('Lifecycle methods', () => {
 
 					// Verify that the component is actually mounted when this
 					// callback is invoked.
-					expect(scratch.querySelector('#inner')).to.equal(this.base);
+					expect(scratch.querySelector('#inner')).to.equalNode(this.base);
 				}
 
 				render() {

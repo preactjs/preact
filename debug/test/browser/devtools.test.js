@@ -551,7 +551,7 @@ describe('devtools', () => {
 			let vnode = getRoot(scratch);
 			let rid = Object.keys(hook._renderers)[0];
 			let renderer = hook._renderers[rid];
-			expect(renderer.findHostInstanceByFiber(vnode)).to.equal(vnode._dom);
+			expect(renderer.findHostInstanceByFiber(vnode)).to.equalNode(vnode._dom);
 		});
 
 		it('should find vnode by dom node', () => {
@@ -568,7 +568,7 @@ describe('devtools', () => {
 			let vnode = getRoot(scratch);
 			let rid = Object.keys(hook._renderers)[0];
 			let helpers = hook.helpers[rid];
-			expect(helpers.getNativeFromReactElement(vnode)).to.equal(vnode._dom);
+			expect(helpers.getNativeFromReactElement(vnode)).to.equalNode(vnode._dom);
 		});
 
 		it('should getReactElementFromNative', () => {

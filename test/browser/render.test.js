@@ -646,7 +646,7 @@ describe('render()', () => {
 			// Re-render
 			thing.forceUpdate();
 
-			expect(firstInnerHTMLChild).to.equal(scratch.firstChild.firstChild);
+			expect(firstInnerHTMLChild).to.equalNode(scratch.firstChild.firstChild);
 		});
 	});
 
@@ -689,10 +689,8 @@ describe('render()', () => {
 			</div>
 		), scratch);
 
-		expect(scratch.firstChild.firstChild).to.have.property('nodeName', 'B');
-		expect(scratch.firstChild.lastChild).to.have.property('nodeName', 'A');
-		expect(scratch.firstChild.firstChild).to.equal(b);
-		expect(scratch.firstChild.lastChild).to.equal(a);
+		expect(scratch.firstChild.firstChild).to.equalNode(b);
+		expect(scratch.firstChild.lastChild).to.equalNode(a);
 	});
 
 	it('should not merge attributes with node created by the DOM', () => {
@@ -792,12 +790,12 @@ describe('render()', () => {
 		});
 
 		// Before Preact rerenders, focus should be on the input
-		expect(document.activeElement).to.equal(input);
+		expect(document.activeElement).to.equalNode(input);
 
 		rerender();
 
 		// After Preact rerenders, focus should remain on the input
-		expect(document.activeElement).to.equal(input);
+		expect(document.activeElement).to.equalNode(input);
 		expect(scratch.innerHTML).to.contain(`<span>${todoText}</span>`);
 	});
 
@@ -986,7 +984,7 @@ describe('render()', () => {
 		it('should use replaceNode as render root and not inject into it', () => {
 			const childA = scratch.querySelector('#a');
 			render(<div id="a">contents</div>, scratch, childA);
-			expect(scratch.querySelector('#a')).to.equal(childA);
+			expect(scratch.querySelector('#a')).to.equalNode(childA);
 			expect(childA.innerHTML).to.equal('contents');
 		});
 
