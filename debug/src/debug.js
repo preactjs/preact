@@ -1,6 +1,6 @@
 import { checkPropTypes } from './check-props';
 import { getDisplayName } from './devtools/custom';
-import { options, toChildArray } from 'preact';
+import { options } from 'preact';
 import { ELEMENT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants';
 
 export function initDebug() {
@@ -34,8 +34,7 @@ export function initDebug() {
 	};
 
 	options.diff = vnode => {
-		let { type, props } = vnode;
-		let children = props && props.children;
+		let { type } = vnode;
 
 		if (type===undefined) {
 			throw new Error('Undefined component passed to createElement()\n\n'+
@@ -93,27 +92,6 @@ export function initDebug() {
 				}
 			}
 			checkPropTypes(vnode.type.propTypes, vnode.props, getDisplayName(vnode), serializeVNode(vnode));
-		}
-
-		let keys = [];
-		for (let deepChild of toChildArray(children)) {
-			if (!deepChild || deepChild.key==null) continue;
-
-			let key = deepChild.key;
-
-			if (keys.indexOf(key) !== -1) {
-				console.error(
-					'Following component has two or more children with the ' +
-					`same key attribute: "${key}". This may cause glitches and misbehavior ` +
-					'in rendering process. Component: \n\n' +
-					serializeVNode(vnode)
-				);
-
-				// Break early to not spam the console
-				break;
-			}
-
-			keys.push(key);
 		}
 
 		if (oldBeforeDiff) oldBeforeDiff(vnode);
@@ -184,6 +162,29 @@ export function initDebug() {
 							'This effect can be found in the render of ' + (vnode.type.name || vnode.type) + '.');
 					}
 				});
+			}
+		}
+
+		if (vnode._children != null) {
+			const keys = [];
+			for (let i = 0; i < vnode._children.length; i++) {
+				const child = vnode._children[i];
+				if (!child || child.key==null) continue;
+
+				const key = child.key;
+				if (keys.indexOf(key) !== -1) {
+					console.error(
+						'Following component has two or more children with the ' +
+						`same key attribute: "${key}". This may cause glitches and misbehavior ` +
+						'in rendering process. Component: \n\n' +
+						serializeVNode(vnode)
+					);
+
+					// Break early to not spam the console
+					break;
+				}
+
+				keys.push(key);
 			}
 		}
 

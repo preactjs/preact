@@ -6,5 +6,5 @@ export function scheduleEffectAssert(assertFn) {
 				resolve();
 			}, 0)
 		);
-	})
+	});
 }

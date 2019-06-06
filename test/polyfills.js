@@ -21,3 +21,34 @@ if (!(function f() {}).name) {
 		}
 	});
 }
+
+/* global chai */
+chai.use((chai, util) => {
+	const Assertion = chai.Assertion;
+
+	Assertion.addMethod('equalNode', function (expectedNode, message) {
+		const obj = this._obj;
+
+		if (expectedNode == null) {
+			new Assertion(obj).to.equal(expectedNode);
+		}
+		else {
+			new Assertion(obj).to.be.instanceof(Node);
+			// new Assertion(obj).to.have.property('tagName', expectedNode.tagName);
+			this.assert(
+				obj.tagName === expectedNode.tagName,
+				`${message}: expected node to have tagName #{exp} but got #{act} instead.`,
+				`${message}: expected node to not have tagName #{act} instead.`,
+				expectedNode.tagName,
+				obj.tagName
+			);
+			this.assert(
+				obj === expectedNode,
+				`${message}: expected #{this} to be #{exp} but got #{act}`,
+				`${message}: expected #{this} not to be #{exp}`,
+				expectedNode,
+				obj
+			);
+		}
+	});
+});

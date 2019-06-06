@@ -228,16 +228,13 @@ describe('Fragment', () => {
 			span(2)
 		].join('')));
 		expectDomLogToBe([
-			'<span>1.remove()',
-			// TODO: Why is it re-appending all the children 😢
 			'<div>.appendChild(#text)',
-			'<div>22.appendChild(<div>1)',
-			'<div>221.appendChild(<span>2)',
-			'<div>212.appendChild(<span>2)'
+			'<div>122.insertBefore(<div>1, <span>1)',
+			'<span>1.remove()'
 		]);
 	});
 
-	it.skip('should preserve state of children with 1 level nesting', () => {
+	it('should preserve state of children with 1 level nesting', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Stateful key="a" />
@@ -396,9 +393,9 @@ describe('Fragment', () => {
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 		expectDomLogToBe([
-			'<div>Hello.remove()',
 			'<div>.appendChild(#text)',
-			'<div>.appendChild(<div>Hello)'
+			'<div>Hello.insertBefore(<div>Hello, <div>Hello)',
+			'<div>Hello.remove()'
 		]);
 
 		clearLog();
@@ -407,9 +404,9 @@ describe('Fragment', () => {
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 		expectDomLogToBe([
-			'<div>Hello.remove()',
 			'<div>.appendChild(#text)',
-			'<div>.appendChild(<div>Hello)'
+			'<div>Hello.insertBefore(<div>Hello, <div>Hello)',
+			'<div>Hello.remove()'
 		]);
 	});
 
@@ -832,6 +829,33 @@ describe('Fragment', () => {
 			'#text.remove()',
 			'#text.remove()'
 		]);
+	});
+
+	it('should render nested Fragments with siblings', () => {
+		clearLog();
+		render((
+			<div>
+				<div>0</div>
+				<div>1</div>
+				<Fragment>
+					<Fragment>
+						<div>2</div>
+						<div>3</div>
+					</Fragment>
+				</Fragment>
+				<div>4</div>
+				<div>5</div>
+			</div>
+		), scratch);
+
+		expect(scratch.innerHTML).to.equal(div([
+			div(0),
+			div(1),
+			div(2),
+			div(3),
+			div(4),
+			div(5)
+		].join('')));
 	});
 
 	it('should respect keyed Fragments', () => {
@@ -1650,13 +1674,13 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
 		expectDomLogToBe([
-			'<div>1.remove()',
-			'<div>2.remove()',
 			'<div>.appendChild(#text)',
 			'<div>.appendChild(<div>3)',
 			'<div>.appendChild(#text)',
 			'<div>3.appendChild(<div>4)',
-			'<div>.appendChild(<div>34)'
+			'<div>12.insertBefore(<div>34, <div>1)',
+			'<div>1.remove()',
+			'<div>2.remove()'
 		], 'rendering from true to false');
 
 		clearLog();
@@ -1664,11 +1688,11 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.equal(htmlForTrue);
 		expectDomLogToBe([
-			'<div>34.remove()',
 			'<div>.appendChild(#text)',
-			'<div>.appendChild(<div>1)',
+			'<div>34.insertBefore(<div>1, <div>34)',
 			'<div>.appendChild(#text)',
-			'<div>1.appendChild(<div>2)'
+			'<div>134.insertBefore(<div>2, <div>34)',
+			'<div>34.remove()'
 		], 'rendering from false to true');
 	});
 
