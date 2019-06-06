@@ -54,4 +54,7 @@ export function teardown() {
 		options.debounceRendering = options.__test__previousDebounce;
 		delete options.__test__previousDebounce;
 	}
+	else {
+		options.debounceRendering = undefined;
+	}
 }

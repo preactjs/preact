@@ -16,6 +16,7 @@ describe('act', () => {
 
 	afterEach(() => {
 		teardown(scratch);
+		options.debounceRendering = undefined;
 	});
 
 	it('should reset options after act finishes', () => {
@@ -136,5 +137,10 @@ describe('act', () => {
 
 		expect(options.debounceRendering).to.equal(spy);
 		expect(spy).to.not.be.called;
+	});
+
+	it('should restore options.debounceRendering when it was undefined before', () => {
+		act(() => null);
+		expect(options.debounceRendering).to.equal(undefined);
 	});
 });
