@@ -128,7 +128,7 @@ export function useLayoutEffect(callback, args) {
 }
 
 export function useRef(initialValue) {
-	return useState({ current: initialValue })[0];
+	return useMemo(() => ({ current: initialValue }), []);
 }
 
 export function useImperativeHandle(ref, createHandle, args) {
