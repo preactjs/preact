@@ -16,7 +16,6 @@ export function setupRerender() {
  */
 export function act(cb) {
 	const previousRequestAnimationFrame = options.requestAnimationFrame;
-	const previousDebounceRendering = options.debounceRendering;
 	const rerender = setupRerender();
 
 	/** @type {() => void} */
@@ -37,7 +36,7 @@ export function act(cb) {
 		rerender();
 	}
 
-	options.debounceRendering = previousDebounceRendering;
+	teardown();
 	options.requestAnimationFrame = previousRequestAnimationFrame;
 }
 
