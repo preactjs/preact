@@ -17,7 +17,7 @@
     "build:hooks": "microbundle build --raw --cwd hooks",
     "build:test-utils": "microbundle build --raw --cwd test-utils",
     "build:compat": "microbundle build --raw --cwd compat --globals 'preact/hooks=preactHooks'",
-    "dev": "microbundle watch --raw --format cjs,umd",
+    "dev": "microbundle watch --raw --format cjs",
     "dev:hooks": "microbundle watch --raw --format cjs --cwd hooks",
     "test": "npm-run-all lint build --parallel test:mocha test:karma test:ts",
     "test:flow": "flow check",
@@ -30,7 +30,7 @@
     "test:karma:test-utils": "cross-env PERFORMANCE=false COVERAGE=false karma start karma.conf.js --grep=test-utils/test/shared/**.js --no-single-run",
     "test:karma:bench": "cross-env PERFORMANCE=true COVERAGE=false karma start karma.conf.js --grep=test/benchmarks/**.js --single-run",
     "benchmark": "npm run test:karma:bench -- no-single-run",
-    "lint": "eslint src test",
+    "lint": "eslint src test debug compat hooks test-utils",
     "postinstall": "node -e \"console.log('\\u001b[35m\\u001b[1mLove Preact? You can now donate to our open collective:\\u001b[22m\\u001b[39m\\n > \\u001b[34mhttps://opencollective.com/preact/donate\\u001b[0m')\""
   },
   "eslintConfig": {
@@ -41,6 +41,16 @@
       }
     },
     "rules": {
+      "camelcase": [
+        1,
+        {
+          "allow": [
+            "__test__*",
+            "unstable_*",
+            "UNSAFE_*"
+          ]
+        }
+      ],
       "prefer-rest-params": 0,
       "prefer-spread": 0,
       "no-cond-assign": 0,

@@ -21,7 +21,7 @@ describe('forwardRef', () => {
 		let ref = createRef();
 		render(<App ref={ref} />, scratch);
 
-		expect(ref.current).to.equal(scratch.firstChild);
+		expect(ref.current).to.equalNode(scratch.firstChild);
 	});
 
 	it('should share the same ref reference', () => {
@@ -42,7 +42,7 @@ describe('forwardRef', () => {
 		let ref;
 		render(<App ref={x => (ref = x)} />, scratch);
 
-		expect(ref).to.equal(scratch.firstChild.firstChild);
+		expect(ref).to.equalNode(scratch.firstChild.firstChild);
 	});
 
 	it('should forward props', () => {

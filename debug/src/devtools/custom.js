@@ -108,15 +108,11 @@ export function getData(vnode) {
  * @returns {import('../internal').VNode[]}
  */
 export function getChildren(vnode) {
-	let c = vnode._component;
-
-	if (c==null) {
+	if (vnode._component==null) {
 		return vnode._children!=null ? vnode._children.filter(Boolean) : [];
 	}
 
-	return !Array.isArray(c._prevVNode) && c._prevVNode!=null
-		? [c._prevVNode]
-		: null;
+	return vnode._children != null ? vnode._children.filter(Boolean) : null;
 }
 
 /**

@@ -1392,24 +1392,24 @@ describe('Components', () => {
 		}
 
 		render(<App />, scratch);
-		expect(child._vnode._dom).to.equal(child.base);
+		expect(child._vnode._dom).to.equalNode(child.base);
 
 		app.forceUpdate();
-		expect(child._vnode._dom).to.equal(child.base);
+		expect(child._vnode._dom).to.equalNode(child.base);
 
 		parent.setState({});
 		condition = true;
 		child.forceUpdate();
-		expect(child._vnode._dom).to.equal(child.base);
+		expect(child._vnode._dom).to.equalNode(child.base);
 		rerender();
 
-		expect(child._vnode._dom).to.equal(child.base);
+		expect(child._vnode._dom).to.equalNode(child.base);
 
 		condition = false;
 		app.setState({});
 		child.forceUpdate();
 		rerender();
-		expect(child._vnode._dom).to.equal(child.base);
+		expect(child._vnode._dom).to.equalNode(child.base);
 	});
 
 	it('should update old dom on forceUpdate in a lifecycle', () => {

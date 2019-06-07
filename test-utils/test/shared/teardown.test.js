@@ -1,11 +1,10 @@
-const { options, render } = require('preact');
-const { teardown, setupRerender } = require('../../src');
+const { options } = require('preact');
+const { teardown } = require('../../src');
 const { setupScratch } = require('../../../test/_util/helpers');
 
 describe('teardown', () => {
-	let rerender, scratch;
+	let scratch;
 	beforeEach(() => {
-		rerender = setupRerender();
 		scratch = setupScratch();
 	});
 
