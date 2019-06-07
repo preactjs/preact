@@ -79,6 +79,11 @@ describe('createElement(jsx)', () => {
 			.that.deep.equals(props);
 	});
 
+	it('should delete the __source and __self props', () => {
+		const props = { __source: {}, __self: {} };
+		expect(h('div', props).props).to.deep.equal({});
+	});
+
 	it('should support element children', () => {
 		let kid1 = h('bar');
 		let kid2 = h('baz');
