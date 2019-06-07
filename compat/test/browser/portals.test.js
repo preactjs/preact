@@ -1,4 +1,4 @@
-import { createElement as h, render, createPortal, useState } from '../../src';
+import { createElement as h, render, createPortal, useState, Component } from '../../src';
 import { setupScratch } from '../../../test/_util/helpers';
 import { setupRerender, teardown } from 'preact/test-utils';
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
@@ -97,6 +97,38 @@ describe('Portal', () => {
 		set({});
 		rerender();
 		expect(scratch.firstChild.style.background).to.equal('');
+	});
+
+	it('should not unmount the portal component', () => {
+		let spy = sinon.spy();
+		let set;
+		class Child extends Component {
+			componentWillUnmount() {
+				spy();
+			}
+
+			render(props) {
+				return props.children;
+			}
+		}
+
+		function Foo(props) {
+			const [additionalProps, setProps] = useState({ style: { background: 'red' } });
+			set = (c) => setProps(c);
+			return (
+				<div>
+					<p>Hello</p>
+					{createPortal(<Child {...additionalProps}>Foo</Child>, scratch)}
+				</div>
+			);
+		}
+
+		render(<Foo />, scratch);
+		expect(spy).not.to.be.called;
+
+		set({});
+		rerender();
+		expect(spy).not.to.be.called;
 	});
 
 	it('should not render <undefined> for Portal nodes', () => {
