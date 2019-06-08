@@ -267,8 +267,8 @@ export function applyRef(ref, value, parentVNode) {
 /**
  * Unmount a virtual node from the tree and apply DOM changes
  * @param {import('../internal').VNode} vnode The virtual node to unmount
- * @param {import('../internal').VNode} parentVNode The parent
- * component to this virtual node
+ * @param {import('../internal').VNode} parentVNode The parent of the VNode that
+ * initiated the unmount
  * @param {boolean} [skipRemove] Flag that indicates that a parent node of the
  * current element is already detached from the DOM.
  */
