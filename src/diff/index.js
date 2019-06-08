@@ -89,7 +89,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 					c._dirty = false;
 					c._vnode = newVNode;
 					newVNode._dom = oldVNode._dom;
-					newVNode._lastDomChild = oldVNode._lastDomChild;
 					newVNode._children = oldVNode._children;
 					break outer;
 				}
