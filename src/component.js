@@ -74,7 +74,10 @@ Component.prototype.forceUpdate = function(callback) {
 
 		if (newDom != oldDom) {
 			// Update parent component's _dom and c.base pointers
-			// TODO: What to do about _lastDomChild?
+			// Note: parent component's _lastDomChild may become out of date, but that is okay,
+			// because _lastDomChild isn't used to restart diffs. It is only important while a
+			// diff for that component is happening and the diff will reset it to the correct value
+			// if/when that component is updated
 			while (
 				vnode._parent
 				&& vnode._parent._children.indexOf(vnode) == 0
