@@ -78,14 +78,13 @@ class ContextProvider {
 function Portal(props) {
 	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
 	let container = props.container;
-	if (!this.mounted) {
-		hydrate('', container);
-	}
-	render(wrap, container);
-	this.componentDidMount = () => {
-		this.mounted = true;
-	};
 
+	if (props.container !== this.container) {
+		hydrate('', container);
+		this.container = container;
+	}
+
+	render(wrap, container);
 	this.componentWillUnmount = () => {
 		render(null, container);
 	};
