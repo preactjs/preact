@@ -61,7 +61,7 @@ Component.prototype.setState = function(update, callback) {
  * re-renderd
  */
 Component.prototype.forceUpdate = function(callback) {
-	let vnode = this._vnode, dom = this._vnode._dom, parentDom = this._parentDom;
+	let vnode = this._vnode, oldDom = this._vnode._dom, parentDom = this._parentDom;
 	if (parentDom) {
 		// Set render mode so that we can differantiate where the render request
 		// is coming from. We need this because forceUpdate should never call
@@ -69,13 +69,19 @@ Component.prototype.forceUpdate = function(callback) {
 		const force = callback!==false;
 
 		let mounts = [];
-		let newDom = diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, force, dom == null ? getDomSibling(vnode) : dom);
+		let newDom = diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, force, oldDom == null ? getDomSibling(vnode) : oldDom);
 		commitRoot(mounts, vnode);
 
-		if (newDom != dom) {
+		if (newDom != oldDom) {
 			// Update parent component's _dom and c.base pointers
 			// TODO: What to do about _lastDomChild?
-			while ((vnode = vnode._parent) && vnode._component && vnode._dom == dom) {
+			while (
+				vnode._parent
+				&& vnode._parent._children.indexOf(vnode) == 0
+				&& (vnode = vnode._parent)
+				&& vnode._component
+				&& vnode._dom == oldDom
+			) {
 				vnode._dom = vnode._component.base = newDom;
 			}
 		}
