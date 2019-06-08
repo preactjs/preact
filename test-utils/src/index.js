@@ -36,6 +36,7 @@ export function act(cb) {
 		rerender();
 	}
 
+	teardown();
 	options.requestAnimationFrame = previousRequestAnimationFrame;
 }
 
@@ -52,5 +53,8 @@ export function teardown() {
 	if (typeof options.__test__previousDebounce !== 'undefined') {
 		options.debounceRendering = options.__test__previousDebounce;
 		delete options.__test__previousDebounce;
+	}
+	else {
+		options.debounceRendering = undefined;
 	}
 }
