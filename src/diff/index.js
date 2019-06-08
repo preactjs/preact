@@ -167,7 +167,7 @@ export function commitRoot(mounts, root) {
 			c.componentDidMount();
 		}
 		catch (e) {
-			catchErrorInComponent(e, c._vnode);
+			catchErrorInComponent(e, c._vnode._parent);
 		}
 	}
 
