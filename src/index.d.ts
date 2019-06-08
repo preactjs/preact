@@ -191,34 +191,17 @@ declare namespace preact {
 	 * Global options for preact
 	 */
 	interface Options {
-		/** Attach a hook that is invoked before render, mainly to check the arguments. */
-		root?(vnode: ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment): void;
 		/** Attach a hook that is invoked whenever a VNode is created. */
-		vnode(vnode: VNode): void;
-		/** Attach a hook that is invoked after a tree was mounted or was updated. */
-		commit?(vnode: VNode): void;
-		/** Attach a hook that is invoked immediately before a component is unmounted. */
+		vnode?(vnode: VNode): void;
+		/** Attach a hook that is invoked immediately before a vnode is unmounted. */
 		unmount?(vnode: VNode): void;
 		/** Attach a hook that is invoked before a vnode is diffed. */
 		diff?(vnode: VNode): void;
-		/** Attach a hook that is invoked before a vnode has rendered. */
-		render?(vnode: VNode): void;
-		/** Attach a hook that is invoked before a hook's state is queried. */
-		hook?(component: Component): void;
 		/** Attach a hook that is invoked after a vnode has rendered. */
 		diffed?(vnode: VNode): void;
-		/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
-		catchError?(error: any, component: Component): void;
-		/**
-		 * Attach a hook that is invoked after an error is caught while executing render.
-		 *
-		 * When this hook returns true, the diffing on the affected vnode will be stopped.
-		 * When this hook returns false, the error will be thrown (and thus passed to catchError or lifecycle hooks)
-		 *
-		 * @return Return a boolean indicating whether the error was handled by the hook or not
-		 */
-		catchRender?(error: any, component: Component): boolean;
 		event?(e: Event): void;
+		requestAnimationFrame?: typeof requestAnimationFrame;
+		debounceRendering?(cb: () => void): void;
 		useDebugValue?(value: string | number): void;
 	}
 

@@ -10,13 +10,13 @@ export function initDebug() {
 	let oldVnode = options.vnode;
 	const warnedComponents = { useEffect: {}, useLayoutEffect: {}, lazyPropTypes: {} };
 
-	options.catchError = (error, component) => {
+	options._catchError = (error, component) => {
 		if (typeof error.then === 'function') {
 			error = new Error('Missing Suspense. The throwing component was: ' + (component.displayName || component.name));
 		}
 	};
 
-	options.root = (vnode, parentNode) => {
+	options._root = (vnode, parentNode) => {
 		if (!parentNode) {
 			throw new Error('Undefined parent passed to render(), this is the second argument.\nCheck if the element is available in the DOM/has the correct id.');
 		}
@@ -97,7 +97,7 @@ export function initDebug() {
 		if (oldBeforeDiff) oldBeforeDiff(vnode);
 	};
 
-	options.hook = (comp) => {
+	options._hook = (comp) => {
 		if (!comp) {
 			throw new Error('Hook can only be invoked from render methods.');
 		}

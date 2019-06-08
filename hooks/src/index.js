@@ -9,8 +9,8 @@ let currentComponent;
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
-let oldBeforeRender = options.render;
-options.render = vnode => {
+let oldBeforeRender = options._render;
+options._render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
 
 	currentComponent = vnode._component;
@@ -54,7 +54,7 @@ options.unmount = vnode => {
  * @returns {import('./internal').HookState}
  */
 function getHookState(index) {
-	if (options.hook) options.hook(currentComponent);
+	if (options._hook) options._hook(currentComponent);
 	// Largely inspired by:
 	// * https://github.com/michael-klein/funcy.js/blob/f6be73468e6ec46b0ff5aa3cc4c9baf72a29025a/src/hooks/core_hooks.mjs
 	// * https://github.com/michael-klein/funcy.js/blob/650beaa58c43c33a74820a3c98b3c7079cf2e333/src/renderer.mjs

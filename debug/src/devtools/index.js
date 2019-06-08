@@ -110,7 +110,7 @@ export function initDevTools() {
 
 	// Store (possible) previous hooks so that we don't overwrite them
 	let prevVNodeHook = options.vnode;
-	let prevCommitRoot = options.commit;
+	let prevCommitRoot = options._commit;
 	let prevBeforeUnmount = options.unmount;
 	let prevBeforeDiff = options.diff;
 	let prevAfterDiff = options.diffed;
@@ -138,7 +138,7 @@ export function initDevTools() {
 		if (prevAfterDiff!=null) prevAfterDiff(vnode);
 	};
 
-	options.commit = catchErrors((vnode) => {
+	options._commit = catchErrors((vnode) => {
 		// Call previously defined hook
 		if (prevCommitRoot!=null) prevCommitRoot(vnode);
 

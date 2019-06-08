@@ -109,7 +109,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c.props = newVNode.props;
 			c.state = c._nextState;
 
-			if (tmp = options.render) tmp(newVNode);
+			if (tmp = options._render) tmp(newVNode);
 
 			c._dirty = false;
 
@@ -119,7 +119,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				toChildArray(isTopLevelFragment ? tmp.props.children : tmp, newVNode._children=[], coerceToVNode, true);
 			}
 			catch (e) {
-				if ((tmp = options.catchRender) && tmp(e, c)) return;
+				if ((tmp = options._catchRender) && tmp(e, c)) return;
 				throw e;
 			}
 
@@ -175,7 +175,7 @@ export function commitRoot(mounts, root) {
 		}
 	}
 
-	if (options.commit) options.commit(root);
+	if (options._commit) options._commit(root);
 }
 
 /**
@@ -327,7 +327,7 @@ function doRender(props, state, context) {
  * component check for error boundary behaviors
  */
 function catchErrorInComponent(error, component) {
-	if (options.catchError) { options.catchError(error, component); }
+	if (options._catchError) { options._catchError(error, component); }
 
 	for (; component; component = component._ancestorComponent) {
 		if (!component._processingException) {

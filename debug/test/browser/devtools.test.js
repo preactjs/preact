@@ -447,8 +447,8 @@ describe('devtools', () => {
 		options.vnode = vnodeSpy;
 		options.diff = diffSpy;
 		options.diffed = diffedSpy;
-		options.commit = commitSpy;
 		options.unmount = unmountSpy;
+		options._commit = commitSpy;
 
 		initDevTools();
 
