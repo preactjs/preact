@@ -73,7 +73,9 @@ export function createRef() {
 	return {};
 }
 
-export /* istanbul ignore next */ function Fragment() { }
+export function Fragment(props) {
+	return props.children;
+}
 
 /**
  * Coerce an untrusted value into a VNode
@@ -86,10 +88,6 @@ export function coerceToVNode(possibleVNode) {
 	if (possibleVNode == null || typeof possibleVNode === 'boolean') return null;
 	if (typeof possibleVNode === 'string' || typeof possibleVNode === 'number') {
 		return createVNode(null, possibleVNode, null, null);
-	}
-
-	if (Array.isArray(possibleVNode)) {
-		return createElement(Fragment, null, possibleVNode);
 	}
 
 	// Clone vnode if it has already been used. ceviche/#57

@@ -128,12 +128,7 @@ export function useLayoutEffect(callback, args) {
 }
 
 export function useRef(initialValue) {
-	const state = getHookState(currentIndex++);
-	if (!state._value) {
-		state._value = { current: initialValue };
-	}
-
-	return state._value;
+	return useMemo(() => ({ current: initialValue }), []);
 }
 
 export function useImperativeHandle(ref, createHandle, args) {
