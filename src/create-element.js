@@ -33,12 +33,6 @@ export function createElement(type, props, children) {
 	let key = props.key;
 	if (ref!=null) delete props.ref;
 	if (key!=null) delete props.key;
-	if (process.env.NODE_ENV==='development') {
-		// The @babel/preset-react preset includes two plugins which add __source and
-		// __self attributes to every element in dev, which React uses for debugging
-		if (props.__source!=null) delete props.__source;
-		if (props.__self!=null) delete props.__self;
-	}
 
 	return createVNode(type, props, key, ref);
 }
