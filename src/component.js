@@ -69,8 +69,16 @@ Component.prototype.forceUpdate = function(callback) {
 		const force = callback!==false;
 
 		let mounts = [];
-		diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, force, dom == null ? getDomSibling(vnode) : dom);
+		let newDom = diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, force, dom == null ? getDomSibling(vnode) : dom);
 		commitRoot(mounts, vnode);
+
+		if (newDom != dom) {
+			// Update parent component's _dom and c.base pointers
+			// TODO: What to do about _lastDomChild?
+			while ((vnode = vnode._parent) && vnode._component && vnode._dom == dom) {
+				vnode._dom = vnode._component.base = newDom;
+			}
+		}
 	}
 	if (callback) callback();
 };
