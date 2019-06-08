@@ -1575,28 +1575,32 @@ describe('Components', () => {
 	});
 
 	it('should keep c.base up to date if a nested child component changes DOM nodes', () => {
-		let parentDom = {};
-		let parent1 = {};
-		let parent2 = {};
-		let child = {};
+		let parentDom1 = {};
+		let parentDom2 = {};
+		let parent1;
+		let parent2;
+		let child;
 
 		class Child extends Component {
 			constructor(props, context) {
 				super(props, context);
+				child = this;
 				this.state = { tagName: 'p' };
 			}
 			render() {
-				return h(this.state.tagName, {}, 'helo');
+				return h(this.state.tagName, {}, 'Hello');
 			}
 		}
 
 		class Parent1 extends Component {
 			render() {
+				parent1 = this;
 				return this.props.children;
 			}
 		}
 
 		function Parent2(props) {
+			parent2 = this;
 			return props.children;
 		}
 
@@ -1605,30 +1609,37 @@ describe('Components', () => {
 		}
 
 		render((
-			<ParentWithDom ref={parentDom}>
-				<Parent1 ref={parent1}>
-					<Parent2 ref={parent2}>
-						<Child ref={child} />
-					</Parent2>
-				</Parent1>
-			</ParentWithDom>
+			<Fragment>
+				<ParentWithDom ref={parentDom1}>
+					<Parent1 ref={parent1}>
+						<Parent2 ref={parent2}>
+							<Child ref={child} />
+						</Parent2>
+					</Parent1>
+				</ParentWithDom>
+				<ParentWithDom ref={parentDom2}>
+					World!
+				</ParentWithDom>
+			</Fragment>
 		), scratch);
 
 		let domChild = scratch.firstChild.firstChild;
-		expect(scratch.innerHTML).to.equal('<div><p>helo</p></div>');
-		expect(child.current.base).to.equalNode(domChild);
-		expect(parent2.current.base).to.equalNode(domChild);
-		expect(parent1.current.base).to.equalNode(domChild);
-		expect(parentDom.current.base).to.equalNode(scratch.firstChild);
+		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div><div>World!</div>');
+		expect(child.base).to.equalNode(domChild);
+		expect(parent2.base).to.equalNode(domChild);
+		expect(parent1.base).to.equalNode(domChild);
+		expect(parentDom1.current.base).to.equalNode(scratch.firstChild);
+		expect(parentDom2.current.base).to.equalNode(scratch.lastChild);
 
-		child.current.setState({ tagName: 'span' });
+		child.setState({ tagName: 'span' });
 		rerender();
 
 		domChild = scratch.firstChild.firstChild;
-		expect(scratch.innerHTML).to.equal('<div><span>helo</span></div>');
-		expect(child.current.base).to.equalNode(domChild);
-		expect(parent2.current.base).to.equalNode(domChild);
-		expect(parent1.current.base).to.equalNode(domChild);
-		expect(parentDom.current.base).to.equalNode(scratch.firstChild);
+		expect(scratch.innerHTML).to.equal('<div><span>Hello</span></div><div>World!</div>');
+		expect(child.base).to.equalNode(domChild);
+		expect(parent2.base).to.equalNode(domChild);
+		expect(parent1.base).to.equalNode(domChild);
+		expect(parentDom1.current.base).to.equalNode(scratch.firstChild);
+		expect(parentDom2.current.base).to.equalNode(scratch.lastChild);
 	});
 });
