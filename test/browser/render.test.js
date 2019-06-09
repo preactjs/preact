@@ -674,8 +674,8 @@ describe('render()', () => {
 			// eslint-disable-next-line react/no-danger
 			render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
 
-			expect(scratch.firstChild).to.have.property('innerHTML', '');
-			expect(scratch.innerHTML).to.equal(`<div></div>`);
+			expect(scratch.firstChild).to.have.property('innerHTML', html);
+			expect(scratch.innerHTML).to.equal(`<div>${html}</div>`);
 		});
 
 		it('should avoid reapplying innerHTML when __html property of dangerouslySetInnerHTML attr remains unchanged', () => {
