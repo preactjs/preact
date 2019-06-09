@@ -1,6 +1,5 @@
-import { IS_NON_DIMENSIONAL, EMPTY_OBJ } from '../constants';
+import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
-import { assign } from '../util';
 
 /**
  * Diff the old and new properties of a VNode and apply changes to the DOM node
@@ -13,23 +12,27 @@ import { assign } from '../util';
 export function diffProps(dom, newProps, oldProps, isSvg) {
 	let i;
 	
-	const keys = Object.keys(newProps).sort();
-	for (i = 0; i < keys.length; i++) {
-		const k = keys[i];
-		if (k!=='children' && k!=='key' && (!oldProps || ((k==='value' || k==='checked') ? dom : oldProps)[k]!==newProps[k])) {
-			setProperty(dom, k, newProps[k], oldProps[k], isSvg);
+	for (i in oldProps) {
+		if (!(i in newProps)) {
+			setProperty(dom, i, null, oldProps[i], isSvg);
 		}
 	}
 
-	for (i in oldProps) {
-		if (i!=='children' && i!=='key' && !(i in newProps)) {
-			setProperty(dom, i, null, oldProps[i], isSvg);
+	for (i in newProps) {
+		if (i!=='value' && i!=='checked' && oldProps[i]!==newProps[i]) {
+			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
 		}
 	}
 }
 
-const CAMEL_REG = /[A-Z]/g;
-const XLINK_NS = 'http://www.w3.org/1999/xlink';
+function setStyle(style, key, value) {
+	if (key[0] === '-') {
+		style.setProperty(key, value);
+	}
+	else {
+		style[key] = typeof value==='number' && IS_NON_DIMENSIONAL.test(key)===false ? value+'px' : value;
+	}
+}
 
 /**
  * Set a property value on a DOM node
@@ -42,20 +45,19 @@ const XLINK_NS = 'http://www.w3.org/1999/xlink';
 function setProperty(dom, name, value, oldValue, isSvg) {
 	name = isSvg ? (name==='className' ? 'class' : name) : (name==='class' ? 'className' : name);
 
-	if (name==='style') {
-		const set = assign(assign({}, oldValue), value);
-		for (let i in set) {
-			if ((value || EMPTY_OBJ)[i] === (oldValue || EMPTY_OBJ)[i]) {
-				continue;
+	if (name==='key' || name === 'children') {}
+	else if (name==='style') {
+		const s = dom.style;
+		if (oldValue) for (let i in oldValue) {
+			if (!(value && i in value)) {
+				setStyle(s, i, '');
 			}
-			dom.style.setProperty(
-				(i[0] === '-' && i[1] === '-') ? i : i.replace(CAMEL_REG, '-$&'),
-				(value && (i in value))
-					? (typeof set[i]==='number' && IS_NON_DIMENSIONAL.test(i)===false)
-						? set[i] + 'px'
-						: set[i]
-					: ''
-			);
+		}
+
+		if (value) for (let i in value) {
+			if (!oldValue || value[i] !== oldValue[i]) {
+				setStyle(s, i, value[i]);
+			}
 		}
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
@@ -78,10 +80,10 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	else if (typeof value!=='function' && name!=='dangerouslySetInnerHTML') {
 		if (name!==(name = name.replace(/^xlink:?/, ''))) {
 			if (value==null || value===false) {
-				dom.removeAttributeNS(XLINK_NS, name.toLowerCase());
+				dom.removeAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase());
 			}
 			else {
-				dom.setAttributeNS(XLINK_NS, name.toLowerCase(), value);
+				dom.setAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase(), value);
 			}
 		}
 		else if (value==null || value===false) {
