@@ -318,11 +318,11 @@ describe('render()', () => {
 		let div = scratch.childNodes[0];
 		expect(div.attributes.length).to.equal(2);
 
-		expect(div.attributes[0].name).equal('bar');
-		expect(div.attributes[0].value).equal('abc');
+		expect(div.attributes[0].name).equal('foo');
+		expect(div.attributes[0].value).equal('[object Object]');
 
-		expect(div.attributes[1].name).equal('foo');
-		expect(div.attributes[1].value).equal('[object Object]');
+		expect(div.attributes[1].name).equal('bar');
+		expect(div.attributes[1].value).equal('abc');
 	});
 
 	it('should apply class as String', () => {
