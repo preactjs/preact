@@ -1,11 +1,19 @@
 import { Component, createElement, unmount } from 'preact';
 import { removeNode } from '../../src/util';
 
-export function catchRender(error, component) {
+/**
+ * @param {any} error
+ * @param {import('./internal').VNode} vnode
+ */
+export function catchRender(error, vnode) {
 	// thrown Promises are meant to suspend...
 	if (error.then) {
-		for (; component; component = component._ancestorComponent) {
-			if (component._childDidSuspend) {
+
+		/** @type {import('./internal').Component} */
+		let component;
+
+		for (; vnode; vnode = vnode._parent) {
+			if ((component = vnode._component) && component._childDidSuspend) {
 				component._childDidSuspend(error);
 				return true;
 			}
