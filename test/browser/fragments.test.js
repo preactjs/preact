@@ -54,6 +54,8 @@ describe('Fragment', () => {
 		scratch = setupScratch();
 		rerender = setupRerender();
 		ops = [];
+
+		clearLog();
 	});
 
 	afterEach(() => {
@@ -1898,9 +1900,19 @@ describe('Fragment', () => {
 		render(<App />, scratch);
 		expect(scratch.textContent).to.equal('');
 
+		clearLog();
 		update();
 		rerender();
+
 		expect(scratch.textContent).to.equal('ABC');
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>.appendChild(<div>A)',
+			'<div>.appendChild(#text)',
+			'<div>A.appendChild(<div>B)',
+			'<div>.appendChild(#text)',
+			'<div>AB.appendChild(<div>C)'
+		]);
 	});
 
 	it('should replace node in-between children', () => {
@@ -1913,8 +1925,8 @@ describe('Fragment', () => {
 
 			render() {
 				return this.state.active
-					? <section>I'm a section now</section>
-					: <div>I'm a div</div>;
+					? <section>B2</section>
+					: <div>B1</div>;
 			}
 		}
 
@@ -1928,15 +1940,21 @@ describe('Fragment', () => {
 		);
 
 		expect(scratch.innerHTML).to.eql(
-			`<div><div>A</div><div>I'm a div</div><div>C</div></div>`
+			`<div><div>A</div><div>B1</div><div>C</div></div>`
 		);
 
+		clearLog();
 		update();
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(
-			`<div><div>A</div><section>I'm a section now</section><div>C</div></div>`
+			`<div><div>A</div><section>B2</section><div>C</div></div>`
 		);
+		expectDomLogToBe([
+			'<section>.appendChild(#text)',
+			'<div>AB1C.insertBefore(<section>B2, <div>B1)',
+			'<div>B1.remove()'
+		]);
 	});
 
 	it('should replace Fragment in-between children', () => {
@@ -1951,14 +1969,14 @@ describe('Fragment', () => {
 				return this.state.active
 					? (
 						<Fragment>
-							<section>I'm a section now</section>
-							<section>Me too!</section>
+							<section>B3</section>
+							<section>B4</section>
 						</Fragment>
 					)
 					: (
 						<Fragment>
-							<div>I'm a div</div>
-							<div>Me as well</div>
+							<div>B1</div>
+							<div>B2</div>
 						</Fragment>
 					);
 			}
@@ -1975,22 +1993,31 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.eql(div([
 			div('A'),
-			div('I\'m a div'),
-			div('Me as well'),
+			div('B1'),
+			div('B2'),
 			div('C')
 		].join('')));
 
+		clearLog();
 		update();
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(
 			div([
 				div('A'),
-				section('I\'m a section now'),
-				section('Me too!'),
+				section('B3'),
+				section('B4'),
 				div('C')
 			].join(''))
 		);
+		expectDomLogToBe([
+			'<section>.appendChild(#text)',
+			'<div>AB1B2C.insertBefore(<section>B3, <div>B1)',
+			'<section>.appendChild(#text)',
+			'<div>AB3B1B2C.insertBefore(<section>B4, <div>B1)',
+			'<div>B2.remove()',
+			'<div>B1.remove()'
+		]);
 	});
 
 	it('should insert in-between children', () => {
@@ -2019,12 +2046,17 @@ describe('Fragment', () => {
 			`<div><div>A</div><div>C</div></div>`
 		);
 
+		clearLog();
 		update();
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>B</div><div>C</div></div>`
 		);
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>AC.insertBefore(<div>B, <div>C)'
+		]);
 	});
 
 	it('should insert in-between Fragments', () => {
@@ -2053,12 +2085,19 @@ describe('Fragment', () => {
 			`<div><div>A</div><div>C</div></div>`
 		);
 
+		clearLog();
 		update();
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>B1</div><div>B2</div><div>C</div></div>`
 		);
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>AC.insertBefore(<div>B1, <div>C)',
+			'<div>.appendChild(#text)',
+			'<div>AB1C.insertBefore(<div>B2, <div>C)'
+		]);
 	});
 
 	it('should insert in-between null children', () => {
@@ -2089,12 +2128,17 @@ describe('Fragment', () => {
 			`<div><div>A</div><div>C</div></div>`
 		);
 
+		clearLog();
 		update();
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>B</div><div>C</div></div>`
 		);
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>AC.insertBefore(<div>B, <div>C)'
+		]);
 	});
 
 	it('should insert Fragment in-between null children', () => {
@@ -2125,12 +2169,19 @@ describe('Fragment', () => {
 			`<div><div>A</div><div>C</div></div>`
 		);
 
+		clearLog();
 		update();
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>B1</div><div>B2</div><div>C</div></div>`
 		);
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>AC.insertBefore(<div>B1, <div>C)',
+			'<div>.appendChild(#text)',
+			'<div>AB1C.insertBefore(<div>B2, <div>C)'
+		]);
 	});
 
 	it('should insert in-between nested null children', () => {
@@ -2165,12 +2216,17 @@ describe('Fragment', () => {
 			`<div><div>A</div><div>C</div></div>`
 		);
 
+		clearLog();
 		update();
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>B</div><div>C</div></div>`
 		);
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>AC.insertBefore(<div>B, <div>C)'
+		]);
 	});
 
 	it('should insert Fragment in-between nested null children', () => {
@@ -2205,12 +2261,19 @@ describe('Fragment', () => {
 			`<div><div>A</div><div>C</div></div>`
 		);
 
+		clearLog();
 		update();
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>B1</div><div>B2</div><div>C</div></div>`
 		);
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>AC.insertBefore(<div>B1, <div>C)',
+			'<div>.appendChild(#text)',
+			'<div>AB1C.insertBefore(<div>B2, <div>C)'
+		]);
 	});
 
 	it('should update at correct place', () => {
@@ -2256,17 +2319,28 @@ describe('Fragment', () => {
 			`<div><div>A</div><div>B</div><div>C</div></div>`
 		);
 
+		clearLog();
 		render(<App condition={false} />, scratch);
+
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>C</div></div>`
 		);
+		expectDomLogToBe([
+			'<div>B.remove()'
+		]);
 
+		clearLog();
 		updateA();
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><span>A2</span><div>C</div></div>`
 		);
+		expectDomLogToBe([
+			'<span>.appendChild(#text)',
+			'<div>AC.insertBefore(<span>A2, <div>A)',
+			'<div>A.remove()'
+		]);
 	});
 
 	it('should update Fragment at correct place', () => {
@@ -2319,16 +2393,30 @@ describe('Fragment', () => {
 			`<div><div>A1</div><div>A2</div><div>B</div><div>C</div></div>`
 		);
 
+		clearLog();
 		render(<App condition={false} />, scratch);
+
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A1</div><div>A2</div><div>C</div></div>`
 		);
+		expectDomLogToBe([
+			'<div>B.remove()'
+		]);
 
+		clearLog();
 		updateA();
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><span>A3</span><span>A4</span><div>C</div></div>`
 		);
+		expectDomLogToBe([
+			'<span>.appendChild(#text)',
+			'<div>A1A2C.insertBefore(<span>A3, <div>A1)',
+			'<span>.appendChild(#text)',
+			'<div>A3A1A2C.insertBefore(<span>A4, <div>A1)',
+			'<div>A2.remove()',
+			'<div>A1.remove()'
+		]);
 	});
 });
