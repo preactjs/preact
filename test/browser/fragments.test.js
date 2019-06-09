@@ -1,7 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component, Fragment } from '../../src/index';
 import { setupScratch, teardown } from '../_util/helpers';
-import { span, div, ul, ol, li } from '../_util/dom';
+import { span, div, ul, ol, li, section } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 
 /** @jsx h */
@@ -1939,6 +1939,60 @@ describe('Fragment', () => {
 		);
 	});
 
+	it('should replace Fragment in-between children', () => {
+		let update;
+		class SetState extends Component {
+			constructor(props) {
+				super(props);
+				update = () => this.setState({ active: true });
+			}
+
+			render() {
+				return this.state.active
+					? (
+						<Fragment>
+							<section>I'm a section now</section>
+							<section>Me too!</section>
+						</Fragment>
+					)
+					: (
+						<Fragment>
+							<div>I'm a div</div>
+							<div>Me as well</div>
+						</Fragment>
+					);
+			}
+		}
+
+		render(
+			<div>
+				<div>A</div>
+				<SetState />
+				<div>C</div>
+			</div>,
+			scratch,
+		);
+
+		expect(scratch.innerHTML).to.eql(div([
+			div('A'),
+			div('I\'m a div'),
+			div('Me as well'),
+			div('C')
+		].join('')));
+
+		update();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			div([
+				div('A'),
+				section('I\'m a section now'),
+				section('Me too!'),
+				div('C')
+			].join(''))
+		);
+	});
+
 	it('should insert in-between children', () => {
 		let update;
 		class SetState extends Component {
@@ -1970,6 +2024,40 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>B</div><div>C</div></div>`
+		);
+	});
+
+	it('should insert in-between Fragments', () => {
+		let update;
+		class SetState extends Component {
+			constructor(props) {
+				super(props);
+				update = () => this.setState({ active: true });
+			}
+
+			render() {
+				return this.state.active ? [<div>B1</div>, <div>B2</div>] : null;
+			}
+		}
+
+		render(
+			<div>
+				<div>A</div>
+				<SetState />
+				<div>C</div>
+			</div>,
+			scratch,
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>C</div></div>`
+		);
+
+		update();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>B1</div><div>B2</div><div>C</div></div>`
 		);
 	});
 
@@ -2006,6 +2094,42 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>B</div><div>C</div></div>`
+		);
+	});
+
+	it('should insert Fragment in-between null children', () => {
+		let update;
+		class SetState extends Component {
+			constructor(props) {
+				super(props);
+				update = () => this.setState({ active: true });
+			}
+
+			render() {
+				return this.state.active ? <Fragment><div>B1</div><div>B2</div></Fragment> : null;
+			}
+		}
+
+		render(
+			<div>
+				<div>A</div>
+				{null}
+				<SetState />
+				{null}
+				<div>C</div>
+			</div>,
+			scratch,
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>C</div></div>`
+		);
+
+		update();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>B1</div><div>B2</div><div>C</div></div>`
 		);
 	});
 
@@ -2046,6 +2170,46 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>B</div><div>C</div></div>`
+		);
+	});
+
+	it('should insert Fragment in-between nested null children', () => {
+		let update;
+		class SetState extends Component {
+			constructor(props) {
+				super(props);
+				update = () => this.setState({ active: true });
+			}
+
+			render() {
+				return this.state.active ? <Fragment><div>B1</div><div>B2</div></Fragment> : null;
+			}
+		}
+
+		function Outer() {
+			return <SetState />;
+		}
+
+		render(
+			<div>
+				<div>A</div>
+				{null}
+				<Outer />
+				{null}
+				<div>C</div>
+			</div>,
+			scratch,
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>C</div></div>`
+		);
+
+		update();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>B1</div><div>B2</div><div>C</div></div>`
 		);
 	});
 
@@ -2102,6 +2266,69 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><span>A2</span><div>C</div></div>`
+		);
+	});
+
+	it('should update Fragment at correct place', () => {
+		let updateA;
+		class A extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { active: true };
+				updateA = () => this.setState(prev => ({ active: !prev }));
+			}
+
+			render() {
+				return this.state.active
+					? [
+						<div>A1</div>,
+						<div>A2</div>
+					] : [
+						<span>A3</span>,
+						<span>A4</span>
+					];
+			}
+		}
+
+		function B() {
+			return <div>B</div>;
+		}
+
+		function X(props) {
+			return props.children;
+		}
+
+		function App(props) {
+			let b = props.condition ? <B /> : null;
+			return (
+				<div>
+					<X>
+						<A />
+					</X>
+					<X>
+						{b}
+						<div>C</div>
+					</X>
+				</div>
+			);
+		}
+
+		render(<App condition={true} />, scratch);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A1</div><div>A2</div><div>B</div><div>C</div></div>`
+		);
+
+		render(<App condition={false} />, scratch);
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A1</div><div>A2</div><div>C</div></div>`
+		);
+
+		updateA();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><span>A3</span><span>A4</span><div>C</div></div>`
 		);
 	});
 });
