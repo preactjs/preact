@@ -76,10 +76,9 @@ Component.prototype.forceUpdate = function(callback) {
 			// Update parent component's _dom and c.base pointers
 			while (
 				vnode._parent
-				&& vnode._parent._children.indexOf(vnode) == 0
+				&& vnode._parent._dom === oldDom
 				&& (vnode = vnode._parent)
 				&& vnode._component
-				&& vnode._dom == oldDom
 			) {
 				vnode._dom = vnode._component.base = newDom;
 			}
