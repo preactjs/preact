@@ -97,6 +97,14 @@ describe('debug', () => {
 		expect(vnode.props.__source).to.be.undefined;
 	});
 
+	it('should add __self to the vnode in debug mode.', () => {
+		const vnode = h('div', {
+			__self: {}
+		});
+		expect(vnode.__self).to.deep.equal({});
+		expect(vnode.props.__self).to.be.undefined;
+	});
+
 	it('should throw an error when using a hook outside a render', () => {
 		class App extends Component {
 			componentWillMount() {
