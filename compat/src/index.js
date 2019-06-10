@@ -19,8 +19,8 @@ options.event = e => {
 	return e.nativeEvent = e;
 };
 
-let oldCatchRender = options.catchRender;
-options.catchRender = (error, component) => (
+let oldCatchRender = options._catchRender;
+options._catchRender = (error, component) => (
 	oldCatchRender && oldCatchRender(error, component) || catchRender(error, component)
 );
 

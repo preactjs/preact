@@ -29,7 +29,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== undefined) return null;
 
-	if (tmp = options.diff) tmp(newVNode);
+	if (tmp = options._diff) tmp(newVNode);
 
 	try {
 		outer: if (typeof newType==='function') {
@@ -106,7 +106,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c.props = newVNode.props;
 			c.state = c._nextState;
 
-			if (tmp = options.render) tmp(newVNode);
+			if (tmp = options._render) tmp(newVNode);
 
 			c._dirty = false;
 
@@ -116,7 +116,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				toChildArray(isTopLevelFragment ? tmp.props.children : tmp, newVNode._children=[], coerceToVNode, true);
 			}
 			catch (e) {
-				if ((tmp = options.catchRender) && tmp(e, newVNode)) return;
+				if ((tmp = options._catchRender) && tmp(e, newVNode)) return;
 				throw e;
 			}
 
@@ -171,7 +171,7 @@ export function commitRoot(mounts, root) {
 		}
 	}
 
-	if (options.commit) options.commit(root);
+	if (options._commit) options._commit(root);
 }
 
 /**
@@ -321,7 +321,7 @@ function doRender(props, state, context) {
  * VNode check for error boundary behaviors
  */
 function catchErrorInComponent(error, vnode) {
-	if (options.catchError) { options.catchError(error, vnode); }
+	if (options._catchError) { options._catchError(error, vnode); }
 
 	/** @type {import('../internal').Component} */
 	let component;
