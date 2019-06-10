@@ -281,7 +281,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	}
 
 	let dom;
-	if (!skipRemove && vnode._lastDomChild==null) {
+	if (!skipRemove && typeof vnode.type !== 'function') {
 		skipRemove = (dom = vnode._dom)!=null;
 	}
 
