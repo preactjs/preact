@@ -1,5 +1,31 @@
 import * as preact from "./index";
 
+export interface Options extends preact.Options {
+	/** Attach a hook that is invoked before render, mainly to check the arguments. */
+	_root?(vnode: preact.ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment): void;
+	/** Attach a hook that is invoked before a vnode is diffed. */
+	diff?(vnode: VNode): void;
+	/** Attach a hook that is invoked after a tree was mounted or was updated. */
+	_commit?(vnode: VNode): void;
+	/** Attach a hook that is invoked before a vnode has rendered. */
+	_render?(vnode: VNode): void;
+	/** Attach a hook that is invoked before a hook's state is queried. */
+	_hook?(component: Component): void;
+	/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
+	catchError?(error: any, vnode: VNode): void;
+	/**
+	 * Attach a hook that is invoked after an error is caught while executing render.
+	 *
+	 * When this hook returns true, the diffing on the affected vnode will be stopped.
+	 * When this hook returns false, the error will be thrown (and thus passed to catchError or lifecycle hooks)
+	 *
+	 * @param error The error caught
+	 * @param vnode The VNode whose component's render method threw an error
+	 * @return Return a boolean indicating whether the error was handled by the hook or not
+	 */
+	catchRender?(error: any, vnode: VNode): boolean;
+}
+
 export interface FunctionalComponent<P = {}> extends preact.FunctionComponent<P> {
 	// Define getDerivedStateFromProps as undefined on FunctionalComponent
 	// to get rid of some errors in `diff()`

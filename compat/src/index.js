@@ -19,8 +19,8 @@ options.event = e => {
 	return e.nativeEvent = e;
 };
 
-let oldCatchRender = options.catchRender;
-options.catchRender = (error, component) => (
+let oldCatchRender = options._catchRender;
+options._catchRender = (error, component) => (
 	oldCatchRender && oldCatchRender(error, component) || catchRender(error, component)
 );
 
@@ -78,7 +78,13 @@ class ContextProvider {
 function Portal(props) {
 	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
 	let container = props.container;
-	hydrate(wrap, container);
+
+	if (props.container !== this.container) {
+		hydrate('', container);
+		this.container = container;
+	}
+
+	render(wrap, container);
 	this.componentWillUnmount = () => {
 		render(null, container);
 	};
