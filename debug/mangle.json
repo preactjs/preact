@@ -30,6 +30,7 @@
       "$_pendingError": "__E",
       "$_processingException": "__p",
       "$_root": "__p",
+      "$_diff": "__b",
       "$_commit": "__c",
       "$_render": "__r",
       "$_hook": "__h",

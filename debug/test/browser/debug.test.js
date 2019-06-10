@@ -24,7 +24,7 @@ describe('debug', () => {
 
 		clearOptions();
 		diffSpy = sinon.spy();
-		options.diff = diffSpy;
+		options._diff = diffSpy;
 
 		initDebug();
 	});

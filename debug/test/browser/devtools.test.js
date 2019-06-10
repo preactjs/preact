@@ -424,12 +424,12 @@ describe('devtools', () => {
 	});
 
 	it('should not initialize hook if __REACT_DEVTOOLS_GLOBAL_HOOK__ is not set', () => {
-		delete options.diff;
+		delete options._diff;
 		delete options.diffed;
 		delete /** @type {*} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
 
 		initDevTools();
-		expect(options.diff).to.equal(undefined);
+		expect(options._diff).to.equal(undefined);
 		expect(options.diffed).to.equal(undefined);
 	});
 
@@ -445,7 +445,7 @@ describe('devtools', () => {
 		let unmountSpy = sinon.spy();
 
 		options.vnode = vnodeSpy;
-		options.diff = diffSpy;
+		options._diff = diffSpy;
 		options.diffed = diffedSpy;
 		options.unmount = unmountSpy;
 		options._commit = commitSpy;

@@ -48,12 +48,12 @@ export default class ProfilerDemo extends Component {
 	}
 
 	componentDidMount() {
-		options.diff = vnode => vnode.startTime = performance.now();
+		options._diff = vnode => vnode.startTime = performance.now();
 		options.diffed = vnode => vnode.endTime = performance.now();
 	}
 
 	componentWillUnmount() {
-		delete options.diff;
+		delete options._diff;
 		delete options.diffed;
 	}
 

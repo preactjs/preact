@@ -3,6 +3,8 @@ import * as preact from "./index";
 export interface Options extends preact.Options {
 	/** Attach a hook that is invoked before render, mainly to check the arguments. */
 	_root?(vnode: preact.ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment): void;
+	/** Attach a hook that is invoked before a vnode is diffed. */
+	diff?(vnode: VNode): void;
 	/** Attach a hook that is invoked after a tree was mounted or was updated. */
 	_commit?(vnode: VNode): void;
 	/** Attach a hook that is invoked before a vnode has rendered. */

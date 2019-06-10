@@ -195,8 +195,6 @@ declare namespace preact {
 		vnode?(vnode: VNode): void;
 		/** Attach a hook that is invoked immediately before a vnode is unmounted. */
 		unmount?(vnode: VNode): void;
-		/** Attach a hook that is invoked before a vnode is diffed. */
-		diff?(vnode: VNode): void;
 		/** Attach a hook that is invoked after a vnode has rendered. */
 		diffed?(vnode: VNode): void;
 		event?(e: Event): void;

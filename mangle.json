@@ -34,6 +34,7 @@
       "$_id": "__c",
       "$_parentDom": "__P",
       "$_root": "__p",
+      "$_diff": "__b",
       "$_commit": "__c",
       "$_render": "__r",
       "$_hook": "__h",

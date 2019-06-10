@@ -112,7 +112,7 @@ export function initDevTools() {
 	let prevVNodeHook = options.vnode;
 	let prevCommitRoot = options._commit;
 	let prevBeforeUnmount = options.unmount;
-	let prevBeforeDiff = options.diff;
+	let prevBeforeDiff = options._diff;
 	let prevAfterDiff = options.diffed;
 
 	options.vnode = (vnode) => {
@@ -128,7 +128,7 @@ export function initDevTools() {
 		if (prevVNodeHook) prevVNodeHook(vnode);
 	};
 
-	options.diff = (vnode) => {
+	options._diff = (vnode) => {
 		vnode.startTime = now();
 		if (prevBeforeDiff!=null) prevBeforeDiff(vnode);
 	};

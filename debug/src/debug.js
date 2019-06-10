@@ -5,7 +5,7 @@ import { ELEMENT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants
 
 export function initDebug() {
 	/* eslint-disable no-console */
-	let oldBeforeDiff = options.diff;
+	let oldBeforeDiff = options._diff;
 	let oldDiffed = options.diffed;
 	let oldVnode = options.vnode;
 	const warnedComponents = { useEffect: {}, useLayoutEffect: {}, lazyPropTypes: {} };
@@ -33,7 +33,7 @@ export function initDebug() {
 		`);
 	};
 
-	options.diff = vnode => {
+	options._diff = vnode => {
 		let { type } = vnode;
 
 		if (type===undefined) {
