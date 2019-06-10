@@ -1295,7 +1295,7 @@ describe('Fragment', () => {
 		expectDomLogToBe([
 			'<ol>012345.insertBefore(<li>4, <li>0)',
 			'<ol>401235.insertBefore(<li>5, <li>0)',
-			// TODO: see issue #193 - Hmmm why does this extra append happen?
+			// TODO: Hmmm why does this extra append happen?
 			'<ol>453012.appendChild(<li>3)'
 		]);
 
@@ -2575,7 +2575,6 @@ describe('Fragment', () => {
 			div('B')
 		].join(''), 'updateB');
 		expectDomLogToBe([
-			// TODO: Extra appends happen here in actual. Why?
 			'<div>.appendChild(#text)',
 			'<div>A3A4.appendChild(<div>B)'
 		]);
