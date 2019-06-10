@@ -208,16 +208,18 @@ declare namespace preact {
 		/** Attach a hook that is invoked after a vnode has rendered. */
 		diffed?(vnode: VNode): void;
 		/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
-		catchError?(error: any, component: Component): void;
+		catchError?(error: any, vnode: VNode): void;
 		/**
 		 * Attach a hook that is invoked after an error is caught while executing render.
 		 *
 		 * When this hook returns true, the diffing on the affected vnode will be stopped.
 		 * When this hook returns false, the error will be thrown (and thus passed to catchError or lifecycle hooks)
 		 *
+		 * @param error The error caught
+		 * @param vnode The VNode whose component's render method threw an error
 		 * @return Return a boolean indicating whether the error was handled by the hook or not
 		 */
-		catchRender?(error: any, component: Component): boolean;
+		catchRender?(error: any, vnode: VNode): boolean;
 		event?(e: Event): void;
 		useDebugValue?(value: string | number): void;
 	}
