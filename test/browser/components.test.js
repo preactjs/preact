@@ -1762,6 +1762,64 @@ describe('Components', () => {
 		expect(parent1.base).to.equalNode(sibling.base);
 	});
 
+	it('should update parent c.base if child component changes DOM nodes and it is first non-null child component', () => {
+		let parent1;
+		let child;
+		let sibling;
+		let nullInst;
+
+		class Child extends Component {
+			constructor(props, context) {
+				super(props, context);
+				child = this;
+				this.state = { tagName: 'p' };
+			}
+			render() {
+				return h(this.state.tagName, {}, 'Hello');
+			}
+		}
+
+		class Parent1 extends Component {
+			render() {
+				parent1 = this;
+				return this.props.children;
+			}
+		}
+
+		function Sibling(props) {
+			sibling = this;
+			return <p />;
+		}
+
+		function Null() {
+			nullInst = this;
+			return null;
+		}
+
+		render((
+			<Parent1>
+				<Null />
+				<Child />
+				<Sibling />
+			</Parent1>
+		), scratch);
+
+		expect(scratch.innerHTML).to.equal('<p>Hello</p><p></p>');
+		expect(nullInst.base).to.equal(undefined);
+		expect(child.base).to.equalNode(scratch.firstChild);
+		expect(sibling.base).to.equalNode(scratch.lastChild);
+		expect(parent1.base).to.equalNode(child.base);
+
+		child.setState({ tagName: 'span' });
+		rerender();
+
+		expect(scratch.innerHTML).to.equal('<span>Hello</span><p></p>');
+		expect(nullInst.base).to.equal(undefined);
+		expect(child.base).to.equalNode(scratch.firstChild);
+		expect(sibling.base).to.equalNode(scratch.lastChild);
+		expect(parent1.base).to.equalNode(child.base);
+	});
+
 	it('should not update parent c.base if child component changes DOM nodes and a parent is not first child component', () => {
 		let parentDom1;
 		let parent1;

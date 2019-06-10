@@ -28,6 +28,7 @@ chai.use((chai, util) => {
 
 	Assertion.addMethod('equalNode', function (expectedNode, message) {
 		const obj = this._obj;
+		message = message || 'equalNode';
 
 		if (expectedNode == null) {
 			new Assertion(obj).to.equal(expectedNode);
