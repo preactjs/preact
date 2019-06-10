@@ -92,9 +92,9 @@ describe('performance', function() {
 							<label><input type="radio" /></label>
 						</fieldset>
 						<button-bar>
-							<button style="width:10px; height:10px; border:1px solid #FFF;">Normal CSS</button>
-							<button style="top:0 ; right: 20">Poor CSS</button>
-							<button style="invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;" icon>Poorer CSS</button>
+							<button style={{ width: '10px', height: '10px', border: '1px solid #FFF' }}>Normal CSS</button>
+							<button style={{ top: 0, right: 20 }}>Poor CSS</button>
+							<button style={{ 'invalid-prop': 1, padding: '1px', font: '12px/1.1 arial,sans-serif' }} icon>Poorer CSS</button>
 							<button style={{ margin: 0, padding: '10px', overflow: 'visible' }}>Object CSS</button>
 						</button-bar>
 					</form>
@@ -145,9 +145,9 @@ describe('performance', function() {
 			render() {
 				return (
 					<button-bar>
-						<Button style="width:10px; height:10px; border:1px solid #FFF;">Normal CSS</Button>
-						<Button style="top:0 ; right: 20">Poor CSS</Button>
-						<Button style="invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;" icon>Poorer CSS</Button>
+						<Button style={{ width: '10px', height: '10px', border: '1px solid #FFF' }}>Normal CSS</Button>
+						<Button style={{ top: 0, right: 20 }}>Poor CSS</Button>
+						<Button style={{ 'invalid-prop': 1, padding: '1px', font: '12px/1.1 arial,sans-serif' }} icon>Poorer CSS</Button>
 						<Button style={{ margin: 0, padding: '10px', overflow: 'visible' }}>Object CSS</Button>
 					</button-bar>
 				);
@@ -227,9 +227,9 @@ describe('performance', function() {
 								)) }
 							</fieldset>
 							<button-bar>
-								<button style="width:10px; height:10px; border:1px solid #FFF;">Normal CSS</button>
-								<button style="top:0 ; right: 20">Poor CSS</button>
-								<button style="invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;" icon>Poorer CSS</button>
+								<button style={{ width: '10px', height: '10px', border: '1px solid #FFF' }}>Normal CSS</button>
+								<button style={{ top: '0', right: '20' }}>Poor CSS</button>
+								<button style={{ 'invalid-prop': 1, padding: '1px', font: '12px/1.1 arial,sans-serif' }} icon>Poorer CSS</button>
 								<button style={{ margin: 0, padding: '10px', overflow: 'visible' }}>Object CSS</button>
 							</button-bar>
 						</form>
@@ -324,9 +324,9 @@ describe('performance', function() {
 		}
 		const ButtonBar = () => (
 			<button-bar>
-				<Button style="width:10px; height:10px; border:1px solid #FFF;">Normal CSS</Button>
-				<Button style="top:0 ; right: 20">Poor CSS</Button>
-				<Button style="invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;" icon>Poorer CSS</Button>
+				<Button style={{ width: '10px', height: '10px', border: '1px solid #FFF' }}>Normal CSS</Button>
+				<Button style={{ top: '0', right: '20' }}>Poor CSS</Button>
+				<Button style={{ 'invalid-prop': 1, padding: '1px', font: '12px/1.1 arial,sans-serif' }} icon>Poorer CSS</Button>
 				<Button style={{ margin: 0, padding: '10px', overflow: 'visible' }}>Object CSS</Button>
 			</button-bar>
 		);

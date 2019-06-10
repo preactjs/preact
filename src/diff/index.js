@@ -220,41 +220,98 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 			dom.data = newProps;
 		}
 	}
-	else {
-		if (excessDomChildren!=null && dom.childNodes!=null) {
+	else if (newVNode!==oldVNode) {
+		// if (excessDomChildren!=null && dom.childNodes!=null) {
+		// 	excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
+		// }
+
+		// let oldProps = oldVNode.props || EMPTY_OBJ;
+		// let newProps = newVNode.props;
+
+		/** Idea: split up updates from hydration */
+
+		// let newHtml = newProps.dangerouslySetInnerHTML;
+
+		// // normal rendering
+		// if (excessDomChildren == null) {
+		// 	diffProps(dom, newProps, oldProps || EMPTY_OBJ, isSvg, false);
+
+		// 	// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
+		// 	if (!newHtml) {
+		// 		diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, null, mounts, EMPTY_OBJ);
+		// 	}
+
+		// 	if (('value' in newProps) && newProps.value != dom.value) dom.value = newProps.value==null ? '' : newProps.value;
+		// 	if (('checked' in newProps) && newProps.checked != dom.checked) dom.checked = newProps.checked;
+		// }
+		// else {
+		// 	diffProps(dom, newProps, oldProps || EMPTY_OBJ, isSvg, true);
+		// 	if (!newHtml) {
+		// 		diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, EMPTY_ARR.slice.call(dom.childNodes), mounts, EMPTY_OBJ);
+		// 	}
+		// }
+
+
+		let newHtml = newProps.dangerouslySetInnerHTML;
+
+		diffProps(dom, newProps, oldProps || EMPTY_OBJ, isSvg, excessDomChildren!=null);
+
+		// let oldHtml = oldProps && oldProps.dangerouslySetInnerHTML;
+
+		// During dangerouslySetInnerHTML is ignored.
+		// @TODO we should warn in debug mode when props don't match here.
+		// if (excessDomChildren == null) {
+		// 	if (newHtml || oldHtml) {
+		// 		// Avoid re-applying the same '__html' if it did not changed between re-render
+		// 		if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
+		// 			dom.innerHTML = newHtml && newHtml.__html || '';
+		// 		}
+		// 	}
+		// }
+		// else {
+		// 	excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
+		// }
+
+		if (excessDomChildren != null) {
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
-		if (newVNode!==oldVNode) {
-			let oldProps = oldVNode.props || EMPTY_OBJ;
-			let newProps = newVNode.props;
 
-			let oldHtml = oldProps.dangerouslySetInnerHTML;
-			let newHtml = newProps.dangerouslySetInnerHTML;
-
-			// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
-			// @TODO we should warn in debug mode when props don't match here.
-			if (excessDomChildren == null) {
-				if (newHtml || oldHtml) {
-					// Avoid re-applying the same '__html' if it did not changed between re-render
-					if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
-						dom.innerHTML = newHtml && newHtml.__html || '';
-					}
-				}
-
-				diffProps(dom, newProps, oldProps, isSvg);
-			}
-
-			// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
-			if (!newHtml) {
-				diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, EMPTY_OBJ);
-			}
-
-			// (as above, don't diff props during hydration)
-			if (excessDomChildren == null) {
-				if (('value' in newProps) && newProps.value !== dom.value) dom.value = newProps.value==null ? '' : newProps.value;
-				if (('checked' in newProps) && newProps.checked !== dom.checked) dom.checked = newProps.checked;
-			}
+		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
+		if (!newHtml) {
+			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, EMPTY_OBJ);
 		}
+
+		// (as above, don't diff props during hydration)
+		if (excessDomChildren == null) {
+			if (('value' in newProps) && newProps.value != dom.value) dom.value = newProps.value==null ? '' : newProps.value;
+			if (('checked' in newProps) && newProps.checked != dom.checked) dom.checked = newProps.checked;
+		}
+
+		
+		// // During dangerouslySetInnerHTML is ignored.
+		// // @TODO we should warn in debug mode when props don't match here.
+		// if (excessDomChildren == null) {
+		// 	if (newHtml || oldHtml) {
+		// 		// Avoid re-applying the same '__html' if it did not changed between re-render
+		// 		if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
+		// 			dom.innerHTML = newHtml && newHtml.__html || '';
+		// 		}
+		// 	}
+
+		// 	diffProps(dom, newProps, oldProps, isSvg);
+
+		// 	// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
+		// 	if (!newHtml) {
+		// 		diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, EMPTY_OBJ);
+		// 	}
+
+		// 	// (as above, don't diff props during hydration)
+		// 	if (('value' in newProps) && newProps.value !== dom.value) dom.value = newProps.value==null ? '' : newProps.value;
+		// 	if (('checked' in newProps) && newProps.checked !== dom.checked) dom.checked = newProps.checked;
+		// }
+		// else if (!newHtml) {
+		// 	diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, EMPTY_OBJ);
+		// }
 	}
 
 	return dom;
