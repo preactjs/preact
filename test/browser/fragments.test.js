@@ -1677,11 +1677,10 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
-			'<div>.appendChild(<div>3)',
+			'<div>1.insertBefore(<div>3, #text)',
 			'<div>.appendChild(#text)',
-			'<div>3.appendChild(<div>4)',
-			'<div>12.insertBefore(<div>34, <div>1)',
-			'<div>1.remove()',
+			'<div>31.insertBefore(<div>4, #text)',
+			'#text.remove()',
 			'<div>2.remove()'
 		], 'rendering from true to false');
 
@@ -1690,11 +1689,11 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.equal(htmlForTrue);
 		expectDomLogToBe([
+			'<div>34.insertBefore(#text, <div>3)',
+			'<div>4.remove()',
+			'<div>3.remove()',
 			'<div>.appendChild(#text)',
-			'<div>34.insertBefore(<div>1, <div>34)',
-			'<div>.appendChild(#text)',
-			'<div>134.insertBefore(<div>2, <div>34)',
-			'<div>34.remove()'
+			'<div>1.appendChild(<div>2)'
 		], 'rendering from false to true');
 	});
 
