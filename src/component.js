@@ -78,9 +78,11 @@ Component.prototype.forceUpdate = function(callback) {
 				vnode._parent
 				&& vnode._parent._dom === oldDom
 				&& (vnode = vnode._parent)
-				&& vnode._component
 			) {
-				vnode._dom = vnode._component.base = newDom;
+				vnode._dom = newDom;
+				if (vnode._component) {
+					vnode._component.base = newDom;
+				}
 			}
 		}
 	}
