@@ -183,7 +183,7 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div foo="bar">Hello</div>');
 		});
 
-		it.skip('should also update the current dom', () => {
+		it('should also update the current dom', () => {
 			let trigger;
 
 			class A extends Component {
