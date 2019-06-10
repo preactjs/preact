@@ -2281,7 +2281,7 @@ describe('Fragment', () => {
 			constructor(props) {
 				super(props);
 				this.state = { active: true };
-				updateA = () => this.setState(prev => ({ active: !prev }));
+				updateA = () => this.setState(prev => ({ active: !prev.active }));
 			}
 
 			render() {
@@ -2348,7 +2348,7 @@ describe('Fragment', () => {
 			constructor(props) {
 				super(props);
 				this.state = { active: true };
-				updateA = () => this.setState(prev => ({ active: !prev }));
+				updateA = () => this.setState(prev => ({ active: !prev.active }));
 			}
 
 			render() {
