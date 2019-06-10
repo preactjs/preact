@@ -5,19 +5,19 @@ import { ELEMENT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants
 
 export function initDebug() {
 	/* eslint-disable no-console */
-	let oldBeforeDiff = options.diff;
+	let oldBeforeDiff = options._diff;
 	let oldDiffed = options.diffed;
 	let oldVnode = options.vnode;
 	const warnedComponents = { useEffect: {}, useLayoutEffect: {}, lazyPropTypes: {} };
 
-	options.catchError = (error, vnode) => {
+	options._catchError = (error, vnode) => {
 		let component = vnode._component;
 		if (component && typeof error.then === 'function') {
 			error = new Error('Missing Suspense. The throwing component was: ' + (component.displayName || component.name));
 		}
 	};
 
-	options.root = (vnode, parentNode) => {
+	options._root = (vnode, parentNode) => {
 		if (!parentNode) {
 			throw new Error('Undefined parent passed to render(), this is the second argument.\nCheck if the element is available in the DOM/has the correct id.');
 		}
@@ -34,7 +34,7 @@ export function initDebug() {
 		`);
 	};
 
-	options.diff = vnode => {
+	options._diff = vnode => {
 		let { type } = vnode;
 
 		if (type===undefined) {
@@ -98,7 +98,7 @@ export function initDebug() {
 		if (oldBeforeDiff) oldBeforeDiff(vnode);
 	};
 
-	options.hook = (comp) => {
+	options._hook = (comp) => {
 		if (!comp) {
 			throw new Error('Hook can only be invoked from render methods.');
 		}

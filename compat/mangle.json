@@ -16,7 +16,14 @@
       "$__html": "__html",
       "$_parent": "__p",
       "$_pendingError": "__E",
-      "$_processingException": "__p"
+      "$_processingException": "__p",
+      "$_root": "__p",
+      "$_commit": "__c",
+      "$_diff": "__b",
+      "$_render": "__r",
+      "$_hook": "__h",
+      "$_catchError": "__e",
+      "$_catchRender": "__E"
     }
   }
 }

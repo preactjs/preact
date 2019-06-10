@@ -948,10 +948,10 @@ describe('render()', () => {
 
 	it('should not cause infinite loop with referentially equal props', () => {
 		let i = 0;
-		let prevDiff = options.diff;
-		options.diff = () => {
+		let prevDiff = options._diff;
+		options._diff = () => {
 			if (++i > 10) {
-				options.diff = prevDiff;
+				options._diff = prevDiff;
 				throw new Error('Infinite loop');
 			}
 		};
@@ -966,7 +966,7 @@ describe('render()', () => {
 
 		render(<App>10</App>, scratch);
 		expect(scratch.textContent).to.equal('10');
-		options.diff = prevDiff;
+		options._diff = prevDiff;
 	});
 
 	describe('replaceNode parameter', () => {
