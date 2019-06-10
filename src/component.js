@@ -23,7 +23,6 @@ export function Component(props, context) {
 	// shown here as commented out for quick reference
 	// this.base = null;
 	// this._context = null;
-	// this._ancestorComponent = null; // Always set right after instantiation
 	// this._vnode = null;
 	// this._nextState = null; // Only class components
 	// this._processingException = null; // Always read, set only when handling error
@@ -70,7 +69,7 @@ Component.prototype.forceUpdate = function(callback) {
 		const force = callback!==false;
 
 		let mounts = [];
-		diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, this._ancestorComponent, force, dom);
+		diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, force, dom == null ? getDomSibling(vnode) : dom);
 		commitRoot(mounts, vnode);
 	}
 	if (callback) callback();
@@ -87,6 +86,37 @@ Component.prototype.forceUpdate = function(callback) {
  * @returns {import('./index').ComponentChildren | void}
  */
 Component.prototype.render = Fragment;
+
+/**
+ * @param {import('./internal').VNode} vnode
+ * @param {number | null} [childIndex]
+ */
+export function getDomSibling(vnode, childIndex) {
+	if (childIndex == null) {
+		// Use childIndex==null as a signal to resume the search from the vnode's sibling
+		return vnode._parent
+			? getDomSibling(vnode._parent, vnode._parent._children.indexOf(vnode) + 1)
+			: null;
+	}
+
+	let sibling;
+	for (; childIndex < vnode._children.length; childIndex++) {
+		sibling = vnode._children[childIndex];
+
+		if (sibling != null) {
+			return typeof sibling.type !== 'function'
+				? sibling._dom
+				: getDomSibling(sibling, 0);
+		}
+	}
+
+	// If we get here, we have not found a DOM node in this vnode's children.
+	// We must resume from this vnode's sibling (in it's parent _children array)
+	// Only climb up and search the parent if we aren't searching through a DOM
+	// VNode (meaning we reached the DOM parent of the original vnode that began
+	// the search)
+	return typeof vnode.type === 'function' ? getDomSibling(vnode) : null;
+}
 
 /**
  * The render queue
@@ -122,7 +152,7 @@ export function enqueueRender(c) {
 /** Flush the render queue by rerendering all queued components */
 function process() {
 	let p;
-	q.sort((a, b) => b._depth - a._depth);
+	q.sort((a, b) => b._vnode._depth - a._vnode._depth);
 	while ((p=q.pop())) {
 		// forceUpdate's callback argument is reused here to indicate a non-forced update.
 		if (p._dirty) p.forceUpdate(false);

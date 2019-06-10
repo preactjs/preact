@@ -10,8 +10,9 @@ export function initDebug() {
 	let oldVnode = options.vnode;
 	const warnedComponents = { useEffect: {}, useLayoutEffect: {}, lazyPropTypes: {} };
 
-	options.catchError = (error, component) => {
-		if (typeof error.then === 'function') {
+	options.catchError = (error, vnode) => {
+		let component = vnode._component;
+		if (component && typeof error.then === 'function') {
 			error = new Error('Missing Suspense. The throwing component was: ' + (component.displayName || component.name));
 		}
 	};
@@ -119,11 +120,16 @@ export function initDebug() {
 	};
 
 	options.vnode = (vnode) => {
-		let source;
+		let source, self;
 		if (vnode.props && vnode.props.__source) {
 			source = vnode.props.__source;
 			delete vnode.props.__source;
 		}
+		if (vnode.props && vnode.props.__self) {
+			self = vnode.props.__self;
+			delete vnode.props.__self;
+		}
+		vnode.__self = self;
 		vnode.__source = source;
 		Object.defineProperties(vnode, deprecatedAttributes);
 		if (oldVnode) oldVnode(vnode);

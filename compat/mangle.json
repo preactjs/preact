@@ -14,7 +14,7 @@
       "$_dom": "__e",
       "$_component": "__c",
       "$__html": "__html",
-      "$_ancestorComponent": "__a",
+      "$_parent": "__p",
       "$_pendingError": "__E",
       "$_processingException": "__p"
     }
