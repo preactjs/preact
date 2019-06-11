@@ -1,13 +1,15 @@
 import * as _hooks from '../../hooks';
 import * as preact from '../../src';
+import { JSXInternal } from '../../src/jsx'
 import { ForwardFn } from './internal';
 import * as _Suspense from './suspense';
 
 // export default React;
 export = React;
+export as namespace React;
 declare namespace React {
 	// Export JSX
-	export import JSX = preact.JSX;
+	export import JSX = JSXInternal
 
 	// Hooks
 	export import CreateHandle = _hooks.CreateHandle;
