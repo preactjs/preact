@@ -715,7 +715,7 @@ describe('Components', () => {
 		});
 	});
 
-	describe('props.children', () => {
+	describe.skip('props.children', () => {
 		let children;
 
 		let Foo = props => {

@@ -24,7 +24,7 @@ import { removeNode } from '../util';
 export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, oldDom) {
 	let childVNode, i, j, oldVNode, newDom, sibDom, firstChildDom, refs;
 
-	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode, true);
+	let newChildren = newParentVNode._children || (newParentVNode._children = Array.isArray(j = newParentVNode.props.children) ? j : [j]);
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
@@ -152,23 +152,18 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
  * @param {import('../index').ComponentChildren} children The unflattened
  * children of a virtual node
  * @param {Array<import('../internal').VNode | null>} [flattened] An flat array of children to modify
- * @param {typeof import('../create-element').coerceToVNode} [map] Function that
- * will be applied on each child if the `vnode` is not `null`
- * @param {boolean} [keepHoles] wether to coerce `undefined` to `null` or not.
- * This is needed for Components without children like `<Foo />`.
  */
-export function toChildArray(children, flattened, map, keepHoles) {
+export function toChildArray(children, flattened) {
 	if (flattened == null) flattened = [];
 	if (children==null || typeof children === 'boolean') {
-		if (keepHoles) flattened.push(null);
 	}
 	else if (Array.isArray(children)) {
 		for (let i=0; i < children.length; i++) {
-			toChildArray(children[i], flattened, map, keepHoles);
+			toChildArray(children[i], flattened);
 		}
 	}
 	else {
-		flattened.push(map ? map(children) : children);
+		flattened.push(children);
 	}
 
 	return flattened;

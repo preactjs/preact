@@ -3,7 +3,7 @@ import { setupScratch, teardown, getMixedArray, mixedArrayHTML } from '../_util/
 
 /** @jsx createElement */
 
-describe('props.children', () => {
+describe.skip('toChildArray', () => {
 
 	/** @type {HTMLDivElement} */
 	let scratch;
