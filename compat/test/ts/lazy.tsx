@@ -1,7 +1,7 @@
 import {
 	createElement,
 	Component,
-} from "../..";
+} from "../../../src";
 
 export interface LazyProps {
 	isProp: boolean;

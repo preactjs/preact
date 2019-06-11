@@ -2,11 +2,11 @@ import "mocha";
 import {
 	createElement,
 	Component,
-} from "../..";
+} from "../../../src";
 import {
 	Suspense,
 	lazy,
-} from "../../compat";
+} from "../../src";
 
 interface LazyProps {
 	isProp: boolean;
