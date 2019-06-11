@@ -1,12 +1,4 @@
-import "mocha";
-import {
-	createElement,
-	Component,
-} from "../../../src";
-import {
-	Suspense,
-	lazy,
-} from "../../src";
+import * as React from "../../src";
 
 interface LazyProps {
 	isProp: boolean;
@@ -33,11 +25,11 @@ const componentPromise = new Promise<{default: typeof IsLazyFunctional}>(resolve
  * For usage with import:
  * const IsLazyComp = lazy(() => import('./lazy'));
 */
-const IsLazyFunc = lazy(() => componentPromise);
+const IsLazyFunc = React.lazy(() => componentPromise);
 
 // Suspense using lazy component
-class SuspensefulFunc extends Component {
+class SuspensefulFunc extends React.Component {
 	render() {
-		return <Suspense fallback={<FallBack/>}><IsLazyFunc isProp={false} /></Suspense>
+		return <React.Suspense fallback={<FallBack/>}><IsLazyFunc isProp={false} /></React.Suspense>
 	}
 }
