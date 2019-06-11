@@ -31,10 +31,10 @@ chai.use((chai, util) => {
 		message = message || 'equalNode';
 
 		if (expectedNode == null) {
-			new Assertion(obj).to.equal(expectedNode);
+			new Assertion(obj, message).to.not.exist;
 		}
 		else {
-			new Assertion(obj).to.be.instanceof(Node);
+			new Assertion(obj).to.be.instanceof(Node, message);
 			// new Assertion(obj).to.have.property('tagName', expectedNode.tagName);
 			this.assert(
 				obj.tagName === expectedNode.tagName,

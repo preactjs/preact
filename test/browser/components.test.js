@@ -1,6 +1,7 @@
 import { createElement as h, render, Component, Fragment } from '../../src/index';
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown, getMixedArray, mixedArrayHTML, serializeHtml } from '../_util/helpers';
+import { div, span } from '../_util/dom';
 
 /** @jsx h */
 
@@ -1805,7 +1806,7 @@ describe('Components', () => {
 		), scratch);
 
 		expect(scratch.innerHTML).to.equal('<p>Hello</p><p></p>');
-		expect(nullInst.base).to.equal(undefined);
+		expect(nullInst.base).to.equalNode(null);
 		expect(child.base).to.equalNode(scratch.firstChild);
 		expect(sibling.base).to.equalNode(scratch.lastChild);
 		expect(parent1.base).to.equalNode(child.base);
@@ -1814,7 +1815,7 @@ describe('Components', () => {
 		rerender();
 
 		expect(scratch.innerHTML).to.equal('<span>Hello</span><p></p>');
-		expect(nullInst.base).to.equal(undefined);
+		expect(nullInst.base).to.equalNode(null);
 		expect(child.base).to.equalNode(scratch.firstChild);
 		expect(sibling.base).to.equalNode(scratch.lastChild);
 		expect(parent1.base).to.equalNode(child.base);
@@ -1887,5 +1888,520 @@ describe('Components', () => {
 		expect(sibling.base).to.equalNode(scratch.firstChild.firstChild);
 		expect(parent1.base).to.equalNode(sibling.base);
 		expect(parentDom1.base).to.equalNode(scratch.firstChild);
+	});
+
+	it('should update parent c.base if first child becomes null', () => {
+		/* eslint-disable lines-around-comment */
+
+		/** @type {import('../../src').Component} */
+		let maybe;
+		/** @type {import('../../src').Component} */
+		let child;
+		/** @type {import('../../src').Component} */
+		let parent;
+
+		/** @type {() => void} */
+		let toggleMaybeNull;
+		/** @type {() => void} */
+		let swapChildTag1;
+
+		class MaybeNull extends Component {
+			constructor(props) {
+				super(props);
+				maybe = this;
+				this.state = { active: true };
+				toggleMaybeNull = () => this.setState(prev => ({
+					active: !prev.active
+				}));
+			}
+			render() {
+				return this.state.active ? <div>maybe</div> : null;
+			}
+		}
+
+		class Child extends Component {
+			constructor(props) {
+				super(props);
+				child = this;
+				this.state = { tagName: 'div' };
+				swapChildTag1 = () => this.setState(prev => ({
+					tagName: prev.tagName == 'div' ? 'span' : 'div'
+				}));
+
+			}
+			render() {
+				return h(this.state.tagName, null, 'child1');
+			}
+		}
+
+		function Parent(props) {
+			parent = this;
+			return props.children;
+		}
+
+		render((
+			<Parent>
+				<MaybeNull />
+				<Fragment>
+					<Child />
+				</Fragment>
+			</Parent>
+		), scratch);
+
+		expect(scratch.innerHTML).to.equal([
+			div('maybe'),
+			div('child1')
+		].join(''));
+		expect(maybe.base).to.equalNode(scratch.firstChild, 'initial - maybe.base');
+		expect(child.base).to.equalNode(scratch.lastChild, 'initial - child.base');
+		expect(parent.base).to.equalNode(maybe.base, 'initial - parent.base');
+
+		toggleMaybeNull();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal([
+			div('child1')
+		].join(''));
+		expect(maybe.base).to.equalNode(null, 'toggleMaybe1 - maybe.base');
+		expect(child.base).to.equalNode(scratch.firstChild, 'toggleMaybe1 - child.base');
+		expect(parent.base).to.equalNode(child.base, 'toggleMaybe1 - parent.base');
+
+		swapChildTag1();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal([
+			span('child1')
+		].join(''));
+		expect(maybe.base).to.equalNode(null, 'swapChild1 - maybe.base');
+		expect(child.base).to.equalNode(scratch.firstChild, 'swapChild1 - child.base');
+		expect(parent.base).to.equalNode(child.base, 'swapChild1 - parent.base');
+	});
+
+	it('should update parent c.base if first child becomes non-null', () => {
+		/* eslint-disable lines-around-comment */
+
+		/** @type {import('../../src').Component} */
+		let maybe;
+		/** @type {import('../../src').Component} */
+		let child;
+		/** @type {import('../../src').Component} */
+		let parent;
+
+		/** @type {() => void} */
+		let toggleMaybeNull;
+		/** @type {() => void} */
+		let swapChildTag1;
+
+		class MaybeNull extends Component {
+			constructor(props) {
+				super(props);
+				maybe = this;
+				this.state = { active: false };
+				toggleMaybeNull = () => this.setState(prev => ({
+					active: !prev.active
+				}));
+			}
+			render() {
+				return this.state.active ? <div>maybe</div> : null;
+			}
+		}
+
+		class Child extends Component {
+			constructor(props) {
+				super(props);
+				child = this;
+				this.state = { tagName: 'div' };
+				swapChildTag1 = () => this.setState(prev => ({
+					tagName: prev.tagName == 'div' ? 'span' : 'div'
+				}));
+
+			}
+			render() {
+				return h(this.state.tagName, null, 'child1');
+			}
+		}
+
+		function Parent(props) {
+			parent = this;
+			return props.children;
+		}
+
+		render((
+			<Parent>
+				<MaybeNull />
+				<Fragment>
+					<Child />
+				</Fragment>
+			</Parent>
+		), scratch);
+
+		expect(scratch.innerHTML).to.equal([
+			div('child1')
+		].join(''));
+		expect(maybe.base).to.equalNode(null, 'toggleMaybe1 - maybe.base');
+		expect(child.base).to.equalNode(scratch.firstChild, 'toggleMaybe1 - child.base');
+		expect(parent.base).to.equalNode(child.base, 'toggleMaybe1 - parent.base');
+
+		swapChildTag1();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal([
+			span('child1')
+		].join(''));
+		expect(maybe.base).to.equalNode(null, 'swapChild1 - maybe.base');
+		expect(child.base).to.equalNode(scratch.firstChild, 'swapChild1 - child.base');
+		expect(parent.base).to.equalNode(child.base, 'swapChild1 - parent.base');
+
+		toggleMaybeNull();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal([
+			div('maybe'),
+			span('child1')
+		].join(''));
+		expect(maybe.base).to.equalNode(scratch.firstChild, 'toggleMaybe2 - maybe.base');
+		expect(child.base).to.equalNode(scratch.lastChild, 'toggleMaybe2 - child.base');
+		expect(parent.base).to.equalNode(maybe.base, 'toggleMaybe2 - parent.base');
+	});
+
+	it('should update parent c.base if first non-null child becomes null with multiple null siblings', () => {
+		/* eslint-disable lines-around-comment */
+
+		/** @type {import('../../src').Component} */
+		let maybe;
+		/** @type {import('../../src').Component} */
+		let child;
+		/** @type {import('../../src').Component} */
+		let parent;
+
+		/** @type {() => void} */
+		let toggleMaybeNull;
+		/** @type {() => void} */
+		let swapChildTag1;
+
+		const Null = () => null;
+
+		class MaybeNull extends Component {
+			constructor(props) {
+				super(props);
+				maybe = this;
+				this.state = { active: true };
+				toggleMaybeNull = () => this.setState(prev => ({
+					active: !prev.active
+				}));
+			}
+			render() {
+				return this.state.active ? <div>maybe</div> : null;
+			}
+		}
+
+		class Child extends Component {
+			constructor(props) {
+				super(props);
+				child = this;
+				this.state = { tagName: 'div' };
+				swapChildTag1 = () => this.setState(prev => ({
+					tagName: prev.tagName == 'div' ? 'span' : 'div'
+				}));
+
+			}
+			render() {
+				return h(this.state.tagName, null, 'child1');
+			}
+		}
+
+		function Parent(props) {
+			parent = this;
+			return props.children;
+		}
+
+		render((
+			<Parent>
+				<Null />
+				<Null />
+				<Fragment>
+					<MaybeNull />
+					<Child />
+				</Fragment>
+			</Parent>
+		), scratch);
+
+		expect(scratch.innerHTML).to.equal([
+			div('maybe'),
+			div('child1')
+		].join(''));
+		expect(maybe.base).to.equalNode(scratch.firstChild, 'initial - maybe.base');
+		expect(child.base).to.equalNode(scratch.lastChild, 'initial - child.base');
+		expect(parent.base).to.equalNode(maybe.base, 'initial - parent.base');
+
+		toggleMaybeNull();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal([
+			div('child1')
+		].join(''));
+		expect(maybe.base).to.equalNode(null, 'toggleMaybe1 - maybe.base');
+		expect(child.base).to.equalNode(scratch.firstChild, 'toggleMaybe1 - child.base');
+		expect(parent.base).to.equalNode(child.base, 'toggleMaybe1 - parent.base');
+
+		swapChildTag1();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal([
+			span('child1')
+		].join(''));
+		expect(maybe.base).to.equalNode(null, 'swapChild1 - maybe.base');
+		expect(child.base).to.equalNode(scratch.firstChild, 'swapChild1 - child.base');
+		expect(parent.base).to.equalNode(child.base, 'swapChild1 - parent.base');
+	});
+
+	it('should update parent c.base if a null child returns DOM with multiple null siblings', () => {
+		/* eslint-disable lines-around-comment */
+
+		/** @type {import('../../src').Component} */
+		let maybe;
+		/** @type {import('../../src').Component} */
+		let child;
+		/** @type {import('../../src').Component} */
+		let parent;
+
+		/** @type {() => void} */
+		let toggleMaybeNull;
+		/** @type {() => void} */
+		let swapChildTag1;
+
+		const Null = () => null;
+
+		class MaybeNull extends Component {
+			constructor(props) {
+				super(props);
+				maybe = this;
+				this.state = { active: false };
+				toggleMaybeNull = () => this.setState(prev => ({
+					active: !prev.active
+				}));
+			}
+			render() {
+				return this.state.active ? <div>maybe</div> : null;
+			}
+		}
+
+		class Child extends Component {
+			constructor(props) {
+				super(props);
+				child = this;
+				this.state = { tagName: 'div' };
+				swapChildTag1 = () => this.setState(prev => ({
+					tagName: prev.tagName == 'div' ? 'span' : 'div'
+				}));
+
+			}
+			render() {
+				return h(this.state.tagName, null, 'child1');
+			}
+		}
+
+		function Parent(props) {
+			parent = this;
+			return props.children;
+		}
+
+		render((
+			<Parent>
+				<Null />
+				<Null />
+				<Fragment>
+					<MaybeNull />
+					<Child />
+				</Fragment>
+			</Parent>
+		), scratch);
+
+		expect(scratch.innerHTML).to.equal([
+			div('child1')
+		].join(''));
+		expect(maybe.base, 'initial - maybe.base').to.equalNode(null);
+		expect(child.base, 'initial - child.base').to.equalNode(scratch.firstChild);
+		expect(parent.base, 'initial - parent.base').to.equalNode(child.base);
+
+		swapChildTag1();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal([
+			span('child1')
+		].join(''));
+		expect(maybe.base, 'swapChild1 - maybe.base').to.equalNode(null);
+		expect(child.base, 'swapChild1 - child.base').to.equalNode(scratch.firstChild);
+		expect(parent.base, 'swapChild1 - parent.base').to.equalNode(child.base);
+
+		toggleMaybeNull();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal([
+			div('maybe'),
+			span('child1')
+		].join(''));
+		expect(maybe.base, 'toggleMaybe2 - maybe.base').to.equalNode(scratch.firstChild);
+		expect(child.base, 'toggleMaybe2 - child.base').to.equalNode(scratch.lastChild);
+		expect(parent.base, 'toggleMaybe2 - parent.base').to.equalNode(maybe.base);
+	});
+
+	it('should update parent c.base to null if last child becomes null', () => {
+		/* eslint-disable lines-around-comment */
+
+		/** @type {import('../../src').Component} */
+		let maybe;
+		/** @type {import('../../src').Component} */
+		let child;
+		/** @type {import('../../src').Component} */
+		let parent;
+
+		/** @type {() => void} */
+		let toggleMaybeNull;
+
+		const Null = () => null;
+
+		class MaybeNull extends Component {
+			constructor(props) {
+				super(props);
+				maybe = this;
+				this.state = { active: true };
+				toggleMaybeNull = () => this.setState(prev => ({
+					active: !prev.active
+				}));
+			}
+			render() {
+				return this.state.active ? <div>maybe</div> : null;
+			}
+		}
+
+		class Child extends Component {
+			constructor(props) {
+				super(props);
+				child = this;
+				this.state = { tagName: 'div' };
+
+			}
+			render() {
+				return h(this.state.tagName, null, 'child1');
+			}
+		}
+
+		function Parent(props) {
+			parent = this;
+			return props.children;
+		}
+
+		render((
+			<Fragment>
+				<Parent>
+					<Null />
+					<Null />
+					<Fragment>
+						<MaybeNull />
+					</Fragment>
+					<Null />
+				</Parent>
+				<Child />
+			</Fragment>
+		), scratch);
+
+
+		expect(scratch.innerHTML).to.equal([
+			div('maybe'),
+			div('child1')
+		].join(''));
+		expect(maybe.base, 'initial - maybe.base').to.equalNode(scratch.firstChild);
+		expect(child.base, 'initial - child.base').to.equalNode(scratch.lastChild);
+		expect(parent.base, 'initial - parent.base').to.equalNode(maybe.base);
+
+		toggleMaybeNull();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal([
+			div('child1')
+		].join(''));
+		expect(maybe.base, 'toggleMaybe1 - maybe.base').to.equalNode(null);
+		expect(child.base, 'toggleMaybe1 - child.base').to.equalNode(scratch.firstChild);
+		expect(parent.base, 'toggleMaybe1 - parent.base').to.equalNode(maybe.base);
+	});
+
+	it('should update parent c.base if last child returns dom', () => {
+		/* eslint-disable lines-around-comment */
+
+		/** @type {import('../../src').Component} */
+		let maybe;
+		/** @type {import('../../src').Component} */
+		let child;
+		/** @type {import('../../src').Component} */
+		let parent;
+
+		/** @type {() => void} */
+		let toggleMaybeNull;
+
+		const Null = () => null;
+
+		class MaybeNull extends Component {
+			constructor(props) {
+				super(props);
+				maybe = this;
+				this.state = { active: false };
+				toggleMaybeNull = () => this.setState(prev => ({
+					active: !prev.active
+				}));
+			}
+			render() {
+				return this.state.active ? <div>maybe</div> : null;
+			}
+		}
+
+		class Child extends Component {
+			constructor(props) {
+				super(props);
+				child = this;
+				this.state = { tagName: 'div' };
+
+			}
+			render() {
+				return h(this.state.tagName, null, 'child1');
+			}
+		}
+
+		function Parent(props) {
+			parent = this;
+			return props.children;
+		}
+
+		render((
+			<Fragment>
+				<Parent>
+					<Null />
+					<Null />
+					<Fragment>
+						<MaybeNull />
+					</Fragment>
+					<Null />
+				</Parent>
+				<Child />
+			</Fragment>
+		), scratch);
+
+		expect(scratch.innerHTML).to.equal([
+			div('child1')
+		].join(''));
+		expect(maybe.base, 'toggleMaybe1 - maybe.base').to.equalNode(null);
+		expect(child.base, 'toggleMaybe1 - child.base').to.equalNode(scratch.firstChild);
+		expect(parent.base, 'toggleMaybe1 - parent.base').to.equalNode(maybe.base);
+
+		toggleMaybeNull();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal([
+			div('maybe'),
+			div('child1')
+		].join(''));
+		expect(maybe.base, 'initial - maybe.base').to.equalNode(scratch.firstChild);
+		expect(child.base, 'initial - child.base').to.equalNode(scratch.lastChild);
+		expect(parent.base, 'initial - parent.base').to.equalNode(maybe.base);
 	});
 });
