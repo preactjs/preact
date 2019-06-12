@@ -72,18 +72,8 @@ Component.prototype.forceUpdate = function(callback) {
 		let newDom = diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, force, oldDom == null ? getDomSibling(vnode) : oldDom);
 		commitRoot(mounts, vnode);
 
-		if (newDom != oldDom) {
-			// Update parent component's _dom and c.base pointers
-			while (
-				vnode._parent
-				&& vnode._parent._dom === oldDom
-				&& (vnode = vnode._parent)
-			) {
-				vnode._dom = newDom;
-				if (vnode._component) {
-					vnode._component.base = newDom;
-				}
-			}
+		if (newDom != oldDom && typeof vnode._parent.type === 'function') {
+			updateDomPointers(vnode._parent);
 		}
 	}
 	if (callback) callback();
@@ -130,6 +120,24 @@ export function getDomSibling(vnode, childIndex) {
 	// VNode (meaning we reached the DOM parent of the original vnode that began
 	// the search)
 	return typeof vnode.type === 'function' ? getDomSibling(vnode) : null;
+}
+
+function updateDomPointers(vnode) {
+	let dom = null;
+	for (let i = 0; dom == null && i < vnode._children.length; i++) {
+		if (vnode._children[i] != null) {
+			dom = vnode._children[i]._dom;
+		}
+	}
+
+	vnode._dom = dom;
+	if (vnode._component) {
+		vnode._component.base = dom;
+	}
+
+	if (vnode._parent != null && typeof vnode._parent.type == 'function') {
+		return updateDomPointers(vnode._parent);
+	}
 }
 
 /**
