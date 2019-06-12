@@ -130,7 +130,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, oldDom);
 
 			// Only change the fields on the component once they represent the new state of the DOM
-			// c.base = newVNode._dom;
+			c.base = newVNode._dom;
 			c._vnode = newVNode;
 			c._parentDom = parentDom;
 
@@ -296,8 +296,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 			}
 		}
 
-		// r.base = r._parentDom = null;
-		r._parentDom = null;
+		r.base = r._parentDom = null;
 	}
 
 	if (r = vnode._children) {
