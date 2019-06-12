@@ -69,22 +69,26 @@ Component.prototype.forceUpdate = function(callback) {
 		const force = callback!==false;
 
 		let mounts = [];
-		let newDom = diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, force, oldDom == null ? getDomSibling(vnode) : oldDom);
+		diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, force, (oldDom = findDomNode(vnode)) == null ? getDomSibling(vnode) : oldDom);
 		commitRoot(mounts, vnode);
 
-		if (newDom != oldDom) {
-			// Update parent component's _dom and c.base pointers
-			while (
-				vnode._parent
-				&& vnode._parent._dom === oldDom
-				&& (vnode = vnode._parent)
-			) {
-				vnode._dom = newDom;
-				if (vnode._component) {
-					vnode._component.base = newDom;
-				}
-			}
-		}
+		// if (newDom != oldDom) {
+		// 	if (newDom == null && vnode._parent._dom == oldDom) {
+		// 		newDom = getDomSibling(vnode);
+		// 	}
+
+		// 	// Update parent component's _dom and c.base pointers
+		// 	while (
+		// 		vnode._parent
+		// 		&& vnode._parent._dom === oldDom
+		// 		&& (vnode = vnode._parent)
+		// 	) {
+		// 		vnode._dom = newDom;
+		// 		if (vnode._component) {
+		// 			vnode._component.base = newDom;
+		// 		}
+		// 	}
+		// }
 	}
 	if (callback) callback();
 };
@@ -130,6 +134,87 @@ export function getDomSibling(vnode, childIndex) {
 	// VNode (meaning we reached the DOM parent of the original vnode that began
 	// the search)
 	return typeof vnode.type === 'function' ? getDomSibling(vnode) : null;
+}
+
+Object.defineProperty(Component.prototype, 'base', {
+	get() {
+		return findDomNode(this._vnode);
+	}
+});
+
+/**
+ * @param {import('./internal').VNode | null} vnode
+ */
+function findDomNode(vnode) {
+	// // 3489 B
+	// if (vnode == null) {
+	// 	return null;
+	// }
+	// else if (typeof vnode.type !== 'function') {
+	// 	return vnode._dom;
+	// }
+	// let dom;
+	// for (let i = 0; i < vnode._children.length; i++) {
+	// 	dom = findDomNode(vnode._children[i]);
+	// 	if (dom) {
+	// 		return dom;
+	// 	}
+	// }
+
+	// // 3489 B
+	// if (vnode == null) {
+	// 	return null;
+	// }
+	// else if (typeof vnode.type !== 'function') {
+	// 	return vnode._dom;
+	// }
+	// let dom;
+	// for (let i = 0; !dom && i < vnode._children.length; i++) {
+	// 	dom = findDomNode(vnode._children[i]);
+	// }
+	// return dom;
+
+	// 3489 B
+	if (vnode == null) {
+		return null;
+	}
+	if (vnode._component == null) {
+		return vnode._dom;
+	}
+	let dom;
+	for (let i = 0; !dom && i < vnode._children.length; i++) {
+		dom = findDomNode(vnode._children[i]);
+	}
+	return dom;
+
+	// // 3489 B
+	// if (vnode == null) {
+	// 	return null;
+	// }
+	// else if (typeof vnode.type !== 'function') {
+	// 	return vnode._dom;
+	// }
+	// let dom;
+	// for (let i = 0; !dom && i < vnode._children.length; dom = findDomNode(vnode._children[i++])) {}
+	// return dom;
+
+	// // 3486 B
+	// if (vnode != null) {
+	// 	return typeof vnode.type !== 'function' ? vnode._dom : vnode._children.reduce((dom, child) => {
+	// 		return dom ? dom : findDomNode(child);
+	// 	}, null);
+	// }
+
+	// // 3494 B
+	// if (vnode != null) {
+	// 	let dom = typeof vnode.type !== 'function' && vnode._dom;
+	// 	if (!dom) {
+	// 		for (let i = 0; !dom && i < vnode._children.length; i++) {
+	// 			dom = findDomNode(vnode._children[i]);
+	// 		}
+	// 	}
+	// 	return dom;
+	// }
 }
 
 /**
