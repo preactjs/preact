@@ -402,9 +402,9 @@ describe('render()', () => {
 
 		it('should remove old styles', () => {
 			render(<div style={{ color: 'red' }} />, scratch);
-			render(<div style={{ background: 'blue' }} />, scratch);
-			expect(scratch.firstChild.style).to.have.property('color').that.equals('');
-			expect(scratch.firstChild.style).to.have.property('background').that.equals('blue');
+			render(<div style={{ backgroundColor: 'blue' }} />, scratch);
+			expect(scratch.firstChild.style.color).to.equal('');
+			expect(scratch.firstChild.style.backgroundColor).to.equal('blue');
 		});
 
 		// Skip test if the currently running browser doesn't support CSS Custom Properties
