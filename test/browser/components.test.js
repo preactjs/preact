@@ -2058,5 +2058,21 @@ describe('Components', () => {
 			expect(parent1.base).to.equalNode(maybe.base, 'toggleMaybe - parent1.base');
 			expect(fragRef.current.base).to.equalNode(maybe.base, 'toggleMaybe - fragRef.current.base');
 		});
+
+		it('should not update parent if it is a DOM node', () => {
+			let divVNode = <div><Child /></div>;
+			render(divVNode, scratch);
+
+			expect(scratch.innerHTML).to.equal('<div><p>child</p></div>');
+			expect(divVNode._dom).to.equalNode(scratch.firstChild, 'initial - divVNode._dom');
+			expect(child.base).to.equalNode(scratch.firstChild.firstChild, 'initial - child.base');
+
+			swapChildTag();
+			rerender();
+
+			expect(scratch.innerHTML).to.equal('<div><span>child</span></div>');
+			expect(divVNode._dom).to.equalNode(scratch.firstChild, 'swapChildTag - divVNode._dom');
+			expect(child.base).to.equalNode(scratch.firstChild.firstChild, 'swapChildTag - child.base');
+		});
 	});
 });
