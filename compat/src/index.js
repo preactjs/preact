@@ -76,7 +76,7 @@ class ContextProvider {
  * @param {object | null | undefined} props
  */
 function Portal(props) {
-	let wrap = h(ContextProvider, { context: this.context }, props.vnode || null);
+	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
 	let container = props.container;
 
 	if (container !== this.container) {
