@@ -79,6 +79,43 @@ describe('Portal', () => {
 		expect(scratch.innerHTML).to.equal('<div>foobar</div><div><p>Hello</p></div>');
 	});
 
+	it.only('should work with stacking portals', () => {
+		let toggle, toggle2;
+
+		function Foo(props) {
+			const [mounted, setMounted] = useState(false);
+			const [mounted2, setMounted2] = useState(false);
+			toggle = () => setMounted((s) => !s);
+			toggle2 = () => setMounted2((s) => !s);
+			return (
+				<div>
+					<p>Hello</p>
+					{mounted && createPortal(props.children, scratch)}
+					{mounted2 && createPortal(props.children, scratch)}
+				</div>
+			);
+		}
+
+		render(<Foo><div>foobar</div></Foo>, scratch);
+		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div>');
+
+		toggle();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>foobar</div><div><p>Hello</p></div>');
+
+		toggle2();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>foobar</div><div>foobar</div><div><p>Hello</p></div>');
+
+		toggle2();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>foobar</div><div><p>Hello</p></div>');
+
+		toggle();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div>');
+	});
+
 	it('should notice prop changes on the portal', () => {
 		let set;
 
