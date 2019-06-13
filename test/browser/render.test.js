@@ -462,7 +462,7 @@ describe('render()', () => {
 		});
 
 		it('should only register truthy values as handlers', () => {
-			function fooHandler() {};
+			function fooHandler() {}
 			const falsyHandler = false;
 
 			render(<div onClick={falsyHandler} onOtherClick={fooHandler} />, scratch);
