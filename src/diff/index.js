@@ -22,8 +22,7 @@ import options from '../options';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
 export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, force, oldDom) {
-	let c, tmp, isNew, oldProps, oldState, snapshot,
-		newType = newVNode.type, clearProcessingException;
+	let tmp, newType = newVNode.type;
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
@@ -33,6 +32,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 	try {
 		outer: if (typeof newType==='function') {
+			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
@@ -141,13 +141,13 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			if (!isNew && oldProps!=null && c.componentDidUpdate!=null) {
 				c.componentDidUpdate(oldProps, oldState, snapshot);
 			}
+
+			if (clearProcessingException) {
+				c._pendingError = c._processingException = null;
+			}
 		}
 		else {
 			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts);
-		}
-
-		if (clearProcessingException) {
-			c._pendingError = c._processingException = null;
 		}
 
 		if (tmp = options.diffed) tmp(newVNode);
