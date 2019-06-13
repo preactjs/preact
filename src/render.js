@@ -6,11 +6,11 @@ import options from './options';
 function addRenderRoot(vnode, parent) {
 	let root = parent.__preact;
 	if (root) {
-		// TODO: should be push (when do we push, since this goofes up test assertion)
 		root.children = [vnode];
 		root.forceUpdate();
 		return root;
 	}
+
 	function Root({ children }) {
 		parent.__preact = this;
 		return createElement(Fragment, null, this.children || (this.children = children));
