@@ -1,19 +1,21 @@
 import { EMPTY_OBJ, EMPTY_ARR } from './constants';
-import { commitRoot } from './diff/index';
-import { diffChildren } from './diff/children';
+import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
-import { Component } from './component';
-
-class Root extends Component {
-	render(props) {
-		return props.children;
-	}
-}
 
 function addRenderRoot(vnode, parent) {
-	parent.__preact = createElement(Root, null, [vnode]);
-	return createElement(Fragment, null, [parent.__preact]);
+	let root = parent.__preact;
+	if (root) {
+		// TODO: should be push (when do we push, since this goofes up test assertion)
+		root.children = [vnode];
+		root.forceUpdate();
+		return root;
+	}
+	function Root({ children }) {
+		parent.__preact = this;
+		return createElement(Fragment, null, this.children || (this.children = children));
+	}
+	return createElement(Root, null, [vnode]);
 }
 
 /**
@@ -26,11 +28,11 @@ function addRenderRoot(vnode, parent) {
  */
 export function render(vnode, parentDom, replaceNode) {
 	if (options._root) options._root(vnode, parentDom);
-	let oldVNode = parentDom._children;
+	let oldVNode = parentDom.__preact && parentDom.__preact._vnode || EMPTY_OBJ;
 	vnode = addRenderRoot(vnode, parentDom);
 
 	let mounts = [];
-	diffChildren(
+	diff(
 		parentDom,
 		replaceNode ? vnode : (parentDom._children = vnode),
 		oldVNode,
@@ -42,6 +44,7 @@ export function render(vnode, parentDom, replaceNode) {
 				? null
 				: EMPTY_ARR.slice.call(parentDom.childNodes),
 		mounts,
+		false,
 		replaceNode || EMPTY_OBJ
 	);
 	commitRoot(mounts, vnode);
