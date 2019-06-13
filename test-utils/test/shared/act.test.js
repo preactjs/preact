@@ -20,9 +20,9 @@ describe('act', () => {
 	});
 
 	it('should reset options after act finishes', () => {
-		expect(options.requestAnimationFrame).to.equal(undefined);
+		expect(options.requestAnimationFrame).toBeUndefined();
 		act(() => null);
-		expect(options.requestAnimationFrame).to.equal(undefined);
+		expect(options.requestAnimationFrame).toBeUndefined();
 	});
 
 	it('should flush pending effects', () => {
@@ -50,15 +50,15 @@ describe('act', () => {
 
 		act(() => render(<StateContainer />, scratch));
 		expect(spy).to.be.calledOnce;
-		expect(scratch.textContent).to.include('Count: 0');
+		expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 0']));
 		act(() => {
 			const button = scratch.querySelector('button');
 			button.click();
 			expect(spy).to.be.calledOnce;
-			expect(scratch.textContent).to.include('Count: 0');
+			expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 0']));
 		});
 		expect(spy).to.be.calledTwice;
-		expect(scratch.textContent).to.include('Count: 1');
+		expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 1']));
 	});
 
 	it('should flush series of hooks', () => {
@@ -88,14 +88,14 @@ describe('act', () => {
 		}
 		act(() => render(<StateContainer />, scratch));
 		expect(spy).to.be.calledOnce;
-		expect(scratch.textContent).to.include('Count: 0');
+		expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 0']));
 		act(() => {
 			const button = scratch.querySelector('button');
 			button.click();
 		});
-		expect(spy.callCount).to.equal(5);
+		expect(spy.callCount).toBe(5);
 		expect(spy2).to.be.calledOnce;
-		expect(scratch.textContent).to.include('Count: 3');
+		expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 3']));
 	});
 
 	it('should drain the queue of hooks', () => {
@@ -110,13 +110,13 @@ describe('act', () => {
 		}
 
 		render(<StateContainer />, scratch);
-		expect(scratch.textContent).to.include('Count: 0');
+		expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 0']));
 		act(() => {
 			const button = scratch.querySelector('button');
 			button.click();
-			expect(scratch.textContent).to.include('Count: 0');
+			expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 0']));
 		});
-		expect(scratch.textContent).to.include('Count: 1');
+		expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 1']));
 	});
 
 	it('should restore options.requestAnimationFrame', () => {
@@ -125,7 +125,7 @@ describe('act', () => {
 		options.requestAnimationFrame = spy;
 		act(() => null);
 
-		expect(options.requestAnimationFrame).to.equal(spy);
+		expect(options.requestAnimationFrame).toBe(spy);
 		expect(spy).to.not.be.called;
 	});
 
@@ -135,12 +135,12 @@ describe('act', () => {
 		options.debounceRendering = spy;
 		act(() => null);
 
-		expect(options.debounceRendering).to.equal(spy);
+		expect(options.debounceRendering).toBe(spy);
 		expect(spy).to.not.be.called;
 	});
 
 	it('should restore options.debounceRendering when it was undefined before', () => {
 		act(() => null);
-		expect(options.debounceRendering).to.equal(undefined);
+		expect(options.debounceRendering).toBeUndefined();
 	});
 });

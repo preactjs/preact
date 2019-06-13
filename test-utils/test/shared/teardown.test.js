@@ -10,7 +10,7 @@ describe('teardown', () => {
 
 	it('should restore debounce', () => {
 		teardown(scratch);
-		expect(options.__test__previousDebounce).to.be.undefined;
+		expect(options.__test__previousDebounce).toBeUndefined();
 	});
 
 	it('should flush the queue', () => {
