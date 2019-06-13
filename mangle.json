@@ -39,7 +39,8 @@
       "$_render": "__r",
       "$_hook": "__h",
       "$_catchError": "__e",
-      "$_catchRender": "__E"
+      "$_catchRender": "__E",
+      "$_unmount": "_e"
     }
   }
 }
