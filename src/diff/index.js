@@ -143,6 +143,10 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			if (!isNew && oldProps!=null && c.componentDidUpdate!=null) {
 				c.componentDidUpdate(oldProps, oldState, snapshot);
 			}
+
+			if (clearProcessingException) {
+				c._pendingError = c._processingException = null;
+			}
 		}
 		else {
 			let dom = oldVNode._dom;
@@ -201,10 +205,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 
 			newVNode._dom = dom;
-		}
-
-		if (clearProcessingException) {
-			c._pendingError = c._processingException = null;
 		}
 
 		if (tmp = options.diffed) tmp(newVNode);
