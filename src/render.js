@@ -3,6 +3,18 @@ import { commitRoot } from './diff/index';
 import { diffChildren } from './diff/children';
 import { createElement, Fragment } from './create-element';
 import options from './options';
+import { Component } from './component';
+
+class Root extends Component {
+	render(props) {
+		return props.children;
+	}
+}
+
+function addRenderRoot(vnode, parent) {
+	parent.__preact = createElement(Root, null, [vnode]);
+	return createElement(Fragment, null, [parent.__preact]);
+}
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -15,7 +27,7 @@ import options from './options';
 export function render(vnode, parentDom, replaceNode) {
 	if (options._root) options._root(vnode, parentDom);
 	let oldVNode = parentDom._children;
-	vnode = createElement(Fragment, null, [vnode]);
+	vnode = addRenderRoot(vnode, parentDom);
 
 	let mounts = [];
 	diffChildren(
