@@ -180,28 +180,27 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 					dom.data = newProps;
 				}
 			}
-			else {
+			else if (newVNode!==oldVNode) {
 				if (excessDomChildren!=null) {
 					excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 				}
-				if (newVNode!==oldVNode) {
-					oldProps = oldVNode.props || EMPTY_OBJ;
 
-					let oldHtml = oldProps.dangerouslySetInnerHTML;
-					let newHtml = newProps.dangerouslySetInnerHTML;
-					if ((newHtml || oldHtml) && excessDomChildren==null) {
-						// Avoid re-applying the same '__html' if it did not changed between re-render
-						if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
-							dom.innerHTML = newHtml && newHtml.__html || '';
-						}
-					}
-					if (newProps.multiple) {
-						dom.multiple = newProps.multiple;
-					}
+				oldProps = oldVNode.props || EMPTY_OBJ;
 
-					diffChildren(dom, newVNode, oldVNode, context, newType==='foreignObject' ? false : isSvg, excessDomChildren, mounts, EMPTY_OBJ);
-					diffProps(dom, newProps, oldProps, isSvg);
+				let oldHtml = oldProps.dangerouslySetInnerHTML;
+				let newHtml = newProps.dangerouslySetInnerHTML;
+				if ((newHtml || oldHtml) && excessDomChildren==null) {
+					// Avoid re-applying the same '__html' if it did not changed between re-render
+					if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
+						dom.innerHTML = newHtml && newHtml.__html || '';
+					}
 				}
+				if (newProps.multiple) {
+					dom.multiple = newProps.multiple;
+				}
+
+				diffChildren(dom, newVNode, oldVNode, context, newType==='foreignObject' ? false : isSvg, excessDomChildren, mounts, EMPTY_OBJ);
+				diffProps(dom, newProps, oldProps, isSvg);
 			}
 
 			newVNode._dom = dom;
