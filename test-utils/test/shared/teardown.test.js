@@ -8,7 +8,7 @@ describe('teardown', () => {
 	});
 
 	it('should flush the queue', () => {
-		const spy = jasmine.createSpy();
+		const spy = jasmine.createSpy('__test__drainQueue');
 		options.__test__drainQueue = spy;
 		teardown();
 		expect(spy).toHaveBeenCalledTimes(1);

@@ -26,7 +26,7 @@ describe('act', () => {
 	});
 
 	it('should flush pending effects', () => {
-		let spy = jasmine.createSpy();
+		let spy = jasmine.createSpy('effect');
 		function StateContainer() {
 			useEffect(spy);
 			return <div />;
@@ -36,7 +36,7 @@ describe('act', () => {
 	});
 
 	it('should flush pending and initial effects', () => {
-		const spy = jasmine.createSpy();
+		const spy = jasmine.createSpy('effect');
 		function StateContainer() {
 			const [count, setCount] = useState(0);
 			useEffect(() => spy(), [count]);
@@ -62,8 +62,8 @@ describe('act', () => {
 	});
 
 	it('should flush series of hooks', () => {
-		const spy = jasmine.createSpy();
-		const spy2 = jasmine.createSpy();
+		const spy = jasmine.createSpy('effect1');
+		const spy2 = jasmine.createSpy('effect2');
 		function StateContainer() {
 			const [count, setCount] = useState(0);
 			useEffect(() => {
@@ -99,7 +99,7 @@ describe('act', () => {
 	});
 
 	it('should drain the queue of hooks', () => {
-		const spy = jasmine.createSpy();
+		const spy = jasmine.createSpy('effect');
 		function StateContainer() {
 			const [count, setCount] = useState(0);
 			useEffect(() => spy());
@@ -120,7 +120,7 @@ describe('act', () => {
 	});
 
 	it('should restore options.requestAnimationFrame', () => {
-		const spy = jasmine.createSpy();
+		const spy = jasmine.createSpy('options.requestAnimationFrame');
 
 		options.requestAnimationFrame = spy;
 		act(() => null);
@@ -130,7 +130,7 @@ describe('act', () => {
 	});
 
 	it('should restore options.debounceRendering', () => {
-		const spy = jasmine.createSpy();
+		const spy = jasmine.createSpy('options.debounceRendering');
 
 		options.debounceRendering = spy;
 		act(() => null);
