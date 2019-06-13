@@ -5,7 +5,6 @@ import { useState } from '../../src';
 
 /** @jsx h */
 
-
 describe('useState', () => {
 
 	/** @type {HTMLDivElement} */
@@ -41,7 +40,7 @@ describe('useState', () => {
 	});
 
 	it('can initialize the state via a function', () => {
-		const initState = sinon.spy(() => { 1; });
+		const initState = jasmine.createSpy('initState').and.callFake(() => { 1; });
 
 		function Comp() {
 			useState(initState);
@@ -51,14 +50,16 @@ describe('useState', () => {
 		render(<Comp />, scratch);
 		render(<Comp />, scratch);
 
-		expect(initState).to.be.calledOnce;
+		expect(initState).toHaveBeenCalledTimes(1);
 	});
 
 	it('does not rerender on equal state', () => {
 		let lastState;
+
+		/** @type {(arg: number | ((prev: number) => number)) => void} */
 		let doSetState;
 
-		const Comp = sinon.spy(() => {
+		const Comp = jasmine.createSpy('Comp').and.callFake(() => {
 			const [state, setState] = useState(0);
 			lastState = state;
 			doSetState = setState;
@@ -67,24 +68,26 @@ describe('useState', () => {
 
 		render(<Comp />, scratch);
 		expect(lastState).toBe(0);
-		expect(Comp).to.be.calledOnce;
+		expect(Comp).toHaveBeenCalledTimes(1);
 
 		doSetState(0);
 		rerender();
 		expect(lastState).toBe(0);
-		expect(Comp).to.be.calledOnce;
+		expect(Comp).toHaveBeenCalledTimes(1);
 
 		doSetState(() => 0);
 		rerender();
 		expect(lastState).toBe(0);
-		expect(Comp).to.be.calledOnce;
+		expect(Comp).toHaveBeenCalledTimes(1);
 	});
 
 	it('rerenders when setting the state', () => {
 		let lastState;
+
+		/** @type {(arg: number | ((prev: number) => number)) => void} */
 		let doSetState;
 
-		const Comp = sinon.spy(() => {
+		const Comp = jasmine.createSpy('Comp').and.callFake(() => {
 			const [state, setState] = useState(0);
 			lastState = state;
 			doSetState = setState;
@@ -93,18 +96,18 @@ describe('useState', () => {
 
 		render(<Comp />, scratch);
 		expect(lastState).toBe(0);
-		expect(Comp).to.be.calledOnce;
+		expect(Comp).toHaveBeenCalledTimes(1);
 
 		doSetState(1);
 		rerender();
 		expect(lastState).toBe(1);
-		expect(Comp).to.be.calledTwice;
+		expect(Comp).toHaveBeenCalledTimes(2);
 
 		// Updater function style
 		doSetState(current => current * 10);
 		rerender();
 		expect(lastState).toBe(10);
-		expect(Comp).to.be.calledThrice;
+		expect(Comp).toHaveBeenCalledTimes(3);
 	});
 
 	it('can be set by another component', () => {
@@ -121,13 +124,13 @@ describe('useState', () => {
 		}
 
 		render(<StateContainer />, scratch);
-		expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 0']));
+		expect(scratch.textContent).toEqual(jasmine.arrayContaining(['Count: 0']));
 
 		const button = scratch.querySelector('button');
 		button.click();
 
 		rerender();
-		expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 10']));
+		expect(scratch.textContent).toEqual(jasmine.arrayContaining(['Count: 10']));
 	});
 
 	it('should handle queued useState', () => {

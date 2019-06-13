@@ -59,7 +59,7 @@ describe('combinations', () => {
 	});
 
 	it('can rerender asynchronously from within an effect', () => {
-		const didRender = sinon.spy();
+		const didRender = jasmine.createSpy('didRender');
 
 		function Comp() {
 			const [counter, setCounter] = useState(0);
@@ -74,12 +74,13 @@ describe('combinations', () => {
 
 		return scheduleEffectAssert(() => {
 			rerender();
-			expect(didRender).to.have.been.calledTwice.and.calledWith(1);
+			expect(didRender).toHaveBeenCalledTimes(2);
+			expect(didRender).toHaveBeenCalledWith(1);
 		});
 	});
 
 	it('can rerender synchronously from within a layout effect', () => {
-		const didRender = sinon.spy();
+		const didRender = jasmine.createSpy('didRender');
 
 		function Comp() {
 			const [counter, setCounter] = useState(0);
@@ -93,7 +94,8 @@ describe('combinations', () => {
 		render(<Comp />, scratch);
 		rerender();
 
-		expect(didRender).to.have.been.calledTwice.and.calledWith(1);
+		expect(didRender).toHaveBeenCalledTimes(2);
+		expect(didRender).toHaveBeenCalledWith(1);
 	});
 
 	it('can access refs from within a layout effect callback', () => {

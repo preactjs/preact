@@ -73,13 +73,13 @@ describe('useReducer', () => {
 		}
 
 		render(<ReducerComponent />, scratch);
-		expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 0']));
+		expect(scratch.textContent).toEqual(jasmine.arrayContaining(['Count: 0']));
 
 		const button = scratch.querySelector('button');
 		button.click();
 
 		rerender();
-		expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 10']));
+		expect(scratch.textContent).toEqual(jasmine.arrayContaining(['Count: 10']));
 	});
 
 	it('can lazily initialize its state with an action', () => {

@@ -25,8 +25,8 @@ describe('useEffect', () => {
 
 
 	it('calls the effect immediately if another render is about to start', () => {
-		const cleanupFunction = sinon.spy();
-		const callback = sinon.spy(() => cleanupFunction);
+		const cleanupFunction = jasmine.createSpy('cleanup');
+		const callback = jasmine.createSpy('callback').and.callFake(() => cleanupFunction);
 
 		function Comp() {
 			useEffect(callback);
@@ -36,18 +36,18 @@ describe('useEffect', () => {
 		render(<Comp />, scratch);
 		render(<Comp />, scratch);
 
-		expect(cleanupFunction).to.be.not.called;
-		expect(callback).to.be.calledOnce;
+		expect(cleanupFunction).not.toHaveBeenCalled();
+		expect(callback).toHaveBeenCalledTimes(1);
 
 		render(<Comp />, scratch);
 
-		expect(cleanupFunction).to.be.calledOnce;
-		expect(callback).to.be.calledTwice;
+		expect(cleanupFunction).toHaveBeenCalledTimes(1);
+		expect(callback).toHaveBeenCalledTimes(2);
 	});
 
 	it('cancels the effect when the component get unmounted before it had the chance to run it', () => {
-		const cleanupFunction = sinon.spy();
-		const callback = sinon.spy(() => cleanupFunction);
+		const cleanupFunction = jasmine.createSpy('cleanup');
+		const callback = jasmine.createSpy('callback').and.callFake(() => cleanupFunction);
 
 		function Comp() {
 			useEffect(callback);
@@ -58,8 +58,8 @@ describe('useEffect', () => {
 		render(null, scratch);
 
 		return scheduleEffectAssert(() => {
-			expect(cleanupFunction).to.not.be.called;
-			expect(callback).to.not.be.called;
+			expect(cleanupFunction).not.toHaveBeenCalled();
+			expect(callback).not.toHaveBeenCalled();
 		});
 	});
 

@@ -29,8 +29,8 @@ describe('useLayoutEffect', () => {
 
 
 	it('calls the effect immediately after render', () => {
-		const cleanupFunction = sinon.spy();
-		const callback = sinon.spy(() => cleanupFunction);
+		const cleanupFunction = jasmine.createSpy('cleanup');
+		const callback = jasmine.createSpy('callback').and.callFake(() => cleanupFunction);
 
 		function Comp() {
 			useLayoutEffect(callback);
@@ -40,17 +40,17 @@ describe('useLayoutEffect', () => {
 		render(<Comp />, scratch);
 		render(<Comp />, scratch);
 
-		expect(cleanupFunction).to.be.calledOnce;
-		expect(callback).to.be.calledTwice;
+		expect(cleanupFunction).toHaveBeenCalledTimes(1);
+		expect(callback).toHaveBeenCalledTimes(2);
 
 		render(<Comp />, scratch);
 
-		expect(cleanupFunction).to.be.calledTwice;
-		expect(callback).to.be.calledThrice;
+		expect(cleanupFunction).toHaveBeenCalledTimes(2);
+		expect(callback).toHaveBeenCalledTimes(3);
 	});
 
 	it('works on a nested component', () => {
-		const callback = sinon.spy();
+		const callback = jasmine.createSpy('callback');
 
 		function Parent() {
 			return (
@@ -67,7 +67,7 @@ describe('useLayoutEffect', () => {
 
 		render(<Parent />, scratch);
 
-		expect(callback).to.be.calledOnce;
+		expect(callback).toHaveBeenCalledTimes(1);
 	});
 
 	it('Should execute layout effects in the right order', () => {

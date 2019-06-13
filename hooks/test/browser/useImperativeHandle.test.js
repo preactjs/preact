@@ -28,7 +28,6 @@ describe('useImperativeHandle', () => {
 		}
 
 		render(<Comp />, scratch);
-		expect(ref.current).toHaveProperty('test');
 		expect(ref.current.test()).toBe('test');
 	});
 
@@ -42,11 +41,9 @@ describe('useImperativeHandle', () => {
 		}
 
 		render(<Comp a={0} />, scratch);
-		expect(ref.current).toHaveProperty('test');
 		expect(ref.current.test()).toBe('test0');
 
 		render(<Comp a={1} />, scratch);
-		expect(ref.current).toHaveProperty('test');
 		expect(ref.current.test()).toBe('test1');
 	});
 

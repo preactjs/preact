@@ -38,7 +38,7 @@ describe('useContext', () => {
 
 	it('should use default value', () => {
 		const Foo = createContext(42);
-		const spy = sinon.spy();
+		const spy = jasmine.createSpy('contextValue');
 
 		function App() {
 			spy(useContext(Foo));
@@ -46,11 +46,11 @@ describe('useContext', () => {
 		}
 
 		render(<App />, scratch);
-		expect(spy).to.be.calledWith(42);
+		expect(spy).toHaveBeenCalledWith(42);
 	});
 
 	it('should update when value changes with nonUpdating Component on top', done => {
-		const spy = sinon.spy();
+		const spy = jasmine.createSpy('contextValue');
 		const Ctx = createContext(0);
 
 		class NoUpdate extends Component {
@@ -79,21 +79,21 @@ describe('useContext', () => {
 		}
 
 		render(<App value={0} />, scratch);
-		expect(spy).to.be.calledOnce;
-		expect(spy).to.be.calledWith(0);
+		expect(spy).toHaveBeenCalledTimes(1);
+		expect(spy).toHaveBeenCalledWith(0);
 		render(<App value={1} />, scratch);
 
 		// Wait for enqueued hook update
 		setTimeout(() => {
 			// Should not be called a third time
-			expect(spy).to.be.calledTwice;
-			expect(spy).to.be.calledWith(1);
+			expect(spy).toHaveBeenCalledTimes(2);
+			expect(spy).toHaveBeenCalledWith(1);
 			done();
 		}, 0);
 	});
 
 	it('should only update when value has changed', done => {
-		const spy = sinon.spy();
+		const spy = jasmine.createSpy('contextValue');
 		const Ctx = createContext(0);
 
 		function App(props) {
@@ -111,17 +111,17 @@ describe('useContext', () => {
 		}
 
 		render(<App value={0} />, scratch);
-		expect(spy).to.be.calledOnce;
-		expect(spy).to.be.calledWith(0);
+		expect(spy).toHaveBeenCalledTimes(1);
+		expect(spy).toHaveBeenCalledWith(0);
 		render(<App value={1} />, scratch);
 
-		expect(spy).to.be.calledTwice;
-		expect(spy).to.be.calledWith(1);
+		expect(spy).toHaveBeenCalledTimes(2);
+		expect(spy).toHaveBeenCalledWith(1);
 
 		// Wait for enqueued hook update
 		setTimeout(() => {
 			// Should not be called a third time
-			expect(spy).to.be.calledTwice;
+			expect(spy).toHaveBeenCalledTimes(2);
 			done();
 		}, 0);
 	});
@@ -129,8 +129,8 @@ describe('useContext', () => {
 	it('should allow multiple context hooks at the same time', () => {
 		const Foo = createContext(0);
 		const Bar = createContext(10);
-		const spy = sinon.spy();
-		const unmountspy = sinon.spy();
+		const spy = jasmine.createSpy('contextValue');
+		const unmountspy = jasmine.createSpy('unmount');
 
 		function Comp() {
 			const foo = useContext(Foo);
@@ -149,8 +149,8 @@ describe('useContext', () => {
 			</Foo.Provider>
 		), scratch);
 
-		expect(spy).to.be.calledOnce;
-		expect(spy).to.be.calledWith(0, 10);
+		expect(spy).toHaveBeenCalledTimes(1);
+		expect(spy).toHaveBeenCalledWith(0, 10);
 
 		render((
 			<Foo.Provider value={11}>
@@ -160,7 +160,7 @@ describe('useContext', () => {
 			</Foo.Provider>
 		), scratch);
 
-		 expect(spy).to.be.calledTwice;
-		 expect(unmountspy).not.to.be.called;
+		 expect(spy).toHaveBeenCalledTimes(2);
+		 expect(unmountspy).not.toHaveBeenCalled();
 	});
 });
