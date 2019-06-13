@@ -22,8 +22,10 @@ import options from '../options';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
 export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, force, oldDom) {
-	let c, tmp, isNew, oldProps, oldState, snapshot,
-		newType = newVNode.type, clearProcessingException;
+	let c, tmp, isNew, oldState, snapshot, clearProcessingException;
+	let oldProps = oldVNode.props;
+	let newProps = newVNode.props;
+	let newType = newVNode.type;
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
@@ -48,16 +50,16 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			else {
 				// Instantiate the new component
 				if (newType.prototype && newType.prototype.render) {
-					newVNode._component = c = new newType(newVNode.props, cctx); // eslint-disable-line new-cap
+					newVNode._component = c = new newType(newProps, cctx); // eslint-disable-line new-cap
 				}
 				else {
-					newVNode._component = c = new Component(newVNode.props, cctx);
+					newVNode._component = c = new Component(newProps, cctx);
 					c.constructor = newType;
 					c.render = doRender;
 				}
 				if (provider) provider.sub(c);
 
-				c.props = newVNode.props;
+				c.props = newProps;
 				if (!c.state) c.state = {};
 				c.context = cctx;
 				c._context = context;
@@ -70,7 +72,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				c._nextState = c.state;
 			}
 			if (newType.getDerivedStateFromProps!=null) {
-				assign(c._nextState==c.state ? (c._nextState = assign({}, c._nextState)) : c._nextState, newType.getDerivedStateFromProps(newVNode.props, c._nextState));
+				assign(c._nextState==c.state ? (c._nextState = assign({}, c._nextState)) : c._nextState, newType.getDerivedStateFromProps(newProps, c._nextState));
 			}
 
 			// Invoke pre-render lifecycle methods
@@ -80,11 +82,11 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 			else {
 				if (newType.getDerivedStateFromProps==null && force==null && c.componentWillReceiveProps!=null) {
-					c.componentWillReceiveProps(newVNode.props, cctx);
+					c.componentWillReceiveProps(newProps, cctx);
 				}
 
-				if (!force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newVNode.props, c._nextState, cctx)===false) {
-					c.props = newVNode.props;
+				if (!force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newProps, c._nextState, cctx)===false) {
+					c.props = newProps;
 					c.state = c._nextState;
 					c._dirty = false;
 					c._vnode = newVNode;
@@ -94,7 +96,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				}
 
 				if (c.componentWillUpdate!=null) {
-					c.componentWillUpdate(newVNode.props, c._nextState, cctx);
+					c.componentWillUpdate(newProps, c._nextState, cctx);
 				}
 			}
 
@@ -102,7 +104,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			oldState = c.state;
 
 			c.context = cctx;
-			c.props = newVNode.props;
+			c.props = newProps;
 			c.state = c._nextState;
 
 			if (tmp = options._render) tmp(newVNode);
@@ -144,16 +146,14 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		}
 		else {
 			let dom = oldVNode._dom;
-			oldProps = oldVNode.props;
-			let newProps = newVNode.props;
 
 			// Tracks entering and exiting SVG namespace when descending through the tree.
-			let newIsSvg = newVNode.type==='svg' || isSvg;
+			isSvg = newType==='svg' || isSvg;
 
 			if (dom==null && excessDomChildren!=null) {
 				for (let i=0; i<excessDomChildren.length; i++) {
 					const child = excessDomChildren[i];
-					if (child!=null && (newVNode.type===null ? child.nodeType===3 : child.localName===newVNode.type)) {
+					if (child!=null && (newType===null ? child.nodeType===3 : child.localName===newType)) {
 						dom = child;
 						excessDomChildren[i] = null;
 						break;
@@ -162,16 +162,16 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 
 			if (dom==null) {
-				if (newVNode.type===null) {
+				if (newType===null) {
 					newVNode._dom = document.createTextNode(newProps);
 					break outer;
 				}
-				dom = newIsSvg ? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type) : document.createElement(newVNode.type);
+				dom = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', newType) : document.createElement(newType);
 				// we created a new parent, so none of the previously attached children can be reused:
 				excessDomChildren = null;
 			}
 
-			if (newVNode.type===null) {
+			if (newType===null) {
 				if (oldProps !== newProps) {
 					dom.data = newProps;
 				}
@@ -195,8 +195,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 						dom.multiple = newProps.multiple;
 					}
 
-					diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : newIsSvg, excessDomChildren, mounts, EMPTY_OBJ);
-					diffProps(dom, newProps, oldProps, newIsSvg);
+					diffChildren(dom, newVNode, oldVNode, context, newType==='foreignObject' ? false : isSvg, excessDomChildren, mounts, EMPTY_OBJ);
+					diffProps(dom, newProps, oldProps, isSvg);
 				}
 			}
 
