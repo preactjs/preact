@@ -66,11 +66,11 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 
 		if (value) {
 			if (!oldValue) dom.addEventListener(name, eventProxy, useCapture);
+			(dom._listeners || (dom._listeners = {}))[name] = value;
 		}
 		else {
 			dom.removeEventListener(name, eventProxy, useCapture);
 		}
-		(dom._listeners || (dom._listeners = {}))[name] = value;
 	}
 	else if (name!=='list' && name!=='tagName' && !isSvg && (name in dom)) {
 		dom[name] = value==null ? '' : value;
