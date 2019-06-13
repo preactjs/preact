@@ -181,7 +181,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				}
 			}
 			else {
-				if (excessDomChildren!=null && dom.childNodes!=null) {
+				if (excessDomChildren!=null) {
 					excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 				}
 				if (newVNode!==oldVNode) {
