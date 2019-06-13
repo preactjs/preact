@@ -76,11 +76,12 @@ class ContextProvider {
  * @param {object | null | undefined} props
  */
 function Portal(props) {
-	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
+	let wrap = h(ContextProvider, { context: this.context }, props.vnode || null);
 	let container = props.container;
 
-	if (props.container !== this.container) {
+	if (container !== this.container) {
 		hydrate('', container);
+		if (this.container) render(null, this.container);
 		this.container = container;
 	}
 

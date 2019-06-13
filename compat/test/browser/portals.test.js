@@ -79,6 +79,46 @@ describe('Portal', () => {
 		expect(scratch.innerHTML).to.equal('<div>foobar</div><div><p>Hello</p></div>');
 	});
 
+	it('should leave a working root after the portal', () => {
+		let toggle, toggle2;
+
+		function Foo(props) {
+			const [mounted, setMounted] = useState(false);
+			const [mounted2, setMounted2] = useState(true);
+			toggle = () => setMounted((s) => !s);
+			toggle2 = () => setMounted2((s) => !s);
+			return (
+				<div>
+					{mounted && createPortal(props.children, scratch)}
+					{mounted2 && <p>Hello</p>}
+				</div>
+			);
+		}
+
+		render(<Foo><div>foobar</div></Foo>, scratch);
+		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div>');
+
+		toggle();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>foobar</div><div><p>Hello</p></div>');
+
+		toggle2();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>foobar</div><div></div>');
+
+		toggle2();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>foobar</div><div><p>Hello</p></div>');
+
+		toggle();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div>');
+
+		toggle2();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div></div>');
+	});
+
 	it('should work with stacking portals', () => {
 		let toggle, toggle2;
 
@@ -114,6 +154,29 @@ describe('Portal', () => {
 		toggle();
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div>');
+	});
+
+	it('should work with changing the container', () => {
+		let set, ref;
+
+		function Foo(props) {
+			const [container, setContainer] = useState(scratch);
+			set = setContainer;
+
+			return (
+				<div ref={(r) => { ref = r; }}>
+					<p>Hello</p>
+					{createPortal(props.children, container)}
+				</div>
+			);
+		}
+
+		render(<Foo><div>foobar</div></Foo>, scratch);
+		expect(scratch.innerHTML).to.equal('<div>foobar</div><div><p>Hello</p></div>');
+
+		set(() => ref);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><div>foobar</div><p>Hello</p></div>');
 	});
 
 	it('should work with replacing placeholder portals', () => {
