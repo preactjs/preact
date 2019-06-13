@@ -1,6 +1,6 @@
 import { createElement as h, render, createPortal, useState, Component } from '../../src';
-import { setupScratch } from '../../../test/_util/helpers';
-import { setupRerender, teardown } from 'preact/test-utils';
+import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { setupRerender } from 'preact/test-utils';
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 
 /** @jsx h */
@@ -29,6 +29,8 @@ describe('Portal', () => {
 		render(<Foo>foobar</Foo>, scratch);
 
 		expect(root.innerHTML).to.equal('foobar');
+
+		root.parentNode.removeChild(root);
 	});
 
 	it('should insert the portal', () => {

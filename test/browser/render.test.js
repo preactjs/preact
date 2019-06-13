@@ -1017,6 +1017,8 @@ describe('render()', () => {
 			render(<div id="a">new</div>, newScratch, newScratch.querySelector('#a'));
 			expect(newScratch.innerHTML).to.equal('<div id="a">new</div>');
 			expect(unmount).to.be.calledOnce;
+
+			newScratch.parentNode.removeChild(newScratch);
 		});
 
 		it('should render multiple render roots in one parentDom', () => {

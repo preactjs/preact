@@ -20,12 +20,16 @@ var sauceLabsLaunchers = {
 		browserName: 'firefox',
 		platform: 'Windows 10'
 	},
-	sl_safari: {
-		base: 'SauceLabs',
-		browserName: 'Safari',
-		version: '11',
-		platform: 'OS X 10.13'
-	},
+	// TODO: Safari always fails and disconnects before any tests are executed.
+	// This seems to be an issue with Saucelabs and they're actively investigating
+	// that (see: https://mobile.twitter.com/bromann/status/1136323458328084482).
+	// We'll disable Safari for now until that's resolved.
+	// sl_safari: {
+	// 	base: 'SauceLabs',
+	// 	browserName: 'Safari',
+	// 	version: '11',
+	// 	platform: 'OS X 10.13'
+	// },
 	sl_edge: {
 		base: 'SauceLabs',
 		browserName: 'MicrosoftEdge',
@@ -101,7 +105,7 @@ module.exports = function(config) {
 
 		files: [
 			{ pattern: 'test/polyfills.js', watched: false },
-			{ pattern: config.grep || '{debug,hooks,compat,test-utils,}/test/{browser,shared}/**.test.js', watched: false }
+			{ pattern: config.grep || '{debug,hooks,compat,test-utils,}/test/{browser,shared}/**/*.test.js', watched: false }
 		],
 
 		preprocessors: {
