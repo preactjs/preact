@@ -461,6 +461,17 @@ describe('render()', () => {
 				.and.to.have.been.calledWithExactly('click', sinon.match.func, false);
 		});
 
+		it('should only register truthy values as handlers', () => {
+			function fooHandler() {}
+			const falsyHandler = false;
+
+			render(<div onClick={falsyHandler} onOtherClick={fooHandler} />, scratch);
+
+			expect(scratch.childNodes[0]._listeners).to.deep.equal({
+				OtherClick: fooHandler
+			});
+		});
+
 		it('should support native event names', () => {
 			let click = sinon.spy(),
 				mousedown = sinon.spy();
