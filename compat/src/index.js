@@ -85,10 +85,6 @@ function Portal(props) {
 		this.container = container;
 	}
 
-	this.componentDidUpdate = () => {
-		this.container.__preact._component.forceUpdate();
-	};
-
 	render(wrap, container);
 	this.componentWillUnmount = () => {
 		render(null, container);
