@@ -1,22 +1,16 @@
 const { options } = require('preact');
 const { teardown } = require('../../src');
-const { setupScratch } = require('../../../test/_util/helpers');
 
 describe('teardown', () => {
-	let scratch;
-	beforeEach(() => {
-		scratch = setupScratch();
-	});
-
 	it('should restore debounce', () => {
-		teardown(scratch);
+		teardown();
 		expect(options.__test__previousDebounce).toBeUndefined();
 	});
 
 	it('should flush the queue', () => {
-		const spy = sinon.spy();
+		const spy = jasmine.createSpy();
 		options.__test__drainQueue = spy;
-		teardown(scratch);
-		expect(spy).to.be.calledOnce;
+		teardown();
+		expect(spy).toHaveBeenCalledTimes(1);
 	});
 });

@@ -26,17 +26,17 @@ describe('act', () => {
 	});
 
 	it('should flush pending effects', () => {
-		let spy = sinon.spy();
+		let spy = jasmine.createSpy();
 		function StateContainer() {
 			useEffect(spy);
 			return <div />;
 		}
 		act(() => render(<StateContainer />, scratch));
-		expect(spy).to.be.calledOnce;
+		expect(spy).toHaveBeenCalledTimes(1);
 	});
 
 	it('should flush pending and initial effects', () => {
-		const spy = sinon.spy();
+		const spy = jasmine.createSpy();
 		function StateContainer() {
 			const [count, setCount] = useState(0);
 			useEffect(() => spy(), [count]);
@@ -49,21 +49,21 @@ describe('act', () => {
 		}
 
 		act(() => render(<StateContainer />, scratch));
-		expect(spy).to.be.calledOnce;
-		expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 0']));
+		expect(spy).toHaveBeenCalledTimes(1);
+		expect(scratch.textContent).toEqual(jasmine.arrayContaining(['Count: 0']));
 		act(() => {
 			const button = scratch.querySelector('button');
 			button.click();
-			expect(spy).to.be.calledOnce;
-			expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 0']));
+			expect(spy).toHaveBeenCalledTimes(1);
+			expect(scratch.textContent).toEqual(jasmine.arrayContaining(['Count: 0']));
 		});
-		expect(spy).to.be.calledTwice;
-		expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 1']));
+		expect(spy).toHaveBeenCalledTimes(2);
+		expect(scratch.textContent).toEqual(jasmine.arrayContaining(['Count: 1']));
 	});
 
 	it('should flush series of hooks', () => {
-		const spy = sinon.spy();
-		const spy2 = sinon.spy();
+		const spy = jasmine.createSpy();
+		const spy2 = jasmine.createSpy();
 		function StateContainer() {
 			const [count, setCount] = useState(0);
 			useEffect(() => {
@@ -87,19 +87,19 @@ describe('act', () => {
 			);
 		}
 		act(() => render(<StateContainer />, scratch));
-		expect(spy).to.be.calledOnce;
-		expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 0']));
+		expect(spy).toHaveBeenCalledTimes(1);
+		expect(scratch.textContent).toEqual(jasmine.arrayContaining(['Count: 0']));
 		act(() => {
 			const button = scratch.querySelector('button');
 			button.click();
 		});
-		expect(spy.callCount).toBe(5);
-		expect(spy2).to.be.calledOnce;
-		expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 3']));
+		expect(spy).toHaveBeenCalledTimes(5);
+		expect(spy2).toHaveBeenCalledTimes(1);
+		expect(scratch.textContent).toEqual(jasmine.arrayContaining(['Count: 3']));
 	});
 
 	it('should drain the queue of hooks', () => {
-		const spy = sinon.spy();
+		const spy = jasmine.createSpy();
 		function StateContainer() {
 			const [count, setCount] = useState(0);
 			useEffect(() => spy());
@@ -110,33 +110,33 @@ describe('act', () => {
 		}
 
 		render(<StateContainer />, scratch);
-		expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 0']));
+		expect(scratch.textContent).toEqual(jasmine.arrayContaining(['Count: 0']));
 		act(() => {
 			const button = scratch.querySelector('button');
 			button.click();
-			expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 0']));
+			expect(scratch.textContent).toEqual(jasmine.arrayContaining(['Count: 0']));
 		});
-		expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 1']));
+		expect(scratch.textContent).toEqual(jasmine.arrayContaining(['Count: 1']));
 	});
 
 	it('should restore options.requestAnimationFrame', () => {
-		const spy = sinon.spy();
+		const spy = jasmine.createSpy();
 
 		options.requestAnimationFrame = spy;
 		act(() => null);
 
 		expect(options.requestAnimationFrame).toBe(spy);
-		expect(spy).to.not.be.called;
+		expect(spy).not.toHaveBeenCalled();
 	});
 
 	it('should restore options.debounceRendering', () => {
-		const spy = sinon.spy();
+		const spy = jasmine.createSpy();
 
 		options.debounceRendering = spy;
 		act(() => null);
 
 		expect(options.debounceRendering).toBe(spy);
-		expect(spy).to.not.be.called;
+		expect(spy).not.toHaveBeenCalled();
 	});
 
 	it('should restore options.debounceRendering when it was undefined before', () => {
