@@ -72,8 +72,20 @@ Component.prototype.forceUpdate = function(callback) {
 		let newDom = diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, force, oldDom == null ? getDomSibling(vnode) : oldDom);
 		commitRoot(mounts, vnode);
 
-		if (newDom != oldDom && typeof vnode._parent.type === 'function') {
-			updateDomPointers(vnode._parent);
+		if (newDom != oldDom) {
+			updateParentDomPointers(vnode);
+
+			// // 3496 B
+			// while ((vnode = vnode._parent) != null && vnode._component != null) {
+			// 	vnode._dom = vnode._component.base = null;
+			// 	for (let i = 0; i < vnode._children.length; i++) {
+			// 		let child = vnode._children[i];
+			// 		if (child != null && child._dom != null) {
+			// 			vnode._dom = vnode._component.base = child._dom;
+			// 			break;
+			// 		}
+			// 	}
+			// }
 		}
 	}
 	if (callback) callback();
@@ -122,21 +134,50 @@ export function getDomSibling(vnode, childIndex) {
 	return typeof vnode.type === 'function' ? getDomSibling(vnode) : null;
 }
 
-function updateDomPointers(vnode) {
-	let dom = null;
-	for (let i = 0; dom == null && i < vnode._children.length; i++) {
-		if (vnode._children[i] != null) {
-			dom = vnode._children[i]._dom;
+/**
+ * @param {import('./internal').VNode} vnode
+ */
+function updateParentDomPointers(vnode) {
+	if ((vnode = vnode._parent) != null && vnode._component != null) {
+		// // 3495 B
+		// let dom;
+		// for (let i = 0; dom == null && i < vnode._children.length; i++) {
+		// 	let child = vnode._children[i];
+		// 	if (child != null) {
+		// 		dom = child._dom;
+		// 	}
+		// }
+		// vnode._dom = dom;
+		// vnode._component.base = dom;
+
+		// 3486 B
+		vnode._dom = vnode._component.base = null;
+		for (let i = 0; i < vnode._children.length; i++) {
+			let child = vnode._children[i];
+			if (child != null && child._dom != null) {
+				vnode._dom = vnode._component.base = child._dom;
+				break;
+			}
 		}
-	}
 
-	vnode._dom = dom;
-	if (vnode._component) {
-		vnode._component.base = dom;
-	}
+		// 3496 B
+		// let i = 0;
+		// let child = vnode._children[i];
+		// while (i < vnode._children.length && (child == null || child._dom == null)) {
+		// 	child = vnode._children[++i];
+		// }
+		// vnode._dom = vnode._component.base = child && child._dom;
 
-	if (vnode._parent != null && typeof vnode._parent.type == 'function') {
-		return updateDomPointers(vnode._parent);
+		// 3496 B
+		// let i, child;
+		// for (
+		// 	child = vnode._children[(i = 0)];
+		// 	i < vnode._children.length && (child == null || null == child._dom);
+		// 	child = vnode._children[++i]
+		// );
+		// vnode._dom = vnode._component.base = child && child._dom;
+
+		return updateParentDomPointers(vnode);
 	}
 }
 
