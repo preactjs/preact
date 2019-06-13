@@ -60,6 +60,7 @@ Suspense.prototype = new Component();
  */
 Suspense.prototype._childDidSuspend = function(promise) {
 	// saves 5B
+	/** @type {import('./internal').SuspenseComponent} */
 	const _this = this;
 
 	_this._suspensions.push(promise);
