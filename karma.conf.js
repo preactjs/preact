@@ -65,7 +65,7 @@ module.exports = function(config) {
 
 		frameworks: ['source-map-support', 'jasmine'],
 
-		reporters: ['spec'].concat(
+		reporters: ['spec', 'kjhtml'].concat(
 			coverage ? 'coverage' : [],
 			sauceLabs ? 'saucelabs' : []
 		),
