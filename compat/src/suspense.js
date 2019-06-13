@@ -93,6 +93,7 @@ Suspense.prototype._childDidSuspend = function(promise) {
 		_this._timeout = (
 			_this.props.maxDuration
 				? new Promise((res) => {
+					/* istanbul ignore next */
 					setTimeout(res, _this.props.maxDuration);
 				})
 				// even tough there is not maxDuration configured we will defer the suspension
