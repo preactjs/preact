@@ -106,7 +106,7 @@ module.exports = function(config) {
 		files: [
 			{ pattern: 'test/polyfills.js', watched: false },
 			// { pattern: config.grep || '{debug,hooks,compat,test-utils,}/test/{browser,shared}/**/*.test.js', watched: false }
-			{ pattern: config.grep || 'test-utils/test/{browser,shared}/**/*.test.js', watched: false }
+			{ pattern: config.grep || '{hooks,test-utils}/test/{browser,shared}/**/*.test.js', watched: false }
 		],
 
 		preprocessors: {
