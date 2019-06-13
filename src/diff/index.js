@@ -33,6 +33,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 	try {
 		outer: if (typeof newType==='function') {
 			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
+			let newProps = newVNode.props;
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
@@ -48,16 +49,16 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			else {
 				// Instantiate the new component
 				if (newType.prototype && newType.prototype.render) {
-					newVNode._component = c = new newType(newVNode.props, cctx); // eslint-disable-line new-cap
+					newVNode._component = c = new newType(newProps, cctx); // eslint-disable-line new-cap
 				}
 				else {
-					newVNode._component = c = new Component(newVNode.props, cctx);
+					newVNode._component = c = new Component(newProps, cctx);
 					c.constructor = newType;
 					c.render = doRender;
 				}
 				if (provider) provider.sub(c);
 
-				c.props = newVNode.props;
+				c.props = newProps;
 				if (!c.state) c.state = {};
 				c.context = cctx;
 				c._context = context;
@@ -70,7 +71,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				c._nextState = c.state;
 			}
 			if (newType.getDerivedStateFromProps!=null) {
-				assign(c._nextState==c.state ? (c._nextState = assign({}, c._nextState)) : c._nextState, newType.getDerivedStateFromProps(newVNode.props, c._nextState));
+				assign(c._nextState==c.state ? (c._nextState = assign({}, c._nextState)) : c._nextState, newType.getDerivedStateFromProps(newProps, c._nextState));
 			}
 
 			// Invoke pre-render lifecycle methods
@@ -80,11 +81,11 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 			else {
 				if (newType.getDerivedStateFromProps==null && force==null && c.componentWillReceiveProps!=null) {
-					c.componentWillReceiveProps(newVNode.props, cctx);
+					c.componentWillReceiveProps(newProps, cctx);
 				}
 
-				if (!force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newVNode.props, c._nextState, cctx)===false) {
-					c.props = newVNode.props;
+				if (!force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newProps, c._nextState, cctx)===false) {
+					c.props = newProps;
 					c.state = c._nextState;
 					c._dirty = false;
 					c._vnode = newVNode;
@@ -94,7 +95,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				}
 
 				if (c.componentWillUpdate!=null) {
-					c.componentWillUpdate(newVNode.props, c._nextState, cctx);
+					c.componentWillUpdate(newProps, c._nextState, cctx);
 				}
 			}
 
@@ -102,7 +103,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			oldState = c.state;
 
 			c.context = cctx;
-			c.props = newVNode.props;
+			c.props = newProps;
 			c.state = c._nextState;
 
 			if (tmp = options._render) tmp(newVNode);
@@ -224,8 +225,7 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 		if (newVNode!==oldVNode) {
-			let oldProps = oldVNode.props || EMPTY_OBJ;
-			let newProps = newVNode.props;
+			oldProps = oldVNode.props || EMPTY_OBJ;
 
 			let oldHtml = oldProps.dangerouslySetInnerHTML;
 			let newHtml = newProps.dangerouslySetInnerHTML;
