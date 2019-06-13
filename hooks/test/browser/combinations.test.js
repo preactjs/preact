@@ -50,12 +50,12 @@ describe('combinations', () => {
 		}
 
 		render(<Parent />, scratch);
-		expect(states).to.deep.equal({ state1: 1, state2: 2, state3: 3, state4: 4 });
+		expect(states).toEqual({ state1: 1, state2: 2, state3: 3, state4: 4 });
 
 		setStates.setState2(n => n * 10);
 		setStates.setState3(n => n * 10);
 		rerender();
-		expect(states).to.deep.equal({ state1: 1, state2: 20, state3: 30, state4: 4 });
+		expect(states).toEqual({ state1: 1, state2: 20, state3: 30, state4: 4 });
 	});
 
 	it('can rerender asynchronously from within an effect', () => {
@@ -111,7 +111,7 @@ describe('combinations', () => {
 
 		render(<Comp />, scratch);
 
-		expect(refAtLayoutTime.value).to.equal('hello');
+		expect(refAtLayoutTime.value).toBe('hello');
 	});
 
 	it('can use multiple useState and useReducer hooks', () => {
@@ -144,14 +144,14 @@ describe('combinations', () => {
 
 		render(<Comp />, scratch);
 
-		expect(states).to.deep.equal([0, 10, 1, 20]);
+		expect(states).toEqual([0, 10, 1, 20]);
 
 		states = [];
 
 		dispatchState4({ type: 'increment', count: 10 });
 		rerender();
 
-		expect(states).to.deep.equal([0, 10, 1, 40]);
+		expect(states).toEqual([0, 10, 1, 40]);
 	});
 
 	it('ensures useEffect always schedule after the next paint following a redraw effect, when using the default debounce strategy', () => {
@@ -171,7 +171,7 @@ describe('combinations', () => {
 		render(<Comp />, scratch);
 
 		return scheduleEffectAssert(() => {
-			expect(effectCount).to.equal(1);
+			expect(effectCount).toBe(1);
 		});
 	});
 
@@ -203,15 +203,15 @@ describe('combinations', () => {
 
 		render(<App />, scratch);
 		act(() => updater.second());
-		expect(scratch.textContent).to.equal('01');
+		expect(scratch.textContent).toBe('01');
 
 		updateParent();
 		rerender();
-		expect(scratch.textContent).to.equal('1');
+		expect(scratch.textContent).toBe('1');
 
 		updateParent();
 		rerender();
 
-		expect(scratch.textContent).to.equal('01');
+		expect(scratch.textContent).toBe('01');
 	});
 });

@@ -28,8 +28,8 @@ describe('useImperativeHandle', () => {
 		}
 
 		render(<Comp />, scratch);
-		expect(ref.current).to.have.property('test');
-		expect(ref.current.test()).to.equal('test');
+		expect(ref.current).toHaveProperty('test');
+		expect(ref.current.test()).toBe('test');
 	});
 
 	it('Updates given ref with args', () => {
@@ -42,12 +42,12 @@ describe('useImperativeHandle', () => {
 		}
 
 		render(<Comp a={0} />, scratch);
-		expect(ref.current).to.have.property('test');
-		expect(ref.current.test()).to.equal('test0');
+		expect(ref.current).toHaveProperty('test');
+		expect(ref.current.test()).toBe('test0');
 
 		render(<Comp a={1} />, scratch);
-		expect(ref.current).to.have.property('test');
-		expect(ref.current.test()).to.equal('test1');
+		expect(ref.current).toHaveProperty('test');
+		expect(ref.current.test()).toBe('test1');
 	});
 
 	it('should not update ref when args have not changed', () => {
@@ -60,10 +60,10 @@ describe('useImperativeHandle', () => {
 		}
 
 		render(<Comp />, scratch);
-		expect(ref.current.test()).to.equal('test');
+		expect(ref.current.test()).toBe('test');
 
 		render(<Comp />, scratch);
-		expect(ref.current.test()).to.equal('test');
+		expect(ref.current.test()).toBe('test');
 	});
 
 	it('should not throw with nullish ref', () => {
@@ -72,6 +72,6 @@ describe('useImperativeHandle', () => {
 			return <p>Test</p>;
 		}
 
-		expect(() => render(<Comp />, scratch)).to.not.throw();
+		expect(() => render(<Comp />, scratch)).not.toThrowError();
 	});
 });

@@ -32,7 +32,7 @@ describe('useRef', () => {
 		render(<Comp />, scratch);
 		render(<Comp />, scratch);
 
-		expect(values).to.deep.equal([1, 2]);
+		expect(values).toEqual([1, 2]);
 	});
 
 });

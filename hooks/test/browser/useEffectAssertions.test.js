@@ -130,6 +130,6 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 		render(<Comp value={1} />, scratch);
 		render(<Comp value={2} />, scratch);
 
-		return scheduleEffectAssert(() => expect(values).to.deep.equal([1, 2]));
+		return scheduleEffectAssert(() => expect(values).toEqual([1, 2]));
 	});
 }

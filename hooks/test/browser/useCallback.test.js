@@ -31,15 +31,15 @@ describe('useCallback', () => {
 		render(<Comp a={1} b={1} />, scratch);
 		render(<Comp a={1} b={1} />, scratch);
 
-		expect(callbacks[0]).to.equal(callbacks[1]);
-		expect(callbacks[0]()).to.equal(2);
+		expect(callbacks[0]).toBe(callbacks[1]);
+		expect(callbacks[0]()).toBe(2);
 
 		render(<Comp a={1} b={2} />, scratch);
 		render(<Comp a={1} b={2} />, scratch);
 
-		expect(callbacks[1]).to.not.equal(callbacks[2]);
-		expect(callbacks[2]).to.equal(callbacks[3]);
-		expect(callbacks[2]()).to.equal(3);
+		expect(callbacks[1]).not.toBe(callbacks[2]);
+		expect(callbacks[2]).toBe(callbacks[3]);
+		expect(callbacks[2]()).toBe(3);
 	});
 
 });

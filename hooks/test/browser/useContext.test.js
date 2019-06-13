@@ -33,7 +33,7 @@ describe('useContext', () => {
 		render(<Context.Provider value={42}><Comp /></Context.Provider>, scratch);
 		render(<Context.Provider value={69}><Comp /></Context.Provider>, scratch);
 
-		expect(values).to.deep.equal([13, 42, 69]);
+		expect(values).toEqual([13, 42, 69]);
 	});
 
 	it('should use default value', () => {

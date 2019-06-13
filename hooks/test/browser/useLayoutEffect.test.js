@@ -86,6 +86,6 @@ describe('useLayoutEffect', () => {
 		};
 		act(() => render(<App i={0} />, scratch));
 		act(() => render(<App i={2} />, scratch));
-		expect(executionOrder).to.deep.equal(['cleanup1', 'cleanup2', 'action1', 'action2']);
+		expect(executionOrder).toEqual(['cleanup1', 'cleanup2', 'action1', 'action2']);
 	});
 });

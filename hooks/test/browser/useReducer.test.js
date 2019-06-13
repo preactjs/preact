@@ -48,7 +48,7 @@ describe('useReducer', () => {
 		_dispatch({ type: 'increment', by: 10 });
 		rerender();
 
-		expect(states).to.deep.equal([{ count: 0 }, { count: 10 }]);
+		expect(states).toEqual([{ count: 0 }, { count: 10 }]);
 	});
 
 	it('can be dispatched by another component', () => {
@@ -73,13 +73,13 @@ describe('useReducer', () => {
 		}
 
 		render(<ReducerComponent />, scratch);
-		expect(scratch.textContent).to.include('Count: 0');
+		expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 0']));
 
 		const button = scratch.querySelector('button');
 		button.click();
 
 		rerender();
-		expect(scratch.textContent).to.include('Count: 10');
+		expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 10']));
 	});
 
 	it('can lazily initialize its state with an action', () => {
@@ -108,7 +108,7 @@ describe('useReducer', () => {
 		_dispatch({ type: 'increment', by: 10 });
 		rerender();
 
-		expect(states).to.deep.equal([{ count: 10 }, { count: 20 }]);
+		expect(states).toEqual([{ count: 10 }, { count: 20 }]);
 	});
 
 });

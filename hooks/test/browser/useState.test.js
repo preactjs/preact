@@ -36,8 +36,8 @@ describe('useState', () => {
 		render(<Comp />, scratch);
 		render(<Comp />, scratch);
 
-		expect(stateHistory).to.deep.equal([{ a: 1 }, { a: 1 }]);
-		expect(stateHistory[0]).to.equal(stateHistory[1]);
+		expect(stateHistory).toEqual([{ a: 1 }, { a: 1 }]);
+		expect(stateHistory[0]).toBe(stateHistory[1]);
 	});
 
 	it('can initialize the state via a function', () => {
@@ -66,17 +66,17 @@ describe('useState', () => {
 		});
 
 		render(<Comp />, scratch);
-		expect(lastState).to.equal(0);
+		expect(lastState).toBe(0);
 		expect(Comp).to.be.calledOnce;
 
 		doSetState(0);
 		rerender();
-		expect(lastState).to.equal(0);
+		expect(lastState).toBe(0);
 		expect(Comp).to.be.calledOnce;
 
 		doSetState(() => 0);
 		rerender();
-		expect(lastState).to.equal(0);
+		expect(lastState).toBe(0);
 		expect(Comp).to.be.calledOnce;
 	});
 
@@ -92,18 +92,18 @@ describe('useState', () => {
 		});
 
 		render(<Comp />, scratch);
-		expect(lastState).to.equal(0);
+		expect(lastState).toBe(0);
 		expect(Comp).to.be.calledOnce;
 
 		doSetState(1);
 		rerender();
-		expect(lastState).to.equal(1);
+		expect(lastState).toBe(1);
 		expect(Comp).to.be.calledTwice;
 
 		// Updater function style
 		doSetState(current => current * 10);
 		rerender();
-		expect(lastState).to.equal(10);
+		expect(lastState).toBe(10);
 		expect(Comp).to.be.calledThrice;
 	});
 
@@ -121,13 +121,13 @@ describe('useState', () => {
 		}
 
 		render(<StateContainer />, scratch);
-		expect(scratch.textContent).to.include('Count: 0');
+		expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 0']));
 
 		const button = scratch.querySelector('button');
 		button.click();
 
 		rerender();
-		expect(scratch.textContent).to.include('Count: 10');
+		expect(scratch.textContent).toEqual(expect.arrayContaining(['Count: 10']));
 	});
 
 	it('should handle queued useState', () => {
@@ -159,10 +159,10 @@ describe('useState', () => {
 		}
 
 		render(<App />, scratch);
-		expect(scratch.textContent).to.equal('Click Here!!');
+		expect(scratch.textContent).toBe('Click Here!!');
 		const text = scratch.querySelector('p');
 		text.click();
 		rerender();
-		expect(scratch.innerHTML).to.equal('');
+		expect(scratch.innerHTML).toBe('');
 	});
 });

@@ -29,7 +29,7 @@ describe('useDebugValue', () => {
 			return <div>{v}</div>;
 		}
 
-		expect(() => render(<App />, scratch)).to.not.throw();
+		expect(() => render(<App />, scratch)).not.toThrowError();
 	});
 
 	it('should call options hook with value', () => {
