@@ -22,7 +22,7 @@ import options from '../options';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
 export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, force, oldDom) {
-	let c, tmp, isNew, oldState, snapshot, clearProcessingException;
+	let i, c, tmp, isNew, oldState, snapshot, clearProcessingException;
 	let oldProps = oldVNode.props || EMPTY_OBJ;
 	let newProps = newVNode.props;
 	let newType = newVNode.type;
@@ -137,7 +137,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			isSvg = newType==='svg' || isSvg;
 
 			if (parentDom==null && excessDomChildren!=null) {
-				for (let i=0; i<excessDomChildren.length; i++) {
+				for (i=0; i<excessDomChildren.length; i++) {
 					const child = excessDomChildren[i];
 					if (child!=null && (newType===null ? child.nodeType===3 : child.localName===newType)) {
 						parentDom = child;
@@ -193,7 +193,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 		isSvg = isSvg && newType==='foreignObject' ? false : isSvg;
 
-		let childVNode, i, j, oldChildVNode, newDom, sibDom, firstChildDom, refs;
+		let childVNode, j, oldChildVNode, newDom, sibDom, firstChildDom, refs;
 
 		let newChildren = newVNode._children || toChildArray(newVNode.props.children, newVNode._children=[], coerceToVNode, true);
 		// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
