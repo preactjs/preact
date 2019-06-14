@@ -26,6 +26,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 	let oldProps = oldVNode.props || EMPTY_OBJ;
 	let newProps = newVNode.props;
 	let newType = newVNode.type;
+	let isComponent = typeof newType==='function';
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
@@ -34,7 +35,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 	if (tmp = options._diff) tmp(newVNode);
 
 	try {
-		if (typeof newType==='function') {
+		if (isComponent) {
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
@@ -295,7 +296,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 					oldDom = newDom.nextSibling;
 
-					if (typeof newVNode.type == 'function') {
+					if (isComponent) {
 						// At this point, if childVNode._lastDomChild existed, then
 						// newDom = childVNode._lastDomChild per line 101. Else it is
 						// the same as childVNode._dom, meaning this component returned
@@ -309,7 +310,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		newVNode._dom = firstChildDom;
 
 		// Remove children that are not part of any vnode.
-		if (excessDomChildren!=null && typeof newVNode.type !== 'function') for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
+		if (excessDomChildren!=null && !isComponent) for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
 
 		// Remove remaining oldChildren if there are any.
 		for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], newVNode);
@@ -327,7 +328,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		//
 		// =============================
 
-		if (c) {
+		if (isComponent) {
 			// Only change the fields on the component once they represent the new state of the DOM
 			c.base = newVNode._dom;
 			c._vnode = newVNode;
