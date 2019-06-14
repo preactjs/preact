@@ -291,7 +291,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			isSvg = newType==='svg' || isSvg;
 
 			if (parentDom==null && excessDomChildren!=null) {
-				for (let i=0; i<excessDomChildren.length; i++) {
+				for (i=0; i<excessDomChildren.length; i++) {
 					const child = excessDomChildren[i];
 					if (child!=null && (newType===null ? child.nodeType===3 : child.localName===newType)) {
 						parentDom = child;
