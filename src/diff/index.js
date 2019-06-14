@@ -1,7 +1,7 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component, enqueueRender } from '../component';
 import { coerceToVNode, Fragment } from '../create-element';
-import { diffChildren, toChildArray } from './children';
+import { toChildArray } from './children';
 import { diffProps } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
@@ -162,6 +162,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				return newVNode._dom = parentDom;
 			}
 			else if (newVNode!==oldVNode) { // TODO: doesn't shortcut diff. It needs to early return
+				oldDom = EMPTY_OBJ;
+
 				if (excessDomChildren!=null) {
 					excessDomChildren = EMPTY_ARR.slice.call(parentDom.childNodes);
 				}
@@ -180,7 +182,153 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 		}
 
-		diffChildren(parentDom, newVNode, oldVNode, context, isSvg && newType==='foreignObject' ? false : isSvg, excessDomChildren, mounts, c ? oldDom : EMPTY_OBJ);
+		// =============================
+		//
+		// #region diffChildren
+		//
+		// =============================
+
+		// diffChildren(parentDom, newVNode, oldVNode, context, isSvg && newType==='foreignObject' ? false : isSvg, excessDomChildren, mounts, c ? oldDom : EMPTY_OBJ);
+
+		isSvg = isSvg && newType==='foreignObject' ? false : isSvg;
+
+		let newParentVNode = newVNode;
+		let oldParentVNode = oldVNode;
+
+		let childVNode, i, j, oldChildVNode, newDom, sibDom, firstChildDom, refs;
+
+		let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode, true);
+		// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
+		// as EMPTY_OBJ._children should be `undefined`.
+		let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
+
+		let oldChildrenLength = oldChildren.length;
+
+		// Only in very specific places should this logic be invoked (top level `render` and `diffElementNodes`).
+		// I'm using `EMPTY_OBJ` to signal when `diffChildren` is invoked in these situations. I can't use `null`
+		// for this purpose, because `null` is a valid value for `oldDom` which can mean to skip to this logic
+		// (e.g. if mounting a new tree in which the old DOM should be ignored (usually for Fragments).
+		if (oldDom == EMPTY_OBJ) {
+			oldDom = null;
+			if (excessDomChildren!=null) {
+				oldDom = excessDomChildren[0];
+			}
+			else {
+				for (i = 0; !oldDom && i < oldChildrenLength; i++) {
+					oldDom = oldChildren[i] && oldChildren[i]._dom;
+				}
+			}
+		}
+
+		for (i=0; i<newChildren.length; i++) {
+			childVNode = newChildren[i] = coerceToVNode(newChildren[i]);
+
+			if (childVNode!=null) {
+				childVNode._parent = newParentVNode;
+				childVNode._depth = newParentVNode._depth + 1;
+
+				// Check if we find a corresponding element in oldChildren.
+				// If found, delete the array item by setting to `undefined`.
+				// We use `undefined`, as `null` is reserved for empty placeholders
+				// (holes).
+				oldChildVNode = oldChildren[i];
+
+				if (oldChildVNode===null || (oldChildVNode && childVNode.key == oldChildVNode.key && childVNode.type === oldChildVNode.type)) {
+					oldChildren[i] = undefined;
+				}
+				else {
+					// Either oldVNode === undefined or oldChildrenLength > 0,
+					// so after this loop oldVNode == null or oldVNode is a valid value.
+					for (j=0; j<oldChildrenLength; j++) {
+						oldChildVNode = oldChildren[j];
+						// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
+						// We always match by type (in either case).
+						if (oldChildVNode && childVNode.key == oldChildVNode.key && childVNode.type === oldChildVNode.type) {
+							oldChildren[j] = undefined;
+							break;
+						}
+						oldChildVNode = null;
+					}
+				}
+
+				oldChildVNode = oldChildVNode || EMPTY_OBJ;
+
+				// Morph the old element into the new one, but don't append it to the dom yet
+				newDom = diff(parentDom, childVNode, oldChildVNode, context, isSvg, excessDomChildren, mounts, null, oldDom);
+
+				if ((j = childVNode.ref) && oldChildVNode.ref != j) {
+					(refs || (refs=[])).push(j, childVNode._component || newDom);
+				}
+
+				// Only proceed if the vnode has not been unmounted by `diff()` above.
+				if (newDom!=null) {
+					if (firstChildDom == null) {
+						firstChildDom = newDom;
+					}
+
+					if (childVNode._lastDomChild != null) {
+						// Only Fragments or components that return Fragment like VNodes will
+						// have a non-null _lastDomChild. Continue the diff from the end of
+						// this Fragment's DOM tree.
+						newDom = childVNode._lastDomChild;
+
+						// Eagerly cleanup _lastDomChild. We don't need to persist the value because
+						// it is only used by `diffChildren` to determine where to resume the diff after
+						// diffing Components and Fragments.
+						childVNode._lastDomChild = null;
+					}
+					else if (excessDomChildren==oldChildVNode || newDom!=oldDom || newDom.parentNode==null) {
+						// NOTE: excessDomChildren==oldVNode above:
+						// This is a compression of excessDomChildren==null && oldVNode==null!
+						// The values only have the same type when `null`.
+
+						outer: if (oldDom==null || oldDom.parentNode!==parentDom) {
+							parentDom.appendChild(newDom);
+						}
+						else {
+							// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
+							for (sibDom=oldDom, j=0; (sibDom=sibDom.nextSibling) && j<oldChildrenLength; j+=2) {
+								if (sibDom==newDom) {
+									break outer;
+								}
+							}
+							parentDom.insertBefore(newDom, oldDom);
+						}
+					}
+
+					oldDom = newDom.nextSibling;
+
+					if (typeof newParentVNode.type == 'function') {
+						// At this point, if childVNode._lastDomChild existed, then
+						// newDom = childVNode._lastDomChild per line 101. Else it is
+						// the same as childVNode._dom, meaning this component returned
+						// only a single DOM node
+						newParentVNode._lastDomChild = newDom;
+					}
+				}
+			}
+		}
+
+		newParentVNode._dom = firstChildDom;
+
+		// Remove children that are not part of any vnode.
+		if (excessDomChildren!=null && typeof newParentVNode.type !== 'function') for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
+
+		// Remove remaining oldChildren if there are any.
+		for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], newParentVNode);
+
+		// Set refs only after unmount
+		if (refs) {
+			for (i = 0; i < refs.length; i++) {
+				applyRef(refs[i], refs[++i], newParentVNode);
+			}
+		}
+
+		// =============================
+		//
+		// #endregion diffChildren
+		//
+		// =============================
 
 		if (c) {
 			// Only change the fields on the component once they represent the new state of the DOM
