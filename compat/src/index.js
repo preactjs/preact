@@ -77,12 +77,7 @@ function addRenderRoot(vnode, parent) {
 		parent._children._component.forceUpdate();
 	}
 	else {
-		// eslint-disable-next-line
-		function Root({ children }) {
-			parent.__preact = this;
-			return createElement(Fragment, null, this.children || (this.children = children));
-		}
-		return createElement(Root, null, [vnode]);
+		render(vnode, parent);
 	}
 }
 
