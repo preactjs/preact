@@ -26,15 +26,13 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		if (Array.isArray(newVNode)) {
 			// return diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, oldDom, newParentVNode);
 
-			let newChildren = newVNode, oldChildren = oldVNode;
-
 			let childVNode, i, j, oldChildVNode, newDom, sibDom, firstChildDom, refs;
 
 			// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 			// as EMPTY_OBJ._children should be `undefined`.
-			oldChildren = oldChildren || EMPTY_ARR;
+			oldVNode = oldVNode || EMPTY_ARR;
 
-			let oldChildrenLength = oldChildren.length;
+			let oldChildrenLength = oldVNode.length;
 
 			// Only in very specific places should this logic be invoked (top level `render` and `diffElementNodes`).
 			// I'm using `EMPTY_OBJ` to signal when `diffChildren` is invoked in these situations. I can't use `null`
@@ -47,13 +45,13 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				}
 				else {
 					for (i = 0; !oldDom && i < oldChildrenLength; i++) {
-						oldDom = oldChildren[i] && oldChildren[i]._dom;
+						oldDom = oldVNode[i] && oldVNode[i]._dom;
 					}
 				}
 			}
 
-			for (i=0; i<newChildren.length; i++) {
-				childVNode = newChildren[i] = coerceToVNode(newChildren[i]);
+			for (i=0; i<newVNode.length; i++) {
+				childVNode = newVNode[i] = coerceToVNode(newVNode[i]);
 
 				if (childVNode!=null) {
 					childVNode._parent = newParentVNode;
@@ -63,20 +61,20 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 					// If found, delete the array item by setting to `undefined`.
 					// We use `undefined`, as `null` is reserved for empty placeholders
 					// (holes).
-					oldChildVNode = oldChildren[i];
+					oldChildVNode = oldVNode[i];
 
 					if (oldChildVNode===null || (oldChildVNode && childVNode.key == oldChildVNode.key && childVNode.type === oldChildVNode.type)) {
-						oldChildren[i] = undefined;
+						oldVNode[i] = undefined;
 					}
 					else {
 						// Either oldVNode === undefined or oldChildrenLength > 0,
 						// so after this loop oldVNode == null or oldVNode is a valid value.
 						for (j=0; j<oldChildrenLength; j++) {
-							oldChildVNode = oldChildren[j];
+							oldChildVNode = oldVNode[j];
 							// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
 							// We always match by type (in either case).
 							if (oldChildVNode && childVNode.key == oldChildVNode.key && childVNode.type === oldChildVNode.type) {
-								oldChildren[j] = undefined;
+								oldVNode[j] = undefined;
 								break;
 							}
 							oldChildVNode = null;
@@ -147,7 +145,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			if (excessDomChildren!=null && typeof newParentVNode.type !== 'function') for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
 
 			// Remove remaining oldChildren if there are any.
-			for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], newParentVNode);
+			for (i=oldChildrenLength; i--; ) if (oldVNode[i]!=null) unmount(oldVNode[i], newParentVNode);
 
 			// Set refs only after unmount
 			if (refs) {
