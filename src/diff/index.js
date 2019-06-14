@@ -149,40 +149,41 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 		}
 		else {
-			let dom = oldVNode._dom;
+			// This VNode's DOM node is the new parentDom
+			parentDom = oldVNode._dom;
 
 			// Tracks entering and exiting SVG namespace when descending through the tree.
 			isSvg = newType==='svg' || isSvg;
 
-			if (dom==null && excessDomChildren!=null) {
+			if (parentDom==null && excessDomChildren!=null) {
 				for (let i=0; i<excessDomChildren.length; i++) {
 					const child = excessDomChildren[i];
 					if (child!=null && (newType===null ? child.nodeType===3 : child.localName===newType)) {
-						dom = child;
+						parentDom = child;
 						excessDomChildren[i] = null;
 						break;
 					}
 				}
 			}
 
-			if (dom==null) {
+			if (parentDom==null) {
 				if (newType===null) {
 					newVNode._dom = document.createTextNode(newProps);
 					break outer;
 				}
-				dom = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', newType) : document.createElement(newType);
+				parentDom = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', newType) : document.createElement(newType);
 				// we created a new parent, so none of the previously attached children can be reused:
 				excessDomChildren = null;
 			}
 
 			if (newType===null) {
 				if (oldProps !== newProps) {
-					dom.data = newProps;
+					parentDom.data = newProps;
 				}
 			}
 			else if (newVNode!==oldVNode) {
 				if (excessDomChildren!=null) {
-					excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
+					excessDomChildren = EMPTY_ARR.slice.call(parentDom.childNodes);
 				}
 
 				oldProps = oldVNode.props || EMPTY_OBJ;
@@ -192,18 +193,18 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				if ((newHtml || oldHtml) && excessDomChildren==null) {
 					// Avoid re-applying the same '__html' if it did not changed between re-render
 					if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
-						dom.innerHTML = newHtml && newHtml.__html || '';
+						parentDom.innerHTML = newHtml && newHtml.__html || '';
 					}
 				}
 				if (newProps.multiple) {
-					dom.multiple = newProps.multiple;
+					parentDom.multiple = newProps.multiple;
 				}
 
-				diffChildren(dom, newVNode, oldVNode, context, newType==='foreignObject' ? false : isSvg, excessDomChildren, mounts, EMPTY_OBJ);
-				diffProps(dom, newProps, oldProps, isSvg);
+				diffChildren(parentDom, newVNode, oldVNode, context, newType==='foreignObject' ? false : isSvg, excessDomChildren, mounts, EMPTY_OBJ);
+				diffProps(parentDom, newProps, oldProps, isSvg);
 			}
 
-			newVNode._dom = dom;
+			newVNode._dom = parentDom;
 		}
 
 		if (tmp = options.diffed) tmp(newVNode);
