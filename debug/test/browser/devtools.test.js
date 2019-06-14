@@ -359,7 +359,6 @@ describe('devtools', () => {
 		it('should check if a vnode is a root', () => {
 			render(<div>Hello World</div>, scratch);
 			let root = getRoot(scratch);
-
 			expect(isRoot(root)).to.equal(true);
 			expect(isRoot(root._children[0])).to.equal(false);
 		});
@@ -455,8 +454,8 @@ describe('devtools', () => {
 		render(<div />, scratch);
 
 		expect(vnodeSpy, 'vnode').to.have.been.called;
-		expect(diffSpy, 'diff').to.have.been.calledOnce;
-		expect(diffedSpy, 'diffed').to.have.been.calledOnce;
+		expect(diffSpy, 'diff').to.have.been.calledTwice;
+		expect(diffedSpy, 'diffed').to.have.been.calledTwice;
 		expect(commitSpy, 'commit').to.have.been.calledOnce;
 
 		render(null, scratch);
@@ -501,7 +500,6 @@ describe('devtools', () => {
 				'mount',
 				'mount',
 				'mount',
-				'root',
 				'rootCommitted'
 			]);
 		});
@@ -592,6 +590,7 @@ describe('devtools', () => {
 			checkEventReferences(prev.concat(hook.log));
 
 			expect(serialize(hook.log)).to.deep.equal([
+				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -609,6 +608,7 @@ describe('devtools', () => {
 			expect(serialize(hook.log)).to.deep.equal([
 				{ type: 'unmount', component: '#text: Hello World' },
 				{ type: 'mount', component: 'span' },
+				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -687,7 +687,6 @@ describe('devtools', () => {
 				{ type: 'mount', component: 'div' },
 				{ type: 'mount', component: 'App' },
 				{ type: 'mount', component: 'Fragment' },
-				{ type: 'root', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 
@@ -722,6 +721,7 @@ describe('devtools', () => {
 			checkEventReferences(prev.concat(hook.log));
 
 			expect(serialize(hook.log)).to.deep.equal([
+				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -736,6 +736,7 @@ describe('devtools', () => {
 				{ type: 'unmount', component: 'span' },
 				{ type: 'unmount', component: '#text: Hello World' },
 				{ type: 'update', component: 'div' },
+				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});

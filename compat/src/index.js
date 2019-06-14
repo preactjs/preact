@@ -1,4 +1,4 @@
-import {  render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
+import { hydrate, render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
 import * as hooks from 'preact/hooks';
 export * from 'preact/hooks';
 import { Suspense as _Suspense, lazy as _lazy, catchRender } from './suspense';
@@ -72,7 +72,7 @@ class ContextProvider {
 }
 
 function addRenderRoot(vnode, parent) {
-	if (parent._children) {
+	if (parent._children && parent._children._vnode) {
 		parent._children.props.children.unshift(vnode);
 		parent._children._component.forceUpdate();
 	}
@@ -90,9 +90,10 @@ function Portal(props) {
 	let container = props.container;
 
 	if (container !== this.container) {
+		hydrate('', container);
+		this.mounted = false;
 		if (this.container) render(null, this.container);
 		this.container = container;
-		this.mounted = false;
 	}
 
 	if (!this.mounted) {
