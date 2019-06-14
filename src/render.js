@@ -14,14 +14,14 @@ import options from './options';
 export function render(vnode, parentDom, replaceNode) {
 	if (options._root) options._root(vnode, parentDom);
 
-	let oldVNode = parentDom._children || EMPTY_OBJ;
+	let oldVNode = parentDom._children;
 	vnode = createElement(Fragment, null, [vnode]);
 
 	let mounts = [];
 	diff(
 		parentDom,
 		replaceNode ? vnode : (parentDom._children = vnode),
-		oldVNode,
+		oldVNode || EMPTY_OBJ,
 		EMPTY_OBJ,
 		parentDom.ownerSVGElement !== undefined,
 		replaceNode
@@ -43,6 +43,6 @@ export function render(vnode, parentDom, replaceNode) {
  * update
  */
 export function hydrate(vnode, parentDom) {
-	parentDom._children = EMPTY_OBJ;
+	parentDom._children = null;
 	render(vnode, parentDom);
 }

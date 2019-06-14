@@ -1,4 +1,4 @@
-import { hydrate, render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
+import {  render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
 import * as hooks from 'preact/hooks';
 export * from 'preact/hooks';
 import { Suspense as _Suspense, lazy as _lazy, catchRender } from './suspense';
@@ -71,6 +71,21 @@ class ContextProvider {
 	}
 }
 
+function addRenderRoot(vnode, parent) {
+	if (parent._children) {
+		parent._children.props.children.unshift(vnode);
+		parent._children._component.forceUpdate();
+	}
+	else {
+		// eslint-disable-next-line
+		function Root({ children }) {
+			parent.__preact = this;
+			return createElement(Fragment, null, this.children || (this.children = children));
+		}
+		return createElement(Root, null, [vnode]);
+	}
+}
+
 /**
  * Portal component
  * @param {object | null | undefined} props
@@ -80,12 +95,16 @@ function Portal(props) {
 	let container = props.container;
 
 	if (container !== this.container) {
-		hydrate('', container);
 		if (this.container) render(null, this.container);
 		this.container = container;
+		this.mounted = false;
 	}
 
-	render(wrap, container);
+	if (!this.mounted) {
+		this.mounted = true;
+		addRenderRoot(wrap, container);
+	}
+
 	this.componentWillUnmount = () => {
 		render(null, container);
 	};
