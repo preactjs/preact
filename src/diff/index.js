@@ -192,15 +192,12 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 		isSvg = isSvg && newType==='foreignObject' ? false : isSvg;
 
-		let newParentVNode = newVNode;
-		let oldParentVNode = oldVNode;
-
 		let childVNode, i, j, oldChildVNode, newDom, sibDom, firstChildDom, refs;
 
-		let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode, true);
+		let newChildren = newVNode._children || toChildArray(newVNode.props.children, newVNode._children=[], coerceToVNode, true);
 		// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 		// as EMPTY_OBJ._children should be `undefined`.
-		let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
+		let oldChildren = (oldVNode && oldVNode._children) || EMPTY_ARR;
 
 		let oldChildrenLength = oldChildren.length;
 
@@ -224,8 +221,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			childVNode = newChildren[i] = coerceToVNode(newChildren[i]);
 
 			if (childVNode!=null) {
-				childVNode._parent = newParentVNode;
-				childVNode._depth = newParentVNode._depth + 1;
+				childVNode._parent = newVNode;
+				childVNode._depth = newVNode._depth + 1;
 
 				// Check if we find a corresponding element in oldChildren.
 				// If found, delete the array item by setting to `undefined`.
@@ -298,29 +295,29 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 					oldDom = newDom.nextSibling;
 
-					if (typeof newParentVNode.type == 'function') {
+					if (typeof newVNode.type == 'function') {
 						// At this point, if childVNode._lastDomChild existed, then
 						// newDom = childVNode._lastDomChild per line 101. Else it is
 						// the same as childVNode._dom, meaning this component returned
 						// only a single DOM node
-						newParentVNode._lastDomChild = newDom;
+						newVNode._lastDomChild = newDom;
 					}
 				}
 			}
 		}
 
-		newParentVNode._dom = firstChildDom;
+		newVNode._dom = firstChildDom;
 
 		// Remove children that are not part of any vnode.
-		if (excessDomChildren!=null && typeof newParentVNode.type !== 'function') for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
+		if (excessDomChildren!=null && typeof newVNode.type !== 'function') for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
 
 		// Remove remaining oldChildren if there are any.
-		for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], newParentVNode);
+		for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], newVNode);
 
 		// Set refs only after unmount
 		if (refs) {
 			for (i = 0; i < refs.length; i++) {
-				applyRef(refs[i], refs[++i], newParentVNode);
+				applyRef(refs[i], refs[++i], newVNode);
 			}
 		}
 
