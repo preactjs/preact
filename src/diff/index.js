@@ -27,7 +27,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 	let newType = newVNode.type;
 
 	let isArray = Array.isArray(newVNode);
-	let childVNode, i, j, oldChildVNode, newDom, sibDom, firstChildDom, refs;
+	let childVNode, i, oldChildVNode, newDom, sibDom, firstChildDom, refs;
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
@@ -80,12 +80,12 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 					else {
 						// Either oldVNode === undefined or oldChildrenLength > 0,
 						// so after this loop oldVNode == null or oldVNode is a valid value.
-						for (j=0; j<oldChildrenLength; j++) {
-							oldChildVNode = oldVNode[j];
+						for (tmp=0; tmp<oldChildrenLength; tmp++) {
+							oldChildVNode = oldVNode[tmp];
 							// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
 							// We always match by type (in either case).
 							if (oldChildVNode && childVNode.key == oldChildVNode.key && childVNode.type === oldChildVNode.type) {
-								oldVNode[j] = undefined;
+								oldVNode[tmp] = undefined;
 								break;
 							}
 							oldChildVNode = null;
@@ -97,8 +97,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 					// Morph the old element into the new one, but don't append it to the dom yet
 					newDom = diff(parentDom, childVNode, oldChildVNode, context, isSvg, excessDomChildren, mounts, null, oldDom, newParentVNode);
 
-					if ((j = childVNode.ref) && oldChildVNode.ref != j) {
-						(refs || (refs=[])).push(j, childVNode._component || newDom);
+					if ((tmp = childVNode.ref) && oldChildVNode.ref != tmp) {
+						(refs || (refs=[])).push(tmp, childVNode._component || newDom);
 					}
 
 					// Only proceed if the vnode has not been unmounted by `diff()` above.
@@ -128,7 +128,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 							}
 							else {
 								// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
-								for (sibDom=oldDom, j=0; (sibDom=sibDom.nextSibling) && j<oldChildrenLength; j+=2) {
+								for (sibDom=oldDom, tmp=0; (sibDom=sibDom.nextSibling) && tmp<oldChildrenLength; tmp+=2) {
 									if (sibDom==newDom) {
 										break outer2;
 									}
