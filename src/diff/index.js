@@ -193,6 +193,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				}
 			}
 
+			toChildArray(newVNode.props.children, newVNode._children=[], coerceToVNode, true);
+
 			// #endregion diffElementNode
 			//
 			// =============================
@@ -208,7 +210,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 		let childVNode, oldChildVNode, newDom, sibDom, firstChildDom, refs;
 
-		let newChildren = newVNode._children || toChildArray(newVNode.props.children, newVNode._children=[], coerceToVNode, true);
 		// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 		// as EMPTY_OBJ._children should be `undefined`.
 		let oldChildren = (oldVNode && oldVNode._children) || EMPTY_ARR;
@@ -231,8 +232,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 		}
 
-		for (i=0; i<newChildren.length; i++) {
-			childVNode = newChildren[i] = coerceToVNode(newChildren[i]);
+		for (i=0; i<newVNode._children.length; i++) {
+			childVNode = newVNode._children[i] = coerceToVNode(newVNode._children[i]);
 
 			if (childVNode!=null) {
 				childVNode._parent = newVNode;
