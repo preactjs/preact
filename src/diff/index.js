@@ -23,7 +23,7 @@ import options from '../options';
  */
 export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, force, oldDom) {
 	let c, tmp, isNew, oldState, snapshot, clearProcessingException;
-	let oldProps = oldVNode.props;
+	let oldProps = oldVNode.props || EMPTY_OBJ;
 	let newProps = newVNode.props;
 	let newType = newVNode.type;
 
@@ -34,7 +34,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 	if (tmp = options._diff) tmp(newVNode);
 
 	try {
-		outer: if (typeof newType==='function') {
+		if (typeof newType==='function') {
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
@@ -90,9 +90,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 					c.state = c._nextState;
 					c._dirty = false;
 					c._vnode = newVNode;
-					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
-					break outer;
+					return newVNode._dom = oldVNode._dom;
 				}
 
 				if (c.componentWillUpdate!=null) {
@@ -117,7 +116,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				toChildArray(isTopLevelFragment ? tmp.props.children : tmp, newVNode._children=[], coerceToVNode, true);
 			}
 			catch (e) {
-				if ((tmp = options._catchRender) && tmp(e, newVNode, oldVNode)) break outer;
+				if ((tmp = options._catchRender) && tmp(e, newVNode, oldVNode)) return newVNode._dom = oldVNode._dom;
 				throw e;
 			}
 
@@ -127,25 +126,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			if (!isNew && c.getSnapshotBeforeUpdate!=null) {
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
-			}
-
-			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, oldDom);
-
-			// Only change the fields on the component once they represent the new state of the DOM
-			c.base = newVNode._dom;
-			c._vnode = newVNode;
-			c._parentDom = parentDom;
-
-			while (tmp=c._renderCallbacks.pop()) tmp.call(c);
-
-			// Don't call componentDidUpdate on mount or when we bailed out via
-			// `shouldComponentUpdate`
-			if (!isNew && oldProps!=null && c.componentDidUpdate!=null) {
-				c.componentDidUpdate(oldProps, oldState, snapshot);
-			}
-
-			if (clearProcessingException) {
-				c._pendingError = c._processingException = null;
 			}
 		}
 		else {
@@ -168,8 +148,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			if (parentDom==null) {
 				if (newType===null) {
-					newVNode._dom = document.createTextNode(newProps);
-					break outer;
+					return newVNode._dom = document.createTextNode(newProps);
 				}
 				parentDom = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', newType) : document.createElement(newType);
 				// we created a new parent, so none of the previously attached children can be reused:
@@ -180,13 +159,12 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				if (oldProps !== newProps) {
 					parentDom.data = newProps;
 				}
+				return newVNode._dom = parentDom;
 			}
-			else if (newVNode!==oldVNode) {
+			else if (newVNode!==oldVNode) { // TODO: doesn't shortcut diff. It needs to early return
 				if (excessDomChildren!=null) {
 					excessDomChildren = EMPTY_ARR.slice.call(parentDom.childNodes);
 				}
-
-				oldProps = oldVNode.props || EMPTY_OBJ;
 
 				let oldHtml = oldProps.dangerouslySetInnerHTML;
 				let newHtml = newProps.dangerouslySetInnerHTML;
@@ -199,11 +177,31 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				if (newProps.multiple) {
 					parentDom.multiple = newProps.multiple;
 				}
+			}
+		}
 
-				diffChildren(parentDom, newVNode, oldVNode, context, newType==='foreignObject' ? false : isSvg, excessDomChildren, mounts, EMPTY_OBJ);
-				diffProps(parentDom, newProps, oldProps, isSvg);
+		diffChildren(parentDom, newVNode, oldVNode, context, isSvg && newType==='foreignObject' ? false : isSvg, excessDomChildren, mounts, c ? oldDom : EMPTY_OBJ);
+
+		if (c) {
+			// Only change the fields on the component once they represent the new state of the DOM
+			c.base = newVNode._dom;
+			c._vnode = newVNode;
+			c._parentDom = parentDom;
+
+			while (tmp=c._renderCallbacks.pop()) tmp.call(c);
+
+			// Don't call componentDidUpdate on mount or when we bailed out via
+			// `shouldComponentUpdate`
+			if (!isNew && oldProps!=null && c.componentDidUpdate!=null) {
+				c.componentDidUpdate(oldProps, oldState, snapshot);
 			}
 
+			if (clearProcessingException) {
+				c._pendingError = c._processingException = null;
+			}
+		}
+		else {
+			diffProps(parentDom, newProps, oldProps, isSvg);
 			newVNode._dom = parentDom;
 		}
 
