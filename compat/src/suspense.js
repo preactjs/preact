@@ -1,4 +1,4 @@
-import { Component, createElement, unmount } from 'preact';
+import { Component, createElement, _unmount as unmount } from 'preact';
 import { removeNode } from '../../src/util';
 
 /**
