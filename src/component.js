@@ -74,18 +74,6 @@ Component.prototype.forceUpdate = function(callback) {
 
 		if (newDom != oldDom) {
 			updateParentDomPointers(vnode);
-
-			// // 3496 B
-			// while ((vnode = vnode._parent) != null && vnode._component != null) {
-			// 	vnode._dom = vnode._component.base = null;
-			// 	for (let i = 0; i < vnode._children.length; i++) {
-			// 		let child = vnode._children[i];
-			// 		if (child != null && child._dom != null) {
-			// 			vnode._dom = vnode._component.base = child._dom;
-			// 			break;
-			// 		}
-			// 	}
-			// }
 		}
 	}
 	if (callback) callback();
@@ -139,18 +127,6 @@ export function getDomSibling(vnode, childIndex) {
  */
 function updateParentDomPointers(vnode) {
 	if ((vnode = vnode._parent) != null && vnode._component != null) {
-		// // 3495 B
-		// let dom;
-		// for (let i = 0; dom == null && i < vnode._children.length; i++) {
-		// 	let child = vnode._children[i];
-		// 	if (child != null) {
-		// 		dom = child._dom;
-		// 	}
-		// }
-		// vnode._dom = dom;
-		// vnode._component.base = dom;
-
-		// 3486 B
 		vnode._dom = vnode._component.base = null;
 		for (let i = 0; i < vnode._children.length; i++) {
 			let child = vnode._children[i];
@@ -159,23 +135,6 @@ function updateParentDomPointers(vnode) {
 				break;
 			}
 		}
-
-		// 3496 B
-		// let i = 0;
-		// let child = vnode._children[i];
-		// while (i < vnode._children.length && (child == null || child._dom == null)) {
-		// 	child = vnode._children[++i];
-		// }
-		// vnode._dom = vnode._component.base = child && child._dom;
-
-		// 3496 B
-		// let i, child;
-		// for (
-		// 	child = vnode._children[(i = 0)];
-		// 	i < vnode._children.length && (child == null || null == child._dom);
-		// 	child = vnode._children[++i]
-		// );
-		// vnode._dom = vnode._component.base = child && child._dom;
 
 		return updateParentDomPointers(vnode);
 	}
