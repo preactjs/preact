@@ -3,21 +3,6 @@ import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
 
-function addRenderRoot(vnode, parent) {
-	let root = parent.__preact;
-	if (root) {
-		root.children = [vnode];
-		root.forceUpdate();
-		return root;
-	}
-
-	function Root({ children }) {
-		parent.__preact = this;
-		return createElement(Fragment, null, this.children || (this.children = children));
-	}
-	return createElement(Root, null, [vnode]);
-}
-
 /**
  * Render a Preact virtual node into a DOM element
  * @param {import('./index').ComponentChild} vnode The virtual node to render
@@ -28,8 +13,9 @@ function addRenderRoot(vnode, parent) {
  */
 export function render(vnode, parentDom, replaceNode) {
 	if (options._root) options._root(vnode, parentDom);
-	let oldVNode = parentDom.__preact && parentDom.__preact._vnode || EMPTY_OBJ;
-	vnode = addRenderRoot(vnode, parentDom);
+
+	let oldVNode = parentDom._children || EMPTY_OBJ;
+	vnode = createElement(Fragment, null, [vnode]);
 
 	let mounts = [];
 	diff(
@@ -57,6 +43,6 @@ export function render(vnode, parentDom, replaceNode) {
  * update
  */
 export function hydrate(vnode, parentDom) {
-	parentDom._children = null;
+	parentDom._children = EMPTY_OBJ;
 	render(vnode, parentDom);
 }
