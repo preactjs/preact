@@ -36,6 +36,9 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 	try {
 		if (isComponent) {
+			// =============================
+			//
+			// #region diffComponent
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
@@ -128,8 +131,16 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			if (!isNew && c.getSnapshotBeforeUpdate!=null) {
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
+
+			// #endregion diffComponent
+			//
+			// =============================
 		}
 		else {
+			// =============================
+			//
+			// #region diffElementNode
+
 			// This VNode's DOM node is the new parentDom
 			parentDom = oldVNode._dom;
 
@@ -181,13 +192,15 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 					parentDom.multiple = newProps.multiple;
 				}
 			}
+
+			// #endregion diffElementNode
+			//
+			// =============================
 		}
 
 		// =============================
 		//
 		// #region diffChildren
-		//
-		// =============================
 
 		// diffChildren(parentDom, newVNode, oldVNode, context, isSvg && newType==='foreignObject' ? false : isSvg, excessDomChildren, mounts, c ? oldDom : EMPTY_OBJ);
 
@@ -322,8 +335,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 		}
 
-		// =============================
-		//
 		// #endregion diffChildren
 		//
 		// =============================
