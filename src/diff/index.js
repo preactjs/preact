@@ -206,8 +206,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 		// diffChildren(parentDom, newVNode, oldVNode, context, isSvg && newType==='foreignObject' ? false : isSvg, excessDomChildren, mounts, c ? oldDom : EMPTY_OBJ);
 
-		isSvg = isSvg && newType==='foreignObject' ? false : isSvg;
-
 		let childVNode, oldChildVNode, newDom, sibDom, firstChildDom, refs;
 
 		// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
@@ -266,7 +264,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				oldChildVNode = oldChildVNode || EMPTY_OBJ;
 
 				// Morph the old element into the new one, but don't append it to the dom yet
-				newDom = diff(parentDom, childVNode, oldChildVNode, context, isSvg, excessDomChildren, mounts, null, oldDom);
+				newDom = diff(parentDom, childVNode, oldChildVNode, context, isSvg && newType==='foreignObject' ? false : isSvg, excessDomChildren, mounts, null, oldDom);
 
 				if ((tmp = childVNode.ref) && oldChildVNode.ref != tmp) {
 					(refs || (refs=[])).push(tmp, childVNode._component || newDom);
