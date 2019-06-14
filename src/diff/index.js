@@ -21,19 +21,23 @@ import options from '../options';
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
-export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, force, oldDom) {
-	let c, tmp, isNew, oldState, snapshot, clearProcessingException;
-	let oldProps = oldVNode.props;
-	let newProps = newVNode.props;
-	let newType = newVNode.type;
-
-	// When passing through createElement it assigns the object
-	// constructor as undefined. This to prevent JSON-injection.
-	if (newVNode.constructor !== undefined) return null;
-
-	if (tmp = options._diff) tmp(newVNode);
-
+export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, force, oldDom, newParentVNode) {
 	try {
+		if (Array.isArray(newVNode)) {
+			return diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, oldDom, newParentVNode);
+		}
+
+		let c, tmp, isNew, oldState, snapshot, clearProcessingException;
+		let oldProps = oldVNode.props;
+		let newProps = newVNode.props;
+		let newType = newVNode.type;
+
+		// When passing through createElement it assigns the object
+		// constructor as undefined. This to prevent JSON-injection.
+		if (newVNode.constructor !== undefined) return null;
+
+		if (tmp = options._diff) tmp(newVNode);
+
 		outer: if (typeof newType==='function') {
 
 			// Necessary for createContext api. Setting this property will pass
@@ -129,7 +133,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, oldDom);
+			diff(parentDom, newVNode._children, oldVNode && oldVNode._children, context, isSvg, excessDomChildren, mounts, force, oldDom, newVNode);
 
 			// Only change the fields on the component once they represent the new state of the DOM
 			c.base = newVNode._dom;
@@ -200,7 +204,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 					parentDom.multiple = newProps.multiple;
 				}
 
-				diffChildren(parentDom, newVNode, oldVNode, context, newType==='foreignObject' ? false : isSvg, excessDomChildren, mounts, EMPTY_OBJ);
+				toChildArray(newVNode.props.children, newVNode._children=[], coerceToVNode, true);
+				diff(parentDom, newVNode._children, oldVNode && oldVNode._children, context, newType==='foreignObject' ? false : isSvg, excessDomChildren, mounts, force, EMPTY_OBJ, newVNode);
 				diffProps(parentDom, newProps, oldProps, isSvg);
 			}
 

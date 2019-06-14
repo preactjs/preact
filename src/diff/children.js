@@ -7,9 +7,9 @@ import { removeNode } from '../util';
  * Diff the children of a virtual node
  * @param {import('../internal').PreactElement} parentDom The DOM element whose
  * children are being diffed
- * @param {import('../internal').VNode} newParentVNode The new virtual
+ * @param {import('../internal').VNode[]} newChildren The new virtual
  * node whose children should be diff'ed against oldParentVNode
- * @param {import('../internal').VNode} oldParentVNode The old virtual
+ * @param {import('../internal').VNode[]} oldChildren The old virtual
  * node whose children should be diff'ed against newParentVNode
  * @param {object} context The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
@@ -20,14 +20,14 @@ import { removeNode } from '../util';
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
+ * @param {import('../internal').VNode} newParentVNode
  */
-export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, oldDom) {
+export function diffChildren(parentDom, newChildren, oldChildren, context, isSvg, excessDomChildren, mounts, oldDom, newParentVNode) {
 	let childVNode, i, j, oldVNode, newDom, sibDom, firstChildDom, refs;
 
-	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode, true);
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
-	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
+	oldChildren = oldChildren || EMPTY_ARR;
 
 	let oldChildrenLength = oldChildren.length;
 
@@ -81,7 +81,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			oldVNode = oldVNode || EMPTY_OBJ;
 
 			// Morph the old element into the new one, but don't append it to the dom yet
-			newDom = diff(parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, null, oldDom);
+			newDom = diff(parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, null, oldDom, newParentVNode);
 
 			if ((j = childVNode.ref) && oldVNode.ref != j) {
 				(refs || (refs=[])).push(j, childVNode._component || newDom);
