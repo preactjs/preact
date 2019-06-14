@@ -22,11 +22,22 @@ import options from '../options';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
 export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, force, oldDom, newParentVNode) {
-	try {
-		if (Array.isArray(newVNode)) {
-			// return diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, oldDom, newParentVNode);
+	let c, tmp, isNew, oldState, snapshot, clearProcessingException;
+	let oldProps, newProps;
+	let newType = newVNode.type;
 
-			let childVNode, i, j, oldChildVNode, newDom, sibDom, firstChildDom, refs;
+	let isArray = Array.isArray(newVNode);
+	let childVNode, i, j, oldChildVNode, newDom, sibDom, firstChildDom, refs;
+
+	// When passing through createElement it assigns the object
+	// constructor as undefined. This to prevent JSON-injection.
+	if (!isArray && newVNode.constructor !== undefined) return null;
+
+	if (tmp = options._diff) tmp(newVNode);
+
+	try {
+		outer: if (isArray) {
+			// return diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, oldDom, newParentVNode);
 
 			// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 			// as EMPTY_OBJ._children should be `undefined`.
@@ -112,14 +123,14 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 							// This is a compression of excessDomChildren==null && oldVNode==null!
 							// The values only have the same type when `null`.
 
-							outer: if (oldDom==null || oldDom.parentNode!==parentDom) {
+							outer2: if (oldDom==null || oldDom.parentNode!==parentDom) {
 								parentDom.appendChild(newDom);
 							}
 							else {
 								// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
 								for (sibDom=oldDom, j=0; (sibDom=sibDom.nextSibling) && j<oldChildrenLength; j+=2) {
 									if (sibDom==newDom) {
-										break outer;
+										break outer2;
 									}
 								}
 								parentDom.insertBefore(newDom, oldDom);
@@ -153,22 +164,9 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 					applyRef(refs[i], refs[++i], newParentVNode);
 				}
 			}
-
-			return;
 		}
-
-		let c, tmp, isNew, oldState, snapshot, clearProcessingException;
-		let oldProps = oldVNode.props;
-		let newProps = newVNode.props;
-		let newType = newVNode.type;
-
-		// When passing through createElement it assigns the object
-		// constructor as undefined. This to prevent JSON-injection.
-		if (newVNode.constructor !== undefined) return null;
-
-		if (tmp = options._diff) tmp(newVNode);
-
-		outer: if (typeof newType==='function') {
+		else if (typeof newType==='function') {
+			newProps = newVNode.props;
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
@@ -283,6 +281,9 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 		}
 		else {
+			oldProps = oldVNode.props;
+			newProps = newVNode.props;
+
 			// This VNode's DOM node is the new parentDom
 			parentDom = oldVNode._dom;
 
