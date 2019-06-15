@@ -1,7 +1,4 @@
-import {
-	createElement,
-	Component,
-} from "../..";
+import * as React from "../../src";
 
 export interface LazyProps {
 	isProp: boolean;
@@ -10,7 +7,7 @@ export interface LazyProps {
 interface LazyState {
 	forState: string;
 }
-export default class IsLazyComponent extends Component<LazyProps, LazyState> {
+export default class IsLazyComponent extends React.Component<LazyProps, LazyState> {
 	render ({ isProp }: LazyProps) {
 		return (
 			<div>{

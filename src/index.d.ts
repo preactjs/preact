@@ -94,7 +94,7 @@ declare namespace preact {
 		componentWillUpdate?(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): void;
 		getSnapshotBeforeUpdate?(oldProps: Readonly<P>, oldState: Readonly<S>): any;
 		componentDidUpdate?(previousProps: Readonly<P>, previousState: Readonly<S>, snapshot: any): void;
-		componentDidCatch?(error: any): void;
+		componentDidCatch?(error: any, errorInfo: any): void;
 	}
 
 	abstract class Component<P, S> {
