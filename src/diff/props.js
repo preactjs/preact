@@ -77,9 +77,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		// Only `<select>` elements have the length property
 		if (dom.length && name=='value') {
 			for (name = dom.length; name--;) {
-				if (dom.options[name].value==value) {
-					dom.selectedIndex = name;
-				}
+				dom.options[name].selected = dom.options[name].value==value;
 			}
 		}
 		else {
