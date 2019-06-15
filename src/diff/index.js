@@ -89,7 +89,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 					c._dirty = false;
 					c._vnode = newVNode;
 					newVNode._dom = oldVNode._dom;
-					newVNode._lastDomChild = oldVNode._lastDomChild;
 					newVNode._children = oldVNode._children;
 					break outer;
 				}
@@ -116,7 +115,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				toChildArray(isTopLevelFragment ? tmp.props.children : tmp, newVNode._children=[], coerceToVNode, true);
 			}
 			catch (e) {
-				if ((tmp = options._catchRender) && tmp(e, newVNode)) return;
+				if ((tmp = options._catchRender) && tmp(e, newVNode, oldVNode)) break outer;
 				throw e;
 			}
 

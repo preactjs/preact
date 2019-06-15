@@ -12,7 +12,7 @@ export interface Options extends preact.Options {
 	/** Attach a hook that is invoked before a hook's state is queried. */
 	_hook?(component: Component): void;
 	/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
-	catchError?(error: any, vnode: VNode): void;
+	_catchError?(error: any, vnode: VNode): void;
 	/**
 	 * Attach a hook that is invoked after an error is caught while executing render.
 	 *
@@ -23,7 +23,7 @@ export interface Options extends preact.Options {
 	 * @param vnode The VNode whose component's render method threw an error
 	 * @return Return a boolean indicating whether the error was handled by the hook or not
 	 */
-	catchRender?(error: any, vnode: VNode): boolean;
+	_catchRender?(error: any, newVNode: VNode, oldVNode: VNode): boolean;
 }
 
 export interface FunctionalComponent<P = {}> extends preact.FunctionComponent<P> {

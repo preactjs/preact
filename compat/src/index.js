@@ -20,8 +20,8 @@ options.event = e => {
 };
 
 let oldCatchRender = options._catchRender;
-options._catchRender = (error, component) => (
-	oldCatchRender && oldCatchRender(error, component) || catchRender(error, component)
+options._catchRender = (error, newVNode, oldVNode) => (
+	oldCatchRender && oldCatchRender(error, newVNode, oldVNode) || catchRender(error, newVNode, oldVNode)
 );
 
 /**
