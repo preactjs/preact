@@ -69,7 +69,7 @@ export function update(state, vnode, isRoot, parentId) {
 	}
 
 	if (shouldReset) {
-		resetChildren(state, vnode);
+		// resetChildren(state, vnode);
 		return false;
 	}
 
@@ -202,14 +202,16 @@ export function flushPendingEvents(hook, state) {
 		2 + // Renderer id + root vnode id
 		1 + // string table length field
 		allStrLengths +
-		2 + // TREE_OPERATION_REMOVE + removed id length
-		state.pendingUnmountIds.length +
+		(state.pendingUnmountIds.length
+			// TREE_OPERATION_REMOVE + removed id length
+			? 2 + state.pendingUnmountIds.length
+			: 0) +
 		state.pending.length
 	);
 
 	let i = 0;
 	ops[i++] = state.rendererId;
-	ops[i++] = 1; // TODO
+	ops[i++] = 1; // TODO: Root vnode id
 
 	// Add string table
 	ops[i++] = allStrLengths;
@@ -219,14 +221,16 @@ export function flushPendingEvents(hook, state) {
 		i += k.length;
 	});
 
-	// All unmounts
-	ops[i++] = TREE_OPERATION_REMOVE;
-	// Total number of unmount ids
-	ops[i++] = state.pendingUnmountIds.length;
-	for (let j = 0; j < state.pendingUnmountIds.length; j++) {
-		ops[i + j] = state.pendingUnmountIds[j];
+	if (state.pendingUnmountIds.length) {
+		// All unmounts
+		ops[i++] = TREE_OPERATION_REMOVE;
+		// Total number of unmount ids
+		ops[i++] = state.pendingUnmountIds.length;
+		for (let j = 0; j < state.pendingUnmountIds.length; j++) {
+			ops[i + j] = state.pendingUnmountIds[j];
+		}
+		i += state.pendingUnmountIds.length;
 	}
-	i += state.pendingUnmountIds.length;
 
 	// Finally add all pending operations
 	ops.set(state.pending, i);

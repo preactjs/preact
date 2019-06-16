@@ -43,7 +43,7 @@ describe('devtools', () => {
 		// TODO
 	});
 
-	it.skip('should mount a functional component', () => {
+	it('should mount a functional component', () => {
 		mock.connect();
 
 		function App() {
@@ -52,6 +52,7 @@ describe('devtools', () => {
 
 		render(<App />, scratch);
 		expect(mock.hook.emit).to.be.calledOnce;
+
 		expect(convertEmit(mock.hook.emit.args[0])).to.deep.equal({
 			rendererId: 1,
 			rootVNodeId: 1,
@@ -74,7 +75,7 @@ describe('devtools', () => {
 					id: 2,
 					name: 'App',
 					parentId: 1,
-					owner: 0,
+					owner: 1,
 					key: null
 				}
 			]

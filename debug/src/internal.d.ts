@@ -37,7 +37,7 @@ export interface RendererConfig {
 	/** Informative string, currently unused in the devtools  */
 	rendererPackageName: string;
 	/** Find the closest DOM element given an id */
-	findNativeByFiberID(id: number): PreactElement | HTMLElement | Text | null;
+	findNativeNodesForFiberID(id: number): PreactElement | HTMLElement | Text | null;
 	inspectElement(id: number): InspectData;
 	/** Called when the user clicks on an element inside the devtools */
 	selectElement(id: number): void;
