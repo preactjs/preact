@@ -1,0 +1,20 @@
+{
+	"compilerOptions": {
+		"target": "es6",
+		"module": "es6",
+		"moduleResolution": "node",
+		"lib": [
+			"es6",
+			"dom",
+		],
+		"strict": true,
+		"forceConsistentCasingInFileNames": true,
+		"jsx": "react",
+		"noEmit": true,
+		"allowSyntheticDefaultImports": true
+	},
+	"include": [
+		"./**/*.ts",
+		"./**/*.tsx"
+	]
+}

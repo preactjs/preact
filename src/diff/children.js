@@ -100,6 +100,11 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 					// have a non-null _lastDomChild. Continue the diff from the end of
 					// this Fragment's DOM tree.
 					newDom = childVNode._lastDomChild;
+
+					// Eagerly cleanup _lastDomChild. We don't need to persist the value because
+					// it is only used by `diffChildren` to determine where to resume the diff after
+					// diffing Components and Fragments.
+					childVNode._lastDomChild = null;
 				}
 				else if (excessDomChildren==oldVNode || newDom!=oldDom || newDom.parentNode==null) {
 					// NOTE: excessDomChildren==oldVNode above:
@@ -124,7 +129,9 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 				if (typeof newParentVNode.type == 'function') {
 					// At this point, if childVNode._lastDomChild existed, then
-					// newDom = childVNode._lastDomChild per line 101
+					// newDom = childVNode._lastDomChild per line 101. Else it is
+					// the same as childVNode._dom, meaning this component returned
+					// only a single DOM node
 					newParentVNode._lastDomChild = newDom;
 				}
 			}

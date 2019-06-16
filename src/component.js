@@ -61,7 +61,7 @@ Component.prototype.setState = function(update, callback) {
  * re-renderd
  */
 Component.prototype.forceUpdate = function(callback) {
-	let vnode = this._vnode, dom = this._vnode._dom, parentDom = this._parentDom;
+	let vnode = this._vnode, oldDom = this._vnode._dom, parentDom = this._parentDom;
 	if (parentDom) {
 		// Set render mode so that we can differantiate where the render request
 		// is coming from. We need this because forceUpdate should never call
@@ -69,8 +69,12 @@ Component.prototype.forceUpdate = function(callback) {
 		const force = callback!==false;
 
 		let mounts = [];
-		diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, force, dom == null ? getDomSibling(vnode) : dom);
+		let newDom = diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, force, oldDom == null ? getDomSibling(vnode) : oldDom);
 		commitRoot(mounts, vnode);
+
+		if (newDom != oldDom) {
+			updateParentDomPointers(vnode);
+		}
 	}
 	if (callback) callback();
 };
@@ -116,6 +120,24 @@ export function getDomSibling(vnode, childIndex) {
 	// VNode (meaning we reached the DOM parent of the original vnode that began
 	// the search)
 	return typeof vnode.type === 'function' ? getDomSibling(vnode) : null;
+}
+
+/**
+ * @param {import('./internal').VNode} vnode
+ */
+function updateParentDomPointers(vnode) {
+	if ((vnode = vnode._parent) != null && vnode._component != null) {
+		vnode._dom = vnode._component.base = null;
+		for (let i = 0; i < vnode._children.length; i++) {
+			let child = vnode._children[i];
+			if (child != null && child._dom != null) {
+				vnode._dom = vnode._component.base = child._dom;
+				break;
+			}
+		}
+
+		return updateParentDomPointers(vnode);
+	}
 }
 
 /**
