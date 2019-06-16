@@ -42,7 +42,7 @@ export function getVNodeId(vnode) {
  * @param {import('../internal').VNode} vnode
  */
 export function hasVNodeId(vnode) {
-	return vnodeToId!=null && vnodeToId.has(getInstance(vnode));
+	return vnode!=null && vnodeToId!=null && vnodeToId.has(getInstance(vnode));
 }
 
 /**
@@ -61,7 +61,9 @@ export function getVNode(id) {
 export function clearVNode(vnode) {
 	let children = vnode._children || [];
 	for (let i = 0; i < children.length; i++) {
-		clearVNode(children[i]);
+		if (children[i]!==null) {
+			clearVNode(children[i]);
+		}
 	}
 	if (hasVNodeId(vnode)) {
 		idToVNode.delete(getVNodeId(vnode));

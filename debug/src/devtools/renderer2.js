@@ -62,7 +62,7 @@ export function update(state, vnode, isRoot, parentId) {
 	else {
 		let children = vnode._children || [];
 		for (let i = 0; i < children.length; i++) {
-			if (update(state, children[i], false, shouldFilter(vnode) ? parentId : getVNodeId(vnode))) {
+			if (children[i]!==null && update(state, children[i], false, shouldFilter(vnode) ? parentId : getVNodeId(vnode))) {
 				shouldReset = true;
 			}
 		}
@@ -128,7 +128,9 @@ export function unmount(state, vnode, isRoot) {
 	else {
 		let children = vnode._children || [];
 		for (let i = 0; i < children.length; i++) {
-			unmount(state, children[i], false);
+			if (children[i]!==null) {
+				unmount(state, children[i], false);
+			}
 		}
 
 		if (!shouldFilter(vnode)) {
@@ -148,7 +150,7 @@ export function unmount(state, vnode, isRoot) {
  */
 export function mount(state, vnode, isRoot, parentId) {
 	let id;
-	let ancestor = vnode._parent;
+	let ancestor = vnode!=null ? vnode._parent : null;
 	let owner = ancestor!=null ? getVNodeId(ancestor) : 0;
 
 	if (isRoot || !shouldFilter(vnode)) {
@@ -180,7 +182,9 @@ export function mount(state, vnode, isRoot, parentId) {
 
 	const children = vnode._children || [];
 	for (let i = 0; i < children.length; i++) {
-		mount(state, children[i], false, !isRoot && shouldFilter(vnode) ? parentId : id);
+		if (children[i]!==null) {
+			mount(state, children[i], false, !isRoot && shouldFilter(vnode) ? parentId : id);
+		}
 	}
 }
 
