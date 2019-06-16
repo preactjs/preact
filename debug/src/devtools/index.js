@@ -65,7 +65,7 @@ export function initDevTools() {
 			bundleType: /* istanbul ignore next */  isDev ? 1 : 0,
 			version: '16.8.4',
 			rendererPackageName: 'preact',
-			findNativeByFiberID(id) {
+			findNativeNodesForFiberID(id) {
 				let vnode = getVNode(id);
 				return vnode!=null ? vnode._dom : null;
 			},

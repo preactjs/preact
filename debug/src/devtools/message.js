@@ -23,16 +23,15 @@ export function parseMessage(msg) {
 
 	pos += allStrLengths;
 
-	if (msg[++pos]!==TREE_OPERATION_REMOVE) {
-		throw new Error(`String table must be followed by TREE_OPERATION_REMOVE`);
-	}
-
 	let unmounts = [];
-	let expectedUnmounts = msg[++pos];
-	for (let i = 0; i < expectedUnmounts; i++) {
-		unmounts.push(msg[pos + i + 1]);
+	if (msg[++pos]===TREE_OPERATION_REMOVE) {
+		pos++;
+		let expectedUnmounts = msg[++pos];
+		for (let i = 0; i < expectedUnmounts; i++) {
+			unmounts.push(msg[pos + i + 1]);
+		}
+		pos += expectedUnmounts + 1;
 	}
-	pos += expectedUnmounts + 1;
 
 	let operations = [];
 	for (let i = 0; pos + i < msg.length; i++) {
@@ -74,6 +73,7 @@ export function parseMessage(msg) {
 				i+=2;
 				continue;
 			default:
+				console.log(pos, msg)
 				throw new Error('TODO: Not implemented');
 		}
 	}
