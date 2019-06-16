@@ -22,6 +22,8 @@ export function getType(data) {
 let LEVEL_LIMIT = 6;
 
 export function prettify(data, cleaned, path, level = 0) {
+	if (level > LEVEL_LIMIT) return '...';
+
 	let type = getType(data);
 
 	switch (type) {
