@@ -1,5 +1,9 @@
-import { Component, PreactElement, VNode } from "../../src/internal";
+import { Component, PreactElement, VNode, Options } from "../../src/internal";
 export { Component, PreactElement, VNode };
+
+export interface Options {
+	_profiling: boolean;
+}
 
 export interface InspectData {
 	id: number;
@@ -45,6 +49,17 @@ export interface RendererConfig {
 	selectElement(id: number): void;
 	/** Called when the devtools panel is closed */
 	cleanup(): void;
+	/** Called when the user started a profiling session */
+	startProfiling(): void;
+	/** Called when the profiling session stopped */
+	stopProfiling(): void;
+	/** Called right after `stopProfiling` */
+	getProfilingData(): ProfilingData;
+}
+
+export interface ProfilingData {
+	dataForRoots: any[];
+	rendererId: number;
 }
 
 export interface PathFrame {
