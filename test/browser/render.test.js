@@ -318,11 +318,17 @@ describe('render()', () => {
 		let div = scratch.childNodes[0];
 		expect(div.attributes.length).to.equal(2);
 
-		expect(div.attributes[0].name).equal('bar');
-		expect(div.attributes[0].value).equal('abc');
+		// Normalize attribute order because it's different in various browsers
+		let normalized = {};
+		for (let i = 0; i < div.attributes.length; i++) {
+			let attr = div.attributes[i];
+			normalized[attr.name] = attr.value;
+		}
 
-		expect(div.attributes[1].name).equal('foo');
-		expect(div.attributes[1].value).equal('[object Object]');
+		expect(normalized).to.deep.equal({
+			bar: 'abc',
+			foo: '[object Object]'
+		});
 	});
 
 	it('should apply class as String', () => {
@@ -396,9 +402,9 @@ describe('render()', () => {
 
 		it('should remove old styles', () => {
 			render(<div style={{ color: 'red' }} />, scratch);
-			render(<div style={{ background: 'blue' }} />, scratch);
-			expect(scratch.firstChild.style).to.have.property('color').that.equals('');
-			expect(scratch.firstChild.style).to.have.property('background').that.equals('blue');
+			render(<div style={{ backgroundColor: 'blue' }} />, scratch);
+			expect(scratch.firstChild.style.color).to.equal('');
+			expect(scratch.firstChild.style.backgroundColor).to.equal('blue');
 		});
 
 		// Skip test if the currently running browser doesn't support CSS Custom Properties
