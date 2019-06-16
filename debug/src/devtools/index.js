@@ -69,6 +69,19 @@ export function initDevTools() {
 				let vnode = getVNode(id);
 				return vnode!=null ? vnode._dom : null;
 			},
+			startProfiling() {
+				options._profiling = true;
+			},
+			stopProfiling() {
+				options._profiling = false;
+			},
+			getProfilingData() {
+				// TODO
+				return {
+					rendererId: rid,
+					dataForRoots: []
+				}
+			},
 			selectElement(id) {
 				// TODO
 			},
@@ -163,12 +176,12 @@ export function initDevTools() {
 	};
 
 	options._diff = (vnode) => {
-		vnode.startTime = now();
+		if (options._profiling) vnode.startTime = now();
 		if (prevBeforeDiff!=null) prevBeforeDiff(vnode);
 	};
 
 	options.diffed = (vnode) => {
-		vnode.endTime = now();
+		if (options._profiling) vnode.endTime = now();
 		if (prevAfterDiff!=null) prevAfterDiff(vnode);
 	};
 
