@@ -8,10 +8,12 @@ export interface InspectData {
 	canToggleSuspense: boolean;
 	canViewSource: boolean;
 	displayName: string;
+	type: number;
 	context: object;
 	hooks: PrettyData | null;
 	props: PrettyData | null;
 	state: PrettyData | null;
+	events: null; // TODO
 	owners: any[] | null; // TODO
 	source: null; // TODO
 }
