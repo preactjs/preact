@@ -268,8 +268,10 @@ export function inspectElement(id) {
 		canToggleSuspense: false, // TODO
 		canViewSource: false, // TODO
 		displayName: getDisplayName(vnode),
+		type: getVNodeType(vnode),
 		// context: vnode._component ? cleanForBridge(vnode._component.context) : null, // TODO
 		context: null, // TODO
+		events: null,
 		hooks: hasHooks ? cleanForBridge(inspectHooks(vnode)) : null,
 		props: vnode.props!=null && Object.keys(vnode.props).length > 0
 			? cleanForBridge(vnode.props)
