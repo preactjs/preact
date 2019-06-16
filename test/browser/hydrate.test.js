@@ -257,4 +257,15 @@ describe('hydrate()', () => {
 		// TODO: Fill in with proper log once this test is passing
 		expect(getLog()).to.deep.equal([]);
 	});
+
+	it('should attach event handlers', () => {
+		let spy = sinon.spy();
+		scratch.innerHTML = '<span>Test</span>';
+		let vnode = <span onClick={spy}>Test</span>;
+
+		hydrate(vnode, scratch);
+
+		scratch.firstChild.click();
+		expect(spy).to.be.calledOnce;
+	});
 });
