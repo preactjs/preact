@@ -1,7 +1,7 @@
 import { Fragment } from 'preact';
 import { getVNodeId, getVNode, clearVNode, hasVNodeId } from './cache';
 import { TREE_OPERATION_ADD, ElementTypeRoot, TREE_OPERATION_REMOVE, TREE_OPERATION_REORDER_CHILDREN } from './constants';
-import { getChildren, getVNodeType, getDisplayName } from './vnode';
+import { getVNodeType, getDisplayName } from './vnode';
 import { cleanForBridge } from './pretty';
 import { inspectHooks } from './hooks';
 import { encode } from './util';
@@ -57,10 +57,10 @@ export function update(state, vnode, isRoot, parentId) {
 	let shouldReset = false;
 	if (!shouldFilter(vnode) && !hasVNodeId(vnode)) {
 		mount(state, vnode, isRoot, parentId);
-		shouldReset = true;
+		shouldReset = false;
 	}
 	else {
-		let children = getChildren(vnode);
+		let children = vnode._children || [];
 		for (let i = 0; i < children.length; i++) {
 			if (update(state, children[i], false, shouldFilter(vnode) ? parentId : getVNodeId(vnode))) {
 				shouldReset = true;
@@ -86,14 +86,14 @@ export function resetChildren(state, vnode) {
 	/** @type {number[]} */
 	let next = [];
 
-	let stack = getChildren(vnode);
+	let stack = vnode._children || [];
 	let child;
 	while ((child = stack.pop())!=null) {
 		if (!shouldFilter(child)) {
 			next.push(getVNodeId(child));
 		}
-		else {
-			stack.push(...getChildren(child));
+		else if (vnode._children) {
+			stack.push(...vnode._children);
 		}
 	}
 
@@ -126,7 +126,7 @@ export function unmount(state, vnode, isRoot) {
 		]);
 	}
 	else {
-		let children = getChildren(vnode);
+		let children = vnode._children || [];
 		for (let i = 0; i < children.length; i++) {
 			unmount(state, children[i], false);
 		}
@@ -150,8 +150,6 @@ export function mount(state, vnode, isRoot, parentId) {
 	let id;
 	let ancestor = vnode._parent;
 	let owner = ancestor!=null ? getVNodeId(ancestor) : 0;
-	if (!shouldFilter(vnode)) {
-	}
 
 	if (isRoot || !shouldFilter(vnode)) {
 		id = getVNodeId(vnode);
@@ -180,7 +178,7 @@ export function mount(state, vnode, isRoot, parentId) {
 		}
 	}
 
-	const children = getChildren(vnode);
+	const children = vnode._children || [];
 	for (let i = 0; i < children.length; i++) {
 		mount(state, children[i], false, !isRoot && shouldFilter(vnode) ? parentId : id);
 	}

@@ -1,7 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, createElement as h, Fragment, options, Component, render } from 'preact';
 import { isRoot, getData, shallowEqual, hasDataChanged } from '../../src/devtools/custom';
-import { getChildren, getDisplayName } from '../../src/devtools/vnode';
+import { getDisplayName } from '../../src/devtools/vnode';
 import { setupScratch, teardown, clearOptions } from '../../../test/_util/helpers';
 import { initDevTools } from '../../src/devtools';
 import { Renderer } from '../../src/devtools/renderer';
@@ -204,34 +204,6 @@ describe('devtools', () => {
 
 			b._component = { state: { foo: 2 }, _prevState: { foo: 1 } };
 			expect(hasDataChanged(a, b)).to.equal(true);
-		});
-	});
-
-	describe('getChildren', () => {
-		it('should get component children', () => {
-			const Foo = () => <div>foo{null}bar</div>;
-			render(<Foo />, scratch);
-
-			const fooVNode = getRoot(scratch)._children[0];
-			const expectedChildren = fooVNode._children;
-			expect(getChildren(fooVNode)).to.deep.equal(expectedChildren);
-		});
-
-		it('should get component children for empty component', () => {
-			const Foo = () => {};
-			render(<Foo />, scratch);
-
-			const fooVNode = getRoot(scratch)._children[0];
-			expect(getChildren(fooVNode)).to.deep.equal([]);
-		});
-
-		it('should get native element children', () => {
-			render(<div>foo</div>, scratch);
-
-			const fooVNode = getRoot(scratch)._children[0];
-			const children = getChildren(fooVNode);
-			expect(children).to.have.lengthOf(1);
-			expect(children[0].props).to.equal('foo');
 		});
 	});
 

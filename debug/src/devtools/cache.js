@@ -1,5 +1,4 @@
 import { getInstance } from './custom';
-import { getChildren } from './vnode';
 
 let uid = 0;
 
@@ -60,7 +59,7 @@ export function getVNode(id) {
  * @param {import('../internal').VNode} vnode The vnode to remove
  */
 export function clearVNode(vnode) {
-	let children = getChildren(vnode);
+	let children = vnode._children || [];
 	for (let i = 0; i < children.length; i++) {
 		clearVNode(children[i]);
 	}
