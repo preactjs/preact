@@ -1,5 +1,6 @@
 import { Fragment } from 'preact';
 import { ElementTypeClass, ElementTypeFunction, ElementTypeOtherOrUnknown } from './constants';
+import { getVNodeId } from './cache';
 
 /**
  * Get human readable name of the component/dom element
@@ -27,4 +28,41 @@ export function getVNodeType(vnode) {
 			: ElementTypeFunction;
 	}
 	return ElementTypeOtherOrUnknown;
+}
+
+/**
+ * Get the ancestor component that rendered the current vnode
+ * @param {import('../internal').VNode} vnode
+ * @returns {import('../internal').VNode | null}
+ */
+export function getAncestorComponent(vnode) {
+	let next = vnode;
+	while (next = next._parent) {
+		if (typeof next.type=='function') {
+			return next;
+		}
+	}
+
+	return null;
+}
+
+/**
+ * Get the ancestor component that rendered the current vnode
+ * @param {import('../internal').VNode} vnode
+ * @returns {Array<import('../internal').Owner>}
+ */
+export function getOwners(vnode) {
+	let owners = [];
+	let next = vnode;
+	while (next = next._parent) {
+		if (typeof next.type=='function' && next.type!==Fragment) {
+			owners.push({
+				id: getVNodeId(next),
+				type: getVNodeType(next),
+				displayName: getDisplayName(next)
+			});
+		}
+	}
+
+	return owners;
 }

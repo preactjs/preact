@@ -62,6 +62,12 @@ export interface ProfilingData {
 	rendererId: number;
 }
 
+export interface Owner {
+	displayName: string;
+	id: number;
+	type: number;
+}
+
 export interface PathFrame {
 	key: string | null,
   index: number,

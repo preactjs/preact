@@ -1,7 +1,7 @@
 import { Fragment } from 'preact';
 import { getVNodeId, getVNode, clearVNode, hasVNodeId } from './cache';
 import { TREE_OPERATION_ADD, ElementTypeRoot, TREE_OPERATION_REMOVE, TREE_OPERATION_REORDER_CHILDREN } from './constants';
-import { getVNodeType, getDisplayName } from './vnode';
+import { getVNodeType, getDisplayName, getAncestorComponent, getOwners } from './vnode';
 import { cleanForBridge } from './pretty';
 import { inspectHooks } from './hooks';
 import { encode } from './util';
@@ -55,9 +55,10 @@ export function onCommitFiberUnmount(hook, state, vnode) {
  */
 export function update(state, vnode, isRoot, parentId) {
 	let shouldReset = false;
-	if (!shouldFilter(vnode) && !hasVNodeId(vnode)) {
+	let include = !shouldFilter(vnode);
+	if (include && !hasVNodeId(vnode)) {
 		mount(state, vnode, isRoot, parentId);
-		shouldReset = false;
+		shouldReset = true;
 	}
 	else {
 		let children = vnode._children || [];
@@ -69,11 +70,15 @@ export function update(state, vnode, isRoot, parentId) {
 	}
 
 	if (shouldReset) {
-		// resetChildren(state, vnode);
-		return false;
+		if (include) {
+			resetChildren(state, vnode);
+			return false;
+		}
+
+		return true;
 	}
 
-	return true;
+	return false;
 }
 
 /**
@@ -99,11 +104,9 @@ export function resetChildren(state, vnode) {
 
 	if (next.length < 2) return;
 
-	let ancestor = getVNode(next[0])._parent;
-
 	state.pending.push(
 		TREE_OPERATION_REORDER_CHILDREN,
-		getVNodeId(ancestor),
+		getVNodeId(vnode),
 		next.length
 	);
 
@@ -118,6 +121,7 @@ export function resetChildren(state, vnode) {
  * @param {boolean} isRoot Mark a root as they need to be mounted differently
  */
 export function unmount(state, vnode, isRoot) {
+	console.log("unmount", getDisplayName(vnode), getVNodeId(vnode))
 	if (hasVNodeId(vnode) && isRoot) {
 		state.pending.push([
 			TREE_OPERATION_REMOVE,
@@ -150,7 +154,7 @@ export function unmount(state, vnode, isRoot) {
  */
 export function mount(state, vnode, isRoot, parentId) {
 	let id;
-	let ancestor = vnode!=null ? vnode._parent : null;
+	let ancestor = getAncestorComponent(vnode);
 	let owner = ancestor!=null ? getVNodeId(ancestor) : 0;
 
 	if (isRoot || !shouldFilter(vnode)) {
@@ -259,11 +263,14 @@ export function shouldFilter(vnode) {
  * @returns {import('../internal').InspectData}
  */
 export function inspectElement(id) {
+	// FIXME: Find out why this function is called in a loop and what we can do
+	// to prevent that.
 	let vnode = getVNode(id);
 	if (vnode==null) {
 		throw new Error('Trying to inspect a vnode that was already unmounted. Please report this bug at: https://github.com/developit/preact/issues/new');
 	}
 	let hasHooks = vnode._component!=null && vnode._component.__hooks!=null;
+	let owners = getOwners(vnode);
 
 	return {
 		id,
@@ -283,8 +290,7 @@ export function inspectElement(id) {
 		state: hasHooks || vnode._component==null || !Object.keys(vnode._component.state).length
 			? null
 			: cleanForBridge(vnode._component.state),
-		owners: null, // TODO
+		owners: owners.length ? owners : null,
 		source: null // TODO
 	};
 }
-
