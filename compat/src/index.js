@@ -1,4 +1,4 @@
-import { render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
+import { hydrate, render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
 import * as hooks from 'preact/hooks';
 export * from 'preact/hooks';
 import { Suspense as _Suspense, lazy as _lazy, catchRender } from './suspense';
@@ -20,8 +20,8 @@ options.event = e => {
 };
 
 let oldCatchRender = options._catchRender;
-options._catchRender = (error, newVNode, oldVNode) => (
-	oldCatchRender && oldCatchRender(error, newVNode, oldVNode) || catchRender(error, newVNode, oldVNode)
+options._catchRender = (error, component) => (
+	oldCatchRender && oldCatchRender(error, component) || catchRender(error, component)
 );
 
 /**
@@ -72,9 +72,16 @@ class ContextProvider {
 }
 
 function addRenderRoot(vnode, parent) {
-	parent._children.props.children.unshift(vnode);
 	if (parent._children && parent._children._component && parent._children._component._vnode) {
+		parent._children.props.children.unshift(vnode);
 		parent._children._component.forceUpdate();
+	}
+	else {
+		// We should insert here aswell but since the vnode doesn't
+		// exist yet we can't forceUpdate.... Most commonly during
+		// initial render.
+		hydrate('', parent);
+		render(vnode, parent);
 	}
 }
 
@@ -83,22 +90,21 @@ function addRenderRoot(vnode, parent) {
  * @param {object | null | undefined} props
  */
 function Portal(props) {
-	const _this = this;
-	let wrap = h(ContextProvider, { context: _this.context }, props.vnode);
+	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
 	let container = props.container;
 
-	if (container !== _this.container) {
-		_this.mounted = false;
-		if (_this.container) render(null, _this.container);
-		_this.container = container;
+	if (container !== this.container) {
+		this.mounted = false;
+		if (this.container) render(null, this.container);
+		this.container = container;
 	}
 
-	if (!_this.mounted) {
-		_this.mounted = true;
+	if (!this.mounted) {
+		this.mounted = true;
 		addRenderRoot(wrap, container);
 	}
 
-	_this.componentWillUnmount = () => {
+	this.componentWillUnmount = () => {
 		render(null, container);
 	};
 	return null;
