@@ -28,21 +28,3 @@ export function getVNodeType(vnode) {
 	}
 	return ElementTypeOtherOrUnknown;
 }
-
-/**
- * Get all rendered vnode children as an array. Moreover we need to filter
- * out `null` or other falsy children.
- * @param {import('../internal').VNode} vnode
- * @returns {import('../internal').VNode[]}
- */
-export function getChildren(vnode) {
-	let c = vnode._component;
-
-	if (c==null) {
-		return vnode._children!=null ? vnode._children.filter(Boolean) : [];
-	}
-
-	return !Array.isArray(c._prevVNode) && c._prevVNode!=null
-		? [c._prevVNode]
-		: [];
-}
