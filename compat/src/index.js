@@ -1,4 +1,4 @@
-import { hydrate, render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
+import { render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
 import * as hooks from 'preact/hooks';
 export * from 'preact/hooks';
 import { Suspense as _Suspense, lazy as _lazy, catchRender } from './suspense';
@@ -72,12 +72,9 @@ class ContextProvider {
 }
 
 function addRenderRoot(vnode, parent) {
-	if (parent._children && parent._children._vnode) {
-		parent._children.props.children.unshift(vnode);
+	parent._children.props.children.unshift(vnode);
+	if (parent._children && parent._children._component && parent._children._component._vnode) {
 		parent._children._component.forceUpdate();
-	}
-	else {
-		render(vnode, parent);
 	}
 }
 
@@ -86,22 +83,22 @@ function addRenderRoot(vnode, parent) {
  * @param {object | null | undefined} props
  */
 function Portal(props) {
-	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
+	const _this = this;
+	let wrap = h(ContextProvider, { context: _this.context }, props.vnode);
 	let container = props.container;
 
-	if (container !== this.container) {
-		hydrate('', container);
-		this.mounted = false;
-		if (this.container) render(null, this.container);
-		this.container = container;
+	if (container !== _this.container) {
+		_this.mounted = false;
+		if (_this.container) render(null, _this.container);
+		_this.container = container;
 	}
 
-	if (!this.mounted) {
-		this.mounted = true;
+	if (!_this.mounted) {
+		_this.mounted = true;
 		addRenderRoot(wrap, container);
 	}
 
-	this.componentWillUnmount = () => {
+	_this.componentWillUnmount = () => {
 		render(null, container);
 	};
 	return null;
