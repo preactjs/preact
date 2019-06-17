@@ -118,7 +118,7 @@ describe('suspense', () => {
 				<Lazy />
 			</Suspense>
 		);
-		
+
 		render(suspense, scratch);
 
 		return suspense._component.__test__suspensions_timeout_race.then(() => {
@@ -149,7 +149,7 @@ describe('suspense', () => {
 				</ClassWrapper>
 			</Suspense>
 		);
-		
+
 		render(suspense, scratch);
 
 		expect(scratch.innerHTML).to.eql(
@@ -198,7 +198,7 @@ describe('suspense', () => {
 				<LifecycleLogger />
 			</Suspense>
 		);
-		
+
 		render(suspense, scratch);
 
 		expect(scratch.innerHTML).to.eql(
@@ -211,7 +211,7 @@ describe('suspense', () => {
 		s._component.suspend();
 
 		rerender();
-	
+
 		return suspense._component.__test__suspensions_timeout_race.then(() => {
 			expect(scratch.innerHTML).to.eql(
 				`<div>Suspended...</div>`
@@ -227,7 +227,7 @@ describe('suspense', () => {
 					expect(scratch.innerHTML).to.eql(
 						`<div>Suspense</div><div>Lifecycle</div>`
 					);
-			
+
 					expect(componentWillMount).to.have.been.calledOnce;
 					expect(componentDidMount).to.have.been.calledOnce;
 					expect(componentWillUnmount).to.not.have.been.called;
@@ -256,7 +256,7 @@ describe('suspense', () => {
 				{s}
 			</Suspense>
 		);
-		
+
 		render(suspense, scratch);
 
 		expect(scratch.innerHTML).to.eql(
@@ -269,7 +269,7 @@ describe('suspense', () => {
 		s._component.suspend();
 
 		rerender();
-	
+
 		return suspense._component.__test__suspensions_timeout_race.then(() => {
 			expect(scratch.innerHTML).to.eql(
 				`<div>Lifecycle</div>`
@@ -285,7 +285,7 @@ describe('suspense', () => {
 					expect(scratch.innerHTML).to.eql(
 						`<div>Suspense</div>`
 					);
-			
+
 					expect(componentWillMount).to.have.been.calledOnce;
 					expect(componentDidMount).to.have.been.calledOnce;
 					expect(componentWillUnmount).to.have.been.calledOnce;
@@ -315,7 +315,7 @@ describe('suspense', () => {
 				<Stateful />
 			</Suspense>
 		);
-		
+
 		render(suspense, scratch);
 
 		expect(scratch.innerHTML).to.eql(
@@ -586,7 +586,7 @@ describe('suspense', () => {
 			expect(s1._component.spies.render).to.have.been.calledTwice;
 			expect(s1._component.spies.render).to.have.been.calledTwice;
 			expect(suspense._component._suspensions.length).to.eql(2);
-	
+
 			return s1._component.resolve()
 				.then(() => {
 					rerender();
@@ -721,12 +721,12 @@ describe('suspense', () => {
 
 		s._component.suspend();
 		rerender();
-		
+
 		return suspense._component.__test__suspensions_timeout_race.then(() => {
 			expect(scratch.innerHTML).to.eql(
 				`Not suspended...<div>Suspended... 2</div>`
 			);
-			
+
 			return s._component.resolve()
 				.then(() => Promise.all(suspense._component._suspensions))
 				.then(() => {
