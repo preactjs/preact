@@ -18,3 +18,9 @@ export const ElementTypeOtherOrUnknown = 9;
 export const ElementTypeProfiler = 10;
 export const ElementTypeRoot = 11;
 export const ElementTypeSuspense = 12;
+
+// Component filters
+export const FilterElementType = 1;
+export const FilterDisplayName = 2;
+export const FilterLocation = 3;
+export const FilterHOC = 4;
