@@ -11,6 +11,53 @@ class LazyComp extends Component {
 	}
 }
 
+/**
+ * @param {h.JSX.Element} defaultResult
+ * @typedef {[(c: h.JSX.Element) => void, (error: Error) => void]} Resolvers
+ * @returns {[typeof Component, () => Resolvers]}
+ */
+function createSuspender(defaultResult) {
+	// Test public api
+	// Prefer not relying on internal VNode shape
+	// Prefer not refs so refs can change and break without affecting unrelated tests
+	// Prefer not using forceUpdate since it doesn't match what our user's will do/experience
+
+	/** @type {(lazy: h.JSX.Element) => void} */
+	let renderLazy;
+	class Suspender extends Component {
+		constructor(props, context) {
+			super(props, context);
+			this.state = { lazy: null };
+
+			renderLazy = lazy => this.setState({ lazy });
+		}
+
+		render(props, state) {
+			return state.lazy ? state.lazy : defaultResult;
+		}
+	}
+
+	sinon.spy(Suspender.prototype, 'render');
+
+	/**
+	 * @returns {Resolvers}
+	 */
+	function suspend() {
+
+		/** @type {(c: h.JSX.Element) => void} */
+		let resolver, rejecter;
+		const Lazy = lazy(() => new Promise((resolve, reject) => {
+			resolver = c => resolve({ default: c });
+			rejecter = reject;
+		}));
+
+		renderLazy(<Lazy />);
+		return [c => resolver(c), e => rejecter(e)];
+	}
+
+	return [Suspender, suspend];
+}
+
 class Suspendable extends Component {
 	constructor(props) {
 		super(props);
@@ -138,13 +185,14 @@ describe('suspense', () => {
 	});
 
 	it('should suspend when a promise is throw', () => {
-		const s = <Suspendable render={() => <div>Hello</div>} />;
+		// const s = <Suspendable render={() => <div>Hello</div>} />;
+		const [Suspender, suspend] = createSuspender(<div>Hello</div>);
 
 		const suspense = (
 			<Suspense fallback={<div>Suspended...</div>}>
 				<ClassWrapper>
 					<FuncWrapper>
-						{s}
+						<Suspender />
 					</FuncWrapper>
 				</ClassWrapper>
 			</Suspense>
@@ -156,8 +204,8 @@ describe('suspense', () => {
 			`<div id="class-wrapper"><div id="func-wrapper"><div>Hello</div></div></div>`
 		);
 
-		s._component.suspend();
-
+		// s._component.suspend();
+		const [resolve] = suspend();
 		rerender();
 
 		return suspense._component.__test__suspensions_timeout_race.then(() => {
@@ -165,15 +213,27 @@ describe('suspense', () => {
 				`<div>Suspended...</div>`
 			);
 
-			return s._component.resolve()
-				.then(() => Promise.all(suspense._component._suspensions))
+			resolve(<div>Hello2</div>);
+
+			Promise.all(suspense._component._suspensions)
 				.then(() => {
 					rerender();
 					expect(scratch.innerHTML).to.eql(
-						`<div id="class-wrapper"><div id="func-wrapper"><div>Hello</div></div></div>`
+						`<div id="class-wrapper"><div id="func-wrapper"><div>Hello2</div></div></div>`
 					);
 				});
 		});
+
+		// return suspense._component.__test__suspensions_timeout_race.then(() => {
+		// 	return s._component.resolve()
+		// 		.then(() => Promise.all(suspense._component._suspensions))
+		// 		.then(() => {
+		// 			rerender();
+		// 			expect(scratch.innerHTML).to.eql(
+		// 				`<div id="class-wrapper"><div id="func-wrapper"><div>Hello</div></div></div>`
+		// 			);
+		// 		});
+		// });
 	});
 
 	it('should not call lifecycle methods when suspending', () => {
