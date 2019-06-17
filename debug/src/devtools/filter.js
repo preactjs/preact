@@ -1,7 +1,8 @@
-import { unmount, mount, flushPendingEvents } from './renderer2';
+import { unmount, mount, flushPendingEvents, recordUnmount } from './renderer2';
 import { FilterElementType, FilterDisplayName as FilterName, FilterLocation, FilterHOC } from './constants';
 import { Fragment } from '../../../src';
-import { getVNodeType, getDisplayName } from './vnode';
+import { getVNodeType, getDisplayName, isRoot } from './vnode';
+import { getVNodeId } from './cache';
 
 /**
  * Update the currently active component filters by unmounting all roots,
@@ -14,14 +15,18 @@ export function updateComponentFilters(hook, state) {
 	return filters => {
 		// Unmount all currently active roots
 		hook.getFiberRoots(state.rendererId).forEach(root => {
-			unmount(state, root, true);
+			unmount(state, root);
+			recordUnmount(state, root);
+			state.currentRootId = -1;
 		});
 
 		updateFilterState(state.filter, filters);
 
 		hook.getFiberRoots(state.rendererId).forEach(root => {
+			state.currentRootId = getVNodeId(root);
 			mount(state, root, true);
 			flushPendingEvents(hook, state);
+			state.currentRootId = -1;
 		});
 	};
 }
@@ -72,8 +77,9 @@ export function shouldFilter(filterState, vnode) {
 		// TODO: Portals
 		// TODO: Root nodes
 		case null:
-		case Fragment:
 			return true;
+		case Fragment:
+			return !isRoot(vnode);
 	}
 
 	if (filterState.byType.has(getVNodeType(vnode))) {

@@ -37,6 +37,9 @@ export function createMockDevtoolsHook() {
 
 	/** @type {*} */
 	(window).__REACT_DEVTOOLS_GLOBAL_HOOK__ = hook;
+	(window).__REACT_DEVTOOLS_COMPONENT_FILTERS__ = [
+		{ isEnabled: true, type: 1, value: 7 }
+	];
 
 	return { hook, connect, inspect, setState };
 }

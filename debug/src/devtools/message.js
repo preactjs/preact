@@ -21,11 +21,10 @@ export function parseMessage(msg) {
 		id++;
 	}
 
-	pos += allStrLengths;
+	pos += allStrLengths + 1;
 
 	let unmounts = [];
-	if (msg[++pos]===TREE_OPERATION_REMOVE) {
-		pos++;
+	if (msg[pos]===TREE_OPERATION_REMOVE) {
 		let expectedUnmounts = msg[++pos];
 		for (let i = 0; i < expectedUnmounts; i++) {
 			unmounts.push(msg[pos + i + 1]);
@@ -101,6 +100,6 @@ export function parseElementType(n) {
 		case ElementTypeRoot:
 			return 'Root';
 		default:
-			throw new Error('TODO: Implement' + n);
+			throw new Error('TODO: Implement ' + n);
 	}
 }

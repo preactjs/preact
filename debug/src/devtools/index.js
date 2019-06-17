@@ -69,6 +69,7 @@ export function initDevTools() {
 			isProfiling: false,
 			pending: [],
 			pendingUnmountIds: [],
+			pendingUnmountRootId: null,
 			rendererId: -1,
 			filter: {
 				// TODO: Lazily initialize for IE11?
