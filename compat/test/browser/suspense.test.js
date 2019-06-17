@@ -5,12 +5,6 @@ import { createElement as h, render, Component, Suspense, lazy, Fragment } from 
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { enqueueRender } from '../../../src/component';
 
-class LazyComp extends Component {
-	render() {
-		return <div>Hello from LazyComp</div>;
-	}
-}
-
 /**
  * @param {h.JSX.Element} defaultResult
  * @typedef {[(c: h.JSX.Element) => void, (error: Error) => void]} Resolvers
@@ -147,8 +141,9 @@ describe('suspense', () => {
 	});
 
 	it('should support lazy', () => {
-		let resolve;
+		const LazyComp = () => <div>Hello from LazyComp</div>;
 
+		let resolve;
 		const Lazy = lazy(() => {
 			const p = new Promise((res) => {
 				resolve = () => {
