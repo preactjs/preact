@@ -55,6 +55,8 @@ export interface RendererConfig {
 	stopProfiling(): void;
 	/** Called right after `stopProfiling` */
 	getProfilingData(): ProfilingData;
+	/** Called when the filter preferences are updated */
+	updateComponentFilters(filters: Filter[]): void;
 }
 
 export interface ProfilingData {
@@ -67,6 +69,30 @@ export interface Owner {
 	id: number;
 	type: number;
 }
+
+export type ElementFilter = {
+  isEnabled: boolean,
+  type: 1,
+  value: number,
+};
+
+export type RegExpFilter = {
+  isEnabled: boolean,
+  isValid: boolean,
+  type: 2 | 3,
+  value: string,
+};
+
+export type BooleanFilter = {
+  isEnabled: boolean,
+  isValid: boolean,
+  type: 4,
+};
+
+export type Filter =
+  | BooleanFilter
+  | ElementTypeFilter
+  | RegExpFilter;
 
 export interface PathFrame {
 	key: string | null,
@@ -159,6 +185,10 @@ export interface DevtoolsWindow extends Window {
 	 * Custom attach function to supply a custom renderer
 	 */
 	__REACT_DEVTOOLS_ATTACH__?: (hook: DevtoolsHook, id: number, renderer: any, target: Window) => any;
+	/**
+	 * Default filtering settings.
+	 */
+	__REACT_DEVTOOLS_COMPONENT_FILTERS__?: Filter[];
 }
 
 export interface AdapterState {
@@ -168,4 +198,9 @@ export interface AdapterState {
 	pending: any[];
 	pendingUnmountIds: number[];
 	isProfiling: boolean;
+	filter: {
+		byType: Set<number>;
+		byName: Set<RegExp>;
+		byPath: Set<RegExp>;
+	}
 }

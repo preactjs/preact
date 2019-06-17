@@ -1,4 +1,3 @@
-import { Fragment } from 'preact';
 import { getVNodeId, getVNode, clearVNode, hasVNodeId } from './cache';
 import { TREE_OPERATION_ADD, ElementTypeRoot, TREE_OPERATION_REMOVE, TREE_OPERATION_REORDER_CHILDREN } from './constants';
 import { getVNodeType, getDisplayName, getAncestorComponent, getOwners } from './vnode';
@@ -6,6 +5,7 @@ import { cleanForBridge } from './pretty';
 import { inspectHooks } from './hooks';
 import { encode } from './util';
 import { getStringId, stringTable, allStrLengths, clearStringTable } from './string-table';
+import { shouldFilter } from './filter';
 
 /**
  * Called when a tree has completed rendering
@@ -55,7 +55,7 @@ export function onCommitFiberUnmount(hook, state, vnode) {
  */
 export function update(state, vnode, isRoot, parentId) {
 	let shouldReset = false;
-	let include = !shouldFilter(vnode);
+	let include = !shouldFilter(state.filter, vnode);
 	if (include && !hasVNodeId(vnode)) {
 		mount(state, vnode, isRoot, parentId);
 		shouldReset = true;
@@ -63,7 +63,7 @@ export function update(state, vnode, isRoot, parentId) {
 	else {
 		let children = vnode._children || [];
 		for (let i = 0; i < children.length; i++) {
-			if (children[i]!==null && update(state, children[i], false, shouldFilter(vnode) ? parentId : getVNodeId(vnode))) {
+			if (children[i]!==null && update(state, children[i], false, shouldFilter(state.filter, vnode) ? parentId : getVNodeId(vnode))) {
 				shouldReset = true;
 			}
 		}
@@ -94,7 +94,7 @@ export function resetChildren(state, vnode) {
 	let stack = vnode._children || [];
 	let child;
 	while ((child = stack.pop())!=null) {
-		if (!shouldFilter(child)) {
+		if (!shouldFilter(state.filter, child)) {
 			next.push(getVNodeId(child));
 		}
 		else if (vnode._children) {
@@ -137,7 +137,7 @@ export function unmount(state, vnode, isRoot) {
 			}
 		}
 
-		if (!shouldFilter(vnode)) {
+		if (!shouldFilter(state.filter, vnode)) {
 			let id = getVNodeId(vnode);
 			state.pendingUnmountIds.push(id);
 		}
@@ -157,7 +157,7 @@ export function mount(state, vnode, isRoot, parentId) {
 	let ancestor = getAncestorComponent(vnode);
 	let owner = ancestor!=null ? getVNodeId(ancestor) : 0;
 
-	if (isRoot || !shouldFilter(vnode)) {
+	if (isRoot || !shouldFilter(state.filter, vnode)) {
 		id = getVNodeId(vnode);
 		console.log("mount", getDisplayName(vnode), id, "owner", owner)
 
@@ -187,7 +187,7 @@ export function mount(state, vnode, isRoot, parentId) {
 	const children = vnode._children || [];
 	for (let i = 0; i < children.length; i++) {
 		if (children[i]!==null) {
-			mount(state, children[i], false, !isRoot && shouldFilter(vnode) ? parentId : id);
+			mount(state, children[i], false, !isRoot && shouldFilter(state.filter, vnode) ? parentId : id);
 		}
 	}
 }
@@ -246,15 +246,6 @@ export function flushPendingEvents(hook, state) {
 	state.pending = [];
 	state.pendingUnmountIds = [];
 	clearStringTable();
-}
-
-/**
- * Whether the element should be visible in the devtools panel. Currently only
- * Components are shown.
- * @param {import('../internal').VNode} vnode
- */
-export function shouldFilter(vnode) {
-	return typeof vnode.type!=='function' || vnode.type===Fragment;
 }
 
 /**

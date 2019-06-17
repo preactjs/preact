@@ -5,6 +5,7 @@ import { assign } from '../../../src/util';
 import { getVNode } from './cache';
 import { setInHook } from './hooks';
 import { now } from './util';
+import { updateComponentFilters } from './filter';
 
 /**
  * Wrap function with generic error logging
@@ -60,6 +61,25 @@ export function initDevTools() {
 				: 'production'
 		}, '*');
 
+
+		/** @type {import('../internal').AdapterState} */
+		let state = {
+			connected: false,
+			currentRootId: -1,
+			isProfiling: false,
+			pending: [],
+			pendingUnmountIds: [],
+			rendererId: -1,
+			filter: {
+				// TODO: Lazily initialize for IE11?
+				byType: new Set(),
+				byName: new Set(),
+				byPath: new Set()
+			}
+		};
+
+		const applyFilters = updateComponentFilters(hook, state);
+
 		/** @type {import('../internal').RendererConfig} */
 		let config = {
 			bundleType: /* istanbul ignore next */  isDev ? 1 : 0,
@@ -88,18 +108,14 @@ export function initDevTools() {
 			cleanup() {
 				// noop
 			},
-			inspectElement
+			inspectElement,
+			updateComponentFilters: applyFilters
 		};
 
-		/** @type {import('../internal').AdapterState} */
-		let state = {
-			connected: false,
-			currentRootId: -1,
-			isProfiling: false,
-			pending: [],
-			pendingUnmountIds: [],
-			rendererId: -1
-		};
+		// Apply initial filters
+		if (window.__REACT_DEVTOOLS_COMPONENT_FILTERS__) {
+			applyFilters(window.__REACT_DEVTOOLS_COMPONENT_FILTERS__);
+		}
 
 		/** @type {import('../internal').DevtoolsWindow} */
 		// eslint-disable-next-line arrow-body-style

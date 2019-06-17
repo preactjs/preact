@@ -1,5 +1,5 @@
 import { Fragment } from 'preact';
-import { ElementTypeClass, ElementTypeFunction, ElementTypeOtherOrUnknown } from './constants';
+import { ElementTypeClass, ElementTypeFunction, ElementTypeOtherOrUnknown, ElementTypeHostComponent } from './constants';
 import { getVNodeId } from './cache';
 
 /**
@@ -27,7 +27,7 @@ export function getVNodeType(vnode) {
 			? ElementTypeClass
 			: ElementTypeFunction;
 	}
-	return ElementTypeOtherOrUnknown;
+	return ElementTypeHostComponent;
 }
 
 /**
