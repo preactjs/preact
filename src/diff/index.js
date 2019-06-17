@@ -276,12 +276,9 @@ export function applyRef(ref, value, vnode) {
  * initiated the unmount
  * @param {boolean} [skipRemove] Flag that indicates that a parent node of the
  * current element is already detached from the DOM.
- * @param {boolean} [calledOptions]
  */
-export function unmount(vnode, parentVNode, skipRemove, calledOptions) {
+export function unmount(vnode, parentVNode, skipRemove) {
 	let r;
-	if (!calledOptions && options.unmount) options.unmount(vnode);
-
 	if (r = vnode.ref) {
 		applyRef(r, null, parentVNode);
 	}
@@ -308,9 +305,11 @@ export function unmount(vnode, parentVNode, skipRemove, calledOptions) {
 
 	if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {
-			if (r[i]) unmount(r[i], parentVNode, skipRemove, true);
+			if (r[i]) unmount(r[i], parentVNode, skipRemove);
 		}
 	}
+
+	if (options.unmount) options.unmount(vnode);
 
 	if (dom!=null) removeNode(dom);
 }

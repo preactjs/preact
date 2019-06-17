@@ -197,6 +197,7 @@ export interface AdapterState {
 	currentRootId: number;
 	pending: any[];
 	pendingUnmountIds: number[];
+	pendingUnmountRootId: number | null;
 	isProfiling: boolean;
 	filter: {
 		byType: Set<number>;

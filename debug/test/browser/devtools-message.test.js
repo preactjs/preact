@@ -1,6 +1,6 @@
 import { parseMessage } from '../../src/devtools/message';
 
-describe('devtools message', () => {
+describe.skip('devtools message', () => {
 	it('should parse simple mount', () => {
 		let arr = [1, 1, 5, 4, 65, 112, 112, 51, 2, 0, 1, 1, 10, 1, 1, 1, 2, 4, 1, 0, 1, 0];
 		expect(parseMessage(Uint32Array.from(arr))).to.deep.equal({

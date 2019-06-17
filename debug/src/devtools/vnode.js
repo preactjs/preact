@@ -1,6 +1,7 @@
 import { Fragment } from 'preact';
-import { ElementTypeClass, ElementTypeFunction, ElementTypeOtherOrUnknown, ElementTypeHostComponent } from './constants';
+import { ElementTypeClass, ElementTypeFunction, ElementTypeHostComponent } from './constants';
 import { getVNodeId } from './cache';
+import { shouldFilter } from './filter';
 
 /**
  * Get human readable name of the component/dom element
@@ -32,13 +33,14 @@ export function getVNodeType(vnode) {
 
 /**
  * Get the ancestor component that rendered the current vnode
+ * @param {import('../internal').AdapterState} state
  * @param {import('../internal').VNode} vnode
  * @returns {import('../internal').VNode | null}
  */
-export function getAncestorComponent(vnode) {
+export function getAncestorComponent(state, vnode) {
 	let next = vnode;
 	while (next = next._parent) {
-		if (typeof next.type=='function') {
+		if (!shouldFilter(state.filter, next)) {
 			return next;
 		}
 	}
@@ -65,4 +67,13 @@ export function getOwners(vnode) {
 	}
 
 	return owners;
+}
+
+/**
+ * Get the ancestor component that rendered the current vnode
+ * @param {import('../internal').VNode} vnode
+ * @returns {boolean}
+ */
+export function isRoot(vnode) {
+	return vnode.type===Fragment && vnode._parent==null;
 }
