@@ -5,12 +5,10 @@ import { createElement as h, render, Component, Suspense, lazy, Fragment } from 
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 // TODO:
-// Add tests for
-// * Fix TODO about improperly unmounting fallback and updating _dom pointers
 // * Specify sibling to what (Suspense) in existing tests
-// * maintaining state of sibling to suspender and suspense
-// * updating state of sibling to suspender and suspense
-// * Have different initial component and resolved component
+// * Add test for maintaining state of sibling to suspender and suspense
+// * Add test for updating state of sibling to suspender and suspense
+// * Have different initial component and resolved component in all tests
 
 /**
  * @typedef {import('../../../src').ComponentType} ComponentType
@@ -372,28 +370,21 @@ describe('suspense', () => {
 		);
 		render(
 			<Fragment>
-				{/*
-					TODO: Update Suspense to use this.state to manage it's children so that it can
-					take advantage of the _dom pointer tracking that happens in `forceUpdate` to
-					unmount fallback and properly mount the new content
-			 	*/}
-				<div>
-					{suspense}
-				</div>
+				{suspense}
 				<Stateful />
 			</Fragment>,
 			scratch
 		);
 
 		expect(scratch.innerHTML).to.eql(
-			`<div><div>Suspense</div></div><div>Stateful: initial</div>`
+			`<div>Suspense</div><div>Stateful: initial</div>`
 		);
 
 		setState({ s: 'first' });
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(
-			`<div><div>Suspense</div></div><div>Stateful: first</div>`
+			`<div>Suspense</div><div>Stateful: first</div>`
 		);
 
 		const [resolve] = suspend();
@@ -401,20 +392,20 @@ describe('suspense', () => {
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(
-			`<div><div>Suspended...</div></div><div>Stateful: first</div>`
+			`<div>Suspended...</div><div>Stateful: first</div>`
 		);
 
 		setState({ s: 'second' });
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(
-			`<div><div>Suspended...</div></div><div>Stateful: second</div>`
+			`<div>Suspended...</div><div>Stateful: second</div>`
 		);
 
 		return resolve(() => <div>Suspense</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
-				`<div><div>Suspense</div></div><div>Stateful: second</div>`
+				`<div>Suspense</div><div>Stateful: second</div>`
 			);
 		});
 	});
@@ -511,7 +502,6 @@ describe('suspense', () => {
 				<Catcher>
 					<Suspender1 />
 					<div>
-						{/* TODO: Try to update such that this div is not needed */}
 						<Suspender2 />
 					</div>
 				</Catcher>

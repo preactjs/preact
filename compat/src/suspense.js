@@ -71,6 +71,8 @@ Suspense.prototype._childDidSuspend = function(promise) {
 
 		if (c._suspensions.length == 0) {
 			unmount(c.props.fallback);
+			c._vnode._dom = null;
+
 			c._vnode._children = c.state._parkedChildren;
 			c.setState({ _parkedChildren: null });
 		}
