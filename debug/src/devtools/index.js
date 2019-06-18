@@ -90,7 +90,7 @@ export function initDevTools() {
 			findNativeNodesForFiberID(id) {
 				let vnode = getVNode(id);
 				// TODO: Check for siblings here?
-				return vnode!=null ? [vnode._dom] : null;
+				return vnode!=null ? [vnode._dom].filter(Boolean) : null;
 			},
 			startProfiling() {
 				options._profiling = true;
