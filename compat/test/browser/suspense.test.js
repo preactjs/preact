@@ -6,7 +6,6 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 // TODO:
 // Add tests for
-// * Remove dependency on suspense._component._suspensions
 // * Fix TODO about improperly unmounting fallback and updating _dom pointers
 // * Specify sibling to what (Suspense) in existing tests
 // * maintaining state of sibling to suspender and suspense
@@ -15,7 +14,7 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 /**
  * @typedef {import('../../../src').ComponentType} ComponentType
- * @typedef {[(c: ComponentType) => void, (error: Error) => void]} Resolvers
+ * @typedef {[(c: ComponentType) => Promise<void>, (error: Error) => Promise<void>]} Resolvers
  * @param {ComponentType} DefaultComponent
  * @returns {[typeof Component, () => Resolvers]}
  */
@@ -47,11 +46,18 @@ function createSuspender(DefaultComponent) {
 	 */
 	function suspend() {
 
-		/** @type {(c: ComponentType) => void} */
-		let resolver, rejecter;
-		const Lazy = lazy(() => new Promise((resolve, reject) => {
-			resolver = c => resolve({ default: c });
-			rejecter = reject;
+		/** @type {(c: ComponentType) => Promise<void>} */
+		let resolver, rejecter, promise;
+		const Lazy = lazy(() => promise = new Promise((resolve, reject) => {
+			resolver = c => {
+				resolve({ default: c });
+				return promise;
+			};
+
+			rejecter = () => {
+				reject();
+				return promise;
+			};
 		}));
 
 		renderLazy(Lazy);
@@ -122,14 +128,12 @@ describe('suspense', () => {
 			`<div>Suspended...</div>`
 		);
 
-		return resolve()
-			.then(() => Promise.all(suspense._component._suspensions))
-			.then(() => {
-				rerender();
-				expect(scratch.innerHTML).to.eql(
-					`<div>Hello from LazyComp</div>`
-				);
-			});
+		return resolve().then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div>Hello from LazyComp</div>`
+			);
+		});
 	});
 
 	it('should suspend when a promise is thrown', () => {
@@ -174,9 +178,7 @@ describe('suspense', () => {
 			`<div>Suspended...</div>`
 		);
 
-		resolve(() => <div>Hello2</div>);
-
-		return Promise.resolve().then(() => {
+		return resolve(() => <div>Hello2</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
 				`<div id="class-wrapper"><div id="func-wrapper"><div>Hello2</div></div></div>`
@@ -227,18 +229,16 @@ describe('suspense', () => {
 		expect(componentDidMount).to.have.been.calledOnce;
 		expect(componentWillUnmount).to.not.have.been.called;
 
-		resolve(() => <div>Suspense</div>);
-		return Promise.all(suspense._component._suspensions)
-			.then(() => {
-				rerender();
-				expect(scratch.innerHTML).to.eql(
-					`<div>Suspense</div><div>Lifecycle</div>`
-				);
+		return resolve(() => <div>Suspense</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div>Suspense</div><div>Lifecycle</div>`
+			);
 
-				expect(componentWillMount).to.have.been.calledOnce;
-				expect(componentDidMount).to.have.been.calledOnce;
-				expect(componentWillUnmount).to.not.have.been.called;
-			});
+			expect(componentWillMount).to.have.been.calledOnce;
+			expect(componentDidMount).to.have.been.calledOnce;
+			expect(componentWillUnmount).to.not.have.been.called;
+		});
 	});
 
 	it('should call fallback\'s lifecycle methods when suspending', () => {
@@ -283,18 +283,16 @@ describe('suspense', () => {
 		expect(componentDidMount).to.have.been.calledOnce;
 		expect(componentWillUnmount).to.not.have.been.called;
 
-		resolve(() => <div>Suspense</div>);
-		return Promise.all(suspense._component._suspensions)
-			.then(() => {
-				rerender();
-				expect(scratch.innerHTML).to.eql(
-					`<div>Suspense</div>`
-				);
+		return resolve(() => <div>Suspense</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div>Suspense</div>`
+			);
 
-				expect(componentWillMount).to.have.been.calledOnce;
-				expect(componentDidMount).to.have.been.calledOnce;
-				expect(componentWillUnmount).to.have.been.calledOnce;
-			});
+			expect(componentWillMount).to.have.been.calledOnce;
+			expect(componentDidMount).to.have.been.calledOnce;
+			expect(componentWillUnmount).to.have.been.calledOnce;
+		});
 	});
 
 	it('should keep state of children when suspending', () => {
@@ -342,14 +340,12 @@ describe('suspense', () => {
 			`<div>Suspended...</div>`
 		);
 
-		resolve(() => <div>Suspense</div>);
-		return Promise.all(suspense._component._suspensions)
-			.then(() => {
-				rerender();
-				expect(scratch.innerHTML).to.eql(
-					`<div>Suspense</div><div>Stateful: first</div>`
-				);
-			});
+		return resolve(() => <div>Suspense</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div>Suspense</div><div>Stateful: first</div>`
+			);
+		});
 	});
 
 	it('should allow siblings to update state while suspending', () => {
@@ -415,14 +411,12 @@ describe('suspense', () => {
 			`<div><div>Suspended...</div></div><div>Stateful: second</div>`
 		);
 
-		resolve(() => <div>Suspense</div>);
-		return Promise.all(suspense._component._suspensions)
-			.then(() => {
-				rerender();
-				expect(scratch.innerHTML).to.eql(
-					`<div><div>Suspense</div></div><div>Stateful: second</div>`
-				);
-			});
+		return resolve(() => <div>Suspense</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div><div>Suspense</div></div><div>Stateful: second</div>`
+			);
+		});
 	});
 
 	it('should suspend with custom error boundary', () => {
@@ -449,14 +443,12 @@ describe('suspense', () => {
 			`<div>Suspended...</div>`
 		);
 
-		resolve(() => <div>within error boundary</div>);
-		return Promise.all(suspense._component._suspensions)
-			.then(() => {
-				rerender();
-				expect(scratch.innerHTML).to.eql(
-					`<div>within error boundary</div>`
-				);
-			});
+		return resolve(() => <div>within error boundary</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div>within error boundary</div>`
+			);
+		});
 	});
 
 	it('should allow multiple children to suspend', () => {
@@ -491,8 +483,7 @@ describe('suspense', () => {
 		expect(Suspender1.prototype.render).to.have.been.calledTwice;
 		expect(Suspender2.prototype.render).to.have.been.calledTwice;
 
-		resolve1(() => <div>Hello first</div>);
-		return Promise.resolve().then(() => {
+		return resolve1(() => <div>Hello first</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
 				`<div>Suspended...</div>`
@@ -500,8 +491,7 @@ describe('suspense', () => {
 			expect(Suspender1.prototype.render).to.have.been.calledTwice;
 			expect(Suspender2.prototype.render).to.have.been.calledTwice;
 
-			resolve2(() => <div>Hello second</div>);
-			return Promise.all(suspense._component._suspensions).then(() => {
+			return resolve2(() => <div>Hello second</div>).then(() => {
 				rerender();
 				expect(scratch.innerHTML).to.eql(
 					`<div>Hello first</div><div>Hello second</div>`
@@ -547,10 +537,8 @@ describe('suspense', () => {
 		);
 		expect(Suspender1.prototype.render).to.have.been.calledTwice;
 		expect(Suspender2.prototype.render).to.have.been.calledTwice;
-		expect(suspense._component._suspensions.length).to.eql(2);
 
-		resolve1(() => <div>Hello first</div>);
-		return Promise.resolve().then(() => {
+		return resolve1(() => <div>Hello first</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
 				`<div>Suspended...</div>`
@@ -558,8 +546,7 @@ describe('suspense', () => {
 			expect(Suspender1.prototype.render).to.have.been.calledTwice;
 			expect(Suspender2.prototype.render).to.have.been.calledTwice;
 
-			resolve2(() => <div>Hello second</div>);
-			return Promise.all(suspense._component._suspensions).then(() => {
+			return resolve2(() => <div>Hello second</div>).then(() => {
 				rerender();
 				expect(scratch.innerHTML).to.eql(
 					`<div>Hello first</div><div><div>Hello second</div></div>`
@@ -593,14 +580,12 @@ describe('suspense', () => {
 			`<div>Suspended...</div>`
 		);
 
-		resolve(() => <div>Hello</div>);
-		return Promise.all(suspense._component._suspensions)
-			.then(() => {
-				rerender();
-				expect(scratch.innerHTML).to.eql(
-					`Text<div>Hello</div>`
-				);
-			});
+		return resolve(() => <div>Hello</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`Text<div>Hello</div>`
+			);
+		});
 	});
 
 	it('should support to change DOM tag directly under suspense', () => {
@@ -645,14 +630,12 @@ describe('suspense', () => {
 
 		setState({ tag: 'article' });
 
-		resolve(() => <div>Hello</div>);
-		return Promise.all(suspense._component._suspensions)
-			.then(() => {
-				rerender();
-				expect(scratch.innerHTML).to.eql(
-					`<article>Stateful</article><div>Hello</div>`
-				);
-			});
+		return resolve(() => <div>Hello</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<article>Stateful</article><div>Hello</div>`
+			);
+		});
 	});
 
 	it('should only suspend the most inner Suspend', () => {
@@ -684,14 +667,12 @@ describe('suspense', () => {
 			`Not suspended...<div>Suspended... 2</div>`
 		);
 
-		resolve(() => <div>Hello</div>);
-		return Promise.all(suspense._component._suspensions)
-			.then(() => {
-				rerender();
-				expect(scratch.innerHTML).to.eql(
-					`Not suspended...<div>Hello</div>`
-				);
-			});
+		return resolve(() => <div>Hello</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`Not suspended...<div>Hello</div>`
+			);
+		});
 	});
 
 	it('should throw when missing Suspense', () => {
@@ -717,11 +698,14 @@ describe('suspense', () => {
 
 	it('should throw when lazy\'s loader throws', () => {
 
-		/** @type {() => void} */
+		/** @type {() => Promise<any>} */
 		let reject;
 		const ThrowingLazy = lazy(() => {
 			const prom = new Promise((res, rej) => {
-				reject = () => rej(new Error('Thrown in lazy\'s loader...'));
+				reject = () => {
+					rej(new Error('Thrown in lazy\'s loader...'));
+					return prom;
+				};
 			});
 
 			return prom;
@@ -741,8 +725,7 @@ describe('suspense', () => {
 			`<div>Suspended...</div>`
 		);
 
-		reject();
-		return Promise.all(suspense._component._suspensions).then(
+		return reject().then(
 			() => { expect.fail('Suspended promises resolved instead of rejected.'); },
 			() => {
 				rerender();
