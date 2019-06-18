@@ -58,44 +58,6 @@ function createSuspender(DefaultComponent) {
 	return [Suspender, suspend];
 }
 
-class Suspendable extends Component {
-	constructor(props) {
-		super(props);
-		this.spies = {};
-		['render'].forEach((method) => {
-			this.spies[method] = sinon.spy(this, method);
-		});
-	}
-	suspend(update) {
-		this.promise = new Promise((res, rej) => {
-			this.resolve = () => {
-				const promise = this.promise;
-				this.promise = null;
-				res();
-				return promise;
-			};
-			this.reject = (err) => {
-				const promise = this.promise;
-				this.promise = null;
-				rej(err);
-				return promise;
-			};
-		});
-
-		if (update === true || update === undefined) {
-			this.forceUpdate();
-		}
-	}
-
-	render(props) {
-		if (this.promise) {
-			throw this.promise;
-		}
-
-		return props.render(props);
-	}
-}
-
 class Catcher extends Component {
 	constructor(props) {
 		super(props);
@@ -114,24 +76,6 @@ class Catcher extends Component {
 	render(props, state) {
 		return state.error ? <div>Catcher did catch: {state.error.message}</div> : props.children;
 	}
-}
-
-class ClassWrapper extends Component {
-	render(props) {
-		return (
-			<div id="class-wrapper">
-				{props.children}
-			</div>
-		);
-	}
-}
-
-function FuncWrapper(props) {
-	return (
-		<div id="func-wrapper">
-			{props.children}
-		</div>
-	);
 }
 
 describe('suspense', () => {
@@ -186,6 +130,22 @@ describe('suspense', () => {
 	});
 
 	it('should suspend when a promise is throw', () => {
+		class ClassWrapper extends Component {
+			render(props) {
+				return (
+					<div id="class-wrapper">
+						{props.children}
+					</div>
+				);
+			}
+		}
+
+		const FuncWrapper = props => (
+			<div id="func-wrapper">
+				{props.children}
+			</div>
+		);
+
 		const [Suspender, suspend] = createSuspender(() => <div>Hello</div>);
 
 		const suspense = (
@@ -504,51 +464,6 @@ describe('suspense', () => {
 					rerender();
 					expect(scratch.innerHTML).to.eql(
 						`<div>within error boundary</div>`
-					);
-				});
-		});
-	});
-
-	it.skip('should support throwing suspense', () => {
-		// TODO: What is the behavior this test is verifying? Update title to reflect it
-		// It seems a thrown promise that is rejected and not handled in user code just
-		// causes an infinite loop. In other words, by default, all react does on thrown
-		// promises is trigger a re-render. It is up to the component that threw the promise
-		// (.e.g. lazy or react-cache) to properly handle the rejection. Since user-thrown
-		// Promises aren't a supported scenario in React, I don't think we should support them
-		// either
-		const s = <Suspendable render={() => <div>Hello</div>} />;
-
-		const suspense = (
-			<Suspense fallback={<div>Suspended...</div>}>
-				<Catcher>
-					{s}
-				</Catcher>
-			</Suspense>
-		);
-		render(suspense, scratch);
-		expect(scratch.innerHTML).to.eql(
-			`<div>Hello</div>`
-		);
-
-		s._component.suspend();
-		rerender();
-
-		return suspense._component.__test__suspensions_timeout_race.then(() => {
-			expect(scratch.innerHTML).to.eql(
-				`<div>Suspended...</div>`
-			);
-
-			return s._component.reject(new Error('Thrown suspension'))
-				.then(() => {
-					expect(true).to.eql(false);
-				}, () => {
-					rerender();
-				})
-				.then(() => Promise.all(suspense._component._suspensions))
-				.then(() => {
-					expect(scratch.innerHTML).to.eql(
-						`<div>Hello</div>`
 					);
 				});
 		});
