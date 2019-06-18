@@ -1,5 +1,3 @@
-import { parseMessage } from '../../src/devtools/message';
-
 /**
  * @returns {import('../../src/internal').DevtoolsMock}
  */
@@ -48,12 +46,12 @@ export function createMockDevtoolsHook() {
 	return { hook, connect, inspect, setState };
 }
 
-export function convertEmit(args) {
+export function parseEmit(args) {
 	if (args.length > 2) {
 		throw new Error('Invalid arguments passed to hook.emit()');
 	}
 	if (args[0]!='operations') {
 		throw new Error('Event type must be "operations"');
 	}
-	return parseMessage(args[1]);
+	return Array.from(args[1]);
 }
