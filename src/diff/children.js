@@ -180,8 +180,6 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
  * @returns {import('../internal').VNode[]}
  */
 export function toChildArray(children, callback, flattened) {
-	// TODO: Consider maintaining index here
-	// TODO: Consider not relying on callback to return the VNode
 	if (flattened == null) flattened = [];
 
 	if (children==null || typeof children === 'boolean') {
