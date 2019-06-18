@@ -312,7 +312,7 @@ export function inspectElement(lastInspected) {
 			owners: owners.length ? owners : null,
 			source: null // TODO
 		};
-	}
+	};
 }
 
 export function selectElement(id) {
