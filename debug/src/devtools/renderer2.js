@@ -6,7 +6,7 @@ import { inspectHooks } from './hooks';
 import { encode } from './util';
 import { getStringId, stringTable, allStrLengths, clearStringTable } from './string-table';
 import { shouldFilter } from './filter';
-import { isRoot } from './custom';
+import { isRoot, getInstance } from './custom';
 
 /**
  * Called when a tree has completed rendering
@@ -274,38 +274,70 @@ export function flushPendingEvents(hook, state) {
 
 /**
  * Provide detailed information about the current vnode
- * @param {number} id
- * @returns {import('../internal').InspectData}
+ * @param {number} lastInspected
+ * @returns {(id: number) => number | import('../internal').InspectData}
  */
-export function inspectElement(id) {
-	// FIXME: Find out why this function is called in a loop and what we can do
-	// to prevent that.
+export function inspectElement(lastInspected) {
+	return id => {
+		// Nothing has changed, so we bail out because `inspectElement` is
+		// called in a loop :S
+		if (id===lastInspected) return id;
+		// FIXME: Find out why this function is called in a loop and what we can do
+		// to prevent that.
+		let vnode = getVNode(id);
+		if (vnode==null) {
+			throw new Error('Trying to inspect a vnode that was already unmounted. Please report this bug at: https://github.com/developit/preact/issues/new');
+		}
+		let hasHooks = vnode._component!=null && vnode._component.__hooks!=null;
+		let owners = getOwners(vnode);
+
+		return {
+			id,
+			canEditHooks: hasHooks,
+			canEditFunctionProps: true, // TODO
+			canToggleSuspense: false, // TODO
+			canViewSource: false, // TODO
+			displayName: getDisplayName(vnode),
+			type: getVNodeType(vnode),
+			// context: vnode._component ? cleanForBridge(vnode._component.context) : null, // TODO
+			context: null, // TODO
+			events: null,
+			hooks: hasHooks ? cleanForBridge(inspectHooks(vnode)) : null,
+			props: vnode.props!=null && Object.keys(vnode.props).length > 0
+				? cleanForBridge(vnode.props)
+				: null,
+			state: hasHooks || vnode._component==null || !Object.keys(vnode._component.state).length
+				? null
+				: cleanForBridge(vnode._component.state),
+			owners: owners.length ? owners : null,
+			source: null // TODO
+		};
+	}
+}
+
+export function selectElement(id) {
 	let vnode = getVNode(id);
 	if (vnode==null) {
-		throw new Error('Trying to inspect a vnode that was already unmounted. Please report this bug at: https://github.com/developit/preact/issues/new');
+		console.warn(`vnode with id ${id} not found`);
+		return;
 	}
-	let hasHooks = vnode._component!=null && vnode._component.__hooks!=null;
-	let owners = getOwners(vnode);
 
-	return {
-		id,
-		canEditHooks: hasHooks,
-		canEditFunctionProps: true, // TODO
-		canToggleSuspense: false, // TODO
-		canViewSource: false, // TODO
-		displayName: getDisplayName(vnode),
-		type: getVNodeType(vnode),
-		// context: vnode._component ? cleanForBridge(vnode._component.context) : null, // TODO
-		context: null, // TODO
-		events: null,
-		hooks: hasHooks ? cleanForBridge(inspectHooks(vnode)) : null,
-		props: vnode.props!=null && Object.keys(vnode.props).length > 0
-			? cleanForBridge(vnode.props)
-			: null,
-		state: hasHooks || vnode._component==null || !Object.keys(vnode._component.state).length
-			? null
-			: cleanForBridge(vnode._component.state),
-		owners: owners.length ? owners : null,
-		source: null // TODO
-	};
+	if (typeof vnode.type=='function') {
+		if (vnode.type.prototype && vnode.type.prototype.render) {
+
+			/** @type {import('../internal').DevtoolsWindow} */
+			(window).$r = getInstance(vnode);
+			return;
+		}
+
+		/** @type {import('../internal').DevtoolsWindow} */
+		(window).$r = {
+			type: vnode.type,
+			props: vnode.props
+		};
+		return;
+	}
+
+	/** @type {import('../internal').DevtoolsWindow} */
+	(window).$r = null;
 }
