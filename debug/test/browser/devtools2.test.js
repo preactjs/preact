@@ -342,7 +342,7 @@ describe('devtools', () => {
 		]);
 	});
 
-	it.skip('should work with router', () => {
+	it('should update in place children', () => {
 		mock.connect();
 
 		function Foo() {
@@ -363,7 +363,7 @@ describe('devtools', () => {
 		}
 
 		let update;
-		function App2() {
+		function App() {
 			let [v, setValue] = useState(true);
 			update = () => setValue(!v);
 
@@ -375,93 +375,78 @@ describe('devtools', () => {
 			);
 		}
 
-		render(<App2 />, scratch);
+		render(<App />, scratch);
 		update();
 		rerender();
 
 		// let mount = [1, 1, 28, 4, 65, 112, 112, 50, 4, 76, 105, 110, 107, 6, 82, 111, 117, 116, 101, 114, 3, 70, 111, 111, 2, 46, 48, 3, 66, 111, 98, 2, 0, 1, 1, 10, 1, 1, 1, 2, 4, 1, 0, 1, 0, 1, 3, 4, 2, 2, 2, 0, 1, 4, 4, 2, 2, 2, 0, 1, 5, 1, 2, 2, 3, 0, 1, 6, 4, 5, 2, 4, 5, 1, 7, 4, 6, 6, 6, 0];
 		// let update = [1, 1, 11, 3, 66, 97, 114, 2, 46, 49, 3, 66, 111, 98, 2, 2, 7, 6, 1, 8, 4, 5, 2, 1, 2, 1, 9, 4, 8, 8, 3, 0];
-		expect(parseEmit(mock.hook.emit.args[0])).to.deep.equal({
-			rendererId: 1,
-			rootVNodeId: 1,
-			stringTable: {
-				length: 24,
-				items: ['App2', 'FakeRouter', 'Foo', 'Bob']
-			},
-			unmounts: [],
-			operations: [
-				{
-					type: 'ADD',
-					id: 1,
-					kind: 'Root',
-					supportsProfiling: true,
-					hasOwnerMetadata: false
-				},
-				{
-					type: 'ADD',
-					id: 2,
-					kind: 'FunctionalComponent',
-					parentId: 1,
-					owner: 0,
-					name: 'App2',
-					key: null
-				},
-				{
-					type: 'ADD',
-					id: 3,
-					kind: 'FunctionalComponent',
-					parentId: 2,
-					owner: 2,
-					name: 'FakeRouter',
-					key: null
-				},
-				{
-					type: 'ADD',
-					id: 4,
-					kind: 'FunctionalComponent',
-					parentId: 3,
-					owner: 3, // FIXME: should be 2
-					name: 'Foo',
-					key: null
-				},
-				{
-					type: 'ADD',
-					id: 5,
-					kind: 'FunctionalComponent',
-					parentId: 4,
-					owner: 4,
-					name: 'Bob',
-					key: null
-				}
-			]
-		});
+		expect(parseEmit(mock.hook.emit.args[1])).to.deep.equal([
+			1, // rendererId
+			1, // root vnode id
+			8, // string table length
+			3, // next string length
+			66, // B
+			97, // a
+			114, // r
+			3, // next string length
+			66, // B
+			111, // o
+			98, // b
+			2, // TREE_OPERATION_REMOVE -> Foo
+			2, //   number of vnodes to unmount
+			5, //   vnode id
+			4, //   vnode id
+			1, // TREE_OPERATION_ADD -> Bar
+			6, //   vnode id
+			5, //   ElementTypeFunction
+			3, //   parent id
+			3, //   owner id // TODO: The react devtools use vnode 2 as an owner?
+			1, //   displayName string id
+			0, //   key string id
+			1, // TREE_OPERATION_ADD -> Bob
+			7, //   vnode id
+			5, //   ElementTypeFunction
+			6, //   parent id
+			6, //   owner id
+			2, //   displayName string id
+			0  //   key string id
+		]);
 
-		expect(parseEmit(mock.hook.emit.args[1])).to.deep.equal({
-			rendererId: 1,
-			rootVNodeId: 1,
-			stringTable: { length: 8, items: ['Bar', 'Bob'] },
-			unmounts: [5, 4],
-			operations: [
-				{
-					type: 'ADD',
-					id: 6,
-					kind: 'FunctionalComponent',
-					parentId: 3,
-					owner: 3, // FIXME: Should be 2
-					name: 'Bar',
-					key: null
-				},
-				{
-					type: 'ADD',
-					id: 7,
-					kind: 'FunctionalComponent',
-					parentId: 6,
-					owner: 6,
-					name: 'Bob',
-					key: null
-				}
-			]
-		});
+		update();
+		rerender();
+
+		expect(parseEmit(mock.hook.emit.args[2])).to.deep.equal([
+			1, // rendererId
+			1, // root vnode id
+			8, // string table length
+			3, // next string length
+			70, // F
+			111, // o
+			111, // o
+			3, // next string length
+			66, // B
+			111, // o
+			98, // b
+			2, // TREE_OPERATION_REMOVE -> Bar
+			2, //   number of vnodes to unmount
+			7, //   vnode id
+			6, //   vnode id
+			1, // TREE_OPERATION_ADD -> Foo
+			8, //   vnode id
+			5, //   ElementTypeFunction
+			3, //   parent id
+			3, //   owner id // TODO: devtools wants owner 2?
+			1, //   displayName string id
+			0, //   key string id
+			1, // TREE_OPERATION_ADD -> Bob
+			9, //   vnode id
+			5, //   ElementTypeFunction
+			8, //   parent id
+			8, //   owner id
+			2, //   displayName string id
+			0  //   key string id
+		]);
 	});
 
 	it.skip('should mount + unmount components', () => {
