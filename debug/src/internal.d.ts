@@ -189,6 +189,10 @@ export interface DevtoolsWindow extends Window {
 	 * Default filtering settings.
 	 */
 	__REACT_DEVTOOLS_COMPONENT_FILTERS__?: Filter[];
+	/**
+	 * Currently selected vnode
+	 */
+	$r: any
 }
 
 export interface AdapterState {
@@ -199,6 +203,7 @@ export interface AdapterState {
 	pendingUnmountIds: number[];
 	pendingUnmountRootId: number | null;
 	isProfiling: boolean;
+	inspectedElementId: number;
 	filter: {
 		byType: Set<number>;
 		byName: Set<RegExp>;

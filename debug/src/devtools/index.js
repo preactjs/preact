@@ -1,5 +1,5 @@
 import { options, Component } from 'preact';
-import { onCommitFiberRoot, flushPendingEvents, inspectElement, onCommitFiberUnmount } from './renderer2';
+import { onCommitFiberRoot, flushPendingEvents, inspectElement, onCommitFiberUnmount, selectElement } from './renderer2';
 import { setInProps, setInState } from './update';
 import { assign } from '../../../src/util';
 import { getVNode } from './cache';
@@ -71,6 +71,7 @@ export function initDevTools() {
 			pendingUnmountIds: [],
 			pendingUnmountRootId: null,
 			rendererId: -1,
+			inspectedElementId: -1,
 			filter: {
 				// TODO: Lazily initialize for IE11?
 				byType: new Set(),
@@ -101,15 +102,13 @@ export function initDevTools() {
 				return {
 					rendererId: rid,
 					dataForRoots: []
-				}
+				};
 			},
-			selectElement(id) {
-				// TODO
-			},
+			selectElement,
 			cleanup() {
 				// noop
 			},
-			inspectElement,
+			inspectElement: inspectElement(state.inspectedElementId),
 			updateComponentFilters: applyFilters
 		};
 
