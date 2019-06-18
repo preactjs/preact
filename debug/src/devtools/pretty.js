@@ -52,7 +52,7 @@ export function prettify(data, cleaned, path, level = 0) {
 				};
 			}
 
-			return data.map((x, i) => prettify(x, cleaned, path.concat([i])), level + 1);
+			return data.map((x, i) => prettify(x, cleaned, path.concat([i]), level + 1));
 		case 'object': {
 			if (level > LEVEL_LIMIT) {
 				cleaned.push(path);
