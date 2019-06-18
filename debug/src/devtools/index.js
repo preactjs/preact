@@ -1,5 +1,5 @@
 import { options, Component } from 'preact';
-import { onCommitFiberRoot, flushPendingEvents, inspectElement, onCommitFiberUnmount, selectElement } from './renderer2';
+import { onCommitFiberRoot, flushPendingEvents, inspectElement, onCommitFiberUnmount, selectElement, logElementToConsole } from './renderer2';
 import { setInProps, setInState } from './update';
 import { assign } from '../../../src/util';
 import { getVNode } from './cache';
@@ -109,7 +109,8 @@ export function initDevTools() {
 				// noop
 			},
 			inspectElement: inspectElement(state.inspectedElementId),
-			updateComponentFilters: applyFilters
+			updateComponentFilters: applyFilters,
+			logElementToConsole
 		};
 
 		// Apply initial filters

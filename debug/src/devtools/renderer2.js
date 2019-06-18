@@ -341,3 +341,30 @@ export function selectElement(id) {
 	/** @type {import('../internal').DevtoolsWindow} */
 	(window).$r = null;
 }
+
+/**
+ * Print an element to console
+ * @param {number} id vnode id
+ */
+export function logElementToConsole(id) {
+	let vnode = getVNode(id);
+	if (vnode==null) {
+		console.warn(`Could not find vnode with id ${id}`);
+		return;
+	}
+
+	/* eslint-disable no-console */
+	console.groupCollapsed(
+		`LOG %c<${getDisplayName(vnode) || 'Component'} />`,
+		// CSS Variable is injected by the devtools extension
+		'color: var(--dom-tag-name-color); font-weight: normal'
+	);
+	console.log('props:', vnode.props);
+	if (vnode._component) {
+		console.log('state:', vnode._component.state);
+	}
+	console.log('vnode:', vnode);
+	console.log('devtools id:', getVNodeId(vnode));
+	console.groupEnd();
+	/* eslint-enable no-console */
+}

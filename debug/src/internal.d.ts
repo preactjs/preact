@@ -57,6 +57,8 @@ export interface RendererConfig {
 	getProfilingData(): ProfilingData;
 	/** Called when the filter preferences are updated */
 	updateComponentFilters(filters: Filter[]): void;
+	/** Called when the user clicks on the log button in the props panel */
+	logElementToConsole(id: number): void;
 }
 
 export interface ProfilingData {
