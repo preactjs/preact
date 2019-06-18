@@ -119,10 +119,10 @@ export function inspectHooks(vnode) {
 
 		/** @type {import('../internal').HookInspectData} */
 		let data = {
-			id: isNative ? native++ : null,
+			id: isNative ? native : null,
 			// Must be `undefined` if not set. `null` is a valid value.
 			value: editable
-				? vnode._component.__hooks._list[native]._value[0]
+				? vnode._component.__hooks._list[native++]._value[0]
 				: !isNative && debugValues.has(id)
 					? debugValues.get(id)
 					: undefined,
