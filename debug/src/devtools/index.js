@@ -233,4 +233,13 @@ export function initDevTools() {
 
 		return setState.call(this, update, callback);
 	};
+
+	// Teardown devtools options. Mainly used for testing
+	return () => {
+		options.unmount = prevBeforeUnmount;
+		options._commit = prevCommitRoot;
+		options.diffed = prevAfterDiff;
+		options._diff = prevBeforeDiff;
+		options.vnode = prevVNodeHook;
+	};
 }
