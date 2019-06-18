@@ -21,21 +21,21 @@ describe('devtools', () => {
 	/** @type {import('../../src/internal').DevtoolsMock} */
 	let mock;
 
+	let teardownDevtools;
+
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
 		mock = createMockDevtoolsHook();
 
-		/** @type {import('../../src/internal').DevtoolsWindow} */
-		(window).__REACT_DEVTOOLS_GLOBAL_HOOK__ = mock.hook;
-
-		initDevTools();
+		teardownDevtools = initDevTools();
 		clearState();
 		clearStringTable();
 	});
 
 	afterEach(() => {
 		teardown(scratch);
+		teardownDevtools();
 	});
 
 	it.skip('should not sent events before marked as connected', () => {

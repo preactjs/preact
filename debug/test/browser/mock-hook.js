@@ -23,6 +23,10 @@ export function createMockDevtoolsHook() {
 	};
 
 	function connect() {
+
+		/** @type {import('../../src/internal').DevtoolsWindow} */
+		(window).__REACT_DEVTOOLS_GLOBAL_HOOK__ = hook;
+
 		let attached = /** @type {*} */ (window).__REACT_DEVTOOLS_ATTACH__(hook, 1, renderers.get(1), window);
 		attached.flushInitialOperations();
 	}
