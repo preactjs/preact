@@ -455,8 +455,8 @@ describe('devtools', () => {
 		render(<div />, scratch);
 
 		expect(vnodeSpy, 'vnode').to.have.been.called;
-		expect(diffSpy, 'diff').to.have.been.calledOnce;
-		expect(diffedSpy, 'diffed').to.have.been.calledOnce;
+		expect(diffSpy, 'diff').to.have.been.calledTwice;
+		expect(diffedSpy, 'diffed').to.have.been.calledTwice;
 		expect(commitSpy, 'commit').to.have.been.calledOnce;
 
 		render(null, scratch);
@@ -592,6 +592,7 @@ describe('devtools', () => {
 			checkEventReferences(prev.concat(hook.log));
 
 			expect(serialize(hook.log)).to.deep.equal([
+				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -609,6 +610,7 @@ describe('devtools', () => {
 			expect(serialize(hook.log)).to.deep.equal([
 				{ type: 'unmount', component: '#text: Hello World' },
 				{ type: 'mount', component: 'span' },
+				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -722,6 +724,7 @@ describe('devtools', () => {
 			checkEventReferences(prev.concat(hook.log));
 
 			expect(serialize(hook.log)).to.deep.equal([
+				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -736,6 +739,7 @@ describe('devtools', () => {
 				{ type: 'unmount', component: 'span' },
 				{ type: 'unmount', component: '#text: Hello World' },
 				{ type: 'update', component: 'div' },
+				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
