@@ -354,7 +354,7 @@ export function logElementToConsole(id) {
 	}
 
 	/* eslint-disable no-console */
-	console.groupCollapsed(
+	console.group(
 		`LOG %c<${getDisplayName(vnode) || 'Component'} />`,
 		// CSS Variable is injected by the devtools extension
 		'color: var(--dom-tag-name-color); font-weight: normal'
