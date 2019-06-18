@@ -89,7 +89,8 @@ export function initDevTools() {
 			rendererPackageName: 'preact',
 			findNativeNodesForFiberID(id) {
 				let vnode = getVNode(id);
-				return vnode!=null ? vnode._dom : null;
+				// TODO: Check for siblings here?
+				return vnode!=null ? [vnode._dom] : null;
 			},
 			startProfiling() {
 				options._profiling = true;
