@@ -5,9 +5,6 @@ import { createElement as h, render, Component, Suspense, lazy, Fragment } from 
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 // TODO:
-// * Specify sibling to what (Suspense) in existing tests
-// * Add test for maintaining state of sibling to suspender and suspense
-// * Add test for updating state of sibling to suspender and suspense
 // * Have different initial component and resolved component in all tests
 
 /**
@@ -346,7 +343,67 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should allow siblings to update state while suspending', () => {
+	// TODO: Fix this test
+	it.skip('should allow children to update state while suspending', () => {
+
+		/** @type {(state: { s: string }) => void} */
+		let setState;
+		class Stateful extends Component {
+			constructor(props) {
+				super(props);
+				setState = this.setState.bind(this);
+				this.state = { s: 'initial' };
+			}
+			render(props, state) {
+				return <div>Stateful: {state.s}</div>;
+			}
+		}
+
+		const [Suspender, suspend] = createSuspender(() => <div>Suspense</div>);
+
+		const suspense = (
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Suspender />
+				<Stateful />
+			</Suspense>
+		);
+
+		render(suspense, scratch);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspense</div><div>Stateful: initial</div>`
+		);
+
+		setState({ s: 'first' });
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspense</div><div>Stateful: first</div>`
+		);
+
+		const [resolve] = suspend();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspended...</div>`
+		);
+
+		setState({ s: 'second' });
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspended...</div>`
+		);
+
+		return resolve(() => <div>Suspense</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div>Suspense</div><div>Stateful: second</div>`
+			);
+		});
+	});
+
+	it('should allow siblings of Suspense to update state while suspending', () => {
 
 		/** @type {(state: { s: string }) => void} */
 		let setState;
