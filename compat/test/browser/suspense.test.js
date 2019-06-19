@@ -107,13 +107,11 @@ describe('suspense', () => {
 			return p;
 		});
 
-		const suspense = (
+		render((
 			<Suspense fallback={<div>Suspended...</div>}>
 				<Lazy />
 			</Suspense>
-		);
-
-		render(suspense, scratch); // Render initial state
+		), scratch); // Render initial state
 		rerender(); // Re-render with fallback cuz lazy threw
 
 		expect(scratch.innerHTML).to.eql(
@@ -147,7 +145,7 @@ describe('suspense', () => {
 
 		const [Suspender, suspend] = createSuspender(() => <div>Hello</div>);
 
-		const suspense = (
+		render((
 			<Suspense fallback={<div>Suspended...</div>}>
 				<ClassWrapper>
 					<FuncWrapper>
@@ -155,9 +153,7 @@ describe('suspense', () => {
 					</FuncWrapper>
 				</ClassWrapper>
 			</Suspense>
-		);
-
-		render(suspense, scratch);
+		), scratch);
 
 		expect(scratch.innerHTML).to.eql(
 			`<div id="class-wrapper"><div id="func-wrapper"><div>Hello</div></div></div>`
@@ -194,14 +190,12 @@ describe('suspense', () => {
 
 		const [Suspender, suspend] = createSuspender(() => <div>Suspense</div>);
 
-		const suspense = (
+		render((
 			<Suspense fallback={<div>Suspended...</div>}>
 				<Suspender />
 				<LifecycleLogger />
 			</Suspense>
-		);
-
-		render(suspense, scratch);
+		), scratch);
 
 		expect(scratch.innerHTML).to.eql(
 			`<div>Suspense</div><div>Lifecycle</div>`
@@ -249,13 +243,11 @@ describe('suspense', () => {
 
 		const [Suspender, suspend] = createSuspender(() => <div>Suspense</div>);
 
-		const suspense = (
+		render((
 			<Suspense fallback={<LifecycleLogger />}>
 				<Suspender />
 			</Suspense>
-		);
-
-		render(suspense, scratch);
+		), scratch);
 
 		expect(scratch.innerHTML).to.eql(
 			`<div>Suspense</div>`
@@ -304,14 +296,12 @@ describe('suspense', () => {
 
 		const [Suspender, suspend] = createSuspender(() => <div>Suspense</div>);
 
-		const suspense = (
+		render((
 			<Suspense fallback={<div>Suspended...</div>}>
 				<Suspender />
 				<Stateful />
 			</Suspense>
-		);
-
-		render(suspense, scratch);
+		), scratch);
 
 		expect(scratch.innerHTML).to.eql(
 			`<div>Suspense</div><div>Stateful: initial</div>`
@@ -358,14 +348,12 @@ describe('suspense', () => {
 
 		const [Suspender, suspend] = createSuspender(() => <div>Suspense</div>);
 
-		const suspense = (
+		render((
 			<Suspense fallback={<div>Suspended...</div>}>
 				<Suspender />
 				<Stateful />
 			</Suspense>
-		);
-
-		render(suspense, scratch);
+		), scratch);
 
 		expect(scratch.innerHTML).to.eql(
 			`<div>Suspense</div><div>Stateful: initial</div>`
@@ -417,14 +405,11 @@ describe('suspense', () => {
 
 		const [Suspender, suspend] = createSuspender(() => <div>Suspense</div>);
 
-		const suspense = (
-			<Suspense fallback={<div>Suspended...</div>}>
-				<Suspender />
-			</Suspense>
-		);
 		render(
 			<Fragment>
-				{suspense}
+				<Suspense fallback={<div>Suspended...</div>}>
+					<Suspender />
+				</Suspense>
 				<Stateful />
 			</Fragment>,
 			scratch
@@ -467,15 +452,13 @@ describe('suspense', () => {
 	it('should suspend with custom error boundary', () => {
 		const [Suspender, suspend] = createSuspender(() => <div>within error boundary</div>);
 
-		const suspense = (
+		render((
 			<Suspense fallback={<div>Suspended...</div>}>
 				<Catcher>
 					<Suspender />
 				</Catcher>
 			</Suspense>
-		);
-
-		render(suspense, scratch);
+		), scratch);
 
 		expect(scratch.innerHTML).to.eql(
 			`<div>within error boundary</div>`
@@ -500,15 +483,15 @@ describe('suspense', () => {
 		const [Suspender1, suspend1] = createSuspender(() => <div>Hello first</div>);
 		const [Suspender2, suspend2] = createSuspender(() => <div>Hello second</div>);
 
-		const suspense = (
+		render((
 			<Suspense fallback={<div>Suspended...</div>}>
 				<Catcher>
 					<Suspender1 />
 					<Suspender2 />
 				</Catcher>
 			</Suspense>
-		);
-		render(suspense, scratch);
+		), scratch);
+
 		expect(scratch.innerHTML).to.eql(
 			`<div>Hello first</div><div>Hello second</div>`
 		);
@@ -551,7 +534,7 @@ describe('suspense', () => {
 		const [Suspender1, suspend1] = createSuspender(() => <div>Hello first</div>);
 		const [Suspender2, suspend2] = createSuspender(() => <div>Hello second</div>);
 
-		const suspense = (
+		render((
 			<Suspense fallback={<div>Suspended...</div>}>
 				<Catcher>
 					<Suspender1 />
@@ -560,8 +543,7 @@ describe('suspense', () => {
 					</div>
 				</Catcher>
 			</Suspense>
-		);
-		render(suspense, scratch);
+		), scratch);
 
 		expect(scratch.innerHTML).to.eql(
 			`<div>Hello first</div><div><div>Hello second</div></div>`
@@ -604,14 +586,13 @@ describe('suspense', () => {
 	it('should support text directly under Suspense', () => {
 		const [Suspender, suspend] = createSuspender(() => <div>Hello</div>);
 
-		const suspense = (
+		render((
 			<Suspense fallback={<div>Suspended...</div>}>
 				Text
 				{/* Adding a <div> here will make things work... */}
 				<Suspender />
 			</Suspense>
-		);
-		render(suspense, scratch);
+		), scratch);
 
 		expect(scratch.innerHTML).to.eql(
 			`Text<div>Hello</div>`
@@ -653,13 +634,12 @@ describe('suspense', () => {
 
 		const [Suspender, suspend] = createSuspender(() => <div>Hello</div>);
 
-		const suspense = (
+		render((
 			<Suspense fallback={<div>Suspended...</div>}>
 				<StatefulComp defaultTag="div" />
 				<Suspender />
 			</Suspense>
-		);
-		render(suspense, scratch);
+		), scratch);
 
 		expect(scratch.innerHTML).to.eql(
 			`<div>Stateful</div><div>Hello</div>`
@@ -685,17 +665,14 @@ describe('suspense', () => {
 	it('should only suspend the most inner Suspend', () => {
 		const [Suspender, suspend] = createSuspender(() => <div>Hello</div>);
 
-		const suspense = (
-			<Suspense fallback={<div>Suspended... 2</div>}>
-				<Catcher>
-					<Suspender />
-				</Catcher>
-			</Suspense>
-		);
 		render(
 			<Suspense fallback={<div>Suspended... 1</div>}>
 				Not suspended...
-				{suspense}
+				<Suspense fallback={<div>Suspended... 2</div>}>
+					<Catcher>
+						<Suspender />
+					</Catcher>
+				</Suspense>
 			</Suspense>,
 			scratch
 		);
@@ -755,14 +732,13 @@ describe('suspense', () => {
 			return prom;
 		});
 
-		const suspense = (
+		render((
 			<Suspense fallback={<div>Suspended...</div>}>
 				<Catcher>
 					<ThrowingLazy />
 				</Catcher>
 			</Suspense>
-		);
-		render(suspense, scratch);
+		), scratch);
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(
