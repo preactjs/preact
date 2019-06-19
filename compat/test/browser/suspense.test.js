@@ -4,9 +4,6 @@ import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component, Suspense, lazy, Fragment } from '../../src/index';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
-// TODO:
-// * Have different initial component and resolved component in all tests
-
 /**
  * @typedef {import('../../../src').ComponentType} ComponentType
  * @typedef {[(c: ComponentType) => Promise<void>, (error: Error) => Promise<void>]} Resolvers
@@ -224,10 +221,10 @@ describe('suspense', () => {
 		expect(componentDidMount).to.have.been.calledOnce;
 		expect(componentWillUnmount).to.not.have.been.called;
 
-		return resolve(() => <div>Suspense</div>).then(() => {
+		return resolve(() => <div>Suspense 2</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
-				`<div>Suspense</div><div>Lifecycle</div>`
+				`<div>Suspense 2</div><div>Lifecycle</div>`
 			);
 
 			expect(componentWillMount).to.have.been.calledOnce;
@@ -278,10 +275,10 @@ describe('suspense', () => {
 		expect(componentDidMount).to.have.been.calledOnce;
 		expect(componentWillUnmount).to.not.have.been.called;
 
-		return resolve(() => <div>Suspense</div>).then(() => {
+		return resolve(() => <div>Suspense 2</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
-				`<div>Suspense</div>`
+				`<div>Suspense 2</div>`
 			);
 
 			expect(componentWillMount).to.have.been.calledOnce;
@@ -335,10 +332,10 @@ describe('suspense', () => {
 			`<div>Suspended...</div>`
 		);
 
-		return resolve(() => <div>Suspense</div>).then(() => {
+		return resolve(() => <div>Suspense 2</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
-				`<div>Suspense</div><div>Stateful: first</div>`
+				`<div>Suspense 2</div><div>Stateful: first</div>`
 			);
 		});
 	});
@@ -395,10 +392,10 @@ describe('suspense', () => {
 			`<div>Suspended...</div>`
 		);
 
-		return resolve(() => <div>Suspense</div>).then(() => {
+		return resolve(() => <div>Suspense 2</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
-				`<div>Suspense</div><div>Stateful: second</div>`
+				`<div>Suspense 2</div><div>Stateful: second</div>`
 			);
 		});
 	});
@@ -459,10 +456,10 @@ describe('suspense', () => {
 			`<div>Suspended...</div><div>Stateful: second</div>`
 		);
 
-		return resolve(() => <div>Suspense</div>).then(() => {
+		return resolve(() => <div>Suspense 2</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
-				`<div>Suspense</div><div>Stateful: second</div>`
+				`<div>Suspense 2</div><div>Stateful: second</div>`
 			);
 		});
 	});
@@ -491,10 +488,10 @@ describe('suspense', () => {
 			`<div>Suspended...</div>`
 		);
 
-		return resolve(() => <div>within error boundary</div>).then(() => {
+		return resolve(() => <div>within error boundary 2</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
-				`<div>within error boundary</div>`
+				`<div>within error boundary 2</div>`
 			);
 		});
 	});
@@ -531,7 +528,7 @@ describe('suspense', () => {
 		expect(Suspender1.prototype.render).to.have.been.calledTwice;
 		expect(Suspender2.prototype.render).to.have.been.calledTwice;
 
-		return resolve1(() => <div>Hello first</div>).then(() => {
+		return resolve1(() => <div>Hello first 2</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
 				`<div>Suspended...</div>`
@@ -539,10 +536,10 @@ describe('suspense', () => {
 			expect(Suspender1.prototype.render).to.have.been.calledTwice;
 			expect(Suspender2.prototype.render).to.have.been.calledTwice;
 
-			return resolve2(() => <div>Hello second</div>).then(() => {
+			return resolve2(() => <div>Hello second 2</div>).then(() => {
 				rerender();
 				expect(scratch.innerHTML).to.eql(
-					`<div>Hello first</div><div>Hello second</div>`
+					`<div>Hello first 2</div><div>Hello second 2</div>`
 				);
 				expect(Suspender1.prototype.render).to.have.been.calledThrice;
 				expect(Suspender2.prototype.render).to.have.been.calledThrice;
@@ -585,7 +582,7 @@ describe('suspense', () => {
 		expect(Suspender1.prototype.render).to.have.been.calledTwice;
 		expect(Suspender2.prototype.render).to.have.been.calledTwice;
 
-		return resolve1(() => <div>Hello first</div>).then(() => {
+		return resolve1(() => <div>Hello first 2</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
 				`<div>Suspended...</div>`
@@ -593,10 +590,10 @@ describe('suspense', () => {
 			expect(Suspender1.prototype.render).to.have.been.calledTwice;
 			expect(Suspender2.prototype.render).to.have.been.calledTwice;
 
-			return resolve2(() => <div>Hello second</div>).then(() => {
+			return resolve2(() => <div>Hello second 2</div>).then(() => {
 				rerender();
 				expect(scratch.innerHTML).to.eql(
-					`<div>Hello first</div><div><div>Hello second</div></div>`
+					`<div>Hello first 2</div><div><div>Hello second 2</div></div>`
 				);
 				expect(Suspender1.prototype.render).to.have.been.calledThrice;
 				expect(Suspender2.prototype.render).to.have.been.calledThrice;
@@ -627,10 +624,10 @@ describe('suspense', () => {
 			`<div>Suspended...</div>`
 		);
 
-		return resolve(() => <div>Hello</div>).then(() => {
+		return resolve(() => <div>Hello 2</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
-				`Text<div>Hello</div>`
+				`Text<div>Hello 2</div>`
 			);
 		});
 	});
@@ -677,10 +674,10 @@ describe('suspense', () => {
 
 		setState({ tag: 'article' });
 
-		return resolve(() => <div>Hello</div>).then(() => {
+		return resolve(() => <div>Hello 2</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
-				`<article>Stateful</article><div>Hello</div>`
+				`<article>Stateful</article><div>Hello 2</div>`
 			);
 		});
 	});
@@ -714,10 +711,10 @@ describe('suspense', () => {
 			`Not suspended...<div>Suspended... 2</div>`
 		);
 
-		return resolve(() => <div>Hello</div>).then(() => {
+		return resolve(() => <div>Hello 2</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
-				`Not suspended...<div>Hello</div>`
+				`Not suspended...<div>Hello 2</div>`
 			);
 		});
 	});
