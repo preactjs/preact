@@ -80,6 +80,32 @@ describe('useState', () => {
 		expect(Comp).to.be.calledOnce;
 	});
 
+	it('does not rerender on same value', () => {
+		let lastState;
+		let doSetState;
+
+		const Comp = sinon.spy(() => {
+			const [state, setState] = useState(NaN);
+			lastState = state;
+			doSetState = setState;
+			return null;
+		});
+
+		render(<Comp />, scratch);
+		expect(lastState).to.be.NaN;
+		expect(Comp).to.be.calledOnce;
+
+		doSetState(NaN);
+		rerender();
+		expect(lastState).to.be.NaN;
+		expect(Comp).to.be.calledOnce;
+
+		doSetState(() => NaN);
+		rerender();
+		expect(lastState).to.be.NaN;
+		expect(Comp).to.be.calledOnce;
+	});
+
 	it('rerenders when setting the state', () => {
 		let lastState;
 		let doSetState;

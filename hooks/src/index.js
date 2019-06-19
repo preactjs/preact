@@ -9,6 +9,15 @@ let currentComponent;
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
+
+/**
+ * Object.is polyfill
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is
+ */
+function is(x, y) {
+	return (x === y && (x !== 0 || 1 / x === 1 / y)) || (x !== x && y !== y);
+}
+
 let oldBeforeRender = options._render;
 options._render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
@@ -84,7 +93,7 @@ export function useReducer(reducer, initialState, init) {
 
 			action => {
 				const nextValue = reducer(hookState._value[0], action);
-				if (hookState._value[0]!==nextValue) {
+				if (!is(hookState._value[0], nextValue)) {
 					hookState._value[0] = nextValue;
 					hookState._component.setState({});
 				}
