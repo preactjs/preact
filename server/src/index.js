@@ -1,6 +1,6 @@
 import { encodeEntities, indent, isLargeString, styleObjToCss, assign, getChildren } from './util';
 import { ENABLE_PRETTY } from '../env';
-import { options, Fragment } from 'preact';
+import { options, Fragment, createElement } from 'preact';
 
 const SHALLOW = { shallow: true };
 
@@ -39,6 +39,11 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 		return '';
 	}
 
+	// wrap array nodes in Fragment
+	if (Array.isArray(vnode)) {
+		vnode = createElement(Fragment, null, vnode);
+	}
+
 	let nodeName = vnode.type,
 		props = vnode.props,
 		isComponent = false;
@@ -71,7 +76,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 		}
 		else {
 			let rendered;
-			
+
 			let c = vnode.__c = { __v: vnode, context, props: vnode.props };
 			if (options.render) options.render(vnode);
 
@@ -98,7 +103,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				else if (c.componentWillMount) c.componentWillMount();
 				rendered = c.render(c.props, c.state, c.context);
 			}
-			
+
 			if (c.getChildContext) {
 				context = assign(assign({}, context), c.getChildContext());
 			}

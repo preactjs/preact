@@ -710,6 +710,23 @@ describe('render', () => {
 			expect(res).to.equal('<div>bar</div>');
 		});
 
+		it('should work with useContext + custom value with multiple children', () => {
+			let Ctx = createContext('foo');
+			function Foo() {
+				let v = useContext(Ctx);
+				return <div>{v}</div>;
+			}
+
+			let res = render(
+				<Ctx.Provider value="bar">
+					<Foo />
+					<Foo />
+				</Ctx.Provider>
+			);
+
+			expect(res).to.equal('<div>bar</div><div>bar</div>');
+		});
+
 		it('should work with useState', () => {
 			function Foo() {
 				let [v] = useState(0);
