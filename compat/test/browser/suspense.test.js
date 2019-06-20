@@ -1,4 +1,4 @@
-/*eslint-env browser, mocha */
+/* eslint-env browser, mocha */
 /** @jsx h */
 import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component, Suspense, lazy, Fragment } from '../../src/index';
@@ -11,10 +11,6 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
  * @returns {[typeof Component, () => Resolvers]}
  */
 function createSuspender(DefaultComponent) {
-	// Test public api
-	// Prefer not relying on internal VNode shape
-	// Prefer not refs so refs can change and break without affecting unrelated tests
-	// Prefer not using forceUpdate since it doesn't match what our user's will do/experience
 
 	/** @type {(lazy: h.JSX.Element) => void} */
 	let renderLazy;
