@@ -84,24 +84,25 @@ declare namespace preact {
 	// Type alias for a component instance considered generally, whether stateless or stateful.
 	type AnyComponent<P = {}, S = {}> = FunctionComponent<P> | Component<P, S>;
 
-	interface Component<P = {}, S = {}> {
+	interface Component<P = {}, S = {}, C = any> {
 		componentWillMount?(): void;
 		componentDidMount?(): void;
 		componentWillUnmount?(): void;
 		getChildContext?(): object;
-		componentWillReceiveProps?(nextProps: Readonly<P>, nextContext: any): void;
-		shouldComponentUpdate?(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): boolean;
-		componentWillUpdate?(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): void;
+		componentWillReceiveProps?(nextProps: Readonly<P>, nextContext: C): void;
+		shouldComponentUpdate?(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: C): boolean;
+		componentWillUpdate?(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: C): void;
 		getSnapshotBeforeUpdate?(oldProps: Readonly<P>, oldState: Readonly<S>): any;
 		componentDidUpdate?(previousProps: Readonly<P>, previousState: Readonly<S>, snapshot: any): void;
 		componentDidCatch?(error: any, errorInfo: any): void;
 	}
 
-	abstract class Component<P, S> {
-		constructor(props?: P, context?: any);
+	abstract class Component<P, S, C> {
+		constructor(props?: P, context?: C);
 
 		static displayName?: string;
 		static defaultProps?: any;
+		// Same as notice below
 		static contextType?: Context<any>;
 
 		// Static members cannot reference class type parameters. This is not
@@ -115,7 +116,7 @@ declare namespace preact {
 
 		state: Readonly<S>;
 		props: RenderableProps<P>;
-		context: any;
+		context: C;
 		base?: Element | Text;
 
 		// From https://github.com/DefinitelyTyped/DefinitelyTyped/blob/e836acc75a78cf0655b5dfdbe81d69fdd4d8a252/types/react/index.d.ts#L402
@@ -129,7 +130,7 @@ declare namespace preact {
 
 		forceUpdate(callback?: () => void): void;
 
-		abstract render(props?: RenderableProps<P>, state?: Readonly<S>, context?: any): ComponentChild;
+		abstract render(props?: RenderableProps<P>, state?: Readonly<S>, context?: C): ComponentChild;
 	}
 
 	//
