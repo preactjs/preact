@@ -24,7 +24,7 @@ describe('debug', () => {
 
 		clearOptions();
 		diffSpy = sinon.spy();
-		options.diff = diffSpy;
+		options._diff = diffSpy;
 
 		initDebug();
 	});
@@ -97,7 +97,22 @@ describe('debug', () => {
 		expect(vnode.props.__source).to.be.undefined;
 	});
 
-	it('should throw an error when using a hook outside a render', () => {
+	it('should add __self to the vnode in debug mode.', () => {
+		const vnode = h('div', {
+			__self: {}
+		});
+		expect(vnode.__self).to.deep.equal({});
+		expect(vnode.props.__self).to.be.undefined;
+	});
+
+	// TODO: Fix this test. It only passed before because App was the first component
+	// into render so currentComponent in hooks/index.js wasn't set yet. However,
+	// any children under App wouldn't have thrown the error if they did what App
+	// did because currentComponent would be set to App.
+	// In other words, hooks never clear currentComponent so once it is set, it won't
+	// be unset
+	it.skip('should throw an error when using a hook outside a render', () => {
+		const Foo = props => props.children;
 		class App extends Component {
 			componentWillMount() {
 				useState();
@@ -107,12 +122,23 @@ describe('debug', () => {
 				return <p>test</p>;
 			}
 		}
-		const fn = () => act(() => render(<App />, scratch));
+		const fn = () => act(() => render(<Foo><App /></Foo>, scratch));
 		expect(fn).to.throw(/Hook can only be invoked from render/);
 	});
 
-	it('should throw an error when invoked outside of a component', () => {
-		const fn = () => act(() => useState());
+	// TODO: Fix this test. It only passed before because render was never called.
+	// Once render is called, currentComponent is set and never unset so calls to
+	// hooks outside of components would still work.
+	it.skip('should throw an error when invoked outside of a component', () => {
+		function Foo(props) {
+			useEffect(() => {}); // Pretend to use a hook
+			return props.children;
+		}
+
+		const fn = () => act(() => {
+			render(<Foo>Hello!</Foo>, scratch);
+			useState();
+		});
 		expect(fn).to.throw(/Hook can only be invoked from render/);
 	});
 
@@ -163,21 +189,15 @@ describe('debug', () => {
 		expect(fn).to.throw(/createElement/);
 	});
 
-	it('Should throw errors when accessing certain attributes', () => {
-		let Foo = () => <div />;
-		const oldOptionsVnode = options.vnode;
-		options.vnode = (vnode) => {
-			oldOptionsVnode(vnode);
-			expect(() => vnode).to.not.throw();
-			expect(() => vnode.attributes).to.throw(/use vnode.props/);
-			expect(() => vnode.nodeName).to.throw(/use vnode.type/);
-			expect(() => vnode.children).to.throw(/use vnode.props.children/);
-			expect(() => vnode.attributes = {}).to.throw(/use vnode.props/);
-			expect(() => vnode.nodeName = 'test').to.throw(/use vnode.type/);
-			expect(() => vnode.children = [<div />]).to.throw(/use vnode.props.children/);
-		};
-		render(<Foo />, scratch);
-		options.vnode = oldOptionsVnode;
+	it('should throw errors when accessing certain attributes', () => {
+		const vnode = h('div', null);
+		expect(() => vnode).to.not.throw();
+		expect(() => vnode.attributes).to.throw(/use vnode.props/);
+		expect(() => vnode.nodeName).to.throw(/use vnode.type/);
+		expect(() => vnode.children).to.throw(/use vnode.props.children/);
+		expect(() => vnode.attributes = {}).to.throw(/use vnode.props/);
+		expect(() => vnode.nodeName = 'test').to.throw(/use vnode.type/);
+		expect(() => vnode.children = [<div />]).to.throw(/use vnode.props.children/);
 	});
 
 	it('should print an error when component is an array', () => {

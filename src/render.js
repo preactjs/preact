@@ -1,6 +1,5 @@
 import { EMPTY_OBJ, EMPTY_ARR } from './constants';
-import { commitRoot } from './diff/index';
-import { diffChildren } from './diff/children';
+import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
 
@@ -13,15 +12,15 @@ import options from './options';
  * existing DOM tree rooted at `replaceNode`
  */
 export function render(vnode, parentDom, replaceNode) {
-	if (options.root) options.root(vnode, parentDom);
+	if (options._root) options._root(vnode, parentDom);
 	let oldVNode = parentDom._children;
 	vnode = createElement(Fragment, null, [vnode]);
 
 	let mounts = [];
-	diffChildren(
+	diff(
 		parentDom,
 		replaceNode ? vnode : (parentDom._children = vnode),
-		oldVNode,
+		oldVNode || EMPTY_OBJ,
 		EMPTY_OBJ,
 		parentDom.ownerSVGElement !== undefined,
 		replaceNode
@@ -30,8 +29,8 @@ export function render(vnode, parentDom, replaceNode) {
 				? null
 				: EMPTY_ARR.slice.call(parentDom.childNodes),
 		mounts,
-		vnode,
-		replaceNode || EMPTY_OBJ
+		false,
+		replaceNode || EMPTY_OBJ,
 	);
 	commitRoot(mounts, vnode);
 }

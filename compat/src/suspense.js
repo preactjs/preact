@@ -1,11 +1,26 @@
-import { Component, createElement, unmount } from 'preact';
+import { Component, createElement, _unmount as unmount } from 'preact';
 import { removeNode } from '../../src/util';
 
-export function catchRender(error, component) {
+/**
+ * @param {any} error
+ * @param {import('./internal').VNode} newVNode
+ * @param {import('./internal').VNode} oldVNode
+ */
+export function catchRender(error, newVNode, oldVNode) {
 	// thrown Promises are meant to suspend...
 	if (error.then) {
-		for (; component; component = component._ancestorComponent) {
-			if (component._childDidSuspend) {
+
+		/** @type {import('./internal').Component} */
+		let component;
+		let vnode = newVNode;
+
+		for (; vnode; vnode = vnode._parent) {
+			if ((component = vnode._component) && component._childDidSuspend) {
+				if (oldVNode) {
+					newVNode._dom = oldVNode._dom;
+					newVNode._children = oldVNode._children;
+				}
+
 				component._childDidSuspend(error);
 				return true;
 			}
@@ -19,18 +34,18 @@ function removeDom(children) {
 	for (let i = 0; i < children.length; i++) {
 		let child = children[i];
 		if (child != null) {
-			if (child._children) {
-				removeDom(child._children);
-			}
-			if (child._dom) {
+			if (typeof child.type !== 'function' && child._dom) {
 				removeNode(child._dom);
+			}
+			else if (child._children) {
+				removeDom(child._children);
 			}
 		}
 	}
 }
 
 // having custom inheritance instead of a class here saves a lot of bytes
-export function Suspense(props) {
+export function Suspense() {
 	// we do not call super here to golf some bytes...
 	this._suspensions = [];
 }

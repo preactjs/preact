@@ -318,11 +318,17 @@ describe('render()', () => {
 		let div = scratch.childNodes[0];
 		expect(div.attributes.length).to.equal(2);
 
-		expect(div.attributes[0].name).equal('bar');
-		expect(div.attributes[0].value).equal('abc');
+		// Normalize attribute order because it's different in various browsers
+		let normalized = {};
+		for (let i = 0; i < div.attributes.length; i++) {
+			let attr = div.attributes[i];
+			normalized[attr.name] = attr.value;
+		}
 
-		expect(div.attributes[1].name).equal('foo');
-		expect(div.attributes[1].value).equal('[object Object]');
+		expect(normalized).to.deep.equal({
+			bar: 'abc',
+			foo: '[object Object]'
+		});
 	});
 
 	it('should apply class as String', () => {
@@ -396,9 +402,9 @@ describe('render()', () => {
 
 		it('should remove old styles', () => {
 			render(<div style={{ color: 'red' }} />, scratch);
-			render(<div style={{ background: 'blue' }} />, scratch);
-			expect(scratch.firstChild.style).to.have.property('color').that.equals('');
-			expect(scratch.firstChild.style).to.have.property('background').that.equals('blue');
+			render(<div style={{ backgroundColor: 'blue' }} />, scratch);
+			expect(scratch.firstChild.style.color).to.equal('');
+			expect(scratch.firstChild.style.backgroundColor).to.equal('blue');
 		});
 
 		// Skip test if the currently running browser doesn't support CSS Custom Properties
@@ -459,6 +465,17 @@ describe('render()', () => {
 
 			expect(proto.addEventListener).to.have.been.calledOnce
 				.and.to.have.been.calledWithExactly('click', sinon.match.func, false);
+		});
+
+		it('should only register truthy values as handlers', () => {
+			function fooHandler() {}
+			const falsyHandler = false;
+
+			render(<div onClick={falsyHandler} onOtherClick={fooHandler} />, scratch);
+
+			expect(scratch.childNodes[0]._listeners).to.deep.equal({
+				OtherClick: fooHandler
+			});
 		});
 
 		it('should support native event names', () => {
@@ -948,10 +965,10 @@ describe('render()', () => {
 
 	it('should not cause infinite loop with referentially equal props', () => {
 		let i = 0;
-		let prevDiff = options.diff;
-		options.diff = () => {
+		let prevDiff = options._diff;
+		options._diff = () => {
 			if (++i > 10) {
-				options.diff = prevDiff;
+				options._diff = prevDiff;
 				throw new Error('Infinite loop');
 			}
 		};
@@ -966,7 +983,7 @@ describe('render()', () => {
 
 		render(<App>10</App>, scratch);
 		expect(scratch.textContent).to.equal('10');
-		options.diff = prevDiff;
+		options._diff = prevDiff;
 	});
 
 	describe('replaceNode parameter', () => {
@@ -1017,6 +1034,8 @@ describe('render()', () => {
 			render(<div id="a">new</div>, newScratch, newScratch.querySelector('#a'));
 			expect(newScratch.innerHTML).to.equal('<div id="a">new</div>');
 			expect(unmount).to.be.calledOnce;
+
+			newScratch.parentNode.removeChild(newScratch);
 		});
 
 		it('should render multiple render roots in one parentDom', () => {

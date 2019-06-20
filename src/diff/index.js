@@ -16,25 +16,24 @@ import options from '../options';
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} mounts A list of newly
  * mounted components
- * @param {import('../internal').Component | null} ancestorComponent The direct
- * parent component
  * @param {Element | Text} oldDom The current attached DOM
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  */
-export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force, oldDom) {
-	let c, tmp, isNew, oldProps, oldState, snapshot,
-		newType = newVNode.type, clearProcessingException;
+export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, force, oldDom) {
+	let tmp, newType = newVNode.type;
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== undefined) return null;
 
-	if (tmp = options.diff) tmp(newVNode);
+	if (tmp = options._diff) tmp(newVNode);
 
 	try {
 		outer: if (typeof newType==='function') {
+			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
+			let newProps = newVNode.props;
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
@@ -50,17 +49,16 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			else {
 				// Instantiate the new component
 				if (newType.prototype && newType.prototype.render) {
-					newVNode._component = c = new newType(newVNode.props, cctx); // eslint-disable-line new-cap
+					newVNode._component = c = new newType(newProps, cctx); // eslint-disable-line new-cap
 				}
 				else {
-					newVNode._component = c = new Component(newVNode.props, cctx);
+					newVNode._component = c = new Component(newProps, cctx);
 					c.constructor = newType;
 					c.render = doRender;
 				}
-				c._ancestorComponent = ancestorComponent;
 				if (provider) provider.sub(c);
 
-				c.props = newVNode.props;
+				c.props = newProps;
 				if (!c.state) c.state = {};
 				c.context = cctx;
 				c._context = context;
@@ -73,7 +71,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				c._nextState = c.state;
 			}
 			if (newType.getDerivedStateFromProps!=null) {
-				assign(c._nextState==c.state ? (c._nextState = assign({}, c._nextState)) : c._nextState, newType.getDerivedStateFromProps(newVNode.props, c._nextState));
+				assign(c._nextState==c.state ? (c._nextState = assign({}, c._nextState)) : c._nextState, newType.getDerivedStateFromProps(newProps, c._nextState));
 			}
 
 			// Invoke pre-render lifecycle methods
@@ -83,22 +81,21 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 			else {
 				if (newType.getDerivedStateFromProps==null && force==null && c.componentWillReceiveProps!=null) {
-					c.componentWillReceiveProps(newVNode.props, cctx);
+					c.componentWillReceiveProps(newProps, cctx);
 				}
 
-				if (!force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newVNode.props, c._nextState, cctx)===false) {
-					c.props = newVNode.props;
+				if (!force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newProps, c._nextState, cctx)===false) {
+					c.props = newProps;
 					c.state = c._nextState;
 					c._dirty = false;
 					c._vnode = newVNode;
 					newVNode._dom = oldVNode._dom;
-					newVNode._lastDomChild = oldVNode._lastDomChild;
 					newVNode._children = oldVNode._children;
 					break outer;
 				}
 
 				if (c.componentWillUpdate!=null) {
-					c.componentWillUpdate(newVNode.props, c._nextState, cctx);
+					c.componentWillUpdate(newProps, c._nextState, cctx);
 				}
 			}
 
@@ -106,10 +103,10 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			oldState = c.state;
 
 			c.context = cctx;
-			c.props = newVNode.props;
+			c.props = newProps;
 			c.state = c._nextState;
 
-			if (tmp = options.render) tmp(newVNode);
+			if (tmp = options._render) tmp(newVNode);
 
 			c._dirty = false;
 
@@ -119,7 +116,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				toChildArray(isTopLevelFragment ? tmp.props.children : tmp, newVNode._children=[], coerceToVNode, true);
 			}
 			catch (e) {
-				if ((tmp = options.catchRender) && tmp(e, c)) return;
+				if ((tmp = options._catchRender) && tmp(e, newVNode, oldVNode)) break outer;
 				throw e;
 			}
 
@@ -131,8 +128,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			c._depth = ancestorComponent ? (ancestorComponent._depth || 0) + 1 : 0;
-			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, c, oldDom);
+			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, oldDom);
 
 			// Only change the fields on the component once they represent the new state of the DOM
 			c.base = newVNode._dom;
@@ -146,19 +142,19 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			if (!isNew && oldProps!=null && c.componentDidUpdate!=null) {
 				c.componentDidUpdate(oldProps, oldState, snapshot);
 			}
+
+			if (clearProcessingException) {
+				c._pendingError = c._processingException = null;
+			}
 		}
 		else {
-			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
-		}
-
-		if (clearProcessingException) {
-			c._pendingError = c._processingException = null;
+			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts);
 		}
 
 		if (tmp = options.diffed) tmp(newVNode);
 	}
 	catch (e) {
-		catchErrorInComponent(e, ancestorComponent);
+		catchErrorInComponent(e, newVNode._parent);
 	}
 
 	return newVNode._dom;
@@ -171,11 +167,11 @@ export function commitRoot(mounts, root) {
 			c.componentDidMount();
 		}
 		catch (e) {
-			catchErrorInComponent(e, c._ancestorComponent);
+			catchErrorInComponent(e, c._vnode._parent);
 		}
 	}
 
-	if (options.commit) options.commit(root);
+	if (options._commit) options._commit(root);
 }
 
 /**
@@ -189,11 +185,9 @@ export function commitRoot(mounts, root) {
  * @param {*} excessDomChildren
  * @param {Array<import('../internal').Component>} mounts An array of newly
  * mounted components
- * @param {import('../internal').Component} ancestorComponent The parent
- * component to the ones being diffed
  * @returns {import('../internal').PreactElement}
  */
-function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent) {
+function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts) {
 	let i;
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
@@ -226,29 +220,27 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 			dom.data = newProps;
 		}
 	}
-	else {
-		if (excessDomChildren!=null && dom.childNodes!=null) {
+	else if (newVNode!==oldVNode) {
+		if (excessDomChildren!=null) {
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
-		if (newVNode!==oldVNode) {
-			let oldProps = oldVNode.props || EMPTY_OBJ;
-			let newProps = newVNode.props;
 
-			let oldHtml = oldProps.dangerouslySetInnerHTML;
-			let newHtml = newProps.dangerouslySetInnerHTML;
-			if ((newHtml || oldHtml) && excessDomChildren==null) {
-				// Avoid re-applying the same '__html' if it did not changed between re-render
-				if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
-					dom.innerHTML = newHtml && newHtml.__html || '';
-				}
-			}
-			if (newProps.multiple) {
-				dom.multiple = newProps.multiple;
-			}
+		oldProps = oldVNode.props || EMPTY_OBJ;
 
-			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent, EMPTY_OBJ);
-			diffProps(dom, newProps, oldProps, isSvg);
+		let oldHtml = oldProps.dangerouslySetInnerHTML;
+		let newHtml = newProps.dangerouslySetInnerHTML;
+		if ((newHtml || oldHtml) && excessDomChildren==null) {
+			// Avoid re-applying the same '__html' if it did not changed between re-render
+			if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
+				dom.innerHTML = newHtml && newHtml.__html || '';
+			}
 		}
+		if (newProps.multiple) {
+			dom.multiple = newProps.multiple;
+		}
+
+		diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, EMPTY_OBJ);
+		diffProps(dom, newProps, oldProps, isSvg);
 	}
 
 	return dom;
@@ -258,36 +250,36 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
  * Invoke or update a ref, depending on whether it is a function or object ref.
  * @param {object|function} ref
  * @param {any} value
- * @param {import('../internal').Component} ancestorComponent
+ * @param {import('../internal').VNode} parentVNode
  */
-export function applyRef(ref, value, ancestorComponent) {
+export function applyRef(ref, value, parentVNode) {
 	try {
 		if (typeof ref=='function') ref(value);
 		else ref.current = value;
 	}
 	catch (e) {
-		catchErrorInComponent(e, ancestorComponent);
+		catchErrorInComponent(e, parentVNode);
 	}
 }
 
 /**
  * Unmount a virtual node from the tree and apply DOM changes
  * @param {import('../internal').VNode} vnode The virtual node to unmount
- * @param {import('../internal').Component} ancestorComponent The parent
- * component to this virtual node
+ * @param {import('../internal').VNode} parentVNode The parent of the VNode that
+ * initiated the unmount
  * @param {boolean} [skipRemove] Flag that indicates that a parent node of the
  * current element is already detached from the DOM.
  */
-export function unmount(vnode, ancestorComponent, skipRemove) {
+export function unmount(vnode, parentVNode, skipRemove) {
 	let r;
 	if (options.unmount) options.unmount(vnode);
 
 	if (r = vnode.ref) {
-		applyRef(r, null, ancestorComponent);
+		applyRef(r, null, parentVNode);
 	}
 
 	let dom;
-	if (!skipRemove && vnode._lastDomChild==null) {
+	if (!skipRemove && typeof vnode.type !== 'function') {
 		skipRemove = (dom = vnode._dom)!=null;
 	}
 
@@ -299,7 +291,7 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 				r.componentWillUnmount();
 			}
 			catch (e) {
-				catchErrorInComponent(e, ancestorComponent);
+				catchErrorInComponent(e, parentVNode);
 			}
 		}
 
@@ -308,7 +300,7 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 
 	if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {
-			if (r[i]) unmount(r[i], ancestorComponent, skipRemove);
+			if (r[i]) unmount(r[i], parentVNode, skipRemove);
 		}
 	}
 
@@ -323,14 +315,17 @@ function doRender(props, state, context) {
 /**
  * Find the closest error boundary to a thrown error and call it
  * @param {object} error The thrown value
- * @param {import('../internal').Component} component The first ancestor
- * component check for error boundary behaviors
+ * @param {import('../internal').VNode} vnode The first ancestor
+ * VNode check for error boundary behaviors
  */
-function catchErrorInComponent(error, component) {
-	if (options.catchError) { options.catchError(error, component); }
+function catchErrorInComponent(error, vnode) {
+	if (options._catchError) { options._catchError(error, vnode); }
 
-	for (; component; component = component._ancestorComponent) {
-		if (!component._processingException) {
+	/** @type {import('../internal').Component} */
+	let component;
+
+	for (; vnode; vnode = vnode._parent) {
+		if ((component = vnode._component) && !component._processingException) {
 			try {
 				if (component.constructor && component.constructor.getDerivedStateFromError!=null) {
 					component.setState(component.constructor.getDerivedStateFromError(error));
