@@ -232,9 +232,9 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 					dom.innerHTML = newHtml && newHtml.__html || '';
 				}
 			}
-
-			diffProps(dom, newProps, oldProps, isSvg);
 		}
+
+		diffProps(dom, newProps, oldProps, isSvg, excessDomChildren!=null);
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (!newHtml) {
