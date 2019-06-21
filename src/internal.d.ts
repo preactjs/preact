@@ -51,7 +51,7 @@ export interface PreactElement extends HTMLElement {
 export interface VNode<P = {}> extends preact.VNode<P> {
 	// Redefine type here using our internal ComponentFactory type
 	type: string | ComponentFactory<P> | null;
-	_children: Array<VNode> | null;
+	_children: Array<VNode<any>> | null;
 	_parent: VNode | null;
 	_depth: number | null;
 	/**
