@@ -109,6 +109,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			if (tmp = options._render) tmp(newVNode);
 
 			c._dirty = false;
+			c._vnode = newVNode;
+			c._parentDom = parentDom;
 
 			try {
 				tmp = c.render(c.props, c.state, c.context);
@@ -130,10 +132,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, oldDom);
 
-			// Only change the fields on the component once they represent the new state of the DOM
 			c.base = newVNode._dom;
-			c._vnode = newVNode;
-			c._parentDom = parentDom;
 
 			while (tmp=c._renderCallbacks.pop()) tmp.call(c);
 

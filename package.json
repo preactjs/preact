@@ -19,6 +19,7 @@
     "build:compat": "microbundle build --raw --cwd compat --globals 'preact/hooks=preactHooks'",
     "dev": "microbundle watch --raw --format cjs",
     "dev:hooks": "microbundle watch --raw --format cjs --cwd hooks",
+    "dev:compat": "microbundle watch --raw --format cjs --cwd compat --globals 'preact/hooks=preactHooks'",
     "test": "npm-run-all lint build --parallel test:mocha test:karma test:ts",
     "test:flow": "flow check",
     "test:ts": "tsc -p test/ts/ && mocha --require babel-register test/ts/**/*-test.js",
