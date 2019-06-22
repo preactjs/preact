@@ -78,7 +78,8 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 			let rendered;
 
 			let c = vnode.__c = { __v: vnode, context, props: vnode.props };
-			if (options.render) options.render(vnode);
+			// options.render
+			if (options.__r) options.__r(vnode);
 
 			if (!nodeName.prototype || typeof nodeName.prototype.render!=='function') {
 				// Necessary for createContext api. Setting this property will pass
