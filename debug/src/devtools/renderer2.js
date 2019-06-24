@@ -1,6 +1,6 @@
-import { getVNodeId, getVNode, clearVNode, hasVNodeId, getPreviousChildrenIds, addChildToParent } from './cache';
+import { getVNodeId, getVNode, clearVNode, hasVNodeId, getPreviousChildrenIds, addChildToParent, removeChildFromParent } from './cache';
 import { TREE_OPERATION_ADD, ElementTypeRoot, TREE_OPERATION_REMOVE, TREE_OPERATION_REORDER_CHILDREN } from './constants';
-import { getVNodeType, getDisplayName, getAncestorComponent, getOwners } from './vnode';
+import { getVNodeType, getDisplayName, getAncestor, getOwners } from './vnode';
 import { cleanForBridge } from './pretty';
 import { inspectHooks } from './hooks';
 import { encode } from './util';
@@ -37,13 +37,19 @@ export function onCommitFiberRoot(hook, state, vnode) {
 }
 
 /**
- * Called when a tree will be unmounted
+ * Called when a vonde unmounts
  * @param {import('../internal').DevtoolsHook} hook
  * @param {import('../internal').AdapterState} state
  * @param {import('../internal').VNode} vnode
  */
 export function onCommitFiberUnmount(hook, state, vnode) {
 	// Check if is root
+	if (!shouldFilter(state.filter, vnode)) {
+		let ancestor = getAncestor(state.filter, vnode);
+		if (ancestor && hasVNodeId(vnode) && hasVNodeId(ancestor)) {
+			removeChildFromParent(getVNodeId(ancestor), getVNodeId(vnode));
+		}
+	}
 	recordUnmount(state, vnode);
 }
 
@@ -70,7 +76,7 @@ export function update(state, vnode, parentId) {
 					shouldReset = true;
 				}
 
-				if (include && !shouldReset && prevChildren[i]!=getVNodeId(children[i])) {
+				if (include && !shouldReset && hasVNodeId(children[i]) && prevChildren[i]!=getVNodeId(children[i])) {
 					shouldReset = true;
 				}
 			}
@@ -80,7 +86,7 @@ export function update(state, vnode, parentId) {
 	if (shouldReset) {
 		if (include) {
 			if (vnode._children!=null && vnode._children.length > 0) {
-				resetChildren(state, vnode);
+				resetChildren(state, getAncestor(state.filter, vnode));
 			}
 			return false;
 		}
@@ -146,13 +152,6 @@ export function unmount(state, vnode) {
 		let id = getVNodeId(vnode);
 		state.pendingUnmountIds.push(id);
 	}
-	// }
-
-	// Root must be last after all children are unmounted
-	// let isRoot = vnode._parent==null;
-	// if (isRoot) {
-	// 	state.pendingUnmountRootId = getVNodeId(vnode);
-	// }
 
 	clearVNode(vnode);
 }
@@ -211,7 +210,7 @@ export function recordMount(state, vnode) {
 		);
 	}
 	else {
-		let ancestor = getAncestorComponent(state, vnode);
+		let ancestor = getAncestor(state.filter, vnode);
 		state.pending.push(
 			TREE_OPERATION_ADD,
 			id,

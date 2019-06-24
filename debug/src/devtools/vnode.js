@@ -33,14 +33,14 @@ export function getVNodeType(vnode) {
 
 /**
  * Get the ancestor component that rendered the current vnode
- * @param {import('../internal').AdapterState} state
+ * @param {import('../internal').AdapterState["filter"]} filters
  * @param {import('../internal').VNode} vnode
  * @returns {import('../internal').VNode | null}
  */
-export function getAncestorComponent(state, vnode) {
+export function getAncestor(filters, vnode) {
 	let next = vnode;
 	while (next = next._parent) {
-		if (!shouldFilter(state.filter, next)) {
+		if (!shouldFilter(filters, next)) {
 			return next;
 		}
 	}
