@@ -111,7 +111,12 @@ export function initDevTools() {
 			},
 			inspectElement: inspectElement(state.inspectedElementId),
 			updateComponentFilters: applyFilters,
-			logElementToConsole
+			logElementToConsole,
+			getOwnersList() {
+				// TODO
+				// eslint-disable-next-line no-console
+				console.log('not implemented');
+			}
 		};
 
 		// Apply initial filters
