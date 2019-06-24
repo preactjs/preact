@@ -66,12 +66,13 @@ export function clearVNode(vnode) {
 		}
 	}
 
+
 	if (hasVNodeId(vnode)) {
 		let id = getVNodeId(vnode);
 		if (oldChildren.has(id)) {
 			oldChildren.delete(id);
 		}
-		idToVNode.delete(getVNodeId(vnode));
+		idToVNode.delete(id);
 	}
 	vnodeToId.delete(vnode);
 }
@@ -100,8 +101,21 @@ let oldChildren = new Map();
  * @param {number} childId The child to add to the parent
  */
 export function addChildToParent(parentId, childId) {
+	if (!oldChildren.has(parentId)) {
+		oldChildren.set(parentId, []);
+	}
+
+	oldChildren.get(parentId).push(childId);
+}
+
+/**
+ * Remove a child from a filtered parent
+ * @param {number} parentId The parent to remove the child from
+ * @param {number} childId The child to remove
+ */
+export function removeChildFromParent(parentId, childId) {
 	if (oldChildren.has(parentId)) {
-		oldChildren.get(parentId).push(childId);
+		oldChildren.set(parentId, oldChildren.get(parentId).filter(x => x!=childId));
 	}
 }
 
