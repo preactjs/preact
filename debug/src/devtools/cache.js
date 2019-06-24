@@ -1,5 +1,4 @@
 import { getInstance } from './custom';
-import { getDisplayName } from './vnode';
 
 let uid = 0;
 
