@@ -285,9 +285,8 @@ export function inspectElement(lastInspected) {
 		// FIXME: Find out why this function is called in a loop and what we can do
 		// to prevent that.
 		let vnode = getVNode(id);
-		if (vnode==null) {
-			throw new Error('Trying to inspect a vnode that was already unmounted. Please report this bug at: https://github.com/developit/preact/issues/new');
-		}
+		if (vnode==null) return;
+
 		let hasHooks = vnode._component!=null && vnode._component.__hooks!=null;
 		let owners = getOwners(vnode);
 
