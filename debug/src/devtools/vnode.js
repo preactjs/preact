@@ -57,6 +57,7 @@ export function getOwners(vnode) {
 	let owners = [];
 	let next = vnode;
 	while (next = next._parent) {
+		// TODO: Check filtering?
 		if (typeof next.type=='function' && next.type!==Fragment) {
 			owners.push({
 				id: getVNodeId(next),

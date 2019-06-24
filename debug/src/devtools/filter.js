@@ -24,7 +24,7 @@ export function updateComponentFilters(hook, state) {
 
 		hook.getFiberRoots(state.rendererId).forEach(root => {
 			state.currentRootId = getVNodeId(root);
-			mount(state, root, true);
+			mount(state, root, state.currentRootId);
 			flushPendingEvents(hook, state);
 			state.currentRootId = -1;
 		});
