@@ -102,6 +102,15 @@ describe('preact-compat', () => {
 			expect(spy).to.be.calledOnce;
 			expect(spy).to.be.calledWithExactly();
 		});
+
+		// Issue #1727
+		it('should destroy the any existing DOM nodes inside the container', () => {
+			scratch.appendChild(document.createElement('div'));
+			scratch.appendChild(document.createElement('div'));
+
+			render(<span>foo</span>, scratch);
+			expect(scratch.innerHTML).to.equal('<span>foo</span>');
+		});
 	});
 
 	describe('createFactory', () => {
