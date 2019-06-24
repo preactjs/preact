@@ -9,7 +9,7 @@ export function getType(data) {
 		case 'symbol': return 'symbol';
 		case 'object': {
 			if (data==null) return null;
-			if (data._dom!==undefined) return 'vnode';
+			if (data.type!==undefined && data._parent!==undefined) return 'vnode';
 			if (typeof data.getMonth=='function') return 'date';
 			if (Array.isArray(data)) return 'array';
 			return 'object';
@@ -22,9 +22,12 @@ export function getType(data) {
 let LEVEL_LIMIT = 6;
 
 export function prettify(data, cleaned, path, level = 0) {
-	if (level > LEVEL_LIMIT) return '...';
-
 	let type = getType(data);
+
+	if (level > LEVEL_LIMIT) {
+		if (type=='array') return [];
+		return '...';
+	}
 
 	switch (type) {
 		case 'function':
