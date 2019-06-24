@@ -86,7 +86,7 @@ export function update(state, vnode, parentId) {
 	if (shouldReset) {
 		if (include) {
 			if (vnode._children!=null && vnode._children.length > 0) {
-				resetChildren(state, getAncestor(state.filter, vnode));
+				resetChildren(state, vnode);
 			}
 			return false;
 		}
@@ -128,6 +128,7 @@ export function resetChildren(state, vnode) {
 		next.length
 	);
 
+	next = next.reverse();
 	for (let i = 0; i < next.length; i++) {
 		state.pending.push(next[i]);
 	}

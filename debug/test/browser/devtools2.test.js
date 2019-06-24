@@ -215,7 +215,7 @@ describe('devtools', () => {
 		]);
 	});
 
-	it.only('should reorder keyed children', () => {
+	it('should reorder keyed children', () => {
 		mock.connect();
 
 		function Foo() {
