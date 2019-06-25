@@ -71,6 +71,22 @@ export function getOwners(vnode) {
 }
 
 /**
+ * Get the root of a vnode
+ * @param {import('../internal').VNode} vnode
+ * @returns {import('../internal').VNode}
+ */
+export function getRoot(vnode) {
+	let next = vnode;
+	while (next = next._parent) {
+		if (isRoot(next)) {
+			return next;
+		}
+	}
+
+	return vnode;
+}
+
+/**
  * Get the ancestor component that rendered the current vnode
  * @param {import('../internal').VNode} vnode
  * @returns {boolean}
