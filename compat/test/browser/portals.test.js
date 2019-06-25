@@ -220,7 +220,7 @@ describe('Portal', () => {
 		let set;
 
 		function Foo(props) {
-			const [additionalProps, setProps] = useState({ style: { background: 'red' } });
+			const [additionalProps, setProps] = useState({ style: { backgroundColor: 'red' } });
 			set = (c) => setProps(c);
 			return (
 				<div>
@@ -231,11 +231,11 @@ describe('Portal', () => {
 		}
 
 		render(<Foo />, scratch);
-		expect(scratch.firstChild.style.background).to.equal('red');
+		expect(scratch.firstChild.style.backgroundColor).to.equal('red');
 
 		set({});
 		rerender();
-		expect(scratch.firstChild.style.background).to.equal('');
+		expect(scratch.firstChild.style.backgroundColor).to.equal('');
 	});
 
 	it('should not unmount the portal component', () => {

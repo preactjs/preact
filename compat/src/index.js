@@ -2,7 +2,7 @@ import { hydrate, render as preactRender, cloneElement as preactCloneElement, cr
 import * as hooks from 'preact/hooks';
 export * from 'preact/hooks';
 import { Suspense as _Suspense, lazy as _lazy, catchRender } from './suspense';
-import { assign } from '../../src/util';
+import { assign, removeNode } from '../../src/util';
 
 const version = '16.8.0'; // trick libraries to think we are react
 
@@ -56,6 +56,11 @@ function handleElementVNode(vnode, props) {
  * @returns {import('./internal').Component | null} The root component reference or null
  */
 function render(vnode, parent, callback) {
+	// React destroys any existing DOM nodes, see #1727
+	while (parent.firstChild) {
+		removeNode(parent.firstChild);
+	}
+
 	preactRender(vnode, parent);
 	if (typeof callback==='function') callback();
 

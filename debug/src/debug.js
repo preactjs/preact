@@ -35,6 +35,8 @@ export function initDebug() {
 	};
 
 	options._diff = vnode => {
+		if (vnode == null) { return; }
+
 		let { type } = vnode;
 
 		if (type===undefined) {
@@ -136,7 +138,9 @@ export function initDebug() {
 	};
 
 	options.diffed = (vnode) => {
-		if (vnode && vnode._component && vnode._component.__hooks) {
+		if (vnode == null) { return; }
+
+		if (vnode._component && vnode._component.__hooks) {
 			let hooks = vnode._component.__hooks;
 			hooks._list.forEach(hook => {
 				if (hook._callback && (!hook._args || !Array.isArray(hook._args))) {
