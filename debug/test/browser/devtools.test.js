@@ -359,6 +359,7 @@ describe('devtools', () => {
 		it('should check if a vnode is a root', () => {
 			render(<div>Hello World</div>, scratch);
 			let root = getRoot(scratch);
+
 			expect(isRoot(root)).to.equal(true);
 			expect(isRoot(root._children[0])).to.equal(false);
 		});
@@ -500,6 +501,7 @@ describe('devtools', () => {
 				'mount',
 				'mount',
 				'mount',
+				'root',
 				'rootCommitted'
 			]);
 		});
@@ -687,6 +689,7 @@ describe('devtools', () => {
 				{ type: 'mount', component: 'div' },
 				{ type: 'mount', component: 'App' },
 				{ type: 'mount', component: 'Fragment' },
+				{ type: 'root', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 

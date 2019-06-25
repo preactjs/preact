@@ -13,7 +13,6 @@ import options from './options';
  */
 export function render(vnode, parentDom, replaceNode) {
 	if (options._root) options._root(vnode, parentDom);
-
 	let oldVNode = parentDom._children;
 	vnode = createElement(Fragment, null, [vnode]);
 
@@ -31,7 +30,7 @@ export function render(vnode, parentDom, replaceNode) {
 				: EMPTY_ARR.slice.call(parentDom.childNodes),
 		mounts,
 		false,
-		replaceNode || EMPTY_OBJ
+		replaceNode || EMPTY_OBJ,
 	);
 	commitRoot(mounts, vnode);
 }
