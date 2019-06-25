@@ -1,7 +1,7 @@
 import { diff, unmount, applyRef } from './index';
 import { coerceToVNode } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
-import { removeNode } from '../util';
+import {removeNode, isFunction, typeOf, TYPE_BOOLEAN} from '../util';
 
 /**
  * Diff the children of a virtual node
@@ -125,7 +125,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 				oldDom = newDom.nextSibling;
 
-				if (typeof newParentVNode.type == 'function') {
+				if (isFunction(newParentVNode.type)) {
 					// At this point, if childVNode._lastDomChild existed, then
 					// newDom = childVNode._lastDomChild per line 101. Else it is
 					// the same as childVNode._dom, meaning this component returned
@@ -139,7 +139,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	newParentVNode._dom = firstChildDom;
 
 	// Remove children that are not part of any vnode.
-	if (excessDomChildren!=null && typeof newParentVNode.type !== 'function') for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
+	if (excessDomChildren!=null && !isFunction(newParentVNode.type)) for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
 
 	// Remove remaining oldChildren if there are any.
 	for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], newParentVNode);
@@ -164,7 +164,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
  */
 export function toChildArray(children, flattened, map, keepHoles) {
 	if (flattened == null) flattened = [];
-	if (children==null || typeof children === 'boolean') {
+	if (children==null || typeOf(children) === TYPE_BOOLEAN) {
 		if (keepHoles) flattened.push(null);
 	}
 	else if (Array.isArray(children)) {

@@ -1,6 +1,6 @@
 import { IS_NON_DIMENSIONAL, EMPTY_OBJ } from '../constants';
 import options from '../options';
-import { assign } from '../util';
+import {assign, isFunction, TYPE_NUMBER, typeOf} from '../util';
 
 /**
  * Diff the old and new properties of a VNode and apply changes to the DOM node
@@ -51,7 +51,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 			dom.style.setProperty(
 				(i[0] === '-' && i[1] === '-') ? i : i.replace(CAMEL_REG, '-$&'),
 				(value && (i in value))
-					? (typeof set[i]==='number' && IS_NON_DIMENSIONAL.test(i)===false)
+					? (typeOf(set[i]) === TYPE_NUMBER && IS_NON_DIMENSIONAL.test(i)===false)
 						? set[i] + 'px'
 						: set[i]
 					: ''
@@ -84,7 +84,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 			dom[name] = value==null ? '' : value;
 		}
 	}
-	else if (typeof value!=='function' && name!=='dangerouslySetInnerHTML') {
+	else if (!isFunction(value) && name!=='dangerouslySetInnerHTML') {
 		if (name!==(name = name.replace(/^xlink:?/, ''))) {
 			if (value==null || value===false) {
 				dom.removeAttributeNS(XLINK_NS, name.toLowerCase());

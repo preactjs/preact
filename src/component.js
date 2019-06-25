@@ -1,4 +1,4 @@
-import { assign } from './util';
+import {assign, isFunction} from './util';
 import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
@@ -42,7 +42,7 @@ Component.prototype.setState = function(update, callback) {
 	let s = (this._nextState!==this.state && this._nextState) || (this._nextState = assign({}, this.state));
 
 	// if update() mutates state in-place, skip the copy:
-	if (typeof update!=='function' || (update = update(s, this.props))) {
+	if (!isFunction(update) || (update = update(s, this.props))) {
 		assign(s, update);
 	}
 
@@ -108,7 +108,7 @@ export function getDomSibling(vnode, childIndex) {
 		sibling = vnode._children[childIndex];
 
 		if (sibling != null) {
-			return typeof sibling.type !== 'function'
+			return !isFunction(sibling.type)
 				? sibling._dom
 				: getDomSibling(sibling, 0);
 		}
@@ -119,7 +119,7 @@ export function getDomSibling(vnode, childIndex) {
 	// Only climb up and search the parent if we aren't searching through a DOM
 	// VNode (meaning we reached the DOM parent of the original vnode that began
 	// the search)
-	return typeof vnode.type === 'function' ? getDomSibling(vnode) : null;
+	return isFunction(vnode.type) ? getDomSibling(vnode) : null;
 }
 
 /**
@@ -150,7 +150,7 @@ let q = [];
  * Asynchronously schedule a callback
  * @type {(cb) => void}
  */
-const defer = typeof Promise=='function' ? Promise.prototype.then.bind(Promise.resolve()) : setTimeout;
+const defer = isFunction(Promise) ? Promise.prototype.then.bind(Promise.resolve()) : setTimeout;
 
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is

@@ -1,5 +1,5 @@
 import options from './options';
-import { assign } from './util';
+import {assign, TYPE_BOOLEAN, TYPE_NUMBER, TYPE_STRING, typeOf} from './util';
 
 /**
   * Create an virtual node (used for JSX)
@@ -87,8 +87,8 @@ export function Fragment(props) {
  * @returns {import('./internal').VNode | null}
  */
 export function coerceToVNode(possibleVNode) {
-	if (possibleVNode == null || typeof possibleVNode === 'boolean') return null;
-	if (typeof possibleVNode === 'string' || typeof possibleVNode === 'number') {
+	if (possibleVNode == null || typeOf(possibleVNode) === TYPE_BOOLEAN) return null;
+	if (typeOf(possibleVNode) === TYPE_STRING || typeOf(possibleVNode) === TYPE_NUMBER) {
 		return createVNode(null, possibleVNode, null, null);
 	}
 

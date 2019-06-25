@@ -3,7 +3,7 @@ import { Component, enqueueRender } from '../component';
 import { coerceToVNode, Fragment } from '../create-element';
 import { diffChildren, toChildArray } from './children';
 import { diffProps } from './props';
-import { assign, removeNode } from '../util';
+import {assign, isFunction, removeNode} from '../util';
 import options from '../options';
 
 /**
@@ -31,7 +31,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 	if (tmp = options._diff) tmp(newVNode);
 
 	try {
-		outer: if (typeof newType==='function') {
+		outer: if (isFunction(newType)) {
 			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
 			let newProps = newVNode.props;
 
@@ -253,7 +253,7 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
  */
 export function applyRef(ref, value, parentVNode) {
 	try {
-		if (typeof ref=='function') ref(value);
+		if (isFunction(ref)) ref(value);
 		else ref.current = value;
 	}
 	catch (e) {
@@ -278,7 +278,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	}
 
 	let dom;
-	if (!skipRemove && typeof vnode.type !== 'function') {
+	if (!skipRemove && !isFunction(vnode.type)) {
 		skipRemove = (dom = vnode._dom)!=null;
 	}
 

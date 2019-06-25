@@ -20,3 +20,21 @@ export function removeNode(node) {
 	let parentNode = node.parentNode;
 	if (parentNode) parentNode.removeChild(node);
 }
+
+/**
+ * @returns {string} typeof a
+ */
+export function typeOf(a) {
+    return typeof a;
+}
+
+/**
+ * @returns {boolean} typeOf(f) === 'function'
+ */
+export function isFunction(f) {
+    return typeOf(f) === 'function';
+}
+
+export const TYPE_NUMBER = 'number';
+export const TYPE_BOOLEAN = 'boolean';
+export const TYPE_STRING = 'string';
