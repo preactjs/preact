@@ -1,6 +1,6 @@
 import { Fragment } from 'preact';
 import { ElementTypeClass, ElementTypeFunction, ElementTypeHostComponent } from './constants';
-import { getVNodeId } from './cache';
+import { getVNodeId, hasVNodeId } from './cache';
 import { shouldFilter } from './filter';
 
 /**
@@ -41,6 +41,23 @@ export function getAncestor(filters, vnode) {
 	let next = vnode;
 	while (next = next._parent) {
 		if (!shouldFilter(filters, next)) {
+			return next;
+		}
+	}
+
+	return null;
+}
+
+/**
+ * Get the ancestor component that rendered the current vnode
+ * @param {import('../internal').AdapterState["filter"]} filters
+ * @param {import('../internal').VNode} vnode
+ * @returns {import('../internal').VNode | null}
+ */
+export function getMountedAncestor(filters, vnode) {
+	let next = vnode;
+	while (next = next._parent) {
+		if (!shouldFilter(filters, next) && hasVNodeId(next)) {
 			return next;
 		}
 	}

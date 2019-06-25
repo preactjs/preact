@@ -2,10 +2,11 @@ import { options, Component } from 'preact';
 import { onCommitFiberRoot, inspectElement, onCommitFiberUnmount, selectElement, logElementToConsole, flushInitialEvents } from './renderer2';
 import { setInProps, setInState } from './update';
 import { assign } from '../../../src/util';
-import { getVNode } from './cache';
+import { getVNode, hasVNodeId } from './cache';
 import { setInHook } from './hooks';
 import { now } from './util';
 import { updateComponentFilters } from './filter';
+import { getMountedAncestor } from './vnode';
 
 /**
  * Wrap function with generic error logging
@@ -46,6 +47,9 @@ export function initDevTools() {
 	/** @type {number | null} */
 	let rid = null;
 
+	/** @type {import('../internal').AdapterState} */
+	let state;
+
 	catchErrors(() => {
 		let isDev = false;
 		try {
@@ -63,7 +67,7 @@ export function initDevTools() {
 
 
 		/** @type {import('../internal').AdapterState} */
-		let state = {
+		state = {
 			connected: false,
 			currentRootId: -1,
 			isProfiling: false,
@@ -208,6 +212,17 @@ export function initDevTools() {
 
 		// These cases are already handled by `unmount`
 		if (vnode==null) return;
+
+		// Sometimes we don't get the actual root but some random child down
+		// the tree. This is very likely an error, but I've not found what's
+		// causeing it so far. For now we apply this workaround where we walk
+		// up the tree and search for the nearest mounted parent.
+		if (!hasVNodeId(vnode)) {
+			const mountedParent = getMountedAncestor(state.filter, vnode);
+			if (mountedParent!=null && mountedParent!==vnode) {
+				vnode = mountedParent;
+			}
+		}
 
 		if (rid!=null) {
 			const roots = hook.getFiberRoots(rid);
