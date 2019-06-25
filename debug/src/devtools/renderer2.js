@@ -320,7 +320,7 @@ export function flushInitialEvents(hook, state) {
 /**
  * Provide detailed information about the current vnode
  * @param {number} lastInspected
- * @returns {(id: number) => number | import('../internal').InspectData}
+ * @returns {(id: number) => number | undefined | import('../internal').InspectData}
  */
 export function inspectElement(lastInspected) {
 	return id => {
