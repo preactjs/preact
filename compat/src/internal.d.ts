@@ -14,7 +14,7 @@ export interface Component<P = {}, S = {}> extends PreactComponent<P, S> {
 	isReactComponent?: object;
 	isPureReactComponent?: true;
 
-	_childDidSuspend?(error: Promise<void>);
+	_childDidSuspend?(error: Promise<void>): void;
 }
 
 export interface FunctionalComponent<P = {}> extends PreactFunctionalComponent<P> {
