@@ -44,7 +44,7 @@ export interface RendererConfig {
 	rendererPackageName: string;
 	/** Find the closest DOM element given an id */
 	findNativeNodesForFiberID(id: number): Array<PreactElement | HTMLElement | Text>;
-	inspectElement(id: number): InspectData;
+	inspectElement(id: number): InspectData | number | undefined;
 	/** Called when the user clicks on an element inside the devtools */
 	selectElement(id: number): void;
 	/** Called when the devtools panel is closed */
@@ -59,6 +59,8 @@ export interface RendererConfig {
 	updateComponentFilters(filters: Filter[]): void;
 	/** Called when the user clicks on the log button in the props panel */
 	logElementToConsole(id: number): void;
+	/** Called when the user double clicks on a component */
+	getOwnersList(): Owner[] | null;
 }
 
 export interface ProfilingData {
