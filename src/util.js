@@ -25,14 +25,14 @@ export function removeNode(node) {
  * @returns {string} typeof a
  */
 export function typeOf(a) {
-    return typeof a;
+	return typeof a;
 }
 
 /**
  * @returns {boolean} typeOf(f) === 'function'
  */
 export function isFunction(f) {
-    return typeOf(f) === 'function';
+	return typeOf(f) === 'function';
 }
 
 export const TYPE_NUMBER = 'number';

@@ -1,5 +1,5 @@
 import options from './options';
-import {assign, TYPE_BOOLEAN, TYPE_NUMBER, TYPE_STRING, typeOf} from './util';
+import { assign, TYPE_BOOLEAN, TYPE_NUMBER, TYPE_STRING, typeOf } from './util';
 
 /**
   * Create an virtual node (used for JSX)

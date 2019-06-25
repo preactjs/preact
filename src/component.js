@@ -1,4 +1,4 @@
-import {assign, isFunction} from './util';
+import { assign, isFunction } from './util';
 import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';

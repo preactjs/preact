@@ -1,6 +1,6 @@
 import { IS_NON_DIMENSIONAL, EMPTY_OBJ } from '../constants';
 import options from '../options';
-import {assign, isFunction, TYPE_NUMBER, typeOf} from '../util';
+import { assign, isFunction, TYPE_NUMBER, typeOf } from '../util';
 
 /**
  * Diff the old and new properties of a VNode and apply changes to the DOM node

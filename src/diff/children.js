@@ -1,7 +1,7 @@
 import { diff, unmount, applyRef } from './index';
 import { coerceToVNode } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
-import {removeNode, isFunction, typeOf, TYPE_BOOLEAN} from '../util';
+import { removeNode, isFunction, typeOf, TYPE_BOOLEAN } from '../util';
 
 /**
  * Diff the children of a virtual node

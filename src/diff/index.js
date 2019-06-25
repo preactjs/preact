@@ -3,7 +3,7 @@ import { Component, enqueueRender } from '../component';
 import { coerceToVNode, Fragment } from '../create-element';
 import { diffChildren, toChildArray } from './children';
 import { diffProps } from './props';
-import {assign, isFunction, removeNode} from '../util';
+import { assign, isFunction, removeNode } from '../util';
 import options from '../options';
 
 /**
