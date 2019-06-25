@@ -172,6 +172,7 @@ export interface DevtoolsHookMock extends DevtoolsHook {
 export interface DevtoolsMock {
 	hook: DevtoolsHookMock;
 	connect(): void;
+	applyFilters(filters: Filter[]): void;
 	inspect(id: number): InspectData;
 	setState(id: number, path: string[], value: any): void;
 }

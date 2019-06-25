@@ -66,7 +66,6 @@ export function clearVNode(vnode) {
 		}
 	}
 
-
 	if (hasVNodeId(vnode)) {
 		let id = getVNodeId(vnode);
 		if (oldChildren.has(id)) {
@@ -74,7 +73,7 @@ export function clearVNode(vnode) {
 		}
 		idToVNode.delete(id);
 	}
-	vnodeToId.delete(vnode);
+	vnodeToId.delete(getInstance(vnode));
 }
 
 // Only used for testing
