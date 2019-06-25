@@ -20,20 +20,22 @@ export function onCommitFiberRoot(hook, state, vnode) {
 
 	// TODO: Profiling
 	let parentId = 0;
-	let ancestor = vnode._parent;
-	if (ancestor!=null && hasVNodeId(ancestor)) {
-		parentId = getVNodeId(ancestor);
+	let ancestor = getAncestor(state.filter, vnode);
+	if (ancestor!=null) {
+		if (hasVNodeId(ancestor)) {
+			parentId = getVNodeId(ancestor);
+		}
 	}
 
 	if (hasVNodeId(vnode)) {
 		update(state, vnode, parentId);
 	}
 	else {
-		mount(state, vnode, null);
+		mount(state, vnode, parentId);
 	}
 
 	flushPendingEvents(hook, state);
-	state.currentRootId = -1;
+	// state.currentRootId = -1;
 }
 
 /**
@@ -146,15 +148,7 @@ export function unmount(state, vnode) {
 		}
 	}
 
-	if (isRoot(vnode)) {
-		state.pendingUnmountRootId = state.currentRootId;
-	}
-	else if (!shouldFilter(state.filter, vnode)) {
-		let id = getVNodeId(vnode);
-		state.pendingUnmountIds.push(id);
-	}
-
-	clearVNode(vnode);
+	recordUnmount(state, vnode);
 }
 
 /**
@@ -167,7 +161,12 @@ export function unmount(state, vnode) {
  */
 export function recordUnmount(state, vnode) {
 	if (hasVNodeId(vnode)) {
-		state.pendingUnmountIds.push(getVNodeId(vnode));
+		if (isRoot(vnode)) {
+			state.pendingUnmountRootId = getVNodeId(vnode);
+		}
+		else {
+			state.pendingUnmountIds.push(getVNodeId(vnode));
+		}
 	}
 	clearVNode(vnode);
 }
@@ -230,7 +229,13 @@ export function recordMount(state, vnode) {
  * @param {import('../internal').AdapterState} state
  */
 export function flushPendingEvents(hook, state) {
-	if (state.pending.length==0 && state.pendingUnmountIds.length==0) return;
+	if (
+		state.pending.length==0 &&
+		state.pendingUnmountIds.length==0 &&
+		state.pendingUnmountRootId==null
+	) {
+		return;
+	}
 
 	// TODO: Profiling
 	if (!state.connected) return;
@@ -250,7 +255,7 @@ export function flushPendingEvents(hook, state) {
 
 	let i = 0;
 	ops[i++] = state.rendererId;
-	ops[i++] = 1; // TODO: Root vnode id
+	ops[i++] = state.currentRootId;
 
 	// Add string table
 	ops[i++] = allStrLengths;
@@ -264,16 +269,17 @@ export function flushPendingEvents(hook, state) {
 		// All unmounts
 		ops[i++] = TREE_OPERATION_REMOVE;
 		// Total number of unmount ids
-		ops[i++] = state.pendingUnmountIds.length;
+		ops[i++] = state.pendingUnmountIds.length +
+			(state.pendingUnmountRootId!=null ? 1 : 0);
+
 		for (let j = 0; j < state.pendingUnmountIds.length; j++) {
 			ops[i + j] = state.pendingUnmountIds[j];
 		}
 		i += state.pendingUnmountIds.length;
+	}
 
-		if (state.pendingUnmountRootId!==null) {
-			ops[i] = state.pendingUnmountRootId;
-			i++;
-		}
+	if (state.pendingUnmountRootId!==null) {
+		ops[i++] = state.pendingUnmountRootId;
 	}
 
 	// Finally add all pending operations

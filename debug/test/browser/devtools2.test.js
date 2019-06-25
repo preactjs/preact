@@ -498,6 +498,72 @@ describe('devtools', () => {
 		]);
 	});
 
+	it('should apply filters', () => {
+		mock.connect();
+
+		function Foo() {
+			return <div>foo</div>;
+		}
+
+		function App() {
+			return <Foo />;
+		}
+
+		render(<App />, scratch);
+
+		// HTML elements are filtered by default. We disable that filter here
+		mock.applyFilters([]);
+
+		expect(parseEmit(mock.hook.emit.args[1])).to.deep.equal([
+			1, // rendererId
+			4, // root vnode id
+			12, // string table length
+			3, // next string length
+			65, // A
+			112, // p
+			112, // p
+			3, // next string length
+			70, // F
+			111, // o
+			111, // o
+			3, // next string length
+			100, // d
+			105, // i
+			118, // v
+			2, // TREE_OPERATION_REMOVE
+			3, //   number of vnodes to unmount
+			3, //   vnode id
+			2, //   vnode id
+			1, //   vnode id
+			1, // TREE_OPERATION_ADD -> Root Fragment
+			4, //   vnode id
+			11, //  ElementTypeRoot
+			1, //   isProfilingSupported
+			1, //   hasOwnerMetadata
+			1, // TREE_OPERATION_ADD -> App
+			5, //   vnode id
+			5, //   ElementTypeFunction
+			4, //   parent id
+			0, //   owner id
+			1, //   displayName string id
+			0, //   key string id
+			1, // TREE_OPERATION_ADD -> Foo
+			6, //   vnode id
+			5, //   ElementTypeFunction
+			5, //   parent id
+			5, //   owner id
+			2, //   displayName string id
+			0, //   key string id
+			1, // TREE_OPERATION_ADD -> div
+			7, //   vnode id
+			7, //   ElementTypeHostComponent
+			6, //   parent id
+			6, //   owner id
+			3, //   displayName string id
+			0 //    key string id
+		]);
+	});
+
 	it.skip('should mount + unmount components', () => {
 		mock.connect();
 

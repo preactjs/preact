@@ -20,6 +20,10 @@ export function createMockDevtoolsHook() {
 		onCommitFiberUnmount() {}
 	};
 
+	function applyFilters(filters) {
+		return renderers.get(1).updateComponentFilters(filters);
+	}
+
 	function connect() {
 
 		/** @type {import('../../src/internal').DevtoolsWindow} */
@@ -43,7 +47,7 @@ export function createMockDevtoolsHook() {
 		{ isEnabled: true, type: 1, value: 7 }
 	];
 
-	return { hook, connect, inspect, setState };
+	return { hook, connect, inspect, setState, applyFilters };
 }
 
 export function parseEmit(args) {
