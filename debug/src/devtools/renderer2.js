@@ -1,6 +1,6 @@
 import { getVNodeId, getVNode, clearVNode, hasVNodeId, getPreviousChildrenIds, addChildToParent, removeChildFromParent } from './cache';
 import { TREE_OPERATION_ADD, ElementTypeRoot, TREE_OPERATION_REMOVE, TREE_OPERATION_REORDER_CHILDREN } from './constants';
-import { getVNodeType, getDisplayName, getAncestor, getOwners } from './vnode';
+import { getVNodeType, getDisplayName, getAncestor, getOwners, getRoot } from './vnode';
 import { cleanForBridge } from './pretty';
 import { inspectHooks } from './hooks';
 import { encode } from './util';
@@ -15,8 +15,11 @@ import { isRoot, getInstance } from './custom';
  * @param {import('../internal').VNode} vnode
  */
 export function onCommitFiberRoot(hook, state, vnode) {
-	// Empty root
-	// if (root.type===Fragment && root._children.length==0) return;
+	// Keep track of mounted roots
+	let roots = hook.getFiberRoots(state.rendererId);
+	if (isRoot(vnode)) {
+		roots.add(vnode);
+	}
 
 	// TODO: Profiling
 	let parentId = 0;
@@ -34,8 +37,9 @@ export function onCommitFiberRoot(hook, state, vnode) {
 		mount(state, vnode, parentId);
 	}
 
+	state.currentRootId = getVNodeId(getRoot(vnode));
 	flushPendingEvents(hook, state);
-	// state.currentRootId = -1;
+	state.currentRootId = -1;
 }
 
 /**
@@ -290,6 +294,27 @@ export function flushPendingEvents(hook, state) {
 	state.pending = [];
 	state.pendingUnmountIds = [];
 	clearStringTable();
+}
+
+/**
+ * Flush initial buffered events as soon a the devtools successfully established
+ * a connection
+ * @param {import('../internal').DevtoolsHook} hook
+ * @param {import('../internal').AdapterState} state
+ */
+export function flushInitialEvents(hook, state) {
+	state.connected = true;
+
+	// TODO: When operations are already queued, we should just flush the queus
+	hook.getFiberRoots(state.rendererId).forEach(root => {
+		state.currentRootId = getVNodeId(root);
+
+		if (state.pending.length > 0) {
+			flushPendingEvents(hook, state);
+		}
+
+		state.pending = [];
+	});
 }
 
 /**

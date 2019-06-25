@@ -1,5 +1,5 @@
 import { options, Component } from 'preact';
-import { onCommitFiberRoot, flushPendingEvents, inspectElement, onCommitFiberUnmount, selectElement, logElementToConsole } from './renderer2';
+import { onCommitFiberRoot, inspectElement, onCommitFiberUnmount, selectElement, logElementToConsole, flushInitialEvents } from './renderer2';
 import { setInProps, setInState } from './update';
 import { assign } from '../../../src/util';
 import { getVNode } from './cache';
@@ -130,14 +130,7 @@ export function initDevTools() {
 			state.rendererId = rid = id;
 			return assign(config, {
 				flushInitialOperations() {
-					state.connected = true;
-
-					if (state.pending.length > 0) {
-						// TODO: Flush each root
-						flushPendingEvents(hook, state);
-					}
-
-					state.pending = [];
+					flushInitialEvents(hook, state);
 				},
 				setInProps,
 				setInState,
