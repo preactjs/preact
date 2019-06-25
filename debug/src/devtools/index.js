@@ -115,7 +115,8 @@ export function initDevTools() {
 			getOwnersList() {
 				// TODO
 				// eslint-disable-next-line no-console
-				console.log('not implemented');
+				console.warn('TODO: getOwnersList() not implemented');
+				return null;
 			}
 		};
 
