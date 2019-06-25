@@ -6,7 +6,7 @@ import { getVNode, hasVNodeId } from './cache';
 import { setInHook } from './hooks';
 import { now } from './util';
 import { updateComponentFilters } from './filter';
-import { getMountedAncestor } from './vnode';
+import { isRoot } from './vnode';
 
 /**
  * Wrap function with generic error logging
@@ -213,15 +213,15 @@ export function initDevTools() {
 		// These cases are already handled by `unmount`
 		if (vnode==null) return;
 
-		// Sometimes we don't get the actual root but some random child down
-		// the tree. This is very likely an error, but I've not found what's
-		// causeing it so far. For now we apply this workaround where we walk
-		// up the tree and search for the nearest mounted parent.
-		if (!hasVNodeId(vnode)) {
-			const mountedParent = getMountedAncestor(state.filter, vnode);
-			if (mountedParent!=null && mountedParent!==vnode) {
-				vnode = mountedParent;
-			}
+		// Some libraries like mobx call `forceUpdate` inside `componentDidMount`.
+		// This leads to an issue where `options.commit` is called twice, once
+		// for the vnode where the update occured and once on the child vnode
+		// somewhere down the tree where `forceUpdate` was called on. The latter
+		// will be called first, but because the parents haven't been mounted
+		// in the devtools this will lead to an incorrect result.
+		// TODO: We should fix this in core instead of patching around it here
+		if ((!isRoot(vnode) && !isRoot(vnode._parent)) && !hasVNodeId(vnode)) {
+			return;
 		}
 
 		if (rid!=null) {
