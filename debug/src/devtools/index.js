@@ -166,14 +166,14 @@ export function initDevTools() {
 		});
 
 		// eslint-disable-next-line arrow-body-style
-		onCommitRoot = catchErrors(root => {
+		onCommitRoot = root => {
 			return onCommitFiberRoot(hook, state, root);
-		});
+		};
 
 		// eslint-disable-next-line arrow-body-style
-		onCommitUnmount = catchErrors(vnode => {
+		onCommitUnmount = vnode => {
 			return onCommitFiberUnmount(hook, state, vnode);
-		});
+		};
 	})();
 
 	// Store (possible) previous hooks so that we don't overwrite them
