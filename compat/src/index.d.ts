@@ -53,7 +53,7 @@ declare namespace React {
 
 	export function unmountComponentAtNode(container: Element | Document | ShadowRoot | DocumentFragment): boolean;
 
-	export function createFactory(type: preact.VNode["type"]): (props?: any, ...children: preact.ComponentChildren[]) => preact.VNode<any>;
+	export function createFactory(type: preact.VNode<any>["type"]): (props?: any, ...children: preact.ComponentChildren[]) => preact.VNode<any>;
 	export function isValidElement(element: any): boolean;
 	export function findDOMNode(component: preact.Component): Element | null;
 
