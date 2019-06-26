@@ -1,7 +1,7 @@
 import { hydrate, render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
 import * as hooks from 'preact/hooks';
 export * from 'preact/hooks';
-import { Suspense as _Suspense, lazy as _lazy, catchRender } from './suspense';
+import { Suspense, lazy, catchRender } from './suspense';
 import { assign, removeNode } from '../../src/util';
 
 const version = '16.8.0'; // trick libraries to think we are react
@@ -393,11 +393,10 @@ export {
 	memo,
 	forwardRef,
 	// eslint-disable-next-line camelcase
-	unstable_batchedUpdates
+	unstable_batchedUpdates,
+	Suspense,
+	lazy
 };
-
-export const Suspense = _Suspense;
-export const lazy = _lazy;
 
 // React copies the named exports to the default one.
 export default assign({
@@ -419,5 +418,7 @@ export default assign({
 	PureComponent,
 	memo,
 	forwardRef,
-	unstable_batchedUpdates
+	unstable_batchedUpdates,
+	Suspense,
+	lazy
 }, hooks);

@@ -23,6 +23,10 @@ describe('exports', () => {
 		expect(Compat.useCallback).to.be.a('function');
 		expect(Compat.useContext).to.be.a('function');
 
+		// Suspense
+		expect(Compat.Suspense).to.be.a('function');
+		expect(Compat.lazy).to.be.a('function');
+
 		// Compat specific
 		expect(Compat.PureComponent).to.exist.and.be.a('function');
 		expect(Compat.createPortal).to.exist.and.be.a('function');
@@ -58,6 +62,10 @@ describe('exports', () => {
 		expect(Named.useMemo).to.be.a('function');
 		expect(Named.useCallback).to.be.a('function');
 		expect(Named.useContext).to.be.a('function');
+
+		// Suspense
+		expect(Named.Suspense).to.be.a('function');
+		expect(Named.lazy).to.be.a('function');
 
 		// Compat specific
 		expect(Named.PureComponent).to.exist.and.be.a('function');
