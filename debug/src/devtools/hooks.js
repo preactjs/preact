@@ -2,6 +2,7 @@ import { options } from 'preact';
 import { USE_STATE, USE_CALLBACK } from 'preact/hooks/constants';
 import ErrorStackParser from 'error-stack-parser';
 import { getVNode } from './cache';
+import { USE_REF, USE_MEMO, USE_REDUCER, USE_CONTEXT } from '../../../hooks/src/constants';
 
 let usePrefix = /^use/;
 
@@ -31,14 +32,18 @@ export function inspectHooks(vnode) {
 	/** @type {Set<number>} */
 	let editHooks = new Set();
 
+	/** @type {number[]} */
+	let nativeHookTypes = [];
+
 	let ignore = 0;
 	let hookIdx = 0;
 	options.hooked = type => {
 		if (ignore > 0) return ignore--;
 		// Ignore primitive hooks that call other primitive hooks
-		if (type===USE_STATE || type===USE_CALLBACK) ignore++;
-		if (type===USE_STATE) editHooks.add(hookIdx);
+		if (type===USE_STATE || type===USE_CALLBACK || USE_REF) ignore++;
+		if (type===USE_STATE || type===USE_REDUCER) editHooks.add(hookIdx);
 		hookIdx++;
+		nativeHookTypes.push(type);
 
 		let stack = getHookStack();
 
@@ -117,15 +122,35 @@ export function inspectHooks(vnode) {
 			? prevTrace.fileName + prevTrace.lineNumber + prevTrace.columnNumber
 			: '';
 
+		let hookType = nativeHookTypes[native];
+		let currentHook = vnode._component.__hooks._list[native++];
+
+		// Must be `undefined` if not set, because `null` is a valid value
+		let value;
+		if (editable) {
+			value = currentHook._value[0];
+		}
+		else if (!isNative && debugValues.has(id)) {
+			value = debugValues.get(id);
+		}
+		else if (isNative) {
+			if (hookType === USE_MEMO || hookType === USE_REF) {
+				value = currentHook._value;
+			}
+			else if (hookType === USE_CONTEXT) {
+				value = currentHook._value.Provider.props
+					? currentHook._value.Provider.props.value
+					: currentHook._value._defaultValue;
+			}
+			else {
+				value = currentHook._value;
+			}
+		}
+
 		/** @type {import('../internal').HookInspectData} */
 		let data = {
 			id: isNative ? native : null,
-			// Must be `undefined` if not set. `null` is a valid value.
-			value: editable
-				? vnode._component.__hooks._list[native++]._value[0]
-				: !isNative && debugValues.has(id)
-					? debugValues.get(id)
-					: undefined,
+			value,
 			isStateEditable: editable,
 			name: trace.functionName.replace(usePrefix, ''),
 			subHooks: []
