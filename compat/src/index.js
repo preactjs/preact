@@ -222,7 +222,7 @@ function applyEventNormalization({ type, props }) {
 
 /**
  * Remove a component tree from the DOM, including state and event handlers.
- * @param {Element | Document | ShadowRoot | DocumentFragment} container
+ * @param {import('./internal').PreactElement} container
  * @returns {boolean}
  */
 function unmountComponentAtNode(container) {

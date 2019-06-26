@@ -53,11 +53,11 @@ declare namespace React {
 
 	export function unmountComponentAtNode(container: Element | Document | ShadowRoot | DocumentFragment): boolean;
 
-	export function createFactory(type: preact.VNode["type"]): preact.VNode<{}>;
+	export function createFactory(type: preact.VNode["type"]): (props?: any, ...children: preact.ComponentChildren[]) => preact.VNode<any>;
 	export function isValidElement(element: any): boolean;
 	export function findDOMNode(component: preact.Component): Element | null;
 
-	export interface PureComponent<P = {}, S = {}> extends preact.Component {
+	export class PureComponent<P = {}, S = {}> extends preact.Component {
 		isPureReactComponenet: boolean;
 	}
 
@@ -67,7 +67,7 @@ declare namespace React {
 
 	export function unstable_batchedUpdates(callback: (arg?: any) => void, arg?: any): void;
 
-	export interface Children {
+	export const Children: {
 		map<T extends preact.ComponentChild, R>(children: T | T[], fn: (child: T, i: number, array: T[]) => R): R[];
 		forEach<T extends preact.ComponentChild>(children: T | T[], fn: (child: T, i: number, array: T[]) => void): void;
 		count: (children: preact.ComponentChildren) => number;
