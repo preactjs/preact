@@ -252,13 +252,8 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
  * @param {import('../internal').VNode} parentVNode
  */
 export function applyRef(ref, value, parentVNode) {
-	try {
-		if (typeof ref=='function') ref(value);
-		else ref.current = value;
-	}
-	catch (e) {
-		options._catchError(e, parentVNode);
-	}
+	if (typeof ref=='function') ref(value);
+	else ref.current = value;
 }
 
 /**
@@ -286,12 +281,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 
 	if ((r = vnode._component)!=null) {
 		if (r.componentWillUnmount) {
-			try {
-				r.componentWillUnmount();
-			}
-			catch (e) {
-				options._catchError(e, parentVNode);
-			}
+			r.componentWillUnmount();
 		}
 
 		r.base = r._parentDom = null;
