@@ -76,19 +76,45 @@ class ContextProvider {
 	}
 }
 
-function addRenderRoot(vnode, parent) {
-	if (parent._children && parent._children._component && parent._children._component._vnode) {
-		parent._children.props.children.unshift(vnode);
-		parent._children._component.forceUpdate();
-	}
-	else {
-		// We should insert here aswell but since the vnode doesn't
-		// exist yet we can't forceUpdate.... Most commonly during
-		// initial render.
-		hydrate('', parent);
-		render(vnode, parent);
-	}
-}
+// Solution 1 I tried:
+// This fails because it doesn't hydrate and just removes the already present DOM
+//
+// function Portal(props) {
+// 	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
+// 	let container = props.container;
+// 	let temp = document.createTextNode('');
+// 	if (container.hasChildNodes()) {
+// 		container.insertBefore(temp, container.firstChild);
+// 	}
+// 	else {
+// 		container.appendChild(temp);
+// 	}
+
+// 	preactRender(wrap, container, temp);
+
+// 	this.componentWillUnmount = () => {
+// 		container.removeChild(temp);
+// 		render(null, container);
+// 	};
+// 	return null;
+// }
+
+// Solution 2:
+// Fails at first render... Since vnode is not present yet
+//
+// function addRenderRoot(vnode, parent) {
+// 	if (parent._children && parent._children._component && parent._children._component._vnode) {
+// 		parent._children.props.children.unshift(vnode);
+// 		parent._children._component.forceUpdate();
+// 	}
+// 	else {
+// 		// We should insert here aswell but since the vnode doesn't
+// 		// exist yet we can't forceUpdate.... Most commonly during
+// 		// initial render.
+// 		hydrate('', container);
+//		render(wrap, container);
+// 	}
+// }
 
 /**
  * Portal component
@@ -106,7 +132,8 @@ function Portal(props) {
 
 	if (!this.mounted) {
 		this.mounted = true;
-		addRenderRoot(wrap, container);
+		hydrate('', container);
+		render(wrap, container);
 	}
 
 	this.componentWillUnmount = () => {
