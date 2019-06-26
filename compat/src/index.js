@@ -179,7 +179,6 @@ function normalizeVNode(vnode) {
 function cloneElement(element) {
 	if (!isValidElement(element)) return element;
 	let vnode = normalizeVNode(preactCloneElement.apply(null, arguments));
-	vnode.$$typeof = REACT_ELEMENT_TYPE;
 	return vnode;
 }
 
