@@ -173,7 +173,7 @@ function normalizeVNode(vnode) {
  * all vnode normalizations.
  * @param {import('./internal').VNode} element The vnode to clone
  * @param {object} props Props to add when cloning
- * @param {Array<import('./internal').ComponentChildren} rest Optional component children
+ * @param {Array<import('./internal').ComponentChildren>} rest Optional component children
  */
 function cloneElement(element) {
 	if (!isValidElement(element)) return element;
@@ -285,7 +285,7 @@ class PureComponent extends Component {
 	}
 }
 
-// Some libraries like `react-virtualized` explicitely check for this.
+// Some libraries like `react-virtualized` explicitly check for this.
 Component.prototype.isReactComponent = {};
 
 /**
@@ -365,7 +365,7 @@ options.vnode = vnode => {
  * Deprecated way to control batched rendering inside the reconciler, but we
  * already schedule in batches inside our rendering code
  * @template Arg
- * @param {(arg: Arg) => void} callback function that triggers the updatd
+ * @param {(arg: Arg) => void} callback function that triggers the updated
  * @param {Arg} [arg] Optional argument that can be passed to the callback
  */
 // eslint-disable-next-line camelcase
