@@ -268,6 +268,20 @@ describe('debug', () => {
 		expect(console.error).to.not.be.called;
 	});
 
+	it('should throw an error when missing Suspense', () => {
+		const Foo = () => <div>Foo</div>;
+		const LazyComp = lazy(() => new Promise(resolve => resolve({ default: Foo })));
+		const fn = () => {
+			render((
+				<Fragment>
+					<LazyComp />
+				</Fragment>
+			), scratch);
+		};
+
+		expect(fn).to.throw(/Missing Suspense/gi);
+	});
+
 	describe('duplicate keys', () => {
 		const List = props => <ul>{props.children}</ul>;
 		const ListItem = props => <li>{props.children}</li>;

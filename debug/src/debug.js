@@ -8,14 +8,17 @@ export function initDebug() {
 	let oldBeforeDiff = options._diff;
 	let oldDiffed = options.diffed;
 	let oldVnode = options.vnode;
+	let oldCatchError = options._catchError;
 	const warnedComponents = { useEffect: {}, useLayoutEffect: {}, lazyPropTypes: {} };
 
-	// options._catchError = (error, vnode) => {
-	// 	let component = vnode && vnode._component;
-	// 	if (component && typeof error.then === 'function') {
-	// 		error = new Error('Missing Suspense. The throwing component was: ' + (component.displayName || component.name));
-	// 	}
-	// };
+	options._catchError = (error, vnode) => {
+		let component = vnode && vnode._component;
+		if (component && typeof error.then === 'function') {
+			error = new Error('Missing Suspense. The throwing component was: ' + (component.displayName || component.name));
+		}
+
+		oldCatchError(error, vnode);
+	};
 
 	options._root = (vnode, parentNode) => {
 		if (!parentNode) {
