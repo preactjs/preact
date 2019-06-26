@@ -153,7 +153,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		if (tmp = options.diffed) tmp(newVNode);
 	}
 	catch (e) {
-		catchErrorInComponent(e, newVNode._parent);
+		options._catchError(e, newVNode._parent);
 	}
 
 	return newVNode._dom;
@@ -166,7 +166,7 @@ export function commitRoot(mounts, root) {
 			c.componentDidMount();
 		}
 		catch (e) {
-			catchErrorInComponent(e, c._vnode._parent);
+			options._catchError(e, c._vnode._parent);
 		}
 	}
 
@@ -257,7 +257,7 @@ export function applyRef(ref, value, parentVNode) {
 		else ref.current = value;
 	}
 	catch (e) {
-		catchErrorInComponent(e, parentVNode);
+		options._catchError(e, parentVNode);
 	}
 }
 
@@ -290,7 +290,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 				r.componentWillUnmount();
 			}
 			catch (e) {
-				catchErrorInComponent(e, parentVNode);
+				options._catchError(e, parentVNode);
 			}
 		}
 
@@ -317,8 +317,7 @@ function doRender(props, state, context) {
  * @param {import('../internal').VNode} vnode The first ancestor
  * VNode check for error boundary behaviors
  */
-function catchErrorInComponent(error, vnode) {
-	if (options._catchError) { options._catchError(error, vnode); }
+(options)._catchError = function (error, vnode) {
 
 	/** @type {import('../internal').Component} */
 	let component;
@@ -344,4 +343,4 @@ function catchErrorInComponent(error, vnode) {
 	}
 
 	throw error;
-}
+};

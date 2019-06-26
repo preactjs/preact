@@ -10,12 +10,12 @@ export function initDebug() {
 	let oldVnode = options.vnode;
 	const warnedComponents = { useEffect: {}, useLayoutEffect: {}, lazyPropTypes: {} };
 
-	options._catchError = (error, vnode) => {
-		let component = vnode && vnode._component;
-		if (component && typeof error.then === 'function') {
-			error = new Error('Missing Suspense. The throwing component was: ' + (component.displayName || component.name));
-		}
-	};
+	// options._catchError = (error, vnode) => {
+	// 	let component = vnode && vnode._component;
+	// 	if (component && typeof error.then === 'function') {
+	// 		error = new Error('Missing Suspense. The throwing component was: ' + (component.displayName || component.name));
+	// 	}
+	// };
 
 	options._root = (vnode, parentNode) => {
 		if (!parentNode) {
