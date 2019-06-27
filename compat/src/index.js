@@ -1,7 +1,7 @@
 import { hydrate, render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
 import * as hooks from 'preact/hooks';
 export * from 'preact/hooks';
-import { Suspense as _Suspense, lazy as _lazy, catchRender } from './suspense';
+import { Suspense as _Suspense, lazy as _lazy } from './suspense';
 import { assign, removeNode } from '../../src/util';
 
 const version = '16.8.0'; // trick libraries to think we are react
@@ -17,13 +17,6 @@ options.event = e => {
 	if (oldEventHook) e = oldEventHook(e);
 	e.persist = () => {};
 	return e.nativeEvent = e;
-};
-
-const oldCatchError = options._catchError;
-options._catchError = function (error, newVNode, oldVNode) {
-	if (!error.then || !oldVNode || !catchRender(error, newVNode, oldVNode)) {
-		oldCatchError(error, newVNode, oldVNode);
-	}
 };
 
 /**
