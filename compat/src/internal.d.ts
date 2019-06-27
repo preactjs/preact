@@ -19,7 +19,7 @@ export interface Component<P = {}, S = {}> extends PreactComponent<P, S> {
 
 export interface FunctionalComponent<P = {}> extends PreactFunctionalComponent<P> {
 	shouldComponentUpdate?(nextProps: Readonly<P>): boolean;
-	_forwarded?: true;
+	_forwarded?: boolean;
 }
 
 export interface VNode<T = any> extends PreactVNode<T> {

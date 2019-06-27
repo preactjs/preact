@@ -1,7 +1,6 @@
 import { hydrate, render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
 import * as hooks from 'preact/hooks';
-export * from 'preact/hooks';
-import { Suspense as _Suspense, lazy as _lazy } from './suspense';
+import { Suspense, lazy } from './suspense';
 import { assign, removeNode } from '../../src/util';
 
 const version = '16.8.0'; // trick libraries to think we are react
@@ -169,12 +168,11 @@ function normalizeVNode(vnode) {
  * all vnode normalizations.
  * @param {import('./internal').VNode} element The vnode to clone
  * @param {object} props Props to add when cloning
- * @param {Array<import('./internal').ComponentChildren} rest Optional component children
+ * @param {Array<import('./internal').ComponentChildren>} rest Optional component children
  */
 function cloneElement(element) {
 	if (!isValidElement(element)) return element;
 	let vnode = normalizeVNode(preactCloneElement.apply(null, arguments));
-	vnode.$$typeof = REACT_ELEMENT_TYPE;
 	return vnode;
 }
 
@@ -217,7 +215,7 @@ function applyEventNormalization({ type, props }) {
 
 /**
  * Remove a component tree from the DOM, including state and event handlers.
- * @param {Element | Document | ShadowRoot | DocumentFragment} container
+ * @param {import('./internal').PreactElement} container
  * @returns {boolean}
  */
 function unmountComponentAtNode(container) {
@@ -282,7 +280,7 @@ class PureComponent extends Component {
 	}
 }
 
-// Some libraries like `react-virtualized` explicitely check for this.
+// Some libraries like `react-virtualized` explicitly check for this.
 Component.prototype.isReactComponent = {};
 
 /**
@@ -361,14 +359,14 @@ options.vnode = vnode => {
 /**
  * Deprecated way to control batched rendering inside the reconciler, but we
  * already schedule in batches inside our rendering code
- * @param {(a) => void} callback function that triggers the updatd
- * @param {*} [arg] Optional argument that can be passed to the callback
+ * @template Arg
+ * @param {(arg: Arg) => void} callback function that triggers the updated
+ * @param {Arg} [arg] Optional argument that can be passed to the callback
  */
 // eslint-disable-next-line camelcase
-function unstable_batchedUpdates(callback, arg) {
-	callback(arg);
-}
+const unstable_batchedUpdates = (callback, arg) => callback(arg);
 
+export * from 'preact/hooks';
 export {
 	version,
 	Children,
@@ -389,11 +387,10 @@ export {
 	memo,
 	forwardRef,
 	// eslint-disable-next-line camelcase
-	unstable_batchedUpdates
+	unstable_batchedUpdates,
+	Suspense,
+	lazy
 };
-
-export const Suspense = _Suspense;
-export const lazy = _lazy;
 
 // React copies the named exports to the default one.
 export default assign({
@@ -415,5 +412,7 @@ export default assign({
 	PureComponent,
 	memo,
 	forwardRef,
-	unstable_batchedUpdates
+	unstable_batchedUpdates,
+	Suspense,
+	lazy
 }, hooks);

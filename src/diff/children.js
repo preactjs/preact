@@ -2,6 +2,7 @@ import { diff, unmount, applyRef } from './index';
 import { coerceToVNode } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { removeNode } from '../util';
+import { getDomSibling } from '../component';
 
 /**
  * Diff the children of a virtual node
@@ -36,14 +37,14 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	// for this purpose, because `null` is a valid value for `oldDom` which can mean to skip to this logic
 	// (e.g. if mounting a new tree in which the old DOM should be ignored (usually for Fragments).
 	if (oldDom == EMPTY_OBJ) {
-		oldDom = null;
-		if (excessDomChildren!=null) {
+		if (excessDomChildren != null) {
 			oldDom = excessDomChildren[0];
 		}
+		else if (oldChildrenLength) {
+			oldDom = getDomSibling(oldParentVNode, 0);
+		}
 		else {
-			for (i = 0; !oldDom && i < oldChildrenLength; i++) {
-				oldDom = oldChildren[i] && oldChildren[i]._dom;
-			}
+			oldDom = null;
 		}
 	}
 

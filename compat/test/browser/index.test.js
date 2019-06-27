@@ -115,14 +115,14 @@ describe('preact-compat', () => {
 
 	describe('createFactory', () => {
 		it('should create a DOM element', () => {
-			render(createFactory('span', null)(), scratch);
-			expect(scratch.firstChild.nodeName).to.equal('SPAN');
+			render(createFactory('span')({ class: 'foo' }, '1'), scratch);
+			expect(scratch.innerHTML).to.equal('<span class="foo">1</span>');
 		});
 
 		it('should create a component', () => {
-			const Foo = () => <div>foo</div>;
-			render(createFactory(Foo, null)(), scratch);
-			expect(scratch.textContent).to.equal('foo');
+			const Foo = ({ id, children }) => <div id={id}>foo {children}</div>;
+			render(createFactory(Foo)({ id: 'value' }, 'bar'), scratch);
+			expect(scratch.innerHTML).to.equal('<div id="value">foo bar</div>');
 		});
 	});
 
