@@ -249,24 +249,32 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
  * Invoke or update a ref, depending on whether it is a function or object ref.
  * @param {object|function} ref
  * @param {any} value
+ * @param {import('../internal').VNode} parentVNode
  */
-export function applyRef(ref, value) {
-	if (typeof ref=='function') ref(value);
-	else ref.current = value;
+export function applyRef(ref, value, parentVNode) {
+	try {
+		if (typeof ref=='function') ref(value);
+		else ref.current = value;
+	}
+	catch (e) {
+		options._catchError(e, parentVNode);
+	}
 }
 
 /**
  * Unmount a virtual node from the tree and apply DOM changes
  * @param {import('../internal').VNode} vnode The virtual node to unmount
+ * @param {import('../internal').VNode} parentVNode The parent of the VNode that
+ * initiated the unmount
  * @param {boolean} [skipRemove] Flag that indicates that a parent node of the
  * current element is already detached from the DOM.
  */
-export function unmount(vnode, skipRemove) {
+export function unmount(vnode, parentVNode, skipRemove) {
 	let r;
 	if (options.unmount) options.unmount(vnode);
 
 	if (r = vnode.ref) {
-		applyRef(r, null);
+		applyRef(r, null, parentVNode);
 	}
 
 	let dom;
@@ -278,7 +286,12 @@ export function unmount(vnode, skipRemove) {
 
 	if ((r = vnode._component)!=null) {
 		if (r.componentWillUnmount) {
-			r.componentWillUnmount();
+			try {
+				r.componentWillUnmount();
+			}
+			catch (e) {
+				options._catchError(e, parentVNode);
+			}
 		}
 
 		r.base = r._parentDom = null;
@@ -286,7 +299,7 @@ export function unmount(vnode, skipRemove) {
 
 	if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {
-			if (r[i]) unmount(r[i], skipRemove);
+			if (r[i]) unmount(r[i], parentVNode, skipRemove);
 		}
 	}
 
