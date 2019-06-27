@@ -97,10 +97,10 @@ export function initDevTools() {
 				return vnode!=null ? [vnode._dom].filter(Boolean) : null;
 			},
 			startProfiling() {
-				options._profiling = true;
+				state.isProfiling = true;
 			},
 			stopProfiling() {
-				options._profiling = false;
+				state.isProfiling = false;
 			},
 			getProfilingData() {
 				// TODO
@@ -197,12 +197,12 @@ export function initDevTools() {
 	};
 
 	options._diff = (vnode) => {
-		if (options._profiling) vnode.startTime = now();
+		if (state.isProfiling) vnode.startTime = now();
 		if (prevBeforeDiff!=null) prevBeforeDiff(vnode);
 	};
 
 	options.diffed = (vnode) => {
-		if (options._profiling) vnode.endTime = now();
+		if (state.isProfiling) vnode.endTime = now();
 		if (prevAfterDiff!=null) prevAfterDiff(vnode);
 	};
 
