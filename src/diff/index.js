@@ -153,7 +153,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		if (tmp = options.diffed) tmp(newVNode);
 	}
 	catch (e) {
-		options._catchError(e, newVNode._parent);
+		options._catchError(e, newVNode);
 	}
 
 	return newVNode._dom;
@@ -166,7 +166,7 @@ export function commitRoot(mounts, root) {
 			c.componentDidMount();
 		}
 		catch (e) {
-			options._catchError(e, c._vnode._parent);
+			options._catchError(e, c._vnode);
 		}
 	}
 
@@ -249,15 +249,15 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
  * Invoke or update a ref, depending on whether it is a function or object ref.
  * @param {object|function} ref
  * @param {any} value
- * @param {import('../internal').VNode} parentVNode
+ * @param {import('../internal').VNode} vnode
  */
-export function applyRef(ref, value, parentVNode) {
+export function applyRef(ref, value, vnode) {
 	try {
 		if (typeof ref=='function') ref(value);
 		else ref.current = value;
 	}
 	catch (e) {
-		options._catchError(e, parentVNode);
+		options._catchError(e, vnode);
 	}
 }
 
@@ -314,15 +314,16 @@ function doRender(props, state, context) {
 /**
  * Find the closest error boundary to a thrown error and call it
  * @param {object} error The thrown value
- * @param {import('../internal').VNode} vnode The first ancestor
- * VNode check for error boundary behaviors
+ * @param {import('../internal').VNode} vnode The vnode that threw
+ * the error that was caught (except for unmounting when this parameter
+ * is the highest parent that was being unmounted)
  */
 (options)._catchError = function (error, vnode) {
 
 	/** @type {import('../internal').Component} */
 	let component;
 
-	for (; vnode; vnode = vnode._parent) {
+	for (; vnode = vnode._parent;) {
 		if ((component = vnode._component) && !component._processingException) {
 			try {
 				if (component.constructor && component.constructor.getDerivedStateFromError!=null) {
