@@ -14,12 +14,12 @@ export interface Component<P = {}, S = {}> extends PreactComponent<P, S> {
 	isReactComponent?: object;
 	isPureReactComponent?: true;
 
-	_childDidSuspend?(error: Promise<void>);
+	_childDidSuspend?(error: Promise<void>): void;
 }
 
 export interface FunctionalComponent<P = {}> extends PreactFunctionalComponent<P> {
 	shouldComponentUpdate?(nextProps: Readonly<P>): boolean;
-	_forwarded?: true;
+	_forwarded?: boolean;
 }
 
 export interface VNode<T = any> extends PreactVNode<T> {

@@ -107,10 +107,11 @@ export function getDomSibling(vnode, childIndex) {
 	for (; childIndex < vnode._children.length; childIndex++) {
 		sibling = vnode._children[childIndex];
 
-		if (sibling != null) {
-			return typeof sibling.type !== 'function'
-				? sibling._dom
-				: getDomSibling(sibling, 0);
+		if (sibling != null && sibling._dom != null) {
+			// Since updateParentDomPointers keeps _dom pointer correct,
+			// we can rely on _dom to tell us if this subtree contains a
+			// rendered DOM node, and what the first rendered DOM node is
+			return sibling._dom;
 		}
 	}
 

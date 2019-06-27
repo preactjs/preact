@@ -10,4 +10,4 @@ export interface SuspenseProps {
   fallback: preact.ComponentChildren;
 }
 
-export abstract class Suspense extends Component<SuspenseProps> {}
+export class Suspense extends Component<SuspenseProps> {}
