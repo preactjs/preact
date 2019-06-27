@@ -19,10 +19,12 @@ options.event = e => {
 	return e.nativeEvent = e;
 };
 
-let oldCatchRender = options._catchRender;
-options._catchRender = (error, newVNode, oldVNode) => (
-	oldCatchRender && oldCatchRender(error, newVNode, oldVNode) || catchRender(error, newVNode, oldVNode)
-);
+const oldCatchError = options._catchError;
+options._catchError = function (error, newVNode, oldVNode) {
+	if (!error.then || !oldVNode || !catchRender(error, newVNode, oldVNode)) {
+		oldCatchError(error, newVNode, oldVNode);
+	}
+};
 
 /**
  * Legacy version of createElement.

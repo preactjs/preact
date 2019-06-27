@@ -112,15 +112,9 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c._vnode = newVNode;
 			c._parentDom = parentDom;
 
-			try {
-				tmp = c.render(c.props, c.state, c.context);
-				let isTopLevelFragment = tmp != null && tmp.type == Fragment && tmp.key == null;
-				toChildArray(isTopLevelFragment ? tmp.props.children : tmp, newVNode._children=[], coerceToVNode, true);
-			}
-			catch (e) {
-				if ((tmp = options._catchRender) && tmp(e, newVNode, oldVNode)) break outer;
-				throw e;
-			}
+			tmp = c.render(c.props, c.state, c.context);
+			let isTopLevelFragment = tmp != null && tmp.type == Fragment && tmp.key == null;
+			toChildArray(isTopLevelFragment ? tmp.props.children : tmp, newVNode._children=[], coerceToVNode, true);
 
 			if (c.getChildContext!=null) {
 				context = assign(assign({}, context), c.getChildContext());
@@ -153,7 +147,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		if (tmp = options.diffed) tmp(newVNode);
 	}
 	catch (e) {
-		options._catchError(e, newVNode);
+		options._catchError(e, newVNode, oldVNode);
 	}
 
 	return newVNode._dom;
@@ -317,8 +311,10 @@ function doRender(props, state, context) {
  * @param {import('../internal').VNode} vnode The vnode that threw
  * the error that was caught (except for unmounting when this parameter
  * is the highest parent that was being unmounted)
+ * @param {import('../internal').VNode} oldVNode The oldVNode of the vnode
+ * that threw, if this VNode threw while diffing
  */
-(options)._catchError = function (error, vnode) {
+(options)._catchError = function (error, vnode, oldVNode) {
 
 	/** @type {import('../internal').Component} */
 	let component;

@@ -11,13 +11,22 @@ export function initDebug() {
 	let oldCatchError = options._catchError;
 	const warnedComponents = { useEffect: {}, useLayoutEffect: {}, lazyPropTypes: {} };
 
-	options._catchError = (error, vnode) => {
+	options._catchError = (error, vnode, oldVNode) => {
 		let component = vnode && vnode._component;
 		if (component && typeof error.then === 'function') {
-			error = new Error('Missing Suspense. The throwing component was: ' + (component.displayName || component.name));
+			const promise = error;
+			error = new Error('Missing Suspense. The throwing component was: ' + getDisplayName(vnode));
+
+			let parent = vnode;
+			for (; parent; parent = parent._parent) {
+				if (parent._component && parent._component._childDidSuspend) {
+					error = promise;
+					break;
+				}
+			}
 		}
 
-		oldCatchError(error, vnode);
+		oldCatchError(error, vnode, oldVNode);
 	};
 
 	options._root = (vnode, parentNode) => {
