@@ -2,11 +2,12 @@ import { options, Component } from 'preact';
 import { onCommitFiberRoot, inspectElement, onCommitFiberUnmount, selectElement, logElementToConsole, flushInitialEvents } from './renderer2';
 import { setInProps, setInState } from './update';
 import { assign } from '../../../src/util';
-import { getVNode, hasVNodeId } from './cache';
+import { getVNode, hasVNodeId, getVNodeId } from './cache';
 import { setInHook } from './hooks';
 import { now } from './util';
 import { updateComponentFilters } from './filter';
 import { isRoot } from './vnode';
+import { getProfilingData } from './profiling';
 
 /**
  * Wrap function with generic error logging
@@ -71,6 +72,9 @@ export function initDevTools() {
 			connected: false,
 			currentRootId: -1,
 			isProfiling: false,
+			profilingData: new Map(),
+			currentCommitProfileData: [],
+			vnodeDurations: new Map(),
 			pending: [],
 			pendingUnmountIds: [],
 			pendingUnmountRootId: null,
@@ -97,17 +101,24 @@ export function initDevTools() {
 				return vnode!=null ? [vnode._dom].filter(Boolean) : null;
 			},
 			startProfiling() {
+				if (state.isProfiling) return;
+
 				state.isProfiling = true;
+				state.profilingStart = now();
+
+				// Trigger a render to capture timings of all parent nodes. This is
+				// needed so that we can display the correct bar length in the
+				// flamegraph.
+				hook.getFiberRoots(rid).forEach(root => {
+					let id = getVNodeId(root);
+					state.profilingData.set(id, []);
+				});
 			},
 			stopProfiling() {
 				state.isProfiling = false;
 			},
 			getProfilingData() {
-				// TODO
-				return {
-					rendererId: rid,
-					dataForRoots: []
-				};
+				return getProfilingData(state, rid);
 			},
 			selectElement,
 			cleanup() {

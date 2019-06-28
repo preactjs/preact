@@ -1,5 +1,5 @@
 import { getVNodeId, getVNode, clearVNode, hasVNodeId, getPreviousChildrenIds, addChildToParent, removeChildFromParent } from './cache';
-import { TREE_OPERATION_ADD, ElementTypeRoot, TREE_OPERATION_REMOVE, TREE_OPERATION_REORDER_CHILDREN } from './constants';
+import { TREE_OPERATION_ADD, ElementTypeRoot, TREE_OPERATION_REMOVE, TREE_OPERATION_REORDER_CHILDREN, TREE_OPERATION_UPDATE_TREE_BASE_DURATION } from './constants';
 import { getVNodeType, getDisplayName, getAncestor, getOwners, getRoot } from './vnode';
 import { cleanForBridge } from './pretty';
 import { inspectHooks } from './hooks';
@@ -17,8 +17,23 @@ import { isRoot, getInstance } from './custom';
 export function onCommitFiberRoot(hook, state, vnode) {
 	// Keep track of mounted roots
 	let roots = hook.getFiberRoots(state.rendererId);
+	let root;
 	if (isRoot(vnode)) {
 		roots.add(vnode);
+		root = vnode;
+	}
+	else {
+		root = getRoot(vnode);
+	}
+
+	// If we're seeing this node for the first time we need to be careful
+	// not to set the id, otherwise the mount branch will not be chosen below
+	if (hasVNodeId(root)) {
+		state.currentRootId = getVNodeId(root);
+	}
+
+	if (state.isProfiling) {
+		state.currentCommitProfileData = [];
 	}
 
 	// TODO: Profiling
@@ -37,7 +52,13 @@ export function onCommitFiberRoot(hook, state, vnode) {
 		mount(state, vnode, parentId);
 	}
 
-	state.currentRootId = getVNodeId(getRoot(vnode));
+	if (state.isProfiling) {
+		if (state.profilingData.has(state.currentRootId)) {
+			state.profilingData.get(state.currentRootId)
+				.push(state.currentCommitProfileData);
+		}
+	}
+
 	flushPendingEvents(hook, state);
 	state.currentRootId = -1;
 }
@@ -87,6 +108,10 @@ export function update(state, vnode, parentId) {
 				}
 			}
 		}
+	}
+
+	if (include) {
+		recordProfiling(state, vnode, false);
 	}
 
 	if (shouldReset) {
@@ -165,13 +190,17 @@ export function unmount(state, vnode) {
  */
 export function recordUnmount(state, vnode) {
 	if (hasVNodeId(vnode)) {
+		let id = getVNodeId(vnode);
 		if (isRoot(vnode)) {
-			state.pendingUnmountRootId = getVNodeId(vnode);
+			state.pendingUnmountRootId = id;
 		}
 		else {
-			state.pendingUnmountIds.push(getVNodeId(vnode));
+			state.pendingUnmountIds.push(id);
 		}
+
+		state.vnodeDurations.delete(id);
 	}
+
 	clearVNode(vnode);
 }
 
@@ -212,6 +241,7 @@ export function recordMount(state, vnode) {
 			1,
 			1
 		);
+		state.currentRootId = id;
 	}
 	else {
 		let ancestor = getAncestor(state.filter, vnode);
@@ -225,6 +255,44 @@ export function recordMount(state, vnode) {
 			vnode.key ? getStringId(vnode.key + '') : 0
 		);
 	}
+
+	recordProfiling(state, vnode, true);
+}
+
+/**
+ * Records profiling timings
+ * @param {import('../internal').AdapterState} state
+ * @param {import('../internal').VNode} vnode
+ * @param {boolean} isNew
+ */
+export function recordProfiling(state, vnode, isNew) {
+	let id = getVNodeId(vnode);
+	let duration = vnode.endTime - vnode.startTime;
+	state.vnodeDurations.set(id, duration > 0 ? duration : 10);
+
+	if (!state.isProfiling) return;
+
+	state.pending.push(
+		TREE_OPERATION_UPDATE_TREE_BASE_DURATION,
+		id,
+		Math.floor(duration * 1000)
+	);
+	let selfDuration = duration;
+
+	if (vnode._children) {
+		for (let i = 0; i < vnode._children.length; i++) {
+			let child = vnode._children[i];
+			if (child) {
+				selfDuration -= child.endTime - child.startTime;
+			}
+		}
+	}
+
+	state.currentCommitProfileData.push(
+		id,
+		duration,
+		selfDuration // without children
+	);
 }
 
 /**
@@ -308,12 +376,7 @@ export function flushInitialEvents(hook, state) {
 	// TODO: When operations are already queued, we should just flush the queus
 	hook.getFiberRoots(state.rendererId).forEach(root => {
 		state.currentRootId = getVNodeId(root);
-
-		if (state.pending.length > 0) {
-			flushPendingEvents(hook, state);
-		}
-
-		state.pending = [];
+		flushPendingEvents(hook, state);
 	});
 }
 

@@ -1,6 +1,6 @@
 import { Fragment } from 'preact';
 import { ElementTypeClass, ElementTypeFunction, ElementTypeHostComponent } from './constants';
-import { getVNodeId, hasVNodeId } from './cache';
+import { getVNodeId } from './cache';
 import { shouldFilter } from './filter';
 
 /**

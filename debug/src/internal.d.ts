@@ -1,10 +1,6 @@
 import { Component, PreactElement, VNode, Options } from "../../src/internal";
 export { Component, PreactElement, VNode };
 
-export interface Options {
-	_profiling: boolean;
-}
-
 export interface InspectData {
 	id: number;
 	canEditHooks: boolean;
@@ -64,8 +60,35 @@ export interface RendererConfig {
 }
 
 export interface ProfilingData {
-	dataForRoots: any[];
-	rendererId: number;
+	dataForRoots: ProfilingRootDataBackend[];
+	rendererID: number;
+}
+
+export interface ChangeDescription {
+	context: string[] | boolean | null;
+  didHooksChange: boolean;
+  isFirstMount: boolean;
+  props: string[] | null;
+  state: string[] | null;
+}
+
+export interface CommitDataBackend {
+  changeDescriptions: Array<[number, ChangeDescription]> | null;
+  duration: number;
+  fiberActualDurations: Array<[number, number]>;
+  fiberSelfDurations: Array<[number, number]>;
+  interactionIDs: Array<number>;
+  priorityLevel: string | null;
+  timestamp: number;
+}
+
+export interface ProfilingRootDataBackend {
+	commitData: CommitDataBackend[];
+	displayName: string;
+	initialTreeBaseDurations: Array<[number, number]>;
+	interactionCommits: Array<[number, number[]]>;
+	interactions: Array<[number, any]>;
+	rootID: number;
 }
 
 export interface Owner {
@@ -208,6 +231,10 @@ export interface AdapterState {
 	pendingUnmountIds: number[];
 	pendingUnmountRootId: number | null;
 	isProfiling: boolean;
+	profilingStart: number;
+	profilingData: Map<number, number[][]>;
+	currentCommitProfileData: number[];
+	vnodeDurations: Map<number, number>;
 	inspectedElementId: number;
 	filter: {
 		byType: Set<number>;
