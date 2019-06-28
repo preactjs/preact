@@ -65,34 +65,28 @@ export function initDebug() {
 			throw new Error('Invalid type passed to createElement(): '+(Array.isArray(type) ? 'array' : type));
 		}
 
-		if (type==='thead' || type==='tfoot' || type==='thead') {
-			if (parentType!=='table') {
-				console.error(
-					'Improper nesting of table.' +
-					'Your <thead/tbody/tfoot> should have a table parent.'
-					+ serializeVNode(vnode)
-				);
-			}
+		if ((type==='thead' || type==='tfoot' || type==='thead') && parentType!=='table') {
+			console.error(
+				'Improper nesting of table.' +
+				'Your <thead/tbody/tfoot> should have a <table> parent.'
+				+ serializeVNode(vnode)
+			);
 		}
-		else if (type==='tr') {
-			if (parentType!=='thead' && parentType!=='tfoot' && parentType!=='tbody') {
-				console.error(
-					'Improper nesting of table.' +
-					'Your <tr> should have a <thead/tbody/tfoot> parent.'
-					+ serializeVNode(vnode)
-				);
-			}
+		else if (type==='tr' && (parentType!=='thead' && parentType!=='tfoot' && parentType!=='tbody')) {
+			console.error(
+				'Improper nesting of table.' +
+				'Your <tr> should have a <thead/tbody/tfoot> parent.'
+				+ serializeVNode(vnode)
+			);
 		}
 		else if (type==='td') {
 			if (parentType!=='tr') {
 				console.error(
 					'Improper nesting of table.' +
-					'Your <td> should have a <tr> parent with a <tbody/tfoot> parent.'
+					'Your <td> should have a <tr> parent.'
 					+ serializeVNode(vnode)
 				);
-			}
-
-			if (parent._parent.type === 'thead') {
+			} else if (parent._parent.type === 'thead') {
 				console.error(
 					'Improper nesting of table.' +
 					'Your <thead> should use <th> instead of <td>.'
@@ -100,14 +94,12 @@ export function initDebug() {
 				);
 			}
 		}
-		else if (type==='th') {
-			if (parentType!=='tr') {
-				console.error(
-					'Improper nesting of table.' +
-					'Your <th> should have a <tr> parent with a <thead> parent.'
-					+ serializeVNode(vnode)
-				);
-			}
+		else if (type==='th' && parentType!=='tr') {
+			console.error(
+				'Improper nesting of table.' +
+				'Your <th> should have a <tr> parent with a <thead> parent.'
+				+ serializeVNode(vnode)
+			);
 		}
 
 		if (
