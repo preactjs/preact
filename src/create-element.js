@@ -13,7 +13,7 @@ export function createElement(type, props, children) {
 	props = assign({}, props);
 
 	if (arguments.length>3) {
-		children = Array.prototype.slice.call(arguments, 2);
+		children = [].slice.call(arguments, 2);
 	}
 	if (children!=null) {
 		props.children = children;
