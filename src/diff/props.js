@@ -43,20 +43,33 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	name = isSvg ? (name==='className' ? 'class' : name) : (name==='class' ? 'className' : name);
 
 	if (name==='style') {
-		const set = assign(assign({}, oldValue), value);
-		for (let i in set) {
-			if ((value || EMPTY_OBJ)[i] === (oldValue || EMPTY_OBJ)[i]) {
-				continue;
-			}
-			dom.style.setProperty(
-				(i[0] === '-' && i[1] === '-') ? i : i.replace(CAMEL_REG, '-$&'),
-				(value && (i in value))
-					? (typeof set[i]==='number' && IS_NON_DIMENSIONAL.test(i)===false)
-						? set[i] + 'px'
-						: set[i]
-					: ''
-			);
+		let s = dom.style;
+
+		if (typeof value==='string') {
+			s.cssText = value;
 		}
+		else {
+			if (typeof oldValue==='string') {
+				s.cssText = '';
+				oldValue = EMPTY_OBJ;
+			}
+
+			const set = assign(assign({}, oldValue), value);
+			for (let i in set) {
+				if ((value || EMPTY_OBJ)[i] === (oldValue || EMPTY_OBJ)[i]) {
+					continue;
+				}
+				dom.style.setProperty(
+					(i[0] === '-' && i[1] === '-') ? i : i.replace(CAMEL_REG, '-$&'),
+					(value && (i in value))
+						? (typeof set[i]==='number' && IS_NON_DIMENSIONAL.test(i)===false)
+							? set[i] + 'px'
+							: set[i]
+						: ''
+				);
+			}
+		}
+
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0]==='o' && name[1]==='n') {

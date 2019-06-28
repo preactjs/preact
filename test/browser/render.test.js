@@ -342,6 +342,38 @@ describe('render()', () => {
 	});
 
 	describe('style attribute', () => {
+		it('should apply style as String', () => {
+			render(<div style="top: 5px; position: relative;" />, scratch);
+			expect(scratch.childNodes[0].style.cssText)
+				.to.equal('top: 5px; position: relative;');
+		});
+
+		it('should not call CSSStyleDeclaration.setProperty for style strings', () => {
+			render(<div style="top: 5px; position: relative;" />, scratch);
+			sinon.stub(scratch.firstChild.style, 'setProperty');
+			render(<div style="top: 10px; position: absolute;" />, scratch);
+			expect(scratch.firstChild.style.setProperty).to.not.be.called;
+		});
+
+		it('should properly switch from string styles to object styles and back', () => {
+			render(<div style="display: inline;">test</div>, scratch);
+
+			let style = scratch.firstChild.style;
+			expect(style.cssText).to.equal('display: inline;');
+
+			render(<div style={{ color: 'red' }} />, scratch);
+			expect(style.cssText).to.equal('color: red;');
+
+			render(<div style="color: blue" />, scratch);
+			expect(style.cssText).to.equal('color: blue;');
+
+			render(<div style={{ color: 'yellow' }} />, scratch);
+			expect(style.cssText).to.equal('color: yellow;');
+
+			render(<div style="display: block" />, scratch);
+			expect(style.cssText).to.equal('display: block;');
+		});
+
 		it('should serialize style objects', () => {
 			const styleObj = {
 				color: 'rgb(255, 255, 255)',
@@ -356,8 +388,7 @@ describe('render()', () => {
 
 			render(<div style={styleObj}>test</div>, scratch);
 
-			let root = scratch.firstChild;
-			let { style } = root;
+			let style = scratch.firstChild.style;
 			expect(style.color).to.equal('rgb(255, 255, 255)');
 			expect(style.background).to.contain('rgb(255, 100, 0)');
 			expect(style.backgroundPosition).to.equal('10px 10px');
