@@ -59,7 +59,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 				if ((value || EMPTY_OBJ)[i] === (oldValue || EMPTY_OBJ)[i]) {
 					continue;
 				}
-				dom.style.setProperty(
+				s.setProperty(
 					(i[0] === '-' && i[1] === '-') ? i : i.replace(CAMEL_REG, '-$&'),
 					(value && (i in value))
 						? (typeof set[i]==='number' && IS_NON_DIMENSIONAL.test(i)===false)
