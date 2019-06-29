@@ -75,6 +75,7 @@ export function initDevTools() {
 			profilingData: new Map(),
 			currentCommitProfileData: [],
 			vnodeDurations: new Map(),
+			changeDescriptions: new Map(),
 			pending: [],
 			pendingUnmountIds: [],
 			pendingUnmountRootId: null,
@@ -212,8 +213,14 @@ export function initDevTools() {
 		if (prevBeforeDiff!=null) prevBeforeDiff(vnode);
 	};
 
-	options.diffed = (vnode) => {
+	options.diffed = (vnode, oldVNode) => {
 		if (state.isProfiling) vnode.endTime = now();
+		if (vnode!=null && vnode._component!=null && oldVNode!=null && oldVNode._component!=null) {
+			let c = vnode._component;
+			c._prevProps = oldVNode.props;
+			c._prevContext = oldVNode._component._context;
+			c._prevHooks = oldVNode._component.__hooks._list;
+		}
 		if (prevAfterDiff!=null) prevAfterDiff(vnode);
 	};
 

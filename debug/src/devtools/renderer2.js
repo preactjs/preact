@@ -7,6 +7,7 @@ import { encode } from './util';
 import { getStringId, stringTable, allStrLengths, clearStringTable } from './string-table';
 import { shouldFilter } from './filter';
 import { isRoot, getInstance } from './custom';
+import { getChangeDescription } from './profiling';
 
 /**
  * Called when a tree has completed rendering
@@ -293,6 +294,12 @@ export function recordProfiling(state, vnode, isNew) {
 		duration,
 		selfDuration // without children
 	);
+
+	// "Why did this component render?" panel
+	let changed = getChangeDescription(vnode);
+	if (changed!=null) {
+		state.changeDescriptions.set(id, changed);
+	}
 }
 
 /**
@@ -412,7 +419,7 @@ export function inspectElementRaw(id) {
 	};
 }
 
-let lastInspected = -1;
+// let lastInspected = -1;
 
 /**
  * Inspect a vnode (the right panel in the devtools)
@@ -422,8 +429,9 @@ let lastInspected = -1;
  */
 export function inspectElement(id, path) {
 	// Prevent infinite loop :/
-	if (id==lastInspected) return;
-	lastInspected = id;
+	// TODO: Somehow this breaks the profiler
+	// if (id==lastInspected) return;
+	// lastInspected = id;
 
 	if (getVNode(id)==null) return;
 	return {

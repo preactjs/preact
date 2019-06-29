@@ -1,5 +1,13 @@
 import { Component, PreactElement, VNode, Options } from "../../src/internal";
-export { Component, PreactElement, VNode };
+import { HookState } from "../../hooks/src/internal";
+import { Component } from '../../hooks/src/internal';
+export { Component, PreactElement, VNode};
+
+export interface Component extends Component {
+	_prevContext: any;
+	_prevProps: object;
+	_prevHooks: HookState;
+}
 
 export interface InspectData {
 	id: number;
@@ -58,6 +66,14 @@ export interface HookInspectData {
 export interface PrettyData {
 	data: any; // TODO
 	cleaned: string[];
+}
+
+export interface ChangeDescription {
+	context: null | boolean,
+	didHooksChange: boolean,
+	isFirstMount: boolean,
+	props: null | string[],
+	state: null | string[],
 }
 
 export interface RendererConfig {
@@ -261,9 +277,11 @@ export interface AdapterState {
 	pending: any[];
 	pendingUnmountIds: number[];
 	pendingUnmountRootId: number | null;
+	// TODO: Cleanup profiling state
 	isProfiling: boolean;
 	profilingStart: number;
 	profilingData: Map<number, number[][]>;
+	changeDescriptions: Map<number, ChangeDescription>;
 	currentCommitProfileData: number[];
 	vnodeDurations: Map<number, number>;
 	inspectedElementId: number;
