@@ -38,25 +38,46 @@ class Child extends Component {
 	}
 }
 
+class OldContext extends Component {
+	getChildContext() {
+		return { foo: 123 };
+	}
+
+	render() {
+		return <OldContextChild />;
+	}
+}
+
+class OldContextChild extends Component {
+	render() {
+		return <div>context value: {this.context.foo}</div>;
+	}
+}
+
 export default class ContextDemo extends Component {
 	render() {
 		return (
-			<ThemeProvider value="blue" next="red">
-				<Child>
-					<Consumer>
-						{data => (
-							<div>
-								<p>current theme: <b>{data}</b></p>
-								<ThemeProvider value="black" next="white">
-									<Consumer>
-										{data => <p>current sub theme: <b>{data}</b></p>}
-									</Consumer>
-								</ThemeProvider>
-							</div>
-						)}
-					</Consumer>
-				</Child>
-			</ThemeProvider>
+			<div>
+				<h2>New Context</h2>
+				<ThemeProvider value="blue" next="red">
+					<Child>
+						<Consumer>
+							{data => (
+								<div>
+									<p>current theme: <b>{data}</b></p>
+									<ThemeProvider value="black" next="white">
+										<Consumer>
+											{data => <p>current sub theme: <b>{data}</b></p>}
+										</Consumer>
+									</ThemeProvider>
+								</div>
+							)}
+						</Consumer>
+					</Child>
+				</ThemeProvider>
+				<h2>Old Context</h2>
+				<OldContext />
+			</div>
 		);
 	}
 }
