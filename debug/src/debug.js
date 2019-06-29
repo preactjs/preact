@@ -86,7 +86,8 @@ export function initDebug() {
 					'Your <td> should have a <tr> parent.'
 					+ serializeVNode(vnode)
 				);
-			} else if (parent._parent.type === 'thead') {
+			}
+			else if (parent._parent.type === 'thead') {
 				console.error(
 					'Improper nesting of table.' +
 					'Your <thead> should use <th> instead of <td>.'
