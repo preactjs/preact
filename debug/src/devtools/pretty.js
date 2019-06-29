@@ -113,3 +113,16 @@ export function cleanForBridge(data) {
 		cleaned
 	};
 }
+
+let reg = /__cC\d+/;
+export function cleanContext(context) {
+	let cleaned = {};
+	for (let key in context) {
+		if (reg.test(key)) continue;
+		cleaned[key] = context[key];
+	}
+
+	let res = cleanForBridge(cleaned);
+	if (Object.keys(cleaned).length==0) return null;
+	return res;
+}

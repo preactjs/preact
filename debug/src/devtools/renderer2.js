@@ -1,7 +1,7 @@
 import { getVNodeId, getVNode, clearVNode, hasVNodeId, getPreviousChildrenIds, addChildToParent, removeChildFromParent } from './cache';
 import { TREE_OPERATION_ADD, ElementTypeRoot, TREE_OPERATION_REMOVE, TREE_OPERATION_REORDER_CHILDREN, TREE_OPERATION_UPDATE_TREE_BASE_DURATION } from './constants';
 import { getVNodeType, getDisplayName, getAncestor, getOwners, getRoot } from './vnode';
-import { cleanForBridge } from './pretty';
+import { cleanForBridge, cleanContext } from './pretty';
 import { inspectHooks } from './hooks';
 import { encode } from './util';
 import { getStringId, stringTable, allStrLengths, clearStringTable } from './string-table';
@@ -387,8 +387,6 @@ export function flushInitialEvents(hook, state) {
  */
 export function inspectElementRaw(id) {
 	let vnode = getVNode(id);
-		if (vnode==null) return;
-
 	let hasHooks = vnode._component!=null && vnode._component.__hooks!=null;
 	let owners = getOwners(vnode);
 
@@ -400,8 +398,7 @@ export function inspectElementRaw(id) {
 		canViewSource: false, // TODO
 		displayName: getDisplayName(vnode),
 		type: getVNodeType(vnode),
-		// context: vnode._component ? cleanForBridge(vnode._component.context) : null, // TODO
-		context: null, // TODO
+		context: vnode._component ? cleanContext(vnode._component.context) : null, // TODO
 		events: null,
 		hooks: hasHooks ? cleanForBridge(inspectHooks(vnode)) : null,
 		props: vnode.props!=null && Object.keys(vnode.props).length > 0
