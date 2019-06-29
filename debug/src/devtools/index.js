@@ -235,10 +235,6 @@ export function initDevTools() {
 			return;
 		}
 
-		if (rid!=null) {
-			const roots = hook.getFiberRoots(rid);
-			roots.add(vnode);
-		}
 		onCommitRoot(vnode);
 	});
 
