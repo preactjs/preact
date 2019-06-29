@@ -231,7 +231,7 @@ export function initDevTools() {
 		// will be called first, but because the parents haven't been mounted
 		// in the devtools this will lead to an incorrect result.
 		// TODO: We should fix this in core instead of patching around it here
-		if ((!isRoot(vnode) && !isRoot(vnode._parent)) && !hasVNodeId(vnode._parent)) {
+		if ((!isRoot(vnode) && !isRoot(vnode._parent)) && !hasVNodeId(vnode)) {
 			return;
 		}
 
