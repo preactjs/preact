@@ -124,7 +124,7 @@ export function initDevTools() {
 			cleanup() {
 				// noop
 			},
-			inspectElement: inspectElement(state.inspectedElementId),
+			inspectElement,
 			updateComponentFilters: applyFilters,
 			logElementToConsole,
 			getOwnersList() {

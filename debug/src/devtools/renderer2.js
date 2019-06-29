@@ -382,43 +382,57 @@ export function flushInitialEvents(hook, state) {
 
 /**
  * Provide detailed information about the current vnode
- * @param {number} lastInspected
- * @returns {(id: number) => number | undefined | import('../internal').InspectData}
+ * @param {number} id vnode id
+ * @returns {import('../internal').InspectData}
  */
-export function inspectElement(lastInspected) {
-	return id => {
-		// Nothing has changed, so we bail out because `inspectElement` is
-		// called in a loop :S
-		if (id===lastInspected) return id;
-		// FIXME: Find out why this function is called in a loop and what we can do
-		// to prevent that.
-		let vnode = getVNode(id);
+export function inspectElementRaw(id) {
+	let vnode = getVNode(id);
 		if (vnode==null) return;
 
-		let hasHooks = vnode._component!=null && vnode._component.__hooks!=null;
-		let owners = getOwners(vnode);
+	let hasHooks = vnode._component!=null && vnode._component.__hooks!=null;
+	let owners = getOwners(vnode);
 
-		return {
-			id,
-			canEditHooks: hasHooks,
-			canEditFunctionProps: true, // TODO
-			canToggleSuspense: false, // TODO
-			canViewSource: false, // TODO
-			displayName: getDisplayName(vnode),
-			type: getVNodeType(vnode),
-			// context: vnode._component ? cleanForBridge(vnode._component.context) : null, // TODO
-			context: null, // TODO
-			events: null,
-			hooks: hasHooks ? cleanForBridge(inspectHooks(vnode)) : null,
-			props: vnode.props!=null && Object.keys(vnode.props).length > 0
-				? cleanForBridge(vnode.props)
-				: null,
-			state: hasHooks || vnode._component==null || !Object.keys(vnode._component.state).length
-				? null
-				: cleanForBridge(vnode._component.state),
-			owners: owners.length ? owners : null,
-			source: null // TODO
-		};
+	return {
+		id,
+		canEditHooks: hasHooks,
+		canEditFunctionProps: true, // TODO
+		canToggleSuspense: false, // TODO
+		canViewSource: false, // TODO
+		displayName: getDisplayName(vnode),
+		type: getVNodeType(vnode),
+		// context: vnode._component ? cleanForBridge(vnode._component.context) : null, // TODO
+		context: null, // TODO
+		events: null,
+		hooks: hasHooks ? cleanForBridge(inspectHooks(vnode)) : null,
+		props: vnode.props!=null && Object.keys(vnode.props).length > 0
+			? cleanForBridge(vnode.props)
+			: null,
+		state: hasHooks || vnode._component==null || !Object.keys(vnode._component.state).length
+			? null
+			: cleanForBridge(vnode._component.state),
+		owners: owners.length ? owners : null,
+		source: null // TODO
+	};
+}
+
+let lastInspected = -1;
+
+/**
+ * Inspect a vnode (the right panel in the devtools)
+ * @param {number} id The vnode id to inspect
+ * @param {*} path TODO
+ * @returns {import('../internal').InspectPayload}
+ */
+export function inspectElement(id, path) {
+	// Prevent infinite loop :/
+	if (id==lastInspected) return;
+	lastInspected = id;
+
+	if (getVNode(id)==null) return;
+	return {
+		id,
+		type: 'full-data',
+		value: inspectElementRaw(id)
 	};
 }
 
