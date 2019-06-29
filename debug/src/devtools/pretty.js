@@ -12,6 +12,9 @@ export function getType(data) {
 			if (data.type!==undefined && data._parent!==undefined) return 'vnode';
 			if (typeof data.getMonth=='function') return 'date';
 			if (Array.isArray(data)) return 'array';
+			if (data instanceof HTMLElement) return 'html';
+			if (data instanceof Set) return 'set';
+			if (data instanceof Map) return 'map';
 			return 'object';
 		}
 		default:
@@ -19,15 +22,18 @@ export function getType(data) {
 	}
 }
 
+// Limit for pretty-printing
 let LEVEL_LIMIT = 6;
 
-export function prettify(data, cleaned, path, level = 0) {
+/**
+ * Pretty-Print any value in the devtool's very specific format
+ * @param {*} data The data to clean
+ * @param {Array<import('../internal').Path>} cleaned Array of cleaned paths
+ * @param {import('../internal').Path} path Current path in the data structure
+ * @param {number} level The maximum depth to clean
+ */
+export function prettify(data, cleaned, path, level) {
 	let type = getType(data);
-
-	if (level > LEVEL_LIMIT) {
-		if (type=='array') return [];
-		return '...';
-	}
 
 	switch (type) {
 		case 'function':
@@ -41,6 +47,7 @@ export function prettify(data, cleaned, path, level = 0) {
 		case 'symbol':
 			cleaned.push(path);
 			return {
+				inspectable: false,
 				name: data.toString(),
 				type: 'symbol'
 			};
@@ -49,9 +56,11 @@ export function prettify(data, cleaned, path, level = 0) {
 			if (level > LEVEL_LIMIT) {
 				cleaned.push(path);
 				return {
+					inspectable: true,
 					name: data.constructor.name,
 					type,
-					meta: { length: data.length, readOnly: type=='typed_array' }
+					size: data.length,
+					readonly: type==='typed_array'
 				};
 			}
 
@@ -60,6 +69,7 @@ export function prettify(data, cleaned, path, level = 0) {
 			if (level > LEVEL_LIMIT) {
 				cleaned.push(path);
 				return {
+					inspectable: true,
 					name: 'Object',
 					type: 'object'
 				};
@@ -79,17 +89,16 @@ export function prettify(data, cleaned, path, level = 0) {
 		case 'vnode':
 			cleaned.push(path);
 			return {
+				inspectable: false,
 				name: getDisplayName(data),
 				type: 'react_element'
 			};
 		case 'date':
 			cleaned.push(path);
 			return {
+				inspectable: false,
 				name: data.toString(),
-				type: 'date',
-				meta: {
-					uninspectable: true
-				}
+				type: 'date'
 			};
 		default:
 			return data;
