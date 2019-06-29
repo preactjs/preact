@@ -1,3 +1,6 @@
+import { getNearestDisplayName } from './vnode';
+import { getVNode } from './cache';
+
 /**
  * @param {number} rendererId
  * @param {import('../internal').AdapterState} state
@@ -48,7 +51,7 @@ export function getProfilingData(state, rendererId) {
 
 		data.push({
 			commitData,
-			displayName: 'Unknown',
+			displayName: getNearestDisplayName(getVNode(rootId)),
 			initialTreeBaseDurations: initialDurations,
 			interactionCommits: [],
 			interactions: [],
