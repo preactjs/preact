@@ -94,3 +94,25 @@ export function getRoot(vnode) {
 export function isRoot(vnode) {
 	return vnode.type===Fragment && vnode._parent==null;
 }
+
+/**
+ * Get the nearest display name for a given vnode
+ * @param {import('../internal').VNode} vnode
+ * @returns {string}
+ */
+export function getNearestDisplayName(vnode) {
+	if (vnode!=null) {
+		if (vnode.type!==Fragment) return getDisplayName(vnode);
+		if (vnode._children==null) return '';
+
+		for (let i = 0; i < vnode._children.length; i++) {
+			let child = vnode._children[i];
+			if (child) {
+				let name = getNearestDisplayName(child);
+				if (name) return name;
+			}
+		}
+	}
+
+	return 'Unknown';
+}
