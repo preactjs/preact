@@ -18,6 +18,35 @@ export interface InspectData {
 	source: null; // TODO
 }
 
+export interface InspectHydratedPayload {
+	id: number;
+	type: 'hydrated-path',
+	path: Path;
+	value: any;
+}
+
+export interface InspectNoChangePayload {
+	id: number;
+	type: 'no-change';
+}
+
+export interface InspectNotFoundPayload {
+	id: number;
+	type: 'not-found';
+}
+
+export interface InspectFullPayload {
+	id: number;
+	type: 'full-data';
+	value: InspectData;
+}
+
+export type InspectPayload =
+	InspectHydratedPayload |
+	InspectNoChangePayload |
+	InspectNotFoundPayload |
+	InspectFullPayload;
+
 export interface HookInspectData {
 	name: string;
 	value: any;
@@ -40,7 +69,7 @@ export interface RendererConfig {
 	rendererPackageName: string;
 	/** Find the closest DOM element given an id */
 	findNativeNodesForFiberID(id: number): Array<PreactElement | HTMLElement | Text>;
-	inspectElement(id: number): InspectData | number | undefined;
+	inspectElement(id: number, path?: Path): InspectPayload;
 	/** Called when the user clicks on an element inside the devtools */
 	selectElement(id: number): void;
 	/** Called when the devtools panel is closed */
