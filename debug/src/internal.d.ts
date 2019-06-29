@@ -119,7 +119,9 @@ export type BooleanFilter = {
 export type Filter =
   | BooleanFilter
   | ElementTypeFilter
-  | RegExpFilter;
+	| RegExpFilter;
+
+export type Path = Array<number | string>;
 
 export interface PathFrame {
 	key: string | null,
