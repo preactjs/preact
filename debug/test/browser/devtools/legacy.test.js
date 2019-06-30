@@ -357,6 +357,27 @@ describe('devtools', () => {
 			rerender();
 		});
 
+		it('should mount only non-null nodes', () => {
+			render((
+				<div>
+					<span>foo</span>
+					<br />
+				</div>
+			), scratch);
+
+			checkEventReferences(hook.log);
+
+			expect(hook.log.map(x => x.type)).to.deep.equal([
+				'mount',
+				'mount',
+				'mount',
+				'mount',
+				'mount',
+				'root',
+				'rootCommitted'
+			]);
+		});
+
 		it('should find dom node by vnode', () => {
 			render(<div />, scratch);
 			let vnode = getRoot(scratch);
