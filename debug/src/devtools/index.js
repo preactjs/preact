@@ -98,9 +98,10 @@ export function initDevTools() {
 		vnode.endTime = now();
 		if (vnode!=null && vnode._component!=null && oldVNode!=null && oldVNode._component!=null) {
 			let c = vnode._component;
+			let oldHooks = oldVNode._component.__hooks;
 			c._prevProps = oldVNode.props;
 			c._prevContext = oldVNode._component._context;
-			c._prevHooks = oldVNode._component.__hooks._list;
+			c._prevHooks = oldHooks!=null ? oldHooks._list : null;
 		}
 		if (prevAfterDiff!=null) prevAfterDiff(vnode);
 	};
