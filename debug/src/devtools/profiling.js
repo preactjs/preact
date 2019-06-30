@@ -1,6 +1,6 @@
 import { ElementTypeClass, ElementTypeFunction, ElementTypeMemo, ElementTypeForwardRef } from './constants';
 import { getNearestDisplayName, getVNodeType } from './vnode';
-import { getVNode, getVNodeId } from './cache';
+import { getVNode } from './cache';
 import { now } from './util';
 
 /**

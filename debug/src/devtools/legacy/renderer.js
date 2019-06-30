@@ -1,4 +1,4 @@
-import { getInstance, isRoot, getRoot, getDisplayName } from '../vnode';
+import { getInstance, isRoot, getRoot } from '../vnode';
 import { getData, hasDataChanged } from './data';
 
 /**
