@@ -145,7 +145,7 @@ export function initDebug() {
 	
 	function componentToString(c) {
 		let str;
-		if (serializedConstructorMap && (str = serializedConstructorMap.get(c)) {
+		if (serializedConstructorMap && (str = serializedConstructorMap.get(c))) {
 			return str;
 		}
 		str = Function.prototype.toString.call(c) + Object.keys(c.prototype).join();
