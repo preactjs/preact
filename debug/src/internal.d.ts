@@ -222,7 +222,7 @@ export interface DevtoolsMock {
 	hook: DevtoolsHookMock;
 	connect(): void;
 	applyFilters(filters: Filter[]): void;
-	inspect(id: number): InspectData;
+	inspect(id: number): InspectPayload;
 	setState(id: number, path: string[], value: any): void;
 }
 
