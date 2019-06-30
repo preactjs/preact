@@ -1,7 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, createElement as h, Fragment, options, Component, render } from 'preact';
 import { getData, shallowEqual, hasDataChanged } from '../../../src/devtools/legacy/data';
-import { getDisplayName, isRoot } from '../../../src/devtools/vnode';
+import { getDisplayName } from '../../../src/devtools/vnode';
 import { setupScratch, teardown, clearOptions } from '../../../../test/_util/helpers';
 import { initDevTools } from '../../../src/devtools';
 import { Renderer } from '../../../src/devtools/legacy/renderer';
