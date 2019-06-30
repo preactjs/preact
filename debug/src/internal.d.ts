@@ -112,14 +112,6 @@ export interface ProfilingData {
 	rendererID: number;
 }
 
-export interface ChangeDescription {
-	context: string[] | boolean | null;
-  didHooksChange: boolean;
-  isFirstMount: boolean;
-  props: string[] | null;
-  state: string[] | null;
-}
-
 export interface CommitDataBackend {
   changeDescriptions: Array<[number, ChangeDescription]> | null;
   duration: number;
