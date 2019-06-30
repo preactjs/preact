@@ -1,20 +1,20 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, createElement as h, Fragment, options, Component, render } from 'preact';
-import { isRoot, getData, shallowEqual, hasDataChanged } from '../../src/devtools/custom';
-import { getDisplayName } from '../../src/devtools/vnode';
-import { setupScratch, teardown, clearOptions } from '../../../test/_util/helpers';
-import { initDevTools } from '../../src/devtools';
-import { Renderer } from '../../src/devtools/renderer';
-import { createPortal } from '../../../compat/src';
+import { isRoot, getData, shallowEqual, hasDataChanged } from '../../../src/devtools/custom';
+import { getDisplayName } from '../../../src/devtools/vnode';
+import { setupScratch, teardown, clearOptions } from '../../../../test/_util/helpers';
+import { initDevTools } from '../../../src/devtools';
+import { Renderer } from '../../../src/devtools/renderer';
+import { createPortal } from '../../../../compat/src';
 
 /** @jsx h */
 
-/** @typedef {import('../../src/internal').DevtoolsHook & { log: any[], clear: () => void }} MockHook */
+/** @typedef {import('../../../src/internal').DevtoolsHook & { log: any[], clear: () => void }} MockHook */
 
 /**
  * Serialize a devtool events and filter out `updateProfilerTimes` because it
  * relies on timings which would lead to flaky tests.
- * @param {import('../../src/internal').DevtoolsEvent[]} events
+ * @param {import('../../../src/internal').DevtoolsEvent[]} events
  */
 function serialize(events) {
 	return events.filter(x => x.type!='updateProfileTimes').map(x => ({
@@ -31,7 +31,7 @@ function serialize(events) {
 function createMockHook() {
 	let roots = new Set();
 
-	/** @type {Array<import('../../src/internal').DevtoolsEvent>} */
+	/** @type {Array<import('../../../src/internal').DevtoolsEvent>} */
 	let events = [];
 
 	function emit(ev, data) {
@@ -71,8 +71,8 @@ function createMockHook() {
 
 /**
  * Check if the event has been seen (=mounted in most cases) before.
- * @param {import('../../src/internal').VNode} event
- * @param {Set<import('../../src/internal').VNode>} seen
+ * @param {import('../../../src/internal').VNode} event
+ * @param {Set<import('../../../src/internal').VNode>} seen
  * @returns {boolean}
  */
 function checkPreceding(vnode, seen) {
@@ -87,7 +87,7 @@ function checkPreceding(vnode, seen) {
 /**
  * Verify the references in the events passed to the devtools. Component have to
  * be traversed in a child-depth-first order for the devtools to work.
- * @param {Array<import('../../src/internal').DevtoolsEvent>} events
+ * @param {Array<import('../../../src/internal').DevtoolsEvent>} events
  */
 function checkEventReferences(events) {
 	let seen = new Set();
@@ -132,7 +132,7 @@ function checkEventReferences(events) {
 }
 
 /**
- * @param {import('../../src/internal').PreactElement} element
+ * @param {import('../../../src/internal').PreactElement} element
  */
 function getRoot(element) {
 	return element._children;
@@ -144,7 +144,7 @@ const supported = /Chrome|Firefox/i.test(navigator.userAgent) &&
 describe('devtools', () => {
 	if (!supported) return;
 
-	/** @type {import('../../src/internal').PreactElement} */
+	/** @type {import('../../../src/internal').PreactElement} */
 	let scratch;
 
 	/** @type {() => void} */
@@ -160,7 +160,7 @@ describe('devtools', () => {
 
 		hook = createMockHook();
 
-		/** @type {import('../../src/internal').DevtoolsWindow} */
+		/** @type {import('../../../src/internal').DevtoolsWindow} */
 		(window).__REACT_DEVTOOLS_GLOBAL_HOOK__ = hook;
 
 		initDevTools();
@@ -184,7 +184,7 @@ describe('devtools', () => {
 		/** @type {*} */
 		(console.error).restore();
 
-		delete /** @type {import('../../src/internal').DevtoolsWindow} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
+		delete /** @type {import('../../../src/internal').DevtoolsWindow} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
 	});
 
 	describe('hasDataChanged', () => {
