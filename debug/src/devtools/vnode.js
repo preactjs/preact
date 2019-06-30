@@ -32,6 +32,28 @@ export function getVNodeType(vnode) {
 }
 
 /**
+ * Cache a vnode by its instance and retrieve previous vnodes by the next
+ * instance.
+ *
+ * We need this to be able to identify the previous vnode of a given instance.
+ * For components we want to check if we already rendered it and use the class
+ * instance as key. For html elements we use the dom node as key.
+ *
+ * @param {import('../internal').VNode} vnode
+ * @param {boolean} [isRoot]
+ * @returns {*}
+ */
+export function getInstance(vnode, isRoot) {
+	// Use the parent element as instance for root nodes
+	if (isRoot) {
+		return vnode;
+	}
+	if (vnode._component!=null) return vnode._component;
+	if (vnode.type===Fragment) return vnode.props;
+	return vnode._dom;
+}
+
+/**
  * Get the ancestor component that rendered the current vnode
  * @param {import('../internal').AdapterState["filter"]} filters
  * @param {import('../internal').VNode} vnode

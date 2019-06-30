@@ -1,12 +1,12 @@
 /* istanbul ignore file */
 import { Component, Fragment } from 'preact';
-import { setIn } from './util';
-import { getDisplayName } from './vnode';
+import { setIn } from '../util';
+import { getDisplayName, getInstance } from '../vnode';
 
 /**
  * Get the type/category of a vnode
- * @param {import('../internal').VNode} vnode
- * @returns {import('../internal').NodeType}
+ * @param {import('../../internal').VNode} vnode
+ * @returns {import('../../internal').NodeType}
  */
 export function getNodeType(vnode) {
 	if (vnode.type===Fragment) return 'Wrapper';
@@ -17,13 +17,13 @@ export function getNodeType(vnode) {
 
 /**
  * Get devtools compatible data from vnode
- * @param {import('../internal').VNode} vnode
- * @returns {import('../internal').DevtoolData}
+ * @param {import('../../internal').VNode} vnode
+ * @returns {import('../../internal').DevtoolData}
  */
 export function getData(vnode) {
 	let c = vnode._component;
 
-	/** @type {import('../internal').DevtoolsUpdater | null} */
+	/** @type {import('../../internal').DevtoolsUpdater | null} */
 	let updater = null;
 
 	if (c!=null && c instanceof Component) {
@@ -49,7 +49,7 @@ export function getData(vnode) {
 		};
 	}
 
-	let children = vnode._children || [];
+	let children = (vnode._children || []).filter(Boolean);
 
 	let duration = vnode.endTime - vnode.startTime;
 	return {
@@ -79,44 +79,6 @@ export function getData(vnode) {
 }
 
 /**
- * Check if a vnode is a root node
- * @param {import('../internal').VNode} vnode
- * @returns {boolean}
- */
-export function isRoot(vnode) {
-	// Timings of root vnodes will never be set
-	return vnode.type===Fragment && vnode._parent === null;
-}
-
-/**
- * Cache a vnode by its instance and retrieve previous vnodes by the next
- * instance.
- *
- * We need this to be able to identify the previous vnode of a given instance.
- * For components we want to check if we already rendered it and use the class
- * instance as key. For html elements we use the dom node as key.
- *
- * @param {import('../internal').VNode} vnode
- * @param {boolean} [isRoot]
- * @returns {*}
- */
-export function getInstance(vnode, isRoot) {
-	// Use the parent element as instance for root nodes
-	if (isRoot) {
-		return vnode;
-		// Edge case: When the tree only consists of components that have not rendered
-		// anything into the DOM we revert to using the vnode as instance.
-		// return vnode._children.length > 0 && vnode._children[0]!=null && vnode._children[0]._dom!=null
-		// 	? /** @type {import('../internal').PreactElement | null} */
-		// 	(vnode._children[0]._dom.parentNode)
-		// 	: vnode;
-	}
-	if (vnode._component!=null) return vnode._component;
-	if (vnode.type===Fragment) return vnode.props;
-	return vnode._dom;
-}
-
-/**
  * Compare two objects
  * @param {object} a
  * @param {object} b
@@ -137,8 +99,8 @@ export function shallowEqual(a, b, isProps) {
 
 /**
  * Check if a vnode was actually updated
- * @param {import('../internal').VNode} next
- * @param {import('../internal').VNode} prev
+ * @param {import('../../internal').VNode} next
+ * @param {import('../../internal').VNode} prev
  * @returns {boolean}
  */
 export function hasDataChanged(prev, next) {

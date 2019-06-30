@@ -1,12 +1,11 @@
 import { getVNodeId, getVNode, clearVNode, hasVNodeId, getPreviousChildrenIds, addChildToParent, removeChildFromParent } from './cache';
 import { TREE_OPERATION_ADD, ElementTypeRoot, TREE_OPERATION_REMOVE, TREE_OPERATION_REORDER_CHILDREN, TREE_OPERATION_UPDATE_TREE_BASE_DURATION } from './constants';
-import { getVNodeType, getDisplayName, getAncestor, getOwners, getRoot } from './vnode';
+import { getVNodeType, getDisplayName, getAncestor, getOwners, getRoot, getInstance, isRoot } from './vnode';
 import { cleanForBridge, cleanContext } from './pretty';
 import { inspectHooks } from './hooks';
 import { encode } from './util';
 import { getStringId, stringTable, allStrLengths, clearStringTable } from './string-table';
 import { shouldFilter } from './filter';
-import { isRoot, getInstance } from './custom';
 import { getChangeDescription } from './profiling';
 
 /**
@@ -16,6 +15,17 @@ import { getChangeDescription } from './profiling';
  * @param {import('../internal').VNode} vnode
  */
 export function onCommitFiberRoot(hook, state, vnode) {
+	// Some libraries like mobx call `forceUpdate` inside `componentDidMount`.
+	// This leads to an issue where `options.commit` is called twice, once
+	// for the vnode where the update occured and once on the child vnode
+	// somewhere down the tree where `forceUpdate` was called on. The latter
+	// will be called first, but because the parents haven't been mounted
+	// in the devtools this will lead to an incorrect result.
+	// TODO: We should fix this in core instead of patching around it here
+	if ((!isRoot(vnode) && !isRoot(vnode._parent)) && !hasVNodeId(vnode)) {
+		return;
+	}
+
 	// Keep track of mounted roots
 	let roots = hook.getFiberRoots(state.rendererId);
 	let root;
@@ -385,6 +395,17 @@ export function flushInitialEvents(hook, state) {
 		state.currentRootId = getVNodeId(root);
 		flushPendingEvents(hook, state);
 	});
+}
+
+/**
+ * Find the DOM node for a vnode
+ * @param {number} id The id of the vnode
+ * @returns {Array<import('../internal').PreactElement | HTMLElement | Text> | null}
+ */
+export function findDomForVNode(id) {
+	let vnode = getVNode(id);
+	// TODO: Check for siblings here?
+	return vnode!=null ? [vnode._dom].filter(Boolean) : null;
 }
 
 /**

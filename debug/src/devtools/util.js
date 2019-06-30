@@ -77,10 +77,12 @@ export function catchErrors(fn) {
 /**
  * Detects the currently used devtools version
  * @param {import('../internal').DevtoolsWindow} win
- * @return {number}
+ * @return {number | null}
  */
-export function detectDevtoolsVersion(win) {
-	return win.__REACT_DEVTOOLS_ATTACH__!=null || win.__REACT_DEVTOOLS_COMPONENT_FILTERS__!=null
+export function getDevtoolsVersion(win) {
+	if (win.__REACT_DEVTOOLS_GLOBAL_HOOK__==null) return null;
+
+	return /** @type {*} */ (win.__REACT_DEVTOOLS_GLOBAL_HOOK__).rendererInterfaces!==undefined
 		? 4
 		: 3;
 }

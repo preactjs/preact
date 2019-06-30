@@ -203,7 +203,7 @@ export interface DevtoolsHook {
 	on(ev: string, listener: () => void): void;
 	emit(ev: string, data?: object): void;
 	getFiberRoots(rendererId: number): Set<any>;
-	inject(config: { renderer: RendererConfig, reactBuildType: number }): string;
+	inject(config: RendererConfig): string;
 	onCommitFiberRoot(rendererId: number, root: VNode): void;
 	onCommitFiberUnmount(rendererId: number, vnode: VNode): void;
 }
@@ -227,7 +227,7 @@ export interface DevtoolsWindow extends Window {
 	 * the dom. This hook handles all communications between preact and the
 	 * devtools panel.
 	 */
-	__REACT_DEVTOOLS_GLOBAL_HOOK__?: DevtoolsHook;
+	__REACT_DEVTOOLS_GLOBAL_HOOK__?: DevtoolsHook | LegacyDevtoolsHook;
 	/**
 	 * Custom attach function to supply a custom renderer
 	 */
@@ -270,6 +270,7 @@ export interface AdapterState {
 export interface LegacyDevtoolsHook {
 	_renderers: Record<string, any>;
 	_roots: Set<VNode>;
+	isDisabled?: boolean;
 	helpers: Record<string, any>;
 	on(ev: string, listener: () => void): void;
 	emit(ev: string, data?: object): void;
@@ -315,4 +316,9 @@ export interface DevtoolsEvent {
 	internalInstance: VNode;
 	renderer?: string;
 	type: EventType;
+}
+
+export interface LegacyMockHook extends LegacyDevtoolsHook {
+	log: any[];
+	clear: () => void ;
 }

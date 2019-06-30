@@ -1,15 +1,13 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, createElement as h, Fragment, options, Component, render } from 'preact';
-import { isRoot, getData, shallowEqual, hasDataChanged } from '../../../src/devtools/custom';
-import { getDisplayName } from '../../../src/devtools/vnode';
+import { getData, shallowEqual, hasDataChanged } from '../../../src/devtools/legacy/data';
+import { getDisplayName, isRoot } from '../../../src/devtools/vnode';
 import { setupScratch, teardown, clearOptions } from '../../../../test/_util/helpers';
 import { initDevTools } from '../../../src/devtools';
 import { Renderer } from '../../../src/devtools/legacy/renderer';
 import { createPortal } from '../../../../compat/src';
 
 /** @jsx h */
-
-/** @typedef {import('../../../src/internal').DevtoolsHook & { log: any[], clear: () => void }} MockHook */
 
 /**
  * Serialize a devtool events and filter out `updateProfilerTimes` because it
@@ -26,7 +24,7 @@ function serialize(events) {
 }
 
 /**
- * @returns {MockHook}
+ * @returns {import('../../../src/internal').LegacyMockHook}
  */
 function createMockHook() {
 	let roots = new Set();
@@ -71,7 +69,7 @@ function createMockHook() {
 
 /**
  * Check if the event has been seen (=mounted in most cases) before.
- * @param {import('../../../src/internal').VNode} event
+ * @param {import('../../../src/internal').VNode} vnode
  * @param {Set<import('../../../src/internal').VNode>} seen
  * @returns {boolean}
  */
@@ -79,7 +77,7 @@ function checkPreceding(vnode, seen) {
 	if (vnode==null) return true;
 
 	// If a leaf node is a Fragment and has no children it will be skipped
-	if (vnode.type===Fragment && vnode._children==0) return true;
+	if (vnode.type===Fragment && vnode._children.length==0) return true;
 
 	return seen.has(vnode);
 }
@@ -132,7 +130,7 @@ function checkEventReferences(events) {
 }
 
 /**
- * @param {import('../../../src/internal').PreactElement} element
+ * @param {*} element
  */
 function getRoot(element) {
 	return element._children;
@@ -144,13 +142,13 @@ const supported = /Chrome|Firefox/i.test(navigator.userAgent) &&
 describe('devtools', () => {
 	if (!supported) return;
 
-	/** @type {import('../../../src/internal').PreactElement} */
+	/** @type {HTMLDivElement} */
 	let scratch;
 
 	/** @type {() => void} */
 	let rerender;
 
-	/** @type {MockHook} */
+	/** @type {import('../../../src/internal').LegacyMockHook} */
 	let hook;
 
 	beforeEach(() => {
@@ -353,7 +351,7 @@ describe('devtools', () => {
 
 		it('should not flush events if not connected', () => {
 			let spy = sinon.spy(hook, 'emit');
-			let renderer = new Renderer(hook, 'abc');
+			let renderer = new Renderer(hook);
 			renderer.flushPendingEvents();
 
 			expect(spy).to.not.be.called;
@@ -785,7 +783,7 @@ describe('devtools', () => {
 		// preact/#1490
 		it('should not crash on a Portal node', () => {
 			const div = document.createElement('div');
-			render(createPortal('foo', div), scratch);
+			render(createPortal(<div>foo</div>, div), scratch);
 			expect(console.error).to.not.be.called;
 		});
 	});
