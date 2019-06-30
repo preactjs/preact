@@ -325,5 +325,6 @@ export interface DevtoolsEvent {
 
 export interface LegacyMockHook extends LegacyDevtoolsHook {
 	log: any[];
-	clear: () => void ;
+	clear: () => void;
+	clearEvents: () => void;
 }
