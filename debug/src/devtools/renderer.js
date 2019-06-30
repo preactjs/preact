@@ -64,10 +64,13 @@ export function onCommitFiberRoot(hook, state, vnode) {
 	}
 
 	if (state.isProfiling) {
-		if (state.profilingData.has(state.currentRootId)) {
-			state.profilingData.get(state.currentRootId)
-				.push(state.currentCommitProfileData);
+		let rootId = state.currentRootId;
+		if (!state.profilingData.has(rootId)) {
+			state.profilingData.set(rootId, []);
 		}
+
+		state.profilingData.get(rootId)
+			.push(state.currentCommitProfileData);
 	}
 
 	flushPendingEvents(hook, state);
@@ -323,7 +326,9 @@ export function flushPendingEvents(hook, state) {
 		state.pendingUnmountIds.length==0 &&
 		state.pendingUnmountRootId==null
 	) {
-		return;
+		if (!state.isProfiling) {
+			return;
+		}
 	}
 
 	// TODO: Profiling

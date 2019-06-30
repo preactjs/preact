@@ -14,11 +14,6 @@ export function startProfiling(hook, state, rendererId) {
 
 	state.isProfiling = true;
 	state.profilingStart = now();
-
-	hook.getFiberRoots(rendererId).forEach(root => {
-		let id = getVNodeId(root);
-		state.profilingData.set(id, []);
-	});
 }
 
 /**

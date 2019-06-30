@@ -2,6 +2,7 @@ import { options, Component } from 'preact';
 import { now, catchErrors, getDevtoolsVersion } from './util';
 import { createAdapter } from './connect';
 import { createLegacyAdapter } from './legacy/connect';
+import { SESSION_STORAGE_RELOAD_AND_PROFILE_KEY } from './constants';
 
 let noop = () => null;
 
@@ -48,6 +49,11 @@ export function initDevTools() {
 		switch (version) {
 			case 4:
 				adapter = createAdapter(config, /** @type {*} */ (hook));
+
+				// Necessary for "reload-and-profile" feature
+				if (window.sessionStorage.getItem(SESSION_STORAGE_RELOAD_AND_PROFILE_KEY)==='true') {
+					adapter.renderer.startProfiling();
+				}
 				break;
 			case 3: {
 				adapter = createLegacyAdapter(config, /** @type {*} */ (hook));
