@@ -176,16 +176,6 @@ describe('devtools', () => {
 		});
 	});
 
-	describe('isRoot', () => {
-		it('should check if a vnode is a root', () => {
-			render(<div>Hello World</div>, scratch);
-			let root = getRoot(scratch);
-
-			expect(isRoot(root)).to.equal(true);
-			expect(isRoot(root._children[0])).to.equal(false);
-		});
-	});
-
 	describe('getData', () => {
 		it('should convert vnode to DevtoolsData', () => {
 			class App extends Component {
