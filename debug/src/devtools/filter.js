@@ -1,4 +1,4 @@
-import { unmount, mount, flushPendingEvents, recordUnmount } from './renderer2';
+import { unmount, mount, flushPendingEvents, recordUnmount } from './renderer';
 import { FilterElementType, FilterDisplayName as FilterName, FilterLocation, FilterHOC } from './constants';
 import { Fragment } from '../../../src';
 import { getVNodeType, getDisplayName, isRoot } from './vnode';

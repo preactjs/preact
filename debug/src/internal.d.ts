@@ -76,13 +76,16 @@ export interface ChangeDescription {
 	state: null | string[],
 }
 
-export interface RendererConfig {
+export interface RendererConfigBase {
 	/** 1 = DEV, 0 = production */
 	bundleType: 1 | 0;
 	/** The devtools enable different features for different versions of react */
 	version: string;
 	/** Informative string, currently unused in the devtools  */
 	rendererPackageName: string;
+}
+
+export interface RendererConfig extends RendererConfigBase {
 	/** Find the closest DOM element given an id */
 	findNativeNodesForFiberID(id: number): Array<PreactElement | HTMLElement | Text>;
 	inspectElement(id: number, path?: Path): InspectPayload;
@@ -194,37 +197,6 @@ export interface DevtoolsUpdater {
 	setInContext(): void;
 }
 
-export type NodeType = "Composite" | "Native" | "Wrapper" | "Text";
-
-export interface DevtoolData {
-	nodeType: NodeType;
-	// Component type
-	type: any;
-	name: string;
-	ref: any;
-	key: string | number;
-	updater: DevtoolsUpdater | null;
-	text: string | number | null;
-	state: any;
-	props: any;
-	children: VNode[] | string | number | null;
-	publicInstance: PreactElement | Text | Component;
-	memoizedInteractions: any[];
-
-	actualDuration: number,
-	actualStartTime: number,
-	treeBaseDuration: number,
-}
-
-export type EventType = 'unmount' | 'rootCommitted' | 'root' | 'mount' | 'update' | 'updateProfileTimes';
-
-export interface DevtoolsEvent {
-	data?: DevtoolData;
-	internalInstance: VNode;
-	renderer: string;
-	type: EventType;
-}
-
 export interface DevtoolsHook {
 	renderers: Map<number, any>;
 	isDisabled?: boolean;
@@ -290,4 +262,57 @@ export interface AdapterState {
 		byName: Set<RegExp>;
 		byPath: Set<RegExp>;
 	}
+}
+
+//
+// Legacy devtools version (v3)
+//
+export interface LegacyDevtoolsHook {
+	_renderers: Record<string, any>;
+	_roots: Set<VNode>;
+	helpers: Record<string, any>;
+	on(ev: string, listener: () => void): void;
+	emit(ev: string, data?: object): void;
+	getFiberRoots(rendererId: string): Set<any>;
+	inject(config: DevtoolsInjectOptions): string;
+	onCommitFiberRoot(rendererId: string, root: VNode): void;
+	onCommitFiberUnmount(rendererId: string, vnode: VNode): void;
+}
+
+export interface LegacyRendererConfig  extends RendererConfigBase {
+	/** Find the root dom node of a vnode */
+	findHostInstanceByFiber(vnode: VNode): HTMLElement | null;
+	/** Find the closest vnode given a dom node */
+	findFiberByHostInstance(instance: HTMLElement): VNode | null;
+}
+
+export type NodeType = "Composite" | "Native" | "Wrapper" | "Text";
+
+export interface DevtoolData {
+	nodeType: NodeType;
+	// Component type
+	type: any;
+	name: string;
+	ref: any;
+	key: string | number;
+	updater: DevtoolsUpdater | null;
+	text: string | number | null;
+	state: any;
+	props: any;
+	children: VNode[] | string | number | null;
+	publicInstance: PreactElement | Text | Component;
+	memoizedInteractions: any[];
+
+	actualDuration: number,
+	actualStartTime: number,
+	treeBaseDuration: number,
+}
+
+export type EventType = 'unmount' | 'rootCommitted' | 'root' | 'mount' | 'update' | 'updateProfileTimes';
+
+export interface DevtoolsEvent {
+	data?: DevtoolData;
+	internalInstance: VNode;
+	renderer?: string;
+	type: EventType;
 }

@@ -55,3 +55,32 @@ try {
 	now = performance.now.bind(performance);
 }
 catch (e) {}
+
+/**
+ * Wrap function with generic error logging
+ * @param {*} fn
+ */
+export function catchErrors(fn) {
+	return arg => {
+		try {
+			return fn(arg);
+		}
+		catch (e) {
+			/* istanbul ignore next */
+			console.error('The react devtools encountered an error');
+			/* istanbul ignore next */
+			console.error(e); // eslint-disable-line no-console
+		}
+	};
+}
+
+/**
+ * Detects the currently used devtools version
+ * @param {import('../internal').DevtoolsWindow} win
+ * @return {number}
+ */
+export function detectDevtoolsVersion(win) {
+	return win.__REACT_DEVTOOLS_ATTACH__!=null || win.__REACT_DEVTOOLS_COMPONENT_FILTERS__!=null
+		? 4
+		: 3;
+}

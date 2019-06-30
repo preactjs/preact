@@ -1,33 +1,13 @@
 import { options, Component } from 'preact';
-import { onCommitFiberRoot, inspectElement, onCommitFiberUnmount, selectElement, logElementToConsole, flushInitialEvents } from './renderer2';
+import { onCommitFiberRoot, inspectElement, onCommitFiberUnmount, selectElement, logElementToConsole, flushInitialEvents } from './renderer';
 import { setInProps, setInState } from './update';
 import { assign } from '../../../src/util';
 import { getVNode, hasVNodeId, getVNodeId } from './cache';
 import { setInHook } from './hooks';
-import { now } from './util';
+import { now, catchErrors } from './util';
 import { updateComponentFilters } from './filter';
 import { isRoot } from './vnode';
 import { getProfilingData } from './profiling';
-
-/**
- * Wrap function with generic error logging
- *
- * @param {*} fn
- * @returns
- */
-function catchErrors(fn) {
-	return function(arg) {
-		try {
-			return fn(arg);
-		}
-		catch (e) {
-			/* istanbul ignore next */
-			console.error('The react devtools encountered an error');
-			/* istanbul ignore next */
-			console.error(e); // eslint-disable-line no-console
-		}
-	};
-}
 
 /* istanbul ignore next */
 let noop = () => undefined;
@@ -76,6 +56,7 @@ export function initDevTools() {
 			currentCommitProfileData: [],
 			vnodeDurations: new Map(),
 			changeDescriptions: new Map(),
+			profilingStart: 0,
 			pending: [],
 			pendingUnmountIds: [],
 			pendingUnmountRootId: null,

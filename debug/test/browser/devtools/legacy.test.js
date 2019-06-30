@@ -4,7 +4,7 @@ import { isRoot, getData, shallowEqual, hasDataChanged } from '../../../src/devt
 import { getDisplayName } from '../../../src/devtools/vnode';
 import { setupScratch, teardown, clearOptions } from '../../../../test/_util/helpers';
 import { initDevTools } from '../../../src/devtools';
-import { Renderer } from '../../../src/devtools/renderer';
+import { Renderer } from '../../../src/devtools/legacy/renderer';
 import { createPortal } from '../../../../compat/src';
 
 /** @jsx h */
