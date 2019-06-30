@@ -74,17 +74,24 @@ export function createAdapter(config, hook) {
 	});
 
 	return {
+		renderer,
 		connect() {
 			// Apply initial filters
 			if (window.__REACT_DEVTOOLS_COMPONENT_FILTERS__) {
 				applyFilters(window.__REACT_DEVTOOLS_COMPONENT_FILTERS__);
 			}
 
-			/** @type {import('../internal').DevtoolsWindow} */
-			(window).__REACT_DEVTOOLS_ATTACH__ = (hook, id, renderer, target) => {
+			let attach = (hook, id, renderer, target) => {
 				state.rendererId = id;
 				return renderer;
 			};
+
+			/** @type {import('../internal').DevtoolsWindow} */
+			// TODO: The react-devtools declare this as non-configurable.
+			// This prevents us from getting
+			Object.defineProperty(window, '__REACT_DEVTOOLS_ATTACH__', {
+				get: () => attach
+			});
 
 			// Tell the devtools that we are ready to start
 			hook.inject(renderer);

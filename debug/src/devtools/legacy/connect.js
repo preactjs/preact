@@ -49,6 +49,7 @@ export function createLegacyAdapter(config, hook) {
 	let helpers = hook.helpers[rendererId];
 
 	return {
+		renderer,
 		connect() {
 			shouldConnect = true;
 
