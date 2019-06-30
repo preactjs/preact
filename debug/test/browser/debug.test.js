@@ -384,11 +384,9 @@ describe('debug', () => {
 	});
 
 	describe('table markup', () => {
-		it('missing <tbody>/<thead>/<tfoot>', () => {
+		it('missing <tbody>/<thead>/<tfoot>/<table>', () => {
 			const Table = () => (
-				<table>
-					<td>Hi</td>
-				</table>
+				<tr><td>hi</td></tr>
 			);
 			render(<Table />, scratch);
 			expect(console.error).to.be.calledOnce;
@@ -406,14 +404,12 @@ describe('debug', () => {
 			expect(console.error).to.be.calledOnce;
 		});
 
-		// Don't know how to do this yet.
-		it.skip('missing <td>', () => {
+		it('missing <tr> with td component', () => {
+			const Cell = ({ children }) => <td>{children}</td>;
 			const Table = () => (
 				<table>
 					<tbody>
-						<tr>
-							<div />
-						</tr>
+						<Cell>Hi</Cell>
 					</tbody>
 				</table>
 			);
@@ -421,7 +417,7 @@ describe('debug', () => {
 			expect(console.error).to.be.calledOnce;
 		});
 
-		it('Using <td> instead of <th> in <thead>', () => {
+		it('Should accept <td> instead of <th> in <thead>', () => {
 			const Table = () => (
 				<table>
 					<thead>
@@ -432,7 +428,7 @@ describe('debug', () => {
 				</table>
 			);
 			render(<Table />, scratch);
-			expect(console.error).to.be.calledOnce;
+			expect(console.error).to.not.be.called;
 		});
 
 		it('Accepts well formed table with TD components', () => {
@@ -478,6 +474,21 @@ describe('debug', () => {
 							<td>Body</td>
 						</tr>
 					</tfoot>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('Accepts minimial well formed table', () => {
+			const Table = () => (
+				<table>
+					<tr>
+						<th>Head</th>
+					</tr>
+					<tr>
+						<td>Body</td>
+					</tr>
 				</table>
 			);
 			render(<Table />, scratch);

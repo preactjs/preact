@@ -4,11 +4,11 @@ import { options } from 'preact';
 import { ELEMENT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants';
 
 function getClosestDomNodeParent(parent) {
-	if (!parent) return null;
+	if (!parent) return {};
 	if (typeof parent.type === 'function') {
 		return getClosestDomNodeParent(parent._parent);
 	}
-	return parent.type;
+	return parent;
 }
 
 export function initDebug() {
@@ -46,7 +46,7 @@ export function initDebug() {
 		if (vnode == null) { return; }
 
 		let { type, _parent: parent } = vnode;
-		let parentType = getClosestDomNodeParent(parent);
+		let parentVNode = getClosestDomNodeParent(parent);
 
 		if (type===undefined) {
 			throw new Error('Undefined component passed to createElement()\n\n'+
@@ -65,40 +65,37 @@ export function initDebug() {
 			throw new Error('Invalid type passed to createElement(): '+(Array.isArray(type) ? 'array' : type));
 		}
 
-		if ((type==='thead' || type==='tfoot' || type==='thead') && parentType!=='table') {
+		if ((type==='thead' || type==='tfoot' || type==='thead') && parentVNode.type!=='table') {
 			console.error(
 				'Improper nesting of table.' +
 				'Your <thead/tbody/tfoot> should have a <table> parent.'
 				+ serializeVNode(vnode)
 			);
 		}
-		else if (type==='tr' && (parentType!=='thead' && parentType!=='tfoot' && parentType!=='tbody')) {
+		else if (
+			type==='tr' && (
+				parentVNode.type!=='thead' &&
+				parentVNode.type!=='tfoot' &&
+				parentVNode.type!=='tbody' &&
+				parentVNode.type!=='table'
+			)) {
 			console.error(
 				'Improper nesting of table.' +
-				'Your <tr> should have a <thead/tbody/tfoot> parent.'
+				'Your <tr> should have a <thead/tbody/tfoot/table> parent.'
 				+ serializeVNode(vnode)
 			);
 		}
-		else if (type==='td') {
-			if (parentType!=='tr') {
-				console.error(
-					'Improper nesting of table.' +
-					'Your <td> should have a <tr> parent.'
-					+ serializeVNode(vnode)
-				);
-			}
-			else if (parent._parent.type === 'thead') {
-				console.error(
-					'Improper nesting of table.' +
-					'Your <thead> should use <th> instead of <td>.'
-					+ serializeVNode(vnode)
-				);
-			}
-		}
-		else if (type==='th' && parentType!=='tr') {
+		else if (type==='td' && parentVNode.type!=='tr') {
 			console.error(
 				'Improper nesting of table.' +
-				'Your <th> should have a <tr> parent with a <thead> parent.'
+					'Your <td> should have a <tr> parent.'
+					+ serializeVNode(vnode)
+			);
+		}
+		else if (type==='th' && parentVNode.type!=='tr') {
+			console.error(
+				'Improper nesting of table.' +
+				'Your <th> should have a <tr>.'
 				+ serializeVNode(vnode)
 			);
 		}
