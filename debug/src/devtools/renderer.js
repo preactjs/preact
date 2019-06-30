@@ -1,6 +1,6 @@
 import { getVNodeId, getVNode, clearVNode, hasVNodeId, getPreviousChildrenIds, addChildToParent, removeChildFromParent } from './cache';
 import { TREE_OPERATION_ADD, ElementTypeRoot, TREE_OPERATION_REMOVE, TREE_OPERATION_REORDER_CHILDREN, TREE_OPERATION_UPDATE_TREE_BASE_DURATION } from './constants';
-import { getVNodeType, getDisplayName, getAncestor, getOwners, getRoot, getInstance, isRoot } from './vnode';
+import { getVNodeType, getDisplayName, getAncestor, getOwners, getRoot, isRoot } from './vnode';
 import { cleanForBridge, cleanContext } from './pretty';
 import { inspectHooks } from './hooks';
 import { encode } from './util';
