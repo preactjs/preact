@@ -1,6 +1,6 @@
 import { setupScratch, teardown } from '../../../../test/_util/helpers';
 import { h, render } from 'preact';
-import { getInstance } from '../../../src/devtools/vnode';
+import { getInstance, isRoot } from '../../../src/devtools/vnode';
 import { clearState } from '../../../src/devtools/cache';
 import { clearStringTable } from '../../../src/devtools/string-table';
 
@@ -45,6 +45,16 @@ describe('devtools', () => {
 			expect(inst).to.not.equal(undefined);
 			expect(inst).to.not.equal(null);
 			expect(inst).to.equal(inst2);
+		});
+	});
+
+	describe('isRoot', () => {
+		it('should check if a vnode is a root', () => {
+			render(<div>Hello World</div>, scratch);
+			let root = scratch._children;
+
+			expect(isRoot(root)).to.equal(true);
+			expect(isRoot(root._children[0])).to.equal(false);
 		});
 	});
 });
