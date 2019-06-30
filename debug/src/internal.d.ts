@@ -166,7 +166,7 @@ export type BooleanFilter = {
 
 export type Filter =
   | BooleanFilter
-  | ElementTypeFilter
+  | ElementFilter
 	| RegExpFilter;
 
 export type Path = Array<number | string>;
