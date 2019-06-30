@@ -1,4 +1,4 @@
-import { getInstance, isRoot, getRoot } from '../vnode';
+import { getInstance, isRoot, getRoot, getDisplayName } from '../vnode';
 import { getData, hasDataChanged } from './data';
 
 /**
@@ -71,7 +71,7 @@ export class Renderer {
 			let item;
 			while ((item = stack.pop())!=null) {
 				if (item._children) {
-					stack.push(...item._children);
+					stack.push(...item._children.filter(Boolean));
 				}
 
 				this.inst2vnode.set(getInstance(item), item);
