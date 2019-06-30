@@ -462,33 +462,6 @@ export function inspectElement(id, path) {
 	};
 }
 
-export function selectElement(id) {
-	let vnode = getVNode(id);
-	if (vnode==null) {
-		console.warn(`vnode with id ${id} not found`);
-		return;
-	}
-
-	if (typeof vnode.type=='function') {
-		if (vnode.type.prototype && vnode.type.prototype.render) {
-
-			/** @type {import('../internal').DevtoolsWindow} */
-			(window).$r = getInstance(vnode);
-			return;
-		}
-
-		/** @type {import('../internal').DevtoolsWindow} */
-		(window).$r = {
-			type: vnode.type,
-			props: vnode.props
-		};
-		return;
-	}
-
-	/** @type {import('../internal').DevtoolsWindow} */
-	(window).$r = null;
-}
-
 /**
  * Print an element to console
  * @param {number} id vnode id

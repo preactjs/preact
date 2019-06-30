@@ -1,9 +1,10 @@
 import { updateComponentFilters } from './filter';
 import { assign } from '../../../src/util';
-import { findDomForVNode, selectElement, inspectElement, logElementToConsole, flushInitialEvents, onCommitFiberRoot, onCommitFiberUnmount } from './renderer';
+import { findDomForVNode, inspectElement, logElementToConsole, flushInitialEvents, onCommitFiberRoot, onCommitFiberUnmount } from './renderer';
 import { startProfiling, getProfilingData, stopProfiling } from './profiling';
 import { setInProps, setInState } from './update';
 import { setInHook } from './hooks';
+import { selectElement, getVNodePath, setTrackedPath, getBestMatch, createSelectionStore } from './selection';
 
 /**
  * Create an adapter instance for the devtools
@@ -36,6 +37,8 @@ export function createAdapter(config, hook) {
 
 	const applyFilters = updateComponentFilters(hook, state);
 
+	let selections = createSelectionStore(state.filter, () => hook.getFiberRoots(state.rendererId));
+
 	let renderer = assign(assign({}, config), {
 		findNativeNodesForFiberID: findDomForVNode,
 		startProfiling: () => startProfiling(hook, state, state.rendererId),
@@ -64,16 +67,9 @@ export function createAdapter(config, hook) {
 		overrideProps(vnode, path, value) {
 			// TODO
 		},
-		setTrackedPath() {
-			// TODO
-		},
-		getPathForElement() {
-			// TODO
-		},
-		getBestMatchForTrackedPath() {
-			// TODO
-			return null;
-		},
+		setTrackedPath: selections.setTrackedPath,
+		getPathForElement: getVNodePath,
+		getBestMatchForTrackedPath: selections.getBestMatch,
 		currentDispatcherRef: { current: null }
 	});
 
