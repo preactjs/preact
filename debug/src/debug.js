@@ -9,6 +9,7 @@ export function initDebug() {
 	let oldDiffed = options.diffed;
 	let oldVnode = options.vnode;
 	const warnedComponents = { useEffect: {}, useLayoutEffect: {} };
+	const serializedConstructorMap = typeof WeakMap!=='undefined' && WeakMap();
 
 	options.root = (vnode, parentNode) => {
 		if (!parentNode) {
@@ -139,10 +140,19 @@ export function initDebug() {
 	// If the constructor source text and prototype properties match,
 	// two different component references are likely to be the same.
 	function componentsAreEquivalent(a, b) {
-		return (
-			Function.prototype.toString.call(a) === Function.prototype.toString.call(b) &&
-			Object.keys(a.prototype).join() === Object.keys(b.prototype).join()
-		);
+		return componentToString(a) === componentToString(b);
+	}
+	
+	function componentToString(c) {
+		let str;
+		if (serializedConstructorMap && (str = serializedConstructorMap.get(c)) {
+			return str;
+		}
+		str = Function.prototype.toString.call(c) + Object.keys(c.prototype).join();
+		if (serializedConstructorMap) {
+			serializedConstructorMap.set(c, str);
+		}
+		return str;
 	}
 	  
 	options.hook = (comp) => {
