@@ -13,9 +13,7 @@ import options from './options';
  */
 export function render(vnode, parentDom, replaceNode) {
 	if (options._root) options._root(vnode, parentDom);
-	let oldVNode = replaceNode ?
-		replaceNode._children || parentDom._children :
-		parentDom._children;
+	let oldVNode = replaceNode && replaceNode._children || parentDom._children;
 
 	vnode = createElement(Fragment, null, [vnode]);
 
