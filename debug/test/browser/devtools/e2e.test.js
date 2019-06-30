@@ -564,7 +564,7 @@ describe('devtools', () => {
 		]);
 	});
 
-	it.skip('should mount + unmount components', () => {
+	it('should mount + unmount components', () => {
 		mock.connect();
 
 		function Foo() {
@@ -600,25 +600,15 @@ describe('devtools', () => {
 			 4,
 			 3
 		]);
-		expect(parseEmit(mock.hook.emit.args[1])).to.deep.equal({
-			operations: [],
-			rendererId: 1,
-			rootVNodeId: 1,
-			stringTable: {
-				items: [],
-				length: 0
-			},
-			unmounts: [5, 4, 3]
-		});
 	});
 
 	describe('inspectElement', () => {
 		it('should provide props', () => {
 			mock.connect();
-			let App = props => <div />;
+			let App = () => <div />;
 			render(<App foo bar="bar" bob={2} baz={{ foo: 1 }} boof={[1]} />, scratch);
 
-			expect(mock.inspect(2).props).to.deep.equal({
+			expect(mock.inspect(2).value.props).to.deep.equal({
 				cleaned: [],
 				data: {
 					foo: true,
@@ -636,7 +626,7 @@ describe('devtools', () => {
 			mock.connect();
 			let App = () => <div />;
 			render(<App />, scratch);
-			expect(mock.inspect(2).state).to.equal(null);
+			expect(mock.inspect(2).value.state).to.equal(null);
 		});
 
 		it('should provide state for class components', () => {
@@ -653,7 +643,7 @@ describe('devtools', () => {
 
 			render(<App />, scratch);
 
-			expect(mock.inspect(2).state).to.deep.equal({
+			expect(mock.inspect(2).value.state).to.deep.equal({
 				cleaned: [],
 				data: {
 					foo: 1
@@ -675,7 +665,7 @@ describe('devtools', () => {
 
 			render(<App />, scratch);
 
-			expect(mock.inspect(2).state).to.deep.equal({
+			expect(mock.inspect(2).value.state).to.deep.equal({
 				cleaned: [],
 				data: {
 					foo: 1
@@ -685,7 +675,7 @@ describe('devtools', () => {
 			mock.setState(2, ['foo'], 42);
 			rerender();
 
-			expect(mock.inspect(2).state).to.deep.equal({
+			expect(mock.inspect(2).value.state).to.deep.equal({
 				cleaned: [],
 				data: {
 					foo: 42

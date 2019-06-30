@@ -14,13 +14,15 @@ export function createMockDevtoolsHook() {
 		emit: sinon.spy(),
 		isDisabled: false,
 		getFiberRoots() { return roots; },
-		inject: sinon.spy(options => {
-			renderers.set(1, options.renderer);
+		inject: sinon.spy(renderer => {
+			renderers.set(1, renderer);
 		}),
 		renderers,
+		rendererInterfaces: {},
 		on() {},
 		onCommitFiberRoot() {},
-		onCommitFiberUnmount() {}
+		onCommitFiberUnmount() {},
+		flushInitialOperations: sinon.spy()
 	};
 
 	function applyFilters(filters) {
@@ -30,7 +32,7 @@ export function createMockDevtoolsHook() {
 	function connect() {
 		win.__REACT_DEVTOOLS_GLOBAL_HOOK__ = hook;
 
-		let attached = /** @type {*} */ (window).__REACT_DEVTOOLS_ATTACH__(hook, 1, renderers.get(1), window);
+		let attached = win.__REACT_DEVTOOLS_ATTACH__(hook, 1, renderers.get(1), window);
 		attached.flushInitialOperations();
 	}
 

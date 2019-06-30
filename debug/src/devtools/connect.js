@@ -4,7 +4,7 @@ import { findDomForVNode, inspectElement, logElementToConsole, flushInitialEvent
 import { startProfiling, getProfilingData, stopProfiling } from './profiling';
 import { setInProps, setInState } from './update';
 import { setInHook } from './hooks';
-import { selectElement, getVNodePath, setTrackedPath, getBestMatch, createSelectionStore } from './selection';
+import { selectElement, getVNodePath, createSelectionStore } from './selection';
 
 /**
  * Create an adapter instance for the devtools
@@ -90,7 +90,8 @@ export function createAdapter(config, hook) {
 			// TODO: The react-devtools declare this as non-configurable.
 			// This prevents us from getting
 			Object.defineProperty(window, '__REACT_DEVTOOLS_ATTACH__', {
-				get: () => attach
+				get: () => attach,
+				configurable: true
 			});
 
 			// Tell the devtools that we are ready to start
