@@ -12,19 +12,11 @@ export function createLegacyAdapter(config, hook) {
 	// The renderer id is just a random string
 	let rendererId = Math.random().toString(16).slice(2);
 
-	let adapter = new Renderer(hook);
+	let adapter = new Renderer(hook, rendererId);
 
 	let renderer = assign(assign({}, config), {
-		// We don't need this, but the devtools `attachRenderer` function relys
-		// it being there.
-		findHostInstanceByFiber(vnode) {
-			return vnode._dom;
-		},
-		// We don't need this, but the devtools `attachRenderer` function relys
-		// it being there.
-		findFiberByHostInstance(instance) {
-			return adapter.inst2vnode.get(instance) || null;
-		}
+		findHostInstanceByFiber: adapter.getNativeFromReactElement,
+		findFiberByHostInstance: adapter.getReactElementFromNative
 	});
 
 	hook._renderers[rendererId] = renderer;

@@ -7,9 +7,10 @@ import { getData, hasDataChanged } from './data';
  * @class Renderer
  */
 export class Renderer {
-	constructor(hook) {
+	constructor(hook, rid) {
 
 		this.hook = hook;
+		this.rid = rid;
 
 		/** @type {Array<import('../../internal').DevtoolsEvent>} */
 		this.pending = [];
@@ -62,6 +63,7 @@ export class Renderer {
 		let work = [{
 			internalInstance: vnode,
 			data,
+			renderer: this.rid,
 			type: 'mount'
 		}];
 
@@ -81,6 +83,7 @@ export class Renderer {
 				work.push({
 					internalInstance: item,
 					data,
+					renderer: this.rid,
 					type: 'mount'
 				});
 			}
@@ -95,6 +98,7 @@ export class Renderer {
 			this.pending.push({
 				internalInstance: vnode,
 				data,
+				renderer: this.rid,
 				type: 'root'
 			});
 		}
@@ -137,6 +141,7 @@ export class Renderer {
 				// vnode/fiber shape.
 				internalInstance: prev,
 				data,
+				renderer: this.rid,
 				type: 'updateProfileTimes'
 			});
 			return;
@@ -150,6 +155,7 @@ export class Renderer {
 			// vnode/fiber shape.
 			internalInstance: prev,
 			data,
+			renderer: this.rid,
 			type: 'update'
 		});
 	}
@@ -187,6 +193,7 @@ export class Renderer {
 		this.pending.push({
 			internalInstance: root,
 			data: getData(root),
+			renderer: this.rid,
 			type: 'rootCommitted'
 		});
 
