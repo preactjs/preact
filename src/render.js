@@ -20,7 +20,7 @@ export function render(vnode, parentDom, replaceNode) {
 	let mounts = [];
 	diff(
 		parentDom,
-		replaceNode ? (replaceNode._children = vnode) : (parentDom._children = vnode),
+		(replaceNode || parentDom)._children = vnode,
 		oldVNode || EMPTY_OBJ,
 		EMPTY_OBJ,
 		parentDom.ownerSVGElement !== undefined,
