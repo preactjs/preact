@@ -1,4 +1,4 @@
-import { getInstance, isRoot } from '../vnode';
+import { getInstance, isRoot, getRoot } from '../vnode';
 import { getData, hasDataChanged } from './data';
 
 /**
@@ -181,10 +181,7 @@ export class Renderer {
 			// "rootCommitted" always needs the actual root node for the profiler
 			// to be able to collect timings. The `_parent` property will
 			// point to a vnode for a root node.
-			root = vnode;
-			while (root._parent!=null) {
-				root = root._parent;
-			}
+			root = getRoot(vnode);
 		}
 
 		this.pending.push({
