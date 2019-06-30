@@ -7,6 +7,9 @@ export function createMockDevtoolsHook() {
 	/** @type {Map<number, import('../../../src/internal').Renderer>} */
 	let renderers = new Map();
 
+	/** @type {import('../../../src/internal').DevtoolsWindow} */
+	let win = /** @type {*} */ (window);
+
 	let hook = {
 		emit: sinon.spy(),
 		isDisabled: false,
@@ -25,9 +28,7 @@ export function createMockDevtoolsHook() {
 	}
 
 	function connect() {
-
-		/** @type {import('../../../src/internal').DevtoolsWindow} */
-		(window).__REACT_DEVTOOLS_GLOBAL_HOOK__ = hook;
+		win.__REACT_DEVTOOLS_GLOBAL_HOOK__ = hook;
 
 		let attached = /** @type {*} */ (window).__REACT_DEVTOOLS_ATTACH__(hook, 1, renderers.get(1), window);
 		attached.flushInitialOperations();
@@ -41,9 +42,8 @@ export function createMockDevtoolsHook() {
 		return renderers.get(1).setInState(id, path, value);
 	}
 
-	/** @type {*} */
-	(window).__REACT_DEVTOOLS_GLOBAL_HOOK__ = hook;
-	(window).__REACT_DEVTOOLS_COMPONENT_FILTERS__ = [
+	win.__REACT_DEVTOOLS_GLOBAL_HOOK__ = hook;
+	win.__REACT_DEVTOOLS_COMPONENT_FILTERS__ = [
 		{ isEnabled: true, type: 1, value: 7 }
 	];
 
