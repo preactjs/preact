@@ -182,6 +182,11 @@ export interface PathMatch {
 	isFullMatch: boolean;
 }
 
+export interface SelectionState {
+	trackedPath: PathFrame[] | null;
+	trackedVNode: VNode | null;
+}
+
 export interface Renderer extends RendererConfig {
 	setInState(id: number, path: string[], value: any): void;
 	setTrackedPath(path: PathFrame[] | null): void;
