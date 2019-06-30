@@ -1,10 +1,10 @@
 /**
- * @returns {import('../../src/internal').DevtoolsMock}
+ * @returns {import('../../../src/internal').DevtoolsMock}
  */
 export function createMockDevtoolsHook() {
 	let roots = new Set();
 
-	/** @type {Map<number, import('../../src/internal').Renderer>} */
+	/** @type {Map<number, import('../../../src/internal').Renderer>} */
 	let renderers = new Map();
 
 	let hook = {
@@ -26,7 +26,7 @@ export function createMockDevtoolsHook() {
 
 	function connect() {
 
-		/** @type {import('../../src/internal').DevtoolsWindow} */
+		/** @type {import('../../../src/internal').DevtoolsWindow} */
 		(window).__REACT_DEVTOOLS_GLOBAL_HOOK__ = hook;
 
 		let attached = /** @type {*} */ (window).__REACT_DEVTOOLS_ATTACH__(hook, 1, renderers.get(1), window);

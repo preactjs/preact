@@ -1,6 +1,6 @@
-import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { setupScratch, teardown } from '../../../../test/_util/helpers';
 import { h } from 'preact';
-import { getType, prettify } from '../../src/devtools/pretty';
+import { getType, prettify } from '../../../src/devtools/pretty';
 
 /** @jsx h */
 

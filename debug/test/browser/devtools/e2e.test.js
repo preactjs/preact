@@ -1,12 +1,12 @@
-import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { setupScratch, teardown } from '../../../../test/_util/helpers';
 import { render, h, Component } from 'preact';
 import { setupRerender } from 'preact/test-utils';
 import { useState } from 'preact/hooks';
 import { createMockDevtoolsHook, parseEmit } from './mock-hook';
-import { initDevTools } from '../../src/devtools';
-import { clearState } from '../../src/devtools/cache';
-import { inspectHooks } from '../../src/devtools/hooks';
-import { clearStringTable } from '../../src/devtools/string-table';
+import { initDevTools } from '../../../src/devtools';
+import { clearState } from '../../../src/devtools/cache';
+import { inspectHooks } from '../../../src/devtools/hooks';
+import { clearStringTable } from '../../../src/devtools/string-table';
 
 /** @jsx h */
 
@@ -18,7 +18,7 @@ describe('devtools', () => {
 	/** @type {() => void} */
 	let rerender;
 
-	/** @type {import('../../src/internal').DevtoolsMock} */
+	/** @type {import('../../../src/internal').DevtoolsMock} */
 	let mock;
 
 	let teardownDevtools;
