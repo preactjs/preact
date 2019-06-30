@@ -1,4 +1,4 @@
-import { getInstance } from './custom';
+import { getInstance } from './vnode';
 
 let uid = 0;
 

@@ -1,6 +1,32 @@
 import { ElementTypeClass, ElementTypeFunction, ElementTypeMemo, ElementTypeForwardRef } from './constants';
 import { getNearestDisplayName, getVNodeType } from './vnode';
-import { getVNode } from './cache';
+import { getVNode, getVNodeId } from './cache';
+import { now } from './util';
+
+/**
+ * Start a profiling session
+ * @param {import('../internal').DevtoolsHook} hook
+ * @param {import('../internal').AdapterState} state
+ * @param {number} rendererId
+ */
+export function startProfiling(hook, state, rendererId) {
+	if (state.isProfiling) return;
+
+	state.isProfiling = true;
+	state.profilingStart = now();
+
+	hook.getFiberRoots(rendererId).forEach(root => {
+		let id = getVNodeId(root);
+		state.profilingData.set(id, []);
+	});
+}
+
+/**
+ * @param {import('../internal').AdapterState} state
+ */
+export function stopProfiling(state) {
+	state.isProfiling = false;
+}
 
 /**
  * @param {number} rendererId

@@ -1,4 +1,5 @@
-import { getData, getInstance, hasDataChanged, isRoot } from '../custom';
+import { getInstance, isRoot } from '../vnode';
+import { getData, hasDataChanged } from './data';
 
 /**
  * Custom renderer tailored for Preact. It converts updated vnode trees
