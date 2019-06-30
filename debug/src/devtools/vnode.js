@@ -40,13 +40,12 @@ export function getVNodeType(vnode) {
  * instance as key. For html elements we use the dom node as key.
  *
  * @param {import('../internal').VNode} vnode
- * @param {boolean} [isRoot]
  * @returns {*}
  */
-export function getInstance(vnode, isRoot) {
+export function getInstance(vnode) {
 	// Use the parent element as instance for root nodes
-	if (isRoot) {
-		return vnode;
+	if (isRoot(vnode)) {
+		return vnode._dom;
 	}
 	if (vnode._component!=null) return vnode._component;
 	if (vnode.type===Fragment) return vnode.props;
