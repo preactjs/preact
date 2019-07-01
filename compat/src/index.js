@@ -83,12 +83,29 @@ function Portal(props) {
 	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
 	let container = props.container;
 
-	if (props.container !== this.container) {
-		hydrate('', container);
-		this.container = container;
+	if (this.container && this.container !== container) {
+		render(null, this.container);
+		this.hasMounted = false;
 	}
 
-	render(wrap, container);
+	if (!this.hasMounted) {
+		hydrate('', container);
+		let temp = document.createTextNode('');
+		if (container.hasChildNodes()) {
+			container.insertBefore(temp, container.firstChild);
+		}
+		else {
+			container.appendChild(temp);
+		}
+		this.hasMounted = true;
+		this.temp = temp;
+		this.container = container;
+		preactRender(wrap, container, temp);
+	}
+	else {
+		render(wrap, container);
+	}
+
 	this.componentWillUnmount = () => {
 		render(null, container);
 	};
