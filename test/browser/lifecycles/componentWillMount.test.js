@@ -1,4 +1,5 @@
 import { createElement, render, Component } from '../../../src/index';
+import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../_util/helpers';
 
 /** @jsx createElement */
@@ -7,9 +8,11 @@ describe('Lifecycle methods', () => {
 
 	/** @type {HTMLDivElement} */
 	let scratch;
+	let rerender;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		rerender = setupRerender();
 	});
 
 	afterEach(() => {
@@ -65,6 +68,41 @@ describe('Lifecycle methods', () => {
 
 			expect(spy).to.be.calledOnce;
 			expect(componentState).to.deep.equal({ value: 1 });
+		});
+
+		it.skip('should call setState callback in correct order', () => {
+			let callOrder = [];
+
+			class A extends Component {
+				componentWillMount() {
+					callOrder.push('willMount');
+					this.setState(
+						{
+							a: 'a'
+						},
+						() => {
+							callOrder.push('willMountCb');
+						}
+					);
+				}
+				render() {
+					return <B />;
+				}
+			}
+
+			class B extends Component {
+				render() {
+					return <div>B</div>;
+				}
+				componentDidMount() {
+					callOrder.push('didMount');
+				}
+			}
+
+			render(<A />, scratch);
+			rerender();
+
+			expect(callOrder).to.deep.equal(['willMount', 'didMount', 'willMountCb']);
 		});
 	});
 });
