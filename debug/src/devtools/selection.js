@@ -57,6 +57,7 @@ export function getBestMatch(filters, path, vnode) {
 	for (let i = 0; i < path.length; i++) {
 		let seg = path[i];
 		item = item._children[seg.index];
+		if (item==null) continue;
 		if (getDisplayName(item)!=seg.displayName) break;
 
 		if (!shouldFilter(filters, item)) {
