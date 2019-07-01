@@ -40,5 +40,31 @@ describe('Lifecycle methods', () => {
 
 			expect(componentState).to.deep.equal({ value: 1 });
 		});
+
+		it('should call setState callback in componentWillMount', () => {
+			let componentState;
+			let spy = sinon.spy();
+
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						value: 0
+					};
+				}
+				componentWillMount() {
+					this.setState({ value: 1 }, spy);
+				}
+				render() {
+					componentState = this.state;
+					return <div />;
+				}
+			}
+
+			render(<Foo />, scratch);
+
+			expect(spy).to.be.calledOnce;
+			expect(componentState).to.deep.equal({ value: 1 });
+		});
 	});
 });

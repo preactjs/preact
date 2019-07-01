@@ -49,8 +49,8 @@ Component.prototype.setState = function(update, callback) {
 	// Skip update if updater function returned null
 	if (update==null) return;
 
+	if (callback && Array.isArray(this._renderCallbacks)) this._renderCallbacks.push(callback);
 	if (this._vnode) {
-		if (callback) this._renderCallbacks.push(callback);
 		enqueueRender(this);
 	}
 };
