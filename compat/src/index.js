@@ -83,14 +83,20 @@ function Portal(props) {
 	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
 	let container = props.container;
 
+	// When we change container we should clear our old container and
+	// indicate a new mount.
 	if (this.container && this.container !== container) {
 		render(null, this.container);
 		this.hasMounted = false;
 	}
 
 	if (!this.hasMounted) {
-		hydrate('', container);
+		// Create a placeholder that we can use to insert into.
 		let temp = document.createTextNode('');
+		// Hydrate existing nodes to keep the dom intact, when rendering
+		// wrap into the container.
+		hydrate('', container);
+		// If it has child nodes we need to insert before the first child.
 		if (container.hasChildNodes()) {
 			container.insertBefore(temp, container.firstChild);
 		}
@@ -98,8 +104,8 @@ function Portal(props) {
 			container.appendChild(temp);
 		}
 		this.hasMounted = true;
-		this.temp = temp;
 		this.container = container;
+		// Render our wrapping element into temp.
 		preactRender(wrap, container, temp);
 	}
 	else {
@@ -107,6 +113,8 @@ function Portal(props) {
 	}
 
 	this.componentWillUnmount = () => {
+		// Since our old dom was hydrated this will result in
+		// our inserted element being rendered away.
 		render(null, container);
 	};
 	return null;
