@@ -333,9 +333,6 @@ export function flushPendingEvents(hook, state) {
 		}
 	}
 
-	// TODO: Profiling
-	if (!state.connected) return;
-
 	// We _must_ set the length on initialization
 	let ops = new Uint32Array(
 		2 + // Renderer id + root vnode id
@@ -380,7 +377,12 @@ export function flushPendingEvents(hook, state) {
 	// Finally add all pending operations
 	ops.set(operations, i);
 
-	hook.emit('operations', ops);
+	if (state.connected) {
+		hook.emit('operations', ops);
+	}
+	else {
+		state.pendingCommits.push(ops);
+	}
 
 	state.currentCommit = {
 		operations: [],
@@ -399,11 +401,20 @@ export function flushPendingEvents(hook, state) {
 export function flushInitialEvents(hook, state) {
 	state.connected = true;
 
-	// TODO: When operations are already queued, we should just flush the queus
-	hook.getFiberRoots(state.rendererId).forEach(root => {
-		state.currentRootId = getVNodeId(root);
-		flushPendingEvents(hook, state);
-	});
+	// Flush any events we have queued up so far
+	if (state.pendingCommits.length > 0) {
+		state.pendingCommits.forEach(commit => {
+			hook.emit('operations', commit);
+		});
+		state.pendingCommits = [];
+	}
+	else {
+		hook.getFiberRoots(state.rendererId).forEach(root => {
+			state.currentRootId = getVNodeId(root);
+			flushPendingEvents(hook, state);
+		});
+		state.currentRootId = -1;
+	}
 }
 
 /**
