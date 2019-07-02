@@ -80,8 +80,8 @@ class ContextProvider {
  * @param {object | null | undefined} props
  */
 function Portal(props) {
-	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
 	let container = props.container;
+	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
 
 	// When we change container we should clear our old container and
 	// indicate a new mount.
@@ -100,12 +100,7 @@ function Portal(props) {
 			// wrap into the container.
 			hydrate('', container);
 			// If it has child nodes we need to insert before the first child.
-			if (container.hasChildNodes()) {
-				container.insertBefore(temp, container.firstChild);
-			}
-			else {
-				container.appendChild(temp);
-			}
+			container.insertBefore(temp, container.firstChild);
 			this.hasMounted = true;
 			this.container = container;
 			// Render our wrapping element into temp.
