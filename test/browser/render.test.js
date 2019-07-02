@@ -994,6 +994,30 @@ describe('render()', () => {
 		expect(scratch.textContent).to.equal('01');
 	});
 
+	it('should call unmount when working with replaceNode', () => {
+		const mountSpy = sinon.spy();
+		const unmountSpy = sinon.spy();
+		class MyComponent extends Component {
+			componentDidMount() {
+				mountSpy();
+			}
+			componentWillUnmount() {
+				unmountSpy();
+			}
+			render() {
+				return <div>My Component</div>;
+			}
+		}
+
+		const container = document.createElement('div');
+		scratch.appendChild(container);
+		render(<MyComponent />, scratch, container);
+		expect(mountSpy).to.be.calledOnce;
+
+		render(<div>Not my component</div>, document.body, container);
+		expect(unmountSpy).to.be.calledOnce;
+	});
+
 	it('should not cause infinite loop with referentially equal props', () => {
 		let i = 0;
 		let prevDiff = options._diff;
