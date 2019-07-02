@@ -319,4 +319,6 @@ describe('Portal', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div>');
 	});
+
+	// TODO: change container with multiple insertions in one root.
 });

@@ -90,26 +90,31 @@ function Portal(props) {
 		this.hasMounted = false;
 	}
 
-	if (!this.hasMounted) {
-		// Create a placeholder that we can use to insert into.
-		let temp = document.createTextNode('');
-		// Hydrate existing nodes to keep the dom intact, when rendering
-		// wrap into the container.
-		hydrate('', container);
-		// If it has child nodes we need to insert before the first child.
-		if (container.hasChildNodes()) {
-			container.insertBefore(temp, container.firstChild);
+	if (props.vnode) {
+		if (!this.hasMounted) {
+			// Create a placeholder that we can use to insert into.
+			let temp = document.createTextNode('');
+			// Hydrate existing nodes to keep the dom intact, when rendering
+			// wrap into the container.
+			hydrate('', container);
+			// If it has child nodes we need to insert before the first child.
+			if (container.hasChildNodes()) {
+				container.insertBefore(temp, container.firstChild);
+			}
+			else {
+				container.appendChild(temp);
+			}
+			this.hasMounted = true;
+			this.container = container;
+			// Render our wrapping element into temp.
+			preactRender(wrap, container, temp);
 		}
 		else {
-			container.appendChild(temp);
+			render(wrap, container);
 		}
-		this.hasMounted = true;
-		this.container = container;
-		// Render our wrapping element into temp.
-		preactRender(wrap, container, temp);
 	}
-	else {
-		render(wrap, container);
+	else if (!props.vnode && this.hasMounted) {
+		render(null, container);
 	}
 
 	this.componentWillUnmount = () => {
