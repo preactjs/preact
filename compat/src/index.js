@@ -90,6 +90,8 @@ function Portal(props) {
 		this.hasMounted = false;
 	}
 
+	// When props.vnode is undefined/false/null we are dealing with some kind of
+	// conditional vnode. This should not trigger a render.
 	if (props.vnode) {
 		if (!this.hasMounted) {
 			// Create a placeholder that we can use to insert into.
@@ -113,7 +115,9 @@ function Portal(props) {
 			render(wrap, container);
 		}
 	}
-	else if (!props.vnode && this.hasMounted) {
+	// When we come from a conditional render, on a mounted
+	// portal we should clear the DOM.
+	else if (this.hasMounted) {
 		render(null, container);
 	}
 
