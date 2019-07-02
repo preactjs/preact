@@ -239,13 +239,17 @@ export interface DevtoolsWindow extends Window {
 	$r: any
 }
 
+export interface CurrentCommit {
+	operations: number[];
+	unmountIds: number[];
+	unmountRootId: number | null;
+}
+
 export interface AdapterState {
 	connected: boolean;
 	rendererId: number;
 	currentRootId: number;
-	pending: any[];
-	pendingUnmountIds: number[];
-	pendingUnmountRootId: number | null;
+	currentCommit: CurrentCommit;
 	// TODO: Cleanup profiling state
 	isProfiling: boolean;
 	profilingStart: number;
