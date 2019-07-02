@@ -9,7 +9,7 @@ export function initDebug() {
 	let oldDiffed = options.diffed;
 	let oldVnode = options.vnode;
 	const warnedComponents = { useEffect: {}, useLayoutEffect: {} };
-	const serializedConstructorMap = typeof WeakMap!=='undefined' && WeakMap();
+	const serializedConstructorMap = typeof WeakMap!=='undefined' && new WeakMap();
 
 	options.root = (vnode, parentNode) => {
 		if (!parentNode) {
