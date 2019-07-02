@@ -23,9 +23,11 @@ export function createAdapter(config, hook) {
 		vnodeDurations: new Map(),
 		changeDescriptions: new Map(),
 		profilingStart: 0,
-		pending: [],
-		pendingUnmountIds: [],
-		pendingUnmountRootId: null,
+		currentCommit: {
+			operations: [],
+			unmountIds: [],
+			unmountRootId: null
+		},
 		rendererId: -1,
 		inspectedElementId: -1,
 		filter: {

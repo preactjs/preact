@@ -167,7 +167,8 @@ export function resetChildren(state, vnode) {
 
 	if (next.length < 2) return;
 
-	state.pending.push(
+	let ops = state.currentCommit.operations;
+	ops.push(
 		TREE_OPERATION_REORDER_CHILDREN,
 		getVNodeId(vnode),
 		next.length
@@ -175,7 +176,7 @@ export function resetChildren(state, vnode) {
 
 	next = next.reverse();
 	for (let i = 0; i < next.length; i++) {
-		state.pending.push(next[i]);
+		ops.push(next[i]);
 	}
 }
 
@@ -206,10 +207,10 @@ export function recordUnmount(state, vnode) {
 	if (hasVNodeId(vnode)) {
 		let id = getVNodeId(vnode);
 		if (isRoot(vnode)) {
-			state.pendingUnmountRootId = id;
+			state.currentCommit.unmountRootId = id;
 		}
 		else {
-			state.pendingUnmountIds.push(id);
+			state.currentCommit.unmountIds.push(id);
 		}
 
 		state.vnodeDurations.delete(id);
@@ -248,7 +249,7 @@ export function mount(state, vnode, parentId) {
 export function recordMount(state, vnode) {
 	let id = getVNodeId(vnode);
 	if (isRoot(vnode)) {
-		state.pending.push(
+		state.currentCommit.operations.push(
 			TREE_OPERATION_ADD,
 			id,
 			ElementTypeRoot,
@@ -259,7 +260,7 @@ export function recordMount(state, vnode) {
 	}
 	else {
 		let ancestor = getAncestor(state.filter, vnode);
-		state.pending.push(
+		state.currentCommit.operations.push(
 			TREE_OPERATION_ADD,
 			id,
 			getVNodeType(vnode),
@@ -286,7 +287,7 @@ export function recordProfiling(state, vnode, isNew) {
 
 	if (!state.isProfiling) return;
 
-	state.pending.push(
+	state.currentCommit.operations.push(
 		TREE_OPERATION_UPDATE_TREE_BASE_DURATION,
 		id,
 		Math.floor(duration * 1000)
@@ -321,10 +322,11 @@ export function recordProfiling(state, vnode, isNew) {
  * @param {import('../internal').AdapterState} state
  */
 export function flushPendingEvents(hook, state) {
+	let { unmountIds, unmountRootId, operations } = state.currentCommit;
 	if (
-		state.pending.length==0 &&
-		state.pendingUnmountIds.length==0 &&
-		state.pendingUnmountRootId==null
+		operations.length==0 &&
+		unmountIds.length==0 &&
+		unmountRootId==null
 	) {
 		if (!state.isProfiling) {
 			return;
@@ -339,12 +341,12 @@ export function flushPendingEvents(hook, state) {
 		2 + // Renderer id + root vnode id
 		1 + // string table length field
 		allStrLengths +
-		(state.pendingUnmountIds.length
+		(unmountIds.length
 			// TREE_OPERATION_REMOVE + removed id length
-			? 2 + state.pendingUnmountIds.length
+			? 2 + unmountIds.length
 			: 0) +
-		(state.pendingUnmountRootId===null ? 0 : 1) +
-		state.pending.length
+		(unmountRootId===null ? 0 : 1) +
+		operations.length
 	);
 
 	let i = 0;
@@ -359,30 +361,32 @@ export function flushPendingEvents(hook, state) {
 		i += k.length;
 	});
 
-	if (state.pendingUnmountIds.length) {
+	if (unmountIds.length) {
 		// All unmounts
 		ops[i++] = TREE_OPERATION_REMOVE;
 		// Total number of unmount ids
-		ops[i++] = state.pendingUnmountIds.length +
-			(state.pendingUnmountRootId!=null ? 1 : 0);
+		ops[i++] = unmountIds.length + (unmountRootId!=null ? 1 : 0);
 
-		for (let j = 0; j < state.pendingUnmountIds.length; j++) {
-			ops[i + j] = state.pendingUnmountIds[j];
+		for (let j = 0; j < unmountIds.length; j++) {
+			ops[i + j] = unmountIds[j];
 		}
-		i += state.pendingUnmountIds.length;
+		i += unmountIds.length;
 	}
 
-	if (state.pendingUnmountRootId!==null) {
-		ops[i++] = state.pendingUnmountRootId;
+	if (unmountRootId!==null) {
+		ops[i++] = unmountRootId;
 	}
 
 	// Finally add all pending operations
-	ops.set(state.pending, i);
+	ops.set(operations, i);
 
 	hook.emit('operations', ops);
 
-	state.pending = [];
-	state.pendingUnmountIds = [];
+	state.currentCommit = {
+		operations: [],
+		unmountIds: [],
+		unmountRootId: null
+	};
 	clearStringTable();
 }
 
