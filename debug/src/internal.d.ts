@@ -249,6 +249,8 @@ export interface AdapterState {
 	connected: boolean;
 	rendererId: number;
 	currentRootId: number;
+	/** If the devtools are not connected we store pending commits here */
+	pendingCommits: Uint32Array[];
 	currentCommit: CurrentCommit;
 	// TODO: Cleanup profiling state
 	isProfiling: boolean;
