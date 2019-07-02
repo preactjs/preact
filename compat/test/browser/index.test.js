@@ -102,18 +102,27 @@ describe('preact-compat', () => {
 			expect(spy).to.be.calledOnce;
 			expect(spy).to.be.calledWithExactly();
 		});
+
+		// Issue #1727
+		it('should destroy the any existing DOM nodes inside the container', () => {
+			scratch.appendChild(document.createElement('div'));
+			scratch.appendChild(document.createElement('div'));
+
+			render(<span>foo</span>, scratch);
+			expect(scratch.innerHTML).to.equal('<span>foo</span>');
+		});
 	});
 
 	describe('createFactory', () => {
 		it('should create a DOM element', () => {
-			render(createFactory('span', null)(), scratch);
-			expect(scratch.firstChild.nodeName).to.equal('SPAN');
+			render(createFactory('span')({ class: 'foo' }, '1'), scratch);
+			expect(scratch.innerHTML).to.equal('<span class="foo">1</span>');
 		});
 
 		it('should create a component', () => {
-			const Foo = () => <div>foo</div>;
-			render(createFactory(Foo, null)(), scratch);
-			expect(scratch.textContent).to.equal('foo');
+			const Foo = ({ id, children }) => <div id={id}>foo {children}</div>;
+			render(createFactory(Foo)({ id: 'value' }, 'bar'), scratch);
+			expect(scratch.innerHTML).to.equal('<div id="value">foo bar</div>');
 		});
 	});
 
@@ -270,7 +279,7 @@ describe('preact-compat', () => {
 
 		it('should return a regular DOM Element if given a regular DOM Element', () => {
 			let scratch = document.createElement('div');
-			expect(findDOMNode(scratch)).to.equal(scratch);
+			expect(findDOMNode(scratch)).to.equalNode(scratch);
 		}),
 
 		// NOTE: React.render() returning false or null has the component pointing

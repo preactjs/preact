@@ -1,17 +1,24 @@
 import { checkPropTypes } from './check-props';
 import { getDisplayName } from './devtools/custom';
-import { options, toChildArray } from 'preact';
+import { options } from 'preact';
 import { ELEMENT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants';
 
 export function initDebug() {
 	/* eslint-disable no-console */
-	let oldBeforeDiff = options.diff;
+	let oldBeforeDiff = options._diff;
 	let oldDiffed = options.diffed;
 	let oldVnode = options.vnode;
-	const warnedComponents = { useEffect: {}, useLayoutEffect: {} };
+	const warnedComponents = { useEffect: {}, useLayoutEffect: {}, lazyPropTypes: {} };
 	const serializedConstructorMap = typeof WeakMap!=='undefined' && new WeakMap();
 
-	options.root = (vnode, parentNode) => {
+	options._catchError = (error, vnode) => {
+		let component = vnode && vnode._component;
+		if (component && typeof error.then === 'function') {
+			error = new Error('Missing Suspense. The throwing component was: ' + (component.displayName || component.name));
+		}
+	};
+
+	options._root = (vnode, parentNode) => {
 		if (!parentNode) {
 			throw new Error('Undefined parent passed to render(), this is the second argument.\nCheck if the element is available in the DOM/has the correct id.');
 		}
@@ -28,8 +35,10 @@ export function initDebug() {
 		`);
 	};
 
-	options.diff = (vnode, oldVnode) => {
-		let { type, props } = vnode;
+	options._diff = (vnode, oldVnode) => {
+		if (vnode == null) { return; }
+
+    let { type, props } = vnode;
 		let children = props && props.children;
 
 		if (type===undefined) {
@@ -94,20 +103,15 @@ export function initDebug() {
 
 		// Check prop-types if available
 		if (typeof vnode.type==='function' && vnode.type.propTypes) {
-			if (vnode.type.displayName === 'Lazy') {
+			if (vnode.type.displayName === 'Lazy' && !warnedComponents.lazyPropTypes[vnode.type]) {
 				const m = 'PropTypes are not supported on lazy(). Use propTypes on the wrapped component itself. ';
 				try {
 					const lazyVNode = vnode.type();
+					warnedComponents.lazyPropTypes[vnode.type] = true;
 					console.warn(m + 'Component wrapped in lazy() is ' + (lazyVNode.type.displayName || lazyVNode.type.name));
 				}
 				catch (promise) {
 					console.warn(m + 'We will log the wrapped component\'s name once it is loaded.');
-					if (promise.then) {
-						promise.then((exports) => {
-							console.warn('Component wrapped in lazy() is ' + (exports.default.displayName || exports.default.name));
-						});
-					}
-
 				}
 			}
 			checkPropTypes(vnode.type.propTypes, vnode.props, getDisplayName(vnode), serializeVNode(vnode));
@@ -155,7 +159,7 @@ export function initDebug() {
 		return str;
 	}
 	  
-	options.hook = (comp) => {
+	options._hook = (comp) => {
 		if (!comp) {
 			throw new Error('Hook can only be invoked from render methods.');
 		}
@@ -177,17 +181,24 @@ export function initDebug() {
 	};
 
 	options.vnode = (vnode) => {
-		let source;
+		let source, self;
 		if (vnode.props && vnode.props.__source) {
 			source = vnode.props.__source;
 			delete vnode.props.__source;
 		}
+		if (vnode.props && vnode.props.__self) {
+			self = vnode.props.__self;
+			delete vnode.props.__self;
+		}
+		vnode.__self = self;
 		vnode.__source = source;
 		Object.defineProperties(vnode, deprecatedAttributes);
 		if (oldVnode) oldVnode(vnode);
 	};
 
 	options.diffed = (vnode) => {
+		if (vnode == null) { return; }
+
 		if (vnode._component && vnode._component.__hooks) {
 			let hooks = vnode._component.__hooks;
 			hooks._list.forEach(hook => {
@@ -220,6 +231,29 @@ export function initDebug() {
 							'This effect can be found in the render of ' + (vnode.type.name || vnode.type) + '.');
 					}
 				});
+			}
+		}
+
+		if (vnode._children != null) {
+			const keys = [];
+			for (let i = 0; i < vnode._children.length; i++) {
+				const child = vnode._children[i];
+				if (!child || child.key==null) continue;
+
+				const key = child.key;
+				if (keys.indexOf(key) !== -1) {
+					console.error(
+						'Following component has two or more children with the ' +
+						`same key attribute: "${key}". This may cause glitches and misbehavior ` +
+						'in rendering process. Component: \n\n' +
+						serializeVNode(vnode)
+					);
+
+					// Break early to not spam the console
+					break;
+				}
+
+				keys.push(key);
 			}
 		}
 

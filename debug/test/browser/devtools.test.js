@@ -130,6 +130,13 @@ function checkEventReferences(events) {
 	});
 }
 
+/**
+ * @param {import('../../src/internal').PreactElement} element
+ */
+function getRoot(element) {
+	return element._children;
+}
+
 describe('devtools', () => {
 
 	/** @type {import('../../src/internal').PreactElement} */
@@ -278,19 +285,29 @@ describe('devtools', () => {
 
 	describe('getChildren', () => {
 		it('should get component children', () => {
-			let a = createElement('div', { foo: 1 });
+			const Foo = () => <div>foo{null}bar</div>;
+			render(<Foo />, scratch);
 
-			a._component = { _prevVNode: null };
-			expect(getChildren(a)).to.equal(null);
+			const fooVNode = getRoot(scratch)._children[0];
+			const expectedChildren = fooVNode._children;
+			expect(getChildren(fooVNode)).to.deep.equal(expectedChildren);
+		});
 
-			a._component._prevVNode = {};
-			expect(getChildren(a)).to.deep.equal([{}]);
+		it('should get component children for empty component', () => {
+			const Foo = () => {};
+			render(<Foo />, scratch);
+
+			const fooVNode = getRoot(scratch)._children[0];
+			expect(getChildren(fooVNode)).to.deep.equal([]);
 		});
 
 		it('should get native element children', () => {
-			let a = createElement('div', { foo: 1 }, 'foo');
-			a._children = ['foo'];
-			expect(getChildren(a)).to.deep.equal(['foo']);
+			render(<div>foo</div>, scratch);
+
+			const fooVNode = getRoot(scratch)._children[0];
+			const children = getChildren(fooVNode);
+			expect(children).to.have.lengthOf(1);
+			expect(children[0].props).to.equal('foo');
 		});
 	});
 
@@ -341,7 +358,7 @@ describe('devtools', () => {
 	describe('isRoot', () => {
 		it('should check if a vnode is a root', () => {
 			render(<div>Hello World</div>, scratch);
-			let root = scratch._prevVNode;
+			let root = getRoot(scratch);
 
 			expect(isRoot(root)).to.equal(true);
 			expect(isRoot(root._children[0])).to.equal(false);
@@ -357,7 +374,7 @@ describe('devtools', () => {
 			}
 
 			render(<App key="foo" active />, scratch);
-			let vnode = scratch._prevVNode._children[0];
+			let vnode = getRoot(scratch)._children[0];
 			vnode.startTime = 10;
 			vnode.endTime = 12;
 
@@ -391,7 +408,7 @@ describe('devtools', () => {
 
 		it('should inline single text child', () => {
 			render(<h1>Hello World</h1>, scratch);
-			let data = getData(scratch._prevVNode._children[0]);
+			let data = getData(getRoot(scratch)._children[0]);
 
 			expect(data.children).to.equal('Hello World');
 			expect(data.text).to.equal(null);
@@ -399,7 +416,7 @@ describe('devtools', () => {
 
 		it('should convert text nodes', () => {
 			render('Hello World', scratch);
-			let data = getData(scratch._prevVNode._children[0]);
+			let data = getData(getRoot(scratch)._children[0]);
 
 			expect(data.children).to.equal(null);
 			expect(data.text).to.equal('Hello World');
@@ -407,12 +424,12 @@ describe('devtools', () => {
 	});
 
 	it('should not initialize hook if __REACT_DEVTOOLS_GLOBAL_HOOK__ is not set', () => {
-		delete options.diff;
+		delete options._diff;
 		delete options.diffed;
 		delete /** @type {*} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
 
 		initDevTools();
-		expect(options.diff).to.equal(undefined);
+		expect(options._diff).to.equal(undefined);
 		expect(options.diffed).to.equal(undefined);
 	});
 
@@ -428,18 +445,18 @@ describe('devtools', () => {
 		let unmountSpy = sinon.spy();
 
 		options.vnode = vnodeSpy;
-		options.diff = diffSpy;
+		options._diff = diffSpy;
 		options.diffed = diffedSpy;
-		options.commit = commitSpy;
 		options.unmount = unmountSpy;
+		options._commit = commitSpy;
 
 		initDevTools();
 
 		render(<div />, scratch);
 
 		expect(vnodeSpy, 'vnode').to.have.been.called;
-		expect(diffSpy, 'diff').to.have.been.calledOnce;
-		expect(diffedSpy, 'diffed').to.have.been.calledOnce;
+		expect(diffSpy, 'diff').to.have.been.calledTwice;
+		expect(diffedSpy, 'diffed').to.have.been.calledTwice;
 		expect(commitSpy, 'commit').to.have.been.calledOnce;
 
 		render(null, scratch);
@@ -531,15 +548,15 @@ describe('devtools', () => {
 
 		it('should find dom node by vnode', () => {
 			render(<div />, scratch);
-			let vnode = scratch._prevVNode;
+			let vnode = getRoot(scratch);
 			let rid = Object.keys(hook._renderers)[0];
 			let renderer = hook._renderers[rid];
-			expect(renderer.findHostInstanceByFiber(vnode)).to.equal(vnode._dom);
+			expect(renderer.findHostInstanceByFiber(vnode)).to.equalNode(vnode._dom);
 		});
 
 		it('should find vnode by dom node', () => {
 			render(<div />, scratch);
-			let vnode = scratch._prevVNode._children[0];
+			let vnode = getRoot(scratch)._children[0];
 			let rid = Object.keys(hook._renderers)[0];
 			let renderer = hook._renderers[rid];
 
@@ -548,15 +565,15 @@ describe('devtools', () => {
 
 		it('should getNativeFromReactElement', () => {
 			render(<div />, scratch);
-			let vnode = scratch._prevVNode;
+			let vnode = getRoot(scratch);
 			let rid = Object.keys(hook._renderers)[0];
 			let helpers = hook.helpers[rid];
-			expect(helpers.getNativeFromReactElement(vnode)).to.equal(vnode._dom);
+			expect(helpers.getNativeFromReactElement(vnode)).to.equalNode(vnode._dom);
 		});
 
 		it('should getReactElementFromNative', () => {
 			render(<div />, scratch);
-			let vnode = scratch._prevVNode._children[0];
+			let vnode = getRoot(scratch)._children[0];
 			let rid = Object.keys(hook._renderers)[0];
 			let helpers = hook.helpers[rid];
 			expect(helpers.getReactElementFromNative(vnode._dom)).to.equal(vnode);
@@ -575,6 +592,7 @@ describe('devtools', () => {
 			checkEventReferences(prev.concat(hook.log));
 
 			expect(serialize(hook.log)).to.deep.equal([
+				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -592,6 +610,7 @@ describe('devtools', () => {
 			expect(serialize(hook.log)).to.deep.equal([
 				{ type: 'unmount', component: '#text: Hello World' },
 				{ type: 'mount', component: 'span' },
+				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -705,6 +724,7 @@ describe('devtools', () => {
 			checkEventReferences(prev.concat(hook.log));
 
 			expect(serialize(hook.log)).to.deep.equal([
+				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -719,6 +739,7 @@ describe('devtools', () => {
 				{ type: 'unmount', component: 'span' },
 				{ type: 'unmount', component: '#text: Hello World' },
 				{ type: 'update', component: 'div' },
+				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});

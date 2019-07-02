@@ -26,7 +26,7 @@ describe('focus', () => {
 		input.focus();
 		input.setSelectionRange(2, 5);
 
-		expect(document.activeElement).to.equal(input);
+		expect(document.activeElement).to.equalNode(input);
 
 		return input;
 	}
@@ -39,7 +39,7 @@ describe('focus', () => {
 		input.focus();
 		input.setSelectionRange(2, 5);
 
-		expect(document.activeElement).to.equal(input);
+		expect(document.activeElement).to.equalNode(input);
 
 		return input;
 	}
@@ -51,9 +51,7 @@ describe('focus', () => {
 	 * eqaul to the `input` parameter
 	 */
 	function validateFocus(input, message) {
-		// Check `nodeName` first to make cli output less spammy
-		expect(document.activeElement.nodeName).to.equal(input.nodeName, message);
-		expect(document.activeElement).to.equal(input, message);
+		expect(document.activeElement).to.equalNode(input, message);
 		expect(input.selectionStart).to.equal(2);
 		expect(input.selectionEnd).to.equal(5);
 
@@ -442,7 +440,7 @@ describe('focus', () => {
 		input.focus();
 		updateState();
 
-		expect(document.activeElement).to.equal(input, 'Before rerender');
+		expect(document.activeElement).to.equalNode(input, 'Before rerender');
 		rerender();
 
 		expect(scratch.innerHTML).to.equal(div([
@@ -452,7 +450,7 @@ describe('focus', () => {
 			'foobar',
 			inputStr()
 		].join('')));
-		expect(document.activeElement).to.equal(input, 'After rerender');
+		expect(document.activeElement).to.equalNode(input, 'After rerender');
 	});
 
 	it('should keep text selection', () => {
@@ -504,7 +502,7 @@ describe('focus', () => {
 		input.setSelectionRange(2, 5);
 		updateState();
 
-		expect(document.activeElement).to.equal(input, 'Before rerender');
+		expect(document.activeElement).to.equalNode(input, 'Before rerender');
 		rerender();
 
 		expect(scratch.innerHTML).to.equal(div([
@@ -516,6 +514,6 @@ describe('focus', () => {
 		].join('')));
 		expect(input.selectionStart).to.equal(2);
 		expect(input.selectionEnd).to.equal(5);
-		expect(document.activeElement).to.equal(input, 'After rerender');
+		expect(document.activeElement).to.equalNode(input, 'After rerender');
 	});
 });
