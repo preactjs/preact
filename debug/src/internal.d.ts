@@ -261,6 +261,8 @@ export interface AdapterState {
 	vnodeDurations: Map<number, number>;
 	inspectedElementId: number;
 	filter: {
+		/** The raw filters from the detools that are applied currently */
+		raw: Filter[];
 		byType: Set<number>;
 		byName: Set<RegExp>;
 		byPath: Set<RegExp>;

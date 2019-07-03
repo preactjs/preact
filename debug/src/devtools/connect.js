@@ -13,6 +13,9 @@ import { selectElement, getVNodePath, createSelectionStore } from './selection';
  */
 export function createAdapter(config, hook) {
 
+	/** @type {import('../internal').DevtoolsWindow} */
+	let win = /** @type {*} */ (window);
+
 	/** @type {import('../internal').AdapterState} */
 	let state = {
 		connected: false,
@@ -32,6 +35,7 @@ export function createAdapter(config, hook) {
 		rendererId: -1,
 		inspectedElementId: -1,
 		filter: {
+			raw: [],
 			byType: new Set(),
 			byName: new Set(),
 			byPath: new Set()
@@ -60,7 +64,7 @@ export function createAdapter(config, hook) {
 			console.warn('TODO: getOwnersList() not implemented');
 			return null;
 		},
-		flushInitialOperations: () => flushInitialEvents(hook, state),
+		flushInitialOperations: () => flushInitialEvents(hook, state, win.__REACT_DEVTOOLS_COMPONENT_FILTERS__),
 		// TODO: Check if the following properties are still needed
 		setInProps,
 		setInState,
@@ -80,8 +84,8 @@ export function createAdapter(config, hook) {
 		renderer,
 		connect() {
 			// Apply initial filters
-			if (window.__REACT_DEVTOOLS_COMPONENT_FILTERS__) {
-				applyFilters(window.__REACT_DEVTOOLS_COMPONENT_FILTERS__);
+			if (win.__REACT_DEVTOOLS_COMPONENT_FILTERS__) {
+				applyFilters(state.filter.raw = win.__REACT_DEVTOOLS_COMPONENT_FILTERS__);
 			}
 
 			let attach = (hook, id, renderer, target) => {
@@ -89,7 +93,6 @@ export function createAdapter(config, hook) {
 				return renderer;
 			};
 
-			/** @type {import('../internal').DevtoolsWindow} */
 			// TODO: The react-devtools declare this as non-configurable.
 			// This prevents us from getting
 			Object.defineProperty(window, '__REACT_DEVTOOLS_ATTACH__', {

@@ -15,8 +15,8 @@ export function updateComponentFilters(hook, state) {
 	return filters => {
 		// Unmount all currently active roots
 		hook.getFiberRoots(state.rendererId).forEach(root => {
-			unmount(state, root);
-			recordUnmount(state, root);
+			unmount(state, root._children[0]);
+			recordUnmount(state, root._children[0]);
 			state.currentRootId = -1;
 		});
 
@@ -24,7 +24,7 @@ export function updateComponentFilters(hook, state) {
 
 		hook.getFiberRoots(state.rendererId).forEach(root => {
 			state.currentRootId = getVNodeId(root);
-			mount(state, root, state.currentRootId);
+			mount(state, root._children[0], state.currentRootId);
 			flushPendingEvents(hook, state);
 			state.currentRootId = -1;
 		});

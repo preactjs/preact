@@ -397,8 +397,9 @@ export function flushPendingEvents(hook, state) {
  * a connection
  * @param {import('../internal').DevtoolsHook} hook
  * @param {import('../internal').AdapterState} state
+ * @param {Array<import('../internal').Filter>} filters
  */
-export function flushInitialEvents(hook, state) {
+export function flushInitialEvents(hook, state, filters) {
 	state.connected = true;
 
 	// Flush any events we have queued up so far
@@ -413,8 +414,14 @@ export function flushInitialEvents(hook, state) {
 			state.currentRootId = getVNodeId(root);
 			flushPendingEvents(hook, state);
 		});
-		state.currentRootId = -1;
 	}
+
+	if (filters && state.filter.raw!==filters) {
+		hook.renderers.get(state.rendererId)
+			.updateComponentFilters(state.filter.raw = filters);
+	}
+
+	state.currentRootId = -1;
 }
 
 /**
