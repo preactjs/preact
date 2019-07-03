@@ -118,7 +118,8 @@ function Portal(props) {
 	// When we come from a conditional render, on a mounted
 	// portal we should clear the DOM.
 	else if (this.hasMounted) {
-		render(null, container);
+		if (this.temp.parentNode) this.container.removeChild(this.temp);
+		_unmount(this.wrap);
 	}
 	// Set the wrapping element for future unmounting.
 	this.wrap = wrap;
