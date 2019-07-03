@@ -86,28 +86,28 @@ function Portal(props) {
 
 	// When we change container we should clear our old container and
 	// indicate a new mount.
-	if (_this.container && _this.container !== container) {
-		if (_this.temp.parentNode) _this.container.removeChild(_this.temp);
-		_unmount(_this.wrap);
-		_this.hasMounted = false;
+	if (_this._container && _this._container !== container) {
+		if (_this._temp.parentNode) _this._container.removeChild(_this._temp);
+		_unmount(_this._wrap);
+		_this._hasMounted = false;
 	}
 
 	// When props.vnode is undefined/false/null we are dealing with some kind of
 	// conditional vnode. This should not trigger a render.
 	if (props.vnode) {
-		if (!_this.hasMounted) {
+		if (!_this._hasMounted) {
 			// Create a placeholder that we can use to insert into.
-			_this.temp = document.createTextNode('');
+			_this._temp = document.createTextNode('');
 			// Hydrate existing nodes to keep the dom intact, when rendering
 			// wrap into the container.
 			hydrate('', container);
 			// Insert before first child (will just append if firstChild is null).
-			container.insertBefore(_this.temp, container.firstChild);
+			container.insertBefore(_this._temp, container.firstChild);
 			// At this point we have mounted and should set our container.
-			_this.hasMounted = true;
-			_this.container = container;
+			_this._hasMounted = true;
+			_this._container = container;
 			// Render our wrapping element into temp.
-			preactRender(wrap, container, _this.temp);
+			preactRender(wrap, container, _this._temp);
 		}
 		else {
 			// When we have mounted and the vnode is present it means the
@@ -118,16 +118,16 @@ function Portal(props) {
 	}
 	// When we come from a conditional render, on a mounted
 	// portal we should clear the DOM.
-	else if (_this.hasMounted) {
-		if (_this.temp.parentNode) _this.container.removeChild(_this.temp);
-		_unmount(_this.wrap);
+	else if (_this._hasMounted) {
+		if (_this._temp.parentNode) _this._container.removeChild(_this._temp);
+		_unmount(_this._wrap);
 	}
 	// Set the wrapping element for future unmounting.
-	_this.wrap = wrap;
+	_this._wrap = wrap;
 
 	_this.componentWillUnmount = () => {
-		if (_this.temp.parentNode) _this.container.removeChild(_this.temp);
-		_unmount(_this.wrap);
+		if (_this._temp.parentNode) _this._container.removeChild(_this._temp);
+		_unmount(_this._wrap);
 	};
 
 	return null;
