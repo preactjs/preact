@@ -34,7 +34,11 @@ export interface Component extends PreactComponent<any, any> {
 	__hooks?: ComponentHooks;
 }
 
-export type HookState = EffectHookState | MemoHookState | ReducerHookState;
+export type HookState =
+	| EffectHookState
+	| MemoHookState
+	| ReducerHookState
+	| ImperativeHookState;
 
 export type Effect = () => (void | Cleanup);
 export type Cleanup = () => void;
@@ -43,15 +47,23 @@ export interface EffectHookState {
 	_value?: Effect;
 	_args?: any[];
 	_cleanup?: Cleanup;
+	_revision?: number;
 }
 
 export interface MemoHookState {
 	_value?: any;
 	_args?: any[];
 	_callback?: () => any;
+	_revision?: number;
 }
 
 export interface ReducerHookState {
 	_value?: any;
 	_component?: Component;
+	_revision?: number;
+}
+
+export interface ImperativeHookState {
+	_args?: any[];
+	_revision?: number;
 }
