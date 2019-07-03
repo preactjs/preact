@@ -1,4 +1,4 @@
-import { getVNode, getVNodeId } from './cache';
+import { getVNode, getVNodeId, hasVNodeId } from './cache';
 import { getInstance, getVNodeType, getDisplayName, isRoot, getNearestDisplayName } from './vnode';
 import { ElementTypeClass, ElementTypeFunction, ElementTypeForwardRef, ElementTypeMemo } from './constants';
 import { shouldFilter } from './filter';
@@ -68,8 +68,9 @@ export function getBestMatch(filters, path, vnode) {
 	if (item==null) return null;
 
 	return {
-		id: getVNodeId(item),
-		isFullMatch: lastNonFiltered === item
+		id: getVNodeId(lastNonFiltered),
+		 // Setting this to true breaks selection more often
+		isFullMatch: false
 	};
 }
 
