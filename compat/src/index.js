@@ -1,4 +1,4 @@
-import { hydrate, render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
+import { hydrate, render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment, _unmount } from 'preact';
 import * as hooks from 'preact/hooks';
 import { Suspense, lazy, catchRender } from './suspense';
 import { assign, removeNode } from '../../src/util';
@@ -86,7 +86,8 @@ function Portal(props) {
 	// When we change container we should clear our old container and
 	// indicate a new mount.
 	if (this.container && this.container !== container) {
-		render(null, this.container);
+		if (this.temp.parentNode) this.container.removeChild(this.temp);
+		_unmount(this.wrap);
 		this.hasMounted = false;
 	}
 
@@ -99,14 +100,17 @@ function Portal(props) {
 			// Hydrate existing nodes to keep the dom intact, when rendering
 			// wrap into the container.
 			hydrate('', container);
-			// If it has child nodes we need to insert before the first child.
+			// Insert before first child (will just append if firstChild is null).
 			container.insertBefore(temp, container.firstChild);
 			this.hasMounted = true;
 			this.container = container;
+			this.wrap = wrap;
+			this.temp = temp;
 			// Render our wrapping element into temp.
 			preactRender(wrap, container, temp);
 		}
 		else {
+			this.wrap = wrap;
 			render(wrap, container);
 		}
 	}
@@ -117,10 +121,10 @@ function Portal(props) {
 	}
 
 	this.componentWillUnmount = () => {
-		// Since our old dom was hydrated this will result in
-		// our inserted element being rendered away.
-		render(null, container);
+		if (this.temp.parentNode) this.container.removeChild(this.temp);
+		_unmount(this.wrap);
 	};
+
 	return null;
 }
 

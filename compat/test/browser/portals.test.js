@@ -320,5 +320,26 @@ describe('Portal', () => {
 		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div>');
 	});
 
-	// TODO: change container with multiple insertions in one root.
+	it('should work with removing an element from stacked container to new one', () => {
+		let toggle, root2;
+
+		function Foo(props) {
+			const [root, setRoot] = useState(scratch);
+			toggle = () => setRoot(() => root2);
+			return (
+				<div ref={r => { root2 = r; }}>
+					<p>Hello</p>
+					{createPortal(props.children, scratch)}
+					{createPortal(props.children, root)}
+				</div>
+			);
+		}
+
+		render(<Foo><div>foobar</div></Foo>, scratch);
+		expect(scratch.innerHTML).to.equal('<div>foobar</div><div>foobar</div><div><p>Hello</p></div>');
+
+		toggle();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>foobar</div><div><div>foobar</div><p>Hello</p></div>');
+	});
 });
