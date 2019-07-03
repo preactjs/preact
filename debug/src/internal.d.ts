@@ -1,12 +1,13 @@
 import { Component, PreactElement, VNode, Options } from "../../src/internal";
-import { HookState } from "../../hooks/src/internal";
-import { Component } from '../../hooks/src/internal';
-export { Component, PreactElement, VNode};
+import { HookState, Component, HookState } from "../../hooks/src/internal";
+export { Component, HookState, PreactElement, VNode};
 
 export interface Component extends Component {
 	_prevContext: any;
 	_prevProps: object;
-	_prevHooks: HookState;
+	// Both are needed to track hook updates in the devtools
+	_prevHooksRevision: number;
+	_currentHooksRevision: number;
 }
 
 export interface InspectData {

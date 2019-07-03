@@ -120,7 +120,7 @@ export function getChangeDescription(vnode) {
 			let c = vnode._component;
 			return {
 				context: getChangedKeys(c._context, c._prevContext)!=null,
-				didHooksChange: didHooksChange(c._prevHooks, c.__hooks!=null ? c.__hooks._list : null),
+				didHooksChange: c._prevHooksRevision!=c._currentHooksRevision,
 				isFirstMount: false,
 				props: getChangedKeys(c.props, c._prevProps),
 				state: getChangedKeys(c.state, c._prevState)
@@ -146,23 +146,4 @@ export function getChangedKeys(a, b) {
 	}
 
 	return changed.length > 0 ? changed : null;
-}
-
-/**
- * Check if hooks changed
- * @param {import('../internal').Component} a
- * @param {import('../internal').Component} b
- */
-export function didHooksChange(a, b) {
-	if (a==null || a.__hooks==null || b==null || b.__hooks==null) return false;
-
-	let aList = a.__hooks._list;
-	let bList = b.__hooks._list;
-
-	for (let i = 0; i < aList.length; i++) {
-		// TODO: Check if comparing references is a viable strategy
-		if (aList[i]._value!==bList[i]._value) return true;
-	}
-
-	return false;
 }

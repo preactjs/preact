@@ -68,7 +68,7 @@ function getHookState(index) {
 	const hooks = currentComponent.__hooks || (currentComponent.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [] });
 
 	if (index >= hooks._list.length) {
-		hooks._list.push({});
+		hooks._list.push({ _revision: 0 });
 	}
 	return hooks._list[index];
 }
@@ -92,6 +92,7 @@ export function useReducer(reducer, initialState, init) {
 			action => {
 				const nextValue = reducer(hookState._value[0], action);
 				if (hookState._value[0]!==nextValue) {
+					hookState._revision++;
 					hookState._value[0] = nextValue;
 					hookState._component.setState({});
 				}
@@ -145,6 +146,7 @@ export function useImperativeHandle(ref, createHandle, args) {
 	const state = getHookState(currentIndex++);
 	if (argsChanged(state._args, args)) {
 		state._args = args;
+		state._revision++;
 		if (ref) {
 			ref.current = createHandle();
 		}
@@ -162,6 +164,7 @@ export function useMemo(callback, args) {
 	const state = getHookState(currentIndex++);
 	if (argsChanged(state._args, args)) {
 		state._args = args;
+		state._revision++;
 		state._callback = callback;
 		return state._value = callback();
 	}
