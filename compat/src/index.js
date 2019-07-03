@@ -96,21 +96,22 @@ function Portal(props) {
 	if (props.vnode) {
 		if (!this.hasMounted) {
 			// Create a placeholder that we can use to insert into.
-			let temp = document.createTextNode('');
+			this.temp = document.createTextNode('');
 			// Hydrate existing nodes to keep the dom intact, when rendering
 			// wrap into the container.
 			hydrate('', container);
 			// Insert before first child (will just append if firstChild is null).
-			container.insertBefore(temp, container.firstChild);
+			container.insertBefore(this.temp, container.firstChild);
+			// At this point we have mounted and should set our container.
 			this.hasMounted = true;
 			this.container = container;
-			this.wrap = wrap;
-			this.temp = temp;
 			// Render our wrapping element into temp.
-			preactRender(wrap, container, temp);
+			preactRender(wrap, container, this.temp);
 		}
 		else {
-			this.wrap = wrap;
+			// When we have mounted and the vnode is present it means the
+			// props have changed or a parent is triggering a rerender.
+			// This implies we only need to call render.
 			render(wrap, container);
 		}
 	}
@@ -119,6 +120,8 @@ function Portal(props) {
 	else if (this.hasMounted) {
 		render(null, container);
 	}
+	// Set the wrapping element for future unmounting.
+	this.wrap = wrap;
 
 	this.componentWillUnmount = () => {
 		if (this.temp.parentNode) this.container.removeChild(this.temp);
