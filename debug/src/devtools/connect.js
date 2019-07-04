@@ -22,12 +22,12 @@ export function createAdapter(config, hook) {
 		currentRootId: -1,
 		isProfiling: false,
 		profilingData: new Map(),
-		currentCommitProfileData: [],
 		vnodeDurations: new Map(),
 		changeDescriptions: new Map(),
 		profilingStart: 0,
 		pendingCommits: [],
 		currentCommit: {
+			timings: [],
 			operations: [],
 			unmountIds: [],
 			unmountRootId: null

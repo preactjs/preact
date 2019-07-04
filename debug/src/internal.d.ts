@@ -244,6 +244,11 @@ export interface CurrentCommit {
 	operations: number[];
 	unmountIds: number[];
 	unmountRootId: number | null;
+	/**
+	 * Array of timings in the format:
+	 * [id, duration, durationWithoutChildren, id2, duration,...]
+	 */
+	timings: number[];
 }
 
 export interface AdapterState {
@@ -258,7 +263,6 @@ export interface AdapterState {
 	profilingStart: number;
 	profilingData: Map<number, number[][]>;
 	changeDescriptions: Map<number, ChangeDescription>;
-	currentCommitProfileData: number[];
 	vnodeDurations: Map<number, number>;
 	inspectedElementId: number;
 	filter: {

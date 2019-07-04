@@ -24,6 +24,19 @@ export function stopProfiling(state) {
 }
 
 /**
+ * @param {import('../internal').AdapterState} state
+ */
+export function setupProfilingCommit(state) {
+	let rootId = state.currentRootId;
+	if (!state.profilingData.has(rootId)) {
+		state.profilingData.set(rootId, []);
+	}
+
+	state.profilingData.get(rootId)
+		.push(state.currentCommit.timings);
+}
+
+/**
  * @param {number} rendererId
  * @param {import('../internal').AdapterState} state
  * @returns {import('../internal').ProfilingData}
