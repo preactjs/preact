@@ -114,13 +114,13 @@ export interface ProfilingData {
 }
 
 export interface CommitDataBackend {
-  changeDescriptions: Array<[number, ChangeDescription]> | null;
-  duration: number;
-  fiberActualDurations: Array<[number, number]>;
-  fiberSelfDurations: Array<[number, number]>;
-  interactionIDs: Array<number>;
-  priorityLevel: string | null;
-  timestamp: number;
+	changeDescriptions: Array<[number, ChangeDescription]> | null;
+	duration: number;
+	fiberActualDurations: Array<[number, number]>;
+	fiberSelfDurations: Array<[number, number]>;
+	interactionIDs: Array<number>;
+	priorityLevel: string | null;
+	timestamp: number;
 }
 
 export interface ProfilingRootDataBackend {
@@ -139,35 +139,35 @@ export interface Owner {
 }
 
 export type ElementFilter = {
-  isEnabled: boolean,
-  type: 1,
-  value: number,
+	isEnabled: boolean,
+	type: 1,
+	value: number,
 };
 
 export type RegExpFilter = {
-  isEnabled: boolean,
-  isValid: boolean,
-  type: 2 | 3,
-  value: string,
+	isEnabled: boolean,
+	isValid: boolean,
+	type: 2 | 3,
+	value: string,
 };
 
 export type BooleanFilter = {
-  isEnabled: boolean,
-  isValid: boolean,
-  type: 4,
+	isEnabled: boolean,
+	isValid: boolean,
+	type: 4,
 };
 
 export type Filter =
-  | BooleanFilter
-  | ElementFilter
+	| BooleanFilter
+	| ElementFilter
 	| RegExpFilter;
 
 export type Path = Array<number | string>;
 
 export interface PathFrame {
 	key: string | null,
-  index: number,
-  displayName: string | null,
+	index: number,
+	displayName: string | null,
 }
 
 export interface PathMatch {
