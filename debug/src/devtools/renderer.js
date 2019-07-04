@@ -412,6 +412,7 @@ export function flushInitialEvents(hook, state, filters) {
 	else {
 		hook.getFiberRoots(state.rendererId).forEach(root => {
 			state.currentRootId = getVNodeId(root);
+			mount(state, root, 0);
 			flushPendingEvents(hook, state);
 		});
 	}
