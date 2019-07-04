@@ -264,6 +264,7 @@ export interface AdapterState {
 	profilingData: Map<number, number[][]>;
 	changeDescriptions: Map<number, ChangeDescription>;
 	vnodeDurations: Map<number, number>;
+	initialDurations: Map<number, number>;
 	inspectedElementId: number;
 	filter: {
 		/** The raw filters from the detools that are applied currently */
