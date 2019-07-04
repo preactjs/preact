@@ -13,6 +13,8 @@ export function startProfiling(hook, state) {
 
 	state.isProfiling = true;
 	state.profilingStart = now();
+	// Copy durations, because it will be mutated during a profiling session
+	state.initialDurations = new Map(state.vnodeDurations);
 }
 
 /**
@@ -55,7 +57,7 @@ export function getProfilingData(state, rendererId) {
 		let fiberSelfDurations = [];
 		let initialDurations = [];
 
-		state.vnodeDurations.forEach((value, id) => {
+		state.initialDurations.forEach((value, id) => {
 			initialDurations.push([id, value]);
 		});
 
