@@ -7,9 +7,8 @@ import { now } from './util';
  * Start a profiling session
  * @param {import('../internal').DevtoolsHook} hook
  * @param {import('../internal').AdapterState} state
- * @param {number} rendererId
  */
-export function startProfiling(hook, state, rendererId) {
+export function startProfiling(hook, state) {
 	if (state.isProfiling) return;
 
 	state.isProfiling = true;
