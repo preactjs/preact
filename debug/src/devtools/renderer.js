@@ -6,7 +6,7 @@ import { inspectHooks } from './hooks';
 import { encode } from './util';
 import { getStringId, stringTable, allStrLengths, clearStringTable } from './string-table';
 import { shouldFilter } from './filter';
-import { getChangeDescription } from './profiling';
+import { getChangeDescription, setupProfilingCommit } from './profiling';
 
 /**
  * Called when a tree has completed rendering
@@ -43,11 +43,6 @@ export function onCommitFiberRoot(hook, state, vnode) {
 		state.currentRootId = getVNodeId(root);
 	}
 
-	if (state.isProfiling) {
-		state.currentCommitProfileData = [];
-	}
-
-	// TODO: Profiling
 	let parentId = 0;
 	let ancestor = getAncestor(state.filter, vnode);
 	if (ancestor!=null) {
@@ -64,13 +59,7 @@ export function onCommitFiberRoot(hook, state, vnode) {
 	}
 
 	if (state.isProfiling) {
-		let rootId = state.currentRootId;
-		if (!state.profilingData.has(rootId)) {
-			state.profilingData.set(rootId, []);
-		}
-
-		state.profilingData.get(rootId)
-			.push(state.currentCommitProfileData);
+		setupProfilingCommit(state);
 	}
 
 	flushPendingEvents(hook, state);
@@ -287,7 +276,8 @@ export function recordProfiling(state, vnode, isNew) {
 
 	if (!state.isProfiling) return;
 
-	state.currentCommit.operations.push(
+	let commit = state.currentCommit;
+	commit.operations.push(
 		TREE_OPERATION_UPDATE_TREE_BASE_DURATION,
 		id,
 		Math.floor(duration * 1000)
@@ -303,7 +293,7 @@ export function recordProfiling(state, vnode, isNew) {
 		}
 	}
 
-	state.currentCommitProfileData.push(
+	commit.timings.push(
 		id,
 		duration,
 		selfDuration // without children
@@ -385,6 +375,7 @@ export function flushPendingEvents(hook, state) {
 	}
 
 	state.currentCommit = {
+		timings: [],
 		operations: [],
 		unmountIds: [],
 		unmountRootId: null
