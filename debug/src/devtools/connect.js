@@ -48,7 +48,7 @@ export function createAdapter(config, hook) {
 
 	let renderer = assign(assign({}, config), {
 		findNativeNodesForFiberID: findDomForVNode,
-		startProfiling: () => startProfiling(hook, state, state.rendererId),
+		startProfiling: () => startProfiling(hook, state),
 		stopProfiling: () => stopProfiling(state),
 		getProfilingData: () => getProfilingData(state, state.rendererId),
 		selectElement,
