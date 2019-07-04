@@ -51,10 +51,10 @@ export interface InspectFullPayload {
 }
 
 export type InspectPayload =
-	InspectHydratedPayload |
-	InspectNoChangePayload |
-	InspectNotFoundPayload |
-	InspectFullPayload;
+	| InspectHydratedPayload
+	| InspectNoChangePayload
+	| InspectNotFoundPayload
+	| InspectFullPayload;
 
 export interface HookInspectData {
 	name: string;
