@@ -13,7 +13,7 @@ export function startProfiling(hook, state) {
 
 	state.isProfiling = true;
 	state.profilingStart = now();
-	// Copy durations, because it will be mutated during a profiling session
+	// Copy durations, because it will be mutated during a profiling
 	state.initialDurations = new Map(state.vnodeDurations);
 }
 
@@ -27,14 +27,20 @@ export function stopProfiling(state) {
 /**
  * @param {import('../internal').AdapterState} state
  */
-export function setupProfilingCommit(state) {
+export function setupProfileData(state) {
 	let rootId = state.currentRootId;
 	if (!state.profilingData.has(rootId)) {
 		state.profilingData.set(rootId, []);
 	}
 
-	state.profilingData.get(rootId)
-		.push(state.currentCommit.timings);
+	state.currentProfilingData = {
+		changed: new Map(),
+		commitTime: performance.now() - state.profilingStart,
+		timings: []
+	};
+
+	let data = state.profilingData.get(rootId);
+	data.push(state.currentProfilingData);
 }
 
 /**
@@ -61,22 +67,23 @@ export function getProfilingData(state, rendererId) {
 			initialDurations.push([id, value]);
 		});
 
-		profile.forEach(durations => {
+		profile.forEach(commit => {
 			let maxActualDuration = 0;
 
-			for (let i = 0; i < durations.length; i+=3) {
-				let id = durations[i];
-				fiberActualDurations.push([id, durations[i+1]]);
-				fiberSelfDurations.push([id, durations[i+2]]);
+			let { timings, commitTime, changed } = commit;
+			for (let i = 0; i < timings.length; i+=3) {
+				let id = timings[i];
+				fiberActualDurations.push([id, timings[i+1]]);
+				fiberSelfDurations.push([id, Math.max(0, timings[i+2])]);
 
-				if (durations[i+1] > maxActualDuration) {
-					maxActualDuration = durations[i+1];
+				if (timings[i+1] > maxActualDuration) {
+					maxActualDuration = timings[i+1];
 				}
 			}
 
 			// render reasons
 			let changeDescriptions = [];
-			state.changeDescriptions.forEach((change, id) => {
+			changed.forEach((change, id) => {
 				changeDescriptions.push([id, change]);
 			});
 
@@ -87,7 +94,7 @@ export function getProfilingData(state, rendererId) {
 				fiberSelfDurations,
 				interactionIDs: [],
 				priorityLevel: null,
-				timestamp: performance.now() - state.profilingStart
+				timestamp: commitTime
 			});
 		});
 

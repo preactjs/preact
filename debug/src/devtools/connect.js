@@ -1,7 +1,7 @@
 import { updateComponentFilters } from './filter';
 import { assign } from '../../../src/util';
 import { findDomForVNode, inspectElement, logElementToConsole, flushInitialEvents, onCommitFiberRoot, onCommitFiberUnmount } from './renderer';
-import { startProfiling, getProfilingData, stopProfiling } from './profiling';
+import { startProfiling, getProfilingData, stopProfiling, setupProfileData } from './profiling';
 import { setInProps, setInState } from './update';
 import { setInHook } from './hooks';
 import { selectElement, getVNodePath, createSelectionStore } from './selection';
@@ -21,17 +21,21 @@ export function createAdapter(config, hook) {
 		connected: false,
 		currentRootId: -1,
 		isProfiling: false,
-		profilingData: new Map(),
 		vnodeDurations: new Map(),
-		changeDescriptions: new Map(),
+		initialDurations: new Map(),
 		profilingStart: 0,
 		pendingCommits: [],
 		currentCommit: {
-			timings: [],
 			operations: [],
 			unmountIds: [],
 			unmountRootId: null
 		},
+		currentProfilingData: {
+			changed: new Map(),
+			commitTime: -1,
+			timings: []
+		},
+		profilingData: new Map(),
 		rendererId: -1,
 		inspectedElementId: -1,
 		filter: {
