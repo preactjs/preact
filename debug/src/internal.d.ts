@@ -240,15 +240,22 @@ export interface DevtoolsWindow extends Window {
 	$r: any
 }
 
-export interface CurrentCommit {
+export interface Commit {
 	operations: number[];
 	unmountIds: number[];
 	unmountRootId: number | null;
+}
+
+export interface CommitProfileData {
 	/**
 	 * Array of timings in the format:
 	 * [id, duration, durationWithoutChildren, id2, duration,...]
 	 */
 	timings: number[];
+	/** Time when the commit was made */
+	commitTime: number;
+	/** Mapping of VNode to an object that described why the vnode rendered */
+	changed: Map<number, ChangeDescription>;
 }
 
 export interface AdapterState {
@@ -257,12 +264,12 @@ export interface AdapterState {
 	currentRootId: number;
 	/** If the devtools are not connected we store pending commits here */
 	pendingCommits: Uint32Array[];
-	currentCommit: CurrentCommit;
-	// TODO: Cleanup profiling state
+	currentCommit: Commit;
+	currentProfilingData: CommitProfileData
+	/** Profile data by root id */
+	profilingData: Map<number, CommitProfileData[]>;
 	isProfiling: boolean;
 	profilingStart: number;
-	profilingData: Map<number, number[][]>;
-	changeDescriptions: Map<number, ChangeDescription>;
 	vnodeDurations: Map<number, number>;
 	initialDurations: Map<number, number>;
 	inspectedElementId: number;

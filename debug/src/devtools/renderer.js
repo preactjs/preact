@@ -6,7 +6,7 @@ import { inspectHooks } from './hooks';
 import { encode } from './util';
 import { getStringId, stringTable, allStrLengths, clearStringTable } from './string-table';
 import { shouldFilter } from './filter';
-import { getChangeDescription, setupProfilingCommit } from './profiling';
+import { getChangeDescription, setupProfileData } from './profiling';
 
 /**
  * Called when a tree has completed rendering
@@ -43,6 +43,10 @@ export function onCommitFiberRoot(hook, state, vnode) {
 		state.currentRootId = getVNodeId(root);
 	}
 
+	if (state.isProfiling) {
+		setupProfileData(state);
+	}
+
 	let parentId = 0;
 	let ancestor = getAncestor(state.filter, vnode);
 	if (ancestor!=null) {
@@ -56,10 +60,6 @@ export function onCommitFiberRoot(hook, state, vnode) {
 	}
 	else {
 		mount(state, vnode, parentId);
-	}
-
-	if (state.isProfiling) {
-		setupProfilingCommit(state);
 	}
 
 	flushPendingEvents(hook, state);
@@ -272,7 +272,7 @@ export function recordMount(state, vnode) {
 export function recordProfiling(state, vnode, isNew) {
 	let id = getVNodeId(vnode);
 	let duration = vnode.endTime - vnode.startTime;
-	state.vnodeDurations.set(id, duration > 0 ? duration : 10);
+	state.vnodeDurations.set(id, duration > 0 ? duration : 0);
 
 	if (!state.isProfiling) return;
 
@@ -288,12 +288,18 @@ export function recordProfiling(state, vnode, isNew) {
 		for (let i = 0; i < vnode._children.length; i++) {
 			let child = vnode._children[i];
 			if (child) {
-				selfDuration -= child.endTime - child.startTime;
+				let childDuration = child.endTime - child.startTime;
+				selfDuration -= childDuration;
 			}
+		}
+
+		// TODO: Why does this happen?
+		if (selfDuration < 0) {
+			selfDuration = 0;
 		}
 	}
 
-	commit.timings.push(
+	state.currentProfilingData.timings.push(
 		id,
 		duration,
 		selfDuration // without children
@@ -302,7 +308,7 @@ export function recordProfiling(state, vnode, isNew) {
 	// "Why did this component render?" panel
 	let changed = getChangeDescription(vnode);
 	if (changed!=null) {
-		state.changeDescriptions.set(id, changed);
+		state.currentProfilingData.changed.set(id, changed);
 	}
 }
 
@@ -375,7 +381,6 @@ export function flushPendingEvents(hook, state) {
 	}
 
 	state.currentCommit = {
-		timings: [],
 		operations: [],
 		unmountIds: [],
 		unmountRootId: null
@@ -392,6 +397,10 @@ export function flushPendingEvents(hook, state) {
  */
 export function flushInitialEvents(hook, state, filters) {
 	state.connected = true;
+
+	if (state.isProfiling) {
+		setupProfileData(state);
+	}
 
 	// Flush any events we have queued up so far
 	if (state.pendingCommits.length > 0) {
