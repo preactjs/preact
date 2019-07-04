@@ -383,6 +383,120 @@ describe('debug', () => {
 		});
 	});
 
+	describe('table markup', () => {
+		it('missing <tbody>/<thead>/<tfoot>/<table>', () => {
+			const Table = () => (
+				<tr><td>hi</td></tr>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('missing <tr>', () => {
+			const Table = () => (
+				<table>
+					<tbody>
+						<td>Hi</td>
+					</tbody>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('missing <tr> with td component', () => {
+			const Cell = ({ children }) => <td>{children}</td>;
+			const Table = () => (
+				<table>
+					<tbody>
+						<Cell>Hi</Cell>
+					</tbody>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('Should accept <td> instead of <th> in <thead>', () => {
+			const Table = () => (
+				<table>
+					<thead>
+						<tr>
+							<td>Hi</td>
+						</tr>
+					</thead>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('Accepts well formed table with TD components', () => {
+			const Cell = ({ children }) => <td>{children}</td>;
+			const Table = () => (
+				<table>
+					<thead>
+						<tr>
+							<th>Head</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Body</td>
+						</tr>
+					</tbody>
+					<tfoot>
+						<tr>
+							<Cell>Body</Cell>
+						</tr>
+					</tfoot>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('Accepts well formed table', () => {
+			const Table = () => (
+				<table>
+					<thead>
+						<tr>
+							<th>Head</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Body</td>
+						</tr>
+					</tbody>
+					<tfoot>
+						<tr>
+							<td>Body</td>
+						</tr>
+					</tfoot>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('Accepts minimial well formed table', () => {
+			const Table = () => (
+				<table>
+					<tr>
+						<th>Head</th>
+					</tr>
+					<tr>
+						<td>Body</td>
+					</tr>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+	});
+
+
 	describe('PropTypes', () => {
 		it('should fail if props don\'t match prop-types', () => {
 			function Foo(props) {

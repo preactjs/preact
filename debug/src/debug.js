@@ -3,6 +3,14 @@ import { getDisplayName } from './devtools/custom';
 import { options } from 'preact';
 import { ELEMENT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants';
 
+function getClosestDomNodeParent(parent) {
+	if (!parent) return {};
+	if (typeof parent.type === 'function') {
+		return getClosestDomNodeParent(parent._parent);
+	}
+	return parent;
+}
+
 export function initDebug() {
 	/* eslint-disable no-console */
 	let oldBeforeDiff = options._diff;
@@ -38,8 +46,9 @@ export function initDebug() {
 	options._diff = (vnode, oldVnode) => {
 		if (vnode == null) { return; }
 
-    let { type, props } = vnode;
+		let { type, props, _parent: parent } = vnode;
 		let children = props && props.children;
+		let parentVNode = getClosestDomNodeParent(parent);
 
 		if (type===undefined) {
 			throw new Error('Undefined component passed to createElement()\n\n'+
@@ -56,6 +65,41 @@ export function initDebug() {
 			}
 
 			throw new Error('Invalid type passed to createElement(): '+(Array.isArray(type) ? 'array' : type));
+		}
+
+		if ((type==='thead' || type==='tfoot' || type==='thead') && parentVNode.type!=='table') {
+			console.error(
+				'Improper nesting of table.' +
+				'Your <thead/tbody/tfoot> should have a <table> parent.'
+				+ serializeVNode(vnode)
+			);
+		}
+		else if (
+			type==='tr' && (
+				parentVNode.type!=='thead' &&
+				parentVNode.type!=='tfoot' &&
+				parentVNode.type!=='tbody' &&
+				parentVNode.type!=='table'
+			)) {
+			console.error(
+				'Improper nesting of table.' +
+				'Your <tr> should have a <thead/tbody/tfoot/table> parent.'
+				+ serializeVNode(vnode)
+			);
+		}
+		else if (type==='td' && parentVNode.type!=='tr') {
+			console.error(
+				'Improper nesting of table.' +
+					'Your <td> should have a <tr> parent.'
+					+ serializeVNode(vnode)
+			);
+		}
+		else if (type==='th' && parentVNode.type!=='tr') {
+			console.error(
+				'Improper nesting of table.' +
+				'Your <th> should have a <tr>.'
+				+ serializeVNode(vnode)
+			);
 		}
 
 		if (
