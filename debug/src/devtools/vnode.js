@@ -1,5 +1,5 @@
 import { Fragment } from 'preact';
-import { ElementTypeClass, ElementTypeFunction, ElementTypeHostComponent } from './constants';
+import { ElementTypeClass, ElementTypeFunction, ElementTypeHostComponent, ElementTypeMemo, ElementTypeForwardRef } from './constants';
 import { getVNodeId } from './cache';
 import { shouldFilter } from './filter';
 
@@ -15,6 +15,9 @@ export function getDisplayName(vnode) {
 	return '#text';
 }
 
+let memoReg = /^Memo\(/;
+let forwardRefReg = /^ForwardRef\(/;
+
 /**
  * Get the type of a vnode. The devtools uses these constants to differentiate
  * between the various forms of components.
@@ -22,7 +25,8 @@ export function getDisplayName(vnode) {
  */
 export function getVNodeType(vnode) {
 	if (typeof vnode.type=='function' && vnode.type!==Fragment) {
-		// TODO: Memo and ForwardRef
+		if (memoReg.test(vnode.type.displayName)) return ElementTypeMemo;
+		if (forwardRefReg.test(vnode.type.displayName)) return ElementTypeForwardRef;
 		// TODO: Provider and Consumer
 		return vnode.type.prototype && vnode.type.prototype.render
 			? ElementTypeClass
