@@ -12,7 +12,7 @@
     "transpile": "echo 'export const ENABLE_PRETTY = false;'>env.js && microbundle src/index.js -f es,umd --target web --external preact",
     "transpile:jsx": "echo 'export const ENABLE_PRETTY = true;'>env.js && microbundle src/jsx.js -o dist/jsx.js --target web --external none && microbundle dist/jsx.js -o dist/jsx.js -f cjs",
     "copy-typescript-definition": "copyfiles -f src/index.d.ts dist",
-    "test": "eslint src test && mocha --compilers js:babel-register test/**/*.js",
+    "test": "eslint src test && tsc && mocha --compilers js:babel-register test/**/*.js",
     "prepublish": "npm run build",
     "release": "npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
@@ -74,7 +74,8 @@
     "mocha": "^5.2.0",
     "preact": "^10.0.0-alpha.0",
     "sinon": "^1.17.5",
-    "sinon-chai": "^2.8.0"
+    "sinon-chai": "^2.8.0",
+    "typescript": "^3.4.1"
   },
   "dependencies": {
     "pretty-format": "^3.8.0"
