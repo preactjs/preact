@@ -406,6 +406,30 @@ describe('debug', () => {
 			expect(console.error).to.be.calledOnce;
 		});
 
+		it('missing <table> #1', () => {
+			const Table = () => (
+				<thead><tr><td>hi</td></tr></thead>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('missing <table> #2', () => {
+			const Table = () => (
+				<tbody><tr><td>hi</td></tr></tbody>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('missing <table> #3', () => {
+			const Table = () => (
+				<tfoot><tr><td>hi</td></tr></tfoot>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
 		it('missing <tr>', () => {
 			const Table = () => (
 				<table>
@@ -420,6 +444,19 @@ describe('debug', () => {
 
 		it('missing <tr> with td component', () => {
 			const Cell = ({ children }) => <td>{children}</td>;
+			const Table = () => (
+				<table>
+					<tbody>
+						<Cell>Hi</Cell>
+					</tbody>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('missing <tr> with th component', () => {
+			const Cell = ({ children }) => <th>{children}</th>;
 			const Table = () => (
 				<table>
 					<tbody>
