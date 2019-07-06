@@ -406,7 +406,7 @@ describe('debug', () => {
 			expect(console.error).to.be.calledOnce;
 		});
 
-		it('missing <table> #1', () => {
+		it('missing <table> with <thead>', () => {
 			const Table = () => (
 				<thead><tr><td>hi</td></tr></thead>
 			);
@@ -414,7 +414,7 @@ describe('debug', () => {
 			expect(console.error).to.be.calledOnce;
 		});
 
-		it('missing <table> #2', () => {
+		it('missing <table> with <tbody>', () => {
 			const Table = () => (
 				<tbody><tr><td>hi</td></tr></tbody>
 			);
@@ -422,7 +422,7 @@ describe('debug', () => {
 			expect(console.error).to.be.calledOnce;
 		});
 
-		it('missing <table> #3', () => {
+		it('missing <table> with <tfoot>', () => {
 			const Table = () => (
 				<tfoot><tr><td>hi</td></tr></tfoot>
 			);
