@@ -32,6 +32,12 @@ export function initDebug() {
 					break;
 				}
 			}
+
+			// We haven't recovered and we know at this point that there is no
+			// Suspense component higher up in the tree
+			if (error instanceof Error) {
+				throw error;
+			}
 		}
 
 		oldCatchError(error, vnode, oldVNode);

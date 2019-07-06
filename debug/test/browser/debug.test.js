@@ -627,6 +627,14 @@ describe('debug', () => {
 				});
 		});
 
+		it('should throw on missing <Suspense>', () => {
+			function Foo() {
+				throw Promise.resolve();
+			}
+
+			expect(() => render(<Foo />, scratch)).to.throw;
+		});
+
 		describe('warn for PropTypes on lazy()', () => {
 			it('should log the function name', () => {
 				const loader = Promise.resolve({ default: function MyLazyLoadedComponent() { return <div>Hi there</div>; } });
