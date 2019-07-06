@@ -270,22 +270,20 @@ export function serializeVNode(vnode) {
 	let name = getDisplayName(vnode);
 
 	let attrs = '';
-	if (props) {
-		for (let prop in props) {
-			if (props.hasOwnProperty(prop) && prop!=='children') {
-				let value = props[prop];
+	for (let prop in props) {
+		if (props.hasOwnProperty(prop) && prop!=='children') {
+			let value = props[prop];
 
-				// If it is an object but doesn't have toString(), use Object.toString
-				if (typeof value==='function') {
-					value = `function ${value.displayName || value.name}() {}`;
-				}
-
-				value = Object(value) === value && !value.toString
-					? Object.prototype.toString.call(value)
-					: value + '';
-
-				attrs += ` ${prop}=${JSON.stringify(value)}`;
+			// If it is an object but doesn't have toString(), use Object.toString
+			if (typeof value==='function') {
+				value = `function ${value.displayName || value.name}() {}`;
 			}
+
+			value = Object(value) === value && !value.toString
+				? Object.prototype.toString.call(value)
+				: value + '';
+
+			attrs += ` ${prop}=${JSON.stringify(value)}`;
 		}
 	}
 
