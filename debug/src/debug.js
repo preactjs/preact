@@ -81,7 +81,7 @@ export function initDebug() {
 			throw new Error('Invalid type passed to createElement(): '+(Array.isArray(type) ? 'array' : type));
 		}
 
-		if ((type==='thead' || type==='tfoot' || type==='thead') && parentVNode.type!=='table') {
+		if ((type==='thead' || type==='tfoot' || type==='tbody') && parentVNode.type!=='table') {
 			console.error(
 				'Improper nesting of table.' +
 				'Your <thead/tbody/tfoot> should have a <table> parent.'
