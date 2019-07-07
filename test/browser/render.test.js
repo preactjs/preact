@@ -674,8 +674,8 @@ describe('render()', () => {
 			// eslint-disable-next-line react/no-danger
 			render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
 
-			expect(scratch.firstChild).to.have.property('innerHTML', '');
-			expect(scratch.innerHTML).to.equal(`<div></div>`);
+			expect(scratch.firstChild).to.have.property('innerHTML', html);
+			expect(scratch.innerHTML).to.equal(`<div>${html}</div>`);
 		});
 
 		it('should avoid reapplying innerHTML when __html property of dangerouslySetInnerHTML attr remains unchanged', () => {
@@ -845,6 +845,20 @@ describe('render()', () => {
 		// After Preact rerenders, focus should remain on the input
 		expect(document.activeElement).to.equalNode(input);
 		expect(scratch.innerHTML).to.contain(`<span>${todoText}</span>`);
+	});
+
+	it('should keep value of uncontrolled inputs', () => {
+		render(<input value={undefined} />, scratch);
+		scratch.firstChild.value = 'foo';
+		render(<input value={undefined} />, scratch);
+		expect(scratch.firstChild.value).to.equal('foo');
+	});
+
+	it('should keep value of uncontrolled checkboxes', () => {
+		render(<input type="checkbox" checked={undefined} />, scratch);
+		scratch.firstChild.checked = true;
+		render(<input type="checkbox" checked={undefined} />, scratch);
+		expect(scratch.firstChild.checked).to.equal(true);
 	});
 
 	it('should always diff `checked` and `value` properties against the DOM', () => {
