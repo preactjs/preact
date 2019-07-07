@@ -21,7 +21,8 @@ export function diffProps(dom, newProps, oldProps, isSvg) {
 			k!=='key' &&
 			// We check for value and checked to diff it against the DOM #1324
 			// However value can't be undefined since this would indicate us dealing with an uncontrolled node.
-			(!oldProps || (((k==='value' || k==='checked') && newProps[k]!==undefined) ? dom : oldProps)[k]!==newProps[k])) {
+			(!oldProps || (((k==='value' || k==='checked') && newProps[k]!==undefined) ? dom : oldProps)[k]!==newProps[k])
+		) {
 			setProperty(dom, k, newProps[k], oldProps[k], isSvg);
 		}
 	}
