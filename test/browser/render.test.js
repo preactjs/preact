@@ -854,6 +854,13 @@ describe('render()', () => {
 		expect(scratch.firstChild.value).to.equal('foo');
 	});
 
+	it('should keep value of uncontrolled checkboxes', () => {
+		render(<input type="checkbox" checked={undefined} />, scratch);
+		scratch.firstChild.checked = true;
+		render(<input type="checkbox" checked={undefined} />, scratch);
+		expect(scratch.firstChild.checked).to.equal(true);
+	});
+
 	it('should always diff `checked` and `value` properties against the DOM', () => {
 		// See https://github.com/preactjs/preact/issues/1324
 
