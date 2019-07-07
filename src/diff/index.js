@@ -9,8 +9,8 @@ import options from '../options';
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
- * @param {import('../internal').VNode | null} newVNode The new virtual node
- * @param {import('../internal').VNode | null} oldVNode The old virtual node
+ * @param {import('../internal').VNode} newVNode The new virtual node
+ * @param {import('../internal').VNode} oldVNode The old virtual node
  * @param {object} context The current context object
  * @param {boolean} isSvg Whether or not this element is an SVG node
  * @param {Array<import('../internal').PreactElement>} excessDomChildren

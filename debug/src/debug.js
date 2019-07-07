@@ -32,6 +32,12 @@ export function initDebug() {
 					break;
 				}
 			}
+
+			// We haven't recovered and we know at this point that there is no
+			// Suspense component higher up in the tree
+			if (error instanceof Error) {
+				throw error;
+			}
 		}
 
 		oldCatchError(error, vnode, oldVNode);
@@ -55,8 +61,6 @@ export function initDebug() {
 	};
 
 	options._diff = vnode => {
-		if (vnode == null) { return; }
-
 		let { type, _parent: parent } = vnode;
 		let parentVNode = getClosestDomNodeParent(parent);
 
@@ -77,7 +81,7 @@ export function initDebug() {
 			throw new Error('Invalid type passed to createElement(): '+(Array.isArray(type) ? 'array' : type));
 		}
 
-		if ((type==='thead' || type==='tfoot' || type==='thead') && parentVNode.type!=='table') {
+		if ((type==='thead' || type==='tfoot' || type==='tbody') && parentVNode.type!=='table') {
 			console.error(
 				'Improper nesting of table.' +
 				'Your <thead/tbody/tfoot> should have a <table> parent.'
@@ -194,8 +198,6 @@ export function initDebug() {
 	};
 
 	options.diffed = (vnode) => {
-		if (vnode == null) { return; }
-
 		if (vnode._component && vnode._component.__hooks) {
 			let hooks = vnode._component.__hooks;
 			hooks._list.forEach(hook => {
@@ -268,22 +270,20 @@ export function serializeVNode(vnode) {
 	let name = getDisplayName(vnode);
 
 	let attrs = '';
-	if (props) {
-		for (let prop in props) {
-			if (props.hasOwnProperty(prop) && prop!=='children') {
-				let value = props[prop];
+	for (let prop in props) {
+		if (props.hasOwnProperty(prop) && prop!=='children') {
+			let value = props[prop];
 
-				// If it is an object but doesn't have toString(), use Object.toString
-				if (typeof value==='function') {
-					value = `function ${value.displayName || value.name}() {}`;
-				}
-
-				value = Object(value) === value && !value.toString
-					? Object.prototype.toString.call(value)
-					: value + '';
-
-				attrs += ` ${prop}=${JSON.stringify(value)}`;
+			// If it is an object but doesn't have toString(), use Object.toString
+			if (typeof value==='function') {
+				value = `function ${value.displayName || value.name}() {}`;
 			}
+
+			value = Object(value) === value && !value.toString
+				? Object.prototype.toString.call(value)
+				: value + '';
+
+			attrs += ` ${prop}=${JSON.stringify(value)}`;
 		}
 	}
 

@@ -406,6 +406,30 @@ describe('debug', () => {
 			expect(console.error).to.be.calledOnce;
 		});
 
+		it('missing <table> with <thead>', () => {
+			const Table = () => (
+				<thead><tr><td>hi</td></tr></thead>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('missing <table> with <tbody>', () => {
+			const Table = () => (
+				<tbody><tr><td>hi</td></tr></tbody>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('missing <table> with <tfoot>', () => {
+			const Table = () => (
+				<tfoot><tr><td>hi</td></tr></tfoot>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
 		it('missing <tr>', () => {
 			const Table = () => (
 				<table>
@@ -420,6 +444,19 @@ describe('debug', () => {
 
 		it('missing <tr> with td component', () => {
 			const Cell = ({ children }) => <td>{children}</td>;
+			const Table = () => (
+				<table>
+					<tbody>
+						<Cell>Hi</Cell>
+					</tbody>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('missing <tr> with th component', () => {
+			const Cell = ({ children }) => <th>{children}</th>;
 			const Table = () => (
 				<table>
 					<tbody>
@@ -588,6 +625,14 @@ describe('debug', () => {
 					expect(errors[0].includes('got prop')).to.equal(true);
 					expect(serializeHtml(scratch)).to.equal('<h1>signal</h1>');
 				});
+		});
+
+		it('should throw on missing <Suspense>', () => {
+			function Foo() {
+				throw Promise.resolve();
+			}
+
+			expect(() => render(<Foo />, scratch)).to.throw;
 		});
 
 		describe('warn for PropTypes on lazy()', () => {
