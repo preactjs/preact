@@ -129,7 +129,15 @@ let Children = {
 function createElement(...args) {
 	let vnode = h(...args);
 
+	vnode.$$typeof = REACT_ELEMENT_TYPE;
+
+	applyEventNormalization(vnode);
 	let type = vnode.type, props = vnode.props;
+	if (type && type._forwarded && vnode.ref) {
+		vnode.props.ref = vnode.ref;
+		vnode.ref = null;
+	}
+
 	if (typeof type!='function') {
 		if (props.defaultValue) {
 			if (!props.value && props.value!==0) {
@@ -341,20 +349,6 @@ function forwardRef(fn) {
 	Forwarded.displayName = 'ForwardRef(' + (fn.displayName || fn.name) + ')';
 	return Forwarded;
 }
-
-let oldVNodeHook = options.vnode;
-options.vnode = vnode => {
-	vnode.$$typeof = REACT_ELEMENT_TYPE;
-
-	applyEventNormalization(vnode);
-	let type = vnode.type;
-	if (type && type._forwarded && vnode.ref) {
-		vnode.props.ref = vnode.ref;
-		vnode.ref = null;
-	}
-	/* istanbul ignore next */
-	if (oldVNodeHook) oldVNodeHook(vnode);
-};
 
 /**
  * Deprecated way to control batched rendering inside the reconciler, but we
