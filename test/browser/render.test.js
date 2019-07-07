@@ -847,6 +847,13 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.contain(`<span>${todoText}</span>`);
 	});
 
+	it('should keep value of uncontrolled inputs', () => {
+		render(<input value={undefined} />, scratch);
+		scratch.firstChild.value = 'foo';
+		render(<input value={undefined} />, scratch);
+		expect(scratch.firstChild.value).to.equal('foo');
+	});
+
 	it('should always diff `checked` and `value` properties against the DOM', () => {
 		// See https://github.com/preactjs/preact/issues/1324
 
