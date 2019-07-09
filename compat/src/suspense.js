@@ -1,20 +1,15 @@
-import { Component, createElement, _unmount as unmount } from 'preact';
+import { Component, createElement, _unmount as unmount, options } from 'preact';
 import { removeNode } from '../../src/util';
 
-/**
- * @param {any} error
- * @param {import('./internal').VNode} newVNode
- * @param {import('./internal').VNode} oldVNode
- */
-export function catchRender(error, newVNode, oldVNode) {
-	// thrown Promises are meant to suspend...
-	if (error.then) {
+const oldCatchError = options._catchError;
+options._catchError = function (error, newVNode, oldVNode) {
+	if (error.then && oldVNode) {
 
 		/** @type {import('./internal').Component} */
 		let component;
 		let vnode = newVNode;
 
-		for (; vnode; vnode = vnode._parent) {
+		for (; vnode = vnode._parent;) {
 			if ((component = vnode._component) && component._childDidSuspend) {
 				if (oldVNode) {
 					newVNode._dom = oldVNode._dom;
@@ -22,13 +17,13 @@ export function catchRender(error, newVNode, oldVNode) {
 				}
 
 				component._childDidSuspend(error);
-				return true;
+				return; // Don't call oldCatchError if we found a Suspense
 			}
 		}
 	}
 
-	return false;
-}
+	oldCatchError(error, newVNode, oldVNode);
+};
 
 function detachDom(children) {
 	for (let i = 0; i < children.length; i++) {

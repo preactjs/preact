@@ -9,8 +9,8 @@ import options from '../options';
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
- * @param {import('../internal').VNode | null} newVNode The new virtual node
- * @param {import('../internal').VNode | null} oldVNode The old virtual node
+ * @param {import('../internal').VNode} newVNode The new virtual node
+ * @param {import('../internal').VNode} oldVNode The old virtual node
  * @param {object} context The current context object
  * @param {boolean} isSvg Whether or not this element is an SVG node
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
@@ -112,15 +112,9 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c._vnode = newVNode;
 			c._parentDom = parentDom;
 
-			try {
-				tmp = c.render(c.props, c.state, c.context);
-				let isTopLevelFragment = tmp != null && tmp.type == Fragment && tmp.key == null;
-				toChildArray(isTopLevelFragment ? tmp.props.children : tmp, newVNode._children=[], coerceToVNode, true);
-			}
-			catch (e) {
-				if ((tmp = options._catchRender) && tmp(e, newVNode, oldVNode)) break outer;
-				throw e;
-			}
+			tmp = c.render(c.props, c.state, c.context);
+			let isTopLevelFragment = tmp != null && tmp.type == Fragment && tmp.key == null;
+			toChildArray(isTopLevelFragment ? tmp.props.children : tmp, newVNode._children=[], coerceToVNode, true);
 
 			if (c.getChildContext!=null) {
 				context = assign(assign({}, context), c.getChildContext());
@@ -153,7 +147,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		if (tmp = options.diffed) tmp(newVNode);
 	}
 	catch (e) {
-		catchErrorInComponent(e, newVNode._parent);
+		options._catchError(e, newVNode, oldVNode);
 	}
 
 	return newVNode._dom;
@@ -166,7 +160,7 @@ export function commitRoot(mounts, root) {
 			c.componentDidMount();
 		}
 		catch (e) {
-			catchErrorInComponent(e, c._vnode._parent);
+			options._catchError(e, c._vnode);
 		}
 	}
 
@@ -228,18 +222,30 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 
 		let oldHtml = oldProps.dangerouslySetInnerHTML;
 		let newHtml = newProps.dangerouslySetInnerHTML;
-		if ((newHtml || oldHtml) && excessDomChildren==null) {
-			// Avoid re-applying the same '__html' if it did not changed between re-render
-			if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
-				dom.innerHTML = newHtml && newHtml.__html || '';
+
+		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
+		// @TODO we should warn in debug mode when props don't match here.
+		if (excessDomChildren == null) {
+			if (newHtml || oldHtml) {
+				// Avoid re-applying the same '__html' if it did not changed between re-render
+				if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
+					dom.innerHTML = newHtml && newHtml.__html || '';
+				}
 			}
 		}
-		if (newProps.multiple) {
-			dom.multiple = newProps.multiple;
+
+		diffProps(dom, newProps, oldProps, isSvg, excessDomChildren!=null);
+
+		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
+		if (!newHtml) {
+			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, EMPTY_OBJ);
 		}
 
-		diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, EMPTY_OBJ);
-		diffProps(dom, newProps, oldProps, isSvg);
+		// (as above, don't diff props during hydration)
+		if (excessDomChildren == null) {
+			if (('value' in newProps) && newProps.value!==undefined && newProps.value !== dom.value) dom.value = newProps.value==null ? '' : newProps.value;
+			if (('checked' in newProps) && newProps.checked!==undefined && newProps.checked !== dom.checked) dom.checked = newProps.checked;
+		}
 	}
 
 	return dom;
@@ -249,15 +255,15 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
  * Invoke or update a ref, depending on whether it is a function or object ref.
  * @param {object|function} ref
  * @param {any} value
- * @param {import('../internal').VNode} parentVNode
+ * @param {import('../internal').VNode} vnode
  */
-export function applyRef(ref, value, parentVNode) {
+export function applyRef(ref, value, vnode) {
 	try {
 		if (typeof ref=='function') ref(value);
 		else ref.current = value;
 	}
 	catch (e) {
-		catchErrorInComponent(e, parentVNode);
+		options._catchError(e, vnode);
 	}
 }
 
@@ -290,7 +296,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 				r.componentWillUnmount();
 			}
 			catch (e) {
-				catchErrorInComponent(e, parentVNode);
+				options._catchError(e, parentVNode);
 			}
 		}
 
@@ -314,16 +320,18 @@ function doRender(props, state, context) {
 /**
  * Find the closest error boundary to a thrown error and call it
  * @param {object} error The thrown value
- * @param {import('../internal').VNode} vnode The first ancestor
- * VNode check for error boundary behaviors
+ * @param {import('../internal').VNode} vnode The vnode that threw
+ * the error that was caught (except for unmounting when this parameter
+ * is the highest parent that was being unmounted)
+ * @param {import('../internal').VNode} oldVNode The oldVNode of the vnode
+ * that threw, if this VNode threw while diffing
  */
-function catchErrorInComponent(error, vnode) {
-	if (options._catchError) { options._catchError(error, vnode); }
+(options)._catchError = function (error, vnode, oldVNode) {
 
 	/** @type {import('../internal').Component} */
 	let component;
 
-	for (; vnode; vnode = vnode._parent) {
+	for (; vnode = vnode._parent;) {
 		if ((component = vnode._component) && !component._processingException) {
 			try {
 				if (component.constructor && component.constructor.getDerivedStateFromError!=null) {
@@ -344,4 +352,4 @@ function catchErrorInComponent(error, vnode) {
 	}
 
 	throw error;
-}
+};
