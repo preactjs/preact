@@ -52,7 +52,7 @@ Component.prototype.setState = function(update, callback) {
 	// The check for _renderCallbacks is because we can't call
 	// this when we're in the constructor but we should call it in
 	// will mount.
-	if (callback && Array.isArray(this._renderCallbacks)) this._renderCallbacks.push(callback);
+	if (callback) (this._renderCallbacks || (this._renderCallbacks = [])).push(callback);
 	if (this._vnode) {
 		enqueueRender(this);
 	}
