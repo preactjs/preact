@@ -119,7 +119,7 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
 		});
 
-		it('should not crash when setting state with cb in constructor', () => {
+		it('should call cb in constructor', () => {
 			let spy = sinon.spy();
 			class Foo extends Component {
 				constructor(props) {
@@ -129,7 +129,7 @@ describe('Components', () => {
 			}
 
 			expect(() => render(<Foo foo="bar" />, scratch)).not.to.throw();
-			expect(spy).to.not.be.called;
+			expect(spy).to.be.calledOnce;
 		});
 
 		it('should initialize props & context but not state in Component constructor', () => {

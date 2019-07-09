@@ -63,7 +63,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				c.context = cctx;
 				c._context = context;
 				isNew = c._dirty = true;
-				c._renderCallbacks = [];
 			}
 
 			// Invoke getDerivedStateFromProps
@@ -128,7 +127,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			c.base = newVNode._dom;
 
-			while (tmp=c._renderCallbacks.pop()) tmp.call(c);
+			while (c._renderCallbacks && (tmp=c._renderCallbacks.pop())) tmp.call(c);
 
 			// Don't call componentDidUpdate on mount or when we bailed out via
 			// `shouldComponentUpdate`
