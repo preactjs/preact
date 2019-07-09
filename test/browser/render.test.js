@@ -674,8 +674,8 @@ describe('render()', () => {
 			// eslint-disable-next-line react/no-danger
 			render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
 
-			expect(scratch.firstChild).to.have.property('innerHTML', '');
-			expect(scratch.innerHTML).to.equal(`<div></div>`);
+			expect(scratch.firstChild).to.have.property('innerHTML', html);
+			expect(scratch.innerHTML).to.equal(`<div>${html}</div>`);
 		});
 
 		it('should avoid reapplying innerHTML when __html property of dangerouslySetInnerHTML attr remains unchanged', () => {
@@ -847,6 +847,20 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.contain(`<span>${todoText}</span>`);
 	});
 
+	it('should keep value of uncontrolled inputs', () => {
+		render(<input value={undefined} />, scratch);
+		scratch.firstChild.value = 'foo';
+		render(<input value={undefined} />, scratch);
+		expect(scratch.firstChild.value).to.equal('foo');
+	});
+
+	it('should keep value of uncontrolled checkboxes', () => {
+		render(<input type="checkbox" checked={undefined} />, scratch);
+		scratch.firstChild.checked = true;
+		render(<input type="checkbox" checked={undefined} />, scratch);
+		expect(scratch.firstChild.checked).to.equal(true);
+	});
+
 	it('should always diff `checked` and `value` properties against the DOM', () => {
 		// See https://github.com/preactjs/preact/issues/1324
 
@@ -992,6 +1006,30 @@ describe('render()', () => {
 		rerender();
 
 		expect(scratch.textContent).to.equal('01');
+	});
+
+	it('should call unmount when working with replaceNode', () => {
+		const mountSpy = sinon.spy();
+		const unmountSpy = sinon.spy();
+		class MyComponent extends Component {
+			componentDidMount() {
+				mountSpy();
+			}
+			componentWillUnmount() {
+				unmountSpy();
+			}
+			render() {
+				return <div>My Component</div>;
+			}
+		}
+
+		const container = document.createElement('div');
+		scratch.appendChild(container);
+		render(<MyComponent />, scratch, container);
+		expect(mountSpy).to.be.calledOnce;
+
+		render(<div>Not my component</div>, document.body, container);
+		expect(unmountSpy).to.be.calledOnce;
 	});
 
 	it('should not cause infinite loop with referentially equal props', () => {

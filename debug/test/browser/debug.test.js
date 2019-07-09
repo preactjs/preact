@@ -268,6 +268,20 @@ describe('debug', () => {
 		expect(console.error).to.not.be.called;
 	});
 
+	it('should throw an error when missing Suspense', () => {
+		const Foo = () => <div>Foo</div>;
+		const LazyComp = lazy(() => new Promise(resolve => resolve({ default: Foo })));
+		const fn = () => {
+			render((
+				<Fragment>
+					<LazyComp />
+				</Fragment>
+			), scratch);
+		};
+
+		expect(fn).to.throw(/Missing Suspense/gi);
+	});
+
 	describe('duplicate keys', () => {
 		const List = props => <ul>{props.children}</ul>;
 		const ListItem = props => <li>{props.children}</li>;
@@ -383,6 +397,157 @@ describe('debug', () => {
 		});
 	});
 
+	describe('table markup', () => {
+		it('missing <tbody>/<thead>/<tfoot>/<table>', () => {
+			const Table = () => (
+				<tr><td>hi</td></tr>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('missing <table> with <thead>', () => {
+			const Table = () => (
+				<thead><tr><td>hi</td></tr></thead>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('missing <table> with <tbody>', () => {
+			const Table = () => (
+				<tbody><tr><td>hi</td></tr></tbody>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('missing <table> with <tfoot>', () => {
+			const Table = () => (
+				<tfoot><tr><td>hi</td></tr></tfoot>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('missing <tr>', () => {
+			const Table = () => (
+				<table>
+					<tbody>
+						<td>Hi</td>
+					</tbody>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('missing <tr> with td component', () => {
+			const Cell = ({ children }) => <td>{children}</td>;
+			const Table = () => (
+				<table>
+					<tbody>
+						<Cell>Hi</Cell>
+					</tbody>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('missing <tr> with th component', () => {
+			const Cell = ({ children }) => <th>{children}</th>;
+			const Table = () => (
+				<table>
+					<tbody>
+						<Cell>Hi</Cell>
+					</tbody>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('Should accept <td> instead of <th> in <thead>', () => {
+			const Table = () => (
+				<table>
+					<thead>
+						<tr>
+							<td>Hi</td>
+						</tr>
+					</thead>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('Accepts well formed table with TD components', () => {
+			const Cell = ({ children }) => <td>{children}</td>;
+			const Table = () => (
+				<table>
+					<thead>
+						<tr>
+							<th>Head</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Body</td>
+						</tr>
+					</tbody>
+					<tfoot>
+						<tr>
+							<Cell>Body</Cell>
+						</tr>
+					</tfoot>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('Accepts well formed table', () => {
+			const Table = () => (
+				<table>
+					<thead>
+						<tr>
+							<th>Head</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Body</td>
+						</tr>
+					</tbody>
+					<tfoot>
+						<tr>
+							<td>Body</td>
+						</tr>
+					</tfoot>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('Accepts minimial well formed table', () => {
+			const Table = () => (
+				<table>
+					<tr>
+						<th>Head</th>
+					</tr>
+					<tr>
+						<td>Body</td>
+					</tr>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+	});
+
+
 	describe('PropTypes', () => {
 		it('should fail if props don\'t match prop-types', () => {
 			function Foo(props) {
@@ -460,6 +625,14 @@ describe('debug', () => {
 					expect(errors[0].includes('got prop')).to.equal(true);
 					expect(serializeHtml(scratch)).to.equal('<h1>signal</h1>');
 				});
+		});
+
+		it('should throw on missing <Suspense>', () => {
+			function Foo() {
+				throw Promise.resolve();
+			}
+
+			expect(() => render(<Foo />, scratch)).to.throw;
 		});
 
 		describe('warn for PropTypes on lazy()', () => {
