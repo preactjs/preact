@@ -342,4 +342,46 @@ describe('Portal', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div>foobar</div><div><div>foobar</div><p>Hello</p></div>');
 	});
+
+	it('should support nested portals', () => {
+		let toggle, toggle2, inner;
+
+		function Bar() {
+			const [mounted, setMounted] = useState(false);
+			toggle2 = () => setMounted(s => !s);
+			return (
+				<div ref={r => { inner = r; }}>
+					<p>Inner</p>
+					{mounted && createPortal(<p>hiFromBar</p>, scratch)}
+					{mounted && createPortal(<p>innerPortal</p>, inner)}
+				</div>
+			);
+		}
+
+		function Foo(props) {
+			const [mounted, setMounted] = useState(false);
+			toggle = () => setMounted(s => !s);
+			return (
+				<div>
+					<p>Hello</p>
+					{mounted && createPortal(<Bar />, scratch)}
+				</div>
+			);
+		}
+
+		render(<Foo />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div>');
+
+		toggle();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><p>Inner</p></div><div><p>Hello</p></div>');
+
+		toggle2();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>hiFromBar</p><div><p>innerPortal</p><p>Inner</p></div><div><p>Hello</p></div>');
+
+		toggle();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div>');
+	});
 });
