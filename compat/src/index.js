@@ -1,4 +1,4 @@
-import { hydrate, render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
+import { hydrate, render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment, _unmount } from 'preact';
 import * as hooks from 'preact/hooks';
 import { Suspense, lazy } from './suspense';
 import { assign, removeNode } from '../../src/util';
@@ -75,18 +75,56 @@ class ContextProvider {
  * @param {object | null | undefined} props
  */
 function Portal(props) {
-	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
+	let _this = this;
 	let container = props.container;
+	let wrap = h(ContextProvider, { context: _this.context }, props.vnode);
 
-	if (props.container !== this.container) {
-		hydrate('', container);
-		this.container = container;
+	// When we change container we should clear our old container and
+	// indicate a new mount.
+	if (_this._container && _this._container !== container) {
+		if (_this._temp.parentNode) _this._container.removeChild(_this._temp);
+		_unmount(_this._wrap);
+		_this._hasMounted = false;
 	}
 
-	render(wrap, container);
-	this.componentWillUnmount = () => {
-		render(null, container);
+	// When props.vnode is undefined/false/null we are dealing with some kind of
+	// conditional vnode. This should not trigger a render.
+	if (props.vnode) {
+		if (!_this._hasMounted) {
+			// Create a placeholder that we can use to insert into.
+			_this._temp = document.createTextNode('');
+			// Hydrate existing nodes to keep the dom intact, when rendering
+			// wrap into the container.
+			hydrate('', container);
+			// Insert before first child (will just append if firstChild is null).
+			container.insertBefore(_this._temp, container.firstChild);
+			// At this point we have mounted and should set our container.
+			_this._hasMounted = true;
+			_this._container = container;
+			// Render our wrapping element into temp.
+			preactRender(wrap, container, _this._temp);
+		}
+		else {
+			// When we have mounted and the vnode is present it means the
+			// props have changed or a parent is triggering a rerender.
+			// This implies we only need to call render.
+			render(wrap, container);
+		}
+	}
+	// When we come from a conditional render, on a mounted
+	// portal we should clear the DOM.
+	else if (_this._hasMounted) {
+		if (_this._temp.parentNode) _this._container.removeChild(_this._temp);
+		_unmount(_this._wrap);
+	}
+	// Set the wrapping element for future unmounting.
+	_this._wrap = wrap;
+
+	_this.componentWillUnmount = () => {
+		if (_this._temp.parentNode) _this._container.removeChild(_this._temp);
+		_unmount(_this._wrap);
 	};
+
 	return null;
 }
 
