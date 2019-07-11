@@ -1,5 +1,4 @@
 import { encodeEntities, indent, isLargeString, styleObjToCss, assign, getChildren } from './util';
-import { ENABLE_PRETTY } from '../env';
 import { options, Fragment, createElement } from 'preact';
 
 const SHALLOW = { shallow: true };
@@ -50,7 +49,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 	context = context || {};
 	opts = opts || {};
 
-	let pretty = ENABLE_PRETTY && opts.pretty,
+	let pretty = opts.pretty,
 		indentChar = pretty && typeof pretty==='string' ? pretty : '\t';
 
 	// #text nodes
