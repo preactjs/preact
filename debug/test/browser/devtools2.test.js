@@ -124,7 +124,6 @@ describe('devtools', () => {
 		]);
 	});
 
-	// Works when singled out, options environment is not cleaned up properly
 	it('should unmount component', () => {
 		mock.connect();
 
@@ -213,6 +212,56 @@ describe('devtools', () => {
 			2, //   owner id
 			1, //   displayName string id
 			0  //   key string id
+		]);
+	});
+
+	it.only('should reorder keyed children', () => {
+		mock.connect();
+
+		function Foo() {
+			return <div>foo</div>;
+		}
+
+		function Bar() {
+			return <div>bar</div>;
+		}
+
+		function FakeRouter(props) {
+			return props.active ? props.children : [...props.children].reverse();
+		}
+
+		let update;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { active: true };
+				update = () => this.setState(prev => ({ active: !prev.active }));
+			}
+			render() {
+				return (
+					<FakeRouter active={this.state.active}>
+						<Foo key="a" />
+						<Bar key="b" />
+					</FakeRouter>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(mock.hook.emit).to.be.calledOnce;
+		update();
+		rerender();
+
+		expect(mock.hook.emit).to.be.calledTwice;
+		expect(parseEmit(mock.hook.emit.args[1])).to.deep.equal([
+			1, // rendererId
+			1, // root vnode id
+			0, // string table lengthl
+			3, // TREE_OPERATION_REORDER_CHILDREN
+			3, //   parent vnode id
+			2, //   children count
+			5, //   vnode id
+			4  //   vnode id
 		]);
 	});
 

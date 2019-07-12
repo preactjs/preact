@@ -87,20 +87,20 @@ export function update(state, vnode, parent) {
  * @param {import('../internal').VNode} vnode
  */
 export function resetChildren(state, vnode) {
-	// TODO: Infinite loop here
-	return;
+	if (!vnode._children) return;
 
 	/** @type {number[]} */
 	let next = [];
 
-	let stack = vnode._children.slice() || [];
+	let stack = vnode._children.slice();
+
 	let child;
 	while ((child = stack.pop())!=null) {
 		if (!shouldFilter(state.filter, child)) {
 			next.push(getVNodeId(child));
 		}
-		else if (vnode._children) {
-			stack.push(...vnode._children.slice());
+		else if (child._children) {
+			stack.push(...child._children);
 		}
 	}
 

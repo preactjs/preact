@@ -62,7 +62,7 @@ export function getVNode(id) {
 export function clearVNode(vnode) {
 	let children = vnode._children || [];
 	for (let i = 0; i < children.length; i++) {
-		if (children[i]!==null) {
+		if (children[i]!=null) {
 			clearVNode(children[i]);
 		}
 	}
