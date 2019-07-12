@@ -166,21 +166,6 @@ export function initDebug() {
 		}
 	};
 
-	const warn = (property, err) => ({
-		get() {
-			throw new Error(`getting vnode.${property} is deprecated, ${err}`);
-		},
-		set() {
-			throw new Error(`setting vnode.${property} is not allowed, ${err}`);
-		}
-	});
-
-	const deprecatedAttributes = {
-		nodeName: warn('nodeName', 'use vnode.type'),
-		attributes: warn('attributes', 'use vnode.props'),
-		children: warn('children', 'use vnode.props.children')
-	};
-
 	options.vnode = (vnode) => {
 		let source, self;
 		if (vnode.props && vnode.props.__source) {
@@ -193,7 +178,6 @@ export function initDebug() {
 		}
 		vnode.__self = self;
 		vnode.__source = source;
-		Object.defineProperties(vnode, deprecatedAttributes);
 		if (oldVnode) oldVnode(vnode);
 	};
 

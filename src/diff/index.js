@@ -100,7 +100,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 
 			oldProps = c.props;
-			oldState = c.state;
+			oldState = c._prevState;
 
 			c.context = cctx;
 			c.props = newProps;
