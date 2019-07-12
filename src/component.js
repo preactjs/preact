@@ -13,6 +13,7 @@ import { Fragment } from './create-element';
 export function Component(props, context) {
 	this.props = props;
 	this.context = context;
+	if (this.state==null) this.state = {};
 	// this.constructor // When component is functional component, this is reset to functional component
 	// if (this.state==null) this.state = {};
 	// this.state = {};
@@ -38,9 +39,9 @@ export function Component(props, context) {
  * updated
  */
 Component.prototype.setState = function(update, callback) {
+	if (this.state) this._prevState = this.state;
 	// only clone state when copying to nextState the first time.
 	let s = (this._nextState!==this.state && this._nextState) || (this._nextState = assign({}, this.state));
-
 	// if update() mutates state in-place, skip the copy:
 	if (typeof update!=='function' || (update = update(s, this.props))) {
 		assign(s, update);
@@ -51,7 +52,6 @@ Component.prototype.setState = function(update, callback) {
 
 	if (this._vnode) {
 		if (callback) this._renderCallbacks.push(callback);
-		if (this.state) this._prevState = this.state;
 		enqueueRender(this);
 	}
 };

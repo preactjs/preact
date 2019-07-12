@@ -189,17 +189,6 @@ describe('debug', () => {
 		expect(fn).to.throw(/createElement/);
 	});
 
-	it('should throw errors when accessing certain attributes', () => {
-		const vnode = h('div', null);
-		expect(() => vnode).to.not.throw();
-		expect(() => vnode.attributes).to.throw(/use vnode.props/);
-		expect(() => vnode.nodeName).to.throw(/use vnode.type/);
-		expect(() => vnode.children).to.throw(/use vnode.props.children/);
-		expect(() => vnode.attributes = {}).to.throw(/use vnode.props/);
-		expect(() => vnode.nodeName = 'test').to.throw(/use vnode.type/);
-		expect(() => vnode.children = [<div />]).to.throw(/use vnode.props.children/);
-	});
-
 	it('should print an error when component is an array', () => {
 		let fn = () => render(h([<div />]), scratch);
 		expect(fn).to.throw(/createElement/);

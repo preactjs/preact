@@ -71,6 +71,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				c._nextState = c.state;
 			}
 			if (newType.getDerivedStateFromProps!=null) {
+				c._prevState = c.state;
 				assign(c._nextState==c.state ? (c._nextState = assign({}, c._nextState)) : c._nextState, newType.getDerivedStateFromProps(newProps, c._nextState));
 			}
 
@@ -100,7 +101,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 
 			oldProps = c.props;
-			oldState = c._prevState;
+			oldState = c._prevState || {};
 
 			c.context = cctx;
 			c.props = newProps;
