@@ -2,7 +2,7 @@ import { Component, PreactElement, VNode } from "../../src/internal";
 
 export { Component, PreactElement, VNode };
 
-export interface DevtoolsInjectOptions {
+export interface RendererConfig {
 	/** 1 = DEV, 0 = production */
 	bundleType: 1 | 0;
 	/** The devtools enable different features for different versions of react */
@@ -10,7 +10,7 @@ export interface DevtoolsInjectOptions {
 	/** Informative string, currently unused in the devtools  */
 	rendererPackageName: string;
 	/** Find the root dom node of a vnode */
-	findHostInstanceByFiber(vnode: VNode): HTMLElement | null;
+	findHostInstanceByFiber(vnode: VNode): HTMLElement | Text | null;
 	/** Find the closest vnode given a dom node */
 	findFiberByHostInstance(instance: HTMLElement): VNode | null;
 }
@@ -55,15 +55,24 @@ export interface DevtoolsEvent {
 }
 
 export interface DevtoolsHook {
-	_renderers: Record<string, any>;
-	_roots: Set<VNode>;
+	renderers: Map<string, any>;
+	isDisabled?: boolean;
 	on(ev: string, listener: () => void): void;
 	emit(ev: string, data?: object): void;
-	helpers: Record<string, any>;
-	getFiberRoots(rendererId: string): Set<any>;
-	inject(config: DevtoolsInjectOptions): string;
-	onCommitFiberRoot(rendererId: string, root: VNode): void;
-	onCommitFiberUnmount(rendererId: string, vnode: VNode): void;
+	getFiberRoots(rendererId: number): Set<any>;
+	inject(config: { renderer: RendererConfig, reactBuildType: number }): string;
+	onCommitFiberRoot(rendererId: number, root: VNode): void;
+	onCommitFiberUnmount(rendererId: number, vnode: VNode): void;
+}
+
+export interface DevtoolsHookMock extends DevtoolsHook {
+	emit: DevtoolsHook['emit'] & Sinon.Spy;
+	inject: DevtoolsHook['inject'] & Sinon.Spy;
+}
+
+export interface DevtoolsMock {
+	hook: DevtoolsHookMock;
+	connect(): void;
 }
 
 export interface DevtoolsWindow extends Window {
@@ -76,5 +85,13 @@ export interface DevtoolsWindow extends Window {
 	/**
 	 * Custom attach function to supply a custom renderer
 	 */
-	__REACT_DEVTOOLS_ATTACH__?: (hook: DevtoolsHook, id: string, renderer: any, target: Window) => any;
+	__REACT_DEVTOOLS_ATTACH__?: (hook: DevtoolsHook, id: number, renderer: any, target: Window) => any;
+}
+
+export interface AdapterState {
+	connected: boolean;
+	rendererId: number;
+	currentRootId: number;
+	pending: any[];
+	isProfiling: boolean;
 }

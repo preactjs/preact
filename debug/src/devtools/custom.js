@@ -135,17 +135,19 @@ export function isRoot(vnode) {
  * instance as key. For html elements we use the dom node as key.
  *
  * @param {import('../internal').VNode} vnode
+ * @param {boolean} isRoot
  * @returns {import('../internal').Component | import('../internal').PreactElement | Text | null}
  */
-export function getInstance(vnode) {
+export function getInstance(vnode, isRoot) {
 	// Use the parent element as instance for root nodes
-	if (isRoot(vnode)) {
+	if (isRoot) {
+		return vnode;
 		// Edge case: When the tree only consists of components that have not rendered
 		// anything into the DOM we revert to using the vnode as instance.
-		return vnode._children.length > 0 && vnode._children[0]!=null && vnode._children[0]._dom!=null
-			? /** @type {import('../internal').PreactElement | null} */
-			(vnode._children[0]._dom.parentNode)
-			: vnode;
+		// return vnode._children.length > 0 && vnode._children[0]!=null && vnode._children[0]._dom!=null
+		// 	? /** @type {import('../internal').PreactElement | null} */
+		// 	(vnode._children[0]._dom.parentNode)
+		// 	: vnode;
 	}
 	if (vnode._component!=null) return vnode._component;
 	if (vnode.type===Fragment) return vnode.props;

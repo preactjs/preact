@@ -1,6 +1,5 @@
-/* istanbul ignore file */
-import { options, Component, Fragment } from 'preact';
-import { Renderer } from './renderer';
+import { options, Component } from 'preact';
+import { onCommitFiberRoot, flushPendingEvents } from './renderer2';
 import { assign } from '../../../src/util';
 
 /**
@@ -28,8 +27,8 @@ let noop = () => undefined;
 
 export function initDevTools() {
 	// This global variable is injected by the devtools
-	/** @type {import('../internal').DevtoolsWindow} */
-	let hook = (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
+	let hook =
+		/** @type {import('../internal').DevtoolsWindow} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
 
 	if (hook==null || hook.isDisabled) return;
 
@@ -39,9 +38,8 @@ export function initDevTools() {
 	/** @type {(vnode: import('../internal').VNode) => void} */
 	let onCommitUnmount = noop;
 
-	// Initialize our custom renderer
-	let rid = Math.random().toString(16).slice(2);
-	let preactRenderer = new Renderer(hook, rid);
+	/** @type {number | null} */
+	let rid = null;
 
 	catchErrors(() => {
 		let isDev = false;
@@ -58,23 +56,57 @@ export function initDevTools() {
 				: 'production'
 		}, '*');
 
+		/** @type {import('../internal').RendererConfig} */
 		let config = {
 			bundleType: /* istanbul ignore next */  isDev ? 1 : 0,
 			version: '16.8.4',
-			rendererPackageName: 'preact',
+			rendererPackageName: 'react-dom',
+			// TODO: Check if needed
+			findHostInstanceByFiber(vnode) {
+				return vnode._dom;
+			},
+			// TODO: Check if needed
 			findFiberByHostInstance(instance) {
-				return preactRenderer.inst2vnode.get(instance) || null;
+				// return preactRenderer.inst2vnode.get(instance) || null;
+			},
+			findNativeByFiberID(id) {
+				// TODO
+			},
+			selectElement(id) {
+				// TODO
+			},
+			inspectElement(id) {
+				// TODO
 			}
+		};
+
+		/** @type {import('../internal').AdapterState} */
+		let state = {
+			connected: false,
+			currentRootId: -1,
+			isProfiling: false,
+			pending: [],
+			rendererId: -1
 		};
 
 		/** @type {import('../internal').DevtoolsWindow} */
 		// eslint-disable-next-line arrow-body-style
 		(window).__REACT_DEVTOOLS_ATTACH__ = (hook, id, renderer, target) => {
+			state.rendererId = rid = id;
 			return assign(config, {
 				flushInitialOperations() {
-					// TODO
+					state.connected = true;
+
+					if (state.pending.length > 0) {
+						// TODO: Flush each root
+						flushPendingEvents(hook, state);
+					}
+
+					state.pending = [];
 				},
-				overrideProps() {
+
+				/** @type {(vnode: import('../internal').VNode, path: Array<string | number>, value: any) => void} */
+				overrideProps(vnode, path, value) {
 					// TODO
 				},
 				currentDispatcherRef: { current: null }
@@ -87,17 +119,14 @@ export function initDevTools() {
 			reactBuildType: config.bundleType
 		});
 
+		// eslint-disable-next-line arrow-body-style
 		onCommitRoot = catchErrors(root => {
-			// Empty root
-			if (root.type===Fragment && root._children.length==0) return;
-
-			let roots = hook.getFiberRoots(rid);
-			// root = helpers.handleCommitFiberRoot(root);
-			if (!roots.has(root)) roots.add(root);
+			return onCommitFiberRoot(hook, state, root);
 		});
 
+		// eslint-disable-next-line arrow-body-style
 		onCommitUnmount = catchErrors(vnode => {
-			hook.onCommitFiberUnmount(rid, vnode);
+			return hook.onCommitFiberUnmount(rid, vnode);
 		});
 	})();
 
@@ -137,6 +166,11 @@ export function initDevTools() {
 
 		// These cases are already handled by `unmount`
 		if (vnode==null) return;
+
+		if (rid!=null) {
+			const roots = hook.getFiberRoots(rid);
+			roots.add(vnode);
+		}
 		onCommitRoot(vnode);
 	});
 
