@@ -198,9 +198,11 @@ export function initDebug() {
 	};
 
 	options.diffed = (vnode) => {
+		if (oldDiffed) oldDiffed(vnode);
+
 		if (vnode._component && vnode._component.__hooks) {
 			let hooks = vnode._component.__hooks;
-			hooks._list.forEach(hook => {
+			(hooks._list || []).forEach(hook => {
 				if (hook._callback && (!hook._args || !Array.isArray(hook._args))) {
 					/* istanbul ignore next */
 					console.warn(
@@ -209,7 +211,7 @@ export function initDebug() {
 					);
 				}
 			});
-			if (hooks._pendingEffects.length > 0) {
+			if (hooks._pendingEffects && Array.isArray(hooks._pendingEffects)) {
 				hooks._pendingEffects.forEach((effect) => {
 					if ((!effect._args || !Array.isArray(effect._args)) && !warnedComponents.useEffect[vnode.type]) {
 						warnedComponents.useEffect[vnode.type] = true;
@@ -220,7 +222,7 @@ export function initDebug() {
 					}
 				});
 			}
-			if (hooks._pendingLayoutEffects.length > 0) {
+			if (hooks._pendingLayoutEffects && Array.isArray(hooks._pendingLayoutEffects)) {
 				hooks._pendingLayoutEffects.forEach((layoutEffect) => {
 					if ((!layoutEffect._args || !Array.isArray(layoutEffect._args)) && !warnedComponents.useLayoutEffect[vnode.type]) {
 						warnedComponents.useLayoutEffect[vnode.type] = true;
@@ -255,8 +257,6 @@ export function initDebug() {
 				keys.push(key);
 			}
 		}
-
-		if (oldDiffed) oldDiffed(vnode);
 	};
 }
 
