@@ -36,6 +36,11 @@
       "react/no-danger": 0,
       "jest/valid-expect": 0,
       "new-cap": 0
+    },
+    "settings": {
+      "react": {
+        "version": "16.8"
+      }
     }
   },
   "babel": {
