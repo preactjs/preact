@@ -200,13 +200,37 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 	}
 	else if (props && getChildren(children = [], props.children).length) {
 		let hasLarge = pretty && ~s.indexOf('\n');
+		let lastWasText = false;
+
 		for (let i=0; i<children.length; i++) {
 			let child = children[i];
+
 			if (child!=null && child!==false) {
 				let childSvgMode = nodeName==='svg' ? true : nodeName==='foreignObject' ? false : isSvgMode,
 					ret = renderToString(child, context, opts, true, childSvgMode, selectValue);
+
 				if (pretty && !hasLarge && isLargeString(ret)) hasLarge = true;
-				if (ret) pieces.push(ret);
+
+				// Skip if we received an empty string
+				if (ret) {
+					if (pretty) {
+						let isText = ret.length > 0 && ret[0]!='<';
+						
+						// We merge adjacent text nodes, otherwise each piece would be printed
+						// on a new line.
+						if (lastWasText && isText) {
+							pieces[pieces.length -1] += ret;
+						}
+						else {
+							pieces.push(ret);
+						}
+
+						lastWasText = isText;
+					}
+					else {
+						pieces.push(ret);
+					}
+				}
 			}
 		}
 		if (pretty && hasLarge) {
