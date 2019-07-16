@@ -123,7 +123,7 @@ declare namespace preact {
 		// // See: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/18365#issuecomment-351013257
 		// // Also, the ` | S` allows intellisense to not be dumbisense
 		setState<K extends keyof S>(
-			state: ((prevState: Readonly<S>, props: Readonly<P>) => (Pick<S, K> | S | null)) | (Pick<S, K> | S | null),
+			state: ((prevState: Readonly<S>, props: Readonly<P>) => (Pick<S, K> | Partial<S> | null)) | (Pick<S, K> | Partial<S> | null),
 			callback?: () => void
 		): void;
 
