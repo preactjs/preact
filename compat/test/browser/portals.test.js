@@ -223,7 +223,7 @@ describe('Portal', () => {
 		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 
-	it.skip('should work with stacking portals', () => {
+	it('should work with stacking portals', () => {
 		let toggle, toggle2;
 
 		function Foo(props) {

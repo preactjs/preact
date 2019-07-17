@@ -103,6 +103,7 @@ function Portal(props) {
 			_this._container = container;
 			// Render our wrapping element into temp.
 			preactRender(wrap, container, _this._temp);
+			_this._children = this._temp._children;
 		}
 		else {
 			// When we have mounted and the vnode is present it means the
@@ -110,11 +111,9 @@ function Portal(props) {
 			// This implies we only need to call render. But we need to keep
 			// the old tree around, otherwise will treat the vnodes as new and
 			// will wrongly call `componentDidMount` on them
-			if (!_this._lastWasUpdate) {
-				container._children = _this._temp._children;
-				_this._lastWasUpdate = true;
-			}
+			container._children = _this._children;
 			preactRender(wrap, container);
+			_this._children = container._children;
 		}
 	}
 	// When we come from a conditional render, on a mounted
