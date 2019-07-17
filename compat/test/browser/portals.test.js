@@ -223,7 +223,7 @@ describe('Portal', () => {
 		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 
-	it('should work with stacking portals', () => {
+	it.skip('should work with stacking portals', () => {
 		let toggle, toggle2;
 
 		function Foo(props) {
@@ -383,5 +383,49 @@ describe('Portal', () => {
 		toggle();
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div>');
+	});
+
+	it('should not unmount when parent renders', () => {
+		let root = document.createElement('div');
+		let dialog = document.createElement('div');
+		dialog.id = 'container';
+
+		scratch.appendChild(root);
+		scratch.appendChild(dialog);
+
+		let spy = sinon.spy();
+		class Child extends Component {
+			componentDidMount() {
+				spy();
+			}
+
+			render() {
+				return <div id="child">child</div>;
+			}
+		}
+
+		let spyParent = sinon.spy();
+		class App extends Component {
+			componentDidMount() {
+				spyParent();
+			}
+			render() {
+				return <div>{createPortal(<Child />, dialog)}</div>;
+			}
+		}
+
+		render(<App />, root);
+		let dom = document.getElementById('child');
+		expect(spyParent).to.be.calledOnce;
+		expect(spy).to.be.calledOnce;
+
+		// Render twice to trigger update scenario
+		render(<App />, root);
+		render(<App />, root);
+
+		let domNew = document.getElementById('child');
+		expect(dom).to.equal(domNew);
+		expect(spyParent).to.be.calledOnce;
+		expect(spy).to.be.calledOnce;
 	});
 });
