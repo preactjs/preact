@@ -58,7 +58,7 @@ declare namespace React {
 	export function findDOMNode(component: preact.Component): Element | null;
 
 	export class PureComponent<P = {}, S = {}> extends preact.Component {
-		isPureReactComponenet: boolean;
+		isPureReactComponent: boolean;
 	}
 
 	export function memo<P = {}>(component: preact.FunctionalComponent<P>, comparer?: (prev: P, next: P) => boolean): preact.FunctionComponent<P>;
