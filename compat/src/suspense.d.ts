@@ -1,4 +1,4 @@
-import { Component } from '../../src';
+import { Component, RenderableProps, ComponentChild } from '../../src';
 
 //
 // Suspense/lazy
@@ -10,4 +10,6 @@ export interface SuspenseProps {
   fallback: preact.ComponentChildren;
 }
 
-export class Suspense extends Component<SuspenseProps> {}
+export class Suspense extends Component<SuspenseProps> {
+    render(props?: RenderableProps<SuspenseProps>, state?: Readonly<{}>, context?: any): ComponentChild;
+}
