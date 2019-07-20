@@ -13,8 +13,13 @@ import options from './options';
  */
 export function render(vnode, parentDom, replaceNode) {
 	if (options._root) options._root(vnode, parentDom);
-	let oldVNode = replaceNode && replaceNode._children || parentDom._children;
 
+	let oldVNode = replaceNode && replaceNode._children || parentDom._children;
+	let isHydrating = false;
+	if (replaceNode === true) {
+		isHydrating = true;
+		replaceNode = undefined;
+	}
 	vnode = createElement(Fragment, null, [vnode]);
 
 	let mounts = [];
@@ -32,6 +37,7 @@ export function render(vnode, parentDom, replaceNode) {
 		mounts,
 		false,
 		replaceNode || EMPTY_OBJ,
+		isHydrating,
 	);
 	commitRoot(mounts, vnode);
 }
@@ -44,5 +50,5 @@ export function render(vnode, parentDom, replaceNode) {
  */
 export function hydrate(vnode, parentDom) {
 	parentDom._children = null;
-	render(vnode, parentDom);
+	render(vnode, parentDom, true);
 }
