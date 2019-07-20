@@ -20,6 +20,7 @@ import DevtoolsDemo from './devtools';
 import SuspenseDemo from './suspense';
 import Redux from './redux';
 import TextFields from './textFields';
+import P5 from './p5'
 
 let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(window.location.href);
 if (!isBenchmark) {
@@ -77,6 +78,7 @@ class App extends Component {
 						<Link href="/redux" activeClassName="active">Redux</Link>
 						<Link href="/suspense" activeClassName="active">Suspense / lazy</Link>
 						<Link href="/textfields" activeClassName="active">Textfields</Link>
+						<Link href="/p5" activeClassName="active">P5</Link>
 					</nav>
 				</header>
 				<main>
@@ -108,6 +110,7 @@ class App extends Component {
 						<StyledComp path="/styled-components" />
 						<Redux path="/redux" />
 						<TextFields path="/textfields" />
+						<P5 path="/p5" />
 					</Router>
 				</main>
 			</div>
