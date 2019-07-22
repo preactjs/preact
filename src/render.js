@@ -16,9 +16,8 @@ export function render(vnode, parentDom, replaceNode) {
 
 	let oldVNode = replaceNode && replaceNode._children || parentDom._children;
 	let isHydrating = false;
-	if (replaceNode === true) {
+	if (replaceNode === null) {
 		isHydrating = true;
-		replaceNode = undefined;
 	}
 	vnode = createElement(Fragment, null, [vnode]);
 
@@ -50,5 +49,5 @@ export function render(vnode, parentDom, replaceNode) {
  */
 export function hydrate(vnode, parentDom) {
 	parentDom._children = null;
-	render(vnode, parentDom, true);
+	render(vnode, parentDom, null);
 }
