@@ -250,5 +250,8 @@
     "sinon-chai": "^3.0.0",
     "typescript": "3.5.3",
     "webpack": "^4.3.0"
+  },
+  "dependencies": {
+    "csstype": "^2.6.6"
   }
 }
