@@ -15,10 +15,7 @@ export function render(vnode, parentDom, replaceNode) {
 	if (options._root) options._root(vnode, parentDom);
 
 	let oldVNode = replaceNode && replaceNode._children || parentDom._children;
-	let isHydrating = false;
-	if (replaceNode === null) {
-		isHydrating = true;
-	}
+	let isHydrating = replaceNode === null;
 	vnode = createElement(Fragment, null, [vnode]);
 
 	let mounts = [];
