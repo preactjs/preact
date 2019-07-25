@@ -4,14 +4,17 @@ export default function LooseMode() {}
 
 LooseMode.prototype = new Component();
 
-LooseMode.prototype.componentDidMount = function() {
-	let oldVnodeHook = options.vnode;
-	options.vnode = vnode => {
-		vnode.nodeName = vnode.type;
-		vnode.attributes = vnode.props;
-		vnode.children = vnode.props.children;
-		if (oldVnodeHook) oldVnodeHook(vnode);
-	};
+let oldVnodeHook = false;
+LooseMode.prototype.componentDidMount = function () {
+	if (oldVnodeHook === false) {
+		oldVnodeHook = options.vnode;
+		options.vnode = vnode => {
+			vnode.nodeName = vnode.type;
+			vnode.attributes = vnode.props;
+			vnode.children = vnode.props.children;
+			if (oldVnodeHook) oldVnodeHook(vnode);
+		};
+	}
 };
 
 LooseMode.prototype.render = function(props) {

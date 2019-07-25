@@ -1,9 +1,21 @@
 import { assign } from './util';
 import { Component, enqueueRender } from './Component';
 
-export function LegacyComponent(){}
+export function LegacyComponent(p, c){
+	Object.defineProperty(this, 'state', stateDescriptor);
+	Component.call(this, p, c);
+}
 
-LegacyComponent.prototype = new Component;
+LegacyComponent.prototype = new Component();
+
+const stateDescriptor = {
+	get() {
+		return this._nextState || this._state;
+	},
+	set(newState) {
+		this._state = newState;
+	}
+};
 
 /**
  * Update component state and schedule a re-render.
@@ -13,6 +25,7 @@ LegacyComponent.prototype = new Component;
  * @param {() => void} [callback] A function to be called once component state is
  * updated
  */
+// TODO: can we remove this now?
 LegacyComponent.prototype.setState = function(update, callback) {
 	if (!this.prevState) this.prevState = this.state;
 	this.state = this._nextState = assign(
