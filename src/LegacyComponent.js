@@ -3,7 +3,7 @@ import { Component, enqueueRender } from './Component';
 
 export function LegacyComponent(){}
 
-LegacyComponent.prototype = Component;
+LegacyComponent.prototype = new Component;
 
 /**
  * Update component state and schedule a re-render.
