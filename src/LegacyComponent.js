@@ -13,7 +13,7 @@ LegacyComponent.prototype = Component;
  * @param {() => void} [callback] A function to be called once component state is
  * updated
  */
-Component.prototype.setState = function(update, callback) {
+LegacyComponent.prototype.setState = function(update, callback) {
 	if (!this.prevState) this.prevState = this.state;
 	this.state = this._nextState = assign(
 		assign({}, this.state),
