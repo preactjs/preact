@@ -86,6 +86,29 @@ describe('preact-compat', () => {
 				.that.equals('dynamic content');
 		});
 
+		it('should support onTransitionEnd', () => {
+			const proto = document.createElement('div').constructor.prototype;
+			sinon.spy(proto, 'addEventListener');
+			sinon.spy(proto, 'removeEventListener');
+
+			const func = () => { };
+			render(<div onTransitionEnd={func} />, scratch);
+
+			expect(proto.addEventListener).to.have.been.calledOnce
+				.and.to.have.been.calledWithExactly('transitionend', sinon.match.func, false);
+
+			expect(scratch.firstChild._listeners).to.deep.equal({
+				transitionend: func
+			});
+
+			render(<div />, scratch);
+			expect(proto.removeEventListener).to.have.been.calledOnce
+				.and.to.have.been.calledWithExactly('transitionend', sinon.match.func, false);
+
+			proto.addEventListener.restore();
+			proto.removeEventListener.restore();
+		});
+
 		it('should support defaultValue', () => {
 			render(<input defaultValue="foo" />, scratch);
 			expect(scratch.firstElementChild).to.have.property('value', 'foo');
@@ -139,12 +162,12 @@ describe('preact-compat', () => {
 			let $$typeof = 0xeac7;
 			try {
 				// eslint-disable-next-line
-				if (Function.prototype.toString.call(eval('Sym'+'bol.for')).match(/\[native code\]/)) {
+				if (Function.prototype.toString.call(eval('Sym' + 'bol.for')).match(/\[native code\]/)) {
 					// eslint-disable-next-line
-					$$typeof = eval('Sym'+'bol.for("react.element")');
+					$$typeof = eval('Sym' + 'bol.for("react.element")');
 				}
 			}
-			catch (e) {}
+			catch (e) { }
 			expect(vnode).to.have.property('$$typeof', $$typeof);
 			expect(vnode).to.have.property('type', 'div');
 			expect(vnode).to.have.property('props').that.is.an('object');
@@ -156,7 +179,7 @@ describe('preact-compat', () => {
 		});
 
 		it('should normalize onChange', () => {
-			let props = { onChange(){} };
+			let props = { onChange() { } };
 
 			function expectToBeNormalized(vnode, desc) {
 				expect(vnode, desc)

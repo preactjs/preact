@@ -181,6 +181,11 @@ function createElement(...args) {
 			delete props.defaultValue;
 		}
 
+		if (props.onTransitionEnd) {
+			props.ontransitionend = props.onTransitionEnd;
+			delete props.onTransitionEnd;
+		}
+
 		if (Array.isArray(props.value) && props.multiple && type==='select') {
 			toChildArray(props.children).forEach((child) => {
 				if (props.value.indexOf(child.props.value)!=-1) {
