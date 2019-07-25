@@ -43,7 +43,7 @@ describe('props.children', () => {
 		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 
-	it('returns an emtpy array with false as a child', () => {
+	it('returns an empty array with false as a child', () => {
 		render(<Foo>{false}</Foo>, scratch);
 
 		expect(children).to.be.an('array');
