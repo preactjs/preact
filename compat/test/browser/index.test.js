@@ -17,13 +17,19 @@ let text = text => document.createTextNode(text);
 describe('preact-compat', () => {
 
 	/** @type {HTMLDivElement} */
-	let scratch;
+	let scratch, proto;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		proto = document.createElement('div').constructor.prototype;
+		sinon.spy(proto, 'addEventListener');
+		sinon.spy(proto, 'removeEventListener');
 	});
 
+
 	afterEach(() => {
+		proto.addEventListener.restore();
+		proto.removeEventListener.restore();
 		teardown(scratch);
 	});
 
@@ -86,11 +92,23 @@ describe('preact-compat', () => {
 				.that.equals('dynamic content');
 		});
 
-		it('should support onTransitionEnd', () => {
-			const proto = document.createElement('div').constructor.prototype;
-			sinon.spy(proto, 'addEventListener');
-			sinon.spy(proto, 'removeEventListener');
+		it('should support onAnimationEnd', () => {
+			const func = () => { };
+			render(<div onAnimationEnd={func} />, scratch);
 
+			expect(proto.addEventListener).to.have.been.calledOnce
+				.and.to.have.been.calledWithExactly('animationend', sinon.match.func, false);
+
+			expect(scratch.firstChild._listeners).to.deep.equal({
+				animationend: func
+			});
+
+			render(<div />, scratch);
+			expect(proto.removeEventListener).to.have.been.calledOnce
+				.and.to.have.been.calledWithExactly('animationend', sinon.match.func, false);
+		});
+
+		it('should support onTransitionEnd', () => {
 			const func = () => { };
 			render(<div onTransitionEnd={func} />, scratch);
 
@@ -104,9 +122,6 @@ describe('preact-compat', () => {
 			render(<div />, scratch);
 			expect(proto.removeEventListener).to.have.been.calledOnce
 				.and.to.have.been.calledWithExactly('transitionend', sinon.match.func, false);
-
-			proto.addEventListener.restore();
-			proto.removeEventListener.restore();
 		});
 
 		it('should support defaultValue', () => {

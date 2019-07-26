@@ -174,16 +174,18 @@ function createElement(...args) {
 
 	let type = vnode.type, props = vnode.props;
 	if (typeof type!='function') {
+		Object.keys(props).forEach(key => {
+			if (/^on(Ani|Tra)/.test(key)) {
+				props[key.toLowerCase()] = props[key];
+				delete props[key];
+			}
+		});
+
 		if (props.defaultValue) {
 			if (!props.value && props.value!==0) {
 				props.value = props.defaultValue;
 			}
 			delete props.defaultValue;
-		}
-
-		if (props.onTransitionEnd) {
-			props.ontransitionend = props.onTransitionEnd;
-			delete props.onTransitionEnd;
 		}
 
 		if (Array.isArray(props.value) && props.multiple && type==='select') {
