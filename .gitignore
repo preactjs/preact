@@ -8,3 +8,4 @@ package-lock.json
 test/ts/**/*.js
 coverage
 *.sw[op]
+jaga
