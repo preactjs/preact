@@ -428,4 +428,30 @@ describe('Portal', () => {
 		expect(spyParent).to.be.calledOnce;
 		expect(spy).to.be.calledOnce;
 	});
+
+	it('should switch between non portal and portal node', () => {
+		let toggle;
+		const Modal = ({ children, open }) => open
+			? createPortal(<div>{children}</div>, scratch)
+			: <div>Closed</div>;
+
+		const App = () => {
+			const [open, setOpen] = useState(false);
+			toggle = setOpen.bind(this, (x) => !x);
+			return (
+				<div>
+					<button onClick={() => setOpen(!open)}>Show</button>
+					{open ? 'Open' : 'Closed'}
+					<Modal open={open}>Hello</Modal>
+				</div>
+			);
+		};
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><button>Show</button>Closed<div>Closed</div></div>');
+
+		toggle();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Hello</div><div><button>Show</button>Open</div>');
+	});
 });
