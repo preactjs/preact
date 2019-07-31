@@ -44,12 +44,6 @@ describe('render()', () => {
 		logCall(Element.prototype, 'remove');
 	});
 
-	it('should render nothing node given null', () => {
-		render(null, scratch);
-		let c = scratch.childNodes;
-		expect(c).to.have.length(0);
-	});
-
 	it('should render an empty text node given an empty string', () => {
 		render('', scratch);
 		let c = scratch.childNodes;
