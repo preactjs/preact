@@ -1077,7 +1077,7 @@ describe('render()', () => {
 		it('should not remove siblings of replaceNode', () => {
 			const childA = scratch.querySelector('#a');
 			render(<div id="a" />, scratch, childA);
-			expect(scratch.innerHTML).to.equal('<div id="a">b</div><div id="b"></div><div id="c"></div>');
+			expect(scratch.innerHTML).to.equal('<div id="a"></div><div id="b"></div><div id="c"></div>');
 		});
 
 		it('should notice prop changes on replaceNode', () => {
