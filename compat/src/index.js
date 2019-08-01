@@ -235,8 +235,14 @@ function isValidElement(element) {
 function applyEventNormalization({ type, props }) {
 	if (!props || typeof type!='string') return;
 	let newProps = {};
+
 	for (let i in props) {
+		if (/^on(Ani|Tra)/.test(i)) {
+			props[i.toLowerCase()] = props[i];
+			delete props[i];
+		}
 		newProps[i.toLowerCase()] = i;
+
 	}
 	if (newProps.ondoubleclick) {
 		props.ondblclick = props[newProps.ondoubleclick];
