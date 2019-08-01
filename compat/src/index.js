@@ -253,7 +253,7 @@ function applyEventNormalization({ type, props }) {
 		delete props[newProps.onbeforeinput];
 	}
 	// for *textual inputs* (incl textarea), normalize `onChange` -> `onInput`:
-	if (newProps.onchange && (type==='textarea' || (type.toLowerCase()==='input' && !/^fil|che|rad/i.test(props.type)))) {
+	if (newProps.onchange && (type==='textarea' || (type.toLowerCase()==='input' && !/^fil|che|ra/i.test(props.type)))) {
 		let normalized = newProps.oninput || 'oninput';
 		if (!props[normalized]) {
 			props[normalized] = props[newProps.onchange];

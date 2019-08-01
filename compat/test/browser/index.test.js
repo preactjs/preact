@@ -389,6 +389,12 @@ describe('preact-compat', () => {
 		expect(vnode.props).to.not.haveOwnProperty('onchange');
 	});
 
+	it('should not normalize onChange for range', () => {
+		render(<input type="range" onChange={() => null} />, scratch);
+		expect(scratch.firstChild._listeners).to.haveOwnProperty('change');
+		expect(scratch.firstChild._listeners).to.not.haveOwnProperty('input');
+	});
+
 	it('should normalize class+className even on components', () => {
 		function Foo(props) {
 			return <div class={props.class} className={props.className}>foo</div>;
