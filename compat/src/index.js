@@ -174,13 +174,6 @@ function createElement(...args) {
 
 	let type = vnode.type, props = vnode.props;
 	if (typeof type!='function') {
-		Object.keys(props).forEach(key => {
-			if (/^on(Ani|Tra)/.test(key)) {
-				props[key.toLowerCase()] = props[key];
-				delete props[key];
-			}
-		});
-
 		if (props.defaultValue) {
 			if (!props.value && props.value!==0) {
 				props.value = props.defaultValue;
@@ -242,8 +235,14 @@ function isValidElement(element) {
 function applyEventNormalization({ type, props }) {
 	if (!props || typeof type!='string') return;
 	let newProps = {};
+
 	for (let i in props) {
+		if (/^on(Ani|Tra)/.test(i)) {
+			props[i.toLowerCase()] = props[i];
+			delete props[i];
+		}
 		newProps[i.toLowerCase()] = i;
+
 	}
 	if (newProps.ondoubleclick) {
 		props.ondblclick = props[newProps.ondoubleclick];
