@@ -8,21 +8,32 @@ import options from '../options';
  * @param {object} newProps The new props
  * @param {object} oldProps The old props
  * @param {boolean} isSvg Whether or not this node is an SVG node
+ * @param {boolean} hydrate Whether or not we are in hydration mode
  */
-export function diffProps(dom, newProps, oldProps, isSvg) {
-	for (let i in newProps) {
-		if (i!=='children' && i!=='key' && (!oldProps || ((i==='value' || i==='checked') ? dom : oldProps)[i]!==newProps[i])) {
-			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
+export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
+	let i;
+
+	for (i in oldProps) {
+		if (!(i in newProps)) {
+			setProperty(dom, i, null, oldProps[i], isSvg);
 		}
 	}
-	for (let i in oldProps) {
-		if (i!=='children' && i!=='key' && (!newProps || !(i in newProps))) {
-			setProperty(dom, i, null, oldProps[i], isSvg);
+
+	for (i in newProps) {
+		if ((!hydrate || typeof newProps[i]=='function') && i!=='value' && i!=='checked' && oldProps[i]!==newProps[i]) {
+			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
 		}
 	}
 }
 
-let CAMEL_REG = /-?(?=[A-Z])/g;
+function setStyle(style, key, value) {
+	if (key[0] === '-') {
+		style.setProperty(key, value);
+	}
+	else {
+		style[key] = typeof value==='number' && IS_NON_DIMENSIONAL.test(key)===false ? value+'px' : value;
+	}
+}
 
 /**
  * Set a property value on a DOM node
@@ -33,64 +44,76 @@ let CAMEL_REG = /-?(?=[A-Z])/g;
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
 function setProperty(dom, name, value, oldValue, isSvg) {
-	let v;
-	if (name==='class' || name==='className') name = isSvg ? 'class' : 'className';
+	name = isSvg ? (name==='className' ? 'class' : name) : (name==='class' ? 'className' : name);
 
-	if (name==='style') {
-
-		/* Possible golfing activities for setting styles:
-		 *   - we could just drop String style values. They're not supported in other VDOM libs.
-		 *   - assigning to .style sets .style.cssText - TODO: benchmark this, might not be worth the bytes.
-		 *   - assigning also casts to String, and ignores invalid values. This means assigning an Object clears all styles.
-		 */
-		let s = dom.style;
+	if (name==='key' || name === 'children') {}
+	else if (name==='style') {
+		const s = dom.style;
 
 		if (typeof value==='string') {
 			s.cssText = value;
 		}
 		else {
-			if (typeof oldValue==='string') s.cssText = '';
-			else {
-				// remove values not in the new list
-				for (let i in oldValue) {
-					if (value==null || !(i in value)) s.setProperty(i.replace(CAMEL_REG, '-'), '');
+			if (typeof oldValue==='string') {
+				s.cssText = '';
+				oldValue = null;
+			}
+
+			if (oldValue) for (let i in oldValue) {
+				if (!(value && i in value)) {
+					setStyle(s, i, '');
 				}
 			}
-			for (let i in value) {
-				v = value[i];
-				if (oldValue==null || v!==oldValue[i]) {
-					s.setProperty(i.replace(CAMEL_REG, '-'), typeof v==='number' && IS_NON_DIMENSIONAL.test(i)===false ? (v + 'px') : v);
+
+			if (value) for (let i in value) {
+				if (!oldValue || value[i] !== oldValue[i]) {
+					setStyle(s, i, value[i]);
 				}
 			}
 		}
-	}
-	else if (name==='dangerouslySetInnerHTML') {
-		return;
+
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0]==='o' && name[1]==='n') {
 		let useCapture = name !== (name=name.replace(/Capture$/, ''));
 		let nameLower = name.toLowerCase();
-		name = (nameLower in dom ? nameLower : name).substring(2);
+		name = (nameLower in dom ? nameLower : name).slice(2);
 
 		if (value) {
 			if (!oldValue) dom.addEventListener(name, eventProxy, useCapture);
+			(dom._listeners || (dom._listeners = {}))[name] = value;
 		}
 		else {
 			dom.removeEventListener(name, eventProxy, useCapture);
 		}
-		(dom._listeners || (dom._listeners = {}))[name] = value;
 	}
 	else if (name!=='list' && name!=='tagName' && !isSvg && (name in dom)) {
-		dom[name] = value==null ? '' : value;
+		// Setting `select.value` doesn't work in IE11.
+		// Only `<select>` elements have the length property
+		if (dom.length && name=='value') {
+			for (name = dom.length; name--;) {
+				dom.options[name].selected = dom.options[name].value==value;
+			}
+		}
+		else {
+			dom[name] = value==null ? '' : value;
+		}
 	}
-	else if (value==null || value===false) {
-		if (name!==(name = name.replace(/^xlink:?/, ''))) dom.removeAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase());
-		else dom.removeAttribute(name);
-	}
-	else if (typeof value!=='function') {
-		if (name!==(name = name.replace(/^xlink:?/, ''))) dom.setAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase(), value);
-		else dom.setAttribute(name, value);
+	else if (typeof value!=='function' && name!=='dangerouslySetInnerHTML') {
+		if (name!==(name = name.replace(/^xlink:?/, ''))) {
+			if (value==null || value===false) {
+				dom.removeAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase());
+			}
+			else {
+				dom.setAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase(), value);
+			}
+		}
+		else if (value==null || value===false) {
+			dom.removeAttribute(name);
+		}
+		else {
+			dom.setAttribute(name, value);
+		}
 	}
 }
 

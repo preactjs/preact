@@ -1,6 +1,7 @@
-import { createElement as h, Component, options } from '../../src';
+import { createElement as h, options } from '../../src';
 import { assign } from '../../src/util';
 import { clearLog, getLog } from './logCall';
+import { teardown as testUtilTeardown } from 'preact/test-utils';
 
 /** @jsx h */
 
@@ -139,7 +140,18 @@ export function sortCss(cssText) {
 	return cssText.split(';')
 		.filter(Boolean)
 		.map(s => s.replace(/^\s+|\s+$/g, '').replace(/(\s*:\s*)/g, ': '))
-		.sort((a, b) => a[0]==='-' ? -1 : b[0]==='-' ? 1 : a.localeCompare(b))
+		.sort((a, b) => {
+			// CSS Variables are typically positioned at the start
+			if (a[0]==='-') {
+				// If both are a variable we just compare them
+				if (b[0]==='-') return a.localeCompare(b);
+				return -1;
+			}
+			// b is a css var
+			if (b[0]==='-') return 1;
+
+			return a.localeCompare(b);
+		})
 		.join('; ') + ';';
 }
 
@@ -158,10 +170,10 @@ let oldOptions = null;
 export function clearOptions() {
 	oldOptions = assign({}, options);
 	delete options.vnode;
-	delete options.diff;
 	delete options.diffed;
-	delete options.commit;
 	delete options.unmount;
+	delete options._diff;
+	delete options._commit;
 }
 
 /**
@@ -178,16 +190,7 @@ export function teardown(scratch) {
 		oldOptions = null;
 	}
 
-	if (Component.__test__drainQueue) {
-		// Flush any pending updates leftover by test
-		Component.__test__drainQueue();
-		delete Component.__test__drainQueue;
-	}
-
-	if (typeof Component.__test__previousDebounce !== 'undefined') {
-		options.debounceRendering = Component.__test__previousDebounce;
-		delete Component.__test__previousDebounce;
-	}
+	testUtilTeardown();
 
 	if (getLog().length > 0) {
 		clearLog();
@@ -220,3 +223,11 @@ export function sortAttributes(html) {
 		return '<' + pre + list.join('') + after;
 	});
 }
+
+
+export const spyAll = obj => Object.keys(obj).forEach( key => sinon.spy(obj,key) );
+export const resetAllSpies = obj => Object.keys(obj).forEach( key => {
+	if (obj[key].args) {
+		obj[key].resetHistory();
+	}
+});

@@ -32,24 +32,27 @@ describe('createElement(jsx)', () => {
 		expect(<Test />).to.have.property('type', Test);
 	});
 
-	it('should set VNode._self property to prevent json injection', () => {
+	it('should set VNode.constructor property to prevent json injection', () => {
 		const vnode = <span />;
-		expect(vnode._self).to.equal(vnode);
+		expect(vnode.constructor).to.equal(undefined);
 	});
 
 	it('should set VNode#props property', () => {
 		const props = {};
-		expect(h('div', props)).to.have.property('props', props);
-	});
-
-	it('should set VNode#text property', () => {
-		expect(<div />).to.have.property('text', null);
+		expect(h('div', props).props).to.deep.equal(props);
 	});
 
 	it('should set VNode#key property', () => {
 		expect(<div />).to.have.property('key').that.is.undefined;
 		expect(<div a="a" />).to.have.property('key').that.is.undefined;
 		expect(<div key="1" />).to.have.property('key', '1');
+	});
+
+	it('should not set VNode#props.key property', () => {
+		expect(<div />).to.not.have.nested.property('props.key');
+		expect(<div key="1" />).to.not.have.nested.property('props.key');
+		expect(<div key={0} />).to.not.have.nested.property('props.key');
+		expect(<div key={''} />).to.not.have.nested.property('props.key');
 	});
 
 	it('should set VNode#ref property', () => {
@@ -59,8 +62,13 @@ describe('createElement(jsx)', () => {
 		expect(<div ref={emptyFunction} />).to.have.property('ref', emptyFunction);
 	});
 
+	it('should not set VNode#props.ref property', () => {
+		expect(<div />).to.not.have.nested.property('props.ref');
+		expect(<div ref={() => {}} />).to.not.have.nested.property('props.ref');
+	});
+
 	it('should have ordered VNode properties', () => {
-		expect(Object.keys(<div />).filter(key => !/^_/.test(key))).to.deep.equal(['type', 'props', 'text', 'key', 'ref']);
+		expect(Object.keys(<div />).filter(key => !/^_/.test(key))).to.deep.equal(['type', 'props', 'key', 'ref', 'constructor']);
 	});
 
 	it('should preserve raw props', () => {

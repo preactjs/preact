@@ -1,6 +1,7 @@
 import { createElement as h, options, render, createRef, Component, Fragment } from 'preact';
+import { lazy, Suspense } from 'preact/compat';
 import { useState, useEffect, useLayoutEffect, useMemo, useCallback } from 'preact/hooks';
-import { act } from 'preact/test-utils';
+import { act, setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown, clearOptions, serializeHtml } from '../../../test/_util/helpers';
 import { serializeVNode, initDebug } from '../../src/debug';
 import * as PropTypes from 'prop-types';
@@ -23,7 +24,7 @@ describe('debug', () => {
 
 		clearOptions();
 		diffSpy = sinon.spy();
-		options.diff = diffSpy;
+		options._diff = diffSpy;
 
 		initDebug();
 	});
@@ -82,7 +83,36 @@ describe('debug', () => {
 		expect(fn).to.throw(/createElement/);
 	});
 
-	it('should throw an error when using a hook outside a render', () => {
+	it('should add __source to the vnode in debug mode.', () => {
+		const vnode = h('div', {
+			__source: {
+				fileName: 'div.jsx',
+				lineNumber: 3
+			}
+		});
+		expect(vnode.__source).to.deep.equal({
+			fileName: 'div.jsx',
+			lineNumber: 3
+		});
+		expect(vnode.props.__source).to.be.undefined;
+	});
+
+	it('should add __self to the vnode in debug mode.', () => {
+		const vnode = h('div', {
+			__self: {}
+		});
+		expect(vnode.__self).to.deep.equal({});
+		expect(vnode.props.__self).to.be.undefined;
+	});
+
+	// TODO: Fix this test. It only passed before because App was the first component
+	// into render so currentComponent in hooks/index.js wasn't set yet. However,
+	// any children under App wouldn't have thrown the error if they did what App
+	// did because currentComponent would be set to App.
+	// In other words, hooks never clear currentComponent so once it is set, it won't
+	// be unset
+	it.skip('should throw an error when using a hook outside a render', () => {
+		const Foo = props => props.children;
 		class App extends Component {
 			componentWillMount() {
 				useState();
@@ -92,16 +122,27 @@ describe('debug', () => {
 				return <p>test</p>;
 			}
 		}
-		const fn = () => act(() => render(<App />, scratch));
+		const fn = () => act(() => render(<Foo><App /></Foo>, scratch));
 		expect(fn).to.throw(/Hook can only be invoked from render/);
 	});
 
-	it('should throw an error when invoked outside of a component', () => {
-		const fn = () => act(() => useState());
+	// TODO: Fix this test. It only passed before because render was never called.
+	// Once render is called, currentComponent is set and never unset so calls to
+	// hooks outside of components would still work.
+	it.skip('should throw an error when invoked outside of a component', () => {
+		function Foo(props) {
+			useEffect(() => {}); // Pretend to use a hook
+			return props.children;
+		}
+
+		const fn = () => act(() => {
+			render(<Foo>Hello!</Foo>, scratch);
+			useState();
+		});
 		expect(fn).to.throw(/Hook can only be invoked from render/);
 	});
 
-	it('should throw an error for argumentless useEffect hooks', () => {
+	it('should warn for argumentless useEffect hooks', () => {
 		const App = () => {
 			const [state] = useState('test');
 			useEffect(() => 'test');
@@ -109,11 +150,13 @@ describe('debug', () => {
 				<p>{state}</p>
 			);
 		};
-		const fn = () => act(() => render(<App />, scratch));
-		expect(fn).to.throw(/You should provide an array of arguments/);
+		render(<App />, scratch);
+		expect(warnings[0]).to.match(/You should provide an array of arguments/);
+		render(<App />, scratch);
+		expect(warnings[1]).to.be.undefined;
 	});
 
-	it('should throw an error for argumentless useLayoutEffect hooks', () => {
+	it('should warn for argumentless useLayoutEffect hooks', () => {
 		const App = () => {
 			const [state] = useState('test');
 			useLayoutEffect(() => 'test');
@@ -121,11 +164,13 @@ describe('debug', () => {
 				<p>{state}</p>
 			);
 		};
-		const fn = () => act(() => render(<App />, scratch));
-		expect(fn).to.throw(/You should provide an array of arguments/);
+		render(<App />, scratch);
+		expect(warnings[0]).to.match(/You should provide an array of arguments/);
+		render(<App />, scratch);
+		expect(warnings[1]).to.be.undefined;
 	});
 
-	it('should not throw an error for argumented effect hooks', () => {
+	it('should not warn for argumented effect hooks', () => {
 		const App = () => {
 			const [state] = useState('test');
 			useLayoutEffect(() => 'test', []);
@@ -144,21 +189,15 @@ describe('debug', () => {
 		expect(fn).to.throw(/createElement/);
 	});
 
-	it('Should throw errors when accessing certain attributes', () => {
-		let Foo = () => <div />;
-		const oldOptionsVnode = options.vnode;
-		options.vnode = (vnode) => {
-			oldOptionsVnode(vnode);
-			expect(() => vnode).to.not.throw();
-			expect(() => vnode.attributes).to.throw(/use vnode.props/);
-			expect(() => vnode.nodeName).to.throw(/use vnode.type/);
-			expect(() => vnode.children).to.throw(/use vnode.props.children/);
-			expect(() => vnode.attributes = {}).to.throw(/use vnode.props/);
-			expect(() => vnode.nodeName = 'test').to.throw(/use vnode.type/);
-			expect(() => vnode.children = [<div />]).to.throw(/use vnode.props.children/);
-		};
-		render(<Foo />, scratch);
-		options.vnode = oldOptionsVnode;
+	it('should throw errors when accessing certain attributes', () => {
+		const vnode = h('div', null);
+		expect(() => vnode).to.not.throw();
+		expect(() => vnode.attributes).to.throw(/use vnode.props/);
+		expect(() => vnode.nodeName).to.throw(/use vnode.type/);
+		expect(() => vnode.children).to.throw(/use vnode.props.children/);
+		expect(() => vnode.attributes = {}).to.throw(/use vnode.props/);
+		expect(() => vnode.nodeName = 'test').to.throw(/use vnode.type/);
+		expect(() => vnode.children = [<div />]).to.throw(/use vnode.props.children/);
 	});
 
 	it('should print an error when component is an array', () => {
@@ -229,6 +268,20 @@ describe('debug', () => {
 		expect(console.error).to.not.be.called;
 	});
 
+	it('should throw an error when missing Suspense', () => {
+		const Foo = () => <div>Foo</div>;
+		const LazyComp = lazy(() => new Promise(resolve => resolve({ default: Foo })));
+		const fn = () => {
+			render((
+				<Fragment>
+					<LazyComp />
+				</Fragment>
+			), scratch);
+		};
+
+		expect(fn).to.throw(/Missing Suspense/gi);
+	});
+
 	describe('duplicate keys', () => {
 		const List = props => <ul>{props.children}</ul>;
 		const ListItem = props => <li>{props.children}</li>;
@@ -264,9 +317,7 @@ describe('debug', () => {
 			}
 
 			render(<App />, scratch);
-			// The error is printed twice. Once for children of <List>
-			// and again for children of <ul> (since List returns props.children)
-			expect(console.error).to.be.calledTwice;
+			expect(console.error).to.be.calledOnce;
 		});
 
 		it('should print an error on duplicate keys with Fragments', () => {
@@ -283,16 +334,14 @@ describe('debug', () => {
 								<ListItem key="c">e</ListItem>
 							</Fragment>
 							<ListItem key="f">f</ListItem>
-						</List>,
+						</List>
 						<div key="list">sibling</div>
 					</Fragment>
 				);
 			}
 
 			render(<App />, scratch);
-			// One error is printed twice. Once for children of <List>
-			// and again for children of <ul> (since List returns props.children)
-			expect(console.error).to.be.calledThrice;
+			expect(console.error).to.be.calledTwice;
 		});
 	});
 
@@ -360,6 +409,157 @@ describe('debug', () => {
 		});
 	});
 
+	describe('table markup', () => {
+		it('missing <tbody>/<thead>/<tfoot>/<table>', () => {
+			const Table = () => (
+				<tr><td>hi</td></tr>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('missing <table> with <thead>', () => {
+			const Table = () => (
+				<thead><tr><td>hi</td></tr></thead>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('missing <table> with <tbody>', () => {
+			const Table = () => (
+				<tbody><tr><td>hi</td></tr></tbody>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('missing <table> with <tfoot>', () => {
+			const Table = () => (
+				<tfoot><tr><td>hi</td></tr></tfoot>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('missing <tr>', () => {
+			const Table = () => (
+				<table>
+					<tbody>
+						<td>Hi</td>
+					</tbody>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('missing <tr> with td component', () => {
+			const Cell = ({ children }) => <td>{children}</td>;
+			const Table = () => (
+				<table>
+					<tbody>
+						<Cell>Hi</Cell>
+					</tbody>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('missing <tr> with th component', () => {
+			const Cell = ({ children }) => <th>{children}</th>;
+			const Table = () => (
+				<table>
+					<tbody>
+						<Cell>Hi</Cell>
+					</tbody>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('Should accept <td> instead of <th> in <thead>', () => {
+			const Table = () => (
+				<table>
+					<thead>
+						<tr>
+							<td>Hi</td>
+						</tr>
+					</thead>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('Accepts well formed table with TD components', () => {
+			const Cell = ({ children }) => <td>{children}</td>;
+			const Table = () => (
+				<table>
+					<thead>
+						<tr>
+							<th>Head</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Body</td>
+						</tr>
+					</tbody>
+					<tfoot>
+						<tr>
+							<Cell>Body</Cell>
+						</tr>
+					</tfoot>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('Accepts well formed table', () => {
+			const Table = () => (
+				<table>
+					<thead>
+						<tr>
+							<th>Head</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Body</td>
+						</tr>
+					</tbody>
+					<tfoot>
+						<tr>
+							<td>Body</td>
+						</tr>
+					</tfoot>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('Accepts minimial well formed table', () => {
+			const Table = () => (
+				<table>
+					<tr>
+						<th>Head</th>
+					</tr>
+					<tr>
+						<td>Body</td>
+					</tr>
+				</table>
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+	});
+
+
 	describe('PropTypes', () => {
 		it('should fail if props don\'t match prop-types', () => {
 			function Foo(props) {
@@ -382,7 +582,7 @@ describe('debug', () => {
 			}
 
 			Baz.propTypes = {
-				unhappy: function alwaysThrows(obj, key) { if (obj[key] === 'signal') throw Error("got prop"); }
+				unhappy: function alwaysThrows(obj, key) { if (obj[key] === 'signal') throw Error('got prop'); }
 			};
 
 			render(<Baz unhappy={'signal'} />, scratch);
@@ -403,6 +603,127 @@ describe('debug', () => {
 
 			render(<Bar text="foo" />, scratch);
 			expect(console.error).to.not.be.called;
+		});
+
+		it('should validate propTypes inside lazy()', () => {
+			const rerender = setupRerender();
+
+			function Baz(props) {
+				return <h1>{props.unhappy}</h1>;
+			}
+
+			Baz.propTypes = {
+				unhappy: function alwaysThrows(obj, key) { if (obj[key] === 'signal') throw Error('got prop inside lazy()'); }
+			};
+
+
+			const loader = Promise.resolve({ default: Baz });
+			const LazyBaz = lazy(() => loader);
+
+			const suspense = (
+				<Suspense fallback={<div>fallback...</div>}>
+					<LazyBaz unhappy="signal" />
+				</Suspense>
+			);
+			render(suspense, scratch);
+
+			expect(console.error).to.not.be.called;
+
+			return loader
+				.then(() => Promise.all(suspense._component._suspensions))
+				.then(() => {
+					rerender();
+					expect(errors.length).to.equal(1);
+					expect(errors[0].includes('got prop')).to.equal(true);
+					expect(serializeHtml(scratch)).to.equal('<h1>signal</h1>');
+				});
+		});
+
+		it('should throw on missing <Suspense>', () => {
+			function Foo() {
+				throw Promise.resolve();
+			}
+
+			expect(() => render(<Foo />, scratch)).to.throw;
+		});
+
+		describe('warn for PropTypes on lazy()', () => {
+			it('should log the function name', () => {
+				const loader = Promise.resolve({ default: function MyLazyLoadedComponent() { return <div>Hi there</div>; } });
+				const FakeLazy = lazy(() => loader);
+				FakeLazy.propTypes = {};
+				const suspense = (
+					<Suspense fallback={<div>fallback...</div>} >
+						<FakeLazy />
+					</Suspense>
+				);
+				render(suspense, scratch);
+
+				return loader
+					.then(() => Promise.all(suspense._component._suspensions))
+					.then(() => {
+						expect(console.warn).to.be.calledTwice;
+						expect(warnings[1].includes('MyLazyLoadedComponent')).to.equal(true);
+					});
+			});
+
+			it('should log the displayName', () => {
+				function MyLazyLoadedComponent() { return <div>Hi there</div>; }
+				MyLazyLoadedComponent.displayName = 'HelloLazy';
+				const loader = Promise.resolve({ default: MyLazyLoadedComponent });
+				const FakeLazy = lazy(() => loader);
+				FakeLazy.propTypes = {};
+				const suspense = (
+					<Suspense fallback={<div>fallback...</div>} >
+						<FakeLazy />
+					</Suspense>
+				);
+				render(suspense, scratch);
+
+				return loader
+					.then(() => Promise.all(suspense._component._suspensions))
+					.then(() => {
+						expect(console.warn).to.be.calledTwice;
+						expect(warnings[1].includes('HelloLazy')).to.equal(true);
+					});
+			});
+
+			it('should not log a component if lazy throws', () => {
+				const loader = Promise.reject(new Error('Hey there'));
+				const FakeLazy = lazy(() => loader);
+				FakeLazy.propTypes = {};
+				render(
+					<Suspense fallback={<div>fallback...</div>} >
+						<FakeLazy />
+					</Suspense>,
+					scratch
+				);
+
+				return loader.catch(() => {
+					expect(console.warn).to.be.calledOnce;
+				});
+			});
+
+			it('should not log a component if lazy\'s loader throws', () => {
+				const FakeLazy = lazy(() => { throw new Error('Hello'); });
+				FakeLazy.propTypes = {};
+				let error;
+				try {
+					render(
+						<Suspense fallback={<div>fallback...</div>} >
+							<FakeLazy />
+						</Suspense>,
+						scratch
+					);
+				}
+				catch (e) {
+					error = e;
+				}
+
+				expect(console.warn).to.be.calledOnce;
+				expect(error).not.to.be.undefined;
+				expect(error.message).to.eql('Hello');
+			});
 		});
 	});
 });

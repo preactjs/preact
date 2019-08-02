@@ -12,8 +12,7 @@ declare namespace preact {
 
 	interface VNode<P = {}> {
 		type: ComponentType<P> | string | null;
-		props: P & { children: ComponentChildren } | null;
-		text: string | number | null;
+		props: P & { children: ComponentChildren } | string | number | null;
 		key: Key;
 		ref: Ref<any> | null;
 		/**
@@ -95,7 +94,7 @@ declare namespace preact {
 		componentWillUpdate?(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): void;
 		getSnapshotBeforeUpdate?(oldProps: Readonly<P>, oldState: Readonly<S>): any;
 		componentDidUpdate?(previousProps: Readonly<P>, previousState: Readonly<S>, snapshot: any): void;
-		componentDidCatch?(error: any): void;
+		componentDidCatch?(error: any, errorInfo: any): void;
 	}
 
 	abstract class Component<P, S> {
@@ -117,14 +116,13 @@ declare namespace preact {
 		state: Readonly<S>;
 		props: RenderableProps<P>;
 		context: any;
-		base?: HTMLElement;
+		base?: Element | Text;
 
 		// From https://github.com/DefinitelyTyped/DefinitelyTyped/blob/e836acc75a78cf0655b5dfdbe81d69fdd4d8a252/types/react/index.d.ts#L402
 		// // We MUST keep setState() as a unified signature because it allows proper checking of the method return type.
 		// // See: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/18365#issuecomment-351013257
-		// // Also, the ` | S` allows intellisense to not be dumbisense
 		setState<K extends keyof S>(
-			state: ((prevState: Readonly<S>, props: Readonly<P>) => (Pick<S, K> | S | null)) | (Pick<S, K> | S | null),
+			state: ((prevState: Readonly<S>, props: Readonly<P>) => (Pick<S, K> | Partial<S> | null)) | (Pick<S, K> | Partial<S> | null),
 			callback?: () => void
 		): void;
 
@@ -151,7 +149,16 @@ declare namespace preact {
 		export import JSX = JSXInternal;
 	}
 
-	type h = typeof createElement;
+	function h(
+		type: string,
+		props: JSXInternal.HTMLAttributes & JSXInternal.SVGAttributes & Record<string, any> | null,
+		...children: ComponentChildren[]
+	): VNode<any>;
+	function h<P>(
+		type: ComponentType<P>,
+		props: Attributes & P | null,
+		...children: ComponentChildren[]
+	): VNode<any>;
 	namespace h {
 		export import JSX = JSXInternal;
 	}
@@ -160,9 +167,13 @@ declare namespace preact {
 	// Preact render
 	// -----------------------------------
 
-	function render(vnode: ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment): void
-	function hydrate(vnode: ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment): void
-	function cloneElement(vnode: JSX.Element, props: any, ...children: ComponentChildren[]): JSX.Element;
+	function render(
+		vnode: ComponentChild,
+		parent: Element | Document | ShadowRoot | DocumentFragment,
+		replaceNode?: Element | Text
+	): void;
+	function hydrate(vnode: ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment): void;
+	function cloneElement(vnode: JSX.Element, props?: any, ...children: ComponentChildren[]): JSX.Element;
 
 	//
 	// Preact Built-in Components
@@ -179,23 +190,15 @@ declare namespace preact {
 	 * Global options for preact
 	 */
 	interface Options {
-		/** Attach a hook that is invoked before render, mainly to check the arguments. */
-		root?(vnode: ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment): void;
 		/** Attach a hook that is invoked whenever a VNode is created. */
-		vnode(vnode: VNode): void;
-		/** Attach a hook that is invoked after a tree was mounted or was updated. */
-		commit?(vnode: VNode): void;
-		/** Attach a hook that is invoked immediately before a component is unmounted. */
+		vnode?(vnode: VNode): void;
+		/** Attach a hook that is invoked immediately before a vnode is unmounted. */
 		unmount?(vnode: VNode): void;
-		/** Attach a hook that is invoked before a vnode is diffed. */
-		diff?(vnode: VNode): void;
-		/** Attach a hook that is invoked before a vnode has rendered. */
-		render?(vnode: VNode): void;
-		/** Attach a hook that is invoked before a hook's state is queried. */
-		hook?(component: Component): void;
 		/** Attach a hook that is invoked after a vnode has rendered. */
 		diffed?(vnode: VNode): void;
 		event?(e: Event): void;
+		requestAnimationFrame?: typeof requestAnimationFrame;
+		debounceRendering?(cb: () => void): void;
 		useDebugValue?(value: string | number): void;
 	}
 

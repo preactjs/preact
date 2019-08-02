@@ -40,12 +40,12 @@ describe('useContext', () => {
 		const Foo = createContext(42);
 		const spy = sinon.spy();
 
- 		function App() {
+		function App() {
 			spy(useContext(Foo));
 			return <div />;
 		}
 
- 		render(<App />, scratch);
+		render(<App />, scratch);
 		expect(spy).to.be.calledWith(42);
 	});
 
@@ -62,7 +62,7 @@ describe('useContext', () => {
 			}
 		}
 
- 		function App(props) {
+		function App(props) {
 			return (
 				<Ctx.Provider value={props.value}>
 					<NoUpdate>
@@ -72,18 +72,18 @@ describe('useContext', () => {
 			);
 		}
 
- 		function Comp() {
+		function Comp() {
 			const value = useContext(Ctx);
 			spy(value);
 			return <h1>{value}</h1>;
 		}
 
- 		render(<App value={0} />, scratch);
+		render(<App value={0} />, scratch);
 		expect(spy).to.be.calledOnce;
 		expect(spy).to.be.calledWith(0);
 		render(<App value={1} />, scratch);
 
- 		// Wait for enqueued hook update
+		// Wait for enqueued hook update
 		setTimeout(() => {
 			// Should not be called a third time
 			expect(spy).to.be.calledTwice;
@@ -96,7 +96,7 @@ describe('useContext', () => {
 		const spy = sinon.spy();
 		const Ctx = createContext(0);
 
- 		function App(props) {
+		function App(props) {
 			return (
 				<Ctx.Provider value={props.value}>
 					<Comp />
@@ -104,21 +104,21 @@ describe('useContext', () => {
 			);
 		}
 
- 		function Comp() {
+		function Comp() {
 			const value = useContext(Ctx);
 			spy(value);
 			return <h1>{value}</h1>;
 		}
 
- 		render(<App value={0} />, scratch);
+		render(<App value={0} />, scratch);
 		expect(spy).to.be.calledOnce;
 		expect(spy).to.be.calledWith(0);
 		render(<App value={1} />, scratch);
 
- 		expect(spy).to.be.calledTwice;
+		expect(spy).to.be.calledTwice;
 		expect(spy).to.be.calledWith(1);
 
- 		// Wait for enqueued hook update
+		// Wait for enqueued hook update
 		setTimeout(() => {
 			// Should not be called a third time
 			expect(spy).to.be.calledTwice;
@@ -126,26 +126,22 @@ describe('useContext', () => {
 		}, 0);
 	});
 
- 	it('should allow multiple context hooks at the same time', () => {
+	it('should allow multiple context hooks at the same time', () => {
 		const Foo = createContext(0);
 		const Bar = createContext(10);
 		const spy = sinon.spy();
 		const unmountspy = sinon.spy();
 
- 		function Comp() {
+		function Comp() {
 			const foo = useContext(Foo);
 			const bar = useContext(Bar);
 			spy(foo, bar);
-			useEffect(() => {
-				() => {
-					unmountspy();
-				}
-			})
+			useEffect(() =>	() => unmountspy());
 
- 			return <div />;
+			return <div />;
 		}
 
- 		render((
+		render((
 			<Foo.Provider value={0}>
 				<Bar.Provider value={10}>
 					<Comp />
@@ -153,10 +149,10 @@ describe('useContext', () => {
 			</Foo.Provider>
 		), scratch);
 
- 		expect(spy).to.be.calledOnce;
+		expect(spy).to.be.calledOnce;
 		expect(spy).to.be.calledWith(0, 10);
 
- 		render((
+		render((
 			<Foo.Provider value={11}>
 				<Bar.Provider value={42}>
 					<Comp />

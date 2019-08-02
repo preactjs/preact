@@ -25,7 +25,7 @@ describe("VNode", () => {
 	it("is returned by h", () => {
 		const actual = <div className="wow"/>;
 		expect(actual).to.include.all.keys(
-			"type", "props", "text", "key"
+			"type", "props", "key"
 		);
 	});
 
@@ -41,7 +41,7 @@ describe("VNode", () => {
 		expect(constructor.name).to.eq("SimpleFunctionalComponent");
 	});
 
-	it("has a nodeName equal to the constructor of a componet", () => {
+	it("has a nodeName equal to the constructor of a component", () => {
 		const sfc = <SimpleComponent />;
 		expect(sfc.type).to.be.instanceOf(Function);
 		const constructor = sfc.type as ComponentConstructor<any>;

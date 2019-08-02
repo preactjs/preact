@@ -131,19 +131,15 @@ describe('hydrate()', () => {
 		]);
 	});
 
-	it('should update attributes on existing DOM', () => {
-		scratch.innerHTML = '<div><span doesnt-exist="test" same-value="foo" different-value="a">Test</span></div>';
+	it('should not update attributes on existing DOM', () => {
+		scratch.innerHTML = '<div><span before-hydrate="test" same-value="foo" different-value="a">Test</span></div>';
 		let vnode = <div><span same-value="foo" different-value="b" new-value="c">Test</span></div>;
 
 		clearLog();
 		hydrate(vnode, scratch);
 
-		expect(serializeHtml(scratch)).to.equal(sortAttributes('<div><span same-value="foo" different-value="b" new-value="c">Test</span></div>'));
-		expect(getLog()).to.deep.equal([
-			'<span>Test.setAttribute(different-value, b)',
-			'<span>Test.setAttribute(new-value, c)',
-			'<span>Test.removeAttribute(doesnt-exist)'
-		]);
+		expect(serializeHtml(scratch)).to.equal(sortAttributes('<div><span before-hydrate="test" different-value="a" same-value="foo">Test</span></div>'));
+		expect(getLog()).to.deep.equal([]);
 	});
 
 	it('should update class attribute via className prop', () => {
@@ -256,5 +252,16 @@ describe('hydrate()', () => {
 		expect(scratch.innerHTML).to.equal(finalHtml);
 		// TODO: Fill in with proper log once this test is passing
 		expect(getLog()).to.deep.equal([]);
+	});
+
+	it('should attach event handlers', () => {
+		let spy = sinon.spy();
+		scratch.innerHTML = '<span>Test</span>';
+		let vnode = <span onClick={spy}>Test</span>;
+
+		hydrate(vnode, scratch);
+
+		scratch.firstChild.click();
+		expect(spy).to.be.calledOnce;
 	});
 });

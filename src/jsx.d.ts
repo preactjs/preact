@@ -601,7 +601,7 @@ export namespace JSXInternal {
 		srcSet?: string;
 		start?: number;
 		step?: number | string;
-		style?: any;
+		style?: string | {[key: string]: string | number};
 		summary?: string;
 		tabIndex?: number;
 		target?: string;
@@ -622,6 +622,13 @@ export namespace JSXInternal {
 		resource?: string;
 		typeof?: string;
 		vocab?: string;
+
+		// Microdata Attributes
+		itemProp?: string;
+		itemScope?: boolean;
+		itemType?: string;
+		itemID?: string;
+		itemRef?: string;
 	}
 
 	interface IntrinsicElements {

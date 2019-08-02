@@ -50,7 +50,7 @@ export class Renderer {
 	}
 
 	/**
-	 * Recursively mount a vnode tree. Note that the devtools expectes the tree to
+	 * Recursively mount a vnode tree. Note that the devtools expects the tree to
 	 * be mounted from the bottom up, otherwise the order will be messed up.
 	 * Therefore we mount children prior to mounting the vnode itself.
 	 * @param {import('../internal').VNode} vnode
@@ -171,7 +171,7 @@ export class Renderer {
 		if (this.inst2vnode.has(inst)) this.update(vnode);
 		else this.mount(vnode);
 
-		// The devtools checks via the existance of this property if the devtools
+		// The devtools checks via the existence of this property if the devtools
 		// profiler should be enabled or not. If it is missing from the first root
 		// node the "Profiler" tab won't show up.
 		/** @type {import('../internal').VNode} */
@@ -184,11 +184,11 @@ export class Renderer {
 		}
 		else {
 			// "rootCommitted" always needs the actual root node for the profiler
-			// to be able to collect timings. The `_ancestorComponent` property will
+			// to be able to collect timings. The `_parent` property will
 			// point to a vnode for a root node.
-			root = vnode._component;
-			while (root._ancestorComponent!=null) {
-				root = root._ancestorComponent;
+			root = vnode;
+			while (root._parent!=null) {
+				root = root._parent;
 			}
 		}
 

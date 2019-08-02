@@ -9,15 +9,16 @@ let currentComponent;
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
-let oldBeforeRender = options.render;
-options.render = vnode => {
+let oldBeforeRender = options._render;
+options._render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
 
 	currentComponent = vnode._component;
 	currentIndex = 0;
 
-	if (!currentComponent.__hooks) return;
-	currentComponent.__hooks._pendingEffects = handleEffects(currentComponent.__hooks._pendingEffects);
+	if (currentComponent.__hooks) {
+		currentComponent.__hooks._pendingEffects = handleEffects(currentComponent.__hooks._pendingEffects);
+	}
 };
 
 let oldAfterDiff = options.diffed;
@@ -28,11 +29,9 @@ options.diffed = vnode => {
 	if (!c) return;
 
 	const hooks = c.__hooks;
-	if (!hooks) return;
-
-	// TODO: Consider moving to a global queue. May need to move
-	// this to the `commit` option
-	hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
+	if (hooks) {
+		hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
+	}
 };
 
 
@@ -44,9 +43,9 @@ options.unmount = vnode => {
 	if (!c) return;
 
 	const hooks = c.__hooks;
-	if (!hooks) return;
-
-	hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
+	if (hooks) {
+		hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
+	}
 };
 
 /**
@@ -55,7 +54,7 @@ options.unmount = vnode => {
  * @returns {import('./internal').HookState}
  */
 function getHookState(index) {
-	if (options.hook) options.hook(currentComponent);
+	if (options._hook) options._hook(currentComponent);
 	// Largely inspired by:
 	// * https://github.com/michael-klein/funcy.js/blob/f6be73468e6ec46b0ff5aa3cc4c9baf72a29025a/src/hooks/core_hooks.mjs
 	// * https://github.com/michael-klein/funcy.js/blob/650beaa58c43c33a74820a3c98b3c7079cf2e333/src/renderer.mjs
@@ -77,11 +76,11 @@ export function useReducer(reducer, initialState, init) {
 
 	/** @type {import('./internal').ReducerHookState} */
 	const hookState = getHookState(currentIndex++);
-	if (hookState._component == null) {
+	if (!hookState._component) {
 		hookState._component = currentComponent;
 
 		hookState._value = [
-			init == null ? invokeOrReturn(null, initialState) : init(initialState),
+			!init ? invokeOrReturn(null, initialState) : init(initialState),
 
 			action => {
 				const nextValue = reducer(hookState._value[0], action);
@@ -129,19 +128,16 @@ export function useLayoutEffect(callback, args) {
 }
 
 export function useRef(initialValue) {
-	const state = getHookState(currentIndex++);
-	if (state._value == null) {
-		state._value = { current: initialValue };
-	}
-
-	return state._value;
+	return useMemo(() => ({ current: initialValue }), []);
 }
 
 export function useImperativeHandle(ref, createHandle, args) {
 	const state = getHookState(currentIndex++);
 	if (argsChanged(state._args, args)) {
 		state._args = args;
-		ref.current = createHandle();
+		if (ref) {
+			ref.current = createHandle();
+		}
 	}
 }
 
@@ -175,8 +171,9 @@ export function useCallback(callback, args) {
  */
 export function useContext(context) {
 	const provider = currentComponent.context[context._id];
-	if (provider == null) return context._defaultValue;
+	if (!provider) return context._defaultValue;
 	const state = getHookState(currentIndex++);
+	// This is probably not safe to convert to "!"
 	if (state._value == null) {
 		state._value = true;
 		provider.sub(currentComponent);
@@ -208,16 +205,28 @@ let afterPaint = () => {};
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
-	afterPaintEffects.forEach(component => {
+	afterPaintEffects.some(component => {
 		component._afterPaintQueued = false;
-		if (!component._parentDom) return;
-		component.__hooks._pendingEffects = handleEffects(component.__hooks._pendingEffects);
+		if (component._parentDom) {
+			component.__hooks._pendingEffects = handleEffects(component.__hooks._pendingEffects);
+		}
 	});
 	afterPaintEffects = [];
 }
 
-function scheduleFlushAfterPaint() {
-	setTimeout(flushAfterPaintEffects, 0);
+const RAF_TIMEOUT = 100;
+
+/**
+ * requestAnimationFrame with a timeout in case it doesn't fire (for example if the browser tab is not visible)
+ */
+function safeRaf(callback) {
+	const done = () => {
+		clearTimeout(timeout);
+		cancelAnimationFrame(raf);
+		setTimeout(callback);
+	};
+	const timeout = setTimeout(done, RAF_TIMEOUT);
+	const raf = requestAnimationFrame(done);
 }
 
 /* istanbul ignore else */
@@ -225,12 +234,7 @@ if (typeof window !== 'undefined') {
 	afterPaint = (component) => {
 		if (!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) {
 			/* istanbul ignore next */
-			if (options.requestAnimationFrame) {
-				options.requestAnimationFrame(flushAfterPaintEffects);
-			}
-			else {
-				requestAnimationFrame(scheduleFlushAfterPaint);
-			}
+			(options.requestAnimationFrame || safeRaf)(flushAfterPaintEffects);
 		}
 	};
 }
@@ -255,7 +259,7 @@ function invokeEffect(hook) {
 }
 
 function argsChanged(oldArgs, newArgs) {
-	return oldArgs == null || newArgs.some((arg, index) => arg !== oldArgs[index]);
+	return !oldArgs || newArgs.some((arg, index) => arg !== oldArgs[index]);
 }
 
 function invokeOrReturn(arg, f) {

@@ -82,13 +82,13 @@ export function getData(vnode) {
 		ref: vnode.ref || null,
 		key: vnode.key || null,
 		updater,
-		text: vnode.text,
+		text: vnode.type===null ? vnode.props : null,
 		state: c!=null && c instanceof Component ? c.state : null,
 		props: vnode.props,
 		// The devtools inline text children if they are the only child
-		children: vnode.text==null
-			? children!=null && children.length==1 && children[0].text!=null
-				? children[0].text
+		children: vnode.type!==null
+			? children!=null && children.length==1 && children[0].type===null
+				? children[0].props
 				: children
 			: null,
 		publicInstance: getInstance(vnode),
@@ -108,15 +108,11 @@ export function getData(vnode) {
  * @returns {import('../internal').VNode[]}
  */
 export function getChildren(vnode) {
-	let c = vnode._component;
-
-	if (c==null) {
+	if (vnode._component==null) {
 		return vnode._children!=null ? vnode._children.filter(Boolean) : [];
 	}
 
-	return !Array.isArray(c._prevVNode) && c._prevVNode!=null
-		? [c._prevVNode]
-		: null;
+	return vnode._children != null ? vnode._children.filter(Boolean) : null;
 }
 
 /**
@@ -126,7 +122,7 @@ export function getChildren(vnode) {
  */
 export function isRoot(vnode) {
 	// Timings of root vnodes will never be set
-	return vnode.type===Fragment && vnode.endTime==-1;
+	return vnode.type===Fragment && vnode._parent === null;
 }
 
 /**
