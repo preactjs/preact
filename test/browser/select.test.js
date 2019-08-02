@@ -3,7 +3,7 @@ import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx h */
 
-describe('Select', () => {
+describe.only('Select', () => {
 	let scratch;
 
 	beforeEach(() => {
@@ -14,7 +14,7 @@ describe('Select', () => {
 		teardown(scratch);
 	});
 
-	it('should set <select> value', () => {
+	fit('should set <select> value', () => {
 		function App() {
 			return (
 				<select value="B">
@@ -26,6 +26,7 @@ describe('Select', () => {
 		}
 
 		render(<App />, scratch);
+		console.log("---select----", scratch.firstChild.innerHTML);
 		expect(scratch.firstChild.value).to.equal('B');
 	});
 

@@ -9,16 +9,16 @@ var coverage = String(process.env.COVERAGE) === 'true',
 	path = require('path');
 
 var sauceLabsLaunchers = {
-	sl_chrome: {
-		base: 'SauceLabs',
-		browserName: 'chrome',
-		platform: 'Windows 10'
-	},
-	sl_firefox: {
-		base: 'SauceLabs',
-		browserName: 'firefox',
-		platform: 'Windows 10'
-	},
+	// sl_chrome: {
+	// 	base: 'SauceLabs',
+	// 	browserName: 'chrome',
+	// 	platform: 'Windows 10'
+	// },
+	// sl_firefox: {
+	// 	base: 'SauceLabs',
+	// 	browserName: 'firefox',
+	// 	platform: 'Windows 10'
+	// },
 	// TODO: Safari always fails and disconnects before any tests are executed.
 	// This seems to be an issue with Saucelabs and they're actively investigating
 	// that (see: https://mobile.twitter.com/bromann/status/1136323458328084482).
@@ -29,11 +29,11 @@ var sauceLabsLaunchers = {
 	// 	version: '11',
 	// 	platform: 'OS X 10.13'
 	// },
-	sl_edge: {
-		base: 'SauceLabs',
-		browserName: 'MicrosoftEdge',
-		platform: 'Windows 10'
-	},
+	// sl_edge: {
+	// 	base: 'SauceLabs',
+	// 	browserName: 'MicrosoftEdge',
+	// 	platform: 'Windows 10'
+	// },
 	sl_ie_11: {
 		base: 'SauceLabs',
 		browserName: 'internet explorer',
