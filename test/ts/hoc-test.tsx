@@ -41,7 +41,7 @@ const HighlightedSimpleComponent = highlighted<SimpleComponentProps>(SimpleCompo
 describe("hoc", () => {
 	it("wraps the given component", () => {
 		const highlight = new HighlightedSimpleComponent({
-			initialName: "inital name",
+			initialName: "initial name",
 			isHighlighted: true
 		});
 
