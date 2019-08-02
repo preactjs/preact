@@ -1,7 +1,7 @@
 {
   "name": "preact",
   "amdName": "preact",
-  "version": "10.0.0-beta.2",
+  "version": "10.0.0-rc.0",
   "private": false,
   "description": "Fast 3kb React-compatible Virtual DOM library.",
   "main": "dist/preact.js",
@@ -19,6 +19,7 @@
     "build:compat": "microbundle build --raw --cwd compat --globals 'preact/hooks=preactHooks'",
     "dev": "microbundle watch --raw --format cjs",
     "dev:hooks": "microbundle watch --raw --format cjs --cwd hooks",
+    "dev:compat": "microbundle watch --raw --format cjs --cwd compat --globals 'preact/hooks=preactHooks'",
     "test": "npm-run-all lint build --parallel test:mocha test:karma test:ts",
     "test:flow": "flow check",
     "test:ts": "tsc -p test/ts/ && mocha --require babel-register test/ts/**/*-test.js",
@@ -62,6 +63,12 @@
       "react/no-find-dom-node": 0
     }
   },
+  "eslintIgnore": [
+    "test/fixtures",
+    "test/ts/",
+    "*.ts",
+    "dist"
+  ],
   "files": [
     "src",
     "dist",

@@ -318,11 +318,17 @@ describe('render()', () => {
 		let div = scratch.childNodes[0];
 		expect(div.attributes.length).to.equal(2);
 
-		expect(div.attributes[0].name).equal('bar');
-		expect(div.attributes[0].value).equal('abc');
+		// Normalize attribute order because it's different in various browsers
+		let normalized = {};
+		for (let i = 0; i < div.attributes.length; i++) {
+			let attr = div.attributes[i];
+			normalized[attr.name] = attr.value;
+		}
 
-		expect(div.attributes[1].name).equal('foo');
-		expect(div.attributes[1].value).equal('[object Object]');
+		expect(normalized).to.deep.equal({
+			bar: 'abc',
+			foo: '[object Object]'
+		});
 	});
 
 	it('should apply class as String', () => {
@@ -336,6 +342,38 @@ describe('render()', () => {
 	});
 
 	describe('style attribute', () => {
+		it('should apply style as String', () => {
+			render(<div style="top: 5px; position: relative;" />, scratch);
+			expect(scratch.childNodes[0].style.cssText)
+				.to.equal('top: 5px; position: relative;');
+		});
+
+		it('should not call CSSStyleDeclaration.setProperty for style strings', () => {
+			render(<div style="top: 5px; position: relative;" />, scratch);
+			sinon.stub(scratch.firstChild.style, 'setProperty');
+			render(<div style="top: 10px; position: absolute;" />, scratch);
+			expect(scratch.firstChild.style.setProperty).to.not.be.called;
+		});
+
+		it('should properly switch from string styles to object styles and back', () => {
+			render(<div style="display: inline;">test</div>, scratch);
+
+			let style = scratch.firstChild.style;
+			expect(style.cssText).to.equal('display: inline;');
+
+			render(<div style={{ color: 'red' }} />, scratch);
+			expect(style.cssText).to.equal('color: red;');
+
+			render(<div style="color: blue" />, scratch);
+			expect(style.cssText).to.equal('color: blue;');
+
+			render(<div style={{ color: 'yellow' }} />, scratch);
+			expect(style.cssText).to.equal('color: yellow;');
+
+			render(<div style="display: block" />, scratch);
+			expect(style.cssText).to.equal('display: block;');
+		});
+
 		it('should serialize style objects', () => {
 			const styleObj = {
 				color: 'rgb(255, 255, 255)',
@@ -350,8 +388,7 @@ describe('render()', () => {
 
 			render(<div style={styleObj}>test</div>, scratch);
 
-			let root = scratch.firstChild;
-			let { style } = root;
+			let style = scratch.firstChild.style;
 			expect(style.color).to.equal('rgb(255, 255, 255)');
 			expect(style.background).to.contain('rgb(255, 100, 0)');
 			expect(style.backgroundPosition).to.equal('10px 10px');
@@ -396,9 +433,9 @@ describe('render()', () => {
 
 		it('should remove old styles', () => {
 			render(<div style={{ color: 'red' }} />, scratch);
-			render(<div style={{ background: 'blue' }} />, scratch);
-			expect(scratch.firstChild.style).to.have.property('color').that.equals('');
-			expect(scratch.firstChild.style).to.have.property('background').that.equals('blue');
+			render(<div style={{ backgroundColor: 'blue' }} />, scratch);
+			expect(scratch.firstChild.style.color).to.equal('');
+			expect(scratch.firstChild.style.backgroundColor).to.equal('blue');
 		});
 
 		// Skip test if the currently running browser doesn't support CSS Custom Properties
@@ -459,6 +496,17 @@ describe('render()', () => {
 
 			expect(proto.addEventListener).to.have.been.calledOnce
 				.and.to.have.been.calledWithExactly('click', sinon.match.func, false);
+		});
+
+		it('should only register truthy values as handlers', () => {
+			function fooHandler() {}
+			const falsyHandler = false;
+
+			render(<div onClick={falsyHandler} onOtherClick={fooHandler} />, scratch);
+
+			expect(scratch.childNodes[0]._listeners).to.deep.equal({
+				OtherClick: fooHandler
+			});
 		});
 
 		it('should support native event names', () => {
@@ -626,8 +674,8 @@ describe('render()', () => {
 			// eslint-disable-next-line react/no-danger
 			render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
 
-			expect(scratch.firstChild).to.have.property('innerHTML', '');
-			expect(scratch.innerHTML).to.equal(`<div></div>`);
+			expect(scratch.firstChild).to.have.property('innerHTML', html);
+			expect(scratch.innerHTML).to.equal(`<div>${html}</div>`);
 		});
 
 		it('should avoid reapplying innerHTML when __html property of dangerouslySetInnerHTML attr remains unchanged', () => {
@@ -799,6 +847,20 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.contain(`<span>${todoText}</span>`);
 	});
 
+	it('should keep value of uncontrolled inputs', () => {
+		render(<input value={undefined} />, scratch);
+		scratch.firstChild.value = 'foo';
+		render(<input value={undefined} />, scratch);
+		expect(scratch.firstChild.value).to.equal('foo');
+	});
+
+	it('should keep value of uncontrolled checkboxes', () => {
+		render(<input type="checkbox" checked={undefined} />, scratch);
+		scratch.firstChild.checked = true;
+		render(<input type="checkbox" checked={undefined} />, scratch);
+		expect(scratch.firstChild.checked).to.equal(true);
+	});
+
 	it('should always diff `checked` and `value` properties against the DOM', () => {
 		// See https://github.com/preactjs/preact/issues/1324
 
@@ -946,12 +1008,36 @@ describe('render()', () => {
 		expect(scratch.textContent).to.equal('01');
 	});
 
+	it('should call unmount when working with replaceNode', () => {
+		const mountSpy = sinon.spy();
+		const unmountSpy = sinon.spy();
+		class MyComponent extends Component {
+			componentDidMount() {
+				mountSpy();
+			}
+			componentWillUnmount() {
+				unmountSpy();
+			}
+			render() {
+				return <div>My Component</div>;
+			}
+		}
+
+		const container = document.createElement('div');
+		scratch.appendChild(container);
+		render(<MyComponent />, scratch, container);
+		expect(mountSpy).to.be.calledOnce;
+
+		render(<div>Not my component</div>, document.body, container);
+		expect(unmountSpy).to.be.calledOnce;
+	});
+
 	it('should not cause infinite loop with referentially equal props', () => {
 		let i = 0;
-		let prevDiff = options.diff;
-		options.diff = () => {
+		let prevDiff = options._diff;
+		options._diff = () => {
 			if (++i > 10) {
-				options.diff = prevDiff;
+				options._diff = prevDiff;
 				throw new Error('Infinite loop');
 			}
 		};
@@ -966,7 +1052,7 @@ describe('render()', () => {
 
 		render(<App>10</App>, scratch);
 		expect(scratch.textContent).to.equal('10');
-		options.diff = prevDiff;
+		options._diff = prevDiff;
 	});
 
 	describe('replaceNode parameter', () => {
@@ -994,6 +1080,12 @@ describe('render()', () => {
 			expect(scratch.innerHTML).to.equal('<div id="a"></div><div id="b"></div><div id="c"></div>');
 		});
 
+		it('should notice prop changes on replaceNode', () => {
+			const childA = scratch.querySelector('#a');
+			render(<div id="a" className="b" />, scratch, childA);
+			expect(scratch.innerHTML).to.equal('<div id="a" class="b"></div><div id="b"></div><div id="c"></div>');
+		});
+
 		it('should unmount existing components', () => {
 			const newScratch = setupScratch();
 			const unmount = sinon.spy();
@@ -1017,6 +1109,8 @@ describe('render()', () => {
 			render(<div id="a">new</div>, newScratch, newScratch.querySelector('#a'));
 			expect(newScratch.innerHTML).to.equal('<div id="a">new</div>');
 			expect(unmount).to.be.calledOnce;
+
+			newScratch.parentNode.removeChild(newScratch);
 		});
 
 		it('should render multiple render roots in one parentDom', () => {

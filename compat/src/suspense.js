@@ -1,36 +1,46 @@
-import { Component, createElement, unmount } from 'preact';
+import { Component, createElement, _unmount as unmount, options } from 'preact';
 import { removeNode } from '../../src/util';
 
-export function catchRender(error, component) {
-	// thrown Promises are meant to suspend...
-	if (error.then) {
-		for (; component; component = component._ancestorComponent) {
-			if (component._childDidSuspend) {
+const oldCatchError = options._catchError;
+options._catchError = function (error, newVNode, oldVNode) {
+	if (error.then && oldVNode) {
+
+		/** @type {import('./internal').Component} */
+		let component;
+		let vnode = newVNode;
+
+		for (; vnode = vnode._parent;) {
+			if ((component = vnode._component) && component._childDidSuspend) {
+				if (oldVNode) {
+					newVNode._dom = oldVNode._dom;
+					newVNode._children = oldVNode._children;
+				}
+
 				component._childDidSuspend(error);
-				return true;
+				return; // Don't call oldCatchError if we found a Suspense
 			}
 		}
 	}
 
-	return false;
-}
+	oldCatchError(error, newVNode, oldVNode);
+};
 
-function removeDom(children) {
+function detachDom(children) {
 	for (let i = 0; i < children.length; i++) {
 		let child = children[i];
 		if (child != null) {
-			if (child._children) {
-				removeDom(child._children);
-			}
-			if (child._dom) {
+			if (typeof child.type !== 'function' && child._dom) {
 				removeNode(child._dom);
+			}
+			else if (child._children) {
+				detachDom(child._children);
 			}
 		}
 	}
 }
 
 // having custom inheritance instead of a class here saves a lot of bytes
-export function Suspense(props) {
+export function Suspense() {
 	// we do not call super here to golf some bytes...
 	this._suspensions = [];
 }
@@ -44,70 +54,36 @@ Suspense.prototype = new Component();
  * @param {Promise} promise The thrown promise
  */
 Suspense.prototype._childDidSuspend = function(promise) {
-	// saves 5B
-	const _this = this;
 
-	_this._suspensions.push(promise);
-	let len = _this._suspensions.length;
+	/** @type {import('./internal').SuspenseComponent} */
+	const c = this;
+	c._suspensions.push(promise);
 
-	const suspensionsCompleted = () => {
-		// make sure we did not add any more suspensions
-		if (len === _this._suspensions.length) {
-			// clear old suspensions
-			_this._suspensions = [];
+	const onSuspensionComplete = () => {
+		// From https://twitter.com/Rich_Harris/status/1125850391155965952
+		c._suspensions[c._suspensions.indexOf(promise)] = c._suspensions[c._suspensions.length - 1];
+		c._suspensions.pop();
 
-			// remove fallback
-			unmount(_this.props.fallback);
+		if (c._suspensions.length == 0) {
+			unmount(c.props.fallback);
+			c._vnode._dom = null;
 
-			// make preact think we had mounted the _parkedChildren previously...
-			_this._vnode._children = _this._parkedChildren;
-			// reset the timeout & clear the now no longer parked vnode
-			_this._timeout = _this._parkedChildren = null;
-
-			_this.forceUpdate();
+			c._vnode._children = c.state._parkedChildren;
+			c.setState({ _parkedChildren: null });
 		}
 	};
 
-	const timeoutOrSuspensionsCompleted = () => {
-		if (_this._timeoutCompleted && _this._suspensions.length && !_this._parkedChildren) {
-			// park old vnode & remove dom
-			removeDom(_this._parkedChildren = _this._vnode._children);
-			_this._vnode._children = [];
-
-			// render and mount fallback
-			_this.forceUpdate();
-		}
-	};
-
-	if (!_this._timeout) {
-		_this._timeoutCompleted = false;
-
-		_this._timeout = (
-			_this.props.maxDuration
-				? new Promise((res) => {
-					setTimeout(res, _this.props.maxDuration);
-				})
-				// even tough there is not maxDuration configured we will defer the suspension
-				// as we want the rendering/diffing to finish as it might yield other suspensions
-				: Promise.resolve()
-		)
-			.then(() => {
-				_this._timeoutCompleted = true;
-			});
+	if (c.state._parkedChildren == null) {
+		c.setState({ _parkedChildren: c._vnode._children });
+		detachDom(c._vnode._children);
+		c._vnode._children = [];
 	}
 
-	// __test__suspensions_timeout_race is assigned here to let tests await _this...
-	_this.__test__suspensions_timeout_race = Promise.race([
-		_this._timeout,
-		// Suspense ignores errors thrown in Promises as _this should be handled by user land code
-		Promise.all(_this._suspensions).then(suspensionsCompleted, suspensionsCompleted)
-	])
-		.then(timeoutOrSuspensionsCompleted);
+	promise.then(onSuspensionComplete, onSuspensionComplete);
 };
 
 Suspense.prototype.render = function(props, state) {
-	// When _parkedChildren is set, we are in suspension state
-	return this._parkedChildren ? props.fallback : props.children;
+	return state._parkedChildren ? props.fallback : props.children;
 };
 
 export function lazy(loader) {

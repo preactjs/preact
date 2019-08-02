@@ -11,6 +11,18 @@ export const span = contents => `<span>${contents}</span>`;
 export const div = contents => `<div>${contents}</div>`;
 
 /**
+ * A helper to generate innerHTML validation strings containing p
+ * @param {string | number} contents The contents of the p, as a string
+ */
+export const p = contents => `<p>${contents}</p>`;
+
+/**
+ * A helper to generate innerHTML validation strings containing sections
+ * @param {string | number} contents The contents of the section, as a string
+ */
+export const section = contents => `<section>${contents}</section>`;
+
+/**
  * A helper to generate innerHTML validation strings containing uls
  * @param {string | number} contents The contents of the ul, as a string
  */

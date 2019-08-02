@@ -1,5 +1,20 @@
 import * as preact from "./index";
 
+export interface Options extends preact.Options {
+	/** Attach a hook that is invoked before render, mainly to check the arguments. */
+	_root?(vnode: preact.ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment): void;
+	/** Attach a hook that is invoked before a vnode is diffed. */
+	_diff?(vnode: VNode): void;
+	/** Attach a hook that is invoked after a tree was mounted or was updated. */
+	_commit?(vnode: VNode): void;
+	/** Attach a hook that is invoked before a vnode has rendered. */
+	_render?(vnode: VNode): void;
+	/** Attach a hook that is invoked before a hook's state is queried. */
+	_hook?(component: Component): void;
+	/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
+	_catchError(error: any, vnode: VNode, oldVNode: VNode | undefined): void;
+}
+
 export interface FunctionalComponent<P = {}> extends preact.FunctionComponent<P> {
 	// Define getDerivedStateFromProps as undefined on FunctionalComponent
 	// to get rid of some errors in `diff()`
@@ -25,7 +40,9 @@ export interface PreactElement extends HTMLElement {
 export interface VNode<P = {}> extends preact.VNode<P> {
 	// Redefine type here using our internal ComponentFactory type
 	type: string | ComponentFactory<P> | null;
-	_children: Array<VNode> | null;
+	_children: Array<VNode<any>> | null;
+	_parent: VNode | null;
+	_depth: number | null;
 	/**
 	 * The [first (for Fragments)] DOM child of a VNode
 	 */
@@ -49,13 +66,11 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	_nextState?: S | null;
 	/** Only used in the devtools to later dirty check if state has changed */
 	_prevState?: S | null;
-	_depth?: number;
 	/**
 	 * Pointer to the parent dom node. This is only needed for top-level Fragment
 	 * components or array returns.
 	 */
 	_parentDom?: PreactElement | null;
-	_ancestorComponent?: Component<any, any>;
 	_processingException?: Component<any, any> | null;
 	_pendingError?: Component<any, any> | null;
 }

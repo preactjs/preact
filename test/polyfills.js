@@ -28,17 +28,23 @@ chai.use((chai, util) => {
 
 	Assertion.addMethod('equalNode', function (expectedNode, message) {
 		const obj = this._obj;
+		message = message || 'equalNode';
 
 		if (expectedNode == null) {
-			new Assertion(obj).to.equal(expectedNode);
+			this.assert(
+				obj == null,
+				`${message}: expected node to "== null" but got #{act} instead.`,
+				`${message}: expected node to not "!= null".`,
+				expectedNode,
+				obj
+			);
 		}
 		else {
-			new Assertion(obj).to.be.instanceof(Node);
-			// new Assertion(obj).to.have.property('tagName', expectedNode.tagName);
+			new Assertion(obj).to.be.instanceof(Node, message);
 			this.assert(
 				obj.tagName === expectedNode.tagName,
 				`${message}: expected node to have tagName #{exp} but got #{act} instead.`,
-				`${message}: expected node to not have tagName #{act} instead.`,
+				`${message}: expected node to not have tagName #{act}.`,
 				expectedNode.tagName,
 				obj.tagName
 			);

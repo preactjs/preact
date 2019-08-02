@@ -1,8 +1,9 @@
 import { EMPTY_OBJ, EMPTY_ARR } from './constants';
-import { commitRoot } from './diff/index';
-import { diffChildren } from './diff/children';
+import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
+
+const IS_HYDRATE = EMPTY_OBJ;
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -13,25 +14,28 @@ import options from './options';
  * existing DOM tree rooted at `replaceNode`
  */
 export function render(vnode, parentDom, replaceNode) {
-	if (options.root) options.root(vnode, parentDom);
-	let oldVNode = parentDom._children;
+	if (options._root) options._root(vnode, parentDom);
+
+	let isHydrating = replaceNode === IS_HYDRATE;
+	let oldVNode = isHydrating ? null : replaceNode && replaceNode._children || parentDom._children;
 	vnode = createElement(Fragment, null, [vnode]);
 
 	let mounts = [];
-	diffChildren(
+	diff(
 		parentDom,
-		replaceNode ? vnode : (parentDom._children = vnode),
-		oldVNode,
+		isHydrating ? parentDom._children = vnode : (replaceNode || parentDom)._children = vnode,
+		oldVNode || EMPTY_OBJ,
 		EMPTY_OBJ,
 		parentDom.ownerSVGElement !== undefined,
-		replaceNode
+		replaceNode && !isHydrating
 			? [replaceNode]
 			: oldVNode
 				? null
 				: EMPTY_ARR.slice.call(parentDom.childNodes),
 		mounts,
-		vnode,
-		replaceNode || EMPTY_OBJ
+		false,
+		replaceNode || EMPTY_OBJ,
+		isHydrating,
 	);
 	commitRoot(mounts, vnode);
 }
@@ -43,6 +47,5 @@ export function render(vnode, parentDom, replaceNode) {
  * update
  */
 export function hydrate(vnode, parentDom) {
-	parentDom._children = null;
-	render(vnode, parentDom);
+	render(vnode, parentDom, IS_HYDRATE);
 }

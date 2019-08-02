@@ -95,7 +95,7 @@ function checkEventReferences(events) {
 		if (i > 0 && event.type!=='unmount' && Array.isArray(event.data.children)) {
 			event.data.children.forEach(child => {
 				if (!checkPreceding(child, seen) && event.type!=='rootCommitted') {
-					throw new Error(`Event at index ${i} has a child that could not be found in a preceeding event for component "${getDisplayName(child)}"`);
+					throw new Error(`Event at index ${i} has a child that could not be found in a preceding event for component "${getDisplayName(child)}"`);
 				}
 			});
 		}
@@ -424,12 +424,12 @@ describe('devtools', () => {
 	});
 
 	it('should not initialize hook if __REACT_DEVTOOLS_GLOBAL_HOOK__ is not set', () => {
-		delete options.diff;
+		delete options._diff;
 		delete options.diffed;
 		delete /** @type {*} */ (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
 
 		initDevTools();
-		expect(options.diff).to.equal(undefined);
+		expect(options._diff).to.equal(undefined);
 		expect(options.diffed).to.equal(undefined);
 	});
 
@@ -445,18 +445,18 @@ describe('devtools', () => {
 		let unmountSpy = sinon.spy();
 
 		options.vnode = vnodeSpy;
-		options.diff = diffSpy;
+		options._diff = diffSpy;
 		options.diffed = diffedSpy;
-		options.commit = commitSpy;
 		options.unmount = unmountSpy;
+		options._commit = commitSpy;
 
 		initDevTools();
 
 		render(<div />, scratch);
 
 		expect(vnodeSpy, 'vnode').to.have.been.called;
-		expect(diffSpy, 'diff').to.have.been.calledOnce;
-		expect(diffedSpy, 'diffed').to.have.been.calledOnce;
+		expect(diffSpy, 'diff').to.have.been.calledTwice;
+		expect(diffedSpy, 'diffed').to.have.been.calledTwice;
 		expect(commitSpy, 'commit').to.have.been.calledOnce;
 
 		render(null, scratch);
@@ -592,6 +592,7 @@ describe('devtools', () => {
 			checkEventReferences(prev.concat(hook.log));
 
 			expect(serialize(hook.log)).to.deep.equal([
+				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -609,6 +610,7 @@ describe('devtools', () => {
 			expect(serialize(hook.log)).to.deep.equal([
 				{ type: 'unmount', component: '#text: Hello World' },
 				{ type: 'mount', component: 'span' },
+				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -722,6 +724,7 @@ describe('devtools', () => {
 			checkEventReferences(prev.concat(hook.log));
 
 			expect(serialize(hook.log)).to.deep.equal([
+				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -736,6 +739,7 @@ describe('devtools', () => {
 				{ type: 'unmount', component: 'span' },
 				{ type: 'unmount', component: '#text: Hello World' },
 				{ type: 'update', component: 'div' },
+				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});

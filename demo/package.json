@@ -20,11 +20,12 @@
     "node-sass": "^4.10.0",
     "sass-loader": "7.1.0",
     "style-loader": "0.23.1",
-    "webpack": "4.29.6",
-    "webpack-cli": "^3.3.0",
-    "webpack-dev-server": "3.2.1"
+    "webpack": "4.33.0",
+    "webpack-cli": "^3.3.4",
+    "webpack-dev-server": "^3.7.1"
   },
   "dependencies": {
+    "@material-ui/core": "4.2.0",
     "d3-scale": "^1.0.7",
     "d3-selection": "^1.2.0",
     "htm": "2.1.1",
@@ -33,6 +34,8 @@
     "mobx-state-tree": "^3.12.2",
     "preact-render-to-string": "^5.0.2",
     "preact-router": "^3.0.0",
+    "react-redux": "^7.1.0",
+    "redux": "^4.0.1",
     "styled-components": "^4.2.0"
   }
 }

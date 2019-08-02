@@ -9,8 +9,8 @@ let currentComponent;
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
-let oldBeforeRender = options.render;
-options.render = vnode => {
+let oldBeforeRender = options._render;
+options._render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
 
 	currentComponent = vnode._component;
@@ -54,7 +54,7 @@ options.unmount = vnode => {
  * @returns {import('./internal').HookState}
  */
 function getHookState(index) {
-	if (options.hook) options.hook(currentComponent);
+	if (options._hook) options._hook(currentComponent);
 	// Largely inspired by:
 	// * https://github.com/michael-klein/funcy.js/blob/f6be73468e6ec46b0ff5aa3cc4c9baf72a29025a/src/hooks/core_hooks.mjs
 	// * https://github.com/michael-klein/funcy.js/blob/650beaa58c43c33a74820a3c98b3c7079cf2e333/src/renderer.mjs
@@ -214,8 +214,19 @@ function flushAfterPaintEffects() {
 	afterPaintEffects = [];
 }
 
-function scheduleFlushAfterPaint() {
-	setTimeout(flushAfterPaintEffects);
+const RAF_TIMEOUT = 100;
+
+/**
+ * requestAnimationFrame with a timeout in case it doesn't fire (for example if the browser tab is not visible)
+ */
+function safeRaf(callback) {
+	const done = () => {
+		clearTimeout(timeout);
+		cancelAnimationFrame(raf);
+		setTimeout(callback);
+	};
+	const timeout = setTimeout(done, RAF_TIMEOUT);
+	const raf = requestAnimationFrame(done);
 }
 
 /* istanbul ignore else */
@@ -223,12 +234,7 @@ if (typeof window !== 'undefined') {
 	afterPaint = (component) => {
 		if (!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) {
 			/* istanbul ignore next */
-			if (options.requestAnimationFrame) {
-				options.requestAnimationFrame(flushAfterPaintEffects);
-			}
-			else {
-				requestAnimationFrame(scheduleFlushAfterPaint);
-			}
+			(options.requestAnimationFrame || safeRaf)(flushAfterPaintEffects);
 		}
 	};
 }

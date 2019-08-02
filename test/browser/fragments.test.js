@@ -1,7 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component, Fragment } from '../../src/index';
 import { setupScratch, teardown } from '../_util/helpers';
-import { span, div, ul, ol, li } from '../_util/dom';
+import { span, div, ul, ol, li, section } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 
 /** @jsx h */
@@ -54,6 +54,8 @@ describe('Fragment', () => {
 		scratch = setupScratch();
 		rerender = setupRerender();
 		ops = [];
+
+		clearLog();
 	});
 
 	afterEach(() => {
@@ -1293,7 +1295,7 @@ describe('Fragment', () => {
 		expectDomLogToBe([
 			'<ol>012345.insertBefore(<li>4, <li>0)',
 			'<ol>401235.insertBefore(<li>5, <li>0)',
-			// TODO: see issue #193 - Hmmm why does this extra append happen?
+			// TODO: Hmmm why does this extra append happen?
 			'<ol>453012.appendChild(<li>3)'
 		]);
 
@@ -1675,11 +1677,10 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
-			'<div>.appendChild(<div>3)',
+			'<div>1.insertBefore(<div>3, #text)',
 			'<div>.appendChild(#text)',
-			'<div>3.appendChild(<div>4)',
-			'<div>12.insertBefore(<div>34, <div>1)',
-			'<div>1.remove()',
+			'<div>31.insertBefore(<div>4, #text)',
+			'#text.remove()',
 			'<div>2.remove()'
 		], 'rendering from true to false');
 
@@ -1688,11 +1689,11 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.equal(htmlForTrue);
 		expectDomLogToBe([
+			'<div>34.insertBefore(#text, <div>3)',
+			'<div>4.remove()',
+			'<div>3.remove()',
 			'<div>.appendChild(#text)',
-			'<div>34.insertBefore(<div>1, <div>34)',
-			'<div>.appendChild(#text)',
-			'<div>134.insertBefore(<div>2, <div>34)',
-			'<div>34.remove()'
+			'<div>1.appendChild(<div>2)'
 		], 'rendering from false to true');
 	});
 
@@ -1898,8 +1899,684 @@ describe('Fragment', () => {
 		render(<App />, scratch);
 		expect(scratch.textContent).to.equal('');
 
+		clearLog();
 		update();
 		rerender();
+
 		expect(scratch.textContent).to.equal('ABC');
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>.appendChild(<div>A)',
+			'<div>.appendChild(#text)',
+			'<div>A.appendChild(<div>B)',
+			'<div>.appendChild(#text)',
+			'<div>AB.appendChild(<div>C)'
+		]);
+	});
+
+	it('should replace node in-between children', () => {
+		let update;
+		class SetState extends Component {
+			constructor(props) {
+				super(props);
+				update = () => this.setState({ active: true });
+			}
+
+			render() {
+				return this.state.active
+					? <section>B2</section>
+					: <div>B1</div>;
+			}
+		}
+
+		render(
+			<div>
+				<div>A</div>
+				<SetState />
+				<div>C</div>
+			</div>,
+			scratch,
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>B1</div><div>C</div></div>`
+		);
+
+		clearLog();
+		update();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><section>B2</section><div>C</div></div>`
+		);
+		expectDomLogToBe([
+			'<section>.appendChild(#text)',
+			'<div>AB1C.insertBefore(<section>B2, <div>B1)',
+			'<div>B1.remove()'
+		]);
+	});
+
+	it('should replace Fragment in-between children', () => {
+		let update;
+		class SetState extends Component {
+			constructor(props) {
+				super(props);
+				update = () => this.setState({ active: true });
+			}
+
+			render() {
+				return this.state.active
+					? (
+						<Fragment>
+							<section>B3</section>
+							<section>B4</section>
+						</Fragment>
+					)
+					: (
+						<Fragment>
+							<div>B1</div>
+							<div>B2</div>
+						</Fragment>
+					);
+			}
+		}
+
+		render(
+			<div>
+				<div>A</div>
+				<SetState />
+				<div>C</div>
+			</div>,
+			scratch,
+		);
+
+		expect(scratch.innerHTML).to.eql(div([
+			div('A'),
+			div('B1'),
+			div('B2'),
+			div('C')
+		].join('')));
+
+		clearLog();
+		update();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			div([
+				div('A'),
+				section('B3'),
+				section('B4'),
+				div('C')
+			].join(''))
+		);
+		expectDomLogToBe([
+			'<section>.appendChild(#text)',
+			'<div>AB1B2C.insertBefore(<section>B3, <div>B1)',
+			'<section>.appendChild(#text)',
+			'<div>AB3B1B2C.insertBefore(<section>B4, <div>B1)',
+			'<div>B2.remove()',
+			'<div>B1.remove()'
+		]);
+	});
+
+	it('should insert in-between children', () => {
+		let update;
+		class SetState extends Component {
+			constructor(props) {
+				super(props);
+				update = () => this.setState({ active: true });
+			}
+
+			render() {
+				return this.state.active ? <div>B</div> : null;
+			}
+		}
+
+		render(
+			<div>
+				<div>A</div>
+				<SetState />
+				<div>C</div>
+			</div>,
+			scratch,
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>C</div></div>`
+		);
+
+		clearLog();
+		update();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>B</div><div>C</div></div>`
+		);
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>AC.insertBefore(<div>B, <div>C)'
+		]);
+	});
+
+	it('should insert in-between Fragments', () => {
+		let update;
+		class SetState extends Component {
+			constructor(props) {
+				super(props);
+				update = () => this.setState({ active: true });
+			}
+
+			render() {
+				return this.state.active ? [<div>B1</div>, <div>B2</div>] : null;
+			}
+		}
+
+		render(
+			<div>
+				<div>A</div>
+				<SetState />
+				<div>C</div>
+			</div>,
+			scratch,
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>C</div></div>`
+		);
+
+		clearLog();
+		update();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>B1</div><div>B2</div><div>C</div></div>`
+		);
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>AC.insertBefore(<div>B1, <div>C)',
+			'<div>.appendChild(#text)',
+			'<div>AB1C.insertBefore(<div>B2, <div>C)'
+		]);
+	});
+
+	it('should insert in-between null children', () => {
+		let update;
+		class SetState extends Component {
+			constructor(props) {
+				super(props);
+				update = () => this.setState({ active: true });
+			}
+
+			render() {
+				return this.state.active ? <div>B</div> : null;
+			}
+		}
+
+		render(
+			<div>
+				<div>A</div>
+				{null}
+				<SetState />
+				{null}
+				<div>C</div>
+			</div>,
+			scratch,
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>C</div></div>`
+		);
+
+		clearLog();
+		update();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>B</div><div>C</div></div>`
+		);
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>AC.insertBefore(<div>B, <div>C)'
+		]);
+	});
+
+	it('should insert Fragment in-between null children', () => {
+		let update;
+		class SetState extends Component {
+			constructor(props) {
+				super(props);
+				update = () => this.setState({ active: true });
+			}
+
+			render() {
+				return this.state.active ? <Fragment><div>B1</div><div>B2</div></Fragment> : null;
+			}
+		}
+
+		render(
+			<div>
+				<div>A</div>
+				{null}
+				<SetState />
+				{null}
+				<div>C</div>
+			</div>,
+			scratch,
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>C</div></div>`
+		);
+
+		clearLog();
+		update();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>B1</div><div>B2</div><div>C</div></div>`
+		);
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>AC.insertBefore(<div>B1, <div>C)',
+			'<div>.appendChild(#text)',
+			'<div>AB1C.insertBefore(<div>B2, <div>C)'
+		]);
+	});
+
+	it('should insert in-between nested null children', () => {
+		let update;
+		class SetState extends Component {
+			constructor(props) {
+				super(props);
+				update = () => this.setState({ active: true });
+			}
+
+			render() {
+				return this.state.active ? <div>B</div> : null;
+			}
+		}
+
+		function Outer() {
+			return <SetState />;
+		}
+
+		render(
+			<div>
+				<div>A</div>
+				{null}
+				<Outer />
+				{null}
+				<div>C</div>
+			</div>,
+			scratch,
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>C</div></div>`
+		);
+
+		clearLog();
+		update();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>B</div><div>C</div></div>`
+		);
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>AC.insertBefore(<div>B, <div>C)'
+		]);
+	});
+
+	it('should insert Fragment in-between nested null children', () => {
+		let update;
+		class SetState extends Component {
+			constructor(props) {
+				super(props);
+				update = () => this.setState({ active: true });
+			}
+
+			render() {
+				return this.state.active ? <Fragment><div>B1</div><div>B2</div></Fragment> : null;
+			}
+		}
+
+		function Outer() {
+			return <SetState />;
+		}
+
+		render(
+			<div>
+				<div>A</div>
+				{null}
+				<Outer />
+				{null}
+				<div>C</div>
+			</div>,
+			scratch,
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>C</div></div>`
+		);
+
+		clearLog();
+		update();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>B1</div><div>B2</div><div>C</div></div>`
+		);
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>AC.insertBefore(<div>B1, <div>C)',
+			'<div>.appendChild(#text)',
+			'<div>AB1C.insertBefore(<div>B2, <div>C)'
+		]);
+	});
+
+	it('should update at correct place', () => {
+		let updateA;
+		class A extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { active: true };
+				updateA = () => this.setState(prev => ({ active: !prev.active }));
+			}
+
+			render() {
+				return this.state.active ? <div>A</div> : <span>A2</span>;
+			}
+		}
+
+		function B() {
+			return <div>B</div>;
+		}
+
+		function X(props) {
+			return props.children;
+		}
+
+		function App(props) {
+			let b = props.condition ? <B /> : null;
+			return (
+				<div>
+					<X>
+						<A />
+					</X>
+					<X>
+						{b}
+						<div>C</div>
+					</X>
+				</div>
+			);
+		}
+
+		render(<App condition={true} />, scratch);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>B</div><div>C</div></div>`
+		);
+
+		clearLog();
+		render(<App condition={false} />, scratch);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A</div><div>C</div></div>`
+		);
+		expectDomLogToBe([
+			'<div>B.remove()'
+		]);
+
+		clearLog();
+		updateA();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><span>A2</span><div>C</div></div>`
+		);
+		expectDomLogToBe([
+			'<span>.appendChild(#text)',
+			'<div>AC.insertBefore(<span>A2, <div>A)',
+			'<div>A.remove()'
+		]);
+	});
+
+	it('should update Fragment at correct place', () => {
+		let updateA;
+		class A extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { active: true };
+				updateA = () => this.setState(prev => ({ active: !prev.active }));
+			}
+
+			render() {
+				return this.state.active
+					? [
+						<div>A1</div>,
+						<div>A2</div>
+					] : [
+						<span>A3</span>,
+						<span>A4</span>
+					];
+			}
+		}
+
+		function B() {
+			return <div>B</div>;
+		}
+
+		function X(props) {
+			return props.children;
+		}
+
+		function App(props) {
+			let b = props.condition ? <B /> : null;
+			return (
+				<div>
+					<X>
+						<A />
+					</X>
+					<X>
+						{b}
+						<div>C</div>
+					</X>
+				</div>
+			);
+		}
+
+		render(<App condition={true} />, scratch);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A1</div><div>A2</div><div>B</div><div>C</div></div>`
+		);
+
+		clearLog();
+		render(<App condition={false} />, scratch);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>A1</div><div>A2</div><div>C</div></div>`
+		);
+		expectDomLogToBe([
+			'<div>B.remove()'
+		]);
+
+		clearLog();
+		updateA();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div><span>A3</span><span>A4</span><div>C</div></div>`
+		);
+		expectDomLogToBe([
+			'<span>.appendChild(#text)',
+			'<div>A1A2C.insertBefore(<span>A3, <div>A1)',
+			'<span>.appendChild(#text)',
+			'<div>A3A1A2C.insertBefore(<span>A4, <div>A1)',
+			'<div>A2.remove()',
+			'<div>A1.remove()'
+		]);
+	});
+
+	it('should insert children correctly if sibling component DOM changes', () => {
+
+		/** @type {() => void} */
+		let updateA;
+		class A extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { active: true };
+				updateA = () => this.setState(prev => ({ active: !prev.active }));
+			}
+
+			render() {
+				return this.state.active ? <div>A</div> : <span>A2</span>;
+			}
+		}
+
+		/** @type {() => void} */
+		let updateB;
+		class B extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { active: false };
+				updateB = () => this.setState(prev => ({ active: !prev.active }));
+			}
+			render() {
+				return this.state.active ? <div>B</div> : null;
+			}
+		}
+
+		function X(props) {
+			return props.children;
+		}
+
+		function App() {
+			return (
+				<div>
+					<X>
+						<A />
+					</X>
+					<X>
+						<B />
+						<div>C</div>
+					</X>
+				</div>
+			);
+		}
+
+		render(<App />, scratch);
+
+		expect(scratch.innerHTML).to.eql(div([
+			div('A'),
+			div('C')
+		].join('')), 'initial');
+
+		clearLog();
+		updateB();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(div([
+			div('A'),
+			div('B'),
+			div('C')
+		].join('')), 'updateB');
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>AC.insertBefore(<div>B, <div>C)'
+		]);
+
+		clearLog();
+		updateA();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(div([
+			span('A2'),
+			div('B'),
+			div('C')
+		].join('')), 'updateA');
+		expectDomLogToBe([
+			'<span>.appendChild(#text)',
+			'<div>ABC.insertBefore(<span>A2, <div>A)',
+			'<div>A.remove()'
+		]);
+	});
+
+	it('should correctly append children if last child changes DOM', () => {
+
+		/** @type {() => void} */
+		let updateA;
+		class A extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { active: true };
+				updateA = () => this.setState(prev => ({ active: !prev.active }));
+			}
+
+			render() {
+				return (
+					this.state.active
+						? [<div>A1</div>, <div>A2</div>]
+						: [<span>A3</span>, <span>A4</span>]
+				);
+			}
+		}
+
+		/** @type {() => void} */
+		let updateB;
+		class B extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { active: false };
+				updateB = () => this.setState(prev => ({ active: !prev.active }));
+			}
+			render() {
+				return (
+					<Fragment>
+						<A />
+						{this.state.active ? <div>B</div> : null}
+					</Fragment>
+				);
+			}
+		}
+
+		render(<B />, scratch);
+
+		expect(scratch.innerHTML).to.eql([
+			div('A1'),
+			div('A2')
+		].join(''), 'initial');
+
+		clearLog();
+		updateA();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql([
+			span('A3'),
+			span('A4')
+		].join(''), 'updateA');
+		expectDomLogToBe([
+			'<span>.appendChild(#text)',
+			'<div>A1A2.insertBefore(<span>A3, <div>A1)',
+			'<span>.appendChild(#text)',
+			'<div>A3A1A2.insertBefore(<span>A4, <div>A1)',
+			'<div>A2.remove()',
+			'<div>A1.remove()'
+		]);
+
+		clearLog();
+		updateB();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql([
+			span('A3'),
+			span('A4'),
+			div('B')
+		].join(''), 'updateB');
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>A3A4.appendChild(<div>B)'
+		]);
 	});
 });
