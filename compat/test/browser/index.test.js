@@ -17,13 +17,19 @@ let text = text => document.createTextNode(text);
 describe('preact-compat', () => {
 
 	/** @type {HTMLDivElement} */
-	let scratch;
+	let scratch, proto;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		proto = document.createElement('div').constructor.prototype;
+		sinon.spy(proto, 'addEventListener');
+		sinon.spy(proto, 'removeEventListener');
 	});
 
+
 	afterEach(() => {
+		proto.addEventListener.restore();
+		proto.removeEventListener.restore();
 		teardown(scratch);
 	});
 
@@ -86,6 +92,38 @@ describe('preact-compat', () => {
 				.that.equals('dynamic content');
 		});
 
+		it('should support onAnimationEnd', () => {
+			const func = () => { };
+			render(<div onAnimationEnd={func} />, scratch);
+
+			expect(proto.addEventListener).to.have.been.calledOnce
+				.and.to.have.been.calledWithExactly('animationend', sinon.match.func, false);
+
+			expect(scratch.firstChild._listeners).to.deep.equal({
+				animationend: func
+			});
+
+			render(<div />, scratch);
+			expect(proto.removeEventListener).to.have.been.calledOnce
+				.and.to.have.been.calledWithExactly('animationend', sinon.match.func, false);
+		});
+
+		it('should support onTransitionEnd', () => {
+			const func = () => { };
+			render(<div onTransitionEnd={func} />, scratch);
+
+			expect(proto.addEventListener).to.have.been.calledOnce
+				.and.to.have.been.calledWithExactly('transitionend', sinon.match.func, false);
+
+			expect(scratch.firstChild._listeners).to.deep.equal({
+				transitionend: func
+			});
+
+			render(<div />, scratch);
+			expect(proto.removeEventListener).to.have.been.calledOnce
+				.and.to.have.been.calledWithExactly('transitionend', sinon.match.func, false);
+		});
+
 		it('should support defaultValue', () => {
 			render(<input defaultValue="foo" />, scratch);
 			expect(scratch.firstElementChild).to.have.property('value', 'foo');
@@ -139,12 +177,12 @@ describe('preact-compat', () => {
 			let $$typeof = 0xeac7;
 			try {
 				// eslint-disable-next-line
-				if (Function.prototype.toString.call(eval('Sym'+'bol.for')).match(/\[native code\]/)) {
+				if (Function.prototype.toString.call(eval('Sym' + 'bol.for')).match(/\[native code\]/)) {
 					// eslint-disable-next-line
-					$$typeof = eval('Sym'+'bol.for("react.element")');
+					$$typeof = eval('Sym' + 'bol.for("react.element")');
 				}
 			}
-			catch (e) {}
+			catch (e) { }
 			expect(vnode).to.have.property('$$typeof', $$typeof);
 			expect(vnode).to.have.property('type', 'div');
 			expect(vnode).to.have.property('props').that.is.an('object');
@@ -156,7 +194,7 @@ describe('preact-compat', () => {
 		});
 
 		it('should normalize onChange', () => {
-			let props = { onChange(){} };
+			let props = { onChange() { } };
 
 			function expectToBeNormalized(vnode, desc) {
 				expect(vnode, desc)
@@ -349,6 +387,12 @@ describe('preact-compat', () => {
 		vnode = <textarea oninput={() => null} onChange={() => null} />;
 		expect(vnode.props).to.haveOwnProperty('oninput');
 		expect(vnode.props).to.not.haveOwnProperty('onchange');
+	});
+
+	it('should not normalize onChange for range', () => {
+		render(<input type="range" onChange={() => null} />, scratch);
+		expect(scratch.firstChild._listeners).to.haveOwnProperty('change');
+		expect(scratch.firstChild._listeners).to.not.haveOwnProperty('input');
 	});
 
 	it('should normalize class+className even on components', () => {
