@@ -24,7 +24,7 @@ addons:
 
 script:
   - npm run build
-  - COVERAGE=true npm run test
+  - COVERAGE=true npm run test:ci
   - ./node_modules/coveralls/bin/coveralls.js < ./coverage/lcov.info;
 
 after_success: sizereport --config

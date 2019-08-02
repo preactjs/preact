@@ -20,7 +20,7 @@ function getAttributes(node) {
 // hacky normalization of attribute order across browsers.
 function sortAttributes(html) {
 	return html.replace(/<([a-z0-9-]+)((?:\s[a-z0-9:_.-]+=".*?")+)((?:\s*\/)?>)/gi, (s, pre, attrs, after) => {
-		let list = attrs.match(/\s[a-z0-9:_.-]+=".*?"/gi).sort( (a, b) => a>b ? 1 : -1 );
+		let list = attrs.match(/\s[a-z0-9:_.-]+=".*?"/gi).sort( (a, b) => a === b ? 0 : (a>b ? 1 : -1 ));
 		if (~after.indexOf('/')) after = '></'+pre+'>';
 		return '<' + pre + list.join('') + after;
 	});
