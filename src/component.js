@@ -58,12 +58,12 @@ Component.prototype.setState = function(update, callback) {
 /**
  * Immediately perform a synchronous re-render of the component
  * @param {() => void} [callback] A function to be called after component is
- * re-renderd
+ * re-rendered
  */
 Component.prototype.forceUpdate = function(callback) {
 	let vnode = this._vnode, oldDom = this._vnode._dom, parentDom = this._parentDom;
 	if (parentDom) {
-		// Set render mode so that we can differantiate where the render request
+		// Set render mode so that we can differentiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
 		const force = callback!==false;
@@ -155,7 +155,7 @@ const defer = typeof Promise=='function' ? Promise.prototype.then.bind(Promise.r
 
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
- * important that contributors to Preact can consistenly reason about what calls to `setState`, etc.
+ * important that contributors to Preact can consistently reason about what calls to `setState`, etc.
  * do, and when their effects will be applied. See the links below for some further reading on designing
  * asynchronous APIs.
  * * [Designing APIs for Asynchrony](https://blog.izs.me/2013/08/designing-apis-for-asynchrony)
