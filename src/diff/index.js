@@ -20,8 +20,9 @@ import options from '../options';
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
+ * @param {boolean} isHydrating Whether or not we are in hydration
  */
-export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, force, oldDom) {
+export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, force, oldDom, isHydrating) {
 	let tmp, newType = newVNode.type;
 
 	// When passing through createElement it assigns the object
@@ -124,7 +125,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, oldDom);
+			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, oldDom, isHydrating);
 
 			c.base = newVNode._dom;
 
@@ -141,7 +142,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 		}
 		else {
-			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts);
+			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, isHydrating);
 		}
 
 		if (tmp = options.diffed) tmp(newVNode);
@@ -178,9 +179,10 @@ export function commitRoot(mounts, root) {
  * @param {*} excessDomChildren
  * @param {Array<import('../internal').Component>} mounts An array of newly
  * mounted components
+ * @param {boolean} isHydrating Whether or not we are in hydration
  * @returns {import('../internal').PreactElement}
  */
-function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts) {
+function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, isHydrating) {
 	let i;
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
@@ -225,7 +227,7 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 
 		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
 		// @TODO we should warn in debug mode when props don't match here.
-		if (excessDomChildren == null) {
+		if (!isHydrating) {
 			if (newHtml || oldHtml) {
 				// Avoid re-applying the same '__html' if it did not changed between re-render
 				if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
@@ -234,15 +236,15 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 			}
 		}
 
-		diffProps(dom, newProps, oldProps, isSvg, excessDomChildren!=null);
+		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (!newHtml) {
-			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, EMPTY_OBJ);
+			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, EMPTY_OBJ, isHydrating);
 		}
 
 		// (as above, don't diff props during hydration)
-		if (excessDomChildren == null) {
+		if (!isHydrating) {
 			if (('value' in newProps) && newProps.value!==undefined && newProps.value !== dom.value) dom.value = newProps.value==null ? '' : newProps.value;
 			if (('checked' in newProps) && newProps.checked!==undefined && newProps.checked !== dom.checked) dom.checked = newProps.checked;
 		}

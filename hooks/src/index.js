@@ -214,8 +214,19 @@ function flushAfterPaintEffects() {
 	afterPaintEffects = [];
 }
 
-function scheduleFlushAfterPaint() {
-	setTimeout(flushAfterPaintEffects);
+const RAF_TIMEOUT = 100;
+
+/**
+ * requestAnimationFrame with a timeout in case it doesn't fire (for example if the browser tab is not visible)
+ */
+function safeRaf(callback) {
+	const done = () => {
+		clearTimeout(timeout);
+		cancelAnimationFrame(raf);
+		setTimeout(callback);
+	};
+	const timeout = setTimeout(done, RAF_TIMEOUT);
+	const raf = requestAnimationFrame(done);
 }
 
 /* istanbul ignore else */
@@ -223,12 +234,7 @@ if (typeof window !== 'undefined') {
 	afterPaint = (component) => {
 		if (!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) {
 			/* istanbul ignore next */
-			if (options.requestAnimationFrame) {
-				options.requestAnimationFrame(flushAfterPaintEffects);
-			}
-			else {
-				requestAnimationFrame(scheduleFlushAfterPaint);
-			}
+			(options.requestAnimationFrame || safeRaf)(flushAfterPaintEffects);
 		}
 	};
 }
