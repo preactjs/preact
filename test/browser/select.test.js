@@ -14,7 +14,7 @@ describe.only('Select', () => {
 		teardown(scratch);
 	});
 
-	fit('should set <select> value', () => {
+	it('should set <select> value', () => {
 		function App() {
 			return (
 				<select value="B">
