@@ -112,7 +112,12 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 					// The values only have the same type when `null`.
 
 					outer: if (oldDom==null || oldDom.parentNode!==parentDom) {
-						parentDom.appendChild(newDom);
+						// Skip appendind if the last element is the same as the new dom
+						// node. This is necessary to prevent the last element losing focus
+						// if it had focus before the diff.
+						if (parentDom.lastChild!==newDom) {
+							parentDom.appendChild(newDom);
+						}
 					}
 					else {
 						// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`

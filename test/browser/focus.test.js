@@ -516,4 +516,67 @@ describe('focus', () => {
 		expect(input.selectionEnd).to.equal(5);
 		expect(document.activeElement).to.equalNode(input, 'After rerender');
 	});
+
+	it('should keep focus on last node if unchanged', () => {
+		function Wrapper() {
+			return this.props.open
+				? <Modal {...this.props} />
+				: null;
+		}
+
+		let closeBtn;
+		class Modal extends Component {
+			constructor(props) {
+				super(props);
+				this.buttonRef = null;
+				this.savedFocus = null;
+				this.onRef = ref => (closeBtn = this.buttonRef = ref);
+			}
+			componentDidMount() {
+				this.savedFocus = document.activeElement;
+				this.buttonRef.focus();
+			}
+			componentWillUnmount() {
+				this.savedFocus.focus();
+			}
+			render() {
+				return (
+					<button ref={this.onRef} onClick={this.props.onClose}>
+						Close and return focus
+					</button>
+				);
+			}
+		}
+
+		let openBtn;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.openDialog = () => this.setState({ open: true });
+				this.closeDialog = () => this.setState({ open: false });
+			}
+			render() {
+				return (
+					<div>
+						<Wrapper
+							open={this.state && this.state.open}
+							onClose={this.closeDialog}
+						/>
+						<button ref={r => openBtn=r} onClick={this.openDialog}>Open</button>
+					</div>
+				);
+			}
+		}
+		render(<App />, scratch);
+		openBtn.focus();
+		expect(document.activeElement).to.equalNode(openBtn);
+
+		openBtn.click();
+		rerender();
+		expect(document.activeElement).to.equalNode(closeBtn);
+
+		closeBtn.click();
+		rerender();
+		expect(document.activeElement).to.equalNode(openBtn);
+	});
 });
