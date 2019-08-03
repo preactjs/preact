@@ -149,6 +149,18 @@ describe('preact-compat', () => {
 			render(<span>foo</span>, scratch);
 			expect(scratch.innerHTML).to.equal('<span>foo</span>');
 		});
+
+		it('should only destroy existing DOM nodes on first render', () => {
+			scratch.appendChild(document.createElement('div'));
+			scratch.appendChild(document.createElement('div'));
+
+			render(<input />, scratch);
+
+			let child = scratch.firstChild;
+			child.focus();
+			render(<input />, scratch);
+			expect(document.activeElement.nodeName).to.equal('INPUT');
+		});
 	});
 
 	describe('createFactory', () => {
