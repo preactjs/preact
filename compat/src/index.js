@@ -51,8 +51,11 @@ function handleElementVNode(vnode, props) {
  */
 function render(vnode, parent, callback) {
 	// React destroys any existing DOM nodes, see #1727
-	while (parent.firstChild) {
-		removeNode(parent.firstChild);
+	// ...but only on the first render, see #1828
+	if (parent._children==null) {
+		while (parent.firstChild) {
+			removeNode(parent.firstChild);
+		}
 	}
 
 	preactRender(vnode, parent);
