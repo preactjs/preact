@@ -49,7 +49,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 			else {
 				// Instantiate the new component
-				if (newType.prototype && newType.prototype.render) {
+				if ('prototype' in newType && newType.prototype.render) {
 					newVNode._component = c = new newType(newProps, cctx); // eslint-disable-line new-cap
 				}
 				else {
