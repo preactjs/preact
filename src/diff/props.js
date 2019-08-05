@@ -88,16 +88,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		}
 	}
 	else if (name!=='list' && name!=='tagName' && !isSvg && (name in dom)) {
-		// Setting `select.value` doesn't work in IE11.
-		// Only `<select>` elements have the length property
-		if (dom.length && name=='value') {
-			for (name = dom.length; name--;) {
-				dom.options[name].selected = dom.options[name].value==value;
-			}
-		}
-		else {
-			dom[name] = value==null ? '' : value;
-		}
+		dom[name] = value==null ? '' : value;
 	}
 	else if (typeof value!=='function' && name!=='dangerouslySetInnerHTML') {
 		if (name!==(name = name.replace(/^xlink:?/, ''))) {
