@@ -137,7 +137,9 @@ function getRoot(element) {
 	return element._children;
 }
 
-const supported = /(Chrome)|(Firefox)[^(Edge)]/i.test(navigator.userAgent);
+const supported = /Chrome|Firefox/i.test(navigator.userAgent) &&
+	!/Edge/i.test(navigator.userAgent);
+
 describe('devtools', () => {
 	if (!supported) return;
 
