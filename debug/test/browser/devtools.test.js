@@ -138,9 +138,8 @@ function getRoot(element) {
 }
 
 const supported = /(Chrome)|(Firefox)[^(Edge)]/i.test(navigator.userAgent);
-const desc = supported ? describe : describe.skip;
-
-desc('devtools', () => {
+describe('devtools', () => {
+	if (!supported) return;
 
 	/** @type {import('../../src/internal').PreactElement} */
 	let scratch;
