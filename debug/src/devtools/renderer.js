@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import { getData, getChildren, getInstance, hasDataChanged, isRoot } from './custom';
 
 /**
