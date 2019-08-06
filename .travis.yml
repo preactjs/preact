@@ -23,7 +23,6 @@ addons:
   sauce_connect: true
 
 script:
-  - npm run build
   - COVERAGE=true npm run test
   - ./node_modules/coveralls/bin/coveralls.js < ./coverage/lcov.info;
 
