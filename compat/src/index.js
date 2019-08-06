@@ -51,8 +51,11 @@ function handleElementVNode(vnode, props) {
  */
 function render(vnode, parent, callback) {
 	// React destroys any existing DOM nodes, see #1727
-	while (parent.firstChild) {
-		removeNode(parent.firstChild);
+	// ...but only on the first render, see #1828
+	if (parent._children==null) {
+		while (parent.firstChild) {
+			removeNode(parent.firstChild);
+		}
 	}
 
 	preactRender(vnode, parent);
@@ -235,8 +238,14 @@ function isValidElement(element) {
 function applyEventNormalization({ type, props }) {
 	if (!props || typeof type!='string') return;
 	let newProps = {};
+
 	for (let i in props) {
+		if (/^on(Ani|Tra)/.test(i)) {
+			props[i.toLowerCase()] = props[i];
+			delete props[i];
+		}
 		newProps[i.toLowerCase()] = i;
+
 	}
 	if (newProps.ondoubleclick) {
 		props.ondblclick = props[newProps.ondoubleclick];
@@ -247,7 +256,7 @@ function applyEventNormalization({ type, props }) {
 		delete props[newProps.onbeforeinput];
 	}
 	// for *textual inputs* (incl textarea), normalize `onChange` -> `onInput`:
-	if (newProps.onchange && (type==='textarea' || (type.toLowerCase()==='input' && !/^fil|che|rad/i.test(props.type)))) {
+	if (newProps.onchange && (type==='textarea' || (type.toLowerCase()==='input' && !/^fil|che|ra/i.test(props.type)))) {
 		let normalized = newProps.oninput || 'oninput';
 		if (!props[normalized]) {
 			props[normalized] = props[newProps.onchange];
