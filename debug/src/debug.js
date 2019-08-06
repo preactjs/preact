@@ -1,6 +1,6 @@
 import { checkPropTypes } from './check-props';
 import { getDisplayName } from './devtools/custom';
-import { options } from 'preact';
+import { options, toChildArray } from 'preact';
 import { ELEMENT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants';
 
 function getClosestDomNodeParent(parent) {
@@ -63,9 +63,9 @@ export function initDebug() {
 
 	options._diff = (vnode, oldVnode) => {
 		if (vnode == null) {
-      if (oldBeforeDiff) oldBeforeDiff(vnode, oldVnode);
-      return;
-    }
+			if (oldBeforeDiff) oldBeforeDiff(vnode, oldVnode);
+			return;
+		}
 
 		let { type, props, _parent: parent } = vnode;
 		let children = props && props.children;
