@@ -21,8 +21,9 @@ import { getDomSibling } from '../component';
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
+ * @param {boolean} isHydrating Whether or not we are in hydration
  */
-export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, oldDom) {
+export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, oldDom, isHydrating) {
 	let childVNode, i, j, oldVNode, newDom, sibDom, firstChildDom, refs;
 
 	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode, true);
@@ -82,10 +83,10 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			oldVNode = oldVNode || EMPTY_OBJ;
 
 			// Morph the old element into the new one, but don't append it to the dom yet
-			newDom = diff(parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, null, oldDom);
+			newDom = diff(parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, null, oldDom, isHydrating);
 
 			if ((j = childVNode.ref) && oldVNode.ref != j) {
-				(refs || (refs=[])).push(j, childVNode._component || newDom);
+				(refs || (refs=[])).push(j, childVNode._component || newDom, childVNode);
 			}
 
 			// Only proceed if the vnode has not been unmounted by `diff()` above.
@@ -122,6 +123,20 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 						}
 						parentDom.insertBefore(newDom, oldDom);
 					}
+
+					// Browsers will infer an option's `value` from `textContent` when
+					// no value is present. This essentially bypasses our code to set it
+					// later in `diff()`. It works fine in all browsers except for IE11
+					// where it breaks setting `select.value`. There it will be always set
+					// to an empty string. Re-applying an options value will fix that, so
+					// there are probably some internal data structures that aren't
+					// updated properly.
+					//
+					// To fix it we make sure to reset the inferred value, so that our own
+					// value check in `diff()` won't be skipped.
+					if (newParentVNode.type == 'option') {
+						parentDom.value = '';
+					}
 				}
 
 				oldDom = newDom.nextSibling;
@@ -143,12 +158,12 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	if (excessDomChildren!=null && typeof newParentVNode.type !== 'function') for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
 
 	// Remove remaining oldChildren if there are any.
-	for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], newParentVNode);
+	for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], oldChildren[i]);
 
 	// Set refs only after unmount
 	if (refs) {
 		for (i = 0; i < refs.length; i++) {
-			applyRef(refs[i], refs[++i], newParentVNode);
+			applyRef(refs[i], refs[++i], refs[++i]);
 		}
 	}
 }

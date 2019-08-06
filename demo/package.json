@@ -25,6 +25,7 @@
     "webpack-dev-server": "^3.7.1"
   },
   "dependencies": {
+    "@material-ui/core": "4.2.0",
     "d3-scale": "^1.0.7",
     "d3-selection": "^1.2.0",
     "htm": "2.1.1",

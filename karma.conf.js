@@ -48,9 +48,11 @@ var localLaunchers = {
 		base: 'Chrome',
 		flags: [
 			'--no-sandbox',
+			'--disable-setuid-sandbox',
 			// See https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
 			'--headless',
 			'--disable-gpu',
+			'--no-gpu',
 			// Without a remote debugging port, Google Chrome exits immediately.
 			'--remote-debugging-port=9333'
 		]

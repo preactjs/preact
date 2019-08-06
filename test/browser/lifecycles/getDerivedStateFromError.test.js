@@ -43,7 +43,7 @@ describe('Lifecycle methods', () => {
 				return { error };
 			}
 			render() {
-				return <div>{this.state.error ? String(this.state.error) : this.props.children}</div>;
+				return this.state.error ? String(this.state.error) : this.props.children;
 			}
 		}
 
@@ -112,7 +112,7 @@ describe('Lifecycle methods', () => {
 			expect(fn).to.not.throw();
 
 			rerender();
-			expect(scratch.innerHTML).to.equal('<div>Error: error! 2</div>');
+			expect(scratch.innerHTML).to.equal('Error: error! 2');
 		});
 
 		it('should be called when child fails in componentWillMount', () => {
@@ -187,7 +187,7 @@ describe('Lifecycle methods', () => {
 					return { error };
 				}
 				render() {
-					return <div>{this.state.error ? String(this.state.error) : <ThrowErr foo={this.state.foo} />}</div>;
+					return this.state.error ? String(this.state.error) : <ThrowErr foo={this.state.foo} />;
 				}
 			}
 
@@ -213,7 +213,7 @@ describe('Lifecycle methods', () => {
 					return { error };
 				}
 				render() {
-					return <div>{this.state.error ? String(this.state.error) : <ThrowErr foo={this.state.foo} />}</div>;
+					return this.state.error ? String(this.state.error) : <ThrowErr foo={this.state.foo} />;
 				}
 			}
 
@@ -250,11 +250,7 @@ describe('Lifecycle methods', () => {
 					return { error };
 				}
 				render() {
-					return (
-						<div>
-							{this.state.error ? String(this.state.error) : <Foo ref={ref} />}
-						</div>
-					);
+					return this.state.error ? String(this.state.error) : <Foo ref={ref} />;
 				}
 			}
 
@@ -277,11 +273,7 @@ describe('Lifecycle methods', () => {
 					return { error };
 				}
 				render() {
-					return (
-						<div>
-							{this.state.error ? String(this.state.error) : <div ref={ref} />}
-						</div>
-					);
+					return this.state.error ? String(this.state.error) : <div ref={ref} />;
 				}
 			}
 
