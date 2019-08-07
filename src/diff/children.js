@@ -33,6 +33,9 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 	let oldChildrenLength = oldChildren.length;
 
+	// We know there is a new element, now we still have to determine what element is new.
+	// const hasOffset = Boolean(newChildren.length > oldChildrenLength && oldParentVNode && oldParentVNode._children);
+
 	// Only in very specific places should this logic be invoked (top level `render` and `diffElementNodes`).
 	// I'm using `EMPTY_OBJ` to signal when `diffChildren` is invoked in these situations. I can't use `null`
 	// for this purpose, because `null` is a valid value for `oldDom` which can mean to skip to this logic
@@ -61,7 +64,8 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			// We use `undefined`, as `null` is reserved for empty placeholders
 			// (holes).
 			oldVNode = oldChildren[i];
-
+			// When we are dealing with an inserted child we should ensure that this is diffed as a hole
+			// and not versus a previously active vnode.
 			if (oldVNode===null || (oldVNode && childVNode.key == oldVNode.key && childVNode.type === oldVNode.type)) {
 				oldChildren[i] = undefined;
 			}

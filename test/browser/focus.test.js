@@ -133,7 +133,66 @@ describe('focus', () => {
 		validateFocus(input, 'move from end to middle');
 	});
 
-	it('should maintain focus when adding children around input', () => {
+	it.skip('should maintain focus when adding children around input (unkeyed offsets)', () => {
+		render((
+			<List>
+				<Input />
+			</List>
+		), scratch);
+		console.log('ITER 1');
+		let input = focusInput();
+		expect(scratch.innerHTML).to.equal(getListHtml([], []));
+
+		render((
+			<List>
+				<ListItem>1</ListItem>
+				<Input />
+			</List>
+		), scratch);
+		console.log('ITER 2');
+		expect(scratch.innerHTML).to.equal(getListHtml([1], []));
+		validateFocus(input, 'insert sibling before');
+
+		render((
+			<List>
+				<ListItem>1</ListItem>
+				<Input />
+				<ListItem>2</ListItem>
+			</List>
+		), scratch);
+		console.log('ITER 3');
+		expect(scratch.innerHTML).to.equal(getListHtml([1], [2]));
+		validateFocus(input, 'insert sibling after');
+
+		render((
+			<List>
+				<ListItem>1</ListItem>
+				<Input />
+				<ListItem>2</ListItem>
+				<ListItem>3</ListItem>
+			</List>
+		), scratch);
+		console.log('ITER 4');
+
+		expect(scratch.innerHTML).to.equal(getListHtml([1], [2, 3]));
+		validateFocus(input, 'insert sibling after again');
+
+		render((
+			<List>
+				<ListItem>0</ListItem>
+				<ListItem>1</ListItem>
+				<Input />
+				<ListItem>2</ListItem>
+				<ListItem>3</ListItem>
+			</List>
+		), scratch);
+		console.log('ITER 5');
+
+		expect(scratch.innerHTML).to.equal(getListHtml([0, 1], [2, 3]));
+		validateFocus(input, 'insert sibling before again');
+	});
+
+	it('should maintain focus when adding children around input (keyed offsets)', () => {
 		render((
 			<List>
 				<Input />
