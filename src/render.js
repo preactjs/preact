@@ -3,6 +3,8 @@ import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
 
+const IS_HYDRATE = EMPTY_OBJ;
+
 /**
  * Render a Preact virtual node into a DOM element
  * @param {import('./index').ComponentChild} vnode The virtual node to render
@@ -14,18 +16,18 @@ import options from './options';
 export function render(vnode, parentDom, replaceNode) {
 	if (options._root) options._root(vnode, parentDom);
 
-	let oldVNode = replaceNode && replaceNode._children || parentDom._children;
-	let isHydrating = replaceNode === null;
+	let isHydrating = replaceNode === IS_HYDRATE;
+	let oldVNode = isHydrating ? null : replaceNode && replaceNode._children || parentDom._children;
 	vnode = createElement(Fragment, null, [vnode]);
 
 	let mounts = [];
 	diff(
 		parentDom,
-		(replaceNode || parentDom)._children = vnode,
+		isHydrating ? parentDom._children = vnode : (replaceNode || parentDom)._children = vnode,
 		oldVNode || EMPTY_OBJ,
 		EMPTY_OBJ,
 		parentDom.ownerSVGElement !== undefined,
-		replaceNode
+		replaceNode && !isHydrating
 			? [replaceNode]
 			: oldVNode
 				? null
@@ -45,6 +47,5 @@ export function render(vnode, parentDom, replaceNode) {
  * update
  */
 export function hydrate(vnode, parentDom) {
-	parentDom._children = null;
-	render(vnode, parentDom, null);
+	render(vnode, parentDom, IS_HYDRATE);
 }
