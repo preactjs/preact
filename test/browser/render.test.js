@@ -157,21 +157,25 @@ describe('render()', () => {
 	it('should not render null', () => {
 		render(null, scratch);
 		expect(scratch.innerHTML).to.equal('');
+		expect(scratch.childNodes).to.have.length(0);
 	});
 
 	it('should not render undefined', () => {
 		render(undefined, scratch);
 		expect(scratch.innerHTML).to.equal('');
+		expect(scratch.childNodes).to.have.length(0);
 	});
 
 	it('should not render boolean true', () => {
 		render(true, scratch);
 		expect(scratch.innerHTML).to.equal('');
+		expect(scratch.childNodes).to.have.length(0);
 	});
 
 	it('should not render boolean false', () => {
 		render(false, scratch);
 		expect(scratch.innerHTML).to.equal('');
+		expect(scratch.childNodes).to.have.length(0);
 	});
 
 	it('should not render children when using function children', () => {
