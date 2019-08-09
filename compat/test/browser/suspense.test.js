@@ -122,6 +122,36 @@ describe('suspense', () => {
 		});
 	});
 
+	it('lazy should forward refs', () => {
+		const LazyComp = () => <div>Hello from LazyComp</div>;
+		let ref = {};
+
+		/** @type {() => Promise<void>} */
+		let resolve;
+		const Lazy = lazy(() => {
+			const p = new Promise((res) => {
+				resolve = () => {
+					res({ default: LazyComp });
+					return p;
+				};
+			});
+
+			return p;
+		});
+
+		render((
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Lazy ref={ref} />
+			</Suspense>
+		), scratch);
+		rerender();
+
+		return resolve().then(() => {
+			rerender();
+			expect(ref.current._vnode.type).to.equal(LazyComp);
+		});
+	});
+
 	it('should suspend when a promise is thrown', () => {
 		class ClassWrapper extends Component {
 			render(props) {

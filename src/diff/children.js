@@ -123,6 +123,20 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 						}
 						parentDom.insertBefore(newDom, oldDom);
 					}
+
+					// Browsers will infer an option's `value` from `textContent` when
+					// no value is present. This essentially bypasses our code to set it
+					// later in `diff()`. It works fine in all browsers except for IE11
+					// where it breaks setting `select.value`. There it will be always set
+					// to an empty string. Re-applying an options value will fix that, so
+					// there are probably some internal data structures that aren't
+					// updated properly.
+					//
+					// To fix it we make sure to reset the inferred value, so that our own
+					// value check in `diff()` won't be skipped.
+					if (newParentVNode.type == 'option') {
+						parentDom.value = '';
+					}
 				}
 
 				oldDom = newDom.nextSibling;
