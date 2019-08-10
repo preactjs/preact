@@ -16,6 +16,11 @@ describe('forwardRef', () => {
 		teardown(scratch);
 	});
 
+	it('should have isReactComponent flag', () => {
+		let App = forwardRef((_, ref) => <div ref={ref}>foo</div>);
+		expect(App.prototype.isReactComponent).to.equal(true);
+	});
+
 	it('should pass ref with createRef', () => {
 		let App = forwardRef((_, ref) => <div ref={ref}>foo</div>);
 		let ref = createRef();
