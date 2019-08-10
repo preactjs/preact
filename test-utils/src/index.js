@@ -24,20 +24,28 @@ export function act(cb) {
 	// Override requestAnimationFrame so we can flush pending hooks.
 	options.requestAnimationFrame = (fc) => flush = fc;
 
-	// Execute the callback we were passed.
-	cb();
-	rerender();
-
-	while (flush) {
-		toFlush = flush;
-		flush = null;
-
-		toFlush();
+	const finish = () => {
 		rerender();
+		while (flush) {
+			toFlush = flush;
+			flush = null;
+
+			toFlush();
+			rerender();
+		}
+
+		teardown();
+		options.requestAnimationFrame = previousRequestAnimationFrame;
+	};
+
+	const result = cb();
+
+	if (result != null && typeof result.then === 'function') {
+		return result.then(finish);
 	}
 
-	teardown();
-	options.requestAnimationFrame = previousRequestAnimationFrame;
+	finish();
+	return Promise.resolve();
 }
 
 /**

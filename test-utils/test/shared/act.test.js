@@ -191,4 +191,51 @@ describe('act', () => {
 		});
 		expect(scratch.firstChild.textContent).to.equal('1');
 	});
+
+	it('returns a Promise if invoked with a sync callback', () => {
+		const result = act(() => {});
+		expect(result.then).to.be.a('function');
+		return result;
+	});
+
+	it('returns a Promise if invoked with an async callback', () => {
+		const result = act(async () => {});
+		expect(result.then).to.be.a('function');
+		return result;
+	});
+
+	it('should await "thenable" result of callback before flushing', async () => {
+		const events = [];
+
+		function TestComponent() {
+			useEffect(() => {
+				events.push('flushed effect');
+			}, []);
+			events.push('scheduled effect');
+			return <div>Test</div>;
+		}
+
+		const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+		events.push('began test');
+		const acted = act(async () => {
+			events.push('began act callback');
+			await delay(1);
+			render(<TestComponent />, scratch);
+			events.push('end act callback');
+		});
+		events.push('act returned');
+		await acted;
+		events.push('act result resolved');
+
+		expect(events).to.deep.equal([
+			'began test',
+			'began act callback',
+			'act returned',
+			'scheduled effect',
+			'end act callback',
+			'flushed effect',
+			'act result resolved'
+		]);
+	});
 });
