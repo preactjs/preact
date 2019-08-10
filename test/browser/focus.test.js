@@ -133,7 +133,7 @@ describe('focus', () => {
 		validateFocus(input, 'move from end to middle');
 	});
 
-	it.only('should maintain focus when adding children around input (unkeyed offsets)', () => {
+	it('should maintain focus when adding children around input (unkeyed offsets)', () => {
 		render((
 			<List>
 				<Input />
