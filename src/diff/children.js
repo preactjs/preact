@@ -33,6 +33,26 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 	let oldChildrenLength = oldChildren.length;
 
+	const hasOffset = oldChildrenLength && oldChildrenLength < newChildren.length;
+	let insertions = [];
+	if (hasOffset) {
+		newChildren.forEach((newChild, i) => {
+			// Example 1:
+			// OLD: [x, y, x, x]
+			// NEW: [x, x, y, x, x] --> won't work
+			// Since dealing with a first-element insertion
+			// is a lot more complicated.
+			//
+			// Example 2:
+			// OLD: [x, x, y, x, y]
+			// NEW: [x, x, y, x, x, y] --> should work
+			//
+			if (oldChildren[i] && oldChildren[i].type !== newChild.type) {
+				insertions.push(newChild[i]);
+			}
+		});
+	}
+
 	// We know there is a new element, now we still have to determine what element is new.
 	// const hasOffset = Boolean(newChildren.length > oldChildrenLength && oldParentVNode && oldParentVNode._children);
 
@@ -66,7 +86,10 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			oldVNode = oldChildren[i];
 			// When we are dealing with an inserted child we should ensure that this is diffed as a hole
 			// and not versus a previously active vnode.
-			if (oldVNode===null || (oldVNode && childVNode.key == oldVNode.key && childVNode.type === oldVNode.type)) {
+			if (insertions.includes(childVNode)) {
+				oldVNode = null;
+			}
+			else if (oldVNode===null || (oldVNode && childVNode.key == oldVNode.key && childVNode.type === oldVNode.type)) {
 				oldChildren[i] = undefined;
 			}
 			else {
@@ -98,6 +121,8 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 				if (firstChildDom == null) {
 					firstChildDom = newDom;
 				}
+				console.log('new', newDom);
+				console.log('old', oldDom);
 
 				if (childVNode._lastDomChild != null) {
 					// Only Fragments or components that return Fragment like VNodes will
@@ -116,6 +141,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 					// The values only have the same type when `null`.
 
 					outer: if (oldDom==null || oldDom.parentNode!==parentDom) {
+						console.log('appending', newDom);
 						parentDom.appendChild(newDom);
 					}
 					else {
@@ -125,6 +151,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 								break outer;
 							}
 						}
+						console.log('inserting', newDom, 'before', oldDom);
 						parentDom.insertBefore(newDom, oldDom);
 					}
 
@@ -143,6 +170,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 					}
 				}
 
+				console.log('setting oldDom to', newDom.nextSibling);
 				oldDom = newDom.nextSibling;
 
 				if (typeof newParentVNode.type == 'function') {

@@ -133,7 +133,7 @@ describe('focus', () => {
 		validateFocus(input, 'move from end to middle');
 	});
 
-	it.skip('should maintain focus when adding children around input (unkeyed offsets)', () => {
+	it.only('should maintain focus when adding children around input (unkeyed offsets)', () => {
 		render((
 			<List>
 				<Input />
@@ -187,6 +187,12 @@ describe('focus', () => {
 			</List>
 		), scratch);
 		console.log('ITER 5');
+
+		/**
+		 * To fix this issue we should be able to detect that 0 is a new item.
+		 * This however does not seem possible without keys since our sole ref
+		 * would be type-index.
+		 */
 
 		expect(scratch.innerHTML).to.equal(getListHtml([0, 1], [2, 3]));
 		validateFocus(input, 'insert sibling before again');
