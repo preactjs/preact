@@ -47,7 +47,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			// OLD: [x, x, y, x, y]
 			// NEW: [x, x, y, x, x, y] --> should work
 			//
-			if (oldChildren[i] && oldChildren[i].type !== newChild.type) {
+			if (oldChildren[i] && oldChildren[i].type !== newChild.type && !newChild.key) {
 				insertions.push(newChild[i]);
 			}
 		});
