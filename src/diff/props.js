@@ -31,7 +31,7 @@ function setStyle(style, key, value) {
 		style.setProperty(key, value);
 	}
 	else {
-		style[key] = typeof value==='number' && IS_NON_DIMENSIONAL.test(key)===false ? value+'px' : value;
+		style[key] = typeof value==='number' && IS_NON_DIMENSIONAL.test(key)===false ? value+'px' : value || null;
 	}
 }
 
