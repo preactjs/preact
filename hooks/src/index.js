@@ -231,8 +231,12 @@ function safeRaf(callback) {
 
 /* istanbul ignore else */
 if (typeof window !== 'undefined') {
+	let prevRaf = options.requestAnimationFrame;
 	afterPaint = (component) => {
-		if (!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) {
+		if ((!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) ||
+		    prevRaf !== options.requestAnimationFrame) {
+			prevRaf = options.requestAnimationFrame;
+
 			/* istanbul ignore next */
 			(options.requestAnimationFrame || safeRaf)(flushAfterPaintEffects);
 		}
