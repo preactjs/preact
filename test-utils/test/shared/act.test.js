@@ -4,6 +4,15 @@ import { useEffect, useState } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { act } from '../../src';
 
+// IE11 doesn't support `new Event()`
+function createEvent(name) {
+	if (typeof Event === 'function') return new Event(name);
+
+	const event = document.createEvent('Event');
+	event.initEvent(name, true, true);
+	return event;
+}
+
 /** @jsx h */
 describe('act', () => {
 
@@ -156,13 +165,13 @@ describe('act', () => {
 
 		// Click button. This will schedule an update which is deferred, as is
 		// normal for Preact, since it happens outside an `act` call.
-		button.dispatchEvent(new Event('click'));
+		button.dispatchEvent(createEvent('click'));
 
 		expect(button.textContent).to.equal('0');
 
 		act(() => {
 			// Click button a second time. This will schedule a second update.
-			button.dispatchEvent(new Event('click'));
+			button.dispatchEvent(createEvent('click'));
 		});
 		// All state updates should be applied synchronously after the `act`
 		// callback has run but before `act` returns.
