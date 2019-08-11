@@ -143,4 +143,52 @@ describe('act', () => {
 		act(() => null);
 		expect(options.debounceRendering).to.equal(undefined);
 	});
+
+	it('should flush state updates if there are pending state updates before `act` call', () => {
+		function CounterButton() {
+			const [count, setCount] = useState(0);
+			const increment = () => setCount(count => count + 1);
+			return <button onClick={increment}>{count}</button>;
+		}
+
+		render(<CounterButton />, scratch);
+		const button = scratch.querySelector('button');
+
+		// Click button. This will schedule an update which is deferred, as is
+		// normal for Preact, since it happens outside an `act` call.
+		button.dispatchEvent(new Event('click'));
+
+		expect(button.textContent).to.equal('0');
+
+		act(() => {
+			// Click button a second time. This will schedule a second update.
+			button.dispatchEvent(new Event('click'));
+		});
+		// All state updates should be applied synchronously after the `act`
+		// callback has run but before `act` returns.
+		expect(button.textContent).to.equal('2');
+	});
+
+	it('should flush effects if there are pending effects before `act` call', () => {
+		function Counter() {
+			const [count, setCount] = useState(0);
+			useEffect(() => {
+				setCount(count => count + 1);
+			}, []);
+			return <div>{count}</div>;
+		}
+
+		// Render a component which schedules an effect outside of an `act`
+		// call. This will be scheduled to execute after the next paint as usual.
+		render(<Counter />, scratch);
+		expect(scratch.firstChild.textContent).to.equal('0');
+
+		// Render a component inside an `act` call, this effect should be
+		// executed synchronously before `act` returns.
+		act(() => {
+			render(<div />, scratch);
+			render(<Counter />, scratch);
+		});
+		expect(scratch.firstChild.textContent).to.equal('1');
+	});
 });

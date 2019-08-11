@@ -436,6 +436,14 @@ describe('render()', () => {
 			expect(scratch.firstChild.style.backgroundColor).to.equal('blue');
 		});
 
+		// Issue #1850
+		it('should remove empty styles', () => {
+			render(<div style={{ visibility: 'hidden' }} />, scratch);
+			expect(scratch.firstChild.style.visibility).to.equal('hidden');
+			render(<div style={{ visibility: undefined }} />, scratch);
+			expect(scratch.firstChild.style.visibility).to.equal('');
+		});
+
 		// Skip test if the currently running browser doesn't support CSS Custom Properties
 		if (window.CSS && CSS.supports('color', 'var(--fake-var)')) {
 			it('should support css custom properties', () => {
