@@ -44,12 +44,6 @@ describe('render()', () => {
 		logCall(Element.prototype, 'remove');
 	});
 
-	it('should render nothing node given null', () => {
-		render(null, scratch);
-		let c = scratch.childNodes;
-		expect(c).to.have.length(0);
-	});
-
 	it('should render an empty text node given an empty string', () => {
 		render('', scratch);
 		let c = scratch.childNodes;
@@ -163,21 +157,25 @@ describe('render()', () => {
 	it('should not render null', () => {
 		render(null, scratch);
 		expect(scratch.innerHTML).to.equal('');
+		expect(scratch.childNodes).to.have.length(0);
 	});
 
 	it('should not render undefined', () => {
 		render(undefined, scratch);
 		expect(scratch.innerHTML).to.equal('');
+		expect(scratch.childNodes).to.have.length(0);
 	});
 
 	it('should not render boolean true', () => {
 		render(true, scratch);
 		expect(scratch.innerHTML).to.equal('');
+		expect(scratch.childNodes).to.have.length(0);
 	});
 
 	it('should not render boolean false', () => {
 		render(false, scratch);
 		expect(scratch.innerHTML).to.equal('');
+		expect(scratch.childNodes).to.have.length(0);
 	});
 
 	it('should not render children when using function children', () => {
