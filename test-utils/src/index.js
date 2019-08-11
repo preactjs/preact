@@ -25,8 +25,7 @@ let actDepth = 0;
  * @return {Promise<void>}
  */
 export function act(cb) {
-	++actDepth;
-	if (actDepth > 1) {
+	if (++actDepth > 1) {
 		// If calls to `act` are nested, a flush happens only when the
 		// outermost call returns. In the inner call, we just execute the
 		// callback and return since the infrastructure for flushing has already

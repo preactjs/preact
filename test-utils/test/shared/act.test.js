@@ -301,7 +301,7 @@ describe('act', () => {
 				expect(counter).to.equal(0);
 
 				act(() => {
-					button.dispatchEvent(new Event('click'));
+					button.dispatchEvent(createEvent('click'));
 				});
 
 				// Effect triggered by inner `act` call should not have been
@@ -327,7 +327,7 @@ describe('act', () => {
 
 			act(() => {
 				act(() => {
-					button.dispatchEvent(new Event('click'));
+					button.dispatchEvent(createEvent('click'));
 				});
 
 				// Update triggered by inner `act` call should not have been
