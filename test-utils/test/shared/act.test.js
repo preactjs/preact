@@ -1,5 +1,5 @@
 import { options, createElement as h, render } from 'preact';
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useReducer, useState } from 'preact/hooks';
 
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { act } from '../../src';
@@ -237,5 +237,98 @@ describe('act', () => {
 			'flushed effect',
 			'act result resolved'
 		]);
+	});
+
+	context('when `act` calls are nested', () => {
+		it('should invoke nested sync callback and return a Promise', () => {
+			let innerResult;
+			const spy = sinon.stub();
+
+			act(() => {
+				innerResult = act(spy);
+			});
+
+			expect(spy).to.be.calledOnce;
+			expect(innerResult.then).to.be.a('function');
+		});
+
+		it('should invoke nested async callback and return a Promise', async () => {
+			const events = [];
+
+			await act(async () => {
+				events.push('began outer act callback');
+				await act(async () => {
+					events.push('began inner act callback');
+					await Promise.resolve();
+					events.push('end inner act callback');
+				});
+				events.push('end outer act callback');
+			});
+			events.push('act finished');
+
+			expect(events).to.deep.equal([
+				'began outer act callback',
+				'began inner act callback',
+				'end inner act callback',
+				'end outer act callback',
+				'act finished'
+			]);
+		});
+
+		it('should only flush effects when outer `act` call returns', () => {
+			let counter = 0;
+
+			function Widget() {
+				useEffect(() => {
+					++counter;
+				});
+				const [, forceUpdate] = useReducer(x => x + 1, 0);
+				return <button onClick={forceUpdate}>test</button>;
+			}
+
+			act(() => {
+				render(<Widget />, scratch);
+				const button = scratch.querySelector('button');
+				expect(counter).to.equal(0);
+
+				act(() => {
+					button.dispatchEvent(new Event('click'));
+				});
+
+				// Effect triggered by inner `act` call should not have been
+				// flushed yet.
+				expect(counter).to.equal(0);
+			});
+
+			// Effects triggered by inner `act` call should now have been
+			// flushed.
+			expect(counter).to.equal(2);
+		});
+
+		it('should only flush updates when outer `act` call returns', () => {
+			function Button() {
+				const [count, setCount] = useState(0);
+				const increment = () => setCount(count => count + 1);
+				return <button onClick={increment}>{count}</button>;
+			}
+
+			render(<Button />, scratch);
+			const button = scratch.querySelector('button');
+			expect(button.textContent).to.equal('0');
+
+			act(() => {
+				act(() => {
+					button.dispatchEvent(new Event('click'));
+				});
+
+				// Update triggered by inner `act` call should not have been
+				// flushed yet.
+				expect(button.textContent).to.equal('0');
+			});
+
+			// Updates from outer and inner `act` calls should now have been
+			// flushed.
+			expect(button.textContent).to.equal('1');
+		});
 	});
 });
