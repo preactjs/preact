@@ -1,4 +1,4 @@
-import { Component, createElement, _unmount as unmount, options } from 'preact';
+import { Component, createElement, _unmount as unmount, _coerceToVNode as coerceToVNode, options } from 'preact';
 import { removeNode } from '../../src/util';
 
 const oldCatchError = options._catchError;
@@ -40,9 +40,10 @@ function detachDom(children) {
 }
 
 // having custom inheritance instead of a class here saves a lot of bytes
-export function Suspense() {
+export function Suspense(props) {
 	// we do not call super here to golf some bytes...
 	this._suspensions = [];
+	this._fallback = coerceToVNode(props.fallback);
 }
 
 // Things we do here to save some bytes but are not proper JS inheritance:
@@ -65,7 +66,8 @@ Suspense.prototype._childDidSuspend = function(promise) {
 		c._suspensions.pop();
 
 		if (c._suspensions.length == 0) {
-			unmount(c.props.fallback);
+			unmount(this._fallback);
+			this._fallback = coerceToVNode(this._fallback);
 			c._vnode._dom = null;
 
 			c._vnode._children = c.state._parkedChildren;
@@ -83,7 +85,7 @@ Suspense.prototype._childDidSuspend = function(promise) {
 };
 
 Suspense.prototype.render = function(props, state) {
-	return state._parkedChildren ? props.fallback : props.children;
+	return state._parkedChildren ? this._fallback : props.children;
 };
 
 export function lazy(loader) {
