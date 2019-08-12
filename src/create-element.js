@@ -80,6 +80,13 @@ export function Fragment(props) {
 }
 
 /**
+ * Check if a the argument is a valid Preact VNode.
+ * @param {*} vnode
+ * @returns {vnode is import('./internal').VNode}
+ */
+export const isElement = vnode => vnode!=null && vnode.constructor === undefined;
+
+/**
  * Coerce an untrusted value into a VNode
  * Specifically, this should be used anywhere a user could provide a boolean, string, or number where
  * a VNode or Component is desired instead
