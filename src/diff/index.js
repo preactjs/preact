@@ -29,7 +29,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== undefined) return null;
 
-	if (tmp = options._diff) tmp(newVNode);
+	if (tmp = options._diff) tmp(newVNode, oldVNode);
 
 	try {
 		outer: if (typeof newType==='function') {

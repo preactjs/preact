@@ -1,6 +1,6 @@
 import { checkPropTypes } from './check-props';
 import { getDisplayName } from './devtools/custom';
-import { options } from 'preact';
+import { options, toChildArray } from 'preact';
 import { ELEMENT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants';
 
 function getClosestDomNodeParent(parent) {
@@ -18,6 +18,7 @@ export function initDebug() {
 	let oldVnode = options.vnode;
 	let oldCatchError = options._catchError;
 	const warnedComponents = { useEffect: {}, useLayoutEffect: {}, lazyPropTypes: {} };
+	const serializedConstructorMap = typeof WeakMap!=='undefined' && new WeakMap();
 
 	options._catchError = (error, vnode, oldVNode) => {
 		let component = vnode && vnode._component;
@@ -60,8 +61,14 @@ export function initDebug() {
 		`);
 	};
 
-	options._diff = vnode => {
-		let { type, _parent: parent } = vnode;
+	options._diff = (vnode, oldVnode) => {
+		if (vnode == null) {
+			if (oldBeforeDiff) oldBeforeDiff(vnode, oldVnode);
+			return;
+		}
+
+		let { type, props, _parent: parent } = vnode;
+		let children = props && props.children;
 		let parentVNode = getClosestDomNodeParent(parent);
 
 		if (type===undefined) {
@@ -140,6 +147,24 @@ export function initDebug() {
 				}
 			}
 		}
+		
+		// Detect component thrashing.
+		// This is a common problem where the diff sees a component reference
+		// on every render, since it can't infer semantic equivalence.
+		if (
+			// it's a component vnode
+			typeof type=='function' && typeof oldVnode.type==='function' &&
+			// and the constructor reference got changed
+			type !== oldVnode.type &&
+			// ... but they seem to be the same source
+			componentsAreEquivalent(type, oldVnode.type)
+		) {
+			console.error(
+				`🚨It looks like ${getDisplayName(vnode)} is being recreated on every render, causing serious performance problems.\n` +
+				`This usually means the component is being defined within another component or render function.\n` +
+				`For more information, see http://preactjs.com/errors/1`
+			);
+		}
 
 		// Check prop-types if available
 		if (typeof vnode.type==='function' && vnode.type.propTypes) {
@@ -157,9 +182,48 @@ export function initDebug() {
 			checkPropTypes(vnode.type.propTypes, vnode.props, getDisplayName(vnode), serializeVNode(vnode));
 		}
 
-		if (oldBeforeDiff) oldBeforeDiff(vnode);
+		let keys = [];
+		for (let deepChild of toChildArray(children)) {
+			if (!deepChild || deepChild.key==null) continue;
+
+			let key = deepChild.key;
+
+			if (keys.indexOf(key) !== -1) {
+				console.error(
+					'Following component has two or more children with the ' +
+					`same key attribute: "${key}". This may cause glitches and misbehavior ` +
+					'in rendering process. Component: \n\n' +
+					serializeVNode(vnode)
+				);
+
+				// Break early to not spam the console
+				break;
+			}
+
+			keys.push(key);
+		}
+
+		if (oldBeforeDiff) oldBeforeDiff(vnode, oldVnode);
 	};
 
+	// If the constructor source text and prototype properties match,
+	// two different component references are likely to be the same.
+	function componentsAreEquivalent(a, b) {
+		return componentToString(a) === componentToString(b);
+	}
+	
+	function componentToString(c) {
+		let str;
+		if (serializedConstructorMap && (str = serializedConstructorMap.get(c))) {
+			return str;
+		}
+		str = Function.prototype.toString.call(c) + Object.keys(c.prototype).join();
+		if (serializedConstructorMap) {
+			serializedConstructorMap.set(c, str);
+		}
+		return str;
+	}
+	  
 	options._hook = (comp) => {
 		if (!comp) {
 			throw new Error('Hook can only be invoked from render methods.');
