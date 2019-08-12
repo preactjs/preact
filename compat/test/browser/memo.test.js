@@ -82,6 +82,8 @@ describe('memo()', () => {
 		update();
 		rerender();
 
+		expect(ref.current).not.to.be.undefined;
+
 		// TODO: not sure whether this is in-line with react...
 		expect(spy).to.be.calledTwice;
 	});
