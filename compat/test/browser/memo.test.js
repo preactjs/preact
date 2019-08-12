@@ -51,6 +51,41 @@ describe('memo()', () => {
 		expect(spy).to.be.calledOnce;
 	});
 
+	it('should support adding refs', () => {
+		let spy = sinon.spy();
+
+		let ref = null;
+
+		function Foo() {
+			spy();
+			return <h1>Hello World</h1>;
+		}
+
+		let Memoized = memo(Foo);
+
+		let update;
+		class App extends Component {
+			constructor() {
+				super();
+				update = () => this.setState({});
+			}
+			render() {
+				return <Memoized ref={ref} />;
+			}
+		}
+		render(<App />, scratch);
+
+		expect(spy).to.be.calledOnce;
+
+		ref = {};
+
+		update();
+		rerender();
+
+		// TODO: not sure whether this is in-line with react...
+		expect(spy).to.be.calledTwice;
+	});
+
 	it('should support custom comparer functions', () => {
 		function Foo() {
 			return <h1>Hello World</h1>;
