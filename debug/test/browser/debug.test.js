@@ -221,6 +221,11 @@ describe('debug', () => {
 		expect(console.warn.args[0]).to.match(/no-op/);
 	});
 
+	it('should print an error when child is a plain object', () => {
+		let fn = () => render(<div>{{}}</div>, scratch);
+		expect(fn).to.throw(/not valid/);
+	});
+
 	it('should warn for useless useMemo calls', () => {
 		const App = () => {
 			const [people] = useState([40, 20, 60, 80]);
