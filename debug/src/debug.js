@@ -1,6 +1,6 @@
 import { checkPropTypes } from './check-props';
 import { getDisplayName } from './devtools/custom';
-import { options } from 'preact';
+import { options, Component } from 'preact';
 import { ELEMENT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants';
 
 function getClosestDomNodeParent(parent) {
@@ -259,6 +259,18 @@ export function initDebug() {
 		}
 	};
 }
+
+const setState = Component.prototype.setState;
+Component.prototype.setState = function(update, callback) {
+	if (this._vnode==null) {
+		console.warn(
+			`Calling "this.setState" inside the constructor of a component is a ` +
+			`no-op and might be a bug in your application. Instead, set ` +
+			`"this.state = {}" directly.`
+		);
+	}
+	return setState.call(this, update, callback);
+};
 
 /**
  * Serialize a vnode tree to a string
