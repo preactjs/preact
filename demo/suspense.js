@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-import { createElement, Component, memo, Fragment, Suspense, lazy } from "react";
+import { createElement, Component, memo, Fragment, Suspense, lazy } from 'react';
 
 function LazyComp() {
 	return <div>I'm (fake) lazy loaded</div>;
