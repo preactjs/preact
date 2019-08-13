@@ -62,7 +62,7 @@ Component.prototype.setState = function(update, callback) {
  * @param {() => void} [callback] A function to be called after component is
  * re-renderd
  */
-Component.prototype.forceUpdate = function(callback) {
+let forceUpdate = Component.prototype.forceUpdate = function(callback) {
 	let vnode = this._vnode, dom = this._vnode._dom, parentDom = this._parentDom;
 	if (parentDom) {
 		// Set render mode so that we can differantiate where the render request
@@ -129,6 +129,7 @@ function process() {
 	q.sort((a, b) => b._depth - a._depth);
 	while ((p=q.pop())) {
 		// forceUpdate's callback argument is reused here to indicate a non-forced update.
-		if (p._dirty) p.forceUpdate(false);
+		// if (p._dirty) p.forceUpdate(false);
+		if (p._dirty) forceUpdate.call(p, false);
 	}
 }
