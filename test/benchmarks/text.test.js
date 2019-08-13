@@ -6,6 +6,7 @@ import { setupScratch, teardown } from '../_util/helpers';
 import bench from '../_util/bench';
 const preact = require('../fixtures/preact');
 const ceviche = require('../../dist/preact');
+const master = require('../fixtures/master');
 const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
 
 describe('benchmarks', function() {
@@ -69,11 +70,13 @@ describe('benchmarks', function() {
 		}
 
 		const preactTest = createTest(preact);
+		const masterTest = createTest(master);
 		const cevicheTest = createTest(ceviche);
 		const vanillaTest = createVanillaTest();
 
 		for (let i=100; i--; ) {
 			preactTest(i);
+			masterTest(i);
 			cevicheTest(i);
 			vanillaTest(i);
 		}
@@ -81,6 +84,7 @@ describe('benchmarks', function() {
 		bench({
 			vanilla: vanillaTest,
 			preact: preactTest,
+			master: masterTest,
 			ceviche: cevicheTest
 		}, ({ text, results }) => {
 			const THRESHOLD = 10 * MULTIPLIER;
