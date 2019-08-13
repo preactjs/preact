@@ -1,5 +1,6 @@
 import { createElement, render, Component, Fragment } from 'preact';
-// import renderToString from 'preact-render-to-string';
+import * as preact from 'preact'; // eslint-disable-line
+import renderToString from 'preact-render-to-string';
 import './style.scss';
 import { Router, Link } from 'preact-router';
 import Pythagoras from './pythagoras';
@@ -18,6 +19,8 @@ import { initDevTools } from 'preact/debug/src/devtools';
 import { initDebug } from 'preact/debug/src/debug';
 import DevtoolsDemo from './devtools';
 import SuspenseDemo from './suspense';
+
+window.preact = preact;
 
 let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(window.location.href);
 if (!isBenchmark) {
@@ -113,7 +116,19 @@ function EmptyFragment() {
 	return <Fragment />;
 }
 
-// document.body.innerHTML = renderToString(<App url={location.href.match(/[#&]ssr/) ? undefined : '/'} />);
+// let old = options.render;
+// options.render = vnode => {
+// 	if (!vnode._component && vnode.__c) {
+// 		vnode._component = vnode.__c;
+// 	}
+// 	if (old) old(vnode);
+// };
+
+const SSR = localStorage.SSR==='true' || /ssr/.test(location.href);
+
+if (SSR) {
+	document.body.innerHTML = renderToString(<App url={location.pathname} />);
+}
 // document.body.firstChild.setAttribute('is-ssr', 'true');
 
 installLogger(

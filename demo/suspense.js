@@ -1,11 +1,17 @@
 // eslint-disable-next-line no-unused-vars
-import { createElement, Component, memo, Fragment, Suspense, lazy } from "react";
+import { createElement, Component, memo, Fragment, Suspense, lazy } from 'react';
+
+if (location.pathname === '/suspense') {
+	document.body.innerHTML = `<div class="app"><header></header><main><div><div style="margin: 10px; border: 1px dotted rgb(204, 204, 204);"><h1>lazy()</h1><div>Loading (fake) lazy loaded component...</div></div><h1>Suspense</h1><div><button>Rerun</button></div><div>Hello from CustomSuspense 1, loaded after 1s</div><div>Hello from CustomSuspense 2, loaded after 2s</div><div>Hello from CustomSuspense 2, loaded after 2s</div><div>Hello from CustomSuspense 3, loaded after 3s</div></div></main></div>`;
+}
 
 function LazyComp() {
 	return <div>I'm (fake) lazy loaded</div>;
 }
 
-const Lazy = lazy(() => Promise.resolve({ default: LazyComp }));
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+const Lazy = lazy(() => sleep(5000).then(() => ({ default: LazyComp })));
 
 function createSuspension(name, timeout, error) {
 	let done = false;
@@ -70,21 +76,28 @@ export default class DevtoolsDemo extends Component {
 	render(props, state) {
 		return (
 			<div>
-				<h1>lazy()</h1>
-				<Suspense fallback={<div>Loading (fake) lazy loaded component...</div>}>
-					<Lazy />
-				</Suspense>
-				<h1>Suspense</h1>
-				<div>
-					<button onClick={this.onRerun} >Rerun</button>
-				</div>
-				<Suspense fallback={<div>Fallback 1</div>}>
-					<CustomSuspense {...state.s1} />
-					<Suspense fallback={<div>Fallback 2</div>}>
-						<CustomSuspense {...state.s2} />
-						<CustomSuspense {...state.s3} />
+				<div style={{ margin: 10, border: '1px dotted #ccc' }}>
+					<h1>lazy()</h1>
+					{/* <Suspense fallback={<div>Loading (fake) lazy loaded component...</div>}> */}
+					<Suspense>
+						<Lazy />
 					</Suspense>
-				</Suspense>
+				</div>
+				{/*
+				<div style={{ margin: 10, border: '1px dotted #ccc' }}>
+					<h1>Suspense</h1>
+					<div>
+						<button onClick={this.onRerun} >Rerun</button>
+					</div>
+					<Suspense fallback={<div>Fallback 1</div>}>
+						<CustomSuspense {...state.s1} />
+						<Suspense fallback={<div>Fallback 2</div>}>
+							<CustomSuspense {...state.s2} />
+							<CustomSuspense {...state.s3} />
+						</Suspense>
+					</Suspense>
+				</div>
+				*/}
 			</div>
 		);
 	}
