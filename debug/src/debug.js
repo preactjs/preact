@@ -198,6 +198,13 @@ export function initDebug() {
 	};
 
 	options.diffed = (vnode) => {
+		// Check if the user passed plain objects as children. Note that we cannot
+		// move this check into `options.vnode` because components can receive
+		// children in any shape they want (e.g.
+		// `<MyJSONFormatter>{{ foo: 123, bar: "abc" }}</MyJSONFormatter>`).
+		// Putting this check in `options.diffed` ensures that
+		// `vnode._children` is set and that we only validate the children
+		// that were actually rendered.
 		if (vnode._children) {
 			vnode._children.forEach(child => {
 				if (child && child.type===undefined) {
