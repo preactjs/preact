@@ -86,7 +86,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			oldVNode = oldChildren[i];
 			// When we are dealing with an inserted child we should ensure that this is diffed as a hole
 			// and not versus a previously active vnode.
-			if (insertions.includes(childVNode)) {
+			if (~insertions.indexOf(childVNode)) {
 				oldVNode = null;
 			}
 			else if (oldVNode===null || (oldVNode && childVNode.key == oldVNode.key && childVNode.type === oldVNode.type)) {
