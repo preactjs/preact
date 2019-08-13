@@ -177,6 +177,30 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 		}
 		else {
+			// if (newType == null) {
+			// 	newVNode._dom = diffTextNodes(oldVNode._dom, newVNode, oldVNode, excessDomChildren);
+			// }
+			// else {
+			// 	newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
+			// }
+
+			// if (newType == null && oldVNode._dom != null) {
+			// 	// oldDom = oldVNode._dom;
+			// 	// if (oldDom == null) {
+			// 	// 	oldDom = document.createTextNode(newVNode.props);
+			// 	// }
+			// 	// else if (oldVNode.props != newVNode.props) {
+			// 	// 	oldDom.data = newVNode.props;
+			// 	// }
+			// 	if (oldVNode.props != newVNode.props) {
+			// 		oldDom.data = newVNode.props;
+			// 	}
+			// 	newVNode._dom = oldDom;
+			// }
+			// else {
+			// 	newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
+			// }
+
 			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent);
 
 			if ((tmp = newVNode.ref) && (oldVNode.ref !== tmp)) {
@@ -225,6 +249,31 @@ export function commitRoot(mounts, root) {
 	if (options.commit) options.commit(root);
 }
 
+// function diffTextNodes(dom, newVNode, oldVNode, excessDomChildren) {
+// 	let i;
+// 	let oldProps = oldVNode.props;
+// 	let newProps = newVNode.props;
+
+// 	if (dom==null && excessDomChildren!=null) {
+// 		for (i=0; i<excessDomChildren.length; i++) {
+// 			const child = excessDomChildren[i];
+// 			if (child!=null && child.nodeType===3) {
+// 				dom = child;
+// 				excessDomChildren[i] = null;
+// 				break;
+// 			}
+// 		}
+// 	}
+
+// 	if (dom == null) {
+// 		return document.createTextNode(newProps);
+// 	}
+// 	if (oldProps !== newProps) {
+// 		dom.data = newProps;
+// 	}
+// 	return dom;
+// }
+
 /**
  * Diff two virtual nodes representing DOM element
  * @param {import('../internal').PreactElement} dom The DOM element representing
@@ -251,6 +300,8 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 	if (dom==null && excessDomChildren!=null) {
 		for (i=0; i<excessDomChildren.length; i++) {
 			const child = excessDomChildren[i];
+			// if (child!=null && child.localName===newVNode.type && child.nodeType!==8) {
+			// if (child!=null && child.localName==newVNode.type) {
 			if (child!=null && (newVNode.type===null ? child.nodeType===3 : child.localName===newVNode.type)) {
 				dom = child;
 				excessDomChildren[i] = null;
