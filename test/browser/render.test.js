@@ -95,6 +95,23 @@ describe('render()', () => {
 		expect(scratch.firstChild).to.have.property('nodeName', 'X-BAR');
 	});
 
+	it('should support the form attribute', () => {
+		render(
+			<div>
+				<form id="myform" />
+				<button form="myform">test</button>
+				<input form="myform" />
+			</div>,
+			scratch
+		);
+		const div = scratch.childNodes[0];
+		const form = div.childNodes[0];
+		const button = div.childNodes[1];
+		const input = div.childNodes[2];
+		expect(button).to.have.property('form', form);
+		expect(input).to.have.property('form', form);
+	});
+
 	it('should allow VNode reuse', () => {
 		let reused = <div class="reuse">Hello World!</div>;
 		render(<div>{reused}<span />{reused}</div>, scratch);
