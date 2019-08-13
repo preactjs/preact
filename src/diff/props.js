@@ -87,7 +87,15 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 			dom.removeEventListener(name, eventProxy, useCapture);
 		}
 	}
-	else if (name!=='list' && name!=='tagName' && !isSvg && (name in dom)) {
+	else if (
+		name!=='list'
+		&& name!=='tagName'
+		// HTMLButtonElement.form and HTMLInputElement.form are read-only but can be set using
+		// setAttribute
+		&& name!=='form'
+		&& !isSvg
+		&& (name in dom)
+	) {
 		dom[name] = value==null ? '' : value;
 	}
 	else if (typeof value!=='function' && name!=='dangerouslySetInnerHTML') {
