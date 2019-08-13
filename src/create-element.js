@@ -84,7 +84,7 @@ export function Fragment(props) {
  * @param {*} vnode
  * @returns {vnode is import('./internal').VNode}
  */
-export const isElement = vnode => vnode!=null && vnode.constructor === undefined;
+export const isValidElement = vnode => vnode!=null && vnode.constructor === undefined;
 
 /**
  * Coerce an untrusted value into a VNode
