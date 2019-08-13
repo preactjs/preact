@@ -73,6 +73,13 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 					// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
 					// We always match by type (in either case).
 					if (oldVNode && childVNode.key == oldVNode.key && childVNode.type === oldVNode.type) {
+
+						// // if this vnode will be an exact match later on, exempt it.
+						// const inPlaceVNode = newChildren[j];
+						// if (inPlaceVNode && inPlaceVNode.key == oldVNode.key && inPlaceVNode.type === oldVNode.type) {
+						// 	continue;
+						// }
+
 						oldChildren[j] = undefined;
 						break;
 					}
