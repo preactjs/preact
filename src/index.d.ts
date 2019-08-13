@@ -209,6 +209,7 @@ declare namespace preact {
 	// -----------------------------------
 	function createRef<T = any>(): RefObject<T>;
 	function toChildArray(children: ComponentChildren): Array<VNode | null>;
+	function isValidElement(vnode: any): vnode is VNode;
 
 	//
 	// Context
