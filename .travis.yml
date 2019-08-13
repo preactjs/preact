@@ -24,6 +24,7 @@ addons:
 
 script:
   - COVERAGE=true npm run test
-  - ./node_modules/coveralls/bin/coveralls.js < ./coverage/lcov.info;
+  # Disable coveralls until their outage is over: https://status.coveralls.io
+  #- ./node_modules/coveralls/bin/coveralls.js < ./coverage/lcov.info;
 
 after_success: sizereport --config
