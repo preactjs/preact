@@ -1,44 +1,71 @@
-import { createElement, Suspense, lazy, Component } from 'react';
-import { MemoryRouter as Router, Route, Switch } from 'react-router-dom';
+import { createElement, Suspense, lazy, Component } from "react";
 
-function delay(time) {
-	return new Promise((res) => {
-		setTimeout(res, time);
-	});
-}
+const Loading = function() {
+	return <div>Loading...</div>;
+};
+const Error = function({ resetState }) {
+	return (
+		<div>
+			Error!&nbsp;
+			<a onClick={resetState} href="#">
+				Reset app
+			</a>
+		</div>
+	);
+};
 
-let Hello = lazy(() => delay(1000).then(() => import('./hello.js')));
-let Bye = lazy(() => delay(10).then(() => import('./bye.js')));
+const pause = timeout =>
+	new Promise(d => setTimeout(d, timeout), console.log(timeout));
 
-class Loading extends Component {
+const DropZone = lazy(() =>
+	pause(Math.random() * 1000).then(() => import("./aduh95/dropzone.js"))
+);
+const Editor = lazy(() =>
+	pause(Math.random() * 1000).then(() => import("./aduh95/editor.js"))
+);
+const AddNewComponent = lazy(() =>
+	pause(Math.random() * 1000).then(() => import("./aduh95/addnewcomponent.js"))
+);
+const GenerateComponents = lazy(() =>
+	pause(Math.random() * 1000).then(() =>
+		import("./aduh95/component-container.js")
+	)
+);
 
-	get __e() {
-		console.log('get __e', this.myDom);
-		return this.myDom;
+export default class App extends Component {
+	state = { hasError: false };
+
+	static getDerivedStateFromError(error) {
+		// Update state so the next render will show the fallback UI.
+		console.warn(error);
+		return { hasError: true };
 	}
-	set __e(myDom) {
-		console.log('set __e', myDom);
-	   this.myDom = myDom;
-	}
+
 	render() {
-		return <div>Hey! This is a fallback because we're loading things! :D</div>;
-	}
-}
+		return this.state.hasError ? (
+			<Error resetState={() => this.setState({ hasError: false })} />
+		) : (
+			<Suspense fallback={<Loading />}>
+				<DropZone appearance={0} />
+				<Editor title="APP_TITLE">
+					<main>
+						<Suspense fallback={<Loading />}>
+							<GenerateComponents appearance={1} />
+						</Suspense>
+						<AddNewComponent appearance={2} />
+					</main>
+					<aside>
+						<section>
+							<Suspense fallback={<Loading />}>
+								<GenerateComponents appearance={3} />
+							</Suspense>
+							<AddNewComponent appearance={4} />
+						</section>
+					</aside>
+				</Editor>
 
-export default class SuspenseRouter extends Component {
-	render() {
-		return (
-			<div>
-				test
-				<Router>
-					<Suspense fallback={<Loading />}>
-						<Switch>
-							<Route path="/" exact component={Hello} />
-							<Route path="/bye" component={Bye} />
-						</Switch>
-					</Suspense>
-				</Router>
-			</div>
+				<footer>Footer here</footer>
+			</Suspense>
 		);
 	}
 }
