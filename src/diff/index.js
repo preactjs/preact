@@ -26,7 +26,7 @@ import options from '../options';
 export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, ancestorComponent, force, oldDom) {
 	// If the previous type doesn't match the new type we drop the whole subtree
 	if (oldVNode==null || newVNode==null || oldVNode.type!==newVNode.type || oldVNode.key!==newVNode.key) {
-		if (oldVNode!=null) unmount(oldVNode, ancestorComponent);
+		if (oldVNode!=null) unmount(oldVNode, ancestorComponent, false);
 		if (newVNode==null) return null;
 		oldVNode = EMPTY_OBJ;
 	}
@@ -191,6 +191,20 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		if (tmp = options.diffed) tmp(newVNode);
 	}
 	catch (e) {
+		newVNode._dom = oldDom;
+		if (excessDomChildren) {
+			// if (c) c.base = oldDom;
+			excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
+		}
+		// if (excessDomChildren!=null) {
+		// 	for (let i=0; i<excessDomChildren.length; i++) {
+		// 		const child = excessDomChildren[i];
+		// 		if (child==oldDom) {
+		// 			excessDomChildren[i] = null;
+		// 			break;
+		// 		}
+		// 	}
+		// }
 		catchErrorInComponent(e, ancestorComponent);
 	}
 
@@ -259,21 +273,22 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 			dom.data = newProps;
 		}
 	}
-	else {
-		if (excessDomChildren!=null && dom.childNodes!=null) {
-			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
+	else if (excessDomChildren!=null && dom.childNodes!=null) {
+		diffProps(dom, newProps, {}, isSvg);
+		// excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
+		diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, EMPTY_ARR.slice.call(dom.childNodes), mounts, ancestorComponent, EMPTY_OBJ);
 		}
-		if (newVNode!==oldVNode) {
+	else if (newVNode!==oldVNode) {
 			// if we're hydrating, use the element's attributes as its current props:
 			if (oldProps==null) {
 				oldProps = {};
-				if (excessDomChildren!=null) {
-					let name;
-					for (i=0; i<dom.attributes.length; i++) {
-						name = dom.attributes[i].name;
-						oldProps[name=='class' && newProps.className ? 'className' : name] = dom.attributes[i].value;
-					}
-				}
+			// if (excessDomChildren!=null) {
+			// 	let name;
+			// 	for (i=0; i<dom.attributes.length; i++) {
+			// 		name = dom.attributes[i].name;
+			// 		oldProps[name=='class' && newProps.className ? 'className' : name] = dom.attributes[i].value;
+			// 	}
+			// }
 			}
 			let oldHtml = oldProps.dangerouslySetInnerHTML;
 			let newHtml = newProps.dangerouslySetInnerHTML;
@@ -290,7 +305,6 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, ancestorComponent, EMPTY_OBJ);
 			diffProps(dom, newProps, oldProps, isSvg);
 		}
-	}
 
 	return dom;
 }
@@ -346,13 +360,19 @@ export function unmount(vnode, ancestorComponent, skipRemove) {
 		r.base = r._parentDom = null;
 		if (r = r._prevVNode) unmount(r, ancestorComponent, skipRemove);
 	}
-	else if (r = vnode._children) {
+	else {
+		if (dom) removeNode(dom);
+		// if (!skipRemove && dom && lastDomChild==null) removeNode(dom);
+
+		if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {
+				// if (r[i]) unmount(r[i], ancestorComponent, true);
 			if (r[i]) unmount(r[i], ancestorComponent, skipRemove);
 		}
 	}
+	}
 
-	if (dom!=null) removeNode(dom);
+	// if (dom!=null) removeNode(dom);
 }
 
 /** The `.render()` method for a PFC backing instance. */
