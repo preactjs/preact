@@ -368,13 +368,13 @@ function doRender(props, state, context) {
  */
 function catchErrorInComponent(error, component) {
 	// thrown Promises are meant to suspend...
-	let isSuspend = typeof error.then === 'function';
-	let suspendingComponent = component;
+	// let isSuspend = typeof error.then === 'function';
+	// let suspendingComponent = component;
 
 	for (; component; component = component._ancestorComponent) {
 		if (!component._processingException) {
 			try {
-				if (isSuspend) {
+				/*if (isSuspend) {
 					if (component._childDidSuspend) {
 						component._childDidSuspend(error);
 					}
@@ -382,7 +382,7 @@ function catchErrorInComponent(error, component) {
 						continue;
 					}
 				}
-				else if (component.constructor.getDerivedStateFromError!=null) {
+				else*/ if (component.constructor.getDerivedStateFromError!=null) {
 					component.setState(component.constructor.getDerivedStateFromError(error));
 				}
 				else if (component.componentDidCatch!=null) {
@@ -395,14 +395,14 @@ function catchErrorInComponent(error, component) {
 			}
 			catch (e) {
 				error = e;
-				isSuspend = false;
+				// isSuspend = false;
 			}
 		}
 	}
 
-	if (isSuspend) {
-		return catchErrorInComponent(new Error('Missing Suspense'), suspendingComponent);
-	}
+	// if (isSuspend) {
+	// 	return catchErrorInComponent(new Error('Missing Suspense'), suspendingComponent);
+	// }
 
 	throw error;
 }
