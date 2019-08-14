@@ -4,9 +4,9 @@ import { getVNodeType, getDisplayName, getAncestor, getOwners, getRoot, isRoot }
 import { cleanForBridge, cleanContext } from './pretty';
 import { inspectHooks } from './hooks';
 import { encode } from './util';
-import { getStringId, stringTable, allStrLengths, clearStringTable } from './string-table';
 import { shouldFilter } from './filter';
 import { getChangeDescription, setupProfileData } from './profiling';
+import { getAllStrLengths, getStringId } from './string-table';
 
 /**
  * Called when a tree has completed rendering
@@ -236,6 +236,7 @@ export function mount(state, vnode, parentId) {
  * @param {import('../internal').VNode} vnode
  */
 export function recordMount(state, vnode) {
+	const table = state.stringTable;
 	let id = getVNodeId(vnode);
 	if (isRoot(vnode)) {
 		state.currentCommit.operations.push(
@@ -255,8 +256,8 @@ export function recordMount(state, vnode) {
 			getVNodeType(vnode),
 			ancestor!=null ? getVNodeId(ancestor) : 0,
 			ancestor!=null && !isRoot(ancestor) ? getVNodeId(ancestor) : 0,
-			getStringId(getDisplayName(vnode)),
-			vnode.key ? getStringId(vnode.key + '') : 0
+			getStringId(table, getDisplayName(vnode)),
+			vnode.key ? getStringId(table, vnode.key + '') : 0
 		);
 	}
 
@@ -329,16 +330,21 @@ export function flushPendingEvents(hook, state) {
 		}
 	}
 
-	// We _must_ set the length on initialization
-	let ops = new Uint32Array(
+	const { stringTable } = state;
+	const allStrLengths = getAllStrLengths(stringTable);
+	let numUnmounts = unmountIds.length + (unmountRootId===null ? 0 : 1);
+
+	/**
+	 * @type {number[]}
+	 */
+	let ops = new Array(
 		2 + // Renderer id + root vnode id
 		1 + // string table length field
 		allStrLengths +
 		(unmountIds.length
 			// TREE_OPERATION_REMOVE + removed id length
-			? 2 + unmountIds.length
+			? 2 + numUnmounts
 			: 0) +
-		(unmountRootId===null ? 0 : 1) +
 		operations.length
 	);
 
@@ -350,28 +356,38 @@ export function flushPendingEvents(hook, state) {
 	ops[i++] = allStrLengths;
 	stringTable.forEach((_, k) => {
 		ops[i++] = k.length;
-		ops.set(encode(k), i);
+		const msg = encode(k);
+		for (let j = 0; j < msg.length; j++) {
+			ops[i + j] = msg[j];
+		}
 		i += k.length;
 	});
 
-	if (unmountIds.length) {
+	if (numUnmounts > 0) {
 		// All unmounts
 		ops[i++] = TREE_OPERATION_REMOVE;
 		// Total number of unmount ids
-		ops[i++] = unmountIds.length + (unmountRootId!=null ? 1 : 0);
+		ops[i++] = numUnmounts;
 
 		for (let j = 0; j < unmountIds.length; j++) {
 			ops[i + j] = unmountIds[j];
 		}
-		i += unmountIds.length;
-	}
 
-	if (unmountRootId!==null) {
-		ops[i++] = unmountRootId;
+		i += unmountIds.length;
+
+		if (unmountRootId!==null) {
+			ops[i] = unmountRootId;
+			i++;
+		}
 	}
 
 	// Finally add all pending operations
-	ops.set(operations, i);
+	// ops.set(operations, i);
+	// Fill in the rest of the operations.
+	for (let j = 0; j < operations.length; j++) {
+		ops[i + j] = operations[j];
+	}
+	i += operations.length;
 
 	if (state.connected) {
 		hook.emit('operations', ops);
@@ -385,7 +401,7 @@ export function flushPendingEvents(hook, state) {
 		unmountIds: [],
 		unmountRootId: null
 	};
-	clearStringTable();
+	stringTable.clear();
 }
 
 /**

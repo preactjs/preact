@@ -3,7 +3,6 @@ import { h, render, Component } from 'preact';
 import { memo, forwardRef } from "preact/compat";
 import { getInstance, isRoot, getVNodeType } from '../../../src/devtools/vnode';
 import { clearState } from '../../../src/devtools/cache';
-import { clearStringTable } from '../../../src/devtools/string-table';
 import { ElementTypeFunction, ElementTypeClass, ElementTypeHostComponent, ElementTypeMemo, ElementTypeForwardRef } from '../../../src/devtools/constants';
 
 /** @jsx h */
@@ -16,7 +15,6 @@ describe('devtools', () => {
 	beforeEach(() => {
 		scratch = setupScratch();
 		clearState();
-		clearStringTable();
 	});
 
 	afterEach(() => {

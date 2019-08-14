@@ -6,7 +6,6 @@ import { createMockDevtoolsHook, parseEmit } from './mock-hook';
 import { initDevTools } from '../../../src/devtools';
 import { clearState } from '../../../src/devtools/cache';
 import { inspectHooks } from '../../../src/devtools/hooks';
-import { clearStringTable } from '../../../src/devtools/string-table';
 
 /** @jsx h */
 
@@ -30,7 +29,6 @@ describe('devtools', () => {
 
 		teardownDevtools = initDevTools();
 		clearState();
-		clearStringTable();
 	});
 
 	afterEach(() => {

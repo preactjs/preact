@@ -1,33 +1,20 @@
 // TODO: Use a proper LRU cache?
-/** @type {Map<string, Uint32Array>} */
+/** @type {Map<string, number[]>} */
 let encoded = new Map();
 
 // Hoisted for perf
 const toCodePoint = s => s.codePointAt(0);
 
 /**
- * Convert a string to an Uint32Array
+ * Convert a string to an array of codepoints
  * @param {string} input
- * @returns {Uint32Array}
+ * @returns {number[]}
  */
 export function encode(input) {
 	if (!encoded.has(input)) {
-		encoded.set(input, Uint32Array.from(input, toCodePoint));
+		encoded.set(input, input.split('').map(toCodePoint));
 	}
 	return encoded.get(input);
-}
-
-/**
- * Append an encoded string to an array
- * @param {number[]} arr
- * @param {Uint32Array} input
- */
-export function append(arr, input) {
-	arr[arr.length] = input.length;
-	let len = arr.length;
-	for (let i = 0; i < input.length; i++) {
-		arr[len + i] = input[i];
-	}
 }
 
 /**

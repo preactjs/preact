@@ -20,6 +20,7 @@ export function createAdapter(config, hook) {
 	let state = {
 		connected: false,
 		currentRootId: -1,
+		stringTable: new Map(),
 		isProfiling: false,
 		vnodeDurations: new Map(),
 		initialDurations: new Map(),
