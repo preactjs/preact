@@ -1,4 +1,4 @@
-import { getStringId, getAllStrLengths } from '../../../src/devtools/string-table';
+import { getStringId, flushTable } from '../../../src/devtools/string-table';
 
 describe('devtools', () => {
 	describe('string-table', () => {
@@ -21,11 +21,34 @@ describe('devtools', () => {
 			});
 		});
 
-		describe('getAllStrLengths', () => {
-			it('should get the total length of all strings', () => {
-				expect(getAllStrLengths(new Map())).to.equal(0);
-				expect(getAllStrLengths(new Map([['foo', 1]]))).to.equal(4);
-				expect(getAllStrLengths(new Map([['foo', 1], ['bar', 2]]))).to.equal(8);
+		describe('flushTable', () => {
+			it('should return just length with empty table', () => {
+				const table = new Map();
+				expect(flushTable(table)).to.deep.equal([0]);
+			});
+
+			it('should convert string tables to code points', () => {
+				let table = new Map([['foo', 1]]);
+				expect(flushTable(table)).to.deep.equal([
+					4,
+					3,
+					102,
+					111,
+					111
+				]);
+
+				table = new Map([['foo', 1], ['bar', 2]]);
+				expect(flushTable(table)).to.deep.equal([
+					8,
+					3,
+					102,
+					111,
+					111,
+					3,
+					98,
+					97,
+					114
+				]);
 			});
 		});
 	});

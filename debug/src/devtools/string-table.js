@@ -1,3 +1,5 @@
+import { encode } from './util';
+
 /**
  * The string table holds a mapping of strings to ids. This saves a lot of space
  * in messaging because we can only need to declare a string once and can later
@@ -22,12 +24,17 @@ export function getStringId(table, input) {
 }
 
 /**
- * Get the total length that's neeeded to encode all strings
+ * Convert string table to something the extension understands
  * @param {import('../internal').AdapterState["stringTable"]} table
- * @returns {number}
+ * @returns {number[]}
  */
-export function getAllStrLengths(table) {
-	return Array.from(table.keys())
-		// One field for each character + field which holds the length
-		.reduce((acc, item) => acc + item.length + 1, 0);
+export function flushTable(table) {
+	let ops = [0];
+
+	table.forEach((_, k) => {
+		ops[0] += k.length + 1;
+		ops.push(k.length, ...encode(k));
+	});
+
+	return ops;
 }
