@@ -3,10 +3,9 @@ import { TREE_OPERATION_ADD, ElementTypeRoot, TREE_OPERATION_REMOVE, TREE_OPERAT
 import { getVNodeType, getDisplayName, getAncestor, getOwners, getRoot, isRoot } from './vnode';
 import { cleanForBridge, cleanContext } from './pretty';
 import { inspectHooks } from './hooks';
-import { encode } from './util';
 import { shouldFilter } from './filter';
 import { getChangeDescription, setupProfileData } from './profiling';
-import { getAllStrLengths, getStringId } from './string-table';
+import { flushTable, getStringId } from './string-table';
 
 /**
  * Called when a tree has completed rendering
@@ -319,81 +318,39 @@ export function recordProfiling(state, vnode, isNew) {
  * @param {import('../internal').AdapterState} state
  */
 export function flushPendingEvents(hook, state) {
-	let { unmountIds, unmountRootId, operations } = state.currentCommit;
-	if (
-		operations.length==0 &&
-		unmountIds.length==0 &&
-		unmountRootId==null
-	) {
-		if (!state.isProfiling) {
-			return;
-		}
-	}
-
-	const { stringTable } = state;
-	const allStrLengths = getAllStrLengths(stringTable);
+	const { stringTable, isProfiling, currentCommit } = state;
+	let { unmountIds, unmountRootId, operations } = currentCommit;
 	let numUnmounts = unmountIds.length + (unmountRootId===null ? 0 : 1);
 
-	/**
-	 * @type {number[]}
-	 */
-	let ops = new Array(
-		2 + // Renderer id + root vnode id
-		1 + // string table length field
-		allStrLengths +
-		(unmountIds.length
-			// TREE_OPERATION_REMOVE + removed id length
-			? 2 + numUnmounts
-			: 0) +
-		operations.length
-	);
+	if (operations.length==0 && numUnmounts > 0 && !isProfiling) {
+		return;
+	}
 
-	let i = 0;
-	ops[i++] = state.rendererId;
-	ops[i++] = state.currentRootId;
-
-	// Add string table
-	ops[i++] = allStrLengths;
-	stringTable.forEach((_, k) => {
-		ops[i++] = k.length;
-		const msg = encode(k);
-		for (let j = 0; j < msg.length; j++) {
-			ops[i + j] = msg[j];
-		}
-		i += k.length;
-	});
+	let msg = [
+		state.rendererId,
+		state.currentRootId,
+		...flushTable(stringTable)
+	];
 
 	if (numUnmounts > 0) {
-		// All unmounts
-		ops[i++] = TREE_OPERATION_REMOVE;
-		// Total number of unmount ids
-		ops[i++] = numUnmounts;
-
-		for (let j = 0; j < unmountIds.length; j++) {
-			ops[i + j] = unmountIds[j];
-		}
-
-		i += unmountIds.length;
+		msg.push(
+			TREE_OPERATION_REMOVE,
+			numUnmounts,
+			...unmountIds
+		);
 
 		if (unmountRootId!==null) {
-			ops[i] = unmountRootId;
-			i++;
+			msg.push(unmountRootId);
 		}
 	}
 
-	// Finally add all pending operations
-	// ops.set(operations, i);
-	// Fill in the rest of the operations.
-	for (let j = 0; j < operations.length; j++) {
-		ops[i + j] = operations[j];
-	}
-	i += operations.length;
+	msg.push(...operations);
 
 	if (state.connected) {
-		hook.emit('operations', ops);
+		hook.emit('operations', msg);
 	}
 	else {
-		state.pendingCommits.push(ops);
+		state.pendingCommits.push(msg);
 	}
 
 	state.currentCommit = {
