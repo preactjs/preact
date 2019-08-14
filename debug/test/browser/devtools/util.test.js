@@ -1,7 +1,7 @@
 import { setupScratch, teardown } from '../../../../test/_util/helpers';
 import { h, Component, Fragment } from 'preact';
 import { forwardRef, memo } from 'preact/compat';
-import { setIn } from '../../../src/devtools/util';
+import { setIn, encode } from '../../../src/devtools/util';
 import { getDisplayName } from '../../../src/devtools/vnode';
 
 /** @jsx h */
@@ -17,6 +17,13 @@ describe('devtools', () => {
 
 	afterEach(() => {
 		teardown(scratch);
+	});
+
+	describe('encode', () => {
+		it('should encode a string to code points', () => {
+			expect(encode('')).to.deep.equal([]);
+			expect(encode('foo')).to.deep.equal([102, 111, 111]);
+		});
 	});
 
 	describe('setIn', () => {

@@ -258,12 +258,15 @@ export interface CommitProfileData {
 	changed: Map<number, ChangeDescription>;
 }
 
+export type stringTable = Map<string, number>;
+
 export interface AdapterState {
 	connected: boolean;
 	rendererId: number;
+	stringTable: stringTable;
 	currentRootId: number;
 	/** If the devtools are not connected we store pending commits here */
-	pendingCommits: Uint32Array[];
+	pendingCommits: number[][];
 	currentCommit: Commit;
 	currentProfilingData: CommitProfileData
 	/** Profile data by root id */
