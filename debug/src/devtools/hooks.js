@@ -123,18 +123,21 @@ export function inspectHooks(vnode) {
 			: '';
 
 		let hookType = nativeHookTypes[native];
-		let currentHook = vnode._component.__hooks._list[native++];
+		let currentHook = isNative
+			? vnode._component.__hooks._list[native++]
+			: null;
+
 
 		// Must be `undefined` if not set, because `null` is a valid value
 		let value;
-		if (editable) {
-			value = currentHook._value[0];
-		}
-		else if (!isNative && debugValues.has(id)) {
+		if (!isNative && debugValues.has(id)) {
 			value = debugValues.get(id);
 		}
 		else if (isNative) {
-			if (hookType === USE_MEMO || hookType === USE_REF) {
+			if (editable) {
+				value = currentHook._value[0];
+			}
+			else if (hookType === USE_MEMO || hookType === USE_REF) {
 				value = currentHook._value;
 			}
 			else if (hookType === USE_CONTEXT) {

@@ -192,7 +192,7 @@ export function useContext(context) {
 	const state = getHookState(currentIndex++);
 	// This is probably not safe to convert to "!"
 	if (state._value == null) {
-		state._value = true;
+		state._value = context;
 		provider.sub(currentComponent);
 	}
 	return provider.props.value;
