@@ -693,13 +693,13 @@ describe('devtools', () => {
 			}
 
 			render(<Foo />, scratch);
-			let vnode = scratch._prevVNode._children[0];
-			expect(inspectHooks(vnode)).to.deep.equal({
+			let vnode = scratch._children._children[0];
+			expect(inspectHooks(vnode)).to.deep.equal([{
 				id: 0,
 				name: 'state',
 				value: 0,
 				subHooks: []
-			});
+			}]);
 		});
 	});
 });
