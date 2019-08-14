@@ -108,8 +108,12 @@ describe('render()', () => {
 		const form = div.childNodes[0];
 		const button = div.childNodes[1];
 		const input = div.childNodes[2];
-		expect(button).to.have.property('form', form);
-		expect(input).to.have.property('form', form);
+
+		// IE11 doesn't support the form attribute
+		if (!/(Trident)/.test(navigator.userAgent)) {
+			expect(button).to.have.property('form', form);
+			expect(input).to.have.property('form', form);
+		}
 	});
 
 	it('should allow VNode reuse', () => {
