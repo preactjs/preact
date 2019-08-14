@@ -5,6 +5,8 @@ import { startProfiling, getProfilingData, stopProfiling, setupProfileData } fro
 import { setInProps, setInState } from './update';
 import { setInHook } from './hooks';
 import { selectElement, getVNodePath, createSelectionStore } from './selection';
+import { getOwners } from './vnode';
+import { getVNode } from './cache';
 
 /**
  * Create an adapter instance for the devtools
@@ -63,14 +65,10 @@ export function createAdapter(config, hook) {
 		inspectElement,
 		updateComponentFilters: applyFilters,
 		logElementToConsole,
-		getOwnersList() {
-			// TODO
-			// eslint-disable-next-line no-console
-			console.warn('TODO: getOwnersList() not implemented');
-			return null;
+		getOwnersList(id) {
+			return getOwners(getVNode(id));
 		},
 		flushInitialOperations: () => flushInitialEvents(hook, state, win.__REACT_DEVTOOLS_COMPONENT_FILTERS__),
-		// TODO: Check if the following properties are still needed
 		setInProps,
 		setInState,
 		setInHook,
