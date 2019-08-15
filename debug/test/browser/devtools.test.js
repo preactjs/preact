@@ -1,19 +1,23 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, createElement as h, Fragment, options, Component, render } from 'preact';
-import { getDisplayName, setIn, isRoot, getData, shallowEqual, hasDataChanged, getChildren } from '../../src/devtools/custom';
+import { createElement, h, Fragment, options, Component, render } from 'preact';
+import { getData, shallowEqual, hasDataChanged, getChildren } from '../../src/devtools/legacy/data';
+import { getDisplayName, isRoot } from '../../src/devtools/vnode';
+import { setIn } from '../../src/devtools/util';
 import { setupScratch, teardown, clearOptions } from '../../../test/_util/helpers';
 import { initDevTools } from '../../src/devtools';
-import { Renderer } from '../../src/devtools/renderer';
+import { Renderer } from '../../src/devtools/legacy/renderer';
 import { memo, forwardRef, createPortal } from '../../../compat/src';
 
 /** @jsx h */
 
-/** @typedef {import('../../src/internal').DevtoolsHook & { log: any[], clear: () => void }} MockHook */
+/** @typedef {import('../../src/internal').VNode} VNode */
+/** @typedef {import('../../src/devtools/legacy').DevtoolsEvent} DevtoolsEvent */
+/** @typedef {import('../../src/devtools/legacy').LegacyDevtoolsHook & { log: any[], clear: () => void }} MockHook */
 
 /**
  * Serialize a devtool events and filter out `updateProfilerTimes` because it
  * relies on timings which would lead to flaky tests.
- * @param {import('../../src/internal').DevtoolsEvent[]} events
+ * @param {import('../../src/devtools/legacy').DevtoolsEvent[]} events
  */
 function serialize(events) {
 	return events.filter(x => x.type!='updateProfileTimes').map(x => ({
@@ -30,7 +34,7 @@ function serialize(events) {
 function createMockHook() {
 	let roots = new Set();
 
-	/** @type {Array<import('../../src/internal').DevtoolsEvent>} */
+	/** @type {Array<DevtoolsEvent>} */
 	let events = [];
 
 	function emit(ev, data) {
@@ -70,15 +74,15 @@ function createMockHook() {
 
 /**
  * Check if the event has been seen (=mounted in most cases) before.
- * @param {import('../../src/internal').VNode} event
- * @param {Set<import('../../src/internal').VNode>} seen
+ * @param {VNode} vnode
+ * @param {Set<VNode>} seen
  * @returns {boolean}
  */
 function checkPreceding(vnode, seen) {
 	if (vnode==null) return true;
 
 	// If a leaf node is a Fragment and has no children it will be skipped
-	if (vnode.type===Fragment && vnode._children==0) return true;
+	if (vnode.type===Fragment && (vnode._children==null || vnode._children.length===0)) return true;
 
 	return seen.has(vnode);
 }
@@ -86,7 +90,7 @@ function checkPreceding(vnode, seen) {
 /**
  * Verify the references in the events passed to the devtools. Component have to
  * be traversed in a child-depth-first order for the devtools to work.
- * @param {Array<import('../../src/internal').DevtoolsEvent>} events
+ * @param {Array<DevtoolsEvent>} events
  */
 function checkEventReferences(events) {
 	let seen = new Set();

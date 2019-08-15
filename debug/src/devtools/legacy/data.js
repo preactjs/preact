@@ -1,10 +1,12 @@
 /* istanbul ignore file */
 import { Component, Fragment } from 'preact';
+import { getDisplayName, getInstance } from '../vnode';
+import { setIn } from '../util';
 
 /**
  * Get the type/category of a vnode
- * @param {import('../internal').VNode} vnode
- * @returns {import('../internal').NodeType}
+ * @param {import('.').VNode} vnode
+ * @returns {import('.').NodeType}
  */
 export function getNodeType(vnode) {
 	if (vnode.type===Fragment) return 'Wrapper';
@@ -14,40 +16,14 @@ export function getNodeType(vnode) {
 }
 
 /**
- * Get human readable name of the component/dom element
- * @param {import('../internal').VNode} vnode
- * @returns {string}
- */
-export function getDisplayName(vnode) {
-	if (vnode.type===Fragment) return 'Fragment';
-	else if (typeof vnode.type==='function') return vnode.type.displayName || vnode.type.name;
-	else if (typeof vnode.type==='string') return vnode.type;
-	return '#text';
-}
-
-/**
- * Deeply mutate a property by walking down an array of property keys
- * @param {object} obj
- * @param {Array<string | number>} path
- * @param {any} value
- */
-export function setIn(obj, path, value) {
-	let last = path.pop();
-	let parent = path.reduce((acc, attr) => acc ? acc[attr] : null, obj);
-	if (parent) {
-		parent[last] = value;
-	}
-}
-
-/**
  * Get devtools compatible data from vnode
- * @param {import('../internal').VNode} vnode
- * @returns {import('../internal').DevtoolData}
+ * @param {import('.').VNode} vnode
+ * @returns {import('.').LegacyDevtoolData}
  */
 export function getData(vnode) {
 	let c = vnode._component;
 
-	/** @type {import('../internal').DevtoolsUpdater | null} */
+	/** @type {import('../../internal').DevtoolsUpdater | null} */
 	let updater = null;
 
 	if (c!=null && c instanceof Component) {
@@ -105,8 +81,8 @@ export function getData(vnode) {
 /**
  * Get all rendered vnode children as an array. Moreover we need to filter
  * out `null` or other falsy children.
- * @param {import('../internal').VNode} vnode
- * @returns {import('../internal').VNode[]}
+ * @param {import('.').VNode} vnode
+ * @returns {import('.').VNode[]}
  */
 export function getChildren(vnode) {
 	if (vnode._component==null) {
@@ -114,42 +90,6 @@ export function getChildren(vnode) {
 	}
 
 	return vnode._children != null ? vnode._children.filter(Boolean) : null;
-}
-
-/**
- * Check if a vnode is a root node
- * @param {import('../internal').VNode} vnode
- * @returns {boolean}
- */
-export function isRoot(vnode) {
-	// Timings of root vnodes will never be set
-	return vnode.type===Fragment && vnode._parent === null;
-}
-
-/**
- * Cache a vnode by its instance and retrieve previous vnodes by the next
- * instance.
- *
- * We need this to be able to identify the previous vnode of a given instance.
- * For components we want to check if we already rendered it and use the class
- * instance as key. For html elements we use the dom node as key.
- *
- * @param {import('../internal').VNode} vnode
- * @returns {import('../internal').Component | import('../internal').PreactElement | Text | null}
- */
-export function getInstance(vnode) {
-	// Use the parent element as instance for root nodes
-	if (isRoot(vnode)) {
-		// Edge case: When the tree only consists of components that have not rendered
-		// anything into the DOM we revert to using the vnode as instance.
-		return vnode._children.length > 0 && vnode._children[0]!=null && vnode._children[0]._dom!=null
-			? /** @type {import('../internal').PreactElement | null} */
-			(vnode._children[0]._dom.parentNode)
-			: vnode;
-	}
-	if (vnode._component!=null) return vnode._component;
-	if (vnode.type===Fragment) return vnode.props;
-	return vnode._dom;
 }
 
 /**
@@ -173,8 +113,8 @@ export function shallowEqual(a, b, isProps) {
 
 /**
  * Check if a vnode was actually updated
- * @param {import('../internal').VNode} next
- * @param {import('../internal').VNode} prev
+ * @param {import('../../internal').VNode} next
+ * @param {import('../../internal').VNode} prev
  * @returns {boolean}
  */
 export function hasDataChanged(prev, next) {

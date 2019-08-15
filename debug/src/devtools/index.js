@@ -1,45 +1,25 @@
 /* istanbul ignore file */
-import { options, Component, Fragment } from 'preact';
-import { Renderer } from './renderer';
+import { options, Component } from 'preact';
+import { now, catchErrors } from './util';
+import { createLegacyAdapter } from './legacy/connect';
 
-/**
- * Wrap function with generic error logging
- *
- * @param {*} fn
- * @returns
- */
-function catchErrors(fn) {
-	return function(arg) {
-		try {
-			return fn(arg);
-		}
-		catch (e) {
-			/* istanbul ignore next */
-			console.error('The react devtools encountered an error');
-			/* istanbul ignore next */
-			console.error(e); // eslint-disable-line no-console
-		}
-	};
-}
-
-/* istanbul ignore next */
 let noop = () => undefined;
 
 export function initDevTools() {
-	// This global variable is injected by the devtools
+
 	/** @type {import('../internal').DevtoolsWindow} */
-	let hook = (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
-	if (hook==null) return;
+	let win = /** @type {*} */ (window);
+
+	// This global variable is injected by the devtools
+	let hook = win.__REACT_DEVTOOLS_GLOBAL_HOOK__;
+
+	if (hook==null || hook.isDisabled) return;
 
 	/** @type {(vnode: import('../internal').VNode) => void} */
 	let onCommitRoot = noop;
 
 	/** @type {(vnode: import('../internal').VNode) => void} */
 	let onCommitUnmount = noop;
-
-	// Initialize our custom renderer
-	let rid = Math.random().toString(16).slice(2);
-	let preactRenderer = new Renderer(hook, rid);
 
 	catchErrors(() => {
 		let isDev = false;
@@ -51,62 +31,24 @@ export function initDevTools() {
 		// Tell devtools which bundle type we run in
 		window.parent.postMessage({
 			source: 'react-devtools-detector',
-			reactBuildType: /* istanbul ignore next */  isDev
+			reactBuildType: isDev
 				? 'development'
 				: 'production'
 		}, '*');
 
-		let renderer = {
-			bundleType: /* istanbul ignore next */  isDev ? 1 : 0,
-			version: '16.5.2',
-			rendererPackageName: 'preact',
-			// We don't need this, but the devtools `attachRenderer` function relys
-			// it being there.
-			findHostInstanceByFiber(vnode) {
-				return vnode._dom;
-			},
-			// We don't need this, but the devtools `attachRenderer` function relys
-			// it being there.
-			findFiberByHostInstance(instance) {
-				return preactRenderer.inst2vnode.get(instance) || null;
-			}
+		/** @type {import('../internal').RendererConfigBase} */
+		let config = {
+			bundleType: isDev ? 1 : 0,
+			version: '16.9.0',
+			rendererPackageName: 'preact'
 		};
 
-		hook._renderers[rid] = renderer;
+		let adapter = createLegacyAdapter(config, hook);
 
-		// We can't bring our own `attachRenderer` function therefore we simply
-		// prevent the devtools from overwriting our custom renderer by creating
-		// a noop setter.
-		Object.defineProperty(hook.helpers, rid, {
-			get: () => preactRenderer,
-			set: () => {
-				if (!preactRenderer.connected) {
-					helpers.markConnected();
-				}
-			}
-		});
+		onCommitRoot = root => adapter.onCommitRoot(root);
+		onCommitUnmount = vnode => adapter.onCommitUnmount(vnode);
 
-		let helpers = hook.helpers[rid];
-
-		// Tell the devtools that we are ready to start
-		hook.emit('renderer-attached', {
-			id: rid,
-			renderer,
-			helpers
-		});
-
-		onCommitRoot = catchErrors(root => {
-			// Empty root
-			if (root.type===Fragment && root._children.length==0) return;
-
-			let roots = hook.getFiberRoots(rid);
-			root = helpers.handleCommitFiberRoot(root);
-			if (!roots.has(root)) roots.add(root);
-		});
-
-		onCommitUnmount = catchErrors(vnode => {
-			hook.onCommitFiberUnmount(rid, vnode);
-		});
+		adapter.connect();
 	})();
 
 	// Store (possible) previous hooks so that we don't overwrite them
@@ -134,8 +76,15 @@ export function initDevTools() {
 		if (prevBeforeDiff!=null) prevBeforeDiff(vnode);
 	};
 
-	options.diffed = (vnode) => {
+	options.diffed = (vnode, oldVNode) => {
 		vnode.endTime = now();
+		let c;
+		if (vnode!=null && (c = vnode._component)!=null && c.__hooks!=null) {
+			c._prevProps = oldVNode!=null ? oldVNode.props : null;
+			c._prevContext = oldVNode!=null && oldVNode._component!=null ? oldVNode._component._context : null;
+			c._prevHooksRevision = c._currentHooksRevision;
+			c._currentHooksRevision = c.__hooks._list.reduce((acc, x) => acc + x._revision, 0);
+		}
 		if (prevAfterDiff!=null) prevAfterDiff(vnode);
 	};
 
@@ -165,16 +114,13 @@ export function initDevTools() {
 
 		return setState.call(this, update, callback);
 	};
-}
 
-/**
- * Get current timestamp in ms. Used for profiling.
- * @returns {number}
- */
-export let now = Date.now;
-
-try {
-	/* istanbul ignore else */
-	now = performance.now.bind(performance);
+	// Teardown devtools options. Mainly used for testing
+	return () => {
+		options.unmount = prevBeforeUnmount;
+		options._commit = prevCommitRoot;
+		options.diffed = prevAfterDiff;
+		options._diff = prevBeforeDiff;
+		options.vnode = prevVNodeHook;
+	};
 }
-catch (e) {}

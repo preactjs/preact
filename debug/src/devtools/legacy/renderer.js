@@ -1,5 +1,6 @@
 /* istanbul ignore file */
-import { getData, getChildren, getInstance, hasDataChanged, isRoot } from './custom';
+import { getData, getChildren, hasDataChanged } from './data';
+import { getRoot, getInstance, isRoot } from '../vnode';
 
 /**
  * Custom renderer tailored for Preact. It converts updated vnode trees
@@ -13,7 +14,7 @@ export class Renderer {
 		this.rid = rid;
 		this.hook = hook;
 
-		/** @type {Array<import('../internal').DevtoolsEvent>} */
+		/** @type {import('.').DevtoolsEvent[]} */
 		this.pending = [];
 
 		/**
@@ -21,7 +22,7 @@ export class Renderer {
 		 * vnode needs to be mounted or updated. For components the instance refers
 		 * to the actuall class instance whereas for dom nodes it refers to the
 		 * underlying dom element.
-		 * @type {WeakMap<import('../internal').Component | import('../internal').PreactElement | HTMLElement | Text, import('../internal').VNode>}
+		 * @type {import('.').InstanceCache}
 		 */
 		this.inst2vnode = new WeakMap();
 		this.connected = false;
@@ -54,13 +55,13 @@ export class Renderer {
 	 * Recursively mount a vnode tree. Note that the devtools expects the tree to
 	 * be mounted from the bottom up, otherwise the order will be messed up.
 	 * Therefore we mount children prior to mounting the vnode itself.
-	 * @param {import('../internal').VNode} vnode
+	 * @param {import('.').VNode} vnode
 	 */
 	mount(vnode) {
 		this.inst2vnode.set(getInstance(vnode), vnode);
 		let data = getData(vnode);
 
-		/** @type {Array<import('../internal').DevtoolsEvent>} */
+		/** @type {Array<import('.').DevtoolsEvent>} */
 		let work = [{
 			internalInstance: vnode,
 			data,
@@ -106,7 +107,7 @@ export class Renderer {
 
 	/**
 	 * Update a vnode tree
-	 * @param {import('../internal').VNode} vnode
+	 * @param {import('.').VNode} vnode
 	 */
 	update(vnode) {
 		let data = getData(vnode);
@@ -164,7 +165,7 @@ export class Renderer {
 	 * Pass a rendered tree to the devtools. At this point elements have already
 	 * unmounted, so we don't need to check for removals and only update vs mount
 	 * instead.
-	 * @param {import('../internal').VNode} vnode
+	 * @param {import('.').VNode} vnode
 	 */
 	handleCommitFiberRoot(vnode) {
 		let inst = getInstance(vnode);
@@ -175,7 +176,7 @@ export class Renderer {
 		// The devtools checks via the existence of this property if the devtools
 		// profiler should be enabled or not. If it is missing from the first root
 		// node the "Profiler" tab won't show up.
-		/** @type {import('../internal').VNode} */
+		/** @type {import('.').VNode} */
 		let root = null;
 		if (isRoot(vnode)) {
 
@@ -187,10 +188,7 @@ export class Renderer {
 			// "rootCommitted" always needs the actual root node for the profiler
 			// to be able to collect timings. The `_parent` property will
 			// point to a vnode for a root node.
-			root = vnode;
-			while (root._parent!=null) {
-				root = root._parent;
-			}
+			root = getRoot(vnode);
 		}
 
 		this.pending.push({
@@ -208,7 +206,7 @@ export class Renderer {
 	 * Unmount a vnode recursively. Contrary to mounting or updating unmounting needs
 	 * to push the events in parent-first order. Because `options.unmount` is
 	 * already fired in parent-first order we don't need to traverse anything here.
-	 * @param {import('../internal').VNode} vnode
+	 * @param {import('.').VNode} vnode
 	 */
 	handleCommitFiberUnmount(vnode) {
 		let inst = getInstance(vnode);
@@ -227,8 +225,8 @@ export class Renderer {
 
 	/**
 	 * Get the dom element by a vnode
-	 * @param {import('../internal').VNode} vnode
-	 * @returns {import('../internal').PreactElement | Text}
+	 * @param {import('.').VNode} vnode
+	 * @returns {import('.').PreactElement | Text}
 	 */
 	getNativeFromReactElement(vnode) {
 		return vnode._dom;
@@ -236,8 +234,8 @@ export class Renderer {
 
 	/**
 	 * Get a vnode by a dom element
-	 * @param {import('../internal').PreactElement | Text} dom
-	 * @returns {import('../internal').VNode | null}
+	 * @param {import('.').PreactElement | Text} dom
+	 * @returns {import('.').VNode | null}
 	 */
 	getReactElementFromNative(dom) {
 		return this.inst2vnode.get(dom) || null;
