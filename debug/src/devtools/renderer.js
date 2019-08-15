@@ -235,7 +235,7 @@ export function mount(state, vnode, parentId) {
  * @param {import('../internal').VNode} vnode
  */
 export function recordMount(state, vnode) {
-	const table = state.stringTable;
+	const { currentCommit, filter, stringTable } = state;
 	let id = getVNodeId(vnode);
 	if (isRoot(vnode)) {
 		state.currentCommit.operations.push(
@@ -248,15 +248,15 @@ export function recordMount(state, vnode) {
 		state.currentRootId = id;
 	}
 	else {
-		let ancestor = getAncestor(state.filter, vnode);
-		state.currentCommit.operations.push(
+		let ancestor = getAncestor(filter, vnode);
+		currentCommit.operations.push(
 			TREE_OPERATION_ADD,
 			id,
 			getVNodeType(vnode),
 			ancestor!=null ? getVNodeId(ancestor) : 0,
 			ancestor!=null && !isRoot(ancestor) ? getVNodeId(ancestor) : 0,
-			getStringId(table, getDisplayName(vnode)),
-			vnode.key ? getStringId(table, vnode.key + '') : 0
+			getStringId(stringTable, getDisplayName(vnode)),
+			vnode.key ? getStringId(stringTable, vnode.key + '') : 0
 		);
 	}
 
