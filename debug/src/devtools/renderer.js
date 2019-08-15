@@ -242,8 +242,8 @@ export function recordMount(state, vnode) {
 			TREE_OPERATION_ADD,
 			id,
 			ElementTypeRoot,
-			1,
-			1
+			1, // supports profiling
+			1 // has owner metadata
 		);
 		state.currentRootId = id;
 	}
