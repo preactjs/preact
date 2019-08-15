@@ -1,7 +1,7 @@
 import { updateComponentFilters } from './filter';
 import { assign } from '../../../src/util';
 import { findDomForVNode, inspectElement, logElementToConsole, flushInitialEvents, onCommitFiberRoot, onCommitFiberUnmount } from './renderer';
-import { startProfiling, getProfilingData, stopProfiling, setupProfileData } from './profiling';
+import { startProfiling, getProfilingData, stopProfiling } from './profiling';
 import { setInProps, setInState } from './update';
 import { setInHook } from './hooks';
 import { selectElement, getVNodePath, createSelectionStore } from './selection';
