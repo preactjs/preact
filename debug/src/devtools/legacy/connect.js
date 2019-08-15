@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import { Fragment } from 'preact';
 import { assign } from '../../../../src/util';
 import { Renderer } from './renderer';
