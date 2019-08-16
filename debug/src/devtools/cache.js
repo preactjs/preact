@@ -1,86 +1,49 @@
 import { getInstance } from './vnode';
 
-let uid = 0;
-
-/** Generate an id that will be used to tag vnodes */
-export function genUuid() {
-	return ++uid;
-}
-
-/** @type {WeakMap<any, number> | null} */
-let vnodeToId = null;
-
-/** @type {Map<number, import('../internal').VNode> | null} */
-let idToVNode = null;
-
 /**
- * Get the unique id of a vnode
- * @param {import('../internal').VNode} vnode
+ * VNode relationships are encoded as simple numbers for the devtools. We use
+ * this function to keep track of existing id's and create new ones if needed.
+ * @returns {import('./devtools').IdMapper}
  */
-export function getVNodeId(vnode) {
-	// Lazily initialize cache so that IE11 won't crash when `preact/debug` was
-	// imported somewhere
-	if (vnodeToId==null) {
-		vnodeToId = new WeakMap();
-	}
-	if (idToVNode==null) {
-		idToVNode = new Map();
-	}
+export function createIdMapper() {
+	const vnodeToId = new WeakMap();
+	const idToVNode = new Map();
+	let uuid = 0;
 
-	let inst = getInstance(vnode);
-	if (!vnodeToId.has(inst)) {
-		vnodeToId.set(inst, genUuid());
-	}
+	const getVNode = id => idToVNode.get(id) || null;
+	const hasId = vnode => vnode!=null && vnodeToId.has(getInstance(vnode));
+	const getId = vnode => {
+		let inst = getInstance(vnode);
+		if (!vnodeToId.has(inst)) vnodeToId.set(inst, uuid++);
+		let id = vnodeToId.get(inst);
+		idToVNode.set(id, vnode);
+		return id;
+	};
+	const remove = vnode => {
+		const id = getId(vnode);
+		if (id!=null) idToVNode.delete(id);
+		vnodeToId.delete(getInstance(vnode));
+	};
 
-	let id = vnodeToId.get(inst);
-	idToVNode.set(id, vnode);
-	return id;
-}
-
-/**
- * Check if a vnode was seen before
- * @param {import('../internal').VNode} vnode
- */
-export function hasVNodeId(vnode) {
-	return vnode!=null && vnodeToId!=null && vnodeToId.has(getInstance(vnode));
-}
-
-/**
- * Get a vnode by id
- * @param {number} id
- * @returns {import('../internal').VNode | null}
- */
-export function getVNode(id) {
-	return idToVNode.get(id) || null;
+	return { getVNode, hasId, getId, remove };
 }
 
 /**
  * Remove a vnode from all caches
+ * @param {import('./devtools').IdMapper} mapper
+ * @param {import('./devtools').Linker} linker
  * @param {import('../internal').VNode} vnode The vnode to remove
  */
-export function clearVNode(vnode) {
+export function clearVNode(mapper, linker, vnode) {
 	let children = vnode._children || [];
 	for (let i = 0; i < children.length; i++) {
 		if (children[i]!=null) {
-			clearVNode(children[i]);
+			clearVNode(mapper, linker, children[i]);
 		}
 	}
 
-	if (hasVNodeId(vnode)) {
-		let id = getVNodeId(vnode);
-		if (oldChildren.has(id)) {
-			oldChildren.delete(id);
-		}
-		idToVNode.delete(id);
-	}
-	vnodeToId.delete(getInstance(vnode));
-}
-
-// Only used for testing
-export function clearState() {
-	uid = 0;
-	vnodeToId = null;
-	idToVNode = null;
+	linker.remove(mapper.getId(vnode));
+	mapper.remove(vnode);
 }
 
 /**
@@ -90,41 +53,21 @@ export function clearState() {
  * That's why we'll use this map to cache the previous children relation of a
  * vnode. Note that we don't care about anything else, so we can effectively
  * skip storing the whole vnode and just store the id.
- * @type {Map<number, number[]> | null}
+ *
+ * @returns {import('./devtools').Linker}
  */
-let oldChildren = new Map();
+export function createLinker() {
+	const m = new Map();
 
-/**
- * Add a child to a parent representing the filtered tree
- * @param {number} parentId The parent to add the child to
- * @param {number} childId The child to add to the parent
- */
-export function addChildToParent(parentId, childId) {
-	if (!oldChildren.has(parentId)) {
-		oldChildren.set(parentId, []);
-	}
+	const get = id => m.get(id) || [];
+	const remove = id => m.delete(id);
+	const link = (parent, child) => {
+		if (!m.has(parent)) m.set(parent, []);
+		m.get(parent).push(child);
+	};
+	const unlink = (parent, child) => {
+		m.has(parent) && m.set(parent, m.get(parent).filter(id => id!=child));
+	};
 
-	oldChildren.get(parentId).push(childId);
-}
-
-/**
- * Remove a child from a filtered parent
- * @param {number} parentId The parent to remove the child from
- * @param {number} childId The child to remove
- */
-export function removeChildFromParent(parentId, childId) {
-	if (oldChildren.has(parentId)) {
-		oldChildren.set(parentId, oldChildren.get(parentId).filter(x => x!=childId));
-	}
-}
-
-/**
- * Get the previous children ids
- * @param {import('../internal').VNode} vnode The vnode whose children to retrieve
- * @returns {number[]}
- */
-export function getPreviousChildrenIds(vnode) {
-	if (!hasVNodeId(vnode)) return [];
-	let id = getVNodeId(vnode);
-	return oldChildren.has(id) ? oldChildren.get(id) : [];
+	return { link, unlink, remove, get };
 }

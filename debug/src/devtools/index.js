@@ -1,5 +1,5 @@
 import { options, Component } from 'preact';
-import { now, catchErrors, getDevtoolsVersion } from './util';
+import { now, catchErrors } from './util';
 import { createAdapter } from './connect';
 import { SESSION_STORAGE_RELOAD_AND_PROFILE_KEY } from './constants';
 
@@ -43,19 +43,11 @@ export function initDevTools() {
 			rendererPackageName: 'preact'
 		};
 
-		let version = getDevtoolsVersion(win);
-		let adapter;
-		switch (version) {
-			case 4:
-				adapter = createAdapter(config, /** @type {*} */ (hook));
+		const adapter = createAdapter(config, /** @type {*} */ (hook));
 
-				// Necessary for "reload-and-profile" feature
-				if (window.sessionStorage.getItem(SESSION_STORAGE_RELOAD_AND_PROFILE_KEY)==='true') {
-					adapter.renderer.startProfiling();
-				}
-				break;
-			default:
-				throw new Error(`No adapter found for devtools version: ${version}`);
+		// Necessary for "reload-and-profile" feature
+		if (window.sessionStorage.getItem(SESSION_STORAGE_RELOAD_AND_PROFILE_KEY)==='true') {
+			adapter.renderer.startProfiling();
 		}
 
 		onCommitRoot = root => adapter.onCommitRoot(root);

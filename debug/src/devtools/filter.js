@@ -1,67 +1,81 @@
-import { unmount, mount, flushPendingEvents, recordUnmount } from './renderer';
+import { unmount, mountTree, recordUnmount } from './renderer';
 import { FilterElementType, FilterDisplayName as FilterName, FilterLocation, FilterHOC } from './constants';
 import { Fragment } from '../../../src';
 import { getVNodeType, getDisplayName, isRoot } from './vnode';
-import { getVNodeId } from './cache';
 
 /**
- * Update the currently active component filters by unmounting all roots,
- * applying all filters and then remounting all roots again
- * @param {import('../internal').DevtoolsHook} hook
- * @param {import('../internal').AdapterState} state
- * @returns {(filters: Array<import('../internal').Filter>) => void}
+ * @returns {import('./devtools').FilterState}
  */
-export function updateComponentFilters(hook, state) {
-	return filters => {
-		// Unmount all currently active roots
-		hook.getFiberRoots(state.rendererId).forEach(root => {
-			unmount(state, root._children[0]);
-			recordUnmount(state, root._children[0]);
-			state.currentRootId = -1;
-		});
-
-		updateFilterState(state.filter, filters);
-
-		hook.getFiberRoots(state.rendererId).forEach(root => {
-			state.currentRootId = getVNodeId(root);
-			mount(state, root._children[0], state.currentRootId);
-			flushPendingEvents(hook, state);
-			state.currentRootId = -1;
-		});
+export function createFilterManager() {
+	return {
+		raw: [],
+		byType: new Set(),
+		byName: new Set(),
+		byPath: new Set()
 	};
 }
 
 /**
+ * Update the currently active component filters by unmounting all roots,
+ * applying all filters and then remounting all roots again
+ * @param {() => Set<any>} getRoots
+ * @param {import('./devtools').AdapterState} state
+ * @param {import('./devtools').IdMapper} idMapper
+ * @param {import('./devtools').Linker} linker
+ * @param {import('./devtools').Profiler} profiler
+ * @param {() => void} flush
+ * @returns {(filters: Array<import('../internal').Filter>) => void}
+ */
+export const updateComponentFilters = (getRoots, state, idMapper, linker, profiler, flush) => filters => {
+	// Unmount all currently active roots
+	getRoots().forEach(root => {
+		unmount(state, idMapper, linker, profiler, root._children[0]);
+		recordUnmount(state, idMapper, linker, profiler, root._children[0]);
+		state.currentRootId = -1;
+	});
+
+	updateFilterState(state.filter, filters);
+
+	getRoots().forEach(root => {
+		state.currentRootId = idMapper.getId(root);
+		mountTree(state, idMapper, linker, profiler, root._children[0], state.currentRootId);
+		flush();
+		state.currentRootId = -1;
+	});
+};
+
+/**
  * Parse filters and load them into the hook.
- * @param {import('../internal').AdapterState["filter"]} filterState
+ * @param {import('./devtools').FilterState} state
  * @param {Array<import('../internal').Filter>} filters
  */
-export function updateFilterState(filterState, filters) {
-	filterState.byName.clear();
-	filterState.byType.clear();
-	filterState.byPath.clear();
+export function updateFilterState(state, filters) {
+	const { byName, byType, byPath } = state;
+	byName.clear();
+	byType.clear();
+	byPath.clear();
 
 	filters.forEach(filter => {
 		if (!filter.isEnabled) return;
 
 		switch (filter.type) {
 			case FilterElementType:
-				filterState.byType.add(filter.value);
+				byType.add(filter.value);
 				break;
 			case FilterName:
 				if (filter.isValid && filter.value!=='') {
-					filterState.byName.add(new RegExp(filter.value, 'i'));
+					byName.add(new RegExp(filter.value, 'i'));
 				}
 				break;
 			case FilterLocation:
 				if (filter.isValid && filter.value!=='') {
-					filterState.byPath.add(new RegExp(filter.value, 'i'));
+					byPath.add(new RegExp(filter.value, 'i'));
 				}
 				break;
 			case FilterHOC:
 				break;
 			default:
-				console.warn(`Invalid filter type ${filter.type}`);
+				console.warn(`Invalid filter type ${/** @type {*} */ (filter).type}`);
 		}
 	});
 }
@@ -69,7 +83,7 @@ export function updateFilterState(filterState, filters) {
 /**
  * Whether the element should be visible in the devtools panel. Currently only
  * Components are shown.
- * @param {import('../internal').AdapterState["filter"]} filterState
+ * @param {import('./devtools').FilterState} filterState
  * @param {import('../internal').VNode} vnode
  */
 export function shouldFilter(filterState, vnode) {

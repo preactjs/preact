@@ -1,12 +1,13 @@
-import { updateComponentFilters } from './filter';
+/* istanbul ignore file */
+import { updateComponentFilters, createFilterManager } from './filter';
 import { assign } from '../../../src/util';
-import { findDomForVNode, inspectElement, logElementToConsole, flushInitialEvents, onCommitFiberRoot, onCommitFiberUnmount } from './renderer';
-import { startProfiling, getProfilingData, stopProfiling } from './profiling';
+import { findDomForVNode, inspectElement, logElementToConsole, flushInitialEvents, onCommitFiberRoot, onCommitFiberUnmount, flushPendingEvents, mountTree, updateTree } from './renderer';
+import { getTimings, createProfiler } from './profiling';
 import { setInProps, setInState } from './update';
 import { setInHook } from './hooks';
 import { selectElement, getVNodePath, createSelectionStore } from './selection';
 import { getOwners } from './vnode';
-import { getVNode } from './cache';
+import { createIdMapper, createLinker } from './cache';
 
 /**
  * Create an adapter instance for the devtools
@@ -18,60 +19,70 @@ export function createAdapter(config, hook) {
 	/** @type {import('../internal').DevtoolsWindow} */
 	let win = /** @type {*} */ (window);
 
-	/** @type {import('../internal').AdapterState} */
+	const profiler = createProfiler();
+	const linker = createLinker();
+	const idMapper = createIdMapper();
+
+	/** @type {import('./devtools').AdapterState} */
 	let state = {
 		connected: false,
 		currentRootId: -1,
 		stringTable: new Map(),
-		isProfiling: false,
-		vnodeDurations: new Map(),
-		initialDurations: new Map(),
-		profilingStart: 0,
 		pendingCommits: [],
 		currentCommit: {
 			operations: [],
 			unmountIds: [],
 			unmountRootId: null
 		},
-		currentProfilingData: {
-			changed: new Map(),
-			commitTime: -1,
-			timings: []
-		},
-		profilingData: new Map(),
-		rendererId: -1,
 		inspectedElementId: -1,
-		filter: {
-			raw: [],
-			byType: new Set(),
-			byName: new Set(),
-			byPath: new Set()
-		}
+		filter: createFilterManager()
 	};
 
-	const applyFilters = updateComponentFilters(hook, state);
+	let rendererId = -1;
 
-	let selections = createSelectionStore(state.filter, () => hook.getFiberRoots(state.rendererId));
+	const getRoots = () => hook.getFiberRoots(rendererId);
+	const emit = data => hook.emit('operations', data);
+	const getRenderer = () => hook.renderers.get(rendererId);
+	const flush = () => flushPendingEvents(emit, profiler.state.running, state, rendererId);
+
+	const mount = mountTree(state, idMapper, linker, profiler);
+	const update = updateTree(state, idMapper, linker, profiler, mount);
+
+	const applyFilters = updateComponentFilters(
+		getRoots,
+		state,
+		idMapper,
+		linker,
+		profiler,
+		flush
+	);
+
+	let selections = createSelectionStore(idMapper, state.filter, getRoots);
+
+	const filters = win.__REACT_DEVTOOLS_COMPONENT_FILTERS__;
 
 	let renderer = assign(assign({}, config), {
-		findNativeNodesForFiberID: findDomForVNode,
-		startProfiling: () => startProfiling(hook, state),
-		stopProfiling: () => stopProfiling(state),
-		getProfilingData: () => getProfilingData(state, state.rendererId),
-		selectElement,
+		findNativeNodesForFiberID: id => findDomForVNode(idMapper, id),
+		startProfiling: profiler.start,
+		stopProfiling: profiler.stop,
+		getProfilingData: () =>  ({
+			rendererID: rendererId,
+			dataForRoots: getTimings(profiler, idMapper)
+		}),
+		selectElement: selectElement(idMapper.getVNode),
 		cleanup() {
 			// noop
 		},
-		inspectElement,
+		inspectElement: (id, path) => inspectElement(idMapper, id, path),
 		updateComponentFilters: applyFilters,
-		logElementToConsole,
+		logElementToConsole: id => logElementToConsole(idMapper.getVNode(id), id),
 		getOwnersList(id) {
-			return getOwners(getVNode(id));
+			return getOwners(idMapper, idMapper.getVNode(id));
 		},
-		flushInitialOperations: () => flushInitialEvents(hook, state, win.__REACT_DEVTOOLS_COMPONENT_FILTERS__),
-		setInProps,
-		setInState,
-		setInHook,
+		flushInitialOperations: () => flushInitialEvents(hook, getRoots, idMapper, linker, profiler, state, getRenderer, filters, mount, flush),
+		setInProps: (id, path, value) => setInProps(idMapper.getVNode(id), path, value),
+		setInState: (id, path, value) => setInState(idMapper.getVNode(id), path, value),
+		setInHook: setInHook(idMapper.getVNode),
 
 		/** @type {(vnode: import('../internal').VNode, path: Array<string | number>, value: any) => void} */
 		overrideProps(vnode, path, value) {
@@ -92,7 +103,7 @@ export function createAdapter(config, hook) {
 			}
 
 			let attach = (hook, id, renderer, target) => {
-				state.rendererId = id;
+				rendererId = id;
 				return renderer;
 			};
 
@@ -106,7 +117,7 @@ export function createAdapter(config, hook) {
 			// Tell the devtools that we are ready to start
 			hook.inject(renderer);
 		},
-		onCommitRoot: root => onCommitFiberRoot(hook, state, root),
-		onCommitUnmount: vnode => onCommitFiberUnmount(hook, state, vnode)
+		onCommitRoot: root => onCommitFiberRoot(getRoots, idMapper, profiler, mount, update, flush, state, root),
+		onCommitUnmount: vnode => onCommitFiberUnmount(state, idMapper, linker, profiler, state.filter, vnode)
 	};
 }

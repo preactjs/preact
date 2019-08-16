@@ -9,7 +9,7 @@ import { encode } from './util';
 
 /**
  * Convert a string to an id. Works similar to a gzip dictionary.
- * @param {import('../internal').stringTable} table
+ * @param {import('./devtools').StringTable} table
  * @param {string | null} input
  * @return {number}
  */
@@ -25,7 +25,7 @@ export function getStringId(table, input) {
 
 /**
  * Convert string table to something the extension understands
- * @param {import('../internal').AdapterState["stringTable"]} table
+ * @param {import('./devtools').AdapterState["stringTable"]} table
  * @returns {number[]}
  */
 export function flushTable(table) {

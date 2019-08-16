@@ -1,6 +1,5 @@
 import { Fragment } from 'preact';
 import { ElementTypeClass, ElementTypeFunction, ElementTypeHostComponent, ElementTypeMemo, ElementTypeForwardRef } from './constants';
-import { getVNodeId } from './cache';
 import { shouldFilter } from './filter';
 
 /**
@@ -58,7 +57,7 @@ export function getInstance(vnode) {
 
 /**
  * Get the ancestor component that rendered the current vnode
- * @param {import('../internal').AdapterState["filter"]} filters
+ * @param {import('./devtools').FilterState} filters
  * @param {import('../internal').VNode} vnode
  * @returns {import('../internal').VNode | null}
  */
@@ -75,17 +74,18 @@ export function getAncestor(filters, vnode) {
 
 /**
  * Get the ancestor component that rendered the current vnode
+ * @param {import('./devtools').IdMapper} idMapper
  * @param {import('../internal').VNode} vnode
  * @returns {Array<import('../internal').Owner>}
  */
-export function getOwners(vnode) {
+export function getOwners(idMapper, vnode) {
 	let owners = [];
 	let next = vnode;
 	while (next = next._parent) {
 		// TODO: Check filtering?
 		if (typeof next.type=='function' && next.type!==Fragment) {
 			owners.push({
-				id: getVNodeId(next),
+				id: idMapper.getId(next),
 				type: getVNodeType(next),
 				displayName: getDisplayName(next)
 			});

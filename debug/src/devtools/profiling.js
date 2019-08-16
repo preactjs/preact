@@ -1,70 +1,69 @@
 import { ElementTypeClass, ElementTypeFunction, ElementTypeMemo, ElementTypeForwardRef } from './constants';
 import { getNearestDisplayName, getVNodeType } from './vnode';
-import { getVNode } from './cache';
 import { now } from './util';
 
 /**
- * Start a profiling session
- * @param {import('../internal').DevtoolsHook} hook
- * @param {import('../internal').AdapterState} state
+ * @returns {import('./devtools').Profiler}
  */
-export function startProfiling(hook, state) {
-	if (state.isProfiling) return;
-
-	state.isProfiling = true;
-	state.profilingStart = now();
-	// Copy durations, because it will be mutated during a profiling
-	state.initialDurations = new Map(state.vnodeDurations);
-}
-
-/**
- * @param {import('../internal').AdapterState} state
- */
-export function stopProfiling(state) {
-	state.isProfiling = false;
-}
-
-/**
- * @param {import('../internal').AdapterState} state
- */
-export function setupProfileData(state) {
-	let rootId = state.currentRootId;
-	if (!state.profilingData.has(rootId)) {
-		state.profilingData.set(rootId, []);
-	}
-
-	state.currentProfilingData = {
-		changed: new Map(),
-		commitTime: performance.now() - state.profilingStart,
-		timings: []
+export function createProfiler() {
+	const state = {
+		running: false,
+		startTime: NaN,
+		initial: new Map(),
+		durations: new Map(),
+		commit: null,
+		data: new Map()
 	};
 
-	let data = state.profilingData.get(rootId);
-	data.push(state.currentProfilingData);
+	const start = () => {
+		if (!state.running) {
+			state.startTime = now();
+			// Copy durations, because it will be mutated during a profiling
+			state.initial = new Map(state.durations);
+		}
+	};
+	const stop = () => state.running = false;
+
+	const prepareCommit = (rootId) => {
+		state.commit = {
+			changed: new Map(),
+			commitTime: now() - state.startTime,
+			timings: []
+		};
+
+		if (!state.data.has(rootId)) state.data.set(rootId, []);
+		state.data.get(rootId).push(state.commit);
+	};
+
+	return { start, stop, state, prepareCommit };
 }
 
 /**
- * @param {number} rendererId
- * @param {import('../internal').AdapterState} state
- * @returns {import('../internal').ProfilingData}
+ * Collect all profiler timings and transform them to something the devtools
+ * can understand.
+ * @param {import('./devtools').Profiler} profiler
+ * @param {import('./devtools').IdMapper} mapper
+ * @returns {import('../internal').ProfilingData["dataForRoots"]}
  */
-export function getProfilingData(state, rendererId) {
+export function getTimings(profiler, mapper) {
 
 	/** @type {Array<import('../internal').ProfilingRootDataBackend>} */
 	let data = [];
 
+	const { state } = profiler;
+
 	// Loop over the profiling data for each root
-	state.profilingData.forEach((profile, rootId) => {
+	state.data.forEach((profile, rootId) => {
 
 		/** @type {Array<import('../internal').CommitDataBackend>} */
 		let commitData = [];
 
 		let fiberActualDurations = [];
 		let fiberSelfDurations = [];
-		let initialDurations = [];
+		let initial = [];
 
-		state.initialDurations.forEach((value, id) => {
-			initialDurations.push([id, value]);
+		state.initial.forEach((value, id) => {
+			initial.push([id, value]);
 		});
 
 		profile.forEach(commit => {
@@ -100,18 +99,15 @@ export function getProfilingData(state, rendererId) {
 
 		data.push({
 			commitData,
-			displayName: getNearestDisplayName(getVNode(rootId)),
-			initialTreeBaseDurations: initialDurations,
+			displayName: getNearestDisplayName(mapper.getVNode(rootId)),
+			initialTreeBaseDurations: initial,
 			interactionCommits: [],
 			interactions: [],
 			rootID: rootId
 		});
 	});
 
-	return {
-		rendererID: rendererId,
-		dataForRoots: data
-	};
+	return data;
 }
 
 /**

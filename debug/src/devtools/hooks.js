@@ -1,7 +1,6 @@
 import { options } from 'preact';
 import { USE_STATE, USE_CALLBACK } from 'preact/hooks/constants';
 import ErrorStackParser from 'error-stack-parser';
-import { getVNode } from './cache';
 import { USE_REF, USE_MEMO, USE_REDUCER, USE_CONTEXT } from '../../../hooks/src/constants';
 
 let usePrefix = /^use/;
@@ -174,12 +173,8 @@ export function inspectHooks(vnode) {
 
 /**
  * Update `useState` hook value
- * @param {number} id
- * @param {number} index
- * @param {Array<string | number>} path
- * @param {*} value
  */
-export function setInHook(id, index, path, value) {
+export const setInHook = getVNode => (id, index, path, value) => {
 	let vnode = getVNode(id);
 	vnode._component.__hooks._list[index]._value[1](value);
-}
+};
