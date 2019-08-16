@@ -1,6 +1,6 @@
 import { setupScratch, teardown } from '../../../../test/_util/helpers';
 import { h, render, Component } from 'preact';
-import { memo, forwardRef } from "preact/compat";
+import { memo, forwardRef } from 'preact/compat';
 import { getInstance, isRoot, getVNodeType } from '../../../src/devtools/vnode';
 import { clearState } from '../../../src/devtools/cache';
 import { ElementTypeFunction, ElementTypeClass, ElementTypeHostComponent, ElementTypeMemo, ElementTypeForwardRef } from '../../../src/devtools/constants';

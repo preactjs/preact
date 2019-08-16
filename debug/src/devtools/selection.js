@@ -1,4 +1,4 @@
-import { getVNode, getVNodeId, hasVNodeId } from './cache';
+import { getVNode, getVNodeId } from './cache';
 import { getInstance, getVNodeType, getDisplayName, isRoot, getNearestDisplayName } from './vnode';
 import { ElementTypeClass, ElementTypeFunction, ElementTypeForwardRef, ElementTypeMemo } from './constants';
 import { shouldFilter } from './filter';

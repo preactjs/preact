@@ -1,5 +1,5 @@
 import { setupScratch, teardown } from '../../../../test/_util/helpers';
-import { useState, useMemo, useReducer } from "preact/hooks";
+import { useState, useMemo, useReducer } from 'preact/hooks';
 import { setupRerender } from 'preact/test-utils';
 import { h, render } from 'preact';
 import { getChangeDescription } from '../../../src/devtools/profiling';
