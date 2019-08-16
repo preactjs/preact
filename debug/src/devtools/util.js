@@ -60,16 +60,3 @@ export function catchErrors(fn) {
 		}
 	};
 }
-
-/**
- * Detects the currently used devtools version
- * @param {import('../internal').DevtoolsWindow} win
- * @return {number | null}
- */
-export function getDevtoolsVersion(win) {
-	if (win.__REACT_DEVTOOLS_GLOBAL_HOOK__==null) return null;
-
-	return /** @type {*} */ (win.__REACT_DEVTOOLS_GLOBAL_HOOK__).rendererInterfaces!==undefined
-		? 4
-		: 3;
-}

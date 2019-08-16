@@ -1,13 +1,13 @@
-import { getVNode, getVNodeId } from './cache';
 import { getInstance, getVNodeType, getDisplayName, isRoot, getNearestDisplayName } from './vnode';
 import { ElementTypeClass, ElementTypeFunction, ElementTypeForwardRef, ElementTypeMemo } from './constants';
 import { shouldFilter } from './filter';
 
 /**
  * Store the devtools selection
- * @param {number} id The vnode id
+ * @param {(id: number) => import('../internal').VNode | null} getVNode
+ * @returns {(id: number) => void}
  */
-export function selectElement(id) {
+export const selectElement = (getVNode) => (id) => {
 	let vnode = getVNode(id);
 	if (vnode==null) {
 		console.warn(`vnode with id ${id} not found`);
@@ -33,7 +33,7 @@ export function selectElement(id) {
 		default:
 			win.$r = null;
 	}
-}
+};
 
 /**
  * Get the closest vnode that's known to the store.
@@ -43,12 +43,13 @@ export function selectElement(id) {
  * thus we can't keep references around when a reload occurs. So instead we'll
  * walk the path downwards from the given root and try to match them.
  *
- * @param {import('../internal').AdapterState['filter']} filters
+ * @param {import('./devtools').IdMapper} idMapper
+ * @param {import('./devtools').FilterState} filters
  * @param {Array<import('../internal').PathFrame>} path Path to match against
  * @param {import('../internal').VNode | null} vnode Root vnode to traverse
  * @returns {import('../internal').PathMatch | null}
  */
-export function getBestMatch(filters, path, vnode) {
+export function getBestMatch(idMapper, filters, path, vnode) {
 	// Bail out if we don't have a path or a vnode reference
 	if (path==null || vnode==null) return null	;
 
@@ -68,7 +69,7 @@ export function getBestMatch(filters, path, vnode) {
 	if (item==null) return null;
 
 	return {
-		id: getVNodeId(lastNonFiltered),
+		id: idMapper.getId(lastNonFiltered),
 		 // Setting this to true breaks selection more often
 		isFullMatch: false
 	};
@@ -76,11 +77,12 @@ export function getBestMatch(filters, path, vnode) {
 
 /**
  * Get the path to a vnode (used for selection)
+ * @param {import('./devtools').IdMapper} idMapper
  * @param {number} id The vnode's id
  * @returns {Array<import('../internal').PathFrame> | null}
  */
-export function getVNodePath(id) {
-	let vnode = getVNode(id);
+export function getVNodePath(idMapper, id) {
+	let vnode = idMapper.getVNode(id);
 	if (vnode==null) return null;
 
 	let path = [];
@@ -124,10 +126,11 @@ export function setTrackedPath(state, path) {
 
 /**
  *
- * @param {import('../internal').AdapterState['filter']} filters
+ * @param {import('./devtools').FilterState} filters
+ * @param {import('./devtools').IdMapper} idMapper
  * @param {() => Set<import('../internal').VNode>} getRoots
  */
-export function createSelectionStore(filters, getRoots) {
+export function createSelectionStore(idMapper, filters, getRoots) {
 
 	/** @type {import('../internal').SelectionState} */
 	let state = {
@@ -148,7 +151,7 @@ export function createSelectionStore(filters, getRoots) {
 					}
 				});
 			}
-			return getBestMatch(filters, state.trackedPath, state.trackedVNode);
+			return getBestMatch(idMapper, filters, state.trackedPath, state.trackedVNode);
 		}
 	};
 }

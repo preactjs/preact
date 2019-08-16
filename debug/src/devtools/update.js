@@ -1,14 +1,12 @@
 import { setIn } from './util';
-import { getVNode } from './cache';
 
 /**
  * Update component state
- * @param {number} id
+ * @param {import('../internal').VNode} vnode
  * @param {string[]} path
  * @param {*} value
  */
-export function setInState(id, path, value) {
-	let vnode = getVNode(id);
+export function setInState(vnode, path, value) {
 	vnode._component.setState(prev => {
 		setIn(prev, path, value);
 		return prev;
@@ -17,12 +15,11 @@ export function setInState(id, path, value) {
 
 /**
  * Update component props
- * @param {number} id
+ * @param {import('../internal').VNode} vnode
  * @param {string[]} path
  * @param {*} value
  */
-export function setInProps(id, path, value) {
-	let vnode = getVNode(id);
+export function setInProps(vnode, path, value) {
 	setIn(vnode.props, path, value);
 	vnode._component.setState({});
 }

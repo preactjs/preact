@@ -258,31 +258,10 @@ export interface CommitProfileData {
 	changed: Map<number, ChangeDescription>;
 }
 
-export type stringTable = Map<string, number>;
-
-export interface AdapterState {
-	connected: boolean;
-	rendererId: number;
-	stringTable: stringTable;
-	currentRootId: number;
-	/** If the devtools are not connected we store pending commits here */
-	pendingCommits: number[][];
-	currentCommit: Commit;
-	currentProfilingData: CommitProfileData
-	/** Profile data by root id */
-	profilingData: Map<number, CommitProfileData[]>;
-	isProfiling: boolean;
-	profilingStart: number;
-	vnodeDurations: Map<number, number>;
-	initialDurations: Map<number, number>;
-	inspectedElementId: number;
-	filter: {
-		/** The raw filters from the detools that are applied currently */
-		raw: Filter[];
-		byType: Set<number>;
-		byName: Set<RegExp>;
-		byPath: Set<RegExp>;
-	}
+export interface MappingTables {
+	vnodeToId: WeakMap<VNode, number>;
+	idToVNode: Map<number, VNode>;
+	nextId: number;
 }
 
 //
