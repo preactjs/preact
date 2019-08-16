@@ -1,7 +1,6 @@
 import { options, Component } from 'preact';
 import { now, catchErrors, getDevtoolsVersion } from './util';
 import { createAdapter } from './connect';
-import { createLegacyAdapter } from './legacy/connect';
 import { SESSION_STORAGE_RELOAD_AND_PROFILE_KEY } from './constants';
 
 let noop = () => null;
@@ -55,10 +54,6 @@ export function initDevTools() {
 					adapter.renderer.startProfiling();
 				}
 				break;
-			case 3: {
-				adapter = createLegacyAdapter(config, /** @type {*} */ (hook));
-				break;
-			}
 			default:
 				throw new Error(`No adapter found for devtools version: ${version}`);
 		}
