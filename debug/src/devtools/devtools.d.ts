@@ -56,3 +56,6 @@ export interface AdapterState {
 	inspectedElementId: number;
 	filter: FilterState;
 }
+
+// Actions
+export type RecordUnmount = (vnode: VNode) => void;

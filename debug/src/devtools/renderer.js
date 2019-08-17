@@ -1,6 +1,6 @@
 import { clearVNode } from './cache';
 import { TREE_OPERATION_ADD, ElementTypeRoot, TREE_OPERATION_REMOVE, TREE_OPERATION_REORDER_CHILDREN, TREE_OPERATION_UPDATE_TREE_BASE_DURATION } from './constants';
-import { getVNodeType, getDisplayName, getAncestor, getOwners, getRoot as findRoot, isRoot } from './vnode';
+import { getDevtoolsType, getDisplayName, getAncestor, getOwners, getRoot as findRoot, isRoot, getRenderedChildren, hasRenderedChildren, hasHookState, getComponentState, getVNodeProps, getComponentContext, getParent } from './vnode';
 import { cleanForBridge, cleanContext } from './pretty';
 import { inspectHooks } from './hooks';
 import { shouldFilter } from './filter';
@@ -26,7 +26,7 @@ export function onCommitFiberRoot(getRoots, idMapper, profiler, mount, update, f
 	// will be called first, but because the parents haven't been mounted
 	// in the devtools this will lead to an incorrect result.
 	// TODO: We should fix this in core instead of patching around it here
-	if ((!isRoot(vnode) && !isRoot(vnode._parent)) && !idMapper.hasId(vnode)) {
+	if ((!isRoot(vnode) && !isRoot(getParent(vnode))) && !idMapper.hasId(vnode)) {
 		return;
 	}
 
@@ -74,23 +74,21 @@ export function onCommitFiberRoot(getRoots, idMapper, profiler, mount, update, f
 
 /**
  * Called when a vonde unmounts
- * @param {import('./devtools').AdapterState} state
  * @param {import('./devtools').IdMapper} idMapper
  * @param {import('./devtools').Linker} linker
- * @param {import('./devtools').Profiler} profiler
+ * @param {import('./devtools').RecordUnmount} recordUnmount
  * @param {import('./devtools').FilterState} filter
- * @param {import('../internal').VNode} vnode
+ * @returns {(vnode: import('../internal').VNode) => void}
  */
-export function onCommitFiberUnmount(state, idMapper, linker, profiler, filter, vnode) {
-	// Check if is root
+export const onCommitFiberUnmount = (idMapper, linker, recordUnmount, filter) => vnode => {
 	if (!shouldFilter(filter, vnode)) {
 		let ancestor = getAncestor(filter, vnode);
 		if (ancestor && idMapper.hasId(vnode) && idMapper.hasId(ancestor)) {
 			linker.unlink(idMapper.getId(ancestor), idMapper.getId(vnode));
 		}
 	}
-	recordUnmount(state, idMapper, linker, profiler, vnode);
-}
+	recordUnmount(vnode);
+};
 
 /**
  * @param {import('./devtools').AdapterState} state
@@ -110,7 +108,7 @@ export function updateTree(state, idMapper, linker, profiler, mount) {
 			shouldReset = true;
 		}
 		else {
-			let children = vnode._children || [];
+			let children = getRenderedChildren(vnode);
 			let prevChildren = linker.get(idMapper.getId(vnode));
 
 			for (let i = 0; i < children.length; i++) {
@@ -132,7 +130,7 @@ export function updateTree(state, idMapper, linker, profiler, mount) {
 
 		if (shouldReset) {
 			if (include) {
-				if (vnode._children!=null && vnode._children.length > 0) {
+				if (hasRenderedChildren(vnode)) {
 					resetChildren(state, idMapper, vnode);
 				}
 				return false;
@@ -152,20 +150,20 @@ export function updateTree(state, idMapper, linker, profiler, mount) {
  * @param {import('../internal').VNode} vnode
  */
 export function resetChildren(state, idMapper, vnode) {
-	if (!vnode._children) return;
+	if (!hasRenderedChildren(vnode)) return;
 
 	/** @type {number[]} */
 	let next = [];
 
-	let stack = vnode._children.slice();
+	let stack = getRenderedChildren(vnode).slice();
 
 	let child;
 	while ((child = stack.pop())!=null) {
 		if (!shouldFilter(state.filter, child)) {
 			next.push(idMapper.getId(child));
 		}
-		else if (child._children) {
-			stack.push(...child._children);
+		else if (hasRenderedChildren(child)) {
+			stack.push(...getRenderedChildren(child));
 		}
 	}
 
@@ -189,7 +187,7 @@ export function resetChildren(state, idMapper, vnode) {
  * @param {import('../internal').VNode} vnode
  */
 export function unmountTree(record, vnode) {
-	let children = vnode._children || [];
+	let children = getRenderedChildren(vnode);
 	for (let i = 0; i < children.length; i++) {
 		if (children[i]!==null) {
 			unmountTree(record, children[i]);
@@ -245,7 +243,7 @@ export const mountTree = (state, idMapper, linker, profiler) => {
 			parentId = newId;
 		}
 
-		const children = vnode._children || [];
+		const children = getRenderedChildren(vnode);
 		for (let i = 0; i < children.length; i++) {
 			if (children[i]!==null) {
 				mount(children[i], parentId);
@@ -278,7 +276,7 @@ export function recordMount(state, idMapper, profiler, vnode) {
 		currentCommit.operations.push(
 			TREE_OPERATION_ADD,
 			id,
-			getVNodeType(vnode),
+			getDevtoolsType(vnode),
 			ancestor!=null ? idMapper.getId(ancestor) : 0,
 			ancestor!=null && !isRoot(ancestor) ? idMapper.getId(ancestor) : 0,
 			getStringId(stringTable, getDisplayName(vnode)),
@@ -309,9 +307,10 @@ export function recordProfiling(state, id, profiler, vnode) {
 	);
 	let selfDuration = duration;
 
-	if (vnode._children) {
-		for (let i = 0; i < vnode._children.length; i++) {
-			let child = vnode._children[i];
+	if (hasRenderedChildren(vnode)) {
+		const children = getRenderedChildren(vnode);
+		for (let i = 0; i < children.length; i++) {
+			let child = children[i];
 			if (child) {
 				let childDuration = child.endTime - child.startTime;
 				selfDuration -= childDuration;
@@ -450,8 +449,11 @@ export function findDomForVNode(idMapper, id) {
  */
 export function inspectElementRaw(idMapper, id) {
 	let vnode = idMapper.getVNode(id);
-	let hasHooks = vnode._component!=null && vnode._component.__hooks!=null;
+	let hasHooks = hasHookState(vnode);
 	let owners = getOwners(idMapper, vnode);
+	let state = getComponentState(vnode);
+	let props = getVNodeProps(vnode);
+	let context = getComponentContext(vnode);
 
 	return {
 		id,
@@ -460,16 +462,12 @@ export function inspectElementRaw(idMapper, id) {
 		canToggleSuspense: false, // TODO
 		canViewSource: false, // TODO
 		displayName: getDisplayName(vnode),
-		type: getVNodeType(vnode),
-		context: vnode._component ? cleanContext(vnode._component.context) : null, // TODO
+		type: getDevtoolsType(vnode),
+		context: context!=null ? cleanContext(context) : null, // TODO
 		events: null,
 		hooks: hasHooks ? cleanForBridge(inspectHooks(vnode)) : null,
-		props: vnode.props!=null && Object.keys(vnode.props).length > 0
-			? cleanForBridge(vnode.props)
-			: null,
-		state: hasHooks || vnode._component==null || !Object.keys(vnode._component.state).length
-			? null
-			: cleanForBridge(vnode._component.state),
+		props: props!=null ? cleanForBridge(props) : null,
+		state: !hasHooks && state!=null ? cleanForBridge(state) : null,
 		owners: owners.length ? owners : null,
 		source: null // TODO
 	};
@@ -496,31 +494,4 @@ export function inspectElement(idMapper, id, path) {
 		type: 'full-data',
 		value: inspectElementRaw(idMapper, id)
 	};
-}
-
-/**
- * Print an element to console
- * @param {import('../internal').VNode | null} vnode
- * @param {number} id vnode id
- */
-export function logElementToConsole(vnode, id) {
-	if (vnode==null) {
-		console.warn(`Could not find vnode with id ${id}`);
-		return;
-	}
-
-	/* eslint-disable no-console */
-	console.group(
-		`LOG %c<${getDisplayName(vnode) || 'Component'} />`,
-		// CSS Variable is injected by the devtools extension
-		'color: var(--dom-tag-name-color); font-weight: normal'
-	);
-	console.log('props:', vnode.props);
-	if (vnode._component) {
-		console.log('state:', vnode._component.state);
-	}
-	console.log('vnode:', vnode);
-	console.log('devtools id:', id);
-	console.groupEnd();
-	/* eslint-enable no-console */
 }

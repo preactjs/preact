@@ -1,4 +1,4 @@
-import { getInstance } from './vnode';
+import { getInstance, getRenderedChildren } from './vnode';
 
 /**
  * VNode relationships are encoded as simple numbers for the devtools. We use
@@ -37,7 +37,7 @@ export function createIdMapper() {
  * @param {import('../internal').VNode} vnode The vnode to remove
  */
 export function clearVNode(mapper, linker, vnode) {
-	let children = vnode._children || [];
+	let children = getRenderedChildren(vnode);
 	for (let i = 0; i < children.length; i++) {
 		if (children[i]!=null) {
 			clearVNode(mapper, linker, children[i]);

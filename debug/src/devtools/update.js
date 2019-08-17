@@ -1,4 +1,5 @@
 import { setIn } from './util';
+import { getVNodeProps } from './vnode';
 
 /**
  * Update component state
@@ -20,6 +21,6 @@ export function setInState(vnode, path, value) {
  * @param {*} value
  */
 export function setInProps(vnode, path, value) {
-	setIn(vnode.props, path, value);
+	setIn(getVNodeProps(vnode), path, value);
 	vnode._component.setState({});
 }

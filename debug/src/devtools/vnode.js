@@ -22,7 +22,7 @@ let forwardRefReg = /^ForwardRef\(/;
  * between the various forms of components.
  * @param {import('../internal').VNode} vnode
  */
-export function getVNodeType(vnode) {
+export function getDevtoolsType(vnode) {
 	if (typeof vnode.type=='function' && vnode.type!==Fragment) {
 		if (memoReg.test(vnode.type.displayName)) return ElementTypeMemo;
 		if (forwardRefReg.test(vnode.type.displayName)) return ElementTypeForwardRef;
@@ -56,6 +56,33 @@ export function getInstance(vnode) {
 }
 
 /**
+ * Get rendered children of a vnode
+ * @param {import('../internal').VNode} vnode
+ * @returns {import('../internal').VNode[]}
+ */
+export function getRenderedChildren(vnode) {
+	return vnode._children || [];
+}
+
+/**
+ * Chcck if a vnode has rendered children
+ * @param {import('../internal').VNode} vnode
+ * @returns {boolean}
+ */
+export function hasRenderedChildren(vnode) {
+	return vnode._children!=null && vnode._children.length > 0;
+}
+
+/**
+ * Get the parent of a vnode
+ * @param {import('../internal').VNode} vnode
+ * @returns {import('../internal').VNode | null}
+ */
+export function getParent(vnode) {
+	return vnode._parent;
+}
+
+/**
  * Get the ancestor component that rendered the current vnode
  * @param {import('./devtools').FilterState} filters
  * @param {import('../internal').VNode} vnode
@@ -86,7 +113,7 @@ export function getOwners(idMapper, vnode) {
 		if (typeof next.type=='function' && next.type!==Fragment) {
 			owners.push({
 				id: idMapper.getId(next),
-				type: getVNodeType(next),
+				type: getDevtoolsType(next),
 				displayName: getDisplayName(next)
 			});
 		}
@@ -140,4 +167,78 @@ export function getNearestDisplayName(vnode) {
 	}
 
 	return 'Unknown';
+}
+
+/**
+ * Check if a component has hooks
+ * @param {import('../internal').VNode} vnode
+ * @returns {boolean}
+ */
+export function hasHookState(vnode) {
+	return vnode._component!=null && vnode._component.__hooks!=null;
+}
+
+/**
+ * Get vnode props
+ * @param {import('../internal').VNode} vnode
+ * @returns {Record<string, any>}
+ */
+export function getVNodeProps(vnode) {
+	return vnode.props!=null && Object.keys(vnode.props).length > 0
+		? vnode.props
+		: null;
+}
+
+/**
+ * Get state of a component
+ * @param {import('../internal').VNode} vnode
+ * @returns {Record<string, any> | null}
+ */
+export function getComponentState(vnode) {
+	return vnode._component!=null && Object.keys(vnode._component.state).length > 0
+		? vnode._component.state
+		: null;
+}
+
+/**
+ * Get context of a component
+ * @param {import('../internal').VNode} vnode
+ * @returns {Record<string, any> | null}
+ */
+export function getComponentContext(vnode) {
+	return vnode._component ? vnode._component.context : null;
+}
+
+/**
+ * Print an element to console
+ * @param {import('../internal').VNode | null} vnode
+ * @param {number} id vnode id
+ */
+export function logElementToConsole(vnode, id) {
+	if (vnode==null) {
+		console.warn(`Could not find vnode with id ${id}`);
+		return;
+	}
+
+	/* eslint-disable no-console */
+	console.group(
+		`LOG %c<${getDisplayName(vnode) || 'Component'} />`,
+		// CSS Variable is injected by the devtools extension
+		'color: var(--dom-tag-name-color); font-weight: normal'
+	);
+	console.log('props:', vnode.props);
+	if (vnode._component) {
+		console.log('state:', vnode._component.state);
+	}
+	console.log('vnode:', vnode);
+	console.log('devtools id:', id);
+	console.groupEnd();
+	/* eslint-enable no-console */
+}
+
+/**
+ * @param {import('../internal').VNode} vnode
+ */
+export function getVNodeType(vnode) {
+	return vnode.type;
 }
