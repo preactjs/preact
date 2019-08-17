@@ -5,7 +5,7 @@ import { findDomForVNode, inspectElement, flushInitialEvents, onCommitFiberRoot,
 import { getTimings, createProfiler } from './profiling';
 import { setInProps, setInState } from './update';
 import { setInHook } from './hooks';
-import { selectElement, getVNodePath, createSelectionStore } from './selection';
+import { selectElement, getVNodePath, createSelection } from './selection';
 import { getOwners, logElementToConsole } from './vnode';
 import { createIdMapper, createLinker } from './cache';
 
@@ -62,7 +62,7 @@ export function createAdapter(config, hook) {
 		flush
 	);
 
-	let selections = createSelectionStore(idMapper, state.filter, getRoots);
+	let selections = createSelection(idMapper, state.filter, getRoots);
 
 	// Build our renderer
 	const filters = win.__REACT_DEVTOOLS_COMPONENT_FILTERS__;

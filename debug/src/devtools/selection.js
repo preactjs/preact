@@ -29,6 +29,7 @@ export const selectElement = (getVNode) => (id) => {
 				props: getVNodeProps(vnode)
 			};
 			break;
+		/* istanbul ignore next */
 		default:
 			win.$r = null;
 	}
@@ -57,14 +58,17 @@ export function getBestMatch(idMapper, filters, path, vnode) {
 	for (let i = 0; i < path.length; i++) {
 		let seg = path[i];
 		item = getRenderedChildren(item)[seg.index];
+		/* istanbul ignore next */
 		if (item==null) continue;
+		/* istanbul ignore next */
 		if (getDisplayName(item)!=seg.displayName) break;
-
+		/* istanbul ignore next */
 		if (!shouldFilter(filters, item)) {
 			lastNonFiltered = item;
 		}
 	}
 
+	/* istanbul ignore next */
 	if (item==null) return null;
 
 	return {
@@ -109,47 +113,31 @@ export function getPathFrame(vnode) {
 }
 
 /**
- * @param {import('../internal').SelectionState} state
- * @param {Array<import('../internal').PathFrame>} path
- */
-export function setTrackedPath(state, path) {
-	if (path==null) {
-		state.trackedPath = null;
-		state.trackedVNode = null;
-	}
-	else {
-		state.trackedPath = path;
-	}
-}
-
-/**
- *
- * @param {import('./devtools').FilterState} filters
+ * Manage devtool selections
  * @param {import('./devtools').IdMapper} idMapper
+ * @param {import('./devtools').FilterState} filters
  * @param {() => Set<import('../internal').VNode>} getRoots
  */
-export function createSelectionStore(idMapper, filters, getRoots) {
-
-	/** @type {import('../internal').SelectionState} */
-	let state = {
-		trackedPath: null,
-		trackedVNode: null
-	};
+export function createSelection(idMapper, filters, getRoots) {
+	let p = null;
+	let vnode = null;
 
 	return {
-		setTrackedPath: path => setTrackedPath(state, path),
+		setTrackedPath: path => {
+			p = path==null ? vnode = null : path;
+		},
 		getBestMatch: () => {
-			let path = state.trackedPath;
-			if (path && path.length > 0) {
+			if (p && p.length > 0) {
 				// Search for the correct root
 				getRoots().forEach(root => {
 					let name = getNearestDisplayName(root);
-					if (name===path[0].displayName) {
-						state.trackedVNode = root;
+					/* istanbul ignore next */
+					if (name===p[0].displayName || p[0].name) {
+						vnode = root;
 					}
 				});
 			}
-			return getBestMatch(idMapper, filters, state.trackedPath, state.trackedVNode);
+			return getBestMatch(idMapper, filters, p, vnode);
 		}
 	};
 }
