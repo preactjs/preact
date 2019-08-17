@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 import { updateComponentFilters, createFilterManager } from './filter';
 import { assign } from '../../../src/util';
-import { findDomForVNode, inspectElement, logElementToConsole, flushInitialEvents, onCommitFiberRoot, onCommitFiberUnmount, flushPendingEvents, mountTree, updateTree } from './renderer';
+import { findDomForVNode, inspectElement, logElementToConsole, flushInitialEvents, onCommitFiberRoot, onCommitFiberUnmount, flushPendingEvents, mountTree, updateTree, recordUnmount, unmountTree as unmount } from './renderer';
 import { getTimings, createProfiler } from './profiling';
 import { setInProps, setInState } from './update';
 import { setInHook } from './hooks';
@@ -43,17 +43,21 @@ export function createAdapter(config, hook) {
 	const getRoots = () => hook.getFiberRoots(rendererId);
 	const emit = data => hook.emit('operations', data);
 	const getRenderer = () => hook.renderers.get(rendererId);
-	const flush = () => flushPendingEvents(emit, profiler.state.running, state, rendererId);
+	const flush = () => {
+		flushPendingEvents(emit, profiler.state.running, state, rendererId);
+	};
 
 	const mount = mountTree(state, idMapper, linker, profiler);
 	const update = updateTree(state, idMapper, linker, profiler, mount);
+	const recordUnmount2 = recordUnmount(state, idMapper, linker, profiler);
 
 	const applyFilters = updateComponentFilters(
 		getRoots,
 		state,
 		idMapper,
-		linker,
-		profiler,
+		mount,
+		unmount,
+		recordUnmount2,
 		flush
 	);
 
@@ -76,10 +80,10 @@ export function createAdapter(config, hook) {
 		inspectElement: (id, path) => inspectElement(idMapper, id, path),
 		updateComponentFilters: applyFilters,
 		logElementToConsole: id => logElementToConsole(idMapper.getVNode(id), id),
-		getOwnersList(id) {
-			return getOwners(idMapper, idMapper.getVNode(id));
+		getOwnersList: id => getOwners(idMapper, idMapper.getVNode(id)),
+		flushInitialOperations: () => {
+			flushInitialEvents(emit, getRoots, idMapper, profiler, state, getRenderer, filters, mount, flush);
 		},
-		flushInitialOperations: () => flushInitialEvents(hook, getRoots, idMapper, linker, profiler, state, getRenderer, filters, mount, flush),
 		setInProps: (id, path, value) => setInProps(idMapper.getVNode(id), path, value),
 		setInState: (id, path, value) => setInState(idMapper.getVNode(id), path, value),
 		setInHook: setInHook(idMapper.getVNode),
@@ -89,7 +93,7 @@ export function createAdapter(config, hook) {
 			// TODO
 		},
 		setTrackedPath: selections.setTrackedPath,
-		getPathForElement: getVNodePath,
+		getPathForElement: getVNodePath(idMapper),
 		getBestMatchForTrackedPath: selections.getBestMatch,
 		currentDispatcherRef: { current: null }
 	});
@@ -107,8 +111,6 @@ export function createAdapter(config, hook) {
 				return renderer;
 			};
 
-			// TODO: The react-devtools declare this as non-configurable.
-			// This prevents us from getting
 			Object.defineProperty(window, '__REACT_DEVTOOLS_ATTACH__', {
 				get: () => attach,
 				configurable: true

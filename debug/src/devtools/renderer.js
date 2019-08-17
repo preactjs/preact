@@ -30,6 +30,8 @@ export function onCommitFiberRoot(getRoots, idMapper, profiler, mount, update, f
 		return;
 	}
 
+	const isNew = !idMapper.hasId(vnode);
+
 	// Keep track of mounted roots
 	let roots = getRoots();
 	let root;
@@ -43,7 +45,7 @@ export function onCommitFiberRoot(getRoots, idMapper, profiler, mount, update, f
 
 	// If we're seeing this node for the first time we need to be careful
 	// not to set the id, otherwise the mount branch will not be chosen below
-	if (idMapper.hasId(root)) {
+	if (!idMapper.hasId(root)) {
 		state.currentRootId = idMapper.getId(root);
 	}
 
@@ -59,11 +61,11 @@ export function onCommitFiberRoot(getRoots, idMapper, profiler, mount, update, f
 		}
 	}
 
-	if (idMapper.getId(vnode)) {
-		update(vnode, parentId);
+	if (isNew) {
+		mount(vnode, parentId);
 	}
 	else {
-		mount(vnode, parentId);
+		update(vnode, parentId);
 	}
 
 	flush();
@@ -183,21 +185,18 @@ export function resetChildren(state, idMapper, vnode) {
 }
 
 /**
- * @param {import('./devtools').AdapterState} state
- * @param {import('./devtools').IdMapper} idMapper
- * @param {import('./devtools').Linker} linker
- * @param {import('./devtools').Profiler} profiler
+ * @param {(vnode: import('../internal').VNode) => void} record
  * @param {import('../internal').VNode} vnode
  */
-export function unmount(state, idMapper, linker, profiler, vnode) {
+export function unmountTree(record, vnode) {
 	let children = vnode._children || [];
 	for (let i = 0; i < children.length; i++) {
 		if (children[i]!==null) {
-			unmount(state, idMapper, linker, profiler, children[i]);
+			unmountTree(record, children[i]);
 		}
 	}
 
-	recordUnmount(state, idMapper, linker, profiler, vnode);
+	record(vnode);
 }
 
 /**
@@ -209,9 +208,9 @@ export function unmount(state, idMapper, linker, profiler, vnode) {
  * @param {import('./devtools').IdMapper} idMapper
  * @param {import('./devtools').Linker} linker
  * @param {import('./devtools').Profiler} profiler
- * @param {import('../internal').VNode} vnode
+ * @returns {(vnode: import('../internal').VNode) => void}
  */
-export function recordUnmount(state, idMapper, linker, profiler, vnode) {
+export const recordUnmount = (state, idMapper, linker, profiler) => vnode => {
 	if (idMapper.hasId(vnode)) {
 		let id = idMapper.getId(vnode);
 		if (isRoot(vnode)) {
@@ -225,7 +224,7 @@ export function recordUnmount(state, idMapper, linker, profiler, vnode) {
 	}
 
 	clearVNode(idMapper, linker, vnode);
-}
+};
 
 /**
  * @param {import('./devtools').AdapterState} state
@@ -340,7 +339,7 @@ export function recordProfiling(state, id, profiler, vnode) {
 
 /**
  * Pass all pending operations to the devtools extension
- * @param {import('../internal').DevtoolsHook["emit"]} emit
+ * @param {(data: number[]) => void} emit
  * @param {boolean} isProfiling
  * @param {import('./devtools').AdapterState} state
  * @param {number} rendererId
@@ -375,7 +374,7 @@ export function flushPendingEvents(emit, isProfiling, state, rendererId) {
 	msg.push(...operations);
 
 	if (state.connected) {
-		emit('operations', msg);
+		emit(msg);
 	}
 	else {
 		state.pendingCommits.push(msg);
@@ -392,18 +391,17 @@ export function flushPendingEvents(emit, isProfiling, state, rendererId) {
 /**
  * Flush initial buffered events as soon a the devtools successfully established
  * a connection
- * @param {import('../internal').DevtoolsHook} hook
+ * @param {(data: number[]) => void} emit
  * @param {() => Set<any>} getRoots
  * @param {import('./devtools').IdMapper} idMapper
  * @param {import('./devtools').Profiler} profiler
- * @param {import('./devtools').Linker} linker
  * @param {import('./devtools').AdapterState} state
  * @param {() => any} getRenderer
  * @param {Array<import('../internal').Filter>} filters
  * @param {(vnode: import('../internal').VNode, parentId: number) => void} mount
  * @param {() => void} flush
  */
-export function flushInitialEvents(hook, getRoots, idMapper, linker, profiler, state, getRenderer, filters, mount, flush) {
+export function flushInitialEvents(emit, getRoots, idMapper, profiler, state, getRenderer, filters, mount, flush) {
 	state.connected = true;
 
 	if (profiler.state.running) {
@@ -413,7 +411,7 @@ export function flushInitialEvents(hook, getRoots, idMapper, linker, profiler, s
 	// Flush any events we have queued up so far
 	if (state.pendingCommits.length > 0) {
 		state.pendingCommits.forEach(commit => {
-			hook.emit('operations', commit);
+			emit(commit);
 		});
 		state.pendingCommits = [];
 	}

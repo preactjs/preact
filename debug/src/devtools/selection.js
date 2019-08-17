@@ -78,10 +78,9 @@ export function getBestMatch(idMapper, filters, path, vnode) {
 /**
  * Get the path to a vnode (used for selection)
  * @param {import('./devtools').IdMapper} idMapper
- * @param {number} id The vnode's id
- * @returns {Array<import('../internal').PathFrame> | null}
+ * @returns {(id: number) => Array<import('../internal').PathFrame> | null}
  */
-export function getVNodePath(idMapper, id) {
+export const getVNodePath = idMapper => id => {
 	let vnode = idMapper.getVNode(id);
 	if (vnode==null) return null;
 
