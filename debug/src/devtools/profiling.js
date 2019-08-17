@@ -1,5 +1,5 @@
 import { ElementTypeClass, ElementTypeFunction, ElementTypeMemo, ElementTypeForwardRef } from './constants';
-import { getNearestDisplayName, getVNodeType } from './vnode';
+import { getNearestDisplayName, getDevtoolsType } from './vnode';
 import { now } from './util';
 
 /**
@@ -116,7 +116,7 @@ export function getTimings(profiler, mapper) {
  * @returns {import('../internal').ChangeDescription | null}
  */
 export function getChangeDescription(vnode) {
-	let type = getVNodeType(vnode);
+	let type = getDevtoolsType(vnode);
 
 	switch (type) {
 		case ElementTypeClass:

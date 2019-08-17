@@ -1,4 +1,4 @@
-import { getInstance, getVNodeType, getDisplayName, isRoot, getNearestDisplayName } from './vnode';
+import { getInstance, getDevtoolsType, getDisplayName, isRoot, getNearestDisplayName, getVNodeProps, getRenderedChildren, getParent, getVNodeType } from './vnode';
 import { ElementTypeClass, ElementTypeFunction, ElementTypeForwardRef, ElementTypeMemo } from './constants';
 import { shouldFilter } from './filter';
 
@@ -17,8 +17,7 @@ export const selectElement = (getVNode) => (id) => {
 	/** @type {import('../internal').DevtoolsWindow} */
 	let win = /** @type {*} */ (window);
 
-	let type = getVNodeType(vnode);
-	switch (type) {
+	switch (getDevtoolsType(vnode)) {
 		case ElementTypeClass:
 			win.$r = getInstance(vnode);
 			break;
@@ -26,8 +25,8 @@ export const selectElement = (getVNode) => (id) => {
 		case ElementTypeForwardRef:
 		case ElementTypeMemo:
 			win.$r = {
-				type: vnode.type,
-				props: vnode.props
+				type: getVNodeType(vnode),
+				props: getVNodeProps(vnode)
 			};
 			break;
 		default:
@@ -57,7 +56,7 @@ export function getBestMatch(idMapper, filters, path, vnode) {
 	let lastNonFiltered = null;
 	for (let i = 0; i < path.length; i++) {
 		let seg = path[i];
-		item = item._children[seg.index];
+		item = getRenderedChildren(item)[seg.index];
 		if (item==null) continue;
 		if (getDisplayName(item)!=seg.displayName) break;
 
@@ -88,11 +87,11 @@ export const getVNodePath = idMapper => id => {
 
 	while (vnode!=null && !isRoot(vnode)) {
 		path.push(getPathFrame(vnode));
-		vnode = vnode._parent;
+		vnode = getParent(vnode);
 	}
 
 	return path.reverse();
-}
+};
 
 /**
  * Convert a vnode to a path segment
@@ -100,7 +99,7 @@ export const getVNodePath = idMapper => id => {
  * @returns {import('../internal').PathFrame}
  */
 export function getPathFrame(vnode) {
-	let index = vnode._parent._children.findIndex(child => child===vnode);
+	let index = getRenderedChildren(getParent(vnode)).findIndex(child => child===vnode);
 
 	return {
 		displayName: getDisplayName(vnode),

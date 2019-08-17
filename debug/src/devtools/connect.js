@@ -1,12 +1,12 @@
 /* istanbul ignore file */
 import { updateComponentFilters, createFilterManager } from './filter';
 import { assign } from '../../../src/util';
-import { findDomForVNode, inspectElement, logElementToConsole, flushInitialEvents, onCommitFiberRoot, onCommitFiberUnmount, flushPendingEvents, mountTree, updateTree, recordUnmount, unmountTree as unmount } from './renderer';
+import { findDomForVNode, inspectElement, flushInitialEvents, onCommitFiberRoot, onCommitFiberUnmount, flushPendingEvents, mountTree, updateTree, recordUnmount, unmountTree as unmount } from './renderer';
 import { getTimings, createProfiler } from './profiling';
 import { setInProps, setInState } from './update';
 import { setInHook } from './hooks';
 import { selectElement, getVNodePath, createSelectionStore } from './selection';
-import { getOwners } from './vnode';
+import { getOwners, logElementToConsole } from './vnode';
 import { createIdMapper, createLinker } from './cache';
 
 /**
@@ -40,6 +40,7 @@ export function createAdapter(config, hook) {
 
 	let rendererId = -1;
 
+	// Construct Actions
 	const getRoots = () => hook.getFiberRoots(rendererId);
 	const emit = data => hook.emit('operations', data);
 	const getRenderer = () => hook.renderers.get(rendererId);
@@ -63,8 +64,8 @@ export function createAdapter(config, hook) {
 
 	let selections = createSelectionStore(idMapper, state.filter, getRoots);
 
+	// Build our renderer
 	const filters = win.__REACT_DEVTOOLS_COMPONENT_FILTERS__;
-
 	let renderer = assign(assign({}, config), {
 		findNativeNodesForFiberID: id => findDomForVNode(idMapper, id),
 		startProfiling: profiler.start,
@@ -120,6 +121,6 @@ export function createAdapter(config, hook) {
 			hook.inject(renderer);
 		},
 		onCommitRoot: root => onCommitFiberRoot(getRoots, idMapper, profiler, mount, update, flush, state, root),
-		onCommitUnmount: vnode => onCommitFiberUnmount(state, idMapper, linker, profiler, state.filter, vnode)
+		onCommitUnmount: onCommitFiberUnmount(idMapper, linker, recordUnmount2, state.filter)
 	};
 }

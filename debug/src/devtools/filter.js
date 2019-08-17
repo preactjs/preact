@@ -1,6 +1,6 @@
 import { FilterElementType, FilterDisplayName as FilterName, FilterLocation, FilterHOC } from './constants';
 import { Fragment } from '../../../src';
-import { getVNodeType, getDisplayName, isRoot } from './vnode';
+import { getDevtoolsType, getDisplayName, isRoot, getVNodeType } from './vnode';
 
 /**
  * @returns {import('./devtools').FilterState}
@@ -87,7 +87,7 @@ export function updateFilterState(state, filters) {
  * @param {import('../internal').VNode} vnode
  */
 export function shouldFilter(filterState, vnode) {
-	switch (vnode.type) {
+	switch (getVNodeType(vnode)) {
 		// TODO: Portals
 		// TODO: Root nodes
 		case null:
@@ -96,7 +96,7 @@ export function shouldFilter(filterState, vnode) {
 			return !isRoot(vnode);
 	}
 
-	if (filterState.byType.has(getVNodeType(vnode))) {
+	if (filterState.byType.has(getDevtoolsType(vnode))) {
 		return true;
 	}
 
