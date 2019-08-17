@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import { clearVNode } from './cache';
 import { TREE_OPERATION_ADD, ElementTypeRoot, TREE_OPERATION_REMOVE, TREE_OPERATION_REORDER_CHILDREN, TREE_OPERATION_UPDATE_TREE_BASE_DURATION } from './constants';
 import { getDevtoolsType, getDisplayName, getAncestor, getOwners, getRoot as findRoot, isRoot, getRenderedChildren, hasRenderedChildren, hasHookState, getComponentState, getVNodeProps, getComponentContext, getParent } from './vnode';

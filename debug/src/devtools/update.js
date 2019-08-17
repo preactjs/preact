@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import { setIn } from './util';
 import { getVNodeProps } from './vnode';
 

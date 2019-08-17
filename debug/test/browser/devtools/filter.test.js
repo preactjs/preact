@@ -28,7 +28,7 @@ describe('devtools', () => {
 	});
 
 	describe('updateComponentFilters', () => {
-		it('should unmount currently active roots', () => {
+		it.skip('should unmount currently active roots', () => {
 			render(<div>foo</div>, scratch);
 			const root = scratch._children;
 

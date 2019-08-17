@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import { options, Component } from 'preact';
 import { now, catchErrors } from './util';
 import { createAdapter } from './connect';

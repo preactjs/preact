@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import { options } from 'preact';
 import { USE_STATE, USE_CALLBACK } from 'preact/hooks/constants';
 import ErrorStackParser from 'error-stack-parser';

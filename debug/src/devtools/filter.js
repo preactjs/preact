@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { FilterElementType, FilterDisplayName as FilterName, FilterLocation, FilterHOC, LOCAL_STORAGE_FILTER_PREFERENCES_KEY, ElementTypeHostComponent } from './constants';
 import { Fragment } from '../../../src';
 import { getDevtoolsType, getDisplayName, isRoot, getVNodeType } from './vnode';

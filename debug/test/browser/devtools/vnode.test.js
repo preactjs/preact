@@ -1,8 +1,7 @@
 import { setupScratch, teardown } from '../../../../test/_util/helpers';
 import { h, render, Component } from 'preact';
 import { memo, forwardRef } from 'preact/compat';
-import { getInstance, isRoot, getVNodeType } from '../../../src/devtools/vnode';
-import { clearState } from '../../../src/devtools/cache';
+import { getInstance, isRoot, getDevtoolsType } from '../../../src/devtools/vnode';
 import { ElementTypeFunction, ElementTypeClass, ElementTypeHostComponent, ElementTypeMemo, ElementTypeForwardRef } from '../../../src/devtools/constants';
 
 /** @jsx h */
@@ -14,7 +13,6 @@ describe('devtools', () => {
 
 	beforeEach(() => {
 		scratch = setupScratch();
-		clearState();
 	});
 
 	afterEach(() => {
@@ -58,12 +56,12 @@ describe('devtools', () => {
 		});
 	});
 
-	describe('getVNodeType', () => {
+	describe('getDevtoolsType', () => {
 		it('should detect Function-Components', () => {
 			function Foo() {
 				return <div />;
 			}
-			expect(getVNodeType(<Foo />)).to.equal(ElementTypeFunction);
+			expect(getDevtoolsType(<Foo />)).to.equal(ElementTypeFunction);
 		});
 
 		it('should detect Class-Components', () => {
@@ -72,11 +70,11 @@ describe('devtools', () => {
 					return <div />;
 				}
 			}
-			expect(getVNodeType(<Foo />)).to.equal(ElementTypeClass);
+			expect(getDevtoolsType(<Foo />)).to.equal(ElementTypeClass);
 		});
 
 		it('should detect HTML-Nodes', () => {
-			expect(getVNodeType(<div />)).to.equal(ElementTypeHostComponent);
+			expect(getDevtoolsType(<div />)).to.equal(ElementTypeHostComponent);
 		});
 
 		it('should detect memo-Components', () => {
@@ -84,7 +82,7 @@ describe('devtools', () => {
 				return <div />;
 			}
 			let Bar = memo(Foo);
-			expect(getVNodeType(<Bar />)).to.equal(ElementTypeMemo);
+			expect(getDevtoolsType(<Bar />)).to.equal(ElementTypeMemo);
 		});
 
 		it('should detect forwardRef-Component', () => {
@@ -92,7 +90,7 @@ describe('devtools', () => {
 				return <div />;
 			}
 			let Bar = forwardRef(Foo);
-			expect(getVNodeType(<Bar />)).to.equal(ElementTypeForwardRef);
+			expect(getDevtoolsType(<Bar />)).to.equal(ElementTypeForwardRef);
 		});
 	});
 });
