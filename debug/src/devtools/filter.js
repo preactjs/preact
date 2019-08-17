@@ -1,7 +1,6 @@
 /* istanbul ignore file */
 
 import { FilterElementType, FilterDisplayName as FilterName, FilterLocation, FilterHOC, LOCAL_STORAGE_FILTER_PREFERENCES_KEY, ElementTypeHostComponent } from './constants';
-import { Fragment } from '../../../src';
 import { getDevtoolsType, getDisplayName, isRoot, getVNodeType } from './vnode';
 
 /**
@@ -120,8 +119,6 @@ export function shouldFilter(filterState, vnode) {
 		// TODO: Root nodes
 		case null:
 			return true;
-		case Fragment:
-			return !isRoot(vnode);
 	}
 
 	if (filterState.byType.has(getDevtoolsType(vnode))) {

@@ -1,10 +1,8 @@
 /* istanbul ignore file */
-import { Fragment } from 'preact';
 import { clearVNode } from './cache';
 import { TREE_OPERATION_ADD, ElementTypeRoot, TREE_OPERATION_REMOVE, TREE_OPERATION_REORDER_CHILDREN, TREE_OPERATION_UPDATE_TREE_BASE_DURATION } from './constants';
 import { getDevtoolsType, getDisplayName, getAncestor, getOwners, getRoot as findRoot, isRoot, getRenderedChildren, hasRenderedChildren, hasHookState, getComponentState, getVNodeProps, getComponentContext, getParent } from './vnode';
 import { cleanForBridge, cleanContext } from './pretty';
-import { inspectHooks } from './hooks';
 import { shouldFilter } from './filter';
 import { getChangeDescription } from './profiling';
 import { flushTable, getStringId } from './string-table';
@@ -420,10 +418,6 @@ export function flushInitialEvents(emit, getRoots, idMapper, profiler, state, ge
 		});
 	}
 
-	if (filters && state.filter.raw!==filters) {
-		getRenderer().updateComponentFilters(state.filter.raw = filters);
-	}
-
 	state.currentRootId = -1;
 }
 
@@ -445,29 +439,24 @@ export function findDomForVNode(vnode) {
  */
 export function inspectElementRaw(idMapper, id) {
 	let vnode = idMapper.getVNode(id);
-	let hasHooks = hasHookState(vnode);
 	let owners = getOwners(idMapper, vnode);
 	let state = getComponentState(vnode);
 	let props = getVNodeProps(vnode);
 	let context = getComponentContext(vnode);
 
-	// Don't import Suspend to not pull in all of compat. We'll simply check
-	// if we're using Preact >= 10.
-	let canToggleSuspense = Fragment !== undefined;
-
 	return {
 		id,
-		canEditHooks: hasHooks,
+		canEditHooks: false,
 		canEditFunctionProps: true, // TODO
-		canToggleSuspense,
+		canToggleSuspense: false,
 		canViewSource: false, // TODO
 		displayName: getDisplayName(vnode),
 		type: getDevtoolsType(vnode),
 		context: context!=null ? cleanContext(context) : null, // TODO
 		events: null,
-		hooks: hasHooks ? cleanForBridge(inspectHooks(vnode)) : null,
+		hooks: null,
 		props: props!=null ? cleanForBridge(props) : null,
-		state: !hasHooks && state!=null ? cleanForBridge(state) : null,
+		state: state!=null ? cleanForBridge(state) : null,
 		owners: owners.length ? owners : null,
 		source: null // TODO
 	};

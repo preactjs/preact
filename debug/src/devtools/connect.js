@@ -1,14 +1,14 @@
 /* istanbul ignore file */
-import { updateComponentFilters, createFilterManager, loadRawFilters } from './filter';
-import { assign } from '../../../src/util';
+import { updateComponentFilters, createFilterManager } from './filter';
+import { assign } from './util';
 import { findDomForVNode, inspectElement, flushInitialEvents, onCommitFiberRoot, onCommitFiberUnmount, flushPendingEvents, mountTree, updateTree, recordUnmount, unmountTree as unmount } from './renderer';
 import { getTimings, createProfiler } from './profiling';
 import { setInProps, setInState } from './update';
-import { setInHook } from './hooks';
-import { selectElement, getVNodePath, createSelection } from './selection';
+import { selectElement } from './selection';
 import { getOwners, logElementToConsole } from './vnode';
 import { createIdMapper, createLinker } from './cache';
-import { createSuspender } from './suspender';
+
+const noop = () => null;
 
 /**
  * Create an adapter instance for the devtools
@@ -63,9 +63,6 @@ export function createAdapter(config, hook) {
 		flush
 	);
 
-	let selections = createSelection(idMapper, state.filter, getRoots);
-	const suspender = createSuspender(idMapper);
-
 	// Build our renderer
 	const filters = win.__REACT_DEVTOOLS_COMPONENT_FILTERS__;
 	let renderer = assign(assign({}, config), {
@@ -89,35 +86,17 @@ export function createAdapter(config, hook) {
 		},
 		setInProps: (id, path, value) => setInProps(idMapper.getVNode(id), path, value),
 		setInState: (id, path, value) => setInState(idMapper.getVNode(id), path, value),
-		setInHook: setInHook(idMapper.getVNode),
-
-		/** @type {(vnode: import('../internal').VNode, path: Array<string | number>, value: any) => void} */
-		overrideProps(vnode, path, value) {
-			// TODO
-		},
-		setTrackedPath: selections.setTrackedPath,
-		getPathForElement: getVNodePath(idMapper),
-		getBestMatchForTrackedPath: selections.getBestMatch,
-		currentDispatcherRef: { current: null },
-
-		overrideSuspense(id, forceFallback) {
-			forceFallback
-				? suspender.showFallback(idMapper.getVNode(id))
-				: suspender.showChildren(idMapper.getVNode(id));
-		}
-
+		setInHook: noop,
+		overrideProps: noop,
+		setTrackedPath: noop,
+		getPathForElement: noop,
+		getBestMatchForTrackedPath: noop,
+		currentDispatcherRef: { current: null }
 	});
 
 	return {
 		renderer,
 		connect() {
-			let filters = loadRawFilters(win.__REACT_DEVTOOLS_COMPONENT_FILTERS__);
-
-			if (filters.length > 0) {
-				// Apply initial filters
-				applyFilters(state.filter.raw = filters);
-			}
-
 			let attach = (hook, id, renderer, target) => {
 				rendererId = id;
 				return renderer;

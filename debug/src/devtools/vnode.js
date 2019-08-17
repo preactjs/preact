@@ -1,6 +1,6 @@
 /* istanbul ignore file */
-import { Fragment } from 'preact';
-import { ElementTypeClass, ElementTypeFunction, ElementTypeHostComponent, ElementTypeMemo, ElementTypeForwardRef, ElementTypeSuspense } from './constants';
+import { ElementTypeClass, ElementTypeFunction, ElementTypeHostComponent } from './constants';
+import { ATTR_KEY } from '../../../src/constants';
 import { shouldFilter } from './filter';
 
 /**
@@ -9,14 +9,10 @@ import { shouldFilter } from './filter';
  * @returns {string}
  */
 export function getDisplayName(vnode) {
-	if (vnode.type===Fragment) return 'Fragment';
-	else if (typeof vnode.type==='function') return vnode.type.displayName || vnode.type.name;
-	else if (typeof vnode.type==='string') return vnode.type;
+	if (typeof vnode.nodeName==='function') return vnode.nodeName.displayName || vnode.nodeName.name;
+	else if (typeof vnode.nodeName==='string') return vnode.nodeName;
 	return '#text';
 }
-
-let memoReg = /^Memo\(/;
-let forwardRefReg = /^ForwardRef\(/;
 
 /**
  * Get the type of a vnode. The devtools uses these constants to differentiate
@@ -24,13 +20,9 @@ let forwardRefReg = /^ForwardRef\(/;
  * @param {import('../internal').VNode} vnode
  */
 export function getDevtoolsType(vnode) {
-	if (typeof vnode.type=='function' && vnode.type!==Fragment) {
-		if (memoReg.test(vnode.type.displayName)) return ElementTypeMemo;
-		if (forwardRefReg.test(vnode.type.displayName)) return ElementTypeForwardRef;
-		// FIXME: Add mangle
-		if (vnode._component && vnode._component._childDidSuspend) return ElementTypeSuspense;
+	if (typeof vnode.nodeName=='function') {
 		// TODO: Provider and Consumer
-		return vnode.type.prototype && vnode.type.prototype.render
+		return vnode.nodeName.prototype && vnode.nodeName.prototype.render
 			? ElementTypeClass
 			: ElementTypeFunction;
 	}
@@ -55,11 +47,11 @@ export function getInstance(vnode) {
 		res = vnode._dom;
 	}
 	else if (vnode._component!=null) return vnode._component;
-	else if (vnode.type===Fragment) return vnode.props;
-	else if (vnode.type===null) res = vnode._dom || vnode.props;
+	else if (vnode.nodeName===null) res = vnode._dom || vnode.attributes;
 	else res = vnode._dom || vnode;
 
 	if (res===null) {
+		// eslint-disable-next-line no-console
 		console.error(`VNode`, vnode);
 		throw new Error(`Could not determine a valid instance for the given vnode. Please report this bug.`);
 	}
@@ -73,7 +65,12 @@ export function getInstance(vnode) {
  * @returns {import('../internal').VNode[]}
  */
 export function getRenderedChildren(vnode) {
-	return vnode._children || [];
+	return vnode.children.map(child => {
+		if (typeof child === 'string') {
+			return { nodeName: null, attributes: child, children: [] };
+		}
+		return child;
+	});
 }
 
 /**
@@ -82,7 +79,7 @@ export function getRenderedChildren(vnode) {
  * @returns {boolean}
  */
 export function hasRenderedChildren(vnode) {
-	return vnode._children!=null && vnode._children.length > 0;
+	return vnode.children.length > 0;
 }
 
 /**
@@ -121,8 +118,7 @@ export function getOwners(idMapper, vnode) {
 	let owners = [];
 	let next = vnode;
 	while (next = next._parent) {
-		// TODO: Check filtering?
-		if (typeof next.type=='function' && next.type!==Fragment) {
+		if (typeof next.nodeName=='function') {
 			owners.push({
 				id: idMapper.getId(next),
 				type: getDevtoolsType(next),
@@ -151,12 +147,23 @@ export function getRoot(vnode) {
 }
 
 /**
- * Get the ancestor component that rendered the current vnode
+ * Return `true` if a preact component is a top level component rendered by
+ * `render()` into a container Element.
  * @param {import('../internal').VNode} vnode
  * @returns {boolean}
  */
 export function isRoot(vnode) {
-	return vnode.type===Fragment && vnode._parent==null;
+	const component = vnode._component;
+	// `_parentComponent` is actually `__u` after minification
+	if (component._parentComponent || component.__u) {
+		// Component with a composite parent
+		return false;
+	}
+	if (component.base.parentElement && component.base.parentElement[ATTR_KEY]) {
+		// Component with a parent DOM element rendered by Preact
+		return false;
+	}
+	return true;
 }
 
 /**
@@ -165,29 +172,15 @@ export function isRoot(vnode) {
  * @returns {string}
  */
 export function getNearestDisplayName(vnode) {
-	if (vnode!=null) {
-		if (vnode.type!==Fragment) return getDisplayName(vnode);
-		if (vnode._children==null) return '';
-
-		for (let i = 0; i < vnode._children.length; i++) {
-			let child = vnode._children[i];
-			if (child) {
-				let name = getNearestDisplayName(child);
-				if (name) return name;
-			}
-		}
-	}
-
-	return 'Unknown';
+	return vnode!=null ? getDisplayName(vnode) : 'Unknown';
 }
 
 /**
  * Check if a component has hooks
- * @param {import('../internal').VNode} vnode
  * @returns {boolean}
  */
-export function hasHookState(vnode) {
-	return vnode._component!=null && vnode._component.__hooks!=null;
+export function hasHookState() {
+	return false;
 }
 
 /**
@@ -196,8 +189,8 @@ export function hasHookState(vnode) {
  * @returns {Record<string, any>}
  */
 export function getVNodeProps(vnode) {
-	return vnode.props!=null && Object.keys(vnode.props).length > 0
-		? vnode.props
+	return vnode.attributes!=null && Object.keys(vnode.attributes).length > 0
+		? vnode.attributes
 		: null;
 }
 
@@ -228,6 +221,7 @@ export function getComponentContext(vnode) {
  */
 export function logElementToConsole(vnode, id) {
 	if (vnode==null) {
+		// eslint-disable-next-line no-console
 		console.warn(`Could not find vnode with id ${id}`);
 		return;
 	}
@@ -238,7 +232,7 @@ export function logElementToConsole(vnode, id) {
 		// CSS Variable is injected by the devtools extension
 		'color: var(--dom-tag-name-color); font-weight: normal'
 	);
-	console.log('props:', vnode.props);
+	console.log('props:', vnode.attributes);
 	if (vnode._component) {
 		console.log('state:', vnode._component.state);
 	}
@@ -252,5 +246,5 @@ export function logElementToConsole(vnode, id) {
  * @param {import('../internal').VNode} vnode
  */
 export function getVNodeType(vnode) {
-	return vnode.type;
+	return vnode.nodeName;
 }

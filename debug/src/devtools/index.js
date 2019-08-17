@@ -1,5 +1,6 @@
 /* istanbul ignore file */
-import { options, ATTR_KEY } from 'preact';
+import { options } from 'preact';
+import { ATTR_KEY } from '../../../src/constants';
 import { now, catchErrors } from './util';
 import { createAdapter } from './connect';
 import { SESSION_STORAGE_RELOAD_AND_PROFILE_KEY } from './constants';
@@ -15,6 +16,12 @@ export function initDevTools() {
 	let hook = win.__REACT_DEVTOOLS_GLOBAL_HOOK__;
 
 	if (hook==null || hook.isDisabled) return;
+
+	/** @type {(vnode: import('../internal').VNode) => void} */
+	let onCommitRoot = noop;
+
+	/** @type {(vnode: import('../internal').VNode) => void} */
+	let onCommitUnmount = noop;
 
 	catchErrors(() => {
 		let isDev = false;
@@ -54,7 +61,7 @@ export function initDevTools() {
 	// Store (possible) previous hooks so that we don't overwrite them
 	let prevVNodeHook = options.vnode;
 	let prevCommitRoot = options._commit;
-	let prevBeforeUnmount = options.unmount;
+	let prevBeforeUnmount = options.beforeUnmount;
 	let prevBeforeDiff = options._diff;
 	let prevAfterDiff = options.diffed;
 
@@ -77,19 +84,19 @@ export function initDevTools() {
 		if (vnode!=null && (c = vnode._component)!=null) {
 			c._prevProps = oldVNode!=null ? oldVNode.props : null;
 			c._prevContext = oldVNode!=null && oldVNode._component!=null ? oldVNode._component._context : null;
-
-			if (c.__hooks!=null) {
-				c._prevHooksRevision = c._currentHooksRevision;
-				c._currentHooksRevision = c.__hooks._list.reduce((acc, x) => acc + x._revision, 0);
-			}
 		}
 		if (prevAfterDiff!=null) prevAfterDiff(vnode);
 	};
 
+	options.beforeUnmount = catchErrors((vnode) => {
+		// Call previously defined hook
+		if (prevBeforeUnmount!=null) prevBeforeUnmount(vnode);
+		onCommitUnmount(vnode);
+	});
 
 	// Teardown devtools options. Mainly used for testing
 	return () => {
-		options.unmount = prevBeforeUnmount;
+		options.beforeUnmount = prevBeforeUnmount;
 		options._commit = prevCommitRoot;
 		options.diffed = prevAfterDiff;
 		options._diff = prevBeforeDiff;
@@ -98,59 +105,41 @@ export function initDevTools() {
 }
 
 
-/** Notify devtools that a component has been unmounted from the DOM. */
-const componentRemoved = component => {
-	const instance = updateReactComponent(component);
-	visitNonCompositeChildren(childInst => {
-		instanceMap.delete(childInst.node);
-		Reconciler.unmountComponent(childInst);
-	});
-	Reconciler.unmountComponent(instance);
-	instanceMap.delete(component);
-	if (instance._rootID) {
-		delete roots[instance._rootID];
-	}
-};
+// /** Notify devtools that a component has been unmounted from the DOM. */
+// const componentRemoved = component => {
+// 	const instance = updateReactComponent(component);
+// 	visitNonCompositeChildren(childInst => {
+// 		instanceMap.delete(childInst.node);
+// 		Reconciler.unmountComponent(childInst);
+// 	});
+// 	Reconciler.unmountComponent(instance);
+// 	instanceMap.delete(component);
+// 	if (instance._rootID) {
+// 		delete roots[instance._rootID];
+// 	}
+// };
 
-
-/**
- * Return `true` if a preact component is a top level component rendered by
- * `render()` into a container Element.
- */
-function isRootComponent(component) {
-	// `_parentComponent` is actually `__u` after minification
-	if (component._parentComponent || component.__u) {
-		// Component with a composite parent
-		return false;
-	}
-	if (component.base.parentElement && component.base.parentElement[ATTR_KEY]) {
-		// Component with a parent DOM element rendered by Preact
-		return false;
-	}
-	return true;
-}
-
-/**
- * Visit all child instances of a ReactCompositeComponent-like object that are
- * not composite components (ie. they represent DOM elements or text)
- *
- * @param {Component} component
- * @param {(Component) => void} visitor
- */
-function visitNonCompositeChildren(component, visitor) {
-	if (!component) return;
-	if (component._renderedComponent) {
-		if (!component._renderedComponent._component) {
-			visitor(component._renderedComponent);
-			visitNonCompositeChildren(component._renderedComponent, visitor);
-		}
-	} else if (component._renderedChildren) {
-		component._renderedChildren.forEach(child => {
-			visitor(child);
-			if (!child._component) visitNonCompositeChildren(child, visitor);
-		});
-	}
-}
+// /**
+//  * Visit all child instances of a ReactCompositeComponent-like object that are
+//  * not composite components (ie. they represent DOM elements or text)
+//  *
+//  * @param {Component} component
+//  * @param {(Component) => void} visitor
+//  */
+// function visitNonCompositeChildren(component, visitor) {
+// 	if (!component) return;
+// 	if (component._renderedComponent) {
+// 		if (!component._renderedComponent._component) {
+// 			visitor(component._renderedComponent);
+// 			visitNonCompositeChildren(component._renderedComponent, visitor);
+// 		}
+// 	} else if (component._renderedChildren) {
+// 		component._renderedChildren.forEach(child => {
+// 			visitor(child);
+// 			if (!child._component) visitNonCompositeChildren(child, visitor);
+// 		});
+// 	}
+// }
 
 // /**
 //  * Create a bridge between the preact component tree and React's dev tools
