@@ -17,6 +17,7 @@ export function createProfiler() {
 
 	const start = () => {
 		if (!state.running) {
+			state.running = true;
 			state.startTime = now();
 			// Copy durations, because it will be mutated during a profiling
 			state.initial = new Map(state.durations);
