@@ -30,6 +30,7 @@
       "$_parent": "__p",
       "$_pendingError": "__E",
       "$_processingException": "__p",
+      "$_childDidSuspend": "__ds",
       "$_root": "__p",
       "$_diff": "__b",
       "$_commit": "__c",

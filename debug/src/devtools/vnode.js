@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 import { Fragment } from 'preact';
-import { ElementTypeClass, ElementTypeFunction, ElementTypeHostComponent, ElementTypeMemo, ElementTypeForwardRef } from './constants';
+import { ElementTypeClass, ElementTypeFunction, ElementTypeHostComponent, ElementTypeMemo, ElementTypeForwardRef, ElementTypeSuspense } from './constants';
 import { shouldFilter } from './filter';
 
 /**
@@ -27,6 +27,8 @@ export function getDevtoolsType(vnode) {
 	if (typeof vnode.type=='function' && vnode.type!==Fragment) {
 		if (memoReg.test(vnode.type.displayName)) return ElementTypeMemo;
 		if (forwardRefReg.test(vnode.type.displayName)) return ElementTypeForwardRef;
+		// FIXME: Add mangle
+		if (vnode._component && vnode._component._childDidSuspend) return ElementTypeSuspense;
 		// TODO: Provider and Consumer
 		return vnode.type.prototype && vnode.type.prototype.render
 			? ElementTypeClass

@@ -59,7 +59,7 @@ export function getBestMatch(idMapper, filters, path, vnode) {
 		let seg = path[i];
 		item = getRenderedChildren(item)[seg.index];
 		/* istanbul ignore next */
-		if (item==null) continue;
+		if (item==null) break;
 		/* istanbul ignore next */
 		if (getDisplayName(item)!=seg.displayName) break;
 		/* istanbul ignore next */

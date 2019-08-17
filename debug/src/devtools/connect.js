@@ -8,6 +8,7 @@ import { setInHook } from './hooks';
 import { selectElement, getVNodePath, createSelection } from './selection';
 import { getOwners, logElementToConsole } from './vnode';
 import { createIdMapper, createLinker } from './cache';
+import { createSuspender } from './suspender';
 
 /**
  * Create an adapter instance for the devtools
@@ -63,6 +64,7 @@ export function createAdapter(config, hook) {
 	);
 
 	let selections = createSelection(idMapper, state.filter, getRoots);
+	const suspender = createSuspender(idMapper);
 
 	// Build our renderer
 	const filters = win.__REACT_DEVTOOLS_COMPONENT_FILTERS__;
@@ -96,7 +98,14 @@ export function createAdapter(config, hook) {
 		setTrackedPath: selections.setTrackedPath,
 		getPathForElement: getVNodePath(idMapper),
 		getBestMatchForTrackedPath: selections.getBestMatch,
-		currentDispatcherRef: { current: null }
+		currentDispatcherRef: { current: null },
+
+		overrideSuspense(id, forceFallback) {
+			forceFallback
+				? suspender.showFallback(idMapper.getVNode(id))
+				: suspender.showChildren(idMapper.getVNode(id));
+		}
+
 	});
 
 	return {

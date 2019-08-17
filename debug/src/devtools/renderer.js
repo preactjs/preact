@@ -1,4 +1,5 @@
 /* istanbul ignore file */
+import { Fragment } from 'preact';
 import { clearVNode } from './cache';
 import { TREE_OPERATION_ADD, ElementTypeRoot, TREE_OPERATION_REMOVE, TREE_OPERATION_REORDER_CHILDREN, TREE_OPERATION_UPDATE_TREE_BASE_DURATION } from './constants';
 import { getDevtoolsType, getDisplayName, getAncestor, getOwners, getRoot as findRoot, isRoot, getRenderedChildren, hasRenderedChildren, hasHookState, getComponentState, getVNodeProps, getComponentContext, getParent } from './vnode';
@@ -450,11 +451,15 @@ export function inspectElementRaw(idMapper, id) {
 	let props = getVNodeProps(vnode);
 	let context = getComponentContext(vnode);
 
+	// Don't import Suspend to not pull in all of compat. We'll simply check
+	// if we're using Preact >= 10.
+	let canToggleSuspense = Fragment !== undefined;
+
 	return {
 		id,
 		canEditHooks: hasHooks,
 		canEditFunctionProps: true, // TODO
-		canToggleSuspense: false, // TODO
+		canToggleSuspense,
 		canViewSource: false, // TODO
 		displayName: getDisplayName(vnode),
 		type: getDevtoolsType(vnode),
