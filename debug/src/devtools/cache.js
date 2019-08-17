@@ -17,7 +17,7 @@ export function createIdMapper() {
 		if (vnode!=null) {
 			return vnodeToId.has(getInstance(vnode));
 		}
-		return null;
+		return false;
 	};
 	const getId = vnode => {
 		let inst = getInstance(vnode);
@@ -30,8 +30,8 @@ export function createIdMapper() {
 		if (hasId(vnode)) {
 			const id = getId(vnode);
 			idToVNode.delete(id);
-			vnodeToId.delete(getInstance);
 		}
+		vnodeToId.delete(getInstance(vnode));
 	};
 
 	return { getVNode, hasId, getId, remove };
