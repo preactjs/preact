@@ -1,6 +1,6 @@
 import { setupScratch, teardown } from '../../../../test/_util/helpers';
-import { h } from 'preact';
-import { getType, prettify } from '../../../src/devtools/pretty';
+import { h, createContext, render, Component } from 'preact';
+import { getType, prettify, cleanContext, cleanForBridge } from '../../../src/devtools/pretty';
 
 /** @jsx h */
 
@@ -151,6 +151,67 @@ describe('devtools', () => {
 			let map = new Map([[1, 2]]);
 			expect(prettify(map, cleaned, ['foo'], 0)).to.deep.equal(map);
 			expect(cleaned).to.deep.equal([]);
+		});
+	});
+
+	describe('cleanForBridge', () => {
+		it('should not throw when data is null', () => {
+			expect(cleanForBridge(null)).to.equal(null);
+		});
+
+		it('should return devtools format', () => {
+			expect(cleanForBridge({ foo: 1, bar: () => null })).to.deep.equal({
+				cleaned: [['bar']],
+				data: {
+					bar: {
+						name: 'bar',
+						type: 'function'
+					},
+					foo: 1
+				}
+			});
+		});
+	});
+
+	describe('cleanContext', () => {
+		it('should remove createContext items', () => {
+			class LegacyProvider extends Component {
+				getChildContext() {
+					return { foo: 1 };
+				}
+
+				render() {
+					return this.props.children;
+				}
+			}
+
+			let contextValue;
+			function Child(props, context) {
+				contextValue = context;
+				return <div>child</div>;
+			}
+
+			const ctx = createContext();
+			render(
+				(
+					<LegacyProvider>
+						<ctx.Provider value="a">
+							<ctx.Consumer>{() => <Child />}</ctx.Consumer>
+						</ctx.Provider>
+					</LegacyProvider>
+				),
+				scratch
+			);
+
+
+			expect(cleanContext(contextValue)).to.deep.equal({
+				cleaned: [],
+				data: { foo: 1 }
+			});
+		});
+
+		it('should return null when no context value is present', () => {
+			expect(cleanContext({})).to.equal(null);
 		});
 	});
 });
