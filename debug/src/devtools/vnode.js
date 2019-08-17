@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import { Fragment } from 'preact';
 import { ElementTypeClass, ElementTypeFunction, ElementTypeHostComponent, ElementTypeMemo, ElementTypeForwardRef } from './constants';
 import { shouldFilter } from './filter';
