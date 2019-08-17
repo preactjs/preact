@@ -54,7 +54,8 @@ export function getInstance(vnode) {
 	}
 	else if (vnode._component!=null) return vnode._component;
 	else if (vnode.type===Fragment) return vnode.props;
-	else res = vnode._dom;
+	else if (vnode.type===null) res = vnode._dom || vnode.props;
+	else res = vnode._dom || vnode;
 
 	if (res===null) {
 		console.error(`VNode`, vnode);

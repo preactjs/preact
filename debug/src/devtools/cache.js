@@ -13,7 +13,12 @@ export function createIdMapper() {
 	let uuid = 1;
 
 	const getVNode = id => idToVNode.get(id) || null;
-	const hasId = vnode => vnode!=null && vnodeToId.has(getInstance(vnode));
+	const hasId = vnode => {
+		if (vnode!=null) {
+			return vnodeToId.has(getInstance(vnode));
+		}
+		return null;
+	};
 	const getId = vnode => {
 		let inst = getInstance(vnode);
 		if (!vnodeToId.has(inst)) vnodeToId.set(inst, uuid++);
@@ -22,9 +27,11 @@ export function createIdMapper() {
 		return id;
 	};
 	const remove = vnode => {
-		const id = getId(vnode);
-		idToVNode.delete(id);
-		vnodeToId.delete(getInstance(vnode));
+		if (hasId(vnode)) {
+			const id = getId(vnode);
+			idToVNode.delete(id);
+			vnodeToId.delete(getInstance);
+		}
 	};
 
 	return { getVNode, hasId, getId, remove };
@@ -44,7 +51,9 @@ export function clearVNode(mapper, linker, vnode) {
 		}
 	}
 
-	linker.remove(mapper.getId(vnode));
+	if (mapper.hasId(vnode)) {
+		linker.remove(mapper.getId(vnode));
+	}
 	mapper.remove(vnode);
 }
 
