@@ -67,7 +67,7 @@ export function createAdapter(config, hook) {
 	// Build our renderer
 	const filters = win.__REACT_DEVTOOLS_COMPONENT_FILTERS__;
 	let renderer = assign(assign({}, config), {
-		findNativeNodesForFiberID: id => findDomForVNode(idMapper, id),
+		findNativeNodesForFiberID: id => findDomForVNode(idMapper.getVNode(id)),
 		startProfiling: profiler.start,
 		stopProfiling: profiler.stop,
 		getProfilingData: () =>  ({
