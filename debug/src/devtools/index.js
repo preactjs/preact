@@ -3,7 +3,7 @@
 import { options } from 'preact';
 
 // Internal helpers from preact
-import { ATTR_KEY } from '../src/constants';
+import { ATTR_KEY } from '../../../src/constants';
 
 /**
  * Return a ReactElement-compatible object for the current state of a preact
