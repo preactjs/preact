@@ -14,7 +14,7 @@ function createMockHook(roots) {
 	};
 }
 
-describe.only('devtools', () => {
+describe('devtools', () => {
 
 	/** @type {HTMLDivElement} */
 	let scratch;
