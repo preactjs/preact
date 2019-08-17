@@ -427,12 +427,10 @@ export function flushInitialEvents(emit, getRoots, idMapper, profiler, state, ge
 
 /**
  * Find the DOM node for a vnode
- * @param {import('./devtools').IdMapper} idMapper
- * @param {number} id The id of the vnode
+ * @param {import('../internal').VNode} vnode
  * @returns {Array<import('../internal').PreactElement | HTMLElement | Text> | null}
  */
-export function findDomForVNode(idMapper, id) {
-	let vnode = idMapper.getVNode(id);
+export function findDomForVNode(vnode) {
 	// TODO: Check for siblings here?
 	return vnode!=null ? [vnode._dom].filter(Boolean) : null;
 }
