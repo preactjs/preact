@@ -43,11 +43,7 @@ export function onCommitFiberRoot(getRoots, idMapper, profiler, mount, update, f
 		root = findRoot(vnode);
 	}
 
-	// If we're seeing this node for the first time we need to be careful
-	// not to set the id, otherwise the mount branch will not be chosen below
-	if (!idMapper.hasId(root)) {
-		state.currentRootId = idMapper.getId(root);
-	}
+	state.currentRootId = idMapper.getId(root);
 
 	if (profiler.state.running) {
 		profiler.prepareCommit(state.currentRootId);
