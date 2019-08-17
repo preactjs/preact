@@ -23,7 +23,7 @@ export function createIdMapper() {
 	};
 	const remove = vnode => {
 		const id = getId(vnode);
-		if (id!=null) idToVNode.delete(id);
+		idToVNode.delete(id);
 		vnodeToId.delete(getInstance(vnode));
 	};
 
@@ -60,15 +60,27 @@ export function clearVNode(mapper, linker, vnode) {
  */
 export function createLinker() {
 	const m = new Map();
+	const u = new Map();
 
 	const get = id => m.get(id) || [];
-	const remove = id => m.delete(id);
+	const remove = id => {
+		m.delete(id);
+		if (u.has(id)) {
+			u.get(id).forEach(parent => unlink(parent, id));
+			u.delete(id);
+		}
+	};
 	const link = (parent, child) => {
 		if (!m.has(parent)) m.set(parent, []);
 		m.get(parent).push(child);
+
+		if (!u.has(child)) u.set(child, []);
+		u.get(child).push(parent);
 	};
 	const unlink = (parent, child) => {
-		m.has(parent) && m.set(parent, m.get(parent).filter(id => id!=child));
+		if (m.has(parent)) {
+			m.set(parent, m.get(parent).filter(id => id!=child));
+		}
 	};
 
 	return { link, unlink, remove, get };

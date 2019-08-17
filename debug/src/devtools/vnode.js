@@ -46,13 +46,21 @@ export function getDevtoolsType(vnode) {
  * @returns {*}
  */
 export function getInstance(vnode) {
+	let res;
 	// Use the parent element as instance for root nodes
 	if (isRoot(vnode)) {
-		return vnode._dom;
+		res = vnode._dom;
 	}
-	if (vnode._component!=null) return vnode._component;
-	if (vnode.type===Fragment) return vnode.props;
-	return vnode._dom;
+	else if (vnode._component!=null) return vnode._component;
+	else if (vnode.type===Fragment) return vnode.props;
+	else res = vnode._dom;
+
+	if (res===null) {
+		console.error(`VNode`, vnode);
+		throw new Error(`Could not determine a valid instance for the given vnode. Please report this bug.`);
+	}
+
+	return res;
 }
 
 /**
