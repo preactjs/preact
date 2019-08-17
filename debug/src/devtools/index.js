@@ -84,11 +84,14 @@ export function initDevTools() {
 	options.diffed = (vnode, oldVNode) => {
 		vnode.endTime = now();
 		let c;
-		if (vnode!=null && (c = vnode._component)!=null && c.__hooks!=null) {
+		if (vnode!=null && (c = vnode._component)!=null) {
 			c._prevProps = oldVNode!=null ? oldVNode.props : null;
 			c._prevContext = oldVNode!=null && oldVNode._component!=null ? oldVNode._component._context : null;
-			c._prevHooksRevision = c._currentHooksRevision;
-			c._currentHooksRevision = c.__hooks._list.reduce((acc, x) => acc + x._revision, 0);
+
+			if (c.__hooks!=null) {
+				c._prevHooksRevision = c._currentHooksRevision;
+				c._currentHooksRevision = c.__hooks._list.reduce((acc, x) => acc + x._revision, 0);
+			}
 		}
 		if (prevAfterDiff!=null) prevAfterDiff(vnode);
 	};

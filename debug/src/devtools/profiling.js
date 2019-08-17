@@ -23,9 +23,16 @@ export function createProfiler() {
 			state.initial = new Map(state.durations);
 		}
 	};
-	const stop = () => state.running = false;
+	const stop = () => {
+		state.running = false;
+		state.startTime = NaN;
+	};
 
 	const prepareCommit = (rootId) => {
+		if (isNaN(state.startTime)) {
+			throw new Error(`Can only prepare profiling data when a profiling session is active.`);
+		}
+
 		state.commit = {
 			changed: new Map(),
 			commitTime: now() - state.startTime,
@@ -124,17 +131,6 @@ export function getChangeDescription(vnode) {
 		case ElementTypeFunction:
 		case ElementTypeMemo:
 		case ElementTypeForwardRef: {
-			let isNew = false;
-			if (isNew) {
-				return {
-					context: null,
-					didHooksChange: false,
-					isFirstMount: true,
-					props: null,
-					state: null
-				};
-			}
-
 			let c = vnode._component;
 			return {
 				context: getChangedKeys(c._context, c._prevContext)!=null,
