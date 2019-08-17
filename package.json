@@ -29,7 +29,7 @@
     "strip:esm": "jscodeshift --run-in-band -s -t config/codemod-strip-tdz.js dist/preact.mjs && jscodeshift --run-in-band -s -t config/codemod-const.js dist/preact.mjs && jscodeshift --run-in-band -s -t config/codemod-let-name.js dist/preact.mjs",
     "strip": "npm-run-all strip:main strip:esm",
     "size": "node -e \"process.stdout.write('gzip size: ')\" && gzip-size --raw dist/preact.min.js",
-    "test": "npm-run-all lint --parallel test:mocha test:karma test:ts test:flow test:size",
+    "test": "npm-run-all lint --parallel test:mocha test:karma test:ts test:flow",
     "test:flow": "flow check",
     "test:ts": "tsc -p test/ts/ && mocha --require babel-register test/ts/**/*-test.js",
     "test:mocha": "mocha --recursive --require babel-register test/shared test/node",
