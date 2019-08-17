@@ -19,7 +19,7 @@ export function createProfiler() {
 		if (!state.running) {
 			state.running = true;
 			state.startTime = now();
-			// Copy durations, because it will be mutated during a profiling
+			// Copy durations, because it will be mutated during a profiling session
 			state.initial = new Map(state.durations);
 		}
 	};
