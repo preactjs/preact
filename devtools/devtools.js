@@ -86,6 +86,10 @@ function createReactCompositeComponent(component) {
 	const node = component.base;
 
 	let instance = {
+		getPublicInstance() {
+			// Can be anything other than null
+			return true;
+		},
 		// --- ReactDOMComponent properties
 		getName() {
 			return typeName(_currentElement);
@@ -258,13 +262,18 @@ function createDevToolsBridge() {
 
 		Reconciler.receiveComponent(instance);
 		visitNonCompositeChildren(instance, childInst => {
+			const info = {
+				// Must be defined otherwise state updates won't work
+				_topLevelWrapper: instance
+			};
+
 			if (!childInst._inDevTools) {
 				// New DOM child component
 				childInst._inDevTools = true;
-				Reconciler.mountComponent(childInst);
+				Reconciler.mountComponent(childInst, null, null, info);
 			} else {
 				// Updated DOM child component
-				Reconciler.receiveComponent(childInst);
+				Reconciler.receiveComponent(childInst, null, null, info);
 			}
 		});
 
