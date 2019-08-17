@@ -8,7 +8,9 @@ import { getInstance } from './vnode';
 export function createIdMapper() {
 	const vnodeToId = new WeakMap();
 	const idToVNode = new Map();
-	let uuid = 0;
+	 // Must never be 0, otherwise an infinite loop will be trigger inside
+	 // the devtools extension ¯\_(ツ)_/¯
+	let uuid = 1;
 
 	const getVNode = id => idToVNode.get(id) || null;
 	const hasId = vnode => vnode!=null && vnodeToId.has(getInstance(vnode));
