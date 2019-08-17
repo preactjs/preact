@@ -196,6 +196,7 @@ export interface DevtoolsUpdater {
 }
 
 export interface DevtoolsHook {
+	rendererInterfaces: Map<number, Renderer>;
 	renderers: Map<number, any>;
 	isDisabled?: boolean;
 	on(ev: string, listener: () => void): void;

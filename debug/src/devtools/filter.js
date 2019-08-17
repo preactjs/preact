@@ -1,4 +1,3 @@
-import { unmount, mountTree, recordUnmount } from './renderer';
 import { FilterElementType, FilterDisplayName as FilterName, FilterLocation, FilterHOC } from './constants';
 import { Fragment } from '../../../src';
 import { getVNodeType, getDisplayName, isRoot } from './vnode';
@@ -21,16 +20,17 @@ export function createFilterManager() {
  * @param {() => Set<any>} getRoots
  * @param {import('./devtools').AdapterState} state
  * @param {import('./devtools').IdMapper} idMapper
- * @param {import('./devtools').Linker} linker
- * @param {import('./devtools').Profiler} profiler
+ * @param {(vnode: import('../internal').VNode, parentId: number) => void} mount
+ * @param {(record: (vnode: import('../internal').VNode) => void, vnode: import('../internal').VNode) => void} unmount
+ * @param {(vnode: import('../internal').VNode) => void} recordUnmount
  * @param {() => void} flush
  * @returns {(filters: Array<import('../internal').Filter>) => void}
  */
-export const updateComponentFilters = (getRoots, state, idMapper, linker, profiler, flush) => filters => {
+export const updateComponentFilters = (getRoots, state, idMapper, mount, unmount, recordUnmount, flush) => filters => {
 	// Unmount all currently active roots
 	getRoots().forEach(root => {
-		unmount(state, idMapper, linker, profiler, root._children[0]);
-		recordUnmount(state, idMapper, linker, profiler, root._children[0]);
+		unmount(recordUnmount, root._children[0]);
+		recordUnmount(root._children[0]);
 		state.currentRootId = -1;
 	});
 
@@ -38,7 +38,7 @@ export const updateComponentFilters = (getRoots, state, idMapper, linker, profil
 
 	getRoots().forEach(root => {
 		state.currentRootId = idMapper.getId(root);
-		mountTree(state, idMapper, linker, profiler, root._children[0], state.currentRootId);
+		mount(root._children[0], state.currentRootId);
 		flush();
 		state.currentRootId = -1;
 	});
