@@ -1,5 +1,5 @@
 /* istanbul ignore file */
-import { updateComponentFilters, createFilterManager } from './filter';
+import { updateComponentFilters, createFilterManager, loadRawFilters } from './filter';
 import { assign } from '../../../src/util';
 import { findDomForVNode, inspectElement, flushInitialEvents, onCommitFiberRoot, onCommitFiberUnmount, flushPendingEvents, mountTree, updateTree, recordUnmount, unmountTree as unmount } from './renderer';
 import { getTimings, createProfiler } from './profiling';
@@ -102,9 +102,11 @@ export function createAdapter(config, hook) {
 	return {
 		renderer,
 		connect() {
-			// Apply initial filters
-			if (win.__REACT_DEVTOOLS_COMPONENT_FILTERS__) {
-				applyFilters(state.filter.raw = win.__REACT_DEVTOOLS_COMPONENT_FILTERS__);
+			let filters = loadRawFilters(win.__REACT_DEVTOOLS_COMPONENT_FILTERS__);
+
+			if (filters.length > 0) {
+				// Apply initial filters
+				applyFilters(state.filter.raw = filters);
 			}
 
 			let attach = (hook, id, renderer, target) => {

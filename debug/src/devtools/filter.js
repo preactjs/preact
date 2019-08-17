@@ -1,6 +1,32 @@
-import { FilterElementType, FilterDisplayName as FilterName, FilterLocation, FilterHOC } from './constants';
+import { FilterElementType, FilterDisplayName as FilterName, FilterLocation, FilterHOC, LOCAL_STORAGE_FILTER_PREFERENCES_KEY, ElementTypeHostComponent } from './constants';
 import { Fragment } from '../../../src';
 import { getDevtoolsType, getDisplayName, isRoot, getVNodeType } from './vnode';
+
+/**
+ * Load filter on connect
+ * @param {import('../internal').Filter[] | undefined} filters
+ */
+export function loadRawFilters(filters) {
+	if (!filters) {
+		try {
+			const raw = localStorage.getItem(LOCAL_STORAGE_FILTER_PREFERENCES_KEY);
+			if (raw != null) {
+				return JSON.parse(raw);
+			}
+		}
+		catch (error) {}
+
+		// Return default filter
+		return [
+			{
+				type: FilterElementType,
+				value: ElementTypeHostComponent,
+				isEnabled: true
+			}
+		];
+	}
+	return filters;
+}
 
 /**
  * @returns {import('./devtools').FilterState}
