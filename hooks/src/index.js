@@ -12,6 +12,7 @@ let afterPaintEffects = [];
 
 let oldBeforeRender = options._render;
 options._render = vnode => {
+	/* istanbul ignore if */
 	if (oldBeforeRender) oldBeforeRender(vnode);
 
 	currentComponent = vnode._component;
@@ -24,6 +25,7 @@ options._render = vnode => {
 
 let oldAfterDiff = options.diffed;
 options.diffed = vnode => {
+	/* istanbul ignore if */
 	if (oldAfterDiff) oldAfterDiff(vnode);
 
 	const c = vnode._component;
@@ -38,6 +40,7 @@ options.diffed = vnode => {
 
 let oldBeforeUnmount = options.unmount;
 options.unmount = vnode => {
+	/* istanbul ignore if */
 	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
 
 	const c = vnode._component;
@@ -50,6 +53,7 @@ options.unmount = vnode => {
 };
 
 function dispatchHook(hook) {
+	/* istanbul ignore if */
 	if (options.hooked) options.hooked(hook);
 }
 
