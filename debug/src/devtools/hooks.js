@@ -1,8 +1,7 @@
 /* istanbul ignore file */
 import { options } from 'preact';
-import { USE_STATE, USE_CALLBACK } from 'preact/hooks/constants';
 import ErrorStackParser from 'error-stack-parser';
-import { USE_REF, USE_MEMO, USE_REDUCER, USE_CONTEXT } from '../../../hooks/src/constants';
+import { USE_STATE, USE_CALLBACK, USE_REF, USE_MEMO, USE_REDUCER, USE_CONTEXT } from '../../../hooks/src/constants';
 
 let usePrefix = /^use/;
 
