@@ -235,6 +235,10 @@ function createDevToolsBridge() {
 	/** Notify devtools that a new component instance has been mounted into the DOM. */
 	const componentAdded = component => {
 		const instance = updateReactComponent(component);
+		const info = {
+			// Must be defined otherwise state updates won't work
+			_topLevelWrapper: instance
+		};
 		if (isRootComponent(component)) {
 			instance._rootID = nextRootKey(roots);
 			roots[instance._rootID] = instance;
@@ -242,9 +246,9 @@ function createDevToolsBridge() {
 		}
 		visitNonCompositeChildren(instance, childInst => {
 			childInst._inDevTools = true;
-			Reconciler.mountComponent(childInst);
+			Reconciler.mountComponent(childInst, null, null, info);
 		});
-		Reconciler.mountComponent(instance);
+		Reconciler.mountComponent(instance, null, null, info);
 	};
 
 	/** Notify devtools that a component has been updated with new props/state. */
