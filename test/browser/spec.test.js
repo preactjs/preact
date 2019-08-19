@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement as h, render, Component } from '../../src/index';
+import { createElement as h, render, Component, options } from '../../src/index';
 import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx h */
@@ -91,6 +91,10 @@ describe('Component spec', () => {
 	});
 
 	describe('forceUpdate', () => {
+		beforeEach(() => {
+			delete options._commit;
+		});
+
 		it('should force a rerender', () => {
 			let forceUpdate;
 			class ForceUpdateComponent extends Component {
@@ -132,6 +136,33 @@ describe('Component spec', () => {
 			expect(ForceUpdateComponent.prototype.forceUpdate).to.have.been.called;
 			expect(ForceUpdateComponent.prototype.forceUpdate).to.have.been.calledWith(callback);
 			expect(callback).to.have.been.called;
+		});
+
+		it('should queue commits', () => {
+			let spy = sinon.spy();
+			options._commit = spy;
+
+			class Child extends Component {
+				componentDidMount() {
+					this.forceUpdate();
+				}
+
+				render() {
+					return <div>child</div>;
+				}
+			}
+
+			class App extends Component {
+				render() {
+					return <Child />;
+				}
+			}
+
+			render(<App />, scratch);
+
+			expect(spy).to.be.calledTwice;
+			expect(spy.args[0][0]._component.constructor).to.equal(App);
+			expect(spy.args[1][0]._component.constructor).to.equal(Child);
 		});
 	});
 });
