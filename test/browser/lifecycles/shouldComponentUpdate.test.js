@@ -292,5 +292,75 @@ describe('Lifecycle methods', () => {
 			expect(spy).to.be.calledWithMatch({ foo: 2 }, { foo: 2 });
 			expect(spy).to.be.calledTwice;
 		});
+
+		// issue #1864
+		it('should update dom pointers correctly', () => {
+			function Child({ showMe, counter }) {
+				return showMe ? <div>Counter: {counter}</div> : null;
+			}
+
+			class Parent extends Component {
+				shouldComponentUpdate() {
+					return false;
+				}
+				render() {
+					return <Inner />;
+				}
+			}
+
+			let updateChild = () => null;
+			class Inner extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { showMe: false };
+					updateChild = () => {
+						this.setState({ showMe: display = !display });
+					};
+				}
+				render() {
+					return <Child showMe={this.state.showMe} counter={0} />;
+				}
+			}
+
+			let display = false;
+			let updateApp = () => null;
+			class App extends Component {
+				constructor(props) {
+					super(props);
+					updateApp = () => this.setState({});
+				}
+				render() {
+					return (
+						<div>
+							<div />
+							<div />
+							<Parent />
+						</div>
+					);
+				}
+			}
+
+			render(<App />, scratch);
+			expect(scratch.textContent).to.equal('');
+
+			updateChild();
+			rerender();
+
+			expect(scratch.textContent).to.equal('Counter: 0');
+
+			updateApp();
+			rerender();
+
+			expect(scratch.textContent).to.equal('Counter: 0');
+
+			updateChild();
+			rerender();
+
+			expect(scratch.textContent).to.equal('');
+
+			updateApp();
+			rerender();
+			expect(scratch.textContent).to.equal('');
+		});
 	});
 });

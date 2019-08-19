@@ -1,6 +1,6 @@
 import { checkPropTypes } from './check-props';
 import { getDisplayName } from './devtools/custom';
-import { options } from 'preact';
+import { options, Component } from 'preact';
 import { ELEMENT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants';
 
 function getClosestDomNodeParent(parent) {
@@ -198,6 +198,25 @@ export function initDebug() {
 	};
 
 	options.diffed = (vnode) => {
+		// Check if the user passed plain objects as children. Note that we cannot
+		// move this check into `options.vnode` because components can receive
+		// children in any shape they want (e.g.
+		// `<MyJSONFormatter>{{ foo: 123, bar: "abc" }}</MyJSONFormatter>`).
+		// Putting this check in `options.diffed` ensures that
+		// `vnode._children` is set and that we only validate the children
+		// that were actually rendered.
+		if (vnode._children) {
+			vnode._children.forEach(child => {
+				if (child && child.type===undefined) {
+					// Remove internal vnode keys that will always be patched
+					delete child._parent;
+					delete child._depth;
+					const keys = Object.keys(child).join(',');
+					throw new Error(`Objects are not valid as a child. Encountered an object with the keys {${keys}}.`);
+				}
+			});
+		}
+
 		if (oldDiffed) oldDiffed(vnode);
 
 		if (vnode._component && vnode._component.__hooks) {
@@ -259,6 +278,18 @@ export function initDebug() {
 		}
 	};
 }
+
+const setState = Component.prototype.setState;
+Component.prototype.setState = function(update, callback) {
+	if (this._vnode==null) {
+		console.warn(
+			`Calling "this.setState" inside the constructor of a component is a ` +
+			`no-op and might be a bug in your application. Instead, set ` +
+			`"this.state = {}" directly.`
+		);
+	}
+	return setState.call(this, update, callback);
+};
 
 /**
  * Serialize a vnode tree to a string

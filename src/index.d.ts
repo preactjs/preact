@@ -76,8 +76,8 @@ declare namespace preact {
 		new (props: P, context?: any): Component<P, S>;
 		displayName?: string;
 		defaultProps?: Partial<P>;
-		getDerivedStateFromProps?(props: Readonly<P>, state: Readonly<S>): Partial<S>;
-		getDerivedStateFromError?(error: any): Partial<S>;
+		getDerivedStateFromProps?(props: Readonly<P>, state: Readonly<S>): Partial<S> | null;
+		getDerivedStateFromError?(error: any): Partial<S> | null;
 	}
 	interface ComponentConstructor<P = {}, S = {}> extends ComponentClass<P, S> {}
 
@@ -110,8 +110,8 @@ declare namespace preact {
 		// constraint under no circumstances, see #1356.In general type arguments
 		// seem to be a bit buggy and not supported well at the time of this
 		// writing with TS 3.3.3333.
-		static getDerivedStateFromProps?(props: Readonly<object>, state: Readonly<object>): object;
-		static getDerivedStateFromError?(error: any): object;
+		static getDerivedStateFromProps?(props: Readonly<object>, state: Readonly<object>): object | null;
+		static getDerivedStateFromError?(error: any): object | null;
 
 		state: Readonly<S>;
 		props: RenderableProps<P>;
@@ -209,6 +209,7 @@ declare namespace preact {
 	// -----------------------------------
 	function createRef<T = any>(): RefObject<T>;
 	function toChildArray(children: ComponentChildren): Array<VNode | null>;
+	function isValidElement(vnode: any): vnode is VNode;
 
 	//
 	// Context

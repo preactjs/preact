@@ -10,11 +10,36 @@ export function setupRerender() {
 	return () => options.__test__drainQueue && options.__test__drainQueue();
 }
 
+const isThenable = value => value != null && typeof value.then === 'function';
+
+/** Depth of nested calls to `act`. */
+let actDepth = 0;
+
 /**
- * Run a test function, and flush all effects and rerenders after invoking it
- * @param {() => void} cb The function under test
+ * Run a test function, and flush all effects and rerenders after invoking it.
+ *
+ * Returns a Promise which resolves "immediately" if the callback is
+ * synchronous or when the callback's result resolves if it is asynchronous.
+ *
+ * @param {() => void|Promise<void>} cb The function under test. This may be sync or async.
+ * @return {Promise<void>}
  */
 export function act(cb) {
+	if (++actDepth > 1) {
+		// If calls to `act` are nested, a flush happens only when the
+		// outermost call returns. In the inner call, we just execute the
+		// callback and return since the infrastructure for flushing has already
+		// been set up.
+		const result = cb();
+		if (isThenable(result)) {
+			return result.then(() => {
+				--actDepth;
+			});
+		}
+		--actDepth;
+		return Promise.resolve();
+	}
+
 	const previousRequestAnimationFrame = options.requestAnimationFrame;
 	const rerender = setupRerender();
 
@@ -24,20 +49,33 @@ export function act(cb) {
 	// Override requestAnimationFrame so we can flush pending hooks.
 	options.requestAnimationFrame = (fc) => flush = fc;
 
-	// Execute the callback we were passed.
-	cb();
-	rerender();
-
-	while (flush) {
-		toFlush = flush;
-		flush = null;
-
-		toFlush();
+	const finish = () => {
 		rerender();
+		while (flush) {
+			toFlush = flush;
+			flush = null;
+
+			toFlush();
+			rerender();
+		}
+
+		teardown();
+		options.requestAnimationFrame = previousRequestAnimationFrame;
+
+		--actDepth;
+	};
+
+	const result = cb();
+
+	if (isThenable(result)) {
+		return result.then(finish);
 	}
 
-	teardown();
-	options.requestAnimationFrame = previousRequestAnimationFrame;
+	// nb. If the callback is synchronous, effects must be flushed before
+	// `act` returns, so that the caller does not have to await the result,
+	// even though React recommends this.
+	finish();
+	return Promise.resolve();
 }
 
 /**

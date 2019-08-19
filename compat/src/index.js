@@ -346,7 +346,7 @@ function memo(c, comparer) {
 	function shouldUpdate(nextProps) {
 		let ref = this.props.ref;
 		let updateRef = ref==nextProps.ref;
-		if (!updateRef) {
+		if (!updateRef && ref) {
 			ref.call ? ref(null) : (ref.current = null);
 		}
 		return (!comparer
@@ -358,6 +358,7 @@ function memo(c, comparer) {
 		this.shouldComponentUpdate = shouldUpdate;
 		return h(c, assign({}, props));
 	}
+	Memoed.prototype.isReactComponent = true;
 	Memoed.displayName = 'Memo(' + (c.displayName || c.name) + ')';
 	Memoed._forwarded = true;
 	return Memoed;
@@ -389,6 +390,7 @@ function forwardRef(fn) {
 		delete props.ref;
 		return fn(props, ref);
 	}
+	Forwarded.prototype.isReactComponent = true;
 	Forwarded._forwarded = true;
 	Forwarded.displayName = 'ForwardRef(' + (fn.displayName || fn.name) + ')';
 	return Forwarded;

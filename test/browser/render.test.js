@@ -44,12 +44,6 @@ describe('render()', () => {
 		logCall(Element.prototype, 'remove');
 	});
 
-	it('should render nothing node given null', () => {
-		render(null, scratch);
-		let c = scratch.childNodes;
-		expect(c).to.have.length(0);
-	});
-
 	it('should render an empty text node given an empty string', () => {
 		render('', scratch);
 		let c = scratch.childNodes;
@@ -99,6 +93,27 @@ describe('render()', () => {
 		render(<x-bar />, scratch);
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.firstChild).to.have.property('nodeName', 'X-BAR');
+	});
+
+	it('should support the form attribute', () => {
+		render(
+			<div>
+				<form id="myform" />
+				<button form="myform">test</button>
+				<input form="myform" />
+			</div>,
+			scratch
+		);
+		const div = scratch.childNodes[0];
+		const form = div.childNodes[0];
+		const button = div.childNodes[1];
+		const input = div.childNodes[2];
+
+		// IE11 doesn't support the form attribute
+		if (!/(Trident)/.test(navigator.userAgent)) {
+			expect(button).to.have.property('form', form);
+			expect(input).to.have.property('form', form);
+		}
 	});
 
 	it('should allow VNode reuse', () => {
@@ -163,21 +178,25 @@ describe('render()', () => {
 	it('should not render null', () => {
 		render(null, scratch);
 		expect(scratch.innerHTML).to.equal('');
+		expect(scratch.childNodes).to.have.length(0);
 	});
 
 	it('should not render undefined', () => {
 		render(undefined, scratch);
 		expect(scratch.innerHTML).to.equal('');
+		expect(scratch.childNodes).to.have.length(0);
 	});
 
 	it('should not render boolean true', () => {
 		render(true, scratch);
 		expect(scratch.innerHTML).to.equal('');
+		expect(scratch.childNodes).to.have.length(0);
 	});
 
 	it('should not render boolean false', () => {
 		render(false, scratch);
 		expect(scratch.innerHTML).to.equal('');
+		expect(scratch.childNodes).to.have.length(0);
 	});
 
 	it('should not render children when using function children', () => {
@@ -436,6 +455,14 @@ describe('render()', () => {
 			render(<div style={{ backgroundColor: 'blue' }} />, scratch);
 			expect(scratch.firstChild.style.color).to.equal('');
 			expect(scratch.firstChild.style.backgroundColor).to.equal('blue');
+		});
+
+		// Issue #1850
+		it('should remove empty styles', () => {
+			render(<div style={{ visibility: 'hidden' }} />, scratch);
+			expect(scratch.firstChild.style.visibility).to.equal('hidden');
+			render(<div style={{ visibility: undefined }} />, scratch);
+			expect(scratch.firstChild.style.visibility).to.equal('');
 		});
 
 		// Skip test if the currently running browser doesn't support CSS Custom Properties
