@@ -498,6 +498,7 @@ describe('Lifecycle methods', () => {
 
 			updateApp();
 			rerender();
+
 			expect(scratch.textContent).to.equal('foo');
 		});
 	});
