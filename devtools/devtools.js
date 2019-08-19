@@ -36,7 +36,7 @@ function createReactDOMComponent(node) {
 
 	return {
 		// --- ReactDOMComponent interface
-		_currentElement: isText ? node.textContent : {
+		_currentElement: isText ? null : {
 			type: node.nodeName.toLowerCase(),
 			props: node[ATTR_KEY]
 		},
@@ -195,7 +195,7 @@ function createDevToolsBridge() {
 	// ReactDOMComponentTree-like object
 	const ComponentTree = {
 		getNodeFromInstance(instance) {
-			return instance.node;
+			return instance ? instance.node : null;
 		},
 		getClosestInstanceFromNode(node) {
 			while (node && !node._component) {
