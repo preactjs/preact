@@ -55,6 +55,16 @@ Component.prototype.setState = function(update, callback) {
 	}
 };
 
+const cQ = [];
+function processCQ() {
+	let p;
+	while ((p=cQ.shift())) p();
+}
+const queueCommit = (cb) => {
+	cQ.push(cb);
+	(options.debounceRendering || defer)(processCQ);
+};
+
 /**
  * Immediately perform a synchronous re-render of the component
  * @param {() => void} [callback] A function to be called after component is
@@ -69,12 +79,16 @@ Component.prototype.forceUpdate = function(callback) {
 		const force = callback!==false;
 
 		let mounts = [];
-		let newDom = diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, force, oldDom == null ? getDomSibling(vnode) : oldDom);
-		commitRoot(mounts, vnode);
+		queueCommit(() => {
+			let newDom = diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, force, oldDom == null ? getDomSibling(vnode) : oldDom);
+			commitRoot(mounts, vnode);
 
-		if (newDom != oldDom) {
-			updateParentDomPointers(vnode);
-		}
+			if (newDom != oldDom) {
+				updateParentDomPointers(vnode);
+			}
+		});
+
+
 	}
 	if (callback) callback();
 };

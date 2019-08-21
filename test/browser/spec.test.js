@@ -1,6 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component, options } from '../../src/index';
 import { setupScratch, teardown } from '../_util/helpers';
+import { Fragment } from '../../src/create-element';
 
 /** @jsx h */
 
@@ -112,6 +113,7 @@ describe('Component spec', () => {
 			expect(ForceUpdateComponent.prototype.componentWillUpdate).not.to.have.been.called;
 
 			forceUpdate();
+			rerender();
 
 			expect(ForceUpdateComponent.prototype.componentWillUpdate).to.have.been.called;
 			expect(ForceUpdateComponent.prototype.forceUpdate).to.have.been.called;
@@ -159,9 +161,10 @@ describe('Component spec', () => {
 			}
 
 			render(<App />, scratch);
+			rerender();
 
 			expect(spy).to.be.calledTwice;
-			expect(spy.args[0][0]._component.constructor).to.equal(App);
+			expect(spy.args[0][0]._component.constructor).to.equal(Fragment);
 			expect(spy.args[1][0]._component.constructor).to.equal(Child);
 		});
 	});
