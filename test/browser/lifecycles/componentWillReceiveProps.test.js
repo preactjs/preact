@@ -136,6 +136,7 @@ describe('Lifecycle methods', () => {
 			spyInner.resetHistory();
 
 			c.forceUpdate();
+			rerender();
 			expect(spy).to.not.be.called;
 			expect(spyInner).to.be.calledOnce;
 		});

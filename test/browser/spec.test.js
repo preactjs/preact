@@ -124,7 +124,10 @@ describe('Component spec', () => {
 			let callback = sinon.spy();
 			class ForceUpdateComponent extends Component {
 				componentDidMount() {
-					forceUpdate = () => this.forceUpdate(callback);
+					forceUpdate = () => {
+						this.forceUpdate(callback);
+						rerender();
+					};
 				}
 				render() {
 					return <div />;

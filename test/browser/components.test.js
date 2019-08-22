@@ -497,14 +497,17 @@ describe('Components', () => {
 
 		comp.setState({ alt: true });
 		comp.forceUpdate();
+		rerender();
 		expect(scratch.innerHTML, 'switching to textnode').to.equal('asdf');
 
 		comp.setState({ alt: false });
 		comp.forceUpdate();
+		rerender();
 		expect(scratch.innerHTML, 'switching to element').to.equal('<div>test</div>');
 
 		comp.setState({ alt: true });
 		comp.forceUpdate();
+		rerender();
 		expect(scratch.innerHTML, 'switching to textnode 2').to.equal('asdf');
 	});
 
@@ -1228,6 +1231,7 @@ describe('Components', () => {
 
 			outer.setState({ child: Inner2 });
 			outer.forceUpdate();
+			rerender();
 
 			expect(Inner2.prototype.render).to.have.been.calledOnce;
 
@@ -1242,6 +1246,7 @@ describe('Components', () => {
 			expect(Inner2.prototype.componentWillUnmount, 'inner2 swap').not.to.have.been.called;
 
 			inner2.forceUpdate();
+			rerender();
 
 			expect(Inner2.prototype.render, 'inner2 update').to.have.been.calledTwice;
 			expect(Inner2.prototype.componentWillMount, 'inner2 update').to.have.been.calledOnce;
@@ -1482,11 +1487,13 @@ describe('Components', () => {
 		expect(child._vnode._dom).to.equalNode(child.base);
 
 		app.forceUpdate();
+		rerender();
 		expect(child._vnode._dom).to.equalNode(child.base);
 
 		parent.setState({});
 		condition = true;
 		child.forceUpdate();
+		rerender();
 		expect(child._vnode._dom).to.equalNode(child.base);
 		rerender();
 
@@ -1504,6 +1511,7 @@ describe('Components', () => {
 		class App extends Component {
 			componentWillReceiveProps() {
 				this.forceUpdate();
+				rerender();
 			}
 			render() {
 				if (i++==0) return <div>foo</div>;

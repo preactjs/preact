@@ -451,6 +451,7 @@ describe('Lifecycle methods', () => {
 					setState = s => {
 						this.setState(s);
 						this.forceUpdate();
+						rerender();
 					};
 				}
 				componentWillMount() {
@@ -573,6 +574,7 @@ describe('Lifecycle methods', () => {
 			for (let i=0; i<20; i++) {
 				app.setState({ page: i%components.length });
 				app.forceUpdate();
+				rerender();
 			}
 		});
 	});

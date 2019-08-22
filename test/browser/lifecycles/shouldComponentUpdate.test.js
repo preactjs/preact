@@ -148,6 +148,7 @@ describe('Lifecycle methods', () => {
 
 			render(<Foo />, scratch);
 			Comp.forceUpdate();
+			rerender();
 
 			expect(Foo.prototype.shouldComponentUpdate).to.not.have.been.called;
 			expect(Foo.prototype.render).to.have.been.calledTwice;
