@@ -65,6 +65,17 @@ const queueCommit = (cb) => {
 	(options.debounceRendering || defer)(processCQ);
 };
 
+const commit = (c, parentDom, vnode, force, oldDom, callback) => {
+	let mounts = [];
+	let newDom = diff(parentDom, vnode, assign({}, vnode), c._context, parentDom.ownerSVGElement !== undefined, null, mounts, force, oldDom == null ? getDomSibling(vnode) : oldDom);
+	commitRoot(mounts, vnode);
+
+	if (newDom != oldDom) {
+		updateParentDomPointers(vnode);
+	}
+	if (callback) callback();
+};
+
 /**
  * Immediately perform a synchronous re-render of the component
  * @param {() => void} [callback] A function to be called after component is
@@ -78,19 +89,13 @@ Component.prototype.forceUpdate = function(callback) {
 		// shouldComponentUpdate
 		const force = callback!==false;
 
-		let mounts = [];
-		queueCommit(() => {
-			let newDom = diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, force, oldDom == null ? getDomSibling(vnode) : oldDom);
-			commitRoot(mounts, vnode);
-
-			if (newDom != oldDom) {
-				updateParentDomPointers(vnode);
-			}
-		});
-
-
+		if (!force) {
+			commit(this, parentDom, vnode, force, oldDom, callback);
+		}
+		else {
+			queueCommit(() => commit(this, parentDom, vnode, force, oldDom, callback));
+		}
 	}
-	if (callback) callback();
 };
 
 /**
