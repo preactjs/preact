@@ -14,6 +14,10 @@ export namespace JSXInternal {
 		? Defaultize<Props, Defaults>
 		: Props;
 
+	interface IntrinsicAttributes {
+		key?: any;
+	}
+
 	interface Element extends preact.VNode<any> {
 	}
 

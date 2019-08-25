@@ -116,6 +116,14 @@ class StaticComponent extends Component<SimpleComponentProps, SimpleState> {
 	}
 }
 
+function MapperItem(props: { foo: number }) {
+	return <div />;
+}
+
+function Mapper() {
+	return [1, 2, 3].map(x => <MapperItem foo={x} key={x}/>)
+}
+
 describe("Component", () => {
 	const component = new SimpleComponent({ initialName: "da name" });
 
