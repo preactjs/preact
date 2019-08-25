@@ -1,0 +1,12 @@
+nav.composition-demo-list {
+	border-bottom: 1px solid gray;
+	margin-bottom: 10px;
+}
+
+nav.composition-demo-list a {
+	margin: 5px;
+}
+
+nav.composition-demo-list a:visited {
+	color: inherit;
+}
