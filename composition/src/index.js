@@ -1,4 +1,4 @@
-import { options } from "preact";
+import { options } from 'preact';
 
 /** @type {import('./internal').Component} */
 let currentComponent;
@@ -42,7 +42,10 @@ export function createComponent(comp) {
 }
 
 export function watch(src, cb) {
-	const vr = ref(undefined, true);
+	const vr = {
+		[$Reactive]: true,
+		value: undefined
+	};
 	const up = { src, cb, vr };
 	handleEffect(up, currentComponent);
 	currentComponent.__compositions.w.push(up);
@@ -61,34 +64,43 @@ export function onUnmounted(cb) {
 	currentComponent.__compositions.u.push(cb);
 }
 
-export const $Reactive = Symbol("reactive");
+const $Reactive = Symbol('reactive');
 
 export function reactive(value) {
 	const c = currentComponent;
-	return new Proxy(Object.create(null), {
-		get(_, p) {
-			if (p === $Reactive) return value;
-			return Reflect.get(value, p);
+	return new Proxy(value, {
+		get(target, p) {
+			return p === $Reactive || p === '$value'
+				? value // returns the immutable value
+				: Reflect.get(target, p);
 		},
-		set(_, p, newValue) {
-			c.setState({});
-			value =
-				p === $Reactive
-					? Object.assign({}, newValue)
-					: Object.assign({}, value, { [p]: newValue });
+		set(target, p, newValue) {
+			let r =
+				p === '$value'
+					? !!Object.assign(target, newValue) // override the innervalue
+					: Reflect.set(target, p, newValue); // set the newValue on target
 
-			return true;
-		},
-		deleteProperty(target, p, value) {
+			// update value with the immutable value of target
+			value = Object.assign({}, target);
+
+			// Make the component re-render
 			c.setState({});
-			value = Object.assign({}, value);
-			return Reflect.deleteProperty(target, p, value);
+			return r;
+		},
+		deleteProperty(target, p) {
+			// delete the property on target
+			const r = Reflect.deleteProperty(target, p);
+			// update value with the immutable value of target
+			value = Object.assign({}, target);
+			// Make the component re-render
+			c.setState({});
+			return r;
 		}
 		//todo implement all reactivity
 	});
 }
 
-export function ref(v, staticRef) {
+export function ref(v) {
 	const c = currentComponent;
 	return {
 		get value() {
@@ -96,8 +108,9 @@ export function ref(v, staticRef) {
 		},
 		set value(newValue) {
 			v = newValue;
-			if (!staticRef) c.setState({});
-		}
+			c.setState({});
+		},
+		[$Reactive]: true
 	};
 }
 
@@ -106,22 +119,25 @@ export function unwrapRef(v) {
 }
 
 export function isRef(v) {
-	return (
-		typeof v === "object" &&
-		v &&
-		Object.prototype.hasOwnProperty.call(v, "value")
-	);
+	return v && v[$Reactive] === true;
 }
 
 function handleEffect(up, c, init) {
-	if (!up.src && up.args) return;
-	let newArgs = [];
+	if (!up.src) {
+		if (!up.args) {
+			up.cb();
+			up.args = [];
+		}
+		return;
+	}
 
-	if (
-		!up.src ||
-		argsChanged(up.args, (newArgs = resolveArgs(up.src, c, init)))
-	) {
-		const r = up.cb ? up.cb(newArgs, up.args || []) : newArgs[0];
+	const srcIsArray = Array.isArray(up.src);
+	let newArgs = srcIsArray
+		? up.src.reduce((acc, s) => acc.concat(resolveArgs(s, c)), [])
+		: resolveArgs(up.src, c, init);
+
+	if (srcIsArray ? argsChanged(up.args, newArgs) : up.args !== newArgs) {
+		const r = up.cb ? up.cb(newArgs, up.args) : newArgs;
 		up.args = newArgs;
 		if (up.vr) up.vr.value = r;
 	}
@@ -130,15 +146,16 @@ function handleEffect(up, c, init) {
 function resolveArgs(src, c) {
 	let a;
 	if (src) {
-		if (Array.isArray(src))
-			return src.reduce((acc, s) => acc.concat(resolveArgs(s, c)), []);
-		if (typeof src === "function") return [].concat(src(c.props));
-		if (isRef(src)) return [src.value];
-		if (src.Provider) return [resolveContext(src, c)];
-		if ((a = src[$Reactive])) return [a];
+		// use the value from a getter function
+		if (typeof src === 'function') return src(c.props);
+		// unrap the value and subscribe to the context
+		if (src.Provider) return resolveContext(src, c);
+		// unwrap ref or reactive, returning their immutable value
+		if ((a = src[$Reactive])) return a === true ? src.value : a;
+		// is src a createRef holding a element, return the current
+		if (isPlainObject(src)) return src.current;
 	}
-
-	throw "Cannot watch this " + src;
+	return src;
 }
 
 function resolveContext(context, c) {
@@ -163,4 +180,8 @@ function getterProxy(get) {
 			// getOwnPropertyDescriptor: () => ({ configurable: false })
 		}
 	);
+}
+
+function isPlainObject(obj) {
+	return obj && obj.constructor === Object;
 }

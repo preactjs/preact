@@ -1,13 +1,13 @@
-import { PreactContext, FunctionComponent } from "../..";
+import { PreactContext, ComponentChildren } from "../..";
 
-type createComponentFN<P> = (props: P) => FunctionComponent<P>;
+type FC<P> = (props: P) => ComponentChildren;
+
+type createComponentFN<P> = (props: P) => FC<P>;
 /**
  * Wraps a FunctionalComponent to be handled with the composition api
  * @param fn
  */
-export function createComponent<P>(
-	fn: createComponentFN<P>
-): FunctionComponent<P>;
+export function createComponent<P>(fn: createComponentFN<P>): FC<P>;
 
 export type ReactiveHolder<T> = T;
 /**
