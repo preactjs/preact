@@ -5,9 +5,15 @@ export { PreactContext } from "../../src/internal";
 import { WatchSrc, WatchCallback, RefHolder } from "./index";
 
 type Watcher = {
+	/** input src */
 	src: WatchSrc;
+	/** callback to call whenever src change */
 	cb: WatchCallback;
+	/** effect onCleanup */
+	cl?: () => void;
+	/** watch returned ref */
 	vr?: RefHolder;
+	/** args resultant from src */
 	args?: any[];
 };
 
