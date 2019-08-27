@@ -212,6 +212,10 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 
 	if (newVNode.type===null) {
 		if (oldProps !== newProps) {
+			if (excessDomChildren!=null) {
+				const index = excessDomChildren.indexOf(dom);
+				if (index > -1) excessDomChildren[index] = null;
+			}
 			dom.data = newProps;
 		}
 	}

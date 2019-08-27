@@ -1059,6 +1059,18 @@ describe('render()', () => {
 		expect(unmountSpy).to.be.calledOnce;
 	});
 
+	it('should replaceNode after rendering', () => {
+		function App({ i }) {
+			return <p>{i}</p>;
+		}
+
+		render(<App i={2} />, scratch);
+		expect(scratch.innerHTML).to.equal('<p>2</p>');
+
+		render(<App i={3} />, scratch, scratch.firstChild);
+		expect(scratch.innerHTML).to.equal('<p>3</p>');
+	});
+
 	it('should not cause infinite loop with referentially equal props', () => {
 		let i = 0;
 		let prevDiff = options._diff;
