@@ -16,6 +16,7 @@ options._render = vnode => {
 	}
 
 	if (c.__compositions && !isFirst)
+		// call all onMounted lifecycle callbacks
 		c.__compositions.w.forEach(up => handleEffect(up, c));
 };
 
@@ -25,6 +26,7 @@ options.diffed = vnode => {
 
 	const c = vnode._component;
 	if (c && c.__compositions)
+		// handle all `effect`s
 		c.__compositions.e.forEach(up => handleEffect(up, c));
 };
 
@@ -33,7 +35,12 @@ options.unmount = vnode => {
 	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
 
 	const c = vnode._component;
-	if (c && c.__compositions) c.__compositions.u.forEach(f => f());
+	if (c && c.__compositions) {
+		// cleanup `effect`s onCleanup
+		c.__compositions.e.forEach(cleanupEffect);
+		// call all onUnmounted lifecycle callbacks
+		c.__compositions.u.forEach(f => f());
+	}
 };
 
 export function createComponent(comp) {
@@ -123,6 +130,7 @@ export function isRef(v) {
 }
 
 function handleEffect(up, c, init) {
+	// handle onMounted
 	if (!up.src) {
 		if (!up.args) {
 			up.cb();
@@ -137,9 +145,19 @@ function handleEffect(up, c, init) {
 		: resolveArgs(up.src, c, init);
 
 	if (srcIsArray ? argsChanged(up.args, newArgs) : up.args !== newArgs) {
-		const r = up.cb ? up.cb(newArgs, up.args) : newArgs;
+		cleanupEffect(up);
+		const r = up.cb
+			? up.cb(newArgs, up.args, /* onCleanup */ cl => (up.cl = cl))
+			: newArgs;
 		up.args = newArgs;
 		if (up.vr) up.vr.value = r;
+	}
+}
+
+function cleanupEffect(up) {
+	if (up.cl) {
+		up.cl();
+		up.cl = undefined;
 	}
 }
 
