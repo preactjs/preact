@@ -386,7 +386,7 @@ describe('createContext', () => {
 		expect(scratch.innerHTML).to.equal('<div>1</div>');
 
 		render(
-			<Provider value={{ i: 2}}>
+			<Provider value={{ i: 2 }}>
 				<Consumer>
 					{data => <Inner {...data} />}
 				</Consumer>
@@ -395,7 +395,7 @@ describe('createContext', () => {
 		);
 
 		// Rendered three times, should call 'Consumer' render two times
-		expect(Inner.prototype.render).to.have.been.calledTwice.and.calledWithMatch({ i: 2}, {},  { ['__cC' + (ctxId - 1)]: {} });
+		expect(Inner.prototype.render).to.have.been.calledTwice.and.calledWithMatch({ i: 2 }, {},  { ['__cC' + (ctxId - 1)]: {} });
 		expect(scratch.innerHTML).to.equal('<div>2</div>');
 	});
 

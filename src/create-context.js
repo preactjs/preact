@@ -15,7 +15,7 @@ export function createContext(defaultValue) {
 		Consumer(props, context) {
 			this.shouldComponentUpdate = function (_props, _state, _context) {
 				return _context !== context;
-			}
+			};
 			return props.children(context);
 		},
 		Provider(props) {
