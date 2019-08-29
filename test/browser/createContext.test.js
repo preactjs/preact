@@ -351,6 +351,54 @@ describe('createContext', () => {
 		expect(scratch.innerHTML).to.equal('<div>b - 1</div><div>a - 1</div>');
 	});
 
+	it('should not re-render the consumer if the context doesn\'t change', () => {
+		const { Provider, Consumer } = createContext();
+		const CONTEXT = { i: 1 };
+
+		class Inner extends Component {
+			render(props) {
+				return <div>{props.i}</div>;
+			}
+		}
+
+		sinon.spy(Inner.prototype, 'render');
+
+		render(
+			<Provider value={CONTEXT}>
+				<Consumer>
+					{data => <Inner {...data} />}
+				</Consumer>
+			</Provider>,
+			scratch
+		);
+
+		render(
+			<Provider value={CONTEXT}>
+				<Consumer>
+					{data => <Inner {...data} />}
+				</Consumer>
+			</Provider>,
+			scratch
+		);
+
+		// Rendered twice, should called just one 'Consumer' render
+		expect(Inner.prototype.render).to.have.been.calledOnce.and.calledWithMatch(CONTEXT, {},  { ['__cC' + (ctxId - 1)]: {} });
+		expect(scratch.innerHTML).to.equal('<div>1</div>');
+
+		render(
+			<Provider value={{ i: 2 }}>
+				<Consumer>
+					{data => <Inner {...data} />}
+				</Consumer>
+			</Provider>,
+			scratch
+		);
+
+		// Rendered three times, should call 'Consumer' render two times
+		expect(Inner.prototype.render).to.have.been.calledTwice.and.calledWithMatch({ i: 2 }, {},  { ['__cC' + (ctxId - 1)]: {} });
+		expect(scratch.innerHTML).to.equal('<div>2</div>');
+	});
+
 	describe('class.contextType', () => {
 		it('should use default value', () => {
 			const ctx = createContext('foo');
