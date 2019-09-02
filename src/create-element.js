@@ -13,8 +13,8 @@ export function createElement(type, props, children) {
 	props = assign({}, props);
 
 	if (arguments.length>3) {
-		children = [children];
-		for (let i=3; i<arguments.length; i++) {
+		children = [];
+		for (let i=2; i<arguments.length; i++) {
 			children.push(arguments[i]);
 		}
 	}

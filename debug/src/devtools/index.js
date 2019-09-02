@@ -72,6 +72,14 @@ export function initDevTools() {
 			}
 		};
 
+		if (!hook._renderers) {
+			console.info(
+				'Preact is not compatible with your version of react-devtools. We ' +
+				'will address this in future releases.'
+			);
+			return;
+		}
+
 		hook._renderers[rid] = renderer;
 
 		// We can't bring our own `attachRenderer` function therefore we simply
