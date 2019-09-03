@@ -66,7 +66,7 @@ declare namespace preact {
 	type ComponentFactory<P = {}> = ComponentType<P>;
 
 	interface FunctionComponent<P = {}> {
-		(props: RenderableProps<P>, context?: any): VNode<any> | null;
+		(props: RenderableProps<P>, context?: any): VNode<any> | null | undefined;
 		displayName?: string;
 		defaultProps?: Partial<P>;
 	}
