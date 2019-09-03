@@ -294,7 +294,7 @@ describe('Lifecycle methods', () => {
 		});
 
 		// issue #1864
-		it('should update dom pointers correctly when returning null', () => {
+		it('should update dom pointers correctly when returning an empty string', () => {
 			function Child({ showMe, counter }) {
 				return showMe ? <div>Counter: {counter}</div> : '';
 			}
