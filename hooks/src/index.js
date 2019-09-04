@@ -30,8 +30,8 @@ options.diffed = vnode => {
 
 	const hooks = c.__hooks;
 	if (hooks) {
+		hooks._handles = bindHandles(hooks._handles);
 		hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
-		hooks._handles = handleHandles(hooks._handles);
 	}
 };
 
@@ -140,7 +140,7 @@ export function useImperativeHandle(ref, createHandle, args) {
 	}
 }
 
-function handleHandles(handles) {
+function bindHandles(handles) {
 	handles.some(handle => {
 		if (handle.ref) handle.ref.current = handle.createHandle();
 	});
