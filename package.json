@@ -31,7 +31,7 @@
     "test:karma:bench": "cross-env PERFORMANCE=true COVERAGE=false karma start karma.conf.js --grep=test/benchmarks/**.js --single-run",
     "benchmark": "npm run test:karma:bench -- no-single-run",
     "lint": "eslint src test debug compat hooks test-utils",
-    "postinstall": "node -e \"console.log('\\u001b[35m\\u001b[1mLove Preact? You can now donate to our open collective:\\u001b[22m\\u001b[39m\\n > \\u001b[34mhttps://opencollective.com/preact/donate\\u001b[0m')\""
+    "postinstall": "node -e \"process.env.ADBLOCK || process.env.OPENCOLLECTIVE_HIDE || process.env.DISABLE_OPENCOLLECTIVE || console.log('\\u001b[35m\\u001b[1mLove Preact? You can now donate to our open collective:\\u001b[22m\\u001b[39m\\n > \\u001b[34mhttps://opencollective.com/preact/donate\\u001b[0m')\""
   },
   "eslintConfig": {
     "extends": "developit",
