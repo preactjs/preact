@@ -91,7 +91,11 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 					c._dirty = false;
 					c._vnode = newVNode;
 					newVNode._dom = oldDom!=null ? oldDom!==oldVNode._dom ? oldDom : oldVNode._dom : null;
-					newVNode._children = oldVNode._children;
+					tmp = newVNode._children = oldVNode._children;
+					// re-using newType as an index here to reduce bundle size
+					for (newType = 0; newType < tmp.length; newType++) {
+						if (tmp[newType]) tmp[newType]._parent = newVNode;
+					}
 					break outer;
 				}
 
