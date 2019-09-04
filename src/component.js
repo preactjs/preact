@@ -136,6 +136,7 @@ function updateParentDomPointers(vnode) {
 				break;
 			}
 		}
+
 		return updateParentDomPointers(vnode);
 	}
 }
