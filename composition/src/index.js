@@ -150,7 +150,14 @@ function handleEffect(up, c, init) {
 			? up.cb(newArgs, up.args, /* onCleanup */ cl => (up.cl = cl))
 			: newArgs;
 		up.args = newArgs;
-		if (up.vr) up.vr.value = r;
+		if (up.vr) {
+			if (isPromise(r))
+				r.then(v => {
+					up.vr.value = v;
+					c.setState({});
+				});
+			else up.vr.value = r;
+		}
 	}
 }
 
@@ -202,4 +209,12 @@ function getterProxy(get) {
 
 function isPlainObject(obj) {
 	return obj && obj.constructor === Object;
+}
+
+function isPromise(obj) {
+	return (
+		!!obj &&
+		(typeof obj === 'object' || typeof obj === 'function') &&
+		typeof obj.then === 'function'
+	);
 }

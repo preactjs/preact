@@ -6,6 +6,7 @@ import Form from "./form";
 import DomEvents from "./domEvents";
 import Theme from "./theme";
 import Raf from "./raf";
+import Async from "./async";
 
 import "./style.css";
 import { ThemeCtx } from "./utils/ctx";
@@ -22,6 +23,8 @@ export default createComponent(function() {
 				return <Theme />;
 			case "raf":
 				return <Raf />;
+			case "async":
+				return <Async />;
 			default:
 				return <div>Not found</div>;
 		}
@@ -49,6 +52,7 @@ export default createComponent(function() {
 					<Link href="/composition/domEvents">DomEvents</Link>
 					<Link href="/composition/theme">Theme</Link>
 					<Link href="/composition/raf">Raf</Link>
+					<Link href="/composition/async">Async</Link>
 					<span style={theme.value.style} onClick={theme.value.invert}>
 						Current theme: {theme.value.style.background}
 					</span>
