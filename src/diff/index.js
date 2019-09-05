@@ -92,9 +92,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 					c._vnode = newVNode;
 					newVNode._dom = oldDom!=null ? oldDom!==oldVNode._dom ? oldDom : oldVNode._dom : null;
 					newVNode._children = oldVNode._children;
-					const c = newVNode._children;
-					for (tmp = c.length; tmp--; ) {
-						if (c[tmp]) c[tmp]._parent = newVNode;
+					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
+						if (newVNode._children[tmp]) newVNode._children[tmp]._parent = newVNode;
 					}
 					break outer;
 				}
