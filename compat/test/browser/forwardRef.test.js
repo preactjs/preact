@@ -1,15 +1,17 @@
-import { createElement as h, render, createRef, forwardRef, hydrate, memo } from '../../src';
+import { createElement as h, render, createRef, forwardRef, hydrate, memo, useState, useImperativeHandle } from '../../src';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { setupRerender } from 'preact/test-utils';
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 
 /** @jsx h */
 describe('forwardRef', () => {
 
 	/** @type {HTMLDivElement} */
-	let scratch;
+	let scratch, rerender;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		rerender = setupRerender();
 	});
 
 	afterEach(() => {
@@ -151,6 +153,34 @@ describe('forwardRef', () => {
 			scratch
 		);
 		expect(ref.current==null).to.equal(true);
+	});
+
+	it('should support useImperativeHandle', () => {
+		let setValue;
+		const Foo = forwardRef((props, ref) => {
+			const result = useState('');
+			setValue = result[1];
+
+			useImperativeHandle(ref, () => ({
+				getValue: () => result[0]
+			}), [result[0]]);
+
+			return (
+				<input ref={ref} value={result[0]}  />
+			);
+		});
+
+		const ref = createRef();
+		render(<Foo ref={ref} />, scratch);
+
+		expect(typeof ref.current.getValue).to.equal('function');
+		expect(ref.current.getValue()).to.equal('');
+
+		setValue('x');
+		rerender();
+		expect(typeof ref.current.getValue).to.equal('function');
+		expect(ref.current.getValue()).to.equal('x');
+
 	});
 
 	it('should not bailout if forwardRef is not wrapped in memo', () => {
