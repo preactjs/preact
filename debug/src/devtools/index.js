@@ -1,5 +1,5 @@
 /* istanbul ignore file */
-import { options, Component, Fragment } from 'preact';
+import { options, Component, Fragment } from '../../..';
 import { Renderer } from './renderer';
 
 /**

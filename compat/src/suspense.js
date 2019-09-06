@@ -1,4 +1,4 @@
-import { Component, createElement, _unmount as unmount, options } from 'preact';
+import { Component, createElement, _unmount as unmount, options } from '../..';
 import { removeNode } from '../../src/util';
 
 const oldCatchError = options._catchError;

@@ -1,5 +1,5 @@
 /* istanbul ignore file */
-import { Component, Fragment } from 'preact';
+import { Component, Fragment } from '../../..';
 
 /**
  * Get the type/category of a vnode

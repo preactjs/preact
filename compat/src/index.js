@@ -1,7 +1,7 @@
-import { hydrate, render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment, _unmount } from 'preact';
-import * as hooks from 'preact/hooks';
+import { hydrate, render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment, _unmount } from '../../src/index.js';
+import * as hooks from '../../hooks/src/index.js';
 import { Suspense, lazy } from './suspense';
-import { assign, removeNode } from '../../src/util';
+import { assign, removeNode } from '../../src/util.js';
 
 const version = '16.8.0'; // trick libraries to think we are react
 
@@ -420,7 +420,7 @@ options.vnode = vnode => {
 // eslint-disable-next-line camelcase
 const unstable_batchedUpdates = (callback, arg) => callback(arg);
 
-export * from 'preact/hooks';
+export * from '../../hooks';
 export {
 	version,
 	Children,
