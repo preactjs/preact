@@ -13,8 +13,8 @@ export function createElement(type, props, children) {
 	props = assign({}, props);
 
 	if (arguments.length>3) {
-		children = [children];
-		for (let i=3; i<arguments.length; i++) {
+		children = [];
+		for (let i=2; i<arguments.length; i++) {
 			children.push(arguments[i]);
 		}
 	}
@@ -78,6 +78,13 @@ export function createRef() {
 export function Fragment(props) {
 	return props.children;
 }
+
+/**
+ * Check if a the argument is a valid Preact VNode.
+ * @param {*} vnode
+ * @returns {vnode is import('./internal').VNode}
+ */
+export const isValidElement = vnode => vnode!=null && vnode.constructor === undefined;
 
 /**
  * Coerce an untrusted value into a VNode

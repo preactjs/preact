@@ -30,6 +30,7 @@ options.diffed = vnode => {
 
 	const hooks = c.__hooks;
 	if (hooks) {
+		hooks._handles = bindHandles(hooks._handles);
 		hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
 	}
 };
@@ -60,7 +61,7 @@ function getHookState(index) {
 	// * https://github.com/michael-klein/funcy.js/blob/650beaa58c43c33a74820a3c98b3c7079cf2e333/src/renderer.mjs
 	// Other implementations to look at:
 	// * https://codesandbox.io/s/mnox05qp8
-	const hooks = currentComponent.__hooks || (currentComponent.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [] });
+	const hooks = currentComponent.__hooks || (currentComponent.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [], _handles: [] });
 
 	if (index >= hooks._list.length) {
 		hooks._list.push({});
@@ -135,10 +136,15 @@ export function useImperativeHandle(ref, createHandle, args) {
 	const state = getHookState(currentIndex++);
 	if (argsChanged(state._args, args)) {
 		state._args = args;
-		if (ref) {
-			ref.current = createHandle();
-		}
+		currentComponent.__hooks._handles.push({ ref, createHandle });
 	}
+}
+
+function bindHandles(handles) {
+	handles.some(handle => {
+		if (handle.ref) handle.ref.current = handle.createHandle();
+	});
+	return [];
 }
 
 /**
@@ -231,8 +237,12 @@ function safeRaf(callback) {
 
 /* istanbul ignore else */
 if (typeof window !== 'undefined') {
+	let prevRaf = options.requestAnimationFrame;
 	afterPaint = (component) => {
-		if (!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) {
+		if ((!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) ||
+		    prevRaf !== options.requestAnimationFrame) {
+			prevRaf = options.requestAnimationFrame;
+
 			/* istanbul ignore next */
 			(options.requestAnimationFrame || safeRaf)(flushAfterPaintEffects);
 		}

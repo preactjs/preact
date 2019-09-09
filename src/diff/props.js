@@ -31,7 +31,7 @@ function setStyle(style, key, value) {
 		style.setProperty(key, value);
 	}
 	else {
-		style[key] = typeof value==='number' && IS_NON_DIMENSIONAL.test(key)===false ? value+'px' : value;
+		style[key] = typeof value==='number' && IS_NON_DIMENSIONAL.test(key)===false ? value+'px' : value || '';
 	}
 }
 
@@ -87,17 +87,16 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 			dom.removeEventListener(name, eventProxy, useCapture);
 		}
 	}
-	else if (name!=='list' && name!=='tagName' && !isSvg && (name in dom)) {
-		// Setting `select.value` doesn't work in IE11.
-		// Only `<select>` elements have the length property
-		if (dom.length && name=='value') {
-			for (name = dom.length; name--;) {
-				dom.options[name].selected = dom.options[name].value==value;
-			}
-		}
-		else {
-			dom[name] = value==null ? '' : value;
-		}
+	else if (
+		name!=='list'
+		&& name!=='tagName'
+		// HTMLButtonElement.form and HTMLInputElement.form are read-only but can be set using
+		// setAttribute
+		&& name!=='form'
+		&& !isSvg
+		&& (name in dom)
+	) {
+		dom[name] = value==null ? '' : value;
 	}
 	else if (typeof value!=='function' && name!=='dangerouslySetInnerHTML') {
 		if (name!==(name = name.replace(/^xlink:?/, ''))) {

@@ -137,7 +137,11 @@ function getRoot(element) {
 	return element._children;
 }
 
+const supported = /Chrome|Firefox/i.test(navigator.userAgent) &&
+	!/Edge/i.test(navigator.userAgent);
+
 describe('devtools', () => {
+	if (!supported) return;
 
 	/** @type {import('../../src/internal').PreactElement} */
 	let scratch;

@@ -18,6 +18,7 @@
   ],
   "plugins": [
     "transform-object-rest-spread",
-    "transform-react-jsx"
+    "transform-react-jsx",
+    "transform-async-to-promises"
   ]
 }

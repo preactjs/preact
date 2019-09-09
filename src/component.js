@@ -162,12 +162,16 @@ const defer = typeof Promise=='function' ? Promise.prototype.then.bind(Promise.r
  * * [Callbacks synchronous and asynchronous](https://blog.ometer.com/2011/07/24/callbacks-synchronous-and-asynchronous/)
  */
 
+let prevDebounce = options.debounceRendering;
+
 /**
  * Enqueue a rerender of a component
  * @param {import('./internal').Component} c The component to rerender
  */
 export function enqueueRender(c) {
-	if (!c._dirty && (c._dirty = true) && q.push(c) === 1) {
+	if ((!c._dirty && (c._dirty = true) && q.push(c) === 1) ||
+	    (prevDebounce !== options.debounceRendering)) {
+		prevDebounce = options.debounceRendering;
 		(options.debounceRendering || defer)(process);
 	}
 }

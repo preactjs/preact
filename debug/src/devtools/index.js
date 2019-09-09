@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import { options, Component, Fragment } from 'preact';
 import { Renderer } from './renderer';
 
@@ -70,6 +71,14 @@ export function initDevTools() {
 				return preactRenderer.inst2vnode.get(instance) || null;
 			}
 		};
+
+		if (!hook._renderers) {
+			console.info(
+				'Preact is not compatible with your version of react-devtools. We ' +
+				'will address this in future releases.'
+			);
+			return;
+		}
 
 		hook._renderers[rid] = renderer;
 

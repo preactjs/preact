@@ -205,6 +205,27 @@ describe('debug', () => {
 		expect(fn).to.throw(/createElement/);
 	});
 
+	it('should warn when calling setState inside the constructor', () => {
+		class Foo extends Component {
+			constructor(props) {
+				super(props);
+				this.setState({ foo: true });
+			}
+			render() {
+				return <div>foo</div>;
+			}
+		}
+
+		render(<Foo />, scratch);
+		expect(console.warn).to.be.calledOnce;
+		expect(console.warn.args[0]).to.match(/no-op/);
+	});
+
+	it('should print an error when child is a plain object', () => {
+		let fn = () => render(<div>{{}}</div>, scratch);
+		expect(fn).to.throw(/not valid/);
+	});
+
 	it('should warn for useless useMemo calls', () => {
 		const App = () => {
 			const [people] = useState([40, 20, 60, 80]);
