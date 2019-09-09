@@ -1,4 +1,4 @@
-import { PreactContext } from "../..";
+import { PreactContext, Ref as PreactRef } from "../..";
 
 type Inputs = ReadonlyArray<unknown>;
 
@@ -74,7 +74,7 @@ type CreateHandle = () => object;
  * ref.current
  * @param inputs If present, effect will only activate if the values in the list change (using ===).
  */
-export function useImperativeHandle<T>(ref: Ref<T>, create: CreateHandle, inputs?: Inputs): void;
+export function useImperativeHandle<T, R extends T>(ref: PreactRef<T>, create: () => R, inputs?: Inputs): void;
 
 /**
  * Accepts a function that contains imperative, possibly effectful code.
