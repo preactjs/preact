@@ -64,7 +64,7 @@ declare namespace React {
 
 	export function memo<P = {}>(component: preact.FunctionalComponent<P>, comparer?: (prev: P, next: P) => boolean): preact.FunctionComponent<P>;
 
-	export function forwardRef<P = {}>(fn: _internal.ForwardFn<P, any>): preact.FunctionalComponent<P>;
+	export function forwardRef<R, P = {}>(fn: _internal.ForwardFn<P, R>): preact.FunctionalComponent<P>;
 
 	export function unstable_batchedUpdates(callback: (arg?: any) => void, arg?: any): void;
 

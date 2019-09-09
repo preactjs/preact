@@ -15,3 +15,7 @@ const MyInput: React.ForwardFn<{ id: string }, { focus(): void }> = (props, ref)
 }
 
 export const foo = React.forwardRef(MyInput)
+
+export const Bar = React.forwardRef<HTMLDivElement, { children: any }>((props, ref) => {
+	return <div ref={ref}>{props.children}</div>
+})
