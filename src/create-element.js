@@ -13,8 +13,9 @@ export function createElement(type, props, children) {
 	props = assign({}, props);
 
 	if (arguments.length>3) {
-		children = [];
-		for (let i=2; i<arguments.length; i++) {
+		children = [children];
+		// https://github.com/preactjs/preact/issues/1916
+		for (let i=3; i<arguments.length; i++) {
 			children.push(arguments[i]);
 		}
 	}
