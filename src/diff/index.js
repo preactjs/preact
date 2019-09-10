@@ -1,7 +1,7 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component, enqueueRender } from '../component';
-import { coerceToVNode, Fragment } from '../create-element';
-import { diffChildren, toChildArray } from './children';
+import { Fragment } from '../create-element';
+import { diffChildren } from './children';
 import { diffProps } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
@@ -90,8 +90,11 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 					c.state = c._nextState;
 					c._dirty = false;
 					c._vnode = newVNode;
-					newVNode._dom = oldDom!=null ? oldVNode._dom : null;
+					newVNode._dom = oldDom!=null ? oldDom!==oldVNode._dom ? oldDom : oldVNode._dom : null;
 					newVNode._children = oldVNode._children;
+					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
+						if (newVNode._children[tmp]) newVNode._children[tmp]._parent = newVNode;
+					}
 					break outer;
 				}
 
@@ -115,7 +118,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			tmp = c.render(c.props, c.state, c.context);
 			let isTopLevelFragment = tmp != null && tmp.type == Fragment && tmp.key == null;
-			toChildArray(isTopLevelFragment ? tmp.props.children : tmp, newVNode._children=[], coerceToVNode, true);
+			newVNode._children = isTopLevelFragment ? tmp.props.children : tmp;
 
 			if (c.getChildContext!=null) {
 				context = assign(assign({}, context), c.getChildContext());
@@ -129,7 +132,10 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			c.base = newVNode._dom;
 
-			while (tmp=c._renderCallbacks.pop()) tmp.call(c);
+			while (tmp=c._renderCallbacks.pop()) {
+				if (c._nextState) { c.state = c._nextState; }
+				tmp.call(c);
+			}
 
 			// Don't call componentDidUpdate on mount or when we bailed out via
 			// `shouldComponentUpdate`
@@ -212,6 +218,7 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 
 	if (newVNode.type===null) {
 		if (oldProps !== newProps) {
+			if (excessDomChildren!=null) excessDomChildren[excessDomChildren.indexOf(dom)] = null;
 			dom.data = newProps;
 		}
 	}
@@ -237,6 +244,8 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 		}
 
 		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
+
+		newVNode._children = newVNode.props.children;
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (!newHtml) {

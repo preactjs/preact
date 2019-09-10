@@ -20,5 +20,6 @@
     "transform-object-rest-spread",
     "transform-react-jsx",
     "transform-async-to-promises"
-  ]
+  ],
+  "ignore": ["./dist"]
 }
