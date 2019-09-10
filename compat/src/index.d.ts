@@ -58,7 +58,7 @@ declare namespace React {
 	export function isValidElement(element: any): boolean;
 	export function findDOMNode(component: preact.Component): Element | null;
 
-	export abstract class PureComponent<P = {}, S = {}> extends preact.Component {
+	export abstract class PureComponent<P = {}, S = {}> extends preact.Component<P, S> {
 		isPureReactComponent: boolean;
 	}
 
