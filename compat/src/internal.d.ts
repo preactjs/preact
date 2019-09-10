@@ -1,4 +1,4 @@
-import { Ref } from '../..';
+import { Ref, ComponentChild } from '../..';
 import {
 	Component as PreactComponent,
 	VNode as PreactVNode,
@@ -28,7 +28,7 @@ export interface VNode<T = any> extends PreactVNode<T> {
 }
 
 export interface ForwardFn<P = {}, T = any> {
-	(props: P, ref: Ref<T>): VNode;
+	(props: P, ref: Ref<T>): ComponentChild;
 	displayName?: string;
 }
 

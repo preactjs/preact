@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component } from '../../../src/index';
+import { createElement, render, Component, Fragment } from '../../../src/index';
 import { setupScratch, teardown } from '../../_util/helpers';
 
 /** @jsx createElement */
@@ -294,9 +294,9 @@ describe('Lifecycle methods', () => {
 		});
 
 		// issue #1864
-		it('should update dom pointers correctly', () => {
+		it('should update dom pointers correctly when returning an empty string', () => {
 			function Child({ showMe, counter }) {
-				return showMe ? <div>Counter: {counter}</div> : null;
+				return showMe ? <div>Counter: {counter}</div> : '';
 			}
 
 			class Parent extends Component {
@@ -361,6 +361,193 @@ describe('Lifecycle methods', () => {
 			updateApp();
 			rerender();
 			expect(scratch.textContent).to.equal('');
+		});
+
+		// issue #1864 second case
+		it('should update dom pointers correctly when returning a string', () => {
+			function Child({ showMe, counter }) {
+				return showMe ? <div>Counter: {counter}</div> : 'foo';
+			}
+
+			class Parent extends Component {
+				shouldComponentUpdate() {
+					return false;
+				}
+				render() {
+					return <Inner />;
+				}
+			}
+
+			let updateChild = () => null;
+			class Inner extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { showMe: false };
+					updateChild = () => {
+						this.setState({ showMe: display = !display });
+					};
+				}
+				render() {
+					return <Child showMe={this.state.showMe} counter={0} />;
+				}
+			}
+
+			let display = false;
+			let updateApp = () => null;
+			class App extends Component {
+				constructor(props) {
+					super(props);
+					updateApp = () => this.setState({});
+				}
+				render() {
+					return (
+						<div>
+							<div />
+							<div />
+							<Parent />
+						</div>
+					);
+				}
+			}
+
+			render(<App />, scratch);
+			expect(scratch.textContent).to.equal('foo');
+
+			updateChild();
+			rerender();
+
+			expect(scratch.textContent).to.equal('Counter: 0');
+
+			updateApp();
+			rerender();
+
+			expect(scratch.textContent).to.equal('Counter: 0');
+
+			updateChild();
+			rerender();
+
+			expect(scratch.textContent).to.equal('foo');
+
+			updateApp();
+			rerender();
+			expect(scratch.textContent).to.equal('foo');
+		});
+
+		it('should correctly update nested chilreen', () => {
+			let hideThree, incrementThree;
+
+			class One extends Component {
+				shouldComponentUpdate() { return false; }
+				render(p) { return p.children; }
+			}
+
+			class Two extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { hideMe: false };
+					hideThree = () => this.setState(s => ({ hideMe: !s.hideMe }));
+				}
+
+				shouldComponentUpdate(nextProps, nextState) { return this.state.hideMe !== nextState.hideMe; }
+
+				render(p, { hideMe }) {
+					return hideMe ? <Fragment /> : p.children;
+				}
+			}
+
+			class Three extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { counter: 1 };
+					incrementThree = () => this.setState(s => ({ counter: s.counter + 1 }));
+				}
+
+				render(p, { counter }) { return <span>{counter}</span>; }
+			}
+
+			render(<One><Two><Three /></Two></One>, scratch);
+			expect(scratch.innerHTML).to.equal('<span>1</span>');
+
+			hideThree();
+			rerender();
+			expect(scratch.innerHTML).to.equal('');
+
+			hideThree();
+			rerender();
+			expect(scratch.innerHTML).to.equal('<span>1</span>');
+
+			incrementThree();
+			rerender();
+			expect(scratch.innerHTML).to.equal('<span>2</span>');
+		});
+
+		// issue #1864 third case
+		it('should update dom pointers correctly without siblings', () => {
+			function Child({ showMe, counter }) {
+				return showMe ? <div>Counter: {counter}</div> : 'foo';
+			}
+
+			class Parent extends Component {
+				shouldComponentUpdate() {
+					return false;
+				}
+				render() {
+					return <Inner />;
+				}
+			}
+
+			let updateChild = () => null;
+			class Inner extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { showMe: false };
+					updateChild = () => {
+						this.setState({ showMe: display = !display });
+					};
+				}
+				render() {
+					return <Child showMe={this.state.showMe} counter={0} />;
+				}
+			}
+
+			let display = false;
+			let updateApp = () => null;
+			class App extends Component {
+				constructor(props) {
+					super(props);
+					updateApp = () => this.setState({});
+				}
+				render() {
+					return (
+						<div>
+							<Parent />
+						</div>
+					);
+				}
+			}
+
+			render(<App />, scratch);
+			expect(scratch.textContent).to.equal('foo');
+
+			updateChild();
+			rerender();
+
+			expect(scratch.textContent).to.equal('Counter: 0');
+
+			updateApp();
+			rerender();
+
+			expect(scratch.textContent).to.equal('Counter: 0');
+
+			updateChild();
+			rerender();
+
+			expect(scratch.textContent).to.equal('foo');
+
+			updateApp();
+			rerender();
+
+			expect(scratch.textContent).to.equal('foo');
 		});
 	});
 });
