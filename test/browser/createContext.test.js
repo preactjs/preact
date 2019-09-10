@@ -351,7 +351,7 @@ describe('createContext', () => {
 		expect(scratch.innerHTML).to.equal('<div>b - 1</div><div>a - 1</div>');
 	});
 
-	it('should not re-render the consumer if the context doesn\'t change', () => {
+	it.skip('should not re-render the consumer if the context doesn\'t change', () => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { i: 1 };
 
