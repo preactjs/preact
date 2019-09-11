@@ -21,6 +21,8 @@ rights to publish new releases on npm.
 > **ATTENTION:** Make sure that you've cleared the project correctly
 > when switching from a 10.x branch.
 
+0. Run `rm -rf dist node_modules && npm i` to make sure to have the correct dependencies.
+
 Apart from that it's the same as above.
 
 ## Writing release notes
