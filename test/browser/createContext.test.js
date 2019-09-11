@@ -401,8 +401,6 @@ describe('createContext', () => {
 		expect(scratch.innerHTML).to.equal('<div>2</div>');
 	});
 
-
-
 	it('should re-render the consumer if the children change', () => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { i: 1 };
@@ -418,7 +416,7 @@ describe('createContext', () => {
 		render(
 			<Provider value={CONTEXT}>
 				<Consumer>
-					{data => <Inner {...data}/>}
+					{data => <Inner {...data} />}
 				</Consumer>
 			</Provider>,
 			scratch
@@ -427,7 +425,7 @@ describe('createContext', () => {
 		render(
 			<Provider value={CONTEXT}>
 				<Consumer>
-					{data => <Inner {...data}/>}
+					{data => <Inner {...data} />}
 				</Consumer>
 			</Provider>,
 			scratch
