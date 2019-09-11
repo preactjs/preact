@@ -16,7 +16,7 @@ export function createContext(defaultValue) {
 
 			this.shouldComponentUpdate = function (_props, _state, _context) {
 				return _context !== context || this.props.children !== _props.children;
-			  };
+			};
 
 			return props.children(context);
 		},
