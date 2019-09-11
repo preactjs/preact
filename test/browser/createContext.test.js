@@ -363,10 +363,12 @@ describe('createContext', () => {
 
 		sinon.spy(Inner.prototype, 'render');
 
+		const Child = data => <Inner {...data} />;
+
 		render(
 			<Provider value={CONTEXT}>
 				<Consumer>
-					{data => <Inner {...data} />}
+					{Child}
 				</Consumer>
 			</Provider>,
 			scratch
@@ -375,7 +377,7 @@ describe('createContext', () => {
 		render(
 			<Provider value={CONTEXT}>
 				<Consumer>
-					{data => <Inner {...data} />}
+					{Child}
 				</Consumer>
 			</Provider>,
 			scratch
@@ -388,7 +390,7 @@ describe('createContext', () => {
 		render(
 			<Provider value={{ i: 2 }}>
 				<Consumer>
-					{data => <Inner {...data} />}
+					{Child}
 				</Consumer>
 			</Provider>,
 			scratch
@@ -397,6 +399,41 @@ describe('createContext', () => {
 		// Rendered three times, should call 'Consumer' render two times
 		expect(Inner.prototype.render).to.have.been.calledTwice.and.calledWithMatch({ i: 2 }, {},  { ['__cC' + (ctxId - 1)]: {} });
 		expect(scratch.innerHTML).to.equal('<div>2</div>');
+	});
+
+	it('should re-render the consumer if the children change', () => {
+		const { Provider, Consumer } = createContext();
+		const CONTEXT = { i: 1 };
+
+		class Inner extends Component {
+			render(props) {
+				return <div>{props.i}</div>;
+			}
+		}
+
+		sinon.spy(Inner.prototype, 'render');
+
+		render(
+			<Provider value={CONTEXT}>
+				<Consumer>
+					{data => <Inner {...data} />}
+				</Consumer>
+			</Provider>,
+			scratch
+		);
+
+		render(
+			<Provider value={CONTEXT}>
+				<Consumer>
+					{data => <Inner {...data} />}
+				</Consumer>
+			</Provider>,
+			scratch
+		);
+
+		// Rendered twice, with two different children for consumer, should render twice
+		expect(Inner.prototype.render).to.have.been.calledTwice;
+		expect(scratch.innerHTML).to.equal('<div>1</div>');
 	});
 
 	describe('class.contextType', () => {
