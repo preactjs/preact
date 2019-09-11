@@ -255,6 +255,10 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 		// (as above, don't diff props during hydration)
 		if (!isHydrating) {
 			if (('value' in newProps) && newProps.value!==undefined && newProps.value !== dom.value) dom.value = newProps.value==null ? '' : newProps.value;
+			// preact/#1899
+			// We need this value for input masking.
+			dom._lastValue = dom.value;
+
 			if (('checked' in newProps) && newProps.checked!==undefined && newProps.checked !== dom.checked) dom.checked = newProps.checked;
 		}
 	}

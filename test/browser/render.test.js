@@ -25,6 +25,12 @@ function sortAttributes(html) {
 	});
 }
 
+function fireEvent(on, type) {
+	let e = document.createEvent('Event');
+	e.initEvent(type, true, true);
+	on.dispatchEvent(e);
+}
+
 describe('render()', () => {
 	let scratch, rerender;
 
@@ -274,6 +280,35 @@ describe('render()', () => {
 		expect(root.children[3]).to.have.property('value', '');
 	});
 
+	it('should sync controlled input value', () => {
+		class Controlled extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { v: '' };
+				this.onInput = e => {
+					this.setState({ v: e.target.value.slice(0, 3) });
+				};
+			}
+
+			render() {
+				return <input value={this.state.v} onInput={this.onInput} />;
+			}
+		}
+
+		render(<Controlled />, scratch);
+
+		const input = scratch.firstChild;
+		input.value = 'abc';
+		fireEvent(input, 'input');
+		rerender();
+
+		input.value = 'abcde';
+		fireEvent(input, 'input');
+		expect(input.value).to.equal('abc');
+		rerender();
+		expect(input.value).to.equal('abc');
+	});
+
 	it('should set value inside the specified range', () => {
 		render(
 			<input type="range" value={0.5} min="0" max="1" step="0.05" />,
@@ -508,12 +543,6 @@ describe('render()', () => {
 
 	describe('event handling', () => {
 		let proto;
-
-		function fireEvent(on, type) {
-			let e = document.createEvent('Event');
-			e.initEvent(type, true, true);
-			on.dispatchEvent(e);
-		}
 
 		beforeEach(() => {
 			proto = document.createElement('div').constructor.prototype;
