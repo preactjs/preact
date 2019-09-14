@@ -355,30 +355,41 @@ describe('createContext', () => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { i: 1 };
 
+		class NoUpdate extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+
+			render() {
+				return this.props.children;
+			}
+		}
+
 		class Inner extends Component {
 			render(props) {
+				console.log('rendering', props.i);
 				return <div>{props.i}</div>;
 			}
 		}
 
 		sinon.spy(Inner.prototype, 'render');
 
-		const Child = data => <Inner {...data} />;
-
 		render(
 			<Provider value={CONTEXT}>
-				<Consumer>
-					{Child}
-				</Consumer>
+				<NoUpdate>
+					<Consumer>
+						{data => <Inner {...data} />}
+					</Consumer>
+				</NoUpdate>
 			</Provider>,
 			scratch
 		);
 
 		render(
 			<Provider value={CONTEXT}>
-				<Consumer>
-					{Child}
-				</Consumer>
+				<NoUpdate>
+					<Consumer>{data => <Inner {...data} />}</Consumer>
+				</NoUpdate>
 			</Provider>,
 			scratch
 		);
@@ -389,16 +400,53 @@ describe('createContext', () => {
 
 		render(
 			<Provider value={{ i: 2 }}>
-				<Consumer>
-					{Child}
-				</Consumer>
+				<NoUpdate>
+					<Consumer>{data => <Inner {...data} />}</Consumer>
+				</NoUpdate>
 			</Provider>,
 			scratch
 		);
 
 		// Rendered three times, should call 'Consumer' render two times
+		// Logged these things I think we're dealing with another stale dom issue due to NoUpdate... :/
 		expect(Inner.prototype.render).to.have.been.calledTwice.and.calledWithMatch({ i: 2 }, {},  { ['__cC' + (ctxId - 1)]: {} });
 		expect(scratch.innerHTML).to.equal('<div>2</div>');
+	});
+
+	it('should allow for updates of props', () => {
+		let set;
+		const MyContext = createContext();
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = {
+					x: 'y'
+				};
+				set = this.setState.bind(this);
+				this.renderInner = this.renderInner.bind(this);
+			}
+
+			renderInner() {
+				return <p>{this.state.x}</p>;
+			}
+
+			render() {
+				return (
+					<MyContext.Provider value="irrelevant">
+						<MyContext.Consumer>
+							{this.renderInner}
+						</MyContext.Consumer>
+					</MyContext.Provider>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<p>y</p>');
+
+		set({ x: 'x' });
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>x</p>');
 	});
 
 	it('should re-render the consumer if the children change', () => {

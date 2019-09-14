@@ -13,11 +13,6 @@ export function createContext(defaultValue) {
 		_id: '__cC' + i++,
 		_defaultValue: defaultValue,
 		Consumer(props, context) {
-
-			this.shouldComponentUpdate = function (_props, _state, _context) {
-				return _context !== context || props.children !== _props.children;
-			};
-
 			return props.children(context);
 		},
 		Provider(props) {
@@ -27,14 +22,16 @@ export function createContext(defaultValue) {
 					ctx[context._id] = this;
 					return ctx;
 				};
-				this.shouldComponentUpdate = props => {
-					subs.some(c => {
-						// Check if still mounted
-						if (c._parentDom) {
-							c.context = props.value;
-							enqueueRender(c);
-						}
-					});
+				this.shouldComponentUpdate = _props => {
+					if (props.value !== _props.value) {
+						subs.some(c => {
+							// Check if still mounted
+							if (c._parentDom) {
+								c.context = props.value;
+								enqueueRender(c);
+							}
+						});
+					}
 				};
 				this.sub = (c) => {
 					subs.push(c);
