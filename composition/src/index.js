@@ -48,10 +48,10 @@ export function createComponent(comp) {
 	return comp;
 }
 
-export function watch(src, cb) {
+export function watch(src, cb, dv) {
 	const vr = {
 		[$Reactive]: true,
-		value: undefined
+		value: dv
 	};
 	const up = { src, cb, vr };
 	handleEffect(up, currentComponent);
