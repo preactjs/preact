@@ -3,6 +3,7 @@ import { createElement as h, render, Component, createContext } from '../../src/
 import { setupScratch, teardown } from '../_util/helpers';
 import { Fragment } from '../../src';
 import { i as ctxId } from '../../src/create-context';
+import options from '../../src/options';
 
 /** @jsx h */
 
@@ -352,6 +353,10 @@ describe('createContext', () => {
 	});
 
 	it('should not re-render the consumer if the context doesn\'t change', () => {
+
+		// Disable the debounce rendering
+		options.debounceRendering = f => f();
+
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { i: 1 };
 
@@ -408,7 +413,6 @@ describe('createContext', () => {
 		);
 
 		// Rendered three times, should call 'Consumer' render two times
-		// Logged these things I think we're dealing with another stale dom issue due to NoUpdate... :/
 		expect(Inner.prototype.render).to.have.been.calledTwice.and.calledWithMatch({ i: 2 }, {},  { ['__cC' + (ctxId - 1)]: {} });
 		expect(scratch.innerHTML).to.equal('<div>2</div>');
 	});
