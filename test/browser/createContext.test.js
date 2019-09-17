@@ -1,9 +1,8 @@
-import { setupRerender } from 'preact/test-utils';
+import { setupRerender, act } from 'preact/test-utils';
 import { createElement as h, render, Component, createContext } from '../../src/index';
 import { setupScratch, teardown } from '../_util/helpers';
 import { Fragment } from '../../src';
 import { i as ctxId } from '../../src/create-context';
-import options from '../../src/options';
 
 /** @jsx h */
 
@@ -353,10 +352,6 @@ describe('createContext', () => {
 	});
 
 	it('should not re-render the consumer if the context doesn\'t change', () => {
-
-		// Disable the debounce rendering
-		options.debounceRendering = f => f();
-
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { i: 1 };
 
@@ -402,31 +397,35 @@ describe('createContext', () => {
 		expect(Inner.prototype.render).to.have.been.calledOnce.and.calledWithMatch(CONTEXT, {},  { ['__cC' + (ctxId - 1)]: {} });
 		expect(scratch.innerHTML).to.equal('<div>1</div>');
 
-		render(
-			<Provider value={{ i: 2 }}>
-				<NoUpdate>
-					<Consumer>{data => <Inner {...data} />}</Consumer>
-				</NoUpdate>
-			</Provider>,
-			scratch
-		);
+		act(() => {
+			render(
+				<Provider value={{ i: 2 }}>
+					<NoUpdate>
+						<Consumer>{data => <Inner {...data} />}</Consumer>
+					</NoUpdate>
+				</Provider>,
+				scratch
+			);
+		});
 
 		// Rendered three times, should call 'Consumer' render two times
 		expect(Inner.prototype.render).to.have.been.calledTwice.and.calledWithMatch({ i: 2 }, {},  { ['__cC' + (ctxId - 1)]: {} });
 		expect(scratch.innerHTML).to.equal('<div>2</div>');
 	});
 
-	it('should allow for updates of props', () => {
-		let set;
-		const MyContext = createContext();
+	it.only('should allow for updates of props', () => {
+		let app;
+		const { Provider, Consumer } = createContext();
 		class App extends Component {
 			constructor(props) {
 				super(props);
 				this.state = {
 					x: 'y'
 				};
-				set = this.setState.bind(this);
+
 				this.renderInner = this.renderInner.bind(this);
+
+				app = this;
 			}
 
 			renderInner() {
@@ -435,19 +434,25 @@ describe('createContext', () => {
 
 			render() {
 				return (
-					<MyContext.Provider value="irrelevant">
-						<MyContext.Consumer>
+					<Provider value="irrelevant">
+						<Consumer>
 							{this.renderInner}
-						</MyContext.Consumer>
-					</MyContext.Provider>
+						</Consumer>
+					</Provider>
 				);
 			}
 		}
 
-		render(<App />, scratch);
+		act(() => {
+			render(<App />, scratch);
+		});
+
 		expect(scratch.innerHTML).to.equal('<p>y</p>');
 
-		set({ x: 'x' });
+		act(() => {
+			app.setState({ x: 'x' });
+		});
+		
 		rerender();
 		expect(scratch.innerHTML).to.equal('<p>x</p>');
 	});
