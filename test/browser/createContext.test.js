@@ -413,7 +413,7 @@ describe('createContext', () => {
 		expect(scratch.innerHTML).to.equal('<div>2</div>');
 	});
 
-	it.only('should allow for updates of props', () => {
+	it('should allow for updates of props', () => {
 		let app;
 		const { Provider, Consumer } = createContext();
 		class App extends Component {
@@ -469,23 +469,19 @@ describe('createContext', () => {
 
 		sinon.spy(Inner.prototype, 'render');
 
-		render(
-			<Provider value={CONTEXT}>
-				<Consumer>
-					{data => <Inner {...data} />}
-				</Consumer>
-			</Provider>,
-			scratch
-		);
+		act(() => {
 
-		render(
-			<Provider value={CONTEXT}>
-				<Consumer>
-					{data => <Inner {...data} />}
-				</Consumer>
-			</Provider>,
-			scratch
-		);
+			render(
+				<Provider value={CONTEXT}>
+					<Consumer>
+						{data => <Inner {...data} />}
+					</Consumer>
+				</Provider>,
+				scratch
+			);
+
+			rerender();
+		});
 
 		// Rendered twice, with two different children for consumer, should render twice
 		expect(Inner.prototype.render).to.have.been.calledTwice;
