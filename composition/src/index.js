@@ -114,8 +114,10 @@ export function ref(v) {
 			return v;
 		},
 		set value(newValue) {
-			v = newValue;
-			c.setState({});
+			if (v !== newValue) {
+				v = newValue;
+				c.setState({});
+			}
 		},
 		[$Reactive]: true
 	};
