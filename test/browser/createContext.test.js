@@ -372,7 +372,6 @@ describe('createContext', () => {
 
 		class Inner extends Component {
 			render(props) {
-				console.log('rendering', props.i);
 				return <div>{props.i}</div>;
 			}
 		}
