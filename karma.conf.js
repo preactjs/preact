@@ -107,11 +107,11 @@ module.exports = function(config) {
 
 		files: [
 			{ pattern: 'test/polyfills.js', watched: false },
-			{ pattern: config.grep || '{debug,hooks,compat,test-utils,}/test/{browser,shared}/**/*.test.js', watched: false }
+			{ pattern: config.grep || '{debug,hooks,composition,compat,test-utils,}/test/{browser,shared}/**/*.test.js', watched: false }
 		],
 
 		preprocessors: {
-			'{debug,hooks,compat,test-utils,}/test/**/*': ['webpack', 'sourcemap']
+			'{debug,hooks,composition,compat,test-utils,}/test/**/*': ['webpack', 'sourcemap']
 		},
 
 		webpack: {
@@ -147,7 +147,7 @@ module.exports = function(config) {
 										'**/__tests__/**',
 										'**/node_modules/**',
 										// Our custom extension
-										'{debug,hooks,compat,test-utils}/test/**/*'
+										'{debug,hooks,composition,compat,test-utils}/test/**/*'
 									]
 								}]] : []
 						}
@@ -161,6 +161,7 @@ module.exports = function(config) {
 				alias: {
 					'preact/compat': path.join(__dirname, './compat/src'),
 					'preact/hooks': path.join(__dirname, './hooks/src'),
+					'preact/composition': path.join(__dirname, './composition/src'),
 					'preact/test-utils': path.join(__dirname, './test-utils/src'),
 					preact: path.join(__dirname, './src')
 				}
