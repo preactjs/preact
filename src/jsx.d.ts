@@ -750,6 +750,7 @@ export namespace JSXInternal {
 		ul: HTMLAttributes;
 		"var": HTMLAttributes;
 		video: HTMLAttributes;
+		volume: HTMLAttributes;
 		wbr: HTMLAttributes;
 
 		//SVG
