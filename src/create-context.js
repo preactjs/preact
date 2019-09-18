@@ -13,9 +13,6 @@ export function createContext(defaultValue) {
 		_id: '__cC' + i++,
 		_defaultValue: defaultValue,
 		Consumer(props, context) {
-			this.shouldComponentUpdate = function (_props, _state, _context) {
-				return context !== _context || _props.children === props.children;
-			}
 			return props.children(context);
 		},
 		Provider(props) {

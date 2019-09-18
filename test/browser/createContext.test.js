@@ -420,7 +420,7 @@ describe('createContext', () => {
 			constructor(props) {
 				super(props);
 				this.state = {
-					x: 'y'
+					status: 'initial'
 				};
 
 				this.renderInner = this.renderInner.bind(this);
@@ -428,13 +428,13 @@ describe('createContext', () => {
 				app = this;
 			}
 
-			renderInner() {
-				return <p>{this.state.x}</p>;
+			renderInner(value) {
+				return <p>{value}: {this.state.status}</p>;
 			}
 
 			render() {
 				return (
-					<Provider value="irrelevant">
+					<Provider value="value">
 						<Consumer>
 							{this.renderInner}
 						</Consumer>
@@ -447,14 +447,14 @@ describe('createContext', () => {
 			render(<App />, scratch);
 		});
 
-		expect(scratch.innerHTML).to.equal('<p>y</p>');
+		expect(scratch.innerHTML).to.equal('<p>value: initial</p>');
 
 		act(() => {
-			app.setState({ x: 'x' });
+			app.setState({ status: 'updated' });
+			rerender();
 		});
 		
-		rerender();
-		expect(scratch.innerHTML).to.equal('<p>x</p>');
+		expect(scratch.innerHTML).to.equal('<p>value: updated</p>');
 	});
 
 	it('should re-render the consumer if the children change', () => {
@@ -480,7 +480,15 @@ describe('createContext', () => {
 				scratch
 			);
 
-			rerender();
+			// Not calling re-render since it's gonna get called with the same Consumer function
+			render(
+				<Provider value={CONTEXT}>
+					<Consumer>
+						{data => <Inner {...data} />}
+					</Consumer>
+				</Provider>,
+				scratch
+			);
 		});
 
 		// Rendered twice, with two different children for consumer, should render twice
