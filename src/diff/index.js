@@ -41,7 +41,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			tmp = newType.contextType;
 			let provider = tmp && context[tmp._id];
 			let cctx = tmp ? (provider ? provider.props.value : tmp._defaultValue) : context;
-			let isConsumer = provider && tmp.Consumer === newType;
 
 			// Get component and set it to `c`
 			if (oldVNode._component) {
@@ -86,7 +85,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 					c.componentWillReceiveProps(newProps, cctx);
 				}
 
-				if (!force && !isConsumer && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newProps, c._nextState, cctx)===false) {
+				if (!force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newProps, c._nextState, cctx)===false) {
 					c.props = newProps;
 					c.state = c._nextState;
 					c._dirty = false;
