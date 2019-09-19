@@ -61,22 +61,20 @@ Component.prototype.setState = function(update, callback) {
  * re-rendered
  */
 Component.prototype.forceUpdate = function(callback) {
-	let vnode = this._vnode, oldDom = this._vnode._dom, parentDom = this._parentDom;
-	if (parentDom) {
+	if (this._vnode) {
 		// Set render mode so that we can differentiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
-		const force = callback!==false;
+		if (callback) this._renderCallbacks.push(callback);
+		this._force = true;
+		enqueueRender(this);
 
-		let mounts = [];
-		let newDom = diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, force, oldDom == null ? getDomSibling(vnode) : oldDom);
-		commitRoot(mounts, vnode);
-
-		if (newDom != oldDom) {
-			updateParentDomPointers(vnode);
-		}
+		// A thought: if there's nothing queued up for rendering, we could immediately flush or render.
+		// This reduces the number of failing tests from 17 to 4, but has the effect of allowing
+		// sequential forceUpdate() calls to produce multiple top-level renders.
+		//if (q.length) enqueueRender(this);
+		//else renderComponent(this);
 	}
-	if (callback) callback();
 };
 
 /**
@@ -121,6 +119,27 @@ export function getDomSibling(vnode, childIndex) {
 	// VNode (meaning we reached the DOM parent of the original vnode that began
 	// the search)
 	return typeof vnode.type === 'function' ? getDomSibling(vnode) : null;
+}
+
+/**
+ * Trigger in-place re-rendering of a component.
+ * @param {import('./internal').Component} c The component to rerender
+ */
+function renderComponent(component) {
+	let vnode = component._vnode,
+		oldDom = vnode._dom,
+		parentDom = component._parentDom,
+		force = component._force;
+	component._force = false;
+	if (parentDom) {
+		let mounts = [];
+		let newDom = diff(parentDom, vnode, assign({}, vnode), component._context, parentDom.ownerSVGElement!==undefined, null, mounts, force, oldDom == null ? getDomSibling(vnode) : oldDom);
+		commitRoot(mounts, vnode);
+
+		if (newDom != oldDom) {
+			updateParentDomPointers(vnode);
+		}
+	}
 }
 
 /**
@@ -182,6 +201,7 @@ function process() {
 	q.sort((a, b) => b._vnode._depth - a._vnode._depth);
 	while ((p=q.pop())) {
 		// forceUpdate's callback argument is reused here to indicate a non-forced update.
-		if (p._dirty) p.forceUpdate(false);
+		if (p._dirty) renderComponent(p);
+		// p.forceUpdate(false);
 	}
 }
