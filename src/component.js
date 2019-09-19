@@ -202,6 +202,5 @@ function process() {
 	while ((p=q.pop())) {
 		// forceUpdate's callback argument is reused here to indicate a non-forced update.
 		if (p._dirty) renderComponent(p);
-		// p.forceUpdate(false);
 	}
 }
