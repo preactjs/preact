@@ -613,6 +613,7 @@ export namespace JSXInternal {
 		type?: string;
 		useMap?: string;
 		value?: string | string[] | number;
+		volume?: string | number;
 		width?: number | string;
 		wmode?: string;
 		wrap?: string;
