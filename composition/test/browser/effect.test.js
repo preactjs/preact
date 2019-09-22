@@ -1,4 +1,3 @@
-import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { createComponent, effect } from '../../src';
@@ -6,15 +5,12 @@ import { createComponent, effect } from '../../src';
 /** @jsx h */
 
 describe('effect', () => {
+
 	/** @type {HTMLDivElement} */
 	let scratch;
 
-	/** @type {() => void} */
-	let rerender;
-
 	beforeEach(() => {
 		scratch = setupScratch();
-		rerender = setupRerender();
 	});
 
 	afterEach(() => {
