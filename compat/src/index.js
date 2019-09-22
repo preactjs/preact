@@ -364,19 +364,6 @@ function memo(c, comparer) {
 	return Memoed;
 }
 
-// Patch in `UNSAFE_*` lifecycle hooks
-function setUnsafeDescriptor(obj, key) {
-	Object.defineProperty(obj.prototype, 'UNSAFE_' + key, {
-		configurable: true,
-		get() { return this[key]; },
-		set(v) { this[key] = v; }
-	});
-}
-
-setUnsafeDescriptor(Component, 'componentWillMount');
-setUnsafeDescriptor(Component, 'componentWillReceiveProps');
-setUnsafeDescriptor(Component, 'componentWillUpdate');
-
 /**
  * Pass ref down to a child. This is mainly used in libraries with HOCs that
  * wrap components. Using `forwardRef` there is an easy way to get a reference
@@ -396,6 +383,17 @@ function forwardRef(fn) {
 	return Forwarded;
 }
 
+// Patch in `UNSAFE_*` lifecycle hooks
+function setSafeDescriptor(obj, key) {
+	if (obj.prototype['UNSAFE_'+key] && !obj.prototype[key]) {
+		Object.defineProperty(obj.prototype, key, {
+			configurable: false,
+			get() { return this['UNSAFE_' + key]; },
+			set(v) { this['UNSAFE_' + key] = v; }
+		});
+	}
+}
+
 let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
@@ -405,6 +403,16 @@ options.vnode = vnode => {
 	if (type && type._forwarded && vnode.ref) {
 		vnode.props.ref = vnode.ref;
 		vnode.ref = null;
+	}
+
+	// We can't just patch the base component class, because components that use
+	// inheritance and are transpiled down to ES5 will overwrite our patched
+	// getters and setters. See #1941
+	if (typeof type === 'function' && !type._patchedLifecycles && type.prototype) {
+		setSafeDescriptor(type, 'componentWillMount');
+		setSafeDescriptor(type, 'componentWillReceiveProps');
+		setSafeDescriptor(type, 'componentWillUpdate');
+		type._patchedLifecycles = true;
 	}
 	/* istanbul ignore next */
 	if (oldVNodeHook) oldVNodeHook(vnode);
