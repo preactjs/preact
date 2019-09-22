@@ -6,6 +6,7 @@ import { createComponent, ref } from '../../src';
 /** @jsx h */
 
 describe('ref', () => {
+
 	/** @type {HTMLDivElement} */
 	let scratch;
 

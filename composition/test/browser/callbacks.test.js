@@ -5,6 +5,7 @@ import { createComponent, watch } from '../../src';
 /** @jsx h */
 
 describe('callback', () => {
+
 	/** @type {HTMLDivElement} */
 	let scratch;
 
