@@ -71,6 +71,26 @@ export function onUnmounted(cb) {
 	currentComponent.__compositions.u.push(cb);
 }
 
+export function setContext(name, _value) {
+	const _component = currentComponent;
+	// todo support multiple contexts!
+	_component.getChildContext = () => ({ [`__sC_${name}`]: { _component, _value } });
+}
+
+export function getContext(name) {
+	const c = currentComponent;
+
+	const ctx = c.context[`__sC_${name}`];
+	if (!ctx) throw 'Context not found';
+
+	ctx._component.__compositions.w.push({
+		src: ctx._value,
+		cb: () => c.setState({})
+	});
+
+	return ctx._value;
+}
+
 const $Reactive = Symbol('reactive');
 
 export function reactive(value) {
