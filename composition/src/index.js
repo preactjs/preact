@@ -75,36 +75,32 @@ const $Reactive = Symbol('reactive');
 
 export function reactive(value) {
 	const c = currentComponent;
-	return new Proxy(value, {
-		get(target, p) {
-			return p === $Reactive || p === '$value'
-				? value // returns the immutable value
-				: Reflect.get(target, p);
-		},
-		set(target, p, newValue) {
-			let r =
-				p === '$value'
-					? !!Object.assign(target, newValue) // override the innervalue
-					: Reflect.set(target, p, newValue); // set the newValue on target
 
-			// update value with the immutable value of target
-			value = Object.assign({}, target);
+	return new Proxy(
+		{ $value: value },
+		{
+			get(target, p) {
+				return p === '$value' || p === $Reactive
+					? target.$value // returns the immutable value
+					: Reflect.get(target.$value, p);
+			},
+			set(target, p, newValue) {
+				// don't do anything if we are just assigning the same value
+				if (target.$value[p] !== newValue) {
+					target.$value =
+						p === '$value'
+							? newValue
+							: Object.assign({}, target.$value, { [p]: newValue });
 
-			// Make the component re-render
-			c.setState({});
-			return r;
-		},
-		deleteProperty(target, p) {
-			// delete the property on target
-			const r = Reflect.deleteProperty(target, p);
-			// update value with the immutable value of target
-			value = Object.assign({}, target);
-			// Make the component re-render
-			c.setState({});
-			return r;
+					// Make the component re-render
+					c.setState({});
+				}
+
+				return true;
+			}
+			//todo implement all reactivity
 		}
-		//todo implement all reactivity
-	});
+	);
 }
 
 export function ref(v) {

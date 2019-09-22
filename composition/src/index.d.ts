@@ -1,4 +1,4 @@
-import { PreactContext, ComponentChildren } from "../..";
+import { PreactContext, ComponentChildren } from '../..';
 
 type FC<P> = (props: P) => ComponentChildren;
 
@@ -9,7 +9,10 @@ type createComponentFN<P> = (props: P) => FC<P>;
  */
 export function createComponent<P>(fn: createComponentFN<P>): FC<P>;
 
-export type ReactiveHolder<T> = T;
+export type ReactiveHolder<T extends {}> = T & {
+	// get or set the immutable inner value of this reactive
+	$value: T;
+};
 /**
  * Creates a Proxy around the `value` object that any time its change it will update the component
  * @param value
