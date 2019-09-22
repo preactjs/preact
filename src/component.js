@@ -68,12 +68,6 @@ Component.prototype.forceUpdate = function(callback) {
 		if (callback) this._renderCallbacks.push(callback);
 		this._force = true;
 		enqueueRender(this);
-
-		// A thought: if there's nothing queued up for rendering, we could immediately flush or render.
-		// This reduces the number of failing tests from 17 to 4, but has the effect of allowing
-		// sequential forceUpdate() calls to produce multiple top-level renders.
-		//if (q.length) enqueueRender(this);
-		//else renderComponent(this);
 	}
 };
 
