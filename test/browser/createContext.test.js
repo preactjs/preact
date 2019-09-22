@@ -1,4 +1,4 @@
-import { setupRerender } from 'preact/test-utils';
+import { setupRerender, act } from 'preact/test-utils';
 import { createElement as h, render, Component, createContext } from '../../src/index';
 import { setupScratch, teardown } from '../_util/helpers';
 import { Fragment } from '../../src';
@@ -355,6 +355,16 @@ describe('createContext', () => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { i: 1 };
 
+		class NoUpdate extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+
+			render() {
+				return this.props.children;
+			}
+		}
+
 		class Inner extends Component {
 			render(props) {
 				return <div>{props.i}</div>;
@@ -363,22 +373,22 @@ describe('createContext', () => {
 
 		sinon.spy(Inner.prototype, 'render');
 
-		const Child = data => <Inner {...data} />;
-
 		render(
 			<Provider value={CONTEXT}>
-				<Consumer>
-					{Child}
-				</Consumer>
+				<NoUpdate>
+					<Consumer>
+						{data => <Inner {...data} />}
+					</Consumer>
+				</NoUpdate>
 			</Provider>,
 			scratch
 		);
 
 		render(
 			<Provider value={CONTEXT}>
-				<Consumer>
-					{Child}
-				</Consumer>
+				<NoUpdate>
+					<Consumer>{data => <Inner {...data} />}</Consumer>
+				</NoUpdate>
 			</Provider>,
 			scratch
 		);
@@ -387,18 +397,64 @@ describe('createContext', () => {
 		expect(Inner.prototype.render).to.have.been.calledOnce.and.calledWithMatch(CONTEXT, {},  { ['__cC' + (ctxId - 1)]: {} });
 		expect(scratch.innerHTML).to.equal('<div>1</div>');
 
-		render(
-			<Provider value={{ i: 2 }}>
-				<Consumer>
-					{Child}
-				</Consumer>
-			</Provider>,
-			scratch
-		);
+		act(() => {
+			render(
+				<Provider value={{ i: 2 }}>
+					<NoUpdate>
+						<Consumer>{data => <Inner {...data} />}</Consumer>
+					</NoUpdate>
+				</Provider>,
+				scratch
+			);
+		});
 
 		// Rendered three times, should call 'Consumer' render two times
 		expect(Inner.prototype.render).to.have.been.calledTwice.and.calledWithMatch({ i: 2 }, {},  { ['__cC' + (ctxId - 1)]: {} });
 		expect(scratch.innerHTML).to.equal('<div>2</div>');
+	});
+
+	it('should allow for updates of props', () => {
+		let app;
+		const { Provider, Consumer } = createContext();
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = {
+					status: 'initial'
+				};
+
+				this.renderInner = this.renderInner.bind(this);
+
+				app = this;
+			}
+
+			renderInner(value) {
+				return <p>{value}: {this.state.status}</p>;
+			}
+
+			render() {
+				return (
+					<Provider value="value">
+						<Consumer>
+							{this.renderInner}
+						</Consumer>
+					</Provider>
+				);
+			}
+		}
+
+		act(() => {
+			render(<App />, scratch);
+		});
+
+		expect(scratch.innerHTML).to.equal('<p>value: initial</p>');
+
+		act(() => {
+			app.setState({ status: 'updated' });
+			rerender();
+		});
+		
+		expect(scratch.innerHTML).to.equal('<p>value: updated</p>');
 	});
 
 	it('should re-render the consumer if the children change', () => {
@@ -413,23 +469,27 @@ describe('createContext', () => {
 
 		sinon.spy(Inner.prototype, 'render');
 
-		render(
-			<Provider value={CONTEXT}>
-				<Consumer>
-					{data => <Inner {...data} />}
-				</Consumer>
-			</Provider>,
-			scratch
-		);
+		act(() => {
 
-		render(
-			<Provider value={CONTEXT}>
-				<Consumer>
-					{data => <Inner {...data} />}
-				</Consumer>
-			</Provider>,
-			scratch
-		);
+			render(
+				<Provider value={CONTEXT}>
+					<Consumer>
+						{data => <Inner {...data} />}
+					</Consumer>
+				</Provider>,
+				scratch
+			);
+
+			// Not calling re-render since it's gonna get called with the same Consumer function
+			render(
+				<Provider value={CONTEXT}>
+					<Consumer>
+						{data => <Inner {...data} />}
+					</Consumer>
+				</Provider>,
+				scratch
+			);
+		});
 
 		// Rendered twice, with two different children for consumer, should render twice
 		expect(Inner.prototype.render).to.have.been.calledTwice;
