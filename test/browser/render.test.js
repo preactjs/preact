@@ -929,6 +929,7 @@ describe('render()', () => {
 		checkbox.checked = false;
 
 		inputs.forceUpdate();
+		rerender();
 
 		expect(text.value).to.equal('Hello');
 		expect(checkbox.checked).to.equal(true);
@@ -988,8 +989,11 @@ describe('render()', () => {
 		render(<App />, scratch);
 
 		updateApp();
+		rerender();
 		updateParent();
+		rerender();
 		updateApp();
+		rerender();
 
 		// Without a fix it would render: `<div>foo</div><div></div>`
 		expect(scratch.innerHTML).to.equal('<div>foo</div>');

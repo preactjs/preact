@@ -513,11 +513,13 @@ describe('Lifecycle methods', () => {
 
 			reset();
 			setState({ show: false });
+			rerender();
 
 			expect(proto.componentWillUnmount).to.have.been.called;
 
 			reset();
 			setState({ show: true });
+			rerender();
 
 			expect(proto.componentWillMount).to.have.been.called;
 			expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);

@@ -147,6 +147,7 @@ describe('Lifecycle methods', () => {
 
 			render(<Receiver><ThrowErr /></Receiver>, scratch);
 			receiver.forceUpdate();
+			rerender();
 
 			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(expectedError);
 		});
@@ -157,6 +158,7 @@ describe('Lifecycle methods', () => {
 			render(<Receiver><ThrowErr /></Receiver>, scratch);
 
 			receiver.forceUpdate();
+			rerender();
 			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(expectedError);
 		});
 
@@ -166,6 +168,7 @@ describe('Lifecycle methods', () => {
 			render(<Receiver><ThrowErr /></Receiver>, scratch);
 
 			receiver.forceUpdate();
+			rerender();
 			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(expectedError);
 		});
 
