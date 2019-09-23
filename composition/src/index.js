@@ -117,7 +117,11 @@ export function reactive(value) {
 				}
 
 				return true;
-			}
+			},
+			// forward internal $target properties
+			ownKeys: target => Object.keys(target.$value),
+			getOwnPropertyDescriptor: (target, name) =>
+				Object.getOwnPropertyDescriptor(target.$value, name)
 			//todo implement all reactivity
 		}
 	);
