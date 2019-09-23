@@ -126,6 +126,7 @@ describe('refs', () => {
 		outer.resetHistory();
 		inner.resetHistory();
 		update();
+		rerender();
 
 		expect(outer, 're-render').not.to.have.been.called;
 		expect(inner, 're-render').not.to.have.been.called;
@@ -133,6 +134,7 @@ describe('refs', () => {
 		inner.resetHistory();
 		InnermostComponent = 'x-span';
 		update();
+		rerender();
 
 		expect(inner, 're-render swap');
 		expect(inner.firstCall, 're-render swap').to.have.been.calledWith(null);
