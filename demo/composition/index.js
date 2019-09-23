@@ -1,10 +1,5 @@
 import { createElement, Fragment } from 'preact';
-import {
-	createComponent,
-	watch,
-	reactive,
-	setContext
-} from 'preact/composition';
+import { createComponent, watch, reactive, provide } from 'preact/composition';
 import { Link } from 'preact-router';
 
 import Form from './form';
@@ -33,19 +28,17 @@ export default createComponent(function() {
 		}
 	});
 
-	const theme = reactive({
-		style: { color: 'black', background: 'white' },
-		invert
-	});
-
 	function invert() {
-		theme.style =
-			theme.style.color === 'black'
+		style.$value =
+			style.color === 'black'
 				? { color: 'white', background: 'black' }
 				: { color: 'black', background: 'white' };
 	}
 
-	setContext('theme', theme);
+	const style = reactive({ color: 'black', background: 'white' });
+
+	provide('theme:style', style);
+	provide('theme:invert', invert);
 
 	return () => {
 		return (
@@ -56,8 +49,8 @@ export default createComponent(function() {
 					<Link href="/composition/theme">Theme</Link>
 					<Link href="/composition/raf">Raf</Link>
 					<Link href="/composition/async">Async</Link>
-					<span style={theme.style} onClick={theme.invert}>
-						Current theme: {theme.style.background}
+					<span style={style.$value} onClick={invert}>
+						Current theme: {style.background}
 					</span>
 				</nav>
 				{match.value}

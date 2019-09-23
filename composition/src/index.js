@@ -71,24 +71,27 @@ export function onUnmounted(cb) {
 	currentComponent.__compositions.u.push(cb);
 }
 
-export function setContext(name, _value) {
+export function provide(name, _value) {
 	const _component = currentComponent;
-	// todo support multiple contexts!
-	_component.getChildContext = () => ({ [`__sC_${name}`]: { _component, _value } });
+	if (!_component.__compositions.c) {
+		_component.__compositions.c = {};
+		_component.getChildContext = () => _component.__compositions.c;
+	}
+	_component.__compositions.c[`__sC_${name}`] = { _component, _value };
 }
 
-export function getContext(name) {
+export function inject(name, defaultValue) {
 	const c = currentComponent;
 
 	const ctx = c.context[`__sC_${name}`];
-	if (!ctx) throw 'Context not found';
+	if (!ctx) return defaultValue;
 
-	ctx._component.__compositions.w.push({
-		src: ctx._value,
-		cb: () => c.setState({})
-	});
+	const src = ctx._value;
 
-	return ctx._value;
+	if (!src[$Reactive]) return src;
+
+	ctx._component.__compositions.w.push({ src, cb: () => c.setState({}) });
+	return src;
 }
 
 const $Reactive = Symbol('reactive');

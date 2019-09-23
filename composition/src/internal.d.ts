@@ -1,8 +1,8 @@
-import { Component as PreactComponent } from "../../src/internal";
+import { Component as PreactComponent } from '../../src/internal';
 
-export { PreactContext } from "../../src/internal";
+export { PreactContext } from '../../src/internal';
 
-import { WatchSrc, WatchCallback, RefHolder } from "./index";
+import { WatchSrc, WatchCallback, RefHolder } from './index';
 
 type Watcher = {
 	/** input src */
@@ -24,10 +24,12 @@ export interface ComponentComposition {
 	w: Watcher[];
 	/** list of effects */
 	e: Watcher[];
-	/** record of contexts connected */
+	/** record of contexts connected via watch */
 	x: Record<string, PreactContext>;
+	/** record of contexts provided by this component */
+	c: Record<string, { _component: Component; _value: any }>;
 }
 
 export interface Component extends PreactComponent<any, any> {
-	__composition?: ComponentComposition;
+	__compositions?: ComponentComposition;
 }

@@ -1,15 +1,15 @@
 import { createElement } from 'preact';
-import { createComponent, watch, getContext } from 'preact/composition';
-import { ThemeCtx } from './utils/ctx';
+import { createComponent, inject } from 'preact/composition';
 
 export default createComponent(() => {
-	const theme = getContext('theme');
+	const style = inject('theme:style');
+	const invert = inject('theme:invert');
 
 	return () => {
 		return (
-			<div style={theme.style}>
+			<div style={style.$value}>
 				<p>Hello everyone</p>
-				<button onClick={theme.invert}>invert</button>
+				<button onClick={invert}>invert</button>
 			</div>
 		);
 	};

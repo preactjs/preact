@@ -78,3 +78,10 @@ export function effect<T, P = any>(
 	src: WatchSrc<T, P> | WatchSrc[],
 	cb: WatchCallback<T>
 ): void;
+
+
+interface InjectionKey<T> extends String {}
+
+export function provide<T>(key: InjectionKey<T> | string, value: T): void;
+export function inject<T>(key: InjectionKey<T> | string): T | undefined;
+export function inject<T>(key: InjectionKey<T> | string, defaultValue: T): T;
