@@ -155,11 +155,11 @@ export function ref(v) {
 	};
 }
 
-export function unwrapRef(v) {
+export function unwrap(v) {
 	return v && $Reactive in v ? v[$Reactive] : v;
 }
 
-export function isRef(v) {
+export function isReactive(v) {
 	return v && $Reactive in v;
 }
 

@@ -27,8 +27,9 @@ export type RefHolder<T> = { value: T };
  * @param staticRef
  */
 export function ref<T>(v?: T, staticRef?: boolean): RefHolder<T>;
-export function unwrapRef<T>(refOrValue: RefHolder<T> | T): T;
-export function isRef(v: any): boolean;
+
+export function unwrap<T>(refOrValue: RefHolder<T> | ReactiveHolder<T> | T): T;
+export function isReactive(v: any): boolean;
 
 /**
  * @param callback run on mount
@@ -78,7 +79,6 @@ export function effect<T, P = any>(
 	src: WatchSrc<T, P> | WatchSrc[],
 	cb: WatchCallback<T>
 ): void;
-
 
 interface InjectionKey<T> extends String {}
 
