@@ -141,4 +141,23 @@ describe('reactive', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal('');
 	});
+
+	it('can be converted to json or spread', () => {
+		const Comp = createComponent(() => {
+			const state = reactive({ a: 1 });
+
+			expect(state).to.deep.equal({ a: 1 });
+			expect(state).to.deep.equal(state.$value);
+
+			expect(Object.assign({}, state)).to.deep.equal({ a: 1 });
+
+			expect(JSON.stringify(state)).to.equal('{"a":1}');
+
+			expect(Object.keys(state)).to.deep.equal(['a']);
+
+			return () => null;
+		});
+
+		render(<Comp />, scratch);
+	});
 });
