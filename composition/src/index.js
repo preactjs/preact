@@ -43,6 +43,8 @@ options.unmount = vnode => {
 	}
 };
 
+const $Reactive = Symbol('reactive');
+
 export function createComponent(comp) {
 	comp.__compositions = true;
 	return comp;
@@ -50,7 +52,9 @@ export function createComponent(comp) {
 
 export function watch(src, cb, dv) {
 	const vr = {
-		[$Reactive]: true,
+		get [$Reactive]() {
+			return this.value;
+		},
 		value: dv
 	};
 	const up = { src, cb, vr };
@@ -88,13 +92,11 @@ export function inject(name, defaultValue) {
 
 	const src = ctx._value;
 
-	if (!src[$Reactive]) return src;
+	if (!($Reactive in src)) return src;
 
 	ctx._component.__compositions.w.push({ src, cb: () => c.setState({}) });
 	return src;
 }
-
-const $Reactive = Symbol('reactive');
 
 export function reactive(value) {
 	const c = currentComponent;
@@ -102,6 +104,11 @@ export function reactive(value) {
 	return new Proxy(
 		{ $value: value },
 		{
+			has(target, p) {
+				return (
+					p === '$value' || p === $Reactive || Reflect.has(target.$value, p)
+				);
+			},
 			get(target, p) {
 				return p === '$value' || p === $Reactive
 					? target.$value // returns the immutable value
@@ -133,6 +140,9 @@ export function reactive(value) {
 export function ref(v) {
 	const c = currentComponent;
 	return {
+		get [$Reactive]() {
+			return v;
+		},
 		get value() {
 			return v;
 		},
@@ -141,17 +151,16 @@ export function ref(v) {
 				v = newValue;
 				c.setState({});
 			}
-		},
-		[$Reactive]: true
+		}
 	};
 }
 
 export function unwrapRef(v) {
-	return isRef(v) ? v.value : v;
+	return v && $Reactive in v ? v[$Reactive] : v;
 }
 
 export function isRef(v) {
-	return v && v[$Reactive] === true;
+	return v && $Reactive in v;
 }
 
 function handleEffect(up, c, init) {
@@ -194,14 +203,13 @@ function cleanupEffect(up) {
 }
 
 function resolveArgs(src, c) {
-	let a;
 	if (src) {
 		// use the value from a getter function
 		if (typeof src === 'function') return src(c.props);
 		// unrap the value and subscribe to the context
 		if (src.Provider) return resolveContext(src, c);
 		// unwrap ref or reactive, returning their immutable value
-		if ((a = src[$Reactive])) return a === true ? src.value : a;
+		if ($Reactive in src) return src[$Reactive];
 		// is src a createRef holding a element, return the current
 		if (isPlainObject(src)) return src.current;
 	}
