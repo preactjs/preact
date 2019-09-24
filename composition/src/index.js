@@ -51,12 +51,12 @@ export function createComponent(comp) {
 }
 
 export function watch(src, cb, dv) {
-	const vr = {
-		get [$Reactive]() {
+	const vr = { value: dv };
+	Object.defineProperty(vr, $Reactive, {
+		get() {
 			return this.value;
-		},
-		value: dv
-	};
+		}
+	});
 	const up = { src, cb, vr };
 	handleEffect(up, currentComponent);
 	currentComponent.__compositions.w.push(up);
@@ -139,20 +139,25 @@ export function reactive(value) {
 
 export function ref(v) {
 	const c = currentComponent;
-	return {
-		get [$Reactive]() {
-			return v;
-		},
-		get value() {
-			return v;
-		},
-		set value(newValue) {
-			if (v !== newValue) {
-				v = newValue;
-				c.setState({});
+	function get() {
+		return v;
+	}
+	return Object.defineProperties(
+		{},
+		{
+			[$Reactive]: { get },
+			value: {
+				get,
+				set(newValue) {
+					if (v !== newValue) {
+						v = newValue;
+						c.setState({});
+					}
+				},
+				enumerable: true
 			}
 		}
-	};
+	);
 }
 
 export function unwrap(v) {
