@@ -92,9 +92,9 @@ export function inject(name, defaultValue) {
 
 	const src = ctx._value;
 
-	if (!($Reactive in src)) return src;
+	if (isReactive(src))
+		ctx._component.__compositions.w.push({ src, cb: () => c.setState({}) });
 
-	ctx._component.__compositions.w.push({ src, cb: () => c.setState({}) });
 	return src;
 }
 
@@ -156,11 +156,11 @@ export function ref(v) {
 }
 
 export function unwrap(v) {
-	return v && $Reactive in v ? v[$Reactive] : v;
+	return !!v && $Reactive in v ? v[$Reactive] : v;
 }
 
 export function isReactive(v) {
-	return v && $Reactive in v;
+	return !!v && $Reactive in v;
 }
 
 function handleEffect(up, c, init) {
