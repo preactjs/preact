@@ -161,11 +161,11 @@ export function ref(v) {
 }
 
 export function unwrap(v) {
-	return !!v && $Reactive in v ? v[$Reactive] : v;
+	return isReactive(v) ? v[$Reactive] : v;
 }
 
 export function isReactive(v) {
-	return !!v && $Reactive in v;
+	return typeof v === 'object' && !!v && $Reactive in v;
 }
 
 function handleEffect(up, c, init) {
