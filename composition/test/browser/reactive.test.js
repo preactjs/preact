@@ -1,7 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { createComponent, reactive } from '../../src';
+import { createComponent, reactive, isReactive, unwrap } from '../../src';
 
 /** @jsx h */
 
@@ -154,6 +154,23 @@ describe('reactive', () => {
 			expect(JSON.stringify(state)).to.equal('{"a":1}');
 
 			expect(Object.keys(state)).to.deep.equal(['a']);
+
+			return () => null;
+		});
+
+		render(<Comp />, scratch);
+	});
+
+	it('unwrap and check reactivity', () => {
+		const Comp = createComponent(() => {
+			const state = reactive({ a: 1 });
+
+			expect(unwrap(state)).to.deep.equal({ a: 1 });
+			expect(unwrap(state)).to.deep.equal(state.$value);
+			expect(isReactive(state)).to.be.true;
+			expect(isReactive(state.$value)).to.be.false;
+			expect(isReactive(null)).to.be.false;
+			expect(isReactive(false)).to.be.false;
 
 			return () => null;
 		});

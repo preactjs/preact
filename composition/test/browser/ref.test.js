@@ -1,7 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { createComponent, ref } from '../../src';
+import { createComponent, ref, unwrap, isReactive } from '../../src';
 
 /** @jsx h */
 
@@ -139,5 +139,22 @@ describe('ref', () => {
 		text.click();
 		rerender();
 		expect(scratch.innerHTML).to.equal('');
+	});
+
+	it('unwrap and check reactivity', () => {
+		const Comp = createComponent(() => {
+			const state = ref({ a: 1 });
+
+			expect(unwrap(state)).to.deep.equal({ a: 1 });
+			expect(unwrap(state)).to.deep.equal(state.value);
+			expect(isReactive(state)).to.be.true;
+			expect(isReactive(state.value)).to.be.false;
+			expect(isReactive(null)).to.be.false;
+			expect(isReactive(false)).to.be.false;
+
+			return () => null;
+		});
+
+		render(<Comp />, scratch);
 	});
 });

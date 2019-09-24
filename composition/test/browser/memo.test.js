@@ -1,6 +1,6 @@
 import { createElement as h, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { createComponent, watch } from '../../src';
+import { createComponent, watch, unwrap, isReactive } from '../../src';
 
 /** @jsx h */
 
@@ -43,5 +43,22 @@ describe('memo', () => {
 
 		expect(results).to.deep.equal([2, 2, 3, 3]);
 		expect(memoFunction).to.have.been.calledTwice;
+	});
+
+	it('unwrap and check reactivity', () => {
+		const Comp = createComponent(() => {
+			const sum = watch(props => props.a + props.b);
+
+			expect(unwrap(sum)).to.equal(3);
+			expect(unwrap(sum)).to.equal(sum.value);
+			expect(isReactive(sum)).to.be.true;
+			expect(isReactive(sum.value)).to.be.false;
+			expect(isReactive(null)).to.be.false;
+			expect(isReactive(false)).to.be.false;
+
+			return () => null;
+		});
+
+		render(<Comp a={1} b={2} />, scratch);
 	});
 });
