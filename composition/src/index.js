@@ -170,7 +170,7 @@ export function isReactive(v) {
 
 function handleEffect(up, c, init) {
 	// handle onMounted
-	if (!up.src) {
+	if (!up.src && up.cb) {
 		if (!up.args) {
 			up.cb();
 			up.args = [];
@@ -214,9 +214,9 @@ function resolveArgs(src, c) {
 		// unrap the value and subscribe to the context
 		if (src.Provider) return resolveContext(src, c);
 		// unwrap ref or reactive, returning their immutable value
-		if ($Reactive in src) return src[$Reactive];
+		if (isReactive(src)) return src[$Reactive];
 		// is src a createRef holding a element, return the current
-		if (isPlainObject(src)) return src.current;
+		if (isPlainObject(src) && 'current' in src) return src.current;
 	}
 	return src;
 }

@@ -61,4 +61,61 @@ describe('memo', () => {
 
 		render(<Comp a={1} b={2} />, scratch);
 	});
+
+	it('watch with unhandled sources', () => {
+		const Comp = createComponent(() => {
+			expect(watch(1).value).to.equal(1);
+			expect(watch('str').value).to.equal('str');
+			expect(watch(null).value).to.equal(null);
+			expect(watch(false).value).to.equal(false);
+			expect(watch({ a: 1 }).value).to.deep.equal({ a: 1 });
+			expect(watch([1, 2]).value).to.deep.equal([1, 2]);
+
+			return () => null;
+		});
+
+		render(<Comp />, scratch);
+	});
+
+	it('watch async', async () => {
+		function fetchData(n) {
+			return new Promise(resolve => setTimeout(() => resolve([1, n]), 1));
+		}
+
+		let data;
+		const Comp = createComponent(() => {
+			data = watch(props => props.a, fetchData);
+
+			return () => null;
+		});
+
+		render(<Comp a={1} />, scratch);
+
+		expect(data.value).to.deep.equal();
+
+		await new Promise(resolve => setTimeout(resolve, 1));
+
+		expect(data.value).to.deep.equal([1, 1]);
+	});
+
+	it('watch async with defaultValue', async () => {
+		function fetchData(n) {
+			return new Promise(resolve => setTimeout(() => resolve([1, n]), 1));
+		}
+
+		let data;
+		const Comp = createComponent(() => {
+			data = watch(props => props.a, fetchData, []);
+
+			return () => null;
+		});
+
+		render(<Comp a={1} />, scratch);
+
+		expect(data.value).to.deep.equal([]);
+
+		await new Promise(resolve => setTimeout(resolve, 1));
+
+		expect(data.value).to.deep.equal([1, 1]);
+	});
 });
