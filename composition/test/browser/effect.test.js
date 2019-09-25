@@ -1,6 +1,7 @@
-import { createElement as h, render } from 'preact';
+import { createElement as h, render, createRef } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { createComponent, effect } from '../../src';
+import { createComponent, effect, ref, reactive } from '../../src';
+import { nextFrame } from '../_util/nextFrame';
 
 /** @jsx h */
 
@@ -84,5 +85,60 @@ describe('effect', () => {
 		render(<Comp x={2} y={10} />, scratch);
 
 		expect(spy).to.be.calledWith([2, 10], [1, 10]);
+	});
+
+	it('call effect with ref changes', async () => {
+		const spy = sinon.spy();
+		let count;
+		const Comp = createComponent(() => {
+			count = ref(1);
+			effect(count, spy);
+			return () => null;
+		});
+
+		render(<Comp />, scratch);
+
+		expect(spy).to.be.calledWith(1);
+
+		count.value = 2;
+
+		await nextFrame();
+
+		expect(spy).to.be.calledWith(2);
+		expect(spy).to.be.calledTwice;
+	});
+
+	it('call effect with reactive changes', async () => {
+		const spy = sinon.spy();
+		let state;
+		const Comp = createComponent(() => {
+			state = reactive({ count: 1 });
+			effect(state, spy);
+			return () => null;
+		});
+
+		render(<Comp />, scratch);
+
+		expect(spy).to.be.calledWith({ count: 1 });
+
+		state.count = 2;
+
+		await nextFrame();
+
+		expect(spy).to.be.calledWith({ count: 2 });
+		expect(spy).to.be.calledTwice;
+	});
+
+	it('call effect with DOM refs', async () => {
+		const spy = sinon.spy();
+		const Comp = createComponent(() => {
+			const inputref = createRef(null);
+			effect(inputref, spy);
+			return () => <input ref={inputref} />;
+		});
+
+		render(<Comp />, scratch);
+
+		expect(spy).to.be.calledWith(scratch.firstChild);
 	});
 });
