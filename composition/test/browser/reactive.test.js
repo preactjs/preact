@@ -167,10 +167,30 @@ describe('reactive', () => {
 
 			expect(unwrap(state)).to.deep.equal({ a: 1 });
 			expect(unwrap(state)).to.deep.equal(state.$value);
+			expect(unwrap('str')).to.equal('str');
+			expect(unwrap(null)).to.equal(null);
+			expect(unwrap(false)).to.equal(false);
+			expect(unwrap(undefined)).to.equal(undefined);
 			expect(isReactive(state)).to.be.true;
 			expect(isReactive(state.$value)).to.be.false;
 			expect(isReactive(null)).to.be.false;
 			expect(isReactive(false)).to.be.false;
+
+			return () => null;
+		});
+
+		render(<Comp />, scratch);
+	});
+
+	it('check, get and set a property', () => {
+		const Comp = createComponent(() => {
+			const state = reactive({ a: 1 });
+
+			expect(state.a).to.equal(1);
+			state.a = 2;
+			expect(state.a).to.equal(2);
+			state.$value = { b: 3 };
+			expect('b' in state).to.be.true;
 
 			return () => null;
 		});
