@@ -81,7 +81,7 @@ export function useReducer(reducer, initialState, init) {
 		hookState._component = currentComponent;
 
 		hookState._value = [
-			!init ? invokeOrReturn(null, initialState) : init(initialState),
+			!init ? invokeOrReturn(undefined, initialState) : init(initialState),
 
 			action => {
 				const nextValue = reducer(hookState._value[0], action);
