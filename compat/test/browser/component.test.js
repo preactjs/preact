@@ -95,6 +95,34 @@ describe('components', () => {
 			expect(spy).to.be.calledWithMatch(expected, expected);
 		});
 
+		it('should ignore the __source variable', () => {
+			const pureSpy = sinon.spy();
+			const appSpy = sinon.spy();
+			let set;
+			class Pure extends React.PureComponent {
+				render()  {
+					pureSpy();
+					return <div>Static</div>;
+				}
+			}
+
+			const App = () => {
+				const [, setState] = React.useState(0);
+				appSpy();
+				set = setState;
+				return <Pure __source={{}} />;
+			};
+
+			React.render(<App />, scratch);
+			expect(appSpy).to.be.calledOnce;
+			expect(pureSpy).to.be.calledOnce;
+
+			set(1);
+			rerender();
+			expect(appSpy).to.be.calledTwice;
+			expect(pureSpy).to.be.calledOnce;
+		});
+
 		it('should only re-render when props or state change', () => {
 			class C extends React.PureComponent {
 				render() {
