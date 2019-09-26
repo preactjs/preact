@@ -303,8 +303,8 @@ let classNameDescriptor = {
  * @returns {boolean}
  */
 function shallowDiffers(a, b) {
-	for (let i in a) if (!(i in b)) return true;
-	for (let i in b) if (a[i]!==b[i]) return true;
+	for (let i in a) if (i !== '__source' && !(i in b)) return true;
+	for (let i in b) if (i !== '__source' && a[i]!==b[i]) return true;
 	return false;
 }
 
