@@ -201,18 +201,17 @@ describe('suspense', () => {
 	});
 
 	it('should not call lifecycle methods when suspending', () => {
+		let componentWillMount = sinon.spy();
+		let componentDidMount = sinon.spy();
+		let componentWillUnmount = sinon.spy();
 		class LifecycleLogger extends Component {
 			render() {
 				return <div>Lifecycle</div>;
 			}
-			componentWillMount() {}
-			componentDidMount() {}
-			componentWillUnmount() {}
+			componentWillMount() { componentWillMount(); }
+			componentDidMount() { componentDidMount(); }
+			componentWillUnmount() { componentWillUnmount(); }
 		}
-
-		const componentWillMount = sinon.spy(LifecycleLogger.prototype, 'componentWillMount');
-		const componentDidMount = sinon.spy(LifecycleLogger.prototype, 'componentDidMount');
-		const componentWillUnmount = sinon.spy(LifecycleLogger.prototype, 'componentWillUnmount');
 
 		const [Suspender, suspend] = createSuspender(() => <div>Suspense</div>);
 
