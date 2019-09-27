@@ -384,9 +384,9 @@ function forwardRef(fn) {
 }
 
 // Patch in `UNSAFE_*` lifecycle hooks
-function setSafeDescriptor(obj, key) {
-	if (obj.prototype['UNSAFE_'+key] && !obj.prototype[key]) {
-		Object.defineProperty(obj.prototype, key, {
+function setSafeDescriptor(proto, key) {
+	if (proto['UNSAFE_'+key] && !proto[key]) {
+		Object.defineProperty(proto, key, {
 			configurable: false,
 			get() { return this['UNSAFE_' + key]; },
 			set(v) { this['UNSAFE_' + key] = v; }
@@ -409,9 +409,9 @@ options.vnode = vnode => {
 	// inheritance and are transpiled down to ES5 will overwrite our patched
 	// getters and setters. See #1941
 	if (typeof type === 'function' && !type._patchedLifecycles && type.prototype) {
-		setSafeDescriptor(type, 'componentWillMount');
-		setSafeDescriptor(type, 'componentWillReceiveProps');
-		setSafeDescriptor(type, 'componentWillUpdate');
+		setSafeDescriptor(type.prototype, 'componentWillMount');
+		setSafeDescriptor(type.prototype, 'componentWillReceiveProps');
+		setSafeDescriptor(type.prototype, 'componentWillUpdate');
 		type._patchedLifecycles = true;
 	}
 	/* istanbul ignore next */
