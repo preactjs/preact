@@ -2,7 +2,7 @@ import { PreactContext, ComponentChildren } from '../..';
 
 type FC<P> = (props: P) => ComponentChildren;
 
-type createComponentFN<P> = (props: P) => FC<P>;
+type createComponentFN<P> = (getProps: () => P) => FC<P>;
 /**
  * Wraps a FunctionalComponent to be handled with the composition api
  * @param fn

@@ -12,7 +12,7 @@ options._render = vnode => {
 	const isFirst = !c.__compositions;
 	if (isFirst && c.constructor.__compositions) {
 		c.__compositions = { u: [], w: [], e: [], x: {} };
-		c.constructor = c.constructor(getterProxy((_, p) => c.props[p]));
+		c.constructor = c.constructor(() => c.props);
 	}
 
 	if (c.__compositions && !isFirst)
@@ -234,16 +234,6 @@ function resolveContext(context, c) {
 
 function argsChanged(oldArgs, newArgs) {
 	return !oldArgs || newArgs.some((arg, index) => arg !== oldArgs[index]);
-}
-
-function getterProxy(get) {
-	return new Proxy(
-		{},
-		{
-			get
-			// getOwnPropertyDescriptor: () => ({ configurable: false })
-		}
-	);
 }
 
 function isPlainObject(obj) {
