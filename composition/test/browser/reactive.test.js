@@ -189,8 +189,9 @@ describe('reactive', () => {
 			expect(state.a).to.equal(1);
 			state.a = 2;
 			expect(state.a).to.equal(2);
-			state.$value = { b: 3 };
-			expect('b' in state).to.be.true;
+			state.$value = { a: 3 };
+			expect(state.a).to.equal(3);
+			expect('a' in state).to.be.true;
 
 			return () => null;
 		});

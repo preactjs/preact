@@ -99,41 +99,42 @@ export function inject(name, defaultValue) {
 }
 
 export function reactive(value) {
+	let x = value;
 	const c = currentComponent;
 
-	return new Proxy(
-		{ $value: value },
-		{
-			has(target, p) {
-				return (
-					p === '$value' || p === $Reactive || Reflect.has(target.$value, p)
-				);
-			},
-			get(target, p) {
-				return p === '$value' || p === $Reactive
-					? target.$value // returns the immutable value
-					: Reflect.get(target.$value, p);
-			},
-			set(target, p, newValue) {
-				// don't do anything if we are just assigning the same value
-				if (target.$value[p] !== newValue) {
-					target.$value =
-						p === '$value'
-							? newValue
-							: Object.assign({}, target.$value, { [p]: newValue });
-
-					// Make the component re-render
-					c.setState({});
-				}
-
-				return true;
-			},
-			// forward internal $target properties
-			ownKeys: target => Object.keys(target.$value),
-			getOwnPropertyDescriptor: (target, name) =>
-				Object.getOwnPropertyDescriptor(target.$value, name)
-			//todo implement all reactivity
+	const reactiveProperty = {
+		get() {
+			return x;
+		},
+		set(v) {
+			x = v;
+			c.setState({});
 		}
+	};
+	return Object.defineProperties(
+		{},
+		Object.keys(value).reduce(
+			(acc, key) =>
+				Object.assign(acc, {
+					[key]: {
+						enumerable: true,
+						get() {
+							return x[key];
+						},
+						set(v) {
+							if (v !== x[key]) {
+								x = Object.assign({}, x);
+								x[key] = v;
+								c.setState({});
+							}
+						}
+					}
+				}),
+			{
+				[$Reactive]: reactiveProperty,
+				$value: reactiveProperty
+			}
+		)
 	);
 }
 

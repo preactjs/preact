@@ -4,10 +4,9 @@
 /** @jsx createElement */
 
 import { createElement, render } from 'preact';
-import { useState } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import bench from '../../../test/_util/bench';
-import { createComponent, ref, reactive } from '../../src';
+import { createComponent } from '../../src';
 
 describe('benchmarks', function() {
 	let scratch;
@@ -57,7 +56,7 @@ describe('benchmarks', function() {
 			const slowdown = results.composition.hz / results.hooks.hz;
 
 			console.log(`composition is ${slowdown.toFixed(2)}x 'faster':` + text);
-			expect(slowdown).to.be.within(0.9, 1.1);
+			expect(slowdown).to.be.above(0.9);
 			done();
 		});
 	});
@@ -97,84 +96,5 @@ describe('benchmarks', function() {
 			expect(slowdown).to.be.above(1.1);
 			done();
 		});
-	});
-
-	it('updates state', done => {
-		function createTestCompositionRef() {
-			const parent = scratch.appendChild(document.createElement('div'));
-
-			let doIncrease;
-			const Comp = createComponent(() => {
-				const count = ref(0);
-				function increase() {
-					count.value += 1;
-				}
-				doIncrease = increase;
-				return () => <div onClick={increase}>{count.value}</div>;
-			});
-
-			render(<Comp />, parent);
-
-			return () => doIncrease();
-		}
-
-		function createTestCompositionReactive() {
-			const parent = scratch.appendChild(document.createElement('div'));
-
-			let doIncrease;
-			const Comp = createComponent(() => {
-				const count = reactive({ value: 0 });
-				function increase() {
-					count.value += 1;
-				}
-				doIncrease = increase;
-				return () => <div onClick={increase}>{count.value}</div>;
-			});
-
-			render(<Comp />, parent);
-
-			return () => doIncrease();
-		}
-
-		function createTestHooks() {
-			const parent = scratch.appendChild(document.createElement('div'));
-
-			let doIncrease;
-			const Comp = () => {
-				const [count, setCount] = useState(0);
-				function increase() {
-					setCount(c => c + 1);
-				}
-				doIncrease = increase;
-
-				return <div onClick={increase}>{count}</div>;
-			};
-
-			render(<Comp />, parent);
-
-			return () => doIncrease();
-		}
-
-		const compositionRef = createTestCompositionRef();
-		const compositionReactive = createTestCompositionReactive();
-		const hooks = createTestHooks();
-
-		bench(
-			{ compositionRef, compositionReactive, hooks },
-			({ text, results }) => {
-				const slowdownRef = results.compositionRef.hz / results.hooks.hz;
-				const slowdownReactive =
-					results.compositionReactive.hz / results.hooks.hz;
-
-				console.log(`ref is ${slowdownRef.toFixed(2)}x 'faster'`);
-
-				console.log(
-					`reactive is ${slowdownReactive.toFixed(2)}x 'slower':` + text
-				);
-				expect(slowdownRef).to.be.above(1.1);
-				expect(slowdownReactive).to.be.within(0.1, 1);
-				done();
-			}
-		);
 	});
 });
