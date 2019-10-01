@@ -11,7 +11,7 @@
   "license": "MIT",
   "types": "src/index.d.ts",
   "peerDependencies": {
-    "preact": "^10.0.0-alpha.0"
+    "preact": "^10.0.0"
   },
   "mangle": {
     "regex": "^_"
