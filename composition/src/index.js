@@ -1,5 +1,7 @@
 import { options } from 'preact';
 
+const EMPTY_STATE = {};
+
 /** @type {import('./internal').Component} */
 let currentComponent;
 
@@ -93,7 +95,10 @@ export function inject(name, defaultValue) {
 	const src = ctx._value;
 
 	if (isReactive(src))
-		ctx._component.__compositions.w.push({ src, cb: () => c.setState({}) });
+		ctx._component.__compositions.w.push({
+			src,
+			cb: () => c.setState(EMPTY_STATE)
+		});
 
 	return src;
 }
@@ -108,7 +113,7 @@ export function reactive(value) {
 		},
 		set(v) {
 			x = v;
-			c.setState({});
+			c.setState(EMPTY_STATE);
 		}
 	};
 	return Object.defineProperties(
@@ -125,7 +130,7 @@ export function reactive(value) {
 							if (v !== x[key]) {
 								x = Object.assign({}, x);
 								x[key] = v;
-								c.setState({});
+								c.setState(EMPTY_STATE);
 							}
 						}
 					}
@@ -152,7 +157,7 @@ export function ref(v) {
 				set(newValue) {
 					if (v !== newValue) {
 						v = newValue;
-						c.setState({});
+						c.setState(EMPTY_STATE);
 					}
 				},
 				enumerable: true
@@ -194,7 +199,7 @@ function handleEffect(up, c, init) {
 			if (isPromise(r))
 				r.then(v => {
 					up.vr.value = v;
-					c.setState({});
+					c.setState(EMPTY_STATE);
 				});
 			else up.vr.value = r;
 		}
