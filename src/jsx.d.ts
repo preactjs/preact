@@ -526,6 +526,7 @@ export namespace JSXInternal {
 		defer?: boolean;
 		dir?: string;
 		disabled?: boolean;
+		disableRemotePlayback?: boolean;
 		download?: any;
 		draggable?: boolean;
 		encType?: string;
