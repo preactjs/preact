@@ -33,12 +33,11 @@ export function useState(initialState) {
 }
 
 export function useReducer(reducer, initialState, init) {
-	const { currentComponent } = globalHookState;
 
 	/** @type {import('./internal').ReducerHookState} */
 	const hookState = getHookState(globalHookState.currentIndex++);
 	if (!hookState._component) {
-		hookState._component = currentComponent;
+		hookState._component = globalHookState.currentComponent;
 
 		hookState._value = [
 			!init ? invokeOrReturn(undefined, initialState) : init(initialState),
@@ -79,14 +78,13 @@ export function useEffect(callback, args) {
  * @param {any[]} args
  */
 export function useLayoutEffect(callback, args) {
-	const { currentComponent } = globalHookState;
 
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(globalHookState.currentIndex++);
 	if (argsChanged(state._args, args)) {
 		state._value = callback;
 		state._args = args;
-		currentComponent.__hooks._pendingLayoutEffects.push(state);
+		globalHookState.currentComponent.__hooks._pendingLayoutEffects.push(state);
 	}
 }
 
@@ -95,11 +93,10 @@ export function useRef(initialValue) {
 }
 
 export function useImperativeHandle(ref, createHandle, args) {
-	const { currentComponent } = globalHookState;
 	const state = getHookState(globalHookState.currentIndex++);
 	if (argsChanged(state._args, args)) {
 		state._args = args;
-		currentComponent.__hooks._handles.push({ ref, createHandle });
+		globalHookState.currentComponent.__hooks._handles.push({ ref, createHandle });
 	}
 }
 
@@ -132,14 +129,13 @@ export function useCallback(callback, args) {
  * @param {import('./internal').PreactContext} context
  */
 export function useContext(context) {
-	const { currentComponent } = globalHookState;
-	const provider = currentComponent.context[context._id];
+	const provider = globalHookState.currentComponent.context[context._id];
 	if (!provider) return context._defaultValue;
 	const state = getHookState(globalHookState.currentIndex++);
 	// This is probably not safe to convert to "!"
 	if (state._value == null) {
 		state._value = true;
-		provider.sub(currentComponent);
+		provider.sub(globalHookState.currentComponent);
 	}
 	return provider.props.value;
 }
@@ -177,8 +173,6 @@ function flushAfterPaintEffects() {
 	globalHookState.afterPaintEffects = [];
 }
 
-const RAF_TIMEOUT = 100;
-
 /**
  * requestAnimationFrame with a timeout in case it doesn't fire (for example if the browser tab is not visible)
  */
@@ -188,7 +182,7 @@ function safeRaf(callback) {
 		cancelAnimationFrame(raf);
 		setTimeout(callback);
 	};
-	const timeout = setTimeout(done, RAF_TIMEOUT);
+	const timeout = setTimeout(done, 100);
 	const raf = requestAnimationFrame(done);
 }
 
