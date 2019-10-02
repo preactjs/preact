@@ -107,11 +107,11 @@ module.exports = function(config) {
 
 		files: [
 			{ pattern: 'test/polyfills.js', watched: false },
-			{ pattern: config.grep || '{debug,hooks,compat,test-utils,}/test/{browser,shared}/**/*.test.js', watched: false }
+			{ pattern: config.grep || '{debug,compat,test-utils,}/test/{browser,shared}/**/*.test.js', watched: false }
 		],
 
 		preprocessors: {
-			'{debug,hooks,compat,test-utils,}/test/**/*': ['webpack', 'sourcemap']
+			'{debug,compat,test-utils,}/test/**/*': ['webpack', 'sourcemap']
 		},
 
 		webpack: {
@@ -147,7 +147,7 @@ module.exports = function(config) {
 										'**/__tests__/**',
 										'**/node_modules/**',
 										// Our custom extension
-										'{debug,hooks,compat,test-utils}/test/**/*'
+										'{debug,compat,test-utils}/test/**/*'
 									]
 								}]] : []
 						}

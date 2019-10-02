@@ -234,10 +234,7 @@ declare namespace preact {
 	function createContext<T>(defaultValue: T): Context<T>;
 }
 
-import { PreactContext, Ref as PreactRef } from "../..";
-
 type Inputs = ReadonlyArray<unknown>;
-
 
 export type StateUpdater<S> = (value: S | ((prevState: S) => S)) => void;
 /**
