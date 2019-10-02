@@ -38,6 +38,7 @@
       "$_commit": "__c",
       "$_render": "__r",
       "$_hook": "__h",
+      "$__hooks": "__H",
       "$_catchError": "__e",
       "$_unmount": "_e"
     }

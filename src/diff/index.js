@@ -119,7 +119,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 			if (tmp = options._render) tmp(newVNode);
 
-
 			c._dirty = false;
 			c._vnode = newVNode;
 			c._parentDom = parentDom;
@@ -311,9 +310,8 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	if (options.unmount) options.unmount(vnode);
 	const c = vnode._component;
 	if (c) {
-		const hooks = c.__hooks;
-		if (hooks) {
-			hooks._list.some(h => {
+		if (c.__hooks) {
+			c.__hooks._list.some(h => {
 				h._cleanup && h._cleanup();
 			});
 		}

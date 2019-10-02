@@ -269,7 +269,6 @@ declare namespace preact {
 
 
 	type PropRef<T> = { readonly current?: T; }
-	type Ref<T> = { current: T; }
 
 	/**
 	 * `useRef` returns a mutable ref object whose `.current` property is initialized to the passed argument
@@ -306,7 +305,7 @@ declare namespace preact {
 	 * ref.current
 	 * @param inputs If present, effect will only activate if the values in the list change (using ===).
 	 */
-	function useImperativeHandle<T, R extends T>(ref: PreactRef<T>, create: () => R, inputs?: Inputs): void;
+	function useImperativeHandle<T, R extends T>(ref: Ref<T>, create: () => R, inputs?: Inputs): void;
 
 	/**
 	 * Accepts a function that contains imperative, possibly effectful code.
