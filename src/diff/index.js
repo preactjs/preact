@@ -165,7 +165,10 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		if (c) {
 			const hooks = c.__hooks;
 			if (hooks) {
-				hooks._handles = bindHandles(hooks._handles);
+				hooks._handles.some(handle => {
+					if (handle.ref) handle.ref.current = handle.createHandle();
+				});
+				hooks._handles = [];
 				hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
 			}
 		}
@@ -310,7 +313,9 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	if (c) {
 		const hooks = c.__hooks;
 		if (hooks) {
-			hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
+			hooks._list.some(h => {
+				h._cleanup && h._cleanup();
+			});
 		}
 	}
 
@@ -389,18 +394,11 @@ function doRender(props, state, context) {
 	throw error;
 };
 
-function bindHandles(handles) {
-	handles.some(handle => {
-		if (handle.ref) handle.ref.current = handle.createHandle();
-	});
-	return [];
-}
-
 export function handleEffects(effects) {
-	effects.forEach(h => {
+	effects.some(h => {
 		if (h._cleanup) h._cleanup();
 	});
-	effects.forEach(h => {
+	effects.some(h => {
 		const result = h._value();
 		if (typeof result === 'function') h._cleanup = result;
 	});
