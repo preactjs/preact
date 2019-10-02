@@ -1,6 +1,5 @@
-import { h, render, options } from 'preact';
-import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useDebugValue, useState } from '../../src';
+import { createElement as h, render, useDebugValue, useState, options } from '../../../src';
+import { setupScratch, teardown } from '../../_util/helpers';
 
 /** @jsx h */
 

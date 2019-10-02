@@ -1,4 +1,5 @@
 import options from './options';
+import { handleEffects } from './diff';
 
 export const globalHookState = {
 	currentComponent: null,
@@ -203,25 +204,6 @@ if (typeof window !== 'undefined') {
 			(options.requestAnimationFrame || safeRaf)(flushAfterPaintEffects);
 		}
 	};
-}
-
-export function handleEffects(effects) {
-	effects.forEach(invokeCleanup);
-	effects.forEach(invokeEffect);
-	return [];
-}
-
-function invokeCleanup(hook) {
-	if (hook._cleanup) hook._cleanup();
-}
-
-/**
- * Invoke a Hook's effect
- * @param {import('./internal').EffectHookState} hook
- */
-function invokeEffect(hook) {
-	const result = hook._value();
-	if (typeof result === 'function') hook._cleanup = result;
 }
 
 function argsChanged(oldArgs, newArgs) {

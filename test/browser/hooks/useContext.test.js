@@ -1,6 +1,5 @@
-import { h, render, createContext, Component } from 'preact';
-import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useContext, useEffect } from '../../src';
+import { createElement as h, render, Component, useEffect, useContext, createContext } from '../../../src';
+import { setupScratch, teardown } from '../../_util/helpers';
 
 /** @jsx h */
 

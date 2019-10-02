@@ -5,7 +5,7 @@ import { diffChildren, toChildArray } from './children';
 import { diffProps } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
-import { globalHookState, handleEffects } from '../hooks';
+import { globalHookState } from '../hooks';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -392,6 +392,17 @@ function doRender(props, state, context) {
 function bindHandles(handles) {
 	handles.some(handle => {
 		if (handle.ref) handle.ref.current = handle.createHandle();
+	});
+	return [];
+}
+
+export function handleEffects(effects) {
+	effects.forEach(h => {
+		if (h._cleanup) h._cleanup();
+	});
+	effects.forEach(h => {
+		const result = h._value();
+		if (typeof result === 'function') h._cleanup = result;
 	});
 	return [];
 }

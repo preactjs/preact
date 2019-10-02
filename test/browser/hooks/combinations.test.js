@@ -1,8 +1,7 @@
 import { setupRerender, act } from 'preact/test-utils';
-import { createElement as h, render, Component } from 'preact';
-import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useState, useReducer, useEffect, useLayoutEffect, useRef } from '../../src';
-import { scheduleEffectAssert } from '../_util/useEffectUtil';
+import { createElement as h, render, Component, useState, useReducer, useEffect, useLayoutEffect, useRef } from '../../../src';
+import { setupScratch, teardown } from '../../_util/helpers';
+import { scheduleEffectAssert } from './_util/useEffectUtil';
 
 /** @jsx h */
 

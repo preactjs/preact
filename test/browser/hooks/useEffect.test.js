@@ -1,9 +1,8 @@
 import { act } from 'preact/test-utils';
-import { createElement as h, render } from 'preact';
-import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useEffect } from '../../src';
+import { createElement as h, render, useEffect } from '../../../src';
+import { setupScratch, teardown } from '../../_util/helpers';
 import { useEffectAssertions } from './useEffectAssertions.test';
-import { scheduleEffectAssert } from '../_util/useEffectUtil';
+import { scheduleEffectAssert } from './_util/useEffectUtil';
 
 
 /** @jsx h */

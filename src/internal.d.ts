@@ -1,8 +1,6 @@
 import * as preact from "./index";
 
-import { Component as PreactComponent } from '../../src/internal';
-
-export { PreactContext } from '../../src/internal';
+import { Component as PreactComponent } from './internal';
 
 /**
  * The type of arguments passed to a Hook function. While this type is not
@@ -29,10 +27,6 @@ export interface ComponentHooks {
 	_pendingEffects: EffectHookState[];
 	/** List of Effects to be invoked at the end of the current render */
 	_pendingLayoutEffects: EffectHookState[];
-}
-
-export interface Component extends PreactComponent<any, any> {
-	__hooks?: ComponentHooks;
 }
 
 export type HookState = EffectHookState | MemoHookState | ReducerHookState;
@@ -117,6 +111,7 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	constructor: preact.ComponentType<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
 	base?: PreactElement;
+	__hooks?: ComponentHooks;
 
 	_dirty: boolean;
 	_renderCallbacks: Array<() => void>;
