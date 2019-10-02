@@ -83,6 +83,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 			// Morph the old element into the new one, but don't append it to the dom yet
 			newDom = diff(parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, null, oldDom, isHydrating);
+			
 			if ((j = childVNode.ref) && oldVNode.ref != j) {
 				(refs || (refs=[])).push(j, childVNode._component || newDom, childVNode);
 			}
