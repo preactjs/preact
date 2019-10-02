@@ -160,16 +160,13 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 		if (tmp = options.diffed) tmp(newVNode);
 
-		const c = newVNode._component;
-		if (c) {
-			const hooks = c.__hooks;
-			if (hooks) {
-				hooks._handles.some(handle => {
-					if (handle.ref) handle.ref.current = handle.createHandle();
-				});
-				hooks._handles = [];
-				hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
-			}
+		const hooks = newVNode._component && newVNode._component.__hooks;
+		if (hooks) {
+			hooks._handles.some(handle => {
+				if (handle.ref) handle.ref.current = handle.createHandle();
+			});
+			hooks._handles = [];
+			hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
 		}
 	}
 	catch (e) {
@@ -308,13 +305,11 @@ export function applyRef(ref, value, vnode) {
 export function unmount(vnode, parentVNode, skipRemove) {
 	let r;
 	if (options.unmount) options.unmount(vnode);
-	const c = vnode._component;
-	if (c) {
-		if (c.__hooks) {
-			c.__hooks._list.some(h => {
-				h._cleanup && h._cleanup();
-			});
-		}
+	const hooks = vnode._component && vnode._component.__hooks;
+	if (hooks) {
+		hooks._list.some(h => {
+			h._cleanup && h._cleanup();
+		});
 	}
 
 	if (r = vnode.ref) {
@@ -394,7 +389,7 @@ function doRender(props, state, context) {
 
 export function handleEffects(effects) {
 	effects.some(h => {
-		if (h._cleanup) h._cleanup();
+		h._cleanup && h._cleanup();
 	});
 	effects.some(h => {
 		const result = h._value();
