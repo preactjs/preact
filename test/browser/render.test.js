@@ -1077,6 +1077,16 @@ describe('render()', () => {
 		expect(unmountSpy).to.be.calledOnce;
 	});
 
+	it('should double replace', () => {
+		const container = document.createElement('div');
+		scratch.appendChild(container);
+		render(<div>Hello</div>, scratch, scratch.firstElementChild);
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+
+		render(<div>Hello</div>, scratch, scratch.firstElementChild);
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+	});
+
 	it('should replaceNode after rendering', () => {
 		function App({ i }) {
 			return <p>{i}</p>;
