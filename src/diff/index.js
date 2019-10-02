@@ -5,6 +5,7 @@ import { diffChildren, toChildArray } from './children';
 import { diffProps } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
+import { globalHookState, handleEffects } from '../hooks';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -110,7 +111,14 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c.props = newProps;
 			c.state = c._nextState;
 
+			globalHookState.currentComponent = c;
+			globalHookState.currentIndex = 0;
+
+			if (c.__hooks) {
+				c.__hooks._pendingEffects = handleEffects(c.__hooks._pendingEffects);
+			}
 			if (tmp = options._render) tmp(newVNode);
+
 
 			c._dirty = false;
 			c._vnode = newVNode;
@@ -152,6 +160,15 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		}
 
 		if (tmp = options.diffed) tmp(newVNode);
+
+		const c = newVNode._component;
+		if (c) {
+			const hooks = c.__hooks;
+			if (hooks) {
+				hooks._handles = bindHandles(hooks._handles);
+				hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
+			}
+		}
 	}
 	catch (e) {
 		options._catchError(e, newVNode, oldVNode);
@@ -289,6 +306,13 @@ export function applyRef(ref, value, vnode) {
 export function unmount(vnode, parentVNode, skipRemove) {
 	let r;
 	if (options.unmount) options.unmount(vnode);
+	const c = vnode._component;
+	if (c) {
+		const hooks = c.__hooks;
+		if (hooks) {
+			hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
+		}
+	}
 
 	if (r = vnode.ref) {
 		applyRef(r, null, parentVNode);
@@ -364,3 +388,10 @@ function doRender(props, state, context) {
 
 	throw error;
 };
+
+function bindHandles(handles) {
+	handles.some(handle => {
+		if (handle.ref) handle.ref.current = handle.createHandle();
+	});
+	return [];
+}

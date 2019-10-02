@@ -1,5 +1,9 @@
-import { hydrate, render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment, _unmount } from 'preact';
-import * as hooks from 'preact/hooks';
+import {
+	hydrate, render as preactRender, cloneElement as preactCloneElement, createRef, h,
+	Component, options, toChildArray, createContext, Fragment, _unmount, useState,
+	useEffect, useLayoutEffect, useRef, useDebugValue, useContext, useReducer, useImperativeHandle,
+	useCallback, useMemo
+} from 'preact';
 import { Suspense, lazy } from './suspense';
 import { assign, removeNode } from '../../src/util';
 
@@ -428,7 +432,6 @@ options.vnode = vnode => {
 // eslint-disable-next-line camelcase
 const unstable_batchedUpdates = (callback, arg) => callback(arg);
 
-export * from 'preact/hooks';
 export {
 	version,
 	Children,
@@ -451,7 +454,17 @@ export {
 	// eslint-disable-next-line camelcase
 	unstable_batchedUpdates,
 	Suspense,
-	lazy
+	lazy,
+	useState,
+	useReducer,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useImperativeHandle,
+	useContext,
+	useCallback,
+	useMemo,
+	useDebugValue
 };
 
 // React copies the named exports to the default one.
@@ -476,5 +489,15 @@ export default assign({
 	forwardRef,
 	unstable_batchedUpdates,
 	Suspense,
-	lazy
-}, hooks);
+	lazy,
+	useState,
+	useReducer,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useImperativeHandle,
+	useContext,
+	useCallback,
+	useMemo,
+	useDebugValue
+});
