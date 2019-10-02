@@ -999,6 +999,13 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('<div>foo</div>');
 	});
 
+	it('should remove missing href attributes', () => {
+		render(<a href={undefined} />, scratch);
+		render(<a />, scratch);
+
+		expect(scratch.firstElementChild.hasAttribute('href')).to.be.false;
+	});
+
 	// see preact/#1327
 	it('should not reuse unkeyed components', () => {
 		class X extends Component {

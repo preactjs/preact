@@ -89,6 +89,8 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	}
 	else if (
 		name!=='list'
+		// The href should be removed via `.setProperty`
+		&& name!=='href'
 		&& name!=='tagName'
 		// HTMLButtonElement.form and HTMLInputElement.form are read-only but can be set using
 		// setAttribute
