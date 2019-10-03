@@ -135,10 +135,10 @@ export function useCallback(callback, args) {
 export function useContext(context) {
 	const provider = currentComponent.context[context._id];
 	if (!provider) return context._defaultValue;
-	let { _value } = getHookState(currentIndex++);
+	let state = getHookState(currentIndex++);
 	// This is probably not safe to convert to "!"
-	if (_value == null) {
-		_value = true;
+	if (state._value == null) {
+		state._value = true;
 		provider.sub(currentComponent);
 	}
 	return provider.props.value;
