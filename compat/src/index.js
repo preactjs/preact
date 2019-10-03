@@ -99,8 +99,8 @@ function Portal(props) {
 			// Hydrate existing nodes to keep the dom intact, when rendering
 			// wrap into the container.
 			hydrate('', container);
-			// Insert before first child (will just append if firstChild is null).
-			container.insertBefore(_this._temp, container.firstChild);
+			// Append to the container (this matches React's behavior)
+			container.appendChild(_this._temp);
 			// At this point we have mounted and should set our container.
 			_this._hasMounted = true;
 			_this._container = container;
