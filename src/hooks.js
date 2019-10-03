@@ -2,11 +2,14 @@ import options from './options';
 import { handleEffects } from './diff';
 import { enqueueRender } from './component';
 
-export const globalHookState = {
-	currentComponent: null,
-	currentIndex: null,
-	afterPaintEffects: []
-};
+let currentComponent = null;
+let currentIndex = null;
+let afterPaintEffects = [];
+
+export function resetHookState(c) {
+	currentComponent = c;
+	currentIndex = 0;
+}
 
 /**
  * Get a hook's state from the currentComponent
@@ -14,7 +17,6 @@ export const globalHookState = {
  * @returns {import('./internal').HookState}
  */
 function getHookState(index) {
-	const { currentComponent } = globalHookState;
 	if (options._hook) options._hook(currentComponent);
 	// Largely inspired by:
 	// * https://github.com/michael-klein/funcy.js/blob/f6be73468e6ec46b0ff5aa3cc4c9baf72a29025a/src/hooks/core_hooks.mjs
@@ -33,9 +35,9 @@ function getHookState(index) {
 export function useReducer(reducer, initialState, init) {
 
 	/** @type {import('./internal').ReducerHookState} */
-	const hookState = getHookState(globalHookState.currentIndex++);
+	const hookState = getHookState(currentIndex++);
 	if (!hookState._component) {
-		hookState._component = globalHookState.currentComponent;
+		hookState._component = currentComponent;
 
 		hookState._value = [
 			!init ? invokeOrReturn(undefined, initialState) : init(initialState),
@@ -60,10 +62,8 @@ export const useState = useReducer.bind(undefined, invokeOrReturn);
  * @param {any[]} args
  */
 export function useEffect(callback, args) {
-	const { currentComponent } = globalHookState;
-
 	/** @type {import('./internal').EffectHookState} */
-	const state = getHookState(globalHookState.currentIndex++);
+	const state = getHookState(currentIndex++);
 	if (argsChanged(state._args, args)) {
 		state._value = callback;
 		state._args = args;
@@ -80,11 +80,11 @@ export function useEffect(callback, args) {
 export function useLayoutEffect(callback, args) {
 
 	/** @type {import('./internal').EffectHookState} */
-	const state = getHookState(globalHookState.currentIndex++);
+	const state = getHookState(currentIndex++);
 	if (argsChanged(state._args, args)) {
 		state._value = callback;
 		state._args = args;
-		globalHookState.currentComponent.__hooks._pendingLayoutEffects.push(state);
+		currentComponent.__hooks._pendingLayoutEffects.push(state);
 	}
 }
 
@@ -93,10 +93,10 @@ export function useRef(initialValue) {
 }
 
 export function useImperativeHandle(ref, createHandle, args) {
-	let { _args } = getHookState(globalHookState.currentIndex++);
+	let { _args } = getHookState(currentIndex++);
 	if (argsChanged(_args, args)) {
 		_args = args;
-		globalHookState.currentComponent.__hooks._handles.push({ ref, createHandle });
+		currentComponent.__hooks._handles.push({ ref, createHandle });
 	}
 }
 
@@ -107,7 +107,7 @@ export function useImperativeHandle(ref, createHandle, args) {
 export function useMemo(callback, args) {
 
 	/** @type {import('./internal').MemoHookState} */
-	const state = getHookState(globalHookState.currentIndex++);
+	const state = getHookState(currentIndex++);
 	if (argsChanged(state._args, args)) {
 		state._args = args;
 		state._callback = callback;
@@ -129,20 +129,20 @@ export function useCallback(callback, args) {
  * @param {import('./internal').PreactContext} context
  */
 export function useContext(context) {
-	const provider = globalHookState.currentComponent.context[context._id];
+	const provider = currentComponent.context[context._id];
 	if (!provider) return context._defaultValue;
-	let { _value } = getHookState(globalHookState.currentIndex++);
+	let { _value } = getHookState(currentIndex++);
 	// This is probably not safe to convert to "!"
 	if (_value == null) {
 		_value = true;
-		provider.sub(globalHookState.currentComponent);
+		provider.sub(currentComponent);
 	}
 	return provider.props.value;
 }
 
 /**
  * Display a custom label for a custom hook for the devtools panel
- * @type {<T>(value: T, cb?: (value: T) => string | number) => void}
+ * @type {<T extends string | number>(value: T, cb?: (value: T) => string | number) => void}
  */
 export function useDebugValue(value, formatter) {
 	if (options.useDebugValue) {
@@ -164,13 +164,13 @@ let afterPaint = () => {};
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
-	globalHookState.afterPaintEffects.some(component => {
+	afterPaintEffects.some(component => {
 		component._afterPaintQueued = false;
 		if (component._parentDom) {
 			component.__hooks._pendingEffects = handleEffects(component.__hooks._pendingEffects);
 		}
 	});
-	globalHookState.afterPaintEffects = [];
+	afterPaintEffects = [];
 }
 
 /**
@@ -190,7 +190,7 @@ function safeRaf(callback) {
 if (typeof window !== 'undefined') {
 	let prevRaf = options.requestAnimationFrame;
 	afterPaint = (component) => {
-		if ((!component._afterPaintQueued && (component._afterPaintQueued = true) && globalHookState.afterPaintEffects.push(component) === 1) ||
+		if ((!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) ||
 		    prevRaf !== options.requestAnimationFrame) {
 			prevRaf = options.requestAnimationFrame;
 

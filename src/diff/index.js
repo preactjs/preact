@@ -5,7 +5,7 @@ import { diffChildren, toChildArray } from './children';
 import { diffProps } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
-import { globalHookState } from '../hooks';
+import { resetHookState } from "../hooks";
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -111,8 +111,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c.props = newProps;
 			c.state = c._nextState;
 
-			globalHookState.currentComponent = c;
-			globalHookState.currentIndex = 0;
+			resetHookState(c);
 
 			if (c.__hooks) {
 				c.__hooks._pendingEffects = handleEffects(c.__hooks._pendingEffects);
