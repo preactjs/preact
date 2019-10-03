@@ -999,8 +999,8 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('<div>foo</div>');
 	});
 
-	it('should remove missing href attributes', () => {
-		render(<a href={undefined} />, scratch);
+	it('should remove old attributes that are undefined', () => {
+		render(<a href={'/'} />, scratch);
 		render(<a />, scratch);
 
 		expect(scratch.firstElementChild.hasAttribute('href')).to.be.false;
