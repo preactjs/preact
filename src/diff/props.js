@@ -93,11 +93,16 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		// HTMLButtonElement.form and HTMLInputElement.form are read-only but can be set using
 		// setAttribute
 		&& name!=='form'
-		&& value!=null
 		&& !isSvg
 		&& (name in dom)
 	) {
-		dom[name] = value;
+		if (value==null) {
+			dom.removeAttribute(name);
+			dom[name] = '';
+		}
+		else {
+			dom[name] = value;
+		}
 	}
 	else if (typeof value!=='function' && name!=='dangerouslySetInnerHTML') {
 		if (name!==(name = name.replace(/^xlink:?/, ''))) {
