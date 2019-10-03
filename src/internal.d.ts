@@ -59,8 +59,6 @@ export interface Options extends preact.Options {
 	_diff?(vnode: VNode): void;
 	/** Attach a hook that is invoked after a tree was mounted or was updated. */
 	_commit?(vnode: VNode): void;
-	/** Attach a hook that is invoked before a vnode has rendered. */
-	_render?(vnode: VNode): void;
 	/** Attach a hook that is invoked before a hook's state is queried. */
 	_hook?(component: Component): void;
 	/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */

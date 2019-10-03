@@ -1,5 +1,6 @@
 import options from './options';
 import { handleEffects } from './diff';
+import { enqueueRender } from './component';
 
 export const globalHookState = {
 	currentComponent: null,
@@ -28,9 +29,6 @@ function getHookState(index) {
 	return hooks._list[index];
 }
 
-export function useState(initialState) {
-	return useReducer(invokeOrReturn, initialState);
-}
 
 export function useReducer(reducer, initialState, init) {
 
@@ -46,7 +44,7 @@ export function useReducer(reducer, initialState, init) {
 				const nextValue = reducer(hookState._value[0], action);
 				if (hookState._value[0]!==nextValue) {
 					hookState._value[0] = nextValue;
-					hookState._component.setState({});
+					enqueueRender(hookState._component);
 				}
 			}
 		];
@@ -54,6 +52,8 @@ export function useReducer(reducer, initialState, init) {
 
 	return hookState._value;
 }
+
+export const useState = useReducer.bind(undefined, invokeOrReturn);
 
 /**
  * @param {import('./internal').Effect} callback
@@ -93,9 +93,9 @@ export function useRef(initialValue) {
 }
 
 export function useImperativeHandle(ref, createHandle, args) {
-	const state = getHookState(globalHookState.currentIndex++);
-	if (argsChanged(state._args, args)) {
-		state._args = args;
+	let { _args } = getHookState(globalHookState.currentIndex++);
+	if (argsChanged(_args, args)) {
+		_args = args;
 		globalHookState.currentComponent.__hooks._handles.push({ ref, createHandle });
 	}
 }
@@ -131,10 +131,10 @@ export function useCallback(callback, args) {
 export function useContext(context) {
 	const provider = globalHookState.currentComponent.context[context._id];
 	if (!provider) return context._defaultValue;
-	const state = getHookState(globalHookState.currentIndex++);
+	let { _value } = getHookState(globalHookState.currentIndex++);
 	// This is probably not safe to convert to "!"
-	if (state._value == null) {
-		state._value = true;
+	if (_value == null) {
+		_value = true;
 		provider.sub(globalHookState.currentComponent);
 	}
 	return provider.props.value;

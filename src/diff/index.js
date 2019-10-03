@@ -117,7 +117,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			if (c.__hooks) {
 				c.__hooks._pendingEffects = handleEffects(c.__hooks._pendingEffects);
 			}
-			if (tmp = options._render) tmp(newVNode);
 
 			c._dirty = false;
 			c._vnode = newVNode;

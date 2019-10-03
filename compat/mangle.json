@@ -20,7 +20,6 @@
       "$_root": "__p",
       "$_commit": "__c",
       "$_diff": "__b",
-      "$_render": "__r",
       "$_hook": "__h",
       "$_catchError": "__e",
       "$_unmount": "_e"
