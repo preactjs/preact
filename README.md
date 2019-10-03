@@ -67,6 +67,7 @@ Preact supports modern browsers and IE9+:
 
 - [**Preact Hacker News**](https://hn.kristoferbaxter.com) _([GitHub Project](https://github.com/kristoferbaxter/preact-hn))_
 - [**Play.cash**](https://play.cash) :notes: _([GitHub Project](https://github.com/feross/play.cash))_
+- [**Songsterr**](https://www.songsterr.com) 🎼 Using Preact X in production since 10.0 alpha
 - [**BitMidi**](https://bitmidi.com/) 🎹 Wayback machine for free MIDI files _([GitHub Project](https://github.com/feross/bitmidi.com))_
 - [**Ultimate Guitar**](https://www.ultimate-guitar.com) 🎸speed boosted by Preact.
 - [**ESBench**](http://esbench.com) is built using Preact.
