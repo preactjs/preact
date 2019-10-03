@@ -92,11 +92,11 @@ export function useRef(initialValue) {
 	return useMemo(() => ({ current: initialValue }), []);
 }
 
-export function useImperativeHandle(ref, createHandle, args) {
+export function useImperativeHandle(_ref, _createHandle, args) {
 	let state = getHookState(currentIndex++);
 	if (argsChanged(state._args, args)) {
 		state._args = args;
-		currentComponent.__hooks._handles.push({ ref, createHandle });
+		currentComponent.__hooks._handles.push({ _ref, _createHandle });
 	}
 }
 

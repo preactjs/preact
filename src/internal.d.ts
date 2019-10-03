@@ -27,6 +27,8 @@ export interface ComponentHooks {
 	_pendingEffects: EffectHookState[];
 	/** List of Effects to be invoked at the end of the current render */
 	_pendingLayoutEffects: EffectHookState[];
+	/** List of handles for useImperativeHandle hook */
+	_handles: ImperativeHandleState[];
 }
 
 export type HookState = EffectHookState | MemoHookState | ReducerHookState;
@@ -51,6 +53,10 @@ export interface ReducerHookState {
 	_component?: Component;
 }
 
+export interface ImperativeHandleState {
+	_ref: preact.RefObject<unknown>;
+	_createHandle(): preact.RefObject<unknown>;
+}
 
 export interface Options extends preact.Options {
 	/** Attach a hook that is invoked before render, mainly to check the arguments. */
