@@ -149,10 +149,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 
 			if (c.__hooks) {
-				c.__hooks._handles.some(handle => {
-					if (handle._ref) handle._ref.current = handle._createHandle();
-				});
-				c.__hooks._handles = [];
 				c.__hooks._pendingLayoutEffects = handleEffects(c.__hooks._pendingLayoutEffects);
 			}
 

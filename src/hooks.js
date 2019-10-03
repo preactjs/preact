@@ -23,7 +23,7 @@ function getHookState(index) {
 	// * https://github.com/michael-klein/funcy.js/blob/650beaa58c43c33a74820a3c98b3c7079cf2e333/src/renderer.mjs
 	// Other implementations to look at:
 	// * https://codesandbox.io/s/mnox05qp8
-	const hooks = currentComponent.__hooks || (currentComponent.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [], _handles: [] });
+	const hooks = currentComponent.__hooks || (currentComponent.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [] });
 
 	if (index >= hooks._list.length) {
 		hooks._list.push({});
@@ -93,11 +93,15 @@ export function useRef(initialValue) {
 }
 
 export function useImperativeHandle(_ref, _createHandle, args) {
-	let state = getHookState(currentIndex++);
-	if (argsChanged(state._args, args)) {
-		state._args = args;
-		currentComponent.__hooks._handles.push({ _ref, _createHandle });
-	}
+	// -37 B
+	// useMemo(() => { if (_ref) { _ref.current = _createHandle(); } }, args);
+
+	// -31 B
+	useLayoutEffect(() => {
+		if (_ref) {
+			_ref.current = _createHandle();
+		}
+	}, args);
 }
 
 /**
