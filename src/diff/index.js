@@ -154,7 +154,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		}
 
 		if (tmp = options.diffed) tmp(newVNode);
-		const hooks = newVNode.component && newVNode.component.__hooks;
+
+		const hooks = newVNode._component && newVNode._component.__hooks;
 		if (hooks) {
 			hooks._handles.some(handle => {
 				if (handle.ref) handle.ref.current = handle.createHandle();
