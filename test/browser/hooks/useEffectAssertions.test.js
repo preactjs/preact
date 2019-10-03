@@ -1,4 +1,4 @@
-import { setupRerender } from 'preact/test-utils';
+import { setupRerender, act } from 'preact/test-utils';
 import { createElement as h, render } from '../../../src';
 import { setupScratch, teardown } from '../../_util/helpers';
 
@@ -67,8 +67,12 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 			return null;
 		}
 
-		render(<Comp />, scratch);
-		render(<Comp />, scratch);
+		act(() => {
+			render(<Comp />, scratch);
+		});
+		act(() => {
+			render(<Comp />, scratch);
+		});
 
 		expect(callback).to.be.calledOnce;
 

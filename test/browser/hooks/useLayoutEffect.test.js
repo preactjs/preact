@@ -1,5 +1,5 @@
 import { act } from 'preact/test-utils';
-import { createElement as h, render, useLayoutEffect } from '../../../src';
+import { createElement as h, render, useLayoutEffect, useRef } from '../../../src';
 import { setupScratch, teardown } from '../../_util/helpers';
 import { useEffectAssertions } from './useEffectAssertions.test';
 
@@ -86,5 +86,18 @@ describe('useLayoutEffect', () => {
 		act(() => render(<App i={0} />, scratch));
 		act(() => render(<App i={2} />, scratch));
 		expect(executionOrder).to.deep.equal(['cleanup1', 'cleanup2', 'action1', 'action2']);
+	});
+
+	it('should correctly display DOM', () => {
+		function AutoResizeTextareaLayoutEffect(props) {
+			const ref = useRef(null);
+			useLayoutEffect(() => {
+				expect(ref.current.offsetHeight).to.equal(36);
+				expect(ref.current.isConnected).to.equal(true);
+			});
+			return <textarea ref={ref} value={props.value} onChange={props.onChange} />;
+		}
+
+		render(<AutoResizeTextareaLayoutEffect />, scratch);
 	});
 });

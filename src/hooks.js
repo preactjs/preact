@@ -5,7 +5,8 @@ import { enqueueRender } from './component';
 export const globalHookState = {
 	currentComponent: null,
 	currentIndex: null,
-	afterPaintEffects: []
+	afterPaintEffects: [],
+	effects: []
 };
 
 /**
@@ -69,7 +70,7 @@ export function useEffect(callback, args) {
 		state._args = args;
 
 		currentComponent.__hooks._pendingEffects.push(state);
-		afterPaint(currentComponent);
+		globalHookState.effects.push(currentComponent);
 	}
 }
 
@@ -78,13 +79,15 @@ export function useEffect(callback, args) {
  * @param {any[]} args
  */
 export function useLayoutEffect(callback, args) {
+	const { currentComponent } = globalHookState;
 
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(globalHookState.currentIndex++);
 	if (argsChanged(state._args, args)) {
 		state._value = callback;
 		state._args = args;
-		globalHookState.currentComponent.__hooks._pendingLayoutEffects.push(state);
+		currentComponent.__hooks._pendingLayoutEffects.push(state);
+		globalHookState.effects.push(currentComponent);
 	}
 }
 
@@ -158,19 +161,16 @@ export function useDebugValue(value, formatter) {
  * @type {(component: import('./internal').Component) => void}
  */
 /* istanbul ignore next */
-let afterPaint = () => {};
+export let afterPaint = () => {};
 
 /**
  * After paint effects consumer.
  */
-function flushAfterPaintEffects() {
-	globalHookState.afterPaintEffects.some(component => {
-		component._afterPaintQueued = false;
-		if (component._parentDom) {
-			component.__hooks._pendingEffects = handleEffects(component.__hooks._pendingEffects);
-		}
-	});
-	globalHookState.afterPaintEffects = [];
+function flushAfterPaintEffects(component) {
+	component._afterPaintQueued = false;
+	if (component._parentDom) {
+		component.__hooks._pendingEffects = handleEffects(component.__hooks._pendingEffects);
+	}
 }
 
 /**
@@ -189,13 +189,11 @@ function safeRaf(callback) {
 /* istanbul ignore else */
 if (typeof window !== 'undefined') {
 	let prevRaf = options.requestAnimationFrame;
-	afterPaint = (component) => {
-		if ((!component._afterPaintQueued && (component._afterPaintQueued = true) && globalHookState.afterPaintEffects.push(component) === 1) ||
-		    prevRaf !== options.requestAnimationFrame) {
+	afterPaint = (c) => {
+		if ((!c._afterPaintQueued && (c._afterPaintQueued = true)) || prevRaf !== options.requestAnimationFrame) {
 			prevRaf = options.requestAnimationFrame;
-
 			/* istanbul ignore next */
-			(options.requestAnimationFrame || safeRaf)(flushAfterPaintEffects);
+			(options.requestAnimationFrame || safeRaf)(() => flushAfterPaintEffects(c));
 		}
 	};
 }

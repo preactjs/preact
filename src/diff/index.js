@@ -5,7 +5,7 @@ import { diffChildren, toChildArray } from './children';
 import { diffProps } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
-import { globalHookState } from '../hooks';
+import { globalHookState, afterPaint } from '../hooks';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -114,10 +114,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			globalHookState.currentComponent = c;
 			globalHookState.currentIndex = 0;
 
-			if (c.__hooks) {
-				c.__hooks._pendingEffects = handleEffects(c.__hooks._pendingEffects);
-			}
-
 			c._dirty = false;
 			c._vnode = newVNode;
 			c._parentDom = parentDom;
@@ -158,14 +154,12 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		}
 
 		if (tmp = options.diffed) tmp(newVNode);
-
-		const hooks = newVNode._component && newVNode._component.__hooks;
+		const hooks = newVNode.component && newVNode.component.__hooks;
 		if (hooks) {
 			hooks._handles.some(handle => {
 				if (handle.ref) handle.ref.current = handle.createHandle();
 			});
 			hooks._handles = [];
-			hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
 		}
 	}
 	catch (e) {
@@ -177,6 +171,18 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 export function commitRoot(mounts, root) {
 	let c;
+	while ((c = globalHookState.effects.pop())) {
+		try {
+			const hooks = c.__hooks;
+			if (hooks) {
+				hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
+				afterPaint(c);
+			}
+		}
+		catch (e) {
+			options._catchError(e, c._vnode);
+		}
+	}
 	while ((c = mounts.pop())) {
 		try {
 			c.componentDidMount();
