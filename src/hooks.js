@@ -93,9 +93,9 @@ export function useRef(initialValue) {
 }
 
 export function useImperativeHandle(ref, createHandle, args) {
-	let { _args } = getHookState(currentIndex++);
-	if (argsChanged(_args, args)) {
-		_args = args;
+	let state = getHookState(currentIndex++);
+	if (argsChanged(state._args, args)) {
+		state._args = args;
 		currentComponent.__hooks._handles.push({ ref, createHandle });
 	}
 }
