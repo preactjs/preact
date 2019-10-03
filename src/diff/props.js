@@ -14,7 +14,7 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 	let i;
 
 	for (i in oldProps) {
-		if (!(i in newProps)) {
+		if (typeof newProps[i] === 'undefined') {
 			setProperty(dom, i, null, oldProps[i], isSvg);
 		}
 	}
@@ -89,16 +89,15 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	}
 	else if (
 		name!=='list'
-		// The href should be removed via `.setProperty`
-		&& name!=='href'
 		&& name!=='tagName'
 		// HTMLButtonElement.form and HTMLInputElement.form are read-only but can be set using
 		// setAttribute
 		&& name!=='form'
+		&& value!=null
 		&& !isSvg
 		&& (name in dom)
 	) {
-		dom[name] = value==null ? '' : value;
+		dom[name] = value;
 	}
 	else if (typeof value!=='function' && name!=='dangerouslySetInnerHTML') {
 		if (name!==(name = name.replace(/^xlink:?/, ''))) {
