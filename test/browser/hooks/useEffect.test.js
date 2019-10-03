@@ -32,13 +32,12 @@ describe('useEffect', () => {
 			return null;
 		}
 
-		render(<Comp />, scratch);
-		render(<Comp />, scratch);
+		act(() => {
+			render(<Comp />, scratch);
+			render(<Comp />, scratch);
+		});
 
-		expect(cleanupFunction).to.be.not.called;
-		expect(callback).to.be.calledOnce;
-
-		render(<Comp />, scratch);
+		act(() => render(<Comp />, scratch));
 
 		expect(cleanupFunction).to.be.calledOnce;
 		expect(callback).to.be.calledTwice;
@@ -53,8 +52,10 @@ describe('useEffect', () => {
 			return null;
 		}
 
-		render(<Comp />, scratch);
-		render(null, scratch);
+		act(() => {
+			render(<Comp />, scratch);
+			render(null, scratch);
+		});
 
 		return scheduleEffectAssert(() => {
 			expect(cleanupFunction).to.not.be.called;

@@ -69,7 +69,7 @@ export function useEffect(callback, args) {
 		state._args = args;
 
 		currentComponent.__hooks._pendingEffects.push(state);
-		globalHookState.effects.push(currentComponent);
+		if (globalHookState.effects.indexOf(currentComponent) === -1) globalHookState.effects.push(currentComponent);
 	}
 }
 
@@ -86,7 +86,7 @@ export function useLayoutEffect(callback, args) {
 		state._value = callback;
 		state._args = args;
 		currentComponent.__hooks._pendingLayoutEffects.push(state);
-		globalHookState.effects.push(currentComponent);
+		if (globalHookState.effects.indexOf(currentComponent) === -1) globalHookState.effects.push(currentComponent);
 	}
 }
 
