@@ -303,12 +303,6 @@ export function applyRef(ref, value, vnode) {
 export function unmount(vnode, parentVNode, skipRemove) {
 	let r;
 	if (options.unmount) options.unmount(vnode);
-	const hooks = vnode._component && vnode._component.__hooks;
-	if (hooks) {
-		hooks._list.some(h => {
-			h._cleanup && h._cleanup();
-		});
-	}
 
 	if (r = vnode.ref) {
 		applyRef(r, null, parentVNode);
@@ -322,6 +316,12 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	vnode._dom = vnode._lastDomChild = null;
 
 	if ((r = vnode._component)!=null) {
+		if (r.__hooks) {
+			r.__hooks._list.some(h => {
+				h._cleanup && h._cleanup();
+			});
+		}
+
 		if (r.componentWillUnmount) {
 			try {
 				r.componentWillUnmount();
