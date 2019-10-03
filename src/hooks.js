@@ -5,7 +5,6 @@ import { enqueueRender } from './component';
 export const globalHookState = {
 	currentComponent: null,
 	currentIndex: null,
-	afterPaintEffects: [],
 	effects: []
 };
 
