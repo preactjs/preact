@@ -70,12 +70,14 @@ export function diffChildren(
 				// (holes).
 				oldVNode = oldChildren[i];
 
+				let oldVNodeIndex = null;
 				if (
 					oldVNode === null ||
 					(oldVNode &&
 						childVNode.key == oldVNode.key &&
 						childVNode.type === oldVNode.type)
 				) {
+					oldVNodeIndex = i;
 					oldChildren[i] = undefined;
 				} else {
 					// Either oldVNode === undefined or oldChildrenLength > 0,
@@ -89,6 +91,7 @@ export function diffChildren(
 							childVNode.key == oldVNode.key &&
 							childVNode.type === oldVNode.type
 						) {
+							oldVNodeIndex = j;
 							oldChildren[j] = undefined;
 							break;
 						}
@@ -123,11 +126,13 @@ export function diffChildren(
 						firstChildDom = newDom;
 					}
 
+					let nextDom = undefined;
 					if (childVNode._lastDomChild != null) {
 						// Only Fragments or components that return Fragment like VNodes will
 						// have a non-null _lastDomChild. Continue the diff from the end of
 						// this Fragment's DOM tree.
 						newDom = childVNode._lastDomChild;
+						nextDom = childVNode._lastDomChild.nextSibling;
 
 						// Eagerly cleanup _lastDomChild. We don't need to persist the value because
 						// it is only used by `diffChildren` to determine where to resume the diff after
@@ -144,6 +149,7 @@ export function diffChildren(
 
 						outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
 							parentDom.appendChild(newDom);
+							nextDom = null;
 						} else {
 							// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
 							for (
@@ -156,6 +162,7 @@ export function diffChildren(
 								}
 							}
 							parentDom.insertBefore(newDom, oldDom);
+							nextDom = oldDom;
 						}
 
 						// Browsers will infer an option's `value` from `textContent` when
@@ -173,7 +180,56 @@ export function diffChildren(
 						}
 					}
 
-					oldDom = newDom.nextSibling;
+					// DEBUG
+					if (nextDom === undefined) {
+						if (oldVNodeIndex == null) {
+							// if (oldVNode == EMPTY_OBJ) {
+							// console.log(newDom.nextSibling)
+
+							if (newDom != oldDom) {
+								console.log(
+									'No oldVNode was found and newDom != oldDom. This is unexpected.'
+								);
+							}
+						} else if (newDom !== oldVNode._dom) {
+							console.log(
+								'oldVNode is not EMPTY_OBJ and newDom !== oldVNode._dom. This is unexpected.'
+							);
+						} else {
+							let nextVNode = null;
+							for (let i = oldVNodeIndex + 1; i < oldChildren.length; i++) {
+								nextVNode = oldChildren[i];
+								if (nextVNode != null) {
+									break;
+								}
+							}
+							nextVNode = nextVNode || EMPTY_OBJ;
+
+							if (oldVNode._dom.nextSibling != nextVNode._dom) {
+								// 'should preserve state of children with 1 level nesting' => <div>World</div> is being removed?
+								//
+								// console.log(false, oldVNode._dom.nextSibling, nextVNode._dom);
+							}
+
+							// if (oldVNode._dom.nextSibling !== oldChildren[oldVNodeIndex + 1]._dom) {
+							// 	// console.log(oldChildren[oldVNodeIndex + 1]._dom);
+							// }
+							// console.log(oldVNode._dom.nextSibling ==);
+						}
+					}
+
+					// REAL
+					if (nextDom == undefined) {
+						if (oldVNodeIndex == null) {
+							nextDom = newDom.nextSibling;
+						} else {
+							nextDom = newDom.nextSibling;
+						}
+					}
+
+					// oldDom = newDom.nextSibling;
+					// oldDom = nextDom === undefined ? newDom.nextSibling : nextDom;
+					oldDom = nextDom;
 
 					if (typeof newParentVNode.type == 'function') {
 						// At this point, if childVNode._lastDomChild existed, then
