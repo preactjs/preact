@@ -148,6 +148,14 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				c.componentDidUpdate(oldProps, oldState, snapshot);
 			}
 
+			if (c.__hooks) {
+				c.__hooks._handles.some(handle => {
+					if (handle.ref) handle.ref.current = handle.createHandle();
+				});
+				c.__hooks._handles = [];
+				c.__hooks._pendingLayoutEffects = handleEffects(c.__hooks._pendingLayoutEffects);
+			}
+
 			if (clearProcessingException) {
 				c._pendingError = c._processingException = null;
 			}
@@ -157,15 +165,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		}
 
 		if (tmp = options.diffed) tmp(newVNode);
-
-		const hooks = newVNode._component && newVNode._component.__hooks;
-		if (hooks) {
-			hooks._handles.some(handle => {
-				if (handle.ref) handle.ref.current = handle.createHandle();
-			});
-			hooks._handles = [];
-			hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
-		}
 	}
 	catch (e) {
 		options._catchError(e, newVNode, oldVNode);
