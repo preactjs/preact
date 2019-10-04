@@ -5,7 +5,7 @@ import { diffChildren, toChildArray } from './children';
 import { diffProps } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
-import { globalHookState, afterPaint } from '../hooks';
+import { resetHookState, handleEffects, afterPaint } from '../hooks';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -111,8 +111,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c.props = newProps;
 			c.state = c._nextState;
 
-			globalHookState.currentComponent = c;
-			globalHookState.currentIndex = 0;
+			resetHookState(c);
 
 			c._dirty = false;
 			c._vnode = newVNode;
@@ -145,6 +144,10 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				c.componentDidUpdate(oldProps, oldState, snapshot);
 			}
 
+			if (c.__hooks) {
+				c.__hooks._pendingLayoutEffects = handleEffects(c.__hooks._pendingLayoutEffects);
+			}
+
 			if (clearProcessingException) {
 				c._pendingError = c._processingException = null;
 			}
@@ -154,14 +157,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 		}
 
 		if (tmp = options.diffed) tmp(newVNode);
-
-		const hooks = newVNode._component && newVNode._component.__hooks;
-		if (hooks) {
-			hooks._handles.some(handle => {
-				if (handle.ref) handle.ref.current = handle.createHandle();
-			});
-			hooks._handles = [];
-		}
 	}
 	catch (e) {
 		options._catchError(e, newVNode, oldVNode);
@@ -311,12 +306,6 @@ export function applyRef(ref, value, vnode) {
 export function unmount(vnode, parentVNode, skipRemove) {
 	let r;
 	if (options.unmount) options.unmount(vnode);
-	const hooks = vnode._component && vnode._component.__hooks;
-	if (hooks) {
-		hooks._list.some(h => {
-			h._cleanup && h._cleanup();
-		});
-	}
 
 	if (r = vnode.ref) {
 		applyRef(r, null, parentVNode);
@@ -330,6 +319,12 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	vnode._dom = vnode._lastDomChild = null;
 
 	if ((r = vnode._component)!=null) {
+		if (r.__hooks) {
+			r.__hooks._list.some(h => {
+				h._cleanup && h._cleanup();
+			});
+		}
+
 		if (r.componentWillUnmount) {
 			try {
 				r.componentWillUnmount();
@@ -392,14 +387,3 @@ function doRender(props, state, context) {
 
 	throw error;
 };
-
-export function handleEffects(effects) {
-	effects.some(h => {
-		h._cleanup && h._cleanup();
-	});
-	effects.some(h => {
-		const result = h._value();
-		if (typeof result === 'function') h._cleanup = result;
-	});
-	return [];
-}

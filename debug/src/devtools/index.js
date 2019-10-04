@@ -73,7 +73,7 @@ export function initDevTools() {
 		};
 
 		if (!hook._renderers) {
-			console.info(
+			console.info( // eslint-disable-line no-console
 				'Preact is not compatible with your version of react-devtools. We ' +
 				'will address this in future releases.'
 			);

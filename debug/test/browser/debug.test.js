@@ -156,7 +156,8 @@ describe('debug', () => {
 		expect(warnings[1]).to.be.undefined;
 	});
 
-	it('should warn for argumentless useLayoutEffect hooks', () => {
+	// TODO: Revist when addressing #1893 which should enable this again
+	it.skip('should warn for argumentless useLayoutEffect hooks', () => {
 		const App = () => {
 			const [state] = useState('test');
 			useLayoutEffect(() => 'test');

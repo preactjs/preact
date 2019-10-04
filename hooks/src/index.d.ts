@@ -1,1 +1,18 @@
-export { useDebugValue, StateUpdater, useState, Reducer, useReducer, useRef, useEffect, useLayoutEffect, useImperativeHandle, useCallback, useMemo, useContext } from 'preact'
+export {
+	Inputs,
+	StateUpdater,
+	useState,
+	Reducer,
+	useReducer,
+	PropRef,
+	useRef,
+	EffectCallback,
+	useEffect,
+	CreateHandle,
+	useImperativeHandle,
+	useLayoutEffect,
+	useCallback,
+	useMemo,
+	useContext,
+	useDebugValues,
+} from "preact";
