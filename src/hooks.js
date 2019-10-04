@@ -1,5 +1,4 @@
 import options from './options';
-import { handleEffects } from './diff';
 import { enqueueRender } from './component';
 
 let currentComponent = null;
@@ -203,6 +202,17 @@ if (typeof window !== 'undefined') {
 			(options.requestAnimationFrame || safeRaf)(flushAfterPaintEffects);
 		}
 	};
+}
+
+export function handleEffects(effects) {
+	effects.some(h => {
+		h._cleanup && h._cleanup();
+	});
+	effects.some(h => {
+		const result = h._value();
+		if (typeof result === 'function') h._cleanup = result;
+	});
+	return [];
 }
 
 function argsChanged(oldArgs, newArgs) {

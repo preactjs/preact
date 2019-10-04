@@ -5,7 +5,7 @@ import { diffChildren, toChildArray } from './children';
 import { diffProps } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
-import { resetHookState } from '../hooks';
+import { resetHookState, handleEffects } from '../hooks';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -379,14 +379,3 @@ function doRender(props, state, context) {
 
 	throw error;
 };
-
-export function handleEffects(effects) {
-	effects.some(h => {
-		h._cleanup && h._cleanup();
-	});
-	effects.some(h => {
-		const result = h._value();
-		if (typeof result === 'function') h._cleanup = result;
-	});
-	return [];
-}
