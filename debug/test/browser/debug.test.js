@@ -349,7 +349,7 @@ describe('debug', () => {
 							<ListItem key="a">a</ListItem>
 							<ListItem key="b">b</ListItem>
 							<Fragment key="b">
-								{/* Should be okay to dupliate keys since these are inside a Fragment */}
+								{/* Should be okay to duplicate keys since these are inside a Fragment */}
 								<ListItem key="a">c</ListItem>
 								<ListItem key="b">d</ListItem>
 								<ListItem key="c">e</ListItem>
