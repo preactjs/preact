@@ -111,6 +111,7 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	__hooks?: ComponentHooks;
 
 	_dirty: boolean;
+	_afterPaintQueued: boolean;
 	_renderCallbacks: Array<() => void>;
 	_context?: any;
 	_vnode?: VNode<P> | null;
