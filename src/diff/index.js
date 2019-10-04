@@ -5,7 +5,7 @@ import { diffChildren, toChildArray } from './children';
 import { diffProps } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
-import { resetHookState, handleEffects, afterPaint } from '../hooks';
+import { resetHookState, handleEffects, afterPaint, effects } from '../hooks';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -167,7 +167,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 export function commitRoot(mounts, root) {
 	let c;
-	while ((c = globalHookState.effects.pop())) {
+	while ((c = effects.pop())) {
 		try {
 			const hooks = c.__hooks;
 			if (hooks) {

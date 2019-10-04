@@ -3,7 +3,7 @@ import { enqueueRender } from './component';
 
 let currentComponent = null;
 let currentIndex = null;
-let effects = [];
+export let effects = [];
 
 export function resetHookState(c) {
 	currentComponent = c;
@@ -69,7 +69,7 @@ export function useEffect(callback, args) {
 		state._args = args;
 
 		currentComponent.__hooks._pendingEffects.push(state);
-		if (globalHookState.effects.indexOf(currentComponent) === -1) globalHookState.effects.push(currentComponent);
+		if (effects.indexOf(currentComponent) === -1) effects.push(currentComponent);
 	}
 }
 
@@ -78,7 +78,6 @@ export function useEffect(callback, args) {
  * @param {any[]} args
  */
 export function useLayoutEffect(callback, args) {
-	const { currentComponent } = globalHookState;
 
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(currentIndex++);
