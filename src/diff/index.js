@@ -5,7 +5,7 @@ import { diffChildren, toChildArray } from './children';
 import { diffProps } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
-import { resetHookState } from "../hooks";
+import { resetHookState } from '../hooks';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM

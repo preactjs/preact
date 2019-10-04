@@ -38,7 +38,7 @@ describe('useImperativeHandle', () => {
 			ref = useRef({});
 			useImperativeHandle(ref, () => {
 				createHandleSpy();
-				return { test: () => "test" + a };
+				return { test: () => 'test' + a };
 			}, [a]);
 			return <p>Test</p>;
 		}

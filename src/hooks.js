@@ -62,6 +62,7 @@ export const useState = useReducer.bind(undefined, invokeOrReturn);
  * @param {any[]} args
  */
 export function useEffect(callback, args) {
+
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(currentIndex++);
 	if (argsChanged(state._args, args)) {
@@ -135,7 +136,7 @@ export function useCallback(callback, args) {
 export function useContext(context) {
 	const provider = currentComponent.context[context._id];
 	if (!provider) return context._defaultValue;
-	let state = getHookState(currentIndex++);
+	const state = getHookState(currentIndex++);
 	// This is probably not safe to convert to "!"
 	if (state._value == null) {
 		state._value = true;
