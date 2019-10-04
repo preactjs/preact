@@ -429,7 +429,7 @@ describe('Portal', () => {
 		expect(spy).to.be.calledOnce;
 	});
 
-	it('should switch between non portal and portal node', () => {
+	it('should switch between non portal and portal node (Modal as lastChild)', () => {
 		let toggle;
 		const Modal = ({ children, open }) => open
 			? createPortal(<div>{children}</div>, scratch)
@@ -453,5 +453,35 @@ describe('Portal', () => {
 		toggle();
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div><button>Show</button>Open</div><div>Hello</div>');
+	});
+
+	it('should switch between non portal and portal node (Modal as firstChild)', () => {
+		let toggle;
+		const Modal = ({ children, open }) => open
+			? createPortal(<div>{children}</div>, scratch)
+			: <div>Closed</div>;
+
+		const App = () => {
+			const [open, setOpen] = useState(false);
+			toggle = setOpen.bind(this, (x) => !x);
+			return (
+				<div>
+					<Modal open={open}>Hello</Modal>
+					<button onClick={() => setOpen(!open)}>Show</button>
+					{open ? 'Open' : 'Closed'}
+				</div>
+			);
+		};
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><div>Closed</div><button>Show</button>Closed</div>');
+
+		toggle();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><button>Show</button>Open</div><div>Hello</div>');
+
+		toggle();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><div>Closed</div><button>Show</button>Closed</div>');
 	});
 });
