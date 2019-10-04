@@ -17,7 +17,7 @@ describe('memo()', () => {
 	});
 
 	it('should have isReactComponent flag', () => {
-		let App = memo(() => <div>foo</div>);
+		const App = memo(() => <div>foo</div>); // eslint-disable-line react/display-name
 		expect(App.prototype.isReactComponent).to.equal(true);
 	});
 

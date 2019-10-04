@@ -51,7 +51,6 @@ export interface ReducerHookState {
 	_component?: Component;
 }
 
-
 export interface Options extends preact.Options {
 	/** Attach a hook that is invoked before render, mainly to check the arguments. */
 	_root?(vnode: preact.ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment): void;

@@ -1,1 +1,12 @@
-export { useState, useEffect, useLayoutEffect, useRef, useImperativeHandle, useReducer, useContext, useMemo, useCallback, useDebugValue } from 'preact';
+export {
+	useState,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useImperativeHandle,
+	useReducer,
+	useContext,
+	useMemo,
+	useCallback,
+	useDebugValue
+} from 'preact';
