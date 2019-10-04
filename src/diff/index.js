@@ -125,6 +125,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			let isTopLevelFragment = tmp != null && tmp.type == Fragment && tmp.key == null;
 			newVNode._children = toChildArray(isTopLevelFragment ? tmp.props.children : tmp);
 
+			resetHookState(null);
+
 			if (c.getChildContext!=null) {
 				context = assign(assign({}, context), c.getChildContext());
 			}
