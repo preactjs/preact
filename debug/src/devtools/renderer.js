@@ -19,7 +19,7 @@ export class Renderer {
 		/**
 		 * Store the instance of a vnode. This will be later used to decide if a
 		 * vnode needs to be mounted or updated. For components the instance refers
-		 * to the actuall class instance whereas for dom nodes it refers to the
+		 * to the actual class instance whereas for dom nodes it refers to the
 		 * underlying dom element.
 		 * @type {WeakMap<import('../internal').Component | import('../internal').PreactElement | HTMLElement | Text, import('../internal').VNode>}
 		 */
