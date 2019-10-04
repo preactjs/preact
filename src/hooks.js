@@ -92,14 +92,10 @@ export function useRef(initialValue) {
 	return useMemo(() => ({ current: initialValue }), []);
 }
 
-export function useImperativeHandle(_ref, _createHandle, args) {
-	// -37 B
-	// useMemo(() => { if (_ref) { _ref.current = _createHandle(); } }, args);
-
-	// -31 B
+export function useImperativeHandle(ref, createHandle, args) {
 	useLayoutEffect(() => {
-		if (_ref) {
-			_ref.current = _createHandle();
+		if (ref) {
+			ref.current = createHandle();
 		}
 	}, args);
 }
