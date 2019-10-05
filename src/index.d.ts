@@ -12,7 +12,7 @@ declare namespace preact {
 
 	interface VNode<P = {}> {
 		type: ComponentType<P> | string | null;
-		props: P & { children: ComponentChildren } | string | number | null;
+		props: P & { children: ComponentChildren };
 		key: Key;
 		ref: Ref<any> | null;
 		/**
@@ -208,7 +208,7 @@ declare namespace preact {
 	// Preact helpers
 	// -----------------------------------
 	function createRef<T = any>(): RefObject<T>;
-	function toChildArray(children: ComponentChildren): Array<VNode | null>;
+	function toChildArray(children: ComponentChildren): Array<VNode | string | number>;
 	function isValidElement(vnode: any): vnode is VNode;
 
 	//
