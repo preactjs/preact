@@ -11,15 +11,24 @@ options._render = vnode => {
 
 	const c = (currentComponent = vnode._component);
 
-	const isFirst = !c.__compositions;
-	if (isFirst && c.constructor.__compositions) {
+	/** the vnode component is a uninitialized composition component */
+	if (c.constructor.__compositions && !c.__compositions) {
 		c.__compositions = { u: [], w: [], e: [], x: {} };
-		c.constructor = c.constructor(() => c.props);
+		const render = c.constructor(() => c.props);
+		c.constructor = props => render(props, c.__compositions.r);
 	}
 
-	if (c.__compositions && !isFirst)
-		// call all onMounted lifecycle callbacks
+	/** the vnode component is a composition initialized component */
+	if (c.__compositions) {
+		// Update the ref to forward
+		if (vnode.ref) {
+			c.__compositions.r = vnode.ref;
+			vnode.ref = null;
+		}
+
+		// call all watch
 		c.__compositions.w.forEach(up => handleEffect(up, c));
+	}
 };
 
 let oldAfterDiff = options.diffed;

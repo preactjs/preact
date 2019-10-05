@@ -4,7 +4,6 @@ import {
 	value,
 	onMounted,
 	onUnmounted,
-	watch,
 	effect
 } from 'preact/composition';
 
@@ -45,7 +44,11 @@ export default createComponent(() => {
 	return () => (
 		<>
 			<div>{Math.round(count.value)}</div>
-			<canvas ref={canvasRef} width="100" height="100" />
+			<Canvas ref={canvasRef} width="100" height="100" />
 		</>
 	);
 });
+
+const Canvas = createComponent(() => ({ width, height }, ref) => (
+	<canvas ref={ref} width={width} height={height} />
+));
