@@ -1,7 +1,7 @@
 import { createElement as h, render } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { createComponent, ref, onMounted, onUnmounted } from '../../src';
+import { createComponent, value, onMounted, onUnmounted } from '../../src';
 import { nextFrame } from '../_util/nextFrame';
 
 /** @jsx h */
@@ -19,9 +19,9 @@ describe('hooks and composition', () => {
 		teardown(scratch);
 	});
 
-	it('useState and ref together', async () => {
+	it('useState and value together', async () => {
 		const Comp = createComponent(() => {
-			const countRef = ref(0);
+			const countRef = value(0);
 			function incrementRef() {
 				countRef.value++;
 			}

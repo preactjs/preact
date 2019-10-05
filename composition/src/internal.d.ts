@@ -2,7 +2,7 @@ import { Component as PreactComponent } from '../../src/internal';
 
 export { PreactContext } from '../../src/internal';
 
-import { WatchSrc, WatchCallback, RefHolder } from './index';
+import { WatchSrc, WatchCallback, ValueHolder } from './index';
 
 type Watcher = {
 	/** input src */
@@ -11,8 +11,8 @@ type Watcher = {
 	cb: WatchCallback;
 	/** effect onCleanup */
 	cl?: () => void;
-	/** watch returned ref */
-	vr?: RefHolder;
+	/** watch returned value */
+	vr?: ValueHolder;
 	/** args resultant from src */
 	args?: any[];
 };

@@ -1,6 +1,6 @@
 import { createElement as h, render, createRef } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { createComponent, effect, ref, reactive } from '../../src';
+import { createComponent, effect, value, reactive } from '../../src';
 import { nextFrame } from '../_util/nextFrame';
 
 /** @jsx h */
@@ -87,11 +87,11 @@ describe('effect', () => {
 		expect(spy).to.be.calledWith([2, 10], [1, 10]);
 	});
 
-	it('call effect with ref changes', async () => {
+	it('call effect with value changes', async () => {
 		const spy = sinon.spy();
 		let count;
 		const Comp = createComponent(() => {
-			count = ref(1);
+			count = value(1);
 			effect(count, spy);
 			return () => null;
 		});

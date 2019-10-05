@@ -1,5 +1,5 @@
 import { createElement } from "preact";
-import { createComponent, watch, ref } from "preact/composition";
+import { createComponent, watch, value } from "preact/composition";
 
 function getItems(length) {
 	return new Promise(resolve =>
@@ -12,7 +12,7 @@ function getItems(length) {
 }
 
 export default createComponent(() => {
-	const count = ref(1);
+	const count = value(1);
 
 	const increase = () => count.value++;
 	const decrease = () => count.value--;

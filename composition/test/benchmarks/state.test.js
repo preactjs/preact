@@ -7,7 +7,7 @@ import { createElement, render } from 'preact';
 import { useState } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import bench from '../../../test/_util/bench';
-import { createComponent, ref, reactive } from '../../src';
+import { createComponent, value, reactive } from '../../src';
 
 describe('benchmarks', function() {
 	let scratch;
@@ -31,13 +31,13 @@ describe('benchmarks', function() {
 		teardown(scratch);
 	});
 
-	it('updates ref state', done => {
+	it('updates value state', done => {
 		function createTestCompositionRef() {
 			const parent = scratch.appendChild(document.createElement('div'));
 
 			let doIncrease;
 			const Comp = createComponent(() => {
-				const count = ref(0);
+				const count = value(0);
 				function increase() {
 					count.value += 1;
 				}
@@ -75,7 +75,7 @@ describe('benchmarks', function() {
 		bench({ compositionRef, hooks }, ({ text, results }) => {
 			const slowdownRef = results.compositionRef.hz / results.hooks.hz;
 
-			console.log(`ref is ${slowdownRef.toFixed(2)}x 'faster':` + text);
+			console.log(`value is ${slowdownRef.toFixed(2)}x 'faster':` + text);
 			expect(slowdownRef).to.be.above(1.1);
 			done();
 		});
@@ -134,13 +134,13 @@ describe('benchmarks', function() {
 		});
 	});
 
-	it('updates reactive slower than ref', done => {
+	it('updates reactive slower than value', done => {
 		function createTestCompositionRef() {
 			const parent = scratch.appendChild(document.createElement('div'));
 
 			let doIncrease;
 			const Comp = createComponent(() => {
-				const count = ref(0);
+				const count = value(0);
 				function increase() {
 					count.value += 1;
 				}
@@ -186,13 +186,13 @@ describe('benchmarks', function() {
 		});
 	});
 
-	it('updates reactive immutable slower than ref', done => {
+	it('updates reactive immutable slower than value', done => {
 		function createTestCompositionRef() {
 			const parent = scratch.appendChild(document.createElement('div'));
 
 			let doIncrease;
 			const Comp = createComponent(() => {
-				const count = ref(0);
+				const count = value(0);
 				function increase() {
 					count.value += 1;
 				}

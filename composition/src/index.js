@@ -143,7 +143,7 @@ export function reactive(value) {
 	);
 }
 
-export function ref(v) {
+export function value(v) {
 	const c = currentComponent;
 	function get() {
 		return v;
@@ -219,7 +219,7 @@ function resolveArgs(src, c) {
 		if (typeof src === 'function') return src(c.props);
 		// unrap the value and subscribe to the context
 		if (src.Provider) return resolveContext(src, c);
-		// unwrap ref or reactive, returning their immutable value
+		// unwrap value or reactive, returning their immutable value
 		if (isReactive(src)) return src[$Reactive];
 		// is src a createRef holding a element, return the current
 		if (isPlainObject(src) && 'current' in src) return src.current;

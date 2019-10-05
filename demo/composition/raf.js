@@ -1,17 +1,17 @@
-import { createElement, Fragment, createRef } from "preact";
+import { createElement, Fragment, createRef } from 'preact';
 import {
 	createComponent,
-	ref,
+	value,
 	onMounted,
 	onUnmounted,
 	watch,
 	effect
-} from "preact/composition";
+} from 'preact/composition';
 
 export default createComponent(() => {
 	// requestAnimationFrame
 	// https://css-tricks.com/using-requestanimationframe-with-react-hooks/
-	const count = ref(0);
+	const count = value(0);
 	let previousTime;
 	let request;
 
@@ -31,7 +31,7 @@ export default createComponent(() => {
 	const canvasRef = createRef();
 
 	effect([canvasRef, count], ([canvas, c]) => {
-		let context = canvas.getContext("2d");
+		let context = canvas.getContext('2d');
 		const width = canvas.width;
 		const height = canvas.height;
 

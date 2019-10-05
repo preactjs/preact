@@ -1,11 +1,11 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { createComponent, ref, unwrap, isReactive } from '../../src';
+import { createComponent, value, unwrap, isReactive } from '../../src';
 
 /** @jsx h */
 
-describe('ref', () => {
+describe('value', () => {
 
 	/** @type {HTMLDivElement} */
 	let scratch;
@@ -26,7 +26,7 @@ describe('ref', () => {
 		const stateHistory = [];
 
 		const Comp = createComponent(() => {
-			const state = ref({ a: 1 });
+			const state = value({ a: 1 });
 
 			return () => {
 				stateHistory.push(state.value);
@@ -46,7 +46,7 @@ describe('ref', () => {
 		let stateRef;
 
 		const Comp = createComponent(() => {
-			stateRef = ref(0);
+			stateRef = value(0);
 			return (renderSpy = sinon.spy(() => null));
 		});
 
@@ -65,7 +65,7 @@ describe('ref', () => {
 		let stateRef;
 
 		const Comp = createComponent(() => {
-			stateRef = ref(0);
+			stateRef = value(0);
 			return (renderSpy = sinon.spy(() => null));
 		});
 
@@ -81,7 +81,7 @@ describe('ref', () => {
 
 	it('can be set by another component', () => {
 		const StateContainer = createComponent(() => {
-			const count = ref(0);
+			const count = value(0);
 			const increment = () => (count.value += 10);
 			return () => (
 				<div>
@@ -109,8 +109,8 @@ describe('ref', () => {
 		// this is a very bad example just for the sake to have same test as hooks
 		// it should use `watch`
 		const Message = createComponent(props => {
-			const visibleRef = ref(Boolean(props.message));
-			const messageRef = ref(props.message);
+			const visibleRef = value(Boolean(props.message));
+			const messageRef = value(props.message);
 
 			const setPrevMessage = message => (messageRef.value = message);
 			const setVisible = visible => (visibleRef.value = visible);
@@ -128,7 +128,7 @@ describe('ref', () => {
 		});
 
 		const App = createComponent(() => {
-			const message = ref('Click Here!!');
+			const message = value('Click Here!!');
 			const setMessage = () => (message.value = '');
 			return () => <Message onClose={setMessage} message={message.value} />;
 		});
@@ -143,7 +143,7 @@ describe('ref', () => {
 
 	it('unwrap and check reactivity', () => {
 		const Comp = createComponent(() => {
-			const state = ref({ a: 1 });
+			const state = value({ a: 1 });
 
 			expect(unwrap(state)).to.deep.equal({ a: 1 });
 			expect(unwrap(state)).to.deep.equal(state.value);

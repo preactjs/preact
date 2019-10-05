@@ -19,16 +19,15 @@ export type ReactiveHolder<T extends {}> = T & {
  */
 export function reactive<T extends {}>(value: T): ReactiveHolder<T>;
 
-export type RefHolder<T> = { value: T };
+export type ValueHolder<T> = { value: T };
 
 /**
  * Returns a reference with a `value` property, that when it changes will update the component if not `staticRef`
  * @param v
- * @param staticRef
  */
-export function ref<T>(v?: T, staticRef?: boolean): RefHolder<T>;
+export function value<T>(v?: T): ValueHolder<T>;
 
-export function unwrap<T>(refOrValue: RefHolder<T> | ReactiveHolder<T> | T): T;
+export function unwrap<T>(refOrValue: ValueHolder<T> | ReactiveHolder<T> | T): T;
 export function isReactive(v: any): boolean;
 
 /**
@@ -45,7 +44,7 @@ export type WatchCallback<T> = (args: any[], oldArgs: any[]) => T;
 export type PropGetter<P, T> = (props: P) => T;
 export type WatchSrc<P, T = any> =
 	| PropGetter<P, T>
-	| RefHolder<T>
+	| ValueHolder<T>
 	| ReactiveHolder<T>
 	| PreactContext<T>;
 
@@ -55,22 +54,22 @@ export type WatchSrc<P, T = any> =
  * Before each render all `watch`'ers are run or updated with the new value
  * and if any args from src changed `callback` is called with the new args and the old args
  * ```js
- * watch(props => props.id) //returns `ref` id props value (kinda irrelevant)
- * watch(props => props.a + props.b) //acts like a compute function and returns a `ref` summing props a + b
+ * watch(props => props.id) //returns `value` id props value (kinda irrelevant)
+ * watch(props => props.a + props.b) //acts like a compute function and returns a `value` summing props a + b
  * watch(someRef, refValue => console.log('The value of someRef is: ', refValue))
  * ```
  * @param src
  * @param callback optional callback to call if the args returned from src changed
- * @returns `ref` holding the result from the first `src` specified or the return of the `callback`
+ * @returns `value` holding the result from the first `src` specified or the return of the `callback`
  */
 export function watch<T, P = any>(
 	src: WatchSrc<T, P> | WatchSrc[],
 	cb?: WatchCallback<T>
-): RefHolder<T>;
+): ValueHolder<T>;
 
 /**
  * `effect` acts like `watch` and it supports the same parameters buts its run after render
- *  And it does not return a `ref`
+ *  And it does not return a `value`
  * @param src
  * @param callback optional callback to call if the args returned from src changed
  * @returns nothing
