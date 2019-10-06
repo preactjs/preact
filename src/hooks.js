@@ -69,9 +69,17 @@ export function useEffect(callback, args) {
 		state._value = callback;
 		state._args = args;
 
+		// Adding this component fixes the double render queue but messes up the act.test.js
+		// since inner will just queue up a double effect triggering this breaking...
+		// This in turn makes me think that the double act messes up hook cleanup...
+
+		// if (currentComponent.__hooks._pendingEffects.indexOf(state) === -1) {
 		currentComponent.__hooks._pendingEffects.push(state);
-		if (effects.indexOf(currentComponent) === -1) effects.push(currentComponent);
-		afterPaint(currentComponent);
+		// }
+		if (effects.indexOf(currentComponent) === -1) {
+			effects.push(currentComponent);
+			afterPaint(currentComponent);
+		}
 	}
 }
 
