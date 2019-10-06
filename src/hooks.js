@@ -3,7 +3,8 @@ import { enqueueRender } from './component';
 
 let currentComponent = null;
 let currentIndex = null;
-export let effects = [];
+let effects = [];
+export let layoutEffects = [];
 
 export function resetHookState(c) {
 	currentComponent = c;
@@ -70,6 +71,7 @@ export function useEffect(callback, args) {
 
 		currentComponent.__hooks._pendingEffects.push(state);
 		if (effects.indexOf(currentComponent) === -1) effects.push(currentComponent);
+		afterPaint(currentComponent);
 	}
 }
 
@@ -85,7 +87,7 @@ export function useLayoutEffect(callback, args) {
 		state._value = callback;
 		state._args = args;
 		currentComponent.__hooks._pendingLayoutEffects.push(state);
-		if (effects.indexOf(currentComponent) === -1) effects.push(currentComponent);
+		if (layoutEffects.indexOf(currentComponent) === -1) layoutEffects.push(currentComponent);
 	}
 }
 
@@ -159,15 +161,23 @@ export function useDebugValue(value, formatter) {
  * @type {(component: import('./internal').Component) => void}
  */
 /* istanbul ignore next */
-export let afterPaint = () => {};
+let afterPaint = () => {};
 
 /**
  * After paint effects consumer.
  */
-function flushAfterPaintEffects(component) {
-	component._afterPaintQueued = false;
-	if (component._parentDom) {
-		component.__hooks._pendingEffects = handleEffects(component.__hooks._pendingEffects);
+function flushAfterPaintEffects() {
+	let component;
+	try {
+		while (component = effects.pop()) {
+			component._afterPaintQueued = false;
+			if (component._parentDom) {
+				component.__hooks._pendingEffects = handleEffects(component.__hooks._pendingEffects);
+			}
+		}
+	}
+	catch (e) {
+		options._catchError(e, component._vnode);
 	}
 }
 
@@ -191,7 +201,7 @@ if (typeof window !== 'undefined') {
 		if ((!c._afterPaintQueued && (c._afterPaintQueued = true)) || prevRaf !== options.requestAnimationFrame) {
 			prevRaf = options.requestAnimationFrame;
 			/* istanbul ignore next */
-			(options.requestAnimationFrame || safeRaf)(() => flushAfterPaintEffects(c));
+			(options.requestAnimationFrame || safeRaf)(flushAfterPaintEffects);
 		}
 	};
 }
