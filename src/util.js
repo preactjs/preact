@@ -6,6 +6,7 @@
  * @returns {O & P}
  */
 export function assign(obj, props) {
+	if(Object.assign) return Object.assign(obj, props);
 	for (let i in props) obj[i] = props[i];
 	return /** @type {O & P} */ (obj);
 }
