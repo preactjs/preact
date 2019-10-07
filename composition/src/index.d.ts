@@ -1,6 +1,6 @@
-import { PreactContext, ComponentChildren } from '../..';
+import { PreactContext, JSX } from 'preact';
 
-type FC<P> = (props: P) => ComponentChildren;
+type FC<P> = (props: P) => JSX.Element;
 
 type createComponentFN<P> = (getProps: () => P) => FC<P>;
 /**
@@ -10,8 +10,8 @@ type createComponentFN<P> = (getProps: () => P) => FC<P>;
 export function createComponent<P>(fn: createComponentFN<P>): FC<P>;
 
 export type ReactiveHolder<T extends {}> = T & {
-	// get or set the immutable inner value of this reactive
-	$value: T;
+  // get or set the immutable inner value of this reactive
+  $value: T;
 };
 /**
  * Creates a Proxy around the `value` object that any time its change it will update the component
@@ -27,7 +27,9 @@ export type ValueHolder<T> = { value: T };
  */
 export function value<T>(v?: T): ValueHolder<T>;
 
-export function unwrap<T>(refOrValue: ValueHolder<T> | ReactiveHolder<T> | T): T;
+export function unwrap<T>(
+  refOrValue: ValueHolder<T> | ReactiveHolder<T> | T
+): T;
 export function isReactive(v: any): boolean;
 
 /**
@@ -41,12 +43,19 @@ export function onMounted(callback: () => void): void;
 export function onUnmounted(cb: () => void): void;
 
 export type WatchCallback<T> = (args: any[], oldArgs: any[]) => T;
+export type WatchCallbackSingle<T, R> = (
+  arg: T,
+  oldArg: T | undefined,
+  onSds: Function
+) => R;
 export type PropGetter<P, T> = (props: P) => T;
-export type WatchSrc<P, T = any> =
-	| PropGetter<P, T>
-	| ValueHolder<T>
-	| ReactiveHolder<T>
-	| PreactContext<T>;
+export type WatchSrc<T, P> =
+  | PropGetter<P, T>
+  | ValueHolder<T>
+  | ReactiveHolder<T>
+  | PreactContext<T>;
+
+export type WatchResult<T> = { readonly value: T };
 
 /**
  * `watch` function can operate in many ways.
@@ -62,10 +71,25 @@ export type WatchSrc<P, T = any> =
  * @param callback optional callback to call if the args returned from src changed
  * @returns `value` holding the result from the first `src` specified or the return of the `callback`
  */
-export function watch<T, P = any>(
-	src: WatchSrc<T, P> | WatchSrc[],
-	cb?: WatchCallback<T>
-): ValueHolder<T>;
+export function watch<P, T>(src: WatchSrc<T, P>): WatchResult<T>;
+export function watch<P, T, R>(
+  src: WatchSrc<T, P>,
+  cb: WatchCallbackSingle<T, PromiseLike<R>>,
+  def: R
+): WatchResult<R>;
+export function watch<P, T, R>(
+  src: WatchSrc<T, P>,
+  cb: WatchCallbackSingle<T, PromiseLike<R>>
+): { readonly value: R | undefined };
+export function watch<P, T, R>(
+  src: WatchSrc<T, P>,
+  cb: WatchCallbackSingle<T, R>
+): WatchResult<R>;
+
+// export function watch<T, P = any>(
+//   src: WatchSrc<T, P> | WatchSrc[],
+//   cb?: WatchCallback<T>
+// ): ValueHolder<T>;
 
 /**
  * `effect` acts like `watch` and it supports the same parameters buts its run after render
@@ -74,10 +98,15 @@ export function watch<T, P = any>(
  * @param callback optional callback to call if the args returned from src changed
  * @returns nothing
  */
-export function effect<T, P = any>(
-	src: WatchSrc<T, P> | WatchSrc[],
-	cb: WatchCallback<T>
+export function effect<P, T, R>(
+  src: WatchSrc<T, P>,
+  cb: WatchCallbackSingle<T, R>
 ): void;
+
+// export function effect<T, P = any>(
+//   src: WatchSrc<T, P> | WatchSrc[],
+//   cb: WatchCallback<T>
+// ): void;
 
 interface InjectionKey<T> extends String {}
 
