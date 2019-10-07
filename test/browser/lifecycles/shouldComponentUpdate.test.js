@@ -154,6 +154,45 @@ describe('Lifecycle methods', () => {
 			expect(Foo.prototype.render).to.have.been.calledTwice;
 		});
 
+		it('should not block queued child forceUpdate', () => {
+			let i = 0;
+			let updateInner;
+			class Inner extends Component {
+				shouldComponentUpdate() {
+					return i===0;
+				}
+				render() {
+					updateInner = () => this.forceUpdate();
+					return <div>{++i}</div>;
+				}
+			}
+
+			let updateOuter;
+			class Outer extends Component {
+				shouldComponentUpdate() {
+					return i===0;
+				}
+				render() {
+					updateOuter = () => this.forceUpdate();
+					return <Inner />;
+				}
+			}
+
+			class App extends Component {
+				render() {
+					return <Outer />;
+				}
+			}
+
+			render(<App />, scratch);
+
+			updateOuter();
+			updateInner();
+			rerender();
+
+			expect(scratch.textContent).to.equal('2');
+		});
+
 		it('should be passed next props and state', () => {
 
 			/** @type {() => void} */
