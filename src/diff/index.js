@@ -22,7 +22,7 @@ import options from '../options';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
  */
-export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, force, oldDom, isHydrating) {
+export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, oldDom, isHydrating) {
 	let tmp, newType = newVNode.type;
 
 	// When passing through createElement it assigns the object
@@ -81,11 +81,11 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				if (c.componentDidMount!=null) mounts.push(c);
 			}
 			else {
-				if (newType.getDerivedStateFromProps==null && force==null && c.componentWillReceiveProps!=null) {
+				if (newType.getDerivedStateFromProps==null && c._force==null && c.componentWillReceiveProps!=null) {
 					c.componentWillReceiveProps(newProps, cctx);
 				}
 
-				if (!force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newProps, c._nextState, cctx)===false) {
+				if (!c._force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newProps, c._nextState, cctx)===false) {
 					c.props = newProps;
 					c.state = c._nextState;
 					c._dirty = false;

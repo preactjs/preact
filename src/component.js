@@ -123,13 +123,13 @@ export function getDomSibling(vnode, childIndex) {
 function renderComponent(component) {
 	let vnode = component._vnode,
 		oldDom = vnode._dom,
-		parentDom = component._parentDom,
-		force = component._force;
-	component._force = false;
+		parentDom = component._parentDom;
+
 	if (parentDom) {
 		let mounts = [];
-		let newDom = diff(parentDom, vnode, assign({}, vnode), component._context, parentDom.ownerSVGElement!==undefined, null, mounts, force, oldDom == null ? getDomSibling(vnode) : oldDom);
+		let newDom = diff(parentDom, vnode, assign({}, vnode), component._context, parentDom.ownerSVGElement!==undefined, null, mounts, oldDom == null ? getDomSibling(vnode) : oldDom);
 		commitRoot(mounts, vnode);
+		component._force = false;
 
 		if (newDom != oldDom) {
 			updateParentDomPointers(vnode);

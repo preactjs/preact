@@ -33,7 +33,6 @@ export function render(vnode, parentDom, replaceNode) {
 				? null
 				: EMPTY_ARR.slice.call(parentDom.childNodes),
 		mounts,
-		false,
 		replaceNode || EMPTY_OBJ,
 		isHydrating,
 	);
