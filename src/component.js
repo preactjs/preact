@@ -129,7 +129,6 @@ function renderComponent(component) {
 		let mounts = [];
 		let newDom = diff(parentDom, vnode, assign({}, vnode), component._context, parentDom.ownerSVGElement!==undefined, null, mounts, oldDom == null ? getDomSibling(vnode) : oldDom);
 		commitRoot(mounts, vnode);
-		component._force = false;
 
 		if (newDom != oldDom) {
 			updateParentDomPointers(vnode);
