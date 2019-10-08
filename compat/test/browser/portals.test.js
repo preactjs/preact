@@ -76,7 +76,7 @@ describe('Portal', () => {
 
 		toggle();
 		rerender();
-		expect(scratch.innerHTML).to.equal('<div>foobar</div><div><p>Hello</p></div>');
+		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div><div>foobar</div>');
 	});
 
 	it('should notice prop changes on the portal', () => {
@@ -204,15 +204,15 @@ describe('Portal', () => {
 
 		toggle();
 		rerender();
-		expect(scratch.innerHTML).to.equal('<div>foobar</div><div><p>Hello</p></div>');
+		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div><div>foobar</div>');
 
 		toggle2();
 		rerender();
-		expect(scratch.innerHTML).to.equal('<div>foobar</div><div></div>');
+		expect(scratch.innerHTML).to.equal('<div></div><div>foobar</div>');
 
 		toggle2();
 		rerender();
-		expect(scratch.innerHTML).to.equal('<div>foobar</div><div><p>Hello</p></div>');
+		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div><div>foobar</div>');
 
 		toggle();
 		rerender();
@@ -245,15 +245,15 @@ describe('Portal', () => {
 
 		toggle();
 		rerender();
-		expect(scratch.innerHTML).to.equal('<div>foobar</div><div><p>Hello</p></div>');
+		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div><div>foobar</div>');
 
 		toggle2();
 		rerender();
-		expect(scratch.innerHTML).to.equal('<div>foobar2</div><div>foobar</div><div><p>Hello</p></div>');
+		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div><div>foobar</div><div>foobar2</div>');
 
 		toggle2();
 		rerender();
-		expect(scratch.innerHTML).to.equal('<div>foobar</div><div><p>Hello</p></div>');
+		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div><div>foobar</div>');
 
 		toggle();
 		rerender();
@@ -280,7 +280,7 @@ describe('Portal', () => {
 
 		set(() => ref);
 		rerender();
-		expect(scratch.innerHTML).to.equal('<div><div>foobar</div><p>Hello</p></div>');
+		expect(scratch.innerHTML).to.equal('<div><p>Hello</p><div>foobar</div></div>');
 	});
 
 	it('should work with replacing placeholder portals', () => {
@@ -305,7 +305,7 @@ describe('Portal', () => {
 
 		toggle();
 		rerender();
-		expect(scratch.innerHTML).to.equal('<div>foobar</div><div><p>Hello</p></div>');
+		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div><div>foobar</div>');
 
 		toggle();
 		rerender();
@@ -313,7 +313,7 @@ describe('Portal', () => {
 
 		toggle2();
 		rerender();
-		expect(scratch.innerHTML).to.equal('<div>foobar</div><div><p>Hello</p></div>');
+		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div><div>foobar</div>');
 
 		toggle2();
 		rerender();
@@ -340,7 +340,7 @@ describe('Portal', () => {
 
 		toggle();
 		rerender();
-		expect(scratch.innerHTML).to.equal('<div>foobar</div><div><div>foobar</div><p>Hello</p></div>');
+		expect(scratch.innerHTML).to.equal('<div>foobar</div><div><p>Hello</p><div>foobar</div></div>');
 	});
 
 	it('should support nested portals', () => {
@@ -374,11 +374,11 @@ describe('Portal', () => {
 
 		toggle();
 		rerender();
-		expect(scratch.innerHTML).to.equal('<div><p>Inner</p></div><div><p>Hello</p></div>');
+		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div><div><p>Inner</p></div>');
 
 		toggle2();
 		rerender();
-		expect(scratch.innerHTML).to.equal('<p>hiFromBar</p><div><p>innerPortal</p><p>Inner</p></div><div><p>Hello</p></div>');
+		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div><div><p>Inner</p><p>innerPortal</p></div><p>hiFromBar</p>');
 
 		toggle();
 		rerender();
@@ -429,7 +429,7 @@ describe('Portal', () => {
 		expect(spy).to.be.calledOnce;
 	});
 
-	it('should switch between non portal and portal node', () => {
+	it('should switch between non portal and portal node (Modal as lastChild)', () => {
 		let toggle;
 		const Modal = ({ children, open }) => open
 			? createPortal(<div>{children}</div>, scratch)
@@ -452,6 +452,36 @@ describe('Portal', () => {
 
 		toggle();
 		rerender();
-		expect(scratch.innerHTML).to.equal('<div>Hello</div><div><button>Show</button>Open</div>');
+		expect(scratch.innerHTML).to.equal('<div><button>Show</button>Open</div><div>Hello</div>');
+	});
+
+	it('should switch between non portal and portal node (Modal as firstChild)', () => {
+		let toggle;
+		const Modal = ({ children, open }) => open
+			? createPortal(<div>{children}</div>, scratch)
+			: <div>Closed</div>;
+
+		const App = () => {
+			const [open, setOpen] = useState(false);
+			toggle = setOpen.bind(this, (x) => !x);
+			return (
+				<div>
+					<Modal open={open}>Hello</Modal>
+					<button onClick={() => setOpen(!open)}>Show</button>
+					{open ? 'Open' : 'Closed'}
+				</div>
+			);
+		};
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><div>Closed</div><button>Show</button>Closed</div>');
+
+		toggle();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><button>Show</button>Open</div><div>Hello</div>');
+
+		toggle();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><div>Closed</div><button>Show</button>Closed</div>');
 	});
 });
