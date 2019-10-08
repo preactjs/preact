@@ -97,8 +97,12 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		&& (name in dom)
 	) {
 		if (value==null) {
+			// If we're not dealing with a input's value or checked attribute
 			if (name!=='value' && name!=='checked') {
+				// Set the value to empty string first
 				dom[name] = '';
+
+				// And remove the attribute entirely
 				dom.removeAttribute(name);
 			}
 		}
