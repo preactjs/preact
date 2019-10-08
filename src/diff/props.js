@@ -14,7 +14,7 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 	let i;
 
 	for (i in oldProps) {
-		if (typeof newProps[i] === 'undefined') {
+		if (newProps[i] === undefined) {
 			setProperty(dom, i, null, oldProps[i], isSvg);
 		}
 	}
@@ -97,8 +97,10 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		&& (name in dom)
 	) {
 		if (value==null) {
-			dom.removeAttribute(name);
-			dom[name] = '';
+			if (name!=='value' && name!=='checked') {
+				dom[name] = '';
+				dom.removeAttribute(name);
+			}
 		}
 		else {
 			dom[name] = value;
