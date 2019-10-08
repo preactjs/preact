@@ -63,6 +63,42 @@ describe('Lifecycle methods', () => {
 			expect(ShouldNot.prototype.render).to.have.been.calledOnce;
 		});
 
+		it('should reorder non-updating children', () => {
+			const rows = [
+				{ id: '1', a: 5, b: 100 },
+				{ id: '2', a: 50, b: 10 },
+				{ id: '3', a: 25, b: 1000 }
+			];
+
+			class Row extends Component {
+				shouldComponentUpdate(nextProps) {
+					return nextProps.id !== this.props.id;
+				}
+
+				render() {
+					return this.props.id;
+				}
+			}
+
+			const App = ({ sortBy }) => (
+				<div>
+					<table>
+						{rows
+							.sort((a, b) => (a[sortBy] > b[sortBy] ? -1 : 1))
+							.map(row => (
+								<Row id={row.id} key={row.id} />
+							))}
+					</table>
+				</div>
+			);
+
+			render(<App sortBy="a" />, scratch);
+			expect(scratch.innerHTML).to.equal('<div><table>231</table></div>');
+
+			render(<App sortBy="b" />, scratch);
+			expect(scratch.innerHTML).to.equal('<div><table>312</table></div>');
+		});
+
 		it('should rerender when sCU returned false before', () => {
 			let c;
 			let spy = sinon.spy();
@@ -152,6 +188,45 @@ describe('Lifecycle methods', () => {
 
 			expect(Foo.prototype.shouldComponentUpdate).to.not.have.been.called;
 			expect(Foo.prototype.render).to.have.been.calledTwice;
+		});
+
+		it('should not block queued child forceUpdate', () => {
+			let i = 0;
+			let updateInner;
+			class Inner extends Component {
+				shouldComponentUpdate() {
+					return i===0;
+				}
+				render() {
+					updateInner = () => this.forceUpdate();
+					return <div>{++i}</div>;
+				}
+			}
+
+			let updateOuter;
+			class Outer extends Component {
+				shouldComponentUpdate() {
+					return i===0;
+				}
+				render() {
+					updateOuter = () => this.forceUpdate();
+					return <Inner />;
+				}
+			}
+
+			class App extends Component {
+				render() {
+					return <Outer />;
+				}
+			}
+
+			render(<App />, scratch);
+
+			updateOuter();
+			updateInner();
+			rerender();
+
+			expect(scratch.textContent).to.equal('2');
 		});
 
 		it('should be passed next props and state', () => {
