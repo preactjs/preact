@@ -146,6 +146,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			if (clearProcessingException) {
 				c._pendingError = c._processingException = null;
 			}
+
+			c._force = null;
 		}
 		else {
 			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, isHydrating);

@@ -227,6 +227,12 @@ describe('Lifecycle methods', () => {
 			rerender();
 
 			expect(scratch.textContent).to.equal('2');
+
+			// The inner sCU should return false on second render because
+			// it was not enqueued via forceUpdate
+			updateOuter();
+			rerender();
+			expect(scratch.textContent).to.equal('2');
 		});
 
 		it('should be passed next props and state', () => {
