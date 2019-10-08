@@ -464,6 +464,26 @@ describe('render()', () => {
 			expect(style.zIndex.toString()).to.equal('');
 		});
 
+		it('should remove existing attributes', () => {
+			const div = document.createElement('div');
+			div.setAttribute('class', 'red');
+			const span = document.createElement('span');
+			const text = document.createTextNode('Hi');
+
+			span.appendChild(text);
+			div.appendChild(span);
+			scratch.appendChild(div);
+
+			const App = () => (
+				<div>
+					<span>Bye</span>
+				</div>
+			);
+
+			render(<App />, scratch);
+			expect(scratch.innerHTML).to.equal('<div class=""><span>Bye</span></div>');
+		});
+
 		it('should remove old styles', () => {
 			render(<div style={{ color: 'red' }} />, scratch);
 			render(<div style={{ backgroundColor: 'blue' }} />, scratch);
