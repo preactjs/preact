@@ -9,6 +9,8 @@ let currentComponent;
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
+let layoutEffects = [];
+
 let oldBeforeRender = options._render;
 options._render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
@@ -21,18 +23,17 @@ options._render = vnode => {
 	}
 };
 
-let oldAfterDiff = options.diffed;
-options.diffed = vnode => {
-	if (oldAfterDiff) oldAfterDiff(vnode);
+let oldCommit = options._commit;
+options._commit = root => {
+	if (oldCommit) oldCommit(root);
 
-	const c = vnode._component;
-	if (!c) return;
-
-	const hooks = c.__hooks;
-	if (hooks) {
-		hooks._handles = bindHandles(hooks._handles);
-		hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
-	}
+	layoutEffects.some(c => {
+		const hooks = c.__hooks;
+		if (hooks) {
+			hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
+		}
+	});
+	layoutEffects = [];
 };
 
 
@@ -69,9 +70,7 @@ function getHookState(index) {
 	return hooks._list[index];
 }
 
-export function useState(initialState) {
-	return useReducer(invokeOrReturn, initialState);
-}
+export const useState = useReducer.bind(undefined, invokeOrReturn);
 
 export function useReducer(reducer, initialState, init) {
 
@@ -124,6 +123,7 @@ export function useLayoutEffect(callback, args) {
 	if (argsChanged(state._args, args)) {
 		state._value = callback;
 		state._args = args;
+		if (layoutEffects.indexOf(currentComponent) === -1) layoutEffects.push(currentComponent);
 		currentComponent.__hooks._pendingLayoutEffects.push(state);
 	}
 }
@@ -133,18 +133,11 @@ export function useRef(initialValue) {
 }
 
 export function useImperativeHandle(ref, createHandle, args) {
-	const state = getHookState(currentIndex++);
-	if (argsChanged(state._args, args)) {
-		state._args = args;
-		currentComponent.__hooks._handles.push({ ref, createHandle });
-	}
-}
-
-function bindHandles(handles) {
-	handles.some(handle => {
-		if (handle.ref) handle.ref.current = handle.createHandle();
-	});
-	return [];
+	useLayoutEffect(() => {
+		if (ref) {
+			ref.current = createHandle();
+		}
+	}, args);
 }
 
 /**
