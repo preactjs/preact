@@ -70,7 +70,7 @@ describe('combinations', () => {
 			return null;
 		}
 
-		render(<Comp />, scratch);
+		act(() => render(<Comp />, scratch));
 
 		return scheduleEffectAssert(() => {
 			rerender();
@@ -90,7 +90,7 @@ describe('combinations', () => {
 			return null;
 		}
 
-		render(<Comp />, scratch);
+		act(() => render(<Comp />, scratch));
 		rerender();
 
 		expect(didRender).to.have.been.calledTwice.and.calledWith(1);
@@ -109,7 +109,7 @@ describe('combinations', () => {
 			return <input ref={input} value="hello" />;
 		}
 
-		render(<Comp />, scratch);
+		act(() => render(<Comp />, scratch));
 
 		expect(refAtLayoutTime.value).to.equal('hello');
 	});

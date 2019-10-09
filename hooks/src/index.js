@@ -27,13 +27,7 @@ let oldCommit = options._commit;
 options._commit = root => {
 	if (oldCommit) oldCommit(root);
 
-	layoutEffects.some(c => {
-		const hooks = c.__hooks;
-		if (hooks) {
-			hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
-		}
-	});
-	layoutEffects = [];
+	(options.requestAnimationFrame || safeRaf)(flushAfterPaintEffects);
 };
 
 
@@ -204,6 +198,13 @@ let afterPaint = () => {};
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
+	layoutEffects.some(c => {
+		const hooks = c.__hooks;
+		if (hooks) {
+			hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
+		}
+	});
+	layoutEffects = [];
 	afterPaintEffects.some(component => {
 		component._afterPaintQueued = false;
 		if (component._parentDom) {
@@ -237,7 +238,7 @@ if (typeof window !== 'undefined') {
 			prevRaf = options.requestAnimationFrame;
 
 			/* istanbul ignore next */
-			(options.requestAnimationFrame || safeRaf)(flushAfterPaintEffects);
+			// (options.requestAnimationFrame || safeRaf)(flushAfterPaintEffects);
 		}
 	};
 }

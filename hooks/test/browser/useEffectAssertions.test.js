@@ -1,4 +1,4 @@
-import { setupRerender } from 'preact/test-utils';
+import { act, setupRerender } from 'preact/test-utils';
 import { createElement as h, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
@@ -32,11 +32,11 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 			return null;
 		}
 
-		render(<Comp />, scratch);
+		act(() => render(<Comp />, scratch));
 
 		return scheduleEffectAssert(() => expect(callback).to.be.calledOnce)
 			.then(() => scheduleEffectAssert(() => expect(callback).to.be.calledOnce))
-			.then(() => render(<Comp />, scratch))
+			.then(() => act(() => render(<Comp />, scratch)))
 			.then(() => scheduleEffectAssert(() => expect(callback).to.be.calledTwice));
 	});
 
@@ -48,14 +48,14 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 			return null;
 		}
 
-		render(<Comp a={1} b={2} />, scratch);
+		act(() => render(<Comp a={1} b={2} />, scratch));
 
 		return scheduleEffectAssert(() => expect(callback).to.be.calledOnce)
-			.then(() => render(<Comp a={1} b={2} />, scratch))
+			.then(() => act(() => render(<Comp a={1} b={2} />, scratch)))
 			.then(() => scheduleEffectAssert(() => expect(callback).to.be.calledOnce))
-			.then(() => render(<Comp a={2} b={2} />, scratch))
+			.then(() => act(() => render(<Comp a={2} b={2} />, scratch)))
 			.then(() => scheduleEffectAssert(() => expect(callback).to.be.calledTwice))
-			.then(() => render(<Comp a={2} b={2} />, scratch))
+			.then(() => act(() => render(<Comp a={2} b={2} />, scratch)))
 			.then(() => scheduleEffectAssert(() => expect(callback).to.be.calledTwice));
 	});
 
@@ -67,13 +67,13 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 			return null;
 		}
 
-		render(<Comp />, scratch);
-		render(<Comp />, scratch);
+		act(() => render(<Comp />, scratch));
+		act(() => render(<Comp />, scratch));
 
 		expect(callback).to.be.calledOnce;
 
 		return scheduleEffectAssert(() => expect(callback).to.be.calledOnce)
-			.then(() => render(<Comp />, scratch))
+			.then(() => act(() => render(<Comp />, scratch)))
 			.then(() => scheduleEffectAssert(() => expect(callback).to.be.calledOnce));
 	});
 
@@ -86,14 +86,14 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 			return null;
 		}
 
-		render(<Comp />, scratch);
+		act(() => render(<Comp />, scratch));
 
 		return scheduleEffectAssert(() => {
 			expect(cleanupFunction).to.be.not.called;
 			expect(callback).to.be.calledOnce;
 		})
 			.then(() => scheduleEffectAssert(() => expect(callback).to.be.calledOnce))
-			.then(() => render(<Comp />, scratch))
+			.then(() => act(() => render(<Comp />, scratch)))
 			.then(() => scheduleEffectAssert(() => {
 				expect(cleanupFunction).to.be.calledOnce;
 				expect(callback).to.be.calledTwice;
@@ -110,10 +110,10 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 			return null;
 		}
 
-		render(<Comp />, scratch);
+		act(() => render(<Comp />, scratch));
 
 		return scheduleEffectAssert(() => {
-			render(null, scratch);
+			act(() => render(null, scratch));
 			rerender();
 			expect(cleanupFunction).to.be.calledOnce;
 		});
@@ -127,8 +127,8 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 			return null;
 		}
 
-		render(<Comp value={1} />, scratch);
-		render(<Comp value={2} />, scratch);
+		act(() => render(<Comp value={1} />, scratch));
+		act(() => render(<Comp value={2} />, scratch));
 
 		return scheduleEffectAssert(() => expect(values).to.deep.equal([1, 2]));
 	});

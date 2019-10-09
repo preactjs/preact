@@ -1,17 +1,16 @@
 import { createElement as h, render, createRef, forwardRef, hydrate, memo, useState, useImperativeHandle } from '../../src';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { setupRerender } from 'preact/test-utils';
+import { act } from 'preact/test-utils';
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 
 /** @jsx h */
 describe('forwardRef', () => {
 
 	/** @type {HTMLDivElement} */
-	let scratch, rerender;
+	let scratch;
 
 	beforeEach(() => {
 		scratch = setupScratch();
-		rerender = setupRerender();
 	});
 
 	afterEach(() => {
@@ -171,13 +170,11 @@ describe('forwardRef', () => {
 		});
 
 		const ref = createRef();
-		render(<Foo ref={ref} />, scratch);
-
+		act(() => render(<Foo ref={ref} />, scratch));
 		expect(typeof ref.current.getValue).to.equal('function');
 		expect(ref.current.getValue()).to.equal('');
 
-		setValue('x');
-		rerender();
+		act(() => setValue('x'));
 		expect(typeof ref.current.getValue).to.equal('function');
 		expect(ref.current.getValue()).to.equal('x');
 

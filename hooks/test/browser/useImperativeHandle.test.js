@@ -1,4 +1,5 @@
 import { createElement as h, render } from 'preact';
+import { act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useImperativeHandle, useRef } from '../../src';
 
@@ -27,7 +28,7 @@ describe('useImperativeHandle', () => {
 			return <p>Test</p>;
 		}
 
-		render(<Comp />, scratch);
+		act(() => render(<Comp />, scratch));
 		expect(ref.current).to.have.property('test');
 		expect(ref.current.test()).to.equal('test');
 	});
@@ -41,11 +42,11 @@ describe('useImperativeHandle', () => {
 			return <p>Test</p>;
 		}
 
-		render(<Comp a={0} />, scratch);
+		act(() => render(<Comp a={0} />, scratch));
 		expect(ref.current).to.have.property('test');
 		expect(ref.current.test()).to.equal('test0');
 
-		render(<Comp a={1} />, scratch);
+		act(() => render(<Comp a={1} />, scratch));
 		expect(ref.current).to.have.property('test');
 		expect(ref.current.test()).to.equal('test1');
 	});
@@ -59,11 +60,11 @@ describe('useImperativeHandle', () => {
 			return <p>Test</p>;
 		}
 
-		render(<Comp />, scratch);
+		act(() => render(<Comp />, scratch));
 		expect(ref.current.test()).to.equal('test');
 
 		render(<Comp />, scratch);
-		expect(ref.current.test()).to.equal('test');
+		act(() => expect(ref.current.test()).to.equal('test'));
 	});
 
 	it('should not throw with nullish ref', () => {
@@ -72,6 +73,6 @@ describe('useImperativeHandle', () => {
 			return <p>Test</p>;
 		}
 
-		expect(() => render(<Comp />, scratch)).to.not.throw();
+		expect(() => act(() => render(<Comp />, scratch))).to.not.throw();
 	});
 });

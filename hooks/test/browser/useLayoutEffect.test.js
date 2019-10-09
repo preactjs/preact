@@ -37,13 +37,13 @@ describe('useLayoutEffect', () => {
 			return null;
 		}
 
-		render(<Comp />, scratch);
-		render(<Comp />, scratch);
+		act(() => render(<Comp />, scratch));
+		act(() => render(<Comp />, scratch));
 
 		expect(cleanupFunction).to.be.calledOnce;
 		expect(callback).to.be.calledTwice;
 
-		render(<Comp />, scratch);
+		act(() => render(<Comp />, scratch));
 
 		expect(cleanupFunction).to.be.calledTwice;
 		expect(callback).to.be.calledThrice;
@@ -65,7 +65,7 @@ describe('useLayoutEffect', () => {
 			return null;
 		}
 
-		render(<Parent />, scratch);
+		act(() => render(<Parent />, scratch));
 
 		expect(callback).to.be.calledOnce;
 	});
@@ -93,7 +93,7 @@ describe('useLayoutEffect', () => {
 		function AutoResizeTextareaLayoutEffect(props) {
 			const ref = useRef(null);
 			useLayoutEffect(() => {
-				expect(scratch.innerHTML).to.equal(`<div><p>${props.value}</p><textarea></textarea></div>`);
+				expect(scratch.innerHTML).to.equal(`<div class="${props.value}"><p>${props.value}</p><textarea></textarea></div>`);
 				expect(ref.current.isConnected).to.equal(true);
 			});
 			return (
@@ -107,16 +107,16 @@ describe('useLayoutEffect', () => {
 		function App(props) {
 			return (
 				<div class={props.value}>
-					<AutoResizeTextareaLayoutEffect {...props} />>
+					<AutoResizeTextareaLayoutEffect {...props} />
 				</div>
 			);
 		}
 
-		render(<App value="hi" />, scratch);
-		render(<App value="hii" />, scratch);
+		act(() => render(<App value="hi" />, scratch));
+		act(() => render(<App value="hii" />, scratch));
 	});
 
-	it('should invoke layout effects after subtree is fully connected', done => {
+	it('should invoke layout effects after subtree is fully connected', () => {
 		let ref;
 		let layoutEffect = sinon.spy(() => {
 			expect(ref.current.parentNode).to.not.be.undefined;
@@ -138,11 +138,7 @@ describe('useLayoutEffect', () => {
 			return <div><Inner /></div>;
 		}
 
-		render(<Outer />, scratch);
-
-		setTimeout(() => {
-			expect(layoutEffect).to.have.been.calledOnce;
-			done();
-		}, 50);
+		act(() => render(<Outer />, scratch));
+		expect(layoutEffect).to.have.been.calledOnce;
 	});
 });
