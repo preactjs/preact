@@ -110,7 +110,7 @@ export function lazy(loader) {
 
 		return createElement(component, props);
 	}
-
+	Lazy.loader = loader;
 	Lazy.displayName = 'Lazy';
 	Lazy._forwarded = true;
 	return Lazy;
