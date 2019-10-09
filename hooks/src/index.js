@@ -19,7 +19,9 @@ options._render = vnode => {
 	currentIndex = 0;
 
 	if (currentComponent.__hooks) {
-		currentComponent.__hooks._pendingEffects = handleEffects(currentComponent.__hooks._pendingEffects);
+		currentComponent.__hooks._pendingEffects.forEach(invokeCleanup);
+		currentComponent.__hooks._pendingEffects.forEach(invokeEffect);
+		currentComponent.__hooks._pendingEffects = [];
 	}
 };
 
@@ -199,13 +201,15 @@ let afterPaint = () => {};
  */
 function flushAfterPaintEffects() {
 	let c;
-	let tempLayoutEffects = [...layoutEffects];
+
+	let tempLayoutEffects = [].concat(layoutEffects);
 	while (c = layoutEffects.pop()) {
 		const hooks = c.__hooks;
 		if (hooks) {
 			hooks._pendingLayoutEffects.forEach(invokeCleanup);
 		}
 	}
+
 	while (c = tempLayoutEffects.pop()) {
 		const hooks = c.__hooks;
 		if (hooks) {
@@ -214,7 +218,7 @@ function flushAfterPaintEffects() {
 		}
 	}
 
-	let tempAfterPaintEffects = [...afterPaintEffects];
+	let tempAfterPaintEffects = [].concat(afterPaintEffects);
 	while (c = afterPaintEffects.pop()) {
 		c._afterPaintQueued = false;
 		if (c._parentDom) {
@@ -255,12 +259,6 @@ if (typeof window !== 'undefined') {
 			prevRaf = options.requestAnimationFrame;
 		}
 	};
-}
-
-function handleEffects(effects) {
-	effects.forEach(invokeCleanup);
-	effects.forEach(invokeEffect);
-	return [];
 }
 
 function invokeCleanup(hook) {
