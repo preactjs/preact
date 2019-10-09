@@ -198,20 +198,37 @@ let afterPaint = () => {};
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
-	layoutEffects.some(c => {
+	let c;
+	let tempLayoutEffects = [...layoutEffects];
+	while (c = layoutEffects.pop()) {
 		const hooks = c.__hooks;
 		if (hooks) {
-			hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
+			hooks._pendingLayoutEffects.forEach(invokeCleanup);
 		}
-	});
-	layoutEffects = [];
-	afterPaintEffects.some(component => {
-		component._afterPaintQueued = false;
-		if (component._parentDom) {
-			component.__hooks._pendingEffects = handleEffects(component.__hooks._pendingEffects);
+	}
+	while (c = tempLayoutEffects.pop()) {
+		const hooks = c.__hooks;
+		if (hooks) {
+			hooks._pendingLayoutEffects.forEach(invokeEffect);
+			hooks._pendingLayoutEffects = [];
 		}
-	});
-	afterPaintEffects = [];
+	}
+
+	let tempAfterPaintEffects = [...afterPaintEffects];
+	while (c = afterPaintEffects.pop()) {
+		c._afterPaintQueued = false;
+		if (c._parentDom) {
+			c.__hooks._pendingEffects.forEach(invokeCleanup);
+		}
+	}
+
+	while (c = tempAfterPaintEffects.pop()) {
+		c._afterPaintQueued = false;
+		if (c._parentDom) {
+			c.__hooks._pendingEffects.forEach(invokeEffect);
+			c.__hooks._pendingEffects = [];
+		}
+	}
 }
 
 const RAF_TIMEOUT = 100;
@@ -236,9 +253,6 @@ if (typeof window !== 'undefined') {
 		if ((!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) ||
 		    prevRaf !== options.requestAnimationFrame) {
 			prevRaf = options.requestAnimationFrame;
-
-			/* istanbul ignore next */
-			// (options.requestAnimationFrame || safeRaf)(flushAfterPaintEffects);
 		}
 	};
 }
