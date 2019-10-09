@@ -13,20 +13,6 @@ import { Fragment } from './create-element';
 export function Component(props, context) {
 	this.props = props;
 	this.context = context;
-	// this.constructor // When component is functional component, this is reset to functional component
-	// if (this.state==null) this.state = {};
-	// this.state = {};
-	// this._dirty = true;
-	// this._renderCallbacks = []; // Only class components
-
-	// Other properties that Component will have set later,
-	// shown here as commented out for quick reference
-	// this.base = null;
-	// this._context = null;
-	// this._vnode = null;
-	// this._nextState = null; // Only class components
-	// this._processingException = null; // Always read, set only when handling error
-	// this._pendingError = null; // Always read, set only when handling error. This is used to indicate at diffTime to set _processingException
 }
 
 /**
