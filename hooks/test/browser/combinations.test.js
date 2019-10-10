@@ -214,4 +214,60 @@ describe('combinations', () => {
 
 		expect(scratch.textContent).to.equal('01');
 	});
+
+	it('should have a right call order with correct dom ref', () => {
+		let i = 0, set;
+		const calls = [];
+
+		function Inner() {
+			useLayoutEffect(() => {
+				calls.push('layout inner call ' + scratch.innerHTML);
+				return () => calls.push('layout inner dispose ' + scratch.innerHTML);
+			});
+			useEffect(() => {
+				calls.push('effect inner call ' + scratch.innerHTML);
+				return () => calls.push('effect inner dispose ' + scratch.innerHTML);
+			});
+			return <span>hello {i}</span>;
+		}
+
+		function Outer() {
+			i++;
+			const [state, setState] = useState(false);
+			set = () => setState(!state);
+			useLayoutEffect(() => {
+				calls.push('layout outer call ' + scratch.innerHTML);
+				return () => calls.push('layout outer dispose ' + scratch.innerHTML);
+			});
+			useEffect(() => {
+				calls.push('effect outer call ' + scratch.innerHTML);
+				return () => calls.push('effect outer dispose ' + scratch.innerHTML);
+			});
+			return <Inner />;
+		}
+
+		act(() => render(<Outer />, scratch));
+		expect(calls).to.deep.equal([
+			'layout inner call <span>hello 1</span>',
+			'layout outer call <span>hello 1</span>',
+			'effect inner call <span>hello 1</span>',
+			'effect outer call <span>hello 1</span>'
+		]);
+
+		act(() => set());
+		expect(calls).to.deep.equal([
+			'layout inner call <span>hello 1</span>',
+			'layout outer call <span>hello 1</span>',
+			'effect inner call <span>hello 1</span>',
+			'effect outer call <span>hello 1</span>',
+			'layout inner dispose <span>hello 2</span>',
+			'layout outer dispose <span>hello 2</span>',
+			'layout inner call <span>hello 2</span>',
+			'layout outer call <span>hello 2</span>',
+			'effect inner dispose <span>hello 2</span>',
+			'effect outer dispose <span>hello 2</span>',
+			'effect inner call <span>hello 2</span>',
+			'effect outer call <span>hello 2</span>'
+		]);
+	});
 });
