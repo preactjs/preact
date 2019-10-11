@@ -68,9 +68,9 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 		}
 
 		render(<Comp />, scratch);
-		render(<Comp />, scratch);
+		// render(<Comp />, scratch);
 
-		expect(callback).to.be.calledOnce;
+		// expect(callback).to.be.calledOnce;
 
 		return scheduleEffectAssert(() => expect(callback).to.be.calledOnce)
 			.then(() => render(<Comp />, scratch))
@@ -128,8 +128,9 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 		}
 
 		render(<Comp value={1} />, scratch);
-		render(<Comp value={2} />, scratch);
 
-		return scheduleEffectAssert(() => expect(values).to.deep.equal([1, 2]));
+		return scheduleEffectAssert(() => expect(values).to.deep.equal([1]))
+			.then(() => render(<Comp value={2} />, scratch))
+			.then(() => scheduleEffectAssert(() => expect(values).to.deep.equal([1, 2])));
 	});
 }
