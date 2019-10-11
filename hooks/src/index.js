@@ -30,7 +30,6 @@ options.diffed = vnode => {
 
 	const hooks = c.__hooks;
 	if (hooks) {
-		hooks._handles = bindHandles(hooks._handles);
 		hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
 	}
 };
@@ -61,7 +60,7 @@ function getHookState(index) {
 	// * https://github.com/michael-klein/funcy.js/blob/650beaa58c43c33a74820a3c98b3c7079cf2e333/src/renderer.mjs
 	// Other implementations to look at:
 	// * https://codesandbox.io/s/mnox05qp8
-	const hooks = currentComponent.__hooks || (currentComponent.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [], _handles: [] });
+	const hooks = currentComponent.__hooks || (currentComponent.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [] });
 
 	if (index >= hooks._list.length) {
 		hooks._list.push({});
@@ -133,18 +132,9 @@ export function useRef(initialValue) {
 }
 
 export function useImperativeHandle(ref, createHandle, args) {
-	const state = getHookState(currentIndex++);
-	if (argsChanged(state._args, args)) {
-		state._args = args;
-		currentComponent.__hooks._handles.push({ ref, createHandle });
-	}
-}
-
-function bindHandles(handles) {
-	handles.some(handle => {
-		if (handle.ref) handle.ref.current = handle.createHandle();
-	});
-	return [];
+	useLayoutEffect(() => {
+		if (ref) ref.current = createHandle();
+	}, args)
 }
 
 /**
