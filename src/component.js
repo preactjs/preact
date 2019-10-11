@@ -114,9 +114,8 @@ function renderComponent(component) {
 
 	if (parentDom) {
 		let mounts = [], updates = [];
-		const oldVNode = assign({}, vnode);
-		const newVNode = renderTree(vnode, oldVNode, component._context);
-		commit(parentDom, newVNode, oldVNode, parentDom.ownerSVGElement !== undefined, null, mounts, updates, oldDom == null ? getDomSibling(vnode) : oldDom, false);
+		const newVNode = renderTree(vnode, assign({}, vnode), component._context);
+		commit(parentDom, newVNode, parentDom.ownerSVGElement !== undefined, null, mounts, updates, oldDom == null ? getDomSibling(vnode) : oldDom, false);
 		commitRoot(mounts, updates, newVNode);
 
 		if (newVNode._dom != oldDom) {

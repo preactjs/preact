@@ -32,7 +32,6 @@ export function render(vnode, parentDom, replaceNode) {
 	commit(
 		parentDom,
 		tree,
-		oldVNode || EMPTY_OBJ,
 		parentDom.ownerSVGElement !== undefined,
 		replaceNode && !isHydrating
 			? [replaceNode]

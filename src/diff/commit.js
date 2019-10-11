@@ -49,25 +49,25 @@ export function commitRoot(mounts, updates, root) {
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
  */
-export default function commit(parentDom, newParentVNode, oldParentVNode, isSvg, excessDomChildren, mounts, updates, oldDom, isHydrating, callsite) {
+export default function commit(parentDom, newParentVNode, isSvg, excessDomChildren, mounts, updates, oldDom, isHydrating, callsite) {
 	// TODO: get rid of this flag. We might be able to replace it with an equality check (newParentVNode == oldParentVNode)
 	// if (newParentVNode._shouldComponentUpdate === false) {
 	// 	return;
 	// }
 	if (newParentVNode._shouldComponentUpdate === false) {
-		newParentVNode._dom = oldParentVNode._dom;
+		newParentVNode._dom = newParentVNode._oldVNode._dom;
 		return;
 	}
 
 	if (newParentVNode._component) {
 		newParentVNode._component._parentDom = parentDom;
 	}
-	let childVNode, i, j, oldVNode, newDom, sibDom, firstChildDom, refs, snapshot;
+	let childVNode, i, j, newDom, sibDom, firstChildDom, refs, snapshot;
   
 	let newChildren = newParentVNode._children;
-	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
+	// This is a compression of newParentVNode._oldVNode!=null && newParentVNode._oldVNode != EMPTY_OBJ && newParentVNode._oldVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
-	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
+	let oldChildren = (newParentVNode._oldVNode && newParentVNode._oldVNode._children) || EMPTY_ARR;
   
 	let oldChildrenLength = oldChildren.length;
 
@@ -80,7 +80,7 @@ export default function commit(parentDom, newParentVNode, oldParentVNode, isSvg,
 			oldDom = excessDomChildren[0];
 		}
 		else if (oldChildrenLength) {
-			oldDom = getDomSibling(oldParentVNode, 0);
+			oldDom = getDomSibling(newParentVNode._oldVNode, 0);
 		}
 		else {
 			oldDom = null;
@@ -102,18 +102,18 @@ export default function commit(parentDom, newParentVNode, oldParentVNode, isSvg,
 				// TODO: validate that if one of these two is given, both should be...
 				if (newParentVNode._component.getSnapshotBeforeUpdate) {
 					try {
-						snapshot = newParentVNode._component.getSnapshotBeforeUpdate(oldParentVNode.props, oldParentVNode._component._previousState);
+						snapshot = newParentVNode._component.getSnapshotBeforeUpdate(newParentVNode._oldVNode.props, newParentVNode._oldVNode._component._previousState);
 					}
 					catch (e) {
-						options._catchError(e, newParentVNode, oldParentVNode);
+						options._catchError(e, newParentVNode, newParentVNode._oldVNode);
 					}
 				}
 
 				if (newParentVNode._component.componentDidUpdate) {
 					updates.push({
 						_component: newParentVNode._component,
-						_previousProps: oldParentVNode.props,
-						_previousState: oldParentVNode._component._previousState,
+						_previousProps: newParentVNode._oldVNode.props,
+						_previousState: newParentVNode._oldVNode._component._previousState,
 						_snapshot: snapshot
 					});
 				}
@@ -130,50 +130,15 @@ export default function commit(parentDom, newParentVNode, oldParentVNode, isSvg,
   
 		if (childVNode != null) {
 			childVNode._parentDom = parentDom;
-			childVNode._parent = newParentVNode;
-			childVNode._depth = newParentVNode._depth + 1;
-  
-			// Check if we find a corresponding element in oldChildren.
-			// If found, delete the array item by setting to `undefined`.
-			// We use `undefined`, as `null` is reserved for empty placeholders
-			// (holes).
-			oldVNode = oldChildren[i];
 
-			if (
-				oldVNode === null ||
-				(oldVNode &&
-					childVNode.key === oldVNode.key &&
-					childVNode.type === oldVNode.type)
-			) {
-				oldChildren[i] = undefined;
-			}
-			else {
-				// Either oldVNode === undefined or oldChildrenLength > 0,
-				// so after this loop oldVNode == null or oldVNode is a valid value.
-				for (j = 0; j < oldChildrenLength; j++) {
-					oldVNode = oldChildren[j];
-					// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
-					// We always match by type (in either case).
-					if (
-						oldVNode &&
-						childVNode.key === oldVNode.key &&
-						childVNode.type === oldVNode.type
-					) {
-						oldChildren[j] = undefined;
-						break;
-					}
-					oldVNode = null;
-				}
-			}
-			oldVNode = oldVNode || EMPTY_OBJ;
-  
+			oldChildren[oldChildren.indexOf(childVNode._oldVNode)] = null;
+
 			let newMounts = [], newUpdates = [];
 			if (typeof childVNode.type === 'function') {
 				// TODO: only proceed if we changed that vnode
 				commit(
 					parentDom,
 					childVNode,
-					oldVNode,
 					isSvg,
 					excessDomChildren,
 					newMounts,
@@ -187,9 +152,8 @@ export default function commit(parentDom, newParentVNode, oldParentVNode, isSvg,
 				typeof childVNode.type === 'string' || childVNode.type === null
 			) {
 				childVNode._dom = diffElementNodes(
-					oldVNode._dom,
+					childVNode._oldVNode._dom,
 					childVNode,
-					oldVNode,
 					isSvg,
 					excessDomChildren,
 					newMounts,
@@ -206,7 +170,7 @@ export default function commit(parentDom, newParentVNode, oldParentVNode, isSvg,
 			
 			newDom = childVNode._dom;
   
-			if ((j = childVNode.ref) && oldVNode.ref != j) {
+			if ((j = childVNode.ref) && childVNode._oldVNode.ref != j) {
 				(refs || (refs = [])).push(
 					j,
 					childVNode._component || newDom,
@@ -232,7 +196,7 @@ export default function commit(parentDom, newParentVNode, oldParentVNode, isSvg,
 					childVNode._lastDomChild = null;
 				}
 				else if (
-					excessDomChildren == oldVNode ||
+					excessDomChildren == childVNode._oldVNode ||
 					newDom != oldDom ||
 					newDom.parentNode == null
 				) {
@@ -324,7 +288,6 @@ export default function commit(parentDom, newParentVNode, oldParentVNode, isSvg,
 function diffElementNodes(
 	dom,
 	newVNode,
-	oldVNode,
 	isSvg,
 	excessDomChildren,
 	mounts,
@@ -332,7 +295,7 @@ function diffElementNodes(
 	isHydrating
 ) {
 	let i;
-	let oldProps = oldVNode.props;
+	let oldProps = newVNode._oldVNode.props;
 	let newProps = newVNode.props;
   
 	// Tracks entering and exiting SVG namespace when descending through the tree.
@@ -371,12 +334,12 @@ function diffElementNodes(
 			dom.data = newProps;
 		}
 	}
-	else if (newVNode !== oldVNode) {
+	else if (newVNode !== newVNode._oldVNode) {
 		if (excessDomChildren != null) {
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
   
-		oldProps = oldVNode.props || EMPTY_OBJ;
+		oldProps = newVNode._oldVNode.props || EMPTY_OBJ;
   
 		let oldHtml = oldProps.dangerouslySetInnerHTML;
 		let newHtml = newProps.dangerouslySetInnerHTML;
@@ -399,7 +362,6 @@ function diffElementNodes(
 			commit(
 				dom,
 				newVNode,
-				oldVNode,
 				newVNode.type === 'foreignObject' ? false : isSvg,
 				excessDomChildren,
 				mounts,

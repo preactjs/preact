@@ -25,6 +25,9 @@ export default function renderTree(
 	let tmp,
 		newType = newVNode.type;
 
+	// TODO: we need to clear this prop at some stage to not leak memory...
+	newVNode._oldVNode = oldVNode;
+
 	// JSON injection protection
 	if (newVNode.constructor !== undefined) return null;
 
