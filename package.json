@@ -1,0 +1,19 @@
+{
+  "name": "preact",
+  "version": "10.0.0",
+  "description": "preact源码解析",
+  "license": "MIT",
+  "author": {
+    "name": "yujingwyh",
+    "email": "yujingwyh@163.com"
+  },
+  "scripts": {
+    "start": "node ./node_modules/parcel-bundler/bin/cli.js ./demo/index.html"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/core": "^7.6.4",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "parcel-bundler": "^1.12.4"
+  }
+}

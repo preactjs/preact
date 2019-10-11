@@ -3,3 +3,5 @@ node_modules
 package-lock.json
 .vscode
 .idea
+.cache
+dist

@@ -1,0 +1,16 @@
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "modules": false,
+        "targets": {
+          "browsers": "ie >= 9"
+        }
+      }
+    ]
+  ],
+  "plugins": [
+    ["transform-react-jsx", { "pragma":"h" }]
+  ]
+}
