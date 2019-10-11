@@ -68,10 +68,19 @@ function getHookState(index) {
 	return hooks._list[index];
 }
 
+/**
+ * @param {import('./index').StateUpdater<any>} initialState
+ */
 export function useState(initialState) {
 	return useReducer(invokeOrReturn, initialState);
 }
 
+/**
+ * @param {import('./index').Reducer<any, any>} reducer
+ * @param {import('./index').StateUpdater<any>} initialState
+ * @param {(initialState: any) => void} [init]
+ * @returns {[ any, (state: any) => void ]}
+ */
 export function useReducer(reducer, initialState, init) {
 
 	/** @type {import('./internal').ReducerHookState} */
@@ -245,12 +254,18 @@ if (typeof window !== 'undefined') {
 	};
 }
 
+/**
+ * @param {import('./internal').EffectHookState[]} effects
+ */
 function handleEffects(effects) {
 	effects.forEach(invokeCleanup);
 	effects.forEach(invokeEffect);
 	return [];
 }
 
+/**
+ * @param {import('./internal').EffectHookState} hook
+ */
 function invokeCleanup(hook) {
 	if (hook._cleanup) hook._cleanup();
 }
@@ -264,6 +279,10 @@ function invokeEffect(hook) {
 	if (typeof result === 'function') hook._cleanup = result;
 }
 
+/**
+ * @param {any[]} oldArgs
+ * @param {any[]} newArgs
+ */
 function argsChanged(oldArgs, newArgs) {
 	return !oldArgs || newArgs.some((arg, index) => arg !== oldArgs[index]);
 }
