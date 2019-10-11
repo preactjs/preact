@@ -9,6 +9,9 @@ let currentComponent;
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
+/** @type {Array<import('./internal').Component>} */
+let layoutEffects = [];
+
 let oldBeforeRender = options._render;
 options._render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
@@ -21,18 +24,11 @@ options._render = vnode => {
 	}
 };
 
-let oldAfterDiff = options.diffed;
-options.diffed = vnode => {
-	if (oldAfterDiff) oldAfterDiff(vnode);
-
-	const c = vnode._component;
-	if (!c) return;
-
-	const hooks = c.__hooks;
-	if (hooks) {
-		hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
-	}
-};
+let oldCommit = options._commit;
+options._commit = vnode => {
+	if (oldCommit) oldCommit(vnode);
+	flushLayoutEffects();
+}
 
 
 let oldBeforeUnmount = options.unmount;
@@ -133,6 +129,9 @@ export function useLayoutEffect(callback, args) {
 		state._value = callback;
 		state._args = args;
 		currentComponent.__hooks._pendingLayoutEffects.push(state);
+		if(!currentComponent._layoutEffectsQueued) {
+			currentComponent._layoutEffectsQueued = layoutEffects.push(currentComponent);
+		}
 	}
 }
 
@@ -211,6 +210,17 @@ export function useDebugValue(value, formatter) {
  */
 /* istanbul ignore next */
 let afterPaint = () => {};
+
+/**
+ * Layout effects consumer
+ */
+function flushLayoutEffects() {
+	layoutEffects.some(component => {
+		component._layoutEffectsQueued = 0;
+		component.__hooks._pendingLayoutEffects = handleEffects(component.__hooks._pendingLayoutEffects);
+	});
+	layoutEffects = [];
+}
 
 /**
  * After paint effects consumer.
