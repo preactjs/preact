@@ -70,7 +70,7 @@ describe('useLayoutEffect', () => {
 		expect(callback).to.be.calledOnce;
 	});
 
-	it('Should execute layout effects in the right order', () => {
+	it('should execute multiple layout effects in same component in the right order', () => {
 		let executionOrder = [];
 		const App = ({ i }) => {
 			executionOrder = [];
@@ -84,8 +84,8 @@ describe('useLayoutEffect', () => {
 			}, [i]);
 			return <p>Test</p>;
 		};
-		act(() => render(<App i={0} />, scratch));
-		act(() => render(<App i={2} />, scratch));
+		render(<App i={0} />, scratch);
+		render(<App i={2} />, scratch);
 		expect(executionOrder).to.deep.equal(['cleanup1', 'cleanup2', 'action1', 'action2']);
 	});
 
