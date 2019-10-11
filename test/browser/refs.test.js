@@ -121,7 +121,7 @@ describe('refs', () => {
 		render(<Outer />, scratch);
 
 		expect(outer).to.have.been.calledOnce.and.calledWith(inst);
-		expect(inner).to.have.been.calledOnce.and.calledWith(inst.base);
+		expect(inner).to.have.been.calledOnce.and.calledWith(inst._vnode._dom);
 
 		outer.resetHistory();
 		inner.resetHistory();
@@ -138,7 +138,7 @@ describe('refs', () => {
 
 		expect(inner, 're-render swap');
 		expect(inner.firstCall, 're-render swap').to.have.been.calledWith(null);
-		expect(inner.secondCall, 're-render swap').to.have.been.calledWith(inst.base);
+		expect(inner.secondCall, 're-render swap').to.have.been.calledWith(inst._vnode._dom);
 
 		InnermostComponent = 'span';
 		outer.resetHistory();
@@ -179,7 +179,7 @@ describe('refs', () => {
 
 		expect(outer, 'outer initial').to.have.been.calledOnce.and.calledWith(outerInst);
 		expect(inner, 'inner initial').to.have.been.calledOnce.and.calledWith(innerInst);
-		expect(innermost, 'innerMost initial').to.have.been.calledOnce.and.calledWith(innerInst.base);
+		expect(innermost, 'innerMost initial').to.have.been.calledOnce.and.calledWith(innerInst._vnode._dom);
 
 		outer.resetHistory();
 		inner.resetHistory();
@@ -196,7 +196,7 @@ describe('refs', () => {
 
 		expect(innermost, 'innerMost swap');
 		expect(innermost.firstCall, 'innerMost swap').to.have.been.calledWith(null);
-		expect(innermost.secondCall, 'innerMost swap').to.have.been.calledWith(innerInst.base);
+		expect(innermost.secondCall, 'innerMost swap').to.have.been.calledWith(innerInst._vnode._dom);
 		InnermostComponent = 'span';
 
 		outer.resetHistory();
@@ -327,7 +327,7 @@ describe('refs', () => {
 			}
 		}
 
-		render(<div><Wrapper ref={c => ref(c.base)} /></div>, scratch);
+		render(<div><Wrapper ref={c => ref(c._vnode._dom)} /></div>, scratch);
 		expect(ref).to.have.been.calledOnce.and.calledWith(scratch.firstChild.firstChild);
 	});
 

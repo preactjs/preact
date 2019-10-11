@@ -94,14 +94,14 @@ export const isValidElement = vnode => vnode!=null && vnode.constructor === unde
  * @param {boolean | string | number | import('./internal').VNode} possibleVNode A possible VNode
  * @returns {import('./internal').VNode | null}
  */
-export function coerceToVNode(possibleVNode) {
+export function coerceToVNode(possibleVNode, dedupe = true) {
 	if (possibleVNode == null || typeof possibleVNode === 'boolean') return null;
 	if (typeof possibleVNode === 'string' || typeof possibleVNode === 'number') {
 		return createVNode(null, possibleVNode, null, null);
 	}
 
 	// Clone vnode if it has already been used. ceviche/#57
-	if (possibleVNode._dom!=null || possibleVNode._component!=null) {
+	if (dedupe && (possibleVNode._used||possibleVNode._dom!=null || possibleVNode._component!=null)) {
 		let vnode = createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.key, null);
 		vnode._dom = possibleVNode._dom;
 		return vnode;

@@ -4,7 +4,7 @@ import { setupRerender } from 'preact/test-utils';
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 
 /** @jsx h */
-describe('Portal', () => {
+xdescribe('Portal', () => {
 
 	/** @type {HTMLDivElement} */
 	let scratch;

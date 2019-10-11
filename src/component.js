@@ -1,7 +1,8 @@
 import { assign } from './util';
-import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
+import renderTree from './diff/render-tree';
+import commit, { commitRoot } from './diff/commit';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -112,12 +113,14 @@ function renderComponent(component) {
 		parentDom = component._parentDom;
 
 	if (parentDom) {
-		let mounts = [];
-		let newDom = diff(parentDom, vnode, assign({}, vnode), component._context, parentDom.ownerSVGElement!==undefined, null, mounts, oldDom == null ? getDomSibling(vnode) : oldDom);
-		commitRoot(mounts, vnode);
+		let mounts = [], updates = [];
+		const oldVNode = assign({}, vnode);
+		const newVNode = renderTree(vnode, oldVNode, component._context);
+		commit(parentDom, newVNode, oldVNode, parentDom.ownerSVGElement !== undefined, null, mounts, updates, oldDom == null ? getDomSibling(vnode) : oldDom, false);
+		commitRoot(mounts, updates, newVNode);
 
-		if (newDom != oldDom) {
-			updateParentDomPointers(vnode);
+		if (newVNode._dom != oldDom) {
+			updateParentDomPointers(newVNode);
 		}
 	}
 }

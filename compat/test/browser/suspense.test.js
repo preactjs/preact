@@ -75,7 +75,7 @@ class Catcher extends Component {
 	}
 }
 
-describe('suspense', () => {
+xdescribe('suspense', () => {
 	let scratch, rerender;
 
 	beforeEach(() => {

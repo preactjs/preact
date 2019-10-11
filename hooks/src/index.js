@@ -21,9 +21,9 @@ options._render = vnode => {
 	}
 };
 
-let oldAfterDiff = options.diffed;
-options.diffed = vnode => {
-	if (oldAfterDiff) oldAfterDiff(vnode);
+let oldCommitted = options.committed;
+options.committed = (vnode, mounts) => {
+	if (oldCommitted) oldCommitted(vnode);
 
 	const c = vnode._component;
 	if (!c) return;
@@ -31,7 +31,12 @@ options.diffed = vnode => {
 	const hooks = c.__hooks;
 	if (hooks) {
 		hooks._handles = bindHandles(hooks._handles);
-		hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
+		// TODO: very nasty mis-use of the mountes here...
+		mounts.push({
+			componentDidMount() {
+				hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
+			}
+		});
 	}
 };
 

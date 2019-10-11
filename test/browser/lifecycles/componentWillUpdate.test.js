@@ -100,7 +100,8 @@ describe('Lifecycle methods', () => {
 
 					// Verify that the component is actually mounted when this
 					// callback is invoked.
-					expect(scratch.querySelector('#inner')).to.equalNode(this.base);
+					// TODO (Sven): this was equalNode(this.base) but this.base is no longer set
+					expect(scratch.querySelector('#inner')).to.equalNode(this._vnode._dom);
 				}
 
 				render() {

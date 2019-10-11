@@ -21,6 +21,10 @@ describe('Lifecycle methods', () => {
 		teardown(scratch);
 	});
 
+	function deepFreeze(arr) {
+		return arr.map(o => typeof o === 'object' ? Object.freeze(o) : o);
+	}
+
 	it('should call nested new lifecycle methods in the right order', () => {
 		let updateOuterState;
 		let updateInnerState;
@@ -29,16 +33,16 @@ describe('Lifecycle methods', () => {
 
 		let log;
 		function logger(msg) {
-			return function() {
+			return function(...args) {
 				// return true for shouldComponentUpdate
-				log.push(msg);
+				log.push([msg, ...deepFreeze(args)]);
 				return true;
 			};
 		}
 
 		class Outer extends Component {
-			static getDerivedStateFromProps() {
-				log.push('outer getDerivedStateFromProps');
+			static getDerivedStateFromProps(...args) {
+				log.push(['outer getDerivedStateFromProps', ...deepFreeze(args)]);
 				return null;
 			}
 			constructor() {
@@ -55,7 +59,9 @@ describe('Lifecycle methods', () => {
 				log.push('outer render');
 				return (
 					<div>
+						<InnerPrevious outerValue={this.state.value} />
 						<Inner x={this.props.x} outerValue={this.state.value} />
+						<InnerNext outerValue={this.state.value} />
 					</div>
 				);
 			}
@@ -69,8 +75,8 @@ describe('Lifecycle methods', () => {
 		});
 
 		class Inner extends Component {
-			static getDerivedStateFromProps() {
-				log.push('inner getDerivedStateFromProps');
+			static getDerivedStateFromProps(...args) {
+				log.push(['inner getDerivedStateFromProps', ...deepFreeze(args)]);
 				return null;
 			}
 			constructor() {
@@ -88,6 +94,37 @@ describe('Lifecycle methods', () => {
 				return <span>{this.props.x} {this.props.outerValue} {this.state.value}</span>;
 			}
 		}
+
+		class InnerPrevious extends Component {
+			static getDerivedStateFromProps(...args) {
+				log.push(['inner-previous getDerivedStateFromProps', ...deepFreeze(args)]);
+				return null;
+			}
+			constructor() {
+				super();
+				log.push('inner-previous constructor');
+			}
+			render() {
+				log.push('inner-previous render');
+				return <span>{this.props.x} {this.props.outerValue}</span>;
+			}
+		}
+
+		class InnerNext extends Component {
+			static getDerivedStateFromProps(...args) {
+				log.push(['inner-next getDerivedStateFromProps', ...deepFreeze(args)]);
+				return null;
+			}
+			constructor() {
+				super();
+				log.push('inner-next constructor');
+			}
+			render() {
+				log.push('inner-next render');
+				return <span>{this.props.x} {this.props.outerValue}</span>;
+			}
+		}
+
 		Object.assign(Inner.prototype, {
 			componentDidMount: logger('inner componentDidMount'),
 			shouldComponentUpdate: logger('inner shouldComponentUpdate'),
@@ -96,40 +133,68 @@ describe('Lifecycle methods', () => {
 			componentWillUnmount: logger('inner componentWillUnmount')
 		});
 
+		Object.assign(InnerPrevious.prototype, {
+			componentDidMount: logger('inner-previous componentDidMount'),
+			shouldComponentUpdate: logger('inner-previous shouldComponentUpdate'),
+			getSnapshotBeforeUpdate: logger('inner-previous getSnapshotBeforeUpdate'),
+			componentDidUpdate: logger('inner-previous componentDidUpdate'),
+			componentWillUnmount: logger('inner-previous componentWillUnmount')
+		});
+
+		Object.assign(InnerNext.prototype, {
+			componentDidMount: logger('inner-next componentDidMount'),
+			shouldComponentUpdate: logger('inner-next shouldComponentUpdate'),
+			getSnapshotBeforeUpdate: logger('inner-next getSnapshotBeforeUpdate'),
+			componentDidUpdate: logger('inner-next componentDidUpdate'),
+			componentWillUnmount: logger('inner-next componentWillUnmount')
+		});
+
 		// Constructor & mounting
 		log = [];
 		render(<Outer x={1} />, scratch);
 		expect(log).to.deep.equal([
 			'outer constructor',
-			'outer getDerivedStateFromProps',
+			['outer getDerivedStateFromProps', { x: 1 }, { value: 0 }],
 			'outer render',
+			'inner-previous constructor',
+			['inner-previous getDerivedStateFromProps', { outerValue: 0 }, {}],
+			'inner-previous render',
 			'inner constructor',
-			'inner getDerivedStateFromProps',
+			['inner getDerivedStateFromProps', { outerValue: 0, x: 1 }, { value: 0 }],
 			'inner render',
-			'inner componentDidMount',
-			'outer componentDidMount'
+			'inner-next constructor',
+			['inner-next getDerivedStateFromProps', { outerValue: 0 }, {}],
+			'inner-next render',
+			['inner-previous componentDidMount'],
+			['inner componentDidMount'],
+			['inner-next componentDidMount'],
+			['outer componentDidMount']
 		]);
 
 		// Outer & Inner props update
 		log = [];
 		render(<Outer x={2} />, scratch);
-		// Note: we differ from react here in that we apply changes to the dom
-		// as we find them while diffing. React on the other hand separates this
-		// into specific phases, meaning changes to the dom are only flushed
-		// once the whole diff-phase is complete. This is why
-		// "outer getSnapshotBeforeUpdate" is called just before the "inner" hooks.
-		// For react this call would be right before "outer componentDidUpdate"
 		expect(log).to.deep.equal([
-			'outer getDerivedStateFromProps',
-			'outer shouldComponentUpdate',
+			['outer getDerivedStateFromProps', { x: 2 }, { value: 0 }],
+			['outer shouldComponentUpdate', { x: 2 }, { value: 0 }, {}],
 			'outer render',
-			'outer getSnapshotBeforeUpdate',
-			'inner getDerivedStateFromProps',
-			'inner shouldComponentUpdate',
+			['inner-previous getDerivedStateFromProps', { outerValue: 0 }, {}],
+			['inner-previous shouldComponentUpdate', { outerValue: 0 }, {}, {}],
+			'inner-previous render',
+			['inner getDerivedStateFromProps', { outerValue: 0, x: 2 }, { value: 0 }],
+			['inner shouldComponentUpdate', { outerValue: 0, x: 2 }, { value: 0 }, {}],
 			'inner render',
-			'inner getSnapshotBeforeUpdate',
-			'inner componentDidUpdate',
-			'outer componentDidUpdate'
+			['inner-next getDerivedStateFromProps', { outerValue: 0 }, {}],
+			['inner-next shouldComponentUpdate', { outerValue: 0 }, {}, {}],
+			'inner-next render',
+			['inner-previous getSnapshotBeforeUpdate', { outerValue: 0 }, {}],
+			['inner getSnapshotBeforeUpdate', { outerValue: 0, x: 1 }, { value: 0 }],
+			['inner-next getSnapshotBeforeUpdate', { outerValue: 0 }, {}],
+			['outer getSnapshotBeforeUpdate', { x: 1 }, { value: 0 }],
+			['inner-previous componentDidUpdate', { outerValue: 0 }, {}, true],
+			['inner componentDidUpdate', { x: 1, outerValue: 0 }, { value: 0 }, true],
+			['inner-next componentDidUpdate', { outerValue: 0 }, {}, true],
+			['outer componentDidUpdate', { x: 1 }, { value: 0 }, true]
 		]);
 
 		// Outer state update & Inner props update
@@ -137,16 +202,26 @@ describe('Lifecycle methods', () => {
 		updateOuterState();
 		rerender();
 		expect(log).to.deep.equal([
-			'outer getDerivedStateFromProps',
-			'outer shouldComponentUpdate',
+			['outer getDerivedStateFromProps', { x: 2 }, { value: 1 }],
+			['outer shouldComponentUpdate', { x: 2 }, { value: 1 }, {}],
 			'outer render',
-			'outer getSnapshotBeforeUpdate',
-			'inner getDerivedStateFromProps',
-			'inner shouldComponentUpdate',
+			['inner-previous getDerivedStateFromProps', { outerValue: 1 }, {}],
+			['inner-previous shouldComponentUpdate', { outerValue: 1 }, {}, {}],
+			'inner-previous render',
+			['inner getDerivedStateFromProps', { outerValue: 1, x: 2 }, { value: 0 }],
+			['inner shouldComponentUpdate', { outerValue: 1, x: 2 }, { value: 0 }, {}],
 			'inner render',
-			'inner getSnapshotBeforeUpdate',
-			'inner componentDidUpdate',
-			'outer componentDidUpdate'
+			['inner-next getDerivedStateFromProps', { outerValue: 1 }, {}],
+			['inner-next shouldComponentUpdate', { outerValue: 1 }, {}, {}],
+			'inner-next render',
+			['inner-previous getSnapshotBeforeUpdate', { outerValue: 0 }, {}],
+			['inner getSnapshotBeforeUpdate', { outerValue: 0, x: 2 }, { value: 0 }],
+			['inner-next getSnapshotBeforeUpdate', { outerValue: 0 }, {}],
+			['outer getSnapshotBeforeUpdate', { x: 2 }, { value: 0 }],
+			['inner-previous componentDidUpdate', { outerValue: 0 }, {}, true],
+			['inner componentDidUpdate', { outerValue: 0, x: 2 }, { value: 0 }, true],
+			['inner-next componentDidUpdate', { outerValue: 0 }, {}, true],
+			['outer componentDidUpdate', { x: 2 }, { value: 0 }, true]
 		]);
 
 		// Inner state update
@@ -154,11 +229,11 @@ describe('Lifecycle methods', () => {
 		updateInnerState();
 		rerender();
 		expect(log).to.deep.equal([
-			'inner getDerivedStateFromProps',
-			'inner shouldComponentUpdate',
+			['inner getDerivedStateFromProps', { outerValue: 1, x: 2 }, { value: 1 }],
+			['inner shouldComponentUpdate', { outerValue: 1, x: 2 }, { value: 1 }, {}],
 			'inner render',
-			'inner getSnapshotBeforeUpdate',
-			'inner componentDidUpdate'
+			['inner getSnapshotBeforeUpdate', { outerValue: 1, x: 2 }, { value: 0 }],
+			['inner componentDidUpdate', { outerValue: 1, x: 2 }, { value: 0 }, true]
 		]);
 
 		// Force update Outer
@@ -166,15 +241,25 @@ describe('Lifecycle methods', () => {
 		forceUpdateOuter();
 		rerender();
 		expect(log).to.deep.equal([
-			'outer getDerivedStateFromProps',
+			['outer getDerivedStateFromProps', { x: 2 }, { value: 1 }],
 			'outer render',
-			'outer getSnapshotBeforeUpdate',
-			'inner getDerivedStateFromProps',
-			'inner shouldComponentUpdate',
+			['inner-previous getDerivedStateFromProps', { outerValue: 1 }, {}],
+			['inner-previous shouldComponentUpdate', { outerValue: 1 }, {}, {}],
+			'inner-previous render',
+			['inner getDerivedStateFromProps', { outerValue: 1, x: 2 }, { value: 1 }],
+			['inner shouldComponentUpdate', { outerValue: 1, x: 2 }, { value: 1 }, {}],
 			'inner render',
-			'inner getSnapshotBeforeUpdate',
-			'inner componentDidUpdate',
-			'outer componentDidUpdate'
+			['inner-next getDerivedStateFromProps', { outerValue: 1 }, {}],
+			['inner-next shouldComponentUpdate', { outerValue: 1 }, {}, {}],
+			'inner-next render',
+			['inner-previous getSnapshotBeforeUpdate', { outerValue: 1 }, {}],
+			['inner getSnapshotBeforeUpdate', { outerValue: 1, x: 2 }, { value: 1 }],
+			['inner-next getSnapshotBeforeUpdate', { outerValue: 1 }, {}],
+			['outer getSnapshotBeforeUpdate', { x: 2 }, { value: 1 }],
+			['inner-previous componentDidUpdate', { outerValue: 1 }, {}, true],
+			['inner componentDidUpdate', { outerValue: 1, x: 2 }, { value: 1 }, true],
+			['inner-next componentDidUpdate', { outerValue: 1 }, {}, true],
+			['outer componentDidUpdate', { x: 2 }, { value: 1 }, true]
 		]);
 
 		// Force update Inner
@@ -182,18 +267,21 @@ describe('Lifecycle methods', () => {
 		forceUpdateInner();
 		rerender();
 		expect(log).to.deep.equal([
-			'inner getDerivedStateFromProps',
+			['inner getDerivedStateFromProps', { outerValue: 1, x: 2 }, { value: 1 }],
 			'inner render',
-			'inner getSnapshotBeforeUpdate',
-			'inner componentDidUpdate'
+			['inner getSnapshotBeforeUpdate', { outerValue: 1, x: 2 }, { value: 1 }],
+			['inner componentDidUpdate', { outerValue: 1, x: 2 }, { value: 1 }, true]
 		]);
 
+		// TODO: unmount order is different to react, react calls willUnmount on outer last
 		// Unmounting Outer & Inner
 		log = [];
 		render(<table />, scratch);
 		expect(log).to.deep.equal([
-			'outer componentWillUnmount',
-			'inner componentWillUnmount'
+			['inner-previous componentWillUnmount'],
+			['inner componentWillUnmount'],
+			['inner-next componentWillUnmount'],
+			['outer componentWillUnmount']
 		]);
 
 	});
