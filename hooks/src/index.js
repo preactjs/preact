@@ -217,7 +217,7 @@ let afterPaint = () => {};
  */
 function flushAfterPaintEffects() {
 	afterPaintEffects.some(component => {
-		component._afterPaintQueued = false;
+		component._afterPaintQueued = 0;
 		if (component._parentDom) {
 			component.__hooks._pendingEffects = handleEffects(component.__hooks._pendingEffects);
 		}
