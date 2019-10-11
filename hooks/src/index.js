@@ -9,6 +9,9 @@ let currentComponent;
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
+/** @type {Array<import('./internal').EffectHookState>} */
+let layoutEffects = [];
+
 let oldBeforeRender = options._render;
 options._render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
@@ -25,15 +28,22 @@ let oldAfterDiff = options.diffed;
 options.diffed = vnode => {
 	if (oldAfterDiff) oldAfterDiff(vnode);
 
+	/** @type {import('./internal').Component} */
 	const c = vnode._component;
 	if (!c) return;
 
 	const hooks = c.__hooks;
 	if (hooks) {
-		hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
+		layoutEffects = layoutEffects.concat(hooks._pendingLayoutEffects);
+		hooks._pendingLayoutEffects = [];
 	}
 };
 
+let oldCommit = options._commit;
+options._commit = vnode => {
+	if (oldCommit) oldCommit(vnode);
+	layoutEffects = handleEffects(layoutEffects);
+}
 
 let oldBeforeUnmount = options.unmount;
 options.unmount = vnode => {
