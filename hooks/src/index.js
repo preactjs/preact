@@ -6,7 +6,7 @@ let currentIndex;
 /** @type {import('./internal').Component} */
 let currentComponent;
 
-/** @type {Array<import('./internal').EffectHookState>} */
+/** @type {Array<import('./internal').EffectHookState[]>} */
 let afterPaintEffects = [];
 
 /** @type {Array<import('./internal').EffectHookState>} */
@@ -19,8 +19,9 @@ options._render = vnode => {
 	currentComponent = vnode._component;
 	currentIndex = 0;
 
-	if (currentComponent.__hooks) {
-		currentComponent.__hooks._pendingEffects = handleEffects(currentComponent.__hooks._pendingEffects);
+	if (currentComponent.__hooks && currentComponent.__hooks._effectPos) {
+		handleEffects(afterPaintEffects.splice(currentComponent.__hooks._effectPos - 1, 1)[0]);
+		currentComponent.__hooks._effectPos = 0;
 	}
 };
 
@@ -34,8 +35,8 @@ options.diffed = vnode => {
 
 	const hooks = c.__hooks;
 	if (hooks) {
-		afterPaintEffects = afterPaintEffects.concat(hooks._pendingEffects);
-		hooks._pendingEffects = []; // TODO: Breaks line 23 :(
+		hooks._effectPos = afterPaintEffects.push(hooks._pendingEffects);
+		hooks._pendingEffects = [];
 
 		layoutEffects = layoutEffects.concat(hooks._pendingLayoutEffects);
 		hooks._pendingLayoutEffects = [];
@@ -232,7 +233,7 @@ let afterPaint = () => {};
  */
 function flushAfterPaintEffects() {
 	afterPaintScheduled = false;
-	afterPaintEffects = handleEffects(afterPaintEffects);
+	afterPaintEffects = handleEffects(afterPaintEffects.flat());
 }
 
 const RAF_TIMEOUT = 100;
@@ -291,6 +292,7 @@ function invokeCleanup(hook) {
  * @param {import('./internal').EffectHookState} hook
  */
 function invokeEffect(hook) {
+	hook._component.__hooks._effectPos = 0;
 	if (hook._component._parentDom) {
 		const result = hook._value();
 		if (typeof result === 'function') hook._cleanup = result;

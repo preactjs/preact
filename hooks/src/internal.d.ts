@@ -28,6 +28,7 @@ export interface ComponentHooks {
 	_pendingEffects: EffectHookState[];
 	/** List of Effects to be invoked at the end of the current render */
 	_pendingLayoutEffects: EffectHookState[];
+	_effectPos?: number;
 }
 
 export interface Component extends PreactComponent<any, any> {
