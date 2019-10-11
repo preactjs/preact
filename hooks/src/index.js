@@ -131,10 +131,16 @@ export function useRef(initialValue) {
 	return useMemo(() => ({ current: initialValue }), []);
 }
 
+/**
+ * @param {object} ref
+ * @param {() => object} createHandle
+ * @param {any[]} args
+ */
 export function useImperativeHandle(ref, createHandle, args) {
+	args.push(ref);
 	useLayoutEffect(() => {
 		if (ref) ref.current = createHandle();
-	}, args)
+	}, args);
 }
 
 /**
