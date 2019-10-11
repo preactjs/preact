@@ -215,7 +215,7 @@ let afterPaint = () => {};
  * Layout effects consumer
  */
 function flushLayoutEffects() {
-	layoutEffects.some(component => {
+	layoutEffects.reverse().some(component => {
 		component._layoutEffectsQueued = 0;
 		component.__hooks._pendingLayoutEffects = handleEffects(component.__hooks._pendingLayoutEffects);
 	});
@@ -226,7 +226,7 @@ function flushLayoutEffects() {
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
-	afterPaintEffects.some(component => {
+	afterPaintEffects.reverse().some(component => {
 		component._afterPaintQueued = 0;
 		if (component._parentDom) {
 			component.__hooks._pendingEffects = handleEffects(component.__hooks._pendingEffects);
