@@ -115,7 +115,10 @@ export function useEffect(callback, args) {
 		state._args = args;
 
 		currentComponent.__hooks._pendingEffects.push(state);
-		afterPaint(currentComponent);
+		if (!currentComponent._afterPaintQueued) {
+			currentComponent._afterPaintQueued = afterPaintEffects.push(currentComponent);
+			afterPaint(currentComponent._afterPaintQueued);
+		}
 	}
 }
 
@@ -130,6 +133,7 @@ export function useLayoutEffect(callback, args) {
 	if (argsChanged(state._args, args)) {
 		state._value = callback;
 		state._args = args;
+
 		currentComponent.__hooks._pendingLayoutEffects.push(state);
 		if(!currentComponent._layoutEffectsQueued) {
 			currentComponent._layoutEffectsQueued = layoutEffects.push(currentComponent);
@@ -207,8 +211,8 @@ export function useDebugValue(value, formatter) {
 // then effects will ALWAYS run on the NEXT frame instead of the current one, incurring a ~16ms delay.
 // Perhaps this is not such a big deal.
 /**
- * Invoke a component's pending effects after the next frame renders
- * @type {(component: import('./internal').Component) => void}
+ * Schedule afterPaintEffects flush after the browser paints
+ * @type {(newQueueLength: number) => void}
  */
 /* istanbul ignore next */
 let afterPaint = () => {};
@@ -270,11 +274,8 @@ function afterNextFrame(callback) {
 /* istanbul ignore else */
 if (typeof window !== 'undefined') {
 	let prevRaf = options.requestAnimationFrame;
-	afterPaint = (component) => {
-		if (
-			(!component._afterPaintQueued && (component._afterPaintQueued = afterPaintEffects.push(component)) === 1)
-			|| prevRaf !== options.requestAnimationFrame
-		) {
+	afterPaint = (newQueueLength) => {
+		if (newQueueLength === 1 || prevRaf !== options.requestAnimationFrame) {
 			prevRaf = options.requestAnimationFrame;
 
 			/* istanbul ignore next */
