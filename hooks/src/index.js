@@ -128,6 +128,7 @@ export function useEffect(callback, args) {
 	if (argsChanged(state._args, args)) {
 		state._value = callback;
 		state._args = args;
+		state._component = currentComponent;
 
 		currentComponent.__hooks._pendingEffects.push(state);
 		afterPaint();
@@ -145,6 +146,8 @@ export function useLayoutEffect(callback, args) {
 	if (argsChanged(state._args, args)) {
 		state._value = callback;
 		state._args = args;
+		state._component = currentComponent;
+
 		currentComponent.__hooks._pendingLayoutEffects.push(state);
 	}
 }
@@ -288,9 +291,10 @@ function invokeCleanup(hook) {
  * @param {import('./internal').EffectHookState} hook
  */
 function invokeEffect(hook) {
-	// TODO: Need to check if component is still mounted
-	const result = hook._value();
-	if (typeof result === 'function') hook._cleanup = result;
+	if (hook._component._parentDom) {
+		const result = hook._value();
+		if (typeof result === 'function') hook._cleanup = result;
+	}
 }
 
 /**
