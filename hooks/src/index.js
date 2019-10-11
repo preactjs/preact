@@ -6,7 +6,7 @@ let currentIndex;
 /** @type {import('./internal').Component} */
 let currentComponent;
 
-/** @type {Array<import('./internal').Component>} */
+/** @type {Array<import('./internal').EffectHookState>} */
 let afterPaintEffects = [];
 
 /** @type {Array<import('./internal').EffectHookState>} */
@@ -34,6 +34,9 @@ options.diffed = vnode => {
 
 	const hooks = c.__hooks;
 	if (hooks) {
+		afterPaintEffects = afterPaintEffects.concat(hooks._pendingEffects);
+		hooks._pendingEffects = []; // TODO: Breaks line 23 :(
+
 		layoutEffects = layoutEffects.concat(hooks._pendingLayoutEffects);
 		hooks._pendingLayoutEffects = [];
 	}
@@ -127,7 +130,7 @@ export function useEffect(callback, args) {
 		state._args = args;
 
 		currentComponent.__hooks._pendingEffects.push(state);
-		afterPaint(currentComponent);
+		afterPaint();
 	}
 }
 
@@ -225,13 +228,8 @@ let afterPaint = () => {};
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
-	afterPaintEffects.some(component => {
-		component._afterPaintQueued = 0;
-		if (component._parentDom) {
-			component.__hooks._pendingEffects = handleEffects(component.__hooks._pendingEffects);
-		}
-	});
-	afterPaintEffects = [];
+	afterPaintScheduled = false;
+	afterPaintEffects = handleEffects(afterPaintEffects);
 }
 
 const RAF_TIMEOUT = 100;
@@ -254,20 +252,19 @@ function afterNextFrame(callback) {
 	const raf = requestAnimationFrame(done);
 }
 
+let afterPaintScheduled = false;
 /* istanbul ignore else */
 if (typeof window !== 'undefined') {
 	let prevRaf = options.requestAnimationFrame;
-	afterPaint = (component) => {
-		if (
-			(!component._afterPaintQueued && (component._afterPaintQueued = afterPaintEffects.push(component)) === 1)
-			|| prevRaf !== options.requestAnimationFrame
-		) {
+	afterPaint = () => {
+		if (!afterPaintScheduled || prevRaf !== options.requestAnimationFrame) {
+			afterPaintScheduled = true;
 			prevRaf = options.requestAnimationFrame;
 
 			/* istanbul ignore next */
 			(options.requestAnimationFrame || afterNextFrame)(flushAfterPaintEffects);
 		}
-	};
+	}
 }
 
 /**
@@ -291,6 +288,7 @@ function invokeCleanup(hook) {
  * @param {import('./internal').EffectHookState} hook
  */
 function invokeEffect(hook) {
+	// TODO: Need to check if component is still mounted
 	const result = hook._value();
 	if (typeof result === 'function') hook._cleanup = result;
 }
