@@ -20,7 +20,9 @@ options._render = vnode => {
 	currentIndex = 0;
 
 	if (currentComponent.__hooks) {
-		currentComponent.__hooks._pendingEffects = handleEffects(currentComponent.__hooks._pendingEffects);
+		currentComponent.__hooks._pendingEffects.forEach(invokeCleanup);
+		currentComponent.__hooks._pendingEffects.forEach(invokeEffect);
+		currentComponent.__hooks._pendingEffects = [];
 	}
 };
 
@@ -215,9 +217,14 @@ let afterPaint = () => {};
  * Layout effects consumer
  */
 function flushLayoutEffects() {
-	layoutEffects.reverse().some(component => {
+	layoutEffects = layoutEffects.reverse();
+	layoutEffects.some(component => {
 		component._layoutEffectsQueued = 0;
-		component.__hooks._pendingLayoutEffects = handleEffects(component.__hooks._pendingLayoutEffects);
+		component.__hooks._pendingLayoutEffects.forEach(invokeCleanup);
+	});
+	layoutEffects.some(component => {
+		component.__hooks._pendingLayoutEffects.forEach(invokeEffect);
+		component.__hooks._pendingLayoutEffects = [];
 	});
 	layoutEffects = [];
 }
@@ -226,10 +233,15 @@ function flushLayoutEffects() {
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
-	afterPaintEffects.reverse().some(component => {
+	afterPaintEffects = afterPaintEffects.reverse();
+	afterPaintEffects.some(component => {
 		component._afterPaintQueued = 0;
+		component.__hooks._pendingEffects.forEach(invokeCleanup);
+	});
+	afterPaintEffects.some(component => {
 		if (component._parentDom) {
-			component.__hooks._pendingEffects = handleEffects(component.__hooks._pendingEffects);
+			component.__hooks._pendingEffects.forEach(invokeEffect);
+			component.__hooks._pendingEffects = [];
 		}
 	});
 	afterPaintEffects = [];
@@ -269,15 +281,6 @@ if (typeof window !== 'undefined') {
 			(prevRaf || afterNextFrame)(flushAfterPaintEffects);
 		}
 	};
-}
-
-/**
- * @param {import('./internal').EffectHookState[]} effects
- */
-function handleEffects(effects) {
-	effects.forEach(invokeCleanup);
-	effects.forEach(invokeEffect);
-	return [];
 }
 
 /**
