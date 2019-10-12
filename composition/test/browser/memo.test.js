@@ -1,6 +1,6 @@
 import { createElement as h, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { createComponent, watch, unwrap, isReactive } from '../../src';
+import { createComponent, watch, unwrap, isReactive, value } from '../../src';
 
 /** @jsx h */
 
@@ -117,5 +117,21 @@ describe('memo', () => {
 		await new Promise(resolve => setTimeout(resolve, 1));
 
 		expect(data.value).to.deep.equal([1, 1]);
+	});
+
+	it('watch with multi sources', () => {
+		const Comp = createComponent(() => {
+			const array = value([0, 5, 10]);
+			const index = value(1);
+
+			expect(watch(array).value).to.equal(array.value);
+			expect(watch([array, index], ([a, i]) => a[i]).value).to.equal(
+				array.value[index.value]
+			);
+
+			return () => null;
+		});
+
+		render(<Comp />, scratch);
 	});
 });

@@ -195,7 +195,7 @@ function handleEffect(up, c, init) {
 
 	const srcIsArray = Array.isArray(up.src);
 	let newArgs = srcIsArray
-		? up.src.reduce((acc, s) => acc.concat(resolveArgs(s, c)), [])
+		? up.src.reduce((acc, s) => (acc.push(resolveArgs(s, c)),acc), [])
 		: resolveArgs(up.src, c, init);
 
 	if (srcIsArray ? argsChanged(up.args, newArgs) : up.args !== newArgs) {
