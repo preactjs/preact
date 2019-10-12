@@ -103,7 +103,7 @@ describe('Lifecycle methods', () => {
 			expect(curState).to.deep.equal({ value: 4 });
 		});
 
-		it('cDU should not be called when sDU returned false', () => {
+		it('cDU should not be called when sCU returned false', () => {
 			let spy = sinon.spy();
 			let c;
 
