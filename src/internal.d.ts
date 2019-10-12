@@ -64,8 +64,6 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 
 	_dirty: boolean;
 	_force?: boolean | null;
-	_afterPaintQueued: number; // For useEffect hook
-	_layoutEffectsQueued: number; // For useLayoutEffect hook
 	_renderCallbacks: Array<() => void>; // Only class components
 	_context?: any;
 	_vnode?: VNode<P> | null;

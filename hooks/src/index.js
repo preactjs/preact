@@ -26,6 +26,25 @@ options._render = vnode => {
 	}
 };
 
+let oldAfterDiff = options.diffed;
+options.diffed = vnode => {
+	if (oldAfterDiff) oldAfterDiff(vnode);
+
+	const c = vnode._component;
+	if (!c) return;
+
+	const hooks = c.__hooks;
+	if (hooks) {
+		if(hooks._pendingLayoutEffects.length) {
+			layoutEffects.push(c);
+		}
+
+		if (hooks._pendingEffects.length) {
+			afterPaint(afterPaintEffects.push(c));
+		}
+	}
+};
+
 let oldCommit = options._commit;
 options._commit = vnode => {
 	if (oldCommit) oldCommit(vnode);
@@ -115,10 +134,6 @@ export function useEffect(callback, args) {
 		state._args = args;
 
 		currentComponent.__hooks._pendingEffects.push(state);
-		if (!currentComponent._afterPaintQueued) {
-			currentComponent._afterPaintQueued = afterPaintEffects.push(currentComponent);
-			afterPaint(currentComponent._afterPaintQueued);
-		}
 	}
 }
 
@@ -135,9 +150,6 @@ export function useLayoutEffect(callback, args) {
 		state._args = args;
 
 		currentComponent.__hooks._pendingLayoutEffects.push(state);
-		if(!currentComponent._layoutEffectsQueued) {
-			currentComponent._layoutEffectsQueued = layoutEffects.push(currentComponent);
-		}
 	}
 }
 
@@ -221,9 +233,7 @@ let afterPaint = () => {};
  * Layout effects consumer
  */
 function flushLayoutEffects() {
-	layoutEffects = layoutEffects.reverse();
 	layoutEffects.some(component => {
-		component._layoutEffectsQueued = 0;
 		component.__hooks._pendingLayoutEffects.forEach(invokeCleanup);
 	});
 	layoutEffects.some(component => {
@@ -237,9 +247,7 @@ function flushLayoutEffects() {
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
-	afterPaintEffects = afterPaintEffects.reverse();
 	afterPaintEffects.some(component => {
-		component._afterPaintQueued = 0;
 		component.__hooks._pendingEffects.forEach(invokeCleanup);
 	});
 	afterPaintEffects.some(component => {
