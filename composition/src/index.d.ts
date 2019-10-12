@@ -42,11 +42,10 @@ export function onMounted(callback: () => void): void;
  */
 export function onUnmounted(cb: () => void): void;
 
-export type WatchCallback<T> = (args: any[], oldArgs: any[]) => T;
-export type WatchCallbackSingle<T, R> = (
-  arg: T,
-  oldArg: T | undefined,
-  onSds: Function
+export type WatchCallback<T, R> = (
+  args: T,
+  oldArgs: T,
+  onCleanup: Function
 ) => R;
 export type PropGetter<P, T> = (props: P) => T;
 export type WatchSrc<T, P> =
@@ -71,25 +70,36 @@ export type WatchResult<T> = { readonly value: T };
  * @param callback optional callback to call if the args returned from src changed
  * @returns `value` holding the result from the first `src` specified or the return of the `callback`
  */
+
+export type Unpack<P, T extends (WatchSrc<any, P>)[]> = {
+  [I in keyof T]: T[I] extends WatchSrc<infer U, P> ? U : never;
+};
+
+export function watch<P, T extends (WatchSrc<any, P>)[]>(src: T): Unpack<P, T>;
+export function watch<P, T extends (WatchSrc<any, P>)[], R>(
+  src: T,
+  cb: WatchCallback<Unpack<P, T>, PromiseLike<R>>,
+  def: R
+): WatchResult<R>;
+export function watch<P, T extends (WatchSrc<any, P>)[], R>(
+  src: T,
+  cb: WatchCallback<Unpack<P, T>, R>
+): WatchResult<R>;
+
 export function watch<P, T>(src: WatchSrc<T, P>): WatchResult<T>;
 export function watch<P, T, R>(
   src: WatchSrc<T, P>,
-  cb: WatchCallbackSingle<T, PromiseLike<R>>,
+  cb: WatchCallback<T, PromiseLike<R>>,
   def: R
 ): WatchResult<R>;
 export function watch<P, T, R>(
   src: WatchSrc<T, P>,
-  cb: WatchCallbackSingle<T, PromiseLike<R>>
+  cb: WatchCallback<T, PromiseLike<R>>
 ): { readonly value: R | undefined };
 export function watch<P, T, R>(
   src: WatchSrc<T, P>,
-  cb: WatchCallbackSingle<T, R>
+  cb: WatchCallback<T, R>
 ): WatchResult<R>;
-
-// export function watch<T, P = any>(
-//   src: WatchSrc<T, P> | WatchSrc[],
-//   cb?: WatchCallback<T>
-// ): ValueHolder<T>;
 
 /**
  * `effect` acts like `watch` and it supports the same parameters buts its run after render
@@ -98,15 +108,14 @@ export function watch<P, T, R>(
  * @param callback optional callback to call if the args returned from src changed
  * @returns nothing
  */
-export function effect<P, T, R>(
+export function effect<P, T>(
   src: WatchSrc<T, P>,
-  cb: WatchCallbackSingle<T, R>
+  cb: WatchCallback<T, void>
 ): void;
-
-// export function effect<T, P = any>(
-//   src: WatchSrc<T, P> | WatchSrc[],
-//   cb: WatchCallback<T>
-// ): void;
+export function effect<P, T extends (WatchSrc<any, P>)[]>(
+  src: T,
+  cb: WatchCallback<Unpack<P, T>, void>
+): void;
 
 interface InjectionKey<T> extends String {}
 
