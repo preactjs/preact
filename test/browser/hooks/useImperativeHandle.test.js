@@ -1,5 +1,6 @@
-import { createElement as h, render, useImperativeHandle, useRef } from '../../../src';
+import { createElement as h, render, useImperativeHandle, useRef, useState } from '../../../src';
 import { setupScratch, teardown } from '../../_util/helpers';
+import { setupRerender } from '../../../test-utils';
 
 /** @jsx h */
 
@@ -9,8 +10,12 @@ describe('useImperativeHandle', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
+	/** @type {() => void} */
+	let rerender;
+
 	beforeEach(() => {
 		scratch = setupScratch();
+		rerender = setupRerender();
 	});
 
 	afterEach(() => {
@@ -57,6 +62,53 @@ describe('useImperativeHandle', () => {
 		expect(createHandleSpy).to.have.been.calledThrice;
 		expect(ref.current).to.have.property('test');
 		expect(ref.current.test()).to.equal('test0');
+	});
+
+	it('Updates given ref when passed-in ref changes', () => {
+		let ref1, ref2;
+
+		/** @type {(arg: any) => void} */
+		let setRef;
+
+		/** @type {() => void} */
+		let updateState;
+
+		const createHandleSpy = sinon.spy(() => ({
+			test: () => 'test'
+		}));
+
+		function Comp() {
+			ref1 = useRef({});
+			ref2 = useRef({});
+
+			const [ref, setRefInternal] = useState(ref1);
+			setRef = setRefInternal;
+
+			let [value, setState] = useState(0);
+			updateState = () => setState((value + 1) % 2);
+
+			useImperativeHandle(ref, createHandleSpy, []);
+			return <p>Test</p>;
+		}
+
+		render(<Comp a={0} />, scratch);
+		expect(createHandleSpy).to.have.been.calledOnce;
+
+		updateState();
+		rerender();
+		expect(createHandleSpy).to.have.been.calledOnce;
+
+		setRef(ref2);
+		rerender();
+		expect(createHandleSpy).to.have.been.calledTwice;
+
+		updateState();
+		rerender();
+		expect(createHandleSpy).to.have.been.calledTwice;
+
+		setRef(ref1);
+		rerender();
+		expect(createHandleSpy).to.have.been.calledThrice;
 	});
 
 	it('should not update ref when args have not changed', () => {
