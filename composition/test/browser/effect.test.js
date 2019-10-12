@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 import { createElement as h, render, createRef } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { createComponent, effect, value, reactive } from '../../src';

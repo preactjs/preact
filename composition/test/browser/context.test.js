@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 import { h, render, createContext, Component } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { createComponent, watch, onUnmounted } from '../../src';
@@ -151,6 +152,7 @@ describe('context', () => {
 			const bar = watch(Bar);
 			onUnmounted(() => unmountspy());
 
+			// eslint-disable-next-line react/display-name
 			return () => {
 				spy(foo.value, bar.value);
 				return <div />;
