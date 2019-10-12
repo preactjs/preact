@@ -1,6 +1,7 @@
 import { h, render, createContext, Component } from 'preact';
+import { act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useContext, useEffect } from '../../src';
+import { useContext, useEffect, useState } from '../../src';
 
 /** @jsx h */
 
@@ -162,5 +163,66 @@ describe('useContext', () => {
 
 		 expect(spy).to.be.calledTwice;
 		 expect(unmountspy).not.to.be.called;
+	});
+
+	it('should maintain context', () => {
+		const context = createContext(null);
+		const { Provider } = context;
+		const configMain = { name: 'main' };
+		const configChild = { name: 'child' };
+		let childSet, mainSet, childValue, mainValue;
+
+		const Input = () => {
+			const config = useContext(context);
+			const [input, set] = useState('');
+
+			if (config.name === 'main') {
+				mainSet = set;
+				mainValue = input;
+			}
+			else {
+				childValue = input;
+				childSet = set;
+			}
+
+			return (
+				<div>
+					{config.name}
+					<input value={input} />
+				</div>
+			);
+		};
+
+		const ChatApp = (props) => {
+			const [config, setConfig] = useState({});
+
+			useEffect(() => {
+				setConfig(props.config);
+			}, [props.config]);
+
+			return (
+				<Provider value={config}>
+					<Input />
+				</Provider>
+			);
+		};
+
+		act(() => render(<ChatApp config={configMain} />, scratch));
+		expect(scratch.innerHTML).to.equal('<div>main<input></div>');
+
+		const div = document.createElement('div');
+		scratch.appendChild(div);
+		act(() => render(<ChatApp config={configChild} />, div));
+		expect(scratch.innerHTML).to.equal('<div>main<input></div><div><div>child<input></div></div>');
+
+		act(() => mainSet('hi'));
+		expect(childValue).to.equal('');
+		expect(mainValue).to.equal('hi');
+		expect(scratch.innerHTML).to.equal('<div>main<input></div><div><div>child<input></div></div>');
+
+		act(() => childSet('bye'));
+		expect(childValue).to.equal('bye');
+		expect(mainValue).to.equal('hi');
+		expect(scratch.innerHTML).to.equal('<div>main<input></div><div><div>child<input></div></div>');
 	});
 });
