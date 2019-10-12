@@ -1,6 +1,6 @@
 import { createElement as h, render, useImperativeHandle, useRef, useState } from '../../../src';
 import { setupScratch, teardown } from '../../_util/helpers';
-import { setupRerender } from "../../../test-utils";
+import { setupRerender } from '../../../test-utils';
 
 /** @jsx h */
 
@@ -74,7 +74,7 @@ describe('useImperativeHandle', () => {
 		let updateState;
 
 		const createHandleSpy = sinon.spy(() => ({
-			test: () => "test"
+			test: () => 'test'
 		}));
 
 		function Comp() {
@@ -82,7 +82,7 @@ describe('useImperativeHandle', () => {
 			ref2 = useRef({});
 
 			const [ref, setRefInternal] = useState(ref1);
-			setRef = setRefInternal
+			setRef = setRefInternal;
 
 			let [value, setState] = useState(0);
 			updateState = () => setState((value + 1) % 2);
