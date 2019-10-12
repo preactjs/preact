@@ -57,15 +57,17 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 }
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
+	// When component is functional component, this is reset to functional component
 	constructor: preact.ComponentType<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
 	base?: PreactElement;
 
 	_dirty: boolean;
-	_renderCallbacks: Array<() => void>;
+	_force?: boolean | null;
+	_renderCallbacks: Array<() => void>; // Only class components
 	_context?: any;
 	_vnode?: VNode<P> | null;
-	_nextState?: S | null;
+	_nextState?: S | null; // Only class components
 	/** Only used in the devtools to later dirty check if state has changed */
 	_prevState?: S | null;
 	/**
@@ -73,7 +75,9 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	 * components or array returns.
 	 */
 	_parentDom?: PreactElement | null;
+	// Always read, set only when handling error
 	_processingException?: Component<any, any> | null;
+	// Always read, set only when handling error. This is used to indicate at diffTime to set _processingException
 	_pendingError?: Component<any, any> | null;
 }
 
