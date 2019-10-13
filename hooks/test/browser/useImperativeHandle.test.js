@@ -37,6 +37,41 @@ describe('useImperativeHandle', () => {
 		expect(ref.current.test()).to.equal('test');
 	});
 
+	it('calls createHandle after every render by default', () => {
+		let ref, createHandleSpy = sinon.spy();
+
+		function Comp() {
+			ref = useRef({});
+			useImperativeHandle(ref, createHandleSpy);
+			return <p>Test</p>;
+		}
+
+		render(<Comp />, scratch);
+		expect(createHandleSpy).to.have.been.calledOnce;
+
+		render(<Comp />, scratch);
+		expect(createHandleSpy).to.have.been.calledTwice;
+
+		render(<Comp />, scratch);
+		expect(createHandleSpy).to.have.been.calledThrice;
+	});
+
+	it('calls createHandle only on mount if an empty array is passed', () => {
+		let ref, createHandleSpy = sinon.spy();
+
+		function Comp() {
+			ref = useRef({});
+			useImperativeHandle(ref, createHandleSpy, []);
+			return <p>Test</p>;
+		}
+
+		render(<Comp />, scratch);
+		expect(createHandleSpy).to.have.been.calledOnce;
+
+		render(<Comp />, scratch);
+		expect(createHandleSpy).to.have.been.calledOnce;
+	});
+
 	it('Updates given ref when args change', () => {
 		let ref, createHandleSpy = sinon.spy();
 
