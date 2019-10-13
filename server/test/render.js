@@ -651,6 +651,22 @@ describe('render', () => {
 			expect(html).to.equal('<div><div>foo</div><div>bar</div></div>');
 		});
 
+		it('should indent Fragment children when pretty printing', () => {
+			let html = render(
+				<div>
+					<Fragment>
+						<div>foo</div>
+						<div>bar</div>
+						<div>
+							<div>baz</div>
+							<div>quux</div>
+						</div>
+					</Fragment>
+				</div>, undefined, { pretty: true }
+			);
+			expect(html).to.equal('<div>\n\t<div>foo</div>\n\t<div>bar</div>\n\t<div>\n\t\t<div>baz</div>\n\t\t<div>quux</div>\n\t</div>\n</div>');
+		});
+
 		it('should skip Fragment even if it has props', () => {
 			let html = render(
 				<div>

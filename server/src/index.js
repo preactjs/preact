@@ -69,7 +69,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 			getChildren(children, vnode.props.children);
 
 			for (let i = 0; i < children.length; i++) {
-				rendered += renderToString(children[i], context, opts, opts.shallowHighOrder!==false, isSvgMode, selectValue);
+				rendered += (i > 0 && pretty ? '\n' : '') + renderToString(children[i], context, opts, opts.shallowHighOrder!==false, isSvgMode, selectValue);
 			}
 			return rendered;
 		}
