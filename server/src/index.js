@@ -98,6 +98,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				// turn off stateful re-rendering:
 				c._dirty = c.__d = true;
 				c.props = props;
+				if (c.state==null) c.state = {};
 				c.context = context;
 				if (nodeName.getDerivedStateFromProps) c.state = assign(assign({}, c.state), nodeName.getDerivedStateFromProps(c.props, c.state));
 				else if (c.componentWillMount) c.componentWillMount();
