@@ -52,8 +52,8 @@ Component.prototype.forceUpdate = function(callback) {
 		// Set render mode so that we can differentiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
-		if (callback) this._renderCallbacks.push(callback);
 		this._force = true;
+		if (callback) this._renderCallbacks.push(callback);
 		enqueueRender(this);
 	}
 };
