@@ -227,9 +227,14 @@ function flushAfterPaintEffects() {
 const RAF_TIMEOUT = 100;
 
 /**
- * requestAnimationFrame with a timeout in case it doesn't fire (for example if the browser tab is not visible)
+ * Schedule a callback to be invoked after the browser has a chance to paint a new frame.
+ * Do this by combining requestAnimationFrame (rAF) + setTimeout to invoke a callback after
+ * the next browser frame.
+ *
+ * Also, schedule a timeout in parallel to the the rAF to ensure the callback is invoked
+ * even if RAF doesn't fire (for example if the browser tab is not visible)
  */
-function safeRaf(callback) {
+function afterNextFrame(callback) {
 	const done = () => {
 		clearTimeout(timeout);
 		cancelAnimationFrame(raf);
@@ -250,7 +255,7 @@ if (typeof window !== 'undefined') {
 			prevRaf = options.requestAnimationFrame;
 
 			/* istanbul ignore next */
-			(options.requestAnimationFrame || safeRaf)(flushAfterPaintEffects);
+			(options.requestAnimationFrame || afterNextFrame)(flushAfterPaintEffects);
 		}
 	};
 }
