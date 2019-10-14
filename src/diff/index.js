@@ -82,7 +82,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			if (isNew) {
 				if (newType.getDerivedStateFromProps==null && c.componentWillMount!=null) c.componentWillMount();
 				if (c.componentDidMount!=null) {
-					c._renderCallbacks.push(() => { c.componentDidMount() });
+					c._renderCallbacks.push(c.componentDidMount);
 				}
 			}
 			else {
