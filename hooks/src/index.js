@@ -233,10 +233,18 @@ let afterPaint = () => {};
  * Layout effects consumer
  */
 function flushLayoutEffects() {
+	// All cleanups then all effects (+4.5 B)
+	// layoutEffects.some(component => {
+	// 	component.__hooks._pendingLayoutEffects.forEach(invokeCleanup);
+	// });
+	// layoutEffects.some(component => {
+	// 	component.__hooks._pendingLayoutEffects.forEach(invokeEffect);
+	// 	component.__hooks._pendingLayoutEffects = [];
+	// });
+	// layoutEffects = [];
+
 	layoutEffects.some(component => {
 		component.__hooks._pendingLayoutEffects.forEach(invokeCleanup);
-	});
-	layoutEffects.some(component => {
 		component.__hooks._pendingLayoutEffects.forEach(invokeEffect);
 		component.__hooks._pendingLayoutEffects = [];
 	});
@@ -247,11 +255,21 @@ function flushLayoutEffects() {
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
-	afterPaintEffects.some(component => {
-		component.__hooks._pendingEffects.forEach(invokeCleanup);
-	});
+	// All cleanups then all effects (+4.5 B)
+	// afterPaintEffects.some(component => {
+	// 	component.__hooks._pendingEffects.forEach(invokeCleanup);
+	// });
+	// afterPaintEffects.some(component => {
+	// 	if (component._parentDom) {
+	// 		component.__hooks._pendingEffects.forEach(invokeEffect);
+	// 		component.__hooks._pendingEffects = [];
+	// 	}
+	// });
+	// afterPaintEffects = [];
+
 	afterPaintEffects.some(component => {
 		if (component._parentDom) {
+			component.__hooks._pendingEffects.forEach(invokeCleanup);
 			component.__hooks._pendingEffects.forEach(invokeEffect);
 			component.__hooks._pendingEffects = [];
 		}
