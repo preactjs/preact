@@ -132,8 +132,9 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			c.base = newVNode._dom;
 
-			tmp = c._renderCallbacks; c._renderCallbacks=[];
-			tmp.some(cb => cb.call(c));
+			tmp = c._renderCallbacks;
+			c._renderCallbacks=[];
+			tmp.some(cb => { cb.call(c); });
 
 			// Don't call componentDidUpdate on mount or when we bailed out via
 			// `shouldComponentUpdate`
