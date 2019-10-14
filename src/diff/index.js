@@ -82,7 +82,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			if (isNew) {
 				if (newType.getDerivedStateFromProps==null && c.componentWillMount!=null) c.componentWillMount();
 				if (c.componentDidMount!=null) {
-					c._renderCallbacks.push(() => c.componentDidMount());
+					c._renderCallbacks.push(() => { c.componentDidMount() });
 				}
 			}
 			else {
@@ -108,9 +108,9 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				}
 
 				if (c.componentDidUpdate!=null) {
-					c._renderCallbacks.push(() =>
+					c._renderCallbacks.push(() => {
 						c.componentDidUpdate(oldProps, oldState, snapshot)
-					);
+					});
 				}
 			}
 
@@ -168,7 +168,7 @@ export function commitRoot(mounts, root) {
 		try {
 			mounts = c._renderCallbacks;
 			c._renderCallbacks = [];
-			mounts.some(effect => effect.call(c));
+			mounts.some(cb => { cb.call(c) });
 		}
 		catch (e) {
 			options._catchError(e, c._vnode);
