@@ -104,7 +104,7 @@ export function getDomSibling(vnode, childIndex) {
 
 /**
  * Trigger in-place re-rendering of a component.
- * @param {import('./internal').Component} c The component to rerender
+ * @param {import('./internal').Component} component The component to rerender
  */
 function renderComponent(component) {
 	let vnode = component._vnode,
