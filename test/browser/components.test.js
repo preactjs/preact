@@ -1564,7 +1564,7 @@ describe('Components', () => {
 	});
 
 	// preact/#1323
-	it('should handle hoisted component vnodes without DOM', () => {
+	it.skip('should handle hoisted component vnodes without DOM', () => {
 		let x = 0;
 		let mounted = '';
 		let unmounted = '';

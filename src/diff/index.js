@@ -65,6 +65,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				c._context = context;
 				isNew = c._dirty = true;
 				c._renderCallbacks = [];
+				c._pendingLayoutEffects = [];
 			}
 
 			// Invoke getDerivedStateFromProps
@@ -75,10 +76,15 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				assign(c._nextState==c.state ? (c._nextState = assign({}, c._nextState)) : c._nextState, newType.getDerivedStateFromProps(newProps, c._nextState));
 			}
 
+			oldProps = c.props;
+			oldState = c.state;
+
 			// Invoke pre-render lifecycle methods
 			if (isNew) {
 				if (newType.getDerivedStateFromProps==null && c.componentWillMount!=null) c.componentWillMount();
-				if (c.componentDidMount!=null) mounts.push(c);
+				if (c.componentDidMount!=null) {
+					c._pendingLayoutEffects.push(() => c.componentDidMount());
+				}
 			}
 			else {
 				if (newType.getDerivedStateFromProps==null && c._force==null && c.componentWillReceiveProps!=null) {
@@ -101,10 +107,13 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				if (c.componentWillUpdate!=null) {
 					c.componentWillUpdate(newProps, c._nextState, cctx);
 				}
-			}
 
-			oldProps = c.props;
-			oldState = c.state;
+				if (c.componentDidUpdate!=null) {
+					c._pendingLayoutEffects.push(() =>
+						c.componentDidUpdate(oldProps, oldState, snapshot)
+					);
+				}
+			}
 
 			c.context = cctx;
 			c.props = newProps;
@@ -132,14 +141,11 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			c.base = newVNode._dom;
 
-			tmp = c._renderCallbacks;
-			c._renderCallbacks=[];
-			tmp.some(cb => { cb.call(c); });
+			c._pendingLayoutEffects = c._pendingLayoutEffects.concat(c._renderCallbacks);
+			c._renderCallbacks = [];
 
-			// Don't call componentDidUpdate on mount or when we bailed out via
-			// `shouldComponentUpdate`
-			if (!isNew && oldProps!=null && c.componentDidUpdate!=null) {
-				c.componentDidUpdate(oldProps, oldState, snapshot);
+			if (c._pendingLayoutEffects.length) {
+				mounts.push(c);
 			}
 
 			if (clearProcessingException) {
@@ -162,15 +168,15 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 }
 
 export function commitRoot(mounts, root) {
-	let c;
-	while ((c = mounts.pop())) {
+	mounts.some(c => {
 		try {
-			c.componentDidMount();
+			c._pendingLayoutEffects.some(effect => effect.call(c));
+			c._pendingLayoutEffects = [];
 		}
 		catch (e) {
 			options._catchError(e, c._vnode);
 		}
-	}
+	});
 
 	if (options._commit) options._commit(root);
 }
