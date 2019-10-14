@@ -164,7 +164,8 @@ describe('Components', () => {
 			}
 
 			render(<Foo />, scratch);
-			rerender();
+			rerender(); // First setState
+			rerender(); // Second setState
 
 			let [firstState, secondState, thirdState] = states;
 			expect(finalState).to.deep.equal({ a: 'c' });

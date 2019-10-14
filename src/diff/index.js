@@ -65,7 +65,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				c._context = context;
 				isNew = c._dirty = true;
 				c._renderCallbacks = [];
-				c._pendingLayoutEffects = [];
 			}
 
 			// Invoke getDerivedStateFromProps
@@ -83,7 +82,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			if (isNew) {
 				if (newType.getDerivedStateFromProps==null && c.componentWillMount!=null) c.componentWillMount();
 				if (c.componentDidMount!=null) {
-					c._pendingLayoutEffects.push(() => c.componentDidMount());
+					c._renderCallbacks.push(() => c.componentDidMount());
 				}
 			}
 			else {
@@ -109,7 +108,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				}
 
 				if (c.componentDidUpdate!=null) {
-					c._pendingLayoutEffects.push(() =>
+					c._renderCallbacks.push(() =>
 						c.componentDidUpdate(oldProps, oldState, snapshot)
 					);
 				}
@@ -141,10 +140,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			c.base = newVNode._dom;
 
-			c._pendingLayoutEffects = c._pendingLayoutEffects.concat(c._renderCallbacks);
-			c._renderCallbacks = [];
-
-			if (c._pendingLayoutEffects.length) {
+			if (c._renderCallbacks.length) {
 				mounts.push(c);
 			}
 
@@ -170,8 +166,9 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 export function commitRoot(mounts, root) {
 	mounts.some(c => {
 		try {
-			c._pendingLayoutEffects.some(effect => effect.call(c));
-			c._pendingLayoutEffects = [];
+			mounts = c._renderCallbacks;
+			c._renderCallbacks = [];
+			mounts.some(effect => effect.call(c));
 		}
 		catch (e) {
 			options._catchError(e, c._vnode);
