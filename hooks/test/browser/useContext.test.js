@@ -165,35 +165,34 @@ describe('useContext', () => {
 		 expect(unmountspy).not.to.be.called;
 	});
 
-	it('should maintain context', () => {
+	it('should maintain context', done => {
 		const context = createContext(null);
 		const { Provider } = context;
-		const configMain = { name: 'main' };
-		const configChild = { name: 'child' };
-		let childSet, mainSet, childValue, mainValue;
+		const first = { name: 'first' };
+		const second = { name: 'second' };
 
 		const Input = () => {
 			const config = useContext(context);
-			const [input, set] = useState('');
 
-			if (config.name === 'main') {
-				mainSet = set;
-				mainValue = input;
-			}
-			else {
-				childValue = input;
-				childSet = set;
-			}
+			// Avoid eslint complaining about unused first value
+			const state = useState('initial');
+			const set = state[1];
+
+			useEffect(() => {
+				// Schedule the update on the next frame
+				requestAnimationFrame(() => {
+					set('irrelevant');
+				});
+			}, [config]);
 
 			return (
 				<div>
 					{config.name}
-					<input value={input} />
 				</div>
 			);
 		};
 
-		const ChatApp = (props) => {
+		const App = (props) => {
 			const [config, setConfig] = useState({});
 
 			useEffect(() => {
@@ -207,22 +206,18 @@ describe('useContext', () => {
 			);
 		};
 
-		act(() => render(<ChatApp config={configMain} />, scratch));
-		expect(scratch.innerHTML).to.equal('<div>main<input></div>');
+		act(() => {
+			render(<App config={first} />, scratch);
 
-		const div = document.createElement('div');
-		scratch.appendChild(div);
-		act(() => render(<ChatApp config={configChild} />, div));
-		expect(scratch.innerHTML).to.equal('<div>main<input></div><div><div>child<input></div></div>');
+			// Create a new div to append the `second` case
+			const div = scratch.appendChild(document.createElement('div'));
+			render(<App config={second} />, div);
+		});
 
-		act(() => mainSet('hi'));
-		expect(childValue).to.equal('');
-		expect(mainValue).to.equal('hi');
-		expect(scratch.innerHTML).to.equal('<div>main<input></div><div><div>child<input></div></div>');
-
-		act(() => childSet('bye'));
-		expect(childValue).to.equal('bye');
-		expect(mainValue).to.equal('hi');
-		expect(scratch.innerHTML).to.equal('<div>main<input></div><div><div>child<input></div></div>');
+		// Push the expect into the next frame
+		requestAnimationFrame(() => {
+			expect(scratch.innerHTML).equal('<div>first</div><div><div>second</div></div>');
+			done();
+		});
 	});
 });
