@@ -1565,10 +1565,11 @@ describe('Components', () => {
 	});
 
 	// preact/#1323
-	it.skip('should handle hoisted component vnodes without DOM', () => {
+	it('should handle hoisted component vnodes without DOM', () => {
 		let x = 0;
 		let mounted = '';
 		let unmounted = '';
+		let updateAppState;
 
 		class X extends Component {
 			constructor(props) {
@@ -1589,21 +1590,14 @@ describe('Components', () => {
 			}
 		}
 
+		// Statically create X element
 		const A = <X />;
 
 		class App extends Component {
 			constructor(props) {
 				super(props);
 				this.state = { i: 0 };
-			}
-
-			componentDidMount() {
-				// eslint-disable-next-line react/no-did-mount-set-state
-				this.setState({ i: this.state.i + 1 });
-				rerender();
-				// eslint-disable-next-line react/no-did-mount-set-state
-				this.setState({ i: this.state.i + 1 });
-				rerender();
+				updateAppState = () => this.setState({ i: this.state.i + 1 });
 			}
 
 			render() {
@@ -1618,7 +1612,12 @@ describe('Components', () => {
 
 		render(<App />, scratch);
 
-		expect(mounted).to.equal(',1,0,3,2,5,4');
+		updateAppState();
+		rerender();
+		updateAppState();
+		rerender();
+
+		expect(mounted).to.equal(',0,1,2,3,4,5');
 		expect(unmounted).to.equal(',0,1,2,3');
 	});
 
