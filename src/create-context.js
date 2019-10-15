@@ -24,7 +24,6 @@ export function createContext(defaultValue) {
 				};
 				this.shouldComponentUpdate = _props => {
 					if (props.value !== _props.value) {
-						ctx[context._id].props.value = _props.value;
 						subs.some(c => {
 							// Check if still mounted
 							if (c._parentDom) {
