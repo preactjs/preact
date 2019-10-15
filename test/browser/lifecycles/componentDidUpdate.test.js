@@ -301,5 +301,38 @@ describe('Lifecycle methods', () => {
 
 			expect(spy).to.have.been.calledOnceWith(scratch.firstChild);
 		});
+
+		it('should be called after children are mounted', () => {
+			let log = [];
+
+			class Inner extends Component {
+				componentDidMount() {
+					log.push('Inner mounted');
+
+					// Verify that the component is actually mounted when this
+					// callback is invoked.
+					expect(scratch.querySelector('#inner')).to.equalNode(this.base);
+				}
+
+				render() {
+					return <div id="inner" />;
+				}
+			}
+
+			class Outer extends Component {
+				componentDidUpdate() {
+					log.push('Outer updated');
+				}
+
+				render(props) {
+					return props.renderInner ? <Inner /> : <div />;
+				}
+			}
+
+			render(<Outer renderInner={false} />, scratch);
+			render(<Outer renderInner />, scratch);
+
+			expect(log).to.deep.equal(['Inner mounted', 'Outer updated']);
+		});
 	});
 });
