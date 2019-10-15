@@ -1,6 +1,7 @@
 import { h, render, createContext, Component } from 'preact';
+import { act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useContext, useEffect } from '../../src';
+import { useContext, useEffect, useState } from '../../src';
 
 /** @jsx h */
 
@@ -162,5 +163,61 @@ describe('useContext', () => {
 
 		 expect(spy).to.be.calledTwice;
 		 expect(unmountspy).not.to.be.called;
+	});
+
+	it('should maintain context', done => {
+		const context = createContext(null);
+		const { Provider } = context;
+		const first = { name: 'first' };
+		const second = { name: 'second' };
+
+		const Input = () => {
+			const config = useContext(context);
+
+			// Avoid eslint complaining about unused first value
+			const state = useState('initial');
+			const set = state[1];
+
+			useEffect(() => {
+				// Schedule the update on the next frame
+				requestAnimationFrame(() => {
+					set('irrelevant');
+				});
+			}, [config]);
+
+			return (
+				<div>
+					{config.name}
+				</div>
+			);
+		};
+
+		const App = (props) => {
+			const [config, setConfig] = useState({});
+
+			useEffect(() => {
+				setConfig(props.config);
+			}, [props.config]);
+
+			return (
+				<Provider value={config}>
+					<Input />
+				</Provider>
+			);
+		};
+
+		act(() => {
+			render(<App config={first} />, scratch);
+
+			// Create a new div to append the `second` case
+			const div = scratch.appendChild(document.createElement('div'));
+			render(<App config={second} />, div);
+		});
+
+		// Push the expect into the next frame
+		requestAnimationFrame(() => {
+			expect(scratch.innerHTML).equal('<div>first</div><div><div>second</div></div>');
+			done();
+		});
 	});
 });

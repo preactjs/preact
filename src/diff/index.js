@@ -132,10 +132,9 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			c.base = newVNode._dom;
 
-			while (tmp=c._renderCallbacks.pop()) {
-				if (c._nextState) { c.state = c._nextState; }
-				tmp.call(c);
-			}
+			tmp = c._renderCallbacks;
+			c._renderCallbacks=[];
+			tmp.some(cb => { cb.call(c); });
 
 			// Don't call componentDidUpdate on mount or when we bailed out via
 			// `shouldComponentUpdate`
@@ -146,6 +145,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			if (clearProcessingException) {
 				c._pendingError = c._processingException = null;
 			}
+
+			c._force = null;
 		}
 		else {
 			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, isHydrating);

@@ -143,10 +143,15 @@ describe('Components', () => {
 
 				componentDidMount() {
 					states.push(this.state);
+					expect(scratch.innerHTML).to.equal('<p>b</p>');
+
 					// eslint-disable-next-line
 					this.setState({ a: 'a' }, () => {
 						states.push(this.state);
+						expect(scratch.innerHTML).to.equal('<p>a</p>');
+
 						this.setState({ a: 'c' }, () => {
+							expect(scratch.innerHTML).to.equal('<p>c</p>');
 							states.push(this.state);
 						});
 					});
@@ -154,7 +159,7 @@ describe('Components', () => {
 
 				render() {
 					finalState = this.state;
-					return <p>Test</p>;
+					return <p>{this.state.a}</p>;
 				}
 			}
 
