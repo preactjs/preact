@@ -334,5 +334,53 @@ describe('Lifecycle methods', () => {
 
 			expect(log).to.deep.equal(['Inner mounted', 'Outer updated']);
 		});
+
+		it('should be called after parent DOM elements are updated', () => {
+			let setValue;
+			let outerChildText;
+
+			class Outer extends Component {
+				constructor(p, c) {
+					super(p, c);
+
+					this.state = { i: 0 };
+					setValue = i => this.setState({ i });
+				}
+
+				render(props, { i }) {
+					return (
+						<div>
+							<Inner i={i} {...props} />
+							<p id="parent-child">Outer: {i}</p>
+						</div>
+					);
+				}
+			}
+
+			class Inner extends Component {
+				componentDidUpdate() {
+					// At this point, the parent's <p> tag should've been updated with the latest value
+					outerChildText = scratch.querySelector('#parent-child').textContent;
+				}
+
+				render(props, { i }) {
+					return <div>Inner: {i}</div>;
+				}
+			}
+
+			sinon.spy(Inner.prototype, 'componentDidUpdate');
+
+			// Initial render
+			render(<Outer />, scratch);
+			expect(Inner.prototype.componentDidUpdate).to.not.have.been.called;
+
+			// Set state with a new i
+			const newValue = 5;
+			setValue(newValue);
+			rerender();
+
+			expect(Inner.prototype.componentDidUpdate).to.have.been.called;
+			expect(outerChildText).to.equal(`Outer: ${newValue.toString()}`);
+		});
 	});
 });
