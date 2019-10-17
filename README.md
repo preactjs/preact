@@ -112,6 +112,7 @@ Preact supports modern browsers and IE9+:
 - [**Preact + TypeScript + Webpack**](https://github.com/k1r0s/bleeding-preact-starter)
 - [**0 config => Preact + Poi**](https://github.com/k1r0s/preact-poi-starter)
 - [**Zero configuration => Preact + Typescript + Parcel**](https://github.com/aalises/preact-typescript-parcel-starter)
+- [**Preact App in ES6 without Babel or JSX**](https://vanilla-preact.surge.sh) _([GitHub Project](https://github.com/safdarjamal/vanilla-preact/))_
 
 ---
 
