@@ -108,6 +108,7 @@ describe('Component spec', () => {
 			expect(ForceUpdateComponent.prototype.componentWillUpdate).not.to.have.been.called;
 
 			forceUpdate();
+			rerender();
 
 			expect(ForceUpdateComponent.prototype.componentWillUpdate).to.have.been.called;
 			expect(ForceUpdateComponent.prototype.forceUpdate).to.have.been.called;
@@ -128,6 +129,7 @@ describe('Component spec', () => {
 			render(<ForceUpdateComponent />, scratch);
 
 			forceUpdate();
+			rerender();
 
 			expect(ForceUpdateComponent.prototype.forceUpdate).to.have.been.called;
 			expect(ForceUpdateComponent.prototype.forceUpdate).to.have.been.calledWith(callback);

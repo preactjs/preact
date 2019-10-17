@@ -130,6 +130,30 @@ describe('useState', () => {
 		expect(scratch.textContent).to.include('Count: 10');
 	});
 
+	it('should correctly initialize', () => {
+		let scopedThing = 'hi';
+		let arg;
+
+		function useSomething() {
+			const args = useState(setup);
+			function setup(thing = scopedThing) {
+				arg = thing;
+				return thing;
+			}
+			return args;
+		}
+
+		const App = () => {
+			const [state] = useSomething();
+			return <p>{state}</p>;
+		};
+
+		render(<App />, scratch);
+
+		expect(arg).to.equal('hi');
+		expect(scratch.innerHTML).to.equal('<p>hi</p>');
+	});
+
 	it('should handle queued useState', () => {
 		function Message({ message, onClose }) {
 			const [isVisible, setVisible] = useState(Boolean(message));

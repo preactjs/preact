@@ -1,8 +1,7 @@
-import { hydrate, render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment } from 'preact';
-import * as hooks from 'preact/hooks';
-export * from 'preact/hooks';
-import { Suspense as _Suspense, lazy as _lazy, catchRender } from './suspense';
-import { assign } from '../../src/util';
+import { hydrate, render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment, _unmount } from 'preact';
+import { useState, useReducer, useEffect, useLayoutEffect, useRef, useImperativeHandle, useMemo, useCallback, useContext, useDebugValue } from 'preact/hooks';
+import { Suspense, lazy } from './suspense';
+import { assign, removeNode } from '../../src/util';
 
 const version = '16.8.0'; // trick libraries to think we are react
 
@@ -18,11 +17,6 @@ options.event = e => {
 	e.persist = () => {};
 	return e.nativeEvent = e;
 };
-
-let oldCatchRender = options._catchRender;
-options._catchRender = (error, newVNode, oldVNode) => (
-	oldCatchRender && oldCatchRender(error, newVNode, oldVNode) || catchRender(error, newVNode, oldVNode)
-);
 
 /**
  * Legacy version of createElement.
@@ -56,6 +50,14 @@ function handleElementVNode(vnode, props) {
  * @returns {import('./internal').Component | null} The root component reference or null
  */
 function render(vnode, parent, callback) {
+	// React destroys any existing DOM nodes, see #1727
+	// ...but only on the first render, see #1828
+	if (parent._children==null) {
+		while (parent.firstChild) {
+			removeNode(parent.firstChild);
+		}
+	}
+
 	preactRender(vnode, parent);
 	if (typeof callback==='function') callback();
 
@@ -76,18 +78,61 @@ class ContextProvider {
  * @param {object | null | undefined} props
  */
 function Portal(props) {
-	let wrap = h(ContextProvider, { context: this.context }, props.vnode);
+	let _this = this;
 	let container = props.container;
+	let wrap = h(ContextProvider, { context: _this.context }, props.vnode);
 
-	if (props.container !== this.container) {
-		hydrate('', container);
-		this.container = container;
+	// When we change container we should clear our old container and
+	// indicate a new mount.
+	if (_this._container && _this._container !== container) {
+		if (_this._temp.parentNode) _this._container.removeChild(_this._temp);
+		_unmount(_this._wrap);
+		_this._hasMounted = false;
 	}
 
-	render(wrap, container);
-	this.componentWillUnmount = () => {
-		render(null, container);
+	// When props.vnode is undefined/false/null we are dealing with some kind of
+	// conditional vnode. This should not trigger a render.
+	if (props.vnode) {
+		if (!_this._hasMounted) {
+			// Create a placeholder that we can use to insert into.
+			_this._temp = document.createTextNode('');
+			// Hydrate existing nodes to keep the dom intact, when rendering
+			// wrap into the container.
+			hydrate('', container);
+			// Append to the container (this matches React's behavior)
+			container.appendChild(_this._temp);
+			// At this point we have mounted and should set our container.
+			_this._hasMounted = true;
+			_this._container = container;
+			// Render our wrapping element into temp.
+			preactRender(wrap, container, _this._temp);
+			_this._children = this._temp._children;
+		}
+		else {
+			// When we have mounted and the vnode is present it means the
+			// props have changed or a parent is triggering a rerender.
+			// This implies we only need to call render. But we need to keep
+			// the old tree around, otherwise will treat the vnodes as new and
+			// will wrongly call `componentDidMount` on them
+			container._children = _this._children;
+			preactRender(wrap, container);
+			_this._children = container._children;
+		}
+	}
+	// When we come from a conditional render, on a mounted
+	// portal we should clear the DOM.
+	else if (_this._hasMounted) {
+		if (_this._temp.parentNode) _this._container.removeChild(_this._temp);
+		_unmount(_this._wrap);
+	}
+	// Set the wrapping element for future unmounting.
+	_this._wrap = wrap;
+
+	_this.componentWillUnmount = () => {
+		if (_this._temp.parentNode) _this._container.removeChild(_this._temp);
+		_unmount(_this._wrap);
 	};
+
 	return null;
 }
 
@@ -169,12 +214,11 @@ function normalizeVNode(vnode) {
  * all vnode normalizations.
  * @param {import('./internal').VNode} element The vnode to clone
  * @param {object} props Props to add when cloning
- * @param {Array<import('./internal').ComponentChildren} rest Optional component children
+ * @param {Array<import('./internal').ComponentChildren>} rest Optional component children
  */
 function cloneElement(element) {
 	if (!isValidElement(element)) return element;
 	let vnode = normalizeVNode(preactCloneElement.apply(null, arguments));
-	vnode.$$typeof = REACT_ELEMENT_TYPE;
 	return vnode;
 }
 
@@ -194,8 +238,14 @@ function isValidElement(element) {
 function applyEventNormalization({ type, props }) {
 	if (!props || typeof type!='string') return;
 	let newProps = {};
+
 	for (let i in props) {
+		if (/^on(Ani|Tra)/.test(i)) {
+			props[i.toLowerCase()] = props[i];
+			delete props[i];
+		}
 		newProps[i.toLowerCase()] = i;
+
 	}
 	if (newProps.ondoubleclick) {
 		props.ondblclick = props[newProps.ondoubleclick];
@@ -206,7 +256,7 @@ function applyEventNormalization({ type, props }) {
 		delete props[newProps.onbeforeinput];
 	}
 	// for *textual inputs* (incl textarea), normalize `onChange` -> `onInput`:
-	if (newProps.onchange && (type==='textarea' || (type.toLowerCase()==='input' && !/^fil|che|rad/i.test(props.type)))) {
+	if (newProps.onchange && (type==='textarea' || (type.toLowerCase()==='input' && !/^fil|che|ra/i.test(props.type)))) {
 		let normalized = newProps.oninput || 'oninput';
 		if (!props[normalized]) {
 			props[normalized] = props[newProps.onchange];
@@ -217,7 +267,7 @@ function applyEventNormalization({ type, props }) {
 
 /**
  * Remove a component tree from the DOM, including state and event handlers.
- * @param {Element | Document | ShadowRoot | DocumentFragment} container
+ * @param {import('./internal').PreactElement} container
  * @returns {boolean}
  */
 function unmountComponentAtNode(container) {
@@ -253,8 +303,8 @@ let classNameDescriptor = {
  * @returns {boolean}
  */
 function shallowDiffers(a, b) {
-	for (let i in a) if (!(i in b)) return true;
-	for (let i in b) if (a[i]!==b[i]) return true;
+	for (let i in a) if (i !== '__source' && !(i in b)) return true;
+	for (let i in b) if (i !== '__source' && a[i]!==b[i]) return true;
 	return false;
 }
 
@@ -282,7 +332,7 @@ class PureComponent extends Component {
 	}
 }
 
-// Some libraries like `react-virtualized` explicitely check for this.
+// Some libraries like `react-virtualized` explicitly check for this.
 Component.prototype.isReactComponent = {};
 
 /**
@@ -296,7 +346,7 @@ function memo(c, comparer) {
 	function shouldUpdate(nextProps) {
 		let ref = this.props.ref;
 		let updateRef = ref==nextProps.ref;
-		if (!updateRef) {
+		if (!updateRef && ref) {
 			ref.call ? ref(null) : (ref.current = null);
 		}
 		return (!comparer
@@ -308,23 +358,11 @@ function memo(c, comparer) {
 		this.shouldComponentUpdate = shouldUpdate;
 		return h(c, assign({}, props));
 	}
+	Memoed.prototype.isReactComponent = true;
 	Memoed.displayName = 'Memo(' + (c.displayName || c.name) + ')';
 	Memoed._forwarded = true;
 	return Memoed;
 }
-
-// Patch in `UNSAFE_*` lifecycle hooks
-function setUnsafeDescriptor(obj, key) {
-	Object.defineProperty(obj.prototype, 'UNSAFE_' + key, {
-		configurable: true,
-		get() { return this[key]; },
-		set(v) { this[key] = v; }
-	});
-}
-
-setUnsafeDescriptor(Component, 'componentWillMount');
-setUnsafeDescriptor(Component, 'componentWillReceiveProps');
-setUnsafeDescriptor(Component, 'componentWillUpdate');
 
 /**
  * Pass ref down to a child. This is mainly used in libraries with HOCs that
@@ -339,9 +377,21 @@ function forwardRef(fn) {
 		delete props.ref;
 		return fn(props, ref);
 	}
+	Forwarded.prototype.isReactComponent = true;
 	Forwarded._forwarded = true;
 	Forwarded.displayName = 'ForwardRef(' + (fn.displayName || fn.name) + ')';
 	return Forwarded;
+}
+
+// Patch in `UNSAFE_*` lifecycle hooks
+function setSafeDescriptor(proto, key) {
+	if (proto['UNSAFE_'+key] && !proto[key]) {
+		Object.defineProperty(proto, key, {
+			configurable: false,
+			get() { return this['UNSAFE_' + key]; },
+			set(v) { this['UNSAFE_' + key] = v; }
+		});
+	}
 }
 
 let oldVNodeHook = options.vnode;
@@ -354,6 +404,16 @@ options.vnode = vnode => {
 		vnode.props.ref = vnode.ref;
 		vnode.ref = null;
 	}
+
+	// We can't just patch the base component class, because components that use
+	// inheritance and are transpiled down to ES5 will overwrite our patched
+	// getters and setters. See #1941
+	if (typeof type === 'function' && !type._patchedLifecycles && type.prototype) {
+		setSafeDescriptor(type.prototype, 'componentWillMount');
+		setSafeDescriptor(type.prototype, 'componentWillReceiveProps');
+		setSafeDescriptor(type.prototype, 'componentWillUpdate');
+		type._patchedLifecycles = true;
+	}
 	/* istanbul ignore next */
 	if (oldVNodeHook) oldVNodeHook(vnode);
 };
@@ -361,14 +421,14 @@ options.vnode = vnode => {
 /**
  * Deprecated way to control batched rendering inside the reconciler, but we
  * already schedule in batches inside our rendering code
- * @param {(a) => void} callback function that triggers the updatd
- * @param {*} [arg] Optional argument that can be passed to the callback
+ * @template Arg
+ * @param {(arg: Arg) => void} callback function that triggers the updated
+ * @param {Arg} [arg] Optional argument that can be passed to the callback
  */
 // eslint-disable-next-line camelcase
-function unstable_batchedUpdates(callback, arg) {
-	callback(arg);
-}
+const unstable_batchedUpdates = (callback, arg) => callback(arg);
 
+export * from 'preact/hooks';
 export {
 	version,
 	Children,
@@ -389,14 +449,23 @@ export {
 	memo,
 	forwardRef,
 	// eslint-disable-next-line camelcase
-	unstable_batchedUpdates
+	unstable_batchedUpdates,
+	Suspense,
+	lazy
 };
 
-export const Suspense = _Suspense;
-export const lazy = _lazy;
-
 // React copies the named exports to the default one.
-export default assign({
+export default {
+	useState,
+	useReducer,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useImperativeHandle,
+	useMemo,
+	useCallback,
+	useContext,
+	useDebugValue,
 	version,
 	Children,
 	render,
@@ -415,5 +484,7 @@ export default assign({
 	PureComponent,
 	memo,
 	forwardRef,
-	unstable_batchedUpdates
-}, hooks);
+	unstable_batchedUpdates,
+	Suspense,
+	lazy
+};

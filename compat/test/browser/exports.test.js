@@ -23,6 +23,10 @@ describe('exports', () => {
 		expect(Compat.useCallback).to.be.a('function');
 		expect(Compat.useContext).to.be.a('function');
 
+		// Suspense
+		expect(Compat.Suspense).to.be.a('function');
+		expect(Compat.lazy).to.be.a('function');
+
 		// Compat specific
 		expect(Compat.PureComponent).to.exist.and.be.a('function');
 		expect(Compat.createPortal).to.exist.and.be.a('function');
@@ -50,14 +54,18 @@ describe('exports', () => {
 		expect(Named.createRef).to.be.a('function');
 
 		// Hooks
-		expect(Compat.useState).to.be.a('function');
-		expect(Compat.useReducer).to.be.a('function');
-		expect(Compat.useEffect).to.be.a('function');
-		expect(Compat.useLayoutEffect).to.be.a('function');
-		expect(Compat.useRef).to.be.a('function');
-		expect(Compat.useMemo).to.be.a('function');
-		expect(Compat.useCallback).to.be.a('function');
-		expect(Compat.useContext).to.be.a('function');
+		expect(Named.useState).to.be.a('function');
+		expect(Named.useReducer).to.be.a('function');
+		expect(Named.useEffect).to.be.a('function');
+		expect(Named.useLayoutEffect).to.be.a('function');
+		expect(Named.useRef).to.be.a('function');
+		expect(Named.useMemo).to.be.a('function');
+		expect(Named.useCallback).to.be.a('function');
+		expect(Named.useContext).to.be.a('function');
+
+		// Suspense
+		expect(Named.Suspense).to.be.a('function');
+		expect(Named.lazy).to.be.a('function');
 
 		// Compat specific
 		expect(Named.PureComponent).to.exist.and.be.a('function');
@@ -70,8 +78,8 @@ describe('exports', () => {
 		expect(Named.Children.count).to.exist.and.be.a('function');
 		expect(Named.Children.toArray).to.exist.and.be.a('function');
 		expect(Named.Children.only).to.exist.and.be.a('function');
-		expect(Compat.unmountComponentAtNode).to.exist.and.be.a('function');
-		expect(Compat.unstable_batchedUpdates).to.exist.and.be.a('function');
+		expect(Named.unmountComponentAtNode).to.exist.and.be.a('function');
+		expect(Named.unstable_batchedUpdates).to.exist.and.be.a('function');
 		expect(Named.version).to.exist.and.be.a('string');
 	});
 });

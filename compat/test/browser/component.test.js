@@ -68,6 +68,7 @@ describe('components', () => {
 
 		let a = React.render(<Parent />, scratch);
 		a.forceUpdate();
+		rerender();
 
 		expect(props).to.exist.and.deep.equal({
 			children: 'second'
@@ -92,6 +93,34 @@ describe('components', () => {
 
 			let expected = { foo: 'bar' };
 			expect(spy).to.be.calledWithMatch(expected, expected);
+		});
+
+		it('should ignore the __source variable', () => {
+			const pureSpy = sinon.spy();
+			const appSpy = sinon.spy();
+			let set;
+			class Pure extends React.PureComponent {
+				render()  {
+					pureSpy();
+					return <div>Static</div>;
+				}
+			}
+
+			const App = () => {
+				const [, setState] = React.useState(0);
+				appSpy();
+				set = setState;
+				return <Pure __source={{}} />;
+			};
+
+			React.render(<App />, scratch);
+			expect(appSpy).to.be.calledOnce;
+			expect(pureSpy).to.be.calledOnce;
+
+			set(1);
+			rerender();
+			expect(appSpy).to.be.calledTwice;
+			expect(pureSpy).to.be.calledOnce;
 		});
 
 		it('should only re-render when props or state change', () => {
@@ -166,6 +195,23 @@ describe('components', () => {
 			expect(spy).to.be.calledOnce;
 		});
 
+		it('should support UNSAFE_componentWillMount #2', () => {
+			let spy = sinon.spy();
+
+			class Foo extends React.Component {
+				render() {
+					return <h1>foo</h1>;
+				}
+			}
+
+			Object.defineProperty(Foo.prototype, 'UNSAFE_componentWillMount', {
+				value: spy
+			});
+
+			React.render(<Foo />, scratch);
+			expect(spy).to.be.calledOnce;
+		});
+
 		it('should support UNSAFE_componentWillReceiveProps', () => {
 			let spy = sinon.spy();
 
@@ -186,6 +232,25 @@ describe('components', () => {
 			expect(spy).to.be.calledOnce;
 		});
 
+		it('should support UNSAFE_componentWillReceiveProps #2', () => {
+			let spy = sinon.spy();
+
+			class Foo extends React.Component {
+				render() {
+					return <h1>foo</h1>;
+				}
+			}
+
+			Object.defineProperty(Foo.prototype, 'UNSAFE_componentWillReceiveProps', {
+				value: spy
+			});
+
+			React.render(<Foo />, scratch);
+			// Trigger an update
+			React.render(<Foo />, scratch);
+			expect(spy).to.be.calledOnce;
+		});
+
 		it('should support UNSAFE_componentWillUpdate', () => {
 			let spy = sinon.spy();
 
@@ -199,6 +264,26 @@ describe('components', () => {
 					return <h1>foo</h1>;
 				}
 			}
+
+			React.render(<Foo />, scratch);
+			// Trigger an update
+			React.render(<Foo />, scratch);
+			expect(spy).to.be.calledOnce;
+		});
+
+		it('should support UNSAFE_componentWillUpdate #2', () => {
+			let spy = sinon.spy();
+
+			class Foo extends React.Component {
+				render() {
+					return <h1>foo</h1>;
+				}
+			}
+
+
+			Object.defineProperty(Foo.prototype, 'UNSAFE_componentWillUpdate', {
+				value: spy
+			});
 
 			React.render(<Foo />, scratch);
 			// Trigger an update

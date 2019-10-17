@@ -1,20 +1,46 @@
 import { checkPropTypes } from './check-props';
 import { getDisplayName } from './devtools/custom';
-import { options } from 'preact';
+import { options, Component } from 'preact';
 import { ELEMENT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants';
+
+function getClosestDomNodeParent(parent) {
+	if (!parent) return {};
+	if (typeof parent.type === 'function') {
+		return getClosestDomNodeParent(parent._parent);
+	}
+	return parent;
+}
 
 export function initDebug() {
 	/* eslint-disable no-console */
 	let oldBeforeDiff = options._diff;
 	let oldDiffed = options.diffed;
 	let oldVnode = options.vnode;
+	let oldCatchError = options._catchError;
 	const warnedComponents = { useEffect: {}, useLayoutEffect: {}, lazyPropTypes: {} };
 
-	options._catchError = (error, vnode) => {
-		let component = vnode._component;
+	options._catchError = (error, vnode, oldVNode) => {
+		let component = vnode && vnode._component;
 		if (component && typeof error.then === 'function') {
-			error = new Error('Missing Suspense. The throwing component was: ' + (component.displayName || component.name));
+			const promise = error;
+			error = new Error('Missing Suspense. The throwing component was: ' + getDisplayName(vnode));
+
+			let parent = vnode;
+			for (; parent; parent = parent._parent) {
+				if (parent._component && parent._component._childDidSuspend) {
+					error = promise;
+					break;
+				}
+			}
+
+			// We haven't recovered and we know at this point that there is no
+			// Suspense component higher up in the tree
+			if (error instanceof Error) {
+				throw error;
+			}
 		}
+
+		oldCatchError(error, vnode, oldVNode);
 	};
 
 	options._root = (vnode, parentNode) => {
@@ -35,7 +61,8 @@ export function initDebug() {
 	};
 
 	options._diff = vnode => {
-		let { type } = vnode;
+		let { type, _parent: parent } = vnode;
+		let parentVNode = getClosestDomNodeParent(parent);
 
 		if (type===undefined) {
 			throw new Error('Undefined component passed to createElement()\n\n'+
@@ -52,6 +79,41 @@ export function initDebug() {
 			}
 
 			throw new Error('Invalid type passed to createElement(): '+(Array.isArray(type) ? 'array' : type));
+		}
+
+		if ((type==='thead' || type==='tfoot' || type==='tbody') && parentVNode.type!=='table') {
+			console.error(
+				'Improper nesting of table.' +
+				'Your <thead/tbody/tfoot> should have a <table> parent.'
+				+ serializeVNode(vnode)
+			);
+		}
+		else if (
+			type==='tr' && (
+				parentVNode.type!=='thead' &&
+				parentVNode.type!=='tfoot' &&
+				parentVNode.type!=='tbody' &&
+				parentVNode.type!=='table'
+			)) {
+			console.error(
+				'Improper nesting of table.' +
+				'Your <tr> should have a <thead/tbody/tfoot/table> parent.'
+				+ serializeVNode(vnode)
+			);
+		}
+		else if (type==='td' && parentVNode.type!=='tr') {
+			console.error(
+				'Improper nesting of table.' +
+					'Your <td> should have a <tr> parent.'
+					+ serializeVNode(vnode)
+			);
+		}
+		else if (type==='th' && parentVNode.type!=='tr') {
+			console.error(
+				'Improper nesting of table.' +
+				'Your <th> should have a <tr>.'
+				+ serializeVNode(vnode)
+			);
 		}
 
 		if (
@@ -136,9 +198,30 @@ export function initDebug() {
 	};
 
 	options.diffed = (vnode) => {
+		// Check if the user passed plain objects as children. Note that we cannot
+		// move this check into `options.vnode` because components can receive
+		// children in any shape they want (e.g.
+		// `<MyJSONFormatter>{{ foo: 123, bar: "abc" }}</MyJSONFormatter>`).
+		// Putting this check in `options.diffed` ensures that
+		// `vnode._children` is set and that we only validate the children
+		// that were actually rendered.
+		if (vnode._children) {
+			vnode._children.forEach(child => {
+				if (child && child.type===undefined) {
+					// Remove internal vnode keys that will always be patched
+					delete child._parent;
+					delete child._depth;
+					const keys = Object.keys(child).join(',');
+					throw new Error(`Objects are not valid as a child. Encountered an object with the keys {${keys}}.`);
+				}
+			});
+		}
+
+		if (oldDiffed) oldDiffed(vnode);
+
 		if (vnode._component && vnode._component.__hooks) {
 			let hooks = vnode._component.__hooks;
-			hooks._list.forEach(hook => {
+			(hooks._list || []).forEach(hook => {
 				if (hook._callback && (!hook._args || !Array.isArray(hook._args))) {
 					/* istanbul ignore next */
 					console.warn(
@@ -147,7 +230,7 @@ export function initDebug() {
 					);
 				}
 			});
-			if (hooks._pendingEffects.length > 0) {
+			if (hooks._pendingEffects && Array.isArray(hooks._pendingEffects)) {
 				hooks._pendingEffects.forEach((effect) => {
 					if ((!effect._args || !Array.isArray(effect._args)) && !warnedComponents.useEffect[vnode.type]) {
 						warnedComponents.useEffect[vnode.type] = true;
@@ -158,7 +241,7 @@ export function initDebug() {
 					}
 				});
 			}
-			if (hooks._pendingLayoutEffects.length > 0) {
+			if (hooks._pendingLayoutEffects && Array.isArray(hooks._pendingLayoutEffects)) {
 				hooks._pendingLayoutEffects.forEach((layoutEffect) => {
 					if ((!layoutEffect._args || !Array.isArray(layoutEffect._args)) && !warnedComponents.useLayoutEffect[vnode.type]) {
 						warnedComponents.useLayoutEffect[vnode.type] = true;
@@ -193,10 +276,20 @@ export function initDebug() {
 				keys.push(key);
 			}
 		}
-
-		if (oldDiffed) oldDiffed(vnode);
 	};
 }
+
+const setState = Component.prototype.setState;
+Component.prototype.setState = function(update, callback) {
+	if (this._vnode==null) {
+		console.warn(
+			`Calling "this.setState" inside the constructor of a component is a ` +
+			`no-op and might be a bug in your application. Instead, set ` +
+			`"this.state = {}" directly.`
+		);
+	}
+	return setState.call(this, update, callback);
+};
 
 /**
  * Serialize a vnode tree to a string
@@ -208,22 +301,20 @@ export function serializeVNode(vnode) {
 	let name = getDisplayName(vnode);
 
 	let attrs = '';
-	if (props) {
-		for (let prop in props) {
-			if (props.hasOwnProperty(prop) && prop!=='children') {
-				let value = props[prop];
+	for (let prop in props) {
+		if (props.hasOwnProperty(prop) && prop!=='children') {
+			let value = props[prop];
 
-				// If it is an object but doesn't have toString(), use Object.toString
-				if (typeof value==='function') {
-					value = `function ${value.displayName || value.name}() {}`;
-				}
-
-				value = Object(value) === value && !value.toString
-					? Object.prototype.toString.call(value)
-					: value + '';
-
-				attrs += ` ${prop}=${JSON.stringify(value)}`;
+			// If it is an object but doesn't have toString(), use Object.toString
+			if (typeof value==='function') {
+				value = `function ${value.displayName || value.name}() {}`;
 			}
+
+			value = Object(value) === value && !value.toString
+				? Object.prototype.toString.call(value)
+				: value + '';
+
+			attrs += ` ${prop}=${JSON.stringify(value)}`;
 		}
 	}
 

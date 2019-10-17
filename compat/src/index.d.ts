@@ -1,7 +1,7 @@
 import * as _hooks from '../../hooks';
 import * as preact from '../../src';
 import { JSXInternal } from '../../src/jsx'
-import { ForwardFn } from './internal';
+import * as _internal from './internal';
 import * as _Suspense from './suspense';
 
 // export default React;
@@ -43,6 +43,7 @@ declare namespace React {
 	export import lazy = _Suspense.lazy;
 
 	// Compat
+	export import ForwardFn = _internal.ForwardFn;
 	export const version: string;
 
 	export function createPortal(vnode: preact.VNode, container: Element): preact.VNode<any>;
@@ -53,21 +54,21 @@ declare namespace React {
 
 	export function unmountComponentAtNode(container: Element | Document | ShadowRoot | DocumentFragment): boolean;
 
-	export function createFactory(type: preact.VNode["type"]): preact.VNode<{}>;
+	export function createFactory(type: preact.VNode<any>["type"]): (props?: any, ...children: preact.ComponentChildren[]) => preact.VNode<any>;
 	export function isValidElement(element: any): boolean;
 	export function findDOMNode(component: preact.Component): Element | null;
 
-	export interface PureComponent<P = {}, S = {}> extends preact.Component {
-		isPureReactComponenet: boolean;
+	export abstract class PureComponent<P = {}, S = {}> extends preact.Component<P, S> {
+		isPureReactComponent: boolean;
 	}
 
 	export function memo<P = {}>(component: preact.FunctionalComponent<P>, comparer?: (prev: P, next: P) => boolean): preact.FunctionComponent<P>;
 
-	export function forwardRef<P = {}>(fn: ForwardFn<P, any>): preact.FunctionalComponent<P>;
+	export function forwardRef<R, P = {}>(fn: _internal.ForwardFn<P, R>): preact.FunctionalComponent<P>;
 
 	export function unstable_batchedUpdates(callback: (arg?: any) => void, arg?: any): void;
 
-	export interface Children {
+	export const Children: {
 		map<T extends preact.ComponentChild, R>(children: T | T[], fn: (child: T, i: number, array: T[]) => R): R[];
 		forEach<T extends preact.ComponentChild>(children: T | T[], fn: (child: T, i: number, array: T[]) => void): void;
 		count: (children: preact.ComponentChildren) => number;

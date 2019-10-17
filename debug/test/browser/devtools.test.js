@@ -95,7 +95,7 @@ function checkEventReferences(events) {
 		if (i > 0 && event.type!=='unmount' && Array.isArray(event.data.children)) {
 			event.data.children.forEach(child => {
 				if (!checkPreceding(child, seen) && event.type!=='rootCommitted') {
-					throw new Error(`Event at index ${i} has a child that could not be found in a preceeding event for component "${getDisplayName(child)}"`);
+					throw new Error(`Event at index ${i} has a child that could not be found in a preceding event for component "${getDisplayName(child)}"`);
 				}
 			});
 		}
@@ -137,7 +137,11 @@ function getRoot(element) {
 	return element._children;
 }
 
+const supported = /Chrome|Firefox/i.test(navigator.userAgent) &&
+	!/Edge/i.test(navigator.userAgent);
+
 describe('devtools', () => {
+	if (!supported) return;
 
 	/** @type {import('../../src/internal').PreactElement} */
 	let scratch;
@@ -455,8 +459,8 @@ describe('devtools', () => {
 		render(<div />, scratch);
 
 		expect(vnodeSpy, 'vnode').to.have.been.called;
-		expect(diffSpy, 'diff').to.have.been.calledOnce;
-		expect(diffedSpy, 'diffed').to.have.been.calledOnce;
+		expect(diffSpy, 'diff').to.have.been.calledTwice;
+		expect(diffedSpy, 'diffed').to.have.been.calledTwice;
 		expect(commitSpy, 'commit').to.have.been.calledOnce;
 
 		render(null, scratch);
@@ -592,6 +596,7 @@ describe('devtools', () => {
 			checkEventReferences(prev.concat(hook.log));
 
 			expect(serialize(hook.log)).to.deep.equal([
+				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -609,6 +614,7 @@ describe('devtools', () => {
 			expect(serialize(hook.log)).to.deep.equal([
 				{ type: 'unmount', component: '#text: Hello World' },
 				{ type: 'mount', component: 'span' },
+				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -722,6 +728,7 @@ describe('devtools', () => {
 			checkEventReferences(prev.concat(hook.log));
 
 			expect(serialize(hook.log)).to.deep.equal([
+				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});
@@ -736,6 +743,7 @@ describe('devtools', () => {
 				{ type: 'unmount', component: 'span' },
 				{ type: 'unmount', component: '#text: Hello World' },
 				{ type: 'update', component: 'div' },
+				{ type: 'update', component: 'Fragment' },
 				{ type: 'rootCommitted', component: 'Fragment' }
 			]);
 		});

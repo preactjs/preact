@@ -13,20 +13,6 @@ import { Fragment } from './create-element';
 export function Component(props, context) {
 	this.props = props;
 	this.context = context;
-	// this.constructor // When component is functional component, this is reset to functional component
-	// if (this.state==null) this.state = {};
-	// this.state = {};
-	// this._dirty = true;
-	// this._renderCallbacks = []; // Only class components
-
-	// Other properties that Component will have set later,
-	// shown here as commented out for quick reference
-	// this.base = null;
-	// this._context = null;
-	// this._vnode = null;
-	// this._nextState = null; // Only class components
-	// this._processingException = null; // Always read, set only when handling error
-	// this._pendingError = null; // Always read, set only when handling error. This is used to indicate at diffTime to set _processingException
 }
 
 /**
@@ -50,6 +36,7 @@ Component.prototype.setState = function(update, callback) {
 	if (update==null) return;
 
 	if (this._vnode) {
+		this._force = false;
 		if (callback) this._renderCallbacks.push(callback);
 		enqueueRender(this);
 	}
@@ -58,25 +45,17 @@ Component.prototype.setState = function(update, callback) {
 /**
  * Immediately perform a synchronous re-render of the component
  * @param {() => void} [callback] A function to be called after component is
- * re-renderd
+ * re-rendered
  */
 Component.prototype.forceUpdate = function(callback) {
-	let vnode = this._vnode, oldDom = this._vnode._dom, parentDom = this._parentDom;
-	if (parentDom) {
-		// Set render mode so that we can differantiate where the render request
+	if (this._vnode) {
+		// Set render mode so that we can differentiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
-		const force = callback!==false;
-
-		let mounts = [];
-		let newDom = diff(parentDom, vnode, assign({}, vnode), this._context, parentDom.ownerSVGElement!==undefined, null, mounts, force, oldDom == null ? getDomSibling(vnode) : oldDom);
-		commitRoot(mounts, vnode);
-
-		if (newDom != oldDom) {
-			updateParentDomPointers(vnode);
-		}
+		this._force = true;
+		if (callback) this._renderCallbacks.push(callback);
+		enqueueRender(this);
 	}
-	if (callback) callback();
 };
 
 /**
@@ -107,10 +86,11 @@ export function getDomSibling(vnode, childIndex) {
 	for (; childIndex < vnode._children.length; childIndex++) {
 		sibling = vnode._children[childIndex];
 
-		if (sibling != null) {
-			return typeof sibling.type !== 'function'
-				? sibling._dom
-				: getDomSibling(sibling, 0);
+		if (sibling != null && sibling._dom != null) {
+			// Since updateParentDomPointers keeps _dom pointer correct,
+			// we can rely on _dom to tell us if this subtree contains a
+			// rendered DOM node, and what the first rendered DOM node is
+			return sibling._dom;
 		}
 	}
 
@@ -120,6 +100,26 @@ export function getDomSibling(vnode, childIndex) {
 	// VNode (meaning we reached the DOM parent of the original vnode that began
 	// the search)
 	return typeof vnode.type === 'function' ? getDomSibling(vnode) : null;
+}
+
+/**
+ * Trigger in-place re-rendering of a component.
+ * @param {import('./internal').Component} c The component to rerender
+ */
+function renderComponent(component) {
+	let vnode = component._vnode,
+		oldDom = vnode._dom,
+		parentDom = component._parentDom;
+
+	if (parentDom) {
+		let mounts = [];
+		let newDom = diff(parentDom, vnode, assign({}, vnode), component._context, parentDom.ownerSVGElement!==undefined, null, mounts, oldDom == null ? getDomSibling(vnode) : oldDom);
+		commitRoot(mounts, vnode);
+
+		if (newDom != oldDom) {
+			updateParentDomPointers(vnode);
+		}
+	}
 }
 
 /**
@@ -154,19 +154,23 @@ const defer = typeof Promise=='function' ? Promise.prototype.then.bind(Promise.r
 
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
- * important that contributors to Preact can consistenly reason about what calls to `setState`, etc.
+ * important that contributors to Preact can consistently reason about what calls to `setState`, etc.
  * do, and when their effects will be applied. See the links below for some further reading on designing
  * asynchronous APIs.
  * * [Designing APIs for Asynchrony](https://blog.izs.me/2013/08/designing-apis-for-asynchrony)
  * * [Callbacks synchronous and asynchronous](https://blog.ometer.com/2011/07/24/callbacks-synchronous-and-asynchronous/)
  */
 
+let prevDebounce = options.debounceRendering;
+
 /**
  * Enqueue a rerender of a component
  * @param {import('./internal').Component} c The component to rerender
  */
 export function enqueueRender(c) {
-	if (!c._dirty && (c._dirty = true) && q.push(c) === 1) {
+	if ((!c._dirty && (c._dirty = true) && q.push(c) === 1) ||
+	    (prevDebounce !== options.debounceRendering)) {
+		prevDebounce = options.debounceRendering;
 		(options.debounceRendering || defer)(process);
 	}
 }
@@ -177,6 +181,6 @@ function process() {
 	q.sort((a, b) => b._vnode._depth - a._vnode._depth);
 	while ((p=q.pop())) {
 		// forceUpdate's callback argument is reused here to indicate a non-forced update.
-		if (p._dirty) p.forceUpdate(false);
+		if (p._dirty) renderComponent(p);
 	}
 }

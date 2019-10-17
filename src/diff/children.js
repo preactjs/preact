@@ -2,6 +2,7 @@ import { diff, unmount, applyRef } from './index';
 import { coerceToVNode } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { removeNode } from '../util';
+import { getDomSibling } from '../component';
 
 /**
  * Diff the children of a virtual node
@@ -20,11 +21,11 @@ import { removeNode } from '../util';
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
+ * @param {boolean} isHydrating Whether or not we are in hydration
  */
-export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, oldDom) {
-	let childVNode, i, j, oldVNode, newDom, sibDom, firstChildDom, refs;
+export function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren, mounts, oldDom, isHydrating) {
+	let i, j, oldVNode, newDom, sibDom, firstChildDom, refs;
 
-	let newChildren = newParentVNode._children || toChildArray(newParentVNode.props.children, newParentVNode._children=[], coerceToVNode, true);
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
@@ -36,21 +37,19 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	// for this purpose, because `null` is a valid value for `oldDom` which can mean to skip to this logic
 	// (e.g. if mounting a new tree in which the old DOM should be ignored (usually for Fragments).
 	if (oldDom == EMPTY_OBJ) {
-		oldDom = null;
-		if (excessDomChildren!=null) {
-			for (i = 0; !oldDom && i < excessDomChildren.length; i++) {
-				oldDom = excessDomChildren[i];
-			}
+		if (excessDomChildren != null) {
+			oldDom = excessDomChildren[0];
+		}
+		else if (oldChildrenLength) {
+			oldDom = getDomSibling(oldParentVNode, 0);
 		}
 		else {
-			for (i = 0; !oldDom && i < oldChildrenLength; i++) {
-				oldDom = oldChildren[i] && oldChildren[i]._dom;
-			}
+			oldDom = null;
 		}
 	}
 
-	for (i=0; i<newChildren.length; i++) {
-		childVNode = newChildren[i] = coerceToVNode(newChildren[i]);
+	i=0;
+	newParentVNode._children = toChildArray(newParentVNode._children, childVNode => {
 
 		if (childVNode!=null) {
 			childVNode._parent = newParentVNode;
@@ -83,10 +82,10 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			oldVNode = oldVNode || EMPTY_OBJ;
 
 			// Morph the old element into the new one, but don't append it to the dom yet
-			newDom = diff(parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, null, oldDom);
+			newDom = diff(parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, oldDom, isHydrating);
 
 			if ((j = childVNode.ref) && oldVNode.ref != j) {
-				(refs || (refs=[])).push(j, childVNode._component || newDom);
+				(refs || (refs=[])).push(j, childVNode._component || newDom, childVNode);
 			}
 
 			// Only proceed if the vnode has not been unmounted by `diff()` above.
@@ -123,6 +122,20 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 						}
 						parentDom.insertBefore(newDom, oldDom);
 					}
+
+					// Browsers will infer an option's `value` from `textContent` when
+					// no value is present. This essentially bypasses our code to set it
+					// later in `diff()`. It works fine in all browsers except for IE11
+					// where it breaks setting `select.value`. There it will be always set
+					// to an empty string. Re-applying an options value will fix that, so
+					// there are probably some internal data structures that aren't
+					// updated properly.
+					//
+					// To fix it we make sure to reset the inferred value, so that our own
+					// value check in `diff()` won't be skipped.
+					if (newParentVNode.type == 'option') {
+						parentDom.value = '';
+					}
 				}
 
 				oldDom = newDom.nextSibling;
@@ -136,7 +149,10 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 				}
 			}
 		}
-	}
+
+		i++;
+		return childVNode;
+	});
 
 	newParentVNode._dom = firstChildDom;
 
@@ -144,38 +160,38 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	if (excessDomChildren!=null && typeof newParentVNode.type !== 'function') for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
 
 	// Remove remaining oldChildren if there are any.
-	for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], newParentVNode);
+	for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], oldChildren[i]);
 
 	// Set refs only after unmount
 	if (refs) {
 		for (i = 0; i < refs.length; i++) {
-			applyRef(refs[i], refs[++i], newParentVNode);
+			applyRef(refs[i], refs[++i], refs[++i]);
 		}
 	}
 }
 
 /**
- * Flatten a virtual nodes children to a single dimensional array
+ * Flatten and loop through the children of a virtual node
  * @param {import('../index').ComponentChildren} children The unflattened
  * children of a virtual node
- * @param {Array<import('../internal').VNode | null>} [flattened] An flat array of children to modify
- * @param {typeof import('../create-element').coerceToVNode} [map] Function that
- * will be applied on each child if the `vnode` is not `null`
- * @param {boolean} [keepHoles] wether to coerce `undefined` to `null` or not.
- * This is needed for Components without children like `<Foo />`.
+ * @param {(vnode: import('../internal').VNode) => import('../internal').VNode} [callback]
+ * A function to invoke for each child before it is added to the flattened list.
+ * @param {import('../internal').VNode[]} [flattened] An flat array of children to modify
+ * @returns {import('../internal').VNode[]}
  */
-export function toChildArray(children, flattened, map, keepHoles) {
+export function toChildArray(children, callback, flattened) {
 	if (flattened == null) flattened = [];
+
 	if (children==null || typeof children === 'boolean') {
-		if (keepHoles) flattened.push(null);
+		if (callback) flattened.push(callback(null));
 	}
 	else if (Array.isArray(children)) {
 		for (let i=0; i < children.length; i++) {
-			toChildArray(children[i], flattened, map, keepHoles);
+			toChildArray(children[i], callback, flattened);
 		}
 	}
 	else {
-		flattened.push(map ? map(children) : children);
+		flattened.push(callback ? callback(coerceToVNode(children)) : children);
 	}
 
 	return flattened;

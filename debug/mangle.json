@@ -9,7 +9,9 @@
         "regex": "^_",
         "reserved": [
           "__REACT_DEVTOOLS_GLOBAL_HOOK__",
-          "_renderers"
+          "_renderers",
+          "__source",
+          "__self"
         ]
       }
     }
@@ -17,6 +19,7 @@
   "props": {
     "cname": 6,
     "props": {
+      "$_depth": "__b",
       "$_dirty": "__d",
       "$_prevState": "__u",
       "$_nextState": "__s",
@@ -35,7 +38,6 @@
       "$_render": "__r",
       "$_hook": "__h",
       "$_catchError": "__e",
-      "$_catchRender": "__E",
       "$_unmount": "_e"
     }
   }

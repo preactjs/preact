@@ -12,18 +12,7 @@ export interface Options extends preact.Options {
 	/** Attach a hook that is invoked before a hook's state is queried. */
 	_hook?(component: Component): void;
 	/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
-	_catchError?(error: any, vnode: VNode): void;
-	/**
-	 * Attach a hook that is invoked after an error is caught while executing render.
-	 *
-	 * When this hook returns true, the diffing on the affected vnode will be stopped.
-	 * When this hook returns false, the error will be thrown (and thus passed to catchError or lifecycle hooks)
-	 *
-	 * @param error The error caught
-	 * @param vnode The VNode whose component's render method threw an error
-	 * @return Return a boolean indicating whether the error was handled by the hook or not
-	 */
-	_catchRender?(error: any, newVNode: VNode, oldVNode: VNode): boolean;
+	_catchError(error: any, vnode: VNode, oldVNode: VNode | undefined): void;
 }
 
 export interface FunctionalComponent<P = {}> extends preact.FunctionComponent<P> {
@@ -51,7 +40,8 @@ export interface PreactElement extends HTMLElement {
 export interface VNode<P = {}> extends preact.VNode<P> {
 	// Redefine type here using our internal ComponentFactory type
 	type: string | ComponentFactory<P> | null;
-	_children: Array<VNode> | null;
+	props: P & { children: preact.ComponentChildren } | string | number | null;
+	_children: Array<VNode<any>> | null;
 	_parent: VNode | null;
 	_depth: number | null;
 	/**
@@ -63,18 +53,21 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	 */
 	_lastDomChild: PreactElement | Text | null;
 	_component: Component | null;
+	constructor: undefined;
 }
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
+	// When component is functional component, this is reset to functional component
 	constructor: preact.ComponentType<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
 	base?: PreactElement;
 
 	_dirty: boolean;
-	_renderCallbacks: Array<() => void>;
+	_force?: boolean | null;
+	_renderCallbacks: Array<() => void>; // Only class components
 	_context?: any;
 	_vnode?: VNode<P> | null;
-	_nextState?: S | null;
+	_nextState?: S | null; // Only class components
 	/** Only used in the devtools to later dirty check if state has changed */
 	_prevState?: S | null;
 	/**
@@ -82,7 +75,9 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	 * components or array returns.
 	 */
 	_parentDom?: PreactElement | null;
+	// Always read, set only when handling error
 	_processingException?: Component<any, any> | null;
+	// Always read, set only when handling error. This is used to indicate at diffTime to set _processingException
 	_pendingError?: Component<any, any> | null;
 }
 

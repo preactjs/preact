@@ -17,13 +17,19 @@ let text = text => document.createTextNode(text);
 describe('preact-compat', () => {
 
 	/** @type {HTMLDivElement} */
-	let scratch;
+	let scratch, proto;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		proto = document.createElement('div').constructor.prototype;
+		sinon.spy(proto, 'addEventListener');
+		sinon.spy(proto, 'removeEventListener');
 	});
 
+
 	afterEach(() => {
+		proto.addEventListener.restore();
+		proto.removeEventListener.restore();
 		teardown(scratch);
 	});
 
@@ -86,6 +92,38 @@ describe('preact-compat', () => {
 				.that.equals('dynamic content');
 		});
 
+		it('should support onAnimationEnd', () => {
+			const func = () => { };
+			render(<div onAnimationEnd={func} />, scratch);
+
+			expect(proto.addEventListener).to.have.been.calledOnce
+				.and.to.have.been.calledWithExactly('animationend', sinon.match.func, false);
+
+			expect(scratch.firstChild._listeners).to.deep.equal({
+				animationend: func
+			});
+
+			render(<div />, scratch);
+			expect(proto.removeEventListener).to.have.been.calledOnce
+				.and.to.have.been.calledWithExactly('animationend', sinon.match.func, false);
+		});
+
+		it('should support onTransitionEnd', () => {
+			const func = () => { };
+			render(<div onTransitionEnd={func} />, scratch);
+
+			expect(proto.addEventListener).to.have.been.calledOnce
+				.and.to.have.been.calledWithExactly('transitionend', sinon.match.func, false);
+
+			expect(scratch.firstChild._listeners).to.deep.equal({
+				transitionend: func
+			});
+
+			render(<div />, scratch);
+			expect(proto.removeEventListener).to.have.been.calledOnce
+				.and.to.have.been.calledWithExactly('transitionend', sinon.match.func, false);
+		});
+
 		it('should support defaultValue', () => {
 			render(<input defaultValue="foo" />, scratch);
 			expect(scratch.firstElementChild).to.have.property('value', 'foo');
@@ -102,18 +140,39 @@ describe('preact-compat', () => {
 			expect(spy).to.be.calledOnce;
 			expect(spy).to.be.calledWithExactly();
 		});
+
+		// Issue #1727
+		it('should destroy the any existing DOM nodes inside the container', () => {
+			scratch.appendChild(document.createElement('div'));
+			scratch.appendChild(document.createElement('div'));
+
+			render(<span>foo</span>, scratch);
+			expect(scratch.innerHTML).to.equal('<span>foo</span>');
+		});
+
+		it('should only destroy existing DOM nodes on first render', () => {
+			scratch.appendChild(document.createElement('div'));
+			scratch.appendChild(document.createElement('div'));
+
+			render(<input />, scratch);
+
+			let child = scratch.firstChild;
+			child.focus();
+			render(<input />, scratch);
+			expect(document.activeElement.nodeName).to.equal('INPUT');
+		});
 	});
 
 	describe('createFactory', () => {
 		it('should create a DOM element', () => {
-			render(createFactory('span', null)(), scratch);
-			expect(scratch.firstChild.nodeName).to.equal('SPAN');
+			render(createFactory('span')({ class: 'foo' }, '1'), scratch);
+			expect(scratch.innerHTML).to.equal('<span class="foo">1</span>');
 		});
 
 		it('should create a component', () => {
-			const Foo = () => <div>foo</div>;
-			render(createFactory(Foo, null)(), scratch);
-			expect(scratch.textContent).to.equal('foo');
+			const Foo = ({ id, children }) => <div id={id}>foo {children}</div>;
+			render(createFactory(Foo)({ id: 'value' }, 'bar'), scratch);
+			expect(scratch.innerHTML).to.equal('<div id="value">foo bar</div>');
 		});
 	});
 
@@ -130,12 +189,12 @@ describe('preact-compat', () => {
 			let $$typeof = 0xeac7;
 			try {
 				// eslint-disable-next-line
-				if (Function.prototype.toString.call(eval('Sym'+'bol.for')).match(/\[native code\]/)) {
+				if (Function.prototype.toString.call(eval('Sym' + 'bol.for')).match(/\[native code\]/)) {
 					// eslint-disable-next-line
-					$$typeof = eval('Sym'+'bol.for("react.element")');
+					$$typeof = eval('Sym' + 'bol.for("react.element")');
 				}
 			}
-			catch (e) {}
+			catch (e) { }
 			expect(vnode).to.have.property('$$typeof', $$typeof);
 			expect(vnode).to.have.property('type', 'div');
 			expect(vnode).to.have.property('props').that.is.an('object');
@@ -147,7 +206,7 @@ describe('preact-compat', () => {
 		});
 
 		it('should normalize onChange', () => {
-			let props = { onChange(){} };
+			let props = { onChange() { } };
 
 			function expectToBeNormalized(vnode, desc) {
 				expect(vnode, desc)
@@ -340,6 +399,12 @@ describe('preact-compat', () => {
 		vnode = <textarea oninput={() => null} onChange={() => null} />;
 		expect(vnode.props).to.haveOwnProperty('oninput');
 		expect(vnode.props).to.not.haveOwnProperty('onchange');
+	});
+
+	it('should not normalize onChange for range', () => {
+		render(<input type="range" onChange={() => null} />, scratch);
+		expect(scratch.firstChild._listeners).to.haveOwnProperty('change');
+		expect(scratch.firstChild._listeners).to.not.haveOwnProperty('input');
 	});
 
 	it('should normalize class+className even on components', () => {

@@ -19,6 +19,8 @@ import { initDebug } from 'preact/debug/src/debug';
 import DevtoolsDemo from './devtools';
 import SuspenseDemo from './suspense';
 import Redux from './redux';
+import TextFields from './textFields';
+import ReduxBug from './reduxUpdate';
 
 let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(window.location.href);
 if (!isBenchmark) {
@@ -75,6 +77,8 @@ class App extends Component {
 						<Link href="/styled-components" activeClassName="active">Styled Components</Link>
 						<Link href="/redux" activeClassName="active">Redux</Link>
 						<Link href="/suspense" activeClassName="active">Suspense / lazy</Link>
+						<Link href="/textfields" activeClassName="active">Textfields</Link>
+						<Link href="/reduxBug/1" activeClassName="active">Redux Bug</Link>
 					</nav>
 				</header>
 				<main>
@@ -105,6 +109,8 @@ class App extends Component {
 						<PeopleBrowser path="/people/:user?" />
 						<StyledComp path="/styled-components" />
 						<Redux path="/redux" />
+						<TextFields path="/textfields" />
+						<ReduxBug path="/reduxBug/:start" />
 					</Router>
 				</main>
 			</div>

@@ -204,3 +204,19 @@ class ComponentWithDefaultProps extends Component<{ value: string }> {
 }
 
 const withDefaultProps = <ComponentWithDefaultProps />;
+
+interface PartialState {
+	foo: string;
+	bar: number;
+}
+
+class ComponentWithPartialSetState extends Component<{}, PartialState> {
+	render({}, {foo, bar}: PartialState) {
+		return <button onClick={ () => this.handleClick('foo')}>{foo}-{bar}</button>;
+	}
+	handleClick = (value: keyof PartialState) => {
+		this.setState({ [value]: 'updated' });
+	}
+}
+
+const withPartialSetState = <ComponentWithPartialSetState />

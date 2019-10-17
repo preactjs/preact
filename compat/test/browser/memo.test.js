@@ -16,6 +16,11 @@ describe('memo()', () => {
 		teardown(scratch);
 	});
 
+	it('should have isReactComponent flag', () => {
+		let App = memo(() => <div>foo</div>);
+		expect(App.prototype.isReactComponent).to.equal(true);
+	});
+
 	it('should work with function components', () => {
 		let spy = sinon.spy();
 
@@ -44,6 +49,43 @@ describe('memo()', () => {
 		rerender();
 
 		expect(spy).to.be.calledOnce;
+	});
+
+	it('should support adding refs', () => {
+		let spy = sinon.spy();
+
+		let ref = null;
+
+		function Foo() {
+			spy();
+			return <h1>Hello World</h1>;
+		}
+
+		let Memoized = memo(Foo);
+
+		let update;
+		class App extends Component {
+			constructor() {
+				super();
+				update = () => this.setState({});
+			}
+			render() {
+				return <Memoized ref={ref} />;
+			}
+		}
+		render(<App />, scratch);
+
+		expect(spy).to.be.calledOnce;
+
+		ref = {};
+
+		update();
+		rerender();
+
+		expect(ref.current).not.to.be.undefined;
+
+		// TODO: not sure whether this is in-line with react...
+		expect(spy).to.be.calledTwice;
 	});
 
 	it('should support custom comparer functions', () => {

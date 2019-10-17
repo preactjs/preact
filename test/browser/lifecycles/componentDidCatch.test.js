@@ -43,7 +43,7 @@ describe('Lifecycle methods', () => {
 				this.setState({ error });
 			}
 			render() {
-				return <div>{this.state.error ? String(this.state.error) : this.props.children}</div>;
+				return this.state.error ? String(this.state.error) : this.props.children;
 			}
 		}
 
@@ -93,6 +93,24 @@ describe('Lifecycle methods', () => {
 			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(expectedError);
 		});
 
+		// https://github.com/preactjs/preact/issues/1570
+		it('should handle double child throws', () => {
+			const Child = ({ i }) => {
+				throw new Error(`error! ${i}`);
+			};
+
+			const fn = () => render(
+				<Receiver>
+					{[1, 2].map(i => <Child key={i} i={i} />)}
+				</Receiver>,
+				scratch
+			);
+			expect(fn).to.not.throw();
+
+			rerender();
+			expect(scratch.innerHTML).to.equal('Error: error! 2');
+		});
+
 		it('should be called when child fails in componentWillMount', () => {
 			ThrowErr.prototype.componentWillMount = throwExpectedError;
 
@@ -129,6 +147,7 @@ describe('Lifecycle methods', () => {
 
 			render(<Receiver><ThrowErr /></Receiver>, scratch);
 			receiver.forceUpdate();
+			rerender();
 
 			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(expectedError);
 		});
@@ -139,6 +158,7 @@ describe('Lifecycle methods', () => {
 			render(<Receiver><ThrowErr /></Receiver>, scratch);
 
 			receiver.forceUpdate();
+			rerender();
 			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(expectedError);
 		});
 
@@ -148,6 +168,7 @@ describe('Lifecycle methods', () => {
 			render(<Receiver><ThrowErr /></Receiver>, scratch);
 
 			receiver.forceUpdate();
+			rerender();
 			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(expectedError);
 		});
 
@@ -165,7 +186,7 @@ describe('Lifecycle methods', () => {
 					this.setState({ error });
 				}
 				render() {
-					return <div>{this.state.error ? String(this.state.error) : <ThrowErr foo={this.state.foo} />}</div>;
+					return this.state.error ? String(this.state.error) : <ThrowErr foo={this.state.foo} />;
 				}
 			}
 
@@ -192,7 +213,7 @@ describe('Lifecycle methods', () => {
 					this.setState({ error });
 				}
 				render() {
-					return <div>{this.state.error ? String(this.state.error) : <ThrowErr foo={this.state.foo} />}</div>;
+					return this.state.error ? String(this.state.error) : <ThrowErr foo={this.state.foo} />;
 				}
 			}
 
@@ -229,11 +250,7 @@ describe('Lifecycle methods', () => {
 					this.setState({ error });
 				}
 				render() {
-					return (
-						<div>
-							{this.state.error ? String(this.state.error) : <Foo ref={ref} />}
-						</div>
-					);
+					return this.state.error ? String(this.state.error) : <Foo ref={ref} />;
 				}
 			}
 
@@ -256,11 +273,7 @@ describe('Lifecycle methods', () => {
 					this.setState({ error });
 				}
 				render() {
-					return (
-						<div>
-							{this.state.error ? String(this.state.error) : <div ref={ref} />}
-						</div>
-					);
+					return this.state.error ? String(this.state.error) : <div ref={ref} />;
 				}
 			}
 

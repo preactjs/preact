@@ -14,6 +14,10 @@ export namespace JSXInternal {
 		? Defaultize<Props, Defaults>
 		: Props;
 
+	interface IntrinsicAttributes {
+		key?: any;
+	}
+
 	interface Element extends preact.VNode<any> {
 	}
 
@@ -522,6 +526,7 @@ export namespace JSXInternal {
 		defer?: boolean;
 		dir?: string;
 		disabled?: boolean;
+		disableRemotePlayback?: boolean;
 		download?: any;
 		draggable?: boolean;
 		encType?: string;
@@ -601,7 +606,7 @@ export namespace JSXInternal {
 		srcSet?: string;
 		start?: number;
 		step?: number | string;
-		style?: {[key: string]: string | number};
+		style?: string | {[key: string]: string | number};
 		summary?: string;
 		tabIndex?: number;
 		target?: string;
@@ -609,6 +614,7 @@ export namespace JSXInternal {
 		type?: string;
 		useMap?: string;
 		value?: string | string[] | number;
+		volume?: string | number;
 		width?: number | string;
 		wmode?: string;
 		wrap?: string;

@@ -3,10 +3,25 @@ import { expect } from "chai";
 import {
 	createElement,
 	Component,
+	toChildArray,
 	FunctionalComponent,
 	ComponentConstructor,
-	ComponentFactory
+	ComponentFactory,
+	VNode,
+	ComponentChildren
 } from "../../src";
+
+function getDisplayType(vnode: VNode | string | number) {
+	if (typeof vnode === 'string' || typeof vnode == 'number') {
+		return vnode.toString();
+	}
+	else if (typeof vnode.type == 'string') {
+		return vnode.type;
+	}
+	else {
+		return vnode.type.displayName;
+	}
+}
 
 class SimpleComponent extends Component<{}, {}> {
 	render() {
@@ -21,7 +36,7 @@ const SimpleFunctionalComponent = () => <div />;
 const a: ComponentFactory = SimpleComponent;
 const b: ComponentFactory = SimpleFunctionalComponent;
 
-describe("VNode", () => {
+describe("VNode TS types", () => {
 	it("is returned by h", () => {
 		const actual = <div className="wow"/>;
 		expect(actual).to.include.all.keys(
@@ -41,7 +56,7 @@ describe("VNode", () => {
 		expect(constructor.name).to.eq("SimpleFunctionalComponent");
 	});
 
-	it("has a nodeName equal to the constructor of a componet", () => {
+	it("has a nodeName equal to the constructor of a component", () => {
 		const sfc = <SimpleComponent />;
 		expect(sfc.type).to.be.instanceOf(Function);
 		const constructor = sfc.type as ComponentConstructor<any>;
@@ -59,6 +74,58 @@ describe("VNode", () => {
 		expect(comp.props.children).to.be.instanceOf(Array);
 		expect(comp.props.children[1]).to.be.a("string");
 	});
+
+	it("children type should work with toChildArray", () => {
+		const comp: VNode = (
+			<SimpleComponent>
+				child1 {1}
+			</SimpleComponent>
+		);
+
+		const children = toChildArray(comp.props.children);
+		expect(children).to.have.lengthOf(2);
+	});
+
+	it("toChildArray should filter out some types", () => {
+		const compChild = <SimpleComponent />;
+		const comp: VNode = (
+			<SimpleComponent>
+				a{null}
+				{true}
+				{false}
+				{2}
+				{undefined}
+				{["b", "c"]}
+				{compChild}
+			</SimpleComponent>
+		);
+
+		const children = toChildArray(comp.props.children);
+		expect(children).to.deep.equal(["a", 2, "b", "c", compChild]);
+	});
+
+	it("functions like getDisplayType should work", () => {
+		function TestComp(props: { children?: ComponentChildren }) {
+			return <div>{props.children}</div>;
+		}
+		TestComp.displayName = "TestComp";
+
+		const compChild = <TestComp />;
+		const comp: VNode = (
+			<SimpleComponent>
+				a{null}
+				{true}
+				{false}
+				{2}
+				{undefined}
+				{["b", "c"]}
+				{compChild}
+			</SimpleComponent>
+		);
+
+		const types = toChildArray(comp.props.children).map(getDisplayType);
+		expect(types).to.deep.equal(["a", "2", "b", "c", "TestComp"]);
+	})
 });
 
 class ComponentWithFunctionChild extends Component<{ children: (num: number) => string; }> {

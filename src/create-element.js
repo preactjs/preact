@@ -14,6 +14,7 @@ export function createElement(type, props, children) {
 
 	if (arguments.length>3) {
 		children = [children];
+		// https://github.com/preactjs/preact/issues/1916
 		for (let i=3; i<arguments.length; i++) {
 			children.push(arguments[i]);
 		}
@@ -41,7 +42,7 @@ export function createElement(type, props, children) {
  * Create a VNode (used internally by Preact)
  * @param {import('./internal').VNode["type"]} type The node name or Component
  * Constructor for this virtual node
- * @param {object | string | number | null} props The properites of this virtual node.
+ * @param {object | string | number | null} props The properties of this virtual node.
  * If this virtual node represents a text node, this is the text of the node (string or number).
  * @param {string | number | null} key The key for this virtual node, used when
  * diffing it against its children
@@ -78,6 +79,13 @@ export function createRef() {
 export function Fragment(props) {
 	return props.children;
 }
+
+/**
+ * Check if a the argument is a valid Preact VNode.
+ * @param {*} vnode
+ * @returns {vnode is import('./internal').VNode}
+ */
+export const isValidElement = vnode => vnode!=null && vnode.constructor === undefined;
 
 /**
  * Coerce an untrusted value into a VNode

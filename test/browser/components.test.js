@@ -132,6 +132,47 @@ describe('Components', () => {
 			expect(spy).to.not.be.called;
 		});
 
+		it('should accurately call nested setState callbacks', () => {
+			let states = [];
+			let finalState;
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { a: 'b' };
+				}
+
+				componentDidMount() {
+					states.push(this.state);
+					expect(scratch.innerHTML).to.equal('<p>b</p>');
+
+					// eslint-disable-next-line
+					this.setState({ a: 'a' }, () => {
+						states.push(this.state);
+						expect(scratch.innerHTML).to.equal('<p>a</p>');
+
+						this.setState({ a: 'c' }, () => {
+							expect(scratch.innerHTML).to.equal('<p>c</p>');
+							states.push(this.state);
+						});
+					});
+				}
+
+				render() {
+					finalState = this.state;
+					return <p>{this.state.a}</p>;
+				}
+			}
+
+			render(<Foo />, scratch);
+			rerender();
+
+			let [firstState, secondState, thirdState] = states;
+			expect(finalState).to.deep.equal({ a: 'c' });
+			expect(firstState).to.deep.equal({ a: 'b' });
+			expect(secondState).to.deep.equal({ a: 'a' });
+			expect(thirdState).to.deep.equal({ a: 'c' });
+		});
+
 		it('should initialize props & context but not state in Component constructor', () => {
 			// Not initializing state matches React behavior: https://codesandbox.io/s/rml19v8o2q
 			class Foo extends Component {
@@ -497,14 +538,17 @@ describe('Components', () => {
 
 		comp.setState({ alt: true });
 		comp.forceUpdate();
+		rerender();
 		expect(scratch.innerHTML, 'switching to textnode').to.equal('asdf');
 
 		comp.setState({ alt: false });
 		comp.forceUpdate();
+		rerender();
 		expect(scratch.innerHTML, 'switching to element').to.equal('<div>test</div>');
 
 		comp.setState({ alt: true });
 		comp.forceUpdate();
+		rerender();
 		expect(scratch.innerHTML, 'switching to textnode 2').to.equal('asdf');
 	});
 
@@ -1228,6 +1272,7 @@ describe('Components', () => {
 
 			outer.setState({ child: Inner2 });
 			outer.forceUpdate();
+			rerender();
 
 			expect(Inner2.prototype.render).to.have.been.calledOnce;
 
@@ -1242,6 +1287,7 @@ describe('Components', () => {
 			expect(Inner2.prototype.componentWillUnmount, 'inner2 swap').not.to.have.been.called;
 
 			inner2.forceUpdate();
+			rerender();
 
 			expect(Inner2.prototype.render, 'inner2 update').to.have.been.calledTwice;
 			expect(Inner2.prototype.componentWillMount, 'inner2 update').to.have.been.calledOnce;

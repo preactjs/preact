@@ -13,6 +13,6 @@
     "regex": "^(?!_renderer)^_"
   },
   "peerDependencies": {
-    "preact": "^10.0.0-alpha.0"
+    "preact": "^10.0.0"
   }
 }

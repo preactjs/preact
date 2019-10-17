@@ -11,8 +11,8 @@ declare namespace preact {
 	// -----------------------------------
 
 	interface VNode<P = {}> {
-		type: ComponentType<P> | string | null;
-		props: P & { children: ComponentChildren } | string | number | null;
+		type: ComponentType<P> | string;
+		props: P & { children: ComponentChildren };
 		key: Key;
 		ref: Ref<any> | null;
 		/**
@@ -76,8 +76,8 @@ declare namespace preact {
 		new (props: P, context?: any): Component<P, S>;
 		displayName?: string;
 		defaultProps?: Partial<P>;
-		getDerivedStateFromProps?(props: Readonly<P>, state: Readonly<S>): Partial<S>;
-		getDerivedStateFromError?(error: any): Partial<S>;
+		getDerivedStateFromProps?(props: Readonly<P>, state: Readonly<S>): Partial<S> | null;
+		getDerivedStateFromError?(error: any): Partial<S> | null;
 	}
 	interface ComponentConstructor<P = {}, S = {}> extends ComponentClass<P, S> {}
 
@@ -110,8 +110,8 @@ declare namespace preact {
 		// constraint under no circumstances, see #1356.In general type arguments
 		// seem to be a bit buggy and not supported well at the time of this
 		// writing with TS 3.3.3333.
-		static getDerivedStateFromProps?(props: Readonly<object>, state: Readonly<object>): object;
-		static getDerivedStateFromError?(error: any): object;
+		static getDerivedStateFromProps?(props: Readonly<object>, state: Readonly<object>): object | null;
+		static getDerivedStateFromError?(error: any): object | null;
 
 		state: Readonly<S>;
 		props: RenderableProps<P>;
@@ -121,9 +121,8 @@ declare namespace preact {
 		// From https://github.com/DefinitelyTyped/DefinitelyTyped/blob/e836acc75a78cf0655b5dfdbe81d69fdd4d8a252/types/react/index.d.ts#L402
 		// // We MUST keep setState() as a unified signature because it allows proper checking of the method return type.
 		// // See: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/18365#issuecomment-351013257
-		// // Also, the ` | S` allows intellisense to not be dumbisense
 		setState<K extends keyof S>(
-			state: ((prevState: Readonly<S>, props: Readonly<P>) => (Pick<S, K> | S | null)) | (Pick<S, K> | S | null),
+			state: ((prevState: Readonly<S>, props: Readonly<P>) => (Pick<S, K> | Partial<S> | null)) | (Pick<S, K> | Partial<S> | null),
 			callback?: () => void
 		): void;
 
@@ -174,7 +173,7 @@ declare namespace preact {
 		replaceNode?: Element | Text
 	): void;
 	function hydrate(vnode: ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment): void;
-	function cloneElement(vnode: JSX.Element, props: any, ...children: ComponentChildren[]): JSX.Element;
+	function cloneElement(vnode: JSX.Element, props?: any, ...children: ComponentChildren[]): JSX.Element;
 
 	//
 	// Preact Built-in Components
@@ -209,7 +208,8 @@ declare namespace preact {
 	// Preact helpers
 	// -----------------------------------
 	function createRef<T = any>(): RefObject<T>;
-	function toChildArray(children: ComponentChildren): Array<VNode | null>;
+	function toChildArray(children: ComponentChildren): Array<VNode | string | number>;
+	function isValidElement(vnode: any): vnode is VNode;
 
 	//
 	// Context

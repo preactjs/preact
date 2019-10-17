@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import { Component, Fragment } from 'preact';
 
 /**
@@ -122,7 +123,7 @@ export function getChildren(vnode) {
  */
 export function isRoot(vnode) {
 	// Timings of root vnodes will never be set
-	return vnode.type===Fragment && vnode.endTime==-1;
+	return vnode.type===Fragment && vnode._parent === null;
 }
 
 /**

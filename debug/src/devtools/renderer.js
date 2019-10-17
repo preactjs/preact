@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import { getData, getChildren, getInstance, hasDataChanged, isRoot } from './custom';
 
 /**
@@ -18,7 +19,7 @@ export class Renderer {
 		/**
 		 * Store the instance of a vnode. This will be later used to decide if a
 		 * vnode needs to be mounted or updated. For components the instance refers
-		 * to the actuall class instance whereas for dom nodes it refers to the
+		 * to the actual class instance whereas for dom nodes it refers to the
 		 * underlying dom element.
 		 * @type {WeakMap<import('../internal').Component | import('../internal').PreactElement | HTMLElement | Text, import('../internal').VNode>}
 		 */
@@ -50,7 +51,7 @@ export class Renderer {
 	}
 
 	/**
-	 * Recursively mount a vnode tree. Note that the devtools expectes the tree to
+	 * Recursively mount a vnode tree. Note that the devtools expects the tree to
 	 * be mounted from the bottom up, otherwise the order will be messed up.
 	 * Therefore we mount children prior to mounting the vnode itself.
 	 * @param {import('../internal').VNode} vnode
@@ -171,7 +172,7 @@ export class Renderer {
 		if (this.inst2vnode.has(inst)) this.update(vnode);
 		else this.mount(vnode);
 
-		// The devtools checks via the existance of this property if the devtools
+		// The devtools checks via the existence of this property if the devtools
 		// profiler should be enabled or not. If it is missing from the first root
 		// node the "Profiler" tab won't show up.
 		/** @type {import('../internal').VNode} */

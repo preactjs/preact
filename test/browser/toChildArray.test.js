@@ -3,7 +3,7 @@ import { setupScratch, teardown, getMixedArray, mixedArrayHTML } from '../_util/
 
 /** @jsx createElement */
 
-describe('props.children', () => {
+describe('toChildArray', () => {
 
 	/** @type {HTMLDivElement} */
 	let scratch;
@@ -43,7 +43,7 @@ describe('props.children', () => {
 		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 
-	it('returns an emtpy array with false as a child', () => {
+	it('returns an empty array with false as a child', () => {
 		render(<Foo>{false}</Foo>, scratch);
 
 		expect(children).to.be.an('array');
@@ -62,6 +62,7 @@ describe('props.children', () => {
 	it('should skip a function child', () => {
 		const child = num => num.toFixed(2);
 		render(<Foo>{child}</Foo>, scratch);
+		expect(children).to.be.an('array');
 		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 
