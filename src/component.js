@@ -10,6 +10,7 @@ import { Fragment } from './create-element';
  * @param {object} context The initial context from parent components'
  * getChildContext
  */
+//类组件
 export function Component(props, context) {
 	this.props = props;
 	this.context = context;
@@ -23,6 +24,7 @@ export function Component(props, context) {
  * @param {() => void} [callback] A function to be called once component state is
  * updated
  */
+//设置状态
 Component.prototype.setState = function(update, callback) {
 	// only clone state when copying to nextState the first time.
 	let s = (this._nextState!==this.state && this._nextState) || (this._nextState = assign({}, this.state));
@@ -33,6 +35,7 @@ Component.prototype.setState = function(update, callback) {
 	}
 
 	// Skip update if updater function returned null
+	//如果update为null则不更新
 	if (update==null) return;
 
 	if (this._vnode) {
@@ -144,12 +147,15 @@ function updateParentDomPointers(vnode) {
  * The render queue
  * @type {Array<import('./internal').Component>}
  */
+//渲染队列
 let q = [];
 
 /**
  * Asynchronously schedule a callback
  * @type {(cb) => void}
  */
+//延迟   如 defer(callback)，callback会用Promise then或者 setTimeout执行
+//Promise.prototype.then.bind(Promise.resolve()) 等同于 Promise.resolve().then
 const defer = typeof Promise=='function' ? Promise.prototype.then.bind(Promise.resolve()) : setTimeout;
 
 /*

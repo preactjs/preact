@@ -5,6 +5,7 @@
  * @param {P} props The object to copy properties from
  * @returns {O & P}
  */
+//复制props上的属性到obj中
 export function assign(obj, props) {
 	for (let i in props) obj[i] = props[i];
 	return /** @type {O & P} */ (obj);
@@ -16,6 +17,7 @@ export function assign(obj, props) {
  * is smaller than including a dedicated polyfill.
  * @param {Node} node The node to remove
  */
+//移除节点
 export function removeNode(node) {
 	let parentNode = node.parentNode;
 	if (parentNode) parentNode.removeChild(node);
