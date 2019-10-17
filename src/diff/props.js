@@ -26,11 +26,15 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 	}
 }
 
+//设置样式
 function setStyle(style, key, value) {
+	//如果第一个字符为-直接调用setProperty设置，例如key为-webkit-border-radius
 	if (key[0] === '-') {
 		style.setProperty(key, value);
 	}
 	else {
+		//value为数字并且key是尺寸类型则值自动加px
+		//value为null则设置为空字符串
 		style[key] = typeof value==='number' && IS_NON_DIMENSIONAL.test(key)===false ? value+'px' : value==null ? '' : value;
 	}
 }
