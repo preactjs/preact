@@ -8,6 +8,17 @@ import { createVNode } from './create-element';
  * @param {object} props Attributes/props to add when cloning
  * @param {Array<import('./index').ComponentChildren>} rest Any additional arguments will be used as replacement children.
  */
+/*
+克隆元素
+cloneElement(
+  element,
+  [props],
+  [...children]
+)
+等同于
+<element.type {...element.props} {...props}>{children}</element.type>
+但cloneElement 会保留了组件的 ref
+*/
 export function cloneElement(vnode, props) {
 	props = assign(assign({}, vnode.props), props);
 	if (arguments.length>2) props.children = EMPTY_ARR.slice.call(arguments, 2);
