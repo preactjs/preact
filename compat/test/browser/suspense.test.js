@@ -805,7 +805,7 @@ describe('suspense', () => {
 				expect(scratch.innerHTML).to.eql(`<div>Hello1</div>`);
 
 				// suspend again
-				[resolve] = suspend();;
+				[resolve] = suspend();
 				rerender();
 
 				expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
