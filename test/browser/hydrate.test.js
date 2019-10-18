@@ -254,6 +254,22 @@ describe('hydrate()', () => {
 		expect(getLog()).to.deep.equal([]);
 	});
 
+	it('should not merge attributes with node created by the DOM', () => {
+		const html = (htmlString) => {
+			const div = document.createElement('div');
+			div.innerHTML = htmlString;
+			return div.firstChild;
+		};
+
+		const DOMElement = html`<div><a foo="bar"></a></div>`;
+		scratch.appendChild(DOMElement);
+
+		const preactElement = <div><a /></div>;
+
+		hydrate(preactElement, scratch);
+		expect(scratch).to.have.property('innerHTML', '<div><a foo="bar"></a></div>');
+	});
+
 	it('should attach event handlers', () => {
 		let spy = sinon.spy();
 		scratch.innerHTML = '<span>Test</span>';

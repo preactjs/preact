@@ -1,4 +1,4 @@
-import * as React from '../../src';
+import React from '../../src';
 
 const MyInput: React.ForwardFn<{ id: string }, { focus(): void }> = (props, ref) => {
   const inputRef = React.useRef<HTMLInputElement>()

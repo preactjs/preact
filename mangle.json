@@ -23,6 +23,7 @@
       "$_renderCallbacks": "__h",
       "$_vnode": "__v",
       "$_children": "__k",
+      "$_suspensions": "__u",
       "$_dom": "__e",
       "$_component": "__c",
       "$__html": "__html",

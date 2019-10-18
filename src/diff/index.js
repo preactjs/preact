@@ -206,6 +206,7 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 	if (dom==null && excessDomChildren!=null) {
 		for (i=0; i<excessDomChildren.length; i++) {
 			const child = excessDomChildren[i];
+
 			if (child!=null && (newVNode.type===null ? child.nodeType===3 : child.localName===newVNode.type)) {
 				dom = child;
 				excessDomChildren[i] = null;
@@ -242,6 +243,13 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
 		// @TODO we should warn in debug mode when props don't match here.
 		if (!isHydrating) {
+			if (oldProps === EMPTY_OBJ) {
+				oldProps = {};
+				for (let i=0; i<dom.attributes.length; i++) {
+					oldProps[dom.attributes[i].name] = dom.attributes[i].value;
+				}
+			}
+
 			if (newHtml || oldHtml) {
 				// Avoid re-applying the same '__html' if it did not changed between re-render
 				if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
