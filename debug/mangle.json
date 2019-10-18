@@ -24,6 +24,7 @@
       "$_prevState": "__u",
       "$_nextState": "__s",
       "$_renderCallbacks": "__h",
+      "$_suspensions": "__u",
       "$_vnode": "__v",
       "$_children": "__k",
       "$_dom": "__e",
