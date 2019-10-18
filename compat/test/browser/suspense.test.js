@@ -824,4 +824,42 @@ describe('suspense', () => {
 		});
 	});
 
+	it('should support suspending multiple times', () => {
+		const [Suspender, suspend] = createSuspender(() => <div>initial render</div>);
+		const Loading = () => <div>Suspended...</div>;
+
+		render(
+			<Suspense fallback={<Loading />}>
+				<Suspender />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(`<div>initial render</div>`);
+
+		let [resolve] = suspend();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+
+		return resolve(() => <div>Hello1</div>)
+			.then(() => {
+				// Rerender promise resolution
+				rerender();
+				expect(scratch.innerHTML).to.eql(`<div>Hello1</div>`);
+
+				// suspend again
+				[resolve] = suspend();
+				rerender();
+
+				expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+
+				return resolve(() => <div>Hello2</div>);
+			})
+			.then(() => {
+				// Rerender promise resolution
+				rerender();
+				expect(scratch.innerHTML).to.eql(`<div>Hello2</div>`);
+			});
+	});
 });
