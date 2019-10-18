@@ -92,14 +92,18 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 			}
 			else {
 				// class-based components
+				let cxType = nodeName.contextType;
+				let provider = cxType && context[cxType.__c];
+				let cctx = cxType != null ? (provider ? provider.props.value : cxType._defaultValue) : context;
+
 				// c = new nodeName(props, context);
-				c = vnode.__c = new nodeName(props, context);
+				c = vnode.__c = new nodeName(props, cctx);
 				c.__v = vnode;
 				// turn off stateful re-rendering:
 				c._dirty = c.__d = true;
 				c.props = props;
 				if (c.state==null) c.state = {};
-				c.context = context;
+				c.context = cctx;
 				if (nodeName.getDerivedStateFromProps) c.state = assign(assign({}, c.state), nodeName.getDerivedStateFromProps(c.props, c.state));
 				else if (c.componentWillMount) c.componentWillMount();
 				rendered = c.render(c.props, c.state, c.context);

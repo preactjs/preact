@@ -1,5 +1,5 @@
 import render from '../src/jsx';
-import { h, createContext } from 'preact';
+import { h, createContext, Component } from 'preact';
 import chai, { expect } from 'chai';
 import sinonChai from 'sinon-chai';
 chai.use(sinonChai);
@@ -11,6 +11,32 @@ function dedent([str]) {
 
 describe('context', () => {
 	let renderJsx = (jsx, opts) => render(jsx, null, opts).replace(/ {2}/g, '\t');
+
+	it('should support class component as consumer', () => {
+		const Ctx = createContext();
+
+		class ClassConsumer extends Component {
+			render() {
+				const value = this.context;
+				return (
+				    <section>
+                        value is: {value}
+					</section>
+				);
+			}
+		}
+		ClassConsumer.contextType = Ctx;
+
+		let rendered = renderJsx(
+			<Ctx.Provider value="correct">
+				<ClassConsumer />
+			</Ctx.Provider>
+		);
+
+		expect(rendered).to.equal(dedent`
+			<section>value is: correct</section>
+		`);
+	});
 
 	it('should support createContext', () => {
 		const { Provider, Consumer } = createContext();
