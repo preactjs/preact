@@ -142,7 +142,8 @@ export function useImperativeHandle(ref, createHandle, args) {
 
 function bindHandles(handles) {
 	handles.some(handle => {
-		if (handle.ref) handle.ref.current = handle.createHandle();
+		if (typeof handle.ref === 'function') handle.ref(handle.createHandle());
+		else if (handle.ref) handle.ref.current = handle.createHandle();
 	});
 	return [];
 }
