@@ -2,25 +2,25 @@ import { createElement, render, Component, Fragment } from 'preact';
 // import renderToString from 'preact-render-to-string';
 import './style.scss';
 import { Router, Link } from 'preact-router';
-import Pythagoras from './pythagoras';
-import Spiral from './spiral';
-import Reorder from './reorder';
-import Todo from './todo';
-import Fragments from './fragments';
-import Context from './context';
+// import Pythagoras from './pythagoras';
+// import Spiral from './spiral';
+// import Reorder from './reorder';
+// import Todo from './todo';
+// import Fragments from './fragments';
+// import Context from './context';
 import installLogger from './logger';
-import ProfilerDemo from './profiler';
-import KeyBug from './key_bug';
-import StateOrderBug from './stateOrderBug';
-import PeopleBrowser from './people';
-import StyledComp from './styled-components';
+// import ProfilerDemo from './profiler';
+// import KeyBug from './key_bug';
+// import StateOrderBug from './stateOrderBug';
+// import PeopleBrowser from './people';
+// import StyledComp from './styled-components';
 import { initDevTools } from 'preact/debug/src/devtools';
 import { initDebug } from 'preact/debug/src/debug';
-import DevtoolsDemo from './devtools';
-import SuspenseDemo from './suspense';
-import Redux from './redux';
-import TextFields from './textFields';
-import ReduxBug from './reduxUpdate';
+// import DevtoolsDemo from './devtools';
+// import SuspenseDemo from './suspense';
+// import Redux from './redux';
+// import TextFields from './textFields';
+// import ReduxBug from './reduxUpdate';
 
 let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(window.location.href);
 if (!isBenchmark) {
@@ -62,7 +62,7 @@ class App extends Component {
 				<header>
 					<nav>
 						<Link href="/" activeClassName="active">Home</Link>
-						<Link href="/reorder" activeClassName="active">Reorder</Link>
+						{/* <Link href="/reorder" activeClassName="active">Reorder</Link>
 						<Link href="/spiral" activeClassName="active">Spiral</Link>
 						<Link href="/pythagoras" activeClassName="active">Pythagoras</Link>
 						<Link href="/todo" activeClassName="active">ToDo</Link>
@@ -78,13 +78,13 @@ class App extends Component {
 						<Link href="/redux" activeClassName="active">Redux</Link>
 						<Link href="/suspense" activeClassName="active">Suspense / lazy</Link>
 						<Link href="/textfields" activeClassName="active">Textfields</Link>
-						<Link href="/reduxBug/1" activeClassName="active">Redux Bug</Link>
+						<Link href="/reduxBug/1" activeClassName="active">Redux Bug</Link> */}
 					</nav>
 				</header>
 				<main>
 					<Router url={url}>
 						<Home path="/" />
-						<StateOrderBug path="/state-order" />
+						{/* <StateOrderBug path="/state-order" />
 						<Reorder path="/reorder" />
 						<div path="/spiral">
 							{!isBenchmark
@@ -110,7 +110,7 @@ class App extends Component {
 						<StyledComp path="/styled-components" />
 						<Redux path="/redux" />
 						<TextFields path="/textfields" />
-						<ReduxBug path="/reduxBug/:start" />
+						<ReduxBug path="/reduxBug/:start" /> */}
 					</Router>
 				</main>
 			</div>
