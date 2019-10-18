@@ -15,6 +15,7 @@
       "$_diff": "__b",
       "$_commit": "__c",
       "$_render": "__r",
+      "$_suspensions": "__u",
       "$_hook": "__h",
       "$_catchError": "__e",
       "$_unmount": "_e"
