@@ -1,4 +1,3 @@
-import { Ref, ComponentChild } from '../..';
 import {
 	Component as PreactComponent,
 	VNode as PreactVNode,
@@ -25,11 +24,6 @@ export interface FunctionalComponent<P = {}> extends PreactFunctionalComponent<P
 export interface VNode<T = any> extends PreactVNode<T> {
 	$$typeof?: symbol | string;
 	preactCompatNormalized?: boolean;
-}
-
-export interface ForwardFn<P = {}, T = any> {
-	(props: P, ref: Ref<T>): ComponentChild;
-	displayName?: string;
 }
 
 export interface SuspenseState {

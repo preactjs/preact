@@ -464,6 +464,40 @@ describe('render()', () => {
 			expect(style.zIndex.toString()).to.equal('');
 		});
 
+		it('should remove existing attributes', () => {
+			const div = document.createElement('div');
+			div.setAttribute('class', 'red');
+			const span = document.createElement('span');
+			const text = document.createTextNode('Hi');
+
+			span.appendChild(text);
+			div.appendChild(span);
+			scratch.appendChild(div);
+
+			const App = () => (
+				<div>
+					<span>Bye</span>
+				</div>
+			);
+
+			render(<App />, scratch);
+			expect(scratch.innerHTML).to.equal('<div class=""><span>Bye</span></div>');
+		});
+
+		it('should remove class attributes', () => {
+			const App = props => (
+				<div className={props.class}>
+					<span>Bye</span>
+				</div>
+			);
+
+			render(<App class="hi" />, scratch);
+			expect(scratch.innerHTML).to.equal('<div class="hi"><span>Bye</span></div>');
+
+			render(<App />, scratch);
+			expect(scratch.innerHTML).to.equal('<div class=""><span>Bye</span></div>');
+		});
+
 		it('should remove old styles', () => {
 			render(<div style={{ color: 'red' }} />, scratch);
 			render(<div style={{ backgroundColor: 'blue' }} />, scratch);
@@ -780,22 +814,6 @@ describe('render()', () => {
 
 		expect(scratch.firstChild.firstChild).to.equalNode(b);
 		expect(scratch.firstChild.lastChild).to.equalNode(a);
-	});
-
-	it('should not merge attributes with node created by the DOM', () => {
-		const html = (htmlString) => {
-			const div = document.createElement('div');
-			div.innerHTML = htmlString;
-			return div.firstChild;
-		};
-
-		const DOMElement = html`<div><a foo="bar"></a></div>`;
-		scratch.appendChild(DOMElement);
-
-		const preactElement = <div><a /></div>;
-
-		render(preactElement, scratch);
-		expect(scratch).to.have.property('innerHTML', '<div><a foo="bar"></a></div>');
 	});
 
 	// Discussion: https://github.com/preactjs/preact/issues/287
