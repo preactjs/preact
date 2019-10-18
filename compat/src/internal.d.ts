@@ -28,9 +28,9 @@ export interface VNode<T = any> extends PreactVNode<T> {
 
 export interface SuspenseState {
 	_parkedChildren: VNode<any>[];
-	_children: ComponentChildren;
 }
 
 export interface SuspenseComponent extends PreactComponent<SuspenseProps, SuspenseState> {
 	_suspensions: Array<Promise<any>>;
+	_fallback: VNode<any>;
 }

@@ -43,7 +43,7 @@ function detachDom(children) {
 export function Suspense(props) {
 	// we do not call super here to golf some bytes...
 	this._suspensions = [];
-	this.state = { _children: props.children };
+	this._fallback = props.fallback;
 }
 
 // Things we do here to save some bytes but are not proper JS inheritance:
@@ -68,22 +68,20 @@ Suspense.prototype._childDidSuspend = function(promise) {
 		if (c._suspensions.length == 0) {
 			// If fallback is null, don't try to unmount it
 			// `unmount` expects a real VNode, not null values
-			if (c.state._children) {
+			if (c._fallback) {
 				// Unmount current children (should be fallback)
-				unmount(c.state._children);
+				unmount(c._fallback);
 			}
 			c._vnode._dom = null;
 
 			c._vnode._children = c.state._parkedChildren;
-			c.setState({ _parkedChildren: null, _children: c.props.children });
+			c.setState({ _parkedChildren: null });
 		}
 	};
 
 	if (c.state._parkedChildren == null) {
-		c.setState({
-			_parkedChildren: c._vnode._children,
-			_children: c.props.fallback && cloneElement(c.props.fallback)
-		});
+		c._fallback = c._fallback && cloneElement(c._fallback);
+		c.setState({ _parkedChildren: c._vnode._children });
 		detachDom(c._vnode._children);
 		c._vnode._children = [];
 	}
@@ -92,7 +90,7 @@ Suspense.prototype._childDidSuspend = function(promise) {
 };
 
 Suspense.prototype.render = function(props, state) {
-	return state._children;
+	return state._parkedChildren ? this._fallback : props.children;
 };
 
 export function lazy(loader) {
