@@ -21,6 +21,7 @@ import { initDebug } from 'preact/debug/src/debug';
 // import Redux from './redux';
 // import TextFields from './textFields';
 // import ReduxBug from './reduxUpdate';
+import SuspenseRouterBug from './suspense-router';
 
 let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(window.location.href);
 if (!isBenchmark) {
@@ -79,6 +80,7 @@ class App extends Component {
 						<Link href="/suspense" activeClassName="active">Suspense / lazy</Link>
 						<Link href="/textfields" activeClassName="active">Textfields</Link>
 						<Link href="/reduxBug/1" activeClassName="active">Redux Bug</Link> */}
+						<Link href="/suspense-router" activeClassName="active">Suspense Router Bug</Link>
 					</nav>
 				</header>
 				<main>
@@ -111,6 +113,7 @@ class App extends Component {
 						<Redux path="/redux" />
 						<TextFields path="/textfields" />
 						<ReduxBug path="/reduxBug/:start" /> */}
+						<SuspenseRouterBug path="/suspense-router" />
 					</Router>
 				</main>
 			</div>
