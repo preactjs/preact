@@ -372,21 +372,21 @@ describe('keys', () => {
 		ops = [];
 		render(<Foo moved={false} />, scratch);
 
-		expect(ops).to.deep.equal(['Mount Stateful2', 'Mount Stateful1']);
+		expect(ops).to.deep.equal(['Mount Stateful1', 'Mount Stateful2']);
 		expect(Stateful1Ref).to.exist;
 		expect(Stateful2Ref).to.exist;
 
 		ops = [];
 		render(<Foo moved />, scratch);
 
-		expect(ops).to.deep.equal(['Unmount Stateful2', 'Unmount Stateful1', 'Mount Stateful2', 'Mount Stateful1']);
+		expect(ops).to.deep.equal(['Unmount Stateful2', 'Unmount Stateful1', 'Mount Stateful1', 'Mount Stateful2']);
 		expect(Stateful1MovedRef).to.not.equal(Stateful1Ref);
 		expect(Stateful2MovedRef).to.not.equal(Stateful2Ref);
 
 		ops = [];
 		render(<Foo moved={false} />, scratch);
 
-		expect(ops).to.deep.equal(['Unmount Stateful2', 'Unmount Stateful1', 'Mount Stateful2', 'Mount Stateful1']);
+		expect(ops).to.deep.equal(['Unmount Stateful2', 'Unmount Stateful1', 'Mount Stateful1', 'Mount Stateful2']);
 		expect(Stateful1Ref).to.not.equal(Stateful1MovedRef);
 		expect(Stateful2Ref).to.not.equal(Stateful2MovedRef);
 	});
@@ -423,7 +423,7 @@ describe('keys', () => {
 		ops = [];
 		render(<Foo moved={false} />, scratch);
 
-		expect(ops).to.deep.equal(['Mount Stateful2', 'Mount Stateful1']);
+		expect(ops).to.deep.equal(['Mount Stateful1', 'Mount Stateful2']);
 		expect(Stateful1Ref).to.exist;
 		expect(Stateful2Ref).to.exist;
 
@@ -474,21 +474,21 @@ describe('keys', () => {
 		ops = [];
 		render(<Foo unkeyed={false} />, scratch);
 
-		expect(ops).to.deep.equal(['Mount Stateful2', 'Mount Stateful1']);
+		expect(ops).to.deep.equal(['Mount Stateful1', 'Mount Stateful2']);
 		expect(Stateful1Ref).to.exist;
 		expect(Stateful2Ref).to.exist;
 
 		ops = [];
 		render(<Foo unkeyed />, scratch);
 
-		expect(ops).to.deep.equal(['Unmount Stateful2', 'Unmount Stateful1', 'Mount Stateful2', 'Mount Stateful1']);
+		expect(ops).to.deep.equal(['Unmount Stateful2', 'Unmount Stateful1', 'Mount Stateful1', 'Mount Stateful2']);
 		expect(Stateful1MovedRef).to.not.equal(Stateful1Ref);
 		expect(Stateful2MovedRef).to.not.equal(Stateful2Ref);
 
 		ops = [];
 		render(<Foo unkeyed={false} />, scratch);
 
-		expect(ops).to.deep.equal(['Unmount Stateful2', 'Unmount Stateful1', 'Mount Stateful2', 'Mount Stateful1']);
+		expect(ops).to.deep.equal(['Unmount Stateful2', 'Unmount Stateful1', 'Mount Stateful1', 'Mount Stateful2']);
 		expect(Stateful1Ref).to.not.equal(Stateful1MovedRef);
 		expect(Stateful2Ref).to.not.equal(Stateful2MovedRef);
 	});
