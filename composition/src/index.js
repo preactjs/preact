@@ -82,7 +82,7 @@ export function effect(src, cb) {
 }
 
 export function onMounted(cb) {
-	currentComponent.__compositions.e.push({ cb });
+	currentComponent._renderCallbacks.push(cb);
 }
 
 export function onUnmounted(cb) {
@@ -187,18 +187,9 @@ export function isReactive(v) {
 }
 
 function handleEffect(up, c, init) {
-	// handle onMounted
-	if (!up.src && up.cb) {
-		if (!up.args) {
-			up.cb();
-			up.args = [];
-		}
-		return;
-	}
-
 	const srcIsArray = Array.isArray(up.src);
 	let newArgs = srcIsArray
-		? up.src.reduce((acc, s) => (acc.push(resolveArgs(s, c)),acc), [])
+		? up.src.reduce((acc, s) => (acc.push(resolveArgs(s, c)), acc), [])
 		: resolveArgs(up.src, c, init);
 
 	if (srcIsArray ? argsChanged(up.args, newArgs) : up.args !== newArgs) {

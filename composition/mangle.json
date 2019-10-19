@@ -8,6 +8,7 @@
     "props": {
       "$__compositions": "__C",
       "$_component": "__c",
+      "$_renderCallbacks": "__h",
       "$_value": "__v",
       "$_defaultValue": "__p",
       "$_id": "__c",
