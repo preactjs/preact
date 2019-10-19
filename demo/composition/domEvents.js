@@ -11,7 +11,7 @@ export default createComponent(function() {
 
 	const pos = watch(
 		[mousePos, windowSize],
-		([{ x, y }, { width, height }]) => ({
+		({ x, y }, { width, height }) => ({
 			x: x + gap + size > width ? width - size : x + gap,
 			y: y + gap + size > height ? height - size : y + gap,
 			color: `RGB(${(255 * x) / width}, 255, ${(255 * y) / height})`

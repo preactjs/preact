@@ -29,7 +29,8 @@ export default createComponent(() => {
 	// http://www.petecorey.com/blog/2019/08/19/animating-a-canvas-with-react-hooks/
 	const canvasRef = createRef();
 
-	effect([canvasRef, count], ([canvas, c]) => {
+	effect(count, c => {
+		const canvas = canvasRef.current;
 		let context = canvas.getContext('2d');
 		const width = canvas.width;
 		const height = canvas.height;
