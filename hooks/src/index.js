@@ -147,7 +147,8 @@ export function useRef(initialValue) {
  */
 export function useImperativeHandle(ref, createHandle, args) {
 	useLayoutEffect(() => {
-		if (ref) ref.current = createHandle();
+		if (typeof ref === 'function') ref(createHandle());
+		else if (ref) ref.current = createHandle();
 	}, args == null ? args : args.concat(ref));
 }
 

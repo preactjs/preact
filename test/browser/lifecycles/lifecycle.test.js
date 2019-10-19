@@ -46,10 +46,11 @@ describe('Lifecycle methods', () => {
 				log.push('outer constructor');
 
 				this.state = { value: 0 };
-				forceUpdateOuter = () => this.forceUpdate();
-				updateOuterState = () => this.setState({
-					value: (this.state.value + 1) % 2
-				});
+				forceUpdateOuter = () => this.forceUpdate(() => log.push('outer forceUpdate callback'));
+				updateOuterState = () => this.setState(
+					prevState => ({ value: prevState.value % 2 }),
+					() => log.push('outer setState callback')
+				);
 			}
 			render() {
 				log.push('outer render');
@@ -78,10 +79,11 @@ describe('Lifecycle methods', () => {
 				log.push('inner constructor');
 
 				this.state = { value: 0 };
-				forceUpdateInner = () => this.forceUpdate();
-				updateInnerState = () => this.setState({
-					value: (this.state.value + 1) % 2
-				});
+				forceUpdateInner = () => this.forceUpdate(() => log.push('inner forceUpdate callback'));
+				updateInnerState = () => this.setState(
+					prevState => ({ value: prevState.value % 2 }),
+					() => log.push('inner setState callback')
+				);
 			}
 			render() {
 				log.push('inner render');
@@ -146,6 +148,7 @@ describe('Lifecycle methods', () => {
 			'inner render',
 			'inner getSnapshotBeforeUpdate',
 			'inner componentDidUpdate',
+			'outer setState callback',
 			'outer componentDidUpdate'
 		]);
 
@@ -158,6 +161,7 @@ describe('Lifecycle methods', () => {
 			'inner shouldComponentUpdate',
 			'inner render',
 			'inner getSnapshotBeforeUpdate',
+			'inner setState callback',
 			'inner componentDidUpdate'
 		]);
 
@@ -174,6 +178,7 @@ describe('Lifecycle methods', () => {
 			'inner render',
 			'inner getSnapshotBeforeUpdate',
 			'inner componentDidUpdate',
+			'outer forceUpdate callback',
 			'outer componentDidUpdate'
 		]);
 
@@ -185,6 +190,7 @@ describe('Lifecycle methods', () => {
 			'inner getDerivedStateFromProps',
 			'inner render',
 			'inner getSnapshotBeforeUpdate',
+			'inner forceUpdate callback',
 			'inner componentDidUpdate'
 		]);
 

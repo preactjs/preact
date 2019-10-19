@@ -104,7 +104,7 @@ export function getDomSibling(vnode, childIndex) {
 
 /**
  * Trigger in-place re-rendering of a component.
- * @param {import('./internal').Component} c The component to rerender
+ * @param {import('./internal').Component} component The component to rerender
  */
 function renderComponent(component) {
 	let vnode = component._vnode,
@@ -112,9 +112,9 @@ function renderComponent(component) {
 		parentDom = component._parentDom;
 
 	if (parentDom) {
-		let mounts = [];
-		let newDom = diff(parentDom, vnode, assign({}, vnode), component._context, parentDom.ownerSVGElement!==undefined, null, mounts, oldDom == null ? getDomSibling(vnode) : oldDom);
-		commitRoot(mounts, vnode);
+		let commitQueue = [];
+		let newDom = diff(parentDom, vnode, assign({}, vnode), component._context, parentDom.ownerSVGElement!==undefined, null, commitQueue, oldDom == null ? getDomSibling(vnode) : oldDom);
+		commitRoot(commitQueue, vnode);
 
 		if (newDom != oldDom) {
 			updateParentDomPointers(vnode);
