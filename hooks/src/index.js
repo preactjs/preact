@@ -19,7 +19,10 @@ options._render = component => {
 		currentComponent.__hooks._pendingEffects = handleEffects(currentComponent.__hooks._pendingEffects);
 	}
 
-	return oldBeforeRender(component);
+	component = oldBeforeRender(component);
+
+	currentComponent = null;
+	return component;
 };
 
 let oldAfterDiff = options.diffed;
