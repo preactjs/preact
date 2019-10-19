@@ -90,12 +90,12 @@ export function onUnmounted(cb) {
 }
 
 export function provide(name, _value) {
-	const _component = currentComponent;
-	if (!_component.__compositions.c) {
-		_component.__compositions.c = {};
-		_component.getChildContext = () => _component.__compositions.c;
+	const c = currentComponent;
+	if (!c.__compositions.c) {
+		c.__compositions.c = {};
+		c.getChildContext = () => c.__compositions.c;
 	}
-	_component.__compositions.c[`__sC_${name}`] = { _component, _value };
+	c.__compositions.c[`__sC_${name}`] = { _component: c, _value };
 }
 
 export function inject(name, defaultValue) {
@@ -188,23 +188,25 @@ export function isReactive(v) {
 
 function handleEffect(up, c, init) {
 	const srcIsArray = Array.isArray(up.src);
-	let newArgs = srcIsArray
+	const watcher = up.vr;
+	const oldArgs = up.args;
+	const newArgs = srcIsArray
 		? up.src.reduce((acc, s) => (acc.push(resolveArgs(s, c)), acc), [])
 		: resolveArgs(up.src, c, init);
 
-	if (srcIsArray ? argsChanged(up.args, newArgs) : up.args !== newArgs) {
+	if (srcIsArray ? argsChanged(oldArgs, newArgs) : oldArgs !== newArgs) {
 		cleanupEffect(up);
 		const r = up.cb
-			? up.cb(newArgs, up.args, /* onCleanup */ cl => (up.cl = cl))
+			? up.cb(newArgs, oldArgs, /* onCleanup */ cl => (up.cl = cl))
 			: newArgs;
 		up.args = newArgs;
-		if (up.vr) {
+		if (watcher) {
 			if (isPromise(r))
 				r.then(v => {
-					up.vr.value = v;
+					watcher.value = v;
 					c.setState(EMPTY_STATE);
 				});
-			else up.vr.value = r;
+			else watcher.value = r;
 		}
 	}
 }
