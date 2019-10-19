@@ -58,12 +58,19 @@ Suspense.prototype._childDidSuspend = function(promise) {
 
 	/** @type {import('./internal').SuspenseComponent} */
 	const c = this;
+
+	if (c._suspensions.indexOf(promise) != -1) {
+		return;
+	}
+
 	c._suspensions.push(promise);
 
 	const onSuspensionComplete = () => {
 		// From https://twitter.com/Rich_Harris/status/1125850391155965952
 		c._suspensions[c._suspensions.indexOf(promise)] = c._suspensions[c._suspensions.length - 1];
 		c._suspensions.pop();
+
+		console.log('onSuspensionComplete', c._suspensions.length, c.state._parkedChildren);
 
 		if (c._suspensions.length == 0) {
 			unmount(c._fallback);

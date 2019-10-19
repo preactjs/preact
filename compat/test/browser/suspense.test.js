@@ -818,4 +818,141 @@ describe('suspense', () => {
 				expect(scratch.innerHTML).to.eql(`<div>Hello2</div>`);
 			});
 	});
+
+	// TODO: add a test for shouldComponentUpdate blocking between Suspense and suspending child
+	// Guess we need to call forceUpdate on the suspended child
+
+	it('should support throwing the same promise multiple times', () => {
+		let suspended = true;
+		let resolve;
+		const promise = new Promise((res) => { resolve = res; });
+
+		function Suspender({ id }) {
+			if (suspended) {
+				throw promise;
+			}
+
+			return <div>Suspender {id} un-suspended</div>;
+		}
+
+		let suspense = { current: null };
+
+		render(
+			<section>
+				<Suspense ref={suspense} fallback={<div>fallback</div>}>
+					<Suspender id="1" />
+					<Suspender id="2" />
+				</Suspense>
+			</section>,
+			scratch
+		);
+
+		expect(suspense.current).to.not.be.null;
+		
+		/**
+		 * This assertion will fail as we keep track of the same promise twice. When commenting
+		 * this assertion the fallback will never be unmounted as we reomve the promise from
+		 * the Suspense' _suspensions only once and therefore will never un-suspend.
+		 */
+		expect(suspense.current._suspensions.length).to.eql(1);
+		
+		expect(scratch.innerHTML).to.eql('<section></section>');
+
+		// this rerender is needed because of Suspense issuing a forceUpdate itself
+		rerender();
+		expect(scratch.innerHTML).to.eql('<section><div>fallback</div></section>');
+
+		suspended = false;
+		resolve();
+
+		rerender();
+		// TODO: why does this assertion fail even after guarding against adding
+		// the promise to _suspensions twice?!
+		expect(scratch.innerHTML).to.eql('<section><div>Suspender 1 un-suspended</div><div>Suspender 2 un-suspended</div></section>');
+
+		expect('to').to.eql('do');
+	});
+
+	it('should allow suspended children to update', () => {
+		let updater;
+		class Updater extends Component {
+			constructor(props) {
+				super(props);
+				updater = this;
+			}
+
+			render({ children }) {
+				return children;
+			}
+		}
+
+		const log = [];
+		class Logger extends Component {
+			constructor(props) {
+				super(props);
+				log.push('construct');
+			}
+
+			render({ children }) {
+				log.push('render');
+				return children;
+			}
+		}
+
+		let suspense = { current: null };
+
+		let suspend = true;
+
+		const Suspender = () => {
+			if (suspend) {
+				throw new Promise(() => {}); // promise never resolves...
+			}
+
+			return <div>Suspender un-suspended</div>;
+		};
+
+		render(
+			<section>
+				<Suspense ref={suspense} fallback={<div>fallback</div>}>
+					<Updater>
+						<Suspender />
+						<Logger />
+					</Updater>
+				</Suspense>
+			</section>,
+			scratch
+		);
+
+		expect(suspense.current).to.not.be.null;
+		expect(log).to.eql(['construct', 'render']);
+		expect(suspense.current._suspensions.length).to.eql(1);
+		expect(scratch.innerHTML).to.eql('<section></section>');
+
+		// this rerender is needed because of Suspense issuing a forceUpdate itself
+		rerender();
+		expect(scratch.innerHTML).to.eql('<section><div>fallback</div></section>');
+
+		suspend = false;
+		updater.forceUpdate();
+
+		rerender();
+
+		/**
+		 * These currently failing assertion shows the issue that we currently unmount
+		 * the suspended tree (unlike react, which adds a display="none") and block any
+		 * further processing on that tree. Thus updates below a suspended Suspense are
+		 * getting lost.
+		 */
+		expect(log).to.eql(['construct', 'render', 'render']);
+
+		/**
+		 * When the above assertion will hold true we will certainly run into the second issue
+		 * here. The problem is that we do not remove suspensions from an instance of Suspense
+		 * when one of its suspending children unmounts or no longer throws because of a state
+		 * update.
+		 */
+		expect(suspense.current._suspensions.length).to.eql(0);
+
+		expect(scratch.innerHTML).to.eql('<section><div>Suspender un-suspended</div></section>');
+	});
 });
