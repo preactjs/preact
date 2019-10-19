@@ -54,6 +54,8 @@ export type WatchSrc<T, P> =
   | ReactiveHolder<T>
   | PreactContext<T>;
 
+type WatchCb<T extends Array<any>, R> = (...value: T) => R;
+
 export type WatchResult<T> = { readonly value: T };
 
 /**
@@ -71,52 +73,58 @@ export type WatchResult<T> = { readonly value: T };
  * @returns `value` holding the result from the first `src` specified or the return of the `callback`
  */
 
-export type Unpack<P, T extends (WatchSrc<any, P>)[]> = {
-  [I in keyof T]: T[I] extends WatchSrc<infer U, P> ? U : never;
-};
-
-/** watch multiple values */
-export function watch<P, T extends (WatchSrc<any, P>)[]>(src: T): Unpack<P, T>;
-
-/** watch multy values with a callback returning a promise */
-export function watch<P, T extends (WatchSrc<any, P>)[], R>(
-  src: T,
-  cb: (...value: Unpack<P, T>) => PromiseLike<R>
-): WatchResult<R>;
-
-/** watch multy values with a callback returning a promise and default value */
-export function watch<P, T extends (WatchSrc<any, P>)[], R>(
-  src: T,
-  cb: (...value: Unpack<P, T>) => PromiseLike<R>,
-  def: R
-): WatchResult<R>;
-
-/** watch multi values with a callback returning a value */
-export function watch<P, T extends (WatchSrc<any, P>)[], R>(
-  src: T,
-  cb: (...value: Unpack<P, T>) => R
-): WatchResult<R>;
-
-/** watch a single value */
+/** watch values */
 export function watch<P, T>(src: WatchSrc<T, P>): WatchResult<T>;
+export function watch<P, T0, T1>(
+  src: [WatchSrc<T0, P>, WatchSrc<T1, P>]
+): WatchResult<[T0, T1]>;
+export function watch<P, T0, T1, T2>(
+  src: [WatchSrc<T0, P>, WatchSrc<T1, P>, WatchSrc<T2, P>]
+): WatchResult<[T0, T1, T2]>;
 
-/** watch a single value with a callback returning a promise and default value */
+/** watch values with a callback returning a promise and default value */
 export function watch<P, T, R>(
   src: WatchSrc<T, P>,
   cb: (value: T) => PromiseLike<R>,
   def: R
 ): WatchResult<R>;
+export function watch<P, T0, T1, R>(
+  src: [WatchSrc<T0, P>, WatchSrc<T1, P>],
+  cb: WatchCb<[T0, T1], PromiseLike<R>>,
+  def: R
+): WatchResult<R>;
+export function watch<P, T0, T1, T2, R>(
+  src: [WatchSrc<T0, P>, WatchSrc<T1, P>, WatchSrc<T2, P>],
+  cb: WatchCb<[T0, T1, T2], PromiseLike<R>>,
+  def: R
+): WatchResult<R>;
 
-/** watch a single value with a callback returning a promise */
+/** watch values with a callback returning a promise */
 export function watch<P, T, R>(
   src: WatchSrc<T, P>,
-  cb: (value: T) => PromiseLike<R>
-): { readonly value: R | undefined };
+  cb: WatchCb<[T], PromiseLike<R>>
+): WatchResult<R | undefined>;
+export function watch<P, T0, T1, R>(
+  src: [WatchSrc<T0, P>, WatchSrc<T1, P>],
+  cb: WatchCb<[T0, T1], PromiseLike<R>>
+): WatchResult<R | undefined>;
+export function watch<P, T0, T1, T2, R>(
+  src: [WatchSrc<T0, P>, WatchSrc<T1, P>, WatchSrc<T2, P>],
+  cb: WatchCb<[T0, T1, T2], PromiseLike<R>>
+): WatchResult<R | undefined>;
 
-/** watch a single value with a callback returning a value */
+/** watch values with a callback returning a value */
 export function watch<P, T, R>(
   src: WatchSrc<T, P>,
-  cb: (value: T) => R
+  cb: WatchCb<[T], R>
+): WatchResult<R>;
+export function watch<P, T0, T1, R>(
+  src: [WatchSrc<T0, P>, WatchSrc<T1, P>],
+  cb: WatchCb<[T0, T1], R>
+): WatchResult<R>;
+export function watch<P, T0, T1, T2, R>(
+  src: [WatchSrc<T0, P>, WatchSrc<T1, P>, WatchSrc<T2, P>],
+  cb: WatchCb<[T0, T1, T2], R>
 ): WatchResult<R>;
 
 /**
@@ -127,13 +135,17 @@ export function watch<P, T, R>(
  * @returns nothing
  */
 export function effect<P, T>(src: WatchSrc<T, P>, cb: EffectCallback<T>): void;
-export function effect<P, T extends (WatchSrc<any, P>)[]>(
-  src: T,
-  cb: EffectCallback<Unpack<P, T>>
+export function effect<P, T0, T1>(
+  src: [WatchSrc<T0, P>, WatchSrc<T1, P>],
+  cb: EffectCallback<[T0, T1]>
+): void;
+export function effect<P, T0, T1, T2>(
+  src: [WatchSrc<T0, P>, WatchSrc<T1, P>, WatchSrc<T2, P>],
+  cb: EffectCallback<[T0, T1, T2]>
 ): void;
 // todo more effect overloads to cover all cases
 
-interface InjectionKey<T> extends String {}
+export interface InjectionKey<T> extends String {}
 
 export function provide<T>(key: InjectionKey<T> | string, value: T): void;
 export function inject<T>(key: InjectionKey<T> | string): T | undefined;
