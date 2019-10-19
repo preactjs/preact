@@ -9,6 +9,7 @@ let oldBeforeRender = options._render;
 options._render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
 
+	/** @type {import('./internal').Component} */
 	const c = (currentComponent = vnode._component);
 
 	/** the vnode component is a uninitialized composition component */
@@ -35,6 +36,7 @@ let oldAfterDiff = options.diffed;
 options.diffed = vnode => {
 	if (oldAfterDiff) oldAfterDiff(vnode);
 
+	/** @type {import('./internal').Component} */
 	const c = vnode._component;
 	if (c && c.__compositions)
 		// handle all `effect`s
@@ -45,6 +47,7 @@ let oldBeforeUnmount = options.unmount;
 options.unmount = vnode => {
 	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
 
+	/** @type {import('./internal').Component} */
 	const c = vnode._component;
 	if (c && c.__compositions) {
 		// cleanup `effect`s onCleanup
