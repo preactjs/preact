@@ -42,11 +42,11 @@ export function onMounted(callback: () => void): void;
  */
 export function onUnmounted(cb: () => void): void;
 
-export type WatchCallback<T, R> = (
+export type EffectCallback<T> = (
   args: T,
   oldArgs: T,
   onCleanup: Function
-) => R;
+) => void;
 export type PropGetter<P, T> = (props: P) => T;
 export type WatchSrc<T, P> =
   | PropGetter<P, T>
@@ -64,7 +64,7 @@ export type WatchResult<T> = { readonly value: T };
  * ```js
  * watch(props => props.id) //returns `value` id props value (kinda irrelevant)
  * watch(props => props.a + props.b) //acts like a compute function and returns a `value` summing props a + b
- * watch(someRef, refValue => console.log('The value of someRef is: ', refValue))
+ * watch(someValue, value => console.log('The value of someValue is: ', value))
  * ```
  * @param src
  * @param callback optional callback to call if the args returned from src changed
@@ -75,47 +75,63 @@ export type Unpack<P, T extends (WatchSrc<any, P>)[]> = {
   [I in keyof T]: T[I] extends WatchSrc<infer U, P> ? U : never;
 };
 
+/** watch multiple values */
 export function watch<P, T extends (WatchSrc<any, P>)[]>(src: T): Unpack<P, T>;
+
+/** watch multy values with a callback returning a promise */
 export function watch<P, T extends (WatchSrc<any, P>)[], R>(
   src: T,
-  cb: WatchCallback<Unpack<P, T>, PromiseLike<R>>,
-  def: R
-): WatchResult<R>;
-export function watch<P, T extends (WatchSrc<any, P>)[], R>(
-  src: T,
-  cb: WatchCallback<Unpack<P, T>, R>
+  cb: (...value: Unpack<P, T>) => PromiseLike<R>
 ): WatchResult<R>;
 
-export function watch<P, T>(src: WatchSrc<T, P>): WatchResult<T>;
-export function watch<P, T, R>(
-  src: WatchSrc<T, P>,
-  cb: WatchCallback<T, PromiseLike<R>>,
+/** watch multy values with a callback returning a promise and default value */
+export function watch<P, T extends (WatchSrc<any, P>)[], R>(
+  src: T,
+  cb: (...value: Unpack<P, T>) => PromiseLike<R>,
   def: R
 ): WatchResult<R>;
+
+/** watch multi values with a callback returning a value */
+export function watch<P, T extends (WatchSrc<any, P>)[], R>(
+  src: T,
+  cb: (...value: Unpack<P, T>) => R
+): WatchResult<R>;
+
+/** watch a single value */
+export function watch<P, T>(src: WatchSrc<T, P>): WatchResult<T>;
+
+/** watch a single value with a callback returning a promise and default value */
 export function watch<P, T, R>(
   src: WatchSrc<T, P>,
-  cb: WatchCallback<T, PromiseLike<R>>
+  cb: (value: T) => PromiseLike<R>,
+  def: R
+): WatchResult<R>;
+
+/** watch a single value with a callback returning a promise */
+export function watch<P, T, R>(
+  src: WatchSrc<T, P>,
+  cb: (value: T) => PromiseLike<R>
 ): { readonly value: R | undefined };
+
+/** watch a single value with a callback returning a value */
 export function watch<P, T, R>(
   src: WatchSrc<T, P>,
-  cb: WatchCallback<T, R>
+  cb: (value: T) => R
 ): WatchResult<R>;
 
 /**
- * `effect` acts like `watch` and it supports the same parameters buts its run after render
- *  And it does not return a `value`
+ * `effect` its run after render it can also be used to callback when something changed
+ * The callback will receive newArgs, oldArgs and onCleanup to assign a cleanup function
  * @param src
  * @param callback optional callback to call if the args returned from src changed
  * @returns nothing
  */
-export function effect<P, T>(
-  src: WatchSrc<T, P>,
-  cb: WatchCallback<T, void>
-): void;
+export function effect<P, T>(src: WatchSrc<T, P>, cb: EffectCallback<T>): void;
 export function effect<P, T extends (WatchSrc<any, P>)[]>(
   src: T,
-  cb: WatchCallback<Unpack<P, T>, void>
+  cb: EffectCallback<Unpack<P, T>>
 ): void;
+// todo more effect overloads to cover all cases
 
 interface InjectionKey<T> extends String {}
 

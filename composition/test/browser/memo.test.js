@@ -22,9 +22,7 @@ describe('memo', () => {
 		const results = [];
 
 		const Comp = createComponent(({ a, b }) => {
-			const result = watch([props => props.a, props => props.b], ([a, b]) =>
-				memoFunction(a, b)
-			);
+			const result = watch([props => props.a, props => props.b], memoFunction);
 
 			return () => {
 				results.push(result.value);
@@ -79,6 +77,8 @@ describe('memo', () => {
 
 	it('watch async', async () => {
 		function fetchData(n) {
+			console.log('fetch', n);
+
 			return new Promise(resolve => setTimeout(() => resolve([1, n]), 1));
 		}
 
@@ -125,7 +125,7 @@ describe('memo', () => {
 			const index = value(1);
 
 			expect(watch(array).value).to.equal(array.value);
-			expect(watch([array, index], ([a, i]) => a[i]).value).to.equal(
+			expect(watch([array, index], (a, i) => a[i]).value).to.equal(
 				array.value[index.value]
 			);
 

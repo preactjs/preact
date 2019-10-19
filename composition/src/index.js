@@ -195,18 +195,25 @@ function handleEffect(up, c, init) {
 		: resolveArgs(up.src, c, init);
 
 	if (srcIsArray ? argsChanged(oldArgs, newArgs) : oldArgs !== newArgs) {
-		cleanupEffect(up);
-		const r = up.cb
-			? up.cb(newArgs, oldArgs, /* onCleanup */ cl => (up.cl = cl))
-			: newArgs;
 		up.args = newArgs;
+
 		if (watcher) {
-			if (isPromise(r))
-				r.then(v => {
+			const value = up.cb
+				? srcIsArray
+					? up.cb(...newArgs)
+					: up.cb(newArgs)
+				: newArgs;
+
+			if (isPromise(value))
+				value.then(v => {
 					watcher.value = v;
 					c.setState(EMPTY_STATE);
 				});
-			else watcher.value = r;
+			else watcher.value = value;
+		}
+		else {
+			cleanupEffect(up);
+			if (up.cb) up.cb(newArgs, oldArgs, /* onCleanup */ cl => (up.cl = cl));
 		}
 	}
 }

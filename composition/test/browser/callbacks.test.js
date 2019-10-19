@@ -22,7 +22,7 @@ describe('callback', () => {
 
 		const Comp = createComponent(props => {
 			// this may look a bit complex
-			const cb = watch([props => props.a, props => props.b], ([a, b]) => () =>
+			const cb = watch([props => props.a, props => props.b], (a, b) => () =>
 				a + b
 			);
 			// most of times this could be just
