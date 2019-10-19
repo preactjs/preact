@@ -1,5 +1,5 @@
 import { hydrate, render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment, _unmount } from 'preact';
-import * as hooks from 'preact/hooks';
+import { useState, useReducer, useEffect, useLayoutEffect, useRef, useImperativeHandle, useMemo, useCallback, useContext, useDebugValue } from 'preact/hooks';
 import { Suspense, lazy } from './suspense';
 import { assign, removeNode } from '../../src/util';
 
@@ -455,7 +455,17 @@ export {
 };
 
 // React copies the named exports to the default one.
-export default assign({
+export default {
+	useState,
+	useReducer,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useImperativeHandle,
+	useMemo,
+	useCallback,
+	useContext,
+	useDebugValue,
 	version,
 	Children,
 	render,
@@ -477,4 +487,4 @@ export default assign({
 	unstable_batchedUpdates,
 	Suspense,
 	lazy
-}, hooks);
+};
