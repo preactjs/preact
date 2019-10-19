@@ -256,7 +256,7 @@ if (typeof window !== 'undefined') {
 			prevRaf = options.requestAnimationFrame;
 
 			/* istanbul ignore next */
-			(options.requestAnimationFrame || afterNextFrame)(flushAfterPaintEffects);
+			(prevRaf || afterNextFrame)(flushAfterPaintEffects);
 		}
 	};
 }
