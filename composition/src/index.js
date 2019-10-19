@@ -224,8 +224,6 @@ function resolveArgs(src, c) {
 		if (src.Provider) return resolveContext(src, c);
 		// unwrap value or reactive, returning their immutable value
 		if (isReactive(src)) return src[$Reactive];
-		// is src a createRef holding a element, return the current
-		if (isPlainObject(src) && 'current' in src) return src.current;
 	}
 	return src;
 }
@@ -242,10 +240,6 @@ function resolveContext(context, c) {
 
 function argsChanged(oldArgs, newArgs) {
 	return !oldArgs || newArgs.some((arg, index) => arg !== oldArgs[index]);
-}
-
-function isPlainObject(obj) {
-	return obj && obj.constructor === Object;
 }
 
 function isPromise(obj) {

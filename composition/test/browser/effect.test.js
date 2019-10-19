@@ -134,7 +134,7 @@ describe('effect', () => {
 		const spy = sinon.spy();
 		const Comp = createComponent(() => {
 			const inputref = createRef(null);
-			effect(inputref, spy);
+			effect(() => inputref.current, spy);
 			return () => <input ref={inputref} />;
 		});
 
