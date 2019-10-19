@@ -11,7 +11,6 @@ let afterPaintEffects = [];
 
 let oldBeforeRender = options._render;
 options._render = component => {
-	if (oldBeforeRender) oldBeforeRender(component);
 
 	currentComponent = component;
 	currentIndex = 0;
@@ -19,6 +18,8 @@ options._render = component => {
 	if (currentComponent.__hooks) {
 		currentComponent.__hooks._pendingEffects = handleEffects(currentComponent.__hooks._pendingEffects);
 	}
+
+	return oldBeforeRender(component);
 };
 
 let oldAfterDiff = options.diffed;
