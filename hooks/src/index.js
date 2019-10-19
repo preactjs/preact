@@ -10,10 +10,10 @@ let currentComponent;
 let afterPaintEffects = [];
 
 let oldBeforeRender = options._render;
-options._render = vnode => {
-	if (oldBeforeRender) oldBeforeRender(vnode);
+options._render = component => {
+	if (oldBeforeRender) oldBeforeRender(component);
 
-	currentComponent = vnode._component;
+	currentComponent = component;
 	currentIndex = 0;
 
 	if (currentComponent.__hooks) {

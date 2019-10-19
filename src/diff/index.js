@@ -121,7 +121,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c.props = newProps;
 			c.state = c._nextState;
 
-			if (tmp = options._render) tmp(newVNode);
+			if (tmp = options._render) tmp(c);
 
 			c._dirty = false;
 			c._vnode = newVNode;
