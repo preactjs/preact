@@ -122,5 +122,5 @@ function setProperty(dom, name, value, oldValue, isSvg) {
  * @private
  */
 function eventProxy(e) {
-	return this._listeners[e.type](options.event ? options.event(e) : e);
+	this._listeners[e.type](options.event ? options.event(e) : e);
 }
