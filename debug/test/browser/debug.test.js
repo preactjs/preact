@@ -552,7 +552,7 @@ describe('debug', () => {
 			expect(console.error).to.not.be.called;
 		});
 
-		it('Accepts minimial well formed table', () => {
+		it('Accepts minimal well formed table', () => {
 			const Table = () => (
 				<table>
 					<tr>

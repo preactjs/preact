@@ -48,7 +48,7 @@ describe('focus', () => {
 	 * Validate an input tag has maintained focus
 	 * @param {HTMLInputElement} input The input to validate
 	 * @param {string} [message] Message to show if the activeElement is not
-	 * eqaul to the `input` parameter
+	 * equal to the `input` parameter
 	 */
 	function validateFocus(input, message) {
 		expect(document.activeElement).to.equalNode(input, message);

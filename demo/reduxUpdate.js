@@ -35,7 +35,7 @@ class Test extends Component {
 						store.dispatch({ type: 1, display });
 					}}
 				>
-					Toggle visibilty
+					Toggle visibility
 				</button>
 				<Link to={`/${(parseInt(this.props.start) || 0) + 1}`}>Click me</Link>
 
