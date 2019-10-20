@@ -312,7 +312,7 @@ describe('Lifecycle methods', () => {
 			expect(nextStateArg).to.deep.equal({ value: 4 });
 		});
 
-		it('should update props reference when sCU reutrns false', () => {
+		it('should update props reference when sCU returns false', () => {
 			let spy = sinon.spy();
 
 			let updateState;
@@ -515,7 +515,7 @@ describe('Lifecycle methods', () => {
 			expect(scratch.textContent).to.equal('foo');
 		});
 
-		it('should correctly update nested chilreen', () => {
+		it('should correctly update nested children', () => {
 			let hideThree, incrementThree;
 
 			class One extends Component {
