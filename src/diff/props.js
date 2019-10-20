@@ -97,7 +97,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		&& (name in dom)
 	) {
 		if (value==null) {
-			// This condition here guards against modifying a unonctrolled input's value
+			// This condition here guards against modifying an uncontrolled input's value
 			if (name!=='value' && name!=='checked') {
 				// Set the value to empty string first
 				dom[name] = '';
