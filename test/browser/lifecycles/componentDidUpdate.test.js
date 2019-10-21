@@ -301,5 +301,86 @@ describe('Lifecycle methods', () => {
 
 			expect(spy).to.have.been.calledOnceWith(scratch.firstChild);
 		});
+
+		it('should be called after children are mounted', () => {
+			let log = [];
+
+			class Inner extends Component {
+				componentDidMount() {
+					log.push('Inner mounted');
+
+					// Verify that the component is actually mounted when this
+					// callback is invoked.
+					expect(scratch.querySelector('#inner')).to.equalNode(this.base);
+				}
+
+				render() {
+					return <div id="inner" />;
+				}
+			}
+
+			class Outer extends Component {
+				componentDidUpdate() {
+					log.push('Outer updated');
+				}
+
+				render(props) {
+					return props.renderInner ? <Inner /> : <div />;
+				}
+			}
+
+			render(<Outer renderInner={false} />, scratch);
+			render(<Outer renderInner />, scratch);
+
+			expect(log).to.deep.equal(['Inner mounted', 'Outer updated']);
+		});
+
+		it('should be called after parent DOM elements are updated', () => {
+			let setValue;
+			let outerChildText;
+
+			class Outer extends Component {
+				constructor(p, c) {
+					super(p, c);
+
+					this.state = { i: 0 };
+					setValue = i => this.setState({ i });
+				}
+
+				render(props, { i }) {
+					return (
+						<div>
+							<Inner i={i} {...props} />
+							<p id="parent-child">Outer: {i}</p>
+						</div>
+					);
+				}
+			}
+
+			class Inner extends Component {
+				componentDidUpdate() {
+					// At this point, the parent's <p> tag should've been updated with the latest value
+					outerChildText = scratch.querySelector('#parent-child').textContent;
+				}
+
+				render(props, { i }) {
+					return <div>Inner: {i}</div>;
+				}
+			}
+
+			sinon.spy(Inner.prototype, 'componentDidUpdate');
+
+			// Initial render
+			render(<Outer />, scratch);
+			expect(Inner.prototype.componentDidUpdate).to.not.have.been.called;
+
+			// Set state with a new i
+			const newValue = 5;
+			setValue(newValue);
+			rerender();
+
+			expect(Inner.prototype.componentDidUpdate).to.have.been.called;
+			expect(outerChildText).to.equal(`Outer: ${newValue.toString()}`);
+		});
 	});
 });

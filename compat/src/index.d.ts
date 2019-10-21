@@ -1,7 +1,6 @@
 import * as _hooks from '../../hooks';
 import * as preact from '../../src';
 import { JSXInternal } from '../../src/jsx'
-import * as _internal from './internal';
 import * as _Suspense from './suspense';
 
 // export default React;
@@ -43,7 +42,6 @@ declare namespace React {
 	export import lazy = _Suspense.lazy;
 
 	// Compat
-	export import ForwardFn = _internal.ForwardFn;
 	export const version: string;
 
 	export function createPortal(vnode: preact.VNode, container: Element): preact.VNode<any>;
@@ -64,7 +62,12 @@ declare namespace React {
 
 	export function memo<P = {}>(component: preact.FunctionalComponent<P>, comparer?: (prev: P, next: P) => boolean): preact.FunctionComponent<P>;
 
-	export function forwardRef<R, P = {}>(fn: _internal.ForwardFn<P, R>): preact.FunctionalComponent<P>;
+	export interface ForwardFn<P = {}, T = any> {
+		(props: P, ref: Ref<T>): preact.ComponentChild;
+		displayName?: string;
+	}
+
+	export function forwardRef<R, P = {}>(fn: ForwardFn<P, R>): preact.FunctionalComponent<P>;
 
 	export function unstable_batchedUpdates(callback: (arg?: any) => void, arg?: any): void;
 

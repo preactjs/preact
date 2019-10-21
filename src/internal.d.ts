@@ -39,8 +39,8 @@ export interface PreactElement extends HTMLElement {
 
 export interface VNode<P = {}> extends preact.VNode<P> {
 	// Redefine type here using our internal ComponentFactory type
-	type: string | ComponentFactory<P> | null;
-	props: P & { children: preact.ComponentChildren } | string | number | null;
+	type: string | ComponentFactory<P>;
+	props: P & { children: preact.ComponentChildren };
 	_children: Array<VNode<any>> | null;
 	_parent: VNode | null;
 	_depth: number | null;
@@ -64,6 +64,7 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 
 	_dirty: boolean;
 	_force?: boolean | null;
+	_afterPaintQueued: number; // For useEffect hook
 	_renderCallbacks: Array<() => void>; // Only class components
 	_context?: any;
 	_vnode?: VNode<P> | null;

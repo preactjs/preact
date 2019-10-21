@@ -60,12 +60,12 @@ export function initDevTools() {
 			bundleType: /* istanbul ignore next */  isDev ? 1 : 0,
 			version: '16.5.2',
 			rendererPackageName: 'preact',
-			// We don't need this, but the devtools `attachRenderer` function relys
+			// We don't need this, but the devtools `attachRenderer` function relies on
 			// it being there.
 			findHostInstanceByFiber(vnode) {
 				return vnode._dom;
 			},
-			// We don't need this, but the devtools `attachRenderer` function relys
+			// We don't need this, but the devtools `attachRenderer` function relies on
 			// it being there.
 			findFiberByHostInstance(instance) {
 				return preactRenderer.inst2vnode.get(instance) || null;

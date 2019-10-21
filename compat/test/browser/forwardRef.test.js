@@ -296,4 +296,16 @@ describe('forwardRef', () => {
 		expect(ref.current==null).to.equal(true);
 		expect(differentRef.current.nodeName).to.equal('DIV');
 	});
+
+	it('calls ref when this is a function.', () => {
+		const spy = sinon.spy();
+		const Bar = forwardRef((props, ref) => {
+			useImperativeHandle(ref, () => ({ foo: 100 }));
+			return null;
+		});
+
+		render(<Bar ref={spy} />, scratch);
+		expect(spy).to.be.calledOnce;
+		expect(spy).to.be.calledWithExactly({ foo: 100 });
+	});
 });

@@ -20,7 +20,7 @@ export function render(vnode, parentDom, replaceNode) {
 	let oldVNode = isHydrating ? null : replaceNode && replaceNode._children || parentDom._children;
 	vnode = createElement(Fragment, null, [vnode]);
 
-	let mounts = [];
+	let commitQueue = [];
 	diff(
 		parentDom,
 		isHydrating ? parentDom._children = vnode : (replaceNode || parentDom)._children = vnode,
@@ -32,11 +32,11 @@ export function render(vnode, parentDom, replaceNode) {
 			: oldVNode
 				? null
 				: EMPTY_ARR.slice.call(parentDom.childNodes),
-		mounts,
+		commitQueue,
 		replaceNode || EMPTY_OBJ,
 		isHydrating,
 	);
-	commitRoot(mounts, vnode);
+	commitRoot(commitQueue, vnode);
 }
 
 /**

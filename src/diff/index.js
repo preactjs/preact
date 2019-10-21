@@ -14,15 +14,15 @@ import options from '../options';
  * @param {object} context The current context object
  * @param {boolean} isSvg Whether or not this element is an SVG node
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
- * @param {Array<import('../internal').Component>} mounts A list of newly
- * mounted components
+ * @param {Array<import('../internal').Component>} commitQueue List of components
+ * which have callbacks to invoke in commitRoot
  * @param {Element | Text} oldDom The current attached DOM
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
- * @param {boolean} isHydrating Whether or not we are in hydration
+ * @param {boolean} [isHydrating] Whether or not we are in hydration
  */
-export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, oldDom, isHydrating) {
+export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, commitQueue, oldDom, isHydrating) {
 	let tmp, newType = newVNode.type;
 
 	// When passing through createElement it assigns the object
@@ -75,10 +75,18 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				assign(c._nextState==c.state ? (c._nextState = assign({}, c._nextState)) : c._nextState, newType.getDerivedStateFromProps(newProps, c._nextState));
 			}
 
+			oldProps = c.props;
+			oldState = c.state;
+
 			// Invoke pre-render lifecycle methods
 			if (isNew) {
-				if (newType.getDerivedStateFromProps==null && c.componentWillMount!=null) c.componentWillMount();
-				if (c.componentDidMount!=null) mounts.push(c);
+				if (newType.getDerivedStateFromProps==null && c.componentWillMount!=null) {
+					c.componentWillMount();
+				}
+
+				if (c.componentDidMount!=null) {
+					c._renderCallbacks.push(c.componentDidMount);
+				}
 			}
 			else {
 				if (newType.getDerivedStateFromProps==null && c._force==null && c.componentWillReceiveProps!=null) {
@@ -101,10 +109,13 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				if (c.componentWillUpdate!=null) {
 					c.componentWillUpdate(newProps, c._nextState, cctx);
 				}
-			}
 
-			oldProps = c.props;
-			oldState = c.state;
+				if (c.componentDidUpdate!=null) {
+					c._renderCallbacks.push(() => {
+						c.componentDidUpdate(oldProps, oldState, snapshot);
+					});
+				}
+			}
 
 			c.context = cctx;
 			c.props = newProps;
@@ -128,18 +139,12 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, oldDom, isHydrating);
+			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, commitQueue, oldDom, isHydrating);
 
 			c.base = newVNode._dom;
 
-			tmp = c._renderCallbacks;
-			c._renderCallbacks=[];
-			tmp.some(cb => { cb.call(c); });
-
-			// Don't call componentDidUpdate on mount or when we bailed out via
-			// `shouldComponentUpdate`
-			if (!isNew && oldProps!=null && c.componentDidUpdate!=null) {
-				c.componentDidUpdate(oldProps, oldState, snapshot);
+			if (c._renderCallbacks.length) {
+				commitQueue.push(c);
 			}
 
 			if (clearProcessingException) {
@@ -149,7 +154,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c._force = null;
 		}
 		else {
-			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, isHydrating);
+			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, commitQueue, isHydrating);
 		}
 
 		if (tmp = options.diffed) tmp(newVNode);
@@ -161,16 +166,17 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 	return newVNode._dom;
 }
 
-export function commitRoot(mounts, root) {
-	let c;
-	while ((c = mounts.pop())) {
+export function commitRoot(commitQueue, root) {
+	commitQueue.some(c => {
 		try {
-			c.componentDidMount();
+			commitQueue = c._renderCallbacks;
+			c._renderCallbacks = [];
+			commitQueue.some(cb => { cb.call(c); });
 		}
 		catch (e) {
 			options._catchError(e, c._vnode);
 		}
-	}
+	});
 
 	if (options._commit) options._commit(root);
 }
@@ -184,12 +190,12 @@ export function commitRoot(mounts, root) {
  * @param {object} context The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {*} excessDomChildren
- * @param {Array<import('../internal').Component>} mounts An array of newly
- * mounted components
+ * @param {Array<import('../internal').Component>} commitQueue List of components
+ * which have callbacks to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @returns {import('../internal').PreactElement}
  */
-function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, isHydrating) {
+function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, commitQueue, isHydrating) {
 	let i;
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
@@ -258,7 +264,7 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (!newHtml) {
-			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, mounts, EMPTY_OBJ, isHydrating);
+			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, commitQueue, EMPTY_OBJ, isHydrating);
 		}
 
 		// (as above, don't diff props during hydration)
