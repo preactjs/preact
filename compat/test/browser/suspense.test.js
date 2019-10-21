@@ -796,4 +796,32 @@ describe('suspense', () => {
 				);
 			});
 	});
+
+	it('should support null fallback', () => {
+		const [Suspender, suspend] = createSuspender(() => <div>Hello</div>);
+
+		render(
+			<div id="wrapper">
+				<Suspense fallback={null}>
+					<div id="inner">
+						<Suspender />
+					</div>
+				</Suspense>
+			</div>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			`<div id="wrapper"><div id="inner"><div>Hello</div></div></div>`
+		);
+
+		const [resolve] = suspend();
+		rerender();
+		expect(scratch.innerHTML).to.equal(`<div id="wrapper"></div>`);
+
+		return resolve(() => <div>Hello2</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(`<div id="wrapper"><div id="inner"><div>Hello2</div></div></div>`);
+		});
+	});
+
 });
