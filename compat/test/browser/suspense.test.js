@@ -76,15 +76,32 @@ class Catcher extends Component {
 }
 
 describe('suspense', () => {
-	let scratch, rerender;
+	let scratch, rerender, unhandledEvents = [];
+
+	function onUnhandledRejection(event) {
+		unhandledEvents.push(event);
+	}
 
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
+
+		unhandledEvents = [];
+		if ('onunhandledrejection' in window) {
+			window.addEventListener("unhandledrejection", onUnhandledRejection);
+		}
 	});
 
 	afterEach(() => {
 		teardown(scratch);
+
+		if ("onunhandledrejection" in window) {
+			window.removeEventListener('unhandledrejection', onUnhandledRejection);
+
+			if (unhandledEvents.length) {
+				throw unhandledEvents[0].reason;
+			}
+		}
 	});
 
 	it('should support lazy', () => {
