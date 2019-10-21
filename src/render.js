@@ -45,6 +45,8 @@ export function render(vnode, parentDom, replaceNode) {
  * @param {import('./internal').PreactElement} parentDom The DOM element to
  * update
  */
+//注水。。。   todo 这种会复用parentDom中的元素
+//比如服务端渲染完成是绑定事件
 export function hydrate(vnode, parentDom) {
 	render(vnode, parentDom, IS_HYDRATE);
 }

@@ -179,12 +179,15 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
  * @param {import('../internal').VNode[]} [flattened] An flat array of children to modify
  * @returns {import('../internal').VNode[]}
  */
+//装换children为数组 类似于React.children.map
 export function toChildArray(children, callback, flattened) {
+	//没有存在的就是空数组
 	if (flattened == null) flattened = [];
 
 	if (children==null || typeof children === 'boolean') {
 		if (callback) flattened.push(callback(null));
 	}
+	//如果children为数组则递归去添加
 	else if (Array.isArray(children)) {
 		for (let i=0; i < children.length; i++) {
 			toChildArray(children[i], callback, flattened);

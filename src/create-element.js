@@ -9,9 +9,11 @@ import { assign } from './util';
   * @param {Array<import('.').ComponentChildren>} [children] The children of the virtual node
   * @returns {import('./internal').VNode}
   */
+//创建元素
 export function createElement(type, props, children) {
+	//拷贝props
 	props = assign({}, props);
-
+	//对参数处理，如果有多个children是数组，单个不是
 	if (arguments.length>3) {
 		children = [children];
 		// https://github.com/preactjs/preact/issues/1916
@@ -19,12 +21,14 @@ export function createElement(type, props, children) {
 			children.push(arguments[i]);
 		}
 	}
+	//赋值给props.children
 	if (children!=null) {
 		props.children = children;
 	}
 
 	// "type" may be undefined during development. The check is needed so that
 	// we can display a nice error message with our debug helpers
+	//对defaultProps做处理，合并到props上
 	if (type!=null && type.defaultProps!=null) {
 		for (let i in type.defaultProps) {
 			if (props[i]===undefined) props[i] = type.defaultProps[i];
@@ -34,7 +38,7 @@ export function createElement(type, props, children) {
 	let key = props.key;
 	if (ref!=null) delete props.ref;
 	if (key!=null) delete props.key;
-
+	//调用创建节点
 	return createVNode(type, props, key, ref);
 }
 
@@ -50,6 +54,7 @@ export function createElement(type, props, children) {
  * receive a reference to its created child
  * @returns {import('./internal').VNode}
  */
+//创建虚拟节点
 export function createVNode(type, props, key, ref) {
 	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
 	// Do not inline into createElement and coerceToVNode!
@@ -60,22 +65,24 @@ export function createVNode(type, props, key, ref) {
 		ref,
 		_children: null,
 		_parent: null,
+		//组件渲染深度
 		_depth: 0,
 		_dom: null,
 		_lastDomChild: null,
 		_component: null,
 		constructor: undefined
 	};
-
+	//钩子
 	if (options.vnode) options.vnode(vnode);
 
 	return vnode;
 }
 
+//创建ref，这个ref不同react，创建时没有current
 export function createRef() {
 	return {};
 }
-
+//片段
 export function Fragment(props) {
 	return props.children;
 }
@@ -85,6 +92,7 @@ export function Fragment(props) {
  * @param {*} vnode
  * @returns {vnode is import('./internal').VNode}
  */
+//判断是否是createElement的元素，createElement创建后constructor为undefined
 export const isValidElement = vnode => vnode!=null && vnode.constructor === undefined;
 
 /**

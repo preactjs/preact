@@ -27,9 +27,11 @@ export function Component(props, context) {
 //设置状态
 Component.prototype.setState = function(update, callback) {
 	// only clone state when copying to nextState the first time.
+	//如果nextState等于state，则为nextState，其它扩展this.state到this._nextState
 	let s = (this._nextState!==this.state && this._nextState) || (this._nextState = assign({}, this.state));
 
 	// if update() mutates state in-place, skip the copy:
+	//如果update不是函数则将update扩展到nextState，是函数执行函数然后扩展
 	if (typeof update!=='function' || (update = update(s, this.props))) {
 		assign(s, update);
 	}
@@ -39,8 +41,11 @@ Component.prototype.setState = function(update, callback) {
 	if (update==null) return;
 
 	if (this._vnode) {
+		//标记不是强制更新
 		this._force = false;
+		//有回调吧回调加入回调数组里
 		if (callback) this._renderCallbacks.push(callback);
+		//加入渲染队列并渲染
 		enqueueRender(this);
 	}
 };
@@ -50,13 +55,17 @@ Component.prototype.setState = function(update, callback) {
  * @param {() => void} [callback] A function to be called after component is
  * re-rendered
  */
+//强制更新
 Component.prototype.forceUpdate = function(callback) {
 	if (this._vnode) {
 		// Set render mode so that we can differentiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
+		//有回调加入回调数组里
 		if (callback) this._renderCallbacks.push(callback);
+		//标记强制更新
 		this._force = true;
+		//加入渲染队列并渲染
 		enqueueRender(this);
 	}
 };
@@ -71,6 +80,7 @@ Component.prototype.forceUpdate = function(callback) {
  * ancestor's `getChildContext()`
  * @returns {import('./index').ComponentChildren | void}
  */
+//设置render
 Component.prototype.render = Fragment;
 
 /**
@@ -166,27 +176,35 @@ const defer = typeof Promise=='function' ? Promise.prototype.then.bind(Promise.r
  * * [Designing APIs for Asynchrony](https://blog.izs.me/2013/08/designing-apis-for-asynchrony)
  * * [Callbacks synchronous and asynchronous](https://blog.ometer.com/2011/07/24/callbacks-synchronous-and-asynchronous/)
  */
-
+//延迟执行的钩子
 let prevDebounce = options.debounceRendering;
 
 /**
  * Enqueue a rerender of a component
  * @param {import('./internal').Component} c The component to rerender
  */
+//组件加入渲染队列并延迟渲染
 export function enqueueRender(c) {
+	//如果_dirty为false则设为true
+	//然后吧组件加入队列中
+	//如果队列长度为1或者重新设置过debounceRendering钩子
 	if ((!c._dirty && (c._dirty = true) && q.push(c) === 1) ||
 	    (prevDebounce !== options.debounceRendering)) {
 		prevDebounce = options.debounceRendering;
+		//延迟执行process
 		(options.debounceRendering || defer)(process);
 	}
 }
 
 /** Flush the render queue by rerendering all queued components */
+//遍历队列渲染组件
 function process() {
 	let p;
+	//按深度排序 最外层的最先执行
 	q.sort((a, b) => b._vnode._depth - a._vnode._depth);
 	while ((p=q.pop())) {
 		// forceUpdate's callback argument is reused here to indicate a non-forced update.
+		//如果组件需要渲染则渲染它
 		if (p._dirty) renderComponent(p);
 	}
 }

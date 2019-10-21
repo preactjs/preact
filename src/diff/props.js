@@ -10,6 +10,7 @@ import options from '../options';
  * @param {boolean} isSvg Whether or not this node is an SVG node
  * @param {boolean} hydrate Whether or not we are in hydration mode
  */
+//对比props
 export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 	let i;
 	//如果属性名在oldProps不在newProps 则执行setProperty

@@ -13,6 +13,7 @@
   "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.6.4",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
     "babel-plugin-transform-react-jsx": "^6.24.1",
     "parcel-bundler": "^1.12.4"
   }

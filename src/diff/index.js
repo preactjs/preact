@@ -162,8 +162,10 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 	return newVNode._dom;
 }
 
+//批量执行 componentDidMount 生命周期
 export function commitRoot(mounts, root) {
 	let c;
+	//循环执行
 	while ((c = mounts.pop())) {
 		try {
 			c.componentDidMount();
@@ -172,7 +174,7 @@ export function commitRoot(mounts, root) {
 			options._catchError(e, c._vnode);
 		}
 	}
-
+	//钩子
 	if (options._commit) options._commit(root);
 }
 
@@ -196,6 +198,7 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 	let newProps = newVNode.props;
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
+	//判断是否是svg
 	isSvg = newVNode.type==='svg' || isSvg;
 
 	if (dom==null && excessDomChildren!=null) {
@@ -270,11 +273,15 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
  * @param {any} value
  * @param {import('../internal').VNode} vnode
  */
+//应用ref
 export function applyRef(ref, value, vnode) {
 	try {
+		//如果是函数 执行函数并把ref传进去
 		if (typeof ref=='function') ref(value);
+		//其它赋值给current属性
 		else ref.current = value;
 	}
+	//捕获错误
 	catch (e) {
 		options._catchError(e, vnode);
 	}
