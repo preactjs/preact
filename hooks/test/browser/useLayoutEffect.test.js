@@ -2,7 +2,7 @@ import { act } from 'preact/test-utils';
 import { createElement as h, render, Fragment } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useEffectAssertions } from './useEffectAssertions.test';
-import { useLayoutEffect, useRef } from '../../src';
+import { useLayoutEffect, useRef, useState } from '../../src';
 
 /** @jsx h */
 
@@ -142,4 +142,65 @@ describe('useLayoutEffect', () => {
 		render(<Outer />, scratch);
 		expect(layoutEffect).to.have.been.calledOnce;
 	});
+
+	it('should call effects correctly when unmounting', () => {
+		let onClick, calledFoo, calledBar, calledFooCleanup, calledBarCleanup;
+
+        const Foo = () => {
+            useLayoutEffect(() => {
+                if (!calledFoo) calledFoo = scratch.innerHTML;
+                return () => {
+                    if (!calledFooCleanup) calledFooCleanup = scratch.innerHTML;
+                };
+            }, []);
+
+            return (
+                <div>
+                    <p>Foo</p>
+                </div>
+            );
+        };
+
+        const Bar = () => {
+            useLayoutEffect(() => {
+                if (!calledBar) calledBar = scratch.innerHTML;
+                return () => {
+                    if (!calledBarCleanup) calledBarCleanup = scratch.innerHTML;
+                };
+            }, []);
+
+            return (
+                <div>
+                    <p>Bar</p>
+                </div>
+            );
+        };
+
+        function App() {
+            const [current, setCurrent] = useState('/foo');
+
+            onClick = () => setCurrent(current === '/foo' ? '/bar' : '/foo');
+
+            return (
+                <Fragment>
+                    <button onClick={onClick}>
+                        next
+                    </button>
+
+                    {current === '/foo' && <Foo />}
+                    {current === '/bar' && <Bar />}
+                </Fragment>
+            );
+        }
+
+        render(<App />, scratch);
+        expect(calledFoo).to.equal('<button>next</button><div><p>Foo</p></div>', 'calledFoo');
+
+        act(() => onClick());
+        expect(calledFooCleanup).to.equal('<button>next</button><div><p>Bar</p></div>', 'calledFooCleanup');
+        expect(calledBar).to.equal('<button>next</button><div><p>Bar</p></div>', 'calledBar');
+
+        act(() => onClick());
+        expect(calledBarCleanup).to.equal('<button>next</button><div><p>Foo</p></div>', 'calledBarCleanup');
+    });
 });
