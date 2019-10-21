@@ -254,6 +254,14 @@ describe('combinations', () => {
 			'effect outer call <span>hello 1</span>'
 		]);
 
+		// NOTE: this order is (at the time of writing) intentionally different from
+		// React. React calls all disposes across all components, and then invokes all
+		// effects across all components. We call disposes and effects in order of components:
+		// for each component, call its disposes and then its effects. If presented with a
+		// compelling use case to support inter-component dispose dependencies, then rewrite this
+		// test to test React's order. In other words, if there is a use case to support calling
+		// all disposes across components then re-order the lines below to demonstrate the desired behavior.
+
 		act(() => set());
 		expect(calls).to.deep.equal([
 			'layout inner call <span>hello 1</span>',
@@ -261,12 +269,12 @@ describe('combinations', () => {
 			'effect inner call <span>hello 1</span>',
 			'effect outer call <span>hello 1</span>',
 			'layout inner dispose <span>hello 2</span>',
-			'layout outer dispose <span>hello 2</span>',
 			'layout inner call <span>hello 2</span>',
+			'layout outer dispose <span>hello 2</span>',
 			'layout outer call <span>hello 2</span>',
 			'effect inner dispose <span>hello 2</span>',
-			'effect outer dispose <span>hello 2</span>',
 			'effect inner call <span>hello 2</span>',
+			'effect outer dispose <span>hello 2</span>',
 			'effect outer call <span>hello 2</span>'
 		]);
 	});
