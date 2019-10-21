@@ -88,14 +88,14 @@ describe('suspense', () => {
 
 		unhandledEvents = [];
 		if ('onunhandledrejection' in window) {
-			window.addEventListener("unhandledrejection", onUnhandledRejection);
+			window.addEventListener('unhandledrejection', onUnhandledRejection);
 		}
 	});
 
 	afterEach(() => {
 		teardown(scratch);
 
-		if ("onunhandledrejection" in window) {
+		if ('onunhandledrejection' in window) {
 			window.removeEventListener('unhandledrejection', onUnhandledRejection);
 
 			if (unhandledEvents.length) {
