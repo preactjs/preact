@@ -35,7 +35,7 @@ options.diffed = vnode => {
 
 	const hooks = c.__hooks;
 	if (hooks) {
-		if(hooks._pendingLayoutEffects.length) {
+		if (hooks._pendingLayoutEffects.length) {
 			layoutEffects.push(c);
 		}
 
@@ -49,7 +49,7 @@ let oldCommit = options._commit;
 options._commit = vnode => {
 	if (oldCommit) oldCommit(vnode);
 	flushLayoutEffects();
-}
+};
 
 
 let oldBeforeUnmount = options.unmount;

@@ -147,61 +147,61 @@ describe('useLayoutEffect', () => {
 	it.skip('should call effects correctly when unmounting', () => {
 		let onClick, calledFoo, calledBar, calledFooCleanup, calledBarCleanup;
 
-        const Foo = () => {
-            useLayoutEffect(() => {
-                if (!calledFoo) calledFoo = scratch.innerHTML;
-                return () => {
-                    if (!calledFooCleanup) calledFooCleanup = scratch.innerHTML;
-                };
-            }, []);
+		const Foo = () => {
+			useLayoutEffect(() => {
+				if (!calledFoo) calledFoo = scratch.innerHTML;
+				return () => {
+					if (!calledFooCleanup) calledFooCleanup = scratch.innerHTML;
+				};
+			}, []);
 
-            return (
-                <div>
-                    <p>Foo</p>
-                </div>
-            );
-        };
+			return (
+				<div>
+					<p>Foo</p>
+				</div>
+			);
+		};
 
-        const Bar = () => {
-            useLayoutEffect(() => {
-                if (!calledBar) calledBar = scratch.innerHTML;
-                return () => {
-                    if (!calledBarCleanup) calledBarCleanup = scratch.innerHTML;
-                };
-            }, []);
+		const Bar = () => {
+			useLayoutEffect(() => {
+				if (!calledBar) calledBar = scratch.innerHTML;
+				return () => {
+					if (!calledBarCleanup) calledBarCleanup = scratch.innerHTML;
+				};
+			}, []);
 
-            return (
-                <div>
-                    <p>Bar</p>
-                </div>
-            );
-        };
+			return (
+				<div>
+					<p>Bar</p>
+				</div>
+			);
+		};
 
-        function App() {
-            const [current, setCurrent] = useState('/foo');
+		function App() {
+			const [current, setCurrent] = useState('/foo');
 
-            onClick = () => setCurrent(current === '/foo' ? '/bar' : '/foo');
+			onClick = () => setCurrent(current === '/foo' ? '/bar' : '/foo');
 
-            return (
-                <Fragment>
-                    <button onClick={onClick}>
-                        next
-                    </button>
+			return (
+				<Fragment>
+					<button onClick={onClick}>
+						next
+					</button>
 
-                    {current === '/foo' && <Foo />}
-                    {current === '/bar' && <Bar />}
-                </Fragment>
-            );
-        }
+					{current === '/foo' && <Foo />}
+					{current === '/bar' && <Bar />}
+				</Fragment>
+			);
+		}
 
-        render(<App />, scratch);
-        expect(calledFoo).to.equal('<button>next</button><div><p>Foo</p></div>', 'calledFoo');
+		render(<App />, scratch);
+		expect(calledFoo).to.equal('<button>next</button><div><p>Foo</p></div>', 'calledFoo');
 
-        act(() => onClick());
-        expect(calledFooCleanup).to.equal('<button>next</button><div><p>Bar</p></div>', 'calledFooCleanup');
-        expect(calledBar).to.equal('<button>next</button><div><p>Bar</p></div>', 'calledBar');
+		act(() => onClick());
+		expect(calledFooCleanup).to.equal('<button>next</button><div><p>Bar</p></div>', 'calledFooCleanup');
+		expect(calledBar).to.equal('<button>next</button><div><p>Bar</p></div>', 'calledBar');
 
-        act(() => onClick());
-        expect(calledBarCleanup).to.equal('<button>next</button><div><p>Foo</p></div>', 'calledBarCleanup');
-    });
+		act(() => onClick());
+		expect(calledBarCleanup).to.equal('<button>next</button><div><p>Foo</p></div>', 'calledBarCleanup');
+	});
 });
