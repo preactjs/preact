@@ -299,22 +299,27 @@ export function applyRef(ref, value, vnode) {
  * @param {boolean} [skipRemove] Flag that indicates that a parent node of the
  * current element is already detached from the DOM.
  */
+//卸载虚拟节点
 export function unmount(vnode, parentVNode, skipRemove) {
 	let r;
+	//unmount钩子
 	if (options.unmount) options.unmount(vnode);
-
+	//如果有ref则将ref设置为null
 	if (r = vnode.ref) {
 		applyRef(r, null, parentVNode);
 	}
 
 	let dom;
+	//如果虚拟节点不是函数并且skipRemove为false 则赋值到dom方便后面移除节点
+	//skipRemove的作用是在后面循环子节点unmount时不会执行removeNode
 	if (!skipRemove && typeof vnode.type !== 'function') {
 		skipRemove = (dom = vnode._dom)!=null;
 	}
-
+	//dom设置为空
 	vnode._dom = vnode._lastDomChild = null;
 
 	if ((r = vnode._component)!=null) {
+		//执行组件生命周期
 		if (r.componentWillUnmount) {
 			try {
 				r.componentWillUnmount();
@@ -326,13 +331,13 @@ export function unmount(vnode, parentVNode, skipRemove) {
 
 		r.base = r._parentDom = null;
 	}
-
+	//循环卸载子节点
 	if (r = vnode._children) {
 		for (let i = 0; i < r.length; i++) {
 			if (r[i]) unmount(r[i], parentVNode, skipRemove);
 		}
 	}
-
+	//dom不为空则移除dom
 	if (dom!=null) removeNode(dom);
 }
 

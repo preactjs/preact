@@ -37,6 +37,7 @@ export function render(vnode, parentDom, replaceNode) {
 		isHydrating,
 	);
 	commitRoot(mounts, vnode);
+	console.log(vnode)
 }
 
 /**

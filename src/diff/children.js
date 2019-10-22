@@ -53,7 +53,9 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	newParentVNode._children = toChildArray(newParentVNode._children, childVNode => {
 
 		if (childVNode!=null) {
+			//设置父虚拟节点
 			childVNode._parent = newParentVNode;
+			//处理深度
 			childVNode._depth = newParentVNode._depth + 1;
 
 			// Check if we find a corresponding element in oldChildren.
@@ -61,17 +63,19 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			// We use `undefined`, as `null` is reserved for empty placeholders
 			// (holes).
 			oldVNode = oldChildren[i];
-
+			//如果老节点为null或者 新老子节点的key和type相同 则设置老的节点为undefined 以便后面不执行unmount
 			if (oldVNode===null || (oldVNode && childVNode.key == oldVNode.key && childVNode.type === oldVNode.type)) {
 				oldChildren[i] = undefined;
 			}
 			else {
 				// Either oldVNode === undefined or oldChildrenLength > 0,
 				// so after this loop oldVNode == null or oldVNode is a valid value.
+				//在老的子节点中循环 以便找到新老子节点向对应的，有相对应的就会复用这个节点而不会重新实例化一个新的节点
 				for (j=0; j<oldChildrenLength; j++) {
 					oldVNode = oldChildren[j];
 					// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
 					// We always match by type (in either case).
+					//同上
 					if (oldVNode && childVNode.key == oldVNode.key && childVNode.type === oldVNode.type) {
 						oldChildren[j] = undefined;
 						break;
@@ -83,8 +87,9 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			oldVNode = oldVNode || EMPTY_OBJ;
 
 			// Morph the old element into the new one, but don't append it to the dom yet
+			//对比子节点
 			newDom = diff(parentDom, childVNode, oldVNode, context, isSvg, excessDomChildren, mounts, oldDom, isHydrating);
-
+			//如果新子节点有ref并且不等于老子节点的ref，推到refs 等会会重新应用ref
 			if ((j = childVNode.ref) && oldVNode.ref != j) {
 				(refs || (refs=[])).push(j, childVNode._component || newDom, childVNode);
 			}
@@ -161,9 +166,11 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	if (excessDomChildren!=null && typeof newParentVNode.type !== 'function') for (i=excessDomChildren.length; i--; ) if (excessDomChildren[i]!=null) removeNode(excessDomChildren[i]);
 
 	// Remove remaining oldChildren if there are any.
+	//循环卸载不使用的老虚拟节点
 	for (i=oldChildrenLength; i--; ) if (oldChildren[i]!=null) unmount(oldChildren[i], oldChildren[i]);
 
 	// Set refs only after unmount
+	//循环应用refs
 	if (refs) {
 		for (i = 0; i < refs.length; i++) {
 			applyRef(refs[i], refs[++i], refs[++i]);
