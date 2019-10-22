@@ -1,3 +1,6 @@
+import * as CSS from 'csstype';
+
+
 type Defaultize<Props, Defaults> =
 	// Distribute over unions
 	Props extends any
@@ -8,6 +11,8 @@ type Defaultize<Props, Defaults> =
 		: never;
 
 export namespace JSXInternal {
+
+
 
 	type LibraryManagedAttributes<Component, Props> =
 	Component extends { defaultProps: infer Defaults }

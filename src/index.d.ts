@@ -1,3 +1,5 @@
+import * as CSS from 'csstype';
+
 export = preact;
 export as namespace preact;
 
@@ -5,6 +7,9 @@ import { JSXInternal } from "./jsx";
 
 declare namespace preact {
 	export import JSX = JSXInternal;
+
+	//id prefer to put on the JSX namespace , but compat reasons here. both?meh
+	export interface CSSProperties extends CSS.Properties<string | number> {}
 
 	//
 	// Preact Virtual DOM
