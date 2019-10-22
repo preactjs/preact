@@ -55,6 +55,7 @@ export function createElement(type, props, children) {
  * @returns {import('./internal').VNode}
  */
 //创建虚拟节点
+//type为null时，props参数就是对应的children {type:null,props:123,..}这个是合法的
 export function createVNode(type, props, key, ref) {
 	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
 	// Do not inline into createElement and coerceToVNode!
@@ -63,13 +64,18 @@ export function createVNode(type, props, key, ref) {
 		props,
 		key,
 		ref,
+		//子的虚拟节点
 		_children: null,
+		//父的虚拟节点
 		_parent: null,
-		//组件渲染深度
+		//渲染深度
 		_depth: 0,
+		//该虚拟节点渲染的dom
 		_dom: null,
 		_lastDomChild: null,
+		//类或函数组件的实例化
 		_component: null,
+		//标识是vnode
 		constructor: undefined
 	};
 	//钩子
@@ -102,18 +108,22 @@ export const isValidElement = vnode => vnode!=null && vnode.constructor === unde
  * @param {boolean | string | number | import('./internal').VNode} possibleVNode A possible VNode
  * @returns {import('./internal').VNode | null}
  */
+//强制转虚拟节点
 export function coerceToVNode(possibleVNode) {
+	//null和布尔 直接返回null
 	if (possibleVNode == null || typeof possibleVNode === 'boolean') return null;
+	//如果是字符串或者数字，props直接为对应的字符串或数字，这样是合法的
 	if (typeof possibleVNode === 'string' || typeof possibleVNode === 'number') {
 		return createVNode(null, possibleVNode, null, null);
 	}
 
 	// Clone vnode if it has already been used. ceviche/#57
+	//如果是已经渲染的虚拟节点，则返回克隆的虚拟节点
 	if (possibleVNode._dom!=null || possibleVNode._component!=null) {
 		let vnode = createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.key, null);
 		vnode._dom = possibleVNode._dom;
 		return vnode;
 	}
-
+	//其它直接返回
 	return possibleVNode;
 }

@@ -28,8 +28,9 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
+	//老节点的children
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
-
+	//老节点长度
 	let oldChildrenLength = oldChildren.length;
 
 	// Only in very specific places should this logic be invoked (top level `render` and `diffElementNodes`).
@@ -179,11 +180,11 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
  * @param {import('../internal').VNode[]} [flattened] An flat array of children to modify
  * @returns {import('../internal').VNode[]}
  */
-//装换children为数组 类似于React.children.map
+//转换children为数组
 export function toChildArray(children, callback, flattened) {
 	//没有存在的就是空数组
 	if (flattened == null) flattened = [];
-
+	//为null或者是布尔类型
 	if (children==null || typeof children === 'boolean') {
 		if (callback) flattened.push(callback(null));
 	}

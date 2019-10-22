@@ -1,17 +1,18 @@
-import {render, toChildArray, createRef, cloneElement, h, Component} from '../src'
+import {render, toChildArray,coerceToVNode, createRef, cloneElement, h, Component} from '../src'
 
 class Root extends Component{
-    $ref=createRef();
-    componentDidMount(){
-        console.log(this.$ref)
+    state = {
+        name:'123'
     }
+    onClick = ()=>{
+        this.setState({
+            name:'345'
+        })
+    }
+
     render(){
-        console.log(<div>1</div>)
-        console.log(<div><span>2</span>1</div>)
-
-
-        return <div ref={this.$ref}>
-
+        return <div onClick={this.onClick}>
+            {this.state.name}
         </div>
     }
 }

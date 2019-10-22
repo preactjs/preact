@@ -27,11 +27,13 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
+	//非虚拟节点直接返回
 	if (newVNode.constructor !== undefined) return null;
-
+	//diff钩子
 	if (tmp = options._diff) tmp(newVNode);
 
 	try {
+		//如果是类组件或者函数组件
 		outer: if (typeof newType==='function') {
 			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
 			let newProps = newVNode.props;
@@ -150,12 +152,14 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c._force = null;
 		}
 		else {
+			//调用diffElementNode去对比
 			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, isHydrating);
 		}
-
+		//diffed钩子
 		if (tmp = options.diffed) tmp(newVNode);
 	}
 	catch (e) {
+		//触发错误
 		options._catchError(e, newVNode, oldVNode);
 	}
 
