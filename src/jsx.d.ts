@@ -1,4 +1,3 @@
-import * as CSS from 'csstype';
 
 
 type Defaultize<Props, Defaults> =
