@@ -43,7 +43,6 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			tmp = newType.contextType;
 			let provider = tmp && context[tmp._id];
 			let cctx = tmp ? (provider ? provider.props.value : tmp._defaultValue) : context;
-
 			// Get component and set it to `c`
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
@@ -52,11 +51,14 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			else {
 				// Instantiate the new component
 				if ('prototype' in newType && newType.prototype.render) {
+					//类组件的话  去实例化
 					newVNode._component = c = new newType(newProps, cctx); // eslint-disable-line new-cap
 				}
 				else {
+					//函数组件的话实例化 Component
 					newVNode._component = c = new Component(newProps, cctx);
 					c.constructor = newType;
+					//设置render
 					c.render = doRender;
 				}
 				if (provider) provider.sub(c);
@@ -78,28 +80,36 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 
 			// Invoke pre-render lifecycle methods
+			//如果是新创建的组件
 			if (isNew) {
+				//没有设置getDerivedStateFromProps但设置了componentWillMount则执行componentWillMount生命周期
 				if (newType.getDerivedStateFromProps==null && c.componentWillMount!=null) c.componentWillMount();
+				//设置了componentDidMount然后放入mounts以便最后执行次生命周期
 				if (c.componentDidMount!=null) mounts.push(c);
 			}
 			else {
+				//没有设置getDerivedStateFromProps并且不是forceUpdate并且设置了componentWillReceiveProps则执行此生命周期
 				if (newType.getDerivedStateFromProps==null && c._force==null && c.componentWillReceiveProps!=null) {
 					c.componentWillReceiveProps(newProps, cctx);
 				}
-
+				//如果不是forceUpdate并且shouldComponentUpdate则执行次生命周期返回false的情况下
 				if (!c._force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newProps, c._nextState, cctx)===false) {
 					c.props = newProps;
 					c.state = c._nextState;
+					//标记已渲染
 					c._dirty = false;
 					c._vnode = newVNode;
+					//dom还是老虚拟节点的dom
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
+					//循环遍历子虚拟节点，设置_parent为newVNode
 					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
 						if (newVNode._children[tmp]) newVNode._children[tmp]._parent = newVNode;
 					}
+					//跳出outer
 					break outer;
 				}
-
+				//如果设置了componentWillUpdate则执行此生命周期
 				if (c.componentWillUpdate!=null) {
 					c.componentWillUpdate(newProps, c._nextState, cctx);
 				}
@@ -111,15 +121,17 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c.context = cctx;
 			c.props = newProps;
 			c.state = c._nextState;
-
+			//render钩子
 			if (tmp = options._render) tmp(newVNode);
-
+			//标记已渲染
 			c._dirty = false;
 			c._vnode = newVNode;
 			c._parentDom = parentDom;
-
+			//执行render
 			tmp = c.render(c.props, c.state, c.context);
+			//如果render返回结果中最外层是Fragment组件
 			let isTopLevelFragment = tmp != null && tmp.type == Fragment && tmp.key == null;
+			//片段组件则使用props.children，其它使用render返回的
 			newVNode._children = toChildArray(isTopLevelFragment ? tmp.props.children : tmp);
 
 			if (c.getChildContext!=null) {
@@ -133,8 +145,9 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, mounts, oldDom, isHydrating);
 
 			c.base = newVNode._dom;
-
+			//循环执行renderCallbacks
 			while (tmp=c._renderCallbacks.pop()) {
+				//如果callback中又调用了setState，则会吧新的状态赋值给state
 				if (c._nextState) { c.state = c._nextState; }
 				tmp.call(c);
 			}
@@ -148,7 +161,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			if (clearProcessingException) {
 				c._pendingError = c._processingException = null;
 			}
-
+			//设置强制更新为false
 			c._force = null;
 		}
 		else {
@@ -215,11 +228,13 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 			}
 		}
 	}
-
+	//如果dom为空
 	if (dom==null) {
+		//text节点
 		if (newVNode.type===null) {
 			return document.createTextNode(newProps);
 		}
+		//创建元素
 		dom = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type) : document.createElement(newVNode.type);
 		// we created a new parent, so none of the previously attached children can be reused:
 		excessDomChildren = null;
@@ -342,7 +357,9 @@ export function unmount(vnode, parentVNode, skipRemove) {
 }
 
 /** The `.render()` method for a PFC backing instance. */
+//函数组件的render
 function doRender(props, state, context) {
+	//就是执行这个函数组件
 	return this.constructor(props, context);
 }
 

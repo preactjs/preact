@@ -14,12 +14,14 @@ const IS_HYDRATE = EMPTY_OBJ;
  * existing DOM tree rooted at `replaceNode`
  */
 export function render(vnode, parentDom, replaceNode) {
+	//root钩子
 	if (options._root) options._root(vnode, parentDom);
 
 	let isHydrating = replaceNode === IS_HYDRATE;
 	let oldVNode = isHydrating ? null : replaceNode && replaceNode._children || parentDom._children;
+	//用Fragment包装下
 	vnode = createElement(Fragment, null, [vnode]);
-
+	//未卸载的组件列表
 	let mounts = [];
 	diff(
 		parentDom,
@@ -36,7 +38,9 @@ export function render(vnode, parentDom, replaceNode) {
 		replaceNode || EMPTY_OBJ,
 		isHydrating,
 	);
+	//执行componentDidMount生命周期
 	commitRoot(mounts, vnode);
+
 	console.log(vnode)
 }
 

@@ -202,6 +202,7 @@ export function toChildArray(children, callback, flattened) {
 		}
 	}
 	else {
+		//有回调则push回调返回的children，不然则是children
 		flattened.push(callback ? callback(coerceToVNode(children)) : children);
 	}
 
