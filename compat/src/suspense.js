@@ -65,6 +65,8 @@ Suspense.prototype._childDidSuspend = function(promise) {
 		c._suspensions.pop();
 
 		if (c._suspensions.length == 0) {
+			// If fallback is null, don't try to unmount it
+			// `unmount` expects a real VNode, not null values
 			if (c.props.fallback) {
 				unmount(c.props.fallback);
 			}
