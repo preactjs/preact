@@ -1431,4 +1431,42 @@ describe('suspense', () => {
 			'<section><div>Suspender un-suspended</div></section>'
 		);
 	});
+
+	it('should render through components using shouldComponentUpdate', () => {
+		const [Suspender, suspend] = createSuspender(() => <i>-1</i>);
+
+		class Blocker extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+			render(props) {
+				return (
+					<b>
+						<i>0</i>
+						{props.children}
+						<i>2</i>
+					</b>
+				);
+			}
+		}
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Blocker>
+					<Suspender />
+				</Blocker>
+			</Suspense>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal('<b><i>0</i><i>-1</i><i>2</i></b>');
+
+		const [resolve] = suspend();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		return resolve(() => <i>1</i>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal('<b><i>0</i><i>1</i><i>2</i></b>');
+		});
+	});
 });
