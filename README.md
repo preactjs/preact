@@ -10,7 +10,7 @@
 **All the power of Virtual DOM components, without the overhead:**
 
 - Familiar React API & patterns: [ES6 Class] and [Functional Components]
-- Extensive React compatibility via a simple [preact-compat] alias
+- Extensive React compatibility via a simple [preact/compat] alias
 - Everything you need: JSX, <abbr title="Virtual DOM">VDOM</abbr>, React DevTools, <abbr title="Hot Module Replacement">HMR</abbr>, <abbr title="Server-Side Rendering">SSR</abbr>..
 - A highly optimized diff algorithm and seamless Server Side Rendering
 - Transparent asynchronous rendering with a pluggable scheduler
@@ -587,7 +587,7 @@ MIT
 [![Preact](http://i.imgur.com/YqCHvEW.gif)](https://preactjs.com)
 
 
-[preact-compat]: https://github.com/developit/preact-compat
+[preact/compat]: https://github.com/preactjs/preact/tree/master/compat
 [ES6 Class]: https://facebook.github.io/react/docs/reusable-components.html#es6-classes
 [Functional Components]: https://facebook.github.io/react/blog/2015/10/07/react-v0.14.html#stateless-functional-components
 [hyperscript]: https://github.com/dominictarr/hyperscript
