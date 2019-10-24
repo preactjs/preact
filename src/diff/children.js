@@ -193,8 +193,13 @@ export function toChildArray(children, callback, flattened) {
 	else if (typeof children === 'string' || typeof children === 'number') {
 		flattened.push(callback ? callback(createVNode(null, children, null, null)) : children);
 	}
+	else if (children._dom != null || children._component != null) {
+		let vnode = createVNode(children.type, children.props, children.key, null);
+		vnode._dom = children._dom;
+		flattened.push(callback ? callback(vnode) : vnode);
+	}
 	else {
-		flattened.push(callback ? callback(coerceToVNode(children)) : children);
+		flattened.push(callback ? callback(children) : children);
 	}
 
 	return flattened;
