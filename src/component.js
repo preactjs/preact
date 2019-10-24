@@ -61,11 +61,11 @@ Component.prototype.forceUpdate = function(callback) {
 		// Set render mode so that we can differentiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
-		//有回调加入回调数组里
+        //标记强制更新
+        this._force = true;
+        //有回调加入回调数组里
 		if (callback) this._renderCallbacks.push(callback);
-		//标记强制更新
-		this._force = true;
-		//加入渲染队列并渲染
+        //加入渲染队列并渲染
 		enqueueRender(this);
 	}
 };
@@ -117,7 +117,7 @@ export function getDomSibling(vnode, childIndex) {
 
 /**
  * Trigger in-place re-rendering of a component.
- * @param {import('./internal').Component} c The component to rerender
+ * @param {import('./internal').Component} component The component to rerender
  */
 function renderComponent(component) {
 	let vnode = component._vnode,
@@ -125,9 +125,9 @@ function renderComponent(component) {
 		parentDom = component._parentDom;
 
 	if (parentDom) {
-		let mounts = [];
-		let newDom = diff(parentDom, vnode, assign({}, vnode), component._context, parentDom.ownerSVGElement!==undefined, null, mounts, oldDom == null ? getDomSibling(vnode) : oldDom);
-		commitRoot(mounts, vnode);
+		let commitQueue = [];
+		let newDom = diff(parentDom, vnode, assign({}, vnode), component._context, parentDom.ownerSVGElement!==undefined, null, commitQueue, oldDom == null ? getDomSibling(vnode) : oldDom);
+		commitRoot(commitQueue, vnode);
 
 		if (newDom != oldDom) {
 			updateParentDomPointers(vnode);

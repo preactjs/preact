@@ -33,10 +33,8 @@ export function createContext(defaultValue) {
 				this.shouldComponentUpdate = _props => {
 					//当value不相等时
 					if (props.value !== _props.value) {
-						//更新props value
-						ctx[context._id].props.value = _props.value;
-						//执行渲染 context消费的组件
-						subs.some(c => {
+                        //执行渲染 context消费的组件
+                        subs.some(c => {
 							// Check if still mounted
 							if (c._parentDom) {
 								c.context = _props.value;

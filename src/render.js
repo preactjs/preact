@@ -22,7 +22,7 @@ export function render(vnode, parentDom, replaceNode) {
 	//用Fragment包装下
 	vnode = createElement(Fragment, null, [vnode]);
 	//未卸载的组件列表
-	let mounts = [];
+	let commitQueue = [];
 	diff(
 		parentDom,
 		isHydrating ? parentDom._children = vnode : (replaceNode || parentDom)._children = vnode,
@@ -34,12 +34,12 @@ export function render(vnode, parentDom, replaceNode) {
 			: oldVNode
 				? null
 				: EMPTY_ARR.slice.call(parentDom.childNodes),
-		mounts,
+		commitQueue,
 		replaceNode || EMPTY_OBJ,
 		isHydrating,
 	);
 	//执行componentDidMount生命周期
-	commitRoot(mounts, vnode);
+	commitRoot(commitQueue, vnode);
 
 	console.log(vnode)
 }
