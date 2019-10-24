@@ -186,7 +186,7 @@ let prevDebounce = options.debounceRendering;
 //组件加入渲染队列并延迟渲染
 export function enqueueRender(c) {
 	//如果_dirty为false则设为true
-	//然后吧组件加入队列中
+	//然后把组件加入队列中
 	//如果队列长度为1或者重新设置过debounceRendering钩子
 	if ((!c._dirty && (c._dirty = true) && q.push(c) === 1) ||
 	    (prevDebounce !== options.debounceRendering)) {

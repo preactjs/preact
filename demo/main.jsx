@@ -1,24 +1,25 @@
 import {Component, createContext, render,h} from '../src'
 
-const FontContent = createContext(10);
-const WidthContent = createContext(20);
 
-class Child extends Component {
-    render() {
-        return <WidthContent.Consumer>
-            {width => {
-                console.log(width)
-                return <div>
-                    {width}&emsp;
-                    <FontContent.Consumer>{font => font}</FontContent.Consumer>
-                </div>
-            }}
-        </WidthContent.Consumer>
+function Child() {
+    var xx = e;
+    return <div key={'child-div'}>234</div>
+}
+class Root extends Component{
+    state = {
+        hasError:false
+    }
+    componentDidCatch(e){
+
+    }
+    render(){
+        if(this.state.hasError){
+            return 'error'
+        }
+        return this.props.children
     }
 }
 
-function Parent() {
-    return <Child/>
-}
-
-render(<Parent/>, document.getElementById('app'));
+render(<Root key={'root'}>
+    <Child key={'child'}/>
+</Root>, document.getElementById('app'));
