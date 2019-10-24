@@ -288,6 +288,14 @@ Component.prototype.setState = function(update, callback) {
 			`"this.state = {}" directly.`
 		);
 	}
+	else if (this._parentDom==null) {
+		console.warn(
+			`Can't call "this.setState" on an unmounted component. This is a no-op, ` +
+			`but it indicates a memory leak in your application. To fix, cancel all ` +
+			`subscriptions and asynchronous tasks in the componentWillUnmount method.`
+		);
+	}
+
 	return setState.call(this, update, callback);
 };
 
@@ -297,6 +305,13 @@ Component.prototype.forceUpdate = function(callback) {
 		console.warn(
 			`Calling "this.forceUpdate" inside the constructor of a component is a ` +
 			`no-op and might be a bug in your application.`
+		);
+	}
+	else if (this._parentDom==null) {
+		console.warn(
+			`Can't call "this.setState" on an unmounted component. This is a no-op, ` +
+			`but it indicates a memory leak in your application. To fix, cancel all ` +
+			`subscriptions and asynchronous tasks in the componentWillUnmount method.`
 		);
 	}
 	return forceUpdate.call(this, callback);
