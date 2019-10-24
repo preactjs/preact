@@ -81,6 +81,8 @@ class Catcher extends Component {
 }
 
 describe('suspense', () => {
+
+	/** @type {HTMLDivElement} */
 	let scratch, rerender, unhandledEvents = [];
 
 	function onUnhandledRejection(event) {
@@ -526,7 +528,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should allow multiple children to suspend', () => {
+	it('should allow multiple sibling children to suspend', () => {
 		const [Suspender1, suspend1] = createSuspender(() => <div>Hello first</div>);
 		const [Suspender2, suspend2] = createSuspender(() => <div>Hello second</div>);
 
@@ -879,7 +881,6 @@ describe('suspense', () => {
 			scratch,
 		);
 
-		rerender();
 		expect(scratch.innerHTML).to.equal(`<div>Hello1</div>`);
 
 		let [resolve1] = suspend1();
@@ -897,6 +898,57 @@ describe('suspense', () => {
 			.then(() => {
 				rerender();
 				expect(scratch.innerHTML).to.equal('<div>All done!</div>');
+			});
+	});
+
+	it('should correctly render nested Suspense components', () => {
+		// Inspired by the nested-suspense demo from #1865
+		// TODO: Explore writing a test that varies the loading orders
+
+		const [Lazy1, resolve1] = createLazy();
+		const [Lazy2, resolve2] = createLazy();
+		const [Lazy3, resolve3] = createLazy();
+
+		const Loading = () => <div>Suspended...</div>;
+		const loadingHtml = `<div>Suspended...</div>`;
+
+		render(
+			<Suspense fallback={<Loading />}>
+				<Lazy1 />
+				<div>
+					<Suspense fallback={<Loading />}>
+						<Lazy2 />
+					</Suspense>
+					<Lazy3 />
+				</div>
+				<b>4</b>
+			</Suspense>,
+			scratch
+		);
+		rerender(); // Rerender with the fallback HTML
+
+		expect(scratch.innerHTML).to.equal(loadingHtml);
+
+		resolve1(() => <b>1</b>)
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal(loadingHtml);
+
+				return resolve3(() => <b>3</b>);
+			})
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal(
+					`<b>1</b><div>${loadingHtml}<b>3</b></div><b>4</b>`
+				);
+
+				return resolve2(() => <b>2</b>);
+			})
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal(
+					`<b>1</b><div><b>2</b><b>3</b></div><b>4</b>`
+				);
 			});
 	});
 });
