@@ -291,6 +291,17 @@ Component.prototype.setState = function(update, callback) {
 	return setState.call(this, update, callback);
 };
 
+const forceUpdate = Component.prototype.forceUpdate;
+Component.prototype.forceUpdate = function(callback) {
+	if (this._vnode==null) {
+		console.warn(
+			`Calling "this.forceUpdate" inside the constructor of a component is a ` +
+			`no-op and might be a bug in your application.`
+		);
+	}
+	return forceUpdate.call(this, callback);
+};
+
 /**
  * Serialize a vnode tree to a string
  * @param {import('./internal').VNode} vnode

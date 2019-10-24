@@ -129,6 +129,21 @@ describe('Components', () => {
 			}
 
 			expect(() => render(<Foo foo="bar" />, scratch)).not.to.throw();
+			rerender();
+			expect(spy).to.not.be.called;
+		});
+
+		it('should not crash when calling forceUpdate with cb in constructor', () => {
+			let spy = sinon.spy();
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.forceUpdate(spy);
+				}
+			}
+
+			expect(() => render(<Foo foo="bar" />, scratch)).not.to.throw();
+			rerender();
 			expect(spy).to.not.be.called;
 		});
 
