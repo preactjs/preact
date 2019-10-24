@@ -165,6 +165,28 @@ describe('useContext', () => {
 		 expect(unmountspy).not.to.be.called;
 	});
 
+	it('should only subscribe a component once', () => {
+		const values = [];
+		const Context = createContext(13);
+		let provider, subSpy;
+
+		function Comp() {
+			const value = useContext(Context);
+			values.push(value);
+			return null;
+		}
+
+		render(<Comp />, scratch);
+
+		render(<Context.Provider ref={p => provider = p} value={42}><Comp /></Context.Provider>, scratch);
+		subSpy = sinon.spy(provider, 'sub');
+
+		render(<Context.Provider value={69}><Comp /></Context.Provider>, scratch);
+		expect(subSpy).to.not.have.been.called;
+
+		expect(values).to.deep.equal([13, 42, 69]);
+	});
+
 	it('should maintain context', done => {
 		const context = createContext(null);
 		const { Provider } = context;

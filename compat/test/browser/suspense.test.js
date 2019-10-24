@@ -76,15 +76,32 @@ class Catcher extends Component {
 }
 
 describe('suspense', () => {
-	let scratch, rerender;
+	let scratch, rerender, unhandledEvents = [];
+
+	function onUnhandledRejection(event) {
+		unhandledEvents.push(event);
+	}
 
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
+
+		unhandledEvents = [];
+		if ('onunhandledrejection' in window) {
+			window.addEventListener('unhandledrejection', onUnhandledRejection);
+		}
 	});
 
 	afterEach(() => {
 		teardown(scratch);
+
+		if ('onunhandledrejection' in window) {
+			window.removeEventListener('unhandledrejection', onUnhandledRejection);
+
+			if (unhandledEvents.length) {
+				throw unhandledEvents[0].reason;
+			}
+		}
 	});
 
 	it('should support lazy', () => {
@@ -779,4 +796,32 @@ describe('suspense', () => {
 				);
 			});
 	});
+
+	it('should support null fallback', () => {
+		const [Suspender, suspend] = createSuspender(() => <div>Hello</div>);
+
+		render(
+			<div id="wrapper">
+				<Suspense fallback={null}>
+					<div id="inner">
+						<Suspender />
+					</div>
+				</Suspense>
+			</div>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			`<div id="wrapper"><div id="inner"><div>Hello</div></div></div>`
+		);
+
+		const [resolve] = suspend();
+		rerender();
+		expect(scratch.innerHTML).to.equal(`<div id="wrapper"></div>`);
+
+		return resolve(() => <div>Hello2</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(`<div id="wrapper"><div id="inner"><div>Hello2</div></div></div>`);
+		});
+	});
+
 });
