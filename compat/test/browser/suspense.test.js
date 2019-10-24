@@ -5,7 +5,8 @@ import React, {
 	Component,
 	Suspense,
 	lazy,
-	Fragment
+	Fragment,
+	createContext
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
@@ -1432,7 +1433,7 @@ describe('suspense', () => {
 		);
 	});
 
-	it('should render through components using shouldComponentUpdate', () => {
+	it('should render lazy components through components using shouldComponentUpdate', () => {
 		const [Suspender, suspend] = createSuspender(() => <i>-1</i>);
 
 		class Blocker extends Component {
@@ -1467,6 +1468,28 @@ describe('suspense', () => {
 		return resolve(() => <i>1</i>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.equal('<b><i>0</i><i>1</i><i>2</i></b>');
+		});
+	});
+
+	it('should render lazy components through createContext', () => {
+		const ctx = createContext(null);
+		const [Lazy, resolve] = createLazy();
+
+		const suspense = (
+			<Suspense fallback={<div>Suspended...</div>}>
+				<ctx.Provider value="123">
+					<ctx.Consumer>{value => <Lazy value={value} />}</ctx.Consumer>
+				</ctx.Provider>
+			</Suspense>
+		);
+
+		render(suspense, scratch);
+		rerender();
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+
+		return resolve(props => <div>{props.value}</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(`<div>123</div>`);
 		});
 	});
 });
