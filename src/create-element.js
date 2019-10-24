@@ -91,14 +91,10 @@ export const isValidElement = vnode => vnode!=null && vnode.constructor === unde
  * Coerce an untrusted value into a VNode
  * Specifically, this should be used anywhere a user could provide a boolean, string, or number where
  * a VNode or Component is desired instead
- * @param {string | number | import('./internal').VNode} possibleVNode A possible VNode
+ * @param {import('./internal').VNode} possibleVNode A possible VNode
  * @returns {import('./internal').VNode | null}
  */
 export function coerceToVNode(possibleVNode) {
-	if (typeof possibleVNode === 'string' || typeof possibleVNode === 'number') {
-		return createVNode(null, possibleVNode, null, null);
-	}
-
 	// Clone vnode if it has already been used. ceviche/#57
 	if (possibleVNode._dom!=null || possibleVNode._component!=null) {
 		let vnode = createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.key, null);
