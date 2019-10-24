@@ -21,5 +21,4 @@ function Parent() {
     return <Child/>
 }
 
-render(
-        <Parent/>, document.getElementById('app'));
+render(<Parent/>, document.getElementById('app'));

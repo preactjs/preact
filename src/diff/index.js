@@ -41,9 +41,13 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
 			tmp = newType.contextType;
+			//找到上层provider
 			let provider = tmp && context[tmp._id];
+			//有tmp时，提供provider时为provider的value，不然为createContext的defaultValue
+			//没有是为上层的context
 			let cctx = tmp ? (provider ? provider.props.value : tmp._defaultValue) : context;
 			// Get component and set it to `c`
+			//如果已经存在实例化的组件
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
 				clearProcessingException = c._processingException = c._pendingError;
@@ -61,12 +65,16 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 					//设置render
 					c.render = doRender;
 				}
+				//订阅，当provider value改变时，渲染组件
 				if (provider) provider.sub(c);
 
 				c.props = newProps;
 				if (!c.state) c.state = {};
 				c.context = cctx;
+				//至于还要用c._context不用c.context
+				//由于context有可能为provider的value
 				c._context = context;
+				//标记需要渲染并且是新创建的组件
 				isNew = c._dirty = true;
 				c._renderCallbacks = [];
 			}
@@ -75,6 +83,8 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			if (c._nextState==null) {
 				c._nextState = c.state;
 			}
+			//有getDerivedStateFromProps执行此生命周期并扩展到_nextState
+			//如果nextState和state相同则拷贝nextState到nextState
 			if (newType.getDerivedStateFromProps!=null) {
 				assign(c._nextState==c.state ? (c._nextState = assign({}, c._nextState)) : c._nextState, newType.getDerivedStateFromProps(newProps, c._nextState));
 			}
@@ -133,11 +143,11 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			let isTopLevelFragment = tmp != null && tmp.type == Fragment && tmp.key == null;
 			//片段组件则使用props.children，其它使用render返回的
 			newVNode._children = toChildArray(isTopLevelFragment ? tmp.props.children : tmp);
-
+			//如果是Provider组件，然后调用getChildContext
 			if (c.getChildContext!=null) {
 				context = assign(assign({}, context), c.getChildContext());
 			}
-
+			//执行getSnapshotBeforeUpdate生命周期，他是静态函数
 			if (!isNew && c.getSnapshotBeforeUpdate!=null) {
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
@@ -237,6 +247,7 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 		//创建元素
 		dom = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type) : document.createElement(newVNode.type);
 		// we created a new parent, so none of the previously attached children can be reused:
+		//设置子dom为空
 		excessDomChildren = null;
 	}
 

@@ -38,6 +38,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 	// for this purpose, because `null` is a valid value for `oldDom` which can mean to skip to this logic
 	// (e.g. if mounting a new tree in which the old DOM should be ignored (usually for Fragments).
 	if (oldDom == EMPTY_OBJ) {
+		//如果有excessDomChildren
 		if (excessDomChildren != null) {
 			oldDom = excessDomChildren[0];
 		}
