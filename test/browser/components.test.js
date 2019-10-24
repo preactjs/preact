@@ -639,7 +639,6 @@ describe('Components', () => {
 			'</div><button>First Button</button><button>Second Button</button><button>Third Button</button>');
 	});
 
-
 	// Test for Issue preactjs/preact#254
 	it('should not recycle common class children with different keys', () => {
 		let idx = 0;
@@ -2134,6 +2133,67 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div><span>child</span></div>');
 			expect(divVNode._dom).to.equalNode(scratch.firstChild, 'swapChildTag - divVNode._dom');
 			expect(child.base).to.equalNode(scratch.firstChild.firstChild, 'swapChildTag - child.base');
+		});
+	});
+
+	describe('setState', () => {
+		it('should not error if called on an unmounted component', () => {
+
+			/** @type {() => void} */
+			let increment;
+
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { count: 0 };
+					increment = () => this.setState({ count: this.state.count + 1 });
+				}
+				render(props, state) {
+					return <div>{ state.count }</div>;
+				}
+			}
+
+			render(<Foo />, scratch);
+			expect(scratch.innerHTML).to.equal('<div>0</div>');
+
+			increment();
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>1</div>');
+
+			render(null, scratch);
+			expect(scratch.innerHTML).to.equal('');
+
+			expect(() => increment()).to.not.throw();
+			expect(() => rerender()).to.not.throw();
+			expect(scratch.innerHTML).to.equal('');
+		});
+	});
+
+	describe('forceUpdate', () => {
+		it('should not error if called on an unmounted component', () => {
+
+			/** @type {() => void} */
+			let forceUpdate;
+
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					forceUpdate = () => this.forceUpdate();
+				}
+				render(props, state) {
+					return <div>Hello</div>;
+				}
+			}
+
+			render(<Foo />, scratch);
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+
+			render(null, scratch);
+			expect(scratch.innerHTML).to.equal('');
+
+			expect(() => forceUpdate()).to.not.throw();
+			expect(() => rerender()).to.not.throw();
+			expect(scratch.innerHTML).to.equal('');
 		});
 	});
 });
