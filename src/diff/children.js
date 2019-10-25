@@ -190,14 +190,17 @@ export function toChildArray(children, callback, flattened) {
 			toChildArray(children[i], callback, flattened);
 		}
 	}
+	else if (!callback) {
+		flattened.push(children);
+	}
 	else if (typeof children === 'string' || typeof children === 'number') {
-		flattened.push(callback ? callback(createVNode(null, children, null, null)) : children);
+		flattened.push(callback(createVNode(null, children, null, null)));
 	}
 	else if (children._dom != null || children._component != null) {
-		flattened.push(callback ? callback(createVNode(children.type, children.props, children.key, null)) : children);
+		flattened.push(callback(createVNode(children.type, children.props, children.key, null)));
 	}
 	else {
-		flattened.push(callback ? callback(children) : children);
+		flattened.push(callback(children));
 	}
 
 	return flattened;
