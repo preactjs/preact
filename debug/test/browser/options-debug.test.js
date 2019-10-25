@@ -16,6 +16,7 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 /** @jsx createElement */
 
 describe('debug options', () => {
+
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -117,7 +118,8 @@ describe('debug options', () => {
 		function Throw({ error }) {
 			if (error) {
 				throw new Error('test');
-			} else {
+			}
+			else {
 				return <div>no error</div>;
 			}
 		}

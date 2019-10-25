@@ -1,4 +1,4 @@
-import { options as rawOptions } from "preact";
+import { options as rawOptions } from 'preact';
 
 /** @type {import('../../src/internal').Options} */
 let options = rawOptions;
