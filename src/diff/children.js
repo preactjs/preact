@@ -1,5 +1,5 @@
 import { diff, unmount, applyRef } from './index';
-import { coerceToVNode, createVNode } from '../create-element';
+import { createVNode } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { removeNode } from '../util';
 import { getDomSibling } from '../component';
