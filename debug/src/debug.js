@@ -17,6 +17,8 @@ export function initDebug() {
 	let oldDiffed = options.diffed;
 	let oldVnode = options.vnode;
 	let oldCatchError = options._catchError;
+	let oldRoot = options._root;
+	let oldHook = options._hook;
 	const warnedComponents = { useEffect: {}, useLayoutEffect: {}, lazyPropTypes: {} };
 
 	options._catchError = (error, vnode, oldVNode) => {
@@ -58,6 +60,8 @@ export function initDebug() {
 			Expected a valid HTML node as a second argument to render.
 			Received ${parentNode} instead: render(<${vnode.type.name || vnode.type} />, ${parentNode});
 		`);
+
+		if (oldRoot) oldRoot(vnode, parentNode);
 	};
 
 	options._diff = vnode => {
@@ -164,6 +168,8 @@ export function initDebug() {
 		if (!comp) {
 			throw new Error('Hook can only be invoked from render methods.');
 		}
+
+		if (oldHook) oldHook(comp);
 	};
 
 	const warn = (property, err) => ({
