@@ -4,6 +4,25 @@ import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render, Component, Suspense, lazy, Fragment } from '../../src/index';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
+function createLazy() {
+
+	/** @type {(c: ComponentType) => Promise<void>} */
+	let resolver, rejecter, promise;
+	const Lazy = lazy(() => promise = new Promise((resolve, reject) => {
+		resolver = c => {
+			resolve({ default: c });
+			return promise;
+		};
+
+		rejecter = () => {
+			reject();
+			return promise;
+		};
+	}));
+
+	return [Lazy, c => resolver(c), e => rejecter(e)];
+}
+
 /**
  * @typedef {import('../../../src').ComponentType} ComponentType
  * @typedef {[(c: ComponentType) => Promise<void>, (error: Error) => Promise<void>]} Resolvers
@@ -33,23 +52,9 @@ function createSuspender(DefaultComponent) {
 	 * @returns {Resolvers}
 	 */
 	function suspend() {
-
-		/** @type {(c: ComponentType) => Promise<void>} */
-		let resolver, rejecter, promise;
-		const Lazy = lazy(() => promise = new Promise((resolve, reject) => {
-			resolver = c => {
-				resolve({ default: c });
-				return promise;
-			};
-
-			rejecter = () => {
-				reject();
-				return promise;
-			};
-		}));
-
+		const [Lazy, resolve, reject] = createLazy();
 		renderLazy(Lazy);
-		return [c => resolver(c), e => rejecter(e)];
+		return [resolve, reject];
 	}
 
 	return [Suspender, suspend];
@@ -76,6 +81,8 @@ class Catcher extends Component {
 }
 
 describe('suspense', () => {
+
+	/** @type {HTMLDivElement} */
 	let scratch, rerender, unhandledEvents = [];
 
 	function onUnhandledRejection(event) {
@@ -521,7 +528,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should allow multiple children to suspend', () => {
+	it('should allow multiple sibling children to suspend', () => {
 		const [Suspender1, suspend1] = createSuspender(() => <div>Hello first</div>);
 		const [Suspender2, suspend2] = createSuspender(() => <div>Hello second</div>);
 
@@ -572,7 +579,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should call multiple nested suspending components render in one go', () => {
+	it('should call multiple nested sibling suspending components render in one go', () => {
 		const [Suspender1, suspend1] = createSuspender(() => <div>Hello first</div>);
 		const [Suspender2, suspend2] = createSuspender(() => <div>Hello second</div>);
 
@@ -824,4 +831,124 @@ describe('suspense', () => {
 		});
 	});
 
+	it('should support suspending multiple times', () => {
+		const [Suspender, suspend] = createSuspender(() => <div>initial render</div>);
+		const Loading = () => <div>Suspended...</div>;
+
+		render(
+			<Suspense fallback={<Loading />}>
+				<Suspender />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(`<div>initial render</div>`);
+
+		let [resolve] = suspend();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+
+		return resolve(() => <div>Hello1</div>)
+			.then(() => {
+				// Rerender promise resolution
+				rerender();
+				expect(scratch.innerHTML).to.eql(`<div>Hello1</div>`);
+
+				// suspend again
+				[resolve] = suspend();
+				rerender();
+
+				expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+
+				return resolve(() => <div>Hello2</div>);
+			})
+			.then(() => {
+				// Rerender promise resolution
+				rerender();
+				expect(scratch.innerHTML).to.eql(`<div>Hello2</div>`);
+			});
+	});
+
+	it('should correctly render when a suspended component\'s child also suspends', () => {
+		const [Suspender1, suspend1] = createSuspender(() => <div>Hello1</div>);
+		const [LazyChild, resolveChild] = createLazy();
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Suspender1 />
+			</Suspense>,
+			scratch,
+		);
+
+		expect(scratch.innerHTML).to.equal(`<div>Hello1</div>`);
+
+		let [resolve1] = suspend1();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+
+		return resolve1(() => <LazyChild />)
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+				return resolveChild(() => <div>All done!</div>);
+			})
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal('<div>All done!</div>');
+			});
+	});
+
+	it('should correctly render nested Suspense components', () => {
+		// Inspired by the nested-suspense demo from #1865
+		// TODO: Explore writing a test that varies the loading orders
+
+		const [Lazy1, resolve1] = createLazy();
+		const [Lazy2, resolve2] = createLazy();
+		const [Lazy3, resolve3] = createLazy();
+
+		const Loading = () => <div>Suspended...</div>;
+		const loadingHtml = `<div>Suspended...</div>`;
+
+		render(
+			<Suspense fallback={<Loading />}>
+				<Lazy1 />
+				<div>
+					<Suspense fallback={<Loading />}>
+						<Lazy2 />
+					</Suspense>
+					<Lazy3 />
+				</div>
+				<b>4</b>
+			</Suspense>,
+			scratch
+		);
+		rerender(); // Rerender with the fallback HTML
+
+		expect(scratch.innerHTML).to.equal(loadingHtml);
+
+		resolve1(() => <b>1</b>)
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal(loadingHtml);
+
+				return resolve3(() => <b>3</b>);
+			})
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal(
+					`<b>1</b><div>${loadingHtml}<b>3</b></div><b>4</b>`
+				);
+
+				return resolve2(() => <b>2</b>);
+			})
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal(
+					`<b>1</b><div><b>2</b><b>3</b></div><b>4</b>`
+				);
+			});
+	});
 });
