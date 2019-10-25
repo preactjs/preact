@@ -194,9 +194,7 @@ export function toChildArray(children, callback, flattened) {
 		flattened.push(callback ? callback(createVNode(null, children, null, null)) : children);
 	}
 	else if (children._dom != null || children._component != null) {
-		let vnode = createVNode(children.type, children.props, children.key, null);
-		vnode._dom = children._dom;
-		flattened.push(callback ? callback(vnode) : vnode);
+		flattened.push(callback ? callback(createVNode(children.type, children.props, children.key, null)) : children);
 	}
 	else {
 		flattened.push(callback ? callback(children) : children);
