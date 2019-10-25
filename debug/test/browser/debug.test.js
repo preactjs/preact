@@ -274,6 +274,7 @@ describe('debug', () => {
 		}
 
 		render(<Foo />, scratch);
+		forceUpdate();
 		expect(console.warn).to.not.be.called;
 
 		render(null, scratch);
@@ -477,6 +478,9 @@ describe('debug', () => {
 
 			expect(serializeVNode(<Foo foo={[1, 2, 3]} />))
 				.to.equal('<Foo foo="1,2,3" />');
+
+			expect(serializeVNode(<div prop={Object.create(null)} />))
+				.to.equal('<div prop="[object Object]" />');
 		});
 	});
 
