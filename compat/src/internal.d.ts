@@ -32,4 +32,5 @@ export interface SuspenseState {
 
 export interface SuspenseComponent extends PreactComponent<SuspenseProps, SuspenseState> {
 	_suspensions: Array<Promise<any>>;
+	_fallback: VNode<any>;
 }
