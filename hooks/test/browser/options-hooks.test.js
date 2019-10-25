@@ -2,7 +2,7 @@ import {
 	afterDiffSpy,
 	beforeRenderSpy,
 	unmountSpy
-} from "../_util/optionsSpies";
+} from "../../../test/_util/optionSpies";
 
 import { setupRerender } from "preact/test-utils";
 import { createElement, render } from "preact";
@@ -32,7 +32,7 @@ describe("hook options", () => {
 	});
 
 	function App() {
-		const [count, setCount] = useState(0);
+		const [count] = useState(0);
 		return <div>{count}</div>;
 	}
 
