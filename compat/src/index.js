@@ -389,6 +389,10 @@ function setSafeDescriptor(proto, key) {
 		Object.defineProperty(proto, key, {
 			configurable: false,
 			get() { return this['UNSAFE_' + key]; },
+			// This set is only used if a user sets an a lifecycle like cWU
+			// after setting a lifecycle like UNSAFE_cWU. I double anyone
+			// actually does this in practice so not testing it
+			/* istanbul ignore next */
 			set(v) { this['UNSAFE_' + key] = v; }
 		});
 	}
