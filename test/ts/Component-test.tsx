@@ -75,13 +75,13 @@ class DestructuringRenderPropsComponent extends Component<
 	}
 }
 
-interface RandomChildrenComponenProps {
+interface RandomChildrenComponentProps {
 	num?: number;
 	val?: string;
 	span?: boolean;
 }
 
-class RandomChildrenComponent extends Component<RandomChildrenComponenProps> {
+class RandomChildrenComponent extends Component<RandomChildrenComponentProps> {
 	render() {
 		const { num, val, span } = this.props;
 		if (num) {

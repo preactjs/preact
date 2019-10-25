@@ -455,7 +455,7 @@ describe('Fragment', () => {
 	});
 
 	it('should preserve state between array nested in fragment and fragment', () => {
-		// In this test case, the children of the Fragment in Foo end up being the same when flatened.
+		// In this test case, the children of the Fragment in Foo end up being the same when flattened.
 		//
 		// When condition == true, the children of the Fragment are a Stateful VNode.
 		// When condition == false, the children of the Fragment are an Array containing a single
@@ -511,14 +511,14 @@ describe('Fragment', () => {
 	});
 
 	it('should not preserve state between array nested in fragment and double nested fragment', () => {
-		// In this test case, the children of the Fragment in Foo end up being the different when flatened.
+		// In this test case, the children of the Fragment in Foo end up being the different when flattened.
 		//
 		// When condition == true, the children of the Fragment are an Array of Stateful VNode.
 		// When condition == false, the children of the Fragment are another Fragment whose children are
 		// a single Stateful VNode.
 		//
 		// When each of these are flattened (in flattenChildren), the first Fragment stays the same
-		// (Fragment -> [Stateful]). The second Fragment also doesn't change (flatenning doesn't erase
+		// (Fragment -> [Stateful]). The second Fragment also doesn't change (flattening doesn't erase
 		// Fragments) so it remains Fragment -> Fragment -> Stateful. Therefore when diff'ed these Fragments
 		// separate the two Stateful VNodes into different trees and state is not preserved between them.
 

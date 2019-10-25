@@ -48,7 +48,7 @@ export default class Spiral extends Component {
 	}
 
 	componentWillUnmount() {
-		console.log('unmout');
+		console.log('unmount');
 		this.stop = true;
 	}
 

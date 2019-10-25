@@ -7,12 +7,13 @@
   "main": "dist/preact.js",
   "module": "dist/preact.module.js",
   "umd:main": "dist/preact.umd.js",
+  "unpkg": "dist/preact.umd.js",
   "source": "src/index.js",
   "license": "MIT",
   "types": "src/index.d.ts",
   "scripts": {
     "build": "npm-run-all --parallel build:*",
-    "build:core": "microbundle build --raw",
+    "build:core": "microbundle build --raw && cp dist/preact.js dist/preact.min.js",
     "build:debug": "microbundle build --raw --cwd debug",
     "build:hooks": "microbundle build --raw --cwd hooks",
     "build:composition": "microbundle build --raw --cwd composition",
@@ -36,8 +37,7 @@
     "test:karma:bench": "cross-env PERFORMANCE=true COVERAGE=false karma start karma.conf.js --grep=test/benchmarks/**.js --single-run",
     "test:karma:composition:bench": "cross-env PERFORMANCE=true COVERAGE=false karma start karma.conf.js --grep=composition/test/benchmarks/**.js --single-run",
     "benchmark": "npm run test:karma:bench -- no-single-run",
-    "lint": "eslint src test debug compat hooks composition test-utils",
-    "postinstall": "node -e \"console.log('\\u001b[35m\\u001b[1mLove Preact? You can now donate to our open collective:\\u001b[22m\\u001b[39m\\n > \\u001b[34mhttps://opencollective.com/preact/donate\\u001b[0m')\""
+    "lint": "eslint src test debug compat hooks composition test-utils"
   },
   "eslintConfig": {
     "extends": "developit",

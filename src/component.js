@@ -150,6 +150,7 @@ let q = [];
  * Asynchronously schedule a callback
  * @type {(cb) => void}
  */
+/* istanbul ignore next */
 const defer = typeof Promise=='function' ? Promise.prototype.then.bind(Promise.resolve()) : setTimeout;
 
 /*

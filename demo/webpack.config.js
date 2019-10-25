@@ -44,7 +44,7 @@ module.exports = {
 						[require.resolve('@babel/plugin-transform-runtime')],
 						[require.resolve('@babel/plugin-transform-react-jsx'), { pragma: 'h', pragmaFrag: 'Fragment' }],
 						[require.resolve('@babel/plugin-proposal-decorators'), { legacy: true }],
-						[require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
+						[require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }]
 					]
 				}
 			},
@@ -67,6 +67,7 @@ module.exports = {
 						[require.resolve('@babel/plugin-transform-react-jsx'), { pragma: 'createElement', pragmaFrag: 'Fragment' }],
 						[require.resolve('@babel/plugin-proposal-class-properties')],
 						[require.resolve('@babel/plugin-transform-react-constant-elements')],
+						[require.resolve('@babel/plugin-syntax-dynamic-import')],
 					]
 				}
 			},

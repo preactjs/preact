@@ -30,7 +30,6 @@ options.diffed = vnode => {
 
 	const hooks = c.__hooks;
 	if (hooks) {
-		hooks._handles = bindHandles(hooks._handles);
 		hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
 	}
 };
@@ -61,7 +60,7 @@ function getHookState(index) {
 	// * https://github.com/michael-klein/funcy.js/blob/650beaa58c43c33a74820a3c98b3c7079cf2e333/src/renderer.mjs
 	// Other implementations to look at:
 	// * https://codesandbox.io/s/mnox05qp8
-	const hooks = currentComponent.__hooks || (currentComponent.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [], _handles: [] });
+	const hooks = currentComponent.__hooks || (currentComponent.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [] });
 
 	if (index >= hooks._list.length) {
 		hooks._list.push({});
@@ -69,10 +68,19 @@ function getHookState(index) {
 	return hooks._list[index];
 }
 
+/**
+ * @param {import('./index').StateUpdater<any>} initialState
+ */
 export function useState(initialState) {
 	return useReducer(invokeOrReturn, initialState);
 }
 
+/**
+ * @param {import('./index').Reducer<any, any>} reducer
+ * @param {import('./index').StateUpdater<any>} initialState
+ * @param {(initialState: any) => void} [init]
+ * @returns {[ any, (state: any) => void ]}
+ */
 export function useReducer(reducer, initialState, init) {
 
 	/** @type {import('./internal').ReducerHookState} */
@@ -132,20 +140,16 @@ export function useRef(initialValue) {
 	return useMemo(() => ({ current: initialValue }), []);
 }
 
+/**
+ * @param {object} ref
+ * @param {() => object} createHandle
+ * @param {any[]} args
+ */
 export function useImperativeHandle(ref, createHandle, args) {
-	const state = getHookState(currentIndex++);
-	if (argsChanged(state._args, args)) {
-		state._args = args;
-		currentComponent.__hooks._handles.push({ ref, createHandle });
-	}
-}
-
-function bindHandles(handles) {
-	handles.some(handle => {
-		if (typeof handle.ref === 'function') handle.ref(handle.createHandle());
-		else if (handle.ref) handle.ref.current = handle.createHandle();
-	});
-	return [];
+	useLayoutEffect(() => {
+		if (typeof ref === 'function') ref(createHandle());
+		else if (ref) ref.current = createHandle();
+	}, args == null ? args : args.concat(ref));
 }
 
 /**
@@ -213,7 +217,7 @@ let afterPaint = () => {};
  */
 function flushAfterPaintEffects() {
 	afterPaintEffects.some(component => {
-		component._afterPaintQueued = false;
+		component._afterPaintQueued = 0;
 		if (component._parentDom) {
 			component.__hooks._pendingEffects = handleEffects(component.__hooks._pendingEffects);
 		}
@@ -224,9 +228,14 @@ function flushAfterPaintEffects() {
 const RAF_TIMEOUT = 100;
 
 /**
- * requestAnimationFrame with a timeout in case it doesn't fire (for example if the browser tab is not visible)
+ * Schedule a callback to be invoked after the browser has a chance to paint a new frame.
+ * Do this by combining requestAnimationFrame (rAF) + setTimeout to invoke a callback after
+ * the next browser frame.
+ *
+ * Also, schedule a timeout in parallel to the the rAF to ensure the callback is invoked
+ * even if RAF doesn't fire (for example if the browser tab is not visible)
  */
-function safeRaf(callback) {
+function afterNextFrame(callback) {
 	const done = () => {
 		clearTimeout(timeout);
 		cancelAnimationFrame(raf);
@@ -240,22 +249,30 @@ function safeRaf(callback) {
 if (typeof window !== 'undefined') {
 	let prevRaf = options.requestAnimationFrame;
 	afterPaint = (component) => {
-		if ((!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) ||
-		    prevRaf !== options.requestAnimationFrame) {
+		if (
+			(!component._afterPaintQueued && (component._afterPaintQueued = afterPaintEffects.push(component)) === 1)
+			|| prevRaf !== options.requestAnimationFrame
+		) {
 			prevRaf = options.requestAnimationFrame;
 
 			/* istanbul ignore next */
-			(options.requestAnimationFrame || safeRaf)(flushAfterPaintEffects);
+			(prevRaf || afterNextFrame)(flushAfterPaintEffects);
 		}
 	};
 }
 
+/**
+ * @param {import('./internal').EffectHookState[]} effects
+ */
 function handleEffects(effects) {
 	effects.forEach(invokeCleanup);
 	effects.forEach(invokeEffect);
 	return [];
 }
 
+/**
+ * @param {import('./internal').EffectHookState} hook
+ */
 function invokeCleanup(hook) {
 	if (hook._cleanup) hook._cleanup();
 }
@@ -269,6 +286,10 @@ function invokeEffect(hook) {
 	if (typeof result === 'function') hook._cleanup = result;
 }
 
+/**
+ * @param {any[]} oldArgs
+ * @param {any[]} newArgs
+ */
 function argsChanged(oldArgs, newArgs) {
 	return !oldArgs || newArgs.some((arg, index) => arg !== oldArgs[index]);
 }
