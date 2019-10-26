@@ -1,8 +1,7 @@
 import { vnodeSpy, eventSpy } from '../../../test/_util/optionSpies';
-
 import { render, createElement, Component, createRef } from '../../src';
 import { setupRerender } from 'preact/test-utils';
-import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { setupScratch, teardown, createEvent } from '../../../test/_util/helpers';
 
 /** @jsx createElement */
 
@@ -63,7 +62,7 @@ describe('compat options', () => {
 		render(<ClassApp />, scratch);
 		expect(scratch.innerHTML).to.equal('<button>0</button>');
 
-		buttonRef.current.dispatchEvent(new Event('click'));
+		buttonRef.current.dispatchEvent(createEvent('click'));
 		rerender();
 		expect(scratch.innerHTML).to.equal('<button>1</button>');
 
