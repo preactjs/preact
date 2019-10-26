@@ -89,7 +89,7 @@ describe('debug with suspense', () => {
 		describe('warn for PropTypes on lazy()', () => {
 			it('should log the function name', () => {
 				const loader = Promise.resolve({
-					default: function MyLazyLoadedComponent() {
+					default: function MyLazyLoaded() {
 						return <div>Hi there</div>;
 					}
 				});
@@ -106,12 +106,15 @@ describe('debug with suspense', () => {
 					.then(() => Promise.all(suspense._component._suspensions))
 					.then(() => {
 						expect(console.warn).to.be.calledTwice;
-						expect(warnings[1].includes('MyLazyLoadedComponent')).to.equal(
-							true
-						);
+						expect(warnings[1].includes('MyLazyLoaded')).to.equal(true);
 					});
 			});
 
+			// TODO: These next 3 tests fail because debug is no longer re-initialized
+			// before each test. Re-initializing before each tests caused the warnedComponents
+			// array to be reset before each test ran. However, these new tests all share the same
+			// warnedComponents array meaning only the first Lazy component will get warned on
+			// because all Lazy components serialize to the same string.
 			it('should log the displayName', () => {
 				function MyLazyLoadedComponent() {
 					return <div>Hi there</div>;
@@ -135,6 +138,7 @@ describe('debug with suspense', () => {
 					});
 			});
 
+			// TODO: Fix debug so this test passes. See comment above
 			it('should not log a component if lazy throws', () => {
 				const loader = Promise.reject(new Error('Hey there'));
 				const FakeLazy = lazy(() => loader);
@@ -151,6 +155,7 @@ describe('debug with suspense', () => {
 				});
 			});
 
+			// TODO: Fix debug so this test passes. See comment above
 			it("should not log a component if lazy's loader throws", () => {
 				const FakeLazy = lazy(() => {
 					throw new Error('Hello');
