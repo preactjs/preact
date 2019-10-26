@@ -58,7 +58,7 @@ export function initDebug() {
 		}
 		if (!isValid) throw new Error(`
 			Expected a valid HTML node as a second argument to render.
-			Received ${parentNode} instead: render(<${vnode.type.name || vnode.type} />, ${parentNode});
+			Received ${parentNode} instead: render(<${getDisplayName(vnode)} />, ${parentNode});
 		`);
 
 		if (oldRoot) oldRoot(vnode, parentNode);
@@ -152,7 +152,7 @@ export function initDebug() {
 				try {
 					const lazyVNode = vnode.type();
 					warnedComponents.lazyPropTypes[vnode.type] = true;
-					console.warn(m + 'Component wrapped in lazy() is ' + (lazyVNode.type.displayName || lazyVNode.type.name));
+					console.warn(m + 'Component wrapped in lazy() is ' + getDisplayName(lazyVNode));
 				}
 				catch (promise) {
 					console.warn(m + 'We will log the wrapped component\'s name once it is loaded.');
