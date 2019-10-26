@@ -223,8 +223,6 @@ export function initDebug() {
 			});
 		}
 
-		if (oldDiffed) oldDiffed(vnode);
-
 		if (vnode._component && vnode._component.__hooks) {
 			let hooks = vnode._component.__hooks;
 			if (Array.isArray(hooks._list)) {
@@ -258,6 +256,8 @@ export function initDebug() {
 				});
 			}
 		}
+
+		if (oldDiffed) oldDiffed(vnode);
 
 		if (vnode._children != null) {
 			const keys = [];
