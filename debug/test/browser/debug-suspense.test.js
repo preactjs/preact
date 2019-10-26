@@ -1,7 +1,11 @@
-import { createElement, render, Fragment, lazy, Suspense } from 'preact/compat';
+import { createElement, render, lazy, Suspense } from 'preact/compat';
 import { initDebug } from '../../src/debug';
 import { setupRerender } from 'preact/test-utils';
-import { setupScratch, teardown, serializeHtml } from '../../../test/_util/helpers';
+import {
+	setupScratch,
+	teardown,
+	serializeHtml
+} from '../../../test/_util/helpers';
 
 /** @jsx createElement */
 
@@ -26,29 +30,24 @@ describe('debug with suspense', () => {
 		teardown(scratch);
 	});
 
-	it('should throw an error when missing Suspense', () => {
-		const Foo = () => <div>Foo</div>;
-		const LazyComp = lazy(
-			() => new Promise(resolve => resolve({ default: Foo }))
-		);
-		const fn = () => {
-			render(
-				<Fragment>
-					<LazyComp />
-				</Fragment>,
-				scratch
-			);
-		};
-
-		expect(fn).to.throw(/Missing Suspense/gi);
-	});
-
 	it('should throw on missing <Suspense>', () => {
 		function Foo() {
 			throw Promise.resolve();
 		}
 
 		expect(() => render(<Foo />, scratch)).to.throw;
+	});
+
+	it('should throw an error when using lazy and missing Suspense', () => {
+		const Foo = () => <div>Foo</div>;
+		const LazyComp = lazy(
+			() => new Promise(resolve => resolve({ default: Foo }))
+		);
+		const fn = () => {
+			render(<LazyComp />, scratch);
+		};
+
+		expect(fn).to.throw(/Missing Suspense/gi);
 	});
 
 	describe('PropTypes', () => {
