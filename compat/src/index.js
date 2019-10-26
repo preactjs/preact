@@ -12,7 +12,6 @@ const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip|color|fill|fl
 
 let oldEventHook = options.event;
 options.event = e => {
-	/* istanbul ignore next */
 	if (oldEventHook) e = oldEventHook(e);
 	e.persist = () => {};
 	return e.nativeEvent = e;
@@ -418,7 +417,6 @@ options.vnode = vnode => {
 		setSafeDescriptor(type.prototype, 'componentWillUpdate');
 		type._patchedLifecycles = true;
 	}
-	/* istanbul ignore next */
 	if (oldVNodeHook) oldVNodeHook(vnode);
 };
 

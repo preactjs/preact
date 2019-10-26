@@ -4,7 +4,7 @@ import { options as rawOptions } from 'preact';
 let options = rawOptions;
 
 let oldVNode = options.vnode;
-let oldEvent = options.event;
+let oldEvent = options.event || (e => e);
 let oldAfterDiff = options.diffed;
 let oldUnmount = options.unmount;
 
