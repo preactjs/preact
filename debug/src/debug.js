@@ -230,9 +230,8 @@ export function initDebug() {
 			if (hooks._list && Array.isArray(hooks._list)) {
 				hooks._list.forEach(hook => {
 					if (hook._callback && (!hook._args || !Array.isArray(hook._args))) {
-						/* istanbul ignore next */
 						console.warn(
-							`In ${vnode.type.name || vnode.type} you are calling useMemo/useCallback without passing arguments.\n` +
+							`In ${getDisplayName(vnode)} you are calling useMemo/useCallback without passing arguments.\n` +
 							`This is a noop since it will not be able to memoize, it will execute it every render.`
 						);
 					}
@@ -242,10 +241,9 @@ export function initDebug() {
 				hooks._pendingEffects.forEach((effect) => {
 					if ((!effect._args || !Array.isArray(effect._args)) && !warnedComponents.useEffect[vnode.type]) {
 						warnedComponents.useEffect[vnode.type] = true;
-						/* istanbul ignore next */
 						console.warn('You should provide an array of arguments as the second argument to the "useEffect" hook.\n\n' +
 							'Not doing so will invoke this effect on every render.\n\n' +
-							'This effect can be found in the render of ' + (vnode.type.name || vnode.type) + '.');
+							'This effect can be found in the render of ' + getDisplayName(vnode) + '.');
 					}
 				});
 			}
@@ -253,10 +251,9 @@ export function initDebug() {
 				hooks._pendingLayoutEffects.forEach((layoutEffect) => {
 					if ((!layoutEffect._args || !Array.isArray(layoutEffect._args)) && !warnedComponents.useLayoutEffect[vnode.type]) {
 						warnedComponents.useLayoutEffect[vnode.type] = true;
-						/* istanbul ignore next */
 						console.warn('You should provide an array of arguments as the second argument to the "useLayoutEffect" hook.\n\n' +
 							'Not doing so will invoke this effect on every render.\n\n' +
-							'This effect can be found in the render of ' + (vnode.type.name || vnode.type) + '.');
+							'This effect can be found in the render of ' + getDisplayName(vnode) + '.');
 					}
 				});
 			}
