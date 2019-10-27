@@ -8,10 +8,10 @@
     "props": {
       "$__hooks": "__H",
       "$_component": "__c",
-      "$_defaultValue": "__p",
+      "$_defaultValue": "__",
       "$_id": "__c",
       "$_parentDom": "__P",
-      "$_root": "__p",
+      "$_root": "__",
       "$_diff": "__b",
       "$_commit": "__c",
       "$_render": "__r",
