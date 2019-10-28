@@ -1,5 +1,5 @@
 import { diff, unmount, applyRef } from './index';
-import { coerceToVNode } from '../create-element';
+import { createVNode } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { removeNode } from '../util';
 import { getDomSibling } from '../component';
@@ -176,7 +176,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
  * children of a virtual node
  * @param {(vnode: import('../internal').VNode) => import('../internal').VNode} [callback]
  * A function to invoke for each child before it is added to the flattened list.
- * @param {import('../internal').VNode[]} [flattened] An flat array of children to modify
+ * @param {Array<import('../internal').VNode | string | number>} [flattened] An flat array of children to modify
  * @returns {import('../internal').VNode[]}
  */
 export function toChildArray(children, callback, flattened) {
@@ -190,8 +190,17 @@ export function toChildArray(children, callback, flattened) {
 			toChildArray(children[i], callback, flattened);
 		}
 	}
+	else if (!callback) {
+		flattened.push(children);
+	}
+	else if (typeof children === 'string' || typeof children === 'number') {
+		flattened.push(callback(createVNode(null, children, null, null)));
+	}
+	else if (children._dom != null || children._component != null) {
+		flattened.push(callback(createVNode(children.type, children.props, children.key, null)));
+	}
 	else {
-		flattened.push(callback ? callback(coerceToVNode(children)) : children);
+		flattened.push(callback(children));
 	}
 
 	return flattened;

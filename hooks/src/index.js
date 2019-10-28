@@ -9,6 +9,9 @@ let currentComponent;
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
+/** @type {Array<import('./internal').Component>} */
+let layoutEffects = [];
+
 let oldBeforeRender = options._render;
 options._render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
@@ -17,7 +20,9 @@ options._render = vnode => {
 	currentIndex = 0;
 
 	if (currentComponent.__hooks) {
-		currentComponent.__hooks._pendingEffects = handleEffects(currentComponent.__hooks._pendingEffects);
+		currentComponent.__hooks._pendingEffects.forEach(invokeCleanup);
+		currentComponent.__hooks._pendingEffects.forEach(invokeEffect);
+		currentComponent.__hooks._pendingEffects = [];
 	}
 };
 
@@ -30,8 +35,20 @@ options.diffed = vnode => {
 
 	const hooks = c.__hooks;
 	if (hooks) {
-		hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
+		if (hooks._pendingLayoutEffects.length) {
+			layoutEffects.push(c);
+		}
+
+		if (hooks._pendingEffects.length) {
+			afterPaint(afterPaintEffects.push(c));
+		}
 	}
+};
+
+let oldCommit = options._commit;
+options._commit = vnode => {
+	if (oldCommit) oldCommit(vnode);
+	flushLayoutEffects();
 };
 
 
@@ -117,7 +134,6 @@ export function useEffect(callback, args) {
 		state._args = args;
 
 		currentComponent.__hooks._pendingEffects.push(state);
-		afterPaint(currentComponent);
 	}
 }
 
@@ -132,6 +148,7 @@ export function useLayoutEffect(callback, args) {
 	if (argsChanged(state._args, args)) {
 		state._value = callback;
 		state._args = args;
+
 		currentComponent.__hooks._pendingLayoutEffects.push(state);
 	}
 }
@@ -206,20 +223,33 @@ export function useDebugValue(value, formatter) {
 // then effects will ALWAYS run on the NEXT frame instead of the current one, incurring a ~16ms delay.
 // Perhaps this is not such a big deal.
 /**
- * Invoke a component's pending effects after the next frame renders
- * @type {(component: import('./internal').Component) => void}
+ * Schedule afterPaintEffects flush after the browser paints
+ * @type {(newQueueLength: number) => void}
  */
 /* istanbul ignore next */
 let afterPaint = () => {};
+
+/**
+ * Layout effects consumer
+ */
+function flushLayoutEffects() {
+	layoutEffects.some(component => {
+		component.__hooks._pendingLayoutEffects.forEach(invokeCleanup);
+		component.__hooks._pendingLayoutEffects.forEach(invokeEffect);
+		component.__hooks._pendingLayoutEffects = [];
+	});
+	layoutEffects = [];
+}
 
 /**
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
 	afterPaintEffects.some(component => {
-		component._afterPaintQueued = 0;
 		if (component._parentDom) {
-			component.__hooks._pendingEffects = handleEffects(component.__hooks._pendingEffects);
+			component.__hooks._pendingEffects.forEach(invokeCleanup);
+			component.__hooks._pendingEffects.forEach(invokeEffect);
+			component.__hooks._pendingEffects = [];
 		}
 	});
 	afterPaintEffects = [];
@@ -248,26 +278,14 @@ function afterNextFrame(callback) {
 /* istanbul ignore else */
 if (typeof window !== 'undefined') {
 	let prevRaf = options.requestAnimationFrame;
-	afterPaint = (component) => {
-		if (
-			(!component._afterPaintQueued && (component._afterPaintQueued = afterPaintEffects.push(component)) === 1)
-			|| prevRaf !== options.requestAnimationFrame
-		) {
+	afterPaint = (newQueueLength) => {
+		if (newQueueLength === 1 || prevRaf !== options.requestAnimationFrame) {
 			prevRaf = options.requestAnimationFrame;
 
 			/* istanbul ignore next */
 			(prevRaf || afterNextFrame)(flushAfterPaintEffects);
 		}
 	};
-}
-
-/**
- * @param {import('./internal').EffectHookState[]} effects
- */
-function handleEffects(effects) {
-	effects.forEach(invokeCleanup);
-	effects.forEach(invokeEffect);
-	return [];
 }
 
 /**

@@ -20,6 +20,7 @@
       "$_root": "__p",
       "$_commit": "__c",
       "$_suspensions": "__u",
+      "$_fallback": "__f",
       "$_diff": "__b",
       "$_render": "__r",
       "$_hook": "__h",

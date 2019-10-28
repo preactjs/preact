@@ -86,26 +86,3 @@ export function Fragment(props) {
  * @returns {vnode is import('./internal').VNode}
  */
 export const isValidElement = vnode => vnode!=null && vnode.constructor === undefined;
-
-/**
- * Coerce an untrusted value into a VNode
- * Specifically, this should be used anywhere a user could provide a boolean, string, or number where
- * a VNode or Component is desired instead
- * @param {boolean | string | number | import('./internal').VNode} possibleVNode A possible VNode
- * @returns {import('./internal').VNode | null}
- */
-export function coerceToVNode(possibleVNode) {
-	if (possibleVNode == null || typeof possibleVNode === 'boolean') return null;
-	if (typeof possibleVNode === 'string' || typeof possibleVNode === 'number') {
-		return createVNode(null, possibleVNode, null, null);
-	}
-
-	// Clone vnode if it has already been used. ceviche/#57
-	if (possibleVNode._dom!=null || possibleVNode._component!=null) {
-		let vnode = createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.key, null);
-		vnode._dom = possibleVNode._dom;
-		return vnode;
-	}
-
-	return possibleVNode;
-}
