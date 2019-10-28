@@ -34,13 +34,15 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 function setStyle(style, key, value) {
 	if (key[0] === '-') {
 		style.setProperty(key, value);
+	} else if (
+		typeof value === 'number' &&
+		IS_NON_DIMENSIONAL.test(key) === false
+	) {
+		style[key] = value + 'px';
+	} else if (value == null) {
+		style[key] = '';
 	} else {
-		style[key] =
-			typeof value === 'number' && IS_NON_DIMENSIONAL.test(key) === false
-				? value + 'px'
-				: value == null
-				? ''
-				: value;
+		style[key] = value;
 	}
 }
 
