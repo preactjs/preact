@@ -3,6 +3,8 @@ import { getDisplayName } from './devtools/custom';
 import { options, Component } from 'preact';
 import { ELEMENT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants';
 
+const isWeakMapSupported = typeof WeakMap === 'function';
+
 function getClosestDomNodeParent(parent) {
 	if (!parent) return {};
 	if (typeof parent.type === 'function') {
@@ -19,7 +21,11 @@ export function initDebug() {
 	let oldCatchError = options._catchError;
 	let oldRoot = options._root;
 	let oldHook = options._hook;
-	const warnedComponents = { useEffect: {}, useLayoutEffect: {}, lazyPropTypes: {} };
+	const warnedComponents = !isWeakMapSupported ? null : ({
+		useEffect: new WeakMap(),
+		useLayoutEffect: new WeakMap(),
+		lazyPropTypes: new WeakMap()
+	});
 
 	options._catchError = (error, vnode, oldVNode) => {
 		let component = vnode && vnode._component;
@@ -58,7 +64,7 @@ export function initDebug() {
 		}
 		if (!isValid) throw new Error(`
 			Expected a valid HTML node as a second argument to render.
-			Received ${parentNode} instead: render(<${vnode.type.name || vnode.type} />, ${parentNode});
+			Received ${parentNode} instead: render(<${getDisplayName(vnode)} />, ${parentNode});
 		`);
 
 		if (oldRoot) oldRoot(vnode, parentNode);
@@ -147,12 +153,12 @@ export function initDebug() {
 
 		// Check prop-types if available
 		if (typeof vnode.type==='function' && vnode.type.propTypes) {
-			if (vnode.type.displayName === 'Lazy' && !warnedComponents.lazyPropTypes[vnode.type]) {
+			if (vnode.type.displayName === 'Lazy' && warnedComponents && !warnedComponents.lazyPropTypes.has(vnode.type)) {
 				const m = 'PropTypes are not supported on lazy(). Use propTypes on the wrapped component itself. ';
 				try {
 					const lazyVNode = vnode.type();
-					warnedComponents.lazyPropTypes[vnode.type] = true;
-					console.warn(m + 'Component wrapped in lazy() is ' + (lazyVNode.type.displayName || lazyVNode.type.name));
+					warnedComponents.lazyPropTypes.set(vnode.type, true);
+					console.warn(m + 'Component wrapped in lazy() is ' + getDisplayName(lazyVNode));
 				}
 				catch (promise) {
 					console.warn(m + 'We will log the wrapped component\'s name once it is loaded.');
@@ -223,8 +229,6 @@ export function initDebug() {
 			});
 		}
 
-		if (oldDiffed) oldDiffed(vnode);
-
 		if (vnode._component && vnode._component.__hooks) {
 			let hooks = vnode._component.__hooks;
 			if (Array.isArray(hooks._list)) {
@@ -239,8 +243,8 @@ export function initDebug() {
 			}
 			if (Array.isArray(hooks._pendingEffects)) {
 				hooks._pendingEffects.forEach((effect) => {
-					if ((!effect._args || !Array.isArray(effect._args)) && !warnedComponents.useEffect[vnode.type]) {
-						warnedComponents.useEffect[vnode.type] = true;
+					if (!Array.isArray(effect._args) && warnedComponents && !warnedComponents.useEffect.has(vnode.type)) {
+						warnedComponents.useEffect.set(vnode.type, true);
 						console.warn('You should provide an array of arguments as the second argument to the "useEffect" hook.\n\n' +
 							'Not doing so will invoke this effect on every render.\n\n' +
 							'This effect can be found in the render of ' + getDisplayName(vnode) + '.');
@@ -249,8 +253,8 @@ export function initDebug() {
 			}
 			if (Array.isArray(hooks._pendingLayoutEffects)) {
 				hooks._pendingLayoutEffects.forEach((layoutEffect) => {
-					if ((!layoutEffect._args || !Array.isArray(layoutEffect._args)) && !warnedComponents.useLayoutEffect[vnode.type]) {
-						warnedComponents.useLayoutEffect[vnode.type] = true;
+					if (!Array.isArray(layoutEffect._args) && warnedComponents && !warnedComponents.useLayoutEffect.has(vnode.type)) {
+						warnedComponents.useLayoutEffect.set(vnode.type, true);
 						console.warn('You should provide an array of arguments as the second argument to the "useLayoutEffect" hook.\n\n' +
 							'Not doing so will invoke this effect on every render.\n\n' +
 							'This effect can be found in the render of ' + getDisplayName(vnode) + '.');
@@ -258,6 +262,8 @@ export function initDebug() {
 				});
 			}
 		}
+
+		if (oldDiffed) oldDiffed(vnode);
 
 		if (vnode._children != null) {
 			const keys = [];
