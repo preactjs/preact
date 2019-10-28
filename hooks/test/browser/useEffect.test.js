@@ -63,7 +63,7 @@ describe('useEffect', () => {
 		});
 	});
 
-	it('Should execute effects in the right order', () => {
+	it('should execute multiple effects in same component in the right order', () => {
 		let executionOrder = [];
 		const App = ({ i }) => {
 			executionOrder = [];
