@@ -23,7 +23,7 @@ export function render(vnode, parentDom, replaceNode) {
 	let commitQueue = [];
 	diff(
 		parentDom,
-		isHydrating ? parentDom._children = vnode : (replaceNode || parentDom)._children = vnode,
+		(isHydrating ? parentDom : (replaceNode || parentDom))._children = vnode,
 		oldVNode || EMPTY_OBJ,
 		EMPTY_OBJ,
 		parentDom.ownerSVGElement !== undefined,
