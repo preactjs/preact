@@ -32,8 +32,11 @@ Component.prototype.setState = function(update, callback) {
 		s = this._nextState = assign({}, this.state);
 	}
 
-	// if update() mutates state in-place, skip the copy:
-	if (typeof update !== 'function' || (update = update(s, this.props))) {
+	if (typeof update == 'function') {
+		update = update(s, this.props);
+	}
+
+	if (update) {
 		assign(s, update);
 	}
 
