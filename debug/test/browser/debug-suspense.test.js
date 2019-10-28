@@ -110,11 +110,6 @@ describe('debug with suspense', () => {
 					});
 			});
 
-			// TODO: These next 3 tests fail because debug is no longer re-initialized
-			// before each test. Re-initializing before each tests caused the warnedComponents
-			// array to be reset before each test ran. However, these new tests all share the same
-			// warnedComponents array meaning only the first Lazy component will get warned on
-			// because all Lazy components serialize to the same string.
 			it('should log the displayName', () => {
 				function MyLazyLoadedComponent() {
 					return <div>Hi there</div>;
@@ -138,7 +133,6 @@ describe('debug with suspense', () => {
 					});
 			});
 
-			// TODO: Fix debug so this test passes. See comment above
 			it('should not log a component if lazy throws', () => {
 				const loader = Promise.reject(new Error('Hey there'));
 				const FakeLazy = lazy(() => loader);
@@ -155,7 +149,6 @@ describe('debug with suspense', () => {
 				});
 			});
 
-			// TODO: Fix debug so this test passes. See comment above
 			it("should not log a component if lazy's loader throws", () => {
 				const FakeLazy = lazy(() => {
 					throw new Error('Hello');
