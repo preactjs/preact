@@ -1,8 +1,8 @@
 import { act } from 'preact/test-utils';
-import { createElement as h, render } from 'preact';
+import { createElement as h, render, Fragment } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useEffectAssertions } from './useEffectAssertions.test';
-import { useLayoutEffect } from '../../src';
+import { useLayoutEffect, useRef, useState } from '../../src';
 
 /** @jsx h */
 
@@ -70,7 +70,7 @@ describe('useLayoutEffect', () => {
 		expect(callback).to.be.calledOnce;
 	});
 
-	it('Should execute layout effects in the right order', () => {
+	it('should execute multiple layout effects in same component in the right order', () => {
 		let executionOrder = [];
 		const App = ({ i }) => {
 			executionOrder = [];
@@ -84,8 +84,124 @@ describe('useLayoutEffect', () => {
 			}, [i]);
 			return <p>Test</p>;
 		};
-		act(() => render(<App i={0} />, scratch));
-		act(() => render(<App i={2} />, scratch));
+		render(<App i={0} />, scratch);
+		render(<App i={2} />, scratch);
 		expect(executionOrder).to.deep.equal(['cleanup1', 'cleanup2', 'action1', 'action2']);
+	});
+
+	it('should correctly display DOM', () => {
+		function AutoResizeTextareaLayoutEffect(props) {
+			const ref = useRef(null);
+			useLayoutEffect(() => {
+				expect(scratch.innerHTML).to.equal(`<div class="${props.value}"><p>${props.value}</p><textarea></textarea></div>`);
+				expect(ref.current.isConnected).to.equal(true);
+			});
+			return (
+				<Fragment>
+					<p>{props.value}</p>
+					<textarea ref={ref} value={props.value} onChange={props.onChange} />
+				</Fragment>
+			);
+		}
+
+		function App(props) {
+			return (
+				<div class={props.value}>
+					<AutoResizeTextareaLayoutEffect {...props} />
+				</div>
+			);
+		}
+
+		render(<App value="hi" />, scratch);
+		render(<App value="hii" />, scratch);
+	});
+
+	it('should invoke layout effects after subtree is fully connected', () => {
+		let ref;
+		let layoutEffect = sinon.spy(() => {
+			expect(ref.current.isConnected).to.equal(true, 'ref.current.isConnected');
+			expect(ref.current.parentNode).to.not.be.undefined;
+			expect(ref.current.parentNode.isConnected).to.equal(true, 'ref.current.parentNode.isConnected');
+		});
+
+		function Inner() {
+			ref = useRef(null);
+			useLayoutEffect(layoutEffect);
+			return (
+				<Fragment>
+					<textarea ref={ref} />
+					<span>hello</span>;
+				</Fragment>
+			);
+		}
+
+		function Outer() {
+			return <div><Inner /></div>;
+		}
+
+		render(<Outer />, scratch);
+		expect(layoutEffect).to.have.been.calledOnce;
+	});
+
+	// TODO: Make this test pass to resolve issue #1886
+	it.skip('should call effects correctly when unmounting', () => {
+		let onClick, calledFoo, calledBar, calledFooCleanup, calledBarCleanup;
+
+		const Foo = () => {
+			useLayoutEffect(() => {
+				if (!calledFoo) calledFoo = scratch.innerHTML;
+				return () => {
+					if (!calledFooCleanup) calledFooCleanup = scratch.innerHTML;
+				};
+			}, []);
+
+			return (
+				<div>
+					<p>Foo</p>
+				</div>
+			);
+		};
+
+		const Bar = () => {
+			useLayoutEffect(() => {
+				if (!calledBar) calledBar = scratch.innerHTML;
+				return () => {
+					if (!calledBarCleanup) calledBarCleanup = scratch.innerHTML;
+				};
+			}, []);
+
+			return (
+				<div>
+					<p>Bar</p>
+				</div>
+			);
+		};
+
+		function App() {
+			const [current, setCurrent] = useState('/foo');
+
+			onClick = () => setCurrent(current === '/foo' ? '/bar' : '/foo');
+
+			return (
+				<Fragment>
+					<button onClick={onClick}>
+						next
+					</button>
+
+					{current === '/foo' && <Foo />}
+					{current === '/bar' && <Bar />}
+				</Fragment>
+			);
+		}
+
+		render(<App />, scratch);
+		expect(calledFoo).to.equal('<button>next</button><div><p>Foo</p></div>', 'calledFoo');
+
+		act(() => onClick());
+		expect(calledFooCleanup).to.equal('<button>next</button><div><p>Bar</p></div>', 'calledFooCleanup');
+		expect(calledBar).to.equal('<button>next</button><div><p>Bar</p></div>', 'calledBar');
+
+		act(() => onClick());
+		expect(calledBarCleanup).to.equal('<button>next</button><div><p>Foo</p></div>', 'calledBarCleanup');
 	});
 });
