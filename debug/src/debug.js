@@ -2,7 +2,8 @@ import { checkPropTypes } from './check-props';
 import { getDisplayName } from './devtools/custom';
 import { options, Component } from 'preact';
 import { ELEMENT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE } from './constants';
-import { createWeakMap } from './weakestOfMaps';
+
+const isWeakMapSupported = typeof WeakMap === 'function';
 
 function getClosestDomNodeParent(parent) {
 	if (!parent) return {};
@@ -20,11 +21,11 @@ export function initDebug() {
 	let oldCatchError = options._catchError;
 	let oldRoot = options._root;
 	let oldHook = options._hook;
-	const warnedComponents = {
-		useEffect: createWeakMap(),
-		useLayoutEffect: createWeakMap(),
-		lazyPropTypes: createWeakMap()
-	};
+	const warnedComponents = !isWeakMapSupported ? null : ({
+		useEffect: new WeakMap(),
+		useLayoutEffect: new WeakMap(),
+		lazyPropTypes: new WeakMap()
+	});
 
 	options._catchError = (error, vnode, oldVNode) => {
 		let component = vnode && vnode._component;
@@ -152,7 +153,7 @@ export function initDebug() {
 
 		// Check prop-types if available
 		if (typeof vnode.type==='function' && vnode.type.propTypes) {
-			if (vnode.type.displayName === 'Lazy' && !warnedComponents.lazyPropTypes.has(vnode.type)) {
+			if (vnode.type.displayName === 'Lazy' && warnedComponents && !warnedComponents.lazyPropTypes.has(vnode.type)) {
 				const m = 'PropTypes are not supported on lazy(). Use propTypes on the wrapped component itself. ';
 				try {
 					const lazyVNode = vnode.type();
@@ -242,7 +243,7 @@ export function initDebug() {
 			}
 			if (Array.isArray(hooks._pendingEffects)) {
 				hooks._pendingEffects.forEach((effect) => {
-					if (!Array.isArray(effect._args) && !warnedComponents.useEffect.has(vnode.type)) {
+					if (!Array.isArray(effect._args) && warnedComponents && !warnedComponents.useEffect.has(vnode.type)) {
 						warnedComponents.useEffect.set(vnode.type, true);
 						console.warn('You should provide an array of arguments as the second argument to the "useEffect" hook.\n\n' +
 							'Not doing so will invoke this effect on every render.\n\n' +
@@ -252,7 +253,7 @@ export function initDebug() {
 			}
 			if (Array.isArray(hooks._pendingLayoutEffects)) {
 				hooks._pendingLayoutEffects.forEach((layoutEffect) => {
-					if (!Array.isArray(layoutEffect._args) && !warnedComponents.useLayoutEffect.has(vnode.type)) {
+					if (!Array.isArray(layoutEffect._args) && warnedComponents && !warnedComponents.useLayoutEffect.has(vnode.type)) {
 						warnedComponents.useLayoutEffect.set(vnode.type, true);
 						console.warn('You should provide an array of arguments as the second argument to the "useLayoutEffect" hook.\n\n' +
 							'Not doing so will invoke this effect on every render.\n\n' +
