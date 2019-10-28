@@ -242,4 +242,49 @@ describe('useContext', () => {
 			done();
 		});
 	});
+
+	it('should not rerender consumers that have been unmounted', () => {
+		const context = createContext(0);
+		const Provider = context.Provider;
+
+		const Inner = sinon.spy(() => {
+			const value = useContext(context);
+			return <div>{value}</div>;
+		});
+
+		let toggleConsumer;
+		let changeValue;
+		class App extends Component {
+			constructor() {
+				super();
+
+				this.state = { value: 0, show: true };
+				changeValue = value => this.setState({ value });
+				toggleConsumer = () => this.setState(({ show }) => ({ show: !show }));
+			}
+			render(props, state) {
+				return (
+					<Provider value={state.value}>
+						<div>{state.show ? <Inner /> : null}</div>
+					</Provider>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><div>0</div></div>');
+		expect(Inner).to.have.been.calledOnce;
+
+		act(() => changeValue(1));
+		expect(scratch.innerHTML).to.equal('<div><div>1</div></div>');
+		expect(Inner).to.have.been.calledTwice;
+
+		act(() => toggleConsumer());
+		expect(scratch.innerHTML).to.equal('<div></div>');
+		expect(Inner).to.have.been.calledTwice;
+
+		act(() => changeValue(2));
+		expect(scratch.innerHTML).to.equal('<div></div>');
+		expect(Inner).to.have.been.calledTwice;
+	});
 });
