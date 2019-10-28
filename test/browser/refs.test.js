@@ -35,6 +35,21 @@ describe('refs', () => {
 		expect(ref).to.have.been.calledOnce.and.calledWith(scratch.firstChild);
 	});
 
+	it('should not call stale refs', () => {
+		let ref = spy('ref');
+		let ref2 = spy('ref2');
+		let bool = true;
+		const App = () => <div ref={bool ? ref : ref2} />;
+
+		render(<App />, scratch);
+		expect(ref).to.have.been.calledOnce.and.calledWith(scratch.firstChild);
+
+		bool = false;
+		render(<App />, scratch);
+		expect(ref).to.have.been.calledTwice.and.calledWith(null);
+		expect(ref2).to.have.been.calledOnce.and.calledWith(scratch.firstChild);
+	});
+
 	it('should support createRef', () => {
 		const r = createRef();
 		expect(r.current).to.equal(undefined);
