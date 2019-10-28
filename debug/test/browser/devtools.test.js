@@ -441,33 +441,6 @@ describe('devtools', () => {
 		expect(() => render(null, scratch)).to.not.throw();
 	});
 
-	it('should not overwrite existing options', () => {
-		let vnodeSpy = sinon.spy();
-		let diffSpy = sinon.spy();
-		let diffedSpy = sinon.spy();
-		let commitSpy = sinon.spy();
-		let unmountSpy = sinon.spy();
-
-		options.vnode = vnodeSpy;
-		options._diff = diffSpy;
-		options.diffed = diffedSpy;
-		options.unmount = unmountSpy;
-		options._commit = commitSpy;
-
-		initDevTools();
-
-		render(<div />, scratch);
-
-		expect(vnodeSpy, 'vnode').to.have.been.called;
-		expect(diffSpy, 'diff').to.have.been.calledTwice;
-		expect(diffedSpy, 'diffed').to.have.been.calledTwice;
-		expect(commitSpy, 'commit').to.have.been.calledOnce;
-
-		render(null, scratch);
-
-		expect(unmountSpy, 'unmount').to.have.been.calledOnce;
-	});
-
 	it('should connect only once', () => {
 		let rid = Object.keys(hook._renderers)[0];
 		let spy = sinon.spy(hook.helpers[rid], 'markConnected');
