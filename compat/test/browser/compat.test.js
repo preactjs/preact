@@ -21,9 +21,12 @@ describe('imported compat in preact', () => {
 		scratch.firstChild.click();
 
 		expect(spy).to.be.calledOnce;
-		expect(spy.args[0][0]).to.haveOwnProperty('persist');
-		expect(typeof spy.args[0][0].persist).to.equal('function');
-		expect(spy.args[0][0]).to.haveOwnProperty('nativeEvent');
+		const event = spy.args[0][0];
+		expect(event).to.haveOwnProperty('persist');
+		expect(event).to.haveOwnProperty('nativeEvent');
+		expect(typeof event.persist).to.equal('function');
+
+		expect(() => event.persist()).to.not.throw();
 	});
 
 	it('should normalize ondoubleclick event', () => {
