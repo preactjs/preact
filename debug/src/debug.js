@@ -227,7 +227,7 @@ export function initDebug() {
 
 		if (vnode._component && vnode._component.__hooks) {
 			let hooks = vnode._component.__hooks;
-			if (hooks._list && Array.isArray(hooks._list)) {
+			if (Array.isArray(hooks._list)) {
 				hooks._list.forEach(hook => {
 					if (hook._callback && (!hook._args || !Array.isArray(hook._args))) {
 						console.warn(
@@ -237,7 +237,7 @@ export function initDebug() {
 					}
 				});
 			}
-			if (hooks._pendingEffects && Array.isArray(hooks._pendingEffects)) {
+			if (Array.isArray(hooks._pendingEffects)) {
 				hooks._pendingEffects.forEach((effect) => {
 					if ((!effect._args || !Array.isArray(effect._args)) && !warnedComponents.useEffect[vnode.type]) {
 						warnedComponents.useEffect[vnode.type] = true;
@@ -247,7 +247,7 @@ export function initDebug() {
 					}
 				});
 			}
-			if (hooks._pendingLayoutEffects && Array.isArray(hooks._pendingLayoutEffects)) {
+			if (Array.isArray(hooks._pendingLayoutEffects)) {
 				hooks._pendingLayoutEffects.forEach((layoutEffect) => {
 					if ((!layoutEffect._args || !Array.isArray(layoutEffect._args)) && !warnedComponents.useLayoutEffect[vnode.type]) {
 						warnedComponents.useLayoutEffect[vnode.type] = true;
