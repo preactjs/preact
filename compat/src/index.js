@@ -12,7 +12,6 @@ const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip|color|fill|fl
 
 let oldEventHook = options.event;
 options.event = e => {
-	/* istanbul ignore next */
 	if (oldEventHook) e = oldEventHook(e);
 	e.persist = () => {};
 	return e.nativeEvent = e;
@@ -389,6 +388,10 @@ function setSafeDescriptor(proto, key) {
 		Object.defineProperty(proto, key, {
 			configurable: false,
 			get() { return this['UNSAFE_' + key]; },
+			// This `set` is only used if a user sets a lifecycle like cWU
+			// after setting a lifecycle like UNSAFE_cWU. I doubt anyone
+			// actually does this in practice so not testing it
+			/* istanbul ignore next */
 			set(v) { this['UNSAFE_' + key] = v; }
 		});
 	}
@@ -414,7 +417,6 @@ options.vnode = vnode => {
 		setSafeDescriptor(type.prototype, 'componentWillUpdate');
 		type._patchedLifecycles = true;
 	}
-	/* istanbul ignore next */
 	if (oldVNodeHook) oldVNodeHook(vnode);
 };
 
