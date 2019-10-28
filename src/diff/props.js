@@ -20,7 +20,12 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 	}
 
 	for (i in newProps) {
-		if ((!hydrate || typeof newProps[i]=='function') && i!=='value' && i!=='checked' && oldProps[i]!==newProps[i]) {
+		if (
+			(!hydrate || typeof newProps[i] == 'function') &&
+			i !== 'value' &&
+			i !== 'checked' &&
+			oldProps[i] !== newProps[i]
+		) {
 			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
 		}
 	}
@@ -31,7 +36,12 @@ function setStyle(style, key, value) {
 		style.setProperty(key, value);
 	}
 	else {
-		style[key] = typeof value==='number' && IS_NON_DIMENSIONAL.test(key)===false ? value+'px' : value==null ? '' : value;
+		style[key] =
+			typeof value === 'number' && IS_NON_DIMENSIONAL.test(key) === false
+				? value + 'px'
+				: value == null
+					? ''
+					: value;
 	}
 }
 
@@ -44,7 +54,13 @@ function setStyle(style, key, value) {
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
 function setProperty(dom, name, value, oldValue, isSvg) {
-	name = isSvg ? (name==='className' ? 'class' : name) : (name==='class' ? 'className' : name);
+	name = isSvg
+		? name === 'className'
+			? 'class'
+			: name
+		: name === 'class'
+			? 'className'
+			: name;
 
 	if (name==='key' || name === 'children') {}
 	else if (name==='style') {

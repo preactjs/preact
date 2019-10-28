@@ -25,7 +25,9 @@ export function Component(props, context) {
  */
 Component.prototype.setState = function(update, callback) {
 	// only clone state when copying to nextState the first time.
-	let s = (this._nextState!==this.state && this._nextState) || (this._nextState = assign({}, this.state));
+	let s =
+		(this._nextState !== this.state && this._nextState) ||
+		(this._nextState = assign({}, this.state));
 
 	// if update() mutates state in-place, skip the copy:
 	if (typeof update!=='function' || (update = update(s, this.props))) {
@@ -113,7 +115,16 @@ function renderComponent(component) {
 
 	if (parentDom) {
 		let commitQueue = [];
-		let newDom = diff(parentDom, vnode, assign({}, vnode), component._context, parentDom.ownerSVGElement!==undefined, null, commitQueue, oldDom == null ? getDomSibling(vnode) : oldDom);
+		let newDom = diff(
+			parentDom,
+			vnode,
+			assign({}, vnode),
+			component._context,
+			parentDom.ownerSVGElement !== undefined,
+			null,
+			commitQueue,
+			oldDom == null ? getDomSibling(vnode) : oldDom
+		);
 		commitRoot(commitQueue, vnode);
 
 		if (newDom != oldDom) {
@@ -151,7 +162,10 @@ let q = [];
  * @type {(cb) => void}
  */
 /* istanbul ignore next */
-const defer = typeof Promise=='function' ? Promise.prototype.then.bind(Promise.resolve()) : setTimeout;
+const defer =
+	typeof Promise == 'function'
+		? Promise.prototype.then.bind(Promise.resolve())
+		: setTimeout;
 
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
@@ -169,8 +183,10 @@ let prevDebounce = options.debounceRendering;
  * @param {import('./internal').Component} c The component to rerender
  */
 export function enqueueRender(c) {
-	if ((!c._dirty && (c._dirty = true) && q.push(c) === 1) ||
-	    (prevDebounce !== options.debounceRendering)) {
+	if (
+		(!c._dirty && (c._dirty = true) && q.push(c) === 1) ||
+		prevDebounce !== options.debounceRendering
+	) {
 		prevDebounce = options.debounceRendering;
 		(options.debounceRendering || defer)(process);
 	}

@@ -70,6 +70,12 @@
     "*.ts",
     "dist"
   ],
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "none",
+    "useTabs": true,
+    "tabWidth": 2
+  },
   "files": [
     "src",
     "dist",

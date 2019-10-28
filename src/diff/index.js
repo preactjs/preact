@@ -22,7 +22,17 @@ import options from '../options';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} [isHydrating] Whether or not we are in hydration
  */
-export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, commitQueue, oldDom, isHydrating) {
+export function diff(
+	parentDom,
+	newVNode,
+	oldVNode,
+	context,
+	isSvg,
+	excessDomChildren,
+	commitQueue,
+	oldDom,
+	isHydrating
+) {
 	let tmp, newType = newVNode.type;
 
 	// When passing through createElement it assigns the object
@@ -72,7 +82,12 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				c._nextState = c.state;
 			}
 			if (newType.getDerivedStateFromProps!=null) {
-				assign(c._nextState==c.state ? (c._nextState = assign({}, c._nextState)) : c._nextState, newType.getDerivedStateFromProps(newProps, c._nextState));
+				assign(
+					c._nextState == c.state
+						? (c._nextState = assign({}, c._nextState))
+						: c._nextState,
+					newType.getDerivedStateFromProps(newProps, c._nextState)
+				);
 			}
 
 			oldProps = c.props;
@@ -139,7 +154,17 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, commitQueue, oldDom, isHydrating);
+			diffChildren(
+				parentDom,
+				newVNode,
+				oldVNode,
+				context,
+				isSvg,
+				excessDomChildren,
+				commitQueue,
+				oldDom,
+				isHydrating
+			);
 
 			c.base = newVNode._dom;
 
@@ -154,7 +179,16 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c._force = null;
 		}
 		else {
-			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, commitQueue, isHydrating);
+			newVNode._dom = diffElementNodes(
+				oldVNode._dom,
+				newVNode,
+				oldVNode,
+				context,
+				isSvg,
+				excessDomChildren,
+				commitQueue,
+				isHydrating
+			);
 		}
 
 		if (tmp = options.diffed) tmp(newVNode);
@@ -200,7 +234,16 @@ export function commitRoot(commitQueue, root) {
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @returns {import('../internal').PreactElement}
  */
-function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, commitQueue, isHydrating) {
+function diffElementNodes(
+	dom,
+	newVNode,
+	oldVNode,
+	context,
+	isSvg,
+	excessDomChildren,
+	commitQueue,
+	isHydrating
+) {
 	let i;
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
@@ -212,7 +255,12 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 		for (i=0; i<excessDomChildren.length; i++) {
 			const child = excessDomChildren[i];
 
-			if (child!=null && (newVNode.type===null ? child.nodeType===3 : child.localName===newVNode.type)) {
+			if (
+				child != null &&
+				(newVNode.type === null
+					? child.nodeType === 3
+					: child.localName === newVNode.type)
+			) {
 				dom = child;
 				excessDomChildren[i] = null;
 				break;
@@ -224,7 +272,11 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 		if (newVNode.type===null) {
 			return document.createTextNode(newProps);
 		}
-		dom = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type) : document.createElement(newVNode.type);
+
+		dom = isSvg
+			? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type)
+			: document.createElement(newVNode.type);
+
 		// we created a new parent, so none of the previously attached children can be reused:
 		excessDomChildren = null;
 	}
@@ -269,13 +321,36 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (!newHtml) {
-			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, commitQueue, EMPTY_OBJ, isHydrating);
+			diffChildren(
+				dom,
+				newVNode,
+				oldVNode,
+				context,
+				newVNode.type === 'foreignObject' ? false : isSvg,
+				excessDomChildren,
+				commitQueue,
+				EMPTY_OBJ,
+				isHydrating
+			);
 		}
 
 		// (as above, don't diff props during hydration)
 		if (!isHydrating) {
-			if (('value' in newProps) && newProps.value!==undefined && newProps.value !== dom.value) dom.value = newProps.value==null ? '' : newProps.value;
-			if (('checked' in newProps) && newProps.checked!==undefined && newProps.checked !== dom.checked) dom.checked = newProps.checked;
+			if (
+				'value' in newProps &&
+				newProps.value !== undefined &&
+				newProps.value !== dom.value
+			) {
+				dom.value = newProps.value == null ? '' : newProps.value;
+			}
+
+			if (
+				'checked' in newProps &&
+				newProps.checked !== undefined &&
+				newProps.checked !== dom.checked
+			) {
+				dom.checked = newProps.checked;
+			}
 		}
 	}
 

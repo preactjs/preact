@@ -2,13 +2,13 @@ import options from './options';
 import { assign } from './util';
 
 /**
-  * Create an virtual node (used for JSX)
-  * @param {import('./internal').VNode["type"]} type The node name or Component
-  * constructor for this virtual node
-  * @param {object | null | undefined} [props] The properties of the virtual node
-  * @param {Array<import('.').ComponentChildren>} [children] The children of the virtual node
-  * @returns {import('./internal').VNode}
-  */
+ * Create an virtual node (used for JSX)
+ * @param {import('./internal').VNode["type"]} type The node name or Component
+ * constructor for this virtual node
+ * @param {object | null | undefined} [props] The properties of the virtual node
+ * @param {Array<import('.').ComponentChildren>} [children] The children of the virtual node
+ * @returns {import('./internal').VNode}
+ */
 export function createElement(type, props, children) {
 	props = assign({}, props);
 
@@ -85,4 +85,5 @@ export function Fragment(props) {
  * @param {*} vnode
  * @returns {vnode is import('./internal').VNode}
  */
-export const isValidElement = vnode => vnode!=null && vnode.constructor === undefined;
+export const isValidElement = vnode =>
+	vnode != null && vnode.constructor === undefined;
