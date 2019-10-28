@@ -229,8 +229,10 @@ export function initDebug() {
 			});
 		}
 
-		if (vnode._component && vnode._component.__hooks) {
-			let hooks = vnode._component.__hooks;
+		/** @type {import('./internal').Component} */
+		const component = vnode._component;
+		if (component && component.__hooks) {
+			let hooks = component.__hooks;
 			if (Array.isArray(hooks._list)) {
 				hooks._list.forEach(hook => {
 					if (hook._callback && (!hook._args || !Array.isArray(hook._args))) {
@@ -241,6 +243,8 @@ export function initDebug() {
 					}
 				});
 			}
+
+			// After paint effects
 			if (Array.isArray(hooks._pendingEffects)) {
 				hooks._pendingEffects.forEach((effect) => {
 					if (!Array.isArray(effect._args) && warnedComponents && !warnedComponents.useEffect.has(vnode.type)) {
@@ -251,16 +255,16 @@ export function initDebug() {
 					}
 				});
 			}
-			if (Array.isArray(hooks._pendingLayoutEffects)) {
-				hooks._pendingLayoutEffects.forEach((layoutEffect) => {
-					if (!Array.isArray(layoutEffect._args) && warnedComponents && !warnedComponents.useLayoutEffect.has(vnode.type)) {
-						warnedComponents.useLayoutEffect.set(vnode.type, true);
-						console.warn('You should provide an array of arguments as the second argument to the "useLayoutEffect" hook.\n\n' +
-							'Not doing so will invoke this effect on every render.\n\n' +
-							'This effect can be found in the render of ' + getDisplayName(vnode) + '.');
-					}
-				});
-			}
+
+			// Layout Effects
+			component._renderCallbacks.forEach((possibleEffect) => {
+				if (possibleEffect._value && !Array.isArray(possibleEffect._args) && warnedComponents && !warnedComponents.useLayoutEffect.has(vnode.type)) {
+					warnedComponents.useLayoutEffect.set(vnode.type, true);
+					console.warn('You should provide an array of arguments as the second argument to the "useLayoutEffect" hook.\n\n' +
+						'Not doing so will invoke this effect on every render.\n\n' +
+						'This effect can be found in the render of ' + getDisplayName(vnode) + '.');
+				}
+			});
 		}
 
 		if (oldDiffed) oldDiffed(vnode);
