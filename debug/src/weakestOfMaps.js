@@ -2,6 +2,15 @@ let c = 0;
 
 const isValidKey = key => typeof key == 'object' && key !== null;
 
+function defineWeakMapProp(obj, prop, value) {
+	Object.defineProperty(obj, prop, {
+		value,
+		writable: true,
+		configurable: true,
+		enumerable: false
+	});
+}
+
 export class WeakestOfMaps {
 	constructor() {
 		this._id = typeof Symbol === 'function' ? Symbol() : `__weak$${++c}`;
@@ -12,7 +21,7 @@ export class WeakestOfMaps {
 			throw new TypeError('Invalid value used as weak map key');
 		}
 
-		key[this._id] = value;
+		defineWeakMapProp(key, this._id, value);
 		return this;
 	}
 

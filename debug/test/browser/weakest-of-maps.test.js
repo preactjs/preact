@@ -177,4 +177,54 @@ describe('WeakestOfMaps', () => {
 			expect(properties.configurable).to.be.true;
 		});
 	});
+
+	describe('secret property', () => {
+		function getForInProps(obj) {
+			const props = [];
+			for (let prop in obj) {
+				props.push(prop);
+			}
+
+			return props;
+		}
+
+		it('should not be enumerable in Object.keys', () => {
+			const key1 = {};
+			const key2 = [];
+			const map = new WeakestOfMaps();
+
+			map.set(key1, true);
+			map.set(key2, true);
+
+			expect(Object.keys(key1)).to.deep.equal([]);
+			expect(Object.keys(key2)).to.deep.equal([]);
+		});
+
+		it('should not be enumerable in for..in', () => {
+			const key1 = {};
+			const key2 = [];
+			const map = new WeakestOfMaps();
+
+			map.set(key1, true);
+			map.set(key2, true);
+
+			expect(getForInProps(key1)).to.deep.equal([]);
+			expect(getForInProps(key2)).to.deep.equal([]);
+		});
+
+		it.skip('should not be enuermable in getOwnPropNames', () => {
+			const key1 = {};
+			const key2 = [];
+			const map = new WeakestOfMaps();
+
+			map.set(key1, true);
+			map.set(key2, true);
+
+			const key1PropNames = Object.getOwnPropertyNames(key1);
+			const key2PropNames = Object.getOwnPropertyNames(key2);
+
+			expect(key1PropNames).to.deep.equal([]);
+			expect(key2PropNames).to.deep.equal(['length']);
+		});
+	});
 });
