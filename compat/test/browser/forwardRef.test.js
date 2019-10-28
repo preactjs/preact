@@ -239,6 +239,42 @@ describe('forwardRef', () => {
 		expect(renderCount).to.equal(3);
 	});
 
+	it('should bailout if forwardRef is wrapped in memo using function refs', () => {
+		const Component = props => <div ref={props.forwardedRef} />;
+
+		let renderCount = 0;
+
+		const App = memo(
+			forwardRef((props, ref) => {
+				renderCount++;
+				return <Component {...props} forwardedRef={ref} />;
+			}),
+		);
+
+		const ref = sinon.spy();
+
+		render(<App ref={ref} optional="foo" />, scratch);
+		expect(renderCount).to.equal(1);
+
+		expect(ref).to.have.been.called;
+
+		ref.resetHistory();
+		render(<App ref={ref} optional="foo" />, scratch);
+		expect(renderCount).to.equal(1);
+
+		const differentRef = sinon.spy();
+
+		render(<App ref={differentRef} optional="foo" />, scratch);
+		expect(renderCount).to.equal(2);
+
+		expect(ref).to.have.been.calledWith(null);
+		expect(differentRef).to.have.been.called;
+
+		differentRef.resetHistory();
+		render(<App ref={ref} optional="bar" />, scratch);
+		expect(renderCount).to.equal(3);
+	});
+
 	it('should pass ref through memo() with custom comparer function', () => {
 		const Foo = props => <div ref={props.forwardedRef} />;
 

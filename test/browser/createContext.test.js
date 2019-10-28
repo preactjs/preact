@@ -453,7 +453,7 @@ describe('createContext', () => {
 			app.setState({ status: 'updated' });
 			rerender();
 		});
-		
+
 		expect(scratch.innerHTML).to.equal('<p>value: updated</p>');
 	});
 
@@ -494,6 +494,54 @@ describe('createContext', () => {
 		// Rendered twice, with two different children for consumer, should render twice
 		expect(Inner.prototype.render).to.have.been.calledTwice;
 		expect(scratch.innerHTML).to.equal('<div>1</div>');
+	});
+
+	it('should not rerender consumers that have been unmounted', () => {
+		const { Provider, Consumer } = createContext(0);
+
+		const Inner = sinon.spy(props => <div>{props.value}</div>);
+
+		let toggleConsumer;
+		let changeValue;
+		class App extends Component {
+			constructor() {
+				super();
+
+				this.state = { value: 0, show: true };
+				changeValue = value => this.setState({ value });
+				toggleConsumer = () => this.setState(({ show }) => ({ show: !show }));
+			}
+			render(props, state) {
+				return (
+					<Provider value={state.value}>
+						<div>
+							{state.show ? (
+								<Consumer>{data => <Inner value={data} />}</Consumer>
+							) : null}
+						</div>
+					</Provider>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><div>0</div></div>');
+		expect(Inner).to.have.been.calledOnce;
+
+		changeValue(1);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><div>1</div></div>');
+		expect(Inner).to.have.been.calledTwice;
+
+		toggleConsumer();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div></div>');
+		expect(Inner).to.have.been.calledTwice;
+
+		changeValue(2);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div></div>');
+		expect(Inner).to.have.been.calledTwice;
 	});
 
 	describe('class.contextType', () => {
