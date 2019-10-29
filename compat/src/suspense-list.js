@@ -3,9 +3,11 @@ import { Suspense } from './suspense';
 
 // Hook for Suspense boundaries to ask for any extra work before rendering suspended children.
 options.__onSuspensionComplete = (vnode, cb) => {
-	vnode._parent._component &&
-	vnode._parent._component.__modifySuspense &&
-	vnode._parent._component.__modifySuspense(vnode, cb);
+	if (vnode._parent._component && vnode._parent._component.__modifySuspense) {
+		vnode._parent._component.__modifySuspense(vnode, cb);
+	} else {
+		cb();
+	}
 };
 
 // having custom inheritance instead of a class here saves a lot of bytes
@@ -30,8 +32,7 @@ SuspenseList.prototype.__modifySuspense = function(vnode, cb) {
 			}
 			thrill.cb();
 		});
-	}
-	else {
+	} else {
 		this._thrillers.find(thrill => thrill.vnode === vnode).cb = cb;
 	}
 };
