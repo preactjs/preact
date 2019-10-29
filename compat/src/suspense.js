@@ -86,7 +86,16 @@ Suspense.prototype._childDidSuspend = function(promise) {
 		c._vnode._children = [];
 	}
 
-	promise.then(onSuspensionComplete, onSuspensionComplete);
+	// This option enables any extra wait required before resolving the suspended promise.
+	if (options.__onSuspensionComplete) {
+		promise.then(() => {
+			options.__onSuspensionComplete(c._vnode, onSuspensionComplete);
+		});
+	}
+	else {
+		promise.then(onSuspensionComplete, onSuspensionComplete);
+	}
+
 };
 
 Suspense.prototype.render = function(props, state) {
