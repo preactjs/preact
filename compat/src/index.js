@@ -186,8 +186,9 @@ let Children = {
 	},
 	only(children) {
 		children = toChildArray(children);
-		if (children.length !== 1)
+		if (children.length !== 1) {
 			throw new Error('Children.only() expects only one child.');
+		}
 		return children[0];
 	},
 	toArray: toChildArray

@@ -129,8 +129,9 @@ export function diff(
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
 					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
-						if (newVNode._children[tmp])
+						if (newVNode._children[tmp]) {
 							newVNode._children[tmp]._parent = newVNode;
+						}
 					}
 					break outer;
 				}
