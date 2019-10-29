@@ -1,0 +1,16 @@
+{
+	"compilerOptions": {
+		"baseUrl": ".",
+		"checkJs": true,
+		"jsx": "react",
+		"lib": ["dom", "es5"],
+		"moduleResolution": "node",
+		"paths": {
+			"preact": ["."],
+			"preact/*": ["./*"]
+		},
+		"reactNamespace": "createElement",
+		"target": "es5"
+	},
+	"exclude": ["node_modules", "dist", "demo"]
+}
