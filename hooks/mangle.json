@@ -16,6 +16,7 @@
       "$_diff": "__b",
       "$_commit": "__c",
       "$_render": "__r",
+      "$_renderCallbacks": "__h",
       "$_suspensions": "__u",
       "$_hook": "__h",
       "$_catchError": "__e",
