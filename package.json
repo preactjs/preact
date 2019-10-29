@@ -76,6 +76,17 @@
     "useTabs": true,
     "tabWidth": 2
   },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
   "files": [
     "src",
     "dist",
@@ -133,6 +144,7 @@
     "eslint": "5.15.1",
     "eslint-config-developit": "^1.1.1",
     "eslint-plugin-react": "7.12.4",
+    "husky": "^3.0.9",
     "karma": "^3.0.0",
     "karma-babel-preprocessor": "^7.0.0",
     "karma-chai-sinon": "^0.1.5",
@@ -145,6 +157,7 @@
     "karma-source-map-support": "^1.3.0",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^3.0.5",
+    "lint-staged": "^9.4.2",
     "lodash": "^4.17.10",
     "microbundle": "^0.11.0",
     "mocha": "^5.2.0",
