@@ -1,5 +1,15 @@
-import { createElement as h, render, createRef, Component, Fragment } from 'preact';
-import { setupScratch, teardown, serializeHtml } from '../../../test/_util/helpers';
+import {
+	createElement as h,
+	render,
+	createRef,
+	Component,
+	Fragment
+} from 'preact';
+import {
+	setupScratch,
+	teardown,
+	serializeHtml
+} from '../../../test/_util/helpers';
 import { serializeVNode, initDebug } from '../../src/debug';
 import * as PropTypes from 'prop-types';
 
@@ -21,10 +31,9 @@ describe('debug', () => {
 	});
 
 	afterEach(() => {
-
 		/** @type {*} */
 		(console.error).restore();
-		(console.warn).restore();
+		console.warn.restore();
 		teardown(scratch);
 	});
 
@@ -109,9 +118,11 @@ describe('debug', () => {
 		expect(() => vnode.attributes).to.throw(/use vnode.props/);
 		expect(() => vnode.nodeName).to.throw(/use vnode.type/);
 		expect(() => vnode.children).to.throw(/use vnode.props.children/);
-		expect(() => vnode.attributes = {}).to.throw(/use vnode.props/);
-		expect(() => vnode.nodeName = 'test').to.throw(/use vnode.type/);
-		expect(() => vnode.children = [<div />]).to.throw(/use vnode.props.children/);
+		expect(() => (vnode.attributes = {})).to.throw(/use vnode.props/);
+		expect(() => (vnode.nodeName = 'test')).to.throw(/use vnode.type/);
+		expect(() => (vnode.children = [<div />])).to.throw(
+			/use vnode.props.children/
+		);
 	});
 
 	it('should warn when calling setState inside the constructor', () => {
@@ -238,20 +249,38 @@ describe('debug', () => {
 		const ListItem = props => <li>{props.children}</li>;
 
 		it('should print an error on duplicate keys with DOM nodes', () => {
-			render(<div><span key="a" /><span key="a" /></div>, scratch);
+			render(
+				<div>
+					<span key="a" />
+					<span key="a" />
+				</div>,
+				scratch
+			);
 			expect(console.error).to.be.calledOnce;
 		});
 
 		it('should allow distinct object keys', () => {
 			const A = { is: 'A' };
 			const B = { is: 'B' };
-			render(<div><span key={A} /><span key={B} /></div>, scratch);
+			render(
+				<div>
+					<span key={A} />
+					<span key={B} />
+				</div>,
+				scratch
+			);
 			expect(console.error).not.to.be.called;
 		});
 
 		it('should print an error for duplicate object keys', () => {
 			const A = { is: 'A' };
-			render(<div><span key={A} /><span key={A} /></div>, scratch);
+			render(
+				<div>
+					<span key={A} />
+					<span key={A} />
+				</div>,
+				scratch
+			);
 			expect(console.error).to.be.calledOnce;
 		});
 
@@ -297,7 +326,7 @@ describe('debug', () => {
 	});
 
 	describe('serializeVNode', () => {
-		it('should prefer a function component\'s displayName', () => {
+		it("should prefer a function component's displayName", () => {
 			function Foo() {
 				return <div />;
 			}
@@ -306,7 +335,7 @@ describe('debug', () => {
 			expect(serializeVNode(<Foo />)).to.equal('<Bar />');
 		});
 
-		it('should prefer a class component\'s displayName', () => {
+		it("should prefer a class component's displayName", () => {
 			class Bar extends Component {
 				render() {
 					return <div />;
@@ -333,28 +362,35 @@ describe('debug', () => {
 		});
 
 		it('should serialize props', () => {
-			expect(serializeVNode(<div class="foo" />)).to.equal('<div class="foo" />');
+			expect(serializeVNode(<div class="foo" />)).to.equal(
+				'<div class="foo" />'
+			);
 
 			let noop = () => {};
-			expect(serializeVNode(<div onClick={noop} />))
-				.to.equal('<div onClick="function noop() {}" />');
+			expect(serializeVNode(<div onClick={noop} />)).to.equal(
+				'<div onClick="function noop() {}" />'
+			);
 
 			function Foo(props) {
 				return props.foo;
 			}
 
-			expect(serializeVNode(<Foo foo={[1, 2, 3]} />))
-				.to.equal('<Foo foo="1,2,3" />');
+			expect(serializeVNode(<Foo foo={[1, 2, 3]} />)).to.equal(
+				'<Foo foo="1,2,3" />'
+			);
 
-			expect(serializeVNode(<div prop={Object.create(null)} />))
-				.to.equal('<div prop="[object Object]" />');
+			expect(serializeVNode(<div prop={Object.create(null)} />)).to.equal(
+				'<div prop="[object Object]" />'
+			);
 		});
 	});
 
 	describe('table markup', () => {
 		it('missing <tbody>/<thead>/<tfoot>/<table>', () => {
 			const Table = () => (
-				<tr><td>hi</td></tr>
+				<tr>
+					<td>hi</td>
+				</tr>
 			);
 			render(<Table />, scratch);
 			expect(console.error).to.be.calledOnce;
@@ -362,7 +398,11 @@ describe('debug', () => {
 
 		it('missing <table> with <thead>', () => {
 			const Table = () => (
-				<thead><tr><td>hi</td></tr></thead>
+				<thead>
+					<tr>
+						<td>hi</td>
+					</tr>
+				</thead>
 			);
 			render(<Table />, scratch);
 			expect(console.error).to.be.calledOnce;
@@ -370,7 +410,11 @@ describe('debug', () => {
 
 		it('missing <table> with <tbody>', () => {
 			const Table = () => (
-				<tbody><tr><td>hi</td></tr></tbody>
+				<tbody>
+					<tr>
+						<td>hi</td>
+					</tr>
+				</tbody>
 			);
 			render(<Table />, scratch);
 			expect(console.error).to.be.calledOnce;
@@ -378,7 +422,11 @@ describe('debug', () => {
 
 		it('missing <table> with <tfoot>', () => {
 			const Table = () => (
-				<tfoot><tr><td>hi</td></tr></tfoot>
+				<tfoot>
+					<tr>
+						<td>hi</td>
+					</tr>
+				</tfoot>
 			);
 			render(<Table />, scratch);
 			expect(console.error).to.be.calledOnce;
@@ -502,7 +550,7 @@ describe('debug', () => {
 	});
 
 	describe('PropTypes', () => {
-		it('should fail if props don\'t match prop-types', () => {
+		it("should fail if props don't match prop-types", () => {
 			function Foo(props) {
 				return <h1>{props.text}</h1>;
 			}
@@ -523,7 +571,9 @@ describe('debug', () => {
 			}
 
 			Baz.propTypes = {
-				unhappy: function alwaysThrows(obj, key) { if (obj[key] === 'signal') throw Error('got prop'); }
+				unhappy: function alwaysThrows(obj, key) {
+					if (obj[key] === 'signal') throw Error('got prop');
+				}
 			};
 
 			render(<Baz unhappy={'signal'} />, scratch);

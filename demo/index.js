@@ -24,7 +24,9 @@ import ReduxBug from './reduxUpdate';
 import SuspenseRouterBug from './suspense-router';
 import NestedSuspenseBug from './nested-suspense';
 
-let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(window.location.href);
+let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(
+	window.location.href
+);
 if (!isBenchmark) {
 	// eslint-disable-next-line no-console
 	console.log('Enabling devtools and debug');
@@ -48,11 +50,13 @@ class Home extends Component {
 class DevtoolsWarning extends Component {
 	onClick = () => {
 		window.location.reload();
-	}
+	};
 
 	render() {
 		return (
-			<button onClick={this.onClick}>Start Benchmark (disables devtools)</button>
+			<button onClick={this.onClick}>
+				Start Benchmark (disables devtools)
+			</button>
 		);
 	}
 }
@@ -63,26 +67,66 @@ class App extends Component {
 			<div class="app">
 				<header>
 					<nav>
-						<Link href="/" activeClassName="active">Home</Link>
-						<Link href="/reorder" activeClassName="active">Reorder</Link>
-						<Link href="/spiral" activeClassName="active">Spiral</Link>
-						<Link href="/pythagoras" activeClassName="active">Pythagoras</Link>
-						<Link href="/todo" activeClassName="active">ToDo</Link>
-						<Link href="/fragments" activeClassName="active">Fragments</Link>
-						<Link href="/key_bug" activeClassName="active">Key Bug</Link>
-						<Link href="/profiler" activeClassName="active">Profiler</Link>
-						<Link href="/context" activeClassName="active">Context</Link>
-						<Link href="/devtools" activeClassName="active">Devtools</Link>
-						<Link href="/empty-fragment" activeClassName="active">Empty Fragment</Link>
-						<Link href="/people" activeClassName="active">People Browser</Link>
-						<Link href="/state-order" activeClassName="active">State Order</Link>
-						<Link href="/styled-components" activeClassName="active">Styled Components</Link>
-						<Link href="/redux" activeClassName="active">Redux</Link>
-						<Link href="/suspense" activeClassName="active">Suspense / lazy</Link>
-						<Link href="/textfields" activeClassName="active">Textfields</Link>
-						<Link href="/reduxBug/1" activeClassName="active">Redux Bug</Link>
-						<Link href="/suspense-router" activeClassName="active">Suspense Router Bug</Link>
-						<Link href="/nested-suspense" activeClassName="active">Nested Suspense Bug</Link>
+						<Link href="/" activeClassName="active">
+							Home
+						</Link>
+						<Link href="/reorder" activeClassName="active">
+							Reorder
+						</Link>
+						<Link href="/spiral" activeClassName="active">
+							Spiral
+						</Link>
+						<Link href="/pythagoras" activeClassName="active">
+							Pythagoras
+						</Link>
+						<Link href="/todo" activeClassName="active">
+							ToDo
+						</Link>
+						<Link href="/fragments" activeClassName="active">
+							Fragments
+						</Link>
+						<Link href="/key_bug" activeClassName="active">
+							Key Bug
+						</Link>
+						<Link href="/profiler" activeClassName="active">
+							Profiler
+						</Link>
+						<Link href="/context" activeClassName="active">
+							Context
+						</Link>
+						<Link href="/devtools" activeClassName="active">
+							Devtools
+						</Link>
+						<Link href="/empty-fragment" activeClassName="active">
+							Empty Fragment
+						</Link>
+						<Link href="/people" activeClassName="active">
+							People Browser
+						</Link>
+						<Link href="/state-order" activeClassName="active">
+							State Order
+						</Link>
+						<Link href="/styled-components" activeClassName="active">
+							Styled Components
+						</Link>
+						<Link href="/redux" activeClassName="active">
+							Redux
+						</Link>
+						<Link href="/suspense" activeClassName="active">
+							Suspense / lazy
+						</Link>
+						<Link href="/textfields" activeClassName="active">
+							Textfields
+						</Link>
+						<Link href="/reduxBug/1" activeClassName="active">
+							Redux Bug
+						</Link>
+						<Link href="/suspense-router" activeClassName="active">
+							Suspense Router Bug
+						</Link>
+						<Link href="/nested-suspense" activeClassName="active">
+							Nested Suspense Bug
+						</Link>
 					</nav>
 				</header>
 				<main>
@@ -91,16 +135,10 @@ class App extends Component {
 						<StateOrderBug path="/state-order" />
 						<Reorder path="/reorder" />
 						<div path="/spiral">
-							{!isBenchmark
-								? <DevtoolsWarning />
-								: <Spiral />
-							}
+							{!isBenchmark ? <DevtoolsWarning /> : <Spiral />}
 						</div>
 						<div path="/pythagoras">
-							{!isBenchmark
-								? <DevtoolsWarning />
-								: <Pythagoras />
-							}
+							{!isBenchmark ? <DevtoolsWarning /> : <Pythagoras />}
 						</div>
 						<Todo path="/todo" />
 						<Fragments path="/fragments" />
@@ -132,8 +170,8 @@ function EmptyFragment() {
 // document.body.firstChild.setAttribute('is-ssr', 'true');
 
 installLogger(
-	String(localStorage.LOG)==='true' || location.href.match(/logger/),
-	String(localStorage.CONSOLE)==='true' || location.href.match(/console/)
+	String(localStorage.LOG) === 'true' || location.href.match(/logger/),
+	String(localStorage.CONSOLE) === 'true' || location.href.match(/console/)
 );
 
 render(<App />, document.body);

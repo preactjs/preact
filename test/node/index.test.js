@@ -2,7 +2,6 @@ import { expect } from 'chai';
 import * as preact from '../../src/index';
 
 describe('build artifact', () => {
-
 	// #1075 Check that the build artifact has the correct exports
 	it('should have exported properties', () => {
 		expect(preact).to.be.an('object');

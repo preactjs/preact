@@ -9,13 +9,16 @@ import React, {
 	unstable_batchedUpdates
 } from '../../src';
 import { createElement as preactH } from 'preact';
-import { setupScratch, teardown, createEvent } from '../../../test/_util/helpers';
+import {
+	setupScratch,
+	teardown,
+	createEvent
+} from '../../../test/_util/helpers';
 
 let ce = type => document.createElement(type);
 let text = text => document.createTextNode(text);
 
 describe('preact-compat', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch, proto;
 
@@ -25,7 +28,6 @@ describe('preact-compat', () => {
 		sinon.spy(proto, 'addEventListener');
 		sinon.spy(proto, 'removeEventListener');
 	});
-
 
 	afterEach(() => {
 		proto.addEventListener.restore();
@@ -93,35 +95,55 @@ describe('preact-compat', () => {
 		});
 
 		it('should support onAnimationEnd', () => {
-			const func = () => { };
+			const func = () => {};
 			render(<div onAnimationEnd={func} />, scratch);
 
-			expect(proto.addEventListener).to.have.been.calledOnce
-				.and.to.have.been.calledWithExactly('animationend', sinon.match.func, false);
+			expect(
+				proto.addEventListener
+			).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
+				'animationend',
+				sinon.match.func,
+				false
+			);
 
 			expect(scratch.firstChild._listeners).to.deep.equal({
 				animationend: func
 			});
 
 			render(<div />, scratch);
-			expect(proto.removeEventListener).to.have.been.calledOnce
-				.and.to.have.been.calledWithExactly('animationend', sinon.match.func, false);
+			expect(
+				proto.removeEventListener
+			).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
+				'animationend',
+				sinon.match.func,
+				false
+			);
 		});
 
 		it('should support onTransitionEnd', () => {
-			const func = () => { };
+			const func = () => {};
 			render(<div onTransitionEnd={func} />, scratch);
 
-			expect(proto.addEventListener).to.have.been.calledOnce
-				.and.to.have.been.calledWithExactly('transitionend', sinon.match.func, false);
+			expect(
+				proto.addEventListener
+			).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
+				'transitionend',
+				sinon.match.func,
+				false
+			);
 
 			expect(scratch.firstChild._listeners).to.deep.equal({
 				transitionend: func
 			});
 
 			render(<div />, scratch);
-			expect(proto.removeEventListener).to.have.been.calledOnce
-				.and.to.have.been.calledWithExactly('transitionend', sinon.match.func, false);
+			expect(
+				proto.removeEventListener
+			).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
+				'transitionend',
+				sinon.match.func,
+				false
+			);
 		});
 
 		it('should support defaultValue', () => {
@@ -185,52 +207,77 @@ describe('preact-compat', () => {
 		});
 
 		it('should normalize vnodes', () => {
-			let vnode = <div a="b"><a>t</a></div>;
+			let vnode = (
+				<div a="b">
+					<a>t</a>
+				</div>
+			);
 			let $$typeof = 0xeac7;
 			try {
 				// eslint-disable-next-line
-				if (Function.prototype.toString.call(eval('Sym' + 'bol.for')).match(/\[native code\]/)) {
+				if (
+					Function.prototype.toString
+						.call(eval('Sym' + 'bol.for'))
+						.match(/\[native code\]/)
+				) {
 					// eslint-disable-next-line
 					$$typeof = eval('Sym' + 'bol.for("react.element")');
 				}
-			}
-			catch (e) { }
+			} catch (e) {}
 			expect(vnode).to.have.property('$$typeof', $$typeof);
 			expect(vnode).to.have.property('type', 'div');
-			expect(vnode).to.have.property('props').that.is.an('object');
+			expect(vnode)
+				.to.have.property('props')
+				.that.is.an('object');
 			expect(vnode.props).to.have.property('children');
 			expect(vnode.props.children).to.have.property('$$typeof', $$typeof);
 			expect(vnode.props.children).to.have.property('type', 'a');
-			expect(vnode.props.children).to.have.property('props').that.is.an('object');
+			expect(vnode.props.children)
+				.to.have.property('props')
+				.that.is.an('object');
 			expect(vnode.props.children.props).to.eql({ children: 't' });
 		});
 
 		it('should normalize onChange', () => {
-			let props = { onChange() { } };
+			let props = { onChange() {} };
 
 			function expectToBeNormalized(vnode, desc) {
 				expect(vnode, desc)
 					.to.have.property('props')
 					.with.all.keys(['oninput'].concat(vnode.props.type ? 'type' : []))
-					.and.property('oninput').that.is.a('function');
+					.and.property('oninput')
+					.that.is.a('function');
 			}
 
 			function expectToBeUnmodified(vnode, desc) {
-				expect(vnode, desc).to.have.property('props').eql({
-					...props,
-					...(vnode.props.type ? { type: vnode.props.type } : {})
-				});
+				expect(vnode, desc)
+					.to.have.property('props')
+					.eql({
+						...props,
+						...(vnode.props.type ? { type: vnode.props.type } : {})
+					});
 			}
 
 			expectToBeUnmodified(<div {...props} />, '<div>');
-			expectToBeUnmodified(<input {...props} type="radio" />, '<input type="radio">');
-			expectToBeUnmodified(<input {...props} type="checkbox" />, '<input type="checkbox">');
-			expectToBeUnmodified(<input {...props} type="file" />, '<input type="file">');
+			expectToBeUnmodified(
+				<input {...props} type="radio" />,
+				'<input type="radio">'
+			);
+			expectToBeUnmodified(
+				<input {...props} type="checkbox" />,
+				'<input type="checkbox">'
+			);
+			expectToBeUnmodified(
+				<input {...props} type="file" />,
+				'<input type="file">'
+			);
 
 			expectToBeNormalized(<textarea {...props} />, '<textarea>');
 			expectToBeNormalized(<input {...props} />, '<input>');
-			expectToBeNormalized(<input {...props} type="text" />, '<input type="text">');
-
+			expectToBeNormalized(
+				<input {...props} type="text" />,
+				'<input type="text">'
+			);
 		});
 
 		it('should normalize beforeinput event listener', () => {
@@ -252,7 +299,11 @@ describe('preact-compat', () => {
 
 	describe('cloneElement', () => {
 		it('should clone elements', () => {
-			let element = <foo a="b" c="d">a<span>b</span></foo>;
+			let element = (
+				<foo a="b" c="d">
+					a<span>b</span>
+				</foo>
+			);
 			expect(cloneElement(element)).to.eql(element);
 		});
 
@@ -264,7 +315,11 @@ describe('preact-compat', () => {
 		});
 
 		it('children take precedence over props.children', () => {
-			let element = <foo children={<span>c</span>}><div>b</div></foo>;
+			let element = (
+				<foo children={<span>c</span>}>
+					<div>b</div>
+				</foo>
+			);
 			let clone = cloneElement(element);
 			expect(clone).to.eql(element);
 			expect(clone.props.children.type).to.eql('div');
@@ -326,18 +381,16 @@ describe('preact-compat', () => {
 		it('should return null if given null', () => {
 			expect(findDOMNode(null)).to.be.null;
 		}),
-
-		it('should return a regular DOM Element if given a regular DOM Element', () => {
-			let scratch = document.createElement('div');
-			expect(findDOMNode(scratch)).to.equalNode(scratch);
-		}),
-
-		// NOTE: React.render() returning false or null has the component pointing
-		// 			to no DOM Node, in contrast, Preact always render an empty Text DOM Node.
-		it('should return null if render returns false', () => {
-			const helper = React.render(<Helper something={false} />, scratch);
-			expect(findDOMNode(helper)).to.be.null;
-		});
+			it('should return a regular DOM Element if given a regular DOM Element', () => {
+				let scratch = document.createElement('div');
+				expect(findDOMNode(scratch)).to.equalNode(scratch);
+			}),
+			// NOTE: React.render() returning false or null has the component pointing
+			// 			to no DOM Node, in contrast, Preact always render an empty Text DOM Node.
+			it('should return null if render returns false', () => {
+				const helper = React.render(<Helper something={false} />, scratch);
+				expect(findDOMNode(helper)).to.be.null;
+			});
 
 		// NOTE: React.render() returning false or null has the component pointing
 		// 			to no DOM Node, in contrast, Preact always render an empty Text DOM Node.
@@ -409,7 +462,11 @@ describe('preact-compat', () => {
 
 	it('should normalize class+className even on components', () => {
 		function Foo(props) {
-			return <div class={props.class} className={props.className}>foo</div>;
+			return (
+				<div class={props.class} className={props.className}>
+					foo
+				</div>
+			);
 		}
 		render(<Foo class="foo" />, scratch);
 		expect(scratch.firstChild.className).to.equal('foo');

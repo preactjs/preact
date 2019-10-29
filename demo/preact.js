@@ -1,11 +1,16 @@
-import { options, createElement, cloneElement, Component as CevicheComponent, render } from 'preact';
+import {
+	options,
+	createElement,
+	cloneElement,
+	Component as CevicheComponent,
+	render
+} from 'preact';
 
 options.vnode = vnode => {
 	vnode.nodeName = vnode.type;
 	vnode.attributes = vnode.props;
 	vnode.children = vnode._children || [].concat(vnode.props.children || []);
 };
-
 
 function asArray(arr) {
 	return Array.isArray(arr) ? arr : [arr];
@@ -21,7 +26,7 @@ function normalize(obj) {
 	return obj;
 }
 
-export function Component (props, context) {
+export function Component(props, context) {
 	CevicheComponent.call(this, props, context);
 	const render = this.render;
 	this.render = function(props, state, context) {

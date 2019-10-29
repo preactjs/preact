@@ -5,7 +5,6 @@ import { useDebugValue, useState } from '../../src';
 /** @jsx h */
 
 describe('useDebugValue', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -33,7 +32,7 @@ describe('useDebugValue', () => {
 	});
 
 	it('should call options hook with value', () => {
-		let spy = options.useDebugValue = sinon.spy();
+		let spy = (options.useDebugValue = sinon.spy());
 
 		function useFoo() {
 			useDebugValue('foo');
@@ -52,7 +51,7 @@ describe('useDebugValue', () => {
 	});
 
 	it('should apply optional formatter', () => {
-		let spy = options.useDebugValue = sinon.spy();
+		let spy = (options.useDebugValue = sinon.spy());
 
 		function useFoo() {
 			useDebugValue('foo', x => x + 'bar');

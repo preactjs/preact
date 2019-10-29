@@ -1,5 +1,12 @@
 // eslint-disable-next-line no-unused-vars
-import { createElement, Component, memo, Fragment, Suspense, lazy } from "react";
+import {
+	createElement,
+	Component,
+	memo,
+	Fragment,
+	Suspense,
+	lazy
+} from 'react';
 
 function LazyComp() {
 	return <div>I'm (fake) lazy loaded</div>;
@@ -21,8 +28,7 @@ function createSuspension(name, timeout, error) {
 						done = true;
 						if (error) {
 							rej(error);
-						}
-						else {
+						} else {
 							res();
 						}
 					}, timeout);
@@ -76,7 +82,7 @@ export default class DevtoolsDemo extends Component {
 				</Suspense>
 				<h1>Suspense</h1>
 				<div>
-					<button onClick={this.onRerun} >Rerun</button>
+					<button onClick={this.onRerun}>Rerun</button>
 				</div>
 				<Suspense fallback={<div>Fallback 1</div>}>
 					<CustomSuspense {...state.s1} />

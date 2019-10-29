@@ -15,7 +15,6 @@ function createEvent(name) {
 
 /** @jsx h */
 describe('act', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -77,7 +76,7 @@ describe('act', () => {
 			const [count, setCount] = useState(0);
 			useEffect(() => {
 				spy();
-				if (count===1) {
+				if (count === 1) {
 					setCount(() => 2);
 				}
 			}, [count]);
@@ -112,10 +111,12 @@ describe('act', () => {
 		function StateContainer() {
 			const [count, setCount] = useState(0);
 			useEffect(() => spy());
-			return (<div>
-				<p>Count: {count}</p>
-				<button onClick={() => setCount(c => c + 11)} />
-			</div>);
+			return (
+				<div>
+					<p>Count: {count}</p>
+					<button onClick={() => setCount(c => c + 11)} />
+				</div>
+			);
 		}
 
 		render(<StateContainer />, scratch);

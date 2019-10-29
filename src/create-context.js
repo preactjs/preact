@@ -26,7 +26,7 @@ export function createContext(defaultValue) {
 						});
 					}
 				};
-				this.sub = (c) => {
+				this.sub = c => {
 					subs.push(c);
 					let old = c.componentWillUnmount;
 					c.componentWillUnmount = () => {

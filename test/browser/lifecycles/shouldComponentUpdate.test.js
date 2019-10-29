@@ -5,7 +5,6 @@ import { setupScratch, teardown } from '../../_util/helpers';
 /** @jsx createElement */
 
 describe('Lifecycle methods', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -142,7 +141,7 @@ describe('Lifecycle methods', () => {
 				}
 
 				shouldComponentUpdate(_, nextState) {
-					return this.state!==nextState;
+					return this.state !== nextState;
 				}
 
 				render() {
@@ -195,7 +194,7 @@ describe('Lifecycle methods', () => {
 			let updateInner;
 			class Inner extends Component {
 				shouldComponentUpdate() {
-					return i===0;
+					return i === 0;
 				}
 				render() {
 					updateInner = () => this.forceUpdate();
@@ -206,7 +205,7 @@ describe('Lifecycle methods', () => {
 			let updateOuter;
 			class Outer extends Component {
 				shouldComponentUpdate() {
-					return i===0;
+					return i === 0;
 				}
 				render() {
 					updateOuter = () => this.forceUpdate();
@@ -236,7 +235,6 @@ describe('Lifecycle methods', () => {
 		});
 
 		it('should be passed next props and state', () => {
-
 			/** @type {() => void} */
 			let updateState;
 
@@ -251,9 +249,10 @@ describe('Lifecycle methods', () => {
 					this.state = {
 						value: 0
 					};
-					updateState = () => this.setState({
-						value: this.state.value + 1
-					});
+					updateState = () =>
+						this.setState({
+							value: this.state.value + 1
+						});
 				}
 				static getDerivedStateFromProps(props, state) {
 					// NOTE: Don't do this in real production code!
@@ -396,7 +395,7 @@ describe('Lifecycle methods', () => {
 					super(props);
 					this.state = { showMe: false };
 					updateChild = () => {
-						this.setState({ showMe: display = !display });
+						this.setState({ showMe: (display = !display) });
 					};
 				}
 				render() {
@@ -466,7 +465,7 @@ describe('Lifecycle methods', () => {
 					super(props);
 					this.state = { showMe: false };
 					updateChild = () => {
-						this.setState({ showMe: display = !display });
+						this.setState({ showMe: (display = !display) });
 					};
 				}
 				render() {
@@ -519,8 +518,12 @@ describe('Lifecycle methods', () => {
 			let hideThree, incrementThree;
 
 			class One extends Component {
-				shouldComponentUpdate() { return false; }
-				render(p) { return p.children; }
+				shouldComponentUpdate() {
+					return false;
+				}
+				render(p) {
+					return p.children;
+				}
 			}
 
 			class Two extends Component {
@@ -530,7 +533,9 @@ describe('Lifecycle methods', () => {
 					hideThree = () => this.setState(s => ({ hideMe: !s.hideMe }));
 				}
 
-				shouldComponentUpdate(nextProps, nextState) { return this.state.hideMe !== nextState.hideMe; }
+				shouldComponentUpdate(nextProps, nextState) {
+					return this.state.hideMe !== nextState.hideMe;
+				}
 
 				render(p, { hideMe }) {
 					return hideMe ? <Fragment /> : p.children;
@@ -541,13 +546,23 @@ describe('Lifecycle methods', () => {
 				constructor(props) {
 					super(props);
 					this.state = { counter: 1 };
-					incrementThree = () => this.setState(s => ({ counter: s.counter + 1 }));
+					incrementThree = () =>
+						this.setState(s => ({ counter: s.counter + 1 }));
 				}
 
-				render(p, { counter }) { return <span>{counter}</span>; }
+				render(p, { counter }) {
+					return <span>{counter}</span>;
+				}
 			}
 
-			render(<One><Two><Three /></Two></One>, scratch);
+			render(
+				<One>
+					<Two>
+						<Three />
+					</Two>
+				</One>,
+				scratch
+			);
 			expect(scratch.innerHTML).to.equal('<span>1</span>');
 
 			hideThree();
@@ -584,7 +599,7 @@ describe('Lifecycle methods', () => {
 					super(props);
 					this.state = { showMe: false };
 					updateChild = () => {
-						this.setState({ showMe: display = !display });
+						this.setState({ showMe: (display = !display) });
 					};
 				}
 				render() {

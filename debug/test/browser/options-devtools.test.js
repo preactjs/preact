@@ -15,7 +15,6 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 /** @jsx createElement */
 
 describe('devtools options', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 

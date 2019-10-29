@@ -13,13 +13,13 @@ module.exports = {
 	},
 	resolve: {
 		alias: {
-			["preact/debug"]: path.join(__dirname, '..', 'debug'),
-			["preact/hooks"]: path.join(__dirname, '..', 'hooks', 'src'),
+			['preact/debug']: path.join(__dirname, '..', 'debug'),
+			['preact/hooks']: path.join(__dirname, '..', 'hooks', 'src'),
 			preact: preact,
 			react: compat,
 			'react-dom': compat
 		},
-		extensions: [ '.tsx', '.ts', '.js' ]
+		extensions: ['.tsx', '.ts', '.js']
 	},
 	module: {
 		rules: [
@@ -30,20 +30,32 @@ module.exports = {
 					sourceMap: true,
 					presets: [
 						[require.resolve('@babel/preset-typescript'), { jsxPragma: 'h' }],
-						[require.resolve('@babel/preset-env'), {
-							targets: {
-								browsers: ['last 2 versions', 'IE >= 9']
-							},
-							modules: false,
-							loose: true
-						}],
-						[require.resolve('@babel/preset-react')],
+						[
+							require.resolve('@babel/preset-env'),
+							{
+								targets: {
+									browsers: ['last 2 versions', 'IE >= 9']
+								},
+								modules: false,
+								loose: true
+							}
+						],
+						[require.resolve('@babel/preset-react')]
 					],
 					plugins: [
 						[require.resolve('@babel/plugin-transform-runtime')],
-						[require.resolve('@babel/plugin-transform-react-jsx'), { pragma: 'h', pragmaFrag: 'Fragment' }],
-						[require.resolve('@babel/plugin-proposal-decorators'), { legacy: true }],
-						[require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }]
+						[
+							require.resolve('@babel/plugin-transform-react-jsx'),
+							{ pragma: 'h', pragmaFrag: 'Fragment' }
+						],
+						[
+							require.resolve('@babel/plugin-proposal-decorators'),
+							{ legacy: true }
+						],
+						[
+							require.resolve('@babel/plugin-proposal-class-properties'),
+							{ loose: true }
+						]
 					]
 				}
 			},
@@ -53,30 +65,34 @@ module.exports = {
 				options: {
 					sourceMap: true,
 					presets: [
-						[require.resolve('@babel/preset-env'), {
-							targets: {
-								browsers: ['last 2 versions', 'IE >= 9']
-							},
-							modules: false,
-							loose: true
-						}],
-						[require.resolve('@babel/preset-react')],
+						[
+							require.resolve('@babel/preset-env'),
+							{
+								targets: {
+									browsers: ['last 2 versions', 'IE >= 9']
+								},
+								modules: false,
+								loose: true
+							}
+						],
+						[require.resolve('@babel/preset-react')]
 					],
 					plugins: [
-						[require.resolve('@babel/plugin-transform-react-jsx'), { pragma: 'createElement', pragmaFrag: 'Fragment' }],
+						[
+							require.resolve('@babel/plugin-transform-react-jsx'),
+							{ pragma: 'createElement', pragmaFrag: 'Fragment' }
+						],
 						[require.resolve('@babel/plugin-proposal-class-properties')],
-						[require.resolve('@babel/plugin-transform-react-constant-elements')],
-						[require.resolve('@babel/plugin-syntax-dynamic-import')],
+						[
+							require.resolve('@babel/plugin-transform-react-constant-elements')
+						],
+						[require.resolve('@babel/plugin-syntax-dynamic-import')]
 					]
 				}
 			},
 			{
 				test: /\.s?css$/,
-				use: [
-					'style-loader',
-					'css-loader',
-					'sass-loader'
-				]
+				use: ['style-loader', 'css-loader', 'sass-loader']
 			}
 		]
 	},
@@ -89,7 +105,5 @@ module.exports = {
 	devServer: {
 		historyApiFallback: true
 	},
-	plugins: [
-		new HtmlWebpackPlugin()
-	]
+	plugins: [new HtmlWebpackPlugin()]
 };
