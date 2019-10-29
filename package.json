@@ -70,6 +70,12 @@
     "*.ts",
     "dist"
   ],
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "none",
+    "useTabs": true,
+    "tabWidth": 2
+  },
   "files": [
     "src",
     "dist",
@@ -143,6 +149,7 @@
     "microbundle": "^0.11.0",
     "mocha": "^5.2.0",
     "npm-run-all": "^4.0.0",
+    "prettier": "^1.18.2",
     "prop-types": "^15.7.2",
     "sinon": "^6.1.3",
     "sinon-chai": "^3.0.0",
