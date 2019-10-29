@@ -380,17 +380,19 @@ describe('preact-compat', () => {
 
 		it('should return null if given null', () => {
 			expect(findDOMNode(null)).to.be.null;
-		}),
-			it('should return a regular DOM Element if given a regular DOM Element', () => {
-				let scratch = document.createElement('div');
-				expect(findDOMNode(scratch)).to.equalNode(scratch);
-			}),
-			// NOTE: React.render() returning false or null has the component pointing
-			// 			to no DOM Node, in contrast, Preact always render an empty Text DOM Node.
-			it('should return null if render returns false', () => {
-				const helper = React.render(<Helper something={false} />, scratch);
-				expect(findDOMNode(helper)).to.be.null;
-			});
+		});
+
+		it('should return a regular DOM Element if given a regular DOM Element', () => {
+			let scratch = document.createElement('div');
+			expect(findDOMNode(scratch)).to.equalNode(scratch);
+		});
+
+		// NOTE: React.render() returning false or null has the component pointing
+		// 			to no DOM Node, in contrast, Preact always render an empty Text DOM Node.
+		it('should return null if render returns false', () => {
+			const helper = React.render(<Helper something={false} />, scratch);
+			expect(findDOMNode(helper)).to.be.null;
+		});
 
 		// NOTE: React.render() returning false or null has the component pointing
 		// 			to no DOM Node, in contrast, Preact always render an empty Text DOM Node.
