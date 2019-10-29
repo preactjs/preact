@@ -31,6 +31,7 @@
       "$_component": "__c",
       "$__html": "__html",
       "$_parent": "__p",
+      "$_parentDom": "__P",
       "$_pendingError": "__E",
       "$_processingException": "__p",
       "$_root": "__p",
