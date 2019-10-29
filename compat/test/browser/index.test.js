@@ -217,7 +217,7 @@ describe('preact-compat', () => {
 				// eslint-disable-next-line
 				if (
 					Function.prototype.toString
-						.call(eval('Sym' + 'bol.for'))
+						.call(eval('Symbol.for'))
 						.match(/\[native code\]/)
 				) {
 					// eslint-disable-next-line
