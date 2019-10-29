@@ -36,10 +36,11 @@
     "lint": "eslint src test debug compat hooks test-utils"
   },
   "eslintConfig": {
-    "extends": "developit",
+    "extends": ["developit", "prettier"],
     "settings": {
       "react": {
-        "pragma": "createElement"
+        "pragma": "createElement",
+        "version": "latest"
       }
     },
     "rules": {
@@ -57,6 +58,7 @@
       "prefer-spread": 0,
       "no-cond-assign": 0,
       "react/jsx-no-bind": 0,
+      "react/no-danger": "off",
       "react/prefer-stateless-function": 0,
       "react/sort-comp": 0,
       "jest/valid-expect": 0,
@@ -143,6 +145,7 @@
     "diff": "^3.5.0",
     "eslint": "5.15.1",
     "eslint-config-developit": "^1.1.1",
+    "eslint-config-prettier": "^6.5.0",
     "eslint-plugin-react": "7.12.4",
     "husky": "^3.0.9",
     "karma": "^3.0.0",
