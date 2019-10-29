@@ -86,6 +86,7 @@ Preact supports modern browsers and IE9+:
 - [**Journalize**](https://preact-journal.herokuapp.com/) 14k offline-capable journaling PWA using preact. _([Github project](https://github.com/jpodwys/preact-journal))_.
 - [**Proxx**](https://proxx.app) A game of proximity by GoogleChromeLabs using preact. _([Github project](https://github.com/GoogleChromeLabs/proxx))_.
 - [**Web Maker**](https://webmaker.app) An offline and blazing fast frontend playground built using Preact. _([Github project](https://github.com/chinchang/web-maker))_.
+- [**Intergram**](https://www.intergram.xyz) A live chat widget linked to your Telegram messenger built using Preact. _([Github project](https://github.com/idoco/intergram))_.
 
 
 #### Runnable Examples
