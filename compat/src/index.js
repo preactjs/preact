@@ -390,11 +390,12 @@ function memo(c, comparer) {
 		if (!updateRef && ref) {
 			ref.call ? ref(null) : (ref.current = null);
 		}
-		return (
-			(!comparer
-				? shallowDiffers(this.props, nextProps)
-				: !comparer(this.props, nextProps)) || !updateRef
-		);
+
+		if (!comparer) {
+			return shallowDiffers(this.props, nextProps);
+		} else {
+			return !comparer(this.props, nextProps) || !updateRef;
+		}
 	}
 
 	function Memoed(props) {
