@@ -5,7 +5,8 @@ import { Suspense } from './suspense';
 options.__onSuspensionComplete = (vnode, cb) => {
 	if (vnode._parent._component && vnode._parent._component.__modifySuspense) {
 		vnode._parent._component.__modifySuspense(vnode, cb);
-	} else {
+	}
+	else {
 		cb();
 	}
 };
@@ -32,7 +33,8 @@ SuspenseList.prototype.__modifySuspense = function(vnode, cb) {
 			}
 			thrill.cb();
 		});
-	} else {
+	}
+	else {
 		this._thrillers.find(thrill => thrill.vnode === vnode).cb = cb;
 	}
 };
