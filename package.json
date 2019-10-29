@@ -39,8 +39,7 @@
     "extends": ["developit", "prettier"],
     "settings": {
       "react": {
-        "pragma": "createElement",
-        "version": "latest"
+        "pragma": "createElement"
       }
     },
     "rules": {
