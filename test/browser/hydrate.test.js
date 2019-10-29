@@ -243,9 +243,8 @@ describe('hydrate()', () => {
 			return div.firstChild;
 		};
 
-		const DOMElement = html`
-			<div><a foo="bar"></a></div>
-		`;
+		// prettier-ignore
+		const DOMElement = html`<div><a foo="bar"></a></div>`;
 		scratch.appendChild(DOMElement);
 
 		const preactElement = (
