@@ -1,21 +1,16 @@
-import {
-	createElement as h,
-	render,
-	createRef,
-	Component,
-	Fragment
-} from 'preact';
+import { createElement, render, createRef, Component, Fragment } from 'preact';
 import {
 	setupScratch,
 	teardown,
 	serializeHtml
 } from '../../../test/_util/helpers';
-import { serializeVNode, initDebug } from '../../src/debug';
+import { serializeVNode, initDebug } from '../../src/debug'; // TODO: Can we somehow convert this? Perhaps move seralizeVNode tests into their own file?
 import * as PropTypes from 'prop-types';
 
 initDebug();
 
-/** @jsx h */
+const h = createElement;
+/** @jsx createElement */
 
 describe('debug', () => {
 	let scratch;

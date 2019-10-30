@@ -10,7 +10,7 @@ import {
 import { createElement, render, Component } from 'preact';
 import { useState } from 'preact/hooks';
 import { setupRerender } from 'preact/test-utils';
-import { initDebug } from '../../src/debug';
+import 'preact/debug';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 /** @jsx createElement */
@@ -24,10 +24,6 @@ describe('debug options', () => {
 
 	/** @type {(count: number) => void} */
 	let setCount;
-
-	before(() => {
-		initDebug();
-	});
 
 	beforeEach(() => {
 		scratch = setupScratch();

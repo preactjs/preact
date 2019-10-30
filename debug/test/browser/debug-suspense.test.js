@@ -1,5 +1,5 @@
 import { createElement, render, lazy, Suspense } from 'preact/compat';
-import { initDebug } from '../../src/debug';
+import 'preact/debug';
 import { setupRerender } from 'preact/test-utils';
 import {
 	setupScratch,
@@ -8,8 +8,6 @@ import {
 } from '../../../test/_util/helpers';
 
 /** @jsx createElement */
-
-initDebug();
 
 describe('debug with suspense', () => {
 	let scratch;
