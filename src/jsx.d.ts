@@ -505,6 +505,7 @@ export namespace JSXInternal {
 		allowFullScreen?: boolean;
 		allowTransparency?: boolean;
 		alt?: string;
+		as?: string;
 		async?: boolean;
 		autocomplete?: string;
 		autoComplete?: string;
