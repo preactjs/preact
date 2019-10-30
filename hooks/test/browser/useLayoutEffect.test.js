@@ -7,7 +7,6 @@ import { useLayoutEffect, useRef, useState } from '../../src';
 /** @jsx h */
 
 describe('useLayoutEffect', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -20,13 +19,13 @@ describe('useLayoutEffect', () => {
 	});
 
 	// Layout effects fire synchronously
-	const scheduleEffectAssert = assertFn => new Promise(resolve => {
-		assertFn();
-		resolve();
-	});
+	const scheduleEffectAssert = assertFn =>
+		new Promise(resolve => {
+			assertFn();
+			resolve();
+		});
 
 	useEffectAssertions(useLayoutEffect, scheduleEffectAssert);
-
 
 	it('calls the effect immediately after render', () => {
 		const cleanupFunction = sinon.spy();
@@ -86,14 +85,21 @@ describe('useLayoutEffect', () => {
 		};
 		render(<App i={0} />, scratch);
 		render(<App i={2} />, scratch);
-		expect(executionOrder).to.deep.equal(['cleanup1', 'cleanup2', 'action1', 'action2']);
+		expect(executionOrder).to.deep.equal([
+			'cleanup1',
+			'cleanup2',
+			'action1',
+			'action2'
+		]);
 	});
 
 	it('should correctly display DOM', () => {
 		function AutoResizeTextareaLayoutEffect(props) {
 			const ref = useRef(null);
 			useLayoutEffect(() => {
-				expect(scratch.innerHTML).to.equal(`<div class="${props.value}"><p>${props.value}</p><textarea></textarea></div>`);
+				expect(scratch.innerHTML).to.equal(
+					`<div class="${props.value}"><p>${props.value}</p><textarea></textarea></div>`
+				);
 				expect(ref.current.isConnected).to.equal(true);
 			});
 			return (
@@ -121,7 +127,10 @@ describe('useLayoutEffect', () => {
 		let layoutEffect = sinon.spy(() => {
 			expect(ref.current.isConnected).to.equal(true, 'ref.current.isConnected');
 			expect(ref.current.parentNode).to.not.be.undefined;
-			expect(ref.current.parentNode.isConnected).to.equal(true, 'ref.current.parentNode.isConnected');
+			expect(ref.current.parentNode.isConnected).to.equal(
+				true,
+				'ref.current.parentNode.isConnected'
+			);
 		});
 
 		function Inner() {
@@ -136,7 +145,11 @@ describe('useLayoutEffect', () => {
 		}
 
 		function Outer() {
-			return <div><Inner /></div>;
+			return (
+				<div>
+					<Inner />
+				</div>
+			);
 		}
 
 		render(<Outer />, scratch);
@@ -184,9 +197,7 @@ describe('useLayoutEffect', () => {
 
 			return (
 				<Fragment>
-					<button onClick={onClick}>
-						next
-					</button>
+					<button onClick={onClick}>next</button>
 
 					{current === '/foo' && <Foo />}
 					{current === '/bar' && <Bar />}
@@ -195,13 +206,25 @@ describe('useLayoutEffect', () => {
 		}
 
 		render(<App />, scratch);
-		expect(calledFoo).to.equal('<button>next</button><div><p>Foo</p></div>', 'calledFoo');
+		expect(calledFoo).to.equal(
+			'<button>next</button><div><p>Foo</p></div>',
+			'calledFoo'
+		);
 
 		act(() => onClick());
-		expect(calledFooCleanup).to.equal('<button>next</button><div><p>Bar</p></div>', 'calledFooCleanup');
-		expect(calledBar).to.equal('<button>next</button><div><p>Bar</p></div>', 'calledBar');
+		expect(calledFooCleanup).to.equal(
+			'<button>next</button><div><p>Bar</p></div>',
+			'calledFooCleanup'
+		);
+		expect(calledBar).to.equal(
+			'<button>next</button><div><p>Bar</p></div>',
+			'calledBar'
+		);
 
 		act(() => onClick());
-		expect(calledBarCleanup).to.equal('<button>next</button><div><p>Foo</p></div>', 'calledBarCleanup');
+		expect(calledBarCleanup).to.equal(
+			'<button>next</button><div><p>Foo</p></div>',
+			'calledBarCleanup'
+		);
 	});
 });

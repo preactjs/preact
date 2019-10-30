@@ -1,7 +1,7 @@
 export = preact;
 export as namespace preact;
 
-import { JSXInternal } from "./jsx";
+import { JSXInternal } from './jsx';
 
 declare namespace preact {
 	export import JSX = JSXInternal;
@@ -35,11 +35,18 @@ declare namespace preact {
 
 	type Key = string | number | any;
 
-	type RefObject<T> = { current?: T | null }
+	type RefObject<T> = { current?: T | null };
 	type RefCallback<T> = (instance: T | null) => void;
 	type Ref<T> = RefObject<T> | RefCallback<T>;
 
-	type ComponentChild = VNode<any> | object | string | number | boolean | null | undefined;
+	type ComponentChild =
+		| VNode<any>
+		| object
+		| string
+		| number
+		| boolean
+		| null
+		| undefined;
 	type ComponentChildren = ComponentChild[] | ComponentChild;
 
 	interface Attributes {
@@ -76,7 +83,10 @@ declare namespace preact {
 		new (props: P, context?: any): Component<P, S>;
 		displayName?: string;
 		defaultProps?: Partial<P>;
-		getDerivedStateFromProps?(props: Readonly<P>, state: Readonly<S>): Partial<S> | null;
+		getDerivedStateFromProps?(
+			props: Readonly<P>,
+			state: Readonly<S>
+		): Partial<S> | null;
 		getDerivedStateFromError?(error: any): Partial<S> | null;
 	}
 	interface ComponentConstructor<P = {}, S = {}> extends ComponentClass<P, S> {}
@@ -90,10 +100,22 @@ declare namespace preact {
 		componentWillUnmount?(): void;
 		getChildContext?(): object;
 		componentWillReceiveProps?(nextProps: Readonly<P>, nextContext: any): void;
-		shouldComponentUpdate?(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): boolean;
-		componentWillUpdate?(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): void;
+		shouldComponentUpdate?(
+			nextProps: Readonly<P>,
+			nextState: Readonly<S>,
+			nextContext: any
+		): boolean;
+		componentWillUpdate?(
+			nextProps: Readonly<P>,
+			nextState: Readonly<S>,
+			nextContext: any
+		): void;
 		getSnapshotBeforeUpdate?(oldProps: Readonly<P>, oldState: Readonly<S>): any;
-		componentDidUpdate?(previousProps: Readonly<P>, previousState: Readonly<S>, snapshot: any): void;
+		componentDidUpdate?(
+			previousProps: Readonly<P>,
+			previousState: Readonly<S>,
+			snapshot: any
+		): void;
 		componentDidCatch?(error: any, errorInfo: any): void;
 	}
 
@@ -110,7 +132,10 @@ declare namespace preact {
 		// constraint under no circumstances, see #1356.In general type arguments
 		// seem to be a bit buggy and not supported well at the time of this
 		// writing with TS 3.3.3333.
-		static getDerivedStateFromProps?(props: Readonly<object>, state: Readonly<object>): object | null;
+		static getDerivedStateFromProps?(
+			props: Readonly<object>,
+			state: Readonly<object>
+		): object | null;
 		static getDerivedStateFromError?(error: any): object | null;
 
 		state: Readonly<S>;
@@ -122,13 +147,22 @@ declare namespace preact {
 		// // We MUST keep setState() as a unified signature because it allows proper checking of the method return type.
 		// // See: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/18365#issuecomment-351013257
 		setState<K extends keyof S>(
-			state: ((prevState: Readonly<S>, props: Readonly<P>) => (Pick<S, K> | Partial<S> | null)) | (Pick<S, K> | Partial<S> | null),
+			state:
+				| ((
+						prevState: Readonly<S>,
+						props: Readonly<P>
+				  ) => Pick<S, K> | Partial<S> | null)
+				| (Pick<S, K> | Partial<S> | null),
 			callback?: () => void
 		): void;
 
 		forceUpdate(callback?: () => void): void;
 
-		abstract render(props?: RenderableProps<P>, state?: Readonly<S>, context?: any): ComponentChild;
+		abstract render(
+			props?: RenderableProps<P>,
+			state?: Readonly<S>,
+			context?: any
+		): ComponentChild;
 	}
 
 	//
@@ -137,7 +171,11 @@ declare namespace preact {
 
 	function createElement(
 		type: string,
-		props: JSXInternal.HTMLAttributes & JSXInternal.SVGAttributes & Record<string, any> | null,
+		props:
+			| JSXInternal.HTMLAttributes &
+					JSXInternal.SVGAttributes &
+					Record<string, any>
+			| null,
 		...children: ComponentChildren[]
 	): VNode<any>;
 	function createElement<P>(
@@ -151,7 +189,11 @@ declare namespace preact {
 
 	function h(
 		type: string,
-		props: JSXInternal.HTMLAttributes & JSXInternal.SVGAttributes & Record<string, any> | null,
+		props:
+			| JSXInternal.HTMLAttributes &
+					JSXInternal.SVGAttributes &
+					Record<string, any>
+			| null,
 		...children: ComponentChildren[]
 	): VNode<any>;
 	function h<P>(
@@ -172,8 +214,15 @@ declare namespace preact {
 		parent: Element | Document | ShadowRoot | DocumentFragment,
 		replaceNode?: Element | Text
 	): void;
-	function hydrate(vnode: ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment): void;
-	function cloneElement(vnode: JSX.Element, props?: any, ...children: ComponentChildren[]): JSX.Element;
+	function hydrate(
+		vnode: ComponentChild,
+		parent: Element | Document | ShadowRoot | DocumentFragment
+	): void;
+	function cloneElement(
+		vnode: JSX.Element,
+		props?: any,
+		...children: ComponentChildren[]
+	): JSX.Element;
 
 	//
 	// Preact Built-in Components
@@ -189,7 +238,7 @@ declare namespace preact {
 	/**
 	 * Global options for preact
 	 */
-	interface Options {
+	interface Options {
 		/** Attach a hook that is invoked whenever a VNode is created. */
 		vnode?(vnode: VNode): void;
 		/** Attach a hook that is invoked immediately before a vnode is unmounted. */
@@ -208,21 +257,25 @@ declare namespace preact {
 	// Preact helpers
 	// -----------------------------------
 	function createRef<T = any>(): RefObject<T>;
-	function toChildArray(children: ComponentChildren): Array<VNode | string | number>;
+	function toChildArray(
+		children: ComponentChildren
+	): Array<VNode | string | number>;
 	function isValidElement(vnode: any): vnode is VNode;
 
 	//
 	// Context
 	// -----------------------------------
-	interface Consumer<T> extends FunctionComponent<{
-		children: (value: T) => ComponentChildren
-	}> {}
+	interface Consumer<T>
+		extends FunctionComponent<{
+			children: (value: T) => ComponentChildren;
+		}> {}
 	interface PreactConsumer<T> extends Consumer<T> {}
 
-	interface Provider<T> extends FunctionComponent<{
-		value: T,
-		children: ComponentChildren
-	}> {}
+	interface Provider<T>
+		extends FunctionComponent<{
+			value: T;
+			children: ComponentChildren;
+		}> {}
 	interface PreactProvider<T> extends Provider<T> {}
 
 	interface Context<T> {

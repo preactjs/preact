@@ -16,7 +16,8 @@ export interface Component<P = {}, S = {}> extends PreactComponent<P, S> {
 	_childDidSuspend?(error: Promise<void>): void;
 }
 
-export interface FunctionalComponent<P = {}> extends PreactFunctionalComponent<P> {
+export interface FunctionalComponent<P = {}>
+	extends PreactFunctionalComponent<P> {
 	shouldComponentUpdate?(nextProps: Readonly<P>): boolean;
 	_forwarded?: boolean;
 }
@@ -30,7 +31,8 @@ export interface SuspenseState {
 	_parkedChildren: VNode<any>[];
 }
 
-export interface SuspenseComponent extends PreactComponent<SuspenseProps, SuspenseState> {
+export interface SuspenseComponent
+	extends PreactComponent<SuspenseProps, SuspenseState> {
 	_suspensions: Array<Promise<any>>;
 	_fallback: VNode<any>;
 }

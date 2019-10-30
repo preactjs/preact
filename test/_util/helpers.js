@@ -17,17 +17,19 @@ export function supportsPassiveEvents() {
 
 		window.addEventListener('test', options, options);
 		window.removeEventListener('test', options, options);
-	}
-	catch (err) {
+	} catch (err) {
 		supported = false;
 	}
 	return supported;
 }
 
 export function supportsDataList() {
-	return 'list' in document.createElement('input') &&
-		Boolean(document.createElement('datalist') &&
-		'HTMLDataListElement' in window);
+	return (
+		'list' in document.createElement('input') &&
+		Boolean(
+			document.createElement('datalist') && 'HTMLDataListElement' in window
+		)
+	);
 }
 
 const VOID_ELEMENTS = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
@@ -48,10 +50,10 @@ function normalizePath(str) {
 	for (let i = 0; i < len; i++) {
 		const char = str[i];
 		if (/[A-Za-z]/.test(char)) {
-			if (i==0) out+= char + ' ';
-			else out+= (str[i-1]==' ' ? '' : ' ') + char + (i < len -1 ? ' ' : '');
-		}
-		else if (char=='-' && str[i-1]!==' ') out+= ' ' + char;
+			if (i == 0) out += char + ' ';
+			else
+				out += (str[i - 1] == ' ' ? '' : ' ') + char + (i < len - 1 ? ' ' : '');
+		} else if (char == '-' && str[i - 1] !== ' ') out += ' ' + char;
 		else out += char;
 	}
 
@@ -77,27 +79,25 @@ export function serializeHtml(node) {
 function serializeDomTree(node) {
 	if (node.nodeType === 3) {
 		return encodeEntities(node.data);
-	}
-	else if (node.nodeType === 8) {
+	} else if (node.nodeType === 8) {
 		return '<!--' + encodeEntities(node.data) + '-->';
-	}
-	else if (node.nodeType === 1 || node.nodeType === 9) {
+	} else if (node.nodeType === 1 || node.nodeType === 9) {
 		let str = '<' + node.localName;
 		const attrs = [];
-		for (let i=0; i<node.attributes.length; i++) {
+		for (let i = 0; i < node.attributes.length; i++) {
 			attrs.push(node.attributes[i].name);
 		}
 		attrs.sort();
-		for (let i=0; i<attrs.length; i++) {
+		for (let i = 0; i < attrs.length; i++) {
 			const name = attrs[i];
 			let value = node.getAttribute(name);
 			if (value == null) continue;
-			if (!value && name==='class') continue;
+			if (!value && name === 'class') continue;
 			str += ' ' + name;
 			value = encodeEntities(value);
 
 			// normalize svg <path d="value">
-			if (node.localName==='path' && name==='d') {
+			if (node.localName === 'path' && name === 'd') {
 				value = normalizePath(value);
 			}
 			str += '="' + value + '"';
@@ -122,7 +122,7 @@ function serializeDomTree(node) {
  */
 export function createEvent(name) {
 	// Modern browsers
-	if (typeof Event==='function') {
+	if (typeof Event === 'function') {
 		return new Event(name);
 	}
 
@@ -137,22 +137,25 @@ export function createEvent(name) {
  * @param {string} cssText
  */
 export function sortCss(cssText) {
-	return cssText.split(';')
-		.filter(Boolean)
-		.map(s => s.replace(/^\s+|\s+$/g, '').replace(/(\s*:\s*)/g, ': '))
-		.sort((a, b) => {
-			// CSS Variables are typically positioned at the start
-			if (a[0]==='-') {
-				// If both are a variable we just compare them
-				if (b[0]==='-') return a.localeCompare(b);
-				return -1;
-			}
-			// b is a css var
-			if (b[0]==='-') return 1;
+	return (
+		cssText
+			.split(';')
+			.filter(Boolean)
+			.map(s => s.replace(/^\s+|\s+$/g, '').replace(/(\s*:\s*)/g, ': '))
+			.sort((a, b) => {
+				// CSS Variables are typically positioned at the start
+				if (a[0] === '-') {
+					// If both are a variable we just compare them
+					if (b[0] === '-') return a.localeCompare(b);
+					return -1;
+				}
+				// b is a css var
+				if (b[0] === '-') return 1;
 
-			return a.localeCompare(b);
-		})
-		.join('; ') + ';';
+				return a.localeCompare(b);
+			})
+			.join('; ') + ';'
+	);
 }
 
 /**
@@ -197,10 +200,9 @@ export function teardown(scratch) {
 }
 
 const Foo = () => 'd';
-export const getMixedArray = () => (
+export const getMixedArray = () =>
 	// Make it a function so each test gets a new copy of the array
-	[0, 'a', 'b', <span>c</span>, <Foo />, null, undefined, false, ['e', 'f'], 1]
-);
+	[0, 'a', 'b', <span>c</span>, <Foo />, null, undefined, false, ['e', 'f'], 1];
 export const mixedArrayHTML = '0ab<span>c</span>def1';
 
 /**
@@ -216,17 +218,23 @@ export function clear(obj) {
  * @param {string} html
  */
 export function sortAttributes(html) {
-	return html.replace(/<([a-z0-9-]+)((?:\s[a-z0-9:_.-]+=".*?")+)((?:\s*\/)?>)/gi, (s, pre, attrs, after) => {
-		let list = attrs.match(/\s[a-z0-9:_.-]+=".*?"/gi).sort( (a, b) => a>b ? 1 : -1 );
-		if (~after.indexOf('/')) after = '></'+pre+'>';
-		return '<' + pre + list.join('') + after;
-	});
+	return html.replace(
+		/<([a-z0-9-]+)((?:\s[a-z0-9:_.-]+=".*?")+)((?:\s*\/)?>)/gi,
+		(s, pre, attrs, after) => {
+			let list = attrs
+				.match(/\s[a-z0-9:_.-]+=".*?"/gi)
+				.sort((a, b) => (a > b ? 1 : -1));
+			if (~after.indexOf('/')) after = '></' + pre + '>';
+			return '<' + pre + list.join('') + after;
+		}
+	);
 }
 
-
-export const spyAll = obj => Object.keys(obj).forEach( key => sinon.spy(obj,key) );
-export const resetAllSpies = obj => Object.keys(obj).forEach( key => {
-	if (obj[key].args) {
-		obj[key].resetHistory();
-	}
-});
+export const spyAll = obj =>
+	Object.keys(obj).forEach(key => sinon.spy(obj, key));
+export const resetAllSpies = obj =>
+	Object.keys(obj).forEach(key => {
+		if (obj[key].args) {
+			obj[key].resetHistory();
+		}
+	});

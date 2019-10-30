@@ -5,7 +5,6 @@ import { setupScratch, teardown } from '../../_util/helpers';
 /** @jsx createElement */
 
 describe('Lifecycle methods', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -22,7 +21,6 @@ describe('Lifecycle methods', () => {
 	});
 
 	describe('#componentWillUpdate', () => {
-
 		it('should NOT be called on initial render', () => {
 			class ReceivePropsComponent extends Component {
 				componentWillUpdate() {}
@@ -32,7 +30,8 @@ describe('Lifecycle methods', () => {
 			}
 			sinon.spy(ReceivePropsComponent.prototype, 'componentWillUpdate');
 			render(<ReceivePropsComponent />, scratch);
-			expect(ReceivePropsComponent.prototype.componentWillUpdate).not.to.have.been.called;
+			expect(ReceivePropsComponent.prototype.componentWillUpdate).not.to.have
+				.been.called;
 		});
 
 		it('should be called when rerender with new props from parent', () => {
@@ -84,11 +83,13 @@ describe('Lifecycle methods', () => {
 			}
 			sinon.spy(ReceivePropsComponent.prototype, 'componentWillUpdate');
 			render(<ReceivePropsComponent />, scratch);
-			expect(ReceivePropsComponent.prototype.componentWillUpdate).not.to.have.been.called;
+			expect(ReceivePropsComponent.prototype.componentWillUpdate).not.to.have
+				.been.called;
 
 			doRender();
 			rerender();
-			expect(ReceivePropsComponent.prototype.componentWillUpdate).to.have.been.called;
+			expect(ReceivePropsComponent.prototype.componentWillUpdate).to.have.been
+				.called;
 		});
 	});
 });

@@ -12,8 +12,7 @@ function catchErrors(fn) {
 	return function(...args) {
 		try {
 			return fn(...args);
-		}
-		catch (e) {
+		} catch (e) {
 			/* istanbul ignore next */
 			console.error('The react devtools encountered an error');
 			/* istanbul ignore next */
@@ -29,7 +28,7 @@ export function initDevTools() {
 	// This global variable is injected by the devtools
 	/** @type {import('../internal').DevtoolsWindow} */
 	let hook = (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
-	if (hook==null) return;
+	if (hook == null) return;
 
 	/** @type {(vnode: import('../internal').VNode) => void} */
 	let onCommitRoot = noop;
@@ -38,26 +37,30 @@ export function initDevTools() {
 	let onCommitUnmount = noop;
 
 	// Initialize our custom renderer
-	let rid = Math.random().toString(16).slice(2);
+	let rid = Math.random()
+		.toString(16)
+		.slice(2);
 	let preactRenderer = new Renderer(hook, rid);
 
 	catchErrors(() => {
 		let isDev = false;
 		try {
-			isDev = process.env.NODE_ENV!=='production';
-		}
-		catch (e) {}
+			isDev = process.env.NODE_ENV !== 'production';
+		} catch (e) {}
 
 		// Tell devtools which bundle type we run in
-		window.parent.postMessage({
-			source: 'react-devtools-detector',
-			reactBuildType: /* istanbul ignore next */  isDev
-				? 'development'
-				: 'production'
-		}, '*');
+		window.parent.postMessage(
+			{
+				source: 'react-devtools-detector',
+				reactBuildType: /* istanbul ignore next */ isDev
+					? 'development'
+					: 'production'
+			},
+			'*'
+		);
 
 		let renderer = {
-			bundleType: /* istanbul ignore next */  isDev ? 1 : 0,
+			bundleType: /* istanbul ignore next */ isDev ? 1 : 0,
 			version: '16.5.2',
 			rendererPackageName: 'preact',
 			// We don't need this, but the devtools `attachRenderer` function relies on
@@ -76,7 +79,7 @@ export function initDevTools() {
 			// eslint-disable-next-line no-console
 			console.info(
 				'Preact is not compatible with your version of react-devtools. We ' +
-				'will address this in future releases.'
+					'will address this in future releases.'
 			);
 			return;
 		}
@@ -106,7 +109,7 @@ export function initDevTools() {
 
 		onCommitRoot = catchErrors(root => {
 			// Empty root
-			if (root.type===Fragment && root._children.length==0) return;
+			if (root.type === Fragment && root._children.length == 0) return;
 
 			let roots = hook.getFiberRoots(rid);
 			root = helpers.handleCommitFiberRoot(root);
@@ -125,7 +128,7 @@ export function initDevTools() {
 	let prevBeforeDiff = options._diff;
 	let prevAfterDiff = options.diffed;
 
-	options.vnode = (vnode) => {
+	options.vnode = vnode => {
 		// Tiny performance improvement by initializing fields as doubles
 		// from the start. `performance.now()` will always return a double.
 		// See https://github.com/facebook/react/issues/14365
@@ -138,28 +141,28 @@ export function initDevTools() {
 		if (prevVNodeHook) prevVNodeHook(vnode);
 	};
 
-	options._diff = (vnode) => {
+	options._diff = vnode => {
 		vnode.startTime = now();
-		if (prevBeforeDiff!=null) prevBeforeDiff(vnode);
+		if (prevBeforeDiff != null) prevBeforeDiff(vnode);
 	};
 
-	options.diffed = (vnode) => {
+	options.diffed = vnode => {
 		vnode.endTime = now();
-		if (prevAfterDiff!=null) prevAfterDiff(vnode);
+		if (prevAfterDiff != null) prevAfterDiff(vnode);
 	};
 
 	options._commit = catchErrors((vnode, commitQueue) => {
 		// Call previously defined hook
-		if (prevCommitRoot!=null) prevCommitRoot(vnode, commitQueue);
+		if (prevCommitRoot != null) prevCommitRoot(vnode, commitQueue);
 
 		// These cases are already handled by `unmount`
-		if (vnode==null) return;
+		if (vnode == null) return;
 		onCommitRoot(vnode);
 	});
 
-	options.unmount = catchErrors((vnode) => {
+	options.unmount = catchErrors(vnode => {
 		// Call previously defined hook
-		if (prevBeforeUnmount!=null) prevBeforeUnmount(vnode);
+		if (prevBeforeUnmount != null) prevBeforeUnmount(vnode);
 		onCommitUnmount(vnode);
 	});
 
@@ -167,7 +170,9 @@ export function initDevTools() {
 	const setState = Component.prototype.setState;
 	Component.prototype.setState = function(update, callback) {
 		// Duplicated in setState() but doesn't matter due to the guard.
-		let s = (this._nextState!==this.state && this._nextState) || (this._nextState = Object.assign({}, this.state));
+		let s =
+			(this._nextState !== this.state && this._nextState) ||
+			(this._nextState = Object.assign({}, this.state));
 
 		// Needed in order to check if state has changed after the tree has been committed:
 		this._prevState = Object.assign({}, s);
@@ -185,5 +190,4 @@ export let now = Date.now;
 try {
 	/* istanbul ignore else */
 	now = performance.now.bind(performance);
-}
-catch (e) {}
+} catch (e) {}

@@ -5,11 +5,9 @@ import { useEffect } from '../../src';
 import { useEffectAssertions } from './useEffectAssertions.test';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
 
-
 /** @jsx h */
 
 describe('useEffect', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -22,7 +20,6 @@ describe('useEffect', () => {
 	});
 
 	useEffectAssertions(useEffect, scheduleEffectAssert);
-
 
 	it('calls the effect immediately if another render is about to start', () => {
 		const cleanupFunction = sinon.spy();
@@ -79,6 +76,11 @@ describe('useEffect', () => {
 		};
 		act(() => render(<App i={0} />, scratch));
 		act(() => render(<App i={2} />, scratch));
-		expect(executionOrder).to.deep.equal(['cleanup1', 'cleanup2', 'action1', 'action2']);
+		expect(executionOrder).to.deep.equal([
+			'cleanup1',
+			'cleanup2',
+			'action1',
+			'action2'
+		]);
 	});
 });

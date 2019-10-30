@@ -1,5 +1,5 @@
-import { createElement } from "react";
-import { Link } from "./simple-router";
+import { createElement } from 'react';
+import { Link } from './simple-router';
 
 /** @jsx createElement */
 

@@ -1,14 +1,18 @@
 import { setupRerender, act } from 'preact/test-utils';
 import { createElement as h, render, Component } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useState, useReducer, useEffect, useLayoutEffect, useRef } from '../../src';
+import {
+	useState,
+	useReducer,
+	useEffect,
+	useLayoutEffect,
+	useRef
+} from '../../src';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
 
 /** @jsx h */
 
-
 describe('combinations', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -23,7 +27,6 @@ describe('combinations', () => {
 	afterEach(() => {
 		teardown(scratch);
 	});
-
 
 	it('can mix useState hooks', () => {
 		const states = {};
@@ -50,12 +53,22 @@ describe('combinations', () => {
 		}
 
 		render(<Parent />, scratch);
-		expect(states).to.deep.equal({ state1: 1, state2: 2, state3: 3, state4: 4 });
+		expect(states).to.deep.equal({
+			state1: 1,
+			state2: 2,
+			state3: 3,
+			state4: 4
+		});
 
 		setStates.setState2(n => n * 10);
 		setStates.setState3(n => n * 10);
 		rerender();
-		expect(states).to.deep.equal({ state1: 1, state2: 20, state3: 30, state4: 4 });
+		expect(states).to.deep.equal({
+			state1: 1,
+			state2: 20,
+			state3: 30,
+			state4: 4
+		});
 	});
 
 	it('can rerender asynchronously from within an effect', () => {
@@ -64,7 +77,9 @@ describe('combinations', () => {
 		function Comp() {
 			const [counter, setCounter] = useState(0);
 
-			useEffect(() => { if (counter === 0) setCounter(1); });
+			useEffect(() => {
+				if (counter === 0) setCounter(1);
+			});
 
 			didRender(counter);
 			return null;
@@ -84,7 +99,9 @@ describe('combinations', () => {
 		function Comp() {
 			const [counter, setCounter] = useState(0);
 
-			useLayoutEffect(() => { if (counter === 0) setCounter(1); });
+			useLayoutEffect(() => {
+				if (counter === 0) setCounter(1);
+			});
 
 			didRender(counter);
 			return null;
@@ -120,13 +137,15 @@ describe('combinations', () => {
 
 		function reducer1(state, action) {
 			switch (action.type) {
-				case 'increment': return state + action.count;
+				case 'increment':
+					return state + action.count;
 			}
 		}
 
 		function reducer2(state, action) {
 			switch (action.type) {
-				case 'increment': return state + action.count * 2;
+				case 'increment':
+					return state + action.count * 2;
 			}
 		}
 
@@ -216,7 +235,8 @@ describe('combinations', () => {
 	});
 
 	it('should have a right call order with correct dom ref', () => {
-		let i = 0, set;
+		let i = 0,
+			set;
 		const calls = [];
 
 		function Inner() {

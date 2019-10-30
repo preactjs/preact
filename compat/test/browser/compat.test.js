@@ -4,7 +4,6 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 import React from 'preact/compat'; // eslint-disable-line
 
 describe('imported compat in preact', () => {
-
 	let scratch;
 
 	beforeEach(() => {
@@ -46,7 +45,11 @@ describe('imported compat in preact', () => {
 
 	it('should normalize class+className even on components', () => {
 		function Foo(props) {
-			return <div class={props.class} className={props.className}>foo</div>;
+			return (
+				<div class={props.class} className={props.className}>
+					foo
+				</div>
+			);
 		}
 		render(<Foo class="foo" />, scratch);
 		expect(scratch.firstChild.className).to.equal('foo');

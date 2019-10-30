@@ -12,7 +12,6 @@ import { useState } from '../../src';
 /** @jsx createElement */
 
 describe('hook options', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
