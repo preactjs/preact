@@ -85,10 +85,12 @@ export function diff(
 				c._nextState = c.state;
 			}
 			if (newType.getDerivedStateFromProps != null) {
+				if (c._nextState == c.state) {
+					c._nextState = assign({}, c._nextState);
+				}
+
 				assign(
-					c._nextState == c.state
-						? (c._nextState = assign({}, c._nextState))
-						: c._nextState,
+					c._nextState,
 					newType.getDerivedStateFromProps(newProps, c._nextState)
 				);
 			}
