@@ -1,7 +1,7 @@
-import { createElement as h, render } from '../../src/index';
+import { createElement, render } from 'preact';
 import { setupScratch, teardown, sortAttributes } from '../_util/helpers';
 
-/** @jsx h */
+/** @jsx createElement */
 
 describe('svg', () => {
 	let scratch;

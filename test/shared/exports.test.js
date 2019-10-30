@@ -8,7 +8,7 @@ import {
 	hydrate,
 	cloneElement,
 	options
-} from '../../src/index';
+} from 'preact';
 import { expect } from 'chai';
 
 describe('preact', () => {

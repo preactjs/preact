@@ -1,7 +1,7 @@
-import { h, isValidElement, Component } from '../../src/index';
+import { createElement, isValidElement, Component } from 'preact';
 import { expect } from 'chai';
 
-/** @jsx h */
+/** @jsx createElement */
 
 describe('isValidElement', () => {
 	it('should check if the argument is a valid vnode', () => {

@@ -1,10 +1,9 @@
-import { createElement as h } from '../../src/index';
-// import { VNode } from '../../src/vnode';
+import { createElement } from 'preact';
 import { expect } from 'chai';
 
+const h = createElement;
+/** @jsx createElement */
 /*eslint-env browser, mocha */
-
-/** @jsx h */
 
 // const buildVNode = (nodeName, attributes, children=[]) => ({
 // 	nodeName,

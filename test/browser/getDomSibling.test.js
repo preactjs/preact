@@ -1,8 +1,8 @@
-import { h, render, Fragment } from '../../src/index';
+import { createElement, render, Fragment } from 'preact';
 import { getDomSibling } from '../../src/component';
 import { setupScratch, teardown } from '../_util/helpers';
 
-/** @jsx h */
+/** @jsx createElement */
 
 describe('getDomSibling', () => {
 	/** @type {import('../../src/internal').PreactElement} */

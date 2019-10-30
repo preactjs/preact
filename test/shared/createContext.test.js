@@ -1,10 +1,8 @@
-import { createElement as h, createContext } from '../../src/index';
-// import { VNode } from '../../src/vnode';
+import { createElement, createContext } from 'preact';
 import { expect } from 'chai';
 
-/*eslint-env browser, mocha */
-
-/** @jsx h */
+/** @jsx createElement */
+/* eslint-env browser, mocha */
 
 describe('createContext', () => {
 	it('should return a Provider and a Consumer', () => {

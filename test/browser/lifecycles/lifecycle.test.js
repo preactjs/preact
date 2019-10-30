@@ -1,8 +1,8 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement as h, render, Component } from '../../../src/index';
+import { createElement, render, Component } from 'preact';
 import { setupScratch, teardown, spyAll } from '../../_util/helpers';
 
-/** @jsx h */
+/** @jsx createElement */
 
 describe('Lifecycle methods', () => {
 	/** @type {HTMLDivElement} */

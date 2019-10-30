@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component } from '../../../src/index';
+import { createElement, render, Component } from 'preact';
 import {
 	setupScratch,
 	teardown,

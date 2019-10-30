@@ -1,8 +1,8 @@
-import { createElement as h, Component, render } from '../../src/index';
+import { createElement, Component, render } from '../../src/index';
 import { setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 
-/** @jsx h */
+/** @jsx createElement */
 
 describe('keys', () => {
 	/** @type {HTMLDivElement} */
