@@ -93,6 +93,29 @@ describe('refs', () => {
 		expect(ref).to.have.been.calledOnce.and.calledWith(instance);
 	});
 
+	it('should have a consistent order', () => {
+		const events = [];
+		const App = () => (
+			<div ref={r => events.push('called with ' + (r && r.tagName))}>
+				<h1 ref={r => events.push('called with ' + (r && r.tagName))}>
+					hi
+				</h1>
+			</div>
+		);
+
+		render(<App />, scratch);
+		render(<App />, scratch);
+		expect(events.length).to.equal(6);
+		expect(events).to.deep.equal([
+			'called with H1',
+			'called with DIV',
+			'called with null',
+			'called with H1',
+			'called with null',
+			'called with DIV'
+		]);
+	});
+
 	it('should pass rendered DOM from functional components to ref functions', () => {
 		let ref = spy('ref');
 
