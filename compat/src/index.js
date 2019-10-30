@@ -393,9 +393,9 @@ function memo(c, comparer) {
 
 		if (!comparer) {
 			return shallowDiffers(this.props, nextProps);
-		} else {
-			return !comparer(this.props, nextProps) || !updateRef;
 		}
+
+		return !comparer(this.props, nextProps) || !updateRef;
 	}
 
 	function Memoed(props) {
