@@ -75,13 +75,14 @@ export function initDebug() {
 			default:
 				isValid = false;
 		}
-		if (!isValid)
+		if (!isValid) {
 			throw new Error(`
 			Expected a valid HTML node as a second argument to render.
 			Received ${parentNode} instead: render(<${getDisplayName(
 				vnode
 			)} />, ${parentNode});
 		`);
+		}
 
 		if (oldRoot) oldRoot(vnode, parentNode);
 	};
