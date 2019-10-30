@@ -13,21 +13,22 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 function createLazy() {
 	/** @type {(c: ComponentType) => Promise<void>} */
-	let resolver, rejecter, promise;
-	const Lazy = lazy(
-		() =>
-			(promise = new Promise((resolve, reject) => {
-				resolver = c => {
-					resolve({ default: c });
-					return promise;
-				};
+	let resolver, rejecter;
+	const Lazy = lazy(() => {
+		let promise = new Promise((resolve, reject) => {
+			resolver = c => {
+				resolve({ default: c });
+				return promise;
+			};
 
-				rejecter = () => {
-					reject();
-					return promise;
-				};
-			}))
-	);
+			rejecter = () => {
+				reject();
+				return promise;
+			};
+		});
+
+		return promise;
+	});
 
 	return [Lazy, c => resolver(c), e => rejecter(e)];
 }
