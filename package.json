@@ -12,8 +12,8 @@
   "license": "MIT",
   "types": "src/index.d.ts",
   "scripts": {
-    "build": "npm-run-all --parallel build:*",
-    "build:core": "microbundle build --raw && cp dist/preact.js dist/preact.min.js",
+    "build": "npm-run-all --parallel build:* && cp dist/preact.js dist/preact.min.js",
+    "build:core": "microbundle build --raw",
     "build:debug": "microbundle build --raw --cwd debug",
     "build:hooks": "microbundle build --raw --cwd hooks",
     "build:test-utils": "microbundle build --raw --cwd test-utils",
