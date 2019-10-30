@@ -38,9 +38,7 @@ describe('useState', () => {
 	});
 
 	it('can initialize the state via a function', () => {
-		const initState = sinon.spy(() => {
-			1;
-		});
+		const initState = sinon.spy(() => 1);
 
 		function Comp() {
 			useState(initState);

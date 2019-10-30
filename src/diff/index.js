@@ -299,8 +299,10 @@ function diffElementNodes(
 	}
 
 	if (newVNode.type === null) {
-		if (excessDomChildren != null)
+		if (excessDomChildren != null) {
 			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
+		}
+
 		if (oldProps !== newProps) {
 			dom.data = newProps;
 		}
@@ -357,14 +359,16 @@ function diffElementNodes(
 				'value' in newProps &&
 				newProps.value !== undefined &&
 				newProps.value !== dom.value
-			)
+			) {
 				dom.value = newProps.value == null ? '' : newProps.value;
+			}
 			if (
 				'checked' in newProps &&
 				newProps.checked !== undefined &&
 				newProps.checked !== dom.checked
-			)
+			) {
 				dom.checked = newProps.checked;
+			}
 		}
 	}
 

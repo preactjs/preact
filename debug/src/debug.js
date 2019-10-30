@@ -38,7 +38,7 @@ export function initDebug() {
 		if (component && typeof error.then === 'function') {
 			const promise = error;
 			error = new Error(
-				'Missing Suspense. The throwing component was: ' + getDisplayName(vnode)
+				`Missing Suspense. The throwing component was: ${getDisplayName(vnode)}`
 			);
 
 			let parent = vnode;
@@ -62,7 +62,8 @@ export function initDebug() {
 	options._root = (vnode, parentNode) => {
 		if (!parentNode) {
 			throw new Error(
-				'Undefined parent passed to render(), this is the second argument.\nCheck if the element is available in the DOM/has the correct id.'
+				'Undefined parent passed to render(), this is the second argument.\n' +
+					'Check if the element is available in the DOM/has the correct id.'
 			);
 		}
 		let isValid;
@@ -75,13 +76,12 @@ export function initDebug() {
 			default:
 				isValid = false;
 		}
-		if (!isValid)
-			throw new Error(`
-			Expected a valid HTML node as a second argument to render.
-			Received ${parentNode} instead: render(<${getDisplayName(
-				vnode
-			)} />, ${parentNode});
-		`);
+		if (!isValid) {
+			let componentName = getDisplayName(vnode);
+			throw new Error(
+				`Expected a valid HTML node as a second argument to render.	Received ${parentNode} instead: render(<${componentName} />, ${parentNode});`
+			);
+		}
 
 		if (oldRoot) oldRoot(vnode, parentNode);
 	};
@@ -98,23 +98,12 @@ export function initDebug() {
 			);
 		} else if (type != null && typeof type === 'object') {
 			if (type._lastDomChild !== undefined && type._dom !== undefined) {
-				let info =
-					'Did you accidentally pass a JSX literal as JSX twice?\n\n' +
-					'  let My' +
-					getDisplayName(type) +
-					' = ' +
-					serializeVNode(type) +
-					';\n' +
-					'  let vnode = <My' +
-					getDisplayName(type) +
-					' />;\n\n' +
-					'This usually happens when you export a JSX literal and not the component.';
 				throw new Error(
-					'Invalid type passed to createElement(): ' +
-						type +
-						'\n\n' +
-						info +
-						'\n'
+					`Invalid type passed to createElement(): ${type}\n\n` +
+						'Did you accidentally pass a JSX literal as JSX twice?\n\n' +
+						`  let My${getDisplayName(vnode)} = ${serializeVNode(type)};\n` +
+						`  let vnode = <My${getDisplayName(vnode)} />;\n\n` +
+						'This usually happens when you export a JSX literal and not the component.'
 				);
 			}
 
@@ -129,8 +118,7 @@ export function initDebug() {
 			parentVNode.type !== 'table'
 		) {
 			console.error(
-				'Improper nesting of table.' +
-					'Your <thead/tbody/tfoot> should have a <table> parent.' +
+				'Improper nesting of table. Your <thead/tbody/tfoot> should have a <table> parent.' +
 					serializeVNode(vnode)
 			);
 		} else if (
@@ -141,20 +129,17 @@ export function initDebug() {
 				parentVNode.type !== 'table')
 		) {
 			console.error(
-				'Improper nesting of table.' +
-					'Your <tr> should have a <thead/tbody/tfoot/table> parent.' +
+				'Improper nesting of table. Your <tr> should have a <thead/tbody/tfoot/table> parent.' +
 					serializeVNode(vnode)
 			);
 		} else if (type === 'td' && parentVNode.type !== 'tr') {
 			console.error(
-				'Improper nesting of table.' +
-					'Your <td> should have a <tr> parent.' +
+				'Improper nesting of table. Your <td> should have a <tr> parent.' +
 					serializeVNode(vnode)
 			);
 		} else if (type === 'th' && parentVNode.type !== 'tr') {
 			console.error(
-				'Improper nesting of table.' +
-					'Your <th> should have a <tr>.' +
+				'Improper nesting of table. Your <th> should have a <tr>.' +
 					serializeVNode(vnode)
 			);
 		}
@@ -202,7 +187,7 @@ export function initDebug() {
 					const lazyVNode = vnode.type();
 					warnedComponents.lazyPropTypes.set(vnode.type, true);
 					console.warn(
-						m + 'Component wrapped in lazy() is ' + getDisplayName(lazyVNode)
+						m + `Component wrapped in lazy() is ${getDisplayName(lazyVNode)}`
 					);
 				} catch (promise) {
 					console.warn(
@@ -289,10 +274,9 @@ export function initDebug() {
 			if (Array.isArray(hooks._list)) {
 				hooks._list.forEach(hook => {
 					if (hook._callback && (!hook._args || !Array.isArray(hook._args))) {
+						let componentName = getDisplayName(vnode);
 						console.warn(
-							`In ${getDisplayName(
-								vnode
-							)} you are calling useMemo/useCallback without passing arguments.\n` +
+							`In ${componentName} you are calling useMemo/useCallback without passing arguments.\n` +
 								`This is a noop since it will not be able to memoize, it will execute it every render.`
 						);
 					}
@@ -308,12 +292,11 @@ export function initDebug() {
 						!warnedComponents.useEffect.has(vnode.type)
 					) {
 						warnedComponents.useEffect.set(vnode.type, true);
+						let componentName = getDisplayName(vnode);
 						console.warn(
 							'You should provide an array of arguments as the second argument to the "useEffect" hook.\n\n' +
 								'Not doing so will invoke this effect on every render.\n\n' +
-								'This effect can be found in the render of ' +
-								getDisplayName(vnode) +
-								'.'
+								`This effect can be found in the render of ${componentName}.`
 						);
 					}
 				});
@@ -328,12 +311,11 @@ export function initDebug() {
 					!warnedComponents.useLayoutEffect.has(vnode.type)
 				) {
 					warnedComponents.useLayoutEffect.set(vnode.type, true);
+					let componentName = getDisplayName(vnode);
 					console.warn(
 						'You should provide an array of arguments as the second argument to the "useLayoutEffect" hook.\n\n' +
 							'Not doing so will invoke this effect on every render.\n\n' +
-							'This effect can be found in the render of ' +
-							getDisplayName(vnode) +
-							'.'
+							`This effect can be found in the render of ${componentName}.`
 					);
 				}
 			});

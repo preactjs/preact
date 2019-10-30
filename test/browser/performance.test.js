@@ -10,8 +10,9 @@ let { createElement: h, Component, render, hydrate } = require(NODE_ENV ===
 const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
 
 // let now = typeof performance!=='undefined' && performance.now ? () => performance.now() : () => +new Date();
-if (typeof performance === 'undefined')
+if (typeof performance === 'undefined') {
 	window.performance = { now: () => +new Date() };
+}
 
 function loop(iter, time) {
 	let start = performance.now(),

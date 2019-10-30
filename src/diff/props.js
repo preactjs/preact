@@ -75,19 +75,21 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 				oldValue = null;
 			}
 
-			if (oldValue)
+			if (oldValue) {
 				for (let i in oldValue) {
 					if (!(value && i in value)) {
 						setStyle(s, i, '');
 					}
 				}
+			}
 
-			if (value)
+			if (value) {
 				for (let i in value) {
 					if (!oldValue || value[i] !== oldValue[i]) {
 						setStyle(s, i, value[i]);
 					}
 				}
+			}
 		}
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
