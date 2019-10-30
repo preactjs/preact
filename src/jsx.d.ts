@@ -1,16 +1,15 @@
 type Defaultize<Props, Defaults> =
 	// Distribute over unions
-	Props extends any
-		? 	// Make any properties included in Default optional
-			& Partial<Pick<Props, Extract<keyof Props, keyof Defaults>>>
-			// Include the remaining properties from Props
-			& Pick<Props, Exclude<keyof Props, keyof Defaults>>
+	Props extends any // Make any properties included in Default optional
+		? Partial<Pick<Props, Extract<keyof Props, keyof Defaults>>> &
+				// Include the remaining properties from Props
+				Pick<Props, Exclude<keyof Props, keyof Defaults>>
 		: never;
 
 export namespace JSXInternal {
-
-	type LibraryManagedAttributes<Component, Props> =
-	Component extends { defaultProps: infer Defaults }
+	type LibraryManagedAttributes<Component, Props> = Component extends {
+		defaultProps: infer Defaults;
+	}
 		? Defaultize<Props, Defaults>
 		: Props;
 
@@ -18,11 +17,9 @@ export namespace JSXInternal {
 		key?: any;
 	}
 
-	interface Element extends preact.VNode<any> {
-	}
+	interface Element extends preact.VNode<any> {}
 
-	interface ElementClass extends preact.Component<any, any> {
-	}
+	interface ElementClass extends preact.Component<any, any> {}
 
 	interface ElementAttributesProperty {
 		props: any;
@@ -34,13 +31,26 @@ export namespace JSXInternal {
 
 	interface SVGAttributes extends HTMLAttributes {
 		accentHeight?: number | string;
-		accumulate?: "none" | "sum";
-		additive?: "replace" | "sum";
-		alignmentBaseline?: "auto" | "baseline" | "before-edge" | "text-before-edge" | "middle" | "central" | "after-edge" | "text-after-edge" | "ideographic" | "alphabetic" | "hanging" | "mathematical" | "inherit";
-		allowReorder?: "no" | "yes";
+		accumulate?: 'none' | 'sum';
+		additive?: 'replace' | 'sum';
+		alignmentBaseline?:
+			| 'auto'
+			| 'baseline'
+			| 'before-edge'
+			| 'text-before-edge'
+			| 'middle'
+			| 'central'
+			| 'after-edge'
+			| 'text-after-edge'
+			| 'ideographic'
+			| 'alphabetic'
+			| 'hanging'
+			| 'mathematical'
+			| 'inherit';
+		allowReorder?: 'no' | 'yes';
 		alphabetic?: number | string;
 		amplitude?: number | string;
-		arabicForm?: "initial" | "medial" | "terminal" | "isolated";
+		arabicForm?: 'initial' | 'medial' | 'terminal' | 'isolated';
 		ascent?: number | string;
 		attributeName?: string;
 		attributeType?: string;
@@ -60,7 +70,7 @@ export namespace JSXInternal {
 		clipPathUnits?: number | string;
 		clipRule?: number | string;
 		colorInterpolation?: number | string;
-		colorInterpolationFilters?: "auto" | "sRGB" | "linearRGB" | "inherit";
+		colorInterpolationFilters?: 'auto' | 'sRGB' | 'linearRGB' | 'inherit';
 		colorProfile?: number | string;
 		colorRendering?: number | string;
 		contentScriptType?: number | string;
@@ -87,7 +97,7 @@ export namespace JSXInternal {
 		externalResourcesRequired?: number | string;
 		fill?: string;
 		fillOpacity?: number | string;
-		fillRule?: "nonzero" | "evenodd" | "inherit";
+		fillRule?: 'nonzero' | 'evenodd' | 'inherit';
 		filter?: string;
 		filterRes?: number | string;
 		filterUnits?: number | string;
@@ -209,8 +219,8 @@ export namespace JSXInternal {
 		stroke?: string;
 		strokeDasharray?: string | number;
 		strokeDashoffset?: string | number;
-		strokeLinecap?: "butt" | "round" | "square" | "inherit";
-		strokeLinejoin?: "miter" | "round" | "bevel" | "inherit";
+		strokeLinecap?: 'butt' | 'round' | 'square' | 'inherit';
+		strokeLinejoin?: 'miter' | 'round' | 'bevel' | 'inherit';
 		strokeMiterlimit?: string;
 		strokeOpacity?: number | string;
 		strokeWidth?: number | string;
@@ -607,7 +617,7 @@ export namespace JSXInternal {
 		srcSet?: string;
 		start?: number;
 		step?: number | string;
-		style?: string | {[key: string]: string | number};
+		style?: string | { [key: string]: string | number };
 		summary?: string;
 		tabIndex?: number;
 		target?: string;
@@ -751,7 +761,7 @@ export namespace JSXInternal {
 		track: HTMLAttributes;
 		u: HTMLAttributes;
 		ul: HTMLAttributes;
-		"var": HTMLAttributes;
+		var: HTMLAttributes;
 		video: HTMLAttributes;
 		wbr: HTMLAttributes;
 

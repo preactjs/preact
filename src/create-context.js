@@ -2,10 +2,6 @@ import { enqueueRender } from './component';
 
 export let i = 0;
 
-/**
- *
- * @param {any} defaultValue
- */
 export function createContext(defaultValue) {
 	const ctx = {};
 
@@ -25,15 +21,12 @@ export function createContext(defaultValue) {
 				this.shouldComponentUpdate = _props => {
 					if (props.value !== _props.value) {
 						subs.some(c => {
-							// Check if still mounted
-							if (c._parentDom) {
-								c.context = _props.value;
-								enqueueRender(c);
-							}
+							c.context = _props.value;
+							enqueueRender(c);
 						});
 					}
 				};
-				this.sub = (c) => {
+				this.sub = c => {
 					subs.push(c);
 					let old = c.componentWillUnmount;
 					c.componentWillUnmount = () => {

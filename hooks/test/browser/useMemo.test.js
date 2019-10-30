@@ -4,9 +4,7 @@ import { useMemo } from '../../src';
 
 /** @jsx h */
 
-
 describe('useMemo', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -40,5 +38,4 @@ describe('useMemo', () => {
 		expect(results).to.deep.equal([2, 2, 3, 3]);
 		expect(memoFunction).to.have.been.calledTwice;
 	});
-
 });

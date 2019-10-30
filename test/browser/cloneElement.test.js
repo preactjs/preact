@@ -4,7 +4,7 @@ import { createElement, cloneElement } from '../../src/index';
 
 describe('cloneElement', () => {
 	it('should clone components', () => {
-		function Comp () {}
+		function Comp() {}
 		const instance = <Comp prop1={1}>hello</Comp>;
 		const clone = cloneElement(instance);
 
@@ -15,7 +15,7 @@ describe('cloneElement', () => {
 	});
 
 	it('should merge new props', () => {
-		function Foo () {}
+		function Foo() {}
 		const instance = <Foo prop1={1} prop2={2} />;
 		const clone = cloneElement(instance, { prop1: -1, newProp: -2 });
 

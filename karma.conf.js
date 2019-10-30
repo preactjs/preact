@@ -2,7 +2,9 @@
 
 var coverage = String(process.env.COVERAGE) === 'true',
 	ci = String(process.env.CI).match(/^(1|true)$/gi),
-	pullRequest = !String(process.env.TRAVIS_PULL_REQUEST).match(/^(0|false|undefined)$/gi),
+	pullRequest = !String(process.env.TRAVIS_PULL_REQUEST).match(
+		/^(0|false|undefined)$/gi
+	),
 	masterBranch = String(process.env.TRAVIS_BRANCH).match(/^master$/gi),
 	sauceLabs = ci && !pullRequest && masterBranch,
 	performance = !coverage && String(process.env.PERFORMANCE) !== 'false',
@@ -96,8 +98,15 @@ module.exports = function(config) {
 		captureTimeout: 0,
 
 		sauceLabs: {
-			build: 'CI #' + process.env.TRAVIS_BUILD_NUMBER + ' (' + process.env.TRAVIS_BUILD_ID + ')',
-			tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER || ('local'+require('./package.json').version),
+			build:
+				'CI #' +
+				process.env.TRAVIS_BUILD_NUMBER +
+				' (' +
+				process.env.TRAVIS_BUILD_ID +
+				')',
+			tunnelIdentifier:
+				process.env.TRAVIS_JOB_NUMBER ||
+				'local' + require('./package.json').version,
 			connectLocationForSERelay: 'localhost',
 			connectPortForSERelay: 4445,
 			startConnect: false
@@ -107,7 +116,12 @@ module.exports = function(config) {
 
 		files: [
 			{ pattern: 'test/polyfills.js', watched: false },
-			{ pattern: config.grep || '{debug,hooks,compat,test-utils,}/test/{browser,shared}/**/*.test.js', watched: false }
+			{
+				pattern:
+					config.grep ||
+					'{debug,hooks,compat,test-utils,}/test/{browser,shared}/**/*.test.js',
+				watched: false
+			}
 		],
 
 		preprocessors: {
@@ -121,9 +135,7 @@ module.exports = function(config) {
 			mode: 'development',
 			devtool: 'inline-source-map',
 			module: {
-				noParse: [
-					/benchmark\.js$/
-				],
+				noParse: [/benchmark\.js$/],
 
 				/* Transpile source and test files */
 				rules: [
@@ -135,21 +147,27 @@ module.exports = function(config) {
 						options: {
 							// comments: false,
 							// compact: true,
-							plugins: coverage ?
-								[['istanbul', {
-									exclude: [
-										// Default config
-										'coverage/**',
-										'dist/**',
-										'test/**',
-										'test{,-*}.js',
-										'**/*.test.js',
-										'**/__tests__/**',
-										'**/node_modules/**',
-										// Our custom extension
-										'{debug,hooks,compat,test-utils}/test/**/*'
-									]
-								}]] : []
+							plugins: coverage
+								? [
+										[
+											'istanbul',
+											{
+												exclude: [
+													// Default config
+													'coverage/**',
+													'dist/**',
+													'test/**',
+													'test{,-*}.js',
+													'**/*.test.js',
+													'**/__tests__/**',
+													'**/node_modules/**',
+													// Our custom extension
+													'{debug,hooks,compat,test-utils}/test/**/*'
+												]
+											}
+										]
+								  ]
+								: []
 						}
 					}
 				]

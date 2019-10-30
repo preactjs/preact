@@ -1,21 +1,47 @@
-import { hydrate, render as preactRender, cloneElement as preactCloneElement, createRef, h, Component, options, toChildArray, createContext, Fragment, _unmount } from 'preact';
-import { useState, useReducer, useEffect, useLayoutEffect, useRef, useImperativeHandle, useMemo, useCallback, useContext, useDebugValue } from 'preact/hooks';
+import {
+	hydrate,
+	render as preactRender,
+	cloneElement as preactCloneElement,
+	createRef,
+	h,
+	Component,
+	options,
+	toChildArray,
+	createContext,
+	Fragment,
+	_unmount
+} from 'preact';
+import {
+	useState,
+	useReducer,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useImperativeHandle,
+	useMemo,
+	useCallback,
+	useContext,
+	useDebugValue
+} from 'preact/hooks';
 import { Suspense, lazy } from './suspense';
 import { assign, removeNode } from '../../src/util';
 
 const version = '16.8.0'; // trick libraries to think we are react
 
 /* istanbul ignore next */
-const REACT_ELEMENT_TYPE = (typeof Symbol!=='undefined' && Symbol.for && Symbol.for('react.element')) || 0xeac7;
+const REACT_ELEMENT_TYPE =
+	(typeof Symbol !== 'undefined' &&
+		Symbol.for &&
+		Symbol.for('react.element')) ||
+	0xeac7;
 
 const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip|color|fill|flood|font|glyph|horiz|marker|overline|paint|stop|strikethrough|stroke|text|underline|unicode|units|v|vector|vert|word|writing|x)[A-Z]/;
 
 let oldEventHook = options.event;
 options.event = e => {
-	/* istanbul ignore next */
 	if (oldEventHook) e = oldEventHook(e);
 	e.persist = () => {};
-	return e.nativeEvent = e;
+	return (e.nativeEvent = e);
 };
 
 /**
@@ -37,7 +63,9 @@ function handleElementVNode(vnode, props) {
 	if (shouldSanitize) {
 		attrs = vnode.props = {};
 		for (i in props) {
-			attrs[CAMEL_PROPS.test(i) ? i.replace(/([A-Z0-9])/, '-$1').toLowerCase() : i] = props[i];
+			attrs[
+				CAMEL_PROPS.test(i) ? i.replace(/([A-Z0-9])/, '-$1').toLowerCase() : i
+			] = props[i];
 		}
 	}
 }
@@ -52,14 +80,14 @@ function handleElementVNode(vnode, props) {
 function render(vnode, parent, callback) {
 	// React destroys any existing DOM nodes, see #1727
 	// ...but only on the first render, see #1828
-	if (parent._children==null) {
+	if (parent._children == null) {
 		while (parent.firstChild) {
 			removeNode(parent.firstChild);
 		}
 	}
 
 	preactRender(vnode, parent);
-	if (typeof callback==='function') callback();
+	if (typeof callback === 'function') callback();
 
 	return vnode ? vnode._component : null;
 }
@@ -107,8 +135,7 @@ function Portal(props) {
 			// Render our wrapping element into temp.
 			preactRender(wrap, container, _this._temp);
 			_this._children = this._temp._children;
-		}
-		else {
+		} else {
 			// When we have mounted and the vnode is present it means the
 			// props have changed or a parent is triggering a rerender.
 			// This implies we only need to call render. But we need to keep
@@ -159,7 +186,9 @@ let Children = {
 	},
 	only(children) {
 		children = toChildArray(children);
-		if (children.length!==1) throw new Error('Children.only() expects only one child.');
+		if (children.length !== 1) {
+			throw new Error('Children.only() expects only one child.');
+		}
 		return children[0];
 	},
 	toArray: toChildArray
@@ -175,18 +204,19 @@ let Children = {
 function createElement(...args) {
 	let vnode = h(...args);
 
-	let type = vnode.type, props = vnode.props;
-	if (typeof type!='function') {
+	let type = vnode.type,
+		props = vnode.props;
+	if (typeof type != 'function') {
 		if (props.defaultValue) {
-			if (!props.value && props.value!==0) {
+			if (!props.value && props.value !== 0) {
 				props.value = props.defaultValue;
 			}
 			delete props.defaultValue;
 		}
 
-		if (Array.isArray(props.value) && props.multiple && type==='select') {
-			toChildArray(props.children).forEach((child) => {
-				if (props.value.indexOf(child.props.value)!=-1) {
+		if (Array.isArray(props.value) && props.multiple && type === 'select') {
+			toChildArray(props.children).forEach(child => {
+				if (props.value.indexOf(child.props.value) != -1) {
 					child.props.selected = true;
 				}
 			});
@@ -228,7 +258,7 @@ function cloneElement(element) {
  * @returns {boolean}
  */
 function isValidElement(element) {
-	return !!element && element.$$typeof===REACT_ELEMENT_TYPE;
+	return !!element && element.$$typeof === REACT_ELEMENT_TYPE;
 }
 
 /**
@@ -236,7 +266,7 @@ function isValidElement(element) {
  * @param {import('./internal').VNode} vnode The vnode to normalize events on
  */
 function applyEventNormalization({ type, props }) {
-	if (!props || typeof type!='string') return;
+	if (!props || typeof type != 'string') return;
 	let newProps = {};
 
 	for (let i in props) {
@@ -245,7 +275,6 @@ function applyEventNormalization({ type, props }) {
 			delete props[i];
 		}
 		newProps[i.toLowerCase()] = i;
-
 	}
 	if (newProps.ondoubleclick) {
 		props.ondblclick = props[newProps.ondoubleclick];
@@ -256,7 +285,11 @@ function applyEventNormalization({ type, props }) {
 		delete props[newProps.onbeforeinput];
 	}
 	// for *textual inputs* (incl textarea), normalize `onChange` -> `onInput`:
-	if (newProps.onchange && (type==='textarea' || (type.toLowerCase()==='input' && !/^fil|che|ra/i.test(props.type)))) {
+	if (
+		newProps.onchange &&
+		(type === 'textarea' ||
+			(type.toLowerCase() === 'input' && !/^fil|che|ra/i.test(props.type)))
+	) {
 		let normalized = newProps.oninput || 'oninput';
 		if (!props[normalized]) {
 			props[normalized] = props[newProps.onchange];
@@ -293,7 +326,9 @@ function applyClassName(vnode) {
 
 let classNameDescriptor = {
 	configurable: true,
-	get() { return this.class; }
+	get() {
+		return this.class;
+	}
 };
 
 /**
@@ -304,7 +339,7 @@ let classNameDescriptor = {
  */
 function shallowDiffers(a, b) {
 	for (let i in a) if (i !== '__source' && !(i in b)) return true;
-	for (let i in b) if (i !== '__source' && a[i]!==b[i]) return true;
+	for (let i in b) if (i !== '__source' && a[i] !== b[i]) return true;
 	return false;
 }
 
@@ -314,7 +349,11 @@ function shallowDiffers(a, b) {
  * @returns {import('./internal').PreactElement | null}
  */
 function findDOMNode(component) {
-	return component && (component.base || component.nodeType === 1 && component) || null;
+	return (
+		(component &&
+			(component.base || (component.nodeType === 1 && component))) ||
+		null
+	);
 }
 
 /**
@@ -328,7 +367,9 @@ class PureComponent extends Component {
 	}
 
 	shouldComponentUpdate(props, state) {
-		return shallowDiffers(this.props, props) || shallowDiffers(this.state, state);
+		return (
+			shallowDiffers(this.props, props) || shallowDiffers(this.state, state)
+		);
 	}
 }
 
@@ -345,13 +386,15 @@ Component.prototype.isReactComponent = {};
 function memo(c, comparer) {
 	function shouldUpdate(nextProps) {
 		let ref = this.props.ref;
-		let updateRef = ref==nextProps.ref;
+		let updateRef = ref == nextProps.ref;
 		if (!updateRef && ref) {
 			ref.call ? ref(null) : (ref.current = null);
 		}
-		return (!comparer
-			? shallowDiffers(this.props, nextProps)
-			: !comparer(this.props, nextProps)) || !updateRef;
+		return (
+			(!comparer
+				? shallowDiffers(this.props, nextProps)
+				: !comparer(this.props, nextProps)) || !updateRef
+		);
 	}
 
 	function Memoed(props) {
@@ -385,11 +428,19 @@ function forwardRef(fn) {
 
 // Patch in `UNSAFE_*` lifecycle hooks
 function setSafeDescriptor(proto, key) {
-	if (proto['UNSAFE_'+key] && !proto[key]) {
+	if (proto['UNSAFE_' + key] && !proto[key]) {
 		Object.defineProperty(proto, key, {
 			configurable: false,
-			get() { return this['UNSAFE_' + key]; },
-			set(v) { this['UNSAFE_' + key] = v; }
+			get() {
+				return this['UNSAFE_' + key];
+			},
+			// This `set` is only used if a user sets a lifecycle like cWU
+			// after setting a lifecycle like UNSAFE_cWU. I doubt anyone
+			// actually does this in practice so not testing it
+			/* istanbul ignore next */
+			set(v) {
+				this['UNSAFE_' + key] = v;
+			}
 		});
 	}
 }
@@ -408,13 +459,16 @@ options.vnode = vnode => {
 	// We can't just patch the base component class, because components that use
 	// inheritance and are transpiled down to ES5 will overwrite our patched
 	// getters and setters. See #1941
-	if (typeof type === 'function' && !type._patchedLifecycles && type.prototype) {
+	if (
+		typeof type === 'function' &&
+		!type._patchedLifecycles &&
+		type.prototype
+	) {
 		setSafeDescriptor(type.prototype, 'componentWillMount');
 		setSafeDescriptor(type.prototype, 'componentWillReceiveProps');
 		setSafeDescriptor(type.prototype, 'componentWillUpdate');
 		type._patchedLifecycles = true;
 	}
-	/* istanbul ignore next */
 	if (oldVNodeHook) oldVNodeHook(vnode);
 };
 

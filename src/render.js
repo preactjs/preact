@@ -17,24 +17,26 @@ export function render(vnode, parentDom, replaceNode) {
 	if (options._root) options._root(vnode, parentDom);
 
 	let isHydrating = replaceNode === IS_HYDRATE;
-	let oldVNode = isHydrating ? null : replaceNode && replaceNode._children || parentDom._children;
+	let oldVNode = isHydrating
+		? null
+		: (replaceNode && replaceNode._children) || parentDom._children;
 	vnode = createElement(Fragment, null, [vnode]);
 
 	let commitQueue = [];
 	diff(
 		parentDom,
-		(isHydrating ? parentDom : (replaceNode || parentDom))._children = vnode,
+		((isHydrating ? parentDom : replaceNode || parentDom)._children = vnode),
 		oldVNode || EMPTY_OBJ,
 		EMPTY_OBJ,
 		parentDom.ownerSVGElement !== undefined,
 		replaceNode && !isHydrating
 			? [replaceNode]
 			: oldVNode
-				? null
-				: EMPTY_ARR.slice.call(parentDom.childNodes),
+			? null
+			: EMPTY_ARR.slice.call(parentDom.childNodes),
 		commitQueue,
 		replaceNode || EMPTY_OBJ,
-		isHydrating,
+		isHydrating
 	);
 	commitRoot(commitQueue, vnode);
 }

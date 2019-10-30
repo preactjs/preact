@@ -4,9 +4,7 @@ import { useCallback } from '../../src';
 
 /** @jsx h */
 
-
 describe('useCallback', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -17,7 +15,6 @@ describe('useCallback', () => {
 	afterEach(() => {
 		teardown(scratch);
 	});
-
 
 	it('only recomputes the callback when inputs change', () => {
 		const callbacks = [];
@@ -41,5 +38,4 @@ describe('useCallback', () => {
 		expect(callbacks[2]).to.equal(callbacks[3]);
 		expect(callbacks[2]()).to.equal(3);
 	});
-
 });
