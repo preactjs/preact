@@ -9,9 +9,6 @@ let currentComponent;
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
-/** @type {Array<import('./internal').Component>} */
-let layoutEffects = [];
-
 let oldBeforeRender = options._render;
 options._render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
@@ -35,10 +32,6 @@ options.diffed = vnode => {
 
 	const hooks = c.__hooks;
 	if (hooks) {
-		if (hooks._pendingLayoutEffects.length) {
-			layoutEffects.push(c);
-		}
-
 		if (hooks._pendingEffects.length) {
 			afterPaint(afterPaintEffects.push(c));
 		}
@@ -46,11 +39,16 @@ options.diffed = vnode => {
 };
 
 let oldCommit = options._commit;
-options._commit = vnode => {
-	if (oldCommit) oldCommit(vnode);
-	flushLayoutEffects();
-};
+options._commit = (vnode, commitQueue) => {
+	commitQueue.some(component => {
+		component._renderCallbacks.forEach(invokeCleanup);
+		component._renderCallbacks = component._renderCallbacks.filter(cb =>
+			cb._value ? invokeEffect(cb) : true
+		);
+	});
 
+	if (oldCommit) oldCommit(vnode, commitQueue);
+};
 
 let oldBeforeUnmount = options.unmount;
 options.unmount = vnode => {
@@ -77,7 +75,7 @@ function getHookState(index) {
 	// * https://github.com/michael-klein/funcy.js/blob/650beaa58c43c33a74820a3c98b3c7079cf2e333/src/renderer.mjs
 	// Other implementations to look at:
 	// * https://codesandbox.io/s/mnox05qp8
-	const hooks = currentComponent.__hooks || (currentComponent.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [] });
+	const hooks = currentComponent.__hooks || (currentComponent.__hooks = { _list: [], _pendingEffects: [] });
 
 	if (index >= hooks._list.length) {
 		hooks._list.push({});
@@ -149,7 +147,7 @@ export function useLayoutEffect(callback, args) {
 		state._value = callback;
 		state._args = args;
 
-		currentComponent.__hooks._pendingLayoutEffects.push(state);
+		currentComponent._renderCallbacks.push(state);
 	}
 }
 
@@ -228,18 +226,6 @@ export function useDebugValue(value, formatter) {
  */
 /* istanbul ignore next */
 let afterPaint = () => {};
-
-/**
- * Layout effects consumer
- */
-function flushLayoutEffects() {
-	layoutEffects.some(component => {
-		component.__hooks._pendingLayoutEffects.forEach(invokeCleanup);
-		component.__hooks._pendingLayoutEffects.forEach(invokeEffect);
-		component.__hooks._pendingLayoutEffects = [];
-	});
-	layoutEffects = [];
-}
 
 /**
  * After paint effects consumer.

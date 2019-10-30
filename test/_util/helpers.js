@@ -173,7 +173,6 @@ export function clearOptions() {
 	delete options.diffed;
 	delete options.unmount;
 	delete options._diff;
-	delete options._commit;
 }
 
 /**

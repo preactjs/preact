@@ -166,7 +166,14 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 	return newVNode._dom;
 }
 
+/**
+ * @param {Array<import('../internal').Component>} commitQueue List of components
+ * which have callbacks to invoke in commitRoot
+ * @param {import('../internal').VNode} root
+ */
 export function commitRoot(commitQueue, root) {
+	if (options._commit) options._commit(root, commitQueue);
+
 	commitQueue.some(c => {
 		try {
 			commitQueue = c._renderCallbacks;
@@ -177,8 +184,6 @@ export function commitRoot(commitQueue, root) {
 			options._catchError(e, c._vnode);
 		}
 	});
-
-	if (options._commit) options._commit(root);
 }
 
 /**
