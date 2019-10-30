@@ -115,7 +115,8 @@ export function diffChildren(
 					(refs || (refs = [])).push(
 						j,
 						childVNode._component || newDom,
-						childVNode
+						childVNode,
+						oldVNode.ref
 					);
 				}
 
