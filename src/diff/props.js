@@ -34,13 +34,15 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 function setStyle(style, key, value) {
 	if (key[0] === '-') {
 		style.setProperty(key, value);
+	} else if (
+		typeof value === 'number' &&
+		IS_NON_DIMENSIONAL.test(key) === false
+	) {
+		style[key] = value + 'px';
+	} else if (value == null) {
+		style[key] = '';
 	} else {
-		style[key] =
-			typeof value === 'number' && IS_NON_DIMENSIONAL.test(key) === false
-				? value + 'px'
-				: value == null
-				? ''
-				: value;
+		style[key] = value;
 	}
 }
 
@@ -53,13 +55,13 @@ function setStyle(style, key, value) {
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
 function setProperty(dom, name, value, oldValue, isSvg) {
-	name = isSvg
-		? name === 'className'
-			? 'class'
-			: name
-		: name === 'class'
-		? 'className'
-		: name;
+	if (isSvg) {
+		if (name === 'className') {
+			name = 'class';
+		}
+	} else if (name === 'class') {
+		name = 'className';
+	}
 
 	if (name === 'key' || name === 'children') {
 	} else if (name === 'style') {
