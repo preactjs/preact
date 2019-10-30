@@ -3,7 +3,7 @@ import { VNode } from 'preact';
 interface Options {
   shallow?: boolean;
   xml?: boolean;
-  pretty?: boolean;
+  pretty?: boolean | string;
 }
 
 export function render(vnode: VNode, context?: any, options?: Options):string;
