@@ -90,7 +90,7 @@ Suspense.prototype._childDidSuspend = function(promise) {
 	if (options.__onSuspensionComplete) {
 		promise.then(() => {
 			options.__onSuspensionComplete(c._vnode, onSuspensionComplete);
-		});
+		}, onSuspensionComplete);
 	}
 	else {
 		promise.then(onSuspensionComplete, onSuspensionComplete);
