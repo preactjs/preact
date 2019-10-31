@@ -4,9 +4,7 @@ import { useRef } from '../../src';
 
 /** @jsx h */
 
-
 describe('useRef', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -17,7 +15,6 @@ describe('useRef', () => {
 	afterEach(() => {
 		teardown(scratch);
 	});
-
 
 	it('provides a stable reference', () => {
 		const values = [];
@@ -34,5 +31,4 @@ describe('useRef', () => {
 
 		expect(values).to.deep.equal([1, 2]);
 	});
-
 });

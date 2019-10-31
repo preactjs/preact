@@ -1,7 +1,7 @@
-import { createElement, Component } from "preact";
-import { connect, Provider } from "react-redux";
-import { createStore } from "redux";
-import { HashRouter, Route, Link } from "react-router-dom";
+import { createElement, Component } from 'preact';
+import { connect, Provider } from 'react-redux';
+import { createStore } from 'redux';
+import { HashRouter, Route, Link } from 'react-router-dom';
 
 const store = createStore(
 	(state, action) => ({ ...state, display: action.display }),
@@ -13,7 +13,7 @@ function _Redux({ showMe, counter }) {
 	return <div>showMe {counter}</div>;
 }
 const Redux = connect(
-	state => console.log("injecting", state.display) || { showMe: state.display }
+	state => console.log('injecting', state.display) || { showMe: state.display }
 )(_Redux);
 
 let display = false;
@@ -35,7 +35,7 @@ class Test extends Component {
 						store.dispatch({ type: 1, display });
 					}}
 				>
-					Toggle visibilty
+					Toggle visibility
 				</button>
 				<Link to={`/${(parseInt(this.props.start) || 0) + 1}`}>Click me</Link>
 

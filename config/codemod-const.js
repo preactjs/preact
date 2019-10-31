@@ -9,14 +9,15 @@ export default (file, api) => {
 		constants = {},
 		found = 0;
 
-	code.find(j.VariableDeclaration)
-		.filter( decl => {
-			for (let i=decl.value.declarations.length; i--; ) {
+	code
+		.find(j.VariableDeclaration)
+		.filter(decl => {
+			for (let i = decl.value.declarations.length; i--; ) {
 				let node = decl.value.declarations[i],
 					name = node.id && node.id.name,
 					init = node.init;
 				if (name && init && name.match(/^[A-Z0-9_$]+$/g) && !init.regex) {
-					if (init.type==='Literal') {
+					if (init.type === 'Literal') {
 						// console.log(`Inlining constant: ${name}=${init.raw}`);
 						found++;
 						constants[name] = init;
@@ -31,9 +32,12 @@ export default (file, api) => {
 		})
 		.remove();
 
-	code.find(j.Identifier)
-		.filter( path => path.value.name && constants.hasOwnProperty(path.value.name) )
-		.replaceWith( path => (found++, constants[path.value.name]) );
+	code
+		.find(j.Identifier)
+		.filter(
+			path => path.value.name && constants.hasOwnProperty(path.value.name)
+		)
+		.replaceWith(path => (found++, constants[path.value.name]));
 
 	return found ? code.toSource({ quote: 'single' }) : null;
 };

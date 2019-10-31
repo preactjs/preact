@@ -1,4 +1,4 @@
-import { Component, PreactElement, VNode } from "../../src/internal";
+import { Component, PreactElement, VNode } from '../../src/internal';
 
 export { Component, PreactElement, VNode };
 
@@ -23,7 +23,7 @@ export interface DevtoolsUpdater {
 	setInContext(): void;
 }
 
-export type NodeType = "Composite" | "Native" | "Wrapper" | "Text";
+export type NodeType = 'Composite' | 'Native' | 'Wrapper' | 'Text';
 
 export interface DevtoolData {
 	nodeType: NodeType;
@@ -40,12 +40,18 @@ export interface DevtoolData {
 	publicInstance: PreactElement | Text | Component;
 	memoizedInteractions: any[];
 
-	actualDuration: number,
-	actualStartTime: number,
-	treeBaseDuration: number,
+	actualDuration: number;
+	actualStartTime: number;
+	treeBaseDuration: number;
 }
 
-export type EventType = 'unmount' | 'rootCommitted' | 'root' | 'mount' | 'update' | 'updateProfileTimes';
+export type EventType =
+	| 'unmount'
+	| 'rootCommitted'
+	| 'root'
+	| 'mount'
+	| 'update'
+	| 'updateProfileTimes';
 
 export interface DevtoolsEvent {
 	data?: DevtoolData;

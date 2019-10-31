@@ -1,7 +1,6 @@
-import { PreactContext, Ref as PreactRef } from "../..";
+import { PreactContext, Ref as PreactRef } from '../..';
 
 type Inputs = ReadonlyArray<unknown>;
-
 
 export type StateUpdater<S> = (value: S | ((prevState: S) => S)) => void;
 /**
@@ -9,7 +8,6 @@ export type StateUpdater<S> = (value: S | ((prevState: S) => S)) => void;
  * @param initialState The initial value (or a function that returns the initial value)
  */
 export function useState<S>(initialState: S | (() => S)): [S, StateUpdater<S>];
-
 
 export type Reducer<S, A> = (prevState: S, action: A) => S;
 /**
@@ -21,7 +19,10 @@ export type Reducer<S, A> = (prevState: S, action: A) => S;
  * @param reducer Given the current state and an action, returns the new state
  * @param initialState The initial value to store as state
  */
-export function useReducer<S, A>(reducer: Reducer<S, A>, initialState: S): [S, (action: A) => void];
+export function useReducer<S, A>(
+	reducer: Reducer<S, A>,
+	initialState: S
+): [S, (action: A) => void];
 
 /**
  * An alternative to `useState`.
@@ -33,11 +34,14 @@ export function useReducer<S, A>(reducer: Reducer<S, A>, initialState: S): [S, (
  * @param initialArg The initial argument to pass to the `init` function
  * @param init A function that, given the `initialArg`, returns the initial value to store as state
  */
-export function useReducer<S, A, I>(reducer: Reducer<S, A>, initialArg: I, init: (arg: I) => S): [S, (action: A) => void];
+export function useReducer<S, A, I>(
+	reducer: Reducer<S, A>,
+	initialArg: I,
+	init: (arg: I) => S
+): [S, (action: A) => void];
 
-
-type PropRef<T> = { readonly current?: T; }
-type Ref<T> = { current: T; }
+type PropRef<T> = { readonly current?: T };
+type Ref<T> = { current: T };
 
 /**
  * `useRef` returns a mutable ref object whose `.current` property is initialized to the passed argument
@@ -55,8 +59,7 @@ export function useRef<T>(initialValue: T): Ref<T>;
  */
 export function useRef<T = unknown>(): PropRef<T>;
 
-
-type EffectCallback = () => (void | (() => void));
+type EffectCallback = () => void | (() => void);
 /**
  * Accepts a function that contains imperative, possibly effectful code.
  * The effects run after browser paint, without blocking it.
@@ -74,7 +77,11 @@ type CreateHandle = () => object;
  * ref.current
  * @param inputs If present, effect will only activate if the values in the list change (using ===).
  */
-export function useImperativeHandle<T, R extends T>(ref: PreactRef<T>, create: () => R, inputs?: Inputs): void;
+export function useImperativeHandle<T, R extends T>(
+	ref: PreactRef<T>,
+	create: () => R,
+	inputs?: Inputs
+): void;
 
 /**
  * Accepts a function that contains imperative, possibly effectful code.
@@ -115,4 +122,7 @@ export function useContext<T>(context: PreactContext<T>): T;
  * @param value Custom hook name or object that is passed to formatter
  * @param formatter Formatter to modify value before sending it to the devtools
  */
-export function useDebugValue<T>(value: T, formatter?: (value: T) => string | number): void;
+export function useDebugValue<T>(
+	value: T,
+	formatter?: (value: T) => string | number
+): void;

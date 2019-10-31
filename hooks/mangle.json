@@ -6,6 +6,7 @@
   "props": {
     "cname": 6,
     "props": {
+      "$_afterPaintQueued": "__a",
       "$__hooks": "__H",
       "$_component": "__c",
       "$_defaultValue": "__p",
@@ -15,6 +16,8 @@
       "$_diff": "__b",
       "$_commit": "__c",
       "$_render": "__r",
+      "$_renderCallbacks": "__h",
+      "$_suspensions": "__u",
       "$_hook": "__h",
       "$_catchError": "__e",
       "$_unmount": "_e"

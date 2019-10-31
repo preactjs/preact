@@ -1,4 +1,14 @@
-import { createElement, h, createContext, Component, Fragment, render, hydrate, cloneElement, options } from '../../src/index';
+import {
+	createElement,
+	h,
+	createContext,
+	Component,
+	Fragment,
+	render,
+	hydrate,
+	cloneElement,
+	options
+} from '../../src/index';
 import { expect } from 'chai';
 
 describe('preact', () => {

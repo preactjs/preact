@@ -14,7 +14,6 @@ describe('Select', () => {
 		teardown(scratch);
 	});
 
-
 	it('should work with multiple selected (array of values)', () => {
 		function App() {
 			return (

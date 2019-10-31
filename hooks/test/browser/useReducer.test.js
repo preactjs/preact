@@ -5,9 +5,7 @@ import { useReducer } from '../../src';
 
 /** @jsx h */
 
-
 describe('useReducer', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -23,7 +21,6 @@ describe('useReducer', () => {
 		teardown(scratch);
 	});
 
-
 	it('rerenders when dispatching an action', () => {
 		const states = [];
 		let _dispatch;
@@ -32,7 +29,8 @@ describe('useReducer', () => {
 
 		function reducer(state, action) {
 			switch (action.type) {
-				case 'increment': return { count: state.count + action.by };
+				case 'increment':
+					return { count: state.count + action.by };
 			}
 		}
 
@@ -56,20 +54,27 @@ describe('useReducer', () => {
 
 		function reducer(state, action) {
 			switch (action.type) {
-				case 'increment': return { count: state.count + action.by };
+				case 'increment':
+					return { count: state.count + action.by };
 			}
 		}
 
 		function ReducerComponent() {
 			const [state, dispatch] = useReducer(reducer, initState);
-			return (<div>
-				<p>Count: {state.count}</p>
-				<DispatchComponent dispatch={dispatch} />
-			</div>);
+			return (
+				<div>
+					<p>Count: {state.count}</p>
+					<DispatchComponent dispatch={dispatch} />
+				</div>
+			);
 		}
 
 		function DispatchComponent(props) {
-			return <button onClick={() => props.dispatch({ type: 'increment', by: 10 })}>Increment</button>;
+			return (
+				<button onClick={() => props.dispatch({ type: 'increment', by: 10 })}>
+					Increment
+				</button>
+			);
 		}
 
 		render(<ReducerComponent />, scratch);
@@ -92,7 +97,8 @@ describe('useReducer', () => {
 
 		function reducer(state, action) {
 			switch (action.type) {
-				case 'increment': return { count: state.count + action.by };
+				case 'increment':
+					return { count: state.count + action.by };
 			}
 		}
 
@@ -110,5 +116,4 @@ describe('useReducer', () => {
 
 		expect(states).to.deep.equal([{ count: 10 }, { count: 20 }]);
 	});
-
 });
