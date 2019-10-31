@@ -357,9 +357,9 @@ describe('forwardRef', () => {
 		let _ref = null;
 		let _set = null;
 		const Inner = forwardRef((props, ref) => {
-			const [_, setState] = useState(null);
+			const _hook = useState(null);
 			_ref = ref;
-			_set = setState;
+			_set = _hook.setState;
 			return <div ref={ref} />;
 		});
 
