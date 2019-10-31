@@ -76,6 +76,9 @@
 		"dist"
 	],
 	"prettier": {
+		"resolveConfig": {
+			"editorconfig": true
+		},
 		"singleQuote": true,
 		"trailingComma": "none",
 		"useTabs": true,
