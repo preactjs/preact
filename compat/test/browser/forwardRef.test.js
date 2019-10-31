@@ -372,13 +372,13 @@ describe('forwardRef', () => {
 			render(<Parent />, scratch);
 		});
 
-		expect(_ref).not.to.be.undefined;
+		expect(_ref.current).to.equal(scratch.firstChild);
 
 		act(() => {
 			_set(1);
 			rerender();
 		});
 
-		expect(_ref).not.to.be.undefined;
+		expect(_ref.current).to.equal(scratch.firstChild);
 	});
 });
