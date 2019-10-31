@@ -17,7 +17,9 @@ options._render = vnode => {
 	currentIndex = 0;
 
 	if (currentComponent.__hooks) {
-		currentComponent.__hooks._pendingEffects = handleEffects(currentComponent.__hooks._pendingEffects);
+		currentComponent.__hooks._pendingEffects.forEach(invokeCleanup);
+		currentComponent.__hooks._pendingEffects.forEach(invokeEffect);
+		currentComponent.__hooks._pendingEffects = [];
 	}
 };
 
@@ -30,11 +32,23 @@ options.diffed = vnode => {
 
 	const hooks = c.__hooks;
 	if (hooks) {
-		hooks._handles = bindHandles(hooks._handles);
-		hooks._pendingLayoutEffects = handleEffects(hooks._pendingLayoutEffects);
+		if (hooks._pendingEffects.length) {
+			afterPaint(afterPaintEffects.push(c));
+		}
 	}
 };
 
+let oldCommit = options._commit;
+options._commit = (vnode, commitQueue) => {
+	commitQueue.some(component => {
+		component._renderCallbacks.forEach(invokeCleanup);
+		component._renderCallbacks = component._renderCallbacks.filter(cb =>
+			cb._value ? invokeEffect(cb) : true
+		);
+	});
+
+	if (oldCommit) oldCommit(vnode, commitQueue);
+};
 
 let oldBeforeUnmount = options.unmount;
 options.unmount = vnode => {
@@ -61,7 +75,9 @@ function getHookState(index) {
 	// * https://github.com/michael-klein/funcy.js/blob/650beaa58c43c33a74820a3c98b3c7079cf2e333/src/renderer.mjs
 	// Other implementations to look at:
 	// * https://codesandbox.io/s/mnox05qp8
-	const hooks = currentComponent.__hooks || (currentComponent.__hooks = { _list: [], _pendingEffects: [], _pendingLayoutEffects: [], _handles: [] });
+	const hooks =
+		currentComponent.__hooks ||
+		(currentComponent.__hooks = { _list: [], _pendingEffects: [] });
 
 	if (index >= hooks._list.length) {
 		hooks._list.push({});
@@ -69,12 +85,20 @@ function getHookState(index) {
 	return hooks._list[index];
 }
 
+/**
+ * @param {import('./index').StateUpdater<any>} initialState
+ */
 export function useState(initialState) {
 	return useReducer(invokeOrReturn, initialState);
 }
 
+/**
+ * @param {import('./index').Reducer<any, any>} reducer
+ * @param {import('./index').StateUpdater<any>} initialState
+ * @param {(initialState: any) => void} [init]
+ * @returns {[ any, (state: any) => void ]}
+ */
 export function useReducer(reducer, initialState, init) {
-
 	/** @type {import('./internal').ReducerHookState} */
 	const hookState = getHookState(currentIndex++);
 	if (!hookState._component) {
@@ -85,7 +109,7 @@ export function useReducer(reducer, initialState, init) {
 
 			action => {
 				const nextValue = reducer(hookState._value[0], action);
-				if (hookState._value[0]!==nextValue) {
+				if (hookState._value[0] !== nextValue) {
 					hookState._value[0] = nextValue;
 					hookState._component.setState({});
 				}
@@ -101,7 +125,6 @@ export function useReducer(reducer, initialState, init) {
  * @param {any[]} args
  */
 export function useEffect(callback, args) {
-
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(currentIndex++);
 	if (argsChanged(state._args, args)) {
@@ -109,7 +132,6 @@ export function useEffect(callback, args) {
 		state._args = args;
 
 		currentComponent.__hooks._pendingEffects.push(state);
-		afterPaint(currentComponent);
 	}
 }
 
@@ -118,13 +140,13 @@ export function useEffect(callback, args) {
  * @param {any[]} args
  */
 export function useLayoutEffect(callback, args) {
-
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(currentIndex++);
 	if (argsChanged(state._args, args)) {
 		state._value = callback;
 		state._args = args;
-		currentComponent.__hooks._pendingLayoutEffects.push(state);
+
+		currentComponent._renderCallbacks.push(state);
 	}
 }
 
@@ -132,19 +154,19 @@ export function useRef(initialValue) {
 	return useMemo(() => ({ current: initialValue }), []);
 }
 
+/**
+ * @param {object} ref
+ * @param {() => object} createHandle
+ * @param {any[]} args
+ */
 export function useImperativeHandle(ref, createHandle, args) {
-	const state = getHookState(currentIndex++);
-	if (argsChanged(state._args, args)) {
-		state._args = args;
-		currentComponent.__hooks._handles.push({ ref, createHandle });
-	}
-}
-
-function bindHandles(handles) {
-	handles.some(handle => {
-		if (handle.ref) handle.ref.current = handle.createHandle();
-	});
-	return [];
+	useLayoutEffect(
+		() => {
+			if (typeof ref === 'function') ref(createHandle());
+			else if (ref) ref.current = createHandle();
+		},
+		args == null ? args : args.concat(ref)
+	);
 }
 
 /**
@@ -152,13 +174,12 @@ function bindHandles(handles) {
  * @param {any[]} args
  */
 export function useMemo(callback, args) {
-
 	/** @type {import('./internal').MemoHookState} */
 	const state = getHookState(currentIndex++);
 	if (argsChanged(state._args, args)) {
 		state._args = args;
 		state._callback = callback;
-		return state._value = callback();
+		return (state._value = callback());
 	}
 
 	return state._value;
@@ -201,8 +222,8 @@ export function useDebugValue(value, formatter) {
 // then effects will ALWAYS run on the NEXT frame instead of the current one, incurring a ~16ms delay.
 // Perhaps this is not such a big deal.
 /**
- * Invoke a component's pending effects after the next frame renders
- * @type {(component: import('./internal').Component) => void}
+ * Schedule afterPaintEffects flush after the browser paints
+ * @type {(newQueueLength: number) => void}
  */
 /* istanbul ignore next */
 let afterPaint = () => {};
@@ -212,9 +233,10 @@ let afterPaint = () => {};
  */
 function flushAfterPaintEffects() {
 	afterPaintEffects.some(component => {
-		component._afterPaintQueued = false;
 		if (component._parentDom) {
-			component.__hooks._pendingEffects = handleEffects(component.__hooks._pendingEffects);
+			component.__hooks._pendingEffects.forEach(invokeCleanup);
+			component.__hooks._pendingEffects.forEach(invokeEffect);
+			component.__hooks._pendingEffects = [];
 		}
 	});
 	afterPaintEffects = [];
@@ -223,9 +245,14 @@ function flushAfterPaintEffects() {
 const RAF_TIMEOUT = 100;
 
 /**
- * requestAnimationFrame with a timeout in case it doesn't fire (for example if the browser tab is not visible)
+ * Schedule a callback to be invoked after the browser has a chance to paint a new frame.
+ * Do this by combining requestAnimationFrame (rAF) + setTimeout to invoke a callback after
+ * the next browser frame.
+ *
+ * Also, schedule a timeout in parallel to the the rAF to ensure the callback is invoked
+ * even if RAF doesn't fire (for example if the browser tab is not visible)
  */
-function safeRaf(callback) {
+function afterNextFrame(callback) {
 	const done = () => {
 		clearTimeout(timeout);
 		cancelAnimationFrame(raf);
@@ -238,23 +265,19 @@ function safeRaf(callback) {
 /* istanbul ignore else */
 if (typeof window !== 'undefined') {
 	let prevRaf = options.requestAnimationFrame;
-	afterPaint = (component) => {
-		if ((!component._afterPaintQueued && (component._afterPaintQueued = true) && afterPaintEffects.push(component) === 1) ||
-		    prevRaf !== options.requestAnimationFrame) {
+	afterPaint = newQueueLength => {
+		if (newQueueLength === 1 || prevRaf !== options.requestAnimationFrame) {
 			prevRaf = options.requestAnimationFrame;
 
 			/* istanbul ignore next */
-			(options.requestAnimationFrame || safeRaf)(flushAfterPaintEffects);
+			(prevRaf || afterNextFrame)(flushAfterPaintEffects);
 		}
 	};
 }
 
-function handleEffects(effects) {
-	effects.forEach(invokeCleanup);
-	effects.forEach(invokeEffect);
-	return [];
-}
-
+/**
+ * @param {import('./internal').EffectHookState} hook
+ */
 function invokeCleanup(hook) {
 	if (hook._cleanup) hook._cleanup();
 }
@@ -268,6 +291,10 @@ function invokeEffect(hook) {
 	if (typeof result === 'function') hook._cleanup = result;
 }
 
+/**
+ * @param {any[]} oldArgs
+ * @param {any[]} newArgs
+ */
 function argsChanged(oldArgs, newArgs) {
 	return !oldArgs || newArgs.some((arg, index) => arg !== oldArgs[index]);
 }

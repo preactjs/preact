@@ -16,10 +16,7 @@ describe('createContext', () => {
 	it('should return a valid Provider Component', () => {
 		const { Provider } = createContext();
 		const contextValue = { value: 'test' };
-		const children = [
-			<div>child1</div>,
-			<div>child2</div>
-		];
+		const children = [<div>child1</div>, <div>child2</div>];
 
 		const providerComponent = <Provider {...contextValue}>{children}</Provider>;
 		//expect(providerComponent).to.have.property('tag', 'Provider');

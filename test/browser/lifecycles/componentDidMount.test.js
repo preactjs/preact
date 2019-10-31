@@ -4,7 +4,6 @@ import { setupScratch, teardown } from '../../_util/helpers';
 /** @jsx createElement */
 
 describe('Lifecycle methods', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 

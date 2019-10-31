@@ -1,12 +1,15 @@
-import * as preact from "./index";
+import * as preact from './index';
 
 export interface Options extends preact.Options {
 	/** Attach a hook that is invoked before render, mainly to check the arguments. */
-	_root?(vnode: preact.ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment): void;
+	_root?(
+		vnode: preact.ComponentChild,
+		parent: Element | Document | ShadowRoot | DocumentFragment
+	): void;
 	/** Attach a hook that is invoked before a vnode is diffed. */
 	_diff?(vnode: VNode): void;
 	/** Attach a hook that is invoked after a tree was mounted or was updated. */
-	_commit?(vnode: VNode): void;
+	_commit?(vnode: VNode, commitQueue: Component[]): void;
 	/** Attach a hook that is invoked before a vnode has rendered. */
 	_render?(vnode: VNode): void;
 	/** Attach a hook that is invoked before a hook's state is queried. */
@@ -15,14 +18,17 @@ export interface Options extends preact.Options {
 	_catchError(error: any, vnode: VNode, oldVNode: VNode | undefined): void;
 }
 
-export interface FunctionalComponent<P = {}> extends preact.FunctionComponent<P> {
+export interface FunctionalComponent<P = {}>
+	extends preact.FunctionComponent<P> {
 	// Define getDerivedStateFromProps as undefined on FunctionalComponent
 	// to get rid of some errors in `diff()`
 	getDerivedStateFromProps?: undefined;
 }
 
 // Redefine ComponentFactory using our new internal FunctionalComponent interface above
-export type ComponentFactory<P> = preact.ComponentClass<P> | FunctionalComponent<P>;
+export type ComponentFactory<P> =
+	| preact.ComponentClass<P>
+	| FunctionalComponent<P>;
 
 export interface PreactElement extends HTMLElement {
 	_children?: VNode<any> | null;
@@ -39,8 +45,8 @@ export interface PreactElement extends HTMLElement {
 
 export interface VNode<P = {}> extends preact.VNode<P> {
 	// Redefine type here using our internal ComponentFactory type
-	type: string | ComponentFactory<P> | null;
-	props: P & { children: preact.ComponentChildren } | string | number | null;
+	type: string | ComponentFactory<P>;
+	props: P & { children: preact.ComponentChildren };
 	_children: Array<VNode<any>> | null;
 	_parent: VNode | null;
 	_depth: number | null;
