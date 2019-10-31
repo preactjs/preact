@@ -1,8 +1,11 @@
-import * as preact from "./index";
+import * as preact from './index';
 
 export interface Options extends preact.Options {
 	/** Attach a hook that is invoked before render, mainly to check the arguments. */
-	_root?(vnode: preact.ComponentChild, parent: Element | Document | ShadowRoot | DocumentFragment): void;
+	_root?(
+		vnode: preact.ComponentChild,
+		parent: Element | Document | ShadowRoot | DocumentFragment
+	): void;
 	/** Attach a hook that is invoked before a vnode is diffed. */
 	_diff?(vnode: VNode): void;
 	/** Attach a hook that is invoked after a tree was mounted or was updated. */
@@ -15,14 +18,17 @@ export interface Options extends preact.Options {
 	_catchError(error: any, vnode: VNode, oldVNode: VNode | undefined): void;
 }
 
-export interface FunctionalComponent<P = {}> extends preact.FunctionComponent<P> {
+export interface FunctionalComponent<P = {}>
+	extends preact.FunctionComponent<P> {
 	// Define getDerivedStateFromProps as undefined on FunctionalComponent
 	// to get rid of some errors in `diff()`
 	getDerivedStateFromProps?: undefined;
 }
 
 // Redefine ComponentFactory using our new internal FunctionalComponent interface above
-export type ComponentFactory<P> = preact.ComponentClass<P> | FunctionalComponent<P>;
+export type ComponentFactory<P> =
+	| preact.ComponentClass<P>
+	| FunctionalComponent<P>;
 
 export interface PreactElement extends HTMLElement {
 	_children?: VNode<any> | null;

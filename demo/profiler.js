@@ -1,7 +1,10 @@
 import { createElement, Component, options } from 'preact';
 
 function getPrimes(max) {
-	let sieve = [], i, j, primes = [];
+	let sieve = [],
+		i,
+		j,
+		primes = [];
 	for (i = 2; i <= max; ++i) {
 		if (!sieve[i]) {
 			// i has not been marked -- it is prime
@@ -48,8 +51,8 @@ export default class ProfilerDemo extends Component {
 	}
 
 	componentDidMount() {
-		options._diff = vnode => vnode.startTime = performance.now();
-		options.diffed = vnode => vnode.endTime = performance.now();
+		options._diff = vnode => (vnode.startTime = performance.now());
+		options.diffed = vnode => (vnode.endTime = performance.now());
 	}
 
 	componentWillUnmount() {
@@ -65,9 +68,16 @@ export default class ProfilerDemo extends Component {
 		return (
 			<div class="foo">
 				<h1>⚛ Preact</h1>
-				<p><b>Devtools Profiler integration 🕒</b></p>
-				<Foo><PrimeNumber><Foo>I'm a fast component</Foo><Bar /></PrimeNumber></Foo>
-				<Foo>I'm the fastest component   🎉</Foo>
+				<p>
+					<b>Devtools Profiler integration 🕒</b>
+				</p>
+				<Foo>
+					<PrimeNumber>
+						<Foo>I'm a fast component</Foo>
+						<Bar />
+					</PrimeNumber>
+				</Foo>
+				<Foo>I'm the fastest component 🎉</Foo>
 				<span>Counter: {this.state.counter}</span>
 				<br />
 				<br />

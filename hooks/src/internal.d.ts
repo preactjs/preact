@@ -34,7 +34,7 @@ export interface Component extends PreactComponent<any, any> {
 
 export type HookState = EffectHookState | MemoHookState | ReducerHookState;
 
-export type Effect = () => (void | Cleanup);
+export type Effect = () => void | Cleanup;
 export type Cleanup = () => void;
 
 export interface EffectHookState {

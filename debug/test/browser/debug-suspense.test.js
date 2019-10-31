@@ -162,8 +162,7 @@ describe('debug with suspense', () => {
 						</Suspense>,
 						scratch
 					);
-				}
-				catch (e) {
+				} catch (e) {
 					error = e;
 				}
 

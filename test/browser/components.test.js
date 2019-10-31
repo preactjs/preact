@@ -1,16 +1,27 @@
-import { createElement as h, render, Component, Fragment } from '../../src/index';
+import {
+	createElement as h,
+	render,
+	Component,
+	Fragment
+} from '../../src/index';
 import { setupRerender } from 'preact/test-utils';
-import { setupScratch, teardown, getMixedArray, mixedArrayHTML, serializeHtml } from '../_util/helpers';
+import {
+	setupScratch,
+	teardown,
+	getMixedArray,
+	mixedArrayHTML,
+	serializeHtml
+} from '../_util/helpers';
 import { div, span, p } from '../_util/dom';
 
 /** @jsx h */
 
-let spyAll = obj => Object.keys(obj).forEach( key => sinon.spy(obj,key) );
+let spyAll = obj => Object.keys(obj).forEach(key => sinon.spy(obj, key));
 
 function getAttributes(node) {
 	let attrs = {};
 	if (node.attributes) {
-		for (let i=node.attributes.length; i--; ) {
+		for (let i = node.attributes.length; i--; ) {
 			attrs[node.attributes[i].name] = node.attributes[i].value;
 		}
 	}
@@ -19,15 +30,19 @@ function getAttributes(node) {
 
 // hacky normalization of attribute order across browsers.
 function sortAttributes(html) {
-	return html.replace(/<([a-z0-9-]+)((?:\s[a-z0-9:_.-]+=".*?")+)((?:\s*\/)?>)/gi, (s, pre, attrs, after) => {
-		let list = attrs.match(/\s[a-z0-9:_.-]+=".*?"/gi).sort( (a, b) => a>b ? 1 : -1 );
-		if (~after.indexOf('/')) after = '></'+pre+'>';
-		return '<' + pre + list.join('') + after;
-	});
+	return html.replace(
+		/<([a-z0-9-]+)((?:\s[a-z0-9:_.-]+=".*?")+)((?:\s*\/)?>)/gi,
+		(s, pre, attrs, after) => {
+			let list = attrs
+				.match(/\s[a-z0-9:_.-]+=".*?"/gi)
+				.sort((a, b) => (a > b ? 1 : -1));
+			if (~after.indexOf('/')) after = '></' + pre + '>';
+			return '<' + pre + list.join('') + after;
+		}
+	);
 }
 
 describe('Components', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -44,7 +59,6 @@ describe('Components', () => {
 	});
 
 	describe('Component construction', () => {
-
 		/** @type {object} */
 		let instance;
 		let PROPS;
@@ -66,26 +80,25 @@ describe('Components', () => {
 			render(<C1 />, scratch);
 
 			expect(C1.prototype.render)
-				.to.have.been.calledOnce
-				.and.to.have.been.calledWithMatch({}, {})
+				.to.have.been.calledOnce.and.to.have.been.calledWithMatch({}, {})
 				.and.to.have.returned(sinon.match({ type: 'div' }));
 
 			expect(scratch.innerHTML).to.equal('<div>C1</div>');
 		});
 
-
 		it('should render functional components', () => {
-			const C3 = sinon.spy( props => <div {...props} /> );
+			const C3 = sinon.spy(props => <div {...props} />);
 
 			render(<C3 {...PROPS} />, scratch);
 
 			expect(C3)
-				.to.have.been.calledOnce
-				.and.to.have.been.calledWithMatch(PROPS)
-				.and.to.have.returned(sinon.match({
-					type: 'div',
-					props: PROPS
-				}));
+				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(PROPS)
+				.and.to.have.returned(
+					sinon.match({
+						type: 'div',
+						props: PROPS
+					})
+				);
 
 			expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
 		});
@@ -109,12 +122,13 @@ describe('Components', () => {
 			expect(constructorProps).to.deep.equal(PROPS);
 
 			expect(C2.prototype.render)
-				.to.have.been.calledOnce
-				.and.to.have.been.calledWithMatch(PROPS, {})
-				.and.to.have.returned(sinon.match({
-					type: 'div',
-					props: PROPS
-				}));
+				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(PROPS, {})
+				.and.to.have.returned(
+					sinon.match({
+						type: 'div',
+						props: PROPS
+					})
+				);
 
 			expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
 		});
@@ -210,8 +224,7 @@ describe('Components', () => {
 			render(<Foo {...PROPS} />, scratch);
 
 			expect(Foo.prototype.render)
-				.to.have.been.calledOnce
-				.and.to.have.been.calledWithMatch(PROPS, {}, {})
+				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(PROPS, {}, {})
 				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal({});
@@ -220,19 +233,24 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div foo="bar">Hello</div>');
 		});
 
-		it('should render Component classes that don\'t pass args into the Component constructor', () => {
-			function Foo () {
+		it("should render Component classes that don't pass args into the Component constructor", () => {
+			function Foo() {
 				Component.call(this);
 				instance = this;
 				this.state = STATE;
 			}
-			Foo.prototype.render = sinon.spy((props, state) => <div {...props}>{state.text}</div>);
+			Foo.prototype.render = sinon.spy((props, state) => (
+				<div {...props}>{state.text}</div>
+			));
 
 			render(<Foo {...PROPS} />, scratch);
 
 			expect(Foo.prototype.render)
-				.to.have.been.calledOnce
-				.and.to.have.been.calledWithMatch(PROPS, STATE, {})
+				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(
+					PROPS,
+					STATE,
+					{}
+				)
 				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal(STATE);
@@ -327,20 +345,25 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<p>B</p>');
 		});
 
-		it('should render components that don\'t pass args into the Component constructor (unistore pattern)', () => {
+		it("should render components that don't pass args into the Component constructor (unistore pattern)", () => {
 			// Pattern unistore uses for connect: https://git.io/fxRqu
 			function Wrapper() {
 				instance = this;
 				this.state = STATE;
-				this.render = sinon.spy((props, state) => <div {...props} >{state.text}</div>);
+				this.render = sinon.spy((props, state) => (
+					<div {...props}>{state.text}</div>
+				));
 			}
 			(Wrapper.prototype = new Component()).constructor = Wrapper;
 
 			render(<Wrapper {...PROPS} />, scratch);
 
 			expect(instance.render)
-				.to.have.been.calledOnce
-				.and.to.have.been.calledWithMatch(PROPS, STATE, {})
+				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(
+					PROPS,
+					STATE,
+					{}
+				)
 				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal(STATE);
@@ -349,19 +372,24 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div foo="bar">Hello</div>');
 		});
 
-		it('should render components that don\'t call Component constructor', () => {
+		it("should render components that don't call Component constructor", () => {
 			function Foo() {
 				instance = this;
 				this.state = STATE;
 			}
 			Foo.prototype = Object.create(Component);
-			Foo.prototype.render = sinon.spy((props, state) => <div {...props}>{state.text}</div>);
+			Foo.prototype.render = sinon.spy((props, state) => (
+				<div {...props}>{state.text}</div>
+			));
 
 			render(<Foo {...PROPS} />, scratch);
 
 			expect(Foo.prototype.render)
-				.to.have.been.calledOnce
-				.and.to.have.been.calledWithMatch(PROPS, STATE, {})
+				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(
+					PROPS,
+					STATE,
+					{}
+				)
 				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal(STATE);
@@ -370,17 +398,16 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div foo="bar">Hello</div>');
 		});
 
-		it('should render components that don\'t call Component constructor and don\'t initialize state', () => {
-			function Foo () {
+		it("should render components that don't call Component constructor and don't initialize state", () => {
+			function Foo() {
 				instance = this;
 			}
-			Foo.prototype.render = sinon.spy((props) => <div {...props}>Hello</div>);
+			Foo.prototype.render = sinon.spy(props => <div {...props}>Hello</div>);
 
 			render(<Foo {...PROPS} />, scratch);
 
 			expect(Foo.prototype.render)
-				.to.have.been.calledOnce
-				.and.to.have.been.calledWithMatch(PROPS, {}, {})
+				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(PROPS, {}, {})
 				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal({});
@@ -389,7 +416,7 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div foo="bar">Hello</div>');
 		});
 
-		it('should render components that don\'t inherit from Component', () => {
+		it("should render components that don't inherit from Component", () => {
 			class Foo {
 				constructor() {
 					instance = this;
@@ -404,8 +431,11 @@ describe('Components', () => {
 			render(<Foo {...PROPS} />, scratch);
 
 			expect(Foo.prototype.render)
-				.to.have.been.calledOnce
-				.and.to.have.been.calledWithMatch(PROPS, STATE, {})
+				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(
+					PROPS,
+					STATE,
+					{}
+				)
 				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal(STATE);
@@ -414,19 +444,24 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div foo="bar">Hello</div>');
 		});
 
-		it('should render components that don\'t inherit from Component (unistore pattern)', () => {
+		it("should render components that don't inherit from Component (unistore pattern)", () => {
 			// Pattern unistore uses for Provider: https://git.io/fxRqR
 			function Provider() {
 				instance = this;
 				this.state = STATE;
 			}
-			Provider.prototype.render = sinon.spy((props, state) => <div {...PROPS}>{state.text}</div>);
+			Provider.prototype.render = sinon.spy((props, state) => (
+				<div {...PROPS}>{state.text}</div>
+			));
 
 			render(<Provider {...PROPS} />, scratch);
 
 			expect(Provider.prototype.render)
-				.to.have.been.calledOnce
-				.and.to.have.been.calledWithMatch(PROPS, STATE, {})
+				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(
+					PROPS,
+					STATE,
+					{}
+				)
 				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal(STATE);
@@ -435,7 +470,7 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div foo="bar">Hello</div>');
 		});
 
-		it('should render components that don\'t inherit from Component and don\'t initialize state', () => {
+		it("should render components that don't inherit from Component and don't initialize state", () => {
 			class Foo {
 				constructor() {
 					instance = this;
@@ -449,8 +484,7 @@ describe('Components', () => {
 			render(<Foo {...PROPS} />, scratch);
 
 			expect(Foo.prototype.render)
-				.to.have.been.calledOnce
-				.and.to.have.been.calledWithMatch(PROPS, {}, {})
+				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(PROPS, {}, {})
 				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal({});
@@ -472,8 +506,7 @@ describe('Components', () => {
 			render(<Foo {...PROPS} />, scratch);
 
 			expect(Foo.prototype.render)
-				.to.have.been.calledOnce
-				.and.to.have.been.calledWithMatch(PROPS, {}, {})
+				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(PROPS, {}, {})
 				.and.to.have.returned(undefined);
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal({});
@@ -560,7 +593,9 @@ describe('Components', () => {
 		comp.setState({ alt: false });
 		comp.forceUpdate();
 		rerender();
-		expect(scratch.innerHTML, 'switching to element').to.equal('<div>test</div>');
+		expect(scratch.innerHTML, 'switching to element').to.equal(
+			'<div>test</div>'
+		);
 
 		comp.setState({ alt: true });
 		comp.forceUpdate();
@@ -571,9 +606,7 @@ describe('Components', () => {
 	// Test for Issue preactjs/preact#1616
 	it('should maintain order when setting state (that inserts dom-elements)', () => {
 		let add, addTwice, reset;
-		const Entry = props => (
-			<div>{props.children}</div>
-		);
+		const Entry = props => <div>{props.children}</div>;
 
 		class App extends Component {
 			constructor(props) {
@@ -602,9 +635,7 @@ describe('Components', () => {
 				return (
 					<div>
 						{this.state.values.map(v => (
-							<Entry>
-								{v}
-							</Entry>
+							<Entry>{v}</Entry>
 						))}
 						<button>First Button</button>
 						<button>Second Button</button>
@@ -615,39 +646,49 @@ describe('Components', () => {
 		}
 
 		render(<App />, scratch);
-		expect(scratch.firstChild.innerHTML).to.equal('<div>abc</div>' +
-			'<button>First Button</button><button>Second Button</button><button>Third Button</button>');
+		expect(scratch.firstChild.innerHTML).to.equal(
+			'<div>abc</div>' +
+				'<button>First Button</button><button>Second Button</button><button>Third Button</button>'
+		);
 
 		add();
 		rerender();
-		expect(scratch.firstChild.innerHTML).to.equal('<div>abc</div><div>def' +
-			'</div><button>First Button</button><button>Second Button</button><button>Third Button</button>');
+		expect(scratch.firstChild.innerHTML).to.equal(
+			'<div>abc</div><div>def' +
+				'</div><button>First Button</button><button>Second Button</button><button>Third Button</button>'
+		);
 
 		add();
 		rerender();
-		expect(scratch.firstChild.innerHTML).to.equal('<div>abc</div><div>def</div><div>def' +
-			'</div><button>First Button</button><button>Second Button</button><button>Third Button</button>');
+		expect(scratch.firstChild.innerHTML).to.equal(
+			'<div>abc</div><div>def</div><div>def' +
+				'</div><button>First Button</button><button>Second Button</button><button>Third Button</button>'
+		);
 
 		reset();
 		rerender();
-		expect(scratch.firstChild.innerHTML).to.equal('<div>abc</div>' +
-			'<button>First Button</button><button>Second Button</button><button>Third Button</button>');
+		expect(scratch.firstChild.innerHTML).to.equal(
+			'<div>abc</div>' +
+				'<button>First Button</button><button>Second Button</button><button>Third Button</button>'
+		);
 
 		addTwice();
 		rerender();
-		expect(scratch.firstChild.innerHTML).to.equal('<div>abc</div><div>def</div><div>ghi' +
-			'</div><button>First Button</button><button>Second Button</button><button>Third Button</button>');
+		expect(scratch.firstChild.innerHTML).to.equal(
+			'<div>abc</div><div>def</div><div>ghi' +
+				'</div><button>First Button</button><button>Second Button</button><button>Third Button</button>'
+		);
 	});
 
 	// Test for Issue preactjs/preact#254
 	it('should not recycle common class children with different keys', () => {
 		let idx = 0;
-		let msgs = ['A','B','C','D','E','F','G','H'];
+		let msgs = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 		let sideEffect = sinon.spy();
 
 		class Comp extends Component {
 			componentWillMount() {
-				this.innerMsg = msgs[(idx++ % 8)];
+				this.innerMsg = msgs[idx++ % 8];
 				sideEffect();
 			}
 			render() {
@@ -667,9 +708,9 @@ describe('Components', () => {
 			render(_, { alt }) {
 				return (
 					<div>
-						{alt ? null : (<Comp key={1} alt={alt} />)}
-						{alt ? null : (<Comp key={2} alt={alt} />)}
-						{alt ? (<Comp key={3} alt={alt} />) : null}
+						{alt ? null : <Comp key={1} alt={alt} />}
+						{alt ? null : <Comp key={2} alt={alt} />}
+						{alt ? <Comp key={3} alt={alt} /> : null}
 					</div>
 				);
 			}
@@ -685,16 +726,18 @@ describe('Components', () => {
 			render(_, { alt }) {
 				return (
 					<div>
-						{alt ? null : (<Comp alt={alt} />)}
-						{alt ? null : (<Comp alt={alt} />)}
-						{alt ? (<Comp alt={alt} />) : null}
+						{alt ? null : <Comp alt={alt} />}
+						{alt ? null : <Comp alt={alt} />}
+						{alt ? <Comp alt={alt} /> : null}
 					</div>
 				);
 			}
 		}
 
 		render(<GoodContainer />, scratch);
-		expect(scratch.textContent, 'new component with key present').to.equal('AB');
+		expect(scratch.textContent, 'new component with key present').to.equal(
+			'AB'
+		);
 		expect(Comp.prototype.componentWillMount).to.have.been.calledTwice;
 		expect(sideEffect).to.have.been.calledTwice;
 
@@ -702,7 +745,10 @@ describe('Components', () => {
 		Comp.prototype.componentWillMount.resetHistory();
 		good.setState({ alt: true });
 		rerender();
-		expect(scratch.textContent, 'new component with key present re-rendered').to.equal('C');
+		expect(
+			scratch.textContent,
+			'new component with key present re-rendered'
+		).to.equal('C');
 		//we are recycling the first 2 components already rendered, just need a new one
 		expect(Comp.prototype.componentWillMount).to.have.been.calledOnce;
 		expect(sideEffect).to.have.been.calledOnce;
@@ -719,18 +765,21 @@ describe('Components', () => {
 		bad.setState({ alt: true });
 		rerender();
 
-		expect(scratch.textContent, 'use null placeholders to detect new component is appended').to.equal('F');
+		expect(
+			scratch.textContent,
+			'use null placeholders to detect new component is appended'
+		).to.equal('F');
 		expect(Comp.prototype.componentWillMount).to.be.calledOnce;
 		expect(sideEffect).to.be.calledOnce;
 	});
 
 	describe('array children', () => {
-		it('should render DOM element\'s array children', () => {
+		it("should render DOM element's array children", () => {
 			render(<div>{getMixedArray()}</div>, scratch);
 			expect(scratch.firstChild.innerHTML).to.equal(mixedArrayHTML);
 		});
 
-		it('should render Component\'s array children', () => {
+		it("should render Component's array children", () => {
 			const Foo = () => getMixedArray();
 
 			render(<Foo />, scratch);
@@ -738,12 +787,8 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal(mixedArrayHTML);
 		});
 
-		it('should render Fragment\'s array children', () => {
-			const Foo = () => (
-				<Fragment>
-					{getMixedArray()}
-				</Fragment>
-			);
+		it("should render Fragment's array children", () => {
+			const Foo = () => <Fragment>{getMixedArray()}</Fragment>;
 
 			render(<Foo />, scratch);
 
@@ -754,9 +799,13 @@ describe('Components', () => {
 			const Todo = () => (
 				<ul>
 					<li>A header</li>
-					{['a','b'].map(value => <li>{value}</li>)}
+					{['a', 'b'].map(value => (
+						<li>{value}</li>
+					))}
 					<li>A divider</li>
-					{['c', 'd'].map(value => <li>{value}</li>)}
+					{['c', 'd'].map(value => (
+						<li>{value}</li>
+					))}
 					<li>A footer</li>
 				</ul>
 			);
@@ -797,14 +846,14 @@ describe('Components', () => {
 		it('should support passing children as a prop', () => {
 			const Foo = props => <div {...props} />;
 
-			render(<Foo a="b" children={[
-				<span class="bar">bar</span>,
-				'123',
-				456
-			]}
-			       />, scratch);
+			render(
+				<Foo a="b" children={[<span class="bar">bar</span>, '123', 456]} />,
+				scratch
+			);
 
-			expect(scratch.innerHTML).to.equal('<div a="b"><span class="bar">bar</span>123456</div>');
+			expect(scratch.innerHTML).to.equal(
+				'<div a="b"><span class="bar">bar</span>123456</div>'
+			);
 		});
 
 		it('should be ignored when explicit children exist', () => {
@@ -860,7 +909,12 @@ describe('Components', () => {
 		});
 
 		it('should be a VNode with a DOM node child', () => {
-			render(<Foo><span /></Foo>, scratch);
+			render(
+				<Foo>
+					<span />
+				</Foo>,
+				scratch
+			);
 
 			expect(children).to.be.an('object');
 			expect(children.type).to.equal('span');
@@ -868,7 +922,12 @@ describe('Components', () => {
 		});
 
 		it('should be a VNode with a Component child', () => {
-			render(<Foo><Bar /></Foo>, scratch);
+			render(
+				<Foo>
+					<Bar />
+				</Foo>,
+				scratch
+			);
 
 			expect(children).to.be.an('object');
 			expect(children.type).to.equal(Bar);
@@ -885,7 +944,14 @@ describe('Components', () => {
 		});
 
 		it('should be an array with multiple children', () => {
-			render(<Foo>0<span /><input /><div />1</Foo>, scratch);
+			render(
+				<Foo>
+					0<span />
+					<input />
+					<div />1
+				</Foo>,
+				scratch
+			);
 
 			expect(children).to.be.an('array');
 			expect(children[0]).to.equal('0');
@@ -893,7 +959,9 @@ describe('Components', () => {
 			expect(children[2].type).to.equal('input');
 			expect(children[3].type).to.equal('div');
 			expect(children[4]).to.equal('1');
-			expect(scratch.innerHTML).to.equal(`<div>0<span></span><input><div></div>1</div>`);
+			expect(scratch.innerHTML).to.equal(
+				`<div>0<span></span><input><div></div>1</div>`
+			);
 		});
 
 		it('should be an array with an array as children', () => {
@@ -912,21 +980,24 @@ describe('Components', () => {
 			const list4 = [6, 7];
 			const list5 = [8, 9];
 
-			render(<Foo>{[list1, list2]}{[list3, list4]}{list5}</Foo>, scratch);
+			render(
+				<Foo>
+					{[list1, list2]}
+					{[list3, list4]}
+					{list5}
+				</Foo>,
+				scratch
+			);
 
 			expect(children).to.be.an('array');
-			expect(children).to.deep.equal([
-				[list1, list2],
-				[list3, list4],
-				list5
-			]);
+			expect(children).to.deep.equal([[list1, list2], [list3, list4], list5]);
 			expect(scratch.innerHTML).to.equal('<div>0123456789</div>');
 		});
 	});
 
 	describe('High-Order Components', () => {
 		it('should render wrapper HOCs', () => {
-			const text = 'We\'ll throw some happy little limbs on this tree.';
+			const text = "We'll throw some happy little limbs on this tree.";
 
 			function withBobRoss(ChildComponent) {
 				return class BobRossIpsum extends Component {
@@ -948,7 +1019,8 @@ describe('Components', () => {
 		});
 
 		it('should render HOCs with generic children', () => {
-			const text = 'Let your imagination just wonder around when you\'re doing these things.';
+			const text =
+				"Let your imagination just wonder around when you're doing these things.";
 
 			class BobRossProvider extends Component {
 				getChildContext() {
@@ -969,47 +1041,44 @@ describe('Components', () => {
 			const Speak = () => (
 				<BobRossProvider>
 					<span>A span</span>
-					<BobRossConsumer>
-						{ text => <Say text={text} /> }
-					</BobRossConsumer>
+					<BobRossConsumer>{text => <Say text={text} />}</BobRossConsumer>
 					<span>A final span</span>
 				</BobRossProvider>
 			);
 
 			render(<Speak />, scratch);
 
-			expect(scratch.innerHTML).to.equal(`<span>A span</span><div>${text}</div><span>A final span</span>`);
+			expect(scratch.innerHTML).to.equal(
+				`<span>A span</span><div>${text}</div><span>A final span</span>`
+			);
 		});
 
 		it('should render nested functional components', () => {
 			const PROPS = { foo: 'bar', onBaz: () => {} };
 
-			const Outer = sinon.spy(
-				props => <Inner {...props} />
-			);
+			const Outer = sinon.spy(props => <Inner {...props} />);
 
-			const Inner = sinon.spy(
-				props => <div {...props}>inner</div>
-			);
+			const Inner = sinon.spy(props => <div {...props}>inner</div>);
 
 			render(<Outer {...PROPS} />, scratch);
 
-
 			expect(Outer)
-				.to.have.been.calledOnce
-				.and.to.have.been.calledWithMatch(PROPS)
-				.and.to.have.returned(sinon.match({
-					type: Inner,
-					props: PROPS
-				}));
+				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(PROPS)
+				.and.to.have.returned(
+					sinon.match({
+						type: Inner,
+						props: PROPS
+					})
+				);
 
 			expect(Inner)
-				.to.have.been.calledOnce
-				.and.to.have.been.calledWithMatch(PROPS)
-				.and.to.have.returned(sinon.match({
-					type: 'div',
-					props: { ...PROPS, children: 'inner' }
-				}));
+				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(PROPS)
+				.and.to.have.returned(
+					sinon.match({
+						type: 'div',
+						props: { ...PROPS, children: 'inner' }
+					})
+				);
 
 			expect(scratch.innerHTML).to.equal('<div foo="bar">inner</div>');
 		});
@@ -1030,9 +1099,11 @@ describe('Components', () => {
 			sinon.spy(Outer.prototype, 'componentWillUnmount');
 
 			let j = 0;
-			const Inner = sinon.spy(
-				props => <div j={++j} {...props}>inner</div>
-			);
+			const Inner = sinon.spy(props => (
+				<div j={++j} {...props}>
+					inner
+				</div>
+			));
 
 			render(<Outer foo="bar" />, scratch);
 
@@ -1040,20 +1111,21 @@ describe('Components', () => {
 			doRender();
 			rerender();
 
-			expect(Outer.prototype.componentWillUnmount)
-				.not.to.have.been.called;
+			expect(Outer.prototype.componentWillUnmount).not.to.have.been.called;
 
 			expect(Inner).to.have.been.calledTwice;
 
 			expect(Inner.secondCall)
 				.to.have.been.calledWithMatch({ foo: 'bar', i: 2 })
-				.and.to.have.returned(sinon.match({
-					props: {
-						j: 2,
-						i: 2,
-						foo: 'bar'
-					}
-				}));
+				.and.to.have.returned(
+					sinon.match({
+						props: {
+							j: 2,
+							i: 2,
+							foo: 'bar'
+						}
+					})
+				);
 
 			expect(getAttributes(scratch.firstElementChild)).to.eql({
 				j: '2',
@@ -1069,13 +1141,15 @@ describe('Components', () => {
 
 			expect(Inner.thirdCall)
 				.to.have.been.calledWithMatch({ foo: 'bar', i: 3 })
-				.and.to.have.returned(sinon.match({
-					props: {
-						j: 3,
-						i: 3,
-						foo: 'bar'
-					}
-				}));
+				.and.to.have.returned(
+					sinon.match({
+						props: {
+							j: 3,
+							i: 3,
+							foo: 'bar'
+						}
+					})
+				);
 
 			expect(getAttributes(scratch.firstElementChild)).to.eql({
 				j: '3',
@@ -1112,7 +1186,11 @@ describe('Components', () => {
 				componentDidMount() {}
 				componentWillUnmount() {}
 				render(props) {
-					return <div j={++j} {...props}>inner</div>;
+					return (
+						<div j={++j} {...props}>
+							inner
+						</div>
+					);
 				}
 			}
 			sinon.spy(Inner.prototype, 'render');
@@ -1137,13 +1215,15 @@ describe('Components', () => {
 
 			expect(Inner.prototype.render.secondCall)
 				.to.have.been.calledWithMatch({ foo: 'bar', i: 2 })
-				.and.to.have.returned(sinon.match({
-					props: {
-						j: 2,
-						i: 2,
-						foo: 'bar'
-					}
-				}));
+				.and.to.have.returned(
+					sinon.match({
+						props: {
+							j: 2,
+							i: 2,
+							foo: 'bar'
+						}
+					})
+				);
 
 			expect(getAttributes(scratch.firstElementChild)).to.eql({
 				j: '2',
@@ -1151,7 +1231,9 @@ describe('Components', () => {
 				foo: 'bar'
 			});
 
-			expect(serializeHtml(scratch)).to.equal(sortAttributes('<div foo="bar" j="2" i="2">inner</div>'));
+			expect(serializeHtml(scratch)).to.equal(
+				sortAttributes('<div foo="bar" j="2" i="2">inner</div>')
+			);
 
 			// update & flush
 			doRender();
@@ -1164,20 +1246,21 @@ describe('Components', () => {
 
 			expect(Inner.prototype.render.thirdCall)
 				.to.have.been.calledWithMatch({ foo: 'bar', i: 3 })
-				.and.to.have.returned(sinon.match({
-					props: {
-						j: 3,
-						i: 3,
-						foo: 'bar'
-					}
-				}));
+				.and.to.have.returned(
+					sinon.match({
+						props: {
+							j: 3,
+							i: 3,
+							foo: 'bar'
+						}
+					})
+				);
 
 			expect(getAttributes(scratch.firstElementChild)).to.eql({
 				j: '3',
 				i: '3',
 				foo: 'bar'
 			});
-
 
 			// update & flush
 			alt = true;
@@ -1193,7 +1276,9 @@ describe('Components', () => {
 			doRender();
 			rerender();
 
-			expect(serializeHtml(scratch)).to.equal(sortAttributes('<div foo="bar" j="4" i="5">inner</div>'));
+			expect(serializeHtml(scratch)).to.equal(
+				sortAttributes('<div foo="bar" j="4" i="5">inner</div>')
+			);
 		});
 
 		it('should resolve intermediary functional component', () => {
@@ -1222,7 +1307,9 @@ describe('Components', () => {
 
 			expect(Inner.prototype.componentWillMount).to.have.been.calledOnce;
 			expect(Inner.prototype.componentDidMount).to.have.been.calledOnce;
-			expect(Inner.prototype.componentWillMount).to.have.been.calledBefore(Inner.prototype.componentDidMount);
+			expect(Inner.prototype.componentWillMount).to.have.been.calledBefore(
+				Inner.prototype.componentDidMount
+			);
 
 			render(<asdf />, scratch);
 
@@ -1230,7 +1317,9 @@ describe('Components', () => {
 		});
 
 		it('should unmount children of high-order components without unmounting parent', () => {
-			let outer, inner2, counter=0;
+			let outer,
+				inner2,
+				counter = 0;
 
 			class Outer extends Component {
 				constructor(props, context) {
@@ -1240,9 +1329,9 @@ describe('Components', () => {
 						child: this.props.child
 					};
 				}
-				componentWillUnmount(){}
-				componentWillMount(){}
-				componentDidMount(){}
+				componentWillUnmount() {}
+				componentWillMount() {}
+				componentDidMount() {}
 				render(_, { child: C }) {
 					return <C />;
 				}
@@ -1250,11 +1339,11 @@ describe('Components', () => {
 			spyAll(Outer.prototype);
 
 			class Inner extends Component {
-				componentWillUnmount(){}
-				componentWillMount(){}
-				componentDidMount(){}
+				componentWillUnmount() {}
+				componentWillMount() {}
+				componentDidMount() {}
 				render() {
-					return h('element'+(++counter));
+					return h('element' + ++counter);
 				}
 			}
 			spyAll(Inner.prototype);
@@ -1264,11 +1353,11 @@ describe('Components', () => {
 					super(props, context);
 					inner2 = this;
 				}
-				componentWillUnmount(){}
-				componentWillMount(){}
-				componentDidMount(){}
+				componentWillUnmount() {}
+				componentWillMount() {}
+				componentDidMount() {}
 				render() {
-					return h('element'+(++counter));
+					return h('element' + ++counter);
 				}
 			}
 			spyAll(Inner2.prototype);
@@ -1276,14 +1365,20 @@ describe('Components', () => {
 			render(<Outer child={Inner} />, scratch);
 
 			// outer should only have been mounted once
-			expect(Outer.prototype.componentWillMount, 'outer initial').to.have.been.calledOnce;
-			expect(Outer.prototype.componentDidMount, 'outer initial').to.have.been.calledOnce;
-			expect(Outer.prototype.componentWillUnmount, 'outer initial').not.to.have.been.called;
+			expect(Outer.prototype.componentWillMount, 'outer initial').to.have.been
+				.calledOnce;
+			expect(Outer.prototype.componentDidMount, 'outer initial').to.have.been
+				.calledOnce;
+			expect(Outer.prototype.componentWillUnmount, 'outer initial').not.to.have
+				.been.called;
 
 			// inner should only have been mounted once
-			expect(Inner.prototype.componentWillMount, 'inner initial').to.have.been.calledOnce;
-			expect(Inner.prototype.componentDidMount, 'inner initial').to.have.been.calledOnce;
-			expect(Inner.prototype.componentWillUnmount, 'inner initial').not.to.have.been.called;
+			expect(Inner.prototype.componentWillMount, 'inner initial').to.have.been
+				.calledOnce;
+			expect(Inner.prototype.componentDidMount, 'inner initial').to.have.been
+				.calledOnce;
+			expect(Inner.prototype.componentWillUnmount, 'inner initial').not.to.have
+				.been.called;
 
 			outer.setState({ child: Inner2 });
 			outer.forceUpdate();
@@ -1292,22 +1387,31 @@ describe('Components', () => {
 			expect(Inner2.prototype.render).to.have.been.calledOnce;
 
 			// outer should still only have been mounted once
-			expect(Outer.prototype.componentWillMount, 'outer swap').to.have.been.calledOnce;
-			expect(Outer.prototype.componentDidMount, 'outer swap').to.have.been.calledOnce;
-			expect(Outer.prototype.componentWillUnmount, 'outer swap').not.to.have.been.called;
+			expect(Outer.prototype.componentWillMount, 'outer swap').to.have.been
+				.calledOnce;
+			expect(Outer.prototype.componentDidMount, 'outer swap').to.have.been
+				.calledOnce;
+			expect(Outer.prototype.componentWillUnmount, 'outer swap').not.to.have
+				.been.called;
 
 			// inner should only have been mounted once
-			expect(Inner2.prototype.componentWillMount, 'inner2 swap').to.have.been.calledOnce;
-			expect(Inner2.prototype.componentDidMount, 'inner2 swap').to.have.been.calledOnce;
-			expect(Inner2.prototype.componentWillUnmount, 'inner2 swap').not.to.have.been.called;
+			expect(Inner2.prototype.componentWillMount, 'inner2 swap').to.have.been
+				.calledOnce;
+			expect(Inner2.prototype.componentDidMount, 'inner2 swap').to.have.been
+				.calledOnce;
+			expect(Inner2.prototype.componentWillUnmount, 'inner2 swap').not.to.have
+				.been.called;
 
 			inner2.forceUpdate();
 			rerender();
 
 			expect(Inner2.prototype.render, 'inner2 update').to.have.been.calledTwice;
-			expect(Inner2.prototype.componentWillMount, 'inner2 update').to.have.been.calledOnce;
-			expect(Inner2.prototype.componentDidMount, 'inner2 update').to.have.been.calledOnce;
-			expect(Inner2.prototype.componentWillUnmount, 'inner2 update').not.to.have.been.called;
+			expect(Inner2.prototype.componentWillMount, 'inner2 update').to.have.been
+				.calledOnce;
+			expect(Inner2.prototype.componentDidMount, 'inner2 update').to.have.been
+				.calledOnce;
+			expect(Inner2.prototype.componentWillUnmount, 'inner2 update').not.to.have
+				.been.called;
 		});
 
 		it('should remount when swapping between HOC child types', () => {
@@ -1326,38 +1430,42 @@ describe('Components', () => {
 			}
 			spyAll(Inner.prototype);
 
-			const InnerFunc = () => (
-				<div class="inner-func">bar</div>
-			);
+			const InnerFunc = () => <div class="inner-func">bar</div>;
 
 			render(<Outer child={Inner} />, scratch);
 
-			expect(Inner.prototype.componentWillMount, 'initial mount').to.have.been.calledOnce;
-			expect(Inner.prototype.componentWillUnmount, 'initial mount').not.to.have.been.called;
+			expect(Inner.prototype.componentWillMount, 'initial mount').to.have.been
+				.calledOnce;
+			expect(Inner.prototype.componentWillUnmount, 'initial mount').not.to.have
+				.been.called;
 
 			Inner.prototype.componentWillMount.resetHistory();
 			render(<Outer child={InnerFunc} />, scratch);
 
-			expect(Inner.prototype.componentWillMount, 'unmount').not.to.have.been.called;
-			expect(Inner.prototype.componentWillUnmount, 'unmount').to.have.been.calledOnce;
+			expect(Inner.prototype.componentWillMount, 'unmount').not.to.have.been
+				.called;
+			expect(Inner.prototype.componentWillUnmount, 'unmount').to.have.been
+				.calledOnce;
 
 			Inner.prototype.componentWillUnmount.resetHistory();
 			render(<Outer child={Inner} />, scratch);
 
-			expect(Inner.prototype.componentWillMount, 'remount').to.have.been.calledOnce;
-			expect(Inner.prototype.componentWillUnmount, 'remount').not.to.have.been.called;
+			expect(Inner.prototype.componentWillMount, 'remount').to.have.been
+				.calledOnce;
+			expect(Inner.prototype.componentWillUnmount, 'remount').not.to.have.been
+				.called;
 		});
 	});
 
 	describe('Component Nesting', () => {
 		let useIntermediary = false;
 
-		let createComponent = (Intermediary) => {
+		let createComponent = Intermediary => {
 			class C extends Component {
 				componentWillMount() {}
 				render({ children }) {
 					if (!useIntermediary) return children;
-					let I = useIntermediary===true ? Intermediary : useIntermediary;
+					let I = useIntermediary === true ? Intermediary : useIntermediary;
 					return <I>{children}</I>;
 				}
 			}
@@ -1365,7 +1473,7 @@ describe('Components', () => {
 			return C;
 		};
 
-		let createFunction = () => sinon.spy( ({ children }) => children );
+		let createFunction = () => sinon.spy(({ children }) => children);
 
 		let F1 = createFunction();
 		let F2 = createFunction();
@@ -1375,70 +1483,160 @@ describe('Components', () => {
 		let C2 = createComponent(F2);
 		let C3 = createComponent(F3);
 
-		let reset = () => [C1, C2, C3].reduce(
-			(acc, c) => acc.concat( Object.keys(c.prototype).map(key => c.prototype[key]) ),
-			[F1, F2, F3]
-		).forEach( c => c.resetHistory() );
-
+		let reset = () =>
+			[C1, C2, C3]
+				.reduce(
+					(acc, c) =>
+						acc.concat(Object.keys(c.prototype).map(key => c.prototype[key])),
+					[F1, F2, F3]
+				)
+				.forEach(c => c.resetHistory());
 
 		it('should handle lifecycle for no intermediary in component tree', () => {
 			reset();
-			render(<C1><C2><C3>Some Text</C3></C2></C1>, scratch);
+			render(
+				<C1>
+					<C2>
+						<C3>Some Text</C3>
+					</C2>
+				</C1>,
+				scratch
+			);
 
-			expect(C1.prototype.componentWillMount, 'initial mount').to.have.been.calledOnce;
-			expect(C2.prototype.componentWillMount, 'initial mount').to.have.been.calledOnce;
-			expect(C3.prototype.componentWillMount, 'initial mount').to.have.been.calledOnce;
-
-			reset();
-			render(<C1><C2>Some Text</C2></C1>, scratch);
-
-			expect(C1.prototype.componentWillMount, 'unmount innermost, C1').not.to.have.been.called;
-			expect(C2.prototype.componentWillMount, 'unmount innermost, C2').not.to.have.been.called;
-
-			reset();
-			render(<C1><C3>Some Text</C3></C1>, scratch);
-
-			expect(C1.prototype.componentWillMount, 'swap innermost').not.to.have.been.called;
-			expect(C3.prototype.componentWillMount, 'swap innermost').to.have.been.calledOnce;
+			expect(C1.prototype.componentWillMount, 'initial mount').to.have.been
+				.calledOnce;
+			expect(C2.prototype.componentWillMount, 'initial mount').to.have.been
+				.calledOnce;
+			expect(C3.prototype.componentWillMount, 'initial mount').to.have.been
+				.calledOnce;
 
 			reset();
-			render(<C1><C2><C3>Some Text</C3></C2></C1>, scratch);
+			render(
+				<C1>
+					<C2>Some Text</C2>
+				</C1>,
+				scratch
+			);
 
-			expect(C1.prototype.componentWillMount, 'inject between, C1').not.to.have.been.called;
-			expect(C2.prototype.componentWillMount, 'inject between, C2').to.have.been.calledOnce;
-			expect(C3.prototype.componentWillMount, 'inject between, C3').to.have.been.calledOnce;
+			expect(C1.prototype.componentWillMount, 'unmount innermost, C1').not.to
+				.have.been.called;
+			expect(C2.prototype.componentWillMount, 'unmount innermost, C2').not.to
+				.have.been.called;
+
+			reset();
+			render(
+				<C1>
+					<C3>Some Text</C3>
+				</C1>,
+				scratch
+			);
+
+			expect(C1.prototype.componentWillMount, 'swap innermost').not.to.have.been
+				.called;
+			expect(C3.prototype.componentWillMount, 'swap innermost').to.have.been
+				.calledOnce;
+
+			reset();
+			render(
+				<C1>
+					<C2>
+						<C3>Some Text</C3>
+					</C2>
+				</C1>,
+				scratch
+			);
+
+			expect(C1.prototype.componentWillMount, 'inject between, C1').not.to.have
+				.been.called;
+			expect(C2.prototype.componentWillMount, 'inject between, C2').to.have.been
+				.calledOnce;
+			expect(C3.prototype.componentWillMount, 'inject between, C3').to.have.been
+				.calledOnce;
 		});
-
 
 		it('should handle lifecycle for nested intermediary functional components', () => {
 			useIntermediary = true;
 
 			render(<div />, scratch);
 			reset();
-			render(<C1><C2><C3>Some Text</C3></C2></C1>, scratch);
+			render(
+				<C1>
+					<C2>
+						<C3>Some Text</C3>
+					</C2>
+				</C1>,
+				scratch
+			);
 
-			expect(C1.prototype.componentWillMount, 'initial mount w/ intermediary fn, C1').to.have.been.calledOnce;
-			expect(C2.prototype.componentWillMount, 'initial mount w/ intermediary fn, C2').to.have.been.calledOnce;
-			expect(C3.prototype.componentWillMount, 'initial mount w/ intermediary fn, C3').to.have.been.calledOnce;
+			expect(
+				C1.prototype.componentWillMount,
+				'initial mount w/ intermediary fn, C1'
+			).to.have.been.calledOnce;
+			expect(
+				C2.prototype.componentWillMount,
+				'initial mount w/ intermediary fn, C2'
+			).to.have.been.calledOnce;
+			expect(
+				C3.prototype.componentWillMount,
+				'initial mount w/ intermediary fn, C3'
+			).to.have.been.calledOnce;
 
 			reset();
-			render(<C1><C2>Some Text</C2></C1>, scratch);
+			render(
+				<C1>
+					<C2>Some Text</C2>
+				</C1>,
+				scratch
+			);
 
-			expect(C1.prototype.componentWillMount, 'unmount innermost w/ intermediary fn, C1').not.to.have.been.called;
-			expect(C2.prototype.componentWillMount, 'unmount innermost w/ intermediary fn, C2').not.to.have.been.called;
+			expect(
+				C1.prototype.componentWillMount,
+				'unmount innermost w/ intermediary fn, C1'
+			).not.to.have.been.called;
+			expect(
+				C2.prototype.componentWillMount,
+				'unmount innermost w/ intermediary fn, C2'
+			).not.to.have.been.called;
 
 			reset();
-			render(<C1><C3>Some Text</C3></C1>, scratch);
+			render(
+				<C1>
+					<C3>Some Text</C3>
+				</C1>,
+				scratch
+			);
 
-			expect(C1.prototype.componentWillMount, 'swap innermost w/ intermediary fn').not.to.have.been.called;
-			expect(C3.prototype.componentWillMount, 'swap innermost w/ intermediary fn').to.have.been.calledOnce;
+			expect(
+				C1.prototype.componentWillMount,
+				'swap innermost w/ intermediary fn'
+			).not.to.have.been.called;
+			expect(
+				C3.prototype.componentWillMount,
+				'swap innermost w/ intermediary fn'
+			).to.have.been.calledOnce;
 
 			reset();
-			render(<C1><C2><C3>Some Text</C3></C2></C1>, scratch);
+			render(
+				<C1>
+					<C2>
+						<C3>Some Text</C3>
+					</C2>
+				</C1>,
+				scratch
+			);
 
-			expect(C1.prototype.componentWillMount, 'inject between, C1 w/ intermediary fn').not.to.have.been.called;
-			expect(C2.prototype.componentWillMount, 'inject between, C2 w/ intermediary fn').to.have.been.calledOnce;
-			expect(C3.prototype.componentWillMount, 'inject between, C3 w/ intermediary fn').to.have.been.calledOnce;
+			expect(
+				C1.prototype.componentWillMount,
+				'inject between, C1 w/ intermediary fn'
+			).not.to.have.been.called;
+			expect(
+				C2.prototype.componentWillMount,
+				'inject between, C2 w/ intermediary fn'
+			).to.have.been.calledOnce;
+			expect(
+				C3.prototype.componentWillMount,
+				'inject between, C3 w/ intermediary fn'
+			).to.have.been.calledOnce;
 		});
 
 		it('should render components by depth', () => {
@@ -1481,37 +1679,91 @@ describe('Components', () => {
 
 			render(<div />, scratch);
 			reset();
-			render(<C1><C2><C3>Some Text</C3></C2></C1>, scratch);
+			render(
+				<C1>
+					<C2>
+						<C3>Some Text</C3>
+					</C2>
+				</C1>,
+				scratch
+			);
 
-			expect(C1.prototype.componentWillMount, 'initial mount w/ intermediary div, C1').to.have.been.calledOnce;
-			expect(C2.prototype.componentWillMount, 'initial mount w/ intermediary div, C2').to.have.been.calledOnce;
-			expect(C3.prototype.componentWillMount, 'initial mount w/ intermediary div, C3').to.have.been.calledOnce;
+			expect(
+				C1.prototype.componentWillMount,
+				'initial mount w/ intermediary div, C1'
+			).to.have.been.calledOnce;
+			expect(
+				C2.prototype.componentWillMount,
+				'initial mount w/ intermediary div, C2'
+			).to.have.been.calledOnce;
+			expect(
+				C3.prototype.componentWillMount,
+				'initial mount w/ intermediary div, C3'
+			).to.have.been.calledOnce;
 
 			reset();
-			render(<C1><C2>Some Text</C2></C1>, scratch);
+			render(
+				<C1>
+					<C2>Some Text</C2>
+				</C1>,
+				scratch
+			);
 
-			expect(C1.prototype.componentWillMount, 'unmount innermost w/ intermediary div, C1').not.to.have.been.called;
-			expect(C2.prototype.componentWillMount, 'unmount innermost w/ intermediary div, C2').not.to.have.been.called;
+			expect(
+				C1.prototype.componentWillMount,
+				'unmount innermost w/ intermediary div, C1'
+			).not.to.have.been.called;
+			expect(
+				C2.prototype.componentWillMount,
+				'unmount innermost w/ intermediary div, C2'
+			).not.to.have.been.called;
 
 			reset();
-			render(<C1><C3>Some Text</C3></C1>, scratch);
+			render(
+				<C1>
+					<C3>Some Text</C3>
+				</C1>,
+				scratch
+			);
 
-			expect(C1.prototype.componentWillMount, 'swap innermost w/ intermediary div').not.to.have.been.called;
-			expect(C3.prototype.componentWillMount, 'swap innermost w/ intermediary div').to.have.been.calledOnce;
+			expect(
+				C1.prototype.componentWillMount,
+				'swap innermost w/ intermediary div'
+			).not.to.have.been.called;
+			expect(
+				C3.prototype.componentWillMount,
+				'swap innermost w/ intermediary div'
+			).to.have.been.calledOnce;
 
 			reset();
-			render(<C1><C2><C3>Some Text</C3></C2></C1>, scratch);
+			render(
+				<C1>
+					<C2>
+						<C3>Some Text</C3>
+					</C2>
+				</C1>,
+				scratch
+			);
 
-			expect(C1.prototype.componentWillMount, 'inject between, C1 w/ intermediary div').not.to.have.been.called;
-			expect(C2.prototype.componentWillMount, 'inject between, C2 w/ intermediary div').to.have.been.calledOnce;
-			expect(C3.prototype.componentWillMount, 'inject between, C3 w/ intermediary div').to.have.been.calledOnce;
+			expect(
+				C1.prototype.componentWillMount,
+				'inject between, C1 w/ intermediary div'
+			).not.to.have.been.called;
+			expect(
+				C2.prototype.componentWillMount,
+				'inject between, C2 w/ intermediary div'
+			).to.have.been.calledOnce;
+			expect(
+				C3.prototype.componentWillMount,
+				'inject between, C3 w/ intermediary div'
+			).to.have.been.calledOnce;
 		});
 	});
 
 	it('should set component._vnode._dom when sCU returns false', () => {
 		let parent;
-		 class Parent extends Component {
-			 render() {
+		class Parent extends Component {
+			render() {
 				parent = this;
 				return <Child />;
 			}
@@ -1567,7 +1819,7 @@ describe('Components', () => {
 				this.forceUpdate();
 			}
 			render() {
-				if (i++==0) return <div>foo</div>;
+				if (i++ == 0) return <div>foo</div>;
 				return <div>bar</div>;
 			}
 		}
@@ -1679,9 +1931,10 @@ describe('Components', () => {
 				super(props);
 				maybe = this;
 				this.state = { active: props.active || false };
-				toggleMaybeNull = () => this.setState(prev => ({
-					active: !prev.active
-				}));
+				toggleMaybeNull = () =>
+					this.setState(prev => ({
+						active: !prev.active
+					}));
 			}
 			render() {
 				return this.state.active ? <div>maybe</div> : null;
@@ -1693,16 +1946,15 @@ describe('Components', () => {
 				super(props);
 				child = this;
 				this.state = { tagName: 'p' };
-				swapChildTag = () => this.setState(prev => ({
-					tagName: prev.tagName == 'p' ? 'span' : 'p'
-				}));
-
+				swapChildTag = () =>
+					this.setState(prev => ({
+						tagName: prev.tagName == 'p' ? 'span' : 'p'
+					}));
 			}
 			render() {
 				return h(this.state.tagName, null, 'child');
 			}
 		}
-
 
 		function Sibling(props) {
 			sibling = this;
@@ -1723,15 +1975,16 @@ describe('Components', () => {
 		});
 
 		it('should keep c.base up to date if a nested child component changes DOM nodes', () => {
-			render((
+			render(
 				<ParentWithDom>
 					<Parent1>
 						<Parent2>
 							<Child />
 						</Parent2>
 					</Parent1>
-				</ParentWithDom>
-			), scratch);
+				</ParentWithDom>,
+				scratch
+			);
 
 			expect(scratch.innerHTML).to.equal('<div><p>child</p></div>');
 			expect(child.base).to.equalNode(scratch.firstChild.firstChild);
@@ -1750,13 +2003,16 @@ describe('Components', () => {
 		});
 
 		it('should not update sibling c.base if child component changes DOM nodes', () => {
-			let s1 = {}, s2 = {}, s3 = {}, s4 = {};
+			let s1 = {},
+				s2 = {},
+				s3 = {},
+				s4 = {};
 
-			render((
+			render(
 				<Fragment>
 					<ParentWithDom>
 						<Parent1>
-							<Parent2 >
+							<Parent2>
 								<Child />
 								<Sibling ref={s1} />
 							</Parent2>
@@ -1765,10 +2021,13 @@ describe('Components', () => {
 						<Sibling ref={s3} />
 					</ParentWithDom>
 					<Sibling ref={s4} />
-				</Fragment>
-			), scratch);
+				</Fragment>,
+				scratch
+			);
 
-			expect(scratch.innerHTML).to.equal('<div><p>child</p><p></p><p></p><p></p></div><p></p>');
+			expect(scratch.innerHTML).to.equal(
+				'<div><p>child</p><p></p><p></p><p></p></div><p></p>'
+			);
 			expect(child.base).to.equalNode(scratch.firstChild.firstChild);
 			expect(parent2.base).to.equalNode(child.base);
 			expect(parent1.base).to.equalNode(child.base);
@@ -1781,7 +2040,9 @@ describe('Components', () => {
 			swapChildTag();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal('<div><span>child</span><p></p><p></p><p></p></div><p></p>');
+			expect(scratch.innerHTML).to.equal(
+				'<div><span>child</span><p></p><p></p><p></p></div><p></p>'
+			);
 			expect(child.base).to.equalNode(scratch.firstChild.firstChild);
 			expect(parent2.base).to.equalNode(child.base);
 			expect(parent1.base).to.equalNode(child.base);
@@ -1793,12 +2054,13 @@ describe('Components', () => {
 		});
 
 		it('should not update parent c.base if child component changes DOM nodes and it is not first child component', () => {
-			render((
+			render(
 				<Parent1>
 					<Sibling />
 					<Child />
-				</Parent1>
-			), scratch);
+				</Parent1>,
+				scratch
+			);
 
 			expect(scratch.innerHTML).to.equal('<p></p><p>child</p>');
 			expect(child.base).to.equalNode(scratch.lastChild);
@@ -1815,13 +2077,14 @@ describe('Components', () => {
 		});
 
 		it('should update parent c.base if child component changes DOM nodes and it is first non-null child component', () => {
-			render((
+			render(
 				<Parent1>
 					<Null />
 					<Child />
 					<Sibling />
-				</Parent1>
-			), scratch);
+				</Parent1>,
+				scratch
+			);
 
 			expect(scratch.innerHTML).to.equal('<p>child</p><p></p>');
 			expect(nullInst.base).to.equalNode(null);
@@ -1840,7 +2103,7 @@ describe('Components', () => {
 		});
 
 		it('should not update parent c.base if child component changes DOM nodes and a parent is not first child component', () => {
-			render((
+			render(
 				<ParentWithDom>
 					<Parent1>
 						<Sibling />
@@ -1848,8 +2111,9 @@ describe('Components', () => {
 							<Child />
 						</Parent2>
 					</Parent1>
-				</ParentWithDom>
-			), scratch);
+				</ParentWithDom>,
+				scratch
+			);
 
 			expect(scratch.innerHTML).to.equal('<div><p></p><p>child</p></div>');
 			expect(child.base).to.equalNode(scratch.firstChild.lastChild);
@@ -1861,7 +2125,9 @@ describe('Components', () => {
 			swapChildTag();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal('<div><p></p><span>child</span></div>');
+			expect(scratch.innerHTML).to.equal(
+				'<div><p></p><span>child</span></div>'
+			);
 			expect(child.base).to.equalNode(scratch.firstChild.lastChild);
 			expect(parent2.base).to.equalNode(child.base);
 			expect(sibling.base).to.equalNode(scratch.firstChild.firstChild);
@@ -1870,91 +2136,129 @@ describe('Components', () => {
 		});
 
 		it('should update parent c.base if first child becomes null', () => {
-			render((
+			render(
 				<Parent1>
 					<MaybeNull active />
 					<Parent2>
 						<Child />
 					</Parent2>
-				</Parent1>
-			), scratch);
+				</Parent1>,
+				scratch
+			);
 
-			expect(scratch.innerHTML).to.equal([
-				div('maybe'),
-				p('child')
-			].join(''));
-			expect(maybe.base).to.equalNode(scratch.firstChild, 'initial - maybe.base');
-			expect(child.base).to.equalNode(scratch.lastChild, 'initial - child.base');
+			expect(scratch.innerHTML).to.equal([div('maybe'), p('child')].join(''));
+			expect(maybe.base).to.equalNode(
+				scratch.firstChild,
+				'initial - maybe.base'
+			);
+			expect(child.base).to.equalNode(
+				scratch.lastChild,
+				'initial - child.base'
+			);
 			expect(parent2.base).to.equalNode(child.base, 'initial - parent2.base');
 			expect(parent1.base).to.equalNode(maybe.base, 'initial - parent1.base');
 
 			toggleMaybeNull();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([
-				p('child')
-			].join(''));
+			expect(scratch.innerHTML).to.equal([p('child')].join(''));
 			expect(maybe.base).to.equalNode(null, 'toggleMaybe - maybe.base');
-			expect(child.base).to.equalNode(scratch.firstChild, 'toggleMaybe - child.base');
-			expect(parent2.base).to.equalNode(child.base, 'toggleMaybe - parent2.base');
-			expect(parent1.base).to.equalNode(child.base, 'toggleMaybe - parent1.base');
+			expect(child.base).to.equalNode(
+				scratch.firstChild,
+				'toggleMaybe - child.base'
+			);
+			expect(parent2.base).to.equalNode(
+				child.base,
+				'toggleMaybe - parent2.base'
+			);
+			expect(parent1.base).to.equalNode(
+				child.base,
+				'toggleMaybe - parent1.base'
+			);
 
 			swapChildTag();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([
-				span('child')
-			].join(''));
+			expect(scratch.innerHTML).to.equal([span('child')].join(''));
 			expect(maybe.base).to.equalNode(null, 'swapChildTag - maybe.base');
-			expect(child.base).to.equalNode(scratch.firstChild, 'swapChildTag - child.base');
-			expect(parent2.base).to.equalNode(child.base, 'swapChildTag - parent2.base');
-			expect(parent1.base).to.equalNode(child.base, 'swapChildTag - parent1.base');
+			expect(child.base).to.equalNode(
+				scratch.firstChild,
+				'swapChildTag - child.base'
+			);
+			expect(parent2.base).to.equalNode(
+				child.base,
+				'swapChildTag - parent2.base'
+			);
+			expect(parent1.base).to.equalNode(
+				child.base,
+				'swapChildTag - parent1.base'
+			);
 		});
 
 		it('should update parent c.base if first child becomes non-null', () => {
-			render((
+			render(
 				<Parent1>
 					<MaybeNull />
 					<Parent2>
 						<Child />
 					</Parent2>
-				</Parent1>
-			), scratch);
+				</Parent1>,
+				scratch
+			);
 
-			expect(scratch.innerHTML).to.equal([
-				p('child')
-			].join(''));
+			expect(scratch.innerHTML).to.equal([p('child')].join(''));
 			expect(maybe.base).to.equalNode(null, 'initial - maybe.base');
-			expect(child.base).to.equalNode(scratch.firstChild, 'initial - child.base');
+			expect(child.base).to.equalNode(
+				scratch.firstChild,
+				'initial - child.base'
+			);
 			expect(parent2.base).to.equalNode(child.base, 'initial - parent2.base');
 			expect(parent1.base).to.equalNode(child.base, 'initial - parent1.base');
 
 			swapChildTag();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([
-				span('child')
-			].join(''));
+			expect(scratch.innerHTML).to.equal([span('child')].join(''));
 			expect(maybe.base).to.equalNode(null, 'swapChildTag - maybe.base');
-			expect(child.base).to.equalNode(scratch.firstChild, 'swapChildTag - child.base');
-			expect(parent2.base).to.equalNode(child.base, 'swapChildTag - parent2.base');
-			expect(parent1.base).to.equalNode(child.base, 'swapChildTag - parent1.base');
+			expect(child.base).to.equalNode(
+				scratch.firstChild,
+				'swapChildTag - child.base'
+			);
+			expect(parent2.base).to.equalNode(
+				child.base,
+				'swapChildTag - parent2.base'
+			);
+			expect(parent1.base).to.equalNode(
+				child.base,
+				'swapChildTag - parent1.base'
+			);
 
 			toggleMaybeNull();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([
-				div('maybe'),
-				span('child')
-			].join(''));
-			expect(maybe.base).to.equalNode(scratch.firstChild, 'toggleMaybe - maybe.base');
-			expect(child.base).to.equalNode(scratch.lastChild, 'toggleMaybe - child.base');
-			expect(parent2.base).to.equalNode(child.base, 'toggleMaybe - parent2.base');
-			expect(parent1.base).to.equalNode(maybe.base, 'toggleMaybe - parent1.base');
+			expect(scratch.innerHTML).to.equal(
+				[div('maybe'), span('child')].join('')
+			);
+			expect(maybe.base).to.equalNode(
+				scratch.firstChild,
+				'toggleMaybe - maybe.base'
+			);
+			expect(child.base).to.equalNode(
+				scratch.lastChild,
+				'toggleMaybe - child.base'
+			);
+			expect(parent2.base).to.equalNode(
+				child.base,
+				'toggleMaybe - parent2.base'
+			);
+			expect(parent1.base).to.equalNode(
+				maybe.base,
+				'toggleMaybe - parent1.base'
+			);
 		});
 
 		it('should update parent c.base if first non-null child becomes null with multiple null siblings', () => {
-			render((
+			render(
 				<Parent1>
 					<Null />
 					<Null />
@@ -1962,43 +2266,61 @@ describe('Components', () => {
 						<MaybeNull active />
 						<Child />
 					</Parent2>
-				</Parent1>
-			), scratch);
+				</Parent1>,
+				scratch
+			);
 
-			expect(scratch.innerHTML).to.equal([
-				div('maybe'),
-				p('child')
-			].join(''));
-			expect(maybe.base).to.equalNode(scratch.firstChild, 'initial - maybe.base');
-			expect(child.base).to.equalNode(scratch.lastChild, 'initial - child.base');
+			expect(scratch.innerHTML).to.equal([div('maybe'), p('child')].join(''));
+			expect(maybe.base).to.equalNode(
+				scratch.firstChild,
+				'initial - maybe.base'
+			);
+			expect(child.base).to.equalNode(
+				scratch.lastChild,
+				'initial - child.base'
+			);
 			expect(parent2.base).to.equalNode(maybe.base, 'initial - parent2.base');
 			expect(parent1.base).to.equalNode(maybe.base, 'initial - parent1.base');
 
 			toggleMaybeNull();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([
-				p('child')
-			].join(''));
+			expect(scratch.innerHTML).to.equal([p('child')].join(''));
 			expect(maybe.base).to.equalNode(null, 'toggleMaybe - maybe.base');
-			expect(child.base).to.equalNode(scratch.firstChild, 'toggleMaybe - child.base');
-			expect(parent2.base).to.equalNode(child.base, 'toggleMaybe - parent2.base');
-			expect(parent1.base).to.equalNode(child.base, 'toggleMaybe - parent1.base');
+			expect(child.base).to.equalNode(
+				scratch.firstChild,
+				'toggleMaybe - child.base'
+			);
+			expect(parent2.base).to.equalNode(
+				child.base,
+				'toggleMaybe - parent2.base'
+			);
+			expect(parent1.base).to.equalNode(
+				child.base,
+				'toggleMaybe - parent1.base'
+			);
 
 			swapChildTag();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([
-				span('child')
-			].join(''));
+			expect(scratch.innerHTML).to.equal([span('child')].join(''));
 			expect(maybe.base).to.equalNode(null, 'swapChildTag - maybe.base');
-			expect(child.base).to.equalNode(scratch.firstChild, 'swapChildTag - child.base');
-			expect(parent2.base).to.equalNode(child.base, 'swapChildTag - parent2.base');
-			expect(parent1.base).to.equalNode(child.base, 'swapChildTag - parent1.base');
+			expect(child.base).to.equalNode(
+				scratch.firstChild,
+				'swapChildTag - child.base'
+			);
+			expect(parent2.base).to.equalNode(
+				child.base,
+				'swapChildTag - parent2.base'
+			);
+			expect(parent1.base).to.equalNode(
+				child.base,
+				'swapChildTag - parent1.base'
+			);
 		});
 
 		it('should update parent c.base if a null child returns DOM with multiple null siblings', () => {
-			render((
+			render(
 				<Parent1>
 					<Null />
 					<Null />
@@ -2006,44 +2328,64 @@ describe('Components', () => {
 						<MaybeNull />
 						<Child />
 					</Parent2>
-				</Parent1>
-			), scratch);
+				</Parent1>,
+				scratch
+			);
 
-			expect(scratch.innerHTML).to.equal([
-				p('child')
-			].join(''));
+			expect(scratch.innerHTML).to.equal([p('child')].join(''));
 			expect(maybe.base).to.equalNode(null, 'initial - maybe.base');
-			expect(child.base).to.equalNode(scratch.firstChild, 'initial - child.base');
+			expect(child.base).to.equalNode(
+				scratch.firstChild,
+				'initial - child.base'
+			);
 			expect(parent2.base).to.equalNode(child.base, 'initial - parent2.base');
 			expect(parent1.base).to.equalNode(child.base, 'initial - parent1.base');
 
 			swapChildTag();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([
-				span('child')
-			].join(''));
+			expect(scratch.innerHTML).to.equal([span('child')].join(''));
 			expect(maybe.base).to.equalNode(null, 'swapChildTag - maybe.base');
-			expect(child.base).to.equalNode(scratch.firstChild, 'swapChildTag - child.base');
-			expect(parent2.base).to.equalNode(child.base, 'swapChildTag - parent2.base');
-			expect(parent1.base).to.equalNode(child.base, 'swapChildTag - parent1.base');
+			expect(child.base).to.equalNode(
+				scratch.firstChild,
+				'swapChildTag - child.base'
+			);
+			expect(parent2.base).to.equalNode(
+				child.base,
+				'swapChildTag - parent2.base'
+			);
+			expect(parent1.base).to.equalNode(
+				child.base,
+				'swapChildTag - parent1.base'
+			);
 
 			toggleMaybeNull();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([
-				div('maybe'),
-				span('child')
-			].join(''));
-			expect(maybe.base).to.equalNode(scratch.firstChild, 'toggleMaybe - maybe.base');
-			expect(child.base).to.equalNode(scratch.lastChild, 'toggleMaybe - child.base');
-			expect(parent2.base).to.equalNode(maybe.base, 'toggleMaybe - parent2.base');
-			expect(parent1.base).to.equalNode(maybe.base, 'toggleMaybe - parent1.base');
+			expect(scratch.innerHTML).to.equal(
+				[div('maybe'), span('child')].join('')
+			);
+			expect(maybe.base).to.equalNode(
+				scratch.firstChild,
+				'toggleMaybe - maybe.base'
+			);
+			expect(child.base).to.equalNode(
+				scratch.lastChild,
+				'toggleMaybe - child.base'
+			);
+			expect(parent2.base).to.equalNode(
+				maybe.base,
+				'toggleMaybe - parent2.base'
+			);
+			expect(parent1.base).to.equalNode(
+				maybe.base,
+				'toggleMaybe - parent1.base'
+			);
 		});
 
 		it('should update parent c.base to null if last child becomes null', () => {
 			let fragRef = {};
-			render((
+			render(
 				<Fragment ref={fragRef}>
 					<Parent1>
 						<Null />
@@ -2054,35 +2396,52 @@ describe('Components', () => {
 						<Null />
 					</Parent1>
 					<Child />
-				</Fragment>
-			), scratch);
+				</Fragment>,
+				scratch
+			);
 
-			expect(scratch.innerHTML).to.equal([
-				div('maybe'),
-				p('child')
-			].join(''));
-			expect(maybe.base).to.equalNode(scratch.firstChild, 'initial - maybe.base');
-			expect(child.base).to.equalNode(scratch.lastChild, 'initial - child.base');
+			expect(scratch.innerHTML).to.equal([div('maybe'), p('child')].join(''));
+			expect(maybe.base).to.equalNode(
+				scratch.firstChild,
+				'initial - maybe.base'
+			);
+			expect(child.base).to.equalNode(
+				scratch.lastChild,
+				'initial - child.base'
+			);
 			expect(parent2.base).to.equalNode(maybe.base, 'initial - parent2.base');
 			expect(parent1.base).to.equalNode(maybe.base, 'initial - parent1.base');
-			expect(fragRef.current.base).to.equalNode(maybe.base, 'initial - fragRef.current.base');
+			expect(fragRef.current.base).to.equalNode(
+				maybe.base,
+				'initial - fragRef.current.base'
+			);
 
 			toggleMaybeNull();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([
-				p('child')
-			].join(''));
+			expect(scratch.innerHTML).to.equal([p('child')].join(''));
 			expect(maybe.base).to.equalNode(null, 'toggleMaybe - maybe.base');
-			expect(child.base).to.equalNode(scratch.firstChild, 'toggleMaybe - child.base');
-			expect(parent2.base).to.equalNode(maybe.base, 'toggleMaybe - parent2.base');
-			expect(parent1.base).to.equalNode(maybe.base, 'toggleMaybe - parent1.base');
-			expect(fragRef.current.base).to.equalNode(child.base, 'toggleMaybe - fragRef.current.base');
+			expect(child.base).to.equalNode(
+				scratch.firstChild,
+				'toggleMaybe - child.base'
+			);
+			expect(parent2.base).to.equalNode(
+				maybe.base,
+				'toggleMaybe - parent2.base'
+			);
+			expect(parent1.base).to.equalNode(
+				maybe.base,
+				'toggleMaybe - parent1.base'
+			);
+			expect(fragRef.current.base).to.equalNode(
+				child.base,
+				'toggleMaybe - fragRef.current.base'
+			);
 		});
 
 		it('should update parent c.base if last child returns dom', () => {
 			let fragRef = {};
-			render((
+			render(
 				<Fragment ref={fragRef}>
 					<Parent1>
 						<Null />
@@ -2093,52 +2452,81 @@ describe('Components', () => {
 						<Null />
 					</Parent1>
 					<Child />
-				</Fragment>
-			), scratch);
+				</Fragment>,
+				scratch
+			);
 
-			expect(scratch.innerHTML).to.equal([
-				p('child')
-			].join(''));
+			expect(scratch.innerHTML).to.equal([p('child')].join(''));
 			expect(maybe.base).to.equalNode(null, 'initial - maybe.base');
-			expect(child.base).to.equalNode(scratch.firstChild, 'initial - child.base');
+			expect(child.base).to.equalNode(
+				scratch.firstChild,
+				'initial - child.base'
+			);
 			expect(parent2.base).to.equalNode(maybe.base, 'initial - parent2.base');
 			expect(parent1.base).to.equalNode(maybe.base, 'initial - parent1.base');
-			expect(fragRef.current.base).to.equalNode(child.base, 'initial - fragRef.current.base');
+			expect(fragRef.current.base).to.equalNode(
+				child.base,
+				'initial - fragRef.current.base'
+			);
 
 			toggleMaybeNull();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([
-				div('maybe'),
-				p('child')
-			].join(''));
-			expect(maybe.base).to.equalNode(scratch.firstChild, 'toggleMaybe - maybe.base');
-			expect(child.base).to.equalNode(scratch.lastChild, 'toggleMaybe - child.base');
+			expect(scratch.innerHTML).to.equal([div('maybe'), p('child')].join(''));
+			expect(maybe.base).to.equalNode(
+				scratch.firstChild,
+				'toggleMaybe - maybe.base'
+			);
+			expect(child.base).to.equalNode(
+				scratch.lastChild,
+				'toggleMaybe - child.base'
+			);
 			expect(parent2.base).to.equalNode(maybe.base, 'initial - parent2.base');
-			expect(parent1.base).to.equalNode(maybe.base, 'toggleMaybe - parent1.base');
-			expect(fragRef.current.base).to.equalNode(maybe.base, 'toggleMaybe - fragRef.current.base');
+			expect(parent1.base).to.equalNode(
+				maybe.base,
+				'toggleMaybe - parent1.base'
+			);
+			expect(fragRef.current.base).to.equalNode(
+				maybe.base,
+				'toggleMaybe - fragRef.current.base'
+			);
 		});
 
 		it('should not update parent if it is a DOM node', () => {
-			let divVNode = <div><Child /></div>;
+			let divVNode = (
+				<div>
+					<Child />
+				</div>
+			);
 			render(divVNode, scratch);
 
 			expect(scratch.innerHTML).to.equal('<div><p>child</p></div>');
-			expect(divVNode._dom).to.equalNode(scratch.firstChild, 'initial - divVNode._dom');
-			expect(child.base).to.equalNode(scratch.firstChild.firstChild, 'initial - child.base');
+			expect(divVNode._dom).to.equalNode(
+				scratch.firstChild,
+				'initial - divVNode._dom'
+			);
+			expect(child.base).to.equalNode(
+				scratch.firstChild.firstChild,
+				'initial - child.base'
+			);
 
 			swapChildTag();
 			rerender();
 
 			expect(scratch.innerHTML).to.equal('<div><span>child</span></div>');
-			expect(divVNode._dom).to.equalNode(scratch.firstChild, 'swapChildTag - divVNode._dom');
-			expect(child.base).to.equalNode(scratch.firstChild.firstChild, 'swapChildTag - child.base');
+			expect(divVNode._dom).to.equalNode(
+				scratch.firstChild,
+				'swapChildTag - divVNode._dom'
+			);
+			expect(child.base).to.equalNode(
+				scratch.firstChild.firstChild,
+				'swapChildTag - child.base'
+			);
 		});
 	});
 
 	describe('setState', () => {
 		it('should not error if called on an unmounted component', () => {
-
 			/** @type {() => void} */
 			let increment;
 
@@ -2149,7 +2537,7 @@ describe('Components', () => {
 					increment = () => this.setState({ count: this.state.count + 1 });
 				}
 				render(props, state) {
-					return <div>{ state.count }</div>;
+					return <div>{state.count}</div>;
 				}
 			}
 
@@ -2171,7 +2559,6 @@ describe('Components', () => {
 
 	describe('forceUpdate', () => {
 		it('should not error if called on an unmounted component', () => {
-
 			/** @type {() => void} */
 			let forceUpdate;
 

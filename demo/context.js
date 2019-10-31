@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-import { createElement, Component, createContext, Fragment } from "preact";
+import { createElement, Component, createContext, Fragment } from 'preact';
 const { Provider, Consumer } = createContext();
 
 class ThemeProvider extends Component {
@@ -9,9 +9,10 @@ class ThemeProvider extends Component {
 
 	onClick = () => {
 		this.setState(prev => ({
-			value: prev.value===this.props.value ? this.props.next : this.props.value
+			value:
+				prev.value === this.props.value ? this.props.next : this.props.value
 		}));
-	}
+	};
 
 	render() {
 		return (
@@ -46,10 +47,16 @@ export default class ContextDemo extends Component {
 					<Consumer>
 						{data => (
 							<div>
-								<p>current theme: <b>{data}</b></p>
+								<p>
+									current theme: <b>{data}</b>
+								</p>
 								<ThemeProvider value="black" next="white">
 									<Consumer>
-										{data => <p>current sub theme: <b>{data}</b></p>}
+										{data => (
+											<p>
+												current sub theme: <b>{data}</b>
+											</p>
+										)}
 									</Consumer>
 								</ThemeProvider>
 							</div>

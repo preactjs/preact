@@ -5,12 +5,12 @@ Math.deg = function(radians) {
 	return radians * (180 / Math.PI);
 };
 
-const memoizedCalc = function () {
+const memoizedCalc = (function() {
 	const memo = {};
 
 	const key = ({ w, heightFactor, lean }) => `${w}-${heightFactor}-${lean}`;
 
-	return (args) => {
+	return args => {
 		let memoKey = key(args);
 
 		if (memo[memoKey]) {
@@ -18,21 +18,31 @@ const memoizedCalc = function () {
 		}
 
 		let { w, heightFactor, lean } = args;
-		let trigH = heightFactor*w;
+		let trigH = heightFactor * w;
 
 		let result = {
-			nextRight: Math.sqrt(trigH**2 + (w * (.5+lean))**2),
-			nextLeft: Math.sqrt(trigH**2 + (w * (.5-lean))**2),
-			A: Math.deg(Math.atan(trigH / ((.5-lean) * w))),
-			B: Math.deg(Math.atan(trigH / ((.5+lean) * w)))
+			nextRight: Math.sqrt(trigH ** 2 + (w * (0.5 + lean)) ** 2),
+			nextLeft: Math.sqrt(trigH ** 2 + (w * (0.5 - lean)) ** 2),
+			A: Math.deg(Math.atan(trigH / ((0.5 - lean) * w))),
+			B: Math.deg(Math.atan(trigH / ((0.5 + lean) * w)))
 		};
 
 		memo[memoKey] = result;
 		return result;
 	};
-}();
+})();
 
-export default function Pythagoras({ w,x, y, heightFactor, lean, left, right, lvl, maxlvl }) {
+export default function Pythagoras({
+	w,
+	x,
+	y,
+	heightFactor,
+	lean,
+	left,
+	right,
+	lvl,
+	maxlvl
+}) {
 	if (lvl >= maxlvl || w < 1) {
 		return null;
 	}
@@ -47,8 +57,7 @@ export default function Pythagoras({ w,x, y, heightFactor, lean, left, right, lv
 
 	if (left) {
 		rotate = `rotate(${-A} 0 ${w})`;
-	}
-	else if (right) {
+	} else if (right) {
 		rotate = `rotate(${B} ${w} ${w})`;
 	}
 
@@ -59,13 +68,15 @@ export default function Pythagoras({ w,x, y, heightFactor, lean, left, right, lv
 				height={w}
 				x={0}
 				y={0}
-				style={{ fill: interpolateViridis(lvl/maxlvl) }}
+				style={{ fill: interpolateViridis(lvl / maxlvl) }}
 			/>
 
 			<Pythagoras
 				w={nextLeft}
-				x={0} y={-nextLeft}
-				lvl={lvl+1} maxlvl={maxlvl}
+				x={0}
+				y={-nextLeft}
+				lvl={lvl + 1}
+				maxlvl={maxlvl}
 				heightFactor={heightFactor}
 				lean={lean}
 				left
@@ -73,8 +84,10 @@ export default function Pythagoras({ w,x, y, heightFactor, lean, left, right, lv
 
 			<Pythagoras
 				w={nextRight}
-				x={w-nextRight} y={-nextRight}
-				lvl={lvl+1} maxlvl={maxlvl}
+				x={w - nextRight}
+				y={-nextRight}
+				lvl={lvl + 1}
+				maxlvl={maxlvl}
 				heightFactor={heightFactor}
 				lean={lean}
 				right
