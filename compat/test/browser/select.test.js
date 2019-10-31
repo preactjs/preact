@@ -1,7 +1,5 @@
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { render, createElement as h } from '../../src';
-
-/** @jsx h */
+import React, { render } from 'preact/compat';
 
 describe('Select', () => {
 	let scratch;

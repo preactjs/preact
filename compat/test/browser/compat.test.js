@@ -1,7 +1,7 @@
-import { createElement, render } from 'preact';
+import { render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
-import React from 'preact/compat'; // eslint-disable-line
+import React from 'preact/compat';
 
 describe('imported compat in preact', () => {
 	let scratch;

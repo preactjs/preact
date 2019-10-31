@@ -56,6 +56,13 @@
           ]
         }
       ],
+      "no-unused-vars": [
+        2,
+        {
+          "args": "none",
+          "varsIgnorePattern": "^h|React$"
+        }
+      ],
       "prefer-rest-params": 0,
       "prefer-spread": 0,
       "no-cond-assign": 0,
