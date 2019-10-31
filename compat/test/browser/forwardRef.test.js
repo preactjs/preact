@@ -6,10 +6,11 @@ import {
 	hydrate,
 	memo,
 	useState,
+	useRef,
 	useImperativeHandle
 } from '../../src';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { setupRerender } from 'preact/test-utils';
+import { setupRerender, act } from 'preact/test-utils';
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 
 /** @jsx h */
@@ -350,5 +351,34 @@ describe('forwardRef', () => {
 		render(<Bar ref={spy} />, scratch);
 		expect(spy).to.be.calledOnce;
 		expect(spy).to.be.calledWithExactly({ foo: 100 });
+	});
+
+	it('stale ref missing with passed useRef', () => {
+		let _ref = null;
+		let _set = null;
+		const Inner = forwardRef((props, ref) => {
+			const [_, setState] = useState(null);
+			_ref = ref;
+			_set = setState;
+			return <div ref={ref} />;
+		});
+
+		const Parent = () => {
+			const parentRef = useRef(null);
+			return <Inner ref={parentRef}>child</Inner>;
+		};
+
+		act(() => {
+			render(<Parent />, scratch);
+		});
+
+		expect(_ref).not.to.be.undefined;
+
+		act(() => {
+			_set(1);
+			rerender();
+		});
+
+		expect(_ref).not.to.be.undefined;
 	});
 });
