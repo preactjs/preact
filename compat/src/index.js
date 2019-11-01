@@ -92,14 +92,13 @@ function render(vnode, parent, callback) {
 	return vnode ? vnode._component : null;
 }
 
-class ContextProvider {
-	getChildContext() {
-		return this.props.context;
-	}
-	render(props) {
-		return props.children;
-	}
-}
+function ContextProvider () {}
+ContextProvider.prototype.getChildContext = function() {
+	return this.props.context;
+};
+ContextProvider.prototype.render = function (props) {
+	return props.children;
+};
 
 /**
  * Portal component
@@ -359,19 +358,12 @@ function findDOMNode(component) {
 /**
  * Component class with a predefined `shouldComponentUpdate` implementation
  */
-class PureComponent extends Component {
-	constructor(props) {
-		super(props);
-		// Some third-party libraries check if this property is present
-		this.isPureReactComponent = true;
-	}
-
-	shouldComponentUpdate(props, state) {
-		return (
-			shallowDiffers(this.props, props) || shallowDiffers(this.state, state)
-		);
-	}
-}
+function PureComponent() {}
+PureComponent.prototype = new Component();
+PureComponent.prototype.isPureReactComponent = true;
+PureComponent.prototype.shouldComponentUpdate = function (props, state) {
+    return shallowDiffers(this.props, props) || shallowDiffers(this.state, state);
+};
 
 // Some libraries like `react-virtualized` explicitly check for this.
 Component.prototype.isReactComponent = {};
