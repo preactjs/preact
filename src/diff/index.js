@@ -383,9 +383,6 @@ function diffElementNodes(
  */
 export function applyRef(ref, value, vnode, oldRef) {
 	try {
-		if (typeof oldRef=='function') oldRef(null);
-		else if (oldRef !== ref && oldRef) oldRef.current = null;
-
 		if (typeof ref=='function') ref(value);
 		else ref.current = value;
 	} catch (e) {
