@@ -33,7 +33,7 @@
     "test:karma:test-utils": "cross-env PERFORMANCE=false COVERAGE=false karma start karma.conf.js --grep=test-utils/test/shared/**.js --no-single-run",
     "test:karma:bench": "cross-env PERFORMANCE=true COVERAGE=false karma start karma.conf.js --grep=test/benchmarks/**.js --single-run",
     "benchmark": "npm run test:karma:bench -- no-single-run",
-    "lint": "eslint src test debug compat hooks test-utils"
+	"lint": "eslint src test debug compat hooks test-utils"
   },
   "eslintConfig": {
     "extends": [
@@ -82,6 +82,7 @@
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": [
+	  "node ./scripts/sync-mangle.js",
       "prettier --write",
       "git add"
     ]
