@@ -5,8 +5,7 @@ import { Suspense } from './suspense';
 options.__onSuspensionComplete = (vnode, cb) => {
 	if (vnode._parent._component && vnode._parent._component.__modifySuspense) {
 		vnode._parent._component.__modifySuspense(vnode, cb);
-	}
-	else {
+	} else {
 		cb();
 	}
 };
@@ -26,12 +25,11 @@ SuspenseList.prototype.__modifySuspense = function(vnode, cb) {
 	switch (this.props.revealOrder) {
 		case 'forwards':
 		case 'backwards':
-
 			/**
 			 * Forwards and backwards work the same way.
-			 * The direction is controlled in render method itself/
+			 * The direction is controlled in render method while creating `_thrillers` itself.
 			 */
-			if (this._thrillers && this._thrillers[0].vnode===vnode) {
+			if (this._thrillers && this._thrillers[0].vnode === vnode) {
 				cb();
 				this._thrillers.shift();
 				this._thrillers.find(thrill => {
@@ -40,8 +38,7 @@ SuspenseList.prototype.__modifySuspense = function(vnode, cb) {
 					}
 					thrill.cb();
 				});
-			}
-			else {
+			} else {
 				this._thrillers.find(thrill => thrill.vnode === vnode).cb = cb;
 			}
 			break;
@@ -55,12 +52,14 @@ SuspenseList.prototype.__modifySuspense = function(vnode, cb) {
 
 SuspenseList.prototype.render = function(props, state) {
 	// assuming all suspense woul
-	this._thrillers = props.children.filter((child) => child.type.name === Suspense.name).map(vnode => ({
-		vnode,
-		cb: null
-	}));
+	this._thrillers = props.children
+		.filter(child => child.type.name === Suspense.name)
+		.map(vnode => ({
+			vnode,
+			cb: null
+		}));
 	if (props.revealOrder === 'backwards') {
 		this._thrillers.reverse();
 	}
-	return (props.children);
+	return props.children;
 };
