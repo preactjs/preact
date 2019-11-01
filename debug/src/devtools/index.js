@@ -9,9 +9,9 @@ import { Renderer } from './renderer';
  * @returns
  */
 function catchErrors(fn) {
-	return function(arg) {
+	return function(...args) {
 		try {
-			return fn(arg);
+			return fn(...args);
 		}
 		catch (e) {
 			/* istanbul ignore next */
@@ -148,9 +148,9 @@ export function initDevTools() {
 		if (prevAfterDiff!=null) prevAfterDiff(vnode);
 	};
 
-	options._commit = catchErrors((vnode) => {
+	options._commit = catchErrors((vnode, commitQueue) => {
 		// Call previously defined hook
-		if (prevCommitRoot!=null) prevCommitRoot(vnode);
+		if (prevCommitRoot!=null) prevCommitRoot(vnode, commitQueue);
 
 		// These cases are already handled by `unmount`
 		if (vnode==null) return;
