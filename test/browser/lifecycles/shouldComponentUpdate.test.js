@@ -161,6 +161,36 @@ describe('Lifecycle methods', () => {
 			expect(spy).to.be.calledOnce;
 		});
 
+		it('should clear renderCallbacks', () => {
+			const spy = sinon.spy();
+			let c, renders = 0;
+
+			class App extends Component {
+				constructor() {
+					super();
+					c = this;
+					this.state = { a: false };
+				}
+
+				shouldComponentUpdate(_, nextState) {
+					return false;
+				}
+
+				render() {
+					renders += 1;
+					return <div>foo</div>;
+				}
+			}
+
+			render(<App />, scratch);
+			expect(renders).to.equal(1);
+
+			c.setState({}, spy);
+			rerender();
+			expect(renders).to.equal(1);
+			expect(spy).to.be.calledOnce;
+		});
+
 		it('should not be called on forceUpdate', () => {
 			let Comp;
 			class Foo extends Component {

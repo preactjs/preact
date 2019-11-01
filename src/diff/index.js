@@ -130,6 +130,9 @@ export function diff(
 					c._vnode = newVNode;
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
+					if (c._renderCallbacks.length) {
+						commitQueue.push(c);
+					}
 					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
 						if (newVNode._children[tmp]) {
 							newVNode._children[tmp]._parent = newVNode;
