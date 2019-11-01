@@ -417,9 +417,9 @@ function memo(c, comparer) {
  */
 function forwardRef(fn) {
 	function Forwarded(props) {
-		let ref = props.ref;
-		delete props.ref;
-		return fn(props, ref);
+		let clone = assign({}, props);
+		delete clone.ref;
+		return fn(clone, props.ref);
 	}
 	Forwarded.prototype.isReactComponent = true;
 	Forwarded._forwarded = true;
