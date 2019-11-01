@@ -76,7 +76,8 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 		else {
 			let rendered;
 
-			let c = vnode.__c = { __v: vnode, context, props: vnode.props };
+			let c = vnode.__c = { __v: vnode, context, props: vnode.props, __h: [] };
+
 			// options.render
 			if (options.__r) options.__r(vnode);
 
