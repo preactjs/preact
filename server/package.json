@@ -77,7 +77,7 @@
     "eslint-config-developit": "^1.1.1",
     "microbundle": "^0.6.0",
     "mocha": "^5.2.0",
-    "preact": "^10.0.0-alpha.0",
+    "preact": "^10.0.4",
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0",
     "typescript": "^3.4.1"
