@@ -81,7 +81,7 @@
     "tabWidth": 2
   },
   "lint-staged": {
-    "**/*.{js,jsx,ts,tsx}": [
+    "**/*.{js,jsx,json,ts,tsx}": [
 	  "node ./scripts/sync-mangle.js",
       "prettier --write",
       "git add"
