@@ -76,7 +76,8 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 		else {
 			let rendered;
 
-			let c = vnode.__c = { __v: vnode, context, props: vnode.props };
+			let c = vnode.__c = { __v: vnode, context, props: vnode.props, __h: [] };
+
 			// options.render
 			if (options.__r) options.__r(vnode);
 
@@ -101,8 +102,6 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				c.__v = vnode;
 				// turn off stateful re-rendering:
 				c._dirty = c.__d = true;
-				// required by hooks
-				c._renderCallbacks = [];
 				c.props = props;
 				if (c.state==null) c.state = {};
 				c.context = cctx;

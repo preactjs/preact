@@ -1,6 +1,6 @@
 import { render, shallowRender } from '../src';
 import { h, Component, createContext, Fragment } from 'preact';
-import { useState, useContext, useEffect } from 'preact/hooks';
+import { useState, useContext, useEffect, useLayoutEffect } from 'preact/hooks';
 import chai, { expect } from 'chai';
 import { spy, stub, match } from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -703,6 +703,25 @@ describe('render', () => {
 			function Foo() {
 				let [v, setter] = useState(0);
 				return <button onClick={() => setter(++v)}>count: {v}</button>;
+			}
+
+			// eslint-disable-next-line prefer-arrow-callback
+			expect(function() {
+				render(<Foo />);
+			}).to.not.throw();
+		});
+
+		it('should not crash with effectful hooks', () => {
+			function Foo() {
+				useEffect(() => {
+					// Nothing
+				}, []);
+
+				useLayoutEffect(() => {
+					// Nothing
+				}, []);
+
+				return <div />;
 			}
 
 			// eslint-disable-next-line prefer-arrow-callback
