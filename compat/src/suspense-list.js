@@ -23,19 +23,33 @@ export function SuspenseList(props) {
 SuspenseList.prototype = new Component();
 
 SuspenseList.prototype.__modifySuspense = function(vnode, cb) {
-	//Note:  This implementation is actually for `forwards`.
-	if (this._thrillers && this._thrillers[0].vnode===vnode) {
-		cb();
-		this._thrillers.shift();
-		this._thrillers.find(thrill => {
-			if (thrill.cb === null) {
-				return true;
+	switch (this.props.revealOrder) {
+		case 'forwards':
+		case 'backwards':
+
+			/**
+			 * Forwards and backwards work the same way.
+			 * The direction is controlled in render method itself/
+			 */
+			if (this._thrillers && this._thrillers[0].vnode===vnode) {
+				cb();
+				this._thrillers.shift();
+				this._thrillers.find(thrill => {
+					if (thrill.cb === null) {
+						return true;
+					}
+					thrill.cb();
+				});
 			}
-			thrill.cb();
-		});
-	}
-	else {
-		this._thrillers.find(thrill => thrill.vnode === vnode).cb = cb;
+			else {
+				this._thrillers.find(thrill => thrill.vnode === vnode).cb = cb;
+			}
+			break;
+		case 'together':
+			// TODO: implement this
+			break;
+		default:
+			cb();
 	}
 };
 
