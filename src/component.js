@@ -165,9 +165,10 @@ let q = [];
 
 /**
  * Asynchronously schedule a callback
- * @type {(cb) => void}
+ * @type {(cb: () => void) => void}
  */
 /* istanbul ignore next */
+// Note the following line isn't tree-shaken by rollup cuz of rollup/rollup#2566
 const defer =
 	typeof Promise == 'function'
 		? Promise.prototype.then.bind(Promise.resolve())
@@ -194,7 +195,7 @@ export function enqueueRender(c) {
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
-		(options.debounceRendering || defer)(process);
+		(prevDebounce || defer)(process);
 	}
 }
 
