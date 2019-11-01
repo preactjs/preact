@@ -6,10 +6,8 @@ import { enqueueRender } from '../component';
  * @param {import('../internal').VNode} vnode The vnode that threw
  * the error that was caught (except for unmounting when this parameter
  * is the highest parent that was being unmounted)
- * @param {import('../internal').VNode} [oldVNode] The oldVNode of the vnode
- * that threw, if this VNode threw while diffing
  */
-export function _catchError(error, vnode, oldVNode) {
+export function _catchError(error, vnode) {
 	/** @type {import('../internal').Component} */
 	let component;
 
