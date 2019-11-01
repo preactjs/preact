@@ -182,7 +182,7 @@ const defer =
  * * [Callbacks synchronous and asynchronous](https://blog.ometer.com/2011/07/24/callbacks-synchronous-and-asynchronous/)
  */
 
-let prevDebounce = options.debounceRendering;
+let prevDebounce;
 
 /**
  * Enqueue a rerender of a component
