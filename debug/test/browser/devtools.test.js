@@ -1,7 +1,26 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, createElement as h, Fragment, options, Component, render } from 'preact';
-import { getDisplayName, setIn, isRoot, getData, shallowEqual, hasDataChanged, getChildren } from '../../src/devtools/custom';
-import { setupScratch, teardown, clearOptions } from '../../../test/_util/helpers';
+import {
+	createElement,
+	createElement as h,
+	Fragment,
+	options,
+	Component,
+	render
+} from 'preact';
+import {
+	getDisplayName,
+	setIn,
+	isRoot,
+	getData,
+	shallowEqual,
+	hasDataChanged,
+	getChildren
+} from '../../src/devtools/custom';
+import {
+	setupScratch,
+	teardown,
+	clearOptions
+} from '../../../test/_util/helpers';
 import { initDevTools } from '../../src/devtools';
 import { Renderer } from '../../src/devtools/renderer';
 import { memo, forwardRef, createPortal } from '../../../compat/src';
@@ -16,12 +35,15 @@ import { memo, forwardRef, createPortal } from '../../../compat/src';
  * @param {import('../../src/internal').DevtoolsEvent[]} events
  */
 function serialize(events) {
-	return events.filter(x => x.type!='updateProfileTimes').map(x => ({
-		type: x.type,
-		component: x.internalInstance.type!==null
-			? getDisplayName(x.internalInstance)
-			: '#text: ' + x.internalInstance.props
-	}));
+	return events
+		.filter(x => x.type != 'updateProfileTimes')
+		.map(x => ({
+			type: x.type,
+			component:
+				x.internalInstance.type !== null
+					? getDisplayName(x.internalInstance)
+					: '#text: ' + x.internalInstance.props
+		}));
 }
 
 /**
@@ -34,7 +56,7 @@ function createMockHook() {
 	let events = [];
 
 	function emit(ev, data) {
-		if (ev=='renderer-attached') return;
+		if (ev == 'renderer-attached') return;
 		events.push(data);
 	}
 
@@ -51,10 +73,12 @@ function createMockHook() {
 
 	return {
 		on() {},
-		inject() { return 'abc'; },
+		inject() {
+			return 'abc';
+		},
 		onCommitFiberRoot() {},
 		onCommitFiberUnmount(rid, vnode) {
-			if (helpers[rid]!=null) {
+			if (helpers[rid] != null) {
 				helpers[rid].handleCommitFiberUnmount(vnode);
 			}
 		},
@@ -75,10 +99,10 @@ function createMockHook() {
  * @returns {boolean}
  */
 function checkPreceding(vnode, seen) {
-	if (vnode==null) return true;
+	if (vnode == null) return true;
 
 	// If a leaf node is a Fragment and has no children it will be skipped
-	if (vnode.type===Fragment && vnode._children==0) return true;
+	if (vnode.type === Fragment && vnode._children == 0) return true;
 
 	return seen.has(vnode);
 }
@@ -92,39 +116,58 @@ function checkEventReferences(events) {
 	let seen = new Set();
 
 	events.forEach((event, i) => {
-		if (i > 0 && event.type!=='unmount' && Array.isArray(event.data.children)) {
+		if (
+			i > 0 &&
+			event.type !== 'unmount' &&
+			Array.isArray(event.data.children)
+		) {
 			event.data.children.forEach(child => {
-				if (!checkPreceding(child, seen) && event.type!=='rootCommitted') {
-					throw new Error(`Event at index ${i} has a child that could not be found in a preceding event for component "${getDisplayName(child)}"`);
+				if (!checkPreceding(child, seen) && event.type !== 'rootCommitted') {
+					throw new Error(
+						`Event at index ${i} has a child that could not be found in a preceding event for component "${getDisplayName(
+							child
+						)}"`
+					);
 				}
 			});
 		}
 
 		let inst = event.internalInstance;
-		if (event.type=='mount') {
+		if (event.type == 'mount') {
 			seen.add(inst);
-		}
-		else if (!checkPreceding(event.internalInstance, seen) && event.type!=='rootCommitted') {
-			throw new Error(`Event at index ${i} for component ${inst!=null ? getDisplayName(inst) : inst} is not mounted. Perhaps you forgot to send a "mount" event prior to this?`);
+		} else if (
+			!checkPreceding(event.internalInstance, seen) &&
+			event.type !== 'rootCommitted'
+		) {
+			throw new Error(
+				`Event at index ${i} for component ${
+					inst != null ? getDisplayName(inst) : inst
+				} is not mounted. Perhaps you forgot to send a "mount" event prior to this?`
+			);
 		}
 
 		// A "root" event must be a `Wrapper`, otherwise the
 		// Profiler tree view will be messed up.
-		if (event.type=='root' && event.data.nodeType!='Wrapper') {
-			throw new Error(`Event of type "root" must be a "Wrapper". Found "${event.data.nodeType}" instead.`);
+		if (event.type == 'root' && event.data.nodeType != 'Wrapper') {
+			throw new Error(
+				`Event of type "root" must be a "Wrapper". Found "${event.data.nodeType}" instead.`
+			);
 		}
 
-		if (i==events.length - 1) {
-
+		if (i == events.length - 1) {
 			// Assert that the last child is of type `rootCommitted`
-			if (event.type!='rootCommitted') {
-				throw new Error(`The last event must be of type 'rootCommitted' for every committed tree`);
+			if (event.type != 'rootCommitted') {
+				throw new Error(
+					`The last event must be of type 'rootCommitted' for every committed tree`
+				);
 			}
 
 			// Assert that the root node is a wrapper node (=Fragment). Otherwise the
 			// Profiler tree view will be messed up.
-			if (event.data.nodeType!=='Wrapper') {
-				throw new Error(`The root node must be a "Wrapper" node (like a Fragment) for the Profiler to display correctly. Found "${event.data.nodeType}" instead.`);
+			if (event.data.nodeType !== 'Wrapper') {
+				throw new Error(
+					`The root node must be a "Wrapper" node (like a Fragment) for the Profiler to display correctly. Found "${event.data.nodeType}" instead.`
+				);
 			}
 		}
 	});
@@ -137,7 +180,8 @@ function getRoot(element) {
 	return element._children;
 }
 
-const supported = /Chrome|Firefox/i.test(navigator.userAgent) &&
+const supported =
+	/Chrome|Firefox/i.test(navigator.userAgent) &&
 	!/Edge/i.test(navigator.userAgent);
 
 describe('devtools', () => {
@@ -199,7 +243,7 @@ describe('devtools', () => {
 			expect(getDisplayName(h(Foo))).to.equal('Foo');
 		});
 
-		it('should prefer a function Component\'s displayName property', () => {
+		it("should prefer a function Component's displayName property", () => {
 			function Foo() {
 				return <div />;
 			}
@@ -218,7 +262,7 @@ describe('devtools', () => {
 			expect(getDisplayName(h(Bar))).to.equal('Bar');
 		});
 
-		it('should prefer a class Component\'s displayName property', () => {
+		it("should prefer a class Component's displayName property", () => {
 			class Bar extends Component {
 				render() {
 					return <div />;
@@ -229,7 +273,7 @@ describe('devtools', () => {
 			expect(getDisplayName(h(Bar))).to.equal('Foo');
 		});
 
-		it('should get a Fragment\'s name', () => {
+		it("should get a Fragment's name", () => {
 			expect(getDisplayName(h(Fragment))).to.equal('Fragment');
 		});
 
@@ -279,7 +323,10 @@ describe('devtools', () => {
 			let a = createElement('div', { foo: 1 });
 			let b = createElement('div', { foo: 1 });
 
-			b._component = a._component = { state: { foo: 1 }, _prevState: { foo: 1 } };
+			b._component = a._component = {
+				state: { foo: 1 },
+				_prevState: { foo: 1 }
+			};
 			expect(hasDataChanged(a, b)).to.equal(false);
 
 			b._component = { state: { foo: 2 }, _prevState: { foo: 1 } };
@@ -319,13 +366,17 @@ describe('devtools', () => {
 		it('should compare objects', () => {
 			expect(shallowEqual({ foo: 1 }, { foo: 2 })).to.equal(false);
 			expect(shallowEqual({ foo: 1 }, { foo: 1 })).to.equal(true);
-			expect(shallowEqual({ foo: 1, bar: 1 }, { foo: 1, bar: '2' })).to.equal(false);
+			expect(shallowEqual({ foo: 1, bar: 1 }, { foo: 1, bar: '2' })).to.equal(
+				false
+			);
 
 			expect(shallowEqual({ foo: 1 }, { foo: 1, bar: '2' })).to.equal(false);
 		});
 
 		it('should skip children for props', () => {
-			expect(shallowEqual({ foo: 1, children: 1 }, { foo: 1, children: '2' }, true)).to.equal(true);
+			expect(
+				shallowEqual({ foo: 1, children: 1 }, { foo: 1, children: '2' }, true)
+			).to.equal(true);
 		});
 	});
 
@@ -384,7 +435,13 @@ describe('devtools', () => {
 
 			let data = getData(vnode);
 
-			expect(Object.keys(data.updater)).to.deep.equal(['setState', 'forceUpdate', 'setInState', 'setInProps', 'setInContext']);
+			expect(Object.keys(data.updater)).to.deep.equal([
+				'setState',
+				'forceUpdate',
+				'setInState',
+				'setInProps',
+				'setInContext'
+			]);
 			expect(data.publicInstance instanceof App).to.equal(true);
 			expect(data.children.length).to.equal(1);
 			expect(data.type).to.equal(App);
@@ -487,7 +544,12 @@ describe('devtools', () => {
 			render(<Fragment />, scratch);
 			checkEventReferences(hook.log);
 
-			render(<div><Fragment /></div>, scratch);
+			render(
+				<div>
+					<Fragment />
+				</div>,
+				scratch
+			);
 			checkEventReferences(hook.log);
 		});
 
@@ -506,7 +568,11 @@ describe('devtools', () => {
 
 			class App2 extends App {
 				render() {
-					return <div><Fragment /></div>;
+					return (
+						<div>
+							<Fragment />
+						</div>
+					);
 				}
 			}
 
@@ -537,7 +603,9 @@ describe('devtools', () => {
 			let rid = Object.keys(hook._renderers)[0];
 			let renderer = hook._renderers[rid];
 
-			expect(renderer.findFiberByHostInstance(scratch.firstChild)).to.equal(vnode);
+			expect(renderer.findFiberByHostInstance(scratch.firstChild)).to.equal(
+				vnode
+			);
 		});
 
 		it('should getNativeFromReactElement', () => {
@@ -581,7 +649,12 @@ describe('devtools', () => {
 			let prev = hook.log.slice();
 			hook.clear();
 
-			render(<div><span>Foo</span></div>, scratch);
+			render(
+				<div>
+					<span>Foo</span>
+				</div>,
+				scratch
+			);
 			checkEventReferences(prev.concat(hook.log));
 
 			expect(serialize(hook.log)).to.deep.equal([
@@ -691,13 +764,27 @@ describe('devtools', () => {
 		});
 
 		it('should only update profile times when nothing else changed', () => {
-			render(<div><div><span>Hello World</span></div></div>, scratch);
+			render(
+				<div>
+					<div>
+						<span>Hello World</span>
+					</div>
+				</div>,
+				scratch
+			);
 			checkEventReferences(hook.log);
 
 			let prev = hook.log.slice();
 			hook.clear();
 
-			render(<div><div><span>Foo</span></div></div>, scratch);
+			render(
+				<div>
+					<div>
+						<span>Foo</span>
+					</div>
+				</div>,
+				scratch
+			);
 			checkEventReferences(prev.concat(hook.log));
 
 			expect(serialize(hook.log)).to.deep.equal([
@@ -707,7 +794,12 @@ describe('devtools', () => {
 		});
 
 		it('should detect when a component is unmounted', () => {
-			render(<div><span>Hello World</span></div>, scratch);
+			render(
+				<div>
+					<span>Hello World</span>
+				</div>,
+				scratch
+			);
 			checkEventReferences(hook.log);
 			hook.clear();
 
@@ -722,7 +814,12 @@ describe('devtools', () => {
 		});
 
 		it('should be able to render Fragments', () => {
-			render(<div><Fragment>foo{'bar'}</Fragment></div>, scratch);
+			render(
+				<div>
+					<Fragment>foo{'bar'}</Fragment>
+				</div>,
+				scratch
+			);
 			checkEventReferences(hook.log);
 		});
 
@@ -751,22 +848,27 @@ describe('devtools', () => {
 
 			// Previous `internalInstance` from mount must be referentially equal to
 			// `internalInstance` from update
-			hook.log.filter(x => x.type === 'update').forEach(next => {
-				let update = prev.find(old =>
-					old.type === 'mount' && old.internalInstance === next.internalInstance);
+			hook.log
+				.filter(x => x.type === 'update')
+				.forEach(next => {
+					let update = prev.find(
+						old =>
+							old.type === 'mount' &&
+							old.internalInstance === next.internalInstance
+					);
 
-				expect(update).to.not.equal(undefined);
+					expect(update).to.not.equal(undefined);
 
-				// ...and the same rules apply for `data.children`. Note that
-				// `data.children`is not always an array.
-				let children = update.data.children;
-				if (Array.isArray(children)) {
-					children.forEach(child => {
-						let prevChild = prev.find(x => x.internalInstance === child);
-						expect(prevChild).to.not.equal(undefined);
-					});
-				}
-			});
+					// ...and the same rules apply for `data.children`. Note that
+					// `data.children`is not always an array.
+					let children = update.data.children;
+					if (Array.isArray(children)) {
+						children.forEach(child => {
+							let prevChild = prev.find(x => x.internalInstance === child);
+							expect(prevChild).to.not.equal(undefined);
+						});
+					}
+				});
 		});
 
 		it('must send an update event for the component setState/forceUpdate was called on', () => {
@@ -783,7 +885,12 @@ describe('devtools', () => {
 				}
 			}
 
-			render(<div><Foo /></div>, scratch);
+			render(
+				<div>
+					<Foo />
+				</div>,
+				scratch
+			);
 			hook.clear();
 
 			updateState();
@@ -826,7 +933,9 @@ describe('devtools', () => {
 				render(<App active />, scratch);
 				expect(scratch.textContent).to.equal('foo');
 
-				let event = hook.log.find(x => x.data.publicInstance instanceof Component);
+				let event = hook.log.find(
+					x => x.data.publicInstance instanceof Component
+				);
 				event.data.updater.setInProps(['active'], false);
 				rerender();
 
@@ -854,7 +963,12 @@ describe('devtools', () => {
 						return <h1>{this.context.active ? 'foo' : 'bar'}</h1>;
 					}
 				}
-				render(<Wrapper><App /></Wrapper>, scratch);
+				render(
+					<Wrapper>
+						<App />
+					</Wrapper>,
+					scratch
+				);
 				expect(scratch.textContent).to.equal('foo');
 
 				let event = hook.log.find(x => x.data.publicInstance instanceof App);
@@ -872,7 +986,7 @@ describe('devtools', () => {
 				render(<div>Hello World</div>, scratch);
 
 				// Filter out root node which doesn't need to have timings
-				const events = hook.log.filter(x => x.type=='mount');
+				const events = hook.log.filter(x => x.type == 'mount');
 				events.splice(-1, 1);
 
 				events.forEach(ev => {
@@ -884,7 +998,7 @@ describe('devtools', () => {
 				render(<div>Hello World</div>, scratch);
 
 				// Filter out root node which doesn't need to have timings
-				const events = hook.log.filter(x => x.type=='mount');
+				const events = hook.log.filter(x => x.type == 'mount');
 				events.splice(-1, 1);
 
 				events.forEach(ev => {

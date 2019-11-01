@@ -1,15 +1,20 @@
-import { Component, createElement, _unmount as unmount, options, cloneElement } from 'preact';
+import {
+	Component,
+	createElement,
+	_unmount as unmount,
+	options,
+	cloneElement
+} from 'preact';
 import { removeNode } from '../../src/util';
 
 const oldCatchError = options._catchError;
-options._catchError = function (error, newVNode, oldVNode) {
+options._catchError = function(error, newVNode, oldVNode) {
 	if (error.then && oldVNode) {
-
 		/** @type {import('./internal').Component} */
 		let component;
 		let vnode = newVNode;
 
-		for (; vnode = vnode._parent;) {
+		for (; (vnode = vnode._parent); ) {
 			if ((component = vnode._component) && component._childDidSuspend) {
 				if (oldVNode) {
 					newVNode._dom = oldVNode._dom;
@@ -31,8 +36,7 @@ function detachDom(children) {
 		if (child != null) {
 			if (typeof child.type !== 'function' && child._dom) {
 				removeNode(child._dom);
-			}
-			else if (child._children) {
+			} else if (child._children) {
 				detachDom(child._children);
 			}
 		}
@@ -55,14 +59,14 @@ Suspense.prototype = new Component();
  * @param {Promise} promise The thrown promise
  */
 Suspense.prototype._childDidSuspend = function(promise) {
-
 	/** @type {import('./internal').SuspenseComponent} */
 	const c = this;
 	c._suspensions.push(promise);
 
 	const onSuspensionComplete = () => {
 		// From https://twitter.com/Rich_Harris/status/1125850391155965952
-		c._suspensions[c._suspensions.indexOf(promise)] = c._suspensions[c._suspensions.length - 1];
+		c._suspensions[c._suspensions.indexOf(promise)] =
+			c._suspensions[c._suspensions.length - 1];
 		c._suspensions.pop();
 
 		if (c._suspensions.length == 0) {
@@ -111,8 +115,12 @@ export function lazy(loader) {
 		if (!prom) {
 			prom = loader();
 			prom.then(
-				(exports) => { component = exports.default; },
-				(e) => { error = e; },
+				exports => {
+					component = exports.default;
+				},
+				e => {
+					error = e;
+				}
 			);
 		}
 

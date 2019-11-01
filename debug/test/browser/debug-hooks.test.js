@@ -28,7 +28,7 @@ describe('debug with hooks', () => {
 	});
 
 	afterEach(() => {
-		(console.error).restore();
+		console.error.restore();
 		console.warn.restore();
 		teardown(scratch);
 	});

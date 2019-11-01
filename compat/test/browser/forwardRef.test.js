@@ -1,11 +1,20 @@
-import { createElement as h, render, createRef, forwardRef, hydrate, memo, useState, useImperativeHandle } from '../../src';
+import {
+	createElement as h,
+	render,
+	createRef,
+	forwardRef,
+	hydrate,
+	memo,
+	useState,
+	useRef,
+	useImperativeHandle
+} from '../../src';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { setupRerender } from 'preact/test-utils';
+import { setupRerender, act } from 'preact/test-utils';
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 
 /** @jsx h */
 describe('forwardRef', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch, rerender;
 
@@ -45,7 +54,11 @@ describe('forwardRef', () => {
 	});
 
 	it('should pass ref with a callback', () => {
-		let App = forwardRef((_, ref) => <div><span ref={ref}>foo</span></div>);
+		let App = forwardRef((_, ref) => (
+			<div>
+				<span ref={ref}>foo</span>
+			</div>
+		));
 		let ref;
 		render(<App ref={x => (ref = x)} />, scratch);
 
@@ -102,7 +115,7 @@ describe('forwardRef', () => {
 		const element = document.createElement('div');
 		element.innerHTML = '<div>Hi</div>';
 		expect(element.textContent).to.equal('Hi');
-		expect(ref.current==null).to.equal(true);
+		expect(ref.current == null).to.equal(true);
 
 		hydrate(markup, element);
 		expect(element.textContent).to.equal('Hi');
@@ -137,7 +150,7 @@ describe('forwardRef', () => {
 		const ref = createRef();
 
 		render(<App ref={ref} />, scratch);
-		expect(ref.current==null).to.equal(true);
+		expect(ref.current == null).to.equal(true);
 	});
 
 	it('should support rendering null for multiple children', () => {
@@ -152,7 +165,7 @@ describe('forwardRef', () => {
 			</div>,
 			scratch
 		);
-		expect(ref.current==null).to.equal(true);
+		expect(ref.current == null).to.equal(true);
 	});
 
 	it('should support useImperativeHandle', () => {
@@ -161,13 +174,15 @@ describe('forwardRef', () => {
 			const result = useState('');
 			setValue = result[1];
 
-			useImperativeHandle(ref, () => ({
-				getValue: () => result[0]
-			}), [result[0]]);
-
-			return (
-				<input ref={ref} value={result[0]}  />
+			useImperativeHandle(
+				ref,
+				() => ({
+					getValue: () => result[0]
+				}),
+				[result[0]]
 			);
+
+			return <input ref={ref} value={result[0]} />;
 		});
 
 		const ref = createRef();
@@ -180,7 +195,6 @@ describe('forwardRef', () => {
 		rerender();
 		expect(typeof ref.current.getValue).to.equal('function');
 		expect(ref.current.getValue()).to.equal('x');
-
 	});
 
 	it('should not bailout if forwardRef is not wrapped in memo', () => {
@@ -211,7 +225,7 @@ describe('forwardRef', () => {
 			forwardRef((props, ref) => {
 				renderCount++;
 				return <Component {...props} forwardedRef={ref} />;
-			}),
+			})
 		);
 
 		const ref = createRef();
@@ -226,13 +240,10 @@ describe('forwardRef', () => {
 
 		const differentRef = createRef();
 
-		render(
-			<App ref={differentRef} optional="foo" />,
-			scratch
-		);
+		render(<App ref={differentRef} optional="foo" />, scratch);
 		expect(renderCount).to.equal(2);
 
-		expect(ref.current==null).to.equal(true);
+		expect(ref.current == null).to.equal(true);
 		expect(differentRef.current.nodeName).to.equal('DIV');
 
 		render(<App ref={ref} optional="bar" />, scratch);
@@ -248,7 +259,7 @@ describe('forwardRef', () => {
 			forwardRef((props, ref) => {
 				renderCount++;
 				return <Component {...props} forwardedRef={ref} />;
-			}),
+			})
 		);
 
 		const ref = sinon.spy();
@@ -285,7 +296,7 @@ describe('forwardRef', () => {
 				renderCount++;
 				return <Foo {...props} forwardedRef={ref} />;
 			}),
-			(o, p) => o.a === p.a && o.b === p.b,
+			(o, p) => o.a === p.a && o.b === p.b
 		);
 
 		const ref = createRef();
@@ -303,10 +314,7 @@ describe('forwardRef', () => {
 		render(<App ref={ref} a="0" b="1" c="2" />, scratch);
 		expect(renderCount).to.equal(2);
 
-		const App2 = memo(
-			App,
-			(o, p) => o.a === p.a && o.c === p.c,
-		);
+		const App2 = memo(App, (o, p) => o.a === p.a && o.c === p.c);
 
 		render(<App2 ref={ref} a="0" b="0" c="0" />, scratch);
 		expect(renderCount).to.equal(3);
@@ -329,7 +337,7 @@ describe('forwardRef', () => {
 		render(<App2 ref={differentRef} a="2" b="2" c="3" />, scratch);
 		expect(renderCount).to.equal(5);
 
-		expect(ref.current==null).to.equal(true);
+		expect(ref.current == null).to.equal(true);
 		expect(differentRef.current.nodeName).to.equal('DIV');
 	});
 
@@ -343,5 +351,34 @@ describe('forwardRef', () => {
 		render(<Bar ref={spy} />, scratch);
 		expect(spy).to.be.calledOnce;
 		expect(spy).to.be.calledWithExactly({ foo: 100 });
+	});
+
+	it('stale ref missing with passed useRef', () => {
+		let _ref = null;
+		let _set = null;
+		const Inner = forwardRef((props, ref) => {
+			const _hook = useState(null);
+			_ref = ref;
+			_set = _hook[1];
+			return <div ref={ref} />;
+		});
+
+		const Parent = () => {
+			const parentRef = useRef(null);
+			return <Inner ref={parentRef}>child</Inner>;
+		};
+
+		act(() => {
+			render(<Parent />, scratch);
+		});
+
+		expect(_ref.current).to.equal(scratch.firstChild);
+
+		act(() => {
+			_set(1);
+			rerender();
+		});
+
+		expect(_ref.current).to.equal(scratch.firstChild);
 	});
 });

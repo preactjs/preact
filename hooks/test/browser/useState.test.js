@@ -5,9 +5,7 @@ import { useState } from '../../src';
 
 /** @jsx h */
 
-
 describe('useState', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -22,7 +20,6 @@ describe('useState', () => {
 	afterEach(() => {
 		teardown(scratch);
 	});
-
 
 	it('serves the same state across render calls', () => {
 		const stateHistory = [];
@@ -41,7 +38,7 @@ describe('useState', () => {
 	});
 
 	it('can initialize the state via a function', () => {
-		const initState = sinon.spy(() => { 1; });
+		const initState = sinon.spy(() => 1);
 
 		function Comp() {
 			useState(initState);
@@ -110,10 +107,12 @@ describe('useState', () => {
 	it('can be set by another component', () => {
 		function StateContainer() {
 			const [count, setCount] = useState(0);
-			return (<div>
-				<p>Count: {count}</p>
-				<Increment increment={() => setCount(c => c + 10)} />
-			</div>);
+			return (
+				<div>
+					<p>Count: {count}</p>
+					<Increment increment={() => setCount(c => c + 10)} />
+				</div>
+			);
 		}
 
 		function Increment(props) {

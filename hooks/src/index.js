@@ -75,7 +75,9 @@ function getHookState(index) {
 	// * https://github.com/michael-klein/funcy.js/blob/650beaa58c43c33a74820a3c98b3c7079cf2e333/src/renderer.mjs
 	// Other implementations to look at:
 	// * https://codesandbox.io/s/mnox05qp8
-	const hooks = currentComponent.__hooks || (currentComponent.__hooks = { _list: [], _pendingEffects: [] });
+	const hooks =
+		currentComponent.__hooks ||
+		(currentComponent.__hooks = { _list: [], _pendingEffects: [] });
 
 	if (index >= hooks._list.length) {
 		hooks._list.push({});
@@ -97,7 +99,6 @@ export function useState(initialState) {
  * @returns {[ any, (state: any) => void ]}
  */
 export function useReducer(reducer, initialState, init) {
-
 	/** @type {import('./internal').ReducerHookState} */
 	const hookState = getHookState(currentIndex++);
 	if (!hookState._component) {
@@ -108,7 +109,7 @@ export function useReducer(reducer, initialState, init) {
 
 			action => {
 				const nextValue = reducer(hookState._value[0], action);
-				if (hookState._value[0]!==nextValue) {
+				if (hookState._value[0] !== nextValue) {
 					hookState._value[0] = nextValue;
 					hookState._component.setState({});
 				}
@@ -124,7 +125,6 @@ export function useReducer(reducer, initialState, init) {
  * @param {any[]} args
  */
 export function useEffect(callback, args) {
-
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(currentIndex++);
 	if (argsChanged(state._args, args)) {
@@ -140,7 +140,6 @@ export function useEffect(callback, args) {
  * @param {any[]} args
  */
 export function useLayoutEffect(callback, args) {
-
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(currentIndex++);
 	if (argsChanged(state._args, args)) {
@@ -161,10 +160,13 @@ export function useRef(initialValue) {
  * @param {any[]} args
  */
 export function useImperativeHandle(ref, createHandle, args) {
-	useLayoutEffect(() => {
-		if (typeof ref === 'function') ref(createHandle());
-		else if (ref) ref.current = createHandle();
-	}, args == null ? args : args.concat(ref));
+	useLayoutEffect(
+		() => {
+			if (typeof ref === 'function') ref(createHandle());
+			else if (ref) ref.current = createHandle();
+		},
+		args == null ? args : args.concat(ref)
+	);
 }
 
 /**
@@ -172,13 +174,12 @@ export function useImperativeHandle(ref, createHandle, args) {
  * @param {any[]} args
  */
 export function useMemo(callback, args) {
-
 	/** @type {import('./internal').MemoHookState} */
 	const state = getHookState(currentIndex++);
 	if (argsChanged(state._args, args)) {
 		state._args = args;
 		state._callback = callback;
-		return state._value = callback();
+		return (state._value = callback());
 	}
 
 	return state._value;
@@ -264,7 +265,7 @@ function afterNextFrame(callback) {
 /* istanbul ignore else */
 if (typeof window !== 'undefined') {
 	let prevRaf = options.requestAnimationFrame;
-	afterPaint = (newQueueLength) => {
+	afterPaint = newQueueLength => {
 		if (newQueueLength === 1 || prevRaf !== options.requestAnimationFrame) {
 			prevRaf = options.requestAnimationFrame;
 

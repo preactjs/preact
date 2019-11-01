@@ -1,5 +1,10 @@
 import { createElement, hydrate, Fragment } from '../../src/index';
-import { setupScratch, teardown, sortAttributes, serializeHtml } from '../_util/helpers';
+import {
+	setupScratch,
+	teardown,
+	sortAttributes,
+	serializeHtml
+} from '../_util/helpers';
 import { ul, li, div } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 
@@ -30,70 +35,61 @@ describe('hydrate()', () => {
 	});
 
 	it('should reuse existing DOM', () => {
-		const html = ul([
-			li('1'),
-			li('2'),
-			li('3')
-		].join(''));
+		const html = ul([li('1'), li('2'), li('3')].join(''));
 
 		scratch.innerHTML = html;
 		clearLog();
 
-		hydrate((
+		hydrate(
 			<ul>
 				<li>1</li>
 				<li>2</li>
 				<li>3</li>
-			</ul>
-		), scratch);
+			</ul>,
+			scratch
+		);
 
 		expect(scratch.innerHTML).to.equal(html);
 		expect(getLog()).to.deep.equal([]);
 	});
 
 	it('should reuse existing DOM when given components', () => {
-		const html = ul([
-			li('1'),
-			li('2'),
-			li('3')
-		].join(''));
+		const html = ul([li('1'), li('2'), li('3')].join(''));
 
 		scratch.innerHTML = html;
 		clearLog();
 
-		hydrate((
+		hydrate(
 			<List>
 				<ListItem>1</ListItem>
 				<ListItem>2</ListItem>
 				<ListItem>3</ListItem>
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
 		expect(scratch.innerHTML).to.equal(html);
 		expect(getLog()).to.deep.equal([]);
 	});
 
 	it('should add missing nodes to existing DOM when hydrating', () => {
-		const html = ul([
-			li('1')
-		].join(''));
+		const html = ul([li('1')].join(''));
 
 		scratch.innerHTML = html;
 		clearLog();
 
-		hydrate((
+		hydrate(
 			<List>
 				<ListItem>1</ListItem>
 				<ListItem>2</ListItem>
 				<ListItem>3</ListItem>
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
-		expect(scratch.innerHTML).to.equal(ul([
-			li('1'),
-			li('2'),
-			li('3')
-		].join('')));
+		expect(scratch.innerHTML).to.equal(
+			ul([li('1'), li('2'), li('3')].join(''))
+		);
 		expect(getLog()).to.deep.equal([
 			'<li>.appendChild(#text)',
 			'<ul>1.appendChild(<li>2)',
@@ -103,42 +99,45 @@ describe('hydrate()', () => {
 	});
 
 	it('should remove extra nodes from existing DOM when hydrating', () => {
-		const html = ul([
-			li('1'),
-			li('2'),
-			li('3'),
-			li('4')
-		].join(''));
+		const html = ul([li('1'), li('2'), li('3'), li('4')].join(''));
 
 		scratch.innerHTML = html;
 		clearLog();
 
-		hydrate((
+		hydrate(
 			<List>
 				<ListItem>1</ListItem>
 				<ListItem>2</ListItem>
 				<ListItem>3</ListItem>
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
-		expect(scratch.innerHTML).to.equal(ul([
-			li('1'),
-			li('2'),
-			li('3')
-		].join('')));
-		expect(getLog()).to.deep.equal([
-			'<li>4.remove()'
-		]);
+		expect(scratch.innerHTML).to.equal(
+			ul([li('1'), li('2'), li('3')].join(''))
+		);
+		expect(getLog()).to.deep.equal(['<li>4.remove()']);
 	});
 
 	it('should not update attributes on existing DOM', () => {
-		scratch.innerHTML = '<div><span before-hydrate="test" same-value="foo" different-value="a">Test</span></div>';
-		let vnode = <div><span same-value="foo" different-value="b" new-value="c">Test</span></div>;
+		scratch.innerHTML =
+			'<div><span before-hydrate="test" same-value="foo" different-value="a">Test</span></div>';
+		let vnode = (
+			<div>
+				<span same-value="foo" different-value="b" new-value="c">
+					Test
+				</span>
+			</div>
+		);
 
 		clearLog();
 		hydrate(vnode, scratch);
 
-		expect(serializeHtml(scratch)).to.equal(sortAttributes('<div><span before-hydrate="test" different-value="a" same-value="foo">Test</span></div>'));
+		expect(serializeHtml(scratch)).to.equal(
+			sortAttributes(
+				'<div><span before-hydrate="test" different-value="a" same-value="foo">Test</span></div>'
+			)
+		);
 		expect(getLog()).to.deep.equal([]);
 	});
 
@@ -149,17 +148,12 @@ describe('hydrate()', () => {
 	});
 
 	it('should correctly hydrate with Fragments', () => {
-		const html = ul([
-			li('1'),
-			li('2'),
-			li('3'),
-			li('4')
-		].join(''));
+		const html = ul([li('1'), li('2'), li('3'), li('4')].join(''));
 
 		scratch.innerHTML = html;
 		clearLog();
 
-		hydrate((
+		hydrate(
 			<List>
 				<ListItem>1</ListItem>
 				<Fragment>
@@ -167,8 +161,9 @@ describe('hydrate()', () => {
 					<ListItem>3</ListItem>
 				</Fragment>
 				<ListItem>4</ListItem>
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
 		expect(scratch.innerHTML).to.equal(html);
 		expect(getLog()).to.deep.equal([]);
@@ -176,19 +171,14 @@ describe('hydrate()', () => {
 
 	it('should correctly hydrate root Fragments', () => {
 		const html = [
-			ul([
-				li('1'),
-				li('2'),
-				li('3'),
-				li('4')
-			].join('')),
+			ul([li('1'), li('2'), li('3'), li('4')].join('')),
 			div('sibling')
 		].join('');
 
 		scratch.innerHTML = html;
 		clearLog();
 
-		hydrate((
+		hydrate(
 			<Fragment>
 				<List>
 					<Fragment>
@@ -199,8 +189,9 @@ describe('hydrate()', () => {
 					<ListItem>4</ListItem>
 				</List>
 				<div>sibling</div>
-			</Fragment>
-		), scratch);
+			</Fragment>,
+			scratch
+		);
 
 		expect(scratch.innerHTML).to.equal(html);
 		expect(getLog()).to.deep.equal([]);
@@ -214,18 +205,13 @@ describe('hydrate()', () => {
 	it.skip('should override incorrect pre-existing DOM with VNodes passed into render', () => {
 		const initialHtml = [
 			div('sibling'),
-			ul([
-				li('1'),
-				li('4'),
-				li('3'),
-				li('2')
-			].join(''))
+			ul([li('1'), li('4'), li('3'), li('2')].join(''))
 		].join('');
 
 		scratch.innerHTML = initialHtml;
 		clearLog();
 
-		hydrate((
+		hydrate(
 			<Fragment>
 				<List>
 					<Fragment>
@@ -236,16 +222,12 @@ describe('hydrate()', () => {
 					<ListItem>4</ListItem>
 				</List>
 				<div>sibling</div>
-			</Fragment>
-		), scratch);
+			</Fragment>,
+			scratch
+		);
 
 		const finalHtml = [
-			ul([
-				li('1'),
-				li('2'),
-				li('3'),
-				li('4')
-			].join('')),
+			ul([li('1'), li('2'), li('3'), li('4')].join('')),
 			div('sibling')
 		].join('');
 
@@ -255,19 +237,27 @@ describe('hydrate()', () => {
 	});
 
 	it('should not merge attributes with node created by the DOM', () => {
-		const html = (htmlString) => {
+		const html = htmlString => {
 			const div = document.createElement('div');
 			div.innerHTML = htmlString;
 			return div.firstChild;
 		};
 
+		// prettier-ignore
 		const DOMElement = html`<div><a foo="bar"></a></div>`;
 		scratch.appendChild(DOMElement);
 
-		const preactElement = <div><a /></div>;
+		const preactElement = (
+			<div>
+				<a />
+			</div>
+		);
 
 		hydrate(preactElement, scratch);
-		expect(scratch).to.have.property('innerHTML', '<div><a foo="bar"></a></div>');
+		expect(scratch).to.have.property(
+			'innerHTML',
+			'<div><a foo="bar"></a></div>'
+		);
 	});
 
 	it('should attach event handlers', () => {

@@ -5,9 +5,7 @@ import { useContext, useEffect, useState } from '../../src';
 
 /** @jsx h */
 
-
 describe('useContext', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -18,7 +16,6 @@ describe('useContext', () => {
 	afterEach(() => {
 		teardown(scratch);
 	});
-
 
 	it('gets values from context', () => {
 		const values = [];
@@ -31,8 +28,18 @@ describe('useContext', () => {
 		}
 
 		render(<Comp />, scratch);
-		render(<Context.Provider value={42}><Comp /></Context.Provider>, scratch);
-		render(<Context.Provider value={69}><Comp /></Context.Provider>, scratch);
+		render(
+			<Context.Provider value={42}>
+				<Comp />
+			</Context.Provider>,
+			scratch
+		);
+		render(
+			<Context.Provider value={69}>
+				<Comp />
+			</Context.Provider>,
+			scratch
+		);
 
 		expect(values).to.deep.equal([13, 42, 69]);
 	});
@@ -137,32 +144,34 @@ describe('useContext', () => {
 			const foo = useContext(Foo);
 			const bar = useContext(Bar);
 			spy(foo, bar);
-			useEffect(() =>	() => unmountspy());
+			useEffect(() => () => unmountspy());
 
 			return <div />;
 		}
 
-		render((
+		render(
 			<Foo.Provider value={0}>
 				<Bar.Provider value={10}>
 					<Comp />
 				</Bar.Provider>
-			</Foo.Provider>
-		), scratch);
+			</Foo.Provider>,
+			scratch
+		);
 
 		expect(spy).to.be.calledOnce;
 		expect(spy).to.be.calledWith(0, 10);
 
-		render((
+		render(
 			<Foo.Provider value={11}>
 				<Bar.Provider value={42}>
 					<Comp />
 				</Bar.Provider>
-			</Foo.Provider>
-		), scratch);
+			</Foo.Provider>,
+			scratch
+		);
 
-		 expect(spy).to.be.calledTwice;
-		 expect(unmountspy).not.to.be.called;
+		expect(spy).to.be.calledTwice;
+		expect(unmountspy).not.to.be.called;
 	});
 
 	it('should only subscribe a component once', () => {
@@ -178,10 +187,20 @@ describe('useContext', () => {
 
 		render(<Comp />, scratch);
 
-		render(<Context.Provider ref={p => provider = p} value={42}><Comp /></Context.Provider>, scratch);
+		render(
+			<Context.Provider ref={p => (provider = p)} value={42}>
+				<Comp />
+			</Context.Provider>,
+			scratch
+		);
 		subSpy = sinon.spy(provider, 'sub');
 
-		render(<Context.Provider value={69}><Comp /></Context.Provider>, scratch);
+		render(
+			<Context.Provider value={69}>
+				<Comp />
+			</Context.Provider>,
+			scratch
+		);
 		expect(subSpy).to.not.have.been.called;
 
 		expect(values).to.deep.equal([13, 42, 69]);
@@ -207,14 +226,10 @@ describe('useContext', () => {
 				});
 			}, [config]);
 
-			return (
-				<div>
-					{config.name}
-				</div>
-			);
+			return <div>{config.name}</div>;
 		};
 
-		const App = (props) => {
+		const App = props => {
 			const [config, setConfig] = useState({});
 
 			useEffect(() => {
@@ -238,7 +253,9 @@ describe('useContext', () => {
 
 		// Push the expect into the next frame
 		requestAnimationFrame(() => {
-			expect(scratch.innerHTML).equal('<div>first</div><div><div>second</div></div>');
+			expect(scratch.innerHTML).equal(
+				'<div>first</div><div><div>second</div></div>'
+			);
 			done();
 		});
 	});

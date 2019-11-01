@@ -41,7 +41,10 @@ export default class Spiral extends Component {
 		});
 
 		// holding the mouse down enables big mode:
-		addEventListener(touch ? 'touchstart' : 'mousedown', e => { this.setBig(true); e.preventDefault(); });
+		addEventListener(touch ? 'touchstart' : 'mousedown', e => {
+			this.setBig(true);
+			e.preventDefault();
+		});
 		addEventListener(touch ? 'touchend' : 'mouseup', e => this.setBig(false));
 
 		requestAnimationFrame(this.increment);
@@ -59,12 +62,14 @@ export default class Spiral extends Component {
 
 	// builds and returns a brand new DOM (every time)
 	render(props, { x, y, big, counter }) {
-		let max = COUNT + Math.round(Math.sin(counter / 90 * 2 * Math.PI) * COUNT * 0.5),
+		let max =
+				COUNT +
+				Math.round(Math.sin((counter / 90) * 2 * Math.PI) * COUNT * 0.5),
 			cursors = [];
 
 		// the advantage of JSX is that you can use the entirety of JS to "template":
-		for (let i = max; i--;) {
-			let f = i / max * LOOPS,
+		for (let i = max; i--; ) {
+			let f = (i / max) * LOOPS,
 				θ = f * 2 * Math.PI,
 				m = 20 + i * 2,
 				hue = (f * 255 + counter * 10) % 255;
@@ -87,7 +92,6 @@ export default class Spiral extends Component {
 	}
 }
 
-
 /** Represents a single coloured dot. */
 class Cursor extends Component {
 	// get shared/pooled class object
@@ -100,28 +104,37 @@ class Cursor extends Component {
 
 	// skip any pointless re-renders
 	shouldComponentUpdate(props) {
-		for (let i in props) if (i !== 'children' && props[i] !== this.props[i]) return true;
+		for (let i in props)
+			if (i !== 'children' && props[i] !== this.props[i]) return true;
 		return false;
 	}
 
 	// first argument is "props", the attributes passed to <Cursor ...>
 	render({ x, y, label, color, big }) {
 		let inner = null;
-		if (label) inner = <span class="label">{x},{y}</span>;
+		if (label)
+			inner = (
+				<span class="label">
+					{x},{y}
+				</span>
+			);
 		return (
 			<div
 				class={this.getClass(big, label)}
 				style={{
-					transform: `translate(${x || 0}px, ${y || 0}px) scale(${big?2:1})`,
+					transform: `translate(${x || 0}px, ${y || 0}px) scale(${
+						big ? 2 : 1
+					})`,
 					// transform: `translate3d(${x || 0}px, ${y || 0}px, 0) scale(${big?2:1})`,
 					borderColor: color
 				}}
 				// style={{ left: x || 0, top: y || 0, borderColor: color }}
-			>{inner}</div>
+			>
+				{inner}
+			</div>
 		);
 	}
 }
-
 
 // Addendum: disable dragging on mobile
 addEventListener('touchstart', e => (e.preventDefault(), false));
