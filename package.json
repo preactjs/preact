@@ -36,7 +36,10 @@
     "lint": "eslint src test debug compat hooks test-utils"
   },
   "eslintConfig": {
-    "extends": ["developit", "prettier"],
+    "extends": [
+      "developit",
+      "prettier"
+    ],
     "settings": {
       "react": {
         "pragma": "createElement"
