@@ -466,16 +466,16 @@ describe('keys', () => {
 			return moved ? (
 				<div>
 					<div>1</div>
-					<Stateful2 key="b" ref={c => (Stateful2MovedRef = c)} />
+					<Stateful2 key="b" ref={c => c ? Stateful2MovedRef = c : undefined} />
 					<div>2</div>
-					<Stateful1 key="a" ref={c => (Stateful1MovedRef = c)} />
+					<Stateful1 key="a" ref={c => c ? Stateful1MovedRef = c : undefined} />
 				</div>
 			) : (
 				<div>
 					<div>1</div>
-					<Stateful1 key="a" ref={c => (Stateful1Ref = c)} />
+					<Stateful1 key="a" ref={c => c ? Stateful1Ref = c : undefined} />
 					<div>2</div>
-					<Stateful2 key="b" ref={c => (Stateful2Ref = c)} />
+					<Stateful2 key="b" ref={c => c ? Stateful2Ref = c : undefined} />
 				</div>
 			);
 		}
