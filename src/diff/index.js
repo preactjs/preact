@@ -381,9 +381,9 @@ function diffElementNodes(
  * @param {any} value
  * @param {import('../internal').VNode} vnode
  */
-export function applyRef(ref, value, vnode, oldRef) {
+export function applyRef(ref, value, vnode) {
 	try {
-		if (typeof ref=='function') ref(value);
+		if (typeof ref == 'function') ref(value);
 		else ref.current = value;
 	} catch (e) {
 		options._catchError(e, vnode);
