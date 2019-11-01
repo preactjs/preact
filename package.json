@@ -76,16 +76,13 @@
 		"dist"
 	],
 	"prettier": {
-		"resolveConfig": {
-			"editorconfig": true
-		},
 		"singleQuote": true,
 		"trailingComma": "none",
 		"useTabs": true,
 		"tabWidth": 2
 	},
 	"lint-staged": {
-		"**/*.{js,jsx,ts,tsx,json}": [
+		"**/*.{js,jsx,ts,tsx}": [
 			"npm run sync:mangle",
 			"prettier --write",
 			"git add"
