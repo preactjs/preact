@@ -101,6 +101,8 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				c.__v = vnode;
 				// turn off stateful re-rendering:
 				c._dirty = c.__d = true;
+				// required by hooks
+				c._renderCallbacks = [];
 				c.props = props;
 				if (c.state==null) c.state = {};
 				c.context = cctx;
