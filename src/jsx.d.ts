@@ -29,7 +29,8 @@ export namespace JSXInternal {
 		children: any;
 	}
 
-	interface SVGAttributes extends HTMLAttributes<SVGElement> {
+	interface SVGAttributes<Target extends EventTarget = SVGElement>
+		extends HTMLAttributes<Target> {
 		accentHeight?: number | string;
 		accumulate?: 'none' | 'sum';
 		additive?: 'replace' | 'sum';
@@ -852,48 +853,48 @@ export namespace JSXInternal {
 		wbr: HTMLAttributes<HTMLElement>;
 
 		//SVG
-		svg: SVGAttributes;
-		animate: SVGAttributes;
-		circle: SVGAttributes;
-		clipPath: SVGAttributes;
-		defs: SVGAttributes;
-		desc: SVGAttributes;
-		ellipse: SVGAttributes;
-		feBlend: SVGAttributes;
-		feColorMatrix: SVGAttributes;
-		feComponentTransfer: SVGAttributes;
-		feComposite: SVGAttributes;
-		feConvolveMatrix: SVGAttributes;
-		feDiffuseLighting: SVGAttributes;
-		feDisplacementMap: SVGAttributes;
-		feFlood: SVGAttributes;
-		feGaussianBlur: SVGAttributes;
-		feImage: SVGAttributes;
-		feMerge: SVGAttributes;
-		feMergeNode: SVGAttributes;
-		feMorphology: SVGAttributes;
-		feOffset: SVGAttributes;
-		feSpecularLighting: SVGAttributes;
-		feTile: SVGAttributes;
-		feTurbulence: SVGAttributes;
-		filter: SVGAttributes;
-		foreignObject: SVGAttributes;
-		g: SVGAttributes;
-		image: SVGAttributes;
-		line: SVGAttributes;
-		linearGradient: SVGAttributes;
-		marker: SVGAttributes;
-		mask: SVGAttributes;
-		path: SVGAttributes;
-		pattern: SVGAttributes;
-		polygon: SVGAttributes;
-		polyline: SVGAttributes;
-		radialGradient: SVGAttributes;
-		rect: SVGAttributes;
-		stop: SVGAttributes;
-		symbol: SVGAttributes;
-		text: SVGAttributes;
-		tspan: SVGAttributes;
-		use: SVGAttributes;
+		svg: SVGAttributes<SVGSVGElement>;
+		animate: SVGAttributes<SVGAnimateElement>;
+		circle: SVGAttributes<SVGCircleElement>;
+		clipPath: SVGAttributes<SVGClipPathElement>;
+		defs: SVGAttributes<SVGDefsElement>;
+		desc: SVGAttributes<SVGDescElement>;
+		ellipse: SVGAttributes<SVGEllipseElement>;
+		feBlend: SVGAttributes<SVGFEBlendElement>;
+		feColorMatrix: SVGAttributes<SVGFEColorMatrixElement>;
+		feComponentTransfer: SVGAttributes<SVGFEComponentTransferElement>;
+		feComposite: SVGAttributes<SVGFECompositeElement>;
+		feConvolveMatrix: SVGAttributes<SVGFEConvolveMatrixElement>;
+		feDiffuseLighting: SVGAttributes<SVGFEDiffuseLightingElement>;
+		feDisplacementMap: SVGAttributes<SVGFEDisplacementMapElement>;
+		feFlood: SVGAttributes<SVGFEFloodElement>;
+		feGaussianBlur: SVGAttributes<SVGFEGaussianBlurElement>;
+		feImage: SVGAttributes<SVGFEImageElement>;
+		feMerge: SVGAttributes<SVGFEMergeElement>;
+		feMergeNode: SVGAttributes<SVGFEMergeNodeElement>;
+		feMorphology: SVGAttributes<SVGFEMorphologyElement>;
+		feOffset: SVGAttributes<SVGFEOffsetElement>;
+		feSpecularLighting: SVGAttributes<SVGFESpecularLightingElement>;
+		feTile: SVGAttributes<SVGFETileElement>;
+		feTurbulence: SVGAttributes<SVGFETurbulenceElement>;
+		filter: SVGAttributes<SVGFilterElement>;
+		foreignObject: SVGAttributes<SVGForeignObjectElement>;
+		g: SVGAttributes<SVGGElement>;
+		image: SVGAttributes<SVGImageElement>;
+		line: SVGAttributes<SVGLineElement>;
+		linearGradient: SVGAttributes<SVGLinearGradientElement>;
+		marker: SVGAttributes<SVGMarkerElement>;
+		mask: SVGAttributes<SVGMaskElement>;
+		path: SVGAttributes<SVGPathElement>;
+		pattern: SVGAttributes<SVGPatternElement>;
+		polygon: SVGAttributes<SVGPolygonElement>;
+		polyline: SVGAttributes<SVGPolylineElement>;
+		radialGradient: SVGAttributes<SVGRadialGradientElement>;
+		rect: SVGAttributes<SVGRectElement>;
+		stop: SVGAttributes<SVGStopElement>;
+		symbol: SVGAttributes<SVGSymbolElement>;
+		text: SVGAttributes<SVGTextElement>;
+		tspan: SVGAttributes<SVGTSpanElement>;
+		use: SVGAttributes<SVGUseElement>;
 	}
 }
