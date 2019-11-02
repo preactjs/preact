@@ -2,38 +2,38 @@ import options from './options';
 import { assign } from './util';
 
 /**
-  * Create an virtual node (used for JSX)
-  * @param {import('./internal').VNode["type"]} type The node name or Component
-  * constructor for this virtual node
-  * @param {object | null | undefined} [props] The properties of the virtual node
-  * @param {Array<import('.').ComponentChildren>} [children] The children of the virtual node
-  * @returns {import('./internal').VNode}
-  */
+ * Create an virtual node (used for JSX)
+ * @param {import('./internal').VNode["type"]} type The node name or Component
+ * constructor for this virtual node
+ * @param {object | null | undefined} [props] The properties of the virtual node
+ * @param {Array<import('.').ComponentChildren>} [children] The children of the virtual node
+ * @returns {import('./internal').VNode}
+ */
 export function createElement(type, props, children) {
 	props = assign({}, props);
 
-	if (arguments.length>3) {
+	if (arguments.length > 3) {
 		children = [children];
 		// https://github.com/preactjs/preact/issues/1916
-		for (let i=3; i<arguments.length; i++) {
+		for (let i = 3; i < arguments.length; i++) {
 			children.push(arguments[i]);
 		}
 	}
-	if (children!=null) {
+	if (children != null) {
 		props.children = children;
 	}
 
 	// "type" may be undefined during development. The check is needed so that
 	// we can display a nice error message with our debug helpers
-	if (type!=null && type.defaultProps!=null) {
+	if (type != null && type.defaultProps != null) {
 		for (let i in type.defaultProps) {
-			if (props[i]===undefined) props[i] = type.defaultProps[i];
+			if (props[i] === undefined) props[i] = type.defaultProps[i];
 		}
 	}
 	let ref = props.ref;
 	let key = props.key;
-	if (ref!=null) delete props.ref;
-	if (key!=null) delete props.key;
+	if (ref != null) delete props.ref;
+	if (key != null) delete props.key;
 
 	return createVNode(type, props, key, ref);
 }
@@ -85,27 +85,5 @@ export function Fragment(props) {
  * @param {*} vnode
  * @returns {vnode is import('./internal').VNode}
  */
-export const isValidElement = vnode => vnode!=null && vnode.constructor === undefined;
-
-/**
- * Coerce an untrusted value into a VNode
- * Specifically, this should be used anywhere a user could provide a boolean, string, or number where
- * a VNode or Component is desired instead
- * @param {boolean | string | number | import('./internal').VNode} possibleVNode A possible VNode
- * @returns {import('./internal').VNode | null}
- */
-export function coerceToVNode(possibleVNode) {
-	if (possibleVNode == null || typeof possibleVNode === 'boolean') return null;
-	if (typeof possibleVNode === 'string' || typeof possibleVNode === 'number') {
-		return createVNode(null, possibleVNode, null, null);
-	}
-
-	// Clone vnode if it has already been used. ceviche/#57
-	if (possibleVNode._dom!=null || possibleVNode._component!=null) {
-		let vnode = createVNode(possibleVNode.type, possibleVNode.props, possibleVNode.key, null);
-		vnode._dom = possibleVNode._dom;
-		return vnode;
-	}
-
-	return possibleVNode;
-}
+export const isValidElement = vnode =>
+	vnode != null && vnode.constructor === undefined;

@@ -24,15 +24,16 @@ export function logCall(obj, method) {
 	let old = obj[method];
 	obj[method] = function(...args) {
 		let c = '';
-		for (let i=0; i<args.length; i++) {
+		for (let i = 0; i < args.length; i++) {
 			if (c) c += ', ';
 			c += serialize(args[i]);
 		}
 
 		// Normalize removeChild -> remove to keep output clean and readable
-		const operation = method!='removeChild'
-			? `${serialize(this)}.${method}(${c})`
-			: `${serialize(c)}.remove()`;
+		const operation =
+			method != 'removeChild'
+				? `${serialize(this)}.${method}(${c})`
+				: `${serialize(c)}.remove()`;
 		log.push(operation);
 		return old.apply(this, args);
 	};
@@ -52,7 +53,6 @@ export function clearLog() {
 }
 
 export function getLogSummary() {
-
 	/** @type {{ [key: string]: number }} */
 	const summary = {};
 

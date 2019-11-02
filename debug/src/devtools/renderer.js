@@ -1,5 +1,11 @@
 /* istanbul ignore file */
-import { getData, getChildren, getInstance, hasDataChanged, isRoot } from './custom';
+import {
+	getData,
+	getChildren,
+	getInstance,
+	hasDataChanged,
+	isRoot
+} from './custom';
 
 /**
  * Custom renderer tailored for Preact. It converts updated vnode trees
@@ -8,7 +14,6 @@ import { getData, getChildren, getInstance, hasDataChanged, isRoot } from './cus
  */
 export class Renderer {
 	constructor(hook, rid) {
-
 		/** @type {string} */
 		this.rid = rid;
 		this.hook = hook;
@@ -61,18 +66,20 @@ export class Renderer {
 		let data = getData(vnode);
 
 		/** @type {Array<import('../internal').DevtoolsEvent>} */
-		let work = [{
-			internalInstance: vnode,
-			data,
-			renderer: this.rid,
-			type: 'mount'
-		}];
+		let work = [
+			{
+				internalInstance: vnode,
+				data,
+				renderer: this.rid,
+				type: 'mount'
+			}
+		];
 
 		// Children must be mounted first
 		if (Array.isArray(data.children)) {
 			let stack = data.children.slice();
 			let item;
-			while ((item = stack.pop())!=null) {
+			while ((item = stack.pop()) != null) {
 				let children = getChildren(item);
 				stack.push(...children);
 
@@ -89,7 +96,7 @@ export class Renderer {
 			}
 		}
 
-		for (let i = work.length; --i>=0;) {
+		for (let i = work.length; --i >= 0; ) {
 			this.pending.push(work[i]);
 		}
 
@@ -118,7 +125,7 @@ export class Renderer {
 				let inst = getInstance(child);
 
 				let prevChild = this.inst2vnode.get(inst);
-				if (prevChild==null) this.mount(child);
+				if (prevChild == null) this.mount(child);
 				else this.update(child);
 
 				// Mutate child to keep referential equality intact
@@ -178,17 +185,15 @@ export class Renderer {
 		/** @type {import('../internal').VNode} */
 		let root = null;
 		if (isRoot(vnode)) {
-
 			/** @type {*} */
 			(vnode).treeBaseDuration = 0;
 			root = vnode;
-		}
-		else {
+		} else {
 			// "rootCommitted" always needs the actual root node for the profiler
 			// to be able to collect timings. The `_parent` property will
 			// point to a vnode for a root node.
 			root = vnode;
-			while (root._parent!=null) {
+			while (root._parent != null) {
 				root = root._parent;
 			}
 		}

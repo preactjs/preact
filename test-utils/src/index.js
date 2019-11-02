@@ -6,7 +6,7 @@ import { options } from 'preact';
  */
 export function setupRerender() {
 	options.__test__previousDebounce = options.debounceRendering;
-	options.debounceRendering = cb => options.__test__drainQueue = cb;
+	options.debounceRendering = cb => (options.__test__drainQueue = cb);
 	return () => options.__test__drainQueue && options.__test__drainQueue();
 }
 
@@ -47,7 +47,7 @@ export function act(cb) {
 	let flush, toFlush;
 
 	// Override requestAnimationFrame so we can flush pending hooks.
-	options.requestAnimationFrame = (fc) => flush = fc;
+	options.requestAnimationFrame = fc => (flush = fc);
 
 	const finish = () => {
 		rerender();
@@ -91,8 +91,7 @@ export function teardown() {
 	if (typeof options.__test__previousDebounce !== 'undefined') {
 		options.debounceRendering = options.__test__previousDebounce;
 		delete options.__test__previousDebounce;
-	}
-	else {
+	} else {
 		options.debounceRendering = undefined;
 	}
 }

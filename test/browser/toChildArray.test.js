@@ -1,10 +1,14 @@
 import { createElement, render, toChildArray } from '../../src/index';
-import { setupScratch, teardown, getMixedArray, mixedArrayHTML } from '../_util/helpers';
+import {
+	setupScratch,
+	teardown,
+	getMixedArray,
+	mixedArrayHTML
+} from '../_util/helpers';
 
 /** @jsx createElement */
 
 describe('toChildArray', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -16,7 +20,6 @@ describe('toChildArray', () => {
 	};
 
 	let Bar = () => <span>Bar</span>;
-
 
 	beforeEach(() => {
 		scratch = setupScratch();
@@ -85,7 +88,12 @@ describe('toChildArray', () => {
 	});
 
 	it('returns an array containing a VNode with a DOM node child', () => {
-		render(<Foo><span /></Foo>, scratch);
+		render(
+			<Foo>
+				<span />
+			</Foo>,
+			scratch
+		);
 
 		expect(children).to.be.an('array');
 		expect(children).to.have.lengthOf(1);
@@ -94,7 +102,12 @@ describe('toChildArray', () => {
 	});
 
 	it('returns an array containing a VNode with a Component child', () => {
-		render(<Foo><Bar /></Foo>, scratch);
+		render(
+			<Foo>
+				<Bar />
+			</Foo>,
+			scratch
+		);
 
 		expect(children).to.be.an('array');
 		expect(children).to.have.lengthOf(1);
@@ -103,7 +116,14 @@ describe('toChildArray', () => {
 	});
 
 	it('returns an array with multiple children', () => {
-		render(<Foo>0<span /><input /><div />1</Foo>, scratch);
+		render(
+			<Foo>
+				0<span />
+				<input />
+				<div />1
+			</Foo>,
+			scratch
+		);
 
 		expect(children).to.be.an('array');
 		expect(children[0]).to.equal('0');
@@ -111,7 +131,9 @@ describe('toChildArray', () => {
 		expect(children[2].type).to.equal('input');
 		expect(children[3].type).to.equal('div');
 		expect(children[4]).to.equal('1');
-		expect(scratch.innerHTML).to.equal(`<div>0<span></span><input><div></div>1</div>`);
+		expect(scratch.innerHTML).to.equal(
+			`<div>0<span></span><input><div></div>1</div>`
+		);
 	});
 
 	it('returns an array with non-renderables removed with a mixed array as children', () => {
@@ -127,7 +149,11 @@ describe('toChildArray', () => {
 				return child.reduce(filterAndReduceChildren, acc);
 			}
 
-			if (child != null && typeof child != 'boolean' && typeof child != 'function') {
+			if (
+				child != null &&
+				typeof child != 'boolean' &&
+				typeof child != 'function'
+			) {
 				acc.push(child);
 			}
 
@@ -142,10 +168,12 @@ describe('toChildArray', () => {
 			let originalChild = renderableArray[i];
 			let actualChild = children[i];
 
-			if (typeof originalChild == 'string' || typeof originalChild == 'number') {
+			if (
+				typeof originalChild == 'string' ||
+				typeof originalChild == 'number'
+			) {
 				expect(actualChild).to.equal(originalChild);
-			}
-			else {
+			} else {
 				expect(actualChild.type).to.equal(originalChild.type);
 			}
 		}
@@ -158,15 +186,16 @@ describe('toChildArray', () => {
 		const list4 = [6, 7];
 		const list5 = [8, 9];
 
-		const flatList = [
-			...list1,
-			...list2,
-			...list3,
-			...list4,
-			...list5
-		];
+		const flatList = [...list1, ...list2, ...list3, ...list4, ...list5];
 
-		render(<Foo>{[list1, list2]}{[list3, list4]}{list5}</Foo>, scratch);
+		render(
+			<Foo>
+				{[list1, list2]}
+				{[list3, list4]}
+				{list5}
+			</Foo>,
+			scratch
+		);
 
 		expect(children).to.be.an('array');
 		expect(scratch.innerHTML).to.equal('<div>0123456789</div>');

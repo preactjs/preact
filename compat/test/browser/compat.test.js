@@ -4,7 +4,6 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 import React from 'preact/compat'; // eslint-disable-line
 
 describe('imported compat in preact', () => {
-
 	let scratch;
 
 	beforeEach(() => {
@@ -21,9 +20,12 @@ describe('imported compat in preact', () => {
 		scratch.firstChild.click();
 
 		expect(spy).to.be.calledOnce;
-		expect(spy.args[0][0]).to.haveOwnProperty('persist');
-		expect(typeof spy.args[0][0].persist).to.equal('function');
-		expect(spy.args[0][0]).to.haveOwnProperty('nativeEvent');
+		const event = spy.args[0][0];
+		expect(event).to.haveOwnProperty('persist');
+		expect(event).to.haveOwnProperty('nativeEvent');
+		expect(typeof event.persist).to.equal('function');
+
+		expect(() => event.persist()).to.not.throw();
 	});
 
 	it('should normalize ondoubleclick event', () => {
@@ -43,7 +45,11 @@ describe('imported compat in preact', () => {
 
 	it('should normalize class+className even on components', () => {
 		function Foo(props) {
-			return <div class={props.class} className={props.className}>foo</div>;
+			return (
+				<div class={props.class} className={props.className}>
+					foo
+				</div>
+			);
 		}
 		render(<Foo class="foo" />, scratch);
 		expect(scratch.firstChild.className).to.equal('foo');

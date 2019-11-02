@@ -3,7 +3,6 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 import React from '../../src';
 
 describe('components', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -38,7 +37,9 @@ describe('components', () => {
 		}
 
 		React.render(
-			<Demo a="b" c="d">inner</Demo>,
+			<Demo a="b" c="d">
+				inner
+			</Demo>,
 			scratch
 		);
 
@@ -77,7 +78,9 @@ describe('components', () => {
 
 	describe('PureComponent', () => {
 		it('should be a class', () => {
-			expect(React).to.have.property('PureComponent').that.is.a('function');
+			expect(React)
+				.to.have.property('PureComponent')
+				.that.is.a('function');
 		});
 
 		it('should pass props in constructor', () => {
@@ -100,7 +103,7 @@ describe('components', () => {
 			const appSpy = sinon.spy();
 			let set;
 			class Pure extends React.PureComponent {
-				render()  {
+				render() {
 					pureSpy();
 					return <div>Static</div>;
 				}
@@ -146,7 +149,7 @@ describe('components', () => {
 			inst = React.render(<C a="a" b={b} />, scratch);
 			expect(spy).not.to.have.been.called;
 
-			inst.setState({ });
+			inst.setState({});
 			rerender();
 			expect(spy).not.to.have.been.called;
 
@@ -280,7 +283,6 @@ describe('components', () => {
 				}
 			}
 
-
 			Object.defineProperty(Foo.prototype, 'UNSAFE_componentWillUpdate', {
 				value: spy
 			});
@@ -309,8 +311,12 @@ describe('components', () => {
 			React.render(<Foo />, scratch);
 
 			expect(inst.UNSAFE_componentWillMount).to.equal(inst.componentWillMount);
-			expect(inst.UNSAFE_componentWillReceiveProps).to.equal(inst.UNSAFE_componentWillReceiveProps);
-			expect(inst.UNSAFE_componentWillUpdate).to.equal(inst.UNSAFE_componentWillUpdate);
+			expect(inst.UNSAFE_componentWillReceiveProps).to.equal(
+				inst.UNSAFE_componentWillReceiveProps
+			);
+			expect(inst.UNSAFE_componentWillUpdate).to.equal(
+				inst.UNSAFE_componentWillUpdate
+			);
 		});
 	});
 });

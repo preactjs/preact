@@ -5,7 +5,6 @@ import { setupScratch, teardown } from '../../_util/helpers';
 /** @jsx createElement */
 
 describe('Lifecycle methods', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -62,7 +61,7 @@ describe('Lifecycle methods', () => {
 			expect(scratch.firstChild.className).to.equal('not-foo bar');
 		});
 
-		it('should update the instance\'s state with the value returned from getDerivedStateFromProps when props change', () => {
+		it("should update the instance's state with the value returned from getDerivedStateFromProps when props change", () => {
 			class Foo extends Component {
 				constructor(props, context) {
 					super(props, context);
@@ -103,7 +102,7 @@ describe('Lifecycle methods', () => {
 			expect(Foo.prototype.componentDidUpdate).to.have.callCount(1); // verify update occurred
 		});
 
-		it('should update the instance\'s state with the value returned from getDerivedStateFromProps when state changes', () => {
+		it("should update the instance's state with the value returned from getDerivedStateFromProps when state changes", () => {
 			class Foo extends Component {
 				constructor(props, context) {
 					super(props, context);
@@ -251,16 +250,13 @@ describe('Lifecycle methods', () => {
 			logs = [];
 			childRef.setState({});
 			rerender();
-			expect(logs).to.deep.equal([
-				'child render'
-			]);
+			expect(logs).to.deep.equal(['child render']);
 		});
 
 		// TODO: Investigate this test:
 		// [should not override state with stale values if prevState is spread within getDerivedStateFromProps](https://github.com/facebook/react/blob/25dda90c1ecb0c662ab06e2c80c1ee31e0ae9d36/packages/react-dom/src/__tests__/ReactComponentLifeCycle-test.js#L1035)
 
 		it('should be passed next props and state', () => {
-
 			/** @type {() => void} */
 			let updateState;
 
@@ -273,9 +269,10 @@ describe('Lifecycle methods', () => {
 					this.state = {
 						value: 0
 					};
-					updateState = () => this.setState({
-						value: this.state.value + 1
-					});
+					updateState = () =>
+						this.setState({
+							value: this.state.value + 1
+						});
 				}
 				static getDerivedStateFromProps(props, state) {
 					// These object references might be updated later so copy
@@ -416,11 +413,7 @@ describe('Lifecycle methods', () => {
 			rerender();
 
 			// Verify captured object references didn't get mutated
-			expect(capturedStates).to.deep.equal([
-				{},
-				{ value: 1 },
-				{ value: 11 }
-			]);
+			expect(capturedStates).to.deep.equal([{}, { value: 1 }, { value: 11 }]);
 		});
 	});
 });

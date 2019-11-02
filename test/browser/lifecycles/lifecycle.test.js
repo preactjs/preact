@@ -5,7 +5,6 @@ import { setupScratch, teardown, spyAll } from '../../_util/helpers';
 /** @jsx h */
 
 describe('Lifecycle methods', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -46,11 +45,13 @@ describe('Lifecycle methods', () => {
 				log.push('outer constructor');
 
 				this.state = { value: 0 };
-				forceUpdateOuter = () => this.forceUpdate(() => log.push('outer forceUpdate callback'));
-				updateOuterState = () => this.setState(
-					prevState => ({ value: prevState.value % 2 }),
-					() => log.push('outer setState callback')
-				);
+				forceUpdateOuter = () =>
+					this.forceUpdate(() => log.push('outer forceUpdate callback'));
+				updateOuterState = () =>
+					this.setState(
+						prevState => ({ value: prevState.value % 2 }),
+						() => log.push('outer setState callback')
+					);
 			}
 			render() {
 				log.push('outer render');
@@ -79,15 +80,21 @@ describe('Lifecycle methods', () => {
 				log.push('inner constructor');
 
 				this.state = { value: 0 };
-				forceUpdateInner = () => this.forceUpdate(() => log.push('inner forceUpdate callback'));
-				updateInnerState = () => this.setState(
-					prevState => ({ value: prevState.value % 2 }),
-					() => log.push('inner setState callback')
-				);
+				forceUpdateInner = () =>
+					this.forceUpdate(() => log.push('inner forceUpdate callback'));
+				updateInnerState = () =>
+					this.setState(
+						prevState => ({ value: prevState.value % 2 }),
+						() => log.push('inner setState callback')
+					);
 			}
 			render() {
 				log.push('inner render');
-				return <span>{this.props.x} {this.props.outerValue} {this.state.value}</span>;
+				return (
+					<span>
+						{this.props.x} {this.props.outerValue} {this.state.value}
+					</span>
+				);
 			}
 		}
 		Object.assign(Inner.prototype, {
@@ -201,7 +208,6 @@ describe('Lifecycle methods', () => {
 			'outer componentWillUnmount',
 			'inner componentWillUnmount'
 		]);
-
 	});
 
 	let _it = it;
@@ -217,13 +223,7 @@ describe('Lifecycle methods', () => {
 				setState = s => this.setState(s);
 			}
 			render(props, { show }) {
-				return (
-					<div>
-						{ show && (
-							<Inner {...props} />
-						) }
-					</div>
-				);
+				return <div>{show && <Inner {...props} />}</div>;
 			}
 		}
 
@@ -231,7 +231,9 @@ describe('Lifecycle methods', () => {
 			componentWillMount() {}
 			componentDidMount() {}
 			componentWillUnmount() {}
-			render() { return <div />; }
+			render() {
+				return <div />;
+			}
 		}
 
 		class Inner extends LifecycleTestComponent {
@@ -245,21 +247,29 @@ describe('Lifecycle methods', () => {
 		}
 
 		class InnerMost extends LifecycleTestComponent {
-			render() { return <div />; }
+			render() {
+				return <div />;
+			}
 		}
 
-		let spies = ['componentWillMount', 'componentDidMount', 'componentWillUnmount'];
+		let spies = [
+			'componentWillMount',
+			'componentDidMount',
+			'componentWillUnmount'
+		];
 
-		let verifyLifecycleMethods = (TestComponent) => {
+		let verifyLifecycleMethods = TestComponent => {
 			let proto = TestComponent.prototype;
-			spies.forEach( s => sinon.spy(proto, s) );
-			let reset = () => spies.forEach( s => proto[s].resetHistory() );
+			spies.forEach(s => sinon.spy(proto, s));
+			let reset = () => spies.forEach(s => proto[s].resetHistory());
 
 			it('should be invoked for components on initial render', () => {
 				reset();
 				render(<Outer />, scratch);
 				expect(proto.componentDidMount).to.have.been.called;
-				expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
+				expect(proto.componentWillMount).to.have.been.calledBefore(
+					proto.componentDidMount
+				);
 				expect(proto.componentDidMount).to.have.been.called;
 			});
 
@@ -277,7 +287,9 @@ describe('Lifecycle methods', () => {
 				rerender();
 
 				expect(proto.componentDidMount).to.have.been.called;
-				expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
+				expect(proto.componentWillMount).to.have.been.calledBefore(
+					proto.componentDidMount
+				);
 				expect(proto.componentDidMount).to.have.been.called;
 			});
 		};
@@ -302,18 +314,20 @@ describe('Lifecycle methods', () => {
 				render(props, { show }) {
 					return (
 						<div>
-							{ show && (
+							{show && (
 								<div>
 									<Inner {...props} />
 								</div>
-							) }
+							)}
 						</div>
 					);
 				}
 			}
 
 			class Inner extends Component {
-				shouldComponentUpdate(){ return false; }
+				shouldComponentUpdate() {
+					return false;
+				}
 				componentWillMount() {}
 				componentDidMount() {}
 				componentWillUnmount() {}
@@ -323,17 +337,23 @@ describe('Lifecycle methods', () => {
 			}
 
 			let proto = Inner.prototype;
-			let spies = ['componentWillMount', 'componentDidMount', 'componentWillUnmount'];
-			spies.forEach( s => sinon.spy(proto, s) );
+			let spies = [
+				'componentWillMount',
+				'componentDidMount',
+				'componentWillUnmount'
+			];
+			spies.forEach(s => sinon.spy(proto, s));
 
-			let reset = () => spies.forEach( s => proto[s].resetHistory() );
+			let reset = () => spies.forEach(s => proto[s].resetHistory());
 
-			beforeEach( () => reset() );
+			beforeEach(() => reset());
 
 			it('should be invoke normally on initial mount', () => {
 				render(<Outer />, scratch);
 				expect(proto.componentWillMount).to.have.been.called;
-				expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
+				expect(proto.componentWillMount).to.have.been.calledBefore(
+					proto.componentDidMount
+				);
 				expect(proto.componentDidMount).to.have.been.called;
 			});
 
@@ -349,7 +369,9 @@ describe('Lifecycle methods', () => {
 				rerender();
 
 				expect(proto.componentWillMount).to.have.been.called;
-				expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
+				expect(proto.componentWillMount).to.have.been.calledBefore(
+					proto.componentDidMount
+				);
 				expect(proto.componentDidMount).to.have.been.called;
 			});
 
@@ -405,10 +427,11 @@ describe('Lifecycle methods', () => {
 				constructor() {
 					super();
 					this.state = { value: 0 };
-					updateState = () => this.setState(prev => {
-						prev.value++;
-						return null;
-					});
+					updateState = () =>
+						this.setState(prev => {
+							prev.value++;
+							return null;
+						});
 				}
 
 				render() {
@@ -460,25 +483,35 @@ describe('Lifecycle methods', () => {
 					};
 				}
 				componentWillMount() {
-					expect(document.getElementById('OuterDiv'), 'Outer componentWillMount').to.not.exist;
+					expect(
+						document.getElementById('OuterDiv'),
+						'Outer componentWillMount'
+					).to.not.exist;
 				}
 				componentDidMount() {
-					expect(document.getElementById('OuterDiv'), 'Outer componentDidMount').to.exist;
+					expect(document.getElementById('OuterDiv'), 'Outer componentDidMount')
+						.to.exist;
 				}
 				componentWillUnmount() {
-					expect(document.getElementById('OuterDiv'), 'Outer componentWillUnmount').to.exist;
-					setTimeout( () => {
-						expect(document.getElementById('OuterDiv'), 'Outer after componentWillUnmount').to.not.exist;
+					expect(
+						document.getElementById('OuterDiv'),
+						'Outer componentWillUnmount'
+					).to.exist;
+					setTimeout(() => {
+						expect(
+							document.getElementById('OuterDiv'),
+							'Outer after componentWillUnmount'
+						).to.not.exist;
 					}, 0);
 				}
 				render(props, { show }) {
 					return (
 						<div id="OuterDiv">
-							{ show && (
+							{show && (
 								<div>
 									<Inner {...props} />
 								</div>
-							) }
+							)}
 						</div>
 					);
 				}
@@ -486,18 +519,25 @@ describe('Lifecycle methods', () => {
 
 			class Inner extends Component {
 				componentWillMount() {
-					expect(document.getElementById('InnerDiv'), 'Inner componentWillMount').to.not.exist;
+					expect(
+						document.getElementById('InnerDiv'),
+						'Inner componentWillMount'
+					).to.not.exist;
 				}
 				componentDidMount() {
-					expect(document.getElementById('InnerDiv'), 'Inner componentDidMount').to.exist;
+					expect(document.getElementById('InnerDiv'), 'Inner componentDidMount')
+						.to.exist;
 				}
 				componentWillUnmount() {
 					// @TODO Component mounted into elements (non-components)
 					// are currently unmounted after those elements, so their
 					// DOM is unmounted prior to the method being called.
 					//expect(document.getElementById('InnerDiv'), 'Inner componentWillUnmount').to.exist;
-					setTimeout( () => {
-						expect(document.getElementById('InnerDiv'), 'Inner after componentWillUnmount').to.not.exist;
+					setTimeout(() => {
+						expect(
+							document.getElementById('InnerDiv'),
+							'Inner after componentWillUnmount'
+						).to.not.exist;
 					}, 0);
 				}
 
@@ -507,14 +547,20 @@ describe('Lifecycle methods', () => {
 			}
 
 			let proto = Inner.prototype;
-			let spies = ['componentWillMount', 'componentDidMount', 'componentWillUnmount'];
-			spies.forEach( s => sinon.spy(proto, s) );
+			let spies = [
+				'componentWillMount',
+				'componentDidMount',
+				'componentWillUnmount'
+			];
+			spies.forEach(s => sinon.spy(proto, s));
 
-			let reset = () => spies.forEach( s => proto[s].resetHistory() );
+			let reset = () => spies.forEach(s => proto[s].resetHistory());
 
 			render(<Outer />, scratch);
 			expect(proto.componentWillMount).to.have.been.called;
-			expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
+			expect(proto.componentWillMount).to.have.been.calledBefore(
+				proto.componentDidMount
+			);
 			expect(proto.componentDidMount).to.have.been.called;
 
 			reset();
@@ -528,7 +574,9 @@ describe('Lifecycle methods', () => {
 			rerender();
 
 			expect(proto.componentWillMount).to.have.been.called;
-			expect(proto.componentWillMount).to.have.been.calledBefore(proto.componentDidMount);
+			expect(proto.componentWillMount).to.have.been.calledBefore(
+				proto.componentDidMount
+			);
 			expect(proto.componentDidMount).to.have.been.called;
 		});
 
@@ -537,11 +585,14 @@ describe('Lifecycle methods', () => {
 				class C extends Component {
 					componentWillUnmount() {
 						expect(this.base, `${name}.componentWillUnmount`).to.exist;
-						setTimeout( () => {
-							expect(this.base, `after ${name}.componentWillUnmount`).not.to.exist;
+						setTimeout(() => {
+							expect(this.base, `after ${name}.componentWillUnmount`).not.to
+								.exist;
 						}, 0);
 					}
-					render(props) { return fn(props); }
+					render(props) {
+						return fn(props);
+					}
 				}
 				spyAll(C.prototype);
 				return C;
@@ -553,9 +604,9 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			let One = createComponent('One', () => <Wrapper>one</Wrapper> );
-			let Two = createComponent('Two', () => <Wrapper>two</Wrapper> );
-			let Three = createComponent('Three', () => <Wrapper>three</Wrapper> );
+			let One = createComponent('One', () => <Wrapper>one</Wrapper>);
+			let Two = createComponent('Two', () => <Wrapper>two</Wrapper>);
+			let Three = createComponent('Three', () => <Wrapper>three</Wrapper>);
 
 			let components = [One, Two, Three];
 
@@ -578,8 +629,8 @@ describe('Lifecycle methods', () => {
 
 			render(<App />, scratch);
 
-			for (let i=0; i<20; i++) {
-				app.setState({ page: i%components.length });
+			for (let i = 0; i < 20; i++) {
+				app.setState({ page: i % components.length });
 				app.forceUpdate();
 			}
 		});

@@ -1,12 +1,17 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement as h, render, Component, Fragment, hydrate } from '../../src/index';
+import {
+	createElement as h,
+	render,
+	Component,
+	Fragment,
+	hydrate
+} from '../../src/index';
 import { setupScratch, teardown } from '../_util/helpers';
 import { div, span, input as inputStr, h1, h2 } from '../_util/dom';
 /* eslint-disable react/jsx-boolean-value */
 
 /** @jsx h */
 describe('focus', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -54,7 +59,6 @@ describe('focus', () => {
 		expect(document.activeElement).to.equalNode(input, message);
 		expect(input.selectionStart).to.equal(2);
 		expect(input.selectionEnd).to.equal(5);
-
 	}
 
 	/**
@@ -62,11 +66,13 @@ describe('focus', () => {
 	 * @param {Array<number | string>} after
 	 */
 	function getListHtml(before, after) {
-		return div([
-			...before.map(i => span(i)),
-			inputStr(),
-			...after.map(i => span(i))
-		].join(''));
+		return div(
+			[
+				...before.map(i => span(i)),
+				inputStr(),
+				...after.map(i => span(i))
+			].join('')
+		);
 	}
 
 	beforeEach(() => {
@@ -79,22 +85,24 @@ describe('focus', () => {
 	});
 
 	it.skip('should maintain focus when swapping elements', () => {
-		render((
+		render(
 			<List>
 				<Input />
 				<ListItem>fooo</ListItem>
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
 		const input = focusInput();
 		expect(scratch.innerHTML).to.equal(getListHtml([], ['fooo']));
 
-		render((
+		render(
 			<List>
 				<ListItem>fooo</ListItem>
 				<Input />
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 		validateFocus(input);
 		expect(scratch.innerHTML).to.equal(getListHtml(['fooo'], []));
 	});
@@ -103,9 +111,9 @@ describe('focus', () => {
 		function App({ showFirst, showLast }) {
 			return (
 				<List>
-					{ showFirst ? <ListItem>1</ListItem> : null }
+					{showFirst ? <ListItem>1</ListItem> : null}
 					<Input />
-					{ showLast ? <ListItem>2</ListItem> : null }
+					{showLast ? <ListItem>2</ListItem> : null}
 				</List>
 			);
 		}
@@ -134,266 +142,281 @@ describe('focus', () => {
 	});
 
 	it('should maintain focus when adding children around input', () => {
-		render((
+		render(
 			<List>
 				<Input />
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
 		let input = focusInput();
 		expect(scratch.innerHTML).to.equal(getListHtml([], []));
 
-		render((
+		render(
 			<List>
 				<ListItem key="1">1</ListItem>
 				<Input />
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
 		expect(scratch.innerHTML).to.equal(getListHtml([1], []));
 		validateFocus(input, 'insert sibling before');
 
-		render((
+		render(
 			<List>
 				<ListItem key="1">1</ListItem>
 				<Input />
 				<ListItem key="2">2</ListItem>
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
 		expect(scratch.innerHTML).to.equal(getListHtml([1], [2]));
 		validateFocus(input, 'insert sibling after');
 
-		render((
+		render(
 			<List>
 				<ListItem key="1">1</ListItem>
 				<Input />
 				<ListItem key="2">2</ListItem>
 				<ListItem key="3">3</ListItem>
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
 		expect(scratch.innerHTML).to.equal(getListHtml([1], [2, 3]));
 		validateFocus(input, 'insert sibling after again');
 
-		render((
+		render(
 			<List>
 				<ListItem key="0">0</ListItem>
 				<ListItem key="1">1</ListItem>
 				<Input />
 				<ListItem key="2">2</ListItem>
 				<ListItem key="3">3</ListItem>
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
 		expect(scratch.innerHTML).to.equal(getListHtml([0, 1], [2, 3]));
 		validateFocus(input, 'insert sibling before again');
 	});
 
 	it('should maintain focus when conditional elements around input', () => {
-		render((
+		render(
 			<List>
 				<ListItem>0</ListItem>
 				<ListItem>1</ListItem>
 				<Input />
 				<ListItem>2</ListItem>
 				<ListItem>3</ListItem>
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
 		let input = focusInput();
 		expect(scratch.innerHTML).to.equal(getListHtml([0, 1], [2, 3]));
 
-		render((
+		render(
 			<List>
 				{false && <ListItem>0</ListItem>}
 				<ListItem>1</ListItem>
 				<Input />
 				<ListItem>2</ListItem>
 				<ListItem>3</ListItem>
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
 		expect(scratch.innerHTML).to.equal(getListHtml([1], [2, 3]));
 		validateFocus(input, 'remove sibling before');
 
-		render((
+		render(
 			<List>
 				{false && <ListItem>0</ListItem>}
 				<ListItem>1</ListItem>
 				<Input />
 				<ListItem>2</ListItem>
 				{false && <ListItem>3</ListItem>}
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
 		expect(scratch.innerHTML).to.equal(getListHtml([1], [2]));
 		validateFocus(input, 'remove sibling after');
 
-		render((
+		render(
 			<List>
 				{false && <ListItem>0</ListItem>}
 				<ListItem>1</ListItem>
 				<Input />
 				{false && <ListItem>2</ListItem>}
 				{false && <ListItem>3</ListItem>}
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
 		expect(scratch.innerHTML).to.equal(getListHtml([1], []));
 		validateFocus(input, 'remove sibling after 2');
 
-		render((
+		render(
 			<List>
 				{false && <ListItem>0</ListItem>}
 				{false && <ListItem>1</ListItem>}
 				<Input />
 				{false && <ListItem>2</ListItem>}
 				{false && <ListItem>3</ListItem>}
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
 		expect(scratch.innerHTML).to.equal(getListHtml([], []));
 		validateFocus(input, 'remove sibling before 2');
 	});
 
 	it('should maintain focus when removing elements around input', () => {
-		render((
+		render(
 			<List>
 				<ListItem key="0">0</ListItem>
 				<ListItem key="1">1</ListItem>
 				<Input />
 				<ListItem key="2">2</ListItem>
 				<ListItem key="3">3</ListItem>
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
 		let input = focusInput();
 		expect(scratch.innerHTML).to.equal(getListHtml([0, 1], [2, 3]));
 
-		render((
+		render(
 			<List>
 				<ListItem key="1">1</ListItem>
 				<Input />
 				<ListItem key="2">2</ListItem>
 				<ListItem key="3">3</ListItem>
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
 		expect(scratch.innerHTML).to.equal(getListHtml([1], [2, 3]));
 		validateFocus(input, 'remove sibling before');
 
-		render((
+		render(
 			<List>
 				<ListItem key="1">1</ListItem>
 				<Input />
 				<ListItem key="2">2</ListItem>
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
 		expect(scratch.innerHTML).to.equal(getListHtml([1], [2]));
 		validateFocus(input, 'remove sibling after');
 
-		render((
+		render(
 			<List>
 				<ListItem key="1">1</ListItem>
 				<Input />
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
 		expect(scratch.innerHTML).to.equal(getListHtml([1], []));
 		validateFocus(input, 'remove sibling after 2');
 
-		render((
+		render(
 			<List>
 				<Input />
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
 		expect(scratch.innerHTML).to.equal(getListHtml([], []));
 		validateFocus(input, 'remove sibling before 2');
 	});
 
 	it('should maintain focus when adding input next to the current input', () => {
-		render((
+		render(
 			<List>
 				<InputWithId i={0} />
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
 		let input = focusInputById();
 
-		render((
+		render(
 			<List>
 				<Input key="1" />
 				<InputWithId i={0} />
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 		validateFocus(input, 'add input before');
 
 		input = focusInputById();
 
-		render((
+		render(
 			<List>
 				<Input key="1" />
 				<InputWithId i={0} />
 				<Input key="2" />
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 		validateFocus(input, 'add input after');
 
 		input = focusInputById();
 
-		render((
+		render(
 			<List>
 				<Input key="0" />
 				<Input key="1" />
 				<InputWithId i={0} />
 				<Input key="2" />
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 		validateFocus(input, 'add input first place');
 
 		input = focusInputById();
 
-		render((
+		render(
 			<List>
 				<Input key="-1" />
 				<Input key="0" />
 				<Input key="1" />
 				<InputWithId i={0} />
 				<Input key="2" />
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 		validateFocus(input, 'add input before');
 	});
 
 	it('should maintain focus when hydrating', () => {
-		const html = div([
-			span('1'),
-			span('2'),
-			span('3'),
-			inputStr()
-		].join(''));
+		const html = div([span('1'), span('2'), span('3'), inputStr()].join(''));
 
 		scratch.innerHTML = html;
 		const input = focusInput();
 
-		hydrate((
+		hydrate(
 			<List>
 				<ListItem>1</ListItem>
 				<ListItem>2</ListItem>
 				<ListItem>3</ListItem>
 				<Input />
-			</List>
-		), scratch);
+			</List>,
+			scratch
+		);
 
 		expect(scratch.innerHTML).to.equal(html);
 		validateFocus(input);
 	});
 
 	it('should keep focus in Fragments', () => {
-
 		/** @type {HTMLInputElement} */
 		let input;
 
@@ -418,7 +441,7 @@ describe('focus', () => {
 									Hello World
 									<h2>yo</h2>
 								</Fragment>
-								<input type="text" ref={i => input = i} />
+								<input type="text" ref={i => (input = i)} />
 							</Fragment>
 						) : (
 							<Fragment>
@@ -427,7 +450,7 @@ describe('focus', () => {
 									<h2>yo</h2>
 								</Fragment>
 								foobar
-								<input type="text" ref={i => input = i} />
+								<input type="text" ref={i => (input = i)} />
 							</Fragment>
 						)}
 					</div>
@@ -443,18 +466,15 @@ describe('focus', () => {
 		expect(document.activeElement).to.equalNode(input, 'Before rerender');
 		rerender();
 
-		expect(scratch.innerHTML).to.equal(div([
-			h1('Heading'),
-			'Hello World',
-			h2('yo'),
-			'foobar',
-			inputStr()
-		].join('')));
+		expect(scratch.innerHTML).to.equal(
+			div(
+				[h1('Heading'), 'Hello World', h2('yo'), 'foobar', inputStr()].join('')
+			)
+		);
 		expect(document.activeElement).to.equalNode(input, 'After rerender');
 	});
 
 	it('should keep text selection', () => {
-
 		/** @type {HTMLInputElement} */
 		let input;
 
@@ -479,7 +499,7 @@ describe('focus', () => {
 									Hello World
 									<h2>yo</h2>
 								</Fragment>
-								<input type="text" ref={i => input = i} value="foobar" />
+								<input type="text" ref={i => (input = i)} value="foobar" />
 							</Fragment>
 						) : (
 							<Fragment>
@@ -488,7 +508,7 @@ describe('focus', () => {
 									<h2>yo</h2>
 								</Fragment>
 								foobar
-								<input type="text" ref={i => input = i} value="foobar" />
+								<input type="text" ref={i => (input = i)} value="foobar" />
 							</Fragment>
 						)}
 					</div>
@@ -505,13 +525,11 @@ describe('focus', () => {
 		expect(document.activeElement).to.equalNode(input, 'Before rerender');
 		rerender();
 
-		expect(scratch.innerHTML).to.equal(div([
-			h1('Heading'),
-			'Hello World',
-			h2('yo'),
-			'foobar',
-			inputStr()
-		].join('')));
+		expect(scratch.innerHTML).to.equal(
+			div(
+				[h1('Heading'), 'Hello World', h2('yo'), 'foobar', inputStr()].join('')
+			)
+		);
 		expect(input.selectionStart).to.equal(2);
 		expect(input.selectionEnd).to.equal(5);
 		expect(document.activeElement).to.equalNode(input, 'After rerender');

@@ -2,12 +2,10 @@ import { setupRerender } from 'preact/test-utils';
 import { createElement as h, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
-
 /** @jsx h */
 
 // Common behaviors between all effect hooks
 export function useEffectAssertions(useEffect, scheduleEffectAssert) {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -23,7 +21,6 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 		teardown(scratch);
 	});
 
-
 	it('performs the effect after every render by default', () => {
 		const callback = sinon.spy();
 
@@ -37,7 +34,9 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 		return scheduleEffectAssert(() => expect(callback).to.be.calledOnce)
 			.then(() => scheduleEffectAssert(() => expect(callback).to.be.calledOnce))
 			.then(() => render(<Comp />, scratch))
-			.then(() => scheduleEffectAssert(() => expect(callback).to.be.calledTwice));
+			.then(() =>
+				scheduleEffectAssert(() => expect(callback).to.be.calledTwice)
+			);
 	});
 
 	it('performs the effect only if one of the inputs changed', () => {
@@ -54,9 +53,13 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 			.then(() => render(<Comp a={1} b={2} />, scratch))
 			.then(() => scheduleEffectAssert(() => expect(callback).to.be.calledOnce))
 			.then(() => render(<Comp a={2} b={2} />, scratch))
-			.then(() => scheduleEffectAssert(() => expect(callback).to.be.calledTwice))
+			.then(() =>
+				scheduleEffectAssert(() => expect(callback).to.be.calledTwice)
+			)
 			.then(() => render(<Comp a={2} b={2} />, scratch))
-			.then(() => scheduleEffectAssert(() => expect(callback).to.be.calledTwice));
+			.then(() =>
+				scheduleEffectAssert(() => expect(callback).to.be.calledTwice)
+			);
 	});
 
 	it('performs the effect at mount time and never again if an empty input Array is passed', () => {
@@ -74,7 +77,9 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 
 		return scheduleEffectAssert(() => expect(callback).to.be.calledOnce)
 			.then(() => render(<Comp />, scratch))
-			.then(() => scheduleEffectAssert(() => expect(callback).to.be.calledOnce));
+			.then(() =>
+				scheduleEffectAssert(() => expect(callback).to.be.calledOnce)
+			);
 	});
 
 	it('calls the cleanup function followed by the effect after each render', () => {
@@ -94,11 +99,13 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 		})
 			.then(() => scheduleEffectAssert(() => expect(callback).to.be.calledOnce))
 			.then(() => render(<Comp />, scratch))
-			.then(() => scheduleEffectAssert(() => {
-				expect(cleanupFunction).to.be.calledOnce;
-				expect(callback).to.be.calledTwice;
-				expect(callback.lastCall.calledAfter(cleanupFunction.lastCall));
-			}));
+			.then(() =>
+				scheduleEffectAssert(() => {
+					expect(cleanupFunction).to.be.calledOnce;
+					expect(callback).to.be.calledTwice;
+					expect(callback.lastCall.calledAfter(cleanupFunction.lastCall));
+				})
+			);
 	});
 
 	it('cleanups the effect when the component get unmounted if the effect was called before', () => {
