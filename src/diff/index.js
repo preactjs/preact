@@ -207,6 +207,20 @@ export function diff(
 			);
 		}
 
+		if ((tmp = newVNode.ref) && oldVNode.ref != tmp) {
+			if (!newVNode._renderCallbacks) newVNode._renderCallbacks = [];
+
+			if (oldVNode.ref) {
+				newVNode._renderCallbacks.push(() => {
+					applyRef(oldVNode.ref, null, newVNode);
+				});
+			}
+
+			newVNode._renderCallbacks.push(() => {
+				applyRef(newVNode.ref, newVNode._component || newVNode._dom, newVNode);
+			});
+		}
+
 		if (newVNode._renderCallbacks && newVNode._renderCallbacks.length) {
 			commitQueue.push(newVNode);
 		}
