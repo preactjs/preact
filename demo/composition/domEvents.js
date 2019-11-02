@@ -33,8 +33,8 @@ export default createComponent(function() {
 					top: pos.value.y + "px"
 				}}
 			>
-				{mousePos.x} - {mousePos.y} <br />
-				{windowSize.width} -{windowSize.height}
+				{mousePos.value.x} - {mousePos.value.y} <br />
+				{windowSize.value.width} -{windowSize.value.height}
 			</div>
 		);
 	};

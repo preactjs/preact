@@ -1,7 +1,7 @@
-import { onMounted, onUnmounted, reactive } from "preact/composition";
+import { onMounted, onUnmounted, value } from "preact/composition";
 
 export function useMousePosition() {
-	const pos = reactive({ x: 0, y: 0 });
+	const pos = value({ x: 0, y: 0 });
 
 	let t;
 	function update(e) {
@@ -9,7 +9,7 @@ export function useMousePosition() {
 		t = requestAnimationFrame(() => {
 			// pos.x = e.pageX;
 			// pos.y = e.pageY;
-			pos.$value = {
+			pos.value = {
 				x: e.pageX,
 				y: e.pageY
 			};
@@ -23,12 +23,12 @@ export function useMousePosition() {
 }
 
 export function useWindowSize() {
-	const pos = reactive(getWindowSize());
+	const pos = value(getWindowSize());
 
 	let t;
 	function update() {
 		cancelAnimationFrame(t);
-		t = requestAnimationFrame(() => (pos.$value = getWindowSize()));
+		t = requestAnimationFrame(() => (pos.value = getWindowSize()));
 	}
 
 	onMounted(() => window.addEventListener("resize", update));
