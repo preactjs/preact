@@ -5,7 +5,6 @@ import { createComponent, watch, unwrap, isReactive, value } from '../../src';
 /** @jsx h */
 
 describe('memo', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -77,8 +76,6 @@ describe('memo', () => {
 
 	it('watch async', async () => {
 		function fetchData(n) {
-			console.log('fetch', n);
-
 			return new Promise(resolve => setTimeout(() => resolve([1, n]), 1));
 		}
 
