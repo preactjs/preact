@@ -1,3 +1,4 @@
+import * as preact from './index';
 type Defaultize<Props, Defaults> =
 	// Distribute over unions
 	Props extends any // Make any properties included in Default optional
