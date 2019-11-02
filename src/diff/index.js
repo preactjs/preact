@@ -133,9 +133,6 @@ export function diff(
 					c._vnode = newVNode;
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
-					if (newVNode._renderCallbacks.length) {
-						commitQueue.push(newVNode);
-					}
 					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
 						if (newVNode._children[tmp]) {
 							newVNode._children[tmp]._parent = newVNode;
@@ -192,10 +189,6 @@ export function diff(
 
 			c.base = newVNode._dom;
 
-			if (newVNode._renderCallbacks.length) {
-				commitQueue.push(newVNode);
-			}
-
 			if (clearProcessingException) {
 				c._pendingError = c._processingException = null;
 			}
@@ -212,6 +205,10 @@ export function diff(
 				commitQueue,
 				isHydrating
 			);
+		}
+
+		if (newVNode._renderCallbacks && newVNode._renderCallbacks.length) {
+			commitQueue.push(newVNode);
 		}
 
 		if ((tmp = options.diffed)) tmp(newVNode);
