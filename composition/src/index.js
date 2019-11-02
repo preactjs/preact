@@ -1,4 +1,5 @@
 import { options } from 'preact';
+import { assign } from '../../src/util';
 
 const EMPTY_STATE = {};
 
@@ -138,7 +139,7 @@ export function reactive(value) {
 		{},
 		Object.keys(value).reduce(
 			(acc, key) =>
-				Object.assign(acc, {
+				assign(acc, {
 					[key]: {
 						enumerable: true,
 						get() {
@@ -146,7 +147,7 @@ export function reactive(value) {
 						},
 						set(v) {
 							if (v !== x[key]) {
-								x = Object.assign({}, x);
+								x = assign({}, x);
 								x[key] = v;
 								c.setState(EMPTY_STATE);
 							}
