@@ -1,6 +1,6 @@
 import * as preact from './index';
 
-export type CommitQueue = Component[];
+export type CommitQueue = VNode[];
 
 export interface Options extends preact.Options {
 	/** Attach a hook that is invoked before render, mainly to check the arguments. */
@@ -61,6 +61,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	 */
 	_lastDomChildSibling: PreactElement | Text | null;
 	_component: Component | null;
+	_renderCallbacks: Array<() => void>;
 	constructor: undefined;
 }
 
@@ -72,7 +73,6 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 
 	_dirty: boolean;
 	_force?: boolean;
-	_renderCallbacks: Array<() => void>; // Only class components
 	_context?: any;
 	_vnode?: VNode<P> | null;
 	_nextState?: S | null; // Only class components

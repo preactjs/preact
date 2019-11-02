@@ -320,23 +320,25 @@ export function initDebug() {
 			}
 
 			// Layout Effects
-			component._renderCallbacks.forEach(possibleEffect => {
-				if (
-					possibleEffect._value &&
-					!Array.isArray(possibleEffect._args) &&
-					warnedComponents &&
-					!warnedComponents.useLayoutEffect.has(vnode.type)
-				) {
-					warnedComponents.useLayoutEffect.set(vnode.type, true);
-					let componentName = getDisplayName(vnode);
-					console.warn(
-						'You should provide an array of arguments as the second argument to the "useLayoutEffect" hook.\n\n' +
-							'Not doing so will invoke this effect on every render.\n\n' +
-							`This effect can be found in the render of ${componentName}.` +
-							`\n\n${getOwnerStack(vnode)}`
-					);
-				}
-			});
+			if (vnode._renderCallbacks) {
+				vnode._renderCallbacks.forEach(possibleEffect => {
+					if (
+						possibleEffect._value &&
+						!Array.isArray(possibleEffect._args) &&
+						warnedComponents &&
+						!warnedComponents.useLayoutEffect.has(vnode.type)
+					) {
+						warnedComponents.useLayoutEffect.set(vnode.type, true);
+						let componentName = getDisplayName(vnode);
+						console.warn(
+							'You should provide an array of arguments as the second argument to the "useLayoutEffect" hook.\n\n' +
+								'Not doing so will invoke this effect on every render.\n\n' +
+								`This effect can be found in the render of ${componentName}.` +
+								`\n\n${getOwnerStack(vnode)}`
+						);
+					}
+				});
+			}
 		}
 
 		if (oldDiffed) oldDiffed(vnode);

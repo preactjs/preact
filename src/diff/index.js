@@ -47,6 +47,10 @@ export function diff(
 			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
 			let newProps = newVNode.props;
 
+			if (!newVNode._renderCallbacks) {
+				newVNode._renderCallbacks = [];
+			}
+
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
 			tmp = newType.contextType;
@@ -77,7 +81,6 @@ export function diff(
 				c.context = cctx;
 				c._context = context;
 				isNew = c._dirty = true;
-				c._renderCallbacks = [];
 			}
 
 			// Invoke getDerivedStateFromProps
@@ -108,7 +111,7 @@ export function diff(
 				}
 
 				if (c.componentDidMount != null) {
-					c._renderCallbacks.push(c.componentDidMount);
+					newVNode._renderCallbacks.push(c.componentDidMount);
 				}
 			} else {
 				if (
@@ -130,8 +133,8 @@ export function diff(
 					c._vnode = newVNode;
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
-					if (c._renderCallbacks.length) {
-						commitQueue.push(c);
+					if (newVNode._renderCallbacks.length) {
+						commitQueue.push(newVNode);
 					}
 					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
 						if (newVNode._children[tmp]) {
@@ -146,7 +149,7 @@ export function diff(
 				}
 
 				if (c.componentDidUpdate != null) {
-					c._renderCallbacks.push(() => {
+					newVNode._renderCallbacks.push(() => {
 						c.componentDidUpdate(oldProps, oldState, snapshot);
 					});
 				}
@@ -189,8 +192,8 @@ export function diff(
 
 			c.base = newVNode._dom;
 
-			if (c._renderCallbacks.length) {
-				commitQueue.push(c);
+			if (newVNode._renderCallbacks.length) {
+				commitQueue.push(newVNode);
 			}
 
 			if (clearProcessingException) {
@@ -227,15 +230,16 @@ export function diff(
 export function commitRoot(commitQueue, root) {
 	if (options._commit) options._commit(root, commitQueue);
 
-	commitQueue.some(c => {
+	commitQueue.some(vnode => {
 		try {
-			commitQueue = c._renderCallbacks;
-			c._renderCallbacks = [];
-			commitQueue.some(cb => {
-				cb.call(c);
-			});
+			if ((commitQueue = vnode._renderCallbacks)) {
+				vnode._renderCallbacks = [];
+				commitQueue.some(cb => {
+					cb.call(vnode._component);
+				});
+			}
 		} catch (e) {
-			options._catchError(e, c._vnode);
+			options._catchError(e, vnode);
 		}
 	});
 }
