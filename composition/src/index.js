@@ -28,7 +28,9 @@ options._render = vnode => {
 		}
 
 		// call all watch
-		c.__compositions.w.forEach(up => handleEffect(up, c));
+		c.__compositions.w.some(up => {
+			handleEffect(up, c);
+		});
 	}
 };
 
@@ -40,7 +42,9 @@ options.diffed = vnode => {
 	const c = vnode._component;
 	if (c && c.__compositions)
 		// handle all `effect`s
-		c.__compositions.e.forEach(up => handleEffect(up, c));
+		c.__compositions.e.some(up => {
+			handleEffect(up, c);
+		});
 };
 
 let oldBeforeUnmount = options.unmount;
@@ -51,9 +55,11 @@ options.unmount = vnode => {
 	const c = vnode._component;
 	if (c && c.__compositions) {
 		// cleanup `effect`s onCleanup
-		c.__compositions.e.forEach(cleanupEffect);
+		c.__compositions.e.some(cleanupEffect);
 		// call all onUnmounted lifecycle callbacks
-		c.__compositions.u.forEach(f => f());
+		c.__compositions.u.some(f => {
+			f();
+		});
 	}
 };
 
@@ -210,8 +216,7 @@ function handleEffect(up, c, init) {
 					c.setState(EMPTY_STATE);
 				});
 			else watcher.value = value;
-		}
-		else {
+		} else {
 			cleanupEffect(up);
 			if (up.cb) up.cb(newArgs, oldArgs, /* onCleanup */ cl => (up.cl = cl));
 		}
