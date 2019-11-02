@@ -165,9 +165,10 @@ let q = [];
 
 /**
  * Asynchronously schedule a callback
- * @type {(cb) => void}
+ * @type {(cb: () => void) => void}
  */
 /* istanbul ignore next */
+// Note the following line isn't tree-shaken by rollup cuz of rollup/rollup#2566
 const defer =
 	typeof Promise == 'function'
 		? Promise.prototype.then.bind(Promise.resolve())
@@ -182,7 +183,7 @@ const defer =
  * * [Callbacks synchronous and asynchronous](https://blog.ometer.com/2011/07/24/callbacks-synchronous-and-asynchronous/)
  */
 
-let prevDebounce = options.debounceRendering;
+let prevDebounce;
 
 /**
  * Enqueue a rerender of a component
@@ -194,7 +195,7 @@ export function enqueueRender(c) {
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
-		(options.debounceRendering || defer)(process);
+		(prevDebounce || defer)(process);
 	}
 }
 
