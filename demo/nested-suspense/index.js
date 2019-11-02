@@ -1,4 +1,4 @@
-import { createElement, Suspense, lazy, Component } from "react";
+import { createElement, Suspense, lazy, Component } from 'react';
 
 const Loading = function() {
 	return <div>Loading...</div>;
@@ -18,18 +18,16 @@ const pause = timeout =>
 	new Promise(d => setTimeout(d, timeout), console.log(timeout));
 
 const DropZone = lazy(() =>
-	pause(Math.random() * 1000).then(() => import("./dropzone.js"))
+	pause(Math.random() * 1000).then(() => import('./dropzone.js'))
 );
 const Editor = lazy(() =>
-	pause(Math.random() * 1000).then(() => import("./editor.js"))
+	pause(Math.random() * 1000).then(() => import('./editor.js'))
 );
 const AddNewComponent = lazy(() =>
-	pause(Math.random() * 1000).then(() => import("./addnewcomponent.js"))
+	pause(Math.random() * 1000).then(() => import('./addnewcomponent.js'))
 );
 const GenerateComponents = lazy(() =>
-	pause(Math.random() * 1000).then(() =>
-		import("./component-container.js")
-	)
+	pause(Math.random() * 1000).then(() => import('./component-container.js'))
 );
 
 export default class App extends Component {

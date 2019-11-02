@@ -1,10 +1,13 @@
-import { setupScratch, teardown, serializeHtml } from '../../../test/_util/helpers';
+import {
+	setupScratch,
+	teardown,
+	serializeHtml
+} from '../../../test/_util/helpers';
 // eslint-disable-next-line no-unused-vars
 import React, { Children, render } from '../../src';
 import { div, span } from '../../../test/_util/dom';
 
 describe('Children', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -29,7 +32,13 @@ describe('Children', () => {
 		});
 
 		it('should return number of children', () => {
-			render(<Foo><div />foo</Foo>, scratch);
+			render(
+				<Foo>
+					<div />
+					foo
+				</Foo>,
+				scratch
+			);
 			expect(count).to.equal(2);
 		});
 	});
@@ -56,23 +65,33 @@ describe('Children', () => {
 		it('should throw if more children are passed', () => {
 			// eslint-disable-next-line prefer-arrow-callback
 			expect(function() {
-				render(<Foo>foo<span /></Foo>, scratch);
+				render(
+					<Foo>
+						foo
+						<span />
+					</Foo>,
+					scratch
+				);
 			}).to.throw();
 		});
 	});
 
 	describe('.map', () => {
 		function Foo(props) {
-			let children = Children.map(props.children, child => <span>{child}</span>);
+			let children = Children.map(props.children, child => (
+				<span>{child}</span>
+			));
 			return <div>{children}</div>;
 		}
 
 		it('should iterate over children', () => {
-			render(<Foo>foo<div>bar</div></Foo>, scratch);
-			let expected = div([
-				span('foo'),
-				span(div('bar'))
-			].join(''));
+			render(
+				<Foo>
+					foo<div>bar</div>
+				</Foo>,
+				scratch
+			);
+			let expected = div([span('foo'), span(div('bar'))].join(''));
 			expect(serializeHtml(scratch)).to.equal(expected);
 		});
 
@@ -85,16 +104,20 @@ describe('Children', () => {
 	describe('.forEach', () => {
 		function Foo(props) {
 			let children = [];
-			Children.forEach(props.children, child => children.push(<span>{child}</span>));
+			Children.forEach(props.children, child =>
+				children.push(<span>{child}</span>)
+			);
 			return <div>{children}</div>;
 		}
 
 		it('should iterate over children', () => {
-			render(<Foo>foo<div>bar</div></Foo>, scratch);
-			let expected = div([
-				span('foo'),
-				span(div('bar'))
-			].join(''));
+			render(
+				<Foo>
+					foo<div>bar</div>
+				</Foo>,
+				scratch
+			);
+			let expected = div([span('foo'), span(div('bar'))].join(''));
 			expect(serializeHtml(scratch)).to.equal(expected);
 		});
 	});

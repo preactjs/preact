@@ -5,7 +5,6 @@ import { setupScratch, teardown } from '../../_util/helpers';
 /** @jsx createElement */
 
 describe('Lifecycle methods', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -23,7 +22,6 @@ describe('Lifecycle methods', () => {
 
 	describe('#componentDidUpdate', () => {
 		it('should be passed previous props and state', () => {
-
 			/** @type {() => void} */
 			let updateState;
 
@@ -39,9 +37,10 @@ describe('Lifecycle methods', () => {
 					this.state = {
 						value: 0
 					};
-					updateState = () => this.setState({
-						value: this.state.value + 1
-					});
+					updateState = () =>
+						this.setState({
+							value: this.state.value + 1
+						});
 				}
 				static getDerivedStateFromProps(props, state) {
 					// NOTE: Don't do this in real production code!
@@ -129,7 +128,7 @@ describe('Lifecycle methods', () => {
 			expect(spy).to.not.be.called;
 		});
 
-		it('prevState argument should be the same object if state doesn\'t change', () => {
+		it("prevState argument should be the same object if state doesn't change", () => {
 			let changeProps, cduPrevState, cduCurrentState;
 
 			class PropsProvider extends Component {
@@ -199,7 +198,7 @@ describe('Lifecycle methods', () => {
 			expect(cduPrevState).to.not.equal(cduCurrentState);
 		});
 
-		it('prevProps argument should be the same object if props don\'t change', () => {
+		it("prevProps argument should be the same object if props don't change", () => {
 			let updateState, cduPrevProps, cduCurrentProps;
 
 			class Foo extends Component {

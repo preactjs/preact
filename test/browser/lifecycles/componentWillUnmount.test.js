@@ -4,7 +4,6 @@ import { setupScratch, teardown, spyAll } from '../../_util/helpers';
 /** @jsx createElement */
 
 describe('Lifecycle methods', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -21,25 +20,33 @@ describe('Lifecycle methods', () => {
 			class Foo extends Component {
 				componentDidMount() {}
 				componentWillUnmount() {}
-				render() { return 'foo'; }
+				render() {
+					return 'foo';
+				}
 			}
 			class Bar extends Component {
 				componentDidMount() {}
 				componentWillUnmount() {}
-				render() { return 'bar'; }
+				render() {
+					return 'bar';
+				}
 			}
 			spyAll(Foo.prototype);
 			spyAll(Bar.prototype);
 
 			render(<Foo />, scratch);
-			expect(Foo.prototype.componentDidMount, 'initial render').to.have.been.calledOnce;
+			expect(Foo.prototype.componentDidMount, 'initial render').to.have.been
+				.calledOnce;
 
 			render(<Bar />, scratch);
-			expect(Foo.prototype.componentWillUnmount, 'when replaced').to.have.been.calledOnce;
-			expect(Bar.prototype.componentDidMount, 'when replaced').to.have.been.calledOnce;
+			expect(Foo.prototype.componentWillUnmount, 'when replaced').to.have.been
+				.calledOnce;
+			expect(Bar.prototype.componentDidMount, 'when replaced').to.have.been
+				.calledOnce;
 
 			render(<div />, scratch);
-			expect(Bar.prototype.componentWillUnmount, 'when removed').to.have.been.calledOnce;
+			expect(Bar.prototype.componentWillUnmount, 'when removed').to.have.been
+				.calledOnce;
 		});
 
 		it('should only remove dom after componentWillUnmount was called', () => {
@@ -53,8 +60,8 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-		 render(<Foo />, scratch);
-		 render(null, scratch);
+			render(<Foo />, scratch);
+			render(null, scratch);
 		});
 	});
 });

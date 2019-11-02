@@ -1,5 +1,5 @@
-import { createElement } from "react";
+import { createElement } from 'react';
 
-export default function DropZone({appearance}) {
+export default function DropZone({ appearance }) {
 	return <div>DropZone (component #{appearance})</div>;
 }

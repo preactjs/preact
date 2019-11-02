@@ -6,7 +6,7 @@ import {
 	useContext,
 	Children,
 	useLayoutEffect
-} from "react";
+} from 'react';
 
 /** @jsx createElement */
 
@@ -38,7 +38,7 @@ const memoryHistory = {
 const RouterContext = createContext(null);
 
 export function Router({ history = memoryHistory, children }) {
-	const [location, setLocation] = useState({ pathname: "/" });
+	const [location, setLocation] = useState({ pathname: '/' });
 
 	useLayoutEffect(() => {
 		return history.listen(newLocation => setLocation(newLocation));

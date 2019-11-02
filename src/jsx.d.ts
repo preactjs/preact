@@ -1,16 +1,15 @@
 type Defaultize<Props, Defaults> =
 	// Distribute over unions
-	Props extends any
-		? 	// Make any properties included in Default optional
-			& Partial<Pick<Props, Extract<keyof Props, keyof Defaults>>>
-			// Include the remaining properties from Props
-			& Pick<Props, Exclude<keyof Props, keyof Defaults>>
+	Props extends any // Make any properties included in Default optional
+		? Partial<Pick<Props, Extract<keyof Props, keyof Defaults>>> &
+				// Include the remaining properties from Props
+				Pick<Props, Exclude<keyof Props, keyof Defaults>>
 		: never;
 
 export namespace JSXInternal {
-
-	type LibraryManagedAttributes<Component, Props> =
-	Component extends { defaultProps: infer Defaults }
+	type LibraryManagedAttributes<Component, Props> = Component extends {
+		defaultProps: infer Defaults;
+	}
 		? Defaultize<Props, Defaults>
 		: Props;
 
@@ -18,11 +17,9 @@ export namespace JSXInternal {
 		key?: any;
 	}
 
-	interface Element extends preact.VNode<any> {
-	}
+	interface Element extends preact.VNode<any> {}
 
-	interface ElementClass extends preact.Component<any, any> {
-	}
+	interface ElementClass extends preact.Component<any, any> {}
 
 	interface ElementAttributesProperty {
 		props: any;
@@ -32,15 +29,28 @@ export namespace JSXInternal {
 		children: any;
 	}
 
-	interface SVGAttributes extends HTMLAttributes {
+	interface SVGAttributes extends HTMLAttributes<SVGElement> {
 		accentHeight?: number | string;
-		accumulate?: "none" | "sum";
-		additive?: "replace" | "sum";
-		alignmentBaseline?: "auto" | "baseline" | "before-edge" | "text-before-edge" | "middle" | "central" | "after-edge" | "text-after-edge" | "ideographic" | "alphabetic" | "hanging" | "mathematical" | "inherit";
-		allowReorder?: "no" | "yes";
+		accumulate?: 'none' | 'sum';
+		additive?: 'replace' | 'sum';
+		alignmentBaseline?:
+			| 'auto'
+			| 'baseline'
+			| 'before-edge'
+			| 'text-before-edge'
+			| 'middle'
+			| 'central'
+			| 'after-edge'
+			| 'text-after-edge'
+			| 'ideographic'
+			| 'alphabetic'
+			| 'hanging'
+			| 'mathematical'
+			| 'inherit';
+		allowReorder?: 'no' | 'yes';
 		alphabetic?: number | string;
 		amplitude?: number | string;
-		arabicForm?: "initial" | "medial" | "terminal" | "isolated";
+		arabicForm?: 'initial' | 'medial' | 'terminal' | 'isolated';
 		ascent?: number | string;
 		attributeName?: string;
 		attributeType?: string;
@@ -60,7 +70,7 @@ export namespace JSXInternal {
 		clipPathUnits?: number | string;
 		clipRule?: number | string;
 		colorInterpolation?: number | string;
-		colorInterpolationFilters?: "auto" | "sRGB" | "linearRGB" | "inherit";
+		colorInterpolationFilters?: 'auto' | 'sRGB' | 'linearRGB' | 'inherit';
 		colorProfile?: number | string;
 		colorRendering?: number | string;
 		contentScriptType?: number | string;
@@ -87,7 +97,7 @@ export namespace JSXInternal {
 		externalResourcesRequired?: number | string;
 		fill?: string;
 		fillOpacity?: number | string;
-		fillRule?: "nonzero" | "evenodd" | "inherit";
+		fillRule?: 'nonzero' | 'evenodd' | 'inherit';
 		filter?: string;
 		filterRes?: number | string;
 		filterUnits?: number | string;
@@ -209,8 +219,8 @@ export namespace JSXInternal {
 		stroke?: string;
 		strokeDasharray?: string | number;
 		strokeDashoffset?: string | number;
-		strokeLinecap?: "butt" | "round" | "square" | "inherit";
-		strokeLinejoin?: "miter" | "round" | "bevel" | "inherit";
+		strokeLinecap?: 'butt' | 'round' | 'square' | 'inherit';
+		strokeLinejoin?: 'miter' | 'round' | 'bevel' | 'inherit';
 		strokeMiterlimit?: string;
 		strokeOpacity?: number | string;
 		strokeWidth?: number | string;
@@ -486,7 +496,9 @@ export namespace JSXInternal {
 		onTransitionEndCapture?: TransitionEventHandler;
 	}
 
-	interface HTMLAttributes extends preact.ClassAttributes<any>, DOMAttributes {
+	interface HTMLAttributes<RefType = Element>
+		extends preact.ClassAttributes<RefType>,
+			DOMAttributes {
 		// Standard HTML Attributes
 		accept?: string;
 		acceptCharset?: string;
@@ -495,6 +507,7 @@ export namespace JSXInternal {
 		allowFullScreen?: boolean;
 		allowTransparency?: boolean;
 		alt?: string;
+		as?: string;
 		async?: boolean;
 		autocomplete?: string;
 		autoComplete?: string;
@@ -607,7 +620,7 @@ export namespace JSXInternal {
 		srcSet?: string;
 		start?: number;
 		step?: number | string;
-		style?: string | {[key: string]: string | number};
+		style?: string | { [key: string]: string | number };
 		summary?: string;
 		tabIndex?: number;
 		target?: string;
@@ -640,120 +653,120 @@ export namespace JSXInternal {
 
 	interface IntrinsicElements {
 		// HTML
-		a: HTMLAttributes;
-		abbr: HTMLAttributes;
-		address: HTMLAttributes;
-		area: HTMLAttributes;
-		article: HTMLAttributes;
-		aside: HTMLAttributes;
-		audio: HTMLAttributes;
-		b: HTMLAttributes;
-		base: HTMLAttributes;
-		bdi: HTMLAttributes;
-		bdo: HTMLAttributes;
-		big: HTMLAttributes;
-		blockquote: HTMLAttributes;
-		body: HTMLAttributes;
-		br: HTMLAttributes;
-		button: HTMLAttributes;
-		canvas: HTMLAttributes;
-		caption: HTMLAttributes;
-		cite: HTMLAttributes;
-		code: HTMLAttributes;
-		col: HTMLAttributes;
-		colgroup: HTMLAttributes;
-		data: HTMLAttributes;
-		datalist: HTMLAttributes;
-		dd: HTMLAttributes;
-		del: HTMLAttributes;
-		details: HTMLAttributes;
-		dfn: HTMLAttributes;
-		dialog: HTMLAttributes;
-		div: HTMLAttributes;
-		dl: HTMLAttributes;
-		dt: HTMLAttributes;
-		em: HTMLAttributes;
-		embed: HTMLAttributes;
-		fieldset: HTMLAttributes;
-		figcaption: HTMLAttributes;
-		figure: HTMLAttributes;
-		footer: HTMLAttributes;
-		form: HTMLAttributes;
-		h1: HTMLAttributes;
-		h2: HTMLAttributes;
-		h3: HTMLAttributes;
-		h4: HTMLAttributes;
-		h5: HTMLAttributes;
-		h6: HTMLAttributes;
-		head: HTMLAttributes;
-		header: HTMLAttributes;
-		hgroup: HTMLAttributes;
-		hr: HTMLAttributes;
-		html: HTMLAttributes;
-		i: HTMLAttributes;
-		iframe: HTMLAttributes;
-		img: HTMLAttributes;
-		input: HTMLAttributes;
-		ins: HTMLAttributes;
-		kbd: HTMLAttributes;
-		keygen: HTMLAttributes;
-		label: HTMLAttributes;
-		legend: HTMLAttributes;
-		li: HTMLAttributes;
-		link: HTMLAttributes;
-		main: HTMLAttributes;
-		map: HTMLAttributes;
-		mark: HTMLAttributes;
-		menu: HTMLAttributes;
-		menuitem: HTMLAttributes;
-		meta: HTMLAttributes;
-		meter: HTMLAttributes;
-		nav: HTMLAttributes;
-		noscript: HTMLAttributes;
-		object: HTMLAttributes;
-		ol: HTMLAttributes;
-		optgroup: HTMLAttributes;
-		option: HTMLAttributes;
-		output: HTMLAttributes;
-		p: HTMLAttributes;
-		param: HTMLAttributes;
-		picture: HTMLAttributes;
-		pre: HTMLAttributes;
-		progress: HTMLAttributes;
-		q: HTMLAttributes;
-		rp: HTMLAttributes;
-		rt: HTMLAttributes;
-		ruby: HTMLAttributes;
-		s: HTMLAttributes;
-		samp: HTMLAttributes;
-		script: HTMLAttributes;
-		section: HTMLAttributes;
-		select: HTMLAttributes;
-		slot: HTMLAttributes;
-		small: HTMLAttributes;
-		source: HTMLAttributes;
-		span: HTMLAttributes;
-		strong: HTMLAttributes;
-		style: HTMLAttributes;
-		sub: HTMLAttributes;
-		summary: HTMLAttributes;
-		sup: HTMLAttributes;
-		table: HTMLAttributes;
-		tbody: HTMLAttributes;
-		td: HTMLAttributes;
-		textarea: HTMLAttributes;
-		tfoot: HTMLAttributes;
-		th: HTMLAttributes;
-		thead: HTMLAttributes;
-		time: HTMLAttributes;
-		title: HTMLAttributes;
-		tr: HTMLAttributes;
-		track: HTMLAttributes;
-		u: HTMLAttributes;
-		ul: HTMLAttributes;
-		"var": HTMLAttributes;
-		video: HTMLAttributes;
-		wbr: HTMLAttributes;
+		a: HTMLAttributes<HTMLAnchorElement>;
+		abbr: HTMLAttributes<HTMLElement>;
+		address: HTMLAttributes<HTMLElement>;
+		area: HTMLAttributes<HTMLAreaElement>;
+		article: HTMLAttributes<HTMLElement>;
+		aside: HTMLAttributes<HTMLElement>;
+		audio: HTMLAttributes<HTMLAudioElement>;
+		b: HTMLAttributes<HTMLElement>;
+		base: HTMLAttributes<HTMLBaseElement>;
+		bdi: HTMLAttributes<HTMLElement>;
+		bdo: HTMLAttributes<HTMLElement>;
+		big: HTMLAttributes<HTMLElement>;
+		blockquote: HTMLAttributes<HTMLQuoteElement>;
+		body: HTMLAttributes<HTMLBodyElement>;
+		br: HTMLAttributes<HTMLBRElement>;
+		button: HTMLAttributes<HTMLButtonElement>;
+		canvas: HTMLAttributes<HTMLCanvasElement>;
+		caption: HTMLAttributes<HTMLTableCaptionElement>;
+		cite: HTMLAttributes<HTMLElement>;
+		code: HTMLAttributes<HTMLElement>;
+		col: HTMLAttributes<HTMLTableColElement>;
+		colgroup: HTMLAttributes<HTMLTableColElement>;
+		data: HTMLAttributes<HTMLDataElement>;
+		datalist: HTMLAttributes<HTMLDataListElement>;
+		dd: HTMLAttributes<HTMLElement>;
+		del: HTMLAttributes<HTMLModElement>;
+		details: HTMLAttributes<HTMLDetailsElement>;
+		dfn: HTMLAttributes<HTMLElement>;
+		dialog: HTMLAttributes<HTMLDialogElement>;
+		div: HTMLAttributes<HTMLDivElement>;
+		dl: HTMLAttributes<HTMLDListElement>;
+		dt: HTMLAttributes<HTMLElement>;
+		em: HTMLAttributes<HTMLElement>;
+		embed: HTMLAttributes<HTMLEmbedElement>;
+		fieldset: HTMLAttributes<HTMLFieldSetElement>;
+		figcaption: HTMLAttributes<HTMLElement>;
+		figure: HTMLAttributes<HTMLElement>;
+		footer: HTMLAttributes<HTMLElement>;
+		form: HTMLAttributes<HTMLFormElement>;
+		h1: HTMLAttributes<HTMLHeadingElement>;
+		h2: HTMLAttributes<HTMLHeadingElement>;
+		h3: HTMLAttributes<HTMLHeadingElement>;
+		h4: HTMLAttributes<HTMLHeadingElement>;
+		h5: HTMLAttributes<HTMLHeadingElement>;
+		h6: HTMLAttributes<HTMLHeadingElement>;
+		head: HTMLAttributes<HTMLHeadElement>;
+		header: HTMLAttributes<HTMLElement>;
+		hgroup: HTMLAttributes<HTMLElement>;
+		hr: HTMLAttributes<HTMLHRElement>;
+		html: HTMLAttributes<HTMLHtmlElement>;
+		i: HTMLAttributes<HTMLElement>;
+		iframe: HTMLAttributes<HTMLIFrameElement>;
+		img: HTMLAttributes<HTMLImageElement>;
+		input: HTMLAttributes<HTMLInputElement>;
+		ins: HTMLAttributes<HTMLModElement>;
+		kbd: HTMLAttributes<HTMLElement>;
+		keygen: HTMLAttributes<HTMLUnknownElement>;
+		label: HTMLAttributes<HTMLLabelElement>;
+		legend: HTMLAttributes<HTMLLegendElement>;
+		li: HTMLAttributes<HTMLLIElement>;
+		link: HTMLAttributes<HTMLLinkElement>;
+		main: HTMLAttributes<HTMLElement>;
+		map: HTMLAttributes<HTMLMapElement>;
+		mark: HTMLAttributes<HTMLElement>;
+		menu: HTMLAttributes<HTMLMenuElement>;
+		menuitem: HTMLAttributes<HTMLUnknownElement>;
+		meta: HTMLAttributes<HTMLMetaElement>;
+		meter: HTMLAttributes<HTMLMeterElement>;
+		nav: HTMLAttributes<HTMLElement>;
+		noscript: HTMLAttributes<HTMLElement>;
+		object: HTMLAttributes<HTMLObjectElement>;
+		ol: HTMLAttributes<HTMLOListElement>;
+		optgroup: HTMLAttributes<HTMLOptGroupElement>;
+		option: HTMLAttributes<HTMLOptionElement>;
+		output: HTMLAttributes<HTMLOutputElement>;
+		p: HTMLAttributes<HTMLParagraphElement>;
+		param: HTMLAttributes<HTMLParamElement>;
+		picture: HTMLAttributes<HTMLPictureElement>;
+		pre: HTMLAttributes<HTMLPreElement>;
+		progress: HTMLAttributes<HTMLProgressElement>;
+		q: HTMLAttributes<HTMLQuoteElement>;
+		rp: HTMLAttributes<HTMLElement>;
+		rt: HTMLAttributes<HTMLElement>;
+		ruby: HTMLAttributes<HTMLElement>;
+		s: HTMLAttributes<HTMLElement>;
+		samp: HTMLAttributes<HTMLElement>;
+		script: HTMLAttributes<HTMLScriptElement>;
+		section: HTMLAttributes<HTMLElement>;
+		select: HTMLAttributes<HTMLSelectElement>;
+		slot: HTMLAttributes<HTMLSlotElement>;
+		small: HTMLAttributes<HTMLElement>;
+		source: HTMLAttributes<HTMLSourceElement>;
+		span: HTMLAttributes<HTMLSpanElement>;
+		strong: HTMLAttributes<HTMLElement>;
+		style: HTMLAttributes<HTMLStyleElement>;
+		sub: HTMLAttributes<HTMLElement>;
+		summary: HTMLAttributes<HTMLElement>;
+		sup: HTMLAttributes<HTMLElement>;
+		table: HTMLAttributes<HTMLTableElement>;
+		tbody: HTMLAttributes<HTMLTableSectionElement>;
+		td: HTMLAttributes<HTMLTableCellElement>;
+		textarea: HTMLAttributes<HTMLTextAreaElement>;
+		tfoot: HTMLAttributes<HTMLTableSectionElement>;
+		th: HTMLAttributes<HTMLTableCellElement>;
+		thead: HTMLAttributes<HTMLTableSectionElement>;
+		time: HTMLAttributes<HTMLTimeElement>;
+		title: HTMLAttributes<HTMLTitleElement>;
+		tr: HTMLAttributes<HTMLTableRowElement>;
+		track: HTMLAttributes<HTMLTrackElement>;
+		u: HTMLAttributes<HTMLElement>;
+		ul: HTMLAttributes<HTMLUListElement>;
+		var: HTMLAttributes<HTMLElement>;
+		video: HTMLAttributes<HTMLVideoElement>;
+		wbr: HTMLAttributes<HTMLElement>;
 
 		//SVG
 		svg: SVGAttributes;

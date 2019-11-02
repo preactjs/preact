@@ -10,7 +10,7 @@ import 'core-js/fn/object/assign';
 
 // Fix Function#name on browsers that do not support it (IE).
 // Taken from: https://stackoverflow.com/a/17056530/755391
-if (!(function f() {}).name) {
+if (!function f() {}.name) {
 	Object.defineProperty(Function.prototype, 'name', {
 		get() {
 			let name = (this.toString().match(/^function\s*([^\s(]+)/) || [])[1];
@@ -26,7 +26,7 @@ if (!(function f() {}).name) {
 chai.use((chai, util) => {
 	const Assertion = chai.Assertion;
 
-	Assertion.addMethod('equalNode', function (expectedNode, message) {
+	Assertion.addMethod('equalNode', function(expectedNode, message) {
 		const obj = this._obj;
 		message = message || 'equalNode';
 
@@ -38,8 +38,7 @@ chai.use((chai, util) => {
 				expectedNode,
 				obj
 			);
-		}
-		else {
+		} else {
 			new Assertion(obj).to.be.instanceof(Node, message);
 			this.assert(
 				obj.tagName === expectedNode.tagName,
