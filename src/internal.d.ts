@@ -1,5 +1,7 @@
 import * as preact from './index';
 
+export type CommitQueue = Component[];
+
 export interface Options extends preact.Options {
 	/** Attach a hook that is invoked before render, mainly to check the arguments. */
 	_root?(
@@ -9,7 +11,7 @@ export interface Options extends preact.Options {
 	/** Attach a hook that is invoked before a vnode is diffed. */
 	_diff?(vnode: VNode): void;
 	/** Attach a hook that is invoked after a tree was mounted or was updated. */
-	_commit?(vnode: VNode, commitQueue: Component[]): void;
+	_commit?(vnode: VNode, commitQueue: CommitQueue): void;
 	/** Attach a hook that is invoked before a vnode has rendered. */
 	_render?(vnode: VNode): void;
 	/** Attach a hook that is invoked before a hook's state is queried. */
