@@ -1,7 +1,7 @@
 import { render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
-import React from 'preact/compat';
+import React, { createElement } from 'preact/compat';
 
 describe('imported compat in preact', () => {
 	let scratch;

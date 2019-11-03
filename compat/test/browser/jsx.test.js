@@ -3,7 +3,7 @@ import {
 	teardown,
 	serializeHtml
 } from '../../../test/_util/helpers';
-import React, { isValidElement } from 'preact/compat';
+import React, { createElement, isValidElement } from 'preact/compat';
 import { createElement as preactH } from 'preact';
 
 describe('jsx', () => {

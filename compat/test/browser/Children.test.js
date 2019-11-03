@@ -4,7 +4,7 @@ import {
 	serializeHtml
 } from '../../../test/_util/helpers';
 import { div, span } from '../../../test/_util/dom';
-import React, { Children, render } from 'preact/compat';
+import React, { createElement, Children, render } from 'preact/compat';
 
 describe('Children', () => {
 	/** @type {HTMLDivElement} */

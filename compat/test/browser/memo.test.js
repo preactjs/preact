@@ -1,6 +1,6 @@
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import React, { Component, render, memo } from 'preact/compat';
+import React, { createElement, Component, render, memo } from 'preact/compat';
 
 const h = React.createElement;
 

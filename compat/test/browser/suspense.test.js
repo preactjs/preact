@@ -1,5 +1,6 @@
 import { setupRerender } from 'preact/test-utils';
 import React, {
+	createElement,
 	render,
 	Component,
 	Suspense,
