@@ -1,5 +1,5 @@
 import { createElement, render, Fragment } from 'preact';
-import { getDomSibling } from '../../src/component';
+import { getDomSibling } from '../../src/component'; // TODO: Hmmmm won't work with minified builds...
 import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx createElement */
