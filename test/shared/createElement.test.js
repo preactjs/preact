@@ -1,4 +1,4 @@
-import { createElement } from 'preact';
+import { createElement } from '../../';
 import { expect } from 'chai';
 
 const h = createElement;

@@ -1,4 +1,4 @@
-import { createElement, createContext } from 'preact';
+import { createElement, createContext } from '../../';
 import { expect } from 'chai';
 
 /** @jsx createElement */
