@@ -241,6 +241,8 @@ const RAF_TIMEOUT = 100;
  *
  * Also, schedule a timeout in parallel to the the rAF to ensure the callback is invoked
  * even if RAF doesn't fire (for example if the browser tab is not visible)
+ *
+ * @param {() => void} callback
  */
 function afterNextFrame(callback) {
 	const done = () => {
@@ -263,7 +265,7 @@ let prevRaf;
 // Perhaps this is not such a big deal.
 /**
  * Schedule afterPaintEffects flush after the browser paints
- * @type {(newQueueLength: number) => void}
+ * @param {number} newQueueLength
  */
 function afterPaint(newQueueLength) {
 	if (newQueueLength === 1 || prevRaf !== options.requestAnimationFrame) {
