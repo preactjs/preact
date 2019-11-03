@@ -256,7 +256,7 @@ function afterNextFrame(callback) {
 	}
 }
 
-let prevRaf = options.requestAnimationFrame;
+let prevRaf;
 
 // Note: if someone used Component.debounce = requestAnimationFrame,
 // then effects will ALWAYS run on the NEXT frame instead of the current one, incurring a ~16ms delay.
