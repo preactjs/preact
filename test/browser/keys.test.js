@@ -1,4 +1,4 @@
-import { createElement, Component, render } from '../../src/index';
+import { createElement, Component, render } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 
@@ -466,16 +466,22 @@ describe('keys', () => {
 			return moved ? (
 				<div>
 					<div>1</div>
-					<Stateful2 key="b" ref={c => c ? Stateful2MovedRef = c : undefined} />
+					<Stateful2
+						key="b"
+						ref={c => (c ? (Stateful2MovedRef = c) : undefined)}
+					/>
 					<div>2</div>
-					<Stateful1 key="a" ref={c => c ? Stateful1MovedRef = c : undefined} />
+					<Stateful1
+						key="a"
+						ref={c => (c ? (Stateful1MovedRef = c) : undefined)}
+					/>
 				</div>
 			) : (
 				<div>
 					<div>1</div>
-					<Stateful1 key="a" ref={c => c ? Stateful1Ref = c : undefined} />
+					<Stateful1 key="a" ref={c => (c ? (Stateful1Ref = c) : undefined)} />
 					<div>2</div>
-					<Stateful2 key="b" ref={c => c ? Stateful2Ref = c : undefined} />
+					<Stateful2 key="b" ref={c => (c ? (Stateful2Ref = c) : undefined)} />
 				</div>
 			);
 		}
