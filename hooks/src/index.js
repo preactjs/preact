@@ -218,16 +218,6 @@ export function useDebugValue(value, formatter) {
 	}
 }
 
-// Note: if someone used Component.debounce = requestAnimationFrame,
-// then effects will ALWAYS run on the NEXT frame instead of the current one, incurring a ~16ms delay.
-// Perhaps this is not such a big deal.
-/**
- * Schedule afterPaintEffects flush after the browser paints
- * @type {(newQueueLength: number) => void}
- */
-/* istanbul ignore next */
-let afterPaint = () => {};
-
 /**
  * After paint effects consumer.
  */
@@ -259,20 +249,29 @@ function afterNextFrame(callback) {
 		setTimeout(callback);
 	};
 	const timeout = setTimeout(done, RAF_TIMEOUT);
-	const raf = requestAnimationFrame(done);
+
+	let raf;
+	if (typeof window !== 'undefined') {
+		raf = requestAnimationFrame(done);
+	}
 }
 
-/* istanbul ignore else */
-if (typeof window !== 'undefined') {
-	let prevRaf = options.requestAnimationFrame;
-	afterPaint = newQueueLength => {
-		if (newQueueLength === 1 || prevRaf !== options.requestAnimationFrame) {
-			prevRaf = options.requestAnimationFrame;
+let prevRaf = options.requestAnimationFrame;
 
-			/* istanbul ignore next */
-			(prevRaf || afterNextFrame)(flushAfterPaintEffects);
-		}
-	};
+// Note: if someone used Component.debounce = requestAnimationFrame,
+// then effects will ALWAYS run on the NEXT frame instead of the current one, incurring a ~16ms delay.
+// Perhaps this is not such a big deal.
+/**
+ * Schedule afterPaintEffects flush after the browser paints
+ * @type {(newQueueLength: number) => void}
+ */
+function afterPaint(newQueueLength) {
+	if (newQueueLength === 1 || prevRaf !== options.requestAnimationFrame) {
+		prevRaf = options.requestAnimationFrame;
+
+		/* istanbul ignore next */
+		(prevRaf || afterNextFrame)(flushAfterPaintEffects);
+	}
 }
 
 /**
