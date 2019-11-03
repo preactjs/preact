@@ -10,6 +10,13 @@ let currentComponent;
 let afterPaintEffects = [];
 
 let oldBeforeRender = options._render;
+let oldAfterDiff = options.diffed;
+let oldCommit = options._commit;
+let oldBeforeUnmount = options.unmount;
+
+const RAF_TIMEOUT = 100;
+let prevRaf;
+
 options._render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
 
@@ -23,7 +30,6 @@ options._render = vnode => {
 	}
 };
 
-let oldAfterDiff = options.diffed;
 options.diffed = vnode => {
 	if (oldAfterDiff) oldAfterDiff(vnode);
 
@@ -38,7 +44,6 @@ options.diffed = vnode => {
 	}
 };
 
-let oldCommit = options._commit;
 options._commit = (vnode, commitQueue) => {
 	commitQueue.some(component => {
 		component._renderCallbacks.forEach(invokeCleanup);
@@ -50,7 +55,6 @@ options._commit = (vnode, commitQueue) => {
 	if (oldCommit) oldCommit(vnode, commitQueue);
 };
 
-let oldBeforeUnmount = options.unmount;
 options.unmount = vnode => {
 	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
 
@@ -232,8 +236,6 @@ function flushAfterPaintEffects() {
 	afterPaintEffects = [];
 }
 
-const RAF_TIMEOUT = 100;
-
 /**
  * Schedule a callback to be invoked after the browser has a chance to paint a new frame.
  * Do this by combining requestAnimationFrame (rAF) + setTimeout to invoke a callback after
@@ -257,8 +259,6 @@ function afterNextFrame(callback) {
 		raf = requestAnimationFrame(done);
 	}
 }
-
-let prevRaf;
 
 // Note: if someone used Component.debounce = requestAnimationFrame,
 // then effects will ALWAYS run on the NEXT frame instead of the current one, incurring a ~16ms delay.
