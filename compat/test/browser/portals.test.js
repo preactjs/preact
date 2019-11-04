@@ -1,15 +1,15 @@
-import {
-	createElement as h,
+import React, {
+	createElement,
 	render,
 	createPortal,
 	useState,
 	Component
-} from '../../src';
+} from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { setupRerender } from 'preact/test-utils';
+
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 
-/** @jsx h */
 describe('Portal', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;

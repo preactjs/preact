@@ -1,9 +1,9 @@
-import { createElement as h, options } from '../../src';
+import { createElement, options } from 'preact';
 import { assign } from '../../src/util';
 import { clearLog, getLog } from './logCall';
 import { teardown as testUtilTeardown } from 'preact/test-utils';
 
-/** @jsx h */
+/** @jsx createElement */
 
 export function supportsPassiveEvents() {
 	let supported = false;

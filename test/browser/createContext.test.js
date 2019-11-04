@@ -1,15 +1,15 @@
 import { setupRerender, act } from 'preact/test-utils';
 import {
-	createElement as h,
+	createElement,
 	render,
 	Component,
-	createContext
+	createContext,
+	Fragment
 } from '../../src/index';
+import { i as ctxId } from '../../src/create-context'; // TODO: Rewrite tests to remove this internal dependency
 import { setupScratch, teardown } from '../_util/helpers';
-import { Fragment } from '../../src';
-import { i as ctxId } from '../../src/create-context';
 
-/** @jsx h */
+/** @jsx createElement */
 
 describe('createContext', () => {
 	let scratch;

@@ -1,15 +1,16 @@
-/* eslint-env browser, mocha */
-/** @jsx h */
 import { setupRerender } from 'preact/test-utils';
-import {
-	createElement as h,
+import React, {
+	createElement,
 	render,
 	Component,
 	Suspense,
 	lazy,
 	Fragment
-} from '../../src/index';
+} from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
+
+const h = React.createElement;
+/* eslint-env browser, mocha */
 
 function createLazy() {
 	/** @type {(c: ComponentType) => Promise<void>} */
@@ -40,7 +41,7 @@ function createLazy() {
  * @returns {[typeof Component, () => Resolvers]}
  */
 function createSuspender(DefaultComponent) {
-	/** @type {(lazy: h.JSX.Element) => void} */
+	/** @type {(lazy: React.JSX.Element) => void} */
 	let renderLazy;
 	class Suspender extends Component {
 		constructor(props, context) {

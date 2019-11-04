@@ -1,9 +1,4 @@
-import {
-	createElement as h,
-	render,
-	Component,
-	Fragment
-} from '../../src/index';
+import { createElement, render, Component, Fragment } from 'preact';
 import { setupRerender } from 'preact/test-utils';
 import {
 	setupScratch,
@@ -14,7 +9,8 @@ import {
 } from '../_util/helpers';
 import { div, span, p } from '../_util/dom';
 
-/** @jsx h */
+/** @jsx createElement */
+const h = createElement;
 
 let spyAll = obj => Object.keys(obj).forEach(key => sinon.spy(obj, key));
 
@@ -571,6 +567,7 @@ describe('Components', () => {
 
 	// Test for Issue preactjs/preact#176
 	it('should remove children when root changes to text node', () => {
+		/** @type {import('preact').Component} */
 		let comp;
 
 		class Comp extends Component {

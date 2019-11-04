@@ -1,13 +1,16 @@
 import { vnodeSpy, eventSpy } from '../../../test/_util/optionSpies';
-import { render, createElement, Component, createRef } from '../../src';
+import React, {
+	createElement,
+	render,
+	Component,
+	createRef
+} from 'preact/compat';
 import { setupRerender } from 'preact/test-utils';
 import {
 	setupScratch,
 	teardown,
 	createEvent
 } from '../../../test/_util/helpers';
-
-/** @jsx createElement */
 
 describe('compat options', () => {
 	/** @type {HTMLDivElement} */

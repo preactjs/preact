@@ -1,6 +1,6 @@
-import Compat from '../../src';
+import Compat from 'preact/compat';
 // eslint-disable-next-line no-duplicate-imports
-import * as Named from '../../src';
+import * as Named from 'preact/compat';
 
 describe('exports', () => {
 	it('should have a default export', () => {

@@ -1,5 +1,5 @@
 import { setupRerender, act } from 'preact/test-utils';
-import { createElement as h, render, Component } from 'preact';
+import { createElement, render, Component } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import {
 	useState,
@@ -7,10 +7,10 @@ import {
 	useEffect,
 	useLayoutEffect,
 	useRef
-} from '../../src';
+} from 'preact/hooks';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
 
-/** @jsx h */
+/** @jsx createElement */
 
 describe('combinations', () => {
 	/** @type {HTMLDivElement} */

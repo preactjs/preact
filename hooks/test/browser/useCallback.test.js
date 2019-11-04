@@ -1,8 +1,8 @@
-import { createElement as h, render } from 'preact';
+import { createElement, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useCallback } from '../../src';
+import { useCallback } from 'preact/hooks';
 
-/** @jsx h */
+/** @jsx createElement */
 
 describe('useCallback', () => {
 	/** @type {HTMLDivElement} */
