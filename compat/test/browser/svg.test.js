@@ -1,4 +1,4 @@
-import React from '../../src';
+import React, { createElement } from 'preact/compat';
 import {
 	setupScratch,
 	teardown,

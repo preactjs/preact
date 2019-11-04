@@ -1,11 +1,11 @@
 import { act } from 'preact/test-utils';
-import { createElement as h, render } from 'preact';
+import { createElement, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useEffect } from '../../src';
+import { useEffect } from 'preact/hooks';
 import { useEffectAssertions } from './useEffectAssertions.test';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
 
-/** @jsx h */
+/** @jsx createElement */
 
 describe('useEffect', () => {
 	/** @type {HTMLDivElement} */

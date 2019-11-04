@@ -112,11 +112,9 @@ export function diffChildren(
 				);
 
 				if ((j = childVNode.ref) && oldVNode.ref != j) {
-					(refs || (refs = [])).push(
-						j,
-						childVNode._component || newDom,
-						childVNode
-					);
+					if (!refs) refs = [];
+					if (oldVNode.ref) refs.push(oldVNode.ref, null, childVNode);
+					refs.push(j, childVNode._component || newDom, childVNode);
 				}
 
 				// Only proceed if the vnode has not been unmounted by `diff()` above.

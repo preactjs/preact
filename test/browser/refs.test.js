@@ -1,13 +1,8 @@
 import { setupRerender } from 'preact/test-utils';
-import {
-	createElement as h,
-	render,
-	Component,
-	createRef
-} from '../../src/index';
+import { createElement, render, Component, createRef } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 
-/** @jsx h */
+/** @jsx createElement */
 
 // gives call count and argument errors names (otherwise sinon just uses "spy"):
 let spy = (name, ...args) => {
@@ -33,6 +28,21 @@ describe('refs', () => {
 		let ref = spy('ref');
 		render(<div ref={ref} />, scratch);
 		expect(ref).to.have.been.calledOnce.and.calledWith(scratch.firstChild);
+	});
+
+	it('should not call stale refs', () => {
+		let ref = spy('ref');
+		let ref2 = spy('ref2');
+		let bool = true;
+		const App = () => <div ref={bool ? ref : ref2} />;
+
+		render(<App />, scratch);
+		expect(ref).to.have.been.calledOnce.and.calledWith(scratch.firstChild);
+
+		bool = false;
+		render(<App />, scratch);
+		expect(ref).to.have.been.calledTwice.and.calledWith(null);
+		expect(ref2).to.have.been.calledOnce.and.calledWith(scratch.firstChild);
 	});
 
 	it('should support createRef', () => {
@@ -76,6 +86,29 @@ describe('refs', () => {
 		render(<Foo ref={ref} />, scratch);
 
 		expect(ref).to.have.been.calledOnce.and.calledWith(instance);
+	});
+
+	it('should have a consistent order', () => {
+		const events = [];
+		const App = () => (
+			<div ref={r => events.push('called with ' + (r && r.tagName))}>
+				<h1 ref={r => events.push('called with ' + (r && r.tagName))}>
+					hi
+				</h1>
+			</div>
+		);
+
+		render(<App />, scratch);
+		render(<App />, scratch);
+		expect(events.length).to.equal(6);
+		expect(events).to.deep.equal([
+			'called with H1',
+			'called with DIV',
+			'called with null',
+			'called with H1',
+			'called with null',
+			'called with DIV'
+		]);
 	});
 
 	it('should pass rendered DOM from functional components to ref functions', () => {

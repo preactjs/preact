@@ -1,4 +1,4 @@
-import { createElement, render, Component } from '../../../src/index';
+import { createElement, render, Component } from 'preact';
 import { setupScratch, teardown, spyAll } from '../../_util/helpers';
 
 /** @jsx createElement */

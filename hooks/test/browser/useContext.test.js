@@ -1,9 +1,9 @@
-import { h, render, createContext, Component } from 'preact';
+import { createElement, render, createContext, Component } from 'preact';
 import { act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useContext, useEffect, useState } from '../../src';
+import { useContext, useEffect, useState } from 'preact/hooks';
 
-/** @jsx h */
+/** @jsx createElement */
 
 describe('useContext', () => {
 	/** @type {HTMLDivElement} */

@@ -1,4 +1,4 @@
-import { createElement, hydrate, Fragment } from '../../src/index';
+import { createElement, hydrate, Fragment } from 'preact';
 import {
 	setupScratch,
 	teardown,
