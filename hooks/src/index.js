@@ -10,6 +10,13 @@ let currentComponent;
 let afterPaintEffects = [];
 
 let oldBeforeRender = options._render;
+let oldAfterDiff = options.diffed;
+let oldCommit = options._commit;
+let oldBeforeUnmount = options.unmount;
+
+const RAF_TIMEOUT = 100;
+let prevRaf;
+
 options._render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
 
@@ -23,7 +30,6 @@ options._render = vnode => {
 	}
 };
 
-let oldAfterDiff = options.diffed;
 options.diffed = vnode => {
 	if (oldAfterDiff) oldAfterDiff(vnode);
 
@@ -38,7 +44,6 @@ options.diffed = vnode => {
 	}
 };
 
-let oldCommit = options._commit;
 options._commit = (vnode, commitQueue) => {
 	commitQueue.some(component => {
 		component._renderCallbacks.forEach(invokeCleanup);
@@ -50,7 +55,6 @@ options._commit = (vnode, commitQueue) => {
 	if (oldCommit) oldCommit(vnode, commitQueue);
 };
 
-let oldBeforeUnmount = options.unmount;
 options.unmount = vnode => {
 	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
 
@@ -218,16 +222,6 @@ export function useDebugValue(value, formatter) {
 	}
 }
 
-// Note: if someone used Component.debounce = requestAnimationFrame,
-// then effects will ALWAYS run on the NEXT frame instead of the current one, incurring a ~16ms delay.
-// Perhaps this is not such a big deal.
-/**
- * Schedule afterPaintEffects flush after the browser paints
- * @type {(newQueueLength: number) => void}
- */
-/* istanbul ignore next */
-let afterPaint = () => {};
-
 /**
  * After paint effects consumer.
  */
@@ -242,8 +236,6 @@ function flushAfterPaintEffects() {
 	afterPaintEffects = [];
 }
 
-const RAF_TIMEOUT = 100;
-
 /**
  * Schedule a callback to be invoked after the browser has a chance to paint a new frame.
  * Do this by combining requestAnimationFrame (rAF) + setTimeout to invoke a callback after
@@ -251,6 +243,8 @@ const RAF_TIMEOUT = 100;
  *
  * Also, schedule a timeout in parallel to the the rAF to ensure the callback is invoked
  * even if RAF doesn't fire (for example if the browser tab is not visible)
+ *
+ * @param {() => void} callback
  */
 function afterNextFrame(callback) {
 	const done = () => {
@@ -259,20 +253,27 @@ function afterNextFrame(callback) {
 		setTimeout(callback);
 	};
 	const timeout = setTimeout(done, RAF_TIMEOUT);
-	const raf = requestAnimationFrame(done);
+
+	let raf;
+	if (typeof window !== 'undefined') {
+		raf = requestAnimationFrame(done);
+	}
 }
 
-/* istanbul ignore else */
-if (typeof window !== 'undefined') {
-	let prevRaf = options.requestAnimationFrame;
-	afterPaint = newQueueLength => {
-		if (newQueueLength === 1 || prevRaf !== options.requestAnimationFrame) {
-			prevRaf = options.requestAnimationFrame;
+// Note: if someone used options.debounceRendering = requestAnimationFrame,
+// then effects will ALWAYS run on the NEXT frame instead of the current one, incurring a ~16ms delay.
+// Perhaps this is not such a big deal.
+/**
+ * Schedule afterPaintEffects flush after the browser paints
+ * @param {number} newQueueLength
+ */
+function afterPaint(newQueueLength) {
+	if (newQueueLength === 1 || prevRaf !== options.requestAnimationFrame) {
+		prevRaf = options.requestAnimationFrame;
 
-			/* istanbul ignore next */
-			(prevRaf || afterNextFrame)(flushAfterPaintEffects);
-		}
-	};
+		/* istanbul ignore next */
+		(prevRaf || afterNextFrame)(flushAfterPaintEffects);
+	}
 }
 
 /**
