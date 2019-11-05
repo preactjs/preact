@@ -10,7 +10,9 @@ class Root extends Component{
         hasError:false
     }
     componentDidCatch(e){
-
+        this.setState({
+            hasError:false
+        })
     }
     render(){
         if(this.state.hasError){
@@ -20,6 +22,6 @@ class Root extends Component{
     }
 }
 
-render(<Root key={'root'}>
-    <Child key={'child'}/>
+render(<Root>
+    <Child/>
 </Root>, document.getElementById('app'));

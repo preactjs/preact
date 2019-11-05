@@ -127,6 +127,7 @@ function renderComponent(component) {
 	if (parentDom) {
 		let commitQueue = [];
 		let newDom = diff(parentDom, vnode, assign({}, vnode), component._context, parentDom.ownerSVGElement!==undefined, null, commitQueue, oldDom == null ? getDomSibling(vnode) : oldDom);
+		//渲染完成时执行did生命周期和setState回调
 		commitRoot(commitQueue, vnode);
 
 		if (newDom != oldDom) {

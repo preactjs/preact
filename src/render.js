@@ -38,7 +38,7 @@ export function render(vnode, parentDom, replaceNode) {
 		replaceNode || EMPTY_OBJ,
 		isHydrating,
 	);
-	//执行componentDidMount生命周期
+	//渲染完成时执行did生命周期和setState回调
 	commitRoot(commitQueue, vnode);
 
 	console.log(vnode)

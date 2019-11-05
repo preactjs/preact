@@ -100,7 +100,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
                 if (newType.getDerivedStateFromProps==null && c.componentWillMount!=null) {
 					c.componentWillMount();
 				}
-				//如果有componentDidMount则放入回调队列
+				//如果有componentDidMount则放到_renderCallbacks
 				if (c.componentDidMount!=null) {
 					c._renderCallbacks.push(c.componentDidMount);
 				}
@@ -131,7 +131,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 				if (c.componentWillUpdate!=null) {
 					c.componentWillUpdate(newProps, c._nextState, cctx);
 				}
-
+				//如果componentDidUpdate不为空则放到_renderCallbacks中
 				if (c.componentDidUpdate!=null) {
 					c._renderCallbacks.push(() => {
 						c.componentDidUpdate(oldProps, oldState, snapshot);
@@ -162,15 +162,15 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			if (!isNew && c.getSnapshotBeforeUpdate!=null) {
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
-
+			//对比子节点
 			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, commitQueue, oldDom, isHydrating);
 
 			c.base = newVNode._dom;
-
+			//有renderCallback则放到commitQueue中，所有渲染完成一起执行
 			if (c._renderCallbacks.length) {
 				commitQueue.push(c);
 			}
-
+			//清除error
 			if (clearProcessingException) {
 				c._pendingError = c._processingException = null;
 			}
@@ -190,12 +190,14 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 	return newVNode._dom;
 }
-
+//执行did生命周期和setState的回调
 export function commitRoot(commitQueue, root) {
 	commitQueue.some(c => {
 		try {
+			//拷贝一份回调，防止执行时在加入回调形成死循环
 			commitQueue = c._renderCallbacks;
 			c._renderCallbacks = [];
+			//循环执行
 			commitQueue.some(cb => { cb.call(c); });
 		}
 		catch (e) {
@@ -228,18 +230,21 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	//判断是否是svg
 	isSvg = newVNode.type==='svg' || isSvg;
-
+	//判断能否复用excessDomChildren中的dom
 	if (dom==null && excessDomChildren!=null) {
 		for (i=0; i<excessDomChildren.length; i++) {
 			const child = excessDomChildren[i];
-
+			//如果虚拟节点类型为null而存在节点类型是text或者虚拟节点类型和存在节点类型相同，则复用
 			if (child!=null && (newVNode.type===null ? child.nodeType===3 : child.localName===newVNode.type)) {
 				dom = child;
+				//设置对应的存在节点为空
 				excessDomChildren[i] = null;
 				break;
 			}
 		}
 	}
+	//以上excessDomChildren中的元素和newNode是同一级的
+	//下面excessDomChildren中的元素是newNode的下级
 	//如果dom为空
 	if (dom==null) {
 		//text节点
@@ -249,16 +254,17 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 		//创建元素
 		dom = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type) : document.createElement(newVNode.type);
 		// we created a new parent, so none of the previously attached children can be reused:
-		//设置子dom为空
+		//已经新创建了dom，excessDomChildren为空
 		excessDomChildren = null;
 	}
-
+	//如果是text节点
 	if (newVNode.type===null) {
 		if (excessDomChildren!=null) excessDomChildren[excessDomChildren.indexOf(dom)] = null;
 		if (oldProps !== newProps) {
 			dom.data = newProps;
 		}
 	}
+	//新老节点不相等
 	else if (newVNode!==oldVNode) {
 		if (excessDomChildren!=null) {
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
@@ -286,9 +292,9 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 				}
 			}
 		}
-
+		//对比元素的属性
 		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
-
+		//设置_children
 		newVNode._children = newVNode.props.children;
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
