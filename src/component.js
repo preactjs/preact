@@ -28,16 +28,17 @@ export function Component(props, context) {
 Component.prototype.setState = function(update, callback) {
 	// only clone state when copying to nextState the first time.
 	let s;
+	//获取_nextState
 	if (this._nextState !== this.state) {
 		s = this._nextState;
 	} else {
 		s = this._nextState = assign({}, this.state);
 	}
-
+	//如果update为函数则执行这个函数
 	if (typeof update == 'function') {
 		update = update(s, this.props);
 	}
-
+	//合并update到_nextState
 	if (update) {
 		assign(s, update);
 	}
@@ -180,9 +181,10 @@ let q = [];
  * Asynchronously schedule a callback
  * @type {(cb: () => void) => void}
  */
-//延迟   如 defer(callback)，callback会用Promise then或者 setTimeout执行
 /* istanbul ignore next */
 // Note the following line isn't tree-shaken by rollup cuz of rollup/rollup#2566
+//延迟   如 defer(callback)，callback会用Promise then或者 setTimeout执行
+//Promise.prototype.then.bind(Promise.resolve()) 等同于 Promise.resolve().then
 const defer =
 	typeof Promise == 'function'
 		? Promise.prototype.then.bind(Promise.resolve())

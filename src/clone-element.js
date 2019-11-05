@@ -20,8 +20,11 @@ cloneElement(
 但cloneElement 会保留了组件的 ref
 */
 export function cloneElement(vnode, props) {
+	//拷贝props
 	props = assign(assign({}, vnode.props), props);
+	//children处理
 	if (arguments.length > 2) props.children = EMPTY_ARR.slice.call(arguments, 2);
+	//调用创建虚拟节点
 	return createVNode(
 		vnode.type,
 		props,

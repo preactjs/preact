@@ -50,7 +50,7 @@ export function createContext(defaultValue) {
 			return props.children;
 		}
 	};
-
+	//设置contextType
 	context.Consumer.contextType = context;
 
 	return context;

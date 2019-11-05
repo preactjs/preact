@@ -38,7 +38,7 @@ export function createElement(type, props, children) {
 	let key = props.key;
 	if (ref != null) delete props.ref;
 	if (key != null) delete props.key;
-	//调用创建节点
+	//调用创建虚拟节点
 	return createVNode(type, props, key, ref);
 }
 
