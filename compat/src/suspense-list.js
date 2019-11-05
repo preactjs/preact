@@ -39,19 +39,31 @@ SuspenseList.prototype.__modifySuspense = function(vnode, cb) {
 			 * Find and execute all callbacks in order from 2nd position.
 			 * Breaks as soon as a non resolved(cb===null) suspense found.
 			 */
-			this._thrillers.find(thrill => {
+			this._thrillers.some(thrill => {
 				if (thrill.cb === null) {
 					return true; // breaks the find loop
 				}
 				thrill.cb();
 			});
 		} else {
-			this._thrillers.find(thrill => thrill.vnode === vnode).cb = cb;
+			this._thrillers.some(thrill => {
+				if (thrill.vnode === vnode) {
+					thrill.cb = cb;
+					return true;
+				}
+			});
 		}
 	} else if (revealOrder[0] === 't') {
-		this._thrillers.find(thrill => thrill.vnode === vnode).cb = cb;
+		this._thrillers.some(thrill => {
+			if (thrill.vnode === vnode) {
+				thrill.cb = cb;
+				return true;
+			}
+		});
 		if (this._thrillers.every(thriller => thriller.cb)) {
-			this._thrillers.forEach(thrill => thrill.cb());
+			this._thrillers.forEach(thrill => {
+				thrill.cb();
+			});
 		}
 	}
 };
