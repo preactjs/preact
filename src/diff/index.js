@@ -22,6 +22,7 @@ import options from '../options';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} [isHydrating] Whether or not we are in hydration
  */
+//对比虚拟节点
 export function diff(
 	parentDom,
 	newVNode,
@@ -224,6 +225,7 @@ export function diff(
 			//设置强制更新为false
 			c._force = null;
 		} else {
+			//其它类型调用diffElementNodes去比较
 			newVNode._dom = diffElementNodes(
 				oldVNode._dom,
 				newVNode,
@@ -424,7 +426,8 @@ export function applyRef(ref, value, vnode) {
 		if (typeof ref == 'function') ref(value);
 		//其它赋值给current属性
 		else ref.current = value;
-	} //捕获错误
+	}
+	//捕获错误
 	catch (e) {
 		options._catchError(e, vnode);
 	}
