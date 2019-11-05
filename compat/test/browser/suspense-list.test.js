@@ -86,6 +86,25 @@ describe('suspense-list', () => {
 		}
 	});
 
+	it('should work for single element', async () => {
+		const [Component1, resolver1] = getSuspendableComponent();
+		render(
+			<SuspenseList>
+				<Suspense fallback={<span>Loading...</span>}>
+					<Component1 />
+				</Suspense>
+			</SuspenseList>,
+			scratch
+		); // Render initial state
+
+		rerender(); // Re-render with fallback cuz lazy threw
+		expect(scratch.innerHTML).to.eql(`<span>Loading...</span>`);
+
+		await resolver1(true);
+		rerender();
+		expect(scratch.innerHTML).to.eql(`<span>I am resolved.</span>`);
+	});
+
 	it('should let components appear backwards if no revealOrder is mentioned', async () => {
 		const { resolver1, resolver2 } = getSuspenseList();
 
@@ -128,7 +147,7 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it('should let components appear in forwards if revealOrder is forwards and first one resolves before others', async () => {
+	it('should let components appear in forwards if revealOrder=forwards and first one resolves before others', async () => {
 		const { resolver1, resolver2 } = getSuspenseList('forwards');
 
 		rerender(); // Re-render with fallback cuz lazy threw
@@ -149,7 +168,7 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it('should make components together if revealOrder is forwards and second one resolves before first', async () => {
+	it('should make components appear together if revealOrder=forwards and second one resolves before first', async () => {
 		const { resolver1, resolver2 } = getSuspenseList('forwards');
 
 		rerender(); // Re-render with fallback cuz lazy threw
@@ -170,7 +189,7 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it('should let components reveal backwards if revealOrder is backwards and second one resolves before first', async () => {
+	it('should let components appear backwards if revealOrder=backwards and second one resolves before first', async () => {
 		const { resolver1, resolver2 } = getSuspenseList('backwards');
 
 		rerender(); // Re-render with fallback cuz lazy threw
@@ -191,7 +210,7 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it('should make components reveal together if revealOrder is backwards and first one resolves before second', async () => {
+	it('should make components appear together if revealOrder=backwards and first one resolves before second', async () => {
 		const { resolver1, resolver2 } = getSuspenseList('backwards');
 
 		rerender(); // Re-render with fallback cuz lazy threw
@@ -212,7 +231,7 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it('should make components reveal together if revealOrder is together and first one resolves before second', async () => {
+	it('should make components appear together if revealOrder=together and first one resolves before second', async () => {
 		const { resolver1, resolver2 } = getSuspenseList('together');
 
 		rerender(); // Re-render with fallback cuz lazy threw
@@ -233,7 +252,7 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it('should make components reveal together if revealOrder is together and second one resolves before first', async () => {
+	it('should make components appear together if revealOrder=together and second one resolves before first', async () => {
 		const { resolver1, resolver2 } = getSuspenseList('together');
 
 		rerender(); // Re-render with fallback cuz lazy threw

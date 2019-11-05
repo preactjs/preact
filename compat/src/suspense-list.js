@@ -22,44 +22,46 @@ export function SuspenseList(props) {
 SuspenseList.prototype = new Component();
 
 SuspenseList.prototype.__modifySuspense = function(vnode, cb) {
-	switch (this.props.revealOrder) {
-		case 'forwards':
-		case 'backwards':
-			/**
-			 * Forwards and backwards work the same way.
-			 * The direction is controlled in render method while creating `_thrillers` itself.
-			 */
-			if (this._thrillers && this._thrillers[0].vnode === vnode) {
-				cb();
-				this._thrillers.shift();
-				/**
-				 * Find and execute all callbacks in order from 2nd position.
-				 * Breaks as soon as a non resolved(cb===null) suspense found.
-				 */
-				this._thrillers.find(thrill => {
-					if (thrill.cb === null) {
-						return true; // breaks the find loop
-					}
-					thrill.cb();
-				});
-			} else {
-				this._thrillers.find(thrill => thrill.vnode === vnode).cb = cb;
-			}
-			break;
-		case 'together':
-			this._thrillers.find(thrill => thrill.vnode === vnode).cb = cb;
-			if (this._thrillers.every(thriller => thriller.cb)) {
-				this._thrillers.forEach(thrill => thrill.cb());
-			}
-			break;
-		default:
+	const revealOrder = this.props.revealOrder;
+	if (!revealOrder) {
+		return cb();
+	}
+
+	if (revealOrder[0] === 'f' || revealOrder[0] === 'b') {
+		/**
+		 * Forwards and backwards work the same way.
+		 * The direction is controlled in render method while creating `_thrillers` itself.
+		 */
+		if (this._thrillers && this._thrillers[0].vnode === vnode) {
 			cb();
+			this._thrillers.shift();
+			/**
+			 * Find and execute all callbacks in order from 2nd position.
+			 * Breaks as soon as a non resolved(cb===null) suspense found.
+			 */
+			this._thrillers.find(thrill => {
+				if (thrill.cb === null) {
+					return true; // breaks the find loop
+				}
+				thrill.cb();
+			});
+		} else {
+			this._thrillers.find(thrill => thrill.vnode === vnode).cb = cb;
+		}
+	} else if (revealOrder[0] === 't') {
+		this._thrillers.find(thrill => thrill.vnode === vnode).cb = cb;
+		if (this._thrillers.every(thriller => thriller.cb)) {
+			this._thrillers.forEach(thrill => thrill.cb());
+		}
 	}
 };
 
-SuspenseList.prototype.render = function(props, state) {
+SuspenseList.prototype.render = function(props) {
 	// assuming all suspense woul
-	this._thrillers = props.children
+	this._thrillers = (Array.isArray(props.children)
+		? props.children
+		: [props.children]
+	)
 		.filter(child => child.type.name === Suspense.name)
 		.map(vnode => ({
 			vnode,

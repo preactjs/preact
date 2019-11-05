@@ -114,13 +114,13 @@ module.exports = function(config) {
 			{
 				pattern:
 					config.grep ||
-					'{compat,test-utils,}/test/{browser,shared}/**/suspense-list.test.js',
+					'{debug,hooks,compat,test-utils,}/test/{browser,shared}/**/*.test.js',
 				watched: false
 			}
 		],
 
 		preprocessors: {
-			'{compat,test-utils,}/test/**/*': ['webpack', 'sourcemap']
+			'{debug,hooks,compat,test-utils,}/test/**/*': ['webpack', 'sourcemap']
 		},
 
 		webpack: {
