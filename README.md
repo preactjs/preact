@@ -156,7 +156,6 @@ Preact supports modern browsers and IE9+:
 - [**preact-photon**](https://git.io/preact-photon): build beautiful desktop UI with [photon](http://photonkit.com)
 - [**preact-mdl**](https://git.io/preact-mdl): [Material Design Lite](https://getmdl.io) for Preact
 - [**preact-weui**](https://github.com/afeiship/preact-weui): [Weui](https://github.com/afeiship/preact-weui) for Preact
-- [**preact-charts**](https://github.com/pmkroeker/preact-charts): Charts for Preact
 
 
 ---
@@ -502,7 +501,7 @@ new webpack.DefinePlugin({
 When enabled, warnings are logged to the console when undefined components or string refs
 are detected.
 
-### Developer Tools
+### Developer Tools (v8 or earlier)
 
 If you only want to include devtool integration, without runtime error checking, you can
 replace `preact/debug` in the above example with `preact/devtools`. This option doesn't
