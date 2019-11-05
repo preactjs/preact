@@ -19,7 +19,7 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 			setProperty(dom, i, null, oldProps[i], isSvg);
 		}
 	}
-	//如果 非hydrate或者属性名为函数 并且属性名不为value，checked 并且新的属性值不等于老的属性值 则执行setProperty
+	//如果 不是hydration模式或者属性名为函数 并且属性名不为value，checked 并且新的属性值不等于老的属性值 则执行setProperty
 	for (i in newProps) {
 		if (
 			(!hydrate || typeof newProps[i] == 'function') &&

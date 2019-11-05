@@ -234,18 +234,21 @@ export function diffChildren(
 export function toChildArray(children, callback, flattened) {
 	//没有存在的就是空数组
 	if (flattened == null) flattened = [];
-	//为null或者是布尔类型
+	//为null或者undefined或者是布尔类型
 	if (children == null || typeof children === 'boolean') {
+		//有回调则执行push执行回调返回的结果
 		if (callback) flattened.push(callback(null));
-	} //如果children为数组则递归去添加
+	}
+	//如果children为数组则递归去添加
 	else if (Array.isArray(children)) {
 		for (let i=0; i < children.length; i++) {
 			toChildArray(children[i], callback, flattened);
 		}
+	//没有回调则直接push
 	} else if (!callback) {
 		flattened.push(children);
+	//字符或者数字类型,创建虚拟节点
 	} else if (typeof children === 'string' || typeof children === 'number') {
-		//有回调则push回调返回的children，不然则是children
 		flattened.push(callback(createVNode(null, children, null, null)));
 	} else if (children._dom != null || children._component != null) {
 		flattened.push(

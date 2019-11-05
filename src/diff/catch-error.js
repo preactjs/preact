@@ -13,6 +13,7 @@ export function _catchError(error, vnode) {
 	//不断向上循环父组件
 	for (; (vnode = vnode._parent); ) {
 		//有父组件并且该父组件不是异常
+		//TODO 感觉这儿直接可以用component._pendingError代替_processingException
 		if ((component = vnode._component) && !component._processingException) {
 			try {
 				//如果组件有静态getDerivedStateFromError，将执行结果传给setState
@@ -30,7 +31,7 @@ export function _catchError(error, vnode) {
 				} else {
 					continue;
 				}
-				//再去渲染error的组件 如果error组件render后还是有error 则会执行下面throw error
+				//再去渲染处理error的组件,如果render后还是有error 则会执行最下面throw error
 				//_pendingError标记此组件有错误，再次渲染会赋值给_processingException，这样如果还出错会跳过这个组件，在向上层组件循环
 				return enqueueRender((component._pendingError = component));
 			} catch (e) {

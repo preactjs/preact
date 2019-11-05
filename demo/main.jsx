@@ -2,7 +2,6 @@ import {Component, createContext, render,h} from '../src'
 
 
 function Child() {
-    var xx = e;
     return <div key={'child-div'}>234</div>
 }
 class Root extends Component{
@@ -11,7 +10,7 @@ class Root extends Component{
     }
     componentDidCatch(e){
         this.setState({
-            hasError:false
+            hasError:true
         })
     }
     render(){

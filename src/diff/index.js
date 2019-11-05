@@ -66,6 +66,7 @@ export function diff(
 			//如果已经存在实例化的组件
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
+				//设置清除异常变量,如果渲染完后没有异常出现,清除该组件的异常标记
 				clearProcessingException = c._processingException = c._pendingError;
 			} else {
 				// Instantiate the new component
@@ -99,8 +100,8 @@ export function diff(
 				c._nextState = c.state;
 			}
 			//有getDerivedStateFromProps执行此生命周期并扩展到_nextState
-			//如果nextState和state相同则拷贝nextState到nextState
 			if (newType.getDerivedStateFromProps != null) {
+				//如果nextState和state相同则拷贝nextState到nextState
 				if (c._nextState == c.state) {
 					c._nextState = assign({}, c._nextState);
 				}
@@ -137,7 +138,7 @@ export function diff(
 				) {
 					c.componentWillReceiveProps(newProps, cctx);
 				}
-				//如果不是forceUpdate并且shouldComponentUpdate则执行次生命周期返回false的情况下
+				//如果不是forceUpdate并且shouldComponentUpdate则执行此生命周期返回false的情况下
 				if (
 					!c._force &&
 					c.shouldComponentUpdate != null &&
@@ -151,9 +152,11 @@ export function diff(
 					//dom还是老虚拟节点的dom
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
+					//执行渲染回调
 					if (c._renderCallbacks.length) {
 						commitQueue.push(c);
 					}
+					//给children设置_parent
 					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
 						if (newVNode._children[tmp]) {
 							newVNode._children[tmp]._parent = newVNode;
@@ -319,8 +322,6 @@ function diffElementNodes(
 			}
 		}
 	}
-	//以上excessDomChildren中的元素和newNode是同一级的
-	//下面excessDomChildren中的元素是newNode的下级
 	//如果dom为空
 	if (dom == null) {
 		//text节点
@@ -332,40 +333,47 @@ function diffElementNodes(
 			? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type)
 			: document.createElement(newVNode.type);
 		// we created a new parent, so none of the previously attached children can be reused:
-		//已经新创建了dom，excessDomChildren为空
+		//以下流程中 excessDomChildren表示dom的子节点,这儿的dom是新创建的,所以要设为null
 		excessDomChildren = null;
 	}
 	//如果是text节点
 	if (newVNode.type === null) {
+		//TODO 不明白 因为上面已经设置过null了
 		if (excessDomChildren != null) {
 			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
 		}
+		//将newProps赋值给data,data所有地方还没用到
 		if (oldProps !== newProps) {
 			dom.data = newProps;
 		}
-	} //新老节点不相等
+	}
+	//新老节点不相等
 	else if (newVNode!==oldVNode) {
+		//在这儿excessDomChildren是dom的子节点
 		if (excessDomChildren!=null) {
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 
 		oldProps = oldVNode.props || EMPTY_OBJ;
-
+		//dangerouslySetInnerHTML Props
 		let oldHtml = oldProps.dangerouslySetInnerHTML;
 		let newHtml = newProps.dangerouslySetInnerHTML;
 
 		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
 		// @TODO we should warn in debug mode when props don't match here.
+		//如果是非hydration模式则执行以下,因为hydration模式不会处理props
 		if (!isHydrating) {
+			//如果oldProps是空对象,则将dom的属性扩展给oldProps
 			if (oldProps === EMPTY_OBJ) {
 				oldProps = {};
 				for (let i = 0; i < dom.attributes.length; i++) {
 					oldProps[dom.attributes[i].name] = dom.attributes[i].value;
 				}
 			}
-
+			//新的props或者老的props有设置dangerouslySetInnerHTML
 			if (newHtml || oldHtml) {
 				// Avoid re-applying the same '__html' if it did not changed between re-render
+				//newHtml为空或者oldHtml为空或者 oldHtml与newHtml不相同  则设置给innerHTML
 				if (!newHtml || !oldHtml || newHtml.__html != oldHtml.__html) {
 					dom.innerHTML = (newHtml && newHtml.__html) || '';
 				}
@@ -377,6 +385,7 @@ function diffElementNodes(
 		newVNode._children = newVNode.props.children;
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
+		//如果没有设置newHtml则比较children
 		if (!newHtml) {
 			diffChildren(
 				dom,
@@ -392,7 +401,10 @@ function diffElementNodes(
 		}
 
 		// (as above, don't diff props during hydration)
+		//如果是非hydration模式
 		if (!isHydrating) {
+			//处理value Todo 感觉不需要'value' in newProps直接newProps.value !== undefined...就行
+			//如果value在newProps中并且value与dom的value不相同则设置value
 			if (
 				'value' in newProps &&
 				newProps.value !== undefined &&
@@ -400,6 +412,7 @@ function diffElementNodes(
 			) {
 				dom.value = newProps.value == null ? '' : newProps.value;
 			}
+			//处理checked
 			if (
 				'checked' in newProps &&
 				newProps.checked !== undefined &&

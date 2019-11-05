@@ -16,7 +16,7 @@ const IS_HYDRATE = EMPTY_OBJ;
 export function render(vnode, parentDom, replaceNode) {
 	//root钩子
 	if (options._root) options._root(vnode, parentDom);
-
+	//是否hydration模式
 	let isHydrating = replaceNode === IS_HYDRATE;
 	let oldVNode = isHydrating
 		? null
@@ -42,8 +42,6 @@ export function render(vnode, parentDom, replaceNode) {
 	);
 	//渲染完成时执行did生命周期和setState回调
 	commitRoot(commitQueue, vnode);
-
-	console.log(vnode)
 }
 
 /**
@@ -52,8 +50,9 @@ export function render(vnode, parentDom, replaceNode) {
  * @param {import('./internal').PreactElement} parentDom The DOM element to
  * update
  */
-//注水。。。   todo 这种会复用parentDom中的元素
-//比如服务端渲染完成是绑定事件
+//hydration模式渲染
+//此模式中,props的处理只处理事件部分,其它都不处理
+//主要用于在服务器渲染的节点去调用hydrate
 export function hydrate(vnode, parentDom) {
 	render(vnode, parentDom, IS_HYDRATE);
 }
