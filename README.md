@@ -156,7 +156,6 @@ Preact supports modern browsers and IE9+:
 - [**preact-photon**](https://git.io/preact-photon): build beautiful desktop UI with [photon](http://photonkit.com)
 - [**preact-mdl**](https://git.io/preact-mdl): [Material Design Lite](https://getmdl.io) for Preact
 - [**preact-weui**](https://github.com/afeiship/preact-weui): [Weui](https://github.com/afeiship/preact-weui) for Preact
-- [**preact-charts**](https://github.com/pmkroeker/preact-charts): Charts for Preact
 
 
 ---
