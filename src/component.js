@@ -94,18 +94,21 @@ Component.prototype.render = Fragment;
  * @param {import('./internal').VNode} vnode
  * @param {number | null} [childIndex]
  */
+//获得虚拟节点对应index的子节点的dom
 export function getDomSibling(vnode, childIndex) {
 	if (childIndex == null) {
 		// Use childIndex==null as a signal to resume the search from the vnode's sibling
+		//使用虚拟节点的父节点去查找
 		return vnode._parent
 			? getDomSibling(vnode._parent, vnode._parent._children.indexOf(vnode) + 1)
 			: null;
 	}
 
 	let sibling;
+	//遍历虚拟节点的子节点
 	for (; childIndex < vnode._children.length; childIndex++) {
 		sibling = vnode._children[childIndex];
-
+		//如果该子节点的_dom不为null,则返回
 		if (sibling != null && sibling._dom != null) {
 			// Since updateParentDomPointers keeps _dom pointer correct,
 			// we can rely on _dom to tell us if this subtree contains a
@@ -119,6 +122,7 @@ export function getDomSibling(vnode, childIndex) {
 	// Only climb up and search the parent if we aren't searching through a DOM
 	// VNode (meaning we reached the DOM parent of the original vnode that began
 	// the search)
+	//没有找到并且虚拟节点类型为函数则调用getDomSibling(vnode)此时Index为null,执行此函数第一行代码      其它则返回null
 	return typeof vnode.type === 'function' ? getDomSibling(vnode) : null;
 }
 
@@ -133,6 +137,7 @@ function renderComponent(component) {
 
 	if (parentDom) {
 		let commitQueue = [];
+		//比对更新
 		let newDom = diff(
 			parentDom,
 			vnode,
@@ -145,7 +150,7 @@ function renderComponent(component) {
 		);
 		//渲染完成时执行did生命周期和setState回调
 		commitRoot(commitQueue, vnode);
-
+		//如果newDom与oldDom不一致,则调用updateParentDomPointers
 		if (newDom != oldDom) {
 			updateParentDomPointers(vnode);
 		}
@@ -155,17 +160,21 @@ function renderComponent(component) {
 /**
  * @param {import('./internal').VNode} vnode
  */
+//递归更新虚拟节点是函数或类组件的父节点的_dom与_component.base
 function updateParentDomPointers(vnode) {
+	//取_parent如果不为空并且_component不为空
 	if ((vnode = vnode._parent) != null && vnode._component != null) {
 		vnode._dom = vnode._component.base = null;
+		//遍历此节点的子节点
 		for (let i = 0; i < vnode._children.length; i++) {
 			let child = vnode._children[i];
+			//如果此节点的子节点_dom为真,然后设置给此节点的_dom与_component.base
 			if (child != null && child._dom != null) {
 				vnode._dom = vnode._component.base = child._dom;
 				break;
 			}
 		}
-
+		//递归设置
 		return updateParentDomPointers(vnode);
 	}
 }

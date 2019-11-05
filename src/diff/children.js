@@ -48,9 +48,10 @@ export function diffChildren(
 	// for this purpose, because `null` is a valid value for `oldDom` which can mean to skip to this logic
 	// (e.g. if mounting a new tree in which the old DOM should be ignored (usually for Fragments).
 	if (oldDom == EMPTY_OBJ) {
-		//如果有excessDomChildren
+		//如果有excessDomChildren,则取第一个
 		if (excessDomChildren != null) {
 			oldDom = excessDomChildren[0];
+		//如果	oldChildrenLength
 		} else if (oldChildrenLength) {
 			oldDom = getDomSibling(oldParentVNode, 0);
 		} else {
