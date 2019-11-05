@@ -502,7 +502,7 @@ new webpack.DefinePlugin({
 When enabled, warnings are logged to the console when undefined components or string refs
 are detected.
 
-### Developer Tools
+### Developer Tools (v8 or earlier)
 
 If you only want to include devtool integration, without runtime error checking, you can
 replace `preact/debug` in the above example with `preact/devtools`. This option doesn't
