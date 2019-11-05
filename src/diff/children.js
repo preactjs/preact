@@ -23,6 +23,7 @@ import { getDomSibling } from '../component';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
  */
+//对比子节点
 export function diffChildren(
 	parentDom,
 	newParentVNode,
@@ -63,29 +64,29 @@ export function diffChildren(
 	newParentVNode._children = toChildArray(
 		newParentVNode._children,
 		childVNode => {
-			if (childVNode != null) {
-				//设置父虚拟节点
+		if (childVNode != null) {
+			//设置父虚拟节点
 			childVNode._parent = newParentVNode;
 			//处理深度
-				childVNode._depth = newParentVNode._depth + 1;
+			childVNode._depth = newParentVNode._depth + 1;
 
 			// Check if we find a corresponding element in oldChildren.
 			// If found, delete the array item by setting to `undefined`.
 			// We use `undefined`, as `null` is reserved for empty placeholders
 			// (holes).
 			oldVNode = oldChildren[i];
-			//如果老节点为null或者 新老子节点的key和type相同 则设置老的节点为undefined 以便后面不执行unmount
-				if (
-					oldVNode === null ||
-					(oldVNode &&
-						childVNode.key == oldVNode.key &&
-						childVNode.type === oldVNode.type)
-				) {
-					oldChildren[i] = undefined;
-				} else {
-					// Either oldVNode === undefined or oldChildrenLength > 0,
-					// so after this loop oldVNode == null or oldVNode is a valid value.
-					//在老的子节点中循环 以便找到新老子节点向对应的，有相对应的就会复用这个节点而不会重新实例化一个新的节点
+				//如果老节点为null或者 新老子节点的key和type相同 则设置老的节点为undefined 以便后面不执行unmount
+			if (
+				oldVNode === null ||
+				(oldVNode &&
+					childVNode.key == oldVNode.key &&
+					childVNode.type === oldVNode.type)
+			) {
+				oldChildren[i] = undefined;
+			} else {
+				// Either oldVNode === undefined or oldChildrenLength > 0,
+				// so after this loop oldVNode == null or oldVNode is a valid value.
+				//在老的子节点中循环 以便找到新老子节点向对应的，有相对应的就会复用这个节点而不会重新实例化一个新的节点
 				for (j=0; j<oldChildrenLength; j++) {
 					oldVNode = oldChildren[j];
 					// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
@@ -106,7 +107,7 @@ export function diffChildren(
 				oldVNode = oldVNode || EMPTY_OBJ;
 
 				// Morph the old element into the new one, but don't append it to the dom yet
-				//对比子节点
+				//对比节点
 				newDom = diff(
 					parentDom,
 					childVNode,
@@ -149,7 +150,7 @@ export function diffChildren(
 						// NOTE: excessDomChildren==oldVNode above:
 						// This is a compression of excessDomChildren==null && oldVNode==null!
 						// The values only have the same type when `null`.
-
+						//如果没有oldDom或者oldDom不等于parentDom,则将newDom追加到parentDom中的后面
 						outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
 							parentDom.appendChild(newDom);
 						} else {
@@ -163,6 +164,7 @@ export function diffChildren(
 									break outer;
 								}
 							}
+							//添加到oldDom前面
 							parentDom.insertBefore(newDom, oldDom);
 						}
 
