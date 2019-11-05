@@ -2,7 +2,6 @@ import { setupRerender } from 'preact/test-utils';
 import React, {
 	createElement,
 	render,
-	Component,
 	Suspense,
 	SuspenseList
 } from 'preact/compat';
