@@ -1,5 +1,5 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
-import { Component, enqueueRender } from '../component';
+import { Component } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren, toChildArray } from './children';
 import { diffProps } from './props';
@@ -22,19 +22,30 @@ import options from '../options';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} [isHydrating] Whether or not we are in hydration
  */
-export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, commitQueue, oldDom, isHydrating) {
-	let tmp, newType = newVNode.type;
+export function diff(
+	parentDom,
+	newVNode,
+	oldVNode,
+	context,
+	isSvg,
+	excessDomChildren,
+	commitQueue,
+	oldDom,
+	isHydrating
+) {
+	let tmp,
+		newType = newVNode.type;
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
 	//非虚拟节点直接返回
 	if (newVNode.constructor !== undefined) return null;
 	//diff钩子
-	if (tmp = options._diff) tmp(newVNode);
+	if ((tmp = options._diff)) tmp(newVNode);
 
 	try {
 		//如果是类组件或者函数组件
-		outer: if (typeof newType==='function') {
+		outer: if (typeof newType === 'function') {
 			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
 			let newProps = newVNode.props;
 
@@ -45,20 +56,22 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			let provider = tmp && context[tmp._id];
 			//有tmp时，提供provider时为provider的value，不然为createContext的defaultValue
 			//没有是为上层的context
-			let cctx = tmp ? (provider ? provider.props.value : tmp._defaultValue) : context;
+			let cctx = tmp
+				? provider
+					? provider.props.value
+					: tmp._defaultValue
+				: context;
 			// Get component and set it to `c`
 			//如果已经存在实例化的组件
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
 				clearProcessingException = c._processingException = c._pendingError;
-			}
-			else {
+			} else {
 				// Instantiate the new component
 				if ('prototype' in newType && newType.prototype.render) {
 					//类组件的话  去实例化
 					newVNode._component = c = new newType(newProps, cctx); // eslint-disable-line new-cap
-				}
-				else {
+				} else {
 					//函数组件的话实例化 Component
 					newVNode._component = c = new Component(newProps, cctx);
 					c.constructor = newType;
@@ -81,13 +94,20 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 
 			// Invoke getDerivedStateFromProps
 			//如果nextState为假则赋值state
-			if (c._nextState==null) {
+			if (c._nextState == null) {
 				c._nextState = c.state;
 			}
 			//有getDerivedStateFromProps执行此生命周期并扩展到_nextState
 			//如果nextState和state相同则拷贝nextState到nextState
-			if (newType.getDerivedStateFromProps!=null) {
-				assign(c._nextState==c.state ? (c._nextState = assign({}, c._nextState)) : c._nextState, newType.getDerivedStateFromProps(newProps, c._nextState));
+			if (newType.getDerivedStateFromProps != null) {
+				if (c._nextState == c.state) {
+					c._nextState = assign({}, c._nextState);
+				}
+
+				assign(
+					c._nextState,
+					newType.getDerivedStateFromProps(newProps, c._nextState)
+				);
 			}
 
 			oldProps = c.props;
@@ -97,21 +117,31 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			//如果是新创建的组件
 			if (isNew) {
                 //没有设置getDerivedStateFromProps但设置了componentWillMount则执行componentWillMount生命周期
-                if (newType.getDerivedStateFromProps==null && c.componentWillMount!=null) {
+                if (
+					newType.getDerivedStateFromProps == null &&
+					c.componentWillMount != null
+				) {
 					c.componentWillMount();
 				}
 				//如果有componentDidMount则放到_renderCallbacks
-				if (c.componentDidMount!=null) {
+				if (c.componentDidMount != null) {
 					c._renderCallbacks.push(c.componentDidMount);
 				}
-			}
-			else {
+			} else {
 				//没有设置getDerivedStateFromProps并且不是forceUpdate并且设置了componentWillReceiveProps则执行此生命周期
-				if (newType.getDerivedStateFromProps==null && c._force==null && c.componentWillReceiveProps!=null) {
+				if (
+					newType.getDerivedStateFromProps == null &&
+					c._force == null &&
+					c.componentWillReceiveProps != null
+				) {
 					c.componentWillReceiveProps(newProps, cctx);
 				}
 				//如果不是forceUpdate并且shouldComponentUpdate则执行次生命周期返回false的情况下
-				if (!c._force && c.shouldComponentUpdate!=null && c.shouldComponentUpdate(newProps, c._nextState, cctx)===false) {
+				if (
+					!c._force &&
+					c.shouldComponentUpdate != null &&
+					c.shouldComponentUpdate(newProps, c._nextState, cctx) === false
+				) {
 					c.props = newProps;
 					c.state = c._nextState;
 					//标记已渲染
@@ -120,19 +150,23 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 					//dom还是老虚拟节点的dom
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
-					//循环遍历子虚拟节点，设置_parent为newVNode
+					if (c._renderCallbacks.length) {
+						commitQueue.push(c);
+					}
 					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
-						if (newVNode._children[tmp]) newVNode._children[tmp]._parent = newVNode;
+						if (newVNode._children[tmp]) {
+							newVNode._children[tmp]._parent = newVNode;
+						}
 					}
 					//跳出outer
 					break outer;
 				}
 				//如果设置了componentWillUpdate则执行此生命周期
-				if (c.componentWillUpdate!=null) {
+				if (c.componentWillUpdate != null) {
 					c.componentWillUpdate(newProps, c._nextState, cctx);
 				}
 				//如果componentDidUpdate不为空则放到_renderCallbacks中
-				if (c.componentDidUpdate!=null) {
+				if (c.componentDidUpdate != null) {
 					c._renderCallbacks.push(() => {
 						c.componentDidUpdate(oldProps, oldState, snapshot);
 					});
@@ -143,7 +177,7 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			c.props = newProps;
 			c.state = c._nextState;
 			//render钩子
-			if (tmp = options._render) tmp(newVNode);
+			if ((tmp = options._render)) tmp(newVNode);
 			//标记已渲染
 			c._dirty = false;
 			c._vnode = newVNode;
@@ -151,19 +185,32 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			//执行render
 			tmp = c.render(c.props, c.state, c.context);
 			//如果render返回结果中最外层是Fragment组件
-			let isTopLevelFragment = tmp != null && tmp.type == Fragment && tmp.key == null;
+			let isTopLevelFragment =
+				tmp != null && tmp.type == Fragment && tmp.key == null;
 			//片段组件则使用props.children，其它使用render返回的
-			newVNode._children = toChildArray(isTopLevelFragment ? tmp.props.children : tmp);
+			newVNode._children = toChildArray(
+				isTopLevelFragment ? tmp.props.children : tmp
+			);
 			//如果是Provider组件，然后调用getChildContext
-			if (c.getChildContext!=null) {
+			if (c.getChildContext != null) {
 				context = assign(assign({}, context), c.getChildContext());
 			}
 			//执行getSnapshotBeforeUpdate生命周期，他是静态函数
-			if (!isNew && c.getSnapshotBeforeUpdate!=null) {
+			if (!isNew && c.getSnapshotBeforeUpdate != null) {
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 			//对比子节点
-			diffChildren(parentDom, newVNode, oldVNode, context, isSvg, excessDomChildren, commitQueue, oldDom, isHydrating);
+			diffChildren(
+				parentDom,
+				newVNode,
+				oldVNode,
+				context,
+				isSvg,
+				excessDomChildren,
+				commitQueue,
+				oldDom,
+				isHydrating
+			);
 
 			c.base = newVNode._dom;
 			//有renderCallback则放到commitQueue中，所有渲染完成一起执行
@@ -176,14 +223,21 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 			}
 			//设置强制更新为false
 			c._force = null;
-		}
-		else {
-			newVNode._dom = diffElementNodes(oldVNode._dom, newVNode, oldVNode, context, isSvg, excessDomChildren, commitQueue, isHydrating);
+		} else {
+			newVNode._dom = diffElementNodes(
+				oldVNode._dom,
+				newVNode,
+				oldVNode,
+				context,
+				isSvg,
+				excessDomChildren,
+				commitQueue,
+				isHydrating
+			);
 		}
 		//diffed钩子
-		if (tmp = options.diffed) tmp(newVNode);
-	}
-	catch (e) {
+		if ((tmp = options.diffed)) tmp(newVNode);
+	} catch (e) {
 		//触发错误
 		options._catchError(e, newVNode, oldVNode);
 	}
@@ -191,21 +245,27 @@ export function diff(parentDom, newVNode, oldVNode, context, isSvg, excessDomChi
 	return newVNode._dom;
 }
 //执行did生命周期和setState的回调
+/**
+ * @param {Array<import('../internal').Component>} commitQueue List of components
+ * which have callbacks to invoke in commitRoot
+ * @param {import('../internal').VNode} root
+ */
 export function commitRoot(commitQueue, root) {
+	if (options._commit) options._commit(root, commitQueue);
+
 	commitQueue.some(c => {
 		try {
 			//拷贝一份回调，防止执行时在加入回调形成死循环
 			commitQueue = c._renderCallbacks;
 			c._renderCallbacks = [];
 			//循环执行
-			commitQueue.some(cb => { cb.call(c); });
-		}
-		catch (e) {
+			commitQueue.some(cb => {
+				cb.call(c);
+			});
+		} catch (e) {
 			options._catchError(e, c._vnode);
 		}
 	});
-
-	if (options._commit) options._commit(root);
 }
 
 /**
@@ -222,20 +282,34 @@ export function commitRoot(commitQueue, root) {
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @returns {import('../internal').PreactElement}
  */
-function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChildren, commitQueue, isHydrating) {
+function diffElementNodes(
+	dom,
+	newVNode,
+	oldVNode,
+	context,
+	isSvg,
+	excessDomChildren,
+	commitQueue,
+	isHydrating
+) {
 	let i;
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	//判断是否是svg
-	isSvg = newVNode.type==='svg' || isSvg;
+	isSvg = newVNode.type === 'svg' || isSvg;
 	//判断能否复用excessDomChildren中的dom
-	if (dom==null && excessDomChildren!=null) {
-		for (i=0; i<excessDomChildren.length; i++) {
+	if (dom == null && excessDomChildren != null) {
+		for (i = 0; i < excessDomChildren.length; i++) {
 			const child = excessDomChildren[i];
 			//如果虚拟节点类型为null而存在节点类型是text或者虚拟节点类型和存在节点类型相同，则复用
-			if (child!=null && (newVNode.type===null ? child.nodeType===3 : child.localName===newVNode.type)) {
+			if (
+				child != null &&
+				(newVNode.type === null
+					? child.nodeType === 3
+					: child.localName === newVNode.type)
+			) {
 				dom = child;
 				//设置对应的存在节点为空
 				excessDomChildren[i] = null;
@@ -246,25 +320,28 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 	//以上excessDomChildren中的元素和newNode是同一级的
 	//下面excessDomChildren中的元素是newNode的下级
 	//如果dom为空
-	if (dom==null) {
+	if (dom == null) {
 		//text节点
-		if (newVNode.type===null) {
+		if (newVNode.type === null) {
 			return document.createTextNode(newProps);
 		}
 		//创建元素
-		dom = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type) : document.createElement(newVNode.type);
+		dom = isSvg
+			? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type)
+			: document.createElement(newVNode.type);
 		// we created a new parent, so none of the previously attached children can be reused:
 		//已经新创建了dom，excessDomChildren为空
 		excessDomChildren = null;
 	}
 	//如果是text节点
-	if (newVNode.type===null) {
-		if (excessDomChildren!=null) excessDomChildren[excessDomChildren.indexOf(dom)] = null;
+	if (newVNode.type === null) {
+		if (excessDomChildren != null) {
+			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
+		}
 		if (oldProps !== newProps) {
 			dom.data = newProps;
 		}
-	}
-	//新老节点不相等
+	} //新老节点不相等
 	else if (newVNode!==oldVNode) {
 		if (excessDomChildren!=null) {
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
@@ -280,15 +357,15 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 		if (!isHydrating) {
 			if (oldProps === EMPTY_OBJ) {
 				oldProps = {};
-				for (let i=0; i<dom.attributes.length; i++) {
+				for (let i = 0; i < dom.attributes.length; i++) {
 					oldProps[dom.attributes[i].name] = dom.attributes[i].value;
 				}
 			}
 
 			if (newHtml || oldHtml) {
 				// Avoid re-applying the same '__html' if it did not changed between re-render
-				if (!newHtml || !oldHtml || newHtml.__html!=oldHtml.__html) {
-					dom.innerHTML = newHtml && newHtml.__html || '';
+				if (!newHtml || !oldHtml || newHtml.__html != oldHtml.__html) {
+					dom.innerHTML = (newHtml && newHtml.__html) || '';
 				}
 			}
 		}
@@ -299,13 +376,35 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (!newHtml) {
-			diffChildren(dom, newVNode, oldVNode, context, newVNode.type==='foreignObject' ? false : isSvg, excessDomChildren, commitQueue, EMPTY_OBJ, isHydrating);
+			diffChildren(
+				dom,
+				newVNode,
+				oldVNode,
+				context,
+				newVNode.type === 'foreignObject' ? false : isSvg,
+				excessDomChildren,
+				commitQueue,
+				EMPTY_OBJ,
+				isHydrating
+			);
 		}
 
 		// (as above, don't diff props during hydration)
 		if (!isHydrating) {
-			if (('value' in newProps) && newProps.value!==undefined && newProps.value !== dom.value) dom.value = newProps.value==null ? '' : newProps.value;
-			if (('checked' in newProps) && newProps.checked!==undefined && newProps.checked !== dom.checked) dom.checked = newProps.checked;
+			if (
+				'value' in newProps &&
+				newProps.value !== undefined &&
+				newProps.value !== dom.value
+			) {
+				dom.value = newProps.value == null ? '' : newProps.value;
+			}
+			if (
+				'checked' in newProps &&
+				newProps.checked !== undefined &&
+				newProps.checked !== dom.checked
+			) {
+				dom.checked = newProps.checked;
+			}
 		}
 	}
 
@@ -322,11 +421,10 @@ function diffElementNodes(dom, newVNode, oldVNode, context, isSvg, excessDomChil
 export function applyRef(ref, value, vnode) {
 	try {
 		//如果是函数 执行函数并把ref传进去
-		if (typeof ref=='function') ref(value);
+		if (typeof ref == 'function') ref(value);
 		//其它赋值给current属性
 		else ref.current = value;
-	}
-	//捕获错误
+	} //捕获错误
 	catch (e) {
 		options._catchError(e, vnode);
 	}
@@ -346,7 +444,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	//unmount钩子
 	if (options.unmount) options.unmount(vnode);
 	//如果有ref则将ref设置为null
-	if (r = vnode.ref) {
+	if ((r = vnode.ref)) {
 		applyRef(r, null, parentVNode);
 	}
 
@@ -354,18 +452,17 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	//如果虚拟节点不是函数并且skipRemove为false 则赋值到dom方便后面移除节点
 	//skipRemove的作用是在后面循环子节点unmount时不会执行removeNode
 	if (!skipRemove && typeof vnode.type !== 'function') {
-		skipRemove = (dom = vnode._dom)!=null;
+		skipRemove = (dom = vnode._dom) != null;
 	}
 	//dom设置为空
 	vnode._dom = vnode._lastDomChild = null;
 
-	if ((r = vnode._component)!=null) {
+	if ((r = vnode._component) != null) {
 		//执行组件生命周期
 		if (r.componentWillUnmount) {
 			try {
 				r.componentWillUnmount();
-			}
-			catch (e) {
+			} catch (e) {
 				options._catchError(e, parentVNode);
 			}
 		}
@@ -373,13 +470,13 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		r.base = r._parentDom = null;
 	}
 	//循环卸载子节点
-	if (r = vnode._children) {
+	if ((r = vnode._children)) {
 		for (let i = 0; i < r.length; i++) {
 			if (r[i]) unmount(r[i], parentVNode, skipRemove);
 		}
 	}
 	//dom不为空则移除dom
-	if (dom!=null) removeNode(dom);
+	if (dom != null) removeNode(dom);
 }
 
 /** The `.render()` method for a PFC backing instance. */
@@ -388,46 +485,3 @@ function doRender(props, state, context) {
 	//就是执行这个函数组件
 	return this.constructor(props, context);
 }
-
-/**
- * Find the closest error boundary to a thrown error and call it
- * @param {object} error The thrown value
- * @param {import('../internal').VNode} vnode The vnode that threw
- * the error that was caught (except for unmounting when this parameter
- * is the highest parent that was being unmounted)
- * @param {import('../internal').VNode} oldVNode The oldVNode of the vnode
- * that threw, if this VNode threw while diffing
- */
-//处理组件error
-(options)._catchError = function (error, vnode, oldVNode) {
-	/** @type {import('../internal').Component} */
-	let component;
-	//不断向上循环父组件
-	for (; vnode = vnode._parent;) {
-		//有父组件并且该父组件不是异常
-		if ((component = vnode._component) && !component._processingException) {
-			try {
-				//如果组件有静态getDerivedStateFromError，将执行结果传给setState
-				if (component.constructor && component.constructor.getDerivedStateFromError!=null) {
-					component.setState(component.constructor.getDerivedStateFromError(error));
-				}
-				//如果设置了componentDidCatch，则执行componentDidCatch
-				else if (component.componentDidCatch!=null) {
-					component.componentDidCatch(error);
-				}
-				//没有以上设置再继续循环他的父组件
-				else {
-					continue;
-				}
-				//再去渲染error的组件 如果error组件render后还是有error 则会执行下面throw error
-				//_pendingError标记此组件有错误，再次渲染会赋值给_processingException，这样如果还出错会跳过这个组件，在向上层组件循环
-				return enqueueRender(component._pendingError = component);
-			}
-			catch (e) {
-				error = e;
-			}
-		}
-	}
-	//如果没有getDerivedStateFromError或componentDidCatch，则抛出error
-	throw error;
-};

@@ -27,18 +27,24 @@ export function Component(props, context) {
 //设置状态
 Component.prototype.setState = function(update, callback) {
 	// only clone state when copying to nextState the first time.
-	//如果nextState等于state，则为nextState，其它扩展this.state到this._nextState
-	let s = (this._nextState!==this.state && this._nextState) || (this._nextState = assign({}, this.state));
+	let s;
+	if (this._nextState !== this.state) {
+		s = this._nextState;
+	} else {
+		s = this._nextState = assign({}, this.state);
+	}
 
-	// if update() mutates state in-place, skip the copy:
-	//如果update不是函数则将update扩展到nextState，是函数执行函数然后扩展
-	if (typeof update!=='function' || (update = update(s, this.props))) {
+	if (typeof update == 'function') {
+		update = update(s, this.props);
+	}
+
+	if (update) {
 		assign(s, update);
 	}
 
 	// Skip update if updater function returned null
 	//如果update为null则不更新
-	if (update==null) return;
+	if (update == null) return;
 
 	if (this._vnode) {
 		//标记不是强制更新
@@ -126,7 +132,16 @@ function renderComponent(component) {
 
 	if (parentDom) {
 		let commitQueue = [];
-		let newDom = diff(parentDom, vnode, assign({}, vnode), component._context, parentDom.ownerSVGElement!==undefined, null, commitQueue, oldDom == null ? getDomSibling(vnode) : oldDom);
+		let newDom = diff(
+			parentDom,
+			vnode,
+			assign({}, vnode),
+			component._context,
+			parentDom.ownerSVGElement !== undefined,
+			null,
+			commitQueue,
+			oldDom == null ? getDomSibling(vnode) : oldDom
+		);
 		//渲染完成时执行did生命周期和setState回调
 		commitRoot(commitQueue, vnode);
 
@@ -163,11 +178,15 @@ let q = [];
 
 /**
  * Asynchronously schedule a callback
- * @type {(cb) => void}
+ * @type {(cb: () => void) => void}
  */
 //延迟   如 defer(callback)，callback会用Promise then或者 setTimeout执行
-//Promise.prototype.then.bind(Promise.resolve()) 等同于 Promise.resolve().then
-const defer = typeof Promise=='function' ? Promise.prototype.then.bind(Promise.resolve()) : setTimeout;
+/* istanbul ignore next */
+// Note the following line isn't tree-shaken by rollup cuz of rollup/rollup#2566
+const defer =
+	typeof Promise == 'function'
+		? Promise.prototype.then.bind(Promise.resolve())
+		: setTimeout;
 
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
@@ -178,7 +197,7 @@ const defer = typeof Promise=='function' ? Promise.prototype.then.bind(Promise.r
  * * [Callbacks synchronous and asynchronous](https://blog.ometer.com/2011/07/24/callbacks-synchronous-and-asynchronous/)
  */
 //延迟执行的钩子
-let prevDebounce = options.debounceRendering;
+let prevDebounce;
 
 /**
  * Enqueue a rerender of a component
@@ -189,11 +208,13 @@ export function enqueueRender(c) {
 	//如果_dirty为false则设为true
 	//然后把组件加入队列中
 	//如果队列长度为1或者重新设置过debounceRendering钩子
-	if ((!c._dirty && (c._dirty = true) && q.push(c) === 1) ||
-	    (prevDebounce !== options.debounceRendering)) {
+	if (
+		(!c._dirty && (c._dirty = true) && q.push(c) === 1) ||
+		prevDebounce !== options.debounceRendering
+	) {
 		prevDebounce = options.debounceRendering;
 		//延迟执行process
-		(options.debounceRendering || defer)(process);
+		(prevDebounce || defer)(process);
 	}
 }
 
@@ -203,7 +224,7 @@ function process() {
 	let p;
 	//按深度排序 最外层的最先执行
 	q.sort((a, b) => b._vnode._depth - a._vnode._depth);
-	while ((p=q.pop())) {
+	while ((p = q.pop())) {
 		// forceUpdate's callback argument is reused here to indicate a non-forced update.
 		//如果组件需要渲染则渲染它
 		if (p._dirty) renderComponent(p);

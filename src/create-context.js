@@ -2,10 +2,6 @@ import { enqueueRender } from './component';
 
 export let i = 0;
 
-/**
- *
- * @param {any} defaultValue
- */
 //defaultValue 只有上层没有Provider组件才使用这个，不是Provider没有设置value
 export function createContext(defaultValue) {
 	const ctx = {};
@@ -35,16 +31,13 @@ export function createContext(defaultValue) {
 					if (props.value !== _props.value) {
                         //执行渲染 context消费的组件
                         subs.some(c => {
-							// Check if still mounted
-							if (c._parentDom) {
-								c.context = _props.value;
-								enqueueRender(c);
-							}
+							c.context = _props.value;
+							enqueueRender(c);
 						});
 					}
 				};
 				//添加的更新列表中，当value改变时执行
-				this.sub = (c) => {
+				this.sub = c => {
 					subs.push(c);
 					let old = c.componentWillUnmount;
 					//当组件卸载后从列表中删除，然后执行老的componentWillUnmount
