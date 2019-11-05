@@ -5,8 +5,7 @@ import {
 	Component,
 	createContext,
 	Fragment
-} from '../../src/index';
-import { i as ctxId } from '../../src/create-context'; // TODO: Rewrite tests to remove this internal dependency
+} from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx createElement */
@@ -28,6 +27,8 @@ describe('createContext', () => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { a: 'a' };
 
+		let receivedContext;
+
 		class Inner extends Component {
 			render(props) {
 				return <div>{props.a}</div>;
@@ -39,18 +40,20 @@ describe('createContext', () => {
 		render(
 			<Provider value={CONTEXT}>
 				<div>
-					<Consumer>{data => <Inner {...data} />}</Consumer>
+					<Consumer>
+						{data => {
+							receivedContext = data;
+							return <Inner {...data} />;
+						}}
+					</Consumer>
 				</div>
 			</Provider>,
 			scratch
 		);
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWithMatch(
-			CONTEXT,
-			{},
-			{ ['__cC' + (ctxId - 1)]: {} }
-		);
+		expect(Inner.prototype.render).to.have.been.calledWithMatch(CONTEXT);
+		expect(receivedContext).to.equal(CONTEXT);
 		expect(scratch.innerHTML).to.equal('<div><div>a</div></div>');
 	});
 
@@ -58,6 +61,8 @@ describe('createContext', () => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { a: 'a' };
 		const CHILD_CONTEXT = { b: 'b' };
+
+		let parentContext, childContext;
 
 		class Inner extends Component {
 			render(props) {
@@ -74,25 +79,32 @@ describe('createContext', () => {
 		render(
 			<Provider value={CONTEXT}>
 				<Consumer>
-					{data => (
-						<Provider value={CHILD_CONTEXT}>
-							<Consumer>
-								{childData => <Inner {...data} {...childData} />}
-							</Consumer>
-						</Provider>
-					)}
+					{data => {
+						parentContext = data;
+						return (
+							<Provider value={CHILD_CONTEXT}>
+								<Consumer>
+									{childData => {
+										childContext = childData;
+										return <Inner {...data} {...childData} />;
+									}}
+								</Consumer>
+							</Provider>
+						);
+					}}
 				</Consumer>
 			</Provider>,
 			scratch
 		);
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWithMatch(
-			{ ...CONTEXT, ...CHILD_CONTEXT },
-			{},
-			{ ['__cC' + (ctxId - 1)]: {} }
-		);
+		expect(Inner.prototype.render).to.have.been.calledWithMatch({
+			...CONTEXT,
+			...CHILD_CONTEXT
+		});
 		expect(Inner.prototype.render).to.be.calledOnce;
+		expect(parentContext).to.equal(CONTEXT);
+		expect(childContext).to.equal(CHILD_CONTEXT);
 		expect(scratch.innerHTML).to.equal('<div>a - b</div>');
 		setTimeout(() => {
 			expect(Inner.prototype.render).to.be.calledOnce;
@@ -108,6 +120,9 @@ describe('createContext', () => {
 		const { Provider: DataProvider, Consumer: DataConsumer } = createContext();
 		const THEME_CONTEXT = { theme: 'black' };
 		const DATA_CONTEXT = { global: 'a' };
+
+		let receivedTheme;
+		let receivedData;
 
 		class Inner extends Component {
 			render(props) {
@@ -125,11 +140,17 @@ describe('createContext', () => {
 			<ThemeProvider value={THEME_CONTEXT.theme}>
 				<DataProvider value={DATA_CONTEXT}>
 					<ThemeConsumer>
-						{theme => (
-							<DataConsumer>
-								{data => <Inner theme={theme} {...data} />}
-							</DataConsumer>
-						)}
+						{theme => {
+							receivedTheme = theme;
+							return (
+								<DataConsumer>
+									{data => {
+										receivedData = data;
+										return <Inner theme={theme} {...data} />;
+									}}
+								</DataConsumer>
+							);
+						}}
 					</ThemeConsumer>
 				</DataProvider>
 			</ThemeProvider>,
@@ -137,17 +158,21 @@ describe('createContext', () => {
 		);
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWithMatch(
-			{ ...THEME_CONTEXT, ...DATA_CONTEXT },
-			{},
-			{ ['__cC' + (ctxId - 1)]: {} }
-		);
+		expect(Inner.prototype.render).to.have.been.calledWithMatch({
+			...THEME_CONTEXT,
+			...DATA_CONTEXT
+		});
+		expect(receivedTheme).to.equal(THEME_CONTEXT.theme);
+		expect(receivedData).to.equal(DATA_CONTEXT);
 		expect(scratch.innerHTML).to.equal('<div>black - a</div>');
 	});
 
 	it('should preserve provider context through nesting consumers', () => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { a: 'a' };
+
+		let receivedData;
+		let receivedChildData;
 
 		class Inner extends Component {
 			render(props) {
@@ -160,22 +185,26 @@ describe('createContext', () => {
 		render(
 			<Provider value={CONTEXT}>
 				<Consumer>
-					{data => (
-						<Consumer>
-							{childData => <Inner {...data} {...childData} />}
-						</Consumer>
-					)}
+					{data => {
+						receivedData = data;
+						return (
+							<Consumer>
+								{childData => {
+									receivedChildData = childData;
+									return <Inner {...data} {...childData} />;
+								}}
+							</Consumer>
+						);
+					}}
 				</Consumer>
 			</Provider>,
 			scratch
 		);
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWithMatch(
-			{ ...CONTEXT },
-			{},
-			{ ['__cC' + (ctxId - 1)]: {} }
-		);
+		expect(Inner.prototype.render).to.have.been.calledWithMatch({ ...CONTEXT });
+		expect(receivedData).to.equal(CONTEXT);
+		expect(receivedChildData).to.equal(CONTEXT);
 		expect(scratch.innerHTML).to.equal('<div>a</div>');
 	});
 
@@ -232,6 +261,8 @@ describe('createContext', () => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { a: 'a' };
 
+		let receivedContext;
+
 		class Consumed extends Component {
 			render(props) {
 				return <strong>{props.a}</strong>;
@@ -264,7 +295,12 @@ describe('createContext', () => {
 			render() {
 				return (
 					<div>
-						<Consumer>{data => <Consumed {...data} />}</Consumer>
+						<Consumer>
+							{data => {
+								receivedContext = data;
+								return <Consumed {...data} />;
+							}}
+						</Consumer>
 					</div>
 				);
 			}
@@ -278,11 +314,10 @@ describe('createContext', () => {
 		);
 
 		// initial render does not invoke anything but render():
-		expect(Consumed.prototype.render).to.have.been.calledWithMatch(
-			{ ...CONTEXT },
-			{},
-			{ ['__cC' + (ctxId - 1)]: {} }
-		);
+		expect(Consumed.prototype.render).to.have.been.calledWithMatch({
+			...CONTEXT
+		});
+		expect(receivedContext).to.equal(CONTEXT);
 		expect(scratch.innerHTML).to.equal(
 			'<div><div><strong>a</strong></div></div>'
 		);
@@ -372,6 +407,9 @@ describe('createContext', () => {
 		const CONTEXT = { theme: 'a', global: 1 };
 		const NESTED_CONTEXT = { theme: 'b', global: 1 };
 
+		let receivedData;
+		let receivedNestedData;
+
 		class Inner extends Component {
 			render(props) {
 				return (
@@ -397,24 +435,30 @@ describe('createContext', () => {
 		render(
 			<Provider value={CONTEXT}>
 				<Provider value={NESTED_CONTEXT}>
-					<Consumer>{data => <Nested {...data} />}</Consumer>
+					<Consumer>
+						{data => {
+							receivedNestedData = data;
+							return <Nested {...data} />;
+						}}
+					</Consumer>
 				</Provider>
-				<Consumer>{data => <Inner {...data} />}</Consumer>
+				<Consumer>
+					{data => {
+						receivedData = data;
+						return <Inner {...data} />;
+					}}
+				</Consumer>
 			</Provider>,
 			scratch
 		);
 
 		// initial render does not invoke anything but render():
-		expect(Nested.prototype.render).to.have.been.calledWithMatch(
-			{ ...NESTED_CONTEXT },
-			{},
-			{ ['__cC' + (ctxId - 1)]: {} }
-		);
-		expect(Inner.prototype.render).to.have.been.calledWithMatch(
-			{ ...CONTEXT },
-			{},
-			{ ['__cC' + (ctxId - 1)]: {} }
-		);
+		expect(Nested.prototype.render).to.have.been.calledWithMatch({
+			...NESTED_CONTEXT
+		});
+		expect(Inner.prototype.render).to.have.been.calledWithMatch({ ...CONTEXT });
+		expect(receivedData).to.equal(CONTEXT);
+		expect(receivedNestedData).to.equal(NESTED_CONTEXT);
 
 		expect(scratch.innerHTML).to.equal('<div>b - 1</div><div>a - 1</div>');
 	});
@@ -461,9 +505,7 @@ describe('createContext', () => {
 
 		// Rendered twice, should called just one 'Consumer' render
 		expect(Inner.prototype.render).to.have.been.calledOnce.and.calledWithMatch(
-			CONTEXT,
-			{},
-			{ ['__cC' + (ctxId - 1)]: {} }
+			CONTEXT
 		);
 		expect(scratch.innerHTML).to.equal('<div>1</div>');
 
@@ -480,9 +522,7 @@ describe('createContext', () => {
 
 		// Rendered three times, should call 'Consumer' render two times
 		expect(Inner.prototype.render).to.have.been.calledTwice.and.calledWithMatch(
-			{ i: 2 },
-			{},
-			{ ['__cC' + (ctxId - 1)]: {} }
+			{ i: 2 }
 		);
 		expect(scratch.innerHTML).to.equal('<div>2</div>');
 	});
