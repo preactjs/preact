@@ -10,14 +10,6 @@ options.__suspenseDidResolve = (vnode, cb) => {
 	}
 };
 
-options.__canSuspenseResolve = (vnode, cb) => {
-	if (vnode._parent._component && vnode._parent._component.__modifySuspense) {
-		vnode._parent._component.__modifySuspense(vnode, cb);
-	} else {
-		cb();
-	}
-};
-
 // having custom inheritance instead of a class here saves a lot of bytes
 export function SuspenseList(props) {
 	this._suspenseBoundaries = [];
@@ -29,7 +21,18 @@ export function SuspenseList(props) {
 SuspenseList.prototype = new Component();
 
 // SuspenseList.prototype.__canSuspenseResolve = function(vnode, cb) {
+// 	const revealOrder = this.props.revealOrder;
+// 	if (!revealOrder) {
+// 		this.setState({
+// 			canRender: true,
+// 		});
+// 	}
+// 	if (revealOrder[0] === 'f' || revealOrder[0] === 'b') {
+// 		console.log(this.vnode);
+// 		debugger;
+// 	} else if (revealOrder[0] === 't') {
 
+// 	}
 // }
 
 SuspenseList.prototype.__modifySuspense = function(vnode, cb) {
