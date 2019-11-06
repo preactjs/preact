@@ -1,8 +1,8 @@
-import { h, render, options } from 'preact';
+import { createElement, render, options } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useDebugValue, useState } from '../../src';
+import { useDebugValue, useState } from 'preact/hooks';
 
-/** @jsx h */
+/** @jsx createElement*/
 
 describe('useDebugValue', () => {
 	/** @type {HTMLDivElement} */

@@ -9,7 +9,7 @@ import {
 import { createElement, render, Component } from 'preact';
 import { useState } from 'preact/hooks';
 import { setupRerender } from 'preact/test-utils';
-import { initDebug } from '../../src/debug';
+import { initDevTools } from '../../src/devtools';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 /** @jsx createElement */
@@ -25,7 +25,7 @@ describe('devtools options', () => {
 	let setCount;
 
 	before(() => {
-		initDebug();
+		initDevTools();
 	});
 
 	beforeEach(() => {

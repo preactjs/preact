@@ -1,4 +1,4 @@
-import { createElement, cloneElement } from '../../src/index';
+import { createElement, cloneElement } from 'preact';
 
 /** @jsx createElement */
 

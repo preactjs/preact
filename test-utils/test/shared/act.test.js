@@ -1,8 +1,9 @@
-import { options, createElement as h, render } from 'preact';
+import { options, createElement, render } from 'preact';
 import { useEffect, useReducer, useState } from 'preact/hooks';
-
+import { act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { act } from '../../src';
+
+/** @jsx createElement */
 
 // IE11 doesn't support `new Event()`
 function createEvent(name) {
@@ -13,7 +14,6 @@ function createEvent(name) {
 	return event;
 }
 
-/** @jsx h */
 describe('act', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;

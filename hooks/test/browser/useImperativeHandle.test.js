@@ -1,9 +1,9 @@
-import { createElement as h, render } from 'preact';
+import { createElement, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useImperativeHandle, useRef, useState } from '../../src';
+import { useImperativeHandle, useRef, useState } from 'preact/hooks';
 import { setupRerender } from '../../../test-utils';
 
-/** @jsx h */
+/** @jsx createElement */
 
 describe('useImperativeHandle', () => {
 	/** @type {HTMLDivElement} */

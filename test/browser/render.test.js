@@ -1,7 +1,7 @@
 /* global DISABLE_FLAKEY */
 
 import { setupRerender } from 'preact/test-utils';
-import { createElement as h, render, Component } from '../../src/index';
+import { createElement, render, Component, options } from 'preact';
 import {
 	setupScratch,
 	teardown,
@@ -13,9 +13,8 @@ import {
 	supportsDataList
 } from '../_util/helpers';
 import { clearLog, getLog, logCall } from '../_util/logCall';
-import options from '../../src/options';
 
-/** @jsx h */
+/** @jsx createElement */
 
 function getAttributes(node) {
 	let attrs = {};

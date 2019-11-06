@@ -1,5 +1,5 @@
-import {
-	createElement as h,
+import React, {
+	createElement,
 	render,
 	createRef,
 	forwardRef,
@@ -8,12 +8,12 @@ import {
 	useState,
 	useRef,
 	useImperativeHandle
-} from '../../src';
+} from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { setupRerender, act } from 'preact/test-utils';
+
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 
-/** @jsx h */
 describe('forwardRef', () => {
 	/** @type {HTMLDivElement} */
 	let scratch, rerender;

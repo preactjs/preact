@@ -1,7 +1,7 @@
-import { createElement as h, render } from '../../src/index';
+import { createElement, render } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 
-/** @jsx h */
+/** @jsx createElement */
 
 describe('Select', () => {
 	let scratch;

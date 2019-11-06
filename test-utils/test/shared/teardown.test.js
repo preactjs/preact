@@ -1,22 +1,16 @@
-const { options } = require('preact');
-const { teardown } = require('../../src');
-const { setupScratch } = require('../../../test/_util/helpers');
+import { options } from 'preact';
+import { teardown } from 'preact/test-utils';
 
 describe('teardown', () => {
-	let scratch;
-	beforeEach(() => {
-		scratch = setupScratch();
-	});
-
 	it('should restore debounce', () => {
-		teardown(scratch);
+		teardown();
 		expect(options.__test__previousDebounce).to.be.undefined;
 	});
 
 	it('should flush the queue', () => {
 		const spy = sinon.spy();
 		options.__test__drainQueue = spy;
-		teardown(scratch);
+		teardown();
 		expect(spy).to.be.calledOnce;
 	});
 });
