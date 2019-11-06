@@ -20,6 +20,7 @@
   "props": {
     "cname": 6,
     "props": {
+      "$__hooks": "__H",
       "$_depth": "__b",
       "$_dirty": "__d",
       "$_prevState": "__u",

@@ -17,6 +17,7 @@
   "props": {
     "cname": 6,
     "props": {
+      "$__hooks": "__H",
       "$_depth": "__b",
       "$_nextDom": "__d",
       "$_dirty": "__d",

@@ -6,6 +6,7 @@
   "props": {
     "cname": 6,
     "props": {
+      "$__hooks": "__H",
       "$_dirty": "__d",
       "$_nextState": "__s",
       "$_renderCallbacks": "__h",
