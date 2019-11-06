@@ -14,6 +14,26 @@ import { Fragment } from './create-element';
 export function Component(props, context) {
 	this.props = props;
 	this.context = context;
+
+	//还有以下内部属性
+	/*
+	//对应渲染的dom
+	this.base
+	//标记是forceUpdate,如果是这个渲染是不执行某些生命周期
+	this._force
+	//标记该组件是否脏,渲染时设为true,渲染后设为false,防止队列中重复渲染
+	this._dirty
+	//保存setState和did生命周期的回调
+	this._renderCallbacks
+	//保存context也就是createContext的context,与this.context的区别是this.context有可能是Provider的value
+	this._context
+	//setState后新的状态会保存在这个,渲染是会设置给state
+	this._nextState
+	//对应的虚拟节点
+	this._vnode
+	//preact.render(vnode,parentDom)中的parentDom
+	this._parentDom
+	*/
 }
 
 /**

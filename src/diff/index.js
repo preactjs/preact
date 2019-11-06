@@ -22,6 +22,7 @@ import options from '../options';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} [isHydrating] Whether or not we are in hydration
  */
+//isSvg是否是svg,svg在创建dom元素和设置dom属性时特殊处理
 //对比虚拟节点
 export function diff(
 	parentDom,

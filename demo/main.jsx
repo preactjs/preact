@@ -1,6 +1,8 @@
 import {Component, createContext, render,h} from '../src'
 
+function Root(){
+	return <div>234234</div>
+}
 
 
-
-render(<span>123</span>, document.getElementById('app'));
+render(<Root/>, document.getElementById('app'));
