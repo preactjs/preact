@@ -63,7 +63,7 @@ export function diff(
 				clearProcessingException = c._processingException = c._pendingError;
 			} else {
 				// Instantiate the new component
-				if ('prototype' in newType && newType.prototype.render) {
+				if (newType.prototype.render) {
 					newVNode._component = c = new newType(newProps, cctx); // eslint-disable-line new-cap
 				} else {
 					newVNode._component = c = new Component(newProps, cctx);
