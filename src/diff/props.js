@@ -71,7 +71,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	}
 	//如果属性名为key 或者 children
 	if (name === 'key' || name === 'children') {
-		//如果为style
+	//如果为style
 	} else if (name === 'style') {
 		const s = dom.style;
 		//value为字符串直接使用cssText设置

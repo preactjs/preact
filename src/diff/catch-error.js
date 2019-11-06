@@ -7,6 +7,7 @@ import { enqueueRender } from '../component';
  * the error that was caught (except for unmounting when this parameter
  * is the highest parent that was being unmounted)
  */
+//处理虚拟节点错误
 export function _catchError(error, vnode) {
 	/** @type {import('../internal').Component} */
 	let component;
@@ -31,8 +32,9 @@ export function _catchError(error, vnode) {
 				} else {
 					continue;
 				}
-				//再去渲染处理error的组件,如果render后还是有error 则会执行最下面throw error
-				//_pendingError标记此组件有错误，再次渲染会赋值给_processingException，这样如果还出错会跳过这个组件，在向上层组件循环
+				//再去渲染处理error的组件
+				//如果render后还是有error,会再循环并跳过这个组件,如果循环完成组件都没有处理错误,则会执行最下面throw error
+				//_pendingError标记此组件有错误，再次渲染会赋值给_processingException，这样如果还出错会跳过这个组件，再向上层组件循环
 				return enqueueRender((component._pendingError = component));
 			} catch (e) {
 				error = e;
