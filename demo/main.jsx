@@ -1,8 +1,9 @@
-import {Component, createContext, render,h} from '../src'
+import { Component, createContext, render, h } from '../src';
 
-function Root(){
-	return <div>234234</div>
-}
-
-
-render(<Root/>, document.getElementById('app'));
+render(
+	<div>
+		<span>123</span>
+		<span>234</span>
+	</div>,
+	document.getElementById('app')
+);

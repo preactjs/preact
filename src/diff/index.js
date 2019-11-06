@@ -127,8 +127,8 @@ export function diff(
 			// Invoke pre-render lifecycle methods
 			//如果是新创建的组件
 			if (isNew) {
-                //没有设置getDerivedStateFromProps但设置了componentWillMount则执行componentWillMount生命周期
-                if (
+				//没有设置getDerivedStateFromProps但设置了componentWillMount则执行componentWillMount生命周期
+				if (
 					newType.getDerivedStateFromProps == null &&
 					c.componentWillMount != null
 				) {
@@ -347,19 +347,19 @@ function diffElementNodes(
 	}
 	//如果是text节点
 	if (newVNode.type === null) {
-		//TODO 不明白 因为上面已经设置过null了
+		//todo 如果diffElementNodes传进来dom就不为空,则将excessDomChildren对应的节点设为null
 		if (excessDomChildren != null) {
 			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
 		}
-		//将newProps赋值给data,data所有地方还没用到
+		//如果两者不相等,则设置data来更新TextNode的文本
 		if (oldProps !== newProps) {
 			dom.data = newProps;
 		}
 	}
 	//新老节点不相等
-	else if (newVNode!==oldVNode) {
+	else if (newVNode !== oldVNode) {
 		//在这儿excessDomChildren是dom的子节点
-		if (excessDomChildren!=null) {
+		if (excessDomChildren != null) {
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 
@@ -448,9 +448,8 @@ export function applyRef(ref, value, vnode) {
 		if (typeof ref == 'function') ref(value);
 		//其它赋值给current属性
 		else ref.current = value;
-	}
-	//捕获错误
-	catch (e) {
+	} catch (e) {
+		//捕获错误
 		options._catchError(e, vnode);
 	}
 }
