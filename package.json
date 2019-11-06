@@ -8,20 +8,20 @@
     "email": "yujingwyh@163.com"
   },
   "scripts": {
-    "start": "node ./node_modules/parcel-bundler/bin/cli.js ./demo/index.html",
-    "lint": "eslint src hooks"
+    "start": "node ./node_modules/parcel-bundler/bin/cli.js ./demo/index.html"
   },
   "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.6.4",
     "@babel/plugin-proposal-class-properties": "^7.5.5",
     "babel-plugin-transform-react-jsx": "^6.24.1",
-    "parcel-bundler": "^1.12.4",
     "eslint": "5.15.1",
     "eslint-config-developit": "^1.1.1",
     "eslint-config-prettier": "^6.5.0",
     "eslint-plugin-react": "7.12.4",
+    "husky": "^3.0.9",
     "lint-staged": "^9.4.2",
+    "parcel-bundler": "^1.12.4",
     "prettier": "^1.18.2"
   },
   "eslintConfig": {
