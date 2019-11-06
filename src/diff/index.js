@@ -22,7 +22,15 @@ import options from '../options';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} [isHydrating] Whether or not we are in hydration
  */
+//parentDom渲染的父dom
+//newVNode新的虚拟节点
+//oldVNOde老的虚拟节点
+//context如果是createContext().Provide组件,或获得context并向下传递
 //isSvg是否是svg,svg在创建dom元素和设置dom属性时特殊处理
+//excessDomChildren
+//commitQueue引用数组,所有执行完后会执行数组中组件的_renderCallbacks的回调
+//oldDom
+//isHydrating是否hydration模式渲染,该模式对props只处理事件
 //对比虚拟节点
 export function diff(
 	parentDom,

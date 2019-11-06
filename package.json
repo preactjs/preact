@@ -8,13 +8,77 @@
     "email": "yujingwyh@163.com"
   },
   "scripts": {
-    "start": "node ./node_modules/parcel-bundler/bin/cli.js ./demo/index.html"
+    "start": "node ./node_modules/parcel-bundler/bin/cli.js ./demo/index.html",
+    "lint": "eslint src test debug compat hooks test-utils"
   },
   "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.6.4",
     "@babel/plugin-proposal-class-properties": "^7.5.5",
     "babel-plugin-transform-react-jsx": "^6.24.1",
-    "parcel-bundler": "^1.12.4"
+    "parcel-bundler": "^1.12.4",
+    "eslint": "5.15.1",
+    "eslint-config-developit": "^1.1.1",
+    "eslint-config-prettier": "^6.5.0",
+    "eslint-plugin-react": "7.12.4",
+    "lint-staged": "^9.4.2",
+    "prettier": "^1.18.2"
+  },
+  "eslintConfig": {
+    "extends": [
+      "developit",
+      "prettier"
+    ],
+    "settings": {
+      "react": {
+        "pragma": "createElement"
+      }
+    },
+    "rules": {
+      "camelcase": [
+        1,
+        {
+          "allow": [
+            "__test__*",
+            "unstable_*",
+            "UNSAFE_*"
+          ]
+        }
+      ],
+      "no-unused-vars": [
+        2,
+        {
+          "args": "none",
+          "varsIgnorePattern": "^h|React$"
+        }
+      ],
+      "prefer-rest-params": 0,
+      "prefer-spread": 0,
+      "no-cond-assign": 0,
+      "react/jsx-no-bind": 0,
+      "react/no-danger": "off",
+      "react/prefer-stateless-function": 0,
+      "react/sort-comp": 0,
+      "jest/valid-expect": 0,
+      "jest/no-disabled-tests": 0,
+      "react/no-find-dom-node": 0
+    }
+  },
+  "eslintIgnore": [
+    "test/fixtures",
+    "test/ts/",
+    "*.ts",
+    "dist"
+  ],
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }
