@@ -47,7 +47,6 @@ SuspenseList.prototype.__modifySuspense = function(vnode, cb) {
 			this._suspenseBoundaries &&
 			this._suspenseBoundaries[0].vnode === vnode
 		) {
-			// this._suspenseBoundaries[0].suspenseResolvedCallback = cb;
 			cb();
 			this._suspenseBoundaries.shift();
 			/**
