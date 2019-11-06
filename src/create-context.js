@@ -22,15 +22,15 @@ export function createContext(defaultValue) {
 				this.getChildContext = () => {
 					ctx[context._id] = this;
 					//至于为什么不直接返回content而是用ctx对象来包含
-                    //是由于一个Context消费者必须要匹配跟他像关联的Provider
-                    //见diff/index.js中diff->outer-> let provider = tmp && context[tmp._id];
+					//是由于一个Context消费者必须要匹配跟他像关联的Provider
+					//见diff/index.js中diff->outer-> let provider = tmp && context[tmp._id];
 					return ctx;
 				};
 				this.shouldComponentUpdate = _props => {
 					//当value不相等时
 					if (props.value !== _props.value) {
-                        //执行渲染 context消费的组件
-                        subs.some(c => {
+						//执行渲染 context消费的组件
+						subs.some(c => {
 							c.context = _props.value;
 							enqueueRender(c);
 						});
