@@ -19,7 +19,7 @@ cloneElement(
 <element.type {...element.props} {...props}>{children}</element.type>
 但cloneElement 会保留了组件的 ref
 */
-export function cloneElement(vnode, props) {
+export function cloneElement(vnode,props) {
 	//拷贝props
 	props = assign(assign({}, vnode.props), props);
 	//children处理

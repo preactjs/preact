@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node ./node_modules/parcel-bundler/bin/cli.js ./demo/index.html",
-    "lint": "eslint src test debug compat hooks test-utils"
+    "lint": "eslint src hooks"
   },
   "dependencies": {},
   "devDependencies": {
