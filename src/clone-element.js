@@ -21,7 +21,7 @@ cloneElement(
 */
 export function cloneElement(vnode,props) {
 	//拷贝props
-	props = assign(assign({},vnode.props), props);
+ props = assign(assign({}, vnode.props), props);
 	//children处理
 	if (arguments.length > 2) props.children = EMPTY_ARR.slice.call(arguments, 2);
 	//调用创建虚拟节点
