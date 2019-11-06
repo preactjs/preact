@@ -140,28 +140,8 @@ module.exports = function(config) {
 						exclude: /node_modules/,
 						loader: 'babel-loader',
 						options: {
-							// comments: false,
-							// compact: true,
 							plugins: coverage
-								? [
-										[
-											'istanbul',
-											{
-												exclude: [
-													// Default config
-													'coverage/**',
-													'dist/**',
-													'test/**',
-													'test{,-*}.js',
-													'**/*.test.js',
-													'**/__tests__/**',
-													'**/node_modules/**',
-													// Our custom extension
-													'{debug,hooks,compat,test-utils}/test/**/*'
-												]
-											}
-										]
-								  ]
+								? [['istanbul', { include: '**/src/**/*.js' }]]
 								: []
 						}
 					}
