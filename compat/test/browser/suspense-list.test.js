@@ -271,4 +271,39 @@ describe('suspense-list', () => {
 			`<span>I am resolved.</span><span>I am resolved.</span>`
 		);
 	});
+
+	it('should not do anything to non suspense elements', async () => {
+		const [Component1, resolver1] = getSuspendableComponent();
+		const [Component2, resolver2] = getSuspendableComponent();
+		render(
+			<SuspenseList>
+				<Suspense fallback={<span>Loading...</span>}>
+					<Component1 />
+				</Suspense>
+				<div>foo</div>
+				<Suspense fallback={<span>Loading...</span>}>
+					<Component2 />
+				</Suspense>
+				<span>bar</span>
+			</SuspenseList>,
+			scratch
+		);
+
+		rerender(); // Re-render with fallback cuz lazy threw
+		expect(scratch.innerHTML).to.eql(
+			`<span>Loading...</span><div>foo</div><span>Loading...</span><span>bar</span>`
+		);
+
+		await resolver2(true);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>Loading...</span><div>foo</div><span>I am resolved.</span><span>bar</span>`
+		);
+
+		await resolver1(true);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>I am resolved.</span><div>foo</div><span>I am resolved.</span><span>bar</span>`
+		);
+	});
 });

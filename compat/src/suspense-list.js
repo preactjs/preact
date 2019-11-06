@@ -69,7 +69,6 @@ SuspenseList.prototype.__modifySuspense = function(vnode, cb) {
 };
 
 SuspenseList.prototype.render = function(props) {
-	// assuming all suspense woul
 	this._thrillers = (Array.isArray(props.children)
 		? props.children
 		: [props.children]
@@ -79,7 +78,7 @@ SuspenseList.prototype.render = function(props) {
 			vnode,
 			cb: null
 		}));
-	if (props.revealOrder === 'backwards') {
+	if (props.revealOrder && props.revealOrder[0] === 'b') {
 		this._thrillers.reverse();
 	}
 	return props.children;
