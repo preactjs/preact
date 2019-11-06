@@ -10,6 +10,10 @@
   "unpkg": "dist/preact.umd.js",
   "source": "src/index.js",
   "license": "MIT",
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/preact"
+  },
   "types": "src/index.d.ts",
   "scripts": {
     "build": "npm-run-all --parallel build:* && cp dist/preact.js dist/preact.min.js",
