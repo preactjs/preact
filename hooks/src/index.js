@@ -60,10 +60,14 @@ options.diffed = vnode => {
 options._commit = (vnode, commitQueue) => {
 	commitQueue.some(vnode => {
 		try {
-			vnode._renderCallbacks.forEach(invokeCleanup);
-			vnode._renderCallbacks = vnode._renderCallbacks.filter(cb =>
-				cb._value ? invokeEffect(cb) : true
-			);
+			vnode._renderCallbacks = vnode._renderCallbacks.map(cb => {
+				if (cb._value) {
+					invokeCleanup(cb);
+					return () => invokeEffect(cb);
+				}
+
+				return cb;
+			});
 		} catch (e) {
 			commitQueue.some(vnode => {
 				if (vnode._renderCallbacks) vnode._renderCallbacks = [];
