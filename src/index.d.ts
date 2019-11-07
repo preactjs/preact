@@ -14,7 +14,7 @@ declare namespace preact {
 		type: ComponentType<P> | string;
 		props: P & { children: ComponentChildren };
 		key: Key;
-		ref: Ref<any> | null;
+		ref?: Ref<any> | null;
 		/**
 		 * The time this `vnode` started rendering. Will only be set when
 		 * the devtools are attached.
