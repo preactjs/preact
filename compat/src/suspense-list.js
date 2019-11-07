@@ -115,9 +115,7 @@ SuspenseList.prototype.componentDidMount = function() {
 };
 
 SuspenseList.prototype.render = function(props) {
-	const children = Array.isArray(props.children)
-		? props.children
-		: [props.children];
+	const children = toChildArray(props.children);
 	this._suspenseBoundaries = children
 		.filter(
 			child =>
