@@ -26,8 +26,11 @@ function getSuspendableComponent() {
 		}
 		return <span>I am resolved.</span>;
 	};
+	SuspendableComponent.resolve = s => {
+		resolver(s);
+	};
 
-	return [SuspendableComponent, s => resolver(s)];
+	return SuspendableComponent;
 }
 
 describe('suspense-list', () => {
@@ -41,8 +44,9 @@ describe('suspense-list', () => {
 	}
 
 	function getSuspenseList(revealOrder) {
-		const [Component1, resolver1] = getSuspendableComponent();
-		const [Component2, resolver2] = getSuspendableComponent();
+		const Component1 = getSuspendableComponent();
+		const Component2 = getSuspendableComponent();
+		const Component3 = getSuspendableComponent();
 		render(
 			<SuspenseList revealOrder={revealOrder}>
 				<Suspense fallback={<span>Loading...</span>}>
@@ -51,16 +55,14 @@ describe('suspense-list', () => {
 				<Suspense fallback={<span>Loading...</span>}>
 					<Component2 />
 				</Suspense>
+				<Suspense fallback={<span>Loading...</span>}>
+					<Component3 />
+				</Suspense>
 			</SuspenseList>,
 			scratch
 		); // Render initial state
 
-		return {
-			Component1,
-			Component2,
-			resolver1,
-			resolver2
-		};
+		return [Component1.resolve, Component2.resolve, Component3.resolve];
 	}
 
 	beforeEach(() => {
@@ -86,11 +88,11 @@ describe('suspense-list', () => {
 	});
 
 	it('should work for single element', async () => {
-		const [Component1, resolver1] = getSuspendableComponent();
+		const Component = getSuspendableComponent();
 		render(
 			<SuspenseList>
 				<Suspense fallback={<span>Loading...</span>}>
-					<Component1 />
+					<Component />
 				</Suspense>
 			</SuspenseList>,
 			scratch
@@ -99,182 +101,230 @@ describe('suspense-list', () => {
 		rerender(); // Re-render with fallback cuz lazy threw
 		expect(scratch.innerHTML).to.eql(`<span>Loading...</span>`);
 
-		await resolver1(true);
+		await Component.resolve(true);
 		rerender();
 		expect(scratch.innerHTML).to.eql(`<span>I am resolved.</span>`);
 	});
 
 	it('should let components appear backwards if no revealOrder is mentioned', async () => {
-		const { resolver1, resolver2 } = getSuspenseList();
+		const [resolver1, resolver2, resolver3] = getSuspenseList();
 
 		rerender(); // Re-render with fallback cuz lazy threw
 		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><span>Loading...</span>`
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
 		await resolver2(true);
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><span>I am resolved.</span>`
+			`<span>Loading...</span><span>I am resolved.</span><span>Loading...</span>`
+		);
+
+		await resolver3(true);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>Loading...</span><span>I am resolved.</span><span>I am resolved.</span>`
 		);
 
 		await resolver1(true);
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>I am resolved.</span>`
+			`<span>I am resolved.</span><span>I am resolved.</span><span>I am resolved.</span>`
 		);
 	});
 
 	it('should let components appear forwards if no revealOrder is mentioned', async () => {
-		const { resolver1, resolver2 } = getSuspenseList();
+		const [resolver1, resolver2, resolver3] = getSuspenseList();
 
 		rerender(); // Re-render with fallback cuz lazy threw
 		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><span>Loading...</span>`
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
 		await resolver1(true);
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>Loading...</span>`
+			`<span>I am resolved.</span><span>Loading...</span><span>Loading...</span>`
 		);
 
 		await resolver2(true);
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>I am resolved.</span>`
+			`<span>I am resolved.</span><span>I am resolved.</span><span>Loading...</span>`
+		);
+
+		await resolver3(true);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>I am resolved.</span><span>I am resolved.</span><span>I am resolved.</span>`
 		);
 	});
 
 	it('should let components appear in forwards if revealOrder=forwards and first one resolves before others', async () => {
-		const { resolver1, resolver2 } = getSuspenseList('forwards');
+		const [resolver1, resolver2, resolver3] = getSuspenseList('forwards');
 
 		rerender(); // Re-render with fallback cuz lazy threw
 		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><span>Loading...</span>`
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
 		await resolver1(true);
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>Loading...</span>`
+			`<span>I am resolved.</span><span>Loading...</span><span>Loading...</span>`
+		);
+
+		await resolver3(true);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>I am resolved.</span><span>Loading...</span><span>Loading...</span>`
 		);
 
 		await resolver2(true);
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>I am resolved.</span>`
+			`<span>I am resolved.</span><span>I am resolved.</span><span>I am resolved.</span>`
 		);
 	});
 
-	it('should make components appear together if revealOrder=forwards and second one resolves before first', async () => {
-		const { resolver1, resolver2 } = getSuspenseList('forwards');
+	it('should make components appear together if revealOrder=forwards and others resolves before first', async () => {
+		const [resolver1, resolver2, resolver3] = getSuspenseList('forwards');
 
 		rerender(); // Re-render with fallback cuz lazy threw
 		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><span>Loading...</span>`
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
 		await resolver2(true);
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><span>Loading...</span>`
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
+		);
+
+		await resolver3(true);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
 		await resolver1(true);
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>I am resolved.</span>`
+			`<span>I am resolved.</span><span>I am resolved.</span><span>I am resolved.</span>`
 		);
 	});
 
-	it('should let components appear backwards if revealOrder=backwards and second one resolves before first', async () => {
-		const { resolver1, resolver2 } = getSuspenseList('backwards');
+	it('should let components appear backwards if revealOrder=backwards and others resolves before first', async () => {
+		const [resolver1, resolver2, resolver3] = getSuspenseList('backwards');
 
 		rerender(); // Re-render with fallback cuz lazy threw
 		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><span>Loading...</span>`
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
+		);
+
+		await resolver3(true);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>Loading...</span><span>Loading...</span><span>I am resolved.</span>`
 		);
 
 		await resolver2(true);
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><span>I am resolved.</span>`
+			`<span>Loading...</span><span>I am resolved.</span><span>I am resolved.</span>`
 		);
 
 		await resolver1(true);
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>I am resolved.</span>`
+			`<span>I am resolved.</span><span>I am resolved.</span><span>I am resolved.</span>`
 		);
 	});
 
-	it('should make components appear together if revealOrder=backwards and first one resolves before second', async () => {
-		const { resolver1, resolver2 } = getSuspenseList('backwards');
+	it('should make components appear together if revealOrder=backwards and first one resolves others', async () => {
+		const [resolver1, resolver2, resolver3] = getSuspenseList('backwards');
 
 		rerender(); // Re-render with fallback cuz lazy threw
 		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><span>Loading...</span>`
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
 		await resolver1(true);
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><span>Loading...</span>`
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
+		);
+
+		await resolver3(true);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>Loading...</span><span>Loading...</span><span>I am resolved.</span>`
 		);
 
 		await resolver2(true);
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>I am resolved.</span>`
+			`<span>I am resolved.</span><span>I am resolved.</span><span>I am resolved.</span>`
 		);
 	});
 
-	it('should make components appear together if revealOrder=together and first one resolves before second', async () => {
-		const { resolver1, resolver2 } = getSuspenseList('together');
+	it('should make components appear together if revealOrder=together and first one resolves others', async () => {
+		const [resolver1, resolver2, resolver3] = getSuspenseList('together');
 
 		rerender(); // Re-render with fallback cuz lazy threw
 		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><span>Loading...</span>`
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
 		await resolver1(true);
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><span>Loading...</span>`
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
+		);
+
+		await resolver3(true);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
 		await resolver2(true);
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>I am resolved.</span>`
+			`<span>I am resolved.</span><span>I am resolved.</span><span>I am resolved.</span>`
 		);
 	});
 
-	it('should make components appear together if revealOrder=together and second one resolves before first', async () => {
-		const { resolver1, resolver2 } = getSuspenseList('together');
+	it('should make components appear together if revealOrder=together and second one resolves before others', async () => {
+		const [resolver1, resolver2, resolver3] = getSuspenseList('together');
 
 		rerender(); // Re-render with fallback cuz lazy threw
 		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><span>Loading...</span>`
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
 		await resolver2(true);
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><span>Loading...</span>`
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
 		await resolver1(true);
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>I am resolved.</span>`
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
+		);
+
+		await resolver3(true);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>I am resolved.</span><span>I am resolved.</span><span>I am resolved.</span>`
 		);
 	});
 
 	it('should not do anything to non suspense elements', async () => {
-		const [Component1, resolver1] = getSuspendableComponent();
-		const [Component2, resolver2] = getSuspendableComponent();
+		const Component1 = getSuspendableComponent();
+		const Component2 = getSuspendableComponent();
 		render(
 			<SuspenseList>
 				<Suspense fallback={<span>Loading...</span>}>
@@ -294,13 +344,13 @@ describe('suspense-list', () => {
 			`<span>Loading...</span><div>foo</div><span>Loading...</span><span>bar</span>`
 		);
 
-		await resolver2(true);
+		await Component1.resolve(true);
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><div>foo</div><span>I am resolved.</span><span>bar</span>`
+			`<span>I am resolved.</span><div>foo</div><span>Loading...</span><span>bar</span>`
 		);
 
-		await resolver1(true);
+		await Component2.resolve(true);
 		rerender();
 		expect(scratch.innerHTML).to.eql(
 			`<span>I am resolved.</span><div>foo</div><span>I am resolved.</span><span>bar</span>`
