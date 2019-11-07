@@ -1,4 +1,4 @@
-import { Component, options } from 'preact';
+import { Component, options, toChildArray } from 'preact';
 import { Suspense } from './suspense';
 
 // Hook for Suspense boundaries to ask for any extra work before rendering suspended children.
@@ -25,6 +25,7 @@ options.__suspenseDidResolve = vnode => {
 // having custom inheritance instead of a class here saves a lot of bytes
 export function SuspenseList(props) {
 	this._suspenseBoundaries = [];
+	this.readyToRender = false;
 }
 
 // Things we do here to save some bytes but are not proper JS inheritance:
@@ -51,11 +52,6 @@ SuspenseList.prototype.__suspenseDidResolve = function(vnode) {
 };
 
 SuspenseList.prototype.__suspenseWillResolve = function(vnode, cb) {
-	const revealOrder = this.props.revealOrder;
-	if (!revealOrder) {
-		return cb();
-	}
-
 	// set the callback to the correct position
 	this._suspenseBoundaries.some(suspenseBoundary => {
 		if (suspenseBoundary.vnode === vnode) {
@@ -64,17 +60,38 @@ SuspenseList.prototype.__suspenseWillResolve = function(vnode, cb) {
 		}
 	});
 
-	if (revealOrder[0] === 'f' || revealOrder[0] === 'b') {
+	this.__findAndResolveNextcandidate();
+};
+
+SuspenseList.prototype.__findAndResolveNextcandidate = function() {
+	if (!this.readyToRender) {
+		return;
+	}
+
+	const revealOrder = this.props.revealOrder;
+	if (!revealOrder) {
+		this._suspenseBoundaries.forEach(suspenseBoundary => {
+			if (
+				!suspenseBoundary.vnode._component._isSuspenseResolved &&
+				suspenseBoundary.suspenseResolvedCallback
+			) {
+				suspenseBoundary.suspenseResolvedCallback();
+			}
+		});
+	} else if (revealOrder[0] === 'f' || revealOrder[0] === 'b') {
 		/**
 		 * Forwards and backwards work the same way.
 		 * The direction is controlled in render method while creating `_suspenseBoundaries` itself.
 		 */
 		// find if the current vnode's suspense can be resolved
 		this._suspenseBoundaries.some(suspenseBoundary => {
-			if (!suspenseBoundary.vnode._component._isSuspenseResolved) {
-				if (suspenseBoundary.vnode === vnode) {
-					cb();
-				}
+			if (
+				!suspenseBoundary.vnode._component._isSuspenseResolved &&
+				suspenseBoundary.suspenseResolvedCallback
+			) {
+				suspenseBoundary.suspenseResolvedCallback();
+				return true;
+			} else if (!suspenseBoundary.suspenseResolvedCallback) {
 				return true;
 			}
 		});
@@ -89,12 +106,20 @@ SuspenseList.prototype.__suspenseWillResolve = function(vnode, cb) {
 	}
 };
 
+SuspenseList.prototype.componentDidMount = function() {
+	options.__suspenseWillResolve(this._vnode, () => {
+		this.readyToRender = true;
+		this.__findAndResolveNextcandidate();
+	});
+};
+
 SuspenseList.prototype.render = function(props) {
-	this._suspenseBoundaries = (Array.isArray(props.children)
-		? props.children
-		: [props.children]
-	)
-		.filter(child => child.type.name === Suspense.name)
+	this._suspenseBoundaries = toChildArray(props.children)
+		.filter(
+			child =>
+				child.type.name === Suspense.name ||
+				child.type.name === SuspenseList.name
+		)
 		.map(vnode => ({
 			vnode,
 			suspenseResolvedCallback: null

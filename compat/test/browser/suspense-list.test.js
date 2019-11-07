@@ -356,4 +356,64 @@ describe('suspense-list', () => {
 			`<span>I am resolved.</span><div>foo</div><span>I am resolved.</span><span>bar</span>`
 		);
 	});
+
+	it('should make sure nested SuspenseList works with forwards', async () => {
+		const Component1 = getSuspendableComponent();
+		const Component2 = getSuspendableComponent();
+		const Component3 = getSuspendableComponent();
+		const Component4 = getSuspendableComponent();
+
+		render(
+			<SuspenseList>
+				<Suspense fallback={<span>Loading...</span>}>
+					<Component1 />
+				</Suspense>
+				<SuspenseList>
+					<Suspense fallback={<span>Loading...</span>}>
+						<Component2 />
+					</Suspense>
+					<Suspense fallback={<span>Loading...</span>}>
+						<Component3 />
+					</Suspense>
+				</SuspenseList>
+				<Suspense fallback={<span>Loading...</span>}>
+					<Component4 />
+				</Suspense>
+			</SuspenseList>,
+			scratch
+		);
+
+		rerender(); // Re-render with fallback cuz lazy threw
+		expect(scratch.innerHTML).to.eql(
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span><span>Loading...</span>`
+		);
+
+		await Component2.resolve(true);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span><span>Loading...</span>`
+		);
+
+		await Component1.resolve(true);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>I am resolved.</span><span>I am resolved.</span><span>Loading...</span><span>Loading...</span>`
+		);
+
+		await Component4.resolve(true);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>I am resolved.</span><span>I am resolved.</span><span>Loading...</span><span>Loading...</span>`
+		);
+
+		await Component3.resolve(true);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>I am resolved.</span><span>I am resolved.</span><span>I am resolved.</span><span>I am resolved.</span>`
+		);
+	});
+
+	it.skip('should make sure nested SuspenseList works with backwards', async () => {});
+
+	it.skip('should make sure nested SuspenseList works with together', async () => {});
 });
