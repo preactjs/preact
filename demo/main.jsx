@@ -1,9 +1,13 @@
 import { Component, createContext, render, h } from '../src';
 
-render(
-	<div>
-		<span>123</span>
-		<span>234</span>
-	</div>,
-	document.getElementById('app')
-);
+class Root extends Component {
+	state = {
+		arr: [1, 2, 3]
+	};
+
+	render() {
+		return <div onClick={() => {}}>{this.state.arr}</div>;
+	}
+}
+
+render(<Root />, document.getElementById('app'));

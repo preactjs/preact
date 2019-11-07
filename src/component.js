@@ -31,7 +31,7 @@ export function Component(props, context) {
 	this._nextState
 	//对应的虚拟节点
 	this._vnode
-	//preact.render(vnode,parentDom)中的parentDom
+	//父的真实dom
 	this._parentDom
 	*/
 }
@@ -88,11 +88,11 @@ Component.prototype.forceUpdate = function(callback) {
 		// Set render mode so that we can differentiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
-        //标记强制更新
-        this._force = true;
-        //有回调加入回调数组里
+		//标记强制更新
+		this._force = true;
+		//有回调加入回调数组里
 		if (callback) this._renderCallbacks.push(callback);
-        //加入渲染队列并渲染
+		//加入渲染队列并渲染
 		enqueueRender(this);
 	}
 };

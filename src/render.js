@@ -42,6 +42,8 @@ export function render(vnode, parentDom, replaceNode) {
 	);
 	//渲染完成时执行did生命周期和setState回调
 	commitRoot(commitQueue, vnode);
+
+	console.log((window.vnode = vnode));
 }
 
 /**

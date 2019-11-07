@@ -52,7 +52,7 @@ export function diffChildren(
 		//如果有excessDomChildren,则取第一个
 		if (excessDomChildren != null) {
 			oldDom = excessDomChildren[0];
-		//如果	oldChildrenLength
+			//如果	oldChildrenLength
 		} else if (oldChildrenLength) {
 			oldDom = getDomSibling(oldParentVNode, 0);
 		} else {
@@ -64,34 +64,34 @@ export function diffChildren(
 	newParentVNode._children = toChildArray(
 		newParentVNode._children,
 		childVNode => {
-		if (childVNode != null) {
-			//设置父虚拟节点
-			childVNode._parent = newParentVNode;
-			//处理深度
-			childVNode._depth = newParentVNode._depth + 1;
+			if (childVNode != null) {
+				//设置父虚拟节点
+				childVNode._parent = newParentVNode;
+				//处理深度
+				childVNode._depth = newParentVNode._depth + 1;
 
-			// Check if we find a corresponding element in oldChildren.
-			// If found, delete the array item by setting to `undefined`.
-			// We use `undefined`, as `null` is reserved for empty placeholders
-			// (holes).
-			oldVNode = oldChildren[i];
+				// Check if we find a corresponding element in oldChildren.
+				// If found, delete the array item by setting to `undefined`.
+				// We use `undefined`, as `null` is reserved for empty placeholders
+				// (holes).
+				oldVNode = oldChildren[i];
 				//如果老节点为null或者 新老子节点的key和type相同 则设置老的节点为undefined 以便后面不执行unmount
-			if (
-				oldVNode === null ||
-				(oldVNode &&
-					childVNode.key == oldVNode.key &&
-					childVNode.type === oldVNode.type)
-			) {
-				oldChildren[i] = undefined;
-			} else {
-				// Either oldVNode === undefined or oldChildrenLength > 0,
-				// so after this loop oldVNode == null or oldVNode is a valid value.
-				//在老的子节点中循环 以便找到新老子节点向对应的，有相对应的就会复用这个节点而不会重新实例化一个新的节点
-				for (j=0; j<oldChildrenLength; j++) {
-					oldVNode = oldChildren[j];
-					// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
-					// We always match by type (in either case).
-					//同上
+				if (
+					oldVNode === null ||
+					(oldVNode &&
+						childVNode.key == oldVNode.key &&
+						childVNode.type === oldVNode.type)
+				) {
+					oldChildren[i] = undefined;
+				} else {
+					// Either oldVNode === undefined or oldChildrenLength > 0,
+					// so after this loop oldVNode == null or oldVNode is a valid value.
+					//在老的子节点中循环 以便找到新老子节点向对应的，有相对应的就会复用这个节点而不会重新实例化一个新的节点
+					for (j = 0; j < oldChildrenLength; j++) {
+						oldVNode = oldChildren[j];
+						// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
+						// We always match by type (in either case).
+						//同上
 						if (
 							oldVNode &&
 							childVNode.key == oldVNode.key &&
@@ -244,13 +244,13 @@ export function toChildArray(children, callback, flattened) {
 	}
 	//如果children为数组则递归去添加
 	else if (Array.isArray(children)) {
-		for (let i=0; i < children.length; i++) {
+		for (let i = 0; i < children.length; i++) {
 			toChildArray(children[i], callback, flattened);
 		}
-	//没有回调则直接push
+		//没有回调则直接push
 	} else if (!callback) {
 		flattened.push(children);
-	//字符或者数字类型,创建虚拟节点
+		//字符或者数字类型,创建虚拟节点
 	} else if (typeof children === 'string' || typeof children === 'number') {
 		flattened.push(callback(createVNode(null, children, null, null)));
 	} else if (children._dom != null || children._component != null) {
