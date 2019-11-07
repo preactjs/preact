@@ -2,11 +2,23 @@ import { Component, options } from 'preact';
 import { Suspense } from './suspense';
 
 // Hook for Suspense boundaries to ask for any extra work before rendering suspended children.
-options.__suspenseDidResolve = (vnode, cb) => {
-	if (vnode._parent._component && vnode._parent._component.__modifySuspense) {
-		vnode._parent._component.__modifySuspense(vnode, cb);
+options.__suspenseWillResolve = (vnode, cb) => {
+	if (
+		vnode._parent._component &&
+		vnode._parent._component.__suspenseWillResolve
+	) {
+		vnode._parent._component.__suspenseWillResolve(vnode, cb);
 	} else {
 		cb();
+	}
+};
+
+options.__suspenseDidResolve = vnode => {
+	if (
+		vnode._parent._component &&
+		vnode._parent._component.__suspenseDidResolve
+	) {
+		vnode._parent._component.__suspenseDidResolve(vnode);
 	}
 };
 
@@ -20,71 +32,59 @@ export function SuspenseList(props) {
 // - do not set `Suspense.prototype.constructor` to `Suspense`
 SuspenseList.prototype = new Component();
 
-// SuspenseList.prototype.__canSuspenseResolve = function(vnode, cb) {
-// 	const revealOrder = this.props.revealOrder;
-// 	if (!revealOrder) {
-// 		this.setState({
-// 			canRender: true,
-// 		});
-// 	}
-// 	if (revealOrder[0] === 'f' || revealOrder[0] === 'b') {
-// 		console.log(this.vnode);
-// 		debugger;
-// 	} else if (revealOrder[0] === 't') {
+SuspenseList.prototype.__suspenseDidResolve = function(vnode) {
+	const revealOrder = this.props.revealOrder;
+	if (!revealOrder) {
+		return;
+	}
+	this._suspenseBoundaries.some((suspenseBoundary, index) => {
+		if (suspenseBoundary.vnode === vnode) {
+			if (
+				this._suspenseBoundaries[index + 1] &&
+				this._suspenseBoundaries[index + 1].suspenseResolvedCallback
+			) {
+				this._suspenseBoundaries[index + 1].suspenseResolvedCallback();
+			}
+			return true;
+		}
+	});
+};
 
-// 	}
-// }
-
-SuspenseList.prototype.__modifySuspense = function(vnode, cb) {
+SuspenseList.prototype.__suspenseWillResolve = function(vnode, cb) {
 	const revealOrder = this.props.revealOrder;
 	if (!revealOrder) {
 		return cb();
 	}
+
+	// set the callback to the correct position
+	this._suspenseBoundaries.some(suspenseBoundary => {
+		if (suspenseBoundary.vnode === vnode) {
+			suspenseBoundary.suspenseResolvedCallback = cb;
+			return true; // breaks the find loop
+		}
+	});
 
 	if (revealOrder[0] === 'f' || revealOrder[0] === 'b') {
 		/**
 		 * Forwards and backwards work the same way.
 		 * The direction is controlled in render method while creating `_suspenseBoundaries` itself.
 		 */
-		if (
-			this._suspenseBoundaries &&
-			this._suspenseBoundaries[0].vnode === vnode
-		) {
-			cb();
-			this._suspenseBoundaries.shift();
-			/**
-			 * Find and execute all callbacks in order from 2nd position.
-			 * Breaks as soon as a non resolved(cb===null) suspense found.
-			 */
-			this._suspenseBoundaries.some(suspenseBoundary => {
-				if (suspenseBoundary.suspenseResolvedCallback === null) {
-					return true; // breaks the find loop
-				}
-				suspenseBoundary.suspenseResolvedCallback();
-			});
-		} else {
-			this._suspenseBoundaries.some(suspenseBoundary => {
-				if (suspenseBoundary.vnode === vnode) {
-					suspenseBoundary.suspenseResolvedCallback = cb;
-					return true;
-				}
-			});
-		}
-	} else if (revealOrder[0] === 't') {
+		// find if the current vnode's suspense can be resolved
 		this._suspenseBoundaries.some(suspenseBoundary => {
-			if (suspenseBoundary.vnode === vnode) {
-				suspenseBoundary.suspenseResolvedCallback = cb;
+			if (!suspenseBoundary.vnode._component._isSuspenseResolved) {
+				if (suspenseBoundary.vnode === vnode) {
+					cb();
+				}
 				return true;
 			}
 		});
+	} else if (revealOrder[0] === 't') {
 		if (
 			this._suspenseBoundaries.every(
 				suspenseBoundary => suspenseBoundary.suspenseResolvedCallback
 			)
 		) {
-			this._suspenseBoundaries.forEach(suspenseBoundary => {
-				suspenseBoundary.suspenseResolvedCallback();
-			});
+			this._suspenseBoundaries[0].suspenseResolvedCallback();
 		}
 	}
 };

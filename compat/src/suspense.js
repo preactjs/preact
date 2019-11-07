@@ -48,6 +48,7 @@ export function Suspense(props) {
 	// we do not call super here to golf some bytes...
 	this._suspensions = [];
 	this._fallback = props.fallback;
+	this._isSuspenseResolved = true;
 }
 
 // Things we do here to save some bytes but are not proper JS inheritance:
@@ -62,7 +63,7 @@ Suspense.prototype._childDidSuspend = function(promise) {
 	/** @type {import('./internal').SuspenseComponent} */
 	const c = this;
 	c._suspensions.push(promise);
-
+	this._isSuspenseResolved = false;
 	const onSuspensionComplete = () => {
 		// From https://twitter.com/Rich_Harris/status/1125850391155965952
 		c._suspensions[c._suspensions.indexOf(promise)] =
@@ -81,6 +82,10 @@ Suspense.prototype._childDidSuspend = function(promise) {
 			c._vnode._children = c.state._parkedChildren;
 			c.setState({ _parkedChildren: null });
 		}
+		this._isSuspenseResolved = true;
+		if (options.__suspenseDidResolve) {
+			options.__suspenseDidResolve(c._vnode);
+		}
 	};
 
 	if (c.state._parkedChildren == null) {
@@ -91,9 +96,9 @@ Suspense.prototype._childDidSuspend = function(promise) {
 	}
 
 	// This option enables any extra wait required before resolving the suspended promise.
-	if (options.__suspenseDidResolve) {
+	if (options.__suspenseWillResolve) {
 		promise.then(() => {
-			options.__suspenseDidResolve(c._vnode, onSuspensionComplete);
+			options.__suspenseWillResolve(c._vnode, onSuspensionComplete);
 		}, onSuspensionComplete);
 	} else {
 		promise.then(onSuspensionComplete, onSuspensionComplete);
