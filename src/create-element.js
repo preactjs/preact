@@ -74,6 +74,7 @@ export function createVNode(type, props, key, ref) {
 		// a _lastDomChildSibling that has been set to `null`
 		_lastDomChildSibling: undefined,
 		_component: null,
+		_renderCallbacks: null,
 		constructor: undefined
 	};
 
