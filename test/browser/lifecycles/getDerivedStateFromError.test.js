@@ -52,8 +52,8 @@ describe('Lifecycle methods', () => {
 			}
 		}
 
-		spyAll(Receiver.prototype);
 		spyAll(Receiver);
+		spyAll(Receiver.prototype);
 
 		function throwExpectedError() {
 			throw (expectedError = new Error('Error!'));
@@ -73,8 +73,9 @@ describe('Lifecycle methods', () => {
 
 			expectedError = undefined;
 			receiver = undefined;
-			resetAllSpies(Receiver.prototype);
+
 			resetAllSpies(Receiver);
+			resetAllSpies(Receiver.prototype);
 		});
 
 		afterEach(() => {
