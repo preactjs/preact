@@ -25,7 +25,8 @@ options.__suspenseDidResolve = vnode => {
 // having custom inheritance instead of a class here saves a lot of bytes
 export function SuspenseList(props) {
 	this._suspenseBoundaries = [];
-	this.readyToRender = false;
+	this._readyToRender = false;
+	this._isSuspenseResolved = false;
 }
 
 // Things we do here to save some bytes but are not proper JS inheritance:
@@ -33,16 +34,16 @@ export function SuspenseList(props) {
 // - do not set `Suspense.prototype.constructor` to `Suspense`
 SuspenseList.prototype = new Component();
 
+SuspenseList.prototype._forwarded = true;
+
 SuspenseList.prototype.__suspenseDidResolve = function(vnode) {
-	const revealOrder = this.props.revealOrder;
-	if (!revealOrder) {
-		return;
-	}
 	this._suspenseBoundaries.some((suspenseBoundary, index) => {
 		if (suspenseBoundary.vnode === vnode) {
 			if (
 				this._suspenseBoundaries[index + 1] &&
-				this._suspenseBoundaries[index + 1].suspenseResolvedCallback
+				this._suspenseBoundaries[index + 1].suspenseResolvedCallback &&
+				!this._suspenseBoundaries[index + 1].vnode._component
+					._isSuspenseResolved
 			) {
 				this._suspenseBoundaries[index + 1].suspenseResolvedCallback();
 			}
@@ -64,7 +65,7 @@ SuspenseList.prototype.__suspenseWillResolve = function(vnode, cb) {
 };
 
 SuspenseList.prototype.__findAndResolveNextcandidate = function() {
-	if (!this.readyToRender) {
+	if (!this._readyToRender) {
 		return;
 	}
 
@@ -108,13 +109,16 @@ SuspenseList.prototype.__findAndResolveNextcandidate = function() {
 
 SuspenseList.prototype.componentDidMount = function() {
 	options.__suspenseWillResolve(this._vnode, () => {
-		this.readyToRender = true;
+		this._readyToRender = true;
 		this.__findAndResolveNextcandidate();
 	});
 };
 
 SuspenseList.prototype.render = function(props) {
-	this._suspenseBoundaries = toChildArray(props.children)
+	const children = Array.isArray(props.children)
+		? props.children
+		: [props.children];
+	this._suspenseBoundaries = children
 		.filter(
 			child =>
 				child.type.name === Suspense.name ||
@@ -127,5 +131,5 @@ SuspenseList.prototype.render = function(props) {
 	if (props.revealOrder && props.revealOrder[0] === 'b') {
 		this._suspenseBoundaries.reverse();
 	}
-	return props.children;
+	return children;
 };

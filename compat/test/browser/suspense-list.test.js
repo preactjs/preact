@@ -11,23 +11,23 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 const h = React.createElement;
 /* eslint-env browser, mocha */
 
-function getSuspendableComponent() {
+function getSuspendableComponent(text) {
 	let resolver;
 	const SuspendableComponent = () => {
 		const [loaded, setLoaded] = useState(false);
 		if (!loaded) {
 			let promise = new Promise(resolve => {
-				resolver = s => {
-					setLoaded(s);
+				resolver = () => {
+					setLoaded(true);
 					return resolve();
 				};
 			});
 			throw promise;
 		}
-		return <span>I am resolved.</span>;
+		return <span>{text}</span>;
 	};
-	SuspendableComponent.resolve = s => {
-		resolver(s);
+	SuspendableComponent.resolve = () => {
+		resolver();
 	};
 
 	return SuspendableComponent;
@@ -44,25 +44,25 @@ describe('suspense-list', () => {
 	}
 
 	function getSuspenseList(revealOrder) {
-		const Component1 = getSuspendableComponent();
-		const Component2 = getSuspendableComponent();
-		const Component3 = getSuspendableComponent();
+		const A = getSuspendableComponent('A');
+		const B = getSuspendableComponent('B');
+		const C = getSuspendableComponent('C');
 		render(
 			<SuspenseList revealOrder={revealOrder}>
 				<Suspense fallback={<span>Loading...</span>}>
-					<Component1 />
+					<A />
 				</Suspense>
 				<Suspense fallback={<span>Loading...</span>}>
-					<Component2 />
+					<B />
 				</Suspense>
 				<Suspense fallback={<span>Loading...</span>}>
-					<Component3 />
+					<C />
 				</Suspense>
 			</SuspenseList>,
 			scratch
 		); // Render initial state
 
-		return [Component1.resolve, Component2.resolve, Component3.resolve];
+		return [A.resolve, B.resolve, C.resolve];
 	}
 
 	beforeEach(() => {
@@ -88,7 +88,7 @@ describe('suspense-list', () => {
 	});
 
 	it('should work for single element', async () => {
-		const Component = getSuspendableComponent();
+		const Component = getSuspendableComponent('A');
 		render(
 			<SuspenseList>
 				<Suspense fallback={<span>Loading...</span>}>
@@ -101,9 +101,9 @@ describe('suspense-list', () => {
 		rerender(); // Re-render with fallback cuz lazy threw
 		expect(scratch.innerHTML).to.eql(`<span>Loading...</span>`);
 
-		await Component.resolve(true);
+		await Component.resolve();
 		rerender();
-		expect(scratch.innerHTML).to.eql(`<span>I am resolved.</span>`);
+		expect(scratch.innerHTML).to.eql(`<span>A</span>`);
 	});
 
 	it('should let components appear backwards if no revealOrder is mentioned', async () => {
@@ -114,22 +114,22 @@ describe('suspense-list', () => {
 			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await resolver2(true);
+		await resolver2();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><span>I am resolved.</span><span>Loading...</span>`
+			`<span>Loading...</span><span>B</span><span>Loading...</span>`
 		);
 
-		await resolver3(true);
+		await resolver3();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><span>I am resolved.</span><span>I am resolved.</span>`
+			`<span>Loading...</span><span>B</span><span>C</span>`
 		);
 
-		await resolver1(true);
+		await resolver1();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>I am resolved.</span><span>I am resolved.</span>`
+			`<span>A</span><span>B</span><span>C</span>`
 		);
 	});
 
@@ -141,22 +141,22 @@ describe('suspense-list', () => {
 			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await resolver1(true);
+		await resolver1();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>Loading...</span><span>Loading...</span>`
+			`<span>A</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await resolver2(true);
+		await resolver2();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>I am resolved.</span><span>Loading...</span>`
+			`<span>A</span><span>B</span><span>Loading...</span>`
 		);
 
-		await resolver3(true);
+		await resolver3();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>I am resolved.</span><span>I am resolved.</span>`
+			`<span>A</span><span>B</span><span>C</span>`
 		);
 	});
 
@@ -168,22 +168,22 @@ describe('suspense-list', () => {
 			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await resolver1(true);
+		await resolver1();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>Loading...</span><span>Loading...</span>`
+			`<span>A</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await resolver3(true);
+		await resolver3();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>Loading...</span><span>Loading...</span>`
+			`<span>A</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await resolver2(true);
+		await resolver2();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>I am resolved.</span><span>I am resolved.</span>`
+			`<span>A</span><span>B</span><span>C</span>`
 		);
 	});
 
@@ -195,22 +195,22 @@ describe('suspense-list', () => {
 			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await resolver2(true);
+		await resolver2();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
 			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await resolver3(true);
+		await resolver3();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
 			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await resolver1(true);
+		await resolver1();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>I am resolved.</span><span>I am resolved.</span>`
+			`<span>A</span><span>B</span><span>C</span>`
 		);
 	});
 
@@ -222,22 +222,22 @@ describe('suspense-list', () => {
 			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await resolver3(true);
+		await resolver3();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><span>Loading...</span><span>I am resolved.</span>`
+			`<span>Loading...</span><span>Loading...</span><span>C</span>`
 		);
 
-		await resolver2(true);
+		await resolver2();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><span>I am resolved.</span><span>I am resolved.</span>`
+			`<span>Loading...</span><span>B</span><span>C</span>`
 		);
 
-		await resolver1(true);
+		await resolver1();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>I am resolved.</span><span>I am resolved.</span>`
+			`<span>A</span><span>B</span><span>C</span>`
 		);
 	});
 
@@ -249,22 +249,22 @@ describe('suspense-list', () => {
 			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await resolver1(true);
+		await resolver1();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
 			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await resolver3(true);
+		await resolver3();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><span>Loading...</span><span>I am resolved.</span>`
+			`<span>Loading...</span><span>Loading...</span><span>C</span>`
 		);
 
-		await resolver2(true);
+		await resolver2();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>I am resolved.</span><span>I am resolved.</span>`
+			`<span>A</span><span>B</span><span>C</span>`
 		);
 	});
 
@@ -276,22 +276,22 @@ describe('suspense-list', () => {
 			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await resolver1(true);
+		await resolver1();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
 			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await resolver3(true);
+		await resolver3();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
 			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await resolver2(true);
+		await resolver2();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>I am resolved.</span><span>I am resolved.</span>`
+			`<span>A</span><span>B</span><span>C</span>`
 		);
 	});
 
@@ -303,36 +303,36 @@ describe('suspense-list', () => {
 			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await resolver2(true);
+		await resolver2();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
 			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await resolver1(true);
+		await resolver1();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
 			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await resolver3(true);
+		await resolver3();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>I am resolved.</span><span>I am resolved.</span>`
+			`<span>A</span><span>B</span><span>C</span>`
 		);
 	});
 
 	it('should not do anything to non suspense elements', async () => {
-		const Component1 = getSuspendableComponent();
-		const Component2 = getSuspendableComponent();
+		const A = getSuspendableComponent('A');
+		const B = getSuspendableComponent('B');
 		render(
 			<SuspenseList>
 				<Suspense fallback={<span>Loading...</span>}>
-					<Component1 />
+					<A />
 				</Suspense>
 				<div>foo</div>
 				<Suspense fallback={<span>Loading...</span>}>
-					<Component2 />
+					<B />
 				</Suspense>
 				<span>bar</span>
 			</SuspenseList>,
@@ -344,40 +344,40 @@ describe('suspense-list', () => {
 			`<span>Loading...</span><div>foo</div><span>Loading...</span><span>bar</span>`
 		);
 
-		await Component1.resolve(true);
+		await A.resolve();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><div>foo</div><span>Loading...</span><span>bar</span>`
+			`<span>A</span><div>foo</div><span>Loading...</span><span>bar</span>`
 		);
 
-		await Component2.resolve(true);
+		await B.resolve();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><div>foo</div><span>I am resolved.</span><span>bar</span>`
+			`<span>A</span><div>foo</div><span>B</span><span>bar</span>`
 		);
 	});
 
 	it('should make sure nested SuspenseList works with forwards', async () => {
-		const Component1 = getSuspendableComponent();
-		const Component2 = getSuspendableComponent();
-		const Component3 = getSuspendableComponent();
-		const Component4 = getSuspendableComponent();
+		const A = getSuspendableComponent('A');
+		const B = getSuspendableComponent('B');
+		const C = getSuspendableComponent('C');
+		const D = getSuspendableComponent('D');
 
 		render(
-			<SuspenseList>
+			<SuspenseList revealOrder="forwards">
 				<Suspense fallback={<span>Loading...</span>}>
-					<Component1 />
+					<A />
 				</Suspense>
-				<SuspenseList>
+				<SuspenseList revealOrder="forwards">
 					<Suspense fallback={<span>Loading...</span>}>
-						<Component2 />
+						<B />
 					</Suspense>
 					<Suspense fallback={<span>Loading...</span>}>
-						<Component3 />
+						<C />
 					</Suspense>
 				</SuspenseList>
 				<Suspense fallback={<span>Loading...</span>}>
-					<Component4 />
+					<D />
 				</Suspense>
 			</SuspenseList>,
 			scratch
@@ -388,28 +388,28 @@ describe('suspense-list', () => {
 			`<span>Loading...</span><span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await Component2.resolve(true);
+		await B.resolve();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
 			`<span>Loading...</span><span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await Component1.resolve(true);
+		await A.resolve();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>I am resolved.</span><span>Loading...</span><span>Loading...</span>`
+			`<span>A</span><span>B</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await Component4.resolve(true);
+		await D.resolve();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>I am resolved.</span><span>Loading...</span><span>Loading...</span>`
+			`<span>A</span><span>B</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await Component3.resolve(true);
+		await C.resolve();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>I am resolved.</span><span>I am resolved.</span><span>I am resolved.</span><span>I am resolved.</span>`
+			`<span>A</span><span>B</span><span>B</span><span>C</span>`
 		);
 	});
 
