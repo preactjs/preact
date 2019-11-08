@@ -13,6 +13,7 @@ import { Fragment } from './create-element';
 export function Component(props, context) {
 	this.props = props;
 	this.context = context;
+	this.__data = {};
 }
 
 /**
@@ -26,10 +27,11 @@ export function Component(props, context) {
 Component.prototype.setState = function(update, callback) {
 	// only clone state when copying to nextState the first time.
 	let s;
-	if (this._nextState !== this.state) {
-		s = this._nextState;
+	const { __data } = this;
+	if (__data._nextState !== this.state) {
+		s = __data._nextState;
 	} else {
-		s = this._nextState = assign({}, this.state);
+		s = __data._nextState = assign({}, this.state);
 	}
 
 	if (typeof update == 'function') {

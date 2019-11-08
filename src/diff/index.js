@@ -80,18 +80,21 @@ export function diff(
 				c._renderCallbacks = [];
 			}
 
+			if (!c.__data) c.__data = {};
+			const { __data: compData } = c;
+
 			// Invoke getDerivedStateFromProps
-			if (c._nextState == null) {
-				c._nextState = c.state;
+			if (compData._nextState == null) {
+				compData._nextState = c.state;
 			}
 			if (newType.getDerivedStateFromProps != null) {
-				if (c._nextState == c.state) {
-					c._nextState = assign({}, c._nextState);
+				if (compData._nextState == c.state) {
+					compData._nextState = assign({}, compData._nextState);
 				}
 
 				assign(
-					c._nextState,
-					newType.getDerivedStateFromProps(newProps, c._nextState)
+					compData._nextState,
+					newType.getDerivedStateFromProps(newProps, compData._nextState)
 				);
 			}
 
@@ -122,10 +125,10 @@ export function diff(
 				if (
 					!c._force &&
 					c.shouldComponentUpdate != null &&
-					c.shouldComponentUpdate(newProps, c._nextState, cctx) === false
+					c.shouldComponentUpdate(newProps, compData._nextState, cctx) === false
 				) {
 					c.props = newProps;
-					c.state = c._nextState;
+					c.state = compData._nextState;
 					c._dirty = false;
 					c._vnode = newVNode;
 					newVNode._dom = oldVNode._dom;
@@ -142,7 +145,7 @@ export function diff(
 				}
 
 				if (c.componentWillUpdate != null) {
-					c.componentWillUpdate(newProps, c._nextState, cctx);
+					c.componentWillUpdate(newProps, compData._nextState, cctx);
 				}
 
 				if (c.componentDidUpdate != null) {
@@ -154,7 +157,7 @@ export function diff(
 
 			c.context = cctx;
 			c.props = newProps;
-			c.state = c._nextState;
+			c.state = compData._nextState;
 
 			if ((tmp = options._render)) tmp(newVNode);
 
