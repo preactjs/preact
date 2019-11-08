@@ -74,13 +74,13 @@ export function diff(
 
 				c.props = newProps;
 				if (!c.state) c.state = {};
+				if (!c.__data) c.__data = {};
 				c.context = cctx;
 				c._context = context;
 				isNew = c._dirty = true;
-				c._renderCallbacks = [];
+				c.__data._renderCallbacks = [];
 			}
 
-			if (!c.__data) c.__data = {};
 			const { __data: compData } = c;
 
 			// Invoke getDerivedStateFromProps
@@ -111,7 +111,7 @@ export function diff(
 				}
 
 				if (c.componentDidMount != null) {
-					c._renderCallbacks.push(c.componentDidMount);
+					compData._renderCallbacks.push(c.componentDidMount);
 				}
 			} else {
 				if (
@@ -133,7 +133,7 @@ export function diff(
 					c._vnode = newVNode;
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
-					if (c._renderCallbacks.length) {
+					if (compData._renderCallbacks.length) {
 						commitQueue.push(c);
 					}
 					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
@@ -149,7 +149,7 @@ export function diff(
 				}
 
 				if (c.componentDidUpdate != null) {
-					c._renderCallbacks.push(() => {
+					compData._renderCallbacks.push(() => {
 						c.componentDidUpdate(oldProps, oldState, snapshot);
 					});
 				}
@@ -194,7 +194,7 @@ export function diff(
 
 			c.base = newVNode._dom;
 
-			if (c._renderCallbacks.length) {
+			if (compData._renderCallbacks.length) {
 				commitQueue.push(c);
 			}
 
@@ -234,8 +234,8 @@ export function commitRoot(commitQueue, root) {
 
 	commitQueue.some(c => {
 		try {
-			commitQueue = c._renderCallbacks;
-			c._renderCallbacks = [];
+			commitQueue = compData._renderCallbacks;
+			compData._renderCallbacks = [];
 			commitQueue.some(cb => {
 				cb.call(c);
 			});

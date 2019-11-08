@@ -46,8 +46,9 @@ options.diffed = vnode => {
 
 options._commit = (vnode, commitQueue) => {
 	commitQueue.some(component => {
-		component._renderCallbacks.forEach(invokeCleanup);
-		component._renderCallbacks = component._renderCallbacks.filter(cb =>
+		const { __data } = component;
+		__data._renderCallbacks.forEach(invokeCleanup);
+		__data._renderCallbacks = __data._renderCallbacks.filter(cb =>
 			cb._value ? invokeEffect(cb) : true
 		);
 	});
