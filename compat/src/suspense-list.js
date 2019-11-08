@@ -34,7 +34,7 @@ export function SuspenseList(props) {
 // - do not set `Suspense.prototype.constructor` to `Suspense`
 SuspenseList.prototype = new Component();
 
-SuspenseList.prototype.getRevealOrder = function() {
+SuspenseList.prototype.__getRevealOrder = function() {
 	let order = this.props.revealOrder;
 	const parent = this._vnode._parent;
 
@@ -44,7 +44,7 @@ SuspenseList.prototype.getRevealOrder = function() {
 	 */
 	if (
 		parent.type.name === SuspenseList.name &&
-		parent._component.getRevealOrder() === 't'
+		parent._component.__getRevealOrder() === 't'
 	) {
 		order = 't';
 	}
@@ -88,7 +88,7 @@ SuspenseList.prototype.__suspenseWillResolve = function(vnode, cb) {
 	 * A Suspense list with revealorder=t is ready render only when all
 	 * of its children are ready to render.
 	 */
-	if (this.getRevealOrder() === 't') {
+	if (this.__getRevealOrder() === 't') {
 		if (
 			this._suspenseBoundaries.every(
 				suspenseBoundary => suspenseBoundary.suspenseResolvedCallback
@@ -109,7 +109,7 @@ SuspenseList.prototype.__findAndResolveNextcandidate = function() {
 		return;
 	}
 
-	const revealOrder = this.getRevealOrder();
+	const revealOrder = this.__getRevealOrder();
 	if (revealOrder === '') {
 		this._suspenseBoundaries.forEach(suspenseBoundary => {
 			if (
@@ -151,7 +151,7 @@ SuspenseList.prototype.componentDidMount = function() {
 	/**
 	 * A Suspense list with revealorder!=t is always ready render.
 	 */
-	const order = this.getRevealOrder();
+	const order = this.__getRevealOrder();
 	if (order !== 't') {
 		options.__suspenseWillResolve(this._vnode, () => {
 			this._readyToRender = true;
@@ -172,7 +172,7 @@ SuspenseList.prototype.render = function(props) {
 			vnode,
 			suspenseResolvedCallback: null
 		}));
-	if (this.getRevealOrder() === 'b') {
+	if (this.__getRevealOrder() === 'b') {
 		this._suspenseBoundaries.reverse();
 	}
 	return children;
