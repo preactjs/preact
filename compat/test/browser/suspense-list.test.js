@@ -400,16 +400,16 @@ describe('suspense-list', () => {
 			`<span>A</span><span>B</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await D.resolve();
-		rerender();
-		expect(scratch.innerHTML).to.eql(
-			`<span>A</span><span>B</span><span>Loading...</span><span>Loading...</span>`
-		);
-
 		await C.resolve();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
-			`<span>A</span><span>B</span><span>B</span><span>C</span>`
+			`<span>A</span><span>B</span><span>C</span><span>Loading...</span>`
+		);
+
+		await D.resolve();
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>A</span><span>B</span><span>C</span><span>D</span>`
 		);
 	});
 

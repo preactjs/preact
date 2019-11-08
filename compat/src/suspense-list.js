@@ -34,8 +34,6 @@ export function SuspenseList(props) {
 // - do not set `Suspense.prototype.constructor` to `Suspense`
 SuspenseList.prototype = new Component();
 
-SuspenseList.prototype._forwarded = true;
-
 SuspenseList.prototype.__suspenseDidResolve = function(vnode) {
 	this._suspenseBoundaries.some((suspenseBoundary, index) => {
 		if (suspenseBoundary.vnode === vnode) {
@@ -46,6 +44,9 @@ SuspenseList.prototype.__suspenseDidResolve = function(vnode) {
 					._isSuspenseResolved
 			) {
 				this._suspenseBoundaries[index + 1].suspenseResolvedCallback();
+			} else if (index === this._suspenseBoundaries.length - 1) {
+				this._isSuspenseResolved = true;
+				options.__suspenseDidResolve(this._vnode);
 			}
 			return true;
 		}

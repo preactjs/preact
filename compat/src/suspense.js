@@ -80,11 +80,12 @@ Suspense.prototype._childDidSuspend = function(promise) {
 			c._vnode._dom = null;
 
 			c._vnode._children = c.state._parkedChildren;
-			c.setState({ _parkedChildren: null });
-		}
-		this._isSuspenseResolved = true;
-		if (options.__suspenseDidResolve) {
-			options.__suspenseDidResolve(c._vnode);
+			c.setState({ _parkedChildren: null }, () => {
+				this._isSuspenseResolved = true;
+				if (options.__suspenseDidResolve) {
+					options.__suspenseDidResolve(c._vnode);
+				}
+			});
 		}
 	};
 
