@@ -46,7 +46,7 @@ Component.prototype.setState = function(update, callback) {
 	if (update == null) return;
 
 	if (this._vnode) {
-		this._force = false;
+		__data._force = false;
 		if (callback) this._renderCallbacks.push(callback);
 		enqueueRender(this);
 	}
@@ -62,7 +62,7 @@ Component.prototype.forceUpdate = function(callback) {
 		// Set render mode so that we can differentiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
-		this._force = true;
+		__data._force = true;
 		if (callback) this._renderCallbacks.push(callback);
 		enqueueRender(this);
 	}

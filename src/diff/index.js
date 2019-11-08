@@ -116,14 +116,14 @@ export function diff(
 			} else {
 				if (
 					newType.getDerivedStateFromProps == null &&
-					c._force == null &&
+					compData._force == null &&
 					c.componentWillReceiveProps != null
 				) {
 					c.componentWillReceiveProps(newProps, cctx);
 				}
 
 				if (
-					!c._force &&
+					!compData._force &&
 					c.shouldComponentUpdate != null &&
 					c.shouldComponentUpdate(newProps, compData._nextState, cctx) === false
 				) {
@@ -202,7 +202,7 @@ export function diff(
 				c._pendingError = c._processingException = null;
 			}
 
-			c._force = null;
+			compData._force = null;
 		} else {
 			newVNode._dom = diffElementNodes(
 				oldVNode._dom,
