@@ -6,6 +6,7 @@ import {
 	cloneElement
 } from 'preact';
 import { removeNode } from '../../src/util';
+import { suspenseDidResolve, suspenseWillResolve } from './suspense-list-utils';
 
 const oldCatchError = options._catchError;
 options._catchError = function(error, newVNode, oldVNode) {
@@ -82,9 +83,7 @@ Suspense.prototype._childDidSuspend = function(promise) {
 			c._vnode._children = c.state._parkedChildren;
 			c.setState({ _parkedChildren: null }, () => {
 				this._isSuspenseResolved = true;
-				if (options.__suspenseDidResolve) {
-					options.__suspenseDidResolve(c._vnode);
-				}
+				suspenseDidResolve(c._vnode);
 			});
 		}
 	};
@@ -97,13 +96,9 @@ Suspense.prototype._childDidSuspend = function(promise) {
 	}
 
 	// This option enables any extra wait required before resolving the suspended promise.
-	if (options.__suspenseWillResolve) {
-		promise.then(() => {
-			options.__suspenseWillResolve(c._vnode, onSuspensionComplete);
-		}, onSuspensionComplete);
-	} else {
-		promise.then(onSuspensionComplete, onSuspensionComplete);
-	}
+	promise.then(() => {
+		suspenseWillResolve(c._vnode, onSuspensionComplete);
+	}, onSuspensionComplete);
 };
 
 Suspense.prototype.render = function(props, state) {

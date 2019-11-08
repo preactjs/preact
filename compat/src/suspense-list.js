@@ -1,26 +1,6 @@
-import { Component, options, toChildArray } from 'preact';
+import { Component, toChildArray } from 'preact';
 import { Suspense } from './suspense';
-
-// Hook for Suspense boundaries to ask for any extra work before rendering suspended children.
-options.__suspenseWillResolve = (vnode, cb) => {
-	if (
-		vnode._parent._component &&
-		vnode._parent._component.__suspenseWillResolve
-	) {
-		vnode._parent._component.__suspenseWillResolve(vnode, cb);
-	} else {
-		cb();
-	}
-};
-
-options.__suspenseDidResolve = vnode => {
-	if (
-		vnode._parent._component &&
-		vnode._parent._component.__suspenseDidResolve
-	) {
-		vnode._parent._component.__suspenseDidResolve(vnode);
-	}
-};
+import { suspenseWillResolve, suspenseDidResolve } from './suspense-list-utils';
 
 // having custom inheritance instead of a class here saves a lot of bytes
 export function SuspenseList(props) {
@@ -68,7 +48,7 @@ SuspenseList.prototype.__suspenseDidResolve = function(vnode) {
 				this._suspenseBoundaries[index + 1].__suspenseResolvedCallback();
 			} else if (index === this._suspenseBoundaries.length - 1) {
 				this._isSuspenseResolved = true;
-				options.__suspenseDidResolve(this._vnode);
+				suspenseDidResolve(this._vnode);
 			}
 			return true;
 		}
@@ -94,7 +74,7 @@ SuspenseList.prototype.__suspenseWillResolve = function(vnode, cb) {
 				suspenseBoundary => suspenseBoundary.__suspenseResolvedCallback
 			)
 		) {
-			options.__suspenseWillResolve(this._vnode, () => {
+			suspenseWillResolve(this._vnode, () => {
 				this._readyToRender = true;
 				this.__findAndResolveNextcandidate();
 			});
@@ -153,7 +133,7 @@ SuspenseList.prototype.componentDidMount = function() {
 	 */
 	const order = this.__getRevealOrder();
 	if (order !== 't') {
-		options.__suspenseWillResolve(this._vnode, () => {
+		suspenseWillResolve(this._vnode, () => {
 			this._readyToRender = true;
 			this.__findAndResolveNextcandidate();
 		});
