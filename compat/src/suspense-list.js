@@ -61,11 +61,11 @@ SuspenseList.prototype.__suspenseDidResolve = function(vnode) {
 		if (suspenseBoundary.vnode === vnode) {
 			if (
 				this._suspenseBoundaries[index + 1] &&
-				this._suspenseBoundaries[index + 1].suspenseResolvedCallback &&
+				this._suspenseBoundaries[index + 1].__suspenseResolvedCallback &&
 				!this._suspenseBoundaries[index + 1].vnode._component
 					._isSuspenseResolved
 			) {
-				this._suspenseBoundaries[index + 1].suspenseResolvedCallback();
+				this._suspenseBoundaries[index + 1].__suspenseResolvedCallback();
 			} else if (index === this._suspenseBoundaries.length - 1) {
 				this._isSuspenseResolved = true;
 				options.__suspenseDidResolve(this._vnode);
@@ -79,7 +79,7 @@ SuspenseList.prototype.__suspenseWillResolve = function(vnode, cb) {
 	// set the callback to the correct position
 	this._suspenseBoundaries.some(suspenseBoundary => {
 		if (suspenseBoundary.vnode === vnode) {
-			suspenseBoundary.suspenseResolvedCallback = cb;
+			suspenseBoundary.__suspenseResolvedCallback = cb;
 			return true; // breaks the find loop
 		}
 	});
@@ -91,7 +91,7 @@ SuspenseList.prototype.__suspenseWillResolve = function(vnode, cb) {
 	if (this.__getRevealOrder() === 't') {
 		if (
 			this._suspenseBoundaries.every(
-				suspenseBoundary => suspenseBoundary.suspenseResolvedCallback
+				suspenseBoundary => suspenseBoundary.__suspenseResolvedCallback
 			)
 		) {
 			options.__suspenseWillResolve(this._vnode, () => {
@@ -114,18 +114,18 @@ SuspenseList.prototype.__findAndResolveNextcandidate = function() {
 		this._suspenseBoundaries.forEach(suspenseBoundary => {
 			if (
 				!suspenseBoundary.vnode._component._isSuspenseResolved &&
-				suspenseBoundary.suspenseResolvedCallback
+				suspenseBoundary.__suspenseResolvedCallback
 			) {
-				suspenseBoundary.suspenseResolvedCallback();
+				suspenseBoundary.__suspenseResolvedCallback();
 			}
 		});
 	} else if (revealOrder === 't') {
 		if (
 			this._suspenseBoundaries.every(
-				suspenseBoundary => suspenseBoundary.suspenseResolvedCallback
+				suspenseBoundary => suspenseBoundary.__suspenseResolvedCallback
 			)
 		) {
-			this._suspenseBoundaries[0].suspenseResolvedCallback();
+			this._suspenseBoundaries[0].__suspenseResolvedCallback();
 		}
 	} else {
 		/**
@@ -136,11 +136,11 @@ SuspenseList.prototype.__findAndResolveNextcandidate = function() {
 		this._suspenseBoundaries.some(suspenseBoundary => {
 			if (
 				!suspenseBoundary.vnode._component._isSuspenseResolved &&
-				suspenseBoundary.suspenseResolvedCallback
+				suspenseBoundary.__suspenseResolvedCallback
 			) {
-				suspenseBoundary.suspenseResolvedCallback();
+				suspenseBoundary.__suspenseResolvedCallback();
 				return true;
-			} else if (!suspenseBoundary.suspenseResolvedCallback) {
+			} else if (!suspenseBoundary.__suspenseResolvedCallback) {
 				return true;
 			}
 		});
@@ -170,7 +170,7 @@ SuspenseList.prototype.render = function(props) {
 		)
 		.map(vnode => ({
 			vnode,
-			suspenseResolvedCallback: null
+			__suspenseResolvedCallback: null
 		}));
 	if (this.__getRevealOrder() === 'b') {
 		this._suspenseBoundaries.reverse();
