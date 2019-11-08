@@ -58,11 +58,11 @@ SuspenseList.prototype.__getRevealOrder = function() {
 
 SuspenseList.prototype.__suspenseDidResolve = function(vnode) {
 	this._suspenseBoundaries.some((suspenseBoundary, index) => {
-		if (suspenseBoundary.vnode === vnode) {
+		if (suspenseBoundary.__vnode === vnode) {
 			if (
 				this._suspenseBoundaries[index + 1] &&
 				this._suspenseBoundaries[index + 1].__suspenseResolvedCallback &&
-				!this._suspenseBoundaries[index + 1].vnode._component
+				!this._suspenseBoundaries[index + 1].__vnode._component
 					._isSuspenseResolved
 			) {
 				this._suspenseBoundaries[index + 1].__suspenseResolvedCallback();
@@ -78,7 +78,7 @@ SuspenseList.prototype.__suspenseDidResolve = function(vnode) {
 SuspenseList.prototype.__suspenseWillResolve = function(vnode, cb) {
 	// set the callback to the correct position
 	this._suspenseBoundaries.some(suspenseBoundary => {
-		if (suspenseBoundary.vnode === vnode) {
+		if (suspenseBoundary.__vnode === vnode) {
 			suspenseBoundary.__suspenseResolvedCallback = cb;
 			return true; // breaks the find loop
 		}
@@ -113,7 +113,7 @@ SuspenseList.prototype.__findAndResolveNextcandidate = function() {
 	if (revealOrder === '') {
 		this._suspenseBoundaries.forEach(suspenseBoundary => {
 			if (
-				!suspenseBoundary.vnode._component._isSuspenseResolved &&
+				!suspenseBoundary.__vnode._component._isSuspenseResolved &&
 				suspenseBoundary.__suspenseResolvedCallback
 			) {
 				suspenseBoundary.__suspenseResolvedCallback();
@@ -135,7 +135,7 @@ SuspenseList.prototype.__findAndResolveNextcandidate = function() {
 		// find if the current vnode's suspense can be resolved
 		this._suspenseBoundaries.some(suspenseBoundary => {
 			if (
-				!suspenseBoundary.vnode._component._isSuspenseResolved &&
+				!suspenseBoundary.__vnode._component._isSuspenseResolved &&
 				suspenseBoundary.__suspenseResolvedCallback
 			) {
 				suspenseBoundary.__suspenseResolvedCallback();
@@ -168,8 +168,8 @@ SuspenseList.prototype.render = function(props) {
 				child.type.name === Suspense.name ||
 				child.type.name === SuspenseList.name
 		)
-		.map(vnode => ({
-			vnode,
+		.map(__vnode => ({
+			__vnode,
 			__suspenseResolvedCallback: null
 		}));
 	if (this.__getRevealOrder() === 'b') {
