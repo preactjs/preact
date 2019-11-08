@@ -34,6 +34,28 @@ export function SuspenseList(props) {
 // - do not set `Suspense.prototype.constructor` to `Suspense`
 SuspenseList.prototype = new Component();
 
+SuspenseList.prototype.getRevealOrder = function() {
+	let order = this.props.revealOrder;
+	const parent = this._vnode._parent;
+
+	/**
+	 * A nested SuspenseList whose parent SuspenseList has revealOrder=t
+	 * should behave as revealOrder=t. This makes everything appear together.
+	 */
+	if (
+		parent.type.name === SuspenseList.name &&
+		parent._component.getRevealOrder() === 't'
+	) {
+		order = 't';
+	}
+
+	if (!order) {
+		return '';
+	}
+
+	return order[0];
+};
+
 SuspenseList.prototype.__suspenseDidResolve = function(vnode) {
 	this._suspenseBoundaries.some((suspenseBoundary, index) => {
 		if (suspenseBoundary.vnode === vnode) {
@@ -62,6 +84,23 @@ SuspenseList.prototype.__suspenseWillResolve = function(vnode, cb) {
 		}
 	});
 
+	/**
+	 * A Suspense list with revealorder=t is ready render only when all
+	 * of its children are ready to render.
+	 */
+	if (this.getRevealOrder() === 't') {
+		if (
+			this._suspenseBoundaries.every(
+				suspenseBoundary => suspenseBoundary.suspenseResolvedCallback
+			)
+		) {
+			options.__suspenseWillResolve(this._vnode, () => {
+				this._readyToRender = true;
+				this.__findAndResolveNextcandidate();
+			});
+		}
+	}
+
 	this.__findAndResolveNextcandidate();
 };
 
@@ -70,8 +109,8 @@ SuspenseList.prototype.__findAndResolveNextcandidate = function() {
 		return;
 	}
 
-	const revealOrder = this.props.revealOrder;
-	if (!revealOrder) {
+	const revealOrder = this.getRevealOrder();
+	if (revealOrder === '') {
 		this._suspenseBoundaries.forEach(suspenseBoundary => {
 			if (
 				!suspenseBoundary.vnode._component._isSuspenseResolved &&
@@ -80,7 +119,15 @@ SuspenseList.prototype.__findAndResolveNextcandidate = function() {
 				suspenseBoundary.suspenseResolvedCallback();
 			}
 		});
-	} else if (revealOrder[0] === 'f' || revealOrder[0] === 'b') {
+	} else if (revealOrder === 't') {
+		if (
+			this._suspenseBoundaries.every(
+				suspenseBoundary => suspenseBoundary.suspenseResolvedCallback
+			)
+		) {
+			this._suspenseBoundaries[0].suspenseResolvedCallback();
+		}
+	} else {
 		/**
 		 * Forwards and backwards work the same way.
 		 * The direction is controlled in render method while creating `_suspenseBoundaries` itself.
@@ -97,22 +144,20 @@ SuspenseList.prototype.__findAndResolveNextcandidate = function() {
 				return true;
 			}
 		});
-	} else if (revealOrder[0] === 't') {
-		if (
-			this._suspenseBoundaries.every(
-				suspenseBoundary => suspenseBoundary.suspenseResolvedCallback
-			)
-		) {
-			this._suspenseBoundaries[0].suspenseResolvedCallback();
-		}
 	}
 };
 
 SuspenseList.prototype.componentDidMount = function() {
-	options.__suspenseWillResolve(this._vnode, () => {
-		this._readyToRender = true;
-		this.__findAndResolveNextcandidate();
-	});
+	/**
+	 * A Suspense list with revealorder!=t is always ready render.
+	 */
+	const order = this.getRevealOrder();
+	if (order !== 't') {
+		options.__suspenseWillResolve(this._vnode, () => {
+			this._readyToRender = true;
+			this.__findAndResolveNextcandidate();
+		});
+	}
 };
 
 SuspenseList.prototype.render = function(props) {
@@ -127,7 +172,7 @@ SuspenseList.prototype.render = function(props) {
 			vnode,
 			suspenseResolvedCallback: null
 		}));
-	if (props.revealOrder && props.revealOrder[0] === 'b') {
+	if (this.getRevealOrder() === 'b') {
 		this._suspenseBoundaries.reverse();
 	}
 	return children;

@@ -65,6 +65,34 @@ describe('suspense-list', () => {
 		return [A.resolve, B.resolve, C.resolve];
 	}
 
+	function getNestedSuspenseList(outerRevealOrder, innerRevealOrder) {
+		const A = getSuspendableComponent('A');
+		const B = getSuspendableComponent('B');
+		const C = getSuspendableComponent('C');
+		const D = getSuspendableComponent('D');
+
+		render(
+			<SuspenseList revealOrder={outerRevealOrder}>
+				<Suspense fallback={<span>Loading...</span>}>
+					<A />
+				</Suspense>
+				<SuspenseList revealOrder={innerRevealOrder}>
+					<Suspense fallback={<span>Loading...</span>}>
+						<B />
+					</Suspense>
+					<Suspense fallback={<span>Loading...</span>}>
+						<C />
+					</Suspense>
+				</SuspenseList>
+				<Suspense fallback={<span>Loading...</span>}>
+					<D />
+				</Suspense>
+			</SuspenseList>,
+			scratch
+		);
+		return [A.resolve, B.resolve, C.resolve, D.resolve];
+	}
+
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
@@ -358,62 +386,107 @@ describe('suspense-list', () => {
 	});
 
 	it('should make sure nested SuspenseList works with forwards', async () => {
-		const A = getSuspendableComponent('A');
-		const B = getSuspendableComponent('B');
-		const C = getSuspendableComponent('C');
-		const D = getSuspendableComponent('D');
-
-		render(
-			<SuspenseList revealOrder="forwards">
-				<Suspense fallback={<span>Loading...</span>}>
-					<A />
-				</Suspense>
-				<SuspenseList revealOrder="forwards">
-					<Suspense fallback={<span>Loading...</span>}>
-						<B />
-					</Suspense>
-					<Suspense fallback={<span>Loading...</span>}>
-						<C />
-					</Suspense>
-				</SuspenseList>
-				<Suspense fallback={<span>Loading...</span>}>
-					<D />
-				</Suspense>
-			</SuspenseList>,
-			scratch
+		const [resolveA, resolveB, resolveC, resolveD] = getNestedSuspenseList(
+			'forwards',
+			'forwards'
 		);
-
 		rerender(); // Re-render with fallback cuz lazy threw
 		expect(scratch.innerHTML).to.eql(
 			`<span>Loading...</span><span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await B.resolve();
+		await resolveB();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
 			`<span>Loading...</span><span>Loading...</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await A.resolve();
+		await resolveA();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
 			`<span>A</span><span>B</span><span>Loading...</span><span>Loading...</span>`
 		);
 
-		await C.resolve();
+		await resolveC();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
 			`<span>A</span><span>B</span><span>C</span><span>Loading...</span>`
 		);
 
-		await D.resolve();
+		await resolveD();
 		rerender();
 		expect(scratch.innerHTML).to.eql(
 			`<span>A</span><span>B</span><span>C</span><span>D</span>`
 		);
 	});
 
-	it.skip('should make sure nested SuspenseList works with backwards', async () => {});
+	it('should make sure nested SuspenseList works with backwards', async () => {
+		const [resolveA, resolveB, resolveC, resolveD] = getNestedSuspenseList(
+			'forwards',
+			'backwards'
+		);
+		rerender(); // Re-render with fallback cuz lazy threw
+		expect(scratch.innerHTML).to.eql(
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span><span>Loading...</span>`
+		);
 
-	it.skip('should make sure nested SuspenseList works with together', async () => {});
+		await resolveA();
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>A</span><span>Loading...</span><span>Loading...</span><span>Loading...</span>`
+		);
+
+		await resolveC();
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>A</span><span>Loading...</span><span>C</span><span>Loading...</span>`
+		);
+
+		await resolveB();
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>A</span><span>B</span><span>C</span><span>Loading...</span>`
+		);
+
+		await resolveD();
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>A</span><span>B</span><span>C</span><span>D</span>`
+		);
+	});
+
+	it('should make sure nested SuspenseList works with together', async () => {
+		const [resolveA, resolveB, resolveC, resolveD] = getNestedSuspenseList(
+			'together',
+			'forwards'
+		);
+		rerender(); // Re-render with fallback cuz lazy threw
+		expect(scratch.innerHTML).to.eql(
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span><span>Loading...</span>`
+		);
+
+		await resolveA();
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span><span>Loading...</span>`
+		);
+
+		await resolveD();
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span><span>Loading...</span>`
+		);
+
+		await resolveB();
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>Loading...</span><span>Loading...</span><span>Loading...</span><span>Loading...</span>`
+		);
+
+		await resolveC();
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>A</span><span>B</span><span>C</span><span>D</span>`
+		);
+	});
 });
