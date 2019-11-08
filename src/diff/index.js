@@ -234,8 +234,9 @@ export function commitRoot(commitQueue, root) {
 
 	commitQueue.some(c => {
 		try {
-			commitQueue = compData._renderCallbacks;
-			compData._renderCallbacks = [];
+			const { __data } = c;
+			commitQueue = __data._renderCallbacks;
+			__data._renderCallbacks = [];
 			commitQueue.some(cb => {
 				cb.call(c);
 			});
