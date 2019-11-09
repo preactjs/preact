@@ -1,8 +1,8 @@
-import { PreactContext, JSX } from 'preact';
+import { PreactContext, JSX, Component } from 'preact';
 
 type FC<P> = (props: P) => JSX.Element;
 
-type createComponentFN<P> = (getProps: () => P) => FC<P>;
+type createComponentFN<P> = (c: Component<P>) => FC<P>;
 /**
  * Wraps a FunctionalComponent to be handled with the composition api
  * @param fn
@@ -10,8 +10,8 @@ type createComponentFN<P> = (getProps: () => P) => FC<P>;
 export function createComponent<P>(fn: createComponentFN<P>): FC<P>;
 
 export type ReactiveHolder<T extends {}> = T & {
-  // get or set the immutable inner value of this reactive
-  $value: T;
+	// get or set the immutable inner value of this reactive
+	$value: T;
 };
 /**
  * Creates a Proxy around the `value` object that any time its change it will update the component
@@ -28,7 +28,7 @@ export type ValueHolder<T> = { value: T };
 export function value<T>(v?: T): ValueHolder<T>;
 
 export function unwrap<T>(
-  refOrValue: ValueHolder<T> | ReactiveHolder<T> | T
+	refOrValue: ValueHolder<T> | ReactiveHolder<T> | T
 ): T;
 export function isReactive(v: any): boolean;
 
@@ -43,16 +43,16 @@ export function onMounted(callback: () => void): void;
 export function onUnmounted(cb: () => void): void;
 
 export type EffectCallback<T> = (
-  args: T,
-  oldArgs: T,
-  onCleanup: Function
+	args: T,
+	oldArgs: T,
+	onCleanup: Function
 ) => void;
 export type PropGetter<P, T> = (props: P) => T;
 export type WatchSrc<T, P> =
-  | PropGetter<P, T>
-  | ValueHolder<T>
-  | ReactiveHolder<T>
-  | PreactContext<T>;
+	| PropGetter<P, T>
+	| ValueHolder<T>
+	| ReactiveHolder<T>
+	| PreactContext<T>;
 
 type WatchCb<T extends Array<any>, R> = (...value: T) => R;
 
@@ -76,55 +76,55 @@ export type WatchResult<T> = { readonly value: T };
 /** watch values */
 export function watch<P, T>(src: WatchSrc<T, P>): WatchResult<T>;
 export function watch<P, T0, T1>(
-  src: [WatchSrc<T0, P>, WatchSrc<T1, P>]
+	src: [WatchSrc<T0, P>, WatchSrc<T1, P>]
 ): WatchResult<[T0, T1]>;
 export function watch<P, T0, T1, T2>(
-  src: [WatchSrc<T0, P>, WatchSrc<T1, P>, WatchSrc<T2, P>]
+	src: [WatchSrc<T0, P>, WatchSrc<T1, P>, WatchSrc<T2, P>]
 ): WatchResult<[T0, T1, T2]>;
 
 /** watch values with a callback returning a promise and default value */
 export function watch<P, T, R>(
-  src: WatchSrc<T, P>,
-  cb: (value: T) => PromiseLike<R>,
-  def: R
+	src: WatchSrc<T, P>,
+	cb: (value: T) => PromiseLike<R>,
+	def: R
 ): WatchResult<R>;
 export function watch<P, T0, T1, R>(
-  src: [WatchSrc<T0, P>, WatchSrc<T1, P>],
-  cb: WatchCb<[T0, T1], PromiseLike<R>>,
-  def: R
+	src: [WatchSrc<T0, P>, WatchSrc<T1, P>],
+	cb: WatchCb<[T0, T1], PromiseLike<R>>,
+	def: R
 ): WatchResult<R>;
 export function watch<P, T0, T1, T2, R>(
-  src: [WatchSrc<T0, P>, WatchSrc<T1, P>, WatchSrc<T2, P>],
-  cb: WatchCb<[T0, T1, T2], PromiseLike<R>>,
-  def: R
+	src: [WatchSrc<T0, P>, WatchSrc<T1, P>, WatchSrc<T2, P>],
+	cb: WatchCb<[T0, T1, T2], PromiseLike<R>>,
+	def: R
 ): WatchResult<R>;
 
 /** watch values with a callback returning a promise */
 export function watch<P, T, R>(
-  src: WatchSrc<T, P>,
-  cb: WatchCb<[T], PromiseLike<R>>
+	src: WatchSrc<T, P>,
+	cb: WatchCb<[T], PromiseLike<R>>
 ): WatchResult<R | undefined>;
 export function watch<P, T0, T1, R>(
-  src: [WatchSrc<T0, P>, WatchSrc<T1, P>],
-  cb: WatchCb<[T0, T1], PromiseLike<R>>
+	src: [WatchSrc<T0, P>, WatchSrc<T1, P>],
+	cb: WatchCb<[T0, T1], PromiseLike<R>>
 ): WatchResult<R | undefined>;
 export function watch<P, T0, T1, T2, R>(
-  src: [WatchSrc<T0, P>, WatchSrc<T1, P>, WatchSrc<T2, P>],
-  cb: WatchCb<[T0, T1, T2], PromiseLike<R>>
+	src: [WatchSrc<T0, P>, WatchSrc<T1, P>, WatchSrc<T2, P>],
+	cb: WatchCb<[T0, T1, T2], PromiseLike<R>>
 ): WatchResult<R | undefined>;
 
 /** watch values with a callback returning a value */
 export function watch<P, T, R>(
-  src: WatchSrc<T, P>,
-  cb: WatchCb<[T], R>
+	src: WatchSrc<T, P>,
+	cb: WatchCb<[T], R>
 ): WatchResult<R>;
 export function watch<P, T0, T1, R>(
-  src: [WatchSrc<T0, P>, WatchSrc<T1, P>],
-  cb: WatchCb<[T0, T1], R>
+	src: [WatchSrc<T0, P>, WatchSrc<T1, P>],
+	cb: WatchCb<[T0, T1], R>
 ): WatchResult<R>;
 export function watch<P, T0, T1, T2, R>(
-  src: [WatchSrc<T0, P>, WatchSrc<T1, P>, WatchSrc<T2, P>],
-  cb: WatchCb<[T0, T1, T2], R>
+	src: [WatchSrc<T0, P>, WatchSrc<T1, P>, WatchSrc<T2, P>],
+	cb: WatchCb<[T0, T1, T2], R>
 ): WatchResult<R>;
 
 /**
@@ -136,12 +136,12 @@ export function watch<P, T0, T1, T2, R>(
  */
 export function effect<P, T>(src: WatchSrc<T, P>, cb: EffectCallback<T>): void;
 export function effect<P, T0, T1>(
-  src: [WatchSrc<T0, P>, WatchSrc<T1, P>],
-  cb: EffectCallback<[T0, T1]>
+	src: [WatchSrc<T0, P>, WatchSrc<T1, P>],
+	cb: EffectCallback<[T0, T1]>
 ): void;
 export function effect<P, T0, T1, T2>(
-  src: [WatchSrc<T0, P>, WatchSrc<T1, P>, WatchSrc<T2, P>],
-  cb: EffectCallback<[T0, T1, T2]>
+	src: [WatchSrc<T0, P>, WatchSrc<T1, P>, WatchSrc<T2, P>],
+	cb: EffectCallback<[T0, T1, T2]>
 ): void;
 // todo more effect overloads to cover all cases
 

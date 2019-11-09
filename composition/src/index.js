@@ -16,7 +16,7 @@ options._render = vnode => {
 	/** the vnode component is a uninitialized composition component */
 	if (c.constructor.__compositions && !c.__compositions) {
 		c.__compositions = { u: [], w: [], e: [], x: {} };
-		const render = c.constructor(() => c.props);
+		const render = c.constructor(c);
 		c.constructor = props => render(props, c.__compositions.r);
 	}
 

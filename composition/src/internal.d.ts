@@ -28,11 +28,12 @@ export interface ComponentComposition {
 	/** record of contexts connected via watch */
 	x: Record<string, PreactContext>;
 	/** record of contexts provided by this component */
-	c: Record<string, { _component: Component; _value: any }>;
+	c?: Record<string, { _component: Component; _value: any }>;
 	/** ref to forward to inner component */
 	r?: Ref<any>;
 }
 
 export interface Component extends PreactComponent<any, any> {
+	constructor: { (c: Component): any; __compositions?: boolean };
 	__compositions?: ComponentComposition;
 }
