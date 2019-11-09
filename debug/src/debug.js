@@ -303,7 +303,7 @@ export function initDebug() {
 			}
 
 			// Layout Effects
-			component._renderCallbacks.forEach(possibleEffect => {
+			component.__data._renderCallbacks.forEach(possibleEffect => {
 				if (
 					possibleEffect._value &&
 					!Array.isArray(possibleEffect._args) &&
