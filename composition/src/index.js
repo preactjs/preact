@@ -1,10 +1,20 @@
 import { options } from 'preact';
 import { assign } from '../../src/util';
 
-const EMPTY_STATE = {};
-
 /** @type {import('./internal').Component} */
 let currentComponent;
+
+let oldVNodeHook = options.vnode;
+options.vnode = vnode => {
+	let type = vnode.type;
+	// Update the ref to forward
+	if (type && type.__compositions && vnode.ref) {
+		vnode.props.ref = vnode.ref;
+		vnode.ref = null;
+	}
+
+	if (oldVNodeHook) oldVNodeHook(vnode);
+};
 
 let oldBeforeRender = options._render;
 options._render = vnode => {
@@ -16,23 +26,25 @@ options._render = vnode => {
 	/** the vnode component is a uninitialized composition component */
 	if (c.constructor.__compositions && !c.__compositions) {
 		c.__compositions = { u: [], w: [], e: [], x: {} };
+		// this could be simplified if the API change to receive `ref` in props
+		// c.constructor = c.constructor(c);
 		const render = c.constructor(c);
-		c.constructor = props => render(props, c.__compositions.r);
+		c.constructor =
+			'ref' in c.props
+				? props => {
+						let clone = assign({}, props);
+						delete clone.ref;
+						return render(clone, props.ref);
+				  }
+				: render;
 	}
 
 	/** the vnode component is a composition initialized component */
-	if (c.__compositions) {
-		// Update the ref to forward
-		if (vnode.ref) {
-			c.__compositions.r = vnode.ref;
-			vnode.ref = null;
-		}
-
+	if (c.__compositions)
 		// call all watch
 		c.__compositions.w.some(up => {
 			handleEffect(up, c);
 		});
-	}
 };
 
 let oldAfterDiff = options.diffed;
@@ -69,6 +81,12 @@ const $Reactive = Symbol('reactive');
 export function createComponent(comp) {
 	comp.__compositions = true;
 	return comp;
+}
+
+export function memo(comparer) {
+	currentComponent.shouldComponentUpdate = function(nextProps) {
+		return (comparer || shallowDiffers)(this.props, nextProps);
+	};
 }
 
 export function watch(src, cb, dv) {
@@ -116,7 +134,7 @@ export function inject(name, defaultValue) {
 	if (isReactive(src))
 		ctx._component.__compositions.w.push({
 			src,
-			cb: () => c.setState(EMPTY_STATE)
+			cb: () => c.forceUpdate()
 		});
 
 	return src;
@@ -132,7 +150,7 @@ export function reactive(value) {
 		},
 		set(v) {
 			x = v;
-			c.setState(EMPTY_STATE);
+			c.forceUpdate();
 		}
 	};
 	return Object.defineProperties(
@@ -149,7 +167,7 @@ export function reactive(value) {
 							if (v !== x[key]) {
 								x = assign({}, x);
 								x[key] = v;
-								c.setState(EMPTY_STATE);
+								c.forceUpdate();
 							}
 						}
 					}
@@ -176,7 +194,7 @@ export function value(v) {
 				set(newValue) {
 					if (v !== newValue) {
 						v = newValue;
-						c.setState(EMPTY_STATE);
+						c.forceUpdate();
 					}
 				},
 				enumerable: true
@@ -214,7 +232,7 @@ function handleEffect(up, c) {
 			if (isPromise(value))
 				value.then(v => {
 					watcher.value = v;
-					c.setState(EMPTY_STATE);
+					c.forceUpdate();
 				});
 			else watcher.value = value;
 		} else {
@@ -255,6 +273,18 @@ function resolveContext(context, c) {
 
 function argsChanged(oldArgs, newArgs) {
 	return !oldArgs || newArgs.some((arg, index) => arg !== oldArgs[index]);
+}
+
+/**
+ * Check if two objects have a different shape
+ * @param {object} a
+ * @param {object} b
+ * @returns {boolean}
+ */
+function shallowDiffers(a, b) {
+	for (let i in a) if (i !== '__source' && !(i in b)) return true;
+	for (let i in b) if (i !== '__source' && a[i] !== b[i]) return true;
+	return false;
 }
 
 function isPromise(obj) {

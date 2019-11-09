@@ -9,6 +9,8 @@ type createComponentFN<P> = (c: Component<P>) => FC<P>;
  */
 export function createComponent<P>(fn: createComponentFN<P>): FC<P>;
 
+export function memo<P = {}>(comparer?: (prev: P, next: P) => boolean): void;
+
 export type ReactiveHolder<T extends {}> = T & {
 	// get or set the immutable inner value of this reactive
 	$value: T;
