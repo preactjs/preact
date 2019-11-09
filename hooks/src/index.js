@@ -151,7 +151,7 @@ export function useLayoutEffect(callback, args) {
 		state._value = callback;
 		state._args = args;
 
-		currentComponent._renderCallbacks.push(state);
+		currentComponent.__data._renderCallbacks.push(state);
 	}
 }
 
