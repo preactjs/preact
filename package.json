@@ -8,6 +8,7 @@
   "module": "dist/preact.module.js",
   "umd:main": "dist/preact.umd.js",
   "unpkg": "dist/preact.umd.js",
+  "sideEffects": false,
   "source": "src/index.js",
   "license": "MIT",
   "funding": {
