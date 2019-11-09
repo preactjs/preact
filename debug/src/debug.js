@@ -356,7 +356,7 @@ Component.prototype.setState = function(update, callback) {
 				`no-op and might be a bug in your application. Instead, set ` +
 				`"this.state = {}" directly.`
 		);
-	} else if (this._parentDom == null) {
+	} else if (this.__data._parentDom == null) {
 		console.warn(
 			`Can't call "this.setState" on an unmounted component. This is a no-op, ` +
 				`but it indicates a memory leak in your application. To fix, cancel all ` +
@@ -374,7 +374,7 @@ Component.prototype.forceUpdate = function(callback) {
 			`Calling "this.forceUpdate" inside the constructor of a component is a ` +
 				`no-op and might be a bug in your application.`
 		);
-	} else if (this._parentDom == null) {
+	} else if (this.__data._parentDom == null) {
 		console.warn(
 			`Can't call "this.setState" on an unmounted component. This is a no-op, ` +
 				`but it indicates a memory leak in your application. To fix, cancel all ` +

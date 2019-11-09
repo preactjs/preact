@@ -76,7 +76,7 @@ export function diff(
 				if (!c.state) c.state = {};
 				if (!c.__data) c.__data = {};
 				c.context = cctx;
-				c._context = context;
+				c.__data._context = context;
 				isNew = c.__data._dirty = true;
 				c.__data._renderCallbacks = [];
 			}
@@ -163,7 +163,7 @@ export function diff(
 
 			compData._dirty = false;
 			c._vnode = newVNode;
-			c._parentDom = parentDom;
+			compData._parentDom = parentDom;
 
 			tmp = c.render(c.props, c.state, c.context);
 			let isTopLevelFragment =
@@ -429,7 +429,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 			}
 		}
 
-		r.base = r._parentDom = null;
+		r.base = r.__data._parentDom = null;
 	}
 
 	if ((r = vnode._children)) {
