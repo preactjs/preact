@@ -74,10 +74,11 @@ export function diff(
 
 				c.props = newProps;
 				if (!c.state) c.state = {};
-				if (!c.__data) c.__data = { _dirty: true, _renderCallbacks: [] };
+				if (!c.__data) c.__data = {};
 				c.context = cctx;
 				c._context = context;
-				isNew = c._dirty = true;
+				isNew = c.__data._dirty = true;
+				c.__data._renderCallbacks = [];
 			}
 
 			const { __data: compData } = c;
@@ -128,7 +129,7 @@ export function diff(
 				) {
 					c.props = newProps;
 					c.state = compData._nextState;
-					c._dirty = false;
+					compData._dirty = false;
 					c._vnode = newVNode;
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
@@ -160,7 +161,7 @@ export function diff(
 
 			if ((tmp = options._render)) tmp(newVNode);
 
-			c._dirty = false;
+			compData._dirty = false;
 			c._vnode = newVNode;
 			c._parentDom = parentDom;
 

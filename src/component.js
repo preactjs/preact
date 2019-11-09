@@ -193,8 +193,9 @@ let prevDebounce;
  * @param {import('./internal').Component} c The component to rerender
  */
 export function enqueueRender(c) {
+	const { __data: cData } = c;
 	if (
-		(!c._dirty && (c._dirty = true) && q.push(c) === 1) ||
+		(!cData._dirty && (cData._dirty = true) && q.push(c) === 1) ||
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
@@ -208,6 +209,6 @@ function process() {
 	q.sort((a, b) => b._vnode._depth - a._vnode._depth);
 	while ((p = q.pop())) {
 		// forceUpdate's callback argument is reused here to indicate a non-forced update.
-		if (p._dirty) renderComponent(p);
+		if (p.__data._dirty) renderComponent(p);
 	}
 }
