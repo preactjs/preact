@@ -46,7 +46,7 @@ function detachDom(children) {
 // having custom inheritance instead of a class here saves a lot of bytes
 export function Suspense(props) {
 	// we do not call super here to golf some bytes...
-	this._suspensions = [];
+	this.__data._suspensions = [];
 	this._fallback = props.fallback;
 }
 
@@ -61,20 +61,21 @@ Suspense.prototype = new Component();
 Suspense.prototype._childDidSuspend = function(promise) {
 	/** @type {import('./internal').SuspenseComponent} */
 	const c = this;
-	c._suspensions.push(promise);
+	const { __data: cData } = c;
+	cData._suspensions.push(promise);
 
 	const onSuspensionComplete = () => {
 		// From https://twitter.com/Rich_Harris/status/1125850391155965952
-		c._suspensions[c._suspensions.indexOf(promise)] =
-			c._suspensions[c._suspensions.length - 1];
-		c._suspensions.pop();
+		cData._suspensions[cData._suspensions.indexOf(promise)] =
+			cData._suspensions[cData._suspensions.length - 1];
+		cData._suspensions.pop();
 
-		if (c._suspensions.length == 0) {
+		if (cData._suspensions.length == 0) {
 			// If fallback is null, don't try to unmount it
 			// `unmount` expects a real VNode, not null values
-			if (c._fallback) {
+			if (cData._fallback) {
 				// Unmount current children (should be fallback)
-				unmount(c._fallback);
+				unmount(cData._fallback);
 			}
 			c._vnode._dom = null;
 
@@ -84,7 +85,7 @@ Suspense.prototype._childDidSuspend = function(promise) {
 	};
 
 	if (c.state._parkedChildren == null) {
-		c._fallback = c._fallback && cloneElement(c._fallback);
+		cData._fallback = cData._fallback && cloneElement(cData._fallback);
 		c.setState({ _parkedChildren: c._vnode._children });
 		detachDom(c._vnode._children);
 		c._vnode._children = [];
@@ -94,7 +95,7 @@ Suspense.prototype._childDidSuspend = function(promise) {
 };
 
 Suspense.prototype.render = function(props, state) {
-	return state._parkedChildren ? this._fallback : props.children;
+	return state._parkedChildren ? this.__data._fallback : props.children;
 };
 
 export function lazy(loader) {

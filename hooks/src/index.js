@@ -23,6 +23,7 @@ options._render = vnode => {
 	currentComponent = vnode._component;
 	currentIndex = 0;
 
+	// TODO: __data (?)
 	if (currentComponent.__hooks) {
 		currentComponent.__hooks._pendingEffects.forEach(invokeCleanup);
 		currentComponent.__hooks._pendingEffects.forEach(invokeEffect);

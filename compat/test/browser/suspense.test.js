@@ -913,7 +913,6 @@ describe('suspense', () => {
 			scratch
 		);
 		rerender(); // Rerender with the fallback HTML
-
 		expect(scratch.innerHTML).to.equal(loadingHtml);
 
 		resolve1(() => <b>1</b>)
