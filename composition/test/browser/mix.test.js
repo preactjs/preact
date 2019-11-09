@@ -1,13 +1,12 @@
-import { createElement as h, render } from 'preact';
+import { createElement, render } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { createComponent, value, onMounted, onUnmounted } from '../../src';
 import { nextFrame } from '../_util/nextFrame';
 
-/** @jsx h */
+/** @jsx createElement */
 
 describe('hooks and composition', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -90,6 +89,5 @@ describe('hooks and composition', () => {
 
 		expect(spyUnmounted).to.be.called;
 		expect(spyCleanup).to.be.calledOnce;
-
 	});
 });

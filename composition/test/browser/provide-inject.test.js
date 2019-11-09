@@ -1,13 +1,12 @@
 /* eslint-disable react/display-name */
-import { h, render, Component } from 'preact';
+import { createElement, render, Component } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { createComponent, provide, inject, reactive } from '../../src';
 import { nextFrame } from '../_util/nextFrame';
 
-/** @jsx h */
+/** @jsx createElement */
 
 describe('provide/inject', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 

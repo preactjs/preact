@@ -1,12 +1,11 @@
 /* eslint-disable react/display-name */
-import { h, render, createContext, Component } from 'preact';
+import { createElement, render, createContext, Component } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { createComponent, watch, onUnmounted } from '../../src';
 
-/** @jsx h */
+/** @jsx createElement */
 
 describe('context', () => {
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
