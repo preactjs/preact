@@ -193,13 +193,13 @@ export function isReactive(v) {
 	return typeof v === 'object' && !!v && $Reactive in v;
 }
 
-function handleEffect(up, c, init) {
+function handleEffect(up, c) {
 	const srcIsArray = Array.isArray(up.src);
 	const watcher = up.vr;
 	const oldArgs = up.args;
 	const newArgs = srcIsArray
 		? up.src.reduce((acc, s) => (acc.push(resolveArgs(s, c)), acc), [])
-		: resolveArgs(up.src, c, init);
+		: resolveArgs(up.src, c);
 
 	if (srcIsArray ? argsChanged(oldArgs, newArgs) : oldArgs !== newArgs) {
 		up.args = newArgs;
