@@ -47,7 +47,7 @@ function detachDom(children) {
 export function Suspense(props) {
 	// we do not call super here to golf some bytes...
 	this.__data._suspensions = [];
-	this._fallback = props.fallback;
+	this.__data._fallback = props.fallback;
 }
 
 // Things we do here to save some bytes but are not proper JS inheritance:
