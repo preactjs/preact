@@ -75,7 +75,7 @@ describe('debug with suspense', () => {
 			expect(console.error).to.not.be.called;
 
 			return loader
-				.then(() => Promise.all(suspense._component._suspensions))
+				.then(() => Promise.all(suspense._component.__data._suspensions))
 				.then(() => {
 					rerender();
 					expect(errors.length).to.equal(1);
@@ -101,7 +101,7 @@ describe('debug with suspense', () => {
 				render(suspense, scratch);
 
 				return loader
-					.then(() => Promise.all(suspense._component._suspensions))
+					.then(() => Promise.all(suspense._component.__data._suspensions))
 					.then(() => {
 						expect(console.warn).to.be.calledTwice;
 						expect(warnings[1].includes('MyLazyLoaded')).to.equal(true);
@@ -124,7 +124,7 @@ describe('debug with suspense', () => {
 				render(suspense, scratch);
 
 				return loader
-					.then(() => Promise.all(suspense._component._suspensions))
+					.then(() => Promise.all(suspense._component.__data._suspensions))
 					.then(() => {
 						expect(console.warn).to.be.calledTwice;
 						expect(warnings[1].includes('HelloLazy')).to.equal(true);
