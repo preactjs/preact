@@ -60,7 +60,8 @@ export function diff(
 			// Get component and set it to `c`
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
-				clearProcessingException = c._processingException = c._pendingError;
+				clearProcessingException = c.__data._processingException =
+					c.__data._pendingError;
 			} else {
 				// Instantiate the new component
 				if ('prototype' in newType && newType.prototype.render) {
@@ -199,7 +200,7 @@ export function diff(
 			}
 
 			if (clearProcessingException) {
-				c._pendingError = c._processingException = null;
+				compData._pendingError = compData._processingException = null;
 			}
 
 			compData._force = null;

@@ -12,7 +12,10 @@ export function _catchError(error, vnode) {
 	let component;
 
 	for (; (vnode = vnode._parent); ) {
-		if ((component = vnode._component) && !component._processingException) {
+		if (
+			(component = vnode._component) &&
+			!component.__data._processingException
+		) {
 			try {
 				if (
 					component.constructor &&
@@ -26,7 +29,7 @@ export function _catchError(error, vnode) {
 				} else {
 					continue;
 				}
-				return enqueueRender((component._pendingError = component));
+				return enqueueRender((component.__data._pendingError = component));
 			} catch (e) {
 				error = e;
 			}
