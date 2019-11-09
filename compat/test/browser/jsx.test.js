@@ -3,8 +3,8 @@ import {
 	teardown,
 	serializeHtml
 } from '../../../test/_util/helpers';
-import React, { isValidElement } from '../../src';
-import { h as preactH } from 'preact';
+import React, { createElement, isValidElement } from 'preact/compat';
+import { createElement as preactH } from 'preact';
 
 describe('jsx', () => {
 	/** @type {HTMLDivElement} */

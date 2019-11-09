@@ -1,10 +1,10 @@
-import { createElement, Component } from "../../src";
+import { createElement, Component } from '../../src';
 
 // declare global JSX types that should not be mixed with preact's internal types
 declare global {
 	namespace JSX {
 		interface Element {
-			unknownProperty: string
+			unknownProperty: string;
 		}
 	}
 }

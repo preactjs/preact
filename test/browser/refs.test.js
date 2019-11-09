@@ -1,13 +1,8 @@
 import { setupRerender } from 'preact/test-utils';
-import {
-	createElement as h,
-	render,
-	Component,
-	createRef
-} from '../../src/index';
+import { createElement, render, Component, createRef } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 
-/** @jsx h */
+/** @jsx createElement */
 
 // gives call count and argument errors names (otherwise sinon just uses "spy"):
 let spy = (name, ...args) => {

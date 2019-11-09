@@ -6,13 +6,11 @@ import {
 	useMemo,
 	useCallback
 } from 'preact/hooks';
-import { initDebug } from '../../src/debug';
+import 'preact/debug';
 import { act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 /** @jsx createElement */
-
-initDebug();
 
 describe('debug with hooks', () => {
 	let scratch;

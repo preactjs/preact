@@ -1,10 +1,10 @@
 import { act } from 'preact/test-utils';
-import { createElement as h, render, Fragment } from 'preact';
+import { createElement, render, Fragment } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useEffectAssertions } from './useEffectAssertions.test';
-import { useLayoutEffect, useRef, useState } from '../../src';
+import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 
-/** @jsx h */
+/** @jsx createElement */
 
 describe('useLayoutEffect', () => {
 	/** @type {HTMLDivElement} */

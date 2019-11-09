@@ -1,4 +1,4 @@
-import { createElement, render, toChildArray } from '../../src/index';
+import { createElement, render, toChildArray } from 'preact';
 import {
 	setupScratch,
 	teardown,

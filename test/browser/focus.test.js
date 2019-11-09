@@ -1,16 +1,11 @@
 import { setupRerender } from 'preact/test-utils';
-import {
-	createElement as h,
-	render,
-	Component,
-	Fragment,
-	hydrate
-} from '../../src/index';
+import { createElement, render, Component, Fragment, hydrate } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 import { div, span, input as inputStr, h1, h2 } from '../_util/dom';
+
+/** @jsx createElement */
 /* eslint-disable react/jsx-boolean-value */
 
-/** @jsx h */
 describe('focus', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;

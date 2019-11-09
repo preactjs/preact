@@ -1,15 +1,10 @@
 import { setupRerender } from 'preact/test-utils';
-import {
-	createElement as h,
-	render,
-	Component,
-	Fragment
-} from '../../src/index';
+import { createElement, render, Component, Fragment } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 import { span, div, ul, ol, li, section } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 
-/** @jsx h */
+/** @jsx createElement */
 /* eslint-disable react/jsx-boolean-value */
 
 describe('Fragment', () => {

@@ -140,28 +140,8 @@ module.exports = function(config) {
 						exclude: /node_modules/,
 						loader: 'babel-loader',
 						options: {
-							// comments: false,
-							// compact: true,
 							plugins: coverage
-								? [
-										[
-											'istanbul',
-											{
-												exclude: [
-													// Default config
-													'coverage/**',
-													'dist/**',
-													'test/**',
-													'test{,-*}.js',
-													'**/*.test.js',
-													'**/__tests__/**',
-													'**/node_modules/**',
-													// Our custom extension
-													'{debug,hooks,composition,compat,test-utils}/test/**/*'
-												]
-											}
-										]
-								  ]
+								? [['istanbul', { include: '**/src/**/*.js' }]]
 								: []
 						}
 					}
@@ -172,6 +152,7 @@ module.exports = function(config) {
 				// rather than referencing source files inside the module
 				// directly
 				alias: {
+					'preact/debug': path.join(__dirname, './debug/src'),
 					'preact/compat': path.join(__dirname, './compat/src'),
 					'preact/hooks': path.join(__dirname, './hooks/src'),
 					'preact/composition': path.join(__dirname, './composition/src'),

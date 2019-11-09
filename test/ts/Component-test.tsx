@@ -1,11 +1,11 @@
-import "mocha";
-import { expect } from "chai";
+import 'mocha';
+import { expect } from 'chai';
 import {
 	createElement,
 	Component,
 	RenderableProps,
 	Fragment
-} from "../../src/";
+} from '../../src/';
 
 export class ContextComponent extends Component<{ foo: string }> {
 	getChildContext() {
@@ -91,18 +91,21 @@ class RandomChildrenComponent extends Component<RandomChildrenComponentProps> {
 			return val;
 		}
 		if (span) {
-			return <span>hi</span>
+			return <span>hi</span>;
 		}
 		return null;
 	}
 }
 
 class StaticComponent extends Component<SimpleComponentProps, SimpleState> {
-	static getDerivedStateFromProps(props: SimpleComponentProps, state: SimpleState): Partial<SimpleState> {
+	static getDerivedStateFromProps(
+		props: SimpleComponentProps,
+		state: SimpleState
+	): Partial<SimpleState> {
 		return {
 			...props,
 			...state
-		}
+		};
 	}
 
 	static getDerivedStateFromError(err: Error) {
@@ -121,33 +124,33 @@ function MapperItem(props: { foo: number }) {
 }
 
 function Mapper() {
-	return [1, 2, 3].map(x => <MapperItem foo={x} key={x}/>)
+	return [1, 2, 3].map(x => <MapperItem foo={x} key={x} />);
 }
 
-describe("Component", () => {
-	const component = new SimpleComponent({ initialName: "da name" });
+describe('Component', () => {
+	const component = new SimpleComponent({ initialName: 'da name' });
 
-	it("has state", () => {
-		expect(component.state.name).to.eq("da name");
+	it('has state', () => {
+		expect(component.state.name).to.eq('da name');
 	});
 
-	it("has props", () => {
-		expect(component.props.initialName).to.eq("da name");
+	it('has props', () => {
+		expect(component.props.initialName).to.eq('da name');
 	});
 
-	it("has no base when not mounted", () => {
+	it('has no base when not mounted', () => {
 		expect(component.base).to.not.exist;
 	});
 
-	describe("setState", () => {
+	describe('setState', () => {
 		// No need to execute these tests. because we only need to check if
 		// the types are working. Executing them would require the DOM.
 		// TODO: Run TS tests in our standard karma setup
-		it.skip("can be used with an object", () => {
-			component.setState({ name: "another name" });
+		it.skip('can be used with an object', () => {
+			component.setState({ name: 'another name' });
 		});
 
-		it.skip("can be used with a function", () => {
+		it.skip('can be used with a function', () => {
 			const updater = (state: any, props: any) => ({
 				name: `${state.name} - ${props.initialName}`
 			});
@@ -155,8 +158,8 @@ describe("Component", () => {
 		});
 	});
 
-	describe("render", () => {
-		it("can return null", () => {
+	describe('render', () => {
+		it('can return null', () => {
 			const comp = new SimpleComponent({ initialName: null });
 			const actual = comp.render();
 
@@ -164,12 +167,14 @@ describe("Component", () => {
 		});
 	});
 
-	describe("Fragment", () => {
+	describe('Fragment', () => {
 		it('should render nested Fragments', () => {
-			var vnode = <Fragment>
+			var vnode = (
+				<Fragment>
 					<Fragment>foo</Fragment>
 					bar
 				</Fragment>
+			);
 
 			expect(vnode.type).to.be.equal(Fragment);
 		});

@@ -1,6 +1,6 @@
 import { options as rawOptions } from 'preact';
 
-/** @type {import('../../src/internal').Options} */
+/** @type {import('preact/src/internal').Options} */
 let options = rawOptions;
 
 let oldVNode = options.vnode;

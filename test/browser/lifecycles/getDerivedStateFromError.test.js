@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component } from '../../../src/index';
+import { createElement, render, Component } from 'preact';
 import {
 	setupScratch,
 	teardown,
@@ -52,8 +52,8 @@ describe('Lifecycle methods', () => {
 			}
 		}
 
-		spyAll(Receiver.prototype);
 		spyAll(Receiver);
+		spyAll(Receiver.prototype);
 
 		function throwExpectedError() {
 			throw (expectedError = new Error('Error!'));
@@ -73,8 +73,9 @@ describe('Lifecycle methods', () => {
 
 			expectedError = undefined;
 			receiver = undefined;
-			resetAllSpies(Receiver.prototype);
+
 			resetAllSpies(Receiver);
+			resetAllSpies(Receiver.prototype);
 		});
 
 		afterEach(() => {

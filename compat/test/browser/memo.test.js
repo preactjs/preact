@@ -1,8 +1,8 @@
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { Component, render, createElement as h, memo } from '../../src';
+import React, { createElement, Component, render, memo } from 'preact/compat';
 
-/** @jsx h */
+const h = React.createElement;
 
 describe('memo()', () => {
 	let scratch, rerender;

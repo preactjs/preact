@@ -7,7 +7,7 @@ import React, {
 	unmountComponentAtNode,
 	createFactory,
 	unstable_batchedUpdates
-} from '../../src';
+} from 'preact/compat';
 import { createElement as preactH } from 'preact';
 import {
 	setupScratch,

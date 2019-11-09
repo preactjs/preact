@@ -3,21 +3,13 @@
 		"target": "es6",
 		"module": "es6",
 		"moduleResolution": "node",
-		"lib": [
-			"es6",
-			"dom"
-		],
+		"lib": ["es6", "dom"],
 		"strict": true,
-		"typeRoots": [
-			"../../"
-		],
+		"typeRoots": ["../../"],
 		"types": [],
 		"forceConsistentCasingInFileNames": true,
 		"jsx": "react",
 		"jsxFactory": "createElement"
 	},
-	"include": [
-		"./**/*.ts",
-		"./**/*.tsx"
-	]
+	"include": ["./**/*.ts", "./**/*.tsx"]
 }

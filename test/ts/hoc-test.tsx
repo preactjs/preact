@@ -1,31 +1,29 @@
-import { expect } from "chai";
+import { expect } from 'chai';
 import {
 	createElement,
 	ComponentFactory,
 	ComponentConstructor,
 	Component
-} from "../../src";
-import {
-	SimpleComponent,
-	SimpleComponentProps
-} from "./Component-test";
+} from '../../src';
+import { SimpleComponent, SimpleComponentProps } from './Component-test';
 
 export interface highlightedProps {
 	isHighlighted: boolean;
 }
 
-export function highlighted<T>(Wrappable: ComponentFactory<T>): ComponentConstructor<T & highlightedProps> {
+export function highlighted<T>(
+	Wrappable: ComponentFactory<T>
+): ComponentConstructor<T & highlightedProps> {
 	return class extends Component<T & highlightedProps> {
-
 		constructor(props: T & highlightedProps) {
 			super(props);
 		}
 
 		render() {
-			let className = this.props.isHighlighted ? "highlighted" : "";
+			let className = this.props.isHighlighted ? 'highlighted' : '';
 			return (
 				<div className={className}>
-					<Wrappable {...this.props}/>
+					<Wrappable {...this.props} />
 				</div>
 			);
 		}
@@ -33,18 +31,20 @@ export function highlighted<T>(Wrappable: ComponentFactory<T>): ComponentConstru
 		toString() {
 			return `Highlighted ${Wrappable.name}`;
 		}
-	}
+	};
 }
 
-const HighlightedSimpleComponent = highlighted<SimpleComponentProps>(SimpleComponent);
+const HighlightedSimpleComponent = highlighted<SimpleComponentProps>(
+	SimpleComponent
+);
 
-describe("hoc", () => {
-	it("wraps the given component", () => {
+describe('hoc', () => {
+	it('wraps the given component', () => {
 		const highlight = new HighlightedSimpleComponent({
-			initialName: "initial name",
+			initialName: 'initial name',
 			isHighlighted: true
 		});
 
-		expect(highlight.toString()).to.eq("Highlighted SimpleComponent");
+		expect(highlight.toString()).to.eq('Highlighted SimpleComponent');
 	});
 });
