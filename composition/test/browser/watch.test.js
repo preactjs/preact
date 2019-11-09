@@ -4,7 +4,7 @@ import { createComponent, watch, unwrap, isReactive, value } from '../../src';
 
 /** @jsx createElement */
 
-describe('memo', () => {
+describe('watch', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -20,7 +20,7 @@ describe('memo', () => {
 		let memoFunction = sinon.spy((a, b) => a + b);
 		const results = [];
 
-		const Comp = createComponent(({ a, b }) => {
+		const Comp = createComponent(() => {
 			const result = watch([props => props.a, props => props.b], memoFunction);
 
 			return () => {
