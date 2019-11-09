@@ -120,16 +120,17 @@ export function getDomSibling(vnode, childIndex) {
 function renderComponent(component) {
 	let vnode = component._vnode,
 		oldDom = vnode._dom,
-		__data = component.__data;
+		__data = component.__data,
+		parentDom = __data._parentDom;
 
-	if (__data.parentDom) {
+	if (parentDom) {
 		let commitQueue = [];
 		let newDom = diff(
-			__data.parentDom,
+			parentDom,
 			vnode,
 			assign({}, vnode),
 			__data._context,
-			__data.parentDom.ownerSVGElement !== undefined,
+			parentDom.ownerSVGElement !== undefined,
 			null,
 			commitQueue,
 			oldDom == null ? getDomSibling(vnode) : oldDom
