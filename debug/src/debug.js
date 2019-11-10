@@ -124,9 +124,9 @@ export function initDebug() {
 		} else if (
 			type === 'tr' &&
 			parentVNode.type !== 'thead' &&
-				parentVNode.type !== 'tfoot' &&
-				parentVNode.type !== 'tbody' &&
-				parentVNode.type !== 'table'
+			parentVNode.type !== 'tfoot' &&
+			parentVNode.type !== 'tbody' &&
+			parentVNode.type !== 'table'
 		) {
 			console.error(
 				'Improper nesting of table. Your <tr> should have a <thead/tbody/tfoot/table> parent.' +
@@ -269,8 +269,8 @@ export function initDebug() {
 
 		/** @type {import('./internal').Component} */
 		const component = vnode._component;
-		if (component && component.__hooks) {
-			let hooks = component.__hooks;
+		if (component && component.__data.__hooks) {
+			let hooks = component.__data.__hooks;
 			if (Array.isArray(hooks._list)) {
 				hooks._list.forEach(hook => {
 					if (hook._callback && (!hook._args || !Array.isArray(hook._args))) {

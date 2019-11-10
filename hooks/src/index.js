@@ -21,13 +21,13 @@ options._render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
 
 	currentComponent = vnode._component;
+	let compData = currentComponent.__data;
 	currentIndex = 0;
 
-	// TODO: __data (?)
-	if (currentComponent.__hooks) {
-		currentComponent.__hooks._pendingEffects.forEach(invokeCleanup);
-		currentComponent.__hooks._pendingEffects.forEach(invokeEffect);
-		currentComponent.__hooks._pendingEffects = [];
+	if (compData.__hooks) {
+		compData.__hooks._pendingEffects.forEach(invokeCleanup);
+		compData.__hooks._pendingEffects.forEach(invokeEffect);
+		compData.__hooks._pendingEffects = [];
 	}
 };
 
@@ -37,7 +37,7 @@ options.diffed = vnode => {
 	const c = vnode._component;
 	if (!c) return;
 
-	const hooks = c.__hooks;
+	const hooks = c.__data.__hooks;
 	if (hooks) {
 		if (hooks._pendingEffects.length) {
 			afterPaint(afterPaintEffects.push(c));
@@ -63,7 +63,7 @@ options.unmount = vnode => {
 	const c = vnode._component;
 	if (!c) return;
 
-	const hooks = c.__hooks;
+	const hooks = c.__data.__hooks;
 	if (hooks) {
 		hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
 	}
@@ -82,8 +82,8 @@ function getHookState(index) {
 	// Other implementations to look at:
 	// * https://codesandbox.io/s/mnox05qp8
 	const hooks =
-		currentComponent.__hooks ||
-		(currentComponent.__hooks = { _list: [], _pendingEffects: [] });
+		currentComponent.__data.__hooks ||
+		(currentComponent.__data.__hooks = { _list: [], _pendingEffects: [] });
 
 	if (index >= hooks._list.length) {
 		hooks._list.push({});
@@ -137,7 +137,7 @@ export function useEffect(callback, args) {
 		state._value = callback;
 		state._args = args;
 
-		currentComponent.__hooks._pendingEffects.push(state);
+		currentComponent.__data.__hooks._pendingEffects.push(state);
 	}
 }
 
@@ -230,9 +230,9 @@ export function useDebugValue(value, formatter) {
 function flushAfterPaintEffects() {
 	afterPaintEffects.some(component => {
 		if (component._parentDom) {
-			component.__hooks._pendingEffects.forEach(invokeCleanup);
-			component.__hooks._pendingEffects.forEach(invokeEffect);
-			component.__hooks._pendingEffects = [];
+			component.__data.__hooks._pendingEffects.forEach(invokeCleanup);
+			component.__data.__hooks._pendingEffects.forEach(invokeEffect);
+			component.__data.__hooks._pendingEffects = [];
 		}
 	});
 	afterPaintEffects = [];
