@@ -34,5 +34,5 @@ export interface SuspenseState {
 export interface SuspenseComponent
 	extends PreactComponent<SuspenseProps, SuspenseState> {
 	_suspensions: number;
-	_fallback: VNode<any>;
+	_detachOnNextRender: boolean;
 }
