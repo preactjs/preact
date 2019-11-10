@@ -916,7 +916,7 @@ describe('suspense', () => {
 
 		expect(scratch.innerHTML).to.equal(loadingHtml);
 
-		resolve1(() => <b>1</b>)
+		return resolve1(() => <b>1</b>)
 			.then(() => {
 				rerender();
 				expect(scratch.innerHTML).to.equal(loadingHtml);
@@ -971,7 +971,7 @@ describe('suspense', () => {
 			`${loadingHtml}${loadingHtml}${loadingHtml}`
 		);
 
-		resolve2(() => <span>2</span>)
+		return resolve2(() => <span>2</span>)
 			.then(() => {
 				return resolve1(() => <span>1</span>);
 			})
