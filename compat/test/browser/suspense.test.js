@@ -938,4 +938,50 @@ describe('suspense', () => {
 				);
 			});
 	});
+
+	it('should correctly render Suspense components inside Fragments', async () => {
+		// Issue #2106.
+
+		const [Lazy1, resolve1] = createLazy();
+		const [Lazy2, resolve2] = createLazy();
+		const [Lazy3, resolve3] = createLazy();
+
+		const Loading = () => <div>Suspended...</div>;
+		const loadingHtml = `<div>Suspended...</div>`;
+
+		render(
+			<Fragment>
+				<Suspense fallback={<Loading />}>
+					<Lazy1 />
+				</Suspense>
+				<Fragment>
+					<Suspense fallback={<Loading />}>
+						<Lazy2 />
+					</Suspense>
+				</Fragment>
+				<Suspense fallback={<Loading />}>
+					<Lazy3 />
+				</Suspense>
+			</Fragment>,
+			scratch
+		);
+
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`${loadingHtml}${loadingHtml}${loadingHtml}`
+		);
+
+		await resolve2(() => <span>2</span>);
+		await resolve1(() => <span>1</span>);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>1</span><span>2</span>${loadingHtml}`
+		);
+
+		await resolve3(() => <span>3</span>);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<span>1</span><span>2</span><span>3</span>`
+		);
+	});
 });
