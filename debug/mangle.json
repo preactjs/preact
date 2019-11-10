@@ -19,6 +19,7 @@
   "props": {
     "cname": 6,
     "props": {
+      "$__data": "__z",
       "$_depth": "__b",
       "$_dirty": "__d",
       "$_prevState": "__u",

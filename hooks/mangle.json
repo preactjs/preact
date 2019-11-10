@@ -6,6 +6,7 @@
   "props": {
     "cname": 6,
     "props": {
+      "$__data": "__z",
       "$_afterPaintQueued": "__a",
       "$__hooks": "__H",
       "$_component": "__c",
