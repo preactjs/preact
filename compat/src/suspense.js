@@ -1,10 +1,4 @@
-import {
-	Component,
-	createElement,
-	_unmount as unmount,
-	options,
-	cloneElement
-} from 'preact';
+import { Component, createElement, options, Fragment } from 'preact';
 import { removeNode } from '../../src/util';
 
 const oldCatchError = options._catchError;
@@ -30,15 +24,12 @@ options._catchError = function(error, newVNode, oldVNode) {
 	oldCatchError(error, newVNode, oldVNode);
 };
 
-function detachDom(children) {
-	for (let i = 0; i < children.length; i++) {
-		let child = children[i];
-		if (child != null) {
-			if (typeof child.type !== 'function' && child._dom) {
-				removeNode(child._dom);
-			} else if (child._children) {
-				detachDom(child._children);
-			}
+function detachDom(vnode) {
+	if (vnode) {
+		if (typeof vnode.type !== 'function' && vnode._dom) {
+			removeNode(vnode._dom);
+		} else if (vnode._children) {
+			vnode._children.some(detachDom);
 		}
 	}
 }
@@ -47,7 +38,6 @@ function detachDom(children) {
 export function Suspense(props) {
 	// we do not call super here to golf some bytes...
 	this._suspensions = [];
-	this._fallback = props.fallback;
 }
 
 // Things we do here to save some bytes but are not proper JS inheritance:
@@ -61,7 +51,6 @@ Suspense.prototype = new Component();
 Suspense.prototype._childDidSuspend = function(promise) {
 	/** @type {import('./internal').SuspenseComponent} */
 	const c = this;
-	c._suspensions.push(promise);
 
 	const onSuspensionComplete = () => {
 		// From https://twitter.com/Rich_Harris/status/1125850391155965952
@@ -69,32 +58,28 @@ Suspense.prototype._childDidSuspend = function(promise) {
 			c._suspensions[c._suspensions.length - 1];
 		c._suspensions.pop();
 
-		if (c._suspensions.length == 0) {
-			// If fallback is null, don't try to unmount it
-			// `unmount` expects a real VNode, not null values
-			if (c._fallback) {
-				// Unmount current children (should be fallback)
-				unmount(c._fallback);
-			}
-			c._vnode._dom = null;
-
-			c._vnode._children = c.state._parkedChildren;
-			c.setState({ _parkedChildren: null });
+		if (c._suspensions.length === 0) {
+			c._vnode._children[0]._children = c.state._suspended;
+			c.setState({ _suspended: null });
 		}
 	};
 
-	if (c.state._parkedChildren == null) {
-		c._fallback = c._fallback && cloneElement(c._fallback);
-		c.setState({ _parkedChildren: c._vnode._children });
-		detachDom(c._vnode._children);
-		c._vnode._children = [];
+	if (c._suspensions.push(promise) === 1) {
+		detachDom(c._vnode._children[0]);
+		c.setState({ _suspended: c._vnode._children[0]._children }, () => {
+			promise.then(onSuspensionComplete, onSuspensionComplete);
+		});
+		c._vnode._children[0]._children = [];
+	} else {
+		promise.then(onSuspensionComplete, onSuspensionComplete);
 	}
-
-	promise.then(onSuspensionComplete, onSuspensionComplete);
 };
 
 Suspense.prototype.render = function(props, state) {
-	return state._parkedChildren ? this._fallback : props.children;
+	return [
+		createElement(Fragment, null, state._suspended ? [] : props.children),
+		createElement(Fragment, null, state._suspended && props.fallback)
+	];
 };
 
 export function lazy(loader) {
