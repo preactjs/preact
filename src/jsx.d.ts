@@ -621,7 +621,7 @@ export namespace JSXInternal {
 		dateTime?: string;
 		default?: boolean;
 		defer?: boolean;
-		dir?: string;
+		dir?: 'auto' | 'rtl' | 'ltr';
 		disabled?: boolean;
 		disableRemotePlayback?: boolean;
 		download?: any;
