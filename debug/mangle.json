@@ -22,6 +22,11 @@
     "props": {
       "$_afterPaintQueued": "__a",
       "$__hooks": "__H",
+      "$_list": "__",
+      "$_pendingEffects": "__h",
+      "$_value": "__",
+      "$_args": "__H",
+      "$_factory": "__h",
       "$_depth": "__b",
       "$_lastDomChildSibling": "__d",
       "$_dirty": "__d",
