@@ -939,7 +939,7 @@ describe('suspense', () => {
 			});
 	});
 
-	it('should correctly render Suspense components inside Fragments', async () => {
+	it('should correctly render Suspense components inside Fragments', () => {
 		// Issue #2106.
 
 		const [Lazy1, resolve1] = createLazy();
@@ -971,17 +971,22 @@ describe('suspense', () => {
 			`${loadingHtml}${loadingHtml}${loadingHtml}`
 		);
 
-		await resolve2(() => <span>2</span>);
-		await resolve1(() => <span>1</span>);
-		rerender();
-		expect(scratch.innerHTML).to.eql(
-			`<span>1</span><span>2</span>${loadingHtml}`
-		);
-
-		await resolve3(() => <span>3</span>);
-		rerender();
-		expect(scratch.innerHTML).to.eql(
-			`<span>1</span><span>2</span><span>3</span>`
-		);
+		resolve2(() => <span>2</span>)
+			.then(() => {
+				return resolve1(() => <span>1</span>);
+			})
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.eql(
+					`<span>1</span><span>2</span>${loadingHtml}`
+				);
+				return resolve3(() => <span>3</span>);
+			})
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.eql(
+					`<span>1</span><span>2</span><span>3</span>`
+				);
+			});
 	});
 });
