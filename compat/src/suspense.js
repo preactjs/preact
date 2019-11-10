@@ -56,14 +56,14 @@ Suspense.prototype._childDidSuspend = function(promise) {
 
 	const onSuspensionComplete = () => {
 		if (!--c._suspensions) {
-			this._detachOnNextRender = false;
+			c._detachOnNextRender = false;
 			c._vnode._children[0]._children = c.state._suspended;
 			c.setState({ _suspended: null });
 		}
 	};
 
 	if (!c._suspensions++) {
-		this._detachOnNextRender = true;
+		c._detachOnNextRender = true;
 		c.setState({ _suspended: c._vnode._children[0]._children });
 	}
 	promise.then(onSuspensionComplete, onSuspensionComplete);
