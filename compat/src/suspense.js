@@ -29,15 +29,17 @@ function detachDom(vnode) {
 		if (typeof vnode.type !== 'function' && vnode._dom) {
 			removeNode(vnode._dom);
 		} else if (vnode._children) {
-			vnode._children.some(detachDom);
+			vnode._children.forEach(detachDom);
 		}
 	}
+	return vnode;
 }
 
 // having custom inheritance instead of a class here saves a lot of bytes
 export function Suspense(props) {
 	// we do not call super here to golf some bytes...
 	this._suspensions = 0;
+	this._detachOnNextRender = false;
 }
 
 // Things we do here to save some bytes but are not proper JS inheritance:
@@ -54,23 +56,25 @@ Suspense.prototype._childDidSuspend = function(promise) {
 
 	const onSuspensionComplete = () => {
 		if (!--c._suspensions) {
+			this._detachOnNextRender = false;
 			c._vnode._children[0]._children = c.state._suspended;
 			c.setState({ _suspended: null });
 		}
 	};
 
 	if (!c._suspensions++) {
-		detachDom(c._vnode._children[0]);
-		c.setState({ _suspended: c._vnode._children[0]._children }, () => {
-			promise.then(onSuspensionComplete, onSuspensionComplete);
-		});
-		c._vnode._children[0]._children = [];
-	} else {
-		promise.then(onSuspensionComplete, onSuspensionComplete);
+		this._detachOnNextRender = true;
+		c.setState({ _suspended: c._vnode._children[0]._children });
 	}
+	promise.then(onSuspensionComplete, onSuspensionComplete);
 };
 
 Suspense.prototype.render = function(props, state) {
+	if (this._detachOnNextRender) {
+		detachDom(this._vnode._children[0])._children = [];
+		this._detachOnNextRender = false;
+	}
+
 	return [
 		createElement(Fragment, null, state._suspended ? null : props.children),
 		createElement(Fragment, null, state._suspended && props.fallback)
