@@ -37,6 +37,7 @@
       "$_vnode": "__v",
       "$_children": "__k",
       "$_pendingSuspensionCount": "__u",
+      "$_childDidSuspend": "__c",
       "$_suspendedComponentWillUnmount": "__c",
       "$_dom": "__e",
       "$_component": "__c",
