@@ -121,7 +121,7 @@ function renderComponent(component) {
 	let vnode = component._vnode,
 		oldDom = vnode._dom,
 		__data = component.__data,
-		parentDom = __data._parentDom;
+		parentDom = component._parentDom;
 
 	if (parentDom) {
 		let commitQueue = [];

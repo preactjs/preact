@@ -164,7 +164,7 @@ export function diff(
 
 			compData._dirty = false;
 			c._vnode = newVNode;
-			compData._parentDom = parentDom;
+			c._parentDom = parentDom;
 
 			tmp = c.render(c.props, c.state, c.context);
 			let isTopLevelFragment =
@@ -430,7 +430,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 			}
 		}
 
-		r.base = r.__data._parentDom = null;
+		r.base = r._parentDom = null;
 	}
 
 	if ((r = vnode._children)) {
