@@ -30,9 +30,13 @@ export function createElement(type, props, children) {
 			if (props[i] === undefined) props[i] = type.defaultProps[i];
 		}
 	}
-	let ref = props.ref;
+	let ref = null;
+	if (!(type != null && type._forwarded)) {
+		ref = props.ref;
+		if (ref != null) delete props.ref;
+	}
+
 	let key = props.key;
-	if (ref != null) delete props.ref;
 	if (key != null) delete props.key;
 
 	return createVNode(type, props, key, ref);
