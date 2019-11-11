@@ -490,45 +490,6 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it.skip('should resolve additional suspense immediately once all initial suspense resolves', async () => {
-		const A = getSuspendableComponent('A');
-		const B = getSuspendableComponent('B');
-		const C = getSuspendableComponent('C');
-		const D = getSuspendableComponent('D');
-
-		let showD = false;
-		render(
-			<SuspenseList revealOrder="together">
-				<Suspense fallback={<span>Loading...</span>}>
-					<A />
-				</Suspense>
-				<Suspense fallback={<span>Loading...</span>}>
-					<B />
-				</Suspense>
-				{showD && (
-					<Suspense fallback={<span>Loading...</span>}>
-						<D />
-					</Suspense>
-				)}
-				<Suspense fallback={<span>Loading...</span>}>
-					<C />
-				</Suspense>
-			</SuspenseList>,
-			scratch
-		);
-
-		// Render initial state
-		rerender();
-		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
-		);
-		showD = true;
-		rerender();
-		expect(scratch.innerHTML).to.eql(
-			`<span>Loading...</span><span>Loading...</span><span>Loading...</span>`
-		);
-	});
-
 	it('should work with forwards even when a <Suspense> child does not suspend', async () => {
 		const Component = getSuspendableComponent('A');
 
