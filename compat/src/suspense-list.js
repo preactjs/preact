@@ -3,7 +3,7 @@ import { Suspense } from './suspense';
 import { suspenseWillResolve, suspenseDidResolve } from './suspense-list-utils';
 
 // having custom inheritance instead of a class here saves a lot of bytes
-export function SuspenseList(props) {
+export function SuspenseList() {
 	this._suspenseBoundaries = [];
 	this._readyToRender = false;
 	this._isSuspenseResolved = false;
