@@ -40,9 +40,9 @@ SuspenseList.prototype.__getRevealOrder = function() {
 SuspenseList.prototype.__suspenseDidResolve = function(vnode) {
 	this._suspenseBoundaries.some((suspenseBoundary, index) => {
 		if (suspenseBoundary === vnode) {
-			const key = this._suspenseBoundaries[index + 1];
-			const cb = key ? this._suspenseCallbacks.get(key) : null;
-			if (key && cb && !key._component._isSuspenseResolved) {
+			const nextVNode = this._suspenseBoundaries[index + 1];
+			const cb = nextVNode ? this._suspenseCallbacks.get(nextVNode) : null;
+			if (nextVNode && cb && !nextVNode._component._isSuspenseResolved) {
 				cb();
 			} else if (index === this._suspenseBoundaries.length - 1) {
 				this._isSuspenseResolved = true;
@@ -66,7 +66,7 @@ SuspenseList.prototype.__suspenseWillResolve = function(vnode, cb) {
 				this._suspenseCallbacks.has(suspenseBoundary)
 			)
 		) {
-			suspenseWillResolve(this._vnode, () => {
+			return suspenseWillResolve(this._vnode, () => {
 				this._readyToRender = true;
 				this.__findAndResolveNextcandidate();
 			});
