@@ -175,6 +175,7 @@
     "babel-loader": "^8.0.6",
     "babel-plugin-istanbul": "^5.2.0",
     "babel-plugin-transform-async-to-promises": "^0.8.15",
+    "babel-plugin-transform-rename-properties": "0.0.3",
     "benchmark": "^2.1.4",
     "chai": "^4.1.2",
     "coveralls": "^3.0.0",

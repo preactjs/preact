@@ -2,6 +2,17 @@
 module.exports = function(api) {
 	api.cache(true);
 
+	const rename = {};
+	const mangle = require('./mangle.json');
+	for (let prop in mangle.props.props) {
+		let name = prop;
+		if (name[0] === '$') {
+			name = name.slice(1);
+		}
+
+		rename[name] = mangle.props.props[prop];
+	}
+
 	return {
 		presets: [
 			[
@@ -20,6 +31,17 @@ module.exports = function(api) {
 			'@babel/plugin-transform-react-jsx',
 			'babel-plugin-transform-async-to-promises'
 		],
-		ignore: ['./dist']
+		ignore: ['./dist'],
+		overrides: [
+			{
+				test(filename) {
+					const result =
+						filename.endsWith('optionSpies.js') ||
+						filename.endsWith('.options.test.js');
+					return result;
+				},
+				plugins: [['babel-plugin-transform-rename-properties', { rename }]]
+			}
+		]
 	};
 };
