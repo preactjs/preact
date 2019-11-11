@@ -39,10 +39,10 @@ SuspenseList.prototype.__getRevealOrder = function() {
 
 SuspenseList.prototype.__suspenseDidResolve = function(vnode) {
 	this._suspenseBoundaries.some((suspenseBoundary, index) => {
-		if (suspenseBoundary.__vnode === vnode) {
+		if (suspenseBoundary === vnode) {
 			const key = this._suspenseBoundaries[index + 1];
-			const cb = key ? this._suspenseCallbacks.get(key.__vnode) : null;
-			if (key && cb && !key.__vnode._component._isSuspenseResolved) {
+			const cb = key ? this._suspenseCallbacks.get(key) : null;
+			if (key && cb && !key._component._isSuspenseResolved) {
 				cb();
 			} else if (index === this._suspenseBoundaries.length - 1) {
 				this._isSuspenseResolved = true;
@@ -63,7 +63,7 @@ SuspenseList.prototype.__suspenseWillResolve = function(vnode, cb) {
 	if (this.__getRevealOrder() === 't') {
 		if (
 			this._suspenseBoundaries.every(suspenseBoundary =>
-				this._suspenseCallbacks.has(suspenseBoundary.__vnode)
+				this._suspenseCallbacks.has(suspenseBoundary)
 			)
 		) {
 			suspenseWillResolve(this._vnode, () => {
@@ -84,18 +84,18 @@ SuspenseList.prototype.__findAndResolveNextcandidate = function() {
 	const revealOrder = this.__getRevealOrder();
 	if (revealOrder === '') {
 		this._suspenseBoundaries.forEach(suspenseBoundary => {
-			const cb = this._suspenseCallbacks.get(suspenseBoundary.__vnode);
-			if (!suspenseBoundary.__vnode._component._isSuspenseResolved && cb) {
+			const cb = this._suspenseCallbacks.get(suspenseBoundary);
+			if (!suspenseBoundary._component._isSuspenseResolved && cb) {
 				cb();
 			}
 		});
 	} else if (revealOrder === 't') {
 		if (
 			this._suspenseBoundaries.every(suspenseBoundary =>
-				this._suspenseCallbacks.has(suspenseBoundary.__vnode)
+				this._suspenseCallbacks.has(suspenseBoundary)
 			)
 		) {
-			this._suspenseCallbacks.get(this._suspenseBoundaries[0].__vnode)();
+			this._suspenseCallbacks.get(this._suspenseBoundaries[0])();
 		}
 	} else {
 		/**
@@ -104,8 +104,8 @@ SuspenseList.prototype.__findAndResolveNextcandidate = function() {
 		 */
 		// find if the current vnode's suspense can be resolved
 		this._suspenseBoundaries.some(suspenseBoundary => {
-			const cb = this._suspenseCallbacks.get(suspenseBoundary.__vnode);
-			if (!suspenseBoundary.__vnode._component._isSuspenseResolved && cb) {
+			const cb = this._suspenseCallbacks.get(suspenseBoundary);
+			if (!suspenseBoundary._component._isSuspenseResolved && cb) {
 				cb();
 				return true;
 			} else if (!cb) {
@@ -130,18 +130,10 @@ SuspenseList.prototype.componentDidMount = function() {
 
 SuspenseList.prototype.render = function(props) {
 	const children = toChildArray(props.children);
-	this._suspenseBoundaries = children
-		.filter(
-			child =>
-				child.type.name === Suspense.name ||
-				child.type.name === SuspenseList.name
-		)
-		.map(__vnode => ({
-			__vnode
-		}));
-	// this._suspenseBoundaries.forEach(boundary => {
-	// 	this._suspenseCallbacks.set(boundary.__vnode, this._suspenseCallbacks.get(boundary.__vnode) || null);
-	// });
+	this._suspenseBoundaries = children.filter(
+		child =>
+			child.type.name === Suspense.name || child.type.name === SuspenseList.name
+	);
 	if (this.__getRevealOrder() === 'b') {
 		this._suspenseBoundaries.reverse();
 	}
