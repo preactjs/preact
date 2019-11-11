@@ -7,6 +7,7 @@ export function SuspenseList(props) {
 	this._suspenseBoundaries = [];
 	this._readyToRender = false;
 	this._isSuspenseResolved = false;
+	this._suspenseCallbacks = new Map();
 }
 
 // Things we do here to save some bytes but are not proper JS inheritance:
@@ -39,13 +40,10 @@ SuspenseList.prototype.__getRevealOrder = function() {
 SuspenseList.prototype.__suspenseDidResolve = function(vnode) {
 	this._suspenseBoundaries.some((suspenseBoundary, index) => {
 		if (suspenseBoundary.__vnode === vnode) {
-			if (
-				this._suspenseBoundaries[index + 1] &&
-				this._suspenseBoundaries[index + 1].__suspenseResolvedCallback &&
-				!this._suspenseBoundaries[index + 1].__vnode._component
-					._isSuspenseResolved
-			) {
-				this._suspenseBoundaries[index + 1].__suspenseResolvedCallback();
+			const key = this._suspenseBoundaries[index + 1];
+			const cb = key ? this._suspenseCallbacks.get(key.__vnode) : null;
+			if (key && cb && !key.__vnode._component._isSuspenseResolved) {
+				cb();
 			} else if (index === this._suspenseBoundaries.length - 1) {
 				this._isSuspenseResolved = true;
 				suspenseDidResolve(this._vnode);
@@ -56,13 +54,7 @@ SuspenseList.prototype.__suspenseDidResolve = function(vnode) {
 };
 
 SuspenseList.prototype.__suspenseWillResolve = function(vnode, cb) {
-	// set the callback to the correct position
-	this._suspenseBoundaries.some(suspenseBoundary => {
-		if (suspenseBoundary.__vnode === vnode) {
-			suspenseBoundary.__suspenseResolvedCallback = cb;
-			return true; // breaks the find loop
-		}
-	});
+	this._suspenseCallbacks.set(vnode, cb);
 
 	/**
 	 * A Suspense list with revealorder=t is ready render only when all
@@ -70,8 +62,8 @@ SuspenseList.prototype.__suspenseWillResolve = function(vnode, cb) {
 	 */
 	if (this.__getRevealOrder() === 't') {
 		if (
-			this._suspenseBoundaries.every(
-				suspenseBoundary => suspenseBoundary.__suspenseResolvedCallback
+			this._suspenseBoundaries.every(suspenseBoundary =>
+				this._suspenseCallbacks.has(suspenseBoundary.__vnode)
 			)
 		) {
 			suspenseWillResolve(this._vnode, () => {
@@ -92,20 +84,18 @@ SuspenseList.prototype.__findAndResolveNextcandidate = function() {
 	const revealOrder = this.__getRevealOrder();
 	if (revealOrder === '') {
 		this._suspenseBoundaries.forEach(suspenseBoundary => {
-			if (
-				!suspenseBoundary.__vnode._component._isSuspenseResolved &&
-				suspenseBoundary.__suspenseResolvedCallback
-			) {
-				suspenseBoundary.__suspenseResolvedCallback();
+			const cb = this._suspenseCallbacks.get(suspenseBoundary.__vnode);
+			if (!suspenseBoundary.__vnode._component._isSuspenseResolved && cb) {
+				cb();
 			}
 		});
 	} else if (revealOrder === 't') {
 		if (
-			this._suspenseBoundaries.every(
-				suspenseBoundary => suspenseBoundary.__suspenseResolvedCallback
+			this._suspenseBoundaries.every(suspenseBoundary =>
+				this._suspenseCallbacks.has(suspenseBoundary.__vnode)
 			)
 		) {
-			this._suspenseBoundaries[0].__suspenseResolvedCallback();
+			this._suspenseCallbacks.get(this._suspenseBoundaries[0].__vnode)();
 		}
 	} else {
 		/**
@@ -114,13 +104,11 @@ SuspenseList.prototype.__findAndResolveNextcandidate = function() {
 		 */
 		// find if the current vnode's suspense can be resolved
 		this._suspenseBoundaries.some(suspenseBoundary => {
-			if (
-				!suspenseBoundary.__vnode._component._isSuspenseResolved &&
-				suspenseBoundary.__suspenseResolvedCallback
-			) {
-				suspenseBoundary.__suspenseResolvedCallback();
+			const cb = this._suspenseCallbacks.get(suspenseBoundary.__vnode);
+			if (!suspenseBoundary.__vnode._component._isSuspenseResolved && cb) {
+				cb();
 				return true;
-			} else if (!suspenseBoundary.__suspenseResolvedCallback) {
+			} else if (!cb) {
 				return true;
 			}
 		});
@@ -149,9 +137,11 @@ SuspenseList.prototype.render = function(props) {
 				child.type.name === SuspenseList.name
 		)
 		.map(__vnode => ({
-			__vnode,
-			__suspenseResolvedCallback: null
+			__vnode
 		}));
+	// this._suspenseBoundaries.forEach(boundary => {
+	// 	this._suspenseCallbacks.set(boundary.__vnode, this._suspenseCallbacks.get(boundary.__vnode) || null);
+	// });
 	if (this.__getRevealOrder() === 'b') {
 		this._suspenseBoundaries.reverse();
 	}
