@@ -989,4 +989,69 @@ describe('suspense', () => {
 				);
 			});
 	});
+
+	it('should not render any of the children if one child suspends', () => {
+		const [Lazy, resolve] = createLazy();
+
+		const Loading = () => <div>Suspended...</div>;
+		const loadingHtml = `<div>Suspended...</div>`;
+
+		render(
+			<Suspense fallback={<Loading />}>
+				<Lazy />
+				<div>World</div>
+			</Suspense>,
+			scratch
+		);
+		rerender();
+		expect(scratch.innerHTML).to.eql(loadingHtml);
+
+		return resolve(() => <div>Hello</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(`<div>Hello</div><div>World</div>`);
+		});
+	});
+
+	it('should render correctly when multiple children suspend with the same promise', () => {
+		/** @type {() => Promise<void>} */
+		let resolve;
+		let resolved = false;
+		const promise = new Promise(_resolve => {
+			resolve = () => {
+				resolved = true;
+				_resolve();
+				return promise;
+			};
+		});
+
+		const Child = props => {
+			if (!resolved) {
+				throw promise;
+			}
+			return props.children;
+		};
+
+		const Loading = () => <div>Suspended...</div>;
+		const loadingHtml = `<div>Suspended...</div>`;
+
+		render(
+			<Suspense fallback={<Loading />}>
+				<Child>
+					<div>A</div>
+				</Child>
+				<Child>
+					<div>B</div>
+				</Child>
+			</Suspense>,
+			scratch
+		);
+		rerender();
+		expect(scratch.innerHTML).to.eql(loadingHtml);
+
+		return resolve().then(() => {
+			resolved = true;
+			rerender();
+			expect(scratch.innerHTML).to.equal(`<div>A</div><div>B</div>`);
+		});
+	});
 });
