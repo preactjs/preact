@@ -44,13 +44,17 @@ SuspenseList.prototype.__suspenseDidResolve = function(vnode) {
 			const cb = nextVNode ? this._suspenseCallbacks.get(nextVNode) : null;
 			if (nextVNode && cb && !nextVNode._component._isSuspenseResolved) {
 				cb();
-			} else if (index === this._suspenseBoundaries.length - 1) {
-				this._isSuspenseResolved = true;
-				suspenseDidResolve(this._vnode);
 			}
 			return true;
 		}
 	});
+	const allSuspenseResolved = this._suspenseBoundaries.every(
+		boundary => boundary._component._isSuspenseResolved
+	);
+	if (allSuspenseResolved) {
+		this._isSuspenseResolved = true;
+		suspenseDidResolve(this._vnode);
+	}
 };
 
 SuspenseList.prototype.__suspenseWillResolve = function(vnode, cb) {
@@ -62,8 +66,10 @@ SuspenseList.prototype.__suspenseWillResolve = function(vnode, cb) {
 	 */
 	if (this.__getRevealOrder() === 't') {
 		if (
-			this._suspenseBoundaries.every(suspenseBoundary =>
-				this._suspenseCallbacks.has(suspenseBoundary)
+			this._suspenseBoundaries.every(
+				suspenseBoundary =>
+					this._suspenseCallbacks.has(suspenseBoundary) ||
+					suspenseBoundary._component._isSuspenseResolved
 			)
 		) {
 			return suspenseWillResolve(this._vnode, () => {
@@ -71,9 +77,9 @@ SuspenseList.prototype.__suspenseWillResolve = function(vnode, cb) {
 				this.__findAndResolveNextcandidate();
 			});
 		}
+	} else {
+		this.__findAndResolveNextcandidate();
 	}
-
-	this.__findAndResolveNextcandidate();
 };
 
 SuspenseList.prototype.__findAndResolveNextcandidate = function() {
@@ -90,13 +96,12 @@ SuspenseList.prototype.__findAndResolveNextcandidate = function() {
 			}
 		});
 	} else if (revealOrder === 't') {
-		if (
-			this._suspenseBoundaries.every(suspenseBoundary =>
-				this._suspenseCallbacks.has(suspenseBoundary)
-			)
-		) {
-			this._suspenseCallbacks.get(this._suspenseBoundaries[0])();
-		}
+		this._suspenseBoundaries.some(suspenseBoundary => {
+			if (this._suspenseCallbacks.has(suspenseBoundary)) {
+				this._suspenseCallbacks.get(suspenseBoundary)();
+				return true;
+			}
+		});
 	} else {
 		/**
 		 * Forwards and backwards work the same way.
@@ -105,9 +110,12 @@ SuspenseList.prototype.__findAndResolveNextcandidate = function() {
 		// find if the current vnode's suspense can be resolved
 		this._suspenseBoundaries.some(suspenseBoundary => {
 			const cb = this._suspenseCallbacks.get(suspenseBoundary);
-			if (!suspenseBoundary._component._isSuspenseResolved && cb) {
+			if (cb && !suspenseBoundary._component._isSuspenseResolved) {
 				cb();
 				return true;
+			} else if (!cb && suspenseBoundary._component._isSuspenseResolved) {
+				// for condition: https://github.com/preactjs/preact/pull/2063#issuecomment-5521226201
+				return false;
 			} else if (!cb) {
 				return true;
 			}
