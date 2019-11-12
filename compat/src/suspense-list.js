@@ -140,7 +140,9 @@ SuspenseList.prototype.render = function(props) {
 	const children = toChildArray(props.children);
 	this._suspenseBoundaries = children.filter(
 		child =>
-			child.type.name === Suspense.name || child.type.name === SuspenseList.name
+			child.type &&
+			(child.type.name === Suspense.name ||
+				child.type.name === SuspenseList.name)
 	);
 	if (this.__getRevealOrder() === 'b') {
 		this._suspenseBoundaries.reverse();

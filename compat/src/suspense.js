@@ -58,11 +58,13 @@ Suspense.prototype._childDidSuspend = function(promise) {
 			c._vnode._children[0] = c.state._suspended;
 			c.setState({ _suspended: (c._detachOnNextRender = null) }, () => {
 				this._isSuspenseResolved = true;
+				suspenseDidResolve(this._vnode);
 			});
 		}
 	};
 
 	if (!c._suspensions++) {
+		this._isSuspenseResolved = false;
 		c.setState({ _suspended: (c._detachOnNextRender = c._vnode._children[0]) });
 	}
 
