@@ -329,7 +329,7 @@ function memo(c, comparer) {
  * Pass ref down to a child. This is mainly used in libraries with HOCs that
  * wrap components. Using `forwardRef` there is an easy way to get a reference
  * of the wrapped component instead of one of the wrapper itself.
- * @param {import('./internal').ForwardFn} fn
+ * @param {import('./index').ForwardFn} fn
  * @returns {import('./internal').FunctionalComponent}
  */
 function forwardRef(fn) {
@@ -411,11 +411,10 @@ options.vnode = vnode => {
 	}
 
 	// Alias `class` prop to `className` if available
-	let a = vnode.props;
-	if (a.class || a.className) {
-		classNameDescriptor.enumerable = 'className' in a;
-		if (a.className) a.class = a.className;
-		Object.defineProperty(a, 'className', classNameDescriptor);
+	if (props.class || props.className) {
+		classNameDescriptor.enumerable = 'className' in props;
+		if (props.className) props.class = props.className;
+		Object.defineProperty(props, 'className', classNameDescriptor);
 	}
 
 	// Events
