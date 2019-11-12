@@ -1,5 +1,6 @@
 import {
 	hydrate,
+	createElement,
 	render as preactRender,
 	cloneElement as preactCloneElement,
 	createRef,
@@ -175,52 +176,6 @@ let Children = {
 	},
 	toArray: toChildArray
 };
-
-/**
- * Wrap `createElement` to apply various vnode normalizations.
- * @param {import('./internal').VNode["type"]} type The node name or Component constructor
- * @param {object | null | undefined} [props] The vnode's properties
- * @param {Array<import('./internal').ComponentChildren>} [children] The vnode's children
- * @returns {import('./internal').VNode}
- */
-function createElement(...args) {
-	let vnode = h(...args);
-
-	let type = vnode.type,
-		props = vnode.props;
-	if (typeof type != 'function') {
-		if (props.defaultValue) {
-			if (!props.value && props.value !== 0) {
-				props.value = props.defaultValue;
-			}
-			delete props.defaultValue;
-		}
-
-		if (Array.isArray(props.value) && props.multiple && type === 'select') {
-			toChildArray(props.children).forEach(child => {
-				if (props.value.indexOf(child.props.value) != -1) {
-					child.props.selected = true;
-				}
-			});
-			delete props.value;
-		}
-
-		// Normalize DOM vnode properties.
-		let shouldSanitize, attrs, i;
-		for (i in props) if ((shouldSanitize = CAMEL_PROPS.test(i))) break;
-		if (shouldSanitize) {
-			attrs = vnode.props = {};
-			for (i in props) {
-				attrs[
-					CAMEL_PROPS.test(i) ? i.replace(/([A-Z0-9])/, '-$1').toLowerCase() : i
-				] = props[i];
-			}
-		}
-	}
-
-	vnode.preactCompatNormalized = false;
-	return normalizeVNode(vnode);
-}
 
 let classNameDescriptor = {
 	configurable: true,
@@ -437,13 +392,52 @@ let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
 
-	applyEventNormalization(vnode);
 	let type = vnode.type;
+	let props = vnode.props;
+
+	// Apply DOM VNode compat
+	if (typeof type != 'function') {
+		// Apply defaultValue to value
+		if (props.defaultValue) {
+			if (!props.value && props.value !== 0) {
+				props.value = props.defaultValue;
+			}
+			delete props.defaultValue;
+		}
+
+		// Add support for array select values: <select value={[]} />
+		if (Array.isArray(props.value) && props.multiple && type === 'select') {
+			toChildArray(props.children).forEach(child => {
+				if (props.value.indexOf(child.props.value) != -1) {
+					child.props.selected = true;
+				}
+			});
+			delete props.value;
+		}
+
+		// Normalize DOM vnode properties.
+		let shouldSanitize, attrs, i;
+		for (i in props) if ((shouldSanitize = CAMEL_PROPS.test(i))) break;
+		if (shouldSanitize) {
+			attrs = vnode.props = {};
+			for (i in props) {
+				attrs[
+					CAMEL_PROPS.test(i) ? i.replace(/([A-Z0-9])/, '-$1').toLowerCase() : i
+				] = props[i];
+			}
+		}
+	}
+
+	// Events
+	applyEventNormalization(vnode);
+
+	// ForwardRef
 	if (type && type._forwarded && vnode.ref) {
 		vnode.props.ref = vnode.ref;
 		vnode.ref = null;
 	}
 
+	// Component base class compat
 	// We can't just patch the base component class, because components that use
 	// inheritance and are transpiled down to ES5 will overwrite our patched
 	// getters and setters. See #1941
@@ -457,6 +451,9 @@ options.vnode = vnode => {
 		setSafeDescriptor(type.prototype, 'componentWillUpdate');
 		type._patchedLifecycles = true;
 	}
+
+	normalizeVNode(vnode);
+
 	if (oldVNodeHook) oldVNodeHook(vnode);
 };
 
