@@ -20,7 +20,7 @@
       "$_root": "__",
       "$_commit": "__c",
       "$_suspensions": "__u",
-      "$_fallback": "__f",
+      "$_detachOnNextRender": "__b",
       "$_diff": "__b",
       "$_render": "__r",
       "$_hook": "__h",

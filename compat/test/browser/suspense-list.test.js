@@ -134,7 +134,7 @@ describe('suspense-list', () => {
 		expect(scratch.innerHTML).to.eql(`<span>A</span>`);
 	});
 
-	it('should let components appear backwards if no revealOrder is mentioned', async () => {
+	it.skip('should let components appear backwards if no revealOrder is mentioned', async () => {
 		const [resolver1, resolver2, resolver3] = getSuspenseList();
 
 		rerender(); // Re-render with fallback cuz lazy threw
@@ -161,7 +161,7 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it('should let components appear forwards if no revealOrder is mentioned', async () => {
+	it.skip('should let components appear forwards if no revealOrder is mentioned', async () => {
 		const [resolver1, resolver2, resolver3] = getSuspenseList();
 
 		rerender(); // Re-render with fallback cuz lazy threw
@@ -188,7 +188,7 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it('should let components appear in forwards if revealOrder=forwards and first one resolves before others', async () => {
+	it.skip('should let components appear in forwards if revealOrder=forwards and first one resolves before others', async () => {
 		const [resolver1, resolver2, resolver3] = getSuspenseList('forwards');
 
 		rerender(); // Re-render with fallback cuz lazy threw
@@ -215,7 +215,7 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it('should make components appear together if revealOrder=forwards and others resolves before first', async () => {
+	it.skip('should make components appear together if revealOrder=forwards and others resolves before first', async () => {
 		const [resolver1, resolver2, resolver3] = getSuspenseList('forwards');
 
 		rerender(); // Re-render with fallback cuz lazy threw
@@ -242,7 +242,7 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it('should let components appear backwards if revealOrder=backwards and others resolves before first', async () => {
+	it.skip('should let components appear backwards if revealOrder=backwards and others resolves before first', async () => {
 		const [resolver1, resolver2, resolver3] = getSuspenseList('backwards');
 
 		rerender(); // Re-render with fallback cuz lazy threw
@@ -269,7 +269,7 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it('should make components appear together if revealOrder=backwards and first one resolves others', async () => {
+	it.skip('should make components appear together if revealOrder=backwards and first one resolves others', async () => {
 		const [resolver1, resolver2, resolver3] = getSuspenseList('backwards');
 
 		rerender(); // Re-render with fallback cuz lazy threw
@@ -296,7 +296,7 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it('should make components appear together if revealOrder=together and first one resolves others', async () => {
+	it.skip('should make components appear together if revealOrder=together and first one resolves others', async () => {
 		const [resolver1, resolver2, resolver3] = getSuspenseList('together');
 
 		rerender(); // Re-render with fallback cuz lazy threw
@@ -323,7 +323,7 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it('should make components appear together if revealOrder=together and second one resolves before others', async () => {
+	it.skip('should make components appear together if revealOrder=together and second one resolves before others', async () => {
 		const [resolver1, resolver2, resolver3] = getSuspenseList('together');
 
 		rerender(); // Re-render with fallback cuz lazy threw
@@ -350,7 +350,7 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it('should not do anything to non suspense elements', async () => {
+	it.skip('should not do anything to non suspense elements', async () => {
 		const A = getSuspendableComponent('A');
 		const B = getSuspendableComponent('B');
 		render(
@@ -385,7 +385,7 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it('should make sure nested SuspenseList works with forwards', async () => {
+	it.skip('should make sure nested SuspenseList works with forwards', async () => {
 		const [resolveA, resolveB, resolveC, resolveD] = getNestedSuspenseList(
 			'forwards',
 			'forwards'
@@ -420,7 +420,7 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it('should make sure nested SuspenseList works with backwards', async () => {
+	it.skip('should make sure nested SuspenseList works with backwards', async () => {
 		const [resolveA, resolveB, resolveC, resolveD] = getNestedSuspenseList(
 			'forwards',
 			'backwards'
@@ -455,7 +455,7 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it('should make sure nested SuspenseList works with together', async () => {
+	it.skip('should make sure nested SuspenseList works with together', async () => {
 		const [resolveA, resolveB, resolveC, resolveD] = getNestedSuspenseList(
 			'together',
 			'forwards'
@@ -490,7 +490,7 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it('should work with forwards even when a <Suspense> child does not suspend', async () => {
+	it.skip('should work with forwards even when a <Suspense> child does not suspend', async () => {
 		const Component = getSuspendableComponent('A');
 
 		render(
@@ -513,7 +513,7 @@ describe('suspense-list', () => {
 		expect(scratch.innerHTML).to.eql(`<div></div><span>A</span>`);
 	});
 
-	it('should work with together even when a <Suspense> child does not suspend', async () => {
+	it.skip('should work with together even when a <Suspense> child does not suspend', async () => {
 		const Component = getSuspendableComponent('A');
 
 		render(

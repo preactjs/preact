@@ -114,7 +114,7 @@ module.exports = function(config) {
 			{
 				pattern:
 					config.grep ||
-					'{debug,hooks,compat,test-utils,}/test/{browser,shared}/**/*.test.js',
+					'{debug,hooks,compat,test-utils,}/test/{browser,shared}/**/suspense-list*.test.js',
 				watched: false
 			}
 		],
