@@ -1,5 +1,5 @@
 import { Component, createElement, options, Fragment } from 'preact';
-import { removeNode } from '../../src/util';
+import { assign } from '../../src/util';
 
 const oldCatchError = options._catchError;
 options._catchError = function(error, newVNode, oldVNode) {
@@ -24,13 +24,11 @@ options._catchError = function(error, newVNode, oldVNode) {
 	oldCatchError(error, newVNode, oldVNode);
 };
 
-function detachDom(vnode) {
+function detachedClone(vnode) {
 	if (vnode) {
-		if (typeof vnode.type !== 'function' && vnode._dom) {
-			removeNode(vnode._dom);
-		} else if (vnode._children) {
-			vnode._children.forEach(detachDom);
-		}
+		vnode = assign({}, vnode);
+		vnode._component = null;
+		vnode._children = vnode._children && vnode._children.map(detachedClone);
 	}
 	return vnode;
 }
@@ -39,7 +37,7 @@ function detachDom(vnode) {
 export function Suspense(props) {
 	// we do not call super here to golf some bytes...
 	this._suspensions = 0;
-	this._detachOnNextRender = false;
+	this._detachOnNextRender = null;
 }
 
 // Things we do here to save some bytes but are not proper JS inheritance:
@@ -56,28 +54,26 @@ Suspense.prototype._childDidSuspend = function(promise) {
 
 	const onSuspensionComplete = () => {
 		if (!--c._suspensions) {
-			c._detachOnNextRender = false;
-			c._vnode._children[0]._children = c.state._suspended;
-			c.setState({ _suspended: null });
+			c._vnode._children[0] = c.state._suspended;
+			c.setState({ _suspended: (c._detachOnNextRender = null) });
 		}
 	};
 
 	if (!c._suspensions++) {
-		c._detachOnNextRender = true;
-		c.setState({ _suspended: c._vnode._children[0]._children });
+		c.setState({ _suspended: (c._detachOnNextRender = c._vnode._children[0]) });
 	}
 	promise.then(onSuspensionComplete, onSuspensionComplete);
 };
 
 Suspense.prototype.render = function(props, state) {
 	if (this._detachOnNextRender) {
-		detachDom(this._vnode._children[0])._children = [];
-		this._detachOnNextRender = false;
+		this._vnode._children[0] = detachedClone(this._detachOnNextRender);
+		this._detachOnNextRender = null;
 	}
 
 	return [
 		createElement(Fragment, null, state._suspended ? null : props.children),
-		createElement(Fragment, null, state._suspended && props.fallback)
+		state._suspended && props.fallback
 	];
 };
 
