@@ -227,7 +227,70 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should not call lifecycle methods when suspending', () => {
+	it('should not call lifecycle methods of a suspending component', () => {
+		let componentWillMount = sinon.spy();
+		let componentDidMount = sinon.spy();
+		let componentWillUnmount = sinon.spy();
+
+		/** @type {() => Promise<void>} */
+		let resolve;
+		let resolved = false;
+		const promise = new Promise(_resolve => {
+			resolve = () => {
+				resolved = true;
+				_resolve();
+				return promise;
+			};
+		});
+
+		class LifecycleSuspender extends Component {
+			render() {
+				if (!resolved) {
+					throw promise;
+				}
+				return <div>Lifecycle</div>;
+			}
+			componentWillMount() {
+				componentWillMount();
+			}
+			componentDidMount() {
+				componentDidMount();
+			}
+			componentWillUnmount() {
+				componentWillUnmount();
+			}
+		}
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<LifecycleSuspender />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(``);
+		expect(componentWillMount).to.have.been.calledOnce;
+		expect(componentDidMount).to.not.have.been.called;
+		expect(componentWillUnmount).to.not.have.been.called;
+
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+		expect(componentWillMount).to.have.been.calledOnce;
+		expect(componentDidMount).to.not.have.been.called;
+		expect(componentWillUnmount).to.not.have.been.called;
+
+		return resolve().then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(`<div>Lifecycle</div>`);
+
+			expect(componentWillMount).to.have.been.calledOnce;
+			expect(componentDidMount).to.have.been.calledOnce;
+			expect(componentWillUnmount).to.not.have.been.called;
+		});
+	});
+
+	it('should not call lifecycle methods when a sibling suspends', () => {
 		let componentWillMount = sinon.spy();
 		let componentDidMount = sinon.spy();
 		let componentWillUnmount = sinon.spy();
