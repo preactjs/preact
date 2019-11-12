@@ -229,13 +229,27 @@ function createElement(...args) {
 	return normalizeVNode(vnode);
 }
 
+let classNameDescriptor = {
+	configurable: true,
+	get() {
+		return this.class;
+	}
+};
+
 /**
  * Normalize a vnode
  * @param {import('./internal').VNode} vnode
  */
 function normalizeVNode(vnode) {
+	// Alias `class` prop to `className` if available
+	let a = vnode.props;
+	if (a.class || a.className) {
+		classNameDescriptor.enumerable = 'className' in a;
+		if (a.className) a.class = a.className;
+		Object.defineProperty(a, 'className', classNameDescriptor);
+	}
+
 	vnode.preactCompatNormalized = true;
-	applyClassName(vnode);
 	return vnode;
 }
 
@@ -310,26 +324,6 @@ function unmountComponentAtNode(container) {
 	}
 	return false;
 }
-
-/**
- * Alias `class` prop to `className` if available
- * @param {import('./internal').VNode} vnode
- */
-function applyClassName(vnode) {
-	let a = vnode.props;
-	if (a.class || a.className) {
-		classNameDescriptor.enumerable = 'className' in a;
-		if (a.className) a.class = a.className;
-		Object.defineProperty(a, 'className', classNameDescriptor);
-	}
-}
-
-let classNameDescriptor = {
-	configurable: true,
-	get() {
-		return this.class;
-	}
-};
 
 /**
  * Check if two objects have a different shape
