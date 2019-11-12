@@ -177,30 +177,6 @@ let Children = {
 	toArray: toChildArray
 };
 
-let classNameDescriptor = {
-	configurable: true,
-	get() {
-		return this.class;
-	}
-};
-
-/**
- * Normalize a vnode
- * @param {import('./internal').VNode} vnode
- */
-function normalizeVNode(vnode) {
-	// Alias `class` prop to `className` if available
-	let a = vnode.props;
-	if (a.class || a.className) {
-		classNameDescriptor.enumerable = 'className' in a;
-		if (a.className) a.class = a.className;
-		Object.defineProperty(a, 'className', classNameDescriptor);
-	}
-
-	vnode.preactCompatNormalized = true;
-	return vnode;
-}
-
 /**
  * Wrap `cloneElement` to abort if the passed element is not a valid element and apply
  * all vnode normalizations.
@@ -210,8 +186,7 @@ function normalizeVNode(vnode) {
  */
 function cloneElement(element) {
 	if (!isValidElement(element)) return element;
-	let vnode = normalizeVNode(preactCloneElement.apply(null, arguments));
-	return vnode;
+	return preactCloneElement.apply(null, arguments);
 }
 
 /**
@@ -388,6 +363,13 @@ function setSafeDescriptor(proto, key) {
 	}
 }
 
+let classNameDescriptor = {
+	configurable: true,
+	get() {
+		return this.class;
+	}
+};
+
 let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
@@ -428,6 +410,14 @@ options.vnode = vnode => {
 		}
 	}
 
+	// Alias `class` prop to `className` if available
+	let a = vnode.props;
+	if (a.class || a.className) {
+		classNameDescriptor.enumerable = 'className' in a;
+		if (a.className) a.class = a.className;
+		Object.defineProperty(a, 'className', classNameDescriptor);
+	}
+
 	// Events
 	applyEventNormalization(vnode);
 
@@ -452,7 +442,8 @@ options.vnode = vnode => {
 		type._patchedLifecycles = true;
 	}
 
-	normalizeVNode(vnode);
+	// TODO: Removing this saves 16 bytes!
+	vnode.preactCompatNormalized = true;
 
 	if (oldVNodeHook) oldVNodeHook(vnode);
 };
