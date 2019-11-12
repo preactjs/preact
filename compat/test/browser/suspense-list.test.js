@@ -6,9 +6,7 @@ import React, {
 	Suspense,
 	SuspenseList
 } from 'preact/compat';
-import { useState } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { createSuspender } from './suspense.test';
 
 const h = React.createElement;
 /* eslint-env browser, mocha */
