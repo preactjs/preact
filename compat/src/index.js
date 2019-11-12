@@ -53,24 +53,6 @@ function createFactory(type) {
 }
 
 /**
- * Normalize DOM vnode properties.
- * @param {import('./internal').VNode} vnode The vnode to normalize props of
- * @param {object | null | undefined} props props to normalize
- */
-function handleElementVNode(vnode, props) {
-	let shouldSanitize, attrs, i;
-	for (i in props) if ((shouldSanitize = CAMEL_PROPS.test(i))) break;
-	if (shouldSanitize) {
-		attrs = vnode.props = {};
-		for (i in props) {
-			attrs[
-				CAMEL_PROPS.test(i) ? i.replace(/([A-Z0-9])/, '-$1').toLowerCase() : i
-			] = props[i];
-		}
-	}
-}
-
-/**
  * Proxy render() since React returns a Component reference.
  * @param {import('./internal').VNode} vnode VNode tree to render
  * @param {import('./internal').PreactElement} parent DOM node to render vnode tree into
@@ -222,7 +204,18 @@ function createElement(...args) {
 			});
 			delete props.value;
 		}
-		handleElementVNode(vnode, props);
+
+		// Normalize DOM vnode properties.
+		let shouldSanitize, attrs, i;
+		for (i in props) if ((shouldSanitize = CAMEL_PROPS.test(i))) break;
+		if (shouldSanitize) {
+			attrs = vnode.props = {};
+			for (i in props) {
+				attrs[
+					CAMEL_PROPS.test(i) ? i.replace(/([A-Z0-9])/, '-$1').toLowerCase() : i
+				] = props[i];
+			}
+		}
 	}
 
 	vnode.preactCompatNormalized = false;
