@@ -77,6 +77,20 @@ describe('debug with hooks', () => {
 		expect(fn).to.throw(/Hook can only be invoked from render/);
 	});
 
+	it('should throw an error when invoked outside of a component before render', () => {
+		function Foo(props) {
+			useEffect(() => {}); // Pretend to use a hook
+			return props.children;
+		}
+
+		const fn = () =>
+			act(() => {
+				useState();
+				render(<Foo>Hello!</Foo>, scratch);
+			});
+		expect(fn).to.throw(/Hook can only be invoked from render/);
+	});
+
 	it('should warn for argumentless useEffect hooks', () => {
 		const App = () => {
 			const [state] = useState('test');

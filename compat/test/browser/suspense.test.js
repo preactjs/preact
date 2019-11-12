@@ -12,6 +12,10 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 const h = React.createElement;
 /* eslint-env browser, mocha */
 
+/**
+ * @typedef {import('../../../src').ComponentType} ComponentType
+ * @returns {[typeof Component, (c: ComponentType) => Promise<void>, (c: ComponentType) => void]}
+ */
 function createLazy() {
 	/** @type {(c: ComponentType) => Promise<void>} */
 	let resolver, rejecter;
@@ -35,7 +39,6 @@ function createLazy() {
 }
 
 /**
- * @typedef {import('../../../src').ComponentType} ComponentType
  * @typedef {[(c: ComponentType) => Promise<void>, (error: Error) => Promise<void>]} Resolvers
  * @param {ComponentType} DefaultComponent
  * @returns {[typeof Component, () => Resolvers]}
@@ -227,7 +230,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should not call lifecycle methods of a suspending component', () => {
+	it('should not call lifecycle methods of an initially suspending component', () => {
 		let componentWillMount = sinon.spy();
 		let componentDidMount = sinon.spy();
 		let componentWillUnmount = sinon.spy();
@@ -286,6 +289,104 @@ describe('suspense', () => {
 
 			expect(componentWillMount).to.have.been.calledOnce;
 			expect(componentDidMount).to.have.been.calledOnce;
+			expect(componentWillUnmount).to.not.have.been.called;
+		});
+	});
+
+	it('should properly call lifecycle methods and maintain state of a delayed suspending component', () => {
+		let componentWillMount = sinon.spy();
+		let componentDidMount = sinon.spy();
+		let componentDidUpdate = sinon.spy();
+		let componentWillUnmount = sinon.spy();
+
+		/** @type {() => void} */
+		let increment;
+
+		/** @type {() => Promise<void>} */
+		let resolve;
+		let resolved = false;
+		const promise = new Promise(_resolve => {
+			resolve = () => {
+				resolved = true;
+				_resolve();
+				return promise;
+			};
+		});
+
+		class LifecycleSuspender extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { count: 0 };
+
+				increment = () => this.setState(({ count }) => ({ count: count + 1 }));
+			}
+			render() {
+				if (this.state.count == 2 && !resolved) {
+					throw promise;
+				}
+
+				return (
+					<Fragment>
+						<p>Count: {this.state.count}</p>
+					</Fragment>
+				);
+			}
+			componentWillMount() {
+				componentWillMount();
+			}
+			componentDidMount() {
+				componentDidMount();
+			}
+			componentWillUnmount() {
+				componentWillUnmount();
+			}
+			componentDidUpdate() {
+				componentDidUpdate();
+			}
+		}
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<LifecycleSuspender />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(`<p>Count: 0</p>`);
+		expect(componentWillMount).to.have.been.calledOnce;
+		expect(componentDidMount).to.have.been.calledOnce;
+		expect(componentDidUpdate).to.not.have.been.called;
+		expect(componentWillUnmount).to.not.have.been.called;
+
+		increment();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<p>Count: 1</p>`);
+		expect(componentWillMount).to.have.been.calledOnce;
+		expect(componentDidMount).to.have.been.calledOnce;
+		expect(componentDidUpdate).to.have.been.calledOnce;
+		expect(componentWillUnmount).to.not.have.been.called;
+
+		increment();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+		expect(componentWillMount).to.have.been.calledOnce;
+		expect(componentDidMount).to.have.been.calledOnce;
+		expect(componentDidUpdate).to.have.been.calledOnce;
+		expect(componentWillUnmount).to.not.have.been.called;
+
+		return resolve().then(() => {
+			rerender();
+
+			expect(scratch.innerHTML).to.eql(`<p>Count: 2</p>`);
+			expect(componentWillMount).to.have.been.calledOnce;
+			expect(componentDidMount).to.have.been.calledOnce;
+			// TODO: This is called thrice since the cDU queued up after the second
+			// increment is never cleared once the component suspends. So when it
+			// resumes and the component is rerendered, we queue up another cDU so
+			// cDU is called an extra time.
+			expect(componentDidUpdate).to.have.been.calledThrice;
 			expect(componentWillUnmount).to.not.have.been.called;
 		});
 	});
@@ -401,7 +502,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should keep state of children when suspending', () => {
+	it('should keep state of siblings when suspending', () => {
 		/** @type {(state: { s: string }) => void} */
 		let setState;
 		class Stateful extends Component {
