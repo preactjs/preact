@@ -342,6 +342,7 @@ describe('suspense', () => {
 		let componentWillMount = sinon.spy();
 		let componentDidMount = sinon.spy();
 		let componentWillUnmount = sinon.spy();
+		let componentDidUpdate = sinon.spy();
 
 		/** @type {() => Promise<void>} */
 		let resolve;
@@ -370,6 +371,9 @@ describe('suspense', () => {
 			componentWillUnmount() {
 				componentWillUnmount();
 			}
+			componentDidUpdate() {
+				componentDidUpdate();
+			}
 		}
 
 		render(
@@ -382,6 +386,7 @@ describe('suspense', () => {
 		expect(scratch.innerHTML).to.eql(``);
 		expect(componentWillMount).to.have.been.calledOnce;
 		expect(componentDidMount).to.not.have.been.called;
+		expect(componentDidUpdate).to.not.have.been.called;
 		expect(componentWillUnmount).to.not.have.been.called;
 
 		rerender();
@@ -389,6 +394,7 @@ describe('suspense', () => {
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
 		expect(componentWillMount).to.have.been.calledOnce;
 		expect(componentDidMount).to.not.have.been.called;
+		expect(componentDidUpdate).to.not.have.been.called;
 		expect(componentWillUnmount).to.not.have.been.called;
 
 		return resolve().then(() => {
@@ -397,6 +403,7 @@ describe('suspense', () => {
 
 			expect(componentWillMount).to.have.been.calledOnce;
 			expect(componentDidMount).to.have.been.calledOnce;
+			expect(componentDidUpdate).to.not.have.been.called;
 			expect(componentWillUnmount).to.not.have.been.called;
 		});
 	});
