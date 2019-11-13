@@ -441,9 +441,6 @@ options.vnode = vnode => {
 		type._patchedLifecycles = true;
 	}
 
-	// TODO: Removing this saves 16 bytes!
-	vnode.preactCompatNormalized = true;
-
 	if (oldVNodeHook) oldVNodeHook(vnode);
 };
 
