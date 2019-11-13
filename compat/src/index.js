@@ -26,6 +26,7 @@ import {
 } from 'preact/hooks';
 import { Suspense, lazy } from './suspense';
 import { assign, removeNode } from '../../src/util';
+import { SuspenseList } from './suspense-list';
 
 const version = '16.8.0'; // trick libraries to think we are react
 
@@ -477,6 +478,7 @@ export {
 	// eslint-disable-next-line camelcase
 	unstable_batchedUpdates,
 	Suspense,
+	SuspenseList,
 	lazy
 };
 
@@ -512,5 +514,6 @@ export default {
 	forwardRef,
 	unstable_batchedUpdates,
 	Suspense,
+	SuspenseList,
 	lazy
 };
