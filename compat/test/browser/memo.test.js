@@ -1,11 +1,19 @@
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import React, { createElement, Component, render, memo } from 'preact/compat';
+import React, {
+	createElement,
+	Component,
+	render,
+	memo,
+	createRef
+} from 'preact/compat';
 
 const h = React.createElement;
 
 describe('memo()', () => {
-	let scratch, rerender;
+	/**@type {HTMLDivElement} */
+	let scratch;
+	let rerender;
 
 	beforeEach(() => {
 		scratch = setupScratch();
@@ -54,7 +62,6 @@ describe('memo()', () => {
 
 	it('should support adding refs', () => {
 		let spy = sinon.spy();
-
 		let ref = null;
 
 		function Foo() {
@@ -74,18 +81,24 @@ describe('memo()', () => {
 				return <Memoized ref={ref} />;
 			}
 		}
+
 		render(<App />, scratch);
-
 		expect(spy).to.be.calledOnce;
+		expect(ref).to.be.null;
 
-		ref = {};
+		ref = createRef();
+		update();
+		rerender();
+
+		expect(ref.current).not.to.be.undefined;
+		expect(ref.current.constructor.name).to.equal('Foo');
+		expect(spy).to.be.calledTwice; // TODO: not sure whether this is in-line with react...
 
 		update();
 		rerender();
 
 		expect(ref.current).not.to.be.undefined;
-
-		// TODO: not sure whether this is in-line with react...
+		expect(ref.current.constructor.name).to.equal('Foo');
 		expect(spy).to.be.calledTwice;
 	});
 

@@ -1,15 +1,20 @@
 import { options } from 'preact';
 import { assign } from './util';
 
-let oldVNodeHook = options.vnode;
-options.vnode = vnode => {
-	if (vnode.type && vnode.type._forwarded && vnode.ref) {
-		vnode.props.ref = vnode.ref;
-		vnode.ref = null;
-	}
+export let isForwardRefInstalled = false;
+export function installForwardRef() {
+	let oldVNodeHook = options.vnode;
+	options.vnode = vnode => {
+		if (vnode.type && vnode.type._forwarded && vnode.ref) {
+			vnode.props.ref = vnode.ref;
+			vnode.ref = null;
+		}
 
-	if (oldVNodeHook) oldVNodeHook(vnode);
-};
+		if (oldVNodeHook) oldVNodeHook(vnode);
+	};
+
+	isForwardRefInstalled = true;
+}
 
 /**
  * Pass ref down to a child. This is mainly used in libraries with HOCs that
@@ -19,6 +24,10 @@ options.vnode = vnode => {
  * @returns {import('./internal').FunctionalComponent}
  */
 export function forwardRef(fn) {
+	if (!isForwardRefInstalled) {
+		installForwardRef();
+	}
+
 	function Forwarded(props) {
 		let clone = assign({}, props);
 		delete clone.ref;

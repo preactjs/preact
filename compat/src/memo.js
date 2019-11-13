@@ -1,5 +1,6 @@
 import { createElement } from 'preact';
 import { shallowDiffers, assign } from './util';
+import { installForwardRef, isForwardRefInstalled } from './forwardRef';
 
 /**
  * Memoize a component, so that it only updates when the props actually have
@@ -9,6 +10,10 @@ import { shallowDiffers, assign } from './util';
  * @returns {import('./internal').FunctionalComponent}
  */
 export function memo(c, comparer) {
+	if (!isForwardRefInstalled) {
+		installForwardRef();
+	}
+
 	function shouldUpdate(nextProps) {
 		let ref = this.props.ref;
 		let updateRef = ref == nextProps.ref;
