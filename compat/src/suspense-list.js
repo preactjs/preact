@@ -48,10 +48,11 @@ SuspenseList.prototype.__suspenseDidResolve = function(vnode) {
 			return true;
 		}
 	});
-	const allSuspenseResolved = this._suspenseBoundaries.every(
-		boundary => boundary._component._isSuspenseResolved
-	);
-	if (allSuspenseResolved) {
+	if (
+		this._suspenseBoundaries.every(
+			boundary => boundary._component._isSuspenseResolved
+		)
+	) {
 		this._isSuspenseResolved = true;
 		suspenseDidResolve(this._vnode);
 	}
@@ -140,9 +141,7 @@ SuspenseList.prototype.render = function(props) {
 	const children = toChildArray(props.children);
 	this._suspenseBoundaries = children.filter(
 		child =>
-			child.type &&
-			(child.type.name === Suspense.name ||
-				child.type.name === SuspenseList.name)
+			child.type.name === Suspense.name || child.type.name === SuspenseList.name
 	);
 	if (this.__getRevealOrder() === 'b') {
 		this._suspenseBoundaries.reverse();
