@@ -127,17 +127,16 @@ describe('suspense-list', () => {
 				<Suspense fallback={<span>Loading...</span>}>
 					<Component />
 				</Suspense>
-				,{' '}
 			</SuspenseList>,
 			scratch
 		); // Render initial state
 
 		rerender(); // Re-render with fallback cuz lazy threw
-		expect(scratch.innerHTML).to.eql(`<span>Loading...</span>,   `);
+		expect(scratch.innerHTML).to.eql(`<span>Loading...</span>`);
 
 		await Component.resolve();
 		rerender();
-		expect(scratch.innerHTML).to.eql(`<span>A</span>,   `);
+		expect(scratch.innerHTML).to.eql(`<span>A</span>`);
 	});
 
 	it('should let components appear backwards if no revealOrder is mentioned', async () => {
