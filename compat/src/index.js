@@ -452,10 +452,6 @@ options.vnode = vnode => {
 
 	applyEventNormalization(vnode);
 	let type = vnode.type;
-	if (type && type._forwarded && vnode.ref) {
-		vnode.props.ref = vnode.ref;
-		vnode.ref = null;
-	}
 
 	// We can't just patch the base component class, because components that use
 	// inheritance and are transpiled down to ES5 will overwrite our patched

@@ -25,14 +25,21 @@ export function createElement(type, props, children) {
 
 	// "type" may be undefined during development. The check is needed so that
 	// we can display a nice error message with our debug helpers
-	if (type != null && type.defaultProps != null) {
-		for (let i in type.defaultProps) {
-			if (props[i] === undefined) props[i] = type.defaultProps[i];
+	let ref;
+	if (type != null) {
+		if (type.defaultProps != null) {
+			for (let i in type.defaultProps) {
+				if (props[i] === undefined) props[i] = type.defaultProps[i];
+			}
+		}
+
+		if (type._forwarded != true) {
+			ref = props.ref;
+			if (ref != null) delete props.ref;
 		}
 	}
-	let ref = props.ref;
+
 	let key = props.key;
-	if (ref != null) delete props.ref;
 	if (key != null) delete props.key;
 
 	return createVNode(type, props, key, ref);
