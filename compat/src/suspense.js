@@ -88,14 +88,25 @@ Suspense.prototype.render = function(props, state) {
 };
 
 /**
- * Checks if the parent has _suspended, then
- * will pass vnode to the parent. The parent can return
- * a callback to allow extra wait.
+ * Checks and calls the parent component's _suspended method, passing in the
+ * suspended vnode. This is a way for a parent (e.g. SuspenseList) to get notified
+ * that one of its children/descendants suspended.
+ *
+ * The parent MAY return a callback. The callback will get called when the
+ * suspension resolves, notifying the parent of the fact.
+ * Moreover, the callback gets function `unsuspend` as a parameter. The resolved
+ * child descendant will not actually get unsuspended until `unsuspend` gets called.
+ * This is a way for the parent to delay unsuspending.
+ *
+ * If the parent does not return a callback then the resolved vnode
+ * gets unsuspended immediately when it resolves.
+ *
  * @param {import('../src/internal').VNode} vnode
+ * @returns {((unsuspend: () => void) => void)?}
  */
 export function suspended(vnode) {
-	let x = vnode._parent._component;
-	return x && x._suspended && x._suspended(vnode);
+	let component = vnode._parent._component;
+	return component && component._suspended && component._suspended(vnode);
 }
 
 export function lazy(loader) {
