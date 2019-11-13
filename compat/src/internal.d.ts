@@ -28,11 +28,11 @@ export interface VNode<T = any> extends PreactVNode<T> {
 }
 
 export interface SuspenseState {
-	_suspended: VNode<any>[];
+	_suspended: VNode<any>;
 }
 
 export interface SuspenseComponent
 	extends PreactComponent<SuspenseProps, SuspenseState> {
 	_suspensions: number;
-	_detachOnNextRender: boolean;
+	_detachOnNextRender: null | VNode<any>;
 }
