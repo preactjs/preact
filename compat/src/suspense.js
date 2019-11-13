@@ -1,4 +1,4 @@
-import { Component, createElement, options, Fragment } from 'preact';
+import { Component, createElement, options } from 'preact';
 import { assign } from '../../src/util';
 
 const oldCatchError = options._catchError;
@@ -15,8 +15,8 @@ options._catchError = function(error, newVNode, oldVNode) {
 					newVNode._children = oldVNode._children;
 				}
 
-				component._childDidSuspend(error);
-				return; // Don't call oldCatchError if we found a Suspense
+				// Don't call oldCatchError if we found a Suspense
+				return component._childDidSuspend(error);
 			}
 		}
 	}
@@ -72,7 +72,7 @@ Suspense.prototype.render = function(props, state) {
 	}
 
 	return [
-		createElement(Fragment, null, state._suspended ? null : props.children),
+		createElement(Component, null, state._suspended ? null : props.children),
 		state._suspended && props.fallback
 	];
 };
