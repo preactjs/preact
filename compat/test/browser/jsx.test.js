@@ -3,8 +3,7 @@ import {
 	teardown,
 	serializeHtml
 } from '../../../test/_util/helpers';
-import React, { createElement, isValidElement } from 'preact/compat';
-import { createElement as preactH } from 'preact';
+import React, { createElement } from 'preact/compat';
 
 describe('jsx', () => {
 	/** @type {HTMLDivElement} */
@@ -32,23 +31,5 @@ describe('jsx', () => {
 		expect(serializeHtml(scratch)).to.equal(
 			'<div class="foo bar" data-foo="bar"><span id="some_id">inner!</span>ab</div>'
 		);
-	});
-
-	describe('isValidElement', () => {
-		it('should check return false for invalid arguments', () => {
-			expect(isValidElement(null)).to.equal(false);
-			expect(isValidElement(false)).to.equal(false);
-			expect(isValidElement(true)).to.equal(false);
-			expect(isValidElement('foo')).to.equal(false);
-			expect(isValidElement(123)).to.equal(false);
-		});
-
-		it('should detect a preact vnode', () => {
-			expect(isValidElement(preactH('div'))).to.equal(true);
-		});
-
-		it('should detect a compat vnode', () => {
-			expect(isValidElement(React.createElement('div'))).to.equal(true);
-		});
 	});
 });
