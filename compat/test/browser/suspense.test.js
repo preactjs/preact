@@ -43,7 +43,7 @@ function createLazy() {
  * @param {ComponentType} DefaultComponent
  * @returns {[typeof Component, () => Resolvers]}
  */
-function createSuspender(DefaultComponent) {
+export function createSuspender(DefaultComponent) {
 	/** @type {(lazy: React.JSX.Element) => void} */
 	let renderLazy;
 	class Suspender extends Component {

@@ -10,10 +10,8 @@ options._catchError = function(error, newVNode, oldVNode) {
 
 		for (; (vnode = vnode._parent); ) {
 			if ((component = vnode._component) && component._childDidSuspend) {
-				if (oldVNode) {
-					newVNode._dom = oldVNode._dom;
-					newVNode._children = oldVNode._children;
-				}
+				newVNode._dom = oldVNode._dom;
+				newVNode._children = oldVNode._children;
 
 				// Don't call oldCatchError if we found a Suspense
 				return component._childDidSuspend(error);
@@ -52,6 +50,16 @@ Suspense.prototype._childDidSuspend = function(promise) {
 	/** @type {import('./internal').SuspenseComponent} */
 	const c = this;
 
+	const resolve = suspended(c._vnode);
+
+	const onResolved = () => {
+		if (resolve) {
+			resolve(onSuspensionComplete);
+		} else {
+			onSuspensionComplete();
+		}
+	};
+
 	const onSuspensionComplete = () => {
 		if (!--c._suspensions) {
 			c._vnode._children[0] = c.state._suspended;
@@ -62,7 +70,7 @@ Suspense.prototype._childDidSuspend = function(promise) {
 	if (!c._suspensions++) {
 		c.setState({ _suspended: (c._detachOnNextRender = c._vnode._children[0]) });
 	}
-	promise.then(onSuspensionComplete, onSuspensionComplete);
+	promise.then(onResolved, onResolved);
 };
 
 Suspense.prototype.render = function(props, state) {
@@ -76,6 +84,28 @@ Suspense.prototype.render = function(props, state) {
 		state._suspended && props.fallback
 	];
 };
+
+/**
+ * Checks and calls the parent component's _suspended method, passing in the
+ * suspended vnode. This is a way for a parent (e.g. SuspenseList) to get notified
+ * that one of its children/descendants suspended.
+ *
+ * The parent MAY return a callback. The callback will get called when the
+ * suspension resolves, notifying the parent of the fact.
+ * Moreover, the callback gets function `unsuspend` as a parameter. The resolved
+ * child descendant will not actually get unsuspended until `unsuspend` gets called.
+ * This is a way for the parent to delay unsuspending.
+ *
+ * If the parent does not return a callback then the resolved vnode
+ * gets unsuspended immediately when it resolves.
+ *
+ * @param {import('../src/internal').VNode} vnode
+ * @returns {((unsuspend: () => void) => void)?}
+ */
+export function suspended(vnode) {
+	let component = vnode._parent._component;
+	return component && component._suspended && component._suspended(vnode);
+}
 
 export function lazy(loader) {
 	let prom;
