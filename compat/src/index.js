@@ -25,7 +25,7 @@ import { forwardRef } from './forwardRef';
 import { Children } from './Children';
 import { Suspense, lazy } from './suspense';
 import { SuspenseList } from './suspense-list';
-import { createPortal } from './createPortal';
+import { createPortal } from './portals';
 import { render, REACT_ELEMENT_TYPE } from './render';
 
 const version = '16.8.0'; // trick libraries to think we are react
