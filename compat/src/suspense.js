@@ -1,5 +1,5 @@
 import { Component, createElement, options, Fragment } from 'preact';
-import { assign } from '../../src/util';
+import { assign } from './util';
 
 const oldCatchError = options._catchError;
 options._catchError = function(error, newVNode, oldVNode) {
