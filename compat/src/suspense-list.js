@@ -113,7 +113,7 @@ SuspenseList.prototype.render = function(props) {
 	return props.children;
 };
 
-SuspenseList.prototype.componentDidMount = function() {
+SuspenseList.prototype.componentDidUpdate = SuspenseList.prototype.componentDidMount = function() {
 	// Iterate through all children after mounting for two reasons:
 	// 1. As each node[SUSPENDED_COUNT] starts from 1, this iteration increases
 	//    each node[RELEASED_COUNT] by 1, therefore balancing the counters.
