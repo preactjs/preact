@@ -6,6 +6,7 @@ import React, {
 	Suspense,
 	SuspenseList
 } from 'preact/compat';
+import { useState } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 const h = React.createElement;
@@ -539,5 +540,49 @@ describe('suspense-list', () => {
 		await Component.resolve();
 		rerender();
 		expect(scratch.innerHTML).to.eql(`<div></div><span>A</span>`);
+	});
+
+	it('should not suspend resolved children if a new suspense comes in between', async () => {
+		const ComponentA = getSuspendableComponent('A');
+		const ComponentB = getSuspendableComponent('B');
+
+		let showB;
+		function Container() {
+			const [showHidden, setShowHidden] = useState(false);
+			showB = setShowHidden;
+			return (
+				<SuspenseList revealOrder="together">
+					<Suspense fallback={<span>Loading...</span>}>
+						<div />
+					</Suspense>
+					{showHidden && (
+						<Suspense fallback={<span>Loading...</span>}>
+							<ComponentB />
+						</Suspense>
+					)}
+					<Suspense fallback={<span>Loading...</span>}>
+						<ComponentA />
+					</Suspense>
+				</SuspenseList>
+			);
+		}
+		render(<Container />, scratch); // Render initial state
+
+		rerender();
+		expect(scratch.innerHTML).to.eql(`<div></div><span>Loading...</span>`);
+
+		await ComponentA.resolve();
+		rerender();
+		expect(scratch.innerHTML).to.eql(`<div></div><span>A</span>`);
+
+		showB(true);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			`<div></div><span>Loading...</span><span>A</span>`
+		);
+
+		await ComponentB.resolve();
+		rerender();
+		expect(scratch.innerHTML).to.eql(`<div></div><span>B</span><span>A</span>`);
 	});
 });
