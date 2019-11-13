@@ -12,6 +12,7 @@ let spy = (name, ...args) => {
 };
 
 describe('refs', () => {
+	/** @type {HTMLDivElement} */
 	let scratch;
 	let rerender;
 
@@ -477,5 +478,53 @@ describe('refs', () => {
 
 		render(<App />, scratch);
 		expect(el).to.not.be.equal(null);
+	});
+
+	it('should bind refs before componentDidMount', () => {
+		/** @type {import('preact').RefObject<HTMLSpanElement>[]} */
+		const refs = [];
+
+		class Parent extends Component {
+			componentDidMount() {
+				// Child refs should be set
+				expect(refs.length).to.equal(2);
+				expect(refs[0].current.tagName).to.equal('SPAN');
+				expect(refs[1].current.tagName).to.equal('SPAN');
+			}
+
+			render(props) {
+				return props.children;
+			}
+		}
+
+		class Child extends Component {
+			constructor(props) {
+				super(props);
+
+				this.ref = createRef();
+			}
+
+			componentDidMount() {
+				// SPAN refs should be set
+				expect(this.ref.current.tagName).to.equal('SPAN');
+				refs.push(this.ref);
+			}
+
+			render() {
+				return <span ref={this.ref}>Hello</span>;
+			}
+		}
+
+		render(
+			<Parent>
+				<Child />
+				<Child />
+			</Parent>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal('<span>Hello</span><span>Hello</span>');
+		expect(refs[0].current).to.equalNode(scratch.firstChild);
+		expect(refs[1].current).to.equalNode(scratch.lastChild);
 	});
 });
