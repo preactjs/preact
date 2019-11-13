@@ -1,27 +1,36 @@
 import { Component, toChildArray } from 'preact';
 import { suspended } from './suspense.js';
 
-// having custom inheritance instead of a class here saves a lot of bytes
+// Having custom inheritance instead of a class here saves a lot of bytes.
 export function SuspenseList() {
 	this._next = null;
 	this._map = null;
 }
 
-const consume = (list, node, vnode) => {
-	node.resolved++;
-
-	const order = list.props.revealOrder;
-	if (!order) {
-		return;
-	}
-
-	if (node.resolved === node.suspended) {
+const resolve = (list, node, vnode) => {
+	if (++node.resolved === node.suspended) {
+		// The number a child (or any of its descendants) has been suspended
+		// matches the number of times it's been resolved. Therefore we
+		// mark the vnode as completely resolved by deleting it from ._map.
+		// This is used to figure out when *all* children have been completely
+		// resolved when revealOrder is 'together'.
 		list._map.delete(vnode);
 	}
-	if (order[0] === 't' && list._map.size) {
+
+	// If revealOrder is falsy then we can do an early exit, as the
+	// callbacks won't get queued in node.callbacks anyway.
+	// If revealOrder is (close enough to) 'together' then early exit
+	// if all suspended descendants have not been resolved.
+	if (
+		!list.props.revealOrder ||
+		(list.props.revealOrder[0] === 't' && list._map.size)
+	) {
 		return;
 	}
 
+	// Walk the currently unfinished children in order, calling their
+	// stored callbacks on the way. Stop if we encounter a child that
+	// has not been completely resolved yet.
 	node = list._next;
 	while (node) {
 		while (node.callbacks.length) {
@@ -52,7 +61,7 @@ SuspenseList.prototype._suspended = function(vnode) {
 				callback();
 			} else {
 				node.callbacks.push(callback);
-				consume(list, node, vnode);
+				resolve(list, node, vnode);
 			}
 		};
 		if (wrapper) {
@@ -66,7 +75,7 @@ SuspenseList.prototype._suspended = function(vnode) {
 SuspenseList.prototype.componentDidMount = function() {
 	const list = this;
 	list._map.forEach((node, vnode) => {
-		consume(list, node, vnode);
+		resolve(list, node, vnode);
 	});
 };
 
