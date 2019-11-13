@@ -1,5 +1,9 @@
 import React, { createElement, render } from 'preact/compat';
-import { setupScratch, teardown } from '../../../test/_util/helpers';
+import {
+	setupScratch,
+	teardown,
+	serializeHtml
+} from '../../../test/_util/helpers';
 
 describe('compat render', () => {
 	/** @type {HTMLDivElement} */
@@ -14,6 +18,22 @@ describe('compat render', () => {
 
 	afterEach(() => {
 		teardown(scratch);
+	});
+
+	it('should render react-style jsx', () => {
+		let jsx = (
+			<div className="foo bar" data-foo="bar">
+				<span id="some_id">inner!</span>
+				{['a', 'b']}
+			</div>
+		);
+
+		expect(jsx.props).to.have.property('className', 'foo bar');
+
+		React.render(jsx, scratch);
+		expect(serializeHtml(scratch)).to.equal(
+			'<div class="foo bar" data-foo="bar"><span id="some_id">inner!</span>ab</div>'
+		);
 	});
 
 	it('should replace isomorphic content', () => {
