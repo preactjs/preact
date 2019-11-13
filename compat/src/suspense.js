@@ -1,6 +1,5 @@
 import { Component, createElement, options, Fragment } from 'preact';
 import { assign } from '../../src/util';
-import { suspenseDidResolve, suspenseWillResolve } from './suspense-list-utils';
 
 const oldCatchError = options._catchError;
 options._catchError = function(error, newVNode, oldVNode) {
@@ -39,7 +38,6 @@ export function Suspense(props) {
 	// we do not call super here to golf some bytes...
 	this._suspensions = 0;
 	this._detachOnNextRender = null;
-	this._isSuspenseResolved = true;
 }
 
 // Things we do here to save some bytes but are not proper JS inheritance:
@@ -53,24 +51,28 @@ Suspense.prototype = new Component();
 Suspense.prototype._childDidSuspend = function(promise) {
 	/** @type {import('./internal').SuspenseComponent} */
 	const c = this;
+
+	const resolve = suspended(c._vnode);
+
+	const onResolved = () => {
+		if (resolve) {
+			resolve(onSuspensionComplete);
+		} else {
+			onSuspensionComplete();
+		}
+	};
+
 	const onSuspensionComplete = () => {
 		if (!--c._suspensions) {
 			c._vnode._children[0] = c.state._suspended;
-			c.setState({ _suspended: (c._detachOnNextRender = null) }, () => {
-				this._isSuspenseResolved = true;
-				suspenseDidResolve(this._vnode);
-			});
+			c.setState({ _suspended: (c._detachOnNextRender = null) });
 		}
 	};
 
 	if (!c._suspensions++) {
-		this._isSuspenseResolved = false;
 		c.setState({ _suspended: (c._detachOnNextRender = c._vnode._children[0]) });
 	}
-
-	promise.then(() => {
-		suspenseWillResolve(c._vnode, onSuspensionComplete);
-	}, onSuspensionComplete);
+	promise.then(onResolved, onResolved);
 };
 
 Suspense.prototype.render = function(props, state) {
@@ -84,6 +86,17 @@ Suspense.prototype.render = function(props, state) {
 		state._suspended && props.fallback
 	];
 };
+
+/**
+ * Checks if the parent has _suspended, then
+ * will pass vnode to the parent. The parent can return
+ * a callback to allow extra wait.
+ * @param {import('../src/internal').VNode} vnode
+ */
+export function suspended(vnode) {
+	let x = vnode._parent._component;
+	return x && x._suspended && x._suspended(vnode);
+}
 
 export function lazy(loader) {
 	let prom;
