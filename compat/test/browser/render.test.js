@@ -3,24 +3,17 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 describe('compat render', () => {
 	/** @type {HTMLDivElement} */
-	let scratch, proto;
+	let scratch;
 
 	const ce = type => document.createElement(type);
 	const text = text => document.createTextNode(text);
 
 	beforeEach(() => {
 		scratch = setupScratch();
-
-		proto = document.createElement('div').constructor.prototype;
-		sinon.spy(proto, 'addEventListener');
-		sinon.spy(proto, 'removeEventListener');
 	});
 
 	afterEach(() => {
 		teardown(scratch);
-
-		proto.addEventListener.restore();
-		proto.removeEventListener.restore();
 	});
 
 	it('should replace isomorphic content', () => {
@@ -74,58 +67,6 @@ describe('compat render', () => {
 			.that.equals('dynamic content');
 	});
 
-	it('should support onAnimationEnd', () => {
-		const func = () => {};
-		render(<div onAnimationEnd={func} />, scratch);
-
-		expect(
-			proto.addEventListener
-		).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
-			'animationend',
-			sinon.match.func,
-			false
-		);
-
-		expect(scratch.firstChild._listeners).to.deep.equal({
-			animationend: func
-		});
-
-		render(<div />, scratch);
-		expect(
-			proto.removeEventListener
-		).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
-			'animationend',
-			sinon.match.func,
-			false
-		);
-	});
-
-	it('should support onTransitionEnd', () => {
-		const func = () => {};
-		render(<div onTransitionEnd={func} />, scratch);
-
-		expect(
-			proto.addEventListener
-		).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
-			'transitionend',
-			sinon.match.func,
-			false
-		);
-
-		expect(scratch.firstChild._listeners).to.deep.equal({
-			transitionend: func
-		});
-
-		render(<div />, scratch);
-		expect(
-			proto.removeEventListener
-		).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
-			'transitionend',
-			sinon.match.func,
-			false
-		);
-	});
-
 	it('should support defaultValue', () => {
 		render(<input defaultValue="foo" />, scratch);
 		expect(scratch.firstElementChild).to.have.property('value', 'foo');
@@ -162,5 +103,21 @@ describe('compat render', () => {
 		child.focus();
 		render(<input />, scratch);
 		expect(document.activeElement.nodeName).to.equal('INPUT');
+	});
+
+	it('should normalize class+className even on components', () => {
+		function Foo(props) {
+			return (
+				<div class={props.class} className={props.className}>
+					foo
+				</div>
+			);
+		}
+		render(<Foo class="foo" />, scratch);
+		expect(scratch.firstChild.className).to.equal('foo');
+		render(null, scratch);
+
+		render(<Foo className="foo" />, scratch);
+		expect(scratch.firstChild.className).to.equal('foo');
 	});
 });

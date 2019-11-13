@@ -1,9 +1,5 @@
-import React, { createElement, render } from 'preact/compat';
-import {
-	setupScratch,
-	teardown,
-	createEvent
-} from '../../../test/_util/helpers';
+import React, { createElement } from 'preact/compat';
+import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 describe('compat createElement()', () => {
 	/** @type {HTMLDivElement} */
@@ -47,54 +43,5 @@ describe('compat createElement()', () => {
 			.to.have.property('props')
 			.that.is.an('object');
 		expect(vnode.props.children.props).to.eql({ children: 't' });
-	});
-
-	it('should normalize onChange', () => {
-		let props = { onChange() {} };
-
-		function expectToBeNormalized(vnode, desc) {
-			expect(vnode, desc)
-				.to.have.property('props')
-				.with.all.keys(['oninput'].concat(vnode.props.type ? 'type' : []))
-				.and.property('oninput')
-				.that.is.a('function');
-		}
-
-		function expectToBeUnmodified(vnode, desc) {
-			expect(vnode, desc)
-				.to.have.property('props')
-				.eql({
-					...props,
-					...(vnode.props.type ? { type: vnode.props.type } : {})
-				});
-		}
-
-		expectToBeUnmodified(<div {...props} />, '<div>');
-		expectToBeUnmodified(
-			<input {...props} type="radio" />,
-			'<input type="radio">'
-		);
-		expectToBeUnmodified(
-			<input {...props} type="checkbox" />,
-			'<input type="checkbox">'
-		);
-		expectToBeUnmodified(
-			<input {...props} type="file" />,
-			'<input type="file">'
-		);
-
-		expectToBeNormalized(<textarea {...props} />, '<textarea>');
-		expectToBeNormalized(<input {...props} />, '<input>');
-		expectToBeNormalized(
-			<input {...props} type="text" />,
-			'<input type="text">'
-		);
-	});
-
-	it('should normalize beforeinput event listener', () => {
-		let spy = sinon.spy();
-		render(<input onBeforeInput={spy} />, scratch);
-		scratch.firstChild.dispatchEvent(createEvent('beforeinput'));
-		expect(spy).to.be.calledOnce;
 	});
 });
