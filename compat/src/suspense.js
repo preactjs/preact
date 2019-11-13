@@ -10,10 +10,8 @@ options._catchError = function(error, newVNode, oldVNode) {
 
 		for (; (vnode = vnode._parent); ) {
 			if ((component = vnode._component) && component._childDidSuspend) {
-				if (oldVNode) {
-					newVNode._dom = oldVNode._dom;
-					newVNode._children = oldVNode._children;
-				}
+				newVNode._dom = oldVNode._dom;
+				newVNode._children = oldVNode._children;
 
 				component._childDidSuspend(error);
 				return; // Don't call oldCatchError if we found a Suspense
