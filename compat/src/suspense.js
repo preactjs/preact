@@ -1,22 +1,27 @@
 import { Component, createElement, options } from 'preact';
 import { assign } from './util';
 
-const oldCatchError = options._catchError;
-options._catchError = function(error, newVNode, oldVNode) {
-	if (error.then) {
-		/** @type {import('./internal').Component} */
-		let component;
-		let vnode = newVNode;
+let isSuspenseInstalled;
+function installSuspense() {
+	const oldCatchError = options._catchError;
+	options._catchError = function(error, newVNode, oldVNode) {
+		if (error.then) {
+			/** @type {import('./internal').Component} */
+			let component;
+			let vnode = newVNode;
 
-		for (; (vnode = vnode._parent); ) {
-			if ((component = vnode._component) && component._childDidSuspend) {
-				// Don't call oldCatchError if we found a Suspense
-				return component._childDidSuspend(error);
+			for (; (vnode = vnode._parent); ) {
+				if ((component = vnode._component) && component._childDidSuspend) {
+					// Don't call oldCatchError if we found a Suspense
+					return component._childDidSuspend(error);
+				}
 			}
 		}
-	}
-	oldCatchError(error, newVNode, oldVNode);
-};
+		oldCatchError(error, newVNode, oldVNode);
+	};
+
+	isSuspenseInstalled = true;
+}
 
 function detachedClone(vnode) {
 	if (vnode) {
@@ -28,7 +33,11 @@ function detachedClone(vnode) {
 }
 
 // having custom inheritance instead of a class here saves a lot of bytes
-export function Suspense(props) {
+export function Suspense() {
+	if (!isSuspenseInstalled) {
+		installSuspense();
+	}
+
 	// we do not call super here to golf some bytes...
 	this._suspensions = 0;
 	this._detachOnNextRender = null;
