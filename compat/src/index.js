@@ -26,6 +26,7 @@ import { Suspense, lazy } from './suspense';
 import { assign, removeNode } from '../../src/util';
 import { SuspenseList } from './suspense-list';
 import { createPortal } from './createPortal';
+import { Children } from './Children';
 
 const version = '16.8.0'; // trick libraries to think we are react
 
@@ -74,28 +75,6 @@ function render(vnode, parent, callback) {
 
 	return vnode ? vnode._component : null;
 }
-
-const mapFn = (children, fn) => {
-	if (!children) return null;
-	return toChildArray(children).map(fn);
-};
-
-// This API is completely unnecessary for Preact, so it's basically passthrough.
-let Children = {
-	map: mapFn,
-	forEach: mapFn,
-	count(children) {
-		return children ? toChildArray(children).length : 0;
-	},
-	only(children) {
-		children = toChildArray(children);
-		if (children.length !== 1) {
-			throw new Error('Children.only() expects only one child.');
-		}
-		return children[0];
-	},
-	toArray: toChildArray
-};
 
 /**
  * Wrap `cloneElement` to abort if the passed element is not a valid element and apply
