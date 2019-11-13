@@ -65,6 +65,7 @@ Preact supports modern browsers and IE9+:
 
 #### Real-World Apps
 
+- [**Preact Jobs**](https://preact-jobs-c0272.firebaseapp.com) _([GitHub Project](https://github.com/AbdulrahmanEng/preact-jobs-beta))_
 - [**Preact Hacker News**](https://hn.kristoferbaxter.com) _([GitHub Project](https://github.com/kristoferbaxter/preact-hn))_
 - [**Play.cash**](https://play.cash) :notes: _([GitHub Project](https://github.com/feross/play.cash))_
 - [**Songsterr**](https://www.songsterr.com) 🎼 Using Preact X in production since 10.0 alpha
