@@ -100,7 +100,7 @@ describe('useLayoutEffect', () => {
 				expect(scratch.innerHTML).to.equal(
 					`<div class="${props.value}"><p>${props.value}</p><textarea></textarea></div>`
 				);
-				expect(ref.current.isConnected).to.equal(true);
+				expect(document.body.contains(ref.current)).to.equal(true);
 			});
 			return (
 				<Fragment>
@@ -125,12 +125,8 @@ describe('useLayoutEffect', () => {
 	it('should invoke layout effects after subtree is fully connected', () => {
 		let ref;
 		let layoutEffect = sinon.spy(() => {
-			expect(ref.current.isConnected).to.equal(true, 'ref.current.isConnected');
-			expect(ref.current.parentNode).to.not.be.undefined;
-			expect(ref.current.parentNode.isConnected).to.equal(
-				true,
-				'ref.current.parentNode.isConnected'
-			);
+			const isConnected = document.body.contains(ref.current);
+			expect(isConnected).to.equal(true, 'isConnected');
 		});
 
 		function Inner() {
