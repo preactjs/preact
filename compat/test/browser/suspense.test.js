@@ -230,12 +230,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should not call lifecycle methods of an initially suspending component', () => {
-		let componentWillMount = sinon.spy();
-		let componentDidMount = sinon.spy();
-		let componentWillUnmount = sinon.spy();
-		let componentDidUpdate = sinon.spy();
-
+	it('should properly call lifecycle methods of an initially suspending component', () => {
 		/** @type {() => Promise<void>} */
 		let resolve;
 		let resolved = false;
@@ -254,19 +249,17 @@ describe('suspense', () => {
 				}
 				return <div>Lifecycle</div>;
 			}
-			componentWillMount() {
-				componentWillMount();
-			}
-			componentDidMount() {
-				componentDidMount();
-			}
-			componentWillUnmount() {
-				componentWillUnmount();
-			}
-			componentDidUpdate() {
-				componentDidUpdate();
-			}
+			componentWillMount() {}
+			componentDidMount() {}
+			componentDidUpdate() {}
+			componentWillUnmount() {}
 		}
+
+		const lifecycles = LifecycleSuspender.prototype;
+		sinon.spy(lifecycles, 'componentWillMount');
+		sinon.spy(lifecycles, 'componentDidMount');
+		sinon.spy(lifecycles, 'componentDidUpdate');
+		sinon.spy(lifecycles, 'componentWillUnmount');
 
 		render(
 			<Suspense fallback={<div>Suspended...</div>}>
@@ -276,36 +269,31 @@ describe('suspense', () => {
 		);
 
 		expect(scratch.innerHTML).to.eql(``);
-		expect(componentWillMount).to.have.been.calledOnce;
-		expect(componentDidMount).to.not.have.been.called;
-		expect(componentDidUpdate).to.not.have.been.called;
-		expect(componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).to.have.been.calledOnce;
+		expect(lifecycles.componentDidMount).to.not.have.been.called;
+		expect(lifecycles.componentDidUpdate).to.not.have.been.called;
+		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
 
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-		expect(componentWillMount).to.have.been.calledOnce;
-		expect(componentDidMount).to.not.have.been.called;
-		expect(componentDidUpdate).to.not.have.been.called;
-		expect(componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).to.have.been.calledOnce;
+		expect(lifecycles.componentDidMount).to.not.have.been.called;
+		expect(lifecycles.componentDidUpdate).to.not.have.been.called;
+		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
 
 		return resolve().then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(`<div>Lifecycle</div>`);
 
-			expect(componentWillMount).to.have.been.calledOnce;
-			expect(componentDidMount).to.have.been.calledOnce;
-			expect(componentDidUpdate).to.not.have.been.called;
-			expect(componentWillUnmount).to.not.have.been.called;
+			expect(lifecycles.componentWillMount).to.have.been.calledOnce;
+			expect(lifecycles.componentDidMount).to.have.been.calledOnce;
+			expect(lifecycles.componentDidUpdate).to.not.have.been.called;
+			expect(lifecycles.componentWillUnmount).to.not.have.been.called;
 		});
 	});
 
 	it('should properly call lifecycle methods and maintain state of a delayed suspending component', () => {
-		let componentWillMount = sinon.spy();
-		let componentDidMount = sinon.spy();
-		let componentDidUpdate = sinon.spy();
-		let componentWillUnmount = sinon.spy();
-
 		/** @type {() => void} */
 		let increment;
 
@@ -338,19 +326,17 @@ describe('suspense', () => {
 					</Fragment>
 				);
 			}
-			componentWillMount() {
-				componentWillMount();
-			}
-			componentDidMount() {
-				componentDidMount();
-			}
-			componentWillUnmount() {
-				componentWillUnmount();
-			}
-			componentDidUpdate() {
-				componentDidUpdate();
-			}
+			componentWillMount() {}
+			componentDidMount() {}
+			componentDidUpdate() {}
+			componentWillUnmount() {}
 		}
+
+		const lifecycles = LifecycleSuspender.prototype;
+		sinon.spy(lifecycles, 'componentWillMount');
+		sinon.spy(lifecycles, 'componentDidMount');
+		sinon.spy(lifecycles, 'componentDidUpdate');
+		sinon.spy(lifecycles, 'componentWillUnmount');
 
 		render(
 			<Suspense fallback={<div>Suspended...</div>}>
@@ -360,58 +346,56 @@ describe('suspense', () => {
 		);
 
 		expect(scratch.innerHTML).to.eql(`<p>Count: 0</p>`);
-		expect(componentWillMount).to.have.been.calledOnce;
-		expect(componentDidMount).to.have.been.calledOnce;
-		expect(componentDidUpdate).to.not.have.been.called;
-		expect(componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).to.have.been.calledOnce;
+		expect(lifecycles.componentDidMount).to.have.been.calledOnce;
+		expect(lifecycles.componentDidUpdate).to.not.have.been.called;
+		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
 
 		increment();
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(`<p>Count: 1</p>`);
-		expect(componentWillMount).to.have.been.calledOnce;
-		expect(componentDidMount).to.have.been.calledOnce;
-		expect(componentDidUpdate).to.have.been.calledOnce;
-		expect(componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).to.have.been.calledOnce;
+		expect(lifecycles.componentDidMount).to.have.been.calledOnce;
+		expect(lifecycles.componentDidUpdate).to.have.been.calledOnce;
+		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
 
 		increment();
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-		expect(componentWillMount).to.have.been.calledOnce;
-		expect(componentDidMount).to.have.been.calledOnce;
-		expect(componentDidUpdate).to.have.been.calledOnce;
-		expect(componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).to.have.been.calledOnce;
+		expect(lifecycles.componentDidMount).to.have.been.calledOnce;
+		expect(lifecycles.componentDidUpdate).to.have.been.calledOnce;
+		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
 
 		return resolve().then(() => {
 			rerender();
 
 			expect(scratch.innerHTML).to.eql(`<p>Count: 2</p>`);
-			expect(componentWillMount).to.have.been.calledOnce;
-			expect(componentDidMount).to.have.been.calledOnce;
-			expect(componentDidUpdate).to.have.been.calledTwice;
-			expect(componentWillUnmount).to.not.have.been.called;
+			expect(lifecycles.componentWillMount).to.have.been.calledOnce;
+			expect(lifecycles.componentDidMount).to.have.been.calledOnce;
+			expect(lifecycles.componentDidUpdate).to.have.been.calledTwice;
+			expect(lifecycles.componentWillUnmount).to.not.have.been.called;
 		});
 	});
 
 	it('should not call lifecycle methods when a sibling suspends', () => {
-		let componentWillMount = sinon.spy();
-		let componentDidMount = sinon.spy();
-		let componentWillUnmount = sinon.spy();
 		class LifecycleLogger extends Component {
 			render() {
 				return <div>Lifecycle</div>;
 			}
-			componentWillMount() {
-				componentWillMount();
-			}
-			componentDidMount() {
-				componentDidMount();
-			}
-			componentWillUnmount() {
-				componentWillUnmount();
-			}
+			componentWillMount() {}
+			componentDidMount() {}
+			componentDidUpdate() {}
+			componentWillUnmount() {}
 		}
+
+		const lifecycles = LifecycleLogger.prototype;
+		sinon.spy(lifecycles, 'componentWillMount');
+		sinon.spy(lifecycles, 'componentDidMount');
+		sinon.spy(lifecycles, 'componentDidUpdate');
+		sinon.spy(lifecycles, 'componentWillUnmount');
 
 		const [Suspender, suspend] = createSuspender(() => <div>Suspense</div>);
 
@@ -424,18 +408,19 @@ describe('suspense', () => {
 		);
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspense</div><div>Lifecycle</div>`);
-		expect(componentWillMount).to.have.been.calledOnce;
-		expect(componentDidMount).to.have.been.calledOnce;
-		expect(componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).to.have.been.calledOnce;
+		expect(lifecycles.componentDidMount).to.have.been.calledOnce;
+		expect(lifecycles.componentDidUpdate).to.not.have.been.called;
+		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
 
 		const [resolve] = suspend();
-
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-		expect(componentWillMount).to.have.been.calledOnce;
-		expect(componentDidMount).to.have.been.calledOnce;
-		expect(componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).to.have.been.calledOnce;
+		expect(lifecycles.componentDidMount).to.have.been.calledOnce;
+		expect(lifecycles.componentDidUpdate).to.not.have.been.called;
+		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
 
 		return resolve(() => <div>Suspense 2</div>).then(() => {
 			rerender();
@@ -443,9 +428,10 @@ describe('suspense', () => {
 				`<div>Suspense 2</div><div>Lifecycle</div>`
 			);
 
-			expect(componentWillMount).to.have.been.calledOnce;
-			expect(componentDidMount).to.have.been.calledOnce;
-			expect(componentWillUnmount).to.not.have.been.called;
+			expect(lifecycles.componentWillMount).to.have.been.calledOnce;
+			expect(lifecycles.componentDidMount).to.have.been.calledOnce;
+			expect(lifecycles.componentDidUpdate).to.have.been.calledOnce;
+			expect(lifecycles.componentWillUnmount).to.not.have.been.called;
 		});
 	});
 
@@ -459,18 +445,10 @@ describe('suspense', () => {
 			componentWillUnmount() {}
 		}
 
-		const componentWillMount = sinon.spy(
-			LifecycleLogger.prototype,
-			'componentWillMount'
-		);
-		const componentDidMount = sinon.spy(
-			LifecycleLogger.prototype,
-			'componentDidMount'
-		);
-		const componentWillUnmount = sinon.spy(
-			LifecycleLogger.prototype,
-			'componentWillUnmount'
-		);
+		const lifecycles = LifecycleLogger.prototype;
+		sinon.spy(lifecycles, 'componentWillMount');
+		sinon.spy(lifecycles, 'componentDidMount');
+		sinon.spy(lifecycles, 'componentWillUnmount');
 
 		const [Suspender, suspend] = createSuspender(() => <div>Suspense</div>);
 
@@ -482,26 +460,26 @@ describe('suspense', () => {
 		);
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspense</div>`);
-		expect(componentWillMount).to.not.have.been.called;
-		expect(componentDidMount).to.not.have.been.called;
-		expect(componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).to.not.have.been.called;
+		expect(lifecycles.componentDidMount).to.not.have.been.called;
+		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
 
 		const [resolve] = suspend();
 
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(`<div>Lifecycle</div>`);
-		expect(componentWillMount).to.have.been.calledOnce;
-		expect(componentDidMount).to.have.been.calledOnce;
-		expect(componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).to.have.been.calledOnce;
+		expect(lifecycles.componentDidMount).to.have.been.calledOnce;
+		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
 
 		return resolve(() => <div>Suspense 2</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(`<div>Suspense 2</div>`);
 
-			expect(componentWillMount).to.have.been.calledOnce;
-			expect(componentDidMount).to.have.been.calledOnce;
-			expect(componentWillUnmount).to.have.been.calledOnce;
+			expect(lifecycles.componentWillMount).to.have.been.calledOnce;
+			expect(lifecycles.componentDidMount).to.have.been.calledOnce;
+			expect(lifecycles.componentWillUnmount).to.have.been.calledOnce;
 		});
 	});
 
