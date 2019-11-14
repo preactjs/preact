@@ -1,6 +1,7 @@
 import {
 	render as preactRender,
 	cloneElement as preactCloneElement,
+	isValidElement as preactIsValidElement,
 	createRef,
 	Component,
 	createContext,
@@ -43,7 +44,10 @@ function createFactory(type) {
  * @returns {boolean}
  */
 function isValidElement(element) {
-	return !!element && element.$$typeof === REACT_ELEMENT_TYPE;
+	return (
+		(!!element && element.$$typeof === REACT_ELEMENT_TYPE) ||
+		preactIsValidElement(element)
+	);
 }
 
 /**
