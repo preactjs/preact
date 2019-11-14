@@ -575,9 +575,7 @@ describe('render()', () => {
 			);
 
 			render(<App />, scratch);
-			expect(scratch.innerHTML).to.equal(
-				'<div class=""><span>Bye</span></div>'
-			);
+			expect(serializeHtml(scratch)).to.equal('<div><span>Bye</span></div>');
 		});
 
 		it('should remove class attributes', () => {
@@ -593,9 +591,7 @@ describe('render()', () => {
 			);
 
 			render(<App />, scratch);
-			expect(scratch.innerHTML).to.equal(
-				'<div class=""><span>Bye</span></div>'
-			);
+			expect(serializeHtml(scratch)).to.equal('<div><span>Bye</span></div>');
 		});
 
 		it('should remove old styles', () => {
