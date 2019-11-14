@@ -9,6 +9,9 @@ import { applyEventNormalization } from './events';
 
 const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip|color|fill|flood|font|glyph|horiz|marker|overline|paint|stop|strikethrough|stroke|text|underline|unicode|units|v|vector|vert|word|writing|x)[A-Z]/;
 
+// Some libraries like `react-virtualized` explicitly check for this.
+Component.prototype.isReactComponent = {};
+
 /* istanbul ignore next */
 export const REACT_ELEMENT_TYPE =
 	(typeof Symbol !== 'undefined' &&
@@ -78,9 +81,6 @@ const classNameDescriptor = {
 
 let isReactCompatInstalled = false;
 function installReactCompat() {
-	// Some libraries like `react-virtualized` explicitly check for this.
-	Component.prototype.isReactComponent = {};
-
 	let oldEventHook = options.event;
 	options.event = e => {
 		if (oldEventHook) e = oldEventHook(e);
