@@ -1,6 +1,10 @@
 import { act } from 'preact/test-utils';
 import { createElement, render, Fragment } from 'preact';
-import { setupScratch, teardown } from '../../../test/_util/helpers';
+import {
+	setupScratch,
+	teardown,
+	serializeHtml
+} from '../../../test/_util/helpers';
 import { useEffectAssertions } from './useEffectAssertions.test';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 
@@ -97,9 +101,11 @@ describe('useLayoutEffect', () => {
 		function AutoResizeTextareaLayoutEffect(props) {
 			const ref = useRef(null);
 			useLayoutEffect(() => {
-				expect(scratch.innerHTML).to.equal(
-					`<div class="${props.value}"><p>${props.value}</p><textarea></textarea></div>`
-				);
+				// IE & Edge put textarea's value as child of textarea when reading innerHTML so use
+				// cross browser serialize helper
+				const actualHtml = serializeHtml(scratch);
+				const expectedHTML = `<div class="${props.value}"><p>${props.value}</p><textarea></textarea></div>`;
+				expect(actualHtml).to.equal(expectedHTML);
 				expect(document.body.contains(ref.current)).to.equal(true);
 			});
 			return (
