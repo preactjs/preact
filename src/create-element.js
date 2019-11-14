@@ -10,9 +10,19 @@ import options from './options';
  */
 export function createElement(type, props, children) {
 	let normalizedProps = {},
-		i;
+		i,
+		ref;
+
 	for (i in props) {
-		if (i !== 'key' && i !== 'ref') normalizedProps[i] = props[i];
+		if (i == 'ref') {
+			if (type && type._forwarded) {
+				normalizedProps[i] = props[i];
+			} else {
+				ref = props[i];
+			}
+		} else if (i !== 'key') {
+			normalizedProps[i] = props[i];
+		}
 	}
 
 	if (arguments.length > 3) {
@@ -36,12 +46,7 @@ export function createElement(type, props, children) {
 		}
 	}
 
-	return createVNode(
-		type,
-		normalizedProps,
-		props && props.key,
-		props && props.ref
-	);
+	return createVNode(type, normalizedProps, props && props.key, ref);
 }
 
 /**

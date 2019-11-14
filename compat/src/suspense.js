@@ -1,6 +1,5 @@
 import { Component, createElement, options } from 'preact';
 import { assign } from './util';
-import { installForwardRef, isForwardRefInstalled } from './forwardRef';
 
 let isSuspenseInstalled;
 function installSuspense() {
@@ -114,10 +113,6 @@ export function suspended(vnode) {
 }
 
 export function lazy(loader) {
-	if (!isForwardRefInstalled) {
-		installForwardRef();
-	}
-
 	let prom;
 	let component;
 	let error;
