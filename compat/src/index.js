@@ -1,5 +1,6 @@
 import {
 	hydrate,
+	createElement,
 	render as preactRender,
 	cloneElement as preactCloneElement,
 	createRef,
@@ -25,6 +26,7 @@ import {
 } from 'preact/hooks';
 import { Suspense, lazy } from './suspense';
 import { assign, removeNode } from '../../src/util';
+import { SuspenseList } from './suspense-list';
 
 const version = '16.8.0'; // trick libraries to think we are react
 
@@ -50,24 +52,6 @@ options.event = e => {
  */
 function createFactory(type) {
 	return createElement.bind(null, type);
-}
-
-/**
- * Normalize DOM vnode properties.
- * @param {import('./internal').VNode} vnode The vnode to normalize props of
- * @param {object | null | undefined} props props to normalize
- */
-function handleElementVNode(vnode, props) {
-	let shouldSanitize, attrs, i;
-	for (i in props) if ((shouldSanitize = CAMEL_PROPS.test(i))) break;
-	if (shouldSanitize) {
-		attrs = vnode.props = {};
-		for (i in props) {
-			attrs[
-				CAMEL_PROPS.test(i) ? i.replace(/([A-Z0-9])/, '-$1').toLowerCase() : i
-			] = props[i];
-		}
-	}
 }
 
 /**
@@ -195,51 +179,6 @@ let Children = {
 };
 
 /**
- * Wrap `createElement` to apply various vnode normalizations.
- * @param {import('./internal').VNode["type"]} type The node name or Component constructor
- * @param {object | null | undefined} [props] The vnode's properties
- * @param {Array<import('./internal').ComponentChildren>} [children] The vnode's children
- * @returns {import('./internal').VNode}
- */
-function createElement(...args) {
-	let vnode = h(...args);
-
-	let type = vnode.type,
-		props = vnode.props;
-	if (typeof type != 'function') {
-		if (props.defaultValue) {
-			if (!props.value && props.value !== 0) {
-				props.value = props.defaultValue;
-			}
-			delete props.defaultValue;
-		}
-
-		if (Array.isArray(props.value) && props.multiple && type === 'select') {
-			toChildArray(props.children).forEach(child => {
-				if (props.value.indexOf(child.props.value) != -1) {
-					child.props.selected = true;
-				}
-			});
-			delete props.value;
-		}
-		handleElementVNode(vnode, props);
-	}
-
-	vnode.preactCompatNormalized = false;
-	return normalizeVNode(vnode);
-}
-
-/**
- * Normalize a vnode
- * @param {import('./internal').VNode} vnode
- */
-function normalizeVNode(vnode) {
-	vnode.preactCompatNormalized = true;
-	applyClassName(vnode);
-	return vnode;
-}
-
-/**
  * Wrap `cloneElement` to abort if the passed element is not a valid element and apply
  * all vnode normalizations.
  * @param {import('./internal').VNode} element The vnode to clone
@@ -248,8 +187,7 @@ function normalizeVNode(vnode) {
  */
 function cloneElement(element) {
 	if (!isValidElement(element)) return element;
-	let vnode = normalizeVNode(preactCloneElement.apply(null, arguments));
-	return vnode;
+	return preactCloneElement.apply(null, arguments);
 }
 
 /**
@@ -310,26 +248,6 @@ function unmountComponentAtNode(container) {
 	}
 	return false;
 }
-
-/**
- * Alias `class` prop to `className` if available
- * @param {import('./internal').VNode} vnode
- */
-function applyClassName(vnode) {
-	let a = vnode.props;
-	if (a.class || a.className) {
-		classNameDescriptor.enumerable = 'className' in a;
-		if (a.className) a.class = a.className;
-		Object.defineProperty(a, 'className', classNameDescriptor);
-	}
-}
-
-let classNameDescriptor = {
-	configurable: true,
-	get() {
-		return this.class;
-	}
-};
 
 /**
  * Check if two objects have a different shape
@@ -412,7 +330,7 @@ function memo(c, comparer) {
  * Pass ref down to a child. This is mainly used in libraries with HOCs that
  * wrap components. Using `forwardRef` there is an easy way to get a reference
  * of the wrapped component instead of one of the wrapper itself.
- * @param {import('./internal').ForwardFn} fn
+ * @param {import('./index').ForwardFn} fn
  * @returns {import('./internal').FunctionalComponent}
  */
 function forwardRef(fn) {
@@ -446,17 +364,70 @@ function setSafeDescriptor(proto, key) {
 	}
 }
 
+let classNameDescriptor = {
+	configurable: true,
+	get() {
+		return this.class;
+	}
+};
+
 let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
 
-	applyEventNormalization(vnode);
 	let type = vnode.type;
+	let props = vnode.props;
+
+	// Apply DOM VNode compat
+	if (typeof type != 'function') {
+		// Apply defaultValue to value
+		if (props.defaultValue) {
+			if (!props.value && props.value !== 0) {
+				props.value = props.defaultValue;
+			}
+			delete props.defaultValue;
+		}
+
+		// Add support for array select values: <select value={[]} />
+		if (Array.isArray(props.value) && props.multiple && type === 'select') {
+			toChildArray(props.children).forEach(child => {
+				if (props.value.indexOf(child.props.value) != -1) {
+					child.props.selected = true;
+				}
+			});
+			delete props.value;
+		}
+
+		// Normalize DOM vnode properties.
+		let shouldSanitize, attrs, i;
+		for (i in props) if ((shouldSanitize = CAMEL_PROPS.test(i))) break;
+		if (shouldSanitize) {
+			attrs = vnode.props = {};
+			for (i in props) {
+				attrs[
+					CAMEL_PROPS.test(i) ? i.replace(/([A-Z0-9])/, '-$1').toLowerCase() : i
+				] = props[i];
+			}
+		}
+	}
+
+	// Alias `class` prop to `className` if available
+	if (props.class || props.className) {
+		classNameDescriptor.enumerable = 'className' in props;
+		if (props.className) props.class = props.className;
+		Object.defineProperty(props, 'className', classNameDescriptor);
+	}
+
+	// Events
+	applyEventNormalization(vnode);
+
+	// ForwardRef
 	if (type && type._forwarded && vnode.ref) {
 		vnode.props.ref = vnode.ref;
 		vnode.ref = null;
 	}
 
+	// Component base class compat
 	// We can't just patch the base component class, because components that use
 	// inheritance and are transpiled down to ES5 will overwrite our patched
 	// getters and setters. See #1941
@@ -470,6 +441,7 @@ options.vnode = vnode => {
 		setSafeDescriptor(type.prototype, 'componentWillUpdate');
 		type._patchedLifecycles = true;
 	}
+
 	if (oldVNodeHook) oldVNodeHook(vnode);
 };
 
@@ -506,6 +478,7 @@ export {
 	// eslint-disable-next-line camelcase
 	unstable_batchedUpdates,
 	Suspense,
+	SuspenseList,
 	lazy
 };
 
@@ -541,5 +514,6 @@ export default {
 	forwardRef,
 	unstable_batchedUpdates,
 	Suspense,
+	SuspenseList,
 	lazy
 };
