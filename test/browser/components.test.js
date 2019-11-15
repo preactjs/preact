@@ -5,14 +5,14 @@ import {
 	teardown,
 	getMixedArray,
 	mixedArrayHTML,
-	serializeHtml
+	serializeHtml,
+	sortAttributes,
+	spyAll
 } from '../_util/helpers';
 import { div, span, p } from '../_util/dom';
 
 /** @jsx createElement */
 const h = createElement;
-
-let spyAll = obj => Object.keys(obj).forEach(key => sinon.spy(obj, key));
 
 function getAttributes(node) {
 	let attrs = {};
@@ -22,20 +22,6 @@ function getAttributes(node) {
 		}
 	}
 	return attrs;
-}
-
-// hacky normalization of attribute order across browsers.
-function sortAttributes(html) {
-	return html.replace(
-		/<([a-z0-9-]+)((?:\s[a-z0-9:_.-]+=".*?")+)((?:\s*\/)?>)/gi,
-		(s, pre, attrs, after) => {
-			let list = attrs
-				.match(/\s[a-z0-9:_.-]+=".*?"/gi)
-				.sort((a, b) => (a > b ? 1 : -1));
-			if (~after.indexOf('/')) after = '></' + pre + '>';
-			return '<' + pre + list.join('') + after;
-		}
-	);
 }
 
 describe('Components', () => {
@@ -1809,24 +1795,6 @@ describe('Components', () => {
 		expect(child._vnode._dom).to.equalNode(child.base);
 	});
 
-	it('should update old dom on forceUpdate in a lifecycle', () => {
-		let i = 0;
-		class App extends Component {
-			componentWillReceiveProps() {
-				this.forceUpdate();
-			}
-			render() {
-				if (i++ == 0) return <div>foo</div>;
-				return <div>bar</div>;
-			}
-		}
-
-		render(<App />, scratch);
-		render(<App />, scratch);
-
-		expect(scratch.innerHTML).to.equal('<div>bar</div>');
-	});
-
 	// preact/#1323
 	it('should handle hoisted component vnodes without DOM', () => {
 		let x = 0;
@@ -2578,6 +2546,24 @@ describe('Components', () => {
 			expect(() => forceUpdate()).to.not.throw();
 			expect(() => rerender()).to.not.throw();
 			expect(scratch.innerHTML).to.equal('');
+		});
+
+		it('should update old dom on forceUpdate in a lifecycle', () => {
+			let i = 0;
+			class App extends Component {
+				componentWillReceiveProps() {
+					this.forceUpdate();
+				}
+				render() {
+					if (i++ == 0) return <div>foo</div>;
+					return <div>bar</div>;
+				}
+			}
+
+			render(<App />, scratch);
+			render(<App />, scratch);
+
+			expect(scratch.innerHTML).to.equal('<div>bar</div>');
 		});
 	});
 });
