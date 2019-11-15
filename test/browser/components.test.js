@@ -5,14 +5,14 @@ import {
 	teardown,
 	getMixedArray,
 	mixedArrayHTML,
-	serializeHtml
+	serializeHtml,
+	sortAttributes,
+	spyAll
 } from '../_util/helpers';
 import { div, span, p } from '../_util/dom';
 
 /** @jsx createElement */
 const h = createElement;
-
-let spyAll = obj => Object.keys(obj).forEach(key => sinon.spy(obj, key));
 
 function getAttributes(node) {
 	let attrs = {};
@@ -22,20 +22,6 @@ function getAttributes(node) {
 		}
 	}
 	return attrs;
-}
-
-// hacky normalization of attribute order across browsers.
-function sortAttributes(html) {
-	return html.replace(
-		/<([a-z0-9-]+)((?:\s[a-z0-9:_.-]+=".*?")+)((?:\s*\/)?>)/gi,
-		(s, pre, attrs, after) => {
-			let list = attrs
-				.match(/\s[a-z0-9:_.-]+=".*?"/gi)
-				.sort((a, b) => (a > b ? 1 : -1));
-			if (~after.indexOf('/')) after = '></' + pre + '>';
-			return '<' + pre + list.join('') + after;
-		}
-	);
 }
 
 describe('Components', () => {

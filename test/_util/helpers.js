@@ -255,6 +255,7 @@ export function sortAttributes(html) {
 
 export const spyAll = obj =>
 	Object.keys(obj).forEach(key => sinon.spy(obj, key));
+
 export const resetAllSpies = obj =>
 	Object.keys(obj).forEach(key => {
 		if (obj[key].args) {
