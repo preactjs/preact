@@ -9,16 +9,9 @@ import {
 
 /** @jsx createElement */
 
-async function waitResolved(suspense) {
-	while (suspense._component._suspensions > 0) {
-		await new Promise(resolve => {
-			setTimeout(resolve, 10);
-		});
-	}
-}
-
 describe('debug with suspense', () => {
 	let scratch;
+	let rerender;
 	let errors = [];
 	let warnings = [];
 
@@ -26,6 +19,7 @@ describe('debug with suspense', () => {
 		errors = [];
 		warnings = [];
 		scratch = setupScratch();
+		rerender = setupRerender();
 		sinon.stub(console, 'error').callsFake(e => errors.push(e));
 		sinon.stub(console, 'warn').callsFake(w => warnings.push(w));
 	});
@@ -58,8 +52,6 @@ describe('debug with suspense', () => {
 
 	describe('PropTypes', () => {
 		it('should validate propTypes inside lazy()', () => {
-			const rerender = setupRerender();
-
 			function Baz(props) {
 				return <h1>{props.unhappy}</h1>;
 			}
@@ -82,14 +74,12 @@ describe('debug with suspense', () => {
 
 			expect(console.error).to.not.be.called;
 
-			return loader
-				.then(() => waitResolved(suspense))
-				.then(() => {
-					rerender();
-					expect(errors.length).to.equal(1);
-					expect(errors[0].includes('got prop')).to.equal(true);
-					expect(serializeHtml(scratch)).to.equal('<h1>signal</h1>');
-				});
+			return loader.then(() => {
+				rerender();
+				expect(errors.length).to.equal(1);
+				expect(errors[0].includes('got prop')).to.equal(true);
+				expect(serializeHtml(scratch)).to.equal('<h1>signal</h1>');
+			});
 		});
 
 		describe('warn for PropTypes on lazy()', () => {
@@ -108,12 +98,11 @@ describe('debug with suspense', () => {
 				);
 				render(suspense, scratch);
 
-				return loader
-					.then(() => waitResolved(suspense))
-					.then(() => {
-						expect(console.warn).to.be.calledTwice;
-						expect(warnings[1].includes('MyLazyLoaded')).to.equal(true);
-					});
+				return loader.then(() => {
+					rerender();
+					expect(console.warn).to.be.calledTwice;
+					expect(warnings[1].includes('MyLazyLoaded')).to.equal(true);
+				});
 			});
 
 			it('should log the displayName', () => {
@@ -131,12 +120,11 @@ describe('debug with suspense', () => {
 				);
 				render(suspense, scratch);
 
-				return loader
-					.then(() => waitResolved(suspense))
-					.then(() => {
-						expect(console.warn).to.be.calledTwice;
-						expect(warnings[1].includes('HelloLazy')).to.equal(true);
-					});
+				return loader.then(() => {
+					rerender();
+					expect(console.warn).to.be.calledTwice;
+					expect(warnings[1].includes('HelloLazy')).to.equal(true);
+				});
 			});
 
 			it('should not log a component if lazy throws', () => {
@@ -151,7 +139,14 @@ describe('debug with suspense', () => {
 				);
 
 				return loader.catch(() => {
-					expect(console.warn).to.be.calledOnce;
+					try {
+						rerender();
+					} catch (e) {
+						// Ignore the loader's bubbling error
+					}
+
+					// Called once on initial render, and again when promise rejects
+					expect(console.warn).to.be.calledTwice;
 				});
 			});
 

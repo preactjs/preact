@@ -91,8 +91,13 @@ function serializeDomTree(node) {
 		for (let i = 0; i < attrs.length; i++) {
 			const name = attrs[i];
 			let value = node.getAttribute(name);
+
+			// don't render attributes with null or undefined values
 			if (value == null) continue;
+
+			// normalize empty class attribute
 			if (!value && name === 'class') continue;
+
 			str += ' ' + name;
 			value = encodeEntities(value);
 
@@ -103,12 +108,19 @@ function serializeDomTree(node) {
 			str += '="' + value + '"';
 		}
 		str += '>';
+
+		// For elements that don't have children (e.g. <wbr />) don't descend.
 		if (!VOID_ELEMENTS.test(node.localName)) {
-			let child = node.firstChild;
-			while (child) {
-				str += serializeDomTree(child);
-				child = child.nextSibling;
+			// IE puts the value of a textarea as its children while other browsers don't.
+			// Normalize those differences by forcing textarea to not have children.
+			if (node.localName != 'textarea') {
+				let child = node.firstChild;
+				while (child) {
+					str += serializeDomTree(child);
+					child = child.nextSibling;
+				}
 			}
+
 			str += '</' + node.localName + '>';
 		}
 		return str;
