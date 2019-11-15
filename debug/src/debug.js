@@ -273,7 +273,7 @@ export function initDebug() {
 			let hooks = component.__hooks;
 			if (Array.isArray(hooks._list)) {
 				hooks._list.forEach(hook => {
-					if (hook._callback && (!hook._args || !Array.isArray(hook._args))) {
+					if (hook._factory && (!hook._args || !Array.isArray(hook._args))) {
 						let componentName = getDisplayName(vnode);
 						console.warn(
 							`In ${componentName} you are calling useMemo/useCallback without passing arguments.\n` +
