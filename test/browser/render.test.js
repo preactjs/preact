@@ -575,9 +575,7 @@ describe('render()', () => {
 			);
 
 			render(<App />, scratch);
-			expect(scratch.innerHTML).to.equal(
-				'<div class=""><span>Bye</span></div>'
-			);
+			expect(serializeHtml(scratch)).to.equal('<div><span>Bye</span></div>');
 		});
 
 		it('should remove class attributes', () => {
@@ -593,9 +591,7 @@ describe('render()', () => {
 			);
 
 			render(<App />, scratch);
-			expect(scratch.innerHTML).to.equal(
-				'<div class=""><span>Bye</span></div>'
-			);
+			expect(serializeHtml(scratch)).to.equal('<div><span>Bye</span></div>');
 		});
 
 		it('should remove old styles', () => {
@@ -716,9 +712,16 @@ describe('render()', () => {
 
 			render(<div onClick={falsyHandler} onOtherClick={fooHandler} />, scratch);
 
-			expect(scratch.childNodes[0]._listeners).to.deep.equal({
-				OtherClick: fooHandler
-			});
+			expect(
+				proto.addEventListener
+			).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
+				'OtherClick',
+				sinon.match.func,
+				false
+			);
+
+			expect(proto.addEventListener).not.to.have.been.calledWith('Click');
+			expect(proto.addEventListener).not.to.have.been.calledWith('click');
 		});
 
 		it('should support native event names', () => {
