@@ -1,9 +1,20 @@
 import { createElement, options } from 'preact';
-import { assign } from '../../src/util';
 import { clearLog, getLog } from './logCall';
 import { teardown as testUtilTeardown } from 'preact/test-utils';
 
 /** @jsx createElement */
+
+/**
+ * Assign properties from `props` to `obj`
+ * @template O, P The obj and props types
+ * @param {O} obj The object to copy properties to
+ * @param {P} props The object to copy properties from
+ * @returns {O & P}
+ */
+function assign(obj, props) {
+	for (let i in props) obj[i] = props[i];
+	return /** @type {O & P} */ (obj);
+}
 
 export function supportsPassiveEvents() {
 	let supported = false;
