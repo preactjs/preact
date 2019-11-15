@@ -187,7 +187,7 @@ describe('suspense', () => {
 
 		return resolve().then(() => {
 			rerender();
-			expect(ref.current._vnode.type).to.equal(LazyComp);
+			expect(ref.current.constructor).to.equal(LazyComp);
 		});
 	});
 
