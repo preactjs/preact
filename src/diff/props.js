@@ -3,6 +3,7 @@ import options from '../options';
 
 /**
  * Diff the old and new properties of a VNode and apply changes to the DOM node
+ * @param {import('../internal').VNode} vnode
  * @param {import('../internal').PreactElement} dom The DOM node to apply
  * changes to
  * @param {object} newProps The new props
@@ -10,12 +11,12 @@ import options from '../options';
  * @param {boolean} isSvg Whether or not this node is an SVG node
  * @param {boolean} hydrate Whether or not we are in hydration mode
  */
-export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
+export function diffProps(vnode, dom, newProps, oldProps, isSvg, hydrate) {
 	let i;
 
 	for (i in oldProps) {
 		if (!(i in newProps)) {
-			setProperty(dom, i, null, oldProps[i], isSvg);
+			diffProperty(vnode, dom, i, null, oldProps[i], isSvg);
 		}
 	}
 
@@ -26,7 +27,7 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 			i !== 'checked' &&
 			oldProps[i] !== newProps[i]
 		) {
-			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
+			diffProperty(vnode, dom, i, newProps[i], oldProps[i], isSvg);
 		}
 	}
 }
@@ -47,14 +48,25 @@ function setStyle(style, key, value) {
 }
 
 /**
+ * Add diffed props to the vnode's update queue
+ * @param {import('../internal').VNode} vnode
+ * @param {string} name
+ * @param {*} value
+ */
+function pushUpdate(vnode, name, value) {
+	(vnode._updateQueue = vnode._updateQueue || []).push(name, value);
+}
+
+/**
  * Set a property value on a DOM node
+ * @param {import('../internal').VNode} vnode
  * @param {import('../internal').PreactElement} dom The DOM node to modify
  * @param {string} name The name of the property to set
  * @param {*} value The value to set the property to
  * @param {*} oldValue The old value the property had
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
-function setProperty(dom, name, value, oldValue, isSvg) {
+function diffProperty(vnode, dom, name, value, oldValue, isSvg) {
 	if (isSvg) {
 		if (name === 'className') {
 			name = 'class';
@@ -94,32 +106,58 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0] === 'o' && name[1] === 'n') {
-		let useCapture = name !== (name = name.replace(/Capture$/, ''));
-		let nameLower = name.toLowerCase();
-		name = (nameLower in dom ? nameLower : name).slice(2);
-
-		if (value) {
-			if (!oldValue) dom.addEventListener(name, eventProxy, useCapture);
-			(dom._listeners || (dom._listeners = {}))[name] = value;
-		} else {
-			dom.removeEventListener(name, eventProxy, useCapture);
+		pushUpdate(vnode, name, value);
+	} else if (name === 'dangerouslySetInnerHTML') {
+		if (value || oldValue) {
+			// Avoid re-applying the same '__html' if it did not changed between re-render
+			if (!value || !oldValue || value.__html != oldValue.__html) {
+				pushUpdate(vnode, name, (value && value.__html) || '');
+			}
 		}
-	} else if (
-		name !== 'list' &&
-		name !== 'tagName' &&
-		// HTMLButtonElement.form and HTMLInputElement.form are read-only but can be set using
-		// setAttribute
-		name !== 'form' &&
-		name !== 'type' &&
-		!isSvg &&
-		name in dom
-	) {
-		dom[name] = value == null ? '' : value;
-	} else if (
-		typeof value !== 'function' &&
-		name !== 'dangerouslySetInnerHTML'
-	) {
-		if (name !== (name = name.replace(/^xlink:?/, ''))) {
+	} else if (typeof value !== 'function') {
+		pushUpdate(vnode, name, value == null ? undefined : value);
+	}
+}
+
+/**
+ * Write updates to the DOM
+ * @param {import('../internal').PreactElement} dom
+ * @param {any[]} updates
+ * @param {boolean} isSvg
+ */
+export function commitProps(dom, updates, isSvg) {
+	let name, value;
+	for (let i = 0; i < updates.length; i += 2) {
+		name = updates[i];
+		value = updates[i + 1];
+
+		if (name[0] === 'o' && name[1] === 'n') {
+			let useCapture = name !== (name = name.replace(/Capture$/, ''));
+			let nameLower = name.toLowerCase();
+			name = (nameLower in dom ? nameLower : name).slice(2);
+			if (value) {
+				const proxy = dom._listeners || (dom._listeners = {});
+				if (!proxy[name]) {
+					dom.addEventListener(name, eventProxy, useCapture);
+				}
+				proxy[name] = value;
+			} else {
+				dom.removeEventListener(name, eventProxy, useCapture);
+			}
+		} else if (
+			name !== 'list' &&
+			name !== 'tagName' &&
+			// HTMLButtonElement.form and HTMLInputElement.form are read-only but can be set using
+			// setAttribute
+			name !== 'form' &&
+			name !== 'type' &&
+			!isSvg &&
+			name in dom
+		) {
+			dom[name] = value == null ? '' : value;
+		} else if (name === 'dangerouslySetInnerHTML') {
+			dom.innerHTML = value;
+		} else if (name !== (name = name.replace(/^xlink:?/, ''))) {
 			if (value == null || value === false) {
 				dom.removeAttributeNS(
 					'http://www.w3.org/1999/xlink',

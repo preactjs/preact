@@ -60,6 +60,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	_lastDomChild: PreactElement | Text | null;
 	_component: Component | null;
 	constructor: undefined;
+	_updateQueue: any[] | null;
 }
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {

@@ -2,7 +2,7 @@ import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren, toChildArray } from './children';
-import { diffProps } from './props';
+import { diffProps, commitProps } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
 
@@ -316,9 +316,6 @@ function diffElementNodes(
 
 		oldProps = oldVNode.props || EMPTY_OBJ;
 
-		let oldHtml = oldProps.dangerouslySetInnerHTML;
-		let newHtml = newProps.dangerouslySetInnerHTML;
-
 		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
 		// @TODO we should warn in debug mode when props don't match here.
 		if (!isHydrating) {
@@ -328,21 +325,18 @@ function diffElementNodes(
 					oldProps[dom.attributes[i].name] = dom.attributes[i].value;
 				}
 			}
-
-			if (newHtml || oldHtml) {
-				// Avoid re-applying the same '__html' if it did not changed between re-render
-				if (!newHtml || !oldHtml || newHtml.__html != oldHtml.__html) {
-					dom.innerHTML = (newHtml && newHtml.__html) || '';
-				}
-			}
 		}
 
-		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
+		diffProps(newVNode, dom, newProps, oldProps, isSvg, isHydrating);
+		// TODO: Temporary code to make tests pass
+		if (newVNode._updateQueue) {
+			commitProps(dom, newVNode._updateQueue, isSvg);
+		}
 
 		newVNode._children = newVNode.props.children;
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
-		if (!newHtml) {
+		if (!newProps.dangerouslySetInnerHTML) {
 			diffChildren(
 				dom,
 				newVNode,

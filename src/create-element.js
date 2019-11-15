@@ -70,6 +70,7 @@ export function createVNode(type, props, key, ref) {
 		_dom: null,
 		_lastDomChild: null,
 		_component: null,
+		_updateQueue: null,
 		constructor: undefined
 	};
 
