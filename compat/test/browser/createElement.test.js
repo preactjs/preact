@@ -28,7 +28,7 @@ describe('compat createElement()', () => {
 					.match(/\[native code\]/)
 			) {
 				// eslint-disable-next-line
-				$$typeof = eval('Sym' + 'bol.for("react.element")');
+				$$typeof = eval('Symbol.for("react.element")');
 			}
 		} catch (e) {}
 		expect(vnode).to.have.property('$$typeof', $$typeof);
