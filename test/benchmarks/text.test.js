@@ -4,8 +4,8 @@
 
 import { setupScratch, teardown } from '../_util/helpers';
 import bench from '../_util/bench';
-const preact = require('../fixtures/preact');
-const ceviche = require('../../dist/preact');
+import preact8 from '../fixtures/preact';
+import * as ceviche from '../../dist/preact.module';
 const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
 
 describe('benchmarks', function() {
@@ -70,12 +70,12 @@ describe('benchmarks', function() {
 			};
 		}
 
-		const preactTest = createTest(preact);
+		const preact8Test = createTest(preact8);
 		const cevicheTest = createTest(ceviche);
 		const vanillaTest = createVanillaTest();
 
 		for (let i = 100; i--; ) {
-			preactTest(i);
+			preact8Test(i);
 			cevicheTest(i);
 			vanillaTest(i);
 		}
@@ -83,7 +83,7 @@ describe('benchmarks', function() {
 		bench(
 			{
 				vanilla: vanillaTest,
-				preact: preactTest,
+				preact8: preact8Test,
 				ceviche: cevicheTest
 			},
 			({ text, results }) => {

@@ -1,11 +1,13 @@
-/*global coverage, ENABLE_PERFORMANCE, NODE_ENV*/
+/*global coverage, ENABLE_PERFORMANCE*/
 /*eslint no-console:0*/
-/** @jsx h */
+/** @jsx createElement */
 import { setupScratch, teardown } from '../_util/helpers';
-let { createElement: h, Component, render, hydrate } = require(NODE_ENV ===
-	'production'
-	? '../../dist/preact.min.js'
-	: '../../dist/preact');
+import {
+	createElement,
+	Component,
+	render,
+	hydrate
+} from '../../dist/preact.module';
 
 const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
 
