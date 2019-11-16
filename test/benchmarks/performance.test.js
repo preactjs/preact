@@ -7,7 +7,7 @@ import {
 	Component,
 	render,
 	hydrate
-} from '../../dist/preact.module';
+} from 'preact/dist/preact.module';
 
 const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
 
