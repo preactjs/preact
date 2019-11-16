@@ -92,6 +92,60 @@ describe('preact/compat events', () => {
 		);
 	});
 
+	it('should support onTouch* events', () => {
+		const onTouchStart = () => {};
+		const onTouchEnd = () => {};
+		const onTouchMove = () => {};
+		const onTouchCancel = () => {};
+
+		render(
+			<div
+				onTouchStart={onTouchStart}
+				onTouchEnd={onTouchEnd}
+				onTouchMove={onTouchMove}
+				onTouchCancel={onTouchCancel}
+			/>,
+			scratch
+		);
+
+		expect(proto.addEventListener.args.length).to.eql(4);
+		expect(proto.addEventListener.args[0].length).to.eql(3);
+		expect(proto.addEventListener.args[0][0]).to.eql('touchstart');
+		expect(proto.addEventListener.args[0][2]).to.eql(false);
+		expect(proto.addEventListener.args[1].length).to.eql(3);
+		expect(proto.addEventListener.args[1][0]).to.eql('touchend');
+		expect(proto.addEventListener.args[1][2]).to.eql(false);
+		expect(proto.addEventListener.args[2].length).to.eql(3);
+		expect(proto.addEventListener.args[2][0]).to.eql('touchmove');
+		expect(proto.addEventListener.args[2][2]).to.eql(false);
+		expect(proto.addEventListener.args[3].length).to.eql(3);
+		expect(proto.addEventListener.args[3][0]).to.eql('touchcancel');
+		expect(proto.addEventListener.args[3][2]).to.eql(false);
+
+		expect(scratch.firstChild._listeners).to.deep.equal({
+			touchstart: onTouchStart,
+			touchend: onTouchEnd,
+			touchmove: onTouchMove,
+			touchcancel: onTouchCancel
+		});
+
+		render(<div />, scratch);
+
+		expect(proto.removeEventListener.args.length).to.eql(4);
+		expect(proto.removeEventListener.args[0].length).to.eql(3);
+		expect(proto.removeEventListener.args[0][0]).to.eql('touchstart');
+		expect(proto.removeEventListener.args[0][2]).to.eql(false);
+		expect(proto.removeEventListener.args[1].length).to.eql(3);
+		expect(proto.removeEventListener.args[1][0]).to.eql('touchend');
+		expect(proto.removeEventListener.args[1][2]).to.eql(false);
+		expect(proto.removeEventListener.args[2].length).to.eql(3);
+		expect(proto.removeEventListener.args[2][0]).to.eql('touchmove');
+		expect(proto.removeEventListener.args[2][2]).to.eql(false);
+		expect(proto.removeEventListener.args[3].length).to.eql(3);
+		expect(proto.removeEventListener.args[3][0]).to.eql('touchcancel');
+		expect(proto.removeEventListener.args[3][2]).to.eql(false);
+	});
+
 	it('should support onTransitionEnd', () => {
 		const func = sinon.spy(() => {});
 		render(<div onTransitionEnd={func} />, scratch);
