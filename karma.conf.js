@@ -78,13 +78,13 @@ const babelOptions = (options = {}) => {
 			]
 		],
 		plugins: [
-			coverage && ['istanbul', { include: '**/src/**/*.js' }],
+			coverage && ['istanbul', { include: '**/dist/**/*.js' }],
 			'@babel/plugin-proposal-object-rest-spread',
 			options.debug && '@babel/plugin-transform-react-jsx-source',
 			'@babel/plugin-transform-react-jsx',
 			'babel-plugin-transform-async-to-promises'
 		].filter(Boolean),
-		ignore: ['./dist']
+		// ignore: ['./dist'], // TODO: Should probably still make sure babel doesn't run on './dist' except for code coverage
 	};
 };
 
