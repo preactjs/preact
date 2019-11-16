@@ -7,7 +7,7 @@ export function applyEventNormalization({ type, props }) {
 	let newProps = {};
 
 	for (let i in props) {
-		if (/^on(Ani|Tra)/.test(i)) {
+		if (/^on(Ani|Tra|Tou)/.test(i)) {
 			props[i.toLowerCase()] = props[i];
 			delete props[i];
 		}
