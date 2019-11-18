@@ -44,8 +44,8 @@ describe('createElement(jsx)', () => {
 	});
 
 	it('should set VNode#key property', () => {
-		expect(<div />).to.have.property('key').that.is.empty;
-		expect(<div a="a" />).to.have.property('key').that.is.empty;
+		expect(<div />).to.have.property('key').that.does.not.exist;
+		expect(<div a="a" />).to.have.property('key').that.does.not.exist;
 		expect(<div key="1" />).to.have.property('key', '1');
 	});
 
@@ -57,8 +57,8 @@ describe('createElement(jsx)', () => {
 	});
 
 	it('should set VNode#ref property', () => {
-		expect(<div />).to.have.property('ref').that.is.empty;
-		expect(<div a="a" />).to.have.property('ref').that.is.empty;
+		expect(<div />).to.have.property('ref').that.does.not.exist;
+		expect(<div a="a" />).to.have.property('ref').that.does.not.exist;
 		const emptyFunction = () => {};
 		expect(<div ref={emptyFunction} />).to.have.property('ref', emptyFunction);
 	});
