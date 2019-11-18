@@ -12,7 +12,7 @@ import {
 } from '../../src';
 
 function getDisplayType(vnode: VNode | string | number) {
-	if (typeof vnode === 'string' || typeof vnode == 'number') {
+	if (typeof vnode == 'string' || typeof vnode == 'number') {
 		return vnode.toString();
 	} else if (typeof vnode.type == 'string') {
 		return vnode.type;

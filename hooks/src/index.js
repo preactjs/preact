@@ -166,7 +166,7 @@ export function useRef(initialValue) {
 export function useImperativeHandle(ref, createHandle, args) {
 	useLayoutEffect(
 		() => {
-			if (typeof ref === 'function') ref(createHandle());
+			if (typeof ref == 'function') ref(createHandle());
 			else if (ref) ref.current = createHandle();
 		},
 		args == null ? args : args.concat(ref)
@@ -255,7 +255,7 @@ function afterNextFrame(callback) {
 	const timeout = setTimeout(done, RAF_TIMEOUT);
 
 	let raf;
-	if (typeof window !== 'undefined') {
+	if (typeof window != 'undefined') {
 		raf = requestAnimationFrame(done);
 	}
 }
@@ -289,7 +289,7 @@ function invokeCleanup(hook) {
  */
 function invokeEffect(hook) {
 	const result = hook._value();
-	if (typeof result === 'function') hook._cleanup = result;
+	if (typeof result == 'function') hook._cleanup = result;
 }
 
 /**
@@ -301,5 +301,5 @@ function argsChanged(oldArgs, newArgs) {
 }
 
 function invokeOrReturn(arg, f) {
-	return typeof f === 'function' ? f(arg) : f;
+	return typeof f == 'function' ? f(arg) : f;
 }

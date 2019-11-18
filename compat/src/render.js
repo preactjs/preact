@@ -13,9 +13,7 @@ Component.prototype.isReactComponent = {};
 
 /* istanbul ignore next */
 export const REACT_ELEMENT_TYPE =
-	(typeof Symbol !== 'undefined' &&
-		Symbol.for &&
-		Symbol.for('react.element')) ||
+	(typeof Symbol != 'undefined' && Symbol.for && Symbol.for('react.element')) ||
 	0xeac7;
 
 /**
@@ -35,7 +33,7 @@ export function render(vnode, parent, callback) {
 	}
 
 	preactRender(vnode, parent);
-	if (typeof callback === 'function') callback();
+	if (typeof callback == 'function') callback();
 
 	return vnode ? vnode._component : null;
 }
@@ -127,11 +125,7 @@ options.vnode = vnode => {
 	// We can't just patch the base component class, because components that use
 	// inheritance and are transpiled down to ES5 will overwrite our patched
 	// getters and setters. See #1941
-	if (
-		typeof type === 'function' &&
-		!type._patchedLifecycles &&
-		type.prototype
-	) {
+	if (typeof type == 'function' && !type._patchedLifecycles && type.prototype) {
 		setSafeDescriptor(type.prototype, 'componentWillMount');
 		setSafeDescriptor(type.prototype, 'componentWillReceiveProps');
 		setSafeDescriptor(type.prototype, 'componentWillUpdate');

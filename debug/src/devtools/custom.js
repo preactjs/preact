@@ -8,8 +8,8 @@ import { Component, Fragment } from 'preact';
  */
 export function getNodeType(vnode) {
 	if (vnode.type === Fragment) return 'Wrapper';
-	else if (typeof vnode.type === 'function') return 'Composite';
-	else if (typeof vnode.type === 'string') return 'Native';
+	else if (typeof vnode.type == 'function') return 'Composite';
+	else if (typeof vnode.type == 'string') return 'Native';
 	return 'Text';
 }
 
@@ -21,9 +21,9 @@ export function getNodeType(vnode) {
 export function getDisplayName(vnode) {
 	if (vnode.type === Fragment) {
 		return 'Fragment';
-	} else if (typeof vnode.type === 'function') {
+	} else if (typeof vnode.type == 'function') {
 		return vnode.type.displayName || vnode.type.name;
-	} else if (typeof vnode.type === 'string') {
+	} else if (typeof vnode.type == 'string') {
 		return vnode.type;
 	}
 
