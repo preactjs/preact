@@ -2,7 +2,7 @@ import Compat from 'preact/compat';
 // eslint-disable-next-line no-duplicate-imports
 import * as Named from 'preact/compat';
 
-describe('exports', () => {
+describe('compat exports', () => {
 	it('should have a default export', () => {
 		expect(Compat.createElement).to.be.a('function');
 		expect(Compat.Component).to.be.a('function');
