@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: saucelabs connect
-        uses: actions/sauce-connect@v1
+        uses: saucelabs/sauce-connect-action@v0.0.1
         with:
           user: $SAUCE_USERNAME
           key: $SAUCE_ACCESS_KEY
