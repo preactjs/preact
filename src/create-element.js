@@ -30,8 +30,9 @@ export function createElement(type, props, children) {
 	// Note: type may be undefined in development, must never error here.
 	if (typeof type === 'function' && type.defaultProps != null) {
 		for (i in type.defaultProps) {
-			if (typeof normalizedProps[i] === 'undefined')
+			if (normalizedProps[i] === undefined) {
 				normalizedProps[i] = type.defaultProps[i];
+			}
 		}
 	}
 
