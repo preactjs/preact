@@ -1,5 +1,4 @@
 import options from './options';
-import { assign } from './util';
 
 /**
  * Create an virtual node (used for JSX)
