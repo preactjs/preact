@@ -273,24 +273,24 @@ function diffElementNodes(
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	isSvg = newVNode.type === 'svg' || isSvg;
 
-	if (dom == null && excessDomChildren != null) {
-		for (i = 0; i < excessDomChildren.length; i++) {
-			const child = excessDomChildren[i];
+	if (dom == null) {
+		if (excessDomChildren != null) {
+			for (i = 0; i < excessDomChildren.length; i++) {
+				const child = excessDomChildren[i];
 
-			if (
-				child != null &&
-				(newVNode.type === null
-					? child.nodeType === 3
-					: child.localName === newVNode.type)
-			) {
-				dom = child;
-				excessDomChildren[i] = null;
-				break;
+				if (
+					child != null &&
+					(newVNode.type === null
+						? child.nodeType === 3
+						: child.localName === newVNode.type)
+				) {
+					dom = child;
+					excessDomChildren[i] = null;
+					break;
+				}
 			}
 		}
-	}
 
-	if (dom == null) {
 		if (newVNode.type === null) {
 			return document.createTextNode(newProps);
 		}
