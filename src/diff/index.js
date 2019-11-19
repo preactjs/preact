@@ -327,7 +327,7 @@ function diffElementNodes(
 			}
 		}
 
-		diffProps(newVNode, dom, newProps, oldProps, isSvg, isHydrating);
+		diffProps(newVNode, newProps, oldProps, isHydrating);
 		// TODO: Temporary code to make tests pass
 		if (newVNode._updateQueue) {
 			commitProps(dom, newVNode._updateQueue, isSvg);
