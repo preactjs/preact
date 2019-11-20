@@ -1,5 +1,4 @@
 import options from './options';
-import { assign } from './util';
 
 /**
  * Create an virtual node (used for JSX)
@@ -10,32 +9,39 @@ import { assign } from './util';
  * @returns {import('./internal').VNode}
  */
 export function createElement(type, props, children) {
-	props = assign({}, props);
+	let normalizedProps = {},
+		i;
+	for (i in props) {
+		if (i !== 'key' && i !== 'ref') normalizedProps[i] = props[i];
+	}
 
 	if (arguments.length > 3) {
 		children = [children];
 		// https://github.com/preactjs/preact/issues/1916
-		for (let i = 3; i < arguments.length; i++) {
+		for (i = 3; i < arguments.length; i++) {
 			children.push(arguments[i]);
 		}
 	}
 	if (children != null) {
-		props.children = children;
+		normalizedProps.children = children;
 	}
 
-	// "type" may be undefined during development. The check is needed so that
-	// we can display a nice error message with our debug helpers
-	if (type != null && type.defaultProps != null) {
-		for (let i in type.defaultProps) {
-			if (props[i] === undefined) props[i] = type.defaultProps[i];
+	// If a Component VNode, check for and apply defaultProps
+	// Note: type may be undefined in development, must never error here.
+	if (typeof type === 'function' && type.defaultProps != null) {
+		for (i in type.defaultProps) {
+			if (normalizedProps[i] === undefined) {
+				normalizedProps[i] = type.defaultProps[i];
+			}
 		}
 	}
-	let ref = props.ref;
-	let key = props.key;
-	if (ref != null) delete props.ref;
-	if (key != null) delete props.key;
 
-	return createVNode(type, props, key, ref);
+	return createVNode(
+		type,
+		normalizedProps,
+		props && props.key,
+		props && props.ref
+	);
 }
 
 /**

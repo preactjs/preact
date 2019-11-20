@@ -46,7 +46,7 @@ export interface EffectHookState {
 export interface MemoHookState {
 	_value?: any;
 	_args?: any[];
-	_callback?: () => any;
+	_factory?: () => any;
 }
 
 export interface ReducerHookState {
