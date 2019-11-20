@@ -47,18 +47,20 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	// Redefine type here using our internal ComponentFactory type
 	type: string | ComponentFactory<P>;
 	props: P & { children: preact.ComponentChildren };
-	_children: Array<VNode<any>> | null;
-	_parent: VNode | null;
-	_depth: number | null;
+	key?: preact.Key;
+	ref?: preact.Ref<any> | null;
+	_children?: Array<VNode<any>> | null;
+	_parent?: VNode | null;
+	_depth?: number | null;
 	/**
 	 * The [first (for Fragments)] DOM child of a VNode
 	 */
-	_dom: PreactElement | Text | null;
+	_dom?: PreactElement | Text | null;
 	/**
 	 * The last dom child of a Fragment, or components that return a Fragment
 	 */
-	_lastDomChild: PreactElement | Text | null;
-	_component: Component | null;
+	_lastDomChild?: PreactElement | Text | null;
+	_component?: Component | null;
 	constructor: undefined;
 }
 
