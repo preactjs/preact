@@ -91,6 +91,10 @@ describe('render()', () => {
 		expect(scratch.childNodes[0].nodeName).to.equal('SPAN');
 	});
 
+	it('should not throw error in IE11 with type date', () => {
+		expect(() => render(<input type="date" />, scratch)).to.not.throw();
+	});
+
 	it('should support custom tag names', () => {
 		render(<foo />, scratch);
 		expect(scratch.childNodes).to.have.length(1);
