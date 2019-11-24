@@ -38,7 +38,16 @@ export function diffChildren(
 
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
-	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
+	// let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
+
+	// Copying the oldParentVNode._children array so we don't modify it when we've found an oldVNode.
+	// We need to preserve the oldChildren array order so getDomSibling will still find the next DOM sibling
+	// in the old tree
+	let oldChildren =
+		(oldParentVNode &&
+			oldParentVNode._children &&
+			oldParentVNode._children.slice()) ||
+		EMPTY_ARR;
 
 	let oldChildrenLength = oldChildren.length;
 
@@ -70,12 +79,14 @@ export function diffChildren(
 				// (holes).
 				oldVNode = oldChildren[i];
 
+				let oldVNodeIndex;
 				if (
 					oldVNode === null ||
 					(oldVNode &&
 						childVNode.key == oldVNode.key &&
 						childVNode.type === oldVNode.type)
 				) {
+					oldVNodeIndex = i;
 					oldChildren[i] = undefined;
 				} else {
 					// Either oldVNode === undefined or oldChildrenLength > 0,
@@ -89,6 +100,7 @@ export function diffChildren(
 							childVNode.key == oldVNode.key &&
 							childVNode.type === oldVNode.type
 						) {
+							oldVNodeIndex = j;
 							oldChildren[j] = undefined;
 							break;
 						}
@@ -160,6 +172,14 @@ export function diffChildren(
 							}
 							parentDom.insertBefore(newDom, oldDom);
 							nextDom = oldDom;
+
+							// If we are moving a VNode up from its previous location, mark it as gone
+							// in the parent's children array so that getDomSibling won't see it and think
+							// it's still in its old location
+							// TODO: lol Fragments... will this work?
+							if (oldParentVNode && oldParentVNode._children) {
+								oldParentVNode._children[oldVNodeIndex] = undefined;
+							}
 						}
 
 						// Browsers will infer an option's `value` from `textContent` when
@@ -183,6 +203,14 @@ export function diffChildren(
 					if (nextDom !== undefined) {
 						oldDom = nextDom;
 					} else {
+						// DEBUG
+						// let nextDomTest = getDomSibling(oldVNode);
+						// if (nextDomTest != newDom.nextSibling) {
+						// 	// Maintian count so its easy to till if a change fixes more tests than it breaks
+						// 	window.__count = (window.__count || 0) + 1;
+						// 	console.log(window.__count, 'default', newDom.nextSibling, nextDomTest);
+						// }
+
 						oldDom = newDom.nextSibling;
 					}
 
