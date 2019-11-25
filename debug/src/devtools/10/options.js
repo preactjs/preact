@@ -21,30 +21,38 @@ export function setupOptions(options, renderer) {
 
 		vnode.startTime = 0;
 		vnode.endTime = -1;
+
+		/* istanbul ignore next */
 		if (prevVNodeHook) prevVNodeHook(vnode);
 	};
 
 	options._diff = vnode => {
 		vnode.startTime = performance.now();
+		/* istanbul ignore next */
 		if (prevBeforeDiff != null) prevBeforeDiff(vnode);
 	};
 
 	options.diffed = vnode => {
 		vnode.endTime = performance.now();
 
+		/* istanbul ignore next */
 		if (prevAfterDiff) prevAfterDiff(vnode);
 	};
 
 	options._commit = (vnode, queue) => {
+		/* istanbul ignore next */
 		if (prevCommitRoot) prevCommitRoot(vnode, queue);
 
 		// These cases are already handled by `unmount`
+		/* istanbul ignore next */
 		if (vnode == null) return;
 
 		renderer.onCommit(vnode);
 	};
 
 	options.unmount = vnode => {
+		/* istanbul ignore next */
+
 		if (prevBeforeUnmount) prevBeforeUnmount(vnode);
 		renderer.onUnmount(vnode);
 	};

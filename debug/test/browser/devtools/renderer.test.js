@@ -1,26 +1,27 @@
-import { h, render, Options, options, Fragment } from 'preact';
+import { createElement, render, options, Fragment } from 'preact';
 import * as sinon from 'sinon';
-import { createRenderer, getFilteredChildren } from './renderer';
-import { setupOptions } from '../10/options';
-import { DevtoolsHook } from '../hook';
+import {
+	createRenderer,
+	getFilteredChildren
+} from '../../../src/devtools/10/renderer';
+import { setupOptions } from '../../../src/devtools/10/options';
 import { expect } from 'chai';
-import { toSnapshot } from '../debug';
+import { toSnapshot } from '../../../src/devtools/10/debug';
 import { useState } from 'preact/hooks';
 import { act } from 'preact/test-utils';
-import { getDisplayName } from './vnode';
-import { FilterState } from '../adapter/filter';
-import { Renderer } from '../renderer';
+import { getDisplayName } from '../../../src/devtools/10/vnode';
+import { setupScratch, teardown } from '../../../../test/_util/helpers';
 
-export function setupScratch() {
-	const div = document.createElement('div');
-	div.id = 'scratch';
-	document.body.appendChild(div);
-	return div;
-}
+/** @jsx createElement */
 
-export function setupMockHook(options: Options) {
+/**
+ * @param {import('../../../src/internal').Options} options
+ */
+export function setupMockHook(options) {
 	const spy = sinon.spy();
-	const fakeHook: DevtoolsHook = {
+
+	/** @type {import('../../../src/devtools/10/types').PreactDevtoolsHook} */
+	const fakeHook = {
 		connected: true,
 		attach: () => 1,
 		detach: () => null,
@@ -37,10 +38,17 @@ export function setupMockHook(options: Options) {
 }
 
 describe('Renderer 10', () => {
-	let scratch: HTMLDivElement;
-	let destroy: () => void;
-	let spy: sinon.SinonSpy;
-	let renderer: Renderer;
+	/** @type {HTMLDivElement} */
+	let scratch;
+
+	/** @type {() => void} */
+	let destroy;
+
+	/** @type {sinon.SinonSpy} */
+	let spy;
+
+	/** @type {import('../../../src/devtools/10/types').Renderer} */
+	let renderer;
 
 	beforeEach(() => {
 		scratch = setupScratch();
@@ -51,7 +59,7 @@ describe('Renderer 10', () => {
 	});
 
 	afterEach(() => {
-		scratch.remove();
+		teardown(scratch);
 		if (destroy) destroy();
 	});
 
@@ -111,8 +119,8 @@ describe('Renderer 10', () => {
 			type: new Set(['dom'])
 		});
 
-		const Foo = (props: any) => <div>{props.children}</div>;
-		const Bar = (props: any) => <span>{props.children}</span>;
+		const Foo = props => <div>{props.children}</div>;
+		const Bar = props => <span>{props.children}</span>;
 
 		render(
 			<div>
@@ -286,8 +294,8 @@ describe('Renderer 10', () => {
 				type: new Set(['dom'])
 			});
 
-			let update: () => void;
-			function Parent(props: { children: any }) {
+			let update;
+			function Parent(props) {
 				const [i, setI] = useState(0);
 				update = () => setI(i + 1);
 				return <div>{props.children}</div>;
@@ -371,7 +379,7 @@ describe('Renderer 10', () => {
 				type: new Set(['dom'])
 			});
 
-			function Foo(props: any) {
+			function Foo(props) {
 				return <div>{props.children}</div>;
 			}
 			render(
@@ -452,7 +460,7 @@ describe('Renderer 10', () => {
 
 			render(vnode, scratch);
 
-			const filters: FilterState = {
+			const filters = {
 				regex: [],
 				type: new Set(['dom'])
 			};

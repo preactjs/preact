@@ -1,19 +1,20 @@
-import { h, Component, createContext, render } from 'preact';
-import { teardown } from 'preact/test-utils';
-import { setupScratch } from './renderer.test';
+import { createElement, Component, createContext, render } from 'preact';
 import { expect } from 'chai';
-import { cleanContext } from './utils';
+import { cleanContext } from '../../../src/devtools/10/utils';
+import { setupScratch, teardown } from '../../../../test/_util/helpers';
+
+/** @jsx createElement */
 
 describe('cleanContext', () => {
-	let scratch: HTMLDivElement;
+	/** @type {HTMLDivElement} */
+	let scratch;
 
 	beforeEach(() => {
 		scratch = setupScratch();
 	});
 
 	afterEach(() => {
-		teardown();
-		scratch.remove();
+		teardown(scratch);
 	});
 
 	it('should remove createContext items', () => {
@@ -27,13 +28,13 @@ describe('cleanContext', () => {
 			}
 		}
 
-		let contextValue: any;
-		function Child(props: any, context: any) {
+		let contextValue;
+		function Child(props, context) {
 			contextValue = context;
 			return <div>child</div>;
 		}
 
-		const ctx = createContext<any>(null);
+		const ctx = createContext(null);
 		render(
 			<LegacyProvider>
 				<ctx.Provider value="a">

@@ -423,7 +423,7 @@ export function update(ids, commit, vnode, ancestorId, filters, domCache) {
 	commit.operations.push(
 		UPDATE_VNODE_TIMINGS,
 		id,
-		(vnode.endTime || 0) - (vnode.startTime || 0)
+		vnode.endTime - vnode.startTime
 	);
 
 	const oldVNode = ids.getVNode(id);

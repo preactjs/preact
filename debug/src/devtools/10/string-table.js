@@ -12,8 +12,6 @@
  * @returns {number}
  */
 export function getStringId(table, input) {
-	if (input === null) return 0;
-
 	if (!table.has(input)) {
 		table.set('' + input, table.size + 1);
 	}
@@ -66,7 +64,7 @@ export function parseTable(data) {
 const encoded = new Map();
 
 /** @type {(s: string) => number} */
-const toCodePoint = s => s.codePointAt(0) || 124; // "|"" symbol;
+const toCodePoint = s => s.codePointAt(0);
 
 /**
  * Convert a string to an array of codepoints

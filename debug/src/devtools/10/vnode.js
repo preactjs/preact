@@ -24,6 +24,7 @@ export function isSuspenseVNode(vnode) {
  * Get the internal hooks state of a component
  * @param {import('../../internal').Component} c
  */
+/* istanbul ignore next */
 export function getComponentHooks(c) {
 	return c.__hooks || null;
 }
@@ -47,11 +48,13 @@ export function getActualChildren(vnode) {
 export function findRoot(vnode) {
 	let next = vnode;
 	while ((next = next._parent) != null) {
+		/* istanbul ignore else */
 		if (isRoot(next)) {
 			return next;
 		}
 	}
 
+	/* istanbul ignore next */
 	return vnode;
 }
 
@@ -65,6 +68,7 @@ export function getAncestor(vnode) {
 		return next;
 	}
 
+	/* istanbul ignore next */
 	return null;
 }
 
@@ -73,6 +77,7 @@ export function getAncestor(vnode) {
  * @param {import('../../internal').VNode} vnode
  * @returns {string}
  */
+/* istanbul ignore next*/
 export function getDisplayName(vnode) {
 	if (vnode.type === Fragment) return 'Fragment';
 	else if (typeof vnode.type === 'function')

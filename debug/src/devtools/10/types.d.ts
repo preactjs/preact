@@ -88,3 +88,11 @@ export interface IdMapper {
 	update(id: number, vnode: VNode): void;
 	remove(vnode: VNode): void;
 }
+
+export interface ParsedMsg {
+	rootId: number;
+	mounts: Array<{ id: ID; key: string; name: string; parentId: ID }>;
+	unmounts: ID[];
+	reorders: Array<{ id: ID; children: ID[] }>;
+	timings: Array<{ id: ID; duration: number }>;
+}
