@@ -93,4 +93,13 @@ describe('jsonify', () => {
 			type: 'function'
 		});
 	});
+
+	it('should work with cyclic structures', () => {
+		const foo = { foo: 123 };
+		foo.bar = foo;
+		expect(jsonify(foo, noop)).to.deep.equal({
+			foo: 123,
+			bar: '...'
+		});
+	});
 });
