@@ -20,17 +20,20 @@ export function createIdMapper() {
 
 	/** @type {import('./types').IdMapper["hasId"]} */
 	const hasId = vnode => {
+		/* istanbul ignore next */
 		if (vnode != null) {
 			return instToId.has(getInstance(vnode));
 		}
+		/* istanbul ignore next */
 		return false;
 	};
 
 	/** @type {import('./types').IdMapper["getId"]} */
 	const getId = vnode => {
+		/* istanbul ignore next */
 		if (vnode == null) return -1;
 		const inst = getInstance(vnode);
-		return instToId.get(inst) || -1;
+		return /* istanbul ignore next */ instToId.get(inst) || -1;
 	};
 
 	/** @type {import('./types').IdMapper["update"]} */
@@ -75,8 +78,8 @@ export function getInstance(vnode) {
 	// For components we use the instance to check refs, otherwise
 	// we'll use a dom node
 	if (typeof vnode.type === 'function') {
-		return vnode._component || null;
+		return vnode._component;
 	}
 
-	return vnode._dom || null;
+	return vnode._dom;
 }

@@ -82,7 +82,6 @@ export function serializeVNode(x) {
  */
 export function flush(commit) {
 	const { rootId, unmountIds, operations, strings } = commit;
-	if (unmountIds.length === 0 && operations.length === 0) return;
 
 	let msg = [rootId, ...flushTable(strings)];
 	if (unmountIds.length > 0) {
@@ -133,6 +132,7 @@ export function createRenderer(hook, filters = defaultFilters) {
 				if (c) c.forceUpdate();
 			}
 		},
+		/* istanbul ignore next */
 		log(id, children) {
 			const vnode = ids.getVNode(id);
 			if (vnode == null) {
@@ -161,13 +161,10 @@ export function createRenderer(hook, filters = defaultFilters) {
 				id,
 				name: getDisplayName(vnode),
 				canEditProps: true,
-				props:
-					vnode.type !== null
-						? jsonify(cleanProps(vnode.props), serializeVNode)
-						: null,
+				props: jsonify(cleanProps(vnode.props), serializeVNode),
 				canEditState: true,
 				state: hasState ? jsonify(c.state, serializeVNode) : null,
-				type: 2
+				type: getDevtoolsType(vnode)
 			};
 		},
 		findDomForVNode(id) {
@@ -180,15 +177,14 @@ export function createRenderer(hook, filters = defaultFilters) {
 				if (shouldFilter(vnode, filters)) {
 					let p = vnode;
 					while ((p = p._parent) != null) {
+						/* istanbul ignore else */
 						if (!shouldFilter(p, filters)) break;
 					}
 
-					if (p != null) {
-						return ids.getId(p) || -1;
-					}
-				} else {
-					return ids.getId(vnode) || -1;
+					return ids.getId(p);
 				}
+
+				return ids.getId(vnode);
 			}
 
 			return -1;
@@ -196,6 +192,7 @@ export function createRenderer(hook, filters = defaultFilters) {
 		applyFilters(nextFilters) {
 			roots.forEach(root => {
 				const children = getActualChildren(root);
+				/* istanbul ignore else */
 				if (children.length > 0 && children[0] != null) {
 					traverse(/** @type{*} */ (children[0]), vnode =>
 						this.onUnmount(vnode)
@@ -211,10 +208,8 @@ export function createRenderer(hook, filters = defaultFilters) {
 				};
 
 				const unmounts = flush(commit);
-				if (unmounts) {
-					currentUnmounts = [];
-					queue.push(unmounts);
-				}
+				currentUnmounts = [];
+				queue.push(unmounts);
 			});
 
 			filters.regex = nextFilters.regex;
@@ -223,10 +218,10 @@ export function createRenderer(hook, filters = defaultFilters) {
 			roots.forEach(root => {
 				const commit = createCommit(ids, roots, root, filters, domToVNode);
 				const ev = flush(commit);
-				if (!ev) return;
 				queue.push(ev);
 			});
 
+			/* istanbul ignore else */
 			if (hook.connected) {
 				this.flushInitial();
 			}
@@ -241,8 +236,8 @@ export function createRenderer(hook, filters = defaultFilters) {
 			commit.unmountIds.push(...currentUnmounts);
 			currentUnmounts = [];
 			const ev = flush(commit);
-			if (!ev) return;
 
+			/* istanbul ignore else */
 			if (hook.connected) {
 				hook.emit(ev.name, ev.data);
 			} else {
@@ -250,12 +245,15 @@ export function createRenderer(hook, filters = defaultFilters) {
 			}
 		},
 		onUnmount(vnode) {
+			/* istanbul ignore else */
 			if (!shouldFilter(vnode, filters)) {
+				/* istanbul ignore else */
 				if (ids.hasId(vnode)) {
 					currentUnmounts.push(ids.getId(vnode));
 				}
 			} else if (typeof vnode.type !== 'function') {
 				const dom = vnode._dom;
+				/* istanbul ignore next */
 				if (dom != null) domToVNode.delete(dom);
 			}
 
@@ -266,17 +264,17 @@ export function createRenderer(hook, filters = defaultFilters) {
 			if (vnode !== null) {
 				if (typeof vnode.type === 'function') {
 					const c = vnode._component;
-					if (c) {
-						if (type === 'props') {
-							setIn(vnode.props || {}, path.slice(), value);
-						} else if (type === 'state') {
-							setIn(c.state || {}, path.slice(), value);
-						} else if (type === 'context') {
-							setIn(c.context || {}, path.slice(), value);
-						}
-
-						c.forceUpdate();
+					/* istanbul ignore else */
+					if (type === 'props') {
+						/* istanbul ignore next */
+						setIn(vnode.props || {}, path.slice(), value);
+					} else if (type === 'state') {
+						setIn(c.state || {}, path.slice(), value);
+					} else if (type === 'context') {
+						setIn(c.context || {}, path.slice(), value);
 					}
+
+					c.forceUpdate();
 				}
 			}
 		}
@@ -289,6 +287,7 @@ export function createRenderer(hook, filters = defaultFilters) {
  * @param {number} id
  * @param {number[]} children
  */
+/* istanbul ignore next */
 export function logVNode(vnode, id, children) {
 	const display = getDisplayName(vnode);
 	const name = display === '#text' ? display : `<${display || 'Component'} />`;
@@ -378,8 +377,10 @@ export function mount(ids, commit, vnode, ancestorId, filters, domCache) {
 		ancestorId = id;
 	}
 
-	if (skip && typeof vnode.type !== 'function') {
+	if (typeof vnode.type !== 'function') {
 		const dom = vnode._dom;
+		// TODO: Find a test case
+		/* istanbul ignore next */
 		if (dom) domCache.set(dom, vnode);
 	}
 
@@ -426,22 +427,13 @@ export function update(ids, commit, vnode, ancestorId, filters, domCache) {
 		vnode.endTime - vnode.startTime
 	);
 
-	const oldVNode = ids.getVNode(id);
 	ids.update(id, vnode);
-
-	const oldChildren = oldVNode
-		? getActualChildren(oldVNode).map(v => v && ids.getId(v))
-		: [];
-
 	let shouldReorder = false;
 
 	const children = getActualChildren(vnode);
 	for (let i = 0; i < children.length; i++) {
 		const child = /** @type {*} */ (children[i]);
 		if (child == null) {
-			if (oldChildren[i] != null) {
-				commit.unmountIds.push(oldChildren[i]);
-			}
 		} else if (ids.hasId(child) || shouldFilter(child, filters)) {
 			update(ids, commit, child, id, filters, domCache);
 			// TODO: This is only sometimes necessary
@@ -466,9 +458,6 @@ export function update(ids, commit, vnode, ancestorId, filters, domCache) {
  * @param {import('./types').FilterState} filters
  */
 export function resetChildren(commit, ids, id, vnode, filters) {
-	let children = getActualChildren(vnode);
-	if (!children.length) return;
-
 	let next = getFilteredChildren(vnode, filters);
 	if (next.length < 2) return;
 

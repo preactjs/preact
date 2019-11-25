@@ -10,6 +10,7 @@ export function traverse(vnode, fn) {
 	const children = getActualChildren(vnode);
 	for (let i = 0; i < children.length; i++) {
 		const child = /** @type {*} */ (children[i]);
+		/* istanbul ignore else */
 		if (child != null) {
 			fn(child);
 		}
@@ -34,7 +35,10 @@ export function jsonify(data, getVNode) {
 		case 'function': {
 			return {
 				type: 'function',
-				name: data.displayName || data.name || 'anonymous'
+				name:
+					/* istanbul ignore next */ data.displayName ||
+					data.name ||
+					'anonymous'
 			};
 		}
 		case 'object': {
@@ -51,6 +55,7 @@ export function jsonify(data, getVNode) {
 }
 
 export function cleanProps(props) {
+	/* istanbul ignore next */
 	if (typeof props === 'string' || !props) return null;
 	const out = { ...props };
 	if (!Object.keys(out).length) return null;
@@ -82,7 +87,9 @@ export function cleanContext(context) {
  */
 export function setIn(obj, path, value) {
 	let last = path.pop();
+	/* istanbul ignore next */
 	let parent = path.reduce((acc, attr) => (acc ? acc[attr] : null), obj);
+	/* istanbul ignore else */
 	if (parent && last) {
 		parent[last] = value;
 	}

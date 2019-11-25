@@ -20,10 +20,7 @@ export function shouldFilter(vnode, filters) {
 
 			return false;
 		}
-	} else if (
-		(typeof vnode.type === 'string' || vnode.type === null) &&
-		filters.type.has('dom')
-	) {
+	} else if (filters.type.has('dom')) {
 		return true;
 	}
 

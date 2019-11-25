@@ -1,6 +1,6 @@
 import { createElement, Component, createContext, render } from 'preact';
 import { expect } from 'chai';
-import { cleanContext } from '../../../src/devtools/10/utils';
+import { cleanContext, jsonify } from '../../../src/devtools/10/utils';
 import { setupScratch, teardown } from '../../../../test/_util/helpers';
 
 /** @jsx createElement */
@@ -51,5 +51,46 @@ describe('cleanContext', () => {
 
 	it('should return null when no context value is present', () => {
 		expect(cleanContext({})).to.equal(null);
+	});
+});
+
+const noop = () => null;
+
+describe('jsonify', () => {
+	it('should serialize arrays', () => {
+		expect(jsonify([1, 2, 3], noop)).to.deep.equal([1, 2, 3]);
+	});
+
+	it('should serialize strings', () => {
+		expect(jsonify('foobar', noop)).to.equal('foobar');
+	});
+
+	it('should cut off long strings', () => {
+		const str = 'foobar'.repeat(100);
+		expect(jsonify(str, noop)).to.equal(str.slice(300));
+	});
+
+	it('should serialize functions', () => {
+		expect(jsonify(noop, noop)).to.deep.equal({
+			name: 'noop',
+			type: 'function'
+		});
+	});
+
+	it('should serialize Components', () => {
+		function Foo() {}
+		Foo.displayName = 'foo';
+		expect(jsonify(Foo, noop)).to.deep.equal({
+			name: 'foo',
+			type: 'function'
+		});
+	});
+
+	it('should serialize function with name', () => {
+		function Foo() {}
+		expect(jsonify(Foo, noop)).to.deep.equal({
+			name: 'Foo',
+			type: 'function'
+		});
 	});
 });
