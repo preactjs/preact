@@ -38,16 +38,7 @@ export function diffChildren(
 
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
-	// let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
-
-	// Copying the oldParentVNode._children array so we don't modify it when we've found an oldVNode.
-	// We need to preserve the oldChildren array order so getDomSibling will still find the next DOM sibling
-	// in the old tree
-	let oldChildren =
-		(oldParentVNode &&
-			oldParentVNode._children &&
-			oldParentVNode._children.slice()) ||
-		EMPTY_ARR;
+	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
 
 	let oldChildrenLength = oldChildren.length;
 
@@ -79,15 +70,16 @@ export function diffChildren(
 				// (holes).
 				oldVNode = oldChildren[i];
 
-				let oldVNodeIndex;
 				if (
 					oldVNode === null ||
 					(oldVNode &&
+						oldVNode._index == null &&
 						childVNode.key == oldVNode.key &&
 						childVNode.type === oldVNode.type)
 				) {
-					oldVNodeIndex = i;
-					oldChildren[i] = undefined;
+					if (oldVNode) {
+						oldVNode._index = i;
+					}
 				} else {
 					// Either oldVNode === undefined or oldChildrenLength > 0,
 					// so after this loop oldVNode == null or oldVNode is a valid value.
@@ -97,11 +89,11 @@ export function diffChildren(
 						// We always match by type (in either case).
 						if (
 							oldVNode &&
+							oldVNode._index == null &&
 							childVNode.key == oldVNode.key &&
 							childVNode.type === oldVNode.type
 						) {
-							oldVNodeIndex = j;
-							oldChildren[j] = undefined;
+							oldVNode._index = j;
 							break;
 						}
 						oldVNode = null;
@@ -173,13 +165,10 @@ export function diffChildren(
 							parentDom.insertBefore(newDom, oldDom);
 							nextDom = oldDom;
 
-							// If we are moving a VNode up from its previous location, mark it as gone
-							// in the parent's children array so that getDomSibling won't see it and think
-							// it's still in its old location
-							// TODO: lol Fragments... will this work?
-							if (oldParentVNode && oldParentVNode._children) {
-								oldParentVNode._children[oldVNodeIndex] = undefined;
-							}
+							// Since this code path means oldVNode moved up in the tree,
+							// remove oldVNode from oldChildren so that getDomSibling doesn't see it
+							// when searching for siblings
+							oldChildren[oldVNode._index] = undefined;
 						}
 
 						// Browsers will infer an option's `value` from `textContent` when
@@ -252,7 +241,10 @@ export function diffChildren(
 
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {
-		if (oldChildren[i] != null) unmount(oldChildren[i], oldChildren[i]);
+		// oldChildren without _index weren't used in this diff
+		if (oldChildren[i] && oldChildren[i]._index == null) {
+			unmount(oldChildren[i], oldChildren[i]);
+		}
 	}
 
 	// Set refs only after unmount
