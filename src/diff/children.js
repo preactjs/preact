@@ -146,6 +146,7 @@ export function diffChildren(
 
 						outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
 							parentDom.appendChild(newDom);
+							nextDom = null;
 						} else {
 							// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
 							for (
@@ -158,6 +159,7 @@ export function diffChildren(
 								}
 							}
 							parentDom.insertBefore(newDom, oldDom);
+							nextDom = oldDom;
 						}
 
 						// Browsers will infer an option's `value` from `textContent` when
