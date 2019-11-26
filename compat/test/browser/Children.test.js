@@ -90,7 +90,7 @@ describe('Children', () => {
 				</Foo>,
 				scratch
 			);
-			let expected = div([span('foo'), span(div('bar'))].join(''));
+			let expected = div([span('foo'), span(div('bar'))]);
 			expect(serializeHtml(scratch)).to.equal(expected);
 		});
 
@@ -116,7 +116,7 @@ describe('Children', () => {
 				</Foo>,
 				scratch
 			);
-			let expected = div([span('foo'), span(div('bar'))].join(''));
+			let expected = div([span('foo'), span(div('bar'))]);
 			expect(serializeHtml(scratch)).to.equal(expected);
 		});
 	});
