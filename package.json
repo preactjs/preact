@@ -140,7 +140,7 @@
   },
   "homepage": "https://github.com/preactjs/preact",
   "devDependencies": {
-    "@babel/core": "^7.7.0",
+    "@babel/core": "^7.7.4",
     "@babel/plugin-proposal-object-rest-spread": "^7.6.2",
     "@babel/plugin-transform-react-jsx": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
