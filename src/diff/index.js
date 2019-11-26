@@ -419,7 +419,9 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		skipRemove = (dom = vnode._dom) != null;
 	}
 
-	vnode._dom = vnode._lastDomChild = null;
+	// Must be set to `undefined` to properly clean up `_lastDomChild`
+	// for which `null` is a valid value. See comment in `create-element.js`
+	vnode._dom = vnode._lastDomChild = undefined;
 
 	if ((r = vnode._component) != null) {
 		if (r.componentWillUnmount) {

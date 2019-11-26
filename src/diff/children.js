@@ -123,16 +123,18 @@ export function diffChildren(
 						firstChildDom = newDom;
 					}
 
-					if (childVNode._lastDomChild != null) {
+					let nextDom;
+					if (childVNode._lastDomChild !== undefined) {
 						// Only Fragments or components that return Fragment like VNodes will
-						// have a non-null _lastDomChild. Continue the diff from the end of
-						// this Fragment's DOM tree.
-						newDom = childVNode._lastDomChild;
+						// have a non-undefined _lastDomChild. Continue the diff from the sibling
+						// of last DOM child of this child VNode
+						nextDom = childVNode._lastDomChild;
 
 						// Eagerly cleanup _lastDomChild. We don't need to persist the value because
 						// it is only used by `diffChildren` to determine where to resume the diff after
-						// diffing Components and Fragments.
-						childVNode._lastDomChild = null;
+						// diffing Components and Fragments. Once we store it the nextDOM local var, we
+						// can clean up the property
+						childVNode._lastDomChild = undefined;
 					} else if (
 						excessDomChildren == oldVNode ||
 						newDom != oldDom ||
@@ -173,14 +175,25 @@ export function diffChildren(
 						}
 					}
 
-					oldDom = newDom.nextSibling;
+					// If we have pre-calculated the nextDOM node, use it. Else calculate it now
+					// Strictly check for `undefined` here cuz `null` is a valid value of `nextDom`.
+					// See more detail in create-element.js:createVNode
+					if (nextDom !== undefined) {
+						oldDom = nextDom;
+					} else {
+						oldDom = newDom.nextSibling;
+					}
 
 					if (typeof newParentVNode.type == 'function') {
-						// At this point, if childVNode._lastDomChild existed, then
-						// newDom = childVNode._lastDomChild per line 101. Else it is
-						// the same as childVNode._dom, meaning this component returned
-						// only a single DOM node
-						newParentVNode._lastDomChild = newDom;
+						// Because the newParentVNode is Fragment-like, we need to set it's
+						// _lastDomChild property to the nextSibling of its last child DOM node.
+						//
+						// `oldDom` contains the correct value here because if the last child
+						// is a Fragment-like, then oldDom has already been set to that child's _lastDomChild.
+						// If the last child is a DOM VNode, then oldDom will be set to that DOM
+						// node's nextSibling.
+
+						newParentVNode._lastDomChild = oldDom;
 					}
 				}
 			}
