@@ -1,6 +1,7 @@
 import { createElement, Component, render } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
+import { div } from '../_util/dom';
 
 /** @jsx createElement */
 
@@ -29,13 +30,13 @@ describe('keys', () => {
 	}
 
 	/** @type {(props: {values: any[]}) => any} */
-	const List = props => ((
+	const List = props => (
 		<ol>
 			{props.values.map(value => (
 				<li key={value}>{value}</li>
 			))}
 		</ol>
-	));
+	);
 
 	/**
 	 * Move an element in an array from one index to another
@@ -345,10 +346,12 @@ describe('keys', () => {
 
 		ops = [];
 		render(<Foo condition />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Stateful</div>');
 		expect(ops).to.deep.equal(['Mount Stateful'], 'initial mount');
 
 		ops = [];
 		render(<Foo condition={false} />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Stateful</div>');
 		expect(ops).to.deep.equal(
 			['Unmount Stateful', 'Mount Stateful'],
 			'switching keys 1'
@@ -356,6 +359,7 @@ describe('keys', () => {
 
 		ops = [];
 		render(<Foo condition />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Stateful</div>');
 		expect(ops).to.deep.equal(
 			['Unmount Stateful', 'Mount Stateful'],
 			'switching keys 2'
@@ -373,10 +377,12 @@ describe('keys', () => {
 
 		ops = [];
 		render(<Foo keyed />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Stateful</div>');
 		expect(ops).to.deep.equal(['Mount Stateful'], 'initial mount with key');
 
 		ops = [];
 		render(<Foo keyed={false} />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Stateful</div>');
 		expect(ops).to.deep.equal(
 			['Unmount Stateful', 'Mount Stateful'],
 			'switching from keyed to unkeyed'
@@ -384,6 +390,7 @@ describe('keys', () => {
 
 		ops = [];
 		render(<Foo keyed />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Stateful</div>');
 		expect(ops).to.deep.equal(
 			['Unmount Stateful', 'Mount Stateful'],
 			'switching from unkeyed to keyed'
@@ -419,9 +426,17 @@ describe('keys', () => {
 			);
 		}
 
+		const expectedHtml = div([
+			div(1),
+			div('Stateful1'),
+			div(2),
+			div('Stateful2')
+		]);
+
 		ops = [];
 		render(<Foo moved={false} />, scratch);
 
+		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal(['Mount Stateful1', 'Mount Stateful2']);
 		expect(Stateful1Ref).to.exist;
 		expect(Stateful2Ref).to.exist;
@@ -429,6 +444,7 @@ describe('keys', () => {
 		ops = [];
 		render(<Foo moved />, scratch);
 
+		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
 			'Unmount Stateful2',
 			'Unmount Stateful1',
@@ -441,6 +457,7 @@ describe('keys', () => {
 		ops = [];
 		render(<Foo moved={false} />, scratch);
 
+		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
 			'Unmount Stateful2',
 			'Unmount Stateful1',
@@ -486,9 +503,24 @@ describe('keys', () => {
 			);
 		}
 
+		const htmlForFalse = div([
+			div(1),
+			div('Stateful1'),
+			div(2),
+			div('Stateful2')
+		]);
+
+		const htmlForTrue = div([
+			div(1),
+			div('Stateful2'),
+			div(2),
+			div('Stateful1')
+		]);
+
 		ops = [];
 		render(<Foo moved={false} />, scratch);
 
+		expect(scratch.innerHTML).to.equal(htmlForFalse);
 		expect(ops).to.deep.equal(['Mount Stateful1', 'Mount Stateful2']);
 		expect(Stateful1Ref).to.exist;
 		expect(Stateful2Ref).to.exist;
@@ -496,6 +528,7 @@ describe('keys', () => {
 		ops = [];
 		render(<Foo moved />, scratch);
 
+		expect(scratch.innerHTML).to.equal(htmlForTrue);
 		expect(ops).to.deep.equal(['Update Stateful2', 'Update Stateful1']);
 		expect(Stateful1MovedRef).to.equal(Stateful1Ref);
 		expect(Stateful2MovedRef).to.equal(Stateful2Ref);
@@ -503,6 +536,7 @@ describe('keys', () => {
 		ops = [];
 		render(<Foo moved={false} />, scratch);
 
+		expect(scratch.innerHTML).to.equal(htmlForFalse);
 		expect(ops).to.deep.equal(['Update Stateful1', 'Update Stateful2']);
 		expect(Stateful1Ref).to.equal(Stateful1MovedRef);
 		expect(Stateful2Ref).to.equal(Stateful2MovedRef);
@@ -537,9 +571,17 @@ describe('keys', () => {
 			);
 		}
 
+		const expectedHtml = div([
+			div(1),
+			div('Stateful1'),
+			div(2),
+			div('Stateful2')
+		]);
+
 		ops = [];
 		render(<Foo unkeyed={false} />, scratch);
 
+		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal(['Mount Stateful1', 'Mount Stateful2']);
 		expect(Stateful1Ref).to.exist;
 		expect(Stateful2Ref).to.exist;
@@ -547,6 +589,7 @@ describe('keys', () => {
 		ops = [];
 		render(<Foo unkeyed />, scratch);
 
+		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
 			'Unmount Stateful2',
 			'Unmount Stateful1',
@@ -559,6 +602,7 @@ describe('keys', () => {
 		ops = [];
 		render(<Foo unkeyed={false} />, scratch);
 
+		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
 			'Unmount Stateful2',
 			'Unmount Stateful1',
@@ -587,9 +631,13 @@ describe('keys', () => {
 		}
 
 		render(<Foo condition />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div><div>Hello</div><div>bar</div></div>'
+		);
 		clearLog();
 
 		render(<Foo />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><div>Hello</div></div>');
 		expect(getLog()).to.deep.equal(['<div>bar.remove()']);
 	});
 });
