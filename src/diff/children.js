@@ -139,6 +139,11 @@ export function diffChildren(
 						// diffing Components and Fragments. Once we store it the nextDOM local var, we
 						// can clean up the property
 						childVNode._nextDom = undefined;
+
+						// TODO: Investigate removing this `if` to save bytes
+						if (oldVNode._index != null) {
+							oldChildren[oldVNode._index] = undefined;
+						}
 					} else if (
 						excessDomChildren == oldVNode ||
 						newDom != oldDom ||
@@ -168,7 +173,10 @@ export function diffChildren(
 							// Since this code path means oldVNode moved up in the tree,
 							// remove oldVNode from oldChildren so that getDomSibling doesn't see it
 							// when searching for siblings
-							oldChildren[oldVNode._index] = undefined;
+							// TODO: Investigate removing this `if` to save bytes
+							if (oldVNode._index != null) {
+								oldChildren[oldVNode._index] = undefined;
+							}
 						}
 
 						// Browsers will infer an option's `value` from `textContent` when
