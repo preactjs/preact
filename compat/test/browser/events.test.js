@@ -93,10 +93,10 @@ describe('preact/compat events', () => {
 	});
 
 	it('should support onTouch* events', () => {
-		const onTouchStart = () => {};
-		const onTouchEnd = () => {};
-		const onTouchMove = () => {};
-		const onTouchCancel = () => {};
+		const onTouchStart = sinon.spy();
+		const onTouchEnd = sinon.spy();
+		const onTouchMove = sinon.spy();
+		const onTouchCancel = sinon.spy();
 
 		render(
 			<div
@@ -122,12 +122,17 @@ describe('preact/compat events', () => {
 		expect(proto.addEventListener.args[3][0]).to.eql('touchcancel');
 		expect(proto.addEventListener.args[3][2]).to.eql(false);
 
-		expect(scratch.firstChild._listeners).to.deep.equal({
-			touchstart: onTouchStart,
-			touchend: onTouchEnd,
-			touchmove: onTouchMove,
-			touchcancel: onTouchCancel
-		});
+		scratch.firstChild.dispatchEvent(createEvent('touchstart'));
+		expect(onTouchStart).to.have.been.calledOnce;
+
+		scratch.firstChild.dispatchEvent(createEvent('touchmove'));
+		expect(onTouchMove).to.have.been.calledOnce;
+
+		scratch.firstChild.dispatchEvent(createEvent('touchend'));
+		expect(onTouchEnd).to.have.been.calledOnce;
+
+		scratch.firstChild.dispatchEvent(createEvent('touchcancel'));
+		expect(onTouchCancel).to.have.been.calledOnce;
 
 		render(<div />, scratch);
 
