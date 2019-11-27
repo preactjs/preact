@@ -31,6 +31,7 @@ ContextProvider.prototype.render = function render(props) {
 
 ```js
 // PureComponent.js
+// DOESN'T WORK CUZ CONSUMERS NEED TO BE ABLE TO CALL SETSTATE
 export function PureComponent() {
 	this.isPureReactComponent = true;
 }
