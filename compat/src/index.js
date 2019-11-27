@@ -3,7 +3,6 @@ import {
 	cloneElement as preactCloneElement,
 	isValidElement as preactIsValidElement,
 	createRef,
-	Component,
 	createContext,
 	Fragment
 } from 'preact';
@@ -27,6 +26,7 @@ import { Suspense, lazy } from './suspense';
 import { SuspenseList } from './suspense-list';
 import { createPortal } from './portals';
 import { createElement, render, REACT_ELEMENT_TYPE } from './render';
+import { Component } from './Component';
 
 const version = '16.8.0'; // trick libraries to think we are react
 

@@ -1,4 +1,5 @@
-import { Component, createElement, options } from 'preact';
+import { createElement, options } from 'preact';
+import { Component } from './Component';
 import { assign } from './util';
 
 let isSuspenseInstalled;
