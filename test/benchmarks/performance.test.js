@@ -236,7 +236,7 @@ describe('performance', function() {
 			},
 			({ ticks, message }) => {
 				console.log(`PERF: repeat diff: ${message}`);
-				expect(ticks).to.be.below(2000 * MULTIPLIER);
+				expect(ticks).to.be.below(3000 * MULTIPLIER);
 				done();
 			}
 		);
@@ -300,7 +300,7 @@ describe('performance', function() {
 			},
 			({ ticks, message }) => {
 				console.log(`PERF: large VTree: ${message}`);
-				expect(ticks).to.be.below(2000 * MULTIPLIER);
+				expect(ticks).to.be.below(200 * MULTIPLIER);
 				done();
 			}
 		);
