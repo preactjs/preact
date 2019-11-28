@@ -174,16 +174,16 @@ export function useImperativeHandle(ref, createHandle, args) {
 }
 
 /**
- * @param {() => any} callback
+ * @param {() => any} factory
  * @param {any[]} args
  */
-export function useMemo(callback, args) {
+export function useMemo(factory, args) {
 	/** @type {import('./internal').MemoHookState} */
 	const state = getHookState(currentIndex++);
 	if (argsChanged(state._args, args)) {
 		state._args = args;
-		state._callback = callback;
-		return (state._value = callback());
+		state._factory = factory;
+		return (state._value = factory());
 	}
 
 	return state._value;

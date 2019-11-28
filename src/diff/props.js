@@ -37,13 +37,13 @@ function setStyle(style, key, value) {
 	//如果第一个字符为-直接调用setProperty设置，例如key为-webkit-border-radius
 	if (key[0] === '-') {
 		style.setProperty(key, value);
-	//value为数字并且key是尺寸类型则值自动加px
+		//value为数字并且key是尺寸类型则值自动加px
 	} else if (
 		typeof value === 'number' &&
 		IS_NON_DIMENSIONAL.test(key) === false
 	) {
 		style[key] = value + 'px';
-	//value为null则设置为空字符串
+		//value为null则设置为空字符串
 	} else if (value == null) {
 		style[key] = '';
 	} else {
@@ -71,7 +71,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	}
 	//如果属性名为key 或者 children
 	if (name === 'key' || name === 'children') {
-	//如果为style
+		//如果为style
 	} else if (name === 'style') {
 		const s = dom.style;
 		//value为字符串直接使用cssText设置
@@ -124,16 +124,17 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	}
 	//属性名不为list tabName form 并且非svg 属性名在dom中    直接用dom设置
 	else if (
-		name!=='list'&&
+		name !== 'list' &&
 		name !== 'tagName' &&
 		// HTMLButtonElement.form and HTMLInputElement.form are read-only but can be set using
 		// setAttribute
 		name !== 'form' &&
+		name !== 'type' &&
 		!isSvg &&
 		name in dom
 	) {
 		dom[name] = value == null ? '' : value;
-	//如果属性值不为函数并且属性名不为dangerouslySetInnerHTML
+		//如果属性值不为函数并且属性名不为dangerouslySetInnerHTML
 	} else if (
 		typeof value !== 'function' &&
 		name !== 'dangerouslySetInnerHTML'
@@ -154,7 +155,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 			}
 		}
 		//值为null或这false则移除属性
-		else if (value==null || value===false) {
+		else if (value == null || value === false) {
 			dom.removeAttribute(name);
 		}
 		//设置属性
