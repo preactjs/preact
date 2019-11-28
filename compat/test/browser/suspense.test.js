@@ -1273,6 +1273,9 @@ describe('suspense', () => {
 	it('should un-suspend when suspender unmounts', () => {
 		const [Suspender, suspend] = createSuspender(() => <div>Suspender</div>);
 
+		const cWUSpy = sinon.spy();
+		Suspender.prototype.componentWillUnmount = cWUSpy;
+
 		let hide;
 
 		class Conditional extends Component {
@@ -1315,6 +1318,7 @@ describe('suspense', () => {
 		hide();
 		rerender();
 
+		expect(cWUSpy).to.have.been.calledOnce;
 		expect(scratch.innerHTML).to.eql(`<div>conditional hide</div>`);
 	});
 });

@@ -25,7 +25,8 @@
       "$_render": "__r",
       "$_hook": "__h",
       "$_catchError": "__e",
-      "$_unmount": "_e"
+      "$_unmount": "_e",
+      "$_suspendedComponentWillUnmount": "__c"
     }
   }
 }
