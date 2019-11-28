@@ -1219,57 +1219,6 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should support updating state while suspended', () => {
-		const [Suspender, suspend] = createSuspender(() => <div>Suspender</div>);
-
-		let increment;
-
-		class Updater extends Component {
-			constructor(props) {
-				super(props);
-				this.state = { i: 0 };
-
-				increment = () => {
-					this.setState(({ i }) => ({ i: i + 1 }));
-				};
-			}
-
-			render(props, { i }) {
-				return (
-					<div>
-						i: {i}
-						<Suspender />
-					</div>
-				);
-			}
-		}
-
-		render(
-			<Suspense fallback={<div>Suspended...</div>}>
-				<Updater />
-			</Suspense>,
-			scratch
-		);
-
-		expect(scratch.innerHTML).to.eql(`<div>i: 0<div>Suspender</div></div>`);
-		expect(Suspender.prototype.render).to.have.been.calledOnce;
-
-		const [resolve] = suspend();
-		rerender();
-
-		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-
-		increment();
-		rerender();
-
-		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-
-		return resolve().then(() => {
-			rerender();
-			expect(scratch.innerHTML).to.equal(`<div>i: 1<div>Suspender</div></div>`);
-		});
-	});
-
 	it('should un-suspend when suspender unmounts', () => {
 		const [Suspender, suspend] = createSuspender(() => <div>Suspender</div>);
 
