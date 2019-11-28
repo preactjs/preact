@@ -103,7 +103,7 @@ module.exports = function(config) {
 
 		files: [
 			{ pattern: 'polyfills.js', watched: false },
-			{ pattern: '{browser,shared}/**.js', watched: false }
+			{ pattern: 'browser/performance.js', watched: false }
 		],
 
 		preprocessors: {
