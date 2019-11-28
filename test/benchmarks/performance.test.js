@@ -128,10 +128,9 @@ describe('performance', function() {
 			</div>
 		);
 
-		let root;
 		benchmark(
 			() => {
-				root = render(jsx, scratch, root);
+				render(jsx, scratch);
 			},
 			({ ticks, message }) => {
 				console.log(`PERF: empty diff: ${message}`);
@@ -228,11 +227,10 @@ describe('performance', function() {
 			}
 		}
 
-		let root;
 		benchmark(
 			() => {
-				root = render(<Parent child={Root} />, scratch, root);
-				root = render(<Parent child={Empty} />, scratch, root);
+				render(<Parent child={Root} />, scratch);
+				render(<Parent child={Empty} />, scratch);
 			},
 			({ ticks, message }) => {
 				console.log(`PERF: repeat diff: ${message}`);
@@ -371,11 +369,10 @@ describe('performance', function() {
 			</div>
 		);
 
-		let root,
-			count = 0;
+		let count = 0;
 		benchmark(
 			() => {
-				root = render(app(++count), scratch, root);
+				render(app(++count), scratch);
 			},
 			({ ticks, message }) => {
 				console.log(`PERF: style/prop mutation: ${message}`);
