@@ -127,6 +127,7 @@ export function diffChildren(
 				}
 
 				// Only proceed if the vnode has not been unmounted by `diff()` above.
+				//如果newDom
 				if (newDom != null) {
 					if (firstChildDom == null) {
 						firstChildDom = newDom;
