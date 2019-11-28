@@ -1,5 +1,4 @@
 import options from './options';
-import { assign } from './util';
 
 /**
  * Create an virtual node (used for JSX)
@@ -11,35 +10,41 @@ import { assign } from './util';
  */
 //创建元素
 export function createElement(type, props, children) {
-	//拷贝props
-	props = assign({}, props);
+	let normalizedProps = {},
+		i;
+	for (i in props) {
+		if (i !== 'key' && i !== 'ref') normalizedProps[i] = props[i];
+	}
 	//对参数处理，如果有多个children是数组，单个不是
 	if (arguments.length > 3) {
 		children = [children];
 		// https://github.com/preactjs/preact/issues/1916
-		for (let i = 3; i < arguments.length; i++) {
+		for (i = 3; i < arguments.length; i++) {
 			children.push(arguments[i]);
 		}
 	}
 	//赋值给props.children
 	if (children != null) {
-		props.children = children;
+		normalizedProps.children = children;
 	}
 
-	// "type" may be undefined during development. The check is needed so that
-	// we can display a nice error message with our debug helpers
+	// If a Component VNode, check for and apply defaultProps
+	// Note: type may be undefined in development, must never error here.
 	//对defaultProps做处理，合并到props上
-	if (type != null && type.defaultProps != null) {
-		for (let i in type.defaultProps) {
-			if (props[i] === undefined) props[i] = type.defaultProps[i];
+	if (typeof type === 'function' && type.defaultProps != null) {
+		for (i in type.defaultProps) {
+			if (normalizedProps[i] === undefined) {
+				normalizedProps[i] = type.defaultProps[i];
+			}
 		}
 	}
-	let ref = props.ref;
-	let key = props.key;
-	if (ref != null) delete props.ref;
-	if (key != null) delete props.key;
 	//调用创建虚拟节点
-	return createVNode(type, props, key, ref);
+	return createVNode(
+		type,
+		normalizedProps,
+		props && props.key,
+		props && props.ref
+	);
 }
 
 /**
