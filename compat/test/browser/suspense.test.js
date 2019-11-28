@@ -1222,9 +1222,6 @@ describe('suspense', () => {
 	it('should un-suspend when suspender unmounts', () => {
 		const [Suspender, suspend] = createSuspender(() => <div>Suspender</div>);
 
-		const cWUSpy = sinon.spy();
-		Suspender.prototype.componentWillUnmount = cWUSpy;
-
 		let hide;
 
 		class Conditional extends Component {
@@ -1263,6 +1260,58 @@ describe('suspense', () => {
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+
+		hide();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>conditional hide</div>`);
+	});
+
+	it('should call componentWillUnmount on a suspended component', () => {
+		const cWUSpy = sinon.spy();
+
+		// eslint-disable-next-line react/require-render-return
+		class Suspender extends Component {
+			render() {
+				throw new Promise(() => {});
+			}
+
+			componentWillUnmount() {
+				cWUSpy();
+			}
+		}
+
+		let hide;
+
+		class Conditional extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { show: true };
+
+				hide = () => {
+					this.setState({ show: false });
+				};
+			}
+
+			render(props, { show }) {
+				return (
+					<div>
+						conditional {show ? 'show' : 'hide'}
+						{show && <Suspender />}
+					</div>
+				);
+			}
+		}
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Conditional />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(`<div>conditional show</div>`);
+		expect(cWUSpy).to.not.have.been.called;
 
 		hide();
 		rerender();
