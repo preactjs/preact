@@ -35,7 +35,7 @@ describe('hydrate()', () => {
 	});
 
 	it('should reuse existing DOM', () => {
-		const html = ul([li('1'), li('2'), li('3')].join(''));
+		const html = ul([li('1'), li('2'), li('3')]);
 
 		scratch.innerHTML = html;
 		clearLog();
@@ -54,7 +54,7 @@ describe('hydrate()', () => {
 	});
 
 	it('should reuse existing DOM when given components', () => {
-		const html = ul([li('1'), li('2'), li('3')].join(''));
+		const html = ul([li('1'), li('2'), li('3')]);
 
 		scratch.innerHTML = html;
 		clearLog();
@@ -73,7 +73,7 @@ describe('hydrate()', () => {
 	});
 
 	it('should add missing nodes to existing DOM when hydrating', () => {
-		const html = ul([li('1')].join(''));
+		const html = ul([li('1')]);
 
 		scratch.innerHTML = html;
 		clearLog();
@@ -87,9 +87,7 @@ describe('hydrate()', () => {
 			scratch
 		);
 
-		expect(scratch.innerHTML).to.equal(
-			ul([li('1'), li('2'), li('3')].join(''))
-		);
+		expect(scratch.innerHTML).to.equal(ul([li('1'), li('2'), li('3')]));
 		expect(getLog()).to.deep.equal([
 			'<li>.appendChild(#text)',
 			'<ul>1.appendChild(<li>2)',
@@ -99,7 +97,7 @@ describe('hydrate()', () => {
 	});
 
 	it('should remove extra nodes from existing DOM when hydrating', () => {
-		const html = ul([li('1'), li('2'), li('3'), li('4')].join(''));
+		const html = ul([li('1'), li('2'), li('3'), li('4')]);
 
 		scratch.innerHTML = html;
 		clearLog();
@@ -113,9 +111,7 @@ describe('hydrate()', () => {
 			scratch
 		);
 
-		expect(scratch.innerHTML).to.equal(
-			ul([li('1'), li('2'), li('3')].join(''))
-		);
+		expect(scratch.innerHTML).to.equal(ul([li('1'), li('2'), li('3')]));
 		expect(getLog()).to.deep.equal(['<li>4.remove()']);
 	});
 
@@ -148,7 +144,7 @@ describe('hydrate()', () => {
 	});
 
 	it('should correctly hydrate with Fragments', () => {
-		const html = ul([li('1'), li('2'), li('3'), li('4')].join(''));
+		const html = ul([li('1'), li('2'), li('3'), li('4')]);
 
 		scratch.innerHTML = html;
 		clearLog();
@@ -171,7 +167,7 @@ describe('hydrate()', () => {
 
 	it('should correctly hydrate root Fragments', () => {
 		const html = [
-			ul([li('1'), li('2'), li('3'), li('4')].join('')),
+			ul([li('1'), li('2'), li('3'), li('4')]),
 			div('sibling')
 		].join('');
 
@@ -205,7 +201,7 @@ describe('hydrate()', () => {
 	it.skip('should override incorrect pre-existing DOM with VNodes passed into render', () => {
 		const initialHtml = [
 			div('sibling'),
-			ul([li('1'), li('4'), li('3'), li('2')].join(''))
+			ul([li('1'), li('4'), li('3'), li('2')])
 		].join('');
 
 		scratch.innerHTML = initialHtml;
@@ -227,7 +223,7 @@ describe('hydrate()', () => {
 		);
 
 		const finalHtml = [
-			ul([li('1'), li('2'), li('3'), li('4')].join('')),
+			ul([li('1'), li('2'), li('3'), li('4')]),
 			div('sibling')
 		].join('');
 

@@ -413,6 +413,9 @@ export namespace JSXInternal {
 		onCompositionUpdate?: CompositionEventHandler<Target>;
 		onCompositionUpdateCapture?: CompositionEventHandler<Target>;
 
+		// Details Events
+		onToggle?: GenericEventHandler<Target>;
+		
 		// Focus Events
 		onFocus?: FocusEventHandler<Target>;
 		onFocusCapture?: FocusEventHandler<Target>;

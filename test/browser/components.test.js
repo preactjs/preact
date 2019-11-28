@@ -2126,7 +2126,7 @@ describe('Components', () => {
 			toggleMaybeNull();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([p('child')].join(''));
+			expect(scratch.innerHTML).to.equal(p('child'));
 			expect(maybe.base).to.equalNode(null, 'toggleMaybe - maybe.base');
 			expect(child.base).to.equalNode(
 				scratch.firstChild,
@@ -2144,7 +2144,7 @@ describe('Components', () => {
 			swapChildTag();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([span('child')].join(''));
+			expect(scratch.innerHTML).to.equal(span('child'));
 			expect(maybe.base).to.equalNode(null, 'swapChildTag - maybe.base');
 			expect(child.base).to.equalNode(
 				scratch.firstChild,
@@ -2171,7 +2171,7 @@ describe('Components', () => {
 				scratch
 			);
 
-			expect(scratch.innerHTML).to.equal([p('child')].join(''));
+			expect(scratch.innerHTML).to.equal(p('child'));
 			expect(maybe.base).to.equalNode(null, 'initial - maybe.base');
 			expect(child.base).to.equalNode(
 				scratch.firstChild,
@@ -2183,7 +2183,7 @@ describe('Components', () => {
 			swapChildTag();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([span('child')].join(''));
+			expect(scratch.innerHTML).to.equal(span('child'));
 			expect(maybe.base).to.equalNode(null, 'swapChildTag - maybe.base');
 			expect(child.base).to.equalNode(
 				scratch.firstChild,
@@ -2250,7 +2250,7 @@ describe('Components', () => {
 			toggleMaybeNull();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([p('child')].join(''));
+			expect(scratch.innerHTML).to.equal(p('child'));
 			expect(maybe.base).to.equalNode(null, 'toggleMaybe - maybe.base');
 			expect(child.base).to.equalNode(
 				scratch.firstChild,
@@ -2268,7 +2268,7 @@ describe('Components', () => {
 			swapChildTag();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([span('child')].join(''));
+			expect(scratch.innerHTML).to.equal(span('child'));
 			expect(maybe.base).to.equalNode(null, 'swapChildTag - maybe.base');
 			expect(child.base).to.equalNode(
 				scratch.firstChild,
@@ -2297,7 +2297,7 @@ describe('Components', () => {
 				scratch
 			);
 
-			expect(scratch.innerHTML).to.equal([p('child')].join(''));
+			expect(scratch.innerHTML).to.equal(p('child'));
 			expect(maybe.base).to.equalNode(null, 'initial - maybe.base');
 			expect(child.base).to.equalNode(
 				scratch.firstChild,
@@ -2309,7 +2309,7 @@ describe('Components', () => {
 			swapChildTag();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([span('child')].join(''));
+			expect(scratch.innerHTML).to.equal(span('child'));
 			expect(maybe.base).to.equalNode(null, 'swapChildTag - maybe.base');
 			expect(child.base).to.equalNode(
 				scratch.firstChild,
@@ -2384,7 +2384,7 @@ describe('Components', () => {
 			toggleMaybeNull();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([p('child')].join(''));
+			expect(scratch.innerHTML).to.equal(p('child'));
 			expect(maybe.base).to.equalNode(null, 'toggleMaybe - maybe.base');
 			expect(child.base).to.equalNode(
 				scratch.firstChild,
@@ -2421,7 +2421,7 @@ describe('Components', () => {
 				scratch
 			);
 
-			expect(scratch.innerHTML).to.equal([p('child')].join(''));
+			expect(scratch.innerHTML).to.equal(p('child'));
 			expect(maybe.base).to.equalNode(null, 'initial - maybe.base');
 			expect(child.base).to.equalNode(
 				scratch.firstChild,

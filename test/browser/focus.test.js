@@ -61,13 +61,11 @@ describe('focus', () => {
 	 * @param {Array<number | string>} after
 	 */
 	function getListHtml(before, after) {
-		return div(
-			[
-				...before.map(i => span(i)),
-				inputStr(),
-				...after.map(i => span(i))
-			].join('')
-		);
+		return div([
+			...before.map(i => span(i)),
+			inputStr(),
+			...after.map(i => span(i))
+		]);
 	}
 
 	beforeEach(() => {
@@ -392,7 +390,7 @@ describe('focus', () => {
 	});
 
 	it('should maintain focus when hydrating', () => {
-		const html = div([span('1'), span('2'), span('3'), inputStr()].join(''));
+		const html = div([span('1'), span('2'), span('3'), inputStr()]);
 
 		scratch.innerHTML = html;
 		const input = focusInput();
@@ -462,9 +460,7 @@ describe('focus', () => {
 		rerender();
 
 		expect(scratch.innerHTML).to.equal(
-			div(
-				[h1('Heading'), 'Hello World', h2('yo'), 'foobar', inputStr()].join('')
-			)
+			div([h1('Heading'), 'Hello World', h2('yo'), 'foobar', inputStr()])
 		);
 		expect(document.activeElement).to.equalNode(input, 'After rerender');
 	});
@@ -521,9 +517,7 @@ describe('focus', () => {
 		rerender();
 
 		expect(scratch.innerHTML).to.equal(
-			div(
-				[h1('Heading'), 'Hello World', h2('yo'), 'foobar', inputStr()].join('')
-			)
+			div([h1('Heading'), 'Hello World', h2('yo'), 'foobar', inputStr()])
 		);
 		expect(input.selectionStart).to.equal(2);
 		expect(input.selectionEnd).to.equal(5);
