@@ -1275,13 +1275,19 @@ describe('suspense', () => {
 			render() {
 				throw new Promise(() => {});
 			}
-
-			componentWillUnmount() {
-				cWUSpy();
-			}
 		}
 
+		Suspender.prototype.componentWillUnmount = cWUSpy;
+
 		let hide;
+
+		let suspender = null;
+		let suspenderRef = s => {
+			// skip null values as we want to keep the ref even after unmount
+			if (s) {
+				suspender = s;
+			}
+		};
 
 		class Conditional extends Component {
 			constructor(props) {
@@ -1297,7 +1303,7 @@ describe('suspense', () => {
 				return (
 					<div>
 						conditional {show ? 'show' : 'hide'}
-						{show && <Suspender />}
+						{show && <Suspender ref={suspenderRef} />}
 					</div>
 				);
 			}
@@ -1317,6 +1323,9 @@ describe('suspense', () => {
 		rerender();
 
 		expect(cWUSpy).to.have.been.calledOnce;
+		expect(suspender).not.to.be.undefined;
+		expect(suspender).not.to.be.null;
+		expect(cWUSpy.getCall(0).thisValue).to.eql(suspender);
 		expect(scratch.innerHTML).to.eql(`<div>conditional hide</div>`);
 	});
 });
