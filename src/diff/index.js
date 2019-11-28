@@ -2,7 +2,7 @@ import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren, toChildArray } from './children';
-import { diffProps } from './props';
+import { diffProps, commitPropUpdates } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
 
@@ -316,7 +316,6 @@ function diffElementNodes(
 
 		oldProps = oldVNode.props || EMPTY_OBJ;
 
-		let oldHtml = oldProps.dangerouslySetInnerHTML;
 		let newHtml = newProps.dangerouslySetInnerHTML;
 
 		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
@@ -328,16 +327,10 @@ function diffElementNodes(
 					oldProps[dom.attributes[i].name] = dom.attributes[i].value;
 				}
 			}
-
-			if (newHtml || oldHtml) {
-				// Avoid re-applying the same '__html' if it did not changed between re-render
-				if (!newHtml || !oldHtml || newHtml.__html != oldHtml.__html) {
-					dom.innerHTML = (newHtml && newHtml.__html) || '';
-				}
-			}
 		}
 
-		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
+		diffProps(newVNode, newProps, oldProps, isSvg, isHydrating);
+		commitPropUpdates(dom, newVNode._updates, isSvg);
 
 		newVNode._children = newVNode.props.children;
 

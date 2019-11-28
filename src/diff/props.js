@@ -1,6 +1,29 @@
 import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
 
+const diffProp = (vnode, name, newValue, oldValue) => {
+	if (name === 'key' || name === 'children') {
+	} else if (name[0] === 'o' && name[1] === 'n') {
+		vnode._updates.push({ name, value: newValue, oldValue });
+	} else if (name === 'dangerouslySetInnerHTML') {
+		if (newValue || oldValue) {
+			if (!newValue || !oldValue || newValue.__html != oldValue.__html) {
+				vnode._updates.push({
+					name,
+					value: (newValue && newValue.__html) || '',
+					oldValue: null
+				});
+			}
+		}
+	} else if (typeof value !== 'function') {
+		vnode._updates.push({
+			name,
+			value: name !== 'style' && newValue == null ? undefined : newValue,
+			oldValue
+		});
+	}
+};
+
 /**
  * Diff the old and new properties of a VNode and apply changes to the DOM node
  * @param {import('../internal').PreactElement} dom The DOM node to apply
@@ -10,12 +33,12 @@ import options from '../options';
  * @param {boolean} isSvg Whether or not this node is an SVG node
  * @param {boolean} hydrate Whether or not we are in hydration mode
  */
-export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
+export function diffProps(vnode, newProps, oldProps, isSvg, hydrate) {
 	let i;
 
 	for (i in oldProps) {
 		if (!(i in newProps)) {
-			setProperty(dom, i, null, oldProps[i], isSvg);
+			diffProp(vnode, i, null, oldProps[i]);
 		}
 	}
 
@@ -26,7 +49,7 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 			i !== 'checked' &&
 			oldProps[i] !== newProps[i]
 		) {
-			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
+			diffProp(vnode, i, newProps[i], oldProps[i]);
 		}
 	}
 }
@@ -46,80 +69,70 @@ function setStyle(style, key, value) {
 	}
 }
 
-/**
- * Set a property value on a DOM node
- * @param {import('../internal').PreactElement} dom The DOM node to modify
- * @param {string} name The name of the property to set
- * @param {*} value The value to set the property to
- * @param {*} oldValue The old value the property had
- * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
- */
-function setProperty(dom, name, value, oldValue, isSvg) {
-	if (isSvg) {
-		if (name === 'className') {
-			name = 'class';
-		}
-	} else if (name === 'class') {
-		name = 'className';
-	}
+export function commitPropUpdates(dom, updates, isSvg) {
+	for (const update of updates) {
+		const value = update.value;
+		let name = update.name;
+		let oldValue = update.oldValue;
 
-	if (name === 'key' || name === 'children') {
-	} else if (name === 'style') {
-		const s = dom.style;
-
-		if (typeof value === 'string') {
-			s.cssText = value;
-		} else {
-			if (typeof oldValue === 'string') {
-				s.cssText = '';
-				oldValue = null;
+		if (isSvg) {
+			if (name === 'className') {
+				name = 'class';
 			}
+		} else if (name === 'class') {
+			name = 'className';
+		}
 
-			if (oldValue) {
-				for (let i in oldValue) {
-					if (!(value && i in value)) {
-						setStyle(s, i, '');
+		if (name == 'style') {
+			const s = dom.style;
+
+			if (typeof value === 'string') {
+				s.cssText = value;
+			} else {
+				if (typeof oldValue === 'string') {
+					s.cssText = '';
+					oldValue = null;
+				}
+
+				if (oldValue) {
+					for (let i in oldValue) {
+						if (!(value && i in value)) {
+							setStyle(s, i, '');
+						}
+					}
+				}
+
+				if (value) {
+					for (let i in value) {
+						if (!oldValue || value[i] !== oldValue[i]) {
+							setStyle(s, i, value[i]);
+						}
 					}
 				}
 			}
-
+		} else if (name[0] === 'o' && name[1] === 'n') {
+			let useCapture = name !== (name = name.replace(/Capture$/, ''));
+			let nameLower = name.toLowerCase();
+			name = (nameLower in dom ? nameLower : name).slice(2);
 			if (value) {
-				for (let i in value) {
-					if (!oldValue || value[i] !== oldValue[i]) {
-						setStyle(s, i, value[i]);
-					}
+				if (!oldValue) {
+					dom.addEventListener(name, eventProxy, useCapture);
 				}
+				(dom._listeners || (dom._listeners = {}))[name] = value;
+			} else {
+				dom.removeEventListener(name, eventProxy, useCapture);
 			}
-		}
-	}
-	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
-	else if (name[0] === 'o' && name[1] === 'n') {
-		let useCapture = name !== (name = name.replace(/Capture$/, ''));
-		let nameLower = name.toLowerCase();
-		name = (nameLower in dom ? nameLower : name).slice(2);
-
-		if (value) {
-			if (!oldValue) dom.addEventListener(name, eventProxy, useCapture);
-			(dom._listeners || (dom._listeners = {}))[name] = value;
-		} else {
-			dom.removeEventListener(name, eventProxy, useCapture);
-		}
-	} else if (
-		name !== 'list' &&
-		name !== 'tagName' &&
-		// HTMLButtonElement.form and HTMLInputElement.form are read-only but can be set using
-		// setAttribute
-		name !== 'form' &&
-		name !== 'type' &&
-		!isSvg &&
-		name in dom
-	) {
-		dom[name] = value == null ? '' : value;
-	} else if (
-		typeof value !== 'function' &&
-		name !== 'dangerouslySetInnerHTML'
-	) {
-		if (name !== (name = name.replace(/^xlink:?/, ''))) {
+		} else if (
+			name !== 'list' &&
+			name !== 'tagName' &&
+			name !== 'form' &&
+			!isSvg &&
+			name in dom
+		) {
+			dom[name] = value == null ? '' : value;
+		} else if (name === 'dangerouslySetInnerHTML') {
+			dom.innerHTML = value;
+		} else if (name !== (name = name.replace(/^xlink:?/, ''))) {
 			if (value == null || value === false) {
 				dom.removeAttributeNS(
 					'http://www.w3.org/1999/xlink',
@@ -134,7 +147,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 			}
 		} else if (value == null || value === false) {
 			dom.removeAttribute(name);
-		} else {
+		} else if (typeof value !== 'function') {
 			dom.setAttribute(name, value);
 		}
 	}
