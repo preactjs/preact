@@ -5,7 +5,7 @@
 import { setupScratch, teardown } from '../_util/helpers';
 import bench from '../_util/bench';
 import preact8 from '../fixtures/preact';
-import * as ceviche from '../../dist/preact.module';
+import * as preactX from '../../dist/preact.module';
 const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
 
 describe('benchmarks', function() {
@@ -71,12 +71,12 @@ describe('benchmarks', function() {
 		}
 
 		const preact8Test = createTest(preact8);
-		const cevicheTest = createTest(ceviche);
+		const preactXTest = createTest(preactX);
 		const vanillaTest = createVanillaTest();
 
 		for (let i = 100; i--; ) {
 			preact8Test(i);
-			cevicheTest(i);
+			preactXTest(i);
 			vanillaTest(i);
 		}
 
@@ -84,12 +84,12 @@ describe('benchmarks', function() {
 			{
 				vanilla: vanillaTest,
 				preact8: preact8Test,
-				ceviche: cevicheTest
+				preactX: preactXTest
 			},
 			({ text, results }) => {
 				const THRESHOLD = 10 * MULTIPLIER;
-				// const slowdown = Math.sqrt(results.ceviche.hz * results.vanilla.hz);
-				const slowdown = results.vanilla.hz / results.ceviche.hz;
+				// const slowdown = Math.sqrt(results.preactX.hz * results.vanilla.hz);
+				const slowdown = results.vanilla.hz / results.preactX.hz;
 				console.log(
 					`in-place text update is ${slowdown.toFixed(2)}x slower:` + text
 				);
