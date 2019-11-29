@@ -80,6 +80,16 @@ export function getOptionsCommit(options) {
 }
 
 /**
+ * Return private `options._root` hook that's called when a tree
+ * is rendered from the top via `render(vnode, dom)`.
+ * @param {import('../../src/internal').Options} options
+ * @returns {import('../../src/internal').Options["_root"]}
+ */
+export function getOptionsRoot(options) {
+	return options._root;
+}
+
+/**
  * Set private `options._diff` hook that's called before `diff()`.
  * @param {import('../../src/internal').Options} options
  * @param {import('../../src/internal').Options["_diff"]} fn
@@ -96,4 +106,14 @@ export function setOptionsDiff(options, fn) {
  */
 export function setOptionsCommit(options, fn) {
 	options._commit = fn;
+}
+
+/**
+ * Return private `options._root` hook that's called at the end of
+ * each commit.
+ * @param {import('../../src/internal').Options} options
+ * @param {import('../../src/internal').Options["_root"]} fn
+ */
+export function setOptionsRoot(options, fn) {
+	options._root = fn;
 }
