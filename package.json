@@ -22,6 +22,7 @@
     "build:hooks": "microbundle build --raw --cwd hooks",
     "build:test-utils": "microbundle build --raw --cwd test-utils",
     "build:compat": "microbundle build --raw --cwd compat --globals 'preact/hooks=preactHooks'",
+    "build:shared-internals": "microbundle build --raw --cwd shared-internals",
     "dev": "microbundle watch --raw --format cjs",
     "dev:hooks": "microbundle watch --raw --format cjs --cwd hooks",
     "dev:compat": "microbundle watch --raw --format cjs --cwd compat --globals 'preact/hooks=preactHooks'",
@@ -118,7 +119,10 @@
     "hooks/package.json",
     "test-utils/src",
     "test-utils/package.json",
-    "test-utils/dist"
+    "test-utils/dist",
+    "shared-internals/src",
+    "shared-internals/package.json",
+    "shared-internals/dist"
   ],
   "keywords": [
     "preact",
