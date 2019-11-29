@@ -70,7 +70,7 @@ export function getOptionsDiff(options) {
 }
 
 /**
- * Return private `options._diff` hook that's called at the end of
+ * Return private `options._commit` hook that's called at the end of
  * each commit.
  * @param {import('../../src/internal').Options} options
  * @returns {import('../../src/internal').Options["_commit"]}
@@ -89,7 +89,7 @@ export function setOptionsDiff(options, fn) {
 }
 
 /**
- * Return private `options._diff` hook that's called at the end of
+ * Return private `options._commit` hook that's called at the end of
  * each commit.
  * @param {import('../../src/internal').Options} options
  * @param {import('../../src/internal').Options["_commit"]} fn
