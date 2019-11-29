@@ -31,16 +31,6 @@ export function getDom(vnode) {
 }
 
 /**
- * Get the last dom child of a `vnode`. This will only be set for
- * Fragment-like components.
- * @param {import('../../src/internal').VNode} vnode
- * @returns {import('../../src/internal').PreactElement | Text | null}
- */
-export function getLastDomChild(vnode) {
-	return vnode._lastDomChild;
-}
-
-/**
  * Return the child `VNodes` associated with a rendered `VNode`.
  * @param {import('../../src/internal').VNode} vnode
  * @returns {Array<import('../../src/internal').VNode | null | undefined>}
