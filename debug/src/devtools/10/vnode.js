@@ -16,8 +16,7 @@ export function isRoot(vnode) {
  */
 export function isSuspenseVNode(vnode) {
 	const c = vnode._component;
-	// FIXME: Mangling of `_childDidSuspend` is not stable in Preact
-	return c != null && c._childDidSuspend != null;
+	return c != null && c._suspensions != null;
 }
 
 /**
