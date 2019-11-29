@@ -1,19 +1,26 @@
-import { Component, createContext, render, h } from '../src';
-var i = 0;
-class Root extends Component {
+import { Component, Fragment, createContext, render, h } from '../src';
+const Preview = () => null; // or false
+
+class App extends Component {
 	state = {
-		arr: [1, 2]
+		output: null
 	};
 
-	render() {
-		return this.state.arr.map(item => {
-			return item;
+	run() {
+		this.setState({
+			output: ['A', 'B', 'C']
 		});
 	}
+
+	render() {
+		return (
+			<div>
+				<button onClick={() => this.run()}>Run</button>
+				<Fragment>
+					{this.state.output && this.state.output.map(v => v)}
+				</Fragment>
+			</div>
+		);
+	}
 }
-const Foo = () => <div>foo</div>;
-render(
-	<Foo />,
-	document.getElementById('container'),
-	document.getElementById('target')
-);
+render(<App />, document.getElementById('app'));

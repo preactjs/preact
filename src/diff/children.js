@@ -135,7 +135,6 @@ export function diffChildren(
 					if (oldVNode.ref) refs.push(oldVNode.ref, null, childVNode);
 					refs.push(j, childVNode._component || newDom, childVNode);
 				}
-				console.log(newParentVNode, childVNode);
 				// Only proceed if the vnode has not been unmounted by `diff()` above.
 				//如果newDom
 				if (newDom != null) {
@@ -200,7 +199,7 @@ export function diffChildren(
 					}
 					//oldDom这时为newDom元素之后紧跟的节点
 					oldDom = newDom.nextSibling;
-
+					//如果是组件类型的节点
 					if (typeof newParentVNode.type == 'function') {
 						// At this point, if childVNode._lastDomChild existed, then
 						// newDom = childVNode._lastDomChild per line 101. Else it is
