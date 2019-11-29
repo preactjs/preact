@@ -22,16 +22,16 @@ import options from '../options';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} [isHydrating] Whether or not we are in hydration
  */
-//parentDom渲染的父dom
+//parentDom渲染的父真实dom
 //newVNode新的虚拟节点
 //oldVNOde老的虚拟节点
-//context如果是createContext().Provide组件,获得context并向下传递
+//context如果是createContext().Provide组件,获得context并向下传递的东西(ctx)
 //isSvg是否是svg,svg在创建dom元素和设置dom属性时特殊处理
 //excessDomChildren
 //commitQueue引用数组,所有执行完后会执行数组中组件的_renderCallbacks的回调
 //oldDom
 //isHydrating是否hydration模式渲染,该模式对props只处理事件
-//对比虚拟节点,主要处理函数组件
+//对比虚拟节点,主要处理函数节点
 export function diff(
 	parentDom,
 	newVNode,
@@ -62,7 +62,7 @@ export function diff(
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
 			tmp = newType.contextType;
-			//找到上层provider
+			//找到祖先的provider
 			let provider = tmp && context[tmp._id];
 			//有tmp时，提供provider时为provider的value，不然为createContext的defaultValue
 			//没有是为上层的context
@@ -75,7 +75,7 @@ export function diff(
 			//如果已经存在实例化的组件
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
-				//设置清除异常变量,如果渲染完后没有异常出现,清除该组件的异常标记
+				//设置清除异常变量,如果渲染完后没有异常出现,会清除该组件的异常标记
 				clearProcessingException = c._processingException = c._pendingError;
 			} else {
 				// Instantiate the new component
@@ -83,7 +83,7 @@ export function diff(
 					//类组件的话  去实例化
 					newVNode._component = c = new newType(newProps, cctx); // eslint-disable-line new-cap
 				} else {
-					//函数组件的话实例化 Component
+					//函数组件的话会实例化Component
 					newVNode._component = c = new Component(newProps, cctx);
 					c.constructor = newType;
 					//设置render
@@ -161,7 +161,7 @@ export function diff(
 					//dom还是老虚拟节点的dom
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
-					//执行渲染回调
+					//添加回调
 					if (c._renderCallbacks.length) {
 						commitQueue.push(c);
 					}
@@ -208,7 +208,7 @@ export function diff(
 			if (c.getChildContext != null) {
 				context = assign(assign({}, context), c.getChildContext());
 			}
-			//执行getSnapshotBeforeUpdate生命周期，他是静态函数
+			//执行getSnapshotBeforeUpdate生命周期
 			if (!isNew && c.getSnapshotBeforeUpdate != null) {
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
@@ -258,18 +258,19 @@ export function diff(
 
 	return newVNode._dom;
 }
-//执行did生命周期和setState的回调
+
 /**
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').VNode} root
  */
+//执行did生命周期和setState的回调
 export function commitRoot(commitQueue, root) {
 	if (options._commit) options._commit(root, commitQueue);
 
 	commitQueue.some(c => {
 		try {
-			//拷贝一份回调，防止执行时在加入回调形成死循环
+			//将_renderCallbacks设为空，防止执行时在加入回调形成死循环
 			commitQueue = c._renderCallbacks;
 			c._renderCallbacks = [];
 			//循环执行
@@ -296,7 +297,7 @@ export function commitRoot(commitQueue, root) {
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @returns {import('../internal').PreactElement}
  */
-//对比div span等基本组件节点
+//对比html标签节点
 function diffElementNodes(
 	dom,
 	newVNode,
@@ -476,8 +477,8 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	}
 
 	let dom;
-	//如果虚拟节点不是函数并且skipRemove为false 则赋值到dom方便后面移除节点
-	//skipRemove的作用是在后面循环子节点unmount时不会执行removeNode
+	//如果虚拟节点类型不是函数并且skipRemove为false 则赋值到dom方便后面移除节点
+	//skipRemove的作用是在后面递归循环子节点unmount时不会执行removeNode
 	if (!skipRemove && typeof vnode.type !== 'function') {
 		skipRemove = (dom = vnode._dom) != null;
 	}

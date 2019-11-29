@@ -11,10 +11,9 @@ class Root extends Component {
 		});
 	}
 }
-
+const Foo = () => <div>foo</div>;
 render(
-	<div id={'1'}>
-		<Root />
-	</div>,
-	document.getElementById('app')
+	<Foo />,
+	document.getElementById('container'),
+	document.getElementById('target')
 );
