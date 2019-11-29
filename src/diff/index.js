@@ -127,7 +127,10 @@ export function diff(
 					c.props = oldVNode.props = newProps;
 					c.state = c._nextState;
 					c._dirty = false;
-					c._vnode = oldVNode;
+					oldVNode._parent = newVNode._parent;
+					oldVNode._parent._children[
+						oldVNode._parent._children.indexOf(newVNode)
+					] = oldVNode;
 					if (c._renderCallbacks.length) {
 						commitQueue.push(c);
 					}
