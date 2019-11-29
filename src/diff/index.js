@@ -124,19 +124,12 @@ export function diff(
 					c.shouldComponentUpdate != null &&
 					c.shouldComponentUpdate(newProps, c._nextState, cctx) === false
 				) {
-					c.props = newProps;
+					c.props = oldVNode.props = newProps;
 					c.state = c._nextState;
 					c._dirty = false;
-					c._vnode = newVNode;
-					newVNode._dom = oldVNode._dom;
-					newVNode._children = oldVNode._children;
+					c._vnode = oldVNode;
 					if (c._renderCallbacks.length) {
 						commitQueue.push(c);
-					}
-					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
-						if (newVNode._children[tmp]) {
-							newVNode._children[tmp]._parent = newVNode;
-						}
 					}
 					break outer;
 				}
