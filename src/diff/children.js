@@ -23,6 +23,15 @@ import { getDomSibling } from '../component';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
  */
+//parentDom 父dom
+//newParentVNode新的父虚拟节点
+//oldParentVNode老的父虚拟节点
+//context如果是createContext().Provide组件,获得context并向下传递
+//isSvg是否是svg
+//excessDomChildren
+//commitQueue引用数组,所有执行完后会执行数组中组件的_renderCallbacks的回调
+//oldDom
+//isHydrating是否hydration模式渲染
 //对比子节点
 export function diffChildren(
 	parentDom,
@@ -100,6 +109,7 @@ export function diffChildren(
 							oldChildren[j] = undefined;
 							break;
 						}
+						//都没匹配 老节点为null
 						oldVNode = null;
 					}
 				}
@@ -125,10 +135,11 @@ export function diffChildren(
 					if (oldVNode.ref) refs.push(oldVNode.ref, null, childVNode);
 					refs.push(j, childVNode._component || newDom, childVNode);
 				}
-
+				console.log(newParentVNode, childVNode);
 				// Only proceed if the vnode has not been unmounted by `diff()` above.
 				//如果newDom
 				if (newDom != null) {
+					//处理firstChildDom
 					if (firstChildDom == null) {
 						firstChildDom = newDom;
 					}
@@ -156,6 +167,9 @@ export function diffChildren(
 							parentDom.appendChild(newDom);
 						} else {
 							// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
+							//这儿的条件是...j < oldChildrenLength / 2;j++
+							//如果紧跟节点和新节点相同,则直接跳出
+							//todo 为什么只判断了对比了一半元素呢,猜测是因为如果一般都不相同后面基本不会相同
 							for (
 								sibDom = oldDom, j = 0;
 								(sibDom = sibDom.nextSibling) && j < oldChildrenLength;
@@ -179,11 +193,12 @@ export function diffChildren(
 						//
 						// To fix it we make sure to reset the inferred value, so that our own
 						// value check in `diff()` won't be skipped.
+						//如果option不设置value他将会从元素的文本内容中获取,这儿主要修复这个
 						if (newParentVNode.type == 'option') {
 							parentDom.value = '';
 						}
 					}
-
+					//oldDom这时为newDom元素之后紧跟的节点
 					oldDom = newDom.nextSibling;
 
 					if (typeof newParentVNode.type == 'function') {
@@ -200,10 +215,11 @@ export function diffChildren(
 			return childVNode;
 		}
 	);
-
+	//设置_dom 函数类型的节点 _dom为第一个子节点的dom,其它的为本身创建的dom节点
 	newParentVNode._dom = firstChildDom;
 
 	// Remove children that are not part of any vnode.
+	//移除不使用的的子dom元素
 	if (excessDomChildren != null && typeof newParentVNode.type !== 'function') {
 		for (i = excessDomChildren.length; i--; ) {
 			if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);

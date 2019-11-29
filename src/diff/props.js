@@ -37,13 +37,13 @@ function setStyle(style, key, value) {
 	//如果第一个字符为-直接调用setProperty设置，例如key为-webkit-border-radius
 	if (key[0] === '-') {
 		style.setProperty(key, value);
-		//value为数字并且key是尺寸类型则值自动加px
+		//如果value为数字并且key是尺寸类型则值自动加px
 	} else if (
 		typeof value === 'number' &&
 		IS_NON_DIMENSIONAL.test(key) === false
 	) {
 		style[key] = value + 'px';
-		//value为null则设置为空字符串
+		//如果value为null则设置为空字符串
 	} else if (value == null) {
 		style[key] = '';
 	} else {
@@ -59,7 +59,7 @@ function setStyle(style, key, value) {
  * @param {*} oldValue The old value the property had
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
-//dom设置属性
+//设置dom属性
 function setProperty(dom, name, value, oldValue, isSvg) {
 	//修复svg时 属性名为className转为class 非svg时属性名为class转className
 	if (isSvg) {
@@ -71,7 +71,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	}
 	//如果属性名为key 或者 children
 	if (name === 'key' || name === 'children') {
-		//如果为style
+		//如果为属性名style
 	} else if (name === 'style') {
 		const s = dom.style;
 		//value为字符串直接使用cssText设置
@@ -103,13 +103,13 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		}
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
-	//如果属性名前面为on  则为事件
+	//如果属性名前面为on,则为事件
 	else if (name[0] === 'o' && name[1] === 'n') {
-		//是否捕获模式
+		//事件是否捕获模式
 		let useCapture = name !== (name = name.replace(/Capture$/, ''));
 		//转小写
 		let nameLower = name.toLowerCase();
-		//小写在dom中用小写不然用name   然后去掉on字符串
+		//如果小写的属性名在dom中用小写不然用name   然后去掉on字符串
 		name = (nameLower in dom ? nameLower : name).slice(2);
 
 		if (value) {

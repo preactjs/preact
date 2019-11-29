@@ -25,9 +25,9 @@ export function Component(props, context) {
 	this._dirty
 	//保存setState和did生命周期的回调
 	this._renderCallbacks
-	//保存context也就是createContext的context,与this.context的区别是this.context有可能是Provider的value
+	//保存context,也就是createContext的context,与this.context的区别是this.context有可能是Provider的value
 	this._context
-	//setState后新的状态会保存在这个,渲染是会设置给state
+	//setState后新的状态会保存在这儿,渲染是会设置给state
 	this._nextState
 	//对应的虚拟节点
 	this._vnode
@@ -52,6 +52,7 @@ Component.prototype.setState = function(update, callback) {
 	if (this._nextState !== this.state) {
 		s = this._nextState;
 	} else {
+		//新拷贝一份
 		s = this._nextState = assign({}, this.state);
 	}
 	//如果update为函数则执行这个函数
@@ -70,7 +71,7 @@ Component.prototype.setState = function(update, callback) {
 	if (this._vnode) {
 		//标记不是强制更新
 		this._force = false;
-		//有回调吧回调加入回调数组里
+		//有回调把回调加入回调数组里
 		if (callback) this._renderCallbacks.push(callback);
 		//加入渲染队列并渲染
 		enqueueRender(this);
@@ -82,7 +83,7 @@ Component.prototype.setState = function(update, callback) {
  * @param {() => void} [callback] A function to be called after component is
  * re-rendered
  */
-//强制更新
+//强制渲染
 Component.prototype.forceUpdate = function(callback) {
 	if (this._vnode) {
 		// Set render mode so that we can differentiate where the render request
@@ -114,11 +115,11 @@ Component.prototype.render = Fragment;
  * @param {import('./internal').VNode} vnode
  * @param {number | null} [childIndex]
  */
-//获得虚拟节点对应index的子节点的dom
+//获得虚拟节点对应index的子节点的真实dom
 export function getDomSibling(vnode, childIndex) {
 	if (childIndex == null) {
 		// Use childIndex==null as a signal to resume the search from the vnode's sibling
-		//使用虚拟节点的父节点去查找
+		//使用虚拟节点的父节点继续查找
 		return vnode._parent
 			? getDomSibling(vnode._parent, vnode._parent._children.indexOf(vnode) + 1)
 			: null;
@@ -150,6 +151,7 @@ export function getDomSibling(vnode, childIndex) {
  * Trigger in-place re-rendering of a component.
  * @param {import('./internal').Component} component The component to rerender
  */
+//渲染组件
 function renderComponent(component) {
 	let vnode = component._vnode,
 		oldDom = vnode._dom,
@@ -180,7 +182,7 @@ function renderComponent(component) {
 /**
  * @param {import('./internal').VNode} vnode
  */
-//递归更新虚拟节点是函数或类组件的父节点的_dom与_component.base
+//更新虚拟节点是函数或类组件的祖先节点的_dom与_component.base
 function updateParentDomPointers(vnode) {
 	//取_parent如果不为空并且_component不为空
 	if ((vnode = vnode._parent) != null && vnode._component != null) {
@@ -212,7 +214,7 @@ let q = [];
  */
 /* istanbul ignore next */
 // Note the following line isn't tree-shaken by rollup cuz of rollup/rollup#2566
-//延迟   如 defer(callback)，callback会用Promise then或者 setTimeout执行
+//延迟   如defer(callback)，如果支持Promise则会用Promise then执行,否则用setTimeout执行
 //Promise.prototype.then.bind(Promise.resolve()) 等同于 Promise.resolve().then
 const defer =
 	typeof Promise == 'function'
@@ -238,7 +240,7 @@ let prevDebounce;
 export function enqueueRender(c) {
 	//如果_dirty为false则设为true
 	//然后把组件加入队列中
-	//如果队列长度为1或者重新设置过debounceRendering钩子
+	//如果队列长度为1或者重新设置过debounceRendering钩子则延迟渲染
 	if (
 		(!c._dirty && (c._dirty = true) && q.push(c) === 1) ||
 		prevDebounce !== options.debounceRendering
@@ -253,7 +255,7 @@ export function enqueueRender(c) {
 //遍历队列渲染组件
 function process() {
 	let p;
-	//按深度排序 最外层的最先执行
+	//按深度排序 最顶级的组件的最先执行
 	q.sort((a, b) => b._vnode._depth - a._vnode._depth);
 	while ((p = q.pop())) {
 		// forceUpdate's callback argument is reused here to indicate a non-forced update.

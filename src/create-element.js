@@ -12,6 +12,7 @@ import options from './options';
 export function createElement(type, props, children) {
 	let normalizedProps = {},
 		i;
+	//选择性拷贝props
 	for (i in props) {
 		if (i !== 'key' && i !== 'ref') normalizedProps[i] = props[i];
 	}

@@ -25,13 +25,13 @@ import options from '../options';
 //parentDom渲染的父dom
 //newVNode新的虚拟节点
 //oldVNOde老的虚拟节点
-//context如果是createContext().Provide组件,或获得context并向下传递
+//context如果是createContext().Provide组件,获得context并向下传递
 //isSvg是否是svg,svg在创建dom元素和设置dom属性时特殊处理
 //excessDomChildren
 //commitQueue引用数组,所有执行完后会执行数组中组件的_renderCallbacks的回调
 //oldDom
 //isHydrating是否hydration模式渲染,该模式对props只处理事件
-//对比虚拟节点
+//对比虚拟节点,主要处理函数组件
 export function diff(
 	parentDom,
 	newVNode,
@@ -296,6 +296,7 @@ export function commitRoot(commitQueue, root) {
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @returns {import('../internal').PreactElement}
  */
+//对比div span等基本组件节点
 function diffElementNodes(
 	dom,
 	newVNode,
@@ -412,8 +413,9 @@ function diffElementNodes(
 		// (as above, don't diff props during hydration)
 		//如果是非hydration模式
 		if (!isHydrating) {
-			//处理value Todo 感觉不需要'value' in newProps直接newProps.value !== undefined...就行
 			//如果value在newProps中并且value与dom的value不相同则设置value
+			//为什么不在diffProps中处理呢?因为option这种不设置value会从元素的文本内容中获取
+			//所以要等子元素处理完了在处理这个
 			if (
 				'value' in newProps &&
 				newProps.value !== undefined &&
@@ -422,6 +424,7 @@ function diffElementNodes(
 				dom.value = newProps.value == null ? '' : newProps.value;
 			}
 			//处理checked
+			//在这儿是保证了顺序,先处理value,在处理checked
 			if (
 				'checked' in newProps &&
 				newProps.checked !== undefined &&

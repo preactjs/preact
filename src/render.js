@@ -13,6 +13,9 @@ const IS_HYDRATE = EMPTY_OBJ;
  * @param {Element | Text} [replaceNode] Attempt to re-use an
  * existing DOM tree rooted at `replaceNode`
  */
+//渲染虚拟节点到真实节点
+//vnode 虚拟节点
+//parentDom 真实节点
 export function render(vnode, parentDom, replaceNode) {
 	//root钩子
 	if (options._root) options._root(vnode, parentDom);
@@ -42,8 +45,6 @@ export function render(vnode, parentDom, replaceNode) {
 	);
 	//渲染完成时执行did生命周期和setState回调
 	commitRoot(commitQueue, vnode);
-
-	console.log((window.vnode = vnode));
 }
 
 /**
@@ -53,7 +54,7 @@ export function render(vnode, parentDom, replaceNode) {
  * update
  */
 //hydration模式渲染
-//此模式中,props的处理只处理事件部分,其它都不处理
+//此模式中,diffProps中只处理事件部分,其它都不处理
 //主要用于在服务器渲染的节点去调用hydrate
 export function hydrate(vnode, parentDom) {
 	render(vnode, parentDom, IS_HYDRATE);
