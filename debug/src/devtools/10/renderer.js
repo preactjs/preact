@@ -8,7 +8,8 @@ import {
 	isSuspenseVNode,
 	getDisplayName,
 	getComponentHooks,
-	getActualChildren
+	getActualChildren,
+	isConsumerVNode
 } from './vnode';
 import { shouldFilter } from './filter';
 import { cleanContext, jsonify, cleanProps, traverse, setIn } from './utils';
@@ -152,10 +153,17 @@ export function createRenderer(hook, filters = defaultFilters) {
 				Object.keys(c.state).length > 0;
 
 			const hasHooks = c != null && getComponentHooks(c) != null;
-			const context = c != null ? cleanContext(c.context) : null;
+			let context = null;
+			if (c != null) {
+				context = isConsumerVNode(vnode)
+					? {
+							value: c.context
+					  }
+					: cleanContext(c.context);
+			}
 
 			return {
-				context,
+				context: context != null ? jsonify(context, serializeVNode) : null,
 				canEditHooks: hasHooks,
 				hooks: null,
 				id,

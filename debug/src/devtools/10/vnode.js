@@ -20,6 +20,15 @@ export function isSuspenseVNode(vnode) {
 }
 
 /**
+ * Check if a `vnode` represents a context `Consumer` component
+ * @param {import('../../internal').VNode} vnode
+ * @returns {boolean}
+ */
+export function isConsumerVNode(vnode) {
+	return getDisplayName(vnode) === 'Consumer';
+}
+
+/**
  * Get the internal hooks state of a component
  * @param {import('../../internal').Component} c
  */

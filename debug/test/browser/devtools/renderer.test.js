@@ -1,4 +1,11 @@
-import { createElement, render, options, Fragment, Component } from 'preact';
+import {
+	createElement,
+	render,
+	options,
+	Fragment,
+	Component,
+	createContext
+} from 'preact';
 import { memo, forwardRef, Suspense } from 'preact/compat';
 import * as sinon from 'sinon';
 import {
@@ -269,6 +276,90 @@ describe('Renderer 10', () => {
 				canEditState: true,
 				state: {
 					foo: 123
+				}
+			});
+		});
+
+		it('should inspect legacy context', () => {
+			class Child extends Component {
+				render() {
+					return <div>child</div>;
+				}
+			}
+
+			class Parent extends Component {
+				getChildContext() {
+					return { foo: 123 };
+				}
+
+				render() {
+					return <Child />;
+				}
+			}
+
+			render(<Parent />, scratch);
+
+			expect(renderer.inspect(3).context).to.deep.equal({
+				foo: 123
+			});
+		});
+
+		it('should serialize legacy context', () => {
+			class Child extends Component {
+				render() {
+					return <div>child</div>;
+				}
+			}
+
+			class Parent extends Component {
+				getChildContext() {
+					return { foo: <div /> };
+				}
+
+				render() {
+					return <Child />;
+				}
+			}
+
+			render(<Parent />, scratch);
+
+			expect(renderer.inspect(3).context).to.deep.equal({
+				foo: {
+					type: 'vnode',
+					name: 'div'
+				}
+			});
+		});
+
+		it('should inspect createContext', () => {
+			const Ctx = createContext(null);
+
+			render(
+				<Ctx.Provider value="foo">
+					<Ctx.Consumer>{value => <div>{value}</div>}</Ctx.Consumer>
+				</Ctx.Provider>,
+				scratch
+			);
+
+			expect(renderer.inspect(3).context).to.deep.equal({
+				value: 'foo'
+			});
+		});
+
+		it('should serialize createContext value', () => {
+			const Ctx = createContext(null);
+
+			render(
+				<Ctx.Provider value={<div />}>
+					<Ctx.Consumer>{value => <div>{value}</div>}</Ctx.Consumer>
+				</Ctx.Provider>,
+				scratch
+			);
+
+			expect(renderer.inspect(3).context).to.deep.equal({
+				value: {
+					type: 'vnode',
+					name: 'div'
 				}
 			});
 		});
