@@ -168,7 +168,7 @@ export function diffChildren(
 							// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
 							//这儿的条件是...j < oldChildrenLength / 2;j++
 							//如果紧跟节点和新节点相同,则直接跳出
-							//todo 为什么只判断了对比了一半元素呢,猜测是因为如果一般都不相同后面基本不会相同
+							//为什么只判断了对比了一半元素呢,猜测是因为如果一般都不相同后面基本不会相同
 							for (
 								sibDom = oldDom, j = 0;
 								(sibDom = sibDom.nextSibling) && j < oldChildrenLength;
