@@ -47,7 +47,7 @@ export function Suspense() {
 // Things we do here to save some bytes but are not proper JS inheritance:
 // - call `new Component()` as the prototype
 // - do not set `Suspense.prototype.constructor` to `Suspense`
-Suspense.prototype = new Component();
+Suspense.prototype.setState = Component.prototype.setState;
 
 /**
  * @param {Promise} promise The thrown promise
