@@ -89,7 +89,7 @@ export function setOptionsDiff(options, fn) {
 }
 
 /**
- * Return private `options._commit` hook that's called at the end of
+ * Set private `options._commit` hook that's called at the end of
  * each commit.
  * @param {import('../../src/internal').Options} options
  * @param {import('../../src/internal').Options["_commit"]} fn
@@ -99,7 +99,7 @@ export function setOptionsCommit(options, fn) {
 }
 
 /**
- * Return private `options._root` hook that's called at the end of
+ * Set private `options._root` hook that's called at the end of
  * each commit.
  * @param {import('../../src/internal').Options} options
  * @param {import('../../src/internal').Options["_root"]} fn
