@@ -1,4 +1,4 @@
-import { Component, toChildArray } from 'preact';
+import { toChildArray } from 'preact';
 import { suspended } from './suspense.js';
 
 // Indexes to linked list nodes (nodes are stored as arrays to save bytes).
@@ -51,11 +51,6 @@ const resolve = (list, child, node) => {
 		list._next = node = node[NEXT_NODE];
 	}
 };
-
-// Things we do here to save some bytes but are not proper JS inheritance:
-// - call `new Component()` as the prototype
-// - do not set `Suspense.prototype.constructor` to `Suspense`
-SuspenseList.prototype = new Component();
 
 SuspenseList.prototype._suspended = function(child) {
 	const list = this;

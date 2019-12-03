@@ -1,15 +1,4 @@
-import { options } from 'preact';
 import { assign } from './util';
-
-let oldVNodeHook = options.vnode;
-options.vnode = vnode => {
-	if (vnode.type && vnode.type._forwarded && vnode.ref) {
-		vnode.props.ref = vnode.ref;
-		vnode.ref = null;
-	}
-
-	if (oldVNodeHook) oldVNodeHook(vnode);
-};
 
 /**
  * Pass ref down to a child. This is mainly used in libraries with HOCs that

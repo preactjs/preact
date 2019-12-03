@@ -1,22 +1,28 @@
-import { Component, createElement, options } from 'preact';
+import { createElement, options } from 'preact';
+import { Component } from './Component';
 import { assign } from './util';
 
-const oldCatchError = options._catchError;
-options._catchError = function(error, newVNode, oldVNode) {
-	if (error.then) {
-		/** @type {import('./internal').Component} */
-		let component;
-		let vnode = newVNode;
+let isSuspenseInstalled;
+function installSuspense() {
+	const oldCatchError = options._catchError;
+	options._catchError = function(error, newVNode, oldVNode) {
+		if (error.then) {
+			/** @type {import('./internal').Component} */
+			let component;
+			let vnode = newVNode;
 
-		for (; (vnode = vnode._parent); ) {
-			if ((component = vnode._component) && component._childDidSuspend) {
-				// Don't call oldCatchError if we found a Suspense
-				return component._childDidSuspend(error);
+			for (; (vnode = vnode._parent); ) {
+				if ((component = vnode._component) && component._childDidSuspend) {
+					// Don't call oldCatchError if we found a Suspense
+					return component._childDidSuspend(error);
+				}
 			}
 		}
-	}
-	oldCatchError(error, newVNode, oldVNode);
-};
+		oldCatchError(error, newVNode, oldVNode);
+	};
+
+	isSuspenseInstalled = true;
+}
 
 function detachedClone(vnode) {
 	if (vnode) {
@@ -28,7 +34,11 @@ function detachedClone(vnode) {
 }
 
 // having custom inheritance instead of a class here saves a lot of bytes
-export function Suspense(props) {
+export function Suspense() {
+	if (!isSuspenseInstalled) {
+		installSuspense();
+	}
+
 	// we do not call super here to golf some bytes...
 	this._suspensions = 0;
 	this._detachOnNextRender = null;
@@ -37,7 +47,7 @@ export function Suspense(props) {
 // Things we do here to save some bytes but are not proper JS inheritance:
 // - call `new Component()` as the prototype
 // - do not set `Suspense.prototype.constructor` to `Suspense`
-Suspense.prototype = new Component();
+Suspense.prototype.setState = Component.prototype.setState;
 
 /**
  * @param {Promise} promise The thrown promise
