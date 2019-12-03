@@ -48,6 +48,17 @@ export function getComponentVNode(component) {
 	return component._vnode;
 }
 
+/**
+ * Return the `VNode` that is associated with a DOM node that was rendered into.
+ * This property only exists on root nodes, commonly called containers. They
+ * are created via top-level `render(vnode, container)` calls.
+ * @param {Element | Document | ShadowRoot | DocumentFragment} container
+ * @returns {import('../../src/internal').VNode | null}
+ */
+export function getContainerVNode(container) {
+	return container._children;
+}
+
 // Options getters/setters
 
 /**

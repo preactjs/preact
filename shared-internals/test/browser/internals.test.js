@@ -1,4 +1,11 @@
-import { createElement, render, Component, createRef, options } from 'preact';
+import {
+	createElement,
+	render,
+	Component,
+	createRef,
+	options,
+	Fragment
+} from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import {
 	getParent,
@@ -6,6 +13,7 @@ import {
 	getDom,
 	getChildren,
 	getComponentVNode,
+	getContainerVNode,
 	getOptionsDiff,
 	getOptionsCommit,
 	getOptionsRoot,
@@ -106,6 +114,17 @@ describe('shared-internals', () => {
 			render(vnode, scratch);
 
 			expect(getComponentVNode(ref.current)).to.equal(vnode);
+		});
+	});
+
+	describe('getContainerVNode', () => {
+		it('should return undefined', () => {
+			expect(getContainerVNode(scratch)).to.equal(undefined);
+		});
+
+		it('should return root Fragment vnode', () => {
+			render(<div />, scratch);
+			expect(getContainerVNode(scratch).type).to.equal(Fragment);
 		});
 	});
 

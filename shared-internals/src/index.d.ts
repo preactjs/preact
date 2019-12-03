@@ -7,6 +7,9 @@ export function getChildren(
 	vnode: preact.VNode
 ): Array<preact.VNode | null | undefined>;
 export function getComponentVNode(component: preact.Component): preact.VNode;
+export function getContainerVNode(
+	container: Element | Document | ShadowRoot | DocumentFragment
+): preact.VNode | null;
 
 //
 // Option hooks
