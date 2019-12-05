@@ -29,6 +29,7 @@ import {
 
 let memoReg = /^Memo\(/;
 let forwardRefReg = /^ForwardRef\(/;
+
 /**
  * Get the type of a vnode. The devtools uses these constants to differentiate
  * between the various forms of components.
@@ -100,6 +101,22 @@ let defaultFilters = {
 };
 
 /**
+ * The renderer is responsible for translating anything preact rendered
+ * into a serializable format that is passed to the devtools extension.
+ * On top of that the devtools can call the renderer to request certain
+ * information about `vnodes`. This is usually done lazily, so that we
+ * don't waste any precious CPU time.
+ *
+ * Instead of passing `json` objects around, we're converting everythign
+ * to a custom format that is representable using a number array. It's one
+ * of the major performance improvements the react team made in their devtools
+ * v4 code.
+ *
+ * The translation process always happens after a commit has finished.
+ * This has the advantage of not tainting measured timings for rendering
+ * `vnodes`. But it has the disadvantage that we need to reconstruct what
+ * changes were done in each commit. Nonetheless I do think the additional
+ * complexity is worth it, given the better and less confusing user experience.
  *
  * @param {import('./types').PreactDevtoolsHook} hook
  * @param {import('./types').FilterState} filters
@@ -133,6 +150,13 @@ export function createRenderer(hook, filters = defaultFilters) {
 				if (c) c.forceUpdate();
 			}
 		},
+
+		/**
+		 * Print out a `vnode` to the native devtools console. Called when
+		 * the bug icon is pressed in the devtools sidebar panel.
+		 * @param {number} id
+		 * @param {number[]} children
+		 */
 		/* istanbul ignore next */
 		log(id, children) {
 			const vnode = ids.getVNode(id);
@@ -140,8 +164,16 @@ export function createRenderer(hook, filters = defaultFilters) {
 				console.warn(`Could not find vnode with id ${id}`);
 				return;
 			}
-			logVNode(/** @type {*} */ (vnode), id, children);
+			logVNode(vnode, id, children);
 		},
+
+		/**
+		 * Retrieve all `vnode` details like `props`, `state` and `context`
+		 * to be displayed in the sidebar. We only request this information
+		 * when a `vnode` is selected in the devtools extension.
+		 * @param {number} id
+		 * @returns {import('./types').InspectData | null}
+		 */
 		inspect(id) {
 			const vnode = ids.getVNode(id);
 			if (!vnode) return null;
@@ -175,10 +207,23 @@ export function createRenderer(hook, filters = defaultFilters) {
 				type: getDevtoolsType(vnode)
 			};
 		},
+
+		/**
+		 * Get the DOM nodes associated with a `vnode`. For `Fragments` this can be
+		 * a range of nodes (experimental).
+		 * @param {number} id
+		 * @returns {[HTMLElement | Text | null, HTMLElement | Text | null] | null}
+		 */
 		findDomForVNode(id) {
 			const vnode = ids.getVNode(id);
 			return vnode ? [vnode._dom, vnode._lastDomChild] : null;
 		},
+
+		/**
+		 * Get the `id` associated with a `vnode`.
+		 * @param {HTMLElement | Text} node
+		 * @returns {number | null}
+		 */
 		findVNodeIdForDom(node) {
 			const vnode = domToVNode.get(node);
 			if (vnode) {
@@ -197,6 +242,11 @@ export function createRenderer(hook, filters = defaultFilters) {
 
 			return -1;
 		},
+
+		/**
+		 * Called when the user changes filtering in the extension.
+		 * @param {import('./types').FilterState} nextFilters
+		 */
 		applyFilters(nextFilters) {
 			roots.forEach(root => {
 				const children = getActualChildren(root);
@@ -234,11 +284,25 @@ export function createRenderer(hook, filters = defaultFilters) {
 				this.flushInitial();
 			}
 		},
+
+		/**
+		 * Flush all events that may have been queued before the devtools are
+		 * done initializing.
+		 */
 		flushInitial() {
 			queue.forEach(ev => hook.emit(ev.name, ev.data));
 			hook.connected = true;
 			queue = [];
 		},
+
+		/**
+		 * Main entry function that's called whenever a commit completed. From here
+		 * on we walk the view tree and store any changes in an operations array
+		 * that the devtools can understand. If we're connected to the extension
+		 * we message the events, and if not we'll queue them until the extension
+		 * becomes active.
+		 * @param {import('../../internal').VNode} vnode
+		 */
 		onCommit(vnode) {
 			const commit = createCommit(ids, roots, vnode, filters, domToVNode);
 			commit.unmountIds.push(...currentUnmounts);
@@ -252,6 +316,11 @@ export function createRenderer(hook, filters = defaultFilters) {
 				queue.push(ev);
 			}
 		},
+
+		/**
+		 * Called when a `vnode` is removed.
+		 * @param {import('../../internal').VNode} vnode
+		 */
 		onUnmount(vnode) {
 			/* istanbul ignore else */
 			if (!shouldFilter(vnode, filters)) {
@@ -267,6 +336,15 @@ export function createRenderer(hook, filters = defaultFilters) {
 
 			ids.remove(vnode);
 		},
+
+		/**
+		 * Apply an update that was triggered in the extension. That's usually
+		 * done via any of the input elements in the sidebar.
+		 * @param {number} id
+		 * @param {'props' | 'state' | 'context' | 'hooks'} type
+		 * @param {Array<string, number>} path
+		 * @param {any} value
+		 */
 		update(id, type, path, value) {
 			const vnode = ids.getVNode(id);
 			if (vnode !== null) {
@@ -315,7 +393,8 @@ export function logVNode(vnode, id, children) {
 }
 
 /**
- *
+ * Walk a `vnode` tree and compare it with the previous one. If any
+ * changes are detected they will be stored in the return value.
  * @param {import('./types').IdMapper} ids
  * @param {Set<import('../../internal').VNode>} roots
  * @param {import('../../internal').VNode} vnode
@@ -355,7 +434,7 @@ export function createCommit(ids, roots, vnode, filters, domCache) {
 }
 
 /**
- * M
+ * Mount a `vnode`
  * @param {import('./types').IdMapper} ids
  * @param {import('./types').Commit} commit
  * @param {import('../../internal').VNode} vnode

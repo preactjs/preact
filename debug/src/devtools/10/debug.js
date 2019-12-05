@@ -9,8 +9,12 @@ import {
 	HTML_ELEMENT
 } from './constants';
 
+// The code in this file is only used in unit tests or to make debugging
+// the devtools adapter easier. It's not used by the integration itself
+// and will thus be tree-shaken away.
+
 /**
- *
+ * Convert
  * @param {number[]} data
  * @returns {import('./types').ParsedMsg}
  */
