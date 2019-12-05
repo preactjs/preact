@@ -853,5 +853,49 @@ describe('Renderer 10', () => {
 				getFilteredChildren(vnode, filters).map(getDisplayName)
 			).to.deep.equal(['Foo', 'Bar']);
 		});
+
+		it('should not include filtered vnodes on unmount', () => {
+			renderer.applyFilters({
+				regex: [/span/i],
+				type: new Set([])
+			});
+
+			render(
+				<div>
+					<span />
+				</div>,
+				scratch
+			);
+			render(<div />, scratch);
+
+			expect(toSnapshot(spy.args[1][1])).to.deep.equal([
+				'rootId: 1',
+				'Update timings 1',
+				'Update timings 2'
+			]);
+		});
+
+		it('should not include filtered vnodes on unmount #2', () => {
+			renderer.applyFilters({
+				regex: [/Foo/i],
+				type: new Set([])
+			});
+
+			const Foo = () => <div />;
+
+			render(
+				<div>
+					<Foo />
+				</div>,
+				scratch
+			);
+			render(<div />, scratch);
+
+			expect(toSnapshot(spy.args[1][1])).to.deep.equal([
+				'rootId: 1',
+				'Update timings 2',
+				'Remove 3'
+			]);
+		});
 	});
 });

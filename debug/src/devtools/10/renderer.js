@@ -322,7 +322,6 @@ export function createRenderer(hook, filters = defaultFilters) {
 		 * @param {import('../../internal').VNode} vnode
 		 */
 		onUnmount(vnode) {
-			/* istanbul ignore else */
 			if (!shouldFilter(vnode, filters)) {
 				/* istanbul ignore else */
 				if (ids.hasId(vnode)) {
