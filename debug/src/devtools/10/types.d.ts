@@ -34,6 +34,19 @@ export interface Renderer {
 	update(id: ID, type: UpdateType, path: ObjPath, value: any): void;
 }
 
+export interface InspectData {
+	id: ID;
+	name: string;
+	type: any;
+	context: Record<string, any> | null;
+	canEditHooks: boolean;
+	hooks: any | null;
+	canEditProps: boolean;
+	props: Record<string, any> | null;
+	canEditState: boolean;
+	state: Record<string, any> | null;
+}
+
 export type EmitterFn = (event: string, data: any) => void;
 
 export interface DevtoolEvents {
