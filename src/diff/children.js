@@ -28,9 +28,9 @@ import { getDomSibling } from '../component';
 //oldParentVNode老的父虚拟节点
 //context如果是createContext().Provide组件,获得context并向下传递
 //isSvg是否是svg
-//excessDomChildren存在的子节点dom
+//excessDomChildren存在的节点dom
 //commitQueue引用数组,所有执行完后会执行数组中组件的_renderCallbacks的回调
-//oldDom子节点老的dom
+//oldDom老的dom
 //isHydrating是否hydration模式渲染
 //对比子节点
 export function diffChildren(
@@ -155,7 +155,7 @@ export function diffChildren(
 						// diffing Components and Fragments.
 						childVNode._lastDomChild = null;
 						//如果excessDomChildren等于oldVNode或者newDom不等于oldDom或者newDom.parentNode为空
-						//todo 感觉excessDomChildren也不会和oldVNode相同
+						//render函数调用时excessDomChildren与oldVNode有可能相等
 					} else if (
 						excessDomChildren == oldVNode ||
 						newDom != oldDom ||
