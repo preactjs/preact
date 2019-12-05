@@ -27,9 +27,9 @@ import options from '../options';
 //oldVNOde老的虚拟节点
 //context如果是createContext().Provide组件,获得context并向下传递的东西(ctx)
 //isSvg是否是svg,svg在创建dom元素和设置dom属性时特殊处理
-//excessDomChildren
+//excessDomChildren存在的子节点dom
 //commitQueue引用数组,所有执行完后会执行数组中组件的_renderCallbacks的回调
-//oldDom
+//oldDom子节点老的dom
 //isHydrating是否hydration模式渲染,该模式对props只处理事件
 //对比虚拟节点,主要处理函数节点
 export function diff(
@@ -344,7 +344,7 @@ function diffElementNodes(
 			? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type)
 			: document.createElement(newVNode.type);
 		// we created a new parent, so none of the previously attached children can be reused:
-		//以下流程中 excessDomChildren表示dom的子节点,这儿的dom是新创建的,所以要设为null
+		//以下流程中 excessDomChildren表示dom的子节点,这儿的dom是新创建的,所以要设为null,表示不可复用子节点
 		excessDomChildren = null;
 	}
 	//如果是text节点

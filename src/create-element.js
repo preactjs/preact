@@ -78,7 +78,7 @@ export function createVNode(type, props, key, ref) {
 		_depth: 0,
 		//该虚拟节点渲染的dom
 		_dom: null,
-		//组件类型节点是会保存最后一个子节点的dom
+		//组件类型节点会保存最后一个子节点的dom
 		_lastDomChild: null,
 		//类或函数组件的实例化
 		_component: null,

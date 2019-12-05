@@ -15,19 +15,19 @@ export function Component(props, context) {
 	this.props = props;
 	this.context = context;
 
-	//还有以下内部属性
 	/*
+	//还有以下内部属性
 	//对应渲染的dom
 	this.base
 	//标记是forceUpdate,如果是这个渲染是不执行某些生命周期
 	this._force
-	//标记该组件是否脏,渲染时设为true,渲染后设为false,防止队列中重复渲染
+	//标记组件内部状态是否发生改变,渲染时设为true,渲染后设为false,防止队列中重复渲染
 	this._dirty
 	//保存setState和did生命周期的回调
 	this._renderCallbacks
 	//保存context,也就是createContext的context,与this.context的区别是this.context有可能是Provider的value
 	this._context
-	//setState后新的状态会保存在这儿,渲染是会设置给state
+	//setState后新的状态会保存在这儿,渲染时会设置给state
 	this._nextState
 	//对应的虚拟节点
 	this._vnode
@@ -143,7 +143,7 @@ export function getDomSibling(vnode, childIndex) {
 	// Only climb up and search the parent if we aren't searching through a DOM
 	// VNode (meaning we reached the DOM parent of the original vnode that began
 	// the search)
-	//没有找到并且虚拟节点类型为函数则调用getDomSibling(vnode)此时Index为null,执行此函数第一行代码      其它则返回null
+	//没有找到并且虚拟节点类型为函数则调用getDomSibling(vnode),此时Index为null,执行此函数第一行代码      其它则返回null
 	return typeof vnode.type === 'function' ? getDomSibling(vnode) : null;
 }
 
@@ -182,7 +182,7 @@ function renderComponent(component) {
 /**
  * @param {import('./internal').VNode} vnode
  */
-//更新虚拟节点是函数或类组件的祖先节点的_dom与_component.base
+//更新组件类型的虚拟节点的祖先节点的_dom与_component.base
 function updateParentDomPointers(vnode) {
 	//取_parent如果不为空并且_component不为空
 	if ((vnode = vnode._parent) != null && vnode._component != null) {

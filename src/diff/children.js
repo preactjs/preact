@@ -28,9 +28,9 @@ import { getDomSibling } from '../component';
 //oldParentVNode老的父虚拟节点
 //context如果是createContext().Provide组件,获得context并向下传递
 //isSvg是否是svg
-//excessDomChildren
+//excessDomChildren存在的子节点dom
 //commitQueue引用数组,所有执行完后会执行数组中组件的_renderCallbacks的回调
-//oldDom
+//oldDom子节点老的dom
 //isHydrating是否hydration模式渲染
 //对比子节点
 export function diffChildren(
@@ -57,11 +57,12 @@ export function diffChildren(
 	// I'm using `EMPTY_OBJ` to signal when `diffChildren` is invoked in these situations. I can't use `null`
 	// for this purpose, because `null` is a valid value for `oldDom` which can mean to skip to this logic
 	// (e.g. if mounting a new tree in which the old DOM should be ignored (usually for Fragments).
+	//只有在render函数和diffElementNodes函数调用diffChildren时，oldDom可能等于EMPTY_OBJ
 	if (oldDom == EMPTY_OBJ) {
 		//如果有excessDomChildren,则取第一个
 		if (excessDomChildren != null) {
 			oldDom = excessDomChildren[0];
-			//如果	oldChildrenLength
+			//如果oldChildrenLength,则从虚拟节点中查找
 		} else if (oldChildrenLength) {
 			oldDom = getDomSibling(oldParentVNode, 0);
 		} else {
@@ -84,7 +85,7 @@ export function diffChildren(
 				// We use `undefined`, as `null` is reserved for empty placeholders
 				// (holes).
 				oldVNode = oldChildren[i];
-				//如果老节点为null或者 新老子节点的key和type相同 则设置老的节点为undefined 以便后面不执行unmount
+				//如果老节点为null或者 新老子节点的key和type相同 则设置老节点删除 以便后面不执行unmount和参与后续节点的比较
 				if (
 					oldVNode === null ||
 					(oldVNode &&
@@ -95,7 +96,7 @@ export function diffChildren(
 				} else {
 					// Either oldVNode === undefined or oldChildrenLength > 0,
 					// so after this loop oldVNode == null or oldVNode is a valid value.
-					//在老的子节点中循环 以便找到新老子节点向对应的，有相对应的就会复用这个节点而不会重新实例化一个新的节点
+					//在老的子节点中循环 以便找到新老子节点相对应的，有相对应的就会复用这个节点
 					for (j = 0; j < oldChildrenLength; j++) {
 						oldVNode = oldChildren[j];
 						// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
@@ -129,7 +130,7 @@ export function diffChildren(
 					oldDom,
 					isHydrating
 				);
-				//如果新子节点有ref并且不等于老子节点的ref，推到refs 等会会重新应用ref
+				//如果新子节点有ref并且不等于老子节点的ref，推到refs等会会执行去掉老节点ref并重新应用新节点ref
 				if ((j = childVNode.ref) && oldVNode.ref != j) {
 					if (!refs) refs = [];
 					if (oldVNode.ref) refs.push(oldVNode.ref, null, childVNode);
@@ -142,7 +143,7 @@ export function diffChildren(
 					if (firstChildDom == null) {
 						firstChildDom = newDom;
 					}
-
+					//如果子节点是函数或类型组件,这儿特殊处理 使其不会执行下面的parentDom.appendChild或parentDom.insertBefore
 					if (childVNode._lastDomChild != null) {
 						// Only Fragments or components that return Fragment like VNodes will
 						// have a non-null _lastDomChild. Continue the diff from the end of
@@ -153,6 +154,8 @@ export function diffChildren(
 						// it is only used by `diffChildren` to determine where to resume the diff after
 						// diffing Components and Fragments.
 						childVNode._lastDomChild = null;
+						//如果excessDomChildren等于oldVNode或者newDom不等于oldDom或者newDom.parentNode为空
+						//todo 感觉excessDomChildren也不会和oldVNode相同
 					} else if (
 						excessDomChildren == oldVNode ||
 						newDom != oldDom ||
@@ -161,14 +164,14 @@ export function diffChildren(
 						// NOTE: excessDomChildren==oldVNode above:
 						// This is a compression of excessDomChildren==null && oldVNode==null!
 						// The values only have the same type when `null`.
-						//如果没有oldDom或者oldDom不等于parentDom,则将newDom追加到parentDom中的后面
+						//如果oldDom为空或者其父节点更新了,则将newDom追加到parentDom的后面
 						outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
 							parentDom.appendChild(newDom);
 						} else {
 							// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
 							//这儿的条件是...j < oldChildrenLength / 2;j++
 							//如果紧跟节点和新节点相同,则直接跳出
-							//为什么只判断了对比了一半元素呢,猜测是因为如果一般都不相同后面基本不会相同
+							//为什么只判断了对比了一半元素呢,猜测是为性能考虑,如果前面一般都不相同后面基本不会相同
 							for (
 								sibDom = oldDom, j = 0;
 								(sibDom = sibDom.nextSibling) && j < oldChildrenLength;
@@ -199,7 +202,7 @@ export function diffChildren(
 					}
 					//oldDom这时为newDom元素之后紧跟的节点
 					oldDom = newDom.nextSibling;
-					//如果是组件类型的节点
+					//如果是组件类型的节点,设置_lastDomChild
 					if (typeof newParentVNode.type == 'function') {
 						// At this point, if childVNode._lastDomChild existed, then
 						// newDom = childVNode._lastDomChild per line 101. Else it is
