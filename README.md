@@ -45,7 +45,7 @@ render(<Root />,document.getElementById('root'));
 ```
 这个是简单的dome,我们看下渲染流程
 1. jsx语法转换<br />
-babel中transform-react-jsx插件会将jsx语法转换为普通的js代码,这是jsx语法转换后的代码
+babel中transform-react-jsx插件会将jsx语法转换为普通的js代码,下面转换后的代码
 ```jsx harmony
 class App extends Component{
  render(){
@@ -78,15 +78,15 @@ interface createElement {
   ( type:ElementType, props:ElementProps ,...children: ElementChildren[]  	): VNode
 }
 ```
-对应的参数描述如下:
-* ElementType 元素类型,
-1. 如果是文本数字等简单元素,则为null,
-2. 如果是html标签的节点,则是html标签字符串,如`div`
-3. 如果是函数型的节点,则是这个函数,如`App`
+对应的参数描述:
+1. ElementType 元素类型,
+* 如果是文本数字等简单元素,则为null,
+* 如果是html标签的节点,则是html标签字符串,如`div`
+* 如果是函数型的节点,则是这个函数,如`App`
 判断是函数节点或者html标签主要依据是是否首字母大写,如果是大写,他就是函数型节点,如果是小写,他就是普通的html节点,这就是为什么函数组件首字母要求大写的原因
-* ElementProps 元素属性
+2. ElementProps 元素属性
 
-* ElementChildren 元素子节点
+3. ElementChildren 元素子节点
 
 
 2. 创建虚拟节点
