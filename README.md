@@ -114,46 +114,21 @@ function createElement(type, props, children) {
 		props && props.ref
 	);
 }
-export function createElement(type, props, children) {
-	let normalizedProps = {},
-		i;
-	//选择性拷贝props
-	for (i in props) {
-		if (i !== 'key' && i !== 'ref') normalizedProps[i] = props[i];
-	}
-	//对参数处理，如果有多个children是数组，单个不是
-	if (arguments.length > 3) {
-		children = [children];
-		// https://github.com/preactjs/preact/issues/1916
-		for (i = 3; i < arguments.length; i++) {
-			children.push(arguments[i]);
-		}
-	}
-	//赋值给props.children
-	if (children != null) {
-		normalizedProps.children = children;
-	}
-
-	// If a Component VNode, check for and apply defaultProps
-	// Note: type may be undefined in development, must never error here.
-	//对defaultProps做处理，合并到props上
-	if (typeof type === 'function' && type.defaultProps != null) {
-		for (i in type.defaultProps) {
-			if (normalizedProps[i] === undefined) {
-				normalizedProps[i] = type.defaultProps[i];
-			}
-		}
-	}
-	//调用创建虚拟节点
-	return createVNode(
+//创建虚拟节点
+function createVNode(type, props, key, ref) {
+	const vnode = {
 		type,
-		normalizedProps,
-		props && props.key,
-		props && props.ref
-	);
+		props,
+		key,
+		ref,
+        //...
+	};
+
+	return vnode;
 }
 ```
-3. **比较虚拟节点,生成真实dom**
+`h(App,null)`最后生成的虚拟节点对象为`{type:App,props:null,key:null,ref:null}`
+2. **处理虚拟节点,生成真实dom**
 
 
 ## 三.重点深剖
