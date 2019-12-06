@@ -43,7 +43,7 @@ render(<App/>, document.getElementById('app'));
 ```
 这个是简单的demo,我们看下渲染流程
 1. **创建虚拟节点**<br />
-babel中transform-react-jsx插件会将jsx语法转换为普通的js代码,下面是转换后的代码
+babel中transform-react-jsx插件会将jsx语法转换为普通的js代码,如下
 ```jsx harmony
 class App extends Component {
 	render() {
@@ -64,7 +64,7 @@ render(
 	document.getElementById('app')
 );
 ```
-调用render函数时,先执行**h**函数,对应的是preact.createElement函数,然后又调用了createVNode函数,最终返回一个虚拟节点对象`{type:App,props:null,key:null,ref:null}`
+**h**函数对应的是preact.createElement函数.当执行render函数时,先执行createElement函数,然后又调用了createVNode函数,最终返回一个虚拟节点对象`{type:App,props:null,key:null,ref:null}`
 ```jsx harmony
 //src/create-element.js
 /**
