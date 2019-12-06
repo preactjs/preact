@@ -41,7 +41,7 @@ function Root(){
 render(<Root />,document.getElementById('root'));
 ```
 这个是简单的dome,我们看下流程
-1.jsx语法装换
+1. jsx语法装换
 transform-react-jsx插件会将jsx语法转换为普通的js代码,转换后如上
 ```jsx
 class App extends Component{
@@ -81,8 +81,8 @@ interface createElement {
 * ElementChildren 元素子节点
 
 
-2.创建虚拟节点
-3.虚拟节点生成真实节点
+2. 创建虚拟节点
+3. 虚拟节点生成真实节点
 
 
 ## 三.重点深剖
