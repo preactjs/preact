@@ -42,7 +42,7 @@ render(<Root />,document.getElementById('root'));
 ```
 这个是简单的dome,我们看下渲染流程
 1. jsx语法转换<br />
-transform-react-jsx插件会将jsx语法转换为普通的js代码,转换后如上
+babel中transform-react-jsx插件会将jsx语法转换为普通的js代码,这是jsx语法转换后的代码
 ```jsx
 class App extends Component{
  render(){
@@ -59,8 +59,12 @@ function Root(){
    null
     )
 }
+render(h(
+          Root,
+          null
+           ),document.getElementById('root'));
 ```
-
+**h** 对应的是preact.createElement,其定义大体如下
 ```typescript
 type ElementType =  null |string| ComponentType;
 type ElementProps =  null | string | Attributes;
@@ -70,7 +74,7 @@ interface createElement {
   ( type:ElementType, props:ElementProps ,...children: ElementChildren[]  	): VNode
 }
 ```
-**h** 对应的是preact.createElement,其定义大体如上,对应的参数描述如下
+对应的参数描述如下:
 * ElementType 元素类型,
 1. 如果是文本数字等简单元素,则为null,
 2. 如果是html标签的节点,则是html标签字符串,如`div`
