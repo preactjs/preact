@@ -43,7 +43,7 @@ render(<App/>, document.getElementById('app'));
 ```
 这个是简单的dome,我们看下渲染流程
 1. **创建虚拟节点**<br />
-babel中transform-react-jsx插件会将jsx语法转换为普通的js代码,下面转换后的代码
+babel中transform-react-jsx插件会将jsx语法转换为普通的js代码,下面是转换后的代码
 ```jsx harmony
 class App extends Component {
 	render() {
@@ -64,7 +64,7 @@ render(
 	document.getElementById('app')
 );
 ```
-调用render函数时,先执行**h**函数,对应的是createElement函数,返回createVNode
+调用render函数时,先执行**h**函数,对应的是createElement函数,然后又调用了createVNode函数
 ```jsx harmony
 //src/create-element.js
 /**
@@ -114,40 +114,44 @@ function createElement(type, props, children) {
 		props && props.ref
 	);
 }
-```
-createVNode函数代码如下
-```js
-function createVNode(type, props, key, ref) {
-	const vnode = {
+export function createElement(type, props, children) {
+	let normalizedProps = {},
+		i;
+	//选择性拷贝props
+	for (i in props) {
+		if (i !== 'key' && i !== 'ref') normalizedProps[i] = props[i];
+	}
+	//对参数处理，如果有多个children是数组，单个不是
+	if (arguments.length > 3) {
+		children = [children];
+		// https://github.com/preactjs/preact/issues/1916
+		for (i = 3; i < arguments.length; i++) {
+			children.push(arguments[i]);
+		}
+	}
+	//赋值给props.children
+	if (children != null) {
+		normalizedProps.children = children;
+	}
+
+	// If a Component VNode, check for and apply defaultProps
+	// Note: type may be undefined in development, must never error here.
+	//对defaultProps做处理，合并到props上
+	if (typeof type === 'function' && type.defaultProps != null) {
+		for (i in type.defaultProps) {
+			if (normalizedProps[i] === undefined) {
+				normalizedProps[i] = type.defaultProps[i];
+			}
+		}
+	}
+	//调用创建虚拟节点
+	return createVNode(
 		type,
-		props,
-		key,
-		ref,
-        //...
-    };
-    return vnode;
+		normalizedProps,
+		props && props.key,
+		props && props.ref
+	);
 }
-```
-所以虚拟节点就是一个普通的对象,其中props.children保存的是子节点,在来分析下执行render函数
-```jsx harmony
-render(
-	h(
-		App,
-		null
-	),
-	document.getElementById('app')
-);
-//1.
-/**
-* 先执行h(App,null),流程是createElement->createVNode
-* 然后返回一个虚拟节点
-* {
-*     type:App,
-      props:null,
-      key:null,
-      ref:null   
-* }
-**/
 ```
 3. **比较虚拟节点,生成真实dom**
 
