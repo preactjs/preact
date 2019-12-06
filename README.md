@@ -64,7 +64,7 @@ render(
 	document.getElementById('app')
 );
 ```
-**h**函数对应的是preact.createElement函数.当执行render函数时,先执行createElement函数,然后又调用了createVNode函数,最终返回一个虚拟节点对象`{type:App,props:null,key:null,ref:null}`
+**h** 函数对应的是preact.createElement函数.当执行render函数时,先执行createElement函数,里面又调用了createVNode函数,最终执行结果返回一个虚拟节点对象`{type:App,props:null,key:null,ref:null}`
 ```jsx harmony
 //src/create-element.js
 /**
