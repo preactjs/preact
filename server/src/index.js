@@ -104,6 +104,11 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				c._dirty = c.__d = true;
 				c.props = props;
 				if (c.state==null) c.state = {};
+
+				if (c._nextState==null && c.__s==null) {
+					c._nextState = c.__s = c.state;
+				}
+
 				c.context = cctx;
 				if (nodeName.getDerivedStateFromProps) c.state = assign(assign({}, c.state), nodeName.getDerivedStateFromProps(c.props, c.state));
 				else if (c.componentWillMount) c.componentWillMount();

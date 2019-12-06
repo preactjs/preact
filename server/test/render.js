@@ -354,6 +354,28 @@ describe('render', () => {
 				.and.to.have.been.calledBefore(Test.prototype.render);
 		});
 
+		it('should be able to call setState in componentWillMount', () => {
+			class Test extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { updated: false };
+				}
+				componentWillMount() {
+					this.setState({ updated: true });
+				}
+
+				render() {
+					return (
+						<p>
+							{this.state.updated.toString()}
+						</p>
+					);
+				}
+			}
+
+			expect(render(<Test />)).to.equal('<p>false</p>');
+		});
+
 		it('should invoke getDerivedStateFromProps rather than componentWillMount', () => {
 			class Test extends Component {
 				static getDerivedStateFromProps() {}
