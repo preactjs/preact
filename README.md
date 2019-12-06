@@ -40,8 +40,8 @@ function Root(){
 
 render(<Root />,document.getElementById('root'));
 ```
-这个是简单的dome,我们看下流程
-1. jsx语法装换
+这个是简单的dome,我们看下渲染流程
+1. jsx语法转换<br />
 transform-react-jsx插件会将jsx语法转换为普通的js代码,转换后如上
 ```jsx
 class App extends Component{
