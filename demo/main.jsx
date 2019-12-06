@@ -1,8 +1,7 @@
-import { Component, Fragment, createContext, render, h } from '../src';
+import { render, h } from '../src';
 
-render(<p>2</p>, document.getElementById('app'));
-render(
-	<p>3</p>,
-	document.getElementById('app'),
-	document.getElementById('app').firstChild
-);
+function App() {
+	return <div>123</div>;
+}
+
+render(<App />, document.getElementById('app'));
