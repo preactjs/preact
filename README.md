@@ -42,7 +42,7 @@ class App extends Component {
 render(<App/>, document.getElementById('app'));
 ```
 这个是简单的dome,我们看下渲染流程
-1. **jsx语法转换**<br />
+1. **创建虚拟节点**<br />
 babel中transform-react-jsx插件会将jsx语法转换为普通的js代码,下面转换后的代码
 ```jsx harmony
 class App extends Component {
@@ -64,8 +64,20 @@ render(
 	document.getElementById('app')
 );
 ```
-**h** 对应的是preact.createElement函数
+调用render函数时,先执行**h**函数,对应的是createElement函数,返回createVNode
 ```jsx harmony
+//src/create-element.js
+/**
+ * 创建元素
+ * @param type {null |string| ComponentType} type 元素类型
+ * 如果是文本数字等简单元素,则为null,
+ * 如果是html标签的节点,则是html标签字符串,如`div`
+ * 如果是函数型的节点,则是这个函数,如`App`判断是函数节点或者html标签主要依据是是否首字母大写,如果是大写,他就是函数型节点,如果是小写,他就是普通的html节点,这就是为什么函数组件首字母要求大写的原因
+ * 
+ * @param props {string | Attributes} 元素属性
+ * @param children {string | VNode} 元素子节点
+ * @returns {VNode}
+ */
 function createElement(type, props, children) {
 	let normalizedProps = {},
 		i;
@@ -86,8 +98,6 @@ function createElement(type, props, children) {
 		normalizedProps.children = children;
 	}
 
-	// If a Component VNode, check for and apply defaultProps
-	// Note: type may be undefined in development, must never error here.
 	//对defaultProps做处理，合并到props上
 	if (typeof type === 'function' && type.defaultProps != null) {
 		for (i in type.defaultProps) {
@@ -105,19 +115,7 @@ function createElement(type, props, children) {
 	);
 }
 ```
-对应的参数描述:
-- [x] type 元素类型,
-* 如果是文本数字等简单元素,则为null,
-* 如果是html标签的节点,则是html标签字符串,如`div`
-* 如果是函数型的节点,则是这个函数,如`App`
-判断是函数节点或者html标签主要依据是是否首字母大写,如果是大写,他就是函数型节点,如果是小写,他就是普通的html节点,这就是为什么函数组件首字母要求大写的原因
-- [x] props 元素属性
-
-- [x] children 元素子节点
-
-
-2. **执行渲染,生成虚拟节点**
-createElement执行后会调用createVNode函数生成虚拟节点,我们来看下这个函数
+createVNode函数代码如下
 ```js
 function createVNode(type, props, key, ref) {
 	const vnode = {

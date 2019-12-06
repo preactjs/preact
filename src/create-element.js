@@ -8,7 +8,17 @@ import options from './options';
  * @param {Array<import('.').ComponentChildren>} [children] The children of the virtual node
  * @returns {import('./internal').VNode}
  */
-//创建元素
+/**
+ * 创建元素
+ * @param type {null |string| ComponentType} type 元素类型
+ * 如果是文本数字等简单元素,则为null,
+ * 如果是html标签的节点,则是html标签字符串,如`div`
+ * 如果是函数型的节点,则是这个函数,如`App`判断是函数节点或者html标签主要依据是是否首字母大写,如果是大写,他就是函数型节点,如果是小写,他就是普通的html节点,这就是为什么函数组件首字母要求大写的原因
+ *
+ * @param props {string | Attributes} 元素属性
+ * @param children {string | VNode} 元素子节点
+ * @returns {VNode}
+ */
 export function createElement(type, props, children) {
 	let normalizedProps = {},
 		i;
