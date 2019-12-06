@@ -127,7 +127,7 @@ function createVNode(type, props, key, ref) {
 	return vnode;
 }
 ```
-2. **渲染虚拟节点,生成真实dom**
+2. **渲染虚拟节点,生成真实dom**<br />
 来看下render函数,调用了diff函数
 ```jsx harmony
 //render.js
