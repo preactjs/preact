@@ -41,7 +41,7 @@ class App extends Component {
 
 render(<App/>, document.getElementById('app'));
 ```
-这个是简单的dome,我们看下渲染流程
+这个是简单的demo,我们看下渲染流程
 1. **创建虚拟节点**<br />
 babel中transform-react-jsx插件会将jsx语法转换为普通的js代码,下面是转换后的代码
 ```jsx harmony
@@ -127,8 +127,27 @@ function createVNode(type, props, key, ref) {
 	return vnode;
 }
 ```
-2. **处理虚拟节点,生成真实dom**
-
+2. **渲染虚拟节点,生成真实dom**
+来看下render函数,调用了diff函数
+```jsx harmony
+//render.js
+/**
+ * 渲染虚拟节点到真实节点
+ * @param vnode 虚拟节点
+ * @param parentDom 真实dom节点
+ * @param replaceNode
+ */
+function render(vnode, parentDom, replaceNode) {
+    //...
+	diff(
+		parentDom,
+		vnode,
+		oldVNode,
+        //...
+	);
+    //...
+}
+```
 
 ## 三.重点深剖
 ###1.component

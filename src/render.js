@@ -13,9 +13,12 @@ const IS_HYDRATE = EMPTY_OBJ;
  * @param {Element | Text} [replaceNode] Attempt to re-use an
  * existing DOM tree rooted at `replaceNode`
  */
-//渲染虚拟节点到真实节点
-//vnode 虚拟节点
-//parentDom 真实节点
+/**
+ * 渲染虚拟节点到真实节点
+ * @param vnode 虚拟节点
+ * @param parentDom 真实dom节点
+ * @param replaceNode
+ */
 export function render(vnode, parentDom, replaceNode) {
 	//root钩子
 	if (options._root) options._root(vnode, parentDom);
