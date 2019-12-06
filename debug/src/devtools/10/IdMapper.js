@@ -13,7 +13,7 @@ export function createIdMapper() {
 	/** @type {Map<number, any>} */
 	const idToInst = new Map();
 
-	let uuid = 1;
+	let nextId = 1;
 
 	/** @type {import('./types').IdMapper["getVNode"]} */
 	const getVNode = id => idToVNode.get(id) || null;
@@ -56,7 +56,7 @@ export function createIdMapper() {
 
 	/** @type {import('./types').IdMapper["createId"]} */
 	const createId = vnode => {
-		const id = uuid++;
+		const id = nextId++;
 		const inst = getInstance(vnode);
 		instToId.set(inst, id);
 		idToInst.set(id, inst);
