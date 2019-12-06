@@ -24,15 +24,15 @@ util.js | 一些单元方法
 ```jsx
 import { Component,render, h } from '../src';
 /**
-* react下应该是这样
+* react中应该是这样
 * import React,{Component} from 'react'
 * import {render} from 'react-dom'
 */
 
 class App extends Component{
-render(){
-  return <div></div>
-}
+ render(){
+   return <div></div>
+ }
 }
 function Root(){
  return <App />
