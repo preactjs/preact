@@ -200,7 +200,7 @@ export function diff(
 			//如果render返回结果中最外层是Fragment组件
 			let isTopLevelFragment =
 				tmp != null && tmp.type == Fragment && tmp.key == null;
-			//片段组件则使用props.children，其它使用render返回的
+			//Fragment组件则使用props.children，其它使用render返回的
 			newVNode._children = toChildArray(
 				isTopLevelFragment ? tmp.props.children : tmp
 			);
@@ -360,11 +360,20 @@ function diffElementNodes(
 	}
 	//新老节点不相等
 	else if (newVNode !== oldVNode) {
-		//在这儿excessDomChildren是dom的子节点
+		/**
+		 * 在这儿excessDomChildren是dom的子节点
+		 * 例如以下就会渲染空,因为第二个渲染文本节点时,由于dom!==null,
+		 * 所以excessDomChildren不会移除之前的文本节点,导致diffChildren中removeNode(excessDomChildren)移除此文本节点
+		 * render(<p>2</p>, document.getElementById('app'));
+		 * render(
+		 * 	<p>3</p>,
+		 * 	document.getElementById('app'),
+		 * 	document.getElementById('app').firstChild
+		 * );
+		 */
 		if (excessDomChildren != null) {
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
-
 		oldProps = oldVNode.props || EMPTY_OBJ;
 		//dangerouslySetInnerHTML Props
 		let oldHtml = oldProps.dangerouslySetInnerHTML;
