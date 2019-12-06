@@ -64,7 +64,7 @@ render(
 	document.getElementById('app')
 );
 ```
-调用render函数时,先执行**h**函数,对应的是createElement函数,然后又调用了createVNode函数
+调用render函数时,先执行**h**函数,对应的是preact.createElement函数,然后又调用了createVNode函数,最终返回一个虚拟节点对象`{type:App,props:null,key:null,ref:null}`
 ```jsx harmony
 //src/create-element.js
 /**
@@ -127,7 +127,6 @@ function createVNode(type, props, key, ref) {
 	return vnode;
 }
 ```
-`h(App,null)`最后生成的虚拟节点对象为`{type:App,props:null,key:null,ref:null}`
 2. **处理虚拟节点,生成真实dom**
 
 
