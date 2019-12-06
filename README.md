@@ -1,6 +1,6 @@
-# 深度解析preact源码,从preact中理解react
+# 深度解析preact源码,从preact中理解react原理
 
->注:每个文件的注释在 链接 ,觉得好的话麻烦点个star 
+>注:每个文件的注释在[链接](https://github.com/yujingwyh/preact-source-annotation) ,觉得好的话麻烦点个star 
 #### 序言
 一直想去研究react源码,看到一半然后不聊聊值了,主要是由于react项目过于庞大,代码也比较颗粒化 ,执行流转比较复杂,另外也没有过多的精力,所有没有持续下去,关注preact有很长一段时间了,有天想想为什么不研究研究preact源码呢,这个号称只有3KB的react浓缩版.<br />
 看了下市面上也有很多preact源码解析,但我感觉都有一些不足,很多都是老版本,例如preact 8,与10版本在代码结构上还是有很大差别的,另外大部分都是分析主要渲染的流程,而对于一些关键点没有去分析,例如为什么有lastDom,为什么value没有在diffProps中处理,这才是重中之重,也是学习源码的收益点,推测作者的用意,还有没有更好的办法,不是提示思维的最佳方式吗?
@@ -42,7 +42,7 @@ render(<Root />,document.getElementById('root'));
 ```
 
 
-##三.重点深剖
+## 三.重点深剖
 ###1.component
 ###2.diff
 ###3.context
