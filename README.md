@@ -21,8 +21,8 @@ options.js | 保存一些设置
 render.js | 渲染虚拟节点到真实节点
 util.js | 一些单元方法
 ## 二.渲染原理
-```jsx
-import { Component,render, h } from '../src';
+```jsx harmony
+import { Component,render, h } from 'preact';
 /**
 * react中应该是这样
 * import React,{Component} from 'react'
@@ -31,7 +31,10 @@ import { Component,render, h } from '../src';
 
 class App extends Component{
  render(){
-   return <div id="app">123</div>
+   return <div id="wrap">
+    <span>123</span>
+    456
+    </div>
  }
 }
 function Root(){
@@ -43,13 +46,14 @@ render(<Root />,document.getElementById('root'));
 这个是简单的dome,我们看下渲染流程
 1. jsx语法转换<br />
 babel中transform-react-jsx插件会将jsx语法转换为普通的js代码,这是jsx语法转换后的代码
-```jsx
+```jsx harmony
 class App extends Component{
  render(){
    return h(
-            'div',
-            { id: 'app' },
-            '123'
+            "div",
+            { id: "wrap" },
+            h("span", null, "123"), 
+            "456"
           )
  }
 }
@@ -64,7 +68,7 @@ render(h(
           null
            ),document.getElementById('root'));
 ```
-**h** 对应的是preact.createElement,其定义大体如下
+**h** 对应的是preact.createElement函数,其定义大体如下
 ```typescript
 type ElementType =  null |string| ComponentType;
 type ElementProps =  null | string | Attributes;
