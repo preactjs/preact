@@ -43,7 +43,7 @@ render(<App/>, document.getElementById('app'));
 ```
 这个是简单的demo,我们看下渲染流程
 1. **创建虚拟节点**<br />
-babel中transform-react-jsx插件会将jsx语法转换为普通的js代码,如下
+babel中transform-react-jsx插件会将jsx语法编译成对应的React.createElement(type, props, children)形式,在preact中需要设置此插件参数,使React.createElement为h,最终编译结果如下
 ```jsx harmony
 class App extends Component {
 	render() {
