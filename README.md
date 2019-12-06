@@ -70,9 +70,9 @@ render(h(
 ```
 **h** 对应的是preact.createElement函数,其定义大体如下
 ```typescript
-type ElementType =  null |string| ComponentType;
-type ElementProps =  null | string | Attributes;
-type ElementChildren =  null |string | VNode;
+type ElementType =  string| ComponentType;
+type ElementProps =  null  | Attributes;
+type ElementChildren =  string | VNode;
 
 interface createElement {
   ( type:ElementType, props:ElementProps ,...children: ElementChildren[]  	): VNode
