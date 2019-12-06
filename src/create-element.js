@@ -105,6 +105,6 @@ export function Fragment(props) {
  * @param {*} vnode
  * @returns {vnode is import('./internal').VNode}
  */
-//判断是否是createElement的元素，createElement创建后constructor为undefined
+//判断是否是preact虚拟节点，createElement创建后constructor为undefined
 export const isValidElement = vnode =>
 	vnode != null && vnode.constructor === undefined;

@@ -58,6 +58,7 @@ export function diffChildren(
 	// for this purpose, because `null` is a valid value for `oldDom` which can mean to skip to this logic
 	// (e.g. if mounting a new tree in which the old DOM should be ignored (usually for Fragments).
 	//只有在render函数和diffElementNodes函数调用diffChildren时，oldDom可能等于EMPTY_OBJ
+	//所以只有标签型节点或者render进来的组件型节点处理,其它的组件类型这儿不用处理
 	if (oldDom == EMPTY_OBJ) {
 		//如果有excessDomChildren,则取第一个
 		if (excessDomChildren != null) {

@@ -29,7 +29,7 @@ import options from '../options';
 //isSvg是否是svg,svg在创建dom元素和设置dom属性时特殊处理
 //excessDomChildren存在的子节点dom
 //commitQueue引用数组,所有执行完后会执行数组中组件的_renderCallbacks的回调
-//oldDom子节点老的dom
+//oldDom节点老的dom
 //isHydrating是否hydration模式渲染,该模式对props只处理事件
 //对比虚拟节点,主要处理函数节点
 export function diff(
