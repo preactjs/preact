@@ -363,7 +363,6 @@ describe('render', () => {
 				componentWillMount() {
 					this.setState({ updated: true });
 				}
-
 				render() {
 					return (
 						<p>
@@ -373,7 +372,7 @@ describe('render', () => {
 				}
 			}
 
-			expect(render(<Test />)).to.equal('<p>false</p>');
+			expect(render(<Test />)).to.equal('<p>true</p>');
 		});
 
 		it('should invoke getDerivedStateFromProps rather than componentWillMount', () => {
