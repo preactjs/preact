@@ -104,9 +104,21 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				c._dirty = c.__d = true;
 				c.props = props;
 				if (c.state==null) c.state = {};
+
+				if (c._nextState==null && c.__s==null) {
+					c._nextState = c.__s = c.state;
+				}
+
 				c.context = cctx;
 				if (nodeName.getDerivedStateFromProps) c.state = assign(assign({}, c.state), nodeName.getDerivedStateFromProps(c.props, c.state));
 				else if (c.componentWillMount) c.componentWillMount();
+
+				// If the user called setState in cWM we need to flush pending,
+				// state updates. This is the same behaviour in React.
+				c.state = c._nextState !== c.state
+					? c._nextState : c.__s!==c.state
+						? c.__s : c.state;
+
 				rendered = c.render(c.props, c.state, c.context);
 			}
 
