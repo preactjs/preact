@@ -201,7 +201,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 	}
 
 	s = `<${nodeName}${s}>`;
-	if (String(nodeName).match(/[\s\n\\/='"\0<>]/)) throw s;
+	if (String(nodeName).match(/[\s\n\\/='"\0<>]/)) throw new Error(`${nodeName} is not a valid HTML tag name in ${s}`);
 
 	let isVoid = String(nodeName).match(VOID_ELEMENTS);
 	if (isVoid) s = s.replace(/>$/, ' />');
