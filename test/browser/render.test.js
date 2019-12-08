@@ -57,7 +57,7 @@ describe('render()', () => {
 		logCall(Element.prototype, 'remove');
 	});
 
-	it('should render an empty text node given an empty string', () => {
+	it.only('should render an empty text node given an empty string', () => {
 		render('', scratch);
 		let c = scratch.childNodes;
 		expect(c).to.have.length(1);
@@ -109,7 +109,7 @@ describe('render()', () => {
 		expect(scratch.firstChild).to.have.property('nodeName', 'X-BAR');
 	});
 
-	it('should support the form attribute', () => {
+	it.only('should support the form attribute', () => {
 		render(
 			<div>
 				<form id="myform" />

@@ -6,22 +6,6 @@ import { diffProps, commitPropUpdates } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
 
-/**
- * Diff two virtual nodes and apply proper changes to the DOM
- * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
- * @param {import('../internal').VNode} newVNode The new virtual node
- * @param {import('../internal').VNode} oldVNode The old virtual node
- * @param {object} context The current context object
- * @param {boolean} isSvg Whether or not this element is an SVG node
- * @param {Array<import('../internal').PreactElement>} excessDomChildren
- * @param {Array<import('../internal').Component>} commitQueue List of components
- * which have callbacks to invoke in commitRoot
- * @param {Element | Text} oldDom The current attached DOM
- * element any new dom elements should be placed around. Likely `null` on first
- * render (except when hydrating). Can be a sibling DOM element when diffing
- * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
- * @param {boolean} [isHydrating] Whether or not we are in hydration
- */
 export function diff(
 	parentDom,
 	newVNode,
@@ -34,22 +18,21 @@ export function diff(
 	isHydrating
 ) {
 	let tmp,
-		newType = newVNode.type;
+		newType = newVNode.type,
+		old = assign({}, oldVNode);
 
-	// When passing through createElement it assigns the object
-	// constructor as undefined. This to prevent JSON-injection.
-	if (newVNode.constructor !== undefined) return null;
+	// JSON-injection assertion (this invalidates) a subtree when
+	// an XSS-attack is potentially happening this because
+	// the constructor property can't be set to undefined through JSON.
+	if (newVNode.constructor !== undefined) return undefined;
 
+	// Before diff
 	if ((tmp = options._diff)) tmp(newVNode);
 
 	try {
 		outer: if (typeof newType === 'function') {
 			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
 			let newProps = newVNode.props;
-
-			// Necessary for createContext api. Setting this property will pass
-			// the context value as `this.context` just for this component.
-			tmp = newType.contextType;
 			let provider = tmp && context[tmp._id];
 			let cctx = tmp
 				? provider
@@ -57,15 +40,22 @@ export function diff(
 					: tmp._defaultValue
 				: context;
 
-			// Get component and set it to `c`
+			// Necessary for createContext api. Setting this property will pass
+			// the context value as `this.context` just for this component.
+			tmp = newType.contextType;
+
 			if (oldVNode._component) {
+				// We already had a component
 				c = newVNode._component = oldVNode._component;
 				clearProcessingException = c._processingException = c._pendingError;
+				c.isNew = false;
 			} else {
-				// Instantiate the new component
+				// First time render
 				if ('prototype' in newType && newType.prototype.render) {
+					// If we have a prototype we are dealing with a class component
 					newVNode._component = c = new newType(newProps, cctx); // eslint-disable-line new-cap
 				} else {
+					// Fucntional component path
 					newVNode._component = c = new Component(newProps, cctx);
 					c.constructor = newType;
 					c.render = doRender;
@@ -76,19 +66,22 @@ export function diff(
 				if (!c.state) c.state = {};
 				c.context = cctx;
 				c._context = context;
-				isNew = c._dirty = true;
+				c.isNew = isNew = c._dirty = true;
 				c._renderCallbacks = [];
 			}
 
-			// Invoke getDerivedStateFromProps
+			// If we have no _nextState just set it to our current state
 			if (c._nextState == null) {
 				c._nextState = c.state;
 			}
+
+			// Invoke getDerivedStateFromProps
 			if (newType.getDerivedStateFromProps != null) {
 				if (c._nextState == c.state) {
 					c._nextState = assign({}, c._nextState);
 				}
 
+				// Merge our current next-state with the one received from getDerived
 				assign(
 					c._nextState,
 					newType.getDerivedStateFromProps(newProps, c._nextState)
@@ -98,17 +91,13 @@ export function diff(
 			oldProps = c.props;
 			oldState = c.state;
 
-			// Invoke pre-render lifecycle methods
+			// New components will be notified that they will mount
 			if (isNew) {
 				if (
 					newType.getDerivedStateFromProps == null &&
 					c.componentWillMount != null
 				) {
 					c.componentWillMount();
-				}
-
-				if (c.componentDidMount != null) {
-					c._renderCallbacks.push(c.componentDidMount);
 				}
 			} else {
 				if (
@@ -130,9 +119,7 @@ export function diff(
 					c._vnode = newVNode;
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
-					if (c._renderCallbacks.length) {
-						commitQueue.push(c);
-					}
+
 					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
 						if (newVNode._children[tmp]) {
 							newVNode._children[tmp]._parent = newVNode;
@@ -143,12 +130,6 @@ export function diff(
 
 				if (c.componentWillUpdate != null) {
 					c.componentWillUpdate(newProps, c._nextState, cctx);
-				}
-
-				if (c.componentDidUpdate != null) {
-					c._renderCallbacks.push(() => {
-						c.componentDidUpdate(oldProps, oldState, snapshot);
-					});
 				}
 			}
 
@@ -174,7 +155,7 @@ export function diff(
 			}
 
 			if (!isNew && c.getSnapshotBeforeUpdate != null) {
-				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
+				c._snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
 			diffChildren(
@@ -191,17 +172,13 @@ export function diff(
 
 			c.base = newVNode._dom;
 
-			if (c._renderCallbacks.length) {
-				commitQueue.push(c);
-			}
-
 			if (clearProcessingException) {
 				c._pendingError = c._processingException = null;
 			}
 
 			c._force = null;
 		} else {
-			newVNode._dom = diffElementNodes(
+			oldVNode._dom = diffElementNodes(
 				oldVNode._dom,
 				newVNode,
 				oldVNode,
@@ -212,23 +189,18 @@ export function diff(
 				isHydrating
 			);
 		}
-
-		if ((tmp = options.diffed)) tmp(newVNode);
 	} catch (e) {
-		options._catchError(e, newVNode, oldVNode);
+		options._catchError(e, newVNode, old);
 	}
-
-	return newVNode._dom;
 }
 
 /**
- * @param {Array<import('../internal').Component>} commitQueue List of components
- * which have callbacks to invoke in commitRoot
  * @param {import('../internal').VNode} root
  */
-export function commitRoot(commitQueue, root) {
+export function commitRoot(root) {
+	let commitQueue = [];
+	commit(root, commitQueue);
 	if (options._commit) options._commit(root, commitQueue);
-
 	commitQueue.some(c => {
 		try {
 			commitQueue = c._renderCallbacks;
@@ -241,6 +213,38 @@ export function commitRoot(commitQueue, root) {
 		}
 	});
 }
+
+export const commit = (vnode, queue) => {
+	let dom = vnode._dom;
+	if (typeof vnode.type === 'function') {
+		let c = vnode._component;
+
+		if (c.isNew && c.componentDidMount) {
+			c._renderCallbacks.push(c.componentDidMount);
+		} else if (!c.isNew && c.componentDidUpdate) {
+			c._renderCallbacks.push(() =>
+				c.componentDidMount(c.props, c.state, c._snapshot)
+			);
+		}
+
+		commitChildren(vnode);
+
+		queue.push(c);
+	} else {
+		if (!dom) {
+			if (vnode.type == null) {
+				return document.createTextNode(vnode.props);
+			}
+
+			dom = false
+				? document.createElementNS('http://www.w3.org/2000/svg', vnode.type)
+				: document.createElement(vnode.type);
+		}
+		commitPropUpdates(dom, vnode._updates, false);
+	}
+
+	return dom;
+};
 
 /**
  * Diff two virtual nodes representing DOM element
@@ -266,6 +270,7 @@ function diffElementNodes(
 	commitQueue,
 	isHydrating
 ) {
+	if (!dom) return;
 	let i;
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
@@ -290,27 +295,12 @@ function diffElementNodes(
 		}
 	}
 
-	if (dom == null) {
-		if (newVNode.type === null) {
-			return document.createTextNode(newProps);
-		}
-		dom = isSvg
-			? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type)
-			: document.createElement(newVNode.type);
-		// we created a new parent, so none of the previously attached children can be reused:
-		excessDomChildren = null;
-	}
-
 	if (newVNode.type === null) {
 		if (excessDomChildren != null) {
 			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
 		}
-
-		if (oldProps !== newProps) {
-			dom.data = newProps;
-		}
 	} else if (newVNode !== oldVNode) {
-		if (excessDomChildren != null) {
+		if (excessDomChildren != null && dom) {
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 
@@ -330,7 +320,6 @@ function diffElementNodes(
 		}
 
 		diffProps(newVNode, newProps, oldProps, isSvg, isHydrating);
-		commitPropUpdates(dom, newVNode._updates, isSvg);
 
 		newVNode._children = newVNode.props.children;
 
@@ -347,24 +336,6 @@ function diffElementNodes(
 				EMPTY_OBJ,
 				isHydrating
 			);
-		}
-
-		// (as above, don't diff props during hydration)
-		if (!isHydrating) {
-			if (
-				'value' in newProps &&
-				newProps.value !== undefined &&
-				newProps.value !== dom.value
-			) {
-				dom.value = newProps.value == null ? '' : newProps.value;
-			}
-			if (
-				'checked' in newProps &&
-				newProps.checked !== undefined &&
-				newProps.checked !== dom.checked
-			) {
-				dom.checked = newProps.checked;
-			}
 		}
 	}
 
