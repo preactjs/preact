@@ -165,7 +165,7 @@ return newVNode._dom;
 defaultValue
 value
 ctx
-##四.解惑疑点
+## 四.解惑疑点
 1. defer
 ```jsx harmony
 //src/component.js
@@ -185,6 +185,7 @@ function render(vnode, parentDom, replaceNode) {
 ```
 发现会用Fragment嵌套了实际传进来的组件,如果不嵌套会怎么样呢,如果是`render(<div>123</div>,document.getElementBuId('App'))`,当执行到diff.js时,会直接调用`newVNode._dom = diffElementNodes(oldVNode._dom,newVNode,oldVNode,...)`,这种最终生成的dom不会添加到parentDom里面中去,而如果用Fragment嵌套下,在diff中判断是组件类型,于是执行`diffChildren(parentDom,newVNode,oldVNode...)`,这样会在diffChildren中把生成的dom添加到parentDom中
 3. hydrate模式
+
 4. props中value 单独处理   
 5. _catchError _ enqueueRender
 如果render后还是有error,会再循环并跳过这个组件,如果循环完成组件都没有处理错误,则会执行最下面throw error
