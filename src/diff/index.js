@@ -349,7 +349,8 @@ function diffElementNodes(
 	}
 	//如果是text节点
 	if (newVNode.type === null) {
-		//todo 如果diffElementNodes传进来dom就不为空,则将excessDomChildren对应的节点设为null
+		//如果diffElementNodes传进来dom就不为空,则将excessDomChildren对应的节点设为null
+		//见README.md解惑疑点9
 		if (excessDomChildren != null) {
 			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
 		}

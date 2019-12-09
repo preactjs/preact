@@ -164,6 +164,7 @@ return newVNode._dom;
 ###3.context
 defaultValue
 value
+ctx
 ##四.解惑疑点
 1. defer
 ```jsx harmony
@@ -173,11 +174,23 @@ const defer =
 		? Promise.prototype.then.bind(Promise.resolve())
 		: setTimeout;
 ```
-最开始这个意思我是懂,如果支持Promise,用Promise处理.不然的话用setTimeout处理,但是`Promise.prototype.then.bind(Promise.resolve())`我是想了很长一段时间,他最终到底是啥东西,其实这个东西等同于`Promise.resolve().then`,Promise.prototype.then会从this中获取一个Promise的实例,这儿`...then.bind(Promise.resolve())`,我们知道bind会改变this的指向,在这儿是`Promise.resolve()`的返回结果,所以就是`Promise.resolve().then`
-
-render 片段包装
-lastchild 
-props中value 单独处理    
-defer
-_catchError _processingException enqueueRender
-diffProps _listeners
+最开始这个意思我是懂,如果支持Promise,用Promise处理.不然的话用setTimeout处理,但是`Promise.prototype.then.bind(Promise.resolve())`他最终到底是啥东西,我是想了很长一段时间,其实这个东西等同于`Promise.resolve().then`,`Promise.prototype.then`会从this中获取一个Promise的实例,后面这段代码`...then.bind(Promise.resolve())`,我们知道bind会改变this的指向,在这儿是`Promise.resolve()`的返回结果,所以就是`Promise.resolve().then`
+2. render 片段包装
+```jsx harmony
+function render(vnode, parentDom, replaceNode) {
+    //...
+    vnode = createElement(Fragment, null, [vnode]);
+    //...
+}
+```
+发现会用Fragment嵌套了实际传进来的组件,如果不嵌套会怎么样呢,如果是`render(<div>123</div>,document.getElementBuId('App'))`,当执行到diff.js时,会直接调用`newVNode._dom = diffElementNodes(oldVNode._dom,newVNode,oldVNode,...)`,这种最终生成的dom不会添加到parentDom里面中去,而如果用Fragment嵌套下,在diff中判断是组件类型,于是执行`diffChildren(parentDom,newVNode,oldVNode...)`,这样会在diffChildren中把生成的dom添加到parentDom中
+3. hydrate模式
+4. props中value 单独处理   
+5. _catchError _ enqueueRender
+如果render后还是有error,会再循环并跳过这个组件,如果循环完成组件都没有处理错误,则会执行最下面throw error
+				//_pendingError标记此组件有错误，再次渲染会赋值给_processingException，这样如果还出错会跳过这个组件，再向上层组件循环
+6. _catchError _processingException
+比如渲染队列中前面有他的子组件需要渲染,如果子组件渲染出错,冒泡出错时不应该跳过这个组件
+7. diffProps _listeners
+8. lastchild 
+9. excessDomChildren[excessDomChildren.indexOf(dom)] = null

@@ -214,8 +214,8 @@ let q = [];
  */
 /* istanbul ignore next */
 // Note the following line isn't tree-shaken by rollup cuz of rollup/rollup#2566
-//延迟   如defer(callback)，如果支持Promise则会用Promise then执行,否则用setTimeout执行
-//Promise.prototype.then.bind(Promise.resolve()) 等同于 Promise.resolve().then
+//延迟,如defer(callback)，如果支持Promise则会用Promise then执行,否则用setTimeout执行
+//见README.md解惑疑点1
 const defer =
 	typeof Promise == 'function'
 		? Promise.prototype.then.bind(Promise.resolve())
