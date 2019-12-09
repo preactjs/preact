@@ -9,6 +9,7 @@
         "regex": "^_",
         "reserved": [
           "__REACT_DEVTOOLS_GLOBAL_HOOK__",
+          "__PREACT_DEVTOOLS__",
           "_renderers",
           "__source",
           "__self"
