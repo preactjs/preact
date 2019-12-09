@@ -6,17 +6,9 @@ import { Component, h, render } from '../src';
  * import {render} from 'react-dom'
  */
 
-class App extends Component {
-	render() {
-		return (
-			<div id="wrap">
-				<span>123</span>
-				456
-			</div>
-		);
-	}
-}
-
-render(<App />, document.getElementById('app'));
-
-console.log(<App />);
+render(<p>2</p>, document.getElementById('app'));
+render(
+	<p>3</p>,
+	document.getElementById('app'),
+	document.getElementById('app').firstChild
+);

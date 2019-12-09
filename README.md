@@ -265,7 +265,7 @@ return enqueueRender((component._pendingError = component));
 }
 ```
 当子组件有异常后,他会不断的寻找他的祖先组件,直到祖先组件设置了getDerivedStateFromError或者componentDidCatch,然后有这个组件处理异常,不然直到最顶级组件都没有处理异常,则会抛出异常.如果设置了`getDerivedStateFromError`,`component.setState`这儿已经用setState来更新组件了,而后面还去`enqueueRender(component)`渲染了组件,有必要吗,其实是有必要的,这儿主要是为了如果setState后没有对异常做处理,那么`enqueueRender`渲染后会再循环并跳过这个组件,在向上寻找<br />
-6. 标记组件处理异常用了两个变量
+6. 标记组件 处理异常中 用了两个变量
 ```jsx harmony
 //src/diff/catch-error.js
 function _catchError(error, vnode) {
@@ -289,7 +289,7 @@ clearProcessingException = c._processingException = c._pendingError;
 }
 ``` 
  `catchError`中用 `_processingException`来判断这个组件是否处理异常,而在`component._pendingError = component`却设置了_pendingError来标记这个组件是处理异常中,在`diff`中又赋给了`_processingException`,为什么不用一个变量来标记呢,其实主要原因是如果渲染队列中前面有他的子组件需要渲染,如果子组件渲染出错,这时不应该跳过这个组件,只有在渲染这个组件的时候才去标记这个组件正在处理异常<br />
-7. diffProps中_listeners
+7. diffProps中事件的处理
 ```jsx harmony
 //src/diff/props.js
 function setProperty(dom, name, value, oldValue, isSvg) {
@@ -306,7 +306,7 @@ function eventProxy(e) {
 }
 ```
 这儿对props的比较处理有点意思,在设置了props的事件时,例如`<input onChange={e=>console.log(e.target.value)} />`,如果onChange之前是空,那么会执行`dom.addEventListener(name, eventProxy, useCapture)`来给dom添加一个事件处理函数,而这个处理函数是一个固定的函数`eventProxy`,当后面onChange中的监听函数发生变化时,只要修改下dom._listeners对应的监听函数,当触发事件时,只要执行固定的dom._listeners中保存的对应监听函数,只有onChange设置了空才去移除这个监听,当onChange中的监听函数发生变化时就不用移除之前的监听,然后监听新的函数<br />
-8. _lastDomChild 
+8. _lastDomChild的用处
 ```jsx harmony
 //src/diff/children.js
 function diffChildren( parentDom, newParentVNode, oldParentVNode){
@@ -343,7 +343,7 @@ function App() {
 render(<App/>,document.getElementById('app'));
 ```
 上面代码中一共会有三个虚拟节点App,div,123,在diffChildren App的虚拟节点时,newDom为div节点,这时不会执行 `parentDom.appendChild(newDom)`,app节点与div节点的关联是在diffChildren div中已经处理了,所有diffChildren App虚拟节点不用处理父子节点的关联,这个还是比较难理解的,建议多看看源码<br />
-9. excessDomChildren[excessDomChildren.indexOf(dom)] = null
+9. excessDomChildren又去设置了null
 ```jsx harmony
 //src/diff/index.js
 function diffElementNodes(dom,newVNode,oldVNode,){
