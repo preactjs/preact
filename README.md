@@ -174,7 +174,7 @@ const defer =
 		? Promise.prototype.then.bind(Promise.resolve())
 		: setTimeout;
 ```
-用意大家基本都懂,如果支持Promise,用Promise处理.不然的话用setTimeout处理,但是`Promise.prototype.then.bind(Promise.resolve())`他最终到底是啥东西,我是想了很长一段时间,我们知道`Promise.prototype.then`会从this中获取Promise的实例,而后面的这段代码`...then.bind(Promise.resolve())`,其中bind会改变this的指向,在这儿将是`Promise.resolve()`的返回结果,所以就是`Promise.resolve().then`<br />
+用意大家基本都懂,如果支持Promise,用Promise处理.不然的话用setTimeout处理,但是`Promise.prototype.then.bind(Promise.resolve())`他最终到底是啥东西,我是想了很长一段时间,我们知道`Promise.prototype.then`会从this中获取Promise的实例,而后面的这段代码`...then.bind(Promise.resolve())`,其中bind会改变this的指向,在这儿将是`Promise.resolve()`的返回结果,所以等于`Promise.resolve().then`<br />
 2. vnode用Fragment包装
 ```jsx harmony
 //src/render.js
@@ -184,7 +184,7 @@ function render(vnode, parentDom, replaceNode) {
 	//...
 }
 ```
-发现会用Fragment嵌套了实际传进来的组件,如果不嵌套会怎么样呢,例如执行这个代码`render(<div>123</div>,document.getElementBuId('App'))`,当执行到diff.js时,会直接调用`newVNode._dom = diffElementNodes(oldVNode._dom,newVNode,oldVNode,...)`,这种最终生成的dom不会添加到parentDom里面中去,而如果用Fragment嵌套下,在diff中判断是组件类型,于是执行`diffChildren(parentDom,newVNode,oldVNode...)`,这样会在diffChildren中把生成的dom添加到parentDom中<br />
+发现render函数中会用Fragment嵌套实际传进来的组件,如果不嵌套会怎么样呢,例如执行这个代码`render(<div>123</div>,document.getElementBuId('App'))`,当执行到diff函数时,会直接调用`newVNode._dom = diffElementNodes(oldVNode._dom,newVNode,oldVNode,)`,这样最终生成的dom不会添加到parentDom里面中去,而如果用Fragment嵌套下,在diff中判断是组件类型,于是执行`diffChildren(parentDom,newVNode,oldVNode...)`,这样会在diffChildren中把生成的dom添加到parentDom中<br />
 3. hydrate渲染
 ```jsx harmony
 //src/render.js
@@ -193,7 +193,7 @@ function hydrate(vnode, parentDom) {
 }
 
 ```
-用hydrate与render两个渲染有什么区别呢,从代码中我们发现在hydrate模式中,diffProps只处理了事件部分,对其他的props没有处理.所以hydrate常用于在服务器渲染的页面,在客户端会用hydrate去渲染,由于props在服务端渲染的时候已经处理了,这儿渲染的时候就不用处理了,从而加快首次渲染性能<br />
+用hydrate与render两个渲染有什么区别呢,从代码中我们发现在hydrate模式中,diffProps只处理了事件部分,对其他的props没有处理.所以hydrate常用于在服务器渲染后端的html,在客户端渲染时会用hydrate去渲染,由于props在服务端渲染的时候已经处理了,这儿渲染的时候就不用处理了,从而加快首次渲染性能<br />
 4. props中value与checked单独处理  
 ```jsx harmony
 //src/diff/props.js
