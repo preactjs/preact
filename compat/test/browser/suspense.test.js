@@ -1218,4 +1218,114 @@ describe('suspense', () => {
 			expect(scratch.innerHTML).to.equal(`<div>A</div><div>B</div>`);
 		});
 	});
+
+	it('should un-suspend when suspender unmounts', () => {
+		const [Suspender, suspend] = createSuspender(() => <div>Suspender</div>);
+
+		let hide;
+
+		class Conditional extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { show: true };
+
+				hide = () => {
+					this.setState({ show: false });
+				};
+			}
+
+			render(props, { show }) {
+				return (
+					<div>
+						conditional {show ? 'show' : 'hide'}
+						{show && <Suspender />}
+					</div>
+				);
+			}
+		}
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Conditional />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>conditional show<div>Suspender</div></div>`
+		);
+		expect(Suspender.prototype.render).to.have.been.calledOnce;
+
+		suspend();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+
+		hide();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>conditional hide</div>`);
+	});
+
+	it('should call componentWillUnmount on a suspended component', () => {
+		const cWUSpy = sinon.spy();
+
+		// eslint-disable-next-line react/require-render-return
+		class Suspender extends Component {
+			render() {
+				throw new Promise(() => {});
+			}
+		}
+
+		Suspender.prototype.componentWillUnmount = cWUSpy;
+
+		let hide;
+
+		let suspender = null;
+		let suspenderRef = s => {
+			// skip null values as we want to keep the ref even after unmount
+			if (s) {
+				suspender = s;
+			}
+		};
+
+		class Conditional extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { show: true };
+
+				hide = () => {
+					this.setState({ show: false });
+				};
+			}
+
+			render(props, { show }) {
+				return (
+					<div>
+						conditional {show ? 'show' : 'hide'}
+						{show && <Suspender ref={suspenderRef} />}
+					</div>
+				);
+			}
+		}
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Conditional />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(`<div>conditional show</div>`);
+		expect(cWUSpy).to.not.have.been.called;
+
+		hide();
+		rerender();
+
+		expect(cWUSpy).to.have.been.calledOnce;
+		expect(suspender).not.to.be.undefined;
+		expect(suspender).not.to.be.null;
+		expect(cWUSpy.getCall(0).thisValue).to.eql(suspender);
+		expect(scratch.innerHTML).to.eql(`<div>conditional hide</div>`);
+	});
 });
