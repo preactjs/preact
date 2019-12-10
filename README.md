@@ -20,8 +20,8 @@ index.js | 入口文件
 options.js | 保存一些设置
 render.js | 渲染虚拟节点到真实节点
 util.js | 一些单元方法
-## 二.渲染原理
-这个是简单的demo,渲染App组件到dom中
+## 二.diff
+这个是简单的demo,渲染App组件到真实dom中
 ```jsx harmony
 import {h, Component, render,} from 'preact';
 
@@ -44,7 +44,7 @@ render(<App/>, document.getElementById('app'));
 ```
 我们看下渲染流程
 1. **创建虚拟节点**<br />
-打包环节中,babel的transform-react-jsx插件会将jsx语法编译成React.createElement(type, props, children)形式,对应的是(元素类型,元素属性,元素子节点).preact中需要设置此插件参数,使React.createElement对应为h,最终编译结果如下
+项目打包环节中,babel的transform-react-jsx插件会将jsx语法编译成React.createElement(type, props, children)形式,对应的是(元素类型,元素属性,元素子节点).preact中需要设置此插件参数,使React.createElement对应为h,最终编译结果如下
 ```jsx harmony
 class App extends Component {
 	render() {
@@ -128,7 +128,7 @@ function createVNode(type, props, key, ref) {
 	return vnode;
 }
 ```
-2. **渲染到真实dom**<br />
+2. **虚拟节点diff**<br />
 当执行完`h(App,null)`后,render会拿执行结果`{type:App,props:null,key:null,ref:null}`去渲染到真实dom
 ```jsx harmony
 //src/render.js
@@ -143,25 +143,11 @@ function render(vnode, parentDom) {
 		vnode
     )
 }
-//src/diff/index.js
-function diff(parentDom,newVNode){
-	let tmp,newType = newVNode.type;
-    if (typeof newType === 'function') {
-    
-}
-else{
-newVNode._dom = diffElementNodes(
-				oldVNode._dom,
-				newVNode)
-}
-return newVNode._dom;
-}
 ```
 执行render函数时,调用了diff函数
-## 三.重点深剖
+## 三.组件
 ###1.component
-###2.diff
-###3.context
+###2.context
 defaultValue
 value
 ctx
