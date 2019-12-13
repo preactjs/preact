@@ -1,11 +1,36 @@
 import { options, Fragment } from 'preact';
 import { getDisplayName } from './devtools/custom';
 
-let oldDiff = options._diff;
-let oldDiffed = options.diffed;
-let oldRoot = options._root;
+/**
+ * Used to keep track of the currently rendered `vnode` and print it
+ * in debug messages.
+ */
+let renderStack = [];
 
-let stack = [];
+/**
+ * Keep track of the current owners. An owner describes a component
+ * which was responsible to render a specific `vnode`. This exclude
+ * children that are passed via `props.children`, because they belong
+ * to the parent owner.
+ *
+ * ```jsx
+ * const Foo = props => <div>{props.children}</div> // div's owner is Foo
+ * const Bar = props => {
+ *   return (
+ *     <Foo><span /></Foo> // Foo's owner is Bar, span's owner is Bar
+ *   )
+ * }
+ * ```
+ */
+let ownerStack = [];
+
+/**
+ * Get the currently rendered `vnode`
+ * @returns {import('./internal').VNode | null}
+ */
+export function getCurrentVNode() {
+	return renderStack.length > 0 ? renderStack[renderStack.length - 1] : null;
+}
 
 /**
  * If the user doesn't have `@babel/plugin-transform-react-jsx-source`
@@ -16,13 +41,30 @@ let stack = [];
 let hasBabelPlugin = false;
 
 /**
- * Return the component stack that was captured up to this point.
+ * Check if a `vnode` is a possible owner.
+ * @param {import('./internal').VNode} vnode
  */
-export function getComponentStack() {
-	return stack.reduce((acc, vnode) => {
-		acc += `  in ${getDisplayName(vnode)}`;
+function isPossibleOwner(vnode) {
+	return typeof vnode.type === 'function' && vnode.type !== Fragment;
+}
 
-		const source = vnode.__source;
+/**
+ * Return the component stack that was captured up to this point.
+ * @param {import('./internal').VNode} vnode
+ * @returns {string}
+ */
+export function getOwnerStack(vnode) {
+	const stack = [vnode];
+	let next = vnode;
+	while (next._owner != null) {
+		stack.push(next._owner);
+		next = next._owner;
+	}
+
+	return stack.reduce((acc, owner) => {
+		acc += `  in ${getDisplayName(owner)}`;
+
+		const source = owner.__source;
 		if (source) {
 			acc += ` (at ${source.fileName}:${source.lineNumber})`;
 		} else if (!hasBabelPlugin) {
@@ -42,22 +84,43 @@ export function getComponentStack() {
  * debug messages for `this.setState` where the `vnode` is `undefined`.
  */
 export function setupComponentStack() {
+	let oldDiff = options._diff;
+	let oldDiffed = options.diffed;
+	let oldRoot = options._root;
+	let oldVNode = options.vnode;
+	let oldRender = options._render;
+
 	options.diffed = vnode => {
-		stack.pop();
+		if (isPossibleOwner(vnode)) {
+			ownerStack.pop();
+		}
+		renderStack.pop();
 		if (oldDiffed) oldDiffed(vnode);
 	};
 
 	options._diff = vnode => {
-		if (typeof vnode.type === 'function') {
-			if (vnode.type !== Fragment) {
-				stack.push(vnode);
-			}
+		if (isPossibleOwner(vnode)) {
+			renderStack.push(vnode);
 		}
 		if (oldDiff) oldDiff(vnode);
 	};
 
 	options._root = (vnode, parent) => {
-		stack = [];
+		ownerStack = [];
 		if (oldRoot) oldRoot(vnode, parent);
+	};
+
+	options.vnode = vnode => {
+		vnode._owner =
+			ownerStack.length > 0 ? ownerStack[ownerStack.length - 1] : null;
+		if (oldVNode) oldVNode(vnode);
+	};
+
+	options._render = vnode => {
+		if (isPossibleOwner(vnode)) {
+			ownerStack.push(vnode);
+		}
+
+		if (oldRender) oldRender(vnode);
 	};
 }

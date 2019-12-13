@@ -11,7 +11,7 @@ describe('component stack', () => {
 	let errors = [];
 	let warnings = [];
 
-	const getWarningStack = () => warnings[0].split('\n\n')[1];
+	const getStack = arr => arr[0].split('\n\n')[1];
 
 	beforeEach(() => {
 		scratch = setupScratch();
@@ -46,9 +46,9 @@ describe('component stack', () => {
 
 		render(<Foo />, scratch);
 
-		let lines = getWarningStack().split('\n');
-		expect(lines[0].indexOf('Foo') > -1).to.equal(true);
-		expect(lines[1].indexOf('Thrower') > -1).to.equal(true);
+		let lines = getStack(warnings).split('\n');
+		expect(lines[0].indexOf('Thrower') > -1).to.equal(true);
+		expect(lines[1].indexOf('Foo') > -1).to.equal(true);
 	});
 
 	it('should only print owners', () => {
@@ -65,21 +65,22 @@ describe('component stack', () => {
 		}
 
 		class Thrower extends Component {
-			constructor(props) {
-				super(props);
-				this.setState({ foo: 1 });
-			}
-
 			render() {
-				return <div>foo</div>;
+				return (
+					<table>
+						<td>
+							<tr>foo</tr>
+						</td>
+					</table>
+				);
 			}
 		}
 
 		render(<Bar />, scratch);
 
-		let lines = getWarningStack().split('\n');
-		expect(lines[0].indexOf('Bar') > -1).to.equal(true);
-		expect(lines[1].indexOf('Foo') > -1).to.equal(true);
-		expect(lines[2].indexOf('Thrower') > -1).to.equal(true);
+		let lines = getStack(errors).split('\n');
+		expect(lines[0].indexOf('td') > -1).to.equal(true);
+		expect(lines[1].indexOf('Thrower') > -1).to.equal(true);
+		expect(lines[2].indexOf('Bar') > -1).to.equal(true);
 	});
 });
