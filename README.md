@@ -145,6 +145,7 @@ Preact supports modern browsers and IE9+:
 - :fax: [**preact-bind-group**](https://github.com/k1r0s/preact-bind-group): Preact Forms made easy, Group Events into a Single Callback
 - :hatching_chick: [**preact-habitat**](https://github.com/zouhir/preact-habitat): Declarative Preact widgets renderer in any CMS or DOM host ([demo](https://codepen.io/zouhir/pen/brrOPB)).
 - :tada: [**proppy-preact**](https://github.com/fahad19/proppy): Functional props composition for Preact components
+- :lipstick: [**preact-css**](https://github.com/Tencent/omi/tree/master/packages/preact-css): Scoped css with pure css string for Preact
 
 #### UI Component Libraries
 
