@@ -1,5 +1,4 @@
-const DEV = process.env.NODE_ENV !== 'production';
-
+// Only used for mocha tests. For karma, see karma.config.js
 module.exports = function(api) {
 	api.cache(true);
 
@@ -18,10 +17,9 @@ module.exports = function(api) {
 		],
 		plugins: [
 			'@babel/plugin-proposal-object-rest-spread',
-			DEV && '@babel/plugin-transform-react-jsx-source',
 			'@babel/plugin-transform-react-jsx',
 			'babel-plugin-transform-async-to-promises'
-		].filter(Boolean),
+		],
 		ignore: ['./dist']
 	};
 };
