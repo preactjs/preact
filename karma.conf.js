@@ -61,6 +61,33 @@ var localLaunchers = {
 	}
 };
 
+const babelOptions = (options = {}) => {
+	return {
+		babelrc: false,
+		cacheDirectory: true,
+		presets: [
+			[
+				'@babel/preset-env',
+				{
+					loose: true,
+					exclude: ['@babel/plugin-transform-typeof-symbol'],
+					targets: {
+						browsers: ['last 2 versions', 'IE >= 9']
+					}
+				}
+			]
+		],
+		plugins: [
+			coverage && ['istanbul', { include: '**/src/**/*.js' }],
+			'@babel/plugin-proposal-object-rest-spread',
+			options.debug && '@babel/plugin-transform-react-jsx-source',
+			'@babel/plugin-transform-react-jsx',
+			'babel-plugin-transform-async-to-promises'
+		].filter(Boolean),
+		ignore: ['./dist']
+	};
+};
+
 module.exports = function(config) {
 	config.set({
 		browsers: sauceLabs
@@ -134,16 +161,22 @@ module.exports = function(config) {
 
 				/* Transpile source and test files */
 				rules: [
+					// Special case for babel plugins that should not be enabled
+					// in production mode and only be enabled for specific
+					// test files
 					{
 						enforce: 'pre',
+						test: /(component-stack|debug)\.test\.js$/,
+						exclude: /node_modules/,
+						loader: 'babel-loader',
+						options: babelOptions({ debug: true })
+					},
+
+					{
 						test: /\.jsx?$/,
 						exclude: /node_modules/,
 						loader: 'babel-loader',
-						options: {
-							plugins: coverage
-								? [['istanbul', { include: '**/src/**/*.js' }]]
-								: []
-						}
+						options: babelOptions()
 					}
 				]
 			},

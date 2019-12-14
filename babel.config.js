@@ -1,3 +1,4 @@
+// Only used for mocha tests. For karma, see karma.config.js
 module.exports = function(api) {
 	api.cache(true);
 
