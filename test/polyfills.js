@@ -8,6 +8,7 @@ import 'core-js/fn/array/includes';
 import 'core-js/fn/string/includes';
 import 'core-js/fn/string/starts-with';
 import 'core-js/fn/string/code-point-at';
+import 'core-js/fn/string/from-code-point';
 import 'core-js/fn/object/assign';
 
 // Fix Function#name on browsers that do not support it (IE).
