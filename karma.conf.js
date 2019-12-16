@@ -172,6 +172,14 @@ module.exports = function(config) {
 						options: babelOptions({ debug: true })
 					},
 
+					// Special case for sinon.js which ships ES2015+ code in their
+					// esm bundle
+					{
+						test: /node_modules\/sinon\/.*\.jsx?$/,
+						loader: 'babel-loader',
+						options: babelOptions()
+					},
+
 					{
 						test: /\.jsx?$/,
 						exclude: /node_modules/,
