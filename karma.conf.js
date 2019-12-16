@@ -80,7 +80,10 @@ const babelOptions = (options = {}) => {
 			]
 		],
 		plugins: [
-			coverage && ['istanbul', { include: '**/src/**/*.js' }],
+			coverage && [
+				'istanbul',
+				{ include: '**/src/**/*.js', exclude: '**/src/devtools/**/*' }
+			],
 			'@babel/plugin-proposal-object-rest-spread',
 			options.debug && '@babel/plugin-transform-react-jsx-source',
 			'@babel/plugin-transform-react-jsx',
