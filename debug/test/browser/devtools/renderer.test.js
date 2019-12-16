@@ -69,6 +69,12 @@ describe('Renderer 10', () => {
 	/** @type {() => void} */
 	let rerender;
 
+	before(function() {
+		if (!/(Firefox|Chrome)/.test(navigator.userAgent)) {
+			this.skip();
+		}
+	});
+
 	beforeEach(() => {
 		scratch = setupScratch();
 		const mock = setupMockHook(options);
