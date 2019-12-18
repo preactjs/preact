@@ -1,5 +1,5 @@
 import { EMPTY_OBJ, EMPTY_ARR } from './constants';
-import { commitRoot, diff } from './diff/index';
+import { commitRoot, diff, commit } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
 
@@ -38,7 +38,7 @@ export function render(vnode, parentDom, replaceNode) {
 		replaceNode || EMPTY_OBJ,
 		isHydrating
 	);
-	commitRoot(commitQueue, vnode);
+	commitRoot(vnode, commitQueue);
 }
 
 /**

@@ -109,7 +109,7 @@ describe('render()', () => {
 		expect(scratch.firstChild).to.have.property('nodeName', 'X-BAR');
 	});
 
-	it.only('should support the form attribute', () => {
+	it('should support the form attribute', () => {
 		render(
 			<div>
 				<form id="myform" />

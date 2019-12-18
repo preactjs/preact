@@ -214,6 +214,43 @@ export function commitRoot(root) {
 	});
 }
 
+const commitChildren = (vnode, q) => {
+	for (let i = 0, len = vnode._children.length; i < len; i++) {
+		const childVNode = vnode._children[i];
+		let newDom = commit(childVNode, q);
+		const oldDom = vnode._;
+		if (newDom != null) {
+			if (childVNode._lastDomChild != null) {
+				// Only Fragments or components that return Fragment like VNodes will
+				// have a non-null _lastDomChild. Continue the diff from the end of
+				// this Fragment's DOM tree.
+				newDom = childVNode._lastDomChild;
+				// Eagerly cleanup _lastDomChild. We don't need to persist the value because
+				// it is only used by `diffChildren` to determine where to resume the diff after
+				// diffing Components and Fragments.
+				childVNode._lastDomChild = null;
+			} else if (newDom != childVNode._dom || newDom.parentNode == null) {
+				outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
+					parentDom.appendChild(newDom);
+				} else {
+					// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
+					for (
+						sibDom = oldDom, j = 0;
+						(sibDom = sibDom.nextSibling) && j < oldChildrenLength;
+						j += 2
+					) {
+						if (sibDom == newDom) {
+							break outer;
+						}
+					}
+					parentDom.insertBefore(newDom, oldDom);
+				}
+			}
+		}
+		vnode._parentDom.appendChild(childVNode._dom);
+	}
+};
+
 export const commit = (vnode, queue) => {
 	let dom = vnode._dom;
 	if (typeof vnode.type === 'function') {
@@ -227,7 +264,7 @@ export const commit = (vnode, queue) => {
 			);
 		}
 
-		commitChildren(vnode);
+		commitChildren(vnode, queue);
 
 		queue.push(c);
 	} else {
