@@ -1379,7 +1379,7 @@ describe('render()', () => {
 			newScratch.parentNode.removeChild(newScratch);
 		});
 
-		it.only('should unmount existing components in prerendered HTML', () => {
+		it('should unmount existing components in prerendered HTML', () => {
 			const newScratch = setupScratch();
 			const unmount = sinon.spy();
 			const mount = sinon.spy();
@@ -1411,7 +1411,7 @@ describe('render()', () => {
 			newScratch.parentNode.removeChild(newScratch);
 		});
 
-		it.only('should unmount nested existing components in prerendered HTML', () => {
+		it('should unmount nested existing components in prerendered HTML', () => {
 			const newScratch = setupScratch();
 			const unmount = sinon.spy();
 			const mount = sinon.spy();
