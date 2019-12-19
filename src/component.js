@@ -76,7 +76,7 @@ Component.prototype.forceUpdate = function(callback) {
  * ancestor's `getChildContext()`
  * @returns {import('./index').ComponentChildren | void}
  */
-Component.prototype.render = Fragment;
+Component.prototype.render = () => {};
 
 /**
  * @param {import('./internal').VNode} vnode
