@@ -96,4 +96,21 @@ describe('context', () => {
 			<section>value is: </section>
 		`);
 	});
+
+	it('should support default context value with absent provider', () => {
+		const { Consumer } = createContext('correct');
+		let rendered = renderJsx(
+			<Consumer>
+				{(value) => (
+					<section>
+						value is: {value}
+					</section>
+				)}
+			</Consumer>
+		);
+
+		expect(rendered).to.equal(dedent`
+			<section>value is: correct</section>
+		`);
+	});
 });

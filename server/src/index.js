@@ -86,7 +86,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				// the context value as `this.context` just for this component.
 				let cxType = nodeName.contextType;
 				let provider = cxType && context[cxType.__c];
-				let cctx = cxType != null ? (provider ? provider.props.value : cxType._defaultValue) : context;
+				let cctx = cxType != null ? (provider ? provider.props.value : cxType.__) : context;
 
 				// stateless functional components
 				rendered = nodeName.call(vnode.__c, props, cctx);
@@ -95,7 +95,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				// class-based components
 				let cxType = nodeName.contextType;
 				let provider = cxType && context[cxType.__c];
-				let cctx = cxType != null ? (provider ? provider.props.value : cxType._defaultValue) : context;
+				let cctx = cxType != null ? (provider ? provider.props.value : cxType.__) : context;
 
 				// c = new nodeName(props, context);
 				c = vnode.__c = new nodeName(props, cctx);
