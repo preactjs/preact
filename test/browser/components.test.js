@@ -485,7 +485,7 @@ describe('Components', () => {
 
 			sinon.spy(Foo.prototype, 'render');
 
-			render(<Foo {...PROPS} />, scratch);
+			render(<Foo {...PROPS}>children <strong>should not</strong> be rendered.</Foo>, scratch);
 
 			expect(Foo.prototype.render)
 				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(PROPS, {}, {})
