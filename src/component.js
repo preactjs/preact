@@ -1,7 +1,6 @@
 import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
 import options from './options';
-import { Fragment } from './create-element';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
