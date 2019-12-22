@@ -98,7 +98,7 @@ describe('useEffect', () => {
 
 		const Page2 = () => {
 			useEffect(() => {
-				throw new Error('wut');
+				throw new Error('err');
 			}, []);
 			return <p>invisible</p>;
 		};
@@ -130,5 +130,49 @@ describe('useEffect', () => {
 		act(() => render(<App page={1} />, scratch));
 		expect(spy).to.be.calledOnce;
 		expect(scratch.innerHTML).to.equal('<p>loaded</p>');
+	});
+
+	it('should throw an error upwards from return', () => {
+		const spy = sinon.spy();
+		let errored = false;
+
+		const Page1 = () => {
+			const [state, setState] = useState('loading');
+			useEffect(() => {
+				setState('loaded');
+			}, []);
+			return <p>{state}</p>;
+		};
+
+		const Page2 = () => {
+			useEffect(() => {
+				return () => {
+					throw new Error('err');
+				};
+			}, []);
+			return <p>Load</p>;
+		};
+
+		class App extends Component {
+			componentDidCatch(err) {
+				spy();
+				errored = err;
+			}
+
+			render(props, state) {
+				if (errored) {
+					return <p>Error</p>;
+				}
+
+				return <Fragment>{props.page === 1 ? <Page1 /> : <Page2 />}</Fragment>;
+			}
+		}
+
+		act(() => render(<App page={2} />, scratch));
+		expect(scratch.innerHTML).to.equal('<p>Load</p>');
+
+		act(() => render(<App page={1} />, scratch));
+		expect(spy).to.be.calledOnce;
+		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 	});
 });

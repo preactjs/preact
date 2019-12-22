@@ -46,12 +46,16 @@ options.diffed = vnode => {
 
 options._commit = (vnode, commitQueue) => {
 	commitQueue.some(component => {
-		component._renderCallbacks.forEach(invokeCleanup);
-		component._renderCallbacks = component._renderCallbacks.filter(cb =>
-			cb._value ? invokeEffect(cb) : true
-		);
+		try {
+			component._renderCallbacks.forEach(invokeCleanup);
+			component._renderCallbacks = component._renderCallbacks.filter(cb =>
+				cb._value ? invokeEffect(cb) : true
+			);
+		} catch (e) {
+			options._catchError(e, component._vnode);
+			return true;
+		}
 	});
-
 	if (oldCommit) oldCommit(vnode, commitQueue);
 };
 
@@ -63,7 +67,11 @@ options.unmount = vnode => {
 
 	const hooks = c.__hooks;
 	if (hooks) {
-		hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
+		try {
+			hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
+		} catch (e) {
+			options._catchError(e, c._vnode);
+		}
 	}
 };
 
