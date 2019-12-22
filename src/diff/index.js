@@ -5,6 +5,13 @@ import { diffChildren, toChildArray } from './children';
 import { diffProps } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
+import {
+	resetHookState,
+	afterPaint,
+	afterPaintEffects,
+	invokeCleanup,
+	invokeEffect
+} from '../hooks';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -156,6 +163,13 @@ export function diff(
 			c.props = newProps;
 			c.state = c._nextState;
 
+			resetHookState(c);
+			if (c.__hooks) {
+				c.__hooks._pendingEffects.forEach(invokeCleanup);
+				c.__hooks._pendingEffects.forEach(invokeEffect);
+				c.__hooks._pendingEffects = [];
+			}
+
 			if ((tmp = options._render)) tmp(newVNode);
 
 			c._dirty = false;
@@ -213,6 +227,13 @@ export function diff(
 			);
 		}
 
+		const hooks = newVNode._component && newVNode._component.__hooks;
+		if (hooks) {
+			if (hooks._pendingEffects.length) {
+				afterPaint(afterPaintEffects.push(newVNode._component));
+			}
+		}
+
 		if ((tmp = options.diffed)) tmp(newVNode);
 	} catch (e) {
 		options._catchError(e, newVNode, oldVNode);
@@ -231,6 +252,10 @@ export function commitRoot(commitQueue, root) {
 
 	commitQueue.some(c => {
 		try {
+			c._renderCallbacks.forEach(invokeCleanup);
+			c._renderCallbacks = c._renderCallbacks.filter(cb =>
+				cb._value ? invokeEffect(cb) : true
+			);
 			commitQueue = c._renderCallbacks;
 			c._renderCallbacks = [];
 			commitQueue.some(cb => {
@@ -417,6 +442,12 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	vnode._dom = vnode._lastDomChild = null;
 
 	if ((r = vnode._component) != null) {
+		if (r.__hooks) {
+			r.__hooks._list.some(h => {
+				h._cleanup && h._cleanup();
+			});
+		}
+
 		if (r.componentWillUnmount) {
 			try {
 				r.componentWillUnmount();

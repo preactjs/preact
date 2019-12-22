@@ -12,3 +12,15 @@ export { createContext } from './create-context';
 export { toChildArray } from './diff/children';
 export { unmount as _unmount } from './diff';
 export { default as options } from './options';
+export {
+	useState,
+	useReducer,
+	useEffect,
+	useLayoutEffect,
+	useDebugValue,
+	useContext,
+	useRef,
+	useImperativeHandle,
+	useMemo,
+	useCallback
+} from './hooks';

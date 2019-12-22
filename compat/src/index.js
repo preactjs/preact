@@ -5,9 +5,7 @@ import {
 	createRef,
 	Component,
 	createContext,
-	Fragment
-} from 'preact';
-import {
+	Fragment,
 	useState,
 	useReducer,
 	useEffect,
@@ -18,7 +16,7 @@ import {
 	useCallback,
 	useContext,
 	useDebugValue
-} from 'preact/hooks';
+} from 'preact';
 import { PureComponent } from './PureComponent';
 import { memo } from './memo';
 import { forwardRef } from './forwardRef';
@@ -95,7 +93,6 @@ function findDOMNode(component) {
 // eslint-disable-next-line camelcase
 const unstable_batchedUpdates = (callback, arg) => callback(arg);
 
-export * from 'preact/hooks';
 export {
 	version,
 	Children,
@@ -119,7 +116,17 @@ export {
 	unstable_batchedUpdates,
 	Suspense,
 	SuspenseList,
-	lazy
+	lazy,
+	useState,
+	useReducer,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useImperativeHandle,
+	useMemo,
+	useCallback,
+	useContext,
+	useDebugValue
 };
 
 // React copies the named exports to the default one.
