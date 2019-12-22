@@ -1,4 +1,4 @@
-import { options } from 'preact';
+import options from './options';
 
 let currentComponent = null;
 let currentIndex = null;
