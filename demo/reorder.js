@@ -80,7 +80,7 @@ export default class Reorder extends Component {
 					<label><input type="checkbox" onClick={this.toggleKeys} checked={useKeys} /> use keys?</label>
 					<label><input type="number" step="1" min="1" style={{ width: '3em' }} onInput={this.setCount} value={count} /> count</label>
 				</header>
-				<ul>
+				<ul log>
 					{items.map(this.renderItem)}
 				</ul>
 			</div>

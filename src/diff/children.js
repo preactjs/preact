@@ -48,6 +48,10 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		}
 	}
 
+	let logs = '';
+	let offset = 0;
+	const log = newParentVNode.props.log ? m => logs+='\n'+m : false;
+
 	i=0;
 	newParentVNode._children = toChildArray(newParentVNode._children, childVNode => {
 
@@ -59,10 +63,13 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 			// If found, delete the array item by setting to `undefined`.
 			// We use `undefined`, as `null` is reserved for empty placeholders
 			// (holes).
-			oldVNode = oldChildren[i];
+			oldVNode = oldChildren[i + offset];
+
+			// if (log) console.log(i, offset, oldVNode===null || (oldVNode && childVNode.key == oldVNode.key && childVNode.type === oldVNode.type));
 
 			if (oldVNode===null || (oldVNode && childVNode.key == oldVNode.key && childVNode.type === oldVNode.type)) {
-				oldChildren[i] = undefined;
+				oldChildren[i + offset] = undefined;
+				if (log) log(i + (offset ? `+ ${offset}` : '') + ' = already in-place');
 			}
 			else {
 				// Either oldVNode === undefined or oldChildrenLength > 0,
@@ -73,9 +80,22 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 					// We always match by type (in either case).
 					if (oldVNode && childVNode.key == oldVNode.key && childVNode.type === oldVNode.type) {
 						oldChildren[j] = undefined;
+						//if (j>i) oldChildren.splice(j, 1);
+						//else oldChildren[j] = undefined;
+						// oldChildren.splice(j, 1);
+						// oldChildren.splice(i, 0, undefined);
 						break;
 					}
 					oldVNode = null;
+				}
+
+				if (log) {
+					if (!oldVNode) {
+						log(i + (offset ? `+ ${offset}` : '') + ' = no match');
+					}
+					else {
+						log(i + (offset ? `+ ${offset}` : '') + ' = move from ' + j);
+					}
 				}
 			}
 
@@ -111,6 +131,7 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 					// The values only have the same type when `null`.
 
 					outer: if (oldDom==null || oldDom.parentNode!==parentDom) {
+						if (log) log(` > insertion of ${oldDom==null ? 'new node' : 'reparented node'}, appending.`);
 						parentDom.appendChild(newDom);
 					}
 					else {
@@ -120,6 +141,8 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 								break outer;
 							}
 						}
+						if (log) log(` > insertion scanned forward ${j/2} siblings.`);
+						// offset++;
 						parentDom.insertBefore(newDom, oldDom);
 					}
 
@@ -153,6 +176,8 @@ export function diffChildren(parentDom, newParentVNode, oldParentVNode, context,
 		i++;
 		return childVNode;
 	});
+
+	if (logs) console.log('debug:' + logs);
 
 	newParentVNode._dom = firstChildDom;
 
