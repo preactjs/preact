@@ -252,12 +252,14 @@ export function commitRoot(commitQueue, root) {
 
 	commitQueue.some(c => {
 		try {
-			c._renderCallbacks.forEach(invokeCleanup);
-			c._renderCallbacks = c._renderCallbacks.filter(cb =>
-				cb._value ? invokeEffect(cb) : true
-			);
 			commitQueue = c._renderCallbacks;
 			c._renderCallbacks = [];
+
+			commitQueue.forEach(invokeCleanup);
+			commitQueue = commitQueue.filter(cb =>
+				cb._value ? invokeEffect(cb) : true
+			);
+
 			commitQueue.some(cb => {
 				cb.call(c);
 			});
