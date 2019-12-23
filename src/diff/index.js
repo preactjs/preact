@@ -2,7 +2,7 @@ import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren, toChildArray } from './children';
-import { diffProps, commitPropUpdates } from './props';
+import { diffProps } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
 
@@ -31,7 +31,7 @@ export function diff(
 
 	try {
 		outer: if (typeof newType === 'function') {
-			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
+			let c, isNew, oldProps, oldState, clearProcessingException;
 			let newProps = newVNode.props;
 			let provider = tmp && context[tmp._id];
 			let cctx = tmp
@@ -193,95 +193,6 @@ export function diff(
 		options._catchError(e, newVNode, old);
 	}
 }
-
-/**
- * @param {import('../internal').VNode} root
- */
-export function commitRoot(root) {
-	let commitQueue = [];
-	commit(root, commitQueue);
-	if (options._commit) options._commit(root, commitQueue);
-	commitQueue.some(c => {
-		try {
-			commitQueue = c._renderCallbacks;
-			c._renderCallbacks = [];
-			commitQueue.some(cb => {
-				cb.call(c);
-			});
-		} catch (e) {
-			options._catchError(e, c._vnode);
-		}
-	});
-}
-
-const commitChildren = (vnode, q) => {
-	for (let i = 0, len = vnode._children.length; i < len; i++) {
-		const childVNode = vnode._children[i];
-		let newDom = commit(childVNode, q);
-		const oldDom = vnode._;
-		if (newDom != null) {
-			if (childVNode._lastDomChild != null) {
-				// Only Fragments or components that return Fragment like VNodes will
-				// have a non-null _lastDomChild. Continue the diff from the end of
-				// this Fragment's DOM tree.
-				newDom = childVNode._lastDomChild;
-				// Eagerly cleanup _lastDomChild. We don't need to persist the value because
-				// it is only used by `diffChildren` to determine where to resume the diff after
-				// diffing Components and Fragments.
-				childVNode._lastDomChild = null;
-			} else if (newDom != childVNode._dom || newDom.parentNode == null) {
-				outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
-					parentDom.appendChild(newDom);
-				} else {
-					// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
-					for (
-						sibDom = oldDom, j = 0;
-						(sibDom = sibDom.nextSibling) && j < oldChildrenLength;
-						j += 2
-					) {
-						if (sibDom == newDom) {
-							break outer;
-						}
-					}
-					parentDom.insertBefore(newDom, oldDom);
-				}
-			}
-		}
-		vnode._parentDom.appendChild(childVNode._dom);
-	}
-};
-
-export const commit = (vnode, queue) => {
-	let dom = vnode._dom;
-	if (typeof vnode.type === 'function') {
-		let c = vnode._component;
-
-		if (c.isNew && c.componentDidMount) {
-			c._renderCallbacks.push(c.componentDidMount);
-		} else if (!c.isNew && c.componentDidUpdate) {
-			c._renderCallbacks.push(() =>
-				c.componentDidMount(c.props, c.state, c._snapshot)
-			);
-		}
-
-		commitChildren(vnode, queue);
-
-		queue.push(c);
-	} else {
-		if (!dom) {
-			if (vnode.type == null) {
-				return document.createTextNode(vnode.props);
-			}
-
-			dom = false
-				? document.createElementNS('http://www.w3.org/2000/svg', vnode.type)
-				: document.createElement(vnode.type);
-		}
-		commitPropUpdates(dom, vnode._updates, false);
-	}
-
-	return dom;
-};
 
 /**
  * Diff two virtual nodes representing DOM element
