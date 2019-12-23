@@ -37,7 +37,7 @@ export function render(vnode, parentDom, replaceNode) {
 		replaceNode || EMPTY_OBJ,
 		isHydrating
 	);
-	commitRoot(vnode);
+	commitRoot(parentDom, vnode);
 }
 
 /**

@@ -57,7 +57,7 @@ describe('render()', () => {
 		logCall(Element.prototype, 'remove');
 	});
 
-	it.only('should render an empty text node given an empty string', () => {
+	it('should render an empty text node given an empty string', () => {
 		render('', scratch);
 		let c = scratch.childNodes;
 		expect(c).to.have.length(1);

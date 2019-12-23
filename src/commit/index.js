@@ -5,9 +5,9 @@ import { commitChildren } from './children';
 /**
  * @param {import('../internal').VNode} root
  */
-export function commitRoot(root) {
+export function commitRoot(parentDom, root) {
 	let commitQueue = [];
-	commit(root, commitQueue);
+	commit(parentDom, root, commitQueue);
 	if (options._commit) options._commit(root, commitQueue);
 	commitQueue.some(c => {
 		try {
@@ -22,7 +22,7 @@ export function commitRoot(root) {
 	});
 }
 
-export const commit = (vnode, queue) => {
+export const commit = (parentDom, vnode, queue) => {
 	let dom = vnode._dom;
 	if (typeof vnode.type === 'function') {
 		let c = vnode._component;
@@ -31,11 +31,11 @@ export const commit = (vnode, queue) => {
 			c._renderCallbacks.push(c.componentDidMount);
 		} else if (!c.isNew && c.componentDidUpdate) {
 			c._renderCallbacks.push(() =>
-				c.componentDidMount(c.props, c.state, c._snapshot)
+				c.componentDidUpdate(c.props, c.state, c._snapshot)
 			);
 		}
 
-		commitChildren(vnode, queue);
+		commitChildren(parentDom, vnode, queue);
 
 		queue.push(c);
 	} else {
