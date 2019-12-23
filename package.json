@@ -1,7 +1,7 @@
 {
   "name": "preact",
   "amdName": "preact",
-  "version": "10.0.5",
+  "version": "10.1.1",
   "private": false,
   "description": "Fast 3kb React-compatible Virtual DOM library.",
   "main": "dist/preact.js",
@@ -148,6 +148,7 @@
     "@babel/core": "^7.7.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.6.2",
     "@babel/plugin-transform-react-jsx": "^7.7.0",
+    "@babel/plugin-transform-react-jsx-source": "^7.7.4",
     "@babel/preset-env": "^7.7.1",
     "@babel/register": "^7.7.0",
     "@types/chai": "^4.1.2",

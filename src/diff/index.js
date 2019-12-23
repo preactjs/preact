@@ -113,7 +113,7 @@ export function diff(
 			} else {
 				if (
 					newType.getDerivedStateFromProps == null &&
-					c._force == null &&
+					newProps !== oldProps &&
 					c.componentWillReceiveProps != null
 				) {
 					c.componentWillReceiveProps(newProps, cctx);
