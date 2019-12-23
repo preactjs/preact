@@ -227,19 +227,21 @@ export function diff(
  * @param {import('../internal').VNode} root
  */
 export function commitRoot(commitQueue, root) {
-	if (options._commit) options._commit(root, commitQueue);
-
-	commitQueue.some(c => {
-		try {
-			commitQueue = c._renderCallbacks;
-			c._renderCallbacks = [];
-			commitQueue.some(cb => {
-				cb.call(c);
-			});
-		} catch (e) {
-			options._catchError(e, c._vnode);
-		}
-	});
+	try {
+		if (options._commit) options._commit(root, commitQueue);
+		commitQueue.some(c => {
+			try {
+				commitQueue = c._renderCallbacks;
+				c._renderCallbacks = [];
+				commitQueue.some(cb => {
+					cb.call(c);
+				});
+			} catch (e) {
+				options._catchError(e, c._vnode);
+			}
+		});
+		// Catch errors thrown in options._commit (this could be solved easier by moving hooks to core)
+	} catch (e) {}
 }
 
 /**

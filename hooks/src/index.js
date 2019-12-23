@@ -53,7 +53,8 @@ options._commit = (vnode, commitQueue) => {
 			);
 		} catch (e) {
 			options._catchError(e, component._vnode);
-			return true;
+			if (oldCommit) oldCommit(vnode, commitQueue);
+			throw e;
 		}
 	});
 	if (oldCommit) oldCommit(vnode, commitQueue);
