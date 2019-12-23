@@ -15,8 +15,6 @@ import { getDomSibling } from '../component';
  * @param {object} context The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
- * @param {Array<import('../internal').Component>} commitQueue List of components
- * which have callbacks to invoke in commitRoot
  * @param {Node | Text} oldDom The current attached DOM
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
@@ -30,7 +28,6 @@ export function diffChildren(
 	context,
 	isSvg,
 	excessDomChildren,
-	commitQueue,
 	oldDom,
 	isHydrating
 ) {
@@ -106,7 +103,6 @@ export function diffChildren(
 					context,
 					isSvg,
 					excessDomChildren,
-					commitQueue,
 					oldDom,
 					isHydrating
 				);

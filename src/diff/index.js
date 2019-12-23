@@ -13,7 +13,6 @@ export function diff(
 	context,
 	isSvg,
 	excessDomChildren,
-	commitQueue,
 	oldDom,
 	isHydrating
 ) {
@@ -165,7 +164,6 @@ export function diff(
 				context,
 				isSvg,
 				excessDomChildren,
-				commitQueue,
 				oldDom,
 				isHydrating
 			);
@@ -185,7 +183,6 @@ export function diff(
 				context,
 				isSvg,
 				excessDomChildren,
-				commitQueue,
 				isHydrating
 			);
 		}
@@ -203,8 +200,6 @@ export function diff(
  * @param {object} context The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {*} excessDomChildren
- * @param {Array<import('../internal').Component>} commitQueue List of components
- * which have callbacks to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @returns {import('../internal').PreactElement}
  */
@@ -215,7 +210,6 @@ function diffElementNodes(
 	context,
 	isSvg,
 	excessDomChildren,
-	commitQueue,
 	isHydrating
 ) {
 	if (!dom) return;
@@ -280,7 +274,6 @@ function diffElementNodes(
 				context,
 				newVNode.type === 'foreignObject' ? false : isSvg,
 				excessDomChildren,
-				commitQueue,
 				EMPTY_OBJ,
 				isHydrating
 			);

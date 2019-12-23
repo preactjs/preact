@@ -1,7 +1,8 @@
 import { assign } from './util';
-import { diff, commitRoot } from './diff/index';
+import { diff } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
+import { commitRoot } from './commit';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -120,7 +121,6 @@ function renderComponent(component) {
 		parentDom = component._parentDom;
 
 	if (parentDom) {
-		let commitQueue = [];
 		let newDom = diff(
 			parentDom,
 			vnode,
@@ -128,10 +128,9 @@ function renderComponent(component) {
 			component._context,
 			parentDom.ownerSVGElement !== undefined,
 			null,
-			commitQueue,
 			oldDom == null ? getDomSibling(vnode) : oldDom
 		);
-		commitRoot(commitQueue, vnode);
+		commitRoot(vnode);
 
 		if (newDom != oldDom) {
 			updateParentDomPointers(vnode);

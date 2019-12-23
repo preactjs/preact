@@ -1,7 +1,8 @@
 import { EMPTY_OBJ, EMPTY_ARR } from './constants';
-import { commitRoot, diff, commit } from './diff/index';
+import { diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
+import { commitRoot } from './commit';
 
 const IS_HYDRATE = EMPTY_OBJ;
 
@@ -22,7 +23,6 @@ export function render(vnode, parentDom, replaceNode) {
 		: (replaceNode && replaceNode._children) || parentDom._children;
 	vnode = createElement(Fragment, null, [vnode]);
 
-	let commitQueue = [];
 	diff(
 		parentDom,
 		((isHydrating ? parentDom : replaceNode || parentDom)._children = vnode),
@@ -34,11 +34,10 @@ export function render(vnode, parentDom, replaceNode) {
 			: oldVNode
 			? null
 			: EMPTY_ARR.slice.call(parentDom.childNodes),
-		commitQueue,
 		replaceNode || EMPTY_OBJ,
 		isHydrating
 	);
-	commitRoot(vnode, commitQueue);
+	commitRoot(vnode);
 }
 
 /**
