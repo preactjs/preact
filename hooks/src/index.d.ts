@@ -127,3 +127,13 @@ export function useDebugValue<T>(
 	value: T,
 	formatter?: (value: T) => string | number
 ): void;
+
+export interface ComponentFunction<P = {}> {
+	(props: P, error?: Error): preact.ComponentChild;
+	displayName?: string;
+}
+
+export function errorBoundary<P = {}>(
+	fn: ComponentFunction<P>,
+	callback: () => Promise<void> | void
+): preact.FunctionalComponent<P>;
