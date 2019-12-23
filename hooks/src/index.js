@@ -222,6 +222,25 @@ export function useDebugValue(value, formatter) {
 	}
 }
 
+export function errorBoundary(fn, callback) {
+	let setErr;
+
+	function Boundary(props) {
+		const result = useState();
+		setErr = result[1];
+		return fn(props, result[0]);
+	}
+
+	Boundary._catch = err => {
+		if (callback) callback(err);
+		setErr(err);
+	};
+
+	Boundary.displayName = 'ErrorBoundary(' + (fn.displayName || fn.name) + ')';
+
+	return Boundary;
+}
+
 /**
  * After paint effects consumer.
  */
