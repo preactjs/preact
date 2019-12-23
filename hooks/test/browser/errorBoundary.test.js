@@ -31,4 +31,22 @@ describe('errorBoundary', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 	});
+
+	it('calls the errorBoundary callback', () => {
+		const spy = sinon.spy();
+		const error = new Error('test');
+		const Throws = () => {
+			throw error;
+		};
+
+		const App = errorBoundary((props, err) => {
+			return err ? <p>Error</p> : <Throws />;
+		}, spy);
+
+		render(<App />, scratch);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>Error</p>');
+		expect(spy).to.be.calledOnce;
+		expect(spy).to.be.calledWith(error);
+	});
 });
