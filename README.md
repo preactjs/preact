@@ -252,7 +252,7 @@ function process() {
 	}
 }
 ```
-renderComponent来渲染组件，通过调用diff来比较更新真实dom，完成后执行所有组件的did生命周期和setState的回调函数
+renderComponent来渲染组件，通过调用diff来比较虚拟节点并更新真实dom，完成后执行所有组件的did生命周期和setState的回调函数
 ```jsx harmony
 //渲染组件
 function renderComponent(component) {
@@ -262,7 +262,7 @@ function renderComponent(component) {
 
 	if (parentDom) {
 		let commitQueue = [];
-		//比对更新
+		//比较更新
 		let newDom = diff(
 			parentDom,
 			vnode,
