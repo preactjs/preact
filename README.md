@@ -1,8 +1,8 @@
 # 解析preact源码,从preact中理解react原理
 
->注:目前是基于preact10.0.5版本做分析,每个文件的详细注释在[链接](https://github.com/yujingwyh/preact-source-annotation) ,觉得好的话麻烦点个star 
+>注:目前是基于preact10.1.0版本做分析,每个文件的详细注释在[链接](https://github.com/yujingwyh/preact-source-annotation) ,觉得好的话麻烦点个star 
 #### 序言
-一直想去研究react源码,看到一半然后不了了之了.主要是由于react项目过于庞大,代码也比较颗粒化,执行流转比较复杂.另外也没有过多的精力,所有没有持续下去.关注preact有很长一段时间了,有天想想为什么不研究研究preact源码呢,这个号称只有3KB的react浓缩版.<br />
+一直想去研究react源码,每次看到一半都然后不了了之了，主要是由于react项目过于庞大,代码也比较颗粒化,执行流转比较复杂.另外也没有过多的精力,所有没有持续下去.关注preact有很长一段时间了,有天想想为什么不研究研究preact源码呢,这个号称只有3KB的react浓缩版.<br />
 看了下市面上也有很多preact源码解析,但我感觉都有一些不足,很多都是老版本,preact 8与10版本在代码结构上还是有很大差别的.另外大部分都是分析主要渲染的流程,而没有对于一些关键点去做作分析,例如为什么有_lastDomChild,为什么value没有在diffProps中处理,这才是代码中的复杂点,重中之重,也是学习源码的收益点,推测作者的用意,还有没有更好的办法,不是提示思维的最佳方式吗?
 ## 一.文件结构
 路径 | 描述
@@ -20,7 +20,7 @@ index.js | 入口文件
 options.js | 保存一些设置
 render.js | 渲染虚拟节点到真实节点
 util.js | 一些单元方法
-## 二.diff
+## 二.渲染原理
 这个是简单的demo,渲染App组件到真实dom中
 ```jsx harmony
 import {h, Component, render,} from 'preact';
@@ -43,8 +43,8 @@ class App extends Component {
 render(<App/>, document.getElementById('app'));
 ```
 我们看下渲染流程
-1. **创建虚拟节点**<br />
-项目打包环节中,babel的transform-react-jsx插件会将jsx语法编译成React.createElement(type, props, children)形式,对应的是(元素类型,元素属性,元素子节点).preact中需要设置此插件参数,使React.createElement对应为h,最终编译结果如下
+1. **vnode**<br />
+vnode是一个节点描述的对象，项目打包环节中,babel的transform-react-jsx插件会将jsx语法编译成React.createElement(type, props, children)形式,对应的是(元素类型,元素属性,元素子节点).preact中需要设置此插件参数,使React.createElement对应为h,最终编译结果如下
 ```jsx harmony
 class App extends Component {
 	render() {
@@ -128,7 +128,8 @@ function createVNode(type, props, key, ref) {
 	return vnode;
 }
 ```
-2. **虚拟节点diff**<br />
+2. **diff**<br />
+diff包括对函数类型节点,html标签类型节点，子节点，props的对比，函数类型节点对比中主要处理了函数组件的创建，执行生命周期等，html类型节点对比中主要负责创建真实的dom，子节点对比主要处理
 当执行完`h(App,null)`后,render会拿执行结果`{type:App,props:null,key:null,ref:null}`去渲染到真实dom
 ```jsx harmony
 //src/render.js
@@ -147,10 +148,235 @@ function render(vnode, parentDom) {
 执行render函数时,调用了diff函数
 ## 三.组件
 ###1.component
+Component构造函数
+```jsx harmony
+function Component(props, context) {
+	this.props = props;
+	this.context = context;
+}
+```
+
+设置状态，可以看到将新的状态保存在_nextState，然后调用enqueueRender(this)加入选渲染队列并渲染
+```jsx harmony
+Component.prototype.setState = function(update, callback) {
+	let s;
+	//获取_nextState
+	if (this._nextState !== this.state) {
+		s = this._nextState;
+	} else {
+		//新拷贝一份
+		s = this._nextState = assign({}, this.state);
+	}
+	//如果update为函数则执行这个函数
+	if (typeof update == 'function') {
+		update = update(s, this.props);
+	}
+	//合并update到_nextState
+	if (update) {
+		assign(s, update);
+	}
+
+	//如果update为null则不更新
+	if (update == null) return;
+
+	if (this._vnode) {
+		//标记不是强制更新
+		this._force = false;
+		//有回调把回调加入回调数组里
+		if (callback) this._renderCallbacks.push(callback);
+		//加入渲染队列并渲染
+		enqueueRender(this);
+	}
+};
+```
+强制渲染，设置_force来标记是强制渲染，然后加入渲染队列并渲染。如果_force为真，则在diff渲染中不会触发组件的某些生命周期，
+```jsx harmony
+Component.prototype.forceUpdate = function(callback) {
+	if (this._vnode) {
+		//标记强制更新
+		this._force = true;
+		//有回调加入回调数组里
+		if (callback) this._renderCallbacks.push(callback);
+		//加入渲染队列并渲染
+		enqueueRender(this);
+	}
+};
+```
+render函数，默认是Fragment组件，返回子节点
+```jsx harmony
+Component.prototype.render = Fragment;
+function Fragment(props) {
+	return props.children;
+}
+```
+enqueueRender函数把待渲染的组件加入渲染队列，然后延迟执行process
+process函数先按照组件的深度进行排序，最外层的组件最先执行
+如果_dirty为真表示需要渲染，然后调用renderComponent，渲染后会设置该组件_dirty为false，防止重复渲染
+```jsx harmony
+//渲染队列
+let q = [];
+
+//延迟执行
+const defer =
+	typeof Promise == 'function'
+		? Promise.prototype.then.bind(Promise.resolve())
+		: setTimeout;
+
+//延迟执行的钩子
+let prevDebounce;
+
+//组件加入渲染队列并延迟渲染
+export function enqueueRender(c) {
+	//如果_dirty为false则设为true
+	//然后把组件加入队列中
+	//如果队列长度为1或者重新设置过debounceRendering钩子则延迟渲染
+	if (
+		(!c._dirty && (c._dirty = true) && q.push(c) === 1) ||
+		prevDebounce !== options.debounceRendering
+	) {
+		prevDebounce = options.debounceRendering;
+		//延迟执行process
+		(prevDebounce || defer)(process);
+	}
+}
+
+//遍历队列渲染组件
+function process() {
+	let p;
+	//按深度排序 最顶级的组件的最先执行
+	q.sort((a, b) => b._vnode._depth - a._vnode._depth);
+	while ((p = q.pop())) {
+		// forceUpdate's callback argument is reused here to indicate a non-forced update.
+		//如果组件需要渲染则渲染它
+		if (p._dirty) renderComponent(p);
+	}
+}
+```
+renderComponent来渲染组件，通过调用diff来比较更新真实dom，完成后执行所有组件的did生命周期和setState的回调函数
+```jsx harmony
+//渲染组件
+function renderComponent(component) {
+	let vnode = component._vnode,
+		oldDom = vnode._dom,
+		parentDom = component._parentDom;
+
+	if (parentDom) {
+		let commitQueue = [];
+		//比对更新
+		let newDom = diff(
+			parentDom,
+			vnode,
+			assign({}, vnode),
+			component._context,
+			parentDom.ownerSVGElement !== undefined,
+			null,
+			commitQueue,
+			oldDom == null ? getDomSibling(vnode) : oldDom
+		);
+		//渲染完成时执行did生命周期和setState回调
+		commitRoot(commitQueue, vnode);
+		//如果newDom与oldDom不一致,则调用updateParentDomPointers
+		if (newDom != oldDom) {
+			updateParentDomPointers(vnode);
+		}
+	}
+}
+```
 ###2.context
-defaultValue
-value
-ctx
+这是一个context案例，首先通过createContext创建一个context，里面包含Provider和Consumer两个组件
+Provider组件用在最外层，通过设置value来跨组件传递数据
+Consumer组件主要是使用数据，子节点是一个函数，第一个参数就是对应的value
+```jsx harmony
+import { createContext, h, render } from 'preact';
+
+const FontContext = createContext(20);
+
+function Child() {
+	return <FontContext.Consumer>
+		{fontSize=><div style={{fontSize:fontSize}}>child</div>}
+	</FontContext.Consumer>
+}
+function App(){
+	return <Child/>
+}
+render(
+	<FontContext.Provider value={26}>
+		<App/>
+	</FontContext.Provider>,
+	document.getElementById('app')
+);
+
+```
+
+源码也比较简单，调用createContext后返回一个context对象，里面包含了Consumer与Provider组件
+Consumer组件设置了contextType静态属性，渲染时会执行子组件，并把context做为参数，等同于如下类组件
+```jsx harmony
+class Consumer extends Comment{
+    //context新创建的context
+    static contextType = context;
+    render(){
+        return this.props.children(this.context);   
+    }
+}
+```
+Provider组件中创建了一些函数，当渲染到Provider组件时，调用getChildContext来获得一个context，然后在diff子孙节时都会向下传递这个context，如果某个子孙节点组件设置了contextType静态属性，会调用sub方法吧该组件添加到数组中，当Provider组件value更新时，触发shouldComponentUpdate生命周期，然后执行所有的渲染所有的订阅组件
+```jsx harmony
+let i = 0;
+//defaultValue参数是 只有组件的祖先组件中没有Provider组件才使用这个，不是Provider没有设置value
+export function createContext(defaultValue) {
+	const ctx = {};
+
+	const context = {
+		_id: '__cC' + i++,
+		_defaultValue: defaultValue,
+		//context消费者
+		Consumer(props, context) {
+			//把context传给children执行
+			return props.children(context);
+		},
+		//context提供者
+		Provider(props) {
+			if (!this.getChildContext) {
+				const subs = [];
+				//渲染Provider时调用这个然后吧ctx作为context传递给下级组件
+				this.getChildContext = () => {
+					ctx[context._id] = this;
+					//至于为什么不直接返回context而是返回ctx对象
+					//是由于Provider组件后代也可以有Provider组件,context的消费者只取contextType中_id像匹配的
+					//见diff/index.js中diff->outer-> let provider = tmp && context[tmp._id];
+					return ctx;
+				};
+				this.shouldComponentUpdate = _props => {
+					//当value不相等时
+					if (props.value !== _props.value) {
+						//执行渲染 context消费的组件
+						subs.some(c => {
+							c.context = _props.value;
+							enqueueRender(c);
+						});
+					}
+				};
+
+				this.sub = c => {
+					//添加到组件更新队列中，当value改变时渲染该组件
+					subs.push(c);
+					let old = c.componentWillUnmount;
+					//当组件卸载后从队列中删除，然后执行老的componentWillUnmount
+					c.componentWillUnmount = () => {
+						subs.splice(subs.indexOf(c), 1);
+						old && old.call(c);
+					};
+				};
+			}
+			return props.children;
+		}
+	};
+	//设置contextType
+	context.Consumer.contextType = context;
+
+	return context;
+}
+```
 ## 四.解惑疑点
 1. defer
 ```jsx harmony
