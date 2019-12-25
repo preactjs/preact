@@ -1,6 +1,6 @@
 # 解析preact源码,从preact中理解react原理
 
->注:目前是基于preact10.1.0版本做分析,每个文件的详细注释在[链接](https://github.com/yujingwyh/preact-source-annotation) ,觉得好的话麻烦点个star 
+>注:目前是基于preact10.1.0版本做分析,每个文件的详细注释在[链接](https://github.com/yujingwyh/preact-source-annotation/tree/master/src) ,觉得好的话麻烦点个star 
 #### 序言
 一直想去研究react源码,每次看到一半都然后不了了之了，主要是由于react项目过于庞大,代码也比较颗粒化,执行流转比较复杂.另外也没有过多的精力,所有没有持续下去.关注preact有很长一段时间了,有天想想为什么不研究研究preact源码呢,这个号称只有3KB的react浓缩版.<br />
 看了下市面上也有很多preact源码解析,但我感觉都有一些不足,很多都是老版本,preact 8与10版本在代码结构上还是有很大差别的.另外大部分都是分析主要渲染的流程,而没有对于一些关键点去做作分析,例如为什么有_lastDomChild,为什么value没有在diffProps中处理,这才是代码中的复杂点,重中之重,也是学习源码的收益点,推测作者的用意,还有没有更好的办法,不是提示思维的最佳方式吗?
@@ -44,7 +44,7 @@ render(<App/>, document.getElementById('app'));
 ```
 
 1. **vnode**<br />
-vnode是一个节点描述的对象，项目打包环节中,babel的transform-react-jsx插件会将jsx语法编译成React.createElement(type, props, children)形式,对应的是(元素类型,元素属性,元素子节点).preact中需要设置此插件参数,使React.createElement对应为h,最终编译结果如下
+vnode是一个节点描述的对象，项目打包环节中,babel的transform-react-jsx插件默认会将jsx语法编译成React.createElement(type, props, children)形式,对应的是(元素类型,元素属性,元素子节点).preact中需要设置此插件参数,使React.createElement对应为h函数,最终编译结果如下
 ```jsx harmony
 class App extends Component {
 	render() {
@@ -128,7 +128,7 @@ function createVNode(type, props, key, ref) {
 	return vnode;
 }
 ```
-当执行完`h(App,null)`后,render会拿执行结果`{type:App,props:null,key:null,ref:null}`去渲染到真实dom，下面就是render函数的主要相关代码。首先会对传进来的虚拟节点套用一个Fragment的父节点，然后调用diff函数来比较虚拟节点渲染真实的dom，当然首次render时旧的虚拟节点基本都是一个空值，当diff完成也就是真实dom渲染完成，然后执行了commitRoot函数，这个函数主要是执行一些组件的did生命周期和setState回调
+当执行完`h(App,null)`后,render函数会拿执行结果`{type:App,props:null,key:null,ref:null}`去渲染到真实dom，下面就是render函数的主要相关代码。首先会对传进来的虚拟节点套用一个Fragment的父节点，然后调用diff函数来比较虚拟节点渲染真实的dom，当然首次render时旧的虚拟节点基本都是一个空对象，当diff完成后也就是真实dom创建挂载完成，然后执行了commitRoot函数，这个函数主要是执行一些组件的did生命周期和setState回调
 ```jsx harmony
 function render(vnode, parentDom, replaceNode) {
 	let oldVNode = parentDom._children;
@@ -151,8 +151,8 @@ function render(vnode, parentDom, replaceNode) {
 }
 ```
 2. **diff**<br />
-虚拟节点的对比主要有diff,diffElementNodes,diffChildren,diffProps四个函数，他会对比新旧虚拟节点，然后渲染出真实的dom
-diff主要处理了preact组件型虚拟节点,当执行到diff`{type:App,props:null}`时，判断这个虚拟节点没有_component属性，然后通过`new App()`来创建一个实例化在组件并赋值给_component，当再次渲染到这个虚拟节点是就不会在去实例化一个新的虚拟节点了，然后执行了组件的一些生命周期，在执行render方法后会吧结果保存在虚拟节点的children属性中，然后调用diffChildren函数来比较子节点，最后diff会返货虚拟节点生成的dom
+虚拟节点的对比主要有diff,diffElementNodes,diffChildren,diffProps四个函数，diff过程中会对新旧虚拟节点和新旧props做对比，然后渲染出真实的dom<br />
+diff函数主要处理函数型节点，也就是类型为类组件和无状态组件的虚拟节点,当执行到diff`{type:App,props:null}`时，判断这个虚拟节点没有_component属性，然后通过`new App()`来实例化一个组件并赋值给_component，当再次渲染到这个虚拟节点是就不会在去实例化一个新的虚拟节点了，然后执行了组件的一些生命周期，在执行完render方法后会吧结果保存在虚拟节点的children属性中，然后调用diffChildren函数来比较子节点，最后diff会返货虚拟节点生成的dom，
 ```jsx harmony
 export function diff(
 	parentDom,
@@ -730,7 +730,33 @@ function diffChildren(
 	}
 }
 ```
+再来看下整个diff流程，当在diff中执行完App的render方法后整个的虚拟节点树为如下，然后吧type为App层级树的children属性传递给diffChildren
+```json5
+{
+	"type": App,
+	"props": null,
+	"children": {
+		"type": "div",
+		"props": {id: "wrap"},
+		"children": [
+			{
+				"type": "span",
+				"props": null,
+				"children": {
+					"type": null,
+					"props": 123,
+					"children": 123
+				}
+			},
+			{
+				"type": null,
+				"props": 456
+			}
+		]
 
+	}
+}
+```
 ## 三.组件
 ### 1.component
 Component构造函数
