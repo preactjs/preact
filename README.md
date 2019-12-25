@@ -1066,7 +1066,7 @@ function render(vnode, parentDom, replaceNode) {
 	//...
 }
 ```
-发现render函数中会用Fragment嵌套实际传进来的虚拟节点，如果不嵌套会怎么样呢？假如执行这个代码`render(<div>123</div>,document.getElementBuId('App'))`，当执行到diff函数时，会直接调用`newVNode._dom = diffElementNodes(oldVNode._dom,newVNode,oldVNode,)`。这样最终生成的dom与parentDom相关联，也就是不会添加到parentDom里面中去。而如果用Fragment嵌套下，在diff中判断是函数类型，于是执行`diffChildren(parentDom,newVNode,oldVNode...)`，这样会在diffChildren中把生成的dom添加到parentDom中。
+发现render函数中会用Fragment嵌套实际传进来的虚拟节点，为什么要用Fragment包装呢？如果不包装会怎么样呢？假如执行这个代码`render(<div>123</div>,document.getElementBuId('App'))`，当执行到diff函数时，会直接调用`newVNode._dom = diffElementNodes(oldVNode._dom,newVNode,oldVNode,)`。这样最终生成的dom无法与parentDom相关联，也就是不会添加到parentDom里面中去。而如果用Fragment嵌套下，在diff中判断是函数类型，于是执行`diffChildren(parentDom,newVNode,oldVNode...)`，这样会在diffChildren中把生成的dom添加到parentDom中。
 #### 3. hydrate渲染
 ```jsx harmony
 //src/render.js
@@ -1075,7 +1075,7 @@ function hydrate(vnode, parentDom) {
 }
 
 ```
-用hydrate与render两个渲染有什么区别呢,从代码中我们发现在hydrate模式中,diffProps只处理了事件部分,对其他的props没有处理.所以hydrate常用于在服务器渲染后端的html,在客户端渲染时会用hydrate去渲染,由于props在服务端渲染的时候已经处理了,这儿渲染的时候就不用处理了,从而加快首次渲染性能<br />
+用hydrate与render两个渲染有什么区别呢？从代码中我们发现在hydrate模式中，diffProps只处理了事件部分，对其他的props没有处理。所以hydrate常用于在服务器渲染的html，在客户端渲染时会用hydrate去渲染。由于props在服务端渲染的时候已经处理好了，所以在客户端渲染的时候就不用处理了，从而加快首次渲染速度。
 #### 4. props中value与checked单独处理  
 ```jsx harmony
 //src/diff/props.js
@@ -1117,18 +1117,18 @@ function diffElementNodes(dom,newVNode,oldVNode,) {
 	//...
 }
 ``` 
-在diffProps并没有对value与checked,而是在`diffChildren()`后对value与checked做了处理,在diffChildren中算是找到了原因
+在diffProps并没有对value与checked处理，而是在`diffChildren()`后对value与checked做了处理，在diffChildren中算是找到了原因。
 ```jsx harmony
 //src/diff/children.js
 function diffChildren(parentDom,newParentVNode,oldParentVNode,){
     //...
-	if (newParentVNode.type == 'option') {
+    if (newParentVNode.type == 'option') {
 		parentDom.value = '';
-	}
+    }
     //...
 }
 ```
-为什么要设置value为空呢,原来option不设置value,他会把元素的文本内容来作为value,当然还有一些元素也是同样的,不设置value,会从子元素中获取,所以在mvvm中会有问题的,这样谈不上数据与dom双向绑定,所以要在子元素渲染完成,设置value为空,而value的具体数据在子元素处理完成才处理<br />
+为什么要设置value为空呢？原来w3c规定，如果option元素不设置value，那么会把元素的文本内容作为option的value。当然还有一些元素是同样的逻辑，不设置value，会从子元素中获取。所以在mvvm中会有问题的，这样谈不上数据与dom双向绑定。必须要在子元素渲染后完成设置value为空，而value的具体数据在子元素处理完成才处理。
 #### 5. 已经setState又去渲染组件
 ```jsx harmony
 //src/diff/catch-error.js
