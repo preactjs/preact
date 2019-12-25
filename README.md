@@ -1147,26 +1147,26 @@ function _catchError(error, vnode) {
     //...
 }
 ```
-当虚拟节点有异常后，会触发_catchError函数。他会不断的寻找该虚拟节点的祖先节点,直到祖先节点设置了getDerivedStateFromError或者componentDidCatch，然后由这个组件的该函数处理异常。不然直到最顶级组件都没有处理异常，则会抛出异常。上面这段代码中如果设置了`getDerivedStateFromError`，然后去调用了`component.setState`来渲染更新组件，但是后面还去调用了`enqueueRender(component)`渲染了组件，有必要吗？其实是有必要的，这儿主要是为了防止如果`setState`后没有对异常做处理，那么`enqueueRender`渲染后还会出现异常，这时在处理异常会再循环并跳过这个组件,继续向上寻找组件来处理异常。
-#### 6. 标记组件 处理异常中 用了两个变量
+当虚拟节点出现异常后，会触发_catchError函数。他会不断的寻找该虚拟节点的祖先节点，直到祖先节点设置了getDerivedStateFromError或者componentDidCatch，然后由这个组件的该函数处理异常。不然直到最顶级组件都没有处理异常，则会抛出异常。上面这段代码中如果设置了`getDerivedStateFromError`，然后去调用了`component.setState`来渲染更新组件，但是后面还调用了`enqueueRender(component)`来渲染了组件，有必要吗？其实是有必要的，这儿主要是为了防止如果`setState`后没有对异常做处理，那么执行`enqueueRender`渲染后还会出现异常，这时处理异常会再循环并跳过这个组件,继续向上寻找组件来处理异常。
+#### 6. 标记组件‘处理异常中’用了两个变量
 ```jsx harmony
 //src/diff/catch-error.js
 function _catchError(error, vnode) {
     //...
-	if ((component = vnode._component) && !component._processingException) {
+    if ((component = vnode._component) && !component._processingException) {
 		//...
 		return enqueueRender((component._pendingError = component));
-	}
+    }
     //...
 }
 //src/diff/index.js
 function diff(parentDom,newVNode,oldVNode){
-	//...
-	clearProcessingException = c._processingException = c._pendingError;
+    //...
+    clearProcessingException = c._processingException = c._pendingError;
     //...
 }
 ``` 
- `catchError`中用 `_processingException`来判断这个组件是否处理异常,而在`component._pendingError = component`却设置了_pendingError来标记这个组件是处理异常中,在`diff`中又赋给了`_processingException`,为什么不用一个变量来标记呢,其实主要原因是如果渲染队列中前面有他的子组件需要渲染,如果子组件渲染出错,这时不应该跳过这个组件,只有在渲染这个组件的时候才去标记这个组件正在处理异常<br />
+ `catchError`中用 `_processingException`来判断这个组件是否处理异常中，而在`component._pendingError = component`却设置了_pendingError来标记这个组件是在处理异常中，在`diff`中又赋给了`_processingException`。为什么不用一个变量来标记呢，其实主要原因是如果渲染队列中前面已经有他的子组件需要渲染，此时渲染子组件出现异常，这时不应该跳过这个组件。只有在渲染这个组件的时候才去标记这个组件正在处理异常中。
 #### 7. diffProps中事件的处理
 ```jsx harmony
 //src/diff/props.js
@@ -1183,7 +1183,7 @@ function eventProxy(e) {
 	this._listeners[e.type](options.event ? options.event(e) : e);
 }
 ```
-这儿对props的比较处理有点意思,在设置了props的事件时,例如`<input onChange={e=>console.log(e.target.value)} />`,如果onChange之前是空,那么会执行`dom.addEventListener(name, eventProxy, useCapture)`来给dom添加一个事件处理函数,而这个处理函数是一个固定的函数`eventProxy`,当后面onChange中的监听函数发生变化时,只要修改下dom._listeners对应的监听函数,当触发事件时,只要执行固定的dom._listeners中保存的对应监听函数,只有onChange设置了空才去移除这个监听,当onChange中的监听函数发生变化时就不用移除之前的监听,然后监听新的函数<br />
+这儿对props的比较处理有点意思。如果props中设置了事件时，例如`<input onChange={e=>console.log(e.target.value)} />`，假设onChange之前是空，那么会执行`dom.addEventListener(name, eventProxy, useCapture)`来给dom添加一个事件处理函数，而这个处理函数是一个固定的函数`eventProxy`。当后面onChange中的监听函数发生变化时，并不会重新添加新的监听函数，而是只要修改下dom._listeners对应的监听函数就行了。当触发事件时，只会执行固定的dom._listeners中保存的对应监听函数。只有onChange设置了空才去移除这个监听，当onChange中的监听函数发生变化时并不会移除之前的监听函数，然后添加新的监听函数。
 #### 8. _lastDomChild的用处
 ```jsx harmony
 //src/diff/children.js
