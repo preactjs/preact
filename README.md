@@ -1066,7 +1066,7 @@ function render(vnode, parentDom, replaceNode) {
 	//...
 }
 ```
-发现render函数中会用Fragment嵌套实际传进来的组件,如果不嵌套会怎么样呢,例如执行这个代码`render(<div>123</div>,document.getElementBuId('App'))`,当执行到diff函数时,会直接调用`newVNode._dom = diffElementNodes(oldVNode._dom,newVNode,oldVNode,)`,这样最终生成的dom不会添加到parentDom里面中去,而如果用Fragment嵌套下,在diff中判断是组件类型,于是执行`diffChildren(parentDom,newVNode,oldVNode...)`,这样会在diffChildren中把生成的dom添加到parentDom中<br />
+发现render函数中会用Fragment嵌套实际传进来的虚拟节点，如果不嵌套会怎么样呢？假如执行这个代码`render(<div>123</div>,document.getElementBuId('App'))`，当执行到diff函数时，会直接调用`newVNode._dom = diffElementNodes(oldVNode._dom,newVNode,oldVNode,)`。这样最终生成的dom与parentDom相关联，也就是不会添加到parentDom里面中去。而如果用Fragment嵌套下，在diff中判断是函数类型，于是执行`diffChildren(parentDom,newVNode,oldVNode...)`，这样会在diffChildren中把生成的dom添加到parentDom中。
 #### 3. hydrate渲染
 ```jsx harmony
 //src/render.js
