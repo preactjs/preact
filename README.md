@@ -1117,7 +1117,7 @@ function diffElementNodes(dom,newVNode,oldVNode,) {
 	//...
 }
 ``` 
-在diffProps并没有对value与checked处理，而是在`diffChildren()`后对value与checked做了处理，在diffChildren中算是找到了原因。
+在diffProps并没有对value与checked处理，而是在`diffChildren()`后对value与checked做了处理，这个在diffChildren中算是找到了原因。
 ```jsx harmony
 //src/diff/children.js
 function diffChildren(parentDom,newParentVNode,oldParentVNode,){
@@ -1128,7 +1128,7 @@ function diffChildren(parentDom,newParentVNode,oldParentVNode,){
     //...
 }
 ```
-为什么要设置value为空呢？原来w3c规定，如果option元素不设置value，那么会把元素的文本内容作为option的value。当然还有一些元素是同样的逻辑，不设置value，会从子元素中获取。所以在mvvm中会有问题的，这样谈不上数据与dom双向绑定。必须要在子元素渲染后完成设置value为空，而value的具体数据在子元素处理完成才处理。
+在这儿为什么要设置value为空呢？原来w3c规定，如果option元素不设置value，那么会把元素的文本内容作为option的value。当然还有一些元素是同样的逻辑，不设置value，会从子元素中获取。所以在mvvm中会有问题的，这样谈不上数据与dom双向绑定。必须要在子元素渲染后完成设置value为空，然后再从props中处理元素value。
 #### 5. 已经setState又去渲染组件
 ```jsx harmony
 //src/diff/catch-error.js
@@ -1141,14 +1141,13 @@ function _catchError(error, vnode) {
 		component.setState(
 			component.constructor.getDerivedStateFromError(error)
 		);
-		//如果设置了componentDidCatch，则执行componentDidCatch
 	}
     //...
-	return enqueueRender((component._pendingError = component));
+    return enqueueRender((component._pendingError = component));
     //...
 }
 ```
-当子组件有异常后,他会不断的寻找他的祖先组件,直到祖先组件设置了getDerivedStateFromError或者componentDidCatch,然后有这个组件处理异常,不然直到最顶级组件都没有处理异常,则会抛出异常.如果设置了`getDerivedStateFromError`,`component.setState`这儿已经用setState来更新组件了,而后面还去`enqueueRender(component)`渲染了组件,有必要吗,其实是有必要的,这儿主要是为了如果setState后没有对异常做处理,那么`enqueueRender`渲染后会再循环并跳过这个组件,在向上寻找<br />
+当虚拟节点有异常后，会触发_catchError函数。他会不断的寻找该虚拟节点的祖先节点,直到祖先节点设置了getDerivedStateFromError或者componentDidCatch，然后由这个组件的该函数处理异常。不然直到最顶级组件都没有处理异常，则会抛出异常。上面这段代码中如果设置了`getDerivedStateFromError`，然后去调用了`component.setState`来渲染更新组件，但是后面还去调用了`enqueueRender(component)`渲染了组件，有必要吗？其实是有必要的，这儿主要是为了防止如果`setState`后没有对异常做处理，那么`enqueueRender`渲染后还会出现异常，这时在处理异常会再循环并跳过这个组件,继续向上寻找组件来处理异常。
 #### 6. 标记组件 处理异常中 用了两个变量
 ```jsx harmony
 //src/diff/catch-error.js
