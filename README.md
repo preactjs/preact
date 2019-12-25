@@ -42,7 +42,7 @@ class App extends Component {
 
 render(<App/>, document.getElementById('app'));
 ```
-我们看下渲染流程
+
 1. **vnode**<br />
 vnode是一个节点描述的对象，项目打包环节中,babel的transform-react-jsx插件会将jsx语法编译成React.createElement(type, props, children)形式,对应的是(元素类型,元素属性,元素子节点).preact中需要设置此插件参数,使React.createElement对应为h,最终编译结果如下
 ```jsx harmony
@@ -65,7 +65,7 @@ render(
 	document.getElementById('app')
 );
 ```
-当执行render函数时,先执行**h**函数, h 函数是preact.createElement函数的别名.其中defaultProps就是在这个函数里处理的,最后又调用了createVNode函数,而createVNode返回了一个虚拟节点对象,所以`h(App,null)`的最终执行结果是`{type:App,props:null,key:null,ref:null}`
+当执行render函数时,先执行**h**函数, h 函数是createElement函数的别名.其中defaultProps就是在这个函数里处理的,最后又调用了createVNode函数,而createVNode返回了一个虚拟节点对象,所以`h(App,null)`的最终执行结果是`{type:App,props:null,key:null,ref:null}`
 ```jsx harmony
 //src/create-element.js
 /**
@@ -156,7 +156,7 @@ function Component(props, context) {
 }
 ```
 
-设置状态，可以看到将新的状态保存在_nextState，然后调用enqueueRender(this)加入选渲染队列并渲染
+设置状态，可以看到将新的状态保存在_nextState，然后调用enqueueRender(this)加入选渲染队列并渲染，在diff过程中会将_nextState设置给state
 ```jsx harmony
 Component.prototype.setState = function(update, callback) {
 	let s;
@@ -210,10 +210,10 @@ function Fragment(props) {
 }
 ```
 enqueueRender函数把待渲染的组件加入渲染队列，然后延迟执行process<br />
-process函数先按照组件的深度进行排序，最外层的组件最先执行<br />
+process函数会先按照组件的深度进行排序，最外层的组件最先执行<br />
 如果_dirty为真表示需要渲染，然后调用renderComponent，渲染后会设置该组件_dirty为false，防止重复渲染
 ```jsx harmony
-//渲染队列
+//待渲染组件列表
 let q = [];
 
 //延迟执行
@@ -246,7 +246,6 @@ function process() {
 	//按深度排序 最顶级的组件的最先执行
 	q.sort((a, b) => b._vnode._depth - a._vnode._depth);
 	while ((p = q.pop())) {
-		// forceUpdate's callback argument is reused here to indicate a non-forced update.
 		//如果组件需要渲染则渲染它
 		if (p._dirty) renderComponent(p);
 	}
@@ -375,6 +374,66 @@ export function createContext(defaultValue) {
 	context.Consumer.contextType = context;
 
 	return context;
+}
+```
+这是diff中关于context的相关代码，在处理组件类型虚拟节点时，先从静态属性contextType，如果存在然后通过id找到context，然后计算Context的value并赋值给cctx，如果是新创建的组件，则会去调用sub函数来订阅Provider组件的value更新，当value更新是渲染这儿组件。然后会吧context赋值给——ontext
+```jsx harmony
+function diff(
+	parentDom,
+	newVNode,
+	oldVNode,
+	context,
+	isSvg,
+	excessDomChildren,
+	commitQueue,
+	oldDom,
+	isHydrating
+) {
+	let tmp,
+		newType = newVNode.type;
+	if (typeof newType === 'function') {
+		let c;
+		let newProps = newVNode.props;
+
+		tmp = newType.contextType;
+		//找到祖先的provider
+		let provider = tmp && context[tmp._id];
+		//有tmp时，提供provider时为provider的value，不然为createContext的defaultValue
+		//没有是为上层的context
+		let cctx = tmp
+			? provider
+				? provider.props.value
+				: tmp._defaultValue
+			: context;
+		//省略一些代码
+		if (oldVNode._component) {
+			c = newVNode._component = oldVNode._component;
+		} else {
+			newVNode._component = c = new newType(newProps, cctx);
+			//订阅，当provider value改变时，渲染组件
+			if (provider) provider.sub(c);
+			c._context = context;
+		}
+
+		c.context = cctx;
+		//如果是Provider组件，然后调用getChildContext
+		if (c.getChildContext != null) {
+			context = assign(assign({}, context), c.getChildContext());
+		}
+		//对比子节点
+		diffChildren(
+			parentDom,
+			newVNode,
+			oldVNode,
+			context,
+			isSvg,
+			excessDomChildren,
+			commitQueue,
+			oldDom,
+			isHydrating
+		);
+
+	}
 }
 ```
 ## 四.解惑疑点

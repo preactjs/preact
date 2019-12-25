@@ -205,7 +205,7 @@ function updateParentDomPointers(vnode) {
  * The render queue
  * @type {Array<import('./internal').Component>}
  */
-//渲染队列
+//待渲染组件列表
 let q = [];
 
 /**

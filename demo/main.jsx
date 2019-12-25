@@ -1,14 +1,20 @@
-import { Component, h, render } from '../src';
+import { createContext, h, render } from '../src';
 
-/**
- * react中应该是这样
- * import React,{Component} from 'react'
- * import {render} from 'react-dom'
- */
+const FontContext = createContext(20);
 
-render(<p>2</p>, document.getElementById('app'));
+function Child() {
+	return (
+		<FontContext.Consumer>
+			{fontSize => <div style={{ fontSize: fontSize }}>child</div>}
+		</FontContext.Consumer>
+	);
+}
+function App() {
+	return <Child />;
+}
 render(
-	<p>3</p>,
-	document.getElementById('app'),
-	document.getElementById('app').firstChild
+	<FontContext.Provider value={26}>
+		<App />
+	</FontContext.Provider>,
+	document.getElementById('app')
 );
