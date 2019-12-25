@@ -1056,7 +1056,7 @@ const defer =
 		? Promise.prototype.then.bind(Promise.resolve())
 		: setTimeout;
 ```
-用意大家基本都懂,如果支持Promise,用Promise处理.不然的话用setTimeout处理,但是`Promise.prototype.then.bind(Promise.resolve())`他最终到底是啥东西,我是想了很长一段时间,我们知道`Promise.prototype.then`会从this中获取Promise的实例,而后面的这段代码`...then.bind(Promise.resolve())`,其中bind会改变this的指向,在这儿将是`Promise.resolve()`的返回结果,所以等于`Promise.resolve().then`<br />
+用意大家基本都懂。如果支持Promise，用Promise处理，不然的话用setTimeout处理。但是`Promise.prototype.then.bind(Promise.resolve())`他最终到底是啥东西，我是想了很长一段时间。我们知道`Promise.prototype.then`会把this作为Promise的实例。而后面的这段代码`...then.bind(Promise.resolve())`，其中bind会改变this的指向，所以这儿将是`Promise.resolve()`的返回结果，最终等同于`Promise.resolve().then`。
 #### 2. vnode用Fragment包装
 ```jsx harmony
 //src/render.js
