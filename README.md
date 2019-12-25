@@ -1,13 +1,13 @@
-# 解析preact源码，从preact中理解react原理
+# preact源码解析，从preact中理解react原理
 
 >注:目前是基于preact10.1.0版本做分析。每个文件的详细注释在[链接](https://github.com/yujingwyh/preact-source-annotation/tree/master/src)，觉得好的话麻烦点个star 
 #### 序言
-一直想去研究react源码，但每次看到一半都然后不了了之了。主要原因是react项目过于庞大，代码比较颗粒化，执行流转比较复杂，这样就需要过多的精力去研究，所有没有持续下去<br />
-关注preact有很长一段时间了，有天想想为什么不研究研究preact源码呢，这个号称只有3KB的react浓缩版。看了下市面上也有很多preact源码解析，但我感觉都有一些不足。首先很多都是老版本，preact中8与10版本在代码结构上还是有很大差别的。其次大部分都是分析主要渲染的流程，而没有对于一些关键点去做作分析。例如为什么有_lastDomChild？为什么value没有在diffProps中处理？这才是分析代码中的复杂点，重中之重，也是解析源码的收益点。推测作者的用意，还有没有更好的办法，不是提示思维的最佳方式吗
+一直想去研究react源码，但每次看到一半都然后不了了之了。主要原因是react项目过于庞大，代码比较颗粒化，执行流转复杂，这就需要过多的精力去研究，所有没有持续下去。<br />
+关注preact有很长一段时间了，有天想想为什么不研究研究preact源码呢，这个号称只有3KB的react浓缩版。看了下市面上也有很多对preact源码解析，但我感觉都有一些不足。首先很多都是老版本，preact中8与10版本在代码结构上还是有很大差别。其次大部分都是分析主要渲染的流程，而没有对于一些关键点去做作分析。例如为什么有_lastDomChild？为什么value没有在diffProps中处理？这才是分析代码中的复杂点，重中之重，也是解析源码的收益点。推测作者的用意，还有没有更好的办法，不是提示思维的最佳方式吗？
 ## 一.文件结构
 路径 | 描述
 ---|---
-/diff/catch-error.js  | 处理组件异常情况
+/diff/catch-error.js  | 处理组件异常
 /diff/children.js | 对比虚拟节点的子节点
 /diff/index.js | 对比虚拟节点
 /diff/props |  对比虚拟节点的props
@@ -1048,7 +1048,7 @@ function diff(
 }
 ```
 ## 四.解惑疑点
-1. defer
+#### 1. defer
 ```jsx harmony
 //src/component.js
 const defer =
@@ -1057,7 +1057,7 @@ const defer =
 		: setTimeout;
 ```
 用意大家基本都懂,如果支持Promise,用Promise处理.不然的话用setTimeout处理,但是`Promise.prototype.then.bind(Promise.resolve())`他最终到底是啥东西,我是想了很长一段时间,我们知道`Promise.prototype.then`会从this中获取Promise的实例,而后面的这段代码`...then.bind(Promise.resolve())`,其中bind会改变this的指向,在这儿将是`Promise.resolve()`的返回结果,所以等于`Promise.resolve().then`<br />
-2. vnode用Fragment包装
+#### 2. vnode用Fragment包装
 ```jsx harmony
 //src/render.js
 function render(vnode, parentDom, replaceNode) {
@@ -1067,7 +1067,7 @@ function render(vnode, parentDom, replaceNode) {
 }
 ```
 发现render函数中会用Fragment嵌套实际传进来的组件,如果不嵌套会怎么样呢,例如执行这个代码`render(<div>123</div>,document.getElementBuId('App'))`,当执行到diff函数时,会直接调用`newVNode._dom = diffElementNodes(oldVNode._dom,newVNode,oldVNode,)`,这样最终生成的dom不会添加到parentDom里面中去,而如果用Fragment嵌套下,在diff中判断是组件类型,于是执行`diffChildren(parentDom,newVNode,oldVNode...)`,这样会在diffChildren中把生成的dom添加到parentDom中<br />
-3. hydrate渲染
+#### 3. hydrate渲染
 ```jsx harmony
 //src/render.js
 function hydrate(vnode, parentDom) {
@@ -1076,7 +1076,7 @@ function hydrate(vnode, parentDom) {
 
 ```
 用hydrate与render两个渲染有什么区别呢,从代码中我们发现在hydrate模式中,diffProps只处理了事件部分,对其他的props没有处理.所以hydrate常用于在服务器渲染后端的html,在客户端渲染时会用hydrate去渲染,由于props在服务端渲染的时候已经处理了,这儿渲染的时候就不用处理了,从而加快首次渲染性能<br />
-4. props中value与checked单独处理  
+#### 4. props中value与checked单独处理  
 ```jsx harmony
 //src/diff/props.js
 function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
@@ -1129,7 +1129,7 @@ function diffChildren(parentDom,newParentVNode,oldParentVNode,){
 }
 ```
 为什么要设置value为空呢,原来option不设置value,他会把元素的文本内容来作为value,当然还有一些元素也是同样的,不设置value,会从子元素中获取,所以在mvvm中会有问题的,这样谈不上数据与dom双向绑定,所以要在子元素渲染完成,设置value为空,而value的具体数据在子元素处理完成才处理<br />
-5. 已经setState又去渲染组件
+#### 5. 已经setState又去渲染组件
 ```jsx harmony
 //src/diff/catch-error.js
 function _catchError(error, vnode) {
@@ -1149,7 +1149,7 @@ function _catchError(error, vnode) {
 }
 ```
 当子组件有异常后,他会不断的寻找他的祖先组件,直到祖先组件设置了getDerivedStateFromError或者componentDidCatch,然后有这个组件处理异常,不然直到最顶级组件都没有处理异常,则会抛出异常.如果设置了`getDerivedStateFromError`,`component.setState`这儿已经用setState来更新组件了,而后面还去`enqueueRender(component)`渲染了组件,有必要吗,其实是有必要的,这儿主要是为了如果setState后没有对异常做处理,那么`enqueueRender`渲染后会再循环并跳过这个组件,在向上寻找<br />
-6. 标记组件 处理异常中 用了两个变量
+#### 6. 标记组件 处理异常中 用了两个变量
 ```jsx harmony
 //src/diff/catch-error.js
 function _catchError(error, vnode) {
@@ -1168,7 +1168,7 @@ function diff(parentDom,newVNode,oldVNode){
 }
 ``` 
  `catchError`中用 `_processingException`来判断这个组件是否处理异常,而在`component._pendingError = component`却设置了_pendingError来标记这个组件是处理异常中,在`diff`中又赋给了`_processingException`,为什么不用一个变量来标记呢,其实主要原因是如果渲染队列中前面有他的子组件需要渲染,如果子组件渲染出错,这时不应该跳过这个组件,只有在渲染这个组件的时候才去标记这个组件正在处理异常<br />
-7. diffProps中事件的处理
+#### 7. diffProps中事件的处理
 ```jsx harmony
 //src/diff/props.js
 function setProperty(dom, name, value, oldValue, isSvg) {
@@ -1185,7 +1185,7 @@ function eventProxy(e) {
 }
 ```
 这儿对props的比较处理有点意思,在设置了props的事件时,例如`<input onChange={e=>console.log(e.target.value)} />`,如果onChange之前是空,那么会执行`dom.addEventListener(name, eventProxy, useCapture)`来给dom添加一个事件处理函数,而这个处理函数是一个固定的函数`eventProxy`,当后面onChange中的监听函数发生变化时,只要修改下dom._listeners对应的监听函数,当触发事件时,只要执行固定的dom._listeners中保存的对应监听函数,只有onChange设置了空才去移除这个监听,当onChange中的监听函数发生变化时就不用移除之前的监听,然后监听新的函数<br />
-8. _lastDomChild的用处
+#### 8. _lastDomChild的用处
 ```jsx harmony
 //src/diff/children.js
 function diffChildren( parentDom, newParentVNode, oldParentVNode){
@@ -1222,7 +1222,7 @@ function App() {
 render(<App/>,document.getElementById('app'));
 ```
 上面代码中一共会有三个虚拟节点App,div,123,在diffChildren App的虚拟节点时,newDom为div节点,这时不会执行 `parentDom.appendChild(newDom)`,app节点与div节点的关联是在diffChildren div中已经处理了,所有diffChildren App虚拟节点不用处理父子节点的关联,这个还是比较难理解的,建议多看看源码<br />
-9. excessDomChildren又去设置了null
+#### 9. excessDomChildren又去设置了null
 ```jsx harmony
 //src/diff/index.js
 function diffElementNodes(dom,newVNode,oldVNode,){
