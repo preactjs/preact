@@ -1183,7 +1183,7 @@ function eventProxy(e) {
 	this._listeners[e.type](options.event ? options.event(e) : e);
 }
 ```
-这儿对props的比较处理有点意思。如果props中设置了事件时，例如`<input onChange={e=>console.log(e.target.value)} />`，假设onChange之前是空，那么会执行`dom.addEventListener(name, eventProxy, useCapture)`来给dom添加一个事件处理函数，而这个处理函数是一个固定的函数`eventProxy`。当后面onChange中的监听函数发生变化时，并不会重新添加新的监听函数，而是只要修改下dom._listeners对应的监听函数就行了。当触发事件时，只会执行固定的dom._listeners中保存的对应监听函数。只有onChange设置了空才去移除这个监听，当onChange中的监听函数发生变化时并不会移除之前的监听函数，然后添加新的监听函数。
+这儿对props的事件处理有点意思。如果props中设置了事件，例如`<input onChange={e=>console.log(e.target.value)} />`，假设`onChange`之前设置的是空，那么会执行`dom.addEventListener(name, eventProxy, useCapture)`来给dom添加一个事件处理函数，而这个处理函数是一个固定的函数`eventProxy`。当后面onChange中的监听函数发生变化时，并不会重新添加新的监听函数，而是只要修改下dom._listeners对应的函数就行了。当触发事件时，只会执行固定的dom._listeners中保存的监听函数。只有onChange设置了空才去移除这个监听，所有当onChange中的监听函数发生变化时并不会移除之前的监听函数，然后添加新的监听函数。
 #### 8. _lastDomChild的用处
 ```jsx harmony
 //src/diff/children.js
@@ -1213,14 +1213,14 @@ function diffChildren( parentDom, newParentVNode, oldParentVNode){
     //...
 }
 ```
-用_lastDomChild的意义何在呢,当子节点渲染完成,他就会与父节点做关联,例如`<div>123</div>`,当文本节点123创建完成,就需要添加到div元素中,这是没有问题的,但是如果是父节点是一个函数类型的节点,这时就没有必要去关联了
+用_lastDomChild的意义何在呢？原来当子节点渲染完成，他就会与父节点做关联。例如`<div>123</div>`，当文本节点123创建完成。就会添加到div元素中，这是没有问题的。但是如果父节点是一个函数类型的节点,这时在diffChildren中就没有必要去关联了。例如下面的代码：
 ```jsx harmony
 function App() {
 	return <div>123</div>;
 }
 render(<App/>,document.getElementById('app'));
 ```
-上面代码中一共会有三个虚拟节点App,div,123,在diffChildren App的虚拟节点时,newDom为div节点,这时不会执行 `parentDom.appendChild(newDom)`,app节点与div节点的关联是在diffChildren div中已经处理了,所有diffChildren App虚拟节点不用处理父子节点的关联,这个还是比较难理解的,建议多看看源码<br />
+上面代码中一共会有三个虚拟节点App、div、123，在diffChildren App的虚拟节点时,newDom为div节点,这时不会执行 `parentDom.appendChild(newDom)`,app节点与div节点的关联是在diffChildren div中已经处理了,所有diffChildren App虚拟节点不用处理父子节点的关联,这个还是比较难理解的,建议多看看源码<br />
 #### 9. excessDomChildren又去设置了null
 ```jsx harmony
 //src/diff/index.js
