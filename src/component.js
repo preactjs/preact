@@ -159,7 +159,7 @@ function renderComponent(component) {
 
 	if (parentDom) {
 		let commitQueue = [];
-		//比对更新
+		//比较更新
 		let newDom = diff(
 			parentDom,
 			vnode,

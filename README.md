@@ -147,7 +147,7 @@ function render(vnode, parentDom) {
 ```
 执行render函数时,调用了diff函数
 ## 三.组件
-###1.component
+### 1.component
 Component构造函数
 ```jsx harmony
 function Component(props, context) {
@@ -209,8 +209,8 @@ function Fragment(props) {
 	return props.children;
 }
 ```
-enqueueRender函数把待渲染的组件加入渲染队列，然后延迟执行process
-process函数先按照组件的深度进行排序，最外层的组件最先执行
+enqueueRender函数把待渲染的组件加入渲染队列，然后延迟执行process<br />
+process函数先按照组件的深度进行排序，最外层的组件最先执行<br />
 如果_dirty为真表示需要渲染，然后调用renderComponent，渲染后会设置该组件_dirty为false，防止重复渲染
 ```jsx harmony
 //渲染队列
@@ -282,9 +282,9 @@ function renderComponent(component) {
 	}
 }
 ```
-###2.context
-这是一个context案例，首先通过createContext创建一个context，里面包含Provider和Consumer两个组件
-Provider组件用在最外层，通过设置value来跨组件传递数据
+### 2.context
+这是一个context案例，首先通过createContext创建一个context，里面包含Provider和Consumer两个组件<br />
+Provider组件用在最外层，通过设置value来跨组件传递数据<br />
 Consumer组件主要是使用数据，子节点是一个函数，第一个参数就是对应的value
 ```jsx harmony
 import { createContext, h, render } from 'preact';
@@ -308,7 +308,7 @@ render(
 
 ```
 
-源码也比较简单，调用createContext后返回一个context对象，里面包含了Consumer与Provider组件
+源码也比较简单，调用createContext后返回一个context对象，里面包含了Consumer与Provider组件<br />
 Consumer组件设置了contextType静态属性，渲染时会执行子组件，并把context做为参数，等同于如下类组件
 ```jsx harmony
 class Consumer extends Comment{
