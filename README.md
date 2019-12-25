@@ -1213,14 +1213,14 @@ function diffChildren( parentDom, newParentVNode, oldParentVNode){
     //...
 }
 ```
-用_lastDomChild的意义何在呢？原来当子节点渲染完成，他就会与父节点做关联。例如`<div>123</div>`，当文本节点123创建完成。就会添加到div元素中，这是没有问题的。但是如果父节点是一个函数类型的节点,这时在diffChildren中就没有必要去关联了。例如下面的代码：
+用_lastDomChild的意义何在呢？原来当子节点渲染完成，他就会与父节点做关联。例如`<div>123</div>`，当文本节点123创建完成，就会添加到div元素中，这是没有问题的。但是如果父节点是一个函数类型的节点,这时在diffChildren中就没有必要去关联了。例如下面的代码：
 ```jsx harmony
 function App() {
 	return <div>123</div>;
 }
-render(<App/>,document.getElementById('app'));
+render(<App/>,document.getElementById('root'));
 ```
-上面代码中一共会有三个虚拟节点App、div、123，在diffChildren App的虚拟节点时,newDom为div节点,这时不会执行 `parentDom.appendChild(newDom)`,app节点与div节点的关联是在diffChildren div中已经处理了,所有diffChildren App虚拟节点不用处理父子节点的关联,这个还是比较难理解的,建议多看看源码<br />
+上面代码中一共会有三个虚拟节点App、div、123，在执行diffChildren函数来比较App虚拟节点时，newDom为div节点，这时不用执行 `parentDom.appendChild(newDom)`。root节点与div节点的关联其实是在执行diffChildren函数比较div虚拟节点中已经处理了，所有diffChildren比较App虚拟节点时不用处理父子节点的关联。
 #### 9. excessDomChildren又去设置了null
 ```jsx harmony
 //src/diff/index.js
