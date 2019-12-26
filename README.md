@@ -142,10 +142,10 @@ function render(vnode, parentDom, replaceNode) {
 }
 ```
 #### 2. diff
-虚拟节点的对比主要有diff,diffElementNodes,diffChildren,diffProps四个函数，diff过程中会对新旧虚拟节点和新旧props做对比，然后渲染出真实的dom<br />
-diff函数主要处理函数型节点，也就是类型为类组件和无状态组件的虚拟节点,当执行到diff`{type:App,props:null}`时，判断这个虚拟节点没有_component属性，然后通过`new App()`来实例化一个组件并赋值给_component，当再次渲染到这个虚拟节点是就不会在去实例化一个新的虚拟节点了，然后执行了组件的一些生命周期，在执行完render方法后会吧结果保存在虚拟节点的children属性中，然后调用diffChildren函数来比较子节点，最后diff会返货虚拟节点生成的dom，
+虚拟节点的对比主要有diff,diffElementNodes,diffChildren,diffProps四个函数。diff过程中会对新旧虚拟节点和新旧props做对比，然后渲染出真实的dom。<br />
+diff函数主要处理函数型节点，也就是类型为类组件和无状态组件的虚拟节点，如果不是函数类型节点则会调用diffElementNodes函数来处理。先判断虚拟节点是否有_component属性，如果没有则实例化一个组件，然后执行组件的一些生命周期，完成后执行组件的render方法，在执行完render方法后会把结果保存在虚拟节点的children属性中，然后调用diffChildren函数来比较子节点，最后diff函数会返回虚拟节点生成的dom。
 ```jsx harmony
-export function diff(
+function diff(
 	parentDom,
 	newVNode,
 	oldVNode,
@@ -156,11 +156,8 @@ export function diff(
 	oldDom,
 	isHydrating
 ) {
-	let tmp,
-		newType = newVNode.type;
+	let tmp,newType = newVNode.type;
 
-	// When passing through createElement it assigns the object
-	// constructor as undefined. This to prevent JSON-injection.
 	//非虚拟节点直接返回
 	if (newVNode.constructor !== undefined) return null;
 	//diff钩子
@@ -175,10 +172,9 @@ export function diff(
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
 			} else {
-				// Instantiate the new component
 				if ('prototype' in newType && newType.prototype.render) {
 					//类组件的话  去实例化
-					newVNode._component = c = new newType(newProps, cctx); // eslint-disable-line new-cap
+					newVNode._component = c = new newType(newProps, cctx);
 				} else {
 					//函数组件的话会实例化Component
 					newVNode._component = c = new Component(newProps, cctx);
@@ -186,22 +182,14 @@ export function diff(
 					//设置render
 					c.render = doRender;
 				}
-				//订阅，当provider value改变时，渲染组件
-				if (provider) provider.sub(c);
-
 				c.props = newProps;
 				if (!c.state) c.state = {};
-				c.context = cctx;
-				//至于还要用c._context不用c.context
-				//由于context有可能为provider的value
-				c._context = context;
 				//标记需要渲染并且是新创建的组件
 				isNew = c._dirty = true;
 				c._renderCallbacks = [];
 			}
 
-			// Invoke getDerivedStateFromProps
-			//如果nextState为假则赋值state
+			//如果nextState为空则赋值state
 			if (c._nextState == null) {
 				c._nextState = c.state;
 			}
@@ -221,7 +209,6 @@ export function diff(
 			oldProps = c.props;
 			oldState = c.state;
 
-			// Invoke pre-render lifecycle methods
 			//如果是新创建的组件
 			if (isNew) {
 				//没有设置getDerivedStateFromProps但设置了componentWillMount则执行componentWillMount生命周期
@@ -283,7 +270,6 @@ export function diff(
 				}
 			}
 
-			c.context = cctx;
 			c.props = newProps;
 			c.state = c._nextState;
 			//render钩子
@@ -721,7 +707,7 @@ function diffChildren(
 	}
 }
 ```
-再来看下整个diff流程，当在diff中执行完App的render方法后整个的虚拟节点树为如下，然后吧type为App层级树的children属性传递给diffChildren
+再来看下整个diff流程，当在diff中执行完App的render方法后整个的虚拟节点树为如下，然后吧type为App层级树的children属性传递给diffChildren，当执行到diff`{type:App,props:null}`时，判断这个虚拟节点没有_component属性，然后通过`new App()`来实例化一个组件并赋值给_component，当再次渲染到这个虚拟节点是就不会在去实例化一个新的虚拟节点了，然后执行了组件的一些生命周期，
 ```json5
 {
 	"type": App,
