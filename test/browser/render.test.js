@@ -78,7 +78,7 @@ describe('render()', () => {
 		expect(c[0].nodeName).to.equal('#text');
 	});
 
-	it.only('should allow node type change with content', () => {
+	it('should allow node type change with content', () => {
 		render(<span>Bad</span>, scratch);
 		expect(scratch.innerHTML).to.eql(`<span>Bad</span>`);
 		render(<div>Good</div>, scratch);

@@ -17,21 +17,21 @@ export function diff(
 	isHydrating
 ) {
 	let tmp,
-		newType = newVNode.type,
-		old = assign({}, oldVNode);
+		newType = newVNode.type;
 
-	// JSON-injection assertion (this invalidates) a subtree when
-	// an XSS-attack is potentially happening this because
-	// the constructor property can't be set to undefined through JSON.
-	if (newVNode.constructor !== undefined) return undefined;
+	newVNode._dom = oldVNode._dom;
 
-	// Before diff
+	// When passing through createElement it assigns the object
+	// constructor as undefined. This to prevent JSON-injection.
+	if (newVNode.constructor !== undefined) return null;
+
 	if ((tmp = options._diff)) tmp(newVNode);
 
 	try {
 		outer: if (typeof newType === 'function') {
 			let c, isNew, oldProps, oldState, clearProcessingException;
 			let newProps = newVNode.props;
+			tmp = newType.contextType;
 			let provider = tmp && context[tmp._id];
 			let cctx = tmp
 				? provider
@@ -39,15 +39,10 @@ export function diff(
 					: tmp._defaultValue
 				: context;
 
-			// Necessary for createContext api. Setting this property will pass
-			// the context value as `this.context` just for this component.
-			tmp = newType.contextType;
-
 			if (oldVNode._component) {
 				// We already had a component
 				c = newVNode._component = oldVNode._component;
 				clearProcessingException = c._processingException = c._pendingError;
-				c.isNew = false;
 			} else {
 				// First time render
 				if ('prototype' in newType && newType.prototype.render) {
@@ -65,7 +60,7 @@ export function diff(
 				if (!c.state) c.state = {};
 				c.context = cctx;
 				c._context = context;
-				c.isNew = isNew = c._dirty = true;
+				isNew = c._dirty = true;
 				c._renderCallbacks = [];
 			}
 
@@ -176,7 +171,7 @@ export function diff(
 
 			c._force = null;
 		} else {
-			newVNode._dom = diffElementNodes(
+			diffElementNodes(
 				oldVNode._dom,
 				newVNode,
 				oldVNode,
@@ -186,11 +181,11 @@ export function diff(
 				isHydrating
 			);
 		}
-	} catch (e) {
-		options._catchError(e, newVNode, old);
-	}
 
-	return newVNode._dom;
+		if ((tmp = options.diffed)) tmp(newVNode);
+	} catch (e) {
+		options._catchError(e, newVNode, oldVNode);
+	}
 }
 
 /**
@@ -268,8 +263,6 @@ function diffElementNodes(
 			);
 		}
 	}
-
-	return dom;
 }
 
 /**
@@ -328,7 +321,6 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		}
 	}
 
-	console.log('removing', dom);
 	if (dom != null) removeNode(dom);
 }
 

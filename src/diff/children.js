@@ -31,7 +31,7 @@ export function diffChildren(
 	oldDom,
 	isHydrating
 ) {
-	let i, j, oldVNode, newDom, firstChildDom, refs;
+	let i, j, oldVNode, newDom, refs;
 
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
@@ -96,7 +96,7 @@ export function diffChildren(
 				oldVNode = oldVNode || EMPTY_OBJ;
 
 				// Morph the old element into the new one, but don't append it to the dom yet
-				childVNode._dom = diff(
+				diff(
 					parentDom,
 					childVNode,
 					oldVNode,
@@ -118,8 +118,6 @@ export function diffChildren(
 			return childVNode;
 		}
 	);
-
-	newParentVNode._dom = firstChildDom;
 
 	// Remove children that are not part of any vnode.
 	if (excessDomChildren != null && typeof newParentVNode.type !== 'function') {
