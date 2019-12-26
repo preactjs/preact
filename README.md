@@ -1204,10 +1204,6 @@ function diffChildren( parentDom, newParentVNode, oldParentVNode){
 	}
     //...
     if (typeof newParentVNode.type == 'function') {
-        // At this point, if childVNode._lastDomChild existed, then
-        // newDom = childVNode._lastDomChild per line 101. Else it is
-        // the same as childVNode._dom, meaning this component returned
-        // only a single DOM node
         newParentVNode._lastDomChild = newDom;
     }
     //...
@@ -1220,16 +1216,16 @@ function App() {
 }
 render(<App/>,document.getElementById('root'));
 ```
-上面代码中一共会有三个虚拟节点App、div、123，在执行diffChildren函数来比较App虚拟节点时，newDom为div节点，这时不用执行 `parentDom.appendChild(newDom)`。root节点与div节点的关联其实是在执行diffChildren函数比较div虚拟节点中已经处理了，所有diffChildren比较App虚拟节点时不用处理父子节点的关联。
-#### 9. excessDomChildren又去设置了null
+上面代码中一共会有三个虚拟节点App、div、123，在执行diffChildren函数来比较App虚拟节点时，newDom为div节点，这时不用执行 `parentDom.appendChild(newDom)`。root节点与div节点的关联其实是在执行diffChildren函数比较div虚拟节点中已经处理了，所以diffChildren比较App虚拟节点时就不用处理父子节点的关联。
+#### 9. excessDomChildren已经设置了null，后面又去设置了null
 ```jsx harmony
 //src/diff/index.js
-function diffElementNodes(dom,newVNode,oldVNode,){
+function diffElementNodes(dom,newVNode,oldVNode,context,isSvg,excessDomChildren,){
 	//判断能否复用excessDomChildren中的dom
 	if (dom == null && excessDomChildren != null) {
 		for (i = 0; i < excessDomChildren.length; i++) {
 			const child = excessDomChildren[i];
-			//如果虚拟节点类型为null而存在节点类型是text或者虚拟节点类型和存在节点类型相同，则复用
+			//如果虚拟节点类型为null而存在节点类型是text或者虚拟节点类型和存在节点类型相同，则复用dom节点
 			if (
 				child != null &&
 				(newVNode.type === null
@@ -1243,10 +1239,9 @@ function diffElementNodes(dom,newVNode,oldVNode,){
 			}
 		}
 	}
-    //...
+    //如果是文本节点
 	if (newVNode.type === null) {
 		//如果diffElementNodes传进来dom就不为空,则将excessDomChildren对应的节点设为null
-		//见README.md解惑疑点9
 		if (excessDomChildren != null) {
 			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
 		}
@@ -1256,8 +1251,18 @@ function diffElementNodes(dom,newVNode,oldVNode,){
 		}
 	}
 }
+//src/diff/children.js
+function diffChildren(parentDom, newParentVNode, oldParentVNode, context, isSvg, excessDomChildren) {
+    //...
+    //移除excessDomChildren中不能复用的代码
+	if (excessDomChildren != null && typeof newParentVNode.type !== 'function') {
+		for (i = excessDomChildren.length; i--;) {
+			if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
+		}
+	}
+}
 ```
-这儿我一直觉得没必要再去`excessDomChildren[excessDomChildren.indexOf(dom)] = null`,因为前面已经设置为null,我认为是作者忘记改了,后来翻了翻github,终于理解作者的用意
+这儿我一直觉得没必要再去`excessDomChildren[excessDomChildren.indexOf(dom)] = null`，因为前面已经设置为null。我认为是作者忘记改了，后来翻了翻github，终于理解作者的用意。
 ```jsx harmony
 render(<p>2</p>, document.getElementById('app'));
 render(
@@ -1266,13 +1271,4 @@ render(
 	document.getElementById('app').firstChild
 );
 ```
-如果这这样处理,那么上面的代码会渲染为空,我们分析下,第一次render时是正常的,在执行第二个render时,此时replaceNode为document.getElementById('app').firstChild,也就是p节点,这次渲染后为什么会为空呢?在`diffElementNodes`文本节点3时,这时dom不为空,所以不会执行`excessDomChildren[i] = null`,但这儿还会复用之前的text为2的节点,只不过将内容设置成了3,后面如果不将`excessDomChildren`中之前的文本节点设为空,那么当执行diffChildren p元素时,会移除这个以前的text节点,所以什么就会渲染空
-```jsx harmony
-function diffChildren(parentDom, newParentVNode, oldParentVNode,) {
-	if (excessDomChildren != null && typeof newParentVNode.type !== 'function') {
-		for (i = excessDomChildren.length; i--;) {
-			if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
-		}
-	}
-}
-```
+如果不加那一个段代码，那么上面的代码会渲染为空。我们分析下，第一个render时是正常的。在执行第二个render时，此时replaceNode为document.getElementById('app').firstChild，也就是p节点，这次渲染后为什么会为空呢？在`diffElementNodes`文本节点3时，这时dom不为空，所以不会执行`excessDomChildren[i] = null`。但这儿还会复用之前的text为2的节点，只不过将内容设置成了3，后面如果不将`excessDomChildren`中之前的文本节点设为空,那么当执行diffChildren p元素时,会移除这个以前的text节点,所以什么就会渲染空，这部分还是比较复杂，建议多读读源码理解。
