@@ -143,7 +143,7 @@ function render(vnode, parentDom, replaceNode) {
 ```
 #### 2. diff
 虚拟节点的对比主要有diff,diffElementNodes,diffChildren,diffProps四个函数。diff过程中会对新旧虚拟节点和新旧props做对比，然后渲染出真实的dom。<br />
-diff函数主要处理函数型节点，也就是类型为类组件和无状态组件的虚拟节点，如果不是函数类型节点则会调用diffElementNodes函数来处理。先判断虚拟节点是否有_component属性，如果没有则实例化一个组件，然后执行组件的一些生命周期，完成后执行组件的render方法，在执行完render方法后会把结果保存在虚拟节点的children属性中，然后调用diffChildren函数来比较子节点，最后diff函数会返回虚拟节点生成的dom。
+diff函数主要处理函数型节点，也就是类型为类组件和无状态组件的虚拟节点，如果不是函数类型节点则会调用diffElementNodes函数来处理。先判断虚拟节点是否有_component属性，如果没有则实例化一个组件，然后执行组件的一些生命周期，完成后执行组件的render方法，在执行完render方法后会把结果保存在虚拟节点的_children属性中，然后调用diffChildren函数来比较子节点，最后diff函数会返回虚拟节点生成的dom。
 ```jsx harmony
 //src/diff/index.js
 function diff(
@@ -653,23 +653,21 @@ function diffChildren(
 	}
 }
 ```
-* diff流程分析 *
-当在diff中执行完App的render方法后整个的虚拟节点树为如下，然后吧type为App层级树的children属性传递给diffChildren，当执行到diff`{type:App,props:null}`时，判断这个虚拟节点没有_component属性，然后通过`new App()`来实例化一个组件并赋值给_component，当再次渲染到这个虚拟节点是就不会在去实例化一个新的虚拟节点了，然后执行了组件的一些生命周期，
+render函数执行后，执行diff函数来比较newVNode为`{type:App,props:null}`和oldVNode为EMPTY_OBJ的虚拟节点。由于`oldVNode._component`属性为空，然后通过`new App()`来实例化一个组件并赋值给`newVNode._component`，继续执行App组件的一些生命周期后然后执行App组件的render方法，然后吧执行结果保存在newVNode的_children属性下，然后调用diffChildren去比较子节点。，此时整个的虚拟节点数如下
 ```json5
 {
 	"type": App,
 	"props": null,
-	"children": {
+	"_children": {
 		"type": "div",
 		"props": {id: "wrap"},
-		"children": [
+		"_children": [
 			{
 				"type": "span",
 				"props": null,
-				"children": {
+				"_children": {
 					"type": null,
 					"props": 123,
-					"children": 123
 				}
 			},
 			{
@@ -681,6 +679,7 @@ function diffChildren(
 	}
 }
 ```
+在diffChildren中先读取newVNode类型为App的_children属性，与oldVNode子节点进行遍历比较，此时第一个子节点是类型为div的虚拟节点，然后吧这个虚拟节点作为参数在调用diff函数，在diff函数中判断是html型节点，调用diffElementNodes函数，然后在这个函数中会创建div真实dom节点，再调用diffChildren来对比div节点的虚拟子节点，如此递归比较完所有div的虚拟节点后，在diffChildren中会将div真实dom添加到parentDom节点中去，也就是document.getElementById('app')节点
 ## 三.组件
 ### 1.component
 Component构造函数
