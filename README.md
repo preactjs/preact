@@ -344,7 +344,7 @@ function diff(
 }
 ```
 diffElementNodes主要处理了html型的虚拟节点，这儿会生成真实的dom节点。<br />
-首先从参数excessDomChildren中查找能否复用之前的dom节点。如果没有复用，则会调用createTextNode或者createElement来创建一个节点。然后调用diffProps来比较props处理节点的属性，比如样式设置，事件监听等。diffProps这个函数的代码就不贴了，可以去源码中去看，都有详细的注释。然后调用了diffChildren来比较子节点并将子节点的dom添加到当前节点。
+首先从参数excessDomChildren中查找能否复用之前的dom节点。如果没有复用，则会调用createTextNode或者createElement来创建一个节点。然后调用diffProps来比较props处理节点的属性，比如样式设置，事件监听等。diffProps这个函数的代码就不贴了，可以去源码中去看，都有详细的注释。然后调用了diffChildren来比较子节点并将子节点的dom添加到当前dom节点。
 ```jsx harmony
 //src/diff/index.js
 function diffElementNodes(
@@ -479,8 +479,9 @@ function diffElementNodes(
 	return dom;
 }
 ```
-在diffChildren主要处理了子节点的比较,首先从excessDomChildren中寻找对应节点已经存在的dom，然后对子节点进行遍历，如果子节点的key和type与之前虚拟节点或者紧跟节点相同，oldNode则会使用之前的这个节点，接下来会去调用diff来比较新老虚拟节点，完成后会把子节点追加到parentDom里面或者parentDom子节点的后面
+在diffChildren主要处理了子节点的比较，首先从excessDomChildren中寻找对应节点已经存在的dom，然后对子节点进行遍历。如果子节点的key和type与之前虚拟节点或者紧跟节点相同，oldNode则会使用之前的这个节点。接下来会去调用diff来比较新老虚拟节点，返回真实的dom，然后会把子节点追加到parentDom里面或者parentDom子节点的后面。
 ```jsx harmony
+///src/diff/children.js
 function diffChildren(
 	parentDom,
 	newParentVNode,
@@ -493,9 +494,7 @@ function diffChildren(
 	isHydrating
 ) {
 	let i, j, oldVNode, newDom, sibDom, firstChildDom, refs;
-
-	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
-	// as EMPTY_OBJ._children should be `undefined`.
+	
 	//老节点的children
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
 	//老节点长度
@@ -525,10 +524,7 @@ function diffChildren(
 				//处理深度
 				childVNode._depth = newParentVNode._depth + 1;
 
-				// Check if we find a corresponding element in oldChildren.
-				// If found, delete the array item by setting to `undefined`.
-				// We use `undefined`, as `null` is reserved for empty placeholders
-				// (holes).
+			
 				oldVNode = oldChildren[i];
 				//如果老节点为null或者 新老子节点的key和type相同 则设置老节点删除 以便后面不执行unmount和参与后续节点的比较
 				if (
@@ -539,13 +535,9 @@ function diffChildren(
 				) {
 					oldChildren[i] = undefined;
 				} else {
-					// Either oldVNode === undefined or oldChildrenLength > 0,
-					// so after this loop oldVNode == null or oldVNode is a valid value.
 					//在老的子节点中循环 以便找到新老子节点相对应的，有相对应的就会复用这个节点
 					for (j = 0; j < oldChildrenLength; j++) {
 						oldVNode = oldChildren[j];
-						// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
-						// We always match by type (in either case).
 						//同上
 						if (
 							oldVNode &&
@@ -562,7 +554,6 @@ function diffChildren(
 
 				oldVNode = oldVNode || EMPTY_OBJ;
 
-				// Morph the old element into the new one, but don't append it to the dom yet
 				//对比节点
 				newDom = diff(
 					parentDom,
@@ -581,7 +572,6 @@ function diffChildren(
 					if (oldVNode.ref) refs.push(oldVNode.ref, null, childVNode);
 					refs.push(j, childVNode._component || newDom, childVNode);
 				}
-				// Only proceed if the vnode has not been unmounted by `diff()` above.
 				//如果newDom
 				if (newDom != null) {
 					//处理firstChildDom
@@ -590,25 +580,16 @@ function diffChildren(
 					}
 					//如果子节点是函数或类型组件,这儿特殊处理 使其不会执行下面的parentDom.appendChild或parentDom.insertBefore
 					if (childVNode._lastDomChild != null) {
-						// Only Fragments or components that return Fragment like VNodes will
-						// have a non-null _lastDomChild. Continue the diff from the end of
-						// this Fragment's DOM tree.
 						newDom = childVNode._lastDomChild;
 
-						// Eagerly cleanup _lastDomChild. We don't need to persist the value because
-						// it is only used by `diffChildren` to determine where to resume the diff after
-						// diffing Components and Fragments.
 						childVNode._lastDomChild = null;
-						//如果excessDomChildren等于oldVNode或者newDom不等于oldDom或者newDom.parentNode为空
-						//render函数调用时excessDomChildren与oldVNode有可能相等
+					//如果excessDomChildren等于oldVNode或者newDom不等于oldDom或者newDom.parentNode为空
+					//render函数调用时excessDomChildren与oldVNode有可能相等
 					} else if (
 						excessDomChildren == oldVNode ||
 						newDom != oldDom ||
 						newDom.parentNode == null
 					) {
-						// NOTE: excessDomChildren==oldVNode above:
-						// This is a compression of excessDomChildren==null && oldVNode==null!
-						// The values only have the same type when `null`.
 						//如果oldDom为空或者其父节点更新了,则将newDom追加到parentDom的后面
 						outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
 							parentDom.appendChild(newDom);
@@ -630,16 +611,7 @@ function diffChildren(
 							parentDom.insertBefore(newDom, oldDom);
 						}
 
-						// Browsers will infer an option's `value` from `textContent` when
-						// no value is present. This essentially bypasses our code to set it
-						// later in `diff()`. It works fine in all browsers except for IE11
-						// where it breaks setting `select.value`. There it will be always set
-						// to an empty string. Re-applying an options value will fix that, so
-						// there are probably some internal data structures that aren't
-						// updated properly.
-						//
-						// To fix it we make sure to reset the inferred value, so that our own
-						// value check in `diff()` won't be skipped.
+					
 						//如果option不设置value他将会从元素的文本内容中获取,这儿主要修复这个
 						if (newParentVNode.type == 'option') {
 							parentDom.value = '';
@@ -649,10 +621,6 @@ function diffChildren(
 					oldDom = newDom.nextSibling;
 					//如果是组件类型的节点,设置_lastDomChild
 					if (typeof newParentVNode.type == 'function') {
-						// At this point, if childVNode._lastDomChild existed, then
-						// newDom = childVNode._lastDomChild per line 101. Else it is
-						// the same as childVNode._dom, meaning this component returned
-						// only a single DOM node
 						newParentVNode._lastDomChild = newDom;
 					}
 				}
@@ -665,7 +633,6 @@ function diffChildren(
 	//设置_dom 函数类型的节点 _dom为第一个子节点的dom,其它的为本身创建的dom节点
 	newParentVNode._dom = firstChildDom;
 
-	// Remove children that are not part of any vnode.
 	//移除不使用的的子dom元素
 	if (excessDomChildren != null && typeof newParentVNode.type !== 'function') {
 		for (i = excessDomChildren.length; i--; ) {
@@ -673,13 +640,11 @@ function diffChildren(
 		}
 	}
 
-	// Remove remaining oldChildren if there are any.
 	//循环卸载不使用的老虚拟节点
 	for (i = oldChildrenLength; i--; ) {
 		if (oldChildren[i] != null) unmount(oldChildren[i], oldChildren[i]);
 	}
 
-	// Set refs only after unmount
 	//循环应用refs
 	if (refs) {
 		for (i = 0; i < refs.length; i++) {
@@ -688,7 +653,8 @@ function diffChildren(
 	}
 }
 ```
-再来看下整个diff流程，当在diff中执行完App的render方法后整个的虚拟节点树为如下，然后吧type为App层级树的children属性传递给diffChildren，当执行到diff`{type:App,props:null}`时，判断这个虚拟节点没有_component属性，然后通过`new App()`来实例化一个组件并赋值给_component，当再次渲染到这个虚拟节点是就不会在去实例化一个新的虚拟节点了，然后执行了组件的一些生命周期，
+* diff流程分析 *
+当在diff中执行完App的render方法后整个的虚拟节点树为如下，然后吧type为App层级树的children属性传递给diffChildren，当执行到diff`{type:App,props:null}`时，判断这个虚拟节点没有_component属性，然后通过`new App()`来实例化一个组件并赋值给_component，当再次渲染到这个虚拟节点是就不会在去实例化一个新的虚拟节点了，然后执行了组件的一些生命周期，
 ```json5
 {
 	"type": App,
