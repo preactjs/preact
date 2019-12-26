@@ -49,7 +49,9 @@ export const commit = (parentDom, vnode, queue) => {
 					? document.createElementNS('http://www.w3.org/2000/svg', vnode.type)
 					: document.createElement(vnode.type);
 		}
+
 		commitPropUpdates(dom, vnode._updates, false);
+		commitChildren(dom, vnode, queue);
 	}
 
 	return dom;

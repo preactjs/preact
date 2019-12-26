@@ -176,7 +176,7 @@ export function diff(
 
 			c._force = null;
 		} else {
-			oldVNode._dom = diffElementNodes(
+			newVNode._dom = diffElementNodes(
 				oldVNode._dom,
 				newVNode,
 				oldVNode,
@@ -189,6 +189,8 @@ export function diff(
 	} catch (e) {
 		options._catchError(e, newVNode, old);
 	}
+
+	return newVNode._dom;
 }
 
 /**
@@ -212,14 +214,12 @@ function diffElementNodes(
 	excessDomChildren,
 	isHydrating
 ) {
-	if (!dom) return;
 	let i;
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	isSvg = newVNode.type === 'svg' || isSvg;
-
 	if (dom == null && excessDomChildren != null) {
 		for (i = 0; i < excessDomChildren.length; i++) {
 			const child = excessDomChildren[i];
@@ -249,17 +249,6 @@ function diffElementNodes(
 		oldProps = oldVNode.props || EMPTY_OBJ;
 
 		let newHtml = newProps.dangerouslySetInnerHTML;
-
-		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
-		// @TODO we should warn in debug mode when props don't match here.
-		if (!isHydrating) {
-			if (oldProps === EMPTY_OBJ) {
-				oldProps = {};
-				for (let i = 0; i < dom.attributes.length; i++) {
-					oldProps[dom.attributes[i].name] = dom.attributes[i].value;
-				}
-			}
-		}
 
 		diffProps(newVNode, newProps, oldProps, isSvg, isHydrating);
 
@@ -339,6 +328,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		}
 	}
 
+	console.log('removing', dom);
 	if (dom != null) removeNode(dom);
 }
 

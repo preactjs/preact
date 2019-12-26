@@ -129,17 +129,7 @@ export function diffChildren(
 	}
 
 	// Remove remaining oldChildren if there are any.
-	for (i = oldChildrenLength; i--; ) {
-		newParentVNode._toRemove = oldChildren.filter(c => c != null);
-	}
-
-	// Set refs only after unmount
-	if (refs) {
-		// TODO
-		for (i = 0; i < refs.length; i++) {
-			applyRef(refs[i], refs[++i], refs[++i]);
-		}
-	}
+	newParentVNode._toRemove = oldChildren.filter(c => c != null);
 }
 
 /**

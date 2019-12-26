@@ -65,8 +65,22 @@ describe('render()', () => {
 		expect(c[0].nodeName).to.equal('#text');
 	});
 
-	it('should allow node type change with content', () => {
+	it('should render strings correctly', () => {
+		render('initial', scratch);
+		let c = scratch.childNodes;
+		expect(c).to.have.length(1);
+		expect(c[0].data).to.equal('initial');
+		expect(c[0].nodeName).to.equal('#text');
+		render('altered', scratch);
+		c = scratch.childNodes;
+		expect(c).to.have.length(1);
+		expect(c[0].data).to.equal('altered');
+		expect(c[0].nodeName).to.equal('#text');
+	});
+
+	it.only('should allow node type change with content', () => {
 		render(<span>Bad</span>, scratch);
+		expect(scratch.innerHTML).to.eql(`<span>Bad</span>`);
 		render(<div>Good</div>, scratch);
 		expect(scratch.innerHTML).to.eql(`<div>Good</div>`);
 	});
