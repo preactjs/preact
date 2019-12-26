@@ -145,6 +145,7 @@ function render(vnode, parentDom, replaceNode) {
 虚拟节点的对比主要有diff,diffElementNodes,diffChildren,diffProps四个函数。diff过程中会对新旧虚拟节点和新旧props做对比，然后渲染出真实的dom。<br />
 diff函数主要处理函数型节点，也就是类型为类组件和无状态组件的虚拟节点，如果不是函数类型节点则会调用diffElementNodes函数来处理。先判断虚拟节点是否有_component属性，如果没有则实例化一个组件，然后执行组件的一些生命周期，完成后执行组件的render方法，在执行完render方法后会把结果保存在虚拟节点的children属性中，然后调用diffChildren函数来比较子节点，最后diff函数会返回虚拟节点生成的dom。
 ```jsx harmony
+//src/diff/index.js
 function diff(
 	parentDom,
 	newVNode,
@@ -342,11 +343,10 @@ function diff(
 	return newVNode._dom;
 }
 ```
-diffElementNodes主要处理了html型的虚拟节点，这儿会创建真实的dom节点
-首先从excessDomChildren中查找能否复用之前的dom节点，如果没有复用，则会调用createTextNode或者createElement来创建一个节点，然后调用diffProps来比较props，这个函数的代码就不贴了，详细的在源码中去看，都有详细的注释，这个函数里主要处理了dom的属性，比如样式设置，事件监听等，
-下来调用了diffChildren来比较子节点并将新创建的节点与子节点做挂钩
+diffElementNodes主要处理了html型的虚拟节点，这儿会生成真实的dom节点。<br />
+首先从参数excessDomChildren中查找能否复用之前的dom节点。如果没有复用，则会调用createTextNode或者createElement来创建一个节点。然后调用diffProps来比较props处理节点的属性，比如样式设置，事件监听等。diffProps这个函数的代码就不贴了，可以去源码中去看，都有详细的注释。然后调用了diffChildren来比较子节点并将子节点的dom添加到当前节点。
 ```jsx harmony
-//对比html标签节点
+//src/diff/index.js
 function diffElementNodes(
 	dom,
 	newVNode,
@@ -361,7 +361,6 @@ function diffElementNodes(
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
 
-	// Tracks entering and exiting SVG namespace when descending through the tree.
 	//判断是否是svg
 	isSvg = newVNode.type === 'svg' || isSvg;
 	//判断能否复用excessDomChildren中的dom
@@ -392,14 +391,12 @@ function diffElementNodes(
 		dom = isSvg
 			? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type)
 			: document.createElement(newVNode.type);
-		// we created a new parent, so none of the previously attached children can be reused:
 		//以下流程中 excessDomChildren表示dom的子节点,这儿的dom是新创建的,所以要设为null,表示不可复用子节点
 		excessDomChildren = null;
 	}
 	//如果是text节点
 	if (newVNode.type === null) {
 		//如果diffElementNodes传进来dom就不为空,则将excessDomChildren对应的节点设为null
-		//见README.md解惑疑点9
 		if (excessDomChildren != null) {
 			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
 		}
@@ -410,27 +407,14 @@ function diffElementNodes(
 	}
 	//新老节点不相等
 	else if (newVNode !== oldVNode) {
-		/**
-		 * 在这儿excessDomChildren是dom的子节点
-		 * 例如以下就会渲染空,因为第二个渲染文本节点时,由于dom!==null,
-		 * 所以excessDomChildren不会移除之前的文本节点,导致diffChildren中removeNode(excessDomChildren)移除此文本节点
-		 * render(<p>2</p>, document.getElementById('app'));
-		 * render(
-		 * 	<p>3</p>,
-		 * 	document.getElementById('app'),
-		 * 	document.getElementById('app').firstChild
-		 * );
-		 */
 		if (excessDomChildren != null) {
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 		oldProps = oldVNode.props || EMPTY_OBJ;
-		//dangerouslySetInnerHTML Props
+
 		let oldHtml = oldProps.dangerouslySetInnerHTML;
 		let newHtml = newProps.dangerouslySetInnerHTML;
 
-		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
-		// @TODO we should warn in debug mode when props don't match here.
 		//如果是非hydration模式则执行以下,因为hydration模式不会处理props
 		if (!isHydrating) {
 			//如果oldProps是空对象,则将dom的属性扩展给oldProps
@@ -442,7 +426,6 @@ function diffElementNodes(
 			}
 			//新的props或者老的props有设置dangerouslySetInnerHTML
 			if (newHtml || oldHtml) {
-				// Avoid re-applying the same '__html' if it did not changed between re-render
 				//newHtml为空或者oldHtml为空或者 oldHtml与newHtml不相同  则设置给innerHTML
 				if (!newHtml || !oldHtml || newHtml.__html != oldHtml.__html) {
 					dom.innerHTML = (newHtml && newHtml.__html) || '';
@@ -454,7 +437,6 @@ function diffElementNodes(
 		//设置_children
 		newVNode._children = newVNode.props.children;
 
-		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		//如果没有设置newHtml则比较children
 		if (!newHtml) {
 			diffChildren(
@@ -470,7 +452,6 @@ function diffElementNodes(
 			);
 		}
 
-		// (as above, don't diff props during hydration)
 		//如果是非hydration模式
 		if (!isHydrating) {
 			//如果value在newProps中并且value与dom的value不相同则设置value
