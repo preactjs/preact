@@ -14,9 +14,7 @@ export function _catchError(error, vnode) {
 	for (; (vnode = vnode._parent); ) {
 		if ((component = vnode._component) && !component._processingException) {
 			try {
-				if (vnode.type._catch) {
-					vnode.type._catch(error);
-				} else if (
+				if (
 					component.constructor &&
 					component.constructor.getDerivedStateFromError != null
 				) {

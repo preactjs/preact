@@ -223,18 +223,18 @@ export function useDebugValue(value, formatter) {
 }
 
 export function errorBoundary(fn, callback) {
-	let setErr;
-
 	function Boundary(props) {
-		const result = useState();
-		setErr = result[1];
-		return fn(props, result[0]);
-	}
+		const errState = useState();
 
-	Boundary._catch = err => {
-		if (callback) callback(err);
-		setErr(err);
-	};
+		if (!currentComponent.componentDidCatch) {
+			currentComponent.componentDidCatch = err => {
+				if (callback) callback(err);
+				errState[1](err);
+			};
+		}
+
+		return fn(props, errState[0]);
+	}
 
 	Boundary.displayName = 'ErrorBoundary(' + (fn.displayName || fn.name) + ')';
 
