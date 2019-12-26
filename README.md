@@ -761,13 +761,14 @@ function diffChildren(
 ### 1.component
 Component构造函数
 ```jsx harmony
+//src/component.js
 function Component(props, context) {
 	this.props = props;
 	this.context = context;
 }
 ```
 
-设置状态，可以看到将新的状态保存在_nextState，然后调用enqueueRender(this)加入选渲染队列并渲染，在diff过程中会将_nextState设置给state
+设置状态。可以看到将新的状态保存在_nextState，然后调用enqueueRender(this)把当前组件加入到待渲染队列并渲染，在diff渲染过程中会将_nextState设置给state。
 ```jsx harmony
 Component.prototype.setState = function(update, callback) {
 	let s;
@@ -800,7 +801,7 @@ Component.prototype.setState = function(update, callback) {
 	}
 };
 ```
-强制渲染，设置_force来标记是强制渲染，然后加入渲染队列并渲染。如果_force为真，则在diff渲染中不会触发组件的某些生命周期，
+强制渲染。设置_force来标记是强制渲染，然后加入渲染队列并渲染。如果_force为真，则在diff渲染中不会触发组件的某些生命周期。
 ```jsx harmony
 Component.prototype.forceUpdate = function(callback) {
 	if (this._vnode) {
@@ -813,16 +814,16 @@ Component.prototype.forceUpdate = function(callback) {
 	}
 };
 ```
-render函数，默认是Fragment组件，返回子节点
+render函数，默认是Fragment组件，返回子节点。
 ```jsx harmony
 Component.prototype.render = Fragment;
 function Fragment(props) {
 	return props.children;
 }
 ```
-enqueueRender函数把待渲染的组件加入渲染队列，然后延迟执行process<br />
-process函数会先按照组件的深度进行排序，最外层的组件最先执行<br />
-如果_dirty为真表示需要渲染，然后调用renderComponent，渲染后会设置该组件_dirty为false，防止重复渲染
+enqueueRender函数会把待渲染的组件加入渲染队列，然后延迟执行process函数。<br />
+process函数会先按照组件的深度进行排序，最外层的组件最先执行。<br />
+如果_dirty为真表示需要渲染，然后会调用renderComponent渲染组件。渲染后设置该组件_dirty为false，防止重复渲染。
 ```jsx harmony
 //待渲染组件列表
 let q = [];
@@ -862,9 +863,8 @@ function process() {
 	}
 }
 ```
-renderComponent来渲染组件，通过调用diff来比较虚拟节点并更新真实dom，完成后执行所有组件的did生命周期和setState的回调函数
+renderComponent来渲染组件。通过调用diff来比较虚拟节点并更新真实dom，完成后执行所有组件的did生命周期和setState的回调函数。
 ```jsx harmony
-//渲染组件
 function renderComponent(component) {
 	let vnode = component._vnode,
 		oldDom = vnode._dom,
@@ -894,8 +894,8 @@ function renderComponent(component) {
 ```
 ### 2.context
 这是一个context的使用案例，跨组件传递数据。首先通过createContext创建一个context，里面包含Provider和Consumer两个组件。<br />
-Provider组件用在最外层，通过设置value来跨组件传递数据<br />
-Consumer组件主要是使用数据，子节点必须是一个函数，第一个参数就是Provider组件的value
+Provider组件用在最外层，通过设置value来跨组件传递数据。<br />
+Consumer组件主要是使用数据，子节点必须是一个函数，第一个参数就是Provider组件的value。
 ```jsx harmony
 import { createContext, h, render } from 'preact';
 
@@ -929,7 +929,7 @@ class Consumer extends Comment{
     }
 }
 ```
-Provider组件中创建了一些函数。当渲染到Provider组件时，调用getChildContext来获得ctx对象，然后在diff子孙节点时都会向下传递这个ctx。如果某个子孙节点组件设置了contextType静态属性，会调用sub方法把该组件添加到订阅数组中。当Provider组件value更新时，触发shouldComponentUpdate生命周期，然后执行所有的渲染所有的订阅组件。
+Provider组件中创建了一些函数。当渲染到Provider组件时，调用getChildContext来获得ctx对象，然后在渲染diff比较Provider组件的子孙节点时都会向下传递这个ctx。如果某个子孙节点组件设置了contextType静态属性，会调用sub方法把该组件添加到订阅数组中。当Provider组件value更新时，会触发shouldComponentUpdate生命周期，然后执行渲染所有的订阅组件。
 ```jsx harmony
 //src/create-context.js
 let i = 0;
