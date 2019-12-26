@@ -653,7 +653,7 @@ function diffChildren(
 	}
 }
 ```
-分析下diff执行流程。render函数执行后，执行diff函数来比较newVNode为`{type:App,props:null}`和oldVNode为EMPTY_OBJ的虚拟节点。由于`oldVNode._component`属性为空，然后通过`new App()`来实例化一个组件并赋值给`newVNode._component`，继续执行App组件的一些生命周期后继续执行App组件的render方法，然后把render方法执行返回的虚拟节点保存在newVNode的_children属性下，然后调用diffChildren去比较子节点。此时整个的虚拟节点数如下：
+分析下diff执行流程。render函数执行后，调用diff函数来比较newVNode为`{type:App,props:null}`和oldVNode为EMPTY_OBJ的虚拟节点。由于`oldVNode._component`属性为空，然后通过`new App()`来实例化一个组件并赋值给`newVNode._component`，继续执行App组件的一些生命周期后执行App组件的render方法，然后把render方法执行返回的虚拟节点保存在newVNode的_children属性下，然后调用diffChildren去比较子节点。此时整个的虚拟节点数如下：
 ```json5
 {
 	"type": App,
@@ -679,7 +679,7 @@ function diffChildren(
 	}
 }
 ```
-在diffChildren中先读取newVNode类型为App的_children属性，与oldVNode子节点进行遍历比较。此时第一个子节点是类型为div的虚拟节点，然后把这个虚拟节点作为参数再调用diff函数。在diff函数中判断是html型节点，调用diffElementNodes函数，然后在这个函数中会创建div真实dom节点。再调用diffChildren来对比div节点的虚拟子节点，如此递归比较完所有div的虚拟节点后会将真实的dom添加到div节点中去。在diffChildren中会将div真实dom添加到parentDom节点中去，也就是document.getElementById('app')节点
+在diffChildren中先读取newVNode类型为App的_children属性，与oldVNode子节点进行遍历比较。此时第一个子节点是类型为div的虚拟节点，然后把这个虚拟节点作为参数再调用diff函数，diff函数执行后会返回div真实的dom，然后会将这个真实dom添加到parentDom节点中去，也就是document.getElementById('app')节点。在diff函数中比较div类型的虚拟节点时，先判断是html型节点，调用diffElementNodes函数。然后在这个函数中会创建div真实dom节点。再调用diffChildren来对比div节点的虚拟子节点，如此递归比较完所有div的虚拟节点。
 ## 三.组件
 ### 1.component
 Component构造函数
