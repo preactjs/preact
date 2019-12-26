@@ -893,9 +893,9 @@ function renderComponent(component) {
 }
 ```
 ### 2.context
-这是一个context案例，首先通过createContext创建一个context，里面包含Provider和Consumer两个组件<br />
+这是一个context的使用案例，跨组件传递数据。首先通过createContext创建一个context，里面包含Provider和Consumer两个组件。<br />
 Provider组件用在最外层，通过设置value来跨组件传递数据<br />
-Consumer组件主要是使用数据，子节点是一个函数，第一个参数就是对应的value
+Consumer组件主要是使用数据，子节点必须是一个函数，第一个参数就是Provider组件的value
 ```jsx harmony
 import { createContext, h, render } from 'preact';
 
@@ -918,8 +918,8 @@ render(
 
 ```
 
-源码也比较简单，调用createContext后返回一个context对象，里面包含了Consumer与Provider组件<br />
-Consumer组件设置了contextType静态属性，渲染时会执行子组件，并把context做为参数，等同于如下类组件
+源码也比较简单，调用createContext后会返回一个context对象，里面包含了Consumer与Provider组件。<br />
+Consumer组件设置了静态属性contextType，渲染时会执行子节点，并把context做为参数，等同于如下类组件。
 ```jsx harmony
 class Consumer extends Comment{
     //context新创建的context
@@ -929,8 +929,9 @@ class Consumer extends Comment{
     }
 }
 ```
-Provider组件中创建了一些函数，当渲染到Provider组件时，调用getChildContext来获得一个context，然后在diff子孙节时都会向下传递这个context，如果某个子孙节点组件设置了contextType静态属性，会调用sub方法吧该组件添加到数组中，当Provider组件value更新时，触发shouldComponentUpdate生命周期，然后执行所有的渲染所有的订阅组件
+Provider组件中创建了一些函数。当渲染到Provider组件时，调用getChildContext来获得ctx对象，然后在diff子孙节点时都会向下传递这个ctx。如果某个子孙节点组件设置了contextType静态属性，会调用sub方法把该组件添加到订阅数组中。当Provider组件value更新时，触发shouldComponentUpdate生命周期，然后执行所有的渲染所有的订阅组件。
 ```jsx harmony
+//src/create-context.js
 let i = 0;
 //defaultValue参数是 只有组件的祖先组件中没有Provider组件才使用这个，不是Provider没有设置value
 export function createContext(defaultValue) {
@@ -987,8 +988,9 @@ export function createContext(defaultValue) {
 	return context;
 }
 ```
-这是diff中关于context的相关代码，在处理组件类型虚拟节点时，先获取静态属性contextType，如果存在然后通过id找到context，然后计算Context的value并赋值给cctx，这个会赋值给组件的context实例属性，如果是新创建的组件，则会去调用sub函数来订阅Provider组件的value更新，当value更新是渲染这个组件。然后会吧context赋值给_context,在setState后进入diff时会读取这个变量并向下传递
+这是diff中关于context的相关代码。在处理组件类型虚拟节点时，先获取静态属性contextType。如果存在然后通过id找到context，计算context的value并赋值给cctx变量，这个变量然后会赋值给组件的context实例属性。如果是新创建的组件，则会去调用sub函数来订阅Provider组件的value更新，也就是当value更新时会渲染这个组件。然后会把context赋值给_context，在setState后进入diff时会读取这个变量并向下传递。
 ```jsx harmony
+//src/diff/index.js
 function diff(
 	parentDom,
 	newVNode,
@@ -1000,8 +1002,7 @@ function diff(
 	oldDom,
 	isHydrating
 ) {
-	let tmp,
-		newType = newVNode.type;
+	let tmp,newType = newVNode.type;
 	if (typeof newType === 'function') {
 		let c;
 		let newProps = newVNode.props;
@@ -1009,8 +1010,8 @@ function diff(
 		tmp = newType.contextType;
 		//找到祖先的provider
 		let provider = tmp && context[tmp._id];
-		//有tmp时，提供provider时为provider的value，不然为createContext的defaultValue
-		//没有是为上层的context
+		//有tmp时，如果提供provider时为provider的value，不然为createContext的defaultValue
+		//没有则为父节点传递下来的context
 		let cctx = tmp
 			? provider
 				? provider.props.value
@@ -1021,13 +1022,13 @@ function diff(
 			c = newVNode._component = oldVNode._component;
 		} else {
 			newVNode._component = c = new newType(newProps, cctx);
-			//订阅，当provider value改变时，渲染组件
+			//订阅，当provider组件value改变时，渲染组件
 			if (provider) provider.sub(c);
 			c._context = context;
 		}
 
 		c.context = cctx;
-		//如果是Provider组件，然后调用getChildContext
+		//如果是Provider组件，然后调用getChildContext获取ctx对象并向下传递
 		if (c.getChildContext != null) {
 			context = assign(assign({}, context), c.getChildContext());
 		}
@@ -1271,4 +1272,4 @@ render(
 	document.getElementById('app').firstChild
 );
 ```
-如果不加那一个段代码，那么上面的代码会渲染为空。我们分析下，第一个render时是正常的。在执行第二个render时，此时replaceNode为document.getElementById('app').firstChild，也就是p节点，这次渲染后为什么会为空呢？在`diffElementNodes`文本节点3时，这时dom不为空，所以不会执行`excessDomChildren[i] = null`。但这儿还会复用之前的text为2的节点，只不过将内容设置成了3，后面如果不将`excessDomChildren`中之前的文本节点设为空,那么当执行diffChildren p元素时,会移除这个以前的text节点,所以什么就会渲染空，这部分还是比较复杂，建议多读读源码理解。
+如果不加那一个段代码，那么上面的代码会渲染为空。我们分析下，执行第一个render时渲染是正常的。在执行第二个render时，此时render的replaceNode参数为`document.getElementById('app').firstChild`，也就是p节点，这次渲染是不能渲染出3文本节点的，为什么呢？原理在`diffElementNodes`文本节点3时，这时dom不为空，所以不会执行`excessDomChildren[i] = null`。但这儿还会复用之前的text为2的节点，只不过将内容设置成了3。后面如果不将`excessDomChildren`中之前的文本节点设为空，那么当执行diffChildren对比p元素时，会移除这个以前的text节点，所以什么就会渲染空。这部分还是比较复杂，建议多读读源码理解。

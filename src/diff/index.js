@@ -64,8 +64,8 @@ export function diff(
 			tmp = newType.contextType;
 			//找到祖先的provider
 			let provider = tmp && context[tmp._id];
-			//有tmp时，提供provider时为provider的value，不然为createContext的defaultValue
-			//没有是为上层的context
+			//有tmp时，如果提供provider时为provider的value，不然为createContext的defaultValue
+			//没有则为父节点传递下来的context
 			let cctx = tmp
 				? provider
 					? provider.props.value
@@ -89,7 +89,7 @@ export function diff(
 					//设置render
 					c.render = doRender;
 				}
-				//订阅，当provider value改变时，渲染组件
+				//订阅，当provider组件value改变时，渲染组件
 				if (provider) provider.sub(c);
 
 				c.props = newProps;
@@ -204,7 +204,7 @@ export function diff(
 			newVNode._children = toChildArray(
 				isTopLevelFragment ? tmp.props.children : tmp
 			);
-			//如果是Provider组件，然后调用getChildContext
+			//如果是Provider组件，然后调用getChildContext获取ctx对象并向下传递
 			if (c.getChildContext != null) {
 				context = assign(assign({}, context), c.getChildContext());
 			}
