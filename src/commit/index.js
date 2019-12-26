@@ -23,6 +23,7 @@ export function commitRoot(parentDom, root) {
 }
 
 export const commit = (parentDom, vnode, queue) => {
+	if (vnode.constructor !== undefined) return null;
 	let dom = vnode._dom;
 	if (typeof vnode.type === 'function') {
 		let c = vnode._component;
