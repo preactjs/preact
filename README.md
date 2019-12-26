@@ -653,7 +653,7 @@ function diffChildren(
 	}
 }
 ```
-分析下diff执行流程。render函数执行后，调用diff函数来比较newVNode为`{type:App,props:null}`和oldVNode为EMPTY_OBJ的虚拟节点。由于`oldVNode._component`属性为空，然后通过`new App()`来实例化一个组件并赋值给`newVNode._component`，继续执行App组件的一些生命周期后执行App组件的render方法，然后把render方法执行返回的虚拟节点保存在newVNode的_children属性下，然后调用diffChildren去比较子节点。此时整个的虚拟节点数如下：
+**分析下diff执行流程**。render函数执行后，调用diff函数来比较newVNode为`{type:App,props:null}`和oldVNode为EMPTY_OBJ的虚拟节点。由于`oldVNode._component`属性为空，然后通过`new App()`来实例化一个组件并赋值给`newVNode._component`，继续执行App组件的一些生命周期后执行App组件的render方法，然后把render方法执行返回的虚拟节点保存在newVNode的_children属性下，然后调用diffChildren去比较子节点。此时整个的虚拟节点数如下：
 ```json5
 {
 	"type": App,
