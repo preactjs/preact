@@ -142,8 +142,8 @@ function render(vnode, parentDom, replaceNode) {
 }
 ```
 #### 2. diff
-虚拟节点的对比主要有diff,diffElementNodes,diffChildren,diffProps四个函数。diff过程中会对新旧虚拟节点和新旧props做对比，然后渲染出真实的dom。<br />
-diff函数主要处理函数型节点，也就是类型为类组件和无状态组件的虚拟节点，如果不是函数类型节点则会调用diffElementNodes函数来处理。先判断虚拟节点是否有_component属性，如果没有则实例化一个组件，然后执行组件的一些生命周期，完成后执行组件的render方法，在执行完render方法后会把结果保存在虚拟节点的_children属性中，然后调用diffChildren函数来比较子节点，最后diff函数会返回虚拟节点生成的dom。
+虚拟节点的对比主要有diff,diffElementNodes,diffChildren,diffProps四个函数。diff过程中会对新旧虚拟节点和新旧props做比较，然后渲染出真实的dom。<br />
+diff函数主要处理函数型节点，也就是类型为类组件和无状态组件的虚拟节点，如果不是函数类型节点则会调用diffElementNodes函数来处理。先判断虚拟节点是否有_component属性，如果没有则实例化一个组件，然后执行组件的一些生命周期。完成后执行组件的render方法，在执行完render方法后会把返回的虚拟节点保存在虚拟节点的_children属性中，然后调用diffChildren函数来比较子节点，最后diff函数会返回虚拟节点生成的dom。
 ```jsx harmony
 //src/diff/index.js
 function diff(
@@ -344,7 +344,7 @@ function diff(
 }
 ```
 diffElementNodes主要处理了html型的虚拟节点，这儿会生成真实的dom节点。<br />
-首先从参数excessDomChildren中查找能否复用之前的dom节点。如果没有复用，则会调用createTextNode或者createElement来创建一个节点。然后调用diffProps来比较props处理节点的属性，比如样式设置，事件监听等。diffProps这个函数的代码就不贴了，可以去源码中去看，都有详细的注释。然后调用了diffChildren来比较子节点并将子节点的dom添加到当前dom节点。
+首先从参数excessDomChildren中查找能否复用之前的dom节点。如果没有复用，则会调用createTextNode或者createElement来创建一个节点。然后调用diffProps来比较props处理节点的属性，比如样式、事件监听等。diffProps这个函数的代码就不贴了，可以去源码中去看，都有详细的注释。然后调用了diffChildren来比较子节点并将子节点的dom添加到当前dom节点。
 ```jsx harmony
 //src/diff/index.js
 function diffElementNodes(
@@ -479,7 +479,7 @@ function diffElementNodes(
 	return dom;
 }
 ```
-在diffChildren主要处理了子节点的比较，首先从excessDomChildren中寻找对应节点已经存在的dom，然后对子节点进行遍历。如果子节点的key和type与之前虚拟节点或者紧跟节点相同，oldNode则会使用之前的这个节点。接下来会去调用diff来比较新老虚拟节点，返回真实的dom，然后会把子节点追加到parentDom里面或者parentDom子节点的后面。
+在diffChildren主要处理了子节点的比较，首先从excessDomChildren中寻找对应节点已经存在的dom，然后对子节点进行遍历。如果子节点的key和type与之前虚拟节点或者紧跟节点相同，oldNode则会使用之前的这个节点。接下来会去调用diff来比较新老虚拟节点，返回真实的dom，然后会把子节点的真实dom追加到parentDom里面或者parentDom子节点的后面。
 ```jsx harmony
 ///src/diff/children.js
 function diffChildren(
