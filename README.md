@@ -43,8 +43,8 @@ class App extends Component {
 render(<App/>, document.getElementById('app'));
 ```
 
-1. **vnode**<br />
-vnode是一个节点描述的对象，项目打包环节中,babel的transform-react-jsx插件默认会将jsx语法编译成React.createElement(type, props, children)形式,对应的是(元素类型,元素属性,元素子节点).preact中需要设置此插件参数,使React.createElement对应为h函数,最终编译结果如下
+#### 1. vnode
+vnode是一个节点描述的对象。项目打包环节中，babel的transform-react-jsx插件默认会将jsx语法编译成React.createElement(type, props, children)形式，对应的是(元素类型,元素属性,元素子节点)。preact中需要设置此插件参数，使React.createElement对应为h函数，最终编译结果如下：
 ```jsx harmony
 class App extends Component {
 	render() {
@@ -65,20 +65,10 @@ render(
 	document.getElementById('app')
 );
 ```
-当执行render函数时,先执行**h**函数, h 函数是createElement函数的别名.其中defaultProps就是在这个函数里处理的,最后又调用了createVNode函数,而createVNode返回了一个虚拟节点对象,所以`h(App,null)`的最终执行结果是`{type:App,props:null,key:null,ref:null}`
+当执行render函数时，先执行**h**函数, h 函数是createElement函数的别名，其中defaultProps就是在这个函数里处理的。最后又调用了createVNode函数，而createVNode返回了一个虚拟节点对象，所以`h(App,null)`的最终执行结果是`{type:App,props:null,key:null,ref:null}`。
 ```jsx harmony
 //src/create-element.js
-/**
- * 创建元素
- * @param type {null |string| ComponentType} type 元素类型
- * 如果是文本数字等简单元素,则为null,
- * 如果是html标签的节点,则是html标签字符串,如`div`
- * 如果是函数型的节点,则是这个函数,如`App`判断是函数节点或者html标签主要依据是是否首字母大写,如果是大写,他就是函数型节点,如果是小写,他就是普通的html节点,这就是为什么函数组件首字母要求大写的原因
- * 
- * @param props {string | Attributes} 元素属性
- * @param children {string | VNode} 元素子节点
- * @returns {VNode}
- */
+//创建元素
 function createElement(type, props, children) {
 	let normalizedProps = {},
 		i;
@@ -128,8 +118,9 @@ function createVNode(type, props, key, ref) {
 	return vnode;
 }
 ```
-当执行完`h(App,null)`后,render函数会拿执行结果`{type:App,props:null,key:null,ref:null}`去渲染到真实dom，下面就是render函数的主要相关代码。首先会对传进来的虚拟节点套用一个Fragment的父节点，然后调用diff函数来比较虚拟节点渲染真实的dom，当然首次render时旧的虚拟节点基本都是一个空对象，当diff完成后也就是真实dom创建挂载完成，然后执行了commitRoot函数，这个函数主要是执行一些组件的did生命周期和setState回调
+当执行完`h(App,null)`后，render函数会拿执行结果`{type:App,props:null,key:null,ref:null}`去渲染真实dom，下面就是render函数的相关代码。首先会对传进来的虚拟节点套用一个Fragment的父节点，然后调用diff函数来比较虚拟节点渲染真实的dom，当然首次render时旧的虚拟节点基本都是一个空对象。当diff完成后也就是真实dom创建挂载完成，然后执行了commitRoot函数，这个函数主要是执行一些组件的did生命周期和setState回调。
 ```jsx harmony
+//src/render.js
 function render(vnode, parentDom, replaceNode) {
 	let oldVNode = parentDom._children;
 	//用Fragment包装下
@@ -143,14 +134,14 @@ function render(vnode, parentDom, replaceNode) {
 		EMPTY_OBJ,
 		parentDom.ownerSVGElement !== undefined,
 		parentDom.childNodes,
-		commitQueue,
+        commitQueue,
         EMPTY_OBJ
 	);
 	//渲染完成时执行did生命周期和setState回调
 	commitRoot(commitQueue, vnode);
 }
 ```
-2. **diff**<br />
+#### 2. diff
 虚拟节点的对比主要有diff,diffElementNodes,diffChildren,diffProps四个函数，diff过程中会对新旧虚拟节点和新旧props做对比，然后渲染出真实的dom<br />
 diff函数主要处理函数型节点，也就是类型为类组件和无状态组件的虚拟节点,当执行到diff`{type:App,props:null}`时，判断这个虚拟节点没有_component属性，然后通过`new App()`来实例化一个组件并赋值给_component，当再次渲染到这个虚拟节点是就不会在去实例化一个新的虚拟节点了，然后执行了组件的一些生命周期，在执行完render方法后会吧结果保存在虚拟节点的children属性中，然后调用diffChildren函数来比较子节点，最后diff会返货虚拟节点生成的dom，
 ```jsx harmony
@@ -801,7 +792,7 @@ Component.prototype.setState = function(update, callback) {
 	}
 };
 ```
-强制渲染。设置_force来标记是强制渲染，然后加入渲染队列并渲染。如果_force为真，则在diff渲染中不会触发组件的某些生命周期。
+强制渲染。通过设置_force来标记是强制渲染，然后加入渲染队列并渲染。如果_force为真，则在diff渲染中不会触发组件的某些生命周期。
 ```jsx harmony
 Component.prototype.forceUpdate = function(callback) {
 	if (this._vnode) {
@@ -822,8 +813,8 @@ function Fragment(props) {
 }
 ```
 enqueueRender函数会把待渲染的组件加入渲染队列，然后延迟执行process函数。<br />
-process函数会先按照组件的深度进行排序，最外层的组件最先执行。<br />
-如果_dirty为真表示需要渲染，然后会调用renderComponent渲染组件。渲染后设置该组件_dirty为false，防止重复渲染。
+process函数会先按照组件的深度进行排序，最外层的组件最先渲染。<br />
+如果_dirty为真表示需要渲染，然后会调用renderComponent渲染组件。渲染后会设置该组件_dirty为false，防止重复渲染。
 ```jsx harmony
 //待渲染组件列表
 let q = [];
