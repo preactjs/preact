@@ -222,23 +222,20 @@ export function useDebugValue(value, formatter) {
 	}
 }
 
-export function errorBoundary(fn, callback) {
-	function Boundary(props) {
-		const errState = useState();
-
-		if (!currentComponent.componentDidCatch) {
-			currentComponent.componentDidCatch = err => {
-				if (callback) callback(err);
-				errState[1](err);
-			};
-		}
-
-		return fn(props, errState[0]);
+export function useErrorBoundary(cb) {
+	const errState = useState();
+	if (!currentComponent.componentDidCatch) {
+		currentComponent.componentDidCatch = err => {
+			if (cb) cb(err);
+			errState[1](err);
+		};
 	}
-
-	Boundary.displayName = 'ErrorBoundary(' + (fn.displayName || fn.name) + ')';
-
-	return Boundary;
+	return [
+		errState[0],
+		() => {
+			errState[1](undefined);
+		}
+	];
 }
 
 /**

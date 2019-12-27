@@ -1,6 +1,6 @@
 import { createElement, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { errorBoundary } from 'preact/hooks';
+import { useErrorBoundary } from 'preact/hooks';
 import { setupRerender } from 'preact/test-utils';
 
 /** @jsx createElement */
@@ -23,9 +23,10 @@ describe('errorBoundary', () => {
 			throw new Error('test');
 		};
 
-		const App = errorBoundary((props, err) => {
+		const App = props => {
+			const [err] = useErrorBoundary();
 			return err ? <p>Error</p> : <Throws />;
-		});
+		};
 
 		render(<App />, scratch);
 		rerender();
@@ -39,9 +40,10 @@ describe('errorBoundary', () => {
 			throw error;
 		};
 
-		const App = errorBoundary((props, err) => {
+		const App = props => {
+			const [err] = useErrorBoundary(spy);
 			return err ? <p>Error</p> : <Throws />;
-		}, spy);
+		};
 
 		render(<App />, scratch);
 		rerender();
