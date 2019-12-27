@@ -1271,9 +1271,12 @@ describe('render()', () => {
 		scratch.appendChild(container);
 		render(<div>Hello</div>, scratch, scratch.firstElementChild);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		const child = scratch.firstElementChild;
 
 		render(<div>Hello</div>, scratch, scratch.firstElementChild);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+
+		expect(scratch.firstElementChild).to.equal(child);
 	});
 
 	it('should replaceNode after rendering', () => {
@@ -1281,11 +1284,15 @@ describe('render()', () => {
 			return <p>{i}</p>;
 		}
 
+		scratch.innerHTML = '';
 		render(<App i={2} />, scratch);
 		expect(scratch.innerHTML).to.equal('<p>2</p>');
+		const child = scratch.firstElementChild;
 
-		render(<App i={3} />, scratch, scratch.firstChild);
+		render(<App i={3} />, scratch, child);
 		expect(scratch.innerHTML).to.equal('<p>3</p>');
+
+		expect(scratch.firstElementChild).to.equal(child);
 	});
 
 	it('should not cause infinite loop with referentially equal props', () => {
@@ -1325,7 +1332,7 @@ describe('render()', () => {
 		it('should use replaceNode as render root and not inject into it', () => {
 			const childA = scratch.querySelector('#a');
 			render(<div id="a">contents</div>, scratch, childA);
-			expect(scratch.querySelector('#a')).to.equalNode(childA);
+			expect(scratch.querySelector('#a')).to.equal(childA);
 			expect(childA.innerHTML).to.equal('contents');
 		});
 
@@ -1392,6 +1399,20 @@ describe('render()', () => {
 			expect(scratch.innerHTML).to.equal(
 				`${expectedA}${expectedB}${expectedC}`
 			);
+		});
+
+		it('should replace type-mismatched nodes', () => {
+			scratch.innerHTML = '';
+			render(<a />, scratch);
+			scratch.innerHTML += '';
+			render(<b />, scratch, scratch.firstChild);
+			expect(scratch.innerHTML).to.equal(`<b></b>`);
+		});
+
+		it('should replace the provided node if unmatched', () => {
+			scratch.innerHTML = `<a>a</a>`;
+			render(<b>b</b>, scratch, scratch.firstChild);
+			expect(scratch.innerHTML).to.equal(`<b>b</b>`);
 		});
 	});
 });
