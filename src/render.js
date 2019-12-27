@@ -2,6 +2,7 @@ import { EMPTY_OBJ, EMPTY_ARR } from './constants';
 import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
+import { removeNode } from './util';
 
 const IS_HYDRATE = EMPTY_OBJ;
 
@@ -22,10 +23,12 @@ export function render(vnode, parentDom, replaceNode) {
 		: (replaceNode && replaceNode._children) || parentDom._children;
 	vnode = createElement(Fragment, null, [vnode]);
 
+	const selectedDomRoot = isHydrating ? parentDom : replaceNode || parentDom;
+
 	let commitQueue = [];
 	diff(
 		parentDom,
-		((isHydrating ? parentDom : replaceNode || parentDom)._children = vnode),
+		(selectedDomRoot._children = vnode),
 		oldVNode || EMPTY_OBJ,
 		EMPTY_OBJ,
 		parentDom.ownerSVGElement !== undefined,
@@ -39,6 +42,9 @@ export function render(vnode, parentDom, replaceNode) {
 		isHydrating
 	);
 	commitRoot(commitQueue, vnode);
+
+	if (!isHydrating && replaceNode && vnode._dom !== replaceNode)
+		removeNode(replaceNode);
 }
 
 /**
