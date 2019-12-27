@@ -19,18 +19,26 @@ describe('errorBoundary', () => {
 	});
 
 	it('catches errors', () => {
+		let resetErr,
+			success = false;
 		const Throws = () => {
 			throw new Error('test');
 		};
 
 		const App = props => {
-			const [err] = useErrorBoundary();
-			return err ? <p>Error</p> : <Throws />;
+			const [err, reset] = useErrorBoundary();
+			resetErr = reset;
+			return err ? <p>Error</p> : success ? <p>Success</p> : <Throws />;
 		};
 
 		render(<App />, scratch);
 		rerender();
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
+
+		success = true;
+		resetErr();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>Success</p>');
 	});
 
 	it('calls the errorBoundary callback', () => {
