@@ -14,7 +14,7 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 	let i;
 
 	for (i in oldProps) {
-		if (!(i in newProps)) {
+		if (i !== 'children' && i !== 'key' && !(i in newProps)) {
 			setProperty(dom, i, null, oldProps[i], isSvg);
 		}
 	}
@@ -22,6 +22,8 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 	for (i in newProps) {
 		if (
 			(!hydrate || typeof newProps[i] == 'function') &&
+			i !== 'children' &&
+			i !== 'key' &&
 			i !== 'value' &&
 			i !== 'checked' &&
 			oldProps[i] !== newProps[i]
@@ -55,6 +57,8 @@ function setStyle(style, key, value) {
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
 function setProperty(dom, name, value, oldValue, isSvg) {
+	let s, useCapture, nameLower;
+
 	if (isSvg) {
 		if (name === 'className') {
 			name = 'class';
@@ -63,9 +67,8 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		name = 'className';
 	}
 
-	if (name === 'key' || name === 'children') {
-	} else if (name === 'style') {
-		const s = dom.style;
+	if (name === 'style') {
+		s = dom.style;
 
 		if (typeof value === 'string') {
 			s.cssText = value;
@@ -94,8 +97,8 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0] === 'o' && name[1] === 'n') {
-		let useCapture = name !== (name = name.replace(/Capture$/, ''));
-		let nameLower = name.toLowerCase();
+		useCapture = name !== (name = name.replace(/Capture$/, ''));
+		nameLower = name.toLowerCase();
 		name = (nameLower in dom ? nameLower : name).slice(2);
 
 		if (value) {
