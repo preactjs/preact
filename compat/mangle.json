@@ -10,6 +10,7 @@
       "$_nextState": "__s",
       "$_renderCallbacks": "__h",
       "$_vnode": "__v",
+      "$_original": "__v",
       "$_children": "__k",
       "$_dom": "__e",
       "$_component": "__c",

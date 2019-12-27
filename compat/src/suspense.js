@@ -1,4 +1,4 @@
-import { Component, createElement, options } from 'preact';
+import { Component, Fragment, createElement, options } from 'preact';
 import { assign } from './util';
 
 const oldCatchError = options._catchError;
@@ -22,6 +22,7 @@ function detachedClone(vnode) {
 	if (vnode) {
 		vnode = assign({}, vnode);
 		vnode._component = null;
+		vnode._original = vnode;
 		vnode._children = vnode._children && vnode._children.map(detachedClone);
 	}
 	return vnode;
@@ -92,7 +93,7 @@ Suspense.prototype.render = function(props, state) {
 	}
 
 	return [
-		createElement(Component, null, state._suspended ? null : props.children),
+		createElement(Fragment, null, state._suspended ? null : props.children),
 		state._suspended && props.fallback
 	];
 };
