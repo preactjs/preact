@@ -40,12 +40,6 @@ export function diff(
 	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== undefined) return null;
 
-	if (newVNode._original === oldVNode._original) {
-		newVNode._children = oldVNode._children;
-		newVNode._lastDomChild = oldVNode._lastDomChild;
-		return (newVNode._dom = oldVNode._dom);
-	}
-
 	if ((tmp = options._diff)) tmp(newVNode);
 
 	try {
@@ -206,6 +200,13 @@ export function diff(
 			}
 
 			c._force = null;
+		} else if (
+			excessDomChildren == null &&
+			newVNode._original === oldVNode._original
+		) {
+			newVNode._children = oldVNode._children;
+			newVNode._lastDomChild = oldVNode._lastDomChild;
+			newVNode._dom = oldVNode._dom;
 		} else {
 			newVNode._dom = diffElementNodes(
 				oldVNode._dom,

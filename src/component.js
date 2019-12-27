@@ -120,11 +120,14 @@ function renderComponent(component) {
 		parentDom = component._parentDom;
 
 	if (parentDom) {
+		// clone the vnode and ensure it's not referentially equal
+		const nextVNode = assign({}, vnode);
+		nextVNode._original = nextVNode;
 		let commitQueue = [];
 		let newDom = diff(
 			parentDom,
 			vnode,
-			assign({}, vnode),
+			nextVNode,
 			component._context,
 			parentDom.ownerSVGElement !== undefined,
 			null,
