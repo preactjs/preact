@@ -130,7 +130,7 @@ export function lazy(loader) {
 			prom = loader();
 			prom.then(
 				exports => {
-					component = exports.default;
+					component = exports.default || exports;
 				},
 				e => {
 					error = e;
