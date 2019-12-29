@@ -301,11 +301,12 @@ function diffElementNodes(
 		excessDomChildren = null;
 	}
 
-	if (newVNode.type === null) {
-		if (excessDomChildren != null) {
-			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
-		}
+	if (excessDomChildren != null) {
+		const index = excessDomChildren.indexOf(dom);
+		if (index !== -1) excessDomChildren[index] = null;
+	}
 
+	if (newVNode.type === null) {
 		if (oldProps !== newProps) {
 			dom.data = newProps;
 		}

@@ -123,6 +123,11 @@ export function diffChildren(
 						firstChildDom = newDom;
 					}
 
+					if (excessDomChildren != null) {
+						const index = excessDomChildren.indexOf(newDom);
+						if (index !== -1) excessDomChildren[index] = null;
+					}
+
 					if (childVNode._lastDomChild != null) {
 						// Only Fragments or components that return Fragment like VNodes will
 						// have a non-null _lastDomChild. Continue the diff from the end of
