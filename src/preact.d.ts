@@ -442,8 +442,9 @@ declare namespace preact {
 		interface DOMAttributes extends preact.PreactDOMAttributes {
 			// Image Events
 			onLoad?: GenericEventHandler;
-			onError?: GenericEventHandler;
 			onLoadCapture?: GenericEventHandler;
+			onError?: GenericEventHandler;
+			onErrorCapture?: GenericEventHandler;
 
 			// Clipboard Events
 			onCopy?: ClipboardEventHandler;
@@ -461,6 +462,9 @@ declare namespace preact {
 			onCompositionUpdate?: CompositionEventHandler;
 			onCompositionUpdateCapture?: CompositionEventHandler;
 
+			// Details Events
+			onToggle?: GenericEventHandler;
+
 			// Focus Events
 			onFocus?: FocusEventHandler;
 			onFocusCapture?: FocusEventHandler;
@@ -477,6 +481,7 @@ declare namespace preact {
 			onSubmit?: GenericEventHandler;
 			onSubmitCapture?: GenericEventHandler;
 			onInvalid?: GenericEventHandler;
+			onInvalidCapture?: GenericEventHandler;
 
 			// Keyboard Events
 			onKeyDown?: KeyboardEventHandler;
@@ -636,9 +641,14 @@ declare namespace preact {
 			allowFullScreen?: boolean;
 			allowTransparency?: boolean;
 			alt?: string;
+			as?: string;
 			async?: boolean;
 			autocomplete?: string;
+			autoComplete?: string;
+			autocorrect?: string;
+			autoCorrect?: string;
 			autofocus?: boolean;
+			autoFocus?: boolean;
 			autoPlay?: boolean;
 			capture?: boolean;
 			cellPadding?: number | string;
@@ -661,8 +671,9 @@ declare namespace preact {
 			dateTime?: string;
 			default?: boolean;
 			defer?: boolean;
-			dir?: string;
+			dir?: 'auto' | 'rtl' | 'ltr';
 			disabled?: boolean;
+			disableRemotePlayback?: boolean;
 			download?: any;
 			draggable?: boolean;
 			encType?: string;
@@ -680,6 +691,7 @@ declare namespace preact {
 			href?: string;
 			hrefLang?: string;
 			for?: string;
+			htmlFor?: string;
 			httpEquiv?: string;
 			icon?: string;
 			id?: string;
@@ -707,6 +719,7 @@ declare namespace preact {
 			multiple?: boolean;
 			muted?: boolean;
 			name?: string;
+			nonce?: string;
 			noValidate?: boolean;
 			open?: boolean;
 			optimum?: number;
@@ -749,6 +762,7 @@ declare namespace preact {
 			type?: string;
 			useMap?: string;
 			value?: string | string[] | number;
+			volume?: string | number;
 			width?: number | string;
 			wmode?: string;
 			wrap?: string;
@@ -762,6 +776,13 @@ declare namespace preact {
 			resource?: string;
 			typeof?: string;
 			vocab?: string;
+
+			// Microdata Attributes
+			itemProp?: string;
+			itemScope?: boolean;
+			itemType?: string;
+			itemID?: string;
+			itemRef?: string;
 		}
 
 		interface IntrinsicElements {
@@ -813,6 +834,7 @@ declare namespace preact {
 			h6: HTMLAttributes;
 			head: HTMLAttributes;
 			header: HTMLAttributes;
+			hgroup: HTMLAttributes;
 			hr: HTMLAttributes;
 			html: HTMLAttributes;
 			i: HTMLAttributes;
@@ -1225,8 +1247,9 @@ declare global {
 		interface DOMAttributes extends preact.PreactDOMAttributes {
 			// Image Events
 			onLoad?: GenericEventHandler;
-			onError?: GenericEventHandler;
 			onLoadCapture?: GenericEventHandler;
+			onError?: GenericEventHandler;
+			onErrorCapture?: GenericEventHandler;
 
 			// Clipboard Events
 			onCopy?: ClipboardEventHandler;
@@ -1244,6 +1267,9 @@ declare global {
 			onCompositionUpdate?: CompositionEventHandler;
 			onCompositionUpdateCapture?: CompositionEventHandler;
 
+			// Details Events
+			onToggle?: GenericEventHandler;
+
 			// Focus Events
 			onFocus?: FocusEventHandler;
 			onFocusCapture?: FocusEventHandler;
@@ -1260,6 +1286,7 @@ declare global {
 			onSubmit?: GenericEventHandler;
 			onSubmitCapture?: GenericEventHandler;
 			onInvalid?: GenericEventHandler;
+			onInvalidCapture?: GenericEventHandler;
 
 			// Keyboard Events
 			onKeyDown?: KeyboardEventHandler;
@@ -1419,9 +1446,14 @@ declare global {
 			allowFullScreen?: boolean;
 			allowTransparency?: boolean;
 			alt?: string;
+			as?: string;
 			async?: boolean;
 			autocomplete?: string;
+			autoComplete?: string;
+			autocorrect?: string;
+			autoCorrect?: string;
 			autofocus?: boolean;
+			autoFocus?: boolean;
 			autoPlay?: boolean;
 			capture?: boolean;
 			cellPadding?: number | string;
@@ -1444,8 +1476,9 @@ declare global {
 			dateTime?: string;
 			default?: boolean;
 			defer?: boolean;
-			dir?: string;
+			dir?: 'auto' | 'rtl' | 'ltr';
 			disabled?: boolean;
+			disableRemotePlayback?: boolean;
 			download?: any;
 			draggable?: boolean;
 			encType?: string;
@@ -1463,6 +1496,7 @@ declare global {
 			href?: string;
 			hrefLang?: string;
 			for?: string;
+			htmlFor?: string;
 			httpEquiv?: string;
 			icon?: string;
 			id?: string;
@@ -1490,6 +1524,7 @@ declare global {
 			multiple?: boolean;
 			muted?: boolean;
 			name?: string;
+			nonce?: string;
 			noValidate?: boolean;
 			open?: boolean;
 			optimum?: number;
@@ -1532,6 +1567,7 @@ declare global {
 			type?: string;
 			useMap?: string;
 			value?: string | string[] | number;
+			volume?: string | number;
 			width?: number | string;
 			wmode?: string;
 			wrap?: string;
@@ -1545,6 +1581,13 @@ declare global {
 			resource?: string;
 			typeof?: string;
 			vocab?: string;
+
+			// Microdata Attributes
+			itemProp?: string;
+			itemScope?: boolean;
+			itemType?: string;
+			itemID?: string;
+			itemRef?: string;
 		}
 
 		interface IntrinsicElements {
@@ -1596,6 +1639,7 @@ declare global {
 			h6: HTMLAttributes;
 			head: HTMLAttributes;
 			header: HTMLAttributes;
+			hgroup: HTMLAttributes;
 			hr: HTMLAttributes;
 			html: HTMLAttributes;
 			i: HTMLAttributes;
