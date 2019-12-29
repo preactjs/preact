@@ -406,7 +406,8 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	if (options.unmount) options.unmount(vnode);
 
 	if ((r = vnode.ref)) {
-		applyRef(r, null, parentVNode);
+		if (!vnode.ref.current || vnode.ref.current === vnode._dom)
+			applyRef(r, null, parentVNode);
 	}
 
 	let dom;
