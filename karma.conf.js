@@ -88,8 +88,6 @@ const babelOptions = (options = {}) => {
 	};
 };
 
-sauceLabs = true;
-
 module.exports = function(config) {
 	config.set({
 		browsers: sauceLabs
