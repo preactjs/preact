@@ -27,7 +27,7 @@ import {
 	SUSPENSE
 } from '../../../src/devtools/10/constants';
 
-const itIfPromises = self.Promise ? describe : describe.skip;
+const itIfPromises = self.Promise ? it : it.skip;
 
 /** @jsx createElement */
 
