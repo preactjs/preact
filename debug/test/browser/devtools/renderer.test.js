@@ -7,7 +7,6 @@ import {
 	createContext
 } from 'preact';
 import { memo, forwardRef, Suspense } from 'preact/compat';
-import * as sinon from 'sinon';
 import {
 	createRenderer,
 	getFilteredChildren
