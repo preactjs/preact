@@ -12,17 +12,6 @@ var coverage = String(process.env.COVERAGE) === 'true',
 	path = require('path');
 
 var sauceLabsLaunchers = {
-	sl_edge: {
-		base: 'SauceLabs',
-		browserName: 'MicrosoftEdge',
-		platform: 'Windows 10'
-	},
-	sl_ie_11: {
-		base: 'SauceLabs',
-		browserName: 'internet explorer',
-		version: '11.0',
-		platform: 'Windows 7'
-	},
 	sl_chrome: {
 		base: 'SauceLabs',
 		browserName: 'chrome',
@@ -31,6 +20,17 @@ var sauceLabsLaunchers = {
 	sl_firefox: {
 		base: 'SauceLabs',
 		browserName: 'firefox',
+		platform: 'Windows 10'
+	},
+	sl_ie_11: {
+		base: 'SauceLabs',
+		browserName: 'internet explorer',
+		version: '11.0',
+		platform: 'Windows 7'
+	},
+	sl_edge: {
+		base: 'SauceLabs',
+		browserName: 'MicrosoftEdge',
 		platform: 'Windows 10'
 	}
 	// TODO: Safari always fails and disconnects before any tests are executed.
