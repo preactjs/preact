@@ -28,7 +28,7 @@ import {
 } from '../../../src/devtools/10/constants';
 
 /* global DISABLE_FLAKEY */
-const itIfNotFlakey = DISABLE_FLAKEY ? it.skip : it;
+const itIfNotFlakey = DISABLE_FLAKEY ? xit : it;
 
 /** @jsx createElement */
 
