@@ -27,7 +27,8 @@ import {
 	SUSPENSE
 } from '../../../src/devtools/10/constants';
 
-const itIfPromises = self.Promise ? it : it.skip;
+/* global DISABLE_FLAKEY */
+const itIfPromises = DISABLE_FLAKEY ? it : it.skip;
 
 /** @jsx createElement */
 
