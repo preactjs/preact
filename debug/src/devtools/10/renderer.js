@@ -100,6 +100,8 @@ let defaultFilters = {
 	type: new Set(['dom', 'fragment'])
 };
 
+console.log('UNIQUE MESSAGE', process.env);
+
 /**
  * The renderer is responsible for translating anything preact rendered
  * into a serializable format that is passed to the devtools extension.

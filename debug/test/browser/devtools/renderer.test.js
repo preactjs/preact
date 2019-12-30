@@ -27,8 +27,8 @@ import {
 	SUSPENSE
 } from '../../../src/devtools/10/constants';
 
-/* global DISABLE_FLAKEY */
-const itIfNotFlakey = DISABLE_FLAKEY ? xit : it;
+const itIfNotFlakey = process.env.DISABLE_FLAKEY ? xit : it;
+console.log('UNIQUE MESSAGE', process.env);
 
 /** @jsx createElement */
 
