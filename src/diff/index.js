@@ -321,7 +321,7 @@ function diffElementNodes(
 			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
 		}
 
-		if (oldProps !== newProps) {
+		if (oldProps !== newProps && !isHydrating && dom.data != newProps) {
 			dom.data = newProps;
 		}
 	} else if (newVNode !== oldVNode) {
