@@ -29,8 +29,6 @@ import {
 
 /* global DISABLE_FLAKEY */
 const flakeyIt = DISABLE_FLAKEY ? xit : it;
-console.log('UNIQUE self', global);
-console.log('UNIQUE process', process);
 
 /** @jsx createElement */
 
