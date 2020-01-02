@@ -228,10 +228,8 @@ export function diff(
 		}
 
 		const hooks = newVNode._component && newVNode._component.__hooks;
-		if (hooks) {
-			if (hooks._pendingEffects.length) {
-				afterPaint(afterPaintEffects.push(newVNode._component));
-			}
+		if (hooks && hooks._pendingEffects.length) {
+			afterPaint(afterPaintEffects.push(newVNode._component));
 		}
 
 		if ((tmp = options.diffed)) tmp(newVNode);
