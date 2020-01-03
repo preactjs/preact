@@ -209,7 +209,7 @@ export function useContext(context) {
 		state._value = true;
 		provider.sub(currentComponent);
 	}
-	return provider.props.value;
+	return provider._isHookProvider ? provider._value : provider.props.value;
 }
 
 /**
@@ -219,6 +219,36 @@ export function useContext(context) {
 export function useDebugValue(value, formatter) {
 	if (options.useDebugValue) {
 		options.useDebugValue(formatter ? formatter(value) : value);
+	}
+}
+
+export function useProvider(context, value) {
+	const state = getHookState(currentIndex++);
+	if (!state._subs) state._subs = [];
+	if (value !== state._value) {
+		currentComponent._value = state._value = value;
+		state._subs.some(c => {
+			c.context = value;
+			c.forceUpdate();
+		});
+	}
+
+	if (!currentComponent.getChildContext) {
+		currentComponent._value = value;
+		currentComponent._isHookProvider = true;
+
+		currentComponent.getChildContext = () => {
+			context.ctx[context._id] = currentComponent;
+			return context.ctx;
+		};
+		currentComponent.sub = c => {
+			state._subs.push(c);
+			let old = c.componentWillUnmount;
+			c.componentWillUnmount = () => {
+				state._subs.splice(state._subs.indexOf(c), 1);
+				old && old.call(c);
+			};
+		};
 	}
 }
 

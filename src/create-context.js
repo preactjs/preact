@@ -6,6 +6,7 @@ export function createContext(defaultValue) {
 	const ctx = {};
 
 	const context = {
+		ctx,
 		_id: '__cC' + i++,
 		_defaultValue: defaultValue,
 		Consumer(props, context) {
