@@ -1,5 +1,6 @@
 import options from './options';
 import { enqueueRender } from './component';
+import { assignRef } from './diff';
 
 let currentComponent = null;
 let currentIndex = null;
@@ -112,8 +113,7 @@ export function useRef(initialValue) {
 export function useImperativeHandle(ref, createHandle, args) {
 	useLayoutEffect(
 		() => {
-			if (typeof ref === 'function') ref(createHandle());
-			else if (ref) ref.current = createHandle();
+			assignRef(ref, createHandle());
 		},
 		args == null ? args : args.concat(ref)
 	);

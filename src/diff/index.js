@@ -403,6 +403,11 @@ function diffElementNodes(
 	return dom;
 }
 
+export function assignRef(ref, value) {
+	if (typeof ref == 'function') ref(value);
+	else ref.current = value;
+}
+
 /**
  * Invoke or update a ref, depending on whether it is a function or object ref.
  * @param {object|function} ref
@@ -411,8 +416,7 @@ function diffElementNodes(
  */
 export function applyRef(ref, value, vnode) {
 	try {
-		if (typeof ref == 'function') ref(value);
-		else ref.current = value;
+		assignRef(ref, value);
 	} catch (e) {
 		options._catchError(e, vnode);
 	}
