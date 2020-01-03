@@ -59,4 +59,34 @@ describe('errorBoundary', () => {
 		expect(spy).to.be.calledOnce;
 		expect(spy).to.be.calledWith(error);
 	});
+
+	it('does not leave a stale closure', () => {
+		const spy = sinon.spy(),
+			spy2 = sinon.spy();
+		let resetErr;
+		const error = new Error('test');
+		const Throws = () => {
+			throw error;
+		};
+
+		const App = props => {
+			const [err, reset] = useErrorBoundary(props.onError);
+			resetErr = reset;
+			return err ? <p>Error</p> : <Throws />;
+		};
+
+		render(<App onError={spy} />, scratch);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>Error</p>');
+		expect(spy).to.be.calledOnce;
+		expect(spy).to.be.calledWith(error);
+
+		resetErr();
+		render(<App onError={spy2} />, scratch);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>Error</p>');
+		expect(spy).to.be.calledOnce;
+		expect(spy2).to.be.calledOnce;
+		expect(spy2).to.be.calledWith(error);
+	});
 });
