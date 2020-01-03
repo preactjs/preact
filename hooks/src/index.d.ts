@@ -127,3 +127,7 @@ export function useDebugValue<T>(
 	value: T,
 	formatter?: (value: T) => string | number
 ): void;
+
+export function useErrorBoundary(
+	callback: () => Promise<void> | void
+): [string | undefined, () => void];

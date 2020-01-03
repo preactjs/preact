@@ -222,6 +222,22 @@ export function useDebugValue(value, formatter) {
 	}
 }
 
+export function useErrorBoundary(cb) {
+	const errState = useState();
+	if (!currentComponent.componentDidCatch) {
+		currentComponent.componentDidCatch = err => {
+			if (cb) cb(err);
+			errState[1](err);
+		};
+	}
+	return [
+		errState[0],
+		() => {
+			errState[1](undefined);
+		}
+	];
+}
+
 /**
  * After paint effects consumer.
  */
