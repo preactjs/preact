@@ -172,15 +172,15 @@ declare namespace preact {
 	function createElement(
 		type: string,
 		props:
-			| JSXInternal.HTMLAttributes &
+			| (JSXInternal.HTMLAttributes &
 					JSXInternal.SVGAttributes &
-					Record<string, any>
+					Record<string, any>)
 			| null,
 		...children: ComponentChildren[]
 	): VNode<any>;
 	function createElement<P>(
 		type: ComponentType<P>,
-		props: Attributes & P | null,
+		props: (Attributes & P) | null,
 		...children: ComponentChildren[]
 	): VNode<any>;
 	namespace createElement {
@@ -190,15 +190,15 @@ declare namespace preact {
 	function h(
 		type: string,
 		props:
-			| JSXInternal.HTMLAttributes &
+			| (JSXInternal.HTMLAttributes &
 					JSXInternal.SVGAttributes &
-					Record<string, any>
+					Record<string, any>)
 			| null,
 		...children: ComponentChildren[]
 	): VNode<any>;
 	function h<P>(
 		type: ComponentType<P>,
-		props: Attributes & P | null,
+		props: (Attributes & P) | null,
 		...children: ComponentChildren[]
 	): VNode<any>;
 	namespace h {
@@ -356,20 +356,6 @@ declare namespace preact {
 	 */
 	function useEffect(effect: EffectCallback, inputs?: Inputs): void;
 
-	type CreateHandle = () => object;
-
-	/**
-	 * @param ref The ref that will be mutated
-	 * @param create The function that will be executed to get the value that will be attached to
-	 * ref.current
-	 * @param inputs If present, effect will only activate if the values in the list change (using ===).
-	 */
-	function useImperativeHandle<T, R extends T>(
-		ref: Ref<T>,
-		create: () => R,
-		inputs?: Inputs
-	): void;
-
 	/**
 	 * Accepts a function that contains imperative, possibly effectful code.
 	 * Use this to read layout from the DOM and synchronously re-render.
@@ -402,15 +388,4 @@ declare namespace preact {
 	 * @param context The context you want to use
 	 */
 	function useContext<T>(context: PreactContext<T>): T;
-
-	/**
-	 * Customize the displayed value in the devtools panel.
-	 *
-	 * @param value Custom hook name or object that is passed to formatter
-	 * @param formatter Formatter to modify value before sending it to the devtools
-	 */
-	function useDebugValue<T>(
-		value: T,
-		formatter?: (value: T) => string | number
-	): void;
 }

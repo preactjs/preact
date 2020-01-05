@@ -6,7 +6,30 @@ export {
 	useDebugValue,
 	useContext,
 	useRef,
-	useImperativeHandle,
 	useMemo,
 	useCallback
 } from 'preact';
+
+/**
+ * @param {object} ref
+ * @param {() => object} createHandle
+ * @param {any[]} args
+ */
+export function useImperativeHandle(ref, createHandle, args) {
+	useLayoutEffect(
+		() => {
+			if (ref) assignRef(ref, createHandle());
+		},
+		args == null ? args : args.concat(ref)
+	);
+}
+
+/**
+ * Display a custom label for a custom hook for the devtools panel
+ * @type {<T>(value: T, cb?: (value: T) => string | number) => void}
+ */
+export function useDebugValue(value, formatter) {
+	if (options.useDebugValue) {
+		options.useDebugValue(formatter ? formatter(value) : value);
+	}
+}

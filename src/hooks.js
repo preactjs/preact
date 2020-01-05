@@ -106,20 +106,6 @@ export function useRef(initialValue) {
 }
 
 /**
- * @param {object} ref
- * @param {() => object} createHandle
- * @param {any[]} args
- */
-export function useImperativeHandle(ref, createHandle, args) {
-	useLayoutEffect(
-		() => {
-			if (ref) assignRef(ref, createHandle());
-		},
-		args == null ? args : args.concat(ref)
-	);
-}
-
-/**
  * @param {() => any} factory
  * @param {any[]} args
  */
@@ -156,16 +142,6 @@ export function useContext(context) {
 		provider.sub(currentComponent);
 	}
 	return provider.props.value;
-}
-
-/**
- * Display a custom label for a custom hook for the devtools panel
- * @type {<T>(value: T, cb?: (value: T) => string | number) => void}
- */
-export function useDebugValue(value, formatter) {
-	if (options.useDebugValue) {
-		options.useDebugValue(formatter ? formatter(value) : value);
-	}
 }
 
 /**
