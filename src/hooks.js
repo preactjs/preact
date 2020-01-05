@@ -1,6 +1,5 @@
 import options from './options';
 import { enqueueRender } from './component';
-import { assignRef } from './diff';
 
 let currentComponent = null;
 let currentIndex = null;

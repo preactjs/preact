@@ -18,7 +18,8 @@ export {
 export function useImperativeHandle(ref, createHandle, args) {
 	useLayoutEffect(
 		() => {
-			if (ref) assignRef(ref, createHandle());
+			if (typeof ref == 'function') ref(value);
+			else if (ref) ref.current = value;
 		},
 		args == null ? args : args.concat(ref)
 	);
