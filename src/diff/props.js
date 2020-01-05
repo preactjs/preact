@@ -115,6 +115,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		name in dom
 	) {
 		dom[name] = value == null ? '' : value;
+		if (name === 'value') dom._value = value;
 	} else if (
 		typeof value !== 'function' &&
 		name !== 'dangerouslySetInnerHTML'
@@ -147,4 +148,5 @@ function setProperty(dom, name, value, oldValue, isSvg) {
  */
 function eventProxy(e) {
 	this._listeners[e.type](options.event ? options.event(e) : e);
+	if ('_value' in e.target) e.target.value = e.target._value;
 }
