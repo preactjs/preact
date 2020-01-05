@@ -1328,4 +1328,107 @@ describe('suspense', () => {
 		expect(cWUSpy.getCall(0).thisValue).to.eql(suspender);
 		expect(scratch.innerHTML).to.eql(`<div>conditional hide</div>`);
 	});
+
+	xit('should support sCU=false when un-suspending', () => {
+		// See #2176 #2125
+		const [Suspender, suspend] = createSuspender(() => <div>Hello</div>);
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				Text
+				{/* Adding a <div> here will make things work... */}
+				<Suspender />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(`Text<div>Hello</div>`);
+
+		const [resolve] = suspend();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+
+		Suspender.prototype.shouldComponentUpdate = () => false;
+
+		return resolve(() => <div>Hello 2</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(`Text<div>Hello 2</div>`);
+		});
+	});
+
+	xit('should allow suspended children to update', () => {
+		const log = [];
+		class Logger extends Component {
+			constructor(props) {
+				super(props);
+				log.push('construct');
+			}
+
+			render({ children }) {
+				log.push('render');
+				return children;
+			}
+		}
+
+		let suspender;
+		class Suspender extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { promise: new Promise(() => {}) };
+				suspender = this;
+			}
+
+			unsuspend() {
+				this.setState({ promise: null });
+			}
+
+			render() {
+				if (this.state.promise) {
+					throw this.state.promise;
+				}
+
+				return 'hello';
+			}
+		}
+
+		render(
+			<section>
+				<Suspense fallback={<div>fallback</div>}>
+					<Suspender />
+					<Logger />
+				</Suspense>
+			</section>,
+			scratch
+		);
+
+		expect(log).to.eql(['construct', 'render']);
+		expect(scratch.innerHTML).to.eql('<section></section>');
+
+		// this rerender is needed because of Suspense issuing a forceUpdate itself
+		rerender();
+		expect(scratch.innerHTML).to.eql('<section><div>fallback</div></section>');
+
+		suspender.unsuspend();
+
+		rerender();
+
+		/**
+		 * These currently failing assertion shows the issue that we currently unmount
+		 * the suspended tree (unlike react, which adds a display="none") and block any
+		 * further processing on that tree. Thus updates below a suspended Suspense are
+		 * getting lost.
+		 */
+		expect(log).to.eql(['construct', 'render', 'render']);
+
+		/**
+		 * When the above assertion will hold true we will certainly run into the second issue
+		 * here. The problem is that we do not remove suspensions from an instance of Suspense
+		 * when one of its suspending children no longer throws because of a state
+		 * update.
+		 */
+		expect(scratch.innerHTML).to.eql(
+			'<section><div>Suspender un-suspended</div></section>'
+		);
+	});
 });
