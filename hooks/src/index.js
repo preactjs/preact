@@ -3,7 +3,6 @@ export {
 	useReducer,
 	useEffect,
 	useLayoutEffect,
-	useDebugValue,
 	useContext,
 	useRef,
 	useMemo,
