@@ -8,6 +8,8 @@ describe('isValidElement', () => {
 		expect(isValidElement(true)).to.equal(false);
 		expect(isValidElement('foo')).to.equal(false);
 		expect(isValidElement(123)).to.equal(false);
+		expect(isValidElement([])).to.equal(false);
+		expect(isValidElement({})).to.equal(false);
 	});
 
 	it('should detect a preact vnode', () => {

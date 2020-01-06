@@ -6,41 +6,16 @@
   "minify": {
     "mangle": {
       "properties": {
-        "regex": "^_",
+        "regex": "^_[^_]",
         "reserved": [
+          "__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED",
           "__REACT_DEVTOOLS_GLOBAL_HOOK__",
+          "__PREACT_DEVTOOLS__",
           "_renderers",
           "__source",
           "__self"
         ]
       }
-    }
-  },
-  "props": {
-    "cname": 6,
-    "props": {
-      "$_depth": "__b",
-      "$_dirty": "__d",
-      "$_prevState": "__u",
-      "$_nextState": "__s",
-      "$_renderCallbacks": "__h",
-      "$_suspensions": "__u",
-      "$_vnode": "__v",
-      "$_children": "__k",
-      "$_dom": "__e",
-      "$_component": "__c",
-      "$__html": "__html",
-      "$_parent": "__",
-      "$_parentDom": "__P",
-      "$_pendingError": "__E",
-      "$_processingException": "__",
-      "$_root": "__",
-      "$_diff": "__b",
-      "$_commit": "__c",
-      "$_render": "__r",
-      "$_hook": "__h",
-      "$_catchError": "__e",
-      "$_unmount": "_e"
     }
   }
 }

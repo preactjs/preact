@@ -1,4 +1,4 @@
-import { enqueueRender } from '../component';
+// import { enqueueRender } from '../component';
 
 /**
  * Find the closest error boundary to a thrown error and call it
@@ -9,24 +9,30 @@ import { enqueueRender } from '../component';
  */
 export function _catchError(error, vnode) {
 	/** @type {import('../internal').Component} */
-	let component;
+	let component, ctor, handled;
+
+	const wasHydrating = vnode._hydrating;
 
 	for (; (vnode = vnode._parent); ) {
 		if ((component = vnode._component) && !component._processingException) {
 			try {
-				if (
-					component.constructor &&
-					component.constructor.getDerivedStateFromError != null
-				) {
-					component.setState(
-						component.constructor.getDerivedStateFromError(error)
-					);
-				} else if (component.componentDidCatch != null) {
-					component.componentDidCatch(error);
-				} else {
-					continue;
+				ctor = component.constructor;
+
+				if (ctor && ctor.getDerivedStateFromError != null) {
+					component.setState(ctor.getDerivedStateFromError(error));
+					handled = component._dirty;
 				}
-				return enqueueRender((component._pendingError = component));
+
+				if (component.componentDidCatch != null) {
+					component.componentDidCatch(error);
+					handled = component._dirty;
+				}
+
+				// This is an error boundary. Mark it as having bailed out, and whether it was mid-hydration.
+				if (handled) {
+					vnode._hydrating = wasHydrating;
+					return (component._pendingError = component);
+				}
 			} catch (e) {
 				error = e;
 			}

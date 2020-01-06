@@ -1,6 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component, Fragment } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
+import { logCall, clearLog } from '../../_util/logCall';
 
 /** @jsx createElement */
 
@@ -11,9 +12,30 @@ describe('Lifecycle methods', () => {
 	/** @type {() => void} */
 	let rerender;
 
+	// function expectDomLogToBe(expectedOperations, message) {
+	// 	expect(getLog()).to.deep.equal(expectedOperations, message);
+	// }
+	let resetInsertBefore;
+	let resetRemoveChild;
+	let resetRemove;
+
+	before(() => {
+		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
+		resetRemoveChild = logCall(Element.prototype, 'appendChild');
+		resetRemove = logCall(Element.prototype, 'removeChild');
+	});
+
+	after(() => {
+		resetInsertBefore();
+		resetRemoveChild();
+		resetRemove();
+	});
+
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
+
+		clearLog();
 	});
 
 	afterEach(() => {
@@ -62,7 +84,7 @@ describe('Lifecycle methods', () => {
 			expect(ShouldNot.prototype.render).to.have.been.calledOnce;
 		});
 
-		it('should reorder non-updating children', () => {
+		it('should reorder non-updating text children', () => {
 			const rows = [
 				{ id: '1', a: 5, b: 100 },
 				{ id: '2', a: 50, b: 10 },
@@ -163,7 +185,8 @@ describe('Lifecycle methods', () => {
 
 		it('should clear renderCallbacks', () => {
 			const spy = sinon.spy();
-			let c, renders = 0;
+			let c,
+				renders = 0;
 
 			class App extends Component {
 				constructor() {
@@ -217,6 +240,35 @@ describe('Lifecycle methods', () => {
 
 			expect(Foo.prototype.shouldComponentUpdate).to.not.have.been.called;
 			expect(Foo.prototype.render).to.have.been.calledTwice;
+		});
+
+		it('should not be called on forceUpdate followed by setState', () => {
+			let Comp;
+			class Foo extends Component {
+				constructor() {
+					super();
+					Comp = this;
+				}
+
+				shouldComponentUpdate() {
+					return false;
+				}
+
+				render() {
+					return <ShouldNot />;
+				}
+			}
+
+			sinon.spy(Foo.prototype, 'shouldComponentUpdate');
+			sinon.spy(Foo.prototype, 'render');
+
+			render(<Foo />, scratch);
+			Comp.forceUpdate();
+			Comp.setState({});
+			rerender();
+
+			expect(Foo.prototype.render).to.have.been.calledTwice;
+			expect(Foo.prototype.shouldComponentUpdate).to.not.have.been.called;
 		});
 
 		it('should not block queued child forceUpdate', () => {
@@ -676,5 +728,133 @@ describe('Lifecycle methods', () => {
 
 			expect(scratch.textContent).to.equal('foo');
 		});
+	});
+
+	it('should correctly render when sCU component has null children', () => {
+		class App extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+			render() {
+				return [null, <div>Hello World!</div>, null];
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Hello World!</div>');
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Hello World!</div>');
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Hello World!</div>');
+	});
+
+	it('should support nested update with strict-equal vnodes', () => {
+		let wrapperSetState, childSetState;
+
+		class Child extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { foo: 'baz' };
+			}
+
+			render() {
+				childSetState = this.setState.bind(this);
+				return <p>{this.state.foo}</p>;
+			}
+		}
+
+		class Wrapper extends Component {
+			render() {
+				wrapperSetState = this.setState.bind(this);
+				return this.props.children;
+			}
+		}
+
+		const App = () => (
+			<Wrapper>
+				<Child />
+			</Wrapper>
+		);
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<p>baz</p>');
+
+		wrapperSetState({ hi: 'world' });
+		childSetState({ foo: 'bar' });
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>bar</p>');
+	});
+
+	it('should reorder non-updating nested Fragment children', () => {
+		const rows = [
+			{ id: '1', a: 5, b: 100 },
+			{ id: '2', a: 50, b: 10 },
+			{ id: '3', a: 25, b: 1000 }
+		];
+
+		function Cell({ id, a, b }) {
+			// Return an array to really test out the reordering algorithm :)
+			return (
+				<Fragment>
+					<div>id: {id}</div>
+					<Fragment>
+						<div>a: {a}</div>
+						<div>b: {b}</div>
+					</Fragment>
+				</Fragment>
+			);
+		}
+
+		class Row extends Component {
+			shouldComponentUpdate(nextProps) {
+				return nextProps.id !== this.props.id;
+			}
+
+			render(props) {
+				return <Cell id={props.id} a={props.a} b={props.b} />;
+			}
+		}
+
+		const App = ({ sortBy }) => (
+			<div>
+				<table>
+					{rows
+						.sort((a, b) => (a[sortBy] > b[sortBy] ? -1 : 1))
+						.map(row => (
+							<Row key={row.id} id={row.id} a={row.a} b={row.b} />
+						))}
+				</table>
+			</div>
+		);
+
+		render(<App sortBy="a" />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			`<div><table>${[
+				'<div>id: 2</div><div>a: 50</div><div>b: 10</div>',
+				'<div>id: 3</div><div>a: 25</div><div>b: 1000</div>',
+				'<div>id: 1</div><div>a: 5</div><div>b: 100</div>'
+			].join('')}</table></div>`
+		);
+
+		clearLog();
+		render(<App sortBy="b" />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			`<div><table>${[
+				'<div>id: 3</div><div>a: 25</div><div>b: 1000</div>',
+				'<div>id: 1</div><div>a: 5</div><div>b: 100</div>',
+				'<div>id: 2</div><div>a: 50</div><div>b: 10</div>'
+			].join('')}</table></div>`
+		);
+		// TODO: these tests pass in isolation but not when all tests are running, figure out why logCall stops appending to log.
+		// expectDomLogToBe([
+		// 	'<table>id: 2a: 50b: 10id: 3a: 25b: 1000id: 1a: 5b: 100.insertBefore(<div>id: 3, <div>id: 2)',
+		// 	'<table>id: 3id: 2a: 50b: 10a: 25b: 1000id: 1a: 5b: 100.insertBefore(<div>a: 25, <div>id: 2)',
+		// 	'<table>id: 3a: 25id: 2a: 50b: 10b: 1000id: 1a: 5b: 100.insertBefore(<div>b: 1000, <div>id: 2)',
+		// 	'<table>id: 3a: 25b: 1000id: 2a: 50b: 10id: 1a: 5b: 100.insertBefore(<div>id: 1, <div>id: 2)',
+		// 	'<table>id: 3a: 25b: 1000id: 1id: 2a: 50b: 10a: 5b: 100.insertBefore(<div>a: 5, <div>id: 2)',
+		// 	'<table>id: 3a: 25b: 1000id: 1a: 5id: 2a: 50b: 10b: 100.insertBefore(<div>b: 100, <div>id: 2)'
+		// ]);
 	});
 });

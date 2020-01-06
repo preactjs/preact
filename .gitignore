@@ -2,10 +2,14 @@
 node_modules
 npm-debug.log
 dist
-package-lock.json
+*/package-lock.json
 yarn.lock
 .vscode
 .idea
 test/ts/**/*.js
 coverage
 *.sw[op]
+*.log
+package/
+preact-*.tgz
+jsx-csstype.d.ts

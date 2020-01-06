@@ -90,13 +90,75 @@ describe('Children', () => {
 				</Foo>,
 				scratch
 			);
-			let expected = div([span('foo'), span(div('bar'))].join(''));
+			let expected = div([span('foo'), span(div('bar'))]);
 			expect(serializeHtml(scratch)).to.equal(expected);
 		});
 
 		it('should work with no children', () => {
 			render(<Foo />, scratch);
 			expect(serializeHtml(scratch)).to.equal('<div></div>');
+		});
+
+		it('should work with children as zero number', () => {
+			const testNumber = 0;
+
+			render(<Foo>{testNumber}</Foo>, scratch);
+			expect(serializeHtml(scratch)).to.equal('<div><span>0</span></div>');
+		});
+
+		it('should flatten result', () => {
+			const ProblemChild = ({ children }) => {
+				return React.Children.map(children, child => {
+					return React.Children.map(child.props.children, x => x);
+				}).filter(React.isValidElement);
+			};
+
+			const App = () => {
+				return (
+					<ProblemChild>
+						<div>
+							<div>1</div>
+							<div>2</div>
+						</div>
+					</ProblemChild>
+				);
+			};
+
+			render(<App />, scratch);
+
+			expect(scratch.textContent).to.equal('12');
+		});
+
+		it('should call with indices', () => {
+			const assertion = [];
+			const ProblemChild = ({ children }) => {
+				return React.Children.map(children, (child, i) => {
+					assertion.push(i);
+					return React.Children.map(child.props.children, (x, j) => {
+						assertion.push(j);
+						return x;
+					});
+				}).filter(React.isValidElement);
+			};
+
+			const App = () => {
+				return (
+					<ProblemChild>
+						<div>
+							<div>1</div>
+							<div>2</div>
+						</div>
+						<div>
+							<div>3</div>
+							<div>4</div>
+						</div>
+					</ProblemChild>
+				);
+			};
+
+			render(<App />, scratch);
+			expect(scratch.textContent).to.equal('1234');
+			expect(assertion.length).to.equal(6);
 		});
 	});
 
@@ -116,7 +178,7 @@ describe('Children', () => {
 				</Foo>,
 				scratch
 			);
-			let expected = div([span('foo'), span(div('bar'))].join(''));
+			let expected = div([span('foo'), span(div('bar'))]);
 			expect(serializeHtml(scratch)).to.equal(expected);
 		});
 	});

@@ -36,9 +36,23 @@ describe('preact/compat events', () => {
 		const event = spy.args[0][0];
 		expect(event).to.haveOwnProperty('persist');
 		expect(event).to.haveOwnProperty('nativeEvent');
+		expect(event).to.haveOwnProperty('isDefaultPrevented');
+		expect(event).to.haveOwnProperty('isPropagationStopped');
 		expect(typeof event.persist).to.equal('function');
+		expect(typeof event.isDefaultPrevented).to.equal('function');
+		expect(typeof event.isPropagationStopped).to.equal('function');
 
 		expect(() => event.persist()).to.not.throw();
+		expect(() => event.isDefaultPrevented()).to.not.throw();
+		expect(() => event.isPropagationStopped()).to.not.throw();
+
+		expect(event.isDefaultPrevented()).to.be.false;
+		event.preventDefault();
+		expect(event.isDefaultPrevented()).to.be.true;
+
+		expect(event.isPropagationStopped()).to.be.false;
+		event.stopPropagation();
+		expect(event.isPropagationStopped()).to.be.true;
 	});
 
 	it('should normalize ondoubleclick event', () => {
@@ -56,15 +70,47 @@ describe('preact/compat events', () => {
 		expect(vnode.props).to.not.haveOwnProperty('onchange');
 	});
 
-	it('should not normalize onChange for range', () => {
+	it('should normalize onChange for range, except in IE11', () => {
+		// NOTE: we don't normalize `onchange` for range inputs in IE11.
+		const eventType = /Trident\//.test(navigator.userAgent)
+			? 'change'
+			: 'input';
+
 		render(<input type="range" onChange={() => null} />, scratch);
 		expect(proto.addEventListener).to.have.been.calledOnce;
 		expect(proto.addEventListener).to.have.been.calledWithExactly(
-			'change',
+			eventType,
 			sinon.match.func,
 			false
 		);
-		expect(proto.addEventListener).not.to.have.been.calledWith('input');
+	});
+
+	it('should normalize onChange for range, except in IE11, including when IE11 has Symbol polyfill', () => {
+		// NOTE: we don't normalize `onchange` for range inputs in IE11.
+		// This test mimics a specific scenario when a Symbol polyfill may
+		// be present, in which case onChange should still not be normalized
+
+		const isIE11 = /Trident\//.test(navigator.userAgent);
+		const eventType = isIE11 ? 'change' : 'input';
+
+		if (isIE11) {
+			window.Symbol = () => 'mockSymbolPolyfill';
+		}
+		sinon.spy(window, 'Symbol');
+
+		render(<input type="range" onChange={() => null} />, scratch);
+		expect(window.Symbol).to.have.been.calledOnce;
+		expect(proto.addEventListener).to.have.been.calledOnce;
+		expect(proto.addEventListener).to.have.been.calledWithExactly(
+			eventType,
+			sinon.match.func,
+			false
+		);
+
+		window.Symbol.restore();
+		if (isIE11) {
+			window.Symbol = undefined;
+		}
 	});
 
 	it('should support onAnimationEnd', () => {
@@ -93,10 +139,10 @@ describe('preact/compat events', () => {
 	});
 
 	it('should support onTouch* events', () => {
-		const onTouchStart = () => {};
-		const onTouchEnd = () => {};
-		const onTouchMove = () => {};
-		const onTouchCancel = () => {};
+		const onTouchStart = sinon.spy();
+		const onTouchEnd = sinon.spy();
+		const onTouchMove = sinon.spy();
+		const onTouchCancel = sinon.spy();
 
 		render(
 			<div
@@ -122,12 +168,17 @@ describe('preact/compat events', () => {
 		expect(proto.addEventListener.args[3][0]).to.eql('touchcancel');
 		expect(proto.addEventListener.args[3][2]).to.eql(false);
 
-		expect(scratch.firstChild._listeners).to.deep.equal({
-			touchstart: onTouchStart,
-			touchend: onTouchEnd,
-			touchmove: onTouchMove,
-			touchcancel: onTouchCancel
-		});
+		scratch.firstChild.dispatchEvent(createEvent('touchstart'));
+		expect(onTouchStart).to.have.been.calledOnce;
+
+		scratch.firstChild.dispatchEvent(createEvent('touchmove'));
+		expect(onTouchMove).to.have.been.calledOnce;
+
+		scratch.firstChild.dispatchEvent(createEvent('touchend'));
+		expect(onTouchEnd).to.have.been.calledOnce;
+
+		scratch.firstChild.dispatchEvent(createEvent('touchcancel'));
+		expect(onTouchCancel).to.have.been.calledOnce;
 
 		render(<div />, scratch);
 

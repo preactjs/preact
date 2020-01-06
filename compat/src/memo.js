@@ -1,5 +1,5 @@
 import { createElement } from 'preact';
-import { shallowDiffers, assign } from './util';
+import { shallowDiffers } from './util';
 
 /**
  * Memoize a component, so that it only updates when the props actually have
@@ -25,10 +25,10 @@ export function memo(c, comparer) {
 
 	function Memoed(props) {
 		this.shouldComponentUpdate = shouldUpdate;
-		return createElement(c, assign({}, props));
+		return createElement(c, props);
 	}
-	Memoed.prototype.isReactComponent = true;
 	Memoed.displayName = 'Memo(' + (c.displayName || c.name) + ')';
+	Memoed.prototype.isReactComponent = true;
 	Memoed._forwarded = true;
 	return Memoed;
 }

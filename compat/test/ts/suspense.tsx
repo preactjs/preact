@@ -33,3 +33,17 @@ class SuspensefulFunc extends React.Component {
 		return <React.Suspense fallback={<FallBack/>}><IsLazyFunc isProp={false} /></React.Suspense>
 	}
 }
+
+//SuspenseList using lazy components
+function SuspenseListTester(props: any) {
+  return (
+    <React.SuspenseList revealOrder="together">
+      <React.Suspense fallback={<FallBack />}>
+        <IsLazyFunc isProp={false} />
+      </React.Suspense>
+      <React.Suspense fallback={<FallBack />}>
+        <IsLazyFunc isProp={false} />
+      </React.Suspense>
+    </React.SuspenseList>
+  )
+}

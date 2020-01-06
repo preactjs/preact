@@ -9,154 +9,42 @@
 
 **All the power of Virtual DOM components, without the overhead:**
 
-- Familiar React API & patterns: [ES6 Class] and [Functional Components]
+- Familiar React API & patterns: ES6 Class, hooks, and Functional Components
 - Extensive React compatibility via a simple [preact/compat] alias
-- Everything you need: JSX, <abbr title="Virtual DOM">VDOM</abbr>, React DevTools, <abbr title="Hot Module Replacement">HMR</abbr>, <abbr title="Server-Side Rendering">SSR</abbr>..
-- A highly optimized diff algorithm and seamless Server Side Rendering
+- Everything you need: JSX, <abbr title="Virtual DOM">VDOM</abbr>, [DevTools], <abbr title="Hot Module Replacement">HMR</abbr>, <abbr title="Server-Side Rendering">SSR</abbr>.
+- Highly optimized diff algorithm and seamless hydration from Server Side Rendering
+- Supports all modern browsers and IE11
 - Transparent asynchronous rendering with a pluggable scheduler
-- 🆕💥 **Instant no-config app bundling with [Preact CLI](https://github.com/preactjs/preact-cli)**
+- **Instant production-grade app setup with [Preact CLI](https://github.com/preactjs/preact-cli)**
 
 ### 💁 More information at the [Preact Website ➞](https://preactjs.com)
 
 
----
-
-<!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
-
-- [Demos](#demos)
-- [Libraries & Add-ons](#libraries--add-ons)
-- [Getting Started](#getting-started)
-	- [Import what you need](#import-what-you-need)
-	- [Rendering JSX](#rendering-jsx)
-	- [Components](#components)
-	- [Props & State](#props--state)
-- [Linked State](#linked-state)
-- [Examples](#examples)
-- [Extensions](#extensions)
-- [Debug Mode](#debug-mode)
-- [Backers](#backers)
-- [Sponsors](#sponsors)
-- [License](#license)
-
-<!-- /TOC -->
-
-
-# Preact
+<table border="0">
+<tbody>
+<tr>
+<td>
 
 [![npm](https://img.shields.io/npm/v/preact.svg)](http://npm.im/preact)
-[![CDNJS](https://img.shields.io/cdnjs/v/preact.svg)](https://cdnjs.com/libraries/preact)
-[![Preact Slack Community](https://preact-slack.now.sh/badge.svg)](https://preact-slack.now.sh)
+[![Preact Slack Community](https://preact-slack.now.sh/badge.svg)](https://chat.preactjs.com)
 [![OpenCollective Backers](https://opencollective.com/preact/backers/badge.svg)](#backers)
 [![OpenCollective Sponsors](https://opencollective.com/preact/sponsors/badge.svg)](#sponsors)
-[![travis](https://travis-ci.org/preactjs/preact.svg?branch=master)](https://travis-ci.org/preactjs/preact)
+
 [![coveralls](https://img.shields.io/coveralls/preactjs/preact/master.svg)](https://coveralls.io/github/preactjs/preact)
-[![gzip size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=gzip)](https://unpkg.com/preact/dist/preact.min.js)
-[![install size](https://packagephobia.now.sh/badge?p=preact)](https://packagephobia.now.sh/result?p=preact)
+[![gzip size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=gzip&label=gzip)](https://unpkg.com/preact/dist/preact.min.js)
+[![brotli size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=brotli&label=brotli)](https://unpkg.com/preact/dist/preact.min.js)
+</td>
+<td>
 
-Preact supports modern browsers and IE9+:
+<img src="https://saucelabs.com/browser-matrix/preact.svg" title="Browser support matrix">
 
-[![Browsers](https://saucelabs.com/browser-matrix/preact.svg)](https://saucelabs.com/u/preact)
-
-
----
-
-
-## Demos
-
-#### Real-World Apps
-
-- [**Preact Hacker News**](https://hn.kristoferbaxter.com) _([GitHub Project](https://github.com/kristoferbaxter/preact-hn))_
-- [**Play.cash**](https://play.cash) :notes: _([GitHub Project](https://github.com/feross/play.cash))_
-- [**Songsterr**](https://www.songsterr.com) 🎼 Using Preact X in production since 10.0 alpha
-- [**BitMidi**](https://bitmidi.com/) 🎹 Wayback machine for free MIDI files _([GitHub Project](https://github.com/feross/bitmidi.com))_
-- [**Ultimate Guitar**](https://www.ultimate-guitar.com) 🎸speed boosted by Preact.
-- [**ESBench**](http://esbench.com) is built using Preact.
-- [**BigWebQuiz**](https://bigwebquiz.com) _([GitHub Project](https://github.com/jakearchibald/big-web-quiz))_
-- [**Nectarine.rocks**](http://nectarine.rocks) _([GitHub Project](https://github.com/developit/nectarine))_ :peach:
-- [**TodoMVC**](https://preact-todomvc.surge.sh) _([GitHub Project](https://github.com/developit/preact-todomvc))_
-- [**OSS.Ninja**](https://oss.ninja) _([GitHub Project](https://github.com/developit/oss.ninja))_
-- [**GuriVR**](https://gurivr.com) _([GitHub Project](https://github.com/opennewslabs/guri-vr))_
-- [**Color Picker**](https://colors.now.sh) _([GitHub Project](https://github.com/lukeed/colors-app))_ :art:
-- [**Offline Gallery**](https://use-the-platform.com/offline-gallery/) _([GitHub Project](https://github.com/vaneenige/offline-gallery/))_ :balloon:
-- [**Periodic Weather**](https://use-the-platform.com/periodic-weather/) _([GitHub Project](https://github.com/vaneenige/periodic-weather/))_ :sunny:
-- [**Rugby News Board**](http://nbrugby.com) _[(GitHub Project)](https://github.com/rugby-board/rugby-board-node)_
-- [**Preact Gallery**](https://preact.gallery/) an 8KB photo gallery PWA built using Preact.
-- [**Rainbow Explorer**](https://use-the-platform.com/rainbow-explorer/) Preact app to translate real life color to digital color _([Github project](https://github.com/vaneenige/rainbow-explorer))_.
-- [**YASCC**](https://carlosqsilva.github.io/YASCC/#/) Yet Another SoundCloud Client _([Github project](https://github.com/carlosqsilva/YASCC))_.
-- [**Journalize**](https://preact-journal.herokuapp.com/) 14k offline-capable journaling PWA using preact. _([Github project](https://github.com/jpodwys/preact-journal))_.
-- [**Proxx**](https://proxx.app) A game of proximity by GoogleChromeLabs using preact. _([Github project](https://github.com/GoogleChromeLabs/proxx))_.
-- [**Web Maker**](https://webmaker.app) An offline and blazing fast frontend playground built using Preact. _([Github project](https://github.com/chinchang/web-maker))_.
-- [**Intergram**](https://www.intergram.xyz) A live chat widget linked to your Telegram messenger built using Preact. _([Github project](https://github.com/idoco/intergram))_.
+</td>
+</tr>
+</tbody>
+</table>
 
 
-#### Runnable Examples
-
-- [**Flickr Browser**](http://codepen.io/developit/full/VvMZwK/) (@ CodePen)
-- [**Animating Text**](http://codepen.io/developit/full/LpNOdm/) (@ CodePen)
-- [**60FPS Rainbow Spiral**](http://codepen.io/developit/full/xGoagz/) (@ CodePen)
-- [**Simple Clock**](http://jsfiddle.net/developit/u9m5x0L7/embedded/result,js/) (@ JSFiddle)
-- [**3D + ThreeJS**](http://codepen.io/developit/pen/PPMNjd?editors=0010) (@ CodePen)
-- [**Stock Ticker**](http://codepen.io/developit/pen/wMYoBb?editors=0010) (@ CodePen)
-- [*Create your Own!*](https://jsfiddle.net/developit/rs6zrh5f/embedded/result/) (@ JSFiddle)
-
-### Starter Projects
-
-- [**Preact Boilerplate**](https://preact-boilerplate.surge.sh) _([GitHub Project](https://github.com/developit/preact-boilerplate))_ :zap:
-- [**Preact Offline Starter**](https://preact-starter.now.sh) _([GitHub Project](https://github.com/lukeed/preact-starter))_ :100:
-- [**Preact PWA**](https://preact-pwa-yfxiijbzit.now.sh/) _([GitHub Project](https://github.com/ezekielchentnik/preact-pwa))_ :hamburger:
-- [**Parcel + Preact + Unistore Starter**](https://github.com/hwclass/parcel-preact-unistore-starter)
-- [**Preact Mobx Starter**](https://awaw00.github.io/preact-mobx-starter/) _([GitHub Project](https://github.com/awaw00/preact-mobx-starter))_ :sunny:
-- [**Preact Redux Example**](https://github.com/developit/preact-redux-example) :star:
-- [**Preact Redux/RxJS/Reselect Example**](https://github.com/continuata/preact-seed)
-- [**V2EX Preact**](https://github.com/yanni4night/v2ex-preact)
-- [**Preact Coffeescript**](https://github.com/crisward/preact-coffee)
-- [**Preact + TypeScript + Webpack**](https://github.com/k1r0s/bleeding-preact-starter)
-- [**0 config => Preact + Poi**](https://github.com/k1r0s/preact-poi-starter)
-- [**Zero configuration => Preact + Typescript + Parcel**](https://github.com/aalises/preact-typescript-parcel-starter)
-
----
-
-## Libraries & Add-ons
-
-- :raised_hands: [**preact-compat**](https://git.io/preact-compat): use any React library with Preact *([full example](http://git.io/preact-compat-example))*
-- :page_facing_up: [**preact-render-to-string**](https://git.io/preact-render-to-string): Universal rendering.
-- :eyes: [**preact-render-spy**](https://github.com/mzgoddard/preact-render-spy): Enzyme-lite: Renderer with access to the produced virtual dom for testing.
-- :loop: [**preact-render-to-json**](https://git.io/preact-render-to-json): Render for Jest Snapshot testing.
-- :earth_americas: [**preact-router**](https://git.io/preact-router): URL routing for your components
-- :bookmark_tabs: [**preact-markup**](https://git.io/preact-markup): Render HTML & Custom Elements as JSX & Components
-- :satellite: [**preact-portal**](https://git.io/preact-portal): Render Preact components into (a) SPACE :milky_way:
-- :pencil: [**preact-richtextarea**](https://git.io/preact-richtextarea): Simple HTML editor component
-- :bookmark: [**preact-token-input**](https://github.com/developit/preact-token-input): Text field that tokenizes input, for things like tags
-- :card_index: [**preact-virtual-list**](https://github.com/developit/preact-virtual-list): Easily render lists with millions of rows ([demo](https://jsfiddle.net/developit/qqan9pdo/))
-- :repeat: [**preact-cycle**](https://git.io/preact-cycle): Functional-reactive paradigm for Preact
-- :triangular_ruler: [**preact-layout**](https://download.github.io/preact-layout/): Small and simple layout library
-- :thought_balloon: [**preact-socrates**](https://github.com/matthewmueller/preact-socrates): Preact plugin for [Socrates](http://github.com/matthewmueller/socrates)
-- :rowboat: [**preact-flyd**](https://github.com/xialvjun/preact-flyd): Use [flyd](https://github.com/paldepind/flyd) FRP streams in Preact + JSX
-- :speech_balloon: [**preact-i18nline**](https://github.com/download/preact-i18nline): Integrates the ecosystem around [i18n-js](https://github.com/everydayhero/i18n-js) with Preact via [i18nline](https://github.com/download/i18nline).
-- :microscope: [**preact-jsx-chai**](https://git.io/preact-jsx-chai): JSX assertion testing _(no DOM, right in Node)_
-- :tophat: [**preact-classless-component**](https://github.com/ld0rman/preact-classless-component): create preact components without the class keyword
-- :hammer: [**preact-hyperscript**](https://github.com/queckezz/preact-hyperscript): Hyperscript-like syntax for creating elements
-- :white_check_mark: [**shallow-compare**](https://github.com/tkh44/shallow-compare): simplified `shouldComponentUpdate` helper.
-- :shaved_ice: [**preact-codemod**](https://github.com/vutran/preact-codemod): Transform your React code to Preact.
-- :construction_worker: [**preact-helmet**](https://github.com/download/preact-helmet): A document head manager for Preact
-- :necktie: [**preact-delegate**](https://github.com/NekR/preact-delegate): Delegate DOM events
-- :art: [**preact-stylesheet-decorator**](https://github.com/k1r0s/preact-stylesheet-decorator): Add Scoped Stylesheets to your Preact Components
-- :electric_plug: [**preact-routlet**](https://github.com/k1r0s/preact-routlet): Simple `Component Driven` Routing for Preact using ES7 Decorators
-- :fax: [**preact-bind-group**](https://github.com/k1r0s/preact-bind-group): Preact Forms made easy, Group Events into a Single Callback
-- :hatching_chick: [**preact-habitat**](https://github.com/zouhir/preact-habitat): Declarative Preact widgets renderer in any CMS or DOM host ([demo](https://codepen.io/zouhir/pen/brrOPB)).
-- :tada: [**proppy-preact**](https://github.com/fahad19/proppy): Functional props composition for Preact components
-
-#### UI Component Libraries
-
-> Want to prototype something or speed up your development? Try one of these toolkits:
-
-- [**preact-material-components**](https://github.com/prateekbh/preact-material-components): Material Design Components for Preact ([website](https://material.preactjs.com/))
-- [**preact-mdc**](https://github.com/BerndWessels/preact-mdc): Material Design Components for Preact ([demo](https://github.com/BerndWessels/preact-mdc-demo))
-- [**preact-mui**](https://git.io/v1aVO): The MUI CSS Preact library.
-- [**preact-photon**](https://git.io/preact-photon): build beautiful desktop UI with [photon](http://photonkit.com)
-- [**preact-mdl**](https://git.io/preact-mdl): [Material Design Lite](https://getmdl.io) for Preact
-- [**preact-weui**](https://github.com/afeiship/preact-weui): [Weui](https://github.com/afeiship/preact-weui) for Preact
-
+You can find some awesome libraries in the [awesome-preact list](https://github.com/preactjs/awesome-preact) :sunglasses:
 
 ---
 
@@ -164,352 +52,55 @@ Preact supports modern browsers and IE9+:
 
 > 💁 _**Note:** You [don't need ES2015 to use Preact](https://github.com/developit/preact-in-es3)... but give it a try!_
 
-The easiest way to get started with Preact is to install [Preact CLI](https://github.com/preactjs/preact-cli). This simple command-line tool wraps up the best possible Webpack and Babel setup for you, and even keeps you up-to-date as the underlying tools change. Best of all, it's easy to understand! It builds your app in a single command (`preact build`), doesn't need any configuration, and bakes in best-practises 🙌.
+The easiest way to get started with Preact is to install [Preact CLI](https://github.com/preactjs/preact-cli). This simple command-line tool wraps up the best possible tooling for you, and even keeps things like Webpack and Babel up-to-date as they change. Best of all, it's easy to understand! Start a project or compile for production in a single command (`preact build`), with no configuration needed and best practices baked in! 🙌
 
-The following guide assumes you have some sort of ES2015 build set up using babel and/or webpack/browserify/gulp/grunt/etc.
+#### Tutorial: Building UI with Preact
 
-You can also start with [preact-boilerplate] or a [CodePen Template](http://codepen.io/developit/pen/pgaROe?editors=0010).
+With Preact, you create user interfaces by assembling trees of components and elements. Components are functions or classes that return a description of what their tree should output. These descriptions are typically written in [JSX](https://facebook.github.io/jsx/) (shown underneath), or [HTM](https://github.com/developit/htm) which leverages standard JavaScript Tagged Templates. Both syntaxes can express trees of elements with "props" (similar to HTML attributes) and children.
 
-
-### Import what you need
-
-The `preact` module provides both named and default exports, so you can either import everything under a namespace of your choosing, or just what you need as locals:
-
-##### Named:
-
-```js
-import { h, render, Component } from 'preact';
-
-// Tell Babel to transform JSX into h() calls:
-/** @jsx h */
-```
-
-##### Default:
-
-```js
-import preact from 'preact';
-
-// Tell Babel to transform JSX into preact.h() calls:
-/** @jsx preact.h */
-```
-
-> Named imports work well for highly structured applications, whereas the default import is quick and never needs to be updated when using different parts of the library.
->
-> Instead of declaring the `@jsx` pragma in your code, it's best to configure it globally in a `.babelrc`:
->
-> **For Babel 5 and prior:**
->
-> ```json
-> { "jsxPragma": "h" }
-> ```
->
-> **For Babel 6:**
->
-> ```json
-> {
->   "plugins": [
->     ["transform-react-jsx", { "pragma":"h" }]
->   ]
-> }
-> ```
->
-> **For Babel 7:**
->
-> ```json
-> {
->   "plugins": [
->     ["@babel/plugin-transform-react-jsx", { "pragma":"h" }]
->   ]
-> }
-> ```
-> **For using Preact along with TypeScript add to `tsconfig.json`:**
->
-> ```json
-> {
->   "jsx": "react",
->   "jsxFactory": "h",
-> }
-> ```
-
-
-### Rendering JSX
-
-Out of the box, Preact provides an `h()` function that turns your JSX into Virtual DOM elements _([here's how](http://jasonformat.com/wtf-is-jsx))_. It also provides a `render()` function that creates a DOM tree from that Virtual DOM.
-
-To render some JSX, just import those two functions and use them like so:
+To get started using Preact, first look at the render() function. This function accepts a tree description and creates the structure described. Next, it appends this structure to a parent DOM element provided as the second argument. Future calls to render() will reuse the existing tree and update it in-place in the DOM. Internally, render() will calculate the difference from previous outputted structures in an attempt to perform as few DOM operations as possible.
 
 ```js
 import { h, render } from 'preact';
+// Tells babel to use h for JSX. It's better to configure this globally.
+// See https://babeljs.io/docs/en/babel-plugin-transform-react-jsx#usage
+// In tsconfig you can specify this with the jsxFactory
+/** @jsx h */
 
-render((
-	<div id="foo">
-		<span>Hello, world!</span>
-		<button onClick={ e => alert("hi!") }>Click Me</button>
-	</div>
-), document.body);
+// create our tree and append it to document.body:
+render(<main><h1>Hello</h1></main>, document.body);
+
+// update the tree in-place:
+render(<main><h1>Hello World!</h1></main>, document.body);
+// ^ this second invocation of render(...) will use a single DOM call to update the text of the <h1>
 ```
 
-This should seem pretty straightforward if you've used hyperscript or one of its many friends. If you're not, the short of it is that the `h()` function import gets used in the final, transpiled code as a drop in replacement for `React.createElement()`, and so needs to be imported even if you don't explicitly use it in the code you write. Also note that if you're the kind of person who likes writing your React code in "pure JavaScript" (you know who you are) you will need to use `h()` wherever you would otherwise use `React.createElement()`.
-
-Rendering hyperscript with a virtual DOM is pointless, though. We want to render components and have them updated when data changes - that's where the power of virtual DOM diffing shines. :star2:
-
-
-### Components
-
-Preact exports a generic `Component` class, which can be extended to build encapsulated, self-updating pieces of a User Interface.  Components support all of the standard React [lifecycle methods], like `shouldComponentUpdate()` and `componentWillReceiveProps()`.  Providing specific implementations of these methods is the preferred mechanism for controlling _when_ and _how_ components update.
-
-Components also have a `render()` method, but unlike React this method is passed `(props, state)` as arguments. This provides an ergonomic means to destructure `props` and `state` into local variables to be referenced from JSX.
-
-Let's take a look at a very simple `Clock` component, which shows the current time.
+Hooray! render() has taken our structure and output a User Interface! This approach demonstrates a simple case, but would be difficult to use as an application grows in complexity. Each change would be forced to calculate the difference between the current and updated structure for the entire application. Components can help here – by dividing the User Interface into nested Components each can calculate their difference from their mounted point. Here's an example:
 
 ```js
-import { h, render, Component } from 'preact';
+import { render, h } from 'preact';
+import { useState } from 'preact/hooks';
 
-class Clock extends Component {
-	render() {
-		let time = new Date();
-		return <time datetime={time.toISOString()}>{ time.toLocaleTimeString() }</time>;
-	}
+/** @jsx h */
+
+const App = () => {
+	const [input, setInput] = useState('');
+
+	return (
+		<div>
+			<p>Do you agree to the statement: "Preact is awesome"?</p>
+			<input value={input} onChange={e => setInput(e.target.value)} />
+		</div>
+	)
 }
 
-// render an instance of Clock into <body>:
-render(<Clock />, document.body);
+render(<App />, document.body);
 ```
-
-
-That's great. Running this produces the following HTML DOM structure:
-
-```html
-<span>10:28:57 PM</span>
-```
-
-In order to have the clock's time update every second, we need to know when `<Clock>` gets mounted to the DOM. _If you've used HTML5 Custom Elements, this is similar to the `attachedCallback` and `detachedCallback` lifecycle methods._ Preact invokes the following lifecycle methods if they are defined for a Component:
-
-| Lifecycle method            | When it gets called                              |
-|-----------------------------|--------------------------------------------------|
-| `componentWillMount`        | before the component gets mounted to the DOM     |
-| `componentDidMount`         | after the component gets mounted to the DOM      |
-| `componentWillUnmount`      | prior to removal from the DOM                    |
-| `componentWillReceiveProps` | before new props get accepted                    |
-| `shouldComponentUpdate`     | before `render()`. Return `false` to skip render |
-| `componentWillUpdate`       | before `render()`                                |
-| `componentDidUpdate`        | after `render()`                                 |
-
-
-
-So, we want to have a 1-second timer start once the Component gets added to the DOM, and stop if it is removed. We'll create the timer and store a reference to it in `componentDidMount()`, and stop the timer in `componentWillUnmount()`. On each timer tick, we'll update the component's `state` object with a new time value. Doing this will automatically re-render the component.
-
-```js
-import { h, render, Component } from 'preact';
-
-class Clock extends Component {
-	constructor() {
-		super();
-		// set initial time:
-		this.state = {
-			time: Date.now()
-		};
-	}
-
-	componentDidMount() {
-		// update time every second
-		this.timer = setInterval(() => {
-			this.setState({ time: Date.now() });
-		}, 1000);
-	}
-
-	componentWillUnmount() {
-		// stop when not renderable
-		clearInterval(this.timer);
-	}
-
-	render(props, state) {
-		let time = new Date(state.time).toLocaleTimeString();
-		return <span>{ time }</span>;
-	}
-}
-
-// render an instance of Clock into <body>:
-render(<Clock />, document.body);
-```
-
-Now we have [a ticking clock](http://jsfiddle.net/developit/u9m5x0L7/embedded/result,js/)!
-
-
-### Props & State
-
-The concept (and nomenclature) for `props` and `state` is the same as in React. `props` are passed to a component by defining attributes in JSX, `state` is internal state. Changing either triggers a re-render, though by default Preact re-renders Components asynchronously for `state` changes and synchronously for `props` changes.  You can tell Preact to render `prop` changes asynchronously by setting `options.syncComponentUpdates` to `false`.
-
 
 ---
 
-
-## Linked State
-
-One area Preact takes a little further than React is in optimizing state changes. A common pattern in ES2015 React code is to use Arrow functions within a `render()` method in order to update state in response to events.  Creating functions enclosed in a scope on every render is inefficient and forces the garbage collector to do more work than is necessary.
-
-One solution to this is to bind component methods declaratively.
-Here is an example using [decko](http://git.io/decko):
-
-```js
-class Foo extends Component {
-	@bind
-	updateText(e) {
-		this.setState({ text: e.target.value });
-	}
-	render({ }, { text }) {
-		return <input value={text} onInput={this.updateText} />;
-	}
-}
-```
-
-While this achieves much better runtime performance, it's still a lot of unnecessary code to wire up state to UI.
-
-Fortunately there is a solution, in the form of a module called [linkstate](https://github.com/developit/linkstate). Calling `linkState(component, 'text')` returns a function that accepts an Event and uses its associated value to update the given property in your component's state. Calls to `linkState()` with the same arguments are cached, so there is no performance penalty.  Here is the previous example rewritten using _Linked State_:
-
-```js
-import linkState from 'linkstate';
-
-class Foo extends Component {
-	render({ }, { text }) {
-		return <input value={text} onInput={linkState(this, 'text')} />;
-	}
-}
-```
-
-Simple and effective. It handles linking state from any input type, or an optional second parameter can be used to explicitly provide a keypath to the new state value.
-
-> **Note:** In Preact 7 and prior, `linkState()` was built right into Component. In 8.0, it was moved to a separate module. You can restore the 7.x behavior by using linkstate as a polyfill - see [the linkstate docs](https://github.com/developit/linkstate#usage).
-
-
-
-## Examples
-
-Here is a somewhat verbose Preact `<Link>` component:
-
-```js
-class Link extends Component {
-	render(props, state) {
-		return <a href={props.href}>{props.children}</a>;
-	}
-}
-```
-
-Since this is ES6/ES2015, we can further simplify:
-
-```js
-class Link extends Component {
-    render({ href, children }) {
-        return <a {...{ href, children }} />;
-    }
-}
-
-// or, for wide-open props support:
-class Link extends Component {
-    render(props) {
-        return <a {...props} />;
-    }
-}
-
-// or, as a stateless functional component:
-const Link = ({ children, ...props }) => (
-    <a {...props}>{ children }</a>
-);
-```
-
-
-## Extensions
-
-It is likely that some projects based on Preact would wish to extend Component with great new functionality.
-
-Perhaps automatic connection to stores for a Flux-like architecture, or mixed-in context bindings to make it feel more like `React.createClass()`.  Just use ES2015 inheritance:
-
-```js
-class BoundComponent extends Component {
-	constructor(props) {
-		super(props);
-		this.bind();
-	}
-	bind() {
-		this.binds = {};
-		for (let i in this) {
-			this.binds[i] = this[i].bind(this);
-		}
-	}
-}
-
-// example usage
-class Link extends BoundComponent {
-	click() {
-		open(this.href);
-	}
-	render() {
-		let { click } = this.binds;
-		return <span onclick={ click }>{ children }</span>;
-	}
-}
-```
-
-
-The possibilities are pretty endless here. You could even add support for rudimentary mixins:
-
-```js
-class MixedComponent extends Component {
-	constructor() {
-		super();
-		(this.mixins || []).forEach( m => Object.assign(this, m) );
-	}
-}
-```
-
-## Debug Mode
-
-You can inspect and modify the state of your Preact UI components at runtime using the
-[React Developer Tools](https://github.com/facebook/react-devtools) browser extension.
-
-1. Install the [React Developer Tools](https://github.com/facebook/react-devtools) extension
-2. Import the "preact/debug" module in your app
-3. Set `process.env.NODE_ENV` to 'development'
-4. Reload and go to the 'React' tab in the browser's development tools
-
-
-```js
-import { h, Component, render } from 'preact';
-
-// Enable debug mode. You can reduce the size of your app by only including this
-// module in development builds. eg. In Webpack, wrap this with an `if (module.hot) {...}`
-// check.
-require('preact/debug');
-```
-
-### Runtime Error Checking
-
-To enable debug mode, you need to set `process.env.NODE_ENV=development`. You can do this
-with webpack via a builtin plugin.
-
-```js
-// webpack.config.js
-
-// Set NODE_ENV=development to enable error checking
-new webpack.DefinePlugin({
-  'process.env': {
-    'NODE_ENV': JSON.stringify('development')
-  }
-});
-```
-
-When enabled, warnings are logged to the console when undefined components or string refs
-are detected.
-
-### Developer Tools (v8 or earlier)
-
-If you only want to include devtool integration, without runtime error checking, you can
-replace `preact/debug` in the above example with `preact/devtools`. This option doesn't
-require setting `NODE_ENV=development`.
-
-
-
 ## Backers
+
 Support us with a monthly donation and help us continue our activities. [[Become a backer](https://opencollective.com/preact#backer)]
 
 <a href="https://opencollective.com/preact/backer/0/website" target="_blank"><img src="https://opencollective.com/preact/backer/0/avatar.svg"></a>
@@ -578,18 +169,17 @@ Become a sponsor and get your logo on our README on GitHub with a link to your s
 <a href="https://opencollective.com/preact/sponsor/28/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/28/avatar.svg"></a>
 <a href="https://opencollective.com/preact/sponsor/29/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/29/avatar.svg"></a>
 
+---
+
 ## License
 
 MIT
 
 
 
-[![Preact](http://i.imgur.com/YqCHvEW.gif)](https://preactjs.com)
+[![Preact](https://i.imgur.com/YqCHvEW.gif)](https://preactjs.com)
 
 
 [preact/compat]: https://github.com/preactjs/preact/tree/master/compat
-[ES6 Class]: https://facebook.github.io/react/docs/reusable-components.html#es6-classes
-[Functional Components]: https://facebook.github.io/react/blog/2015/10/07/react-v0.14.html#stateless-functional-components
 [hyperscript]: https://github.com/dominictarr/hyperscript
-[preact-boilerplate]: https://github.com/developit/preact-boilerplate
-[lifecycle methods]: https://facebook.github.io/react/docs/component-specs.html
+[DevTools]: https://github.com/preactjs/preact-devtools

@@ -7,7 +7,7 @@ function serialize(obj) {
 	if (obj instanceof Text) return '#text';
 	if (obj instanceof Element) return `<${obj.localName}>${obj.textContent}`;
 	if (obj === document) return 'document';
-	if (typeof obj === 'string') return obj;
+	if (typeof obj == 'string') return obj;
 	return Object.prototype.toString.call(obj).replace(/(^\[object |\]$)/g, '');
 }
 
@@ -37,6 +37,8 @@ export function logCall(obj, method) {
 		log.push(operation);
 		return old.apply(this, args);
 	};
+
+	return () => (obj[method] = old);
 }
 
 /**

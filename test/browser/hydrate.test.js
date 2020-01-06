@@ -3,7 +3,8 @@ import {
 	setupScratch,
 	teardown,
 	sortAttributes,
-	serializeHtml
+	serializeHtml,
+	spyOnElementAttributes
 } from '../_util/helpers';
 import { ul, li, div } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
@@ -11,22 +12,39 @@ import { logCall, clearLog, getLog } from '../_util/logCall';
 /** @jsx createElement */
 
 describe('hydrate()', () => {
-	let scratch;
+	let scratch, attributesSpy;
 
 	const List = ({ children }) => <ul>{children}</ul>;
 	const ListItem = ({ children }) => <li>{children}</li>;
 
+	let resetAppendChild;
+	let resetInsertBefore;
+	let resetRemoveChild;
+	let resetRemove;
+	let resetSetAttribute;
+	let resetRemoveAttribute;
+
 	before(() => {
-		logCall(Element.prototype, 'appendChild');
-		logCall(Element.prototype, 'insertBefore');
-		logCall(Element.prototype, 'removeChild');
-		logCall(Element.prototype, 'remove');
-		logCall(Element.prototype, 'setAttribute');
-		logCall(Element.prototype, 'removeAttribute');
+		resetAppendChild = logCall(Element.prototype, 'appendChild');
+		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
+		resetRemoveChild = logCall(Element.prototype, 'removeChild');
+		resetRemove = logCall(Element.prototype, 'remove');
+		resetSetAttribute = logCall(Element.prototype, 'setAttribute');
+		resetRemoveAttribute = logCall(Element.prototype, 'removeAttribute');
+	});
+
+	after(() => {
+		resetAppendChild();
+		resetInsertBefore();
+		resetRemoveChild();
+		resetRemove();
+		resetSetAttribute();
+		resetRemoveAttribute();
 	});
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		attributesSpy = spyOnElementAttributes();
 	});
 
 	afterEach(() => {
@@ -35,7 +53,7 @@ describe('hydrate()', () => {
 	});
 
 	it('should reuse existing DOM', () => {
-		const html = ul([li('1'), li('2'), li('3')].join(''));
+		const html = ul([li('1'), li('2'), li('3')]);
 
 		scratch.innerHTML = html;
 		clearLog();
@@ -54,7 +72,7 @@ describe('hydrate()', () => {
 	});
 
 	it('should reuse existing DOM when given components', () => {
-		const html = ul([li('1'), li('2'), li('3')].join(''));
+		const html = ul([li('1'), li('2'), li('3')]);
 
 		scratch.innerHTML = html;
 		clearLog();
@@ -73,7 +91,7 @@ describe('hydrate()', () => {
 	});
 
 	it('should add missing nodes to existing DOM when hydrating', () => {
-		const html = ul([li('1')].join(''));
+		const html = ul([li('1')]);
 
 		scratch.innerHTML = html;
 		clearLog();
@@ -87,9 +105,7 @@ describe('hydrate()', () => {
 			scratch
 		);
 
-		expect(scratch.innerHTML).to.equal(
-			ul([li('1'), li('2'), li('3')].join(''))
-		);
+		expect(scratch.innerHTML).to.equal(ul([li('1'), li('2'), li('3')]));
 		expect(getLog()).to.deep.equal([
 			'<li>.appendChild(#text)',
 			'<ul>1.appendChild(<li>2)',
@@ -99,7 +115,7 @@ describe('hydrate()', () => {
 	});
 
 	it('should remove extra nodes from existing DOM when hydrating', () => {
-		const html = ul([li('1'), li('2'), li('3'), li('4')].join(''));
+		const html = ul([li('1'), li('2'), li('3'), li('4')]);
 
 		scratch.innerHTML = html;
 		clearLog();
@@ -113,9 +129,7 @@ describe('hydrate()', () => {
 			scratch
 		);
 
-		expect(scratch.innerHTML).to.equal(
-			ul([li('1'), li('2'), li('3')].join(''))
-		);
+		expect(scratch.innerHTML).to.equal(ul([li('1'), li('2'), li('3')]));
 		expect(getLog()).to.deep.equal(['<li>4.remove()']);
 	});
 
@@ -133,6 +147,7 @@ describe('hydrate()', () => {
 		clearLog();
 		hydrate(vnode, scratch);
 
+		expect(attributesSpy.get).to.not.have.been.called;
 		expect(serializeHtml(scratch)).to.equal(
 			sortAttributes(
 				'<div><span before-hydrate="test" different-value="a" same-value="foo">Test</span></div>'
@@ -148,7 +163,7 @@ describe('hydrate()', () => {
 	});
 
 	it('should correctly hydrate with Fragments', () => {
-		const html = ul([li('1'), li('2'), li('3'), li('4')].join(''));
+		const html = ul([li('1'), li('2'), li('3'), li('4')]);
 
 		scratch.innerHTML = html;
 		clearLog();
@@ -171,7 +186,7 @@ describe('hydrate()', () => {
 
 	it('should correctly hydrate root Fragments', () => {
 		const html = [
-			ul([li('1'), li('2'), li('3'), li('4')].join('')),
+			ul([li('1'), li('2'), li('3'), li('4')]),
 			div('sibling')
 		].join('');
 
@@ -205,7 +220,7 @@ describe('hydrate()', () => {
 	it.skip('should override incorrect pre-existing DOM with VNodes passed into render', () => {
 		const initialHtml = [
 			div('sibling'),
-			ul([li('1'), li('4'), li('3'), li('2')].join(''))
+			ul([li('1'), li('4'), li('3'), li('2')])
 		].join('');
 
 		scratch.innerHTML = initialHtml;
@@ -227,7 +242,7 @@ describe('hydrate()', () => {
 		);
 
 		const finalHtml = [
-			ul([li('1'), li('2'), li('3'), li('4')].join('')),
+			ul([li('1'), li('2'), li('3'), li('4')]),
 			div('sibling')
 		].join('');
 
@@ -254,6 +269,7 @@ describe('hydrate()', () => {
 		);
 
 		hydrate(preactElement, scratch);
+		expect(attributesSpy.get).to.not.have.been.called;
 		expect(scratch).to.have.property(
 			'innerHTML',
 			'<div><a foo="bar"></a></div>'
@@ -269,5 +285,79 @@ describe('hydrate()', () => {
 
 		scratch.firstChild.click();
 		expect(spy).to.be.calledOnce;
+	});
+
+	// #2237
+	it('should not redundantly add text nodes', () => {
+		scratch.innerHTML = '<div id="test"><p>hello bar</p></div>';
+		const element = document.getElementById('test');
+		const Component = props => <p>hello {props.foo}</p>;
+
+		hydrate(<Component foo="bar" />, element);
+		expect(element.innerHTML).to.equal('<p>hello bar</p>');
+	});
+
+	it('should not remove values', () => {
+		scratch.innerHTML =
+			'<select><option value="0">Zero</option><option selected value="2">Two</option></select>';
+		const App = () => {
+			const options = [
+				{
+					value: '0',
+					label: 'Zero'
+				},
+				{
+					value: '2',
+					label: 'Two'
+				}
+			];
+
+			return (
+				<select value="2">
+					{options.map(({ disabled, label, value }) => (
+						<option key={label} disabled={disabled} value={value}>
+							{label}
+						</option>
+					))}
+				</select>
+			);
+		};
+
+		hydrate(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<select><option value="0">Zero</option><option selected="" value="2">Two</option></select>'
+		);
+	});
+
+	it('should deopt for trees introduced in hydrate (append)', () => {
+		scratch.innerHTML = '<div id="test"><p class="hi">hello bar</p></div>';
+		const Component = props => <p class="hi">hello {props.foo}</p>;
+		const element = document.getElementById('test');
+		hydrate(
+			<Fragment>
+				<Component foo="bar" />
+				<Component foo="baz" />
+			</Fragment>,
+			element
+		);
+		expect(element.innerHTML).to.equal(
+			'<p class="hi">hello bar</p><p class="hi">hello baz</p>'
+		);
+	});
+
+	it('should deopt for trees introduced in hydrate (insert before)', () => {
+		scratch.innerHTML = '<div id="test"><p class="hi">hello bar</p></div>';
+		const Component = props => <p class="hi">hello {props.foo}</p>;
+		const element = document.getElementById('test');
+		hydrate(
+			<Fragment>
+				<Component foo="baz" />
+				<Component foo="bar" />
+			</Fragment>,
+			element
+		);
+		expect(element.innerHTML).to.equal(
+			'<p class="hi">hello baz</p><p class="hi">hello bar</p>'
+		);
 	});
 });

@@ -47,7 +47,7 @@ describe('refs', () => {
 
 	it('should support createRef', () => {
 		const r = createRef();
-		expect(r.current).to.equal(undefined);
+		expect(r.current).to.equal(null);
 
 		render(<div ref={r} />, scratch);
 		expect(r.current).to.equalNode(scratch.firstChild);
@@ -92,9 +92,7 @@ describe('refs', () => {
 		const events = [];
 		const App = () => (
 			<div ref={r => events.push('called with ' + (r && r.tagName))}>
-				<h1 ref={r => events.push('called with ' + (r && r.tagName))}>
-					hi
-				</h1>
+				<h1 ref={r => events.push('called with ' + (r && r.tagName))}>hi</h1>
 			</div>
 		);
 
@@ -435,6 +433,26 @@ describe('refs', () => {
 
 		render(<input type="text" ref={autoFocus} value="foo" />, scratch);
 		expect(input.value).to.equal('foo');
+	});
+
+	it('should correctly set nested child refs', () => {
+		const ref = createRef();
+		const App = ({ open }) =>
+			open ? (
+				<div class="open" key="open">
+					<div ref={ref} />
+				</div>
+			) : (
+				<div class="closes" key="closed">
+					<div ref={ref} />
+				</div>
+			);
+
+		render(<App />, scratch);
+		expect(ref.current).to.not.be.null;
+
+		render(<App open />, scratch);
+		expect(ref.current).to.not.be.null;
 	});
 
 	it('should correctly call child refs for un-keyed children on re-render', () => {

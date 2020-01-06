@@ -1,0 +1,197 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - '**'
+  push:
+    branches:
+      - master
+
+jobs:
+  build_test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - name: Cache node modules
+        uses: actions/cache@v1
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          # This uses the same name as the build-action so we can share the caches.
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      - run: npm ci
+      - name: test
+        env:
+          CI: true
+          COVERAGE: true
+          FLAKEY: false
+        # Not using `npm test` since it rebuilds source which npm ci has already done
+        run: |
+          npm run lint
+          npm run test:unit
+      - name: Coveralls GitHub Action
+        uses: coverallsapp/github-action@v1.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Package
+        # Use --ignore-scripts here to avoid re-building again before pack
+        run: |
+          npm pack --ignore-scripts
+          mv preact-*.tgz preact.tgz
+          tar -xzf preact.tgz
+      - name: Upload build output
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-output
+          path: package/
+      - name: Upload npm package
+        uses: actions/upload-artifact@v2
+        with:
+          name: npm-package
+          path: preact.tgz
+      - name: Initialize Tachometer Results Report
+        uses: andrewiggins/tachometer-reporter-action@v2
+        with:
+          initialize: true
+
+  bench_text_update:
+    name: Bench text_update
+    runs-on: ubuntu-latest
+    needs: build_test
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - uses: andrewiggins/download-base-artifact@v1
+        with:
+          artifact: npm-package
+          required: false
+      - name: install & build
+        run: |
+          cd benches
+          npm ci
+      - name: bench
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          cd benches
+          npm run bench text_update.html
+      - uses: andrewiggins/tachometer-reporter-action@v2
+        with:
+          path: benches/results/text_update.json
+          report-id: text_update
+          base-bench-name: preact-master
+          pr-bench-name: preact-local
+
+  bench_many_updates:
+    name: Bench many_updates
+    runs-on: ubuntu-latest
+    needs: build_test
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - uses: andrewiggins/download-base-artifact@v1
+        with:
+          artifact: npm-package
+          required: false
+      - name: install & build
+        run: |
+          cd benches
+          npm ci
+      - name: bench
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          cd benches
+          npm run bench many_updates.html
+      - uses: andrewiggins/tachometer-reporter-action@v2
+        with:
+          path: benches/results/many_updates.json
+          report-id: many_updates
+          base-bench-name: preact-master
+          pr-bench-name: preact-local
+
+  bench_02_replace1k:
+    name: Bench 02_replace1k
+    runs-on: ubuntu-latest
+    needs: build_test
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - uses: andrewiggins/download-base-artifact@v1
+        with:
+          artifact: npm-package
+          required: false
+      - name: install & build
+        run: |
+          cd benches
+          npm ci
+      - name: bench
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          cd benches
+          npm run bench 02_replace1k.html
+      - uses: andrewiggins/tachometer-reporter-action@v2
+        with:
+          path: benches/results/02_replace1k.json
+          report-id: 02_replace1k
+          base-bench-name: preact-master
+          pr-bench-name: preact-local
+
+  bench_03_update10th1k_x16:
+    name: Bench 03_update10th1k_x16
+    runs-on: ubuntu-latest
+    needs: build_test
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - uses: andrewiggins/download-base-artifact@v1
+        with:
+          artifact: npm-package
+          required: false
+      - name: install & build
+        run: |
+          cd benches
+          npm ci
+      - name: bench
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          cd benches
+          npm run bench 03_update10th1k_x16.html
+      - uses: andrewiggins/tachometer-reporter-action@v2
+        with:
+          path: benches/results/03_update10th1k_x16.json
+          report-id: 03_update10th1k_x16
+          base-bench-name: preact-master
+          pr-bench-name: preact-local

@@ -14,6 +14,7 @@ module.exports = {
 	resolve: {
 		alias: {
 			['preact/debug']: path.join(__dirname, '..', 'debug'),
+			['preact/devtools']: path.join(__dirname, '..', 'devtools'),
 			['preact/hooks']: path.join(__dirname, '..', 'hooks', 'src'),
       ["preact/composition"]: path.join(__dirname, '..', 'composition', 'src'),
 			preact: preact,
@@ -45,6 +46,7 @@ module.exports = {
 					],
 					plugins: [
 						[require.resolve('@babel/plugin-transform-runtime')],
+						[require.resolve('@babel/plugin-transform-react-jsx-source')],
 						[
 							require.resolve('@babel/plugin-transform-react-jsx'),
 							{ pragma: 'h', pragmaFrag: 'Fragment' }
@@ -79,6 +81,7 @@ module.exports = {
 						[require.resolve('@babel/preset-react')]
 					],
 					plugins: [
+						[require.resolve('@babel/plugin-transform-react-jsx-source')],
 						[
 							require.resolve('@babel/plugin-transform-react-jsx'),
 							{ pragma: 'createElement', pragmaFrag: 'Fragment' }
