@@ -39,7 +39,7 @@ Preact supports modern browsers and IE11+:
 
 ---
 
-You can find some awesome libraries in the [awesome-preact list](https://github.com/ooade/awesome-preact) :sunglasses:
+You can find some awesome libraries in the [awesome-preact list](https://github.com/preactjs/awesome-preact) :sunglasses:
 
 ---
 
