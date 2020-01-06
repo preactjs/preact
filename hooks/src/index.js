@@ -222,6 +222,24 @@ export function useDebugValue(value, formatter) {
 	}
 }
 
+export function useErrorBoundary(cb) {
+	const state = getHookState(currentIndex++);
+	const errState = useState();
+	state._value = cb;
+	if (!currentComponent.componentDidCatch) {
+		currentComponent.componentDidCatch = err => {
+			if (state._value) state._value(err);
+			errState[1](err);
+		};
+	}
+	return [
+		errState[0],
+		() => {
+			errState[1](undefined);
+		}
+	];
+}
+
 /**
  * After paint effects consumer.
  */

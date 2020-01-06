@@ -1,6 +1,8 @@
 /* istanbul ignore file */
 import { options, Component, Fragment } from 'preact';
 import { Renderer } from './renderer';
+import { setupOptions } from './10/options';
+import { createRenderer } from './10/renderer';
 
 /**
  * Wrap function with generic error logging
@@ -26,6 +28,16 @@ let noop = () => undefined;
 
 export function initDevTools() {
 	// This global variable is injected by the devtools
+	let preactHook = /** @type {*} */ (window).__PREACT_DEVTOOLS__;
+
+	// Check for Preact devtools first :)
+	if (preactHook) {
+		const renderer = createRenderer(preactHook);
+		setupOptions(/** @type {*} */ (options), renderer);
+		preactHook.attach(renderer);
+		return;
+	}
+
 	/** @type {import('../internal').DevtoolsWindow} */
 	let hook = (window).__REACT_DEVTOOLS_GLOBAL_HOOK__;
 	if (hook == null) return;

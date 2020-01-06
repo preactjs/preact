@@ -7,6 +7,12 @@ import {
 	Fragment
 } from '../../src/';
 
+// Test `this` binding on event handlers
+function onHandler(this: HTMLInputElement, event: any) {
+	return this.value;
+}
+const foo = <input onChange={onHandler} />;
+
 export class ContextComponent extends Component<{ foo: string }> {
 	getChildContext() {
 		return { something: 2 };

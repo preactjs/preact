@@ -113,7 +113,7 @@ export function diff(
 			} else {
 				if (
 					newType.getDerivedStateFromProps == null &&
-					c._force == null &&
+					newProps !== oldProps &&
 					c.componentWillReceiveProps != null
 				) {
 					c.componentWillReceiveProps(newProps, cctx);
@@ -306,7 +306,7 @@ function diffElementNodes(
 			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
 		}
 
-		if (oldProps !== newProps) {
+		if (oldProps !== newProps && !isHydrating && dom.data != newProps) {
 			dom.data = newProps;
 		}
 	} else if (newVNode !== oldVNode) {

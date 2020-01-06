@@ -183,6 +183,59 @@ describe('Lifecycle methods', () => {
 			expect(Inner.prototype.componentWillReceiveProps).to.have.been.called;
 		});
 
+		it('should be called when rerender with new props from parent even with setState/forceUpdate in child', () => {
+			let setStateAndUpdateProps;
+			let forceUpdateAndUpdateProps;
+			let cWRPSpy = sinon.spy();
+
+			class Outer extends Component {
+				constructor(p, c) {
+					super(p, c);
+					this.state = { i: 0 };
+					this.update = this.update.bind(this);
+				}
+				update() {
+					this.setState({ i: this.state.i + 1 });
+				}
+				render(props, { i }) {
+					return <Inner i={i} update={this.update} />;
+				}
+			}
+			class Inner extends Component {
+				componentDidMount() {
+					expect(this.props.i).to.be.equal(0);
+
+					setStateAndUpdateProps = () => {
+						this.setState({});
+						this.props.update();
+					};
+					forceUpdateAndUpdateProps = () => {
+						this.forceUpdate();
+						this.props.update();
+					};
+				}
+				componentWillReceiveProps(nextProps) {
+					cWRPSpy(nextProps.i);
+				}
+				render() {
+					return <div />;
+				}
+			}
+			// Initial render
+			render(<Outer />, scratch);
+			expect(cWRPSpy).not.to.have.been.called;
+
+			// setState in inner component and update with new props
+			setStateAndUpdateProps();
+			rerender();
+			expect(cWRPSpy).to.have.been.calledWith(1);
+
+			// forceUpdate in inner component and update with new props
+			forceUpdateAndUpdateProps();
+			rerender();
+			expect(cWRPSpy).to.have.been.calledWith(2);
+		});
+
 		it('should be called in right execution order', () => {
 			let doRender;
 			class Outer extends Component {
