@@ -6,6 +6,11 @@ import {
 	DOCUMENT_NODE,
 	DOCUMENT_FRAGMENT_NODE
 } from './constants';
+import {
+	getOwnerStack,
+	setupComponentStack,
+	getCurrentVNode
+} from './component-stack';
 
 const isWeakMapSupported = typeof WeakMap === 'function';
 
@@ -18,6 +23,8 @@ function getClosestDomNodeParent(parent) {
 }
 
 export function initDebug() {
+	setupComponentStack();
+
 	/* eslint-disable no-console */
 	let oldBeforeDiff = options._diff;
 	let oldDiffed = options.diffed;
@@ -94,7 +101,8 @@ export function initDebug() {
 			throw new Error(
 				'Undefined component passed to createElement()\n\n' +
 					'You likely forgot to export your component or might have mixed up default and named imports' +
-					serializeVNode(vnode)
+					serializeVNode(vnode) +
+					`\n\n${getOwnerStack(vnode)}`
 			);
 		} else if (type != null && typeof type === 'object') {
 			if (type._lastDomChild !== undefined && type._dom !== undefined) {
@@ -103,7 +111,8 @@ export function initDebug() {
 						'Did you accidentally pass a JSX literal as JSX twice?\n\n' +
 						`  let My${getDisplayName(vnode)} = ${serializeVNode(type)};\n` +
 						`  let vnode = <My${getDisplayName(vnode)} />;\n\n` +
-						'This usually happens when you export a JSX literal and not the component.'
+						'This usually happens when you export a JSX literal and not the component.' +
+						`\n\n${getOwnerStack(vnode)}`
 				);
 			}
 
@@ -119,7 +128,8 @@ export function initDebug() {
 		) {
 			console.error(
 				'Improper nesting of table. Your <thead/tbody/tfoot> should have a <table> parent.' +
-					serializeVNode(vnode)
+					serializeVNode(vnode) +
+					`\n\n${getOwnerStack(vnode)}`
 			);
 		} else if (
 			type === 'tr' &&
@@ -130,17 +140,20 @@ export function initDebug() {
 		) {
 			console.error(
 				'Improper nesting of table. Your <tr> should have a <thead/tbody/tfoot/table> parent.' +
-					serializeVNode(vnode)
+					serializeVNode(vnode) +
+					`\n\n${getOwnerStack(vnode)}`
 			);
 		} else if (type === 'td' && parentVNode.type !== 'tr') {
 			console.error(
 				'Improper nesting of table. Your <td> should have a <tr> parent.' +
-					serializeVNode(vnode)
+					serializeVNode(vnode) +
+					`\n\n${getOwnerStack(vnode)}`
 			);
 		} else if (type === 'th' && parentVNode.type !== 'tr') {
 			console.error(
 				'Improper nesting of table. Your <th> should have a <tr>.' +
-					serializeVNode(vnode)
+					serializeVNode(vnode) +
+					`\n\n${getOwnerStack(vnode)}`
 			);
 		}
 
@@ -153,7 +166,8 @@ export function initDebug() {
 			throw new Error(
 				`Component's "ref" property should be a function, or an object created ` +
 					`by createRef(), but got [${typeof vnode.ref}] instead\n` +
-					serializeVNode(vnode)
+					serializeVNode(vnode) +
+					`\n\n${getOwnerStack(vnode)}`
 			);
 		}
 
@@ -168,7 +182,8 @@ export function initDebug() {
 					throw new Error(
 						`Component's "${key}" property should be a function, ` +
 							`but got [${typeof vnode.props[key]}] instead\n` +
-							serializeVNode(vnode)
+							serializeVNode(vnode) +
+							`\n\n${getOwnerStack(vnode)}`
 					);
 				}
 			}
@@ -277,7 +292,8 @@ export function initDebug() {
 						let componentName = getDisplayName(vnode);
 						console.warn(
 							`In ${componentName} you are calling useMemo/useCallback without passing arguments.\n` +
-								`This is a noop since it will not be able to memoize, it will execute it every render.`
+								`This is a noop since it will not be able to memoize, it will execute it every render.` +
+								`\n\n${getOwnerStack(vnode)}`
 						);
 					}
 				});
@@ -296,7 +312,8 @@ export function initDebug() {
 						console.warn(
 							'You should provide an array of arguments as the second argument to the "useEffect" hook.\n\n' +
 								'Not doing so will invoke this effect on every render.\n\n' +
-								`This effect can be found in the render of ${componentName}.`
+								`This effect can be found in the render of ${componentName}.` +
+								`\n\n${getOwnerStack(vnode)}`
 						);
 					}
 				});
@@ -315,7 +332,8 @@ export function initDebug() {
 					console.warn(
 						'You should provide an array of arguments as the second argument to the "useLayoutEffect" hook.\n\n' +
 							'Not doing so will invoke this effect on every render.\n\n' +
-							`This effect can be found in the render of ${componentName}.`
+							`This effect can be found in the render of ${componentName}.` +
+							`\n\n${getOwnerStack(vnode)}`
 					);
 				}
 			});
@@ -335,7 +353,8 @@ export function initDebug() {
 						'Following component has two or more children with the ' +
 							`same key attribute: "${key}". This may cause glitches and misbehavior ` +
 							'in rendering process. Component: \n\n' +
-							serializeVNode(vnode)
+							serializeVNode(vnode) +
+							`\n\n${getOwnerStack(vnode)}`
 					);
 
 					// Break early to not spam the console
@@ -354,13 +373,14 @@ Component.prototype.setState = function(update, callback) {
 		console.warn(
 			`Calling "this.setState" inside the constructor of a component is a ` +
 				`no-op and might be a bug in your application. Instead, set ` +
-				`"this.state = {}" directly.`
+				`"this.state = {}" directly.\n\n${getOwnerStack(getCurrentVNode())}`
 		);
 	} else if (this._parentDom == null) {
 		console.warn(
 			`Can't call "this.setState" on an unmounted component. This is a no-op, ` +
 				`but it indicates a memory leak in your application. To fix, cancel all ` +
-				`subscriptions and asynchronous tasks in the componentWillUnmount method.`
+				`subscriptions and asynchronous tasks in the componentWillUnmount method.` +
+				`\n\n${getOwnerStack(this._vnode)}`
 		);
 	}
 
@@ -372,13 +392,16 @@ Component.prototype.forceUpdate = function(callback) {
 	if (this._vnode == null) {
 		console.warn(
 			`Calling "this.forceUpdate" inside the constructor of a component is a ` +
-				`no-op and might be a bug in your application.`
+				`no-op and might be a bug in your application.\n\n${getOwnerStack(
+					getCurrentVNode()
+				)}`
 		);
 	} else if (this._parentDom == null) {
 		console.warn(
 			`Can't call "this.setState" on an unmounted component. This is a no-op, ` +
 				`but it indicates a memory leak in your application. To fix, cancel all ` +
-				`subscriptions and asynchronous tasks in the componentWillUnmount method.`
+				`subscriptions and asynchronous tasks in the componentWillUnmount method.` +
+				`\n\n${getOwnerStack(this._vnode)}`
 		);
 	}
 	return forceUpdate.call(this, callback);

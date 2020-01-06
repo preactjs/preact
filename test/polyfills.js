@@ -7,6 +7,10 @@ import 'core-js/fn/array/find';
 import 'core-js/fn/array/includes';
 import 'core-js/fn/string/includes';
 import 'core-js/fn/object/assign';
+import 'core-js/fn/string/starts-with';
+import 'core-js/fn/string/code-point-at';
+import 'core-js/fn/string/from-code-point';
+import 'core-js/fn/string/repeat';
 
 // Fix Function#name on browsers that do not support it (IE).
 // Taken from: https://stackoverflow.com/a/17056530/755391

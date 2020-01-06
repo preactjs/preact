@@ -98,9 +98,11 @@ describe('debug with hooks', () => {
 			return <p>{state}</p>;
 		};
 		render(<App />, scratch);
-		expect(warnings[0]).to.match(/You should provide an array of arguments/);
+		// Skip first warning which is about missing babel plugin for better
+		// debug messages
+		expect(warnings[1]).to.match(/You should provide an array of arguments/);
 		render(<App />, scratch);
-		expect(warnings[1]).to.be.undefined;
+		expect(warnings[2]).to.be.undefined;
 	});
 
 	it('should warn for argumentless useLayoutEffect hooks', () => {

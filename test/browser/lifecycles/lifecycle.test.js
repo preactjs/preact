@@ -580,6 +580,43 @@ describe('Lifecycle methods', () => {
 			expect(proto.componentDidMount).to.have.been.called;
 		});
 
+		it('should be able to use getDerivedStateFromError and componentDidCatch together', () => {
+			let didCatch = sinon.spy(),
+				getDerived = sinon.spy();
+			const error = new Error('hi');
+
+			class Boundary extends Component {
+				static getDerivedStateFromError(err) {
+					getDerived(err);
+					return { err };
+				}
+
+				componentDidCatch(err) {
+					didCatch(err);
+				}
+
+				render() {
+					return this.state.err ? <div /> : this.props.children;
+				}
+			}
+
+			const ThrowErr = () => {
+				throw error;
+			};
+
+			render(
+				<Boundary>
+					<ThrowErr />
+				</Boundary>,
+				scratch
+			);
+			rerender();
+
+			expect(didCatch).to.have.been.calledWith(error);
+
+			expect(getDerived).to.have.been.calledWith(error);
+		});
+
 		it('should remove this.base for HOC', () => {
 			let createComponent = (name, fn) => {
 				class C extends Component {
