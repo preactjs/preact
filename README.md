@@ -50,7 +50,25 @@ The easiest way to get started with Preact is to install [Preact CLI](https://gi
 
 ### Getting Started
 
-Here we'll have a small example
+Preact lets you build user interfaces by assembling trees of components and elements. Components are functions or classes that return a description of what their part of the tree should look like. These descriptions are typically written in [JSX](https://facebook.github.io/jsx/) (shown here), or [HTM](https://github.com/developit/htm) which is similar but uses only standard JavaScript. Both syntaxes let us express trees of elements, each with "props" (like HTML attributes) and children.
+
+To get started using Preact, first we'll take a look at the `render()` function. We can pass a tree description to render() and it will create the structure we described and append it to a parent DOM element we provide. Future render() calls will find our existing tree and update it in-place in the DOM, calculating the difference from our previous render in order to perform as few operations as possible.
+
+```js
+import { h, render } from 'preact';
+// Tells babel to use h for JSX. It's better to configure this globally.
+// See https://babeljs.io/docs/en/babel-plugin-transform-react-jsx#usage
+/** @jsx h */
+
+// create our tree:
+render(<main><h1>Hello</h1></main>, document.body);
+
+// update the tree in-place:
+render(<main><h1>Hello World!</h1></main>, document.body);
+// ^ only updates the text of our <h1>
+```
+
+Great, now we've built a User Interface using JSX and Preact! This approach would be tough to use for a full application though, since we have to re-render our whole app any time there is a change. This is where Components come into play: we can divide up our User Interface into nested Components, and each can update itself wherever it happens to be mounted rather than updating our whole app. Let's take a look at a simple component:
 
 ```js
 import { render, h } from 'preact';
