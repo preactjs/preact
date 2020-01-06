@@ -251,7 +251,6 @@ describe('useLayoutEffect', () => {
 
 		class App extends Component {
 			componentDidCatch(err) {
-				console.log('err', err);
 				spy();
 				errored = err;
 			}

@@ -229,19 +229,24 @@ export function diff(
 export function commitRoot(commitQueue, root) {
 	try {
 		if (options._commit) options._commit(root, commitQueue);
+	} catch (e) {
 		commitQueue.some(c => {
-			try {
-				commitQueue = c._renderCallbacks;
-				c._renderCallbacks = [];
-				commitQueue.some(cb => {
-					cb.call(c);
-				});
-			} catch (e) {
-				options._catchError(e, c._vnode);
-			}
+			if (c._renderCallbacks) c._renderCallbacks = [];
 		});
-		// Catch errors thrown in options._commit (this could be solved easier by moving hooks to core)
-	} catch (e) {}
+		commitQueue = [];
+	}
+
+	commitQueue.some(c => {
+		try {
+			commitQueue = c._renderCallbacks;
+			c._renderCallbacks = [];
+			commitQueue.some(cb => {
+				cb.call(c);
+			});
+		} catch (e) {
+			options._catchError(e, c._vnode);
+		}
+	});
 }
 
 /**
