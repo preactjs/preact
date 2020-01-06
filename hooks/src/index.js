@@ -52,11 +52,14 @@ options._commit = (vnode, commitQueue) => {
 				cb._value ? invokeEffect(cb) : true
 			);
 		} catch (e) {
+			commitQueue.some(c => {
+				if (c._renderCallbacks) c._renderCallbacks = [];
+			});
+			commitQueue = [];
 			options._catchError(e, component._vnode);
-			if (oldCommit) oldCommit(vnode, commitQueue);
-			throw e;
 		}
 	});
+
 	if (oldCommit) oldCommit(vnode, commitQueue);
 };
 

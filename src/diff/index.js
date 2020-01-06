@@ -227,15 +227,7 @@ export function diff(
  * @param {import('../internal').VNode} root
  */
 export function commitRoot(commitQueue, root) {
-	try {
-		if (options._commit) options._commit(root, commitQueue);
-	} catch (e) {
-		commitQueue.some(c => {
-			if (c._renderCallbacks) c._renderCallbacks = [];
-		});
-		commitQueue = [];
-	}
-
+	if (options._commit) options._commit(root, commitQueue);
 	commitQueue.some(c => {
 		try {
 			commitQueue = c._renderCallbacks;
