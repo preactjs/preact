@@ -48,7 +48,7 @@ You can find some awesome libraries in the [awesome-preact list](https://github.
 
 The easiest way to get started with Preact is to install [Preact CLI](https://github.com/preactjs/preact-cli). This simple command-line tool wraps up the best possible Webpack and Babel setup for you, and even keeps you up-to-date as the underlying tools change. Best of all, it's easy to understand! It builds your app in a single command (`preact build`), doesn't need any configuration, and bakes in best practices 🙌.
 
-### Minimal example
+### Getting Started
 
 Here we'll have a small example
 
