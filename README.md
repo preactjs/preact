@@ -30,7 +30,6 @@
 [![travis](https://travis-ci.org/preactjs/preact.svg?branch=master)](https://travis-ci.org/preactjs/preact)
 [![coveralls](https://img.shields.io/coveralls/preactjs/preact/master.svg)](https://coveralls.io/github/preactjs/preact)
 [![gzip size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=gzip)](https://unpkg.com/preact/dist/preact.min.js)
-[![install size](https://packagephobia.now.sh/badge?p=preact)](https://packagephobia.now.sh/result?p=preact)
 
 Preact supports modern browsers and IE11+:
 
