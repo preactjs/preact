@@ -49,11 +49,6 @@ You can find some awesome libraries in the [awesome-preact list](https://github.
 
 The easiest way to get started with Preact is to install [Preact CLI](https://github.com/preactjs/preact-cli). This simple command-line tool wraps up the best possible Webpack and Babel setup for you, and even keeps you up-to-date as the underlying tools change. Best of all, it's easy to understand! It builds your app in a single command (`preact build`), doesn't need any configuration, and bakes in best practices 🙌.
 
-The following guide assumes you have some sort of ES2015 build set up using babel and/or webpack/browserify/gulp/grunt/etc.
-
-You can also start with [preact-boilerplate] or a [CodePen Template](http://codepen.io/developit/pen/pgaROe?editors=0010).
-
-
 ### Minimal example
 
 Here we'll have a small example
@@ -159,4 +154,3 @@ MIT
 
 [preact/compat]: https://github.com/preactjs/preact/tree/master/compat
 [hyperscript]: https://github.com/dominictarr/hyperscript
-[preact-boilerplate]: https://github.com/developit/preact-boilerplate
