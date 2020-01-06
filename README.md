@@ -9,7 +9,7 @@
 
 **All the power of Virtual DOM components, without the overhead:**
 
-- Familiar React API & patterns: [ES6 Class], [hooks], and [Functional Components]
+- Familiar React API & patterns: ES6 Class, hooks, and Functional Components
 - Extensive React compatibility via a simple [preact/compat] alias
 - Everything you need: JSX, <abbr title="Virtual DOM">VDOM</abbr>, React DevTools, <abbr title="Hot Module Replacement">HMR</abbr>, <abbr title="Server-Side Rendering">SSR</abbr>..
 - A highly optimized diff algorithm and seamless Server Side Rendering
