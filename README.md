@@ -30,6 +30,7 @@
 [![travis](https://travis-ci.org/preactjs/preact.svg?branch=master)](https://travis-ci.org/preactjs/preact)
 [![coveralls](https://img.shields.io/coveralls/preactjs/preact/master.svg)](https://coveralls.io/github/preactjs/preact)
 [![gzip size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=gzip)](https://unpkg.com/preact/dist/preact.min.js)
+[![brotli size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=brotli)](https://unpkg.com/preact/dist/preact.min.js)
 
 Preact supports modern browsers and IE11+:
 
@@ -50,31 +51,31 @@ The easiest way to get started with Preact is to install [Preact CLI](https://gi
 
 ### Getting Started
 
-Preact lets you build user interfaces by assembling trees of components and elements. Components are functions or classes that return a description of what their part of the tree should look like. These descriptions are typically written in [JSX](https://facebook.github.io/jsx/) (shown here), or [HTM](https://github.com/developit/htm) which is similar but uses only standard JavaScript. Both syntaxes let us express trees of elements, each with "props" (like HTML attributes) and children.
+With Preact, you create user interfaces by assembling trees of components and elements. Components are functions or classes that return a description of what their tree should output. These descriptions are typically written in [JSX](https://facebook.github.io/jsx/) (shown underneath), or [HTM](https://github.com/developit/htm) which leverages standard JavaScript Tagged Templates. Both syntaxes can express trees of elements with "props" (similar to HTML attributes) and children.
 
-To get started using Preact, first we'll take a look at the `render()` function. We can pass a tree description to render() and it will create the structure we described and append it to a parent DOM element we provide. Future render() calls will find our existing tree and update it in-place in the DOM, calculating the difference from our previous render in order to perform as few operations as possible.
+To get started using Preact, first look at the render() function. This function accepts a tree description and creates the structure described. Next, it appends this structure to a parent DOM element provided as the second argument. Future calls to render() will use the existing tree and update it in-place in the DOM. Internally, render() will calculate the difference from previous outputted structures in an attempt to perform as few DOM operations as possible.
 
 ```js
 import { h, render } from 'preact';
 // Tells babel to use h for JSX. It's better to configure this globally.
 // See https://babeljs.io/docs/en/babel-plugin-transform-react-jsx#usage
+// In tsconfig you can specify this with the jsxFactory
 /** @jsx h */
 
-// create our tree:
+// create our tree and append it to document.body:
 render(<main><h1>Hello</h1></main>, document.body);
 
 // update the tree in-place:
 render(<main><h1>Hello World!</h1></main>, document.body);
-// ^ only updates the text of our <h1>
+// ^ this second invocation of render(...) will use a single DOM call to update the text of the <h1>
 ```
 
-Great, now we've built a User Interface using JSX and Preact! This approach would be tough to use for a full application though, since we have to re-render our whole app any time there is a change. This is where Components come into play: we can divide up our User Interface into nested Components, and each can update itself wherever it happens to be mounted rather than updating our whole app. Let's take a look at a simple component:
+Hooray! render() has taken our structure and output a User Interface! This approach demonstrates a simple case, but would be difficult to use as an application grows in complexity. Each change would be forced to calculate the difference between the current and updated stucture for the entire application. Components can help here – by dividing the User Interface into nested Components each can calculate their difference from their mounted point. Here's an example:
 
 ```js
 import { render, h } from 'preact';
 import { useState } from 'preact/hooks';
 
-// Tells babel to use h for jsx, this can be configured in your .babelrc (https://babeljs.io/docs/en/babel-plugin-transform-react-jsx#usage)
 /** @jsx h */
 
 const App = () => {
