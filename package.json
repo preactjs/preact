@@ -123,23 +123,19 @@
   "keywords": [
     "preact",
     "react",
+    "ui",
+    "user interface",
     "virtual dom",
     "vdom",
     "components",
-    "virtual",
-    "dom"
+    "dom diff"
   ],
   "authors": [
     "Jason Miller <jason@developit.ca>"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/preactjs/preact.git"
-  },
-  "bugs": {
-    "url": "https://github.com/preactjs/preact/issues"
-  },
-  "homepage": "https://github.com/preactjs/preact",
+  "repository": "preactjs/preact",
+  "bugs": "https://github.com/preactjs/preact/issues",
+  "homepage": "https://preactjs.com",
   "devDependencies": {
     "@babel/core": "^7.7.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.6.2",
