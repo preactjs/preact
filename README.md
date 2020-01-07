@@ -11,33 +11,40 @@
 
 - Familiar React API & patterns: ES6 Class, hooks, and Functional Components
 - Extensive React compatibility via a simple [preact/compat] alias
-- Everything you need: JSX, <abbr title="Virtual DOM">VDOM</abbr>, React DevTools, <abbr title="Hot Module Replacement">HMR</abbr>, <abbr title="Server-Side Rendering">SSR</abbr>..
-- A highly optimized diff algorithm and seamless Server Side Rendering
+- Everything you need: JSX, <abbr title="Virtual DOM">VDOM</abbr>, [DevTools], <abbr title="Hot Module Replacement">HMR</abbr>, <abbr title="Server-Side Rendering">SSR</abbr>.
+- Highly optimized diff algorithm and seamless hydration from Server Side Rendering
+- Supports all modern browsers and IE11+
 - Transparent asynchronous rendering with a pluggable scheduler
-- 🆕💥 **Instant no-config app bundling with [Preact CLI](https://github.com/preactjs/preact-cli)**
+- **Instant production-grade app setup with [Preact CLI](https://github.com/preactjs/preact-cli)**
 
 ### 💁 More information at the [Preact Website ➞](https://preactjs.com)
 
 
----
-
-# Preact
+<table border="0">
+<tbody>
+<tr>
+<td>
 
 [![npm](https://img.shields.io/npm/v/preact.svg)](http://npm.im/preact)
 [![Preact Slack Community](https://preact-slack.now.sh/badge.svg)](https://preact-slack.now.sh)
 [![OpenCollective Backers](https://opencollective.com/preact/backers/badge.svg)](#backers)
 [![OpenCollective Sponsors](https://opencollective.com/preact/sponsors/badge.svg)](#sponsors)
+
+
 [![travis](https://travis-ci.org/preactjs/preact.svg?branch=master)](https://travis-ci.org/preactjs/preact)
 [![coveralls](https://img.shields.io/coveralls/preactjs/preact/master.svg)](https://coveralls.io/github/preactjs/preact)
-[![gzip size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=gzip)](https://unpkg.com/preact/dist/preact.min.js)
-[![brotli size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=brotli)](https://unpkg.com/preact/dist/preact.min.js)
+[![gzip size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=gzip&label=gzip)](https://unpkg.com/preact/dist/preact.min.js)
+[![brotli size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=brotli&label=brotli)](https://unpkg.com/preact/dist/preact.min.js)
+</td>
+<td>
 
-Preact supports modern browsers and IE11+:
+<img src="https://saucelabs.com/browser-matrix/preact.svg" title="Browser support matrix">
 
-[![Browsers](https://saucelabs.com/browser-matrix/preact.svg)](https://saucelabs.com/u/preact)
+</td>
+</tr>
+</tbody>
+</table>
 
-
----
 
 You can find some awesome libraries in the [awesome-preact list](https://github.com/preactjs/awesome-preact) :sunglasses:
 
@@ -47,13 +54,13 @@ You can find some awesome libraries in the [awesome-preact list](https://github.
 
 > 💁 _**Note:** You [don't need ES2015 to use Preact](https://github.com/developit/preact-in-es3)... but give it a try!_
 
-The easiest way to get started with Preact is to install [Preact CLI](https://github.com/preactjs/preact-cli). This simple command-line tool wraps up the best possible Webpack and Babel setup for you, and even keeps you up-to-date as the underlying tools change. Best of all, it's easy to understand! It builds your app in a single command (`preact build`), doesn't need any configuration, and bakes in best practices 🙌.
+The easiest way to get started with Preact is to install [Preact CLI](https://github.com/preactjs/preact-cli). This simple command-line tool wraps up the best possible tooling for you, and even keeps things like Webpack and Babel up-to-date as they change. Best of all, it's easy to understand! Start a project or compile for production in a single command (`preact build`), with no configuration needed and best practices baked in! 🙌
 
-### Getting Started
+#### Tutorial: Building UI with Preact
 
 With Preact, you create user interfaces by assembling trees of components and elements. Components are functions or classes that return a description of what their tree should output. These descriptions are typically written in [JSX](https://facebook.github.io/jsx/) (shown underneath), or [HTM](https://github.com/developit/htm) which leverages standard JavaScript Tagged Templates. Both syntaxes can express trees of elements with "props" (similar to HTML attributes) and children.
 
-To get started using Preact, first look at the render() function. This function accepts a tree description and creates the structure described. Next, it appends this structure to a parent DOM element provided as the second argument. Future calls to render() will use the existing tree and update it in-place in the DOM. Internally, render() will calculate the difference from previous outputted structures in an attempt to perform as few DOM operations as possible.
+To get started using Preact, first look at the render() function. This function accepts a tree description and creates the structure described. Next, it appends this structure to a parent DOM element provided as the second argument. Future calls to render() will reuse the existing tree and update it in-place in the DOM. Internally, render() will calculate the difference from previous outputted structures in an attempt to perform as few DOM operations as possible.
 
 ```js
 import { h, render } from 'preact';
@@ -92,7 +99,10 @@ const App = () => {
 render(<App />, document.body);
 ```
 
+---
+
 ## Backers
+
 Support us with a monthly donation and help us continue our activities. [[Become a backer](https://opencollective.com/preact#backer)]
 
 <a href="https://opencollective.com/preact/backer/0/website" target="_blank"><img src="https://opencollective.com/preact/backer/0/avatar.svg"></a>
@@ -161,6 +171,8 @@ Become a sponsor and get your logo on our README on GitHub with a link to your s
 <a href="https://opencollective.com/preact/sponsor/28/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/28/avatar.svg"></a>
 <a href="https://opencollective.com/preact/sponsor/29/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/29/avatar.svg"></a>
 
+---
+
 ## License
 
 MIT
@@ -172,3 +184,4 @@ MIT
 
 [preact/compat]: https://github.com/preactjs/preact/tree/master/compat
 [hyperscript]: https://github.com/dominictarr/hyperscript
+[DevTools]: https://github.com/preactjs/preact-devtools
