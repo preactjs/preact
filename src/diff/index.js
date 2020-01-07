@@ -228,6 +228,7 @@ export function diff(
  */
 export function commitRoot(commitQueue, root) {
 	if (options._commit) options._commit(root, commitQueue);
+
 	commitQueue.some(c => {
 		try {
 			commitQueue = c._renderCallbacks;
