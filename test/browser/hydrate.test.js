@@ -266,4 +266,14 @@ describe('hydrate()', () => {
 		scratch.firstChild.click();
 		expect(spy).to.be.calledOnce;
 	});
+
+	// #2237
+	it('should not redundantly add text nodes', () => {
+		scratch.innerHTML = '<div id="test"><p>hello bar</p></div>';
+		const element = document.getElementById('test');
+		const Component = props => <p>hello {props.foo}</p>;
+
+		hydrate(<Component foo="bar" />, element);
+		expect(element.innerHTML).to.equal('<p>hello bar</p>');
+	});
 });
