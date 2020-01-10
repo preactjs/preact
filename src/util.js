@@ -1,3 +1,6 @@
+export const assign =
+	typeof Object.assign === 'undefined' ? assignFallback : Object.assign;
+
 /**
  * Assign properties from `props` to `obj`
  * @template O, P The obj and props types
@@ -5,7 +8,7 @@
  * @param {P} props The object to copy properties from
  * @returns {O & P}
  */
-export function assign(obj, props) {
+function assignFallback(obj, props) {
 	for (let i in props) obj[i] = props[i];
 	return /** @type {O & P} */ (obj);
 }
