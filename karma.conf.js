@@ -194,6 +194,7 @@ module.exports = function(config) {
 				// directly
 				alias: {
 					'preact/debug': path.join(__dirname, './debug/src'),
+					'preact/devtools': path.join(__dirname, './devtools/src'),
 					'preact/compat': path.join(__dirname, './compat/src'),
 					'preact/hooks': path.join(__dirname, './hooks/src'),
 					'preact/test-utils': path.join(__dirname, './test-utils/src'),
