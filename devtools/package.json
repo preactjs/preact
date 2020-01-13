@@ -9,9 +9,6 @@
 	"umd:main": "dist/devtools.umd.js",
 	"source": "src/index.js",
 	"license": "MIT",
-	"mangle": {
-		"regex": "^(?!_renderer)^_"
-	},
 	"peerDependencies": {
 		"preact": "^10.0.0"
 	}
