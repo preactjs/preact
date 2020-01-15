@@ -1,11 +1,13 @@
-/*global coverage, ENABLE_PERFORMANCE, NODE_ENV*/
+/*global coverage, ENABLE_PERFORMANCE*/
 /*eslint no-console:0*/
-/** @jsx h */
+/** @jsx createElement */
 import { setupScratch, teardown } from '../_util/helpers';
-let { createElement: h, Component, render, hydrate } = require(NODE_ENV ===
-	'production'
-	? '../../dist/preact.min.js'
-	: '../../dist/preact');
+import {
+	createElement,
+	Component,
+	render,
+	hydrate
+} from '../../dist/preact.module';
 
 const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
 
@@ -126,10 +128,9 @@ describe('performance', function() {
 			</div>
 		);
 
-		let root;
 		benchmark(
 			() => {
-				root = render(jsx, scratch, root);
+				render(jsx, scratch);
 			},
 			({ ticks, message }) => {
 				console.log(`PERF: empty diff: ${message}`);
@@ -226,15 +227,14 @@ describe('performance', function() {
 			}
 		}
 
-		let root;
 		benchmark(
 			() => {
-				root = render(<Parent child={Root} />, scratch, root);
-				root = render(<Parent child={Empty} />, scratch, root);
+				render(<Parent child={Root} />, scratch);
+				render(<Parent child={Empty} />, scratch);
 			},
 			({ ticks, message }) => {
 				console.log(`PERF: repeat diff: ${message}`);
-				expect(ticks).to.be.below(2000 * MULTIPLIER);
+				expect(ticks).to.be.below(3000 * MULTIPLIER);
 				done();
 			}
 		);
@@ -298,7 +298,7 @@ describe('performance', function() {
 			},
 			({ ticks, message }) => {
 				console.log(`PERF: large VTree: ${message}`);
-				expect(ticks).to.be.below(2000 * MULTIPLIER);
+				expect(ticks).to.be.below(200 * MULTIPLIER);
 				done();
 			}
 		);
@@ -369,11 +369,10 @@ describe('performance', function() {
 			</div>
 		);
 
-		let root,
-			count = 0;
+		let count = 0;
 		benchmark(
 			() => {
-				root = render(app(++count), scratch, root);
+				render(app(++count), scratch);
 			},
 			({ ticks, message }) => {
 				console.log(`PERF: style/prop mutation: ${message}`);

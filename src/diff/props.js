@@ -110,6 +110,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		// HTMLButtonElement.form and HTMLInputElement.form are read-only but can be set using
 		// setAttribute
 		name !== 'form' &&
+		name !== 'type' &&
 		!isSvg &&
 		name in dom
 	) {

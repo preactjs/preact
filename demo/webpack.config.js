@@ -44,6 +44,7 @@ module.exports = {
 					],
 					plugins: [
 						[require.resolve('@babel/plugin-transform-runtime')],
+						[require.resolve('@babel/plugin-transform-react-jsx-source')],
 						[
 							require.resolve('@babel/plugin-transform-react-jsx'),
 							{ pragma: 'h', pragmaFrag: 'Fragment' }
@@ -78,6 +79,7 @@ module.exports = {
 						[require.resolve('@babel/preset-react')]
 					],
 					plugins: [
+						[require.resolve('@babel/plugin-transform-react-jsx-source')],
 						[
 							require.resolve('@babel/plugin-transform-react-jsx'),
 							{ pragma: 'createElement', pragmaFrag: 'Fragment' }
