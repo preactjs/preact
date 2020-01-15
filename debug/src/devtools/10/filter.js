@@ -12,7 +12,7 @@ export function shouldFilter(vnode, filters) {
 	// with the previous one...
 	if (vnode.type == null) return true;
 
-	if (typeof vnode.type === 'function') {
+	if (typeof vnode.type == 'function') {
 		if (vnode.type === Fragment && filters.type.has('fragment')) {
 			const parent = vnode._parent;
 			// Only filter non-root nodes

@@ -77,7 +77,7 @@ export function createIdMapper() {
 export function getInstance(vnode) {
 	// For components we use the instance to check refs, otherwise
 	// we'll use a dom node
-	if (typeof vnode.type === 'function') {
+	if (typeof vnode.type == 'function') {
 		return vnode._component;
 	}
 

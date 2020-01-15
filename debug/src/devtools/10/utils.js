@@ -60,7 +60,7 @@ export function jsonify(data, getVNode, seen = new Set()) {
 
 export function cleanProps(props) {
 	/* istanbul ignore next */
-	if (typeof props === 'string' || !props) return null;
+	if (typeof props == 'string' || !props) return null;
 	const out = { ...props };
 	if (!Object.keys(out).length) return null;
 	return out;

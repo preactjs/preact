@@ -48,7 +48,7 @@ let hasBabelPlugin = false;
  * @param {import('./internal').VNode} vnode
  */
 function isPossibleOwner(vnode) {
-	return typeof vnode.type === 'function' && vnode.type !== Fragment;
+	return typeof vnode.type == 'function' && vnode.type !== Fragment;
 }
 
 /**

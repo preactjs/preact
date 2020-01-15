@@ -180,7 +180,7 @@ export function createRenderer(hook, filters = defaultFilters) {
 
 			const c = vnode._component;
 			const hasState =
-				typeof vnode.type === 'function' &&
+				typeof vnode.type == 'function' &&
 				c != null &&
 				Object.keys(c.state).length > 0;
 
@@ -327,7 +327,7 @@ export function createRenderer(hook, filters = defaultFilters) {
 				if (ids.hasId(vnode)) {
 					currentUnmounts.push(ids.getId(vnode));
 				}
-			} else if (typeof vnode.type !== 'function') {
+			} else if (typeof vnode.type != 'function') {
 				const dom = vnode._dom;
 				/* istanbul ignore next */
 				if (dom != null) domToVNode.delete(dom);
@@ -347,7 +347,7 @@ export function createRenderer(hook, filters = defaultFilters) {
 		update(id, type, path, value) {
 			const vnode = ids.getVNode(id);
 			if (vnode !== null) {
-				if (typeof vnode.type === 'function') {
+				if (typeof vnode.type == 'function') {
 					const c = vnode._component;
 					/* istanbul ignore else */
 					if (type === 'props') {
@@ -463,7 +463,7 @@ export function mount(ids, commit, vnode, ancestorId, filters, domCache) {
 		ancestorId = id;
 	}
 
-	if (typeof vnode.type !== 'function') {
+	if (typeof vnode.type != 'function') {
 		const dom = vnode._dom;
 		// TODO: Find a test case
 		/* istanbul ignore next */
