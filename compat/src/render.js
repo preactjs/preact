@@ -6,7 +6,7 @@ import {
 } from 'preact';
 import { applyEventNormalization } from './events';
 
-const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip|color|fill|flood|font|glyph|horiz|marker|overline|paint|stop|strikethrough|stroke|text|underline|unicode|units|v|vector|vert|word|writing|x)[clipPathUnits][A-Z]/;
+const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clipPathUnits|scolor|fill|flood|font|glyph|horiz|marker|overline|paint|stop|strikethrough|stroke|text|underline|unicode|units|v|vector|vert|word|writing|x)[A-Z]/;
 
 // Some libraries like `react-virtualized` explicitly check for this.
 Component.prototype.isReactComponent = {};
