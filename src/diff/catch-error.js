@@ -9,7 +9,7 @@ import { enqueueRender } from '../component';
  */
 export function _catchError(error, vnode) {
 	/** @type {import('../internal').Component} */
-	let component;
+	let component, hasCaught;
 
 	for (; (vnode = vnode._parent); ) {
 		if ((component = vnode._component) && !component._processingException) {
@@ -18,15 +18,19 @@ export function _catchError(error, vnode) {
 					component.constructor &&
 					component.constructor.getDerivedStateFromError != null
 				) {
+					hasCaught = true;
 					component.setState(
 						component.constructor.getDerivedStateFromError(error)
 					);
-				} else if (component.componentDidCatch != null) {
-					component.componentDidCatch(error);
-				} else {
-					continue;
 				}
-				return enqueueRender((component._pendingError = component));
+
+				if (component.componentDidCatch != null) {
+					hasCaught = true;
+					component.componentDidCatch(error);
+				}
+
+				if (hasCaught)
+					return enqueueRender((component._pendingError = component));
 			} catch (e) {
 				error = e;
 			}
