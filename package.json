@@ -39,7 +39,7 @@
     "test:karma:bench": "cross-env PERFORMANCE=true COVERAGE=false karma start karma.conf.js --grep=test/benchmarks/**.js --single-run",
     "benchmark": "npm run test:karma:bench -- no-single-run",
     "lint": "eslint src test debug compat hooks test-utils",
-    "preinstall": "npm-merge-driver install"
+    "postinstall": "npm-merge-driver install"
   },
   "eslintConfig": {
     "extends": [
