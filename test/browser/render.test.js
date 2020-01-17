@@ -1379,6 +1379,38 @@ describe('render()', () => {
 			newScratch.parentNode.removeChild(newScratch);
 		});
 
+		it('should unmount existing components in prerendered HTML', () => {
+			const newScratch = setupScratch();
+			const unmount = sinon.spy();
+			const mount = sinon.spy();
+			class App extends Component {
+				componentDidMount() {
+					mount();
+				}
+
+				componentWillUnmount() {
+					unmount();
+				}
+
+				render() {
+					return <span>App</span>;
+				}
+			}
+
+			newScratch.innerHTML = `<div id="child"></div>`;
+
+			const childContainer = newScratch.querySelector('#child');
+
+			render(<App />, childContainer);
+			expect(childContainer.innerHTML.trim()).to.equal('<span>App</span>');
+			expect(mount).to.be.calledOnce;
+			render(<div />, newScratch, newScratch.firstElementChild);
+			expect(newScratch.innerHTML.trim()).to.equal('<div id=""></div>');
+			expect(unmount).to.be.calledOnce;
+
+			newScratch.parentNode.removeChild(newScratch);
+		});
+
 		it('should render multiple render roots in one parentDom', () => {
 			const childA = scratch.querySelector('#a');
 			const childB = scratch.querySelector('#b');
