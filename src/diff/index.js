@@ -307,8 +307,7 @@ function diffElementNodes(
 
 	if (dom == null) {
 		if (excessDomChildren != null) {
-			const index = excessDomChildren.indexOf(dom);
-			if (index !== -1) excessDomChildren[index] = null;
+			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
 		}
 
 		if (newVNode.type === null) {
