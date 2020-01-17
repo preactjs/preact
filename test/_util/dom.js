@@ -54,13 +54,13 @@ export const li = contents => `<li>${serialize(contents)}</li>`;
 export const input = () => `<input type="text">`;
 
 /**
- * A helper to generate innerHTML validation strings containing inputs
+ * A helper to generate innerHTML validation strings containing h1
  * @param {Contents} contents The contents of the h1
  */
 export const h1 = contents => `<h1>${serialize(contents)}</h1>`;
 
 /**
- * A helper to generate innerHTML validation strings containing inputs
+ * A helper to generate innerHTML validation strings containing h2
  * @param {Contents} contents The contents of the h2
  */
 export const h2 = contents => `<h2>${serialize(contents)}</h2>`;

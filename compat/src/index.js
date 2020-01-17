@@ -26,7 +26,7 @@ import { Children } from './Children';
 import { Suspense, lazy } from './suspense';
 import { SuspenseList } from './suspense-list';
 import { createPortal } from './portals';
-import { render, REACT_ELEMENT_TYPE } from './render';
+import { hydrate, render, REACT_ELEMENT_TYPE } from './render';
 
 const version = '16.8.0'; // trick libraries to think we are react
 
@@ -100,7 +100,7 @@ export {
 	version,
 	Children,
 	render,
-	render as hydrate,
+	hydrate,
 	unmountComponentAtNode,
 	createPortal,
 	createElement,

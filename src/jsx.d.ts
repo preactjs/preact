@@ -437,6 +437,11 @@ export namespace JSXInternal {
 		onSubmitCapture?: GenericEventHandler<Target>;
 		onInvalid?: GenericEventHandler<Target>;
 		onInvalidCapture?: GenericEventHandler<Target>;
+		onReset?: GenericEventHandler<Target>;
+		onResetCapture?: GenericEventHandler<Target>;
+		onFormData?: GenericEventHandler<Target>;
+		onFormDataCapture?: GenericEventHandler<Target>;
+
 
 		// Keyboard Events
 		onKeyDown?: KeyboardEventHandler<Target>;

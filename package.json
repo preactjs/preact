@@ -1,7 +1,7 @@
 {
   "name": "preact",
   "amdName": "preact",
-  "version": "10.1.1",
+  "version": "10.2.1",
   "private": false,
   "description": "Fast 3kb React-compatible Virtual DOM library.",
   "main": "dist/preact.js",
@@ -38,7 +38,8 @@
     "test:karma:test-utils": "cross-env PERFORMANCE=false COVERAGE=false karma start karma.conf.js --grep=test-utils/test/shared/**.js --no-single-run",
     "test:karma:bench": "cross-env PERFORMANCE=true COVERAGE=false karma start karma.conf.js --grep=test/benchmarks/**.js --single-run",
     "benchmark": "npm run test:karma:bench -- no-single-run",
-    "lint": "eslint src test debug compat hooks test-utils"
+    "lint": "eslint src test debug compat hooks test-utils",
+    "postinstall": "npm-merge-driver install"
   },
   "eslintConfig": {
     "extends": [
@@ -123,23 +124,19 @@
   "keywords": [
     "preact",
     "react",
+    "ui",
+    "user interface",
     "virtual dom",
     "vdom",
     "components",
-    "virtual",
-    "dom"
+    "dom diff"
   ],
   "authors": [
     "Jason Miller <jason@developit.ca>"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/preactjs/preact.git"
-  },
-  "bugs": {
-    "url": "https://github.com/preactjs/preact/issues"
-  },
-  "homepage": "https://github.com/preactjs/preact",
+  "repository": "preactjs/preact",
+  "bugs": "https://github.com/preactjs/preact/issues",
+  "homepage": "https://preactjs.com",
   "devDependencies": {
     "@babel/core": "^7.7.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.6.2",
@@ -178,6 +175,7 @@
     "lodash": "^4.17.10",
     "microbundle": "^0.11.0",
     "mocha": "^5.2.0",
+    "npm-merge-driver": "^2.3.5",
     "npm-run-all": "^4.0.0",
     "prettier": "^1.18.2",
     "prop-types": "^15.7.2",
