@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { createElement } from 'preact/compat';
 import {
 	setupScratch,
@@ -69,13 +68,18 @@ describe('svg', () => {
 	});
 
 	it('should render SVG to DOM without name (clipPathUnits) attribute manipulation', () => {
-		let svg = (
+		React.render(
 			<svg>
 				<clipPath id="hexagon" clipPathUnits="objectBoundingBox">
 					<polygon points="0.5 0, 1 0.25, 1 0.75, 0.5 1, 0 0.75, 0 0.25" />
 				</clipPath>
-			</svg>
+			</svg>,
+			scratch
 		);
-		expect(svg).to.eql(svg);
+		expect(serializeHtml(scratch)).to.eql(
+			sortAttributes(
+				'<svg><clipPath id="hexagon" clipPathUnits="objectBoundingBox"><polygon points="0.5 0, 1 0.25, 1 0.75, 0.5 1, 0 0.75, 0 0.25" /></clipPath></svg>'
+			)
+		);
 	});
 });
