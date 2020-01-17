@@ -219,6 +219,36 @@ describe('Lifecycle methods', () => {
 			expect(Foo.prototype.render).to.have.been.calledTwice;
 		});
 
+		it('should not be called on forceUpdate followed by setState', () => {
+			let Comp;
+			class Foo extends Component {
+				constructor() {
+					super();
+					Comp = this;
+				}
+
+				shouldComponentUpdate() {
+					return false;
+				}
+
+				render() {
+					return <ShouldNot />;
+				}
+			}
+
+			sinon.spy(Foo.prototype, 'shouldComponentUpdate');
+			sinon.spy(Foo.prototype, 'render');
+
+			render(<Foo />, scratch);
+			Comp.forceUpdate();
+			Comp.setState({});
+			rerender();
+
+			expect(Foo.prototype.render).to.have.been.calledTwice;
+			expect(Foo.prototype.shouldComponentUpdate).to.not.have.been.called;
+		});
+
+
 		it('should not block queued child forceUpdate', () => {
 			let i = 0;
 			let updateInner;
