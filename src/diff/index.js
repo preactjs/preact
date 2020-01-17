@@ -43,9 +43,8 @@ export function diff(
 	// If this was the innermost VNode at a point where the tree suspended,
 	// pick up diffing where we left off using the saved DOM element and hydration state.
 	if (oldVNode._hydrateDom && excessDomChildren == null) {
-		oldDom = oldVNode._hydrateDom;
+		newVNode._dom = oldDom = oldVNode._hydrateDom;
 		excessDomChildren = [oldDom];
-		newVNode._dom = oldDom;
 		oldVNode._hydrateDom = null;
 		isHydrating = oldVNode._hydrating;
 	}
@@ -228,8 +227,7 @@ export function diff(
 		if (isHydrating) {
 			// Before bailing out, mark the current VNode with the DOM element and hydration state.
 			// We can use this information if we return here to render later on.
-			newVNode._dom = oldDom;
-			oldVNode._hydrateDom = oldDom;
+			oldVNode._hydrateDom = newVNode._dom = oldDom;
 			oldVNode._hydrating = true;
 		}
 		options._catchError(e, newVNode, oldVNode);
