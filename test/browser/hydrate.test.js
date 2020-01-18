@@ -1,4 +1,6 @@
 import { createElement, hydrate, Fragment } from 'preact';
+import { Suspense } from 'preact/compat';
+import { useState } from 'preact/hooks';
 import {
 	setupScratch,
 	teardown,
@@ -7,11 +9,13 @@ import {
 } from '../_util/helpers';
 import { ul, li, div } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
+import { setupRerender } from 'preact/test-utils';
 
 /** @jsx createElement */
 
 describe('hydrate()', () => {
 	let scratch;
+	let rerender;
 
 	const List = ({ children }) => <ul>{children}</ul>;
 	const ListItem = ({ children }) => <li>{children}</li>;
@@ -27,6 +31,7 @@ describe('hydrate()', () => {
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		rerender = setupRerender();
 	});
 
 	afterEach(() => {
@@ -275,5 +280,46 @@ describe('hydrate()', () => {
 
 		hydrate(<Component foo="bar" />, element);
 		expect(element.innerHTML).to.equal('<p>hello bar</p>');
+	});
+
+	it('should reuse suspense component markup when suspense resolves during hydration', () => {
+		scratch.innerHTML = '<div id="test"><p>hello bar</p><p>Hello foo</p></div>';
+		const element = scratch;
+		let resolver;
+		const Component = () => {
+			const [state, setState] = useState(false);
+			if (!state) {
+				throw new Promise(resolve => {
+					resolver = () => {
+						setState(true);
+						resolve();
+					};
+				});
+			} else {
+				return <p>hello bar</p>;
+			}
+		};
+		const App = () => {
+			return (
+				<div id="test">
+					<Suspense>
+						<Component />
+					</Suspense>
+					<p>Hello foo</p>
+				</div>
+			);
+		};
+		hydrate(<App />, element);
+		rerender();
+		expect(element.innerHTML).to.equal(
+			'<div id="test"><p>hello bar</p><p>Hello foo</p></div>'
+		);
+		const removeChildSpy = sinon.spy(element.firstChild, 'removeChild');
+		resolver();
+		rerender();
+		expect(removeChildSpy).to.be.not.called;
+		expect(element.innerHTML).to.equal(
+			'<div id="test"><p>hello bar</p><p>Hello foo</p></div>'
+		);
 	});
 });
