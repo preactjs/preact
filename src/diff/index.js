@@ -199,7 +199,7 @@ export function diff(
 				c._pendingError = c._processingException = null;
 			}
 
-			c._force = null;
+			c._force = false;
 		} else {
 			newVNode._dom = diffElementNodes(
 				oldVNode._dom,
