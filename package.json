@@ -62,7 +62,7 @@
     "prepare": "run-s build",
     "build": "npm-run-all --parallel build:*",
     "build:core": "microbundle build --raw -f es,umd",
-    "build:core:min": "microbundle build --raw -f cjs src/cjs.js",
+    "build:core:min": "microbundle build --raw -f iife src/cjs.js",
     "build:debug": "microbundle build --raw --cwd debug",
     "build:devtools": "microbundle build --raw --cwd devtools",
     "build:hooks": "microbundle build --raw --cwd hooks",
