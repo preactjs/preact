@@ -56,22 +56,6 @@ export function diffChildren(
 		}
 	}
 
-	// Build maps for both keyed and unkeyed old children, used to find matches for keyed and unkeyed new children.
-	// For unkeyed children the map key is the child's type, for keyed children the map key is the child's key.
-	// Each map value is a singly-linked list of the old child nodes that have that particular key or type.
-	// A list item contains an oldChildren index (`i`) and a pointer to the next linked list item (`next`).
-	// The lists are in the same order as the children appear in the oldChildren list, so it's convenient
-	// to build them by iterating backwards through oldChildren.
-	const keyed = new Map();
-	const unkeyed = new Map();
-	for (i = oldChildrenLength; i--; ) {
-		if ((oldVNode = oldChildren[i])) {
-			map = oldVNode.key == null ? unkeyed : keyed;
-			key = oldVNode.key == null ? oldVNode.type : oldVNode.key;
-			map.set(key, { i, next: map.get(key) });
-		}
-	}
-
 	i = 0;
 	newParentVNode._children = toChildArray(
 		newParentVNode._children,
@@ -94,29 +78,52 @@ export function diffChildren(
 				) {
 					oldChildren[i] = undefined;
 				} else {
-					// Look up potential old children that have either the same key or type as the new child.
-					map = childVNode.key == null ? unkeyed : keyed;
-					key = childVNode.key == null ? childVNode.type : childVNode.key;
-					let head = map.get(key);
+					if (map === undefined) {
+						map = null;
 
-					// Clean up old consumed children from the beginning of the linked list.
-					// Update the map accordingly to speed up potential future lookups.
-					while (head && !oldChildren[head.i]) {
-						map.set(key, (head = head.next));
+						// Build maps for both keyed and unkeyed old children, used to find matches for keyed and unkeyed new children.
+						// For unkeyed children the map key is the child's type, for keyed children the map key is the child's key.
+						// Each map value is a singly-linked list of the old child nodes that have that particular key or type.
+						// A list item contains an oldChildren index (`i`) and a pointer to the next linked list item (`next`).
+						// The lists are in the same order as the children appear in the oldChildren list, so it's convenient
+						// to build them by iterating backwards through oldChildren.
+						for (j = oldChildrenLength; j--; ) {
+							if ((oldVNode = oldChildren[j])) {
+								map = map || new Map();
+								key = oldVNode.key == null ? oldVNode.type : oldVNode.key;
+								map.set(key, { index: j, next: map.get(key) });
+							}
+						}
 					}
 
-					// Try to find an old child that has the same type (*and* key if the new child
-					// is keyed). Don't update the map here, as the match might not be the first
-					// tested item - the linked list items for consumed children will be cleaned up in
-					// possible later iterations.
 					oldVNode = undefined;
-					while (head && !oldVNode) {
-						oldVNode = oldChildren[head.i];
-						if (oldVNode && oldVNode.type === childVNode.type) {
-							oldChildren[head.i] = undefined;
-						} else {
-							oldVNode = undefined;
-							head = head.next;
+					if (map) {
+						// Look up potential old children that have either the same key or type as the new child.
+						key = childVNode.key == null ? childVNode.type : childVNode.key;
+						let head = map.get(key);
+
+						// Clean up old consumed children from the beginning of the linked list.
+						// Update the map accordingly to speed up potential future lookups.
+						while (head && !oldChildren[head.index]) {
+							map.set(key, (head = head.next));
+						}
+
+						// Try to find an old child that has the same type (*and* key if the new child
+						// is keyed). Don't update the map here, as the match might not be the first
+						// tested item - the linked list items for consumed children will be cleaned up in
+						// possible later iterations.
+						while (head && !oldVNode) {
+							oldVNode = oldChildren[head.index];
+							if (
+								oldVNode &&
+								oldVNode.key == childVNode.key &&
+								oldVNode.type === childVNode.type
+							) {
+								oldChildren[head.index] = undefined;
+							} else {
+								oldVNode = undefined;
+								head = head.next;
+							}
 						}
 					}
 				}
