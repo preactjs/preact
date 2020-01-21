@@ -1402,10 +1402,10 @@ describe('render()', () => {
 			const childContainer = newScratch.querySelector('#child');
 
 			render(<App />, childContainer);
-			expect(childContainer.innerHTML.trim()).to.equal('<span>App</span>');
+			expect(serializeHtml(childContainer)).to.equal('<span>App</span>');
 			expect(mount).to.be.calledOnce;
 			render(<div />, newScratch, newScratch.firstElementChild);
-			expect(newScratch.innerHTML.trim()).to.equal('<div id=""></div>');
+			expect(serializeHtml(newScratch)).to.equal('<div id=""></div>');
 			expect(unmount).to.be.calledOnce;
 
 			newScratch.parentNode.removeChild(newScratch);
