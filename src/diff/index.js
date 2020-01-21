@@ -294,9 +294,12 @@ function diffElementNodes(
 		if (newVNode.type === null) {
 			return document.createTextNode(newProps);
 		}
+
+		const builtIn = newProps.is;
+
 		dom = isSvg
 			? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type)
-			: document.createElement(newVNode.type);
+			: document.createElement(newVNode.type, builtIn && { is: builtIn });
 		// we created a new parent, so none of the previously attached children can be reused:
 		excessDomChildren = null;
 	}
