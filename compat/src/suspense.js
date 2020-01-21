@@ -11,7 +11,11 @@ options._catchError = function(error, newVNode, oldVNode) {
 		for (; (vnode = vnode._parent); ) {
 			if ((component = vnode._component) && component._childDidSuspend) {
 				// Don't call oldCatchError if we found a Suspense
-				return component._childDidSuspend(error, newVNode._component);
+				return component._childDidSuspend(
+					error,
+					newVNode._component,
+					oldVNode && oldVNode._hydrateDom && oldVNode._hydrating
+				);
 			}
 		}
 	}
@@ -42,8 +46,13 @@ Suspense.prototype = new Component();
 /**
  * @param {Promise} promise The thrown promise
  * @param {Component<any, any>} suspendingComponent The suspending component
+ * @param {Boolean} isSuspendedDuringHydration is Suspension done during hydration
  */
-Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
+Suspense.prototype._childDidSuspend = function(
+	promise,
+	suspendingComponent,
+	isSuspendedDuringHydration
+) {
 	/** @type {import('./internal').SuspenseComponent} */
 	const c = this;
 
@@ -79,7 +88,12 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 		}
 	};
 
-	if (!c._suspensions++) {
+	/**
+	 * We do not set `suspended: true` during hydration because we want the actual markup to remain on screen
+	 * and hydrate it when the suspense actually gets resolved.
+	 * While in non-hydration cases the usual fallbac -> component flow would occour.
+	 */
+	if (!isSuspendedDuringHydration && !c._suspensions++) {
 		c.setState({ _suspended: (c._detachOnNextRender = c._vnode._children[0]) });
 	}
 	promise.then(onResolved, onResolved);

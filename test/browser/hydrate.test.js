@@ -302,7 +302,7 @@ describe('hydrate()', () => {
 		const App = () => {
 			return (
 				<div id="test">
-					<Suspense>
+					<Suspense fallback={<div>baz</div>}>
 						<Component />
 					</Suspense>
 					<p>Hello foo</p>
