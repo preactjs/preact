@@ -8,13 +8,12 @@
   "module": "dist/index.module.js",
   "jsnext:main": "dist/index.module.js",
   "scripts": {
-    "postinstall": "npm-merge-driver install",
     "build": "npm run -s transpile && npm run -s transpile:jsx && npm run -s copy-typescript-definition",
     "transpile": "microbundle src/index.js -f es,umd --target web --external preact",
     "transpile:jsx": "microbundle src/jsx.js -o dist/jsx.js --target web --external none && microbundle dist/jsx.js -o dist/jsx.js -f cjs",
     "copy-typescript-definition": "copyfiles -f src/*.d.ts dist",
     "test": "eslint src test && tsc && mocha -r babel-core/register test/**/*.js",
-    "prepublish": "npm run build",
+    "prepublishOnly": "npm run build",
     "release": "npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
   "keywords": [
@@ -85,6 +84,7 @@
     "typescript": "^3.4.1"
   },
   "dependencies": {
+    "npm-merge-driver-install": "^1.1.1",
     "pretty-format": "^3.8.0"
   }
 }
