@@ -13,7 +13,7 @@
     "transpile:jsx": "microbundle src/jsx.js -o dist/jsx.js --target web --external none && microbundle dist/jsx.js -o dist/jsx.js -f cjs",
     "copy-typescript-definition": "copyfiles -f src/*.d.ts dist",
     "test": "eslint src test && tsc && mocha -r babel-core/register test/**/*.js",
-    "prepublish": "npm run build",
+    "prepublishOnly": "npm run build",
     "release": "npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
   "keywords": [
@@ -77,6 +77,7 @@
     "eslint-config-developit": "^1.1.1",
     "microbundle": "^0.6.0",
     "mocha": "^5.2.0",
+    "npm-merge-driver-install": "^1.1.1",
     "preact": "^10.0.4",
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0",
