@@ -8,6 +8,7 @@
   "module": "dist/index.module.js",
   "jsnext:main": "dist/index.module.js",
   "scripts": {
+    "postinstall": "npm-merge-driver install",
     "build": "npm run -s transpile && npm run -s transpile:jsx && npm run -s copy-typescript-definition",
     "transpile": "microbundle src/index.js -f es,umd --target web --external preact",
     "transpile:jsx": "microbundle src/jsx.js -o dist/jsx.js --target web --external none && microbundle dist/jsx.js -o dist/jsx.js -f cjs",
@@ -77,6 +78,7 @@
     "eslint-config-developit": "^1.1.1",
     "microbundle": "^0.6.0",
     "mocha": "^5.2.0",
+    "npm-merge-driver": "2.3.5",
     "preact": "^10.0.4",
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0",
