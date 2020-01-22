@@ -3,7 +3,9 @@ import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx createElement */
 
-describe('customised built-in elements', () => {
+const runSuite = typeof customElements === 'undefined' ? xdescribe : describe;
+
+runSuite('customised built-in elements', () => {
 	let scratch;
 
 	beforeEach(() => {
