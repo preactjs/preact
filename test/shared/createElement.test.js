@@ -158,17 +158,22 @@ describe('createElement(jsx)', () => {
 	});
 
 	it('should NOT set children prop when null', () => {
-		let r = h('foo', null, null);
+		let r = h('foo', {foo : 'bar'}, null);
 
-		expect(r).to.be.an('object')
-		expect(r).not.have.nested.property('props.children')
+		expect(r)
+			.to.be.an('object')
+			.to.have.nested.property('props.foo')
+			.not.to.have.nested.property('props.children')
+			
 	})
 
 	it('should NOT set children prop when unspecified', () => {
-		let r = h('foo', null);
+		let r = h('foo', {foo : 'bar'});
 
-		expect(r).to.be.an('object')
-		expect(r).not.have.nested.property('props.children')
+		expect(r)
+			.to.be.an('object')
+			.to.have.nested.property('props.foo')
+			.not.to.have.nested.property('props.children')
 	})
 
 	it('should NOT merge adjacent text children', () => {
