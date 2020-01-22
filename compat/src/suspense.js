@@ -42,7 +42,7 @@ Suspense.prototype = new Component();
 /**
  * @param {Promise} promise The thrown promise
  * @param {Component<any, any>} suspendingComponent The suspending component
- * @param {import('./internal').VNode} oldVNode old VNode caught in the _catchError options
+ * @param {import('./internal').VNode | null | undefined} oldVNode old VNode caught in the _catchError options
  */
 Suspense.prototype._childDidSuspend = function(
 	promise,
