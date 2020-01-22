@@ -1332,6 +1332,32 @@ describe('render()', () => {
 				'<div>New content<button>Update</button></div>'
 			);
 		});
+
+		it('should remove redundant elements', () => {
+			const placeholder = document.createElement('div');
+			scratch.appendChild(placeholder);
+			const App = () => (
+				<div>
+					New content
+					<button>Update</button>
+				</div>
+			);
+
+			render(<App />, scratch, placeholder);
+			expect(scratch.innerHTML).to.equal(
+				'<div>New content<button>Update</button></div>'
+			);
+
+			placeholder.appendChild(document.createElement('span'));
+			expect(scratch.innerHTML).to.equal(
+				'<div>New content<button>Update</button><span></span></div>'
+			);
+
+			render(<App />, scratch, placeholder);
+			expect(scratch.innerHTML).to.equal(
+				'<div>New content<button>Update</button></div>'
+			);
+		});
 	});
 
 	describe('replaceNode parameter', () => {
