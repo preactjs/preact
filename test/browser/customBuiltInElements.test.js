@@ -18,10 +18,6 @@ runSuite('customised built-in elements', () => {
 
 	it('should create built in elements correctly', () => {
 		class Foo extends Component {
-			constructor(props) {
-				super(props);
-				return true;
-			}
 			render() {
 				return <div is="built-in" />;
 			}
