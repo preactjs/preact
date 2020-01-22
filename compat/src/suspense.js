@@ -14,7 +14,7 @@ options._catchError = function(error, newVNode, oldVNode) {
 				return component._childDidSuspend(
 					error,
 					newVNode._component,
-					oldVNode && oldVNode._hydrateDom && oldVNode._hydrating
+					oldVNode && oldVNode._hydrateDom
 				);
 			}
 		}

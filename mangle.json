@@ -28,7 +28,6 @@
       "$_suspensions": "__u",
       "$_dom": "__e",
       "$_hydrateDom": "__s",
-      "$_hydrating": "__h",
       "$_component": "__c",
       "$__html": "__html",
       "$_parent": "__",

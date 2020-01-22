@@ -46,7 +46,6 @@ export function diff(
 		newVNode._dom = oldDom = oldVNode._hydrateDom;
 		excessDomChildren = [oldDom];
 		oldVNode._hydrateDom = null;
-		isHydrating = oldVNode._hydrating;
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
@@ -228,7 +227,6 @@ export function diff(
 			// Before bailing out, mark the current VNode with the DOM element and hydration state.
 			// We can use this information if we return here to render later on.
 			oldVNode._hydrateDom = newVNode._dom = oldDom;
-			oldVNode._hydrating = true;
 		}
 		options._catchError(e, newVNode, oldVNode);
 	}
