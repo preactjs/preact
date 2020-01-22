@@ -157,6 +157,20 @@ describe('createElement(jsx)', () => {
 			.that.equals('textstuff');
 	});
 
+	it('should NOT set children prop when null', () => {
+		let r = h('foo', null, null);
+
+		expect(r).to.be.an('object')
+		expect(r).not.have.nested.property('props.children')
+	})
+
+	it('should NOT set children prop when unspecified', () => {
+		let r = h('foo', null);
+
+		expect(r).to.be.an('object')
+		expect(r).not.have.nested.property('props.children')
+	})
+
 	it('should NOT merge adjacent text children', () => {
 		let r = h(
 			'foo',
@@ -214,6 +228,7 @@ describe('createElement(jsx)', () => {
 				null
 			]);
 	});
+	
 	it('should not merge children that are boolean values', () => {
 		let r = h('foo', null, 'one', true, 'two', false, 'three');
 
