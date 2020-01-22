@@ -174,7 +174,6 @@
     "lodash": "^4.17.10",
     "microbundle": "^0.11.0",
     "mocha": "^5.2.0",
-    "npm-merge-driver": "^2.3.5",
     "npm-merge-driver-install": "^1.1.1",
     "npm-run-all": "^4.0.0",
     "prettier": "^1.18.2",
