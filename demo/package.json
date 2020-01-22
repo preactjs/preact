@@ -2,8 +2,7 @@
   "name": "demo",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --inline",
-    "postinstall": ""
+    "start": "webpack-dev-server --inline"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-beta.55",
