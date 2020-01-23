@@ -175,4 +175,38 @@ describe('useEffect', () => {
 		expect(spy).to.be.calledOnce;
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 	});
+
+	it('catches errors when error is invoked during render', () => {
+		const spy = sinon.spy();
+		let errored;
+
+		function Comp() {
+			useEffect(() => {
+				throw new Error('hi');
+			});
+			return null;
+		}
+
+		class App extends Component {
+			componentDidCatch(err) {
+				spy();
+				errored = err;
+			}
+
+			render(props, state) {
+				if (errored) {
+					return <p>Error</p>;
+				}
+
+				return <Comp />;
+			}
+		}
+
+		render(<App />, scratch);
+		act(() => {
+			render(<App />, scratch);
+		});
+		expect(spy).to.be.calledOnce;
+		expect(scratch.innerHTML).to.equal('<p>Error</p>');
+	});
 });
