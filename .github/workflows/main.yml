@@ -11,6 +11,6 @@ jobs:
     - uses: actions/checkout@v2-beta
       with:
         fetch-depth: 1
-    - uses: preactjs/gzip-size-action@v1
+    - uses: preactjs/gzip-size-action@v1.0.1
       with:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
