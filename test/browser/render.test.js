@@ -1,5 +1,3 @@
-/* global DISABLE_FLAKEY */
-
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component, options } from 'preact';
 import {
@@ -832,15 +830,13 @@ describe('render()', () => {
 
 				expect(click, 'click').to.have.been.calledOnce;
 
-				if (DISABLE_FLAKEY !== true) {
-					// Focus delegation requires a 50b hack I'm not sure we want to incur
-					expect(focus, 'focus').to.have.been.calledOnce;
+				// Focus delegation requires a 50b hack I'm not sure we want to incur
+				expect(focus, 'focus').to.have.been.calledOnce;
 
-					// IE doesn't set it
-					if (!/Edge/.test(navigator.userAgent)) {
-						expect(click).to.have.been.calledWithMatch({ eventPhase: 0 }); // capturing
-						expect(focus).to.have.been.calledWithMatch({ eventPhase: 0 }); // capturing
-					}
+				// IE doesn't set it
+				if (!/Edge/.test(navigator.userAgent)) {
+					expect(click).to.have.been.calledWithMatch({ eventPhase: 0 }); // capturing
+					expect(focus).to.have.been.calledWithMatch({ eventPhase: 0 }); // capturing
 				}
 			});
 		}
@@ -1309,6 +1305,55 @@ describe('render()', () => {
 		render(<App>10</App>, scratch);
 		expect(scratch.textContent).to.equal('10');
 		options._diff = prevDiff;
+	});
+
+	describe('subsequent replaces', () => {
+		it("shouldn't remove elements", () => {
+			const placeholder = document.createElement('div');
+			scratch.appendChild(placeholder);
+			const App = () => (
+				<div>
+					New content
+					<button>Update</button>
+				</div>
+			);
+
+			render(<App />, scratch, placeholder);
+			expect(scratch.innerHTML).to.equal(
+				'<div>New content<button>Update</button></div>'
+			);
+
+			render(<App />, scratch, placeholder);
+			expect(scratch.innerHTML).to.equal(
+				'<div>New content<button>Update</button></div>'
+			);
+		});
+
+		it('should remove redundant elements', () => {
+			const placeholder = document.createElement('div');
+			scratch.appendChild(placeholder);
+			const App = () => (
+				<div>
+					New content
+					<button>Update</button>
+				</div>
+			);
+
+			render(<App />, scratch, placeholder);
+			expect(scratch.innerHTML).to.equal(
+				'<div>New content<button>Update</button></div>'
+			);
+
+			placeholder.appendChild(document.createElement('span'));
+			expect(scratch.innerHTML).to.equal(
+				'<div>New content<button>Update</button><span></span></div>'
+			);
+
+			render(<App />, scratch, placeholder);
+			expect(scratch.innerHTML).to.equal(
+				'<div>New content<button>Update</button></div>'
+			);
+		});
 	});
 
 	describe('replaceNode parameter', () => {

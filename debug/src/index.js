@@ -1,5 +1,4 @@
 import { initDebug } from './debug';
-import { initDevTools } from './devtools';
+import 'preact/devtools';
 
 initDebug();
-initDevTools();
