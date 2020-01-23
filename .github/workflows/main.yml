@@ -1,4 +1,4 @@
-name: Compressed Size
+name: Compressed Sizes
 
 on: [pull_request]
 
