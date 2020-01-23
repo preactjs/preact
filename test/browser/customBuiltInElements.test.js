@@ -3,7 +3,9 @@ import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx createElement */
 
-describe('customised built-in elements', () => {
+const runSuite = typeof customElements === 'undefined' ? xdescribe : describe;
+
+runSuite('customised built-in elements', () => {
 	let scratch;
 
 	beforeEach(() => {
@@ -16,10 +18,6 @@ describe('customised built-in elements', () => {
 
 	it('should create built in elements correctly', () => {
 		class Foo extends Component {
-			constructor(props) {
-				super(props);
-				return true;
-			}
 			render() {
 				return <div is="built-in" />;
 			}
