@@ -1,5 +1,22 @@
 import { options, Fragment } from 'preact';
-import { getDisplayName } from './devtools/custom';
+
+/**
+ * Get human readable name of the component/dom node
+ * @param {import('./internal').VNode} vnode
+ * @param {import('./internal').VNode} vnode
+ * @returns {string}
+ */
+export function getDisplayName(vnode) {
+	if (vnode.type === Fragment) {
+		return 'Fragment';
+	} else if (typeof vnode.type === 'function') {
+		return vnode.type.displayName || vnode.type.name;
+	} else if (typeof vnode.type === 'string') {
+		return vnode.type;
+	}
+
+	return '#text';
+}
 
 /**
  * Used to keep track of the currently rendered `vnode` and print it
