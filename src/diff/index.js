@@ -199,7 +199,7 @@ export function diff(
 				c._pendingError = c._processingException = null;
 			}
 
-			c._force = null;
+			c._force = false;
 		} else {
 			newVNode._dom = diffElementNodes(
 				oldVNode._dom,
@@ -294,9 +294,13 @@ function diffElementNodes(
 		if (newVNode.type === null) {
 			return document.createTextNode(newProps);
 		}
+
 		dom = isSvg
 			? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type)
-			: document.createElement(newVNode.type);
+			: document.createElement(
+					newVNode.type,
+					newProps.is && { is: newProps.is }
+			  );
 		// we created a new parent, so none of the previously attached children can be reused:
 		excessDomChildren = null;
 	}
@@ -311,6 +315,7 @@ function diffElementNodes(
 		}
 	} else if (newVNode !== oldVNode) {
 		if (excessDomChildren != null) {
+			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 

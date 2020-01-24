@@ -69,7 +69,7 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	base?: PreactElement;
 
 	_dirty: boolean;
-	_force?: boolean | null;
+	_force?: boolean;
 	_renderCallbacks: Array<() => void>; // Only class components
 	_context?: any;
 	_vnode?: VNode<P> | null;

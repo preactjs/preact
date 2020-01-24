@@ -1,5 +1,4 @@
 import { checkPropTypes } from './check-props';
-import { getDisplayName } from './devtools/custom';
 import { options, Component } from 'preact';
 import {
 	ELEMENT_NODE,
@@ -9,7 +8,8 @@ import {
 import {
 	getOwnerStack,
 	setupComponentStack,
-	getCurrentVNode
+	getCurrentVNode,
+	getDisplayName
 } from './component-stack';
 
 const isWeakMapSupported = typeof WeakMap === 'function';
