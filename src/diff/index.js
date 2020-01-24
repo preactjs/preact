@@ -303,11 +303,12 @@ function diffElementNodes(
 		}
 	}
 
-	if (dom == null) {
-		if (excessDomChildren != null) {
-			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
-		}
+	if (excessDomChildren != null && dom) {
+		excessDomChildren[excessDomChildren.indexOf(dom)] = null;
+		excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
+	}
 
+	if (dom == null) {
 		if (newVNode.type === null) {
 			return document.createTextNode(newProps);
 		}
@@ -323,19 +324,10 @@ function diffElementNodes(
 	}
 
 	if (newVNode.type === null) {
-		if (excessDomChildren != null) {
-			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
-		}
-
 		if (oldProps !== newProps && dom.data != newProps) {
 			dom.data = newProps;
 		}
 	} else if (newVNode !== oldVNode) {
-		if (excessDomChildren != null) {
-			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
-			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
-		}
-
 		oldProps = oldVNode.props || EMPTY_OBJ;
 
 		let oldHtml = oldProps.dangerouslySetInnerHTML;
