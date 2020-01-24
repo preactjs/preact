@@ -118,6 +118,41 @@ it.only('should test something', () => {
 });
 ```
 
+## Common terminology and variable names
+
+- `vnode` -> shorthand for `virtual-node` which is an object that specifies how a Component or DOM-node looks like
+- `commit` -> A commit is the moment in time when you flush all changes to the DOM
+- `c` -> The variable `c` always refers to a `component` instance throughout our code base.
+- `diff/diffing` -> Diffing describes the process of comparing two "things". In our case we compare the previous `vnode` tree with the new one and apply the delta to the DOM.
+- `root` -> The topmost node of a `vnode` tree
+
+## Tips for getting to know the code base
+
+- Check the JSDoc block right above the function definition to understand what it does. It contains a short description of each function argument and what it does.
+- Check the callsites of a function to understand how it's used. Modern editors/IDEs allow you to quickly find those, or use the plain old search feature instead.
+
+## FAQ
+
+### Why does the JSDoc use TypeScript syntax to specify types?
+
+Several members of the team are very fond of TypeScript and we wanted to leverage as many of its advantages, like improved autocompletion, for Preact. We even attempted to port Preact to TypeScript a few times, but we ran into many issues with the DOM typings. Those would force us to fill our codebase with many `any` castings, making our code very noisy.
+
+Luckily TypeScript has a mode where it can somewhat reliably typecheck JavaScript code by reusing the types defined in JSDoc blocks. It's not perfect and it often has trouble inferring the correct types the further one strays away from the function arguments, but it's good enough that it helps us a lot with autocompletion. Another plus is that we can make sure that our TypeScript definitons are correct at the same time.
+
+Check out the [official TypeScript documentation](https://www.typescriptlang.org/docs/handbook/type-checking-javascript-files.html) for more information.
+
+_Note that we have separate tests for our TypeScript definition files. We only use `ts-check` for local development and don't check it anywhere else like on the CI._
+
+### Why does the code base often use `let` instead of `const`?
+
+There is no real reason for that other a historical one. Back before auto-formatting via prettier was a thing and minifiers weren't as advanced as they are today we used a pretty terse code-style. The code-style deliberately was aimed at making code look as concise and short as possible. The `let` keyword is a bit shorter than `const` to write, so we only used that. This was done only for stylistic reasons.
+
+This helped our minds to not lose sight of focusing on size, but made it difficult for newcomers to start contributing to Preact. For that reason alone we switched to `prettier` and loosened our rule regarding usage of `let` or `const`. Today we use both, but you can still find many existing places where `let` is still in use.
+
+In the end there is no effect on size regardless if you use `const`, `let` or use both. Our code is downtranspiled to `ES5` for npm so both will be replaced with `var` anyways. Therefore it doesn't really matter at all which one is used in our codebase.
+
+This will only become important once shipping modern JavaScript code on npm becomes a thing and bundlers follow suit.
+
 ## I have more questions on how to contribute to Preact. How can I reach you?
 
 We closely watch our issues and have a pretty active [Slack workspace](https://preact-slack.now.sh/). Nearly all our communication happens via these two forms of communication.
