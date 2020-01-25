@@ -84,6 +84,13 @@ options.vnode = vnode => {
 	let type = vnode.type;
 	let props = vnode.props;
 
+	// Alias `class` prop to `className` if available
+	if (props.class || props.className) {
+		classNameDescriptor.enumerable = 'className' in props;
+		if (props.className) props.class = props.className;
+		Object.defineProperty(props, 'className', classNameDescriptor);
+	}
+
 	// Apply DOM VNode compat
 	if (typeof type != 'function') {
 		// Apply defaultValue to value
@@ -115,13 +122,6 @@ options.vnode = vnode => {
 				] = props[i];
 			}
 		}
-	}
-
-	// Alias `class` prop to `className` if available
-	if (props.class || props.className) {
-		classNameDescriptor.enumerable = 'className' in props;
-		if (props.className) props.class = props.className;
-		Object.defineProperty(props, 'className', classNameDescriptor);
 	}
 
 	// Events

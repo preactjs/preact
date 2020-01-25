@@ -140,4 +140,14 @@ describe('compat render', () => {
 		render(<Foo className="foo" />, scratch);
 		expect(scratch.firstChild.className).to.equal('foo');
 	});
+
+	// Issue #2275
+	it('should normalize class+className + DOM properties', () => {
+		function Foo(props) {
+			return <ul {...props} class="old" />;
+		}
+
+		render(<Foo fontSize="xlarge" className="new" />, scratch);
+		expect(scratch.firstChild.className).to.equal('new');
+	});
 });
