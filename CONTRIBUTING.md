@@ -153,6 +153,14 @@ In the end there is no effect on size regardless if you use `const`, `let` or us
 
 This will only become important once shipping modern JavaScript code on npm becomes a thing and bundlers follow suit.
 
+## How to create a good bug report
+
+To be able to fix issues we need to see them on our machine. This is only possible when we can reproduce the error. The easiest way to do that is narrow down the problem to specific components or combination of them. This can be done by removing as much unrelated code as possible.
+
+The perfect way to do that is to make a [codesandbox](https://codesandbox.io/). That way you can easily share the problematic code and ensure that others can see the same issue you are seeing.
+
+For us a [codesandbox](https://codesandbox.io/) says more than a 1000 words :tada:
+
 ## I have more questions on how to contribute to Preact. How can I reach you?
 
 We closely watch our issues and have a pretty active [Slack workspace](https://preact-slack.now.sh/). Nearly all our communication happens via these two forms of communication.
