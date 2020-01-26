@@ -1,4 +1,5 @@
-import React, { createElement, render } from 'preact/compat';
+import React, { createElement, render, Component } from 'preact/compat';
+import { setupRerender } from 'preact/test-utils';
 import {
 	setupScratch,
 	teardown,
@@ -9,11 +10,15 @@ describe('compat render', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
+	/** @type {() => void} */
+	let rerender;
+
 	const ce = type => document.createElement(type);
 	const text = text => document.createTextNode(text);
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		rerender = setupRerender();
 	});
 
 	afterEach(() => {
@@ -149,5 +154,46 @@ describe('compat render', () => {
 
 		render(<Foo fontSize="xlarge" className="new" />, scratch);
 		expect(scratch.firstChild.className).to.equal('new');
+	});
+
+	// Issue #2224
+	it('should not mark both class and className as enumerable', () => {
+		function ClassNameCheck(props) {
+			return (
+				<div>{props.propertyIsEnumerable('className') ? 'Failed' : ''}</div>
+			);
+		}
+
+		let update;
+		class OtherThing extends Component {
+			render({ children }) {
+				update = () => this.forceUpdate();
+				return (
+					<div>
+						{children}
+						<ClassNameCheck class="test" />
+					</div>
+				);
+			}
+		}
+
+		function App() {
+			return (
+				<OtherThing>
+					<ClassNameCheck class="test" />
+				</OtherThing>
+			);
+		}
+
+		render(<App />, scratch);
+
+		update();
+		rerender();
+
+		console.log(scratch.textContent);
+		expect(/Failed/g.test(scratch.textContent)).to.equal(
+			false,
+			'not enumerable'
+		);
 	});
 });
