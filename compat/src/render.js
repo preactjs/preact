@@ -85,7 +85,7 @@ options.vnode = vnode => {
 	let props = vnode.props;
 
 	// Alias `class` prop to `className` if available
-	if (props.class || props.className) {
+	if (props.class != props.className) {
 		classNameDescriptor.enumerable = 'className' in props;
 		if (props.className) props.class = props.className;
 		Object.defineProperty(props, 'className', classNameDescriptor);
