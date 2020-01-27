@@ -111,6 +111,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		// setAttribute
 		name !== 'form' &&
 		name !== 'type' &&
+		name !== 'size' &&
 		!isSvg &&
 		name in dom
 	) {
