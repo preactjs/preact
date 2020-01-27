@@ -9,6 +9,23 @@
   "umd:main": "dist/preact.umd.js",
   "unpkg": "dist/preact.umd.js",
   "source": "src/index.js",
+  "exports": {
+    "./compat": {
+      "require": "./compat/dist/compat.js",
+      "import": "./compat/dist/compat.module.js",
+      "browser": "./compat/dist/compat.umd.js"
+    },
+    "./debug": {
+      "require": "./debug/dist/debug.js",
+      "import": "./debug/dist/debug.module.js",
+      "browser": "./debug/dist/debug.umd.js"
+    },
+    "./hooks": {
+      "require": "./hooks/dist/hooks.js",
+      "import": "./hooks/dist/hooks.module.js",
+      "browser": "./hooks/dist/hooks.umd.js"
+    }
+  },
   "license": "MIT",
   "funding": {
     "type": "opencollective",
