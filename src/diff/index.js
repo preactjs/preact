@@ -265,7 +265,7 @@ function diffElementNodes(
 	isHydrating
 ) {
 	let i;
-	let oldProps = oldVNode.props;
+	let oldProps = oldVNode.props || EMPTY_OBJ;
 	let newProps = newVNode.props;
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
@@ -308,7 +308,7 @@ function diffElementNodes(
 			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
 		}
 
-		if (oldProps !== newProps && dom.data != newProps) {
+		if (oldVNode.props !== newProps && dom.data != newProps) {
 			dom.data = newProps;
 		}
 	} else if (newVNode !== oldVNode) {
@@ -316,8 +316,6 @@ function diffElementNodes(
 			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
-
-		oldProps = oldVNode.props || EMPTY_OBJ;
 
 		let oldHtml = oldProps.dangerouslySetInnerHTML;
 		let newHtml = newProps.dangerouslySetInnerHTML;
