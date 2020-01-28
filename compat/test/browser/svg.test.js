@@ -70,15 +70,15 @@ describe('svg', () => {
 	it('should render SVG to DOM without name (clipPathUnits) attribute manipulation', () => {
 		React.render(
 			<svg>
-				<clipPath id="hexagon" clipPathUnits="objectBoundingBox">
-					<polygon points="0.5 0, 1 0.25, 1 0.75, 0.5 1, 0 0.75, 0 0.25" />
+				<clipPath clipPathUnits="objectBoundingBox">
+					<polygon points="0,100 50,25 50,75 100,0" />
 				</clipPath>
 			</svg>,
 			scratch
 		);
 		expect(serializeHtml(scratch)).to.eql(
 			sortAttributes(
-				'<svg><clipPath id="hexagon" clipPathUnits="objectBoundingBox"><polygon points="0.5 0, 1 0.25, 1 0.75, 0.5 1, 0 0.75, 0 0.25" /></clipPath></svg>'
+				'<svg><clipPath clipPathUnits="objectBoundingBox"><polygon points="0,100 50,25 50,75 100,0" /></clipPath></svg>'
 			)
 		);
 	});
