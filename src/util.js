@@ -17,6 +17,5 @@ export function assign(obj, props) {
  * @param {Node} node The node to remove
  */
 export function removeNode(node) {
-	let parentNode = node.parentNode;
-	if (parentNode) parentNode.removeChild(node);
+	if (node.parentNode) node.parentNode.removeChild(node);
 }
