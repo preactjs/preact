@@ -98,6 +98,29 @@ describe('Children', () => {
 			render(<Foo />, scratch);
 			expect(serializeHtml(scratch)).to.equal('<div></div>');
 		});
+
+		it('should flatten result', () => {
+			const ProblemChild = ({ children }) => {
+				return React.Children.map(children, child => {
+					return React.Children.map(child.props.children, x => x);
+				}).filter(React.isValidElement);
+			};
+
+			const App = () => {
+				return (
+					<ProblemChild>
+						<div>
+							<div>1</div>
+							<div>2</div>
+						</div>
+					</ProblemChild>
+				);
+			};
+
+			render(<App />, scratch);
+
+			expect(scratch.textContent).to.equal('12');
+		});
 	});
 
 	describe('.forEach', () => {
