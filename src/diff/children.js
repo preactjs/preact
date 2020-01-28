@@ -111,10 +111,14 @@ export function diffChildren(
 					isHydrating
 				);
 
-				if ((j = childVNode.ref) && oldVNode.ref != j) {
+				if (childVNode.ref && oldVNode.ref != childVNode.ref) {
 					if (!refs) refs = [];
 					if (oldVNode.ref) refs.push(oldVNode.ref, null, childVNode);
-					refs.push(j, childVNode._component || newDom, childVNode);
+					refs.push(
+						childVNode.ref,
+						childVNode._component || newDom,
+						childVNode
+					);
 				}
 
 				// Only proceed if the vnode has not been unmounted by `diff()` above.
