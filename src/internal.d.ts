@@ -57,7 +57,10 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	/**
 	 * The last dom child of a Fragment, or components that return a Fragment
 	 */
-	_lastDomChild: PreactElement | Text | null;
+	/**
+	 * Indicates whether the VNode at the root of a suspended tree was suspended during hydration, or an update.
+	 */
+	_hydrating: boolean;
 	_component: Component | null;
 	constructor: undefined;
 }

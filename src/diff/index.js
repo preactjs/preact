@@ -40,14 +40,6 @@ export function diff(
 	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== undefined) return null;
 
-	// If this was the innermost VNode at a point where the tree suspended,
-	// pick up diffing where we left off using the saved DOM element and hydration state.
-	if (oldVNode._hydrateDom && excessDomChildren == null) {
-		newVNode._dom = oldDom = oldVNode._hydrateDom;
-		excessDomChildren = [oldDom];
-		oldVNode._hydrateDom = null;
-	}
-
 	if ((tmp = options._diff)) tmp(newVNode);
 
 	try {
@@ -223,11 +215,8 @@ export function diff(
 
 		if ((tmp = options.diffed)) tmp(newVNode);
 	} catch (e) {
-		if (isHydrating) {
-			// Before bailing out, mark the current VNode with the DOM element and hydration state.
-			// We can use this information if we return here to render later on.
-			oldVNode._hydrateDom = newVNode._dom = oldDom;
-		}
+		newVNode._dom = oldDom; // is this needed?
+		newVNode._hydrating = !!isHydrating;
 		options._catchError(e, newVNode, oldVNode);
 	}
 
