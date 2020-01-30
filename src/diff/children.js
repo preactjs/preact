@@ -124,7 +124,10 @@ export function diffChildren(
 					}
 
 					if (excessDomChildren != null) {
-						excessDomChildren[excessDomChildren.indexOf(newDom)] = null;
+						j = excessDomChildren.indexOf(newDom);
+						if (j !== -1) {
+							excessDomChildren[j] = null;
+						}
 					}
 
 					if (childVNode._lastDomChild != null) {
