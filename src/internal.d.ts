@@ -30,10 +30,10 @@ export type ComponentFactory<P> =
 	| preact.ComponentClass<P>
 	| FunctionalComponent<P>;
 
-export interface PreactElement extends HTMLElement {
+export interface PreactElement extends Partial<HTMLElement>, Partial<Text> {
 	_children?: VNode<any> | null;
 	/** Event listeners to support event delegation */
-	_listeners: Record<string, (e: Event) => void>;
+	_listeners?: Record<string, (e: Event) => void>;
 
 	// Preact uses this attribute to detect SVG nodes
 	ownerSVGElement?: SVGElement | null;
@@ -53,10 +53,11 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	/**
 	 * The [first (for Fragments)] DOM child of a VNode
 	 */
-	_dom: PreactElement | Text | null;
+	_dom: PreactElement | null;
 	/**
 	 * The last dom child of a Fragment, or components that return a Fragment
 	 */
+	_lastDomChild: PreactElement | null;
 	/**
 	 * Indicates whether the VNode at the root of a suspended tree was suspended during hydration, or an update.
 	 */
