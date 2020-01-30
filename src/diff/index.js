@@ -295,7 +295,7 @@ function diffElementNodes(
 			// During hydration, only the first Text node is attached.
 			// Subsequent updates will trigger splitting up into separate nodes.
 			// See https://github.com/preactjs/preact/wiki/Hydration-Design-Documentation
-			if (isHydrating) return null;
+			if (isHydrating && excessDomChildren != null) return null;
 
 			return document.createTextNode(newProps);
 		}
@@ -317,7 +317,7 @@ function diffElementNodes(
 
 		// Text mutations during hydration are ignored.
 		// See https://github.com/preactjs/preact/wiki/Hydration-Design-Documentation
-		if (isHydrating) {
+		if (isHydrating && excessDomChildren != null) {
 			newVNode.props = dom.data;
 		}
 		else if (oldProps !== newProps) {
