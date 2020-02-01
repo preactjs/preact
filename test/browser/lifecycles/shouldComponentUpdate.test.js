@@ -163,7 +163,8 @@ describe('Lifecycle methods', () => {
 
 		it('should clear renderCallbacks', () => {
 			const spy = sinon.spy();
-			let c, renders = 0;
+			let c,
+				renders = 0;
 
 			class App extends Component {
 				constructor() {
@@ -247,7 +248,6 @@ describe('Lifecycle methods', () => {
 			expect(Foo.prototype.render).to.have.been.calledTwice;
 			expect(Foo.prototype.shouldComponentUpdate).to.not.have.been.called;
 		});
-
 
 		it('should not block queued child forceUpdate', () => {
 			let i = 0;
@@ -706,5 +706,25 @@ describe('Lifecycle methods', () => {
 
 			expect(scratch.textContent).to.equal('foo');
 		});
+	});
+
+	it('should correctly render when sCU component has null children', () => {
+		class App extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+			render() {
+				return [null, <div>Hello World!</div>, null];
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Hello World!</div>');
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Hello World!</div>');
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Hello World!</div>');
 	});
 });
