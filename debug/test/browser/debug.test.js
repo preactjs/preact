@@ -80,7 +80,7 @@ describe('debug', () => {
 	it('should print an error on double jsx conversion', () => {
 		let Foo = <div />;
 		let fn = () => render(h(<Foo />), scratch);
-		expect(fn).to.throw(/createElement/);
+		expect(fn).to.throw(/JSX twice/);
 	});
 
 	it('should add __source to the vnode in debug mode.', () => {

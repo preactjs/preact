@@ -1886,7 +1886,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(successHtml);
 	});
 
-	it('should use the last dom node for _lastDomChild', () => {
+	it('should properly render Fragments whose last child is a component returning null', () => {
 		let Noop = () => null;
 		let update;
 		class App extends Component {
