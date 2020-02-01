@@ -1001,6 +1001,15 @@ describe('render()', () => {
 		});
 	}
 
+	// Issue #2284
+	it('should not throw when setting size to an invalid value', () => {
+		// These values are usually used to reset the `size` attribute to its
+		// initial state.
+		expect(() => render(<input size={undefined} />, scratch)).to.not.throw();
+		expect(() => render(<input size={null} />, scratch)).to.not.throw();
+		expect(() => render(<input size={0} />, scratch)).to.not.throw();
+	});
+
 	it('should not execute append operation when child is at last', () => {
 		// See preactjs/preact#717 for discussion about the issue this addresses
 
