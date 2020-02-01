@@ -105,7 +105,7 @@ export function initDebug() {
 					`\n\n${getOwnerStack(vnode)}`
 			);
 		} else if (type != null && typeof type === 'object') {
-			if (type._lastDomChild !== undefined && type._dom !== undefined) {
+			if (type._children !== undefined && type._dom !== undefined) {
 				throw new Error(
 					`Invalid type passed to createElement(): ${type}\n\n` +
 						'Did you accidentally pass a JSX literal as JSX twice?\n\n' +
@@ -133,10 +133,10 @@ export function initDebug() {
 			);
 		} else if (
 			type === 'tr' &&
-			(parentVNode.type !== 'thead' &&
-				parentVNode.type !== 'tfoot' &&
-				parentVNode.type !== 'tbody' &&
-				parentVNode.type !== 'table')
+			parentVNode.type !== 'thead' &&
+			parentVNode.type !== 'tfoot' &&
+			parentVNode.type !== 'tbody' &&
+			parentVNode.type !== 'table'
 		) {
 			console.error(
 				'Improper nesting of table. Your <tr> should have a <thead/tbody/tfoot/table> parent.' +
