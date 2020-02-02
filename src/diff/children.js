@@ -124,17 +124,17 @@ export function diffChildren(
 					}
 
 					let nextDom;
-					if (childVNode._lastDomChildSibling !== undefined) {
+					if (childVNode._nextDom !== undefined) {
 						// Only Fragments or components that return Fragment like VNodes will
-						// have a non-undefined _lastDomChildSibling. Continue the diff from the sibling
+						// have a non-undefined _nextDom. Continue the diff from the sibling
 						// of last DOM child of this child VNode
-						nextDom = childVNode._lastDomChildSibling;
+						nextDom = childVNode._nextDom;
 
-						// Eagerly cleanup _lastDomChildSibling. We don't need to persist the value because
+						// Eagerly cleanup _nextDom. We don't need to persist the value because
 						// it is only used by `diffChildren` to determine where to resume the diff after
 						// diffing Components and Fragments. Once we store it the nextDOM local var, we
 						// can clean up the property
-						childVNode._lastDomChildSibling = undefined;
+						childVNode._nextDom = undefined;
 					} else if (
 						excessDomChildren == oldVNode ||
 						newDom != oldDom ||
@@ -188,14 +188,14 @@ export function diffChildren(
 
 					if (typeof newParentVNode.type == 'function') {
 						// Because the newParentVNode is Fragment-like, we need to set it's
-						// _lastDomChildSibling property to the nextSibling of its last child DOM node.
+						// _nextDom property to the nextSibling of its last child DOM node.
 						//
 						// `oldDom` contains the correct value here because if the last child
-						// is a Fragment-like, then oldDom has already been set to that child's _lastDomChildSibling.
+						// is a Fragment-like, then oldDom has already been set to that child's _nextDom.
 						// If the last child is a DOM VNode, then oldDom will be set to that DOM
 						// node's nextSibling.
 
-						newParentVNode._lastDomChildSibling = oldDom;
+						newParentVNode._nextDom = oldDom;
 					}
 				}
 			}

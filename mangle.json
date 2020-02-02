@@ -18,7 +18,7 @@
     "cname": 6,
     "props": {
       "$_depth": "__b",
-      "$_lastDomChildSibling": "__d",
+      "$_nextDom": "__d",
       "$_dirty": "__d",
       "$_force": "__e",
       "$_nextState": "__s",
