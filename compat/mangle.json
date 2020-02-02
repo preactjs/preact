@@ -19,7 +19,7 @@
       "$_processingException": "__",
       "$_root": "__",
       "$_commit": "__c",
-      "$_suspensions": "__u",
+      "$_pendingSuspensionCount": "__u",
       "$_detachOnNextRender": "__b",
       "$_diff": "__b",
       "$_render": "__r",
