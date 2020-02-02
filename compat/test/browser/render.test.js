@@ -190,7 +190,6 @@ describe('compat render', () => {
 		update();
 		rerender();
 
-		console.log(scratch.textContent);
 		expect(/Failed/g.test(scratch.textContent)).to.equal(
 			false,
 			'not enumerable'
