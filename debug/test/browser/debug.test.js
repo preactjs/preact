@@ -4,8 +4,11 @@ import {
 	teardown,
 	serializeHtml
 } from '../../../test/_util/helpers';
-import 'preact/debug';
 import * as PropTypes from 'prop-types';
+
+window.__PREACT_DEVTOOLS__ = { attachPreact: sinon.spy() };
+
+import 'preact/debug';
 
 const h = createElement;
 /** @jsx createElement */
@@ -28,6 +31,10 @@ describe('debug', () => {
 		(console.error).restore();
 		console.warn.restore();
 		teardown(scratch);
+	});
+
+	it('should initialize devtools', () => {
+		expect(window.__PREACT_DEVTOOLS__.attachPreact).to.have.been.called;
 	});
 
 	it('should print an error on rendering on undefined parent', () => {
