@@ -398,7 +398,7 @@ Component.prototype.forceUpdate = function(callback) {
 		);
 	} else if (this._parentDom == null) {
 		console.warn(
-			`Can't call "this.setState" on an unmounted component. This is a no-op, ` +
+			`Can't call "this.forceUpdate" on an unmounted component. This is a no-op, ` +
 				`but it indicates a memory leak in your application. To fix, cancel all ` +
 				`subscriptions and asynchronous tasks in the componentWillUnmount method.` +
 				`\n\n${getOwnerStack(this._vnode)}`
