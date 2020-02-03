@@ -151,7 +151,6 @@ module.exports = function(config) {
 							plugins: [
 								coverage && ['istanbul', { include: '**/dist/**/*.js' }]
 							].filter(Boolean)
-							// ignore: ['./dist'], // TODO: Should probably still make sure babel doesn't run on './dist' except for code coverage
 						}
 					}
 				]

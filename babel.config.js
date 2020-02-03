@@ -30,7 +30,7 @@ module.exports = function(api) {
 			'@babel/plugin-transform-react-jsx',
 			'babel-plugin-transform-async-to-promises'
 		],
-		// ignore: ['./dist'], // TODO: Should probably still make sure babel doesn't run on './dist' except for code coverage
+		include: ['**/src/**/*.js', '**/test/**/*.js'],
 		overrides: [
 			{
 				test(filename) {
