@@ -1,6 +1,7 @@
 /*eslint no-var:0, object-shorthand:0 */
 
 var coverage = String(process.env.COVERAGE) === 'true',
+	minify = String(process.env.MINIFY) === 'true',
 	ci = String(process.env.CI).match(/^(1|true)$/gi),
 	pullRequest = !String(process.env.TRAVIS_PULL_REQUEST).match(
 		/^(0|false|undefined)$/gi
@@ -61,9 +62,10 @@ var localLaunchers = {
 	}
 };
 
-module.exports = function(config) {
-	const watchMode = config.singleRun;
+const subPkgPath = pkgName =>
+	path.join(__dirname, pkgName, !minify ? 'src' : '');
 
+module.exports = function(config) {
 	config.set({
 		browsers: sauceLabs
 			? Object.keys(sauceLabsLaunchers)
@@ -149,7 +151,10 @@ module.exports = function(config) {
 						loader: 'babel-loader',
 						options: {
 							plugins: [
-								coverage && ['istanbul', { include: '**/dist/**/*.js' }]
+								coverage && [
+									'istanbul',
+									{ include: minify ? '**/dist/**/*.js' : '**/src/**/*.js' }
+								]
 							].filter(Boolean)
 						}
 					}
@@ -160,12 +165,12 @@ module.exports = function(config) {
 				// rather than referencing source files inside the module
 				// directly
 				alias: {
-					'preact/debug': path.join(__dirname, './debug/'),
-					'preact/devtools': path.join(__dirname, './devtools/'),
-					'preact/compat': path.join(__dirname, './compat/'),
-					'preact/hooks': path.join(__dirname, './hooks/'),
-					'preact/test-utils': path.join(__dirname, './test-utils/'),
-					preact: path.join(__dirname, '')
+					'preact/debug': subPkgPath('./debug/'),
+					'preact/devtools': subPkgPath('./devtools/'),
+					'preact/compat': subPkgPath('./compat/'),
+					'preact/hooks': subPkgPath('./hooks/'),
+					'preact/test-utils': subPkgPath('./test-utils/'),
+					preact: subPkgPath('')
 				}
 			},
 			plugins: [

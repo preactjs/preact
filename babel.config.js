@@ -1,6 +1,8 @@
 module.exports = function(api) {
 	api.cache(true);
 
+	const minify = String(process.env.MINIFY) === 'true';
+
 	const rename = {};
 	const mangle = require('./mangle.json');
 	for (let prop in mangle.props.props) {
@@ -34,10 +36,10 @@ module.exports = function(api) {
 		overrides: [
 			{
 				test(filename) {
-					const result =
+					const isOptionsTestFile =
 						filename.endsWith('optionSpies.js') ||
 						filename.endsWith('.options.test.js');
-					return result;
+					return minify && isOptionsTestFile;
 				},
 				plugins: [['babel-plugin-transform-rename-properties', { rename }]]
 			},
