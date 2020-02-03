@@ -4,6 +4,7 @@ import {
 	teardown,
 	serializeHtml
 } from '../../../test/_util/helpers';
+import './fakeDevTools';
 import 'preact/debug';
 import * as PropTypes from 'prop-types';
 
@@ -30,6 +31,10 @@ describe('debug', () => {
 		teardown(scratch);
 	});
 
+	it('should initialize devtools', () => {
+		expect(window.__PREACT_DEVTOOLS__.attachPreact).to.have.been.called;
+	});
+
 	it('should print an error on rendering on undefined parent', () => {
 		let fn = () => render(<div />, undefined);
 		expect(fn).to.throw(/render/);
@@ -50,6 +55,10 @@ describe('debug', () => {
 		fn = () => render(<App />, {});
 		expect(fn).to.throw(/<App/);
 		expect(fn).to.throw(/[object Object]/);
+
+		fn = () => render(<Fragment />, 'badroot');
+		expect(fn).to.throw(/<Fragment/);
+		expect(fn).to.throw(/badroot/);
 	});
 
 	it('should print an error with (class) component name when available', () => {

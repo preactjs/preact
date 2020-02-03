@@ -11,7 +11,6 @@ const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|color|fill|flood|f
 // Some libraries like `react-virtualized` explicitly check for this.
 Component.prototype.isReactComponent = {};
 
-/* istanbul ignore next */
 export const REACT_ELEMENT_TYPE =
 	(typeof Symbol !== 'undefined' &&
 		Symbol.for &&
