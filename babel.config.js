@@ -1,4 +1,3 @@
-// Only used for mocha tests. For karma, see karma.config.js
 module.exports = function(api) {
 	api.cache(true);
 
@@ -41,6 +40,10 @@ module.exports = function(api) {
 					return result;
 				},
 				plugins: [['babel-plugin-transform-rename-properties', { rename }]]
+			},
+			{
+				test: /(component-stack|debug)\.test\.js$/,
+				plugins: ['@babel/plugin-transform-react-jsx-source']
 			}
 		]
 	};

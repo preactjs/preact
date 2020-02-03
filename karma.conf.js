@@ -61,33 +61,6 @@ var localLaunchers = {
 	}
 };
 
-const babelOptions = (options = {}) => {
-	return {
-		babelrc: false,
-		cacheDirectory: true,
-		presets: [
-			[
-				'@babel/preset-env',
-				{
-					loose: true,
-					exclude: ['@babel/plugin-transform-typeof-symbol'],
-					targets: {
-						browsers: ['last 2 versions', 'IE >= 9']
-					}
-				}
-			]
-		],
-		plugins: [
-			coverage && ['istanbul', { include: '**/dist/**/*.js' }],
-			'@babel/plugin-proposal-object-rest-spread',
-			options.debug && '@babel/plugin-transform-react-jsx-source',
-			'@babel/plugin-transform-react-jsx',
-			'babel-plugin-transform-async-to-promises'
-		].filter(Boolean),
-		// ignore: ['./dist'], // TODO: Should probably still make sure babel doesn't run on './dist' except for code coverage
-	};
-};
-
 module.exports = function(config) {
 	const watchMode = config.singleRun;
 
@@ -163,30 +136,23 @@ module.exports = function(config) {
 
 				/* Transpile source and test files */
 				rules: [
-					// Special case for babel plugins that should not be enabled
-					// in production mode and only be enabled for specific
-					// test files
-					{
-						enforce: 'pre',
-						test: /(component-stack|debug)\.test\.js$/,
-						exclude: /node_modules/,
-						loader: 'babel-loader',
-						options: babelOptions({ debug: true })
-					},
-
 					// Special case for sinon.js which ships ES2015+ code in their
 					// esm bundle
 					{
 						test: /node_modules\/sinon\/.*\.jsx?$/,
-						loader: 'babel-loader',
-						options: babelOptions()
+						loader: 'babel-loader'
 					},
 
 					{
 						test: /\.jsx?$/,
 						exclude: /node_modules/,
 						loader: 'babel-loader',
-						options: babelOptions()
+						options: {
+							plugins: [
+								coverage && ['istanbul', { include: '**/dist/**/*.js' }]
+							].filter(Boolean)
+							// ignore: ['./dist'], // TODO: Should probably still make sure babel doesn't run on './dist' except for code coverage
+						}
 					}
 				]
 			},
