@@ -57,6 +57,10 @@ describe('debug', () => {
 		fn = () => render(<App />, {});
 		expect(fn).to.throw(/<App/);
 		expect(fn).to.throw(/[object Object]/);
+
+		fn = () => render(<Fragment />, 'badroot');
+		expect(fn).to.throw(/<Fragment/);
+		expect(fn).to.throw(/badroot/);
 	});
 
 	it('should print an error with (class) component name when available', () => {
