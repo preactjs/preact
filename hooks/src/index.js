@@ -305,8 +305,6 @@ function afterNextFrame(callback) {
 function afterPaint(newQueueLength) {
 	if (newQueueLength === 1 || prevRaf !== options.requestAnimationFrame) {
 		prevRaf = options.requestAnimationFrame;
-
-		/* istanbul ignore next */
 		(prevRaf || afterNextFrame)(flushAfterPaintEffects);
 	}
 }
