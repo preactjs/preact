@@ -141,13 +141,16 @@ module.exports = function(config) {
 			{
 				pattern:
 					config.grep ||
-					'{debug,hooks,compat,test-utils,}/test/{browser,shared}/**/*.test.js',
+					'{debug,hooks,compat,test-utils,shared-internals,}/test/{browser,shared}/**/*.test.js',
 				watched: false
 			}
 		],
 
 		preprocessors: {
-			'{debug,hooks,compat,test-utils,}/test/**/*': ['webpack', 'sourcemap']
+			'{debug,hooks,compat,test-utils,shared-internals,}/test/**/*': [
+				'webpack',
+				'sourcemap'
+			]
 		},
 
 		webpack: {
@@ -198,6 +201,10 @@ module.exports = function(config) {
 					'preact/compat': path.join(__dirname, './compat/src'),
 					'preact/hooks': path.join(__dirname, './hooks/src'),
 					'preact/test-utils': path.join(__dirname, './test-utils/src'),
+					'preact/shared-internals': path.join(
+						__dirname,
+						'./shared-internals/src'
+					),
 					preact: path.join(__dirname, './src')
 				}
 			},

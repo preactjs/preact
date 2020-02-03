@@ -1,0 +1,19 @@
+{
+	"name": "shared-internals",
+	"amdName": "sharedInternals",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Shared internals for testing or debugging adapters",
+	"main": "dist/shared-internals.js",
+	"module": "dist/shared-internals.module.js",
+	"umd:main": "dist/shared-internals.umd.js",
+	"source": "src/index.js",
+	"license": "MIT",
+	"types": "src/index.d.ts",
+	"peerDependencies": {
+		"preact": "^10.0.0"
+	},
+	"mangle": {
+		"regex": "^_"
+	}
+}
