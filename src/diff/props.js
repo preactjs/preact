@@ -59,7 +59,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 
 	if (isSvg && name === 'className') {
 		name = 'class';
-	} else if (name === 'class') {
+	} else if (!isSvg && name === 'class') {
 		name = 'className';
 	}
 
