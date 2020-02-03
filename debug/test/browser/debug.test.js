@@ -4,11 +4,9 @@ import {
 	teardown,
 	serializeHtml
 } from '../../../test/_util/helpers';
-import * as PropTypes from 'prop-types';
-
-window.__PREACT_DEVTOOLS__ = { attachPreact: sinon.spy() };
-
+import './fakeDevTools';
 import 'preact/debug';
+import * as PropTypes from 'prop-types';
 
 const h = createElement;
 /** @jsx createElement */
