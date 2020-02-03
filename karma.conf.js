@@ -69,7 +69,7 @@ module.exports = function(config) {
 			? Object.keys(sauceLabsLaunchers)
 			: Object.keys(localLaunchers),
 
-		frameworks: ['source-map-support', 'mocha', 'chai-sinon'],
+		frameworks: ['mocha', 'chai-sinon'],
 
 		reporters: ['mocha'].concat(
 			coverage ? 'coverage' : [],

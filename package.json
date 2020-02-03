@@ -194,7 +194,6 @@
     "karma-mocha-reporter": "^2.2.5",
     "karma-sauce-launcher": "^1.2.0",
     "karma-sinon": "^1.0.5",
-    "karma-source-map-support": "^1.3.0",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^3.0.5",
     "lint-staged": "^9.4.2",
