@@ -29,6 +29,9 @@
       "require": "./test-utils/dist/testUtils.js",
       "import": "./test-utils/dist/testUtils.module.js",
       "browser": "./test-utils/dist/testUtils.umd.js"
+    },
+    "./compat/server": {
+      "require": "./compat/server.js"
     }
   },
   "license": "MIT",
