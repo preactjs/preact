@@ -30,7 +30,8 @@ function detachedClone(vnode) {
 // having custom inheritance instead of a class here saves a lot of bytes
 export function Suspense(props) {
 	// we do not call super here to golf some bytes...
-	this._suspensions = 0;
+	this._pendingSuspensionCount = 0;
+	this._suspenders = null;
 	this._detachOnNextRender = null;
 }
 
@@ -46,6 +47,11 @@ Suspense.prototype = new Component();
 Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 	/** @type {import('./internal').SuspenseComponent} */
 	const c = this;
+
+	if (c._suspenders == null) {
+		c._suspenders = [];
+	}
+	c._suspenders.push(suspendingComponent);
 
 	const resolve = suspended(c._vnode);
 
@@ -73,13 +79,18 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 	};
 
 	const onSuspensionComplete = () => {
-		if (!--c._suspensions) {
+		if (!--c._pendingSuspensionCount) {
 			c._vnode._children[0] = c.state._suspended;
 			c.setState({ _suspended: (c._detachOnNextRender = null) });
+
+			let suspended;
+			while ((suspended = c._suspenders.pop())) {
+				suspended.forceUpdate();
+			}
 		}
 	};
 
-	if (!c._suspensions++) {
+	if (!c._pendingSuspensionCount++) {
 		c.setState({ _suspended: (c._detachOnNextRender = c._vnode._children[0]) });
 	}
 	promise.then(onResolved, onResolved);
