@@ -55,16 +55,15 @@ function setStyle(style, key, value) {
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
 function setProperty(dom, name, value, oldValue, isSvg) {
-	if (isSvg) {
-		if (name === 'className') {
-			name = 'class';
-		}
+	if (name === 'key' || name === 'children') return;
+
+	if (isSvg && name === 'className') {
+		name = 'class';
 	} else if (name === 'class') {
 		name = 'className';
 	}
 
-	if (name === 'key' || name === 'children') {
-	} else if (name === 'style') {
+	if (name === 'style') {
 		const s = dom.style;
 
 		if (typeof value === 'string') {

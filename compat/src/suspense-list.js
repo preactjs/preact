@@ -30,10 +30,8 @@ const resolve = (list, child, node) => {
 	// callbacks won't get queued in the node anyway.
 	// If revealOrder is 'together' then also do an early exit
 	// if all suspended descendants have not yet been resolved.
-	if (
-		!list.props.revealOrder ||
-		(list.props.revealOrder[0] === 't' && list._map.size)
-	) {
+	const revealOrder = list.props.revealOrder;
+	if (!revealOrder || (revealOrder[0] === 't' && list._map.size)) {
 		return;
 	}
 
