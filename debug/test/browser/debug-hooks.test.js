@@ -128,7 +128,7 @@ describe('debug with hooks', () => {
 		expect(fn).to.not.throw();
 	});
 
-	it('should warn for useless useMemo calls', () => {
+	it('should warn for useMemo/useCallback without arguments', () => {
 		const App = () => {
 			const [people] = useState([40, 20, 60, 80]);
 			const retiredPeople = useMemo(() => people.filter(x => x >= 60));
@@ -139,7 +139,7 @@ describe('debug with hooks', () => {
 		expect(warnings.length).to.equal(2);
 	});
 
-	it('should warn when non-array args is passed', () => {
+	it('should warn when useMemo is called with non-array args', () => {
 		const App = () => {
 			const foo = useMemo(() => 'foo', 12);
 			return <p>{foo}</p>;

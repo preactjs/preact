@@ -1,4 +1,4 @@
-import { createElement, isValidElement, Component } from '../../src/';
+import { createElement, isValidElement, Component } from '../../';
 import { expect } from 'chai';
 
 /** @jsx createElement */
