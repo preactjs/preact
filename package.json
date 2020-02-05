@@ -10,6 +10,11 @@
   "unpkg": "dist/preact.umd.js",
   "source": "src/index.js",
   "exports": {
+    ".": {
+      "require": "./dist/preact.js",
+      "import": "./dist/preact.module.js",
+      "browser": "./dist/preact.umd.js"
+    },
     "./compat": {
       "require": "./compat/dist/compat.js",
       "import": "./compat/dist/compat.module.js",
