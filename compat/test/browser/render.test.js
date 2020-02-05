@@ -146,6 +146,15 @@ describe('compat render', () => {
 		expect(scratch.firstChild.className).to.equal('foo');
 	});
 
+	it('should normalize className when it has an empty string', () => {
+		function Foo(props) {
+			expect(props.className).to.equal('');
+			return <div className="">foo</div>;
+		}
+
+		render(<Foo className="" />, scratch);
+	});
+
 	// Issue #2275
 	it('should normalize class+className + DOM properties', () => {
 		function Foo(props) {
