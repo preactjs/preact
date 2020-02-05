@@ -31,7 +31,7 @@
     "./test-utils": {
       "require": "./test-utils/dist/testUtils.js",
       "import": "./test-utils/dist/testUtils.module.js",
-      "browser": "./test-utils/dist/testUtils.umd.js",
+      "browser": "./test-utils/dist/testUtils.module.js",
       "umd": "./test-utils/dist/testUtils.umd.js"
     },
     "./compat/server": {
