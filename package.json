@@ -17,7 +17,7 @@
       "umd": "./compat/dist/compat.umd.js"
     },
     "./debug": {
-      "require": "./compat/dist/debug.js",
+      "require": "./debug/dist/debug.js",
       "import": "./debug/dist/debug.module.js",
       "browser": "./debug/dist/debug.module.js",
       "umd": "./debug/dist/debug.umd.js"
