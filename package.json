@@ -13,7 +13,8 @@
     ".": {
       "require": "./dist/preact.js",
       "import": "./dist/preact.module.js",
-      "browser": "./dist/preact.umd.js"
+      "browser": "./dist/preact.module.js",
+      "umd": "./dist/preact.umd.js"
     },
     "./compat": {
       "require": "./compat/dist/compat.js",
