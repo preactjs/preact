@@ -163,9 +163,11 @@ export function diff(
 			c._parentDom = parentDom;
 
 			tmp = c.render(c.props, c.state, c.context);
-			let isTopLevelFragment =
-				tmp != null && tmp.type == Fragment && tmp.key == null;
-			newVNode._children = isTopLevelFragment ? tmp.props.children : tmp;
+
+			newVNode._children =
+				tmp != null && tmp.type == Fragment && tmp.key == null
+					? tmp.props.children
+					: tmp;
 
 			if (c.getChildContext != null) {
 				context = assign(assign({}, context), c.getChildContext());
