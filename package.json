@@ -42,7 +42,9 @@
     },
     "./compat/server": {
       "require": "./compat/server.js"
-    }
+    },
+    "./package.json": "./package.json",
+    "./": "./"
   },
   "license": "MIT",
   "funding": {
