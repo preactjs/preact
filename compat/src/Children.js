@@ -3,7 +3,7 @@ import { toChildArray } from 'preact';
 const mapFn = (children, fn) => {
 	if (!children) return null;
 	return toChildArray(children).reduce(
-		(acc, value) => acc.concat(fn(value)),
+		(acc, value, index) => acc.concat(fn(value, index)),
 		[]
 	);
 };
