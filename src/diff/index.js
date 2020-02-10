@@ -163,7 +163,6 @@ export function diff(
 			c._parentDom = parentDom;
 
 			tmp = c.render(c.props, c.state, c.context);
-
 			let isTopLevelFragment =
 				tmp != null && tmp.type == Fragment && tmp.key == null;
 			newVNode._children = isTopLevelFragment ? tmp.props.children : tmp;
