@@ -1,0 +1,24 @@
+html, body {
+  font: 14px system-ui, sans-serif;
+}
+.list {
+  list-style: none;
+  padding: 0;
+}
+.list > li {
+  position: relative;
+  padding: 5px 10px;
+  animation: fadeIn 1s ease;
+}
+@keyframes fadeIn {
+  0% {
+    box-shadow: inset 0 0 2px 2px red,
+                0 0 2px 2px red;
+  }
+}
+.list > .odd {
+  background-color: #def;
+}
+.list > .even {
+  background-color: #fed;
+}

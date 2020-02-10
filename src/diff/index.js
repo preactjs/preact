@@ -1,7 +1,7 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component } from '../component';
 import { Fragment } from '../create-element';
-import { diffChildren, toChildArray } from './children';
+import { diffChildren } from './children';
 import { diffProps } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
@@ -113,7 +113,7 @@ export function diff(
 			} else {
 				if (
 					newType.getDerivedStateFromProps == null &&
-					c._force == null &&
+					newProps !== oldProps &&
 					c.componentWillReceiveProps != null
 				) {
 					c.componentWillReceiveProps(newProps, cctx);
@@ -165,9 +165,7 @@ export function diff(
 			tmp = c.render(c.props, c.state, c.context);
 			let isTopLevelFragment =
 				tmp != null && tmp.type == Fragment && tmp.key == null;
-			newVNode._children = toChildArray(
-				isTopLevelFragment ? tmp.props.children : tmp
-			);
+			newVNode._children = isTopLevelFragment ? tmp.props.children : tmp;
 
 			if (c.getChildContext != null) {
 				context = assign(assign({}, context), c.getChildContext());
@@ -199,7 +197,7 @@ export function diff(
 				c._pendingError = c._processingException = null;
 			}
 
-			c._force = null;
+			c._force = false;
 		} else {
 			newVNode._dom = diffElementNodes(
 				oldVNode._dom,
@@ -294,9 +292,13 @@ function diffElementNodes(
 		if (newVNode.type === null) {
 			return document.createTextNode(newProps);
 		}
+
 		dom = isSvg
 			? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type)
-			: document.createElement(newVNode.type);
+			: document.createElement(
+					newVNode.type,
+					newProps.is && { is: newProps.is }
+			  );
 		// we created a new parent, so none of the previously attached children can be reused:
 		excessDomChildren = null;
 	}
@@ -306,11 +308,12 @@ function diffElementNodes(
 			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
 		}
 
-		if (oldProps !== newProps) {
+		if (oldProps !== newProps && dom.data != newProps) {
 			dom.data = newProps;
 		}
 	} else if (newVNode !== oldVNode) {
 		if (excessDomChildren != null) {
+			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 
@@ -406,7 +409,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	if (options.unmount) options.unmount(vnode);
 
 	if ((r = vnode.ref)) {
-		applyRef(r, null, parentVNode);
+		if (!r.current || r.current === vnode._dom) applyRef(r, null, parentVNode);
 	}
 
 	let dom;
@@ -414,7 +417,9 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		skipRemove = (dom = vnode._dom) != null;
 	}
 
-	vnode._dom = vnode._lastDomChild = null;
+	// Must be set to `undefined` to properly clean up `_nextDom`
+	// for which `null` is a valid value. See comment in `create-element.js`
+	vnode._dom = vnode._nextDom = undefined;
 
 	if ((r = vnode._component) != null) {
 		if (r.componentWillUnmount) {

@@ -1,6 +1,7 @@
 /*eslint no-var:0, object-shorthand:0 */
 
 var coverage = String(process.env.COVERAGE) === 'true',
+	minify = String(process.env.MINIFY) === 'true',
 	ci = String(process.env.CI).match(/^(1|true)$/gi),
 	pullRequest = !String(process.env.TRAVIS_PULL_REQUEST).match(
 		/^(0|false|undefined)$/gi
@@ -61,13 +62,16 @@ var localLaunchers = {
 	}
 };
 
+const subPkgPath = pkgName =>
+	path.join(__dirname, pkgName, !minify ? 'src' : '');
+
 module.exports = function(config) {
 	config.set({
 		browsers: sauceLabs
 			? Object.keys(sauceLabsLaunchers)
 			: Object.keys(localLaunchers),
 
-		frameworks: ['source-map-support', 'mocha', 'chai-sinon'],
+		frameworks: ['mocha', 'chai-sinon'],
 
 		reporters: ['mocha'].concat(
 			coverage ? 'coverage' : [],
@@ -134,15 +138,24 @@ module.exports = function(config) {
 
 				/* Transpile source and test files */
 				rules: [
+					// Special case for sinon.js which ships ES2015+ code in their
+					// esm bundle
 					{
-						enforce: 'pre',
+						test: /node_modules\/sinon\/.*\.jsx?$/,
+						loader: 'babel-loader'
+					},
+
+					{
 						test: /\.jsx?$/,
 						exclude: /node_modules/,
 						loader: 'babel-loader',
 						options: {
-							plugins: coverage
-								? [['istanbul', { include: '**/src/**/*.js' }]]
-								: []
+							plugins: [
+								coverage && [
+									'istanbul',
+									{ include: minify ? '**/dist/**/*.js' : '**/src/**/*.js' }
+								]
+							].filter(Boolean)
 						}
 					}
 				]
@@ -152,19 +165,19 @@ module.exports = function(config) {
 				// rather than referencing source files inside the module
 				// directly
 				alias: {
-					'preact/debug': path.join(__dirname, './debug/src'),
-					'preact/compat': path.join(__dirname, './compat/src'),
-					'preact/hooks': path.join(__dirname, './hooks/src'),
-					'preact/test-utils': path.join(__dirname, './test-utils/src'),
-					preact: path.join(__dirname, './src')
+					'preact/debug': subPkgPath('./debug/'),
+					'preact/devtools': subPkgPath('./devtools/'),
+					'preact/compat': subPkgPath('./compat/'),
+					'preact/hooks': subPkgPath('./hooks/'),
+					'preact/test-utils': subPkgPath('./test-utils/'),
+					preact: subPkgPath('')
 				}
 			},
 			plugins: [
 				new webpack.DefinePlugin({
 					coverage: coverage,
 					NODE_ENV: JSON.stringify(process.env.NODE_ENV || ''),
-					ENABLE_PERFORMANCE: performance,
-					DISABLE_FLAKEY: !!String(process.env.FLAKEY).match(/^(0|false)$/gi)
+					ENABLE_PERFORMANCE: performance
 				})
 			],
 			performance: {

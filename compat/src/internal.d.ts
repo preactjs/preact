@@ -37,6 +37,7 @@ export interface SuspenseState {
 
 export interface SuspenseComponent
 	extends PreactComponent<SuspenseProps, SuspenseState> {
-	_suspensions: number;
+	_pendingSuspensionCount: number;
+	_suspenders: Component[];
 	_detachOnNextRender: null | VNode<any>;
 }

@@ -5,7 +5,8 @@ import React, {
 	Component,
 	Suspense,
 	lazy,
-	Fragment
+	Fragment,
+	createContext
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
@@ -13,7 +14,7 @@ const h = React.createElement;
 /* eslint-env browser, mocha */
 
 /**
- * @typedef {import('../../../src').ComponentType} ComponentType
+ * @typedef {import('../../../src').ComponentType<any>} ComponentType
  * @returns {[typeof Component, (c: ComponentType) => Promise<void>, (c: ComponentType) => void]}
  */
 function createLazy() {
@@ -55,7 +56,7 @@ export function createSuspender(DefaultComponent) {
 		}
 
 		render(props, state) {
-			return state.Lazy ? h(state.Lazy, {}) : h(DefaultComponent, {});
+			return state.Lazy ? h(state.Lazy, props) : h(DefaultComponent, props);
 		}
 	}
 
@@ -129,7 +130,7 @@ describe('suspense', () => {
 	});
 
 	it('should support lazy', () => {
-		const LazyComp = () => <div>Hello from LazyComp</div>;
+		const LazyComp = ({ name }) => <div>Hello from {name}</div>;
 
 		/** @type {() => Promise<void>} */
 		let resolve;
@@ -146,7 +147,7 @@ describe('suspense', () => {
 
 		render(
 			<Suspense fallback={<div>Suspended...</div>}>
-				<Lazy />
+				<Lazy name="LazyComp" />
 			</Suspense>,
 			scratch
 		); // Render initial state
@@ -1327,5 +1328,255 @@ describe('suspense', () => {
 		expect(suspender).not.to.be.null;
 		expect(cWUSpy.getCall(0).thisValue).to.eql(suspender);
 		expect(scratch.innerHTML).to.eql(`<div>conditional hide</div>`);
+	});
+
+	xit('should support sCU=false when un-suspending', () => {
+		// See #2176 #2125
+		const [Suspender, suspend] = createSuspender(() => <div>Hello</div>);
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				Text
+				{/* Adding a <div> here will make things work... */}
+				<Suspender />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(`Text<div>Hello</div>`);
+
+		const [resolve] = suspend();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+
+		Suspender.prototype.shouldComponentUpdate = () => false;
+
+		return resolve(() => <div>Hello 2</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(`Text<div>Hello 2</div>`);
+		});
+	});
+
+	xit('should allow suspended children to update', () => {
+		const log = [];
+		class Logger extends Component {
+			constructor(props) {
+				super(props);
+				log.push('construct');
+			}
+
+			render({ children }) {
+				log.push('render');
+				return children;
+			}
+		}
+
+		let suspender;
+		class Suspender extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { promise: new Promise(() => {}) };
+				suspender = this;
+			}
+
+			unsuspend() {
+				this.setState({ promise: null });
+			}
+
+			render() {
+				if (this.state.promise) {
+					throw this.state.promise;
+				}
+
+				return 'hello';
+			}
+		}
+
+		render(
+			<section>
+				<Suspense fallback={<div>fallback</div>}>
+					<Suspender />
+					<Logger />
+				</Suspense>
+			</section>,
+			scratch
+		);
+
+		expect(log).to.eql(['construct', 'render']);
+		expect(scratch.innerHTML).to.eql('<section></section>');
+
+		// this rerender is needed because of Suspense issuing a forceUpdate itself
+		rerender();
+		expect(scratch.innerHTML).to.eql('<section><div>fallback</div></section>');
+
+		suspender.unsuspend();
+
+		rerender();
+
+		/**
+		 * These currently failing assertion shows the issue that we currently unmount
+		 * the suspended tree (unlike react, which adds a display="none") and block any
+		 * further processing on that tree. Thus updates below a suspended Suspense are
+		 * getting lost.
+		 */
+		expect(log).to.eql(['construct', 'render', 'render']);
+
+		/**
+		 * When the above assertion will hold true we will certainly run into the second issue
+		 * here. The problem is that we do not remove suspensions from an instance of Suspense
+		 * when one of its suspending children no longer throws because of a state
+		 * update.
+		 */
+		expect(scratch.innerHTML).to.eql(
+			'<section><div>Suspender un-suspended</div></section>'
+		);
+	});
+
+	it('should render delayed lazy components through components using shouldComponentUpdate', () => {
+		const [Suspender1, suspend1] = createSuspender(() => <i>1</i>);
+		const [Suspender2, suspend2] = createSuspender(() => <i>2</i>);
+
+		class Blocker extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+			render(props) {
+				return (
+					<b>
+						<i>a</i>
+						{props.children}
+						<i>d</i>
+					</b>
+				);
+			}
+		}
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Blocker>
+					<Suspender1 />
+					<Suspender2 />
+				</Blocker>
+			</Suspense>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<b><i>a</i><i>1</i><i>2</i><i>d</i></b>'
+		);
+
+		const [resolve1] = suspend1();
+		const [resolve2] = suspend2();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		return resolve1(() => <i>b</i>)
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+				return resolve2(() => <i>c</i>);
+			})
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal(
+					'<b><i>a</i><i>b</i><i>c</i><i>d</i></b>'
+				);
+			});
+	});
+
+	it('should render initially lazy components through components using shouldComponentUpdate', () => {
+		const [Lazy1, resolve1] = createLazy();
+		const [Lazy2, resolve2] = createLazy();
+
+		class Blocker extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+			render(props) {
+				return (
+					<b>
+						<i>a</i>
+						{props.children}
+						<i>d</i>
+					</b>
+				);
+			}
+		}
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Blocker>
+					<Lazy1 />
+					<Lazy2 />
+				</Blocker>
+			</Suspense>,
+			scratch
+		);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		return resolve1(() => <i>b</i>)
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+				return resolve2(() => <i>c</i>);
+			})
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal(
+					'<b><i>a</i><i>b</i><i>c</i><i>d</i></b>'
+				);
+			});
+	});
+
+	it('should render initially lazy components through createContext', () => {
+		const ctx = createContext(null);
+		const [Lazy, resolve] = createLazy();
+
+		const suspense = (
+			<Suspense fallback={<div>Suspended...</div>}>
+				<ctx.Provider value="123">
+					<ctx.Consumer>{value => <Lazy value={value} />}</ctx.Consumer>
+				</ctx.Provider>
+			</Suspense>
+		);
+
+		render(suspense, scratch);
+		rerender();
+		expect(scratch.innerHTML).to.equal(`<div>Suspended...</div>`);
+
+		return resolve(props => <div>{props.value}</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(`<div>123</div>`);
+		});
+	});
+
+	it('should render delayed lazy components through createContext', () => {
+		const ctx = createContext(null);
+		const [Suspender, suspend] = createSuspender(({ value }) => (
+			<span>{value}</span>
+		));
+
+		const suspense = (
+			<Suspense fallback={<div>Suspended...</div>}>
+				<ctx.Provider value="123">
+					<ctx.Consumer>{value => <Suspender value={value} />}</ctx.Consumer>
+				</ctx.Provider>
+			</Suspense>
+		);
+
+		render(suspense, scratch);
+		expect(scratch.innerHTML).to.equal('<span>123</span>');
+
+		const [resolve] = suspend();
+		rerender();
+		expect(scratch.innerHTML).to.equal(`<div>Suspended...</div>`);
+
+		return resolve(props => <div>{props.value}</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(`<div>123</div>`);
+		});
 	});
 });
