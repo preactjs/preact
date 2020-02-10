@@ -11,40 +11,39 @@
   "source": "src/index.js",
   "exports": {
     ".": {
-      "require": "./dist/preact.js",
-      "import": "./dist/preact.module.js",
       "browser": "./dist/preact.module.js",
-      "umd": "./dist/preact.umd.js"
+      "umd": "./dist/preact.umd.js",
+      "import": "./dist/preact.module.js",
+      "require": "./dist/preact.js"
     },
     "./compat": {
-      "require": "./compat/dist/compat.js",
-      "import": "./compat/dist/compat.module.js",
       "browser": "./compat/dist/compat.module.js",
       "umd": "./compat/dist/compat.umd.js"
+      "require": "./compat/dist/compat.js",
+      "import": "./compat/dist/compat.module.js"
     },
     "./debug": {
-      "require": "./debug/dist/debug.js",
-      "import": "./debug/dist/debug.module.js",
       "browser": "./debug/dist/debug.module.js",
       "umd": "./debug/dist/debug.umd.js"
+      "require": "./debug/dist/debug.js",
+      "import": "./debug/dist/debug.module.js"
     },
     "./hooks": {
-      "require": "./hooks/dist/hooks.js",
-      "import": "./hooks/dist/hooks.module.js",
       "browser": "./hooks/dist/hooks.module.js",
-      "umd": "./hooks/dist/hooks.umd.js"
+      "umd": "./hooks/dist/hooks.umd.js",
+      "require": "./hooks/dist/hooks.js",
+      "import": "./hooks/dist/hooks.module.js"
     },
     "./test-utils": {
-      "require": "./test-utils/dist/testUtils.js",
-      "import": "./test-utils/dist/testUtils.module.js",
       "browser": "./test-utils/dist/testUtils.module.js",
-      "umd": "./test-utils/dist/testUtils.umd.js"
+      "umd": "./test-utils/dist/testUtils.umd.js",
+      "require": "./test-utils/dist/testUtils.js",
+      "import": "./test-utils/dist/testUtils.module.js"
     },
     "./compat/server": {
       "require": "./compat/server.js"
     },
-    "./package.json": "./package.json",
-    "./": "./"
+    "./package.json": "./package.json"
   },
   "license": "MIT",
   "funding": {
