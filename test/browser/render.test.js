@@ -1,5 +1,3 @@
-/* global DISABLE_FLAKEY */
-
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component, options } from 'preact';
 import {
@@ -89,6 +87,10 @@ describe('render()', () => {
 		render(<span />, scratch);
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.childNodes[0].nodeName).to.equal('SPAN');
+	});
+
+	it('should not throw error in IE11 with type date', () => {
+		expect(() => render(<input type="date" />, scratch)).to.not.throw();
 	});
 
 	it('should support custom tag names', () => {
@@ -828,15 +830,13 @@ describe('render()', () => {
 
 				expect(click, 'click').to.have.been.calledOnce;
 
-				if (DISABLE_FLAKEY !== true) {
-					// Focus delegation requires a 50b hack I'm not sure we want to incur
-					expect(focus, 'focus').to.have.been.calledOnce;
+				// Focus delegation requires a 50b hack I'm not sure we want to incur
+				expect(focus, 'focus').to.have.been.calledOnce;
 
-					// IE doesn't set it
-					if (!/Edge/.test(navigator.userAgent)) {
-						expect(click).to.have.been.calledWithMatch({ eventPhase: 0 }); // capturing
-						expect(focus).to.have.been.calledWithMatch({ eventPhase: 0 }); // capturing
-					}
+				// IE doesn't set it
+				if (!/Edge/.test(navigator.userAgent)) {
+					expect(click).to.have.been.calledWithMatch({ eventPhase: 0 }); // capturing
+					expect(focus).to.have.been.calledWithMatch({ eventPhase: 0 }); // capturing
 				}
 			});
 		}
@@ -1000,6 +1000,15 @@ describe('render()', () => {
 			);
 		});
 	}
+
+	// Issue #2284
+	it('should not throw when setting size to an invalid value', () => {
+		// These values are usually used to reset the `size` attribute to its
+		// initial state.
+		expect(() => render(<input size={undefined} />, scratch)).to.not.throw();
+		expect(() => render(<input size={null} />, scratch)).to.not.throw();
+		expect(() => render(<input size={0} />, scratch)).to.not.throw();
+	});
 
 	it('should not execute append operation when child is at last', () => {
 		// See preactjs/preact#717 for discussion about the issue this addresses
@@ -1307,6 +1316,55 @@ describe('render()', () => {
 		options._diff = prevDiff;
 	});
 
+	describe('subsequent replaces', () => {
+		it("shouldn't remove elements", () => {
+			const placeholder = document.createElement('div');
+			scratch.appendChild(placeholder);
+			const App = () => (
+				<div>
+					New content
+					<button>Update</button>
+				</div>
+			);
+
+			render(<App />, scratch, placeholder);
+			expect(scratch.innerHTML).to.equal(
+				'<div>New content<button>Update</button></div>'
+			);
+
+			render(<App />, scratch, placeholder);
+			expect(scratch.innerHTML).to.equal(
+				'<div>New content<button>Update</button></div>'
+			);
+		});
+
+		it('should remove redundant elements', () => {
+			const placeholder = document.createElement('div');
+			scratch.appendChild(placeholder);
+			const App = () => (
+				<div>
+					New content
+					<button>Update</button>
+				</div>
+			);
+
+			render(<App />, scratch, placeholder);
+			expect(scratch.innerHTML).to.equal(
+				'<div>New content<button>Update</button></div>'
+			);
+
+			placeholder.appendChild(document.createElement('span'));
+			expect(scratch.innerHTML).to.equal(
+				'<div>New content<button>Update</button><span></span></div>'
+			);
+
+			render(<App />, scratch, placeholder);
+			expect(scratch.innerHTML).to.equal(
+				'<div>New content<button>Update</button></div>'
+			);
+		});
+	});
+
 	describe('replaceNode parameter', () => {
 		function appendChildToScratch(id) {
 			const child = document.createElement('div');
@@ -1370,6 +1428,38 @@ describe('render()', () => {
 			expect(mount).to.be.calledOnce;
 			render(<div id="a">new</div>, newScratch, newScratch.querySelector('#a'));
 			expect(newScratch.innerHTML).to.equal('<div id="a">new</div>');
+			expect(unmount).to.be.calledOnce;
+
+			newScratch.parentNode.removeChild(newScratch);
+		});
+
+		it('should unmount existing components in prerendered HTML', () => {
+			const newScratch = setupScratch();
+			const unmount = sinon.spy();
+			const mount = sinon.spy();
+			class App extends Component {
+				componentDidMount() {
+					mount();
+				}
+
+				componentWillUnmount() {
+					unmount();
+				}
+
+				render() {
+					return <span>App</span>;
+				}
+			}
+
+			newScratch.innerHTML = `<div id="child"></div>`;
+
+			const childContainer = newScratch.querySelector('#child');
+
+			render(<App />, childContainer);
+			expect(serializeHtml(childContainer)).to.equal('<span>App</span>');
+			expect(mount).to.be.calledOnce;
+			render(<div />, newScratch, newScratch.firstElementChild);
+			expect(serializeHtml(newScratch)).to.equal('<div id=""></div>');
 			expect(unmount).to.be.calledOnce;
 
 			newScratch.parentNode.removeChild(newScratch);

@@ -14,7 +14,7 @@ import KeyBug from './key_bug';
 import StateOrderBug from './stateOrderBug';
 import PeopleBrowser from './people';
 import StyledComp from './styled-components';
-import { initDevTools } from 'preact/debug/src/devtools';
+import { initDevTools } from 'preact/devtools/src/devtools';
 import { initDebug } from 'preact/debug/src/debug';
 import DevtoolsDemo from './devtools';
 import SuspenseDemo from './suspense';

@@ -11,7 +11,7 @@ options._catchError = function(error, newVNode, oldVNode) {
 		for (; (vnode = vnode._parent); ) {
 			if ((component = vnode._component) && component._childDidSuspend) {
 				// Don't call oldCatchError if we found a Suspense
-				return component._childDidSuspend(error);
+				return component._childDidSuspend(error, newVNode._component);
 			}
 		}
 	}
@@ -30,7 +30,8 @@ function detachedClone(vnode) {
 // having custom inheritance instead of a class here saves a lot of bytes
 export function Suspense(props) {
 	// we do not call super here to golf some bytes...
-	this._suspensions = 0;
+	this._pendingSuspensionCount = 0;
+	this._suspenders = null;
 	this._detachOnNextRender = null;
 }
 
@@ -41,14 +42,25 @@ Suspense.prototype = new Component();
 
 /**
  * @param {Promise} promise The thrown promise
+ * @param {Component<any, any>} suspendingComponent The suspending component
  */
-Suspense.prototype._childDidSuspend = function(promise) {
+Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 	/** @type {import('./internal').SuspenseComponent} */
 	const c = this;
 
+	if (c._suspenders == null) {
+		c._suspenders = [];
+	}
+	c._suspenders.push(suspendingComponent);
+
 	const resolve = suspended(c._vnode);
 
+	let resolved = false;
 	const onResolved = () => {
+		if (resolved) return;
+
+		resolved = true;
+
 		if (resolve) {
 			resolve(onSuspensionComplete);
 		} else {
@@ -56,14 +68,29 @@ Suspense.prototype._childDidSuspend = function(promise) {
 		}
 	};
 
-	const onSuspensionComplete = () => {
-		if (!--c._suspensions) {
-			c._vnode._children[0] = c.state._suspended;
-			c.setState({ _suspended: (c._detachOnNextRender = null) });
+	suspendingComponent._suspendedComponentWillUnmount =
+		suspendingComponent.componentWillUnmount;
+	suspendingComponent.componentWillUnmount = () => {
+		onResolved();
+
+		if (suspendingComponent._suspendedComponentWillUnmount) {
+			suspendingComponent._suspendedComponentWillUnmount();
 		}
 	};
 
-	if (!c._suspensions++) {
+	const onSuspensionComplete = () => {
+		if (!--c._pendingSuspensionCount) {
+			c._vnode._children[0] = c.state._suspended;
+			c.setState({ _suspended: (c._detachOnNextRender = null) });
+
+			let suspended;
+			while ((suspended = c._suspenders.pop())) {
+				suspended.forceUpdate();
+			}
+		}
+	};
+
+	if (!c._pendingSuspensionCount++) {
 		c.setState({ _suspended: (c._detachOnNextRender = c._vnode._children[0]) });
 	}
 	promise.then(onResolved, onResolved);
@@ -113,7 +140,7 @@ export function lazy(loader) {
 			prom = loader();
 			prom.then(
 				exports => {
-					component = exports.default;
+					component = exports.default || exports;
 				},
 				e => {
 					error = e;

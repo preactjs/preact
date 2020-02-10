@@ -46,10 +46,18 @@ options.diffed = vnode => {
 
 options._commit = (vnode, commitQueue) => {
 	commitQueue.some(component => {
-		component._renderCallbacks.forEach(invokeCleanup);
-		component._renderCallbacks = component._renderCallbacks.filter(cb =>
-			cb._value ? invokeEffect(cb) : true
-		);
+		try {
+			component._renderCallbacks.forEach(invokeCleanup);
+			component._renderCallbacks = component._renderCallbacks.filter(cb =>
+				cb._value ? invokeEffect(cb) : true
+			);
+		} catch (e) {
+			commitQueue.some(c => {
+				if (c._renderCallbacks) c._renderCallbacks = [];
+			});
+			commitQueue = [];
+			options._catchError(e, component._vnode);
+		}
 	});
 
 	if (oldCommit) oldCommit(vnode, commitQueue);
@@ -63,7 +71,11 @@ options.unmount = vnode => {
 
 	const hooks = c.__hooks;
 	if (hooks) {
-		hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
+		try {
+			hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
+		} catch (e) {
+			options._catchError(e, c._vnode);
+		}
 	}
 };
 
@@ -222,15 +234,38 @@ export function useDebugValue(value, formatter) {
 	}
 }
 
+export function useErrorBoundary(cb) {
+	const state = getHookState(currentIndex++);
+	const errState = useState();
+	state._value = cb;
+	if (!currentComponent.componentDidCatch) {
+		currentComponent.componentDidCatch = err => {
+			if (state._value) state._value(err);
+			errState[1](err);
+		};
+	}
+	return [
+		errState[0],
+		() => {
+			errState[1](undefined);
+		}
+	];
+}
+
 /**
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
 	afterPaintEffects.some(component => {
 		if (component._parentDom) {
-			component.__hooks._pendingEffects.forEach(invokeCleanup);
-			component.__hooks._pendingEffects.forEach(invokeEffect);
-			component.__hooks._pendingEffects = [];
+			try {
+				component.__hooks._pendingEffects.forEach(invokeCleanup);
+				component.__hooks._pendingEffects.forEach(invokeEffect);
+				component.__hooks._pendingEffects = [];
+			} catch (e) {
+				options._catchError(e, component._vnode);
+				return true;
+			}
 		}
 	});
 	afterPaintEffects = [];
@@ -270,8 +305,6 @@ function afterNextFrame(callback) {
 function afterPaint(newQueueLength) {
 	if (newQueueLength === 1 || prevRaf !== options.requestAnimationFrame) {
 		prevRaf = options.requestAnimationFrame;
-
-		/* istanbul ignore next */
 		(prevRaf || afterNextFrame)(flushAfterPaintEffects);
 	}
 }

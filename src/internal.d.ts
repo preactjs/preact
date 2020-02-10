@@ -57,7 +57,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	/**
 	 * The last dom child of a Fragment, or components that return a Fragment
 	 */
-	_lastDomChild: PreactElement | Text | null;
+	_nextDom: PreactElement | Text | null;
 	_component: Component | null;
 	constructor: undefined;
 }
@@ -69,7 +69,7 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	base?: PreactElement;
 
 	_dirty: boolean;
-	_force?: boolean | null;
+	_force?: boolean;
 	_renderCallbacks: Array<() => void>; // Only class components
 	_context?: any;
 	_vnode?: VNode<P> | null;

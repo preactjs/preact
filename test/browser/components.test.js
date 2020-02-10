@@ -1774,25 +1774,30 @@ describe('Components', () => {
 			}
 		}
 
+		// TODO: Consider rewriting test to not rely on internal properties
+		// and instead capture user-facing bug that would occur if this
+		// behavior were broken
+		const getDom = c => ('__v' in c ? c.__v.__e : c._vnode._dom);
+
 		render(<App />, scratch);
-		expect(child._vnode._dom).to.equalNode(child.base);
+		expect(getDom(child)).to.equalNode(child.base);
 
 		app.forceUpdate();
-		expect(child._vnode._dom).to.equalNode(child.base);
+		expect(getDom(child)).to.equalNode(child.base);
 
 		parent.setState({});
 		condition = true;
 		child.forceUpdate();
-		expect(child._vnode._dom).to.equalNode(child.base);
+		expect(getDom(child)).to.equalNode(child.base);
 		rerender();
 
-		expect(child._vnode._dom).to.equalNode(child.base);
+		expect(getDom(child)).to.equalNode(child.base);
 
 		condition = false;
 		app.setState({});
 		child.forceUpdate();
 		rerender();
-		expect(child._vnode._dom).to.equalNode(child.base);
+		expect(getDom(child)).to.equalNode(child.base);
 	});
 
 	// preact/#1323
@@ -2126,7 +2131,7 @@ describe('Components', () => {
 			toggleMaybeNull();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([p('child')].join(''));
+			expect(scratch.innerHTML).to.equal(p('child'));
 			expect(maybe.base).to.equalNode(null, 'toggleMaybe - maybe.base');
 			expect(child.base).to.equalNode(
 				scratch.firstChild,
@@ -2144,7 +2149,7 @@ describe('Components', () => {
 			swapChildTag();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([span('child')].join(''));
+			expect(scratch.innerHTML).to.equal(span('child'));
 			expect(maybe.base).to.equalNode(null, 'swapChildTag - maybe.base');
 			expect(child.base).to.equalNode(
 				scratch.firstChild,
@@ -2171,7 +2176,7 @@ describe('Components', () => {
 				scratch
 			);
 
-			expect(scratch.innerHTML).to.equal([p('child')].join(''));
+			expect(scratch.innerHTML).to.equal(p('child'));
 			expect(maybe.base).to.equalNode(null, 'initial - maybe.base');
 			expect(child.base).to.equalNode(
 				scratch.firstChild,
@@ -2183,7 +2188,7 @@ describe('Components', () => {
 			swapChildTag();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([span('child')].join(''));
+			expect(scratch.innerHTML).to.equal(span('child'));
 			expect(maybe.base).to.equalNode(null, 'swapChildTag - maybe.base');
 			expect(child.base).to.equalNode(
 				scratch.firstChild,
@@ -2250,7 +2255,7 @@ describe('Components', () => {
 			toggleMaybeNull();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([p('child')].join(''));
+			expect(scratch.innerHTML).to.equal(p('child'));
 			expect(maybe.base).to.equalNode(null, 'toggleMaybe - maybe.base');
 			expect(child.base).to.equalNode(
 				scratch.firstChild,
@@ -2268,7 +2273,7 @@ describe('Components', () => {
 			swapChildTag();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([span('child')].join(''));
+			expect(scratch.innerHTML).to.equal(span('child'));
 			expect(maybe.base).to.equalNode(null, 'swapChildTag - maybe.base');
 			expect(child.base).to.equalNode(
 				scratch.firstChild,
@@ -2297,7 +2302,7 @@ describe('Components', () => {
 				scratch
 			);
 
-			expect(scratch.innerHTML).to.equal([p('child')].join(''));
+			expect(scratch.innerHTML).to.equal(p('child'));
 			expect(maybe.base).to.equalNode(null, 'initial - maybe.base');
 			expect(child.base).to.equalNode(
 				scratch.firstChild,
@@ -2309,7 +2314,7 @@ describe('Components', () => {
 			swapChildTag();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([span('child')].join(''));
+			expect(scratch.innerHTML).to.equal(span('child'));
 			expect(maybe.base).to.equalNode(null, 'swapChildTag - maybe.base');
 			expect(child.base).to.equalNode(
 				scratch.firstChild,
@@ -2384,7 +2389,7 @@ describe('Components', () => {
 			toggleMaybeNull();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal([p('child')].join(''));
+			expect(scratch.innerHTML).to.equal(p('child'));
 			expect(maybe.base).to.equalNode(null, 'toggleMaybe - maybe.base');
 			expect(child.base).to.equalNode(
 				scratch.firstChild,
@@ -2421,7 +2426,7 @@ describe('Components', () => {
 				scratch
 			);
 
-			expect(scratch.innerHTML).to.equal([p('child')].join(''));
+			expect(scratch.innerHTML).to.equal(p('child'));
 			expect(maybe.base).to.equalNode(null, 'initial - maybe.base');
 			expect(child.base).to.equalNode(
 				scratch.firstChild,
@@ -2465,8 +2470,13 @@ describe('Components', () => {
 			);
 			render(divVNode, scratch);
 
+			// TODO: Consider rewriting test to not rely on internal properties
+			// and instead capture user-facing bug that would occur if this
+			// behavior were broken
+			const domProp = '__e' in divVNode ? '__e' : '_dom';
+
 			expect(scratch.innerHTML).to.equal('<div><p>child</p></div>');
-			expect(divVNode._dom).to.equalNode(
+			expect(divVNode[domProp]).to.equalNode(
 				scratch.firstChild,
 				'initial - divVNode._dom'
 			);
@@ -2479,7 +2489,7 @@ describe('Components', () => {
 			rerender();
 
 			expect(scratch.innerHTML).to.equal('<div><span>child</span></div>');
-			expect(divVNode._dom).to.equalNode(
+			expect(divVNode[domProp]).to.equalNode(
 				scratch.firstChild,
 				'swapChildTag - divVNode._dom'
 			);
