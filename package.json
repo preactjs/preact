@@ -18,13 +18,13 @@
     },
     "./compat": {
       "browser": "./compat/dist/compat.module.js",
-      "umd": "./compat/dist/compat.umd.js"
+      "umd": "./compat/dist/compat.umd.js",
       "require": "./compat/dist/compat.js",
       "import": "./compat/dist/compat.module.js"
     },
     "./debug": {
       "browser": "./debug/dist/debug.module.js",
-      "umd": "./debug/dist/debug.umd.js"
+      "umd": "./debug/dist/debug.umd.js",
       "require": "./debug/dist/debug.js",
       "import": "./debug/dist/debug.module.js"
     },
