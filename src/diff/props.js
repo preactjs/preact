@@ -99,7 +99,10 @@ function setProperty(dom, name, value, oldValue, isSvg, type) {
 		name = (nameLower in dom ? nameLower : name).slice(2);
 		
 		// Fix onInput not firing on select/radio/checkbox in Edge <= 18.
-		if (name === 'input' && /^(select|input(rad|che))$/.test(type+props.type)) name = 'change';
+		if (name === 'input' && (
+			type === 'select' ||
+			type === 'input' && /rad|check/.test(props.type)
+		)) name = 'change';
 
 		if (value) {
 			if (!oldValue) dom.addEventListener(name, eventProxy, useCapture);
