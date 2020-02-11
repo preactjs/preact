@@ -339,9 +339,9 @@ function diffElementNodes(
 				}
 			}
 
-			if (newVNode.type === 'select' && newProps.onInput) {
+			if (newVNode.type === 'select') {
 				newProps.onChange = newProps.onInput;
-				delete newProps.onInput;
+				newProps.onInput = undefined;
 			}
 		}
 
