@@ -30,8 +30,8 @@ declare namespace React {
 	export import useState = _hooks.useState;
 
 	// Preact Defaults
-	export type Component<P = {}, S = {}, SS = any> = preact.Component<P, S>;
-	export type ReactElement<P = {}, S = any> = preact.VNode<P>;
+	export interface Component<P = {}, S = {}, SS = any> extends preact.Component<P, S> {}
+	export interface ReactElement<P = {}, S = any> extends preact.VNode<P> {}
 	export import ComponentClass = preact.ComponentClass;
 	export import ComponentType = preact.ComponentType;
 	export import Context = preact.Context;
