@@ -62,7 +62,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	} else if (name === 'class') {
 		name = 'className';
 	}
-
+	
 	if (name === 'key' || name === 'children') {
 	} else if (name === 'style') {
 		const s = dom.style;
@@ -97,6 +97,10 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		let useCapture = name !== (name = name.replace(/Capture$/, ''));
 		let nameLower = name.toLowerCase();
 		name = (nameLower in dom ? nameLower : name).slice(2);
+		
+		// Fix <select onInput> not firing in Edge <= 18.
+		// We test for .options here because the text is already in source.
+		if (name === 'input' && 'options' in dom) name = 'change';
 
 		if (value) {
 			if (!oldValue) dom.addEventListener(name, eventProxy, useCapture);
