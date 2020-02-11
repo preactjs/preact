@@ -48,7 +48,14 @@ describe('Select', () => {
 
 	it('should alias onInput to onChange', () => {
 		const func = () => {};
-		render(<select onInput={func} />, scratch);
+		render(
+			<select onInput={func}>
+				<option value="A">A</option>
+				<option value="B">B</option>
+				<option value="C">C</option>
+			</select>,
+			scratch
+		);
 
 		expect(scratch.firstChild._listeners.change).to.not.be.undefined;
 		expect(scratch.firstChild._listeners.input).to.be.undefined;
