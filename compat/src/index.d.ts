@@ -31,13 +31,14 @@ declare namespace React {
 
 	// Preact Defaults
 	export interface Component<P = {}, S = {}, SS = any> extends preact.Component<P, S> {}
+	export abstract class Component<P, S> extends preact.Component<P, S> {}
 	export interface ReactElement<P = {}, S = any> extends preact.VNode<P> {}
 	export import ComponentClass = preact.ComponentClass;
 	export import ComponentType = preact.ComponentType;
 	export import Context = preact.Context;
 	export import ReactNode = preact.ComponentChildren;
 	export type CSSProperties = string | {[key: string]: string | number};
-	export type AllHTMLAttributes<T> = JSX.HTMLAttributes;
+	export interface AllHTMLAttributes<T> extends JSX.HTMLAttributes {}
 	export import FunctionComponent = preact.FunctionComponent;
 	export import FC = preact.FunctionComponent;
 	export import createContext = preact.createContext;
