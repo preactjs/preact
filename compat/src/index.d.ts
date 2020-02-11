@@ -1,6 +1,6 @@
 import * as _hooks from '../../hooks';
 import * as preact from '../../src';
-import { JSXInternal } from '../../src/jsx';
+import * as JSXInternal from './jsx';
 import * as _Suspense from './suspense';
 
 // export default React;
@@ -30,7 +30,14 @@ declare namespace React {
 	export import useState = _hooks.useState;
 
 	// Preact Defaults
-	export import Component = preact.Component;
+	export type Component<P = {}, S = {}, SS = any> = preact.Component<P, S>;
+    export type ReactElement<P = {}, S = any> = preact.VNode<P>;
+    export import ComponentClass = preact.ComponentClass;
+    export import ComponentType = preact.ComponentType;
+    export import Context = preact.Context;
+    export import ReactNode = preact.ComponentChildren;
+    export type CSSProperties = string | {[key: string]: string | number};
+	export type AllHTMLAttributes<T> = JSX.HTMLAttributes;
 	export import FunctionComponent = preact.FunctionComponent;
 	export import FC = preact.FunctionComponent;
 	export import createContext = preact.createContext;
@@ -105,14 +112,15 @@ declare namespace React {
 	export const Children: {
 		map<T extends preact.ComponentChild, R>(
 			children: T | T[],
-			fn: (child: T, i: number) => R
+			fn: (child: T, i: number, array: T[]) => R
 		): R[];
 		forEach<T extends preact.ComponentChild>(
 			children: T | T[],
-			fn: (child: T, i: number) => void
+			fn: (child: T, i: number, array: T[]) => void
 		): void;
 		count: (children: preact.ComponentChildren) => number;
 		only: (children: preact.ComponentChildren) => preact.ComponentChild;
 		toArray: (children: preact.ComponentChildren) => preact.VNode<{}>[];
 	};
+
 }
