@@ -130,4 +130,4 @@ export function useDebugValue<T>(
 
 export function useErrorBoundary(
 	callback?: () => Promise<void> | void
-): [string | undefined, () => void];
+): [any, () => void];
