@@ -338,6 +338,11 @@ function diffElementNodes(
 					dom.innerHTML = (newHtml && newHtml.__html) || '';
 				}
 			}
+
+			if (newVNode.type === 'select' && newProps.onInput) {
+				newProps.onChange = newProps.onInput;
+				delete newProps.onInput;
+			}
 		}
 
 		diffProps(dom, newProps, oldProps, isSvg, isHydrating);

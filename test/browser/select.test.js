@@ -46,6 +46,14 @@ describe('Select', () => {
 		expect(scratch.firstChild.value).to.equal('B');
 	});
 
+	it('should alias onInput to onChange', () => {
+		const func = () => {};
+		render(<select onInput={func} />, scratch);
+
+		expect(scratch.firstChild._listeners.change).to.not.be.undefined;
+		expect(scratch.firstChild._listeners.input).to.be.undefined;
+	});
+
 	it('should work with multiple selected', () => {
 		function App() {
 			return (
