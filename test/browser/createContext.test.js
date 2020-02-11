@@ -57,6 +57,39 @@ describe('createContext', () => {
 		expect(scratch.innerHTML).to.equal('<div><div>a</div></div>');
 	});
 
+	it('should support wrappers', () => {
+		const { Provider, Consumer } = createContext();
+		let set,
+			renders = 0;
+		const Layout = ({ children }) => {
+			renders++;
+			return children;
+		};
+		class State extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { i: 0 };
+				set = this.setState.bind(this);
+			}
+			render() {
+				const { children } = this.props;
+				return <Provider value={this.state}>{children}</Provider>;
+			}
+		}
+		const App = () => (
+			<State>
+				<Layout>
+					<Consumer>{({ i }) => <p>{i}</p>}</Consumer>
+				</Layout>
+			</State>
+		);
+		render(<App />, scratch);
+		expect(renders).to.equal(1);
+		set({ i: 2 });
+		rerender();
+		expect(renders).to.equal(1);
+	});
+
 	it('should preserve provider context through nesting providers', done => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { a: 'a' };
@@ -521,9 +554,9 @@ describe('createContext', () => {
 		});
 
 		// Rendered three times, should call 'Consumer' render two times
-		expect(Inner.prototype.render).to.have.been.calledTwice.and.calledWithMatch(
-			{ i: 2 }
-		);
+		expect(
+			Inner.prototype.render
+		).to.have.been.calledTwice.and.calledWithMatch({ i: 2 });
 		expect(scratch.innerHTML).to.equal('<div>2</div>');
 	});
 
