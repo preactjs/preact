@@ -340,7 +340,7 @@ function diffElementNodes(
 			}
 		}
 
-		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
+		diffProps(dom, newProps, oldProps, isSvg, isHydrating, newVNode.type);
 
 		newVNode._children = newVNode.props.children;
 
