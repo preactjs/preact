@@ -35,12 +35,18 @@ declare namespace React {
 	export interface ReactElement<P = {}, S = any> extends preact.VNode<P> {}
 	export import ComponentClass = preact.ComponentClass;
 	export import ComponentType = preact.ComponentType;
+	export import JSXElementConstructor = preact.AnyComponent;
+	export import Attributes = preact.Attributes;
+	export import ClassAttributes = preact.ClassAttributes;
 	export import Context = preact.Context;
+	export import Provider = preact.Provider;
 	export import ReactNode = preact.ComponentChildren;
+	export import ComponentPropsWithRef = preact.RenderableProps;
 	export type CSSProperties = string | {[key: string]: string | number};
 	export interface AllHTMLAttributes<T> extends JSX.HTMLAttributes {}
 	export import FunctionComponent = preact.FunctionComponent;
 	export import FC = preact.FunctionComponent;
+	export import SFC = preact.FunctionComponent;
 	export import createContext = preact.createContext;
 	export import createRef = preact.createRef;
 	export import Fragment = preact.Fragment;
@@ -113,11 +119,11 @@ declare namespace React {
 	export const Children: {
 		map<T extends preact.ComponentChild, R>(
 			children: T | T[],
-			fn: (child: T, i: number, array: T[]) => R
+			fn: (child: T, i: number) => R
 		): R[];
 		forEach<T extends preact.ComponentChild>(
 			children: T | T[],
-			fn: (child: T, i: number, array: T[]) => void
+			fn: (child: T, i: number) => void
 		): void;
 		count: (children: preact.ComponentChildren) => number;
 		only: (children: preact.ComponentChildren) => preact.ComponentChild;
