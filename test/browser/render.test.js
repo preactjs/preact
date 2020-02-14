@@ -433,6 +433,11 @@ describe('render()', () => {
 		expect(scratch.childNodes[0]).to.have.property('className', 'bar');
 	});
 
+	it('should support false aria-* attributes', () => {
+		render(<div aria-checked="false" />, scratch);
+		expect(scratch.firstChild.getAttribute('aria-checked')).to.equal('false');
+	});
+
 	describe('style attribute', () => {
 		it('should apply style as String', () => {
 			render(<div style="top: 5px; position: relative;" />, scratch);
