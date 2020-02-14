@@ -1,4 +1,5 @@
 import options from './options';
+import { assign } from './util';
 
 /**
  * Create an virtual node (used for JSX)
@@ -40,6 +41,28 @@ export function createElement(type, props, children) {
 		type,
 		normalizedProps,
 		props && props.key,
+		props && props.ref
+	);
+}
+
+/**
+ * Experimental support for JSX2
+ * https://github.com/reactjs/rfcs/blob/createlement-rfc/text/0000-create-element-changes.md
+ */
+export function jsx(type, props, key) {
+	if (typeof type === 'function' && type.defaultProps != null) {
+		props = props ? assign({}, props) : {};
+		for (i in type.defaultProps) {
+			if (props[i] === undefined) {
+				props[i] = type.defaultProps[i];
+			}
+		}
+	}
+
+	return createVNode(
+		type,
+		props,
+		key,
 		props && props.ref
 	);
 }
