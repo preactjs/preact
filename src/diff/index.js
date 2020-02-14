@@ -290,6 +290,11 @@ function diffElementNodes(
 
 	if (dom == null) {
 		if (newVNode.type === null) {
+			// During hydration, only the first Text node is attached.
+			// Subsequent updates will trigger splitting up into separate nodes.
+			// See https://github.com/preactjs/preact/wiki/Hydration-Design-Documentation
+			if (isHydrating && excessDomChildren != null) return null;
+
 			return document.createTextNode(newProps);
 		}
 
@@ -308,7 +313,12 @@ function diffElementNodes(
 			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
 		}
 
-		if (oldProps !== newProps && dom.data != newProps) {
+		// Text mutations during hydration are ignored.
+		// See https://github.com/preactjs/preact/wiki/Hydration-Design-Documentation
+		if (isHydrating && excessDomChildren != null) {
+			newVNode.props = dom.data;
+		}
+		else if (oldProps !== newProps) {
 			dom.data = newProps;
 		}
 	} else if (newVNode !== oldVNode) {
