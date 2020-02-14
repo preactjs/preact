@@ -1,19 +1,36 @@
 <!--
-🚨HOLD UP PLEASE 🚨
-Thank you for considering taking your time to open an issue but to prevent redundant issue please consider the following points:
+👋 Hi there! Thanks for taking the time to open an issue.
+ׁ
+Here's a guide to getting your issue resolved quickly:
+🗣 For help with Preact, ask on Slack: https://preact-slack.now.sh
+✨ Check for existing StackOverflow solutions: https://stackoverflow.com/search?q=preact
+📚 Check out our docs - for Preact 10: https://preactjs.com/guide/v10/getting-started
+🔎 Check if there's already an issue for your problem
+🛠 If your issue relates to preact-cli, please file at https://github.com/preactjs/preact-cli
+📑 For documentation or website issues, please file at https://github.com/preactjs/preact-www
+-->
 
-- for usage questions visit our slack: https://preact-slack.now.sh/
-- look on stackoverflow for existing solutions: https://stackoverflow.com/search?q=preact
-- check out our documentation: https://preactjs.com/guide/v10/getting-started (ensure you're on the right version)
-- maybe there's already an issue for your problem
-- ensure your question isn't related to preact-cli or the docs (preact-www)
+### Reproduction
 
-## Reproduction
+<!--
+If possible, please provide a CodeSandbox/Codepen that demonstrates the issue.
+ׁ
+Otherwise, we'll need the versions of Preact and related libraries you're using.
+For npm, copy & paste the output of this terminal command:
+  npm ls --depth 0 | grep preact
+-->
 
-**Include version and information if you can't reproduce**
+### Steps to reproduce
 
-## Steps to reproduce
+<!--
+It's sometimes difficult to understand what's happening in demos.
+List steps to take helps clarify - click this button, wait 5 seconds, etc.
+-->
 
-## Expected Behavior
+### Expected Behavior
 
-## Actual Behavior
+<!-- What should have happened when following the steps above? -->
+
+### Actual Behavior
+
+<!-- Here's what actually happened 😲 -->
