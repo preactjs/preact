@@ -6,7 +6,7 @@
   "minify": {
     "mangle": {
       "properties": {
-        "regex": "^_",
+        "regex": "^_[^_]",
         "reserved": [
           "__REACT_DEVTOOLS_GLOBAL_HOOK__",
           "__PREACT_DEVTOOLS__",
@@ -51,6 +51,7 @@
       "$_pendingError": "__E",
       "$_processingException": "__",
       "$_globalContext": "__n",
+      "$_context": "__c",
       "$_defaultValue": "__",
       "$_id": "__c",
       "$_contextRef": "__",
@@ -62,8 +63,9 @@
       "$_render": "__r",
       "$_hook": "__h",
       "$_catchError": "__e",
-      "$_unmount": "_e",
-      "$_owner": "__o"
+      "$_unmount": "__u",
+      "$_owner": "__o",
+      "$_skipEffects": "__s"
     }
   }
 }
