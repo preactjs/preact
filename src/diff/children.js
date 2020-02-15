@@ -81,10 +81,7 @@ export function diffChildren(
 					// Either oldVNode === undefined or oldChildrenLength > 0,
 					// so after this loop oldVNode == null or oldVNode is a valid value.
 					for (j = 0; j < oldChildrenLength; j++) {
-						const idx =
-							i === 0
-								? (j + i) % oldChildrenLength
-								: (j + i - 1) % oldChildrenLength;
+						const idx = i === 0 ? j : (j + i - 1) % oldChildrenLength;
 						oldVNode = oldChildren[idx];
 						// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
 						// We always match by type (in either case).
