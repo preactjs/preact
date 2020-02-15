@@ -133,7 +133,17 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 					value
 				);
 			}
-		} else if (value == null || value === false) {
+		} else if (
+			value == null ||
+			(value === false &&
+				// ARIA-attributes have a different notion of boolean values.
+				// The value `false` is different from the attribute not
+				// existing on the DOM, so we can't remove it. For non-boolean
+				// ARIA-attributes we could treat false as a removal, but the
+				// amount of exceptions would cost us too many bytes. On top of
+				// that other VDOM frameworks also always stringify `false`.
+				!/^ar/.test(name))
+		) {
 			dom.removeAttribute(name);
 		} else {
 			dom.setAttribute(name, value);
