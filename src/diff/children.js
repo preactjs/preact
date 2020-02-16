@@ -98,6 +98,12 @@ export function diffChildren(
 
 				oldVNode = oldVNode || EMPTY_OBJ;
 
+				// If the previous node was a placeholder we pick a new value
+				// for oldDom
+				// if (oldDom === undefined) {
+				// 	oldDom = oldVNode._dom || getDomSibling(oldVNode)
+				// }
+
 				// Morph the old element into the new one, but don't append it to the dom yet
 				newDom = diff(
 					parentDom,
@@ -197,6 +203,16 @@ export function diffChildren(
 
 						newParentVNode._nextDom = oldDom;
 					}
+				}
+				// else {
+				// 	oldDom = undefined;
+				// }
+				else if (
+					oldDom &&
+					oldVNode._dom == oldDom &&
+					oldDom.parentNode != parentDom
+				) {
+					oldDom = getDomSibling(oldVNode);
 				}
 			}
 
