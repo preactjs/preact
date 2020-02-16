@@ -250,7 +250,7 @@ describe('null placeholders', () => {
 	});
 
 	// See preactjs/preact#2350
-	xit('should efficiently replace null placeholders in parent rerenders (#2350)', () => {
+	it('should efficiently replace null placeholders in parent rerenders (#2350)', () => {
 		// This Nullable only changes when it's parent rerenders
 		const Nullable1 = createNullable('Nullable 1');
 		const Nullable2 = createNullable('Nullable 2');
