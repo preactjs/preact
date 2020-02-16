@@ -289,12 +289,11 @@ describe('null placeholders', () => {
 			'<div>trueNullable 1the middle.appendChild(#text)'
 		]);
 
+		clearLog();
 		toggle();
 		rerender();
 		expect(scratch.innerHTML).to.equal(div([div('false'), div('the middle')]));
 		expect(getLog()).to.deep.equal([
-			// '<div>truethe middle.insertBefore(#text, <div>the middle)',
-			// '<div>trueNullable 1the middle.appendChild(#text)',
 			'#text.remove()',
 			// '<div>falsethe middleNullable 2.appendChild(<div>the middle)',
 			'#text.remove()'
