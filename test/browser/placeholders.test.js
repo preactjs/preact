@@ -26,12 +26,12 @@ describe('null placeholders', () => {
 	 * @param {string} name
 	 * @returns {[import('preact').ComponentClass, import('preact').RefObject<{ toggle(): void }>]}
 	 */
-	function createStatefulNullable(name) {
+	function createStatefulNullable(name, initialShow = true) {
 		let ref = createRef();
 		class Nullable extends Component {
 			constructor(props) {
 				super(props);
-				this.state = { show: props.initialShow || true };
+				this.state = { show: initialShow };
 				ref.current = this;
 			}
 			toggle() {
@@ -101,38 +101,51 @@ describe('null placeholders', () => {
 	});
 
 	it('should preserve state of Components when using null or booleans as placeholders', () => {
-		class Stateful extends Component {
-			constructor(props) {
-				super(props);
-				this.state = { count: 0 };
+		/**
+		 * @param {string} name
+		 * @returns {[import('preact').ComponentClass, import('preact').RefObject<{ increment(): void }]}
+		 */
+		function createCounter(name) {
+			const ref = createRef();
+			class Stateful extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { count: 0 };
+					ref.current = this;
+				}
+				increment() {
+					this.setState({ count: this.state.count + 1 });
+				}
+				componentDidUpdate() {
+					ops.push(`Update ${name}`);
+				}
+				componentDidMount() {
+					ops.push(`Mount ${name}`);
+				}
+				componentWillUnmount() {
+					ops.push(`Unmount ${name}`);
+				}
+				render() {
+					return (
+						<div>
+							{name}: {this.state.count}
+						</div>
+					);
+				}
 			}
-			increment() {
-				this.setState({ count: this.state.count + 1 });
-			}
-			componentDidUpdate() {
-				ops.push(`Update ${this.props.name}`);
-			}
-			componentDidMount() {
-				ops.push(`Mount ${this.props.name}`);
-			}
-			componentWillUnmount() {
-				ops.push(`Unmount ${this.props.name}`);
-			}
-			render() {
-				return (
-					<div>
-						{this.props.name}: {this.state.count}
-					</div>
-				);
-			}
+
+			return [Stateful, ref];
 		}
 
-		const s1ref = createRef();
-		const s2ref = createRef();
-		const s3ref = createRef();
+		const [Stateful1, s1ref] = createCounter('first');
+		const [Stateful2, s2ref] = createCounter('second');
+		const [Stateful3, s3ref] = createCounter('third');
 
+		/**
+		 * @param {{first: any; second: any}} props
+		 */
 		function App({ first = null, second = false }) {
-			return [first, second, <Stateful name="third" ref={s3ref} />];
+			return [first, second, <Stateful3 />];
 		}
 
 		// Mount third stateful - Initial render
@@ -149,7 +162,7 @@ describe('null placeholders', () => {
 
 		// Mount first stateful
 		ops = [];
-		render(<App first={<Stateful name="first" ref={s1ref} />} />, scratch);
+		render(<App first={<Stateful1 />} />, scratch);
 		expect(scratch.innerHTML).to.equal(
 			'<div>first: 0</div><div>third: 1</div>'
 		);
@@ -167,13 +180,7 @@ describe('null placeholders', () => {
 
 		// Mount second stateful
 		ops = [];
-		render(
-			<App
-				first={<Stateful name="first" ref={s1ref} />}
-				second={<Stateful name="second" ref={s2ref} />}
-			/>,
-			scratch
-		);
+		render(<App first={<Stateful1 />} second={<Stateful2 />} />, scratch);
 		expect(scratch.innerHTML).to.equal(
 			'<div>first: 1</div><div>second: 0</div><div>third: 2</div>'
 		);
