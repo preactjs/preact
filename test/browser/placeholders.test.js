@@ -101,6 +101,7 @@ describe('null placeholders', () => {
 	});
 
 	it('should preserve state of Components when using null or booleans as placeholders', () => {
+		// Must be the same class for all children in <App /> for this test to be valid
 		class Stateful extends Component {
 			constructor(props) {
 				super(props);
