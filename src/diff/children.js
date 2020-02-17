@@ -199,14 +199,10 @@ export function diffChildren(
 					// See more detail in create-element.js:createVNode
 					if (nextDom !== undefined) {
 						oldDom = nextDom;
+					} else if (excessDomChildren != null) {
+						oldDom = null;
 					} else {
-						if (excessDomChildren != null) {
-							nextDom = null;
-						} else {
-							nextDom = getDomSibling(oldVNode);
-						}
-
-						oldDom = nextDom;
+						oldDom = getDomSibling(oldVNode);
 					}
 
 					if (typeof newParentVNode.type == 'function') {
