@@ -214,7 +214,19 @@ export function diffChildren(
 						// 	nextDomTest = getDomSibling(oldVNode);
 						// }
 
-						// if (nextDomTest != newDom.nextSibling) {
+						// if (oldVNode._parent && oldVNode._parent._children.indexOf(oldVNode) == -1) {
+						// 	// For rerenders in `renderComponent`, we copy the vnode and pass it as oldVNode,
+						// 	// which breaks the `oldVnode._parent._children` chain which breaks getDomSibling.
+						// 	// In other words, because of `assign({}, vnode)` in `renderComponent`,
+						// 	// `oldVNode._parent._children.indexOf(oldVNode) == -1` which it shouldn't
+						// 	window.__copyCount = (window.__copyCount || 0) + 1;
+						// 	console.log(
+						// 		window.__copyCount,
+						// 		'copyCount',
+						// 		newDom.nextSibling,
+						// 		nextDomTest
+						// 	);
+						// } else if (nextDomTest != newDom.nextSibling) {
 						// 	// Maintain count so its easy to tell if a change fixes more tests than it breaks
 						// 	window.__count = (window.__count || 0) + 1;
 						// 	console.log(
