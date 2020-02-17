@@ -114,26 +114,31 @@ export function getDomSibling(vnode, childIndex) {
  * @param {import('./internal').Component} component The component to rerender
  */
 function renderComponent(component) {
-	let vnode = component._vnode,
-		oldDom = vnode._dom,
+	let oldVNode = component._vnode,
+		oldDom = oldVNode._dom,
 		parentDom = component._parentDom;
 
 	if (parentDom) {
 		let commitQueue = [];
+		let newVNode = assign({}, oldVNode);
 		let newDom = diff(
 			parentDom,
-			vnode,
-			assign({}, vnode),
+			newVNode,
+			oldVNode,
 			component._globalContext,
 			parentDom.ownerSVGElement !== undefined,
 			null,
 			commitQueue,
-			oldDom == null ? getDomSibling(vnode) : oldDom
+			oldDom == null ? getDomSibling(oldVNode) : oldDom
 		);
-		commitRoot(commitQueue, vnode);
+		// Commit the newVNode to the tree by replacing the oldVNode in the parent's children array
+		oldVNode._parent._children[
+			oldVNode._parent._children.indexOf(oldVNode)
+		] = newVNode;
+		commitRoot(commitQueue, newVNode);
 
 		if (newDom != oldDom) {
-			updateParentDomPointers(vnode);
+			updateParentDomPointers(newVNode);
 		}
 	}
 }
