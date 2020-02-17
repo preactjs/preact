@@ -275,15 +275,19 @@ function diffElementNodes(
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	isSvg = newVNode.type === 'svg' || isSvg;
 
-	if (dom == null && excessDomChildren != null) {
+	if (excessDomChildren != null) {
 		for (i = 0; i < excessDomChildren.length; i++) {
 			const child = excessDomChildren[i];
 
+			// if newVNode matches an element in excessDomChildren or the `dom`
+			// argument matches an element in excessDomChildren, remove it from
+			// excessDomChildren so it isn't later removed in diffChildren
 			if (
 				child != null &&
-				(newVNode.type === null
+				((newVNode.type === null
 					? child.nodeType === 3
-					: child.localName === newVNode.type)
+					: child.localName === newVNode.type) ||
+					dom == child)
 			) {
 				dom = child;
 				excessDomChildren[i] = null;
@@ -308,16 +312,11 @@ function diffElementNodes(
 	}
 
 	if (newVNode.type === null) {
-		if (excessDomChildren != null) {
-			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
-		}
-
 		if (oldProps !== newProps && dom.data != newProps) {
 			dom.data = newProps;
 		}
 	} else if (newVNode !== oldVNode) {
 		if (excessDomChildren != null) {
-			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 
