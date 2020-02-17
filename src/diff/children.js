@@ -145,9 +145,9 @@ export function diffChildren(
 							oldChildren[oldVNode._index] = undefined;
 						}
 					} else if (
-						excessDomChildren == oldVNode ||
-						newDom != oldDom ||
-						newDom.parentNode == null
+						newDom.parentNode == null ||
+						(excessDomChildren == null &&
+							(oldVNode == null || newDom != oldDom))
 					) {
 						// NOTE: excessDomChildren==oldVNode above:
 						// This is a compression of excessDomChildren==null && oldVNode==null!
@@ -201,13 +201,7 @@ export function diffChildren(
 						oldDom = nextDom;
 					} else {
 						if (excessDomChildren != null) {
-							// If hydrating, nextDom should be the next non-null node in excessDomChildren
-							for (j = 0; j < excessDomChildren.length; j++) {
-								if (excessDomChildren[j] != null) {
-									nextDom = excessDomChildren[j];
-									break;
-								}
-							}
+							nextDom = null;
 						} else {
 							nextDom = getDomSibling(oldVNode);
 						}
