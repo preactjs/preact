@@ -73,12 +73,12 @@ export function diffChildren(
 				if (
 					oldVNode === null ||
 					(oldVNode &&
-						oldVNode._index == null &&
+						oldVNode._newIndex == null &&
 						childVNode.key == oldVNode.key &&
 						childVNode.type === oldVNode.type)
 				) {
 					if (oldVNode) {
-						oldVNode._index = i;
+						oldVNode._newIndex = i;
 					}
 				} else {
 					// Either oldVNode === undefined or oldChildrenLength > 0,
@@ -89,11 +89,11 @@ export function diffChildren(
 						// We always match by type (in either case).
 						if (
 							oldVNode &&
-							oldVNode._index == null &&
+							oldVNode._newIndex == null &&
 							childVNode.key == oldVNode.key &&
 							childVNode.type === oldVNode.type
 						) {
-							oldVNode._index = j;
+							oldVNode._newIndex = j;
 							break;
 						}
 						oldVNode = null;
@@ -141,8 +141,8 @@ export function diffChildren(
 						childVNode._nextDom = undefined;
 
 						// TODO: Investigate removing this `if` to save bytes
-						if (oldVNode._index != null) {
-							oldChildren[oldVNode._index] = undefined;
+						if (oldVNode._newIndex != null) {
+							oldChildren[oldVNode._newIndex] = undefined;
 						}
 					} else if (
 						newDom.parentNode == null ||
@@ -174,8 +174,8 @@ export function diffChildren(
 							// remove oldVNode from oldChildren so that getDomSibling doesn't see it
 							// when searching for siblings
 							// TODO: Investigate removing this `if` to save bytes
-							if (oldVNode._index != null) {
-								oldChildren[oldVNode._index] = undefined;
+							if (oldVNode._newIndex != null) {
+								oldChildren[oldVNode._newIndex] = undefined;
 							}
 						}
 
@@ -243,8 +243,8 @@ export function diffChildren(
 
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {
-		// oldChildren without _index weren't used in this diff
-		if (oldChildren[i] && oldChildren[i]._index == null) {
+		// oldChildren without _newIndex weren't used in this diff
+		if (oldChildren[i] && oldChildren[i]._newIndex == null) {
 			unmount(oldChildren[i], oldChildren[i]);
 		}
 	}

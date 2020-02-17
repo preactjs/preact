@@ -29,6 +29,7 @@
       "$_factory": "__h",
       "$_depth": "__b",
       "$_nextDom": "__d",
+      "$_newIndex": "__n",
       "$_dirty": "__d",
       "$_detachOnNextRender": "__b",
       "$_force": "__e",

@@ -59,6 +59,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	 */
 	_nextDom: PreactElement | Text | null;
 	_component: Component | null;
+	_newIndex: number | null;
 	constructor: undefined;
 }
 
