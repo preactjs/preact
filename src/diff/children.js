@@ -201,11 +201,28 @@ export function diffChildren(
 						oldDom = nextDom;
 					} else {
 						// DEBUG
-						// let nextDomTest = getDomSibling(oldVNode);
+						// let nextDomTest = null;
+						// if (excessDomChildren != null) {
+						// 	// If hydrating, nextDom should be the next non-null node in excessDomChildren
+						// 	for (j = 0; j < excessDomChildren.length; j++) {
+						// 		if (excessDomChildren[j] != null) {
+						// 			nextDomTest = excessDomChildren[j];
+						// 			break;
+						// 		}
+						// 	}
+						// } else {
+						// 	nextDomTest = getDomSibling(oldVNode);
+						// }
+
 						// if (nextDomTest != newDom.nextSibling) {
-						// 	// Maintian count so its easy to till if a change fixes more tests than it breaks
+						// 	// Maintain count so its easy to tell if a change fixes more tests than it breaks
 						// 	window.__count = (window.__count || 0) + 1;
-						// 	console.log(window.__count, 'default', newDom.nextSibling, nextDomTest);
+						// 	console.log(
+						// 		window.__count,
+						// 		'default',
+						// 		newDom.nextSibling,
+						// 		nextDomTest
+						// 	);
 						// }
 
 						oldDom = newDom.nextSibling;
