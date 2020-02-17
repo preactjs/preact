@@ -140,7 +140,6 @@ export function diffChildren(
 						// can clean up the property
 						childVNode._nextDom = undefined;
 
-						// TODO: Investigate removing this `if` to save bytes
 						if (oldVNode._newIndex != null) {
 							oldChildren[oldVNode._newIndex] = undefined;
 						}
@@ -172,8 +171,8 @@ export function diffChildren(
 
 							// Since this code path means oldVNode moved up in the tree,
 							// remove oldVNode from oldChildren so that getDomSibling doesn't see it
-							// when searching for siblings
-							// TODO: Investigate removing this `if` to save bytes
+							// when searching for siblings. This mimics actually moving the DOM like
+							// insertBefore would do
 							if (oldVNode._newIndex != null) {
 								oldChildren[oldVNode._newIndex] = undefined;
 							}
