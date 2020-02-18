@@ -83,6 +83,7 @@ export function initDebug() {
 			default:
 				isValid = false;
 		}
+
 		if (!isValid) {
 			let componentName = getDisplayName(vnode);
 			throw new Error(
@@ -298,45 +299,6 @@ export function initDebug() {
 					}
 				});
 			}
-
-			// After paint effects
-			if (Array.isArray(hooks._pendingEffects)) {
-				hooks._pendingEffects.forEach(effect => {
-					if (
-						!Array.isArray(effect._args) &&
-						warnedComponents &&
-						!warnedComponents.useEffect.has(vnode.type)
-					) {
-						warnedComponents.useEffect.set(vnode.type, true);
-						let componentName = getDisplayName(vnode);
-						console.warn(
-							'You should provide an array of arguments as the second argument to the "useEffect" hook.\n\n' +
-								'Not doing so will invoke this effect on every render.\n\n' +
-								`This effect can be found in the render of ${componentName}.` +
-								`\n\n${getOwnerStack(vnode)}`
-						);
-					}
-				});
-			}
-
-			// Layout Effects
-			component._renderCallbacks.forEach(possibleEffect => {
-				if (
-					possibleEffect._value &&
-					!Array.isArray(possibleEffect._args) &&
-					warnedComponents &&
-					!warnedComponents.useLayoutEffect.has(vnode.type)
-				) {
-					warnedComponents.useLayoutEffect.set(vnode.type, true);
-					let componentName = getDisplayName(vnode);
-					console.warn(
-						'You should provide an array of arguments as the second argument to the "useLayoutEffect" hook.\n\n' +
-							'Not doing so will invoke this effect on every render.\n\n' +
-							`This effect can be found in the render of ${componentName}.` +
-							`\n\n${getOwnerStack(vnode)}`
-					);
-				}
-			});
 		}
 
 		if (oldDiffed) oldDiffed(vnode);

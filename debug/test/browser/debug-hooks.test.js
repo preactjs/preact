@@ -91,43 +91,6 @@ describe('debug with hooks', () => {
 		expect(fn).to.throw(/Hook can only be invoked from render/);
 	});
 
-	it('should warn for argumentless useEffect hooks', () => {
-		const App = () => {
-			const [state] = useState('test');
-			useEffect(() => 'test');
-			return <p>{state}</p>;
-		};
-		render(<App />, scratch);
-		// Skip first warning which is about missing babel plugin for better
-		// debug messages
-		expect(warnings[1]).to.match(/You should provide an array of arguments/);
-		render(<App />, scratch);
-		expect(warnings[2]).to.be.undefined;
-	});
-
-	it('should warn for argumentless useLayoutEffect hooks', () => {
-		const App = () => {
-			const [state] = useState('test');
-			useLayoutEffect(() => 'test');
-			return <p>{state}</p>;
-		};
-		render(<App />, scratch);
-		expect(warnings[0]).to.match(/You should provide an array of arguments/);
-		render(<App />, scratch);
-		expect(warnings[1]).to.be.undefined;
-	});
-
-	it('should not warn for argumented effect hooks', () => {
-		const App = () => {
-			const [state] = useState('test');
-			useLayoutEffect(() => 'test', []);
-			useEffect(() => 'test', [state]);
-			return <p>{state}</p>;
-		};
-		const fn = () => act(() => render(<App />, scratch));
-		expect(fn).to.not.throw();
-	});
-
 	it('should warn for useMemo/useCallback without arguments', () => {
 		const App = () => {
 			const [people] = useState([40, 20, 60, 80]);
@@ -136,7 +99,8 @@ describe('debug with hooks', () => {
 			return <p onClick={cb}>{retiredPeople.map(x => x)}</p>;
 		};
 		render(<App />, scratch);
-		expect(warnings.length).to.equal(2);
+		// One more to show the need for @babel/plugin-transform-react-jsx-source
+		expect(warnings.length).to.equal(3);
 	});
 
 	it('should warn when useMemo is called with non-array args', () => {
