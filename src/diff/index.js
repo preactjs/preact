@@ -51,7 +51,7 @@ export function diff(
 			// the context value as `this.context` just for this component.
 			tmp = newType.contextType;
 			let provider = tmp && globalContext[tmp._id];
-			let cctx = tmp
+			let componentContext = tmp
 				? provider
 					? provider.props.value
 					: tmp._defaultValue
@@ -64,9 +64,9 @@ export function diff(
 			} else {
 				// Instantiate the new component
 				if ('prototype' in newType && newType.prototype.render) {
-					newVNode._component = c = new newType(newProps, cctx); // eslint-disable-line new-cap
+					newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
 				} else {
-					newVNode._component = c = new Component(newProps, cctx);
+					newVNode._component = c = new Component(newProps, componentContext);
 					c.constructor = newType;
 					c.render = doRender;
 				}
@@ -74,7 +74,7 @@ export function diff(
 
 				c.props = newProps;
 				if (!c.state) c.state = {};
-				c.context = cctx;
+				c.context = componentContext;
 				c._context = globalContext;
 				isNew = c._dirty = true;
 				c._renderCallbacks = [];
@@ -116,13 +116,14 @@ export function diff(
 					newProps !== oldProps &&
 					c.componentWillReceiveProps != null
 				) {
-					c.componentWillReceiveProps(newProps, cctx);
+					c.componentWillReceiveProps(newProps, componentContext);
 				}
 
 				if (
 					!c._force &&
 					c.shouldComponentUpdate != null &&
-					c.shouldComponentUpdate(newProps, c._nextState, cctx) === false
+					c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
+						false
 				) {
 					c.props = newProps;
 					c.state = c._nextState;
@@ -142,7 +143,7 @@ export function diff(
 				}
 
 				if (c.componentWillUpdate != null) {
-					c.componentWillUpdate(newProps, c._nextState, cctx);
+					c.componentWillUpdate(newProps, c._nextState, componentContext);
 				}
 
 				if (c.componentDidUpdate != null) {
@@ -152,7 +153,7 @@ export function diff(
 				}
 			}
 
-			c.context = cctx;
+			c.context = componentContext;
 			c.props = newProps;
 			c.state = c._nextState;
 
