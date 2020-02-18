@@ -124,7 +124,7 @@ function renderComponent(component) {
 			parentDom,
 			vnode,
 			assign({}, vnode),
-			component._context,
+			component._globalContext,
 			parentDom.ownerSVGElement !== undefined,
 			null,
 			commitQueue,

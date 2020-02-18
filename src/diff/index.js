@@ -75,7 +75,7 @@ export function diff(
 				c.props = newProps;
 				if (!c.state) c.state = {};
 				c.context = componentContext;
-				c._context = globalContext;
+				c._globalContext = globalContext;
 				isNew = c._dirty = true;
 				c._renderCallbacks = [];
 			}

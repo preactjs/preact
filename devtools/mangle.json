@@ -45,7 +45,7 @@
       "$_parent": "__",
       "$_pendingError": "__E",
       "$_processingException": "__",
-      "$_context": "__n",
+      "$_globalContext": "__n",
       "$_defaultValue": "__",
       "$_id": "__c",
       "$_parentDom": "__P",
