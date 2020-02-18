@@ -63,7 +63,7 @@ describe('debug with hooks', () => {
 	it('should throw an error when invoked outside of a component', () => {
 		function foo() {
 			useEffect(() => {}); // Pretend to use a hook
-			return props.children;
+			return <p>test</p>;
 		}
 
 		const fn = () =>
