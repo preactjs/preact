@@ -17,7 +17,7 @@ services:
   - xvfb
 
 install:
-  - npm install
+  - npm ci
 
 addons:
   sauce_connect: true

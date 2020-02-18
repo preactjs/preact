@@ -36,7 +36,7 @@
       "$_renderCallbacks": "__h",
       "$_vnode": "__v",
       "$_children": "__k",
-      "$_pendingSuspensionCount": "__u",
+      "$_suspensions": "__u",
       "$_childDidSuspend": "__c",
       "$_suspendedComponentWillUnmount": "__c",
       "$_dom": "__e",

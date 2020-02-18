@@ -68,7 +68,11 @@ export function createVNode(type, props, key, ref) {
 		_parent: null,
 		_depth: 0,
 		_dom: null,
-		_lastDomChild: null,
+		// _nextDom must be initialized to undefined b/c it will eventually
+		// be set to dom.nextSibling which can return `null` and it is important
+		// to be able to distinguish between an uninitialized _nextDom and
+		// a _nextDom that has been set to `null`
+		_nextDom: undefined,
 		_component: null,
 		_hydrateDom: null,
 		_hydrating: false,

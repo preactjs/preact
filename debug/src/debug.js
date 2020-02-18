@@ -1,5 +1,4 @@
 import { checkPropTypes } from './check-props';
-import { getDisplayName } from './devtools/custom';
 import { options, Component } from 'preact';
 import {
 	ELEMENT_NODE,
@@ -9,7 +8,8 @@ import {
 import {
 	getOwnerStack,
 	setupComponentStack,
-	getCurrentVNode
+	getCurrentVNode,
+	getDisplayName
 } from './component-stack';
 
 const isWeakMapSupported = typeof WeakMap === 'function';
@@ -83,6 +83,7 @@ export function initDebug() {
 			default:
 				isValid = false;
 		}
+
 		if (!isValid) {
 			let componentName = getDisplayName(vnode);
 			throw new Error(
@@ -105,7 +106,7 @@ export function initDebug() {
 					`\n\n${getOwnerStack(vnode)}`
 			);
 		} else if (type != null && typeof type === 'object') {
-			if (type._lastDomChild !== undefined && type._dom !== undefined) {
+			if (type._children !== undefined && type._dom !== undefined) {
 				throw new Error(
 					`Invalid type passed to createElement(): ${type}\n\n` +
 						'Did you accidentally pass a JSX literal as JSX twice?\n\n' +
@@ -133,10 +134,10 @@ export function initDebug() {
 			);
 		} else if (
 			type === 'tr' &&
-			(parentVNode.type !== 'thead' &&
-				parentVNode.type !== 'tfoot' &&
-				parentVNode.type !== 'tbody' &&
-				parentVNode.type !== 'table')
+			parentVNode.type !== 'thead' &&
+			parentVNode.type !== 'tfoot' &&
+			parentVNode.type !== 'tbody' &&
+			parentVNode.type !== 'table'
 		) {
 			console.error(
 				'Improper nesting of table. Your <tr> should have a <thead/tbody/tfoot/table> parent.' +
@@ -298,45 +299,6 @@ export function initDebug() {
 					}
 				});
 			}
-
-			// After paint effects
-			if (Array.isArray(hooks._pendingEffects)) {
-				hooks._pendingEffects.forEach(effect => {
-					if (
-						!Array.isArray(effect._args) &&
-						warnedComponents &&
-						!warnedComponents.useEffect.has(vnode.type)
-					) {
-						warnedComponents.useEffect.set(vnode.type, true);
-						let componentName = getDisplayName(vnode);
-						console.warn(
-							'You should provide an array of arguments as the second argument to the "useEffect" hook.\n\n' +
-								'Not doing so will invoke this effect on every render.\n\n' +
-								`This effect can be found in the render of ${componentName}.` +
-								`\n\n${getOwnerStack(vnode)}`
-						);
-					}
-				});
-			}
-
-			// Layout Effects
-			component._renderCallbacks.forEach(possibleEffect => {
-				if (
-					possibleEffect._value &&
-					!Array.isArray(possibleEffect._args) &&
-					warnedComponents &&
-					!warnedComponents.useLayoutEffect.has(vnode.type)
-				) {
-					warnedComponents.useLayoutEffect.set(vnode.type, true);
-					let componentName = getDisplayName(vnode);
-					console.warn(
-						'You should provide an array of arguments as the second argument to the "useLayoutEffect" hook.\n\n' +
-							'Not doing so will invoke this effect on every render.\n\n' +
-							`This effect can be found in the render of ${componentName}.` +
-							`\n\n${getOwnerStack(vnode)}`
-					);
-				}
-			});
 		}
 
 		if (oldDiffed) oldDiffed(vnode);
@@ -398,7 +360,7 @@ Component.prototype.forceUpdate = function(callback) {
 		);
 	} else if (this._parentDom == null) {
 		console.warn(
-			`Can't call "this.setState" on an unmounted component. This is a no-op, ` +
+			`Can't call "this.forceUpdate" on an unmounted component. This is a no-op, ` +
 				`but it indicates a memory leak in your application. To fix, cancel all ` +
 				`subscriptions and asynchronous tasks in the componentWillUnmount method.` +
 				`\n\n${getOwnerStack(this._vnode)}`

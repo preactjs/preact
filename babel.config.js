@@ -1,6 +1,18 @@
-// Only used for mocha tests. For karma, see karma.config.js
 module.exports = function(api) {
 	api.cache(true);
+
+	const minify = String(process.env.MINIFY) === 'true';
+
+	const rename = {};
+	const mangle = require('./mangle.json');
+	for (let prop in mangle.props.props) {
+		let name = prop;
+		if (name[0] === '$') {
+			name = name.slice(1);
+		}
+
+		rename[name] = mangle.props.props[prop];
+	}
 
 	return {
 		presets: [
@@ -20,6 +32,21 @@ module.exports = function(api) {
 			'@babel/plugin-transform-react-jsx',
 			'babel-plugin-transform-async-to-promises'
 		],
-		ignore: ['./dist']
+		include: ['**/src/**/*.js', '**/test/**/*.js'],
+		overrides: [
+			{
+				test(filename) {
+					const isOptionsTestFile =
+						filename.endsWith('optionSpies.js') ||
+						filename.endsWith('.options.test.js');
+					return minify && isOptionsTestFile;
+				},
+				plugins: [['babel-plugin-transform-rename-properties', { rename }]]
+			},
+			{
+				test: /(component-stack|debug)\.test\.js$/,
+				plugins: ['@babel/plugin-transform-react-jsx-source']
+			}
+		]
 	};
 };

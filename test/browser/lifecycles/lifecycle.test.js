@@ -210,11 +210,7 @@ describe('Lifecycle methods', () => {
 		]);
 	});
 
-	let _it = it;
 	describe('#constructor and component(Did|Will)(Mount|Unmount)', () => {
-		/* global DISABLE_FLAKEY */
-		let it = DISABLE_FLAKEY ? xit : _it;
-
 		let setState;
 		class Outer extends Component {
 			constructor(p, c) {

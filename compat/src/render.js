@@ -6,12 +6,11 @@ import {
 } from 'preact';
 import { applyEventNormalization } from './events';
 
-const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip|color|fill|flood|font|glyph|horiz|marker|overline|paint|stop|strikethrough|stroke|text|underline|unicode|units|v|vector|vert|word|writing|x)[A-Z]/;
+const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|color|fill|flood|font|glyph|horiz|marker|overline|paint|stop|strikethrough|stroke|text|underline|unicode|units|v|vector|vert|word|writing|x)[A-Z]/;
 
 // Some libraries like `react-virtualized` explicitly check for this.
 Component.prototype.isReactComponent = {};
 
-/* istanbul ignore next */
 export const REACT_ELEMENT_TYPE =
 	(typeof Symbol !== 'undefined' &&
 		Symbol.for &&
@@ -84,6 +83,13 @@ options.vnode = vnode => {
 	let type = vnode.type;
 	let props = vnode.props;
 
+	// Alias `class` prop to `className` if available
+	if (props.class != props.className) {
+		classNameDescriptor.enumerable = 'className' in props;
+		if (props.className != null) props.class = props.className;
+		Object.defineProperty(props, 'className', classNameDescriptor);
+	}
+
 	// Apply DOM VNode compat
 	if (typeof type != 'function') {
 		// Apply defaultValue to value
@@ -115,13 +121,6 @@ options.vnode = vnode => {
 				] = props[i];
 			}
 		}
-	}
-
-	// Alias `class` prop to `className` if available
-	if (props.class || props.className) {
-		classNameDescriptor.enumerable = 'className' in props;
-		if (props.className) props.class = props.className;
-		Object.defineProperty(props, 'className', classNameDescriptor);
 	}
 
 	// Events
