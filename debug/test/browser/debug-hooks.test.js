@@ -1,11 +1,5 @@
 import { createElement, render, Component } from 'preact';
-import {
-	useState,
-	useEffect,
-	useLayoutEffect,
-	useMemo,
-	useCallback
-} from 'preact/hooks';
+import { useState, useEffect, useMemo, useCallback } from 'preact/hooks';
 import 'preact/debug';
 import { act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
