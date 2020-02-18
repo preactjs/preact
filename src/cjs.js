@@ -1,3 +1,3 @@
-import htm from './index.js';
-if (typeof module != 'undefined') module.exports = htm;
-else self.preact = htm;
+import * as preact from './index.js';
+if (typeof module != 'undefined') module.exports = preact;
+else self.preact = preact;
