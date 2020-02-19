@@ -83,6 +83,7 @@ export function initDebug() {
 			default:
 				isValid = false;
 		}
+
 		if (!isValid) {
 			let componentName = getDisplayName(vnode);
 			throw new Error(
@@ -244,19 +245,24 @@ export function initDebug() {
 		children: warn('children', 'use vnode.props.children')
 	};
 
+	const deprecatedProto = Object.create({}, deprecatedAttributes);
+
 	options.vnode = vnode => {
-		let source, self;
-		if (vnode.props && vnode.props.__source) {
-			source = vnode.props.__source;
-			delete vnode.props.__source;
+		const props = vnode.props;
+		if (
+			vnode.type !== null &&
+			props != null &&
+			('__source' in props || '__self' in props)
+		) {
+			const newProps = (vnode.props = {});
+			for (let i in props) {
+				const v = props[i];
+				if (i === '__source') vnode.__source = v;
+				else if (i === '__self') vnode.__self = v;
+				else newProps[i] = v;
+			}
 		}
-		if (vnode.props && vnode.props.__self) {
-			self = vnode.props.__self;
-			delete vnode.props.__self;
-		}
-		vnode.__self = self;
-		vnode.__source = source;
-		Object.defineProperties(vnode, deprecatedAttributes);
+		Object.setPrototypeOf(vnode, deprecatedProto);
 		if (oldVnode) oldVnode(vnode);
 	};
 
@@ -298,45 +304,6 @@ export function initDebug() {
 					}
 				});
 			}
-
-			// After paint effects
-			if (Array.isArray(hooks._pendingEffects)) {
-				hooks._pendingEffects.forEach(effect => {
-					if (
-						!Array.isArray(effect._args) &&
-						warnedComponents &&
-						!warnedComponents.useEffect.has(vnode.type)
-					) {
-						warnedComponents.useEffect.set(vnode.type, true);
-						let componentName = getDisplayName(vnode);
-						console.warn(
-							'You should provide an array of arguments as the second argument to the "useEffect" hook.\n\n' +
-								'Not doing so will invoke this effect on every render.\n\n' +
-								`This effect can be found in the render of ${componentName}.` +
-								`\n\n${getOwnerStack(vnode)}`
-						);
-					}
-				});
-			}
-
-			// Layout Effects
-			component._renderCallbacks.forEach(possibleEffect => {
-				if (
-					possibleEffect._value &&
-					!Array.isArray(possibleEffect._args) &&
-					warnedComponents &&
-					!warnedComponents.useLayoutEffect.has(vnode.type)
-				) {
-					warnedComponents.useLayoutEffect.set(vnode.type, true);
-					let componentName = getDisplayName(vnode);
-					console.warn(
-						'You should provide an array of arguments as the second argument to the "useLayoutEffect" hook.\n\n' +
-							'Not doing so will invoke this effect on every render.\n\n' +
-							`This effect can be found in the render of ${componentName}.` +
-							`\n\n${getOwnerStack(vnode)}`
-					);
-				}
-			});
 		}
 
 		if (oldDiffed) oldDiffed(vnode);

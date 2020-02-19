@@ -11,7 +11,7 @@ import options from '../options';
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').VNode} oldVNode The old virtual node
- * @param {object} context The current context object
+ * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {boolean} isSvg Whether or not this element is an SVG node
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
@@ -26,7 +26,7 @@ export function diff(
 	parentDom,
 	newVNode,
 	oldVNode,
-	context,
+	globalContext,
 	isSvg,
 	excessDomChildren,
 	commitQueue,
@@ -50,12 +50,12 @@ export function diff(
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
 			tmp = newType.contextType;
-			let provider = tmp && context[tmp._id];
-			let cctx = tmp
+			let provider = tmp && globalContext[tmp._id];
+			let componentContext = tmp
 				? provider
 					? provider.props.value
 					: tmp._defaultValue
-				: context;
+				: globalContext;
 
 			// Get component and set it to `c`
 			if (oldVNode._component) {
@@ -64,9 +64,9 @@ export function diff(
 			} else {
 				// Instantiate the new component
 				if ('prototype' in newType && newType.prototype.render) {
-					newVNode._component = c = new newType(newProps, cctx); // eslint-disable-line new-cap
+					newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
 				} else {
-					newVNode._component = c = new Component(newProps, cctx);
+					newVNode._component = c = new Component(newProps, componentContext);
 					c.constructor = newType;
 					c.render = doRender;
 				}
@@ -74,8 +74,8 @@ export function diff(
 
 				c.props = newProps;
 				if (!c.state) c.state = {};
-				c.context = cctx;
-				c._context = context;
+				c.context = componentContext;
+				c._globalContext = globalContext;
 				isNew = c._dirty = true;
 				c._renderCallbacks = [];
 			}
@@ -116,13 +116,14 @@ export function diff(
 					newProps !== oldProps &&
 					c.componentWillReceiveProps != null
 				) {
-					c.componentWillReceiveProps(newProps, cctx);
+					c.componentWillReceiveProps(newProps, componentContext);
 				}
 
 				if (
 					!c._force &&
 					c.shouldComponentUpdate != null &&
-					c.shouldComponentUpdate(newProps, c._nextState, cctx) === false
+					c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
+						false
 				) {
 					c.props = newProps;
 					c.state = c._nextState;
@@ -142,7 +143,7 @@ export function diff(
 				}
 
 				if (c.componentWillUpdate != null) {
-					c.componentWillUpdate(newProps, c._nextState, cctx);
+					c.componentWillUpdate(newProps, c._nextState, componentContext);
 				}
 
 				if (c.componentDidUpdate != null) {
@@ -152,7 +153,7 @@ export function diff(
 				}
 			}
 
-			c.context = cctx;
+			c.context = componentContext;
 			c.props = newProps;
 			c.state = c._nextState;
 
@@ -165,10 +166,14 @@ export function diff(
 			tmp = c.render(c.props, c.state, c.context);
 			let isTopLevelFragment =
 				tmp != null && tmp.type == Fragment && tmp.key == null;
-			newVNode._children = isTopLevelFragment ? tmp.props.children : tmp;
+			newVNode._children = isTopLevelFragment
+				? tmp.props.children
+				: Array.isArray(tmp)
+				? tmp
+				: [tmp];
 
 			if (c.getChildContext != null) {
-				context = assign(assign({}, context), c.getChildContext());
+				globalContext = assign(assign({}, globalContext), c.getChildContext());
 			}
 
 			if (!isNew && c.getSnapshotBeforeUpdate != null) {
@@ -179,7 +184,7 @@ export function diff(
 				parentDom,
 				newVNode,
 				oldVNode,
-				context,
+				globalContext,
 				isSvg,
 				excessDomChildren,
 				commitQueue,
@@ -203,7 +208,7 @@ export function diff(
 				oldVNode._dom,
 				newVNode,
 				oldVNode,
-				context,
+				globalContext,
 				isSvg,
 				excessDomChildren,
 				commitQueue,
@@ -246,7 +251,7 @@ export function commitRoot(commitQueue, root) {
  * the virtual nodes being diffed
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').VNode} oldVNode The old virtual node
- * @param {object} context The current context object
+ * @param {object} globalContext The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {*} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
@@ -258,7 +263,7 @@ function diffElementNodes(
 	dom,
 	newVNode,
 	oldVNode,
-	context,
+	globalContext,
 	isSvg,
 	excessDomChildren,
 	commitQueue,
@@ -271,15 +276,19 @@ function diffElementNodes(
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	isSvg = newVNode.type === 'svg' || isSvg;
 
-	if (dom == null && excessDomChildren != null) {
+	if (excessDomChildren != null) {
 		for (i = 0; i < excessDomChildren.length; i++) {
 			const child = excessDomChildren[i];
 
+			// if newVNode matches an element in excessDomChildren or the `dom`
+			// argument matches an element in excessDomChildren, remove it from
+			// excessDomChildren so it isn't later removed in diffChildren
 			if (
 				child != null &&
-				(newVNode.type === null
+				((newVNode.type === null
 					? child.nodeType === 3
-					: child.localName === newVNode.type)
+					: child.localName === newVNode.type) ||
+					dom == child)
 			) {
 				dom = child;
 				excessDomChildren[i] = null;
@@ -304,16 +313,11 @@ function diffElementNodes(
 	}
 
 	if (newVNode.type === null) {
-		if (excessDomChildren != null) {
-			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
-		}
-
 		if (oldProps !== newProps && dom.data != newProps) {
 			dom.data = newProps;
 		}
 	} else if (newVNode !== oldVNode) {
 		if (excessDomChildren != null) {
-			excessDomChildren[excessDomChildren.indexOf(dom)] = null;
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 
@@ -350,7 +354,7 @@ function diffElementNodes(
 				dom,
 				newVNode,
 				oldVNode,
-				context,
+				globalContext,
 				newVNode.type === 'foreignObject' ? false : isSvg,
 				excessDomChildren,
 				commitQueue,

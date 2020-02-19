@@ -124,7 +124,7 @@ function renderComponent(component) {
 			parentDom,
 			vnode,
 			assign({}, vnode),
-			component._context,
+			component._globalContext,
 			parentDom.ownerSVGElement !== undefined,
 			null,
 			commitQueue,
@@ -160,7 +160,7 @@ function updateParentDomPointers(vnode) {
  * The render queue
  * @type {Array<import('./internal').Component>}
  */
-let q = [];
+let rerenderQueue = [];
 
 /**
  * Asynchronously schedule a callback
@@ -190,7 +190,7 @@ let prevDebounce;
  */
 export function enqueueRender(c) {
 	if (
-		(!c._dirty && (c._dirty = true) && q.push(c) === 1) ||
+		(!c._dirty && (c._dirty = true) && rerenderQueue.push(c) === 1) ||
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
@@ -200,10 +200,10 @@ export function enqueueRender(c) {
 
 /** Flush the render queue by rerendering all queued components */
 function process() {
-	let p;
-	q.sort((a, b) => b._vnode._depth - a._vnode._depth);
-	while ((p = q.pop())) {
+	let c;
+	rerenderQueue.sort((a, b) => b._vnode._depth - a._vnode._depth);
+	while ((c = rerenderQueue.pop())) {
 		// forceUpdate's callback argument is reused here to indicate a non-forced update.
-		if (p._dirty) renderComponent(p);
+		if (c._dirty) renderComponent(c);
 	}
 }
