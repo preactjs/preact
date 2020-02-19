@@ -54,19 +54,15 @@ describe('debug with hooks', () => {
 		expect(fn).to.throw(/Hook can only be invoked from render/);
 	});
 
-	// TODO: Fix this test. It only passed before because render was never called.
-	// Once render is called, currentComponent is set and never unset so calls to
-	// hooks outside of components would still work.
-	it.skip('should throw an error when invoked outside of a component', () => {
-		function Foo(props) {
+	it('should throw an error when invoked outside of a component', () => {
+		function foo() {
 			useEffect(() => {}); // Pretend to use a hook
-			return props.children;
+			return <p>test</p>;
 		}
 
 		const fn = () =>
 			act(() => {
-				render(<Foo>Hello!</Foo>, scratch);
-				useState();
+				render(foo(), scratch);
 			});
 		expect(fn).to.throw(/Hook can only be invoked from render/);
 	});
