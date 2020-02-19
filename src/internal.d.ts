@@ -71,7 +71,7 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	_dirty: boolean;
 	_force?: boolean;
 	_renderCallbacks: Array<() => void>; // Only class components
-	_context?: any;
+	_globalContext?: any;
 	_vnode?: VNode<P> | null;
 	_nextState?: S | null; // Only class components
 	/** Only used in the devtools to later dirty check if state has changed */
