@@ -248,11 +248,14 @@ export function initDebug() {
 	const deprecatedProto = Object.create({}, deprecatedAttributes);
 
 	options.vnode = vnode => {
-		let props = vnode.props;
-		if (props != null && ('__source' in props || '__self' in props)) {
-			let i,
-				newProps = (vnode.props = {});
-			for (i in props) {
+		const props = vnode.props;
+		if (
+			vnode.type !== null &&
+			props != null &&
+			('__source' in props || '__self' in props)
+		) {
+			const newProps = (vnode.props = {});
+			for (let i in props) {
 				const v = props[i];
 				if (i === '__source') vnode.__source = v;
 				else if (i === '__self') vnode.__self = v;
