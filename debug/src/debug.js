@@ -245,19 +245,21 @@ export function initDebug() {
 		children: warn('children', 'use vnode.props.children')
 	};
 
+	const deprecatedProto = Object.create({}, deprecatedAttributes);
+
 	options.vnode = vnode => {
-		let source, self;
-		if (vnode.props && vnode.props.__source) {
-			source = vnode.props.__source;
-			delete vnode.props.__source;
+		let props = vnode.props;
+		if (props != null && ('__source' in props || '__self' in props)) {
+			let i,
+				newProps = (vnode.props = {});
+			for (i in props) {
+				const v = props[i];
+				if (i === '__source') vnode.__source = v;
+				else if (i === '__self') vnode.__self = v;
+				else newProps[i] = v;
+			}
 		}
-		if (vnode.props && vnode.props.__self) {
-			self = vnode.props.__self;
-			delete vnode.props.__self;
-		}
-		vnode.__self = self;
-		vnode.__source = source;
-		Object.defineProperties(vnode, deprecatedAttributes);
+		Object.setPrototypeOf(vnode, deprecatedProto);
 		if (oldVnode) oldVnode(vnode);
 	};
 
