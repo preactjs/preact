@@ -1,7 +1,7 @@
 # preact-render-to-string
 
 [![NPM](http://img.shields.io/npm/v/preact-render-to-string.svg)](https://www.npmjs.com/package/preact-render-to-string)
-[![travis-ci](https://travis-ci.org/developit/preact-render-to-string.svg)](https://travis-ci.org/developit/preact-render-to-string)
+[![travis-ci](https://travis-ci.org/preactjs/preact-render-to-string.svg)](https://travis-ci.org/preactjs/preact-render-to-string)
 
 Render JSX and [Preact] components to an HTML string.
 
