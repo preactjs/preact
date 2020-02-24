@@ -2,9 +2,6 @@ import React, {
 	createElement,
 	render,
 	Component,
-	useRef,
-	useState,
-	useEffect,
 	hydrate
 } from 'preact/compat';
 import { setupRerender, act } from 'preact/test-utils';
@@ -261,7 +258,6 @@ describe('compat render', () => {
 		expect(mountSpy).to.be.calledOnce;
 		expect(updateSpy).to.not.be.calledOnce;
 
-		console.log('--- hydrating ---');
 		act(() => {
 			hydrate(
 				<StaticContent staticMode>
