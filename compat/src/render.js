@@ -1,5 +1,6 @@
 import {
 	render as preactRender,
+	hydrate as preactHydrate,
 	options,
 	toChildArray,
 	Component
@@ -33,11 +34,14 @@ export function render(vnode, parent, callback) {
 		}
 	}
 
-	return hydrate(vnode, parent, callback);
+	preactRender(vnode, parent);
+	if (typeof callback === 'function') callback();
+
+	return vnode ? vnode._component : null;
 }
 
 export function hydrate(vnode, parent, callback) {
-	preactRender(vnode, parent);
+	preactHydrate(vnode, parent);
 	if (typeof callback === 'function') callback();
 
 	return vnode ? vnode._component : null;

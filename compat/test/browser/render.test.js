@@ -1,5 +1,10 @@
-import React, { createElement, render, Component } from 'preact/compat';
-import { setupRerender } from 'preact/test-utils';
+import React, {
+	createElement,
+	render,
+	Component,
+	hydrate
+} from 'preact/compat';
+import { setupRerender, act } from 'preact/test-utils';
 import {
 	setupScratch,
 	teardown,
@@ -203,5 +208,68 @@ describe('compat render', () => {
 			false,
 			'not enumerable'
 		);
+	});
+
+	it('should support static content', () => {
+		const updateSpy = sinon.spy();
+		const mountSpy = sinon.spy();
+		const renderSpy = sinon.spy();
+
+		function StaticContent({ children, element = 'div', staticMode }) {
+			// if we're in the server or a spa navigation, just render it
+			if (!staticMode) {
+				return createElement(element, {
+					children
+				});
+			}
+
+			// avoid re-render on the client
+			return createElement(element, {
+				dangerouslySetInnerHTML: { __html: '' }
+			});
+		}
+
+		class App extends Component {
+			componentDidMount() {
+				mountSpy();
+			}
+
+			componentDidUpdate() {
+				updateSpy();
+			}
+
+			render() {
+				renderSpy();
+				return <div>Staticness</div>;
+			}
+		}
+
+		act(() => {
+			render(
+				<StaticContent staticMode={false}>
+					<App />
+				</StaticContent>,
+				scratch
+			);
+		});
+
+		expect(scratch.innerHTML).to.eq('<div><div>Staticness</div></div>');
+		expect(renderSpy).to.be.calledOnce;
+		expect(mountSpy).to.be.calledOnce;
+		expect(updateSpy).to.not.be.calledOnce;
+
+		act(() => {
+			hydrate(
+				<StaticContent staticMode>
+					<App />
+				</StaticContent>,
+				scratch
+			);
+		});
+
+		expect(scratch.innerHTML).to.eq('<div><div>Staticness</div></div>');
+		expect(renderSpy).to.be.calledOnce;
+		expect(mountSpy).to.be.calledOnce;
+		expect(updateSpy).to.not.be.calledOnce;
 	});
 });
