@@ -337,11 +337,17 @@ export function initDebug() {
 const setState = Component.prototype.setState;
 Component.prototype.setState = function(update, callback) {
 	if (this._vnode == null) {
-		console.warn(
-			`Calling "this.setState" inside the constructor of a component is a ` +
-				`no-op and might be a bug in your application. Instead, set ` +
-				`"this.state = {}" directly.\n\n${getOwnerStack(getCurrentVNode())}`
-		);
+		// `this._vnode` will be `null` during componentWillMount. But it
+		// is perfectly valid to call `setState` during cWM. So we
+		// need an additional check to verify that we are dealing with a
+		// call inside constructor.
+		if (this.state == null) {
+			console.warn(
+				`Calling "this.setState" inside the constructor of a component is a ` +
+					`no-op and might be a bug in your application. Instead, set ` +
+					`"this.state = {}" directly.\n\n${getOwnerStack(getCurrentVNode())}`
+			);
+		}
 	} else if (this._parentDom == null) {
 		console.warn(
 			`Can't call "this.setState" on an unmounted component. This is a no-op, ` +

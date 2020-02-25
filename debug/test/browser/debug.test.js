@@ -143,6 +143,20 @@ describe('debug', () => {
 		expect(console.warn.args[0]).to.match(/no-op/);
 	});
 
+	it('should NOT warn when calling setState inside the cWM', () => {
+		class Foo extends Component {
+			componentWillMount() {
+				this.setState({ foo: true });
+			}
+			render() {
+				return <div>foo</div>;
+			}
+		}
+
+		render(<Foo />, scratch);
+		expect(console.warn).to.not.be.called;
+	});
+
 	it('should warn when calling setState on an unmounted Component', () => {
 		let setState;
 
