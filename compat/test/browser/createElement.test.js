@@ -27,6 +27,8 @@ describe('compat createElement()', () => {
 					.call(eval('Symbol.for'))
 					.match(/\[native code\]/)
 			) {
+				// concatenate these string literals to prevent the test
+				// harness and/or Babel from modifying the symbol value.
 				// eslint-disable-next-line
 				$$typeof = eval('Sym' + 'bol.for("react.element")');
 			}
