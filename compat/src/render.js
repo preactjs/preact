@@ -1,12 +1,13 @@
 import {
 	render as preactRender,
+	hydrate as preactHydrate,
 	options,
 	toChildArray,
 	Component
 } from 'preact';
 import { applyEventNormalization } from './events';
 
-const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|color|fill|flood|font|glyph|horiz|marker|overline|paint|stop|strikethrough|stroke|text|underline|unicode|units|v|vector|vert|word|writing|x)[A-Z]/;
+const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|fill|flood|font|glyph(?!R)|horiz|marker(?!H|W|U)|overline|paint|stop|strikethrough|stroke|text(?!L)|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
 
 // Some libraries like `react-virtualized` explicitly check for this.
 Component.prototype.isReactComponent = {};
@@ -33,11 +34,14 @@ export function render(vnode, parent, callback) {
 		}
 	}
 
-	return hydrate(vnode, parent, callback);
+	preactRender(vnode, parent);
+	if (typeof callback === 'function') callback();
+
+	return vnode ? vnode._component : null;
 }
 
 export function hydrate(vnode, parent, callback) {
-	preactRender(vnode, parent);
+	preactHydrate(vnode, parent);
 	if (typeof callback === 'function') callback();
 
 	return vnode ? vnode._component : null;
