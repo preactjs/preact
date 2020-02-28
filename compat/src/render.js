@@ -52,6 +52,7 @@ options.event = e => {
 	if (oldEventHook) e = oldEventHook(e);
 	e.persist = () => {};
 	e.isDefaultPrevented = () => e.defaultPrevented;
+	e.isPropagationStopped = () => e.stopPropagation;
 	return (e.nativeEvent = e);
 };
 
