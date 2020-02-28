@@ -51,6 +51,7 @@ let oldEventHook = options.event;
 options.event = e => {
 	if (oldEventHook) e = oldEventHook(e);
 	e.persist = () => {};
+	e.isDefaultPrevented = () => e.defaultPrevented;
 	return (e.nativeEvent = e);
 };
 
