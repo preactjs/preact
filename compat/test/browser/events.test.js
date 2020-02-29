@@ -34,12 +34,17 @@ describe('preact/compat events', () => {
 
 		expect(spy).to.be.calledOnce;
 		const event = spy.args[0][0];
-		expect(event.nativeEvent).to.eql(event);
-		expect(event.persist()).to.be.undefined;
-		expect(event.isDefaultPrevented()).to.be.false;
+		expect(event).to.haveOwnProperty('persist');
+		expect(event).to.haveOwnProperty('nativeEvent');
+		expect(event).to.haveOwnProperty('isDefaultPrevented');
+		expect(event).to.haveOwnProperty('isPropagationStopped');
+		expect(typeof event.persist).to.equal('function');
+		expect(typeof event.isDefaultPrevented).to.equal('function');
+		expect(typeof event.isPropagationStopped).to.equal('function');
 
-		event.preventDefault();
-		expect(event.isDefaultPrevented()).to.be.true;
+		expect(() => event.persist()).to.not.throw();
+		expect(() => event.isDefaultPrevented()).to.not.throw();
+		expect(() => event.isPropagationStopped()).to.not.throw();
 	});
 
 	it('should normalize ondoubleclick event', () => {
