@@ -50,10 +50,18 @@ export function hydrate(vnode, parent, callback) {
 let oldEventHook = options.event;
 options.event = e => {
 	if (oldEventHook) e = oldEventHook(e);
-	e.persist = () => {};
-	e.isDefaultPrevented = () => e.defaultPrevented;
-	e.isPropagationStopped = () => e.stopPropagation;
-	return (e.nativeEvent = e);
+	if (e.nativeEvent === undefined) {
+		e.persist = () => {};
+		e.isDefaultPrevented = () => e.defaultPrevented;
+		const stopPropagation = e.stopPropagation;
+		event.stopPropagation = function() {
+			stopPropagation.call(this);
+			this.isPropagationStopped = () => true;
+		};
+		e.isPropagationStopped = () => false;
+		e.nativeEvent = e;
+	}
+	return e;
 };
 
 // Patch in `UNSAFE_*` lifecycle hooks
