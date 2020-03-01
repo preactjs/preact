@@ -45,6 +45,14 @@ describe('preact/compat events', () => {
 		expect(() => event.persist()).to.not.throw();
 		expect(() => event.isDefaultPrevented()).to.not.throw();
 		expect(() => event.isPropagationStopped()).to.not.throw();
+
+		expect(event.isDefaultPrevented()).to.be.false;
+		event.preventDefault();
+		expect(event.isDefaultPrevented()).to.be.true;
+
+		expect(event.isPropagationStopped()).to.be.false;
+		event.stopPropagation();
+		expect(event.isPropagationStopped()).to.be.true;
 	});
 
 	it('should normalize ondoubleclick event', () => {

@@ -52,7 +52,13 @@ options.event = e => {
 	if (oldEventHook) e = oldEventHook(e);
 	e.persist = () => {};
 	e.isDefaultPrevented = () => e.defaultPrevented;
-	e.isPropagationStopped = () => e.stopPropagation;
+	const normalStopPropagation = e.stopPropagation;
+	let stoppedPropagating = false;
+	e.stopPropagation = function() {
+		stoppedPropagating = true;
+		normalStopPropagation.call(this);
+	};
+	e.isPropagationStopped = () => stoppedPropagating;
 	return (e.nativeEvent = e);
 };
 
