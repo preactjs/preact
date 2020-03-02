@@ -794,7 +794,7 @@ describe('suspense', () => {
 					`<div>Hello first 2</div><div><div>Hello second 2</div></div>`
 				);
 				expect(Suspender1.prototype.render).to.have.been.calledThrice;
-				expect(Suspender2.prototype.render).to.have.been.calledThrice;
+				expect(Suspender2.prototype.render).to.have.been.calledTwice;
 			});
 		});
 	});

@@ -134,11 +134,13 @@ export function diff(
 					if (c._renderCallbacks.length) {
 						commitQueue.push(c);
 					}
+
 					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
 						if (newVNode._children[tmp]) {
 							newVNode._children[tmp]._parent = newVNode;
 						}
 					}
+
 					break outer;
 				}
 
@@ -203,6 +205,13 @@ export function diff(
 			}
 
 			c._force = false;
+		} else if (
+			excessDomChildren == null &&
+			newVNode._original === oldVNode._original
+		) {
+			newVNode._children = oldVNode._children;
+			newVNode._lastDomChild = oldVNode._lastDomChild;
+			newVNode._dom = oldVNode._dom;
 		} else {
 			newVNode._dom = diffElementNodes(
 				oldVNode._dom,
