@@ -8,7 +8,6 @@ describe('cloneElement', () => {
 		const instance = <Comp prop1={1}>hello</Comp>;
 		const clone = cloneElement(instance);
 
-		expect(clone.prototype).to.equal(instance.prototype);
 		expect(clone.type).to.equal(instance.type);
 		expect(clone.props).not.to.equal(instance.props); // Should be a different object...
 		expect(clone.props).to.deep.equal(instance.props); // with the same properties
@@ -19,7 +18,6 @@ describe('cloneElement', () => {
 		const instance = <Foo prop1={1} prop2={2} />;
 		const clone = cloneElement(instance, { prop1: -1, newProp: -2 });
 
-		expect(clone.prototype).to.equal(instance.prototype);
 		expect(clone.type).to.equal(instance.type);
 		expect(clone.props).not.to.equal(instance.props);
 		expect(clone.props.prop1).to.equal(-1);
@@ -32,7 +30,6 @@ describe('cloneElement', () => {
 		const instance = <Foo>hello</Foo>;
 		const clone = cloneElement(instance, null, 'world', '!');
 
-		expect(clone.prototype).to.equal(instance.prototype);
 		expect(clone.type).to.equal(instance.type);
 		expect(clone.props).not.to.equal(instance.props);
 		expect(clone.props.children).to.deep.equal(['world', '!']);

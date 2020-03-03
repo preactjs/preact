@@ -7,6 +7,7 @@ import { createVNode } from './create-element';
  * @param {import('./internal').VNode} vnode The virtual DOM element to clone
  * @param {object} props Attributes/props to add when cloning
  * @param {Array<import('./index').ComponentChildren>} rest Any additional arguments will be used as replacement children.
+ * @returns {import('./internal').VNode}
  */
 export function cloneElement(vnode, props) {
 	props = assign(assign({}, vnode.props), props);
