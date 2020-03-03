@@ -40,6 +40,16 @@ export function diff(
 	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== undefined) return null;
 
+	if (oldVNode._hydrating != null) {
+		// console.log('Resuming at ', oldDom, ' is ', { vnode: Object.assign({}, newVNode), isHydrating: oldVNode._hydrating, domMatch: oldVNode._dom === oldDom, excessDomChildren });
+		isHydrating = oldVNode._hydrating;
+		oldDom = newVNode._dom = oldVNode._dom;
+		// if we resume, we want the tree to be "unlocked"  (TODO: check if this is true for oldVNode)
+		// oldVNode._hydrating = newVNode._hydrating = null;
+		newVNode._hydrating = null;
+		excessDomChildren = [oldDom];
+	}
+
 	if ((tmp = options._diff)) tmp(newVNode);
 
 	try {
@@ -130,6 +140,8 @@ export function diff(
 					c._vnode = newVNode;
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
+					// if we are rendering a suspended tree, make sure to keep it suspended until we are done.
+					newVNode._hydrating = oldVNode._hydrating;
 					if (c._renderCallbacks.length) {
 						commitQueue.push(c);
 					}
@@ -215,8 +227,10 @@ export function diff(
 
 		if ((tmp = options.diffed)) tmp(newVNode);
 	} catch (e) {
-		newVNode._dom = oldDom; // is this needed?
-		newVNode._hydrating = !!isHydrating;
+		if (isHydrating || excessDomChildren != null) {
+			newVNode._dom = oldDom;
+			newVNode._hydrating = !!isHydrating;
+		}
 		options._catchError(e, newVNode, oldVNode);
 	}
 
@@ -299,6 +313,11 @@ function diffElementNodes(
 
 	if (dom == null) {
 		if (newVNode.type === null) {
+			// During hydration, only the first Text node is attached.
+			// Subsequent updates will trigger splitting up into separate nodes.
+			// See https://github.com/preactjs/preact/wiki/Hydration-Design-Documentation
+			if (isHydrating && excessDomChildren != null) return null;
+
 			return document.createTextNode(newProps);
 		}
 
@@ -310,10 +329,15 @@ function diffElementNodes(
 			  );
 		// we created a new parent, so none of the previously attached children can be reused:
 		excessDomChildren = null;
+		isHydrating = false;
 	}
 
 	if (newVNode.type === null) {
-		if (oldProps !== newProps && dom.data != newProps) {
+		// Text mutations during hydration are ignored.
+		// See https://github.com/preactjs/preact/wiki/Hydration-Design-Documentation
+		if (isHydrating && excessDomChildren != null) {
+			newVNode.props = dom.data;
+		} else if (oldProps !== newProps) {
 			dom.data = newProps;
 		}
 	} else if (newVNode !== oldVNode) {
