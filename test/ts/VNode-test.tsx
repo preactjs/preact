@@ -130,6 +130,15 @@ describe('VNode TS types', () => {
 		expect(comp.props).not.to.equal(clone.props);
 		expect(comp.props).to.deep.equal(clone.props);
 	});
+
+	it('component should work with cloneElement using generics', () => {
+		const comp: VNode<string> = <SimpleComponent></SimpleComponent>;
+		const clone: VNode<string> = cloneElement<string>(comp);
+
+		expect(comp.type).to.equal(clone.type);
+		expect(comp.props).not.to.equal(clone.props);
+		expect(comp.props).to.deep.equal(clone.props);
+	});
 });
 
 class ComponentWithFunctionChild extends Component<{

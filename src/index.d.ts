@@ -227,6 +227,11 @@ declare namespace preact {
 		props?: any,
 		...children: ComponentChildren[]
 	): VNode<any>;
+	function cloneElement<P>(
+		vnode: VNode<P>,
+		props?: any,
+		...children: ComponentChildren[]
+	): VNode<P>;
 
 	//
 	// Preact Built-in Components
