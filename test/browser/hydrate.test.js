@@ -1,4 +1,4 @@
-import { createElement, hydrate, Fragment } from 'preact';
+import { createElement, hydrate, Fragment, Component } from 'preact';
 import { Suspense } from 'preact/compat';
 import { useState } from 'preact/hooks';
 import {
@@ -282,44 +282,277 @@ describe('hydrate()', () => {
 		expect(element.innerHTML).to.equal('<p>hello bar</p>');
 	});
 
-	it('should reuse suspense component markup when suspense resolves during hydration', () => {
-		scratch.innerHTML = '<div id="test"><p>hello bar</p><p>Hello foo</p></div>';
-		const element = scratch;
-		let resolver;
-		const Component = () => {
-			const [state, setState] = useState(false);
-			if (!state) {
-				throw new Promise(resolve => {
-					resolver = () => {
-						setState(true);
-						resolve();
-					};
-				});
-			} else {
-				return <p>hello bar</p>;
+	describe('Progressive Hydration', () => {
+		beforeEach(() => {
+			scratch.observer = new MutationObserver(() => {});
+			scratch.observer.observe(scratch, {
+				subtree: true,
+				childList: true,
+				attributes: true,
+				attributeOldValue: true,
+				characterData: true,
+				characterDataOldValue: true
+			});
+		});
+
+		afterEach(() => {
+			if (scratch.observer) scratch.observer.disconnect();
+			scratch.observer = null;
+		});
+
+		it('should preserve DOM for caught exceptions during hydration', () => {
+			scratch.innerHTML = '<div id="test"><p>inner</p><p>after</p></div>';
+			scratch.observer.takeRecords(); // ignore
+			let outerInstance;
+			let shouldThrow = true;
+			function Inner() {
+				if (shouldThrow) {
+					throw {};
+				}
+				return <p>inner</p>;
 			}
-		};
-		const App = () => {
-			return (
-				<div id="test">
-					<Suspense fallback={<div>baz</div>}>
-						<Component />
-					</Suspense>
-					<p>Hello foo</p>
-				</div>
+			class Outer extends Component {
+				constructor(props, context) {
+					super(props, context);
+					outerInstance = this;
+				}
+				componentDidCatch() {}
+				render() {
+					return <Inner />;
+				}
+			}
+			function App() {
+				return (
+					<div id="test">
+						<Outer />
+						<p>after</p>
+					</div>
+				);
+			}
+			const componentDidCatch = sinon.spy(Outer.prototype, 'componentDidCatch');
+			hydrate(<App />, scratch);
+			expect(componentDidCatch).to.have.been.calledOnce;
+			componentDidCatch.resetHistory();
+			// our instance of Outer()
+			const firstOuterInstance = outerInstance;
+			expect(outerInstance).to.exist;
+			expect(outerInstance.base).to.equal(scratch.firstChild.firstChild);
+			expect(outerInstance._vnode._dom).to.equal(scratch.firstChild.firstChild);
+
+			expect(scratch.observer.takeRecords()).to.have.length(
+				0,
+				'no DOM mutations'
 			);
-		};
-		hydrate(<App />, element);
-		rerender();
-		expect(element.innerHTML).to.equal(
-			'<div id="test"><p>hello bar</p><p>Hello foo</p></div>'
-		);
-		const removeChildSpy = sinon.spy(element.firstChild, 'removeChild');
-		resolver();
-		rerender();
-		expect(removeChildSpy).to.be.not.called;
-		expect(element.innerHTML).to.equal(
-			'<div id="test"><p>hello bar</p><p>Hello foo</p></div>'
-		);
+
+			// now re-render and see if we hydrate:
+			shouldThrow = false;
+			outerInstance.forceUpdate();
+			rerender();
+			expect(componentDidCatch).not.to.have.been.called;
+			expect(outerInstance).to.equal(
+				firstOuterInstance,
+				'Resumption should reuse component instances'
+			);
+
+			expect(scratch.innerHTML).to.equal(
+				'<div id="test"><p>inner</p><p>after</p></div>'
+			);
+			expect(scratch.observer.takeRecords()).to.have.length(
+				0,
+				'no DOM mutations'
+			);
+
+			// it should work repeatedly:
+			outerInstance.forceUpdate();
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				'<div id="test"><p>inner</p><p>after</p></div>'
+			);
+			expect(scratch.observer.takeRecords()).to.have.length(
+				0,
+				'no DOM mutations'
+			);
+		});
+
+		it('should preserve DOM for nested exceptions when resuming from suspended hydration', () => {
+			const HTML =
+				'<div id="test"><p><span>inner</span>outer</p><p>after</p></div>';
+			scratch.innerHTML = HTML;
+			scratch.observer.takeRecords(); // ignore
+
+			// Similar to @preact-cli/async-component
+			const wrap = () =>
+				class Wrap extends Component {
+					componentDidCatch() {}
+					render(props) {
+						Wrap.instance = this;
+						return props.children;
+					}
+				};
+
+			let shouldThrowOuter = true;
+			function Outer(props) {
+				if (shouldThrowOuter) throw {};
+				return <p>{props.children}</p>;
+			}
+			const OuterWrap = wrap();
+
+			let shouldThrowInner = true;
+			function Inner(props) {
+				if (shouldThrowInner) throw {};
+				return <span>{props.children}</span>;
+			}
+			const InnerWrap = wrap();
+
+			function App() {
+				return (
+					<div id="test">
+						<OuterWrap>
+							<Outer>
+								<InnerWrap>
+									<Inner>inner</Inner>
+								</InnerWrap>
+								outer
+							</Outer>
+						</OuterWrap>
+						<p>after</p>
+					</div>
+				);
+			}
+			const componentDidCatchOuter = sinon.spy(
+				OuterWrap.prototype,
+				'componentDidCatch'
+			);
+			const componentDidCatchInner = sinon.spy(
+				InnerWrap.prototype,
+				'componentDidCatch'
+			);
+			hydrate(<App />, scratch);
+			expect(componentDidCatchOuter).to.have.been.calledOnce;
+			expect(componentDidCatchInner).not.to.have.been.called;
+			// our instance of Outer()
+			const firstOuterInstance = OuterWrap.instance;
+			expect(firstOuterInstance).to.exist;
+			expect(firstOuterInstance.base).to.equal(scratch.firstChild.firstChild);
+			expect(firstOuterInstance._vnode._dom).to.equal(
+				scratch.firstChild.firstChild
+			);
+
+			expect(scratch.observer.takeRecords()).to.have.length(
+				0,
+				'[outer] no DOM mutations'
+			);
+
+			componentDidCatchOuter.resetHistory();
+
+			// now re-render and let the inner component suspend:
+			console.log('un-suspending Outer');
+			shouldThrowOuter = false;
+			OuterWrap.instance.forceUpdate();
+			rerender();
+			expect(componentDidCatchOuter).not.to.have.been.called;
+			expect(componentDidCatchInner).to.have.been.calledOnce;
+			expect(OuterWrap.instance).to.equal(
+				firstOuterInstance,
+				'[outer] Resumption should reuse component instances'
+			);
+
+			const firstInnerInstance = InnerWrap.instance;
+			expect(firstInnerInstance).to.exist;
+			expect(firstInnerInstance.base).to.equal(
+				scratch.firstChild.firstChild.firstChild
+			);
+			expect(firstInnerInstance._vnode._dom).to.equal(
+				scratch.firstChild.firstChild.firstChild
+			);
+
+			expect(scratch.innerHTML).to.equal(
+				HTML,
+				'[outer] Resumption should preserve DOM tree'
+			);
+			expect(scratch.observer.takeRecords()).to.have.length(
+				0,
+				'no DOM mutations'
+			);
+
+			componentDidCatchInner.resetHistory();
+
+			// now re-render the inner component to finish hydration:
+			console.log('un-suspending Inner');
+			shouldThrowInner = false;
+			// OuterWrap.instance.forceUpdate();
+			InnerWrap.instance.forceUpdate();
+			rerender();
+			expect(componentDidCatchOuter).not.to.have.been.called;
+			expect(componentDidCatchInner).not.to.have.been.called;
+			expect(InnerWrap.instance).to.equal(
+				firstInnerInstance,
+				'[inner] Resumption should reuse component instances'
+			);
+
+			expect(scratch.innerHTML).to.equal(
+				HTML,
+				'[inner] Resumption should preserve DOM tree'
+			);
+			expect(scratch.observer.takeRecords()).to.have.length(
+				0,
+				'no DOM mutations'
+			);
+
+			/*
+			// it should also update fine from the root
+			console.log('re-rendering from Outer');
+			OuterWrap.instance.forceUpdate();
+			rerender();
+			expect(componentDidCatchOuter).not.to.have.been.called;
+			expect(componentDidCatchInner).not.to.have.been.called;
+			expect(InnerWrap.instance).to.equal(firstInnerInstance, '[inner] Resumption should reuse component instances');
+
+			expect(scratch.innerHTML).to.equal(HTML, '[inner] Resumption should preserve DOM tree');
+			expect(scratch.observer.takeRecords()).to.have.length(0, 'no DOM mutations');
+			*/
+		});
+
+		it('should reuse suspended markup when suspense resolves during hydration', () => {
+			scratch.innerHTML =
+				'<div id="test"><p>hello bar</p><p>Hello foo</p></div>';
+			const element = scratch;
+			let resolver;
+			const Component = () => {
+				const [state, setState] = useState(false);
+				if (!state) {
+					throw new Promise(resolve => {
+						resolver = () => {
+							setState(true);
+							resolve();
+						};
+					});
+				} else {
+					return <p>hello bar</p>;
+				}
+			};
+			const App = () => {
+				return (
+					<div id="test">
+						<Suspense fallback={<div>baz</div>}>
+							<Component />
+						</Suspense>
+						<p>Hello foo</p>
+					</div>
+				);
+			};
+			hydrate(<App />, element);
+			rerender();
+			expect(element.innerHTML).to.equal(
+				'<div id="test"><p>hello bar</p><p>Hello foo</p></div>'
+			);
+			const removeChildSpy = sinon.spy(element.firstChild, 'removeChild');
+			resolver();
+			rerender();
+			expect(removeChildSpy).to.be.not.called;
+			expect(element.innerHTML).to.equal(
+				'<div id="test"><p>hello bar</p><p>Hello foo</p></div>'
+			);
+		});
 	});
 });
