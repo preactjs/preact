@@ -8,7 +8,8 @@ import {
 	ComponentConstructor,
 	ComponentFactory,
 	VNode,
-	ComponentChildren
+	ComponentChildren,
+	cloneElement
 } from '../../src';
 
 function getDisplayType(vnode: VNode | string | number) {
@@ -115,6 +116,28 @@ describe('VNode TS types', () => {
 
 		const types = toChildArray(comp.props.children).map(getDisplayType);
 		expect(types).to.deep.equal(['a', '2', 'b', 'c', 'TestComp']);
+	});
+
+	it('component should work with cloneElement', () => {
+		const comp: VNode = (
+			<SimpleComponent>
+				<div>child 1</div>
+			</SimpleComponent>
+		);
+		const clone: VNode = cloneElement(comp);
+
+		expect(comp.type).to.equal(clone.type);
+		expect(comp.props).not.to.equal(clone.props);
+		expect(comp.props).to.deep.equal(clone.props);
+	});
+
+	it('component should work with cloneElement using generics', () => {
+		const comp: VNode<string> = <SimpleComponent></SimpleComponent>;
+		const clone: VNode<string> = cloneElement<string>(comp);
+
+		expect(comp.type).to.equal(clone.type);
+		expect(comp.props).not.to.equal(clone.props);
+		expect(comp.props).to.deep.equal(clone.props);
 	});
 });
 
