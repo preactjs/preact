@@ -124,7 +124,7 @@ describe('VNode TS types', () => {
 				<div>child 1</div>
 			</SimpleComponent>
 		);
-		const clone = cloneElement(comp);
+		const clone: VNode = cloneElement(comp);
 
 		expect(comp.type).to.equal(clone.type);
 		expect(comp.props).not.to.equal(clone.props);
