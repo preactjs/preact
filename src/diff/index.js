@@ -368,6 +368,7 @@ function diffElementNodes(
 			if (
 				'value' in newProps &&
 				newProps.value !== undefined &&
+				newProps.value !== oldProps.value &&
 				newProps.value !== dom.value
 			) {
 				dom.value = newProps.value == null ? '' : newProps.value;
