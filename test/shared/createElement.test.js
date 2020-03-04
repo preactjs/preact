@@ -74,7 +74,9 @@ describe('createElement(jsx)', () => {
 			'props',
 			'key',
 			'ref',
-			'constructor'
+			'constructor',
+			'source',
+			'self'
 		]);
 	});
 
@@ -158,23 +160,22 @@ describe('createElement(jsx)', () => {
 	});
 
 	it('should NOT set children prop when null', () => {
-		let r = h('foo', {foo : 'bar'}, null);
+		let r = h('foo', { foo: 'bar' }, null);
 
 		expect(r)
 			.to.be.an('object')
 			.to.have.nested.property('props.foo')
-			.not.to.have.nested.property('props.children')
-			
-	})
+			.not.to.have.nested.property('props.children');
+	});
 
 	it('should NOT set children prop when unspecified', () => {
-		let r = h('foo', {foo : 'bar'});
+		let r = h('foo', { foo: 'bar' });
 
 		expect(r)
 			.to.be.an('object')
 			.to.have.nested.property('props.foo')
-			.not.to.have.nested.property('props.children')
-	})
+			.not.to.have.nested.property('props.children');
+	});
 
 	it('should NOT merge adjacent text children', () => {
 		let r = h(
@@ -233,7 +234,7 @@ describe('createElement(jsx)', () => {
 				null
 			]);
 	});
-	
+
 	it('should not merge children that are boolean values', () => {
 		let r = h('foo', null, 'one', true, 'two', false, 'three');
 

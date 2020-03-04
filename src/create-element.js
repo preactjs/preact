@@ -54,9 +54,11 @@ export function createElement(type, props, children) {
  * diffing it against its children
  * @param {import('./internal').VNode["ref"]} ref The ref property that will
  * receive a reference to its created child
+ * @param {import('./internal').VNode["ref"]} source The ref property that will
+ * receive a reference to its created child
  * @returns {import('./internal').VNode}
  */
-export function createVNode(type, props, key, ref) {
+export function createVNode(type, props, key, ref, source, self) {
 	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
 	// Do not inline into createElement and coerceToVNode!
 	const vnode = {
@@ -74,7 +76,11 @@ export function createVNode(type, props, key, ref) {
 		// a _nextDom that has been set to `null`
 		_nextDom: undefined,
 		_component: null,
-		constructor: undefined
+		constructor: undefined,
+
+		// These are added by babel and used to generate component stacks.
+		__source: source,
+		__self: self
 	};
 
 	if (options.vnode) options.vnode(vnode);
@@ -110,14 +116,7 @@ export function jsx(type, props, key, isStaticChildren, source, self) {
 		}
 	}
 
-	const vnode = createVNode(type, props, key, props && props.ref);
-
-	// TODO: Should this be inlined into `createVNode`?
-	if (source || self) {
-		vnode.__source = source;
-		vnode.__self = self;
-	}
-	return vnode;
+	return createVNode(type, props, key, props && props.ref, source, self);
 }
 
 // The difference between `jsxs` and `jsx` is that the former is used by babel
