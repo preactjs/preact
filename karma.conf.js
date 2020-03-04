@@ -65,7 +65,6 @@ var localLaunchers = {
 const subPkgPath = pkgName =>
 	path.join(__dirname, pkgName, !minify ? 'src' : '');
 
-sauceLabs = true;
 module.exports = function(config) {
 	config.set({
 		browsers: sauceLabs
