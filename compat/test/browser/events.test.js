@@ -37,10 +37,10 @@ describe('preact/compat events', () => {
 		expect(event).to.haveOwnProperty('persist');
 		expect(event).to.haveOwnProperty('nativeEvent');
 		expect(event).to.haveOwnProperty('isDefaultPrevented');
-		//expect(event).to.haveOwnProperty('isPropagationStopped');
+		expect(event).to.haveOwnProperty('isPropagationStopped');
 		expect(typeof event.persist).to.equal('function');
 		expect(typeof event.isDefaultPrevented).to.equal('function');
-		//expect(typeof event.isPropagationStopped).to.equal('function');
+		expect(typeof event.isPropagationStopped).to.equal('function');
 
 		expect(() => event.persist()).to.not.throw();
 		expect(() => event.isDefaultPrevented()).to.not.throw();
