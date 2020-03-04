@@ -2,6 +2,9 @@ export { render, hydrate } from './render';
 export {
 	createElement,
 	createElement as h,
+	jsx,
+	jsxs,
+	jsxDEV,
 	Fragment,
 	createRef,
 	isValidElement

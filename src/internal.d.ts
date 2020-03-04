@@ -91,3 +91,8 @@ export interface PreactContext extends preact.Context<any> {
 	_id: string;
 	_defaultValue: any;
 }
+
+export interface DevSource {
+	fileName: string;
+	lineNumber: number;
+}
