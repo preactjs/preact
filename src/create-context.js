@@ -20,11 +20,12 @@ export function createContext(defaultValue) {
 				};
 				this.shouldComponentUpdate = _props => {
 					if (props.value !== _props.value) {
-						subs.sort((a, b) => b._vnode._depth - a._vnode._depth);
-						subs.some(c => {
-							c.context = _props.value;
-							enqueueRender(c);
-						});
+						subs
+							.sort((a, b) => b._vnode._depth - a._vnode._depth)
+							.some(c => {
+								c.context = _props.value;
+								enqueueRender(c);
+							});
 					}
 				};
 
