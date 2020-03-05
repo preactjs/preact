@@ -372,7 +372,6 @@ function diffElementNodes(
 				newProps.defaultValue !== newProps.value
 			) {
 				dom.value = newProps.value == null ? '' : newProps.value;
-				delete newProps.defaultValue; // is this needed?
 			}
 			if (
 				'checked' in newProps &&
