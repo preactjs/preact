@@ -200,10 +200,12 @@ export function enqueueRender(c) {
 
 /** Flush the render queue by rerendering all queued components */
 function process() {
-	let c;
-	rerenderQueue.sort((a, b) => b._vnode._depth - a._vnode._depth);
-	while ((c = rerenderQueue.pop())) {
-		// forceUpdate's callback argument is reused here to indicate a non-forced update.
-		if (c._dirty) renderComponent(c);
+	let q;
+	while (rerenderQueue.length) {
+		q = rerenderQueue.sort((a, b) => a._vnode._depth - b._vnode._depth);
+		rerenderQueue = [];
+		q.some(c => {
+			if (c._dirty) renderComponent(c);
+		});
 	}
 }
