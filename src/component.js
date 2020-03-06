@@ -212,7 +212,7 @@ function process() {
 		// process() calls won't get scheduled.
 		rerenderCount = 1;
 		queue.some(c => {
-			if (c && c._dirty) renderComponent(c);
+			if (c._dirty) renderComponent(c);
 		});
 	}
 }
