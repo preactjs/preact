@@ -521,9 +521,9 @@ describe('createContext', () => {
 		});
 
 		// Rendered three times, should call 'Consumer' render two times
-		expect(Inner.prototype.render).to.have.been.calledTwice.and.calledWithMatch(
-			{ i: 2 }
-		);
+		expect(
+			Inner.prototype.render
+		).to.have.been.calledTwice.and.calledWithMatch({ i: 2 });
 		expect(scratch.innerHTML).to.equal('<div>2</div>');
 	});
 
@@ -774,6 +774,78 @@ describe('createContext', () => {
 
 			expect(spy).to.be.calledOnce;
 			expect(spy.getCall(0).args[0]).to.equal(instance);
+		});
+
+		it('should order updates correctly', () => {
+			const events = [];
+			let update;
+			const Store = createContext();
+
+			class Root extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { id: 0 };
+					update = this.updateStore = this.updateStore.bind(this);
+				}
+
+				updateStore() {
+					this.setState(state => ({ id: state.id + 1 }));
+				}
+
+				render() {
+					return (
+						<Store.Provider value={this.state.id}>
+							<App />
+						</Store.Provider>
+					);
+				}
+			}
+
+			class App extends Component {
+				shouldComponentUpdate() {
+					return false;
+				}
+
+				render() {
+					return <Store.Consumer>{id => <Parent key={id} />}</Store.Consumer>;
+				}
+			}
+
+			function Parent(props) {
+				return <Store.Consumer>{id => <Child id={id} />}</Store.Consumer>;
+			}
+
+			class Child extends Component {
+				componentDidMount() {
+					events.push('mount ' + this.props.id);
+				}
+
+				componentDidUpdate(prevProps) {
+					events.push('update ' + prevProps.id + ' to ' + this.props.id);
+				}
+
+				componentWillUnmount() {
+					events.push('unmount ' + this.props.id);
+				}
+
+				render() {
+					events.push('render ' + this.props.id);
+					return this.props.id;
+				}
+			}
+
+			render(<Root />, scratch);
+			expect(events).to.deep.equal(['render 0', 'mount 0']);
+
+			update();
+			rerender();
+			expect(events).to.deep.equal([
+				'render 0',
+				'mount 0',
+				'render 1',
+				'unmount 0',
+				'mount 1'
+			]);
 		});
 	});
 });
