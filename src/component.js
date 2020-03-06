@@ -161,6 +161,7 @@ function updateParentDomPointers(vnode) {
  * @type {Array<import('./internal').Component>}
  */
 let rerenderQueue = [];
+let rerenderCount = 0;
 
 /**
  * Asynchronously schedule a callback
@@ -190,7 +191,10 @@ let prevDebounce;
  */
 export function enqueueRender(c) {
 	if (
-		(!c._dirty && (c._dirty = true) && rerenderQueue.push(c) === 1) ||
+		(!c._dirty &&
+			(c._dirty = true) &&
+			rerenderQueue.push(c) &&
+			!rerenderCount++) ||
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
@@ -200,10 +204,14 @@ export function enqueueRender(c) {
 
 /** Flush the render queue by rerendering all queued components */
 function process() {
-	let c;
-	rerenderQueue.sort((a, b) => b._vnode._depth - a._vnode._depth);
-	while ((c = rerenderQueue.pop())) {
-		// forceUpdate's callback argument is reused here to indicate a non-forced update.
-		if (c._dirty) renderComponent(c);
+	let queue;
+	while ((rerenderCount = rerenderQueue.length)) {
+		queue = rerenderQueue.sort((a, b) => a._vnode._depth - b._vnode._depth);
+		rerenderQueue = [];
+		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
+		// process() calls from getting scheduled while `queue` is still being consumed.
+		queue.some(c => {
+			if (c._dirty) renderComponent(c);
+		});
 	}
 }

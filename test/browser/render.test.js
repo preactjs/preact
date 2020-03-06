@@ -1485,4 +1485,38 @@ describe('render()', () => {
 			);
 		});
 	});
+
+	it('should not call options.debounceRendering unnecessarily', () => {
+		let comp;
+
+		class A extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { updates: 0 };
+				comp = this;
+			}
+
+			render() {
+				return <div>{this.state.updates}</div>;
+			}
+		}
+
+		render(<A />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>0</div>');
+
+		const sandbox = sinon.createSandbox();
+		try {
+			sandbox.spy(options, 'debounceRendering');
+
+			comp.setState({ updates: 1 }, () => {
+				comp.setState({ updates: 2 });
+			});
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>2</div>');
+
+			expect(options.debounceRendering).to.have.been.calledOnce;
+		} finally {
+			sandbox.restore();
+		}
+	});
 });
