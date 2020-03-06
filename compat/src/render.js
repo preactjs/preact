@@ -51,14 +51,23 @@ let oldEventHook = options.event;
 options.event = e => {
 	if (oldEventHook) e = oldEventHook(e);
 	e.persist = () => {};
-	e.isDefaultPrevented = () => e.defaultPrevented;
-	let stoppedPropagating = false;
-	Object.defineProperty(e, 'stopPropagation', {
-		value() {
-			stoppedPropagating = true;
-		}
-	});
+	let stoppedPropagating = false,
+		defaultPrevented = false;
+
+	const origStopPropagation = e.stopPropagation;
+	e.stopPropagation = () => {
+		origStopPropagation.call(e);
+		stoppedPropagating = true;
+	};
+
+	const origPreventDefault = e.preventDefault;
+	e.preventDefault = () => {
+		origPreventDefault.call(e);
+		defaultPrevented = true;
+	};
+
 	e.isPropagationStopped = () => stoppedPropagating;
+	e.isDefaultPrevented = () => defaultPrevented;
 	return (e.nativeEvent = e);
 };
 
