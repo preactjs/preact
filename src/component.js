@@ -208,9 +208,8 @@ function process() {
 	while ((rerenderCount = rerenderQueue.length)) {
 		queue = rerenderQueue.sort((a, b) => a._vnode._depth - b._vnode._depth);
 		rerenderQueue = [];
-		// Pretend momentarily that renderQueue has items in it so unnecessary
-		// process() calls won't get scheduled.
-		rerenderCount = 1;
+		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
+		// process() calls from getting scheduled while `queue` is still being consumed.
 		queue.some(c => {
 			if (c._dirty) renderComponent(c);
 		});
