@@ -120,10 +120,14 @@ export function diff(
 				}
 
 				if (
-					!c._force &&
-					c.shouldComponentUpdate != null &&
-					c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
-						false
+					(!c._force &&
+						c.shouldComponentUpdate != null &&
+							c.shouldComponentUpdate(
+								newProps,
+								c._nextState,
+								componentContext
+							) === false) ||
+					(newVNode._original === oldVNode._original && !c._processingException)
 				) {
 					c.props = newProps;
 					c.state = c._nextState;
@@ -227,6 +231,7 @@ export function diff(
 
 		if ((tmp = options.diffed)) tmp(newVNode);
 	} catch (e) {
+		newVNode._original = null;
 		options._catchError(e, newVNode, oldVNode);
 	}
 

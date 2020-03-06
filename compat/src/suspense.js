@@ -29,7 +29,7 @@ function detachedClone(vnode) {
 }
 
 // having custom inheritance instead of a class here saves a lot of bytes
-export function Suspense(props) {
+export function Suspense() {
 	// we do not call super here to golf some bytes...
 	this._pendingSuspensionCount = 0;
 	this._suspenders = null;

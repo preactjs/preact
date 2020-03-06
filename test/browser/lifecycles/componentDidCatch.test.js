@@ -52,6 +52,8 @@ describe('Lifecycle methods', () => {
 			}
 		}
 
+		let thrower;
+
 		spyAll(Receiver.prototype);
 
 		function throwExpectedError() {
@@ -60,6 +62,11 @@ describe('Lifecycle methods', () => {
 
 		beforeEach(() => {
 			ThrowErr = class ThrowErr extends Component {
+				constructor(props) {
+					super(props);
+					thrower = this;
+				}
+
 				componentDidCatch() {
 					expect.fail("Throwing component should not catch it's own error.");
 				}
@@ -197,7 +204,7 @@ describe('Lifecycle methods', () => {
 				</Receiver>,
 				scratch
 			);
-			receiver.forceUpdate();
+			thrower.forceUpdate();
 			rerender();
 
 			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
@@ -215,7 +222,7 @@ describe('Lifecycle methods', () => {
 				scratch
 			);
 
-			receiver.forceUpdate();
+			thrower.forceUpdate();
 			rerender();
 			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
 				expectedError
@@ -232,7 +239,7 @@ describe('Lifecycle methods', () => {
 				scratch
 			);
 
-			receiver.forceUpdate();
+			thrower.forceUpdate();
 			rerender();
 			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
 				expectedError
