@@ -107,6 +107,30 @@ describe('compat render', () => {
 		expect(scratch.firstElementChild.value).to.equal('0');
 	});
 
+	it('should keep value of uncontrolled inputs using defaultValue', () => {
+		// See https://github.com/preactjs/preact/issues/2391
+
+		class Input extends Component {
+			render() {
+				return (
+					<input
+						type="text"
+						defaultValue="bar"
+						onChange={() => this.forceUpdate()}
+					/>
+				);
+			}
+		}
+
+		render(<Input />, scratch);
+		expect(scratch.firstChild.value).to.equal('bar');
+		scratch.firstChild.focus();
+		scratch.firstChild.value = 'foo';
+		scratch.firstChild.dispatchEvent(new InputEvent('input'));
+		rerender();
+		expect(scratch.firstChild.value).to.equal('foo');
+	});
+
 	it('should call the callback', () => {
 		let spy = sinon.spy();
 		render(<div />, scratch, spy);
