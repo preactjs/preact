@@ -129,5 +129,5 @@ export function useDebugValue<T>(
 ): void;
 
 export function useErrorBoundary(
-	callback?: () => Promise<void> | void
+	callback?: (error: any) => Promise<void> | void
 ): [any, () => void];
