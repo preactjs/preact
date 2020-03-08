@@ -8,7 +8,8 @@ import { setupRerender, act } from 'preact/test-utils';
 import {
 	setupScratch,
 	teardown,
-	serializeHtml
+	serializeHtml,
+	createEvent
 } from '../../../test/_util/helpers';
 
 describe('compat render', () => {
@@ -110,13 +111,18 @@ describe('compat render', () => {
 	it('should keep value of uncontrolled inputs using defaultValue', () => {
 		// See https://github.com/preactjs/preact/issues/2391
 
+		const spy = sinon.spy();
+
 		class Input extends Component {
 			render() {
 				return (
 					<input
 						type="text"
 						defaultValue="bar"
-						onChange={() => this.forceUpdate()}
+						onChange={() => {
+							spy();
+							this.forceUpdate();
+						}}
 					/>
 				);
 			}
@@ -126,9 +132,11 @@ describe('compat render', () => {
 		expect(scratch.firstChild.value).to.equal('bar');
 		scratch.firstChild.focus();
 		scratch.firstChild.value = 'foo';
-		scratch.firstChild.dispatchEvent(new InputEvent('input'));
+
+		scratch.firstChild.dispatchEvent(createEvent('input'));
 		rerender();
 		expect(scratch.firstChild.value).to.equal('foo');
+		expect(spy).to.be.calledOnce;
 	});
 
 	it('should call the callback', () => {
