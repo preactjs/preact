@@ -105,7 +105,7 @@ options.vnode = vnode => {
 	// Apply DOM VNode compat
 	if (typeof type != 'function') {
 		// Apply defaultValue to value
-		if (props.defaultValue) {
+		if (props.defaultValue && props.value !== undefined) {
 			if (!props.value && props.value !== 0) {
 				props.value = props.defaultValue;
 			}
