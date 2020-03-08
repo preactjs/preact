@@ -51,14 +51,23 @@ let oldEventHook = options.event;
 options.event = e => {
 	if (oldEventHook) e = oldEventHook(e);
 	e.persist = () => {};
-	e.isDefaultPrevented = () => e.defaultPrevented;
-	const normalStopPropagation = e.stopPropagation;
-	let stoppedPropagating = false;
-	e.stopPropagation = function() {
+	let stoppedPropagating = false,
+		defaultPrevented = false;
+
+	const origStopPropagation = e.stopPropagation;
+	e.stopPropagation = () => {
+		origStopPropagation.call(e);
 		stoppedPropagating = true;
-		normalStopPropagation.call(this);
 	};
+
+	const origPreventDefault = e.preventDefault;
+	e.preventDefault = () => {
+		origPreventDefault.call(e);
+		defaultPrevented = true;
+	};
+
 	e.isPropagationStopped = () => stoppedPropagating;
+	e.isDefaultPrevented = () => defaultPrevented;
 	return (e.nativeEvent = e);
 };
 
