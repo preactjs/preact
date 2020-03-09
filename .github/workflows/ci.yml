@@ -1,0 +1,31 @@
+name: CI
+on: [pull_request]
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2-beta
+      with:
+        fetch-depth: 1
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+    - run: npm ci
+    - run: npm run build
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2-beta
+      with:
+        fetch-depth: 1
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+    - run: npm ci
+    - run: COVERAGE=true FLAKEY=false npm run test
+    - run: ./node_modules/coveralls/bin/coveralls.js < ./coverage/lcov.info;
+    - run: sizereport --config
+
