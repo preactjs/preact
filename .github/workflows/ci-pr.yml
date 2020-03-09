@@ -1,5 +1,7 @@
-name: CI
+name: CI-PR
+
 on: [pull_request]
+
 jobs:
   build:
     name: Build
@@ -25,7 +27,7 @@ jobs:
       with:
         node-version: '10.x'
     - run: npm ci
-    - run: COVERAGE=true FLAKEY=false npm run test
+    - run: COVERAGE=true FLAKEY=false CI=true npm run test
     - name: Coveralls GitHub Action
       uses: coverallsapp/github-action@v1.0.1
       with:
