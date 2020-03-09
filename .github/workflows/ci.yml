@@ -26,6 +26,9 @@ jobs:
         node-version: '10.x'
     - run: npm ci
     - run: COVERAGE=true FLAKEY=false npm run test
-    - run: ./node_modules/coveralls/bin/coveralls.js < ./coverage/lcov.info;
+    - name: Coveralls GitHub Action
+      uses: coverallsapp/github-action@v1.0.1
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
     - run: sizereport --config
 
