@@ -30,7 +30,14 @@ jobs:
       with:
         node-version: '10.x'
     - run: npm ci
-    - run: COVERAGE=true FLAKEY=false CI=true npm run test
+    - name: test
+      env:
+        CI: true
+        COVERAGE: true
+        FLAKEY: false
+        SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+        SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+      run: npm run test
     - name: Coveralls GitHub Action
       uses: coverallsapp/github-action@v1.0.1
       with:

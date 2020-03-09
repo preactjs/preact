@@ -27,7 +27,12 @@ jobs:
       with:
         node-version: '10.x'
     - run: npm ci
-    - run: COVERAGE=true FLAKEY=false CI=true npm run test
+    - name: test
+      env:
+        CI: true
+        COVERAGE: true
+        FLAKEY: false
+      run: npm run test
     - name: Coveralls GitHub Action
       uses: coverallsapp/github-action@v1.0.1
       with:
