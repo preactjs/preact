@@ -10,8 +10,6 @@ var coverage = String(process.env.COVERAGE) === 'true',
 	webpack = require('webpack'),
 	path = require('path');
 
-console.log(process.env.GITHUB_EVENT_NAME);
-
 var sauceLabsLaunchers = {
 	sl_chrome: {
 		base: 'SauceLabs',
