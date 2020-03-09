@@ -102,7 +102,7 @@ module.exports = function(config) {
 		sauceLabs: {
 			build: `CI #${process.env.GITHUB_RUN_NUMBER} (${process.env.GITHUB_RUN_ID})`,
 			tunnelIdentifier:
-				process.env.TRAVIS_JOB_NUMBER ||
+				process.env.GITHUB_RUN_NUMBER ||
 				`local${require('./package.json').version}`,
 			connectLocationForSERelay: 'localhost',
 			connectPortForSERelay: 4445,
