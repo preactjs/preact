@@ -46,7 +46,7 @@ function Portal(props) {
 			_this._container = container;
 			// Render our wrapping element into temp.
 			render(wrap, container, _this._temp);
-			_this._children = this._temp._children;
+			_this._children = _this._temp._children;
 		} else {
 			// When we have mounted and the vnode is present it means the
 			// props have changed or a parent is triggering a rerender.
