@@ -381,4 +381,32 @@ describe('forwardRef', () => {
 
 		expect(_ref.current).to.equal(scratch.firstChild);
 	});
+
+	it('should forward at diff time instead vnode-creation.', () => {
+		let ref, set;
+		const Wrapper = forwardRef((_props, ref) => <div ref={ref}>Wrapper</div>);
+		const Transition = ({ children }) => {
+			const state = useState(0);
+			set = state[1];
+			expect(children.ref).to.not.be.undefined;
+			return <div>{children}</div>;
+		};
+
+		const App = () => {
+			ref = useRef();
+			return (
+				<Transition>
+					<Wrapper ref={ref} />
+				</Transition>
+			);
+		};
+
+		render(<App />, scratch);
+
+		act(() => {
+			set(1);
+		});
+
+		expect(ref.current.innerHTML).to.equal('Wrapper');
+	});
 });

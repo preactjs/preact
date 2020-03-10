@@ -23,6 +23,7 @@ import TextFields from './textFields';
 import ReduxBug from './reduxUpdate';
 import SuspenseRouterBug from './suspense-router';
 import NestedSuspenseBug from './nested-suspense';
+import { Select, MenuItem } from '@material-ui/core';
 
 let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(
 	window.location.href
@@ -40,9 +41,11 @@ window.setImmediate = setTimeout;
 class Home extends Component {
 	render() {
 		return (
-			<div>
-				<h1>Hello</h1>
-			</div>
+			<Select value={0}>
+				<MenuItem value="0">Test 0</MenuItem>
+				<MenuItem value="1">Test 1</MenuItem>
+				<MenuItem value="3">Test 3</MenuItem>
+			</Select>
 		);
 	}
 }
