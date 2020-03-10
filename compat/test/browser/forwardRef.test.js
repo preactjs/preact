@@ -393,7 +393,7 @@ describe('forwardRef', () => {
 		const Transition = ({ children }) => {
 			const state = useState(0);
 			forceTransition = state[1];
-			expect(children.ref).to.exist;
+			expect(children.ref).to.not.be.undefined;
 			if (state[0] === 0) expect(children.props.ref).to.be.undefined;
 			return children;
 		};
