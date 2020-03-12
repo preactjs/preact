@@ -139,9 +139,7 @@ options.vnode = vnode => {
 				attrs = vnode.props = {};
 				for (i in props) {
 					attrs[
-						CAMEL_PROPS.test(i)
-							? i.replace(/([A-Z0-9])/, '-$1').toLowerCase()
-							: i
+						CAMEL_PROPS.test(i) ? i.replace(/[A-Z0-9]/, '-$&').toLowerCase() : i
 					] = props[i];
 				}
 			}
