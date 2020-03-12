@@ -55,6 +55,8 @@ jobs:
         CI: true
         COVERAGE: true
         FLAKEY: false
+        SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+        SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
       run: npm run test
     - name: Coveralls GitHub Action
       uses: coverallsapp/github-action@v1.0.1

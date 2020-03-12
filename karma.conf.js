@@ -1,5 +1,5 @@
 /*eslint no-var:0, object-shorthand:0 */
-var isFork = !!process.env.GITHUB_HEAD_REF;
+var isFork = process.env.GITHUB_REPOSITORY !== 'preactjs/preact';
 
 var coverage = String(process.env.COVERAGE) === 'true',
 	minify = String(process.env.MINIFY) === 'true',
@@ -12,7 +12,7 @@ var coverage = String(process.env.COVERAGE) === 'true',
 	webpack = require('webpack'),
 	path = require('path');
 
-console.log('GITHUB_HEAD_REF', process.env);
+console.log('isFork', isFork);
 
 var sauceLabsLaunchers = {
 	sl_chrome: {
