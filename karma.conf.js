@@ -12,7 +12,7 @@ var coverage = String(process.env.COVERAGE) === 'true',
 	webpack = require('webpack'),
 	path = require('path');
 
-console.log('isFork', process.env.GITHUB_HEAD_REF);
+console.log('GITHUB_HEAD_REF', process.env);
 
 var sauceLabsLaunchers = {
 	sl_chrome: {
