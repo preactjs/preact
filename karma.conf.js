@@ -12,8 +12,6 @@ var coverage = String(process.env.COVERAGE) === 'true',
 	webpack = require('webpack'),
 	path = require('path');
 
-console.log('isFork', isFork);
-
 var sauceLabsLaunchers = {
 	sl_chrome: {
 		base: 'SauceLabs',
@@ -110,7 +108,7 @@ module.exports = function(config) {
 				`local${require('./package.json').version}`,
 			connectLocationForSERelay: 'localhost',
 			connectPortForSERelay: 4445,
-			startConnect: true
+			startConnect: !!sauceLabs
 		},
 
 		customLaunchers: sauceLabs ? sauceLabsLaunchers : localLaunchers,
