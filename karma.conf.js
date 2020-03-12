@@ -1,11 +1,13 @@
 /*eslint no-var:0, object-shorthand:0 */
+var isFork = !!process.env.GITHUB_HEAD_REF;
 
 var coverage = String(process.env.COVERAGE) === 'true',
 	minify = String(process.env.MINIFY) === 'true',
 	ci = String(process.env.CI).match(/^(1|true)$/gi),
 	pullRequest = String(process.env.GITHUB_EVENT_NAME) === 'pull_request',
 	masterBranch = String(process.env.GITHUB_WORKFLOW) === 'CI-master',
-	sauceLabs = ci && !pullRequest && masterBranch,
+	sauceLabs =
+		ci && ((!pullRequest && masterBranch) || (pullRequest && !isFork)),
 	performance = !coverage && String(process.env.PERFORMANCE) !== 'false',
 	webpack = require('webpack'),
 	path = require('path');
@@ -106,7 +108,7 @@ module.exports = function(config) {
 				`local${require('./package.json').version}`,
 			connectLocationForSERelay: 'localhost',
 			connectPortForSERelay: 4445,
-			startConnect: false
+			startConnect: true
 		},
 
 		customLaunchers: sauceLabs ? sauceLabsLaunchers : localLaunchers,
