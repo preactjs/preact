@@ -106,7 +106,7 @@ module.exports = function(config) {
 				`local${require('./package.json').version}`,
 			connectLocationForSERelay: 'localhost',
 			connectPortForSERelay: 4445,
-			startConnect: false
+			startConnect: true
 		},
 
 		customLaunchers: sauceLabs ? sauceLabsLaunchers : localLaunchers,
