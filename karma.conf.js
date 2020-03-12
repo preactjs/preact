@@ -12,6 +12,8 @@ var coverage = String(process.env.COVERAGE) === 'true',
 	webpack = require('webpack'),
 	path = require('path');
 
+console.log('isFork', isFork, pullRequest, ci);
+
 var sauceLabsLaunchers = {
 	sl_chrome: {
 		base: 'SauceLabs',
