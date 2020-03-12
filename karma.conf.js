@@ -1,5 +1,5 @@
 /*eslint no-var:0, object-shorthand:0 */
-
+console.log('isFork', process.env.GITHUB_REPOSITORY !== 'preactjs/preact')
 var coverage = String(process.env.COVERAGE) === 'true',
 	minify = String(process.env.MINIFY) === 'true',
 	ci = String(process.env.CI).match(/^(1|true)$/gi),
