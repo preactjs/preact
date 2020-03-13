@@ -56,6 +56,5 @@ describe('compat createElement()', () => {
 		render(vnode, scratch);
 
 		expect(scratch.innerHTML).to.equal('<div>hi buddy</div>');
-		console.log(scratch);
 	});
 });
