@@ -43,7 +43,7 @@ export function diff(
 	if ((tmp = options._diff)) tmp(newVNode);
 
 	try {
-		outer: if (typeof newType === 'function') {
+		outer: if (typeof newType == 'function') {
 			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
 			let newProps = newVNode.props;
 
@@ -417,7 +417,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	}
 
 	let dom;
-	if (!skipRemove && typeof vnode.type !== 'function') {
+	if (!skipRemove && typeof vnode.type != 'function') {
 		skipRemove = (dom = vnode._dom) != null;
 	}
 

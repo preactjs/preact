@@ -35,7 +35,7 @@ function setStyle(style, key, value) {
 	if (key[0] === '-') {
 		style.setProperty(key, value);
 	} else if (
-		typeof value === 'number' &&
+		typeof value == 'number' &&
 		IS_NON_DIMENSIONAL.test(key) === false
 	) {
 		style[key] = value + 'px';
@@ -67,10 +67,10 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	} else if (name === 'style') {
 		const s = dom.style;
 
-		if (typeof value === 'string') {
+		if (typeof value == 'string') {
 			s.cssText = value;
 		} else {
-			if (typeof oldValue === 'string') {
+			if (typeof oldValue == 'string') {
 				s.cssText = '';
 				oldValue = null;
 			}
@@ -116,10 +116,7 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		name in dom
 	) {
 		dom[name] = value == null ? '' : value;
-	} else if (
-		typeof value !== 'function' &&
-		name !== 'dangerouslySetInnerHTML'
-	) {
+	} else if (typeof value != 'function' && name !== 'dangerouslySetInnerHTML') {
 		if (name !== (name = name.replace(/^xlink:?/, ''))) {
 			if (value == null || value === false) {
 				dom.removeAttributeNS(

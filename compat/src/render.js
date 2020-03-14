@@ -13,9 +13,7 @@ const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|colo
 Component.prototype.isReactComponent = {};
 
 export const REACT_ELEMENT_TYPE =
-	(typeof Symbol !== 'undefined' &&
-		Symbol.for &&
-		Symbol.for('react.element')) ||
+	(typeof Symbol != 'undefined' && Symbol.for && Symbol.for('react.element')) ||
 	0xeac7;
 
 /**
@@ -35,14 +33,14 @@ export function render(vnode, parent, callback) {
 	}
 
 	preactRender(vnode, parent);
-	if (typeof callback === 'function') callback();
+	if (typeof callback == 'function') callback();
 
 	return vnode ? vnode._component : null;
 }
 
 export function hydrate(vnode, parent, callback) {
 	preactHydrate(vnode, parent);
-	if (typeof callback === 'function') callback();
+	if (typeof callback == 'function') callback();
 
 	return vnode ? vnode._component : null;
 }
@@ -153,7 +151,7 @@ options.vnode = vnode => {
 		// inheritance and are transpiled down to ES5 will overwrite our patched
 		// getters and setters. See #1941
 		if (
-			typeof type === 'function' &&
+			typeof type == 'function' &&
 			!type._patchedLifecycles &&
 			type.prototype
 		) {
