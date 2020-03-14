@@ -106,7 +106,7 @@ export function getDomSibling(vnode, childIndex) {
 	// Only climb up and search the parent if we aren't searching through a DOM
 	// VNode (meaning we reached the DOM parent of the original vnode that began
 	// the search)
-	return typeof vnode.type === 'function' ? getDomSibling(vnode) : null;
+	return typeof vnode.type == 'function' ? getDomSibling(vnode) : null;
 }
 
 /**

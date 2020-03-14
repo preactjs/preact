@@ -10,7 +10,7 @@ export function setupRerender() {
 	return () => options.__test__drainQueue && options.__test__drainQueue();
 }
 
-const isThenable = value => value != null && typeof value.then === 'function';
+const isThenable = value => value != null && typeof value.then == 'function';
 
 /** Depth of nested calls to `act`. */
 let actDepth = 0;
@@ -88,7 +88,7 @@ export function teardown() {
 		delete options.__test__drainQueue;
 	}
 
-	if (typeof options.__test__previousDebounce !== 'undefined') {
+	if (typeof options.__test__previousDebounce != 'undefined') {
 		options.debounceRendering = options.__test__previousDebounce;
 		delete options.__test__previousDebounce;
 	} else {
