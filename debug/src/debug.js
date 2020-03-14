@@ -282,7 +282,8 @@ export function initDebug() {
 					delete child._depth;
 					const keys = Object.keys(child).join(',');
 					throw new Error(
-						`Objects are not valid as a child. Encountered an object with the keys {${keys}}.`
+						`Objects are not valid as a child. Encountered an object with the keys {${keys}}.` +
+							`\n\n${getOwnerStack(vnode)}`
 					);
 				}
 			});
