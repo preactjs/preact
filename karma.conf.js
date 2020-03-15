@@ -3,10 +3,8 @@
 var coverage = String(process.env.COVERAGE) === 'true',
 	minify = String(process.env.MINIFY) === 'true',
 	ci = String(process.env.CI).match(/^(1|true)$/gi),
-	pullRequest = !String(process.env.TRAVIS_PULL_REQUEST).match(
-		/^(0|false|undefined)$/gi
-	),
-	masterBranch = String(process.env.TRAVIS_BRANCH).match(/^master$/gi),
+	pullRequest = String(process.env.GITHUB_EVENT_NAME) === 'pull_request',
+	masterBranch = String(process.env.GITHUB_WORKFLOW) === 'CI-master',
 	sauceLabs = ci && !pullRequest && masterBranch,
 	performance = !coverage && String(process.env.PERFORMANCE) !== 'false',
 	webpack = require('webpack'),
@@ -102,13 +100,13 @@ module.exports = function(config) {
 		captureTimeout: 0,
 
 		sauceLabs: {
-			build: `CI #${process.env.TRAVIS_BUILD_NUMBER} (${process.env.TRAVIS_BUILD_ID})`,
+			build: `CI #${process.env.GITHUB_RUN_NUMBER} (${process.env.GITHUB_RUN_ID})`,
 			tunnelIdentifier:
-				process.env.TRAVIS_JOB_NUMBER ||
+				process.env.GITHUB_RUN_NUMBER ||
 				`local${require('./package.json').version}`,
 			connectLocationForSERelay: 'localhost',
 			connectPortForSERelay: 4445,
-			startConnect: false
+			startConnect: !!sauceLabs
 		},
 
 		customLaunchers: sauceLabs ? sauceLabsLaunchers : localLaunchers,

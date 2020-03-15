@@ -7,7 +7,7 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 // IE11 doesn't support `new Event()`
 function createEvent(name) {
-	if (typeof Event === 'function') return new Event(name);
+	if (typeof Event == 'function') return new Event(name);
 
 	const event = document.createEvent('Event');
 	event.initEvent(name, true, true);
