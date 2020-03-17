@@ -304,4 +304,48 @@ describe('useContext', () => {
 		expect(scratch.innerHTML).to.equal('<div></div>');
 		expect(Inner).to.have.been.calledTwice;
 	});
+
+	it('should rerender when reset to defaultValue', () => {
+		const defaultValue = { state: 'hi' };
+		const context = createContext(defaultValue);
+		let set;
+
+		const Consumer = () => {
+			const ctx = useContext(context);
+			return <p>{ctx.state}</p>;
+		};
+
+		class NoUpdate extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+
+			render() {
+				return <Consumer />;
+			}
+		}
+
+		const Provider = () => {
+			const [state, setState] = useState(defaultValue);
+			set = setState;
+			return (
+				<context.Provider value={state}>
+					<NoUpdate />
+				</context.Provider>
+			);
+		};
+
+		render(<Provider />, scratch);
+		expect(scratch.innerHTML).to.equal('<p>hi</p>');
+
+		act(() => {
+			set({ state: 'bye' });
+		});
+		expect(scratch.innerHTML).to.equal('<p>bye</p>');
+
+		act(() => {
+			set(defaultValue);
+		});
+		expect(scratch.innerHTML).to.equal('<p>hi</p>');
+	});
 });

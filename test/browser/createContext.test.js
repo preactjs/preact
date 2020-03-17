@@ -848,4 +848,47 @@ describe('createContext', () => {
 			]);
 		});
 	});
+
+	it('should rerender when reset to defaultValue', () => {
+		const defaultValue = { state: 'hi' };
+		const context = createContext(defaultValue);
+		let set;
+
+		class NoUpdate extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+
+			render() {
+				return <context.Consumer>{v => <p>{v.state}</p>}</context.Consumer>;
+			}
+		}
+
+		class Provider extends Component {
+			constructor(props) {
+				super(props);
+				this.state = defaultValue;
+				set = this.setState.bind(this);
+			}
+
+			render() {
+				return (
+					<context.Provider value={this.state}>
+						<NoUpdate />
+					</context.Provider>
+				);
+			}
+		}
+
+		render(<Provider />, scratch);
+		expect(scratch.innerHTML).to.equal('<p>hi</p>');
+
+		set({ state: 'bye' });
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>bye</p>');
+
+		set(defaultValue);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>hi</p>');
+	});
 });
