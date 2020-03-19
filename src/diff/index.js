@@ -164,6 +164,12 @@ export function diff(
 			c._parentDom = parentDom;
 
 			tmp = c.render(c.props, c.state, c.context);
+			while (c._dirty) {
+				oldState = c.state;
+				c._dirty = false;
+				tmp = c.render(c.props, (c.state = c._nextState), c.context);
+			}
+
 			let isTopLevelFragment =
 				tmp != null && tmp.type == Fragment && tmp.key == null;
 			newVNode._children = isTopLevelFragment

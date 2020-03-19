@@ -2575,5 +2575,25 @@ describe('Components', () => {
 
 			expect(scratch.innerHTML).to.equal('<div>bar</div>');
 		});
+
+		it('should call render again when state got dirtied', () => {
+			class Persons extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { x: false };
+				}
+
+				render() {
+					if (this.state.x === false) {
+						this.setState({ x: true });
+					}
+
+					return <p>{this.state.x === true ? 'hi' : 'bye'}</p>;
+				}
+			}
+
+			render(<Persons />, scratch);
+			expect(scratch.innerHTML).to.equal('<p>hi</p>');
+		});
 	});
 });
