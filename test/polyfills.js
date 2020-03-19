@@ -12,6 +12,15 @@ import 'core-js/fn/string/code-point-at';
 import 'core-js/fn/string/from-code-point';
 import 'core-js/fn/string/repeat';
 
+Object.defineProperty(Array.prototype, '-1', {
+	get() {
+		throw Error('Attempted to access array[-1]');
+	},
+	set(v) {
+		throw Error('Attempted to set array[-1] = ' + v);
+	}
+});
+
 // Fix Function#name on browsers that do not support it (IE).
 // Taken from: https://stackoverflow.com/a/17056530/755391
 if (!function f() {}.name) {
