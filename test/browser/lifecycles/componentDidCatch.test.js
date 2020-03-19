@@ -33,18 +33,11 @@ describe('Lifecycle methods', () => {
 
 		/** @type {typeof import('../../../').Component} */
 		let ThrowErr;
-
-		/** @type {Receiver} */
-		let receiver;
 		class Receiver extends Component {
-			constructor() {
-				super();
-				receiver = this;
-			}
-
 			componentDidCatch(error) {
 				this.setState({ error });
 			}
+
 			render() {
 				return this.state.error
 					? String(this.state.error)
@@ -76,7 +69,6 @@ describe('Lifecycle methods', () => {
 			};
 			sinon.spy(ThrowErr.prototype, 'componentDidCatch');
 
-			receiver = undefined;
 			expectedError = undefined;
 			resetAllSpies(Receiver.prototype);
 		});

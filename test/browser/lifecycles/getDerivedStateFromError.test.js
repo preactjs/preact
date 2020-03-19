@@ -34,17 +34,9 @@ describe('Lifecycle methods', () => {
 		/** @type {typeof import('../../../').Component} */
 		let ThrowErr;
 
-		/** @type {Receiver} */
-		let receiver;
-
 		let thrower;
 
 		class Receiver extends Component {
-			constructor() {
-				super();
-				receiver = this;
-			}
-
 			static getDerivedStateFromError(error) {
 				return { error };
 			}
@@ -80,7 +72,6 @@ describe('Lifecycle methods', () => {
 			sinon.spy(ThrowErr, 'getDerivedStateFromError');
 
 			expectedError = undefined;
-			receiver = undefined;
 
 			resetAllSpies(Receiver);
 			resetAllSpies(Receiver.prototype);
