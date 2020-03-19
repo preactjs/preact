@@ -57,11 +57,11 @@ describe('createContext', () => {
 		expect(scratch.innerHTML).to.equal('<div><div>a</div></div>');
 	});
 
-	// TODO: support this like React where this optimization helps
+	// This optimization helps
 	// to prevent a Provider from rerendering the children, this means
 	// we only propagate to children.
 	// Strict equal vnode optimization
-	it.skip('should support wrappers', () => {
+	it('should support wrappers', () => {
 		const { Provider, Consumer } = createContext();
 		let set,
 			renders = 0;
