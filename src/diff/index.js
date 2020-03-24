@@ -122,16 +122,32 @@ export function diff(
 				if (
 					(!c._force &&
 						c.shouldComponentUpdate != null &&
-							c.shouldComponentUpdate(
-								newProps,
-								c._nextState,
-								componentContext
-							) === false) ||
+						c.shouldComponentUpdate(
+							newProps,
+							c._nextState,
+							componentContext
+						) === false) ||
 					(newVNode._original === oldVNode._original && !c._processingException)
 				) {
 					c.props = newProps;
 					c.state = c._nextState;
-					c._dirty = false;
+					/**
+					 * When the diff originates from a component we know that this was the component that dirtied the component
+					 * linearly this means that if vnodes are equal that an update could've originated from this component and is still
+					 * queued for an update.
+					 * Example:
+					 *
+					 * We have a wrapping component, when this wrapping component updates its internal state the children
+					 * ref could have remained static:
+					 *
+					 * <div>
+					 *   {children}
+					 * </div>
+					 *
+					 * What if inside this children ref there was another setState then this should not be marked as not dirty yet until
+					 * we have traversed this node.
+					 */
+					if (newVNode._original !== oldVNode._original) c._dirty = false;
 					c._vnode = newVNode;
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
