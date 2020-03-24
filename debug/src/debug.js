@@ -12,11 +12,11 @@ import {
 	getDisplayName
 } from './component-stack';
 
-const isWeakMapSupported = typeof WeakMap === 'function';
+const isWeakMapSupported = typeof WeakMap == 'function';
 
 function getClosestDomNodeParent(parent) {
 	if (!parent) return {};
-	if (typeof parent.type === 'function') {
+	if (typeof parent.type == 'function') {
 		return getClosestDomNodeParent(parent._parent);
 	}
 	return parent;
@@ -42,7 +42,7 @@ export function initDebug() {
 
 	options._catchError = (error, vnode, oldVNode) => {
 		let component = vnode && vnode._component;
-		if (component && typeof error.then === 'function') {
+		if (component && typeof error.then == 'function') {
 			const promise = error;
 			error = new Error(
 				`Missing Suspense. The throwing component was: ${getDisplayName(vnode)}`
@@ -105,7 +105,7 @@ export function initDebug() {
 					serializeVNode(vnode) +
 					`\n\n${getOwnerStack(vnode)}`
 			);
-		} else if (type != null && typeof type === 'object') {
+		} else if (type != null && typeof type == 'object') {
 			if (type._children !== undefined && type._dom !== undefined) {
 				throw new Error(
 					`Invalid type passed to createElement(): ${type}\n\n` +
@@ -160,8 +160,8 @@ export function initDebug() {
 
 		if (
 			vnode.ref !== undefined &&
-			typeof vnode.ref !== 'function' &&
-			typeof vnode.ref !== 'object' &&
+			typeof vnode.ref != 'function' &&
+			typeof vnode.ref != 'object' &&
 			!('$$typeof' in vnode) // allow string refs when preact-compat is installed
 		) {
 			throw new Error(
@@ -172,12 +172,12 @@ export function initDebug() {
 			);
 		}
 
-		if (typeof vnode.type === 'string') {
+		if (typeof vnode.type == 'string') {
 			for (const key in vnode.props) {
 				if (
 					key[0] === 'o' &&
 					key[1] === 'n' &&
-					typeof vnode.props[key] !== 'function' &&
+					typeof vnode.props[key] != 'function' &&
 					vnode.props[key] != null
 				) {
 					throw new Error(
@@ -191,7 +191,7 @@ export function initDebug() {
 		}
 
 		// Check prop-types if available
-		if (typeof vnode.type === 'function' && vnode.type.propTypes) {
+		if (typeof vnode.type == 'function' && vnode.type.propTypes) {
 			if (
 				vnode.type.displayName === 'Lazy' &&
 				warnedComponents &&
@@ -282,7 +282,8 @@ export function initDebug() {
 					delete child._depth;
 					const keys = Object.keys(child).join(',');
 					throw new Error(
-						`Objects are not valid as a child. Encountered an object with the keys {${keys}}.`
+						`Objects are not valid as a child. Encountered an object with the keys {${keys}}.` +
+							`\n\n${getOwnerStack(vnode)}`
 					);
 				}
 			});
@@ -395,7 +396,7 @@ export function serializeVNode(vnode) {
 			let value = props[prop];
 
 			// If it is an object but doesn't have toString(), use Object.toString
-			if (typeof value === 'function') {
+			if (typeof value == 'function') {
 				value = `function ${value.displayName || value.name}() {}`;
 			}
 

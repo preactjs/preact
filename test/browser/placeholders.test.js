@@ -164,7 +164,7 @@ describe('null placeholders', () => {
 		expect(scratch.innerHTML).to.equal(
 			'<div>first: 1</div><div>third: 2</div>'
 		);
-		expect(ops).to.deep.equal(['Update third', 'Update first'], 'update first');
+		expect(ops).to.deep.equal(['Update first', 'Update third'], 'update first');
 
 		// Mount second stateful
 		ops = [];
@@ -193,7 +193,7 @@ describe('null placeholders', () => {
 			'<div>first: 2</div><div>second: 1</div><div>third: 3</div>'
 		);
 		expect(ops).to.deep.equal(
-			['Update third', 'Update second', 'Update first'],
+			['Update first', 'Update second', 'Update third'],
 			'update second'
 		);
 	});
@@ -224,8 +224,8 @@ describe('null placeholders', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal(div([div(1), div(3)]));
 		expect(getLog()).to.deep.equal([
-			'<div>Nullable.remove()',
-			'<div>Nullable2.remove()'
+			'<div>Nullable2.remove()',
+			'<div>Nullable.remove()'
 		]);
 
 		clearLog();
@@ -237,9 +237,9 @@ describe('null placeholders', () => {
 		);
 		expect(getLog()).to.deep.equal([
 			'<div>.appendChild(#text)',
-			'<div>13.insertBefore(<div>Nullable, <div>3)',
+			'<div>13.appendChild(<div>Nullable2)',
 			'<div>.appendChild(#text)',
-			'<div>1Nullable3.appendChild(<div>Nullable2)'
+			'<div>13Nullable2.insertBefore(<div>Nullable, <div>3)'
 		]);
 	});
 

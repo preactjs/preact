@@ -17,7 +17,7 @@ declare namespace preact {
 		/**
 		 * ref is not guaranteed by React.ReactElement, for compatiblity reasons
 		 * with popular react libs we define it as optional too
-		*/
+		 */
 		ref?: Ref<any> | null;
 		/**
 		 * The time this `vnode` started rendering. Will only be set when
@@ -176,15 +176,15 @@ declare namespace preact {
 	function createElement(
 		type: string,
 		props:
-			| JSXInternal.HTMLAttributes &
+			| (JSXInternal.HTMLAttributes &
 					JSXInternal.SVGAttributes &
-					Record<string, any>
+					Record<string, any>)
 			| null,
 		...children: ComponentChildren[]
 	): VNode<any>;
 	function createElement<P>(
 		type: ComponentType<P>,
-		props: Attributes & P | null,
+		props: (Attributes & P) | null,
 		...children: ComponentChildren[]
 	): VNode<any>;
 	namespace createElement {
@@ -194,15 +194,15 @@ declare namespace preact {
 	function h(
 		type: string,
 		props:
-			| JSXInternal.HTMLAttributes &
+			| (JSXInternal.HTMLAttributes &
 					JSXInternal.SVGAttributes &
-					Record<string, any>
+					Record<string, any>)
 			| null,
 		...children: ComponentChildren[]
 	): VNode<any>;
 	function h<P>(
 		type: ComponentType<P>,
-		props: Attributes & P | null,
+		props: (Attributes & P) | null,
 		...children: ComponentChildren[]
 	): VNode<any>;
 	namespace h {
@@ -223,10 +223,15 @@ declare namespace preact {
 		parent: Element | Document | ShadowRoot | DocumentFragment
 	): void;
 	function cloneElement(
-		vnode: JSX.Element,
+		vnode: VNode<any>,
 		props?: any,
 		...children: ComponentChildren[]
-	): JSX.Element;
+	): VNode<any>;
+	function cloneElement<P>(
+		vnode: VNode<P>,
+		props?: any,
+		...children: ComponentChildren[]
+	): VNode<P>;
 
 	//
 	// Preact Built-in Components

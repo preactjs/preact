@@ -216,7 +216,7 @@ export function diffChildren(
 	newParentVNode._dom = firstChildDom;
 
 	// Remove children that are not part of any vnode.
-	if (excessDomChildren != null && typeof newParentVNode.type !== 'function') {
+	if (excessDomChildren != null && typeof newParentVNode.type != 'function') {
 		for (i = excessDomChildren.length; i--; ) {
 			if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
 		}
@@ -247,7 +247,7 @@ export function diffChildren(
 export function toChildArray(children, callback, flattened) {
 	if (flattened == null) flattened = [];
 
-	if (children == null || typeof children === 'boolean') {
+	if (children == null || typeof children == 'boolean') {
 		if (callback) flattened.push(callback(null));
 	} else if (Array.isArray(children)) {
 		for (let i = 0; i < children.length; i++) {

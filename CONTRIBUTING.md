@@ -84,7 +84,7 @@ Once a PR or a Draft PR has been created our community typically joins the discu
 
 When everything is good to go someone will approve the PR and the changes will be merged into the `master` branch and we usually cut a release a few days/ a week later.
 
-_The big takeaway for you here is, that we will guide you along the way. We're here to help to make a PR ready for aproval!_
+_The big takeaway for you here is, that we will guide you along the way. We're here to help to make a PR ready for approval!_
 
 The short summary is:
 

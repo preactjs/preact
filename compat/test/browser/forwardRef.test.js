@@ -7,7 +7,8 @@ import React, {
 	memo,
 	useState,
 	useRef,
-	useImperativeHandle
+	useImperativeHandle,
+	createPortal
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { setupRerender, act } from 'preact/test-utils';
@@ -380,5 +381,48 @@ describe('forwardRef', () => {
 		});
 
 		expect(_ref.current).to.equal(scratch.firstChild);
+	});
+
+	it('should forward at diff time instead vnode-creation.', () => {
+		let ref, forceTransition, forceOpen;
+
+		const Portal = ({ children, open }) =>
+			open ? createPortal(children, scratch) : null;
+
+		const Wrapper = forwardRef((_props, ref) => <div ref={ref}>Wrapper</div>);
+		const Transition = ({ children }) => {
+			const state = useState(0);
+			forceTransition = state[1];
+			expect(children.ref).to.not.be.undefined;
+			if (state[0] === 0) expect(children.props.ref).to.be.undefined;
+			return children;
+		};
+
+		const App = () => {
+			const openState = useState(false);
+			forceOpen = openState[1];
+			ref = useRef();
+			return (
+				<Portal open={openState[0]}>
+					<Transition>
+						<Wrapper ref={ref} />
+					</Transition>
+				</Portal>
+			);
+		};
+
+		render(<App />, scratch);
+
+		act(() => {
+			forceOpen(true);
+		});
+
+		expect(ref.current.innerHTML).to.equal('Wrapper');
+
+		act(() => {
+			forceTransition(1);
+		});
+
+		expect(ref.current.innerHTML).to.equal('Wrapper');
 	});
 });

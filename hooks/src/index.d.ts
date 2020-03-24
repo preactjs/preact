@@ -40,7 +40,7 @@ export function useReducer<S, A, I>(
 	init: (arg: I) => S
 ): [S, (action: A) => void];
 
-type PropRef<T> = { readonly current?: T };
+type PropRef<T> = { current?: T };
 type Ref<T> = { current: T };
 
 /**
@@ -129,5 +129,5 @@ export function useDebugValue<T>(
 ): void;
 
 export function useErrorBoundary(
-	callback?: () => Promise<void> | void
+	callback?: (error: any) => Promise<void> | void
 ): [any, () => void];
