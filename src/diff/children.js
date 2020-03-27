@@ -63,6 +63,18 @@ export function diffChildren(
 		// in a `if (childVNode) { ... } condition
 		if (childVNode == null) continue;
 
+		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
+		// copy it so it can have it's own DOM & etc. pointers
+		if (childVNode._dom != null || childVNode._component != null) {
+			childVNode = newParentVNode._children[i] = createVNode(
+				childVNode.type,
+				childVNode.props,
+				childVNode.key,
+				null,
+				childVNode._original
+			);
+		}
+
 		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;
 
@@ -253,16 +265,6 @@ export function toChildArray(children, internal, flattened) {
 		flattened.push(children);
 	} else if (typeof children == 'string' || typeof children == 'number') {
 		flattened.push(createVNode(null, children, null, null, children));
-	} else if (children._dom != null || children._component != null) {
-		flattened.push(
-			createVNode(
-				children.type,
-				children.props,
-				children.key,
-				null,
-				children._original
-			)
-		);
 	} else {
 		flattened.push(children);
 	}
