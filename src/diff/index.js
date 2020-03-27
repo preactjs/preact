@@ -1,7 +1,7 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component } from '../component';
 import { Fragment } from '../create-element';
-import { diffChildren } from './children';
+import { diffChildren, toChildArray } from './children';
 import { diffProps, setProperty } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
@@ -173,11 +173,10 @@ export function diff(
 			tmp = c.render(c.props, c.state, c.context);
 			let isTopLevelFragment =
 				tmp != null && tmp.type == Fragment && tmp.key == null;
-			newVNode._children = isTopLevelFragment
-				? tmp.props.children
-				: Array.isArray(tmp)
-				? tmp
-				: [tmp];
+			newVNode._children = toChildArray(
+				isTopLevelFragment ? tmp.props.children : tmp,
+				true
+			);
 
 			if (c.getChildContext != null) {
 				globalContext = assign(assign({}, globalContext), c.getChildContext());
@@ -368,7 +367,7 @@ function diffElementNodes(
 		if (newHtml) {
 			newVNode._children = [];
 		} else {
-			newVNode._children = newVNode.props.children;
+			newVNode._children = toChildArray(newVNode.props.children, true);
 			diffChildren(
 				dom,
 				newVNode,

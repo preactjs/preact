@@ -119,24 +119,24 @@ describe('render()', () => {
 		render(
 			<div>
 				{reused}
-				<span />
+				<hr />
 				{reused}
 			</div>,
 			scratch
 		);
-		expect(scratch.innerHTML).to.eql(
-			`<div><div class="reuse">Hello World!</div><span></span><div class="reuse">Hello World!</div></div>`
+		expect(serializeHtml(scratch)).to.eql(
+			`<div><div class="reuse">Hello World!</div><hr><div class="reuse">Hello World!</div></div>`
 		);
 
 		render(
 			<div>
-				<span />
+				<hr />
 				{reused}
 			</div>,
 			scratch
 		);
-		expect(scratch.innerHTML).to.eql(
-			`<div><span></span><div class="reuse">Hello World!</div></div>`
+		expect(serializeHtml(scratch)).to.eql(
+			`<div><hr><div class="reuse">Hello World!</div></div>`
 		);
 	});
 
