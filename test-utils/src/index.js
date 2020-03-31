@@ -65,16 +65,29 @@ export function act(cb) {
 		--actDepth;
 	};
 
-	const result = cb();
+	let err;
+	let result;
+
+	try {
+		result = cb();
+	} catch (e) {
+		err = e;
+	}
 
 	if (isThenable(result)) {
-		return result.then(finish);
+		return result.then(finish, err => {
+			finish();
+			throw err;
+		});
 	}
 
 	// nb. If the callback is synchronous, effects must be flushed before
 	// `act` returns, so that the caller does not have to await the result,
 	// even though React recommends this.
 	finish();
+	if (err) {
+		throw err;
+	}
 	return Promise.resolve();
 }
 
