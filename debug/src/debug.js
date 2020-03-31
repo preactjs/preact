@@ -1,5 +1,4 @@
 import { checkPropTypes } from './check-props';
-import { getDisplayName } from './devtools/custom';
 import { options, Component } from 'preact';
 import {
 	ELEMENT_NODE,
@@ -9,14 +8,15 @@ import {
 import {
 	getOwnerStack,
 	setupComponentStack,
-	getCurrentVNode
+	getCurrentVNode,
+	getDisplayName
 } from './component-stack';
 
-const isWeakMapSupported = typeof WeakMap === 'function';
+const isWeakMapSupported = typeof WeakMap == 'function';
 
 function getClosestDomNodeParent(parent) {
 	if (!parent) return {};
-	if (typeof parent.type === 'function') {
+	if (typeof parent.type == 'function') {
 		return getClosestDomNodeParent(parent._parent);
 	}
 	return parent;
@@ -42,7 +42,7 @@ export function initDebug() {
 
 	options._catchError = (error, vnode, oldVNode) => {
 		let component = vnode && vnode._component;
-		if (component && typeof error.then === 'function') {
+		if (component && typeof error.then == 'function') {
 			const promise = error;
 			error = new Error(
 				`Missing Suspense. The throwing component was: ${getDisplayName(vnode)}`
@@ -83,6 +83,7 @@ export function initDebug() {
 			default:
 				isValid = false;
 		}
+
 		if (!isValid) {
 			let componentName = getDisplayName(vnode);
 			throw new Error(
@@ -104,8 +105,8 @@ export function initDebug() {
 					serializeVNode(vnode) +
 					`\n\n${getOwnerStack(vnode)}`
 			);
-		} else if (type != null && typeof type === 'object') {
-			if (type._lastDomChild !== undefined && type._dom !== undefined) {
+		} else if (type != null && typeof type == 'object') {
+			if (type._children !== undefined && type._dom !== undefined) {
 				throw new Error(
 					`Invalid type passed to createElement(): ${type}\n\n` +
 						'Did you accidentally pass a JSX literal as JSX twice?\n\n' +
@@ -133,10 +134,10 @@ export function initDebug() {
 			);
 		} else if (
 			type === 'tr' &&
-			(parentVNode.type !== 'thead' &&
-				parentVNode.type !== 'tfoot' &&
-				parentVNode.type !== 'tbody' &&
-				parentVNode.type !== 'table')
+			parentVNode.type !== 'thead' &&
+			parentVNode.type !== 'tfoot' &&
+			parentVNode.type !== 'tbody' &&
+			parentVNode.type !== 'table'
 		) {
 			console.error(
 				'Improper nesting of table. Your <tr> should have a <thead/tbody/tfoot/table> parent.' +
@@ -159,8 +160,8 @@ export function initDebug() {
 
 		if (
 			vnode.ref !== undefined &&
-			typeof vnode.ref !== 'function' &&
-			typeof vnode.ref !== 'object' &&
+			typeof vnode.ref != 'function' &&
+			typeof vnode.ref != 'object' &&
 			!('$$typeof' in vnode) // allow string refs when preact-compat is installed
 		) {
 			throw new Error(
@@ -171,12 +172,12 @@ export function initDebug() {
 			);
 		}
 
-		if (typeof vnode.type === 'string') {
+		if (typeof vnode.type == 'string') {
 			for (const key in vnode.props) {
 				if (
 					key[0] === 'o' &&
 					key[1] === 'n' &&
-					typeof vnode.props[key] !== 'function' &&
+					typeof vnode.props[key] != 'function' &&
 					vnode.props[key] != null
 				) {
 					throw new Error(
@@ -190,7 +191,7 @@ export function initDebug() {
 		}
 
 		// Check prop-types if available
-		if (typeof vnode.type === 'function' && vnode.type.propTypes) {
+		if (typeof vnode.type == 'function' && vnode.type.propTypes) {
 			if (
 				vnode.type.displayName === 'Lazy' &&
 				warnedComponents &&
@@ -244,19 +245,24 @@ export function initDebug() {
 		children: warn('children', 'use vnode.props.children')
 	};
 
+	const deprecatedProto = Object.create({}, deprecatedAttributes);
+
 	options.vnode = vnode => {
-		let source, self;
-		if (vnode.props && vnode.props.__source) {
-			source = vnode.props.__source;
-			delete vnode.props.__source;
+		const props = vnode.props;
+		if (
+			vnode.type !== null &&
+			props != null &&
+			('__source' in props || '__self' in props)
+		) {
+			const newProps = (vnode.props = {});
+			for (let i in props) {
+				const v = props[i];
+				if (i === '__source') vnode.__source = v;
+				else if (i === '__self') vnode.__self = v;
+				else newProps[i] = v;
+			}
 		}
-		if (vnode.props && vnode.props.__self) {
-			self = vnode.props.__self;
-			delete vnode.props.__self;
-		}
-		vnode.__self = self;
-		vnode.__source = source;
-		Object.defineProperties(vnode, deprecatedAttributes);
+		Object.setPrototypeOf(vnode, deprecatedProto);
 		if (oldVnode) oldVnode(vnode);
 	};
 
@@ -276,7 +282,8 @@ export function initDebug() {
 					delete child._depth;
 					const keys = Object.keys(child).join(',');
 					throw new Error(
-						`Objects are not valid as a child. Encountered an object with the keys {${keys}}.`
+						`Objects are not valid as a child. Encountered an object with the keys {${keys}}.` +
+							`\n\n${getOwnerStack(vnode)}`
 					);
 				}
 			});
@@ -298,45 +305,6 @@ export function initDebug() {
 					}
 				});
 			}
-
-			// After paint effects
-			if (Array.isArray(hooks._pendingEffects)) {
-				hooks._pendingEffects.forEach(effect => {
-					if (
-						!Array.isArray(effect._args) &&
-						warnedComponents &&
-						!warnedComponents.useEffect.has(vnode.type)
-					) {
-						warnedComponents.useEffect.set(vnode.type, true);
-						let componentName = getDisplayName(vnode);
-						console.warn(
-							'You should provide an array of arguments as the second argument to the "useEffect" hook.\n\n' +
-								'Not doing so will invoke this effect on every render.\n\n' +
-								`This effect can be found in the render of ${componentName}.` +
-								`\n\n${getOwnerStack(vnode)}`
-						);
-					}
-				});
-			}
-
-			// Layout Effects
-			component._renderCallbacks.forEach(possibleEffect => {
-				if (
-					possibleEffect._value &&
-					!Array.isArray(possibleEffect._args) &&
-					warnedComponents &&
-					!warnedComponents.useLayoutEffect.has(vnode.type)
-				) {
-					warnedComponents.useLayoutEffect.set(vnode.type, true);
-					let componentName = getDisplayName(vnode);
-					console.warn(
-						'You should provide an array of arguments as the second argument to the "useLayoutEffect" hook.\n\n' +
-							'Not doing so will invoke this effect on every render.\n\n' +
-							`This effect can be found in the render of ${componentName}.` +
-							`\n\n${getOwnerStack(vnode)}`
-					);
-				}
-			});
 		}
 
 		if (oldDiffed) oldDiffed(vnode);
@@ -370,11 +338,17 @@ export function initDebug() {
 const setState = Component.prototype.setState;
 Component.prototype.setState = function(update, callback) {
 	if (this._vnode == null) {
-		console.warn(
-			`Calling "this.setState" inside the constructor of a component is a ` +
-				`no-op and might be a bug in your application. Instead, set ` +
-				`"this.state = {}" directly.\n\n${getOwnerStack(getCurrentVNode())}`
-		);
+		// `this._vnode` will be `null` during componentWillMount. But it
+		// is perfectly valid to call `setState` during cWM. So we
+		// need an additional check to verify that we are dealing with a
+		// call inside constructor.
+		if (this.state == null) {
+			console.warn(
+				`Calling "this.setState" inside the constructor of a component is a ` +
+					`no-op and might be a bug in your application. Instead, set ` +
+					`"this.state = {}" directly.\n\n${getOwnerStack(getCurrentVNode())}`
+			);
+		}
 	} else if (this._parentDom == null) {
 		console.warn(
 			`Can't call "this.setState" on an unmounted component. This is a no-op, ` +
@@ -398,7 +372,7 @@ Component.prototype.forceUpdate = function(callback) {
 		);
 	} else if (this._parentDom == null) {
 		console.warn(
-			`Can't call "this.setState" on an unmounted component. This is a no-op, ` +
+			`Can't call "this.forceUpdate" on an unmounted component. This is a no-op, ` +
 				`but it indicates a memory leak in your application. To fix, cancel all ` +
 				`subscriptions and asynchronous tasks in the componentWillUnmount method.` +
 				`\n\n${getOwnerStack(this._vnode)}`
@@ -422,7 +396,7 @@ export function serializeVNode(vnode) {
 			let value = props[prop];
 
 			// If it is an object but doesn't have toString(), use Object.toString
-			if (typeof value === 'function') {
+			if (typeof value == 'function') {
 				value = `function ${value.displayName || value.name}() {}`;
 			}
 

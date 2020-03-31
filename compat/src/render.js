@@ -1,21 +1,19 @@
 import {
 	render as preactRender,
+	hydrate as preactHydrate,
 	options,
 	toChildArray,
 	Component
 } from 'preact';
 import { applyEventNormalization } from './events';
 
-const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip|color|fill|flood|font|glyph|horiz|marker|overline|paint|stop|strikethrough|stroke|text|underline|unicode|units|v|vector|vert|word|writing|x)[A-Z]/;
+const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|fill|flood|font|glyph(?!R)|horiz|marker(?!H|W|U)|overline|paint|stop|strikethrough|stroke|text(?!L)|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
 
 // Some libraries like `react-virtualized` explicitly check for this.
 Component.prototype.isReactComponent = {};
 
-/* istanbul ignore next */
 export const REACT_ELEMENT_TYPE =
-	(typeof Symbol !== 'undefined' &&
-		Symbol.for &&
-		Symbol.for('react.element')) ||
+	(typeof Symbol != 'undefined' && Symbol.for && Symbol.for('react.element')) ||
 	0xeac7;
 
 /**
@@ -34,12 +32,15 @@ export function render(vnode, parent, callback) {
 		}
 	}
 
-	return hydrate(vnode, parent, callback);
+	preactRender(vnode, parent);
+	if (typeof callback == 'function') callback();
+
+	return vnode ? vnode._component : null;
 }
 
 export function hydrate(vnode, parent, callback) {
-	preactRender(vnode, parent);
-	if (typeof callback === 'function') callback();
+	preactHydrate(vnode, parent);
+	if (typeof callback == 'function') callback();
 
 	return vnode ? vnode._component : null;
 }
@@ -48,6 +49,23 @@ let oldEventHook = options.event;
 options.event = e => {
 	if (oldEventHook) e = oldEventHook(e);
 	e.persist = () => {};
+	let stoppedPropagating = false,
+		defaultPrevented = false;
+
+	const origStopPropagation = e.stopPropagation;
+	e.stopPropagation = () => {
+		origStopPropagation.call(e);
+		stoppedPropagating = true;
+	};
+
+	const origPreventDefault = e.preventDefault;
+	e.preventDefault = () => {
+		origPreventDefault.call(e);
+		defaultPrevented = true;
+	};
+
+	e.isPropagationStopped = () => stoppedPropagating;
+	e.isDefaultPrevented = () => defaultPrevented;
 	return (e.nativeEvent = e);
 };
 
@@ -84,62 +102,64 @@ options.vnode = vnode => {
 	let type = vnode.type;
 	let props = vnode.props;
 
-	// Apply DOM VNode compat
-	if (typeof type != 'function') {
-		// Apply defaultValue to value
-		if (props.defaultValue) {
-			if (!props.value && props.value !== 0) {
-				props.value = props.defaultValue;
-			}
-			delete props.defaultValue;
+	if (type) {
+		// Alias `class` prop to `className` if available
+		if (props.class != props.className) {
+			classNameDescriptor.enumerable = 'className' in props;
+			if (props.className != null) props.class = props.className;
+			Object.defineProperty(props, 'className', classNameDescriptor);
 		}
 
-		// Add support for array select values: <select value={[]} />
-		if (Array.isArray(props.value) && props.multiple && type === 'select') {
-			toChildArray(props.children).forEach(child => {
-				if (props.value.indexOf(child.props.value) != -1) {
-					child.props.selected = true;
+		// Apply DOM VNode compat
+		if (typeof type != 'function') {
+			// Apply defaultValue to value
+			if (props.defaultValue && props.value !== undefined) {
+				if (!props.value && props.value !== 0) {
+					props.value = props.defaultValue;
 				}
-			});
-			delete props.value;
-		}
+				delete props.defaultValue;
+			}
 
-		// Normalize DOM vnode properties.
-		let shouldSanitize, attrs, i;
-		for (i in props) if ((shouldSanitize = CAMEL_PROPS.test(i))) break;
-		if (shouldSanitize) {
-			attrs = vnode.props = {};
-			for (i in props) {
-				attrs[
-					CAMEL_PROPS.test(i) ? i.replace(/([A-Z0-9])/, '-$1').toLowerCase() : i
-				] = props[i];
+			// Add support for array select values: <select value={[]} />
+			if (Array.isArray(props.value) && props.multiple && type === 'select') {
+				toChildArray(props.children).forEach(child => {
+					if (props.value.indexOf(child.props.value) != -1) {
+						child.props.selected = true;
+					}
+				});
+				delete props.value;
+			}
+
+			// Normalize DOM vnode properties.
+			let shouldSanitize, attrs, i;
+			for (i in props) if ((shouldSanitize = CAMEL_PROPS.test(i))) break;
+			if (shouldSanitize) {
+				attrs = vnode.props = {};
+				for (i in props) {
+					attrs[
+						CAMEL_PROPS.test(i) ? i.replace(/[A-Z0-9]/, '-$&').toLowerCase() : i
+					] = props[i];
+				}
 			}
 		}
-	}
 
-	// Alias `class` prop to `className` if available
-	if (props.class || props.className) {
-		classNameDescriptor.enumerable = 'className' in props;
-		if (props.className) props.class = props.className;
-		Object.defineProperty(props, 'className', classNameDescriptor);
-	}
+		// Events
+		applyEventNormalization(vnode);
 
-	// Events
-	applyEventNormalization(vnode);
-
-	// Component base class compat
-	// We can't just patch the base component class, because components that use
-	// inheritance and are transpiled down to ES5 will overwrite our patched
-	// getters and setters. See #1941
-	if (
-		typeof type === 'function' &&
-		!type._patchedLifecycles &&
-		type.prototype
-	) {
-		setSafeDescriptor(type.prototype, 'componentWillMount');
-		setSafeDescriptor(type.prototype, 'componentWillReceiveProps');
-		setSafeDescriptor(type.prototype, 'componentWillUpdate');
-		type._patchedLifecycles = true;
+		// Component base class compat
+		// We can't just patch the base component class, because components that use
+		// inheritance and are transpiled down to ES5 will overwrite our patched
+		// getters and setters. See #1941
+		if (
+			typeof type == 'function' &&
+			!type._patchedLifecycles &&
+			type.prototype
+		) {
+			setSafeDescriptor(type.prototype, 'componentWillMount');
+			setSafeDescriptor(type.prototype, 'componentWillReceiveProps');
+			setSafeDescriptor(type.prototype, 'componentWillUpdate');
+			type._patchedLifecycles = true;
+		}
 	}
 
 	if (oldVNodeHook) oldVNodeHook(vnode);

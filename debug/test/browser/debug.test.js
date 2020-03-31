@@ -4,6 +4,7 @@ import {
 	teardown,
 	serializeHtml
 } from '../../../test/_util/helpers';
+import './fakeDevTools';
 import 'preact/debug';
 import * as PropTypes from 'prop-types';
 
@@ -30,6 +31,10 @@ describe('debug', () => {
 		teardown(scratch);
 	});
 
+	it('should initialize devtools', () => {
+		expect(window.__PREACT_DEVTOOLS__.attachPreact).to.have.been.called;
+	});
+
 	it('should print an error on rendering on undefined parent', () => {
 		let fn = () => render(<div />, undefined);
 		expect(fn).to.throw(/render/);
@@ -50,6 +55,10 @@ describe('debug', () => {
 		fn = () => render(<App />, {});
 		expect(fn).to.throw(/<App/);
 		expect(fn).to.throw(/[object Object]/);
+
+		fn = () => render(<Fragment />, 'badroot');
+		expect(fn).to.throw(/<Fragment/);
+		expect(fn).to.throw(/badroot/);
 	});
 
 	it('should print an error with (class) component name when available', () => {
@@ -80,7 +89,7 @@ describe('debug', () => {
 	it('should print an error on double jsx conversion', () => {
 		let Foo = <div />;
 		let fn = () => render(h(<Foo />), scratch);
-		expect(fn).to.throw(/createElement/);
+		expect(fn).to.throw(/JSX twice/);
 	});
 
 	it('should add __source to the vnode in debug mode.', () => {
@@ -132,6 +141,20 @@ describe('debug', () => {
 		render(<Foo />, scratch);
 		expect(console.warn).to.be.calledOnce;
 		expect(console.warn.args[0]).to.match(/no-op/);
+	});
+
+	it('should NOT warn when calling setState inside the cWM', () => {
+		class Foo extends Component {
+			componentWillMount() {
+				this.setState({ foo: true });
+			}
+			render() {
+				return <div>foo</div>;
+			}
+		}
+
+		render(<Foo />, scratch);
+		expect(console.warn).to.not.be.called;
 	});
 
 	it('should warn when calling setState on an unmounted Component', () => {

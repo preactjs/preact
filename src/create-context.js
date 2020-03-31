@@ -18,14 +18,16 @@ export function createContext(defaultValue) {
 					ctx[context._id] = this;
 					return ctx;
 				};
+
 				this.shouldComponentUpdate = _props => {
-					if (props.value !== _props.value) {
+					if (this.props.value !== _props.value) {
 						subs.some(c => {
 							c.context = _props.value;
 							enqueueRender(c);
 						});
 					}
 				};
+
 				this.sub = c => {
 					subs.push(c);
 					let old = c.componentWillUnmount;
@@ -35,6 +37,7 @@ export function createContext(defaultValue) {
 					};
 				};
 			}
+
 			return props.children;
 		}
 	};

@@ -37,7 +37,7 @@ function setStyle(style, key, value) {
 	if (key[0] === '-') {
 		style.setProperty(key, value);
 	} else if (
-		typeof value === 'number' &&
+		typeof value == 'number' &&
 		IS_NON_DIMENSIONAL.test(key) === false
 	) {
 		style[key] = value + 'px';
@@ -70,10 +70,10 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 	if (name === 'style') {
 		s = dom.style;
 
-		if (typeof value === 'string') {
+		if (typeof value == 'string') {
 			s.cssText = value;
 		} else {
-			if (typeof oldValue === 'string') {
+			if (typeof oldValue == 'string') {
 				s.cssText = '';
 				oldValue = null;
 			}
@@ -114,14 +114,12 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 		// setAttribute
 		name !== 'form' &&
 		name !== 'type' &&
+		name !== 'size' &&
 		!isSvg &&
 		name in dom
 	) {
 		dom[name] = value == null ? '' : value;
-	} else if (
-		typeof value !== 'function' &&
-		name !== 'dangerouslySetInnerHTML'
-	) {
+	} else if (typeof value != 'function' && name !== 'dangerouslySetInnerHTML') {
 		if (name !== (name = name.replace(/^xlink:?/, ''))) {
 			if (value == null || value === false) {
 				dom.removeAttributeNS(
@@ -135,7 +133,17 @@ function setProperty(dom, name, value, oldValue, isSvg) {
 					value
 				);
 			}
-		} else if (value == null || value === false) {
+		} else if (
+			value == null ||
+			(value === false &&
+				// ARIA-attributes have a different notion of boolean values.
+				// The value `false` is different from the attribute not
+				// existing on the DOM, so we can't remove it. For non-boolean
+				// ARIA-attributes we could treat false as a removal, but the
+				// amount of exceptions would cost us too many bytes. On top of
+				// that other VDOM frameworks also always stringify `false`.
+				!/^ar/.test(name))
+		) {
 			dom.removeAttribute(name);
 		} else {
 			dom.setAttribute(name, value);

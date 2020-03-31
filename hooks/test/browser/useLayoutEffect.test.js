@@ -1,5 +1,5 @@
 import { act } from 'preact/test-utils';
-import { createElement, render, Fragment } from 'preact';
+import { createElement, render, Fragment, Component } from 'preact';
 import {
 	setupScratch,
 	teardown,
@@ -228,5 +228,97 @@ describe('useLayoutEffect', () => {
 			'<button>next</button><div><p>Foo</p></div>',
 			'calledBarCleanup'
 		);
+	});
+
+	it('should throw an error upwards', () => {
+		const spy = sinon.spy();
+		let errored = false;
+
+		const Page1 = () => {
+			const [state, setState] = useState('loading');
+			useLayoutEffect(() => {
+				setState('loaded');
+			}, []);
+			return <p>{state}</p>;
+		};
+
+		const Page2 = () => {
+			useLayoutEffect(() => {
+				throw new Error('err');
+			}, []);
+			return <p>invisible</p>;
+		};
+
+		class App extends Component {
+			componentDidCatch(err) {
+				spy();
+				errored = err;
+			}
+
+			render(props, state) {
+				if (errored) {
+					return <p>Error</p>;
+				}
+
+				return <Fragment>{props.page === 1 ? <Page1 /> : <Page2 />}</Fragment>;
+			}
+		}
+
+		act(() => render(<App page={1} />, scratch));
+		expect(spy).to.not.be.called;
+		expect(scratch.innerHTML).to.equal('<p>loaded</p>');
+
+		act(() => render(<App page={2} />, scratch));
+		expect(spy).to.be.calledOnce;
+		expect(scratch.innerHTML).to.equal('<p>Error</p>');
+		errored = false;
+
+		act(() => render(<App page={1} />, scratch));
+		expect(spy).to.be.calledOnce;
+		expect(scratch.innerHTML).to.equal('<p>loaded</p>');
+	});
+
+	it('should throw an error upwards from return', () => {
+		const spy = sinon.spy();
+		let errored = false;
+
+		const Page1 = () => {
+			const [state, setState] = useState('loading');
+			useLayoutEffect(() => {
+				setState('loaded');
+			}, []);
+			return <p>{state}</p>;
+		};
+
+		const Page2 = () => {
+			useLayoutEffect(() => {
+				return () => {
+					throw new Error('err');
+				};
+			}, []);
+			return <p>Load</p>;
+		};
+
+		class App extends Component {
+			componentDidCatch(err) {
+				spy();
+				errored = err;
+			}
+
+			render(props, state) {
+				if (errored) {
+					return <p>Error</p>;
+				}
+
+				return <Fragment>{props.page === 1 ? <Page1 /> : <Page2 />}</Fragment>;
+			}
+		}
+
+		act(() => render(<App page={2} />, scratch));
+		expect(scratch.innerHTML).to.equal('<p>Load</p>');
+
+		act(() => render(<App page={1} />, scratch));
+		expect(spy).to.be.calledOnce;
+		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 	});
 });

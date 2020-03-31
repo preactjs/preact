@@ -242,7 +242,7 @@ describe('keys', () => {
 		]);
 	});
 
-	it('should swap children efficiently', () => {
+	it('should swap keyed children efficiently', () => {
 		render(<List values={['a', 'b']} />, scratch);
 		expect(scratch.textContent).to.equal('ab');
 
@@ -312,7 +312,7 @@ describe('keys', () => {
 		);
 	});
 
-	it('should reverse children effectively', () => {
+	it('should reverse keyed children effectively', () => {
 		const values = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
 
 		render(<List values={values} />, scratch);
@@ -611,33 +611,5 @@ describe('keys', () => {
 		]);
 		expect(Stateful1Ref).to.not.equal(Stateful1MovedRef);
 		expect(Stateful2Ref).to.not.equal(Stateful2MovedRef);
-	});
-
-	it('should treat undefined as a hole', () => {
-		let Bar = () => <div>bar</div>;
-
-		function Foo(props) {
-			let sibling;
-			if (props.condition) {
-				sibling = <Bar />;
-			}
-
-			return (
-				<div>
-					<div>Hello</div>
-					{sibling}
-				</div>
-			);
-		}
-
-		render(<Foo condition />, scratch);
-		expect(scratch.innerHTML).to.equal(
-			'<div><div>Hello</div><div>bar</div></div>'
-		);
-		clearLog();
-
-		render(<Foo />, scratch);
-		expect(scratch.innerHTML).to.equal('<div><div>Hello</div></div>');
-		expect(getLog()).to.deep.equal(['<div>bar.remove()']);
 	});
 });

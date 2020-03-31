@@ -12,7 +12,7 @@ import { getDomSibling } from '../component';
  * node whose children should be diff'ed against oldParentVNode
  * @param {import('../internal').VNode} oldParentVNode The old virtual
  * node whose children should be diff'ed against newParentVNode
- * @param {object} context The current context object
+ * @param {object} globalContext The current context object - modified by getChildContext
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
@@ -27,7 +27,7 @@ export function diffChildren(
 	parentDom,
 	newParentVNode,
 	oldParentVNode,
-	context,
+	globalContext,
 	isSvg,
 	excessDomChildren,
 	commitQueue,
@@ -103,7 +103,7 @@ export function diffChildren(
 					parentDom,
 					childVNode,
 					oldVNode,
-					context,
+					globalContext,
 					isSvg,
 					excessDomChildren,
 					commitQueue,
@@ -123,16 +123,18 @@ export function diffChildren(
 						firstChildDom = newDom;
 					}
 
-					if (childVNode._lastDomChild != null) {
+					let nextDom;
+					if (childVNode._nextDom !== undefined) {
 						// Only Fragments or components that return Fragment like VNodes will
-						// have a non-null _lastDomChild. Continue the diff from the end of
-						// this Fragment's DOM tree.
-						newDom = childVNode._lastDomChild;
+						// have a non-undefined _nextDom. Continue the diff from the sibling
+						// of last DOM child of this child VNode
+						nextDom = childVNode._nextDom;
 
-						// Eagerly cleanup _lastDomChild. We don't need to persist the value because
+						// Eagerly cleanup _nextDom. We don't need to persist the value because
 						// it is only used by `diffChildren` to determine where to resume the diff after
-						// diffing Components and Fragments.
-						childVNode._lastDomChild = null;
+						// diffing Components and Fragments. Once we store it the nextDOM local var, we
+						// can clean up the property
+						childVNode._nextDom = undefined;
 					} else if (
 						excessDomChildren == oldVNode ||
 						newDom != oldDom ||
@@ -144,6 +146,7 @@ export function diffChildren(
 
 						outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
 							parentDom.appendChild(newDom);
+							nextDom = null;
 						} else {
 							// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
 							for (
@@ -156,6 +159,7 @@ export function diffChildren(
 								}
 							}
 							parentDom.insertBefore(newDom, oldDom);
+							nextDom = oldDom;
 						}
 
 						// Browsers will infer an option's `value` from `textContent` when
@@ -173,15 +177,34 @@ export function diffChildren(
 						}
 					}
 
-					oldDom = newDom.nextSibling;
+					// If we have pre-calculated the nextDOM node, use it. Else calculate it now
+					// Strictly check for `undefined` here cuz `null` is a valid value of `nextDom`.
+					// See more detail in create-element.js:createVNode
+					if (nextDom !== undefined) {
+						oldDom = nextDom;
+					} else {
+						oldDom = newDom.nextSibling;
+					}
 
 					if (typeof newParentVNode.type == 'function') {
-						// At this point, if childVNode._lastDomChild existed, then
-						// newDom = childVNode._lastDomChild per line 101. Else it is
-						// the same as childVNode._dom, meaning this component returned
-						// only a single DOM node
-						newParentVNode._lastDomChild = newDom;
+						// Because the newParentVNode is Fragment-like, we need to set it's
+						// _nextDom property to the nextSibling of its last child DOM node.
+						//
+						// `oldDom` contains the correct value here because if the last child
+						// is a Fragment-like, then oldDom has already been set to that child's _nextDom.
+						// If the last child is a DOM VNode, then oldDom will be set to that DOM
+						// node's nextSibling.
+
+						newParentVNode._nextDom = oldDom;
 					}
+				} else if (
+					oldDom &&
+					oldVNode._dom == oldDom &&
+					oldDom.parentNode != parentDom
+				) {
+					// The above condition is to handle null placeholders. See test in placeholder.test.js:
+					// `efficiently replace null placeholders in parent rerenders`
+					oldDom = getDomSibling(oldVNode);
 				}
 			}
 
@@ -193,7 +216,7 @@ export function diffChildren(
 	newParentVNode._dom = firstChildDom;
 
 	// Remove children that are not part of any vnode.
-	if (excessDomChildren != null && typeof newParentVNode.type !== 'function') {
+	if (excessDomChildren != null && typeof newParentVNode.type != 'function') {
 		for (i = excessDomChildren.length; i--; ) {
 			if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
 		}
@@ -224,7 +247,7 @@ export function diffChildren(
 export function toChildArray(children, callback, flattened) {
 	if (flattened == null) flattened = [];
 
-	if (children == null || typeof children === 'boolean') {
+	if (children == null || typeof children == 'boolean') {
 		if (callback) flattened.push(callback(null));
 	} else if (Array.isArray(children)) {
 		for (let i = 0; i < children.length; i++) {
@@ -232,7 +255,7 @@ export function toChildArray(children, callback, flattened) {
 		}
 	} else if (!callback) {
 		flattened.push(children);
-	} else if (typeof children === 'string' || typeof children === 'number') {
+	} else if (typeof children == 'string' || typeof children == 'number') {
 		flattened.push(callback(createVNode(null, children, null, null)));
 	} else if (children._dom != null || children._component != null) {
 		flattened.push(

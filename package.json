@@ -1,7 +1,7 @@
 {
   "name": "preact",
   "amdName": "preact",
-  "version": "10.2.1",
+  "version": "10.3.4",
   "private": false,
   "description": "Fast 3kb React-compatible Virtual DOM library.",
   "main": "dist/preact.js",
@@ -9,6 +9,43 @@
   "umd:main": "dist/preact.umd.js",
   "unpkg": "dist/preact.umd.js",
   "source": "src/index.js",
+  "exports": {
+    ".": {
+      "browser": "./dist/preact.module.js",
+      "umd": "./dist/preact.umd.js",
+      "import": "./dist/preact.module.js",
+      "require": "./dist/preact.js"
+    },
+    "./compat": {
+      "browser": "./compat/dist/compat.module.js",
+      "umd": "./compat/dist/compat.umd.js",
+      "require": "./compat/dist/compat.js",
+      "import": "./compat/dist/compat.module.js"
+    },
+    "./debug": {
+      "browser": "./debug/dist/debug.module.js",
+      "umd": "./debug/dist/debug.umd.js",
+      "require": "./debug/dist/debug.js",
+      "import": "./debug/dist/debug.module.js"
+    },
+    "./hooks": {
+      "browser": "./hooks/dist/hooks.module.js",
+      "umd": "./hooks/dist/hooks.umd.js",
+      "require": "./hooks/dist/hooks.js",
+      "import": "./hooks/dist/hooks.module.js"
+    },
+    "./test-utils": {
+      "browser": "./test-utils/dist/testUtils.module.js",
+      "umd": "./test-utils/dist/testUtils.umd.js",
+      "require": "./test-utils/dist/testUtils.js",
+      "import": "./test-utils/dist/testUtils.module.js"
+    },
+    "./compat/server": {
+      "require": "./compat/server.js"
+    },
+    "./package.json": "./package.json",
+    "./": "./"
+  },
   "license": "MIT",
   "funding": {
     "type": "opencollective",
@@ -19,6 +56,7 @@
     "build": "npm-run-all --parallel build:* && cp dist/preact.js dist/preact.min.js",
     "build:core": "microbundle build --raw",
     "build:debug": "microbundle build --raw --cwd debug",
+    "build:devtools": "microbundle build --raw --cwd devtools",
     "build:hooks": "microbundle build --raw --cwd hooks",
     "build:test-utils": "microbundle build --raw --cwd test-utils",
     "build:compat": "microbundle build --raw --cwd compat --globals 'preact/hooks=preactHooks'",
@@ -26,13 +64,14 @@
     "dev:hooks": "microbundle watch --raw --format cjs --cwd hooks",
     "dev:compat": "microbundle watch --raw --format cjs --cwd compat --globals 'preact/hooks=preactHooks'",
     "test": "npm-run-all lint build test:unit",
-    "test:unit": "run-p test:mocha test:karma test:ts",
+    "test:unit": "run-p test:mocha test:karma:minify test:ts",
     "test:ts": "run-p test:ts:*",
     "test:ts:core": "tsc -p test/ts/ && mocha --require \"@babel/register\" test/ts/**/*-test.js",
     "test:ts:compat": "tsc -p compat/test/ts/",
     "test:mocha": "mocha --recursive --require \"@babel/register\" test/shared test/node",
-    "test:karma": "cross-env COVERAGE=true karma start karma.conf.js --single-run",
     "test:mocha:watch": "npm run test:mocha -- --watch",
+    "test:karma": "cross-env COVERAGE=true karma start karma.conf.js --single-run",
+    "test:karma:minify": "cross-env COVERAGE=true MINIFY=true karma start karma.conf.js --single-run",
     "test:karma:watch": "karma start karma.conf.js --no-single-run",
     "test:karma:hooks": "cross-env COVERAGE=false karma start karma.conf.js --grep=hooks/test/browser/**.js --no-single-run",
     "test:karma:test-utils": "cross-env PERFORMANCE=false COVERAGE=false karma start karma.conf.js --grep=test-utils/test/shared/**.js --no-single-run",
@@ -113,6 +152,9 @@
     "debug/dist",
     "debug/src",
     "debug/package.json",
+    "devtools/dist",
+    "devtools/src",
+    "devtools/package.json",
     "hooks/dist",
     "hooks/src",
     "hooks/package.json",
@@ -147,8 +189,9 @@
     "@types/mocha": "^5.0.0",
     "@types/node": "^10.5.2",
     "babel-loader": "^8.0.6",
-    "babel-plugin-istanbul": "^5.2.0",
+    "babel-plugin-istanbul": "^6.0.0",
     "babel-plugin-transform-async-to-promises": "^0.8.15",
+    "babel-plugin-transform-rename-properties": "0.0.3",
     "benchmark": "^2.1.4",
     "chai": "^4.1.2",
     "coveralls": "^3.0.0",
@@ -162,24 +205,23 @@
     "karma": "^3.0.0",
     "karma-chai-sinon": "^0.1.5",
     "karma-chrome-launcher": "^2.2.0",
-    "karma-coverage": "^1.1.2",
+    "karma-coverage": "^2.0.1",
     "karma-mocha": "^1.3.0",
     "karma-mocha-reporter": "^2.2.5",
     "karma-sauce-launcher": "^1.2.0",
     "karma-sinon": "^1.0.5",
-    "karma-source-map-support": "^1.3.0",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^3.0.5",
     "lint-staged": "^9.4.2",
     "lodash": "^4.17.10",
     "microbundle": "^0.11.0",
     "mocha": "^5.2.0",
+    "npm-merge-driver-install": "^1.1.1",
     "npm-run-all": "^4.0.0",
     "prettier": "^1.18.2",
     "prop-types": "^15.7.2",
     "sinon": "^6.1.3",
     "sinon-chai": "^3.0.0",
-    "travis-size-report": "^1.0.1",
     "typescript": "^3.0.1",
     "webpack": "^4.3.0"
   }

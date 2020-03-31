@@ -145,7 +145,7 @@ function serializeDomTree(node) {
  */
 export function createEvent(name) {
 	// Modern browsers
-	if (typeof Event === 'function') {
+	if (typeof Event == 'function') {
 		return new Event(name);
 	}
 

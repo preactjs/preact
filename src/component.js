@@ -44,7 +44,6 @@ Component.prototype.setState = function(update, callback) {
 	if (update == null) return;
 
 	if (this._vnode) {
-		this._force = false;
 		if (callback) this._renderCallbacks.push(callback);
 		enqueueRender(this);
 	}
@@ -107,7 +106,7 @@ export function getDomSibling(vnode, childIndex) {
 	// Only climb up and search the parent if we aren't searching through a DOM
 	// VNode (meaning we reached the DOM parent of the original vnode that began
 	// the search)
-	return typeof vnode.type === 'function' ? getDomSibling(vnode) : null;
+	return typeof vnode.type == 'function' ? getDomSibling(vnode) : null;
 }
 
 /**
@@ -125,7 +124,7 @@ function renderComponent(component) {
 			parentDom,
 			vnode,
 			assign({}, vnode),
-			component._context,
+			component._globalContext,
 			parentDom.ownerSVGElement !== undefined,
 			null,
 			commitQueue,
@@ -161,7 +160,8 @@ function updateParentDomPointers(vnode) {
  * The render queue
  * @type {Array<import('./internal').Component>}
  */
-let q = [];
+let rerenderQueue = [];
+let rerenderCount = 0;
 
 /**
  * Asynchronously schedule a callback
@@ -191,7 +191,10 @@ let prevDebounce;
  */
 export function enqueueRender(c) {
 	if (
-		(!c._dirty && (c._dirty = true) && q.push(c) === 1) ||
+		(!c._dirty &&
+			(c._dirty = true) &&
+			rerenderQueue.push(c) &&
+			!rerenderCount++) ||
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
@@ -201,10 +204,14 @@ export function enqueueRender(c) {
 
 /** Flush the render queue by rerendering all queued components */
 function process() {
-	let p;
-	q.sort((a, b) => b._vnode._depth - a._vnode._depth);
-	while ((p = q.pop())) {
-		// forceUpdate's callback argument is reused here to indicate a non-forced update.
-		if (p._dirty) renderComponent(p);
+	let queue;
+	while ((rerenderCount = rerenderQueue.length)) {
+		queue = rerenderQueue.sort((a, b) => a._vnode._depth - b._vnode._depth);
+		rerenderQueue = [];
+		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
+		// process() calls from getting scheduled while `queue` is still being consumed.
+		queue.some(c => {
+			if (c._dirty) renderComponent(c);
+		});
 	}
 }
