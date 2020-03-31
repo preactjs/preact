@@ -258,10 +258,11 @@ export function useErrorBoundary(cb) {
 function flushAfterPaintEffects() {
 	afterPaintEffects.some(component => {
 		if (component._parentDom) {
+			const effects = component.__hooks._pendingEffects;
+			component.__hooks._pendingEffects = [];
 			try {
-				component.__hooks._pendingEffects.forEach(invokeCleanup);
-				component.__hooks._pendingEffects.forEach(invokeEffect);
-				component.__hooks._pendingEffects = [];
+				effects.forEach(invokeCleanup);
+				effects.forEach(invokeEffect);
 			} catch (e) {
 				options._catchError(e, component._vnode);
 				return true;

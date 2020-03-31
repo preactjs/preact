@@ -438,5 +438,42 @@ describe('act', () => {
 				expect(effectCount).to.equal(1);
 			});
 		});
+
+		context('in an effect', () => {
+			function BrokenEffect() {
+				useEffect(() => {
+					throw new Error('BrokenEffect effect');
+				}, []);
+				return null;
+			}
+
+			const renderBrokenEffect = () => {
+				act(() => {
+					render(<BrokenEffect />, scratch);
+				});
+			};
+
+			it('should rethrow the exception', () => {
+				expect(renderBrokenEffect).to.throw('BrokenEffect effect');
+			});
+
+			it('should not affect state updates in future renders', () => {
+				try {
+					renderBrokenEffect();
+				} catch (e) {}
+
+				renderWorking();
+				expect(scratch.textContent).to.equal('1');
+			});
+
+			it('should not affect effects in future renders', () => {
+				try {
+					renderBrokenEffect();
+				} catch (e) {}
+
+				renderWorking();
+				expect(effectCount).to.equal(1);
+			});
+		});
 	});
 });
