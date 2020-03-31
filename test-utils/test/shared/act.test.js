@@ -341,4 +341,139 @@ describe('act', () => {
 			expect(button.textContent).to.equal('1');
 		});
 	});
+
+	describe('when `act` callback throws an exception', () => {
+		function BrokenWidget() {
+			throw new Error('BrokenWidget is broken');
+		}
+
+		let effectCount;
+
+		function WorkingWidget() {
+			const [count, setCount] = useState(0);
+
+			useEffect(() => {
+				++effectCount;
+			}, []);
+
+			if (count === 0) {
+				setCount(1);
+			}
+
+			return <div>{count}</div>;
+		}
+
+		beforeEach(() => {
+			effectCount = 0;
+		});
+
+		const renderBroken = () => {
+			act(() => {
+				render(<BrokenWidget />, scratch);
+			});
+		};
+
+		const renderWorking = () => {
+			act(() => {
+				render(<WorkingWidget />, scratch);
+			});
+		};
+
+		const tryRenderBroken = () => {
+			try {
+				renderBroken();
+			} catch (e) {}
+		};
+
+		describe('synchronously', () => {
+			it('should rethrow the exception', () => {
+				expect(renderBroken).to.throw('BrokenWidget is broken');
+			});
+
+			it('should not affect state updates in future renders', () => {
+				tryRenderBroken();
+				renderWorking();
+				expect(scratch.textContent).to.equal('1');
+			});
+
+			it('should not affect effects in future renders', () => {
+				tryRenderBroken();
+				renderWorking();
+				expect(effectCount).to.equal(1);
+			});
+		});
+
+		describe('asynchronously', () => {
+			const renderBrokenAsync = async () => {
+				await act(async () => {
+					render(<BrokenWidget />, scratch);
+				});
+			};
+
+			it('should rethrow the exception', async () => {
+				let err;
+				try {
+					await renderBrokenAsync();
+				} catch (e) {
+					err = e;
+				}
+				expect(err.message).to.equal('BrokenWidget is broken');
+			});
+
+			it('should not affect state updates in future renders', async () => {
+				try {
+					await renderBrokenAsync();
+				} catch (e) {}
+
+				renderWorking();
+				expect(scratch.textContent).to.equal('1');
+			});
+
+			it('should not affect effects in future renders', async () => {
+				try {
+					await renderBrokenAsync();
+				} catch (e) {}
+
+				renderWorking();
+				expect(effectCount).to.equal(1);
+			});
+		});
+
+		describe('in an effect', () => {
+			function BrokenEffect() {
+				useEffect(() => {
+					throw new Error('BrokenEffect effect');
+				}, []);
+				return null;
+			}
+
+			const renderBrokenEffect = () => {
+				act(() => {
+					render(<BrokenEffect />, scratch);
+				});
+			};
+
+			it('should rethrow the exception', () => {
+				expect(renderBrokenEffect).to.throw('BrokenEffect effect');
+			});
+
+			it('should not affect state updates in future renders', () => {
+				try {
+					renderBrokenEffect();
+				} catch (e) {}
+
+				renderWorking();
+				expect(scratch.textContent).to.equal('1');
+			});
+
+			it('should not affect effects in future renders', () => {
+				try {
+					renderBrokenEffect();
+				} catch (e) {}
+
+				renderWorking();
+				expect(effectCount).to.equal(1);
+			});
+		});
+	});
 });
