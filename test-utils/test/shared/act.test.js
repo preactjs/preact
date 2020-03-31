@@ -342,7 +342,7 @@ describe('act', () => {
 		});
 	});
 
-	context('when `act` callback throws an exception', () => {
+	describe('when `act` callback throws an exception', () => {
 		function BrokenWidget() {
 			throw new Error('BrokenWidget is broken');
 		}
@@ -385,7 +385,7 @@ describe('act', () => {
 			} catch (e) {}
 		};
 
-		context('synchronously', () => {
+		describe('synchronously', () => {
 			it('should rethrow the exception', () => {
 				expect(renderBroken).to.throw('BrokenWidget is broken');
 			});
@@ -403,7 +403,7 @@ describe('act', () => {
 			});
 		});
 
-		context('asynchronously', () => {
+		describe('asynchronously', () => {
 			const renderBrokenAsync = async () => {
 				await act(async () => {
 					render(<BrokenWidget />, scratch);
@@ -439,7 +439,7 @@ describe('act', () => {
 			});
 		});
 
-		context('in an effect', () => {
+		describe('in an effect', () => {
 			function BrokenEffect() {
 				useEffect(() => {
 					throw new Error('BrokenEffect effect');
