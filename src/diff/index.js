@@ -70,7 +70,7 @@ export function diff(
 					c.constructor = newType;
 					c.render = doRender;
 				}
-				if (provider) provider.sub(c);
+				if (provider) provider.sub(c, newProps.shouldUpdate);
 
 				c.props = newProps;
 				if (!c.state) c.state = {};
