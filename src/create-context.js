@@ -9,7 +9,7 @@ export function createContext(defaultValue) {
 		_id: '__cC' + i++,
 		_defaultValue: defaultValue,
 		Consumer(props, context) {
-			return props.children(context);
+			return props.children(props.selector(context));
 		},
 		Provider(props) {
 			if (!this.getChildContext) {

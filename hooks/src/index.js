@@ -212,16 +212,16 @@ export function useCallback(callback, args) {
 /**
  * @param {import('./internal').PreactContext} context
  */
-export function useContext(context, shouldUpdate) {
+export function useContext(context, selector) {
 	const provider = currentComponent.context[context._id];
 	if (!provider) return context._defaultValue;
 	const state = getHookState(currentIndex++);
 	// This is probably not safe to convert to "!"
 	if (state._value == null) {
 		state._value = true;
-		provider.sub(currentComponent, shouldUpdate);
+		provider.sub(currentComponent, selector);
 	}
-	return provider.props.value;
+	return selector ? selector(provider.props.value) : provider.props.value;
 }
 
 /**
