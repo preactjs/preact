@@ -22,7 +22,6 @@ function detachedClone(vnode) {
 	if (vnode) {
 		vnode = assign({}, vnode);
 		vnode._component = null;
-		vnode._original = vnode;
 		vnode._children = vnode._children && vnode._children.map(detachedClone);
 	}
 	return vnode;
