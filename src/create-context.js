@@ -22,7 +22,7 @@ export function createContext(defaultValue) {
 				this.shouldComponentUpdate = _props => {
 					if (this.props.value !== _props.value) {
 						subs.some(c => {
-							if (!c[1] || c[1](_props.value, this.props.value)) {
+							if (!c[1] || c[1](_props.value) !== c[1](this.props.value)) {
 								c[0].context = _props.value;
 								enqueueRender(c[0]);
 							}
