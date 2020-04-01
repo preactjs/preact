@@ -263,6 +263,7 @@ function flushAfterPaintEffects() {
 				component.__hooks._pendingEffects.forEach(invokeEffect);
 				component.__hooks._pendingEffects = [];
 			} catch (e) {
+				component.__hooks._pendingEffects = [];
 				options._catchError(e, component._vnode);
 				return true;
 			}
