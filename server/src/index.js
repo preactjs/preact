@@ -8,6 +8,8 @@ const UNNAMED = [];
 
 const VOID_ELEMENTS = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
 
+const noop = () => {};
+
 
 /** Render Preact JSX + Components to an HTML string.
  *	@name render
@@ -76,7 +78,16 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 		else {
 			let rendered;
 
-			let c = vnode.__c = { __v: vnode, context, props: vnode.props, __h: [] };
+			let c = vnode.__c = {
+				__v: vnode,
+				context,
+				props: vnode.props,
+				// silently drop state updates
+				setState: noop,
+				forceUpdate: noop,
+				// hooks
+				__h: []
+			};
 
 			// options.render
 			if (options.__r) options.__r(vnode);
