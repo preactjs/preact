@@ -74,6 +74,8 @@ export function createVNode(type, props, key, ref) {
 		// a _nextDom that has been set to `null`
 		_nextDom: undefined,
 		_component: null,
+		_hydrateDom: null,
+		_hydrating: false,
 		constructor: undefined
 	};
 
