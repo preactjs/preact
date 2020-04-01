@@ -255,7 +255,7 @@ export function toChildArray(children, callback, flattened) {
 		}
 	} else if (!callback) {
 		flattened.push(children);
-	} else if (typeof children === 'string' || typeof children === 'number') {
+	} else if (typeof children == 'string' || typeof children == 'number') {
 		flattened.push(callback(createVNode(null, children, null, null, children)));
 	} else if (children._dom != null || children._component != null) {
 		flattened.push(
