@@ -303,6 +303,5 @@ export default renderToString;
 
 export {
 	renderToString as render,
-	renderToString,
 	shallowRender
 };
