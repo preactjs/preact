@@ -82,6 +82,7 @@ describe('Lifecycle methods', () => {
 				ThrowErr.getDerivedStateFromError,
 				"Throwing component should not catch it's own error."
 			).to.not.be.called;
+			thrower = undefined;
 		});
 
 		it('should be called when child fails in constructor', () => {

@@ -78,6 +78,7 @@ describe('Lifecycle methods', () => {
 				ThrowErr.prototype.componentDidCatch,
 				"Throwing component should not catch it's own error."
 			).to.not.be.called;
+			thrower = undefined;
 		});
 
 		it('should be called when child fails in constructor', () => {
