@@ -214,8 +214,8 @@ export function initDebug() {
 			checkPropTypes(
 				vnode.type.propTypes,
 				vnode.props,
-				getDisplayName(vnode),
-				serializeVNode(vnode)
+				'prop',
+				getDisplayName(vnode)
 			);
 		}
 
