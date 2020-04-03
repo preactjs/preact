@@ -298,6 +298,7 @@ function diffElementNodes(
 	}
 
 	if (dom == null) {
+		isHydrating = false;
 		if (newVNode.type === null) {
 			return document.createTextNode(newProps);
 		}
