@@ -61,7 +61,7 @@ describe('createContext', () => {
 	// to prevent a Provider from rerendering the children, this means
 	// we only propagate to children.
 	// Strict equal vnode optimization
-	it('should support wrappers', () => {
+	it('skips referentially equal children to Provider', () => {
 		const { Provider, Consumer } = createContext();
 		let set,
 			renders = 0;
