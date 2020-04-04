@@ -1,0 +1,27 @@
+{
+	"$schema": "https://raw.githubusercontent.com/Polymer/tachometer/master/config.schema.json",
+	"sampleSize": 2,
+	"timeout": 0,
+	"benchmarks": [
+		{
+			"name": "02_replace1k",
+			"url": "benchmarks/02_replace1k.html",
+			"packageVersions": {
+				"label": "preact8",
+				"dependencies": {
+					"preact": "^8.5.3"
+				}
+			}
+		},
+		{
+			"name": "02_replace1k",
+			"url": "benchmarks/02_replace1k.html",
+			"packageVersions": {
+				"label": "preact10",
+				"dependencies": {
+					"preact": "^10.0.0"
+				}
+			}
+		}
+	]
+}
