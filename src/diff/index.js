@@ -119,7 +119,6 @@ export function diff(
 					c.componentWillReceiveProps(newProps, componentContext);
 				}
 
-				console.log(newVNode.type, newVNode._original === oldVNode._original);
 				if (
 					(!c._force &&
 						c.shouldComponentUpdate != null &&
