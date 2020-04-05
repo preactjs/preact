@@ -276,4 +276,36 @@ describe('hydrate()', () => {
 		hydrate(<Component foo="bar" />, element);
 		expect(element.innerHTML).to.equal('<p>hello bar</p>');
 	});
+
+	it('should deopt for trees introduced in hydrate (append)', () => {
+		scratch.innerHTML = '<div id="test"><p class="hi">hello bar</p></div>';
+		const Component = props => <p class="hi">hello {props.foo}</p>;
+		const element = document.getElementById('test');
+		hydrate(
+			<Fragment>
+				<Component foo="bar" />
+				<Component foo="baz" />
+			</Fragment>,
+			element
+		);
+		expect(element.innerHTML).to.equal(
+			'<p class="hi">hello bar</p><p class="hi">hello baz</p>'
+		);
+	});
+
+	it('should deopt for trees introduced in hydrate (insert before)', () => {
+		scratch.innerHTML = '<div id="test"><p class="hi">hello bar</p></div>';
+		const Component = props => <p class="hi">hello {props.foo}</p>;
+		const element = document.getElementById('test');
+		hydrate(
+			<Fragment>
+				<Component foo="baz" />
+				<Component foo="bar" />
+			</Fragment>,
+			element
+		);
+		expect(element.innerHTML).to.equal(
+			'<p class="hi">hello baz</p><p class="hi">hello bar</p>'
+		);
+	});
 });

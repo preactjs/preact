@@ -324,6 +324,8 @@ function diffElementNodes(
 			  );
 		// we created a new parent, so none of the previously attached children can be reused:
 		excessDomChildren = null;
+		// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
+		isHydrating = false;
 	}
 
 	if (newVNode.type === null) {
