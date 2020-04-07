@@ -1206,30 +1206,15 @@ describe('render()', () => {
 			'<li>1</li><li>2</li><li>3</li><li>4</li><li>5</li>'
 		);
 
-		let added = 0,
-			removed = 0;
-		new MutationObserver(records => {
-			for (const record of records) {
-				added += record.addedNodes.length;
-				removed += record.removedNodes.length;
-			}
-		}).observe(scratch, {
-			subtree: true,
-			childList: true
-		});
-
 		// swap the second and fourth items
 		list = list.slice();
-		const fourth = list[3];
+		const fourth = list[4];
 		list[4] = list[1];
 		list[1] = fourth;
 		render(list, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<li>1</li><li>4</li><li>3</li><li>4</li><li>2</li>'
+			'<li>1</li><li>5</li><li>3</li><li>4</li><li>2</li>'
 		);
-
-		expect(added).to.equal(0);
-		expect(removed).to.equal(0);
 	});
 
 	// see preact/#1327
