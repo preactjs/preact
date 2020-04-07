@@ -33,24 +33,19 @@ describe('Lifecycle methods', () => {
 
 		/** @type {typeof import('../../../').Component} */
 		let ThrowErr;
-
-		/** @type {Receiver} */
-		let receiver;
 		class Receiver extends Component {
-			constructor() {
-				super();
-				receiver = this;
-			}
-
 			componentDidCatch(error) {
 				this.setState({ error });
 			}
+
 			render() {
 				return this.state.error
 					? String(this.state.error)
 					: this.props.children;
 			}
 		}
+
+		let thrower;
 
 		spyAll(Receiver.prototype);
 
@@ -60,6 +55,11 @@ describe('Lifecycle methods', () => {
 
 		beforeEach(() => {
 			ThrowErr = class ThrowErr extends Component {
+				constructor(props) {
+					super(props);
+					thrower = this;
+				}
+
 				componentDidCatch() {
 					expect.fail("Throwing component should not catch it's own error.");
 				}
@@ -69,7 +69,6 @@ describe('Lifecycle methods', () => {
 			};
 			sinon.spy(ThrowErr.prototype, 'componentDidCatch');
 
-			receiver = undefined;
 			expectedError = undefined;
 			resetAllSpies(Receiver.prototype);
 		});
@@ -79,6 +78,7 @@ describe('Lifecycle methods', () => {
 				ThrowErr.prototype.componentDidCatch,
 				"Throwing component should not catch it's own error."
 			).to.not.be.called;
+			thrower = undefined;
 		});
 
 		it('should be called when child fails in constructor', () => {
@@ -197,7 +197,7 @@ describe('Lifecycle methods', () => {
 				</Receiver>,
 				scratch
 			);
-			receiver.forceUpdate();
+			thrower.forceUpdate();
 			rerender();
 
 			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
@@ -215,7 +215,7 @@ describe('Lifecycle methods', () => {
 				scratch
 			);
 
-			receiver.forceUpdate();
+			thrower.forceUpdate();
 			rerender();
 			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
 				expectedError
@@ -232,7 +232,7 @@ describe('Lifecycle methods', () => {
 				scratch
 			);
 
-			receiver.forceUpdate();
+			thrower.forceUpdate();
 			rerender();
 			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
 				expectedError

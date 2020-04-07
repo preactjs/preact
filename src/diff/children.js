@@ -256,10 +256,18 @@ export function toChildArray(children, callback, flattened) {
 	} else if (!callback) {
 		flattened.push(children);
 	} else if (typeof children == 'string' || typeof children == 'number') {
-		flattened.push(callback(createVNode(null, children, null, null)));
+		flattened.push(callback(createVNode(null, children, null, null, children)));
 	} else if (children._dom != null || children._component != null) {
 		flattened.push(
-			callback(createVNode(children.type, children.props, children.key, null))
+			callback(
+				createVNode(
+					children.type,
+					children.props,
+					children.key,
+					null,
+					children._original
+				)
+			)
 		);
 	} else {
 		flattened.push(callback(children));

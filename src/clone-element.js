@@ -16,6 +16,7 @@ export function cloneElement(vnode, props) {
 		vnode.type,
 		props,
 		props.key || vnode.key,
-		props.ref || vnode.ref
+		props.ref || vnode.ref,
+		null
 	);
 }

@@ -120,25 +120,32 @@ export function diff(
 				}
 
 				if (
-					!c._force &&
-					c.shouldComponentUpdate != null &&
-					c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
-						false
+					(!c._force &&
+						c.shouldComponentUpdate != null &&
+						c.shouldComponentUpdate(
+							newProps,
+							c._nextState,
+							componentContext
+						) === false) ||
+					(newVNode._original === oldVNode._original && !c._processingException)
 				) {
 					c.props = newProps;
 					c.state = c._nextState;
-					c._dirty = false;
+					// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
+					if (newVNode._original !== oldVNode._original) c._dirty = false;
 					c._vnode = newVNode;
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
 					if (c._renderCallbacks.length) {
 						commitQueue.push(c);
 					}
+
 					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
 						if (newVNode._children[tmp]) {
 							newVNode._children[tmp]._parent = newVNode;
 						}
 					}
+
 					break outer;
 				}
 
@@ -203,6 +210,12 @@ export function diff(
 			}
 
 			c._force = false;
+		} else if (
+			excessDomChildren == null &&
+			newVNode._original === oldVNode._original
+		) {
+			newVNode._children = oldVNode._children;
+			newVNode._dom = oldVNode._dom;
 		} else {
 			newVNode._dom = diffElementNodes(
 				oldVNode._dom,
@@ -218,6 +231,7 @@ export function diff(
 
 		if ((tmp = options.diffed)) tmp(newVNode);
 	} catch (e) {
+		newVNode._original = null;
 		options._catchError(e, newVNode, oldVNode);
 	}
 
@@ -318,7 +332,7 @@ function diffElementNodes(
 		if (oldProps !== newProps && dom.data != newProps) {
 			dom.data = newProps;
 		}
-	} else if (newVNode !== oldVNode) {
+	} else {
 		if (excessDomChildren != null) {
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
