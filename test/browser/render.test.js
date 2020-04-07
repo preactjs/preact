@@ -1198,6 +1198,40 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('<div>foo</div>');
 	});
 
+	it('should performantly diff', () => {
+		let list = [1, 2, 3, 4, 5].map(v => <li key={v}>{v}</li>);
+
+		render(list, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<li>1</li><li>2</li><li>3</li><li>4</li><li>5</li>'
+		);
+
+		let added = 0,
+			removed = 0;
+		new MutationObserver(records => {
+			for (const record of records) {
+				added += record.addedNodes.length;
+				removed += record.removedNodes.length;
+			}
+		}).observe(scratch, {
+			subtree: true,
+			childList: true
+		});
+
+		// swap the second and fourth items
+		list = list.slice();
+		const fourth = list[3];
+		list[4] = list[1];
+		list[1] = fourth;
+		render(list, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<li>1</li><li>4</li><li>3</li><li>4</li><li>2</li>'
+		);
+
+		expect(added).to.equal(0);
+		expect(removed).to.equal(0);
+	});
+
 	// see preact/#1327
 	it('should not reuse unkeyed components', () => {
 		class X extends Component {
