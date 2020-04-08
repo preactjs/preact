@@ -115,7 +115,10 @@ export function useMemo<T>(factory: () => T, inputs: Inputs | undefined): T;
  *
  * @param context The context you want to use
  */
-export function useContext<T>(context: PreactContext<T>): T;
+export function useContext<T>(
+	context: PreactContext<T>,
+	update?: (context: T, prevContext: T) => boolean
+): T;
 
 /**
  * Customize the displayed value in the devtools panel.
