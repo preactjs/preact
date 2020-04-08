@@ -53,6 +53,7 @@
       "$_globalContext": "__n",
       "$_defaultValue": "__",
       "$_id": "__c",
+      "$_contextRef": "__",
       "$_parentDom": "__P",
       "$_prevState": "__u",
       "$_root": "__",

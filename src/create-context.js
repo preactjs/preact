@@ -44,5 +44,12 @@ export function createContext(defaultValue) {
 
 	context.Consumer.contextType = context;
 
+	// Devtools needs access to the context object when it
+	// encounters a Provider. This is necessary to support
+	// setting `displayName` on the context object instead
+	// of on the component itself. See:
+	// https://reactjs.org/docs/context.html#contextdisplayname
+	context.Provider._contextRef = context;
+
 	return context;
 }
