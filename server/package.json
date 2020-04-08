@@ -64,7 +64,7 @@
   "bugs": "https://github.com/developit/preact-render-to-string/issues",
   "homepage": "https://github.com/developit/preact-render-to-string",
   "peerDependencies": {
-    "preact": ">=10 || ^10.0.0-alpha.0 || ^10.0.0-beta.0"
+    "preact": ">=10"
   },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
