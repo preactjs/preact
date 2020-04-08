@@ -21,17 +21,17 @@ export function createContext(defaultValue) {
 
 				this.shouldComponentUpdate = _props => {
 					if (this.props.value !== _props.value) {
-						subs.some(c => {
-							c[0].context = _props.value;
-							if (!c[1] || c[1](_props.value, this.props.value)) {
-								enqueueRender(c[0]);
+						subs.some(payload => {
+							payload.c.context = _props.value;
+							if (!payload.u || payload.u(_props.value, this.props.value)) {
+								enqueueRender(payload.c);
 							}
 						});
 					}
 				};
 
 				this.sub = (c, shouldUpdate) => {
-					const entry = [c, shouldUpdate];
+					const entry = { c, u: shouldUpdate };
 					subs.push(entry);
 					let old = c.componentWillUnmount;
 					c.componentWillUnmount = () => {

@@ -928,4 +928,112 @@ describe('createContext', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal('<p>hi</p>');
 	});
+
+	it('should selectively rerender', () => {
+		let appRenders = 0,
+			providerRenders = 0,
+			layoutRenders = 0,
+			consumerFooRenders = 0,
+			consumerBarRenders = 0,
+			set;
+		const context = createContext();
+
+		class MyProvider extends Component {
+			constructor(props) {
+				super(props);
+				set = this.setState.bind(this);
+				this.state = {
+					bar: 'world',
+					foo: 'hello'
+				};
+			}
+
+			render() {
+				providerRenders++;
+				return (
+					<context.Provider value={this.state}>
+						{this.props.children}
+					</context.Provider>
+				);
+			}
+		}
+
+		const Layout = ({ children }) => {
+			layoutRenders++;
+			return <div>{children}</div>;
+		};
+
+		const Foo = () => {
+			return (
+				<context.Consumer update={(curr, prev) => curr.foo !== prev.foo}>
+					{ctx => {
+						consumerFooRenders++;
+						return <p>{ctx.foo}</p>;
+					}}
+				</context.Consumer>
+			);
+		};
+
+		const Bar = () => {
+			return (
+				<context.Consumer update={(curr, prev) => curr.bar !== prev.bar}>
+					{ctx => {
+						consumerBarRenders++;
+						return <p>{ctx.bar}</p>;
+					}}
+				</context.Consumer>
+			);
+		};
+
+		const App = () => {
+			appRenders++;
+			return (
+				<MyProvider>
+					<Layout>
+						<Foo />
+						<Bar />
+					</Layout>
+				</MyProvider>
+			);
+		};
+
+		render(<App />, scratch);
+
+		expect(scratch.innerHTML).to.equal('<div><p>hello</p><p>world</p></div>');
+		expect(appRenders).to.equal(1);
+		expect(layoutRenders).to.equal(1);
+		expect(providerRenders).to.equal(1);
+		expect(consumerFooRenders).to.equal(1);
+		expect(consumerBarRenders).to.equal(1);
+
+		act(() => {
+			set({ foo: 'hello', bar: 'Earth' });
+		});
+		expect(scratch.innerHTML).to.equal('<div><p>hello</p><p>Earth</p></div>');
+		expect(appRenders).to.equal(1);
+		expect(layoutRenders).to.equal(1);
+		expect(providerRenders).to.equal(2);
+		expect(consumerFooRenders).to.equal(1);
+		expect(consumerBarRenders).to.equal(2);
+
+		act(() => {
+			set({ foo: 'hi', bar: 'Earth' });
+		});
+		expect(scratch.innerHTML).to.equal('<div><p>hi</p><p>Earth</p></div>');
+		expect(appRenders).to.equal(1);
+		expect(layoutRenders).to.equal(1);
+		expect(providerRenders).to.equal(3);
+		expect(consumerFooRenders).to.equal(2);
+		expect(consumerBarRenders).to.equal(2);
+
+		act(() => {
+			set({ foo: 'hello', bar: 'world' });
+		});
+		expect(scratch.innerHTML).to.equal('<div><p>hello</p><p>world</p></div>');
+		expect(appRenders).to.equal(1);
+		expect(layoutRenders).to.equal(1);
+		expect(providerRenders).to.equal(4);
+		expect(consumerFooRenders).to.equal(3);
+		expect(consumerBarRenders).to.equal(3);
+	});
 });
