@@ -764,4 +764,36 @@ describe('Lifecycle methods', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal('<p>bar</p>');
 	});
+
+	it('should support nested update with strict-equal vnodes (forceUpdate)', () => {
+		let force,
+			setState,
+			i = 0;
+
+		class Wrapper extends Component {
+			render() {
+				force = this.forceUpdate.bind(this);
+				setState = this.setState.bind(this);
+				return this.props.children;
+			}
+		}
+
+		const Child = () => <p>{++i}</p>;
+		const App = () => (
+			<Wrapper>
+				<Child />
+			</Wrapper>
+		);
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<p>1</p>');
+
+		setState({ i: false });
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>1</p>');
+
+		force();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>2</p>');
+	});
 });

@@ -122,12 +122,15 @@ export function diff(
 				if (
 					(!c._force &&
 						c.shouldComponentUpdate != null &&
-						c.shouldComponentUpdate(
-							newProps,
-							c._nextState,
-							componentContext
-						) === false) ||
-					(newVNode._original === oldVNode._original && !c._processingException)
+							c.shouldComponentUpdate(
+								newProps,
+								c._nextState,
+								componentContext
+							) === false) ||
+					(newVNode._original === oldVNode._original &&
+						!c._processingException &&
+						(!oldVNode._parent._component ||
+							!oldVNode._parent._component._force))
 				) {
 					c.props = newProps;
 					c.state = c._nextState;
@@ -212,7 +215,8 @@ export function diff(
 			c._force = false;
 		} else if (
 			excessDomChildren == null &&
-			newVNode._original === oldVNode._original
+			newVNode._original === oldVNode._original &&
+			(!oldVNode._parent._component || !oldVNode._parent._component._force)
 		) {
 			newVNode._children = oldVNode._children;
 			newVNode._dom = oldVNode._dom;
