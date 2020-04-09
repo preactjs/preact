@@ -58,7 +58,7 @@ export function diffChildren(
 
 	i = 0;
 	newParentVNode._children = toChildArray(
-		newParentVNode._children,
+		newParentVNode.props && newParentVNode.props.children,
 		childVNode => {
 			if (childVNode != null) {
 				childVNode._parent = newParentVNode;
