@@ -362,10 +362,11 @@ function diffElementNodes(
 
 		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
 
-		newVNode._children = newVNode.props.children;
-
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
-		if (!newHtml) {
+		if (newHtml) {
+			newVNode._children = [];
+		}
+		else {
 			diffChildren(
 				dom,
 				newVNode,
