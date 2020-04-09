@@ -33,6 +33,11 @@ export function createContext(defaultValue) {
 
 				this.sub = function() {
 					subs.push(arguments);
+					let old = c.componentWillUnmount;
+					c.componentWillUnmount = () => {
+						subs.splice(subs.indexOf(arguments), 1);
+						old && old.call(c);
+					};
 				};
 			}
 
