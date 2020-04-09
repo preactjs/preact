@@ -1519,4 +1519,31 @@ describe('render()', () => {
 			sandbox.restore();
 		}
 	});
+
+	it('should unmount dangerouslySetInnerHTML', () => {
+		let set;
+
+		const TextDiv = () => (
+			<div dangerouslySetInnerHTML={{ __html: '' }}>some text</div>
+		);
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				set = this.setState.bind(this);
+				this.state = { show: true };
+			}
+
+			render() {
+				return this.state.show && <TextDiv />;
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
+
+		set({ show: false });
+		rerender();
+		expect(scratch.innerHTML).to.equal('');
+	});
 });
