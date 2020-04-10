@@ -70,12 +70,7 @@ export function diffChildren(
 				// (holes).
 				oldVNode = oldChildren[i];
 
-				if (
-					oldVNode === null ||
-					(oldVNode &&
-						childVNode.key == oldVNode.key &&
-						childVNode.type === oldVNode.type)
-				) {
+				if (oldVNode === null) {
 					oldChildren[i] = undefined;
 				} else {
 					// Either oldVNode === undefined or oldChildrenLength > 0,

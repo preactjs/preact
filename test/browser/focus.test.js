@@ -134,7 +134,7 @@ describe('focus', () => {
 		validateFocus(input, 'move from end to middle');
 	});
 
-	it('should maintain focus when adding children around input', () => {
+	it('should maintain focus when adding children around input (keyed)', () => {
 		render(
 			<List>
 				<Input />
