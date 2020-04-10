@@ -80,10 +80,8 @@ export function createVNode(type, props, key, ref, original) {
 
 	Object.defineProperty(vnode, '_original', {
 		value: original || vnode,
-		enumerable: false,
-		writable: true
+		enumerable: false
 	});
-
 	if (options.vnode) options.vnode(vnode);
 
 	return vnode;
