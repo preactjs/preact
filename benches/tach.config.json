@@ -36,6 +36,24 @@
           "url": "src/text_update.html"
         }
       ]
+    },
+    {
+      "packageVersions": {
+        "label": "preactLocal",
+        "dependencies": {
+          "preact": "file:../"
+        }
+      },
+      "expand": [
+        {
+          "name": "02_replace1k",
+          "url": "src/02_replace1k.html"
+        },
+        {
+          "name": "text_update",
+          "url": "src/text_update.html"
+        }
+      ]
     }
   ]
 }

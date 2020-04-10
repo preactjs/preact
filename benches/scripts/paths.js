@@ -1,7 +1,8 @@
 const path = require('path');
 const globby = require('globby');
 
-const benchesRoot = (...args) => path.join(__dirname, '..', ...args);
+const repoRoot = (...args) => path.join(__dirname, '..', '..', ...args);
+const benchesRoot = (...args) => repoRoot('benches', ...args);
 const resultsPath = (...args) => benchesRoot('results', ...args);
 
 const toUrl = str => str.replace(/^[A-Za-z]+:/, '/').replace(/\\/g, '/');
@@ -12,6 +13,7 @@ function globSrc(patterns) {
 }
 
 module.exports = {
+	repoRoot,
 	benchesRoot,
 	resultsPath,
 	toUrl,

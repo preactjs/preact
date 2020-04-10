@@ -30,7 +30,6 @@ async function runBenches(bench1, opts) {
 			benchesRoot('node_modules/tachometer/bin/tach.js'),
 			'--config',
 			configPath,
-			'--force-clean-npm-install',
 			'--csv-file',
 			benchesRoot('results', name + '.csv'),
 			'--json-file',

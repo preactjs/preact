@@ -1,6 +1,12 @@
 const path = require('path');
 const { writeFile } = require('fs').promises;
-const { globSrc, benchesRoot, toUrl, allBenches } = require('./paths');
+const {
+	globSrc,
+	repoRoot,
+	benchesRoot,
+	toUrl,
+	allBenches
+} = require('./paths');
 
 const TACH_SCHEMA =
 	'https://raw.githubusercontent.com/Polymer/tachometer/master/config.schema.json';
@@ -35,6 +41,15 @@ async function generateDefaultConfig() {
 					}
 				},
 				expand
+			},
+			{
+				packageVersions: {
+					label: 'preactLocal',
+					dependencies: {
+						preact: 'file:../'
+					}
+				},
+				expand
 			}
 		]
 	};
@@ -60,9 +75,6 @@ async function generateConfig(bench, options) {
 
 	const config = {
 		$schema: TACH_SCHEMA,
-		sampleSize: options['sample-size'],
-		timeout: options.timeout,
-		horizons: options.horizon.split(','),
 		benchmarks: [
 			{
 				name,
@@ -83,9 +95,25 @@ async function generateConfig(bench, options) {
 						preact: '^10.4.0'
 					}
 				}
+			},
+			{
+				name,
+				url,
+				packageVersions: {
+					label: 'preactLocal',
+					dependencies: {
+						preact: 'file:' + repoRoot()
+					}
+				}
 			}
 		]
 	};
+
+	if (options) {
+		options.sampleSize = options['sample-size'];
+		options.timeout = options.timeout;
+		options.horizons = options.horizon.split(',');
+	}
 
 	return config;
 }

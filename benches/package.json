@@ -4,14 +4,12 @@
 	"version": "1.0.0",
 	"description": "Benchmarks for Preact",
 	"scripts": {
-		"start": "tach --config ./tach.config.json --force-clean-npm-install",
+		"start": "tach --config ./tach.config.json",
 		"bench": "node ./scripts bench",
+		"config": "node ./scripts config",
 		"serve": "node ./scripts serve",
 		"help": "node ./scripts --help"
 	},
-	"authors": [
-		"Jason Miller <jason@developit.ca>"
-	],
 	"license": "MIT",
 	"dependencies": {
 		"afterframe": "^1.0.1"
