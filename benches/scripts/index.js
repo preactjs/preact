@@ -2,7 +2,7 @@ const sade = require('sade');
 const { generateDefaultConfig } = require('./config');
 const { runBenches } = require('./bench');
 
-const prog = sade('scripts');
+const prog = sade('./scripts');
 
 prog
 	.command('config')
@@ -12,8 +12,11 @@ prog
 prog
 	.command('bench [globs]')
 	.describe(
-		'Run the benchmarks matching the given globs. The cwd for glob is the src directory. Specify "all" to run all benchmarks. To get more help on options, see polymer/tachometer help'
+		'Run the benchmarks matching the given globs. The root for the globs is the "src" directory. Specify "all" to run all benchmarks. To get more help on options, see polymer/tachometer help. Result table is printed to stdout and written to a csv and json file in the results directory.'
 	)
+	.example('bench text*')
+	.example('bench *.html')
+	.example('bench all')
 	// TODO: Consider parsing and adding to configs
 	// .option(
 	// 	'--browser, -b',

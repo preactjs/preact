@@ -1,7 +1,7 @@
 const path = require('path');
 const { spawnSync } = require('child_process');
 const { writeFile, mkdir } = require('fs').promises;
-const { globSrc, benchesRoot, allBenches } = require('./paths');
+const { globSrc, benchesRoot, allBenches, resultsPath } = require('./paths');
 const { generateConfig, getBenchName } = require('./config');
 
 /**
@@ -19,24 +19,30 @@ async function runBenches(bench1, opts) {
 		await mkdir(path.dirname(configPath), { recursive: true });
 		await writeFile(configPath, JSON.stringify(config, null, 2), 'utf8');
 
-		return configPath;
+		return { name, configPath };
 	});
 
+	await mkdir(resultsPath(), { recursive: true });
+
 	const configFiles = await Promise.all(configFileTasks);
-	for (const configFile of configFiles) {
-		spawnSync(
-			'node',
-			[
-				benchesRoot('node_modules/tachometer/bin/tach.js'),
-				'--config',
-				configFile,
-				'--force-clean-npm-install'
-			],
-			{
-				cwd: benchesRoot(),
-				stdio: 'inherit'
-			}
-		);
+	for (const { name, configPath } of configFiles) {
+		const args = [
+			benchesRoot('node_modules/tachometer/bin/tach.js'),
+			'--config',
+			configPath,
+			'--force-clean-npm-install',
+			'--csv-file',
+			benchesRoot('results', name + '.csv'),
+			'--json-file',
+			benchesRoot('results', name + '.json')
+		];
+
+		console.log('$', process.execPath, ...args);
+
+		spawnSync(process.execPath, args, {
+			cwd: benchesRoot(),
+			stdio: 'inherit'
+		});
 	}
 }
 
