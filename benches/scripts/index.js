@@ -1,18 +1,18 @@
 const sade = require('sade');
-const { generateDefaultConfig } = require('./config');
+const { generateSingleConfig } = require('./config');
 const { runBenches } = require('./bench');
 
 const prog = sade('./scripts');
 
 prog
-	.command('config')
-	.describe('Generate default config to run all benches')
-	.action(generateDefaultConfig);
+	.command('config [bench]')
+	.describe('Generate the config for the given benchmark HTML file.')
+	.action(generateSingleConfig);
 
 prog
 	.command('bench [globs]')
 	.describe(
-		'Run the benchmarks matching the given globs. The root for the globs is the "src" directory. Specify "all" to run all benchmarks. To get more help on options, see polymer/tachometer help. Result table is printed to stdout and written to a csv and json file in the results directory.'
+		'Run the benchmarks matching the given globs. The root for the globs is the "src" directory. Specify "all" to run all benchmarks (default). To get more help on options, see polymer/tachometer help. Result table is printed to stdout and written to a csv and json file in the results directory.'
 	)
 	.example('bench text*')
 	.example('bench *.html')

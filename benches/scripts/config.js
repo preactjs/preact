@@ -1,125 +1,84 @@
 const path = require('path');
-const { writeFile } = require('fs').promises;
-const {
-	globSrc,
-	repoRoot,
-	benchesRoot,
-	toUrl,
-	allBenches
-} = require('./paths');
+const { writeFile, stat, mkdir } = require('fs').promises;
+const { repoRoot, benchesRoot, toUrl } = require('./paths');
 
 const TACH_SCHEMA =
 	'https://raw.githubusercontent.com/Polymer/tachometer/master/config.schema.json';
 
-const getBenchName = benchPath => path.basename(benchPath).replace('.html', '');
+async function generateSingleConfig(benchFile) {
+	const benchPath = await benchesRoot('src', benchFile);
+	const results = await stat(benchPath);
+	if (!results.isFile) {
+		throw new Error(`Given path is not a file: ${benchPath}`);
+	}
 
-async function generateDefaultConfig() {
-	const benches = await globSrc(allBenches);
-	const benchConfigs = await Promise.all(benches.map(b => generateConfig(b)));
-	const expand = benchConfigs.map(config => ({
-		name: config.benchmarks[0].name,
-		url: config.benchmarks[0].url
-	}));
-
-	const config = {
-		$schema: TACH_SCHEMA,
-		benchmarks: [
-			{
-				packageVersions: {
-					label: 'preact8',
-					dependencies: {
-						preact: '^8.5.3'
-					}
-				},
-				expand
-			},
-			{
-				packageVersions: {
-					label: 'preact10',
-					dependencies: {
-						preact: '^10.4.0'
-					}
-				},
-				expand
-			},
-			{
-				packageVersions: {
-					label: 'preactLocal',
-					dependencies: {
-						preact: 'file:../'
-					}
-				},
-				expand
-			}
-		]
-	};
-
-	await writeFile(
-		benchesRoot('tach.config.json'),
-		JSON.stringify(config, null, 2),
-		'utf8'
-	);
+	await generateConfig(benchPath);
 }
 
 /**
  * @typedef {{ browser: string; "window-size": string; "sample-size": number; horizon: string; timeout: number; }} TachometerOptions
- * @param {string} bench
+ * @param {string} benchPath
  * @param {TachometerOptions} [options]
  */
-async function generateConfig(bench, options) {
-	const name = getBenchName(bench);
-	const url = path.posix.relative(
-		toUrl(benchesRoot()),
-		toUrl(benchesRoot('src', bench))
-	);
+async function generateConfig(benchPath, options) {
+	const name = path.basename(benchPath).replace('.html', '');
+	const url = path.posix.relative(toUrl(benchesRoot()), toUrl(benchPath));
 
-	const config = {
-		$schema: TACH_SCHEMA,
-		benchmarks: [
-			{
-				name,
-				url,
-				packageVersions: {
-					label: 'preact8',
-					dependencies: {
-						preact: '^8.5.3'
-					}
-				}
-			},
-			{
-				name,
-				url,
-				packageVersions: {
-					label: 'preact10',
-					dependencies: {
-						preact: '^10.4.0'
-					}
-				}
-			},
-			{
-				name,
-				url,
-				packageVersions: {
-					label: 'preactLocal',
-					dependencies: {
-						preact: 'file:' + repoRoot()
-					}
-				}
-			}
-		]
-	};
+	const config = { $schema: TACH_SCHEMA };
 
 	if (options) {
-		options.sampleSize = options['sample-size'];
-		options.timeout = options.timeout;
-		options.horizons = options.horizon.split(',');
+		config.sampleSize = options['sample-size'];
+		config.timeout = options.timeout;
+		config.horizons = options.horizon.split(',');
 	}
 
-	return config;
+	config.benchmarks = [
+		{
+			name,
+			url,
+			packageVersions: {
+				label: 'preact8',
+				dependencies: {
+					preact: '^8.5.3'
+				}
+			}
+		},
+		{
+			name,
+			url,
+			packageVersions: {
+				label: 'preact10',
+				dependencies: {
+					preact: '^10.4.0'
+				}
+			}
+		},
+		{
+			name,
+			url,
+			packageVersions: {
+				label: 'preactLocal',
+				dependencies: {
+					preact: 'file:' + repoRoot()
+				}
+			}
+		}
+	];
+
+	const configPath = await writeConfig(name, config);
+
+	return { name, configPath };
+}
+
+async function writeConfig(name, config) {
+	const configPath = benchesRoot('dist', name + '.config.json');
+	await mkdir(path.dirname(configPath), { recursive: true });
+	await writeFile(configPath, JSON.stringify(config, null, 2), 'utf8');
+
+	return configPath;
 }
 
 module.exports = {
-	getBenchName,
-	generateDefaultConfig,
+	generateSingleConfig,
 	generateConfig
 };

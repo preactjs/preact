@@ -4,10 +4,8 @@
 	"version": "1.0.0",
 	"description": "Benchmarks for Preact",
 	"scripts": {
-		"start": "tach --config ./tach.config.json",
+		"start": "node ./scripts config text_update.html && tach --config dist/text_update.config.json --manual",
 		"bench": "node ./scripts bench",
-		"config": "node ./scripts config",
-		"serve": "node ./scripts serve",
 		"help": "node ./scripts --help"
 	},
 	"license": "MIT",
