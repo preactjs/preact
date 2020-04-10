@@ -4,18 +4,20 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "bench": "tach ./benchmarks/02_replace1k.html --package-version=preact@8.5.3 --package-version=preact@10.3.4 -n 2 --timeout 0",
+    "bench": "tach ./src/02_replace1k.html --package-version=preact@8.5.3 --package-version=preact@10.3.4 -n 2 --timeout 0",
     "benchc": "tach --config tach.config.json",
-    "serve": "tach ./benchmarks/02_replace1k.html --package-version=preact@8.5.3 --package-version=preact@10.3.4 -n 2 --timeout 0 --manual",
+    "benchc2": "tach --config tach.config.2.json",
+    "serve": "tach ./src/02_replace1k.html --package-version=preact@8.5.3 --package-version=preact@10.3.4 -n 2 --timeout 0 --manual",
     "servec": "tach --config tach.config.json --manual --force-clean-npm-install"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "afterframe": "^1.0.1",
-    "preact": "^8.5.3"
+    "afterframe": "^1.0.1"
   },
   "devDependencies": {
+    "globby": "^11.0.0",
+    "sade": "^1.7.3",
     "tachometer": "^0.4.17"
   }
 }

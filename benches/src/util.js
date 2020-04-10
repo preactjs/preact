@@ -38,3 +38,8 @@ export function testElementText(selector, expectedText) {
 		);
 	}
 }
+
+export function isPreactX(createElement) {
+	const vnode = createElement('div', {});
+	return vnode.constructor === undefined;
+}
