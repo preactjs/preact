@@ -75,11 +75,15 @@ export function createVNode(type, props, key, ref, original) {
 		// a _nextDom that has been set to `null`
 		_nextDom: undefined,
 		_component: null,
-		constructor: undefined,
-		_original: original
+		constructor: undefined
 	};
 
-	if (original == null) vnode._original = vnode;
+	Object.defineProperty(vnode, '_original', {
+		value: original || vnode,
+		enumerable: false,
+		writable: true
+	});
+
 	if (options.vnode) options.vnode(vnode);
 
 	return vnode;
