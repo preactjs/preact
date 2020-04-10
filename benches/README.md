@@ -66,3 +66,5 @@ To contribute a new benchmark, look at the existing benchmarks (the HTML files i
 Add an HTML file containing the benchmark you'd like to run. Use `npm start` (documented above) to test and debug your benchmark. Then run `npm bench YOUR_BENCH.html` to run it. Note while initialling developing it may be easier to limit the amount of samples taken while benching. Use the options documented for the `npm bench` command to customize the sample size and auto-sample timeout.
 
 Currently this infra is only setup to run benchmarks against different preact versions and requires that your benchmark use the `bench.start()` and `bench.stop()` methods.
+
+The `src/util.js` file contains some utility functions for running your benchmark. For, example the `afterFrame/afterFrameAsync` functions can be used to run `bench.stop()` after the browser as painted the next frame. The `testElement/testElementText` functions can be used to verify that the benchmark implementation rendered the expected result properly.
