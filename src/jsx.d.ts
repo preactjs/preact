@@ -746,6 +746,20 @@ export namespace JSXInternal {
 		itemID?: string;
 		itemRef?: string;
 	}
+	
+	interface HTMLMarqueeElement extends HTMLElement {
+		behavior?: "scroll" | "slide" | "alternate";
+		bgColor?: string;
+		direction?: "left" | "right" | "up" | "down";
+		height?: number | string;
+		hspace?: number | string;
+		loop?: number | string;
+		scrollAmount?: number | string;
+		scrollDelay?: number | string;
+		trueSpeed?: boolean;
+		vspace?: number | string;
+		width?: number | string;
+	}
 
 	interface IntrinsicElements {
 		// HTML
@@ -813,6 +827,7 @@ export namespace JSXInternal {
 		main: HTMLAttributes<HTMLElement>;
 		map: HTMLAttributes<HTMLMapElement>;
 		mark: HTMLAttributes<HTMLElement>;
+		marquee: HTMLAttributes<HTMLMarqueeElement>;
 		menu: HTMLAttributes<HTMLMenuElement>;
 		menuitem: HTMLAttributes<HTMLUnknownElement>;
 		meta: HTMLAttributes<HTMLMetaElement>;
