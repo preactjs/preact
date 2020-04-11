@@ -78,6 +78,10 @@ export function createVNode(type, props, key, ref, original) {
 		constructor: undefined
 	};
 
+	// We're setting this as non-enumberable (+writeable)
+	// because we need to overwrite this value sometimes and
+	// because this can induce circular references on _children and
+	// for testing frameworks traversing the vnodes.
 	Object.defineProperty(vnode, '_original', {
 		value: original || vnode,
 		writable: true
