@@ -44,8 +44,6 @@ var sauceLabsLaunchers = {
 	}
 };
 
-sauceLabs = true;
-
 var localLaunchers = {
 	ChromeNoSandboxHeadless: {
 		base: 'Chrome',
