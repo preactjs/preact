@@ -1,4 +1,4 @@
-import { createElement, cloneElement } from 'preact';
+import { createElement, cloneElement, createRef } from 'preact';
 
 /** @jsx createElement */
 
@@ -60,5 +60,11 @@ describe('cloneElement', () => {
 
 		clone = cloneElement(instance, { ref: b });
 		expect(clone.ref).to.equal(b);
+	});
+
+	it('should normalize props', () => {
+		const div = <div>hello</div>;
+		const clone = cloneElement(div, { ref: createRef() });
+		expect(clone.props.ref).to.equal(undefined);
 	});
 });
