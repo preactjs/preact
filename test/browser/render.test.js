@@ -438,6 +438,18 @@ describe('render()', () => {
 		expect(scratch.firstChild.getAttribute('aria-checked')).to.equal('false');
 	});
 
+	it('should support checked on custom elements', () => {
+		render(<o-checkbox checked />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<o-checkbox checked="true"></o-checkbox>'
+		);
+	});
+
+	it('should mask value on password input elements', () => {
+		render(<input value="xyz" type="password" />, scratch);
+		expect(scratch.innerHTML).to.equal('<input type="password">');
+	});
+
 	describe('style attribute', () => {
 		it('should apply style as String', () => {
 			render(<div style="top: 5px; position: relative;" />, scratch);
