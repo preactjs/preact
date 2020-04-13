@@ -62,9 +62,15 @@ describe('cloneElement', () => {
 		expect(clone.ref).to.equal(b);
 	});
 
-	it('should normalize props', () => {
+	it('should normalize props (ref)', () => {
 		const div = <div>hello</div>;
 		const clone = cloneElement(div, { ref: createRef() });
 		expect(clone.props.ref).to.equal(undefined);
+	});
+
+	it('should normalize props (key)', () => {
+		const div = <div>hello</div>;
+		const clone = cloneElement(div, { key: 'myKey' });
+		expect(clone.props.key).to.equal(undefined);
 	});
 });
