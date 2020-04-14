@@ -2,7 +2,7 @@ import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
-import { diffProps } from './props';
+import { diffProps, setProperty } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
 
@@ -365,8 +365,7 @@ function diffElementNodes(
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (newHtml) {
 			newVNode._children = [];
-		}
-		else {
+		} else {
 			newVNode._children = newVNode.props.children;
 			diffChildren(
 				dom,
@@ -388,14 +387,20 @@ function diffElementNodes(
 				newProps.value !== undefined &&
 				newProps.value !== dom.value
 			) {
-				dom.value = newProps.value == null ? '' : newProps.value;
+				setProperty(
+					dom,
+					'value',
+					newProps.value == null ? '' : newProps.value,
+					oldProps.value,
+					false
+				);
 			}
 			if (
 				'checked' in newProps &&
 				newProps.checked !== undefined &&
 				newProps.checked !== dom.checked
 			) {
-				dom.checked = newProps.checked;
+				setProperty(dom, 'checked', newProps.checked, oldProps.checked, false);
 			}
 		}
 	}
