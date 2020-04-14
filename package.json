@@ -54,7 +54,7 @@
   "types": "src/index.d.ts",
   "scripts": {
     "prepare": "run-s build",
-    "build": "npm-run-all --parallel build:* && cp dist/preact.js dist/preact.min.js",
+    "build": "npm-run-all --parallel build:* && cpy dist/preact.js dist/preact.min.js",
     "build:core": "microbundle build --raw",
     "build:debug": "microbundle build --raw --cwd debug",
     "build:devtools": "microbundle build --raw --cwd devtools",
@@ -196,6 +196,7 @@
     "benchmark": "^2.1.4",
     "chai": "^4.1.2",
     "coveralls": "^3.0.0",
+    "cpy-cli": "^3.1.0",
     "cross-env": "^5.2.0",
     "diff": "^3.5.0",
     "eslint": "5.15.1",
