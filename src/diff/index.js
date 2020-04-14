@@ -384,23 +384,17 @@ function diffElementNodes(
 		if (!isHydrating) {
 			if (
 				'value' in newProps &&
-				newProps.value !== undefined &&
-				newProps.value !== dom.value
+				(i = newProps.value) !== undefined &&
+				i !== dom.value
 			) {
-				setProperty(
-					dom,
-					'value',
-					newProps.value == null ? '' : newProps.value,
-					oldProps.value,
-					false
-				);
+				setProperty(dom, 'value', i == null ? '' : i, oldProps.value, false);
 			}
 			if (
 				'checked' in newProps &&
-				newProps.checked !== undefined &&
-				newProps.checked !== dom.checked
+				(i = newProps.checked) !== undefined &&
+				i !== dom.checked
 			) {
-				setProperty(dom, 'checked', newProps.checked, oldProps.checked, false);
+				setProperty(dom, 'checked', i, oldProps.checked, false);
 			}
 		}
 	}
