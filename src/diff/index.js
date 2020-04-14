@@ -387,7 +387,7 @@ function diffElementNodes(
 				(i = newProps.value) !== undefined &&
 				i !== dom.value
 			) {
-				setProperty(dom, 'value', i == null ? '' : i, oldProps.value, false);
+				setProperty(dom, 'value', i, oldProps.value, false);
 			}
 			if (
 				'checked' in newProps &&
