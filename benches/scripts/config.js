@@ -37,7 +37,7 @@ async function generateConfig(benchPath, options) {
 			name,
 			url,
 			packageVersions: {
-				label: 'preact8',
+				label: 'preact-v8',
 				dependencies: {
 					preact: '^8.5.3'
 				}
@@ -47,7 +47,7 @@ async function generateConfig(benchPath, options) {
 			name,
 			url,
 			packageVersions: {
-				label: 'preact10',
+				label: 'preact-v10',
 				dependencies: {
 					preact: '^10.4.0'
 				}
@@ -57,7 +57,7 @@ async function generateConfig(benchPath, options) {
 			name,
 			url,
 			packageVersions: {
-				label: 'preactLocal',
+				label: 'preact-local',
 				dependencies: {
 					preact: 'file:' + repoRoot()
 				}
