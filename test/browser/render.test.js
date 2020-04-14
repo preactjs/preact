@@ -438,11 +438,16 @@ describe('render()', () => {
 		expect(scratch.firstChild.getAttribute('aria-checked')).to.equal('false');
 	});
 
-	it('should support checked on custom elements', () => {
+	it('should set checked attribute on custom elements without checked property', () => {
 		render(<o-checkbox checked />, scratch);
 		expect(scratch.innerHTML).to.equal(
 			'<o-checkbox checked="true"></o-checkbox>'
 		);
+	});
+
+	it('should set value attribute on custom elements without value property', () => {
+		render(<o-input value="test" />, scratch);
+		expect(scratch.innerHTML).to.equal('<o-input value="test"></o-input>');
 	});
 
 	it('should mask value on password input elements', () => {

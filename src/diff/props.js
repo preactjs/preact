@@ -24,6 +24,8 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 			(!hydrate || typeof newProps[i] == 'function') &&
 			i !== 'children' &&
 			i !== 'key' &&
+			i !== 'value' &&
+			i !== 'checked' &&
 			oldProps[i] !== newProps[i]
 		) {
 			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
@@ -54,7 +56,7 @@ function setStyle(style, key, value) {
  * @param {*} oldValue The old value the property had
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
-function setProperty(dom, name, value, oldValue, isSvg) {
+export function setProperty(dom, name, value, oldValue, isSvg) {
 	let s, useCapture, nameLower;
 
 	if (isSvg) {
