@@ -53,6 +53,7 @@
   },
   "types": "src/index.d.ts",
   "scripts": {
+    "prepare": "run-s build",
     "build": "npm-run-all --parallel build:* && cp dist/preact.js dist/preact.min.js",
     "build:core": "microbundle build --raw",
     "build:debug": "microbundle build --raw --cwd debug",
