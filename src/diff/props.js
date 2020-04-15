@@ -56,7 +56,7 @@ function setStyle(style, key, value) {
  * @param {*} oldValue The old value the property had
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
-function setProperty(dom, name, value, oldValue, isSvg) {
+export function setProperty(dom, name, value, oldValue, isSvg) {
 	let s, useCapture, nameLower;
 
 	if (isSvg) {

@@ -69,12 +69,17 @@ declare namespace preact {
 		};
 	}
 
-	type RenderableProps<P, RefType = any> = Readonly<
-		P & Attributes & { children?: ComponentChildren; ref?: Ref<RefType> }
-	>;
+	type RenderableProps<P, RefType = any> = P &
+		Readonly<Attributes & { children?: ComponentChildren; ref?: Ref<RefType> }>;
 
 	type ComponentType<P = {}> = ComponentClass<P> | FunctionComponent<P>;
 	type ComponentFactory<P = {}> = ComponentType<P>;
+
+	type ComponentProps<C extends ComponentType<any>> = C extends ComponentType<
+		infer P
+	>
+		? P
+		: never;
 
 	interface FunctionComponent<P = {}> {
 		(props: RenderableProps<P>, context?: any): VNode<any> | null;
