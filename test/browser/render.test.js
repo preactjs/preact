@@ -438,6 +438,23 @@ describe('render()', () => {
 		expect(scratch.firstChild.getAttribute('aria-checked')).to.equal('false');
 	});
 
+	it('should set checked attribute on custom elements without checked property', () => {
+		render(<o-checkbox checked />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<o-checkbox checked="true"></o-checkbox>'
+		);
+	});
+
+	it('should set value attribute on custom elements without value property', () => {
+		render(<o-input value="test" />, scratch);
+		expect(scratch.innerHTML).to.equal('<o-input value="test"></o-input>');
+	});
+
+	it('should mask value on password input elements', () => {
+		render(<input value="xyz" type="password" />, scratch);
+		expect(scratch.innerHTML).to.equal('<input type="password">');
+	});
+
 	describe('style attribute', () => {
 		it('should apply style as String', () => {
 			render(<div style="top: 5px; position: relative;" />, scratch);
@@ -1518,5 +1535,32 @@ describe('render()', () => {
 		} finally {
 			sandbox.restore();
 		}
+	});
+
+	it('should unmount dangerouslySetInnerHTML', () => {
+		let set;
+
+		const TextDiv = () => (
+			<div dangerouslySetInnerHTML={{ __html: '' }}>some text</div>
+		);
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				set = this.setState.bind(this);
+				this.state = { show: true };
+			}
+
+			render() {
+				return this.state.show && <TextDiv />;
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
+
+		set({ show: false });
+		rerender();
+		expect(scratch.innerHTML).to.equal('');
 	});
 });

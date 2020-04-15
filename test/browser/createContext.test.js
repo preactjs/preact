@@ -57,6 +57,43 @@ describe('createContext', () => {
 		expect(scratch.innerHTML).to.equal('<div><div>a</div></div>');
 	});
 
+	// This optimization helps
+	// to prevent a Provider from rerendering the children, this means
+	// we only propagate to children.
+	// Strict equal vnode optimization
+	it('skips referentially equal children to Provider', () => {
+		const { Provider, Consumer } = createContext();
+		let set,
+			renders = 0;
+		const Layout = ({ children }) => {
+			renders++;
+			return children;
+		};
+		class State extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { i: 0 };
+				set = this.setState.bind(this);
+			}
+			render() {
+				const { children } = this.props;
+				return <Provider value={this.state}>{children}</Provider>;
+			}
+		}
+		const App = () => (
+			<State>
+				<Layout>
+					<Consumer>{({ i }) => <p>{i}</p>}</Consumer>
+				</Layout>
+			</State>
+		);
+		render(<App />, scratch);
+		expect(renders).to.equal(1);
+		set({ i: 2 });
+		rerender();
+		expect(renders).to.equal(1);
+	});
+
 	it('should preserve provider context through nesting providers', done => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { a: 'a' };
