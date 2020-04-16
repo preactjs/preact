@@ -83,7 +83,9 @@ jobs:
           ${{ runner.os }}-build-
           ${{ runner.os }}-
     - name: install
-      run: npm ci && cd benches && npm ci
+      run: |
+        CHROMEDRIVER_FILEPATH=$CHROMEWEBDRIVER
+        npm ci && cd benches && npm ci
     - name: build
       run: npm run build
     - name: bench
