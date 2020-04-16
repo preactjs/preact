@@ -41,6 +41,10 @@ async function generateConfig(benchPath, options) {
 				dependencies: {
 					preact: '^8.5.3'
 				}
+			},
+			browser: {
+				name: 'chrome',
+				headless: true
 			}
 		},
 		{
@@ -51,6 +55,10 @@ async function generateConfig(benchPath, options) {
 				dependencies: {
 					preact: 'github:preactjs/preact#master'
 				}
+			},
+			browser: {
+				name: 'chrome',
+				headless: true
 			}
 		},
 		{
@@ -61,6 +69,10 @@ async function generateConfig(benchPath, options) {
 				dependencies: {
 					preact: 'file:' + repoRoot()
 				}
+			},
+			browser: {
+				name: 'chrome',
+				headless: true
 			}
 		}
 	];
