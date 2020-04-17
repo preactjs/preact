@@ -26,7 +26,6 @@ jobs:
           ${{ runner.os }}-build-
           ${{ runner.os }}-
     - run: npm ci
-    - run: npm run build
 
   test:
     name: Test
