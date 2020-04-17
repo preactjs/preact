@@ -47,9 +47,9 @@ async function generateConfig(benchPath, options) {
 			name,
 			url,
 			packageVersions: {
-				label: 'preact-v10',
+				label: 'preact-master',
 				dependencies: {
-					preact: '^10.4.0'
+					preact: 'github:preactjs/preact#master'
 				}
 			}
 		},
