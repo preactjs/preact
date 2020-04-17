@@ -60,8 +60,8 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
 
-  bench:
-    name: Bench
+  bench_text_update:
+    name: Bench text_update
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -82,12 +82,47 @@ jobs:
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
-    - name: install
+    - name: install & build
       run: |
+        echo CHROMEWEBDRIVER = $CHROMEWEBDRIVER
         npm ci
         cd benches
         DETECT_CHROMEDRIVER_VERSION=true npm ci
-    - name: build
-      run: npm run build
     - name: bench
-      run: cd benches && npm run bench
+      run: |
+        cd benches
+        npm run bench text_update.html
+
+  bench_02_replace1k:
+    name: Bench 02_replace1k
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+    - name: Cache node modules
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.npm
+        # This uses the same name as the build-action so we can share the caches.
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+    - name: install & build
+      env:
+        DETECT_CHROMEDRIVER_VERSION: true
+      run: |
+        npm ci
+        cd benches
+        npm ci
+    - name: bench
+      run: |
+        cd benches
+        npm run bench 02_replace1k.html
