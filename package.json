@@ -65,7 +65,7 @@
     "dev": "microbundle watch --raw --format cjs",
     "dev:hooks": "microbundle watch --raw --format cjs --cwd hooks",
     "dev:compat": "microbundle watch --raw --format cjs --cwd compat --globals 'preact/hooks=preactHooks'",
-    "test": "npm-run-all lint build test:unit",
+    "test": "npm-run-all build lint test:unit",
     "test:unit": "run-p test:mocha test:karma:minify test:ts",
     "test:ts": "run-p test:ts:*",
     "test:ts:core": "tsc -p test/ts/ && mocha --require \"@babel/register\" test/ts/**/*-test.js",
