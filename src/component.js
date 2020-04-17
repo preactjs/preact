@@ -1,7 +1,7 @@
 import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
 import options from './options';
-import { Fragment } from './create-element';
+import { Fragment, createVNode } from './create-element';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -114,29 +114,41 @@ export function getDomSibling(vnode, childIndex) {
  * @param {import('./internal').Component} component The component to rerender
  */
 function renderComponent(component) {
-	let vnode = component._vnode,
-		oldDom = vnode._dom,
+	let oldVNode = component._vnode,
+		oldDom = oldVNode._dom,
 		parentDom = component._parentDom;
 
 	if (parentDom) {
 		let commitQueue = [];
-		const oldVNode = assign({}, vnode);
-		oldVNode._original = oldVNode;
+		const newVNode = createVNode(
+			oldVNode.type,
+			oldVNode.props,
+			oldVNode.key,
+			oldVNode.ref,
+			null
+		);
 
 		let newDom = diff(
 			parentDom,
-			vnode,
+			newVNode,
 			oldVNode,
 			component._globalContext,
 			parentDom.ownerSVGElement !== undefined,
 			null,
 			commitQueue,
-			oldDom == null ? getDomSibling(vnode) : oldDom
+			oldDom == null ? getDomSibling(oldVNode) : oldDom
 		);
-		commitRoot(commitQueue, vnode);
+
+		component._vnode = newVNode;
+		const parent = oldVNode._parent;
+		const index = parent._children.indexOf(oldVNode);
+		parent._children[index] = newVNode;
+		newVNode._parent = parent;
+
+		commitRoot(commitQueue, newVNode);
 
 		if (newDom != oldDom) {
-			updateParentDomPointers(vnode);
+			updateParentDomPointers(newVNode);
 		}
 	}
 }
