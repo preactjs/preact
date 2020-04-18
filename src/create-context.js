@@ -31,11 +31,10 @@ export function createContext(defaultValue) {
 				};
 
 				this.sub = (c, shouldUpdate) => {
-					const entry = { c, u: shouldUpdate };
-					subs.push(entry);
+					subs.push(arguments);
 					let old = c.componentWillUnmount;
 					c.componentWillUnmount = () => {
-						subs.splice(subs.indexOf(entry), 1);
+						subs.splice(subs.indexOf(arguments), 1);
 						old && old.call(c);
 					};
 				};
