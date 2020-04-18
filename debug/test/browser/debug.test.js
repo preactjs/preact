@@ -117,7 +117,7 @@ describe('debug', () => {
 		expect(vnode.props.__self).to.be.undefined;
 	});
 
-	it('should throw errors when accessing certain attributes', () => {
+	it('should warn when accessing certain attributes', () => {
 		const vnode = h('div', null);
 		vnode;
 		vnode.attributes;
