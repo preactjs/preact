@@ -22,19 +22,20 @@ export function createContext(defaultValue) {
 				this.shouldComponentUpdate = _props => {
 					if (this.props.value !== _props.value) {
 						subs.some(payload => {
-							payload.c.context = _props.value;
-							if (!payload.u || payload.u(_props.value, this.props.value)) {
-								enqueueRender(payload.c);
+							payload[0].context = _props.value;
+							if (!payload[1] || payload[1](_props.value, this.props.value)) {
+								enqueueRender(payload[0]);
 							}
 						});
 					}
 				};
 
 				this.sub = (c, shouldUpdate) => {
-					subs.push(arguments);
+					const entry = [c, shouldUpdate];
+					subs.push(entry);
 					let old = c.componentWillUnmount;
 					c.componentWillUnmount = () => {
-						subs.splice(subs.indexOf(arguments), 1);
+						subs.splice(subs.indexOf(entry), 1);
 						old && old.call(c);
 					};
 				};
