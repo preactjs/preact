@@ -173,10 +173,10 @@ export function diff(
 			tmp = c.render(c.props, c.state, c.context);
 			let isTopLevelFragment =
 				tmp != null && tmp.type == Fragment && tmp.key == null;
-			newVNode._children = toChildArray(
-				isTopLevelFragment ? tmp.props.children : tmp,
-				true
-			);
+			newVNode._children = isTopLevelFragment ? tmp.props.children : tmp;
+			newVNode._children = Array.isArray(newVNode._children)
+				? newVNode._children
+				: [newVNode._children];
 
 			if (c.getChildContext != null) {
 				globalContext = assign(assign({}, globalContext), c.getChildContext());
@@ -367,7 +367,10 @@ function diffElementNodes(
 		if (newHtml) {
 			newVNode._children = [];
 		} else {
-			newVNode._children = toChildArray(newVNode.props.children, true);
+			newVNode._children = newVNode.props.children;
+			newVNode._children = Array.isArray(newVNode._children)
+				? newVNode._children
+				: [newVNode._children];
 			diffChildren(
 				dom,
 				newVNode,
@@ -441,7 +444,10 @@ export function unmount(vnode, parentVNode, skipRemove) {
 
 	// Must be set to `undefined` to properly clean up `_nextDom`
 	// for which `null` is a valid value. See comment in `create-element.js`
-	vnode._dom = vnode._nextDom = undefined;
+	// TODO - Fix up
+	if (typeof vnode == 'object') {
+		vnode._dom = vnode._nextDom = undefined;
+	}
 
 	if ((r = vnode._component) != null) {
 		if (r.componentWillUnmount) {
