@@ -1,5 +1,5 @@
 import { diff, unmount, applyRef } from './index';
-import { createVNode } from '../create-element';
+import { createVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { removeNode } from '../util';
 import { getDomSibling } from '../component';
@@ -61,11 +61,28 @@ export function diffChildren(
 
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
-		if (childVNode == null) continue;
-
+		if (childVNode == null || typeof childVNode == 'boolean') {
+			childVNode = newParentVNode._children[i] = null;
+		}
 		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
 		// copy it so it can have it's own DOM & etc. pointers
-		if (childVNode._dom != null || childVNode._component != null) {
+		else if (typeof childVNode == 'string' || typeof childVNode == 'number') {
+			childVNode = newParentVNode._children[i] = createVNode(
+				null,
+				childVNode,
+				null,
+				null,
+				childVNode
+			);
+		} else if (Array.isArray(childVNode)) {
+			childVNode = newParentVNode._children[i] = createVNode(
+				Fragment,
+				{ children: childVNode },
+				null,
+				null,
+				null
+			);
+		} else if (childVNode._dom != null || childVNode._component != null) {
 			childVNode = newParentVNode._children[i] = createVNode(
 				childVNode.type,
 				childVNode.props,
@@ -73,6 +90,10 @@ export function diffChildren(
 				null,
 				childVNode._original
 			);
+		}
+
+		if (childVNode == null) {
+			continue;
 		}
 
 		childVNode._parent = newParentVNode;
@@ -254,6 +275,8 @@ export function diffChildren(
  */
 export function toChildArray(children, internal, flattened) {
 	if (flattened == null) flattened = [];
+
+	// TODO: REMOVE INTERNAL OPTION
 
 	if (children == null || typeof children == 'boolean') {
 		if (internal) flattened.push(null);
