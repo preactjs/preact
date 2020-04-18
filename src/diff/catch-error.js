@@ -16,7 +16,7 @@ export function _catchError(error, vnode) {
 			try {
 				if (
 					component.constructor &&
-					component.constructor.getDerivedStateFromError != null
+					component.constructor.getDerivedStateFromError
 				) {
 					hasCaught = true;
 					component.setState(
@@ -24,7 +24,7 @@ export function _catchError(error, vnode) {
 					);
 				}
 
-				if (component.componentDidCatch != null) {
+				if (component.componentDidCatch) {
 					hasCaught = true;
 					component.componentDidCatch(error);
 				}

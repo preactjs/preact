@@ -81,10 +81,10 @@ export function diff(
 			}
 
 			// Invoke getDerivedStateFromProps
-			if (c._nextState == null) {
+			if (!c._nextState) {
 				c._nextState = c.state;
 			}
-			if (newType.getDerivedStateFromProps != null) {
+			if (newType.getDerivedStateFromProps) {
 				if (c._nextState == c.state) {
 					c._nextState = assign({}, c._nextState);
 				}
@@ -100,28 +100,25 @@ export function diff(
 
 			// Invoke pre-render lifecycle methods
 			if (isNew) {
-				if (
-					newType.getDerivedStateFromProps == null &&
-					c.componentWillMount != null
-				) {
+				if (!newType.getDerivedStateFromProps && c.componentWillMount) {
 					c.componentWillMount();
 				}
 
-				if (c.componentDidMount != null) {
+				if (c.componentDidMount) {
 					c._renderCallbacks.push(c.componentDidMount);
 				}
 			} else {
 				if (
-					newType.getDerivedStateFromProps == null &&
+					!newType.getDerivedStateFromProps &&
 					newProps !== oldProps &&
-					c.componentWillReceiveProps != null
+					c.componentWillReceiveProps
 				) {
 					c.componentWillReceiveProps(newProps, componentContext);
 				}
 
 				if (
 					(!c._force &&
-						c.shouldComponentUpdate != null &&
+						c.shouldComponentUpdate &&
 						c.shouldComponentUpdate(
 							newProps,
 							c._nextState,
@@ -149,11 +146,11 @@ export function diff(
 					break outer;
 				}
 
-				if (c.componentWillUpdate != null) {
+				if (c.componentWillUpdate) {
 					c.componentWillUpdate(newProps, c._nextState, componentContext);
 				}
 
-				if (c.componentDidUpdate != null) {
+				if (c.componentDidUpdate) {
 					c._renderCallbacks.push(() => {
 						c.componentDidUpdate(oldProps, oldState, snapshot);
 					});
@@ -171,19 +168,18 @@ export function diff(
 			c._parentDom = parentDom;
 
 			tmp = c.render(c.props, c.state, c.context);
-			let isTopLevelFragment =
-				tmp != null && tmp.type == Fragment && tmp.key == null;
+			let isTopLevelFragment = tmp && tmp.type == Fragment && tmp.key == null;
 			newVNode._children = isTopLevelFragment
 				? tmp.props.children
 				: Array.isArray(tmp)
 				? tmp
 				: [tmp];
 
-			if (c.getChildContext != null) {
+			if (c.getChildContext) {
 				globalContext = assign(assign({}, globalContext), c.getChildContext());
 			}
 
-			if (!isNew && c.getSnapshotBeforeUpdate != null) {
+			if (!isNew && c.getSnapshotBeforeUpdate) {
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
@@ -211,7 +207,7 @@ export function diff(
 
 			c._force = false;
 		} else if (
-			excessDomChildren == null &&
+			!excessDomChildren &&
 			newVNode._original === oldVNode._original
 		) {
 			newVNode._children = oldVNode._children;
@@ -290,7 +286,7 @@ function diffElementNodes(
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	isSvg = newVNode.type === 'svg' || isSvg;
 
-	if (excessDomChildren != null) {
+	if (excessDomChildren) {
 		for (i = 0; i < excessDomChildren.length; i++) {
 			const child = excessDomChildren[i];
 
@@ -298,8 +294,8 @@ function diffElementNodes(
 			// argument matches an element in excessDomChildren, remove it from
 			// excessDomChildren so it isn't later removed in diffChildren
 			if (
-				child != null &&
-				((newVNode.type === null
+				child &&
+				((!newVNode.type
 					? child.nodeType === 3
 					: child.localName === newVNode.type) ||
 					dom == child)
@@ -312,7 +308,7 @@ function diffElementNodes(
 	}
 
 	if (dom == null) {
-		if (newVNode.type === null) {
+		if (!newVNode.type) {
 			return document.createTextNode(newProps);
 		}
 
@@ -328,12 +324,12 @@ function diffElementNodes(
 		isHydrating = false;
 	}
 
-	if (newVNode.type === null) {
+	if (!newVNode.type) {
 		if (oldProps !== newProps && dom.data != newProps) {
 			dom.data = newProps;
 		}
 	} else {
-		if (excessDomChildren != null) {
+		if (excessDomChildren) {
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 
@@ -444,7 +440,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	// for which `null` is a valid value. See comment in `create-element.js`
 	vnode._dom = vnode._nextDom = undefined;
 
-	if ((r = vnode._component) != null) {
+	if ((r = vnode._component)) {
 		if (r.componentWillUnmount) {
 			try {
 				r.componentWillUnmount();

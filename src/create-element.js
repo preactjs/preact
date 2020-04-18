@@ -22,13 +22,14 @@ export function createElement(type, props, children) {
 			children.push(arguments[i]);
 		}
 	}
+
 	if (children != null) {
 		normalizedProps.children = children;
 	}
 
 	// If a Component VNode, check for and apply defaultProps
 	// Note: type may be undefined in development, must never error here.
-	if (typeof type == 'function' && type.defaultProps != null) {
+	if (typeof type == 'function' && type.defaultProps) {
 		for (i in type.defaultProps) {
 			if (normalizedProps[i] === undefined) {
 				normalizedProps[i] = type.defaultProps[i];

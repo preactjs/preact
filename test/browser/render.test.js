@@ -49,6 +49,23 @@ describe('render()', () => {
 		expect(c[0].nodeName).to.equal('#text');
 	});
 
+	it('should unmount a 0 text node', () => {
+		render(
+			<div>
+				<p>0</p>
+				<p>1</p>01
+			</div>,
+			scratch
+		);
+		render(
+			<div>
+				<p>1</p>1
+			</div>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.eql(`<div><p>1</p>1</div>`);
+	});
+
 	it('should allow node type change with content', () => {
 		render(<span>Bad</span>, scratch);
 		render(<div>Good</div>, scratch);
