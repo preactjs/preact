@@ -60,7 +60,7 @@ export function diffChildren(
 	newParentVNode._children = toChildArray(
 		newParentVNode._children,
 		childVNode => {
-			if (childVNode != null) {
+			if (childVNode) {
 				childVNode._parent = newParentVNode;
 				childVNode._depth = newParentVNode._depth + 1;
 
@@ -68,20 +68,17 @@ export function diffChildren(
 				// If found, delete the array item by setting to `undefined`.
 				// We use `undefined`, as `null` is reserved for empty placeholders
 				// (holes).
-				oldVNode = oldChildren[i];
-
-				if (
-					oldVNode === null ||
-					(oldVNode &&
-						childVNode.key == oldVNode.key &&
-						childVNode.type === oldVNode.type)
-				) {
+				if ((oldVNode = oldChildren[i]) === null) {
 					oldChildren[i] = undefined;
 				} else {
 					// Either oldVNode === undefined or oldChildrenLength > 0,
 					// so after this loop oldVNode == null or oldVNode is a valid value.
 					for (j = 0; j < oldChildrenLength; j++) {
-						oldVNode = oldChildren[j];
+						// This line will ensure we look to the current
+						const idx =
+							(i + ((j >>> 1) ^ -(j & 1)) + oldChildrenLength) %
+							oldChildrenLength;
+						oldVNode = oldChildren[idx];
 						// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
 						// We always match by type (in either case).
 						if (
@@ -89,7 +86,7 @@ export function diffChildren(
 							childVNode.key == oldVNode.key &&
 							childVNode.type === oldVNode.type
 						) {
-							oldChildren[j] = undefined;
+							oldChildren[idx] = undefined;
 							break;
 						}
 						oldVNode = null;
@@ -111,14 +108,18 @@ export function diffChildren(
 					isHydrating
 				);
 
-				if ((j = childVNode.ref) && oldVNode.ref != j) {
+				if (childVNode.ref && oldVNode.ref != childVNode.ref) {
 					if (!refs) refs = [];
 					if (oldVNode.ref) refs.push(oldVNode.ref, null, childVNode);
-					refs.push(j, childVNode._component || newDom, childVNode);
+					refs.push(
+						childVNode.ref,
+						childVNode._component || newDom,
+						childVNode
+					);
 				}
 
 				// Only proceed if the vnode has not been unmounted by `diff()` above.
-				if (newDom != null) {
+				if (newDom) {
 					if (firstChildDom == null) {
 						firstChildDom = newDom;
 					}

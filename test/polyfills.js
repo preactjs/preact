@@ -26,6 +26,15 @@ if (!function f() {}.name) {
 	});
 }
 
+Object.defineProperty(Array.prototype, '-1', {
+	get() {
+		throw Error('Attempted to access array[-1]');
+	},
+	set(v) {
+		throw Error('Attempted to set array[-1] = ' + v);
+	}
+});
+
 /* global chai */
 chai.use((chai, util) => {
 	const Assertion = chai.Assertion;
