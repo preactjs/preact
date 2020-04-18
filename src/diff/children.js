@@ -74,7 +74,8 @@ export function diffChildren(
 					// Either oldVNode === undefined or oldChildrenLength > 0,
 					// so after this loop oldVNode == null or oldVNode is a valid value.
 					for (j = 0; j < oldChildrenLength; j++) {
-						// This line will ensure we look to the current
+						// This line will ensure we look around the originating position. This helps
+						// with improving performance for operations resulting in an offset.
 						const idx =
 							(i + ((j >>> 1) ^ -(j & 1)) + oldChildrenLength) %
 							oldChildrenLength;
