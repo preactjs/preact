@@ -312,9 +312,7 @@ function diffElementNodes(
 	}
 
 	if (dom == null) {
-		if (newVNode.type === null) {
-			return document.createTextNode(newProps);
-		}
+		if (newVNode.type === null) return document.createTextNode(newProps);
 
 		dom = isSvg
 			? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type)
@@ -329,13 +327,10 @@ function diffElementNodes(
 	}
 
 	if (newVNode.type === null) {
-		if (oldProps !== newProps && dom.data != newProps) {
-			dom.data = newProps;
-		}
+		if (oldProps !== newProps && dom.data != newProps) dom.data = newProps;
 	} else {
-		if (excessDomChildren != null) {
+		if (excessDomChildren != null)
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
-		}
 
 		oldProps = oldVNode.props || EMPTY_OBJ;
 

@@ -60,12 +60,8 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	let s, useCapture, nameLower;
 
 	if (isSvg) {
-		if (name === 'className') {
-			name = 'class';
-		}
-	} else if (name === 'class') {
-		name = 'className';
-	}
+		if (name === 'className') name = 'class';
+	} else if (name === 'class') name = 'className';
 
 	if (name === 'style') {
 		s = dom.style;
