@@ -56,6 +56,24 @@ export function diffChildren(
 		}
 	}
 
+	const insertedIndices = [];
+	if (
+		Array.isArray(newParentVNode._children) &&
+		newParentVNode._children.length > oldChildrenLength
+	) {
+		for (i = 0; i < newParentVNode._children.length; i++) {
+			const child = newParentVNode._children[i];
+			if (
+				child &&
+				oldChildren[i - insertedIndices.length] &&
+				(oldChildren[i - insertedIndices.length].type !== child.type ||
+					oldChildren[i - insertedIndices.length].key !== child.key)
+			) {
+				insertedIndices.push(i);
+			}
+		}
+	}
+
 	i = 0;
 	newParentVNode._children = toChildArray(
 		newParentVNode._children,
@@ -77,6 +95,9 @@ export function diffChildren(
 						childVNode.type === oldVNode.type)
 				) {
 					oldChildren[i] = undefined;
+				} else if (insertedIndices.indexOf(i) !== -1) {
+					console.log('in inserted index clause');
+					oldVNode = null;
 				} else {
 					// Either oldVNode === undefined or oldChildrenLength > 0,
 					// so after this loop oldVNode == null or oldVNode is a valid value.

@@ -134,7 +134,69 @@ describe('focus', () => {
 		validateFocus(input, 'move from end to middle');
 	});
 
-	it('should maintain focus when adding children around input', () => {
+	it('should maintain focus when adding children around input (unkeyed)', () => {
+		render(
+			<div>
+				<input type="text" />
+			</div>,
+			scratch
+		);
+
+		let input = focusInput();
+		expect(scratch.innerHTML).to.equal(getListHtml([], []));
+
+		render(
+			<div>
+				<span>1</span>
+				<input type="text" />
+			</div>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal(getListHtml([1], []));
+		validateFocus(input, 'insert sibling before');
+
+		render(
+			<div>
+				<span>1</span>
+				<input type="text" />
+				<span>2</span>
+			</div>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal(getListHtml([1], [2]));
+		validateFocus(input, 'insert sibling after');
+
+		render(
+			<div>
+				<span>1</span>
+				<input type="text" />
+				<span>2</span>
+				<span>3</span>
+			</div>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal(getListHtml([1], [2, 3]));
+		validateFocus(input, 'insert sibling after again');
+
+		render(
+			<div>
+				<span>0</span>
+				<span>1</span>
+				<input type="text" />
+				<span>2</span>
+				<span>3</span>
+			</div>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal(getListHtml([0, 1], [2, 3]));
+		validateFocus(input, 'insert sibling before again');
+	});
+
+	it('should maintain focus when adding children around input (keyed)', () => {
 		render(
 			<List>
 				<Input />
