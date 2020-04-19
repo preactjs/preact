@@ -10,7 +10,9 @@ export enum HookType {
 	useMemo = 7,
 	useCallback = 8,
 	useContext = 9,
-	useErrorBoundary = 10
+	useErrorBoundary = 10,
+	// Not a real hook, but the devtools treat is as such
+	useDebugvalue = 11
 }
 
 export interface Options extends preact.Options {
