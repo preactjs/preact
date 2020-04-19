@@ -232,10 +232,10 @@ export function initDebug() {
 
 	const warn = (property, err) => ({
 		get() {
-			throw new Error(`getting vnode.${property} is deprecated, ${err}`);
+			console.warn(`getting vnode.${property} is deprecated, ${err}`);
 		},
 		set() {
-			throw new Error(`setting vnode.${property} is not allowed, ${err}`);
+			console.warn(`setting vnode.${property} is not allowed, ${err}`);
 		}
 	});
 

@@ -117,17 +117,25 @@ describe('debug', () => {
 		expect(vnode.props.__self).to.be.undefined;
 	});
 
-	it('should throw errors when accessing certain attributes', () => {
+	it('should warn when accessing certain attributes', () => {
 		const vnode = h('div', null);
-		expect(() => vnode).to.not.throw();
-		expect(() => vnode.attributes).to.throw(/use vnode.props/);
-		expect(() => vnode.nodeName).to.throw(/use vnode.type/);
-		expect(() => vnode.children).to.throw(/use vnode.props.children/);
-		expect(() => (vnode.attributes = {})).to.throw(/use vnode.props/);
-		expect(() => (vnode.nodeName = 'test')).to.throw(/use vnode.type/);
-		expect(() => (vnode.children = [<div />])).to.throw(
-			/use vnode.props.children/
-		);
+		vnode;
+		vnode.attributes;
+		expect(console.warn).to.be.calledOnce;
+		expect(console.warn.args[0]).to.match(/use vnode.props/);
+		vnode.nodeName;
+		expect(console.warn).to.be.calledTwice;
+		expect(console.warn.args[1]).to.match(/use vnode.type/);
+		vnode.children;
+		expect(console.warn).to.be.calledThrice;
+		expect(console.warn.args[2]).to.match(/use vnode.props.children/);
+
+		vnode.attributes = {};
+		expect(console.warn.args[3]).to.match(/use vnode.props/);
+		vnode.nodeName = '';
+		expect(console.warn.args[4]).to.match(/use vnode.type/);
+		vnode.children = [];
+		expect(console.warn.args[5]).to.match(/use vnode.props.children/);
 	});
 
 	it('should warn when calling setState inside the constructor', () => {
