@@ -34,7 +34,13 @@ export function diffChildren(
 	oldDom,
 	isHydrating
 ) {
-	let i, j, oldVNode, newDom, sibDom, firstChildDom, refs;
+	let i,
+		j = 0,
+		oldVNode,
+		newDom,
+		sibDom,
+		firstChildDom,
+		refs;
 
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
@@ -64,12 +70,11 @@ export function diffChildren(
 		for (i = 0; i < newParentVNode._children.length; i++) {
 			if (
 				newParentVNode._children[i] &&
-				oldChildren[i - insertedIndices.length] &&
-				(oldChildren[i - insertedIndices.length].type !==
-					newParentVNode._children[i].type ||
-					oldChildren[i - insertedIndices.length].key !==
-						newParentVNode._children[i].key)
+				oldChildren[i - j] &&
+				(oldChildren[i - j].type !== newParentVNode._children[i].type ||
+					oldChildren[i - j].key !== newParentVNode._children[i].key)
 			) {
+				j++;
 				insertedIndices.push(i);
 			}
 		}
