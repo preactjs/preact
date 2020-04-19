@@ -229,9 +229,13 @@ export function useCallback(callback, args) {
  */
 export function useContext(context) {
 	const provider = currentComponent.context[context._id];
-	// We could skip this, but we need to call getHookState here, make
-	// the devtools aware of the hook.
+	// We could skip this call here, but than we'd not call
+	// `options._hook`. We need to do that in order to make
+	// the devtools aware of this hook.
 	const state = getHookState(currentIndex++, 9);
+	// The devtools needs access to the context object to
+	// be able to pull of the default value when no provider
+	// is present in the tree.
 	state._context = context;
 	if (!provider) return context._defaultValue;
 	// This is probably not safe to convert to "!"
