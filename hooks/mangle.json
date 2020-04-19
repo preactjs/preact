@@ -46,6 +46,7 @@
       "$_pendingError": "__E",
       "$_processingException": "__",
       "$_globalContext": "__n",
+      "$_context": "__c",
       "$_defaultValue": "__",
       "$_id": "__c",
       "$_parentDom": "__P",
@@ -57,7 +58,8 @@
       "$_hook": "__h",
       "$_catchError": "__e",
       "$_unmount": "_e",
-      "$_owner": "__o"
+      "$_owner": "__o",
+      "$_skipEffects": "__s"
     }
   }
 }
