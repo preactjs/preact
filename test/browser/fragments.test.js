@@ -1503,7 +1503,7 @@ describe('Fragment', () => {
 		clearLog();
 		render(<Foo condition={true} />, scratch);
 
-		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
+		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal(
 			htmlForTrue,
 			'rendering from false to true'

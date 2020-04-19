@@ -96,7 +96,6 @@ export function diffChildren(
 				) {
 					oldChildren[i] = undefined;
 				} else if (insertedIndices.indexOf(i) !== -1) {
-					console.log('in inserted index clause');
 					oldVNode = null;
 				} else {
 					// Either oldVNode === undefined or oldChildrenLength > 0,
