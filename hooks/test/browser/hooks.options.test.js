@@ -127,21 +127,28 @@ describe('hook options', () => {
 		]);
 	});
 
-	it('should skip effect hooks', () => {
-		options._skipEffects = true;
-		const spy = sinon.spy();
-		function App() {
-			useEffect(spy, []);
-			useLayoutEffect(spy, []);
-			return null;
-		}
-
-		act(() => {
-			render(<App />, scratch);
+	describe('Effects', () => {
+		beforeEach(() => {
+			options._skipEffects = options.__s = true;
 		});
 
-		expect(spy.callCount).to.equal(0);
+		afterEach(() => {
+			options._skipEffects = options.__s = false;
+		});
 
-		options._skipEffects = false;
+		it('should skip effect hooks', () => {
+			const spy = sinon.spy();
+			function App() {
+				useEffect(spy, []);
+				useLayoutEffect(spy, []);
+				return null;
+			}
+
+			act(() => {
+				render(<App />, scratch);
+			});
+
+			expect(spy.callCount).to.equal(0);
+		});
 	});
 });
