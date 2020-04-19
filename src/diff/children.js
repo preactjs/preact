@@ -62,12 +62,13 @@ export function diffChildren(
 		newParentVNode._children.length > oldChildrenLength
 	) {
 		for (i = 0; i < newParentVNode._children.length; i++) {
-			const child = newParentVNode._children[i];
 			if (
-				child &&
+				newParentVNode._children[i] &&
 				oldChildren[i - insertedIndices.length] &&
-				(oldChildren[i - insertedIndices.length].type !== child.type ||
-					oldChildren[i - insertedIndices.length].key !== child.key)
+				(oldChildren[i - insertedIndices.length].type !==
+					newParentVNode._children[i].type ||
+					oldChildren[i - insertedIndices.length].key !==
+						newParentVNode._children[i].key)
 			) {
 				insertedIndices.push(i);
 			}
