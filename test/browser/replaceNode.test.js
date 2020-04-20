@@ -1,4 +1,3 @@
-import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component } from 'preact';
 import {
 	setupScratch,
@@ -10,19 +9,24 @@ import {
 /** @jsx createElement */
 
 describe('replaceNode parameter in render()', () => {
-	let scratch, rerender;
+	let scratch;
 
-	function appendChildToScratch(id) {
-		const child = document.createElement('div');
-		child.id = id;
-		scratch.appendChild(child);
+	/**
+	 * @param {HTMLDivElement} container
+	 * @returns {HTMLDivElement[]}
+	 */
+	function setupABCDom(container) {
+		return ['a', 'b', 'c'].map(id => {
+			const child = document.createElement('div');
+			child.id = id;
+			container.appendChild(child);
+
+			return child;
+		});
 	}
 
 	beforeEach(() => {
 		scratch = setupScratch();
-		rerender = setupRerender();
-
-		['a', 'b', 'c'].forEach(id => appendChildToScratch(id));
 	});
 
 	afterEach(() => {
@@ -30,14 +34,18 @@ describe('replaceNode parameter in render()', () => {
 	});
 
 	it('should use replaceNode as render root and not inject into it', () => {
+		setupABCDom(scratch);
 		const childA = scratch.querySelector('#a');
+
 		render(<div id="a">contents</div>, scratch, childA);
 		expect(scratch.querySelector('#a')).to.equalNode(childA);
 		expect(childA.innerHTML).to.equal('contents');
 	});
 
 	it('should not remove siblings of replaceNode', () => {
+		setupABCDom(scratch);
 		const childA = scratch.querySelector('#a');
+
 		render(<div id="a" />, scratch, childA);
 		expect(scratch.innerHTML).to.equal(
 			'<div id="a"></div><div id="b"></div><div id="c"></div>'
@@ -45,7 +53,9 @@ describe('replaceNode parameter in render()', () => {
 	});
 
 	it('should notice prop changes on replaceNode', () => {
+		setupABCDom(scratch);
 		const childA = scratch.querySelector('#a');
+
 		render(<div id="a" className="b" />, scratch, childA);
 		expect(sortAttributes(String(scratch.innerHTML))).to.equal(
 			sortAttributes(
@@ -55,7 +65,6 @@ describe('replaceNode parameter in render()', () => {
 	});
 
 	it('should unmount existing components', () => {
-		const newScratch = setupScratch();
 		const unmount = sinon.spy();
 		const mount = sinon.spy();
 		class App extends Component {
@@ -71,23 +80,22 @@ describe('replaceNode parameter in render()', () => {
 				return <div>App</div>;
 			}
 		}
+
 		render(
 			<div id="a">
 				<App />
 			</div>,
-			newScratch
+			scratch
 		);
-		expect(newScratch.innerHTML).to.equal('<div id="a"><div>App</div></div>');
+		expect(scratch.innerHTML).to.equal('<div id="a"><div>App</div></div>');
 		expect(mount).to.be.calledOnce;
-		render(<div id="a">new</div>, newScratch, newScratch.querySelector('#a'));
-		expect(newScratch.innerHTML).to.equal('<div id="a">new</div>');
-		expect(unmount).to.be.calledOnce;
 
-		newScratch.parentNode.removeChild(newScratch);
+		render(<div id="a">new</div>, scratch, scratch.querySelector('#a'));
+		expect(scratch.innerHTML).to.equal('<div id="a">new</div>');
+		expect(unmount).to.be.calledOnce;
 	});
 
 	it('should unmount existing components in prerendered HTML', () => {
-		const newScratch = setupScratch();
 		const unmount = sinon.spy();
 		const mount = sinon.spy();
 		class App extends Component {
@@ -104,22 +112,21 @@ describe('replaceNode parameter in render()', () => {
 			}
 		}
 
-		newScratch.innerHTML = `<div id="child"></div>`;
+		scratch.innerHTML = `<div id="child"></div>`;
 
-		const childContainer = newScratch.querySelector('#child');
+		const childContainer = scratch.querySelector('#child');
 
 		render(<App />, childContainer);
 		expect(serializeHtml(childContainer)).to.equal('<span>App</span>');
 		expect(mount).to.be.calledOnce;
 
-		render(<div />, newScratch, newScratch.firstElementChild);
-		expect(serializeHtml(newScratch)).to.equal('<div id=""></div>');
+		render(<div />, scratch, scratch.firstElementChild);
+		expect(serializeHtml(scratch)).to.equal('<div id=""></div>');
 		expect(unmount).to.be.calledOnce;
-
-		newScratch.parentNode.removeChild(newScratch);
 	});
 
 	it('should render multiple render roots in one parentDom', () => {
+		setupABCDom(scratch);
 		const childA = scratch.querySelector('#a');
 		const childB = scratch.querySelector('#b');
 		const childC = scratch.querySelector('#c');
