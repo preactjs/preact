@@ -337,15 +337,13 @@ function diffElementNodes(
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 
-		oldProps = oldVNode.props || EMPTY_OBJ;
-
-		let oldHtml = oldProps.dangerouslySetInnerHTML;
+		let oldHtml = oldProps && oldProps.dangerouslySetInnerHTML;
 		let newHtml = newProps.dangerouslySetInnerHTML;
 
 		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
 		// @TODO we should warn in debug mode when props don't match here.
 		if (!isHydrating) {
-			if (oldProps === EMPTY_OBJ) {
+			if (excessDomChildren != null) {
 				oldProps = {};
 				for (let i = 0; i < dom.attributes.length; i++) {
 					oldProps[dom.attributes[i].name] = dom.attributes[i].value;
@@ -387,14 +385,14 @@ function diffElementNodes(
 				(i = newProps.value) !== undefined &&
 				i !== dom.value
 			) {
-				setProperty(dom, 'value', i, oldProps.value, false);
+				setProperty(dom, 'value', i, oldProps && oldProps.value, false);
 			}
 			if (
 				'checked' in newProps &&
 				(i = newProps.checked) !== undefined &&
 				i !== dom.checked
 			) {
-				setProperty(dom, 'checked', i, oldProps.checked, false);
+				setProperty(dom, 'checked', i, oldProps && oldProps.checked, false);
 			}
 		}
 	}

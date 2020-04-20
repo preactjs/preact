@@ -13,6 +13,7 @@ import { Fragment } from './create-element';
 export function Component(props, context) {
 	this.props = props;
 	this.context = context;
+	this.state = {}; // WIP: Does this do anything good?
 }
 
 /**
