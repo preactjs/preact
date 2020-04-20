@@ -5,9 +5,7 @@ import {
 	teardown,
 	getMixedArray,
 	mixedArrayHTML,
-	sortCss,
 	serializeHtml,
-	supportsPassiveEvents,
 	supportsDataList
 } from '../_util/helpers';
 import { clearLog, getLog, logCall } from '../_util/logCall';
@@ -455,415 +453,6 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('<input type="password">');
 	});
 
-	describe('style attribute', () => {
-		it('should apply style as String', () => {
-			render(<div style="top: 5px; position: relative;" />, scratch);
-			expect(scratch.childNodes[0].style.cssText).to.equal(
-				'top: 5px; position: relative;'
-			);
-		});
-
-		it('should not call CSSStyleDeclaration.setProperty for style strings', () => {
-			render(<div style="top: 5px; position: relative;" />, scratch);
-			sinon.stub(scratch.firstChild.style, 'setProperty');
-			render(<div style="top: 10px; position: absolute;" />, scratch);
-			expect(scratch.firstChild.style.setProperty).to.not.be.called;
-		});
-
-		it('should properly switch from string styles to object styles and back', () => {
-			render(<div style="display: inline;">test</div>, scratch);
-
-			let style = scratch.firstChild.style;
-			expect(style.cssText).to.equal('display: inline;');
-
-			render(<div style={{ color: 'red' }} />, scratch);
-			expect(style.cssText).to.equal('color: red;');
-
-			render(<div style="color: blue" />, scratch);
-			expect(style.cssText).to.equal('color: blue;');
-
-			render(<div style={{ color: 'yellow' }} />, scratch);
-			expect(style.cssText).to.equal('color: yellow;');
-
-			render(<div style="display: block" />, scratch);
-			expect(style.cssText).to.equal('display: block;');
-		});
-
-		it('should serialize style objects', () => {
-			const styleObj = {
-				color: 'rgb(255, 255, 255)',
-				background: 'rgb(255, 100, 0)',
-				backgroundPosition: '10px 10px',
-				'background-size': 'cover',
-				gridRowStart: 1,
-				padding: 5,
-				top: 100,
-				left: '100%'
-			};
-
-			render(<div style={styleObj}>test</div>, scratch);
-
-			let style = scratch.firstChild.style;
-			expect(style.color).to.equal('rgb(255, 255, 255)');
-			expect(style.background).to.contain('rgb(255, 100, 0)');
-			expect(style.backgroundPosition).to.equal('10px 10px');
-			expect(style.backgroundSize).to.equal('cover');
-			expect(style.padding).to.equal('5px');
-			expect(style.top).to.equal('100px');
-			expect(style.left).to.equal('100%');
-
-			// Only check for this in browsers that support css grids
-			if (typeof scratch.style.grid == 'string') {
-				expect(style.gridRowStart).to.equal('1');
-			}
-		});
-
-		it('should support opacity 0', () => {
-			render(<div style={{ opacity: 1 }}>Test</div>, scratch);
-			let style = scratch.firstChild.style;
-			expect(style)
-				.to.have.property('opacity')
-				.that.equals('1');
-
-			render(<div style={{ opacity: 0 }}>Test</div>, scratch);
-			style = scratch.firstChild.style;
-			expect(style)
-				.to.have.property('opacity')
-				.that.equals('0');
-		});
-
-		it('should replace previous style objects', () => {
-			render(<div style={{ display: 'inline' }}>test</div>, scratch);
-
-			let style = scratch.firstChild.style;
-			expect(style.cssText).to.equal('display: inline;');
-			expect(style)
-				.to.have.property('display')
-				.that.equals('inline');
-			expect(style)
-				.to.have.property('color')
-				.that.equals('');
-			expect(style.zIndex.toString()).to.equal('');
-
-			render(
-				<div style={{ color: 'rgb(0, 255, 255)', zIndex: '3' }}>test</div>,
-				scratch
-			);
-
-			style = scratch.firstChild.style;
-			expect(style.cssText).to.equal('color: rgb(0, 255, 255); z-index: 3;');
-			expect(style)
-				.to.have.property('display')
-				.that.equals('');
-			expect(style)
-				.to.have.property('color')
-				.that.equals('rgb(0, 255, 255)');
-
-			// IE stores numeric z-index values as a number
-			expect(style.zIndex.toString()).to.equal('3');
-
-			render(
-				<div style={{ color: 'rgb(0, 255, 255)', display: 'inline' }}>
-					test
-				</div>,
-				scratch
-			);
-
-			style = scratch.firstChild.style;
-			expect(style.cssText).to.equal(
-				'color: rgb(0, 255, 255); display: inline;'
-			);
-			expect(style)
-				.to.have.property('display')
-				.that.equals('inline');
-			expect(style)
-				.to.have.property('color')
-				.that.equals('rgb(0, 255, 255)');
-			expect(style.zIndex.toString()).to.equal('');
-		});
-
-		it('should remove existing attributes', () => {
-			const div = document.createElement('div');
-			div.setAttribute('class', 'red');
-			const span = document.createElement('span');
-			const text = document.createTextNode('Hi');
-
-			span.appendChild(text);
-			div.appendChild(span);
-			scratch.appendChild(div);
-
-			const App = () => (
-				<div>
-					<span>Bye</span>
-				</div>
-			);
-
-			render(<App />, scratch);
-			expect(serializeHtml(scratch)).to.equal('<div><span>Bye</span></div>');
-		});
-
-		it('should remove class attributes', () => {
-			const App = props => (
-				<div className={props.class}>
-					<span>Bye</span>
-				</div>
-			);
-
-			render(<App class="hi" />, scratch);
-			expect(scratch.innerHTML).to.equal(
-				'<div class="hi"><span>Bye</span></div>'
-			);
-
-			render(<App />, scratch);
-			expect(serializeHtml(scratch)).to.equal('<div><span>Bye</span></div>');
-		});
-
-		it('should remove old styles', () => {
-			render(<div style={{ color: 'red' }} />, scratch);
-			render(<div style={{ backgroundColor: 'blue' }} />, scratch);
-			expect(scratch.firstChild.style.color).to.equal('');
-			expect(scratch.firstChild.style.backgroundColor).to.equal('blue');
-		});
-
-		// Issue #1850
-		it('should remove empty styles', () => {
-			render(<div style={{ visibility: 'hidden' }} />, scratch);
-			expect(scratch.firstChild.style.visibility).to.equal('hidden');
-			render(<div style={{ visibility: undefined }} />, scratch);
-			expect(scratch.firstChild.style.visibility).to.equal('');
-		});
-
-		// Skip test if the currently running browser doesn't support CSS Custom Properties
-		if (window.CSS && CSS.supports('color', 'var(--fake-var)')) {
-			it('should support css custom properties', () => {
-				render(
-					<div style={{ '--foo': 'red', color: 'var(--foo)' }}>test</div>,
-					scratch
-				);
-				expect(sortCss(scratch.firstChild.style.cssText)).to.equal(
-					'--foo: red; color: var(--foo);'
-				);
-				expect(window.getComputedStyle(scratch.firstChild).color).to.equal(
-					'rgb(255, 0, 0)'
-				);
-			});
-
-			it('should not add "px" suffix for custom properties', () => {
-				render(
-					<div style={{ '--foo': '100px', width: 'var(--foo)' }}>test</div>,
-					scratch
-				);
-				expect(sortCss(scratch.firstChild.style.cssText)).to.equal(
-					'--foo: 100px; width: var(--foo);'
-				);
-			});
-
-			it('css vars should not be transformed into dash-separated', () => {
-				render(
-					<div
-						style={{
-							'--fooBar': 1,
-							'--foo-baz': 2,
-							opacity: 'var(--fooBar)',
-							zIndex: 'var(--foo-baz)'
-						}}
-					>
-						test
-					</div>,
-					scratch
-				);
-				expect(sortCss(scratch.firstChild.style.cssText)).to.equal(
-					'--foo-baz: 2; --fooBar: 1; opacity: var(--fooBar); z-index: var(--foo-baz);'
-				);
-			});
-
-			it('should call CSSStyleDeclaration.setProperty for css vars', () => {
-				render(<div style={{ padding: '10px' }} />, scratch);
-				sinon.stub(scratch.firstChild.style, 'setProperty');
-				render(
-					<div style={{ '--foo': '10px', padding: 'var(--foo)' }} />,
-					scratch
-				);
-				expect(scratch.firstChild.style.setProperty).to.be.calledWith(
-					'--foo',
-					'10px'
-				);
-			});
-		}
-	});
-
-	describe('event handling', () => {
-		let proto;
-
-		function fireEvent(on, type) {
-			let e = document.createEvent('Event');
-			e.initEvent(type, true, true);
-			on.dispatchEvent(e);
-		}
-
-		beforeEach(() => {
-			proto = document.createElement('div').constructor.prototype;
-
-			sinon.spy(proto, 'addEventListener');
-			sinon.spy(proto, 'removeEventListener');
-		});
-
-		afterEach(() => {
-			proto.addEventListener.restore();
-			proto.removeEventListener.restore();
-		});
-
-		it('should only register on* functions as handlers', () => {
-			let click = () => {},
-				onclick = () => {};
-
-			render(<div click={click} onClick={onclick} />, scratch);
-
-			expect(scratch.childNodes[0].attributes.length).to.equal(0);
-
-			expect(
-				proto.addEventListener
-			).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
-				'click',
-				sinon.match.func,
-				false
-			);
-		});
-
-		it('should only register truthy values as handlers', () => {
-			function fooHandler() {}
-			const falsyHandler = false;
-
-			render(<div onClick={falsyHandler} onOtherClick={fooHandler} />, scratch);
-
-			expect(
-				proto.addEventListener
-			).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
-				'OtherClick',
-				sinon.match.func,
-				false
-			);
-
-			expect(proto.addEventListener).not.to.have.been.calledWith('Click');
-			expect(proto.addEventListener).not.to.have.been.calledWith('click');
-		});
-
-		it('should support native event names', () => {
-			let click = sinon.spy(),
-				mousedown = sinon.spy();
-
-			render(<div onclick={() => click(1)} onmousedown={mousedown} />, scratch);
-
-			expect(proto.addEventListener)
-				.to.have.been.calledTwice.and.to.have.been.calledWith('click')
-				.and.calledWith('mousedown');
-
-			fireEvent(scratch.childNodes[0], 'click');
-			expect(click).to.have.been.calledOnce.and.calledWith(1);
-		});
-
-		it('should support camel-case event names', () => {
-			let click = sinon.spy(),
-				mousedown = sinon.spy();
-
-			render(<div onClick={() => click(1)} onMouseDown={mousedown} />, scratch);
-
-			expect(proto.addEventListener)
-				.to.have.been.calledTwice.and.to.have.been.calledWith('click')
-				.and.calledWith('mousedown');
-
-			fireEvent(scratch.childNodes[0], 'click');
-			expect(click).to.have.been.calledOnce.and.calledWith(1);
-		});
-
-		it('should update event handlers', () => {
-			let click1 = sinon.spy();
-			let click2 = sinon.spy();
-
-			render(<div onClick={click1} />, scratch);
-
-			fireEvent(scratch.childNodes[0], 'click');
-			expect(click1).to.have.been.calledOnce;
-			expect(click2).to.not.have.been.called;
-
-			click1.resetHistory();
-			click2.resetHistory();
-
-			render(<div onClick={click2} />, scratch);
-
-			fireEvent(scratch.childNodes[0], 'click');
-			expect(click1).to.not.have.been.called;
-			expect(click2).to.have.been.called;
-		});
-
-		it('should remove event handlers', () => {
-			let click = sinon.spy(),
-				mousedown = sinon.spy();
-
-			render(<div onClick={() => click(1)} onMouseDown={mousedown} />, scratch);
-			render(<div onClick={() => click(2)} />, scratch);
-
-			expect(proto.removeEventListener).to.have.been.calledWith('mousedown');
-
-			fireEvent(scratch.childNodes[0], 'mousedown');
-			expect(mousedown).not.to.have.been.called;
-
-			proto.removeEventListener.resetHistory();
-			click.resetHistory();
-			mousedown.resetHistory();
-
-			render(<div />, scratch);
-
-			expect(proto.removeEventListener).to.have.been.calledWith('click');
-
-			fireEvent(scratch.childNodes[0], 'click');
-			expect(click).not.to.have.been.called;
-		});
-
-		it('should register events not appearing on dom nodes', () => {
-			let onAnimationEnd = () => {};
-
-			render(<div onanimationend={onAnimationEnd} />, scratch);
-			expect(
-				proto.addEventListener
-			).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
-				'animationend',
-				sinon.match.func,
-				false
-			);
-		});
-
-		// Skip test if browser doesn't support passive events
-		if (supportsPassiveEvents()) {
-			it('should use capturing for event props ending with *Capture', () => {
-				let click = sinon.spy(),
-					focus = sinon.spy();
-
-				render(
-					<div onClickCapture={click} onFocusCapture={focus}>
-						<button />
-					</div>,
-					scratch
-				);
-
-				let root = scratch.firstChild;
-				root.firstElementChild.click();
-				root.firstElementChild.focus();
-
-				expect(click, 'click').to.have.been.calledOnce;
-
-				// Focus delegation requires a 50b hack I'm not sure we want to incur
-				expect(focus, 'focus').to.have.been.calledOnce;
-
-				// IE doesn't set it
-				if (!/Edge/.test(navigator.userAgent)) {
-					expect(click).to.have.been.calledWithMatch({ eventPhase: 0 }); // capturing
-					expect(focus).to.have.been.calledWithMatch({ eventPhase: 0 }); // capturing
-				}
-			});
-		}
-	});
-
 	describe('dangerouslySetInnerHTML', () => {
 		it('should support dangerouslySetInnerHTML', () => {
 			let html = '<b>foo &amp; bar</b>';
@@ -951,6 +540,33 @@ describe('render()', () => {
 			thing.forceUpdate();
 
 			expect(firstInnerHTMLChild).to.equalNode(scratch.firstChild.firstChild);
+		});
+
+		it('should unmount dangerouslySetInnerHTML', () => {
+			let set;
+
+			const TextDiv = () => (
+				<div dangerouslySetInnerHTML={{ __html: '' }}>some text</div>
+			);
+
+			class App extends Component {
+				constructor(props) {
+					super(props);
+					set = this.setState.bind(this);
+					this.state = { show: true };
+				}
+
+				render() {
+					return this.state.show && <TextDiv />;
+				}
+			}
+
+			render(<App />, scratch);
+			expect(scratch.innerHTML).to.equal('<div></div>');
+
+			set({ show: false });
+			rerender();
+			expect(scratch.innerHTML).to.equal('');
 		});
 	});
 
@@ -1535,32 +1151,5 @@ describe('render()', () => {
 		} finally {
 			sandbox.restore();
 		}
-	});
-
-	it('should unmount dangerouslySetInnerHTML', () => {
-		let set;
-
-		const TextDiv = () => (
-			<div dangerouslySetInnerHTML={{ __html: '' }}>some text</div>
-		);
-
-		class App extends Component {
-			constructor(props) {
-				super(props);
-				set = this.setState.bind(this);
-				this.state = { show: true };
-			}
-
-			render() {
-				return this.state.show && <TextDiv />;
-			}
-		}
-
-		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal('<div></div>');
-
-		set({ show: false });
-		rerender();
-		expect(scratch.innerHTML).to.equal('');
 	});
 });
