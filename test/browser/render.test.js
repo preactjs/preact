@@ -8,7 +8,8 @@ import {
 	sortCss,
 	serializeHtml,
 	supportsPassiveEvents,
-	supportsDataList
+	supportsDataList,
+	spyOnElementAttributes
 } from '../_util/helpers';
 import { clearLog, getLog, logCall } from '../_util/logCall';
 
@@ -1528,7 +1529,7 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('');
 	});
 
-	it('should remove existing attributes', () => {
+	it('should remove attributes on pre-existing DOM', () => {
 		const div = document.createElement('div');
 		div.setAttribute('class', 'red');
 		const span = document.createElement('span');
@@ -1562,5 +1563,31 @@ describe('render()', () => {
 
 		render(<App />, scratch);
 		expect(serializeHtml(scratch)).to.equal('<div><span>Bye</span></div>');
+	});
+
+	it('should not read DOM attributes on render without existing DOM', () => {
+		const attributesSpy = spyOnElementAttributes();
+
+		render(
+			<div id="wrapper">
+				<div id="page1">Page 1</div>
+			</div>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<div id="wrapper"><div id="page1">Page 1</div></div>'
+		);
+		expect(attributesSpy.get).to.not.have.been.called;
+
+		render(
+			<div id="wrapper">
+				<div id="page2">Page 2</div>
+			</div>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<div id="wrapper"><div id="page2">Page 2</div></div>'
+		);
+		expect(attributesSpy.get).to.not.have.been.called;
 	});
 });
