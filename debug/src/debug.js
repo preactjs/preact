@@ -222,12 +222,12 @@ export function initDebug() {
 		if (oldBeforeDiff) oldBeforeDiff(vnode);
 	};
 
-	options._hook = comp => {
+	options._hook = (comp, index, type) => {
 		if (!comp) {
 			throw new Error('Hook can only be invoked from render methods.');
 		}
 
-		if (oldHook) oldHook(comp);
+		if (oldHook) oldHook(comp, index, type);
 	};
 
 	const warn = (property, err) => ({
