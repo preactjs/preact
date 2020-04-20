@@ -127,7 +127,7 @@ export function diff(
 							c._nextState,
 							componentContext
 						) === false) ||
-					(newVNode._original === oldVNode._original && !c._processingException)
+					newVNode._original === oldVNode._original
 				) {
 					c.props = newProps;
 					c.state = c._nextState;
