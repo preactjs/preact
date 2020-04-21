@@ -334,7 +334,7 @@ function diffElementNodes(
 		// 	excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		// }
 
-		oldProps = oldVNode.props || EMPTY_OBJ;
+		// oldProps = oldVNode.props || EMPTY_OBJ;
 
 		// let oldHtml = oldProps.dangerouslySetInnerHTML;
 		// let newHtml = newProps.dangerouslySetInnerHTML;
@@ -389,14 +389,14 @@ function diffElementNodes(
 				(i = newProps.value) !== undefined &&
 				i !== dom.value
 			) {
-				setProperty(dom, 'value', i, oldProps.value, false);
+				setProperty(dom, 'value', i, oldProps && oldProps.value, false);
 			}
 			if (
 				'checked' in newProps &&
 				(i = newProps.checked) !== undefined &&
 				i !== dom.checked
 			) {
-				setProperty(dom, 'checked', i, oldProps.checked, false);
+				setProperty(dom, 'checked', i, oldProps && oldProps.checked, false);
 			}
 		}
 	}
