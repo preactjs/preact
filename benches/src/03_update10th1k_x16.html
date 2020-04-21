@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>partial update</title>
+		<meta
+			name="description"
+			content="updating every 10th row for 1,000 rows (3 warmup runs). 16x CPU slowdown."
+		/>
+	</head>
+	<body>
+		<div id="main"></div>
+		<script type="module">
+			import * as bench from '/bench.js';
+			import {
+				afterFrame,
+				afterFrameAsync,
+				getRowLinkSel,
+				testElement,
+				testElementTextContains
+			} from './util.js';
+			import * as preact from 'preact';
+			import { render } from '../src/keyed-children/index.js';
+
+			const { run: mount, update } = render(preact);
+
+			function repeat(pattern, repeats) {
+				let result = '';
+				for (let i = 0; i < repeats; i++) {
+					result += pattern;
+				}
+
+				return result;
+			}
+
+			async function init() {
+				mount();
+
+				await afterFrameAsync();
+				testElement(getRowLinkSel(1000));
+
+				for (let i = 0; i < 3; i++) {
+					update();
+
+					await afterFrameAsync();
+					testElementTextContains(getRowLinkSel(991), repeat(' !!!', i + 1));
+				}
+			}
+
+			async function run() {
+				bench.start();
+				update();
+
+				await afterFrameAsync();
+				testElementTextContains(getRowLinkSel(991), repeat(' !!!', 3 + 1));
+				bench.stop();
+			}
+
+			init().then(run);
+		</script>
+	</body>
+</html>
