@@ -220,6 +220,8 @@ export function teardown(scratch) {
 	if (getLog().length > 0) {
 		clearLog();
 	}
+
+	restoreElementAttributes();
 }
 
 const Foo = () => 'd';
@@ -262,3 +264,29 @@ export const resetAllSpies = obj =>
 			obj[key].resetHistory();
 		}
 	});
+
+let attributesSpy, originalAttributesPropDescriptor;
+
+export function spyOnElementAttributes() {
+	if (!attributesSpy) {
+		originalAttributesPropDescriptor = Object.getOwnPropertyDescriptor(
+			Element.prototype,
+			'attributes'
+		);
+		attributesSpy = sinon.spy(Element.prototype, 'attributes', ['get']);
+	}
+
+	return attributesSpy;
+}
+
+function restoreElementAttributes() {
+	if (originalAttributesPropDescriptor) {
+		// Workaround bug in Sinon where getter/setter spies don't get auto-restored
+		Object.defineProperty(
+			Element.prototype,
+			'attributes',
+			originalAttributesPropDescriptor
+		);
+		attributesSpy = null;
+	}
+}
