@@ -1,7 +1,7 @@
 import { act } from 'preact/test-utils';
 import { createElement, render, Fragment, Component } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useEffect, useState, useRef } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { useEffectAssertions } from './useEffectAssertions.test';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
 
