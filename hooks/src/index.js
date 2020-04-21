@@ -26,11 +26,11 @@ options._render = vnode => {
 	currentComponent = vnode._component;
 	currentIndex = 0;
 
-	if (currentComponent.__hooks) {
-		const c = currentComponent;
-		c.__hooks._pendingEffects.forEach(invokeCleanup);
-		c.__hooks._pendingEffects.forEach(invokeEffect);
-		c.__hooks._pendingEffects = [];
+	const hooks = currentComponent.__hooks;
+	if (hooks) {
+		hooks._pendingEffects.forEach(invokeCleanup);
+		hooks._pendingEffects.forEach(invokeEffect);
+		hooks._pendingEffects = [];
 	}
 };
 
@@ -38,13 +38,8 @@ options.diffed = vnode => {
 	if (oldAfterDiff) oldAfterDiff(vnode);
 
 	const c = vnode._component;
-	if (!c) return;
-
-	const hooks = c.__hooks;
-	if (hooks) {
-		if (hooks._pendingEffects.length) {
-			afterPaint(afterPaintEffects.push(c));
-		}
+	if (c && c.__hooks && c.__hooks._pendingEffects.length) {
+		afterPaint(afterPaintEffects.push(c));
 	}
 };
 
