@@ -27,9 +27,10 @@ options._render = vnode => {
 	currentIndex = 0;
 
 	if (currentComponent.__hooks) {
-		currentComponent.__hooks._pendingEffects.forEach(invokeCleanup);
-		currentComponent.__hooks._pendingEffects.forEach(invokeEffect);
-		currentComponent.__hooks._pendingEffects = [];
+		const c = currentComponent;
+		c.__hooks._pendingEffects.forEach(invokeCleanup);
+		c.__hooks._pendingEffects.forEach(invokeEffect);
+		c.__hooks._pendingEffects = [];
 	}
 };
 
@@ -336,9 +337,7 @@ function afterPaint(newQueueLength) {
  * @param {import('./internal').EffectHookState} hook
  */
 function invokeCleanup(hook) {
-	const comp = currentComponent;
 	if (hook._cleanup) hook._cleanup();
-	currentComponent = comp;
 }
 
 /**
@@ -346,10 +345,8 @@ function invokeCleanup(hook) {
  * @param {import('./internal').EffectHookState} hook
  */
 function invokeEffect(hook) {
-	const comp = currentComponent;
 	const result = hook._value();
 	if (typeof result == 'function') hook._cleanup = result;
-	currentComponent = comp;
 }
 
 /**
