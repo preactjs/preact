@@ -336,7 +336,9 @@ function afterPaint(newQueueLength) {
  * @param {import('./internal').EffectHookState} hook
  */
 function invokeCleanup(hook) {
+	const comp = currentComponent;
 	if (hook._cleanup) hook._cleanup();
+	currentComponent = comp;
 }
 
 /**
@@ -344,8 +346,10 @@ function invokeCleanup(hook) {
  * @param {import('./internal').EffectHookState} hook
  */
 function invokeEffect(hook) {
+	const comp = currentComponent;
 	const result = hook._value();
 	if (typeof result == 'function') hook._cleanup = result;
+	currentComponent = comp;
 }
 
 /**

@@ -1,7 +1,7 @@
 import { act } from 'preact/test-utils';
 import { createElement, render, Fragment, Component } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState, useRef } from 'preact/hooks';
 import { useEffectAssertions } from './useEffectAssertions.test';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
 
@@ -208,5 +208,47 @@ describe('useEffect', () => {
 		});
 		expect(spy).to.be.calledOnce;
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
+	});
+
+	it('should allow creating a new root', () => {
+		const root = document.createElement('div');
+		const global = document.createElement('div');
+		scratch.appendChild(root);
+		scratch.appendChild(global);
+
+		const Modal = props => {
+			let [, setCanProceed] = useState(true);
+			let ChildProp = props.content;
+
+			return (
+				<div>
+					<ChildProp setCanProceed={setCanProceed} />
+				</div>
+			);
+		};
+
+		const Inner = () => {
+			useEffect(() => {
+				render(<div>global</div>, global);
+			}, []);
+
+			return <div>Inner</div>;
+		};
+
+		act(() => {
+			render(
+				<Modal
+					content={props => {
+						props.setCanProceed(false);
+						return <Inner />;
+					}}
+				/>,
+				root
+			);
+		});
+
+		expect(scratch.innerHTML).to.equal(
+			'<div><div><div>Inner</div></div></div><div><div>global</div></div>'
+		);
 	});
 });
