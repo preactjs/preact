@@ -21,12 +21,14 @@ const RAF_TIMEOUT = 100;
 let prevRaf;
 
 options._render = vnode => {
-	if (oldBeforeRender) oldBeforeRender(vnode);
+	if (oldBeforeRender) {
+		oldBeforeRender(vnode);
+	}
 
 	currentComponent = vnode._component;
 	currentIndex = 0;
 
-	if (currentComponent.__hooks) {
+	if (currentComponent !== undefined && currentComponent.__hooks) {
 		currentComponent.__hooks._pendingEffects.forEach(invokeCleanup);
 		currentComponent.__hooks._pendingEffects.forEach(invokeEffect);
 		currentComponent.__hooks._pendingEffects = [];
@@ -34,10 +36,14 @@ options._render = vnode => {
 };
 
 options.diffed = vnode => {
-	if (oldAfterDiff) oldAfterDiff(vnode);
+	if (oldAfterDiff) {
+		oldAfterDiff(vnode);
+	}
 
 	const c = vnode._component;
-	if (!c) return;
+	if (!c) {
+		return;
+	}
 
 	const hooks = c.__hooks;
 	if (hooks) {
@@ -56,21 +62,29 @@ options._commit = (vnode, commitQueue) => {
 			);
 		} catch (e) {
 			commitQueue.some(c => {
-				if (c._renderCallbacks) c._renderCallbacks = [];
+				if (c._renderCallbacks) {
+					c._renderCallbacks = [];
+				}
 			});
 			commitQueue = [];
 			options._catchError(e, component._vnode);
 		}
 	});
 
-	if (oldCommit) oldCommit(vnode, commitQueue);
+	if (oldCommit) {
+		oldCommit(vnode, commitQueue);
+	}
 };
 
 options.unmount = vnode => {
-	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
+	if (oldBeforeUnmount) {
+		oldBeforeUnmount(vnode);
+	}
 
 	const c = vnode._component;
-	if (!c) return;
+	if (!c) {
+		return;
+	}
 
 	const hooks = c.__hooks;
 	if (hooks) {
@@ -99,6 +113,7 @@ function getHookState(index, type) {
 	// * https://github.com/michael-klein/funcy.js/blob/650beaa58c43c33a74820a3c98b3c7079cf2e333/src/renderer.mjs
 	// Other implementations to look at:
 	// * https://codesandbox.io/s/mnox05qp8
+	currentComponent = currentComponent || {};
 	const hooks =
 		currentComponent.__hooks ||
 		(currentComponent.__hooks = {
@@ -129,7 +144,7 @@ export function useState(initialState) {
 export function useReducer(reducer, initialState, init) {
 	/** @type {import('./internal').ReducerHookState} */
 	const hookState = getHookState(currentIndex++, 2);
-	if (!hookState._component) {
+	if (hookState !== undefined && !hookState._component) {
 		hookState._component = currentComponent;
 
 		hookState._value = [
@@ -192,8 +207,11 @@ export function useImperativeHandle(ref, createHandle, args) {
 	currentHook = 6;
 	useLayoutEffect(
 		() => {
-			if (typeof ref == 'function') ref(createHandle());
-			else if (ref) ref.current = createHandle();
+			if (typeof ref == 'function') {
+				ref(createHandle());
+			} else if (ref) {
+				ref.current = createHandle();
+			}
 		},
 		args == null ? args : args.concat(ref)
 	);
@@ -237,7 +255,9 @@ export function useContext(context) {
 	// be able to pull of the default value when no provider
 	// is present in the tree.
 	state._context = context;
-	if (!provider) return context._defaultValue;
+	if (!provider) {
+		return context._defaultValue;
+	}
 	// This is probably not safe to convert to "!"
 	if (state._value == null) {
 		state._value = true;
@@ -262,7 +282,9 @@ export function useErrorBoundary(cb) {
 	state._value = cb;
 	if (!currentComponent.componentDidCatch) {
 		currentComponent.componentDidCatch = err => {
-			if (state._value) state._value(err);
+			if (state._value) {
+				state._value(err);
+			}
 			errState[1](err);
 		};
 	}
@@ -336,7 +358,9 @@ function afterPaint(newQueueLength) {
  * @param {import('./internal').EffectHookState} hook
  */
 function invokeCleanup(hook) {
-	if (hook._cleanup) hook._cleanup();
+	if (hook._cleanup) {
+		hook._cleanup();
+	}
 }
 
 /**
@@ -345,7 +369,9 @@ function invokeCleanup(hook) {
  */
 function invokeEffect(hook) {
 	const result = hook._value();
-	if (typeof result == 'function') hook._cleanup = result;
+	if (typeof result == 'function') {
+		hook._cleanup = result;
+	}
 }
 
 /**
