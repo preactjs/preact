@@ -26,10 +26,11 @@ options._render = vnode => {
 	currentComponent = vnode._component;
 	currentIndex = 0;
 
-	if (currentComponent.__hooks) {
-		currentComponent.__hooks._pendingEffects.forEach(invokeCleanup);
-		currentComponent.__hooks._pendingEffects.forEach(invokeEffect);
-		currentComponent.__hooks._pendingEffects = [];
+	const hooks = currentComponent.__hooks;
+	if (hooks) {
+		hooks._pendingEffects.forEach(invokeCleanup);
+		hooks._pendingEffects.forEach(invokeEffect);
+		hooks._pendingEffects = [];
 	}
 };
 
@@ -37,13 +38,8 @@ options.diffed = vnode => {
 	if (oldAfterDiff) oldAfterDiff(vnode);
 
 	const c = vnode._component;
-	if (!c) return;
-
-	const hooks = c.__hooks;
-	if (hooks) {
-		if (hooks._pendingEffects.length) {
-			afterPaint(afterPaintEffects.push(c));
-		}
+	if (c && c.__hooks && c.__hooks._pendingEffects.length) {
+		afterPaint(afterPaintEffects.push(c));
 	}
 };
 
@@ -70,12 +66,9 @@ options.unmount = vnode => {
 	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
 
 	const c = vnode._component;
-	if (!c) return;
-
-	const hooks = c.__hooks;
-	if (hooks) {
+	if (c && c.__hooks) {
 		try {
-			hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
+			c.__hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
 		} catch (e) {
 			options._catchError(e, c._vnode);
 		}
