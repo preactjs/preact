@@ -66,12 +66,9 @@ options.unmount = vnode => {
 	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
 
 	const c = vnode._component;
-	if (!c) return;
-
-	const hooks = c.__hooks;
-	if (hooks) {
+	if (c && c.__hooks) {
 		try {
-			hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
+			c.__hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
 		} catch (e) {
 			options._catchError(e, c._vnode);
 		}
