@@ -26,7 +26,7 @@ options._render = vnode => {
 	currentComponent = vnode._component;
 	currentIndex = 0;
 
-	if (currentComponent !== undefined && currentComponent.__hooks) {
+	if (currentComponent && currentComponent.__hooks) {
 		currentComponent.__hooks._pendingEffects.forEach(invokeCleanup);
 		currentComponent.__hooks._pendingEffects.forEach(invokeEffect);
 		currentComponent.__hooks._pendingEffects = [];
@@ -130,7 +130,7 @@ export function useState(initialState) {
 export function useReducer(reducer, initialState, init) {
 	/** @type {import('./internal').ReducerHookState} */
 	const hookState = getHookState(currentIndex++, 2);
-	if (hookState !== undefined && !hookState._component) {
+	if (hookState && !hookState._component) {
 		hookState._component = currentComponent;
 
 		hookState._value = [
