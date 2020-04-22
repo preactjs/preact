@@ -1,4 +1,3 @@
-import { setupRerender } from 'preact/test-utils';
 import { createElement, render } from 'preact';
 import {
 	setupScratch,
@@ -10,11 +9,10 @@ import {
 /** @jsx createElement */
 
 describe('style attribute', () => {
-	let scratch, rerender;
+	let scratch;
 
 	beforeEach(() => {
 		scratch = setupScratch();
-		rerender = setupRerender();
 	});
 
 	afterEach(() => {

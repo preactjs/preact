@@ -1,4 +1,3 @@
-import { setupRerender } from 'preact/test-utils';
 import { createElement, render } from 'preact';
 import {
 	setupScratch,
@@ -9,7 +8,7 @@ import {
 /** @jsx createElement */
 
 describe('event handling', () => {
-	let scratch, rerender, proto;
+	let scratch, proto;
 
 	function fireEvent(on, type) {
 		let e = document.createEvent('Event');
@@ -19,7 +18,6 @@ describe('event handling', () => {
 
 	beforeEach(() => {
 		scratch = setupScratch();
-		rerender = setupRerender();
 
 		proto = document.createElement('div').constructor.prototype;
 
