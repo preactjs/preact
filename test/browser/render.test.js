@@ -7,7 +7,8 @@ import {
 	mixedArrayHTML,
 	serializeHtml,
 	supportsDataList,
-	sortAttributes
+	sortAttributes,
+	spyOnElementAttributes
 } from '../_util/helpers';
 import { clearLog, getLog, logCall } from '../_util/logCall';
 
@@ -927,5 +928,67 @@ describe('render()', () => {
 		} finally {
 			sandbox.restore();
 		}
+	});
+
+	it('should remove attributes on pre-existing DOM', () => {
+		const div = document.createElement('div');
+		div.setAttribute('class', 'red');
+		const span = document.createElement('span');
+		const text = document.createTextNode('Hi');
+
+		span.appendChild(text);
+		div.appendChild(span);
+		scratch.appendChild(div);
+
+		const App = () => (
+			<div>
+				<span>Bye</span>
+			</div>
+		);
+
+		render(<App />, scratch);
+		expect(serializeHtml(scratch)).to.equal('<div><span>Bye</span></div>');
+	});
+
+	it('should remove class attributes', () => {
+		const App = props => (
+			<div className={props.class}>
+				<span>Bye</span>
+			</div>
+		);
+
+		render(<App class="hi" />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div class="hi"><span>Bye</span></div>'
+		);
+
+		render(<App />, scratch);
+		expect(serializeHtml(scratch)).to.equal('<div><span>Bye</span></div>');
+	});
+
+	it('should not read DOM attributes on render without existing DOM', () => {
+		const attributesSpy = spyOnElementAttributes();
+
+		render(
+			<div id="wrapper">
+				<div id="page1">Page 1</div>
+			</div>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<div id="wrapper"><div id="page1">Page 1</div></div>'
+		);
+		expect(attributesSpy.get).to.not.have.been.called;
+
+		render(
+			<div id="wrapper">
+				<div id="page2">Page 2</div>
+			</div>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<div id="wrapper"><div id="page2">Page 2</div></div>'
+		);
+		expect(attributesSpy.get).to.not.have.been.called;
 	});
 });

@@ -45,7 +45,9 @@ export function render(vnode, parentDom, replaceNode) {
 			? [replaceNode]
 			: oldVNode
 			? null
-			: EMPTY_ARR.slice.call(parentDom.childNodes),
+			: parentDom.childNodes.length
+			? EMPTY_ARR.slice.call(parentDom.childNodes)
+			: null,
 		commitQueue,
 		replaceNode || EMPTY_OBJ,
 		isHydrating

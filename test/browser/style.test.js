@@ -1,10 +1,5 @@
 import { createElement, render } from 'preact';
-import {
-	setupScratch,
-	teardown,
-	sortCss,
-	serializeHtml
-} from '../_util/helpers';
+import { setupScratch, teardown, sortCss } from '../_util/helpers';
 
 /** @jsx createElement */
 
@@ -139,42 +134,6 @@ describe('style attribute', () => {
 			.to.have.property('color')
 			.that.equals('rgb(0, 255, 255)');
 		expect(style.zIndex.toString()).to.equal('');
-	});
-
-	it('should remove existing attributes', () => {
-		const div = document.createElement('div');
-		div.setAttribute('class', 'red');
-		const span = document.createElement('span');
-		const text = document.createTextNode('Hi');
-
-		span.appendChild(text);
-		div.appendChild(span);
-		scratch.appendChild(div);
-
-		const App = () => (
-			<div>
-				<span>Bye</span>
-			</div>
-		);
-
-		render(<App />, scratch);
-		expect(serializeHtml(scratch)).to.equal('<div><span>Bye</span></div>');
-	});
-
-	it('should remove class attributes', () => {
-		const App = props => (
-			<div className={props.class}>
-				<span>Bye</span>
-			</div>
-		);
-
-		render(<App class="hi" />, scratch);
-		expect(scratch.innerHTML).to.equal(
-			'<div class="hi"><span>Bye</span></div>'
-		);
-
-		render(<App />, scratch);
-		expect(serializeHtml(scratch)).to.equal('<div><span>Bye</span></div>');
 	});
 
 	it('should remove old styles', () => {
