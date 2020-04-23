@@ -231,7 +231,6 @@ export function useContext(context, shouldUpdate) {
 	// is present in the tree.
 	state._context = context;
 	if (!provider) return context._defaultValue;
-	const state = getHookState(currentIndex++);
 
 	if (!state._shouldUpdate && shouldUpdate)
 		state._shouldUpdate = { _update: shouldUpdate };
