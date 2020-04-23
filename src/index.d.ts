@@ -284,7 +284,6 @@ declare namespace preact {
 	interface Consumer<T>
 		extends FunctionComponent<{
 			children: (value: T) => ComponentChildren;
-			update?: (context: T, prevContext: T) => boolean;
 		}> {}
 	interface PreactConsumer<T> extends Consumer<T> {}
 
