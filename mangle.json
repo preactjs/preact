@@ -63,7 +63,8 @@
       "$_hook": "__h",
       "$_catchError": "__e",
       "$_unmount": "_e",
-      "$_owner": "__o"
+      "$_owner": "__o",
+      "$_update": "u"
     }
   }
 }

@@ -59,7 +59,8 @@
       "$_catchError": "__e",
       "$_unmount": "_e",
       "$_owner": "__o",
-      "$_skipEffects": "__s"
+      "$_skipEffects": "__s",
+      "$_update": "u"
     }
   }
 }
