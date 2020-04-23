@@ -216,11 +216,17 @@ export function useContext(context, shouldUpdate) {
 	const provider = currentComponent.context[context._id];
 	if (!provider) return context._defaultValue;
 	const state = getHookState(currentIndex++);
+
+	if (!state._shouldUpdate && shouldUpdate)
+		state._shouldUpdate = { _update: shouldUpdate };
+	else if (shouldUpdate) state._shouldUpdate._update = shouldUpdate;
+
 	// This is probably not safe to convert to "!"
 	if (state._value == null) {
 		state._value = true;
-		provider.sub(currentComponent, shouldUpdate);
+		provider.sub(currentComponent, state._shouldUpdate);
 	}
+
 	return provider.props.value;
 }
 

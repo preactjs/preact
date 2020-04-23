@@ -433,4 +433,47 @@ describe('useContext', () => {
 		expect(consumerFooRenders).to.equal(3);
 		expect(consumerBarRenders).to.equal(3);
 	});
+
+	it('should support outside closures', () => {
+		let set;
+		const context = createContext();
+
+		const MyProvider = ({ children }) => {
+			const [state, setState] = useState({ foo: 'hello', bar: 'world' });
+			set = setState;
+			return <context.Provider value={state}>{children}</context.Provider>;
+		};
+
+		const MyComponent = ({ watching }) => {
+			const ctx = useContext(
+				context,
+				(curr, prev) => curr[watching] !== prev[watching]
+			);
+			return <p>{ctx[watching]}</p>;
+		};
+
+		const App = ({ watching }) => {
+			return (
+				<MyProvider>
+					<MyComponent watching={watching} />
+				</MyProvider>
+			);
+		};
+
+		render(<App watching="foo" />, scratch);
+		expect(scratch.innerHTML).to.equal('<p>hello</p>');
+
+		act(() => {
+			set({ foo: 'Earth', bar: 'world' });
+		});
+		expect(scratch.innerHTML).to.equal('<p>Earth</p>');
+
+		render(<App watching="bar" />, scratch);
+		expect(scratch.innerHTML).to.equal('<p>world</p>');
+
+		act(() => {
+			set({ foo: 'Earth', bar: 'hello' });
+		});
+		expect(scratch.innerHTML).to.equal('<p>hello</p>');
+	});
 });

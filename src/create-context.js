@@ -23,7 +23,10 @@ export function createContext(defaultValue) {
 					if (this.props.value !== _props.value) {
 						subs.some(payload => {
 							payload[0].context = _props.value;
-							if (!payload[1] || payload[1](_props.value, this.props.value)) {
+							if (
+								!payload[1] ||
+								payload[1]._update(_props.value, this.props.value)
+							) {
 								enqueueRender(payload[0]);
 							}
 						});
