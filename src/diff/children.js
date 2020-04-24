@@ -260,7 +260,7 @@ export function diffChildren(
 
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {
-		if (oldChildren[i] != null) unmount(oldChildren[i], oldChildren[i]);
+		if (oldChildren[i] != null) unmount(oldChildren[i], oldChildren[i], false);
 	}
 
 	// Set refs only after unmount
