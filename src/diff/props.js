@@ -1,4 +1,4 @@
-import { IS_NON_DIMENSIONAL } from '../constants';
+// import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
 
 /**
@@ -33,20 +33,20 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 	}
 }
 
-function setStyle(style, key, value) {
-	if (key[0] === '-') {
-		style.setProperty(key, value);
-	} else if (
-		typeof value == 'number' &&
-		IS_NON_DIMENSIONAL.test(key) === false
-	) {
-		style[key] = value + 'px';
-	} else if (value == null) {
-		style[key] = '';
-	} else {
-		style[key] = value;
-	}
-}
+// function setStyle(style, key, value) {
+// 	if (key[0] === '-') {
+// 		style.setProperty(key, value);
+// 	} else if (
+// 		typeof value == 'number' &&
+// 		IS_NON_DIMENSIONAL.test(key) === false
+// 	) {
+// 		style[key] = value + 'px';
+// 	} else if (value == null) {
+// 		style[key] = '';
+// 	} else {
+// 		style[key] = value;
+// 	}
+// }
 
 /**
  * Set a property value on a DOM node
@@ -68,36 +68,33 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	}
 
 	if (name === 'style') {
-		s = dom.style;
-
-		if (typeof value == 'string') {
-			s.cssText = value;
-		} else {
-			if (typeof oldValue == 'string') {
-				s.cssText = '';
-				oldValue = null;
-			}
-
-			if (oldValue) {
-				for (let i in oldValue) {
-					if (!(value && i in value)) {
-						setStyle(s, i, '');
-					}
-				}
-			}
-
-			if (value) {
-				for (let i in value) {
-					if (!oldValue || value[i] !== oldValue[i]) {
-						setStyle(s, i, value[i]);
-					}
-				}
-			}
-		}
+		// s = dom.style;
+		// if (typeof value == 'string') {
+		// 	s.cssText = value;
+		// } else {
+		// 	if (typeof oldValue == 'string') {
+		// 		s.cssText = '';
+		// 		oldValue = null;
+		// 	}
+		// 	if (oldValue) {
+		// 		for (let i in oldValue) {
+		// 			if (!(value && i in value)) {
+		// 				setStyle(s, i, '');
+		// 			}
+		// 		}
+		// 	}
+		// 	if (value) {
+		// 		for (let i in value) {
+		// 			if (!oldValue || value[i] !== oldValue[i]) {
+		// 				setStyle(s, i, value[i]);
+		// 			}
+		// 		}
+		// 	}
+		// }
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0] === 'o' && name[1] === 'n') {
-		useCapture = name !== (name = name.replace(/Capture$/, ''));
+		// useCapture = name !== (name = name.replace(/Capture$/, ''));
 		nameLower = name.toLowerCase();
 		name = (nameLower in dom ? nameLower : name).slice(2);
 
@@ -120,20 +117,21 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	) {
 		dom[name] = value == null ? '' : value;
 	} else if (typeof value != 'function' && name !== 'dangerouslySetInnerHTML') {
-		if (name !== (name = name.replace(/^xlink:?/, ''))) {
-			if (value == null || value === false) {
-				dom.removeAttributeNS(
-					'http://www.w3.org/1999/xlink',
-					name.toLowerCase()
-				);
-			} else {
-				dom.setAttributeNS(
-					'http://www.w3.org/1999/xlink',
-					name.toLowerCase(),
-					value
-				);
-			}
-		} else if (
+		// if (name !== (name = name.replace(/^xlink:?/, ''))) {
+		// 	if (value == null || value === false) {
+		// 		dom.removeAttributeNS(
+		// 			'http://www.w3.org/1999/xlink',
+		// 			name.toLowerCase()
+		// 		);
+		// 	} else {
+		// 		dom.setAttributeNS(
+		// 			'http://www.w3.org/1999/xlink',
+		// 			name.toLowerCase(),
+		// 			value
+		// 		);
+		// 	}
+		// } else if (
+		if (
 			value == null ||
 			(value === false &&
 				// ARIA-attributes have a different notion of boolean values.
@@ -157,5 +155,6 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
  * @private
  */
 function eventProxy(e) {
-	this._listeners[e.type](options.event ? options.event(e) : e);
+	// this._listeners[e.type](options.event ? options.event(e) : e);
+	this._listeners[e.type](e);
 }

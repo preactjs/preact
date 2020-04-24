@@ -141,11 +141,11 @@ export function diffChildren(
 			isHydrating
 		);
 
-		if ((j = childVNode.ref) && oldVNode.ref != j) {
-			if (!refs) refs = [];
-			if (oldVNode.ref) refs.push(oldVNode.ref, null, childVNode);
-			refs.push(j, childVNode._component || newDom, childVNode);
-		}
+		// if ((j = childVNode.ref) && oldVNode.ref != j) {
+		// 	if (!refs) refs = [];
+		// 	if (oldVNode.ref) refs.push(oldVNode.ref, null, childVNode);
+		// 	refs.push(j, childVNode._component || newDom, childVNode);
+		// }
 
 		// Only proceed if the vnode has not been unmounted by `diff()` above.
 		if (newDom != null) {
@@ -241,11 +241,11 @@ export function diffChildren(
 	newParentVNode._dom = firstChildDom;
 
 	// Remove children that are not part of any vnode.
-	if (excessDomChildren != null && typeof newParentVNode.type != 'function') {
-		for (i = excessDomChildren.length; i--; ) {
-			if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
-		}
-	}
+	// if (excessDomChildren != null && typeof newParentVNode.type != 'function') {
+	// 	for (i = excessDomChildren.length; i--; ) {
+	// 		if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
+	// 	}
+	// }
 
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {
@@ -253,11 +253,11 @@ export function diffChildren(
 	}
 
 	// Set refs only after unmount
-	if (refs) {
-		for (i = 0; i < refs.length; i++) {
-			applyRef(refs[i], refs[++i], refs[++i]);
-		}
-	}
+	// if (refs) {
+	// 	for (i = 0; i < refs.length; i++) {
+	// 		applyRef(refs[i], refs[++i], refs[++i]);
+	// 	}
+	// }
 }
 
 /**
@@ -268,22 +268,22 @@ export function diffChildren(
  * @param {Array<import('../internal').VNode | string | number>} [flattened] An flat array of children to modify
  * @returns {import('../internal').VNode[]}
  */
-export function toChildArray(children, internal, flattened) {
-	if (flattened == null) flattened = [];
+// export function toChildArray(children, internal, flattened) {
+// 	if (flattened == null) flattened = [];
 
-	if (children == null || typeof children == 'boolean') {
-		if (internal) flattened.push(null);
-	} else if (Array.isArray(children)) {
-		for (let i = 0; i < children.length; i++) {
-			toChildArray(children[i], internal, flattened);
-		}
-	} else if (!internal) {
-		flattened.push(children);
-	} else if (typeof children == 'string' || typeof children == 'number') {
-		flattened.push(createVNode(null, children, null, null, children));
-	} else {
-		flattened.push(children);
-	}
+// 	if (children == null || typeof children == 'boolean') {
+// 		if (internal) flattened.push(null);
+// 	} else if (Array.isArray(children)) {
+// 		for (let i = 0; i < children.length; i++) {
+// 			toChildArray(children[i], internal, flattened);
+// 		}
+// 	} else if (!internal) {
+// 		flattened.push(children);
+// 	} else if (typeof children == 'string' || typeof children == 'number') {
+// 		flattened.push(createVNode(null, children, null, null, children));
+// 	} else {
+// 		flattened.push(children);
+// 	}
 
-	return flattened;
-}
+// 	return flattened;
+// }
