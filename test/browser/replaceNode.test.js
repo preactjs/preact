@@ -211,6 +211,45 @@ describe('replaceNode parameter in render()', () => {
 		);
 	});
 
+	it('should correctly render differently keyed children on subsequent renders with replaceNode (#2496)', () => {
+		const placeholder = document.createElement('div');
+		scratch.appendChild(placeholder);
+		const App = ({ keys }) => (
+			<div>
+				{keys.map(key => (
+					<p key={key}>{key}</p>
+				))}
+			</div>
+		);
+
+		render(<App keys={[0, 1, 2]} />, scratch, placeholder);
+		expect(scratch.innerHTML).to.equal('<div><p>0</p><p>1</p><p>2</p></div>');
+
+		render(<App keys={[1, 2, 3]} />, scratch, placeholder);
+		expect(scratch.innerHTML).to.equal('<div><p>1</p><p>2</p><p>3</p></div>');
+	});
+
+	it('should correctly render keyed top level components on subsequent renders with replaceNode', () => {
+		// Related but slightly different than #2500
+
+		const placeholder = document.createElement('div');
+		scratch.appendChild(placeholder);
+
+		const Wrapper = ({ children }) => <div>{children}</div>;
+		const PreactComponent = ({ data }) => {
+			const elements = data.map(i => <span>{i}</span>);
+			return <Wrapper>{elements}</Wrapper>;
+		};
+
+		render(<PreactComponent key={0} data={[0]} />, scratch, placeholder);
+		expect(scratch.innerHTML).to.equal('<div><span>0</span></div>');
+
+		render(<PreactComponent key={1} data={[0, 1]} />, scratch, placeholder);
+		expect(scratch.innerHTML).to.equal(
+			'<div><span>0</span><span>1</span></div>'
+		);
+	});
+
 	it('should remove redundant elements on subsequent renders with replaceNode', () => {
 		const placeholder = document.createElement('div');
 		scratch.appendChild(placeholder);
