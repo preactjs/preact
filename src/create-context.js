@@ -28,6 +28,10 @@ export function createContext(defaultValue) {
 					}
 				};
 
+				this.unsub = c => {
+					subs.splice(subs.indexOf(c), 1);
+				};
+
 				this.sub = c => {
 					subs.push(c);
 					let old = c.componentWillUnmount;

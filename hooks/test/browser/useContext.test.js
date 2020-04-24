@@ -206,6 +206,65 @@ describe('useContext', () => {
 		expect(values).to.deep.equal([13, 42, 69]);
 	});
 
+	it('should allow for switching subscriptions', () => {
+		const values = [];
+		const Context = createContext();
+		const Context2 = createContext();
+		let unsubSpy, ctxRef, ctx2Ref, subSpy2;
+
+		function Comp({ context }) {
+			const value = useContext(context);
+			values.push(value);
+			return null;
+		}
+
+		render(
+			<Context.Provider
+				ref={r => {
+					ctxRef = r;
+				}}
+				value={42}
+			>
+				<Context2.Provider
+					ref={r => {
+						ctx2Ref = r;
+					}}
+					value={43}
+				>
+					<Comp context={Context} />
+				</Context2.Provider>
+			</Context.Provider>,
+			scratch
+		);
+
+		subSpy2 = sinon.spy(ctx2Ref, 'sub');
+		unsubSpy = sinon.spy(ctxRef, 'unsub');
+
+		render(
+			<Context.Provider
+				ref={r => {
+					ctxRef = r;
+				}}
+				value={42}
+			>
+				<Context2.Provider
+					ref={r => {
+						ctx2Ref = r;
+					}}
+					value={43}
+				>
+					<Comp context={Context2} />
+				</Context2.Provider>
+			</Context.Provider>,
+			scratch
+		);
+
+		expect(unsubSpy).to.have.been.called;
+		expect(subSpy2).to.have.been.called;
+
+		expect(values).to.deep.equal([42, 43]);
+	});
+
 	it('should maintain context', done => {
 		const context = createContext(null);
 		const { Provider } = context;

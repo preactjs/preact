@@ -226,16 +226,25 @@ export function useContext(context) {
 	// `options._hook`. We need to do that in order to make
 	// the devtools aware of this hook.
 	const state = getHookState(currentIndex++, 9);
+
+	if (state._context && state._context !== context && provider) {
+		const previousProvider = currentComponent.context[state._context._id];
+		if (previousProvider) previousProvider.unsub(currentComponent);
+		provider.sub(currentComponent);
+	}
+
 	// The devtools needs access to the context object to
 	// be able to pull of the default value when no provider
 	// is present in the tree.
 	state._context = context;
+
 	if (!provider) return context._defaultValue;
 	// This is probably not safe to convert to "!"
 	if (state._value == null) {
 		state._value = true;
 		provider.sub(currentComponent);
 	}
+
 	return provider.props.value;
 }
 
