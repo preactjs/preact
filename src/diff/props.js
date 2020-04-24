@@ -1,39 +1,39 @@
 // import { IS_NON_DIMENSIONAL } from '../constants';
-// import options from '../options';
+import options from '../options';
 
-// /**
-//  * Diff the old and new properties of a VNode and apply changes to the DOM node
-//  * @param {import('../internal').PreactElement} dom The DOM node to apply
-//  * changes to
-//  * @param {object} newProps The new props
-//  * @param {object} oldProps The old props
-//  * @param {boolean} isSvg Whether or not this node is an SVG node
-//  * @param {boolean} hydrate Whether or not we are in hydration mode
-//  */
-// export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
-// 	let i;
+/**
+ * Diff the old and new properties of a VNode and apply changes to the DOM node
+ * @param {import('../internal').PreactElement} dom The DOM node to apply
+ * changes to
+ * @param {object} newProps The new props
+ * @param {object} oldProps The old props
+ * @param {boolean} isSvg Whether or not this node is an SVG node
+ * @param {boolean} hydrate Whether or not we are in hydration mode
+ */
+export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
+	let i;
 
-// 	if (oldProps) {
-// 		for (i in oldProps) {
-// 			if (i !== 'children' && i !== 'key' && !(i in newProps)) {
-// 				setProperty(dom, i, null, oldProps[i], isSvg);
-// 			}
-// 		}
-// 	}
+	if (oldProps) {
+		for (i in oldProps) {
+			if (i !== 'children' && i !== 'key' && !(i in newProps)) {
+				setProperty(dom, i, null, oldProps[i], isSvg);
+			}
+		}
+	}
 
-// 	for (i in newProps) {
-// 		if (
-// 			(!hydrate || typeof newProps[i] == 'function') &&
-// 			i !== 'children' &&
-// 			i !== 'key' &&
-// 			i !== 'value' &&
-// 			i !== 'checked' &&
-// 			(oldProps && oldProps[i]) !== newProps[i]
-// 		) {
-// 			setProperty(dom, i, newProps[i], oldProps && oldProps[i], isSvg);
-// 		}
-// 	}
-// }
+	for (i in newProps) {
+		if (
+			(!hydrate || typeof newProps[i] == 'function') &&
+			i !== 'children' &&
+			i !== 'key' &&
+			i !== 'value' &&
+			i !== 'checked' &&
+			(oldProps && oldProps[i]) !== newProps[i]
+		) {
+			setProperty(dom, i, newProps[i], oldProps && oldProps[i], isSvg);
+		}
+	}
+}
 
 // function setStyle(style, key, value) {
 // 	if (key[0] === '-') {
