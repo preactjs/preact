@@ -215,7 +215,7 @@ export function diff(
 		newVNode._dom = oldVNode._dom;
 	} else {
 		newVNode._dom = diffElementNodes(
-			oldVNode._dom,
+			// oldVNode._dom,
 			newVNode,
 			oldVNode,
 			globalContext,
@@ -271,7 +271,7 @@ export function commitRoot(commitQueue, root) {
  * @returns {import('../internal').PreactElement}
  */
 function diffElementNodes(
-	dom,
+	// dom,
 	newVNode,
 	oldVNode,
 	globalContext,
@@ -281,6 +281,7 @@ function diffElementNodes(
 	isHydrating
 ) {
 	let i;
+	let dom = oldVNode._dom;
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
 
