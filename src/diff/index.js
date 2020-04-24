@@ -278,7 +278,7 @@ function diffElementNodes(
 	commitQueue,
 	isHydrating
 ) {
-	let i, newValue, newChecked;
+	let i;
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
 
@@ -357,31 +357,7 @@ function diffElementNodes(
 		// 	}
 		// }
 
-		// diffProps(dom, newProps, oldProps, isSvg, isHydrating);
-		if (oldProps) {
-			for (i in oldProps) {
-				if (i !== 'children' && i !== 'key' && !(i in newProps)) {
-					setProperty(dom, i, null, oldProps[i], isSvg);
-				}
-			}
-		}
-
-		for (i in newProps) {
-			if (i === 'value') {
-				newValue = newProps.value;
-			} else if (i === 'checked') {
-				newChecked = newProps.checked;
-			} else if (
-				(!isHydrating || typeof newProps[i] == 'function') &&
-				i !== 'children' &&
-				i !== 'key' &&
-				// i !== 'value' &&
-				// i !== 'checked' &&
-				(oldProps && oldProps[i]) !== newProps[i]
-			) {
-				setProperty(dom, i, newProps[i], oldProps && oldProps[i], isSvg);
-			}
-		}
+		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		// if (newHtml) {
@@ -404,17 +380,19 @@ function diffElementNodes(
 
 		// (as above, don't diff props during hydration)
 		if (!isHydrating) {
-			if (newValue !== undefined && newValue !== dom.value) {
-				setProperty(dom, 'value', newValue, oldProps && oldProps.value, false);
+			if (
+				'value' in newProps &&
+				(i = newProps.value) !== undefined &&
+				i !== dom.value
+			) {
+				setProperty(dom, 'value', i, oldProps && oldProps.value, false);
 			}
-			if (newChecked !== undefined && newChecked !== dom.checked) {
-				setProperty(
-					dom,
-					'checked',
-					newChecked,
-					oldProps && oldProps.checked,
-					false
-				);
+			if (
+				'checked' in newProps &&
+				(i = newProps.checked) !== undefined &&
+				i !== dom.checked
+			) {
+				setProperty(dom, 'checked', i, oldProps && oldProps.checked, false);
 			}
 		}
 	}
