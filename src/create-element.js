@@ -1,4 +1,5 @@
 import options from './options';
+import { EMPTY_OBJ } from './constants';
 
 /**
  * Create an virtual node (used for JSX)
@@ -100,3 +101,5 @@ export function Fragment(props) {
  */
 // export const isValidElement = vnode =>
 // 	vnode != null && vnode.constructor === undefined;
+
+export const EMPTY_VNODE = createVNode(null, EMPTY_OBJ, null, null, null);

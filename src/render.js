@@ -1,6 +1,6 @@
 import { EMPTY_OBJ, EMPTY_ARR } from './constants';
 import { commitRoot, diff } from './diff/index';
-import { createElement, Fragment } from './create-element';
+import { createElement, Fragment, EMPTY_VNODE } from './create-element';
 import options from './options';
 
 const IS_HYDRATE = EMPTY_OBJ;
@@ -38,7 +38,7 @@ export function render(vnode, parentDom, replaceNode) {
 		// Determine the new vnode tree and store it on the DOM element on
 		// our custom `_children` property.
 		((isHydrating ? parentDom : replaceNode || parentDom)._children = vnode),
-		oldVNode || EMPTY_OBJ,
+		oldVNode || EMPTY_VNODE,
 		EMPTY_OBJ,
 		parentDom.ownerSVGElement !== undefined,
 		null,
