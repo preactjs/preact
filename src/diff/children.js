@@ -268,22 +268,22 @@ export function diffChildren(
  * @param {Array<import('../internal').VNode | string | number>} [flattened] An flat array of children to modify
  * @returns {import('../internal').VNode[]}
  */
-// export function toChildArray(children, internal, flattened) {
-// 	if (flattened == null) flattened = [];
+export function toChildArray(children, internal, flattened) {
+	if (flattened == null) flattened = [];
 
-// 	if (children == null || typeof children == 'boolean') {
-// 		if (internal) flattened.push(null);
-// 	} else if (Array.isArray(children)) {
-// 		for (let i = 0; i < children.length; i++) {
-// 			toChildArray(children[i], internal, flattened);
-// 		}
-// 	} else if (!internal) {
-// 		flattened.push(children);
-// 	} else if (typeof children == 'string' || typeof children == 'number') {
-// 		flattened.push(createVNode(null, children, null, null, children));
-// 	} else {
-// 		flattened.push(children);
-// 	}
+	if (children == null || typeof children == 'boolean') {
+		if (internal) flattened.push(null);
+	} else if (Array.isArray(children)) {
+		for (let i = 0; i < children.length; i++) {
+			toChildArray(children[i], internal, flattened);
+		}
+	} else if (!internal) {
+		flattened.push(children);
+	} else if (typeof children == 'string' || typeof children == 'number') {
+		flattened.push(createVNode(null, children, null, null, children));
+	} else {
+		flattened.push(children);
+	}
 
-// 	return flattened;
-// }
+	return flattened;
+}

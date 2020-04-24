@@ -1,7 +1,6 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component } from '../component';
 import { Fragment } from '../create-element';
-// import { diffChildren, toChildArray } from './children';
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
 import { assign, removeNode } from '../util';
