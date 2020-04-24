@@ -227,10 +227,10 @@ export function useContext(context) {
 	// the devtools aware of this hook.
 	const state = getHookState(currentIndex++, 9);
 
-	if (state._context && state._context !== context && provider) {
+	if (state._context && state._context !== context) {
 		const previousProvider = currentComponent.context[state._context._id];
 		if (previousProvider) previousProvider.unsub(currentComponent);
-		provider.sub(currentComponent);
+		if (provider) provider.sub(currentComponent);
 	}
 
 	// The devtools needs access to the context object to
