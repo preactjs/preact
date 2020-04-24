@@ -10,6 +10,8 @@ const { generateConfig } = require('./config');
 async function runBenches(bench1 = 'all', opts) {
 	const globs = bench1 === 'all' ? allBenches : [bench1].concat(opts._);
 	const benchesToRun = await globSrc(globs);
+	console.log('Resolved bench glob to:', benchesToRun);
+
 	const configFileTasks = benchesToRun.map(async benchPath => {
 		return generateConfig(benchesRoot('src', benchPath), opts);
 	});
@@ -17,6 +19,9 @@ async function runBenches(bench1 = 'all', opts) {
 	await mkdir(resultsPath(), { recursive: true });
 
 	const configFiles = await Promise.all(configFileTasks);
+	console.log('Running tach with the following config files:');
+	console.log(configFiles);
+
 	for (const { name, configPath } of configFiles) {
 		const args = [
 			benchesRoot('node_modules/tachometer/bin/tach.js'),
