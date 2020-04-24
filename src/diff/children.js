@@ -286,3 +286,4 @@ export function toChildArray(children) {
 
 	return [children];
 }
+

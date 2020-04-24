@@ -19,7 +19,7 @@ export function render(vnode, parentDom, replaceNode) {
 	// We abuse the `replaceNode` parameter in `hydrate()` to signal if we
 	// are in hydration mode or not by passing `IS_HYDRATE` instead of a
 	// DOM element.
-	let isHydrating = false;
+	let isHydrating = replaceNode === IS_HYDRATE;
 
 	// To be able to support calling `render()` multiple times on the same
 	// DOM node, we need to obtain a reference to the previous tree. We do
@@ -41,9 +41,15 @@ export function render(vnode, parentDom, replaceNode) {
 		oldVNode || EMPTY_VNODE,
 		EMPTY_OBJ,
 		parentDom.ownerSVGElement !== undefined,
-		null,
+		replaceNode && !isHydrating
+			? [replaceNode]
+			: oldVNode
+			? null
+			: parentDom.childNodes.length
+			? EMPTY_ARR.slice.call(parentDom.childNodes)
+			: null,
 		commitQueue,
-		EMPTY_OBJ,
+		replaceNode || EMPTY_OBJ,
 		isHydrating
 	);
 
@@ -57,6 +63,6 @@ export function render(vnode, parentDom, replaceNode) {
  * @param {import('./internal').PreactElement} parentDom The DOM element to
  * update
  */
-// export function hydrate(vnode, parentDom) {
-// 	render(vnode, parentDom, IS_HYDRATE);
-// }
+export function hydrate(vnode, parentDom) {
+	render(vnode, parentDom, IS_HYDRATE);
+}

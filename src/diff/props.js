@@ -1,4 +1,4 @@
-// import { IS_NON_DIMENSIONAL } from '../constants';
+import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
 
 /**
@@ -35,20 +35,20 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 	}
 }
 
-// function setStyle(style, key, value) {
-// 	if (key[0] === '-') {
-// 		style.setProperty(key, value);
-// 	} else if (
-// 		typeof value == 'number' &&
-// 		IS_NON_DIMENSIONAL.test(key) === false
-// 	) {
-// 		style[key] = value + 'px';
-// 	} else if (value == null) {
-// 		style[key] = '';
-// 	} else {
-// 		style[key] = value;
-// 	}
-// }
+function setStyle(style, key, value) {
+	if (key[0] === '-') {
+		style.setProperty(key, value);
+	} else if (
+		typeof value == 'number' &&
+		IS_NON_DIMENSIONAL.test(key) === false
+	) {
+		style[key] = value + 'px';
+	} else if (value == null) {
+		style[key] = '';
+	} else {
+		style[key] = value;
+	}
+}
 
 /**
  * Set a property value on a DOM node
