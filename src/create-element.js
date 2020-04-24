@@ -80,14 +80,14 @@ export function createVNode(type, props, key, ref, original) {
 	};
 
 	if (original == null) vnode._original = vnode;
-	if (options.vnode) options.vnode(vnode);
+	// if (options.vnode) options.vnode(vnode);
 
 	return vnode;
 }
 
-export function createRef() {
-	return {};
-}
+// export function createRef() {
+// 	return {};
+// }
 
 export function Fragment(props) {
 	return props.children;
@@ -98,5 +98,5 @@ export function Fragment(props) {
  * @param {*} vnode
  * @returns {vnode is import('./internal').VNode}
  */
-export const isValidElement = vnode =>
-	vnode != null && vnode.constructor === undefined;
+// export const isValidElement = vnode =>
+// 	vnode != null && vnode.constructor === undefined;
