@@ -1,7 +1,8 @@
 import { EMPTY_OBJ, EMPTY_ARR } from './constants';
-import { commitRoot, diff } from './diff/index';
+import { commitRoot, diff, createDiffData } from './diff/index';
 import { createElement, Fragment, EMPTY_VNODE } from './create-element';
 import options from './options';
+import { selectOldDom } from './diff/children';
 
 const IS_HYDRATE = EMPTY_OBJ;
 
@@ -31,6 +32,15 @@ export function render(vnode, parentDom, replaceNode) {
 		: (replaceNode && replaceNode._children) || parentDom._children;
 	vnode = createElement(Fragment, null, [vnode]);
 
+	let excessDomChildren =
+		replaceNode && !isHydrating
+			? [replaceNode]
+			: oldVNode
+			? null
+			: parentDom.childNodes.length
+			? EMPTY_ARR.slice.call(parentDom.childNodes)
+			: null;
+
 	// List of effects that need to be called after diffing.
 	let commitQueue = [];
 	diff(
@@ -41,15 +51,9 @@ export function render(vnode, parentDom, replaceNode) {
 		oldVNode || EMPTY_VNODE,
 		EMPTY_OBJ,
 		parentDom.ownerSVGElement !== undefined,
-		replaceNode && !isHydrating
-			? [replaceNode]
-			: oldVNode
-			? null
-			: parentDom.childNodes.length
-			? EMPTY_ARR.slice.call(parentDom.childNodes)
-			: null,
+		excessDomChildren,
 		commitQueue,
-		replaceNode || EMPTY_OBJ,
+		createDiffData(replaceNode || selectOldDom(oldVNode, excessDomChildren)),
 		isHydrating
 	);
 

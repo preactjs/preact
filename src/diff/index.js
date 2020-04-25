@@ -1,10 +1,27 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component } from '../component';
 import { Fragment } from '../create-element';
-import { diffChildren } from './children';
+import { diffChildren, selectOldDom } from './children';
 import { diffProps, setProperty } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
+import { logArgsShapeChange, logShapeChange } from '../logShapeChange';
+
+/**
+ * @typedef {{ oldDom: Element | Text; }} DiffData
+ * @param {Element | Text} oldDom
+ */
+export function createDiffData(oldDom) {
+	// const data = { oldDom: null };
+	// data.oldDom = oldDom;
+	// logShapeChange('diffData', data);
+	// if (oldDom === undefined) {
+	// 	throw new Error('whaaaattt');
+	// }
+	// return data;
+
+	return { oldDom };
+}
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -16,7 +33,7 @@ import options from '../options';
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @param {Element | Text} oldDom The current attached DOM
+ * @param {DiffData} diffData The current attached DOM
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
@@ -30,7 +47,7 @@ export function diff(
 	isSvg,
 	excessDomChildren,
 	commitQueue,
-	oldDom,
+	diffData,
 	isHydrating
 ) {
 	let tmp,
@@ -76,7 +93,7 @@ export function diff(
 			c.props = newProps;
 			if (!c.state) c.state = {};
 			c.context = componentContext;
-			// c._globalContext = globalContext;
+			c._globalContext = globalContext;
 			isNew = c._dirty = true;
 			c._renderCallbacks = [];
 		}
@@ -182,6 +199,8 @@ export function diff(
 		let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
 
 		diffChildren(
+			// ...logArgsShapeChange(
+			// 	'diffChildren',
 			parentDom,
 			Array.isArray(renderResult) ? renderResult : [renderResult],
 			newVNode,
@@ -190,8 +209,9 @@ export function diff(
 			isSvg,
 			excessDomChildren,
 			commitQueue,
-			oldDom,
+			diffData,
 			isHydrating
+			// )
 		);
 
 		c.base = newVNode._dom;
@@ -366,6 +386,8 @@ function diffElementNodes(
 		// } else {
 		i = newVNode.props.children;
 		diffChildren(
+			// ...logArgsShapeChange(
+			// 	'diffChildren',
 			dom,
 			Array.isArray(i) ? i : [i],
 			newVNode,
@@ -374,8 +396,9 @@ function diffElementNodes(
 			newVNode.type === 'foreignObject' ? false : isSvg,
 			excessDomChildren,
 			commitQueue,
-			EMPTY_OBJ,
+			createDiffData(selectOldDom(oldVNode, excessDomChildren)),
 			isHydrating
+			// )
 		);
 		// }
 
