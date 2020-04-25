@@ -274,28 +274,39 @@ export function diffChildren(
  * Flatten and loop through the children of a virtual node
  * @param {import('../index').ComponentChildren} children The unflattened
  * children of a virtual node
- * @param {boolean} [internal]
  * @param {Array<import('../internal').VNode | string | number>} [flattened] An flat array of children to modify
  * @returns {import('../internal').VNode[]}
  */
-export function toChildArray(children, internal, flattened) {
-	if (flattened == null) flattened = [];
-
-	// TODO: REMOVE INTERNAL OPTION
-
+// export function toChildArray(children, flattened) {
+// if (flattened == null) flattened = [];
+// if (Array.isArray(children)) {
+// 	for (let i = 0; i < children.length; i++) {
+// 		toChildArray(children[i], flattened);
+// 	}
+// } else if (children != null && typeof children != 'boolean') {
+// 	flattened.push(children);
+// }
+// return flattened;
+// }
+export function toChildArray(children) {
 	if (children == null || typeof children == 'boolean') {
-		if (internal) flattened.push(null);
+		return [];
 	} else if (Array.isArray(children)) {
-		for (let i = 0; i < children.length; i++) {
-			toChildArray(children[i], internal, flattened);
-		}
-	} else if (!internal) {
-		flattened.push(children);
-	} else if (typeof children == 'string' || typeof children == 'number') {
-		flattened.push(createVNode(null, children, null, null, children));
+		// let flattened = [];
+		// for (let i = 0; i < children.length; i++) {
+		// 	flattened = flattened.concat(toChildArray(children[i]));
+		// }
+		// return flattened;
+		// return Array.prototype.concat.apply([], children.map(toChildArray));
+		return [].concat.apply([], children.map(toChildArray));
 	} else {
-		flattened.push(children);
+		return [children];
 	}
 
-	return flattened;
+	// if (children != null && typeof children != 'boolean') {
+	// 	return [children];
+	// }
+	// else if (Array.isArray(children)) {
+	// 	return [].concat.apply([], children.map(toChildArray).filter(Boolean));
+	// }
 }
