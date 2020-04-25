@@ -277,36 +277,12 @@ export function diffChildren(
  * @param {Array<import('../internal').VNode | string | number>} [flattened] An flat array of children to modify
  * @returns {import('../internal').VNode[]}
  */
-// export function toChildArray(children, flattened) {
-// if (flattened == null) flattened = [];
-// if (Array.isArray(children)) {
-// 	for (let i = 0; i < children.length; i++) {
-// 		toChildArray(children[i], flattened);
-// 	}
-// } else if (children != null && typeof children != 'boolean') {
-// 	flattened.push(children);
-// }
-// return flattened;
-// }
 export function toChildArray(children) {
 	if (children == null || typeof children == 'boolean') {
 		return [];
 	} else if (Array.isArray(children)) {
-		// let flattened = [];
-		// for (let i = 0; i < children.length; i++) {
-		// 	flattened = flattened.concat(toChildArray(children[i]));
-		// }
-		// return flattened;
-		// return Array.prototype.concat.apply([], children.map(toChildArray));
-		return [].concat.apply([], children.map(toChildArray));
+		return EMPTY_ARR.concat.apply([], children.map(toChildArray));
 	} else {
 		return [children];
 	}
-
-	// if (children != null && typeof children != 'boolean') {
-	// 	return [children];
-	// }
-	// else if (Array.isArray(children)) {
-	// 	return [].concat.apply([], children.map(toChildArray).filter(Boolean));
-	// }
 }
