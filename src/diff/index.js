@@ -374,13 +374,10 @@ function diffElementNodes(
 		if (newHtml) {
 			newVNode._children = [];
 		} else {
-			let renderResult = newVNode.props.children;
-			renderResult = Array.isArray(renderResult)
-				? renderResult
-				: [renderResult];
+			i = newVNode.props.children;
 			diffChildren(
 				dom,
-				renderResult,
+				Array.isArray(i) ? i : [i],
 				newVNode,
 				oldVNode,
 				globalContext,
