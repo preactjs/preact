@@ -47,7 +47,7 @@ export function diffChildren(
 	// for this purpose, because `null` is a valid value for `oldDom` which can mean to skip to this logic
 	// (e.g. if mounting a new tree in which the old DOM should be ignored (usually for Fragments).
 	if (oldDom == EMPTY_OBJ) {
-		if (excessDomChildren != null) {
+		if (excessDomChildren) {
 			oldDom = excessDomChildren[0];
 		} else if (oldChildrenLength) {
 			oldDom = getDomSibling(oldParentVNode, 0);
@@ -111,10 +111,14 @@ export function diffChildren(
 					isHydrating
 				);
 
-				if ((j = childVNode.ref) && oldVNode.ref != j) {
+				if (childVNode.ref && oldVNode.ref != childVNode.ref) {
 					if (!refs) refs = [];
 					if (oldVNode.ref) refs.push(oldVNode.ref, null, childVNode);
-					refs.push(j, childVNode._component || newDom, childVNode);
+					refs.push(
+						childVNode.ref,
+						childVNode._component || newDom,
+						childVNode
+					);
 				}
 
 				// Only proceed if the vnode has not been unmounted by `diff()` above.
@@ -216,7 +220,7 @@ export function diffChildren(
 	newParentVNode._dom = firstChildDom;
 
 	// Remove children that are not part of any vnode.
-	if (excessDomChildren != null && typeof newParentVNode.type != 'function') {
+	if (excessDomChildren && typeof newParentVNode.type != 'function') {
 		for (i = excessDomChildren.length; i--; ) {
 			if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
 		}
@@ -224,7 +228,7 @@ export function diffChildren(
 
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {
-		if (oldChildren[i] != null) unmount(oldChildren[i], oldChildren[i]);
+		if (oldChildren[i]) unmount(oldChildren[i], oldChildren[i]);
 	}
 
 	// Set refs only after unmount
@@ -245,9 +249,9 @@ export function diffChildren(
  * @returns {import('../internal').VNode[]}
  */
 export function toChildArray(children, callback, flattened) {
-	if (flattened == null) flattened = [];
+	if (!flattened) flattened = [];
 
-	if (children == null || typeof children == 'boolean') {
+	if (!children || typeof children == 'boolean') {
 		if (callback) flattened.push(callback(null));
 	} else if (Array.isArray(children)) {
 		for (let i = 0; i < children.length; i++) {
@@ -257,7 +261,7 @@ export function toChildArray(children, callback, flattened) {
 		flattened.push(children);
 	} else if (typeof children == 'string' || typeof children == 'number') {
 		flattened.push(callback(createVNode(null, children, null, null, children)));
-	} else if (children._dom != null || children._component != null) {
+	} else if (children._dom != null || children._component) {
 		flattened.push(
 			callback(
 				createVNode(
