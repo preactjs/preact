@@ -68,8 +68,6 @@ export function diffChildren(
 				// If found, delete the array item by setting to `undefined`.
 				// We use `undefined`, as `null` is reserved for empty placeholders
 				// (holes).
-				oldVNode = oldChildren[i];
-
 				if (
 					(oldVNode = oldChildren[i]) === null ||
 					(oldVNode &&
