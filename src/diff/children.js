@@ -251,7 +251,7 @@ export function diffChildren(
 export function toChildArray(children, callback, flattened) {
 	if (!flattened) flattened = [];
 
-	if (children != null || typeof children == 'boolean') {
+	if (children == null || typeof children == 'boolean') {
 		if (callback) flattened.push(callback(null));
 	} else if (Array.isArray(children)) {
 		for (let i = 0; i < children.length; i++) {
