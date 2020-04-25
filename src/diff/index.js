@@ -175,7 +175,7 @@ export function diff(
 				tmp != null && tmp.type == Fragment && tmp.key == null;
 			newVNode._children = isTopLevelFragment ? tmp.props.children : tmp;
 			newVNode._children = Array.isArray(newVNode._children)
-				? newVNode._children
+				? newVNode._children.slice()
 				: [newVNode._children];
 
 			if (c.getChildContext != null) {
@@ -369,7 +369,7 @@ function diffElementNodes(
 		} else {
 			newVNode._children = newVNode.props.children;
 			newVNode._children = Array.isArray(newVNode._children)
-				? newVNode._children
+				? newVNode._children.slice()
 				: [newVNode._children];
 			diffChildren(
 				dom,
