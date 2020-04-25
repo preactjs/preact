@@ -173,10 +173,16 @@ export function diff(
 			tmp = c.render(c.props, c.state, c.context);
 			let isTopLevelFragment =
 				tmp != null && tmp.type == Fragment && tmp.key == null;
-			newVNode._children = isTopLevelFragment ? tmp.props.children : tmp;
-			newVNode._children = Array.isArray(newVNode._children)
-				? newVNode._children.slice()
-				: [newVNode._children];
+
+			// NOTE: Reusing _children here leads to VNode shape changes since _children
+			// isn't always an array
+			// TODO: Could we fast path renderResult not being an array? Would probably need to happen
+			// in diffChildren, and might make it hard for diffChildren to be optimized if one of its
+			// argument's type changes a lot
+			let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
+			renderResult = Array.isArray(renderResult)
+				? renderResult
+				: [renderResult];
 
 			if (c.getChildContext != null) {
 				globalContext = assign(assign({}, globalContext), c.getChildContext());
@@ -188,6 +194,7 @@ export function diff(
 
 			diffChildren(
 				parentDom,
+				renderResult,
 				newVNode,
 				oldVNode,
 				globalContext,
@@ -367,12 +374,13 @@ function diffElementNodes(
 		if (newHtml) {
 			newVNode._children = [];
 		} else {
-			newVNode._children = newVNode.props.children;
-			newVNode._children = Array.isArray(newVNode._children)
-				? newVNode._children.slice()
-				: [newVNode._children];
+			let renderResult = newVNode.props.children;
+			renderResult = Array.isArray(renderResult)
+				? renderResult
+				: [renderResult];
 			diffChildren(
 				dom,
+				renderResult,
 				newVNode,
 				oldVNode,
 				globalContext,
