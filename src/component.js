@@ -1,5 +1,5 @@
 import { assign } from './util';
-import { diff, commitRoot } from './diff/index';
+import { diff, commitRoot, createDiffData } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
 
@@ -131,7 +131,7 @@ function renderComponent(component) {
 			parentDom.ownerSVGElement !== undefined,
 			null,
 			commitQueue,
-			oldDom == null ? getDomSibling(vnode) : oldDom,
+			createDiffData(oldDom == null ? getDomSibling(vnode) : oldDom),
 			false
 		);
 		commitRoot(commitQueue, vnode);
