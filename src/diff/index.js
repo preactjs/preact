@@ -182,12 +182,6 @@ export function diff(
 
 			let isTopLevelFragment =
 				tmp != null && tmp.type == Fragment && tmp.key == null;
-
-			// NOTE: Reusing _children here leads to VNode shape changes since _children
-			// isn't always an array
-			// TODO: Could we fast path renderResult not being an array? Would probably need to happen
-			// in diffChildren, and might make it hard for diffChildren to be optimized if one of its
-			// argument's type changes a lot
 			let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
 
 			diffChildren(
