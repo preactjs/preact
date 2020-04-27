@@ -1,4 +1,4 @@
-import { createElement, hydrate, Fragment, Component } from 'preact';
+import { createElement, hydrate, render, Fragment, Component } from 'preact';
 import { Suspense } from 'preact/compat';
 import { useState } from 'preact/hooks';
 import {
@@ -515,8 +515,9 @@ describe('hydrate()', () => {
 
 		it('should reuse suspended markup when suspense resolves during hydration', () => {
 			scratch.innerHTML =
-				'<div id="test"><p>hello bar</p><p>Hello foo</p></div>';
-			const element = scratch;
+				'<div id="test"><p>unsuspended</p><p>regular content</p></div>';
+			// reset
+			scratch.observer.takeRecords();
 			let resolver;
 			const Component = () => {
 				const [state, setState] = useState(false);
@@ -527,31 +528,99 @@ describe('hydrate()', () => {
 							resolve();
 						};
 					});
-				} else {
-					return <p>hello bar</p>;
 				}
+				return <p>unsuspended</p>;
 			};
 			const App = () => {
 				return (
 					<div id="test">
-						<Suspense fallback={<div>baz</div>}>
+						<Suspense fallback={<div>suspense placeholder</div>}>
 							<Component />
 						</Suspense>
-						<p>Hello foo</p>
+						<p>regular content</p>
 					</div>
 				);
 			};
-			hydrate(<App />, element);
-			rerender();
-			expect(element.innerHTML).to.equal(
-				'<div id="test"><p>hello bar</p><p>Hello foo</p></div>'
+			hydrate(<App />, scratch);
+			expect(scratch.observer.takeRecords()).to.have.length(
+				0,
+				'no DOM mutations'
 			);
-			const removeChildSpy = sinon.spy(element.firstChild, 'removeChild');
+			expect(scratch.innerHTML).to.equal(
+				'<div id="test"><p>unsuspended</p><p>regular content</p></div>',
+				'initial hydrated HTML is unchanged'
+			);
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				'<div id="test"><p>unsuspended</p><p>regular content</p></div>',
+				'should not render fallback during hydration'
+			);
+			const removeChildSpy = sinon.spy(scratch.firstChild, 'removeChild');
 			resolver();
 			rerender();
 			expect(removeChildSpy).to.be.not.called;
-			expect(element.innerHTML).to.equal(
-				'<div id="test"><p>hello bar</p><p>Hello foo</p></div>'
+			expect(scratch.innerHTML).to.equal(
+				'<div id="test"><p>unsuspended</p><p>regular content</p></div>'
+			);
+		});
+
+		it('should render fallback when suspense resolves during render (non-hydrate)', () => {
+			scratch.innerHTML =
+				'<div id="test"><p>unsuspended</p><p>regular content</p></div>';
+			// reset
+			scratch.observer.takeRecords();
+			let resolver;
+			const Component = () => {
+				const [state, setState] = useState(false);
+				if (!state) {
+					throw new Promise(resolve => {
+						resolver = () => {
+							setState(true);
+							resolve();
+						};
+					});
+				}
+				return <p>unsuspended</p>;
+			};
+			const App = () => {
+				return (
+					<div id="test">
+						<Suspense fallback={<div>suspense placeholder</div>}>
+							<Component />
+						</Suspense>
+						<p>regular content</p>
+					</div>
+				);
+			};
+			render(<App />, scratch);
+			let mutations = scratch.observer.takeRecords();
+			for (let m of mutations) {
+				switch (m.type) {
+					case 'characterData':
+						console.log('characterData', m.target.data);
+					case 'childList':
+						console.log('childList', m.addedNodes, m.removedNodes);
+				}
+			}
+			// expect(mutations).to.have.length(
+			// 	1,
+			// 	'should inject fallback'
+			// );
+			// expect(scratch.innerHTML).to.equal(
+			// 	'<div id="test"><p>unsuspended</p><p>regular content</p></div>',
+			// 	'initial hydrated HTML is unchanged'
+			// );
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				'<div id="test"><div>suspense placeholder</div><p>regular content</p></div>',
+				'should not render fallback during hydration'
+			);
+			const removeChildSpy = sinon.spy(scratch.firstChild, 'removeChild');
+			resolver();
+			rerender();
+			expect(removeChildSpy).to.be.not.called;
+			expect(scratch.innerHTML).to.equal(
+				'<div id="test"><p>unsuspended</p><p>regular content</p></div>'
 			);
 		});
 	});
