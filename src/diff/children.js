@@ -34,7 +34,7 @@ export function diffChildren(
 	oldDom,
 	isHydrating
 ) {
-	let i, j, oldVNode, newDom, sibDom, firstChildDom, refs;
+	let i, j, oldVNode, newDom, sibDom, firstChildDom, refs, map, key;
 
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
@@ -78,21 +78,53 @@ export function diffChildren(
 				) {
 					oldChildren[i] = undefined;
 				} else {
-					// Either oldVNode === undefined or oldChildrenLength > 0,
-					// so after this loop oldVNode == null or oldVNode is a valid value.
-					for (j = 0; j < oldChildrenLength; j++) {
-						oldVNode = oldChildren[j];
-						// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
-						// We always match by type (in either case).
-						if (
-							oldVNode &&
-							childVNode.key == oldVNode.key &&
-							childVNode.type === oldVNode.type
-						) {
-							oldChildren[j] = undefined;
-							break;
+					if (map === undefined) {
+						map = null;
+
+						// Build maps for both keyed and unkeyed old children, used to find matches for keyed and unkeyed new children.
+						// For unkeyed children the map key is the child's type, for keyed children the map key is the child's key.
+						// Each map value is a singly-linked list of the old child nodes that have that particular key or type.
+						// A list item contains an oldChildren index (`i`) and a pointer to the next linked list item (`next`).
+						// The lists are in the same order as the children appear in the oldChildren list, so it's convenient
+						// to build them by iterating backwards through oldChildren.
+						for (j = oldChildrenLength; j--; ) {
+							if ((oldVNode = oldChildren[j])) {
+								map = map || new Map();
+								key = oldVNode.key == null ? oldVNode.type : oldVNode.key;
+								map.set(key, { index: j, next: map.get(key) });
+							}
 						}
-						oldVNode = null;
+					}
+
+					oldVNode = undefined;
+					if (map) {
+						// Look up potential old children that have either the same key or type as the new child.
+						key = childVNode.key == null ? childVNode.type : childVNode.key;
+						let head = map.get(key);
+
+						// Clean up old consumed children from the beginning of the linked list.
+						// Update the map accordingly to speed up potential future lookups.
+						while (head && !oldChildren[head.index]) {
+							map.set(key, (head = head.next));
+						}
+
+						// Try to find an old child that has the same type (*and* key if the new child
+						// is keyed). Don't update the map here, as the match might not be the first
+						// tested item - the linked list items for consumed children will be cleaned up in
+						// possible later iterations.
+						while (head && !oldVNode) {
+							oldVNode = oldChildren[head.index];
+							if (
+								oldVNode &&
+								oldVNode.key == childVNode.key &&
+								oldVNode.type === childVNode.type
+							) {
+								oldChildren[head.index] = undefined;
+							} else {
+								oldVNode = undefined;
+								head = head.next;
+							}
+						}
 					}
 				}
 
