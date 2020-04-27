@@ -70,11 +70,15 @@ describe('focus', () => {
 			return (
 				<div>
 					{state.before.map(value => (
-						<ListComponent key={value}>{value}</ListComponent>
+						<ListComponent key={props.unkeyed ? undefined : value}>
+							{value}
+						</ListComponent>
 					))}
 					<InputWithId id="0" />
 					{state.after.map(value => (
-						<ListComponent key={value}>{value}</ListComponent>
+						<ListComponent key={props.unkeyed ? undefined : value}>
+							{value}
+						</ListComponent>
 					))}
 				</div>
 			);
@@ -205,6 +209,39 @@ describe('focus', () => {
 
 	it('should maintain focus when adding children around input', () => {
 		render(<DynamicList />, scratch);
+
+		let input = focusInput();
+		expect(scratch.innerHTML).to.equal(getDynamicListHtml());
+
+		prepend();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(getDynamicListHtml());
+		validateFocus(input, 'insert sibling before');
+
+		append();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(getDynamicListHtml());
+		validateFocus(input, 'insert sibling after');
+
+		append();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(getDynamicListHtml());
+		validateFocus(input, 'insert sibling after again');
+
+		prepend();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(getDynamicListHtml());
+		validateFocus(input, 'insert sibling before again');
+	});
+
+	it.skip('should maintain focus when adding children around input (unkeyed)', () => {
+		// Related preactjs/preact#2446
+
+		render(<DynamicList unkeyed />, scratch);
 
 		let input = focusInput();
 		expect(scratch.innerHTML).to.equal(getDynamicListHtml());
