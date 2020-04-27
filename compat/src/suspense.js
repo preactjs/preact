@@ -1,4 +1,4 @@
-import { Component, createElement, options } from 'preact';
+import { Component, createElement, Fragment, options } from 'preact';
 import { assign } from './util';
 
 const oldCatchError = options._catchError;
@@ -11,7 +11,7 @@ options._catchError = function(error, newVNode, oldVNode) {
 		for (; (vnode = vnode._parent); ) {
 			if ((component = vnode._component) && component._childDidSuspend) {
 				// Don't call oldCatchError if we found a Suspense
-				return component._childDidSuspend(error, newVNode._component, oldVNode);
+				return component._childDidSuspend(error, newVNode._component, newVNode);
 			}
 		}
 	}
@@ -42,12 +42,12 @@ Suspense.prototype = new Component();
 /**
  * @param {Promise} promise The thrown promise
  * @param {Component<any, any>} suspendingComponent The suspending component
- * @param {import('./internal').VNode | null | undefined} oldVNode old VNode caught in the _catchError options
+ * @param {import('./internal').VNode | null | undefined} vnode the VNode that originated this suspend
  */
 Suspense.prototype._childDidSuspend = function(
 	promise,
 	suspendingComponent,
-	oldVNode
+	vnode
 ) {
 	/** @type {import('./internal').SuspenseComponent} */
 	const c = this;
@@ -89,7 +89,8 @@ Suspense.prototype._childDidSuspend = function(
 	 * and hydrate it when the suspense actually gets resolved.
 	 * While in non-hydration cases the usual fallbac -> component flow would occour.
 	 */
-	if (!(oldVNode && oldVNode._hydrateDom) && !c._suspensions++) {
+	const wasHydrating = vnode && vnode._hydrating === true;
+	if (!wasHydrating && !c._suspensions++) {
 		c.setState({ _suspended: (c._detachOnNextRender = c._vnode._children[0]) });
 	}
 	promise.then(onResolved, onResolved);
@@ -101,9 +102,13 @@ Suspense.prototype.render = function(props, state) {
 		this._detachOnNextRender = null;
 	}
 
+	const fallback =
+		state._suspended && createElement(Fragment, null, props.fallback);
+	if (fallback) fallback._hydrating = null;
+
 	return [
-		createElement(Component, null, state._suspended ? null : props.children),
-		state._suspended && props.fallback
+		createElement(Fragment, null, state._suspended ? null : props.children),
+		fallback
 	];
 };
 

@@ -41,7 +41,6 @@ export function diff(
 	if (newVNode.constructor !== undefined) return null;
 
 	if (oldVNode._hydrating != null) {
-		// console.log('Resuming at ', oldDom, ' is ', { vnode: Object.assign({}, newVNode), isHydrating: oldVNode._hydrating, domMatch: oldVNode._dom === oldDom, excessDomChildren });
 		isHydrating = oldVNode._hydrating;
 		oldDom = newVNode._dom = oldVNode._dom;
 		// if we resume, we want the tree to be "unlocked"  (TODO: check if this is true for oldVNode)
