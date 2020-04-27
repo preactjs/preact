@@ -275,7 +275,6 @@ export function diffChildren(
  * Flatten and loop through the children of a virtual node
  * @param {import('../index').ComponentChildren} children The unflattened
  * children of a virtual node
- * @param {Array<import('../internal').VNode | string | number>} [flattened] An flat array of children to modify
  * @returns {import('../internal').VNode[]}
  */
 export function toChildArray(children) {
@@ -283,7 +282,7 @@ export function toChildArray(children) {
 		return [];
 	} else if (Array.isArray(children)) {
 		return EMPTY_ARR.concat.apply([], children.map(toChildArray));
-	} else {
-		return [children];
 	}
+
+	return [children];
 }
