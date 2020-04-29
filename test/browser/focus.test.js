@@ -238,7 +238,7 @@ describe('focus', () => {
 		validateFocus(input, 'insert sibling before again');
 	});
 
-	it.skip('should maintain focus when adding children around input (unkeyed)', () => {
+	it('should maintain focus when adding children around input (unkeyed)', () => {
 		// Related preactjs/preact#2446
 
 		render(<DynamicList unkeyed />, scratch);
