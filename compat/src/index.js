@@ -137,7 +137,7 @@ export default {
 	version,
 	Children,
 	render,
-	hydrate: render,
+	hydrate,
 	unmountComponentAtNode,
 	createPortal,
 	createElement,
