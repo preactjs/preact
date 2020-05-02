@@ -14,14 +14,6 @@ import {
 
 const isWeakMapSupported = typeof WeakMap == 'function';
 
-Object.setPrototypeOf =
-	Object.setPrototypeOf ||
-	function(obj, proto) {
-		// eslint-disable-next-line
-		obj.__proto__ = proto;
-		return obj;
-	};
-
 function getClosestDomNodeParent(parent) {
 	if (!parent) return {};
 	if (typeof parent.type == 'function') {
@@ -270,7 +262,8 @@ export function initDebug() {
 				else newProps[i] = v;
 			}
 		}
-		Object.setPrototypeOf(vnode, deprecatedProto);
+		// eslint-disable-next-line
+		vnode.__proto__ = deprecatedProto;
 		if (oldVnode) oldVnode(vnode);
 	};
 
