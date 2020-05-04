@@ -7,8 +7,23 @@
   "umd:main": "dist/index.js",
   "module": "dist/index.module.js",
   "jsnext:main": "dist/index.module.js",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "browser": "./dist/index.module.js"
+    },
+    "./jsx": {
+      "require": "./dist/jsx.js",
+      "import": "./dist/jsx.mjs",
+      "browser": "./dist/jsx.module.js"
+    },
+    "./package.json": "./package.json",
+    "./": "./"
+  },
   "scripts": {
     "build": "npm run -s transpile && npm run -s transpile:jsx && npm run -s copy-typescript-definition",
+    "postbuild": "node ./config/node-13-exports.js",
     "transpile": "microbundle src/index.js -f es,umd --target web --external preact",
     "transpile:jsx": "microbundle src/jsx.js -o dist/jsx.js --target web --external none && microbundle dist/jsx.js -o dist/jsx.js -f cjs",
     "copy-typescript-definition": "copyfiles -f src/*.d.ts dist",
