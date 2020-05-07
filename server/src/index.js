@@ -167,6 +167,11 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				name = name.toLowerCase().replace(/^xlink:?/, 'xlink:');
 			}
 
+			if (name==='htmlFor') {
+				if (props.for) continue;
+				name = 'for';
+			}
+
 			if (name==='style' && v && typeof v==='object') {
 				v = styleObjToCss(v);
 			}
@@ -244,7 +249,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				if (ret) {
 					if (pretty) {
 						let isText = ret.length > 0 && ret[0]!='<';
-						
+
 						// We merge adjacent text nodes, otherwise each piece would be printed
 						// on a new line.
 						if (lastWasText && isText) {
