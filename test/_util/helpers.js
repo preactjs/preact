@@ -270,11 +270,14 @@ let attributesSpy, originalAttributesPropDescriptor;
 export function spyOnElementAttributes() {
 	const test = Object.getOwnPropertyDescriptor(Element.prototype, 'attributes');
 
-	if (!attributesSpy && !test.get.isSinonProxy) {
-		originalAttributesPropDescriptor = Object.getOwnPropertyDescriptor(
-			Element.prototype,
-			'attributes'
-		);
+	if (!attributesSpy || !test.get.isSinonProxy) {
+		if (!originalAttributesPropDescriptor) {
+			originalAttributesPropDescriptor = Object.getOwnPropertyDescriptor(
+				Element.prototype,
+				'attributes'
+			);
+		}
+
 		attributesSpy = sinon.spy(Element.prototype, 'attributes', ['get']);
 	}
 
