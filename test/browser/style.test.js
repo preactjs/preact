@@ -90,6 +90,20 @@ describe('style attribute', () => {
 			.that.equals('0');
 	});
 
+	it('should support animation-iteration-count as number', () => {
+		render(<div style={{ animationIterationCount: 1 }}>Test</div>, scratch);
+		let style = scratch.firstChild.style;
+		expect(style)
+			.to.have.property('animationIterationCount')
+			.that.equals('1');
+
+		render(<div style={{ animationIterationCount: 2.5 }}>Test</div>, scratch);
+		style = scratch.firstChild.style;
+		expect(style)
+			.to.have.property('animationIterationCount')
+			.that.equals('2.5');
+	});
+
 	it('should replace previous style objects', () => {
 		render(<div style={{ display: 'inline' }}>test</div>, scratch);
 
