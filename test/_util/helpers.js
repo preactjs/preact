@@ -221,6 +221,7 @@ export function teardown(scratch) {
 		clearLog();
 	}
 
+	console.log('restoring');
 	restoreElementAttributes();
 }
 
@@ -273,11 +274,8 @@ export function spyOnElementAttributes() {
 			Element.prototype,
 			'attributes'
 		);
-		try {
-			attributesSpy = sinon.spy(Element.prototype, 'attributes', ['get']);
-		} catch (e) {
-			/* IE11 is sometimes weird */
-		}
+		console.log('original', originalAttributesPropDescriptor);
+		attributesSpy = sinon.spy(Element.prototype, 'attributes', ['get']);
 	}
 
 	return attributesSpy;
