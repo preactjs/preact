@@ -221,7 +221,6 @@ export function teardown(scratch) {
 		clearLog();
 	}
 
-	console.log('restoring');
 	restoreElementAttributes();
 }
 
@@ -283,6 +282,7 @@ export function spyOnElementAttributes() {
 
 function restoreElementAttributes() {
 	if (originalAttributesPropDescriptor) {
+		console.log('restoring', originalAttributesPropDescriptor);
 		// Workaround bug in Sinon where getter/setter spies don't get auto-restored
 		Object.defineProperty(
 			Element.prototype,
