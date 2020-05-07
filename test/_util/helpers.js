@@ -270,7 +270,9 @@ let attributesSpy,
 	originalAttributesGetPropDescriptor;
 
 export function spyOnElementAttributes() {
-	if (!attributesSpy) {
+	const test = Object.getOwnPropertyDescriptor(Element.prototype, 'attributes');
+
+	if (!attributesSpy && !test.get.isSinonProxy) {
 		originalAttributesPropDescriptor = Object.getOwnPropertyDescriptor(
 			Element.prototype,
 			'attributes'
