@@ -573,6 +573,23 @@ describe('render', () => {
 		});
 	});
 
+	describe('htmlFor / for massaging', () => {
+		it('should render for using htmlFor', () => {
+			let rendered = render(<label htmlFor="foo" />);
+			expect(rendered).to.equal('<label for="foo"></label>');
+		});
+
+		it('should render for using for', () => {
+			let rendered = render(<label for="foo" />);
+			expect(rendered).to.equal('<label for="foo"></label>');
+		});
+
+		it('should prefer for over htmlFor', () => {
+			let rendered = render(<label for="foo" htmlFor="bar" />);
+			expect(rendered).to.equal('<label for="foo"></label>');
+		});
+	});
+
 	describe('sortAttributes', () => {
 		it('should leave attributes unsorted by default', () => {
 			let rendered = render(<div b1="b1" c="c" a="a" b="b" />);
@@ -602,7 +619,7 @@ describe('render', () => {
 			expect(renderXml(<div foo={false} bar={0} />)).to.equal(`<div bar="0" />`);
 		});
 	});
-	
+
 	describe('state locking', () => {
 		it('should set _dirty and __d to true', () => {
 			let inst;
@@ -615,9 +632,9 @@ describe('render', () => {
 					return <div />;
 				}
 			}
-			
+
 			expect(render(<Foo />)).to.equal('<div></div>');
-			
+
 			expect(inst).to.have.property('_dirty', true);
 			expect(inst).to.have.property('__d', true);
 		});
@@ -635,9 +652,9 @@ describe('render', () => {
 					return <Bar count={++count} />;
 				}
 			}
-			
+
 			expect(render(<Foo />)).to.equal('<div></div>');
-			
+
 			expect(Bar).to.have.been.calledOnce.and.calledWithMatch({ count: 1 });
 		});
 	});
