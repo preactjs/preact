@@ -273,7 +273,11 @@ export function spyOnElementAttributes() {
 			Element.prototype,
 			'attributes'
 		);
-		attributesSpy = sinon.spy(Element.prototype, 'attributes', ['get']);
+		try {
+			attributesSpy = sinon.spy(Element.prototype, 'attributes', ['get']);
+		} catch (e) {
+			/* IE11 is sometimes weird */
+		}
 	}
 
 	return attributesSpy;
