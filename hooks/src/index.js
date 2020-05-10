@@ -122,6 +122,7 @@ export function useState(initialState) {
 export function useReducer(reducer, initialState, init) {
 	/** @type {import('./internal').ReducerHookState} */
 	const hookState = getHookState(currentIndex++, 2);
+	hookState._reducer = reducer;
 	if (!hookState._component) {
 		hookState._component = currentComponent;
 
@@ -129,7 +130,7 @@ export function useReducer(reducer, initialState, init) {
 			!init ? invokeOrReturn(undefined, initialState) : init(initialState),
 
 			action => {
-				const nextValue = reducer(hookState._value[0], action);
+				const nextValue = hookState._reducer(hookState._value[0], action);
 				if (hookState._value[0] !== nextValue) {
 					hookState._value[0] = nextValue;
 					hookState._component.setState({});
