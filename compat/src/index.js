@@ -95,6 +95,12 @@ function findDOMNode(component) {
 // eslint-disable-next-line camelcase
 const unstable_batchedUpdates = (callback, arg) => callback(arg);
 
+/**
+ * Strict Mode is not implemented in Preact, so we provide a stand-in for it
+ * that just renders its children without imposing any restrictions.
+ */
+const StrictMode = Fragment;
+
 export * from 'preact/hooks';
 export {
 	version,
@@ -117,6 +123,7 @@ export {
 	forwardRef,
 	// eslint-disable-next-line camelcase
 	unstable_batchedUpdates,
+	StrictMode,
 	Suspense,
 	SuspenseList,
 	lazy
@@ -153,6 +160,7 @@ export default {
 	memo,
 	forwardRef,
 	unstable_batchedUpdates,
+	StrictMode,
 	Suspense,
 	SuspenseList,
 	lazy
