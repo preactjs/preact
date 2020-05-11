@@ -44,6 +44,7 @@ declare namespace React {
 	export import lazy = _Suspense.lazy;
 
 	// Compat
+	export import StrictMode = preact.Fragment;
 	export const version: string;
 
 	export function createPortal(
