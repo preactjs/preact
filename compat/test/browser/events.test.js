@@ -36,9 +36,23 @@ describe('preact/compat events', () => {
 		const event = spy.args[0][0];
 		expect(event).to.haveOwnProperty('persist');
 		expect(event).to.haveOwnProperty('nativeEvent');
+		expect(event).to.haveOwnProperty('isDefaultPrevented');
+		expect(event).to.haveOwnProperty('isPropagationStopped');
 		expect(typeof event.persist).to.equal('function');
+		expect(typeof event.isDefaultPrevented).to.equal('function');
+		expect(typeof event.isPropagationStopped).to.equal('function');
 
 		expect(() => event.persist()).to.not.throw();
+		expect(() => event.isDefaultPrevented()).to.not.throw();
+		expect(() => event.isPropagationStopped()).to.not.throw();
+
+		expect(event.isDefaultPrevented()).to.be.false;
+		event.preventDefault();
+		expect(event.isDefaultPrevented()).to.be.true;
+
+		expect(event.isPropagationStopped()).to.be.false;
+		event.stopPropagation();
+		expect(event.isPropagationStopped()).to.be.true;
 	});
 
 	it('should normalize ondoubleclick event', () => {

@@ -116,4 +116,60 @@ describe('useReducer', () => {
 
 		expect(states).to.deep.equal([{ count: 10 }, { count: 20 }]);
 	});
+
+	it('provides a stable reference for dispatch', () => {
+		const dispatches = [];
+		let _dispatch;
+
+		const initState = { count: 0 };
+
+		function reducer(state, action) {
+			switch (action.type) {
+				case 'increment':
+					return { count: state.count + action.by };
+			}
+		}
+
+		function Comp() {
+			const [, dispatch] = useReducer(reducer, initState);
+			_dispatch = dispatch;
+			dispatches.push(dispatch);
+			return null;
+		}
+
+		render(<Comp />, scratch);
+
+		_dispatch({ type: 'increment', by: 10 });
+		rerender();
+
+		expect(dispatches[0]).to.equal(dispatches[1]);
+	});
+
+	it('uses latest reducer', () => {
+		const states = [];
+		let _dispatch;
+
+		const initState = { count: 0 };
+
+		function Comp({ increment }) {
+			const [state, dispatch] = useReducer(function(state, action) {
+				switch (action.type) {
+					case 'increment':
+						return { count: state.count + increment };
+				}
+			}, initState);
+			_dispatch = dispatch;
+			states.push(state);
+			return null;
+		}
+
+		render(<Comp increment={10} />, scratch);
+
+		render(<Comp increment={20} />, scratch);
+
+		_dispatch({ type: 'increment' });
+		rerender();
+
+		expect(states).to.deep.equal([{ count: 0 }, { count: 0 }, { count: 20 }]);
+	});
 });

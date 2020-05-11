@@ -8,6 +8,9 @@ import './fakeDevTools';
 import 'preact/debug';
 import * as PropTypes from 'prop-types';
 
+// eslint-disable-next-line no-duplicate-imports
+import { resetPropWarnings } from 'preact/debug';
+
 const h = createElement;
 /** @jsx createElement */
 
@@ -114,17 +117,25 @@ describe('debug', () => {
 		expect(vnode.props.__self).to.be.undefined;
 	});
 
-	it('should throw errors when accessing certain attributes', () => {
+	it('should warn when accessing certain attributes', () => {
 		const vnode = h('div', null);
-		expect(() => vnode).to.not.throw();
-		expect(() => vnode.attributes).to.throw(/use vnode.props/);
-		expect(() => vnode.nodeName).to.throw(/use vnode.type/);
-		expect(() => vnode.children).to.throw(/use vnode.props.children/);
-		expect(() => (vnode.attributes = {})).to.throw(/use vnode.props/);
-		expect(() => (vnode.nodeName = 'test')).to.throw(/use vnode.type/);
-		expect(() => (vnode.children = [<div />])).to.throw(
-			/use vnode.props.children/
-		);
+		vnode;
+		vnode.attributes;
+		expect(console.warn).to.be.calledOnce;
+		expect(console.warn.args[0]).to.match(/use vnode.props/);
+		vnode.nodeName;
+		expect(console.warn).to.be.calledTwice;
+		expect(console.warn.args[1]).to.match(/use vnode.type/);
+		vnode.children;
+		expect(console.warn).to.be.calledThrice;
+		expect(console.warn.args[2]).to.match(/use vnode.props.children/);
+
+		vnode.attributes = {};
+		expect(console.warn.args[3]).to.match(/use vnode.props/);
+		vnode.nodeName = '';
+		expect(console.warn.args[4]).to.match(/use vnode.type/);
+		vnode.children = [];
+		expect(console.warn.args[5]).to.match(/use vnode.props.children/);
 	});
 
 	it('should warn when calling setState inside the constructor', () => {
@@ -141,6 +152,20 @@ describe('debug', () => {
 		render(<Foo />, scratch);
 		expect(console.warn).to.be.calledOnce;
 		expect(console.warn.args[0]).to.match(/no-op/);
+	});
+
+	it('should NOT warn when calling setState inside the cWM', () => {
+		class Foo extends Component {
+			componentWillMount() {
+				this.setState({ foo: true });
+			}
+			render() {
+				return <div>foo</div>;
+			}
+		}
+
+		render(<Foo />, scratch);
+		expect(console.warn).to.not.be.called;
 	});
 
 	it('should warn when calling setState on an unmounted Component', () => {
@@ -492,6 +517,10 @@ describe('debug', () => {
 	});
 
 	describe('PropTypes', () => {
+		beforeEach(() => {
+			resetPropWarnings();
+		});
+
 		it("should fail if props don't match prop-types", () => {
 			function Foo(props) {
 				return <h1>{props.text}</h1>;
@@ -501,10 +530,40 @@ describe('debug', () => {
 				text: PropTypes.string.isRequired
 			};
 
-			render(<Foo />, scratch);
+			render(<Foo text={123} />, scratch);
 
 			expect(console.error).to.be.calledOnce;
-			expect(errors[0].includes('required')).to.equal(true);
+
+			// The message here may change when the "prop-types" library is updated,
+			// but we check it exactly to make sure all parameters were supplied
+			// correctly.
+			expect(console.error).to.be.calledWith(
+				'Failed prop type: Invalid prop `text` of type `number` supplied to `Foo`, expected `string`.'
+			);
+		});
+
+		it('should only log a given prop type error once', () => {
+			function Foo(props) {
+				return <h1>{props.text}</h1>;
+			}
+
+			Foo.propTypes = {
+				text: PropTypes.string.isRequired,
+				count: PropTypes.number
+			};
+
+			// Trigger the same error twice. The error should only be logged
+			// once.
+			render(<Foo text={123} />, scratch);
+			render(<Foo text={123} />, scratch);
+
+			expect(console.error).to.be.calledOnce;
+
+			// Trigger a different error. This should result in a new log
+			// message.
+			console.error.resetHistory();
+			render(<Foo text="ok" count="123" />, scratch);
+			expect(console.error).to.be.calledOnce;
 		});
 
 		it('should render with error logged when validator gets signal and throws exception', () => {

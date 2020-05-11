@@ -727,4 +727,41 @@ describe('Lifecycle methods', () => {
 		render(<App />, scratch);
 		expect(scratch.innerHTML).to.equal('<div>Hello World!</div>');
 	});
+
+	it('should support nested update with strict-equal vnodes', () => {
+		let wrapperSetState, childSetState;
+
+		class Child extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { foo: 'baz' };
+			}
+
+			render() {
+				childSetState = this.setState.bind(this);
+				return <p>{this.state.foo}</p>;
+			}
+		}
+
+		class Wrapper extends Component {
+			render() {
+				wrapperSetState = this.setState.bind(this);
+				return this.props.children;
+			}
+		}
+
+		const App = () => (
+			<Wrapper>
+				<Child />
+			</Wrapper>
+		);
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<p>baz</p>');
+
+		wrapperSetState({ hi: 'world' });
+		childSetState({ foo: 'bar' });
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>bar</p>');
+	});
 });

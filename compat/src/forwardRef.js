@@ -1,14 +1,13 @@
 import { options } from 'preact';
 import { assign } from './util';
 
-let oldVNodeHook = options.vnode;
-options.vnode = vnode => {
+let oldDiffHook = options._diff;
+options._diff = vnode => {
 	if (vnode.type && vnode.type._forwarded && vnode.ref) {
 		vnode.props.ref = vnode.ref;
 		vnode.ref = null;
 	}
-
-	if (oldVNodeHook) oldVNodeHook(vnode);
+	if (oldDiffHook) oldDiffHook(vnode);
 };
 
 /**
@@ -24,8 +23,7 @@ export function forwardRef(fn) {
 		delete clone.ref;
 		return fn(clone, props.ref);
 	}
-	Forwarded.prototype.isReactComponent = true;
-	Forwarded._forwarded = true;
+	Forwarded.prototype.isReactComponent = Forwarded._forwarded = true;
 	Forwarded.displayName = 'ForwardRef(' + (fn.displayName || fn.name) + ')';
 	return Forwarded;
 }

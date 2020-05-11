@@ -1752,7 +1752,7 @@ describe('Components', () => {
 			}
 		}
 
-		let condition = false;
+		let renderChildDiv = false;
 
 		let child;
 		class Child extends Component {
@@ -1761,7 +1761,7 @@ describe('Components', () => {
 			}
 			render() {
 				child = this;
-				if (!condition) return null;
+				if (!renderChildDiv) return null;
 				return <div class="child" />;
 			}
 		}
@@ -1786,14 +1786,14 @@ describe('Components', () => {
 		expect(getDom(child)).to.equalNode(child.base);
 
 		parent.setState({});
-		condition = true;
+		renderChildDiv = true;
 		child.forceUpdate();
 		expect(getDom(child)).to.equalNode(child.base);
 		rerender();
 
 		expect(getDom(child)).to.equalNode(child.base);
 
-		condition = false;
+		renderChildDiv = false;
 		app.setState({});
 		child.forceUpdate();
 		rerender();

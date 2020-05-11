@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>replace all rows</title>
+		<meta name="description" content="updating all 1,000 rows" />
+	</head>
+	<body>
+		<div id="main"></div>
+		<script type="module">
+			import * as bench from '/bench.js';
+			import { testElementText, afterFrame, afterFrameAsync } from "./util.js";
+			import * as preact from 'preact';
+			import { render } from "../src/keyed-children/index.js"
+
+			const { run } = render(preact);
+
+			async function main() {
+				const elementSelector = "tr:first-child > td:first-child";
+
+				const WARMUP_COUNT = 5;
+				for (let i = 0; i < WARMUP_COUNT; i++) {
+					run();
+
+					await afterFrameAsync();
+					testElementText(elementSelector, (i * 1000 + 1).toFixed());
+				}
+
+				await afterFrameAsync();
+
+				afterFrame(function() {
+					testElementText(elementSelector, "5001");
+					bench.stop();
+				});
+
+				bench.start();
+				run();
+			}
+
+			main();
+		</script>
+	</body>
+</html>

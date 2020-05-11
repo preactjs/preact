@@ -9,3 +9,4 @@ yarn.lock
 test/ts/**/*.js
 coverage
 *.sw[op]
+*.log

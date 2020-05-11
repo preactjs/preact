@@ -1,7 +1,7 @@
 {
   "name": "preact",
   "amdName": "preact",
-  "version": "10.3.2",
+  "version": "10.4.1",
   "private": false,
   "description": "Fast 3kb React-compatible Virtual DOM library.",
   "main": "dist/preact.js",
@@ -13,32 +13,38 @@
     ".": {
       "browser": "./dist/preact.module.js",
       "umd": "./dist/preact.umd.js",
-      "import": "./dist/preact.module.js",
+      "import": "./dist/preact.mjs",
       "require": "./dist/preact.js"
     },
     "./compat": {
       "browser": "./compat/dist/compat.module.js",
       "umd": "./compat/dist/compat.umd.js",
       "require": "./compat/dist/compat.js",
-      "import": "./compat/dist/compat.module.js"
+      "import": "./compat/dist/compat.mjs"
     },
     "./debug": {
       "browser": "./debug/dist/debug.module.js",
       "umd": "./debug/dist/debug.umd.js",
       "require": "./debug/dist/debug.js",
-      "import": "./debug/dist/debug.module.js"
+      "import": "./debug/dist/debug.mjs"
+    },
+    "./devtools": {
+      "browser": "./devtools/dist/devtools.module.js",
+      "umd": "./devtools/dist/devtools.umd.js",
+      "require": "./devtools/dist/devtools.js",
+      "import": "./devtools/dist/devtools.mjs"
     },
     "./hooks": {
       "browser": "./hooks/dist/hooks.module.js",
       "umd": "./hooks/dist/hooks.umd.js",
       "require": "./hooks/dist/hooks.js",
-      "import": "./hooks/dist/hooks.module.js"
+      "import": "./hooks/dist/hooks.mjs"
     },
     "./test-utils": {
       "browser": "./test-utils/dist/testUtils.module.js",
       "umd": "./test-utils/dist/testUtils.umd.js",
       "require": "./test-utils/dist/testUtils.js",
-      "import": "./test-utils/dist/testUtils.module.js"
+      "import": "./test-utils/dist/testUtils.mjs"
     },
     "./compat/server": {
       "require": "./compat/server.js"
@@ -53,17 +59,19 @@
   },
   "types": "src/index.d.ts",
   "scripts": {
-    "build": "npm-run-all --parallel build:* && cp dist/preact.js dist/preact.min.js",
+    "prepare": "run-s build",
+    "build": "npm-run-all --parallel build:*",
     "build:core": "microbundle build --raw",
     "build:debug": "microbundle build --raw --cwd debug",
     "build:devtools": "microbundle build --raw --cwd devtools",
     "build:hooks": "microbundle build --raw --cwd hooks",
     "build:test-utils": "microbundle build --raw --cwd test-utils",
     "build:compat": "microbundle build --raw --cwd compat --globals 'preact/hooks=preactHooks'",
+    "postbuild": "node ./config/node-13-exports.js",
     "dev": "microbundle watch --raw --format cjs",
     "dev:hooks": "microbundle watch --raw --format cjs --cwd hooks",
     "dev:compat": "microbundle watch --raw --format cjs --cwd compat --globals 'preact/hooks=preactHooks'",
-    "test": "npm-run-all lint build test:unit",
+    "test": "npm-run-all build lint test:unit",
     "test:unit": "run-p test:mocha test:karma:minify test:ts",
     "test:ts": "run-p test:ts:*",
     "test:ts:core": "tsc -p test/ts/ && mocha --require \"@babel/register\" test/ts/**/*-test.js",
@@ -222,7 +230,6 @@
     "prop-types": "^15.7.2",
     "sinon": "^6.1.3",
     "sinon-chai": "^3.0.0",
-    "travis-size-report": "^1.0.1",
     "typescript": "^3.0.1",
     "webpack": "^4.3.0"
   }
