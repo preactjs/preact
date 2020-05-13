@@ -7,9 +7,13 @@ import { createVNode } from './create-element';
  * @param {import('./internal').VNode} vnode The virtual DOM element to clone
  * @param {object} props Attributes/props to add when cloning
  * @param {Array<import('./index').ComponentChildren>} rest Any additional arguments will be used as replacement children.
- * @returns {import('./internal').VNode}
+ * @returns {import('./internal').VNode|import('./index').ComponentChildren}
  */
 export function cloneElement(vnode, props) {
+	if (!vnode.type && !vnode._children) {
+		const clone = vnode;
+		return clone;
+	}
 	props = assign(assign({}, vnode.props), props);
 	if (arguments.length > 2) props.children = EMPTY_ARR.slice.call(arguments, 2);
 	let normalizedProps = {};
