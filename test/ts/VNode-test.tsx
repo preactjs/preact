@@ -9,6 +9,7 @@ import {
 	ComponentFactory,
 	VNode,
 	ComponentChildren,
+	ComponentChild,
 	cloneElement
 } from '../../src';
 
@@ -32,6 +33,43 @@ const SimpleFunctionalComponent = () => <div />;
 
 const a: ComponentFactory = SimpleComponent;
 const b: ComponentFactory = SimpleFunctionalComponent;
+
+describe('ComponentChild TS types', () => {
+	it('vnode should work with cloneElement', () => {
+		const comp: VNode = (
+			<SimpleComponent>
+				<div>child 1</div>
+			</SimpleComponent>
+		);
+		const clone: ComponentChild = cloneElement(comp.props.children);
+		expect(comp.props.children).to.deep.equal(clone);
+	});
+
+	it('number should work with cloneElement', () => {
+		const comp: VNode = <SimpleComponent>123124</SimpleComponent>;
+		const clone: ComponentChild = cloneElement(comp.props.children);
+		expect(comp.props.children).to.equal(clone);
+	});
+
+	it('string should work with cloneElement', () => {
+		const comp: VNode = <SimpleComponent>'hello'</SimpleComponent>;
+		const clone: ComponentChild = cloneElement(comp.props.children);
+		expect(comp.props.children).to.equal(clone);
+	});
+
+	it('object should work with cloneElement', () => {
+		const foo = { bar: 'baz' };
+		const comp: VNode = <SimpleComponent>{foo}</SimpleComponent>;
+		const clone: ComponentChild = cloneElement(comp.props.children);
+		expect(comp.props.children).to.equal(clone);
+	});
+
+	it('boolean should work with cloneElement', () => {
+		const comp: VNode = <SimpleComponent>false</SimpleComponent>;
+		const clone: ComponentChild = cloneElement(comp.props.children);
+		expect(comp.props.children).to.equal(clone);
+	});
+});
 
 describe('VNode TS types', () => {
 	it('is returned by h', () => {
