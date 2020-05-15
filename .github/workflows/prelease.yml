@@ -20,7 +20,7 @@ jobs:
 
       - name: git config
         run: |
-          git config --global user.email "sventschui@gmail.com"
+          git config --global user.email "hello@preact.dev"
           git config --global user.name "prelease"
 
       - run: npm version ${{ github.event.client_payload.version }}
