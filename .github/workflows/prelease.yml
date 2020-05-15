@@ -1,0 +1,61 @@
+on:
+  repository_dispatch:
+    types: prelease
+
+jobs:
+  prelease:
+    runs-on: ubuntu-latest
+    name: prelease
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: '${{ github.event.client_payload.branch }}'
+
+      - name: assert on correct commit
+        run: |
+          if [[ "$(git rev-parse HEAD)" != "${{ github.event.client_payload.latest_commit_sha }}" ]]; then
+            echo "Branch ${{ github.event.client_payload.branch }} checked out with SHA $(git rev-parse HEAD) but expected ${{ github.event.client_payload.latest_commit_sha }}"
+            exit 1
+          fi
+
+      - name: git config
+        run: |
+          git config --global user.email "sventschui@gmail.com"
+          git config --global user.name "prelease"
+
+      - run: npm version ${{ github.event.client_payload.version }}
+
+      - run: npm pack
+
+      - name: Set PRELEASE_GIT_TAG
+        run: echo "::set-env name=PRELEASE_GIT_TAG::$(cat package.json | jq -r '["v",.version]|join("")')"
+
+      - run: git push origin refs/tags/${{ env.PRELEASE_GIT_TAG }}
+
+      - run: git push origin ${{ github.event.client_payload.branch }}
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ env.PRELEASE_GIT_TAG }}
+          release_name: ${{ github.event.client_payload.title }}
+          body: ${{ github.event.client_payload.changelog }}
+          draft: false
+          prerelease: false
+
+      - name: Set PRELEASE_TARBALL
+        run: echo "::set-env name=PRELEASE_TARBALL::$(cat package.json | jq -r '[.name,"-",.version,".tgz"]|join("")')"
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ./${{ env.PRELEASE_TARBALL }}
+          asset_name: ${{ env.PRELEASE_TARBALL }}
+          asset_content_type: application/gzip
