@@ -14,6 +14,7 @@
     "regex": "^_"
   },
   "peerDependencies": {
-    "preact": "^10.0.0"
+    "preact": "^10.0.0",
+    "preact-render-to-string": "^5.1.8"
   }
 }
