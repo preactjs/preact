@@ -1,5 +1,6 @@
 import React, { createElement, render } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { getSymbol } from './testUtils';
 
 describe('compat createElement()', () => {
 	/** @type {HTMLDivElement} */
@@ -19,20 +20,8 @@ describe('compat createElement()', () => {
 				<a>t</a>
 			</div>
 		);
-		let $$typeof = 0xeac7;
-		try {
-			// eslint-disable-next-line
-			if (
-				Function.prototype.toString
-					.call(eval('Symbol.for'))
-					.match(/\[native code\]/)
-			) {
-				// Concatenate these string literals to prevent the test
-				// harness and/or Babel from modifying the symbol value.
-				// eslint-disable-next-line
-				$$typeof = eval('Sym' + 'bol.for("react.element")');
-			}
-		} catch (e) {}
+
+		const $$typeof = getSymbol('react.element', 0xeac7);
 		expect(vnode).to.have.property('$$typeof', $$typeof);
 		expect(vnode).to.have.property('type', 'div');
 		expect(vnode)
