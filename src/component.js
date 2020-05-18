@@ -2,6 +2,7 @@ import { assign } from './util';
 import { diff, commitRoot, createDiffData } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
+import { logArgsShapeChange } from './logShapeChange';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -124,6 +125,8 @@ function renderComponent(component) {
 		oldVNode._original = oldVNode;
 
 		let newDom = diff(
+			// ...logArgsShapeChange(
+			// 	'diff',
 			parentDom,
 			vnode,
 			oldVNode,
@@ -133,6 +136,7 @@ function renderComponent(component) {
 			commitQueue,
 			createDiffData(oldDom == null ? getDomSibling(vnode) : oldDom),
 			false
+			// )
 		);
 		commitRoot(commitQueue, vnode);
 

@@ -3,6 +3,7 @@ import { createVNode, Fragment, EMPTY_VNODE } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { removeNode } from '../util';
 import { getDomSibling } from '../component';
+import { logArgsShapeChange } from '../logShapeChange';
 
 /**
  * Diff the children of a virtual node
@@ -62,6 +63,8 @@ export function diffChildren(
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		newDom = diff(
+			// ...logArgsShapeChange(
+			// 	'diff',
 			parentDom,
 			childVNode,
 			oldVNode,
@@ -71,6 +74,7 @@ export function diffChildren(
 			commitQueue,
 			createDiffData(oldDom),
 			isHydrating
+			// )
 		);
 
 		// if ((j = childVNode.ref) && oldVNode.ref != j) {

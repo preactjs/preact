@@ -3,6 +3,7 @@ import { commitRoot, diff, createDiffData } from './diff/index';
 import { createElement, Fragment, EMPTY_VNODE } from './create-element';
 import options from './options';
 import { selectOldDom } from './diff/children';
+import { logArgsShapeChange } from './logShapeChange';
 
 const IS_HYDRATE = EMPTY_OBJ;
 
@@ -44,6 +45,8 @@ export function render(vnode, parentDom, replaceNode) {
 	// List of effects that need to be called after diffing.
 	let commitQueue = [];
 	diff(
+		// ...logArgsShapeChange(
+		// 	'diff',
 		parentDom,
 		// Determine the new vnode tree and store it on the DOM element on
 		// our custom `_children` property.
@@ -55,6 +58,7 @@ export function render(vnode, parentDom, replaceNode) {
 		commitQueue,
 		createDiffData(replaceNode || selectOldDom(oldVNode, excessDomChildren)),
 		isHydrating
+		// )
 	);
 
 	// Flush all queued effects
