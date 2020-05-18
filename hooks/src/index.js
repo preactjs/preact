@@ -68,7 +68,7 @@ options.unmount = vnode => {
 	const c = vnode._component;
 	if (c && c.__hooks) {
 		try {
-			c.__hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
+			c.__hooks._list.forEach(invokeCleanup);
 		} catch (e) {
 			options._catchError(e, c._vnode);
 		}
