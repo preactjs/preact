@@ -202,7 +202,8 @@ export function diff(
 			// ...logArgsShapeChange(
 			// 	'diffChildren',
 			parentDom,
-			Array.isArray(renderResult) ? renderResult : [renderResult],
+			// Array.isArray(renderResult) ? renderResult : [renderResult],
+			renderResult,
 			newVNode,
 			oldVNode,
 			globalContext,
@@ -389,7 +390,8 @@ function diffElementNodes(
 			// ...logArgsShapeChange(
 			// 	'diffChildren',
 			dom,
-			Array.isArray(i) ? i : [i],
+			// Array.isArray(i) ? i : [i],
+			newVNode.props.children,
 			newVNode,
 			oldVNode,
 			globalContext,

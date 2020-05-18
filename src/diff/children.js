@@ -45,6 +45,8 @@ export function diffChildren(
 
 	let oldChildrenLength = oldChildren.length;
 
+	renderResult = Array.isArray(renderResult) ? renderResult : [renderResult];
+
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = newParentVNode._children[i] = coerceToVNode(renderResult[i]);
