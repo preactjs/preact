@@ -196,13 +196,16 @@ export function diff(
 
 		let isTopLevelFragment =
 			tmp != null && tmp.type == Fragment && tmp.key == null;
-		let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
+		newVNode._children = isTopLevelFragment ? tmp.props.children : tmp;
+		newVNode._children = Array.isArray(newVNode._children)
+			? newVNode._children
+			: [newVNode._children];
 
 		diffChildren(
 			// ...logArgsShapeChange(
 			// 	'diffChildren',
 			parentDom,
-			Array.isArray(renderResult) ? renderResult : [renderResult],
+			// Array.isArray(renderResult) ? renderResult : [renderResult],
 			newVNode,
 			oldVNode,
 			globalContext,
@@ -385,11 +388,12 @@ function diffElementNodes(
 		// 	newVNode._children = [];
 		// } else {
 		i = newVNode.props.children;
+		newVNode._children = Array.isArray(i) ? i : [i];
 		diffChildren(
 			// ...logArgsShapeChange(
 			// 	'diffChildren',
 			dom,
-			Array.isArray(i) ? i : [i],
+			// Array.isArray(i) ? i : [i],
 			newVNode,
 			oldVNode,
 			globalContext,
