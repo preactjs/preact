@@ -8,7 +8,6 @@ import { getDomSibling } from '../component';
  * Diff the children of a virtual node
  * @param {import('../internal').PreactElement} parentDom The DOM element whose
  * children are being diffed
- * @param {import('../index').ComponentChildren[]} renderResult
  * @param {import('../internal').VNode} newParentVNode The new virtual
  * node whose children should be diff'ed against oldParentVNode
  * @param {import('../internal').VNode} oldParentVNode The old virtual
@@ -26,7 +25,6 @@ import { getDomSibling } from '../component';
  */
 export function diffChildren(
 	parentDom,
-	renderResult,
 	newParentVNode,
 	oldParentVNode,
 	globalContext,
@@ -41,12 +39,12 @@ export function diffChildren(
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
-
 	let oldChildrenLength = oldChildren.length;
 
-	newParentVNode._children = [];
-	for (i = 0; i < renderResult.length; i++) {
-		childVNode = newParentVNode._children[i] = coerceToVNode(renderResult[i]);
+	for (i = 0; i < newParentVNode._children.length; i++) {
+		childVNode = newParentVNode._children[i] = coerceToVNode(
+			newParentVNode._children[i]
+		);
 
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
