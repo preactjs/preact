@@ -81,7 +81,7 @@ export function createVNode(type, props, key, ref, original) {
 	};
 
 	if (original == null) vnode._original = vnode;
-	// if (options.vnode) options.vnode(vnode);
+	if (options.vnode) options.vnode(vnode);
 
 	return vnode;
 }

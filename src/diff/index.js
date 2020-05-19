@@ -59,199 +59,202 @@ export function diff(
 
 	// if ((tmp = options._diff)) tmp(newVNode);
 
-	// try {
-	outer: if (typeof newType == 'function') {
-		let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
-		let newProps = newVNode.props;
+	try {
+		outer: if (typeof newType == 'function') {
+			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
+			let newProps = newVNode.props;
 
-		// Necessary for createContext api. Setting this property will pass
-		// the context value as `this.context` just for this component.
-		let componentContext = null;
-		// tmp = newType.contextType;
-		// let provider = tmp && globalContext[tmp._id];
-		// let componentContext = tmp
-		// 	? provider
-		// 		? provider.props.value
-		// 		: tmp._defaultValue
-		// 	: globalContext;
+			// Necessary for createContext api. Setting this property will pass
+			// the context value as `this.context` just for this component.
+			let componentContext = null;
+			// tmp = newType.contextType;
+			// let provider = tmp && globalContext[tmp._id];
+			// let componentContext = tmp
+			// 	? provider
+			// 		? provider.props.value
+			// 		: tmp._defaultValue
+			// 	: globalContext;
 
-		// Get component and set it to `c`
-		if (oldVNode._component) {
-			c = newVNode._component = oldVNode._component;
-			clearProcessingException = c._processingException = c._pendingError;
-		} else {
-			// Instantiate the new component
-			if ('prototype' in newType && newType.prototype.render) {
-				newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
+			// Get component and set it to `c`
+			if (oldVNode._component) {
+				c = newVNode._component = oldVNode._component;
+				clearProcessingException = c._processingException = c._pendingError;
 			} else {
-				newVNode._component = c = new Component(newProps, componentContext);
-				c.constructor = newType;
-				c.render = doRender;
-			}
-			// if (provider) provider.sub(c);
+				// Instantiate the new component
+				if ('prototype' in newType && newType.prototype.render) {
+					newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
+				} else {
+					newVNode._component = c = new Component(newProps, componentContext);
+					c.constructor = newType;
+					c.render = doRender;
+				}
+				// if (provider) provider.sub(c);
 
-			c.props = newProps;
-			if (!c.state) c.state = {};
-			c.context = componentContext;
-			c._globalContext = globalContext;
-			isNew = c._dirty = true;
-			c._renderCallbacks = [];
-		}
-
-		// Invoke getDerivedStateFromProps
-		if (c._nextState == null) {
-			c._nextState = c.state;
-		}
-		// if (newType.getDerivedStateFromProps != null) {
-		// 	if (c._nextState == c.state) {
-		// 		c._nextState = assign({}, c._nextState);
-		// 	}
-
-		// 	assign(
-		// 		c._nextState,
-		// 		newType.getDerivedStateFromProps(newProps, c._nextState)
-		// 	);
-		// }
-
-		oldProps = c.props;
-		oldState = c.state;
-
-		// Invoke pre-render lifecycle methods
-		if (isNew) {
-			// if (
-			// 	newType.getDerivedStateFromProps == null &&
-			// 	c.componentWillMount != null
-			// ) {
-			// 	c.componentWillMount();
-			// }
-			// if (c.componentDidMount != null) {
-			// 	c._renderCallbacks.push(c.componentDidMount);
-			// }
-		} else {
-			// if (
-			// 	newType.getDerivedStateFromProps == null &&
-			// 	newProps !== oldProps &&
-			// 	c.componentWillReceiveProps != null
-			// ) {
-			// 	c.componentWillReceiveProps(newProps, componentContext);
-			// }
-
-			if (
-				(!c._force &&
-					c.shouldComponentUpdate != null &&
-					c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
-						false) ||
-				newVNode._original === oldVNode._original
-			) {
 				c.props = newProps;
-				c.state = c._nextState;
-				// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
-				if (newVNode._original !== oldVNode._original) c._dirty = false;
-				c._vnode = newVNode;
-				newVNode._dom = oldVNode._dom;
-				newVNode._children = oldVNode._children;
-				if (c._renderCallbacks.length) {
-					commitQueue.push(c);
-				}
-
-				for (tmp = 0; tmp < newVNode._children.length; tmp++) {
-					if (newVNode._children[tmp]) {
-						newVNode._children[tmp]._parent = newVNode;
-					}
-				}
-
-				break outer;
+				if (!c.state) c.state = {};
+				c.context = componentContext;
+				c._globalContext = globalContext;
+				isNew = c._dirty = true;
+				c._renderCallbacks = [];
 			}
 
-			// if (c.componentWillUpdate != null) {
-			// 	c.componentWillUpdate(newProps, c._nextState, componentContext);
+			// Invoke getDerivedStateFromProps
+			if (c._nextState == null) {
+				c._nextState = c.state;
+			}
+			// if (newType.getDerivedStateFromProps != null) {
+			// 	if (c._nextState == c.state) {
+			// 		c._nextState = assign({}, c._nextState);
+			// 	}
+
+			// 	assign(
+			// 		c._nextState,
+			// 		newType.getDerivedStateFromProps(newProps, c._nextState)
+			// 	);
 			// }
 
-			// if (c.componentDidUpdate != null) {
-			// 	c._renderCallbacks.push(() => {
-			// 		c.componentDidUpdate(oldProps, oldState, snapshot);
-			// 	});
+			oldProps = c.props;
+			oldState = c.state;
+
+			// Invoke pre-render lifecycle methods
+			if (isNew) {
+				// if (
+				// 	newType.getDerivedStateFromProps == null &&
+				// 	c.componentWillMount != null
+				// ) {
+				// 	c.componentWillMount();
+				// }
+				// if (c.componentDidMount != null) {
+				// 	c._renderCallbacks.push(c.componentDidMount);
+				// }
+			} else {
+				// if (
+				// 	newType.getDerivedStateFromProps == null &&
+				// 	newProps !== oldProps &&
+				// 	c.componentWillReceiveProps != null
+				// ) {
+				// 	c.componentWillReceiveProps(newProps, componentContext);
+				// }
+
+				if (
+					(!c._force &&
+						c.shouldComponentUpdate != null &&
+						c.shouldComponentUpdate(
+							newProps,
+							c._nextState,
+							componentContext
+						) === false) ||
+					newVNode._original === oldVNode._original
+				) {
+					c.props = newProps;
+					c.state = c._nextState;
+					// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
+					if (newVNode._original !== oldVNode._original) c._dirty = false;
+					c._vnode = newVNode;
+					newVNode._dom = oldVNode._dom;
+					newVNode._children = oldVNode._children;
+					if (c._renderCallbacks.length) {
+						commitQueue.push(c);
+					}
+
+					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
+						if (newVNode._children[tmp]) {
+							newVNode._children[tmp]._parent = newVNode;
+						}
+					}
+
+					break outer;
+				}
+
+				// if (c.componentWillUpdate != null) {
+				// 	c.componentWillUpdate(newProps, c._nextState, componentContext);
+				// }
+
+				// if (c.componentDidUpdate != null) {
+				// 	c._renderCallbacks.push(() => {
+				// 		c.componentDidUpdate(oldProps, oldState, snapshot);
+				// 	});
+				// }
+			}
+
+			// c.context = componentContext;
+			c.props = newProps;
+			c.state = c._nextState;
+
+			// if ((tmp = options._render)) tmp(newVNode);
+
+			c._dirty = false;
+			c._vnode = newVNode;
+			c._parentDom = parentDom;
+
+			tmp = c.render(c.props, c.state, c.context);
+
+			// if (c.getChildContext != null) {
+			// 	globalContext = assign(assign({}, globalContext), c.getChildContext());
 			// }
+
+			// if (!isNew && c.getSnapshotBeforeUpdate != null) {
+			// 	snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
+			// }
+
+			let isTopLevelFragment =
+				tmp != null && tmp.type == Fragment && tmp.key == null;
+			newVNode._children = isTopLevelFragment ? tmp.props.children : tmp;
+			newVNode._children = Array.isArray(newVNode._children)
+				? newVNode._children
+				: [newVNode._children];
+
+			diffChildren(
+				// ...logArgsShapeChange(
+				// 	'diffChildren',
+				parentDom,
+				// Array.isArray(renderResult) ? renderResult : [renderResult],
+				newVNode,
+				oldVNode,
+				globalContext,
+				isSvg,
+				excessDomChildren,
+				commitQueue,
+				diffData,
+				isHydrating
+				// )
+			);
+
+			c.base = newVNode._dom;
+
+			if (c._renderCallbacks.length) {
+				commitQueue.push(c);
+			}
+
+			// if (clearProcessingException) {
+			// 	c._pendingError = c._processingException = null;
+			// }
+
+			c._force = false;
+		} else if (
+			excessDomChildren == null &&
+			newVNode._original === oldVNode._original
+		) {
+			newVNode._children = oldVNode._children;
+			newVNode._dom = oldVNode._dom;
+		} else {
+			newVNode._dom = diffElementNodes(
+				// oldVNode._dom,
+				newVNode,
+				oldVNode,
+				globalContext,
+				isSvg,
+				excessDomChildren,
+				commitQueue,
+				isHydrating
+			);
 		}
 
-		// c.context = componentContext;
-		c.props = newProps;
-		c.state = c._nextState;
-
-		// if ((tmp = options._render)) tmp(newVNode);
-
-		c._dirty = false;
-		c._vnode = newVNode;
-		c._parentDom = parentDom;
-
-		tmp = c.render(c.props, c.state, c.context);
-
-		// if (c.getChildContext != null) {
-		// 	globalContext = assign(assign({}, globalContext), c.getChildContext());
-		// }
-
-		// if (!isNew && c.getSnapshotBeforeUpdate != null) {
-		// 	snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
-		// }
-
-		let isTopLevelFragment =
-			tmp != null && tmp.type == Fragment && tmp.key == null;
-		newVNode._children = isTopLevelFragment ? tmp.props.children : tmp;
-		newVNode._children = Array.isArray(newVNode._children)
-			? newVNode._children
-			: [newVNode._children];
-
-		diffChildren(
-			// ...logArgsShapeChange(
-			// 	'diffChildren',
-			parentDom,
-			// Array.isArray(renderResult) ? renderResult : [renderResult],
-			newVNode,
-			oldVNode,
-			globalContext,
-			isSvg,
-			excessDomChildren,
-			commitQueue,
-			diffData,
-			isHydrating
-			// )
-		);
-
-		c.base = newVNode._dom;
-
-		if (c._renderCallbacks.length) {
-			commitQueue.push(c);
-		}
-
-		// if (clearProcessingException) {
-		// 	c._pendingError = c._processingException = null;
-		// }
-
-		c._force = false;
-	} else if (
-		excessDomChildren == null &&
-		newVNode._original === oldVNode._original
-	) {
-		newVNode._children = oldVNode._children;
-		newVNode._dom = oldVNode._dom;
-	} else {
-		newVNode._dom = diffElementNodes(
-			// oldVNode._dom,
-			newVNode,
-			oldVNode,
-			globalContext,
-			isSvg,
-			excessDomChildren,
-			commitQueue,
-			isHydrating
-		);
+		// if ((tmp = options.diffed)) tmp(newVNode);
+	} catch (e) {
+		newVNode._original = null;
+		options._catchError(e, newVNode, oldVNode);
 	}
-
-	// if ((tmp = options.diffed)) tmp(newVNode);
-	// } catch (e) {
-	// 	newVNode._original = null;
-	// 	options._catchError(e, newVNode, oldVNode);
-	// }
 
 	return newVNode._dom;
 }
@@ -434,14 +437,14 @@ function diffElementNodes(
  * @param {any} value
  * @param {import('../internal').VNode} vnode
  */
-// export function applyRef(ref, value, vnode) {
-// 	try {
-// 		if (typeof ref == 'function') ref(value);
-// 		else ref.current = value;
-// 	} catch (e) {
-// 		options._catchError(e, vnode);
-// 	}
-// }
+export function applyRef(ref, value, vnode) {
+	try {
+		if (typeof ref == 'function') ref(value);
+		else ref.current = value;
+	} catch (e) {
+		options._catchError(e, vnode);
+	}
+}
 
 /**
  * Unmount a virtual node from the tree and apply DOM changes

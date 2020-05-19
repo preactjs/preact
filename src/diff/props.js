@@ -70,29 +70,29 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	}
 
 	if (name === 'style') {
-		// s = dom.style;
-		// if (typeof value == 'string') {
-		// 	s.cssText = value;
-		// } else {
-		// 	if (typeof oldValue == 'string') {
-		// 		s.cssText = '';
-		// 		oldValue = null;
-		// 	}
-		// 	if (oldValue) {
-		// 		for (let i in oldValue) {
-		// 			if (!(value && i in value)) {
-		// 				setStyle(s, i, '');
-		// 			}
-		// 		}
-		// 	}
-		// 	if (value) {
-		// 		for (let i in value) {
-		// 			if (!oldValue || value[i] !== oldValue[i]) {
-		// 				setStyle(s, i, value[i]);
-		// 			}
-		// 		}
-		// 	}
-		// }
+		s = dom.style;
+		if (typeof value == 'string') {
+			s.cssText = value;
+		} else {
+			if (typeof oldValue == 'string') {
+				s.cssText = '';
+				oldValue = null;
+			}
+			if (oldValue) {
+				for (let i in oldValue) {
+					if (!(value && i in value)) {
+						setStyle(s, i, '');
+					}
+				}
+			}
+			if (value) {
+				for (let i in value) {
+					if (!oldValue || value[i] !== oldValue[i]) {
+						setStyle(s, i, value[i]);
+					}
+				}
+			}
+		}
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0] === 'o' && name[1] === 'n') {
@@ -157,6 +157,5 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
  * @private
  */
 function eventProxy(e) {
-	// this._listeners[e.type](options.event ? options.event(e) : e);
-	this._listeners[e.type](e);
+	this._listeners[e.type](options.event ? options.event(e) : e);
 }

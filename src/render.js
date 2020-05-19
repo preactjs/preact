@@ -15,7 +15,7 @@ const IS_HYDRATE = EMPTY_OBJ;
  * existing DOM tree rooted at `replaceNode`
  */
 export function render(vnode, parentDom, replaceNode) {
-	// if (options._root) options._root(vnode, parentDom);
+	if (options._root) options._root(vnode, parentDom);
 
 	// We abuse the `replaceNode` parameter in `hydrate()` to signal if we
 	// are in hydration mode or not by passing `IS_HYDRATE` instead of a
