@@ -8,7 +8,6 @@ import { getDomSibling } from '../component';
  * Diff the children of a virtual node
  * @param {import('../internal').PreactElement} parentDom The DOM element whose
  * children are being diffed
- * @param {import('../index').ComponentChildren[]} renderResult
  * @param {import('../internal').VNode} newParentVNode The new virtual
  * node whose children should be diff'ed against oldParentVNode
  * @param {import('../internal').VNode} oldParentVNode The old virtual
@@ -26,7 +25,6 @@ import { getDomSibling } from '../component';
  */
 export function diffChildren(
 	parentDom,
-	renderResult,
 	newParentVNode,
 	oldParentVNode,
 	globalContext,
@@ -58,9 +56,8 @@ export function diffChildren(
 		}
 	}
 
-	newParentVNode._children = [];
-	for (i = 0; i < renderResult.length; i++) {
-		childVNode = renderResult[i];
+	for (i = 0; i < newParentVNode._children.length; i++) {
+		childVNode = newParentVNode._children[i];
 
 		if (childVNode == null || typeof childVNode == 'boolean') {
 			childVNode = newParentVNode._children[i] = null;
