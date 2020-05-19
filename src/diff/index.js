@@ -62,6 +62,8 @@ export function diff(
 	// try {
 	if (typeof newVNode.type == 'function') {
 		diffComponentNode(
+			// ...logArgsShapeChange(
+			// 	'diffComponentNode',
 			parentDom,
 			newVNode,
 			oldVNode,
@@ -71,6 +73,7 @@ export function diff(
 			commitQueue,
 			diffData,
 			isHydrating
+			// )
 		);
 	} else if (
 		excessDomChildren == null &&
@@ -80,6 +83,8 @@ export function diff(
 		newVNode._dom = oldVNode._dom;
 	} else {
 		newVNode._dom = diffElementNodes(
+			// ...logArgsShapeChange(
+			// 	'diffElementNodes',
 			// oldVNode._dom,
 			newVNode,
 			oldVNode,
@@ -88,6 +93,7 @@ export function diff(
 			excessDomChildren,
 			commitQueue,
 			isHydrating
+			// )
 		);
 	}
 
