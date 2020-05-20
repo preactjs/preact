@@ -48,7 +48,41 @@ export function diffChildren(
 
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
-		childVNode = newParentVNode._children[i] = coerceToVNode(renderResult[i]);
+		childVNode = renderResult[i];
+
+		if (childVNode == null || typeof childVNode == 'boolean') {
+			childVNode = newParentVNode._children[i] = null;
+		}
+		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
+		// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
+		// it's own DOM & etc. pointers
+		else if (typeof childVNode == 'string' || typeof childVNode == 'number') {
+			childVNode = newParentVNode._children[i] = createVNode(
+				null,
+				childVNode,
+				null,
+				null,
+				childVNode
+			);
+		} else if (Array.isArray(childVNode)) {
+			childVNode = newParentVNode._children[i] = createVNode(
+				Fragment,
+				{ children: childVNode },
+				null,
+				null,
+				null
+			);
+		} else if (childVNode._dom != null || childVNode._component != null) {
+			childVNode = newParentVNode._children[i] = createVNode(
+				childVNode.type,
+				childVNode.props,
+				childVNode.key,
+				null,
+				childVNode._original
+			);
+		} else {
+			childVNode = newParentVNode._children[i] = childVNode;
+		}
 
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
@@ -157,30 +191,6 @@ export function selectOldDom(oldParentVNode, excessDomChildren) {
 		oldDom = null;
 	}
 	return oldDom;
-}
-
-function coerceToVNode(childVNode) {
-	if (childVNode == null || typeof childVNode == 'boolean') {
-		return null;
-	}
-	// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
-	// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
-	// it's own DOM & etc. pointers
-	else if (typeof childVNode == 'string' || typeof childVNode == 'number') {
-		return createVNode(null, childVNode, null, null, childVNode);
-	} else if (Array.isArray(childVNode)) {
-		return createVNode(Fragment, { children: childVNode }, null, null, null);
-	} else if (childVNode._dom != null || childVNode._component != null) {
-		return createVNode(
-			childVNode.type,
-			childVNode.props,
-			childVNode.key,
-			null,
-			childVNode._original
-		);
-	} else {
-		return childVNode;
-	}
 }
 
 function findOldVNode(childVNode, oldChildren, i) {
