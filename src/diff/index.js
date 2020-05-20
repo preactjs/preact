@@ -1,6 +1,6 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component } from '../component';
-import { Fragment } from '../create-element';
+import { Fragment, EMPTY_VNODE } from '../create-element';
 import { diffChildren, selectOldDom } from './children';
 import { diffProps, setProperty } from './props';
 import { assign, removeNode } from '../util';
@@ -233,27 +233,30 @@ function diffElementNodes(
 
 		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
 
-		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
-		// if (newHtml) {
-		// 	newVNode._children = [];
-		// } else {
 		i = newVNode.props.children;
-		diffChildren(
-			// ...logArgsShapeChange(
-			// 	'diffChildren',
-			dom,
-			Array.isArray(i) ? i : [i],
-			newVNode,
-			oldVNode,
-			globalContext,
-			newVNode.type === 'foreignObject' ? false : isSvg,
-			excessDomChildren,
-			commitQueue,
-			createDiffData(selectOldDom(oldVNode, excessDomChildren)),
-			isHydrating
-			// )
-		);
-		// }
+		if (
+			// newHtml || // If the new vnode had dangerouslySetInnerHTML, don't diff its children
+			(oldVNode == EMPTY_VNODE && i == null) ||
+			(oldVNode != EMPTY_VNODE && oldVNode._children.length == 0 && i == null)
+		) {
+			newVNode._children = [];
+		} else {
+			diffChildren(
+				// ...logArgsShapeChange(
+				// 	'diffChildren',
+				dom,
+				Array.isArray(i) ? i : [i],
+				newVNode,
+				oldVNode,
+				globalContext,
+				newVNode.type === 'foreignObject' ? false : isSvg,
+				excessDomChildren,
+				commitQueue,
+				createDiffData(selectOldDom(oldVNode, excessDomChildren)),
+				isHydrating
+				// )
+			);
+		}
 
 		// (as above, don't diff props during hydration)
 		if (!isHydrating) {
