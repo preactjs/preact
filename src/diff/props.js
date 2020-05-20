@@ -146,7 +146,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 				// ARIA-attributes we could treat false as a removal, but the
 				// amount of exceptions would cost us too many bytes. On top of
 				// that other VDOM frameworks also always stringify `false`.
-				!/^ar/.test(name))
+				name.substr(0, 2) !== 'ar')
 		) {
 			dom.removeAttribute(name);
 		} else {
