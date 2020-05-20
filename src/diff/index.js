@@ -234,29 +234,29 @@ function diffElementNodes(
 		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
 
 		i = newVNode.props.children;
-		if (
-			// newHtml || // If the new vnode had dangerouslySetInnerHTML, don't diff its children
-			(oldVNode == EMPTY_VNODE && i == null) ||
-			(oldVNode != EMPTY_VNODE && oldVNode._children.length == 0 && i == null)
-		) {
-			newVNode._children = [];
-		} else {
-			diffChildren(
-				// ...logArgsShapeChange(
-				// 	'diffChildren',
-				dom,
-				Array.isArray(i) ? i : [i],
-				newVNode,
-				oldVNode,
-				globalContext,
-				newVNode.type === 'foreignObject' ? false : isSvg,
-				excessDomChildren,
-				commitQueue,
-				createDiffData(selectOldDom(oldVNode, excessDomChildren)),
-				isHydrating
-				// )
-			);
-		}
+		// if (
+		// 	// newHtml || // If the new vnode had dangerouslySetInnerHTML, don't diff its children
+		// 	(oldVNode == EMPTY_VNODE && i == null) ||
+		// 	(oldVNode != EMPTY_VNODE && oldVNode._children.length == 0 && i == null)
+		// ) {
+		// 	newVNode._children = [];
+		// } else {
+		diffChildren(
+			// ...logArgsShapeChange(
+			// 	'diffChildren',
+			dom,
+			Array.isArray(i) ? i : [i],
+			newVNode,
+			oldVNode,
+			globalContext,
+			newVNode.type === 'foreignObject' ? false : isSvg,
+			excessDomChildren,
+			commitQueue,
+			createDiffData(selectOldDom(oldVNode, excessDomChildren)),
+			isHydrating
+			// )
+		);
+		// }
 
 		// (as above, don't diff props during hydration)
 		if (!isHydrating) {

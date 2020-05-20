@@ -46,6 +46,18 @@ export function diffChildren(
 
 	let oldChildrenLength = oldChildren.length;
 
+	if (renderResult.length <= 1) {
+		if (
+			(oldParentVNode == EMPTY_VNODE && renderResult[0] == null) ||
+			(oldParentVNode != EMPTY_VNODE &&
+				oldParentVNode._children.length == 0 &&
+				renderResult[0] == null)
+		) {
+			newParentVNode._children = [];
+			return;
+		}
+	}
+
 	let isCloned = false;
 	newParentVNode._children = renderResult;
 
