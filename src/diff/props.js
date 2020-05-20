@@ -97,7 +97,11 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0] === 'o' && name[1] === 'n') {
-		useCapture = name !== (name = name.replace(/Capture$/, ''));
+		if (name.substr(name.length - 7) == 'Capture') {
+			name = name.substr(0, name.length - 7);
+			useCapture = true;
+		}
+
 		nameLower = name.toLowerCase();
 		name = (nameLower in dom ? nameLower : name).slice(2);
 

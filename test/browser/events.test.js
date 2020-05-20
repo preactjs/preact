@@ -45,7 +45,7 @@ describe('event handling', () => {
 		).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
 			'click',
 			sinon.match.func,
-			false
+			undefined
 		);
 	});
 
@@ -60,7 +60,7 @@ describe('event handling', () => {
 		).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
 			'OtherClick',
 			sinon.match.func,
-			false
+			undefined
 		);
 
 		expect(proto.addEventListener).not.to.have.been.calledWith('Click');
@@ -148,7 +148,7 @@ describe('event handling', () => {
 		).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
 			'animationend',
 			sinon.match.func,
-			false
+			undefined
 		);
 	});
 
