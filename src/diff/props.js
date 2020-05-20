@@ -97,7 +97,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	// Choosing to use substr here as a compromise between perf and size
-	else if (name.substr(0, 2) == 'on') {
+	else if (name[0] === 'o' && name[1] === 'n') {
 		if (name.substr(name.length - 7) == 'Capture') {
 			name = name.substr(0, name.length - 7);
 			useCapture = true;
@@ -125,7 +125,13 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	) {
 		dom[name] = value == null ? '' : value;
 	} else if (typeof value != 'function' && name !== 'dangerouslySetInnerHTML') {
-		if (name.substr(0, 5) == 'xlink') {
+		if (
+			name[0] === 'x' &&
+			name[1] === 'l' &&
+			name[2] === 'i' &&
+			name[3] === 'n' &&
+			name[4] === 'k'
+		) {
 			name = name.substr(name[5] == ':' ? 6 : 5).toLowerCase();
 			if (value == null || value === false) {
 				dom.removeAttributeNS('http://www.w3.org/1999/xlink', name);
@@ -141,7 +147,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 				// ARIA-attributes we could treat false as a removal, but the
 				// amount of exceptions would cost us too many bytes. On top of
 				// that other VDOM frameworks also always stringify `false`.
-				name.substr(0, 2) !== 'ar')
+				!(name[0] === 'a' && name[1] === 'r'))
 		) {
 			dom.removeAttribute(name);
 		} else {
