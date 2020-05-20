@@ -46,17 +46,28 @@ export function diffChildren(
 
 	let oldChildrenLength = oldChildren.length;
 
-	newParentVNode._children = [];
-	for (i = 0; i < renderResult.length; i++) {
-		childVNode = renderResult[i];
+	let isCloned = false;
+	newParentVNode._children = renderResult;
+	for (i = 0; i < newParentVNode._children.length; i++) {
+		childVNode = newParentVNode._children[i];
 
 		if (childVNode == null || typeof childVNode == 'boolean') {
+			if (!isCloned) {
+				isCloned = true;
+				newParentVNode._children = newParentVNode._children.slice(0, i);
+			}
+
 			childVNode = newParentVNode._children[i] = null;
 		}
 		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
 		// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
 		// it's own DOM & etc. pointers
 		else if (typeof childVNode == 'string' || typeof childVNode == 'number') {
+			if (!isCloned) {
+				isCloned = true;
+				newParentVNode._children = newParentVNode._children.slice(0, i);
+			}
+
 			childVNode = newParentVNode._children[i] = createVNode(
 				null,
 				childVNode,
@@ -65,6 +76,11 @@ export function diffChildren(
 				childVNode
 			);
 		} else if (Array.isArray(childVNode)) {
+			if (!isCloned) {
+				isCloned = true;
+				newParentVNode._children = newParentVNode._children.slice(0, i);
+			}
+
 			childVNode = newParentVNode._children[i] = createVNode(
 				Fragment,
 				{ children: childVNode },
@@ -73,6 +89,11 @@ export function diffChildren(
 				null
 			);
 		} else if (childVNode._dom != null || childVNode._component != null) {
+			if (!isCloned) {
+				isCloned = true;
+				newParentVNode._children = newParentVNode._children.slice(0, i);
+			}
+
 			childVNode = newParentVNode._children[i] = createVNode(
 				childVNode.type,
 				childVNode.props,
