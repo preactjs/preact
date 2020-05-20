@@ -1,7 +1,7 @@
 import { diff, unmount, applyRef } from './index';
 import { createVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
-import { removeNode } from '../util';
+import { removeNode, isStringLike } from '../util';
 import { getDomSibling } from '../component';
 
 /**
@@ -68,7 +68,7 @@ export function diffChildren(
 		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
 		// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
 		// it's own DOM & etc. pointers
-		else if (typeof childVNode == 'string' || typeof childVNode == 'number') {
+		else if (isStringLike(childVNode)) {
 			childVNode = newParentVNode._children[i] = createVNode(
 				null,
 				childVNode,
