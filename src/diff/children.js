@@ -48,6 +48,28 @@ export function diffChildren(
 
 	let isCloned = false;
 	newParentVNode._children = renderResult;
+
+	if (
+		renderResult.length == 1 &&
+		(typeof renderResult[0] == 'string' ||
+			typeof renderResult[0] == 'number') &&
+		(oldParentVNode == EMPTY_VNODE ||
+			(oldChildrenLength == 1 &&
+				(typeof oldParentVNode._children[0].props == 'string' ||
+					typeof oldParentVNode._children[0].props == 'number')))
+	) {
+		let text = renderResult[0];
+		newParentVNode._children[0] = createVNode(null, text, null, null, null);
+
+		if (
+			oldParentVNode == EMPTY_VNODE ||
+			oldParentVNode._children[0].props !== text
+		) {
+			parentDom.textContent = text;
+		}
+		return;
+	}
+
 	for (i = 0; i < newParentVNode._children.length; i++) {
 		childVNode = newParentVNode._children[i];
 
