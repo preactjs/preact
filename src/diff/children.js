@@ -58,9 +58,6 @@ export function diffChildren(
 		}
 	}
 
-	let isCloned = false;
-	newParentVNode._children = renderResult;
-
 	if (
 		renderResult.length == 1 &&
 		(typeof renderResult[0] == 'string' ||
@@ -71,7 +68,7 @@ export function diffChildren(
 					typeof oldParentVNode._children[0].props == 'number')))
 	) {
 		let text = renderResult[0];
-		newParentVNode._children[0] = createVNode(null, text, null, null, null);
+		newParentVNode._children = [createVNode(null, text, null, null, null)];
 
 		if (
 			oldParentVNode == EMPTY_VNODE ||
@@ -81,6 +78,9 @@ export function diffChildren(
 		}
 		return;
 	}
+
+	let isCloned = false;
+	newParentVNode._children = renderResult;
 
 	for (i = 0; i < newParentVNode._children.length; i++) {
 		childVNode = newParentVNode._children[i];
