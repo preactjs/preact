@@ -125,18 +125,12 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	) {
 		dom[name] = value == null ? '' : value;
 	} else if (typeof value != 'function' && name !== 'dangerouslySetInnerHTML') {
-		if (name !== (name = name.replace(/^xlink:?/, ''))) {
+		if (name.substr(0, 5) == 'xlink') {
+			name = name.substr(5).toLowerCase();
 			if (value == null || value === false) {
-				dom.removeAttributeNS(
-					'http://www.w3.org/1999/xlink',
-					name.toLowerCase()
-				);
+				dom.removeAttributeNS('http://www.w3.org/1999/xlink', name);
 			} else {
-				dom.setAttributeNS(
-					'http://www.w3.org/1999/xlink',
-					name.toLowerCase(),
-					value
-				);
+				dom.setAttributeNS('http://www.w3.org/1999/xlink', name, value);
 			}
 		} else if (
 			value == null ||
