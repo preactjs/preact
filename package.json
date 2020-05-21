@@ -150,29 +150,10 @@
     }
   },
   "files": [
-    "src/index.d.ts",
-    "src/internal.d.ts",
-    "src/jsx.d.ts",
-    "dist",
-    "compat/src/index.d.ts",
-    "compat/src/internal.d.ts",
-    "compat/src/suspense.d.ts",
-    "compat/src/suspense-list.d.ts",
-    "compat/dist",
-    "compat/server.js",
-    "compat/package.json",
-    "debug/src/internal.d.ts",
-    "debug/dist",
-    "debug/package.json",
-    "devtools/dist",
-    "devtools/package.json",
-    "hooks/src/index.d.ts",
-    "hooks/src/internal.d.ts",
-    "hooks/dist",
-    "hooks/package.json",
-    "test-utils/package.json",
-    "test-utils/dist",
-    "test-utils/src/index.d.ts"
+    "**/*.d.ts",
+    "**/dist",
+    "**/package.json",
+    "compat/server.js"
   ],
   "keywords": [
     "preact",
