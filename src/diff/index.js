@@ -1,9 +1,9 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component } from '../component';
-import { Fragment, createVNode } from '../create-element';
+import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
-import { assign, removeNode, isStringLike } from '../util';
+import { assign, removeNode } from '../util';
 import options from '../options';
 
 /**
@@ -362,32 +362,11 @@ function diffElementNodes(
 
 		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
 
-		i = newVNode.props.children;
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (newHtml) {
 			newVNode._children = [];
-		} else if (
-			!isHydrating &&
-			isStringLike(i) &&
-			(oldVNode == EMPTY_OBJ ||
-				(oldVNode._children.length == 1 &&
-					oldVNode._children[0] &&
-					isStringLike(oldVNode._children[0].props)))
-		) {
-			let vnode = createVNode(null, i, null, null, null);
-			vnode._parent = newVNode;
-			newVNode._children = [vnode];
-
-			if (oldVNode == EMPTY_OBJ) {
-				vnode._dom = document.createTextNode(i);
-				dom.appendChild(vnode._dom);
-			} else if (oldVNode._children[0].props !== i) {
-				vnode._dom = document.createTextNode(i);
-				dom.replaceChild(vnode._dom, dom.firstChild);
-			} else {
-				vnode._dom = dom.firstChild;
-			}
 		} else {
+			i = newVNode.props.children;
 			diffChildren(
 				dom,
 				Array.isArray(i) ? i : [i],

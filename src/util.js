@@ -20,7 +20,3 @@ export function removeNode(node) {
 	let parentNode = node.parentNode;
 	if (parentNode) parentNode.removeChild(node);
 }
-
-export function isStringLike(v) {
-	return typeof v == 'string' || typeof v == 'number';
-}
