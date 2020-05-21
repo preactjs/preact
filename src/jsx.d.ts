@@ -666,6 +666,7 @@ export namespace JSXInternal {
 		label?: string;
 		lang?: string;
 		list?: string;
+		loading?: 'eager' | 'lazy';
 		loop?: boolean;
 		low?: number;
 		manifest?: string;

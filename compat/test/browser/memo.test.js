@@ -155,4 +155,21 @@ describe('memo()', () => {
 			render(<App />, scratch);
 		}).to.not.throw();
 	});
+
+	it('should pass ref through nested memos', () => {
+		class Foo extends Component {
+			render() {
+				return <h1>Hello World</h1>;
+			}
+		}
+
+		const App = memo(memo(Foo));
+
+		const ref = {};
+
+		render(<App ref={ref} />, scratch);
+
+		expect(ref.current).not.to.be.undefined;
+		expect(ref.current).to.be.instanceOf(Foo);
+	});
 });

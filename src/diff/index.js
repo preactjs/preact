@@ -171,13 +171,6 @@ export function diff(
 			c._parentDom = parentDom;
 
 			tmp = c.render(c.props, c.state, c.context);
-			let isTopLevelFragment =
-				tmp != null && tmp.type == Fragment && tmp.key == null;
-			newVNode._children = isTopLevelFragment
-				? tmp.props.children
-				: Array.isArray(tmp)
-				? tmp
-				: [tmp];
 
 			if (c.getChildContext != null) {
 				globalContext = assign(assign({}, globalContext), c.getChildContext());
@@ -187,8 +180,13 @@ export function diff(
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
+			let isTopLevelFragment =
+				tmp != null && tmp.type == Fragment && tmp.key == null;
+			let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
+
 			diffChildren(
 				parentDom,
+				Array.isArray(renderResult) ? renderResult : [renderResult],
 				newVNode,
 				oldVNode,
 				globalContext,
@@ -368,9 +366,10 @@ function diffElementNodes(
 		if (newHtml) {
 			newVNode._children = [];
 		} else {
-			newVNode._children = newVNode.props.children;
+			i = newVNode.props.children;
 			diffChildren(
 				dom,
+				Array.isArray(i) ? i : [i],
 				newVNode,
 				oldVNode,
 				globalContext,

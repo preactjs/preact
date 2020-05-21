@@ -68,7 +68,7 @@ options.unmount = vnode => {
 	const c = vnode._component;
 	if (c && c.__hooks) {
 		try {
-			c.__hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
+			c.__hooks._list.forEach(invokeCleanup);
 		} catch (e) {
 			options._catchError(e, c._vnode);
 		}
@@ -122,6 +122,7 @@ export function useState(initialState) {
 export function useReducer(reducer, initialState, init) {
 	/** @type {import('./internal').ReducerHookState} */
 	const hookState = getHookState(currentIndex++, 2);
+	hookState._reducer = reducer;
 	if (!hookState._component) {
 		hookState._component = currentComponent;
 
@@ -129,7 +130,7 @@ export function useReducer(reducer, initialState, init) {
 			!init ? invokeOrReturn(undefined, initialState) : init(initialState),
 
 			action => {
-				const nextValue = reducer(hookState._value[0], action);
+				const nextValue = hookState._reducer(hookState._value[0], action);
 				if (hookState._value[0] !== nextValue) {
 					hookState._value[0] = nextValue;
 					hookState._component.setState({});
@@ -329,7 +330,7 @@ function afterPaint(newQueueLength) {
  * @param {import('./internal').EffectHookState} hook
  */
 function invokeCleanup(hook) {
-	if (hook._cleanup) hook._cleanup();
+	if (typeof hook._cleanup == 'function') hook._cleanup();
 }
 
 /**
@@ -337,8 +338,7 @@ function invokeCleanup(hook) {
  * @param {import('./internal').EffectHookState} hook
  */
 function invokeEffect(hook) {
-	const result = hook._value();
-	if (typeof result == 'function') hook._cleanup = result;
+	hook._cleanup = hook._value();
 }
 
 /**

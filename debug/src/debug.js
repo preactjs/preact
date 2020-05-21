@@ -262,7 +262,8 @@ export function initDebug() {
 				else newProps[i] = v;
 			}
 		}
-		Object.setPrototypeOf(vnode, deprecatedProto);
+		// eslint-disable-next-line
+		vnode.__proto__ = deprecatedProto;
 		if (oldVnode) oldVnode(vnode);
 	};
 

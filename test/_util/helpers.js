@@ -268,15 +268,25 @@ export const resetAllSpies = obj =>
 let attributesSpy, originalAttributesPropDescriptor;
 
 export function spyOnElementAttributes() {
-	if (!attributesSpy) {
-		originalAttributesPropDescriptor = Object.getOwnPropertyDescriptor(
-			Element.prototype,
-			'attributes'
-		);
+	const test = Object.getOwnPropertyDescriptor(Element.prototype, 'attributes');
+
+	// IE11 doesn't correctly restore the prototype methods so we have to check
+	// whether this prototype method is already a sinon spy.
+	if (!attributesSpy && !(test && test.get && test.get.isSinonProxy)) {
+		if (!originalAttributesPropDescriptor) {
+			originalAttributesPropDescriptor = Object.getOwnPropertyDescriptor(
+				Element.prototype,
+				'attributes'
+			);
+		}
+
 		attributesSpy = sinon.spy(Element.prototype, 'attributes', ['get']);
+	} else if (test && test.get && test.get.isSinonProxy) {
+		// Due to IE11 not resetting we will do this manually when it is a proxy.
+		test.get.resetHistory();
 	}
 
-	return attributesSpy;
+	return attributesSpy || test;
 }
 
 function restoreElementAttributes() {
