@@ -1,7 +1,7 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component } from '../component';
 import { Fragment } from '../create-element';
-import { diffChildren } from './children';
+import { diffChildren, selectOldDom } from './children';
 import { diffProps, setProperty } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
@@ -353,7 +353,7 @@ function diffElementNodes(
 			newVNode.type === 'foreignObject' ? false : isSvg,
 			excessDomChildren,
 			commitQueue,
-			EMPTY_OBJ,
+			selectOldDom(oldVNode, excessDomChildren),
 			isHydrating
 		);
 	}
