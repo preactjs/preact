@@ -66,7 +66,7 @@
     "build:devtools": "microbundle build --raw --cwd devtools",
     "build:hooks": "microbundle build --raw --cwd hooks",
     "build:test-utils": "microbundle build --raw --cwd test-utils",
-    "build:compat": "microbundle build --raw --cwd compat --globals 'preact/hooks=preactHooks' --no-compress",
+    "build:compat": "microbundle build --raw --cwd compat --globals 'preact/hooks=preactHooks'",
     "postbuild": "node ./config/node-13-exports.js",
     "dev": "microbundle watch --raw --format cjs",
     "dev:hooks": "microbundle watch --raw --format cjs --cwd hooks",
