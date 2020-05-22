@@ -1,5 +1,5 @@
 import { diff, unmount, applyRef } from './index';
-import { createVNode, Fragment } from '../create-element';
+import { createVNode, Fragment, EMPTY_VNODE } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { removeNode } from '../util';
 import { getDomSibling } from '../component';
@@ -209,7 +209,7 @@ function findOldVNode(childVNode, oldChildren, i) {
 		}
 	}
 
-	return oldVNode || EMPTY_OBJ;
+	return oldVNode || EMPTY_VNODE;
 }
 
 function placeChild(

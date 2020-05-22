@@ -337,8 +337,6 @@ function diffElementNodes(
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 
-		oldProps = oldVNode.props || EMPTY_OBJ;
-
 		let oldHtml = oldProps.dangerouslySetInnerHTML;
 		let newHtml = newProps.dangerouslySetInnerHTML;
 
