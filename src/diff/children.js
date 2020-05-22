@@ -1,5 +1,5 @@
 import { diff, unmount, applyRef } from './index';
-import { createVNode, Fragment } from '../create-element';
+import { createVNode, Fragment, EMPTY_VNODE } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { removeNode } from '../util';
 import { getDomSibling } from '../component';
@@ -137,7 +137,7 @@ export function diffChildren(
 			}
 		}
 
-		oldVNode = oldVNode || EMPTY_OBJ;
+		oldVNode = oldVNode || EMPTY_VNODE;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		newDom = diff(

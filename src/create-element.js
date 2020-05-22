@@ -93,6 +93,8 @@ export function Fragment(props) {
 	return props.children;
 }
 
+export const EMPTY_VNODE = createVNode(null, {}, null, null, null);
+
 /**
  * Check if a the argument is a valid Preact VNode.
  * @param {*} vnode
