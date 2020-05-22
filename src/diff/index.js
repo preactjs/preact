@@ -1,6 +1,6 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component } from '../component';
-import { Fragment } from '../create-element';
+import { Fragment, createVNode } from '../create-element';
 import { diffChildren, selectOldDom } from './children';
 import { diffProps, setProperty } from './props';
 import { assign, removeNode } from '../util';
@@ -339,12 +339,35 @@ function diffElementNodes(
 	diffProps(dom, newProps, oldProps, isSvg, isHydrating);
 
 	// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
-	if (newHtml) {
+	let renderResult = newVNode.props.children;
+	if (
+		newHtml ||
+		((renderResult == null || typeof renderResult == 'boolean') &&
+			(oldVNode == EMPTY_OBJ || oldVNode._children.length == 0))
+	) {
 		newVNode._children = [];
+	} else if (
+		(typeof renderResult == 'string' || typeof renderResult == 'number') &&
+		(oldVNode == EMPTY_OBJ ||
+			(oldVNode._children.length == 1 &&
+				(oldVNode._children[0] == null || oldVNode._children[0].type == null)))
+	) {
+		let childVNode = createVNode(null, renderResult, null, null, null);
+		newVNode._children = [childVNode];
+		childVNode._parent = childVNode;
+		childVNode._dom = diffTextNode(
+			childVNode,
+			(oldVNode._children && oldVNode._children[0]) || EMPTY_OBJ,
+			excessDomChildren
+		);
+
+		if (!isHydrating && oldVNode == EMPTY_OBJ) {
+			dom.appendChild(childVNode._dom);
+		}
 	} else {
 		diffChildren(
 			dom,
-			newVNode.props.children,
+			renderResult,
 			newVNode,
 			oldVNode,
 			globalContext,
@@ -357,21 +380,20 @@ function diffElementNodes(
 	}
 
 	// (as above, don't diff props during hydration)
-	let propValue;
 	if (!isHydrating) {
 		if (
 			'value' in newProps &&
-			(propValue = newProps.value) !== undefined &&
-			propValue !== dom.value
+			(renderResult = newProps.value) !== undefined &&
+			renderResult !== dom.value
 		) {
-			setProperty(dom, 'value', propValue, oldProps.value, false);
+			setProperty(dom, 'value', renderResult, oldProps.value, false);
 		}
 		if (
 			'checked' in newProps &&
-			(propValue = newProps.checked) !== undefined &&
-			propValue !== dom.checked
+			(renderResult = newProps.checked) !== undefined &&
+			renderResult !== dom.checked
 		) {
-			setProperty(dom, 'checked', propValue, oldProps.checked, false);
+			setProperty(dom, 'checked', renderResult, oldProps.checked, false);
 		}
 	}
 

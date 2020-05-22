@@ -54,40 +54,42 @@ export function diffChildren(
 
 		// TODO: Cases to test: dynamic text nodes, multiple dynamic text nodes,
 		// conditional (null placeholder & not) text nodes
-		if (
-			(renderResult == null || typeof renderResult == 'boolean') &&
-			oldChildrenLength == 0
-		) {
-			newParentVNode._children = [];
-			return;
-		} else if (
-			(typeof renderResult == 'string' || typeof renderResult == 'number') &&
-			(oldParentVNode == EMPTY_OBJ ||
-				(oldChildrenLength == 1 &&
-					((i = oldChildren[0]) == null || i.type == null)))
-		) {
-			childVNode = createVNode(null, renderResult, null, null, null);
-			newParentVNode._children = [childVNode];
-			childVNode._parent = childVNode;
-			newDom = childVNode._dom = diffTextNode(
-				childVNode,
-				i || EMPTY_OBJ,
-				excessDomChildren
-			);
+		// if (
+		// 	(renderResult == null || typeof renderResult == 'boolean') &&
+		// 	oldChildrenLength == 0
+		// ) {
+		// 	newParentVNode._children = [];
+		// 	return;
+		// } else if (
+		// 	(typeof renderResult == 'string' || typeof renderResult == 'number') &&
+		// 	(oldParentVNode == EMPTY_OBJ ||
+		// 		(oldChildrenLength == 1 &&
+		// 			((i = oldChildren[0]) == null || i.type == null)))
+		// ) {
+		// 	childVNode = createVNode(null, renderResult, null, null, null);
+		// 	newParentVNode._children = [childVNode];
+		// 	childVNode._parent = childVNode;
+		// 	newDom = childVNode._dom = diffTextNode(
+		// 		childVNode,
+		// 		i || EMPTY_OBJ,
+		// 		excessDomChildren
+		// 	);
 
-			placeChild(
-				parentDom,
-				childVNode,
-				i || EMPTY_OBJ,
-				oldChildren,
-				excessDomChildren,
-				newDom,
-				oldDom
-			);
-			return;
-		} else {
-			renderResult = [renderResult];
-		}
+		// 	placeChild(
+		// 		parentDom,
+		// 		childVNode,
+		// 		i || EMPTY_OBJ,
+		// 		oldChildren,
+		// 		excessDomChildren,
+		// 		newDom,
+		// 		oldDom
+		// 	);
+		// 	return;
+		// } else {
+		// 	renderResult = [renderResult];
+		// }
+
+		renderResult = [renderResult];
 	}
 
 	newParentVNode._children = [];
