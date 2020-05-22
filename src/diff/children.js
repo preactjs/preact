@@ -3,6 +3,7 @@ import { createVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { removeNode } from '../util';
 import { getDomSibling } from '../component';
+import { diffTextNode } from './text';
 
 /**
  * Diff the children of a virtual node
@@ -43,6 +44,51 @@ export function diffChildren(
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
 
 	let oldChildrenLength = oldChildren.length;
+
+	if (!Array.isArray(renderResult)) {
+		// TODO: Consider checking for single stringLike || null || boolean node here
+
+		// TODO: Check if running this bypass in diffElementNodes (where we can set
+		// textContent and assume its the only dom child) is faster than using
+		// placeChild() here
+
+		// TODO: Cases to test: dynamic text nodes, multiple dynamic text nodes,
+		// conditional (null placeholder & not) text nodes
+		if (
+			(renderResult == null || typeof renderResult == 'boolean') &&
+			oldChildrenLength == 0
+		) {
+			newParentVNode._children = [];
+			return;
+		} else if (
+			(typeof renderResult == 'string' || typeof renderResult == 'number') &&
+			(oldParentVNode == EMPTY_OBJ ||
+				(oldChildrenLength == 1 &&
+					((i = oldChildren[0]) == null || i.type == null)))
+		) {
+			childVNode = createVNode(null, renderResult, null, null, null);
+			newParentVNode._children = [childVNode];
+			childVNode._parent = childVNode;
+			newDom = childVNode._dom = diffTextNode(
+				childVNode,
+				i || EMPTY_OBJ,
+				excessDomChildren
+			);
+
+			placeChild(
+				parentDom,
+				childVNode,
+				i || EMPTY_OBJ,
+				oldChildren,
+				excessDomChildren,
+				newDom,
+				oldDom
+			);
+			return;
+		} else {
+			renderResult = [renderResult];
+		}
+	}
 
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
