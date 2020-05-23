@@ -24,9 +24,16 @@ export function createElement(type, props, children) {
 		normalizedProps.children = children;
 	}
 
+	let key = null;
+	let ref = null;
 	for (i in props) {
-		if (i !== 'key' && i !== 'ref' && (i != 'children' || children == null))
+		if (i == 'key') {
+			key = props.key;
+		} else if (i == 'ref') {
+			ref = props.ref;
+		} else if (i != 'children' || children == null) {
 			normalizedProps[i] = props[i];
+		}
 	}
 
 	// If a Component VNode, check for and apply defaultProps
@@ -39,13 +46,7 @@ export function createElement(type, props, children) {
 		}
 	}
 
-	return createVNode(
-		type,
-		normalizedProps,
-		props && props.key,
-		props && props.ref,
-		null
-	);
+	return createVNode(type, normalizedProps, key, ref, null);
 }
 
 /**
