@@ -1,5 +1,6 @@
 import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
+import { EMPTY_VNODE } from '../create-element';
 
 /**
  * Diff the old and new properties of a VNode and apply changes to the DOM node
@@ -12,6 +13,7 @@ import options from '../options';
  */
 export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 	let i;
+	let isMount = oldProps == EMPTY_VNODE.props;
 
 	for (i in oldProps) {
 		if (i !== 'children' && i !== 'key' && !(i in newProps)) {
@@ -26,9 +28,10 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 			i !== 'key' &&
 			i !== 'value' &&
 			i !== 'checked' &&
-			oldProps[i] !== newProps[i]
+			// Skip comparison when mounting
+			(isMount || oldProps[i] !== newProps[i])
 		) {
-			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
+			setProperty(dom, i, newProps[i], isMount ? null : oldProps[i], isSvg);
 		}
 	}
 }
