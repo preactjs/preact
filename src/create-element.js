@@ -11,9 +11,6 @@ import options from './options';
 export function createElement(type, props, children) {
 	let normalizedProps = {},
 		i;
-	for (i in props) {
-		if (i !== 'key' && i !== 'ref') normalizedProps[i] = props[i];
-	}
 
 	if (arguments.length > 3) {
 		children = [children];
@@ -22,8 +19,14 @@ export function createElement(type, props, children) {
 			children.push(arguments[i]);
 		}
 	}
+
 	if (children != null) {
 		normalizedProps.children = children;
+	}
+
+	for (i in props) {
+		if (i !== 'key' && i !== 'ref' && (i != 'children' || children == null))
+			normalizedProps[i] = props[i];
 	}
 
 	// If a Component VNode, check for and apply defaultProps
