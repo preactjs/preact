@@ -67,18 +67,27 @@ describe('svg', () => {
 		);
 	});
 
-	it('should render SVG to DOM without name (clipPathUnits) attribute manipulation', () => {
+	it('should render correct SVG attribute names to the DOM', () => {
 		React.render(
-			<svg>
-				<clipPath clipPathUnits="objectBoundingBox">
-					<polygon points="0,100 50,25 50,75 100,0" />
-				</clipPath>
-			</svg>,
+			<svg
+				clipPath="value"
+				clipRule="value"
+				clipPathUnits="value"
+				glyphOrientationHorizontal="value"
+				glyphRef="value"
+				markerStart="value"
+				markerHeight="value"
+				markerUnits="value"
+				markerWidth="value"
+				x1="value"
+				xChannelSelector="value"
+			/>,
 			scratch
 		);
+
 		expect(serializeHtml(scratch)).to.eql(
 			sortAttributes(
-				'<svg><clipPath clipPathUnits="objectBoundingBox"><polygon points="0,100 50,25 50,75 100,0" /></clipPath></svg>'
+				'<svg clip-path="value" clip-rule="value" clipPathUnits="value" glyph-orientationhorizontal="value" glyphRef="value" marker-start="value" markerHeight="value" markerUnits="value" markerWidth="value" x1="value" xChannelSelector="value"></svg>'
 			)
 		);
 	});

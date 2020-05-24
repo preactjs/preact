@@ -3,7 +3,8 @@ import {
 	setupScratch,
 	teardown,
 	sortAttributes,
-	serializeHtml
+	serializeHtml,
+	spyOnElementAttributes
 } from '../_util/helpers';
 import { ul, li, div } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
@@ -11,7 +12,7 @@ import { logCall, clearLog, getLog } from '../_util/logCall';
 /** @jsx createElement */
 
 describe('hydrate()', () => {
-	let scratch;
+	let scratch, attributesSpy;
 
 	const List = ({ children }) => <ul>{children}</ul>;
 	const ListItem = ({ children }) => <li>{children}</li>;
@@ -27,6 +28,7 @@ describe('hydrate()', () => {
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		attributesSpy = spyOnElementAttributes();
 	});
 
 	afterEach(() => {
@@ -129,6 +131,7 @@ describe('hydrate()', () => {
 		clearLog();
 		hydrate(vnode, scratch);
 
+		expect(attributesSpy.get).to.not.have.been.called;
 		expect(serializeHtml(scratch)).to.equal(
 			sortAttributes(
 				'<div><span before-hydrate="test" different-value="a" same-value="foo">Test</span></div>'
@@ -250,6 +253,7 @@ describe('hydrate()', () => {
 		);
 
 		hydrate(preactElement, scratch);
+		expect(attributesSpy.get).to.not.have.been.called;
 		expect(scratch).to.have.property(
 			'innerHTML',
 			'<div><a foo="bar"></a></div>'
@@ -275,5 +279,37 @@ describe('hydrate()', () => {
 
 		hydrate(<Component foo="bar" />, element);
 		expect(element.innerHTML).to.equal('<p>hello bar</p>');
+	});
+
+	it('should deopt for trees introduced in hydrate (append)', () => {
+		scratch.innerHTML = '<div id="test"><p class="hi">hello bar</p></div>';
+		const Component = props => <p class="hi">hello {props.foo}</p>;
+		const element = document.getElementById('test');
+		hydrate(
+			<Fragment>
+				<Component foo="bar" />
+				<Component foo="baz" />
+			</Fragment>,
+			element
+		);
+		expect(element.innerHTML).to.equal(
+			'<p class="hi">hello bar</p><p class="hi">hello baz</p>'
+		);
+	});
+
+	it('should deopt for trees introduced in hydrate (insert before)', () => {
+		scratch.innerHTML = '<div id="test"><p class="hi">hello bar</p></div>';
+		const Component = props => <p class="hi">hello {props.foo}</p>;
+		const element = document.getElementById('test');
+		hydrate(
+			<Fragment>
+				<Component foo="baz" />
+				<Component foo="bar" />
+			</Fragment>,
+			element
+		);
+		expect(element.innerHTML).to.equal(
+			'<p class="hi">hello baz</p><p class="hi">hello bar</p>'
+		);
 	});
 });

@@ -58,6 +58,7 @@ declare namespace React {
 	export import lazy = _Suspense.lazy;
 
 	// Compat
+	export import StrictMode = preact.Fragment;
 	export const version: string;
 
 	export function createPortal(
@@ -97,10 +98,13 @@ declare namespace React {
 		isPureReactComponent: boolean;
 	}
 
-	export function memo<P = {}>(
-		component: preact.FunctionalComponent<P>,
-		comparer?: (prev: P, next: P) => boolean
-	): preact.FunctionComponent<P>;
+	export function memo<C extends preact.FunctionalComponent<any>>(
+		component: C,
+		comparer?: (
+			prev: preact.ComponentProps<C>,
+			next: preact.ComponentProps<C>
+		) => boolean
+	): C;
 
 	export interface ForwardFn<P = {}, T = any> {
 		(props: P, ref: Ref<T>): preact.ComponentChild;

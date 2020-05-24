@@ -34,14 +34,9 @@ describe('Lifecycle methods', () => {
 		/** @type {typeof import('../../../').Component} */
 		let ThrowErr;
 
-		/** @type {Receiver} */
-		let receiver;
-		class Receiver extends Component {
-			constructor() {
-				super();
-				receiver = this;
-			}
+		let thrower;
 
+		class Receiver extends Component {
 			static getDerivedStateFromError(error) {
 				return { error };
 			}
@@ -61,6 +56,11 @@ describe('Lifecycle methods', () => {
 
 		beforeEach(() => {
 			ThrowErr = class ThrowErr extends Component {
+				constructor(props) {
+					super(props);
+					thrower = this;
+				}
+
 				static getDerivedStateFromError() {
 					expect.fail("Throwing component should not catch it's own error.");
 					return {};
@@ -72,7 +72,6 @@ describe('Lifecycle methods', () => {
 			sinon.spy(ThrowErr, 'getDerivedStateFromError');
 
 			expectedError = undefined;
-			receiver = undefined;
 
 			resetAllSpies(Receiver);
 			resetAllSpies(Receiver.prototype);
@@ -83,6 +82,7 @@ describe('Lifecycle methods', () => {
 				ThrowErr.getDerivedStateFromError,
 				"Throwing component should not catch it's own error."
 			).to.not.be.called;
+			thrower = undefined;
 		});
 
 		it('should be called when child fails in constructor', () => {
@@ -202,7 +202,7 @@ describe('Lifecycle methods', () => {
 				</Receiver>,
 				scratch
 			);
-			receiver.forceUpdate();
+			thrower.forceUpdate();
 			rerender();
 
 			expect(Receiver.getDerivedStateFromError).to.have.been.calledWith(
@@ -220,7 +220,7 @@ describe('Lifecycle methods', () => {
 				scratch
 			);
 
-			receiver.forceUpdate();
+			thrower.forceUpdate();
 			rerender();
 			expect(Receiver.getDerivedStateFromError).to.have.been.calledWith(
 				expectedError
@@ -237,7 +237,7 @@ describe('Lifecycle methods', () => {
 				scratch
 			);
 
-			receiver.forceUpdate();
+			thrower.forceUpdate();
 			rerender();
 			expect(Receiver.getDerivedStateFromError).to.have.been.calledWith(
 				expectedError

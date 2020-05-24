@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Text Updates</title>
+	</head>
+	<body>
+		<div id="root"></div>
+		<script type="module">
+			import * as bench from '/bench.js';
+			import { isPreactX } from './util.js';
+			import { render, createElement } from 'preact';
+
+			const root = document.getElementById('root');
+
+			const isVersionX = isPreactX(createElement);
+
+			function component(randomValue) {
+				return createElement('div', {}, [
+					createElement('h2', {}, 'Test ' + randomValue),
+					createElement('h1', {}, `===${randomValue}===`)
+				]);
+			}
+
+			let result;
+
+			bench.start();
+			for (let i = 0; i < 100; i++) {
+				if (isVersionX) {
+					render(component(i), root);
+				} else {
+					result = render(component(i), root, result);
+				}
+			}
+			bench.stop();
+		</script>
+	</body>
+</html>

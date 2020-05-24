@@ -9,9 +9,9 @@ import { options, Fragment } from 'preact';
 export function getDisplayName(vnode) {
 	if (vnode.type === Fragment) {
 		return 'Fragment';
-	} else if (typeof vnode.type === 'function') {
+	} else if (typeof vnode.type == 'function') {
 		return vnode.type.displayName || vnode.type.name;
-	} else if (typeof vnode.type === 'string') {
+	} else if (typeof vnode.type == 'string') {
 		return vnode.type;
 	}
 
@@ -65,7 +65,7 @@ let hasBabelPlugin = false;
  * @param {import('./internal').VNode} vnode
  */
 function isPossibleOwner(vnode) {
-	return typeof vnode.type === 'function' && vnode.type !== Fragment;
+	return typeof vnode.type == 'function' && vnode.type != Fragment;
 }
 
 /**

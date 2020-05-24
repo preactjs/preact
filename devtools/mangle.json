@@ -6,7 +6,7 @@
   "minify": {
     "mangle": {
       "properties": {
-        "regex": "^_",
+        "regex": "^_[^_]",
         "reserved": [
           "__REACT_DEVTOOLS_GLOBAL_HOOK__",
           "__PREACT_DEVTOOLS__",
@@ -15,49 +15,6 @@
           "__self"
         ]
       }
-    }
-  },
-  "props": {
-    "cname": 6,
-    "props": {
-      "$_afterPaintQueued": "__a",
-      "$__hooks": "__H",
-      "$_list": "__",
-      "$_pendingEffects": "__h",
-      "$_value": "__",
-      "$_args": "__H",
-      "$_factory": "__h",
-      "$_depth": "__b",
-      "$_nextDom": "__d",
-      "$_dirty": "__d",
-      "$_detachOnNextRender": "__b",
-      "$_force": "__e",
-      "$_nextState": "__s",
-      "$_renderCallbacks": "__h",
-      "$_vnode": "__v",
-      "$_children": "__k",
-      "$_suspensions": "__u",
-      "$_childDidSuspend": "__c",
-      "$_suspendedComponentWillUnmount": "__c",
-      "$_dom": "__e",
-      "$_component": "__c",
-      "$__html": "__html",
-      "$_parent": "__",
-      "$_pendingError": "__E",
-      "$_processingException": "__",
-      "$_context": "__n",
-      "$_defaultValue": "__",
-      "$_id": "__c",
-      "$_parentDom": "__P",
-      "$_prevState": "__u",
-      "$_root": "__",
-      "$_diff": "__b",
-      "$_commit": "__c",
-      "$_render": "__r",
-      "$_hook": "__h",
-      "$_catchError": "__e",
-      "$_unmount": "_e",
-      "$_owner": "__o"
     }
   }
 }

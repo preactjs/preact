@@ -6,6 +6,9 @@ let currentIndex;
 /** @type {import('./internal').Component} */
 let currentComponent;
 
+/** @type {number} */
+let currentHook = 0;
+
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
@@ -23,10 +26,11 @@ options._render = vnode => {
 	currentComponent = vnode._component;
 	currentIndex = 0;
 
-	if (currentComponent.__hooks) {
-		currentComponent.__hooks._pendingEffects.forEach(invokeCleanup);
-		currentComponent.__hooks._pendingEffects.forEach(invokeEffect);
-		currentComponent.__hooks._pendingEffects = [];
+	const hooks = currentComponent.__hooks;
+	if (hooks) {
+		hooks._pendingEffects.forEach(invokeCleanup);
+		hooks._pendingEffects.forEach(invokeEffect);
+		hooks._pendingEffects = [];
 	}
 };
 
@@ -34,13 +38,8 @@ options.diffed = vnode => {
 	if (oldAfterDiff) oldAfterDiff(vnode);
 
 	const c = vnode._component;
-	if (!c) return;
-
-	const hooks = c.__hooks;
-	if (hooks) {
-		if (hooks._pendingEffects.length) {
-			afterPaint(afterPaintEffects.push(c));
-		}
+	if (c && c.__hooks && c.__hooks._pendingEffects.length) {
+		afterPaint(afterPaintEffects.push(c));
 	}
 };
 
@@ -67,12 +66,9 @@ options.unmount = vnode => {
 	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
 
 	const c = vnode._component;
-	if (!c) return;
-
-	const hooks = c.__hooks;
-	if (hooks) {
+	if (c && c.__hooks) {
 		try {
-			hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
+			c.__hooks._list.forEach(invokeCleanup);
 		} catch (e) {
 			options._catchError(e, c._vnode);
 		}
@@ -82,10 +78,15 @@ options.unmount = vnode => {
 /**
  * Get a hook's state from the currentComponent
  * @param {number} index The index of the hook to get
+ * @param {number} type The index of the hook to get
  * @returns {import('./internal').HookState}
  */
-function getHookState(index) {
-	if (options._hook) options._hook(currentComponent);
+function getHookState(index, type) {
+	if (options._hook) {
+		options._hook(currentComponent, index, currentHook || type);
+	}
+	currentHook = 0;
+
 	// Largely inspired by:
 	// * https://github.com/michael-klein/funcy.js/blob/f6be73468e6ec46b0ff5aa3cc4c9baf72a29025a/src/hooks/core_hooks.mjs
 	// * https://github.com/michael-klein/funcy.js/blob/650beaa58c43c33a74820a3c98b3c7079cf2e333/src/renderer.mjs
@@ -93,7 +94,10 @@ function getHookState(index) {
 	// * https://codesandbox.io/s/mnox05qp8
 	const hooks =
 		currentComponent.__hooks ||
-		(currentComponent.__hooks = { _list: [], _pendingEffects: [] });
+		(currentComponent.__hooks = {
+			_list: [],
+			_pendingEffects: []
+		});
 
 	if (index >= hooks._list.length) {
 		hooks._list.push({});
@@ -105,6 +109,7 @@ function getHookState(index) {
  * @param {import('./index').StateUpdater<any>} initialState
  */
 export function useState(initialState) {
+	currentHook = 1;
 	return useReducer(invokeOrReturn, initialState);
 }
 
@@ -116,7 +121,8 @@ export function useState(initialState) {
  */
 export function useReducer(reducer, initialState, init) {
 	/** @type {import('./internal').ReducerHookState} */
-	const hookState = getHookState(currentIndex++);
+	const hookState = getHookState(currentIndex++, 2);
+	hookState._reducer = reducer;
 	if (!hookState._component) {
 		hookState._component = currentComponent;
 
@@ -124,9 +130,9 @@ export function useReducer(reducer, initialState, init) {
 			!init ? invokeOrReturn(undefined, initialState) : init(initialState),
 
 			action => {
-				const nextValue = reducer(hookState._value[0], action);
+				const nextValue = hookState._reducer(hookState._value[0], action);
 				if (hookState._value[0] !== nextValue) {
-					hookState._value[0] = nextValue;
+					hookState._value = [nextValue, hookState._value[1]];
 					hookState._component.setState({});
 				}
 			}
@@ -142,8 +148,8 @@ export function useReducer(reducer, initialState, init) {
  */
 export function useEffect(callback, args) {
 	/** @type {import('./internal').EffectHookState} */
-	const state = getHookState(currentIndex++);
-	if (argsChanged(state._args, args)) {
+	const state = getHookState(currentIndex++, 3);
+	if (!options._skipEffects && argsChanged(state._args, args)) {
 		state._value = callback;
 		state._args = args;
 
@@ -157,8 +163,8 @@ export function useEffect(callback, args) {
  */
 export function useLayoutEffect(callback, args) {
 	/** @type {import('./internal').EffectHookState} */
-	const state = getHookState(currentIndex++);
-	if (argsChanged(state._args, args)) {
+	const state = getHookState(currentIndex++, 4);
+	if (!options._skipEffects && argsChanged(state._args, args)) {
 		state._value = callback;
 		state._args = args;
 
@@ -167,6 +173,7 @@ export function useLayoutEffect(callback, args) {
 }
 
 export function useRef(initialValue) {
+	currentHook = 5;
 	return useMemo(() => ({ current: initialValue }), []);
 }
 
@@ -176,9 +183,10 @@ export function useRef(initialValue) {
  * @param {any[]} args
  */
 export function useImperativeHandle(ref, createHandle, args) {
+	currentHook = 6;
 	useLayoutEffect(
 		() => {
-			if (typeof ref === 'function') ref(createHandle());
+			if (typeof ref == 'function') ref(createHandle());
 			else if (ref) ref.current = createHandle();
 		},
 		args == null ? args : args.concat(ref)
@@ -191,7 +199,7 @@ export function useImperativeHandle(ref, createHandle, args) {
  */
 export function useMemo(factory, args) {
 	/** @type {import('./internal').MemoHookState} */
-	const state = getHookState(currentIndex++);
+	const state = getHookState(currentIndex++, 7);
 	if (argsChanged(state._args, args)) {
 		state._args = args;
 		state._factory = factory;
@@ -206,6 +214,7 @@ export function useMemo(factory, args) {
  * @param {any[]} args
  */
 export function useCallback(callback, args) {
+	currentHook = 8;
 	return useMemo(() => callback, args);
 }
 
@@ -214,8 +223,15 @@ export function useCallback(callback, args) {
  */
 export function useContext(context) {
 	const provider = currentComponent.context[context._id];
+	// We could skip this call here, but than we'd not call
+	// `options._hook`. We need to do that in order to make
+	// the devtools aware of this hook.
+	const state = getHookState(currentIndex++, 9);
+	// The devtools needs access to the context object to
+	// be able to pull of the default value when no provider
+	// is present in the tree.
+	state._context = context;
 	if (!provider) return context._defaultValue;
-	const state = getHookState(currentIndex++);
 	// This is probably not safe to convert to "!"
 	if (state._value == null) {
 		state._value = true;
@@ -235,7 +251,7 @@ export function useDebugValue(value, formatter) {
 }
 
 export function useErrorBoundary(cb) {
-	const state = getHookState(currentIndex++);
+	const state = getHookState(currentIndex++, 10);
 	const errState = useState();
 	state._value = cb;
 	if (!currentComponent.componentDidCatch) {
@@ -263,6 +279,7 @@ function flushAfterPaintEffects() {
 				component.__hooks._pendingEffects.forEach(invokeEffect);
 				component.__hooks._pendingEffects = [];
 			} catch (e) {
+				component.__hooks._pendingEffects = [];
 				options._catchError(e, component._vnode);
 				return true;
 			}
@@ -290,7 +307,7 @@ function afterNextFrame(callback) {
 	const timeout = setTimeout(done, RAF_TIMEOUT);
 
 	let raf;
-	if (typeof window !== 'undefined') {
+	if (typeof window != 'undefined') {
 		raf = requestAnimationFrame(done);
 	}
 }
@@ -313,7 +330,7 @@ function afterPaint(newQueueLength) {
  * @param {import('./internal').EffectHookState} hook
  */
 function invokeCleanup(hook) {
-	if (hook._cleanup) hook._cleanup();
+	if (typeof hook._cleanup == 'function') hook._cleanup();
 }
 
 /**
@@ -321,8 +338,7 @@ function invokeCleanup(hook) {
  * @param {import('./internal').EffectHookState} hook
  */
 function invokeEffect(hook) {
-	const result = hook._value();
-	if (typeof result === 'function') hook._cleanup = result;
+	hook._cleanup = hook._value();
 }
 
 /**
@@ -334,5 +350,5 @@ function argsChanged(oldArgs, newArgs) {
 }
 
 function invokeOrReturn(arg, f) {
-	return typeof f === 'function' ? f(arg) : f;
+	return typeof f == 'function' ? f(arg) : f;
 }
