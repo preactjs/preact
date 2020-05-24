@@ -110,7 +110,7 @@ function getHookState(index, type) {
  */
 export function useState(initialState) {
 	currentHook = 1;
-	return useReducer((prev, s) => s, initialState);
+	return useReducer(invokeOrReturn, initialState);
 }
 
 /**
