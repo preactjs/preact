@@ -73,8 +73,15 @@ export function diff(
 				if (provider) provider.sub(c);
 
 				c.props = newProps;
-				if (!c.state) c.state = {};
 				c.context = componentContext;
+				if (!c.state) c.state = {};
+
+				// TODO: Something to explore: Suspense needs a component to have a
+				// VNode upon creation so that a Lazy component can rerender itself if
+				// it threw in the initial render. The `process` function requires a
+				// component have a VNode to read the _depth property. Could this be
+				// avoided or this desirable?
+				c._vnode = newVNode;
 				c._globalContext = globalContext;
 				isNew = c._dirty = true;
 				c._renderCallbacks = [];
@@ -167,10 +174,18 @@ export function diff(
 			if ((tmp = options._render)) tmp(newVNode);
 
 			c._dirty = false;
-			c._vnode = newVNode;
 			c._parentDom = parentDom;
 
 			tmp = c.render(c.props, c.state, c.context);
+			// TODO: Is this the right thing to do? Originally thinking we shouldn't
+			// update the _vnode property until we know it represents what was latest
+			// rendered, but if render throws, then c.props won't align with
+			// c._vnode.props (maybe? need to verify)... Doing this fixes almost all
+			// Suspense errors with using createVNode in renderComponent because then
+			// c._vnode doesn't point to a vnode that never had _children set (current
+			// implementation copies using `assign` all properties from oldVNode to
+			// newVnode)
+			c._vnode = newVNode;
 
 			if (c.getChildContext != null) {
 				globalContext = assign(assign({}, globalContext), c.getChildContext());

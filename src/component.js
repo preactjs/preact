@@ -43,7 +43,7 @@ Component.prototype.setState = function(update, callback) {
 	// Skip update if updater function returned null
 	if (update == null) return;
 
-	if (this._vnode) {
+	if (this._parentDom) {
 		if (callback) this._renderCallbacks.push(callback);
 		enqueueRender(this);
 	}
@@ -55,7 +55,7 @@ Component.prototype.setState = function(update, callback) {
  * re-rendered
  */
 Component.prototype.forceUpdate = function(callback) {
-	if (this._vnode) {
+	if (this._parentDom) {
 		// Set render mode so that we can differentiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
@@ -128,6 +128,17 @@ function renderComponent(component) {
 			null
 		);
 
+		// TODO: If rerendering this component throws, the current implementation of
+		// _catchError uses the newVNode to climb up the tree to find the nearest
+		// error boundary, so we need to set the _parent pointer on the newVNode
+		// before diffing. Is this the right behavior or should _catchError use
+		// oldVNode? I guess in the case of rerender it is the same. Would have to
+		// use newVnode if oldVNode is null (e.g. mounting). Need to consider if
+		// there are other situations where newVNode._parent != oldVNode._parent and
+		// which one to use.
+		const parent = oldVNode._parent;
+		newVNode._parent = parent;
+
 		let newDom = diff(
 			parentDom,
 			newVNode,
@@ -139,11 +150,13 @@ function renderComponent(component) {
 			oldDom == null ? getDomSibling(oldVNode) : oldDom
 		);
 
-		component._vnode = newVNode;
-		const parent = oldVNode._parent;
+		// TODO: Investigate if this is needed. If a component throws then diff may not
+		// set _vnode to the newVNode, so we may need to set it here. Should we update
+		// _vnode if a component throws? Is the current implementation consistent
+		// depending on where a component throws?
+		// component._vnode = newVNode;
 		const index = parent._children.indexOf(oldVNode);
 		parent._children[index] = newVNode;
-		newVNode._parent = parent;
 
 		commitRoot(commitQueue, newVNode);
 
