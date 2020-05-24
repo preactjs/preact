@@ -224,6 +224,7 @@ export function diffChildren(
 			if (nextDom !== undefined) {
 				oldDom = nextDom;
 			} else {
+				console.log('undefined nextdom', newDom.nextSibling);
 				oldDom = newDom.nextSibling;
 			}
 
@@ -236,6 +237,7 @@ export function diffChildren(
 				// If the last child is a DOM VNode, then oldDom will be set to that DOM
 				// node's nextSibling.
 
+				console.log('setting nextdom to', oldDom);
 				newParentVNode._nextDom = oldDom;
 			}
 		} else if (
