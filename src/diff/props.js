@@ -2,9 +2,10 @@ import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
 import { EMPTY_VNODE } from '../create-element';
 
-export const SET_VALUE = 1 << 0;
-export const SET_CHECKED = 1 << 1;
-export const HAS_INNERHTML = 1 << 2;
+// TODO: Why doesn't inline these constants?
+// export const SET_VALUE = 1 << 0;
+// export const SET_CHECKED = 1 << 1;
+// export const HAS_INNERHTML = 1 << 2;
 
 /**
  * Diff the old and new properties of a VNode and apply changes to the DOM node
@@ -29,16 +30,11 @@ export function diffProps(dom, newProps, oldProps, isSvg, isHydrating) {
 	for (i in newProps) {
 		if (!isHydrating && i === 'value') {
 			if (newProps.value !== undefined && newProps.value !== dom.value) {
-				flags |= SET_VALUE;
+				flags |= 1;
 			}
 		} else if (!isHydrating && i === 'checked') {
 			if (newProps.checked !== undefined && newProps.checked !== dom.checked) {
-				flags |= SET_CHECKED;
-			}
-		} else if (i == 'dangerouslySetInnerHTML') {
-			flags |= HAS_INNERHTML;
-			if (!isHydrating) {
-				setProperty(dom, i, newProps[i], isMount ? null : oldProps[i], isSvg);
+				flags |= 2;
 			}
 		} else if (
 			(!isHydrating || typeof newProps[i] == 'function') &&
@@ -50,7 +46,7 @@ export function diffProps(dom, newProps, oldProps, isSvg, isHydrating) {
 			(isMount || oldProps[i] !== newProps[i])
 		) {
 			if (i == 'dangerouslySetInnerHTML') {
-				flags |= HAS_INNERHTML;
+				flags |= 4;
 			}
 
 			setProperty(dom, i, newProps[i], isMount ? null : oldProps[i], isSvg);

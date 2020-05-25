@@ -2,13 +2,7 @@ import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
-import {
-	diffProps,
-	setProperty,
-	HAS_INNERHTML,
-	SET_VALUE,
-	SET_CHECKED
-} from './props';
+import { diffProps, setProperty } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
 
@@ -370,7 +364,7 @@ function diffElementNodes(
 		let flags = diffProps(dom, newProps, oldProps, isSvg, isHydrating);
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
-		if (flags & HAS_INNERHTML) {
+		if (flags & 4) {
 			newVNode._children = [];
 		} else {
 			i = newVNode.props.children;
@@ -389,11 +383,11 @@ function diffElementNodes(
 		}
 
 		// (as above, don't diff props during hydration)
-		if (flags & SET_VALUE) {
+		if (flags & 1) {
 			setProperty(dom, 'value', newProps.value, oldProps.value, false);
 		}
 
-		if (flags & SET_CHECKED) {
+		if (flags & 2) {
 			setProperty(dom, 'checked', newProps.checked, oldProps.checked, false);
 		}
 	}
