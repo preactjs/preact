@@ -77,8 +77,6 @@ Component.prototype.forceUpdate = function(callback) {
  */
 Component.prototype.render = Fragment;
 
-Component.prototype._rerenderCount = 0;
-
 /**
  * @param {import('./internal').VNode} vnode
  * @param {number | null} [childIndex]
@@ -198,7 +196,7 @@ export function enqueueRender(c) {
 		(!c._dirty &&
 			(c._dirty = true) &&
 			rerenderQueue.push(c) &&
-			!Component.prototype.rerenderCount++) ||
+			!process.rerenderCount++) ||
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
@@ -209,7 +207,7 @@ export function enqueueRender(c) {
 /** Flush the render queue by rerendering all queued components */
 function process() {
 	let queue;
-	while ((Component.prototype._rerenderCount = rerenderQueue.length)) {
+	while ((process._rerenderCount = rerenderQueue.length)) {
 		queue = rerenderQueue.sort((a, b) => a._vnode._depth - b._vnode._depth);
 		rerenderQueue = [];
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
@@ -219,3 +217,4 @@ function process() {
 		});
 	}
 }
+process._rerenderCount = 0;
