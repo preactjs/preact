@@ -2,6 +2,10 @@ import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
 import { EMPTY_VNODE } from '../create-element';
 
+export const SET_VALUE = 1 << 0;
+export const SET_CHECKED = 1 << 1;
+export const HAS_INNERHTML = 1 << 2;
+
 /**
  * Diff the old and new properties of a VNode and apply changes to the DOM node
  * @param {import('../internal').PreactElement} dom The DOM node to apply
@@ -9,10 +13,11 @@ import { EMPTY_VNODE } from '../create-element';
  * @param {object} newProps The new props
  * @param {object} oldProps The old props
  * @param {boolean} isSvg Whether or not this node is an SVG node
- * @param {boolean} hydrate Whether or not we are in hydration mode
+ * @param {boolean} isHydrating Whether or not we are in hydration mode
  */
-export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
+export function diffProps(dom, newProps, oldProps, isSvg, isHydrating) {
 	let i;
+	let flags = 0;
 	let isMount = oldProps == EMPTY_VNODE.props;
 
 	for (i in oldProps) {
@@ -22,18 +27,37 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 	}
 
 	for (i in newProps) {
-		if (
-			(!hydrate || typeof newProps[i] == 'function') &&
+		if (!isHydrating && i === 'value') {
+			if (newProps.value !== undefined && newProps.value !== dom.value) {
+				flags |= SET_VALUE;
+			}
+		} else if (!isHydrating && i === 'checked') {
+			if (newProps.checked !== undefined && newProps.checked !== dom.checked) {
+				flags |= SET_CHECKED;
+			}
+		} else if (i == 'dangerouslySetInnerHTML') {
+			flags |= HAS_INNERHTML;
+			if (!isHydrating) {
+				setProperty(dom, i, newProps[i], isMount ? null : oldProps[i], isSvg);
+			}
+		} else if (
+			(!isHydrating || typeof newProps[i] == 'function') &&
 			i !== 'children' &&
 			i !== 'key' &&
-			i !== 'value' &&
-			i !== 'checked' &&
+			// i !== 'value' &&
+			// i !== 'checked' &&
 			// Skip comparison when mounting
 			(isMount || oldProps[i] !== newProps[i])
 		) {
+			if (i == 'dangerouslySetInnerHTML') {
+				flags |= HAS_INNERHTML;
+			}
+
 			setProperty(dom, i, newProps[i], isMount ? null : oldProps[i], isSvg);
 		}
 	}
+
+	return flags;
 }
 
 function setStyle(style, key, value) {
@@ -109,6 +133,11 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			(dom._listeners || (dom._listeners = {}))[name] = value;
 		} else {
 			dom.removeEventListener(name, eventProxy, useCapture);
+		}
+	} else if (name == 'dangerouslySetInnerHTML') {
+		// Avoid re-applying the same '__html' if it did not changed between re-render
+		if (!value || !oldValue || value.__html != oldValue.__html) {
+			dom.innerHTML = (value && value.__html) || '';
 		}
 	} else if (
 		name !== 'list' &&

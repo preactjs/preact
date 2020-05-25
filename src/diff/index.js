@@ -2,7 +2,13 @@ import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
-import { diffProps, setProperty } from './props';
+import {
+	diffProps,
+	setProperty,
+	HAS_INNERHTML,
+	SET_VALUE,
+	SET_CHECKED
+} from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
 
@@ -348,35 +354,23 @@ function diffElementNodes(
 	} else {
 		if (excessDomChildren != null) {
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
-		}
 
-		let oldHtml = oldProps.dangerouslySetInnerHTML;
-		let newHtml = newProps.dangerouslySetInnerHTML;
-
-		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
-		// @TODO we should warn in debug mode when props don't match here.
-		if (!isHydrating) {
-			// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
-			// we should read the existing DOM attributes to diff them
-			if (excessDomChildren != null) {
+			if (!isHydrating) {
+				// If we are in a situation where we are using existing DOM but not
+				// hydration (e.g. replaceNode) we should read the existing DOM
+				// attributes to diff them
 				oldProps = {};
 				for (let i = 0; i < dom.attributes.length; i++) {
 					oldProps[dom.attributes[i].name] = dom.attributes[i].value;
 				}
 			}
-
-			if (newHtml || oldHtml) {
-				// Avoid re-applying the same '__html' if it did not changed between re-render
-				if (!newHtml || !oldHtml || newHtml.__html != oldHtml.__html) {
-					dom.innerHTML = (newHtml && newHtml.__html) || '';
-				}
-			}
 		}
 
-		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
+		// @TODO we should warn in debug mode when props don't match here.
+		let flags = diffProps(dom, newProps, oldProps, isSvg, isHydrating);
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
-		if (newHtml) {
+		if (flags & HAS_INNERHTML) {
 			newVNode._children = [];
 		} else {
 			i = newVNode.props.children;
@@ -395,21 +389,12 @@ function diffElementNodes(
 		}
 
 		// (as above, don't diff props during hydration)
-		if (!isHydrating) {
-			if (
-				'value' in newProps &&
-				(i = newProps.value) !== undefined &&
-				i !== dom.value
-			) {
-				setProperty(dom, 'value', i, oldProps.value, false);
-			}
-			if (
-				'checked' in newProps &&
-				(i = newProps.checked) !== undefined &&
-				i !== dom.checked
-			) {
-				setProperty(dom, 'checked', i, oldProps.checked, false);
-			}
+		if (flags & SET_VALUE) {
+			setProperty(dom, 'value', newProps.value, oldProps.value, false);
+		}
+
+		if (flags & SET_CHECKED) {
+			setProperty(dom, 'checked', newProps.checked, oldProps.checked, false);
 		}
 	}
 
