@@ -209,7 +209,7 @@ export function enqueueRender(c) {
 /** Flush the render queue by rerendering all queued components */
 function process() {
 	let queue;
-	while ((Component.prototype.rerenderCount = rerenderQueue.length)) {
+	while ((Component.prototype._rerenderCount = rerenderQueue.length)) {
 		queue = rerenderQueue.sort((a, b) => a._vnode._depth - b._vnode._depth);
 		rerenderQueue = [];
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
