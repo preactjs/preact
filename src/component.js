@@ -196,7 +196,7 @@ export function enqueueRender(c) {
 		(!c._dirty &&
 			(c._dirty = true) &&
 			rerenderQueue.push(c) &&
-			!process.rerenderCount++) ||
+			!process._rerenderCount++) ||
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
