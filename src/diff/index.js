@@ -381,22 +381,19 @@ function diffElementNodes(
 			);
 		}
 
-		// (as above, don't diff props during hydration)
-		if (!isHydrating) {
-			if (
-				'value' in newProps &&
-				(i = newProps.value) !== undefined &&
-				i !== dom.value
-			) {
-				setProperty(dom, 'value', i, oldProps.value, false);
-			}
-			if (
-				'checked' in newProps &&
-				(i = newProps.checked) !== undefined &&
-				i !== dom.checked
-			) {
-				setProperty(dom, 'checked', i, oldProps.checked, false);
-			}
+		if (
+			'value' in newProps &&
+			(i = newProps.value) !== undefined &&
+			i !== dom.value
+		) {
+			setProperty(dom, 'value', i, oldProps.value, false);
+		}
+		if (
+			'checked' in newProps &&
+			(i = newProps.checked) !== undefined &&
+			i !== dom.checked
+		) {
+			setProperty(dom, 'checked', i, oldProps.checked, false);
 		}
 	}
 
