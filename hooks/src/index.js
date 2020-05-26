@@ -307,7 +307,7 @@ function afterNextFrame(callback) {
 	const timeout = setTimeout(done, RAF_TIMEOUT);
 
 	let raf;
-	if (typeof window != 'undefined') {
+	if (typeof requestAnimationFrame == 'function') {
 		raf = requestAnimationFrame(done);
 	}
 }
