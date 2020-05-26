@@ -6,6 +6,17 @@ const divider = '=========================';
 const prevShapes = new Map();
 const shapeChanges = new Map();
 
+function testIfAllowNativeSyntax() {
+	var native = false;
+	try {
+		eval('%GetHeapUsage();');
+		native = true;
+	} catch (err) {
+		native = false;
+	}
+	return native;
+}
+
 /**
  * @template T
  * @param {string} key
@@ -17,6 +28,10 @@ export function logArgsShapeChange(key, ...args) {
 }
 
 export function logShapeChange(key, obj) {
+	// calculateShape, compareShape, & getShapeChange
+	// Try to use %HaveSameMap runtime function to determine shape diff
+	// Is there a better way to display shapes?
+
 	var currShape = calculateShape(obj);
 	if (prevShapes.has(key)) {
 		const prevObjShapes = prevShapes.get(key);
