@@ -1,19 +1,15 @@
 import { Component } from '../component';
-import { diffChildren } from './children';
 import { Fragment } from '../create-element';
 import { assign } from '../util';
 import options from '../options';
+import { EMPTY_OBJ } from '../constants';
 
-export function diffComponentNodes(
+export function renderComponent(
 	parentDom,
 	newVNode,
 	oldVNode,
 	globalContext,
-	isSvg,
-	excessDomChildren,
-	commitQueue,
-	oldDom,
-	isHydrating
+	commitQueue
 ) {
 	let tmp, c, isNew, oldProps, oldState, clearProcessingException;
 	let newType = newVNode.type;
@@ -85,7 +81,7 @@ export function diffComponentNodes(
 				}
 			}
 
-			return true;
+			return EMPTY_OBJ;
 		}
 
 		if (c.componentWillUpdate != null) {
@@ -96,38 +92,40 @@ export function diffComponentNodes(
 	c._parentDom = parentDom;
 	let renderResult = invokeRender(c, newVNode, componentContext);
 
-	if (c.getChildContext != null) {
-		globalContext = assign(assign({}, globalContext), c.getChildContext());
-	}
+	// if (c.getChildContext != null) {
+	// 	globalContext = assign(assign({}, globalContext), c.getChildContext());
+	// }
 
 	if (!isNew) {
 		invokePostRenderLifecycles(c, oldProps, oldState);
 	}
 
-	diffChildren(
-		parentDom,
-		Array.isArray(renderResult) ? renderResult : [renderResult],
-		newVNode,
-		oldVNode,
-		globalContext,
-		isSvg,
-		excessDomChildren,
-		commitQueue,
-		oldDom,
-		isHydrating
-	);
+	// diffChildren(
+	// 	parentDom,
+	// 	Array.isArray(renderResult) ? renderResult : [renderResult],
+	// 	newVNode,
+	// 	oldVNode,
+	// 	globalContext,
+	// 	isSvg,
+	// 	excessDomChildren,
+	// 	commitQueue,
+	// 	oldDom,
+	// 	isHydrating
+	// );
 
-	c.base = newVNode._dom;
+	// c.base = newVNode._dom;
 
-	if (c._renderCallbacks.length) {
-		commitQueue.push(c);
-	}
+	// if (c._renderCallbacks.length) {
+	// 	commitQueue.push(c);
+	// }
 
-	if (clearProcessingException) {
-		c._pendingError = c._processingException = null;
-	}
+	// if (clearProcessingException) {
+	// 	c._pendingError = c._processingException = null;
+	// }
 
 	c._force = false;
+
+	return renderResult;
 }
 
 function createComponent(newType, newProps, componentContext) {

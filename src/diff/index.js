@@ -1,12 +1,10 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
-import { Component } from '../component';
-import { Fragment } from '../create-element';
 import { diffChildren, selectOldDom } from './children';
 import { diffProps, setProperty } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
 import { diffTextNode } from './text';
-import { diffComponentNodes } from './component';
+import { renderComponent } from './component';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -46,17 +44,80 @@ export function diff(
 
 	try {
 		if (typeof newType == 'function') {
-			diffComponentNodes(
+			let c, clearProcessingException;
+
+			// Component Model TODO: Track error handling.
+			//
+			// Perhaps store these as internal properties on the VNode instead of on
+			// the _component
+			if (oldVNode._component) {
+				c = oldVNode._component;
+				clearProcessingException = c._processingException = c._pendingError;
+			}
+
+			let renderResult = renderComponent(
 				parentDom,
 				newVNode,
 				oldVNode,
 				globalContext,
-				isSvg,
-				excessDomChildren,
-				commitQueue,
-				oldDom,
-				isHydrating
+				commitQueue
 			);
+
+			// Component Model TODO: How to communicate we should skip children?
+			// Currently using EMPTY_OBJ as a flag to indicate this rerender should be
+			// skipped.
+			//
+			// Components should probably be able to just return the oldVNode
+			// reference and then we properly handle that
+			if (renderResult !== EMPTY_OBJ) {
+				c = newVNode._component;
+
+				// Component Model TODO: Ability to modify/re-assign global context.
+				//
+				// Though maybe the re-assignment of globalContext is a component's
+				// implementation detail. So what Class Component would do is to store
+				// it's globalContext on a property of globalContext and then reuse or
+				// reassign to that property of the shared globalContext. Perhaps in the
+				// component model world we rename globalContext to sharedContext since
+				// there is only one sharedContext between all the different component
+				// models
+				if (c.getChildContext != null) {
+					globalContext = assign(
+						assign({}, globalContext),
+						c.getChildContext()
+					);
+				}
+
+				diffChildren(
+					parentDom,
+					Array.isArray(renderResult) ? renderResult : [renderResult],
+					newVNode,
+					oldVNode,
+					globalContext,
+					isSvg,
+					excessDomChildren,
+					commitQueue,
+					oldDom,
+					isHydrating
+				);
+
+				// Component Model TODO: Modify component after diffChildren since we
+				// can't determine the DOM node before diffChildren :(
+				c.base = newVNode._dom;
+
+				// Component Model TODO: We have to add components to the commitQueue
+				// bottom up so that callbacks such as cDM are called in the correct
+				// (inner -> outer).
+				//
+				// This problem is easier if vnodes have renderCallbacks
+				if (c._renderCallbacks.length) {
+					commitQueue.push(c);
+				}
+
+				if (clearProcessingException) {
+					c._pendingError = c._processingException = null;
+				}
+			}
 		} else if (
 			excessDomChildren == null &&
 			newVNode._original === oldVNode._original
