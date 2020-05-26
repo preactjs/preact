@@ -1,5 +1,5 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
-import { Component } from '../component';
+import { Component, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
@@ -140,10 +140,34 @@ export function diff(
 						commitQueue.push(c);
 					}
 
+					let lastVNodeChild;
 					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
 						if (newVNode._children[tmp]) {
 							newVNode._children[tmp]._parent = newVNode;
+							lastVNodeChild = newVNode._children[tmp];
 						}
+					}
+
+					// TODO: Not sure why this `isConnected` works but it fixes Suspense
+					// tests. Should look into a better way to fix this later.
+					if (
+						lastVNodeChild &&
+						lastVNodeChild._dom &&
+						lastVNodeChild._dom.isConnected
+					) {
+						// TODO: This doesn't fix reordering components wrapped in sCU
+						// because we need to re-place the dom children of the sCU
+						// component, using our oldDom compared to newDom algorithm. Also,
+						// this implementation of sCU doesn't work for reordering components
+						// that return Fragments. See the test 'should reorder non-updating
+						// nested Fragment children' in shouldComponentUpdate.test.js.
+						//
+						// For Fragments (and Components) we need to recurse down through
+						// them to the DOM VNode children and place them if oldDom !==
+						// newDom (could possibly use that check to determine if we can skip
+						// recursing down).
+						newVNode._nextDom = getDomSibling(lastVNodeChild);
+						// newVNode._nextDom = lastVNodeChild._dom.nextSibling;
 					}
 
 					break outer;

@@ -2561,7 +2561,8 @@ describe('Fragment', () => {
 		]);
 	});
 
-	it.only('should not reorder itself', () => {
+	it('should properly reorder elements around short-circuited strictly equal vnodes', () => {
+		/** @type {() => void} */
 		let set;
 
 		const Children = () => (
@@ -2612,11 +2613,9 @@ describe('Fragment', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal(top);
 
-		console.log('ERRONEOUS RENDER');
 		set();
 		rerender();
 		expect(scratch.innerHTML).to.equal(bottom);
-		console.log('ERRONEOUS RENDER END');
 
 		set();
 		rerender();
