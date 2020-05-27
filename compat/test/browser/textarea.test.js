@@ -17,4 +17,10 @@ describe('Textarea', () => {
 
 		expect(scratch.innerHTML).to.equal('<textarea>foo</textarea>');
 	});
+
+	it('should alias defaultValue to children', () => {
+		render(<textarea defaultValue="foo" />, scratch);
+
+		expect(scratch.innerHTML).to.equal('<textarea>foo</textarea>');
+	});
 });
