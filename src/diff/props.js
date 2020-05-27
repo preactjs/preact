@@ -19,6 +19,8 @@ import { EMPTY_VNODE } from '../create-element';
 export function diffProps(dom, newProps, oldProps, isSvg, isHydrating) {
 	let i;
 	let flags = 0;
+	// TODO: Consider initializing EMPTY_VNODE.props to EMPTY_OBJ to make this
+	// comparison shorter: oldProps == EMPTY_OBJ
 	let isMount = oldProps == EMPTY_VNODE.props;
 
 	for (i in oldProps) {
