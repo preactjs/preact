@@ -13,11 +13,9 @@ import options from '../options';
 export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 	let i;
 
-	if (oldProps) {
-		for (i in oldProps) {
-			if (i !== 'children' && i !== 'key' && !(i in newProps)) {
-				setProperty(dom, i, null, oldProps[i], isSvg);
-			}
+	for (i in oldProps) {
+		if (i !== 'children' && i !== 'key' && !(i in newProps)) {
+			setProperty(dom, i, null, oldProps[i], isSvg);
 		}
 	}
 
@@ -28,9 +26,9 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 			i !== 'key' &&
 			i !== 'value' &&
 			i !== 'checked' &&
-			(oldProps && oldProps[i]) !== newProps[i]
+			oldProps[i] !== newProps[i]
 		) {
-			setProperty(dom, i, newProps[i], oldProps && oldProps[i], isSvg);
+			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
 		}
 	}
 }
