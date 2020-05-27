@@ -57,7 +57,7 @@ export function diff(
 	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== undefined) return null;
 
-	// if ((tmp = options._diff)) tmp(newVNode);
+	if ((tmp = options._diff)) tmp(newVNode);
 
 	try {
 		outer: if (typeof newType == 'function') {
@@ -181,7 +181,7 @@ export function diff(
 			c.props = newProps;
 			c.state = c._nextState;
 
-			// if ((tmp = options._render)) tmp(newVNode);
+			if ((tmp = options._render)) tmp(newVNode);
 
 			c._dirty = false;
 			c._vnode = newVNode;
@@ -226,9 +226,9 @@ export function diff(
 				commitQueue.push(c);
 			}
 
-			// if (clearProcessingException) {
-			// 	c._pendingError = c._processingException = null;
-			// }
+			if (clearProcessingException) {
+				c._pendingError = c._processingException = null;
+			}
 
 			c._force = false;
 		} else if (
@@ -250,7 +250,7 @@ export function diff(
 			);
 		}
 
-		// if ((tmp = options.diffed)) tmp(newVNode);
+		if ((tmp = options.diffed)) tmp(newVNode);
 	} catch (e) {
 		newVNode._original = null;
 		options._catchError(e, newVNode, oldVNode);
@@ -268,15 +268,15 @@ export function commitRoot(commitQueue, root) {
 	if (options._commit) options._commit(root, commitQueue);
 
 	commitQueue.some(c => {
-		// try {
-		commitQueue = c._renderCallbacks;
-		c._renderCallbacks = [];
-		commitQueue.some(cb => {
-			cb.call(c);
-		});
-		// } catch (e) {
-		// 	options._catchError(e, c._vnode);
-		// }
+		try {
+			commitQueue = c._renderCallbacks;
+			c._renderCallbacks = [];
+			commitQueue.some(cb => {
+				cb.call(c);
+			});
+		} catch (e) {
+			options._catchError(e, c._vnode);
+		}
 	});
 }
 
@@ -458,9 +458,9 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	let r;
 	if (options.unmount) options.unmount(vnode);
 
-	// if ((r = vnode.ref)) {
-	// 	if (!r.current || r.current === vnode._dom) applyRef(r, null, parentVNode);
-	// }
+	if ((r = vnode.ref)) {
+		if (!r.current || r.current === vnode._dom) applyRef(r, null, parentVNode);
+	}
 
 	let dom;
 	if (!skipRemove && typeof vnode.type != 'function') {

@@ -1,7 +1,3 @@
-/** Param obj for diffChildren
- * @param {{ parentDom: any; newParentVNode: any; oldParentVNode: any; globalContext: any; isSvg: any; excessDomChildren; commitQueue: any; oldDom: any; isHydrating: boolean; }} args
- */
-
 const divider = '=========================';
 const prevShapes = new Map();
 const shapeChanges = new Map();
