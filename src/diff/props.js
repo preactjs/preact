@@ -97,7 +97,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0] === 'o' && name[1] === 'n') {
-		useCapture = name !== (name = name.replace(/Capture$/, ''));
+		// useCapture = name !== (name = name.replace(/Capture$/, ''));
 		nameLower = name.toLowerCase();
 		name = (nameLower in dom ? nameLower : name).slice(2);
 
@@ -120,20 +120,21 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	) {
 		dom[name] = value == null ? '' : value;
 	} else if (typeof value != 'function' && name !== 'dangerouslySetInnerHTML') {
-		if (name !== (name = name.replace(/^xlink:?/, ''))) {
-			if (value == null || value === false) {
-				dom.removeAttributeNS(
-					'http://www.w3.org/1999/xlink',
-					name.toLowerCase()
-				);
-			} else {
-				dom.setAttributeNS(
-					'http://www.w3.org/1999/xlink',
-					name.toLowerCase(),
-					value
-				);
-			}
-		} else if (
+		// if (name !== (name = name.replace(/^xlink:?/, ''))) {
+		// 	if (value == null || value === false) {
+		// 		dom.removeAttributeNS(
+		// 			'http://www.w3.org/1999/xlink',
+		// 			name.toLowerCase()
+		// 		);
+		// 	} else {
+		// 		dom.setAttributeNS(
+		// 			'http://www.w3.org/1999/xlink',
+		// 			name.toLowerCase(),
+		// 			value
+		// 		);
+		// 	}
+		// } else if (
+		if (
 			value == null ||
 			(value === false &&
 				// ARIA-attributes have a different notion of boolean values.

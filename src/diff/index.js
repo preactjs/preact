@@ -49,13 +49,15 @@ export function diff(
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
-			tmp = newType.contextType;
-			let provider = tmp && globalContext[tmp._id];
-			let componentContext = tmp
-				? provider
-					? provider.props.value
-					: tmp._defaultValue
-				: globalContext;
+			let provider;
+			let componentContext = null;
+			// tmp = newType.contextType;
+			// let provider = tmp && globalContext[tmp._id];
+			// let componentContext = tmp
+			// 	? provider
+			// 		? provider.props.value
+			// 		: tmp._defaultValue
+			// 	: globalContext;
 
 			// Get component and set it to `c`
 			if (oldVNode._component) {
@@ -84,40 +86,39 @@ export function diff(
 			if (c._nextState == null) {
 				c._nextState = c.state;
 			}
-			if (newType.getDerivedStateFromProps != null) {
-				if (c._nextState == c.state) {
-					c._nextState = assign({}, c._nextState);
-				}
+			// if (newType.getDerivedStateFromProps != null) {
+			// 	if (c._nextState == c.state) {
+			// 		c._nextState = assign({}, c._nextState);
+			// 	}
 
-				assign(
-					c._nextState,
-					newType.getDerivedStateFromProps(newProps, c._nextState)
-				);
-			}
+			// 	assign(
+			// 		c._nextState,
+			// 		newType.getDerivedStateFromProps(newProps, c._nextState)
+			// 	);
+			// }
 
-			oldProps = c.props;
-			oldState = c.state;
+			// oldProps = c.props;
+			// oldState = c.state;
 
 			// Invoke pre-render lifecycle methods
 			if (isNew) {
-				if (
-					newType.getDerivedStateFromProps == null &&
-					c.componentWillMount != null
-				) {
-					c.componentWillMount();
-				}
-
-				if (c.componentDidMount != null) {
-					c._renderCallbacks.push(c.componentDidMount);
-				}
+				// 	if (
+				// 		newType.getDerivedStateFromProps == null &&
+				// 		c.componentWillMount != null
+				// 	) {
+				// 		c.componentWillMount();
+				// 	}
+				// 	if (c.componentDidMount != null) {
+				// 		c._renderCallbacks.push(c.componentDidMount);
+				// 	}
 			} else {
-				if (
-					newType.getDerivedStateFromProps == null &&
-					newProps !== oldProps &&
-					c.componentWillReceiveProps != null
-				) {
-					c.componentWillReceiveProps(newProps, componentContext);
-				}
+				// 	if (
+				// 		newType.getDerivedStateFromProps == null &&
+				// 		newProps !== oldProps &&
+				// 		c.componentWillReceiveProps != null
+				// 	) {
+				// 		c.componentWillReceiveProps(newProps, componentContext);
+				// 	}
 
 				if (
 					(!c._force &&
@@ -149,15 +150,15 @@ export function diff(
 					break outer;
 				}
 
-				if (c.componentWillUpdate != null) {
-					c.componentWillUpdate(newProps, c._nextState, componentContext);
-				}
+				// if (c.componentWillUpdate != null) {
+				// 	c.componentWillUpdate(newProps, c._nextState, componentContext);
+				// }
 
-				if (c.componentDidUpdate != null) {
-					c._renderCallbacks.push(() => {
-						c.componentDidUpdate(oldProps, oldState, snapshot);
-					});
-				}
+				// if (c.componentDidUpdate != null) {
+				// 	c._renderCallbacks.push(() => {
+				// 		c.componentDidUpdate(oldProps, oldState, snapshot);
+				// 	});
+				// }
 			}
 
 			c.context = componentContext;
@@ -172,13 +173,13 @@ export function diff(
 
 			tmp = c.render(c.props, c.state, c.context);
 
-			if (c.getChildContext != null) {
-				globalContext = assign(assign({}, globalContext), c.getChildContext());
-			}
+			// if (c.getChildContext != null) {
+			// 	globalContext = assign(assign({}, globalContext), c.getChildContext());
+			// }
 
-			if (!isNew && c.getSnapshotBeforeUpdate != null) {
-				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
-			}
+			// if (!isNew && c.getSnapshotBeforeUpdate != null) {
+			// 	snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
+			// }
 
 			let isTopLevelFragment =
 				tmp != null && tmp.type == Fragment && tmp.key == null;
@@ -444,13 +445,13 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	vnode._dom = vnode._nextDom = undefined;
 
 	if ((r = vnode._component) != null) {
-		if (r.componentWillUnmount) {
-			try {
-				r.componentWillUnmount();
-			} catch (e) {
-				options._catchError(e, parentVNode);
-			}
-		}
+		// if (r.componentWillUnmount) {
+		// 	try {
+		// 		r.componentWillUnmount();
+		// 	} catch (e) {
+		// 		options._catchError(e, parentVNode);
+		// 	}
+		// }
 
 		r.base = r._parentDom = null;
 	}
