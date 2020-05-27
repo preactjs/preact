@@ -290,26 +290,26 @@ function diffElementNodes(
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	isSvg = newVNode.type === 'svg' || isSvg;
 
-	if (excessDomChildren != null) {
-		for (i = 0; i < excessDomChildren.length; i++) {
-			const child = excessDomChildren[i];
+	// if (excessDomChildren != null) {
+	// 	for (i = 0; i < excessDomChildren.length; i++) {
+	// 		const child = excessDomChildren[i];
 
-			// if newVNode matches an element in excessDomChildren or the `dom`
-			// argument matches an element in excessDomChildren, remove it from
-			// excessDomChildren so it isn't later removed in diffChildren
-			if (
-				child != null &&
-				((newVNode.type === null
-					? child.nodeType === 3
-					: child.localName === newVNode.type) ||
-					dom == child)
-			) {
-				dom = child;
-				excessDomChildren[i] = null;
-				break;
-			}
-		}
-	}
+	// 		// if newVNode matches an element in excessDomChildren or the `dom`
+	// 		// argument matches an element in excessDomChildren, remove it from
+	// 		// excessDomChildren so it isn't later removed in diffChildren
+	// 		if (
+	// 			child != null &&
+	// 			((newVNode.type === null
+	// 				? child.nodeType === 3
+	// 				: child.localName === newVNode.type) ||
+	// 				dom == child)
+	// 		) {
+	// 			dom = child;
+	// 			excessDomChildren[i] = null;
+	// 			break;
+	// 		}
+	// 	}
+	// }
 
 	if (dom == null) {
 		if (newVNode.type === null) {
@@ -333,53 +333,53 @@ function diffElementNodes(
 			dom.data = newProps;
 		}
 	} else {
-		if (excessDomChildren != null) {
-			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
-		}
+		// if (excessDomChildren != null) {
+		// 	excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
+		// }
 
-		let oldHtml = oldProps.dangerouslySetInnerHTML;
-		let newHtml = newProps.dangerouslySetInnerHTML;
+		// let oldHtml = oldProps.dangerouslySetInnerHTML;
+		// let newHtml = newProps.dangerouslySetInnerHTML;
 
-		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
-		// @TODO we should warn in debug mode when props don't match here.
-		if (!isHydrating) {
-			// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
-			// we should read the existing DOM attributes to diff them
-			if (excessDomChildren != null) {
-				oldProps = {};
-				for (let i = 0; i < dom.attributes.length; i++) {
-					oldProps[dom.attributes[i].name] = dom.attributes[i].value;
-				}
-			}
+		// // During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
+		// // @TODO we should warn in debug mode when props don't match here.
+		// if (!isHydrating) {
+		// 	// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
+		// 	// we should read the existing DOM attributes to diff them
+		// 	if (excessDomChildren != null) {
+		// 		oldProps = {};
+		// 		for (let i = 0; i < dom.attributes.length; i++) {
+		// 			oldProps[dom.attributes[i].name] = dom.attributes[i].value;
+		// 		}
+		// 	}
 
-			if (newHtml || oldHtml) {
-				// Avoid re-applying the same '__html' if it did not changed between re-render
-				if (!newHtml || !oldHtml || newHtml.__html != oldHtml.__html) {
-					dom.innerHTML = (newHtml && newHtml.__html) || '';
-				}
-			}
-		}
+		// 	if (newHtml || oldHtml) {
+		// 		// Avoid re-applying the same '__html' if it did not changed between re-render
+		// 		if (!newHtml || !oldHtml || newHtml.__html != oldHtml.__html) {
+		// 			dom.innerHTML = (newHtml && newHtml.__html) || '';
+		// 		}
+		// 	}
+		// }
 
 		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
-		if (newHtml) {
-			newVNode._children = [];
-		} else {
-			i = newVNode.props.children;
-			newVNode._children = Array.isArray(i) ? i : [i];
-			diffChildren(
-				dom,
-				newVNode,
-				oldVNode,
-				globalContext,
-				newVNode.type === 'foreignObject' ? false : isSvg,
-				excessDomChildren,
-				commitQueue,
-				selectOldDom(oldVNode, excessDomChildren),
-				isHydrating
-			);
-		}
+		// if (newHtml) {
+		// 	newVNode._children = [];
+		// } else {
+		i = newVNode.props.children;
+		newVNode._children = Array.isArray(i) ? i : [i];
+		diffChildren(
+			dom,
+			newVNode,
+			oldVNode,
+			globalContext,
+			newVNode.type === 'foreignObject' ? false : isSvg,
+			excessDomChildren,
+			commitQueue,
+			selectOldDom(oldVNode, excessDomChildren),
+			isHydrating
+		);
+		// }
 
 		// (as above, don't diff props during hydration)
 		if (!isHydrating) {
