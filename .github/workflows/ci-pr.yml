@@ -62,7 +62,7 @@ jobs:
 
   bench_text_update:
     name: Bench text_update
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
       with:
@@ -84,10 +84,11 @@ jobs:
           ${{ runner.os }}-
     - name: install & build
       run: |
-        echo CHROMEWEBDRIVER = $CHROMEWEBDRIVER
+        echo CHROMEWEBDRIVER=$env:CHROMEWEBDRIVER
         npm ci
         cd benches
-        DETECT_CHROMEDRIVER_VERSION=true npm ci
+        #DETECT_CHROMEDRIVER_VERSION=true npm ci
+        npm ci
     - name: bench
       run: |
         cd benches
@@ -95,7 +96,7 @@ jobs:
 
   bench_02_replace1k:
     name: Bench 02_replace1k
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
       with:
