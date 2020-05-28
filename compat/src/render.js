@@ -130,6 +130,12 @@ options.vnode = vnode => {
 				delete props.value;
 			}
 
+			// Normalize textarea by setting children to value
+			if (props.value != null && type === 'textarea') {
+				props.children = props.value;
+				delete props.value;
+			}
+
 			// Normalize DOM vnode properties.
 			let shouldSanitize, attrs, i;
 			for (i in props) if ((shouldSanitize = CAMEL_PROPS.test(i))) break;
