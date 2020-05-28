@@ -83,6 +83,9 @@ jobs:
           ${{ runner.os }}-build-
           ${{ runner.os }}-
     - name: install & build
+      env:
+        # Skip downloading Firefox driver until we bench against it
+        GECKODRIVER_SKIP_DOWNLOAD: 'true'
       run: |
         $env:CHROMEDRIVER_FILEPATH=(Join-Path $env:CHROMEWEBDRIVER chromedriver.exe)
         npm ci
@@ -116,6 +119,9 @@ jobs:
           ${{ runner.os }}-build-
           ${{ runner.os }}-
     - name: install & build
+      env:
+        # Skip downloading Firefox driver until we bench against it
+        GECKODRIVER_SKIP_DOWNLOAD: 'true'
       run: |
         $env:CHROMEDRIVER_FILEPATH=(Join-Path $env:CHROMEWEBDRIVER chromedriver.exe)
         npm ci
