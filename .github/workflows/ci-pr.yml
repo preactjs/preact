@@ -83,8 +83,14 @@ jobs:
           ${{ runner.os }}-build-
           ${{ runner.os }}-
     - name: install & build
+      #env:
+      #  CHROMEDRIVER_FILEPATH: ${{ env.CHROMEWEBDRIVER }}\chromedriver.exe
       run: |
         echo CHROMEWEBDRIVER=$env:CHROMEWEBDRIVER
+        #ls $env:CHROMEWEBDRIVER
+        #ls $env:CHROMEDRIVER_FILEPATH
+        $env:CHROMEDRIVER_FILEPATH=(Join-Path $env:CHROMEWEBDRIVER chromedriver.exe)
+        echo CHROMEDRIVER_FILEPATH=$env:CHROMEDRIVER_FILEPATH
         npm ci
         cd benches
         #DETECT_CHROMEDRIVER_VERSION=true npm ci
