@@ -145,6 +145,13 @@ describe('render', () => {
 			expect(rendered).to.equal(expected);
 		});
 
+		it('should preserve CSS Custom Properties', () => {
+			let rendered = render(<div style={{ '--foo': 1, '--foo-bar': '2' }} />),
+				expected = `<div style="--foo: 1; --foo-bar: 2;"></div>`;
+
+			expect(rendered).to.equal(expected);
+		});
+
 		it('should ignore empty object styles', () => {
 			let rendered = render(<div style={{}} />),
 				expected = `<div></div>`;
