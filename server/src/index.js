@@ -157,7 +157,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 
 			if (name.match(/[\s\n\\/='"\0<>]/)) continue;
 
-			if (!(opts && opts.allAttributes) && (name==='key' || name==='ref')) continue;
+			if (!(opts && opts.allAttributes) && (name==='key' || name==='ref' || name==='__self' || name==='__source')) continue;
 
 			if (name==='className') {
 				if (props.class) continue;
