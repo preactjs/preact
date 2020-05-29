@@ -21,7 +21,7 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 
 	for (i in newProps) {
 		if (
-			(!hydrate || typeof newProps[i] == 'function') &&
+			(!hydrate || typeof newProps[i] == 'function' || i === 'style') &&
 			i !== 'children' &&
 			i !== 'key' &&
 			i !== 'value' &&
