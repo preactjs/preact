@@ -30,7 +30,11 @@ export function forwardRef(fn) {
 	function Forwarded(props, ref) {
 		let clone = assign({}, props);
 		delete clone.ref;
-		return fn(clone, props.ref || ref);
+		ref = props.ref || ref;
+		return fn(
+			clone,
+			typeof ref === 'object' && !('current' in ref) ? null : ref
+		);
 	}
 
 	// mobx-react checks for this being present
