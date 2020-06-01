@@ -432,4 +432,16 @@ describe('forwardRef', () => {
 
 		expect(ref.current.innerHTML).to.equal('Wrapper');
 	});
+
+	// Issue #2566
+	it('should pass null as ref when no ref is present', () => {
+		let actual;
+		const App = forwardRef((_, ref) => {
+			actual = ref;
+			return <div />;
+		});
+
+		render(<App />, scratch);
+		expect(actual).to.equal(null);
+	});
 });
