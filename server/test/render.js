@@ -329,19 +329,23 @@ describe('render', () => {
 
 		it('should invoke getDerivedStateFromProps', () => {
 			class Test extends Component {
-				static getDerivedStateFromProps() {}
-				render(props) {
-					return <div {...props} />;
+				static getDerivedStateFromProps() {
+					return { foo: 'bar' };
+				}
+				render(props, state) {
+					return <div {...props} {...state} />;
 				}
 			}
 			spy(Test.prototype.constructor, 'getDerivedStateFromProps');
 			spy(Test.prototype, 'render');
 
-			render(<Test />);
+			const result = render(<Test />);
 
 			expect(Test.prototype.constructor.getDerivedStateFromProps)
 				.to.have.been.calledOnce
 				.and.to.have.been.calledBefore(Test.prototype.render);
+
+			expect(result).to.equal('<div foo="bar"></div>');
 		});
 
 		it('should invoke componentWillMount', () => {
