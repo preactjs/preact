@@ -176,6 +176,12 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				v = styleObjToCss(v);
 			}
 
+			// always use string values instead of booleans for aria attributes
+			// also see https://github.com/preactjs/preact/pull/2347/files
+			if (name[0] === 'a' && name['1'] === 'r' && typeof v === 'boolean') {
+				v = String(v);
+			}
+
 			let hooked = opts.attributeHook && opts.attributeHook(name, v, context, opts, isComponent);
 			if (hooked || hooked==='') {
 				s += hooked;

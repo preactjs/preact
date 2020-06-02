@@ -57,6 +57,13 @@ describe('render', () => {
 			expect(render(<div foo={0} />)).to.equal(`<div foo="0"></div>`);
 		});
 
+		it('should include boolean aria-* attributes', () => {
+			let rendered = render(<div aria-hidden aria-whatever={false} />),
+				expected = `<div aria-hidden="true" aria-whatever="false"></div>`;
+
+			expect(rendered).to.equal(expected);
+		});
+
 		describe('attribute name sanitization', () => {
 			it('should omit attributes with invalid names', () => {
 				let rendered = render(h('div', {
