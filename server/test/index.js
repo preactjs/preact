@@ -1,4 +1,4 @@
-import renderToString, { render, shallowRender, renderToString as _renderToString } from '../src';
+import renderToString, { render, shallowRender, renderToStaticMarkup, renderToString as _renderToString } from '../src';
 import { expect } from 'chai';
 
 describe('render-to-string', () => {
@@ -15,6 +15,11 @@ describe('render-to-string', () => {
 		it('exposes renderToString as a named export', () => {
 			expect(_renderToString).to.be.a('function');
 			expect(_renderToString).to.equal(renderToString);
+		});
+
+		it('exposes renderToStaticMarkup as a named export', () => {
+			expect(renderToStaticMarkup).to.be.a('function');
+			expect(renderToStaticMarkup).to.equal(renderToStaticMarkup);
 		});
 
 		it('exposes shallowRender as a named export', () => {
