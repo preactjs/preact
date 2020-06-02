@@ -131,6 +131,13 @@ describe('render', () => {
 			expect(rendered).to.equal(expected);
 		});
 
+		it('should self-close custom void elements', () => {
+			let rendered = render(<div><hello-world /></div>, null, { voidElements: /^hello-world$/ }),
+				expected = `<div><hello-world /></div>`;
+
+			expect(rendered).to.equal(expected);
+		});
+
 		it('does not close void elements with closing tags', () => {
 			let rendered = render(<input><p>Hello World</p></input>),
 				expected = `<input /><p>Hello World</p>`;
