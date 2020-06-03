@@ -1,4 +1,5 @@
-import { createElement, hydrate, Fragment } from 'preact';
+import { setupRerender } from 'preact/test-utils';
+import { createElement, hydrate, Fragment, Component } from 'preact';
 import {
 	setupScratch,
 	teardown,
@@ -311,5 +312,35 @@ describe('hydrate()', () => {
 		expect(element.innerHTML).to.equal(
 			'<p class="hi">hello baz</p><p class="hi">hello bar</p>'
 		);
+	});
+
+	it('should handle errors during hydration', () => {
+		let rerender = setupRerender();
+		scratch.innerHTML = '<div id="test"><div>Hello World!</div></div>';
+
+		function App() {
+			throw Error();
+		}
+
+		class Root extends Component {
+			constructor() {
+				super();
+				this.state = {};
+			}
+			componentDidCatch(error) {
+				this.setState({ error });
+			}
+			render() {
+				if (!this.state.error) {
+					return <App />;
+				}
+				return <div>Error!</div>;
+			}
+		}
+
+		const element = document.getElementById('test');
+		hydrate(<Root />, element);
+		rerender();
+		expect(element.innerHTML).to.equal('<div>Error!</div>');
 	});
 });
