@@ -229,8 +229,8 @@ export function diff(
 				isSvg,
 				excessDomChildren,
 				commitQueue,
-                isHydrating,
-                doc
+                		isHydrating,
+                		doc
 			);
 		}
 
