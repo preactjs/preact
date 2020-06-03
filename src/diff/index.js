@@ -36,6 +36,9 @@ export function diff(
 	let tmp,
 		newType = newVNode.type;
 
+    // #2545, access owner document from the parentDom instead of using the global
+    const doc = parentDom.ownerDocument;
+
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== undefined) return null;
@@ -360,17 +363,17 @@ function diffElementNodes(
 	if (dom == null) {
 		if (nodeType === null) {
 			// @ts-ignore createTextNode returns Text, we expect PreactElement
-			return document.createTextNode(newProps);
+			return doc.createTextNode(newProps);
 		}
 
 		if (isSvg) {
-			dom = document.createElementNS(
+			dom = doc.createElementNS(
 				'http://www.w3.org/2000/svg',
 				// @ts-ignore We know `newVNode.type` is a string
 				nodeType
 			);
 		} else {
-			dom = document.createElement(
+			dom = doc.createElement(
 				// @ts-ignore We know `newVNode.type` is a string
 				nodeType,
 				newProps.is && newProps
