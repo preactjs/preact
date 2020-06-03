@@ -357,6 +357,7 @@ export function commitRoot(commitQueue, root, refQueue) {
  * to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
+ * @param {Document} doc The owner document of the parentNode
  * @returns {PreactElement}
  */
 function diffElementNodes(
