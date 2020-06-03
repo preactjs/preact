@@ -229,7 +229,8 @@ export function diff(
 				isSvg,
 				excessDomChildren,
 				commitQueue,
-				isHydrating
+                isHydrating,
+                doc
 			);
 		}
 
@@ -285,7 +286,8 @@ function diffElementNodes(
 	isSvg,
 	excessDomChildren,
 	commitQueue,
-	isHydrating
+    isHydrating,
+    doc
 ) {
 	let i;
 	let oldProps = oldVNode.props;
