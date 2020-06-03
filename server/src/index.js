@@ -6,7 +6,7 @@ const SHALLOW = { shallow: true };
 // components without names, kept as a hash for later comparison to return consistent UnnamedComponentXX names.
 const UNNAMED = [];
 
-const DEFAULT_VOID_ELEMENTS = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
+const VOID_ELEMENTS = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
 
 const noop = () => {};
 
@@ -20,7 +20,7 @@ const noop = () => {};
  *	@param {Boolean} [options.shallow=false]	If `true`, renders nested Components as HTML elements (`<Foo a="b" />`).
  *	@param {Boolean} [options.xml=false]		If `true`, uses self-closing tags for elements without children.
  *	@param {Boolean} [options.pretty=false]		If `true`, adds whitespace for readability
- *	@param {RegEx} [options.voidElements=DEFAULT_VOID_ELEMENTS]       RegeEx that matches elements that are considered void (self-closing)
+ *	@param {RegEx|undefined} [options.voidElements]       RegeEx that matches elements that are considered void (self-closing)
  */
 renderToString.render = renderToString;
 
@@ -220,7 +220,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 	s = `<${nodeName}${s}>`;
 	if (String(nodeName).match(/[\s\n\\/='"\0<>]/)) throw new Error(`${nodeName} is not a valid HTML tag name in ${s}`);
 
-	let isVoid = String(nodeName).match(opts.voidElements || DEFAULT_VOID_ELEMENTS);
+	let isVoid = String(nodeName).match(VOID_ELEMENTS) || (opts.voidElements && String(nodeName).match(opts.voidElements));
 	if (isVoid) s = s.replace(/>$/, ' />');
 
 	let pieces = [];
