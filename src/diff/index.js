@@ -307,7 +307,8 @@ export function diff(
 			excessDomChildren,
 			commitQueue,
 			isHydrating,
-			refQueue
+			refQueue,
+			doc,
 		);
 	}
 
@@ -367,7 +368,8 @@ function diffElementNodes(
 	excessDomChildren,
 	commitQueue,
 	isHydrating,
-	refQueue
+	refQueue,
+	doc
 ) {
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
