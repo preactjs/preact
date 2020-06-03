@@ -98,6 +98,9 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 
 Suspense.prototype.render = function(props, state) {
 	if (this._detachOnNextRender) {
+		if (this._vnode._children == null) {
+			this._vnode._children = [];
+		}
 		this._vnode._children[0] = detachedClone(this._detachOnNextRender);
 		this._detachOnNextRender = null;
 	}
