@@ -325,6 +325,7 @@ export default renderToString;
 
 export {
 	renderToString as render,
+	renderToString as renderToStaticMarkup,
 	renderToString,
 	shallowRender
 };
