@@ -322,6 +322,7 @@ export function commitRoot(commitQueue, root) {
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
+ * @param {Document} doc The owner document of the parentNode
  * @returns {import('../internal').PreactElement}
  */
 function diffElementNodes(
@@ -332,8 +333,8 @@ function diffElementNodes(
 	isSvg,
 	excessDomChildren,
 	commitQueue,
-    isHydrating,
-    doc
+    	isHydrating,
+    	doc
 ) {
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
