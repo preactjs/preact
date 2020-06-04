@@ -23,7 +23,7 @@ describe('parentDom.ownerDocument', () => {
 		}
 
 		render(<Foo />, scratch);
-		expect(spy).to.be.calledOnce;
+		expect(spy.get).to.be.calledOnce;
 		expect(scratch.ownerDocument).to.equal(document);
 	});
 });
