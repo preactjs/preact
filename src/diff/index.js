@@ -21,6 +21,7 @@ import options from '../options';
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} [isHydrating] Whether or not we are in hydration
+ * @param {Document} doc The owner document of the parentNode
  */
 export function diff(
 	parentDom,
@@ -31,7 +32,8 @@ export function diff(
 	excessDomChildren,
 	commitQueue,
 	oldDom,
-	isHydrating
+	isHydrating,
+	doc
 ) {
 	let tmp,
 		newType = newVNode.type;
@@ -197,7 +199,8 @@ export function diff(
 				excessDomChildren,
 				commitQueue,
 				oldDom,
-				isHydrating
+				isHydrating,
+				doc
 			);
 
 			c.base = newVNode._dom;
@@ -227,7 +230,7 @@ export function diff(
 				excessDomChildren,
 				commitQueue,
 				isHydrating,
-				parentDom.ownerDocument
+				doc
 			);
 		}
 
@@ -380,7 +383,8 @@ function diffElementNodes(
 				excessDomChildren,
 				commitQueue,
 				EMPTY_OBJ,
-				isHydrating
+				isHydrating,
+				doc
 			);
 		}
 
