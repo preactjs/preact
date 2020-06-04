@@ -34,10 +34,8 @@ export function diff(
 	isHydrating
 ) {
 	let tmp,
-		newType = newVNode.type;
-
-    // #2545, access owner document from the parentDom instead of using the global    
-    const doc = parentDom.ownerDocument; 
+        newType = newVNode.type;
+        
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
@@ -229,8 +227,8 @@ export function diff(
 				isSvg,
 				excessDomChildren,
 				commitQueue,
-                		isHydrating,
-                		parentDom.ownerDocument
+                isHydrating,
+                parentDom.ownerDocument
 			);
 		}
 
@@ -276,7 +274,7 @@ export function commitRoot(commitQueue, root) {
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
- * @param {Document} doc The owner document of the parentNode
+ * @param {Document} doc The owner document of the parentNode #2545
  * @returns {import('../internal').PreactElement}
  */
 function diffElementNodes(
@@ -287,8 +285,8 @@ function diffElementNodes(
 	isSvg,
 	excessDomChildren,
 	commitQueue,
-    	isHydrating,
-    	doc
+    isHydrating,
+    doc
 ) {
 	let i;
 	let oldProps = oldVNode.props;
