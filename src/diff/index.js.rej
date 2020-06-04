@@ -1,0 +1,8 @@
+diff a/src/diff/index.js b/src/diff/index.js	(rejected hunks)
+@@ -34,2 +34 @@ export function diff(
+-	isHydrating,
+-	
++	isHydrating
+@@ -40,2 +38,0 @@ export function diff(
+-	
+-
