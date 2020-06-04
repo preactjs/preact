@@ -28,6 +28,7 @@ import options from '../options';
  * siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
+ * @param {Document} doc The owner document of the parentNode
  */
 export function diff(
 	parentDom,
@@ -39,14 +40,12 @@ export function diff(
 	commitQueue,
 	oldDom,
 	isHydrating,
-	refQueue
+	refQueue,
+	doc
 ) {
 	/** @type {any} */
 	let tmp,
 		newType = newVNode.type;
-
-    // #2545, access owner document from the parentDom instead of using the global
-    const doc = parentDom.ownerDocument;
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
@@ -308,7 +307,7 @@ export function diff(
 			commitQueue,
 			isHydrating,
 			refQueue,
-			parentDom.ownerDocument,
+			doc,
 		);
 	}
 
