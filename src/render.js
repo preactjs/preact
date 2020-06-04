@@ -50,8 +50,7 @@ export function render(vnode, parentDom, replaceNode) {
 			: null,
 		commitQueue,
 		replaceNode || EMPTY_OBJ,
-		isHydrating,
-		parentDom.ownerDocument
+		isHydrating
 	);
 
 	// Flush all queued effects

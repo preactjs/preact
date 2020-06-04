@@ -132,8 +132,7 @@ function renderComponent(component) {
 			null,
 			commitQueue,
 			oldDom == null ? getDomSibling(vnode) : oldDom,
-			null,
-			parentDom.ownerDocument
+			null
 		);
 		commitRoot(commitQueue, vnode);
 
