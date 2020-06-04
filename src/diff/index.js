@@ -256,7 +256,8 @@ export function diff(
 				commitQueue,
 				oldDom,
 				isHydrating,
-				refQueue
+				refQueue,
+				doc
 			);
 
 			c.base = newVNode._dom;
@@ -523,7 +524,8 @@ function diffElementNodes(
 					? excessDomChildren[0]
 					: oldVNode._children && getDomSibling(oldVNode, 0),
 				isHydrating,
-				refQueue
+				refQueue,
+				doc
 			);
 
 			// Remove children that are not part of any vnode.

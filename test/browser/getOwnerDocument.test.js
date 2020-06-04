@@ -19,7 +19,6 @@ describe('parentDom.ownerDocument', () => {
 		function Foo() {
 			return <div>A</div>;
 		}
-
 		render(<Foo />, scratch);
 		expect(scratch.ownerDocument).to.equal(document);
 	});
