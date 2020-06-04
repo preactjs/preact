@@ -230,7 +230,7 @@ export function diff(
 				excessDomChildren,
 				commitQueue,
                 		isHydrating,
-                		doc
+                		parentDom.ownerDocument
 			);
 		}
 
