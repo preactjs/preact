@@ -308,7 +308,7 @@ export function diff(
 			commitQueue,
 			isHydrating,
 			refQueue,
-			doc,
+			parentDom.ownerDocument,
 		);
 	}
 
