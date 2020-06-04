@@ -131,7 +131,9 @@ function renderComponent(component) {
 			parentDom.ownerSVGElement !== undefined,
 			null,
 			commitQueue,
-			oldDom == null ? getDomSibling(vnode) : oldDom
+			oldDom == null ? getDomSibling(vnode) : oldDom,
+			null,
+			parentDom.ownerDocument
 		);
 		commitRoot(commitQueue, vnode);
 
