@@ -1,4 +1,4 @@
-import { createElement, render } from 'preact';
+import { render } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx createElement */
