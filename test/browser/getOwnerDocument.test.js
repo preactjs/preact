@@ -33,7 +33,7 @@ describe('parentDom.ownerDocument', () => {
 		render('Hello', iframeRootNode);
 
 		expect(iframeRootNode.textContent).to.be.equal('Hello');
-		expect(iframeRootNode.ownerDocument).to.be.equal(iframeDoc);
-		expect(iframeRootNode.ownerDocument).to.not.be.equal(document);
+		expect(iframeRootNode.firstChild.ownerDocument).to.be.equal(iframeDoc);
+		expect(iframeRootNode.firstChild.ownerDocument).to.not.be.equal(document);
 	});
 });
