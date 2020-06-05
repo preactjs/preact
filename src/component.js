@@ -164,7 +164,6 @@ function updateParentDomPointers(vnode) {
  * @type {Array<import('./internal').Component>}
  */
 let rerenderQueue = [];
-let rerenderCount = 0;
 
 /**
  * Asynchronously schedule a callback
@@ -197,7 +196,7 @@ export function enqueueRender(c) {
 		(!c._dirty &&
 			(c._dirty = true) &&
 			rerenderQueue.push(c) &&
-			!rerenderCount++) ||
+			!process._rerenderCount++) ||
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
@@ -208,7 +207,7 @@ export function enqueueRender(c) {
 /** Flush the render queue by rerendering all queued components */
 function process() {
 	let queue;
-	while ((rerenderCount = rerenderQueue.length)) {
+	while ((process._rerenderCount = rerenderQueue.length)) {
 		queue = rerenderQueue.sort((a, b) => a._vnode._depth - b._vnode._depth);
 		rerenderQueue = [];
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
@@ -218,3 +217,4 @@ function process() {
 		});
 	}
 }
+process._rerenderCount = 0;

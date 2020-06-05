@@ -172,6 +172,9 @@ export function diff(
 
 			tmp = c.render(c.props, c.state, c.context);
 
+			// Handle setState called in render, see #2553
+			c.state = c._nextState;
+
 			if (c.getChildContext != null) {
 				globalContext = assign(assign({}, globalContext), c.getChildContext());
 			}
