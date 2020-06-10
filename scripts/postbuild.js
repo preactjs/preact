@@ -20,7 +20,14 @@ const targets = [
 			from: `${name}/dist/${filename}.module.js`,
 			to: `${name}/dist/${filename}.mjs`
 		};
-	})
+	}),
+
+	// Copy TypeScript types to dist folder
+	{ from: 'src/index.d.ts', to: 'dist/index.d.ts' },
+	{ from: 'src/jsx.d.ts', to: 'dist/jsx.d.ts' },
+	{ from: 'compat/src/index.d.ts', to: 'compat/dist/index.d.ts' },
+	{ from: 'hooks/src/index.d.ts', to: 'hooks/dist/index.d.ts' },
+	{ from: 'test-utils/src/index.d.ts', to: 'test-utils/dist/index.d.ts' }
 ];
 
 async function main() {
