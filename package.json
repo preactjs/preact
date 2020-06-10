@@ -151,24 +151,10 @@
     }
   },
   "files": [
-    "src",
-    "dist",
-    "compat/dist",
-    "compat/src",
-    "compat/server.js",
-    "compat/package.json",
-    "debug/dist",
-    "debug/src",
-    "debug/package.json",
-    "devtools/dist",
-    "devtools/src",
-    "devtools/package.json",
-    "hooks/dist",
-    "hooks/src",
-    "hooks/package.json",
-    "test-utils/src",
-    "test-utils/package.json",
-    "test-utils/dist"
+    "{compat,debug,devtools,hooks,test-utils,}/src",
+    "{compat,debug,devtools,hooks,test-utils,}/dist",
+    "{compat,debug,devtools,hooks,test-utils,}/package.json",
+    "compat/server.js"
   ],
   "keywords": [
     "preact",
