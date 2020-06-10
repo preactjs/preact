@@ -57,7 +57,7 @@
     "type": "opencollective",
     "url": "https://opencollective.com/preact"
   },
-  "types": "src/index.d.ts",
+  "types": "dist/index.d.ts",
   "scripts": {
     "prepare": "run-s build",
     "build": "npm-run-all --parallel build:*",

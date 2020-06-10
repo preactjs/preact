@@ -9,7 +9,7 @@
   "umd:main": "dist/hooks.umd.js",
   "source": "src/index.js",
   "license": "MIT",
-  "types": "src/index.d.ts",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "microbundle build --raw",
     "dev": "microbundle watch --raw --format cjs",
