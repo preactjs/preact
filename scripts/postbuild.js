@@ -1,30 +1,34 @@
-const fs = require('fs');
+const path = require('path');
+const { copyFile } = require('fs/promises');
 
 const subRepositories = ['compat', 'debug', 'devtools', 'hooks', 'test-utils'];
+
+const repoRoot = (...args) => path.join(__dirname, '..', ...args);
 const snakeCaseToCamelCase = str =>
 	str.replace(/([-_][a-z])/g, group => group.toUpperCase().replace('-', ''));
 
-const copyPreact = () => {
-	// Copy .module.js --> .mjs for Node 13 compat.
-	fs.writeFileSync(
-		`${process.cwd()}/dist/preact.mjs`,
-		fs.readFileSync(`${process.cwd()}/dist/preact.module.js`)
-	);
+const targets = [
+	// Copy .module.js --> .mjs for Node 13 compat for main package
+	{ from: 'dist/preact.module.js', to: 'dist/preact.mjs' },
 	// Copy over preact.cjs --> preact.min.js for Preact 8 compat.
-	fs.writeFileSync(
-		`${process.cwd()}/dist/preact.min.js`,
-		fs.readFileSync(`${process.cwd()}/dist/preact.js`)
-	);
-};
+	{ from: 'dist/preact.js', to: 'dist/preact.min.js' },
 
-const copy = name => {
-	// Copy .module.js --> .mjs for Node 13 compat.
-	const filename = name.includes('-') ? snakeCaseToCamelCase(name) : name;
-	fs.writeFileSync(
-		`${process.cwd()}/${name}/dist/${filename}.mjs`,
-		fs.readFileSync(`${process.cwd()}/${name}/dist/${filename}.module.js`)
-	);
-};
+	// Copy .module.js --> .mjs for Node 13 compat for sub-pacages
+	...subRepositories.map(name => {
+		const filename = name.includes('-') ? snakeCaseToCamelCase(name) : name;
+		return {
+			from: `${name}/dist/${filename}.module.js`,
+			to: `${name}/dist/${filename}.mjs`
+		};
+	})
+];
 
-copyPreact();
-subRepositories.forEach(copy);
+async function main() {
+	await Promise.all(
+		targets.map(({ from, to }) => {
+			return copyFile(repoRoot(from), repoRoot(to));
+		})
+	);
+}
+
+main();
