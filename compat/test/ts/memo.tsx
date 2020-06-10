@@ -1,4 +1,4 @@
-import * as React from '../../src';
+import * as React from 'react';
 
 function ExpectType<T>(v: T) {} // type assertion helper
 

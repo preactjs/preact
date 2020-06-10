@@ -1,7 +1,6 @@
-// import React from '../../src';
-import * as React from '../../src';
+import * as React from 'react';
 class ReactIsh extends React.Component {
 	render() {
-		return <div>Text</div>
+		return <div>Text</div>;
 	}
 }
