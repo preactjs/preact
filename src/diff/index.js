@@ -140,7 +140,7 @@ export function diff(
 						commitQueue.push(c);
 					}
 
-					let lastVNodeChild, tmp;
+					let lastVNodeChild;
 					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
 						if (newVNode._children[tmp]) {
 							newVNode._children[tmp]._parent = newVNode;
@@ -156,6 +156,7 @@ export function diff(
 					) {
 						newVNode._nextDom = getDomSibling(lastVNodeChild);
 						if (newVNode._nextDom !== newVNode._dom) {
+							// TODO: traverse children
 						}
 					}
 
