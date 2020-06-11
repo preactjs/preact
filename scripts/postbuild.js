@@ -1,5 +1,5 @@
 const path = require('path');
-const { copyFile } = require('fs/promises');
+const { copyFile } = require('fs').promises;
 
 const subRepositories = ['compat', 'debug', 'devtools', 'hooks', 'test-utils'];
 
