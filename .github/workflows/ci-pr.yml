@@ -59,3 +59,111 @@ jobs:
       uses: coverallsapp/github-action@v1.0.1
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  bench_text_update:
+    name: Bench text_update
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+    - name: Cache node modules
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.npm
+        # This uses the same name as the build-action so we can share the caches.
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+    - name: install & build
+      env:
+        # Skip downloading Firefox driver until we bench against it
+        GECKODRIVER_SKIP_DOWNLOAD: 'true'
+      run: |
+        $env:CHROMEDRIVER_FILEPATH=(Join-Path $env:CHROMEWEBDRIVER chromedriver.exe)
+        npm ci
+        cd benches
+        npm ci
+    - name: bench
+      run: |
+        cd benches
+        npm run bench text_update.html
+
+  bench_02_replace1k:
+    name: Bench 02_replace1k
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+    - name: Cache node modules
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.npm
+        # This uses the same name as the build-action so we can share the caches.
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+    - name: install & build
+      env:
+        # Skip downloading Firefox driver until we bench against it
+        GECKODRIVER_SKIP_DOWNLOAD: 'true'
+      run: |
+        $env:CHROMEDRIVER_FILEPATH=(Join-Path $env:CHROMEWEBDRIVER chromedriver.exe)
+        npm ci
+        cd benches
+        npm ci
+    - name: bench
+      run: |
+        cd benches
+        npm run bench 02_replace1k.html
+
+  bench_03_update10th1k_x16:
+    name: Bench 03_update10th1k_x16
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+    - name: Cache node modules
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.npm
+        # This uses the same name as the build-action so we can share the caches.
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+    - name: install & build
+      env:
+        # Skip downloading Firefox driver until we bench against it
+        GECKODRIVER_SKIP_DOWNLOAD: 'true'
+      run: |
+        $env:CHROMEDRIVER_FILEPATH=(Join-Path $env:CHROMEWEBDRIVER chromedriver.exe)
+        npm ci
+        cd benches
+        npm ci
+    - name: bench
+      run: |
+        cd benches
+        npm run bench 03_update10th1k_x16.html
