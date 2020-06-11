@@ -42,7 +42,7 @@ Suspense.prototype = new Component();
 
 /**
  * @param {Promise} promise The thrown promise
- * @param {Component<any, any>} suspendingComponent The suspending component
+ * @param {import('./internal').Component<any, any>} suspendingComponent The suspending component
  */
 Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 	/** @type {import('./internal').SuspenseComponent} */
@@ -122,7 +122,7 @@ Suspense.prototype.render = function(props, state) {
  * If the parent does not return a callback then the resolved vnode
  * gets unsuspended immediately when it resolves.
  *
- * @param {import('../src/internal').VNode} vnode
+ * @param {import('./internal').VNode} vnode
  * @returns {((unsuspend: () => void) => void)?}
  */
 export function suspended(vnode) {

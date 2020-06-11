@@ -1859,19 +1859,19 @@ describe('Components', () => {
 
 	describe('c.base', () => {
 		/* eslint-disable lines-around-comment */
-		/** @type {import('../../src').Component} */
+		/** @type {import('../../').Component} */
 		let parentDom1;
-		/** @type {import('../../src').Component} */
+		/** @type {import('../../').Component} */
 		let parent1;
-		/** @type {import('../../src').Component} */
+		/** @type {import('../../').Component} */
 		let parent2;
-		/** @type {import('../../src').Component} */
+		/** @type {import('../../').Component} */
 		let maybe;
-		/** @type {import('../../src').Component} */
+		/** @type {import('../../').Component} */
 		let child;
-		/** @type {import('../../src').Component} */
+		/** @type {import('../../').Component} */
 		let sibling;
-		/** @type {import('../../src').Component} */
+		/** @type {import('../../').Component} */
 		let nullInst;
 
 		/** @type {() => void} */
