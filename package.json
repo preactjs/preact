@@ -140,7 +140,7 @@
     "tabWidth": 2
   },
   "lint-staged": {
-    "**/*.{js,jsx,ts,tsx}": [
+    "**/*.{js,jsx,ts,tsx,yml}": [
       "prettier --write",
       "git add"
     ]
