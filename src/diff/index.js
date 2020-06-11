@@ -1,5 +1,5 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
-import { Component } from '../component';
+import { Component, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
@@ -140,9 +140,22 @@ export function diff(
 						commitQueue.push(c);
 					}
 
+					let lastVNodeChild, tmp;
 					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
 						if (newVNode._children[tmp]) {
 							newVNode._children[tmp]._parent = newVNode;
+							lastVNodeChild = newVNode._children[tmp];
+						}
+					}
+
+					if (
+						lastVNodeChild &&
+						lastVNodeChild.type &&
+						lastVNodeChild._dom &&
+						lastVNodeChild._dom.isConnected
+					) {
+						newVNode._nextDom = getDomSibling(lastVNodeChild);
+						if (newVNode._nextDom !== newVNode._dom) {
 						}
 					}
 

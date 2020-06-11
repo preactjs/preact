@@ -62,7 +62,7 @@ describe('Lifecycle methods', () => {
 			expect(ShouldNot.prototype.render).to.have.been.calledOnce;
 		});
 
-		it('should reorder non-updating children', () => {
+		it('should reorder non-updating text children', () => {
 			const rows = [
 				{ id: '1', a: 5, b: 100 },
 				{ id: '2', a: 50, b: 10 },
@@ -763,5 +763,66 @@ describe('Lifecycle methods', () => {
 		childSetState({ foo: 'bar' });
 		rerender();
 		expect(scratch.innerHTML).to.equal('<p>bar</p>');
+	});
+
+	it('should reorder non-updating nested Fragment children', () => {
+		const rows = [
+			{ id: '1', a: 5, b: 100 },
+			{ id: '2', a: 50, b: 10 },
+			{ id: '3', a: 25, b: 1000 }
+		];
+
+		function Cell({ id, a, b }) {
+			// Return an array to really test out the reordering algorithm :)
+			return (
+				<Fragment>
+					<div>id: {id}</div>
+					<Fragment>
+						<div>a: {a}</div>
+						<div>b: {b}</div>
+					</Fragment>
+				</Fragment>
+			);
+		}
+
+		class Row extends Component {
+			shouldComponentUpdate(nextProps) {
+				return nextProps.id !== this.props.id;
+			}
+
+			render(props) {
+				return <Cell id={props.id} a={props.a} b={props.b} />;
+			}
+		}
+
+		const App = ({ sortBy }) => (
+			<div>
+				<table>
+					{rows
+						.sort((a, b) => (a[sortBy] > b[sortBy] ? -1 : 1))
+						.map(row => (
+							<Row key={row.id} id={row.id} a={row.a} b={row.b} />
+						))}
+				</table>
+			</div>
+		);
+
+		render(<App sortBy="a" />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			`<div><table>${[
+				'<div>id: 2</div><div>a: 50</div><div>b: 10</div>',
+				'<div>id: 3</div><div>a: 25</div><div>b: 1000</div>',
+				'<div>id: 1</div><div>a: 5</div><div>b: 100</div>'
+			].join('')}</table></div>`
+		);
+
+		render(<App sortBy="b" />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			`<div><table>${[
+				'<div>id: 3</div><div>a: 25</div><div>b: 1000</div>',
+				'<div>id: 1</div><div>a: 5</div><div>b: 100</div>',
+				'<div>id: 2</div><div>a: 50</div><div>b: 10</div>'
+			].join('')}</table></div>`
+		);
 	});
 });
