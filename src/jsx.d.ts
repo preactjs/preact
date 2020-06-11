@@ -682,6 +682,7 @@ export namespace JSXInternal {
 		multiple?: boolean;
 		muted?: boolean;
 		name?: string;
+		native?: boolean;
 		nonce?: string;
 		noValidate?: boolean;
 		open?: boolean;
