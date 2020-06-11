@@ -57,10 +57,15 @@ jobs:
   bench_text_update:
     name: Bench text_update
     runs-on: windows-latest
+    needs: build_test
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 1
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - run: ls -alR
       - uses: actions/setup-node@v1
         with:
           node-version: '12.x'
@@ -82,7 +87,6 @@ jobs:
           GECKODRIVER_SKIP_DOWNLOAD: 'true'
         run: |
           $env:CHROMEDRIVER_FILEPATH=(Join-Path $env:CHROMEWEBDRIVER chromedriver.exe)
-          npm ci
           cd benches
           npm ci
       - name: bench
@@ -93,10 +97,14 @@ jobs:
   bench_02_replace1k:
     name: Bench 02_replace1k
     runs-on: windows-latest
+    needs: build_test
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 1
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
       - uses: actions/setup-node@v1
         with:
           node-version: '12.x'
@@ -118,7 +126,6 @@ jobs:
           GECKODRIVER_SKIP_DOWNLOAD: 'true'
         run: |
           $env:CHROMEDRIVER_FILEPATH=(Join-Path $env:CHROMEWEBDRIVER chromedriver.exe)
-          npm ci
           cd benches
           npm ci
       - name: bench
@@ -129,10 +136,14 @@ jobs:
   bench_03_update10th1k_x16:
     name: Bench 03_update10th1k_x16
     runs-on: windows-latest
+    needs: build_test
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 1
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
       - uses: actions/setup-node@v1
         with:
           node-version: '12.x'
@@ -154,7 +165,6 @@ jobs:
           GECKODRIVER_SKIP_DOWNLOAD: 'true'
         run: |
           $env:CHROMEDRIVER_FILEPATH=(Join-Path $env:CHROMEWEBDRIVER chromedriver.exe)
-          npm ci
           cd benches
           npm ci
       - name: bench
