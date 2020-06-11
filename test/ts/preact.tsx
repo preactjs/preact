@@ -5,7 +5,7 @@ import {
 	FunctionalComponent,
 	AnyComponent,
 	h
-} from 'preact';
+} from '../../';
 
 interface DummyProps {
 	initialInput: string;

@@ -9,11 +9,7 @@
 		"types": [],
 		"forceConsistentCasingInFileNames": true,
 		"jsx": "react",
-		"jsxFactory": "createElement",
-		"baseUrl": ".",
-		"paths": {
-			"preact": ["../../"]
-		}
+		"jsxFactory": "createElement"
 	},
 	"include": ["./**/*.ts", "./**/*.tsx"]
 }

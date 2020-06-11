@@ -8,11 +8,7 @@
 		"forceConsistentCasingInFileNames": true,
 		"jsx": "react",
 		"noEmit": true,
-		"allowSyntheticDefaultImports": true,
-		"baseUrl": ".",
-		"paths": {
-			"react": ["../../"]
-		}
+		"allowSyntheticDefaultImports": true
 	},
 	"include": ["./**/*.ts", "./**/*.tsx"]
 }

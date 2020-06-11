@@ -1,4 +1,4 @@
-import React from 'react';
+import React from '../../';
 
 const MyInput: React.ForwardFn<{ id: string }, { focus(): void }> = (
 	props,
