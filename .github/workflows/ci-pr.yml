@@ -65,7 +65,7 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: build-output
-      - run: ls -alR
+      - run: ls; ls hooks
       - uses: actions/setup-node@v1
         with:
           node-version: '12.x'
@@ -89,10 +89,12 @@ jobs:
           $env:CHROMEDRIVER_FILEPATH=(Join-Path $env:CHROMEWEBDRIVER chromedriver.exe)
           cd benches
           npm ci
+      - run: ls; ls hooks
       - name: bench
         run: |
           cd benches
           npm run bench text_update.html
+      - run: ls; ls hooks
 
   bench_02_replace1k:
     name: Bench 02_replace1k
