@@ -1,6 +1,6 @@
 import * as _hooks from '../../hooks';
-import * as preact from '../../src';
-import { JSXInternal } from '../../src/jsx';
+import * as preact from '../../';
+import { JSXInternal } from '../../dist/jsx';
 
 // export default React;
 export = React;
