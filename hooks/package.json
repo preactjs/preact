@@ -7,7 +7,6 @@
   "main": "dist/hooks.js",
   "module": "dist/hooks.module.js",
   "umd:main": "dist/hooks.umd.js",
-  "source": "src/index.js",
   "license": "MIT",
   "types": "dist/index.d.ts",
   "scripts": {

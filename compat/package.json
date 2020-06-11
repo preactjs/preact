@@ -7,7 +7,6 @@
   "main": "dist/compat.js",
   "module": "dist/compat.module.js",
   "umd:main": "dist/compat.umd.js",
-  "source": "src/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
   "mangle": {
