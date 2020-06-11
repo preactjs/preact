@@ -3,8 +3,8 @@ name: CI-PR
 on: [pull_request]
 
 jobs:
-  build:
-    name: Build
+  build_test:
+    name: Build & Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -19,30 +19,6 @@ jobs:
           cache-name: cache-node-modules
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-      - run: npm ci
-
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '12.x'
-      - name: Cache node modules
-        uses: actions/cache@v1
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: ~/.npm
-          # This uses the same name as the build-action so we can share the caches.
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-
@@ -54,7 +30,10 @@ jobs:
           CI: true
           COVERAGE: true
           FLAKEY: false
-        run: npm run test
+        # Not using `npm test` since it rebuilds source which npm ci has already done
+        run: |
+          npm run lint
+          npm run test:unit
       - name: Coveralls GitHub Action
         uses: coverallsapp/github-action@v1.0.1
         with:
