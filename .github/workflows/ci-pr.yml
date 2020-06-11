@@ -38,6 +38,21 @@ jobs:
         uses: coverallsapp/github-action@v1.0.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Package
+        # Use --ignore-scripts here to avoid re-building again before pack
+        run: |
+          npm pack --ignore-scripts
+          tar -xzf preact-*.tgz
+      - name: Upload NPM tarball
+        uses: actions/upload-artifact@v2
+        with:
+          name: npm-tarball
+          path: preact-*.tgz
+      - name: Upload build output
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-output
+          path: package/
 
   bench_text_update:
     name: Bench text_update
