@@ -156,7 +156,9 @@ export function diff(
 					) {
 						newVNode._nextDom = getDomSibling(lastVNodeChild);
 						if (newVNode._nextDom !== newVNode._dom) {
-							// TODO: traverse children
+							newVNode._children.forEach(() => {
+								// Reorder if needed
+							});
 						}
 					}
 

@@ -2612,11 +2612,9 @@ describe('Fragment', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal(top);
 
-		console.log('ERRONEOUS RENDER');
 		set();
 		rerender();
 		expect(scratch.innerHTML).to.equal(bottom);
-		console.log('ERRONEOUS RENDER END');
 
 		set();
 		rerender();
