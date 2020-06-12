@@ -43,11 +43,6 @@ jobs:
         run: |
           npm pack --ignore-scripts
           tar -xzf preact-*.tgz
-      - name: Upload NPM tarball
-        uses: actions/upload-artifact@v2
-        with:
-          name: npm-tarball
-          path: preact-*.tgz
       - name: Upload build output
         uses: actions/upload-artifact@v2
         with:
