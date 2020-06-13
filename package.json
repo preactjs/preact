@@ -230,7 +230,7 @@
     "prop-types": "^15.7.2",
     "sinon": "^6.1.3",
     "sinon-chai": "^3.0.0",
-    "typescript": "^3.0.1",
+    "typescript": "3.5.3",
     "webpack": "^4.3.0"
   }
 }
