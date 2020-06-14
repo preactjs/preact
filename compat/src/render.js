@@ -104,7 +104,8 @@ options.vnode = vnode => {
 
 	if (type) {
 		// Alias `class` prop to `className` if available
-		if (props.class != props.className) {
+		// only alias on dom elements
+		if (typeof type === 'string' && props.class != props.className) {
 			classNameDescriptor.enumerable = 'className' in props;
 			if (props.className != null) props.class = props.className;
 			Object.defineProperty(props, 'className', classNameDescriptor);
