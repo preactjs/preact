@@ -6,6 +6,35 @@ import { diffProps, setProperty } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
 
+const reorderChildren = newVNode => {
+	let lastVNodeChild;
+	for (let tmp = 0; tmp < newVNode._children.length; tmp++) {
+		if (newVNode._children[tmp]) {
+			newVNode._children[tmp]._parent = newVNode;
+			lastVNodeChild = newVNode._children[tmp];
+		}
+	}
+
+	if (
+		lastVNodeChild &&
+		lastVNodeChild.type &&
+		lastVNodeChild._dom &&
+		lastVNodeChild._dom.isConnected
+	) {
+		newVNode._nextDom = getDomSibling(lastVNodeChild);
+		if (newVNode._nextDom !== newVNode._dom) {
+			newVNode._children.forEach(vnode => {
+				if (typeof vnode.type == 'function') {
+					reorderChildren(vnode);
+					if (vnode._dom !== vnode._nextDom) {
+						// TODO: we should now correctly change the ordering for this node.
+					}
+				}
+			});
+		}
+	}
+};
+
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
@@ -140,28 +169,7 @@ export function diff(
 						commitQueue.push(c);
 					}
 
-					let lastVNodeChild;
-					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
-						if (newVNode._children[tmp]) {
-							newVNode._children[tmp]._parent = newVNode;
-							lastVNodeChild = newVNode._children[tmp];
-						}
-					}
-
-					if (
-						lastVNodeChild &&
-						lastVNodeChild.type &&
-						lastVNodeChild._dom &&
-						lastVNodeChild._dom.isConnected
-					) {
-						newVNode._nextDom = getDomSibling(lastVNodeChild);
-						if (newVNode._nextDom !== newVNode._dom) {
-							newVNode._children.forEach(() => {
-								// Reorder if needed
-							});
-						}
-					}
-
+					reorderChildren(newVNode);
 					break outer;
 				}
 
