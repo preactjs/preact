@@ -5,7 +5,7 @@ import {
 	FunctionalComponent,
 	AnyComponent,
 	h
-} from '../../src';
+} from '../../';
 
 interface DummyProps {
 	initialInput: string;
@@ -207,7 +207,8 @@ class DefaultPropsWithUnion extends Component<
 		| {
 				type: 'number';
 				num: number;
-		  })
+		  }
+	)
 > {
 	static defaultProps = {
 		default: true
