@@ -242,6 +242,37 @@ describe('compat render', () => {
 		);
 	});
 
+	// Issue #2582
+	it('should not leak class/className normalisation into props', () => {
+		function Foo({ className, ...props }) {
+			return (
+				<ul className={className}>
+					<li {...props}>hi</li>
+				</ul>
+			);
+		}
+		function Bar({ class: className, ...props }) {
+			return (
+				<ul class={className}>
+					<li {...props}>hi</li>
+				</ul>
+			);
+		}
+
+		render(
+			<>
+				<Foo className="foo" />
+				<Bar class="bar" />
+			</>,
+			scratch
+		);
+		expect(scratch.firstChild.className).to.equal('foo');
+		expect(scratch.firstChild.children[0].className).to.equal('');
+
+		expect(scratch.lastChild.className).to.equal('bar');
+		expect(scratch.lastChild.children[0].className).to.equal('');
+	});
+
 	it('should support static content', () => {
 		const updateSpy = sinon.spy();
 		const mountSpy = sinon.spy();
