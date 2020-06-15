@@ -2561,7 +2561,7 @@ describe('Fragment', () => {
 		]);
 	});
 
-	it.only('should not reorder itself', () => {
+	it('should not reorder itself', () => {
 		let set;
 
 		const Children = () => (

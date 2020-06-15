@@ -1,5 +1,5 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
-import { Component, getDomSibling } from '../component';
+import { Component } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren, placeChild } from './children';
 import { diffProps, setProperty } from './props';
@@ -7,7 +7,7 @@ import { assign, removeNode } from '../util';
 import options from '../options';
 
 const reorderChildren = (newVNode, oldDom, parentDom) => {
-	let lastVNodeChild, tmp, j;
+	let lastVNodeChild, tmp;
 	for (tmp = 0; tmp < newVNode._children.length; tmp++) {
 		if (newVNode._children[tmp]) {
 			newVNode._children[tmp]._parent = newVNode;
