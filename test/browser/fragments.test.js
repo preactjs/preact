@@ -8,7 +8,7 @@ import { logCall, clearLog, getLog } from '../_util/logCall';
 /* eslint-disable react/jsx-boolean-value */
 
 describe('Fragment', () => {
-	let expectDomLog = true;
+	let expectDomLog = false;
 
 	/** @type {HTMLDivElement} */
 	let scratch;
@@ -2562,6 +2562,7 @@ describe('Fragment', () => {
 	});
 
 	it('should not reorder itself', () => {
+		expectDomLog = true;
 		let set;
 
 		const Children = () => (
@@ -2637,5 +2638,7 @@ describe('Fragment', () => {
 			'<div>NavigationContentbottom panel.insertBefore(<div>top panel, <div>Navigation)',
 			'<div>bottom panel.remove()'
 		]);
+
+		expectDomLog = false;
 	});
 });

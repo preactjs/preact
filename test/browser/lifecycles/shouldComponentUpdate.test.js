@@ -12,27 +12,14 @@ describe('Lifecycle methods', () => {
 	/** @type {() => void} */
 	let rerender;
 
-	let expectDomLog = true;
 	function expectDomLogToBe(expectedOperations, message) {
-		if (expectDomLog) {
-			expect(getLog()).to.deep.equal(expectedOperations, message);
-		}
+		expect(getLog()).to.deep.equal(expectedOperations, message);
 	}
 
 	before(() => {
 		logCall(Node.prototype, 'insertBefore');
 		logCall(Node.prototype, 'appendChild');
 		logCall(Node.prototype, 'removeChild');
-		// logCall(CharacterData.prototype, 'remove');
-		// TODO: Consider logging setting set data
-		// ```
-		// var orgData = Object.getOwnPropertyDescriptor(CharacterData.prototype, 'data')
-		// Object.defineProperty(CharacterData.prototype, 'data', {
-		// 	...orgData,
-		// 	get() { return orgData.get.call(this) },
-		// 	set(value) { console.log('setData', value); orgData.set.call(this, value); }
-		// });
-		// ```
 	});
 
 	beforeEach(() => {
