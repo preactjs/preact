@@ -243,17 +243,17 @@ describe('compat render', () => {
 	});
 
 	// Issue #2582
-	it('should not leak class/className normalisation into props', () => {
-		function Foo({ className, ...props }) {
+	it.only('should not leak class/className normalisation into props', () => {
+		function Foo({ className, class: cl, ...props }) {
 			return (
-				<ul className={className}>
+				<ul className={className} data-class={cl}>
 					<li {...props}>hi</li>
 				</ul>
 			);
 		}
-		function Bar({ class: className, ...props }) {
+		function Bar({ class: className, className: cl, ...props }) {
 			return (
-				<ul class={className}>
+				<ul className={className} data-class={cl}>
 					<li {...props}>hi</li>
 				</ul>
 			);
@@ -267,9 +267,11 @@ describe('compat render', () => {
 			scratch
 		);
 		expect(scratch.firstChild.className).to.equal('foo');
+		expect(scratch.firstChild.dataset.class).to.equal('foo');
 		expect(scratch.firstChild.children[0].className).to.equal('');
 
 		expect(scratch.lastChild.className).to.equal('bar');
+		expect(scratch.lastChild.dataset.class).to.equal('bar');
 		expect(scratch.lastChild.children[0].className).to.equal('');
 	});
 
