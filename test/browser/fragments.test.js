@@ -8,7 +8,7 @@ import { logCall, clearLog, getLog } from '../_util/logCall';
 /* eslint-disable react/jsx-boolean-value */
 
 describe('Fragment', () => {
-	let expectDomLog = false;
+	let expectDomLog = true;
 
 	/** @type {HTMLDivElement} */
 	let scratch;
@@ -2561,7 +2561,7 @@ describe('Fragment', () => {
 		]);
 	});
 
-	it('should not reorder itself', () => {
+	it.only('should not reorder itself', () => {
 		let set;
 
 		const Children = () => (
@@ -2608,16 +2608,34 @@ describe('Fragment', () => {
 		render(<App />, scratch);
 		expect(scratch.innerHTML).to.equal(bottom);
 
+		clearLog();
 		set();
 		rerender();
 		expect(scratch.innerHTML).to.equal(top);
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>NavigationContentbottom panel.insertBefore(<div>top panel, <div>Navigation)',
+			'<div>bottom panel.remove()'
+		]);
 
+		clearLog();
 		set();
 		rerender();
 		expect(scratch.innerHTML).to.equal(bottom);
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>top panelNavigationContent.appendChild(<div>bottom panel)',
+			'<div>top panel.remove()'
+		]);
 
+		clearLog();
 		set();
 		rerender();
 		expect(scratch.innerHTML).to.equal(top);
+		expectDomLogToBe([
+			'<div>.appendChild(#text)',
+			'<div>NavigationContentbottom panel.insertBefore(<div>top panel, <div>Navigation)',
+			'<div>bottom panel.remove()'
+		]);
 	});
 });

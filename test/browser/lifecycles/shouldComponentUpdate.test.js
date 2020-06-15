@@ -1,6 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component, Fragment } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
+import { logCall, clearLog, getLog } from '../../_util/logCall';
 
 /** @jsx createElement */
 
@@ -11,9 +12,34 @@ describe('Lifecycle methods', () => {
 	/** @type {() => void} */
 	let rerender;
 
+	let expectDomLog = true;
+	function expectDomLogToBe(expectedOperations, message) {
+		if (expectDomLog) {
+			expect(getLog()).to.deep.equal(expectedOperations, message);
+		}
+	}
+
+	before(() => {
+		logCall(Node.prototype, 'insertBefore');
+		logCall(Node.prototype, 'appendChild');
+		logCall(Node.prototype, 'removeChild');
+		// logCall(CharacterData.prototype, 'remove');
+		// TODO: Consider logging setting set data
+		// ```
+		// var orgData = Object.getOwnPropertyDescriptor(CharacterData.prototype, 'data')
+		// Object.defineProperty(CharacterData.prototype, 'data', {
+		// 	...orgData,
+		// 	get() { return orgData.get.call(this) },
+		// 	set(value) { console.log('setData', value); orgData.set.call(this, value); }
+		// });
+		// ```
+	});
+
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
+
+		clearLog();
 	});
 
 	afterEach(() => {
@@ -816,6 +842,7 @@ describe('Lifecycle methods', () => {
 			].join('')}</table></div>`
 		);
 
+		clearLog();
 		render(<App sortBy="b" />, scratch);
 		expect(scratch.innerHTML).to.equal(
 			`<div><table>${[
@@ -824,5 +851,13 @@ describe('Lifecycle methods', () => {
 				'<div>id: 2</div><div>a: 50</div><div>b: 10</div>'
 			].join('')}</table></div>`
 		);
+		expectDomLogToBe([
+			'<table>id: 2a: 50b: 10id: 3a: 25b: 1000id: 1a: 5b: 100.insertBefore(<div>id: 3, <div>id: 2)',
+			'<table>id: 3id: 2a: 50b: 10a: 25b: 1000id: 1a: 5b: 100.insertBefore(<div>a: 25, <div>id: 2)',
+			'<table>id: 3a: 25id: 2a: 50b: 10b: 1000id: 1a: 5b: 100.insertBefore(<div>b: 1000, <div>id: 2)',
+			'<table>id: 3a: 25b: 1000id: 2a: 50b: 10id: 1a: 5b: 100.insertBefore(<div>id: 1, <div>id: 2)',
+			'<table>id: 3a: 25b: 1000id: 1id: 2a: 50b: 10a: 5b: 100.insertBefore(<div>a: 5, <div>id: 2)',
+			'<table>id: 3a: 25b: 1000id: 1a: 5id: 2a: 50b: 10b: 100.insertBefore(<div>b: 100, <div>id: 2)'
+		]);
 	});
 });
