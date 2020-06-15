@@ -7,23 +7,11 @@ import { assign, removeNode } from '../util';
 import options from '../options';
 
 const reorderChildren = (newVNode, oldDom, parentDom) => {
-	let lastVNodeChild, tmp;
-	for (tmp = 0; tmp < newVNode._children.length; tmp++) {
+	for (let tmp = 0; tmp < newVNode._children.length; tmp++) {
 		if (newVNode._children[tmp]) {
-			newVNode._children[tmp]._parent = newVNode;
-			lastVNodeChild = newVNode._children[tmp];
-		}
-	}
-
-	if (
-		lastVNodeChild &&
-		lastVNodeChild.type &&
-		lastVNodeChild._dom &&
-		lastVNodeChild._dom.isConnected &&
-		newVNode._nextDom !== newVNode._dom
-	) {
-		newVNode._children.forEach(vnode => {
-			if (vnode) {
+			const vnode = newVNode._children[tmp];
+			vnode._parent = newVNode;
+			if (vnode._dom && vnode._dom.isConnected) {
 				if (typeof vnode.type == 'function') {
 					reorderChildren(vnode, oldDom, parentDom);
 				}
@@ -40,17 +28,10 @@ const reorderChildren = (newVNode, oldDom, parentDom) => {
 				);
 
 				if (typeof newVNode.type == 'function') {
-					// Because the newParentVNode is Fragment-like, we need to set it's
-					// _nextDom property to the nextSibling of its last child DOM node.
-					//
-					// `oldDom` contains the correct value here because if the last child
-					// is a Fragment-like, then oldDom has already been set to that child's _nextDom.
-					// If the last child is a DOM VNode, then oldDom will be set to that DOM
-					// node's nextSibling.
 					newVNode._nextDom = oldDom;
 				}
 			}
-		});
+		}
 	}
 };
 
