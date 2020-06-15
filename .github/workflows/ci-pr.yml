@@ -3,31 +3,8 @@ name: CI-PR
 on: [pull_request]
 
 jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '12.x'
-      - name: Cache node modules
-        uses: actions/cache@v1
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-      - run: npm ci
-
-  test:
-    name: Test
+  build_test:
+    name: Build & Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -54,41 +31,45 @@ jobs:
           CI: true
           COVERAGE: true
           FLAKEY: false
-        run: npm run test
+        # Not using `npm test` since it rebuilds source which npm ci has already done
+        run: |
+          npm run lint
+          npm run test:unit
       - name: Coveralls GitHub Action
         uses: coverallsapp/github-action@v1.0.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Package
+        # Use --ignore-scripts here to avoid re-building again before pack
+        run: |
+          npm pack --ignore-scripts
+          tar -xzf preact-*.tgz
+      - name: Upload build output
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-output
+          path: package/
 
   bench_text_update:
     name: Bench text_update
     runs-on: windows-latest
+    needs: build_test
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 1
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
       - uses: actions/setup-node@v1
         with:
           node-version: '12.x'
-      - name: Cache node modules
-        uses: actions/cache@v1
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: ~/.npm
-          # This uses the same name as the build-action so we can share the caches.
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
       - name: install & build
         env:
           # Skip downloading Firefox driver until we bench against it
           GECKODRIVER_SKIP_DOWNLOAD: 'true'
         run: |
           $env:CHROMEDRIVER_FILEPATH=(Join-Path $env:CHROMEWEBDRIVER chromedriver.exe)
-          npm ci
           cd benches
           npm ci
       - name: bench
@@ -99,32 +80,23 @@ jobs:
   bench_02_replace1k:
     name: Bench 02_replace1k
     runs-on: windows-latest
+    needs: build_test
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 1
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
       - uses: actions/setup-node@v1
         with:
           node-version: '12.x'
-      - name: Cache node modules
-        uses: actions/cache@v1
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: ~/.npm
-          # This uses the same name as the build-action so we can share the caches.
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
       - name: install & build
         env:
           # Skip downloading Firefox driver until we bench against it
           GECKODRIVER_SKIP_DOWNLOAD: 'true'
         run: |
           $env:CHROMEDRIVER_FILEPATH=(Join-Path $env:CHROMEWEBDRIVER chromedriver.exe)
-          npm ci
           cd benches
           npm ci
       - name: bench
@@ -135,32 +107,23 @@ jobs:
   bench_03_update10th1k_x16:
     name: Bench 03_update10th1k_x16
     runs-on: windows-latest
+    needs: build_test
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 1
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
       - uses: actions/setup-node@v1
         with:
           node-version: '12.x'
-      - name: Cache node modules
-        uses: actions/cache@v1
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: ~/.npm
-          # This uses the same name as the build-action so we can share the caches.
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
       - name: install & build
         env:
           # Skip downloading Firefox driver until we bench against it
           GECKODRIVER_SKIP_DOWNLOAD: 'true'
         run: |
           $env:CHROMEDRIVER_FILEPATH=(Join-Path $env:CHROMEWEBDRIVER chromedriver.exe)
-          npm ci
           cd benches
           npm ci
       - name: bench
