@@ -21,7 +21,6 @@ const reorderChildren = (newVNode, oldDom, parentDom) => {
 		lastVNodeChild._dom &&
 		lastVNodeChild._dom.isConnected
 	) {
-		// newVNode._nextDom = getDomSibling(lastVNodeChild);
 		if (newVNode._nextDom !== newVNode._dom) {
 			newVNode._children.forEach(vnode => {
 				if (vnode) {
@@ -51,45 +50,7 @@ const reorderChildren = (newVNode, oldDom, parentDom) => {
 						newVNode._nextDom = oldDom;
 					}
 				}
-
-				// if (vnode && typeof vnode.type == 'function') {
-				// 	reorderChildren(vnode, oldDom, parentDom);
-
-				// 	oldDom = vnode._nextDom;
-
-				// 	if (typeof newVNode.type == 'function') {
-				// 		// Because the newParentVNode is Fragment-like, we need to set it's
-				// 		// _nextDom property to the nextSibling of its last child DOM node.
-				// 		//
-				// 		// `oldDom` contains the correct value here because if the last child
-				// 		// is a Fragment-like, then oldDom has already been set to that child's _nextDom.
-				// 		// If the last child is a DOM VNode, then oldDom will be set to that DOM
-				// 		// node's nextSibling.
-				// 		newVNode._nextDom = oldDom;
-
-				// 		// newVNode._nextDom = getDomSibling(lastVNodeChild);
-				// 	}
-				// } else if (vnode) {
-				// 	oldDom = placeChild(
-				// 		newVNode,
-				// 		parentDom,
-				// 		vnode,
-				// 		vnode,
-				// 		newVNode._children,
-				// 		null,
-				// 		vnode._dom,
-				// 		oldDom
-				// 	);
-				// }
-				console.log(newVNode._dom, vnode._dom, vnode._nextDom);
 			});
-
-			// console.log(
-			// 	'getDomSibling(lastVNodeChild):',
-			// 	getDomSibling(lastVNodeChild),
-			// 	lastVNodeChild._dom.nextSibling
-			// );
-			// newVNode._nextDom = lastVNodeChild._dom.nextSibling;
 		}
 	}
 };
