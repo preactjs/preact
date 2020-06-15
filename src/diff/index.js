@@ -1,14 +1,14 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
-import { diffChildren } from './children';
+import { diffChildren, placeChild } from './children';
 import { diffProps, setProperty } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
 
-const reorderChildren = newVNode => {
-	let lastVNodeChild;
-	for (let tmp = 0; tmp < newVNode._children.length; tmp++) {
+const reorderChildren = (newVNode, oldDom) => {
+	let lastVNodeChild, tmp, j;
+	for (tmp = 0; tmp < newVNode._children.length; tmp++) {
 		if (newVNode._children[tmp]) {
 			newVNode._children[tmp]._parent = newVNode;
 			lastVNodeChild = newVNode._children[tmp];
@@ -24,11 +24,19 @@ const reorderChildren = newVNode => {
 		newVNode._nextDom = getDomSibling(lastVNodeChild);
 		if (newVNode._nextDom !== newVNode._dom) {
 			newVNode._children.forEach(vnode => {
-				if (typeof vnode.type == 'function') {
-					reorderChildren(vnode);
-					if (vnode._dom !== vnode._nextDom) {
-						// TODO: we should now correctly change the ordering for this node.
-					}
+				if (vnode && typeof vnode.type == 'function') {
+					reorderChildren(vnode, oldDom);
+					oldDom = placeChild(
+						newVNode,
+						newVNode._dom,
+						vnode,
+						vnode,
+						newVNode._children,
+						null,
+						vnode._dom,
+						oldDom
+					);
+					console.log(newVNode._dom, vnode._dom, vnode._nextDom);
 				}
 			});
 		}
@@ -169,7 +177,7 @@ export function diff(
 						commitQueue.push(c);
 					}
 
-					reorderChildren(newVNode);
+					reorderChildren(newVNode, oldDom);
 					break outer;
 				}
 
