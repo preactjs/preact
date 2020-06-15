@@ -1,7 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component, Fragment } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
-import { logCall, clearLog, getLog } from '../../_util/logCall';
+import { logCall, clearLog } from '../../_util/logCall';
 
 /** @jsx createElement */
 
@@ -12,9 +12,9 @@ describe('Lifecycle methods', () => {
 	/** @type {() => void} */
 	let rerender;
 
-	function expectDomLogToBe(expectedOperations, message) {
-		expect(getLog()).to.deep.equal(expectedOperations, message);
-	}
+	// function expectDomLogToBe(expectedOperations, message) {
+	// 	expect(getLog()).to.deep.equal(expectedOperations, message);
+	// }
 
 	before(() => {
 		logCall(Node.prototype, 'insertBefore');
