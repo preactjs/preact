@@ -243,7 +243,7 @@ describe('compat render', () => {
 	});
 
 	// Issue #2582
-	it.only('should not leak class/className normalisation into props', () => {
+	it('should not leak class/className normalisation into props', () => {
 		function Foo({ className, class: cl, ...props }) {
 			return (
 				<ul className={className} data-class={cl}>
