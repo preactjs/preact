@@ -232,6 +232,9 @@ export function diff(
 
 		if ((tmp = options.diffed)) tmp(newVNode);
 	} catch (e) {
+		// When we are hydrating and have excessDomChildren we don't know the _children this VNode
+		// should receive so it's safer to unmount them. Else on the subsequent error-boundary diff,
+		// we won't know the oldDom and insert an additional node instead of replace the prerendered one. (#2539)
 		if (isHydrating && excessDomChildren != null) {
 			for (tmp = excessDomChildren.length; tmp--; ) {
 				if (excessDomChildren[tmp] != null) removeNode(excessDomChildren[tmp]);
