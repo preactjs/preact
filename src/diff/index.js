@@ -6,10 +6,10 @@ import { diffProps, setProperty } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
 
-const reorderChildren = (newVNode, oldDom, parentDom) => {
+function reorderChildren(newVNode, oldDom, parentDom) {
 	for (let tmp = 0; tmp < newVNode._children.length; tmp++) {
 		if (newVNode._children[tmp]) {
-			const vnode = newVNode._children[tmp];
+			let vnode = newVNode._children[tmp];
 			vnode._parent = newVNode;
 			if (vnode._dom && vnode._dom.isConnected) {
 				if (typeof vnode.type == 'function') {
@@ -32,7 +32,7 @@ const reorderChildren = (newVNode, oldDom, parentDom) => {
 			}
 		}
 	}
-};
+}
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -316,7 +316,7 @@ function diffElementNodes(
 
 	if (excessDomChildren != null) {
 		for (i = 0; i < excessDomChildren.length; i++) {
-			const child = excessDomChildren[i];
+			let child = excessDomChildren[i];
 
 			// if newVNode matches an element in excessDomChildren or the `dom`
 			// argument matches an element in excessDomChildren, remove it from
