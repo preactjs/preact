@@ -288,6 +288,8 @@ function flushAfterPaintEffects() {
 	afterPaintEffects = [];
 }
 
+let HAS_RAF = typeof requestAnimationFrame == 'function';
+
 /**
  * Schedule a callback to be invoked after the browser has a chance to paint a new frame.
  * Do this by combining requestAnimationFrame (rAF) + setTimeout to invoke a callback after
@@ -301,13 +303,13 @@ function flushAfterPaintEffects() {
 function afterNextFrame(callback) {
 	const done = () => {
 		clearTimeout(timeout);
-		cancelAnimationFrame(raf);
+		if (HAS_RAF) cancelAnimationFrame(raf);
 		setTimeout(callback);
 	};
 	const timeout = setTimeout(done, RAF_TIMEOUT);
 
 	let raf;
-	if (typeof requestAnimationFrame == 'function') {
+	if (HAS_RAF) {
 		raf = requestAnimationFrame(done);
 	}
 }
