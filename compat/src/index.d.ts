@@ -1,7 +1,6 @@
 import * as _hooks from '../../hooks';
-import * as preact from '../../src';
-import { JSXInternal } from '../../src/jsx';
-import * as _Suspense from './suspense';
+import * as preact from '../../';
+import { JSXInternal } from '../../dist/jsx';
 
 // export default React;
 export = React;
@@ -39,9 +38,32 @@ declare namespace React {
 	export import createElement = preact.createElement;
 	export import cloneElement = preact.cloneElement;
 
-	// Suspense
-	export import Suspense = _Suspense.Suspense;
-	export import lazy = _Suspense.lazy;
+	//
+	// Suspense/lazy
+	// -----------------------------------
+	export function lazy<T>(loader: () => Promise<{ default: T }>): T;
+
+	export interface SuspenseProps {
+		children?: preact.ComponentChildren;
+		fallback: preact.ComponentChildren;
+	}
+
+	export class Suspense extends Component<SuspenseProps> {
+		render(): preact.ComponentChildren;
+	}
+
+	//
+	// SuspenseList
+	// -----------------------------------
+
+	export interface SuspenseListProps {
+		children?: preact.ComponentChildren;
+		revealOrder?: 'forwards' | 'backwards' | 'together';
+	}
+
+	export class SuspenseList extends Component<SuspenseListProps> {
+		render(): preact.ComponentChildren;
+	}
 
 	// Compat
 	export import StrictMode = preact.Fragment;

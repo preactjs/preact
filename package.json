@@ -8,7 +8,6 @@
   "module": "dist/preact.module.js",
   "umd:main": "dist/preact.umd.js",
   "unpkg": "dist/preact.umd.js",
-  "source": "src/index.js",
   "exports": {
     ".": {
       "browser": "./dist/preact.module.js",
@@ -57,7 +56,7 @@
     "type": "opencollective",
     "url": "https://opencollective.com/preact"
   },
-  "types": "src/index.d.ts",
+  "types": "dist/index.d.ts",
   "scripts": {
     "prepare": "run-s build",
     "build": "npm-run-all --parallel build:*",
@@ -67,7 +66,7 @@
     "build:hooks": "microbundle build --raw --cwd hooks",
     "build:test-utils": "microbundle build --raw --cwd test-utils",
     "build:compat": "microbundle build --raw --cwd compat --globals 'preact/hooks=preactHooks'",
-    "postbuild": "node ./config/node-13-exports.js",
+    "postbuild": "node ./scripts/postbuild.js",
     "dev": "microbundle watch --raw --format cjs",
     "dev:hooks": "microbundle watch --raw --format cjs --cwd hooks",
     "dev:compat": "microbundle watch --raw --format cjs --cwd compat --globals 'preact/hooks=preactHooks'",
@@ -151,24 +150,9 @@
     }
   },
   "files": [
-    "src",
-    "dist",
-    "compat/dist",
-    "compat/src",
-    "compat/server.js",
-    "compat/package.json",
-    "debug/dist",
-    "debug/src",
-    "debug/package.json",
-    "devtools/dist",
-    "devtools/src",
-    "devtools/package.json",
-    "hooks/dist",
-    "hooks/src",
-    "hooks/package.json",
-    "test-utils/src",
-    "test-utils/package.json",
-    "test-utils/dist"
+    "{compat,debug,devtools,hooks,test-utils,}/dist",
+    "{compat,debug,devtools,hooks,test-utils,}/package.json",
+    "compat/server.js"
   ],
   "keywords": [
     "preact",

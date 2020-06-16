@@ -3,7 +3,7 @@ import {
 	VNode as PreactVNode,
 	FunctionalComponent as PreactFunctionalComponent
 } from '../../src/internal';
-import { SuspenseProps } from './suspense';
+import { SuspenseProps } from '../';
 
 export { ComponentChildren } from '../..';
 

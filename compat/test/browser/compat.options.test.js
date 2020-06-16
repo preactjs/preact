@@ -22,7 +22,7 @@ describe('compat options', () => {
 	/** @type {() => void} */
 	let increment;
 
-	/** @type {import('../../src/index').PropRef<HTMLButtonElement | null>} */
+	/** @type {import('preact/compat').PropRef<HTMLButtonElement | null>} */
 	let buttonRef;
 
 	beforeEach(() => {

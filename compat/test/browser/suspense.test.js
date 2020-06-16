@@ -14,7 +14,7 @@ const h = React.createElement;
 /* eslint-env browser, mocha */
 
 /**
- * @typedef {import('../../../src').ComponentType<any>} ComponentType
+ * @typedef {import('../../../').ComponentType<any>} ComponentType
  * @returns {[typeof Component, (c: ComponentType) => Promise<void>, (c: ComponentType) => void]}
  */
 function createLazy() {
