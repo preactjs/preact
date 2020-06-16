@@ -162,8 +162,8 @@ export function diffChildren(
 			if (firstChildDom == null) {
 				firstChildDom = newDom;
 			}
+
 			oldDom = placeChild(
-				newParentVNode,
 				parentDom,
 				childVNode,
 				oldVNode,
@@ -172,7 +172,20 @@ export function diffChildren(
 				newDom,
 				oldDom
 			);
-			if (typeof newParentVNode.type == 'function') {
+
+			// Browsers will infer an option's `value` from `textContent` when
+			// no value is present. This essentially bypasses our code to set it
+			// later in `diff()`. It works fine in all browsers except for IE11
+			// where it breaks setting `select.value`. There it will be always set
+			// to an empty string. Re-applying an options value will fix that, so
+			// there are probably some internal data structures that aren't
+			// updated properly.
+			//
+			// To fix it we make sure to reset the inferred value, so that our own
+			// value check in `diff()` won't be skipped.
+			if (newParentVNode.type == 'option') {
+				parentDom.value = '';
+			} else if (typeof newParentVNode.type == 'function') {
 				// Because the newParentVNode is Fragment-like, we need to set it's
 				// _nextDom property to the nextSibling of its last child DOM node.
 				//
@@ -232,7 +245,6 @@ export function toChildArray(children) {
 }
 
 export function placeChild(
-	parentVNode,
 	parentDom,
 	childVNode,
 	oldVNode,
@@ -278,21 +290,6 @@ export function placeChild(
 			}
 			parentDom.insertBefore(newDom, oldDom);
 			nextDom = oldDom;
-		}
-
-		// Browsers will infer an option's `value` from `textContent` when
-		// no value is present. This essentially bypasses our code to set it
-		// later in `diff()`. It works fine in all browsers except for IE11
-		// where it breaks setting `select.value`. There it will be always set
-		// to an empty string. Re-applying an options value will fix that, so
-		// there are probably some internal data structures that aren't
-		// updated properly.
-		//
-		// To fix it we make sure to reset the inferred value, so that our own
-		// value check in `diff()` won't be skipped.
-		// TODO: Revisit where to put this
-		if (parentVNode.type == 'option') {
-			parentDom.value = '';
 		}
 	}
 

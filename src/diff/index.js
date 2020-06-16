@@ -17,7 +17,6 @@ const reorderChildren = (newVNode, oldDom, parentDom) => {
 				}
 
 				oldDom = placeChild(
-					newVNode,
 					parentDom,
 					vnode,
 					vnode,
