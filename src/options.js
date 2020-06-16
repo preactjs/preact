@@ -9,7 +9,7 @@ import { _catchError } from './diff/catch-error';
  * ctrl+click or cmd+click on mac the type definition below).
  * @type {import('./internal').Options}
  */
-const options = {
+let options = {
 	_catchError
 };
 

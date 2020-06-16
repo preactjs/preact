@@ -3,9 +3,9 @@ import { enqueueRender } from './component';
 export let i = 0;
 
 export function createContext(defaultValue) {
-	const ctx = {};
+	let ctx = {};
 
-	const context = {
+	let context = {
 		_id: '__cC' + i++,
 		_defaultValue: defaultValue,
 		Consumer(props, context) {
@@ -13,7 +13,7 @@ export function createContext(defaultValue) {
 		},
 		Provider(props) {
 			if (!this.getChildContext) {
-				const subs = [];
+				let subs = [];
 				this.getChildContext = () => {
 					ctx[context._id] = this;
 					return ctx;

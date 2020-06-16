@@ -120,7 +120,7 @@ function renderComponent(component) {
 
 	if (parentDom) {
 		let commitQueue = [];
-		const oldVNode = assign({}, vnode);
+		let oldVNode = assign({}, vnode);
 		oldVNode._original = oldVNode;
 
 		let newDom = diff(
@@ -171,7 +171,7 @@ let rerenderQueue = [];
  */
 /* istanbul ignore next */
 // Note the following line isn't tree-shaken by rollup cuz of rollup/rollup#2566
-const defer =
+let defer =
 	typeof Promise == 'function'
 		? Promise.prototype.then.bind(Promise.resolve())
 		: setTimeout;
