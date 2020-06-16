@@ -232,6 +232,12 @@ export function diff(
 
 		if ((tmp = options.diffed)) tmp(newVNode);
 	} catch (e) {
+		if (isHydrating && excessDomChildren != null) {
+			for (tmp = excessDomChildren.length; tmp--; ) {
+				if (excessDomChildren[tmp] != null) removeNode(excessDomChildren[tmp]);
+			}
+		}
+
 		newVNode._original = null;
 		options._catchError(e, newVNode, oldVNode);
 	}
