@@ -3,7 +3,7 @@ import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
 
-let IS_HYDRATE = EMPTY_OBJ;
+const IS_HYDRATE = EMPTY_OBJ;
 
 /**
  * Render a Preact virtual node into a DOM element
