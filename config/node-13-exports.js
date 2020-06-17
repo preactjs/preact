@@ -10,11 +10,6 @@ const copyPreact = () => {
 		`${process.cwd()}/dist/preact.mjs`,
 		fs.readFileSync(`${process.cwd()}/dist/preact.module.js`)
 	);
-	// Copy over preact.cjs --> preact.min.js for Preact 8 compat.
-	fs.writeFileSync(
-		`${process.cwd()}/dist/preact.min.js`,
-		fs.readFileSync(`${process.cwd()}/dist/preact.js`)
-	);
 };
 
 const copy = name => {
