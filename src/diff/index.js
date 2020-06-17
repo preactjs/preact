@@ -11,7 +11,7 @@ function reorderChildren(newVNode, oldDom, parentDom) {
 		if (newVNode._children[tmp]) {
 			let vnode = newVNode._children[tmp];
 			vnode._parent = newVNode;
-			if (vnode._dom && vnode._dom.isConnected) {
+			if (vnode._dom) {
 				if (typeof vnode.type == 'function') {
 					reorderChildren(vnode, oldDom, parentDom);
 				}

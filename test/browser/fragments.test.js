@@ -2561,7 +2561,7 @@ describe('Fragment', () => {
 		]);
 	});
 
-	it('should not reorder itself', () => {
+	it('should properly place conditional elements around strictly equal vnodes', () => {
 		expectDomLog = true;
 		let set;
 
