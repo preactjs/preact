@@ -8,11 +8,12 @@ import options from '../options';
 
 function reorderChildren(newVNode, oldDom, parentDom) {
 	for (let tmp = 0; tmp < newVNode._children.length; tmp++) {
-		if (newVNode._children[tmp]) {
-			let vnode = newVNode._children[tmp];
+		const vnode = newVNode._children[tmp];
+		if (vnode) {
 			vnode._parent = newVNode;
+
 			if (vnode._dom) {
-				if (typeof vnode.type == 'function') {
+				if (typeof vnode.type == 'function' && vnode._children.length > 1) {
 					reorderChildren(vnode, oldDom, parentDom);
 				}
 
@@ -316,7 +317,7 @@ function diffElementNodes(
 
 	if (excessDomChildren != null) {
 		for (i = 0; i < excessDomChildren.length; i++) {
-			let child = excessDomChildren[i];
+			const child = excessDomChildren[i];
 
 			// if newVNode matches an element in excessDomChildren or the `dom`
 			// argument matches an element in excessDomChildren, remove it from
