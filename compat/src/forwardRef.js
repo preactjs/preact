@@ -4,7 +4,7 @@ import { assign } from './util';
 let oldDiffHook = options._diff;
 options._diff = vnode => {
 	if (vnode.type && vnode.type._forwarded && vnode.ref) {
-		vnode.props.ref = vnode.ref;
+		vnode.vnode.props.ref = vnode.ref;
 		vnode.ref = null;
 	}
 	if (oldDiffHook) oldDiffHook(vnode);
