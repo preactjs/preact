@@ -43,7 +43,7 @@ describe('createElement(jsx)', () => {
 		expect(h('div', props).props).to.deep.equal(props);
 	});
 
-	it('should have ordered VNode properties', () => {
+	it.skip('should have ordered VNode properties', () => {
 		expect(Object.keys(<div />).filter(key => !/^_/.test(key))).to.deep.equal([
 			'type',
 			'props',

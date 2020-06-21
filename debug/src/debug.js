@@ -173,12 +173,12 @@ export function initDebug() {
 		}
 
 		if (typeof vnode.type == 'string') {
-			for (const key in vnode.props) {
+			for (const key in vnode.vnode.props) {
 				if (
 					key[0] === 'o' &&
 					key[1] === 'n' &&
-					typeof vnode.props[key] != 'function' &&
-					vnode.props[key] != null
+					typeof vnode.vnode.props[key] != 'function' &&
+					vnode.vnode.props[key] != null
 				) {
 					throw new Error(
 						`Component's "${key}" property should be a function, ` +

@@ -1,4 +1,5 @@
 import options from './options';
+import { assign } from './util';
 
 /**
  * Create an virtual node (used for JSX)
@@ -11,7 +12,7 @@ import options from './options';
 export function createElement(type, props, children) {
 	let i;
 
-	if (props == null) props = {};
+	props = assign({}, props);
 
 	if (arguments.length > 3) {
 		children = [children];
