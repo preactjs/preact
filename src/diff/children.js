@@ -83,9 +83,9 @@ export function diffChildren(
 				createVNode(childVNode.type, childVNode.props),
 				childVNode._original
 			);
-		} else {
+		} else if (typeof childVNode !== 'function') {
 			childVNode = newParentVNode._children[i] = createBackingNode(
-				childVNode.vnode,
+				childVNode,
 				childVNode
 			);
 		}

@@ -100,7 +100,7 @@ export function createBackingNode(vnode, original) {
 		_original: original
 	};
 
-	if (original == null) backingNode._original = backingNode;
+	if (original == null) backingNode._original = vnode;
 
 	if (vnode.props) {
 		delete vnode.props.ref;
