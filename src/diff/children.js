@@ -1,5 +1,5 @@
 import { diff, unmount, applyRef } from './index';
-import { createVNode, Fragment } from '../create-element';
+import { createVNode, Fragment, createBackingNode } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { removeNode } from '../util';
 import { getDomSibling } from '../component';
@@ -69,38 +69,30 @@ export function diffChildren(
 		// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
 		// it's own DOM & etc. pointers
 		else if (typeof childVNode == 'string' || typeof childVNode == 'number') {
-			childVNode = newParentVNode._children[i] = createVNode(
-				null,
-				childVNode,
-				null,
-				null,
+			childVNode = newParentVNode._children[i] = createBackingNode(
+				createVNode(null, childVNode),
 				childVNode
 			);
 		} else if (Array.isArray(childVNode)) {
-			childVNode = newParentVNode._children[i] = createVNode(
-				Fragment,
-				{ children: childVNode },
-				null,
-				null,
+			childVNode = newParentVNode._children[i] = createBackingNode(
+				createVNode(Fragment, { children: childVNode }),
 				null
 			);
 		} else if (childVNode._dom != null || childVNode._component != null) {
-			childVNode = newParentVNode._children[i] = createVNode(
-				childVNode.type,
-				childVNode.props,
-				childVNode.key,
-				null,
+			childVNode = newParentVNode._children[i] = createBackingNode(
+				createVNode(childVNode.type, childVNode.props),
 				childVNode._original
 			);
 		} else {
-			childVNode = newParentVNode._children[i] = childVNode;
+			childVNode = newParentVNode._children[i] = createBackingNode(
+				childVNode.vnode,
+				childVNode
+			);
 		}
 
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
-		if (childVNode == null) {
-			continue;
-		}
+		if (childVNode == null) continue;
 
 		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;

@@ -1,6 +1,6 @@
 import { EMPTY_OBJ, EMPTY_ARR } from './constants';
 import { commitRoot, diff } from './diff/index';
-import { createElement, Fragment } from './create-element';
+import { createElement, Fragment, createBackingNode } from './create-element';
 import options from './options';
 
 const IS_HYDRATE = EMPTY_OBJ;
@@ -29,7 +29,7 @@ export function render(vnode, parentDom, replaceNode) {
 	let oldVNode = isHydrating
 		? null
 		: (replaceNode && replaceNode._children) || parentDom._children;
-	vnode = createElement(Fragment, null, [vnode]);
+	vnode = createBackingNode(createElement(Fragment, null, [vnode]), null);
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [];

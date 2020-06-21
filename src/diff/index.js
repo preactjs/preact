@@ -74,7 +74,7 @@ export function diff(
 	try {
 		outer: if (typeof newType == 'function') {
 			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
-			let newProps = newVNode.props;
+			let newProps = newVNode.vnode.props;
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
@@ -235,12 +235,6 @@ export function diff(
 			}
 
 			c._force = false;
-		} else if (
-			excessDomChildren == null &&
-			newVNode._original === oldVNode._original
-		) {
-			newVNode._children = oldVNode._children;
-			newVNode._dom = oldVNode._dom;
 		} else {
 			newVNode._dom = diffElementNodes(
 				oldVNode._dom,
@@ -309,8 +303,8 @@ function diffElementNodes(
 	isHydrating
 ) {
 	let i;
-	let oldProps = oldVNode.props;
-	let newProps = newVNode.props;
+	let oldProps = oldVNode.vnode && oldVNode.vnode.props;
+	let newProps = newVNode.vnode.props;
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	isSvg = newVNode.type === 'svg' || isSvg;
@@ -362,7 +356,7 @@ function diffElementNodes(
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 
-		oldProps = oldVNode.props || EMPTY_OBJ;
+		oldProps = (oldVNode.vnode && oldVNode.vnode.props) || EMPTY_OBJ;
 
 		let oldHtml = oldProps.dangerouslySetInnerHTML;
 		let newHtml = newProps.dangerouslySetInnerHTML;
@@ -393,7 +387,7 @@ function diffElementNodes(
 		if (newHtml) {
 			newVNode._children = [];
 		} else {
-			i = newVNode.props.children;
+			i = newVNode.vnode.props.children;
 			diffChildren(
 				dom,
 				Array.isArray(i) ? i : [i],
