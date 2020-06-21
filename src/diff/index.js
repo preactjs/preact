@@ -67,7 +67,7 @@ export function diff(
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
-	if (newVNode.constructor !== undefined) return null;
+	if (newVNode._vnode.constructor !== undefined) return null;
 
 	if ((tmp = options._diff)) tmp(newVNode);
 
