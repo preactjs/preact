@@ -16,7 +16,7 @@ export function createElement(type, props, children) {
 	if (arguments.length > 3) {
 		children = [children];
 		// https://github.com/preactjs/preact/issues/1916
-		for (let i = 3; i < arguments.length; i++) {
+		for (i = 3; i < arguments.length; i++) {
 			children.push(arguments[i]);
 		}
 	}
@@ -85,7 +85,7 @@ export function createBackingNode(vnode, original) {
 		key: vnode.props ? vnode.props.key : undefined,
 		ref: vnode.props ? vnode.props.ref : undefined,
 		type: vnode.type,
-		vnode,
+		_vnode: vnode,
 		_children: null,
 		_parent: null,
 		_depth: 0,
@@ -96,7 +96,6 @@ export function createBackingNode(vnode, original) {
 		// a _nextDom that has been set to `null`
 		_nextDom: undefined,
 		_component: null,
-		constructor: undefined,
 		_original: original
 	};
 
