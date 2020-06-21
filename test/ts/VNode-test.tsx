@@ -36,7 +36,7 @@ const b: ComponentFactory = SimpleFunctionalComponent;
 describe('VNode TS types', () => {
 	it('is returned by h', () => {
 		const actual = <div className="wow" />;
-		expect(actual).to.include.all.keys('type', 'props', 'key');
+		expect(actual).to.include.all.keys('type', 'props', 'constructor');
 	});
 
 	it('has a nodeName of string when html element', () => {
