@@ -43,37 +43,10 @@ describe('createElement(jsx)', () => {
 		expect(h('div', props).props).to.deep.equal(props);
 	});
 
-	it('should set VNode#key property', () => {
-		expect(<div />).to.have.property('key').that.does.not.exist;
-		expect(<div a="a" />).to.have.property('key').that.does.not.exist;
-		expect(<div key="1" />).to.have.property('key', '1');
-	});
-
-	it('should not set VNode#props.key property', () => {
-		expect(<div />).to.not.have.nested.property('props.key');
-		expect(<div key="1" />).to.not.have.nested.property('props.key');
-		expect(<div key={0} />).to.not.have.nested.property('props.key');
-		expect(<div key={''} />).to.not.have.nested.property('props.key');
-	});
-
-	it('should set VNode#ref property', () => {
-		expect(<div />).to.have.property('ref').that.does.not.exist;
-		expect(<div a="a" />).to.have.property('ref').that.does.not.exist;
-		const emptyFunction = () => {};
-		expect(<div ref={emptyFunction} />).to.have.property('ref', emptyFunction);
-	});
-
-	it('should not set VNode#props.ref property', () => {
-		expect(<div />).to.not.have.nested.property('props.ref');
-		expect(<div ref={() => {}} />).to.not.have.nested.property('props.ref');
-	});
-
 	it('should have ordered VNode properties', () => {
 		expect(Object.keys(<div />).filter(key => !/^_/.test(key))).to.deep.equal([
 			'type',
 			'props',
-			'key',
-			'ref',
 			'constructor'
 		]);
 	});
@@ -158,23 +131,22 @@ describe('createElement(jsx)', () => {
 	});
 
 	it('should NOT set children prop when null', () => {
-		let r = h('foo', {foo : 'bar'}, null);
+		let r = h('foo', { foo: 'bar' }, null);
 
 		expect(r)
 			.to.be.an('object')
 			.to.have.nested.property('props.foo')
-			.not.to.have.nested.property('props.children')
-			
-	})
+			.not.to.have.nested.property('props.children');
+	});
 
 	it('should NOT set children prop when unspecified', () => {
-		let r = h('foo', {foo : 'bar'});
+		let r = h('foo', { foo: 'bar' });
 
 		expect(r)
 			.to.be.an('object')
 			.to.have.nested.property('props.foo')
-			.not.to.have.nested.property('props.children')
-	})
+			.not.to.have.nested.property('props.children');
+	});
 
 	it('should NOT merge adjacent text children', () => {
 		let r = h(
@@ -233,7 +205,7 @@ describe('createElement(jsx)', () => {
 				null
 			]);
 	});
-	
+
 	it('should not merge children that are boolean values', () => {
 		let r = h('foo', null, 'one', true, 'two', false, 'three');
 
