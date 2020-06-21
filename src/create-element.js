@@ -11,7 +11,7 @@ import options from './options';
 export function createElement(type, props, children) {
 	let i;
 
-	if (!props) props = {};
+	if (props == null) props = {};
 
 	if (arguments.length > 3) {
 		children = [children];
@@ -85,7 +85,7 @@ export function createBackingNode(vnode, original) {
 		key: vnode.props ? vnode.props.key : undefined,
 		ref: vnode.props ? vnode.props.ref : undefined,
 		type: vnode.type,
-		_vnode: vnode,
+		vnode,
 		_children: null,
 		_parent: null,
 		_depth: 0,
