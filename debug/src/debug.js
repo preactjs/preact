@@ -213,7 +213,7 @@ export function initDebug() {
 			}
 			checkPropTypes(
 				vnode.type.propTypes,
-				vnode.props,
+				vnode.vnode.props,
 				'prop',
 				getDisplayName(vnode)
 			);
@@ -262,8 +262,9 @@ export function initDebug() {
 				else newProps[i] = v;
 			}
 		}
+
 		// eslint-disable-next-line
-		vnode.__proto__ = deprecatedProto;
+		if (vnode.vnode) vnode.vnode.__proto__ = deprecatedProto;
 		if (oldVnode) oldVnode(vnode);
 	};
 
@@ -388,7 +389,7 @@ Component.prototype.forceUpdate = function(callback) {
  * @returns {string}
  */
 export function serializeVNode(vnode) {
-	let { props } = vnode;
+	let { props } = vnode.vnode || { props: {} };
 	let name = getDisplayName(vnode);
 
 	let attrs = '';

@@ -604,13 +604,13 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div><span>World</span>');
+		expect(ops).to.deep.equal([]);
 
 		render(<Foo condition={true} />, scratch);
 
-		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(ops).to.deep.equal([]);
 	});
 
 	it('should not preserve state between unkeyed and keyed fragment', () => {
@@ -631,13 +631,13 @@ describe('Fragment', () => {
 		render(<Foo condition={true} />, scratch);
 		render(<Foo condition={false} />, scratch);
 
-		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(ops).to.deep.equal([]);
 
 		render(<Foo condition={true} />, scratch);
 
-		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(ops).to.deep.equal([]);
 	});
 
 	it('should preserve state with reordering in multiple levels', () => {
