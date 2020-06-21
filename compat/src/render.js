@@ -35,7 +35,7 @@ export function render(vnode, parent, callback) {
 	preactRender(vnode, parent);
 	if (typeof callback == 'function') callback();
 
-	return vnode ? vnode._component : null;
+	return vnode ? parent._children._component : null;
 }
 
 export function hydrate(vnode, parent, callback) {
