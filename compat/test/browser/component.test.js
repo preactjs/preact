@@ -63,15 +63,16 @@ describe('components', () => {
 
 		class Parent extends React.Component {
 			render() {
-				return <Child>second</Child>;
+				return <Child a="b">second</Child>;
 			}
 		}
 
-		let a = React.render(<Parent />, scratch);
-		a.forceUpdate();
+		React.render(<Parent />, scratch);
+		React.render(<Parent />, scratch);
 		rerender();
 
 		expect(props).to.exist.and.deep.equal({
+			a: 'b',
 			children: 'second'
 		});
 	});

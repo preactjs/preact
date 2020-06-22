@@ -67,14 +67,14 @@ export function diff(
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
-	if (newVNode.vnode && newVNode.vnode.constructor !== undefined) return null;
+	if (newVNode._node && newVNode._node.constructor !== undefined) return null;
 
 	if ((tmp = options._diff)) tmp(newVNode);
 
 	try {
 		outer: if (typeof newType == 'function') {
 			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
-			let newProps = newVNode.vnode.props;
+			let newProps = newVNode._node.props;
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
@@ -309,8 +309,8 @@ function diffElementNodes(
 	isHydrating
 ) {
 	let i;
-	let oldProps = oldVNode.vnode && oldVNode.vnode.props;
-	let newProps = newVNode.vnode.props;
+	let oldProps = oldVNode._node && oldVNode._node.props;
+	let newProps = newVNode._node.props;
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	isSvg = newVNode.type === 'svg' || isSvg;
@@ -362,7 +362,7 @@ function diffElementNodes(
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 
-		oldProps = (oldVNode.vnode && oldVNode.vnode.props) || EMPTY_OBJ;
+		oldProps = (oldVNode._node && oldVNode._node.props) || EMPTY_OBJ;
 
 		let oldHtml = oldProps.dangerouslySetInnerHTML;
 		let newHtml = newProps.dangerouslySetInnerHTML;
@@ -393,7 +393,7 @@ function diffElementNodes(
 		if (newHtml) {
 			newVNode._children = [];
 		} else {
-			i = newVNode.vnode.props.children;
+			i = newVNode._node.props.children;
 			diffChildren(
 				dom,
 				Array.isArray(i) ? i : [i],

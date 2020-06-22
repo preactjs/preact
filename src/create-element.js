@@ -86,7 +86,7 @@ export function createBackingNode(vnode, original) {
 		key: vnode.props ? vnode.props.key : undefined,
 		ref: vnode.props ? vnode.props.ref : undefined,
 		type: vnode.type,
-		vnode,
+		_node: vnode,
 		_children: null,
 		_parent: null,
 		_depth: 0,

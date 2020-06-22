@@ -40,6 +40,7 @@
       "$_nextState": "__s",
       "$_renderCallbacks": "__h",
       "$_vnode": "__v",
+      "$_node": "__n",
       "$_children": "__k",
       "$_pendingSuspensionCount": "__u",
       "$_childDidSuspend": "__c",

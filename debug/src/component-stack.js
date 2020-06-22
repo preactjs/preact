@@ -76,9 +76,9 @@ function isPossibleOwner(vnode) {
 export function getOwnerStack(vnode) {
 	const stack = [vnode];
 	let next = vnode;
-	while (next._owner != null) {
-		stack.push(next._owner);
-		next = next._owner;
+	while (next._node._owner != null) {
+		stack.push(next._node._owner);
+		next = next._node._owner;
 	}
 
 	return stack.reduce((acc, owner) => {

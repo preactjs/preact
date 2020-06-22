@@ -106,7 +106,7 @@ export function initDebug() {
 					`\n\n${getOwnerStack(vnode)}`
 			);
 		} else if (type != null && typeof type == 'object') {
-			if (type._children !== undefined && type._dom !== undefined) {
+			if (vnode._children !== undefined && vnode._dom !== undefined) {
 				throw new Error(
 					`Invalid type passed to createElement(): ${type}\n\n` +
 						'Did you accidentally pass a JSX literal as JSX twice?\n\n' +
@@ -173,16 +173,16 @@ export function initDebug() {
 		}
 
 		if (typeof vnode.type == 'string') {
-			for (const key in vnode.vnode.props) {
+			for (const key in vnode._node.props) {
 				if (
 					key[0] === 'o' &&
 					key[1] === 'n' &&
-					typeof vnode.vnode.props[key] != 'function' &&
-					vnode.vnode.props[key] != null
+					typeof vnode._node.props[key] != 'function' &&
+					vnode._node.props[key] != null
 				) {
 					throw new Error(
 						`Component's "${key}" property should be a function, ` +
-							`but got [${typeof vnode.props[key]}] instead\n` +
+							`but got [${typeof vnode._node.props[key]}] instead\n` +
 							serializeVNode(vnode) +
 							`\n\n${getOwnerStack(vnode)}`
 					);
@@ -213,7 +213,7 @@ export function initDebug() {
 			}
 			checkPropTypes(
 				vnode.type.propTypes,
-				vnode.vnode.props,
+				vnode._node.props,
 				'prop',
 				getDisplayName(vnode)
 			);
@@ -264,7 +264,8 @@ export function initDebug() {
 		}
 
 		// eslint-disable-next-line
-		if (vnode.vnode) vnode.vnode.__proto__ = deprecatedProto;
+		vnode.__proto__ = deprecatedProto;
+
 		if (oldVnode) oldVnode(vnode);
 	};
 
@@ -389,7 +390,7 @@ Component.prototype.forceUpdate = function(callback) {
  * @returns {string}
  */
 export function serializeVNode(vnode) {
-	let { props } = vnode.vnode || { props: {} };
+	let { props } = vnode._node || { props: {} };
 	let name = getDisplayName(vnode);
 
 	let attrs = '';

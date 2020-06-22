@@ -68,38 +68,44 @@ describe('PureComponent', () => {
 	});
 
 	it('should only re-render when props or state change', () => {
+		let set;
 		class C extends React.PureComponent {
+			constructor(props) {
+				super(props);
+				set = this.setState.bind(this);
+			}
+
 			render() {
 				return <div />;
 			}
 		}
 		let spy = sinon.spy(C.prototype, 'render');
 
-		let inst = React.render(<C />, scratch);
+		React.render(<C />, scratch);
 		expect(spy).to.have.been.calledOnce;
 		spy.resetHistory();
 
-		inst = React.render(<C />, scratch);
+		React.render(<C />, scratch);
 		expect(spy).not.to.have.been.called;
 
 		let b = { foo: 'bar' };
-		inst = React.render(<C a="a" b={b} />, scratch);
+		React.render(<C a="a" b={b} />, scratch);
 		expect(spy).to.have.been.calledOnce;
 		spy.resetHistory();
 
-		inst = React.render(<C a="a" b={b} />, scratch);
+		React.render(<C a="a" b={b} />, scratch);
 		expect(spy).not.to.have.been.called;
 
-		inst.setState({});
+		set({});
 		rerender();
 		expect(spy).not.to.have.been.called;
 
-		inst.setState({ a: 'a', b });
+		set({ a: 'a', b });
 		rerender();
 		expect(spy).to.have.been.calledOnce;
 		spy.resetHistory();
 
-		inst.setState({ a: 'a', b });
+		set({ a: 'a', b });
 		rerender();
 		expect(spy).not.to.have.been.called;
 	});
