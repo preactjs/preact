@@ -84,7 +84,7 @@ export function getOwnerStack(vnode) {
 	return stack.reduce((acc, owner) => {
 		acc += `  in ${getDisplayName(owner)}`;
 
-		const source = owner.__source;
+		const source = owner._node.__source;
 		if (source) {
 			acc += ` (at ${source.fileName}:${source.lineNumber})`;
 		} else if (!hasBabelPlugin) {
