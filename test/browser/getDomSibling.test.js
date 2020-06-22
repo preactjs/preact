@@ -132,7 +132,8 @@ describe('getDomSibling', () => {
 		);
 
 		let divAVNode = getRoot(scratch)._children[0]._children[0]._children[0]
-			._children[0];
+			._children[0]._children[0];
+
 		expect(divAVNode.type).to.equal('div');
 		expect(getDomSibling(divAVNode)).to.equalNode(
 			scratch.firstChild.childNodes[1]
@@ -185,7 +186,8 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		let foo = getRoot(scratch)._children[0]._children[0]._children[0];
+		let foo = getRoot(scratch)._children[0]._children[0]._children[0]
+			._children[0];
 		expect(foo.type).to.equal(Foo);
 		expect(getDomSibling(foo)).to.equalNode(scratch.firstChild.childNodes[1]);
 	});
