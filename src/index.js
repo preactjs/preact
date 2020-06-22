@@ -4,7 +4,8 @@ export {
 	createElement as h,
 	Fragment,
 	createRef,
-	isValidElement
+	isValidElement,
+	createBackingNode as c
 } from './create-element';
 export { Component } from './component';
 export { cloneElement } from './clone-element';

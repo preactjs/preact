@@ -26,7 +26,7 @@ function Portal(props) {
 	// indicate a new mount.
 	if (_this._container && _this._container !== container) {
 		if (_this._temp.parentNode) _this._container.removeChild(_this._temp);
-		_unmount(_this._wrap);
+		_unmount(_this._children);
 		_this._hasMounted = false;
 	}
 
@@ -62,14 +62,14 @@ function Portal(props) {
 	// portal we should clear the DOM.
 	else if (_this._hasMounted) {
 		if (_this._temp.parentNode) _this._container.removeChild(_this._temp);
-		_unmount(_this._wrap);
+		// TODO: we need the backing node
+		_unmount(_this._children);
 	}
-	// Set the wrapping element for future unmounting.
-	_this._wrap = wrap;
 
 	_this.componentWillUnmount = () => {
 		if (_this._temp.parentNode) _this._container.removeChild(_this._temp);
-		_unmount(_this._wrap);
+		// TODO: we need the backing node
+		_unmount(_this._children);
 	};
 
 	return null;
