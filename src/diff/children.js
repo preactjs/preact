@@ -78,11 +78,6 @@ export function diffChildren(
 				createVNode(Fragment, { children: childVNode }),
 				null
 			);
-		} else if (childVNode._dom != null || childVNode._component != null) {
-			childVNode = newParentVNode._children[i] = createBackingNode(
-				createVNode(childVNode.type, childVNode.props),
-				childVNode._original
-			);
 		} else if (typeof childVNode !== 'function') {
 			childVNode = newParentVNode._children[i] = createBackingNode(
 				childVNode,

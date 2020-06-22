@@ -11,7 +11,6 @@ import { assign } from './util';
  */
 export function createElement(type, props, children) {
 	let i;
-
 	props = assign({}, props);
 
 	if (arguments.length > 3) {
@@ -102,8 +101,11 @@ export function createBackingNode(vnode, original) {
 
 	if (original == null) backingNode._original = vnode;
 
-	if (vnode.props) {
+	if (vnode.props && vnode.props.ref) {
 		delete vnode.props.ref;
+	}
+
+	if (vnode.props && vnode.props.key) {
 		delete vnode.props.key;
 	}
 
