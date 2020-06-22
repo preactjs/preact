@@ -35,6 +35,7 @@ export function render(vnode, parent, callback) {
 	preactRender(vnode, parent);
 	if (typeof callback == 'function') callback();
 
+	// TODO: this is wrong
 	return vnode ? parent._children._component : null;
 }
 

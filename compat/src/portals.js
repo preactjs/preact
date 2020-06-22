@@ -62,13 +62,11 @@ function Portal(props) {
 	// portal we should clear the DOM.
 	else if (_this._hasMounted) {
 		if (_this._temp.parentNode) _this._container.removeChild(_this._temp);
-		// TODO: we need the backing node
 		_unmount(_this._children);
 	}
 
 	_this.componentWillUnmount = () => {
 		if (_this._temp.parentNode) _this._container.removeChild(_this._temp);
-		// TODO: we need the backing node
 		_unmount(_this._children);
 	};
 
