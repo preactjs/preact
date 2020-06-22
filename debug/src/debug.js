@@ -390,7 +390,12 @@ Component.prototype.forceUpdate = function(callback) {
  * @returns {string}
  */
 export function serializeVNode(vnode) {
-	let { props } = vnode._node || { props: {} };
+	let props;
+	if (vnode._node) {
+		props = vnode._node.props || {};
+	} else {
+		props = vnode.props || {};
+	}
 	let name = getDisplayName(vnode);
 
 	let attrs = '';
