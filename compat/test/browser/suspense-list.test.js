@@ -519,8 +519,7 @@ describe('suspense-list', () => {
 		expect(scratch.innerHTML).to.eql(`<div></div><span>A</span>`);
 	});
 
-	// TODO: temp
-	it.skip('should work with together even when a <Suspense> child does not suspend', async () => {
+	it('should work with together even when a <Suspense> child does not suspend', async () => {
 		const Component = getSuspendableComponent('A');
 
 		render(
@@ -543,8 +542,7 @@ describe('suspense-list', () => {
 		expect(scratch.innerHTML).to.eql(`<div></div><span>A</span>`);
 	});
 
-	// TODO: temp
-	it.skip('should not suspend resolved children if a new suspense comes in between', async () => {
+	it('should not suspend resolved children if a new suspense comes in between', async () => {
 		const ComponentA = getSuspendableComponent('A');
 		const ComponentB = getSuspendableComponent('B');
 
