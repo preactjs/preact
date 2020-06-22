@@ -40,7 +40,7 @@ function getSuspendableComponent(text) {
 }
 
 // TODO: weird issue
-describe.skip('suspense-list', () => {
+describe('suspense-list', () => {
 	/** @type {HTMLDivElement} */
 	let scratch,
 		rerender,

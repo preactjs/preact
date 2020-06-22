@@ -23,7 +23,7 @@ const resolve = (list, child, node) => {
 		// mark the child as completely resolved by deleting it from ._map.
 		// This is used to figure out when *all* children have been completely
 		// resolved when revealOrder is 'together'.
-		list._map.delete(child);
+		list._map.delete(child._node);
 	}
 
 	// If revealOrder is falsy then we can do an early exit, as the
@@ -60,7 +60,7 @@ SuspenseList.prototype = new Component();
 SuspenseList.prototype._suspended = function(child) {
 	const list = this;
 	const delegated = suspended(list._vnode);
-	let node = list._map.get(child);
+	let node = list._map.get(child._node);
 	node[SUSPENDED_COUNT]++;
 
 	return unsuspend => {
@@ -119,8 +119,7 @@ SuspenseList.prototype.componentDidUpdate = SuspenseList.prototype.componentDidM
 	//    The nodes can now be completely consumed from the linked list.
 	// 2. Handle nodes that might have gotten resolved between render and
 	//    componentDidMount.
-	const list = this;
-	list._map.forEach((node, child) => {
-		resolve(list, child, node);
+	this._map.forEach((node, child) => {
+		resolve(this, child, node);
 	});
 };
