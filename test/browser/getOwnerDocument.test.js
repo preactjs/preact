@@ -28,9 +28,13 @@ describe('parentDom.ownerDocument', () => {
 
 		iframeDoc.close();
 
+		let spy = sinon.spy(iframeDoc, 'createTextNode');
+
 		let iframeRootNode = iframeDoc.querySelector('div');
 
 		render('Hello', iframeRootNode);
+
+		expect(spy).to.be.called;
 
 		expect(iframeRootNode.textContent).to.be.equal('Hello');
 		expect(iframeRootNode.firstChild.ownerDocument).to.be.equal(iframeDoc);
