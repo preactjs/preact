@@ -7,7 +7,7 @@
   "main": "dist/preact.js",
   "module": "dist/preact.module.js",
   "umd:main": "dist/preact.umd.js",
-  "unpkg": "dist/preact.umd.js",
+  "unpkg": "dist/preact.min.js",
   "source": "src/index.js",
   "exports": {
     ".": {
@@ -62,6 +62,7 @@
     "prepare": "run-s build",
     "build": "npm-run-all --parallel build:*",
     "build:core": "microbundle build --raw",
+    "build:core-min": "microbundle build --raw -f iife src/cjs.js -o dist/preact.min.js",
     "build:debug": "microbundle build --raw --cwd debug",
     "build:devtools": "microbundle build --raw --cwd devtools",
     "build:hooks": "microbundle build --raw --cwd hooks",
