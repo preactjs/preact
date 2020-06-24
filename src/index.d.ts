@@ -15,7 +15,7 @@ declare namespace preact {
 		props: P & { children: ComponentChildren };
 		key: Key;
 		/**
-		 * ref is not guaranteed by React.ReactElement, for compatiblity reasons
+		 * ref is not guaranteed by React.ReactElement, for compatibility reasons
 		 * with popular react libs we define it as optional too
 		 */
 		ref?: Ref<any> | null;
