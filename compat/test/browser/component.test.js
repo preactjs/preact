@@ -216,5 +216,28 @@ describe('components', () => {
 				inst.UNSAFE_componentWillUpdate
 			);
 		});
+
+		it('should call UNSAFE_* methods through Suspense with wrapper component #2525', () => {
+			class Page extends React.Component {
+				UNSAFE_componentWillMount() {}
+				render() {
+					return <h1>Example</h1>;
+				}
+			}
+
+			const Wrapper = () => <Page />;
+
+			sinon.spy(Page.prototype, 'UNSAFE_componentWillMount');
+
+			React.render(
+				<React.Suspense fallback={<div>fallback</div>}>
+					<Wrapper />
+				</React.Suspense>,
+				scratch
+			);
+
+			expect(scratch.innerHTML).to.equal('<h1>Example</h1>');
+			expect(Page.prototype.UNSAFE_componentWillMount).to.have.been.called;
+		});
 	});
 });
