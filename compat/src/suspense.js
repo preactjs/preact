@@ -1,4 +1,4 @@
-import { Component, createElement, options } from 'preact';
+import { Component, createElement, options, Fragment } from 'preact';
 import { assign } from './util';
 
 const oldCatchError = options._catchError;
@@ -103,7 +103,7 @@ Suspense.prototype.render = function(props, state) {
 	}
 
 	return [
-		createElement(Component, null, state._suspended ? null : props.children),
+		createElement(Fragment, null, state._suspended ? null : props.children),
 		state._suspended && props.fallback
 	];
 };
