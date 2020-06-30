@@ -99,13 +99,32 @@ describe('compat render', () => {
 	});
 
 	it('should support defaultValue', () => {
+		// React's default value behavior: https://codesandbox.io/s/react-defaultvalue-06po5
 		render(<input defaultValue="foo" />, scratch);
 		expect(scratch.firstElementChild).to.have.property('value', 'foo');
 	});
 
-	it('should ignore defaultValue when value is 0', () => {
-		render(<input defaultValue={2} value={0} />, scratch);
+	// React emits a warning when defaultValue and value are specified, but we
+	// make a best effort attempt to match their behavior
+
+	it('should ignore defaultValue when value is specified (empty string)', () => {
+		render(<input defaultValue="foo-empty-string" value="" />, scratch);
+		expect(scratch.firstElementChild.value).to.equal('');
+	});
+
+	it('should ignore defaultValue when value is specified (0)', () => {
+		render(<input defaultValue="foo-0" value={0} />, scratch);
 		expect(scratch.firstElementChild.value).to.equal('0');
+	});
+
+	it('should ignore defaultValue when value is specified (false)', () => {
+		render(<input defaultValue="foo-false" value={false} />, scratch);
+		expect(scratch.firstElementChild.value).to.equal('false');
+	});
+
+	it('should ignore defaultValue when value is specified (string)', () => {
+		render(<input defaultValue="foo-string" value="bar" />, scratch);
+		expect(scratch.firstElementChild.value).to.equal('bar');
 	});
 
 	it('should keep value of uncontrolled inputs using defaultValue', () => {
@@ -113,7 +132,14 @@ describe('compat render', () => {
 
 		const spy = sinon.spy();
 
+		/** @type {Component} */
+		let ref;
 		class Input extends Component {
+			constructor(props) {
+				super(props);
+				ref = this;
+			}
+
 			render() {
 				return (
 					<input
@@ -130,10 +156,18 @@ describe('compat render', () => {
 
 		render(<Input />, scratch);
 		expect(scratch.firstChild.value).to.equal('bar');
+
+		// Rerenders without value change should maintain the default value
+		ref.forceUpdate();
+		rerender();
+		expect(scratch.firstChild.value).to.equal('bar');
+
+		// Simulate user typing into form
 		scratch.firstChild.focus();
 		scratch.firstChild.value = 'foo';
-
 		scratch.firstChild.dispatchEvent(createEvent('input'));
+
+		// Re-renders should not overwrite user provided value with defaultValue
 		rerender();
 		expect(scratch.firstChild.value).to.equal('foo');
 		expect(spy).to.be.calledOnce;

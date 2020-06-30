@@ -112,14 +112,6 @@ options.vnode = vnode => {
 
 		// Apply DOM VNode compat
 		if (typeof type != 'function') {
-			// Apply defaultValue to value
-			if (props.defaultValue && props.value !== undefined) {
-				if (!props.value && props.value !== 0) {
-					props.value = props.defaultValue;
-				}
-				delete props.defaultValue;
-			}
-
 			// Add support for array select values: <select value={[]} />
 			if (Array.isArray(props.value) && props.multiple && type === 'select') {
 				toChildArray(props.children).forEach(child => {
@@ -133,6 +125,7 @@ options.vnode = vnode => {
 			// Normalize textarea by setting children to value
 			if (props.value != null && type === 'textarea') {
 				props.children = props.value;
+				delete props.defaultValue;
 				delete props.value;
 			}
 
