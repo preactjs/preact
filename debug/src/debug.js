@@ -96,7 +96,8 @@ export function initDebug() {
 
 	options._diff = vnode => {
 		let { type, _parent: parent } = vnode;
-		let parentVNode = getClosestDomNodeParent(parent);
+		const parentType = getClosestDomNodeParent(parent).type;
+		const isVNodeCompatInstalled = '$$typeof' in vnode;
 
 		if (type === undefined) {
 			throw new Error(
@@ -125,7 +126,7 @@ export function initDebug() {
 
 		if (
 			(type === 'thead' || type === 'tfoot' || type === 'tbody') &&
-			parentVNode.type !== 'table'
+			parentType !== 'table'
 		) {
 			console.error(
 				'Improper nesting of table. Your <thead/tbody/tfoot> should have a <table> parent.' +
@@ -134,23 +135,23 @@ export function initDebug() {
 			);
 		} else if (
 			type === 'tr' &&
-			parentVNode.type !== 'thead' &&
-			parentVNode.type !== 'tfoot' &&
-			parentVNode.type !== 'tbody' &&
-			parentVNode.type !== 'table'
+			parentType !== 'thead' &&
+			parentType !== 'tfoot' &&
+			parentType !== 'tbody' &&
+			parentType !== 'table'
 		) {
 			console.error(
 				'Improper nesting of table. Your <tr> should have a <thead/tbody/tfoot/table> parent.' +
 					serializeVNode(vnode) +
 					`\n\n${getOwnerStack(vnode)}`
 			);
-		} else if (type === 'td' && parentVNode.type !== 'tr') {
+		} else if (type === 'td' && parentType !== 'tr') {
 			console.error(
 				'Improper nesting of table. Your <td> should have a <tr> parent.' +
 					serializeVNode(vnode) +
 					`\n\n${getOwnerStack(vnode)}`
 			);
-		} else if (type === 'th' && parentVNode.type !== 'tr') {
+		} else if (type === 'th' && parentType !== 'tr') {
 			console.error(
 				'Improper nesting of table. Your <th> should have a <tr>.' +
 					serializeVNode(vnode) +
@@ -162,7 +163,7 @@ export function initDebug() {
 			vnode.ref !== undefined &&
 			typeof vnode.ref != 'function' &&
 			typeof vnode.ref != 'object' &&
-			!('$$typeof' in vnode) // allow string refs when preact-compat is installed
+			!isVNodeCompatInstalled // allow string refs when preact-compat is installed
 		) {
 			throw new Error(
 				`Component's "ref" property should be a function, or an object created ` +
@@ -172,7 +173,7 @@ export function initDebug() {
 			);
 		}
 
-		if (typeof vnode.type == 'string') {
+		if (typeof type == 'string') {
 			for (const key in vnode.props) {
 				if (
 					key[0] === 'o' &&
@@ -191,17 +192,17 @@ export function initDebug() {
 		}
 
 		// Check prop-types if available
-		if (typeof vnode.type == 'function' && vnode.type.propTypes) {
+		if (typeof type == 'function' && type.propTypes) {
 			if (
-				vnode.type.displayName === 'Lazy' &&
+				type.displayName === 'Lazy' &&
 				warnedComponents &&
-				!warnedComponents.lazyPropTypes.has(vnode.type)
+				!warnedComponents.lazyPropTypes.has(type)
 			) {
 				const m =
 					'PropTypes are not supported on lazy(). Use propTypes on the wrapped component itself. ';
 				try {
-					const lazyVNode = vnode.type();
-					warnedComponents.lazyPropTypes.set(vnode.type, true);
+					const lazyVNode = type();
+					warnedComponents.lazyPropTypes.set(type, true);
 					console.warn(
 						m + `Component wrapped in lazy() is ${getDisplayName(lazyVNode)}`
 					);
@@ -212,7 +213,7 @@ export function initDebug() {
 				}
 			}
 			checkPropTypes(
-				vnode.type.propTypes,
+				type.propTypes,
 				vnode.props,
 				'prop',
 				getDisplayName(vnode)
