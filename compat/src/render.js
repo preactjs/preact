@@ -123,8 +123,13 @@ options.vnode = vnode => {
 			}
 
 			// Normalize textarea by setting children to value
-			if (props.value != null && type === 'textarea') {
-				props.children = props.value;
+			if (type === 'textarea') {
+				if (props.value != null) {
+					props.children = props.value;
+				} else if (props.defaultValue != null) {
+					props.children = props.defaultValue; // IE 11 fix
+				}
+
 				delete props.defaultValue;
 				delete props.value;
 			}
