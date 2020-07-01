@@ -189,6 +189,18 @@ export function initDebug() {
 					);
 				}
 			}
+
+			if (isVNodeCompatInstalled && type == 'input') {
+				if ('value' in vnode.props && 'defaultValue' in vnode.props) {
+					console.warn(
+						`An input of type "${vnode.props.type}" includes both "value" and ` +
+							`"defaultValue" props. Input elements should either specify a ` +
+							`value prop or a defaultValue prop.\n` +
+							serializeVNode(vnode) +
+							`\n\n${getOwnerStack(vnode)}`
+					);
+				}
+			}
 		}
 
 		// Check prop-types if available
