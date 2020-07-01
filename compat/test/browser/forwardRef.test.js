@@ -444,4 +444,16 @@ describe('forwardRef', () => {
 		render(<App />, scratch);
 		expect(actual).to.equal(null);
 	});
+
+	// Issue #2599
+	it('should not crash when explicitly passing null', () => {
+		let actual;
+		const App = forwardRef((_, ref) => {
+			actual = ref;
+			return <div />;
+		});
+
+		render(<App ref={null} />, scratch);
+		expect(actual).to.equal(null);
+	});
 });
