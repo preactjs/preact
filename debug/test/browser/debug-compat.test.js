@@ -1,18 +1,12 @@
-import { createElement, render, lazy, Suspense } from 'preact/compat';
+import { createElement, render } from 'preact/compat';
 import 'preact/debug';
-import { setupRerender } from 'preact/test-utils';
-import {
-	setupScratch,
-	teardown,
-	serializeHtml
-} from '../../../test/_util/helpers';
+import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 /** @jsx createElement */
 
 describe('debug with suspense', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
-	let rerender;
 	let errors = [];
 	let warnings = [];
 
@@ -20,7 +14,6 @@ describe('debug with suspense', () => {
 		errors = [];
 		warnings = [];
 		scratch = setupScratch();
-		rerender = setupRerender();
 		sinon.stub(console, 'error').callsFake(e => errors.push(e));
 		sinon.stub(console, 'warn').callsFake(w => warnings.push(w));
 	});
