@@ -31,4 +31,24 @@ describe('Select', () => {
 		});
 		expect(scratch.firstChild.value).to.equal('B');
 	});
+
+	it('should work with multiple selected defaultValues (array of values)', () => {
+		function App() {
+			return (
+				<select multiple defaultValue={['B', 'C']}>
+					<option value="A">A</option>
+					<option value="B">B</option>
+					<option value="C">C</option>
+				</select>
+			);
+		}
+
+		render(<App />, scratch);
+		Array.prototype.slice.call(scratch.firstChild.childNodes).forEach(node => {
+			if (node.value === 'B' || node.value === 'C') {
+				expect(node.selected).to.equal(true);
+			}
+		});
+		expect(scratch.firstChild.value).to.equal('B');
+	});
 });

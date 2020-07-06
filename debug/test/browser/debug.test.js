@@ -271,6 +271,12 @@ describe('debug', () => {
 		expect(console.error).to.not.be.called;
 	});
 
+	it('should not warn on input with value and defaultValue', () => {
+		// Only when using preact/compat should this warn
+		render(<input value="a" defaultValue="b" />, scratch);
+		expect(console.warn).to.not.be.called;
+	});
+
 	describe('duplicate keys', () => {
 		const List = props => <ul>{props.children}</ul>;
 		const ListItem = props => <li>{props.children}</li>;
