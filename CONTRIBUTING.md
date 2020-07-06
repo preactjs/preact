@@ -78,7 +78,7 @@ We merge every PR into the `master` branch which is the one that we'll use to pu
 
 ## Creating your first Pull-Request
 
-We try to make it as easy as possible to contribute to Preact and make heavy use of GitHub's "Draft PR" feature which tags Pull-Requests (short = PR) as work in progress. PRs tend to be published as soon as there is an idea that the developer deems worthwile to include into Preact and has written some rough code. The PR doesn't have to be perfect or anything really ;)
+We try to make it as easy as possible to contribute to Preact and make heavy use of GitHub's "Draft PR" feature which tags Pull-Requests (short = PR) as work in progress. PRs tend to be published as soon as there is an idea that the developer deems worthwhile to include into Preact and has written some rough code. The PR doesn't have to be perfect or anything really ;)
 
 Once a PR or a Draft PR has been created our community typically joins the discussion about the proposed change. Sometimes that includes ideas for test cases or even different ways to go about implementing a feature. Often this also includes ideas on how to make the code smaller. We usually refer to the latter as "code-golfing" or just "golfing".
 
