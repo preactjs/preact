@@ -453,7 +453,8 @@ describe('forwardRef', () => {
 			return <div />;
 		});
 
-		render(<App ref={null} />, scratch);
+		// eslint-disable-next-line new-cap
+		render(App({}, null), scratch);
 		expect(actual).to.equal(null);
 	});
 });
