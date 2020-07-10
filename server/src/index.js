@@ -196,6 +196,10 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 			if (name==='dangerouslySetInnerHTML') {
 				html = v && v.__html;
 			}
+			else if (nodeName === 'textarea' && name === 'value') {
+				// <textarea value="a&b"> --> <textarea>a&amp;b</textarea>
+				propChildren = v;
+			}
 			else if ((v || v===0 || v==='') && typeof v!=='function') {
 				if (v===true || v==='') {
 					v = name;
@@ -207,12 +211,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				}
 
 				if (name==='value') {
-					if (nodeName==='textarea') {
-						// <textarea value="a&b"> --> <textarea>a&amp;b</textarea>
-						propChildren = v;
-						continue;
-					}
-					else if (nodeName==='select') {
+					if (nodeName==='select') {
 						selectValue = v;
 						continue;
 					}
@@ -248,7 +247,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 		}
 		s += html;
 	}
-	else if (propChildren && getChildren(children = [], propChildren).length) {
+	else if (props && getChildren(children = [], propChildren).length) {
 		let hasLarge = pretty && ~s.indexOf('\n');
 		let lastWasText = false;
 
