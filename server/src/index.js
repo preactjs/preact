@@ -145,9 +145,11 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 	}
 
 	// render JSX to HTML
-	let s = '', html;
+	let s = '', propChildren, html;
 
 	if (props) {
+		propChildren = props.children;
+
 		let attrs = Object.keys(props);
 
 		// allow sorting lexicographically for more determinism (useful for tests, such as via preact-jsx-chai)
@@ -205,7 +207,12 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				}
 
 				if (name==='value') {
-					if (nodeName==='select') {
+					if (nodeName==='textarea') {
+						// <textarea value="a&b"> --> <textarea>a&amp;b</textarea>
+						propChildren = v;
+						continue;
+					}
+					else if (nodeName==='select') {
 						selectValue = v;
 						continue;
 					}
@@ -241,7 +248,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 		}
 		s += html;
 	}
-	else if (props && getChildren(children = [], props.children).length) {
+	else if (propChildren && getChildren(children = [], propChildren).length) {
 		let hasLarge = pretty && ~s.indexOf('\n');
 		let lastWasText = false;
 
