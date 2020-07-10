@@ -39,8 +39,10 @@ describe('Textarea', () => {
 		act(() => {
 			set('hello');
 		});
-		// Note: this looks super counterintuitive. The value is not present because
-		// innerHTML doesn't serialize form field values. See https://jsfiddle.net/4had2Lu8
+		// Note: This looks counterintuitive, but it's working correctly - the value
+		// missing from HTML because innerHTML doesn't serialize form field values.
+		// See demo: https://jsfiddle.net/4had2Lu8
+		// Related renderToString PR: preactjs/preact-render-to-string#161
 		expect(scratch.innerHTML).to.equal('<textarea></textarea>');
 		expect(scratch.firstElementChild.value).to.equal('hello');
 
