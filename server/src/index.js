@@ -248,7 +248,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 		}
 		s += html;
 	}
-	else if (props && getChildren(children = [], propChildren).length) {
+	else if (propChildren != null && getChildren(children = [], propChildren).length) {
 		let hasLarge = pretty && ~s.indexOf('\n');
 		let lastWasText = false;
 
