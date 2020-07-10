@@ -39,6 +39,7 @@ describe('Textarea', () => {
 		act(() => {
 			set('hello');
 		});
+		expect(scratch.firstElementChild.value).to.equal('hello');
 		expect(scratch.innerHTML).to.equal('<textarea>hello</textarea>');
 
 		act(() => {
