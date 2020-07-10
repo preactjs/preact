@@ -148,8 +148,6 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 	let s = '', propChildren, html;
 
 	if (props) {
-		propChildren = props.children;
-
 		let attrs = Object.keys(props);
 
 		// allow sorting lexicographically for more determinism (useful for tests, such as via preact-jsx-chai)
@@ -158,7 +156,10 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 		for (let i=0; i<attrs.length; i++) {
 			let name = attrs[i],
 				v = props[name];
-			if (name==='children') continue;
+			if (name==='children') {
+				propChildren = v;
+				continue;
+			}
 
 			if (name.match(/[\s\n\\/='"\0<>]/)) continue;
 
