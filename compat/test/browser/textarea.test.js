@@ -16,13 +16,13 @@ describe('Textarea', () => {
 	it('should alias value to children', () => {
 		render(<textarea value="foo" />, scratch);
 
-		expect(scratch.innerHTML).to.equal('<textarea>foo</textarea>');
+		expect(scratch.firstElementChild.value).to.equal('foo');
 	});
 
 	it('should alias defaultValue to children', () => {
 		render(<textarea defaultValue="foo" />, scratch);
 
-		expect(scratch.innerHTML).to.equal('<textarea>foo</textarea>');
+		expect(scratch.firstElementChild.value).to.equal('foo');
 	});
 
 	it('should support resetting the value', () => {
@@ -39,12 +39,15 @@ describe('Textarea', () => {
 		act(() => {
 			set('hello');
 		});
+		// Note: this looks super counterintuitive. The value is not present because
+		// innerHTML doesn't serialize form field values. See https://jsfiddle.net/4had2Lu8
+		expect(scratch.innerHTML).to.equal('<textarea></textarea>');
 		expect(scratch.firstElementChild.value).to.equal('hello');
-		expect(scratch.innerHTML).to.equal('<textarea>hello</textarea>');
 
 		act(() => {
 			set('');
 		});
 		expect(scratch.innerHTML).to.equal('<textarea></textarea>');
+		expect(scratch.firstElementChild.value).to.equal('');
 	});
 });
