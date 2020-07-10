@@ -133,7 +133,7 @@ options.vnode = vnode => {
 			// Normalize textarea by setting children to value
 			if (props.value != null && type === 'textarea') {
 				props.children = props.value;
-				delete props.value;
+				// delete props.value;
 			}
 
 			// Normalize DOM vnode properties.
