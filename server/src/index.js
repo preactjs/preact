@@ -145,7 +145,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 	}
 
 	// render JSX to HTML
-	let s = '', html;
+	let s = '', propChildren, html;
 
 	if (props) {
 		let attrs = Object.keys(props);
@@ -156,7 +156,10 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 		for (let i=0; i<attrs.length; i++) {
 			let name = attrs[i],
 				v = props[name];
-			if (name==='children') continue;
+			if (name==='children') {
+				propChildren = v;
+				continue;
+			}
 
 			if (name.match(/[\s\n\\/='"\0<>]/)) continue;
 
@@ -193,6 +196,10 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 
 			if (name==='dangerouslySetInnerHTML') {
 				html = v && v.__html;
+			}
+			else if (nodeName === 'textarea' && name === 'value') {
+				// <textarea value="a&b"> --> <textarea>a&amp;b</textarea>
+				propChildren = v;
 			}
 			else if ((v || v===0 || v==='') && typeof v!=='function') {
 				if (v===true || v==='') {
@@ -241,7 +248,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 		}
 		s += html;
 	}
-	else if (props && getChildren(children = [], props.children).length) {
+	else if (propChildren != null && getChildren(children = [], propChildren).length) {
 		let hasLarge = pretty && ~s.indexOf('\n');
 		let lastWasText = false;
 

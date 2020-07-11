@@ -124,6 +124,27 @@ describe('render', () => {
 			expect(rendered).to.equal(expected);
 		});
 
+		it('should serialize textarea value', () => {
+			let rendered = render(<textarea value="abc" />),
+				expected = `<textarea>abc</textarea>`;
+
+			expect(rendered).to.equal(expected);
+		});
+
+		it('should escape textarea value', () => {
+			let rendered = render(<textarea value={`a&b"c`} />),
+				expected = `<textarea>a&amp;b&quot;c</textarea>`;
+
+			expect(rendered).to.equal(expected);
+		});
+
+		it('should omit empty textarea value', () => {
+			let rendered = render(<textarea value="" />),
+				expected = `<textarea></textarea>`;
+
+			expect(rendered).to.equal(expected);
+		});
+
 		it('should omit falsey children', () => {
 			let rendered = render(<div>{null}|{undefined}|{false}</div>),
 				expected = `<div>||</div>`;
