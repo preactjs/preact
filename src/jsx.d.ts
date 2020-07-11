@@ -222,7 +222,7 @@ export namespace JSXInternal {
 		strokeDashoffset?: string | number;
 		strokeLinecap?: 'butt' | 'round' | 'square' | 'inherit';
 		strokeLinejoin?: 'miter' | 'round' | 'bevel' | 'inherit';
-		strokeMiterlimit?: string;
+		strokeMiterlimit?: string | number;
 		strokeOpacity?: number | string;
 		strokeWidth?: number | string;
 		surfaceScale?: number | string;
