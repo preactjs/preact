@@ -442,7 +442,6 @@ export namespace JSXInternal {
 		onFormData?: GenericEventHandler<Target>;
 		onFormDataCapture?: GenericEventHandler<Target>;
 
-
 		// Keyboard Events
 		onKeyDown?: KeyboardEventHandler<Target>;
 		onKeyDownCapture?: KeyboardEventHandler<Target>;
@@ -747,11 +746,11 @@ export namespace JSXInternal {
 		itemID?: string;
 		itemRef?: string;
 	}
-	
+
 	interface HTMLMarqueeElement extends HTMLElement {
-		behavior?: "scroll" | "slide" | "alternate";
+		behavior?: 'scroll' | 'slide' | 'alternate';
 		bgColor?: string;
-		direction?: "left" | "right" | "up" | "down";
+		direction?: 'left' | 'right' | 'up' | 'down';
 		height?: number | string;
 		hspace?: number | string;
 		loop?: number | string;
@@ -895,6 +894,7 @@ export namespace JSXInternal {
 		feConvolveMatrix: SVGAttributes<SVGFEConvolveMatrixElement>;
 		feDiffuseLighting: SVGAttributes<SVGFEDiffuseLightingElement>;
 		feDisplacementMap: SVGAttributes<SVGFEDisplacementMapElement>;
+		feDropShadow: SVGAttributes<SVGFEDropShadowElement>;
 		feFlood: SVGAttributes<SVGFEFloodElement>;
 		feGaussianBlur: SVGAttributes<SVGFEGaussianBlurElement>;
 		feImage: SVGAttributes<SVGFEImageElement>;
