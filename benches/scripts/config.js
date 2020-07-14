@@ -2,6 +2,7 @@ const path = require('path');
 const { writeFile, stat, mkdir } = require('fs').promises;
 const { repoRoot, benchesRoot, toUrl } = require('./paths');
 
+const IS_CI = process.env.CI === 'true';
 const TACH_SCHEMA =
 	'https://raw.githubusercontent.com/Polymer/tachometer/master/config.schema.json';
 
@@ -32,17 +33,8 @@ async function generateConfig(benchPath, options) {
 		config.horizons = options.horizon.split(',');
 	}
 
+	const headless = IS_CI;
 	config.benchmarks = [
-		{
-			name,
-			url,
-			packageVersions: {
-				label: 'preact-v8',
-				dependencies: {
-					preact: '^8.5.3'
-				}
-			}
-		},
 		{
 			name,
 			url,
@@ -51,6 +43,10 @@ async function generateConfig(benchPath, options) {
 				dependencies: {
 					preact: 'github:preactjs/preact#master'
 				}
+			},
+			browser: {
+				name: 'chrome',
+				headless
 			}
 		},
 		{
@@ -61,9 +57,31 @@ async function generateConfig(benchPath, options) {
 				dependencies: {
 					preact: 'file:' + repoRoot()
 				}
+			},
+			browser: {
+				name: 'chrome',
+				headless
 			}
 		}
 	];
+
+	// Only run preact-v8 locally so CI benches run faster
+	if (!IS_CI) {
+		config.benchmarks.unshift({
+			name,
+			url,
+			packageVersions: {
+				label: 'preact-v8',
+				dependencies: {
+					preact: '^8.5.3'
+				}
+			},
+			browser: {
+				name: 'chrome',
+				headless
+			}
+		});
+	}
 
 	const configPath = await writeConfig(name, config);
 

@@ -68,7 +68,7 @@ options.unmount = vnode => {
 	const c = vnode._component;
 	if (c && c.__hooks) {
 		try {
-			c.__hooks._list.forEach(hook => hook._cleanup && hook._cleanup());
+			c.__hooks._list.forEach(invokeCleanup);
 		} catch (e) {
 			options._catchError(e, c._vnode);
 		}
@@ -132,7 +132,7 @@ export function useReducer(reducer, initialState, init) {
 			action => {
 				const nextValue = hookState._reducer(hookState._value[0], action);
 				if (hookState._value[0] !== nextValue) {
-					hookState._value[0] = nextValue;
+					hookState._value = [nextValue, hookState._value[1]];
 					hookState._component.setState({});
 				}
 			}
@@ -288,6 +288,8 @@ function flushAfterPaintEffects() {
 	afterPaintEffects = [];
 }
 
+let HAS_RAF = typeof requestAnimationFrame == 'function';
+
 /**
  * Schedule a callback to be invoked after the browser has a chance to paint a new frame.
  * Do this by combining requestAnimationFrame (rAF) + setTimeout to invoke a callback after
@@ -301,13 +303,13 @@ function flushAfterPaintEffects() {
 function afterNextFrame(callback) {
 	const done = () => {
 		clearTimeout(timeout);
-		cancelAnimationFrame(raf);
+		if (HAS_RAF) cancelAnimationFrame(raf);
 		setTimeout(callback);
 	};
 	const timeout = setTimeout(done, RAF_TIMEOUT);
 
 	let raf;
-	if (typeof window != 'undefined') {
+	if (HAS_RAF) {
 		raf = requestAnimationFrame(done);
 	}
 }

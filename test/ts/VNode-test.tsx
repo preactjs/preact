@@ -10,7 +10,7 @@ import {
 	VNode,
 	ComponentChildren,
 	cloneElement
-} from '../../src';
+} from '../../';
 
 function getDisplayType(vnode: VNode | string | number) {
 	if (typeof vnode === 'string' || typeof vnode == 'number') {

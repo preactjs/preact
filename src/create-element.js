@@ -86,7 +86,7 @@ export function createVNode(type, props, key, ref, original) {
 }
 
 export function createRef() {
-	return {};
+	return { current: null };
 }
 
 export function Fragment(props) {

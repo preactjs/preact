@@ -30,19 +30,11 @@ module.exports = function(api) {
 		plugins: [
 			'@babel/plugin-proposal-object-rest-spread',
 			'@babel/plugin-transform-react-jsx',
-			'babel-plugin-transform-async-to-promises'
+			'babel-plugin-transform-async-to-promises',
+			['babel-plugin-transform-rename-properties', { rename }]
 		],
 		include: ['**/src/**/*.js', '**/test/**/*.js'],
 		overrides: [
-			{
-				test(filename) {
-					const isOptionsTestFile =
-						filename.endsWith('optionSpies.js') ||
-						filename.endsWith('.options.test.js');
-					return minify && isOptionsTestFile;
-				},
-				plugins: [['babel-plugin-transform-rename-properties', { rename }]]
-			},
 			{
 				test: /(component-stack|debug)\.test\.js$/,
 				plugins: ['@babel/plugin-transform-react-jsx-source']

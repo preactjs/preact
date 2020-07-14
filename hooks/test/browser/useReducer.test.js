@@ -1,7 +1,7 @@
-import { setupRerender } from 'preact/test-utils';
-import { createElement, render } from 'preact';
+import { setupRerender, act } from 'preact/test-utils';
+import { createElement, render, createContext } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useReducer } from 'preact/hooks';
+import { useReducer, useEffect, useContext } from 'preact/hooks';
 
 /** @jsx createElement */
 
@@ -171,5 +171,44 @@ describe('useReducer', () => {
 		rerender();
 
 		expect(states).to.deep.equal([{ count: 0 }, { count: 0 }, { count: 20 }]);
+	});
+
+	// Relates to #2549
+	it('should not mutate the hookState', () => {
+		const reducer = (state, action) => ({
+			...state,
+			innerMessage: action.payload
+		});
+
+		const ContextMessage = ({ context }) => {
+			const [{ innerMessage }, dispatch] = useContext(context);
+			useEffect(() => {
+				dispatch({ payload: 'message' });
+			}, []);
+
+			return innerMessage && <p>{innerMessage}</p>;
+		};
+
+		const Wrapper = ({ children }) => <div>{children}</div>;
+
+		const badContextDefault = {};
+		const BadContext = createContext({});
+
+		const Abstraction = ({ reducer, defaultState, children }) => (
+			<BadContext.Provider value={useReducer(reducer, defaultState)}>
+				<Wrapper>{children}</Wrapper>
+			</BadContext.Provider>
+		);
+
+		const App = () => (
+			<Abstraction reducer={reducer} defaultState={badContextDefault}>
+				<ContextMessage context={BadContext} />
+			</Abstraction>
+		);
+
+		act(() => {
+			render(<App />, scratch);
+		});
+		expect(scratch.innerHTML).to.equal('<div><p>message</p></div>');
 	});
 });

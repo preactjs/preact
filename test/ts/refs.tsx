@@ -6,7 +6,7 @@ import {
 	Fragment,
 	RefObject,
 	RefCallback
-} from '../../src';
+} from '../../';
 
 // Test Fixtures
 const Foo: FunctionalComponent = () => <span>Foo</span>;

@@ -1,4 +1,4 @@
-import { createElement, hydrate, render, _unmount } from 'preact';
+import { createElement, hydrate, render, __u as _unmount } from 'preact';
 
 class ContextProvider {
 	getChildContext() {

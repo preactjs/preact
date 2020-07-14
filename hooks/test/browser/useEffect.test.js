@@ -251,4 +251,19 @@ describe('useEffect', () => {
 			'<div><div><div>Inner</div></div></div><div><div>global</div></div>'
 		);
 	});
+
+	it('should not crash when effect returns truthy non-function value', () => {
+		const callback = sinon.spy(() => 'truthy');
+		function Comp() {
+			useEffect(callback);
+			return null;
+		}
+
+		render(<Comp />, scratch);
+		render(<Comp />, scratch);
+
+		expect(callback).to.have.been.calledOnce;
+
+		render(<div>Replacement</div>, scratch);
+	});
 });

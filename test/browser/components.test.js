@@ -2530,6 +2530,34 @@ describe('Components', () => {
 			expect(() => rerender()).to.not.throw();
 			expect(scratch.innerHTML).to.equal('');
 		});
+
+		it('setState callbacks should have latest state, even when called in render', () => {
+			let callbackState;
+			let i = 0;
+
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { foo: 'bar' };
+				}
+				render() {
+					// So we don't get infinite loop
+					if (i++ === 0) {
+						this.setState({ foo: 'baz' }, () => {
+							callbackState = this.state;
+						});
+					}
+					return String(this.state.foo);
+				}
+			}
+
+			render(<Foo />, scratch);
+			expect(scratch.innerHTML).to.equal('bar');
+
+			rerender();
+			expect(scratch.innerHTML).to.equal('baz');
+			expect(callbackState).to.deep.equal({ foo: 'baz' });
+		});
 	});
 
 	describe('forceUpdate', () => {
