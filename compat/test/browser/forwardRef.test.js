@@ -12,6 +12,7 @@ import React, {
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { setupRerender, act } from 'preact/test-utils';
+import { getSymbol } from './testUtils';
 
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 
@@ -31,6 +32,12 @@ describe('forwardRef', () => {
 	it('should have isReactComponent flag', () => {
 		let App = forwardRef((_, ref) => <div ref={ref}>foo</div>);
 		expect(App.prototype.isReactComponent).to.equal(true);
+	});
+
+	it('should have $$typeof property', () => {
+		let App = forwardRef((_, ref) => <div ref={ref}>foo</div>);
+		const expected = getSymbol('react.forward_ref', 0xf47);
+		expect(App.$$typeof).to.equal(expected);
 	});
 
 	it('should pass ref with createRef', () => {
@@ -424,5 +431,30 @@ describe('forwardRef', () => {
 		});
 
 		expect(ref.current.innerHTML).to.equal('Wrapper');
+	});
+
+	// Issue #2566
+	it('should pass null as ref when no ref is present', () => {
+		let actual;
+		const App = forwardRef((_, ref) => {
+			actual = ref;
+			return <div />;
+		});
+
+		render(<App />, scratch);
+		expect(actual).to.equal(null);
+	});
+
+	// Issue #2599
+	it('should not crash when explicitly passing null', () => {
+		let actual;
+		const App = forwardRef((_, ref) => {
+			actual = ref;
+			return <div />;
+		});
+
+		// eslint-disable-next-line new-cap
+		render(App({}, null), scratch);
+		expect(actual).to.equal(null);
 	});
 });

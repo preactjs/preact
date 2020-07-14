@@ -1,10 +1,39 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component } from '../component';
 import { Fragment } from '../create-element';
-import { diffChildren } from './children';
+import { diffChildren, placeChild } from './children';
 import { diffProps, setProperty } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
+
+function reorderChildren(newVNode, oldDom, parentDom) {
+	for (let tmp = 0; tmp < newVNode._children.length; tmp++) {
+		const vnode = newVNode._children[tmp];
+		if (vnode) {
+			vnode._parent = newVNode;
+
+			if (vnode._dom) {
+				if (typeof vnode.type == 'function' && vnode._children.length > 1) {
+					reorderChildren(vnode, oldDom, parentDom);
+				}
+
+				oldDom = placeChild(
+					parentDom,
+					vnode,
+					vnode,
+					newVNode._children,
+					null,
+					vnode._dom,
+					oldDom
+				);
+
+				if (typeof newVNode.type == 'function') {
+					newVNode._nextDom = oldDom;
+				}
+			}
+		}
+	}
+}
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -127,7 +156,7 @@ export function diff(
 							c._nextState,
 							componentContext
 						) === false) ||
-					(newVNode._original === oldVNode._original && !c._processingException)
+					newVNode._original === oldVNode._original
 				) {
 					c.props = newProps;
 					c.state = c._nextState;
@@ -140,12 +169,7 @@ export function diff(
 						commitQueue.push(c);
 					}
 
-					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
-						if (newVNode._children[tmp]) {
-							newVNode._children[tmp]._parent = newVNode;
-						}
-					}
-
+					reorderChildren(newVNode, oldDom, parentDom);
 					break outer;
 				}
 
@@ -171,13 +195,9 @@ export function diff(
 			c._parentDom = parentDom;
 
 			tmp = c.render(c.props, c.state, c.context);
-			let isTopLevelFragment =
-				tmp != null && tmp.type == Fragment && tmp.key == null;
-			newVNode._children = isTopLevelFragment
-				? tmp.props.children
-				: Array.isArray(tmp)
-				? tmp
-				: [tmp];
+
+			// Handle setState called in render, see #2553
+			c.state = c._nextState;
 
 			if (c.getChildContext != null) {
 				globalContext = assign(assign({}, globalContext), c.getChildContext());
@@ -187,8 +207,13 @@ export function diff(
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
+			let isTopLevelFragment =
+				tmp != null && tmp.type == Fragment && tmp.key == null;
+			let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
+
 			diffChildren(
 				parentDom,
+				Array.isArray(renderResult) ? renderResult : [renderResult],
 				newVNode,
 				oldVNode,
 				globalContext,
@@ -340,7 +365,9 @@ function diffElementNodes(
 		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
 		// @TODO we should warn in debug mode when props don't match here.
 		if (!isHydrating) {
-			if (oldProps === EMPTY_OBJ) {
+			// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
+			// we should read the existing DOM attributes to diff them
+			if (excessDomChildren != null) {
 				oldProps = {};
 				for (let i = 0; i < dom.attributes.length; i++) {
 					oldProps[dom.attributes[i].name] = dom.attributes[i].value;
@@ -361,9 +388,10 @@ function diffElementNodes(
 		if (newHtml) {
 			newVNode._children = [];
 		} else {
-			newVNode._children = newVNode.props.children;
+			i = newVNode.props.children;
 			diffChildren(
 				dom,
+				Array.isArray(i) ? i : [i],
 				newVNode,
 				oldVNode,
 				globalContext,

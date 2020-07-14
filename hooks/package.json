@@ -1,5 +1,5 @@
 {
-  "name": "hooks",
+  "name": "preact-hooks",
   "amdName": "preactHooks",
   "version": "0.1.0",
   "private": true,

@@ -3,7 +3,8 @@ import {
 	setupScratch,
 	teardown,
 	sortAttributes,
-	serializeHtml
+	serializeHtml,
+	spyOnElementAttributes
 } from '../_util/helpers';
 import { ul, li, div } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
@@ -11,7 +12,7 @@ import { logCall, clearLog, getLog } from '../_util/logCall';
 /** @jsx createElement */
 
 describe('hydrate()', () => {
-	let scratch;
+	let scratch, attributesSpy;
 
 	const List = ({ children }) => <ul>{children}</ul>;
 	const ListItem = ({ children }) => <li>{children}</li>;
@@ -27,6 +28,7 @@ describe('hydrate()', () => {
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		attributesSpy = spyOnElementAttributes();
 	});
 
 	afterEach(() => {
@@ -129,6 +131,7 @@ describe('hydrate()', () => {
 		clearLog();
 		hydrate(vnode, scratch);
 
+		expect(attributesSpy.get).to.not.have.been.called;
 		expect(serializeHtml(scratch)).to.equal(
 			sortAttributes(
 				'<div><span before-hydrate="test" different-value="a" same-value="foo">Test</span></div>'
@@ -250,6 +253,7 @@ describe('hydrate()', () => {
 		);
 
 		hydrate(preactElement, scratch);
+		expect(attributesSpy.get).to.not.have.been.called;
 		expect(scratch).to.have.property(
 			'innerHTML',
 			'<div><a foo="bar"></a></div>'

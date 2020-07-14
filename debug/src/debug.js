@@ -222,12 +222,12 @@ export function initDebug() {
 		if (oldBeforeDiff) oldBeforeDiff(vnode);
 	};
 
-	options._hook = comp => {
+	options._hook = (comp, index, type) => {
 		if (!comp) {
 			throw new Error('Hook can only be invoked from render methods.');
 		}
 
-		if (oldHook) oldHook(comp);
+		if (oldHook) oldHook(comp, index, type);
 	};
 
 	const warn = (property, err) => ({
@@ -262,7 +262,8 @@ export function initDebug() {
 				else newProps[i] = v;
 			}
 		}
-		Object.setPrototypeOf(vnode, deprecatedProto);
+		// eslint-disable-next-line
+		vnode.__proto__ = deprecatedProto;
 		if (oldVnode) oldVnode(vnode);
 	};
 

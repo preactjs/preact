@@ -222,7 +222,7 @@ export namespace JSXInternal {
 		strokeDashoffset?: string | number;
 		strokeLinecap?: 'butt' | 'round' | 'square' | 'inherit';
 		strokeLinejoin?: 'miter' | 'round' | 'bevel' | 'inherit';
-		strokeMiterlimit?: string;
+		strokeMiterlimit?: string | number;
 		strokeOpacity?: number | string;
 		strokeWidth?: number | string;
 		surfaceScale?: number | string;
@@ -441,7 +441,6 @@ export namespace JSXInternal {
 		onResetCapture?: GenericEventHandler<Target>;
 		onFormData?: GenericEventHandler<Target>;
 		onFormDataCapture?: GenericEventHandler<Target>;
-
 
 		// Keyboard Events
 		onKeyDown?: KeyboardEventHandler<Target>;
@@ -666,6 +665,7 @@ export namespace JSXInternal {
 		label?: string;
 		lang?: string;
 		list?: string;
+		loading?: 'eager' | 'lazy';
 		loop?: boolean;
 		low?: number;
 		manifest?: string;
@@ -746,11 +746,11 @@ export namespace JSXInternal {
 		itemID?: string;
 		itemRef?: string;
 	}
-	
+
 	interface HTMLMarqueeElement extends HTMLElement {
-		behavior?: "scroll" | "slide" | "alternate";
+		behavior?: 'scroll' | 'slide' | 'alternate';
 		bgColor?: string;
-		direction?: "left" | "right" | "up" | "down";
+		direction?: 'left' | 'right' | 'up' | 'down';
 		height?: number | string;
 		hspace?: number | string;
 		loop?: number | string;
@@ -894,6 +894,7 @@ export namespace JSXInternal {
 		feConvolveMatrix: SVGAttributes<SVGFEConvolveMatrixElement>;
 		feDiffuseLighting: SVGAttributes<SVGFEDiffuseLightingElement>;
 		feDisplacementMap: SVGAttributes<SVGFEDisplacementMapElement>;
+		feDropShadow: SVGAttributes<SVGFEDropShadowElement>;
 		feFlood: SVGAttributes<SVGFEFloodElement>;
 		feGaussianBlur: SVGAttributes<SVGFEGaussianBlurElement>;
 		feImage: SVGAttributes<SVGFEImageElement>;
