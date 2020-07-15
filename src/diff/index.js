@@ -191,7 +191,7 @@ export function diff(
 			if ((tmp = options._render)) tmp(newVNode);
 
 			if (newType === Root) {
-				parentDom = newVNode.props._parentDom;
+				parentDom = newProps._parentDom;
 			}
 
 			c._dirty = false;
