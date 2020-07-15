@@ -6,6 +6,7 @@ import {
 	Component
 } from 'preact';
 import { applyEventNormalization } from './events';
+import { IS_NON_DIMENSIONAL } from './util';
 
 const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|fill|flood|font|glyph(?!R)|horiz|marker(?!H|W|U)|overline|paint|stop|strikethrough|stroke|text(?!L)|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
 
@@ -146,6 +147,15 @@ options.vnode = vnode => {
 				if (shouldSanitize)
 					vnode.props[i.replace(/[A-Z0-9]/, '-$&').toLowerCase()] = props[i];
 				if (shouldSanitize || props[i] === null) props[i] = undefined;
+			}
+
+			let style = props.style;
+			if (typeof style === 'object') {
+				for (i in style) {
+					if (typeof style[i] === 'number' && !IS_NON_DIMENSIONAL.test(i)) {
+						style[i] += 'px';
+					}
+				}
 			}
 		}
 
