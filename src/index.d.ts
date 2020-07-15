@@ -244,6 +244,7 @@ declare namespace preact {
 
 	// TODO: Revisit what the public type of this is...
 	const Fragment: ComponentClass<{}, {}>;
+	const Root: ComponentClass<{ _parentDom: HTMLElement }, {}>;
 
 	//
 	// Preact options

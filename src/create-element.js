@@ -93,6 +93,10 @@ export function Fragment(props) {
 	return props.children;
 }
 
+export function Root(props) {
+	return props.children;
+}
+
 /**
  * Check if a the argument is a valid Preact VNode.
  * @param {*} vnode
