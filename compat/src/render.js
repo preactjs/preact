@@ -1,5 +1,6 @@
 import {
 	render as preactRender,
+	createRoot,
 	hydrate as preactHydrate,
 	options,
 	toChildArray,
@@ -33,7 +34,8 @@ export function render(vnode, parent, callback) {
 		}
 	}
 
-	preactRender(vnode, parent);
+	const root = createRoot(parent);
+	root.render(vnode, parent);
 	if (typeof callback == 'function') callback();
 
 	return vnode ? vnode._component : null;
