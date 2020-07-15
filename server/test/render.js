@@ -57,6 +57,41 @@ describe('render', () => {
 			expect(render(<div foo={0} />)).to.equal(`<div foo="0"></div>`);
 		});
 
+		it('should omit key attribute', () => {
+			let rendered = render(<div key="test" />),
+				expected = `<div></div>`;
+
+			expect(rendered).to.equal(expected);
+		});
+
+		it('should omit ref attribute', () => {
+			let rendered = render(<div ref="test" />),
+				expected = `<div></div>`;
+
+			expect(rendered).to.equal(expected);
+		});
+
+		it('should omit __source attribute', () => {
+			let rendered = render(<div __source="test" />),
+				expected = `<div></div>`;
+
+			expect(rendered).to.equal(expected);
+		});
+
+		it('should omit __self attribute', () => {
+			let rendered = render(<div __self="test" />),
+				expected = `<div></div>`;
+
+			expect(rendered).to.equal(expected);
+		});
+
+		it('should omit defaultValue attribute', () => {
+			let rendered = render(<div defaultValue="test" />),
+				expected = `<div></div>`;
+
+			expect(rendered).to.equal(expected);
+		});
+
 		it('should include boolean aria-* attributes', () => {
 			let rendered = render(<div aria-hidden aria-whatever={false} />),
 				expected = `<div aria-hidden="true" aria-whatever="false"></div>`;
