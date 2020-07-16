@@ -98,7 +98,11 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 
 Suspense.prototype.render = function(props, state) {
 	if (this._detachOnNextRender) {
-		this._vnode._children[0] = detachedClone(this._detachOnNextRender);
+		// When the Suspense's _vnode was created by a call to createVNode
+		// (i.e. due to a setState further up in the tree)
+		// it's _children prop is null, in this case we "forget" about the parked vnodes to detach
+		if (this._vnode._children)
+			this._vnode._children[0] = detachedClone(this._detachOnNextRender);
 		this._detachOnNextRender = null;
 	}
 
