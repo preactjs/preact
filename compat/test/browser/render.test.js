@@ -304,4 +304,36 @@ describe('compat render', () => {
 		expect(mountSpy).to.be.calledOnce;
 		expect(updateSpy).to.not.be.calledOnce;
 	});
+
+	it('should append "px" to unitless inline css values', () => {
+		render(
+			<div
+				style={{
+					color: 'rgb(255, 255, 255)',
+					background: 'rgb(255, 100, 0)',
+					backgroundPosition: '10px 10px',
+					'background-size': 'cover',
+					gridRowStart: 1,
+					padding: 5,
+					top: 100,
+					left: '100%'
+				}}
+			/>,
+			scratch
+		);
+
+		let style = scratch.firstChild.style;
+		expect(style.color).to.equal('rgb(255, 255, 255)');
+		expect(style.background).to.contain('rgb(255, 100, 0)');
+		expect(style.backgroundPosition).to.equal('10px 10px');
+		expect(style.backgroundSize).to.equal('cover');
+		expect(style.padding).to.equal('5px');
+		expect(style.top).to.equal('100px');
+		expect(style.left).to.equal('100%');
+
+		// Only check for this in browsers that support css grids
+		if (typeof scratch.style.grid == 'string') {
+			expect(style.gridRowStart).to.equal('1');
+		}
+	});
 });
