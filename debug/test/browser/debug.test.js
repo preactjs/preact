@@ -271,6 +271,12 @@ describe('debug', () => {
 		expect(console.error).to.not.be.called;
 	});
 
+	it('should warn on invalid unitless inline CSS value', () => {
+		render(<div style={{ padding: 5 }} />, scratch);
+		expect(console.warn).to.be.calledOnce;
+		expect(console.warn.args[0][0]).to.match(/CSS value is missing a unit/);
+	});
+
 	describe('duplicate keys', () => {
 		const List = props => <ul>{props.children}</ul>;
 		const ListItem = props => <li>{props.children}</li>;
