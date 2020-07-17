@@ -197,7 +197,7 @@ declare namespace preact {
 	}
 
 	function h(
-		type: string,
+		type: string | ReactComponent,
 		props:
 			| (JSXInternal.HTMLAttributes &
 					JSXInternal.SVGAttributes &
