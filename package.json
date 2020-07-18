@@ -182,7 +182,7 @@
     "dom diff"
   ],
   "authors": [
-    "Jason Miller <jason@developit.ca>"
+    "The Preact Authors (https://github.com/preactjs/preact/contributors)"
   ],
   "repository": "preactjs/preact",
   "bugs": "https://github.com/preactjs/preact/issues",
