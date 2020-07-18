@@ -275,6 +275,13 @@ export function placeChild(
 		// The values only have the same type when `null`.
 
 		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
+			// console.log(
+			// 	'append',
+			// 	newDom,
+			// 	oldDom,
+			// 	oldDom && oldDom.parentNode,
+			// 	parentDom
+			// );
 			parentDom.appendChild(newDom);
 			nextDom = null;
 		} else {

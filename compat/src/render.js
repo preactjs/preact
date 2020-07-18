@@ -35,7 +35,7 @@ export function render(vnode, parent, callback) {
 	}
 
 	const root = createRoot(parent);
-	root.render(vnode, parent);
+	root.render(vnode);
 	if (typeof callback == 'function') callback();
 
 	return vnode ? vnode._component : null;

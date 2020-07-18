@@ -12,7 +12,7 @@ const IS_HYDRATE = EMPTY_OBJ;
 export function createRoot(parentDom) {
 	let oldRoot = null;
 	return {
-		render(vnode) {
+		render(vnode, replaceNode) {
 			if (options._root) options._root(vnode, parentDom);
 
 			// We abuse the `replaceNode` parameter in `hydrate()` to signal if we
@@ -26,7 +26,20 @@ export function createRoot(parentDom) {
 			// to the last rendered tree. By default this property is not present, which
 			// means that we are mounting a new tree for the first time.
 			let oldVNode = isHydrating ? null : oldRoot;
-			vnode = createElement(Root, { _parentDom: parentDom }, [vnode]);
+			vnode = createElement(Root, { _parentDom: parentDom }, vnode);
+
+			console.log(
+				'excess root',
+				parentDom,
+				replaceNode,
+				replaceNode && !isHydrating
+					? [replaceNode]
+					: oldVNode
+					? null
+					: parentDom.childNodes.length
+					? EMPTY_ARR.slice.call(parentDom.childNodes)
+					: null
+			);
 
 			// List of effects that need to be called after diffing.
 			let commitQueue = [];

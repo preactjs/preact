@@ -171,7 +171,7 @@ describe.only('Portal', () => {
 		expect(scratch.firstChild.firstChild.childNodes.length).to.equal(0);
 	});
 
-	it('should unmount Portal', () => {
+	it.only('should unmount Portal', () => {
 		let root = document.createElement('div');
 		let dialog = document.createElement('div');
 		dialog.id = 'container';
@@ -216,7 +216,6 @@ describe.only('Portal', () => {
 			scratch
 		);
 		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div>');
-
 		toggle();
 		rerender();
 		expect(scratch.innerHTML).to.equal(
