@@ -22,4 +22,13 @@ describe('compat hydrate', () => {
 		hydrate(<input />, scratch);
 		expect(document.activeElement).to.equal(input);
 	});
+
+	it('should call the callback', () => {
+		scratch.innerHTML = '<div></div>';
+
+		let spy = sinon.spy();
+		hydrate(<div />, scratch, spy);
+		expect(spy).to.be.calledOnce;
+		expect(spy).to.be.calledWithExactly();
+	});
 });

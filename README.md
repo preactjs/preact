@@ -177,7 +177,7 @@ MIT
 
 
 
-[![Preact](http://i.imgur.com/YqCHvEW.gif)](https://preactjs.com)
+[![Preact](https://i.imgur.com/YqCHvEW.gif)](https://preactjs.com)
 
 
 [preact/compat]: https://github.com/preactjs/preact/tree/master/compat

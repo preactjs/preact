@@ -26,7 +26,7 @@ export function Component(props, context) {
 Component.prototype.setState = function(update, callback) {
 	// only clone state when copying to nextState the first time.
 	let s;
-	if (this._nextState !== this.state) {
+	if (this._nextState != null && this._nextState !== this.state) {
 		s = this._nextState;
 	} else {
 		s = this._nextState = assign({}, this.state);
