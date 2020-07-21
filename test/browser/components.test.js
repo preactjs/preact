@@ -115,6 +115,20 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
 		});
 
+		it('should not crash when setting state in constructor', () => {
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					// the following line made `this._nextState !== this.state` be truthy prior to the fix for preactjs/preact#2638
+					this.state = {};
+					this.setState({ preact: 'awesome' });
+				}
+			}
+
+			expect(() => render(<Foo foo="bar" />, scratch)).not.to.throw();
+			rerender();
+		});
+
 		it('should not crash when setting state with cb in constructor', () => {
 			let spy = sinon.spy();
 			class Foo extends Component {
