@@ -4,7 +4,7 @@ import {
 	ComponentFactory,
 	ComponentConstructor,
 	Component
-} from '../../src';
+} from '../../';
 import { SimpleComponent, SimpleComponentProps } from './Component-test';
 
 export interface highlightedProps {

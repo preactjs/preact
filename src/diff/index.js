@@ -1,10 +1,39 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component } from '../component';
 import { Fragment } from '../create-element';
-import { diffChildren } from './children';
+import { diffChildren, placeChild } from './children';
 import { diffProps, setProperty } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
+
+function reorderChildren(newVNode, oldDom, parentDom) {
+	for (let tmp = 0; tmp < newVNode._children.length; tmp++) {
+		const vnode = newVNode._children[tmp];
+		if (vnode) {
+			vnode._parent = newVNode;
+
+			if (vnode._dom) {
+				if (typeof vnode.type == 'function' && vnode._children.length > 1) {
+					reorderChildren(vnode, oldDom, parentDom);
+				}
+
+				oldDom = placeChild(
+					parentDom,
+					vnode,
+					vnode,
+					newVNode._children,
+					null,
+					vnode._dom,
+					oldDom
+				);
+
+				if (typeof newVNode.type == 'function') {
+					newVNode._nextDom = oldDom;
+				}
+			}
+		}
+	}
+}
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -140,12 +169,7 @@ export function diff(
 						commitQueue.push(c);
 					}
 
-					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
-						if (newVNode._children[tmp]) {
-							newVNode._children[tmp]._parent = newVNode;
-						}
-					}
-
+					reorderChildren(newVNode, oldDom, parentDom);
 					break outer;
 				}
 

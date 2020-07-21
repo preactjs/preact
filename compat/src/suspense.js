@@ -1,4 +1,4 @@
-import { Component, createElement, options } from 'preact';
+import { Component, createElement, options, Fragment } from 'preact';
 import { assign } from './util';
 
 const oldCatchError = options._catchError;
@@ -98,12 +98,16 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 
 Suspense.prototype.render = function(props, state) {
 	if (this._detachOnNextRender) {
-		this._vnode._children[0] = detachedClone(this._detachOnNextRender);
+		// When the Suspense's _vnode was created by a call to createVNode
+		// (i.e. due to a setState further up in the tree)
+		// it's _children prop is null, in this case we "forget" about the parked vnodes to detach
+		if (this._vnode._children)
+			this._vnode._children[0] = detachedClone(this._detachOnNextRender);
 		this._detachOnNextRender = null;
 	}
 
 	return [
-		createElement(Component, null, state._suspended ? null : props.children),
+		createElement(Fragment, null, state._suspended ? null : props.children),
 		state._suspended && props.fallback
 	];
 };

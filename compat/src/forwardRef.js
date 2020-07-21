@@ -33,7 +33,7 @@ export function forwardRef(fn) {
 		ref = props.ref || ref;
 		return fn(
 			clone,
-			typeof ref === 'object' && !('current' in ref) ? null : ref
+			!ref || (typeof ref === 'object' && !('current' in ref)) ? null : ref
 		);
 	}
 
