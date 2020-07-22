@@ -112,13 +112,13 @@ declare namespace React {
 	export const Children: {
 		map<T extends preact.ComponentChild, R>(
 			children: T | T[],
-			fn: (child: T, i: number) => R,
-			context: mixed
+			fn: (context: any, child: T, i: number) => R,
+			context: any
 		): R[];
 		forEach<T extends preact.ComponentChild>(
 			children: T | T[],
-			fn: (child: T, i: number) => void,
-			context: mixed
+			fn: (context: any, child: T, i: number) => void,
+			context: any
 		): void;
 		count: (children: preact.ComponentChildren) => number;
 		only: (children: preact.ComponentChildren) => preact.ComponentChild;
