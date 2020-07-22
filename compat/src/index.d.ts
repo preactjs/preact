@@ -2,7 +2,7 @@ import * as _hooks from '../../hooks';
 import * as preact from '../../src';
 import { JSXInternal } from '../../src/jsx';
 import * as _Suspense from './suspense';
-import * as _SuspenseList from './suspense-list'
+import * as _SuspenseList from './suspense-list';
 
 // export default React;
 export = React;
@@ -29,7 +29,7 @@ declare namespace React {
 	export import useReducer = _hooks.useReducer;
 	export import useRef = _hooks.useRef;
 	export import useState = _hooks.useState;
-	export import useErrorBoundary = _hooks.useErrorBoundary
+	export import useErrorBoundary = _hooks.useErrorBoundary;
 
 	// Preact Defaults
 	export import Component = preact.Component;
@@ -44,7 +44,7 @@ declare namespace React {
 	// Suspense
 	export import Suspense = _Suspense.Suspense;
 	export import lazy = _Suspense.lazy;
-	export import SuspenseList = _SuspenseList.SuspenseList
+	export import SuspenseList = _SuspenseList.SuspenseList;
 
 	// Compat
 	export import StrictMode = preact.Fragment;
@@ -112,11 +112,13 @@ declare namespace React {
 	export const Children: {
 		map<T extends preact.ComponentChild, R>(
 			children: T | T[],
-			fn: (child: T, i: number) => R
+			fn: (child: T, i: number) => R,
+			context: mixed
 		): R[];
 		forEach<T extends preact.ComponentChild>(
 			children: T | T[],
-			fn: (child: T, i: number) => void
+			fn: (child: T, i: number) => void,
+			context: mixed
 		): void;
 		count: (children: preact.ComponentChildren) => number;
 		only: (children: preact.ComponentChildren) => preact.ComponentChild;
