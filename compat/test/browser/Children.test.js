@@ -99,6 +99,16 @@ describe('Children', () => {
 			expect(serializeHtml(scratch)).to.equal('<div></div>');
 		});
 
+		it('should propagate the this context', () => {
+			const context = {};
+			const fn = () => {
+				expect(this).to.equal(context);
+			};
+			({ children }) => {
+				React.Children.map(children, fn, context => {});
+			};
+		});
+
 		it('should flatten result', () => {
 			const ProblemChild = ({ children }) => {
 				return React.Children.map(children, child => {
