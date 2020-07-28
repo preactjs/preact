@@ -77,7 +77,7 @@ describe('Children', () => {
 
 	describe('.map', () => {
 		function Foo(props) {
-			let children = Children.map(props.children, child, context => (
+			let children = Children.map(props.children, child => (
 				<span>{child}</span>
 			));
 			return <div>{children}</div>;
@@ -101,8 +101,8 @@ describe('Children', () => {
 
 		it('should flatten result', () => {
 			const ProblemChild = ({ children }) => {
-				return React.Children.map(children, child, context => {
-					return React.Children.map(context, child.props.children, x => x);
+				return React.Children.map(children, child => {
+					return React.Children.map(child.props.children, x => x);
 				}).filter(React.isValidElement);
 			};
 
@@ -125,9 +125,9 @@ describe('Children', () => {
 		it('should call with indices', () => {
 			const assertion = [];
 			const ProblemChild = ({ children }) => {
-				return React.Children.map(children, (context, child, i), context => {
+				return React.Children.map(children, (child, i) => {
 					assertion.push(i);
-					return React.Children.map(context, child.props.children, (x, j) => {
+					return React.Children.map(child.props.children, (x, j) => {
 						assertion.push(j);
 						return x;
 					});
@@ -158,7 +158,7 @@ describe('Children', () => {
 	describe('.forEach', () => {
 		function Foo(props) {
 			let children = [];
-			Children.forEach(props.children, child, context =>
+			Children.forEach(props.children, child =>
 				children.push(<span>{child}</span>)
 			);
 			return <div>{children}</div>;
