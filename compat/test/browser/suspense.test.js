@@ -1381,6 +1381,79 @@ describe('suspense', () => {
 		expect(scratch.innerHTML).to.eql('<div>conditional hide</div>');
 	});
 
+	it('should allow same component to be suspended multiple times', async () => {
+		const cache = { '1': true };
+		function Lazy({ value }) {
+			if (!cache[value]) {
+				throw new Promise(resolve => {
+					cache[value] = resolve;
+				});
+			}
+			return <div>{`Lazy ${value}`}</div>;
+		}
+
+		let hide, setValue;
+
+		class Conditional extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { show: true, value: '1' };
+
+				hide = () => {
+					this.setState({ show: false });
+				};
+				setValue = value => {
+					this.setState({ value });
+				};
+			}
+
+			render(props, { show, value }) {
+				return (
+					<div>
+						conditional {show ? 'show' : 'hide'}
+						{show && (
+							<Suspense fallback="Suspended">
+								<Lazy value={value} />
+							</Suspense>
+						)}
+					</div>
+				);
+			}
+		}
+
+		render(<Conditional />, scratch);
+		expect(scratch.innerHTML).to.eql(
+			'<div>conditional show<div>Lazy 1</div></div>'
+		);
+
+		setValue('2');
+		rerender();
+
+		expect(scratch.innerHTML).to.eql('<div>conditional showSuspended</div>');
+
+		await cache[2]();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			'<div>conditional show<div>Lazy 2</div></div>'
+		);
+
+		setValue('3');
+		rerender();
+
+		expect(scratch.innerHTML).to.eql('<div>conditional showSuspended</div>');
+
+		await cache[3]();
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			'<div>conditional show<div>Lazy 3</div></div>'
+		);
+
+		hide();
+		rerender();
+		expect(scratch.innerHTML).to.eql('<div>conditional hide</div>');
+	});
+
 	it('should call componentWillUnmount on a suspended component', () => {
 		const cWUSpy = sinon.spy();
 

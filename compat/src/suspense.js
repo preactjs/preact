@@ -10,6 +10,10 @@ options._catchError = function(error, newVNode, oldVNode) {
 
 		for (; (vnode = vnode._parent); ) {
 			if ((component = vnode._component) && component._childDidSuspend) {
+				if (newVNode._dom == null) {
+					newVNode._dom = oldVNode._dom;
+					newVNode._children = oldVNode._children;
+				}
 				// Don't call oldCatchError if we found a Suspense
 				return component._childDidSuspend(error, newVNode._component);
 			}
@@ -68,6 +72,8 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 		if (resolved) return;
 
 		resolved = true;
+		suspendingComponent.componentWillUnmount =
+			suspendingComponent._suspendedComponentWillUnmount;
 
 		if (resolve) {
 			resolve(onSuspensionComplete);
