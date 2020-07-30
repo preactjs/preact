@@ -96,6 +96,10 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 	promise.then(onResolved, onResolved);
 };
 
+Suspense.prototype.componentWillUnmount = function() {
+	this._suspenders = [];
+};
+
 Suspense.prototype.render = function(props, state) {
 	if (this._detachOnNextRender) {
 		// When the Suspense's _vnode was created by a call to createVNode
