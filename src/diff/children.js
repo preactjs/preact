@@ -237,7 +237,8 @@ export function diffChildren(
 export function toChildArray(children) {
 	if (children == null || typeof children == 'boolean') {
 		return [];
-	} else if (Array.isArray(children)) {
+	}
+	if (Array.isArray(children)) {
 		return EMPTY_ARR.concat.apply([], children.map(toChildArray));
 	}
 
