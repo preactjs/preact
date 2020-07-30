@@ -20,8 +20,8 @@ function Portal(props) {
 	);
 
 	this.componentWillUnmount = function() {
-		// if (this._temp.parentNode) this._container.removeChild(this._temp);
-		this._container.removeChild(this._temp);
+		let parent = this._temp.parentNode;
+		if (parent) parent.removeChild(this._temp);
 		_unmount(this._wrap);
 	};
 
