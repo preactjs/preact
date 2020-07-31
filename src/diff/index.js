@@ -354,7 +354,7 @@ function diffElementNodes(
 	}
 
 	if (newVNode.type === null) {
-		if (oldProps !== newProps && dom.data != newProps) {
+		if (oldProps !== newProps && dom.data !== newProps) {
 			dom.data = newProps;
 		}
 	} else {
