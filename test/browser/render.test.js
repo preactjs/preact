@@ -41,6 +41,14 @@ describe('render()', () => {
 		logCall(Element.prototype, 'remove');
 	});
 
+	it('should rerender when value from "" to 0', () => {
+		render('', scratch);
+		expect(scratch.innerHTML).to.equal('');
+
+		render(0, scratch);
+		expect(scratch.innerHTML).to.equal('0');
+	});
+
 	it('should render an empty text node given an empty string', () => {
 		render('', scratch);
 		let c = scratch.childNodes;
