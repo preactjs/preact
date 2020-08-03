@@ -787,8 +787,8 @@ describe('suspense', () => {
 				expect(scratch.innerHTML).to.eql(
 					`<div>Hello first 2</div><div>Hello second 2</div>`
 				);
-				expect(Suspender1.prototype.render).to.have.been.calledTwice;
-				expect(Suspender2.prototype.render).to.have.been.calledTwice;
+				expect(Suspender1.prototype.render).to.have.been.calledThrice;
+				expect(Suspender2.prototype.render).to.have.been.calledThrice;
 			});
 		});
 	});
@@ -841,8 +841,8 @@ describe('suspense', () => {
 				expect(scratch.innerHTML).to.eql(
 					`<div>Hello first 2</div><div><div>Hello second 2</div></div>`
 				);
-				expect(Suspender1.prototype.render).to.have.been.calledTwice;
-				expect(Suspender2.prototype.render).to.have.been.calledTwice;
+				expect(Suspender1.prototype.render).to.have.been.calledThrice;
+				expect(Suspender2.prototype.render).to.have.been.calledThrice;
 			});
 		});
 	});
@@ -1314,6 +1314,144 @@ describe('suspense', () => {
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(`<div>conditional hide</div>`);
+	});
+
+	it('should allow suspended multiple times', async () => {
+		const [Suspender1, suspend1] = createSuspender(() => (
+			<div>Suspender 1</div>
+		));
+		const [Suspender2, suspend2] = createSuspender(() => (
+			<div>Suspender 2</div>
+		));
+
+		let hide, resolve;
+
+		class Conditional extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { show: true };
+
+				hide = () => {
+					this.setState({ show: false });
+				};
+			}
+
+			render(props, { show }) {
+				return (
+					<div>
+						conditional {show ? 'show' : 'hide'}
+						{show && (
+							<Suspense fallback="Suspended">
+								<Suspender1 />
+								<Suspender2 />
+							</Suspense>
+						)}
+					</div>
+				);
+			}
+		}
+
+		render(<Conditional />, scratch);
+		expect(scratch.innerHTML).to.eql(
+			'<div>conditional show<div>Suspender 1</div><div>Suspender 2</div></div>'
+		);
+
+		resolve = suspend1()[0];
+		rerender();
+		expect(scratch.innerHTML).to.eql('<div>conditional showSuspended</div>');
+
+		await resolve(() => <div>Done 1</div>);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			'<div>conditional show<div>Done 1</div><div>Suspender 2</div></div>'
+		);
+
+		resolve = suspend2()[0];
+		rerender();
+		expect(scratch.innerHTML).to.eql('<div>conditional showSuspended</div>');
+
+		await resolve(() => <div>Done 2</div>);
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			'<div>conditional show<div>Done 1</div><div>Done 2</div></div>'
+		);
+
+		hide();
+		rerender();
+		expect(scratch.innerHTML).to.eql('<div>conditional hide</div>');
+	});
+
+	it('should allow same component to be suspended multiple times', async () => {
+		const cache = { '1': true };
+		function Lazy({ value }) {
+			if (!cache[value]) {
+				throw new Promise(resolve => {
+					cache[value] = resolve;
+				});
+			}
+			return <div>{`Lazy ${value}`}</div>;
+		}
+
+		let hide, setValue;
+
+		class Conditional extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { show: true, value: '1' };
+
+				hide = () => {
+					this.setState({ show: false });
+				};
+				setValue = value => {
+					this.setState({ value });
+				};
+			}
+
+			render(props, { show, value }) {
+				return (
+					<div>
+						conditional {show ? 'show' : 'hide'}
+						{show && (
+							<Suspense fallback="Suspended">
+								<Lazy value={value} />
+							</Suspense>
+						)}
+					</div>
+				);
+			}
+		}
+
+		render(<Conditional />, scratch);
+		expect(scratch.innerHTML).to.eql(
+			'<div>conditional show<div>Lazy 1</div></div>'
+		);
+
+		setValue('2');
+		rerender();
+
+		expect(scratch.innerHTML).to.eql('<div>conditional showSuspended</div>');
+
+		await cache[2]();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			'<div>conditional show<div>Lazy 2</div></div>'
+		);
+
+		setValue('3');
+		rerender();
+
+		expect(scratch.innerHTML).to.eql('<div>conditional showSuspended</div>');
+
+		await cache[3]();
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			'<div>conditional show<div>Lazy 3</div></div>'
+		);
+
+		hide();
+		rerender();
+		expect(scratch.innerHTML).to.eql('<div>conditional hide</div>');
 	});
 
 	it('should allow resolve suspense promise after unmounts', async () => {
