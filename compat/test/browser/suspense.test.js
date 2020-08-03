@@ -1454,6 +1454,53 @@ describe('suspense', () => {
 		expect(scratch.innerHTML).to.eql('<div>conditional hide</div>');
 	});
 
+	it('should allow resolve suspense promise after unmounts', async () => {
+		const [Suspender, suspend] = createSuspender(() => <div>Suspender</div>);
+
+		let hide, resolve;
+
+		class Conditional extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { show: true };
+
+				hide = () => {
+					this.setState({ show: false });
+				};
+			}
+
+			render(props, { show }) {
+				return (
+					<div>
+						conditional {show ? 'show' : 'hide'}
+						{show && (
+							<Suspense fallback="Suspended">
+								<Suspender />
+							</Suspense>
+						)}
+					</div>
+				);
+			}
+		}
+
+		render(<Conditional />, scratch);
+		expect(scratch.innerHTML).to.eql(
+			'<div>conditional show<div>Suspender</div></div>'
+		);
+
+		resolve = suspend()[0];
+		rerender();
+		expect(scratch.innerHTML).to.eql('<div>conditional showSuspended</div>');
+
+		hide();
+		rerender();
+		expect(scratch.innerHTML).to.eql('<div>conditional hide</div>');
+
+		await resolve(() => <div>Done</div>);
+		rerender();
+		expect(scratch.innerHTML).to.eql('<div>conditional hide</div>');
+	});
+
 	it('should call componentWillUnmount on a suspended component', () => {
 		const cWUSpy = sinon.spy();
 
