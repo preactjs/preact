@@ -25,6 +25,8 @@ function getClosestDomNodeParent(parent) {
 export function initDebug() {
 	setupComponentStack();
 
+	let hooksAllowed = false;
+
 	/* eslint-disable no-console */
 	let oldBeforeDiff = options._diff;
 	let oldDiffed = options.diffed;
@@ -97,6 +99,8 @@ export function initDebug() {
 	options._diff = vnode => {
 		let { type, _parent: parent } = vnode;
 		let parentVNode = getClosestDomNodeParent(parent);
+
+		hooksAllowed = true;
 
 		if (type === undefined) {
 			throw new Error(
@@ -223,7 +227,7 @@ export function initDebug() {
 	};
 
 	options._hook = (comp, index, type) => {
-		if (!comp) {
+		if (!comp || !hooksAllowed) {
 			throw new Error('Hook can only be invoked from render methods.');
 		}
 
@@ -307,6 +311,8 @@ export function initDebug() {
 				});
 			}
 		}
+
+		hooksAllowed = false;
 
 		if (oldDiffed) oldDiffed(vnode);
 
