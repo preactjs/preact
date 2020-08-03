@@ -58,12 +58,11 @@ jobs:
 
   bench_text_update:
     name: Bench text_update
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     needs: build_test
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
       - uses: actions/download-artifact@v2
         with:
           name: build-output
@@ -75,7 +74,7 @@ jobs:
           # Skip downloading Firefox driver until we bench against it
           GECKODRIVER_SKIP_DOWNLOAD: 'true'
         run: |
-          $env:CHROMEDRIVER_FILEPATH=(Join-Path $env:CHROMEWEBDRIVER chromedriver.exe)
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           cd benches
           npm ci
       - name: bench
@@ -85,12 +84,11 @@ jobs:
 
   bench_02_replace1k:
     name: Bench 02_replace1k
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     needs: build_test
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
       - uses: actions/download-artifact@v2
         with:
           name: build-output
@@ -102,7 +100,7 @@ jobs:
           # Skip downloading Firefox driver until we bench against it
           GECKODRIVER_SKIP_DOWNLOAD: 'true'
         run: |
-          $env:CHROMEDRIVER_FILEPATH=(Join-Path $env:CHROMEWEBDRIVER chromedriver.exe)
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           cd benches
           npm ci
       - name: bench
@@ -112,12 +110,11 @@ jobs:
 
   bench_03_update10th1k_x16:
     name: Bench 03_update10th1k_x16
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     needs: build_test
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
       - uses: actions/download-artifact@v2
         with:
           name: build-output
@@ -129,7 +126,7 @@ jobs:
           # Skip downloading Firefox driver until we bench against it
           GECKODRIVER_SKIP_DOWNLOAD: 'true'
         run: |
-          $env:CHROMEDRIVER_FILEPATH=(Join-Path $env:CHROMEWEBDRIVER chromedriver.exe)
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           cd benches
           npm ci
       - name: bench

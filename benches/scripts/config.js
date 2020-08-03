@@ -33,7 +33,7 @@ async function generateConfig(benchPath, options) {
 		config.horizons = options.horizon.split(',');
 	}
 
-	const headless = IS_CI;
+	const headless = true;
 	config.benchmarks = [
 		{
 			name,
