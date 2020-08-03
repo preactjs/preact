@@ -88,10 +88,16 @@ function setSafeDescriptor(proto, key) {
 	}
 }
 
-let classNameDescriptor = {
+const classNameDescriptor = {
 	configurable: true,
 	get() {
 		return this.class;
+	}
+};
+const classDescriptor = {
+	configurable: true,
+	get() {
+		return this.className;
 	}
 };
 
@@ -104,10 +110,17 @@ options.vnode = vnode => {
 
 	if (type) {
 		// Alias `class` prop to `className` if available
-		if (props.class != props.className) {
+		// only alias on dom elements
+		if (props.class) {
 			classNameDescriptor.enumerable = 'className' in props;
-			if (props.className != null) props.class = props.className;
+			if (props.className != null) {
+				props.class = props.className;
+			}
 			Object.defineProperty(props, 'className', classNameDescriptor);
+		}
+		if (props.className && !props.class) {
+			classDescriptor.enumerable = false;
+			Object.defineProperty(props, 'class', classDescriptor);
 		}
 
 		// Apply DOM VNode compat
