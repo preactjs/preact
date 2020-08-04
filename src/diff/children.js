@@ -183,7 +183,7 @@ export function diffChildren(
 			//
 			// To fix it we make sure to reset the inferred value, so that our own
 			// value check in `diff()` won't be skipped.
-			if (newParentVNode.type == 'option') {
+			if (newParentVNode.type == 'option' && !isHydrating) {
 				parentDom.value = '';
 			} else if (typeof newParentVNode.type == 'function') {
 				// Because the newParentVNode is Fragment-like, we need to set it's
