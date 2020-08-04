@@ -281,6 +281,38 @@ describe('hydrate()', () => {
 		expect(element.innerHTML).to.equal('<p>hello bar</p>');
 	});
 
+	it('should not remove values', () => {
+		scratch.innerHTML =
+			'<select><option value="0">Zero</option><option selected value="2">Two</option></select>';
+		const App = () => {
+			const options = [
+				{
+					value: '0',
+					label: 'Zero'
+				},
+				{
+					value: '2',
+					label: 'Two'
+				}
+			];
+
+			return (
+				<select value="2">
+					{options.map(({ disabled, label, value }) => (
+						<option key={label} disabled={disabled} value={value}>
+							{label}
+						</option>
+					))}
+				</select>
+			);
+		};
+
+		hydrate(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<select><option value="0">Zero</option><option selected="" value="2">Two</option></select>'
+		);
+	});
+
 	it('should deopt for trees introduced in hydrate (append)', () => {
 		scratch.innerHTML = '<div id="test"><p class="hi">hello bar</p></div>';
 		const Component = props => <p class="hi">hello {props.foo}</p>;
