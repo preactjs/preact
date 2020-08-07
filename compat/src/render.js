@@ -114,6 +114,9 @@ options.vnode = vnode => {
 		if (typeof type != 'function') {
 			// Apply defaultValue to value
 			if (props.defaultValue && props.value !== undefined) {
+				if (props.value === null) {
+					props.value = props.defaultValue;
+				}
 				delete props.defaultValue;
 			}
 
