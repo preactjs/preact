@@ -537,8 +537,10 @@ describe('debug', () => {
 			// The message here may change when the "prop-types" library is updated,
 			// but we check it exactly to make sure all parameters were supplied
 			// correctly.
-			expect(console.error).to.be.calledWith(
-				'Failed prop type: Invalid prop `text` of type `number` supplied to `Foo`, expected `string`.'
+			expect(console.error).to.have.been.calledOnceWith(
+				sinon.match(
+					/^Failed prop type: Invalid prop `text` of type `number` supplied to `Foo`, expected `string`\.\n {2}in Foo \(at (.*)\/debug\/test\/browser\/debug\.test\.js:[0-9]+\)$/m
+				)
 			);
 		});
 

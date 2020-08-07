@@ -45,7 +45,8 @@ export function checkPropTypes(
 		if (error && !(error.message in loggedTypeFailures)) {
 			loggedTypeFailures[error.message] = true;
 			console.error(
-				`Failed ${location} type: ${error.message}${(getStack && getStack()) ||
+				`Failed ${location} type: ${error.message}${(getStack &&
+					`\n${getStack()}`) ||
 					''}`
 			);
 		}
