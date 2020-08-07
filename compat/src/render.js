@@ -130,6 +130,15 @@ options.vnode = vnode => {
 				delete props.value;
 			}
 
+			// Calling `setAttribute` with a truthy value will lead to it being
+			// passed as a stringified value, e.g. `download="true"`. React
+			// converts it to an empty string instead, otherwise the attribute
+			// value will be used as the file name and the file will be called
+			// "true" upon downloading it.
+			if (props.download === true) {
+				props.download = '';
+			}
+
 			// Normalize DOM vnode properties.
 			let shouldSanitize, attrs, i;
 			for (i in props) if ((shouldSanitize = CAMEL_PROPS.test(i))) break;

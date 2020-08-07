@@ -41,6 +41,14 @@ describe('render()', () => {
 		logCall(Element.prototype, 'remove');
 	});
 
+	it('should rerender when value from "" to 0', () => {
+		render('', scratch);
+		expect(scratch.innerHTML).to.equal('');
+
+		render(0, scratch);
+		expect(scratch.innerHTML).to.equal('0');
+	});
+
 	it('should render an empty text node given an empty string', () => {
 		render('', scratch);
 		let c = scratch.childNodes;
@@ -360,6 +368,14 @@ describe('render()', () => {
 	it('should set enumerable boolean attribute', () => {
 		render(<input spellcheck={false} />, scratch);
 		expect(scratch.firstChild.spellcheck).to.equal(false);
+	});
+
+	it('should render download attribute', () => {
+		render(<a download="" />, scratch);
+		expect(scratch.firstChild.getAttribute('download')).to.equal('');
+
+		render(<a download={null} />, scratch);
+		expect(scratch.firstChild.getAttribute('download')).to.equal(null);
 	});
 
 	it('should not set tagName', () => {

@@ -81,6 +81,21 @@ describe('debug with hooks', () => {
 		expect(fn).to.throw(/Hook can only be invoked from render/);
 	});
 
+	it('should throw an error when invoked inside an effect callback', () => {
+		function Foo(props) {
+			useEffect(() => {
+				useState();
+			});
+			return props.children;
+		}
+
+		const fn = () =>
+			act(() => {
+				render(<Foo>Hello!</Foo>, scratch);
+			});
+		expect(fn).to.throw(/Hook can only be invoked from render/);
+	});
+
 	it('should warn for useMemo/useCallback without arguments', () => {
 		const App = () => {
 			const [people] = useState([40, 20, 60, 80]);

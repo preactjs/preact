@@ -611,7 +611,7 @@ export namespace JSXInternal {
 		autofocus?: boolean;
 		autoFocus?: boolean;
 		autoPlay?: boolean;
-		capture?: boolean;
+		capture?: boolean | string;
 		cellPadding?: number | string;
 		cellSpacing?: number | string;
 		charSet?: string;

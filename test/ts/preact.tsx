@@ -2,6 +2,7 @@ import {
 	createElement,
 	render,
 	Component,
+	ComponentProps,
 	FunctionalComponent,
 	AnyComponent,
 	h
@@ -277,3 +278,16 @@ class ComponentWithPartialSetState extends Component<{}, PartialState> {
 }
 
 const withPartialSetState = <ComponentWithPartialSetState />;
+
+let functionalProps: ComponentProps<typeof DummerComponent> = {
+	initialInput: '',
+	input: ''
+};
+
+let classProps: ComponentProps<typeof DummyComponent> = {
+	initialInput: ''
+};
+
+let elementProps: ComponentProps<'button'> = {
+	type: 'button'
+};
