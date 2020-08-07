@@ -215,9 +215,16 @@ export function initDebug() {
 					);
 				}
 			}
+
+			let values = vnode.props;
+			if (vnode.type._forwarded) {
+				values = { ...values };
+				delete values.ref;
+			}
+
 			checkPropTypes(
 				vnode.type.propTypes,
-				vnode.props,
+				values,
 				'prop',
 				getDisplayName(vnode),
 				() => getOwnerStack(vnode)
