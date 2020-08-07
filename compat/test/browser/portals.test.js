@@ -6,7 +6,7 @@ import React, {
 	Component
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { setupRerender } from 'preact/test-utils';
+import { setupRerender, act } from 'preact/test-utils';
 
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 
@@ -456,6 +456,60 @@ describe('Portal', () => {
 		toggle();
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div>');
+	});
+
+	it.only('should support nested portals remounting #2669', () => {
+		let setVisible;
+
+		function PortalComponent(props) {
+			return createPortal(
+				<div style={{ padding: 10, border: '1px solid green' }}>
+					{props.show && createPortal(<div>Portal content</div>, scratch)}
+				</div>,
+				scratch
+			);
+		}
+
+		function App() {
+			const [visible, _setVisible] = useState(true);
+			setVisible = _setVisible;
+
+			return (
+				<div style={{ border: '1px solid blue', padding: 10 }}>
+					test
+					<PortalComponent show={visible} />
+				</div>
+			);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div style="padding: 10px; border: 1px solid green;"></div><div>Portal content</div><div style="border: 1px solid blue; padding: 10px;">test</div>'
+		);
+
+		act(() => {
+			setVisible(false);
+		});
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div style="padding: 10px; border: 1px solid green;"></div><div style="border: 1px solid blue; padding: 10px;">test</div>'
+		);
+
+		act(() => {
+			setVisible(true);
+		});
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div style="padding: 10px; border: 1px solid green;"></div><div style="border: 1px solid blue; padding: 10px;">test</div><div>Portal content</div>'
+		);
+
+		act(() => {
+			setVisible(false);
+		});
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div style="padding: 10px; border: 1px solid green;"></div><div style="border: 1px solid blue; padding: 10px;">test</div>'
+		);
 	});
 
 	it('should not unmount when parent renders', () => {
