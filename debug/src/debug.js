@@ -219,7 +219,8 @@ export function initDebug() {
 				vnode.type.propTypes,
 				vnode.props,
 				'prop',
-				getDisplayName(vnode)
+				getDisplayName(vnode),
+				() => getOwnerStack(vnode)
 			);
 		}
 

@@ -538,7 +538,9 @@ describe('debug', () => {
 			// but we check it exactly to make sure all parameters were supplied
 			// correctly.
 			expect(console.error).to.be.calledWith(
-				'Failed prop type: Invalid prop `text` of type `number` supplied to `Foo`, expected `string`.'
+				sinon.match(
+					/^Failed prop type: Invalid prop `text` of type `number` supplied to `Foo`, expected `string`\.\n {2}in Foo \(at (.*)\/debug\/test\/browser\/debug\.test\.js:[0-9]+\)$/m
+				)
 			);
 		});
 
