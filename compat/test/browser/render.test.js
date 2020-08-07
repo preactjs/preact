@@ -98,8 +98,13 @@ describe('compat render', () => {
 			.that.equals('dynamic content');
 	});
 
-	it('should support defaultValue', () => {
+	it('should support defaultValue when value is omitted', () => {
 		render(<input defaultValue="foo" />, scratch);
+		expect(scratch.firstElementChild).to.have.property('value', 'foo');
+	});
+
+	it('should support defaultValue when value is undefined', () => {
+		render(<input defaultValue="foo" value={undefined} />, scratch);
 		expect(scratch.firstElementChild).to.have.property('value', 'foo');
 	});
 
@@ -109,13 +114,18 @@ describe('compat render', () => {
 	});
 
 	it('should ignore defaultValue when value is false', () => {
-		render(<input value={false} defaultValue="foo" />, scratch);
+		render(<input defaultValue="foo" value={false} />, scratch);
 		expect(scratch.firstElementChild).to.have.property('value', 'false');
 	});
 
 	it('should ignore defaultValue when value is 0', () => {
 		render(<input defaultValue={2} value={0} />, scratch);
 		expect(scratch.firstElementChild.value).to.equal('0');
+	});
+
+	it('should ignore defaultValue when value is empty-string', () => {
+		render(<input defaultValue={2} value="" />, scratch);
+		expect(scratch.firstElementChild.value).to.equal('');
 	});
 
 	it('should keep value of uncontrolled inputs using defaultValue', () => {

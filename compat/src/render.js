@@ -113,11 +113,8 @@ options.vnode = vnode => {
 		// Apply DOM VNode compat
 		if (typeof type != 'function') {
 			// Apply defaultValue to value
-			if (props.defaultValue && props.value !== undefined) {
-				if (props.value === null) {
-					props.value = props.defaultValue;
-				}
-				delete props.defaultValue;
+			if (props.defaultValue && props.value === null) {
+				props.value = props.defaultValue;
 			}
 
 			// Add support for array select values: <select value={[]} />
