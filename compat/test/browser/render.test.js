@@ -2,7 +2,8 @@ import React, {
 	createElement,
 	render,
 	Component,
-	hydrate
+	hydrate,
+	useState
 } from 'preact/compat';
 import { setupRerender, act } from 'preact/test-utils';
 import {
@@ -103,79 +104,72 @@ describe('compat render', () => {
 		expect(scratch.firstElementChild).to.have.property('value', 'foo');
 	});
 
-	it('should support defaultValue when value is undefined', () => {
-		render(<input defaultValue="foo" value={undefined} />, scratch);
-		expect(scratch.firstElementChild).to.have.property('value', 'foo');
-	});
-
-	it('should support defaultValue when value is null', () => {
-		render(<input defaultValue="foo" value={null} />, scratch);
-		expect(scratch.firstElementChild).to.have.property('value', 'foo');
-	});
-
-	it('should support defaultValue of false', () => {
-		render(<input defaultValue={false} value={null} />, scratch);
-		expect(scratch.firstElementChild).to.have.property('value', 'false');
-	});
-
-	it('should support defaultValue of 0', () => {
-		render(<input defaultValue={0} value={null} />, scratch);
-		expect(scratch.firstElementChild).to.have.property('value', '0');
-	});
-
-	it('should ignore defaultValue when value is false', () => {
-		render(<input defaultValue="foo" value={false} />, scratch);
-		expect(scratch.firstElementChild).to.have.property('value', 'false');
-	});
-
-	it('should ignore defaultValue when value is 0', () => {
-		render(<input defaultValue={2} value={0} />, scratch);
-		expect(scratch.firstElementChild).to.have.property('value', '0');
-	});
-
-	it('should ignore defaultValue when value is empty-string', () => {
-		render(<input defaultValue={2} value="" />, scratch);
-		expect(scratch.firstElementChild).to.have.property('value', '');
-	});
-
 	it('should support defaultValue on textarea when value is omitted', () => {
 		render(<textarea defaultValue="foo" />, scratch);
 		expect(scratch.firstElementChild).to.have.property('innerHTML', 'foo');
 	});
 
-	it('should support defaultValue on textarea when value is undefined', () => {
-		render(<textarea defaultValue="foo" value={undefined} />, scratch);
-		expect(scratch.firstElementChild).to.have.property('innerHTML', 'foo');
+	[undefined, null].forEach(val => {
+		it(`should support defaultValue when value is ${val}`, () => {
+			render(<input defaultValue="foo" value={val} />, scratch);
+			expect(scratch.firstElementChild).to.have.property('value', 'foo');
+		});
+
+		it(`should support defaultValue on textarea when value is ${val}`, () => {
+			render(<textarea defaultValue="foo" value={val} />, scratch);
+			expect(scratch.firstElementChild).to.have.property('innerHTML', 'foo');
+		});
 	});
 
-	it('should support defaultValue on textarea when value is null', () => {
-		render(<textarea defaultValue="foo" value={null} />, scratch);
-		expect(scratch.firstElementChild).to.have.property('innerHTML', 'foo');
+	[false, 0, ''].forEach(val => {
+		it(`should ignore defaultValue when value is ${
+			val === '' ? 'empty-string' : val
+		}`, () => {
+			render(<input defaultValue="foo" value={val} />, scratch);
+			expect(scratch.firstElementChild).to.have.property('value', String(val));
+		});
+
+		it(`should ignore defaultValue on textarea when value is ${
+			val === '' ? 'empty-string' : val
+		}`, () => {
+			render(<textarea defaultValue="foo" value={val} />, scratch);
+			expect(scratch.firstElementChild).to.have.property(
+				'innerHTML',
+				String(val)
+			);
+		});
 	});
 
-	it('should ignore defaultValue on textarea when value is false', () => {
-		render(<textarea defaultValue="foo" value={false} />, scratch);
-		expect(scratch.firstElementChild).to.have.property('innerHTML', 'false');
-	});
-
-	it('should ignore defaultValue on textarea when value is 0', () => {
-		render(<textarea defaultValue={2} value={0} />, scratch);
-		expect(scratch.firstElementChild).to.have.property('innerHTML', '0');
-	});
-
-	it('should ignore defaultValue on textarea when value is empty-string', () => {
-		render(<textarea defaultValue={2} value="" />, scratch);
-		expect(scratch.firstElementChild).to.have.property('innerHTML', '');
-	});
-
-	it('should support defaultValue of false on textarea', () => {
-		render(<textarea defaultValue={false} value={null} />, scratch);
-		expect(scratch.firstElementChild).to.have.property('innerHTML', 'false');
-	});
-
-	it('should support defaultValue of 0 on textarea', () => {
-		render(<textarea defaultValue={0} value={null} />, scratch);
-		expect(scratch.firstElementChild).to.have.property('innerHTML', '0');
+	it('should ignore changing defaultValue', () => {
+		let setDefaultValue;
+		function Foo() {
+			const [defaultValue, _setDefaultValue] = useState('foo');
+			setDefaultValue = _setDefaultValue;
+			return (
+				<>
+					<p>{defaultValue}</p>
+					<input defaultValue="foo" />
+					<textarea defaultValue="foo" />
+				</>
+			);
+		}
+		render(<Foo />, scratch);
+		expect(scratch.querySelector('input')).to.have.property('value', 'foo');
+		expect(scratch.querySelector('textarea')).to.have.property(
+			'innerHTML',
+			'foo'
+		);
+		expect(scratch.querySelector('p')).to.have.property('innerText', 'foo');
+		act(() => {
+			setDefaultValue('bar');
+		});
+		rerender();
+		expect(scratch.querySelector('input')).to.have.property('value', 'foo');
+		expect(scratch.querySelector('textarea')).to.have.property(
+			'innerHTML',
+			'foo'
+		);
+		expect(scratch.querySelector('p')).to.have.property('innerText', 'bar');
 	});
 
 	it('should keep value of uncontrolled inputs using defaultValue', () => {
