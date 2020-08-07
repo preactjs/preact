@@ -29,7 +29,6 @@ declare namespace React {
 	export import useReducer = _hooks.useReducer;
 	export import useRef = _hooks.useRef;
 	export import useState = _hooks.useState;
-	export import useErrorBoundary = _hooks.useErrorBoundary
 
 	// Preact Defaults
 	export import Component = preact.Component;

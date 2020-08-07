@@ -75,10 +75,12 @@ declare namespace preact {
 	type ComponentType<P = {}> = ComponentClass<P> | FunctionComponent<P>;
 	type ComponentFactory<P = {}> = ComponentType<P>;
 
-	type ComponentProps<C extends ComponentType<any>> = C extends ComponentType<
-		infer P
-	>
+	type ComponentProps<
+		C extends ComponentType<any> | keyof JSXInternal.IntrinsicElements
+	> = C extends ComponentType<infer P>
 		? P
+		: C extends keyof JSXInternal.IntrinsicElements
+		? JSXInternal.IntrinsicElements[C]
 		: never;
 
 	interface FunctionComponent<P = {}> {
