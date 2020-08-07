@@ -458,16 +458,21 @@ describe('Portal', () => {
 		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div>');
 	});
 
-	it.only('should support nested portals remounting #2669', () => {
+	it('should support nested portals remounting #2669', () => {
 		let setVisible;
+		let i = 0;
 
 		function PortalComponent(props) {
-			return createPortal(
-				<div style={{ padding: 10, border: '1px solid green' }}>
-					{props.show && createPortal(<div>Portal content</div>, scratch)}
-				</div>,
-				scratch
+			const innerVnode = <div id="inner">{i}</div>;
+			innerVnode.___id = 'inner_' + i++;
+			const outerVnode = (
+				<div id="outer">
+					{i}
+					{props.show && createPortal(innerVnode, scratch)}
+				</div>
 			);
+			outerVnode.___id = 'outer_' + i++;
+			return createPortal(outerVnode, scratch);
 		}
 
 		function App() {
@@ -475,7 +480,7 @@ describe('Portal', () => {
 			setVisible = _setVisible;
 
 			return (
-				<div style={{ border: '1px solid blue', padding: 10 }}>
+				<div id="app">
 					test
 					<PortalComponent show={visible} />
 				</div>
@@ -484,7 +489,7 @@ describe('Portal', () => {
 
 		render(<App />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div style="padding: 10px; border: 1px solid green;"></div><div>Portal content</div><div style="border: 1px solid blue; padding: 10px;">test</div>'
+			'<div id="outer">1</div><div id="inner">0</div><div id="app">test</div>'
 		);
 
 		act(() => {
@@ -492,7 +497,7 @@ describe('Portal', () => {
 		});
 		rerender();
 		expect(scratch.innerHTML).to.equal(
-			'<div style="padding: 10px; border: 1px solid green;"></div><div style="border: 1px solid blue; padding: 10px;">test</div>'
+			'<div id="outer">3</div><div id="app">test</div>'
 		);
 
 		act(() => {
@@ -500,7 +505,7 @@ describe('Portal', () => {
 		});
 		rerender();
 		expect(scratch.innerHTML).to.equal(
-			'<div style="padding: 10px; border: 1px solid green;"></div><div style="border: 1px solid blue; padding: 10px;">test</div><div>Portal content</div>'
+			'<div id="outer">5</div><div id="app">test</div><div id="inner">4</div>'
 		);
 
 		act(() => {
@@ -508,7 +513,7 @@ describe('Portal', () => {
 		});
 		rerender();
 		expect(scratch.innerHTML).to.equal(
-			'<div style="padding: 10px; border: 1px solid green;"></div><div style="border: 1px solid blue; padding: 10px;">test</div>'
+			'<div id="outer">7</div><div id="app">test</div>'
 		);
 	});
 
