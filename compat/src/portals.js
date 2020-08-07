@@ -38,6 +38,7 @@ function Portal(props) {
 			_this._temp = document.createTextNode('');
 			// Hydrate existing nodes to keep the dom intact, when rendering
 			// wrap into the container.
+			_this._children = container._children;
 			hydrate('', container);
 			// Append to the container (this matches React's behavior)
 			container.appendChild(_this._temp);
@@ -46,6 +47,7 @@ function Portal(props) {
 			_this._container = container;
 			// Render our wrapping element into temp.
 			render(wrap, container, _this._temp);
+			container._children = _this._children;
 			_this._children = _this._temp._children;
 		} else {
 			// When we have mounted and the vnode is present it means the
