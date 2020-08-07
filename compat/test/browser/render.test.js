@@ -103,6 +103,11 @@ describe('compat render', () => {
 		expect(scratch.firstElementChild).to.have.property('value', 'foo');
 	});
 
+	it('should ignore defaultValue when value is false', () => {
+		render(<input value={false} defaultValue="foo" />, scratch);
+		expect(scratch.firstElementChild).to.have.property('value', 'false');
+	});
+
 	it('should ignore defaultValue when value is 0', () => {
 		render(<input defaultValue={2} value={0} />, scratch);
 		expect(scratch.firstElementChild.value).to.equal('0');
