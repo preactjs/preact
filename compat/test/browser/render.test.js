@@ -148,8 +148,8 @@ describe('compat render', () => {
 			return (
 				<>
 					<p>{defaultValue}</p>
-					<input defaultValue="foo" />
-					<textarea defaultValue="foo" />
+					<input defaultValue={defaultValue} />
+					<textarea defaultValue={defaultValue} />
 				</>
 			);
 		}
@@ -170,6 +170,35 @@ describe('compat render', () => {
 			'foo'
 		);
 		expect(scratch.querySelector('p')).to.have.property('innerText', 'bar');
+	});
+
+	it('should support changing value to null', () => {
+		let setValue;
+		function Foo() {
+			const [value, _setValue] = useState('foo');
+			setValue = _setValue;
+			return (
+				<>
+					<p>{value}</p>
+					<input value={value} />
+					<textarea value={value} />
+				</>
+			);
+		}
+		render(<Foo />, scratch);
+		expect(scratch.querySelector('input')).to.have.property('value', 'foo');
+		expect(scratch.querySelector('textarea')).to.have.property(
+			'innerHTML',
+			'foo'
+		);
+		expect(scratch.querySelector('p')).to.have.property('innerText', 'foo');
+		act(() => {
+			setValue(null);
+		});
+		rerender();
+		expect(scratch.querySelector('input')).to.have.property('value', '');
+		expect(scratch.querySelector('textarea')).to.have.property('innerHTML', '');
+		expect(scratch.querySelector('p')).to.have.property('innerText', 'null');
 	});
 
 	it('should keep value of uncontrolled inputs using defaultValue', () => {
