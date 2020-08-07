@@ -11,6 +11,7 @@ import {
 	getCurrentVNode,
 	getDisplayName
 } from './component-stack';
+import { assign } from './util';
 
 const isWeakMapSupported = typeof WeakMap == 'function';
 
@@ -218,7 +219,7 @@ export function initDebug() {
 
 			let values = vnode.props;
 			if (vnode.type._forwarded) {
-				values = { ...values };
+				values = assign({}, values);
 				delete values.ref;
 			}
 
