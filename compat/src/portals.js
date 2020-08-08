@@ -36,6 +36,8 @@ function Portal(props) {
 		if (!_this._hasMounted) {
 			// Create a placeholder that we can use to insert into.
 			_this._temp = document.createTextNode('');
+			// temporarily store the current children of the container to restore them after render
+			_this._children = container._children;
 			// Hydrate existing nodes to keep the dom intact, when rendering
 			// wrap into the container.
 			hydrate('', container);
@@ -46,6 +48,9 @@ function Portal(props) {
 			_this._container = container;
 			// Render our wrapping element into temp.
 			render(wrap, container, _this._temp);
+			// restore the previous children of the container
+			container._children = _this._children;
+			// store the children of the new vnode to be used in subsequent re-renders
 			_this._children = _this._temp._children;
 		} else {
 			// When we have mounted and the vnode is present it means the

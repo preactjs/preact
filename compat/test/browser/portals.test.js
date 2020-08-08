@@ -6,7 +6,7 @@ import React, {
 	Component
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { setupRerender } from 'preact/test-utils';
+import { setupRerender, act } from 'preact/test-utils';
 
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 
@@ -456,6 +456,65 @@ describe('Portal', () => {
 		toggle();
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div>');
+	});
+
+	it('should support nested portals remounting #2669', () => {
+		let setVisible;
+		let i = 0;
+
+		function PortalComponent(props) {
+			const innerVnode = <div id="inner">{i}</div>;
+			innerVnode.___id = 'inner_' + i++;
+			const outerVnode = (
+				<div id="outer">
+					{i}
+					{props.show && createPortal(innerVnode, scratch)}
+				</div>
+			);
+			outerVnode.___id = 'outer_' + i++;
+			return createPortal(outerVnode, scratch);
+		}
+
+		function App() {
+			const [visible, _setVisible] = useState(true);
+			setVisible = _setVisible;
+
+			return (
+				<div id="app">
+					test
+					<PortalComponent show={visible} />
+				</div>
+			);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div id="outer">1</div><div id="inner">0</div><div id="app">test</div>'
+		);
+
+		act(() => {
+			setVisible(false);
+		});
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div id="outer">3</div><div id="app">test</div>'
+		);
+
+		act(() => {
+			setVisible(true);
+		});
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div id="outer">5</div><div id="app">test</div><div id="inner">4</div>'
+		);
+
+		act(() => {
+			setVisible(false);
+		});
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div id="outer">7</div><div id="app">test</div>'
+		);
 	});
 
 	it('should not unmount when parent renders', () => {
