@@ -32,7 +32,7 @@ describe('useRef', () => {
 		expect(values).to.deep.equal([1, 2]);
 	});
 
-	it('defaults to null', () => {
+	it('defaults to undefined', () => {
 		const values = [];
 
 		function Comp() {
@@ -45,6 +45,6 @@ describe('useRef', () => {
 		render(<Comp />, scratch);
 		render(<Comp />, scratch);
 
-		expect(values).to.deep.equal([null, 2]);
+		expect(values).to.deep.equal([undefined, 2]);
 	});
 });
