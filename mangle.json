@@ -66,7 +66,8 @@
       "$_unmount": "__u",
       "$_owner": "__o",
       "$_skipEffects": "__s",
-      "$_rerenderCount": "__r"
+      "$_rerenderCount": "__r",
+      "$_forwarded": "__f"
     }
   }
 }

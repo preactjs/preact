@@ -11,6 +11,7 @@ import {
 	getCurrentVNode,
 	getDisplayName
 } from './component-stack';
+import { assign } from './util';
 
 const isWeakMapSupported = typeof WeakMap == 'function';
 
@@ -24,6 +25,8 @@ function getClosestDomNodeParent(parent) {
 
 export function initDebug() {
 	setupComponentStack();
+
+	let hooksAllowed = false;
 
 	/* eslint-disable no-console */
 	let oldBeforeDiff = options._diff;
@@ -97,6 +100,8 @@ export function initDebug() {
 	options._diff = vnode => {
 		let { type, _parent: parent } = vnode;
 		let parentVNode = getClosestDomNodeParent(parent);
+
+		hooksAllowed = true;
 
 		if (type === undefined) {
 			throw new Error(
@@ -211,11 +216,19 @@ export function initDebug() {
 					);
 				}
 			}
+
+			let values = vnode.props;
+			if (vnode.type._forwarded) {
+				values = assign({}, values);
+				delete values.ref;
+			}
+
 			checkPropTypes(
 				vnode.type.propTypes,
-				vnode.props,
+				values,
 				'prop',
-				getDisplayName(vnode)
+				getDisplayName(vnode),
+				() => getOwnerStack(vnode)
 			);
 		}
 
@@ -223,7 +236,7 @@ export function initDebug() {
 	};
 
 	options._hook = (comp, index, type) => {
-		if (!comp) {
+		if (!comp || !hooksAllowed) {
 			throw new Error('Hook can only be invoked from render methods.');
 		}
 
@@ -307,6 +320,8 @@ export function initDebug() {
 				});
 			}
 		}
+
+		hooksAllowed = false;
 
 		if (oldDiffed) oldDiffed(vnode);
 

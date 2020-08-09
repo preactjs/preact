@@ -36,17 +36,12 @@ class SuspensefulFunc extends React.Component {
 
 //SuspenseList using lazy components
 function SuspenseListTester(props: any) {
-  const [error] = React.useErrorBoundary((msg) => {
-    console.log(msg)
-  })
-  const _fallback = error ? <div>{JSON.stringify(error)}</div> : <FallBack />
-
   return (
     <React.SuspenseList revealOrder="together">
-      <React.Suspense fallback={_fallback}>
+      <React.Suspense fallback={<FallBack />}>
         <IsLazyFunc isProp={false} />
       </React.Suspense>
-      <React.Suspense fallback={_fallback}>
+      <React.Suspense fallback={<FallBack />}>
         <IsLazyFunc isProp={false} />
       </React.Suspense>
     </React.SuspenseList>

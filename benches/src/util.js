@@ -1,5 +1,5 @@
 // import afterFrame from "../node_modules/afterframe/dist/afterframe.module.js";
-import afterFrame from 'afterFrame';
+import afterFrame from 'afterframe';
 
 export { afterFrame };
 

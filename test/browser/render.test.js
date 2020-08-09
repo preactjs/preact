@@ -370,6 +370,14 @@ describe('render()', () => {
 		expect(scratch.firstChild.spellcheck).to.equal(false);
 	});
 
+	it('should render download attribute', () => {
+		render(<a download="" />, scratch);
+		expect(scratch.firstChild.getAttribute('download')).to.equal('');
+
+		render(<a download={null} />, scratch);
+		expect(scratch.firstChild.getAttribute('download')).to.equal(null);
+	});
+
 	it('should not set tagName', () => {
 		expect(() => render(<input tagName="div" />, scratch)).not.to.throw();
 	});

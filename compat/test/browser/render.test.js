@@ -242,6 +242,14 @@ describe('compat render', () => {
 		);
 	});
 
+	it('should cast boolean "download" values', () => {
+		render(<a download />, scratch);
+		expect(scratch.firstChild.getAttribute('download')).to.equal('');
+
+		render(<a download={false} />, scratch);
+		expect(scratch.firstChild.getAttribute('download')).to.equal(null);
+	});
+
 	it('should support static content', () => {
 		const updateSpy = sinon.spy();
 		const mountSpy = sinon.spy();
