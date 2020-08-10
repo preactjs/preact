@@ -173,3 +173,27 @@ options.vnode = vnode => {
 
 	if (oldVNodeHook) oldVNodeHook(vnode);
 };
+
+// Only needed for react-relay
+let currentComponent;
+const oldBeforeRender = options._render;
+options._render = function(vnode) {
+	if (oldBeforeRender) {
+		oldBeforeRender(vnode);
+	}
+	currentComponent = vnode._component;
+};
+
+// This is a very very private internal function for React it
+// is used to sort-of do runtime dependency injection. So far
+// only `react-relay` makes use of it. It uses it to read the
+// context value.
+export const __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = {
+	ReactCurrentDispatcher: {
+		current: {
+			readContext(context) {
+				return currentComponent._globalContext[context._id].props.value;
+			}
+		}
+	}
+};
