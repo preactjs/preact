@@ -113,11 +113,12 @@ options.vnode = vnode => {
 		// Apply DOM VNode compat
 		if (typeof type != 'function') {
 			// Apply defaultValue to value
-			if (props.defaultValue && props.value !== undefined) {
-				if (!props.value && props.value !== 0) {
+			if (props.defaultValue != null) {
+				if (props.value === null) {
 					props.value = props.defaultValue;
+				} else if (props.value !== undefined && type === 'textarea') {
+					props.defaultValue = props.value;
 				}
-				delete props.defaultValue;
 			}
 
 			// Add support for array select values: <select value={[]} />
