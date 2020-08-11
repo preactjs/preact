@@ -457,6 +457,24 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('<input type="password">');
 	});
 
+	it('should unset href if null || undefined', () => {
+		render(
+			<pre>
+				<a href="#">href="#"</a>
+				<a href={undefined}>href="undefined"</a>
+				<a href={null}>href="null"</a>
+				<a href={''}>href="''"</a>
+			</pre>,
+			scratch
+		);
+
+		const links = scratch.querySelectorAll('a');
+		expect(links[0].hasAttribute('href')).to.equal(true);
+		expect(links[1].hasAttribute('href')).to.equal(false);
+		expect(links[2].hasAttribute('href')).to.equal(false);
+		expect(links[3].hasAttribute('href')).to.equal(true);
+	});
+
 	describe('dangerouslySetInnerHTML', () => {
 		it('should support dangerouslySetInnerHTML', () => {
 			let html = '<b>foo &amp; bar</b>';
