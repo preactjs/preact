@@ -119,7 +119,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		try {
 			dom[name] = value == null ? '' : value;
 		} catch (e) {}
-		if (value == null || value === false) {
+		if (value == null) {
 			dom.removeAttribute(name);
 		}
 	} else if (typeof value != 'function' && name !== 'dangerouslySetInnerHTML') {
