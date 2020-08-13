@@ -113,6 +113,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		name !== 'type' &&
 		name !== 'size' &&
 		name !== 'download' &&
+		name !== 'href' &&
 		!isSvg &&
 		name in dom
 	) {
