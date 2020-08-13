@@ -26,7 +26,7 @@
 <td>
 
 [![npm](https://img.shields.io/npm/v/preact.svg)](http://npm.im/preact)
-[![Preact Slack Community](https://preact-slack.now.sh/badge.svg)](https://join.slack.com/t/preact/shared_invite/zt-c4nj0yn8-DQi78IcfaayUHj98Lv9cBw)
+[![Preact Slack Community](https://preact-slack.now.sh/badge.svg)](https://chat.preactjs.com)
 [![OpenCollective Backers](https://opencollective.com/preact/backers/badge.svg)](#backers)
 [![OpenCollective Sponsors](https://opencollective.com/preact/sponsors/badge.svg)](#sponsors)
 
