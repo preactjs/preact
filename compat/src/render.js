@@ -140,15 +140,12 @@ options.vnode = vnode => {
 			}
 
 			// Normalize DOM vnode properties.
-			let shouldSanitize, attrs, i;
-			for (i in props) if ((shouldSanitize = CAMEL_PROPS.test(i))) break;
-			if (shouldSanitize) {
-				attrs = vnode.props = {};
-				for (i in props) {
-					attrs[
-						CAMEL_PROPS.test(i) ? i.replace(/[A-Z0-9]/, '-$&').toLowerCase() : i
-					] = props[i];
-				}
+			let i;
+			for (i in props) {
+				let shouldSanitize = CAMEL_PROPS.test(i);
+				if (shouldSanitize)
+					vnode.props[i.replace(/[A-Z0-9]/, '-$&').toLowerCase()] = props[i];
+				if (shouldSanitize || props[i] === null) props[i] = undefined;
 			}
 		}
 
