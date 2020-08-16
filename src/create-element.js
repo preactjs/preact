@@ -1,4 +1,5 @@
-import options from './options';
+import { assign } from './util';
+import { options } from './options';
 
 /**
  * Create an virtual node (used for JSX)
@@ -9,11 +10,8 @@ import options from './options';
  * @returns {import('./internal').VNode}
  */
 export function createElement(type, props, children) {
-	let normalizedProps = {},
-		i;
-	for (i in props) {
-		if (i !== 'key' && i !== 'ref') normalizedProps[i] = props[i];
-	}
+	let i;
+	props = assign({}, props);
 
 	if (arguments.length > 3) {
 		children = [children];
@@ -22,27 +20,22 @@ export function createElement(type, props, children) {
 			children.push(arguments[i]);
 		}
 	}
+
 	if (children != null) {
-		normalizedProps.children = children;
+		props.children = children;
 	}
 
 	// If a Component VNode, check for and apply defaultProps
 	// Note: type may be undefined in development, must never error here.
 	if (typeof type == 'function' && type.defaultProps != null) {
 		for (i in type.defaultProps) {
-			if (normalizedProps[i] === undefined) {
-				normalizedProps[i] = type.defaultProps[i];
+			if (props[i] === undefined) {
+				props[i] = type.defaultProps[i];
 			}
 		}
 	}
 
-	return createVNode(
-		type,
-		normalizedProps,
-		props && props.key,
-		props && props.ref,
-		null
-	);
+	return createVNode(type, props);
 }
 
 /**
@@ -51,38 +44,24 @@ export function createElement(type, props, children) {
  * Constructor for this virtual node
  * @param {object | string | number | null} props The properties of this virtual node.
  * If this virtual node represents a text node, this is the text of the node (string or number).
- * @param {string | number | null} key The key for this virtual node, used when
- * diffing it against its children
- * @param {import('./internal').VNode["ref"]} ref The ref property that will
- * receive a reference to its created child
  * @returns {import('./internal').VNode}
  */
-export function createVNode(type, props, key, ref, original) {
+export function createVNode(type, props) {
 	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
 	// Do not inline into createElement and coerceToVNode!
 	const vnode = {
 		type,
 		props,
-		key,
-		ref,
-		_children: null,
-		_parent: null,
-		_depth: 0,
-		_dom: null,
-		// _nextDom must be initialized to undefined b/c it will eventually
-		// be set to dom.nextSibling which can return `null` and it is important
-		// to be able to distinguish between an uninitialized _nextDom and
-		// a _nextDom that has been set to `null`
-		_nextDom: undefined,
-		_component: null,
-		constructor: undefined,
-		_original: original
+		constructor: undefined
 	};
 
-	if (original == null) vnode._original = vnode;
 	if (options.vnode) options.vnode(vnode);
 
-	return vnode;
+	return {
+		type,
+		props,
+		constructor: undefined
+	};
 }
 
 export function createRef() {
@@ -100,3 +79,32 @@ export function Fragment(props) {
  */
 export const isValidElement = vnode =>
 	vnode != null && vnode.constructor === undefined;
+
+export function createBackingNode(vnode) {
+	const backingNode = {
+		key: vnode.props ? vnode.props.key : undefined,
+		ref: vnode.props ? vnode.props.ref : undefined,
+		type: vnode.type,
+		_node: vnode,
+		_children: null,
+		_parent: null,
+		_depth: 0,
+		_dom: null,
+		// _nextDom must be initialized to undefined b/c it will eventually
+		// be set to dom.nextSibling which can return `null` and it is important
+		// to be able to distinguish between an uninitialized _nextDom and
+		// a _nextDom that has been set to `null`
+		_nextDom: undefined,
+		_component: null
+	};
+
+	if (vnode.props && vnode.props.ref) {
+		delete vnode.props.ref;
+	}
+
+	if (vnode.props && vnode.props.key) {
+		delete vnode.props.key;
+	}
+
+	return backingNode;
+}

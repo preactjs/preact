@@ -11,17 +11,8 @@ import { createVNode } from './create-element';
  */
 export function cloneElement(vnode, props) {
 	props = assign(assign({}, vnode.props), props);
-	if (arguments.length > 2) props.children = EMPTY_ARR.slice.call(arguments, 2);
-	let normalizedProps = {};
-	for (const i in props) {
-		if (i !== 'key' && i !== 'ref') normalizedProps[i] = props[i];
-	}
 
-	return createVNode(
-		vnode.type,
-		normalizedProps,
-		props.key || vnode.key,
-		props.ref || vnode.ref,
-		null
-	);
+	if (arguments.length > 2) props.children = EMPTY_ARR.slice.call(arguments, 2);
+
+	return createVNode(vnode.type, props);
 }
