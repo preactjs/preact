@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component, options } from 'preact';
+import { createElement, render, Component, options, createRef } from 'preact';
 import {
 	setupScratch,
 	teardown,
@@ -8,9 +8,11 @@ import {
 	serializeHtml,
 	supportsDataList,
 	sortAttributes,
-	spyOnElementAttributes
+	spyOnElementAttributes,
+	createEvent
 } from '../_util/helpers';
 import { clearLog, getLog, logCall } from '../_util/logCall';
+import { useState } from 'preact/hooks';
 
 /** @jsx createElement */
 
@@ -787,6 +789,41 @@ describe('render()', () => {
 
 		expect(text.value).to.equal('Hello');
 		expect(checkbox.checked).to.equal(true);
+	});
+
+	it('should always diff `contenteditable` `innerHTML` against the DOM', () => {
+		// This prevents cursor jumps in contenteditable fields
+		// See https://github.com/preactjs/preact/issues/2691
+
+		function Editable() {
+			const [value, setValue] = useState('Hello');
+
+			return (
+				<div
+					contentEditable
+					dangerouslySetInnerHTML={{ __html: value }}
+					onInput={e => setValue(e.currentTarget.innerHTML)}
+				/>
+			);
+		}
+
+		render(<Editable />, scratch);
+
+		let editable = scratch.querySelector('[contenteditable]');
+		editable.innerHTML = 'World';
+		editable.dispatchEvent(createEvent('input'));
+		const range = document.createRange();
+		range.selectNodeContents(editable);
+		const sel = window.getSelection();
+		sel.removeAllRanges();
+		sel.addRange(range);
+
+		expect(window.getSelection().getRangeAt(0).endOffset).to.equal(1);
+		rerender();
+
+		editable = scratch.querySelector('[contenteditable]');
+		expect(editable.innerHTML).to.equal('World');
+		expect(window.getSelection().getRangeAt(0).endOffset).to.equal(1);
 	});
 
 	it('should not re-render when a component returns undefined', () => {
