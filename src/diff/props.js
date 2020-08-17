@@ -34,17 +34,16 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 }
 
 function setStyle(style, key, value) {
+	// if (!(key in style)) {  // -3b
+	// if (key < '.') {  // -1b
 	if (key[0] === '-') {
 		style.setProperty(key, value);
-	} else if (
-		typeof value == 'number' &&
-		IS_NON_DIMENSIONAL.test(key) === false
-	) {
-		style[key] = value + 'px';
 	} else if (value == null) {
 		style[key] = '';
-	} else {
+	} else if (typeof value != 'number' || IS_NON_DIMENSIONAL.test(key)) {
 		style[key] = value;
+	} else {
+		style[key] = value + 'px';
 	}
 }
 
@@ -57,39 +56,34 @@ function setStyle(style, key, value) {
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
 export function setProperty(dom, name, value, oldValue, isSvg) {
-	let s, useCapture, nameLower;
+	let useCapture, nameLower;
 
-	if (isSvg) {
-		if (name === 'className') {
-			name = 'class';
-		}
-	} else if (name === 'class') {
-		name = 'className';
-	}
+	if (isSvg && name == 'className') name = 'class';
+
+	// if (isSvg) {
+	// 	if (name === 'className') name = 'class';
+	// } else if (name === 'class') name += 'Name';
 
 	if (name === 'style') {
-		s = dom.style;
-
 		if (typeof value == 'string') {
-			s.cssText = value;
+			dom.style = value;
 		} else {
 			if (typeof oldValue == 'string') {
-				s.cssText = '';
-				oldValue = null;
+				dom.style = oldValue = '';
 			}
 
 			if (oldValue) {
-				for (let i in oldValue) {
-					if (!(value && i in value)) {
-						setStyle(s, i, '');
+				for (name in oldValue) {
+					if (!(value && name in value)) {
+						setStyle(dom.style, name, '');
 					}
 				}
 			}
 
 			if (value) {
-				for (let i in value) {
-					if (!oldValue || value[i] !== oldValue[i]) {
-						setStyle(s, i, value[i]);
+				for (name in value) {
+					if (!oldValue || value[name] !== oldValue[name]) {
+						setStyle(dom.style, name, value[name]);
 					}
 				}
 			}
@@ -99,11 +93,14 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	else if (name[0] === 'o' && name[1] === 'n') {
 		useCapture = name !== (name = name.replace(/Capture$/, ''));
 		nameLower = name.toLowerCase();
-		name = (nameLower in dom ? nameLower : name).slice(2);
+		if (nameLower in dom) name = nameLower;
+		name = name.slice(2);
+
+		if (!dom._listeners) dom._listeners = {};
+		dom._listeners[name] = value;
 
 		if (value) {
 			if (!oldValue) dom.addEventListener(name, eventProxy, useCapture);
-			(dom._listeners || (dom._listeners = {}))[name] = value;
 		} else {
 			dom.removeEventListener(name, eventProxy, useCapture);
 		}
@@ -122,7 +119,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	) {
 		dom[name] = value == null ? '' : value;
 	} else if (typeof value != 'function' && name !== 'dangerouslySetInnerHTML') {
-		if (name !== (name = name.replace(/^xlink:?/, ''))) {
+		if (name !== (name = name.replace(/xlink:?/, ''))) {
 			if (value == null || value === false) {
 				dom.removeAttributeNS(
 					'http://www.w3.org/1999/xlink',

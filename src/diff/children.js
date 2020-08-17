@@ -234,14 +234,17 @@ export function diffChildren(
  * children of a virtual node
  * @returns {import('../internal').VNode[]}
  */
-export function toChildArray(children) {
+export function toChildArray(children, out) {
+	out = out || [];
 	if (children == null || typeof children == 'boolean') {
-		return [];
 	} else if (Array.isArray(children)) {
-		return EMPTY_ARR.concat.apply([], children.map(toChildArray));
+		children.some(child => {
+			toChildArray(child, out);
+		});
+	} else {
+		out.push(children);
 	}
-
-	return [children];
+	return out;
 }
 
 export function placeChild(

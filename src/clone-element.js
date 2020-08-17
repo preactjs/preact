@@ -1,5 +1,4 @@
 import { assign } from './util';
-import { EMPTY_ARR } from './constants';
 import { createVNode } from './create-element';
 
 /**
@@ -9,19 +8,32 @@ import { createVNode } from './create-element';
  * @param {Array<import('./index').ComponentChildren>} rest Any additional arguments will be used as replacement children.
  * @returns {import('./internal').VNode}
  */
-export function cloneElement(vnode, props) {
-	props = assign(assign({}, vnode.props), props);
-	if (arguments.length > 2) props.children = EMPTY_ARR.slice.call(arguments, 2);
-	let normalizedProps = {};
-	for (const i in props) {
-		if (i !== 'key' && i !== 'ref') normalizedProps[i] = props[i];
+export function cloneElement(vnode, props, children) {
+	let normalizedProps = assign({}, vnode.props),
+		key,
+		ref,
+		i;
+	for (i in props) {
+		if (i == 'key') key = props[i];
+		else if (i == 'ref') ref = props[i];
+		else normalizedProps[i] = props[i];
+	}
+
+	if (arguments.length > 3) {
+		children = [children];
+		for (i = 3; i < arguments.length; i++) {
+			children.push(arguments[i]);
+		}
+	}
+	if (children != null) {
+		normalizedProps.children = children;
 	}
 
 	return createVNode(
 		vnode.type,
 		normalizedProps,
-		props.key || vnode.key,
-		props.ref || vnode.ref,
+		key || vnode.key,
+		ref || vnode.ref,
 		null
 	);
 }

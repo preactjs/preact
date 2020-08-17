@@ -73,7 +73,6 @@ options.event = e => {
 function setSafeDescriptor(proto, key) {
 	if (proto['UNSAFE_' + key] && !proto[key]) {
 		Object.defineProperty(proto, key, {
-			configurable: false,
 			get() {
 				return this['UNSAFE_' + key];
 			},
@@ -117,17 +116,17 @@ options.vnode = vnode => {
 				if (!props.value && props.value !== 0) {
 					props.value = props.defaultValue;
 				}
-				delete props.defaultValue;
+				props.defaultValue = undefined;
 			}
 
 			// Add support for array select values: <select value={[]} />
-			if (Array.isArray(props.value) && props.multiple && type === 'select') {
+			if (type === 'select' && props.multiple && Array.isArray(props.value)) {
 				toChildArray(props.children).forEach(child => {
 					if (props.value.indexOf(child.props.value) != -1) {
 						child.props.selected = true;
 					}
 				});
-				delete props.value;
+				props.value = undefined;
 			}
 
 			// Calling `setAttribute` with a truthy value will lead to it being
@@ -148,24 +147,19 @@ options.vnode = vnode => {
 				if (shouldSanitize || props[i] === null) props[i] = undefined;
 			}
 		}
-
-		// Events
-		applyEventNormalization(vnode);
-
 		// Component base class compat
 		// We can't just patch the base component class, because components that use
 		// inheritance and are transpiled down to ES5 will overwrite our patched
 		// getters and setters. See #1941
-		if (
-			typeof type == 'function' &&
-			!type._patchedLifecycles &&
-			type.prototype
-		) {
+		else if (type.prototype && !type.prototype._patchedLifecycles) {
+			type.prototype._patchedLifecycles = true;
 			setSafeDescriptor(type.prototype, 'componentWillMount');
 			setSafeDescriptor(type.prototype, 'componentWillReceiveProps');
 			setSafeDescriptor(type.prototype, 'componentWillUpdate');
-			type._patchedLifecycles = true;
 		}
+
+		// Events
+		applyEventNormalization(vnode);
 	}
 
 	if (oldVNodeHook) oldVNodeHook(vnode);
