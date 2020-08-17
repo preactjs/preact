@@ -792,7 +792,7 @@ describe('render()', () => {
 	});
 
 	it('should always diff `contenteditable` `innerHTML` against the DOM', () => {
-		// This prevents cursor jumps in contenteditable fields
+		// This tests that we do not cause any cursor jumps in contenteditable fields
 		// See https://github.com/preactjs/preact/issues/2691
 
 		function Editable() {
@@ -809,9 +809,8 @@ describe('render()', () => {
 
 		render(<Editable />, scratch);
 
+		// select all the text inside the contenteditable div
 		let editable = scratch.querySelector('[contenteditable]');
-		editable.innerHTML = 'World';
-		editable.dispatchEvent(createEvent('input'));
 		const range = document.createRange();
 		range.selectNodeContents(editable);
 		const sel = window.getSelection();
@@ -819,8 +818,18 @@ describe('render()', () => {
 		sel.addRange(range);
 
 		expect(window.getSelection().getRangeAt(0).endOffset).to.equal(1);
+
+		// dispatch a change event
+		editable.innerHTML = 'World';
+		editable.dispatchEvent(createEvent('input'));
+
+		expect(window.getSelection().getRangeAt(0).endOffset).to.equal(1);
+
+		// let preact re-render
 		rerender();
 
+		// ensure innerHTML is still correct (was not an issue before) and
+		// more importantly the text is still selected
 		editable = scratch.querySelector('[contenteditable]');
 		expect(editable.innerHTML).to.equal('World');
 		expect(window.getSelection().getRangeAt(0).endOffset).to.equal(1);
