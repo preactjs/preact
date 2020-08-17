@@ -125,7 +125,7 @@ export function useContext<T>(context: PreactContext<T>): T;
  */
 export function useDebugValue<T>(
 	value: T,
-	formatter?: (value: T) => string | number
+	formatter?: (value: T) => any
 ): void;
 
 export function useErrorBoundary(

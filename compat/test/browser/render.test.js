@@ -99,6 +99,12 @@ describe('compat render', () => {
 			.that.equals('dynamic content');
 	});
 
+	it('should ignore maxLength / minLength when is null', () => {
+		render(<input maxLength={null} minLength={null} />, scratch);
+		expect(scratch.firstElementChild.getAttribute('maxlength')).to.equal(null);
+		expect(scratch.firstElementChild.getAttribute('minlength')).to.equal(null);
+	});
+
 	it('should support defaultValue', () => {
 		render(<input defaultValue="foo" />, scratch);
 		expect(scratch.firstElementChild).to.have.property('value', 'foo');
