@@ -14,6 +14,20 @@ describe('cloneElement', () => {
 		expect(clone.props).to.deep.equal(instance.props); // with the same properties
 	});
 
+	it('should clone components without native Object.assign', () => {
+		function Comp() {}
+		const instance = <Comp prop1={1}>hello</Comp>;
+		const old = Object.assign;
+		Object.assign = undefined;
+		const clone = cloneElement(instance);
+		Object.assign = old;
+
+		expect(clone.prototype).to.equal(instance.prototype);
+		expect(clone.type).to.equal(instance.type);
+		expect(clone.props).not.to.equal(instance.props); // Should be a different object...
+		expect(clone.props).to.deep.equal(instance.props); // with the same properties
+	});
+
 	it('should merge new props', () => {
 		function Foo() {}
 		const instance = <Foo prop1={1} prop2={2} />;
