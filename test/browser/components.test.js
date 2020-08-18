@@ -115,6 +115,20 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
 		});
 
+		it('should not crash when setting state in constructor', () => {
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					// the following line made `this._nextState !== this.state` be truthy prior to the fix for preactjs/preact#2638
+					this.state = {};
+					this.setState({ preact: 'awesome' });
+				}
+			}
+
+			expect(() => render(<Foo foo="bar" />, scratch)).not.to.throw();
+			rerender();
+		});
+
 		it('should not crash when setting state with cb in constructor', () => {
 			let spy = sinon.spy();
 			class Foo extends Component {
@@ -1752,7 +1766,7 @@ describe('Components', () => {
 			}
 		}
 
-		let condition = false;
+		let renderChildDiv = false;
 
 		let child;
 		class Child extends Component {
@@ -1761,7 +1775,7 @@ describe('Components', () => {
 			}
 			render() {
 				child = this;
-				if (!condition) return null;
+				if (!renderChildDiv) return null;
 				return <div class="child" />;
 			}
 		}
@@ -1774,25 +1788,30 @@ describe('Components', () => {
 			}
 		}
 
+		// TODO: Consider rewriting test to not rely on internal properties
+		// and instead capture user-facing bug that would occur if this
+		// behavior were broken
+		const getDom = c => ('__v' in c ? c.__v.__e : c._vnode._dom);
+
 		render(<App />, scratch);
-		expect(child._vnode._dom).to.equalNode(child.base);
+		expect(getDom(child)).to.equalNode(child.base);
 
 		app.forceUpdate();
-		expect(child._vnode._dom).to.equalNode(child.base);
+		expect(getDom(child)).to.equalNode(child.base);
 
 		parent.setState({});
-		condition = true;
+		renderChildDiv = true;
 		child.forceUpdate();
-		expect(child._vnode._dom).to.equalNode(child.base);
+		expect(getDom(child)).to.equalNode(child.base);
 		rerender();
 
-		expect(child._vnode._dom).to.equalNode(child.base);
+		expect(getDom(child)).to.equalNode(child.base);
 
-		condition = false;
+		renderChildDiv = false;
 		app.setState({});
 		child.forceUpdate();
 		rerender();
-		expect(child._vnode._dom).to.equalNode(child.base);
+		expect(getDom(child)).to.equalNode(child.base);
 	});
 
 	// preact/#1323
@@ -2465,8 +2484,13 @@ describe('Components', () => {
 			);
 			render(divVNode, scratch);
 
+			// TODO: Consider rewriting test to not rely on internal properties
+			// and instead capture user-facing bug that would occur if this
+			// behavior were broken
+			const domProp = '__e' in divVNode ? '__e' : '_dom';
+
 			expect(scratch.innerHTML).to.equal('<div><p>child</p></div>');
-			expect(divVNode._dom).to.equalNode(
+			expect(divVNode[domProp]).to.equalNode(
 				scratch.firstChild,
 				'initial - divVNode._dom'
 			);
@@ -2479,7 +2503,7 @@ describe('Components', () => {
 			rerender();
 
 			expect(scratch.innerHTML).to.equal('<div><span>child</span></div>');
-			expect(divVNode._dom).to.equalNode(
+			expect(divVNode[domProp]).to.equalNode(
 				scratch.firstChild,
 				'swapChildTag - divVNode._dom'
 			);
@@ -2519,6 +2543,34 @@ describe('Components', () => {
 			expect(() => increment()).to.not.throw();
 			expect(() => rerender()).to.not.throw();
 			expect(scratch.innerHTML).to.equal('');
+		});
+
+		it('setState callbacks should have latest state, even when called in render', () => {
+			let callbackState;
+			let i = 0;
+
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { foo: 'bar' };
+				}
+				render() {
+					// So we don't get infinite loop
+					if (i++ === 0) {
+						this.setState({ foo: 'baz' }, () => {
+							callbackState = this.state;
+						});
+					}
+					return String(this.state.foo);
+				}
+			}
+
+			render(<Foo />, scratch);
+			expect(scratch.innerHTML).to.equal('bar');
+
+			rerender();
+			expect(scratch.innerHTML).to.equal('baz');
+			expect(callbackState).to.deep.equal({ foo: 'baz' });
 		});
 	});
 

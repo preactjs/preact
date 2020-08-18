@@ -1,7 +1,7 @@
 import { act } from 'preact/test-utils';
-import { createElement, render } from 'preact';
+import { createElement, render, Fragment, Component } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useEffect } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { useEffectAssertions } from './useEffectAssertions.test';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
 
@@ -82,5 +82,188 @@ describe('useEffect', () => {
 			'action1',
 			'action2'
 		]);
+	});
+
+	it('should throw an error upwards', () => {
+		const spy = sinon.spy();
+		let errored = false;
+
+		const Page1 = () => {
+			const [state, setState] = useState('loading');
+			useEffect(() => {
+				setState('loaded');
+			}, []);
+			return <p>{state}</p>;
+		};
+
+		const Page2 = () => {
+			useEffect(() => {
+				throw new Error('err');
+			}, []);
+			return <p>invisible</p>;
+		};
+
+		class App extends Component {
+			componentDidCatch(err) {
+				spy();
+				errored = err;
+			}
+
+			render(props, state) {
+				if (errored) {
+					return <p>Error</p>;
+				}
+
+				return <Fragment>{props.page === 1 ? <Page1 /> : <Page2 />}</Fragment>;
+			}
+		}
+
+		act(() => render(<App page={1} />, scratch));
+		expect(spy).to.not.be.called;
+		expect(scratch.innerHTML).to.equal('<p>loaded</p>');
+
+		act(() => render(<App page={2} />, scratch));
+		expect(spy).to.be.calledOnce;
+		expect(scratch.innerHTML).to.equal('<p>Error</p>');
+		errored = false;
+
+		act(() => render(<App page={1} />, scratch));
+		expect(spy).to.be.calledOnce;
+		expect(scratch.innerHTML).to.equal('<p>loaded</p>');
+	});
+
+	it('should throw an error upwards from return', () => {
+		const spy = sinon.spy();
+		let errored = false;
+
+		const Page1 = () => {
+			const [state, setState] = useState('loading');
+			useEffect(() => {
+				setState('loaded');
+			}, []);
+			return <p>{state}</p>;
+		};
+
+		const Page2 = () => {
+			useEffect(() => {
+				return () => {
+					throw new Error('err');
+				};
+			}, []);
+			return <p>Load</p>;
+		};
+
+		class App extends Component {
+			componentDidCatch(err) {
+				spy();
+				errored = err;
+			}
+
+			render(props, state) {
+				if (errored) {
+					return <p>Error</p>;
+				}
+
+				return <Fragment>{props.page === 1 ? <Page1 /> : <Page2 />}</Fragment>;
+			}
+		}
+
+		act(() => render(<App page={2} />, scratch));
+		expect(scratch.innerHTML).to.equal('<p>Load</p>');
+
+		act(() => render(<App page={1} />, scratch));
+		expect(spy).to.be.calledOnce;
+		expect(scratch.innerHTML).to.equal('<p>Error</p>');
+	});
+
+	it('catches errors when error is invoked during render', () => {
+		const spy = sinon.spy();
+		let errored;
+
+		function Comp() {
+			useEffect(() => {
+				throw new Error('hi');
+			});
+			return null;
+		}
+
+		class App extends Component {
+			componentDidCatch(err) {
+				spy();
+				errored = err;
+			}
+
+			render(props, state) {
+				if (errored) {
+					return <p>Error</p>;
+				}
+
+				return <Comp />;
+			}
+		}
+
+		render(<App />, scratch);
+		act(() => {
+			render(<App />, scratch);
+		});
+		expect(spy).to.be.calledOnce;
+		expect(scratch.innerHTML).to.equal('<p>Error</p>');
+	});
+
+	it('should allow creating a new root', () => {
+		const root = document.createElement('div');
+		const global = document.createElement('div');
+		scratch.appendChild(root);
+		scratch.appendChild(global);
+
+		const Modal = props => {
+			let [, setCanProceed] = useState(true);
+			let ChildProp = props.content;
+
+			return (
+				<div>
+					<ChildProp setCanProceed={setCanProceed} />
+				</div>
+			);
+		};
+
+		const Inner = () => {
+			useEffect(() => {
+				render(<div>global</div>, global);
+			}, []);
+
+			return <div>Inner</div>;
+		};
+
+		act(() => {
+			render(
+				<Modal
+					content={props => {
+						props.setCanProceed(false);
+						return <Inner />;
+					}}
+				/>,
+				root
+			);
+		});
+
+		expect(scratch.innerHTML).to.equal(
+			'<div><div><div>Inner</div></div></div><div><div>global</div></div>'
+		);
+	});
+
+	it('should not crash when effect returns truthy non-function value', () => {
+		const callback = sinon.spy(() => 'truthy');
+		function Comp() {
+			useEffect(callback);
+			return null;
+		}
+
+		render(<Comp />, scratch);
+		render(<Comp />, scratch);
+
+		expect(callback).to.have.been.calledOnce;
+
+		render(<div>Replacement</div>, scratch);
 	});
 });

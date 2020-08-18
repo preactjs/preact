@@ -1,4 +1,4 @@
-import { Component, createElement, options } from 'preact';
+import { Component, createElement, options, Fragment } from 'preact';
 import { assign } from './util';
 
 const oldCatchError = options._catchError;
@@ -10,6 +10,10 @@ options._catchError = function(error, newVNode, oldVNode) {
 
 		for (; (vnode = vnode._parent); ) {
 			if ((component = vnode._component) && component._childDidSuspend) {
+				if (newVNode._dom == null) {
+					newVNode._dom = oldVNode._dom;
+					newVNode._children = oldVNode._children;
+				}
 				// Don't call oldCatchError if we found a Suspense
 				return component._childDidSuspend(error, newVNode._component);
 			}
@@ -27,10 +31,19 @@ function detachedClone(vnode) {
 	return vnode;
 }
 
+function removeOriginal(vnode) {
+	if (vnode) {
+		vnode._original = null;
+		vnode._children = vnode._children && vnode._children.map(removeOriginal);
+	}
+	return vnode;
+}
+
 // having custom inheritance instead of a class here saves a lot of bytes
-export function Suspense(props) {
+export function Suspense() {
 	// we do not call super here to golf some bytes...
-	this._suspensions = 0;
+	this._pendingSuspensionCount = 0;
+	this._suspenders = null;
 	this._detachOnNextRender = null;
 }
 
@@ -47,6 +60,11 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 	/** @type {import('./internal').SuspenseComponent} */
 	const c = this;
 
+	if (c._suspenders == null) {
+		c._suspenders = [];
+	}
+	c._suspenders.push(suspendingComponent);
+
 	const resolve = suspended(c._vnode);
 
 	let resolved = false;
@@ -54,6 +72,8 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 		if (resolved) return;
 
 		resolved = true;
+		suspendingComponent.componentWillUnmount =
+			suspendingComponent._suspendedComponentWillUnmount;
 
 		if (resolve) {
 			resolve(onSuspensionComplete);
@@ -73,26 +93,39 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 	};
 
 	const onSuspensionComplete = () => {
-		if (!--c._suspensions) {
-			c._vnode._children[0] = c.state._suspended;
+		if (!--c._pendingSuspensionCount) {
+			c._vnode._children[0] = removeOriginal(c.state._suspended);
 			c.setState({ _suspended: (c._detachOnNextRender = null) });
+
+			let suspended;
+			while ((suspended = c._suspenders.pop())) {
+				suspended.forceUpdate();
+			}
 		}
 	};
 
-	if (!c._suspensions++) {
+	if (!c._pendingSuspensionCount++) {
 		c.setState({ _suspended: (c._detachOnNextRender = c._vnode._children[0]) });
 	}
 	promise.then(onResolved, onResolved);
 };
 
+Suspense.prototype.componentWillUnmount = function() {
+	this._suspenders = [];
+};
+
 Suspense.prototype.render = function(props, state) {
 	if (this._detachOnNextRender) {
-		this._vnode._children[0] = detachedClone(this._detachOnNextRender);
+		// When the Suspense's _vnode was created by a call to createVNode
+		// (i.e. due to a setState further up in the tree)
+		// it's _children prop is null, in this case we "forget" about the parked vnodes to detach
+		if (this._vnode._children)
+			this._vnode._children[0] = detachedClone(this._detachOnNextRender);
 		this._detachOnNextRender = null;
 	}
 
 	return [
-		createElement(Component, null, state._suspended ? null : props.children),
+		createElement(Fragment, null, state._suspended ? null : props.children),
 		state._suspended && props.fallback
 	];
 };

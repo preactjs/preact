@@ -57,6 +57,43 @@ describe('createContext', () => {
 		expect(scratch.innerHTML).to.equal('<div><div>a</div></div>');
 	});
 
+	// This optimization helps
+	// to prevent a Provider from rerendering the children, this means
+	// we only propagate to children.
+	// Strict equal vnode optimization
+	it('skips referentially equal children to Provider', () => {
+		const { Provider, Consumer } = createContext();
+		let set,
+			renders = 0;
+		const Layout = ({ children }) => {
+			renders++;
+			return children;
+		};
+		class State extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { i: 0 };
+				set = this.setState.bind(this);
+			}
+			render() {
+				const { children } = this.props;
+				return <Provider value={this.state}>{children}</Provider>;
+			}
+		}
+		const App = () => (
+			<State>
+				<Layout>
+					<Consumer>{({ i }) => <p>{i}</p>}</Consumer>
+				</Layout>
+			</State>
+		);
+		render(<App />, scratch);
+		expect(renders).to.equal(1);
+		set({ i: 2 });
+		rerender();
+		expect(renders).to.equal(1);
+	});
+
 	it('should preserve provider context through nesting providers', done => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { a: 'a' };
@@ -521,9 +558,9 @@ describe('createContext', () => {
 		});
 
 		// Rendered three times, should call 'Consumer' render two times
-		expect(Inner.prototype.render).to.have.been.calledTwice.and.calledWithMatch(
-			{ i: 2 }
-		);
+		expect(
+			Inner.prototype.render
+		).to.have.been.calledTwice.and.calledWithMatch({ i: 2 });
 		expect(scratch.innerHTML).to.equal('<div>2</div>');
 	});
 
@@ -775,5 +812,120 @@ describe('createContext', () => {
 			expect(spy).to.be.calledOnce;
 			expect(spy.getCall(0).args[0]).to.equal(instance);
 		});
+
+		it('should order updates correctly', () => {
+			const events = [];
+			let update;
+			const Store = createContext();
+
+			class Root extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { id: 0 };
+					update = this.updateStore = this.updateStore.bind(this);
+				}
+
+				updateStore() {
+					this.setState(state => ({ id: state.id + 1 }));
+				}
+
+				render() {
+					return (
+						<Store.Provider value={this.state.id}>
+							<App />
+						</Store.Provider>
+					);
+				}
+			}
+
+			class App extends Component {
+				shouldComponentUpdate() {
+					return false;
+				}
+
+				render() {
+					return <Store.Consumer>{id => <Parent key={id} />}</Store.Consumer>;
+				}
+			}
+
+			function Parent(props) {
+				return <Store.Consumer>{id => <Child id={id} />}</Store.Consumer>;
+			}
+
+			class Child extends Component {
+				componentDidMount() {
+					events.push('mount ' + this.props.id);
+				}
+
+				componentDidUpdate(prevProps) {
+					events.push('update ' + prevProps.id + ' to ' + this.props.id);
+				}
+
+				componentWillUnmount() {
+					events.push('unmount ' + this.props.id);
+				}
+
+				render() {
+					events.push('render ' + this.props.id);
+					return this.props.id;
+				}
+			}
+
+			render(<Root />, scratch);
+			expect(events).to.deep.equal(['render 0', 'mount 0']);
+
+			update();
+			rerender();
+			expect(events).to.deep.equal([
+				'render 0',
+				'mount 0',
+				'render 1',
+				'unmount 0',
+				'mount 1'
+			]);
+		});
+	});
+
+	it('should rerender when reset to defaultValue', () => {
+		const defaultValue = { state: 'hi' };
+		const context = createContext(defaultValue);
+		let set;
+
+		class NoUpdate extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+
+			render() {
+				return <context.Consumer>{v => <p>{v.state}</p>}</context.Consumer>;
+			}
+		}
+
+		class Provider extends Component {
+			constructor(props) {
+				super(props);
+				this.state = defaultValue;
+				set = this.setState.bind(this);
+			}
+
+			render() {
+				return (
+					<context.Provider value={this.state}>
+						<NoUpdate />
+					</context.Provider>
+				);
+			}
+		}
+
+		render(<Provider />, scratch);
+		expect(scratch.innerHTML).to.equal('<p>hi</p>');
+
+		set({ state: 'bye' });
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>bye</p>');
+
+		set(defaultValue);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>hi</p>');
 	});
 });

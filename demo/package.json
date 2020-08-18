@@ -26,13 +26,13 @@
     "webpack-dev-server": "^3.7.1"
   },
   "dependencies": {
-    "@material-ui/core": "4.2.0",
+    "@material-ui/core": "4.9.5",
     "d3-scale": "^1.0.7",
     "d3-selection": "^1.2.0",
     "htm": "2.1.1",
-    "mobx": "^5.9.0",
-    "mobx-react": "^5.4.3",
-    "mobx-state-tree": "^3.12.2",
+    "mobx": "^5.15.4",
+    "mobx-react": "^6.2.2",
+    "mobx-state-tree": "^3.16.0",
     "preact-render-to-string": "^5.0.2",
     "preact-router": "^3.0.0",
     "react-redux": "^7.1.0",

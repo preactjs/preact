@@ -1,4 +1,5 @@
 import { Component as PreactComponent } from '../../src/internal';
+import { Reducer } from '.';
 
 export { PreactContext } from '../../src/internal';
 
@@ -52,4 +53,5 @@ export interface MemoHookState {
 export interface ReducerHookState {
 	_value?: any;
 	_component?: Component;
+	_reducer?: Reducer<any, any>;
 }

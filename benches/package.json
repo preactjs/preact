@@ -1,0 +1,20 @@
+{
+	"name": "preact-benchmarks",
+	"private": true,
+	"version": "1.0.0",
+	"description": "Benchmarks for Preact",
+	"scripts": {
+		"start": "node ./scripts config text_update.html && tach --config dist/text_update.config.json --manual",
+		"bench": "node ./scripts bench",
+		"help": "node ./scripts --help"
+	},
+	"license": "MIT",
+	"dependencies": {
+		"afterframe": "^1.0.1"
+	},
+	"devDependencies": {
+		"globby": "^11.0.0",
+		"sade": "^1.7.3",
+		"tachometer": "^0.4.21"
+	}
+}

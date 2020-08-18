@@ -3,24 +3,19 @@
     "what is this file?": "It controls protected/private property mangling so that minified builds have consistent property names.",
     "why are there duplicate minified properties?": "Most properties are only used on one type of objects, so they can have the same name since they will never collide. Doing this reduces size."
   },
-  "props": {
-    "cname": 6,
-    "props": {
-      "$_afterPaintQueued": "__a",
-      "$__hooks": "__H",
-      "$_component": "__c",
-      "$_defaultValue": "__",
-      "$_id": "__c",
-      "$_parentDom": "__P",
-      "$_root": "__",
-      "$_diff": "__b",
-      "$_commit": "__c",
-      "$_render": "__r",
-      "$_renderCallbacks": "__h",
-      "$_suspensions": "__u",
-      "$_hook": "__h",
-      "$_catchError": "__e",
-      "$_unmount": "_e"
+  "minify": {
+    "mangle": {
+      "properties": {
+        "regex": "^_[^_]",
+        "reserved": [
+          "__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED",
+          "__REACT_DEVTOOLS_GLOBAL_HOOK__",
+          "__PREACT_DEVTOOLS__",
+          "_renderers",
+          "__source",
+          "__self"
+        ]
+      }
     }
   }
 }

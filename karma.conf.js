@@ -1,11 +1,10 @@
 /*eslint no-var:0, object-shorthand:0 */
 
 var coverage = String(process.env.COVERAGE) === 'true',
+	minify = String(process.env.MINIFY) === 'true',
 	ci = String(process.env.CI).match(/^(1|true)$/gi),
-	pullRequest = !String(process.env.TRAVIS_PULL_REQUEST).match(
-		/^(0|false|undefined)$/gi
-	),
-	masterBranch = String(process.env.TRAVIS_BRANCH).match(/^master$/gi),
+	pullRequest = String(process.env.GITHUB_EVENT_NAME) === 'pull_request',
+	masterBranch = String(process.env.GITHUB_WORKFLOW) === 'CI-master',
 	sauceLabs = ci && !pullRequest && masterBranch,
 	performance = !coverage && String(process.env.PERFORMANCE) !== 'false',
 	webpack = require('webpack'),
@@ -61,32 +60,8 @@ var localLaunchers = {
 	}
 };
 
-const babelOptions = (options = {}) => {
-	return {
-		babelrc: false,
-		cacheDirectory: true,
-		presets: [
-			[
-				'@babel/preset-env',
-				{
-					loose: true,
-					exclude: ['@babel/plugin-transform-typeof-symbol'],
-					targets: {
-						browsers: ['last 2 versions', 'IE >= 9']
-					}
-				}
-			]
-		],
-		plugins: [
-			coverage && ['istanbul', { include: '**/src/**/*.js' }],
-			'@babel/plugin-proposal-object-rest-spread',
-			options.debug && '@babel/plugin-transform-react-jsx-source',
-			'@babel/plugin-transform-react-jsx',
-			'babel-plugin-transform-async-to-promises'
-		].filter(Boolean),
-		ignore: ['./dist']
-	};
-};
+const subPkgPath = pkgName =>
+	path.join(__dirname, pkgName, !minify ? 'src' : '');
 
 module.exports = function(config) {
 	config.set({
@@ -94,7 +69,7 @@ module.exports = function(config) {
 			? Object.keys(sauceLabsLaunchers)
 			: Object.keys(localLaunchers),
 
-		frameworks: ['source-map-support', 'mocha', 'chai-sinon'],
+		frameworks: ['mocha', 'chai-sinon'],
 
 		reporters: ['mocha'].concat(
 			coverage ? 'coverage' : [],
@@ -125,13 +100,13 @@ module.exports = function(config) {
 		captureTimeout: 0,
 
 		sauceLabs: {
-			build: `CI #${process.env.TRAVIS_BUILD_NUMBER} (${process.env.TRAVIS_BUILD_ID})`,
+			build: `CI #${process.env.GITHUB_RUN_NUMBER} (${process.env.GITHUB_RUN_ID})`,
 			tunnelIdentifier:
-				process.env.TRAVIS_JOB_NUMBER ||
+				process.env.GITHUB_RUN_NUMBER ||
 				`local${require('./package.json').version}`,
 			connectLocationForSERelay: 'localhost',
 			connectPortForSERelay: 4445,
-			startConnect: false
+			startConnect: !!sauceLabs
 		},
 
 		customLaunchers: sauceLabs ? sauceLabsLaunchers : localLaunchers,
@@ -161,30 +136,25 @@ module.exports = function(config) {
 
 				/* Transpile source and test files */
 				rules: [
-					// Special case for babel plugins that should not be enabled
-					// in production mode and only be enabled for specific
-					// test files
-					{
-						enforce: 'pre',
-						test: /(component-stack|debug)\.test\.js$/,
-						exclude: /node_modules/,
-						loader: 'babel-loader',
-						options: babelOptions({ debug: true })
-					},
-
 					// Special case for sinon.js which ships ES2015+ code in their
 					// esm bundle
 					{
 						test: /node_modules\/sinon\/.*\.jsx?$/,
-						loader: 'babel-loader',
-						options: babelOptions()
+						loader: 'babel-loader'
 					},
 
 					{
 						test: /\.jsx?$/,
 						exclude: /node_modules/,
 						loader: 'babel-loader',
-						options: babelOptions()
+						options: {
+							plugins: [
+								coverage && [
+									'istanbul',
+									{ include: minify ? '**/dist/**/*.js' : '**/src/**/*.js' }
+								]
+							].filter(Boolean)
+						}
 					}
 				]
 			},
@@ -193,19 +163,19 @@ module.exports = function(config) {
 				// rather than referencing source files inside the module
 				// directly
 				alias: {
-					'preact/debug': path.join(__dirname, './debug/src'),
-					'preact/compat': path.join(__dirname, './compat/src'),
-					'preact/hooks': path.join(__dirname, './hooks/src'),
-					'preact/test-utils': path.join(__dirname, './test-utils/src'),
-					preact: path.join(__dirname, './src')
+					'preact/debug': subPkgPath('./debug/'),
+					'preact/devtools': subPkgPath('./devtools/'),
+					'preact/compat': subPkgPath('./compat/'),
+					'preact/hooks': subPkgPath('./hooks/'),
+					'preact/test-utils': subPkgPath('./test-utils/'),
+					preact: subPkgPath('')
 				}
 			},
 			plugins: [
 				new webpack.DefinePlugin({
 					coverage: coverage,
 					NODE_ENV: JSON.stringify(process.env.NODE_ENV || ''),
-					ENABLE_PERFORMANCE: performance,
-					DISABLE_FLAKEY: !!String(process.env.FLAKEY).match(/^(0|false)$/gi)
+					ENABLE_PERFORMANCE: performance
 				})
 			],
 			performance: {

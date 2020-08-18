@@ -13,7 +13,7 @@
 - Extensive React compatibility via a simple [preact/compat] alias
 - Everything you need: JSX, <abbr title="Virtual DOM">VDOM</abbr>, [DevTools], <abbr title="Hot Module Replacement">HMR</abbr>, <abbr title="Server-Side Rendering">SSR</abbr>.
 - Highly optimized diff algorithm and seamless hydration from Server Side Rendering
-- Supports all modern browsers and IE11+
+- Supports all modern browsers and IE11
 - Transparent asynchronous rendering with a pluggable scheduler
 - **Instant production-grade app setup with [Preact CLI](https://github.com/preactjs/preact-cli)**
 
@@ -26,12 +26,10 @@
 <td>
 
 [![npm](https://img.shields.io/npm/v/preact.svg)](http://npm.im/preact)
-[![Preact Slack Community](https://preact-slack.now.sh/badge.svg)](https://preact-slack.now.sh)
+[![Preact Slack Community](https://preact-slack.now.sh/badge.svg)](https://chat.preactjs.com)
 [![OpenCollective Backers](https://opencollective.com/preact/backers/badge.svg)](#backers)
 [![OpenCollective Sponsors](https://opencollective.com/preact/sponsors/badge.svg)](#sponsors)
 
-
-[![travis](https://travis-ci.org/preactjs/preact.svg?branch=master)](https://travis-ci.org/preactjs/preact)
 [![coveralls](https://img.shields.io/coveralls/preactjs/preact/master.svg)](https://coveralls.io/github/preactjs/preact)
 [![gzip size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=gzip&label=gzip)](https://unpkg.com/preact/dist/preact.min.js)
 [![brotli size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=brotli&label=brotli)](https://unpkg.com/preact/dist/preact.min.js)
@@ -77,7 +75,7 @@ render(<main><h1>Hello World!</h1></main>, document.body);
 // ^ this second invocation of render(...) will use a single DOM call to update the text of the <h1>
 ```
 
-Hooray! render() has taken our structure and output a User Interface! This approach demonstrates a simple case, but would be difficult to use as an application grows in complexity. Each change would be forced to calculate the difference between the current and updated stucture for the entire application. Components can help here – by dividing the User Interface into nested Components each can calculate their difference from their mounted point. Here's an example:
+Hooray! render() has taken our structure and output a User Interface! This approach demonstrates a simple case, but would be difficult to use as an application grows in complexity. Each change would be forced to calculate the difference between the current and updated structure for the entire application. Components can help here – by dividing the User Interface into nested Components each can calculate their difference from their mounted point. Here's an example:
 
 ```js
 import { render, h } from 'preact';
@@ -179,7 +177,7 @@ MIT
 
 
 
-[![Preact](http://i.imgur.com/YqCHvEW.gif)](https://preactjs.com)
+[![Preact](https://i.imgur.com/YqCHvEW.gif)](https://preactjs.com)
 
 
 [preact/compat]: https://github.com/preactjs/preact/tree/master/compat

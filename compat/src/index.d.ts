@@ -2,6 +2,7 @@ import * as _hooks from '../../hooks';
 import * as preact from '../../src';
 import { JSXInternal } from '../../src/jsx';
 import * as _Suspense from './suspense';
+import * as _SuspenseList from './suspense-list'
 
 // export default React;
 export = React;
@@ -42,8 +43,10 @@ declare namespace React {
 	// Suspense
 	export import Suspense = _Suspense.Suspense;
 	export import lazy = _Suspense.lazy;
+	export import SuspenseList = _SuspenseList.SuspenseList
 
 	// Compat
+	export import StrictMode = preact.Fragment;
 	export const version: string;
 
 	export function createPortal(
@@ -83,10 +86,13 @@ declare namespace React {
 		isPureReactComponent: boolean;
 	}
 
-	export function memo<P = {}>(
-		component: preact.FunctionalComponent<P>,
-		comparer?: (prev: P, next: P) => boolean
-	): preact.FunctionComponent<P>;
+	export function memo<C extends preact.FunctionalComponent<any>>(
+		component: C,
+		comparer?: (
+			prev: preact.ComponentProps<C>,
+			next: preact.ComponentProps<C>
+		) => boolean
+	): C;
 
 	export interface ForwardFn<P = {}, T = any> {
 		(props: P, ref: Ref<T>): preact.ComponentChild;
@@ -105,11 +111,11 @@ declare namespace React {
 	export const Children: {
 		map<T extends preact.ComponentChild, R>(
 			children: T | T[],
-			fn: (child: T, i: number, array: T[]) => R
+			fn: (child: T, i: number) => R
 		): R[];
 		forEach<T extends preact.ComponentChild>(
 			children: T | T[],
-			fn: (child: T, i: number, array: T[]) => void
+			fn: (child: T, i: number) => void
 		): void;
 		count: (children: preact.ComponentChildren) => number;
 		only: (children: preact.ComponentChildren) => preact.ComponentChild;

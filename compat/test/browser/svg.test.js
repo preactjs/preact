@@ -66,4 +66,29 @@ describe('svg', () => {
 			)
 		);
 	});
+
+	it('should render correct SVG attribute names to the DOM', () => {
+		React.render(
+			<svg
+				clipPath="value"
+				clipRule="value"
+				clipPathUnits="value"
+				glyphOrientationHorizontal="value"
+				glyphRef="value"
+				markerStart="value"
+				markerHeight="value"
+				markerUnits="value"
+				markerWidth="value"
+				x1="value"
+				xChannelSelector="value"
+			/>,
+			scratch
+		);
+
+		expect(serializeHtml(scratch)).to.eql(
+			sortAttributes(
+				'<svg clip-path="value" clip-rule="value" clipPathUnits="value" glyph-orientationhorizontal="value" glyphRef="value" marker-start="value" markerHeight="value" markerUnits="value" markerWidth="value" x1="value" xChannelSelector="value"></svg>'
+			)
+		);
+	});
 });

@@ -47,7 +47,7 @@ describe('refs', () => {
 
 	it('should support createRef', () => {
 		const r = createRef();
-		expect(r.current).to.equal(undefined);
+		expect(r.current).to.equal(null);
 
 		render(<div ref={r} />, scratch);
 		expect(r.current).to.equalNode(scratch.firstChild);

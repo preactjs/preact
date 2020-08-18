@@ -26,7 +26,12 @@ import { Children } from './Children';
 import { Suspense, lazy } from './suspense';
 import { SuspenseList } from './suspense-list';
 import { createPortal } from './portals';
-import { hydrate, render, REACT_ELEMENT_TYPE } from './render';
+import {
+	hydrate,
+	render,
+	REACT_ELEMENT_TYPE,
+	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
+} from './render';
 
 const version = '16.8.0'; // trick libraries to think we are react
 
@@ -95,6 +100,12 @@ function findDOMNode(component) {
 // eslint-disable-next-line camelcase
 const unstable_batchedUpdates = (callback, arg) => callback(arg);
 
+/**
+ * Strict Mode is not implemented in Preact, so we provide a stand-in for it
+ * that just renders its children without imposing any restrictions.
+ */
+const StrictMode = Fragment;
+
 export * from 'preact/hooks';
 export {
 	version,
@@ -117,9 +128,11 @@ export {
 	forwardRef,
 	// eslint-disable-next-line camelcase
 	unstable_batchedUpdates,
+	StrictMode,
 	Suspense,
 	SuspenseList,
-	lazy
+	lazy,
+	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 };
 
 // React copies the named exports to the default one.
@@ -137,7 +150,7 @@ export default {
 	version,
 	Children,
 	render,
-	hydrate: render,
+	hydrate,
 	unmountComponentAtNode,
 	createPortal,
 	createElement,
@@ -153,7 +166,9 @@ export default {
 	memo,
 	forwardRef,
 	unstable_batchedUpdates,
+	StrictMode,
 	Suspense,
 	SuspenseList,
-	lazy
+	lazy,
+	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 };

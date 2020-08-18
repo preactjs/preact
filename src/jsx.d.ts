@@ -222,7 +222,7 @@ export namespace JSXInternal {
 		strokeDashoffset?: string | number;
 		strokeLinecap?: 'butt' | 'round' | 'square' | 'inherit';
 		strokeLinejoin?: 'miter' | 'round' | 'bevel' | 'inherit';
-		strokeMiterlimit?: string;
+		strokeMiterlimit?: string | number;
 		strokeOpacity?: number | string;
 		strokeWidth?: number | string;
 		surfaceScale?: number | string;
@@ -442,7 +442,6 @@ export namespace JSXInternal {
 		onFormData?: GenericEventHandler<Target>;
 		onFormDataCapture?: GenericEventHandler<Target>;
 
-
 		// Keyboard Events
 		onKeyDown?: KeyboardEventHandler<Target>;
 		onKeyDownCapture?: KeyboardEventHandler<Target>;
@@ -612,7 +611,7 @@ export namespace JSXInternal {
 		autofocus?: boolean;
 		autoFocus?: boolean;
 		autoPlay?: boolean;
-		capture?: boolean;
+		capture?: boolean | string;
 		cellPadding?: number | string;
 		cellSpacing?: number | string;
 		charSet?: string;
@@ -666,6 +665,7 @@ export namespace JSXInternal {
 		label?: string;
 		lang?: string;
 		list?: string;
+		loading?: 'eager' | 'lazy';
 		loop?: boolean;
 		low?: number;
 		manifest?: string;
@@ -747,6 +747,20 @@ export namespace JSXInternal {
 		itemRef?: string;
 	}
 
+	interface HTMLMarqueeElement extends HTMLElement {
+		behavior?: 'scroll' | 'slide' | 'alternate';
+		bgColor?: string;
+		direction?: 'left' | 'right' | 'up' | 'down';
+		height?: number | string;
+		hspace?: number | string;
+		loop?: number | string;
+		scrollAmount?: number | string;
+		scrollDelay?: number | string;
+		trueSpeed?: boolean;
+		vspace?: number | string;
+		width?: number | string;
+	}
+
 	interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -813,6 +827,7 @@ export namespace JSXInternal {
 		main: HTMLAttributes<HTMLElement>;
 		map: HTMLAttributes<HTMLMapElement>;
 		mark: HTMLAttributes<HTMLElement>;
+		marquee: HTMLAttributes<HTMLMarqueeElement>;
 		menu: HTMLAttributes<HTMLMenuElement>;
 		menuitem: HTMLAttributes<HTMLUnknownElement>;
 		meta: HTMLAttributes<HTMLMetaElement>;
@@ -879,6 +894,7 @@ export namespace JSXInternal {
 		feConvolveMatrix: SVGAttributes<SVGFEConvolveMatrixElement>;
 		feDiffuseLighting: SVGAttributes<SVGFEDiffuseLightingElement>;
 		feDisplacementMap: SVGAttributes<SVGFEDisplacementMapElement>;
+		feDropShadow: SVGAttributes<SVGFEDropShadowElement>;
 		feFlood: SVGAttributes<SVGFEFloodElement>;
 		feGaussianBlur: SVGAttributes<SVGFEGaussianBlurElement>;
 		feImage: SVGAttributes<SVGFEImageElement>;

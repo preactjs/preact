@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Patching HTML</title>
+		<style>
+			.hello {
+				color: red;
+			}
+
+			.bye {
+				color: blue;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="app"></div>
+		<script type="module">
+			import * as bench from '/bench.js';
+			import { render, createElement as h, Component } from 'preact';
+
+			const state = {
+				msg: 'hello',
+				list: new Array(1000).fill(0).map((_, i) => ({
+					i,
+					text: 'foobar' + i
+				}))
+			};
+
+			class App extends Component {
+				render() {
+					return h(
+						'div',
+						{ id: 'app' },
+						h('p', null, state.msg),
+						...state.list.map((obj, i) =>
+							h(
+								'div',
+								{ key: i, title: state.msg + i },
+								h('span', { className: state.msg }, obj.text),
+								h('span', { className: 'baz' }, 'one'),
+								h('span', { className: 'qux' }, 'two'),
+								h(
+									'div',
+									null,
+									h('span', { className: 'qux' }, 'three'),
+									h('span', { className: 'qux' }, 'four'),
+									h('span', { className: 'baz' }, 'five'),
+									h(
+										'div',
+										null,
+										h('span', { className: 'qux' }, 'six'),
+										h('span', { className: 'baz' }, 'seven'),
+										h('span', { className: state.msg }, 'eight')
+									)
+								)
+							)
+						)
+					);
+				}
+			}
+
+			// const p = performance.now();
+			render(h(App), document.getElementById('app'));
+			// console.log(`mount: ${(performance.now() - p).toFixed(2)}ms`);
+
+			// const patchResults = [];
+
+			function runPatch() {
+				// const s = performance.now();
+				state.msg = state.msg === 'hello' ? 'bye' : 'hello';
+				state.list[0].text = state.msg;
+				render(h(App), document.getElementById('app'));
+				// patchResults.push(performance.now() - s);
+			}
+
+			async function warmup() {
+				// const count = 100;
+				const count = 25;
+
+				for (let i = 0; i < count; i++) {
+					runPatch();
+					await new Promise(r => requestAnimationFrame(r));
+				}
+
+				// let fastest = Infinity;
+				// const total = patchResults.reduce((all, cur) => {
+				// 	if (cur < fastest) {
+				// 		fastest = cur;
+				// 	}
+				// 	return all + cur;
+				// }, 0);
+
+				// console.log(`${count} runs average: ${(total / count).toFixed(2)}ms`);
+				// console.log(`fastest run: ${fastest.toFixed(2)}ms`);
+			}
+
+			warmup().then(async () => {
+				bench.start();
+				runPatch();
+				await new Promise(r => requestAnimationFrame(r));
+				bench.stop();
+			});
+		</script>
+	</body>
+</html>
