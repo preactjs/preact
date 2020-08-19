@@ -791,7 +791,7 @@ describe('render()', () => {
 		expect(checkbox.checked).to.equal(true);
 	});
 
-	it.only('should always diff `contenteditable` `innerHTML` against the DOM', () => {
+	it('should always diff `contenteditable` `innerHTML` against the DOM', () => {
 		// This tests that we do not cause any cursor jumps in contenteditable fields
 		// See https://github.com/preactjs/preact/issues/2691
 
