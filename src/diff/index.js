@@ -87,8 +87,8 @@ export function diff(
 				: globalContext;
 
 			// Get component and set it to `c`
-			if (oldVNode._component) {
-				c = newVNode._component = oldVNode._component;
+			if (newVNode._component) {
+				c = newVNode._component;
 				clearProcessingException = c._processingException = c._pendingError;
 			} else {
 				// Instantiate the new component
@@ -156,12 +156,12 @@ export function diff(
 							c._nextState,
 							componentContext
 						) === false) ||
-					newVNode._original === oldVNode._original
+					newVNode._node === oldVNode
 				) {
 					c.props = newProps;
 					c.state = c._nextState;
 					// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
-					if (newVNode._original !== oldVNode._original) c._dirty = false;
+					if (newVNode._node !== oldVNode) c._dirty = false;
 					c._vnode = newVNode;
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
@@ -235,15 +235,9 @@ export function diff(
 			}
 
 			c._force = false;
-		} else if (
-			excessDomChildren == null &&
-			newVNode._original === oldVNode._original
-		) {
-			newVNode._children = oldVNode._children;
-			newVNode._dom = oldVNode._dom;
 		} else {
 			newVNode._dom = diffElementNodes(
-				oldVNode._dom,
+				newVNode._dom,
 				newVNode,
 				oldVNode,
 				globalContext,
@@ -310,7 +304,7 @@ function diffElementNodes(
 ) {
 	let i;
 	let oldProps = oldVNode.props;
-	let newProps = newVNode.props;
+	let newProps = (newVNode.props = newVNode._node.props);
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	isSvg = newVNode.type === 'svg' || isSvg;
