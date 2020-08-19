@@ -142,6 +142,16 @@ options.vnode = vnode => {
 					] = props[i];
 				}
 			}
+			
+			
+			let style = props.style;
+			if (typeof style === 'object') {
+				for (i in style) {
+					if (typeof style[i] === 'number' && !IS_NON_DIMENSIONAL.test(i)) {
+						style[i] += 'px';
+					}
+				}
+			}
 		}
 
 		// Events
