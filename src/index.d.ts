@@ -127,7 +127,7 @@ declare namespace preact {
 			previousState: Readonly<S>,
 			snapshot: any
 		): void;
-		componentDidCatch?(error: any, errorInfo: any): void;
+		componentDidCatch?(error: any): void;
 	}
 
 	abstract class Component<P, S> {
