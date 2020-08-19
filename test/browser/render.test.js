@@ -791,7 +791,7 @@ describe('render()', () => {
 		expect(checkbox.checked).to.equal(true);
 	});
 
-	it('should always diff `contenteditable` `innerHTML` against the DOM', () => {
+	it.only('should always diff `contenteditable` `innerHTML` against the DOM', () => {
 		// This tests that we do not cause any cursor jumps in contenteditable fields
 		// See https://github.com/preactjs/preact/issues/2691
 
@@ -809,30 +809,31 @@ describe('render()', () => {
 
 		render(<Editable />, scratch);
 
-		// select all the text inside the contenteditable div
 		let editable = scratch.querySelector('[contenteditable]');
+
+		// modify the innerHTML and set the caret to character 2 to simulate a user typing
+		editable.innerHTML = 'World';
+
 		const range = document.createRange();
 		range.selectNodeContents(editable);
+		range.setStart(editable.childNodes[0], 2);
+		range.collapse(true);
 		const sel = window.getSelection();
 		sel.removeAllRanges();
 		sel.addRange(range);
 
-		expect(window.getSelection().getRangeAt(0).endOffset).to.equal(1);
+		// ensure we didn't mess up setting the cursor to position 2
+		expect(window.getSelection().getRangeAt(0).startOffset).to.equal(2);
 
-		// dispatch a change event
-		editable.innerHTML = 'World';
+		// dispatch the input event to tell preact to re-render
 		editable.dispatchEvent(createEvent('input'));
-
-		expect(window.getSelection().getRangeAt(0).endOffset).to.equal(1);
-
-		// let preact re-render
 		rerender();
 
 		// ensure innerHTML is still correct (was not an issue before) and
-		// more importantly the text is still selected
+		// more importantly the caret is still at character 2
 		editable = scratch.querySelector('[contenteditable]');
 		expect(editable.innerHTML).to.equal('World');
-		expect(window.getSelection().getRangeAt(0).endOffset).to.equal(1);
+		expect(window.getSelection().getRangeAt(0).startOffset).to.equal(2);
 	});
 
 	it('should not re-render when a component returns undefined', () => {
