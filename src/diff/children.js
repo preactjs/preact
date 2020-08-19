@@ -189,7 +189,8 @@ export function diffChildren(
 		) {
 			// The above condition is to handle null placeholders. See test in placeholder.test.js:
 			// `efficiently replace null placeholders in parent rerenders`
-			oldDom = getDomSibling(oldVNode);
+			// TODO: oldVNode is reset to a plain element-node
+			// oldDom = getDomSibling(oldVNode);
 		}
 	}
 
