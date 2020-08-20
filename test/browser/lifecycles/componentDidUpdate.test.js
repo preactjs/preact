@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component } from 'preact';
+import { createElement, createRoot, Component } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
 
 /** @jsx createElement */
@@ -11,8 +11,11 @@ describe('Lifecycle methods', () => {
 	/** @type {() => void} */
 	let rerender;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 		rerender = setupRerender();
 	});
 
@@ -72,7 +75,7 @@ describe('Lifecycle methods', () => {
 
 			// Initial render
 			// state.value: initialized to 0 in constructor, 0 -> 1 in gDSFP
-			render(<Foo foo="foo" />, scratch);
+			render(<Foo foo="foo" />);
 			expect(scratch.firstChild.textContent).to.be.equal('1');
 			expect(prevPropsArg).to.be.undefined;
 			expect(prevStateArg).to.be.undefined;
@@ -82,7 +85,7 @@ describe('Lifecycle methods', () => {
 
 			// New props
 			// state.value: 1 -> 2 in gDSFP
-			render(<Foo foo="bar" />, scratch);
+			render(<Foo foo="bar" />);
 			expect(scratch.firstChild.textContent).to.be.equal('2');
 			expect(prevPropsArg).to.deep.equal({ foo: 'foo' });
 			expect(prevStateArg).to.deep.equal({ value: 1 });
@@ -121,7 +124,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<App />, scratch);
+			render(<App />);
 			c.setState({});
 			rerender();
 
@@ -158,7 +161,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<PropsProvider />, scratch);
+			render(<PropsProvider />);
 
 			changeProps();
 			rerender();
@@ -190,7 +193,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<Foo />, scratch);
+			render(<Foo />);
 
 			updateState();
 			rerender();
@@ -222,7 +225,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<Foo />, scratch);
+			render(<Foo />);
 
 			updateState();
 			rerender();
@@ -260,7 +263,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<PropsProvider />, scratch);
+			render(<PropsProvider />);
 
 			changeProps();
 			rerender();
@@ -292,7 +295,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<App />, scratch);
+			render(<App />);
 			expect(spy).not.to.have.been.called;
 
 			inst.setState({});
@@ -328,8 +331,8 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<Outer renderInner={false} />, scratch);
-			render(<Outer renderInner />, scratch);
+			render(<Outer renderInner={false} />);
+			render(<Outer renderInner />);
 
 			expect(log).to.deep.equal(['Inner mounted', 'Outer updated']);
 		});
@@ -370,7 +373,7 @@ describe('Lifecycle methods', () => {
 			sinon.spy(Inner.prototype, 'componentDidUpdate');
 
 			// Initial render
-			render(<Outer />, scratch);
+			render(<Outer />);
 			expect(Inner.prototype.componentDidUpdate).to.not.have.been.called;
 
 			// Set state with a new i

@@ -1,4 +1,4 @@
-import { createElement, render, Component } from 'preact';
+import { createElement, createRoot, Component } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
 
 /** @jsx createElement */
@@ -7,8 +7,11 @@ describe('Lifecycle methods', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 	});
 
 	afterEach(() => {
@@ -35,7 +38,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<Foo />, scratch);
+			render(<Foo />);
 
 			expect(componentState).to.deep.equal({ value: 1 });
 		});

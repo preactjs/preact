@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component } from 'preact';
+import { createElement, createRoot, Component } from 'preact';
 import { setupScratch, teardown, spyAll } from '../../_util/helpers';
 
 /** @jsx createElement */
@@ -11,8 +11,11 @@ describe('Lifecycle methods', () => {
 	/** @type {() => void} */
 	let rerender;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 		rerender = setupRerender();
 	});
 
@@ -107,7 +110,7 @@ describe('Lifecycle methods', () => {
 
 		// Constructor & mounting
 		log = [];
-		render(<Outer x={1} />, scratch);
+		render(<Outer x={1} />);
 		expect(log).to.deep.equal([
 			'outer constructor',
 			'outer getDerivedStateFromProps',
@@ -121,7 +124,7 @@ describe('Lifecycle methods', () => {
 
 		// Outer & Inner props update
 		log = [];
-		render(<Outer x={2} />, scratch);
+		render(<Outer x={2} />);
 		// Note: we differ from react here in that we apply changes to the dom
 		// as we find them while diffing. React on the other hand separates this
 		// into specific phases, meaning changes to the dom are only flushed
@@ -203,7 +206,7 @@ describe('Lifecycle methods', () => {
 
 		// Unmounting Outer & Inner
 		log = [];
-		render(<table />, scratch);
+		render(<table />);
 		expect(log).to.deep.equal([
 			'outer componentWillUnmount',
 			'inner componentWillUnmount'
@@ -261,7 +264,7 @@ describe('Lifecycle methods', () => {
 
 			it('should be invoked for components on initial render', () => {
 				reset();
-				render(<Outer />, scratch);
+				render(<Outer />);
 				expect(proto.componentDidMount).to.have.been.called;
 				expect(proto.componentWillMount).to.have.been.calledBefore(
 					proto.componentDidMount
@@ -345,7 +348,7 @@ describe('Lifecycle methods', () => {
 			beforeEach(() => reset());
 
 			it('should be invoke normally on initial mount', () => {
-				render(<Outer />, scratch);
+				render(<Outer />);
 				expect(proto.componentWillMount).to.have.been.called;
 				expect(proto.componentWillMount).to.have.been.calledBefore(
 					proto.componentDidMount
@@ -407,7 +410,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<Stateful />, scratch);
+			render(<Stateful />);
 			rerender();
 
 			expect(didMount).to.equal(true);
@@ -436,7 +439,7 @@ describe('Lifecycle methods', () => {
 			}
 
 			let renderSpy = sinon.spy(Foo.prototype, 'render');
-			render(<Foo />, scratch);
+			render(<Foo />);
 			renderSpy.resetHistory();
 
 			updateState();
@@ -458,7 +461,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<Foo />, scratch);
+			render(<Foo />);
 			updateState();
 			rerender();
 
@@ -552,7 +555,7 @@ describe('Lifecycle methods', () => {
 
 			let reset = () => spies.forEach(s => proto[s].resetHistory());
 
-			render(<Outer />, scratch);
+			render(<Outer />);
 			expect(proto.componentWillMount).to.have.been.called;
 			expect(proto.componentWillMount).to.have.been.calledBefore(
 				proto.componentDidMount
@@ -660,7 +663,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<App />, scratch);
+			render(<App />);
 
 			for (let i = 0; i < 20; i++) {
 				app.setState({ page: i % components.length });

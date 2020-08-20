@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component } from 'preact';
+import { createElement, createRoot, Component } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
 
 /** @jsx createElement */
@@ -11,8 +11,11 @@ describe('Lifecycle methods', () => {
 	/** @type {() => void} */
 	let rerender;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 		rerender = setupRerender();
 	});
 
@@ -29,7 +32,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 			sinon.spy(ReceivePropsComponent.prototype, 'componentWillUpdate');
-			render(<ReceivePropsComponent />, scratch);
+			render(<ReceivePropsComponent />);
 			expect(ReceivePropsComponent.prototype.componentWillUpdate).not.to.have
 				.been.called;
 		});
@@ -61,7 +64,7 @@ describe('Lifecycle methods', () => {
 			sinon.spy(Outer.prototype, 'componentDidMount');
 
 			// Initial render
-			render(<Outer />, scratch);
+			render(<Outer />);
 			expect(Inner.prototype.componentWillUpdate).not.to.have.been.called;
 
 			// Rerender inner with new props
@@ -82,7 +85,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 			sinon.spy(ReceivePropsComponent.prototype, 'componentWillUpdate');
-			render(<ReceivePropsComponent />, scratch);
+			render(<ReceivePropsComponent />);
 			expect(ReceivePropsComponent.prototype.componentWillUpdate).not.to.have
 				.been.called;
 

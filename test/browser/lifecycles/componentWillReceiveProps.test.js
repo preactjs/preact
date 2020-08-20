@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component } from 'preact';
+import { createElement, createRoot, Component } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
 
 /** @jsx createElement */
@@ -11,8 +11,11 @@ describe('Lifecycle methods', () => {
 	/** @type {() => void} */
 	let rerender;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 		rerender = setupRerender();
 	});
 
@@ -55,7 +58,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<Foo />, scratch);
+			render(<Foo />);
 			rerender();
 
 			expect(componentState).to.deep.equal({ value: 1 });
@@ -65,8 +68,8 @@ describe('Lifecycle methods', () => {
 
 			Foo.prototype.shouldComponentUpdate = cWRP;
 
-			render(null, scratch);
-			render(<Foo />, scratch);
+			render(null);
+			render(<Foo />);
 			rerender();
 
 			expect(componentState, 'via shouldComponentUpdate').to.deep.equal({
@@ -76,8 +79,8 @@ describe('Lifecycle methods', () => {
 			delete Foo.prototype.shouldComponentUpdate;
 			Foo.prototype.componentWillUpdate = cWRP;
 
-			render(null, scratch);
-			render(<Foo />, scratch);
+			render(null);
+			render(<Foo />);
 			rerender();
 
 			expect(componentState, 'via componentWillUpdate').to.deep.equal({
@@ -93,7 +96,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 			sinon.spy(ReceivePropsComponent.prototype, 'componentWillReceiveProps');
-			render(<ReceivePropsComponent />, scratch);
+			render(<ReceivePropsComponent />);
 			expect(ReceivePropsComponent.prototype.componentWillReceiveProps).not.to
 				.have.been.called;
 		});
@@ -129,7 +132,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<Outer />, scratch);
+			render(<Outer />);
 			expect(spy).to.not.be.called;
 
 			c.setState({});
@@ -174,7 +177,7 @@ describe('Lifecycle methods', () => {
 			sinon.spy(Outer.prototype, 'componentDidMount');
 
 			// Initial render
-			render(<Outer />, scratch);
+			render(<Outer />);
 			expect(Inner.prototype.componentWillReceiveProps).not.to.have.been.called;
 
 			// Rerender inner with new props
@@ -222,7 +225,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 			// Initial render
-			render(<Outer />, scratch);
+			render(<Outer />);
 			expect(cWRPSpy).not.to.have.been.called;
 
 			// setState in inner component and update with new props
@@ -278,7 +281,7 @@ describe('Lifecycle methods', () => {
 			sinon.spy(Inner.prototype, 'shouldComponentUpdate');
 			sinon.spy(Outer.prototype, 'componentDidMount');
 
-			render(<Outer />, scratch);
+			render(<Outer />);
 			doRender();
 			rerender();
 

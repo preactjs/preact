@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component } from 'preact';
+import { createElement, createRoot, Component } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
 
 /** @jsx createElement */
@@ -11,8 +11,11 @@ describe('Lifecycle methods', () => {
 	/** @type {() => void} */
 	let rerender;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 		rerender = setupRerender();
 	});
 
@@ -53,11 +56,11 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<MyComponent value="foo" />, scratch);
+			render(<MyComponent value="foo" />);
 			expect(log).to.deep.equal(['render']);
 			log = [];
 
-			render(<MyComponent value="bar" />, scratch);
+			render(<MyComponent value="bar" />);
 			expect(log).to.deep.equal([
 				'render',
 				'getSnapshotBeforeUpdate() prevProps:foo prevState:1',
@@ -65,7 +68,7 @@ describe('Lifecycle methods', () => {
 			]);
 			log = [];
 
-			render(<MyComponent value="baz" />, scratch);
+			render(<MyComponent value="baz" />);
 			expect(log).to.deep.equal([
 				'render',
 				'getSnapshotBeforeUpdate() prevProps:bar prevState:2',
@@ -73,7 +76,7 @@ describe('Lifecycle methods', () => {
 			]);
 			log = [];
 
-			render(<div />, scratch, scratch.firstChild);
+			render(<div />, scratch.firstChild);
 			expect(log).to.deep.equal([]);
 		});
 
@@ -101,11 +104,11 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<MyComponent value="foo" />, scratch);
+			render(<MyComponent value="foo" />);
 			expect(log).to.deep.equal(['render']);
 			log = [];
 
-			render(<MyComponent value="bar" />, scratch);
+			render(<MyComponent value="bar" />);
 			expect(log).to.deep.equal([
 				'render',
 				'getSnapshotBeforeUpdate',
@@ -162,7 +165,7 @@ describe('Lifecycle methods', () => {
 
 			// Initial render
 			// state.value: initialized to 0 in constructor, 0 -> 1 in gDSFP
-			render(<Foo foo="foo" />, scratch);
+			render(<Foo foo="foo" />);
 			const element = scratch.firstChild;
 
 			expect(element.textContent).to.be.equal('1');
@@ -173,7 +176,7 @@ describe('Lifecycle methods', () => {
 
 			// New props
 			// state.value: 1 -> 2 in gDSFP
-			render(<Foo foo="bar" />, scratch);
+			render(<Foo foo="bar" />);
 
 			expect(element.textContent).to.be.equal('2');
 			expect(prevPropsArg).to.deep.equal({
