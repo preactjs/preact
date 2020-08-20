@@ -1,4 +1,4 @@
-import { createElement, render, Component } from 'preact';
+import { createElement, createRoot, Component } from 'preact';
 import {
 	setupScratch,
 	teardown,
@@ -9,7 +9,7 @@ import {
 /** @jsx createElement */
 
 describe('replaceNode parameter in render()', () => {
-	let scratch;
+	let scratch, render;
 
 	/**
 	 * @param {HTMLDivElement} container
@@ -27,6 +27,7 @@ describe('replaceNode parameter in render()', () => {
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 	});
 
 	afterEach(() => {
@@ -37,7 +38,7 @@ describe('replaceNode parameter in render()', () => {
 		setupABCDom(scratch);
 		const childA = scratch.querySelector('#a');
 
-		render(<div id="a">contents</div>, scratch, childA);
+		render(<div id="a">contents</div>, childA);
 		expect(scratch.querySelector('#a')).to.equalNode(childA);
 		expect(childA.innerHTML).to.equal('contents');
 	});
@@ -46,7 +47,7 @@ describe('replaceNode parameter in render()', () => {
 		setupABCDom(scratch);
 		const childA = scratch.querySelector('#a');
 
-		render(<div id="a" />, scratch, childA);
+		render(<div id="a" />, childA);
 		expect(scratch.innerHTML).to.equal(
 			'<div id="a"></div><div id="b"></div><div id="c"></div>'
 		);
@@ -56,7 +57,7 @@ describe('replaceNode parameter in render()', () => {
 		setupABCDom(scratch);
 		const childA = scratch.querySelector('#a');
 
-		render(<div id="a" className="b" />, scratch, childA);
+		render(<div id="a" className="b" />, childA);
 		expect(sortAttributes(String(scratch.innerHTML))).to.equal(
 			sortAttributes(
 				'<div id="a" class="b"></div><div id="b"></div><div id="c"></div>'
@@ -90,7 +91,7 @@ describe('replaceNode parameter in render()', () => {
 		expect(scratch.innerHTML).to.equal('<div id="a"><div>App</div></div>');
 		expect(mount).to.be.calledOnce;
 
-		render(<div id="a">new</div>, scratch, scratch.querySelector('#a'));
+		render(<div id="a">new</div>, scratch.querySelector('#a'));
 		expect(scratch.innerHTML).to.equal('<div id="a">new</div>');
 		expect(unmount).to.be.calledOnce;
 	});
@@ -120,7 +121,7 @@ describe('replaceNode parameter in render()', () => {
 		expect(serializeHtml(childContainer)).to.equal('<span>App</span>');
 		expect(mount).to.be.calledOnce;
 
-		render(<div />, scratch, scratch.firstElementChild);
+		render(<div />, scratch.firstElementChild);
 		expect(serializeHtml(scratch)).to.equal('<div id=""></div>');
 		expect(unmount).to.be.calledOnce;
 	});
@@ -135,9 +136,9 @@ describe('replaceNode parameter in render()', () => {
 		const expectedB = '<div id="b">childB</div>';
 		const expectedC = '<div id="c">childC</div>';
 
-		render(<div id="a">childA</div>, scratch, childA);
-		render(<div id="b">childB</div>, scratch, childB);
-		render(<div id="c">childC</div>, scratch, childC);
+		render(<div id="a">childA</div>, childA);
+		render(<div id="b">childB</div>, childB);
+		render(<div id="c">childC</div>, childC);
 
 		expect(scratch.innerHTML).to.equal(`${expectedA}${expectedB}${expectedC}`);
 	});
@@ -160,7 +161,7 @@ describe('replaceNode parameter in render()', () => {
 		const container = document.createElement('div');
 		scratch.appendChild(container);
 
-		render(<MyComponent />, scratch, container);
+		render(<MyComponent />, container);
 		expect(mountSpy).to.be.calledOnce;
 
 		render(<div>Not my component</div>, document.body, container);
@@ -171,10 +172,10 @@ describe('replaceNode parameter in render()', () => {
 		const container = document.createElement('div');
 		scratch.appendChild(container);
 
-		render(<div>Hello</div>, scratch, scratch.firstElementChild);
+		render(<div>Hello</div>, scratch.firstElementChild);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
-		render(<div>Hello</div>, scratch, scratch.firstElementChild);
+		render(<div>Hello</div>, scratch.firstElementChild);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
@@ -183,10 +184,10 @@ describe('replaceNode parameter in render()', () => {
 			return <p>{i}</p>;
 		}
 
-		render(<App i={2} />, scratch);
+		render(<App i={2} />);
 		expect(scratch.innerHTML).to.equal('<p>2</p>');
 
-		render(<App i={3} />, scratch, scratch.firstChild);
+		render(<App i={3} />, scratch.firstChild);
 		expect(scratch.innerHTML).to.equal('<p>3</p>');
 	});
 
@@ -200,12 +201,12 @@ describe('replaceNode parameter in render()', () => {
 			</div>
 		);
 
-		render(<App />, scratch, placeholder);
+		render(<App />, placeholder);
 		expect(scratch.innerHTML).to.equal(
 			'<div>New content<button>Update</button></div>'
 		);
 
-		render(<App />, scratch, placeholder);
+		render(<App />, placeholder);
 		expect(scratch.innerHTML).to.equal(
 			'<div>New content<button>Update</button></div>'
 		);
@@ -221,7 +222,7 @@ describe('replaceNode parameter in render()', () => {
 			</div>
 		);
 
-		render(<App />, scratch, placeholder);
+		render(<App />, placeholder);
 		expect(scratch.innerHTML).to.equal(
 			'<div>New content<button>Update</button></div>'
 		);
@@ -231,7 +232,7 @@ describe('replaceNode parameter in render()', () => {
 			'<div>New content<button>Update</button><span></span></div>'
 		);
 
-		render(<App />, scratch, placeholder);
+		render(<App />, placeholder);
 		expect(scratch.innerHTML).to.equal(
 			'<div>New content<button>Update</button></div>'
 		);

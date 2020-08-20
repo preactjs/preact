@@ -1,14 +1,15 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component } from 'preact';
+import { createElement, createRoot, Component } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx createElement */
 
 describe('Component spec', () => {
-	let scratch, rerender;
+	let scratch, rerender, render;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 		rerender = setupRerender();
 	});
 
@@ -33,7 +34,7 @@ describe('Component spec', () => {
 				}
 			}
 			WithDefaultProps.defaultProps = { fieldC: 1, fieldD: 1 };
-			render(<WithDefaultProps fieldA={1} fieldB={2} fieldD={2} />, scratch);
+			render(<WithDefaultProps fieldA={1} fieldB={2} fieldD={2} />);
 		});
 
 		it('should apply default props on rerender', () => {
@@ -68,7 +69,7 @@ describe('Component spec', () => {
 			sinon.spy(proto, 'componentWillReceiveProps');
 			sinon.spy(proto, 'render');
 
-			render(<Outer />, scratch);
+			render(<Outer />);
 			doRender();
 
 			const PROPS1 = {
@@ -112,7 +113,7 @@ describe('Component spec', () => {
 			}
 			sinon.spy(ForceUpdateComponent.prototype, 'componentWillUpdate');
 			sinon.spy(ForceUpdateComponent.prototype, 'forceUpdate');
-			render(<ForceUpdateComponent />, scratch);
+			render(<ForceUpdateComponent />);
 			expect(ForceUpdateComponent.prototype.componentWillUpdate).not.to.have
 				.been.called;
 
@@ -136,7 +137,7 @@ describe('Component spec', () => {
 				}
 			}
 			sinon.spy(ForceUpdateComponent.prototype, 'forceUpdate');
-			render(<ForceUpdateComponent />, scratch);
+			render(<ForceUpdateComponent />);
 
 			forceUpdate();
 			rerender();

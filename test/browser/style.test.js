@@ -1,13 +1,14 @@
-import { createElement, render } from 'preact';
+import { createElement, createRoot } from 'preact';
 import { setupScratch, teardown, sortCss } from '../_util/helpers';
 
 /** @jsx createElement */
 
 describe('style attribute', () => {
-	let scratch;
+	let scratch, render;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 	});
 
 	afterEach(() => {
@@ -15,35 +16,35 @@ describe('style attribute', () => {
 	});
 
 	it('should apply style as String', () => {
-		render(<div style="top: 5px; position: relative;" />, scratch);
+		render(<div style="top: 5px; position: relative;" />);
 		expect(scratch.childNodes[0].style.cssText).to.equal(
 			'top: 5px; position: relative;'
 		);
 	});
 
 	it('should not call CSSStyleDeclaration.setProperty for style strings', () => {
-		render(<div style="top: 5px; position: relative;" />, scratch);
+		render(<div style="top: 5px; position: relative;" />);
 		sinon.stub(scratch.firstChild.style, 'setProperty');
-		render(<div style="top: 10px; position: absolute;" />, scratch);
+		render(<div style="top: 10px; position: absolute;" />);
 		expect(scratch.firstChild.style.setProperty).to.not.be.called;
 	});
 
 	it('should properly switch from string styles to object styles and back', () => {
-		render(<div style="display: inline;">test</div>, scratch);
+		render(<div style="display: inline;">test</div>);
 
 		let style = scratch.firstChild.style;
 		expect(style.cssText).to.equal('display: inline;');
 
-		render(<div style={{ color: 'red' }} />, scratch);
+		render(<div style={{ color: 'red' }} />);
 		expect(style.cssText).to.equal('color: red;');
 
-		render(<div style="color: blue" />, scratch);
+		render(<div style="color: blue" />);
 		expect(style.cssText).to.equal('color: blue;');
 
-		render(<div style={{ color: 'yellow' }} />, scratch);
+		render(<div style={{ color: 'yellow' }} />);
 		expect(style.cssText).to.equal('color: yellow;');
 
-		render(<div style="display: block" />, scratch);
+		render(<div style="display: block" />);
 		expect(style.cssText).to.equal('display: block;');
 	});
 
@@ -59,7 +60,7 @@ describe('style attribute', () => {
 			left: '100%'
 		};
 
-		render(<div style={styleObj}>test</div>, scratch);
+		render(<div style={styleObj}>test</div>);
 
 		let style = scratch.firstChild.style;
 		expect(style.color).to.equal('rgb(255, 255, 255)');
@@ -77,13 +78,13 @@ describe('style attribute', () => {
 	});
 
 	it('should support opacity 0', () => {
-		render(<div style={{ opacity: 1 }}>Test</div>, scratch);
+		render(<div style={{ opacity: 1 }}>Test</div>);
 		let style = scratch.firstChild.style;
 		expect(style)
 			.to.have.property('opacity')
 			.that.equals('1');
 
-		render(<div style={{ opacity: 0 }}>Test</div>, scratch);
+		render(<div style={{ opacity: 0 }}>Test</div>);
 		style = scratch.firstChild.style;
 		expect(style)
 			.to.have.property('opacity')
@@ -91,13 +92,13 @@ describe('style attribute', () => {
 	});
 
 	it('should support animation-iteration-count as number', () => {
-		render(<div style={{ animationIterationCount: 1 }}>Test</div>, scratch);
+		render(<div style={{ animationIterationCount: 1 }}>Test</div>);
 		let style = scratch.firstChild.style;
 		expect(style)
 			.to.have.property('animationIterationCount')
 			.that.equals('1');
 
-		render(<div style={{ animationIterationCount: 2.5 }}>Test</div>, scratch);
+		render(<div style={{ animationIterationCount: 2.5 }}>Test</div>);
 		style = scratch.firstChild.style;
 		expect(style)
 			.to.have.property('animationIterationCount')
@@ -105,7 +106,7 @@ describe('style attribute', () => {
 	});
 
 	it('should replace previous style objects', () => {
-		render(<div style={{ display: 'inline' }}>test</div>, scratch);
+		render(<div style={{ display: 'inline' }}>test</div>);
 
 		let style = scratch.firstChild.style;
 		expect(style.cssText).to.equal('display: inline;');
@@ -151,27 +152,24 @@ describe('style attribute', () => {
 	});
 
 	it('should remove old styles', () => {
-		render(<div style={{ color: 'red' }} />, scratch);
-		render(<div style={{ backgroundColor: 'blue' }} />, scratch);
+		render(<div style={{ color: 'red' }} />);
+		render(<div style={{ backgroundColor: 'blue' }} />);
 		expect(scratch.firstChild.style.color).to.equal('');
 		expect(scratch.firstChild.style.backgroundColor).to.equal('blue');
 	});
 
 	// Issue #1850
 	it('should remove empty styles', () => {
-		render(<div style={{ visibility: 'hidden' }} />, scratch);
+		render(<div style={{ visibility: 'hidden' }} />);
 		expect(scratch.firstChild.style.visibility).to.equal('hidden');
-		render(<div style={{ visibility: undefined }} />, scratch);
+		render(<div style={{ visibility: undefined }} />);
 		expect(scratch.firstChild.style.visibility).to.equal('');
 	});
 
 	// Skip test if the currently running browser doesn't support CSS Custom Properties
 	if (window.CSS && CSS.supports('color', 'var(--fake-var)')) {
 		it('should support css custom properties', () => {
-			render(
-				<div style={{ '--foo': 'red', color: 'var(--foo)' }}>test</div>,
-				scratch
-			);
+			render(<div style={{ '--foo': 'red', color: 'var(--foo)' }}>test</div>);
 			expect(sortCss(scratch.firstChild.style.cssText)).to.equal(
 				'--foo: red; color: var(--foo);'
 			);
@@ -181,10 +179,7 @@ describe('style attribute', () => {
 		});
 
 		it('should not add "px" suffix for custom properties', () => {
-			render(
-				<div style={{ '--foo': '100px', width: 'var(--foo)' }}>test</div>,
-				scratch
-			);
+			render(<div style={{ '--foo': '100px', width: 'var(--foo)' }}>test</div>);
 			expect(sortCss(scratch.firstChild.style.cssText)).to.equal(
 				'--foo: 100px; width: var(--foo);'
 			);
@@ -201,8 +196,7 @@ describe('style attribute', () => {
 					}}
 				>
 					test
-				</div>,
-				scratch
+				</div>
 			);
 			expect(sortCss(scratch.firstChild.style.cssText)).to.equal(
 				'--foo-baz: 2; --fooBar: 1; opacity: var(--fooBar); z-index: var(--foo-baz);'
@@ -210,12 +204,9 @@ describe('style attribute', () => {
 		});
 
 		it('should call CSSStyleDeclaration.setProperty for css vars', () => {
-			render(<div style={{ padding: '10px' }} />, scratch);
+			render(<div style={{ padding: '10px' }} />);
 			sinon.stub(scratch.firstChild.style, 'setProperty');
-			render(
-				<div style={{ '--foo': '10px', padding: 'var(--foo)' }} />,
-				scratch
-			);
+			render(<div style={{ '--foo': '10px', padding: 'var(--foo)' }} />);
 			expect(scratch.firstChild.style.setProperty).to.be.calledWith(
 				'--foo',
 				'10px'

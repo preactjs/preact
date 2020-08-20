@@ -1,13 +1,14 @@
-import { createElement, render } from 'preact';
+import { createElement, createRoot } from 'preact';
 import { setupScratch, teardown, sortAttributes } from '../_util/helpers';
 
 /** @jsx createElement */
 
 describe('svg', () => {
-	let scratch;
+	let scratch, render;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 	});
 
 	afterEach(() => {
@@ -22,8 +23,7 @@ describe('svg', () => {
 					fill="black"
 					d="M 347.1 357.9 L 183.3 256.5 L 13 357.9 V 1.7 h 334.1 v 356.2 Z M 58.5 47.2 v 231.4 l 124.8 -74.1 l 118.3 72.8 V 47.2 H 58.5 Z"
 				/>
-			</svg>,
-			scratch
+			</svg>
 		);
 
 		let html = sortAttributes(
@@ -53,7 +53,7 @@ describe('svg', () => {
 				/>
 			</svg>
 		);
-		render(<Demo url="www.preact.com" />, scratch);
+		render(<Demo url="www.preact.com" />);
 
 		let html = String(scratch.innerHTML).replace(
 			' xmlns="http://www.w3.org/2000/svg"',
@@ -71,7 +71,7 @@ describe('svg', () => {
 		`.replace(/[\n\t]+/g, '')
 			)
 		);
-		render(<Demo />, scratch);
+		render(<Demo />);
 
 		html = String(scratch.innerHTML).replace(
 			' xmlns="http://www.w3.org/2000/svg"',
@@ -101,7 +101,7 @@ describe('svg', () => {
 				/>
 			</svg>
 		);
-		render(<Demo />, scratch);
+		render(<Demo />);
 
 		let html = sortAttributes(
 			String(scratch.innerHTML).replace(
@@ -117,7 +117,7 @@ describe('svg', () => {
 	});
 
 	it('should render with the correct namespace URI', () => {
-		render(<svg />, scratch);
+		render(<svg />);
 
 		let namespace = scratch.querySelector('svg').namespaceURI;
 
@@ -135,21 +135,21 @@ describe('svg', () => {
 				/>
 			</svg>
 		);
-		render(<Demo c="1" />, scratch);
+		render(<Demo c="1" />);
 		let root = scratch.firstChild;
 		sinon.spy(root, 'removeAttribute');
-		render(<Demo />, scratch);
+		render(<Demo />);
 		expect(root.removeAttribute).to.have.been.calledOnce.and.calledWith(
 			'class'
 		);
 
 		root.removeAttribute.restore();
 
-		render(<div />, scratch);
-		render(<Demo />, scratch);
+		render(<div />);
+		render(<Demo />);
 		root = scratch.firstChild;
 		sinon.spy(root, 'setAttribute');
-		render(<Demo c="2" />, scratch);
+		render(<Demo c="2" />);
 		expect(root.setAttribute).to.have.been.calledOnce.and.calledWith(
 			'class',
 			'foo_2'
@@ -159,13 +159,13 @@ describe('svg', () => {
 	});
 
 	it('should still support class attribute', () => {
-		render(<svg viewBox="0 0 1 1" class="foo bar" />, scratch);
+		render(<svg viewBox="0 0 1 1" class="foo bar" />);
 
 		expect(scratch.innerHTML).to.contain(` class="foo bar"`);
 	});
 
 	it('should still support className attribute', () => {
-		render(<svg viewBox="0 0 1 1" className="foo bar" />, scratch);
+		render(<svg viewBox="0 0 1 1" className="foo bar" />);
 
 		expect(scratch.innerHTML).to.contain(` class="foo bar"`);
 	});
@@ -178,8 +178,7 @@ describe('svg', () => {
 						<a href="#foo">test</a>
 					</foreignObject>
 				</g>
-			</svg>,
-			scratch
+			</svg>
 		);
 
 		expect(scratch.getElementsByTagName('a'))
@@ -195,8 +194,7 @@ describe('svg', () => {
 						<a href="#foo">test</a>
 					</foreignObject>
 				</g>
-			</svg>,
-			scratch
+			</svg>
 		);
 
 		expect(scratch.querySelector('foreignObject').localName).to.equal(
@@ -216,8 +214,7 @@ describe('svg', () => {
 					<circle cy="333" cx="333" r="333" />
 					<circle cy="333" cx="333" r="333" fill="#fede58" />
 				</svg>
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.firstChild).to.be.an('HTMLDivElement');

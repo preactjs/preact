@@ -1,4 +1,4 @@
-import { createElement, Component, render, createRef } from 'preact';
+import { createElement, Component, createRoot, createRef } from 'preact';
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
@@ -15,6 +15,8 @@ describe('null placeholders', () => {
 
 	/** @type {string[]} */
 	let ops;
+
+	let render;
 
 	function createNullable(name) {
 		return function Nullable(props) {
@@ -64,6 +66,7 @@ describe('null placeholders', () => {
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
+		({ render } = createRoot(scratch));
 		ops = [];
 	});
 
@@ -89,13 +92,13 @@ describe('null placeholders', () => {
 			);
 		}
 
-		render(<Foo condition />, scratch);
+		render(<Foo condition />);
 		expect(scratch.innerHTML).to.equal(
 			'<div><div>Hello</div><div>bar</div></div>'
 		);
 		clearLog();
 
-		render(<Foo />, scratch);
+		render(<Foo />);
 		expect(scratch.innerHTML).to.equal('<div><div>Hello</div></div>');
 		expect(getLog()).to.deep.equal(['<div>bar.remove()']);
 	});
@@ -137,7 +140,7 @@ describe('null placeholders', () => {
 		}
 
 		// Mount third stateful - Initial render
-		render(<App />, scratch);
+		render(<App />);
 		expect(scratch.innerHTML).to.equal('<div>third: 0</div>');
 		expect(ops).to.deep.equal(['Mount third'], 'mount third');
 
@@ -150,7 +153,7 @@ describe('null placeholders', () => {
 
 		// Mount first stateful
 		ops = [];
-		render(<App first={<Stateful name="first" ref={s1ref} />} />, scratch);
+		render(<App first={<Stateful name="first" ref={s1ref} />} />);
 		expect(scratch.innerHTML).to.equal(
 			'<div>first: 0</div><div>third: 1</div>'
 		);
@@ -213,7 +216,7 @@ describe('null placeholders', () => {
 			);
 		}
 
-		render(<App />, scratch);
+		render(<App />);
 		expect(scratch.innerHTML).to.equal(
 			div([div(1), div('Nullable'), div(3), div('Nullable2')])
 		);
@@ -269,7 +272,7 @@ describe('null placeholders', () => {
 			}
 		}
 
-		render(<App />, scratch);
+		render(<App />);
 		expect(scratch.innerHTML).to.equal(div([div('false'), div('the middle')]));
 
 		clearLog();
