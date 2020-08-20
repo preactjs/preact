@@ -92,8 +92,7 @@ describe('toChildArray', () => {
 		render(
 			<Foo>
 				<span />
-			</Foo>,
-			scratch
+			</Foo>
 		);
 
 		expect(children).to.be.an('array');
@@ -106,8 +105,7 @@ describe('toChildArray', () => {
 		render(
 			<Foo>
 				<Bar />
-			</Foo>,
-			scratch
+			</Foo>
 		);
 
 		expect(children).to.be.an('array');
@@ -122,8 +120,7 @@ describe('toChildArray', () => {
 				0<span />
 				<input />
 				<div />1
-			</Foo>,
-			scratch
+			</Foo>
 		);
 
 		expect(children).to.be.an('array');
@@ -194,8 +191,7 @@ describe('toChildArray', () => {
 				{[list1, list2]}
 				{[list3, list4]}
 				{list5}
-			</Foo>,
-			scratch
+			</Foo>
 		);
 
 		expect(children).to.be.an('array');
