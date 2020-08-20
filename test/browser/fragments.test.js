@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component, Fragment } from 'preact';
+import { createElement, createRoot, Component, Fragment } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 import { span, div, ul, ol, li, section } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
@@ -17,6 +17,8 @@ describe('Fragment', () => {
 	let rerender;
 
 	let ops = [];
+
+	let render;
 
 	function expectDomLogToBe(expectedOperations, message) {
 		if (expectDomLog) {
@@ -53,7 +55,7 @@ describe('Fragment', () => {
 		scratch = setupScratch();
 		rerender = setupRerender();
 		ops = [];
-
+		({ render } = createRoot(scratch));
 		clearLog();
 	});
 
@@ -62,7 +64,7 @@ describe('Fragment', () => {
 	});
 
 	it('should not render empty Fragment', () => {
-		render(<Fragment />, scratch);
+		render(<Fragment />);
 		expect(scratch.innerHTML).to.equal('');
 	});
 
@@ -71,8 +73,7 @@ describe('Fragment', () => {
 		render(
 			<Fragment>
 				<span>foo</span>
-			</Fragment>,
-			scratch
+			</Fragment>
 		);
 
 		expect(scratch.innerHTML).to.equal('<span>foo</span>');
@@ -86,8 +87,7 @@ describe('Fragment', () => {
 		render(
 			<Fragment>
 				hello <span>world</span>
-			</Fragment>,
-			scratch
+			</Fragment>
 		);
 
 		expect(scratch.innerHTML).to.equal('hello <span>world</span>');
@@ -110,8 +110,7 @@ describe('Fragment', () => {
 			<Fragment>
 				<span>world</span>
 				<p>Hello</p>
-			</Fragment>,
-			scratch
+			</Fragment>
 		);
 		expect(scratch.innerHTML).to.equal('<span>world</span><p>Hello</p>');
 
@@ -123,8 +122,7 @@ describe('Fragment', () => {
 				<span>world</span>
 				{null}
 				<span>world</span>
-			</Fragment>,
-			scratch
+			</Fragment>
 		);
 		expect(scratch.innerHTML).to.equal('<span>world</span><span>world</span>');
 
@@ -133,8 +131,7 @@ describe('Fragment', () => {
 				<span>world</span>
 				Hello
 				<span>world</span>
-			</Fragment>,
-			scratch
+			</Fragment>
 		);
 		expect(scratch.innerHTML).to.equal(
 			'<span>world</span>Hello<span>world</span>'
@@ -167,9 +164,9 @@ describe('Fragment', () => {
 			}
 		}
 
-		render(<App i={0} />, scratch);
+		render(<App i={0} />);
 		expect(scratch.textContent).to.equal('12');
-		render(<App i={1} />, scratch);
+		render(<App i={1} />);
 		expect(scratch.textContent).to.equal('21');
 	});
 
@@ -219,7 +216,7 @@ describe('Fragment', () => {
 			}
 		}
 
-		render(<App />, scratch);
+		render(<App />);
 		expect(scratch.innerHTML).to.equal(div([span(1), span(2), span(2)]));
 
 		setState({ i: 1 });
@@ -247,13 +244,13 @@ describe('Fragment', () => {
 			);
 		}
 
-		render(<Foo condition={true} />, scratch);
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={true} />);
+		render(<Foo condition={false} />);
 
 		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.deep.equal('<div>Hello</div><div>World</div>');
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.deep.equal('<div>Hello</div>');
@@ -272,17 +269,17 @@ describe('Fragment', () => {
 			);
 		}
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		clearLog();
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={false} />);
 
 		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 		expectDomLogToBe([]);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
@@ -311,17 +308,17 @@ describe('Fragment', () => {
 			);
 		}
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		clearLog();
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={false} />);
 
 		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div></div><div>Hello</div>');
 		expectDomLogToBe(['<div>Hello.insertBefore(<div>, <div>Hello)']);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
@@ -343,10 +340,10 @@ describe('Fragment', () => {
 			);
 		}
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		clearLog();
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={false} />);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
@@ -357,7 +354,7 @@ describe('Fragment', () => {
 		]);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
@@ -382,10 +379,10 @@ describe('Fragment', () => {
 			);
 		}
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		clearLog();
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={false} />);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
@@ -396,7 +393,7 @@ describe('Fragment', () => {
 		]);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
@@ -419,7 +416,7 @@ describe('Fragment', () => {
 			}
 		}
 
-		render(<Comp />, scratch);
+		render(<Comp />);
 		expect(scratch.innerHTML).to.equal('<div>Child1</div><div>Child2</div>');
 	});
 
@@ -437,13 +434,13 @@ describe('Fragment', () => {
 			);
 		}
 
-		render(<Foo condition={true} />, scratch);
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={true} />);
+		render(<Foo condition={false} />);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div><div></div>');
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
@@ -470,13 +467,13 @@ describe('Fragment', () => {
 			);
 		}
 
-		render(<Foo condition={true} />, scratch);
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={true} />);
+		render(<Foo condition={false} />);
 
 		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
@@ -493,13 +490,13 @@ describe('Fragment', () => {
 			);
 		}
 
-		render(<Foo condition={true} />, scratch);
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={true} />);
+		render(<Foo condition={false} />);
 
 		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
@@ -529,13 +526,13 @@ describe('Fragment', () => {
 			);
 		}
 
-		render(<Foo condition={true} />, scratch);
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={true} />);
+		render(<Foo condition={false} />);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
@@ -550,13 +547,13 @@ describe('Fragment', () => {
 			);
 		}
 
-		render(<Foo condition={true} />, scratch);
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={true} />);
+		render(<Foo condition={false} />);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
@@ -575,13 +572,13 @@ describe('Fragment', () => {
 			);
 		}
 
-		render(<Foo condition={true} />, scratch);
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={true} />);
+		render(<Foo condition={false} />);
 
 		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
@@ -601,13 +598,13 @@ describe('Fragment', () => {
 			);
 		}
 
-		render(<Foo condition={true} />, scratch);
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={true} />);
+		render(<Foo condition={false} />);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div><span>World</span>');
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
@@ -628,13 +625,13 @@ describe('Fragment', () => {
 
 		// React & Preact: has the same behavior for components
 		// https://codesandbox.io/s/57prmy5mx
-		render(<Foo condition={true} />, scratch);
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={true} />);
+		render(<Foo condition={false} />);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
@@ -670,12 +667,12 @@ describe('Fragment', () => {
 		const htmlForFalse = div([div('beep'), div(div('Hello')), div('bar')]);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		expect(scratch.innerHTML).to.equal(htmlForTrue);
 
 		clearLog();
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={false} />);
 
 		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
@@ -688,7 +685,7 @@ describe('Fragment', () => {
 		);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal(htmlForTrue);
@@ -724,10 +721,10 @@ describe('Fragment', () => {
 		const html = div([span('1'), div('Hello'), span('2')]);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		clearLog();
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={false} />);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal(html);
@@ -742,7 +739,7 @@ describe('Fragment', () => {
 		]);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal(html);
@@ -773,13 +770,13 @@ describe('Fragment', () => {
 				  ];
 		}
 
-		render(<Foo condition={true} />, scratch);
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={true} />);
+		render(<Foo condition={false} />);
 
 		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<span></span><div>Hello</div>');
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal('<span></span><div>Hello</div>');
@@ -793,8 +790,7 @@ describe('Fragment', () => {
 				<Fragment>foo</Fragment>
 				<Fragment />
 				bar
-			</Fragment>,
-			scratch
+			</Fragment>
 		);
 
 		expect(scratch.innerHTML).to.equal('spamfoobar');
@@ -809,8 +805,7 @@ describe('Fragment', () => {
 			<Fragment>
 				<Fragment>foo</Fragment>
 				<Fragment>bar</Fragment>
-			</Fragment>,
-			scratch
+			</Fragment>
 		);
 
 		expect(scratch.innerHTML).to.equal('foobar');
@@ -835,8 +830,7 @@ describe('Fragment', () => {
 				</Fragment>
 				<div>4</div>
 				<div>5</div>
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.innerHTML).to.equal(
@@ -859,7 +853,7 @@ describe('Fragment', () => {
 				return <Fragment key={this.state.key}>foo</Fragment>;
 			}
 		}
-		render(<Comp />, scratch);
+		render(<Comp />);
 		expect(scratch.innerHTML).to.equal('foo');
 
 		update();
@@ -892,7 +886,7 @@ describe('Fragment', () => {
 
 		const html = contents => span('0') + contents + span('1');
 
-		render(<Comp />, scratch);
+		render(<Comp />);
 		expect(scratch.innerHTML).to.equal(html('foo'));
 
 		update();
@@ -930,7 +924,7 @@ describe('Fragment', () => {
 			}
 		}
 
-		render(<List />, scratch);
+		render(<List />);
 		expect(scratch.textContent).to.equal('012');
 
 		push();
@@ -962,7 +956,7 @@ describe('Fragment', () => {
 			</ul>
 		);
 
-		render(<Todo />, scratch);
+		render(<Todo />);
 
 		expect(scratch.innerHTML).to.equal(
 			ul([
@@ -1015,7 +1009,7 @@ describe('Fragment', () => {
 			}
 		}
 
-		render(<App />, scratch);
+		render(<App />);
 
 		expect(scratch.innerHTML).to.equal(
 			'<div><h1>Heading</h1>foobarHello World<h2>yo</h2><input type="text"></div>'
@@ -1046,8 +1040,7 @@ describe('Fragment', () => {
 					<li>6</li>
 				</Fragment>
 				<li>7</li>
-			</ol>,
-			scratch
+			</ol>
 		);
 
 		expect(scratch.textContent).to.equal('01234567');
@@ -1087,7 +1080,7 @@ describe('Fragment', () => {
 			</Fragment>
 		);
 
-		render(<Speak />, scratch);
+		render(<Speak />);
 
 		expect(scratch.innerHTML).to.equal(
 			[
@@ -1120,7 +1113,7 @@ describe('Fragment', () => {
 		const html = ol([li('0'), li('1'), li('2'), li('3')]);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 		expect(scratch.innerHTML).to.equal(html, 'initial render of true');
 		expectDomLogToBe(
 			[
@@ -1138,7 +1131,7 @@ describe('Fragment', () => {
 		);
 
 		clearLog();
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={false} />);
 		expect(scratch.innerHTML).to.equal(html, 'rendering from true to false');
 		expectDomLogToBe(
 			[
@@ -1153,7 +1146,7 @@ describe('Fragment', () => {
 		);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 		expect(scratch.innerHTML).to.equal(html, 'rendering from false to true');
 		expectDomLogToBe(
 			[
@@ -1188,7 +1181,7 @@ describe('Fragment', () => {
 		const htmlForFalse = ol([li('0'), li('3'), li('4')]);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true');
 		expectDomLogToBe(
 			[
@@ -1208,7 +1201,7 @@ describe('Fragment', () => {
 		);
 
 		clearLog();
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={false} />);
 		expect(scratch.innerHTML).to.equal(
 			htmlForFalse,
 			'rendering from true to false'
@@ -1219,7 +1212,7 @@ describe('Fragment', () => {
 		);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 		expect(scratch.innerHTML).to.equal(
 			htmlForTrue,
 			'rendering from false to true'
@@ -1281,11 +1274,11 @@ describe('Fragment', () => {
 		]);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true');
 
 		clearLog();
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={false} />);
 		expect(scratch.innerHTML).to.equal(
 			htmlForFalse,
 			'rendering from true to false'
@@ -1298,7 +1291,7 @@ describe('Fragment', () => {
 		]);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 		expect(scratch.innerHTML).to.equal(
 			htmlForTrue,
 			'rendering from false to true'
@@ -1334,11 +1327,11 @@ describe('Fragment', () => {
 		const htmlForFalse = ol([li(2), li(2), li(3), li(4)]);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true');
 
 		clearLog();
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={false} />);
 		expect(scratch.innerHTML).to.equal(
 			htmlForFalse,
 			'rendering from true to false'
@@ -1355,7 +1348,7 @@ describe('Fragment', () => {
 		]);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 		expect(scratch.innerHTML).to.equal(
 			htmlForTrue,
 			'rendering from false to true'
@@ -1405,11 +1398,11 @@ describe('Fragment', () => {
 		const htmlForFalse = ol([li(2), li(3), li(4), li(5)]);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true');
 
 		clearLog();
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={false} />);
 		expect(scratch.innerHTML).to.equal(
 			htmlForFalse,
 			'rendering from true to false'
@@ -1426,7 +1419,7 @@ describe('Fragment', () => {
 		]);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 		expect(scratch.innerHTML).to.equal(
 			htmlForTrue,
 			'rendering from false to true'
@@ -1481,10 +1474,10 @@ describe('Fragment', () => {
 		const htmlForFalse = div([div('beep'), div(div('Hello')), div('bar')]);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		clearLog();
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={false} />);
 
 		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal(
@@ -1501,7 +1494,7 @@ describe('Fragment', () => {
 		);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal(
@@ -1567,10 +1560,10 @@ describe('Fragment', () => {
 		]);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		clearLog();
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={false} />);
 
 		expect(ops).to.deep.equal(['Update Stateful']);
 		expect(scratch.innerHTML).to.equal(
@@ -1586,7 +1579,7 @@ describe('Fragment', () => {
 		);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
 		expect(scratch.innerHTML).to.equal(
@@ -1624,7 +1617,7 @@ describe('Fragment', () => {
 
 		let values = [0, 1, 2];
 		clearLog();
-		render(<Foo values={values} />, scratch);
+		render(<Foo values={values} />);
 		expect(scratch.innerHTML).to.equal(
 			getHtml(values),
 			`original list: [${values.join(',')}]`
@@ -1633,7 +1626,7 @@ describe('Fragment', () => {
 		values.push(3);
 
 		clearLog();
-		render(<Foo values={values} />, scratch);
+		render(<Foo values={values} />);
 		expect(scratch.innerHTML).to.equal(
 			getHtml(values),
 			`push 3: [${values.join(',')}]`
@@ -1646,7 +1639,7 @@ describe('Fragment', () => {
 		values.push(4);
 
 		clearLog();
-		render(<Foo values={values} />, scratch);
+		render(<Foo values={values} />);
 		expect(scratch.innerHTML).to.equal(
 			getHtml(values),
 			`push 4: [${values.join(',')}]`
@@ -1676,12 +1669,12 @@ describe('Fragment', () => {
 		const htmlForFalse = div([div(3), div(4)]);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		expect(scratch.innerHTML).to.equal(htmlForTrue);
 
 		clearLog();
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={false} />);
 
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
 		expectDomLogToBe(
@@ -1697,7 +1690,7 @@ describe('Fragment', () => {
 		);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 
 		expect(scratch.innerHTML).to.equal(htmlForTrue);
 		expectDomLogToBe(
@@ -1720,10 +1713,10 @@ describe('Fragment', () => {
 			return <Fragment />;
 		}
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 		expect(scratch.textContent).to.equal('foo');
 
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={false} />);
 		expect(scratch.textContent).to.equal('');
 	});
 
@@ -1757,7 +1750,7 @@ describe('Fragment', () => {
 		const htmlForFalse = ol([li('0'), li('1'), li('4'), li('5')]);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true');
 		expectDomLogToBe(
 			[
@@ -1779,7 +1772,7 @@ describe('Fragment', () => {
 		);
 
 		clearLog();
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={false} />);
 		expect(scratch.innerHTML).to.equal(
 			htmlForFalse,
 			'rendering from true to false'
@@ -1790,7 +1783,7 @@ describe('Fragment', () => {
 		);
 
 		clearLog();
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />);
 		expect(scratch.innerHTML).to.equal(
 			htmlForTrue,
 			'rendering from false to true'
@@ -1817,7 +1810,7 @@ describe('Fragment', () => {
 			</ol>
 		);
 
-		render(<Foo />, scratch);
+		render(<Foo />);
 		expect(scratch.innerHTML).to.equal(ol(li(1)));
 	});
 
@@ -1866,7 +1859,7 @@ describe('Fragment', () => {
 
 		const errorHtml = div(div('Error!'));
 
-		render(<App />, scratch);
+		render(<App />);
 		expect(scratch.innerHTML).to.equal(successHtml);
 
 		setState({}); // Trigger sCU
@@ -1914,7 +1907,7 @@ describe('Fragment', () => {
 			}
 		}
 
-		render(<App />, scratch);
+		render(<App />);
 		expect(scratch.textContent).to.equal('');
 
 		clearLog();
@@ -1950,8 +1943,7 @@ describe('Fragment', () => {
 				<div>A</div>
 				<SetState />
 				<div>C</div>
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.innerHTML).to.eql(
@@ -2000,8 +1992,7 @@ describe('Fragment', () => {
 				<div>A</div>
 				<SetState />
 				<div>C</div>
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.innerHTML).to.eql(
@@ -2043,8 +2034,7 @@ describe('Fragment', () => {
 				<div>A</div>
 				<SetState />
 				<div>C</div>
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`);
@@ -2080,8 +2070,7 @@ describe('Fragment', () => {
 				<div>A</div>
 				<SetState />
 				<div>C</div>
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`);
@@ -2121,8 +2110,7 @@ describe('Fragment', () => {
 				<SetState />
 				{null}
 				<div>C</div>
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`);
@@ -2165,8 +2153,7 @@ describe('Fragment', () => {
 				<SetState />
 				{null}
 				<div>C</div>
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`);
@@ -2210,8 +2197,7 @@ describe('Fragment', () => {
 				<Outer />
 				{null}
 				<div>C</div>
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`);
@@ -2258,8 +2244,7 @@ describe('Fragment', () => {
 				<Outer />
 				{null}
 				<div>C</div>
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`);
@@ -2316,14 +2301,14 @@ describe('Fragment', () => {
 			);
 		}
 
-		render(<App condition={true} />, scratch);
+		render(<App condition={true} />);
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>B</div><div>C</div></div>`
 		);
 
 		clearLog();
-		render(<App condition={false} />, scratch);
+		render(<App condition={false} />);
 
 		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`);
 		expectDomLogToBe(['<div>B.remove()']);
@@ -2379,14 +2364,14 @@ describe('Fragment', () => {
 			);
 		}
 
-		render(<App condition={true} />, scratch);
+		render(<App condition={true} />);
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A1</div><div>A2</div><div>B</div><div>C</div></div>`
 		);
 
 		clearLog();
-		render(<App condition={false} />, scratch);
+		render(<App condition={false} />);
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A1</div><div>A2</div><div>C</div></div>`
@@ -2456,7 +2441,7 @@ describe('Fragment', () => {
 			);
 		}
 
-		render(<App />, scratch);
+		render(<App />);
 
 		expect(scratch.innerHTML).to.eql(div([div('A'), div('C')]), 'initial');
 
@@ -2523,7 +2508,7 @@ describe('Fragment', () => {
 			}
 		}
 
-		render(<B />, scratch);
+		render(<B />);
 
 		expect(scratch.innerHTML).to.eql(
 			[div('A1'), div('A2')].join(''),
@@ -2606,7 +2591,7 @@ describe('Fragment', () => {
 		const top = `<div><div>top panel</div>${content}</div>`;
 		const bottom = `<div>${content}<div>bottom panel</div></div>`;
 
-		render(<App />, scratch);
+		render(<App />);
 		expect(scratch.innerHTML).to.equal(bottom);
 
 		clearLog();

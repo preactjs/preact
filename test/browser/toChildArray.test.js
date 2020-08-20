@@ -1,4 +1,4 @@
-import { createElement, render, toChildArray } from 'preact';
+import { createElement, createRoot, toChildArray } from 'preact';
 import {
 	setupScratch,
 	teardown,
@@ -12,7 +12,7 @@ describe('toChildArray', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
-	let children;
+	let children, render;
 
 	let Foo = props => {
 		children = toChildArray(props.children);
@@ -23,6 +23,7 @@ describe('toChildArray', () => {
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 		children = undefined;
 	});
 
@@ -31,7 +32,7 @@ describe('toChildArray', () => {
 	});
 
 	it('returns an empty array with no child', () => {
-		render(<Foo />, scratch);
+		render(<Foo />);
 
 		expect(children).to.be.an('array');
 		expect(children).to.have.lengthOf(0);
@@ -39,7 +40,7 @@ describe('toChildArray', () => {
 	});
 
 	it('returns an empty array with null as a child', () => {
-		render(<Foo>{null}</Foo>, scratch);
+		render(<Foo>{null}</Foo>);
 
 		expect(children).to.be.an('array');
 		expect(children).to.have.lengthOf(0);
@@ -47,7 +48,7 @@ describe('toChildArray', () => {
 	});
 
 	it('returns an empty array with false as a child', () => {
-		render(<Foo>{false}</Foo>, scratch);
+		render(<Foo>{false}</Foo>);
 
 		expect(children).to.be.an('array');
 		expect(children).to.have.lengthOf(0);
@@ -55,7 +56,7 @@ describe('toChildArray', () => {
 	});
 
 	it('returns an empty array with true as a child', () => {
-		render(<Foo>{true}</Foo>, scratch);
+		render(<Foo>{true}</Foo>);
 
 		expect(children).to.be.an('array');
 		expect(children).to.have.lengthOf(0);
@@ -64,13 +65,13 @@ describe('toChildArray', () => {
 
 	it('should skip a function child', () => {
 		const child = num => num.toFixed(2);
-		render(<Foo>{child}</Foo>, scratch);
+		render(<Foo>{child}</Foo>);
 		expect(children).to.be.an('array');
 		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 
 	it('returns an array containing a VNode with a text child', () => {
-		render(<Foo>text</Foo>, scratch);
+		render(<Foo>text</Foo>);
 
 		expect(children).to.be.an('array');
 		expect(children).to.have.lengthOf(1);
@@ -79,7 +80,7 @@ describe('toChildArray', () => {
 	});
 
 	it('returns an array containing a VNode with a number child', () => {
-		render(<Foo>{1}</Foo>, scratch);
+		render(<Foo>{1}</Foo>);
 
 		expect(children).to.be.an('array');
 		expect(children).to.have.lengthOf(1);
@@ -91,8 +92,7 @@ describe('toChildArray', () => {
 		render(
 			<Foo>
 				<span />
-			</Foo>,
-			scratch
+			</Foo>
 		);
 
 		expect(children).to.be.an('array');
@@ -105,8 +105,7 @@ describe('toChildArray', () => {
 		render(
 			<Foo>
 				<Bar />
-			</Foo>,
-			scratch
+			</Foo>
 		);
 
 		expect(children).to.be.an('array');
@@ -121,8 +120,7 @@ describe('toChildArray', () => {
 				0<span />
 				<input />
 				<div />1
-			</Foo>,
-			scratch
+			</Foo>
 		);
 
 		expect(children).to.be.an('array');
@@ -138,7 +136,7 @@ describe('toChildArray', () => {
 
 	it('returns an array with non-renderables removed with a mixed array as children', () => {
 		const mixedArray = getMixedArray();
-		render(<Foo>{mixedArray}</Foo>, scratch);
+		render(<Foo>{mixedArray}</Foo>);
 
 		expect(children).to.be.an('array');
 		expect(children).to.have.lengthOf(8); // Length of flattened mixedArray with non-renderables removed
@@ -193,8 +191,7 @@ describe('toChildArray', () => {
 				{[list1, list2]}
 				{[list3, list4]}
 				{list5}
-			</Foo>,
-			scratch
+			</Foo>
 		);
 
 		expect(children).to.be.an('array');

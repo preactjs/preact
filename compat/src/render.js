@@ -1,11 +1,4 @@
-import {
-	render as preactRender,
-	createRoot,
-	hydrate as preactHydrate,
-	options,
-	toChildArray,
-	Component
-} from 'preact';
+import { createRoot, options, toChildArray, Component } from 'preact';
 import { applyEventNormalization } from './events';
 import { IS_NON_DIMENSIONAL } from './util';
 
@@ -34,15 +27,14 @@ export function render(vnode, parent, callback) {
 		}
 	}
 
-	const root = createRoot(parent);
-	root.render(vnode, parent);
+	createRoot(parent).render(vnode, parent);
 	if (typeof callback == 'function') callback();
 
 	return vnode ? vnode._component : null;
 }
 
 export function hydrate(vnode, parent, callback) {
-	preactHydrate(vnode, parent);
+	createRoot(parent).hydrate(vnode);
 	if (typeof callback == 'function') callback();
 
 	return vnode ? vnode._component : null;
