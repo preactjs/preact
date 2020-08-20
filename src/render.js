@@ -29,6 +29,7 @@ export function createRoot(parentDom) {
 
 		// List of effects that need to be called after diffing.
 		let commitQueue = [];
+
 		diff(
 			parentDom,
 			// Determine the new vnode tree and store it on the DOM element on

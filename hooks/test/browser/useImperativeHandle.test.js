@@ -1,4 +1,4 @@
-import { createElement, render } from 'preact';
+import { createElement, createRoot } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useImperativeHandle, useRef, useState } from 'preact/hooks';
 import { setupRerender } from 'preact/test-utils';
@@ -12,8 +12,11 @@ describe('useImperativeHandle', () => {
 	/** @type {() => void} */
 	let rerender;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 		rerender = setupRerender();
 	});
 
@@ -30,7 +33,7 @@ describe('useImperativeHandle', () => {
 			return <p>Test</p>;
 		}
 
-		render(<Comp />, scratch);
+		render(<Comp />);
 		expect(ref.current).to.have.property('test');
 		expect(ref.current.test()).to.equal('test');
 	});
@@ -45,13 +48,13 @@ describe('useImperativeHandle', () => {
 			return <p>Test</p>;
 		}
 
-		render(<Comp />, scratch);
+		render(<Comp />);
 		expect(createHandleSpy).to.have.been.calledOnce;
 
-		render(<Comp />, scratch);
+		render(<Comp />);
 		expect(createHandleSpy).to.have.been.calledTwice;
 
-		render(<Comp />, scratch);
+		render(<Comp />);
 		expect(createHandleSpy).to.have.been.calledThrice;
 	});
 
@@ -65,10 +68,10 @@ describe('useImperativeHandle', () => {
 			return <p>Test</p>;
 		}
 
-		render(<Comp />, scratch);
+		render(<Comp />);
 		expect(createHandleSpy).to.have.been.calledOnce;
 
-		render(<Comp />, scratch);
+		render(<Comp />);
 		expect(createHandleSpy).to.have.been.calledOnce;
 	});
 
@@ -89,17 +92,17 @@ describe('useImperativeHandle', () => {
 			return <p>Test</p>;
 		}
 
-		render(<Comp a={0} />, scratch);
+		render(<Comp a={0} />);
 		expect(createHandleSpy).to.have.been.calledOnce;
 		expect(ref.current).to.have.property('test');
 		expect(ref.current.test()).to.equal('test0');
 
-		render(<Comp a={1} />, scratch);
+		render(<Comp a={1} />);
 		expect(createHandleSpy).to.have.been.calledTwice;
 		expect(ref.current).to.have.property('test');
 		expect(ref.current.test()).to.equal('test1');
 
-		render(<Comp a={0} />, scratch);
+		render(<Comp a={0} />);
 		expect(createHandleSpy).to.have.been.calledThrice;
 		expect(ref.current).to.have.property('test');
 		expect(ref.current.test()).to.equal('test0');
@@ -132,7 +135,7 @@ describe('useImperativeHandle', () => {
 			return <p>Test</p>;
 		}
 
-		render(<Comp a={0} />, scratch);
+		render(<Comp a={0} />);
 		expect(createHandleSpy).to.have.been.calledOnce;
 
 		updateState();
@@ -162,11 +165,11 @@ describe('useImperativeHandle', () => {
 			return <p>Test</p>;
 		}
 
-		render(<Comp />, scratch);
+		render(<Comp />);
 		expect(createHandleSpy).to.have.been.calledOnce;
 		expect(ref.current.test()).to.equal('test');
 
-		render(<Comp />, scratch);
+		render(<Comp />);
 		expect(createHandleSpy).to.have.been.calledOnce;
 		expect(ref.current.test()).to.equal('test');
 	});
@@ -177,6 +180,6 @@ describe('useImperativeHandle', () => {
 			return <p>Test</p>;
 		}
 
-		expect(() => render(<Comp />, scratch)).to.not.throw();
+		expect(() => render(<Comp />)).to.not.throw();
 	});
 });

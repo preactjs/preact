@@ -1,4 +1,4 @@
-import { createElement, render, options } from 'preact';
+import { createElement, createRoot, options } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useDebugValue, useState } from 'preact/hooks';
 
@@ -8,8 +8,11 @@ describe('useDebugValue', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 	});
 
 	afterEach(() => {
@@ -28,7 +31,7 @@ describe('useDebugValue', () => {
 			return <div>{v}</div>;
 		}
 
-		expect(() => render(<App />, scratch)).to.not.throw();
+		expect(() => render(<App />)).to.not.throw();
 	});
 
 	it('should call options hook with value', () => {
@@ -44,7 +47,7 @@ describe('useDebugValue', () => {
 			return <div>{v}</div>;
 		}
 
-		render(<App />, scratch);
+		render(<App />);
 
 		expect(spy).to.be.calledOnce;
 		expect(spy).to.be.calledWith('foo');
@@ -63,7 +66,7 @@ describe('useDebugValue', () => {
 			return <div>{v}</div>;
 		}
 
-		render(<App />, scratch);
+		render(<App />);
 
 		expect(spy).to.be.calledOnce;
 		expect(spy).to.be.calledWith('foobar');
