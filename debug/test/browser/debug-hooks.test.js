@@ -1,4 +1,4 @@
-import { createElement, render, Component } from 'preact';
+import { createElement, createRoot, Component } from 'preact';
 import { useState, useEffect, useMemo, useCallback } from 'preact/hooks';
 import 'preact/debug';
 import { act } from 'preact/test-utils';
@@ -10,11 +10,13 @@ describe('debug with hooks', () => {
 	let scratch;
 	let errors = [];
 	let warnings = [];
+	let render;
 
 	beforeEach(() => {
 		errors = [];
 		warnings = [];
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 		sinon.stub(console, 'error').callsFake(e => errors.push(e));
 		sinon.stub(console, 'warn').callsFake(w => warnings.push(w));
 	});
@@ -47,8 +49,7 @@ describe('debug with hooks', () => {
 				render(
 					<Foo>
 						<App />
-					</Foo>,
-					scratch
+					</Foo>
 				)
 			);
 		expect(fn).to.throw(/Hook can only be invoked from render/);
@@ -62,7 +63,7 @@ describe('debug with hooks', () => {
 
 		const fn = () =>
 			act(() => {
-				render(foo(), scratch);
+				render(foo());
 			});
 		expect(fn).to.throw(/Hook can only be invoked from render/);
 	});
@@ -76,7 +77,7 @@ describe('debug with hooks', () => {
 		const fn = () =>
 			act(() => {
 				useState();
-				render(<Foo>Hello!</Foo>, scratch);
+				render(<Foo>Hello!</Foo>);
 			});
 		expect(fn).to.throw(/Hook can only be invoked from render/);
 	});
@@ -88,7 +89,7 @@ describe('debug with hooks', () => {
 			const cb = useCallback(() => () => 'test');
 			return <p onClick={cb}>{retiredPeople.map(x => x)}</p>;
 		};
-		render(<App />, scratch);
+		render(<App />);
 		// One more to show the need for @babel/plugin-transform-react-jsx-source
 		expect(warnings.length).to.equal(3);
 	});
@@ -98,7 +99,7 @@ describe('debug with hooks', () => {
 			const foo = useMemo(() => 'foo', 12);
 			return <p>{foo}</p>;
 		};
-		render(<App />, scratch);
+		render(<App />);
 		expect(warnings[0]).to.match(/without passing arguments/);
 	});
 });

@@ -1,4 +1,4 @@
-import { createElement, render, Component } from 'preact';
+import { createElement, createRoot, Component } from 'preact';
 import 'preact/debug';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
@@ -8,6 +8,8 @@ describe('component stack', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
+	let render;
+
 	let errors = [];
 	let warnings = [];
 
@@ -15,6 +17,7 @@ describe('component stack', () => {
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 
 		errors = [];
 		warnings = [];
@@ -44,7 +47,7 @@ describe('component stack', () => {
 			}
 		}
 
-		render(<Foo />, scratch);
+		render(<Foo />);
 
 		let lines = getStack(warnings).split('\n');
 		expect(lines[0].indexOf('Thrower') > -1).to.equal(true);
@@ -76,7 +79,7 @@ describe('component stack', () => {
 			}
 		}
 
-		render(<Bar />, scratch);
+		render(<Bar />);
 
 		let lines = getStack(errors).split('\n');
 		expect(lines[0].indexOf('td') > -1).to.equal(true);

@@ -1,4 +1,4 @@
-import { createElement, render, lazy, Suspense } from 'preact/compat';
+import { createElement, createRoot, lazy, Suspense } from 'preact/compat';
 import 'preact/debug';
 import { setupRerender } from 'preact/test-utils';
 import {
@@ -15,12 +15,14 @@ describe('debug with suspense', () => {
 	let rerender;
 	let errors = [];
 	let warnings = [];
+	let render;
 
 	beforeEach(() => {
 		errors = [];
 		warnings = [];
 		scratch = setupScratch();
 		rerender = setupRerender();
+		({ render } = createRoot(scratch));
 		sinon.stub(console, 'error').callsFake(e => errors.push(e));
 		sinon.stub(console, 'warn').callsFake(w => warnings.push(w));
 	});
@@ -36,7 +38,7 @@ describe('debug with suspense', () => {
 			throw Promise.resolve();
 		}
 
-		expect(() => render(<Foo />, scratch)).to.throw;
+		expect(() => render(<Foo />)).to.throw;
 	});
 
 	it('should throw an error when using lazy and missing Suspense', () => {
@@ -45,7 +47,7 @@ describe('debug with suspense', () => {
 			() => new Promise(resolve => resolve({ default: Foo }))
 		);
 		const fn = () => {
-			render(<LazyComp />, scratch);
+			render(<LazyComp />);
 		};
 
 		expect(fn).to.throw(/Missing Suspense/gi);
@@ -71,7 +73,7 @@ describe('debug with suspense', () => {
 					<LazyBaz unhappy="signal" />
 				</Suspense>
 			);
-			render(suspense, scratch);
+			render(suspense);
 			rerender(); // render fallback
 
 			expect(console.error).to.not.be.called;
@@ -99,7 +101,7 @@ describe('debug with suspense', () => {
 						<FakeLazy />
 					</Suspense>
 				);
-				render(suspense, scratch);
+				render(suspense);
 				rerender(); // Render fallback
 
 				expect(serializeHtml(scratch)).to.equal('<div>fallback...</div>');
@@ -125,7 +127,7 @@ describe('debug with suspense', () => {
 						<FakeLazy />
 					</Suspense>
 				);
-				render(suspense, scratch);
+				render(suspense);
 				rerender(); // Render fallback
 
 				expect(serializeHtml(scratch)).to.equal('<div>fallback...</div>');

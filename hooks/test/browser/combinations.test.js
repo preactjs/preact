@@ -1,5 +1,5 @@
 import { setupRerender, act } from 'preact/test-utils';
-import { createElement, render, Component } from 'preact';
+import { createElement, createRoot, Component } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import {
 	useState,
@@ -19,9 +19,12 @@ describe('combinations', () => {
 	/** @type {() => void} */
 	let rerender;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
+		({ render } = createRoot(scratch));
 	});
 
 	afterEach(() => {
@@ -52,7 +55,7 @@ describe('combinations', () => {
 			return null;
 		}
 
-		render(<Parent />, scratch);
+		render(<Parent />);
 		expect(states).to.deep.equal({
 			state1: 1,
 			state2: 2,
@@ -85,7 +88,7 @@ describe('combinations', () => {
 			return null;
 		}
 
-		render(<Comp />, scratch);
+		render(<Comp />);
 
 		return scheduleEffectAssert(() => {
 			rerender();
@@ -107,7 +110,7 @@ describe('combinations', () => {
 			return null;
 		}
 
-		render(<Comp />, scratch);
+		render(<Comp />);
 		rerender();
 
 		expect(didRender).to.have.been.calledTwice.and.calledWith(1);
@@ -126,7 +129,7 @@ describe('combinations', () => {
 			return <input ref={input} value="hello" />;
 		}
 
-		render(<Comp />, scratch);
+		render(<Comp />);
 
 		expect(refAtLayoutTime.value).to.equal('hello');
 	});
@@ -161,7 +164,7 @@ describe('combinations', () => {
 			return null;
 		}
 
-		render(<Comp />, scratch);
+		render(<Comp />);
 
 		expect(states).to.deep.equal([0, 10, 1, 20]);
 
@@ -187,7 +190,7 @@ describe('combinations', () => {
 			return null;
 		}
 
-		render(<Comp />, scratch);
+		render(<Comp />);
 
 		return scheduleEffectAssert(() => {
 			expect(effectCount).to.equal(1);
@@ -220,7 +223,7 @@ describe('combinations', () => {
 			}
 		}
 
-		render(<App />, scratch);
+		render(<App />);
 		act(() => updater.second());
 		expect(scratch.textContent).to.equal('01');
 
@@ -266,7 +269,7 @@ describe('combinations', () => {
 			return <Inner />;
 		}
 
-		act(() => render(<Outer />, scratch));
+		act(() => render(<Outer />));
 		expect(calls).to.deep.equal([
 			'layout inner call <span>hello 1</span>',
 			'layout outer call <span>hello 1</span>',

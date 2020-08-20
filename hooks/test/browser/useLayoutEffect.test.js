@@ -1,5 +1,5 @@
 import { act } from 'preact/test-utils';
-import { createElement, render, Fragment, Component } from 'preact';
+import { createElement, createRoot, Fragment, Component } from 'preact';
 import {
 	setupScratch,
 	teardown,
@@ -14,8 +14,11 @@ describe('useLayoutEffect', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 	});
 
 	afterEach(() => {
@@ -40,13 +43,13 @@ describe('useLayoutEffect', () => {
 			return null;
 		}
 
-		render(<Comp />, scratch);
-		render(<Comp />, scratch);
+		render(<Comp />);
+		render(<Comp />);
 
 		expect(cleanupFunction).to.be.calledOnce;
 		expect(callback).to.be.calledTwice;
 
-		render(<Comp />, scratch);
+		render(<Comp />);
 
 		expect(cleanupFunction).to.be.calledTwice;
 		expect(callback).to.be.calledThrice;
@@ -68,7 +71,7 @@ describe('useLayoutEffect', () => {
 			return null;
 		}
 
-		render(<Parent />, scratch);
+		render(<Parent />);
 
 		expect(callback).to.be.calledOnce;
 	});
@@ -87,8 +90,8 @@ describe('useLayoutEffect', () => {
 			}, [i]);
 			return <p>Test</p>;
 		};
-		render(<App i={0} />, scratch);
-		render(<App i={2} />, scratch);
+		render(<App i={0} />);
+		render(<App i={2} />);
 		expect(executionOrder).to.deep.equal([
 			'cleanup1',
 			'cleanup2',
@@ -124,8 +127,8 @@ describe('useLayoutEffect', () => {
 			);
 		}
 
-		render(<App value="hi" />, scratch);
-		render(<App value="hii" />, scratch);
+		render(<App value="hi" />);
+		render(<App value="hii" />);
 	});
 
 	it('should invoke layout effects after subtree is fully connected', () => {
@@ -154,7 +157,7 @@ describe('useLayoutEffect', () => {
 			);
 		}
 
-		render(<Outer />, scratch);
+		render(<Outer />);
 		expect(layoutEffect).to.have.been.calledOnce;
 	});
 
@@ -207,7 +210,7 @@ describe('useLayoutEffect', () => {
 			);
 		}
 
-		render(<App />, scratch);
+		render(<App />);
 		expect(calledFoo).to.equal(
 			'<button>next</button><div><p>Foo</p></div>',
 			'calledFoo'
@@ -264,16 +267,16 @@ describe('useLayoutEffect', () => {
 			}
 		}
 
-		act(() => render(<App page={1} />, scratch));
+		act(() => render(<App page={1} />));
 		expect(spy).to.not.be.called;
 		expect(scratch.innerHTML).to.equal('<p>loaded</p>');
 
-		act(() => render(<App page={2} />, scratch));
+		act(() => render(<App page={2} />));
 		expect(spy).to.be.calledOnce;
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 		errored = false;
 
-		act(() => render(<App page={1} />, scratch));
+		act(() => render(<App page={1} />));
 		expect(spy).to.be.calledOnce;
 		expect(scratch.innerHTML).to.equal('<p>loaded</p>');
 	});
@@ -314,10 +317,10 @@ describe('useLayoutEffect', () => {
 			}
 		}
 
-		act(() => render(<App page={2} />, scratch));
+		act(() => render(<App page={2} />));
 		expect(scratch.innerHTML).to.equal('<p>Load</p>');
 
-		act(() => render(<App page={1} />, scratch));
+		act(() => render(<App page={1} />));
 		expect(spy).to.be.calledOnce;
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 	});
