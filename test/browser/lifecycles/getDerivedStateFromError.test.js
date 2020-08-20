@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component } from 'preact';
+import { createElement, createRoot, Component } from 'preact';
 import {
 	setupScratch,
 	teardown,
@@ -18,8 +18,11 @@ describe('Lifecycle methods', () => {
 	/** @type {() => void} */
 	let rerender;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 		rerender = setupRerender();
 	});
 
@@ -103,8 +106,7 @@ describe('Lifecycle methods', () => {
 			render(
 				<Receiver>
 					<ThrowErr />
-				</Receiver>,
-				scratch
+				</Receiver>
 			);
 			rerender();
 
@@ -140,8 +142,7 @@ describe('Lifecycle methods', () => {
 			render(
 				<Receiver>
 					<ThrowErr />
-				</Receiver>,
-				scratch
+				</Receiver>
 			);
 			expect(Receiver.getDerivedStateFromError).to.have.been.calledWith(
 				expectedError
@@ -154,8 +155,7 @@ describe('Lifecycle methods', () => {
 			render(
 				<Receiver>
 					<ThrowErr />
-				</Receiver>,
-				scratch
+				</Receiver>
 			);
 			expect(Receiver.getDerivedStateFromError).to.have.been.calledWith(
 				expectedError
@@ -168,8 +168,7 @@ describe('Lifecycle methods', () => {
 			render(
 				<Receiver>
 					<ThrowErr />
-				</Receiver>,
-				scratch
+				</Receiver>
 			);
 			expect(Receiver.getDerivedStateFromError).to.have.been.calledWith(
 				expectedError
@@ -183,8 +182,7 @@ describe('Lifecycle methods', () => {
 			render(
 				<Receiver>
 					<ThrowErr />
-				</Receiver>,
-				scratch
+				</Receiver>
 			);
 
 			expect(Receiver.getDerivedStateFromError).to.have.been.calledWith(
@@ -199,8 +197,7 @@ describe('Lifecycle methods', () => {
 			render(
 				<Receiver>
 					<ThrowErr />
-				</Receiver>,
-				scratch
+				</Receiver>
 			);
 			thrower.forceUpdate();
 			rerender();
@@ -216,8 +213,7 @@ describe('Lifecycle methods', () => {
 			render(
 				<Receiver>
 					<ThrowErr />
-				</Receiver>,
-				scratch
+				</Receiver>
 			);
 
 			thrower.forceUpdate();
@@ -233,8 +229,7 @@ describe('Lifecycle methods', () => {
 			render(
 				<Receiver>
 					<ThrowErr />
-				</Receiver>,
-				scratch
+				</Receiver>
 			);
 
 			thrower.forceUpdate();
@@ -267,7 +262,7 @@ describe('Lifecycle methods', () => {
 			}
 
 			sinon.spy(Receiver, 'getDerivedStateFromError');
-			render(<Receiver />, scratch);
+			render(<Receiver />);
 
 			receiver.setState({ foo: 'baz' });
 			rerender();
@@ -299,7 +294,7 @@ describe('Lifecycle methods', () => {
 			}
 
 			sinon.spy(Receiver, 'getDerivedStateFromError');
-			render(<Receiver />, scratch);
+			render(<Receiver />);
 
 			receiver.setState({ foo: 'baz' });
 			rerender();
@@ -315,14 +310,12 @@ describe('Lifecycle methods', () => {
 			render(
 				<Receiver>
 					<ThrowErr />
-				</Receiver>,
-				scratch
+				</Receiver>
 			);
 			render(
 				<Receiver>
 					<div />
-				</Receiver>,
-				scratch
+				</Receiver>
 			);
 			expect(Receiver.getDerivedStateFromError).to.have.been.calledWith(
 				expectedError
@@ -354,7 +347,7 @@ describe('Lifecycle methods', () => {
 			}
 
 			sinon.spy(Receiver, 'getDerivedStateFromError');
-			render(<Receiver />, scratch);
+			render(<Receiver />);
 			expect(Receiver.getDerivedStateFromError).to.have.been.calledWith(
 				expectedError
 			);
@@ -386,8 +379,7 @@ describe('Lifecycle methods', () => {
 			render(
 				<Receiver>
 					<ThrowErr />
-				</Receiver>,
-				scratch
+				</Receiver>
 			);
 			expect(Receiver.getDerivedStateFromError).to.have.been.calledWith(
 				expectedError
@@ -406,14 +398,12 @@ describe('Lifecycle methods', () => {
 			render(
 				<Receiver>
 					<ThrowErr />
-				</Receiver>,
-				scratch
+				</Receiver>
 			);
 			render(
 				<Receiver>
 					<div />
-				</Receiver>,
-				scratch
+				</Receiver>
 			);
 			expect(Receiver.getDerivedStateFromError).to.have.been.calledOnceWith(
 				expectedError
@@ -428,8 +418,7 @@ describe('Lifecycle methods', () => {
 			render(
 				<Receiver>
 					<ThrowErr />
-				</Receiver>,
-				scratch
+				</Receiver>
 			);
 			expect(Receiver.getDerivedStateFromError).to.have.been.calledWith(
 				expectedError
@@ -449,8 +438,7 @@ describe('Lifecycle methods', () => {
 			render(
 				<Receiver>
 					<ThrowErr />
-				</Receiver>,
-				scratch
+				</Receiver>
 			);
 			rerender();
 			expect(scratch).to.have.property('textContent', 'Error: Error contents');
@@ -480,8 +468,7 @@ describe('Lifecycle methods', () => {
 					<Adapter>
 						<ThrowErr />
 					</Adapter>
-				</Receiver>,
-				scratch
+				</Receiver>
 			);
 
 			expect(Adapter.getDerivedStateFromError).to.have.been.calledWith(
@@ -520,8 +507,7 @@ describe('Lifecycle methods', () => {
 					<Adapter>
 						<ThrowErr />
 					</Adapter>
-				</Receiver>,
-				scratch
+				</Receiver>
 			);
 			rerender();
 
@@ -556,8 +542,7 @@ describe('Lifecycle methods', () => {
 					<Adapter>
 						<ThrowErr />
 					</Adapter>
-				</Receiver>,
-				scratch
+				</Receiver>
 			);
 			rerender();
 
@@ -593,8 +578,7 @@ describe('Lifecycle methods', () => {
 					<Receiver>
 						<ThrowErr />
 					</Receiver>
-				</TopReceiver>,
-				scratch
+				</TopReceiver>
 			);
 			rerender();
 
@@ -613,8 +597,7 @@ describe('Lifecycle methods', () => {
 					<div>
 						<ThrowErr />
 					</div>
-				</Receiver>,
-				scratch
+				</Receiver>
 			);
 			expect(Receiver.getDerivedStateFromError).to.have.been.calledWith(
 				expectedError
@@ -635,8 +618,7 @@ describe('Lifecycle methods', () => {
 			render(
 				<Receiver>
 					<ThrowErr />
-				</Receiver>,
-				scratch
+				</Receiver>
 			);
 			expect(Receiver.getDerivedStateFromError).to.have.been.calledWith(
 				expectedError
@@ -653,8 +635,7 @@ describe('Lifecycle methods', () => {
 			render(
 				<Receiver>
 					<ThrowErr />
-				</Receiver>,
-				scratch
+				</Receiver>
 			);
 			rerender();
 

@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component } from 'preact';
+import { createElement, createRoot, Component } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
 
 /** @jsx createElement */
@@ -11,8 +11,11 @@ describe('Lifecycle methods', () => {
 	/** @type {() => void} */
 	let rerender;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 		rerender = setupRerender();
 	});
 
@@ -34,7 +37,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<Foo foo="foo" />, scratch);
+			render(<Foo foo="foo" />);
 			expect(scratch.firstChild.className).to.be.equal('foo bar');
 		});
 
@@ -57,7 +60,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<Foo />, scratch);
+			render(<Foo />);
 			expect(scratch.firstChild.className).to.equal('not-foo bar');
 		});
 
@@ -89,13 +92,13 @@ describe('Lifecycle methods', () => {
 			sinon.spy(Foo.prototype, 'componentDidMount');
 			sinon.spy(Foo.prototype, 'componentDidUpdate');
 
-			render(<Foo update={false} />, scratch);
+			render(<Foo update={false} />);
 			expect(scratch.firstChild.className).to.equal('initial');
 			expect(Foo.getDerivedStateFromProps).to.have.callCount(1);
 			expect(Foo.prototype.componentDidMount).to.have.callCount(1); // verify mount occurred
 			expect(Foo.prototype.componentDidUpdate).to.have.callCount(0);
 
-			render(<Foo update />, scratch);
+			render(<Foo update />);
 			expect(scratch.firstChild.className).to.equal('updated');
 			expect(Foo.getDerivedStateFromProps).to.have.callCount(2);
 			expect(Foo.prototype.componentDidMount).to.have.callCount(1);
@@ -131,7 +134,7 @@ describe('Lifecycle methods', () => {
 
 			sinon.spy(Foo, 'getDerivedStateFromProps');
 
-			render(<Foo />, scratch);
+			render(<Foo />);
 			expect(scratch.firstChild.className).to.equal('initial');
 			expect(Foo.getDerivedStateFromProps).to.have.been.calledOnce;
 
@@ -159,7 +162,7 @@ describe('Lifecycle methods', () => {
 
 			sinon.spy(Foo, 'getDerivedStateFromProps');
 
-			render(<Foo />, scratch);
+			render(<Foo />);
 			expect(scratch.firstChild.className).to.equal('foo bar');
 			expect(Foo.getDerivedStateFromProps).to.have.been.called;
 		});
@@ -183,7 +186,7 @@ describe('Lifecycle methods', () => {
 
 			sinon.spy(Foo, 'getDerivedStateFromProps');
 
-			render(<Foo />, scratch);
+			render(<Foo />);
 			expect(scratch.firstChild.className).to.equal('foo bar');
 			expect(Foo.getDerivedStateFromProps).to.have.been.called;
 		});
@@ -202,7 +205,7 @@ describe('Lifecycle methods', () => {
 			sinon.spy(Foo.prototype, 'componentWillMount');
 			sinon.spy(Foo.prototype, 'componentWillReceiveProps');
 
-			render(<Foo />, scratch);
+			render(<Foo />);
 			expect(Foo.getDerivedStateFromProps).to.have.been.called;
 			expect(Foo.prototype.componentWillMount).to.not.have.been.called;
 			expect(Foo.prototype.componentWillReceiveProps).to.not.have.been.called;
@@ -240,7 +243,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<Parent />, scratch);
+			render(<Parent />);
 			expect(logs).to.deep.equal([
 				'parent getDerivedStateFromProps',
 				'parent render',
@@ -293,7 +296,7 @@ describe('Lifecycle methods', () => {
 
 			// Initial render
 			// state.value: initialized to 0 in constructor, 0 -> 1 in gDSFP
-			render(<Foo foo="foo" />, scratch);
+			render(<Foo foo="foo" />);
 
 			let element = scratch.firstChild;
 			expect(element.textContent).to.be.equal('1');
@@ -306,7 +309,7 @@ describe('Lifecycle methods', () => {
 
 			// New Props
 			// state.value: 1 -> 2 in gDSFP
-			render(<Foo foo="bar" />, scratch);
+			render(<Foo foo="bar" />);
 			expect(element.textContent).to.be.equal('2');
 			expect(propsArg).to.deep.equal({
 				foo: 'bar'
@@ -329,7 +332,7 @@ describe('Lifecycle methods', () => {
 
 			// New Props (see #1446)
 			// 4 -> 5 in gDSFP
-			render(<Foo foo="baz" />, scratch);
+			render(<Foo foo="baz" />);
 			expect(element.textContent).to.be.equal('5');
 			expect(stateArg).to.deep.equal({
 				value: 4
@@ -337,7 +340,7 @@ describe('Lifecycle methods', () => {
 
 			// New Props (see #1446)
 			// 5 -> 6 in gDSFP
-			render(<Foo foo="qux" />, scratch);
+			render(<Foo foo="qux" />);
 			expect(element.textContent).to.be.equal('6');
 			expect(stateArg).to.deep.equal({
 				value: 5
@@ -368,7 +371,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<Stateful />, scratch);
+			render(<Stateful />);
 
 			// Verify captured object references didn't get mutated
 			expect(componentState).to.deep.equal({ key: 'value' });
@@ -407,7 +410,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<Stateful />, scratch);
+			render(<Stateful />);
 
 			setState({ value: 10 });
 			rerender();

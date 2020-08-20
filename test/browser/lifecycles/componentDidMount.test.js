@@ -1,4 +1,4 @@
-import { createElement, render, Component } from 'preact';
+import { createElement, createRoot, Component } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
 
 /** @jsx createElement */
@@ -7,8 +7,11 @@ describe('Lifecycle methods', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 	});
 
 	afterEach(() => {
@@ -29,7 +32,7 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<App />, scratch);
+			render(<App />);
 			expect(spy).to.have.been.calledOnceWith(scratch.firstChild);
 		});
 	});
