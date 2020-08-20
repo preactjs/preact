@@ -73,8 +73,7 @@ describe('Fragment', () => {
 		render(
 			<Fragment>
 				<span>foo</span>
-			</Fragment>,
-			scratch
+			</Fragment>
 		);
 
 		expect(scratch.innerHTML).to.equal('<span>foo</span>');
@@ -88,8 +87,7 @@ describe('Fragment', () => {
 		render(
 			<Fragment>
 				hello <span>world</span>
-			</Fragment>,
-			scratch
+			</Fragment>
 		);
 
 		expect(scratch.innerHTML).to.equal('hello <span>world</span>');
@@ -112,8 +110,7 @@ describe('Fragment', () => {
 			<Fragment>
 				<span>world</span>
 				<p>Hello</p>
-			</Fragment>,
-			scratch
+			</Fragment>
 		);
 		expect(scratch.innerHTML).to.equal('<span>world</span><p>Hello</p>');
 
@@ -125,8 +122,7 @@ describe('Fragment', () => {
 				<span>world</span>
 				{null}
 				<span>world</span>
-			</Fragment>,
-			scratch
+			</Fragment>
 		);
 		expect(scratch.innerHTML).to.equal('<span>world</span><span>world</span>');
 
@@ -135,8 +131,7 @@ describe('Fragment', () => {
 				<span>world</span>
 				Hello
 				<span>world</span>
-			</Fragment>,
-			scratch
+			</Fragment>
 		);
 		expect(scratch.innerHTML).to.equal(
 			'<span>world</span>Hello<span>world</span>'
@@ -795,8 +790,7 @@ describe('Fragment', () => {
 				<Fragment>foo</Fragment>
 				<Fragment />
 				bar
-			</Fragment>,
-			scratch
+			</Fragment>
 		);
 
 		expect(scratch.innerHTML).to.equal('spamfoobar');
@@ -811,8 +805,7 @@ describe('Fragment', () => {
 			<Fragment>
 				<Fragment>foo</Fragment>
 				<Fragment>bar</Fragment>
-			</Fragment>,
-			scratch
+			</Fragment>
 		);
 
 		expect(scratch.innerHTML).to.equal('foobar');
@@ -837,8 +830,7 @@ describe('Fragment', () => {
 				</Fragment>
 				<div>4</div>
 				<div>5</div>
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.innerHTML).to.equal(
@@ -1048,8 +1040,7 @@ describe('Fragment', () => {
 					<li>6</li>
 				</Fragment>
 				<li>7</li>
-			</ol>,
-			scratch
+			</ol>
 		);
 
 		expect(scratch.textContent).to.equal('01234567');
@@ -1952,8 +1943,7 @@ describe('Fragment', () => {
 				<div>A</div>
 				<SetState />
 				<div>C</div>
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.innerHTML).to.eql(
@@ -2002,8 +1992,7 @@ describe('Fragment', () => {
 				<div>A</div>
 				<SetState />
 				<div>C</div>
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.innerHTML).to.eql(
@@ -2045,8 +2034,7 @@ describe('Fragment', () => {
 				<div>A</div>
 				<SetState />
 				<div>C</div>
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`);
@@ -2082,8 +2070,7 @@ describe('Fragment', () => {
 				<div>A</div>
 				<SetState />
 				<div>C</div>
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`);
@@ -2123,8 +2110,7 @@ describe('Fragment', () => {
 				<SetState />
 				{null}
 				<div>C</div>
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`);
@@ -2167,8 +2153,7 @@ describe('Fragment', () => {
 				<SetState />
 				{null}
 				<div>C</div>
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`);
@@ -2212,8 +2197,7 @@ describe('Fragment', () => {
 				<Outer />
 				{null}
 				<div>C</div>
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`);
@@ -2260,8 +2244,7 @@ describe('Fragment', () => {
 				<Outer />
 				{null}
 				<div>C</div>
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`);

@@ -280,8 +280,7 @@ describe('refs', () => {
 			<div>
 				<Foo ref={foo} a="a" />
 				<Bar ref={bar} b="b" />
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(Foo.prototype.render).to.have.been.calledWithMatch(
@@ -324,8 +323,7 @@ describe('refs', () => {
 		render(
 			<div>
 				<TestUnmount />
-			</div>,
-			scratch
+			</div>
 		);
 		outer = scratch.querySelector('#outer');
 		inner = scratch.querySelector('#inner');
@@ -409,8 +407,7 @@ describe('refs', () => {
 		render(
 			<div>
 				<Wrapper ref={c => ref(c.base)} />
-			</div>,
-			scratch
+			</div>
 		);
 		expect(ref).to.have.been.calledOnce.and.calledWith(
 			scratch.firstChild.firstChild

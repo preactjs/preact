@@ -118,10 +118,7 @@ describe('style attribute', () => {
 			.that.equals('');
 		expect(style.zIndex.toString()).to.equal('');
 
-		render(
-			<div style={{ color: 'rgb(0, 255, 255)', zIndex: '3' }}>test</div>,
-			scratch
-		);
+		render(<div style={{ color: 'rgb(0, 255, 255)', zIndex: '3' }}>test</div>);
 
 		style = scratch.firstChild.style;
 		expect(style.cssText).to.equal('color: rgb(0, 255, 255); z-index: 3;');
@@ -136,8 +133,7 @@ describe('style attribute', () => {
 		expect(style.zIndex.toString()).to.equal('3');
 
 		render(
-			<div style={{ color: 'rgb(0, 255, 255)', display: 'inline' }}>test</div>,
-			scratch
+			<div style={{ color: 'rgb(0, 255, 255)', display: 'inline' }}>test</div>
 		);
 
 		style = scratch.firstChild.style;

@@ -85,8 +85,7 @@ describe('replaceNode parameter in render()', () => {
 		render(
 			<div id="a">
 				<App />
-			</div>,
-			scratch
+			</div>
 		);
 		expect(scratch.innerHTML).to.equal('<div id="a"><div>App</div></div>');
 		expect(mount).to.be.calledOnce;
