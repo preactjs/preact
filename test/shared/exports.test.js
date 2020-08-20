@@ -4,8 +4,7 @@ import {
 	createContext,
 	Component,
 	Fragment,
-	render,
-	hydrate,
+	createRoot,
 	cloneElement,
 	options
 } from '../../';
@@ -17,8 +16,7 @@ describe('preact', () => {
 		expect(createElement).to.be.a('function');
 		expect(Component).to.be.a('function');
 		expect(Fragment).to.exist;
-		expect(render).to.be.a('function');
-		expect(hydrate).to.be.a('function');
+		expect(createRoot).to.be.a('function');
 		expect(cloneElement).to.be.a('function');
 		expect(createContext).to.be.a('function');
 		expect(options).to.exist.and.be.an('object');
