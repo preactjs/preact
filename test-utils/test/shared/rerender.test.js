@@ -1,4 +1,4 @@
-import { options, createElement, render, Component } from 'preact';
+import { options, createElement, createRoot, Component } from 'preact';
 import { teardown, setupRerender } from 'preact/test-utils';
 
 /** @jsx createElement */
@@ -7,8 +7,11 @@ describe('setupRerender & teardown', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = document.createElement('div');
+		({ render } = createRoot(scratch));
 	});
 
 	it('should restore previous debounce', () => {
@@ -42,7 +45,7 @@ describe('setupRerender & teardown', () => {
 		setupRerender();
 
 		// Initial render
-		render(<Counter />, scratch);
+		render(<Counter />);
 		expect(Counter.prototype.render).to.have.been.calledOnce;
 		expect(scratch.innerHTML).to.equal('<div>0</div>');
 

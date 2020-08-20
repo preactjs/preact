@@ -137,7 +137,7 @@ describe('replaceNode parameter in render()', () => {
 
 		render(<div id="a">childA</div>, childA);
 		render(<div id="b">childB</div>, childB);
-		render(<div id="c">childC</div>, childC);
+		render(<div id="c">gi</div>, childC);
 
 		expect(scratch.innerHTML).to.equal(`${expectedA}${expectedB}${expectedC}`);
 	});

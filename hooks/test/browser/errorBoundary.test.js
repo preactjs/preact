@@ -1,4 +1,4 @@
-import { createElement, render } from 'preact';
+import { createElement, createRoot } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useErrorBoundary } from 'preact/hooks';
 import { setupRerender } from 'preact/test-utils';
@@ -7,10 +7,11 @@ import { setupRerender } from 'preact/test-utils';
 
 describe('errorBoundary', () => {
 	/** @type {HTMLDivElement} */
-	let scratch, rerender;
+	let scratch, rerender, render;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 		rerender = setupRerender();
 	});
 
@@ -31,7 +32,7 @@ describe('errorBoundary', () => {
 			return err ? <p>Error</p> : success ? <p>Success</p> : <Throws />;
 		};
 
-		render(<App />, scratch);
+		render(<App />);
 		rerender();
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 
@@ -53,7 +54,7 @@ describe('errorBoundary', () => {
 			return err ? <p>Error</p> : <Throws />;
 		};
 
-		render(<App />, scratch);
+		render(<App />);
 		rerender();
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 		expect(spy).to.be.calledOnce;
@@ -75,14 +76,14 @@ describe('errorBoundary', () => {
 			return err ? <p>Error</p> : <Throws />;
 		};
 
-		render(<App onError={spy} />, scratch);
+		render(<App onError={spy} />);
 		rerender();
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 		expect(spy).to.be.calledOnce;
 		expect(spy).to.be.calledWith(error);
 
 		resetErr();
-		render(<App onError={spy2} />, scratch);
+		render(<App onError={spy2} />);
 		rerender();
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 		expect(spy).to.be.calledOnce;

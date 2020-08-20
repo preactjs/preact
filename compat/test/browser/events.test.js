@@ -1,4 +1,4 @@
-import { render } from 'preact';
+import { createRoot } from 'preact';
 import {
 	setupScratch,
 	teardown,
@@ -11,9 +11,11 @@ describe('preact/compat events', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 	let proto;
+	let render;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 
 		proto = Element.prototype;
 		sinon.spy(proto, 'addEventListener');
@@ -71,7 +73,7 @@ describe('preact/compat events', () => {
 	});
 
 	it('should not normalize onChange for range', () => {
-		render(<input type="range" onChange={() => null} />, scratch);
+		render(<input type="range" onChange={() => null} />);
 		expect(proto.addEventListener).to.have.been.calledOnce;
 		expect(proto.addEventListener).to.have.been.calledWithExactly(
 			'change',
@@ -83,7 +85,7 @@ describe('preact/compat events', () => {
 
 	it('should support onAnimationEnd', () => {
 		const func = sinon.spy(() => {});
-		render(<div onAnimationEnd={func} />, scratch);
+		render(<div onAnimationEnd={func} />);
 
 		expect(
 			proto.addEventListener
@@ -96,7 +98,7 @@ describe('preact/compat events', () => {
 		scratch.firstChild.dispatchEvent(createEvent('animationend'));
 		expect(func).to.have.been.calledOnce;
 
-		render(<div />, scratch);
+		render(<div />);
 		expect(
 			proto.removeEventListener
 		).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
@@ -148,7 +150,7 @@ describe('preact/compat events', () => {
 		scratch.firstChild.dispatchEvent(createEvent('touchcancel'));
 		expect(onTouchCancel).to.have.been.calledOnce;
 
-		render(<div />, scratch);
+		render(<div />);
 
 		expect(proto.removeEventListener.args.length).to.eql(4);
 		expect(proto.removeEventListener.args[0].length).to.eql(3);
@@ -167,7 +169,7 @@ describe('preact/compat events', () => {
 
 	it('should support onTransitionEnd', () => {
 		const func = sinon.spy(() => {});
-		render(<div onTransitionEnd={func} />, scratch);
+		render(<div onTransitionEnd={func} />);
 
 		expect(
 			proto.addEventListener
@@ -180,7 +182,7 @@ describe('preact/compat events', () => {
 		scratch.firstChild.dispatchEvent(createEvent('transitionend'));
 		expect(func).to.have.been.calledOnce;
 
-		render(<div />, scratch);
+		render(<div />);
 		expect(
 			proto.removeEventListener
 		).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
@@ -234,7 +236,7 @@ describe('preact/compat events', () => {
 
 	it('should normalize beforeinput event listener', () => {
 		let spy = sinon.spy();
-		render(<input onBeforeInput={spy} />, scratch);
+		render(<input onBeforeInput={spy} />);
 		scratch.firstChild.dispatchEvent(createEvent('beforeinput'));
 		expect(spy).to.be.calledOnce;
 	});

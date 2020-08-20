@@ -1,4 +1,4 @@
-import { createElement, render } from 'preact';
+import { createElement, createRoot } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useMemo } from 'preact/hooks';
 
@@ -8,8 +8,11 @@ describe('useMemo', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 	});
 
 	afterEach(() => {
@@ -26,14 +29,14 @@ describe('useMemo', () => {
 			return null;
 		}
 
-		render(<Comp a={1} b={1} />, scratch);
-		render(<Comp a={1} b={1} />, scratch);
+		render(<Comp a={1} b={1} />);
+		render(<Comp a={1} b={1} />);
 
 		expect(results).to.deep.equal([2, 2]);
 		expect(memoFunction).to.have.been.calledOnce;
 
-		render(<Comp a={1} b={2} />, scratch);
-		render(<Comp a={1} b={2} />, scratch);
+		render(<Comp a={1} b={2} />);
+		render(<Comp a={1} b={2} />);
 
 		expect(results).to.deep.equal([2, 2, 3, 3]);
 		expect(memoFunction).to.have.been.calledTwice;
@@ -62,26 +65,26 @@ describe('useMemo', () => {
 			);
 		};
 
-		render(<App x={0} />, scratch);
+		render(<App x={0} />);
 		expect(spy).to.be.calledOnce;
 		expect(spy2).to.be.calledOnce;
 		expect(scratch.innerHTML).to.equal('<div><span>0</span><p>0</p></div>');
 
-		render(<App x={0} />, scratch);
+		render(<App x={0} />);
 		expect(spy).to.be.calledTwice;
 		expect(spy2).to.be.calledOnce;
 		expect(scratch.innerHTML).to.equal('<div><span>0</span><p>0</p></div>');
 
-		render(<App x={1} />, scratch);
+		render(<App x={1} />);
 		expect(spy).to.be.calledThrice;
 		expect(spy2).to.be.calledTwice;
 		expect(scratch.innerHTML).to.equal('<div><span>1</span><p>1</p></div>');
 
-		render(<App x={1} />, scratch);
+		render(<App x={1} />);
 		expect(spy2).to.be.calledTwice;
 		expect(scratch.innerHTML).to.equal('<div><span>1</span><p>1</p></div>');
 
-		render(<App x={2} />, scratch);
+		render(<App x={2} />);
 		expect(spy2).to.be.calledThrice;
 		expect(scratch.innerHTML).to.equal('<div><span>2</span><p>2</p></div>');
 	});

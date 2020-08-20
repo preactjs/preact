@@ -25,7 +25,7 @@ describe('focus', () => {
 	/** @type {() => void} */
 	let getDynamicListHtml;
 
-	let render;
+	let render, hydrate;
 
 	class DynamicList extends Component {
 		constructor(props) {
@@ -151,7 +151,7 @@ describe('focus', () => {
 
 	beforeEach(() => {
 		scratch = setupScratch();
-		({ render } = createRoot(scratch));
+		({ render, hydrate } = createRoot(scratch));
 		rerender = setupRerender();
 	});
 

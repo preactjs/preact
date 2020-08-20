@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render } from 'preact';
+import { createElement, createRoot } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useState } from 'preact/hooks';
 
@@ -12,9 +12,12 @@ describe('useState', () => {
 	/** @type {() => void} */
 	let rerender;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
+		({ render } = createRoot(scratch));
 	});
 
 	afterEach(() => {
@@ -30,8 +33,8 @@ describe('useState', () => {
 			return null;
 		}
 
-		render(<Comp />, scratch);
-		render(<Comp />, scratch);
+		render(<Comp />);
+		render(<Comp />);
 
 		expect(stateHistory).to.deep.equal([{ a: 1 }, { a: 1 }]);
 		expect(stateHistory[0]).to.equal(stateHistory[1]);
@@ -45,8 +48,8 @@ describe('useState', () => {
 			return null;
 		}
 
-		render(<Comp />, scratch);
-		render(<Comp />, scratch);
+		render(<Comp />);
+		render(<Comp />);
 
 		expect(initState).to.be.calledOnce;
 	});
@@ -62,7 +65,7 @@ describe('useState', () => {
 			return null;
 		});
 
-		render(<Comp />, scratch);
+		render(<Comp />);
 		expect(lastState).to.equal(0);
 		expect(Comp).to.be.calledOnce;
 
@@ -88,7 +91,7 @@ describe('useState', () => {
 			return null;
 		});
 
-		render(<Comp />, scratch);
+		render(<Comp />);
 		expect(lastState).to.equal(0);
 		expect(Comp).to.be.calledOnce;
 
@@ -119,7 +122,7 @@ describe('useState', () => {
 			return <button onClick={props.increment}>Increment</button>;
 		}
 
-		render(<StateContainer />, scratch);
+		render(<StateContainer />);
 		expect(scratch.textContent).to.include('Count: 0');
 
 		const button = scratch.querySelector('button');
@@ -147,7 +150,7 @@ describe('useState', () => {
 			return <p>{state}</p>;
 		};
 
-		render(<App />, scratch);
+		render(<App />);
 
 		expect(arg).to.equal('hi');
 		expect(scratch.innerHTML).to.equal('<p>hi</p>');
@@ -181,7 +184,7 @@ describe('useState', () => {
 			);
 		}
 
-		render(<App />, scratch);
+		render(<App />);
 		expect(scratch.textContent).to.equal('Click Here!!');
 		const text = scratch.querySelector('p');
 		text.click();
