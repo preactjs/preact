@@ -26,6 +26,8 @@ export function createRoot(parentDom) {
 		// means that we are mounting a new tree for the first time.
 		let oldVNode = isHydrating ? null : oldRoot;
 		vnode = createElement(Root, { _parentDom: parentDom }, [vnode]);
+		// TODO: this is temp for getDomSibling & compat render
+		parent._children = vnode;
 
 		// List of effects that need to be called after diffing.
 		let commitQueue = [];
