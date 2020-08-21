@@ -55,18 +55,26 @@ Component.prototype.isReactComponent = {};
 export function render(vnode, parent, callback) {
 	// React destroys any existing DOM nodes, see #1727
 	// ...but only on the first render, see #1828
+	console.log(parent._children == null);
 	if (parent._children == null) {
 		parent.textContent = '';
 	}
 
-	createRoot(parent).render(vnode);
+	const root = !parent._root
+		? (parent._root = createRoot(parent))
+		: parent._root;
+
+	root.render(vnode);
 	if (typeof callback == 'function') callback();
 
 	return vnode ? vnode._component : null;
 }
 
 export function hydrate(vnode, parent, callback) {
-	createRoot(parent).hydrate(vnode);
+	const root = !parent._root
+		? (parent._root = createRoot(parent))
+		: parent._root;
+	root.hydrate(vnode);
 	if (typeof callback == 'function') callback();
 
 	return vnode ? vnode._component : null;
