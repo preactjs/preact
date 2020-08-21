@@ -544,8 +544,7 @@ describe('createContext', () => {
 					<NoUpdate>
 						<Consumer>{data => <Inner {...data} />}</Consumer>
 					</NoUpdate>
-				</Provider>,
-				scratch
+				</Provider>
 			);
 		});
 
@@ -618,16 +617,14 @@ describe('createContext', () => {
 			render(
 				<Provider value={CONTEXT}>
 					<Consumer>{data => <Inner {...data} />}</Consumer>
-				</Provider>,
-				scratch
+				</Provider>
 			);
 
 			// Not calling re-render since it's gonna get called with the same Consumer function
 			render(
 				<Provider value={CONTEXT}>
 					<Consumer>{data => <Inner {...data} />}</Consumer>
-				</Provider>,
-				scratch
+				</Provider>
 			);
 		});
 
@@ -721,8 +718,7 @@ describe('createContext', () => {
 					<Provider value="bob">
 						<App />
 					</Provider>
-				</Provider>,
-				scratch
+				</Provider>
 			);
 			expect(actual).to.deep.equal('bob');
 		});
@@ -763,8 +759,7 @@ describe('createContext', () => {
 							<Inner />
 						</NewContext>
 					</OldContext>
-				</Foo.Provider>,
-				scratch
+				</Foo.Provider>
 			);
 
 			expect(spy).to.be.calledWithMatch({ foo: 'foo' });
@@ -795,8 +790,7 @@ describe('createContext', () => {
 			render(
 				<Foo.Provider value="foo">
 					<App />
-				</Foo.Provider>,
-				scratch
+				</Foo.Provider>
 			);
 
 			render(null);

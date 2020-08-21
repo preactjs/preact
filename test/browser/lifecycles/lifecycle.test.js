@@ -606,8 +606,7 @@ describe('Lifecycle methods', () => {
 			render(
 				<Boundary>
 					<ThrowErr />
-				</Boundary>,
-				scratch
+				</Boundary>
 			);
 			rerender();
 

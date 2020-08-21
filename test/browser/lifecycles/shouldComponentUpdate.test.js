@@ -636,8 +636,7 @@ describe('Lifecycle methods', () => {
 					<Two>
 						<Three />
 					</Two>
-				</One>,
-				scratch
+				</One>
 			);
 			expect(scratch.innerHTML).to.equal('<span>1</span>');
 
