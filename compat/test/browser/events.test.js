@@ -31,7 +31,7 @@ describe('preact/compat events', () => {
 
 	it('should patch events', () => {
 		let spy = sinon.spy();
-		render(<div onClick={spy} />, scratch);
+		render(<div onClick={spy} />);
 		scratch.firstChild.click();
 
 		expect(spy).to.be.calledOnce;
@@ -120,8 +120,7 @@ describe('preact/compat events', () => {
 				onTouchEnd={onTouchEnd}
 				onTouchMove={onTouchMove}
 				onTouchCancel={onTouchCancel}
-			/>,
-			scratch
+			/>
 		);
 
 		expect(proto.addEventListener.args.length).to.eql(4);
