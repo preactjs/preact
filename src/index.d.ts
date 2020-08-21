@@ -222,7 +222,7 @@ declare namespace preact {
 		parent: Element | Document | ShadowRoot | DocumentFragment
 	): {
 		render: (vnode: ComponentChild, replaceNode?: Element | Text) => void;
-		hydrate: (vnode) => void;
+		hydrate: (vnode: ComponentChild) => void;
 	};
 
 	function cloneElement(
