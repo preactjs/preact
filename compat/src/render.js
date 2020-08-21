@@ -21,7 +21,6 @@ export const REACT_ELEMENT_TYPE =
 export function render(vnode, parent, callback) {
 	// React destroys any existing DOM nodes, see #1727
 	// ...but only on the first render, see #1828
-	console.log(parent._children == null);
 	if (parent._children == null) {
 		while (parent.firstChild) {
 			parent.removeChild(parent.firstChild);
