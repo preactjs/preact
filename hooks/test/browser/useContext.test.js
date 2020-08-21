@@ -245,7 +245,8 @@ describe('useContext', () => {
 
 			// Create a new div to append the `second` case
 			const div = scratch.appendChild(document.createElement('div'));
-			render(<App config={second} />, div);
+			({ render } = createRoot(div));
+			render(<App config={second} />);
 		});
 
 		// Push the expect into the next frame

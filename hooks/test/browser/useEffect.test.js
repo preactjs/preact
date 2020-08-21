@@ -232,21 +232,22 @@ describe('useEffect', () => {
 
 		const Inner = () => {
 			useEffect(() => {
-				render(<div>global</div>, global);
+				({ render } = createRoot(global));
+				render(<div>global</div>);
 			}, []);
 
 			return <div>Inner</div>;
 		};
 
 		act(() => {
+			({ render } = createRoot(root));
 			render(
 				<Modal
 					content={props => {
 						props.setCanProceed(false);
 						return <Inner />;
 					}}
-				/>,
-				root
+				/>
 			);
 		});
 
