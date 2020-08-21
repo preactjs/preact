@@ -1,6 +1,6 @@
 import {
 	createElement,
-	render as preactRender,
+	createRoot,
 	cloneElement as preactCloneElement,
 	createRef,
 	Component,
@@ -66,7 +66,8 @@ function cloneElement(element) {
  */
 function unmountComponentAtNode(container) {
 	if (container._children) {
-		preactRender(null, container);
+		// TODO: this doesn't work
+		createRoot(container).render(null);
 		return true;
 	}
 	return false;
