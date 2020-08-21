@@ -71,6 +71,7 @@ describe('render()', () => {
 		scratch = document.createElement('div');
 		(document.body || document.documentElement).appendChild(scratch);
 
+		({ render } = createRoot(scratch));
 		render(<span />);
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.childNodes[0].nodeName).to.equal('SPAN');
@@ -88,6 +89,7 @@ describe('render()', () => {
 		scratch.parentNode.removeChild(scratch);
 		scratch = document.createElement('div');
 		(document.body || document.documentElement).appendChild(scratch);
+		({ render } = createRoot(scratch));
 
 		render(<x-bar />);
 		expect(scratch.childNodes).to.have.length(1);
