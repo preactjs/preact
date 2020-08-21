@@ -59,7 +59,7 @@ export function render(vnode, parent, callback) {
 		parent.textContent = '';
 	}
 
-	createRoot(parent).render(vnode, parent);
+	createRoot(parent).render(vnode);
 	if (typeof callback == 'function') callback();
 
 	return vnode ? vnode._component : null;
