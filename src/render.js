@@ -3,8 +3,6 @@ import { commitRoot, diff } from './diff/index';
 import { createElement, Root } from './create-element';
 import options from './options';
 
-const IS_HYDRATE = EMPTY_OBJ;
-
 /**
  *
  * @param {import('./internal').PreactElement} parentDom The DOM element to
@@ -15,15 +13,10 @@ export function createRoot(parentDom) {
 		if (options._root) options._root(vnode, parentDom);
 
 		// We abuse the `replaceNode` parameter in `hydrate()` to signal if we
-		// are in hydration mode or not by passing `IS_HYDRATE` instead of a
+		// are in hydration mode or not by passing `EMPTY_OBJ` instead of a
 		// DOM element.
-		let isHydrating = replaceNode === IS_HYDRATE;
+		let isHydrating = replaceNode === EMPTY_OBJ;
 
-		// To be able to support calling `render()` multiple times on the same
-		// DOM node, we need to obtain a reference to the previous tree. We do
-		// this by assigning a new `_children` property to DOM nodes which points
-		// to the last rendered tree. By default this property is not present, which
-		// means that we are mounting a new tree for the first time.
 		let oldVNode = isHydrating ? null : oldRoot;
 		vnode = createElement(Root, { _parentDom: parentDom }, [vnode]);
 
@@ -32,8 +25,6 @@ export function createRoot(parentDom) {
 
 		diff(
 			parentDom,
-			// Determine the new vnode tree and store it on the DOM element on
-			// our custom `_children` property.
 			(oldRoot = vnode),
 			oldVNode || EMPTY_OBJ,
 			EMPTY_OBJ,
@@ -55,7 +46,7 @@ export function createRoot(parentDom) {
 	}
 	return {
 		hydrate(vnode) {
-			render(vnode, IS_HYDRATE);
+			render(vnode, EMPTY_OBJ);
 		},
 		render
 	};
