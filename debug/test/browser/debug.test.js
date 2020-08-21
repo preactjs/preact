@@ -47,11 +47,13 @@ describe('debug', () => {
 	});
 
 	it('should print an error on rendering on undefined parent', () => {
+		({ render } = createRoot(undefined));
 		let fn = () => render(<div />);
 		expect(fn).to.throw(/render/);
 	});
 
 	it('should print an error on rendering on invalid parent', () => {
+		({ render } = createRoot(6));
 		let fn = () => render(<div />, 6);
 		expect(fn).to.throw(/valid HTML node/);
 		expect(fn).to.throw(/<div/);
@@ -59,6 +61,7 @@ describe('debug', () => {
 
 	it('should print an error with (function) component name when available', () => {
 		const App = () => <div />;
+		({ render } = createRoot());
 		let fn = () => render(<App />);
 		expect(fn).to.throw(/<App/);
 		expect(fn).to.throw(/6/);
