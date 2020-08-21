@@ -10,7 +10,7 @@ import { setupRerender } from 'preact/test-utils';
 
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 
-describe.skip('Portal', () => {
+describe('Portal', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 	let rerender;
@@ -372,7 +372,8 @@ describe.skip('Portal', () => {
 		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div>');
 	});
 
-	it('should work with removing an element from stacked container to new one', () => {
+	// Reparenting is an issue in createRoot
+	it.skip('should work with removing an element from stacked container to new one', () => {
 		let toggle, root2;
 
 		function Foo(props) {
