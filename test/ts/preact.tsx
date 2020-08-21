@@ -15,8 +15,6 @@ interface DummyState {
 	input: string;
 }
 
-const;
-
 class DummyComponent extends Component<DummyProps, DummyState> {
 	constructor(props: DummyProps) {
 		super(props);
