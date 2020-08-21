@@ -122,8 +122,7 @@ describe('Lifecycle methods', () => {
 						{[1, 2].map(i => (
 							<Child key={i} i={i} />
 						))}
-					</Receiver>,
-					scratch
+					</Receiver>
 				);
 			expect(fn).to.not.throw();
 

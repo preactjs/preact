@@ -95,7 +95,7 @@ describe('replaceNode parameter in render()', () => {
 		expect(unmount).to.be.calledOnce;
 	});
 
-	it('should unmount existing components in prerendered HTML', () => {
+	it.only('should unmount existing components in prerendered HTML', () => {
 		const unmount = sinon.spy();
 		const mount = sinon.spy();
 		class App extends Component {
@@ -113,6 +113,7 @@ describe('replaceNode parameter in render()', () => {
 		}
 
 		scratch.innerHTML = `<div id="child"></div>`;
+		({ render } = createRoot(scratch));
 
 		const childContainer = scratch.querySelector('#child');
 

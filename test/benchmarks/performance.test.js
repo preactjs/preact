@@ -5,8 +5,7 @@ import { setupScratch, teardown } from '../_util/helpers';
 import {
 	createElement,
 	Component,
-	render,
-	hydrate
+	createRoot
 } from 'preact/dist/preact.module';
 
 const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
@@ -63,6 +62,8 @@ function benchmark(iter, callback) {
 describe('performance', function() {
 	let scratch;
 
+	let render, hydrate;
+
 	this.timeout(10000);
 
 	before(function() {
@@ -76,6 +77,7 @@ describe('performance', function() {
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render, hydrate } = createRoot(scratch));
 	});
 
 	afterEach(() => {
@@ -130,7 +132,7 @@ describe('performance', function() {
 
 		benchmark(
 			() => {
-				render(jsx, scratch);
+				render(jsx);
 			},
 			({ ticks, message }) => {
 				console.log(`PERF: empty diff: ${message}`);
@@ -229,8 +231,8 @@ describe('performance', function() {
 
 		benchmark(
 			() => {
-				render(<Parent child={Root} />, scratch);
-				render(<Parent child={Empty} />, scratch);
+				render(<Parent child={Root} />);
+				render(<Parent child={Empty} />);
 			},
 			({ ticks, message }) => {
 				console.log(`PERF: repeat diff: ${message}`);
@@ -372,7 +374,7 @@ describe('performance', function() {
 		let count = 0;
 		benchmark(
 			() => {
-				render(app(++count), scratch);
+				render(app(++count));
 			},
 			({ ticks, message }) => {
 				console.log(`PERF: style/prop mutation: ${message}`);
@@ -452,13 +454,13 @@ describe('performance', function() {
 			}
 		}
 
-		render(<App />, scratch);
+		render(<App />);
 		let html = scratch.innerHTML;
 
 		benchmark(
 			() => {
 				scratch.innerHTML = html;
-				hydrate(<App />, scratch);
+				hydrate(<App />);
 			},
 			({ ticks, message }) => {
 				console.log(`PERF: SSR Hydrate: ${message}`);

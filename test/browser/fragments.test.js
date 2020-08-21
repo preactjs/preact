@@ -99,8 +99,7 @@ describe('Fragment', () => {
 				<Fragment>
 					<span>world</span>
 					{null}
-				</Fragment>,
-				scratch
+				</Fragment>
 			);
 		};
 		expect(fn).not.to.throw();

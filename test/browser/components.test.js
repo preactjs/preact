@@ -269,8 +269,7 @@ describe('Components', () => {
 				<div>
 					<A />
 					<B />
-				</div>,
-				scratch
+				</div>
 			);
 			expect(scratch.innerHTML).to.equal('<div><p>B</p></div>');
 
@@ -833,8 +832,7 @@ describe('Components', () => {
 			const Foo = props => <div {...props} />;
 
 			render(
-				<Foo a="b" children={[<span class="bar">bar</span>, '123', 456]} />,
-				scratch
+				<Foo a="b" children={[<span class="bar">bar</span>, '123', 456]} />
 			);
 
 			expect(scratch.innerHTML).to.equal(
@@ -898,8 +896,7 @@ describe('Components', () => {
 			render(
 				<Foo>
 					<span />
-				</Foo>,
-				scratch
+				</Foo>
 			);
 
 			expect(children).to.be.an('object');
@@ -911,8 +908,7 @@ describe('Components', () => {
 			render(
 				<Foo>
 					<Bar />
-				</Foo>,
-				scratch
+				</Foo>
 			);
 
 			expect(children).to.be.an('object');
@@ -935,8 +931,7 @@ describe('Components', () => {
 					0<span />
 					<input />
 					<div />1
-				</Foo>,
-				scratch
+				</Foo>
 			);
 
 			expect(children).to.be.an('array');
@@ -971,8 +966,7 @@ describe('Components', () => {
 					{[list1, list2]}
 					{[list3, list4]}
 					{list5}
-				</Foo>,
-				scratch
+				</Foo>
 			);
 
 			expect(children).to.be.an('array');
@@ -1485,8 +1479,7 @@ describe('Components', () => {
 					<C2>
 						<C3>Some Text</C3>
 					</C2>
-				</C1>,
-				scratch
+				</C1>
 			);
 
 			expect(C1.prototype.componentWillMount, 'initial mount').to.have.been
@@ -1500,8 +1493,7 @@ describe('Components', () => {
 			render(
 				<C1>
 					<C2>Some Text</C2>
-				</C1>,
-				scratch
+				</C1>
 			);
 
 			expect(C1.prototype.componentWillMount, 'unmount innermost, C1').not.to
@@ -1513,8 +1505,7 @@ describe('Components', () => {
 			render(
 				<C1>
 					<C3>Some Text</C3>
-				</C1>,
-				scratch
+				</C1>
 			);
 
 			expect(C1.prototype.componentWillMount, 'swap innermost').not.to.have.been
@@ -1528,8 +1519,7 @@ describe('Components', () => {
 					<C2>
 						<C3>Some Text</C3>
 					</C2>
-				</C1>,
-				scratch
+				</C1>
 			);
 
 			expect(C1.prototype.componentWillMount, 'inject between, C1').not.to.have
@@ -1550,8 +1540,7 @@ describe('Components', () => {
 					<C2>
 						<C3>Some Text</C3>
 					</C2>
-				</C1>,
-				scratch
+				</C1>
 			);
 
 			expect(
@@ -1571,8 +1560,7 @@ describe('Components', () => {
 			render(
 				<C1>
 					<C2>Some Text</C2>
-				</C1>,
-				scratch
+				</C1>
 			);
 
 			expect(
@@ -1588,8 +1576,7 @@ describe('Components', () => {
 			render(
 				<C1>
 					<C3>Some Text</C3>
-				</C1>,
-				scratch
+				</C1>
 			);
 
 			expect(
@@ -1607,8 +1594,7 @@ describe('Components', () => {
 					<C2>
 						<C3>Some Text</C3>
 					</C2>
-				</C1>,
-				scratch
+				</C1>
 			);
 
 			expect(
@@ -1670,8 +1656,7 @@ describe('Components', () => {
 					<C2>
 						<C3>Some Text</C3>
 					</C2>
-				</C1>,
-				scratch
+				</C1>
 			);
 
 			expect(
@@ -1691,8 +1676,7 @@ describe('Components', () => {
 			render(
 				<C1>
 					<C2>Some Text</C2>
-				</C1>,
-				scratch
+				</C1>
 			);
 
 			expect(
@@ -1708,8 +1692,7 @@ describe('Components', () => {
 			render(
 				<C1>
 					<C3>Some Text</C3>
-				</C1>,
-				scratch
+				</C1>
 			);
 
 			expect(
@@ -1727,8 +1710,7 @@ describe('Components', () => {
 					<C2>
 						<C3>Some Text</C3>
 					</C2>
-				</C1>,
-				scratch
+				</C1>
 			);
 
 			expect(
@@ -1955,8 +1937,7 @@ describe('Components', () => {
 							<Child />
 						</Parent2>
 					</Parent1>
-				</ParentWithDom>,
-				scratch
+				</ParentWithDom>
 			);
 
 			expect(scratch.innerHTML).to.equal('<div><p>child</p></div>');
@@ -1994,8 +1975,7 @@ describe('Components', () => {
 						<Sibling ref={s3} />
 					</ParentWithDom>
 					<Sibling ref={s4} />
-				</Fragment>,
-				scratch
+				</Fragment>
 			);
 
 			expect(scratch.innerHTML).to.equal(
@@ -2031,8 +2011,7 @@ describe('Components', () => {
 				<Parent1>
 					<Sibling />
 					<Child />
-				</Parent1>,
-				scratch
+				</Parent1>
 			);
 
 			expect(scratch.innerHTML).to.equal('<p></p><p>child</p>');
@@ -2055,8 +2034,7 @@ describe('Components', () => {
 					<Null />
 					<Child />
 					<Sibling />
-				</Parent1>,
-				scratch
+				</Parent1>
 			);
 
 			expect(scratch.innerHTML).to.equal('<p>child</p><p></p>');
@@ -2084,8 +2062,7 @@ describe('Components', () => {
 							<Child />
 						</Parent2>
 					</Parent1>
-				</ParentWithDom>,
-				scratch
+				</ParentWithDom>
 			);
 
 			expect(scratch.innerHTML).to.equal('<div><p></p><p>child</p></div>');
@@ -2115,8 +2092,7 @@ describe('Components', () => {
 					<Parent2>
 						<Child />
 					</Parent2>
-				</Parent1>,
-				scratch
+				</Parent1>
 			);
 
 			expect(scratch.innerHTML).to.equal([div('maybe'), p('child')].join(''));
@@ -2175,8 +2151,7 @@ describe('Components', () => {
 					<Parent2>
 						<Child />
 					</Parent2>
-				</Parent1>,
-				scratch
+				</Parent1>
 			);
 
 			expect(scratch.innerHTML).to.equal(p('child'));
@@ -2239,8 +2214,7 @@ describe('Components', () => {
 						<MaybeNull active />
 						<Child />
 					</Parent2>
-				</Parent1>,
-				scratch
+				</Parent1>
 			);
 
 			expect(scratch.innerHTML).to.equal([div('maybe'), p('child')].join(''));
@@ -2301,8 +2275,7 @@ describe('Components', () => {
 						<MaybeNull />
 						<Child />
 					</Parent2>
-				</Parent1>,
-				scratch
+				</Parent1>
 			);
 
 			expect(scratch.innerHTML).to.equal(p('child'));
@@ -2369,8 +2342,7 @@ describe('Components', () => {
 						<Null />
 					</Parent1>
 					<Child />
-				</Fragment>,
-				scratch
+				</Fragment>
 			);
 
 			expect(scratch.innerHTML).to.equal([div('maybe'), p('child')].join(''));
@@ -2425,8 +2397,7 @@ describe('Components', () => {
 						<Null />
 					</Parent1>
 					<Child />
-				</Fragment>,
-				scratch
+				</Fragment>
 			);
 
 			expect(scratch.innerHTML).to.equal(p('child'));
