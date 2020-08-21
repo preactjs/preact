@@ -279,12 +279,12 @@ describe('hydrate()', () => {
 		scratch.innerHTML = '<div id="test"><p class="hi">hello bar</p></div>';
 		const Component = props => <p class="hi">hello {props.foo}</p>;
 		const element = document.getElementById('test');
+		({ hydrate } = createRoot(element));
 		hydrate(
 			<Fragment>
 				<Component foo="bar" />
 				<Component foo="baz" />
-			</Fragment>,
-			element
+			</Fragment>
 		);
 		expect(element.innerHTML).to.equal(
 			'<p class="hi">hello bar</p><p class="hi">hello baz</p>'
@@ -295,12 +295,12 @@ describe('hydrate()', () => {
 		scratch.innerHTML = '<div id="test"><p class="hi">hello bar</p></div>';
 		const Component = props => <p class="hi">hello {props.foo}</p>;
 		const element = document.getElementById('test');
+		({ hydrate } = createRoot(element));
 		hydrate(
 			<Fragment>
 				<Component foo="baz" />
 				<Component foo="bar" />
-			</Fragment>,
-			element
+			</Fragment>
 		);
 		expect(element.innerHTML).to.equal(
 			'<p class="hi">hello baz</p><p class="hi">hello bar</p>'
