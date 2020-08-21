@@ -66,8 +66,10 @@ function cloneElement(element) {
  */
 function unmountComponentAtNode(container) {
 	if (container._children) {
-		// TODO: this doesn't work
 		createRoot(container).render(null);
+		return true;
+	} else if (container._root) {
+		container._root.render(null);
 		return true;
 	}
 	return false;
