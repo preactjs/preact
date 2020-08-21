@@ -319,8 +319,7 @@ describe('render()', () => {
 					<div>
 						<input value={val} />
 						<table border={val} />
-					</div>,
-					scratch
+					</div>
 				);
 			}
 
@@ -443,8 +442,7 @@ describe('render()', () => {
 			render(
 				<div>
 					a<strong>b</strong>
-				</div>,
-				scratch
+				</div>
 			);
 
 			expect(scratch, 'unset').to.have.property(
@@ -604,8 +602,7 @@ describe('render()', () => {
 						<option>50</option>
 						<option>100</option>
 					</datalist>
-				</div>,
-				scratch
+				</div>
 			);
 
 			let html = scratch.firstElementChild.firstElementChild.outerHTML;
