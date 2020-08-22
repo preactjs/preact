@@ -130,12 +130,28 @@ describe('debug', () => {
 		expect(console.warn).to.be.calledThrice;
 		expect(console.warn.args[2]).to.match(/use vnode.props.children/);
 
+		// Should only warn once
+		vnode.attributes;
+		expect(console.warn).to.be.calledThrice;
+		vnode.nodeName;
+		expect(console.warn).to.be.calledThrice;
+		vnode.children;
+		expect(console.warn).to.be.calledThrice;
+
 		vnode.attributes = {};
 		expect(console.warn.args[3]).to.match(/use vnode.props/);
 		vnode.nodeName = '';
 		expect(console.warn.args[4]).to.match(/use vnode.type/);
 		vnode.children = [];
 		expect(console.warn.args[5]).to.match(/use vnode.props.children/);
+
+		// Should only warn once
+		vnode.attributes = {};
+		expect(console.warn.args.length).to.equal(6);
+		vnode.nodeName = '';
+		expect(console.warn.args.length).to.equal(6);
+		vnode.children = [];
+		expect(console.warn.args.length).to.equal(6);
 	});
 
 	it('should warn when calling setState inside the constructor', () => {
