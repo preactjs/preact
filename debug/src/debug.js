@@ -14,7 +14,6 @@ import {
 import { assign } from './util';
 
 const isWeakMapSupported = typeof WeakMap == 'function';
-const isSetSupported = typeof Set == 'function';
 
 function getClosestDomNodeParent(parent) {
 	if (!parent) return {};
@@ -43,7 +42,7 @@ export function initDebug() {
 				useLayoutEffect: new WeakMap(),
 				lazyPropTypes: new WeakMap()
 		  };
-	const deprecations = isSetSupported ? new Set() : null;
+	const deprecations = [];
 
 	options._catchError = (error, vnode, oldVNode) => {
 		let component = vnode && vnode._component;
@@ -252,15 +251,15 @@ export function initDebug() {
 	const warn = (property, message) => ({
 		get() {
 			const key = 'get' + property + message;
-			if (deprecations && !deprecations.has(key)) {
-				deprecations.add(key);
+			if (deprecations && deprecations.indexOf(key) < 0) {
+				deprecations.push(key);
 				console.warn(`getting vnode.${property} is deprecated, ${message}`);
 			}
 		},
 		set() {
 			const key = 'set' + property + message;
-			if (deprecations && !deprecations.has(key)) {
-				deprecations.add(key);
+			if (deprecations && deprecations.indexOf(key) < 0) {
+				deprecations.push(key);
 				console.warn(`setting vnode.${property} is not allowed, ${message}`);
 			}
 		}
