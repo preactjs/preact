@@ -115,11 +115,14 @@ describe('replaceNode parameter in render()', () => {
 		scratch.innerHTML = `<div id="child"></div>`;
 
 		const childContainer = scratch.querySelector('#child');
+		
+		({ render } = createRoot(childContainer));
 		// TODO: this renders wrong the span is rendered in root instead of replaceNode
 		render(<App />, childContainer);
 		expect(serializeHtml(childContainer)).to.equal('<span>App</span>');
 		expect(mount).to.be.calledOnce;
 
+		({ render } = createRoot(scratch));
 		render(<div />, scratch.firstElementChild);
 		expect(serializeHtml(scratch)).to.equal('<div id=""></div>');
 		expect(unmount).to.be.calledOnce;
