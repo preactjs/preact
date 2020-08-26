@@ -9,13 +9,8 @@ import options from './options';
  */
 export function createRoot(parentDom) {
 	let oldRoot = null;
-	function render(vnode, replaceNode) {
+	function render(vnode, isHydrating) {
 		if (options._root) options._root(vnode, parentDom);
-
-		// We abuse the `replaceNode` parameter in `hydrate()` to signal if we
-		// are in hydration mode or not by passing `EMPTY_OBJ` instead of a
-		// DOM element.
-		let isHydrating = replaceNode === EMPTY_OBJ;
 
 		let oldVNode = isHydrating ? null : oldRoot;
 		vnode = createElement(Root, { _parentDom: parentDom }, [vnode]);
@@ -29,15 +24,13 @@ export function createRoot(parentDom) {
 			oldVNode || EMPTY_OBJ,
 			EMPTY_OBJ,
 			parentDom.ownerSVGElement !== undefined,
-			replaceNode && !isHydrating
-				? [replaceNode]
-				: oldVNode
+			oldVNode
 				? null
 				: parentDom.childNodes.length
 				? EMPTY_ARR.slice.call(parentDom.childNodes)
 				: null,
 			commitQueue,
-			replaceNode || EMPTY_OBJ,
+			EMPTY_OBJ,
 			isHydrating
 		);
 
@@ -46,7 +39,7 @@ export function createRoot(parentDom) {
 	}
 	return {
 		hydrate(vnode) {
-			render(vnode, EMPTY_OBJ);
+			render(vnode, true);
 		},
 		render
 	};
