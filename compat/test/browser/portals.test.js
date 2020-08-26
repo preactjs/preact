@@ -372,7 +372,6 @@ describe('Portal', () => {
 		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div>');
 	});
 
-	// TODO: Reparenting is an issue in createRoot
 	it('should work with removing an element from stacked container to new one', () => {
 		let toggle, root2;
 
@@ -385,8 +384,8 @@ describe('Portal', () => {
 						root2 = r;
 					}}
 				>
-					<p>Hello</p>
 					{createPortal(props.children, scratch)}
+					<p>Hello</p>
 					{createPortal(props.children, root)}
 				</div>
 			);
