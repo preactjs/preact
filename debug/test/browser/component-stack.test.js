@@ -1,8 +1,8 @@
 import { createElement, render, Component } from 'preact';
 import 'preact/debug';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-
-/** @jsx createElement */
+import sinon from 'sinon';
+import { expect } from '@open-wc/testing';
 
 describe('component stack', () => {
 	/** @type {HTMLDivElement} */
@@ -11,7 +11,8 @@ describe('component stack', () => {
 	let errors = [];
 	let warnings = [];
 
-	const getStack = arr => arr[0].split('\n\n')[1];
+	const getStack = arr =>
+		arr.filter(m => !/transform-react-jsx-source/.test(m))[0].split('\n\n')[1];
 
 	beforeEach(() => {
 		scratch = setupScratch();

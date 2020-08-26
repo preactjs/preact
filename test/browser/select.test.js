@@ -1,7 +1,6 @@
 import { createElement, render } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
-
-/** @jsx createElement */
+import { expect } from '@open-wc/testing';
 
 describe('Select', () => {
 	let scratch;

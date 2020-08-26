@@ -4,8 +4,8 @@ import {
 	teardown,
 	supportsPassiveEvents
 } from '../_util/helpers';
-
-/** @jsx createElement */
+import { expect } from '@open-wc/testing';
+import sinon from 'sinon';
 
 describe('event handling', () => {
 	let scratch, proto;

@@ -1,8 +1,9 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component, createRef } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
-
-/** @jsx createElement */
+import { expect } from '@open-wc/testing';
+import sinon from 'sinon';
+import '../polyfills';
 
 // gives call count and argument errors names (otherwise sinon just uses "spy"):
 let spy = (name, ...args) => {

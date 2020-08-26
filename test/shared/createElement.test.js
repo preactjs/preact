@@ -1,8 +1,7 @@
-import { createElement } from '../../';
-import { expect } from 'chai';
+import { createElement } from '../../src';
+import { expect } from '@open-wc/testing';
 
 const h = createElement;
-/** @jsx createElement */
 /*eslint-env browser, mocha */
 
 // const buildVNode = (nodeName, attributes, children=[]) => ({

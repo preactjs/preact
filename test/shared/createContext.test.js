@@ -1,7 +1,6 @@
-import { createElement, createContext } from '../../';
-import { expect } from 'chai';
+import { createElement, createContext } from '../../src';
+import { expect } from '@open-wc/testing';
 
-/** @jsx createElement */
 /* eslint-env browser, mocha */
 
 describe('createContext', () => {

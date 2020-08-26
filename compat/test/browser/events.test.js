@@ -4,6 +4,8 @@ import {
 	teardown,
 	createEvent
 } from '../../../test/_util/helpers';
+import { expect } from '@open-wc/testing';
+import sinon from 'sinon';
 
 import React, { createElement } from 'preact/compat';
 

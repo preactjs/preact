@@ -1,4 +1,5 @@
 import { options as rawOptions } from 'preact';
+import sinon from 'sinon';
 
 /** @type {import('preact/src/internal').Options} */
 let options = rawOptions;

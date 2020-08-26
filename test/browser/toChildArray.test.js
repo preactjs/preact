@@ -5,8 +5,7 @@ import {
 	getMixedArray,
 	mixedArrayHTML
 } from '../_util/helpers';
-
-/** @jsx createElement */
+import { expect } from '@open-wc/testing';
 
 describe('toChildArray', () => {
 	/** @type {HTMLDivElement} */

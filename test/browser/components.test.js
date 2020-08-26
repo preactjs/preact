@@ -10,8 +10,10 @@ import {
 	spyAll
 } from '../_util/helpers';
 import { div, span, p } from '../_util/dom';
+import { expect } from '@open-wc/testing';
+import sinon from 'sinon';
+import '../polyfills';
 
-/** @jsx createElement */
 const h = createElement;
 
 function getAttributes(node) {
@@ -1470,7 +1472,10 @@ describe('Components', () => {
 			return C;
 		};
 
-		let createFunction = () => sinon.spy(({ children }) => children);
+		let createFunction = () =>
+			sinon.spy(function inner({ children }) {
+				return children;
+			});
 
 		let F1 = createFunction();
 		let F2 = createFunction();
@@ -1484,7 +1489,11 @@ describe('Components', () => {
 			[C1, C2, C3]
 				.reduce(
 					(acc, c) =>
-						acc.concat(Object.keys(c.prototype).map(key => c.prototype[key])),
+						acc.concat(
+							Object.getOwnPropertyNames(c.prototype).map(
+								key => c.prototype[key]
+							)
+						),
 					[F1, F2, F3]
 				)
 				.forEach(c => c.resetHistory());

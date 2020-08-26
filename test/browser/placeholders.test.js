@@ -3,8 +3,7 @@ import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 import { div } from '../_util/dom';
-
-/** @jsx createElement */
+import { expect } from '@open-wc/testing';
 
 describe('null placeholders', () => {
 	/** @type {HTMLDivElement} */

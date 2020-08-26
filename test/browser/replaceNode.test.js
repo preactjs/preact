@@ -5,8 +5,9 @@ import {
 	serializeHtml,
 	sortAttributes
 } from '../_util/helpers';
-
-/** @jsx createElement */
+import { expect } from '@open-wc/testing';
+import sinon from 'sinon';
+import '../polyfills';
 
 describe('replaceNode parameter in render()', () => {
 	let scratch;

@@ -13,6 +13,8 @@ import React, {
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { createLazy, createSuspender } from './suspense-utils';
+import { expect } from '@open-wc/testing';
+import sinon from 'sinon';
 
 const h = React.createElement;
 /* eslint-env browser, mocha */

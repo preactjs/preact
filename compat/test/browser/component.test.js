@@ -1,6 +1,8 @@
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import React, { createElement } from 'preact/compat';
+import { expect } from '@open-wc/testing';
+import sinon from 'sinon';
 
 describe('components', () => {
 	/** @type {HTMLDivElement} */

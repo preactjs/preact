@@ -4,8 +4,8 @@ import { useEffect, useState, useRef } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useEffectAssertions } from './useEffectAssertions.test';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
-
-/** @jsx createElement */
+import sinon from 'sinon';
+import { expect } from '@open-wc/testing';
 
 describe('useEffect', () => {
 	/** @type {HTMLDivElement} */

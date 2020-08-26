@@ -1,7 +1,7 @@
 import { createElement, render, Component, Fragment } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
-
-/** @jsx createElement */
+import { expect } from '@open-wc/testing';
+import sinon from 'sinon';
 
 describe('context', () => {
 	let scratch;
@@ -214,7 +214,11 @@ describe('context', () => {
 	it('should pass context through Fragments', () => {
 		const context = { foo: 'bar' };
 
-		const Foo = sinon.spy(() => <div />);
+		let arg;
+		const Foo = (props, ctx) => {
+			arg = ctx;
+			return <div />;
+		};
 
 		class Wrapper extends Component {
 			getChildContext() {
@@ -232,6 +236,6 @@ describe('context', () => {
 		}
 
 		render(<Wrapper />, scratch);
-		expect(Foo.args[0][1]).to.deep.equal(context);
+		expect(arg).to.deep.equal(context);
 	});
 });

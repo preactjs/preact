@@ -2,8 +2,9 @@ import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component, Fragment, hydrate } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 import { div, span, input as inputStr, h1, h2 } from '../_util/dom';
+import { expect } from '@open-wc/testing';
+import '../polyfills';
 
-/** @jsx createElement */
 /* eslint-disable react/jsx-boolean-value */
 
 describe('focus', () => {

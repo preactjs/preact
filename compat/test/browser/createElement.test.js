@@ -1,6 +1,7 @@
 import React, { createElement, render } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { getSymbol } from './testUtils';
+import { expect } from '@open-wc/testing';
 
 describe('compat createElement()', () => {
 	/** @type {HTMLDivElement} */

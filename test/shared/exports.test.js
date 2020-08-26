@@ -9,7 +9,7 @@ import {
 	cloneElement,
 	options
 } from '../../';
-import { expect } from 'chai';
+import { expect } from '@open-wc/testing';
 
 describe('preact', () => {
 	it('should be available as named exports', () => {

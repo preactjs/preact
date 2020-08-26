@@ -1,7 +1,7 @@
 import { createElement, render } from 'preact';
 import { setupScratch, teardown, sortCss } from '../_util/helpers';
-
-/** @jsx createElement */
+import { expect } from '@open-wc/testing';
+import sinon from 'sinon';
 
 describe('style attribute', () => {
 	let scratch;
