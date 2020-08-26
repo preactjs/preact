@@ -2572,6 +2572,35 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('baz');
 			expect(callbackState).to.deep.equal({ foo: 'baz' });
 		});
+
+		// #2716
+		it('should work with readonly state', () => {
+			let update;
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { foo: 'bar' };
+					update = () =>
+						this.setState(prev => {
+							Object.defineProperty(prev, 'foo', {
+								writable: false
+							});
+
+							return prev;
+						});
+				}
+
+				render() {
+					return <div />;
+				}
+			}
+
+			render(<Foo />, scratch);
+			expect(() => {
+				update();
+				rerender();
+			}).to.not.throw();
+		});
 	});
 
 	describe('forceUpdate', () => {
