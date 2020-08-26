@@ -1,5 +1,4 @@
-
-import { createElement, Root } from 'preact';
+import { createElement, Fragment } from 'preact';
 
 /**
  * Create a `Portal` to continue rendering the vnode tree at a different DOM node
@@ -7,5 +6,5 @@ import { createElement, Root } from 'preact';
  * @param {import('./internal').PreactElement} container The DOM node to continue rendering in to.
  */
 export function createPortal(vnode, container) {
-	return createElement(Root, { _parentDom: container }, vnode);
+	return createElement(Fragment, { parentNode: container }, vnode);
 }

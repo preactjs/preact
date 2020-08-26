@@ -1,6 +1,6 @@
 import { EMPTY_OBJ, EMPTY_ARR } from './constants';
 import { commitRoot, diff } from './diff/index';
-import { createElement, Root } from './create-element';
+import { createElement, Fragment } from './create-element';
 import options from './options';
 
 /**
@@ -13,7 +13,7 @@ export function createRoot(parentDom) {
 		if (options._root) options._root(vnode, parentDom);
 
 		let oldVNode = isHydrating ? null : oldRoot;
-		vnode = createElement(Root, { _parentDom: parentDom }, [vnode]);
+		vnode = createElement(Fragment, null, [vnode]);
 
 		// List of effects that need to be called after diffing.
 		let commitQueue = [];

@@ -190,8 +190,8 @@ export function diff(
 
 			if ((tmp = options._render)) tmp(newVNode);
 
-			if (newType === Root) {
-				parentDom = newProps._parentDom;
+			if (newType === Fragment && newProps.parentNode) {
+				parentDom = newProps.parentNode;
 			}
 
 			c._dirty = false;
@@ -468,7 +468,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	let dom;
 	if (!skipRemove && typeof vnode.type != 'function') {
 		skipRemove = (dom = vnode._dom) != null;
-	} else if (vnode.type === Root) {
+	} else if (vnode.type === Fragment && vnode.props.parentNode) {
 		skipRemove = false;
 	}
 
