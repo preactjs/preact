@@ -70,9 +70,7 @@ export function render(vnode, parent, callback) {
 }
 
 export function hydrate(vnode, parent, callback) {
-	const root = !parent._root
-		? (parent._root = createRoot(parent))
-		: parent._root;
+	const root = parent._root || (parent._root = createRoot(parent));
 	root.hydrate(vnode);
 	if (typeof callback == 'function') callback();
 
