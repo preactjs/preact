@@ -12,8 +12,7 @@ import { useState } from 'preact/hooks';
 import { setupRerender } from 'preact/test-utils';
 import 'preact/debug';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-
-/** @jsx createElement */
+import { expect } from '@open-wc/testing';
 
 describe('debug options', () => {
 	/** @type {HTMLDivElement} */

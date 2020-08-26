@@ -1,8 +1,9 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
-
-/** @jsx createElement */
+import sinon from 'sinon';
+import { expect } from '@open-wc/testing';
+import '../../polyfills';
 
 describe('Lifecycle methods', () => {
 	/** @type {HTMLDivElement} */

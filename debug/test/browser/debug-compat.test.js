@@ -3,13 +3,12 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 import './fakeDevTools';
 import 'preact/debug';
 import * as PropTypes from 'prop-types';
+import sinon from 'sinon';
+import { expect } from '@open-wc/testing';
 
 // eslint-disable-next-line no-duplicate-imports
 import { resetPropWarnings } from 'preact/debug';
 import { forwardRef } from 'preact/compat';
-
-const h = createElement;
-/** @jsx createElement */
 
 describe('debug compat', () => {
 	let scratch;

@@ -6,8 +6,8 @@ import {
 	spyAll,
 	resetAllSpies
 } from '../../_util/helpers';
-
-/** @jsx createElement */
+import sinon from 'sinon';
+import { expect } from '@open-wc/testing';
 
 describe('Lifecycle methods', () => {
 	/* eslint-disable react/display-name */
@@ -31,7 +31,7 @@ describe('Lifecycle methods', () => {
 		/** @type {Error} */
 		let expectedError;
 
-		/** @type {typeof import('../../../').Component} */
+		/** @type {typeof import('../../../src').Component} */
 		let ThrowErr;
 		class Receiver extends Component {
 			componentDidCatch(error) {

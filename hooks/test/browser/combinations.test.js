@@ -9,8 +9,8 @@ import {
 	useRef
 } from 'preact/hooks';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
-
-/** @jsx createElement */
+import sinon from 'sinon';
+import { expect } from '@open-wc/testing';
 
 describe('combinations', () => {
 	/** @type {HTMLDivElement} */

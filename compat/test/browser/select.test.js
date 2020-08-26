@@ -1,5 +1,6 @@
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import React, { createElement, render } from 'preact/compat';
+import { expect } from '@open-wc/testing';
 
 describe('Select', () => {
 	let scratch;

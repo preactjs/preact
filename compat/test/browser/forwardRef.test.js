@@ -13,6 +13,9 @@ import React, {
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { setupRerender, act } from 'preact/test-utils';
 import { getSymbol } from './testUtils';
+import { expect } from '@open-wc/testing';
+import sinon from 'sinon';
+import '../../../test/polyfills';
 
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 

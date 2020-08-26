@@ -12,6 +12,8 @@ import {
 	serializeHtml,
 	createEvent
 } from '../../../test/_util/helpers';
+import { expect } from '@open-wc/testing';
+import sinon from 'sinon';
 
 describe('compat render', () => {
 	/** @type {HTMLDivElement} */

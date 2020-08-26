@@ -1,5 +1,7 @@
-import React, { hydrate } from 'preact/compat';
+import React, { createElement, hydrate } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { expect } from '@open-wc/testing';
+import sinon from 'sinon';
 
 describe('compat hydrate', () => {
 	/** @type {HTMLDivElement} */

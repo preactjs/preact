@@ -7,6 +7,8 @@ import React, {
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { setupRerender, act } from 'preact/test-utils';
+import { expect } from '@open-wc/testing';
+import sinon from 'sinon';
 
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 

@@ -7,12 +7,13 @@ import {
 import './fakeDevTools';
 import 'preact/debug';
 import * as PropTypes from 'prop-types';
+import sinon from 'sinon';
+import { expect } from '@open-wc/testing';
 
 // eslint-disable-next-line no-duplicate-imports
 import { resetPropWarnings } from 'preact/debug';
 
 const h = createElement;
-/** @jsx createElement */
 
 describe('debug', () => {
 	let scratch;

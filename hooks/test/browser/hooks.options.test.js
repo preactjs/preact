@@ -20,8 +20,8 @@ import {
 	useContext,
 	useErrorBoundary
 } from 'preact/hooks';
-
-/** @jsx createElement */
+import sinon from 'sinon';
+import { expect } from '@open-wc/testing';
 
 describe('hook options', () => {
 	/** @type {HTMLDivElement} */

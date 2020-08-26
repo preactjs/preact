@@ -77,6 +77,7 @@
     "test:ts": "run-p test:ts:*",
     "test:ts:core": "tsc -p test/ts/ && mocha --require \"@babel/register\" test/ts/**/*-test.js",
     "test:ts:compat": "tsc -p compat/test/ts/",
+    "test:wc": "wtr '{debug/test,hooks/test,compat/test,test-utils/test,test}/{browser,shared}/{**/*,*}.test.{js,jsx}'",
     "test:mocha": "mocha --recursive --require \"@babel/register\" test/shared test/node",
     "test:mocha:watch": "npm run test:mocha -- --watch",
     "test:karma": "cross-env COVERAGE=true karma start karma.conf.js --single-run",
@@ -113,7 +114,7 @@
         2,
         {
           "args": "none",
-          "varsIgnorePattern": "^h|React$"
+          "varsIgnorePattern": "^h|React|createElement$"
         }
       ],
       "prefer-rest-params": 0,
@@ -190,13 +191,22 @@
   "devDependencies": {
     "@babel/core": "^7.7.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.6.2",
+    "@babel/plugin-syntax-dynamic-import": "^7.8.3",
+    "@babel/plugin-syntax-import-meta": "^7.10.4",
     "@babel/plugin-transform-react-jsx": "^7.7.0",
     "@babel/plugin-transform-react-jsx-source": "^7.7.4",
     "@babel/preset-env": "^7.7.1",
     "@babel/register": "^7.7.0",
+    "@open-wc/testing": "^2.5.24",
+    "@rollup/plugin-babel": "^5.2.0",
     "@types/chai": "^4.1.2",
     "@types/mocha": "^5.0.0",
     "@types/node": "^10.5.2",
+    "@web/dev-server-core": "^0.2.2",
+    "@web/dev-server-import-maps": "0.0.1",
+    "@web/dev-server-rollup": "^0.2.3",
+    "@web/test-runner": "^0.7.10",
+    "@web/test-runner-playwright": "^0.5.3",
     "babel-loader": "^8.0.6",
     "babel-plugin-istanbul": "^6.0.0",
     "babel-plugin-transform-async-to-promises": "^0.8.15",
@@ -229,7 +239,7 @@
     "npm-run-all": "^4.0.0",
     "prettier": "^1.18.2",
     "prop-types": "^15.7.2",
-    "sinon": "^6.1.3",
+    "sinon": "^9.0.3",
     "sinon-chai": "^3.0.0",
     "typescript": "3.5.3",
     "webpack": "^4.3.0"

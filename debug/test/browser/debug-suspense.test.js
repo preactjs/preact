@@ -6,8 +6,8 @@ import {
 	teardown,
 	serializeHtml
 } from '../../../test/_util/helpers';
-
-/** @jsx createElement */
+import sinon from 'sinon';
+import { expect } from '@open-wc/testing';
 
 describe('debug with suspense', () => {
 	/** @type {HTMLDivElement} */

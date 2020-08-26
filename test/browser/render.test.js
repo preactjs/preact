@@ -13,8 +13,9 @@ import {
 } from '../_util/helpers';
 import { clearLog, getLog, logCall } from '../_util/logCall';
 import { useState } from 'preact/hooks';
-
-/** @jsx createElement */
+import { expect } from '@open-wc/testing';
+import sinon from 'sinon';
+import '../polyfills';
 
 function getAttributes(node) {
 	let attrs = {};

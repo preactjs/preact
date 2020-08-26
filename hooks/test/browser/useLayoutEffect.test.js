@@ -7,8 +7,8 @@ import {
 } from '../../../test/_util/helpers';
 import { useEffectAssertions } from './useEffectAssertions.test';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
-
-/** @jsx createElement */
+import sinon from 'sinon';
+import { expect } from '@open-wc/testing';
 
 describe('useLayoutEffect', () => {
 	/** @type {HTMLDivElement} */

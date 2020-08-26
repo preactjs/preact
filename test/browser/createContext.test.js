@@ -7,8 +7,8 @@ import {
 	Fragment
 } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
-
-/** @jsx createElement */
+import { expect } from '@open-wc/testing';
+import sinon from 'sinon';
 
 describe('createContext', () => {
 	let scratch;

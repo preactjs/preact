@@ -2,8 +2,8 @@ import { createElement, Component, render } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 import { div } from '../_util/dom';
-
-/** @jsx createElement */
+import { expect } from '@open-wc/testing';
+import sinon from 'sinon';
 
 describe('keys', () => {
 	/** @type {HTMLDivElement} */
