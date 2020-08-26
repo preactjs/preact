@@ -373,7 +373,7 @@ describe('Portal', () => {
 	});
 
 	// TODO: Reparenting is an issue in createRoot
-	it.skip('should work with removing an element from stacked container to new one', () => {
+	it('should work with removing an element from stacked container to new one', () => {
 		let toggle, root2;
 
 		function Foo(props) {
