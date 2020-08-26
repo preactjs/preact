@@ -3,8 +3,7 @@ import {
 	createElement,
 	createRoot,
 	Component,
-	Fragment,
-	hydrate
+	Fragment
 } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 import { div, span, input as inputStr, h1, h2 } from '../_util/dom';
