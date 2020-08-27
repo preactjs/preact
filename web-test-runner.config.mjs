@@ -39,6 +39,7 @@ export default {
 			}
 		}),
 		babel({
+			sourceMaps: 'inline',
 			exclude: ['node_modules/**'],
 			babelHelpers: 'inline',
 			plugins: [
