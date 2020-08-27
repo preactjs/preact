@@ -1,6 +1,6 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { Component } from '../component';
-import { Fragment, Root } from '../create-element';
+import { Fragment } from '../create-element';
 import { diffChildren, placeChild } from './children';
 import { diffProps, setProperty } from './props';
 import { assign, removeNode } from '../util';
@@ -190,7 +190,7 @@ export function diff(
 
 			if ((tmp = options._render)) tmp(newVNode);
 
-			if (newType === Fragment && newProps.parentNode) {
+			if (newProps.parentNode) {
 				parentDom = newProps.parentNode;
 			}
 
@@ -468,7 +468,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	let dom;
 	if (!skipRemove && typeof vnode.type != 'function') {
 		skipRemove = (dom = vnode._dom) != null;
-	} else if (vnode.type === Fragment && vnode.props.parentNode) {
+	} else if (vnode.props.parentNode) {
 		skipRemove = false;
 	}
 
