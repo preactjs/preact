@@ -1,4 +1,5 @@
 import { importMapsPlugin } from '@web/dev-server-import-maps';
+import { legacyPlugin } from '@web/dev-server-legacy';
 import rollupBabel from '@rollup/plugin-babel';
 import { fromRollup } from '@web/dev-server-rollup';
 import fs from 'fs';
@@ -18,28 +19,11 @@ const babel = fromRollup(rollupBabel.default);
 
 export default {
 	nodeResolve: true,
-	testRunnerHtml: (testRunnerImport, config) => `
-	<html>
-		<body>
-			<script type="module">
-				window.process = {
-					env: {
-						NODE_ENV: 'test'
-					}
-				};
-			</script>
-
-			<script type="module">
-				import '${testRunnerImport}';
-			</script>
-		</body>
-	</html>
-`,
 	mimeTypes: {
-		// serve all json files as js
 		'**/*.jsx': 'js'
 	},
 	plugins: [
+		legacyPlugin(),
 		importMapsPlugin({
 			inject: {
 				importMap: {
