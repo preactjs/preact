@@ -6,9 +6,14 @@ import {
 } from '../../../test/_util/helpers';
 import './fakeDevTools';
 import 'preact/debug';
-import * as PropTypes from 'prop-types';
+import 'prop-types';
 import sinon from 'sinon';
 import { expect } from '@open-wc/testing';
+
+// We include the umd bundle of prop-types, because they don't have an ESM
+// version of it. The umd bundle cannot be imported, so we pull it off of
+// window.
+const PropTypes = window.PropTypes;
 
 // eslint-disable-next-line no-duplicate-imports
 import { resetPropWarnings } from 'preact/debug';

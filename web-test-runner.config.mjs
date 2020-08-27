@@ -49,7 +49,8 @@ export default {
 						'preact/devtools': '/devtools/src/index.js',
 						'preact/hooks': '/hooks/src/index.js',
 						'preact/test-utils': '/test-utils/src/index.js',
-						preact: '/src/index.js'
+						preact: '/src/index.js',
+						'prop-types': '/node_modules/prop-types/prop-types.js'
 					}
 				}
 			}
