@@ -122,7 +122,8 @@ export {
 	StrictMode,
 	Suspense,
 	SuspenseList,
-	lazy
+	lazy,
+	createRoot
 };
 
 // React copies the named exports to the default one.
@@ -159,5 +160,6 @@ export default {
 	StrictMode,
 	Suspense,
 	SuspenseList,
-	lazy
+	lazy,
+	createRoot
 };
