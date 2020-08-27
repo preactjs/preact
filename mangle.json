@@ -55,7 +55,7 @@
       "$_defaultValue": "__",
       "$_id": "__c",
       "$_contextRef": "__",
-      "$_parentDom": "__P",
+      "$_parentNode": "__P",
       "$_prevState": "__u",
       "$_root": "__",
       "$_diff": "__b",

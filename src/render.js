@@ -9,38 +9,58 @@ import options from './options';
  */
 export function createRoot(parentDom) {
 	let oldRoot = null;
-	function render(vnode, isHydrating) {
-		if (options._root) options._root(vnode, parentDom);
-
-		let oldVNode = isHydrating ? null : oldRoot;
-		vnode = createElement(Fragment, null, [vnode]);
-
-		// List of effects that need to be called after diffing.
-		let commitQueue = [];
-
-		diff(
-			parentDom,
-			(oldRoot = vnode),
-			oldVNode || EMPTY_OBJ,
-			EMPTY_OBJ,
-			parentDom.ownerSVGElement !== undefined,
-			oldVNode
-				? null
-				: parentDom.childNodes.length
-				? EMPTY_ARR.slice.call(parentDom.childNodes)
-				: null,
-			commitQueue,
-			EMPTY_OBJ,
-			isHydrating
-		);
-
-		// Flush all queued effects
-		commitRoot(commitQueue, vnode);
-	}
 	return {
 		hydrate(vnode) {
-			render(vnode, true);
+			if (options._root) options._root(vnode, parentDom);
+
+			vnode = createElement(Fragment, null, [vnode]);
+
+			// List of effects that need to be called after diffing.
+			let commitQueue = [];
+
+			diff(
+				parentDom,
+				(oldRoot = vnode),
+				oldRoot || EMPTY_OBJ,
+				EMPTY_OBJ,
+				parentDom.ownerSVGElement !== undefined,
+				oldRoot
+					? null
+					: parentDom.childNodes.length
+					? EMPTY_ARR.slice.call(parentDom.childNodes)
+					: null,
+				commitQueue,
+				EMPTY_OBJ,
+				false
+			);
+
+			// Flush all queued effects
+			commitRoot(commitQueue, vnode);
 		},
-		render
+		render(vnode) {
+			if (options._root) options._root(vnode, parentDom);
+
+			vnode = createElement(Fragment, null, [vnode]);
+
+			// List of effects that need to be called after diffing.
+			let commitQueue = [];
+
+			diff(
+				parentDom,
+				(oldRoot = vnode),
+				EMPTY_OBJ,
+				EMPTY_OBJ,
+				parentDom.ownerSVGElement !== undefined,
+				parentDom.childNodes.length
+					? EMPTY_ARR.slice.call(parentDom.childNodes)
+					: null,
+				commitQueue,
+				EMPTY_OBJ,
+				true
+			);
+
+			// Flush all queued effects
+			commitRoot(commitQueue, vnode);
+		}
 	};
 }
