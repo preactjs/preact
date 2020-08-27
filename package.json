@@ -220,6 +220,7 @@
 		"@types/node": "^14.14.10",
 		"@web/dev-server-core": "^0.2.2",
 		"@web/dev-server-import-maps": "0.0.1",
+		"@web/dev-server-legacy": "^0.1.2",
 		"@web/dev-server-rollup": "^0.2.3",
 		"@web/test-runner": "^0.7.10",
 		"@web/test-runner-playwright": "^0.5.3",
