@@ -65,7 +65,7 @@ function cloneElement(element) {
  * @returns {boolean}
  */
 function unmountComponentAtNode(container) {
-	return container._root && container._root.render(null);
+	return Boolean(container._root && (container._root.render(null), true));
 }
 
 /**
