@@ -23,7 +23,6 @@ export default {
 		'**/*.jsx': 'js'
 	},
 	plugins: [
-		legacyPlugin(),
 		importMapsPlugin({
 			inject: {
 				importMap: {
@@ -40,6 +39,7 @@ export default {
 			}
 		}),
 		babel({
+			exclude: ['node_modules/**'],
 			babelHelpers: 'inline',
 			plugins: [
 				'@babel/plugin-syntax-dynamic-import',
@@ -50,6 +50,7 @@ export default {
 					{ pragma: 'createElement', pragmaFrag: 'Fragment' }
 				]
 			]
-		})
+		}),
+		legacyPlugin()
 	]
 };
