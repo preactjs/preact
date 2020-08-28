@@ -1,11 +1,11 @@
 import { toChildArray } from 'preact';
 
 const mapFn = (children, fn) => {
-	if (typeof children === 'undefined' || children === null) return null;
+	if (children === undefined || children === null) return null;
 	return toChildArray(toChildArray(children).map(fn));
 };
 
-// This API is completely unnecessary for Preact, so it's basically passthrough.
+// This API is completely unne`cessary for Preact, so it's basically passthrough.
 export const Children = {
 	map: mapFn,
 	forEach: mapFn,
