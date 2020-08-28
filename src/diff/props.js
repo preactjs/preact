@@ -54,7 +54,7 @@ function setStyle(style, key, value) {
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
 export function setProperty(dom, name, value, oldValue, isSvg) {
-	let s, useCapture, nameLower;
+	let useCapture, nameLower;
 
 	if (isSvg && name == 'className') name = 'class';
 
