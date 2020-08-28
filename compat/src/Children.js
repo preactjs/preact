@@ -1,7 +1,7 @@
 import { toChildArray } from 'preact';
 
 const mapFn = (children, fn) => {
-	if (!children) return null;
+	if (typeof children === 'undefined' || children === null) return null;
 	return toChildArray(toChildArray(children).map(fn));
 };
 
