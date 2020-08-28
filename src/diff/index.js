@@ -129,25 +129,10 @@ export function diff(
 
 			// Invoke pre-render lifecycle methods
 			if (isNew) {
-				if (
-					newType.getDerivedStateFromProps == null &&
-					c.componentWillMount != null
-				) {
-					c.componentWillMount();
-				}
-
 				if (c.componentDidMount != null) {
 					c._renderCallbacks.push(c.componentDidMount);
 				}
 			} else {
-				if (
-					newType.getDerivedStateFromProps == null &&
-					newProps !== oldProps &&
-					c.componentWillReceiveProps != null
-				) {
-					c.componentWillReceiveProps(newProps, componentContext);
-				}
-
 				if (
 					(!c._force &&
 						c.shouldComponentUpdate != null &&
@@ -171,10 +156,6 @@ export function diff(
 
 					reorderChildren(newVNode, oldDom, parentDom);
 					break outer;
-				}
-
-				if (c.componentWillUpdate != null) {
-					c.componentWillUpdate(newProps, c._nextState, componentContext);
 				}
 
 				if (c.componentDidUpdate != null) {
