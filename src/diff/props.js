@@ -34,8 +34,6 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 }
 
 function setStyle(style, key, value) {
-	// if (!(key in style)) {  // -3b
-	// if (key < '.') {  // -1b
 	if (key[0] === '-') {
 		style.setProperty(key, value);
 	} else if (value == null) {
@@ -66,10 +64,10 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 
 	if (name === 'style') {
 		if (typeof value == 'string') {
-			dom.style = value;
+			dom.style.cssText = value;
 		} else {
 			if (typeof oldValue == 'string') {
-				dom.style = oldValue = '';
+				dom.style.cssText = oldValue = '';
 			}
 
 			if (oldValue) {
