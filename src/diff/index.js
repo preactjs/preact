@@ -455,7 +455,7 @@ export function applyRef(ref, value, vnode) {
  */
 export function unmount(vnode, parentVNode, skipRemove) {
 	let r;
-	if (options.unmount) options.unmount(vnode);
+	if (options.unmount) options.unmount(vnode, parentVNode);
 
 	if ((r = vnode.ref)) {
 		if (!r.current || r.current === vnode._dom) applyRef(r, null, parentVNode);
@@ -469,18 +469,6 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	// Must be set to `undefined` to properly clean up `_nextDom`
 	// for which `null` is a valid value. See comment in `create-element.js`
 	vnode._dom = vnode._nextDom = undefined;
-
-	if ((r = vnode._component) != null) {
-		if (r.componentWillUnmount) {
-			try {
-				r.componentWillUnmount();
-			} catch (e) {
-				options._catchError(e, parentVNode);
-			}
-		}
-
-		r.base = r._parentDom = null;
-	}
 
 	if ((r = vnode._children)) {
 		for (let i = 0; i < r.length; i++) {
