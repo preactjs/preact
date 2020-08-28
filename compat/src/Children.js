@@ -5,7 +5,7 @@ const mapFn = (children, fn) => {
 	return toChildArray(toChildArray(children).map(fn));
 };
 
-// This API is completely unne`cessary for Preact, so it's basically passthrough.
+// This API is completely unnecessary for Preact, so it's basically passthrough.
 export const Children = {
 	map: mapFn,
 	forEach: mapFn,
