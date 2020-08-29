@@ -9,6 +9,19 @@ type Defaultize<Props, Defaults> =
 				Pick<Props, Exclude<keyof Props, keyof Defaults>>
 		: never;
 
+type HTMLElementsMap = {
+	[K in keyof HTMLElementTagNameMap]: JSXInternal.HTMLAttributes<
+		HTMLElementTagNameMap[K]
+	>;
+};
+
+type SVGElementsMap = {
+	[K in keyof Omit<
+		SVGElementTagNameMap,
+		keyof HTMLElementTagNameMap
+	>]: JSXInternal.SVGAttributes<SVGElementTagNameMap[K]>;
+};
+
 export namespace JSXInternal {
 	type LibraryManagedAttributes<Component, Props> = Component extends {
 		defaultProps: infer Defaults;
@@ -750,12 +763,6 @@ export namespace JSXInternal {
 		itemRef?: string;
 	}
 
-	type IntrinsicElements = {
-		[K in keyof HTMLElementTagNameMap]: HTMLAttributes<
-			HTMLElementTagNameMap[K]
-		>;
-	} &
-		{
-			[K in keyof SVGElementTagNameMap]: SVGAttributes<SVGElementTagNameMap[K]>;
-		};
+	// A namespace is used, so it can be augmented.
+	interface IntrinsicElements extends HTMLElementsMap, SVGElementsMap {}
 }
