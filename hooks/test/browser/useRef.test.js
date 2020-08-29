@@ -31,4 +31,20 @@ describe('useRef', () => {
 
 		expect(values).to.deep.equal([1, 2]);
 	});
+
+	it('defaults to undefined', () => {
+		const values = [];
+
+		function Comp() {
+			const ref = useRef();
+			values.push(ref.current);
+			ref.current = 2;
+			return null;
+		}
+
+		render(<Comp />, scratch);
+		render(<Comp />, scratch);
+
+		expect(values).to.deep.equal([undefined, 2]);
+	});
 });

@@ -50,7 +50,7 @@ type Ref<T> = { current: T };
  * Note that `useRef()` is useful for more than the `ref` attribute. It’s handy for keeping any mutable
  * value around similar to how you’d use instance fields in classes.
  */
-export function useRef<T>(initialValue: T | null): Ref<T>;
+export function useRef<T>(initialValue?: T | null): Ref<T>;
 
 /**
  * `useRef` without an initial value is the special case handling `ref` props.
@@ -125,7 +125,7 @@ export function useContext<T>(context: PreactContext<T>): T;
  */
 export function useDebugValue<T>(
 	value: T,
-	formatter?: (value: T) => string | number
+	formatter?: (value: T) => any
 ): void;
 
 export function useErrorBoundary(

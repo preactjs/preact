@@ -2,7 +2,8 @@ import React, {
 	createElement,
 	render,
 	Component,
-	hydrate
+	hydrate,
+	createContext
 } from 'preact/compat';
 import { setupRerender, act } from 'preact/test-utils';
 import {
@@ -96,6 +97,12 @@ describe('compat render', () => {
 			.to.have.property('textContent')
 			.that.is.a('string')
 			.that.equals('dynamic content');
+	});
+
+	it('should ignore maxLength / minLength when is null', () => {
+		render(<input maxLength={null} minLength={null} />, scratch);
+		expect(scratch.firstElementChild.getAttribute('maxlength')).to.equal(null);
+		expect(scratch.firstElementChild.getAttribute('minlength')).to.equal(null);
 	});
 
 	it('should support defaultValue', () => {
@@ -242,6 +249,14 @@ describe('compat render', () => {
 		);
 	});
 
+	it('should cast boolean "download" values', () => {
+		render(<a download />, scratch);
+		expect(scratch.firstChild.getAttribute('download')).to.equal('');
+
+		render(<a download={false} />, scratch);
+		expect(scratch.firstChild.getAttribute('download')).to.equal(null);
+	});
+
 	it('should support static content', () => {
 		const updateSpy = sinon.spy();
 		const mountSpy = sinon.spy();
@@ -303,5 +318,32 @@ describe('compat render', () => {
 		expect(renderSpy).to.be.calledOnce;
 		expect(mountSpy).to.be.calledOnce;
 		expect(updateSpy).to.not.be.calledOnce;
+	});
+
+	it("should support react-relay's usage of __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED", () => {
+		const Ctx = createContext('foo');
+
+		// Simplified version of: https://github.com/facebook/relay/blob/fba79309977bf6b356ee77a5421ca5e6f306223b/packages/react-relay/readContext.js#L17-L28
+		function readContext(Context) {
+			const {
+				ReactCurrentDispatcher
+			} = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+			const dispatcher = ReactCurrentDispatcher.current;
+			return dispatcher.readContext(Context);
+		}
+
+		function Foo() {
+			const value = readContext(Ctx);
+			return <div>{value}</div>;
+		}
+
+		React.render(
+			<Ctx.Provider value="foo">
+				<Foo />
+			</Ctx.Provider>,
+			scratch
+		);
+
+		expect(scratch.textContent).to.equal('foo');
 	});
 });

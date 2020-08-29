@@ -186,7 +186,7 @@ export function diffChildren(
 			//
 			// To fix it we make sure to reset the inferred value, so that our own
 			// value check in `diff()` won't be skipped.
-			if (newParentVNode.type == 'option') {
+			if (!isHydrating && newParentVNode.type == 'option') {
 				parentDom.value = '';
 			} else if (typeof newParentVNode.type == 'function') {
 				// Because the newParentVNode is Fragment-like, we need to set it's
@@ -237,14 +237,17 @@ export function diffChildren(
  * children of a virtual node
  * @returns {import('../internal').VNode[]}
  */
-export function toChildArray(children) {
+export function toChildArray(children, out) {
+	out = out || [];
 	if (children == null || typeof children == 'boolean') {
-		return [];
 	} else if (Array.isArray(children)) {
-		return EMPTY_ARR.concat.apply([], children.map(toChildArray));
+		children.some(child => {
+			toChildArray(child, out);
+		});
+	} else {
+		out.push(children);
 	}
-
-	return [children];
+	return out;
 }
 
 export function placeChild(

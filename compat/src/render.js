@@ -73,7 +73,6 @@ options.event = e => {
 function setSafeDescriptor(proto, key) {
 	if (proto['UNSAFE_' + key] && !proto[key]) {
 		Object.defineProperty(proto, key, {
-			configurable: false,
 			get() {
 				return this['UNSAFE_' + key];
 			},
@@ -117,50 +116,75 @@ options.vnode = vnode => {
 				if (!props.value && props.value !== 0) {
 					props.value = props.defaultValue;
 				}
-				delete props.defaultValue;
+				props.defaultValue = undefined;
 			}
 
 			// Add support for array select values: <select value={[]} />
-			if (Array.isArray(props.value) && props.multiple && type === 'select') {
+			if (type === 'select' && props.multiple && Array.isArray(props.value)) {
 				toChildArray(props.children).forEach(child => {
 					if (props.value.indexOf(child.props.value) != -1) {
 						child.props.selected = true;
 					}
 				});
-				delete props.value;
+				props.value = undefined;
+			}
+
+			// Calling `setAttribute` with a truthy value will lead to it being
+			// passed as a stringified value, e.g. `download="true"`. React
+			// converts it to an empty string instead, otherwise the attribute
+			// value will be used as the file name and the file will be called
+			// "true" upon downloading it.
+			if (props.download === true) {
+				props.download = '';
 			}
 
 			// Normalize DOM vnode properties.
-			let shouldSanitize, attrs, i;
-			for (i in props) if ((shouldSanitize = CAMEL_PROPS.test(i))) break;
-			if (shouldSanitize) {
-				attrs = vnode.props = {};
-				for (i in props) {
-					attrs[
-						CAMEL_PROPS.test(i) ? i.replace(/[A-Z0-9]/, '-$&').toLowerCase() : i
-					] = props[i];
-				}
+			let i;
+			for (i in props) {
+				let shouldSanitize = CAMEL_PROPS.test(i);
+				if (shouldSanitize)
+					vnode.props[i.replace(/[A-Z0-9]/, '-$&').toLowerCase()] = props[i];
+				if (shouldSanitize || props[i] === null) props[i] = undefined;
 			}
 		}
-
-		// Events
-		applyEventNormalization(vnode);
-
 		// Component base class compat
 		// We can't just patch the base component class, because components that use
 		// inheritance and are transpiled down to ES5 will overwrite our patched
 		// getters and setters. See #1941
-		if (
-			typeof type == 'function' &&
-			!type._patchedLifecycles &&
-			type.prototype
-		) {
+		else if (type.prototype && !type.prototype._patchedLifecycles) {
+			type.prototype._patchedLifecycles = true;
 			setSafeDescriptor(type.prototype, 'componentWillMount');
 			setSafeDescriptor(type.prototype, 'componentWillReceiveProps');
 			setSafeDescriptor(type.prototype, 'componentWillUpdate');
-			type._patchedLifecycles = true;
 		}
+
+		// Events
+		applyEventNormalization(vnode);
 	}
 
 	if (oldVNodeHook) oldVNodeHook(vnode);
+};
+
+// Only needed for react-relay
+let currentComponent;
+const oldBeforeRender = options._render;
+options._render = function(vnode) {
+	if (oldBeforeRender) {
+		oldBeforeRender(vnode);
+	}
+	currentComponent = vnode._component;
+};
+
+// This is a very very private internal function for React it
+// is used to sort-of do runtime dependency injection. So far
+// only `react-relay` makes use of it. It uses it to read the
+// context value.
+export const __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = {
+	ReactCurrentDispatcher: {
+		current: {
+			readContext(context) {
+				return currentComponent._globalContext[context._id].props.value;
+			}
+		}
+	}
 };

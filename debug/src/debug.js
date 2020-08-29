@@ -11,6 +11,7 @@ import {
 	getCurrentVNode,
 	getDisplayName
 } from './component-stack';
+import { assign } from './util';
 
 const isWeakMapSupported = typeof WeakMap == 'function';
 
@@ -24,6 +25,8 @@ function getClosestDomNodeParent(parent) {
 
 export function initDebug() {
 	setupComponentStack();
+
+	let hooksAllowed = false;
 
 	/* eslint-disable no-console */
 	let oldBeforeDiff = options._diff;
@@ -39,6 +42,7 @@ export function initDebug() {
 				useLayoutEffect: new WeakMap(),
 				lazyPropTypes: new WeakMap()
 		  };
+	const deprecations = [];
 
 	options._catchError = (error, vnode, oldVNode) => {
 		let component = vnode && vnode._component;
@@ -97,6 +101,8 @@ export function initDebug() {
 	options._diff = vnode => {
 		let { type, _parent: parent } = vnode;
 		let parentVNode = getClosestDomNodeParent(parent);
+
+		hooksAllowed = true;
 
 		if (type === undefined) {
 			throw new Error(
@@ -211,11 +217,19 @@ export function initDebug() {
 					);
 				}
 			}
+
+			let values = vnode.props;
+			if (vnode.type._forwarded) {
+				values = assign({}, values);
+				delete values.ref;
+			}
+
 			checkPropTypes(
 				vnode.type.propTypes,
-				vnode.props,
+				values,
 				'prop',
-				getDisplayName(vnode)
+				getDisplayName(vnode),
+				() => getOwnerStack(vnode)
 			);
 		}
 
@@ -223,19 +237,31 @@ export function initDebug() {
 	};
 
 	options._hook = (comp, index, type) => {
-		if (!comp) {
+		if (!comp || !hooksAllowed) {
 			throw new Error('Hook can only be invoked from render methods.');
 		}
 
 		if (oldHook) oldHook(comp, index, type);
 	};
 
-	const warn = (property, err) => ({
+	// Ideally we'd want to print a warning once per component, but we
+	// don't have access to the vnode that triggered it here. As a
+	// compromise and to avoid flooding the console with warnings we
+	// print each deprecation warning only once.
+	const warn = (property, message) => ({
 		get() {
-			console.warn(`getting vnode.${property} is deprecated, ${err}`);
+			const key = 'get' + property + message;
+			if (deprecations && deprecations.indexOf(key) < 0) {
+				deprecations.push(key);
+				console.warn(`getting vnode.${property} is deprecated, ${message}`);
+			}
 		},
 		set() {
-			console.warn(`setting vnode.${property} is not allowed, ${err}`);
+			const key = 'set' + property + message;
+			if (deprecations && deprecations.indexOf(key) < 0) {
+				deprecations.push(key);
+				console.warn(`setting vnode.${property} is not allowed, ${message}`);
+			}
 		}
 	});
 
@@ -307,6 +333,8 @@ export function initDebug() {
 				});
 			}
 		}
+
+		hooksAllowed = false;
 
 		if (oldDiffed) oldDiffed(vnode);
 
