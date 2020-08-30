@@ -4,7 +4,7 @@
 Here's a guide to getting your issue resolved quickly:
 
 ❓ Did you check that you're on the latest version of Preact?
-🗣 For help with Preact, ask on Slack: https://preact-slack.now.sh
+🗣 For help with Preact, ask on Slack: https://chat.preactjs.com/
 ✨ Check for existing StackOverflow solutions: https://stackoverflow.com/search?q=preact
 📚 Check out our docs - for Preact 10: https://preactjs.com/guide/v10/getting-started
 🔎 Check if there's already an issue for your problem
