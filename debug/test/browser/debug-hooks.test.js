@@ -135,19 +135,19 @@ describe('debug with hooks', () => {
 			return <p>{foo}</p>;
 		};
 
-		render(<App useMemo={true} />, scratch);
+		render(<App useMemo />, scratch);
 		render(<App useMemo={false} />, scratch);
 		expect(errors[0]).to.match(/changed size/);
 		expect(errors[0]).to.match(/useMemo/);
 
 		errors = [];
-		render(<App useEffect={true} />, scratch);
+		render(<App useEffect />, scratch);
 		render(<App useEffect={false} />, scratch);
 		expect(errors[0]).to.match(/changed size/);
 		expect(errors[0]).to.match(/useEffect/);
 
 		errors = [];
-		render(<App useLayoutEffect={true} />, scratch);
+		render(<App useLayoutEffect />, scratch);
 		render(<App useLayoutEffect={false} />, scratch);
 		expect(errors[0]).to.match(/changed size/);
 		expect(errors[0]).to.match(/useLayoutEffect/);
