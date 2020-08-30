@@ -381,7 +381,11 @@ function diffElementNodes(
 
 			if (newHtml || oldHtml) {
 				// Avoid re-applying the same '__html' if it did not changed between re-render
-				if (!newHtml || !oldHtml || newHtml.__html != oldHtml.__html) {
+				if (
+					!newHtml ||
+					((!oldHtml || newHtml.__html != oldHtml.__html) &&
+						newHtml.__html !== dom.innerHTML)
+				) {
 					dom.innerHTML = (newHtml && newHtml.__html) || '';
 				}
 			}
