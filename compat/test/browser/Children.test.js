@@ -99,6 +99,13 @@ describe('Children', () => {
 			expect(serializeHtml(scratch)).to.equal('<div></div>');
 		});
 
+		it('should work with children as zero number', () => {
+			const testNumber = 0;
+
+			render(<Foo>{testNumber}</Foo>, scratch);
+			expect(serializeHtml(scratch)).to.equal('<div><span>0</span></div>');
+		});
+
 		it('should flatten result', () => {
 			const ProblemChild = ({ children }) => {
 				return React.Children.map(children, child => {

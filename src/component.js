@@ -33,7 +33,9 @@ Component.prototype.setState = function(update, callback) {
 	}
 
 	if (typeof update == 'function') {
-		update = update(s, this.props);
+		// Some libraries like `immer` mark the current state as readonly,
+		// preventing us from mutating it, so we need to clone it. See #2716
+		update = update(assign({}, s), this.props);
 	}
 
 	if (update) {

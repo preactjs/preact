@@ -348,7 +348,7 @@ function invokeEffect(hook) {
  * @param {any[]} newArgs
  */
 function argsChanged(oldArgs, newArgs) {
-	return !oldArgs || newArgs.some((arg, index) => arg !== oldArgs[index]);
+	return !oldArgs || oldArgs.length !== newArgs.length || newArgs.some((arg, index) => arg !== oldArgs[index]);
 }
 
 function invokeOrReturn(arg, f) {
