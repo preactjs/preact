@@ -1,5 +1,11 @@
 import { createElement, render, Component } from 'preact';
-import { useState, useEffect, useMemo, useCallback } from 'preact/hooks';
+import {
+	useState,
+	useEffect,
+	useLayoutEffect,
+	useMemo,
+	useCallback
+} from 'preact/hooks';
 import 'preact/debug';
 import { act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
@@ -115,5 +121,35 @@ describe('debug with hooks', () => {
 		};
 		render(<App />, scratch);
 		expect(warnings[0]).to.match(/without passing arguments/);
+	});
+
+	it('should print error when dependency array length changes', () => {
+		const App = props => {
+			const foo = useMemo(
+				() => 'foo',
+				[props.useMemo && 'foo'].filter(Boolean)
+			);
+			useEffect(() => {}, [props.useEffect && 'foo'].filter(Boolean));
+			useLayoutEffect(() => {},
+			[props.useLayoutEffect && 'foo'].filter(Boolean));
+			return <p>{foo}</p>;
+		};
+
+		render(<App useMemo={true} />, scratch);
+		render(<App useMemo={false} />, scratch);
+		expect(errors[0]).to.match(/changed size/);
+		expect(errors[0]).to.match(/useMemo/);
+
+		errors = [];
+		render(<App useEffect={true} />, scratch);
+		render(<App useEffect={false} />, scratch);
+		expect(errors[0]).to.match(/changed size/);
+		expect(errors[0]).to.match(/useEffect/);
+
+		errors = [];
+		render(<App useLayoutEffect={true} />, scratch);
+		render(<App useLayoutEffect={false} />, scratch);
+		expect(errors[0]).to.match(/changed size/);
+		expect(errors[0]).to.match(/useLayoutEffect/);
 	});
 });
