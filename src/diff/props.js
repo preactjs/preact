@@ -117,7 +117,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	) {
 		dom[name] = value == null ? '' : value;
 	} else if (typeof value != 'function' && name !== 'dangerouslySetInnerHTML') {
-		if (name !== (name = name.replace(/xlink:?/, ''))) {
+		if (name !== (name = name.replace(/^xlink:?/, ''))) {
 			if (value == null || value === false) {
 				dom.removeAttributeNS(
 					'http://www.w3.org/1999/xlink',
