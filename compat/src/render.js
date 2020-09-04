@@ -5,7 +5,6 @@ import {
 	toChildArray,
 	Component
 } from 'preact';
-// import { applyEventNormalization } from './events';
 import { IS_NON_DIMENSIONAL } from './util';
 
 const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|fill|flood|font|glyph(?!R)|horiz|marker(?!H|W|U)|overline|paint|stop|strikethrough|stroke|text(?!L)|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
@@ -49,26 +48,21 @@ export function hydrate(vnode, parent, callback) {
 let oldEventHook = options.event;
 options.event = e => {
 	if (oldEventHook) e = oldEventHook(e);
-	e.persist = () => {};
-	let stoppedPropagating = false,
-		defaultPrevented = false;
-
-	const origStopPropagation = e.stopPropagation;
-	e.stopPropagation = () => {
-		origStopPropagation.call(e);
-		stoppedPropagating = true;
-	};
-
-	const origPreventDefault = e.preventDefault;
-	e.preventDefault = () => {
-		origPreventDefault.call(e);
-		defaultPrevented = true;
-	};
-
-	e.isPropagationStopped = () => stoppedPropagating;
-	e.isDefaultPrevented = () => defaultPrevented;
+	e.persist = empty;
+	e.isPropagationStopped = isPropagationStopped;
+	e.isDefaultPrevented = isDefaultPrevented;
 	return (e.nativeEvent = e);
 };
+
+function empty() {}
+
+function isPropagationStopped() {
+	return this.cancelBubble;
+}
+
+function isDefaultPrevented() {
+	return this.defaultPrevented;
+}
 
 // Patch in `UNSAFE_*` lifecycle hooks
 function setSafeDescriptor(proto, key) {
