@@ -64,24 +64,29 @@ function isDefaultPrevented() {
 	return this.defaultPrevented;
 }
 
-// Patch in `UNSAFE_*` lifecycle hooks
-function setSafeDescriptor(proto, key) {
-	if (proto['UNSAFE_' + key] && !proto[key]) {
-		Object.defineProperty(proto, key, {
-			configurable: false,
-			get() {
-				return this['UNSAFE_' + key];
-			},
-			// This `set` is only used if a user sets a lifecycle like cWU
-			// after setting a lifecycle like UNSAFE_cWU. I doubt anyone
-			// actually does this in practice so not testing it
-			/* istanbul ignore next */
-			set(v) {
-				this['UNSAFE_' + key] = v;
-			}
-		});
-	}
-}
+// `UNSAFE_*` lifecycle hooks
+// Preact only ever invokes the unprefixed methods.
+// Here we provide a base "fallback" implementation that calls any defined UNSAFE_ prefixed method.
+// - If a component defines its own `componentDidMount()` (including via defineProperty), use that.
+// - If a component defines `UNSAFE_componentDidMount()`, `componentDidMount` is the alias getter/setter.
+// - If anything assigns to an `UNSAFE_*` property, the assignment is forwarded to the unprefixed property.
+// See https://github.com/preactjs/preact/issues/1941
+[
+	'componentWillMount',
+	'componentWillReceiveProps',
+	'componentWillUpdate'
+].forEach(key => {
+	const mapped = 'UNSAFE_' + key;
+	Object.defineProperty(Component.prototype, key, {
+		configurable: true,
+		get() {
+			return this[mapped];
+		},
+		set(v) {
+			this[mapped] = v;
+		}
+	});
+});
 
 let classNameDescriptor = {
 	configurable: true,
@@ -96,23 +101,11 @@ options.vnode = vnode => {
 
 	let type = vnode.type;
 	let props = vnode.props;
-	let proto;
 
 	const isComponent = typeof type == 'function';
 	if (isComponent) {
 		classNameDescriptor.enumerable = 'className' in props;
 		Object.defineProperty(props, 'className', classNameDescriptor);
-
-		// Component base class compat
-		// We can't just patch the base component class, because components that use
-		// inheritance and are transpiled down to ES5 will overwrite our patched
-		// getters and setters. See #1941
-		if (!type._patchedLifecycles && (proto = type.prototype)) {
-			setSafeDescriptor(proto, 'componentWillMount');
-			setSafeDescriptor(proto, 'componentWillReceiveProps');
-			setSafeDescriptor(proto, 'componentWillUpdate');
-			type._patchedLifecycles = true;
-		}
 	} else if (type) {
 		let normalizedProps = {};
 		let value, hasClass, valueProp, multiple;
