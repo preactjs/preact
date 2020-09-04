@@ -142,11 +142,10 @@ options.vnode = vnode => {
 				}
 			} else {
 				if (
-					i === 'onchange' &&
-					/textarea|input(fil|che|ra)/i.test(type + props.type)
+					/onchange(textarea|input(fil|che|ra))/i.test(i + type + props.type)
 				) {
 					i = 'oninput';
-				} else if (i === 'ondoubleclick') {
+				} else if (/ondoubleclick/.test(i)) {
 					i = 'ondblclick';
 				} else if (/^on(Ani|Tra|Tou|BeforeInp|Cha)/.test(i)) {
 					i = i.toLowerCase();
@@ -169,6 +168,8 @@ options.vnode = vnode => {
 				normalizedProps.value = valueProp;
 			}
 		}
+
+		vnode.props = normalizedProps;
 	}
 
 	if (oldVNodeHook) oldVNodeHook(vnode);
