@@ -5,7 +5,7 @@ import {
 	toChildArray,
 	Component
 } from 'preact';
-import { applyEventNormalization } from './events';
+// import { applyEventNormalization } from './events';
 import { IS_NON_DIMENSIONAL } from './util';
 
 const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|fill|flood|font|glyph(?!R)|horiz|marker(?!H|W|U)|overline|paint|stop|strikethrough|stroke|text(?!L)|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
@@ -102,73 +102,85 @@ options.vnode = vnode => {
 
 	let type = vnode.type;
 	let props = vnode.props;
+	let proto;
 
-	if (type) {
-		// Alias `class` prop to `className` if available
-		if (props.class != props.className) {
-			classNameDescriptor.enumerable = 'className' in props;
-			if (props.className != null) props.class = props.className;
-			Object.defineProperty(props, 'className', classNameDescriptor);
-		}
-
-		// Apply DOM VNode compat
-		if (typeof type != 'function') {
-			// Apply defaultValue to value
-			if (props.defaultValue && props.value !== undefined) {
-				if (!props.value && props.value !== 0) {
-					props.value = props.defaultValue;
-				}
-				delete props.defaultValue;
-			}
-
-			// Add support for array select values: <select value={[]} />
-			if (Array.isArray(props.value) && props.multiple && type === 'select') {
-				toChildArray(props.children).forEach(child => {
-					if (props.value.indexOf(child.props.value) != -1) {
-						child.props.selected = true;
-					}
-				});
-				delete props.value;
-			}
-
-			// Normalize DOM vnode properties.
-			let shouldSanitize, attrs, i;
-			for (i in props) if ((shouldSanitize = CAMEL_PROPS.test(i))) break;
-			if (shouldSanitize) {
-				attrs = vnode.props = {};
-				for (i in props) {
-					attrs[
-						CAMEL_PROPS.test(i) ? i.replace(/[A-Z0-9]/, '-$&').toLowerCase() : i
-					] = props[i];
-				}
-			}
-
-			let style = props.style;
-			if (typeof style === 'object') {
-				for (i in style) {
-					if (typeof style[i] === 'number' && !IS_NON_DIMENSIONAL.test(i)) {
-						style[i] += 'px';
-					}
-				}
-			}
-		}
-
-		// Events
-		applyEventNormalization(vnode);
+	const isComponent = typeof type == 'function';
+	if (isComponent) {
+		classNameDescriptor.enumerable = 'className' in props;
+		Object.defineProperty(props, 'className', classNameDescriptor);
 
 		// Component base class compat
 		// We can't just patch the base component class, because components that use
 		// inheritance and are transpiled down to ES5 will overwrite our patched
 		// getters and setters. See #1941
-		if (
-			typeof type == 'function' &&
-			!type._patchedLifecycles &&
-			type.prototype
-		) {
-			setSafeDescriptor(type.prototype, 'componentWillMount');
-			setSafeDescriptor(type.prototype, 'componentWillReceiveProps');
-			setSafeDescriptor(type.prototype, 'componentWillUpdate');
+		if (!type._patchedLifecycles && (proto = type.prototype)) {
+			setSafeDescriptor(proto, 'componentWillMount');
+			setSafeDescriptor(proto, 'componentWillReceiveProps');
+			setSafeDescriptor(proto, 'componentWillUpdate');
 			type._patchedLifecycles = true;
+		}
+	} else if (type) {
+		let normalizedProps = {};
+		let value, hasClass, valueProp, multiple;
+
+		for (let i in props) {
+			value = props[i];
+			if (i === 'class') hasClass = true;
+			if (i === 'multiple') multiple = true;
+
+			// Alias `class` prop to `className` if available
+			if (i === 'className') {
+				if (!hasClass) normalizedProps.class = value;
+				classNameDescriptor.enumerable = true;
+			}
+
+			if (i === 'style' && typeof value === 'object') {
+				for (let j in value) {
+					if (typeof value[j] === 'number' && !IS_NON_DIMENSIONAL.test(j)) {
+						value[j] += 'px';
+					}
+				}
+			}
+
+			/*if (isComponent) {
+				normalizedProps[i] = value;
+			} else*/
+			if (i === 'defaultValue') {
+				if (valueProp == null) {
+					valueProp = value;
+				}
+			} else if (i === 'value') {
+				if (value != null) {
+					valueProp = value;
+				}
+			} else {
+				if (
+					i === 'onchange' &&
+					/textarea|input(fil|che|ra)/i.test(type + props.type)
+				) {
+					i = 'oninput';
+				} else if (i === 'ondoubleclick') {
+					i = 'ondblclick';
+				} else if (/^on(Ani|Tra|Tou|BeforeInp|Cha)/.test(i)) {
+					i = i.toLowerCase();
+				} else if (CAMEL_PROPS.test(i)) {
+					i = i.replace(/[A-Z0-9]/, '-$&').toLowerCase();
+				}
+
+				normalizedProps[i] = value;
+			}
+		}
+		Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
+
+		if (valueProp != null) {
+			// Add support for array select values: <select value={[]} />
+			if (type === 'select' && multiple && Array.isArray(valueProp)) {
+				toChildArray(props.children).forEach(child => {
+					child.props.selected = valueProp.indexOf(child.props.value);
+				});
+			} else {
+				normalizedProps.value = valueProp;
+			}
 		}
 	}
 
