@@ -134,33 +134,30 @@ options.vnode = vnode => {
 				}
 			}
 
-			/*if (isComponent) {
-				normalizedProps[i] = value;
-			} else*/
-			if (i === 'defaultValue') {
-				if (valueProp == null) {
+			if (i === 'defaultValue' && valueProp == null) {
+				if ('value' in props) {
+					i = 'value';
+				} else {
 					valueProp = value;
 				}
-			} else if (i === 'value') {
-				if (value != null) {
-					valueProp = value;
-				}
-			} else {
-				if (
-					/^onchange(textarea|input)/i.test(i + type) &&
-					!/fil|che|rad/i.test(props.type)
-				) {
-					i = 'oninput';
-				} else if (/ondoubleclick/i.test(i)) {
-					i = 'ondblclick';
-				} else if (/^on(Ani|Tra|Tou|BeforeInp)/.test(i)) {
-					i = i.toLowerCase();
-				} else if (CAMEL_PROPS.test(i)) {
-					i = i.replace(/[A-Z0-9]/, '-$&').toLowerCase();
-				}
-
-				normalizedProps[i] = value;
 			}
+
+			if (i === 'value') {
+				valueProp = value;
+			} else if (
+				/^onchange(textarea|input)/i.test(i + type) &&
+				!/fil|che|rad/i.test(props.type)
+			) {
+				i = 'oninput';
+			} else if (/ondoubleclick/i.test(i)) {
+				i = 'ondblclick';
+			} else if (/^on(Ani|Tra|Tou|BeforeInp)/.test(i)) {
+				i = i.toLowerCase();
+			} else if (CAMEL_PROPS.test(i)) {
+				i = i.replace(/[A-Z0-9]/, '-$&').toLowerCase();
+			}
+
+			normalizedProps[i] = value;
 		}
 		Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
 
@@ -170,8 +167,6 @@ options.vnode = vnode => {
 				toChildArray(props.children).forEach(child => {
 					child.props.selected = valueProp.indexOf(child.props.value) != -1;
 				});
-			} else {
-				normalizedProps.value = valueProp;
 			}
 		}
 
