@@ -164,7 +164,7 @@ options.vnode = vnode => {
 			// Add support for array select values: <select value={[]} />
 			if (type === 'select' && multiple && Array.isArray(valueProp)) {
 				toChildArray(props.children).forEach(child => {
-					child.props.selected = valueProp.indexOf(child.props.value);
+					child.props.selected = valueProp.indexOf(child.props.value) != -1;
 				});
 			} else {
 				normalizedProps.value = valueProp;
