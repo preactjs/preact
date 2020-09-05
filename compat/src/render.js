@@ -120,11 +120,9 @@ options.vnode = vnode => {
 		Object.defineProperty(props, 'className', classNameDescriptor);
 	} else if (type) {
 		let normalizedProps = {};
-		let value, valueProp, multiple;
 
 		for (let i in props) {
-			value = props[i];
-			if (i === 'multiple') multiple = true;
+			let value = props[i];
 
 			// Alias `class` prop to `className` if available
 			if (i === 'className') {
@@ -140,16 +138,10 @@ options.vnode = vnode => {
 				}
 			}
 
-			if (i === 'defaultValue' && valueProp == null) {
-				if ('value' in props) {
-					i = 'value';
-				} else {
-					valueProp = value;
-				}
-			}
-
-			if (i === 'value') {
-				valueProp = value;
+			if (i === 'defaultValue' && 'value' in props && props.value == null) {
+				// `defaultValue` is treated as a fallback `value` when a value prop is present but null/undefined.
+				// `defaultValue` for Elements with no value prop is the same as the DOM defaultValue property.
+				i = 'value';
 			} else if (
 				/^onchange(textarea|input)/i.test(i + type) &&
 				!ONCHANGE_INPUT_TYPES.test(props.type)
@@ -165,6 +157,7 @@ options.vnode = vnode => {
 
 			normalizedProps[i] = value;
 		}
+
 		Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
 
 		if (valueProp != null) {
