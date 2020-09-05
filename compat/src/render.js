@@ -118,12 +118,11 @@ options.vnode = vnode => {
 
 		for (let i in props) {
 			value = props[i];
-			if (i === 'class') hasClass = true;
 			if (i === 'multiple') multiple = true;
 
 			// Alias `class` prop to `className` if available
 			if (i === 'className') {
-				if (!hasClass) normalizedProps.class = value;
+				normalizedProps.class = value;
 				classNameDescriptor.enumerable = true;
 			}
 
