@@ -7,6 +7,10 @@ import {
 } from 'preact';
 import { IS_NON_DIMENSIONAL } from './util';
 
+export const REACT_ELEMENT_TYPE =
+	(typeof Symbol != 'undefined' && Symbol.for && Symbol.for('react.element')) ||
+	0xeac7;
+
 const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|fill|flood|font|glyph(?!R)|horiz|marker(?!H|W|U)|overline|paint|stop|strikethrough|stroke|text(?!L)|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
 
 // Input types for which onchange should not be converted to oninput.
@@ -18,9 +22,33 @@ const ONCHANGE_INPUT_TYPES =
 // Some libraries like `react-virtualized` explicitly check for this.
 Component.prototype.isReactComponent = {};
 
-export const REACT_ELEMENT_TYPE =
-	(typeof Symbol != 'undefined' && Symbol.for && Symbol.for('react.element')) ||
-	0xeac7;
+// `UNSAFE_*` lifecycle hooks
+// Preact only ever invokes the unprefixed methods.
+// Here we provide a base "fallback" implementation that calls any defined UNSAFE_ prefixed method.
+// - If a component defines its own `componentDidMount()` (including via defineProperty), use that.
+// - If a component defines `UNSAFE_componentDidMount()`, `componentDidMount` is the alias getter/setter.
+// - If anything assigns to an `UNSAFE_*` property, the assignment is forwarded to the unprefixed property.
+// See https://github.com/preactjs/preact/issues/1941
+[
+	'componentWillMount',
+	'componentWillReceiveProps',
+	'componentWillUpdate'
+].forEach(key => {
+	Object.defineProperty(Component.prototype, key, {
+		configurable: true,
+		get() {
+			return this['UNSAFE_' + key];
+		},
+		set(v) {
+			Object.defineProperty(this, key, {
+				configurable: true,
+				writable: true,
+				value: v
+			});
+			// this[mapped] = v;
+		}
+	});
+});
 
 /**
  * Proxy render() since React returns a Component reference.
@@ -69,34 +97,6 @@ function isPropagationStopped() {
 function isDefaultPrevented() {
 	return this.defaultPrevented;
 }
-
-// `UNSAFE_*` lifecycle hooks
-// Preact only ever invokes the unprefixed methods.
-// Here we provide a base "fallback" implementation that calls any defined UNSAFE_ prefixed method.
-// - If a component defines its own `componentDidMount()` (including via defineProperty), use that.
-// - If a component defines `UNSAFE_componentDidMount()`, `componentDidMount` is the alias getter/setter.
-// - If anything assigns to an `UNSAFE_*` property, the assignment is forwarded to the unprefixed property.
-// See https://github.com/preactjs/preact/issues/1941
-[
-	'componentWillMount',
-	'componentWillReceiveProps',
-	'componentWillUpdate'
-].forEach(key => {
-	const mapped = 'UNSAFE_' + key;
-	Object.defineProperty(Component.prototype, key, {
-		configurable: true,
-		get() {
-			return this[mapped];
-		},
-		set(v) {
-			Object.defineProperty(this, key, {
-				configurable: true,
-				writable: true,
-				value: v
-			});
-		}
-	});
-});
 
 let classNameDescriptor = {
 	configurable: true,
