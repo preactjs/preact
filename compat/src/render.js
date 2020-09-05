@@ -160,13 +160,17 @@ options.vnode = vnode => {
 
 		Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
 
-		if (valueProp != null) {
-			// Add support for array select values: <select value={[]} />
-			if (type === 'select' && multiple && Array.isArray(valueProp)) {
-				toChildArray(props.children).forEach(child => {
-					child.props.selected = valueProp.indexOf(child.props.value) != -1;
-				});
-			}
+		// Add support for array select values: <select multiple value={[]} />
+		if (
+			type == 'select' &&
+			normalizedProps.multiple &&
+			Array.isArray(normalizedProps.value)
+		) {
+			// forEach() always returns undefined, which we abuse here to unset the value prop.
+			normalizedProps.value = toChildArray(props.children).forEach(child => {
+				child.props.selected =
+					normalizedProps.value.indexOf(child.props.value) != -1;
+			});
 		}
 
 		vnode.props = normalizedProps;
