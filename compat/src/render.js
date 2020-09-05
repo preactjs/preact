@@ -83,7 +83,11 @@ function isDefaultPrevented() {
 			return this[mapped];
 		},
 		set(v) {
-			this[mapped] = v;
+			Object.defineProperty(this, key, {
+				configurable: true,
+				writable: true,
+				value: v
+			});
 		}
 	});
 });
