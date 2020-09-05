@@ -45,7 +45,6 @@ Component.prototype.isReactComponent = {};
 				writable: true,
 				value: v
 			});
-			// this[mapped] = v;
 		}
 	});
 });
@@ -61,9 +60,7 @@ export function render(vnode, parent, callback) {
 	// React destroys any existing DOM nodes, see #1727
 	// ...but only on the first render, see #1828
 	if (parent._children == null) {
-		while (parent.firstChild) {
-			parent.removeChild(parent.firstChild);
-		}
+		parent.textContent = '';
 	}
 
 	preactRender(vnode, parent);
