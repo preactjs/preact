@@ -144,12 +144,13 @@ options.vnode = vnode => {
 				}
 			} else {
 				if (
-					/onchange(textarea|input(fil|che|ra))/i.test(i + type + props.type)
+					/^onchange(textarea|input)/i.test(i + type) &&
+					!/fil|che|rad/i.test(props.type)
 				) {
 					i = 'oninput';
-				} else if (/ondoubleclick/.test(i)) {
+				} else if (/ondoubleclick/i.test(i)) {
 					i = 'ondblclick';
-				} else if (/^on(Ani|Tra|Tou|BeforeInp|Cha)/.test(i)) {
+				} else if (/^on(Ani|Tra|Tou|BeforeInp)/.test(i)) {
 					i = i.toLowerCase();
 				} else if (CAMEL_PROPS.test(i)) {
 					i = i.replace(/[A-Z0-9]/, '-$&').toLowerCase();
