@@ -9,6 +9,12 @@ import { IS_NON_DIMENSIONAL } from './util';
 
 const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|fill|flood|font|glyph(?!R)|horiz|marker(?!H|W|U)|overline|paint|stop|strikethrough|stroke|text(?!L)|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
 
+// Input types for which onchange should not be converted to oninput.
+// type="file|checkbox|radio", plus "range" in IE11.
+// (IE11 doesn't support Symbol, which we use here to turn `rad` into `ra` which matches "range")
+const ONCHANGE_INPUT_TYPES =
+	typeof Symbol != 'undefined' ? /fil|che|rad/i : /fil|che|ra/i;
+
 // Some libraries like `react-virtualized` explicitly check for this.
 Component.prototype.isReactComponent = {};
 
@@ -114,7 +120,7 @@ options.vnode = vnode => {
 		Object.defineProperty(props, 'className', classNameDescriptor);
 	} else if (type) {
 		let normalizedProps = {};
-		let value, hasClass, valueProp, multiple;
+		let value, valueProp, multiple;
 
 		for (let i in props) {
 			value = props[i];
@@ -146,7 +152,7 @@ options.vnode = vnode => {
 				valueProp = value;
 			} else if (
 				/^onchange(textarea|input)/i.test(i + type) &&
-				!/fil|che|rad/i.test(props.type)
+				!ONCHANGE_INPUT_TYPES.test(props.type)
 			) {
 				i = 'oninput';
 			} else if (/ondoubleclick/i.test(i)) {
