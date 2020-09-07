@@ -65,7 +65,9 @@ function cloneElement(element) {
  * @returns {boolean}
  */
 function unmountComponentAtNode(container) {
-	return Boolean(container._root && (container._root.render(null), true));
+	// true if no root, otherwise undefined
+	const hadNoRoot = !container._root || container._root.render(null);
+	return !hadNoRoot;
 }
 
 /**
