@@ -22,15 +22,27 @@ export function applyEventNormalization({ type, props }) {
 		delete props[newProps.onbeforeinput];
 	}
 	// for *textual inputs* (incl textarea), normalize `onChange` -> `onInput`:
-	if (
-		newProps.onchange &&
-		(type === 'textarea' ||
-			(type.toLowerCase() === 'input' && !/^fil|che|ra/i.test(props.type)))
-	) {
+	if (type === 'textarea' || type === 'input') {
 		let normalized = newProps.oninput || 'oninput';
-		if (!props[normalized]) {
-			props[normalized] = props[newProps.onchange];
-			delete props[newProps.onchange];
+		if (newProps.onchange) {
+			if (!props[normalized] && !/^fil|che|ra/i.test(props.type)) {
+				props[normalized] = props[newProps.onchange];
+				delete props[newProps.onchange];
+			}
+		}
+		else if (newProps.checked) {
+			if (!newProps.onclick) {
+				props.onclick = prevent;
+			}
+		}
+		else {
+			if (!newProps.oninput) {
+				props.oninput = prevent;
+			}
 		}
 	}
+}
+
+function prevent(e) {
+	e.preventDefault();
 }
