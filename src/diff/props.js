@@ -54,7 +54,7 @@ function setStyle(style, key, value) {
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
 export function setProperty(dom, name, value, oldValue, isSvg) {
-	let useCapture, nameLower;
+	let useCapture, nameLower, proxy;
 
 	if (isSvg && name == 'className') name = 'class';
 
@@ -95,12 +95,13 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		name = name.slice(2);
 
 		if (!dom._listeners) dom._listeners = {};
-		dom._listeners[name] = value;
+		dom._listeners[name + useCapture] = value;
 
+		proxy = useCapture ? eventProxyCapture : eventProxy;
 		if (value) {
-			if (!oldValue) dom.addEventListener(name, eventProxy, useCapture);
+			if (!oldValue) dom.addEventListener(name, proxy, useCapture);
 		} else {
-			dom.removeEventListener(name, eventProxy, useCapture);
+			dom.removeEventListener(name, proxy, useCapture);
 		}
 	} else if (
 		name !== 'list' &&
@@ -154,5 +155,9 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
  * @private
  */
 function eventProxy(e) {
-	this._listeners[e.type](options.event ? options.event(e) : e);
+	this._listeners[e.type + false](options.event ? options.event(e) : e);
+}
+
+function eventProxyCapture(e) {
+	this._listeners[e.type + true](options.event ? options.event(e) : e);
 }
