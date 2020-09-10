@@ -2,7 +2,7 @@ import { createElement, Component, render } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 import { div } from '../_util/dom';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 import sinon from 'sinon';
 
 describe('keys', () => {

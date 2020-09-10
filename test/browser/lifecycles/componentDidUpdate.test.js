@@ -2,7 +2,7 @@ import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
 import sinon from 'sinon';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 import '../../polyfills';
 
 describe('Lifecycle methods', () => {

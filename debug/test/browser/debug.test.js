@@ -8,7 +8,7 @@ import './fakeDevTools';
 import 'preact/debug';
 import 'prop-types';
 import sinon from 'sinon';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 
 // We include the umd bundle of prop-types, because they don't have an ESM
 // version of it. The umd bundle cannot be imported, so we pull it off of

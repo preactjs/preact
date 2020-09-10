@@ -10,7 +10,7 @@ import {
 	spyAll
 } from '../_util/helpers';
 import { div, span, p } from '../_util/dom';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 import sinon from 'sinon';
 import '../polyfills';
 

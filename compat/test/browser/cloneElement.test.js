@@ -1,7 +1,7 @@
 import { createElement as preactH } from 'preact';
 import React, { createElement, render, cloneElement } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 
 describe('compat cloneElement', () => {
 	/** @type {HTMLDivElement} */

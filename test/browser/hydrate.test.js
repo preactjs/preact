@@ -8,7 +8,7 @@ import {
 } from '../_util/helpers';
 import { ul, li, div } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 import sinon from 'sinon';
 
 describe('hydrate()', () => {

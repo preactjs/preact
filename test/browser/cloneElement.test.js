@@ -1,5 +1,5 @@
 import { createElement, cloneElement, createRef } from 'preact';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 
 describe('cloneElement', () => {
 	it('should clone components', () => {

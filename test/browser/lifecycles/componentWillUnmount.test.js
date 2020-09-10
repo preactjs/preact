@@ -1,6 +1,6 @@
 import { createElement, render, Component } from 'preact';
 import { setupScratch, teardown, spyAll } from '../../_util/helpers';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 
 describe('Lifecycle methods', () => {
 	/** @type {HTMLDivElement} */

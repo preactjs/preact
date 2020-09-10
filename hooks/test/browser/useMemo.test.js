@@ -2,7 +2,7 @@ import { createElement, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useMemo } from 'preact/hooks';
 import sinon from 'sinon';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 
 describe('useMemo', () => {
 	/** @type {HTMLDivElement} */

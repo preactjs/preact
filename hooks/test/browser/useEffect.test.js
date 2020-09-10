@@ -5,7 +5,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { useEffectAssertions } from './useEffectAssertions.test';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
 import sinon from 'sinon';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 
 describe('useEffect', () => {
 	/** @type {HTMLDivElement} */

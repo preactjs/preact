@@ -10,7 +10,7 @@ import {
 } from 'preact/hooks';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
 import sinon from 'sinon';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 
 describe('combinations', () => {
 	/** @type {HTMLDivElement} */

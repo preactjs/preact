@@ -3,7 +3,7 @@ import { createElement, render, Component, Fragment } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
 import { logCall, clearLog } from '../../_util/logCall';
 import sinon from 'sinon';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 
 describe('Lifecycle methods', () => {
 	/** @type {HTMLDivElement} */

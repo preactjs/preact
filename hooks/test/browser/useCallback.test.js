@@ -1,7 +1,7 @@
 import { createElement, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useCallback } from 'preact/hooks';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 
 describe('useCallback', () => {
 	/** @type {HTMLDivElement} */

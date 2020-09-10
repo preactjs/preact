@@ -21,7 +21,7 @@ import {
 	useErrorBoundary
 } from 'preact/hooks';
 import sinon from 'sinon';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 
 describe('hook options', () => {
 	/** @type {HTMLDivElement} */

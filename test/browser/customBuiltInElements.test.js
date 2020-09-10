@@ -1,6 +1,6 @@
 import { createElement, render, Component } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 import sinon from 'sinon';
 
 const runSuite = typeof customElements == 'undefined' ? xdescribe : describe;

@@ -1,6 +1,6 @@
 import { createElement, render } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 
 describe('Select', () => {
 	let scratch;

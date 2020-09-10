@@ -1,7 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import React, { createElement, Component, render, memo } from 'preact/compat';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 import sinon from 'sinon';
 
 const h = React.createElement;
