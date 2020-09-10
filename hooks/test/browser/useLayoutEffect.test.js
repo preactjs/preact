@@ -8,7 +8,7 @@ import {
 import { useEffectAssertions } from './useEffectAssertions.test';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import sinon from 'sinon';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 
 describe('useLayoutEffect', () => {
 	/** @type {HTMLDivElement} */

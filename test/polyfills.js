@@ -11,7 +11,6 @@
 // import 'core-js/fn/string/code-point-at';
 // import 'core-js/fn/string/from-code-point';
 // import 'core-js/fn/string/repeat';
-import chai from '@open-wc/testing/import-wrappers/chai';
 
 // Fix Function#name on browsers that do not support it (IE).
 // Taken from: https://stackoverflow.com/a/17056530/755391
@@ -26,38 +25,3 @@ if (!function f() {}.name) {
 		}
 	});
 }
-
-chai.use((chai, util) => {
-	const Assertion = chai.Assertion;
-
-	Assertion.addMethod('equalNode', function(expectedNode, message) {
-		const obj = this._obj;
-		message = message || 'equalNode';
-
-		if (expectedNode == null) {
-			this.assert(
-				obj == null,
-				`${message}: expected node to "== null" but got #{act} instead.`,
-				`${message}: expected node to not "!= null".`,
-				expectedNode,
-				obj
-			);
-		} else {
-			new Assertion(obj).to.be.instanceof(Node, message);
-			this.assert(
-				obj.tagName === expectedNode.tagName,
-				`${message}: expected node to have tagName #{exp} but got #{act} instead.`,
-				`${message}: expected node to not have tagName #{act}.`,
-				expectedNode.tagName,
-				obj.tagName
-			);
-			this.assert(
-				obj === expectedNode,
-				`${message}: expected #{this} to be #{exp} but got #{act}`,
-				`${message}: expected #{this} not to be #{exp}`,
-				expectedNode,
-				obj
-			);
-		}
-	});
-});

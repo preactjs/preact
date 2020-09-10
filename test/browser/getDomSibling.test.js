@@ -1,7 +1,7 @@
 import { createElement, render, Fragment } from '../../src';
 import { getDomSibling } from '../../src/component';
 import { setupScratch, teardown } from '../_util/helpers';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 import '../polyfills';
 
 describe('getDomSibling', () => {

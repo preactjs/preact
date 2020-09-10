@@ -5,7 +5,7 @@ import {
 	serializeHtml,
 	sortAttributes
 } from '../_util/helpers';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 import sinon from 'sinon';
 import '../polyfills';
 

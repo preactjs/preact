@@ -2,7 +2,7 @@ import { createElement, render, Component } from 'preact';
 import 'preact/debug';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import sinon from 'sinon';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 
 // This test is not part of component-stack.test.js to avoid it being
 // transpiled with '@babel/plugin-transform-react-jsx-source' enabled.

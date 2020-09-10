@@ -1,5 +1,5 @@
 import { unstable_batchedUpdates } from 'preact/compat';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 import sinon from 'sinon';
 
 describe('unstable_batchedUpdates', () => {

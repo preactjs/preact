@@ -1,5 +1,5 @@
 import { createElement } from '../../src';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 
 const h = createElement;
 /*eslint-env browser, mocha */

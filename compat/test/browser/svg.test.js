@@ -5,7 +5,7 @@ import {
 	serializeHtml,
 	sortAttributes
 } from '../../../test/_util/helpers';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 
 describe('svg', () => {
 	/** @type {HTMLDivElement} */

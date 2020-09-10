@@ -5,7 +5,7 @@ import {
 	getMixedArray,
 	mixedArrayHTML
 } from '../_util/helpers';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 
 describe('toChildArray', () => {
 	/** @type {HTMLDivElement} */

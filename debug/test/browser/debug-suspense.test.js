@@ -7,7 +7,7 @@ import {
 	serializeHtml
 } from '../../../test/_util/helpers';
 import sinon from 'sinon';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 
 describe('debug with suspense', () => {
 	/** @type {HTMLDivElement} */

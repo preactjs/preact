@@ -1,6 +1,6 @@
 import { createElement, Component } from 'preact';
 import { serializeVNode } from '../../src/debug';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 
 describe('serializeVNode', () => {
 	it("should prefer a function component's displayName", () => {

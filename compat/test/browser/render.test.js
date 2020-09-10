@@ -12,7 +12,7 @@ import {
 	serializeHtml,
 	createEvent
 } from '../../../test/_util/helpers';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 import sinon from 'sinon';
 
 describe('compat render', () => {

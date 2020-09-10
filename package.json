@@ -240,6 +240,7 @@
 		"eslint-config-developit": "^1.1.1",
 		"eslint-config-prettier": "^6.5.0",
 		"eslint-plugin-react": "7.12.4",
+		"expectus": "^0.2.0",
 		"husky": "^4.3.0",
 		"karma": "^5.2.3",
 		"karma-chai-sinon": "^0.1.5",

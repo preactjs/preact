@@ -9,7 +9,7 @@ import {
 	cloneElement,
 	options
 } from '../../';
-import { expect } from '@open-wc/testing';
+import { expect } from 'expectus';
 
 describe('preact', () => {
 	it('should be available as named exports', () => {
