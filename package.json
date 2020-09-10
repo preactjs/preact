@@ -224,6 +224,7 @@
 		"@web/dev-server-rollup": "^0.2.3",
 		"@web/test-runner": "^0.7.11",
 		"@web/test-runner-playwright": "^0.5.4",
+		"@web/test-runner-saucelabs": "0.0.2",
 		"babel-loader": "^8.0.6",
 		"babel-plugin-istanbul": "^6.0.0",
 		"babel-plugin-transform-async-to-promises": "^0.8.15",
