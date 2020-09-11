@@ -6,12 +6,10 @@ import { fromRollup } from '@web/dev-server-rollup';
 import fs from 'fs';
 import os from 'os';
 
-const ci = String(process.env.CI).match(/^(1|true)$/gi);
-const pullRequest = String(process.env.GITHUB_EVENT_NAME) === 'pull_request';
-const masterBranch = String(process.env.GITHUB_WORKFLOW);
-const sauceLabs = true;
 let browsers;
-
+const sauceLabsUser = process.env.SAUCE_USERNAME;
+const sauceLabsKey = process.env.SAUCE_ACCESS_KEY;
+const sauceLabs = sauceLabsUser && sauceLabsKey;
 if (sauceLabs) {
 	const sauceLabsLauncher = createSauceLabsLauncher({
 		user: process.env.SAUCE_USERNAME,
