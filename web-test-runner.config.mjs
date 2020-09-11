@@ -86,9 +86,7 @@ export default {
 	// an automatic number based on CPU-Cores for non-saucelab runs
 	concurrency: sauceLabs ? 2 : Math.max(1, os.cpus().length - 1),
 	// SauceLabs takes a bit longer to start
-	browserStartTimeout: 1000 * 60 * 1,
-	testsStartTimeout: 1000 * 60 * 1,
-	testsFinishTimeout: 1000 * 60 * 5,
+	browserStartTimeout: 1000 * 30,
 	plugins: [
 		importMapsPlugin({
 			inject: {
