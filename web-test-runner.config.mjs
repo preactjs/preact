@@ -4,6 +4,7 @@ import { createSauceLabsLauncher } from '@web/test-runner-saucelabs';
 import rollupBabel from '@rollup/plugin-babel';
 import { fromRollup } from '@web/dev-server-rollup';
 import fs from 'fs';
+import os from 'os';
 
 const ci = String(process.env.CI).match(/^(1|true)$/gi);
 const pullRequest = String(process.env.GITHUB_EVENT_NAME) === 'pull_request';
@@ -14,9 +15,9 @@ let browsers;
 if (sauceLabs) {
 	const sauceLabsLauncher = createSauceLabsLauncher({
 		user: process.env.SAUCE_USERNAME,
-		key: process.env.SAUCE_ACCESS_KEY
+		key: process.env.SAUCE_ACCESS_KEY,
 		// the Sauce Labs datacenter to run your tests on, defaults to 'us-west-1'
-		// region: 'eu-central-1',
+		region: 'eu-central-1'
 	});
 
 	const sharedCapabilities = {
@@ -81,6 +82,13 @@ export default {
 		'**/*.jsx': 'js'
 	},
 	browsers,
+	// SauceLabs only allows a max concurrency of 2 in the OSS plan. Pick
+	// an automatic number based on CPU-Cores for non-saucelab runs
+	concurrency: sauceLabs ? 2 : Math.max(1, os.cpus().length - 1),
+	// SauceLabs takes a bit longer to start
+	browserStartTimeout: 1000 * 60 * 1,
+	testsStartTimeout: 1000 * 60 * 1,
+	testsFinishTimeout: 1000 * 60 * 5,
 	plugins: [
 		importMapsPlugin({
 			inject: {
