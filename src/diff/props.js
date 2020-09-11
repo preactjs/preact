@@ -26,7 +26,7 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 			i !== 'key' &&
 			i !== 'value' &&
 			i !== 'checked' &&
-			oldProps[i] != newProps[i]
+			oldProps[i] !== newProps[i]
 		) {
 			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
 		}

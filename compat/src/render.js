@@ -148,6 +148,8 @@ options.vnode = vnode => {
 				i = i.toLowerCase();
 			} else if (CAMEL_PROPS.test(i)) {
 				i = i.replace(/[A-Z0-9]/, '-$&').toLowerCase();
+			} else if (value === null) {
+				value = undefined;
 			}
 
 			normalizedProps[i] = value;
