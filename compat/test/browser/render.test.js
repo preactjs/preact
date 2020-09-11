@@ -202,11 +202,19 @@ describe('compat render', () => {
 	// Issue #2275
 	it('should normalize class+className + DOM properties', () => {
 		function Foo(props) {
-			return <ul {...props} class="old" />;
+			return <ul class="old" {...props} />;
 		}
 
 		render(<Foo fontSize="xlarge" className="new" />, scratch);
 		expect(scratch.firstChild.className).to.equal('new');
+	});
+
+	it('should give precedence to last-applied class/className prop', () => {
+		render(<ul className="from className" class="from class" />, scratch);
+		expect(scratch.firstChild.className).to.equal('from class');
+
+		render(<ul class="from class" className="from className" />, scratch);
+		expect(scratch.firstChild.className).to.equal('from className');
 	});
 
 	// Issue #2224

@@ -24,11 +24,10 @@ describe('Select', () => {
 		}
 
 		render(<App />, scratch);
-		Array.prototype.slice.call(scratch.firstChild.childNodes).forEach(node => {
-			if (node.value === 'B' || node.value === 'C') {
-				expect(node.selected).to.equal(true);
-			}
-		});
+		const options = scratch.firstChild.children;
+		expect(options[0]).to.have.property('selected', false);
+		expect(options[1]).to.have.property('selected', true);
+		expect(options[2]).to.have.property('selected', true);
 		expect(scratch.firstChild.value).to.equal('B');
 	});
 });

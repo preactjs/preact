@@ -5,16 +5,48 @@ import {
 	toChildArray,
 	Component
 } from 'preact';
-import { applyEventNormalization } from './events';
-
-const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|fill|flood|font|glyph(?!R)|horiz|marker(?!H|W|U)|overline|paint|stop|strikethrough|stroke|text(?!L)|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
-
-// Some libraries like `react-virtualized` explicitly check for this.
-Component.prototype.isReactComponent = {};
 
 export const REACT_ELEMENT_TYPE =
 	(typeof Symbol != 'undefined' && Symbol.for && Symbol.for('react.element')) ||
 	0xeac7;
+
+const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|fill|flood|font|glyph(?!R)|horiz|marker(?!H|W|U)|overline|paint|stop|strikethrough|stroke|text(?!L)|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
+
+// Input types for which onchange should not be converted to oninput.
+// type="file|checkbox|radio", plus "range" in IE11.
+// (IE11 doesn't support Symbol, which we use here to turn `rad` into `ra` which matches "range")
+const ONCHANGE_INPUT_TYPES =
+	typeof Symbol != 'undefined' ? /fil|che|rad/i : /fil|che|ra/i;
+
+// Some libraries like `react-virtualized` explicitly check for this.
+Component.prototype.isReactComponent = {};
+
+// `UNSAFE_*` lifecycle hooks
+// Preact only ever invokes the unprefixed methods.
+// Here we provide a base "fallback" implementation that calls any defined UNSAFE_ prefixed method.
+// - If a component defines its own `componentDidMount()` (including via defineProperty), use that.
+// - If a component defines `UNSAFE_componentDidMount()`, `componentDidMount` is the alias getter/setter.
+// - If anything assigns to an `UNSAFE_*` property, the assignment is forwarded to the unprefixed property.
+// See https://github.com/preactjs/preact/issues/1941
+[
+	'componentWillMount',
+	'componentWillReceiveProps',
+	'componentWillUpdate'
+].forEach(key => {
+	Object.defineProperty(Component.prototype, key, {
+		configurable: true,
+		get() {
+			return this['UNSAFE_' + key];
+		},
+		set(v) {
+			Object.defineProperty(this, key, {
+				configurable: true,
+				writable: true,
+				value: v
+			});
+		}
+	});
+});
 
 /**
  * Proxy render() since React returns a Component reference.
@@ -27,9 +59,7 @@ export function render(vnode, parent, callback) {
 	// React destroys any existing DOM nodes, see #1727
 	// ...but only on the first render, see #1828
 	if (parent._children == null) {
-		while (parent.firstChild) {
-			parent.removeChild(parent.firstChild);
-		}
+		parent.textContent = '';
 	}
 
 	preactRender(vnode, parent);
@@ -48,43 +78,20 @@ export function hydrate(vnode, parent, callback) {
 let oldEventHook = options.event;
 options.event = e => {
 	if (oldEventHook) e = oldEventHook(e);
-	e.persist = () => {};
-	let stoppedPropagating = false,
-		defaultPrevented = false;
-
-	const origStopPropagation = e.stopPropagation;
-	e.stopPropagation = () => {
-		origStopPropagation.call(e);
-		stoppedPropagating = true;
-	};
-
-	const origPreventDefault = e.preventDefault;
-	e.preventDefault = () => {
-		origPreventDefault.call(e);
-		defaultPrevented = true;
-	};
-
-	e.isPropagationStopped = () => stoppedPropagating;
-	e.isDefaultPrevented = () => defaultPrevented;
+	e.persist = empty;
+	e.isPropagationStopped = isPropagationStopped;
+	e.isDefaultPrevented = isDefaultPrevented;
 	return (e.nativeEvent = e);
 };
 
-// Patch in `UNSAFE_*` lifecycle hooks
-function setSafeDescriptor(proto, key) {
-	if (proto['UNSAFE_' + key] && !proto[key]) {
-		Object.defineProperty(proto, key, {
-			get() {
-				return this['UNSAFE_' + key];
-			},
-			// This `set` is only used if a user sets a lifecycle like cWU
-			// after setting a lifecycle like UNSAFE_cWU. I doubt anyone
-			// actually does this in practice so not testing it
-			/* istanbul ignore next */
-			set(v) {
-				this['UNSAFE_' + key] = v;
-			}
-		});
-	}
+function empty() {}
+
+function isPropagationStopped() {
+	return this.cancelBubble;
+}
+
+function isDefaultPrevented() {
+	return this.defaultPrevented;
 }
 
 let classNameDescriptor = {
@@ -101,65 +108,67 @@ options.vnode = vnode => {
 	let type = vnode.type;
 	let props = vnode.props;
 
-	if (type) {
-		// Alias `class` prop to `className` if available
-		if (props.class != props.className) {
-			classNameDescriptor.enumerable = 'className' in props;
-			if (props.className != null) props.class = props.className;
-			Object.defineProperty(props, 'className', classNameDescriptor);
+	const isComponent = typeof type == 'function';
+	if (isComponent) {
+		if ((classNameDescriptor.enumerable = 'className' in props)) {
+			props.class = props.className;
+		}
+		Object.defineProperty(props, 'className', classNameDescriptor);
+	} else if (type) {
+		let normalizedProps = {};
+
+		for (let i in props) {
+			let value = props[i];
+
+			// Alias `class` prop to `className` if available
+			if (i === 'className') {
+				normalizedProps.class = value;
+				classNameDescriptor.enumerable = true;
+			}
+
+			if (i === 'defaultValue' && 'value' in props && props.value == null) {
+				// `defaultValue` is treated as a fallback `value` when a value prop is present but null/undefined.
+				// `defaultValue` for Elements with no value prop is the same as the DOM defaultValue property.
+				i = 'value';
+			} else if (i === 'download' && value === true) {
+				// Calling `setAttribute` with a truthy value will lead to it being
+				// passed as a stringified value, e.g. `download="true"`. React
+				// converts it to an empty string instead, otherwise the attribute
+				// value will be used as the file name and the file will be called
+				// "true" upon downloading it.
+				value = '';
+			} else if (/ondoubleclick/i.test(i)) {
+				i = 'ondblclick';
+			} else if (
+				/^onchange(textarea|input)/i.test(i + type) &&
+				!ONCHANGE_INPUT_TYPES.test(props.type)
+			) {
+				i = 'oninput';
+			} else if (/^on(Ani|Tra|Tou|BeforeInp)/.test(i)) {
+				i = i.toLowerCase();
+			} else if (CAMEL_PROPS.test(i)) {
+				i = i.replace(/[A-Z0-9]/, '-$&').toLowerCase();
+			}
+
+			normalizedProps[i] = value;
 		}
 
-		// Apply DOM VNode compat
-		if (typeof type != 'function') {
-			// Apply defaultValue to value
-			if (props.defaultValue && props.value !== undefined) {
-				if (!props.value && props.value !== 0) {
-					props.value = props.defaultValue;
-				}
-				props.defaultValue = undefined;
-			}
+		Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
 
-			// Add support for array select values: <select value={[]} />
-			if (type === 'select' && props.multiple && Array.isArray(props.value)) {
-				toChildArray(props.children).forEach(child => {
-					if (props.value.indexOf(child.props.value) != -1) {
-						child.props.selected = true;
-					}
-				});
-				props.value = undefined;
-			}
-
-			// Calling `setAttribute` with a truthy value will lead to it being
-			// passed as a stringified value, e.g. `download="true"`. React
-			// converts it to an empty string instead, otherwise the attribute
-			// value will be used as the file name and the file will be called
-			// "true" upon downloading it.
-			if (props.download === true) {
-				props.download = '';
-			}
-
-			// Normalize DOM vnode properties.
-			let i;
-			for (i in props) {
-				let shouldSanitize = CAMEL_PROPS.test(i);
-				if (shouldSanitize)
-					vnode.props[i.replace(/[A-Z0-9]/, '-$&').toLowerCase()] = props[i];
-				if (shouldSanitize || props[i] === null) props[i] = undefined;
-			}
-		}
-		// Component base class compat
-		// We can't just patch the base component class, because components that use
-		// inheritance and are transpiled down to ES5 will overwrite our patched
-		// getters and setters. See #1941
-		else if (type.prototype && !type.prototype._patchedLifecycles) {
-			type.prototype._patchedLifecycles = true;
-			setSafeDescriptor(type.prototype, 'componentWillMount');
-			setSafeDescriptor(type.prototype, 'componentWillReceiveProps');
-			setSafeDescriptor(type.prototype, 'componentWillUpdate');
+		// Add support for array select values: <select multiple value={[]} />
+		if (
+			type == 'select' &&
+			normalizedProps.multiple &&
+			Array.isArray(normalizedProps.value)
+		) {
+			// forEach() always returns undefined, which we abuse here to unset the value prop.
+			normalizedProps.value = toChildArray(props.children).forEach(child => {
+				child.props.selected =
+					normalizedProps.value.indexOf(child.props.value) != -1;
+			});
 		}
 
-		// Events
-		applyEventNormalization(vnode);
+		vnode.props = normalizedProps;
 	}
 
 	if (oldVNodeHook) oldVNodeHook(vnode);
