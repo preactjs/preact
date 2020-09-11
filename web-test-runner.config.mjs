@@ -8,7 +8,7 @@ import fs from 'fs';
 const ci = String(process.env.CI).match(/^(1|true)$/gi);
 const pullRequest = String(process.env.GITHUB_EVENT_NAME) === 'pull_request';
 const masterBranch = String(process.env.GITHUB_WORKFLOW);
-const sauceLabs = ci;
+const sauceLabs = true;
 let browsers;
 
 if (sauceLabs) {
@@ -36,36 +36,28 @@ if (sauceLabs) {
 	};
 	browsers = [
 		sauceLabsLauncher({
-			capabilities: {
-				...sharedCapabilities,
-				browserName: 'chrome',
-				browserVersion: 'latest',
-				platformName: 'Windows 10'
-			}
+			...sharedCapabilities,
+			browserName: 'chrome',
+			browserVersion: 'latest',
+			platformName: 'Windows 10'
 		}),
 		sauceLabsLauncher({
-			capabilities: {
-				...sharedCapabilities,
-				browserName: 'firefox',
-				browserVersion: 'latest',
-				platformName: 'Windows 10'
-			}
+			...sharedCapabilities,
+			browserName: 'firefox',
+			browserVersion: 'latest',
+			platformName: 'Windows 10'
 		}),
 		sauceLabsLauncher({
-			capabilities: {
-				...sharedCapabilities,
-				browserName: 'MicrosoftEdge',
-				browserVersion: 'latest',
-				platformName: 'Windows 10'
-			}
+			...sharedCapabilities,
+			browserName: 'MicrosoftEdge',
+			browserVersion: 'latest',
+			platformName: 'Windows 10'
 		}),
 		sauceLabsLauncher({
-			capabilities: {
-				...sharedCapabilities,
-				browserName: 'internet explorer',
-				browserVersion: '11.0',
-				platformName: 'Windows 7'
-			}
+			...sharedCapabilities,
+			browserName: 'internet explorer',
+			browserVersion: '11.0',
+			platformName: 'Windows 7'
 		})
 	];
 }
