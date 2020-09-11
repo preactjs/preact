@@ -15,9 +15,9 @@ let browsers;
 if (sauceLabs) {
 	const sauceLabsLauncher = createSauceLabsLauncher({
 		user: process.env.SAUCE_USERNAME,
-		key: process.env.SAUCE_ACCESS_KEY,
+		key: process.env.SAUCE_ACCESS_KEY
 		// the Sauce Labs datacenter to run your tests on, defaults to 'us-west-1'
-		region: 'eu-central-1'
+		// region: 'eu-central-1'
 	});
 
 	const sharedCapabilities = {
