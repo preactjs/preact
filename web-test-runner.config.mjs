@@ -8,7 +8,7 @@ import fs from 'fs';
 const ci = String(process.env.CI).match(/^(1|true)$/gi);
 const pullRequest = String(process.env.GITHUB_EVENT_NAME) === 'pull_request';
 const masterBranch = String(process.env.GITHUB_WORKFLOW);
-const sauceLabs = ci && !pullRequest && masterBranch;
+const sauceLabs = ci;
 let browsers;
 
 if (sauceLabs) {
