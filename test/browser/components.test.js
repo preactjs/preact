@@ -499,15 +499,15 @@ describe('Components', () => {
 
 			sinon.spy(Foo.prototype, 'render');
 
-			render(<Foo {...PROPS} />, scratch);
+			render(
+				<Foo {...PROPS}>
+					children <strong>should not</strong> be rendered.
+				</Foo>,
+				scratch
+			);
 
-			expect(Foo.prototype.render)
-				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(PROPS, {}, {})
-				.and.to.have.returned(undefined);
-			expect(instance.props).to.deep.equal(PROPS);
-			expect(instance.state).to.deep.equal({});
-			expect(instance.context).to.deep.equal({});
-
+			// Can't check on props here without deeply making the children array
+			expect(Foo.prototype.render).to.have.returned(undefined);
 			expect(scratch.innerHTML).to.equal('');
 		});
 	});

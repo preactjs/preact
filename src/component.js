@@ -1,7 +1,6 @@
 import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
 import options from './options';
-import { Fragment } from './create-element';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -77,7 +76,7 @@ Component.prototype.forceUpdate = function(callback) {
  * ancestor's `getChildContext()`
  * @returns {import('./index').ComponentChildren | void}
  */
-Component.prototype.render = Fragment;
+Component.prototype.render = () => {};
 
 /**
  * @param {import('./internal').VNode} vnode
