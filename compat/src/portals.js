@@ -1,12 +1,8 @@
 import { createElement, hydrate, render, __u as _unmount } from 'preact';
 
-class ContextProvider {
-	getChildContext() {
-		return this.props.context;
-	}
-	render(props) {
-		return props.children;
-	}
+function ContextProvider(props) {
+	this.getChildContext = () => props.context;
+	return props.children;
 }
 
 /**
