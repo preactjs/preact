@@ -16,7 +16,8 @@ export interface Component<P = {}, S = {}> extends PreactComponent<P, S> {
 
 	_childDidSuspend?(
 		error: Promise<void>,
-		suspendingComponent: Component<any, any>
+		suspendingComponent: Component<any, any>,
+		oldVNode?: VNode
 	): void;
 	_suspendedComponentWillUnmount?(): void;
 }

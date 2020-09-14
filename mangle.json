@@ -46,6 +46,7 @@
       "$_childDidSuspend": "__c",
       "$_suspendedComponentWillUnmount": "__c",
       "$_dom": "__e",
+      "$_hydrating": "__h",
       "$_component": "__c",
       "$__html": "__html",
       "$_parent": "__",
