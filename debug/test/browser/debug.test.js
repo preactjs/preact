@@ -555,7 +555,7 @@ describe('debug', () => {
 			// correctly.
 			expect(console.error).to.have.been.calledOnceWith(
 				sinon.match(
-					/^Failed prop type: Invalid prop `text` of type `number` supplied to `Foo`, expected `string`\.\n {2}in Foo \(at (.*)[\/\\]debug[\/\\]test[\/\\]browser[\/\\]debug\.test\.js:[0-9]+\)$/m
+					/^Failed prop type: Invalid prop `text` of type `number` supplied to `Foo`, expected `string`\.\n {2}in Foo \(at (.*)[/\\]debug[/\\]test[/\\]browser[/\\]debug\.test\.js:[0-9]+\)$/m
 				)
 			);
 		});
