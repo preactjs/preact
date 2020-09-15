@@ -190,6 +190,8 @@ const defer =
 
 let prevDebounce;
 
+let rerenderCount = 0;
+
 /**
  * Enqueue a rerender of a component
  * @param {import('./internal').Component} c The component to rerender
@@ -199,7 +201,7 @@ export function enqueueRender(c) {
 		(!c._dirty &&
 			(c._dirty = true) &&
 			rerenderQueue.push(c) &&
-			!process._rerenderCount++) ||
+			!rerenderCount++) ||
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
@@ -210,7 +212,7 @@ export function enqueueRender(c) {
 /** Flush the render queue by rerendering all queued components */
 function process() {
 	let queue;
-	while ((process._rerenderCount = rerenderQueue.length)) {
+	while ((rerenderCount = rerenderQueue.length)) {
 		queue = rerenderQueue.sort((a, b) => a._vnode._depth - b._vnode._depth);
 		rerenderQueue = [];
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
@@ -220,4 +222,3 @@ function process() {
 		});
 	}
 }
-process._rerenderCount = 0;
