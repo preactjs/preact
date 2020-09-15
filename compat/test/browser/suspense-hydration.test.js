@@ -3,9 +3,9 @@ import React, {
 	createElement,
 	hydrate,
 	Component,
-	Fragment,
-	Suspense
+	Fragment
 } from 'preact/compat';
+import { logCall, getLog, clearLog } from '../../../test/_util/logCall';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { createLazy } from './suspense-utils';
 
@@ -45,6 +45,13 @@ describe('suspense hydration', () => {
 		}
 	}
 
+	before(() => {
+		logCall(Element.prototype, 'appendChild');
+		logCall(Element.prototype, 'insertBefore');
+		logCall(Element.prototype, 'removeChild');
+		logCall(Element.prototype, 'remove');
+	});
+
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
@@ -69,6 +76,7 @@ describe('suspense hydration', () => {
 
 	it('should leave DOM untouched when suspending while hydrating', () => {
 		scratch.innerHTML = '<div>Hello</div>';
+		clearLog();
 
 		const [Lazy, resolve] = createLazy();
 		hydrate(
@@ -79,15 +87,18 @@ describe('suspense hydration', () => {
 		);
 		rerender(); // Flush rerender queue to mimic what preact will really do
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(getLog()).to.deep.equal([]);
 
 		return resolve(() => <div>Hello</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+			expect(getLog()).to.deep.equal([]);
 		});
 	});
 
 	it('should allow siblings to update around suspense boundary', () => {
 		scratch.innerHTML = '<div>Count: 0</div><div>Hello</div>';
+		clearLog();
 
 		const [Lazy, resolve] = createLazy();
 		hydrate(
@@ -101,18 +112,57 @@ describe('suspense hydration', () => {
 		);
 		rerender(); // Flush rerender queue to mimic what preact will really do
 		expect(scratch.innerHTML).to.equal('<div>Count: 0</div><div>Hello</div>');
+		// Re: DOM OP below - Known issue with hydrating merged text nodes
+		expect(getLog()).to.deep.equal(['<div>Count: .appendChild(#text)']);
+		clearLog();
 
 		increment();
 		rerender();
+
 		expect(scratch.innerHTML).to.equal('<div>Count: 1</div><div>Hello</div>');
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
 
 		return resolve(() => <div>Hello</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.equal('<div>Count: 1</div><div>Hello</div>');
+			expect(getLog()).to.deep.equal([]);
+		});
+	});
+
+	it('should properly hydrate when there is DOM and Components between Suspense and suspender', () => {
+		scratch.innerHTML = '<div><div>Hello</div></div>';
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<ErrorBoundary>
+				<div>
+					<Fragment>
+						<Lazy />
+					</Fragment>
+				</div>
+			</ErrorBoundary>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal('<div><div>Hello</div></div>');
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		return resolve(() => <div>Hello</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div><div>Hello</div></div>');
+			expect(getLog()).to.deep.equal([]);
 		});
 	});
 
 	// TODO:
-	// 1. What if props change between when hydrate suspended and suspense resolves?
+	// 1. What if props change between when hydrate suspended and suspense
+	//    resolves?
 	// 2. If using real Suspense, test re-suspending after hydrate suspense
+	// 3. Put some DOM and components with state and event listeners between
+	//    suspender and Suspense boundary
+	// 4. Put some sibling DOM and components with state and event listeners
+	//    sibling to suspender and under Suspense boundary
 });
