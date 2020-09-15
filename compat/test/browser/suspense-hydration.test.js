@@ -79,11 +79,13 @@ describe('suspense hydration', () => {
 		rerender(); // Flush rerender queue to mimic what preact will really do
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 		expect(getLog()).to.deep.equal([]);
+		clearLog();
 
 		return resolve(() => <div>Hello</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 			expect(getLog()).to.deep.equal([]);
+			clearLog();
 		});
 	});
 
@@ -118,6 +120,7 @@ describe('suspense hydration', () => {
 			rerender();
 			expect(scratch.innerHTML).to.equal('<div>Count: 1</div><div>Hello</div>');
 			expect(getLog()).to.deep.equal([]);
+			clearLog();
 		});
 	});
 
@@ -145,6 +148,7 @@ describe('suspense hydration', () => {
 			rerender();
 			expect(scratch.innerHTML).to.equal('<div><div>Hello</div></div>');
 			expect(getLog()).to.deep.equal([]);
+			clearLog();
 		});
 	});
 
