@@ -3,7 +3,8 @@ import React, {
 	createElement,
 	hydrate,
 	Component,
-	Fragment
+	Fragment,
+	Suspense
 } from 'preact/compat';
 import { logCall, getLog, clearLog } from '../../../test/_util/logCall';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
@@ -32,16 +33,6 @@ describe('suspense hydration', () => {
 
 		render(props, { count }) {
 			return <div>Count: {count}</div>;
-		}
-	}
-
-	class ErrorBoundary {
-		componentDidCatch(err) {
-			if (err && err.then) this.__d = true;
-		}
-
-		render(props) {
-			return props.children;
 		}
 	}
 
@@ -80,9 +71,9 @@ describe('suspense hydration', () => {
 
 		const [Lazy, resolve] = createLazy();
 		hydrate(
-			<ErrorBoundary>
+			<Suspense>
 				<Lazy />
-			</ErrorBoundary>,
+			</Suspense>,
 			scratch
 		);
 		rerender(); // Flush rerender queue to mimic what preact will really do
@@ -104,9 +95,9 @@ describe('suspense hydration', () => {
 		hydrate(
 			<Fragment>
 				<Counter />
-				<ErrorBoundary>
+				<Suspense>
 					<Lazy />
-				</ErrorBoundary>
+				</Suspense>
 			</Fragment>,
 			scratch
 		);
@@ -136,13 +127,13 @@ describe('suspense hydration', () => {
 
 		const [Lazy, resolve] = createLazy();
 		hydrate(
-			<ErrorBoundary>
+			<Suspense>
 				<div>
 					<Fragment>
 						<Lazy />
 					</Fragment>
 				</div>
-			</ErrorBoundary>,
+			</Suspense>,
 			scratch
 		);
 		rerender(); // Flush rerender queue to mimic what preact will really do
