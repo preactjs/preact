@@ -70,15 +70,18 @@ describe('preact/compat events', () => {
 		expect(vnode.props).to.not.haveOwnProperty('onchange');
 	});
 
-	it('should not normalize onChange for range', () => {
+	it('should normalize onChange for range, except in IE11', () => {
+		// NOTE: we don't normalize `onchange` for range inputs in IE11.
+		const eventType = /Trident\//.test(navigator.userAgent)
+			? 'change'
+			: 'input';
 		render(<input type="range" onChange={() => null} />, scratch);
 		expect(proto.addEventListener).to.have.been.calledOnce;
 		expect(proto.addEventListener).to.have.been.calledWithExactly(
-			'change',
+			eventType,
 			sinon.match.func,
 			false
 		);
-		expect(proto.addEventListener).not.to.have.been.calledWith('input');
 	});
 
 	it('should support onAnimationEnd', () => {

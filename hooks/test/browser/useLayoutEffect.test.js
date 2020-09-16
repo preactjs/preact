@@ -253,6 +253,7 @@ describe('useLayoutEffect', () => {
 			componentDidCatch(err) {
 				spy();
 				errored = err;
+				this.forceUpdate();
 			}
 
 			render(props, state) {
@@ -303,6 +304,7 @@ describe('useLayoutEffect', () => {
 			componentDidCatch(err) {
 				spy();
 				errored = err;
+				this.forceUpdate();
 			}
 
 			render(props, state) {

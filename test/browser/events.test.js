@@ -180,5 +180,23 @@ describe('event handling', () => {
 				expect(focus).to.have.been.calledWithMatch({ eventPhase: 0 }); // capturing
 			}
 		});
+
+		it('should support both capturing and non-capturing events on the same element', () => {
+			let click = sinon.spy(),
+				clickCapture = sinon.spy();
+
+			render(
+				<div onClick={click} onClickCapture={clickCapture}>
+					<button />
+				</div>,
+				scratch
+			);
+
+			let root = scratch.firstChild;
+			root.firstElementChild.click();
+
+			expect(clickCapture, 'click').to.have.been.calledOnce;
+			expect(click, 'click').to.have.been.calledOnce;
+		});
 	}
 });

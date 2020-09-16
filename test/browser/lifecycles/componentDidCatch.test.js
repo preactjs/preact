@@ -570,8 +570,10 @@ describe('Lifecycle methods', () => {
 			);
 			rerender();
 
-			expect(Adapter.prototype.componentDidCatch).to.have.been.called;
-			expect(Receiver.prototype.componentDidCatch).to.have.been.called;
+			expect(Adapter.prototype.componentDidCatch, 'Adapter').to.have.been
+				.called;
+			expect(Receiver.prototype.componentDidCatch, 'Receiver').to.have.been
+				.called;
 			expect(scratch).to.have.property('textContent', 'Error: Error!');
 		});
 
