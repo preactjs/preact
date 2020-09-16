@@ -120,11 +120,16 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	} else if (typeof value != 'function' && name !== 'dangerouslySetInnerHTML') {
 		const oldName = name;
 		if (name !== (name = name.replace(/^(xlink|xmlns):?/, ''))) {
+			let ns =
+				'http://www.w3.org/' +
+				(/xm/.test(oldName) ? '2000/xmlns/' : '1999/xlink');
 			if (/xm/.test(oldName)) {
-				name = oldName === 'xmlns' ? 'xmlns' : 'xmlns:' + name;
-				updateAttributeNS(dom, 'http://www.w3.org/2000/xmlns/', name, value);
+				name = oldName === 'xmlns' ? oldName : 'xmlns:' + name;
+			}
+			if (value == null || value === false) {
+				dom.removeAttributeNS(ns, name.toLowerCase());
 			} else {
-				updateAttributeNS(dom, 'http://www.w3.org/1999/xlink', name, value);
+				dom.setAttributeNS(ns, name.toLowerCase(), value);
 			}
 		} else if (
 			value == null ||
@@ -141,14 +146,6 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		} else {
 			dom.setAttribute(name, value);
 		}
-	}
-}
-
-function updateAttributeNS(dom, ns, name, value) {
-	if (value == null || value === false) {
-		dom.removeAttributeNS(ns, name.toLowerCase());
-	} else {
-		dom.setAttributeNS(ns, name.toLowerCase(), value);
 	}
 }
 
