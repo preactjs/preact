@@ -15,7 +15,6 @@ describe('Babel jsx/jsxDEV', () => {
 	it('should keep ref in props', () => {
 		const ref = () => null;
 		const vnode = jsx('div', { ref });
-		expect(vnode.props.ref).to.equal(ref);
 		expect(vnode.ref).to.equal(ref);
 	});
 
