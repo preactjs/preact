@@ -118,18 +118,18 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	) {
 		dom[name] = value == null ? '' : value;
 	} else if (typeof value != 'function' && name !== 'dangerouslySetInnerHTML') {
-		const oldName = name;
-		if (name !== (name = name.replace(/^(xlink|xmlns):?/, ''))) {
-			let ns =
-				'http://www.w3.org/' +
-				(/xm/.test(oldName) ? '2000/xmlns/' : '1999/xlink');
-			if (/xm/.test(oldName)) {
-				name = oldName === 'xmlns' ? oldName : 'xmlns:' + name;
-			}
+		if (name !== (name = name.replace(/xlink:?/, ''))) {
 			if (value == null || value === false) {
-				dom.removeAttributeNS(ns, name.toLowerCase());
+				dom.removeAttributeNS(
+					'http://www.w3.org/1999/xlink',
+					name.toLowerCase()
+				);
 			} else {
-				dom.setAttributeNS(ns, name.toLowerCase(), value);
+				dom.setAttributeNS(
+					'http://www.w3.org/1999/xlink',
+					name.toLowerCase(),
+					value
+				);
 			}
 		} else if (
 			value == null ||
