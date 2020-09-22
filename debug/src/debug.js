@@ -273,7 +273,7 @@ export function initDebug() {
 
 	const deprecatedProto = Object.create({}, deprecatedAttributes);
 
-	options.vnode = vnode => {
+	options.vnode = (vnode, source, compSelf) => {
 		const props = vnode.props;
 		if (
 			vnode.type !== null &&
@@ -288,6 +288,12 @@ export function initDebug() {
 				else newProps[i] = v;
 			}
 		}
+
+		if (source) {
+			vnode.__self = compSelf;
+			vnode.__source = source;
+		}
+
 		// eslint-disable-next-line
 		vnode.__proto__ = deprecatedProto;
 		if (oldVnode) oldVnode(vnode);

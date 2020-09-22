@@ -53,9 +53,13 @@ export function createElement(type, props, children) {
  * diffing it against its children
  * @param {import('./internal').VNode["ref"]} ref The ref property that will
  * receive a reference to its created child
+ * @param {import('./internal').DevSource} [source] Optional source location
+ * info from babel. Only available via `jsxDEV`
+ * @param {import('./internal').DevSource} [compSelf] Optional reference to the
+ * component this node is part of. Only available via `jsxDEV`
  * @returns {import('./internal').VNode}
  */
-export function createVNode(type, props, key, ref, original) {
+export function createVNode(type, props, key, ref, original, source, compSelf) {
 	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
 	// Do not inline into createElement and coerceToVNode!
 	const vnode = {
@@ -79,7 +83,7 @@ export function createVNode(type, props, key, ref, original) {
 	};
 
 	if (original == null) vnode._original = vnode;
-	if (options.vnode != null) options.vnode(vnode);
+	if (options.vnode != null) options.vnode(vnode, source, compSelf);
 
 	return vnode;
 }
@@ -99,3 +103,41 @@ export function Fragment(props) {
  */
 export const isValidElement = vnode =>
 	vnode != null && vnode.constructor === undefined;
+
+/**
+ * Create an virtual node (used for JSX). It's the successor of `createElement`.
+ * @param {import('./internal').VNode["type"]} type The node name or Component
+ * constructor for this virtual node
+ * @param {object | null | undefined} [props] The properties of the virtual node
+ * @param {string | undefined} [key] Optional key
+ * @param {boolean} [_isStaticChildren] Marks if `jsx` or `jsxs` should be used.
+ * For us they are the same thing as our debug warnings live in a separate
+ * module (`preact/debug`). Only available via `jsxDEV`
+ * @param {import('./internal').DevSource} [source] Optional source location
+ * info from babel. Only available via `jsxDEV`
+ * @param {import('./internal').DevSource} [self] Optional reference to the
+ * component this node is part of. Only available via `jsxDEV`
+ * @returns {import('./internal').VNode}
+ */
+export function jsx(type, props, key, _isStaticChildren, source, self) {
+	let i;
+
+	// If a Component VNode, check for and apply defaultProps
+	// Note: type may be undefined in development, must never error here.
+	if (typeof type === 'function' && type.defaultProps != null) {
+		for (i in type.defaultProps) {
+			if (props[i] === undefined) {
+				props[i] = type.defaultProps[i];
+			}
+		}
+	}
+
+	return createVNode(type, props, key, props && props.ref, null, source, self);
+}
+
+// The difference between `jsxs` and `jsx` is that the former is used by babel
+// when the node has more than one child
+export const jsxs = jsx;
+
+// Same as `jsx`, but with supplied `source` and `self` information
+export const jsxDEV = jsx;

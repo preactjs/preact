@@ -2,6 +2,7 @@ export = preact;
 export as namespace preact;
 
 import { JSXInternal } from './jsx';
+import { DevSource } from './internal';
 
 declare namespace preact {
 	export import JSX = JSXInternal;
@@ -256,7 +257,7 @@ declare namespace preact {
 	 */
 	interface Options {
 		/** Attach a hook that is invoked whenever a VNode is created. */
-		vnode?(vnode: VNode): void;
+		vnode?(vnode: VNode, source: DevSource, componentSelf: DevSource): void;
 		/** Attach a hook that is invoked immediately before a vnode is unmounted. */
 		unmount?(vnode: VNode): void;
 		/** Attach a hook that is invoked after a vnode has rendered. */
