@@ -1,4 +1,4 @@
-import { jsx } from 'preact';
+import { jsx } from '../../jsx-runtime';
 import { setupScratch, teardown } from '../_util/helpers';
 
 describe('Babel jsx/jsxDEV', () => {

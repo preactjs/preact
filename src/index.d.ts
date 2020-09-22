@@ -217,33 +217,6 @@ declare namespace preact {
 		export import JSX = JSXInternal;
 	}
 
-	function jsx(
-		type: VNode.type,
-		props?: object | null,
-		key?: string,
-		isStaticChildren?: boolean,
-		source?: DevSource,
-		self?: DevSource
-	): VNode<any>;
-
-	function jsxs(
-		type: VNode.type,
-		props?: object | null,
-		key?: string,
-		isStaticChildren?: boolean,
-		source?: DevSource,
-		self?: DevSource
-	): VNode<any>;
-
-	function jsxDev(
-		type: VNode.type,
-		props?: object | null,
-		key?: string,
-		isStaticChildren?: boolean,
-		source?: DevSource,
-		self?: DevSource
-	): VNode<any>;
-
 	//
 	// Preact render
 	// -----------------------------------
