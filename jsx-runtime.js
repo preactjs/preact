@@ -1,37 +1,49 @@
-import { createElement } from 'preact';
+import { options, Fragment } from 'preact';
+
+/** @typedef {import('preact').VNode} VNode */
 
 /**
- * Create an virtual node (used for JSX). It's the successor of `createElement`.
- * @param {import('./src/internal').VNode["type"]} type The node name or Component
- * constructor for this virtual node
- * @param {object | null | undefined} [props] The properties of the virtual node
- * @param {string | undefined} [key] Optional key
- * @param {boolean} [_isStaticChildren] Marks if `jsx` or `jsxs` should be used.
- * For us they are the same thing as our debug warnings live in a separate
- * module (`preact/debug`). Only available via `jsxDEV`
- * @param {import('./src/internal').DevSource} [source] Optional source location
- * info from babel. Only available via `jsxDEV`
- * @param {import('./src/internal').DevSource} [self] Optional reference to the
- * component this node is part of. Only available via `jsxDEV`
- * @returns {import('./src/internal').VNode}
+ * jsx(type, props, key)
+ * jsxs(type, props, key)
+ * jsxDEV(type, props, key, __source, __self)
+ * @param {VNode['type']} type
+ * @param {VNode['props']} props
+ * @param {VNode['key']} [key]
+ * @param {string} [__source]
+ * @param {string} [__self]
  */
-export function jsx(type, props, key, _isStaticChildren, source, self) {
-	if (!props) props = {};
-	if (key) props.key = key;
-
-	if (source) {
-		props.source = source;
-		props.self = self;
+function createVNode(type, props, key, __source, __self, _i, _x) {
+	// If a Component VNode, check for and apply defaultProps
+	// Note: type may be undefined in development, must never error here.
+	if ((_x = type && type.defaultProps)) {
+		for (_i in _x) if (props[_i] === undefined) props[_i] = _x[_i];
 	}
 
-	return createElement(type, props);
+	const vnode = {
+		type,
+		props,
+		key,
+		ref: props && props.ref,
+		_children: null,
+		_parent: null,
+		_depth: 0,
+		_dom: null,
+		_nextDom: undefined,
+		_component: null,
+		_hydrating: null,
+		constructor: undefined,
+		_original: undefined,
+		__source,
+		__self
+	};
+	vnode._original = vnode;
+	if (options.vnode != null) options.vnode(vnode);
+	return vnode;
 }
 
-// The difference between `jsxs` and `jsx` is that the former is used by babel
-// when the node has more than one child
-export const jsxs = jsx;
-
-// Same as `jsx`, but with supplied `source` and `self` information
-export const jsxDEV = jsx;
-
-export { Fragment } from 'preact';
+export {
+	createVNode as jsx,
+	createVNode as jsxs,
+	createVNode as jsxDEV,
+	Fragment
+};
