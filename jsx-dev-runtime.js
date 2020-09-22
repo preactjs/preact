@@ -16,6 +16,7 @@ import { createElement } from 'preact';
  * @returns {import('./src/internal').VNode}
  */
 export function jsx(type, props, key, _isStaticChildren, source, self) {
+	if (!props) props = {};
 	if (key) props.key = key;
 
 	if (source) {
