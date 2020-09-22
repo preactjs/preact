@@ -4,10 +4,7 @@ export {
 	createElement as h,
 	Fragment,
 	createRef,
-	isValidElement,
-	jsx,
-	jsxs,
-	jsxDEV
+	isValidElement
 } from './create-element';
 export { Component } from './component';
 export { cloneElement } from './clone-element';
