@@ -9,28 +9,14 @@ import { createElement } from 'preact';
  * @param {boolean} [_isStaticChildren] Marks if `jsx` or `jsxs` should be used.
  * For us they are the same thing as our debug warnings live in a separate
  * module (`preact/debug`). Only available via `jsxDEV`
- * @param {import('./internal').DevSource} [source] Optional source location
+ * @param {import('./src/internal').DevSource} [source] Optional source location
  * info from babel. Only available via `jsxDEV`
- * @param {import('./internal').DevSource} [self] Optional reference to the
+ * @param {import('./src/internal').DevSource} [self] Optional reference to the
  * component this node is part of. Only available via `jsxDEV`
- * @returns {import('./internal').VNode}
+ * @returns {import('./src/internal').VNode}
  */
 export function jsx(type, props, key, _isStaticChildren, source, self) {
-	let i;
-
-	// If a Component VNode, check for and apply defaultProps
-	// Note: type may be undefined in development, must never error here.
-	if (typeof type === 'function' && type.defaultProps != null) {
-		for (i in type.defaultProps) {
-			if (props[i] === undefined) {
-				props[i] = type.defaultProps[i];
-			}
-		}
-	}
-
-	if (key) {
-		props.key = key;
-	}
+	if (key) props.key = key;
 
 	if (source) {
 		props.source = source;
