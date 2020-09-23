@@ -46,6 +46,18 @@
       "require": "./test-utils/dist/testUtils.js",
       "import": "./test-utils/dist/testUtils.mjs"
     },
+    "./jsx-runtime": {
+      "browser": "./jsx-runtime/dist/jsx-runtime.module.js",
+      "umd": "./jsx-runtime/dist/jsx-runtime.umd.js",
+      "require": "./jsx-runtime/dist/jsx-runtime.js",
+      "import": "./jsx-runtime/dist/jsx-runtime.mjs"
+    },
+    "./jsx-dev-runtime": {
+      "browser": "./jsx-runtime/dist/jsx-runtime.module.js",
+      "umd": "./jsx-runtime/dist/jsx-runtime.umd.js",
+      "require": "./jsx-runtime/dist/jsx-runtime.js",
+      "import": "./jsx-runtime/dist/jsx-runtime.mjs"
+    },
     "./compat/server": {
       "require": "./compat/server.js"
     },
@@ -68,6 +80,7 @@
     "build:hooks": "microbundle build --raw --cwd hooks",
     "build:test-utils": "microbundle build --raw --cwd test-utils",
     "build:compat": "microbundle build --raw --cwd compat --globals 'preact/hooks=preactHooks'",
+    "build:jsx": "microbundle build --raw --cwd jsx-runtime",
     "postbuild": "node ./config/node-13-exports.js",
     "dev": "microbundle watch --raw --format cjs",
     "dev:hooks": "microbundle watch --raw --format cjs --cwd hooks",
