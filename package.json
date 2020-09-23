@@ -180,6 +180,9 @@
     "hooks/dist",
     "hooks/src",
     "hooks/package.json",
+    "jsx-runtime/dist",
+    "jsx-runtime/src",
+    "jsx-runtime/package.json",
     "test-utils/src",
     "test-utils/package.json",
     "test-utils/dist"
