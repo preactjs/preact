@@ -15,6 +15,11 @@ export enum HookType {
 	useDebugvalue = 11
 }
 
+export interface DevSource {
+	fileName: string;
+	lineNumber: number;
+}
+
 export interface Options extends preact.Options {
 	/** Attach a hook that is invoked before render, mainly to check the arguments. */
 	_root?(

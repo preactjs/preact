@@ -288,6 +288,7 @@ export function initDebug() {
 				else newProps[i] = v;
 			}
 		}
+
 		// eslint-disable-next-line
 		vnode.__proto__ = deprecatedProto;
 		if (oldVnode) oldVnode(vnode);
