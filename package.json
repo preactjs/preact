@@ -47,16 +47,16 @@
       "import": "./test-utils/dist/testUtils.mjs"
     },
     "./jsx-runtime": {
-      "browser": "./jsx-runtime/dist/jsx-runtime.module.js",
-      "umd": "./jsx-runtime/dist/jsx-runtime.umd.js",
-      "require": "./jsx-runtime/dist/jsx-runtime.js",
-      "import": "./jsx-runtime/dist/jsx-runtime.mjs"
+      "browser": "./jsx-runtime/dist/jsxRuntime.module.js",
+      "umd": "./jsx-runtime/dist/jsxRuntime.umd.js",
+      "require": "./jsx-runtime/dist/jsxRuntime.js",
+      "import": "./jsx-runtime/dist/jsxRuntime.mjs"
     },
     "./jsx-dev-runtime": {
-      "browser": "./jsx-runtime/dist/jsx-runtime.module.js",
-      "umd": "./jsx-runtime/dist/jsx-runtime.umd.js",
-      "require": "./jsx-runtime/dist/jsx-runtime.js",
-      "import": "./jsx-runtime/dist/jsx-runtime.mjs"
+      "browser": "./jsx-runtime/dist/jsxRuntime.module.js",
+      "umd": "./jsx-runtime/dist/jsxRuntime.umd.js",
+      "require": "./jsx-runtime/dist/jsxRuntime.js",
+      "import": "./jsx-runtime/dist/jsxRuntime.mjs"
     },
     "./compat/server": {
       "require": "./compat/server.js"
