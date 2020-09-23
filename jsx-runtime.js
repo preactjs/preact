@@ -11,6 +11,8 @@ import { options, Fragment } from 'preact';
  * @param {VNode['key']} [key]
  * @param {string} [__source]
  * @param {string} [__self]
+ * @param {string} [_i]
+ * @param {*} [_x]
  */
 function createVNode(type, props, key, __source, __self, _i, _x) {
 	// If a Component VNode, check for and apply defaultProps
