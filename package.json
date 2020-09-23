@@ -71,7 +71,7 @@
   },
   "types": "src/index.d.ts",
   "scripts": {
-    "prepare": "run-s build",
+    "prepare": "run-s build && node ./config/check-export-map.js",
     "build": "npm-run-all --parallel build:*",
     "build:core": "microbundle build --raw",
     "build:core-min": "microbundle build --raw -f iife src/cjs.js -o dist/preact.min.js",
