@@ -12,3 +12,6 @@ coverage
 *.log
 package/
 preact-*.tgz
+
+# Will be created on postinstall
+jsx-dev-runtime.js
