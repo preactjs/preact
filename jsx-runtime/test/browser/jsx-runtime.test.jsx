@@ -1,6 +1,6 @@
 import { Component, createElement } from 'preact';
-import { jsx, jsxs, jsxDEV, Fragment } from '../../jsx-runtime';
-import { setupScratch, teardown } from '../_util/helpers';
+import { jsx, jsxs, jsxDEV, Fragment } from 'preact/jsx-runtime';
+import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 describe('Babel jsx/jsxDEV', () => {
 	let scratch;

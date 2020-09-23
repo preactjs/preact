@@ -116,13 +116,16 @@ module.exports = function(config) {
 			{
 				pattern:
 					config.grep ||
-					'{debug,hooks,compat,test-utils,}/test/{browser,shared}/**/*.test.js',
+					'{debug,hooks,compat,test-utils,jsx-runtime,}/test/{browser,shared}/**/*.test.js',
 				watched: false
 			}
 		],
 
 		preprocessors: {
-			'{debug,hooks,compat,test-utils,}/test/**/*': ['webpack', 'sourcemap']
+			'{debug,hooks,compat,test-utils,jsx-runtime,}/test/**/*': [
+				'webpack',
+				'sourcemap'
+			]
 		},
 
 		webpack: {
@@ -168,6 +171,8 @@ module.exports = function(config) {
 					'preact/compat': subPkgPath('./compat/'),
 					'preact/hooks': subPkgPath('./hooks/'),
 					'preact/test-utils': subPkgPath('./test-utils/'),
+					'preact/jsx-runtime': subPkgPath('./jsx-runtime/'),
+					'preact/jsx-dev-runtime': subPkgPath('./jsx-runtime/'),
 					preact: subPkgPath('')
 				}
 			},

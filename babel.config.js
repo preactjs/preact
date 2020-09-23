@@ -33,7 +33,7 @@ module.exports = function(api) {
 			'babel-plugin-transform-async-to-promises',
 			['babel-plugin-transform-rename-properties', { rename }]
 		],
-		include: ['jsx-runtime.js', '**/src/**/*.js', '**/test/**/*.js'],
+		include: ['**/src/**/*.js', '**/test/**/*.js'],
 		overrides: [
 			{
 				test: /(component-stack|debug)\.test\.js$/,
