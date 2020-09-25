@@ -109,11 +109,10 @@ options.vnode = vnode => {
 	let props = vnode.props;
 
 	const isComponent = typeof type == 'function';
-	if (isComponent && props.class !== props.className) {
-		if (
-			(classNameDescriptor.enumerable = 'className' in props) &&
-			props.className != null
-		) {
+	if (isComponent) {
+		// All component props get a `className` alias that ensures `class===className`.
+		// If a `className` prop was provided, its value is used instead of `class`.
+		if ((classNameDescriptor.enumerable = 'className' in props)) {
 			props.class = props.className;
 		}
 		Object.defineProperty(props, 'className', classNameDescriptor);
@@ -123,9 +122,11 @@ options.vnode = vnode => {
 		for (let i in props) {
 			let value = props[i];
 
-			// Alias `class` prop to `className` if available
+			// If a `className` prop exists, its value replaces any `class` prop.
+			// Note: we must replace both the original and normalized here because
+			// the loop may not have copied `class` to `normalizedProps` yet.
 			if (i === 'className') {
-				normalizedProps.class = value;
+				props.class = normalizedProps.class = value;
 				classNameDescriptor.enumerable = true;
 			}
 
