@@ -159,13 +159,15 @@ options.vnode = vnode => {
 		vnode.props = normalizedProps;
 	}
 
-	// All component and element prop objects are given a `className` alias.
-	// This alias ensures `props.class` is kept in sync with `props.className`.
-	// If a `className` prop was provided, its value is used, and it becomes enumerable.
-	if ((classNameDescriptor.enumerable = 'className' in normalizedProps)) {
-		normalizedProps.class = normalizedProps.className;
+	if (normalizedProps) {
+		// All component and element prop objects are given a `className` alias.
+		// This alias ensures `props.class` is kept in sync with `props.className`.
+		// If a `className` prop was provided, its value is used, and it becomes enumerable.
+		if ((classNameDescriptor.enumerable = 'className' in normalizedProps)) {
+			normalizedProps.class = normalizedProps.className;
+		}
+		Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
 	}
-	Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
 
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
 
