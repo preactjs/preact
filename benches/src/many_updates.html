@@ -17,8 +17,8 @@
 	<body>
 		<div id="app"></div>
 		<script type="module">
-			import * as bench from '/bench.js';
-			import { render, createElement as h, Component } from 'preact';
+			import { measureName, measureMemory } from './util.js';
+			import { render, createElement as h, Component } from 'framework';
 
 			const state = {
 				msg: 'hello',
@@ -97,10 +97,13 @@
 			}
 
 			warmup().then(async () => {
-				bench.start();
+				performance.mark('start');
 				runPatch();
 				await new Promise(r => requestAnimationFrame(r));
-				bench.stop();
+				performance.mark('stop');
+				performance.measure('duration', 'start', 'stop');
+
+				measureMemory();
 			});
 		</script>
 	</body>
