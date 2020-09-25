@@ -59,6 +59,10 @@ jobs:
         with:
           name: npm-package
           path: preact.tgz
+      - name: Initialize Tachometer Results Report
+        uses: andrewiggins/tachometer-reporter-action@v2
+        with:
+          initialize: true
 
   bench_text_update:
     name: Bench text_update
@@ -85,6 +89,12 @@ jobs:
           export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           cd benches
           npm run bench text_update.html
+      - uses: andrewiggins/tachometer-reporter-action@v2
+        with:
+          path: benches/results/text_update.json
+          report-id: text_update
+          base-bench-name: preact-master
+          pr-bench-name: preact-local
 
   bench_many_updates:
     name: Bench text_update
@@ -111,6 +121,12 @@ jobs:
           export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           cd benches
           npm run bench many_updates.html
+      - uses: andrewiggins/tachometer-reporter-action@v2
+        with:
+          path: benches/results/many_updates.json
+          report-id: many_updates
+          base-bench-name: preact-master
+          pr-bench-name: preact-local
 
   bench_02_replace1k:
     name: Bench 02_replace1k
@@ -137,6 +153,12 @@ jobs:
           export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           cd benches
           npm run bench 02_replace1k.html
+      - uses: andrewiggins/tachometer-reporter-action@v2
+        with:
+          path: benches/results/02_replace1k.json
+          report-id: 02_replace1k
+          base-bench-name: preact-master
+          pr-bench-name: preact-local
 
   bench_03_update10th1k_x16:
     name: Bench 03_update10th1k_x16
@@ -163,3 +185,9 @@ jobs:
           export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           cd benches
           npm run bench 03_update10th1k_x16.html
+      - uses: andrewiggins/tachometer-reporter-action@v2
+        with:
+          path: benches/results/03_update10th1k_x16.json
+          report-id: 03_update10th1k_x16
+          base-bench-name: preact-master
+          pr-bench-name: preact-local
