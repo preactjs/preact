@@ -80,6 +80,7 @@ jobs:
       - uses: andrewiggins/download-base-artifact@v1
         with:
           artifact: npm-package
+          required: false
       - name: install & build
         run: |
           cd benches
