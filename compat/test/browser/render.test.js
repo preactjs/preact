@@ -209,9 +209,9 @@ describe('compat render', () => {
 		expect(scratch.firstChild.className).to.equal('new');
 	});
 
-	it('should give precedence to last-applied class/className prop', () => {
+	it('should give precedence to className over class', () => {
 		render(<ul className="from className" class="from class" />, scratch);
-		expect(scratch.firstChild.className).to.equal('from class');
+		expect(scratch.firstChild.className).to.equal('from className');
 
 		render(<ul class="from class" className="from className" />, scratch);
 		expect(scratch.firstChild.className).to.equal('from className');

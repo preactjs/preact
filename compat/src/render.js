@@ -103,32 +103,16 @@ let classNameDescriptor = {
 
 let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
-	vnode.$$typeof = REACT_ELEMENT_TYPE;
-
 	let type = vnode.type;
 	let props = vnode.props;
+	let normalizedProps = props;
 
-	const isComponent = typeof type == 'function';
-	if (isComponent) {
-		// All component props get a `className` alias that ensures `class===className`.
-		// If a `className` prop was provided, its value is used instead of `class`.
-		if ((classNameDescriptor.enumerable = 'className' in props)) {
-			props.class = props.className;
-		}
-		Object.defineProperty(props, 'className', classNameDescriptor);
-	} else if (type) {
-		let normalizedProps = {};
+	// only normalize props on Element nodes
+	if (typeof type === 'string') {
+		normalizedProps = {};
 
 		for (let i in props) {
 			let value = props[i];
-
-			// If a `className` prop exists, its value replaces any `class` prop.
-			// Note: we must replace both the original and normalized here because
-			// the loop may not have copied `class` to `normalizedProps` yet.
-			if (i === 'className') {
-				props.class = normalizedProps.class = value;
-				classNameDescriptor.enumerable = true;
-			}
 
 			if (i === 'defaultValue' && 'value' in props && props.value == null) {
 				// `defaultValue` is treated as a fallback `value` when a value prop is present but null/undefined.
@@ -159,8 +143,6 @@ options.vnode = vnode => {
 			normalizedProps[i] = value;
 		}
 
-		Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
-
 		// Add support for array select values: <select multiple value={[]} />
 		if (
 			type == 'select' &&
@@ -176,6 +158,16 @@ options.vnode = vnode => {
 
 		vnode.props = normalizedProps;
 	}
+
+	// All component and element prop objects are given a `className` alias.
+	// This alias ensures `props.class` is kept in sync with `props.className`.
+	// If a `className` prop was provided, its value is used, and it becomes enumerable.
+	if ((classNameDescriptor.enumerable = 'className' in normalizedProps)) {
+		normalizedProps.class = normalizedProps.className;
+	}
+	Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
+
+	vnode.$$typeof = REACT_ELEMENT_TYPE;
 
 	if (oldVNodeHook) oldVNodeHook(vnode);
 };
