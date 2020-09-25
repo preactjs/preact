@@ -14,8 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
       - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
@@ -49,12 +47,22 @@ jobs:
         # Use --ignore-scripts here to avoid re-building again before pack
         run: |
           npm pack --ignore-scripts
-          tar -xzf preact-*.tgz
+          mv preact-*.tgz preact.tgz
+          tar -xzf preact.tgz
       - name: Upload build output
         uses: actions/upload-artifact@v2
         with:
           name: build-output
           path: package/
+      - name: Upload npm package
+        uses: actions/upload-artifact@v2
+        with:
+          name: npm-package
+          path: preact.tgz
+      - name: Initialize Tachometer Results Report
+        uses: andrewiggins/tachometer-reporter-action@v2
+        with:
+          initialize: true
 
   bench_text_update:
     name: Bench text_update
@@ -63,24 +71,64 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
-        with:
-          name: build-output
       - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - uses: andrewiggins/download-base-artifact@v1
+        with:
+          artifact: npm-package
+          required: false
       - name: install & build
-        env:
-          # Skip downloading Firefox driver until we bench against it
-          GECKODRIVER_SKIP_DOWNLOAD: 'true'
         run: |
-          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           cd benches
           npm ci
       - name: bench
         run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           cd benches
           npm run bench text_update.html
+      - uses: andrewiggins/tachometer-reporter-action@v2
+        with:
+          path: benches/results/text_update.json
+          report-id: text_update
+          base-bench-name: preact-master
+          pr-bench-name: preact-local
+
+  bench_many_updates:
+    name: Bench many_updates
+    runs-on: ubuntu-latest
+    needs: build_test
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - uses: andrewiggins/download-base-artifact@v1
+        with:
+          artifact: npm-package
+          required: false
+      - name: install & build
+        run: |
+          cd benches
+          npm ci
+      - name: bench
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          cd benches
+          npm run bench many_updates.html
+      - uses: andrewiggins/tachometer-reporter-action@v2
+        with:
+          path: benches/results/many_updates.json
+          report-id: many_updates
+          base-bench-name: preact-master
+          pr-bench-name: preact-local
 
   bench_02_replace1k:
     name: Bench 02_replace1k
@@ -89,24 +137,31 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
-        with:
-          name: build-output
       - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - uses: andrewiggins/download-base-artifact@v1
+        with:
+          artifact: npm-package
+          required: false
       - name: install & build
-        env:
-          # Skip downloading Firefox driver until we bench against it
-          GECKODRIVER_SKIP_DOWNLOAD: 'true'
         run: |
-          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           cd benches
           npm ci
       - name: bench
         run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           cd benches
           npm run bench 02_replace1k.html
+      - uses: andrewiggins/tachometer-reporter-action@v2
+        with:
+          path: benches/results/02_replace1k.json
+          report-id: 02_replace1k
+          base-bench-name: preact-master
+          pr-bench-name: preact-local
 
   bench_03_update10th1k_x16:
     name: Bench 03_update10th1k_x16
@@ -115,21 +170,28 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
-        with:
-          name: build-output
       - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - uses: andrewiggins/download-base-artifact@v1
+        with:
+          artifact: npm-package
+          required: false
       - name: install & build
-        env:
-          # Skip downloading Firefox driver until we bench against it
-          GECKODRIVER_SKIP_DOWNLOAD: 'true'
         run: |
-          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           cd benches
           npm ci
       - name: bench
         run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           cd benches
           npm run bench 03_update10th1k_x16.html
+      - uses: andrewiggins/tachometer-reporter-action@v2
+        with:
+          path: benches/results/03_update10th1k_x16.json
+          report-id: 03_update10th1k_x16
+          base-bench-name: preact-master
+          pr-bench-name: preact-local

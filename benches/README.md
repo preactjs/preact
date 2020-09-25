@@ -4,7 +4,9 @@ This directory contains benchmarks for Preact, run using the [`polymer/tachomete
 
 ## Getting Started
 
-To run and debug benches use the following npm scripts:
+To run benchmark suite, use `npm bench`.
+
+To debug benches locally, use `npm start`.
 
 ### bench
 
