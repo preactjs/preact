@@ -98,7 +98,7 @@ jobs:
           pr-bench-name: preact-local
 
   bench_many_updates:
-    name: Bench text_update
+    name: Bench many_updates
     runs-on: ubuntu-latest
     needs: build_test
     timeout-minutes: 10
@@ -113,6 +113,7 @@ jobs:
       - uses: andrewiggins/download-base-artifact@v1
         with:
           artifact: npm-package
+          required: false
       - name: install & build
         run: |
           cd benches
@@ -145,6 +146,7 @@ jobs:
       - uses: andrewiggins/download-base-artifact@v1
         with:
           artifact: npm-package
+          required: false
       - name: install & build
         run: |
           cd benches
@@ -177,6 +179,7 @@ jobs:
       - uses: andrewiggins/download-base-artifact@v1
         with:
           artifact: npm-package
+          required: false
       - name: install & build
         run: |
           cd benches
