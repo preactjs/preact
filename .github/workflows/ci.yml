@@ -14,8 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
       - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
@@ -49,12 +47,18 @@ jobs:
         # Use --ignore-scripts here to avoid re-building again before pack
         run: |
           npm pack --ignore-scripts
-          tar -xzf preact-*.tgz
+          mv preact-*.tgz preact.tgz
+          tar -xzf preact.tgz
       - name: Upload build output
         uses: actions/upload-artifact@v2
         with:
           name: build-output
           path: package/
+      - name: Upload npm package
+        uses: actions/upload-artifact@v2
+        with:
+          name: npm-package
+          path: preact.tgz
 
   bench_text_update:
     name: Bench text_update
@@ -63,22 +67,22 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
-        with:
-          name: build-output
       - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - uses: andrewiggins/download-base-artifact@v1
+        with:
+          artifact: npm-package
       - name: install & build
-        env:
-          # Skip downloading Firefox driver until we bench against it
-          GECKODRIVER_SKIP_DOWNLOAD: 'true'
         run: |
-          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           cd benches
           npm ci
       - name: bench
         run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           cd benches
           npm run bench text_update.html
 
@@ -89,22 +93,22 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
-        with:
-          name: build-output
       - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - uses: andrewiggins/download-base-artifact@v1
+        with:
+          artifact: npm-package
       - name: install & build
-        env:
-          # Skip downloading Firefox driver until we bench against it
-          GECKODRIVER_SKIP_DOWNLOAD: 'true'
         run: |
-          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           cd benches
           npm ci
       - name: bench
         run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           cd benches
           npm run bench 02_replace1k.html
 
@@ -115,21 +119,21 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
-        with:
-          name: build-output
       - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - uses: andrewiggins/download-base-artifact@v1
+        with:
+          artifact: npm-package
       - name: install & build
-        env:
-          # Skip downloading Firefox driver until we bench against it
-          GECKODRIVER_SKIP_DOWNLOAD: 'true'
         run: |
-          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           cd benches
           npm ci
       - name: bench
         run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           cd benches
           npm run bench 03_update10th1k_x16.html
