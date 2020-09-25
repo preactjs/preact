@@ -217,6 +217,15 @@ describe('compat render', () => {
 		expect(scratch.firstChild.className).to.equal('from className');
 	});
 
+	// Issue #2772
+	it('should give precedence to className from spread props', () => {
+		const Foo = ({ className, ...props }) => {
+			return <div className={`${className} foo`} {...props} />;
+		};
+		render(<Foo className="bar" />, scratch);
+		expect(scratch.firstChild.className).to.equal('bar foo');
+	});
+
 	// Issue #2224
 	it('should not mark both class and className as enumerable', () => {
 		function ClassNameCheck(props) {
