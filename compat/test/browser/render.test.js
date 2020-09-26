@@ -217,6 +217,42 @@ describe('compat render', () => {
 		expect(scratch.firstChild.className).to.equal('from className');
 	});
 
+	describe('className normalization', () => {
+		it('should give precedence to className over class', () => {
+			const { props } = <ul className="from className" class="from class" />;
+			expect(props).to.have.property('className', 'from className');
+			expect(props).to.have.property('class', 'from className');
+		});
+
+		it('should preserve className, add class alias', () => {
+			const { props } = <ul className="from className" />;
+			expect(props).to.have.property('className', 'from className');
+			expect(props).to.have.property('class', 'from className');
+		});
+
+		it('should preserve class, and add className alias', () => {
+			const { props } = <ul class="from class" />;
+			expect(props).to.have.property('className', 'from class');
+			expect(props).to.have.property('class', 'from class');
+		});
+
+		it('should preserve class when spreading', () => {
+			const { props } = <ul class="from class" />;
+			const spreaded = (<li {...props} />).props;
+			expect(spreaded).to.have.property('class', 'from class');
+			expect(spreaded).to.have.property('className', 'from class');
+			expect(spreaded.propertyIsEnumerable('className')).to.equal(false);
+		});
+
+		it('should preserve className when spreading', () => {
+			const { props } = <ul className="from className" />;
+			const spreaded = (<li {...props} />).props;
+			expect(spreaded).to.have.property('className', 'from className');
+			expect(spreaded).to.have.property('class', 'from className');
+			expect(spreaded.propertyIsEnumerable('class')).to.equal(false);
+		});
+	});
+
 	// Issue #2772
 	it('should give precedence to className from spread props', () => {
 		const Foo = ({ className, ...props }) => {
