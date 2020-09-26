@@ -71,7 +71,7 @@
   },
   "types": "src/index.d.ts",
   "scripts": {
-    "prepare": "run-s build && node ./config/check-export-map.js",
+    "prepare": "run-s build && check-export-map",
     "build": "npm-run-all --parallel build:*",
     "build:core": "microbundle build --raw",
     "build:core-min": "microbundle build --raw -f iife src/cjs.js -o dist/preact.min.js",
@@ -219,6 +219,7 @@
     "babel-plugin-transform-rename-properties": "0.0.3",
     "benchmark": "^2.1.4",
     "chai": "^4.1.2",
+    "check-export-map": "^1.0.1",
     "coveralls": "^3.0.0",
     "cross-env": "^5.2.0",
     "diff": "^3.5.0",
