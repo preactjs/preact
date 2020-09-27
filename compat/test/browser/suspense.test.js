@@ -1718,6 +1718,40 @@ describe('suspense', () => {
 			});
 	});
 
+	it('should not traverse deeply when a boundary is thrown', () => {
+		const [Suspender1, suspend1] = createSuspender(() => <i>1</i>);
+		const [Suspender2, suspend2] = createSuspender(() => <i>2</i>);
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Suspender1 />
+				<Suspense fallback={<div>Suspended2</div>}>
+					<Suspender2 />
+				</Suspense>
+			</Suspense>,
+			scratch
+		);
+
+		const [resolve1] = suspend1();
+		const [resolve2] = suspend2();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		return resolve1(() => <i>b</i>)
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal('<div>Suspended2...</div>');
+
+				return resolve2(() => <i>c</i>);
+			})
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal(
+					'<b><i>a</i><i>b</i><i>c</i><i>d</i></b>'
+				);
+			});
+	});
+
 	it('should render initially lazy components through components using shouldComponentUpdate', () => {
 		const [Lazy1, resolve1] = createLazy();
 		const [Lazy2, resolve2] = createLazy();
