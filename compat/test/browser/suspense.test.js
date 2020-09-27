@@ -1740,15 +1740,13 @@ describe('suspense', () => {
 		return resolve1(() => <i>b</i>)
 			.then(() => {
 				rerender();
-				expect(scratch.innerHTML).to.equal('<div>Suspended2...</div>');
+				expect(scratch.innerHTML).to.equal('<i>b</i><div>Suspended2...</div>');
 
 				return resolve2(() => <i>c</i>);
 			})
 			.then(() => {
 				rerender();
-				expect(scratch.innerHTML).to.equal(
-					'<b><i>a</i><i>b</i><i>c</i><i>d</i></b>'
-				);
+				expect(scratch.innerHTML).to.equal('<i>b</i><i>c</i>');
 			});
 	});
 
