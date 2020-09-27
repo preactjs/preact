@@ -33,7 +33,9 @@ Component.prototype.setState = function(update, callback) {
 	}
 
 	if (typeof update == 'function') {
-		update = update(s, this.props);
+		// Some libraries like `immer` mark the current state as readonly,
+		// preventing us from mutating it, so we need to clone it. See #2716
+		update = update(assign({}, s), this.props);
 	}
 
 	if (update) {
@@ -129,9 +131,10 @@ function renderComponent(component) {
 			oldVNode,
 			component._globalContext,
 			parentDom.ownerSVGElement !== undefined,
-			null,
+			vnode._hydrating != null ? [oldDom] : null,
 			commitQueue,
-			oldDom == null ? getDomSibling(vnode) : oldDom
+			oldDom == null ? getDomSibling(vnode) : oldDom,
+			vnode._hydrating
 		);
 		commitRoot(commitQueue, vnode);
 

@@ -15,6 +15,11 @@ export enum HookType {
 	useDebugvalue = 11
 }
 
+export interface DevSource {
+	fileName: string;
+	lineNumber: number;
+}
+
 export interface Options extends preact.Options {
 	/** Attach a hook that is invoked before render, mainly to check the arguments. */
 	_root?(
@@ -47,7 +52,7 @@ export type ComponentFactory<P> =
 	| preact.ComponentClass<P>
 	| FunctionalComponent<P>;
 
-export interface PreactElement extends HTMLElement {
+export interface PreactElement extends HTMLElement, Text {
 	_children?: VNode<any> | null;
 	/** Event listeners to support event delegation */
 	_listeners: Record<string, (e: Event) => void>;
@@ -70,12 +75,13 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	/**
 	 * The [first (for Fragments)] DOM child of a VNode
 	 */
-	_dom: PreactElement | Text | null;
+	_dom: PreactElement | null;
 	/**
 	 * The last dom child of a Fragment, or components that return a Fragment
 	 */
-	_nextDom: PreactElement | Text | null;
+	_nextDom: PreactElement | null;
 	_component: Component | null;
+	_hydrating: boolean | null;
 	constructor: undefined;
 	_original?: VNode | null;
 }

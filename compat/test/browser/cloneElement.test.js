@@ -48,10 +48,18 @@ describe('compat cloneElement', () => {
 		expect(clone.props.children).to.eql(children);
 	});
 
-	it('children argument takes precedence over props.children', () => {
+	it('single child argument takes precedence over props.children', () => {
 		let element = <foo />;
 		let childrenA = [<span>b</span>];
 		let childrenB = [<div>c</div>];
+		let clone = cloneElement(element, { children: childrenA }, ...childrenB);
+		expect(clone.props.children).to.eql(childrenB[0]);
+	});
+
+	it('multiple children arguments take precedence over props.children', () => {
+		let element = <foo />;
+		let childrenA = [<span>b</span>];
+		let childrenB = [<div>c</div>, 'd'];
 		let clone = cloneElement(element, { children: childrenA }, ...childrenB);
 		expect(clone.props.children).to.eql(childrenB);
 	});

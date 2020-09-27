@@ -12,18 +12,19 @@
 	<body>
 		<div id="main"></div>
 		<script type="module">
-			import * as bench from '/bench.js';
 			import {
+				measureName,
+				measureMemory,
 				afterFrame,
 				afterFrameAsync,
 				getRowLinkSel,
 				testElement,
 				testElementTextContains
 			} from './util.js';
-			import * as preact from 'preact';
+			import * as framework from 'framework';
 			import { render } from '../src/keyed-children/index.js';
 
-			const { run: mount, update } = render(preact);
+			const { run: mount, update } = render(framework);
 
 			function repeat(pattern, repeats) {
 				let result = '';
@@ -49,12 +50,15 @@
 			}
 
 			async function run() {
-				bench.start();
+				performance.mark('start');
 				update();
 
 				await afterFrameAsync();
 				testElementTextContains(getRowLinkSel(991), repeat(' !!!', 3 + 1));
-				bench.stop();
+				performance.mark('stop');
+				performance.measure(measureName, 'start', 'stop');
+
+				measureMemory();
 			}
 
 			init().then(run);

@@ -69,6 +69,15 @@ export function diff(
 	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== undefined) return null;
 
+	// If the previous diff bailed out, resume creating/hydrating.
+	if (oldVNode._hydrating != null) {
+		isHydrating = oldVNode._hydrating;
+		oldDom = newVNode._dom = oldVNode._dom;
+		// if we resume, we want the tree to be "unlocked"
+		newVNode._hydrating = null;
+		excessDomChildren = [oldDom];
+	}
+
 	if ((tmp = options._diff)) tmp(newVNode);
 
 	try {
@@ -226,6 +235,9 @@ export function diff(
 
 			c.base = newVNode._dom;
 
+			// We successfully rendered this VNode, unset any stored hydration/bailout state:
+			newVNode._hydrating = null;
+
 			if (c._renderCallbacks.length) {
 				commitQueue.push(c);
 			}
@@ -257,6 +269,14 @@ export function diff(
 		if ((tmp = options.diffed)) tmp(newVNode);
 	} catch (e) {
 		newVNode._original = null;
+		// if hydrating or creating initial tree, bailout preserves DOM:
+		if (isHydrating || excessDomChildren != null) {
+			newVNode._dom = oldDom;
+			newVNode._hydrating = !!isHydrating;
+			excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
+			// ^ could possibly be simplified to:
+			// excessDomChildren.length = 0;
+		}
 		options._catchError(e, newVNode, oldVNode);
 	}
 
@@ -354,7 +374,8 @@ function diffElementNodes(
 	}
 
 	if (newVNode.type === null) {
-		if (oldProps !== newProps && dom.data !== newProps) {
+		// During hydration, we still have to split merged text from SSR'd HTML.
+		if (oldProps !== newProps && (!isHydrating || dom.data !== newProps)) {
 			dom.data = newProps;
 		}
 	} else {
@@ -381,7 +402,11 @@ function diffElementNodes(
 
 			if (newHtml || oldHtml) {
 				// Avoid re-applying the same '__html' if it did not changed between re-render
-				if (!newHtml || !oldHtml || newHtml.__html != oldHtml.__html) {
+				if (
+					!newHtml ||
+					((!oldHtml || newHtml.__html != oldHtml.__html) &&
+						newHtml.__html !== dom.innerHTML)
+				) {
 					dom.innerHTML = (newHtml && newHtml.__html) || '';
 				}
 			}
@@ -413,7 +438,11 @@ function diffElementNodes(
 			if (
 				'value' in newProps &&
 				(i = newProps.value) !== undefined &&
-				i !== dom.value
+				// #2756 For the <progress>-element the initial value is 0,
+				// despite the attribute not being present. When the attribute
+				// is missing the progress bar is treated as indeterminate.
+				// To fix that we'll always update it when it is 0 for progress elements
+				(i !== dom.value || (newVNode.type === 'progress' && !i))
 			) {
 				setProperty(dom, 'value', i, oldProps.value, false);
 			}

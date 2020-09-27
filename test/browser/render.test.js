@@ -8,9 +8,11 @@ import {
 	serializeHtml,
 	supportsDataList,
 	sortAttributes,
-	spyOnElementAttributes
+	spyOnElementAttributes,
+	createEvent
 } from '../_util/helpers';
 import { clearLog, getLog, logCall } from '../_util/logCall';
+import { useState } from 'preact/hooks';
 
 /** @jsx createElement */
 
@@ -756,6 +758,13 @@ describe('render()', () => {
 		expect(scratch.firstChild.checked).to.equal(true);
 	});
 
+	// #2756
+	it('should set progress value to 0', () => {
+		render(<progress value={0} max="100" />, scratch);
+		expect(scratch.firstChild.value).to.equal(0);
+		expect(scratch.firstChild.getAttribute('value')).to.equal('0');
+	});
+
 	it('should always diff `checked` and `value` properties against the DOM', () => {
 		// See https://github.com/preactjs/preact/issues/1324
 
@@ -787,6 +796,51 @@ describe('render()', () => {
 
 		expect(text.value).to.equal('Hello');
 		expect(checkbox.checked).to.equal(true);
+	});
+
+	it('should always diff `contenteditable` `innerHTML` against the DOM', () => {
+		// This tests that we do not cause any cursor jumps in contenteditable fields
+		// See https://github.com/preactjs/preact/issues/2691
+
+		function Editable() {
+			const [value, setValue] = useState('Hello');
+
+			return (
+				<div
+					contentEditable
+					dangerouslySetInnerHTML={{ __html: value }}
+					onInput={e => setValue(e.currentTarget.innerHTML)}
+				/>
+			);
+		}
+
+		render(<Editable />, scratch);
+
+		let editable = scratch.querySelector('[contenteditable]');
+
+		// modify the innerHTML and set the caret to character 2 to simulate a user typing
+		editable.innerHTML = 'World';
+
+		const range = document.createRange();
+		range.selectNodeContents(editable);
+		range.setStart(editable.childNodes[0], 2);
+		range.collapse(true);
+		const sel = window.getSelection();
+		sel.removeAllRanges();
+		sel.addRange(range);
+
+		// ensure we didn't mess up setting the cursor to position 2
+		expect(window.getSelection().getRangeAt(0).startOffset).to.equal(2);
+
+		// dispatch the input event to tell preact to re-render
+		editable.dispatchEvent(createEvent('input'));
+		rerender();
+
+		// ensure innerHTML is still correct (was not an issue before) and
+		// more importantly the caret is still at character 2
+		editable = scratch.querySelector('[contenteditable]');
+		expect(editable.innerHTML).to.equal('World');
+		expect(window.getSelection().getRangeAt(0).startOffset).to.equal(2);
 	});
 
 	it('should not re-render when a component returns undefined', () => {

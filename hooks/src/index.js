@@ -124,8 +124,6 @@ export function useReducer(reducer, initialState, init) {
 	const hookState = getHookState(currentIndex++, 2);
 	hookState._reducer = reducer;
 	if (!hookState._component) {
-		hookState._component = currentComponent;
-
 		hookState._value = [
 			!init ? invokeOrReturn(undefined, initialState) : init(initialState),
 
@@ -137,6 +135,8 @@ export function useReducer(reducer, initialState, init) {
 				}
 			}
 		];
+
+		hookState._component = currentComponent;
 	}
 
 	return hookState._value;
@@ -201,9 +201,9 @@ export function useMemo(factory, args) {
 	/** @type {import('./internal').MemoHookState} */
 	const state = getHookState(currentIndex++, 7);
 	if (argsChanged(state._args, args)) {
+		state._value = factory();
 		state._args = args;
 		state._factory = factory;
-		return (state._value = factory());
 	}
 
 	return state._value;
@@ -348,7 +348,11 @@ function invokeEffect(hook) {
  * @param {any[]} newArgs
  */
 function argsChanged(oldArgs, newArgs) {
-	return !oldArgs || newArgs.some((arg, index) => arg !== oldArgs[index]);
+	return (
+		!oldArgs ||
+		oldArgs.length !== newArgs.length ||
+		newArgs.some((arg, index) => arg !== oldArgs[index])
+	);
 }
 
 function invokeOrReturn(arg, f) {

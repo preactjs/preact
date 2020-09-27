@@ -1,38 +1,43 @@
 import { createElement, hydrate, render, __u as _unmount } from 'preact';
 
-class ContextProvider {
-	getChildContext() {
-		return this.props.context;
-	}
-	render(props) {
-		return props.children;
-	}
+function ContextProvider(props) {
+	this.getChildContext = () => props.context;
+	return props.children;
 }
 
 /**
  * Portal component
  * @param {object | null | undefined} props
+ *
+ * TODO: this could use the "fake root node" trick from the partial hydration demo
  */
 function Portal(props) {
-	let _this = this;
-	let container = props.container;
+	const _this = this;
+	let container = props._container;
 	let wrap = createElement(
 		ContextProvider,
 		{ context: _this.context },
-		props.vnode
+		props._vnode
 	);
+
+	_this.componentWillUnmount = function() {
+		let parent = _this._temp.parentNode;
+		if (parent) parent.removeChild(_this._temp);
+		_unmount(_this._wrap);
+	};
 
 	// When we change container we should clear our old container and
 	// indicate a new mount.
 	if (_this._container && _this._container !== container) {
-		if (_this._temp.parentNode) _this._container.removeChild(_this._temp);
-		_unmount(_this._wrap);
+		_this.componentWillUnmount();
+		// if (_this._temp.parentNode) _this._container.removeChild(_this._temp);
+		// _unmount(_this._wrap);
 		_this._hasMounted = false;
 	}
 
 	// When props.vnode is undefined/false/null we are dealing with some kind of
 	// conditional vnode. This should not trigger a render.
-	if (props.vnode) {
+	if (props._vnode) {
 		if (!_this._hasMounted) {
 			// Create a placeholder that we can use to insert into.
 			_this._temp = document.createTextNode('');
@@ -66,18 +71,12 @@ function Portal(props) {
 	// When we come from a conditional render, on a mounted
 	// portal we should clear the DOM.
 	else if (_this._hasMounted) {
-		if (_this._temp.parentNode) _this._container.removeChild(_this._temp);
-		_unmount(_this._wrap);
+		_this.componentWillUnmount();
+		// if (_this._temp.parentNode) _this._container.removeChild(_this._temp);
+		// _unmount(_this._wrap);
 	}
 	// Set the wrapping element for future unmounting.
 	_this._wrap = wrap;
-
-	_this.componentWillUnmount = () => {
-		if (_this._temp.parentNode) _this._container.removeChild(_this._temp);
-		_unmount(_this._wrap);
-	};
-
-	return null;
 }
 
 /**
@@ -86,5 +85,5 @@ function Portal(props) {
  * @param {import('./internal').PreactElement} container The DOM node to continue rendering in to.
  */
 export function createPortal(vnode, container) {
-	return createElement(Portal, { vnode, container });
+	return createElement(Portal, { _vnode: vnode, _container: container });
 }

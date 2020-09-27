@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const subRepositories = ['compat', 'debug', 'devtools', 'hooks', 'test-utils'];
+const subRepositories = ['compat', 'debug', 'devtools', 'hooks', 'jsx-runtime', 'test-utils'];
 const snakeCaseToCamelCase = str =>
 	str.replace(/([-_][a-z])/g, group => group.toUpperCase().replace('-', ''));
 
