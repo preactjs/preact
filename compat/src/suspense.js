@@ -137,7 +137,7 @@ Suspense.prototype.render = function(props, state) {
 	if (fallback) fallback._hydrating = null;
 
 	return [
-		createElement(Fragment, null, state._suspended ? null : props.children),
+		createElement(Fragment, null, state._suspended ? [null] : props.children),
 		fallback
 	];
 };
