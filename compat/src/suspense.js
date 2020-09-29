@@ -10,6 +10,10 @@ options._catchError = function(error, newVNode, oldVNode) {
 
 		for (; (vnode = vnode._parent); ) {
 			if ((component = vnode._component) && component._childDidSuspend) {
+				if (newVNode._dom == null) {
+					newVNode._dom = oldVNode._dom;
+					newVNode._children = oldVNode._children;
+				}
 				// Don't call oldCatchError if we found a Suspense
 				return component._childDidSuspend(error, newVNode._component);
 			}
@@ -23,6 +27,14 @@ function detachedClone(vnode) {
 		vnode = assign({}, vnode);
 		vnode._component = null;
 		vnode._children = vnode._children && vnode._children.map(detachedClone);
+	}
+	return vnode;
+}
+
+function removeOriginal(vnode) {
+	if (vnode) {
+		vnode._original = null;
+		vnode._children = vnode._children && vnode._children.map(removeOriginal);
 	}
 	return vnode;
 }
@@ -60,6 +72,8 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 		if (resolved) return;
 
 		resolved = true;
+		suspendingComponent.componentWillUnmount =
+			suspendingComponent._suspendedComponentWillUnmount;
 
 		if (resolve) {
 			resolve(onSuspensionComplete);
@@ -80,7 +94,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 
 	const onSuspensionComplete = () => {
 		if (!--c._pendingSuspensionCount) {
-			c._vnode._children[0] = c.state._suspended;
+			c._vnode._children[0] = removeOriginal(c.state._suspended);
 			c.setState({ _suspended: (c._detachOnNextRender = null) });
 
 			let suspended;
@@ -90,10 +104,21 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 		}
 	};
 
-	if (!c._pendingSuspensionCount++) {
+	/**
+	 * We do not set `suspended: true` during hydration because we want the actual markup
+	 * to remain on screen and hydrate it when the suspense actually gets resolved.
+	 * While in non-hydration cases the usual fallback -> component flow would occour.
+	 */
+	const vnode = c._vnode;
+	const wasHydrating = vnode && vnode._hydrating === true;
+	if (!wasHydrating && !c._pendingSuspensionCount++) {
 		c.setState({ _suspended: (c._detachOnNextRender = c._vnode._children[0]) });
 	}
 	promise.then(onResolved, onResolved);
+};
+
+Suspense.prototype.componentWillUnmount = function() {
+	this._suspenders = [];
 };
 
 Suspense.prototype.render = function(props, state) {
@@ -106,9 +131,14 @@ Suspense.prototype.render = function(props, state) {
 		this._detachOnNextRender = null;
 	}
 
+	// Wrap fallback tree in a VNode that prevents itself from being marked as aborting mid-hydration:
+	const fallback =
+		state._suspended && createElement(Fragment, null, props.fallback);
+	if (fallback) fallback._hydrating = null;
+
 	return [
 		createElement(Fragment, null, state._suspended ? null : props.children),
-		state._suspended && props.fallback
+		fallback
 	];
 };
 

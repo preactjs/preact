@@ -1,14 +1,21 @@
-const sade = require('sade');
-const { generateSingleConfig } = require('./config');
-const { runBenches } = require('./bench');
+import sade from 'sade';
+import { generateSingleConfig } from './config.js';
+import { defaultDeoptsOptions, runDeopts } from './deopts.js';
+import { defaultBenchOptions, runBenches } from './bench.js';
 
 const prog = sade('./scripts');
 
+// Tests:
+// - npm start
 prog
 	.command('config [bench]')
 	.describe('Generate the config for the given benchmark HTML file.')
 	.action(generateSingleConfig);
 
+// Tests:
+// - many* -n 2 -t 0
+// - many* -n 2 -t 0 -f preact-local -f preact-v8
+// - many* -n 2 -t 0 -f preact-local -f preact-v8 -b chrome
 prog
 	.command('bench [globs]')
 	.describe(
@@ -17,32 +24,68 @@ prog
 	.example('bench text*')
 	.example('bench *.html')
 	.example('bench all')
+	.example('bench many* -f preact-local -f preact-master')
+	.option(
+		'--browser, -b',
+		'Which browsers to launch in automatic mode, comma-delimited (chrome, chrome-headless, firefox, firefox-headless, safari, edge, ie)',
+		defaultBenchOptions.browser
+	)
 	// TODO: Consider parsing and adding to configs
-	// .option(
-	// 	'--browser, -b',
-	// 	'Which browsers to launch in automatic mode, comma-delimited (chrome, chrome-headless, firefox, firefox-headless, safari, edge, ie)',
-	// 	'chrome'
-	// )
 	// .option(
 	// 	'--window-size',
 	// 	'"width,height" in pixels of the browser windows that will be created',
-	// 	'1024,768'
+	// 	defaultOptions['window-size']
 	// )
 	.option(
 		'--sample-size, -n',
 		'Minimum number of times to run each benchmark',
-		50
+		defaultBenchOptions['sample-size']
 	)
 	.option(
-		'--horizon',
+		'--horizon, -h',
 		'The degrees of difference to try and resolve when auto-sampling ("N%" or "Nms", comma-delimited)',
-		'10%'
+		defaultBenchOptions.horizon
 	)
 	.option(
-		'--timeout',
+		'--timeout, -t',
 		'The maximum number of minutes to spend auto-sampling',
-		3
+		defaultBenchOptions.timeout
+	)
+	.option(
+		'--framework, -f',
+		'Which framework(s) to bench. Specify the flag multiple times to compare specific frameworks. Default is all frameworks',
+		defaultBenchOptions.framework
 	)
 	.action(runBenches);
+
+// Tests:
+// - (no args)
+// - many*
+// - many* -f preact-local -f preact-v8
+prog
+	.command('deopts [benchmark]')
+	.describe(
+		'Run v8-deopt-viewer against the specified benchmark file (defaults to many_updates.html). If a glob is given, only the first matching file will be run'
+	)
+	.example('deopts many_updates.html')
+	.example('deopts many*')
+	.example('deopts many* -f preact-local')
+	.example('deopts many* -f preact-local -f preact-master')
+	.option(
+		'--framework, -f',
+		'The framework to run the benchmark with.',
+		defaultDeoptsOptions.framework
+	)
+	.option(
+		'--timeout, -t',
+		'How long in seconds to keep the browser open while the benchmark runs. Passed to v8-deopt-viewer.',
+		defaultDeoptsOptions.timeout
+	)
+	.option(
+		'--open',
+		'Open the resulting v8-deopt-viewer result in the browser upon completion',
+		defaultDeoptsOptions.open
+	)
+	.action(runDeopts);
 
 prog.parse(process.argv);

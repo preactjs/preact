@@ -1,3 +1,6 @@
+// Users who only use Preact for SSR might not specify "dom" in their lib in tsconfig.json
+/// <reference lib="dom" />
+
 type Defaultize<Props, Defaults> =
 	// Distribute over unions
 	Props extends any // Make any properties included in Default optional

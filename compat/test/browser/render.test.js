@@ -2,7 +2,8 @@ import React, {
 	createElement,
 	render,
 	Component,
-	hydrate
+	hydrate,
+	createContext
 } from 'preact/compat';
 import { setupRerender, act } from 'preact/test-utils';
 import {
@@ -96,6 +97,12 @@ describe('compat render', () => {
 			.to.have.property('textContent')
 			.that.is.a('string')
 			.that.equals('dynamic content');
+	});
+
+	it('should ignore maxLength / minLength when is null', () => {
+		render(<input maxLength={null} minLength={null} />, scratch);
+		expect(scratch.firstElementChild.getAttribute('maxlength')).to.equal(null);
+		expect(scratch.firstElementChild.getAttribute('minlength')).to.equal(null);
 	});
 
 	it('should support defaultValue', () => {
@@ -195,11 +202,64 @@ describe('compat render', () => {
 	// Issue #2275
 	it('should normalize class+className + DOM properties', () => {
 		function Foo(props) {
-			return <ul {...props} class="old" />;
+			return <ul class="old" {...props} />;
 		}
 
 		render(<Foo fontSize="xlarge" className="new" />, scratch);
 		expect(scratch.firstChild.className).to.equal('new');
+	});
+
+	it('should give precedence to className over class', () => {
+		render(<ul className="from className" class="from class" />, scratch);
+		expect(scratch.firstChild.className).to.equal('from className');
+
+		render(<ul class="from class" className="from className" />, scratch);
+		expect(scratch.firstChild.className).to.equal('from className');
+	});
+
+	describe('className normalization', () => {
+		it('should give precedence to className over class', () => {
+			const { props } = <ul className="from className" class="from class" />;
+			expect(props).to.have.property('className', 'from className');
+			expect(props).to.have.property('class', 'from className');
+		});
+
+		it('should preserve className, add class alias', () => {
+			const { props } = <ul className="from className" />;
+			expect(props).to.have.property('className', 'from className');
+			expect(props).to.have.property('class', 'from className');
+		});
+
+		it('should preserve class, and add className alias', () => {
+			const { props } = <ul class="from class" />;
+			expect(props).to.have.property('className', 'from class');
+			expect(props).to.have.property('class', 'from class');
+		});
+
+		it('should preserve class when spreading', () => {
+			const { props } = <ul class="from class" />;
+			const spreaded = (<li {...props} />).props;
+			expect(spreaded).to.have.property('class', 'from class');
+			expect(spreaded).to.have.property('className', 'from class');
+			expect(spreaded.propertyIsEnumerable('className')).to.equal(false);
+		});
+
+		it('should preserve className when spreading', () => {
+			const { props } = <ul className="from className" />;
+			const spreaded = (<li {...props} />).props;
+			expect(spreaded).to.have.property('className', 'from className');
+			expect(spreaded).to.have.property('class', 'from className');
+			expect(spreaded.propertyIsEnumerable('class')).to.equal(false);
+		});
+	});
+
+	// Issue #2772
+	it('should give precedence to className from spread props', () => {
+		const Foo = ({ className, ...props }) => {
+			return <div className={`${className} foo`} {...props} />;
+		};
+		render(<Foo className="bar" />, scratch);
+		expect(scratch.firstChild.className).to.equal('bar foo');
 	});
 
 	// Issue #2224
@@ -240,6 +300,14 @@ describe('compat render', () => {
 			false,
 			'not enumerable'
 		);
+	});
+
+	it('should cast boolean "download" values', () => {
+		render(<a download />, scratch);
+		expect(scratch.firstChild.getAttribute('download')).to.equal('');
+
+		render(<a download={false} />, scratch);
+		expect(scratch.firstChild.getAttribute('download')).to.equal(null);
 	});
 
 	it('should support static content', () => {
@@ -303,5 +371,32 @@ describe('compat render', () => {
 		expect(renderSpy).to.be.calledOnce;
 		expect(mountSpy).to.be.calledOnce;
 		expect(updateSpy).to.not.be.calledOnce;
+	});
+
+	it("should support react-relay's usage of __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED", () => {
+		const Ctx = createContext('foo');
+
+		// Simplified version of: https://github.com/facebook/relay/blob/fba79309977bf6b356ee77a5421ca5e6f306223b/packages/react-relay/readContext.js#L17-L28
+		function readContext(Context) {
+			const {
+				ReactCurrentDispatcher
+			} = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+			const dispatcher = ReactCurrentDispatcher.current;
+			return dispatcher.readContext(Context);
+		}
+
+		function Foo() {
+			const value = readContext(Ctx);
+			return <div>{value}</div>;
+		}
+
+		React.render(
+			<Ctx.Provider value="foo">
+				<Foo />
+			</Ctx.Provider>,
+			scratch
+		);
+
+		expect(scratch.textContent).to.equal('foo');
 	});
 });

@@ -120,8 +120,7 @@ SuspenseList.prototype.componentDidUpdate = SuspenseList.prototype.componentDidM
 	//    The nodes can now be completely consumed from the linked list.
 	// 2. Handle nodes that might have gotten resolved between render and
 	//    componentDidMount.
-	const list = this;
-	list._map.forEach((node, child) => {
-		resolve(list, child, node);
+	this._map.forEach((node, child) => {
+		resolve(this, child, node);
 	});
 };

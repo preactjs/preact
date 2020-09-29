@@ -8,6 +8,7 @@
       "properties": {
         "regex": "^_[^_]",
         "reserved": [
+          "__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED",
           "__REACT_DEVTOOLS_GLOBAL_HOOK__",
           "__PREACT_DEVTOOLS__",
           "_renderers",
@@ -44,7 +45,9 @@
       "$_pendingSuspensionCount": "__u",
       "$_childDidSuspend": "__c",
       "$_suspendedComponentWillUnmount": "__c",
+      "$_suspended": "__e",
       "$_dom": "__e",
+      "$_hydrating": "__h",
       "$_component": "__c",
       "$__html": "__html",
       "$_parent": "__",
@@ -66,7 +69,8 @@
       "$_unmount": "__u",
       "$_owner": "__o",
       "$_skipEffects": "__s",
-      "$_rerenderCount": "__r"
+      "$_rerenderCount": "__r",
+      "$_forwarded": "__f"
     }
   }
 }

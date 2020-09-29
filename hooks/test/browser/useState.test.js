@@ -153,6 +153,29 @@ describe('useState', () => {
 		expect(scratch.innerHTML).to.equal('<p>hi</p>');
 	});
 
+	it('should correctly re-initialize when first run threw an error', () => {
+		let hasThrown = false;
+		let setup = sinon.spy(() => {
+			if (!hasThrown) {
+				hasThrown = true;
+				throw new Error('test');
+			} else {
+				return 'hi';
+			}
+		});
+
+		const App = () => {
+			const state = useState(setup)[0];
+			return <p>{state}</p>;
+		};
+
+		expect(() => render(<App />, scratch)).to.throw('test');
+		expect(setup).to.have.been.calledOnce;
+		expect(() => render(<App />, scratch)).not.to.throw();
+		expect(setup).to.have.been.calledTwice;
+		expect(scratch.innerHTML).to.equal('<p>hi</p>');
+	});
+
 	it('should handle queued useState', () => {
 		function Message({ message, onClose }) {
 			const [isVisible, setVisible] = useState(Boolean(message));

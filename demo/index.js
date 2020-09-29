@@ -23,6 +23,7 @@ import TextFields from './textFields';
 import ReduxBug from './reduxUpdate';
 import SuspenseRouterBug from './suspense-router';
 import NestedSuspenseBug from './nested-suspense';
+import Contenteditable from './contenteditable';
 import { MobXDemo } from './mobx';
 
 let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(
@@ -131,6 +132,9 @@ class App extends Component {
 						<Link href="/nested-suspense" activeClassName="active">
 							Nested Suspense Bug
 						</Link>
+						<Link href="/contenteditable" activeClassName="active">
+							contenteditable
+						</Link>
 					</nav>
 				</header>
 				<main>
@@ -160,6 +164,7 @@ class App extends Component {
 						<ReduxBug path="/reduxBug/:start" />
 						<SuspenseRouterBug path="/suspense-router" />
 						<NestedSuspenseBug path="/nested-suspense" />
+						<Contenteditable path="/contenteditable" />
 					</Router>
 				</main>
 			</div>

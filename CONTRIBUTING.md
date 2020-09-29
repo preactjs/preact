@@ -163,7 +163,7 @@ For us a [codesandbox](https://codesandbox.io/) says more than a 1000 words :tad
 
 ## I have more questions on how to contribute to Preact. How can I reach you?
 
-We closely watch our issues and have a pretty active [Slack workspace](https://preact-slack.now.sh/). Nearly all our communication happens via these two forms of communication.
+We closely watch our issues and have a pretty active [Slack workspace](https://chat.preactjs.com/). Nearly all our communication happens via these two forms of communication.
 
 ## Releasing Preact (Maintainers only)
 

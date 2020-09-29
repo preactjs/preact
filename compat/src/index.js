@@ -26,7 +26,12 @@ import { Children } from './Children';
 import { Suspense, lazy } from './suspense';
 import { SuspenseList } from './suspense-list';
 import { createPortal } from './portals';
-import { hydrate, render, REACT_ELEMENT_TYPE } from './render';
+import {
+	hydrate,
+	render,
+	REACT_ELEMENT_TYPE,
+	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
+} from './render';
 
 const version = '16.8.0'; // trick libraries to think we are react
 
@@ -126,7 +131,8 @@ export {
 	StrictMode,
 	Suspense,
 	SuspenseList,
-	lazy
+	lazy,
+	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 };
 
 // React copies the named exports to the default one.
@@ -163,5 +169,6 @@ export default {
 	StrictMode,
 	Suspense,
 	SuspenseList,
-	lazy
+	lazy,
+	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 };

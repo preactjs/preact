@@ -130,12 +130,28 @@ describe('debug', () => {
 		expect(console.warn).to.be.calledThrice;
 		expect(console.warn.args[2]).to.match(/use vnode.props.children/);
 
+		// Should only warn once
+		vnode.attributes;
+		expect(console.warn).to.be.calledThrice;
+		vnode.nodeName;
+		expect(console.warn).to.be.calledThrice;
+		vnode.children;
+		expect(console.warn).to.be.calledThrice;
+
 		vnode.attributes = {};
 		expect(console.warn.args[3]).to.match(/use vnode.props/);
 		vnode.nodeName = '';
 		expect(console.warn.args[4]).to.match(/use vnode.type/);
 		vnode.children = [];
 		expect(console.warn.args[5]).to.match(/use vnode.props.children/);
+
+		// Should only warn once
+		vnode.attributes = {};
+		expect(console.warn.args.length).to.equal(6);
+		vnode.nodeName = '';
+		expect(console.warn.args.length).to.equal(6);
+		vnode.children = [];
+		expect(console.warn.args.length).to.equal(6);
 	});
 
 	it('should warn when calling setState inside the constructor', () => {
@@ -537,8 +553,10 @@ describe('debug', () => {
 			// The message here may change when the "prop-types" library is updated,
 			// but we check it exactly to make sure all parameters were supplied
 			// correctly.
-			expect(console.error).to.be.calledWith(
-				'Failed prop type: Invalid prop `text` of type `number` supplied to `Foo`, expected `string`.'
+			expect(console.error).to.have.been.calledOnceWith(
+				sinon.match(
+					/^Failed prop type: Invalid prop `text` of type `number` supplied to `Foo`, expected `string`\.\n {2}in Foo \(at (.*)\/debug\/test\/browser\/debug\.test\.js:[0-9]+\)$/m
+				)
 			);
 		});
 

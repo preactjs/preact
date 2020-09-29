@@ -2,7 +2,9 @@
 👋 Hi there! Thanks for taking the time to open an issue.
 ׁ
 Here's a guide to getting your issue resolved quickly:
-🗣 For help with Preact, ask on Slack: https://preact-slack.now.sh
+
+❓ Did you check that you're on the latest version of Preact?
+🗣 For help with Preact, ask on Slack: https://chat.preactjs.com/
 ✨ Check for existing StackOverflow solutions: https://stackoverflow.com/search?q=preact
 📚 Check out our docs - for Preact 10: https://preactjs.com/guide/v10/getting-started
 🔎 Check if there's already an issue for your problem

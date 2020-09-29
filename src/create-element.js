@@ -10,9 +10,13 @@ import options from './options';
  */
 export function createElement(type, props, children) {
 	let normalizedProps = {},
+		key,
+		ref,
 		i;
 	for (i in props) {
-		if (i !== 'key' && i !== 'ref') normalizedProps[i] = props[i];
+		if (i == 'key') key = props[i];
+		else if (i == 'ref') ref = props[i];
+		else normalizedProps[i] = props[i];
 	}
 
 	if (arguments.length > 3) {
@@ -36,13 +40,7 @@ export function createElement(type, props, children) {
 		}
 	}
 
-	return createVNode(
-		type,
-		normalizedProps,
-		props && props.key,
-		props && props.ref,
-		null
-	);
+	return createVNode(type, normalizedProps, key, ref, null);
 }
 
 /**
@@ -75,12 +73,13 @@ export function createVNode(type, props, key, ref, original) {
 		// a _nextDom that has been set to `null`
 		_nextDom: undefined,
 		_component: null,
+		_hydrating: null,
 		constructor: undefined,
 		_original: original
 	};
 
 	if (original == null) vnode._original = vnode;
-	if (options.vnode) options.vnode(vnode);
+	if (options.vnode != null) options.vnode(vnode);
 
 	return vnode;
 }

@@ -9,15 +9,20 @@
 	<body>
 		<div id="main"></div>
 		<script type="module">
-			import * as bench from '/bench.js';
-			import { testElementText, afterFrame, afterFrameAsync } from "./util.js";
-			import * as preact from 'preact';
-			import { render } from "../src/keyed-children/index.js"
+			import {
+				measureName,
+				measureMemory,
+				testElementText,
+				afterFrame,
+				afterFrameAsync
+			} from './util.js';
+			import * as framework from 'framework';
+			import { render } from '../src/keyed-children/index.js';
 
-			const { run } = render(preact);
+			const { run } = render(framework);
 
 			async function main() {
-				const elementSelector = "tr:first-child > td:first-child";
+				const elementSelector = 'tr:first-child > td:first-child';
 
 				const WARMUP_COUNT = 5;
 				for (let i = 0; i < WARMUP_COUNT; i++) {
@@ -29,12 +34,15 @@
 
 				await afterFrameAsync();
 
-				afterFrame(function() {
-					testElementText(elementSelector, "5001");
-					bench.stop();
+				afterFrame(function () {
+					testElementText(elementSelector, '5001');
+					performance.mark('stop');
+					performance.measure(measureName, 'start', 'stop');
+
+					measureMemory();
 				});
 
-				bench.start();
+				performance.mark('start');
 				run();
 			}
 

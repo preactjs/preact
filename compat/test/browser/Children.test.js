@@ -56,14 +56,14 @@ describe('Children', () => {
 
 		it('should throw if no children are passed', () => {
 			// eslint-disable-next-line prefer-arrow-callback
-			expect(function() {
+			expect(function () {
 				render(<Foo />, scratch);
 			}).to.throw();
 		});
 
 		it('should throw if more children are passed', () => {
 			// eslint-disable-next-line prefer-arrow-callback
-			expect(function() {
+			expect(function () {
 				render(
 					<Foo>
 						foo
@@ -77,7 +77,7 @@ describe('Children', () => {
 
 	describe('.map', () => {
 		function Foo(props) {
-			let children = Children.map(props.children, child => (
+			let children = Children.map(props.children, (child) => (
 				<span>{child}</span>
 			));
 			return <div>{children}</div>;
@@ -105,14 +105,14 @@ describe('Children', () => {
 				expect(this).to.equal(context);
 			};
 			({ children }) => {
-				React.Children.map(children, fn, context => {});
+				React.Children.map(children, fn, (context) => {});
 			};
 		});
 
 		it('should flatten result', () => {
 			const ProblemChild = ({ children }) => {
-				return React.Children.map(children, child => {
-					return React.Children.map(child.props.children, x => x);
+				return React.Children.map(children, (child) => {
+					return React.Children.map(child.props.children, (x) => x);
 				}).filter(React.isValidElement);
 			};
 
@@ -168,7 +168,7 @@ describe('Children', () => {
 	describe('.forEach', () => {
 		function Foo(props) {
 			let children = [];
-			Children.forEach(props.children, child =>
+			Children.forEach(props.children, (child) =>
 				children.push(<span>{child}</span>)
 			);
 			return <div>{children}</div>;
