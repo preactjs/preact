@@ -209,7 +209,7 @@ describe('compat render', () => {
 		expect(scratch.firstChild.className).to.equal('new');
 	});
 
-	it('should give precedence to className over class', () => {
+	it('should give precedence to last-applied class/className prop', () => {
 		render(<ul className="from className" class="from class" />, scratch);
 		expect(scratch.firstChild.className).to.equal('from className');
 
@@ -232,7 +232,7 @@ describe('compat render', () => {
 
 		it('should preserve class, and add className alias', () => {
 			const { props } = <ul class="from class" />;
-			expect(props).to.have.property('className', 'from class');
+			expect(props).not.to.have.property('className', 'from class');
 			expect(props).to.have.property('class', 'from class');
 		});
 
@@ -240,7 +240,7 @@ describe('compat render', () => {
 			const { props } = <ul class="from class" />;
 			const spreaded = (<li {...props} />).props;
 			expect(spreaded).to.have.property('class', 'from class');
-			expect(spreaded).to.have.property('className', 'from class');
+			expect(spreaded).not.to.have.property('className', 'from class');
 			expect(spreaded.propertyIsEnumerable('className')).to.equal(false);
 		});
 
@@ -249,7 +249,7 @@ describe('compat render', () => {
 			const spreaded = (<li {...props} />).props;
 			expect(spreaded).to.have.property('className', 'from className');
 			expect(spreaded).to.have.property('class', 'from className');
-			expect(spreaded.propertyIsEnumerable('class')).to.equal(false);
+			expect(spreaded.propertyIsEnumerable('class')).to.equal(true);
 		});
 	});
 

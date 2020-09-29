@@ -101,18 +101,17 @@ let classNameDescriptor = {
 	}
 };
 
-let classDescriptor = {
-	configurable: true,
-	get() {
-		return this.className;
-	}
-};
-
 let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
 	let type = vnode.type;
 	let props = vnode.props;
 	let normalizedProps = props;
+
+	if (type && props.class != props.className) {
+		classNameDescriptor.enumerable = 'className' in props;
+		if (props.className != null) props.class = props.className;
+		Object.defineProperty(props, 'className', classNameDescriptor);
+	}
 
 	// only normalize props on Element nodes
 	if (typeof type === 'string') {
@@ -164,16 +163,6 @@ options.vnode = vnode => {
 		}
 
 		vnode.props = normalizedProps;
-	}
-
-	if (type && normalizedProps) {
-		// All component and element prop objects are given a `className` or `class` alias.
-		// Whichever prop is *not* defined is aliased to the one that is.
-		if ('className' in normalizedProps) {
-			Object.defineProperty(normalizedProps, 'class', classDescriptor);
-		} else {
-			Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
-		}
 	}
 
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
