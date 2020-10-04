@@ -75,9 +75,8 @@ export function initDebug() {
 			// and thus make the Next.js dev overlay work.
 			if (typeof error.then != 'function') {
 				setTimeout(() => {
-					console.log('re-throw', error);
 					throw error;
-				}, 0);
+				});
 			}
 		} catch (e) {
 			throw e;
