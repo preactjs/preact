@@ -118,9 +118,15 @@ describe('debug options', () => {
 			}
 		}
 
+		const oldOnError = window.onerror;
+		window.onerror = sinon.spy();
+
 		render(<ErrorApp />, scratch);
 		rerender();
 
-		expect(catchErrorSpy).to.have.been.called;
+		expect(catchErrorSpy).to.have.been.calledOnce;
+		expect(window.onerror).to.have.been.calledOnce;
+
+		window.onerror = oldOnError;
 	});
 });
