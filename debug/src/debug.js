@@ -67,7 +67,25 @@ export function initDebug() {
 			}
 		}
 
-		oldCatchError(error, vnode, oldVNode);
+		try {
+			oldCatchError(error, vnode, oldVNode);
+
+			// when an error was handled by an ErrorBoundary we will nontheless emit an error
+			// event on the window object. This is to make up for react compatibility in dev mode
+			// and thus make the Next.js dev overlay work.
+			if (typeof error.then != 'function') {
+				const errorEvent = new ErrorEvent(error.message, {
+					error,
+					message: error.message,
+					lineno: error.lineno,
+					filename: error.filename
+				});
+				errorEvent.initEvent('error', true, true);
+				window.dispatchEvent(errorEvent);
+			}
+		} catch (e) {
+			throw e;
+		}
 	};
 
 	options._root = (vnode, parentNode) => {
