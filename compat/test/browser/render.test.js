@@ -239,7 +239,7 @@ describe('compat render', () => {
 
 		it('should preserve class when spreading', () => {
 			const { props } = <ul class="from class" />;
-			const spreaded = (<li {...props} />).props;
+			const spreaded = (<li a {...props} />).props;
 			expect(spreaded).to.have.property('class', 'from class');
 			expect(spreaded.propertyIsEnumerable('className')).to.equal(false);
 			expect(spreaded).to.have.property('className', 'from class');
@@ -247,60 +247,68 @@ describe('compat render', () => {
 
 		it('should preserve className when spreading', () => {
 			const { props } = <ul className="from className" />;
-			const spreaded = (<li {...props} />).props;
+			const spreaded = (<li a {...props} />).props;
 			expect(spreaded).to.have.property('className', 'from className');
 			expect(spreaded).to.have.property('class', 'from className');
 			expect(spreaded.propertyIsEnumerable('class')).to.equal(true);
 		});
-	});
 
-	// Issue #2772
-	it('should give precedence to className from spread props', () => {
-		const Foo = ({ className, ...props }) => {
-			return <div className={`${className} foo`} {...props} />;
-		};
-		render(<Foo className="bar" />, scratch);
-		expect(scratch.firstChild.className).to.equal('bar foo');
-	});
+		// Issue #2772
+		it('should give precedence to className from spread props', () => {
+			const Foo = ({ className, ...props }) => {
+				return <div className={`${className} foo`} {...props} />;
+			};
+			render(<Foo className="bar" />, scratch);
+			expect(scratch.firstChild.className).to.equal('bar foo');
+		});
 
-	// Issue #2224
-	it('should not mark both class and className as enumerable', () => {
-		function ClassNameCheck(props) {
-			return (
-				<div>{props.propertyIsEnumerable('className') ? 'Failed' : ''}</div>
-			);
-		}
+		it('should give precedence to class from spread props', () => {
+			const Foo = ({ class: c, ...props }) => {
+				return <div class={`${c} foo`} {...props} />;
+			};
+			render(<Foo class="bar" />, scratch);
+			expect(scratch.firstChild.className).to.equal('bar foo');
+		});
 
-		let update;
-		class OtherThing extends Component {
-			render({ children }) {
-				update = () => this.forceUpdate();
+		// Issue #2224
+		it('should not mark both class and className as enumerable', () => {
+			function ClassNameCheck(props) {
 				return (
-					<div>
-						{children}
-						<ClassNameCheck class="test" />
-					</div>
+					<div>{props.propertyIsEnumerable('className') ? 'Failed' : ''}</div>
 				);
 			}
-		}
 
-		function App() {
-			return (
-				<OtherThing>
-					<ClassNameCheck class="test" />
-				</OtherThing>
+			let update;
+			class OtherThing extends Component {
+				render({ children }) {
+					update = () => this.forceUpdate();
+					return (
+						<div>
+							{children}
+							<ClassNameCheck class="test" />
+						</div>
+					);
+				}
+			}
+
+			function App() {
+				return (
+					<OtherThing>
+						<ClassNameCheck class="test" />
+					</OtherThing>
+				);
+			}
+
+			render(<App />, scratch);
+
+			update();
+			rerender();
+
+			expect(/Failed/g.test(scratch.textContent)).to.equal(
+				false,
+				'not enumerable'
 			);
-		}
-
-		render(<App />, scratch);
-
-		update();
-		rerender();
-
-		expect(/Failed/g.test(scratch.textContent)).to.equal(
-			false,
-			'not enumerable'
-		);
+		});
 	});
 
 	it('should cast boolean "download" values', () => {
