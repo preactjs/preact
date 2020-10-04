@@ -232,16 +232,17 @@ describe('compat render', () => {
 
 		it('should preserve class, and add className alias', () => {
 			const { props } = <ul class="from class" />;
-			expect(props).not.to.have.property('className', 'from class');
 			expect(props).to.have.property('class', 'from class');
+			expect(props.propertyIsEnumerable('className')).to.equal(false);
+			expect(props).to.have.property('className', 'from class');
 		});
 
 		it('should preserve class when spreading', () => {
 			const { props } = <ul class="from class" />;
 			const spreaded = (<li {...props} />).props;
 			expect(spreaded).to.have.property('class', 'from class');
-			expect(spreaded).not.to.have.property('className', 'from class');
 			expect(spreaded.propertyIsEnumerable('className')).to.equal(false);
+			expect(spreaded).to.have.property('className', 'from class');
 		});
 
 		it('should preserve className when spreading', () => {
