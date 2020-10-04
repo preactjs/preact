@@ -97,6 +97,7 @@ describe('debug options', () => {
 	});
 
 	it('should call old options on error', () => {
+		const e = new Error('test');
 		class ErrorApp extends Component {
 			constructor() {
 				super();
@@ -112,21 +113,23 @@ describe('debug options', () => {
 
 		function Throw({ error }) {
 			if (error) {
-				throw new Error('test');
+				throw e;
 			} else {
 				return <div>no error</div>;
 			}
 		}
 
-		const oldOnError = window.onerror;
-		window.onerror = sinon.spy();
+		const clock = sinon.useFakeTimers();
 
 		render(<ErrorApp />, scratch);
 		rerender();
 
-		expect(catchErrorSpy).to.have.been.calledOnce;
-		expect(window.onerror).to.have.been.calledOnce;
+		expect(catchErrorSpy).to.have.been.called;
 
-		window.onerror = oldOnError;
+		// we expect to throw after setTimeout to trigger a window.onerror
+		// this is to ensure react compat (i.e. with next.js' dev overlay)
+		expect(() => clock.tick(0)).to.throw(e);
+
+		clock.restore();
 	});
 });
