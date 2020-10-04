@@ -60,6 +60,7 @@ export function diffChildren(
 
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
+		let changedPos = false;
 		childVNode = renderResult[i];
 
 		if (childVNode == null || typeof childVNode == 'boolean') {
@@ -130,6 +131,7 @@ export function diffChildren(
 					childVNode.key == oldVNode.key &&
 					childVNode.type === oldVNode.type
 				) {
+					changedPos = true;
 					oldChildren[j] = undefined;
 					break;
 				}
@@ -149,7 +151,8 @@ export function diffChildren(
 			excessDomChildren,
 			commitQueue,
 			oldDom,
-			isHydrating
+			isHydrating,
+			changedPos
 		);
 
 		if ((j = childVNode.ref) && oldVNode.ref != j) {

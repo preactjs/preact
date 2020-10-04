@@ -6,15 +6,15 @@ import { diffProps, setProperty } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
 
-function reorderChildren(newVNode, oldDom, parentDom) {
+function reorderChildren(newVNode, oldDom, parentDom, hasChangedPos) {
 	for (let tmp = 0; tmp < newVNode._children.length; tmp++) {
 		const vnode = newVNode._children[tmp];
 		if (vnode) {
 			vnode._parent = newVNode;
 
-			if (vnode._dom) {
-				if (typeof vnode.type == 'function' && vnode._children.length > 1) {
-					reorderChildren(vnode, oldDom, parentDom);
+			if (vnode._dom && hasChangedPos) {
+				if (typeof vnode.type == 'function') {
+					reorderChildren(vnode, oldDom, parentDom, hasChangedPos);
 				}
 
 				oldDom = placeChild(
@@ -60,7 +60,8 @@ export function diff(
 	excessDomChildren,
 	commitQueue,
 	oldDom,
-	isHydrating
+	isHydrating,
+	hasChangedPositionInParent
 ) {
 	let tmp,
 		newType = newVNode.type;
@@ -178,7 +179,12 @@ export function diff(
 						commitQueue.push(c);
 					}
 
-					reorderChildren(newVNode, oldDom, parentDom);
+					reorderChildren(
+						newVNode,
+						oldDom,
+						parentDom,
+						hasChangedPositionInParent
+					);
 					break outer;
 				}
 
