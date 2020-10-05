@@ -11,11 +11,11 @@ const sauceLabsUser = process.env.SAUCE_USERNAME;
 const sauceLabsKey = process.env.SAUCE_ACCESS_KEY;
 const sauceLabs = sauceLabsUser && sauceLabsKey;
 if (sauceLabs) {
+	const version = JSON.parse(fs.readFileSync('package.json', 'utf-8')).version;
 	const sauceLabsLauncher = createSauceLabsLauncher({
 		user: process.env.SAUCE_USERNAME,
-		key: process.env.SAUCE_ACCESS_KEY
-		// the Sauce Labs datacenter to run your tests on, defaults to 'us-west-1'
-		// region: 'eu-central-1'
+		key: process.env.SAUCE_ACCESS_KEY,
+		region: 'eu'
 	});
 
 	const sharedCapabilities = {
@@ -25,24 +25,19 @@ if (sauceLabs) {
 			// environment variable. this is useful for identifying test runs
 			// this is for example the name for github actions
 			build: `CI #${process.env.GITHUB_RUN_NUMBER} (${process.env.GITHUB_RUN_ID})`,
-			tunnelIdentifier:
-				process.env.GITHUB_RUN_NUMBER ||
-				`local${require('./package.json').version}`,
-			connectLocationForSERelay: 'localhost',
-			connectPortForSERelay: 4445,
-			startConnect: !!sauceLabs
+			tunnelIdentifier: process.env.GITHUB_RUN_NUMBER || `local${version}`
 		}
 	};
 	browsers = [
 		sauceLabsLauncher({
 			...sharedCapabilities,
-			browserName: 'chrome',
-			browserVersion: 'latest',
-			platformName: 'Windows 10'
+			browserName: 'internet explorer',
+			browserVersion: '11.0',
+			platformName: 'Windows 7'
 		}),
 		sauceLabsLauncher({
 			...sharedCapabilities,
-			browserName: 'firefox',
+			browserName: 'chrome',
 			browserVersion: 'latest',
 			platformName: 'Windows 10'
 		}),
@@ -54,10 +49,10 @@ if (sauceLabs) {
 		}),
 		sauceLabsLauncher({
 			...sharedCapabilities,
-			browserName: 'internet explorer',
-			browserVersion: '11.0',
-			platformName: 'Windows 7'
-		})
+			browserName: 'firefox',
+			browserVersion: 'latest',
+			platformName: 'Windows 10'
+		}),
 	];
 }
 
@@ -80,11 +75,21 @@ export default {
 		'**/*.jsx': 'js'
 	},
 	browsers,
-	// SauceLabs only allows a max concurrency of 2 in the OSS plan. Pick
-	// an automatic number based on CPU-Cores for non-saucelab runs
-	concurrency: sauceLabs ? 2 : Math.max(1, os.cpus().length - 1),
-	// SauceLabs takes a bit longer to start
+	// How many browsers to test concurrently.=
+	// SauceLabs only allows a max concurrency of 2 in the OSS plan, locally 2 is good as well
+	concurrentBrowsers: 2,
+	// How many test files to test concurrent per browser.=
+	// Limit SauceLabs to 6 concurrent tests, take half CPUs locally
+	concurrency: sauceLabs ? 6 : os.cpus().length / 2,
+	// SauceLabs tests take a bit longer
 	browserStartTimeout: 1000 * 60 * 5,
+	testsStartTimeout: 1000 * 60 * 5,
+	testsFinishTimeout: 1000 * 60 * 5,
+	testFramework: {
+		config: {
+			timeout: 5000
+		}
+	},
 	plugins: [
 		importMapsPlugin({
 			inject: {
@@ -115,6 +120,20 @@ export default {
 				]
 			]
 		}),
-		legacyPlugin()
+		// compiles to es5 and add polyfills on browsers that don't support modules
+		legacyPlugin({
+			polyfills: {
+				// needed for es5
+				regeneratorRuntime: 'always',
+				// needed by WTR
+				fetch: true,
+				// polyfill Promise and others
+				coreJs: true,
+
+				// disable defaults
+				abortController: false,
+				webcomponents: false
+			}
+		})
 	]
 };
