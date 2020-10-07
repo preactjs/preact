@@ -272,7 +272,7 @@ export function useErrorBoundary(cb) {
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
-	afterPaintEffects.some(component => {
+	afterPaintEffects.forEach(component => {
 		if (component._parentDom) {
 			try {
 				component.__hooks._pendingEffects.forEach(invokeCleanup);
@@ -281,7 +281,6 @@ function flushAfterPaintEffects() {
 			} catch (e) {
 				component.__hooks._pendingEffects = [];
 				options._catchError(e, component._vnode);
-				return true;
 			}
 		}
 	});
