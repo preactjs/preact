@@ -84,6 +84,54 @@ describe('useEffect', () => {
 		]);
 	});
 
+	it('should execute effects in parent if child throws in effect', async () => {
+		let executionOrder = [];
+
+		const Child = () => {
+			useEffect(() => {
+				executionOrder.push('child');
+				throw new Error('test');
+			}, []);
+
+			useEffect(() => {
+				executionOrder.push('child after throw');
+				return () => executionOrder.push('child after throw cleanup');
+			}, []);
+
+			return <p>Test</p>;
+		};
+
+		const Parent = () => {
+			useEffect(() => {
+				executionOrder.push('parent');
+				return () => executionOrder.push('parent cleanup');
+			}, []);
+			return <Child />;
+		};
+
+		class ErrorBoundary extends Component {
+			componentDidCatch(error) {
+				this.setState({ error });
+			}
+
+			render({ children }, { error }) {
+				return error ? <div>error</div> : children;
+			}
+		}
+
+		act(() =>
+			render(
+				<ErrorBoundary>
+					<Parent />
+				</ErrorBoundary>,
+				scratch
+			)
+		);
+
+		expect(executionOrder).to.deep.equal(['child', 'parent', 'parent cleanup']);
+		expect(scratch.innerHTML).to.equal('<div>error</div>');
+	});
+
 	it('should throw an error upwards', () => {
 		const spy = sinon.spy();
 		let errored = false;
