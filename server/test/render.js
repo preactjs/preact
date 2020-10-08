@@ -202,8 +202,8 @@ describe('render', () => {
 		});
 
 		it('does not close void elements with closing tags', () => {
-			let rendered = render(<input><p>Hello World</p></input>),
-				expected = `<input /><p>Hello World</p>`;
+			let rendered = render(<link>http://preactjs.com</link>),
+				expected = `<link>http://preactjs.com</link>`;
 
 			expect(rendered).to.equal(expected);
 		});
