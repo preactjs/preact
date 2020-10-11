@@ -24,19 +24,24 @@ options._catchError = function(error, newVNode, oldVNode) {
 
 function detachedClone(vnode) {
 	if (vnode) {
-		if (vnode._component) {
-			if (vnode._component.__hooks._pendingEffects.length) {
-				vnode._component.__hooks._pendingEffects.forEach(effect => {
+		if (vnode._component && vnode._component.__hooks) {
+			if (vnode._component.__hooks._list.length) {
+				vnode._component.__hooks._list.forEach(effect => {
 					if (typeof effect._cleanup == 'function') effect._cleanup();
 				});
 			}
 
-			vnode._component.__hooks = null;
+			vnode._component.__hooks = {
+				_list: [],
+				_pendingEffects: []
+			};
 		}
+
 		vnode = assign({}, vnode);
 		vnode._component = null;
 		vnode._children = vnode._children && vnode._children.map(detachedClone);
 	}
+
 	return vnode;
 }
 
