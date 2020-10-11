@@ -25,6 +25,12 @@ options._catchError = function(error, newVNode, oldVNode) {
 function detachedClone(vnode) {
 	if (vnode) {
 		if (vnode._component) {
+			if (vnode._component.__hooks._pendingEffects.length) {
+				vnode._component.__hooks._pendingEffects.forEach(effect => {
+					if (typeof effect._cleanup == 'function') effect._cleanup();
+				});
+			}
+
 			vnode._component.__hooks = null;
 		}
 		vnode = assign({}, vnode);

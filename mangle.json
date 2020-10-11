@@ -25,6 +25,7 @@
   "props": {
     "cname": 6,
     "props": {
+      "$_cleanup": "__c",
       "$_afterPaintQueued": "__a",
       "$__hooks": "__H",
       "$_list": "__",
