@@ -50,7 +50,8 @@
       "react/jsx-no-bind": 0,
       "react/no-danger": 0,
       "jest/valid-expect": 0,
-      "new-cap": 0
+      "new-cap": 0,
+      "no-fallthrough": 1
     },
     "settings": {
       "react": {
