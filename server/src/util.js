@@ -6,12 +6,12 @@ export function encodeEntities(s) {
 	for (let i=0; i<s.length; i++) {
 		let ch = s[i];
 		switch (ch) {
-			case '<': ch = '&lt;';
-			case '>': ch = '&gt;';
-			case '"': ch = '&quot;';
-			case '&': ch = '&amp;';
+			case '<': out += '&lt;'; break;
+			case '>': out += '&gt;'; break;
+			case '"': out += '&quot;'; break;
+			case '&': out += '&amp;'; break;
+			default: out += ch;
 		}
-		out += ch;
 	}
 	return out;
 }
