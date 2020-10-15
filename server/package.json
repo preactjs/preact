@@ -90,15 +90,34 @@
     "copyfiles": "^1.2.0",
     "eslint": "^4.19.1",
     "eslint-config-developit": "^1.1.1",
+    "husky": "^4.3.0",
+    "lint-staged": "^10.4.0",
     "microbundle": "^0.6.0",
     "mocha": "^5.2.0",
     "npm-merge-driver-install": "^1.1.1",
     "preact": "^10.0.4",
+    "prettier": "^2.1.2",
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0",
     "typescript": "^3.4.1"
   },
   "dependencies": {
     "pretty-format": "^3.8.0"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "none",
+    "useTabs": true,
+    "tabWidth": 2
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,yml}": [
+      "prettier --write"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }
