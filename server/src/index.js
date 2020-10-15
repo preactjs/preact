@@ -236,8 +236,6 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 	if (String(nodeName).match(/[\s\n\\/='"\0<>]/)) throw new Error(`${nodeName} is not a valid HTML tag name in ${s}`);
 
 	let isVoid = String(nodeName).match(VOID_ELEMENTS) || (opts.voidElements && String(nodeName).match(opts.voidElements));
-	if (isVoid) s = s.replace(/>$/, ' />');
-
 	let pieces = [];
 
 	let children;
@@ -297,7 +295,10 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 		return s.substring(0, s.length-1) + ' />';
 	}
 
-	if (!isVoid) {
+	if (isVoid && !children) {
+		s = s.replace(/>$/, ' />');
+	}
+	else {
 		if (pretty && ~s.indexOf('\n')) s += '\n';
 		s += `</${nodeName}>`;
 	}
