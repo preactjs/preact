@@ -75,10 +75,9 @@ export function createVNode(type, props, key, ref, original) {
 		_component: null,
 		_hydrating: null,
 		constructor: undefined,
-		_original: original
+		_original: original == null ? Math.random() : original
 	};
 
-	if (original == null) vnode._original = {};
 	if (options.vnode != null) options.vnode(vnode);
 
 	return vnode;
