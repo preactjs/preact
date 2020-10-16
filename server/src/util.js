@@ -4,8 +4,9 @@ export const IS_NON_DIMENSIONAL = /acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine
 export function encodeEntities(s) {
 	if (typeof s !== 'string') s = String(s);
 	let out = '';
-	for (let i=0; i<s.length; i++) {
+	for (let i = 0; i < s.length; i++) {
 		let ch = s[i];
+		// prettier-ignore
 		switch (ch) {
 			case '<': out += '&lt;'; break;
 			case '>': out += '&gt;'; break;
@@ -17,10 +18,13 @@ export function encodeEntities(s) {
 	return out;
 }
 
+export let indent = (s, char) =>
+	String(s).replace(/(\n+)/g, '$1' + (char || '\t'));
 
-export let indent = (s, char) => String(s).replace(/(\n+)/g, '$1' + (char || '\t'));
-
-export let isLargeString = (s, length, ignoreLines) => (String(s).length>(length || 40) || (!ignoreLines && String(s).indexOf('\n')!==-1) || String(s).indexOf('<')!==-1);
+export let isLargeString = (s, length, ignoreLines) =>
+	String(s).length > (length || 40) ||
+	(!ignoreLines && String(s).indexOf('\n') !== -1) ||
+	String(s).indexOf('<') !== -1;
 
 const JS_TO_CSS = {};
 
@@ -29,13 +33,17 @@ export function styleObjToCss(s) {
 	let str = '';
 	for (let prop in s) {
 		let val = s[prop];
-		if (val!=null) {
+		if (val != null) {
 			if (str) str += ' ';
 			// str += jsToCss(prop);
-			str += prop[0]=='-' ? prop : (JS_TO_CSS[prop] || (JS_TO_CSS[prop] = prop.replace(/([A-Z])/g,'-$1').toLowerCase()));
+			str +=
+				prop[0] == '-'
+					? prop
+					: JS_TO_CSS[prop] ||
+					  (JS_TO_CSS[prop] = prop.replace(/([A-Z])/g, '-$1').toLowerCase());
 			str += ': ';
 			str += val;
-			if (typeof val==='number' && IS_NON_DIMENSIONAL.test(prop)===false) {
+			if (typeof val === 'number' && IS_NON_DIMENSIONAL.test(prop) === false) {
 				str += 'px';
 			}
 			str += ';';
@@ -66,8 +74,7 @@ export function assign(obj, props) {
 export function getChildren(accumulator, children) {
 	if (Array.isArray(children)) {
 		children.reduce(getChildren, accumulator);
-	}
-	else if (children!=null && children!==false) {
+	} else if (children != null && children !== false) {
 		accumulator.push(children);
 	}
 	return accumulator;

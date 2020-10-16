@@ -1,7 +1,8 @@
-if (typeof Symbol!=='function') {
+if (typeof Symbol !== 'function') {
 	let c = 0;
-	Symbol = function(s) {		// eslint-disable-line
+	// eslint-disable-next-line
+	Symbol = function (s) {
 		return `@@${s}${++c}`;
 	};
-	Symbol.for = s => `@@${s}`;
+	Symbol.for = (s) => `@@${s}`;
 }

@@ -6,7 +6,10 @@ chai.use(sinonChai);
 
 // tag to remove leading whitespace from tagged template literal
 function dedent([str]) {
-	return str.split( '\n'+str.match(/^\n*(\s+)/)[1] ).join('\n').replace(/(^\n+|\n+\s*$)/g, '');
+	return str
+		.split('\n' + str.match(/^\n*(\s+)/)[1])
+		.join('\n')
+		.replace(/(^\n+|\n+\s*$)/g, '');
 }
 
 describe('context', () => {
@@ -18,11 +21,7 @@ describe('context', () => {
 		class ClassConsumer extends Component {
 			render() {
 				const value = this.context;
-				return (
-				    <section>
-                        value is: {value}
-					</section>
-				);
+				return <section>value is: {value}</section>;
 			}
 		}
 		ClassConsumer.contextType = Ctx;
@@ -42,13 +41,7 @@ describe('context', () => {
 		const { Provider, Consumer } = createContext();
 		let rendered = renderJsx(
 			<Provider value="correct">
-				<Consumer>
-					{(value) => (
-						<section>
-							value is: {value}
-						</section>
-					)}
-				</Consumer>
+				<Consumer>{(value) => <section>value is: {value}</section>}</Consumer>
 			</Provider>
 		);
 
@@ -62,13 +55,7 @@ describe('context', () => {
 		let rendered = renderJsx(
 			<Provider value="wrong">
 				<Provider value="correct">
-					<Consumer>
-						{(value) => (
-							<section>
-								value is: {value}
-							</section>
-						)}
-					</Consumer>
+					<Consumer>{(value) => <section>value is: {value}</section>}</Consumer>
 				</Provider>
 			</Provider>
 		);
@@ -82,13 +69,7 @@ describe('context', () => {
 		const { Provider, Consumer } = createContext();
 		let rendered = renderJsx(
 			<Provider value={null}>
-				<Consumer>
-					{(value) => (
-						<section>
-							value is: {value}
-						</section>
-					)}
-				</Consumer>
+				<Consumer>{(value) => <section>value is: {value}</section>}</Consumer>
 			</Provider>
 		);
 
@@ -100,13 +81,7 @@ describe('context', () => {
 	it('should support default context value with absent provider', () => {
 		const { Consumer } = createContext('correct');
 		let rendered = renderJsx(
-			<Consumer>
-				{(value) => (
-					<section>
-						value is: {value}
-					</section>
-				)}
-			</Consumer>
+			<Consumer>{(value) => <section>value is: {value}</section>}</Consumer>
 		);
 
 		expect(rendered).to.equal(dedent`
