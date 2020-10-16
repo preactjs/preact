@@ -1,104 +1,127 @@
 {
-  "name": "preact-render-to-string",
-  "amdName": "preactRenderToString",
-  "version": "5.1.10",
-  "description": "Render JSX to an HTML string, with support for Preact components.",
-  "main": "dist/index.js",
-  "umd:main": "dist/index.js",
-  "module": "dist/index.module.js",
-  "jsnext:main": "dist/index.module.js",
-  "exports": {
-    ".": {
-      "require": "./dist/index.js",
-      "import": "./dist/index.mjs",
-      "browser": "./dist/index.module.js"
-    },
-    "./jsx": {
-      "require": "./dist/jsx.js",
-      "import": "./dist/jsx.mjs",
-      "browser": "./dist/jsx.module.js"
-    },
-    "./package.json": "./package.json",
-    "./": "./"
-  },
-  "scripts": {
-    "build": "npm run -s transpile && npm run -s transpile:jsx && npm run -s copy-typescript-definition",
-    "postbuild": "node ./config/node-13-exports.js",
-    "transpile": "microbundle src/index.js -f es,umd --target web --external preact",
-    "transpile:jsx": "microbundle src/jsx.js -o dist/jsx.js --target web --external none && microbundle dist/jsx.js -o dist/jsx.js -f cjs",
-    "copy-typescript-definition": "copyfiles -f src/*.d.ts dist",
-    "test": "eslint src test && tsc && mocha -r babel-core/register test/**/*.js",
-    "prepublishOnly": "npm run build",
-    "release": "npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
-  },
-  "keywords": [
-    "preact",
-    "render",
-    "universal",
-    "isomorphic"
-  ],
-  "files": [
-    "src",
-    "dist",
-    "jsx.js",
-    "typings.json"
-  ],
-  "eslintConfig": {
-    "extends": "developit",
-    "rules": {
-      "react/prefer-stateless-function": 0,
-      "react/jsx-no-bind": 0,
-      "react/no-danger": 0,
-      "jest/valid-expect": 0,
-      "new-cap": 0
-    },
-    "settings": {
-      "react": {
-        "version": "16.8"
-      }
-    }
-  },
-  "babel": {
-    "presets": [
-      "env"
-    ],
-    "plugins": [
-      [
-        "transform-react-jsx",
-        {
-          "pragma": "h"
-        }
-      ],
-      "transform-object-rest-spread"
-    ]
-  },
-  "author": "Jason Miller <jason@developit.ca>",
-  "license": "MIT",
-  "typings": "src/index.d.ts",
-  "repository": "developit/preact-render-to-string",
-  "bugs": "https://github.com/developit/preact-render-to-string/issues",
-  "homepage": "https://github.com/developit/preact-render-to-string",
-  "peerDependencies": {
-    "preact": ">=10"
-  },
-  "devDependencies": {
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-plugin-transform-react-jsx": "^6.24.1",
-    "babel-preset-env": "^1.7.0",
-    "babel-register": "^6.26.0",
-    "chai": "^3.5.0",
-    "copyfiles": "^1.2.0",
-    "eslint": "^4.19.1",
-    "eslint-config-developit": "^1.1.1",
-    "microbundle": "^0.6.0",
-    "mocha": "^5.2.0",
-    "npm-merge-driver-install": "^1.1.1",
-    "preact": "^10.0.4",
-    "sinon": "^1.17.5",
-    "sinon-chai": "^2.8.0",
-    "typescript": "^3.4.1"
-  },
-  "dependencies": {
-    "pretty-format": "^3.8.0"
-  }
+	"name": "preact-render-to-string",
+	"amdName": "preactRenderToString",
+	"version": "5.1.10",
+	"description": "Render JSX to an HTML string, with support for Preact components.",
+	"main": "dist/index.js",
+	"umd:main": "dist/index.js",
+	"module": "dist/index.module.js",
+	"jsnext:main": "dist/index.module.js",
+	"exports": {
+		".": {
+			"require": "./dist/index.js",
+			"import": "./dist/index.mjs",
+			"browser": "./dist/index.module.js"
+		},
+		"./jsx": {
+			"require": "./dist/jsx.js",
+			"import": "./dist/jsx.mjs",
+			"browser": "./dist/jsx.module.js"
+		},
+		"./package.json": "./package.json",
+		"./": "./"
+	},
+	"scripts": {
+		"build": "npm run -s transpile && npm run -s transpile:jsx && npm run -s copy-typescript-definition",
+		"postbuild": "node ./config/node-13-exports.js",
+		"transpile": "microbundle src/index.js -f es,umd --target web --external preact",
+		"transpile:jsx": "microbundle src/jsx.js -o dist/jsx.js --target web --external none && microbundle dist/jsx.js -o dist/jsx.js -f cjs",
+		"copy-typescript-definition": "copyfiles -f src/*.d.ts dist",
+		"test": "eslint src test && tsc && mocha -r babel-core/register test/**/*.js",
+		"format": "prettier src/**/*.{d.ts,js} test/**/*.js --write",
+		"prepublishOnly": "npm run build",
+		"release": "npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
+	},
+	"keywords": [
+		"preact",
+		"render",
+		"universal",
+		"isomorphic"
+	],
+	"files": [
+		"src",
+		"dist",
+		"jsx.js",
+		"typings.json"
+	],
+	"eslintConfig": {
+		"extends": "developit",
+		"rules": {
+			"react/prefer-stateless-function": 0,
+			"react/jsx-no-bind": 0,
+			"react/no-danger": 0,
+			"jest/valid-expect": 0,
+			"new-cap": 0,
+			"curly": "off",
+			"brace-style": "off",
+			"indent": "off"
+		},
+		"settings": {
+			"react": {
+				"version": "16.8"
+			}
+		}
+	},
+	"babel": {
+		"presets": [
+			"env"
+		],
+		"plugins": [
+			[
+				"transform-react-jsx",
+				{
+					"pragma": "h"
+				}
+			],
+			"transform-object-rest-spread"
+		]
+	},
+	"author": "Jason Miller <jason@developit.ca>",
+	"license": "MIT",
+	"typings": "src/index.d.ts",
+	"repository": "developit/preact-render-to-string",
+	"bugs": "https://github.com/developit/preact-render-to-string/issues",
+	"homepage": "https://github.com/developit/preact-render-to-string",
+	"peerDependencies": {
+		"preact": ">=10"
+	},
+	"devDependencies": {
+		"babel-plugin-transform-object-rest-spread": "^6.26.0",
+		"babel-plugin-transform-react-jsx": "^6.24.1",
+		"babel-preset-env": "^1.7.0",
+		"babel-register": "^6.26.0",
+		"chai": "^3.5.0",
+		"copyfiles": "^1.2.0",
+		"eslint": "^4.19.1",
+		"eslint-config-developit": "^1.1.1",
+		"husky": "^4.3.0",
+		"lint-staged": "^10.4.0",
+		"microbundle": "^0.6.0",
+		"mocha": "^5.2.0",
+		"npm-merge-driver-install": "^1.1.1",
+		"preact": "^10.0.4",
+		"prettier": "^2.1.2",
+		"sinon": "^1.17.5",
+		"sinon-chai": "^2.8.0",
+		"typescript": "^3.4.1"
+	},
+	"dependencies": {
+		"pretty-format": "^3.8.0"
+	},
+	"prettier": {
+		"singleQuote": true,
+		"trailingComma": "none",
+		"useTabs": true,
+		"tabWidth": 2
+	},
+	"lint-staged": {
+		"**/*.{js,jsx,ts,tsx,yml}": [
+			"prettier --write"
+		]
+	},
+	"husky": {
+		"hooks": {
+			"pre-commit": "lint-staged"
+		}
+	}
 }

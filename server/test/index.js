@@ -1,4 +1,9 @@
-import renderToString, { render, shallowRender, renderToStaticMarkup, renderToString as _renderToString } from '../src';
+import renderToString, {
+	render,
+	shallowRender,
+	renderToStaticMarkup,
+	renderToString as _renderToString
+} from '../src';
 import { expect } from 'chai';
 
 describe('render-to-string', () => {
