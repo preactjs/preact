@@ -40,7 +40,7 @@ export function useReducer<S, A, I>(
 	init: (arg: I) => S
 ): [S, (action: A) => void];
 
-type PropRef<T> = { current?: T };
+type PropRef<T> = { current: T };
 type Ref<T> = { current: T };
 
 /**
@@ -123,10 +123,7 @@ export function useContext<T>(context: PreactContext<T>): T;
  * @param value Custom hook name or object that is passed to formatter
  * @param formatter Formatter to modify value before sending it to the devtools
  */
-export function useDebugValue<T>(
-	value: T,
-	formatter?: (value: T) => any
-): void;
+export function useDebugValue<T>(value: T, formatter?: (value: T) => any): void;
 
 export function useErrorBoundary(
 	callback?: (error: any) => Promise<void> | void
