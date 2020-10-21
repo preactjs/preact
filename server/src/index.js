@@ -101,7 +101,10 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				__h: []
 			});
 
-			// options.render
+			// options._diff
+			if (options.__b) options.__b(vnode);
+
+			// options._render
 			if (options.__r) options.__r(vnode);
 
 			if (

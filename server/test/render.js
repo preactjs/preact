@@ -1,5 +1,5 @@
 import { render, shallowRender } from '../src';
-import { h, Component, createContext, Fragment } from 'preact';
+import { h, Component, createContext, Fragment, options } from 'preact';
 import { useState, useContext, useEffect, useLayoutEffect } from 'preact/hooks';
 import chai, { expect } from 'chai';
 import { spy, stub, match } from 'sinon';
@@ -1047,6 +1047,47 @@ describe('render', () => {
 			render(<Foo />);
 			expect(called).to.equal(false);
 		});
+	});
+
+	it('should invoke options._render and options._diff', () => {
+		const calls = [];
+		// _diff
+		const oldDiff = options.__b;
+		options.__b = (...args) => {
+			calls.push(['_diff', args]);
+			if (oldDiff) oldDiff(...args);
+		};
+		// _render
+		const oldRender = options.__r;
+		options.__r = (...args) => {
+			calls.push(['_render', args]);
+			if (oldRender) oldRender(...args);
+		};
+
+		function Component1({ children }) {
+			return children;
+		}
+
+		function Component2() {
+			return <div />;
+		}
+
+		const vnode2 = <Component2>1</Component2>;
+		const vnode1 = <Component1>{vnode2}</Component1>;
+
+		render(vnode1);
+
+		expect(calls).to.deep.equal([
+			['_diff', [vnode1]],
+			['_render', [vnode1]],
+			['_diff', [vnode2]],
+			['_render', [vnode2]]
+		]);
+
+		expect(calls.length).to.equal(4);
+
+		options.__b = oldDiff;
+		options.__r = oldRender;
 	});
 
 	it('should render select value on option', () => {
