@@ -65,6 +65,13 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 	}
 	c._suspenders.push(suspendingComponent);
 
+	(Array.isArray(this.props.children)
+		? this.props.children
+		: [this.props.children]
+	).forEach(child => {
+		if (child._component) child._component._parentDom = null;
+	});
+
 	const resolve = suspended(c._vnode);
 
 	let resolved = false;
