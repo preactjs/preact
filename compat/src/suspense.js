@@ -65,12 +65,21 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 	}
 	c._suspenders.push(suspendingComponent);
 
+	function undirty(vnode) {
+		(Array.isArray(vnode._children)
+			? vnode._children
+			: [vnode._children]
+		).forEach(child => {
+			if (child) {
+				if (child._component) child._component._dirty = false;
+				undirty(child);
+			}
+		});
+	}
 	(Array.isArray(this.props.children)
 		? this.props.children
 		: [this.props.children]
-	).forEach(child => {
-		if (child._component) child._component._parentDom = null;
-	});
+	).forEach(undirty);
 
 	const resolve = suspended(c._vnode);
 

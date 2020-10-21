@@ -1725,7 +1725,7 @@ describe('suspense', () => {
 		render(
 			<Suspense fallback={<div>Suspended...</div>}>
 				<Suspender1 />
-				<Suspense fallback={<div>Suspended2</div>}>
+				<Suspense fallback={<div>Suspended2...</div>}>
 					<Suspender2 />
 				</Suspense>
 			</Suspense>,
