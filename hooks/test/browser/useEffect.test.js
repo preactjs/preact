@@ -321,14 +321,14 @@ describe('useEffect', () => {
 		render(<div>Replacement</div>, scratch);
 	});
 
-	it.only('support render roots from an effect', async () => {
+	it('support render roots from an effect', async () => {
 		let promise, increment;
 
 		const Counter = () => {
 			const [count, setCount] = useState(0);
 			const renderRoot = useRef();
 			useEffect(() => {
-				if (count === 1) {
+				if (count > 0) {
 					const div = renderRoot.current;
 					return () => render(<Dummy />, div);
 				}
