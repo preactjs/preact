@@ -337,7 +337,7 @@ describe('useEffect', () => {
 
 			increment = () => {
 				setCount(x => x + 1);
-				promise = Promise(res => {
+				promise = new Promise(res => {
 					setTimeout(() => {
 						setCount(x => x + 1);
 						res();
@@ -364,10 +364,10 @@ describe('useEffect', () => {
 		act(() => {
 			increment();
 		});
-
-		await act(async () => {
-			await promise;
-		});
-		expect(scratch.innerHTML).to.equal('');
+		await promise;
+		act(() => {});
+		expect(scratch.innerHTML).to.equal(
+			'<div><div>Count: 2</div><div><div>dummy</div></div></div>'
+		);
 	});
 });
