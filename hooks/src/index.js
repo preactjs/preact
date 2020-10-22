@@ -331,7 +331,11 @@ function afterPaint(newQueueLength) {
  * @param {import('./internal').EffectHookState} hook
  */
 function invokeCleanup(hook) {
+	// A hook cleanup can introduce a call to render which creates a new root, this will call options.vnode
+	// and move the currentComponent away.
+	const comp = currentComponent;
 	if (typeof hook._cleanup == 'function') hook._cleanup();
+	currentComponent = comp;
 }
 
 /**
@@ -339,7 +343,11 @@ function invokeCleanup(hook) {
  * @param {import('./internal').EffectHookState} hook
  */
 function invokeEffect(hook) {
+	// A hook call can introduce a call to render which creates a new root, this will call options.vnode
+	// and move the currentComponent away.
+	const comp = currentComponent;
 	hook._cleanup = hook._value();
+	currentComponent = comp;
 }
 
 /**

@@ -1,7 +1,7 @@
 import { act } from 'preact/test-utils';
 import { createElement, render, Fragment, Component } from 'preact';
+import { useEffect, useState, useRef } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useEffect, useState } from 'preact/hooks';
 import { useEffectAssertions } from './useEffectAssertions.test';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
 
@@ -319,5 +319,55 @@ describe('useEffect', () => {
 		expect(callback).to.have.been.calledOnce;
 
 		render(<div>Replacement</div>, scratch);
+	});
+
+	it('support render roots from an effect', async () => {
+		let promise, increment;
+
+		const Counter = () => {
+			const [count, setCount] = useState(0);
+			const renderRoot = useRef();
+			useEffect(() => {
+				if (count > 0) {
+					const div = renderRoot.current;
+					return () => render(<Dummy />, div);
+				}
+				return () => 'test';
+			}, [count]);
+
+			increment = () => {
+				setCount(x => x + 1);
+				promise = new Promise(res => {
+					setTimeout(() => {
+						setCount(x => x + 1);
+						res();
+					});
+				});
+			};
+
+			return (
+				<div>
+					<div>Count: {count}</div>
+					<div ref={renderRoot} />
+				</div>
+			);
+		};
+
+		const Dummy = () => <div>dummy</div>;
+
+		render(<Counter />, scratch);
+
+		expect(scratch.innerHTML).to.equal(
+			'<div><div>Count: 0</div><div></div></div>'
+		);
+
+		act(() => {
+			increment();
+		});
+		await promise;
+		act(() => {});
+		expect(scratch.innerHTML).to.equal(
+			'<div><div>Count: 2</div><div><div>dummy</div></div></div>'
+		);
 	});
 });
