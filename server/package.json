@@ -9,14 +9,14 @@
 	"jsnext:main": "dist/index.module.js",
 	"exports": {
 		".": {
-			"require": "./dist/index.js",
 			"import": "./dist/index.mjs",
-			"browser": "./dist/index.module.js"
+			"browser": "./dist/index.module.js",
+			"require": "./dist/index.js"
 		},
 		"./jsx": {
-			"require": "./dist/jsx.js",
 			"import": "./dist/jsx.mjs",
-			"browser": "./dist/jsx.module.js"
+			"browser": "./dist/jsx.module.js",
+			"require": "./dist/jsx.js"
 		},
 		"./package.json": "./package.json",
 		"./": "./"
