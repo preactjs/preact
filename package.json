@@ -1,7 +1,7 @@
 {
   "name": "preact",
   "amdName": "preact",
-  "version": "10.4.8",
+  "version": "10.5.5",
   "private": false,
   "description": "Fast 3kb React-compatible Virtual DOM library.",
   "main": "dist/preact.js",
@@ -46,6 +46,18 @@
       "require": "./test-utils/dist/testUtils.js",
       "import": "./test-utils/dist/testUtils.mjs"
     },
+    "./jsx-runtime": {
+      "browser": "./jsx-runtime/dist/jsxRuntime.module.js",
+      "umd": "./jsx-runtime/dist/jsxRuntime.umd.js",
+      "require": "./jsx-runtime/dist/jsxRuntime.js",
+      "import": "./jsx-runtime/dist/jsxRuntime.mjs"
+    },
+    "./jsx-dev-runtime": {
+      "browser": "./jsx-runtime/dist/jsxRuntime.module.js",
+      "umd": "./jsx-runtime/dist/jsxRuntime.umd.js",
+      "require": "./jsx-runtime/dist/jsxRuntime.js",
+      "import": "./jsx-runtime/dist/jsxRuntime.mjs"
+    },
     "./compat/server": {
       "require": "./compat/server.js"
     },
@@ -59,7 +71,7 @@
   },
   "types": "src/index.d.ts",
   "scripts": {
-    "prepare": "run-s build",
+    "prepare": "run-s build && check-export-map",
     "build": "npm-run-all --parallel build:*",
     "build:core": "microbundle build --raw",
     "build:core-min": "microbundle build --raw -f iife src/cjs.js -o dist/preact.min.js",
@@ -68,6 +80,7 @@
     "build:hooks": "microbundle build --raw --cwd hooks",
     "build:test-utils": "microbundle build --raw --cwd test-utils",
     "build:compat": "microbundle build --raw --cwd compat --globals 'preact/hooks=preactHooks'",
+    "build:jsx": "microbundle build --raw --cwd jsx-runtime",
     "postbuild": "node ./config/node-13-exports.js",
     "dev": "microbundle watch --raw --format cjs",
     "dev:hooks": "microbundle watch --raw --format cjs --cwd hooks",
@@ -167,6 +180,9 @@
     "hooks/dist",
     "hooks/src",
     "hooks/package.json",
+    "jsx-runtime/dist",
+    "jsx-runtime/src",
+    "jsx-runtime/package.json",
     "test-utils/src",
     "test-utils/package.json",
     "test-utils/dist"
@@ -203,6 +219,7 @@
     "babel-plugin-transform-rename-properties": "0.0.3",
     "benchmark": "^2.1.4",
     "chai": "^4.1.2",
+    "check-export-map": "^1.0.1",
     "coveralls": "^3.0.0",
     "cross-env": "^5.2.0",
     "diff": "^3.5.0",

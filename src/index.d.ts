@@ -39,7 +39,7 @@ declare namespace preact {
 
 	type Key = string | number | any;
 
-	type RefObject<T> = { current?: T | null };
+	type RefObject<T> = { current: T | null };
 	type RefCallback<T> = (instance: T | null) => void;
 	type Ref<T> = RefObject<T> | RefCallback<T>;
 

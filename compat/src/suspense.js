@@ -24,10 +24,19 @@ options._catchError = function(error, newVNode, oldVNode) {
 
 function detachedClone(vnode) {
 	if (vnode) {
+		if (vnode._component && vnode._component.__hooks) {
+			vnode._component.__hooks._list.forEach(effect => {
+				if (typeof effect._cleanup == 'function') effect._cleanup();
+			});
+
+			vnode._component.__hooks = null;
+		}
+
 		vnode = assign({}, vnode);
 		vnode._component = null;
 		vnode._children = vnode._children && vnode._children.map(detachedClone);
 	}
+
 	return vnode;
 }
 

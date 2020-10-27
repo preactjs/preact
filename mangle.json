@@ -25,6 +25,7 @@
   "props": {
     "cname": 6,
     "props": {
+      "$_cleanup": "__c",
       "$_afterPaintQueued": "__a",
       "$__hooks": "__H",
       "$_list": "__",
@@ -45,6 +46,7 @@
       "$_pendingSuspensionCount": "__u",
       "$_childDidSuspend": "__c",
       "$_suspendedComponentWillUnmount": "__c",
+      "$_suspended": "__e",
       "$_dom": "__e",
       "$_hydrating": "__h",
       "$_component": "__c",

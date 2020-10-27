@@ -8,9 +8,8 @@
 	<body>
 		<div id="root"></div>
 		<script type="module">
-			import * as bench from '/bench.js';
-			import { isPreactX } from './util.js';
-			import { render, createElement } from 'preact';
+			import { measureName, measureMemory, isPreactX } from './util.js';
+			import { render, createElement } from 'framework';
 
 			const root = document.getElementById('root');
 
@@ -25,7 +24,7 @@
 
 			let result;
 
-			bench.start();
+			performance.mark('start');
 			for (let i = 0; i < 100; i++) {
 				if (isVersionX) {
 					render(component(i), root);
@@ -33,7 +32,9 @@
 					result = render(component(i), root, result);
 				}
 			}
-			bench.stop();
+			performance.mark('stop');
+			performance.measure(measureName, 'start', 'stop');
+			measureMemory();
 		</script>
 	</body>
 </html>

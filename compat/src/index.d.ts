@@ -2,7 +2,7 @@ import * as _hooks from '../../hooks';
 import * as preact from '../../src';
 import { JSXInternal } from '../../src/jsx';
 import * as _Suspense from './suspense';
-import * as _SuspenseList from './suspense-list'
+import * as _SuspenseList from './suspense-list';
 
 // export default React;
 export = React;
@@ -43,7 +43,7 @@ declare namespace React {
 	// Suspense
 	export import Suspense = _Suspense.Suspense;
 	export import lazy = _Suspense.lazy;
-	export import SuspenseList = _SuspenseList.SuspenseList
+	export import SuspenseList = _SuspenseList.SuspenseList;
 
 	// Compat
 	export import StrictMode = preact.Fragment;
@@ -86,6 +86,10 @@ declare namespace React {
 		isPureReactComponent: boolean;
 	}
 
+	export function memo<P = {}>(
+		component: preact.FunctionalComponent<P>,
+		comparer?: (prev: P, next: P) => boolean
+	): preact.FunctionComponent<P>;
 	export function memo<C extends preact.FunctionalComponent<any>>(
 		component: C,
 		comparer?: (

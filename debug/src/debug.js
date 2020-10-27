@@ -67,7 +67,20 @@ export function initDebug() {
 			}
 		}
 
-		oldCatchError(error, vnode, oldVNode);
+		try {
+			oldCatchError(error, vnode, oldVNode);
+
+			// when an error was handled by an ErrorBoundary we will nontheless emit an error
+			// event on the window object. This is to make up for react compatibility in dev mode
+			// and thus make the Next.js dev overlay work.
+			if (typeof error.then != 'function') {
+				setTimeout(() => {
+					throw error;
+				});
+			}
+		} catch (e) {
+			throw e;
+		}
 	};
 
 	options._root = (vnode, parentNode) => {
@@ -288,6 +301,7 @@ export function initDebug() {
 				else newProps[i] = v;
 			}
 		}
+
 		// eslint-disable-next-line
 		vnode.__proto__ = deprecatedProto;
 		if (oldVnode) oldVnode(vnode);

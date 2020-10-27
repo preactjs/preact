@@ -1,7 +1,7 @@
 import { act } from 'preact/test-utils';
 import { createElement, render, Fragment, Component } from 'preact';
+import { useEffect, useState, useRef } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useEffect, useState } from 'preact/hooks';
 import { useEffectAssertions } from './useEffectAssertions.test';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
 
@@ -82,6 +82,54 @@ describe('useEffect', () => {
 			'action1',
 			'action2'
 		]);
+	});
+
+	it('should execute effects in parent if child throws in effect', async () => {
+		let executionOrder = [];
+
+		const Child = () => {
+			useEffect(() => {
+				executionOrder.push('child');
+				throw new Error('test');
+			}, []);
+
+			useEffect(() => {
+				executionOrder.push('child after throw');
+				return () => executionOrder.push('child after throw cleanup');
+			}, []);
+
+			return <p>Test</p>;
+		};
+
+		const Parent = () => {
+			useEffect(() => {
+				executionOrder.push('parent');
+				return () => executionOrder.push('parent cleanup');
+			}, []);
+			return <Child />;
+		};
+
+		class ErrorBoundary extends Component {
+			componentDidCatch(error) {
+				this.setState({ error });
+			}
+
+			render({ children }, { error }) {
+				return error ? <div>error</div> : children;
+			}
+		}
+
+		act(() =>
+			render(
+				<ErrorBoundary>
+					<Parent />
+				</ErrorBoundary>,
+				scratch
+			)
+		);
+
+		expect(executionOrder).to.deep.equal(['child', 'parent', 'parent cleanup']);
+		expect(scratch.innerHTML).to.equal('<div>error</div>');
 	});
 
 	it('should throw an error upwards', () => {
@@ -271,5 +319,55 @@ describe('useEffect', () => {
 		expect(callback).to.have.been.calledOnce;
 
 		render(<div>Replacement</div>, scratch);
+	});
+
+	it('support render roots from an effect', async () => {
+		let promise, increment;
+
+		const Counter = () => {
+			const [count, setCount] = useState(0);
+			const renderRoot = useRef();
+			useEffect(() => {
+				if (count > 0) {
+					const div = renderRoot.current;
+					return () => render(<Dummy />, div);
+				}
+				return () => 'test';
+			}, [count]);
+
+			increment = () => {
+				setCount(x => x + 1);
+				promise = new Promise(res => {
+					setTimeout(() => {
+						setCount(x => x + 1);
+						res();
+					});
+				});
+			};
+
+			return (
+				<div>
+					<div>Count: {count}</div>
+					<div ref={renderRoot} />
+				</div>
+			);
+		};
+
+		const Dummy = () => <div>dummy</div>;
+
+		render(<Counter />, scratch);
+
+		expect(scratch.innerHTML).to.equal(
+			'<div><div>Count: 0</div><div></div></div>'
+		);
+
+		act(() => {
+			increment();
+		});
+		await promise;
+		act(() => {});
+		expect(scratch.innerHTML).to.equal(
+			'<div><div>Count: 2</div><div><div>dummy</div></div></div>'
+		);
 	});
 });

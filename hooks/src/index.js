@@ -124,8 +124,6 @@ export function useReducer(reducer, initialState, init) {
 	const hookState = getHookState(currentIndex++, 2);
 	hookState._reducer = reducer;
 	if (!hookState._component) {
-		hookState._component = currentComponent;
-
 		hookState._value = [
 			!init ? invokeOrReturn(undefined, initialState) : init(initialState),
 
@@ -137,6 +135,8 @@ export function useReducer(reducer, initialState, init) {
 				}
 			}
 		];
+
+		hookState._component = currentComponent;
 	}
 
 	return hookState._value;
@@ -201,9 +201,9 @@ export function useMemo(factory, args) {
 	/** @type {import('./internal').MemoHookState} */
 	const state = getHookState(currentIndex++, 7);
 	if (argsChanged(state._args, args)) {
+		state._value = factory();
 		state._args = args;
 		state._factory = factory;
-		return (state._value = factory());
 	}
 
 	return state._value;
@@ -272,7 +272,7 @@ export function useErrorBoundary(cb) {
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
-	afterPaintEffects.some(component => {
+	afterPaintEffects.forEach(component => {
 		if (component._parentDom) {
 			try {
 				component.__hooks._pendingEffects.forEach(invokeCleanup);
@@ -281,7 +281,6 @@ function flushAfterPaintEffects() {
 			} catch (e) {
 				component.__hooks._pendingEffects = [];
 				options._catchError(e, component._vnode);
-				return true;
 			}
 		}
 	});
@@ -332,7 +331,11 @@ function afterPaint(newQueueLength) {
  * @param {import('./internal').EffectHookState} hook
  */
 function invokeCleanup(hook) {
+	// A hook cleanup can introduce a call to render which creates a new root, this will call options.vnode
+	// and move the currentComponent away.
+	const comp = currentComponent;
 	if (typeof hook._cleanup == 'function') hook._cleanup();
+	currentComponent = comp;
 }
 
 /**
@@ -340,7 +343,11 @@ function invokeCleanup(hook) {
  * @param {import('./internal').EffectHookState} hook
  */
 function invokeEffect(hook) {
+	// A hook call can introduce a call to render which creates a new root, this will call options.vnode
+	// and move the currentComponent away.
+	const comp = currentComponent;
 	hook._cleanup = hook._value();
+	currentComponent = comp;
 }
 
 /**
@@ -348,7 +355,11 @@ function invokeEffect(hook) {
  * @param {any[]} newArgs
  */
 function argsChanged(oldArgs, newArgs) {
-	return !oldArgs || oldArgs.length !== newArgs.length || newArgs.some((arg, index) => arg !== oldArgs[index]);
+	return (
+		!oldArgs ||
+		oldArgs.length !== newArgs.length ||
+		newArgs.some((arg, index) => arg !== oldArgs[index])
+	);
 }
 
 function invokeOrReturn(arg, f) {

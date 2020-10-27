@@ -2,10 +2,13 @@
 	"name": "preact-benchmarks",
 	"private": true,
 	"version": "1.0.0",
+	"type": "module",
 	"description": "Benchmarks for Preact",
 	"scripts": {
+		"prepare": "cd proxy-packages/preact-v8-proxy && npm ci",
 		"start": "node ./scripts config text_update.html && tach --config dist/text_update.config.json --manual",
 		"bench": "node ./scripts bench",
+		"deopts": "node ./scripts deopts",
 		"help": "node ./scripts --help"
 	},
 	"license": "MIT",
@@ -13,8 +16,13 @@
 		"afterframe": "^1.0.1"
 	},
 	"devDependencies": {
+		"@kristoferbaxter/async": "^1.0.0",
+		"escalade": "^3.0.2",
+		"escape-string-regexp": "^4.0.0",
 		"globby": "^11.0.0",
 		"sade": "^1.7.3",
-		"tachometer": "^0.4.21"
+		"strip-ansi": "^6.0.0",
+		"tachometer": "^0.5.1",
+		"v8-deopt-viewer": "^0.1.4"
 	}
 }

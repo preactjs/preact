@@ -438,7 +438,11 @@ function diffElementNodes(
 			if (
 				'value' in newProps &&
 				(i = newProps.value) !== undefined &&
-				i !== dom.value
+				// #2756 For the <progress>-element the initial value is 0,
+				// despite the attribute not being present. When the attribute
+				// is missing the progress bar is treated as indeterminate.
+				// To fix that we'll always update it when it is 0 for progress elements
+				(i !== dom.value || (newVNode.type === 'progress' && !i))
 			) {
 				setProperty(dom, 'value', i, oldProps.value, false);
 			}
