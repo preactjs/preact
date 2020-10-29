@@ -268,16 +268,14 @@ export function diff(
 
 		if ((tmp = options.diffed)) tmp(newVNode);
 	} catch (e) {
+		options._catchError(e, newVNode, oldVNode);
 		newVNode._original = null;
 		// if hydrating or creating initial tree, bailout preserves DOM:
 		if (isHydrating || excessDomChildren != null) {
 			newVNode._dom = oldDom;
 			newVNode._hydrating = !!isHydrating;
-			excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
-			// ^ could possibly be simplified to:
-			// excessDomChildren.length = 0;
+			excessDomChildren.length = 0;
 		}
-		options._catchError(e, newVNode, oldVNode);
 	}
 
 	return newVNode._dom;
