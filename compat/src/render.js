@@ -1,6 +1,4 @@
-
 import { createRoot, options, toChildArray, Component } from 'preact';
-import { applyEventNormalization } from './events';
 import { IS_NON_DIMENSIONAL } from './util';
 
 export const REACT_ELEMENT_TYPE =
