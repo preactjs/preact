@@ -35,7 +35,7 @@ function createVNode(type, props, key, __source, __self) {
 		_component: null,
 		_hydrating: null,
 		constructor: undefined,
-		_original: 0,
+		_original: Math.random(),
 		__source,
 		__self
 	};
