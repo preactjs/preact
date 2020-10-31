@@ -11,6 +11,8 @@ const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
 describe('benchmarks', function() {
 	let scratch;
 
+	let render, hydrate;
+
 	this.timeout(100000);
 
 	before(function() {
@@ -24,6 +26,9 @@ describe('benchmarks', function() {
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render, hydrate } = preactX.createRoot(scratch));
+		preactX.render = render;
+		preactX.hydrate = hydrate;
 	});
 
 	afterEach(() => {

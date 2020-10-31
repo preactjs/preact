@@ -1,5 +1,10 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component, Fragment, hydrate } from 'preact';
+import {
+	createElement,
+	createRoot,
+	Component,
+	Fragment
+} from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 import { div, span, input as inputStr, h1, h2 } from '../_util/dom';
 
@@ -18,6 +23,8 @@ describe('focus', () => {
 
 	/** @type {() => void} */
 	let getDynamicListHtml;
+
+	let render, hydrate;
 
 	class DynamicList extends Component {
 		constructor(props) {
@@ -143,6 +150,7 @@ describe('focus', () => {
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render, hydrate } = createRoot(scratch));
 		rerender = setupRerender();
 	});
 
@@ -155,8 +163,7 @@ describe('focus', () => {
 			<List>
 				<Input />
 				<ListItem>fooo</ListItem>
-			</List>,
-			scratch
+			</List>
 		);
 
 		const input = focusInput();
@@ -166,8 +173,7 @@ describe('focus', () => {
 			<List>
 				<ListItem>fooo</ListItem>
 				<Input />
-			</List>,
-			scratch
+			</List>
 		);
 		validateFocus(input);
 		expect(scratch.innerHTML).to.equal(getListHtml(['fooo'], []));
@@ -184,31 +190,31 @@ describe('focus', () => {
 			);
 		}
 
-		render(<App showFirst={true} showLast={true} />, scratch);
+		render(<App showFirst={true} showLast={true} />);
 
 		let input = focusInput();
-		render(<App showFirst={false} showLast={true} />, scratch);
+		render(<App showFirst={false} showLast={true} />);
 		expect(scratch.innerHTML).to.equal(getListHtml([], [2]));
 		validateFocus(input, 'move from middle to beginning');
 
 		input = focusInput();
-		render(<App showFirst={true} showLast={true} />, scratch);
+		render(<App showFirst={true} showLast={true} />);
 		expect(scratch.innerHTML).to.equal(getListHtml([1], [2]));
 		validateFocus(input, 'move from beginning to middle');
 
 		input = focusInput();
-		render(<App showFirst={true} showLast={false} />, scratch);
+		render(<App showFirst={true} showLast={false} />);
 		expect(scratch.innerHTML).to.equal(getListHtml([1], []));
 		validateFocus(input, 'move from middle to end');
 
 		input = focusInput();
-		render(<App showFirst={true} showLast={true} />, scratch);
+		render(<App showFirst={true} showLast={true} />);
 		expect(scratch.innerHTML).to.equal(getListHtml([1], [2]));
 		validateFocus(input, 'move from end to middle');
 	});
 
 	it('should maintain focus when adding children around input', () => {
-		render(<DynamicList />, scratch);
+		render(<DynamicList />);
 
 		let input = focusInput();
 		expect(scratch.innerHTML).to.equal(getDynamicListHtml());
@@ -241,7 +247,7 @@ describe('focus', () => {
 	it('should maintain focus when adding children around input (unkeyed)', () => {
 		// Related preactjs/preact#2446
 
-		render(<DynamicList unkeyed />, scratch);
+		render(<DynamicList unkeyed />);
 
 		let input = focusInput();
 		expect(scratch.innerHTML).to.equal(getDynamicListHtml());
@@ -279,8 +285,7 @@ describe('focus', () => {
 				<Input />
 				<ListItem>2</ListItem>
 				<ListItem>3</ListItem>
-			</List>,
-			scratch
+			</List>
 		);
 
 		let input = focusInput();
@@ -293,8 +298,7 @@ describe('focus', () => {
 				<Input />
 				<ListItem>2</ListItem>
 				<ListItem>3</ListItem>
-			</List>,
-			scratch
+			</List>
 		);
 
 		expect(scratch.innerHTML).to.equal(getListHtml([1], [2, 3]));
@@ -307,8 +311,7 @@ describe('focus', () => {
 				<Input />
 				<ListItem>2</ListItem>
 				{false && <ListItem>3</ListItem>}
-			</List>,
-			scratch
+			</List>
 		);
 
 		expect(scratch.innerHTML).to.equal(getListHtml([1], [2]));
@@ -321,8 +324,7 @@ describe('focus', () => {
 				<Input />
 				{false && <ListItem>2</ListItem>}
 				{false && <ListItem>3</ListItem>}
-			</List>,
-			scratch
+			</List>
 		);
 
 		expect(scratch.innerHTML).to.equal(getListHtml([1], []));
@@ -335,8 +337,7 @@ describe('focus', () => {
 				<Input />
 				{false && <ListItem>2</ListItem>}
 				{false && <ListItem>3</ListItem>}
-			</List>,
-			scratch
+			</List>
 		);
 
 		expect(scratch.innerHTML).to.equal(getListHtml([], []));
@@ -344,10 +345,7 @@ describe('focus', () => {
 	});
 
 	it('should maintain focus when removing elements around input', () => {
-		render(
-			<DynamicList initialBefore={[0, 1]} initialAfter={[2, 3]} />,
-			scratch
-		);
+		render(<DynamicList initialBefore={[0, 1]} initialAfter={[2, 3]} />);
 
 		let input = focusInput();
 		expect(scratch.innerHTML).to.equal(getDynamicListHtml());
@@ -378,7 +376,7 @@ describe('focus', () => {
 	});
 
 	it('should maintain focus when adding input next to the current input', () => {
-		render(<DynamicList as={Input} />, scratch);
+		render(<DynamicList as={Input} />);
 
 		expect(scratch.innerHTML).to.equal(getDynamicListHtml());
 
@@ -423,8 +421,7 @@ describe('focus', () => {
 				<ListItem>2</ListItem>
 				<ListItem>3</ListItem>
 				<Input />
-			</List>,
-			scratch
+			</List>
 		);
 
 		expect(scratch.innerHTML).to.equal(html);
@@ -473,7 +470,7 @@ describe('focus', () => {
 			}
 		}
 
-		render(<App />, scratch);
+		render(<App />);
 
 		input.focus();
 		updateState();
@@ -529,7 +526,7 @@ describe('focus', () => {
 			}
 		}
 
-		render(<App />, scratch);
+		render(<App />);
 
 		input.focus();
 		input.setSelectionRange(2, 5);

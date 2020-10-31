@@ -1,4 +1,4 @@
-import { createElement, render, Component } from 'preact';
+import { createElement, createRoot, Component } from 'preact';
 import 'preact/debug';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
@@ -11,11 +11,14 @@ describe('component stack', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
+	let render;
+
 	let errors = [];
 	let warnings = [];
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 
 		errors = [];
 		warnings = [];
@@ -45,7 +48,7 @@ describe('component stack', () => {
 			}
 		}
 
-		render(<Foo />, scratch);
+		render(<Foo />);
 
 		expect(
 			warnings[0].indexOf('@babel/plugin-transform-react-jsx-source') > -1

@@ -56,6 +56,7 @@
       "$_id": "__c",
       "$_contextRef": "__",
       "$_parentDom": "__P",
+      "$_parentNode": "__N",
       "$_prevState": "__u",
       "$_root": "__",
       "$_diff": "__b",

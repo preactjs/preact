@@ -1,6 +1,6 @@
 import {
 	createElement,
-	render as preactRender,
+	createRoot,
 	cloneElement as preactCloneElement,
 	createRef,
 	Component,
@@ -65,11 +65,9 @@ function cloneElement(element) {
  * @returns {boolean}
  */
 function unmountComponentAtNode(container) {
-	if (container._children) {
-		preactRender(null, container);
-		return true;
-	}
-	return false;
+	// true if no root, otherwise undefined
+	const hadNoRoot = !container._root || container._root.render(null);
+	return !hadNoRoot;
 }
 
 /**
@@ -126,7 +124,8 @@ export {
 	StrictMode,
 	Suspense,
 	SuspenseList,
-	lazy
+	lazy,
+	createRoot
 };
 
 // React copies the named exports to the default one.
@@ -163,5 +162,6 @@ export default {
 	StrictMode,
 	Suspense,
 	SuspenseList,
-	lazy
+	lazy,
+	createRoot
 };

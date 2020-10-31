@@ -1,4 +1,4 @@
-import { createElement, render, Component } from 'preact';
+import { createElement, createRoot, Component } from 'preact';
 import { setupScratch, teardown, spyAll } from '../../_util/helpers';
 
 /** @jsx createElement */
@@ -7,8 +7,11 @@ describe('Lifecycle methods', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 	});
 
 	afterEach(() => {
@@ -34,17 +37,17 @@ describe('Lifecycle methods', () => {
 			spyAll(Foo.prototype);
 			spyAll(Bar.prototype);
 
-			render(<Foo />, scratch);
+			render(<Foo />);
 			expect(Foo.prototype.componentDidMount, 'initial render').to.have.been
 				.calledOnce;
 
-			render(<Bar />, scratch);
+			render(<Bar />);
 			expect(Foo.prototype.componentWillUnmount, 'when replaced').to.have.been
 				.calledOnce;
 			expect(Bar.prototype.componentDidMount, 'when replaced').to.have.been
 				.calledOnce;
 
-			render(<div />, scratch);
+			render(<div />);
 			expect(Bar.prototype.componentWillUnmount, 'when removed').to.have.been
 				.calledOnce;
 		});
@@ -60,8 +63,8 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			render(<Foo />, scratch);
-			render(null, scratch);
+			render(<Foo />);
+			render(null);
 		});
 	});
 });

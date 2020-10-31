@@ -218,15 +218,13 @@ declare namespace preact {
 	// Preact render
 	// -----------------------------------
 
-	function render(
-		vnode: ComponentChild,
-		parent: Element | Document | ShadowRoot | DocumentFragment,
-		replaceNode?: Element | Text
-	): void;
-	function hydrate(
-		vnode: ComponentChild,
+	function createRoot(
 		parent: Element | Document | ShadowRoot | DocumentFragment
-	): void;
+	): {
+		render: (vnode: ComponentChild, replaceNode?: Element | Text) => void;
+		hydrate: (vnode: ComponentChild) => void;
+	};
+
 	function cloneElement(
 		vnode: VNode<any>,
 		props?: any,
@@ -244,6 +242,7 @@ declare namespace preact {
 
 	// TODO: Revisit what the public type of this is...
 	const Fragment: ComponentClass<{}, {}>;
+	const Root: ComponentClass<{ _parentDom: HTMLElement }, {}>;
 
 	//
 	// Preact options

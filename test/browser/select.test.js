@@ -1,13 +1,14 @@
-import { createElement, render } from 'preact';
+import { createElement, createRoot } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx createElement */
 
 describe('Select', () => {
-	let scratch;
+	let scratch, render;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 	});
 
 	afterEach(() => {
@@ -25,7 +26,7 @@ describe('Select', () => {
 			);
 		}
 
-		render(<App />, scratch);
+		render(<App />);
 		expect(scratch.firstChild.value).to.equal('B');
 	});
 
@@ -42,7 +43,7 @@ describe('Select', () => {
 			);
 		}
 
-		render(<App />, scratch);
+		render(<App />);
 		expect(scratch.firstChild.value).to.equal('B');
 	});
 
@@ -61,7 +62,7 @@ describe('Select', () => {
 			);
 		}
 
-		render(<App />, scratch);
+		render(<App />);
 		Array.prototype.slice.call(scratch.firstChild.childNodes).forEach(node => {
 			if (node.value === 'B' || node.value === 'C') {
 				expect(node.selected).to.equal(true);

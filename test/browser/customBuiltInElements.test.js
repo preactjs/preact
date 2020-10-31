@@ -1,4 +1,4 @@
-import { createElement, render, Component } from 'preact';
+import { createElement, createRoot, Component } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx createElement */
@@ -6,10 +6,11 @@ import { setupScratch, teardown } from '../_util/helpers';
 const runSuite = typeof customElements == 'undefined' ? xdescribe : describe;
 
 runSuite('customised built-in elements', () => {
-	let scratch;
+	let scratch, render;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 	});
 
 	afterEach(() => {
@@ -33,7 +34,7 @@ runSuite('customised built-in elements', () => {
 
 		customElements.define('built-in', BuiltIn, { extends: 'div' });
 
-		render(<Foo />, scratch);
+		render(<Foo />);
 
 		expect(spy).to.have.been.calledOnce;
 	});

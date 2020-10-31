@@ -1,4 +1,4 @@
-import { createElement, render, Fragment } from '../../src/';
+import { createElement, createRoot, Fragment } from '../../src/';
 import { getDomSibling } from '../../src/component';
 import { setupScratch, teardown } from '../_util/helpers';
 
@@ -8,10 +8,11 @@ describe('getDomSibling', () => {
 	/** @type {import('../../src/internal').PreactElement} */
 	let scratch;
 
-	const getRoot = dom => dom._children;
+	let render;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 	});
 
 	afterEach(() => {
@@ -19,120 +20,133 @@ describe('getDomSibling', () => {
 	});
 
 	it('should find direct sibling', () => {
+		let rootNode;
 		render(
-			<div>
-				<div>A</div>
-				<div>B</div>
-			</div>,
-			scratch
+			(rootNode = (
+				<div>
+					<div>A</div>
+					<div>B</div>
+				</div>
+			))
 		);
-		let vnode = getRoot(scratch)._children[0]._children[0];
+		let vnode = rootNode._children[0];
 		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1]);
 	});
 
 	it('should find direct text node sibling', () => {
-		render(
+		let rootNode = (
 			<div>
 				<div>A</div>B
-			</div>,
-			scratch
+			</div>
 		);
-		let vnode = getRoot(scratch)._children[0]._children[0];
+		render(rootNode);
+		let vnode = rootNode._children[0];
 		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1]);
 	});
 
 	it('should find nested text node sibling', () => {
+		let rootNode;
 		render(
-			<div>
-				<Fragment>
-					<div>A</div>
-				</Fragment>
-				<Fragment>B</Fragment>
-			</div>,
-			scratch
+			(rootNode = (
+				<div>
+					<Fragment>
+						<div>A</div>
+					</Fragment>
+					<Fragment>B</Fragment>
+				</div>
+			))
 		);
-		let vnode = getRoot(scratch)._children[0]._children[0];
+		let vnode = rootNode._children[0];
 		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1]);
 	});
 
 	it('should find text node sibling with placeholder', () => {
-		render(<div>A{null}B</div>, scratch);
-		let vnode = getRoot(scratch)._children[0]._children[0];
+		let rootNode;
+		render((rootNode = <div>A{null}B</div>));
+		let vnode = rootNode._children[0];
 		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1]);
 	});
 
 	it('should find sibling with placeholder', () => {
+		let rootNode;
 		render(
-			<div key="parent">
-				<div key="A">A</div>
-				{null}
-				<div key="B">B</div>
-			</div>,
-			scratch
+			(rootNode = (
+				<div key="parent">
+					<div key="A">A</div>
+					{null}
+					<div key="B">B</div>
+				</div>
+			))
 		);
-		let vnode = getRoot(scratch)._children[0]._children[0];
+		let vnode = rootNode._children[0];
 		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1]);
 	});
 
 	it('should find sibling with nested placeholder', () => {
+		let rootNode;
 		render(
-			<div key="0">
-				<Fragment key="0.0">
-					<div key="A">A</div>
-				</Fragment>
-				<Fragment key="0.1">{null}</Fragment>
-				<Fragment key="0.2">
-					<div key="B">B</div>
-				</Fragment>
-			</div>,
-			scratch
+			(rootNode = (
+				<div key="0">
+					<Fragment key="0.0">
+						<div key="A">A</div>
+					</Fragment>
+					<Fragment key="0.1">{null}</Fragment>
+					<Fragment key="0.2">
+						<div key="B">B</div>
+					</Fragment>
+				</div>
+			))
 		);
-		let vnode = getRoot(scratch)._children[0]._children[0]._children[0];
+		let vnode = rootNode._children[0]._children[0];
 		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1]);
 	});
 
 	it('should find sibling in parent', () => {
+		let rootNode;
 		render(
-			<div>
-				<Fragment>
-					<div>A</div>
-				</Fragment>
-				<div>B</div>
-			</div>,
-			scratch
+			(rootNode = (
+				<div>
+					<Fragment>
+						<div>A</div>
+					</Fragment>
+					<div>B</div>
+				</div>
+			))
 		);
-		let vnode = getRoot(scratch)._children[0]._children[0]._children[0];
+		let vnode = rootNode._children[0]._children[0];
 		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1]);
 	});
 
 	it('should find unrelated sibling from a DOM VNode', () => {
+		let rootNode;
 		render(
-			<div key="0">
-				<Fragment key="0.0">
-					<Fragment key="0.0.0">
-						<Fragment key="0.0.0.0">
-							<div key="A">A</div>
+			(rootNode = (
+				<div key="0">
+					<Fragment key="0.0">
+						<Fragment key="0.0.0">
+							<Fragment key="0.0.0.0">
+								<div key="A">A</div>
+							</Fragment>
 						</Fragment>
 					</Fragment>
-				</Fragment>
-				<Fragment key="0.1">
-					<Fragment key="0.1.0" />
-					<Fragment key="0.1.1" />
-					<Fragment key="0.1.2" />
-				</Fragment>
-				<Fragment key="0.2">
-					<Fragment key="0.2.0" />
-					<Fragment key="0.2.1" />
-					<Fragment key="0.2.2">
-						<div key="B">B</div>
+					<Fragment key="0.1">
+						<Fragment key="0.1.0" />
+						<Fragment key="0.1.1" />
+						<Fragment key="0.1.2" />
 					</Fragment>
-				</Fragment>
-			</div>,
-			scratch
+					<Fragment key="0.2">
+						<Fragment key="0.2.0" />
+						<Fragment key="0.2.1" />
+						<Fragment key="0.2.2">
+							<div key="B">B</div>
+						</Fragment>
+					</Fragment>
+				</div>
+			))
 		);
 
-		let divAVNode = getRoot(scratch)._children[0]._children[0]._children[0]
-			._children[0]._children[0];
+		let divAVNode =
+			rootNode._children[0]._children[0]._children[0]._children[0];
 		expect(divAVNode.type).to.equal('div');
 		expect(getDomSibling(divAVNode)).to.equalNode(
 			scratch.firstChild.childNodes[1]
@@ -140,26 +154,27 @@ describe('getDomSibling', () => {
 	});
 
 	it('should find unrelated sibling from a Fragment VNode', () => {
+		let rootNode;
 		render(
-			<div key="0">
-				<Fragment key="0.0">
-					<Fragment key="0.0.0">
-						<Fragment key="0.0.0.0">
-							<div key="A">A</div>
+			(rootNode = (
+				<div key="0">
+					<Fragment key="0.0">
+						<Fragment key="0.0.0">
+							<Fragment key="0.0.0.0">
+								<div key="A">A</div>
+							</Fragment>
 						</Fragment>
 					</Fragment>
-				</Fragment>
-				<Fragment key="0.1">
-					<Fragment key="0.1.0">
-						<div key="B">B</div>
+					<Fragment key="0.1">
+						<Fragment key="0.1.0">
+							<div key="B">B</div>
+						</Fragment>
 					</Fragment>
-				</Fragment>
-			</div>,
-			scratch
+				</div>
+			))
 		);
 
-		let fragment = getRoot(scratch)._children[0]._children[0]._children[0]
-			._children[0];
+		let fragment = rootNode._children[0]._children[0]._children[0];
 		expect(fragment.type).to.equal(Fragment);
 		expect(getDomSibling(fragment)).to.equalNode(
 			scratch.firstChild.childNodes[1]
@@ -167,49 +182,52 @@ describe('getDomSibling', () => {
 	});
 
 	it('should find unrelated sibling from a Component VNode', () => {
+		let rootNode;
 		const Foo = props => props.children;
 		render(
-			<div key="0">
-				<Fragment key="0.0">
-					<Fragment key="0.0.0">
-						<Foo key="0.0.0.0">
-							<div key="A">A</div>
-						</Foo>
+			(rootNode = (
+				<div key="0">
+					<Fragment key="0.0">
+						<Fragment key="0.0.0">
+							<Foo key="0.0.0.0">
+								<div key="A">A</div>
+							</Foo>
+						</Fragment>
 					</Fragment>
-				</Fragment>
-				<Fragment key="0.1">
-					<Fragment key="0.1.0">
-						<div key="B">B</div>
+					<Fragment key="0.1">
+						<Fragment key="0.1.0">
+							<div key="B">B</div>
+						</Fragment>
 					</Fragment>
-				</Fragment>
-			</div>,
-			scratch
+				</div>
+			))
 		);
 
-		let foo = getRoot(scratch)._children[0]._children[0]._children[0]
-			._children[0];
+		let foo = rootNode._children[0]._children[0]._children[0];
 		expect(foo.type).to.equal(Foo);
 		expect(getDomSibling(foo)).to.equalNode(scratch.firstChild.childNodes[1]);
 	});
 
 	it('should find sibling through components', () => {
+		let rootNode;
 		const Foo = props => props.children;
 		render(
-			<div key="0">
-				<Foo key="0.0">
-					<div key="A">A</div>
-				</Foo>
-				<Foo key="0.1" />
-				<Foo key="0.2">
-					<Foo key="0.2.0">
-						<div key="B">B</div>
+			(rootNode = (
+				<div key="0">
+					<Foo key="0.0">
+						<div key="A">A</div>
 					</Foo>
-				</Foo>
-			</div>,
-			scratch
+					<Foo key="0.1" />
+					<Foo key="0.2">
+						<Foo key="0.2.0">
+							<div key="B">B</div>
+						</Foo>
+					</Foo>
+				</div>
+			))
 		);
 
-		let divAVNode = getRoot(scratch)._children[0]._children[0]._children[0];
+		let divAVNode = rootNode._children[0]._children[0];
 		expect(divAVNode.type).to.equal('div');
 		expect(getDomSibling(divAVNode)).to.equalNode(
 			scratch.firstChild.childNodes[1]
@@ -217,18 +235,20 @@ describe('getDomSibling', () => {
 	});
 
 	it('should find sibling rendered in Components that wrap JSX children', () => {
+		let rootNode;
 		const Foo = props => <p key="p">{props.children}</p>;
 		render(
-			<div key="0">
-				<div key="A">A</div>
-				<Foo key="Foo">
-					<span key="span">a span</span>
-				</Foo>
-			</div>,
-			scratch
+			(rootNode = (
+				<div key="0">
+					<div key="A">A</div>
+					<Foo key="Foo">
+						<span key="span">a span</span>
+					</Foo>
+				</div>
+			))
 		);
 
-		let divAVNode = getRoot(scratch)._children[0]._children[0];
+		let divAVNode = rootNode._children[0];
 		expect(divAVNode.type).to.equal('div');
 
 		let sibling = getDomSibling(divAVNode);
@@ -236,16 +256,18 @@ describe('getDomSibling', () => {
 	});
 
 	it('should find sibling rendered in Components without JSX children', () => {
+		let rootNode;
 		const Foo = props => <p key="p">A paragraph</p>;
 		render(
-			<div key="0">
-				<div key="A">A</div>
-				<Foo key="Foo" />
-			</div>,
-			scratch
+			(rootNode = (
+				<div key="0">
+					<div key="A">A</div>
+					<Foo key="Foo" />
+				</div>
+			))
 		);
 
-		let divAVNode = getRoot(scratch)._children[0]._children[0];
+		let divAVNode = rootNode._children[0];
 		expect(divAVNode.type).to.equal('div');
 
 		let sibling = getDomSibling(divAVNode);
@@ -260,8 +282,7 @@ describe('getDomSibling', () => {
 			<div key="0">
 				<Foo key="Foo" />
 				<div key="B">B</div>
-			</div>,
-			scratch
+			</div>
 		);
 
 		let sibling = getDomSibling(divAVNode);
@@ -269,73 +290,79 @@ describe('getDomSibling', () => {
 	});
 
 	it('should return null if last sibling', () => {
+		let rootNode;
 		render(
-			<div key="0">
-				<Fragment key="0.0">
-					<div key="A">A</div>
-				</Fragment>
-				<Fragment key="0.1">
-					<div key="B">B</div>
-				</Fragment>
-				<Fragment key="0.2">
-					<div key="C">C</div>
-				</Fragment>
-			</div>,
-			scratch
+			(rootNode = (
+				<div key="0">
+					<Fragment key="0.0">
+						<div key="A">A</div>
+					</Fragment>
+					<Fragment key="0.1">
+						<div key="B">B</div>
+					</Fragment>
+					<Fragment key="0.2">
+						<div key="C">C</div>
+					</Fragment>
+				</div>
+			))
 		);
 
-		const divCVNode = getRoot(scratch)._children[0]._children[2]._children[0];
+		const divCVNode = rootNode._children[2]._children[0];
 		expect(getDomSibling(divCVNode)).to.equal(null);
 	});
 
 	it('should return null if no sibling', () => {
+		let rootNode;
 		render(
-			<div key="0">
-				<Fragment key="0.0">
-					<Fragment key="0.0.0">
-						<Fragment key="0.0.0.0">
-							<div key="A">A</div>
+			(rootNode = (
+				<div key="0">
+					<Fragment key="0.0">
+						<Fragment key="0.0.0">
+							<Fragment key="0.0.0.0">
+								<div key="A">A</div>
+							</Fragment>
 						</Fragment>
 					</Fragment>
-				</Fragment>
-				<Fragment key="0.1">
-					<Fragment key="0.1.0">{null}</Fragment>
-				</Fragment>
-			</div>,
-			scratch
+					<Fragment key="0.1">
+						<Fragment key="0.1.0">{null}</Fragment>
+					</Fragment>
+				</div>
+			))
 		);
 
-		let divAVNode = getRoot(scratch)._children[0]._children[0]._children[0]
-			._children[0]._children[0];
+		let divAVNode =
+			rootNode._children[0]._children[0]._children[0]._children[0];
 		expect(getDomSibling(divAVNode)).to.equal(null);
 	});
 
 	it('should return null if no sibling with lots of empty trees', () => {
+		let rootNode;
 		render(
-			<div key="0">
-				<Fragment key="0.0">
-					<Fragment key="0.0.0">
-						<Fragment key="0.0.0.0">
-							<div key="A">A</div>
+			(rootNode = (
+				<div key="0">
+					<Fragment key="0.0">
+						<Fragment key="0.0.0">
+							<Fragment key="0.0.0.0">
+								<div key="A">A</div>
+							</Fragment>
 						</Fragment>
 					</Fragment>
-				</Fragment>
-				<Fragment key="0.1">
-					<Fragment key="0.1.0" />
-					<Fragment key="0.1.1" />
-					<Fragment key="0.1.2" />
-				</Fragment>
-				<Fragment key="0.2">
-					<Fragment key="0.2.0" />
-					<Fragment key="0.2.1" />
-					<Fragment key="0.2.2">{null}</Fragment>
-				</Fragment>
-			</div>,
-			scratch
+					<Fragment key="0.1">
+						<Fragment key="0.1.0" />
+						<Fragment key="0.1.1" />
+						<Fragment key="0.1.2" />
+					</Fragment>
+					<Fragment key="0.2">
+						<Fragment key="0.2.0" />
+						<Fragment key="0.2.1" />
+						<Fragment key="0.2.2">{null}</Fragment>
+					</Fragment>
+				</div>
+			))
 		);
 
-		let divAVNode = getRoot(scratch)._children[0]._children[0]._children[0]
-			._children[0]._children[0];
+		let divAVNode =
+			rootNode._children[0]._children[0]._children[0]._children[0];
 		expect(getDomSibling(divAVNode)).to.equal(null);
 	});
 
@@ -353,8 +380,7 @@ describe('getDomSibling', () => {
 					<Fragment key="0.1.0" />
 					<div key="B">B</div>
 				</div>
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(getDomSibling(divAVNode)).to.equal(null);

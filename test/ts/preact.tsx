@@ -1,6 +1,6 @@
 import {
 	createElement,
-	render,
+	createRoot,
 	Component,
 	FunctionalComponent,
 	AnyComponent,
@@ -53,28 +53,24 @@ function DummerComponent({ input, initialInput }: DummerComponentProps) {
 	);
 }
 
-render(createElement('div', { title: 'test', key: '1' }), document);
-render(
-	createElement(DummyComponent, { initialInput: 'The input', key: '1' }),
-	document
-);
+const { render } = createRoot(document);
+render(createElement('div', { title: 'test', key: '1' }));
+render(createElement(DummyComponent, { initialInput: 'The input', key: '1' }));
 render(
 	createElement(DummerComponent, {
 		initialInput: 'The input',
 		input: 'New input',
 		key: '1'
-	}),
-	document
+	})
 );
-render(h('div', { title: 'test', key: '1' }), document);
-render(h(DummyComponent, { initialInput: 'The input', key: '1' }), document);
+render(h('div', { title: 'test', key: '1' }));
+render(h(DummyComponent, { initialInput: 'The input', key: '1' }));
 render(
 	h(DummerComponent, {
 		initialInput: 'The input',
 		input: 'New input',
 		key: '1'
-	}),
-	document
+	})
 );
 
 // Accessing children

@@ -188,7 +188,7 @@ describe('Portal', () => {
 		}
 
 		render(<App />, root);
-		expect(dialog.childNodes.length).to.equal(2);
+		expect(dialog.childNodes.length).to.equal(1);
 		render(null, root);
 		expect(dialog.childNodes.length).to.equal(0);
 	});
@@ -384,8 +384,8 @@ describe('Portal', () => {
 						root2 = r;
 					}}
 				>
-					<p>Hello</p>
 					{createPortal(props.children, scratch)}
+					<p>Hello</p>
 					{createPortal(props.children, root)}
 				</div>
 			);

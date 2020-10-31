@@ -7,7 +7,7 @@ import {
 	catchErrorSpy
 } from '../../../test/_util/optionSpies';
 
-import { createElement, render, Component } from 'preact';
+import { createElement, createRoot, Component } from 'preact';
 import { useState } from 'preact/hooks';
 import { setupRerender } from 'preact/test-utils';
 import 'preact/debug';
@@ -25,9 +25,12 @@ describe('debug options', () => {
 	/** @type {(count: number) => void} */
 	let setCount;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
+		({ render } = createRoot(scratch));
 
 		vnodeSpy.resetHistory();
 		rootSpy.resetHistory();
@@ -54,7 +57,7 @@ describe('debug options', () => {
 	}
 
 	it('should call old options on mount', () => {
-		render(<ClassApp />, scratch);
+		render(<ClassApp />);
 
 		expect(vnodeSpy).to.have.been.called;
 		expect(rootSpy).to.have.been.called;
@@ -63,7 +66,7 @@ describe('debug options', () => {
 	});
 
 	it('should call old options on update', () => {
-		render(<ClassApp />, scratch);
+		render(<ClassApp />);
 
 		setCount(1);
 		rerender();
@@ -75,8 +78,8 @@ describe('debug options', () => {
 	});
 
 	it('should call old options on unmount', () => {
-		render(<ClassApp />, scratch);
-		render(null, scratch);
+		render(<ClassApp />);
+		render(null);
 
 		expect(vnodeSpy).to.have.been.called;
 		expect(rootSpy).to.have.been.called;
@@ -91,7 +94,7 @@ describe('debug options', () => {
 			return <div>{count}</div>;
 		}
 
-		render(<HookApp />, scratch);
+		render(<HookApp />);
 
 		expect(hookSpy).to.have.been.called;
 	});
@@ -118,7 +121,7 @@ describe('debug options', () => {
 			}
 		}
 
-		render(<ErrorApp />, scratch);
+		render(<ErrorApp />);
 		rerender();
 
 		expect(catchErrorSpy).to.have.been.called;

@@ -1,4 +1,4 @@
-import { options, createElement, render } from 'preact';
+import { options, createElement, createRoot } from 'preact';
 import { useEffect, useReducer, useState } from 'preact/hooks';
 import { act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
@@ -18,8 +18,11 @@ describe('act', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 	});
 
 	afterEach(() => {
@@ -39,7 +42,7 @@ describe('act', () => {
 			useEffect(spy);
 			return <div />;
 		}
-		act(() => render(<StateContainer />, scratch));
+		act(() => render(<StateContainer />));
 		expect(spy).to.be.calledOnce;
 	});
 
@@ -56,7 +59,7 @@ describe('act', () => {
 			);
 		}
 
-		act(() => render(<StateContainer />, scratch));
+		act(() => render(<StateContainer />));
 		expect(spy).to.be.calledOnce;
 		expect(scratch.textContent).to.include('Count: 0');
 		act(() => {
@@ -94,7 +97,7 @@ describe('act', () => {
 				</div>
 			);
 		}
-		act(() => render(<StateContainer />, scratch));
+		act(() => render(<StateContainer />));
 		expect(spy).to.be.calledOnce;
 		expect(scratch.textContent).to.include('Count: 0');
 		act(() => {
@@ -119,7 +122,7 @@ describe('act', () => {
 			);
 		}
 
-		render(<StateContainer />, scratch);
+		render(<StateContainer />);
 		expect(scratch.textContent).to.include('Count: 0');
 		act(() => {
 			const button = scratch.querySelector('button');
@@ -161,7 +164,7 @@ describe('act', () => {
 			return <button onClick={increment}>{count}</button>;
 		}
 
-		render(<CounterButton />, scratch);
+		render(<CounterButton />);
 		const button = scratch.querySelector('button');
 
 		// Click button. This will schedule an update which is deferred, as is
@@ -190,14 +193,14 @@ describe('act', () => {
 
 		// Render a component which schedules an effect outside of an `act`
 		// call. This will be scheduled to execute after the next paint as usual.
-		render(<Counter />, scratch);
+		render(<Counter />);
 		expect(scratch.firstChild.textContent).to.equal('0');
 
 		// Render a component inside an `act` call, this effect should be
 		// executed synchronously before `act` returns.
 		act(() => {
-			render(<div />, scratch);
-			render(<Counter />, scratch);
+			render(<div />);
+			render(<Counter />);
 		});
 		expect(scratch.firstChild.textContent).to.equal('1');
 	});
@@ -231,7 +234,7 @@ describe('act', () => {
 		const acted = act(async () => {
 			events.push('began act callback');
 			await delay(1);
-			render(<TestComponent />, scratch);
+			render(<TestComponent />);
 			events.push('end act callback');
 		});
 		events.push('act returned');
@@ -297,7 +300,7 @@ describe('act', () => {
 			}
 
 			act(() => {
-				render(<Widget />, scratch);
+				render(<Widget />);
 				const button = scratch.querySelector('button');
 				expect(counter).to.equal(0);
 
@@ -322,7 +325,7 @@ describe('act', () => {
 				return <button onClick={increment}>{count}</button>;
 			}
 
-			render(<Button />, scratch);
+			render(<Button />);
 			const button = scratch.querySelector('button');
 			expect(button.textContent).to.equal('0');
 
@@ -369,13 +372,13 @@ describe('act', () => {
 
 		const renderBroken = () => {
 			act(() => {
-				render(<BrokenWidget />, scratch);
+				render(<BrokenWidget />);
 			});
 		};
 
 		const renderWorking = () => {
 			act(() => {
-				render(<WorkingWidget />, scratch);
+				render(<WorkingWidget />);
 			});
 		};
 
@@ -406,7 +409,7 @@ describe('act', () => {
 		describe('asynchronously', () => {
 			const renderBrokenAsync = async () => {
 				await act(async () => {
-					render(<BrokenWidget />, scratch);
+					render(<BrokenWidget />);
 				});
 			};
 
@@ -449,7 +452,7 @@ describe('act', () => {
 
 			const renderBrokenEffect = () => {
 				act(() => {
-					render(<BrokenEffect />, scratch);
+					render(<BrokenEffect />);
 				});
 			};
 

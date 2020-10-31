@@ -1,4 +1,4 @@
-import { createElement, render } from 'preact';
+import { createElement, createRoot } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useRef } from 'preact/hooks';
 
@@ -8,8 +8,11 @@ describe('useRef', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 	});
 
 	afterEach(() => {
@@ -26,8 +29,8 @@ describe('useRef', () => {
 			return null;
 		}
 
-		render(<Comp />, scratch);
-		render(<Comp />, scratch);
+		render(<Comp />);
+		render(<Comp />);
 
 		expect(values).to.deep.equal([1, 2]);
 	});

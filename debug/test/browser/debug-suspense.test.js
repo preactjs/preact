@@ -21,6 +21,7 @@ describe('debug with suspense', () => {
 		warnings = [];
 		scratch = setupScratch();
 		rerender = setupRerender();
+
 		sinon.stub(console, 'error').callsFake(e => errors.push(e));
 		sinon.stub(console, 'warn').callsFake(w => warnings.push(w));
 	});
@@ -36,7 +37,7 @@ describe('debug with suspense', () => {
 			throw Promise.resolve();
 		}
 
-		expect(() => render(<Foo />, scratch)).to.throw;
+		expect(() => render(<Foo />)).to.throw;
 	});
 
 	it('should throw an error when using lazy and missing Suspense', () => {

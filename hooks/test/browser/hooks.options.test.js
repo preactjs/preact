@@ -6,7 +6,7 @@ import {
 } from '../../../test/_util/optionSpies';
 
 import { setupRerender, act } from 'preact/test-utils';
-import { createElement, render, createContext, options } from 'preact';
+import { createElement, createRoot, createContext, options } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import {
 	useState,
@@ -33,8 +33,11 @@ describe('hook options', () => {
 	/** @type {() => void} */
 	let increment;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 		rerender = setupRerender();
 
 		afterDiffSpy.resetHistory();
@@ -54,14 +57,14 @@ describe('hook options', () => {
 	}
 
 	it('should call old options on mount', () => {
-		render(<App />, scratch);
+		render(<App />);
 
 		expect(beforeRenderSpy).to.have.been.called;
 		expect(afterDiffSpy).to.have.been.called;
 	});
 
 	it('should call old options.diffed on update', () => {
-		render(<App />, scratch);
+		render(<App />);
 
 		increment();
 		rerender();
@@ -71,8 +74,8 @@ describe('hook options', () => {
 	});
 
 	it('should call old options on unmount', () => {
-		render(<App />, scratch);
-		render(null, scratch);
+		render(<App />);
+		render(null);
 
 		expect(unmountSpy).to.have.been.called;
 	});
@@ -107,8 +110,7 @@ describe('hook options', () => {
 		render(
 			<Ctx.Provider value="a">
 				<App />
-			</Ctx.Provider>,
-			scratch
+			</Ctx.Provider>
 		);
 
 		expect(hookSpy.args.map(arg => [arg[1], arg[2]])).to.deep.equal([
@@ -145,7 +147,7 @@ describe('hook options', () => {
 			}
 
 			act(() => {
-				render(<App />, scratch);
+				render(<App />);
 			});
 
 			expect(spy.callCount).to.equal(0);

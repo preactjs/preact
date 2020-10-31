@@ -1,5 +1,5 @@
 import { setupRerender, act } from 'preact/test-utils';
-import { createElement, render, createContext } from 'preact';
+import { createElement, createRoot, createContext } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useReducer, useEffect, useContext } from 'preact/hooks';
 
@@ -12,9 +12,12 @@ describe('useReducer', () => {
 	/** @type {() => void} */
 	let rerender;
 
+	let render;
+
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
+		({ render } = createRoot(scratch));
 	});
 
 	afterEach(() => {
@@ -41,7 +44,7 @@ describe('useReducer', () => {
 			return null;
 		}
 
-		render(<Comp />, scratch);
+		render(<Comp />);
 
 		_dispatch({ type: 'increment', by: 10 });
 		rerender();
@@ -77,7 +80,7 @@ describe('useReducer', () => {
 			);
 		}
 
-		render(<ReducerComponent />, scratch);
+		render(<ReducerComponent />);
 		expect(scratch.textContent).to.include('Count: 0');
 
 		const button = scratch.querySelector('button');
@@ -109,7 +112,7 @@ describe('useReducer', () => {
 			return null;
 		}
 
-		render(<Comp initCount={10} />, scratch);
+		render(<Comp initCount={10} />);
 
 		_dispatch({ type: 'increment', by: 10 });
 		rerender();
@@ -137,7 +140,7 @@ describe('useReducer', () => {
 			return null;
 		}
 
-		render(<Comp />, scratch);
+		render(<Comp />);
 
 		_dispatch({ type: 'increment', by: 10 });
 		rerender();
@@ -163,9 +166,9 @@ describe('useReducer', () => {
 			return null;
 		}
 
-		render(<Comp increment={10} />, scratch);
+		render(<Comp increment={10} />);
 
-		render(<Comp increment={20} />, scratch);
+		render(<Comp increment={20} />);
 
 		_dispatch({ type: 'increment' });
 		rerender();
@@ -207,7 +210,7 @@ describe('useReducer', () => {
 		);
 
 		act(() => {
-			render(<App />, scratch);
+			render(<App />);
 		});
 		expect(scratch.innerHTML).to.equal('<div><p>message</p></div>');
 	});

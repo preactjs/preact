@@ -1,4 +1,4 @@
-import { createElement, render } from 'preact';
+import { createElement, createRoot } from 'preact';
 import {
 	setupScratch,
 	teardown,
@@ -8,7 +8,7 @@ import {
 /** @jsx createElement */
 
 describe('event handling', () => {
-	let scratch, proto;
+	let scratch, proto, render;
 
 	function fireEvent(on, type) {
 		let e = document.createEvent('Event');
@@ -18,6 +18,7 @@ describe('event handling', () => {
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 
 		proto = document.createElement('div').constructor.prototype;
 
@@ -36,7 +37,7 @@ describe('event handling', () => {
 		let click = () => {},
 			onclick = () => {};
 
-		render(<div click={click} onClick={onclick} />, scratch);
+		render(<div click={click} onClick={onclick} />);
 
 		expect(scratch.childNodes[0].attributes.length).to.equal(0);
 
@@ -53,7 +54,7 @@ describe('event handling', () => {
 		function fooHandler() {}
 		const falsyHandler = false;
 
-		render(<div onClick={falsyHandler} onOtherClick={fooHandler} />, scratch);
+		render(<div onClick={falsyHandler} onOtherClick={fooHandler} />);
 
 		expect(
 			proto.addEventListener
@@ -71,7 +72,7 @@ describe('event handling', () => {
 		let click = sinon.spy(),
 			mousedown = sinon.spy();
 
-		render(<div onclick={() => click(1)} onmousedown={mousedown} />, scratch);
+		render(<div onclick={() => click(1)} onmousedown={mousedown} />);
 
 		expect(proto.addEventListener)
 			.to.have.been.calledTwice.and.to.have.been.calledWith('click')
@@ -85,7 +86,7 @@ describe('event handling', () => {
 		let click = sinon.spy(),
 			mousedown = sinon.spy();
 
-		render(<div onClick={() => click(1)} onMouseDown={mousedown} />, scratch);
+		render(<div onClick={() => click(1)} onMouseDown={mousedown} />);
 
 		expect(proto.addEventListener)
 			.to.have.been.calledTwice.and.to.have.been.calledWith('click')
@@ -99,7 +100,7 @@ describe('event handling', () => {
 		let click1 = sinon.spy();
 		let click2 = sinon.spy();
 
-		render(<div onClick={click1} />, scratch);
+		render(<div onClick={click1} />);
 
 		fireEvent(scratch.childNodes[0], 'click');
 		expect(click1).to.have.been.calledOnce;
@@ -108,7 +109,7 @@ describe('event handling', () => {
 		click1.resetHistory();
 		click2.resetHistory();
 
-		render(<div onClick={click2} />, scratch);
+		render(<div onClick={click2} />);
 
 		fireEvent(scratch.childNodes[0], 'click');
 		expect(click1).to.not.have.been.called;
@@ -119,8 +120,8 @@ describe('event handling', () => {
 		let click = sinon.spy(),
 			mousedown = sinon.spy();
 
-		render(<div onClick={() => click(1)} onMouseDown={mousedown} />, scratch);
-		render(<div onClick={() => click(2)} />, scratch);
+		render(<div onClick={() => click(1)} onMouseDown={mousedown} />);
+		render(<div onClick={() => click(2)} />);
 
 		expect(proto.removeEventListener).to.have.been.calledWith('mousedown');
 
@@ -131,7 +132,7 @@ describe('event handling', () => {
 		click.resetHistory();
 		mousedown.resetHistory();
 
-		render(<div />, scratch);
+		render(<div />);
 
 		expect(proto.removeEventListener).to.have.been.calledWith('click');
 
@@ -142,7 +143,7 @@ describe('event handling', () => {
 	it('should register events not appearing on dom nodes', () => {
 		let onAnimationEnd = () => {};
 
-		render(<div onanimationend={onAnimationEnd} />, scratch);
+		render(<div onanimationend={onAnimationEnd} />);
 		expect(
 			proto.addEventListener
 		).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
@@ -161,8 +162,7 @@ describe('event handling', () => {
 			render(
 				<div onClickCapture={click} onFocusCapture={focus}>
 					<button />
-				</div>,
-				scratch
+				</div>
 			);
 
 			let root = scratch.firstChild;

@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component, options } from 'preact';
+import { createElement, createRoot, Component, options } from 'preact';
 import {
 	setupScratch,
 	teardown,
@@ -23,10 +23,11 @@ function getAttributes(node) {
 }
 
 describe('render()', () => {
-	let scratch, rerender;
+	let scratch, rerender, render;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		({ render } = createRoot(scratch));
 		rerender = setupRerender();
 	});
 
@@ -42,7 +43,7 @@ describe('render()', () => {
 	});
 
 	it('should render an empty text node given an empty string', () => {
-		render('', scratch);
+		render('');
 		let c = scratch.childNodes;
 		expect(c).to.have.length(1);
 		expect(c[0].data).to.equal('');
@@ -50,19 +51,19 @@ describe('render()', () => {
 	});
 
 	it('should allow node type change with content', () => {
-		render(<span>Bad</span>, scratch);
-		render(<div>Good</div>, scratch);
+		render(<span>Bad</span>);
+		render(<div>Good</div>);
 		expect(scratch.innerHTML).to.eql(`<div>Good</div>`);
 	});
 
 	it('should not render when detecting JSON-injection', () => {
 		const vnode = JSON.parse('{"type":"span","children":"Malicious"}');
-		render(vnode, scratch);
+		render(vnode);
 		expect(scratch.firstChild).to.be.null;
 	});
 
 	it('should create empty nodes (<* />)', () => {
-		render(<div />, scratch);
+		render(<div />);
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.childNodes[0].nodeName).to.equal('DIV');
 
@@ -70,25 +71,27 @@ describe('render()', () => {
 		scratch = document.createElement('div');
 		(document.body || document.documentElement).appendChild(scratch);
 
-		render(<span />, scratch);
+		({ render } = createRoot(scratch));
+		render(<span />);
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.childNodes[0].nodeName).to.equal('SPAN');
 	});
 
 	it('should not throw error in IE11 with type date', () => {
-		expect(() => render(<input type="date" />, scratch)).to.not.throw();
+		expect(() => render(<input type="date" />)).to.not.throw();
 	});
 
 	it('should support custom tag names', () => {
-		render(<foo />, scratch);
+		render(<foo />);
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.firstChild).to.have.property('nodeName', 'FOO');
 
 		scratch.parentNode.removeChild(scratch);
 		scratch = document.createElement('div');
 		(document.body || document.documentElement).appendChild(scratch);
+		({ render } = createRoot(scratch));
 
-		render(<x-bar />, scratch);
+		render(<x-bar />);
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.firstChild).to.have.property('nodeName', 'X-BAR');
 	});
@@ -99,8 +102,7 @@ describe('render()', () => {
 				<form id="myform" />
 				<button form="myform">test</button>
 				<input form="myform" />
-			</div>,
-			scratch
+			</div>
 		);
 		const div = scratch.childNodes[0];
 		const form = div.childNodes[0];
@@ -121,8 +123,7 @@ describe('render()', () => {
 				{reused}
 				<hr />
 				{reused}
-			</div>,
-			scratch
+			</div>
 		);
 		expect(serializeHtml(scratch)).to.eql(
 			`<div><div class="reuse">Hello World!</div><hr><div class="reuse">Hello World!</div></div>`
@@ -132,8 +133,7 @@ describe('render()', () => {
 			<div>
 				<hr />
 				{reused}
-			</div>,
-			scratch
+			</div>
 		);
 		expect(serializeHtml(scratch)).to.eql(
 			`<div><hr><div class="reuse">Hello World!</div></div>`
@@ -141,17 +141,17 @@ describe('render()', () => {
 	});
 
 	it('should merge new elements when called multiple times', () => {
-		render(<div />, scratch);
+		render(<div />);
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.firstChild).to.have.property('nodeName', 'DIV');
 		expect(scratch.innerHTML).to.equal('<div></div>');
 
-		render(<span />, scratch);
+		render(<span />);
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.firstChild).to.have.property('nodeName', 'SPAN');
 		expect(scratch.innerHTML).to.equal('<span></span>');
 
-		render(<span class="hello">Hello!</span>, scratch);
+		render(<span class="hello">Hello!</span>);
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.firstChild).to.have.property('nodeName', 'SPAN');
 		expect(scratch.innerHTML).to.equal('<span class="hello">Hello!</span>');
@@ -163,8 +163,7 @@ describe('render()', () => {
 				<span />
 				<foo />
 				<x-bar />
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.childNodes).to.have.length(1);
@@ -181,64 +180,63 @@ describe('render()', () => {
 		render(
 			<div>
 				{null},{undefined},{false},{0},{NaN}
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.firstChild).to.have.property('innerHTML', ',,,0,NaN');
 	});
 
 	it('should not render null', () => {
-		render(null, scratch);
+		render(null);
 		expect(scratch.innerHTML).to.equal('');
 		expect(scratch.childNodes).to.have.length(0);
 	});
 
 	it('should not render undefined', () => {
-		render(undefined, scratch);
+		render(undefined);
 		expect(scratch.innerHTML).to.equal('');
 		expect(scratch.childNodes).to.have.length(0);
 	});
 
 	it('should not render boolean true', () => {
-		render(true, scratch);
+		render(true);
 		expect(scratch.innerHTML).to.equal('');
 		expect(scratch.childNodes).to.have.length(0);
 	});
 
 	it('should not render boolean false', () => {
-		render(false, scratch);
+		render(false);
 		expect(scratch.innerHTML).to.equal('');
 		expect(scratch.childNodes).to.have.length(0);
 	});
 
 	it('should not render children when using function children', () => {
-		render(<div>{() => {}}</div>, scratch);
+		render(<div>{() => {}}</div>);
 		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 
 	it('should render NaN as text content', () => {
-		render(NaN, scratch);
+		render(NaN);
 		expect(scratch.innerHTML).to.equal('NaN');
 	});
 
 	it('should render numbers (0) as text content', () => {
-		render(0, scratch);
+		render(0);
 		expect(scratch.innerHTML).to.equal('0');
 	});
 
 	it('should render numbers (42) as text content', () => {
-		render(42, scratch);
+		render(42);
 		expect(scratch.innerHTML).to.equal('42');
 	});
 
 	it('should render strings as text content', () => {
-		render('Testing, huh! How is it going?', scratch);
+		render('Testing, huh! How is it going?');
 		expect(scratch.innerHTML).to.equal('Testing, huh! How is it going?');
 	});
 
 	it('should render arrays of mixed elements', () => {
-		render(getMixedArray(), scratch);
+		render(getMixedArray());
 		expect(scratch.innerHTML).to.equal(mixedArrayHTML);
 	});
 
@@ -250,8 +248,7 @@ describe('render()', () => {
 				afalse="afalse"
 				anan="aNaN"
 				a0="a0"
-			/>,
-			scratch
+			/>
 		);
 
 		render(
@@ -261,8 +258,7 @@ describe('render()', () => {
 				afalse={false}
 				anan={NaN}
 				a0={0}
-			/>,
-			scratch
+			/>
 		);
 
 		expect(
@@ -282,8 +278,7 @@ describe('render()', () => {
 				afalse={false}
 				anan={NaN}
 				a0={0}
-			/>,
-			scratch
+			/>
 		);
 
 		expect(getAttributes(scratch.firstChild), 'initial render').to.eql({
@@ -300,8 +295,7 @@ describe('render()', () => {
 				<input value={false} />
 				<input value={null} />
 				<input value={undefined} />
-			</div>,
-			scratch
+			</div>
 		);
 
 		let root = scratch.firstChild;
@@ -312,10 +306,7 @@ describe('render()', () => {
 	});
 
 	it('should set value inside the specified range', () => {
-		render(
-			<input type="range" value={0.5} min="0" max="1" step="0.05" />,
-			scratch
-		);
+		render(<input type="range" value={0.5} min="0" max="1" step="0.05" />);
 		expect(scratch.firstChild.value).to.equal('0.5');
 	});
 
@@ -328,8 +319,7 @@ describe('render()', () => {
 					<div>
 						<input value={val} />
 						<table border={val} />
-					</div>,
-					scratch
+					</div>
 				);
 			}
 
@@ -358,23 +348,23 @@ describe('render()', () => {
 
 	// Test for preactjs/preact#651
 	it('should set enumerable boolean attribute', () => {
-		render(<input spellcheck={false} />, scratch);
+		render(<input spellcheck={false} />);
 		expect(scratch.firstChild.spellcheck).to.equal(false);
 	});
 
 	it('should not set tagName', () => {
-		expect(() => render(<input tagName="div" />, scratch)).not.to.throw();
+		expect(() => render(<input tagName="div" />)).not.to.throw();
 	});
 
 	it('should apply string attributes', () => {
-		render(<div foo="bar" data-foo="databar" />, scratch);
+		render(<div foo="bar" data-foo="databar" />);
 		expect(serializeHtml(scratch)).to.equal(
 			'<div data-foo="databar" foo="bar"></div>'
 		);
 	});
 
 	it('should not serialize function props as attributes', () => {
-		render(<div click={function a() {}} ONCLICK={function b() {}} />, scratch);
+		render(<div click={function a() {}} ONCLICK={function b() {}} />);
 
 		let div = scratch.childNodes[0];
 		expect(div.attributes.length).to.equal(0);
@@ -389,8 +379,7 @@ describe('render()', () => {
 						return 'abc';
 					}
 				}}
-			/>,
-			scratch
+			/>
 		);
 
 		let div = scratch.childNodes[0];
@@ -410,34 +399,34 @@ describe('render()', () => {
 	});
 
 	it('should apply class as String', () => {
-		render(<div class="foo" />, scratch);
+		render(<div class="foo" />);
 		expect(scratch.childNodes[0]).to.have.property('className', 'foo');
 	});
 
 	it('should alias className to class', () => {
-		render(<div className="bar" />, scratch);
+		render(<div className="bar" />);
 		expect(scratch.childNodes[0]).to.have.property('className', 'bar');
 	});
 
 	it('should support false aria-* attributes', () => {
-		render(<div aria-checked="false" />, scratch);
+		render(<div aria-checked="false" />);
 		expect(scratch.firstChild.getAttribute('aria-checked')).to.equal('false');
 	});
 
 	it('should set checked attribute on custom elements without checked property', () => {
-		render(<o-checkbox checked />, scratch);
+		render(<o-checkbox checked />);
 		expect(scratch.innerHTML).to.equal(
 			'<o-checkbox checked="true"></o-checkbox>'
 		);
 	});
 
 	it('should set value attribute on custom elements without value property', () => {
-		render(<o-input value="test" />, scratch);
+		render(<o-input value="test" />);
 		expect(scratch.innerHTML).to.equal('<o-input value="test"></o-input>');
 	});
 
 	it('should mask value on password input elements', () => {
-		render(<input value="xyz" type="password" />, scratch);
+		render(<input value="xyz" type="password" />);
 		expect(scratch.innerHTML).to.equal('<input type="password">');
 	});
 
@@ -445,7 +434,7 @@ describe('render()', () => {
 		it('should support dangerouslySetInnerHTML', () => {
 			let html = '<b>foo &amp; bar</b>';
 			// eslint-disable-next-line react/no-danger
-			render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
+			render(<div dangerouslySetInnerHTML={{ __html: html }} />);
 
 			expect(scratch.firstChild, 'set').to.have.property('innerHTML', html);
 			expect(scratch.innerHTML).to.equal('<div>' + html + '</div>');
@@ -453,8 +442,7 @@ describe('render()', () => {
 			render(
 				<div>
 					a<strong>b</strong>
-				</div>,
-				scratch
+				</div>
 			);
 
 			expect(scratch, 'unset').to.have.property(
@@ -463,7 +451,7 @@ describe('render()', () => {
 			);
 
 			// eslint-disable-next-line react/no-danger
-			render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
+			render(<div dangerouslySetInnerHTML={{ __html: html }} />);
 			expect(scratch.innerHTML, 're-set').to.equal('<div>' + html + '</div>');
 		});
 
@@ -485,7 +473,7 @@ describe('render()', () => {
 				}
 			}
 
-			render(<Thing html="<b><i>test</i></b>" />, scratch);
+			render(<Thing html="<b><i>test</i></b>" />);
 			expect(scratch.innerHTML).to.equal('<div><b><i>test</i></b></div>');
 
 			thing.setState({ html: false });
@@ -503,7 +491,7 @@ describe('render()', () => {
 			let html = '<b>foo &amp; bar</b>';
 			scratch.innerHTML = `<div>${html}</div>`;
 			// eslint-disable-next-line react/no-danger
-			render(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
+			render(<div dangerouslySetInnerHTML={{ __html: html }} />);
 
 			expect(scratch.firstChild).to.have.property('innerHTML', html);
 			expect(scratch.innerHTML).to.equal(`<div>${html}</div>`);
@@ -520,7 +508,7 @@ describe('render()', () => {
 			}
 
 			let thing;
-			render(<Thing ref={r => (thing = r)} />, scratch);
+			render(<Thing ref={r => (thing = r)} />);
 
 			let firstInnerHTMLChild = scratch.firstChild.firstChild;
 
@@ -549,7 +537,7 @@ describe('render()', () => {
 				}
 			}
 
-			render(<App />, scratch);
+			render(<App />);
 			expect(scratch.innerHTML).to.equal('<div></div>');
 
 			set({ show: false });
@@ -559,7 +547,7 @@ describe('render()', () => {
 	});
 
 	it('should reconcile mutated DOM attributes', () => {
-		let check = p => render(<input type="checkbox" checked={p} />, scratch),
+		let check = p => render(<input type="checkbox" checked={p} />),
 			value = () => scratch.lastChild.checked,
 			setValue = p => (scratch.lastChild.checked = p);
 		check(true);
@@ -581,8 +569,7 @@ describe('render()', () => {
 			<div>
 				<a>a</a>
 				<b>b</b>
-			</div>,
-			scratch
+			</div>
 		);
 
 		let a = scratch.firstChild.firstChild;
@@ -595,8 +582,7 @@ describe('render()', () => {
 			<div>
 				<b>b</b>
 				<a>a</a>
-			</div>,
-			scratch
+			</div>
 		);
 
 		expect(scratch.firstChild.firstChild).to.equalNode(b);
@@ -616,8 +602,7 @@ describe('render()', () => {
 						<option>50</option>
 						<option>100</option>
 					</datalist>
-				</div>,
-				scratch
+				</div>
 			);
 
 			let html = scratch.firstElementChild.firstElementChild.outerHTML;
@@ -631,9 +616,9 @@ describe('render()', () => {
 	it('should not throw when setting size to an invalid value', () => {
 		// These values are usually used to reset the `size` attribute to its
 		// initial state.
-		expect(() => render(<input size={undefined} />, scratch)).to.not.throw();
-		expect(() => render(<input size={null} />, scratch)).to.not.throw();
-		expect(() => render(<input size={0} />, scratch)).to.not.throw();
+		expect(() => render(<input size={undefined} />)).to.not.throw();
+		expect(() => render(<input size={null} />)).to.not.throw();
+		expect(() => render(<input size={0} />)).to.not.throw();
 	});
 
 	it('should not execute append operation when child is at last', () => {
@@ -681,7 +666,7 @@ describe('render()', () => {
 			}
 		}
 
-		render(<TodoList />, scratch);
+		render(<TodoList />);
 
 		// Simulate user typing
 		input.focus();
@@ -709,16 +694,16 @@ describe('render()', () => {
 	});
 
 	it('should keep value of uncontrolled inputs', () => {
-		render(<input value={undefined} />, scratch);
+		render(<input value={undefined} />);
 		scratch.firstChild.value = 'foo';
-		render(<input value={undefined} />, scratch);
+		render(<input value={undefined} />);
 		expect(scratch.firstChild.value).to.equal('foo');
 	});
 
 	it('should keep value of uncontrolled checkboxes', () => {
-		render(<input type="checkbox" checked={undefined} />, scratch);
+		render(<input type="checkbox" checked={undefined} />);
 		scratch.firstChild.checked = true;
-		render(<input type="checkbox" checked={undefined} />, scratch);
+		render(<input type="checkbox" checked={undefined} />);
 		expect(scratch.firstChild.checked).to.equal(true);
 	});
 
@@ -740,7 +725,7 @@ describe('render()', () => {
 			}
 		}
 
-		render(<Inputs ref={x => (inputs = x)} />, scratch);
+		render(<Inputs ref={x => (inputs = x)} />);
 
 		expect(text.value).to.equal('Hello');
 		expect(checkbox.checked).to.equal(true);
@@ -775,7 +760,7 @@ describe('render()', () => {
 			}
 		}
 
-		render(<App />, scratch);
+		render(<App />);
 		clearLog();
 
 		updateState();
@@ -806,7 +791,7 @@ describe('render()', () => {
 			return i < 3 ? null : <div>foo</div>;
 		}
 
-		render(<App />, scratch);
+		render(<App />);
 
 		updateApp();
 		rerender();
@@ -859,7 +844,7 @@ describe('render()', () => {
 			}
 		}
 
-		render(<App />, scratch);
+		render(<App />);
 		expect(scratch.textContent).to.equal('00');
 
 		ref.update();
@@ -891,7 +876,7 @@ describe('render()', () => {
 			);
 		}
 
-		render(<App>10</App>, scratch);
+		render(<App>10</App>);
 		expect(scratch.textContent).to.equal('10');
 		options._diff = prevDiff;
 	});
@@ -911,7 +896,7 @@ describe('render()', () => {
 			}
 		}
 
-		render(<A />, scratch);
+		render(<A />);
 		expect(scratch.innerHTML).to.equal('<div>0</div>');
 
 		const sandbox = sinon.createSandbox();
@@ -946,7 +931,7 @@ describe('render()', () => {
 			</div>
 		);
 
-		render(<App />, scratch);
+		render(<App />);
 		expect(serializeHtml(scratch)).to.equal('<div><span>Bye</span></div>');
 	});
 
@@ -957,12 +942,12 @@ describe('render()', () => {
 			</div>
 		);
 
-		render(<App class="hi" />, scratch);
+		render(<App class="hi" />);
 		expect(scratch.innerHTML).to.equal(
 			'<div class="hi"><span>Bye</span></div>'
 		);
 
-		render(<App />, scratch);
+		render(<App />);
 		expect(serializeHtml(scratch)).to.equal('<div><span>Bye</span></div>');
 	});
 
@@ -972,8 +957,7 @@ describe('render()', () => {
 		render(
 			<div id="wrapper">
 				<div id="page1">Page 1</div>
-			</div>,
-			scratch
+			</div>
 		);
 		expect(scratch.innerHTML).to.equal(
 			'<div id="wrapper"><div id="page1">Page 1</div></div>'
@@ -983,8 +967,7 @@ describe('render()', () => {
 		render(
 			<div id="wrapper">
 				<div id="page2">Page 2</div>
-			</div>,
-			scratch
+			</div>
 		);
 		expect(scratch.innerHTML).to.equal(
 			'<div id="wrapper"><div id="page2">Page 2</div></div>'
