@@ -13,6 +13,8 @@ import { options, Fragment } from 'preact';
  * Benchmarks: https://esbench.com/bench/5f6b54a0b4632100a7dcd2b3
  */
 
+let vnodeCounter = 0;
+
 /**
  * JSX.Element factory used by Babel's {runtime:"automatic"} JSX transform
  * @param {VNode['type']} type
@@ -35,7 +37,7 @@ function createVNode(type, props, key, __source, __self) {
 		_component: null,
 		_hydrating: null,
 		constructor: undefined,
-		_original: Math.random(),
+		_original: ++vnodeCounter,
 		__source,
 		__self
 	};

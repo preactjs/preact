@@ -43,6 +43,8 @@ export function createElement(type, props, children) {
 	return createVNode(type, normalizedProps, key, ref, null);
 }
 
+let vnodeCounter = 0;
+
 /**
  * Create a VNode (used internally by Preact)
  * @param {import('./internal').VNode["type"]} type The node name or Component
@@ -75,7 +77,7 @@ export function createVNode(type, props, key, ref, original) {
 		_component: null,
 		_hydrating: null,
 		constructor: undefined,
-		_original: original == null ? Math.random() : original
+		_original: original == null ? ++vnodeCounter : original
 	};
 
 	if (options.vnode != null) options.vnode(vnode);
