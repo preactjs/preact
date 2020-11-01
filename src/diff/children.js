@@ -252,7 +252,6 @@ export function diffChildren(
 				newParentVNode._nextDom = oldDom;
 			} else if (childVNode._bailed) {
 				oldDom = getLastDomChild(childVNode).nextSibling;
-				console.log('new oldDom', oldDom);
 				childVNode._bailed = false;
 			}
 		} else if (
