@@ -4,6 +4,22 @@ import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { removeNode } from '../util';
 import { getDomSibling } from '../component';
 
+export function getLastDomChild(vnode) {
+	let sibling, domChild;
+
+	for (let childIndex = 0; childIndex < vnode._children.length; childIndex++) {
+		sibling = vnode._children[childIndex];
+
+		if (sibling != null && sibling._dom != null) {
+			// Since updateParentDomPointers keeps _dom pointer correct,
+			// we can rely on _dom to tell us if this subtree contains a
+			// rendered DOM node, and what the first rendered DOM node is
+			domChild = sibling._dom;
+		}
+	}
+
+	return domChild;
+}
 /**
  * Diff the children of a virtual node
  * @param {import('../internal').PreactElement} parentDom The DOM element whose
@@ -194,6 +210,10 @@ export function diffChildren(
 				// If the last child is a DOM VNode, then oldDom will be set to that DOM
 				// node's nextSibling.
 				newParentVNode._nextDom = oldDom;
+			} else if (childVNode._bailed) {
+				oldDom = getLastDomChild(childVNode).nextSibling;
+				console.log('new oldDom', oldDom);
+				childVNode._bailed = false;
 			}
 		} else if (
 			oldDom &&
@@ -291,6 +311,7 @@ export function placeChild(
 					break outer;
 				}
 			}
+
 			parentDom.insertBefore(newDom, oldDom);
 			nextDom = oldDom;
 		}
