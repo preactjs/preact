@@ -228,6 +228,15 @@ describe('render', () => {
 			expect(rendered).to.equal(expected);
 		});
 
+		it('should not self-close void elements if it has dangerouslySetInnerHTML prop', () => {
+			let rendered = render(
+					<link dangerouslySetInnerHTML={{ __html: '<foo>' }} />
+				),
+				expected = `<link><foo></link>`;
+
+			expect(rendered).to.equal(expected);
+		});
+
 		it('should serialize object styles', () => {
 			let rendered = render(<div style={{ color: 'red', border: 'none' }} />),
 				expected = `<div style="color: red; border: none;"></div>`;
@@ -812,6 +821,15 @@ describe('render', () => {
 			expect(renderXml(<div />)).to.equal(`<div />`);
 			expect(renderXml(<a />)).to.equal(`<a />`);
 			expect(renderXml(<a>b</a>)).to.equal(`<a>b</a>`);
+		});
+
+		it('should not self-close if it has dangerouslySetInnerHTML prop', () => {
+			expect(
+				renderXml(<a dangerouslySetInnerHTML={{ __html: 'b' }} />)
+			).to.equal(`<a>b</a>`);
+			expect(
+				renderXml(<a dangerouslySetInnerHTML={{ __html: '<b />' }} />)
+			).to.equal(`<a><b /></a>`);
 		});
 
 		it('should render boolean attributes with named values', () => {

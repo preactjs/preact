@@ -351,13 +351,13 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 		}
 	}
 
-	if (pieces.length) {
+	if (pieces.length || html) {
 		s += pieces.join('');
 	} else if (opts && opts.xml) {
 		return s.substring(0, s.length - 1) + ' />';
 	}
 
-	if (isVoid && !children) {
+	if (isVoid && !children && !html) {
 		s = s.replace(/>$/, ' />');
 	} else {
 		if (pretty && ~s.indexOf('\n')) s += '\n';
