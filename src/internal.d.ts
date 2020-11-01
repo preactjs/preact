@@ -21,6 +21,7 @@ export interface DevSource {
 }
 
 export interface Options extends preact.Options {
+	_vnodeId: number;
 	/** Attach a hook that is invoked before render, mainly to check the arguments. */
 	_root?(
 		vnode: preact.ComponentChild,
