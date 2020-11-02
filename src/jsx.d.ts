@@ -1,6 +1,6 @@
 // Users who only use Preact for SSR might not specify "dom" in their lib in tsconfig.json
 /// <reference lib="dom" />
-import * as CSS from 'csstype';
+import * as CSS from './jsx-csstype';
 
 type Defaultize<Props, Defaults> =
 	// Distribute over unions

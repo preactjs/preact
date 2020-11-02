@@ -81,7 +81,7 @@
     "build:test-utils": "microbundle build --raw --cwd test-utils",
     "build:compat": "microbundle build --raw --cwd compat --globals 'preact/hooks=preactHooks'",
     "build:jsx": "microbundle build --raw --cwd jsx-runtime",
-    "postbuild": "node ./config/node-13-exports.js",
+    "postbuild": "node ./config/node-13-exports.js && node ./config/copy-csstype.js",
     "dev": "microbundle watch --raw --format cjs",
     "dev:hooks": "microbundle watch --raw --format cjs --cwd hooks",
     "dev:compat": "microbundle watch --raw --format cjs --cwd compat --globals 'preact/hooks=preactHooks'",
@@ -222,6 +222,7 @@
     "check-export-map": "^1.0.1",
     "coveralls": "^3.0.0",
     "cross-env": "^5.2.0",
+    "csstype": "^2.6.6",
     "diff": "^3.5.0",
     "eslint": "5.15.1",
     "eslint-config-developit": "^1.1.1",
@@ -250,8 +251,5 @@
     "sinon-chai": "^3.0.0",
     "typescript": "3.5.3",
     "webpack": "^4.3.0"
-  },
-  "dependencies": {
-    "csstype": "^2.6.6"
   }
 }
