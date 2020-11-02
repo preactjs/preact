@@ -787,7 +787,7 @@ describe('Lifecycle methods', () => {
 		expect(scratch.innerHTML).to.equal('<p>bar</p>');
 	});
 
-	it('should reorder non-updating nested Fragment children', () => {
+	it.skip('should reorder non-updating nested Fragment children', () => {
 		const rows = [
 			{ id: '1', a: 5, b: 100 },
 			{ id: '2', a: 50, b: 10 },
