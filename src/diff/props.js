@@ -156,10 +156,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
  */
 function eventProxy(e) {
 	this._listeners[e.type + false](options.event ? options.event(e) : e);
-	if (
-		(e.type === 'input' || e.type === 'change') &&
-		this._prevValue
-	) {
+	if (e.type === 'input' || e.type === 'change' && this._prevValue) {
 		this.value = this._prevValue || this.value;
 	}
 }
