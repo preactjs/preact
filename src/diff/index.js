@@ -444,6 +444,9 @@ function diffElementNodes(
 				// To fix that we'll always update it when it is 0 for progress elements
 				(i !== dom.value || (newVNode.type === 'progress' && !i))
 			) {
+				if ('onChange' in newProps) {
+					dom._prevValue = oldProps.value;
+				}
 				setProperty(dom, 'value', i, oldProps.value, false);
 			}
 			if (
@@ -451,6 +454,9 @@ function diffElementNodes(
 				(i = newProps.checked) !== undefined &&
 				i !== dom.checked
 			) {
+				if ('onChange' in newProps) {
+					dom._prevValue = oldProps.value;
+				}
 				setProperty(dom, 'checked', i, oldProps.checked, false);
 			}
 		}
