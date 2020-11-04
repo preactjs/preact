@@ -155,15 +155,11 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
  * @private
  */
 function eventProxy(e) {
-	if (e.target.prevValue) {
-		e.target.value = e.target._prevValue;
-	}
 	this._listeners[e.type + false](options.event ? options.event(e) : e);
+	this.value = this._prevValue || '';
 }
 
 function eventProxyCapture(e) {
-	if (e.target.prevValue) {
-		e.target.value = e.target._prevValue;
-	}
 	this._listeners[e.type + true](options.event ? options.event(e) : e);
+	this.value = this._prevValue || '';
 }
