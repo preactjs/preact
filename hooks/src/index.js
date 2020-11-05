@@ -5,6 +5,13 @@ let currentIndex;
 
 /** @type {import('./internal').Component} */
 let currentComponent;
+/**
+ * Keep track of the previous component so that we can set
+ * `currentComponent` to `null` and throw when a hook is invoked
+ * outside of render
+ * @type {import('./internal').Component}
+ */
+let previousComponent;
 
 /** @type {number} */
 let currentHook = 0;
@@ -12,6 +19,7 @@ let currentHook = 0;
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
+let oldBeforeDiff = options._diff;
 let oldBeforeRender = options._render;
 let oldAfterDiff = options.diffed;
 let oldCommit = options._commit;
@@ -19,6 +27,11 @@ let oldBeforeUnmount = options.unmount;
 
 const RAF_TIMEOUT = 100;
 let prevRaf;
+
+options._diff = vnode => {
+	currentComponent = null;
+	if (oldBeforeDiff) oldBeforeDiff(vnode);
+};
 
 options._render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
@@ -41,6 +54,7 @@ options.diffed = vnode => {
 	if (c && c.__hooks && c.__hooks._pendingEffects.length) {
 		afterPaint(afterPaintEffects.push(c));
 	}
+	currentComponent = previousComponent;
 };
 
 options._commit = (vnode, commitQueue) => {
