@@ -16,7 +16,9 @@ const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|colo
 // type="file|checkbox|radio", plus "range" in IE11.
 // (IE11 doesn't support Symbol, which we use here to turn `rad` into `ra` which matches "range")
 const ONCHANGE_INPUT_TYPES =
-	typeof Symbol != 'undefined' ? /fil|che|rad/i : /fil|che|ra/i;
+	typeof Symbol != 'undefined' && typeof Symbol() == 'symbol'
+		? /fil|che|rad/i
+		: /fil|che|ra/i;
 
 // Some libraries like `react-virtualized` explicitly check for this.
 Component.prototype.isReactComponent = {};
