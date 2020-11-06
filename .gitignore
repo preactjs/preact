@@ -12,3 +12,4 @@ coverage
 *.log
 package/
 preact-*.tgz
+jsx-csstype.d.ts

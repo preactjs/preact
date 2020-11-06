@@ -20,9 +20,6 @@ export function jsx<P>(
 	props: Attributes & P & { children?: ComponentChild },
 	key?: string
 ): VNode<any>;
-export namespace jsx {
-	export import JSX = JSXInternal;
-}
 
 export function jsxs(
 	type: string,
@@ -36,9 +33,6 @@ export function jsxs<P>(
 	props: Attributes & P & { children?: ComponentChild[] },
 	key?: string
 ): VNode<any>;
-export namespace jsxs {
-	export import JSX = JSXInternal;
-}
 
 export function jsxDEV(
 	type: string,
@@ -52,6 +46,5 @@ export function jsxDEV<P>(
 	props: Attributes & P & { children?: ComponentChildren },
 	key?: string
 ): VNode<any>;
-export namespace jsxDEV {
-	export import JSX = JSXInternal;
-}
+
+export { JSXInternal as JSX };
