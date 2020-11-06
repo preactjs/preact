@@ -644,6 +644,63 @@ describe('createContext', () => {
 		expect(scratch.innerHTML).to.equal('<div>1</div>');
 	});
 
+	it('should re-render based on changedBits if provided', () => {
+		const { Provider, Consumer } = createContext(null, (prev, next) => {
+			if (prev.i !== next.i) {
+				return 1;
+			}
+
+			return 0;
+		});
+
+		const INITIAL = { i: 1 };
+		const INITIAL_DIFFERENT_INSTANCE = { i: 1 };
+		const CHANGED_VALUE = { i: 2 };
+
+		class Inner extends Component {
+			render(props) {
+				return <div>{props.i}</div>;
+			}
+		}
+
+		sinon.spy(Inner.prototype, 'render');
+
+		act(() => {
+			render(
+				<Provider value={INITIAL}>
+					<Consumer>{data => <Inner {...data} />}</Consumer>
+				</Provider>,
+				scratch
+			);
+
+			// Not calling re-render since it's gonna get called with the same Consumer function
+			render(
+				<Provider value={INITIAL_DIFFERENT_INSTANCE}>
+					<Consumer>{data => <Inner {...data} />}</Consumer>
+				</Provider>,
+				scratch
+			);
+		});
+
+		// Rendered once, with the changedBits returning zero, even though the context value is not
+		// stricly equal
+		expect(Inner.prototype.render).to.have.been.calledOnce;
+		expect(scratch.innerHTML).to.equal('<div>1</div>');
+
+		act(() => {
+			render(
+				<Provider value={CHANGED_VALUE}>
+					<Consumer>{data => <Inner {...data} />}</Consumer>
+				</Provider>,
+				scratch
+			);
+		});
+
+		// Rendered twice, with a changed value that makes changedBits to return something else than zero
+		expect(Inner.prototype.render).to.have.been.calledTwice;
+		expect(scratch.innerHTML).to.equal('<div>2</div>');
+	});
+
 	it('should not rerender consumers that have been unmounted', () => {
 		const { Provider, Consumer } = createContext(0);
 

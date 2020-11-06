@@ -302,5 +302,8 @@ declare namespace preact {
 	}
 	interface PreactContext<T> extends Context<T> {}
 
-	function createContext<T>(defaultValue: T): Context<T>;
+	function createContext<T>(
+		defaultValue?: T,
+		changedBits?: (prev: T, next: T) => Number
+	): Context<T>;
 }
