@@ -1,0 +1,5 @@
+{
+  "sandboxes": ["preact-x-preact-cli-3-starter-vj285y2rn3"],
+  "buildCommand": "build",
+  "silent": true
+}
