@@ -299,6 +299,7 @@ declare namespace preact {
 	interface Context<T> {
 		Consumer: Consumer<T>;
 		Provider: Provider<T>;
+		displayName?: string;
 	}
 	interface PreactContext<T> extends Context<T> {}
 
