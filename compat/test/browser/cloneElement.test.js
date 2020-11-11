@@ -20,12 +20,17 @@ describe('compat cloneElement', () => {
 				a<span>b</span>
 			</foo>
 		);
-		expect(cloneElement(element)).to.eql(element);
+		const clone = cloneElement(element);
+		delete clone._original;
+		delete element._original;
+		expect(clone).to.eql(element);
 	});
 
 	it('should support props.children', () => {
 		let element = <foo children={<span>b</span>} />;
 		let clone = cloneElement(element);
+		delete clone._original;
+		delete element._original;
 		expect(clone).to.eql(element);
 		expect(cloneElement(clone).props.children).to.eql(element.props.children);
 	});
@@ -37,6 +42,8 @@ describe('compat cloneElement', () => {
 			</foo>
 		);
 		let clone = cloneElement(element);
+		delete clone._original;
+		delete element._original;
 		expect(clone).to.eql(element);
 		expect(clone.props.children.type).to.eql('div');
 	});
