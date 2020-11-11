@@ -15,11 +15,20 @@ describe('Lifecycle methods', () => {
 	// function expectDomLogToBe(expectedOperations, message) {
 	// 	expect(getLog()).to.deep.equal(expectedOperations, message);
 	// }
+	let resetInsertBefore;
+	let resetRemoveChild;
+	let resetRemove;
 
 	before(() => {
-		logCall(Node.prototype, 'insertBefore');
-		logCall(Node.prototype, 'appendChild');
-		logCall(Node.prototype, 'removeChild');
+		resetInsertBefore = logCall(Node.prototype, 'insertBefore');
+		resetRemoveChild = logCall(Node.prototype, 'appendChild');
+		resetRemove = logCall(Node.prototype, 'removeChild');
+	});
+
+	after(() => {
+		resetInsertBefore();
+		resetRemoveChild();
+		resetRemove();
 	});
 
 	beforeEach(() => {
