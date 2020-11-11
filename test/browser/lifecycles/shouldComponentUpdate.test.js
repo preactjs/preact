@@ -20,9 +20,9 @@ describe('Lifecycle methods', () => {
 	let resetRemove;
 
 	before(() => {
-		resetInsertBefore = logCall(Node.prototype, 'insertBefore');
-		resetRemoveChild = logCall(Node.prototype, 'appendChild');
-		resetRemove = logCall(Node.prototype, 'removeChild');
+		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
+		resetRemoveChild = logCall(Element.prototype, 'appendChild');
+		resetRemove = logCall(Element.prototype, 'removeChild');
 	});
 
 	after(() => {

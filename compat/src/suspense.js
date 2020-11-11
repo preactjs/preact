@@ -15,7 +15,7 @@ options._catchError = function(error, newVNode, oldVNode) {
 					newVNode._children = oldVNode._children;
 				}
 				// Don't call oldCatchError if we found a Suspense
-				return component._childDidSuspend(error, newVNode._component);
+				return component._childDidSuspend(error, newVNode);
 			}
 		}
 	}
@@ -63,9 +63,11 @@ Suspense.prototype = new Component();
 
 /**
  * @param {Promise} promise The thrown promise
- * @param {Component<any, any>} suspendingComponent The suspending component
+ * @param {import('./internal').VNode<any, any>} suspendingVNode The suspending component
  */
-Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
+Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
+	const suspendingComponent = suspendingVNode._component;
+
 	/** @type {import('./internal').SuspenseComponent} */
 	const c = this;
 
@@ -118,8 +120,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingComponent) {
 	 * to remain on screen and hydrate it when the suspense actually gets resolved.
 	 * While in non-hydration cases the usual fallback -> component flow would occour.
 	 */
-	const vnode = c._vnode;
-	const wasHydrating = vnode && vnode._hydrating === true;
+	const wasHydrating = suspendingVNode._hydrating === true;
 	if (!wasHydrating && !c._pendingSuspensionCount++) {
 		c.setState({ _suspended: (c._detachOnNextRender = c._vnode._children[0]) });
 	}
@@ -141,6 +142,7 @@ Suspense.prototype.render = function(props, state) {
 	}
 
 	// Wrap fallback tree in a VNode that prevents itself from being marked as aborting mid-hydration:
+	/** @type {import('./internal').VNode} */
 	const fallback =
 		state._suspended && createElement(Fragment, null, props.fallback);
 	if (fallback) fallback._hydrating = null;
@@ -165,10 +167,11 @@ Suspense.prototype.render = function(props, state) {
  * If the parent does not return a callback then the resolved vnode
  * gets unsuspended immediately when it resolves.
  *
- * @param {import('../src/internal').VNode} vnode
+ * @param {import('./internal').VNode} vnode
  * @returns {((unsuspend: () => void) => void)?}
  */
 export function suspended(vnode) {
+	/** @type {import('./internal').Component} */
 	let component = vnode._parent._component;
 	return component && component._suspended && component._suspended(vnode);
 }
