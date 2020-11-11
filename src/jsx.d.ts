@@ -1,5 +1,6 @@
 // Users who only use Preact for SSR might not specify "dom" in their lib in tsconfig.json
 /// <reference lib="dom" />
+import * as CSS from './jsx-csstype';
 
 type Defaultize<Props, Defaults> =
 	// Distribute over unions
@@ -30,6 +31,17 @@ export namespace JSXInternal {
 
 	interface ElementChildrenAttribute {
 		children: any;
+	}
+
+	interface CSSProperties extends CSS.Properties<string | number> {
+		/**
+		 * The index signature was removed to enable closed typing for style
+		 * using CSSType. You're able to use type assertion or module augmentation
+		 * to add properties or an index signature of your own.
+		 *
+		 * For examples and more information, visit:
+		 * https://github.com/frenic/csstype#what-should-i-do-when-i-get-type-errors
+		 */
 	}
 
 	interface SVGAttributes<Target extends EventTarget = SVGElement>
@@ -719,7 +731,7 @@ export namespace JSXInternal {
 		srcSet?: string;
 		start?: number;
 		step?: number | string;
-		style?: string | { [key: string]: string | number };
+		style?: string | CSSProperties;
 		summary?: string;
 		tabIndex?: number;
 		target?: string;
@@ -886,6 +898,7 @@ export namespace JSXInternal {
 		svg: SVGAttributes<SVGSVGElement>;
 		animate: SVGAttributes<SVGAnimateElement>;
 		circle: SVGAttributes<SVGCircleElement>;
+		animateTransform: SVGAttributes<SVGAnimateElement>;
 		clipPath: SVGAttributes<SVGClipPathElement>;
 		defs: SVGAttributes<SVGDefsElement>;
 		desc: SVGAttributes<SVGDescElement>;

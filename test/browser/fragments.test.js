@@ -33,10 +33,14 @@ describe('Fragment', () => {
 		}
 	}
 
+	let resetInsertBefore;
+	let resetAppendChild;
+	let resetRemoveChild;
+
 	before(() => {
-		logCall(Node.prototype, 'insertBefore');
-		logCall(Node.prototype, 'appendChild');
-		logCall(Node.prototype, 'removeChild');
+		resetInsertBefore = logCall(Node.prototype, 'insertBefore');
+		resetAppendChild = logCall(Node.prototype, 'appendChild');
+		resetRemoveChild = logCall(Node.prototype, 'removeChild');
 		// logCall(CharacterData.prototype, 'remove');
 		// TODO: Consider logging setting set data
 		// ```
@@ -47,6 +51,12 @@ describe('Fragment', () => {
 		// 	set(value) { console.log('setData', value); orgData.set.call(this, value); }
 		// });
 		// ```
+	});
+
+	after(() => {
+		resetInsertBefore();
+		resetAppendChild();
+		resetRemoveChild();
 	});
 
 	beforeEach(() => {
@@ -541,7 +551,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
-	it.skip('should not preserve state between array nested in fragment and double nested array', () => {
+	it('should not preserve state between array nested in fragment and double nested array', () => {
 		function Foo({ condition }) {
 			return condition ? (
 				<Fragment>{[<Stateful key="a" />]}</Fragment>

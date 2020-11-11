@@ -17,13 +17,29 @@ describe('hydrate()', () => {
 	const List = ({ children }) => <ul>{children}</ul>;
 	const ListItem = ({ children }) => <li>{children}</li>;
 
+	let resetAppendChild;
+	let resetInsertBefore;
+	let resetRemoveChild;
+	let resetRemove;
+	let resetSetAttribute;
+	let resetRemoveAttribute;
+
 	before(() => {
-		logCall(Element.prototype, 'appendChild');
-		logCall(Element.prototype, 'insertBefore');
-		logCall(Element.prototype, 'removeChild');
-		logCall(Element.prototype, 'remove');
-		logCall(Element.prototype, 'setAttribute');
-		logCall(Element.prototype, 'removeAttribute');
+		resetAppendChild = logCall(Element.prototype, 'appendChild');
+		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
+		resetRemoveChild = logCall(Element.prototype, 'removeChild');
+		resetRemove = logCall(Element.prototype, 'remove');
+		resetSetAttribute = logCall(Element.prototype, 'setAttribute');
+		resetRemoveAttribute = logCall(Element.prototype, 'removeAttribute');
+	});
+
+	after(() => {
+		resetAppendChild();
+		resetInsertBefore();
+		resetRemoveChild();
+		resetRemove();
+		resetSetAttribute();
+		resetRemoveAttribute();
 	});
 
 	beforeEach(() => {
