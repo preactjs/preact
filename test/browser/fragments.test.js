@@ -38,9 +38,9 @@ describe('Fragment', () => {
 	let resetRemoveChild;
 
 	before(() => {
-		resetInsertBefore = logCall(Node.prototype, 'insertBefore');
-		resetAppendChild = logCall(Node.prototype, 'appendChild');
-		resetRemoveChild = logCall(Node.prototype, 'removeChild');
+		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
+		resetAppendChild = logCall(Element.prototype, 'appendChild');
+		resetRemoveChild = logCall(Element.prototype, 'removeChild');
 		// logCall(CharacterData.prototype, 'remove');
 		// TODO: Consider logging setting set data
 		// ```
@@ -2571,9 +2571,7 @@ describe('Fragment', () => {
 		]);
 	});
 
-	// TODO: Revisit why this test is failing. Likely due to some side effect of
-	// the logCalls in suspense-hydration.test.js
-	it.skip('should properly place conditional elements around strictly equal vnodes', () => {
+	it('should properly place conditional elements around strictly equal vnodes', () => {
 		expectDomLog = true;
 		let set;
 

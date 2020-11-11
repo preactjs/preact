@@ -36,11 +36,23 @@ describe('suspense hydration', () => {
 		}
 	}
 
+	let resetAppendChild;
+	let resetInsertBefore;
+	let resetRemoveChild;
+	let resetRemove;
+
 	before(() => {
-		logCall(Element.prototype, 'appendChild');
-		logCall(Element.prototype, 'insertBefore');
-		logCall(Element.prototype, 'removeChild');
-		logCall(Element.prototype, 'remove');
+		resetAppendChild = logCall(Element.prototype, 'appendChild');
+		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
+		resetRemoveChild = logCall(Element.prototype, 'removeChild');
+		resetRemove = logCall(Element.prototype, 'remove');
+	});
+
+	after(() => {
+		resetAppendChild();
+		resetInsertBefore();
+		resetRemoveChild();
+		resetRemove();
 	});
 
 	beforeEach(() => {
