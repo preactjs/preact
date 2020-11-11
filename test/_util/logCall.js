@@ -37,6 +37,8 @@ export function logCall(obj, method) {
 		log.push(operation);
 		return old.apply(this, args);
 	};
+
+	return () => (obj[method] = old);
 }
 
 /**
