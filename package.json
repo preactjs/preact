@@ -170,6 +170,8 @@
 		"compat/dist",
 		"compat/src",
 		"compat/server.js",
+		"compat/jsx-runtime.js",
+		"compat/jsx-runtime.mjs",
 		"compat/package.json",
 		"debug/dist",
 		"debug/src",
