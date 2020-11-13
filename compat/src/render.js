@@ -15,10 +15,11 @@ const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|colo
 // Input types for which onchange should not be converted to oninput.
 // type="file|checkbox|radio", plus "range" in IE11.
 // (IE11 doesn't support Symbol, which we use here to turn `rad` into `ra` which matches "range")
-const ONCHANGE_INPUT_TYPES =
-	typeof Symbol != 'undefined' && typeof Symbol() == 'symbol'
+const onChangeInputType = type =>
+	(typeof Symbol != 'undefined' && typeof Symbol() == 'symbol'
 		? /fil|che|rad/i
-		: /fil|che|ra/i;
+		: /fil|che|ra/i
+	).test(type);
 
 // Some libraries like `react-virtualized` explicitly check for this.
 Component.prototype.isReactComponent = {};
@@ -131,7 +132,7 @@ options.vnode = vnode => {
 				i = 'ondblclick';
 			} else if (
 				/^onchange(textarea|input)/i.test(i + type) &&
-				!ONCHANGE_INPUT_TYPES.test(props.type)
+				!onChangeInputType(props.type)
 			) {
 				i = 'oninput';
 			} else if (/^on(Ani|Tra|Tou|BeforeInp)/.test(i)) {
