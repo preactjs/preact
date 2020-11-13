@@ -62,6 +62,8 @@ describe('Babel jsx/jsxDEV', () => {
 		const jsxVNode = jsx('div', { class: 'foo' }, 'key');
 		delete jsxVNode.__self;
 		delete jsxVNode.__source;
+		delete jsxVNode._original;
+		delete elementVNode._original;
 		expect(jsxVNode).to.deep.equal(elementVNode);
 	});
 });

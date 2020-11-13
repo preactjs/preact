@@ -14,11 +14,8 @@ export interface Component<P = {}, S = {}> extends PreactComponent<P, S> {
 	isPureReactComponent?: true;
 	_patchedLifecycles?: true;
 
-	_childDidSuspend?(
-		error: Promise<void>,
-		suspendingComponent: Component<any, any>,
-		oldVNode?: VNode
-	): void;
+	_childDidSuspend?(error: Promise<void>, suspendingVNode: VNode): void;
+	_suspended: (vnode: VNode) => (unsuspend: () => void) => void;
 	_suspendedComponentWillUnmount?(): void;
 }
 

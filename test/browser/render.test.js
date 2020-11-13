@@ -27,6 +27,11 @@ function getAttributes(node) {
 describe('render()', () => {
 	let scratch, rerender;
 
+	let resetAppendChild;
+	let resetInsertBefore;
+	let resetRemoveChild;
+	let resetRemove;
+
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
@@ -37,10 +42,17 @@ describe('render()', () => {
 	});
 
 	before(() => {
-		logCall(Element.prototype, 'appendChild');
-		logCall(Element.prototype, 'insertBefore');
-		logCall(Element.prototype, 'removeChild');
-		logCall(Element.prototype, 'remove');
+		resetAppendChild = logCall(Element.prototype, 'appendChild');
+		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
+		resetRemoveChild = logCall(Element.prototype, 'removeChild');
+		resetRemove = logCall(Element.prototype, 'remove');
+	});
+
+	after(() => {
+		resetAppendChild();
+		resetInsertBefore();
+		resetRemoveChild();
+		resetRemove();
 	});
 
 	it('should rerender when value from "" to 0', () => {
