@@ -12,70 +12,10 @@ import React, {
 	useLayoutEffect
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { createLazy, createSuspender } from './suspense-utils';
 
 const h = React.createElement;
 /* eslint-env browser, mocha */
-
-/**
- * @typedef {import('../../../src').ComponentType<any>} ComponentType
- * @returns {[typeof Component, (c: ComponentType) => Promise<void>, (c: ComponentType) => void]}
- */
-function createLazy() {
-	/** @type {(c: ComponentType) => Promise<void>} */
-	let resolver, rejecter;
-	const Lazy = lazy(() => {
-		let promise = new Promise((resolve, reject) => {
-			resolver = c => {
-				resolve({ default: c });
-				return promise;
-			};
-
-			rejecter = () => {
-				reject();
-				return promise;
-			};
-		});
-
-		return promise;
-	});
-
-	return [Lazy, c => resolver(c), e => rejecter(e)];
-}
-
-/**
- * @typedef {[(c: ComponentType) => Promise<void>, (error: Error) => Promise<void>]} Resolvers
- * @param {ComponentType} DefaultComponent
- * @returns {[typeof Component, () => Resolvers]}
- */
-export function createSuspender(DefaultComponent) {
-	/** @type {(lazy: React.JSX.Element) => void} */
-	let renderLazy;
-	class Suspender extends Component {
-		constructor(props, context) {
-			super(props, context);
-			this.state = { Lazy: null };
-
-			renderLazy = Lazy => this.setState({ Lazy });
-		}
-
-		render(props, state) {
-			return state.Lazy ? h(state.Lazy, props) : h(DefaultComponent, props);
-		}
-	}
-
-	sinon.spy(Suspender.prototype, 'render');
-
-	/**
-	 * @returns {Resolvers}
-	 */
-	function suspend() {
-		const [Lazy, resolve, reject] = createLazy();
-		renderLazy(Lazy);
-		return [resolve, reject];
-	}
-
-	return [Suspender, suspend];
-}
 
 class Catcher extends Component {
 	constructor(props) {

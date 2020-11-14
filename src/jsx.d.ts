@@ -33,7 +33,10 @@ export namespace JSXInternal {
 		children: any;
 	}
 
-	interface CSSProperties extends CSS.Properties<string | number> {
+	interface CSSProperties<
+		TLength = (string & {}) | number,
+		TTime = string & {}
+	> extends CSS.Properties<TLength, TTime> {
 		/**
 		 * The index signature was removed to enable closed typing for style
 		 * using CSSType. You're able to use type assertion or module augmentation
@@ -898,6 +901,7 @@ export namespace JSXInternal {
 		svg: SVGAttributes<SVGSVGElement>;
 		animate: SVGAttributes<SVGAnimateElement>;
 		circle: SVGAttributes<SVGCircleElement>;
+		animateTransform: SVGAttributes<SVGAnimateElement>;
 		clipPath: SVGAttributes<SVGClipPathElement>;
 		defs: SVGAttributes<SVGDefsElement>;
 		desc: SVGAttributes<SVGDescElement>;

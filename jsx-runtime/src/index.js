@@ -35,11 +35,10 @@ function createVNode(type, props, key, __source, __self) {
 		_component: null,
 		_hydrating: null,
 		constructor: undefined,
-		_original: undefined,
+		_original: ++options._vnodeId,
 		__source,
 		__self
 	};
-	vnode._original = vnode;
 
 	// If a Component VNode, check for and apply defaultProps.
 	// Note: `type` is often a String, and can be `undefined` in development.
