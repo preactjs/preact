@@ -100,7 +100,7 @@
 		"microbundle": "^0.6.0",
 		"mocha": "^5.2.0",
 		"npm-merge-driver-install": "^1.1.1",
-		"preact": "^10.0.4",
+		"preact": "^10.5.7",
 		"prettier": "^2.1.2",
 		"sinon": "^1.17.5",
 		"sinon-chai": "^2.8.0",
