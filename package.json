@@ -224,7 +224,7 @@
 		"check-export-map": "^1.0.1",
 		"coveralls": "^3.0.0",
 		"cross-env": "^5.2.0",
-		"csstype": "^2.6.6",
+		"csstype": "^3.0.5",
 		"diff": "^3.5.0",
 		"eslint": "5.15.1",
 		"eslint-config-developit": "^1.1.1",
