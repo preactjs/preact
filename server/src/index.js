@@ -39,8 +39,17 @@ renderToString.render = renderToString;
  */
 let shallowRender = (vnode, context) => renderToString(vnode, context, SHALLOW);
 
+const EMPTY_ARR = [];
+function renderToString(vnode, context, opts) {
+	const res = _renderToString(vnode, context, opts);
+	// options._commit, we don't schedule any effects in this library right now,
+	// so we can pass an empty queue to this hook.
+	if (options.__c) options.__c(vnode, EMPTY_ARR);
+	return res;
+}
+
 /** The default export is an alias of `render()`. */
-function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
+function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 	if (vnode == null || typeof vnode === 'boolean') {
 		return '';
 	}
@@ -77,7 +86,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 			for (let i = 0; i < children.length; i++) {
 				rendered +=
 					(i > 0 && pretty ? '\n' : '') +
-					renderToString(
+					_renderToString(
 						children[i],
 						context,
 						opts,
@@ -173,7 +182,8 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				context = assign(assign({}, context), c.getChildContext());
 			}
 
-			return renderToString(
+			if (options.diffed) options.diffed(vnode);
+			return _renderToString(
 				rendered,
 				context,
 				opts,
@@ -313,7 +323,7 @@ function renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 							: nodeName === 'foreignObject'
 							? false
 							: isSvgMode,
-					ret = renderToString(
+					ret = _renderToString(
 						child,
 						context,
 						opts,

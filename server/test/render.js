@@ -1067,7 +1067,7 @@ describe('render', () => {
 		});
 	});
 
-	it('should invoke options._render and options._diff', () => {
+	it('should invoke option hooks', () => {
 		const calls = [];
 		// _diff
 		const oldDiff = options.__b;
@@ -1080,6 +1080,17 @@ describe('render', () => {
 		options.__r = (...args) => {
 			calls.push(['_render', args]);
 			if (oldRender) oldRender(...args);
+		};
+		const oldDiffed = options.diffed;
+		options.diffed = (...args) => {
+			calls.push(['diffed', args]);
+			if (oldDiffed) oldDiffed(...args);
+		};
+		// _commit
+		const oldCommit = options.__c;
+		options.__c = (...args) => {
+			calls.push(['_commit', args]);
+			if (oldCommit) oldCommit(...args);
 		};
 
 		function Component1({ children }) {
@@ -1098,11 +1109,14 @@ describe('render', () => {
 		expect(calls).to.deep.equal([
 			['_diff', [vnode1]],
 			['_render', [vnode1]],
+			['diffed', [vnode1]],
 			['_diff', [vnode2]],
-			['_render', [vnode2]]
+			['_render', [vnode2]],
+			['diffed', [vnode2]],
+			['_commit', [vnode1, []]]
 		]);
 
-		expect(calls.length).to.equal(4);
+		expect(calls.length).to.equal(7);
 
 		options.__b = oldDiff;
 		options.__r = oldRender;
