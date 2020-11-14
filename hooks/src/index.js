@@ -29,6 +29,7 @@ const RAF_TIMEOUT = 100;
 let prevRaf;
 
 options._diff = vnode => {
+	previousComponent = currentComponent;
 	currentComponent = null;
 	if (oldBeforeDiff) oldBeforeDiff(vnode);
 };
@@ -73,6 +74,8 @@ options._commit = (vnode, commitQueue) => {
 		}
 	});
 
+	previousComponent = null;
+	currentComponent = null;
 	if (oldCommit) oldCommit(vnode, commitQueue);
 };
 
