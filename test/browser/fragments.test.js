@@ -2626,6 +2626,8 @@ describe('Fragment', () => {
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
 			'<div>NavigationContentbottom panel.insertBefore(<div>top panel, <div>Navigation)',
+			'<div>top panelNavigationContentbottom panel.insertBefore(<div>Navigation, <div>bottom panel)',
+			'<div>top panelContentNavigationbottom panel.insertBefore(<div>Content, <div>bottom panel)',
 			'<div>bottom panel.remove()'
 		]);
 
@@ -2634,6 +2636,8 @@ describe('Fragment', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal(bottom);
 		expectDomLogToBe([
+			'<div>top panelNavigationContent.appendChild(<div>Navigation)',
+			'<div>top panelContentNavigation.appendChild(<div>Content)',
 			'<div>.appendChild(#text)',
 			'<div>top panelNavigationContent.appendChild(<div>bottom panel)',
 			'<div>top panel.remove()'
@@ -2646,6 +2650,8 @@ describe('Fragment', () => {
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
 			'<div>NavigationContentbottom panel.insertBefore(<div>top panel, <div>Navigation)',
+			'<div>top panelNavigationContentbottom panel.insertBefore(<div>Navigation, <div>bottom panel)',
+			'<div>top panelContentNavigationbottom panel.insertBefore(<div>Content, <div>bottom panel)',
 			'<div>bottom panel.remove()'
 		]);
 

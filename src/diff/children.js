@@ -4,7 +4,7 @@ import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { removeNode } from '../util';
 import { getDomSibling } from '../component';
 
-export function getLastDomChild(vnode) {
+function getLastDomChild(vnode) {
 	let sibling, domChild;
 
 	for (let childIndex = 0; childIndex < vnode._children.length; childIndex++) {
@@ -20,6 +20,7 @@ export function getLastDomChild(vnode) {
 
 	return domChild;
 }
+
 /**
  * Diff the children of a virtual node
  * @param {import('../internal').PreactElement} parentDom The DOM element whose
@@ -174,60 +175,20 @@ export function diffChildren(
 			refs.push(j, childVNode._component || newDom, childVNode);
 		}
 
-		let nextDom;
 		if (newDom != null) {
 			if (firstChildDom == null) {
 				firstChildDom = newDom;
 			}
 
-			if (childVNode._nextDom !== undefined) {
-				// Only Fragments or components that return Fragment like VNodes will
-				// have a non-undefined _nextDom. Continue the diff from the sibling
-				// of last DOM child of this child VNode
-				nextDom = childVNode._nextDom;
-
-				// Eagerly cleanup _nextDom. We don't need to persist the value because
-				// it is only used by `diffChildren` to determine where to resume the diff after
-				// diffing Components and Fragments. Once we store it the nextDOM local var, we
-				// can clean up the property
-				childVNode._nextDom = undefined;
-			} else if (
-				excessDomChildren == oldVNode ||
-				newDom != oldDom ||
-				newDom.parentNode == null
-			) {
-				// NOTE: excessDomChildren==oldVNode above:
-				// This is a compression of excessDomChildren==null && oldVNode==null!
-				// The values only have the same type when `null`.
-
-				outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
-					parentDom.appendChild(newDom);
-					nextDom = null;
-				} else {
-					// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
-					for (
-						let sibDom = oldDom, j = 0;
-						(sibDom = sibDom.nextSibling) && j < oldChildren.length;
-						j += 2
-					) {
-						if (sibDom == newDom) {
-							break outer;
-						}
-					}
-
-					parentDom.insertBefore(newDom, oldDom);
-					nextDom = oldDom;
-				}
-			}
-
-			// If we have pre-calculated the nextDOM node, use it. Else calculate it now
-			// Strictly check for `undefined` here cuz `null` is a valid value of `nextDom`.
-			// See more detail in create-element.js:createVNode
-			if (nextDom !== undefined) {
-				oldDom = nextDom;
-			} else {
-				oldDom = newDom.nextSibling;
-			}
+			oldDom = placeChild(
+				parentDom,
+				childVNode,
+				oldVNode,
+				oldChildren,
+				excessDomChildren,
+				newDom,
+				oldDom
+			);
 
 			// Browsers will infer an option's `value` from `textContent` when
 			// no value is present. This essentially bypasses our code to set it
@@ -250,8 +211,9 @@ export function diffChildren(
 				// If the last child is a DOM VNode, then oldDom will be set to that DOM
 				// node's nextSibling.
 				newParentVNode._nextDom = oldDom;
-			} else if (childVNode._bailed) {
+			} else if (childVNode._bailed && !isHydrating) {
 				oldDom = getLastDomChild(childVNode).nextSibling;
+				reorderChildren(childVNode, oldDom, parentDom);
 				childVNode._bailed = false;
 			}
 		} else if (
@@ -287,6 +249,33 @@ export function diffChildren(
 	}
 }
 
+function reorderChildren(childVNode, oldDom, parentDom) {
+	for (let tmp = 0; tmp < childVNode._children.length; tmp++) {
+		const vnode = childVNode._children[tmp];
+		if (vnode) {
+			if (typeof vnode.type == 'function' && vnode._children.length > 1) {
+				reorderChildren(vnode, oldDom, parentDom);
+			}
+
+			oldDom = placeChild(
+				parentDom,
+				vnode,
+				vnode,
+				childVNode._children,
+				null,
+				vnode._dom,
+				oldDom
+			);
+
+			if (typeof childVNode.type == 'function') {
+				childVNode._nextDom = oldDom;
+			}
+		}
+	}
+
+	return oldDom;
+}
+
 /**
  * Flatten and loop through the children of a virtual node
  * @param {import('../index').ComponentChildren} children The unflattened
@@ -304,4 +293,65 @@ export function toChildArray(children, out) {
 		out.push(children);
 	}
 	return out;
+}
+
+function placeChild(
+	parentDom,
+	childVNode,
+	oldVNode,
+	oldChildren,
+	excessDomChildren,
+	newDom,
+	oldDom
+) {
+	let nextDom;
+	if (childVNode._nextDom !== undefined) {
+		// Only Fragments or components that return Fragment like VNodes will
+		// have a non-undefined _nextDom. Continue the diff from the sibling
+		// of last DOM child of this child VNode
+		nextDom = childVNode._nextDom;
+
+		// Eagerly cleanup _nextDom. We don't need to persist the value because
+		// it is only used by `diffChildren` to determine where to resume the diff after
+		// diffing Components and Fragments. Once we store it the nextDOM local var, we
+		// can clean up the property
+		childVNode._nextDom = undefined;
+	} else if (
+		excessDomChildren == oldVNode ||
+		newDom != oldDom ||
+		newDom.parentNode == null
+	) {
+		// NOTE: excessDomChildren==oldVNode above:
+		// This is a compression of excessDomChildren==null && oldVNode==null!
+		// The values only have the same type when `null`.
+
+		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
+			parentDom.appendChild(newDom);
+			nextDom = null;
+		} else {
+			// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
+			for (
+				let sibDom = oldDom, j = 0;
+				(sibDom = sibDom.nextSibling) && j < oldChildren.length;
+				j += 2
+			) {
+				if (sibDom == newDom) {
+					break outer;
+				}
+			}
+			parentDom.insertBefore(newDom, oldDom);
+			nextDom = oldDom;
+		}
+	}
+
+	// If we have pre-calculated the nextDOM node, use it. Else calculate it now
+	// Strictly check for `undefined` here cuz `null` is a valid value of `nextDom`.
+	// See more detail in create-element.js:createVNode
+	if (nextDom !== undefined) {
+		oldDom = nextDom;
+	} else {
+		oldDom = newDom.nextSibling;
+	}
+
+	return oldDom;
 }
