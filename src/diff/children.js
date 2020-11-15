@@ -235,23 +235,23 @@ export function diffChildren(
 
 function reorderChildren(childVNode, oldDom, parentDom) {
 	for (let tmp = 0; tmp < childVNode._children.length; tmp++) {
-		const vnode = childVNode._children[tmp];
+		let vnode = childVNode._children[tmp];
 		if (vnode) {
 			vnode._parent = childVNode;
 
 			if (typeof vnode.type == 'function') {
 				reorderChildren(vnode, oldDom, parentDom);
+			} else {
+				oldDom = placeChild(
+					parentDom,
+					vnode,
+					vnode,
+					childVNode._children,
+					null,
+					vnode._dom,
+					oldDom
+				);
 			}
-
-			oldDom = placeChild(
-				parentDom,
-				vnode,
-				vnode,
-				childVNode._children,
-				null,
-				vnode._dom,
-				oldDom
-			);
 
 			if (typeof childVNode.type == 'function') {
 				childVNode._nextDom = oldDom;
