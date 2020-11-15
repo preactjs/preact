@@ -25,6 +25,7 @@
   "props": {
     "cname": 6,
     "props": {
+      "$_bailed": "__B",
       "$_vnodeId": "__v",
       "$_cleanup": "__c",
       "$_afterPaintQueued": "__a",
