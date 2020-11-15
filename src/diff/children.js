@@ -4,23 +4,6 @@ import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { removeNode } from '../util';
 import { getDomSibling } from '../component';
 
-function getLastDomChild(vnode) {
-	let sibling, domChild;
-
-	for (let childIndex = 0; childIndex < vnode._children.length; childIndex++) {
-		sibling = vnode._children[childIndex];
-
-		if (sibling != null && sibling._dom != null) {
-			// Since updateParentDomPointers keeps _dom pointer correct,
-			// we can rely on _dom to tell us if this subtree contains a
-			// rendered DOM node, and what the first rendered DOM node is
-			domChild = sibling._dom;
-		}
-	}
-
-	return domChild;
-}
-
 /**
  * Diff the children of a virtual node
  * @param {import('../internal').PreactElement} parentDom The DOM element whose
@@ -212,8 +195,7 @@ export function diffChildren(
 				// node's nextSibling.
 				newParentVNode._nextDom = oldDom;
 			} else if (childVNode._bailed && !isHydrating) {
-				oldDom = getLastDomChild(childVNode).nextSibling;
-				reorderChildren(childVNode, oldDom, parentDom);
+				oldDom = reorderChildren(childVNode, oldDom, parentDom);
 				childVNode._bailed = false;
 			}
 		} else if (
@@ -253,6 +235,8 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 	for (let tmp = 0; tmp < childVNode._children.length; tmp++) {
 		const vnode = childVNode._children[tmp];
 		if (vnode) {
+			vnode._parent = childVNode;
+
 			if (typeof vnode.type == 'function' && vnode._children.length > 1) {
 				reorderChildren(vnode, oldDom, parentDom);
 			}

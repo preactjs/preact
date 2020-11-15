@@ -149,12 +149,6 @@ export function diff(
 						commitQueue.push(c);
 					}
 
-					for (tmp = 0; tmp < newVNode._children.length; tmp++) {
-						if (newVNode._children[tmp]) {
-							newVNode._children[tmp]._parent = newVNode;
-						}
-					}
-
 					newVNode._bailed = true;
 					break outer;
 				}
