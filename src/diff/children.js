@@ -164,7 +164,11 @@ export function diffChildren(
 			}
 
 			if (childVNode._bailed) {
-				oldDom = reorderChildren(childVNode, oldDom, parentDom);
+				childVNode._nextDom = oldDom = reorderChildren(
+					childVNode,
+					oldDom,
+					parentDom
+				);
 				childVNode._bailed = false;
 			} else {
 				oldDom = placeChild(
@@ -251,10 +255,6 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 					vnode._dom,
 					oldDom
 				);
-			}
-
-			if (typeof childVNode.type == 'function') {
-				childVNode._nextDom = oldDom;
 			}
 		}
 	}
