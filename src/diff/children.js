@@ -194,7 +194,9 @@ export function diffChildren(
 				// If the last child is a DOM VNode, then oldDom will be set to that DOM
 				// node's nextSibling.
 				newParentVNode._nextDom = oldDom;
-			} else if (childVNode._bailed && !isHydrating) {
+			}
+
+			if (childVNode._bailed && !isHydrating) {
 				oldDom = reorderChildren(childVNode, oldDom, parentDom);
 				childVNode._bailed = false;
 			}
