@@ -163,13 +163,15 @@ export function diffChildren(
 				firstChildDom = newDom;
 			}
 
-			if (childVNode._bailed) {
+			if (
+				typeof childVNode.type == 'function' &&
+				childVNode._children === oldVNode._children
+			) {
 				childVNode._nextDom = oldDom = reorderChildren(
 					childVNode,
 					oldDom,
 					parentDom
 				);
-				childVNode._bailed = false;
 			} else {
 				oldDom = placeChild(
 					parentDom,

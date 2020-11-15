@@ -149,7 +149,6 @@ export function diff(
 						commitQueue.push(c);
 					}
 
-					newVNode._bailed = true;
 					break outer;
 				}
 
