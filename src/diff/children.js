@@ -163,15 +163,20 @@ export function diffChildren(
 				firstChildDom = newDom;
 			}
 
-			oldDom = placeChild(
-				parentDom,
-				childVNode,
-				oldVNode,
-				oldChildren,
-				excessDomChildren,
-				newDom,
-				oldDom
-			);
+			if (childVNode._bailed) {
+				oldDom = reorderChildren(childVNode, oldDom, parentDom);
+				childVNode._bailed = false;
+			} else {
+				oldDom = placeChild(
+					parentDom,
+					childVNode,
+					oldVNode,
+					oldChildren,
+					excessDomChildren,
+					newDom,
+					oldDom
+				);
+			}
 
 			// Browsers will infer an option's `value` from `textContent` when
 			// no value is present. This essentially bypasses our code to set it
@@ -194,11 +199,6 @@ export function diffChildren(
 				// If the last child is a DOM VNode, then oldDom will be set to that DOM
 				// node's nextSibling.
 				newParentVNode._nextDom = oldDom;
-			}
-
-			if (childVNode._bailed && !isHydrating) {
-				oldDom = reorderChildren(childVNode, oldDom, parentDom);
-				childVNode._bailed = false;
 			}
 		} else if (
 			oldDom &&
