@@ -239,7 +239,7 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 		if (vnode) {
 			vnode._parent = childVNode;
 
-			if (typeof vnode.type == 'function' && vnode._children.length > 1) {
+			if (typeof vnode.type == 'function') {
 				reorderChildren(vnode, oldDom, parentDom);
 			}
 
