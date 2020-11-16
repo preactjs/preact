@@ -321,7 +321,7 @@ function placeChild(
 			for (
 				let sibDom = oldDom, j = 0;
 				(sibDom = sibDom.nextSibling) && j < oldChildren.length;
-				j += 2
+				j++
 			) {
 				if (sibDom == newDom) {
 					break outer;
