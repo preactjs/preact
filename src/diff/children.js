@@ -278,7 +278,7 @@ export function placeChild(
 		// The values only have the same type when `null`.
 
 		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
-			parentDom.appendChild(newDom);
+			parentDom.insertBefore(newDom, null);
 			nextDom = null;
 		} else {
 			// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
