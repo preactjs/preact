@@ -118,7 +118,7 @@ describe('suspense hydration', () => {
 		rerender(); // Flush rerender queue to mimic what preact will really do
 		expect(scratch.innerHTML).to.equal('<div>Count: 0</div><div>Hello</div>');
 		// Re: DOM OP below - Known issue with hydrating merged text nodes
-		expect(getLog()).to.deep.equal(['<div>Count: .appendChild(#text)']);
+		expect(getLog()).to.deep.equal(['<div>Count: .insertBefore(#text, Null)']);
 		clearLog();
 
 		increment();

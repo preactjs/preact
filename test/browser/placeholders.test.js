@@ -248,9 +248,9 @@ describe('null placeholders', () => {
 			div([div(1), div('Nullable'), div(3), div('Nullable2')])
 		);
 		expect(getLog()).to.deep.equal([
-			'<div>.appendChild(#text)',
-			'<div>13.appendChild(<div>Nullable2)',
-			'<div>.appendChild(#text)',
+			'<div>.insertBefore(#text, Null)',
+			'<div>13.insertBefore(<div>Nullable2, Null)',
+			'<div>.insertBefore(#text, Null)',
 			'<div>13Nullable2.insertBefore(<div>Nullable, <div>3)'
 		]);
 	});
@@ -292,17 +292,13 @@ describe('null placeholders', () => {
 		);
 		expect(getLog()).to.deep.equal([
 			'<div>truethe middle.insertBefore(#text, <div>the middle)',
-			'<div>trueNullable 1the middle.appendChild(#text)'
+			'<div>trueNullable 1the middle.insertBefore(#text, Null)'
 		]);
 
 		clearLog();
 		toggle();
 		rerender();
 		expect(scratch.innerHTML).to.equal(div([div('false'), div('the middle')]));
-		expect(getLog()).to.deep.equal([
-			'#text.remove()',
-			// '<div>falsethe middleNullable 2.appendChild(<div>the middle)',
-			'#text.remove()'
-		]);
+		expect(getLog()).to.deep.equal(['#text.remove()', '#text.remove()']);
 	});
 });
