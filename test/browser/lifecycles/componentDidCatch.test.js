@@ -670,5 +670,20 @@ describe('Lifecycle methods', () => {
 
 			expect(scratch.innerHTML).to.equal('<div>Error: Error!</div>');
 		});
+
+		// #2835
+		it('should pass errorInfo object as second parameter', () => {
+			ThrowErr.prototype.render = throwExpectedError;
+
+			render(
+				<Receiver>
+					<ThrowErr />
+				</Receiver>,
+				scratch
+			);
+			expect(
+				Receiver.prototype.componentDidCatch
+			).to.have.been.calledWith(expectedError, { componentStack: '' });
+		});
 	});
 });
