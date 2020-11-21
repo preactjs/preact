@@ -1,4 +1,4 @@
-import { Component, createElement } from 'preact';
+import { Component, createElement, createRef } from 'preact';
 import { jsx, jsxs, jsxDEV, Fragment } from 'preact/jsx-runtime';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
@@ -65,5 +65,13 @@ describe('Babel jsx/jsxDEV', () => {
 		delete jsxVNode._original;
 		delete elementVNode._original;
 		expect(jsxVNode).to.deep.equal(elementVNode);
+	});
+
+	// #2839
+	it('should remove ref from props', () => {
+		const ref = createRef();
+		const vnode = jsx('div', { ref }, null);
+		expect(vnode.props).to.deep.equal({});
+		expect(vnode.ref).to.equal(ref);
 	});
 });
