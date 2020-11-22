@@ -420,7 +420,7 @@ describe('keys', () => {
 
 	it('should effectively iterate on large component lists', done => {
 		const newItems = () =>
-			Array(100)
+			Array(3)
 				.fill(0)
 				.map((item, i) => i);
 
@@ -454,7 +454,7 @@ describe('keys', () => {
 				const currentItems = this.state.items;
 				const items = newItems().filter(id => {
 					const isVisible = currentItems.includes(id);
-					return id >= 20 && id <= 80 ? !isVisible : isVisible;
+					return id >= 0 && id <= 1 ? !isVisible : isVisible;
 				});
 				this.setState({ items });
 			}
@@ -472,6 +472,7 @@ describe('keys', () => {
 
 		render(<App />, scratch);
 
+		console.log('=======================');
 		set();
 		rerender();
 

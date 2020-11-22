@@ -43,7 +43,6 @@ export function diff(
 	// If the previous diff bailed out, resume creating/hydrating.
 	if (oldVNode._hydrating != null) {
 		isHydrating = oldVNode._hydrating;
-		oldDom = newVNode._dom = oldVNode._dom;
 		// if we resume, we want the tree to be "unlocked"
 		newVNode._hydrating = null;
 		excessDomChildren = [oldDom];
@@ -143,7 +142,6 @@ export function diff(
 					// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
 					if (newVNode._original !== oldVNode._original) c._dirty = false;
 					c._vnode = newVNode;
-					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
 					if (c._renderCallbacks.length) {
 						commitQueue.push(c);
@@ -203,7 +201,7 @@ export function diff(
 				isHydrating
 			);
 
-			c.base = newVNode._dom;
+			// c.base = newVNode._dom;
 
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
 			newVNode._hydrating = null;
@@ -222,7 +220,6 @@ export function diff(
 			newVNode._original === oldVNode._original
 		) {
 			newVNode._children = oldVNode._children;
-			newVNode._dom = oldVNode._dom;
 		} else {
 			newVNode._dom = diffElementNodes(
 				oldVNode._dom,
@@ -241,7 +238,7 @@ export function diff(
 		newVNode._original = null;
 		// if hydrating or creating initial tree, bailout preserves DOM:
 		if (isHydrating || excessDomChildren != null) {
-			newVNode._dom = oldDom;
+			// newVNode._dom = oldDom;
 			newVNode._hydrating = !!isHydrating;
 			excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
 			// ^ could possibly be simplified to:

@@ -125,7 +125,7 @@ function renderComponent(component) {
 		const oldVNode = assign({}, vnode);
 		oldVNode._original = vnode._original + 1;
 
-		let newDom = diff(
+		diff(
 			parentDom,
 			vnode,
 			oldVNode,
@@ -137,28 +137,6 @@ function renderComponent(component) {
 			vnode._hydrating
 		);
 		commitRoot(commitQueue, vnode);
-
-		if (newDom != oldDom) {
-			updateParentDomPointers(vnode);
-		}
-	}
-}
-
-/**
- * @param {import('./internal').VNode} vnode
- */
-function updateParentDomPointers(vnode) {
-	if ((vnode = vnode._parent) != null && vnode._component != null) {
-		vnode._dom = vnode._component.base = null;
-		for (let i = 0; i < vnode._children.length; i++) {
-			let child = vnode._children[i];
-			if (child != null && child._dom != null) {
-				vnode._dom = vnode._component.base = child._dom;
-				break;
-			}
-		}
-
-		return updateParentDomPointers(vnode);
 	}
 }
 
