@@ -364,7 +364,7 @@ describe('keys', () => {
 				.map((item, i) => i);
 
 		let set,
-			mutations = [];
+			mutatedNodes = [];
 
 		class App extends Component {
 			constructor(props) {
@@ -381,7 +381,7 @@ describe('keys', () => {
 				function listener(mutations) {
 					for (const { addedNodes } of mutations) {
 						for (const node of addedNodes) {
-							mutations.push(node);
+							mutatedNodes.push(node);
 						}
 					}
 				}
@@ -413,7 +413,70 @@ describe('keys', () => {
 		rerender();
 
 		setTimeout(() => {
-			expect(mutations.length).to.equal(0);
+			expect(mutatedNodes.length).to.equal(0);
+			done();
+		});
+	});
+
+	it('should effectively iterate on large component lists', done => {
+		const newItems = () =>
+			Array(100)
+				.fill(0)
+				.map((item, i) => i);
+
+		let set,
+			mutatedNodes = [];
+
+		const Row = ({ i }) => <p>{i}</p>;
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { items: newItems() };
+				set = this.set = this.set.bind(this);
+				this.ref = createRef();
+			}
+
+			componentDidMount() {
+				const observer = new MutationObserver(listener);
+				observer.observe(this.ref.current, { childList: true });
+
+				function listener(mutations) {
+					for (const { addedNodes } of mutations) {
+						for (const node of addedNodes) {
+							mutatedNodes.push(node);
+						}
+					}
+				}
+			}
+
+			set() {
+				const currentItems = this.state.items;
+				const items = newItems().filter(id => {
+					const isVisible = currentItems.includes(id);
+					return id >= 20 && id <= 80 ? !isVisible : isVisible;
+				});
+				this.setState({ items });
+			}
+
+			render() {
+				return (
+					<div ref={this.ref}>
+						{this.state.items.map(i => (
+							<Row key={i} i={i} />
+						))}
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+
+		set();
+		rerender();
+
+		setTimeout(() => {
+			expect(mutatedNodes.length).to.equal(0);
 			done();
 		});
 	});
