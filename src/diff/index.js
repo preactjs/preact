@@ -382,6 +382,10 @@ function diffElementNodes(
 			}
 		}
 
+		if (newVNode.type === 'input') {
+			dom._isControlled = newProps.checked != null || newProps.value != null;
+		}
+
 		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
@@ -405,18 +409,16 @@ function diffElementNodes(
 
 		// (as above, don't diff props during hydration)
 		if (!isHydrating) {
-			if (
-				'value' in newProps &&
-				(i = newProps.value) !== undefined
-			) {
+			if ('value' in newProps && (i = newProps.value) !== undefined) {
 				if ('onInput' in newProps) {
-					dom._prevValue = i
+					dom._prevValue = i;
 				}
 				// #2756 For the <progress>-element the initial value is 0,
 				// despite the attribute not being present. When the attribute
 				// is missing the progress bar is treated as indeterminate.
 				// To fix that we'll always update it when it is 0 for progress elements
-				if ((i !== dom.value || (newVNode.type === 'progress' && !i))) setProperty(dom, 'value', i, oldProps.value, false);
+				if (i !== dom.value || (newVNode.type === 'progress' && !i))
+					setProperty(dom, 'value', i, oldProps.value, false);
 			}
 			if (
 				'checked' in newProps &&

@@ -13,7 +13,6 @@ import options from '../options';
 export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 	let i;
 
-	dom._isControlled = newProps.checked != null || newProps.value != null;
 	for (i in oldProps) {
 		if (i !== 'children' && i !== 'key' && !(i in newProps)) {
 			setProperty(dom, i, null, oldProps[i], isSvg);
