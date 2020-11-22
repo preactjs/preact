@@ -13,6 +13,7 @@ import options from '../options';
 export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 	let i;
 
+	dom._isControlled = newProps.checked != null || newProps.value != null;
 	for (i in oldProps) {
 		if (i !== 'children' && i !== 'key' && !(i in newProps)) {
 			setProperty(dom, i, null, oldProps[i], isSvg);
@@ -156,7 +157,11 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
  */
 function eventProxy(e) {
 	this._listeners[e.type + false](options.event ? options.event(e) : e);
-	if ((e.type === 'input' || e.type === 'change') && this._prevValue) {
+	if (
+		this.isControlled &&
+		(e.type === 'input' || e.type === 'change') &&
+		this._prevValue
+	) {
 		if (this.value) this.value = this._prevValue;
 		if (this.checked) this.checked = this._prevValue;
 	}

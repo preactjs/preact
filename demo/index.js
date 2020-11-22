@@ -24,6 +24,7 @@ import ReduxBug from './reduxUpdate';
 import SuspenseRouterBug from './suspense-router';
 import NestedSuspenseBug from './nested-suspense';
 import Contenteditable from './contenteditable';
+import Inputs from './inputs';
 import { MobXDemo } from './mobx';
 
 let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(
@@ -71,6 +72,9 @@ class App extends Component {
 					<nav>
 						<Link href="/" activeClassName="active">
 							Home
+						</Link>
+						<Link href="/inputs" activeClassName="active">
+							Controlled inputs
 						</Link>
 						<Link href="/reorder" activeClassName="active">
 							Reorder
@@ -140,6 +144,7 @@ class App extends Component {
 				<main>
 					<Router url={url}>
 						<Home path="/" />
+						<Inputs path="/inputs" />
 						<StateOrderBug path="/state-order" />
 						<Reorder path="/reorder" />
 						<div path="/spiral">
