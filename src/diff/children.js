@@ -163,15 +163,26 @@ export function diffChildren(
 				firstChildDom = newDom;
 			}
 
-			oldDom = placeChild(
-				parentDom,
-				childVNode,
-				oldVNode,
-				oldChildren,
-				excessDomChildren,
-				newDom,
-				oldDom
-			);
+			if (
+				typeof childVNode.type == 'function' &&
+				childVNode._children === oldVNode._children
+			) {
+				childVNode._nextDom = oldDom = reorderChildren(
+					childVNode,
+					oldDom,
+					parentDom
+				);
+			} else {
+				oldDom = placeChild(
+					parentDom,
+					childVNode,
+					oldVNode,
+					oldChildren,
+					excessDomChildren,
+					newDom,
+					oldDom
+				);
+			}
 
 			// Browsers will infer an option's `value` from `textContent` when
 			// no value is present. This essentially bypasses our code to set it
@@ -228,6 +239,31 @@ export function diffChildren(
 	}
 }
 
+function reorderChildren(childVNode, oldDom, parentDom) {
+	for (let tmp = 0; tmp < childVNode._children.length; tmp++) {
+		let vnode = childVNode._children[tmp];
+		if (vnode) {
+			vnode._parent = childVNode;
+
+			if (typeof vnode.type == 'function') {
+				reorderChildren(vnode, oldDom, parentDom);
+			} else {
+				oldDom = placeChild(
+					parentDom,
+					vnode,
+					vnode,
+					childVNode._children,
+					null,
+					vnode._dom,
+					oldDom
+				);
+			}
+		}
+	}
+
+	return oldDom;
+}
+
 /**
  * Flatten and loop through the children of a virtual node
  * @param {import('../index').ComponentChildren} children The unflattened
@@ -247,7 +283,7 @@ export function toChildArray(children, out) {
 	return out;
 }
 
-export function placeChild(
+function placeChild(
 	parentDom,
 	childVNode,
 	oldVNode,
