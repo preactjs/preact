@@ -1,14 +1,15 @@
-import { createElement, render } from 'preact';
+import { createElement, render, Component } from 'preact';
 import {
 	setupScratch,
 	teardown,
 	supportsPassiveEvents
 } from '../_util/helpers';
+import { setupRerender } from 'preact/test-utils';
 
 /** @jsx createElement */
 
 describe('event handling', () => {
-	let scratch, proto;
+	let scratch, proto, rerender;
 
 	function fireEvent(on, type) {
 		let e = document.createEvent('Event');
@@ -18,6 +19,7 @@ describe('event handling', () => {
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		rerender = setupRerender();
 
 		proto = document.createElement('div').constructor.prototype;
 
@@ -150,6 +152,76 @@ describe('event handling', () => {
 			sinon.match.func,
 			false
 		);
+	});
+
+	it('should support controlled inputs', () => {
+		const calls = [];
+		class Input extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { text: '' };
+				this.onInput = this.onInput.bind(this);
+			}
+
+			onInput(e) {
+				calls.push(e.target.value);
+				if (e.target.value.length > 3) return;
+				this.setState({ text: e.target.value });
+			}
+
+			render() {
+				return <input onInput={this.onInput} value={this.state.text} />;
+			}
+		}
+
+		render(<Input />, scratch);
+
+		scratch.firstChild.value = 'hii';
+		fireEvent(scratch.firstChild, 'input');
+		rerender();
+		expect(calls).to.deep.equal(['hii']);
+		expect(scratch.firstChild.value).to.equal('hii');
+
+		scratch.firstChild.value = 'hiii';
+		fireEvent(scratch.firstChild, 'input');
+		rerender();
+		expect(calls).to.deep.equal(['hii', 'hiii']);
+		expect(scratch.firstChild.value).to.equal('hii');
+	});
+
+	it('should support controlled checkboxes', () => {
+		const calls = [];
+		class Input extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { checked: true };
+				this.onInput = this.onInput.bind(this);
+			}
+
+			onInput(e) {
+				calls.push(e.target.checked);
+				if (e.target.checked === false) return;
+				this.setState({ checked: e.target.checked });
+			}
+
+			render() {
+				return (
+					<input
+						type="checkbox"
+						onChange={this.onInput}
+						checked={this.state.checked}
+					/>
+				);
+			}
+		}
+
+		render(<Input />, scratch);
+
+		scratch.firstChild.checked = false;
+		fireEvent(scratch.firstChild, 'change');
+		rerender();
+		expect(calls).to.deep.equal([false]);
+		expect(scratch.firstChild.checked).to.equal(true);
 	});
 
 	// Skip test if browser doesn't support passive events
