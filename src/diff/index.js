@@ -249,8 +249,6 @@ export function diff(
 		}
 		options._catchError(e, newVNode, oldVNode);
 	}
-
-	return newVNode._dom;
 }
 
 /**
