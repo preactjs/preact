@@ -391,6 +391,10 @@ function diffElementNodes(
 			}
 		}
 
+		if (newVNode.type === 'input') {
+			dom._isControlled = newProps.checked != null || newProps.value != null;
+		}
+
 		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
@@ -414,19 +418,21 @@ function diffElementNodes(
 
 		// (as above, don't diff props during hydration)
 		if (!isHydrating) {
-			if (
-				'value' in newProps &&
-				(i = newProps.value) !== undefined &&
-				i !== dom.value
-			) {
-				setProperty(dom, 'value', i, oldProps.value, false);
+			if ('value' in newProps && (i = newProps.value) !== undefined) {
+				if ('onInput' in newProps) {
+					dom._prevValue = i;
+				}
+
+				if (i !== dom.value)
+					setProperty(dom, 'value', i, oldProps.value, false);
 			}
-			if (
-				'checked' in newProps &&
-				(i = newProps.checked) !== undefined &&
-				i !== dom.checked
-			) {
-				setProperty(dom, 'checked', i, oldProps.checked, false);
+			if ('checked' in newProps && (i = newProps.checked) !== undefined) {
+				if ('onChange' in newProps) {
+					dom._prevValue = i;
+				}
+
+				if (i !== dom.checked)
+					setProperty(dom, 'checked', i, oldProps.checked, false);
 			}
 		}
 	}
