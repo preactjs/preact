@@ -622,6 +622,7 @@ export namespace JSXInternal {
 		alt?: string;
 		as?: string;
 		async?: boolean;
+		autoCapitalize?: string;
 		autocomplete?: string;
 		autoComplete?: string;
 		autocorrect?: string;
