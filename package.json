@@ -197,7 +197,9 @@
 		"virtual dom",
 		"vdom",
 		"components",
-		"dom diff"
+		"dom diff",
+    "front-end",
+    "framework"
 	],
 	"authors": [
 		"The Preact Authors (https://github.com/preactjs/preact/contributors)"
