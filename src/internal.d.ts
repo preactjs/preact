@@ -85,6 +85,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	_hydrating: boolean | null;
 	constructor: undefined;
 	_original: number;
+	_oldVNode: VNode<any> | null;
 }
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {

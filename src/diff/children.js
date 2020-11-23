@@ -3,6 +3,7 @@ import { createVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { removeNode } from '../util';
 import { getDomSibling } from '../component';
+import { printVNode } from './test-utils';
 
 /**
  * Diff the children of a virtual node
@@ -18,7 +19,7 @@ import { getDomSibling } from '../component';
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @param {Node | Text} oldDom The current attached DOM
+ * @param {Element | Text} oldDom The current attached DOM
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
@@ -58,7 +59,10 @@ export function diffChildren(
 		}
 	}
 
+	console.log('>>>>', oldChildren.length, renderResult.length);
+
 	newParentVNode._children = [];
+	const ch = [];
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = renderResult[i];
 
@@ -118,6 +122,8 @@ export function diffChildren(
 				childVNode.type === oldVNode.type)
 		) {
 			oldChildren[i] = undefined;
+			childVNode._oldIndex = i;
+			console.log('    MATCH #1', printVNode(childVNode), printVNode(oldVNode));
 		} else {
 			// Either oldVNode === undefined or oldChildrenLength > 0,
 			// so after this loop oldVNode == null or oldVNode is a valid value.
@@ -131,13 +137,51 @@ export function diffChildren(
 					childVNode.type === oldVNode.type
 				) {
 					oldChildren[j] = undefined;
+					console.log(
+						'    MATCH #2',
+						printVNode(childVNode),
+						printVNode(oldVNode)
+					);
+					childVNode._oldIndex = j;
 					break;
 				}
 				oldVNode = null;
 			}
 		}
 
-		oldVNode = oldVNode || EMPTY_OBJ;
+		if (oldVNode == null) {
+			console.log('    NO MATCH', printVNode(childVNode));
+		}
+
+		childVNode._oldVNode = oldVNode || EMPTY_OBJ;
+		ch.push(childVNode);
+	}
+
+	console.log(
+		'    NEW',
+		ch.map(x => printVNode(x))
+	);
+	console.log(
+		'    OLD',
+		oldChildren.map(x => printVNode(x))
+	);
+
+	// Remove remaining oldChildren if there are any.
+	for (i = oldChildrenLength; i--; ) {
+		if (oldChildren[i] != null) unmount(oldChildren[i], oldChildren[i]);
+	}
+
+	console.log('      EXCESS', excessDomChildren);
+
+	// Now we can start the actual diff
+	for (i = 0; i < ch.length; i++) {
+		childVNode = ch[i];
+		if (childVNode == null) continue;
+
+		oldVNode = childVNode._oldVNode;
+		oldDom = oldVNode._dom || oldDom;
+		console.log('    DIFF', printVNode(childVNode), printVNode(oldVNode));
+		console.log('      oldDom', oldDom, oldVNode._dom);
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		diff(
@@ -175,6 +219,7 @@ export function diffChildren(
 					parentDom
 				);
 			} else {
+				console.log('    PLACE', printVNode(childVNode));
 				oldDom = placeChild(
 					parentDom,
 					childVNode,
@@ -226,11 +271,6 @@ export function diffChildren(
 		for (i = excessDomChildren.length; i--; ) {
 			if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
 		}
-	}
-
-	// Remove remaining oldChildren if there are any.
-	for (i = oldChildrenLength; i--; ) {
-		if (oldChildren[i] != null) unmount(oldChildren[i], oldChildren[i]);
 	}
 
 	// Set refs only after unmount
@@ -316,6 +356,15 @@ function placeChild(
 		// The values only have the same type when `null`.
 
 		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
+			console.log(
+				'--> append',
+				'new',
+				newDom,
+				'old',
+				oldDom,
+				oldDom && oldDom.parentNode,
+				parentDom
+			);
 			parentDom.appendChild(newDom);
 			nextDom = null;
 		} else {
@@ -326,9 +375,11 @@ function placeChild(
 				j += 2
 			) {
 				if (sibDom == newDom) {
+					console.log('--> NO reorder');
 					break outer;
 				}
 			}
+			console.log('--> insert', newDom, 'before', oldDom);
 			parentDom.insertBefore(newDom, oldDom);
 			nextDom = oldDom;
 		}

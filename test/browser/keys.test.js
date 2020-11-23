@@ -213,7 +213,6 @@ describe('keys', () => {
 
 		values.shift();
 		clearLog();
-
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abc');
 		expect(getLog()).to.deep.equal(['<li>z.remove()']);

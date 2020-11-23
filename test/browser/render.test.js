@@ -624,7 +624,7 @@ describe('render()', () => {
 		expect(value()).to.equal(true);
 	});
 
-	it('should reorder child pairs', () => {
+	it.only('should reorder child pairs', () => {
 		render(
 			<div>
 				<a>a</a>
@@ -647,6 +647,7 @@ describe('render()', () => {
 			scratch
 		);
 
+		console.log(scratch.innerHTML);
 		expect(scratch.firstChild.firstChild).to.equalNode(b);
 		expect(scratch.firstChild.lastChild).to.equalNode(a);
 	});
