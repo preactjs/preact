@@ -125,7 +125,7 @@ function renderComponent(component) {
 		const oldVNode = assign({}, vnode);
 		oldVNode._original = vnode._original + 1;
 
-		let newDom = diff(
+		diff(
 			parentDom,
 			vnode,
 			oldVNode,
@@ -138,7 +138,7 @@ function renderComponent(component) {
 		);
 		commitRoot(commitQueue, vnode);
 
-		if (newDom != oldDom) {
+		if (vnode._dom != oldDom) {
 			updateParentDomPointers(vnode);
 		}
 	}

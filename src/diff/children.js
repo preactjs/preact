@@ -140,7 +140,7 @@ export function diffChildren(
 		oldVNode = oldVNode || EMPTY_OBJ;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		newDom = diff(
+		diff(
 			parentDom,
 			childVNode,
 			oldVNode,
@@ -151,6 +151,8 @@ export function diffChildren(
 			oldDom,
 			isHydrating
 		);
+
+		newDom = childVNode._dom;
 
 		if ((j = childVNode.ref) && oldVNode.ref != j) {
 			if (!refs) refs = [];
