@@ -163,7 +163,7 @@ options.vnode = vnode => {
 		if (type == 'select' && normalizedProps.defaultValue != null) {
 			normalizedProps.value = toChildArray(props.children).forEach(child => {
 				child.props.selected =
-					normalizedProps.defaultValue.indexOf(child.props.value) != -1;
+					normalizedProps.defaultValue == child.props.value;
 			});
 		}
 
