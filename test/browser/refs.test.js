@@ -262,8 +262,7 @@ describe('refs', () => {
 		).to.have.been.calledOnce.and.calledWith(null);
 	});
 
-	// Test for #1143
-	it.skip('should not pass ref into component as a prop', () => {
+	it('should pass ref into component as a prop', () => {
 		let foo = spy('foo'),
 			bar = spy('bar');
 
@@ -284,12 +283,12 @@ describe('refs', () => {
 		);
 
 		expect(Foo.prototype.render).to.have.been.calledWithMatch(
-			{ ref: sinon.match.falsy, a: 'a' },
+			{ ref: sinon.match.truthy, a: 'a' },
 			{},
 			{}
 		);
 		expect(Bar).to.have.been.calledWithMatch(
-			{ b: 'b', ref: sinon.match.falsy },
+			{ b: 'b', ref: sinon.match.truthy },
 			{}
 		);
 	});
