@@ -110,6 +110,11 @@ options.vnode = vnode => {
 
 	const isComponent = typeof type == 'function';
 	if (isComponent) {
+		if (props.ref) {
+			vnode.ref = props.ref;
+			delete props.ref;
+		}
+
 		if ((classNameDescriptor.enumerable = 'className' in props)) {
 			props.class = props.className;
 		}
