@@ -31,6 +31,7 @@ export function forwardRef(fn) {
 		let clone = assign({}, props);
 		delete clone.ref;
 		ref = props.ref || ref;
+
 		return fn(
 			clone,
 			!ref || (typeof ref === 'object' && !('current' in ref)) ? null : ref

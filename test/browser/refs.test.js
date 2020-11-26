@@ -263,7 +263,7 @@ describe('refs', () => {
 	});
 
 	// Test for #1143
-	it('should not pass ref into component as a prop', () => {
+	it.skip('should not pass ref into component as a prop', () => {
 		let foo = spy('foo'),
 			bar = spy('bar');
 

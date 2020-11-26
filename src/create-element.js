@@ -12,7 +12,11 @@ export function createElement(type, props, children) {
 	let normalizedProps = {},
 		i;
 	for (i in props) {
-		if (i !== 'key' && i !== 'ref') normalizedProps[i] = props[i];
+		if (i === 'key') {
+		} else if (typeof type !== 'function' && i === 'ref') {
+		} else {
+			normalizedProps[i] = props[i];
+		}
 	}
 
 	if (arguments.length > 3) {

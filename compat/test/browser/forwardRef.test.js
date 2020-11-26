@@ -390,7 +390,7 @@ describe('forwardRef', () => {
 		expect(_ref.current).to.equal(scratch.firstChild);
 	});
 
-	it('should forward at diff time instead vnode-creation.', () => {
+	it.only('should forward at diff time instead vnode-creation.', () => {
 		let ref, forceTransition, forceOpen;
 
 		const Portal = ({ children, open }) =>

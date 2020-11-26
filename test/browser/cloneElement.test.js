@@ -49,7 +49,7 @@ describe('cloneElement', () => {
 		expect(clone.key).to.equal('2');
 	});
 
-	it('should override ref if specified', () => {
+	it.skip('should override ref if specified', () => {
 		function a() {}
 		function b() {}
 		function Foo() {}
