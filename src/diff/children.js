@@ -155,6 +155,8 @@ export function diffChildren(
 		if ((j = childVNode.ref) && oldVNode.ref != j) {
 			if (!refs) refs = [];
 			if (oldVNode.ref) refs.push(oldVNode.ref, null, childVNode);
+
+			// We keep childVNode._component here to guarantee React compatability
 			refs.push(j, childVNode._component || newDom, childVNode);
 		}
 
