@@ -262,3 +262,36 @@ jobs:
           report-id: hydrate1k
           base-bench-name: preact-master
           pr-bench-name: preact-local
+
+  bench_filter_list:
+    name: Bench filter_list
+    runs-on: ubuntu-latest
+    needs: build_test
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - uses: andrewiggins/download-base-artifact@v1
+        with:
+          artifact: npm-package
+          required: false
+      - name: install & build
+        run: |
+          cd benches
+          npm ci
+      - name: bench
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          cd benches
+          npm run bench filter_list.html
+      - uses: andrewiggins/tachometer-reporter-action@v2
+        with:
+          path: benches/results/filter_list.json
+          report-id: filter_list
+          base-bench-name: preact-master
+          pr-bench-name: preact-local
