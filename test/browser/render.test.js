@@ -24,7 +24,7 @@ function getAttributes(node) {
 	return attrs;
 }
 
-describe('render()', () => {
+describe.only('render()', () => {
 	let scratch, rerender;
 
 	let resetAppendChild;
@@ -624,7 +624,7 @@ describe('render()', () => {
 		expect(value()).to.equal(true);
 	});
 
-	it.only('should reorder child pairs', () => {
+	it('should reorder child pairs', () => {
 		render(
 			<div>
 				<a>a</a>
@@ -647,7 +647,6 @@ describe('render()', () => {
 			scratch
 		);
 
-		console.log(scratch.innerHTML);
 		expect(scratch.firstChild.firstChild).to.equalNode(b);
 		expect(scratch.firstChild.lastChild).to.equalNode(a);
 	});
@@ -1051,7 +1050,7 @@ describe('render()', () => {
 		expect(serializeHtml(scratch)).to.equal('<div><span>Bye</span></div>');
 	});
 
-	it('should remove class attributes', () => {
+	it.only('should remove class attributes', () => {
 		const App = props => (
 			<div className={props.class}>
 				<span>Bye</span>
@@ -1063,6 +1062,7 @@ describe('render()', () => {
 			'<div class="hi"><span>Bye</span></div>'
 		);
 
+		console.log('============');
 		render(<App />, scratch);
 		expect(serializeHtml(scratch)).to.equal('<div><span>Bye</span></div>');
 	});

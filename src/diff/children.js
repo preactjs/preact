@@ -5,6 +5,51 @@ import { removeNode } from '../util';
 import { getDomSibling } from '../component';
 import { printVNode } from './test-utils';
 
+let nextId = 1; // Start from 1 so a valid _key is always > 0
+const TYPES = new Map();
+const KEYS = new Map();
+
+function getKey(type, key) {
+	const map = key == null ? TYPES : KEYS;
+	const value = key == null ? type : key;
+	let id = map.get(value);
+	if (!id) {
+		map.set(value, (id = nextId++));
+	}
+	return id;
+}
+
+// A comparison function for sorting VNodes/Internals primarily by _key,
+// secondarily by _index.
+// Apparently normalizeChildren can return undefined values, so sort them
+// to the end of the array.
+function byKey(a, b) {
+	if (!a) return b ? 1 : 0;
+	else if (!b) return -1;
+	return a._key - b._key || a._index - b._index;
+}
+
+function byIndex(a, b) {
+	return a._index - b._index;
+}
+
+// Reorder an array (of VNodes/Internals) back to its original order,
+// according to their _index values, in O(n) time.
+// Note that this assumes that it's ok to put null where there originally
+// was undefined, and vice versa.
+function reorder(array) {
+	for (let i = 0; i < array.length; i++) {
+		let item = array[i];
+		while (item && item._index !== i) {
+			array[i] = array[item._index];
+			array[item._index] = item;
+			item = array[i];
+		}
+	}
+}
+
+const DUPLICATES = new Set();
+
 /**
  * Diff the children of a virtual node
  * @param {import('../internal').PreactElement} parentDom The DOM element whose
@@ -59,10 +104,9 @@ export function diffChildren(
 		}
 	}
 
-	console.log('>>>>', oldChildren.length, renderResult.length);
+	// console.log('>>>>', oldChildren.length, renderResult.length);
 
 	newParentVNode._children = [];
-	const ch = [];
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = renderResult[i];
 
@@ -88,7 +132,11 @@ export function diffChildren(
 				null,
 				null
 			);
-		} else if (childVNode._dom != null || childVNode._component != null) {
+		} else if (
+			childVNode._index != null ||
+			childVNode._dom != null || // TODO: Can this be removed?
+			childVNode._component != null
+		) {
 			childVNode = newParentVNode._children[i] = createVNode(
 				childVNode.type,
 				childVNode.props,
@@ -109,82 +157,131 @@ export function diffChildren(
 		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;
 
-		// Check if we find a corresponding element in oldChildren.
-		// If found, delete the array item by setting to `undefined`.
-		// We use `undefined`, as `null` is reserved for empty placeholders
-		// (holes).
-		oldVNode = oldChildren[i];
-
-		if (
-			oldVNode === null ||
-			(oldVNode &&
-				childVNode.key == oldVNode.key &&
-				childVNode.type === oldVNode.type)
-		) {
-			oldChildren[i] = undefined;
-			childVNode._oldIndex = i;
-			console.log('    MATCH #1', printVNode(childVNode), printVNode(oldVNode));
-		} else {
-			// Either oldVNode === undefined or oldChildrenLength > 0,
-			// so after this loop oldVNode == null or oldVNode is a valid value.
-			for (j = 0; j < oldChildrenLength; j++) {
-				oldVNode = oldChildren[j];
-				// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
-				// We always match by type (in either case).
-				if (
-					oldVNode &&
-					childVNode.key == oldVNode.key &&
-					childVNode.type === oldVNode.type
-				) {
-					oldChildren[j] = undefined;
-					console.log(
-						'    MATCH #2',
-						printVNode(childVNode),
-						printVNode(oldVNode)
-					);
-					childVNode._oldIndex = j;
-					break;
-				}
-				oldVNode = null;
-			}
-		}
-
-		if (oldVNode == null) {
-			console.log('    NO MATCH', printVNode(childVNode));
-		}
-
-		childVNode._oldVNode = oldVNode || EMPTY_OBJ;
-		ch.push(childVNode);
+		childVNode._index = i;
+		childVNode._key = getKey(
+			childVNode.type,
+			childVNode.type == null || childVNode.props == null
+				? null
+				: childVNode.props.key
+		);
+		childVNode._match = -1;
 	}
+
+	const parentChildren = newParentVNode._children;
+	if (
+		newParentVNode._children.length !== new Set(newParentVNode._children).size
+	) {
+		console.log(
+			'    NEW',
+			parentChildren.map(x => x._index),
+			parentChildren.map(x => printVNode(x))
+		);
+		throw new Error('Duplicate child');
+	}
+
+	console.log('    MATCH', parentChildren.length, oldChildrenLength);
+	for (
+		let n = 0, o = 0;
+		n < parentChildren.length &&
+		o < oldChildrenLength &&
+		(childVNode = parentChildren[n]);
+
+	) {
+		const oldVNode = oldChildren[o];
+		console.log(
+			'        ',
+			n,
+			o,
+			'new key',
+			childVNode._key,
+			printVNode(childVNode),
+			'old key',
+			oldVNode._key,
+			printVNode(oldVNode)
+		);
+		if (childVNode._key === oldVNode._key) {
+			console.log('           match', oldVNode._index);
+			childVNode._match = oldVNode._index;
+			oldVNode._matched = true;
+			n++;
+			o++;
+		} else if (childVNode._key < oldVNode._key) {
+			n++;
+		} else {
+			o++;
+		}
+	}
+
+	console.log(
+		'    MATCHES',
+		parentChildren.map(x => x && x._match)
+	);
 
 	console.log(
 		'    NEW',
-		ch.map(x => printVNode(x))
+		parentChildren.map(x => printVNode(x)),
+		Array.from(new Set(parentChildren)).map(x => printVNode(x))
 	);
 	console.log(
 		'    OLD',
-		oldChildren.map(x => printVNode(x))
+		oldChildren.map(x => printVNode(x)),
+		Array.from(new Set(oldChildren.map(x => (x == null ? 'null' : x)))).map(x =>
+			printVNode(x)
+		)
 	);
 
 	// Remove remaining oldChildren if there are any.
-	for (i = oldChildrenLength; i--; ) {
-		if (oldChildren[i] != null) unmount(oldChildren[i], oldChildren[i]);
+	for (i = 0; i < oldChildrenLength; i++) {
+		if (oldChildren[i] !== null) {
+			console.log(
+				'    check unmount',
+				printVNode(oldChildren[i]),
+				oldChildren[i]._matched
+			);
+		}
+		if (oldChildren[i] != null && !oldChildren[i]._matched) {
+			// If we happen to unmount the vnode which hosts our oldDom pointer
+			// we need to re-query it after all unmounts are done.
+			if (oldDom === oldChildren[i]._dom) {
+				console.log('OH NO', oldDom, oldDom && oldDom.previousSibling);
+				console.log('    ', oldChildren[i]._nextDom);
+				oldDom = oldChildren[i]._nextDom || oldDom.nextSibling;
+			}
+			console.log(
+				'--> unmount',
+				i,
+				printVNode(oldChildren[i]),
+				oldChildren[i]._matched
+			);
+			unmount(oldChildren[i], oldChildren[i]);
+		}
 	}
 
-	console.log('      EXCESS', excessDomChildren);
+	// console.log('      EXCESS', excessDomChildren);
 
 	// Now we can start the actual diff
-	for (i = 0; i < ch.length; i++) {
-		childVNode = ch[i];
+	for (i = 0; i < parentChildren.length; i++) {
+		childVNode = parentChildren[i];
 		if (childVNode == null) continue;
 
-		oldVNode = childVNode._oldVNode;
-		oldDom = oldVNode._dom || oldDom;
-		console.log('    DIFF', printVNode(childVNode), printVNode(oldVNode));
-		console.log('      oldDom', oldDom, oldVNode._dom);
+		oldVNode =
+			childVNode.type !== null && childVNode._match > -1
+				? oldChildren[childVNode._match]
+				: EMPTY_OBJ;
+		// oldDom = oldVNode._dom || oldDom;
+		if (oldVNode == null) {
+			console.log(childVNode && childVNode._match, oldChildren);
+		}
+		console.log(
+			'    DIFF',
+			printVNode(childVNode),
+			oldVNode === EMPTY_OBJ ? 'EMTPY' : printVNode(oldVNode)
+		);
+		console.log('    match', childVNode._match);
+		console.log('      oldDom', oldDom);
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		diff(
+		const r = diff(
 			parentDom,
 			childVNode,
 			oldVNode,
@@ -197,6 +294,10 @@ export function diffChildren(
 		);
 
 		newDom = childVNode._dom;
+		if (newDom === undefined) {
+			console.log(childVNode);
+		}
+		console.log('    newDom', newDom, r);
 
 		if ((j = childVNode.ref) && oldVNode.ref != j) {
 			if (!refs) refs = [];
@@ -213,13 +314,14 @@ export function diffChildren(
 				typeof childVNode.type == 'function' &&
 				childVNode._children === oldVNode._children
 			) {
+				console.log('    REORDER', printVNode(childVNode));
 				childVNode._nextDom = oldDom = reorderChildren(
 					childVNode,
 					oldDom,
 					parentDom
 				);
 			} else {
-				console.log('    PLACE', printVNode(childVNode));
+				console.log('    PLACE', printVNode(childVNode), printVNode(oldVNode));
 				oldDom = placeChild(
 					parentDom,
 					childVNode,
@@ -290,6 +392,7 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 			if (typeof vnode.type == 'function') {
 				reorderChildren(vnode, oldDom, parentDom);
 			} else {
+				console.log('    --> reorder to place');
 				oldDom = placeChild(
 					parentDom,
 					vnode,
