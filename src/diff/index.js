@@ -241,11 +241,19 @@ export function diff(
 		newVNode._original = null;
 		// if hydrating or creating initial tree, bailout preserves DOM:
 		if (isHydrating || excessDomChildren != null) {
-			newVNode._dom = oldDom;
-			newVNode._hydrating = !!isHydrating;
-			excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
-			// ^ could possibly be simplified to:
-			// excessDomChildren.length = 0;
+			if (e.then) {
+				newVNode._dom = oldDom;
+				newVNode._hydrating = !!isHydrating;
+				excessDomChildren.length = 0;
+			} else {
+				// When we are hydrating and have excessDomChildren we don't know the _children this VNode
+				// should receive so it's safer to unmount them. Else on the subsequent error-boundary diff,
+				// we won't know the oldDom and insert an additional node instead of replace the prerendered one. (#2539)
+				for (tmp = excessDomChildren.length; tmp--; ) {
+					if (excessDomChildren[tmp] != null)
+						removeNode(excessDomChildren[tmp]);
+				}
+			}
 		}
 		options._catchError(e, newVNode, oldVNode);
 	}

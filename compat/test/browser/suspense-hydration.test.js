@@ -164,6 +164,30 @@ describe('suspense hydration', () => {
 		});
 	});
 
+	it('should properly hydrate when the suspended component is a list', () => {
+		const items = ['Todo 1', 'Todo 2'];
+		scratch.innerHTML = '<p>Todo 1</p><p>Todo 2</p>';
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<Suspense>
+				<Lazy />
+			</Suspense>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal('<p>Todo 1</p><p>Todo 2</p>');
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		return resolve(() => items.map(t => <p>{t}</p>)).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal('<p>Todo 1</p><p>Todo 2</p>');
+			expect(getLog()).to.deep.equal([]);
+			clearLog();
+		});
+	});
 	// TODO:
 	// 1. What if props change between when hydrate suspended and suspense
 	//    resolves?
