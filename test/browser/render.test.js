@@ -647,6 +647,7 @@ describe.only('render()', () => {
 			scratch
 		);
 
+		console.log(scratch.innerHTML);
 		expect(scratch.firstChild.firstChild).to.equalNode(b);
 		expect(scratch.firstChild.lastChild).to.equalNode(a);
 	});
@@ -1050,7 +1051,7 @@ describe.only('render()', () => {
 		expect(serializeHtml(scratch)).to.equal('<div><span>Bye</span></div>');
 	});
 
-	it.only('should remove class attributes', () => {
+	it('should remove class attributes', () => {
 		const App = props => (
 			<div className={props.class}>
 				<span>Bye</span>

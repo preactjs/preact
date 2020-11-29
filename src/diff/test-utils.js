@@ -12,8 +12,17 @@ export function printVNode(vnode) {
 	} else if (typeof vnode === 'string') {
 		v = vnode;
 	} else if (vnode.type == null) {
-		v = `text#${vnode.props}`;
-	} else if (typeof vnode.type === 'string') {
+		v = `text#"${vnode.props}"`;
+	} else if (
+		typeof vnode.type === 'string' ||
+		typeof vnode.type === 'function'
+	) {
+		const name =
+			typeof vnode.type === 'string'
+				? vnode.type
+				: 'prototype' in vnode.type
+				? vnode.type.prototype.constructor.name
+				: vnode.type.name;
 		const key = vnode.key ? ` key="${vnode.key}"` : '';
 		const props = vnode.props
 			? Object.keys(vnode.props).reduce((acc, key) => {
@@ -30,11 +39,9 @@ export function printVNode(vnode) {
 				: vnode._children && vnode._children.length > 0
 				? '...'
 				: '';
-		v = `<${vnode.type}${key}${props}`;
+		v = `<${name}${key}${props}`;
 		if (children) {
-			v += `>${children}</${vnode.type}>`;
-		} else {
-			v += ' />';
+			v += `>${children}</${name}>`;
 		}
 	}
 	return v;

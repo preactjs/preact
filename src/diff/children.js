@@ -30,6 +30,7 @@ function byKey(a, b) {
 }
 
 function byIndex(a, b) {
+	if (a == null || b == null) return 0;
 	return a._index - b._index;
 }
 
@@ -47,8 +48,6 @@ function reorder(array) {
 		}
 	}
 }
-
-const DUPLICATES = new Set();
 
 /**
  * Diff the children of a virtual node
@@ -168,18 +167,12 @@ export function diffChildren(
 	}
 
 	const parentChildren = newParentVNode._children;
-	if (
-		newParentVNode._children.length !== new Set(newParentVNode._children).size
-	) {
-		console.log(
-			'    NEW',
-			parentChildren.map(x => x._index),
-			parentChildren.map(x => printVNode(x))
-		);
-		throw new Error('Duplicate child');
-	}
 
 	console.log('    MATCH', parentChildren.length, oldChildrenLength);
+	// Find matching newVNode -> oldVNode pairs.
+	oldChildren.sort(byKey);
+	parentChildren.sort(byKey);
+	let found = 0;
 	for (
 		let n = 0, o = 0;
 		n < parentChildren.length &&
@@ -187,7 +180,7 @@ export function diffChildren(
 		(childVNode = parentChildren[n]);
 
 	) {
-		const oldVNode = oldChildren[o];
+		const oldVNode = oldChildren[o] || EMPTY_OBJ;
 		console.log(
 			'        ',
 			n,
@@ -196,13 +189,14 @@ export function diffChildren(
 			childVNode._key,
 			printVNode(childVNode),
 			'old key',
-			oldVNode._key,
+			oldVNode && oldVNode._key,
 			printVNode(oldVNode)
 		);
 		if (childVNode._key === oldVNode._key) {
 			console.log('           match', oldVNode._index);
 			childVNode._match = oldVNode._index;
 			oldVNode._matched = true;
+			found++;
 			n++;
 			o++;
 		} else if (childVNode._key < oldVNode._key) {
@@ -211,6 +205,8 @@ export function diffChildren(
 			o++;
 		}
 	}
+	oldChildren.sort(byIndex);
+	parentChildren.sort(byIndex);
 
 	console.log(
 		'    MATCHES',
@@ -234,7 +230,7 @@ export function diffChildren(
 	for (i = 0; i < oldChildrenLength; i++) {
 		if (oldChildren[i] !== null) {
 			console.log(
-				'    check unmount',
+				'    > check unmount',
 				printVNode(oldChildren[i]),
 				oldChildren[i]._matched
 			);
@@ -265,9 +261,7 @@ export function diffChildren(
 		if (childVNode == null) continue;
 
 		oldVNode =
-			childVNode.type !== null && childVNode._match > -1
-				? oldChildren[childVNode._match]
-				: EMPTY_OBJ;
+			childVNode._match > -1 ? oldChildren[childVNode._match] : EMPTY_OBJ;
 		// oldDom = oldVNode._dom || oldDom;
 		if (oldVNode == null) {
 			console.log(childVNode && childVNode._match, oldChildren);
