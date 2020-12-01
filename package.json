@@ -155,8 +155,7 @@
 	},
 	"lint-staged": {
 		"**/*.{js,jsx,ts,tsx,yml}": [
-			"prettier --write",
-			"git add"
+			"prettier --write"
 		]
 	},
 	"husky": {
@@ -198,8 +197,8 @@
 		"vdom",
 		"components",
 		"dom diff",
-    "front-end",
-    "framework"
+		"front-end",
+		"framework"
 	],
 	"authors": [
 		"The Preact Authors (https://github.com/preactjs/preact/contributors)"
@@ -216,44 +215,44 @@
 		"@babel/register": "^7.7.0",
 		"@types/chai": "^4.1.2",
 		"@types/mocha": "^5.0.0",
-		"@types/node": "^10.5.2",
+		"@types/node": "^14.14.10",
 		"babel-loader": "^8.0.6",
 		"babel-plugin-istanbul": "^6.0.0",
 		"babel-plugin-transform-async-to-promises": "^0.8.15",
-		"babel-plugin-transform-rename-properties": "0.0.3",
+		"babel-plugin-transform-rename-properties": "0.1.0",
 		"benchmark": "^2.1.4",
 		"chai": "^4.1.2",
 		"check-export-map": "^1.0.1",
 		"coveralls": "^3.0.0",
-		"cross-env": "^5.2.0",
+		"cross-env": "^7.0.2",
 		"csstype": "^3.0.5",
-		"diff": "^3.5.0",
+		"diff": "^5.0.0",
 		"eslint": "5.15.1",
 		"eslint-config-developit": "^1.1.1",
 		"eslint-config-prettier": "^6.5.0",
 		"eslint-plugin-react": "7.12.4",
-		"husky": "^3.0.9",
-		"karma": "^3.0.0",
+		"husky": "^4.3.0",
+		"karma": "^5.2.3",
 		"karma-chai-sinon": "^0.1.5",
-		"karma-chrome-launcher": "^2.2.0",
-		"karma-coverage": "^2.0.1",
-		"karma-mocha": "^1.3.0",
+		"karma-chrome-launcher": "^3.1.0",
+		"karma-coverage": "^2.0.3",
+		"karma-mocha": "^2.0.1",
 		"karma-mocha-reporter": "^2.2.5",
-		"karma-sauce-launcher": "^1.2.0",
+		"karma-sauce-launcher": "^4.3.4",
 		"karma-sinon": "^1.0.5",
 		"karma-sourcemap-loader": "^0.3.7",
 		"karma-webpack": "^3.0.5",
-		"lint-staged": "^9.4.2",
-		"lodash": "^4.17.10",
+		"lint-staged": "^10.5.2",
+		"lodash": "^4.17.20",
 		"microbundle": "^0.11.0",
-		"mocha": "^5.2.0",
+		"mocha": "^8.2.1",
 		"npm-merge-driver-install": "^1.1.1",
 		"npm-run-all": "^4.0.0",
 		"prettier": "^1.18.2",
 		"prop-types": "^15.7.2",
-		"sinon": "^6.1.3",
+		"sinon": "^9.2.1",
 		"sinon-chai": "^3.0.0",
 		"typescript": "3.5.3",
-		"webpack": "^4.3.0"
+		"webpack": "^4.44.2"
 	}
 }
