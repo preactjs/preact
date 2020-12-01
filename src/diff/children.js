@@ -105,6 +105,7 @@ export function diffChildren(
 
 	// console.log('>>>>', oldChildren.length, renderResult.length);
 
+	let isKeyedDiff = false;
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = renderResult[i];
@@ -157,6 +158,8 @@ export function diffChildren(
 		childVNode._depth = newParentVNode._depth + 1;
 
 		childVNode._index = i;
+		isKeyedDiff = isKeyedDiff || (childVNode.props && childVNode.props.key);
+
 		childVNode._key = getKey(
 			childVNode.type,
 			childVNode.type == null || childVNode.props == null
@@ -168,87 +171,101 @@ export function diffChildren(
 
 	const parentChildren = newParentVNode._children;
 
-	console.log('    MATCH', parentChildren.length, oldChildrenLength);
-	// Find matching newVNode -> oldVNode pairs.
-	oldChildren.sort(byKey);
-	parentChildren.sort(byKey);
-	let found = 0;
-	for (
-		let n = 0, o = 0;
-		n < parentChildren.length &&
-		o < oldChildrenLength &&
-		(childVNode = parentChildren[n]);
+	// console.log('    MATCH', parentChildren.length, oldChildrenLength);
+	if (isKeyedDiff) {
+		// Find matching newVNode -> oldVNode pairs.
+		oldChildren.sort(byKey);
+		parentChildren.sort(byKey);
+		for (
+			let n = 0, o = 0;
+			n < parentChildren.length &&
+			o < oldChildrenLength &&
+			(childVNode = parentChildren[n]);
 
-	) {
-		const oldVNode = oldChildren[o] || EMPTY_OBJ;
-		console.log(
-			'        ',
-			n,
-			o,
-			'new key',
-			childVNode._key,
-			printVNode(childVNode),
-			'old key',
-			oldVNode && oldVNode._key,
-			printVNode(oldVNode)
-		);
-		if (childVNode._key === oldVNode._key) {
-			console.log('           match', oldVNode._index);
-			childVNode._match = oldVNode._index;
-			oldVNode._matched = true;
-			found++;
-			n++;
-			o++;
-		} else if (childVNode._key < oldVNode._key) {
-			n++;
-		} else {
-			o++;
+		) {
+			const oldVNode = oldChildren[o] || EMPTY_OBJ;
+			// console.log(
+			// 	'        ',
+			// 	n,
+			// 	o,
+			// 	'new key',
+			// 	childVNode._key,
+			// 	printVNode(childVNode),
+			// 	'old key',
+			// 	oldVNode && oldVNode._key,
+			// 	printVNode(oldVNode)
+			// );
+			if (childVNode._key === oldVNode._key) {
+				// console.log('           match', oldVNode._index);
+				childVNode._match = oldVNode._index;
+				oldVNode._match = -2;
+				n++;
+				o++;
+			} else if (childVNode._key < oldVNode._key) {
+				n++;
+			} else {
+				o++;
+			}
+		}
+		oldChildren.sort(byIndex);
+		parentChildren.sort(byIndex);
+	} else {
+		for (i = 0; i < parentChildren.length && i < oldChildrenLength; i++) {
+			childVNode = parentChildren[i];
+			const oldVNode = oldChildren[i] || EMPTY_OBJ;
+			// console.log(
+			// 	'      unkeyed ' + i,
+			// 	childVNode && childVNode._key,
+			// 	oldVNode._key
+			// );
+			if (childVNode !== null && childVNode._key === oldVNode._key) {
+				childVNode._match = oldVNode._index;
+				oldVNode._match = -2;
+			}
 		}
 	}
-	oldChildren.sort(byIndex);
-	parentChildren.sort(byIndex);
 
-	console.log(
-		'    MATCHES',
-		parentChildren.map(x => x && x._match)
-	);
+	// console.log(
+	// 	'    MATCHES',
+	// 	parentChildren.map(x => x && x._match)
+	// );
 
-	console.log(
-		'    NEW',
-		parentChildren.map(x => printVNode(x)),
-		Array.from(new Set(parentChildren)).map(x => printVNode(x))
-	);
-	console.log(
-		'    OLD',
-		oldChildren.map(x => printVNode(x)),
-		Array.from(new Set(oldChildren.map(x => (x == null ? 'null' : x)))).map(x =>
-			printVNode(x)
-		)
-	);
+	// console.log(
+	// 	'    NEW',
+	// 	parentChildren.map(x => printVNode(x)),
+	// 	Array.from(new Set(parentChildren)).map(x => printVNode(x))
+	// );
+	// console.log(
+	// 	'    OLD',
+	// 	oldChildren.map(x => printVNode(x)),
+	// 	Array.from(new Set(oldChildren.map(x => (x == null ? 'null' : x)))).map(x =>
+	// 		printVNode(x)
+	// 	)
+	// );
 
 	// Remove remaining oldChildren if there are any.
 	for (i = 0; i < oldChildrenLength; i++) {
 		if (oldChildren[i] !== null) {
-			console.log(
-				'    > check unmount',
-				printVNode(oldChildren[i]),
-				oldChildren[i]._matched
-			);
+			// console.log(
+			// 	'    > check unmount ' + i,
+			// 	printVNode(oldChildren[i]),
+			// 	oldChildren[i]._match
+			// );
 		}
-		if (oldChildren[i] != null && !oldChildren[i]._matched) {
+		if (oldChildren[i] != null && oldChildren[i]._match !== -2) {
 			// If we happen to unmount the vnode which hosts our oldDom pointer
 			// we need to re-query it after all unmounts are done.
 			if (oldDom === oldChildren[i]._dom) {
-				console.log('OH NO', oldDom, oldDom && oldDom.previousSibling);
-				console.log('    ', oldChildren[i]._nextDom);
-				oldDom = oldChildren[i]._nextDom || oldDom.nextSibling;
+				// console.log('OH NO', oldDom, oldDom && oldDom.previousSibling);
+				// console.log('    ', oldChildren[i]._nextDom);
+				oldDom = oldChildren[i]._nextDom || oldDom ? oldDom.nextSibling : null;
 			}
-			console.log(
-				'--> unmount',
-				i,
-				printVNode(oldChildren[i]),
-				oldChildren[i]._matched
-			);
+			// console.log(
+			// 	'--> unmount',
+			// 	i,
+			// 	printVNode(oldChildren[i]),
+			// 	oldChildren[i]._matched
+			// );
 			unmount(oldChildren[i], oldChildren[i]);
 		}
 	}
@@ -261,24 +278,26 @@ export function diffChildren(
 		if (childVNode == null) continue;
 
 		oldVNode =
-			childVNode._match > -1 ? oldChildren[childVNode._match] : EMPTY_OBJ;
+			childVNode._match > -1
+				? oldChildren[childVNode._match] || EMPTY_OBJ
+				: EMPTY_OBJ;
 		// oldDom = oldVNode._dom || oldDom;
-		if (oldVNode == null) {
-			console.log(childVNode && childVNode._match, oldChildren);
-		}
-		console.log(
-			'    DIFF',
-			printVNode(childVNode),
-			oldVNode === EMPTY_OBJ ? 'EMTPY' : printVNode(oldVNode)
-		);
-		console.log('    match', childVNode._match);
-		console.log('      oldDom', oldDom);
+		// if (oldVNode == null) {
+		// 	console.log(childVNode && childVNode._match, oldChildren);
+		// }
+		// console.log(
+		// 	'    DIFF',
+		// 	printVNode(childVNode),
+		// 	oldVNode === EMPTY_OBJ ? 'EMTPY' : printVNode(oldVNode)
+		// );
+		// console.log('    match', childVNode._match);
+		// console.log('      oldDom', oldDom);
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		const r = diff(
+		diff(
 			parentDom,
 			childVNode,
-			oldVNode,
+			oldVNode || EMPTY_OBJ,
 			globalContext,
 			isSvg,
 			excessDomChildren,
@@ -288,10 +307,10 @@ export function diffChildren(
 		);
 
 		newDom = childVNode._dom;
-		if (newDom === undefined) {
-			console.log(childVNode);
-		}
-		console.log('    newDom', newDom, r);
+		// if (newDom === undefined) {
+		// 	console.log(childVNode);
+		// }
+		// console.log('    newDom', newDom, r);
 
 		if ((j = childVNode.ref) && oldVNode.ref != j) {
 			if (!refs) refs = [];
@@ -308,14 +327,14 @@ export function diffChildren(
 				typeof childVNode.type == 'function' &&
 				childVNode._children === oldVNode._children
 			) {
-				console.log('    REORDER', printVNode(childVNode));
+				// console.log('    REORDER', printVNode(childVNode));
 				childVNode._nextDom = oldDom = reorderChildren(
 					childVNode,
 					oldDom,
 					parentDom
 				);
 			} else {
-				console.log('    PLACE', printVNode(childVNode), printVNode(oldVNode));
+				// console.log('    PLACE', printVNode(childVNode), printVNode(oldVNode));
 				oldDom = placeChild(
 					parentDom,
 					childVNode,
@@ -453,15 +472,15 @@ function placeChild(
 		// The values only have the same type when `null`.
 
 		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
-			console.log(
-				'--> append',
-				'new',
-				newDom,
-				'old',
-				oldDom,
-				oldDom && oldDom.parentNode,
-				parentDom
-			);
+			// console.log(
+			// 	'--> append',
+			// 	'new',
+			// 	newDom,
+			// 	'old',
+			// 	oldDom,
+			// 	oldDom && oldDom.parentNode,
+			// 	parentDom
+			// );
 			parentDom.appendChild(newDom);
 			nextDom = null;
 		} else {
@@ -472,11 +491,11 @@ function placeChild(
 				j += 2
 			) {
 				if (sibDom == newDom) {
-					console.log('--> NO reorder');
+					// console.log('--> NO reorder');
 					break outer;
 				}
 			}
-			console.log('--> insert', newDom, 'before', oldDom);
+			// console.log('--> insert', newDom, 'before', oldDom);
 			parentDom.insertBefore(newDom, oldDom);
 			nextDom = oldDom;
 		}
