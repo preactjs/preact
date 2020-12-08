@@ -126,3 +126,11 @@ declare namespace React {
 		toArray: (children: preact.ComponentChildren) => preact.VNode<{}>[];
 	};
 }
+
+declare module 'preact/src/jsx' {
+	namespace JSXInternal {
+		interface HTMLAttributes<RefType extends EventTarget = EventTarget> {
+			defaultValue?: string;
+		}
+	}
+}
