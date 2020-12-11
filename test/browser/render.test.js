@@ -24,7 +24,7 @@ function getAttributes(node) {
 	return attrs;
 }
 
-describe.only('render()', () => {
+describe('render()', () => {
 	let scratch, rerender;
 
 	let resetAppendChild;
@@ -963,11 +963,13 @@ describe.only('render()', () => {
 		render(<App />, scratch);
 		expect(scratch.textContent).to.equal('00');
 
+		console.log('===========================');
 		ref.update();
 		updateApp();
 		rerender();
 		expect(scratch.textContent).to.equal('1');
 
+		console.log('===========================');
 		updateApp();
 		rerender();
 

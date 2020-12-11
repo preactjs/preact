@@ -479,7 +479,7 @@ describe('keys', () => {
 		expect(Stateful2Ref).to.not.equal(Stateful2MovedRef);
 	});
 
-	it('should preserve state when moving keyed children components', () => {
+	it.only('should preserve state when moving keyed children components', () => {
 		// React & Preact v8 behavior: https://codesandbox.io/s/8l3p6lz9kj
 
 		const Stateful1 = createStateful('Stateful1');
