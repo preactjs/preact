@@ -3,6 +3,7 @@ import { createVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { removeNode } from '../util';
 import { getDomSibling } from '../component';
+import { normalizeVNode } from './shared';
 
 /**
  * Diff the children of a virtual node
@@ -60,50 +61,16 @@ export function diffChildren(
 
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
-		childVNode = renderResult[i];
-
-		if (childVNode == null || typeof childVNode == 'boolean') {
-			childVNode = newParentVNode._children[i] = null;
-		}
-		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
-		// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
-		// it's own DOM & etc. pointers
-		else if (typeof childVNode == 'string' || typeof childVNode == 'number') {
-			childVNode = newParentVNode._children[i] = createVNode(
-				null,
-				childVNode,
-				null,
-				null,
-				childVNode
-			);
-		} else if (Array.isArray(childVNode)) {
-			childVNode = newParentVNode._children[i] = createVNode(
-				Fragment,
-				{ children: childVNode },
-				null,
-				null,
-				null
-			);
-		} else if (childVNode._dom != null || childVNode._component != null) {
-			childVNode = newParentVNode._children[i] = createVNode(
-				childVNode.type,
-				childVNode.props,
-				childVNode.key,
-				null,
-				childVNode._original
-			);
-		} else {
-			childVNode = newParentVNode._children[i] = childVNode;
-		}
+		childVNode = newParentVNode._children[i] = normalizeVNode(
+			renderResult[i],
+			newParentVNode
+		);
 
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
 		if (childVNode == null) {
 			continue;
 		}
-
-		childVNode._parent = newParentVNode;
-		childVNode._depth = newParentVNode._depth + 1;
 
 		// Check if we find a corresponding element in oldChildren.
 		// If found, delete the array item by setting to `undefined`.
