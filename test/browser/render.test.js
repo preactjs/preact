@@ -136,7 +136,7 @@ describe.only('render()', () => {
 		}
 	});
 
-	it.only('should allow VNode reuse', () => {
+	it('should allow VNode reuse', () => {
 		let reused = <div class="reuse">Hello World!</div>;
 		render(
 			<div>
@@ -150,7 +150,6 @@ describe.only('render()', () => {
 			`<div><div class="reuse">Hello World!</div><hr><div class="reuse">Hello World!</div></div>`
 		);
 
-		console.log('==============');
 		render(
 			<div>
 				<hr />
@@ -260,7 +259,7 @@ describe.only('render()', () => {
 		expect(scratch.innerHTML).to.equal('Testing, huh! How is it going?');
 	});
 
-	it('should render arrays of mixed elements', () => {
+	it.only('should render arrays of mixed elements', () => {
 		render(getMixedArray(), scratch);
 		expect(scratch.innerHTML).to.equal(mixedArrayHTML);
 	});
