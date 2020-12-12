@@ -24,7 +24,7 @@ function getAttributes(node) {
 	return attrs;
 }
 
-describe('render()', () => {
+describe.only('render()', () => {
 	let scratch, rerender;
 
 	let resetAppendChild;
@@ -136,7 +136,7 @@ describe('render()', () => {
 		}
 	});
 
-	it('should allow VNode reuse', () => {
+	it.only('should allow VNode reuse', () => {
 		let reused = <div class="reuse">Hello World!</div>;
 		render(
 			<div>
@@ -150,6 +150,7 @@ describe('render()', () => {
 			`<div><div class="reuse">Hello World!</div><hr><div class="reuse">Hello World!</div></div>`
 		);
 
+		console.log('==============');
 		render(
 			<div>
 				<hr />

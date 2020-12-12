@@ -58,7 +58,15 @@ export function diffChildren(
 		}
 	}
 
+	// Requirements:
+	//   1. Keyed VNodes can be freely re-used and moved around if the keys match
+	//   2. Unkeyed VNodes cannot be moved around, because the sub-tree can
+	//      contain statful VNodes or DOM nodes.
+	//   3. Text VNodes are never stateful and can always be moved around
+	//   4. Children array can be a mix of keyed and unkeyed VNodes
+	//   5. Placeholder values (=null) are an optional optimization hint.
 	newParentVNode._children = [];
+	const map = new Map();
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = renderResult[i];
 
@@ -117,6 +125,8 @@ export function diffChildren(
 				childVNode.key == oldVNode.key &&
 				childVNode.type === oldVNode.type)
 		) {
+			console.log('    match', i, childVNode.type && oldVNode.type);
+			map.set(i, oldVNode);
 			oldChildren[i] = undefined;
 		} else {
 			// Either oldVNode === undefined or oldChildrenLength > 0,
@@ -130,14 +140,29 @@ export function diffChildren(
 					childVNode.key == oldVNode.key &&
 					childVNode.type === oldVNode.type
 				) {
+					console.log('    match #2', i, j, childVNode.type && oldVNode.type);
+					map.set(i, oldVNode);
 					oldChildren[j] = undefined;
 					break;
 				}
 				oldVNode = null;
 			}
 		}
+	}
 
-		oldVNode = oldVNode || EMPTY_OBJ;
+	console.log(
+		'oldchildren',
+		oldChildren.map(x => x && x.type)
+	);
+	// Remove remaining oldChildren if there are any.
+	for (i = oldChildrenLength; i--; ) {
+		if (oldChildren[i] != null) unmount(oldChildren[i], oldChildren[i]);
+	}
+
+	for (let i = 0; i < newParentVNode._children.length; i++) {
+		childVNode = newParentVNode._children[i];
+		if (childVNode == null) continue;
+		oldVNode = map.get(i) || EMPTY_OBJ;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		diff(
@@ -226,11 +251,6 @@ export function diffChildren(
 		for (i = excessDomChildren.length; i--; ) {
 			if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
 		}
-	}
-
-	// Remove remaining oldChildren if there are any.
-	for (i = oldChildrenLength; i--; ) {
-		if (oldChildren[i] != null) unmount(oldChildren[i], oldChildren[i]);
 	}
 
 	// Set refs only after unmount
