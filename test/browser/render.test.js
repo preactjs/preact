@@ -24,7 +24,7 @@ function getAttributes(node) {
 	return attrs;
 }
 
-describe.only('render()', () => {
+describe('render()', () => {
 	let scratch, rerender;
 
 	let resetAppendChild;
@@ -259,7 +259,7 @@ describe.only('render()', () => {
 		expect(scratch.innerHTML).to.equal('Testing, huh! How is it going?');
 	});
 
-	it.only('should render arrays of mixed elements', () => {
+	it('should render arrays of mixed elements', () => {
 		render(getMixedArray(), scratch);
 		expect(scratch.innerHTML).to.equal(mixedArrayHTML);
 	});

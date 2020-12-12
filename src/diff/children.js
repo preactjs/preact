@@ -125,7 +125,11 @@ export function diffChildren(
 				childVNode.key == oldVNode.key &&
 				childVNode.type === oldVNode.type)
 		) {
-			// console.log('    match', i, childVNode.type && oldVNode.type);
+			console.log(
+				'    match',
+				i,
+				childVNode && childVNode.type && oldVNode && oldVNode.type
+			);
 			map.set(i, oldVNode);
 			oldChildren[i] = undefined;
 		} else {
@@ -140,7 +144,12 @@ export function diffChildren(
 					childVNode.key == oldVNode.key &&
 					childVNode.type === oldVNode.type
 				) {
-					// console.log('    match #2', i, j, childVNode.type && oldVNode.type);
+					console.log(
+						'    match #2',
+						i,
+						j,
+						childVNode && childVNode.type && oldVNode.type
+					);
 					map.set(i, oldVNode);
 					oldChildren[j] = undefined;
 					break;
@@ -150,10 +159,10 @@ export function diffChildren(
 		}
 	}
 
-	// console.log(
-	// 	'OLD CHILDREN',
-	// 	oldChildren.map(x => x && x.type)
-	// );
+	console.log(
+		'OLD CHILDREN',
+		oldChildren.map(x => x && x.type)
+	);
 
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {
@@ -181,7 +190,7 @@ export function diffChildren(
 		);
 
 		newDom = childVNode._dom;
-		// console.log('NEW', newDom, childVNode.type);
+		console.log('NEW', newDom, childVNode.type);
 
 		if ((j = childVNode.ref) && oldVNode.ref != j) {
 			if (!refs) refs = [];
@@ -194,39 +203,59 @@ export function diffChildren(
 				firstChildDom = newDom;
 			}
 
-			// console.log('    DIFFED', newDom, childVNode._nextDom);
-			// console.log('        ', newDom.previousSibling, childVNode._nextDom);
+			console.log('    DIFFED', newDom, childVNode._nextDom);
+			console.log('        oldDom', oldDom);
 			let nextDom;
-			outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
-				parentDom.appendChild(newDom);
-				console.log('--> append', newDom);
-				// TODO: _nextDom
-				if (childVNode._nextDom != null) {
-					console.log('NEXTDOM');
-				}
-				nextDom = null;
-			} else {
-				console.log('--> insert', newDom, 'before', oldDom);
-				if (childVNode._nextDom != null) {
-					console.log('NEXTDOM');
-				}
-				for (
-					let sibDom = oldDom, j = 0;
-					(sibDom = sibDom.nextSibling) && j < oldChildren.length;
-					j += 2
-				) {
-					if (sibDom == newDom) {
-						break outer;
+			if (childVNode._nextDom !== undefined) {
+				// Only Fragments or components that return Fragment like VNodes will
+				// have a non-undefined _nextDom. Continue the diff from the sibling
+				// of last DOM child of this child VNode
+				nextDom = childVNode._nextDom;
+
+				// Eagerly cleanup _nextDom. We don't need to persist the value because
+				// it is only used by `diffChildren` to determine where to resume the diff after
+				// diffing Components and Fragments. Once we store it the nextDOM local var, we
+				// can clean up the property
+				childVNode._nextDom = undefined;
+			} else if (newDom != oldDom || newDom.parentNode == null) {
+				if (typeof childVNode.type !== 'function') {
+					outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
+						parentDom.appendChild(newDom);
+						console.log('--> append', newDom);
+						console.log('    parentDom before', parentDom);
+						// TODO: _nextDom
+						if (childVNode._nextDom) {
+							console.log('NEXTDOM');
+						}
+						nextDom = null;
+					} else {
+						if (childVNode._nextDom != null) {
+							console.log('NEXTDOM');
+						}
+						for (
+							let sibDom = oldDom, j = 0;
+							(sibDom = sibDom.nextSibling) && j < oldChildrenLength;
+							j += 2
+						) {
+							if (sibDom == newDom) {
+								console.log('--> BREAK outer');
+								break outer;
+							}
+						}
+						console.log('--> insert', newDom, 'before', oldDom);
+						parentDom.insertBefore(newDom, oldDom);
 					}
 				}
-				parentDom.insertBefore(newDom, oldDom);
 			}
 
 			if (nextDom !== undefined) {
+				console.log('nextDom', nextDom);
 				oldDom = nextDom;
 			} else {
+				console.log('dom sib', newDom, newDom.nextSibling);
 				oldDom = newDom.nextSibling;
 			}
+			console.log('set old DOM', oldDom);
 			// if (
 			// 	typeof childVNode.type == 'function' &&
 			// 	childVNode._children === oldVNode._children
