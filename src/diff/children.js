@@ -92,7 +92,8 @@ export function diffChildren(
 				null,
 				null
 			);
-		} else if (childVNode._dom != null || childVNode._component != null) {
+		} else if (childVNode._depth > 0) {
+			console.log('CLONE');
 			childVNode = newParentVNode._children[i] = createVNode(
 				childVNode.type,
 				childVNode.props,
@@ -127,6 +128,8 @@ export function diffChildren(
 		) {
 			console.log('    match', i, childVNode.type && oldVNode.type);
 			map.set(i, oldVNode);
+			childVNode._dom = oldVNode._dom;
+			childVNode._nextDom = oldVNode._nextDom;
 			oldChildren[i] = undefined;
 		} else {
 			// Either oldVNode === undefined or oldChildrenLength > 0,
@@ -142,6 +145,8 @@ export function diffChildren(
 				) {
 					console.log('    match #2', i, j, childVNode.type && oldVNode.type);
 					map.set(i, oldVNode);
+					// childVNode._dom = oldVNode._dom;
+					// childVNode._nextDom = oldVNode._nextDom;
 					oldChildren[j] = undefined;
 					break;
 				}
@@ -151,18 +156,81 @@ export function diffChildren(
 	}
 
 	console.log(
-		'oldchildren',
+		'OLD CHILDREN',
 		oldChildren.map(x => x && x.type)
 	);
+	console.log(
+		'OLD CHILDREN DOM',
+		Array.from(map.values()).map(x => x && x._dom)
+	);
+
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {
-		if (oldChildren[i] != null) unmount(oldChildren[i], oldChildren[i]);
+		if (oldChildren[i] != null) {
+			console.log('--> UNMOUNT', i);
+			unmount(oldChildren[i], oldChildren[i]);
+		}
 	}
 
-	for (let i = 0; i < newParentVNode._children.length; i++) {
+	console.log(
+		'OLD CHILDREN DOM',
+		Array.from(map.values()).map(x => x && x._dom)
+	);
+
+	// // Re-order/append children
+	// console.log('REORDER', oldDom);
+	// if (!isHydrating) {
+	// 	let j = 0;
+	// 	let child = oldDom;
+	// 	while (child && (child = child.previousSibling) != null) j++;
+	// 	console.log('    oldDom', oldDom, j);
+
+	// 	let next = newParentVNode._children[newParentVNode._children.length - 1];
+	// 	for (i = newParentVNode._children.length - 2; i >= 0; i--) {
+	// 		childVNode = newParentVNode._children[i];
+	// 		if (next._dom == null && childVNode._dom != null) {
+	// 			console.log('www', childVNode._dom);
+	// 			parentDom.appendChild(childVNode._dom);
+	// 		}
+	// 		if (next._dom != null && childVNode != null) {
+	// 			if (next._dom.parentNode !== parentDom) {
+	// 				parentDom.appendChild(next._dom);
+	// 			}
+
+	// 			if (childVNode._nextDom != null) {
+	// 				console.log('TODO');
+	// 			} else if (
+	// 				childVNode._dom != null &&
+	// 				childVNode._dom.nextSibling !== next._dom
+	// 			) {
+	// 				console.log(
+	// 					'YESS',
+	// 					parentDom,
+	// 					childVNode._dom.parentNode,
+	// 					next._dom.parentNode
+	// 				);
+	// 				parentDom.insertBefore(childVNode._dom, next._dom);
+	// 			}
+	// 			console.log(
+	// 				'      ',
+	// 				childVNode.type,
+	// 				childVNode._dom,
+	// 				childVNode._nextDom,
+	// 				'next',
+	// 				next._dom
+	// 			);
+	// 		}
+	// 	}
+	// }
+
+	for (i = 0; i < newParentVNode._children.length; i++) {
 		childVNode = newParentVNode._children[i];
 		if (childVNode == null) continue;
 		oldVNode = map.get(i) || EMPTY_OBJ;
+
+		if (map.get(i)) {
+			console.log('     OLD', map.get(i)._dom, map.get(i)._nextDom);
+		}
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		diff(
@@ -178,6 +246,10 @@ export function diffChildren(
 		);
 
 		newDom = childVNode._dom;
+		console.log('NEW', newDom, childVNode.type);
+		if (newDom == null) {
+			console.log('      ', childVNode._children);
+		}
 
 		if ((j = childVNode.ref) && oldVNode.ref != j) {
 			if (!refs) refs = [];
@@ -190,26 +262,38 @@ export function diffChildren(
 				firstChildDom = newDom;
 			}
 
-			if (
-				typeof childVNode.type == 'function' &&
-				childVNode._children === oldVNode._children
-			) {
-				childVNode._nextDom = oldDom = reorderChildren(
-					childVNode,
-					oldDom,
-					parentDom
-				);
-			} else {
-				oldDom = placeChild(
-					parentDom,
-					childVNode,
-					oldVNode,
-					oldChildren,
-					excessDomChildren,
-					newDom,
-					oldDom
-				);
+			console.log('    DIFFED', newDom, childVNode._nextDom);
+			console.log('        ', newDom.previousSibling, childVNode._nextDom);
+			if (oldDom == null || oldDom.parentNode !== parentDom) {
+				parentDom.appendChild(newDom);
+				console.log('--> append', newDom);
+				// TODO: _nextDom
+				oldDom = null;
+			} else if (newDom !== oldDom) {
+				console.log('--> insert', newDom, 'before', oldDom);
+
+				console.log(oldDom === newDom, oldDom, newDom);
 			}
+			// if (
+			// 	typeof childVNode.type == 'function' &&
+			// 	childVNode._children === oldVNode._children
+			// ) {
+			// 	childVNode._nextDom = oldDom = reorderChildren(
+			// 		childVNode,
+			// 		oldDom,
+			// 		parentDom
+			// 	);
+			// } else {
+			// 	oldDom = placeChild(
+			// 		parentDom,
+			// 		childVNode,
+			// 		oldVNode,
+			// 		oldChildren,
+			// 		excessDomChildren,
+			// 		newDom,
+			// 		oldDom
+			// 	);
+			// }
 
 			// Browsers will infer an option's `value` from `textContent` when
 			// no value is present. This essentially bypasses our code to set it
@@ -244,6 +328,8 @@ export function diffChildren(
 		}
 	}
 
+	console.log('  set PARENT DOM', firstChildDom, oldDom, newParentVNode.type);
+	console.log();
 	newParentVNode._dom = firstChildDom;
 
 	// Remove children that are not part of any vnode.

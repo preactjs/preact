@@ -223,6 +223,7 @@ export function diff(
 		) {
 			newVNode._children = oldVNode._children;
 			newVNode._dom = oldVNode._dom;
+			console.log('ABORT diff', oldVNode._dom, newVNode._original);
 		} else {
 			newVNode._dom = diffElementNodes(
 				oldVNode._dom,
@@ -234,6 +235,7 @@ export function diff(
 				commitQueue,
 				isHydrating
 			);
+			console.log('   diff DOM', newVNode.type, newVNode._dom);
 		}
 
 		if ((tmp = options.diffed)) tmp(newVNode);
