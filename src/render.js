@@ -2,6 +2,7 @@ import { EMPTY_OBJ, EMPTY_ARR } from './constants';
 import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
+import { flushToDom } from './diff/apply';
 
 const IS_HYDRATE = EMPTY_OBJ;
 
@@ -33,6 +34,18 @@ export function render(vnode, parentDom, replaceNode) {
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [];
+	let unmountQueue = [];
+	let refs = [];
+	const oldDom =
+		replaceNode && !isHydrating
+			? [replaceNode]
+			: oldVNode
+			? null
+			: parentDom.childNodes.length
+			? EMPTY_ARR.slice.call(parentDom.childNodes)
+			: null;
+
+	console.log('>>> DIFF');
 	diff(
 		parentDom,
 		// Determine the new vnode tree and store it on the DOM element on
@@ -41,20 +54,23 @@ export function render(vnode, parentDom, replaceNode) {
 		oldVNode || EMPTY_OBJ,
 		EMPTY_OBJ,
 		parentDom.ownerSVGElement !== undefined,
-		replaceNode && !isHydrating
-			? [replaceNode]
-			: oldVNode
-			? null
-			: parentDom.childNodes.length
-			? EMPTY_ARR.slice.call(parentDom.childNodes)
-			: null,
+		oldDom,
 		commitQueue,
+		unmountQueue,
+		refs,
 		replaceNode || EMPTY_OBJ,
 		isHydrating
 	);
 
-	// Flush all queued effects
-	commitRoot(commitQueue, vnode);
+	flushToDom(
+		parentDom,
+		vnode,
+		oldDom,
+		commitQueue,
+		unmountQueue,
+		refs,
+		isHydrating
+	);
 }
 
 /**

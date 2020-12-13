@@ -66,6 +66,15 @@ export interface PreactElement extends HTMLElement, Text {
 	data?: string | number; // From Text node
 }
 
+type CONSTANTS = typeof import('./lib/constants');
+
+type Flags =
+	| CONSTANTS['FLAG_NONE']
+	| CONSTANTS['FLAG_MOUNT']
+	| CONSTANTS['FLAG_UNMOUNT']
+	| CONSTANTS['FLAG_PLACEMENT']
+	| CONSTANTS['FLAG_UPDATE'];
+
 export interface VNode<P = {}> extends preact.VNode<P> {
 	// Redefine type here using our internal ComponentFactory type
 	type: string | ComponentFactory<P>;
@@ -73,6 +82,8 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	_children: Array<VNode<any>> | null;
 	_parent: VNode | null;
 	_depth: number | null;
+	_flags: Flags;
+	_oldProps: P & { children: preact.ComponentChildren };
 	/**
 	 * The [first (for Fragments)] DOM child of a VNode
 	 */

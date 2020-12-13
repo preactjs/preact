@@ -21,7 +21,7 @@ export function normalizeVNode(childVNode, newParentVNode) {
 			null,
 			null
 		);
-	} else if (childVNode._dom != null || childVNode._component != null) {
+	} else if (childVNode._depth > 0) {
 		childVNode = createVNode(
 			childVNode.type,
 			childVNode.props,

@@ -1,4 +1,4 @@
-import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
+import { EMPTY_OBJ, EMPTY_ARR, FLAG_UPDATE, FLAG_MOUNT } from '../constants';
 import { Component } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
@@ -15,7 +15,9 @@ import options from '../options';
  * @param {boolean} isSvg Whether or not this element is an SVG node
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
- * which have callbacks to invoke in commitRoot
+ * @param {Array<import('../internal').Component>} unmountQueue List of components
+ * to unmount
+ * @param {any[]} refs
  * @param {Element | Text} oldDom The current attached DOM
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
@@ -30,6 +32,8 @@ export function diff(
 	isSvg,
 	excessDomChildren,
 	commitQueue,
+	unmountQueue,
+	refs,
 	oldDom,
 	isHydrating
 ) {
@@ -41,12 +45,19 @@ export function diff(
 	if (newVNode.constructor !== undefined) return null;
 
 	// If the previous diff bailed out, resume creating/hydrating.
-	if (oldVNode._hydrating != null) {
-		isHydrating = oldVNode._hydrating;
-		oldDom = newVNode._dom = oldVNode._dom;
-		// if we resume, we want the tree to be "unlocked"
-		newVNode._hydrating = null;
-		excessDomChildren = [oldDom];
+	// if (oldVNode._hydrating != null) {
+	// 	isHydrating = oldVNode._hydrating;
+	// 	oldDom = newVNode._dom = oldVNode._dom;
+	// 	// if we resume, we want the tree to be "unlocked"
+	// 	newVNode._hydrating = null;
+	// 	excessDomChildren = [oldDom];
+	// }
+
+	if (oldVNode === EMPTY_OBJ) {
+		newVNode._flags |= FLAG_MOUNT;
+		console.log('MOUNT #1');
+	} else {
+		newVNode._flags |= FLAG_UPDATE;
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
@@ -199,6 +210,8 @@ export function diff(
 				isSvg,
 				excessDomChildren,
 				commitQueue,
+				unmountQueue,
+				refs,
 				oldDom,
 				isHydrating
 			);
@@ -232,6 +245,8 @@ export function diff(
 				isSvg,
 				excessDomChildren,
 				commitQueue,
+				unmountQueue,
+				refs,
 				isHydrating
 			);
 		}
@@ -283,6 +298,9 @@ export function commitRoot(commitQueue, root) {
  * @param {*} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
+ * @param {Array<import('../internal').Component>} unmountQueue List of components
+ * which have callbacks to invoke in commitRoot
+ * @param {any[]} refs
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @returns {import('../internal').PreactElement}
  */
@@ -294,63 +312,24 @@ function diffElementNodes(
 	isSvg,
 	excessDomChildren,
 	commitQueue,
+	unmountQueue,
+	refs,
 	isHydrating
 ) {
 	let i;
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
 
-	// Tracks entering and exiting SVG namespace when descending through the tree.
-	isSvg = newVNode.type === 'svg' || isSvg;
-
-	if (excessDomChildren != null) {
-		for (i = 0; i < excessDomChildren.length; i++) {
-			const child = excessDomChildren[i];
-
-			// if newVNode matches an element in excessDomChildren or the `dom`
-			// argument matches an element in excessDomChildren, remove it from
-			// excessDomChildren so it isn't later removed in diffChildren
-			if (
-				child != null &&
-				((newVNode.type === null
-					? child.nodeType === 3
-					: child.localName === newVNode.type) ||
-					dom == child)
-			) {
-				dom = child;
-				excessDomChildren[i] = null;
-				break;
-			}
-		}
-	}
-
-	if (dom == null) {
-		if (newVNode.type === null) {
-			return document.createTextNode(newProps);
-		}
-
-		dom = isSvg
-			? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type)
-			: document.createElement(
-					newVNode.type,
-					newProps.is && { is: newProps.is }
-			  );
-		// we created a new parent, so none of the previously attached children can be reused:
-		excessDomChildren = null;
-		// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
-		isHydrating = false;
+	if (newVNode._oldProps == null) {
+		newVNode._oldProps = oldProps;
 	}
 
 	if (newVNode.type === null) {
 		// During hydration, we still have to split merged text from SSR'd HTML.
 		if (oldProps !== newProps && (!isHydrating || dom.data !== newProps)) {
-			dom.data = newProps;
+			newVNode._flags |= FLAG_UPDATE;
 		}
 	} else {
-		if (excessDomChildren != null) {
-			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
-		}
-
 		oldProps = oldVNode.props || EMPTY_OBJ;
 
 		let oldHtml = oldProps.dangerouslySetInnerHTML;
@@ -370,17 +349,15 @@ function diffElementNodes(
 
 			if (newHtml || oldHtml) {
 				// Avoid re-applying the same '__html' if it did not changed between re-render
-				if (
-					!newHtml ||
-					((!oldHtml || newHtml.__html != oldHtml.__html) &&
-						newHtml.__html !== dom.innerHTML)
-				) {
-					dom.innerHTML = (newHtml && newHtml.__html) || '';
-				}
+				// if (
+				// 	!newHtml ||
+				// 	((!oldHtml || newHtml.__html != oldHtml.__html) &&
+				// 		newHtml.__html !== dom.innerHTML)
+				// ) {
+				// 	dom.innerHTML = (newHtml && newHtml.__html) || '';
+				// }
 			}
 		}
-
-		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (newHtml) {
@@ -396,31 +373,11 @@ function diffElementNodes(
 				newVNode.type === 'foreignObject' ? false : isSvg,
 				excessDomChildren,
 				commitQueue,
+				unmountQueue,
+				refs,
 				EMPTY_OBJ,
 				isHydrating
 			);
-		}
-
-		// (as above, don't diff props during hydration)
-		if (!isHydrating) {
-			if (
-				'value' in newProps &&
-				(i = newProps.value) !== undefined &&
-				// #2756 For the <progress>-element the initial value is 0,
-				// despite the attribute not being present. When the attribute
-				// is missing the progress bar is treated as indeterminate.
-				// To fix that we'll always update it when it is 0 for progress elements
-				(i !== dom.value || (newVNode.type === 'progress' && !i))
-			) {
-				setProperty(dom, 'value', i, oldProps.value, false);
-			}
-			if (
-				'checked' in newProps &&
-				(i = newProps.checked) !== undefined &&
-				i !== dom.checked
-			) {
-				setProperty(dom, 'checked', i, oldProps.checked, false);
-			}
 		}
 	}
 
@@ -434,58 +391,13 @@ function diffElementNodes(
  * @param {import('../internal').VNode} vnode
  */
 export function applyRef(ref, value, vnode) {
+	console.log('    --> apply ref', ref, value, vnode.type);
 	try {
 		if (typeof ref == 'function') ref(value);
 		else ref.current = value;
 	} catch (e) {
 		options._catchError(e, vnode);
 	}
-}
-
-/**
- * Unmount a virtual node from the tree and apply DOM changes
- * @param {import('../internal').VNode} vnode The virtual node to unmount
- * @param {import('../internal').VNode} parentVNode The parent of the VNode that
- * initiated the unmount
- * @param {boolean} [skipRemove] Flag that indicates that a parent node of the
- * current element is already detached from the DOM.
- */
-export function unmount(vnode, parentVNode, skipRemove) {
-	let r;
-	if (options.unmount) options.unmount(vnode);
-
-	if ((r = vnode.ref)) {
-		if (!r.current || r.current === vnode._dom) applyRef(r, null, parentVNode);
-	}
-
-	let dom;
-	if (!skipRemove && typeof vnode.type != 'function') {
-		skipRemove = (dom = vnode._dom) != null;
-	}
-
-	// Must be set to `undefined` to properly clean up `_nextDom`
-	// for which `null` is a valid value. See comment in `create-element.js`
-	vnode._dom = vnode._nextDom = undefined;
-
-	if ((r = vnode._component) != null) {
-		if (r.componentWillUnmount) {
-			try {
-				r.componentWillUnmount();
-			} catch (e) {
-				options._catchError(e, parentVNode);
-			}
-		}
-
-		r.base = r._parentDom = null;
-	}
-
-	if ((r = vnode._children)) {
-		for (let i = 0; i < r.length; i++) {
-			if (r[i]) unmount(r[i], parentVNode, skipRemove);
-		}
-	}
-
-	if (dom != null) removeNode(dom);
 }
 
 /** The `.render()` method for a PFC backing instance. */

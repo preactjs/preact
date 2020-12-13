@@ -24,7 +24,7 @@ function getAttributes(node) {
 	return attrs;
 }
 
-describe('render()', () => {
+describe.only('render()', () => {
 	let scratch, rerender;
 
 	let resetAppendChild;
@@ -489,7 +489,7 @@ describe('render()', () => {
 		expect(links[3].hasAttribute('href')).to.equal(true);
 	});
 
-	describe('dangerouslySetInnerHTML', () => {
+	describe.skip('dangerouslySetInnerHTML', () => {
 		it('should support dangerouslySetInnerHTML', () => {
 			let html = '<b>foo &amp; bar</b>';
 			// eslint-disable-next-line react/no-danger
@@ -806,6 +806,7 @@ describe('render()', () => {
 		inputs.forceUpdate();
 		rerender();
 
+		console.log(scratch.querySelector('input').value);
 		expect(text.value).to.equal('Hello');
 		expect(checkbox.checked).to.equal(true);
 	});
@@ -855,7 +856,7 @@ describe('render()', () => {
 		expect(window.getSelection().getRangeAt(0).startOffset).to.equal(2);
 	});
 
-	it('should not re-render when a component returns undefined', () => {
+	it.only('should not re-render when a component returns undefined', () => {
 		let Dialog = () => undefined;
 		let updateState;
 		class App extends Component {

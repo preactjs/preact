@@ -2,6 +2,7 @@ import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
+import { flushToDom } from './diff/apply';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -122,9 +123,12 @@ function renderComponent(component) {
 
 	if (parentDom) {
 		let commitQueue = [];
+		let unmountQueue = [];
+		let refs = [];
 		const oldVNode = assign({}, vnode);
 		oldVNode._original = vnode._original + 1;
 
+		const sibling = oldDom == null ? getDomSibling(vnode) : oldDom;
 		diff(
 			parentDom,
 			vnode,
@@ -133,10 +137,21 @@ function renderComponent(component) {
 			parentDom.ownerSVGElement !== undefined,
 			vnode._hydrating != null ? [oldDom] : null,
 			commitQueue,
-			oldDom == null ? getDomSibling(vnode) : oldDom,
+			unmountQueue,
+			refs,
+			sibling,
 			vnode._hydrating
 		);
-		commitRoot(commitQueue, vnode);
+
+		flushToDom(
+			parentDom,
+			vnode,
+			sibling,
+			commitQueue,
+			unmountQueue,
+			refs,
+			vnode._hydrating
+		);
 
 		if (vnode._dom != oldDom) {
 			updateParentDomPointers(vnode);
