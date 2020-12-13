@@ -41,6 +41,7 @@ export async function runBenches(bench1 = 'all', opts) {
 	for (const { name, configPath } of configFiles) {
 		const args = [
 			benchesRoot('node_modules/tachometer/bin/tach.js'),
+			'--force-clean-npm-install',
 			'--config',
 			configPath,
 			'--json-file',
