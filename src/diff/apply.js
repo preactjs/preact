@@ -18,13 +18,14 @@ import { removeNode } from '../util';
  * @param {import('../internal').PreactElement} newDom
  * @param {import('../internal').PreactElement} siblingDom
  */
-function placeChild(parentDom, newDom, siblingDom) {
+function placeDom(parentDom, newDom, siblingDom) {
 	if (
 		newDom.parentNode !== parentDom ||
+		(siblingDom == null && newDom.nextSibling !== null) ||
 		(siblingDom != null && newDom.nextSibling !== siblingDom)
 	) {
 		console.log(
-			'    place',
+			'    place inner',
 			parentDom,
 			newDom.parentNode !== parentDom,
 			siblingDom != null && newDom.nextSibling !== siblingDom
@@ -173,14 +174,14 @@ function flushNode(parentDom, vnode, nextDom, isSvg, commitQueue) {
 				if (childVNode._nextDom != null) {
 					let dom = childVNode._nextDom;
 					while (dom != null && dom !== childVNode._dom) {
-						placeChild(parentDom, dom, siblingDom);
+						placeDom(parentDom, dom, siblingDom);
 						siblingDom = dom;
 						dom = dom.previousSibling;
 					}
 				}
 
-				console.log('place', childVNode.type, childVNode._dom === siblingDom);
-				placeChild(parentDom, childVNode._dom, siblingDom);
+				console.log('place', childVNode.type, childVNode._dom);
+				placeDom(parentDom, childVNode._dom, siblingDom);
 				siblingDom = childVNode._dom;
 
 				if (lastDom == null) {
