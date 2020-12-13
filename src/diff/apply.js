@@ -179,7 +179,7 @@ function flushNode(parentDom, vnode, nextDom, isSvg, commitQueue) {
 					}
 				}
 
-				console.log('place', childVNode.type, siblingDom);
+				console.log('place', childVNode.type, childVNode._dom === siblingDom);
 				placeChild(parentDom, childVNode._dom, siblingDom);
 				siblingDom = childVNode._dom;
 
@@ -191,7 +191,12 @@ function flushNode(parentDom, vnode, nextDom, isSvg, commitQueue) {
 	}
 
 	// Update dom pointers
-	if (typeof vnode.type === 'function' && lastDom !== nextDom) {
+	if (
+		typeof vnode.type === 'function' &&
+		lastDom !== null &&
+		lastDom !== nextDom
+	) {
+		console.log('----> SET', vnode.type, siblingDom, lastDom, nextDom);
 		vnode._dom = siblingDom;
 		if (lastDom !== siblingDom) {
 			vnode._nextDom = lastDom;
@@ -221,6 +226,10 @@ export function flushToDom(
 	unmountQueue.forEach(vnode => unmount(vnode, vnode._parent, false));
 
 	console.log('>>> FLUSH');
+	console.log(
+		'  start sibling',
+		nextDom == null ? getDomSibling(vnode) : nextDom
+	);
 	flushNode(
 		parentDom,
 		vnode,

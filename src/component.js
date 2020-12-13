@@ -128,7 +128,7 @@ function renderComponent(component) {
 		const oldVNode = assign({}, vnode);
 		oldVNode._original = vnode._original + 1;
 
-		const sibling = oldDom == null ? getDomSibling(vnode) : oldDom;
+		const sibling = oldDom == null ? getDomSibling(vnode) : null;
 		diff(
 			parentDom,
 			vnode,

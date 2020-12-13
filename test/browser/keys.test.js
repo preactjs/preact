@@ -5,7 +5,7 @@ import { div } from '../_util/dom';
 
 /** @jsx createElement */
 
-describe('keys', () => {
+describe.only('keys', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -295,7 +295,7 @@ describe('keys', () => {
 		);
 	});
 
-	it('should move keyed children to the end of the list', () => {
+	it.only('should move keyed children to the end of the list', () => {
 		const values = ['a', 'b', 'c', 'd'];
 
 		render(<List values={values} />, scratch);

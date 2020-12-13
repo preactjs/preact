@@ -24,7 +24,7 @@ function getAttributes(node) {
 	return attrs;
 }
 
-describe.only('render()', () => {
+describe('render()', () => {
 	let scratch, rerender;
 
 	let resetAppendChild;
@@ -489,6 +489,7 @@ describe.only('render()', () => {
 		expect(links[3].hasAttribute('href')).to.equal(true);
 	});
 
+	// TODO
 	describe.skip('dangerouslySetInnerHTML', () => {
 		it('should support dangerouslySetInnerHTML', () => {
 			let html = '<b>foo &amp; bar</b>';
@@ -856,7 +857,7 @@ describe.only('render()', () => {
 		expect(window.getSelection().getRangeAt(0).startOffset).to.equal(2);
 	});
 
-	it.only('should not re-render when a component returns undefined', () => {
+	it('should not re-render when a component returns undefined', () => {
 		let Dialog = () => undefined;
 		let updateState;
 		class App extends Component {
@@ -1031,7 +1032,8 @@ describe.only('render()', () => {
 		}
 	});
 
-	it('should remove attributes on pre-existing DOM', () => {
+	// TODO
+	it.skip('should remove attributes on pre-existing DOM', () => {
 		const div = document.createElement('div');
 		div.setAttribute('class', 'red');
 		const span = document.createElement('span');
