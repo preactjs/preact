@@ -162,6 +162,7 @@ jobs:
           report-id: 02_replace1k
           base-bench-name: preact-master
           pr-bench-name: preact-local
+          summarize: 'duration, usedJSHeapSize'
 
   bench_03_update10th1k_x16:
     name: Bench 03_update10th1k_x16
@@ -193,5 +194,71 @@ jobs:
         with:
           path: benches/results/03_update10th1k_x16.json
           report-id: 03_update10th1k_x16
+          base-bench-name: preact-master
+          pr-bench-name: preact-local
+
+  bench_07_create10k:
+    name: Bench 07_create10k
+    runs-on: ubuntu-latest
+    needs: build_test
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - uses: andrewiggins/download-base-artifact@v1
+        with:
+          artifact: npm-package
+          required: false
+      - name: install & build
+        run: |
+          cd benches
+          npm ci
+      - name: bench
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          cd benches
+          npm run bench 07_create10k.html
+      - uses: andrewiggins/tachometer-reporter-action@v2
+        with:
+          path: benches/results/07_create10k.json
+          report-id: 07_create10k
+          base-bench-name: preact-master
+          pr-bench-name: preact-local
+
+  bench_hydrate1k:
+    name: Bench hydrate1k
+    runs-on: ubuntu-latest
+    needs: build_test
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - uses: andrewiggins/download-base-artifact@v1
+        with:
+          artifact: npm-package
+          required: false
+      - name: install & build
+        run: |
+          cd benches
+          npm ci
+      - name: bench
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          cd benches
+          npm run bench hydrate1k.html
+      - uses: andrewiggins/tachometer-reporter-action@v2
+        with:
+          path: benches/results/hydrate1k.json
+          report-id: hydrate1k
           base-bench-name: preact-master
           pr-bench-name: preact-local

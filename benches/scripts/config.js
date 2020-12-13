@@ -9,7 +9,7 @@ const TACH_SCHEMA =
 	'https://raw.githubusercontent.com/Polymer/tachometer/master/config.schema.json';
 
 /**
- * @typedef {ConfigFile["benchmarks"][0]["packageVersions"]} ConfigFilePackageVersion
+ * @typedef {ConfigFileBenchmark["packageVersions"]} ConfigFilePackageVersion
  * @type {ConfigFilePackageVersion[]}
  */
 const frameworks = [
@@ -33,6 +33,68 @@ const frameworks = [
 	}
 ];
 
+/**
+ * @param {string} benchPath
+ * @returns {Pick<ConfigFileBenchmark, "name" | "url" | "measurement">}
+ */
+function getBaseBenchmarkConfig(benchPath) {
+	let name = path.basename(benchPath).replace('.html', '');
+	let url = path.posix.relative(toUrl(benchesRoot()), toUrl(benchPath));
+
+	/** @type {ConfigFileBenchmark["measurement"]} */
+	let measurement;
+	if (name == '02_replace1k') {
+		// MUST BE KEPT IN SYNC WITH WARMUP COUNT IN 02_replace1k.html
+		const WARMUP_COUNT = 5;
+
+		// For 02_replace1k, collect additional measurements focusing on the JS
+		// clock time for each warmup and the final duration.
+		measurement = [
+			{
+				name: 'duration',
+				mode: 'performance',
+				entryName: measureName
+			},
+			{
+				name: 'usedJSHeapSize',
+				mode: 'expression',
+				expression: 'window.usedJSHeapSize'
+			}
+		];
+
+		for (let i = 0; i < WARMUP_COUNT; i++) {
+			const entryName = `run-warmup-${i}`;
+			measurement.push({
+				name: entryName,
+				mode: 'performance',
+				entryName
+			});
+		}
+
+		measurement.push({
+			name: 'run-final',
+			mode: 'performance',
+			entryName: 'run-final'
+		});
+	} else {
+		// Default measurements
+		measurement = [
+			{
+				name: 'duration',
+				mode: 'performance',
+				entryName: measureName
+			},
+			{
+				name: 'usedJSHeapSize',
+				mode: 'expression',
+				expression: 'window.usedJSHeapSize'
+			}
+		];
+	}
+
+	return { name, url, measurement };
+}
+
 export async function generateSingleConfig(benchFile) {
 	const benchPath = await benchesRoot('src', benchFile);
 	const results = await stat(benchPath);
@@ -46,19 +108,19 @@ export async function generateSingleConfig(benchFile) {
 /**
  * @typedef {import('tachometer/lib/configfile').ConfigFile} ConfigFile Expected
  * format of a top-level tachometer JSON config file.
+ * @typedef {ConfigFile["benchmarks"][0]} ConfigFileBenchmark
  * @typedef {{ name: string; configPath: string; config: ConfigFile; }} ConfigData
  * @param {string} benchPath
  * @param {TachometerOptions} options
  * @returns {Promise<ConfigData>}
  */
 export async function generateConfig(benchPath, options) {
-	const name = path.basename(benchPath).replace('.html', '');
-	const url = path.posix.relative(toUrl(benchesRoot()), toUrl(benchPath));
-
-	/** @type {ConfigFile["benchmarks"][0]["expand"]} */
+	/** @type {ConfigFileBenchmark["expand"]} */
 	let expand;
 	/** @type {BrowserConfigs} */
 	let browser;
+
+	const baseBenchConfig = getBaseBenchmarkConfig(benchPath);
 
 	// See https://www.npmjs.com/package/tachometer#browsers
 	// and https://www.npmjs.com/package/tachometer#config-file
@@ -103,7 +165,13 @@ export async function generateConfig(benchPath, options) {
 	const benchmarks = [];
 	for (let framework of frameworksToRun) {
 		let frameworkPath = framework.dependencies.framework;
-		if (typeof frameworkPath == 'string' && frameworkPath.startsWith('file:')) {
+		if (typeof frameworkPath !== 'string') {
+			throw new Error(
+				'Only string/npm dependencies are supported at this time'
+			);
+		}
+
+		if (frameworkPath.startsWith('file:')) {
 			frameworkPath = frameworkPath.replace(/^file:/, '');
 			try {
 				await stat(frameworkPath);
@@ -119,19 +187,8 @@ export async function generateConfig(benchPath, options) {
 		}
 
 		benchmarks.push({
-			name,
-			url,
+			...baseBenchConfig,
 			packageVersions: framework,
-			measurement: [
-				{
-					mode: 'performance',
-					entryName: measureName
-				},
-				{
-					mode: 'expression',
-					expression: 'window.usedJSHeapSize'
-				}
-			],
 			browser,
 			expand
 		});
@@ -159,9 +216,9 @@ export async function generateConfig(benchPath, options) {
 		}
 	}
 
-	const configPath = await writeConfig(name, config);
+	const configPath = await writeConfig(baseBenchConfig.name, config);
 
-	return { name, configPath, config };
+	return { name: baseBenchConfig.name, configPath, config };
 }
 
 async function writeConfig(name, config) {
@@ -173,7 +230,7 @@ async function writeConfig(name, config) {
 }
 
 /**
- * @typedef {Exclude<ConfigFile["benchmarks"][0]["browser"], string>} BrowserConfigs
+ * @typedef {Exclude<ConfigFileBenchmark["browser"], string>} BrowserConfigs
  * @param {string} str
  * @returns {BrowserConfigs}
  */

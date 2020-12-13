@@ -15,7 +15,7 @@
 
 			const isVersionX = isPreactX(createElement);
 
-			function component(randomValue) {
+			function component({ randomValue }) {
 				return createElement('div', {}, [
 					createElement('h2', {}, 'Test ' + randomValue),
 					createElement('h1', {}, `===${randomValue}===`)
@@ -27,9 +27,13 @@
 			performance.mark('start');
 			for (let i = 0; i < 100; i++) {
 				if (isVersionX) {
-					render(component(i), root);
+					render(createElement(component, { randomValue: i }), root);
 				} else {
-					result = render(component(i), root, result);
+					result = render(
+						createElement(component, { randomValue: i }),
+						root,
+						result
+					);
 				}
 			}
 			performance.mark('stop');

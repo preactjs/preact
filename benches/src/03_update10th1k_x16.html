@@ -8,6 +8,14 @@
 			name="description"
 			content="updating every 10th row for 1,000 rows (3 warmup runs). 16x CPU slowdown."
 		/>
+		<style>
+			.preloadicon {
+				display: none;
+			}
+			.glyphicon-remove:before {
+				content: "⨯";
+			}
+		</style>
 	</head>
 	<body>
 		<div id="main"></div>
@@ -24,7 +32,10 @@
 			import * as framework from 'framework';
 			import { render } from '../src/keyed-children/index.js';
 
-			const { run: mount, update } = render(framework);
+			const { run: mount, update } = render(
+				framework,
+				document.getElementById('main')
+			);
 
 			function repeat(pattern, repeats) {
 				let result = '';

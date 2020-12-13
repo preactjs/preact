@@ -29,6 +29,22 @@ export function measureMemory() {
 	}
 }
 
+export function markRunStart(runId) {
+	performance.mark(`run-${runId}-start`);
+}
+
+let staticPromise = Promise.resolve();
+export function markRunEnd(runId) {
+	return staticPromise.then(() => {
+		performance.mark(`run-${runId}-end`);
+		performance.measure(
+			`run-${runId}`,
+			`run-${runId}-start`,
+			`run-${runId}-end`
+		);
+	});
+}
+
 export function getRowIdSel(index) {
 	return `tbody > tr:nth-child(${index}) > td:first-child`;
 }
