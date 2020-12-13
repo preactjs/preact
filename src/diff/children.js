@@ -84,7 +84,11 @@ export function diffChildren(
 				null,
 				null
 			);
-		} else if (childVNode._dom != null || childVNode._component != null) {
+		} else if (childVNode._depth > 0) {
+			// VNode is already in use, clone it. This can happen in the following
+			// scenario:
+			//   const reuse = <div />
+			//   <div>{reuse}<span />{reuse}</div>
 			childVNode = newParentVNode._children[i] = createVNode(
 				childVNode.type,
 				childVNode.props,
