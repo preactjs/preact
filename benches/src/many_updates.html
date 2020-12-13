@@ -18,7 +18,7 @@
 		<div id="root"></div>
 		<script type="module">
 			import { measureName, measureMemory } from './util.js';
-			import { render, createElement as h } from 'framework';
+			import { createRoot, createElement as h } from 'framework';
 
 			const state = {
 				msg: 'hello',
@@ -61,10 +61,10 @@
 				);
 			}
 
-			const container = document.getElementById('root');
+			const root = createRoot(document.getElementById('root'));
 
 			// const p = performance.now();
-			render(h(App), container);
+			root.render(h(App));
 			// console.log(`mount: ${(performance.now() - p).toFixed(2)}ms`);
 
 			// const patchResults = [];
@@ -73,7 +73,7 @@
 				// const s = performance.now();
 				state.msg = state.msg === 'hello' ? 'bye' : 'hello';
 				state.list[0].text = state.msg;
-				render(h(App), container);
+				root.render(h(App));
 				// patchResults.push(performance.now() - s);
 			}
 

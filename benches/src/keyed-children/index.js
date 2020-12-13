@@ -3,7 +3,7 @@ import { getComponents } from './components.js';
 /**
  * @typedef Framework
  * @property {(type: any, props?: any, ...children: any) => JSX.Element} createElement
- * @property {(vnode: JSX.Element, root: HTMLElement) => void} render
+ * @property {(root: HTMLElement) => ({ render(vnode: JSX.Element): void; hydrate(vnode: JSX.Element): void; })} createRoot
  * @property {any} Component
  *
  * @param {Framework} framework
@@ -11,7 +11,7 @@ import { getComponents } from './components.js';
  */
 export function render(framework, rootDom) {
 	const { Main } = getComponents(framework);
-	framework.render(framework.createElement(Main), rootDom);
+	framework.createRoot(rootDom).render(framework.createElement(Main));
 
 	/** @type {Main} */
 	// @ts-ignore

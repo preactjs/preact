@@ -28,7 +28,7 @@ const frameworks = [
 	{
 		label: 'preact-local',
 		dependencies: {
-			framework: 'file:' + repoRoot()
+			framework: 'file:' + repoRoot('benches/proxy-packages/preact-proxy')
 		}
 	}
 ];
