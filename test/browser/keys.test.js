@@ -295,7 +295,7 @@ describe.only('keys', () => {
 		);
 	});
 
-	it.only('should move keyed children to the end of the list', () => {
+	it('should move keyed children to the end of the list', () => {
 		const values = ['a', 'b', 'c', 'd'];
 
 		render(<List values={values} />, scratch);

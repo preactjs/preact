@@ -45,7 +45,6 @@ export function render(vnode, parentDom, replaceNode) {
 			? EMPTY_ARR.slice.call(parentDom.childNodes)
 			: null;
 
-	console.log('>>> DIFF');
 	diff(
 		parentDom,
 		// Determine the new vnode tree and store it on the DOM element on

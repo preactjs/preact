@@ -56,7 +56,6 @@ function setStyle(style, key, value) {
 export function setProperty(dom, name, value, oldValue, isSvg) {
 	let useCapture, nameLower, proxy;
 
-	console.log('    --> set prop', name, value);
 	if (isSvg && name == 'className') name = 'class';
 
 	// if (isSvg) {
@@ -117,7 +116,6 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		!isSvg &&
 		name in dom
 	) {
-		console.log('SET', name, value);
 		dom[name] = value == null ? '' : value;
 	} else if (typeof value != 'function' && name !== 'dangerouslySetInnerHTML') {
 		if (name !== (name = name.replace(/xlink:?/, ''))) {

@@ -1,12 +1,5 @@
 import { getDomSibling } from '../component';
-import {
-	FLAG_PLACEMENT,
-	FLAG_UPDATE,
-	FLAG_MOUNT,
-	FLAG_UNMOUNT,
-	EMPTY_OBJ,
-	FLAG_NONE
-} from '../constants';
+import { FLAG_UPDATE, FLAG_MOUNT, EMPTY_OBJ, FLAG_NONE } from '../constants';
 import options from '../options';
 import { diffProps, setProperty } from './props';
 import { applyRef } from './index';
@@ -24,17 +17,9 @@ function placeDom(parentDom, newDom, siblingDom) {
 		(siblingDom == null && newDom.nextSibling !== null) ||
 		(siblingDom != null && newDom.nextSibling !== siblingDom)
 	) {
-		console.log(
-			'    place inner',
-			parentDom,
-			newDom.parentNode !== parentDom,
-			siblingDom != null && newDom.nextSibling !== siblingDom
-		);
 		if (siblingDom != null) {
-			console.log('      --> insert', newDom, 'before', siblingDom);
 			parentDom.insertBefore(newDom, siblingDom);
 		} else {
-			console.log('      --> append', newDom);
 			parentDom.appendChild(newDom);
 		}
 	}
@@ -51,7 +36,6 @@ function placeDom(parentDom, newDom, siblingDom) {
 export function unmount(vnode, parentVNode, skipRemove) {
 	let r;
 	if (options.unmount) options.unmount(vnode);
-	console.log('    --> unmount', vnode.type, vnode._dom);
 
 	if ((r = vnode.ref)) {
 		if (!r.current || r.current === vnode._dom) applyRef(r, null, parentVNode);
@@ -116,7 +100,6 @@ function flushNode(parentDom, vnode, nextDom, isSvg, commitQueue) {
 		}
 
 		let dom = vnode._dom;
-		console.log('  >>> DIFF PROPS');
 		diffProps(dom, newProps, oldProps, isSvg, false);
 
 		let i;
@@ -180,7 +163,6 @@ function flushNode(parentDom, vnode, nextDom, isSvg, commitQueue) {
 					}
 				}
 
-				console.log('place', childVNode.type, childVNode._dom);
 				placeDom(parentDom, childVNode._dom, siblingDom);
 				siblingDom = childVNode._dom;
 
@@ -197,7 +179,6 @@ function flushNode(parentDom, vnode, nextDom, isSvg, commitQueue) {
 		lastDom !== null &&
 		lastDom !== nextDom
 	) {
-		console.log('----> SET', vnode.type, siblingDom, lastDom, nextDom);
 		vnode._dom = siblingDom;
 		if (lastDom !== siblingDom) {
 			vnode._nextDom = lastDom;
@@ -223,14 +204,8 @@ export function flushToDom(
 	refs,
 	isHydrating
 ) {
-	console.log('>>> UNMOUNT', unmountQueue.length);
 	unmountQueue.forEach(vnode => unmount(vnode, vnode._parent, false));
 
-	console.log('>>> FLUSH');
-	console.log(
-		'  start sibling',
-		nextDom == null ? getDomSibling(vnode) : nextDom
-	);
 	flushNode(
 		parentDom,
 		vnode,
@@ -240,7 +215,6 @@ export function flushToDom(
 	);
 
 	// Set refs only after unmount
-	console.log('>>> REFS', refs.length);
 	for (let i = 0; i < refs.length; i++) {
 		let r1 = refs[i];
 		let r2 = refs[++i] ? refs[i + 1]._component || refs[i + 1]._dom : null;

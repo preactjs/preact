@@ -24,7 +24,7 @@ function getAttributes(node) {
 	return attrs;
 }
 
-describe('render()', () => {
+describe.only('render()', () => {
 	let scratch, rerender;
 
 	let resetAppendChild;

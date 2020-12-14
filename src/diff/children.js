@@ -162,7 +162,6 @@ export function diffChildren(
 	for (i = oldChildrenLength; i--; ) {
 		if (oldChildren[i] != null) {
 			oldChildren[i]._flags |= FLAG_UNMOUNT;
-			console.log(oldChildren.map((x, i) => x && x.type + ' ' + i));
 			unmountQueue.push(oldChildren[i]);
 		}
 	}

@@ -55,7 +55,6 @@ export function diff(
 
 	if (oldVNode === EMPTY_OBJ) {
 		newVNode._flags |= FLAG_MOUNT;
-		console.log('MOUNT #1');
 	} else {
 		newVNode._flags |= FLAG_UPDATE;
 	}
@@ -391,7 +390,6 @@ function diffElementNodes(
  * @param {import('../internal').VNode} vnode
  */
 export function applyRef(ref, value, vnode) {
-	console.log('    --> apply ref', ref, value, vnode.type);
 	try {
 		if (typeof ref == 'function') ref(value);
 		else ref.current = value;
