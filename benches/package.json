@@ -17,6 +17,7 @@
 	},
 	"devDependencies": {
 		"@kristoferbaxter/async": "^1.0.0",
+		"del": "^6.0.0",
 		"escalade": "^3.0.2",
 		"escape-string-regexp": "^4.0.0",
 		"globby": "^11.0.0",
