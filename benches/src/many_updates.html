@@ -15,10 +15,10 @@
 		</style>
 	</head>
 	<body>
-		<div id="app"></div>
+		<div id="root"></div>
 		<script type="module">
 			import { measureName, measureMemory } from './util.js';
-			import { render, createElement as h, Component } from 'framework';
+			import { render, createElement as h } from 'framework';
 
 			const state = {
 				msg: 'hello',
@@ -28,41 +28,43 @@
 				}))
 			};
 
-			class App extends Component {
-				render() {
-					return h(
-						'div',
-						{ id: 'app' },
-						h('p', null, state.msg),
-						...state.list.map((obj, i) =>
+			let counter = 0;
+			function App() {
+				return h(
+					'div',
+					{ id: 'app' },
+					h('p', null, '> ', ++counter, ' <'),
+					h('p', null, state.msg),
+					...state.list.map((obj, i) =>
+						h(
+							'div',
+							{ key: i, title: state.msg + i },
+							h('span', { className: state.msg }, obj.text),
+							h('span', { className: 'baz' }, 'one'),
+							h('span', { className: 'qux' }, 'two'),
 							h(
 								'div',
-								{ key: i, title: state.msg + i },
-								h('span', { className: state.msg }, obj.text),
-								h('span', { className: 'baz' }, 'one'),
-								h('span', { className: 'qux' }, 'two'),
+								null,
+								h('span', { className: 'qux' }, 'three'),
+								h('span', { className: 'qux' }, 'four'),
+								h('span', { className: 'baz' }, 'five'),
 								h(
 									'div',
 									null,
-									h('span', { className: 'qux' }, 'three'),
-									h('span', { className: 'qux' }, 'four'),
-									h('span', { className: 'baz' }, 'five'),
-									h(
-										'div',
-										null,
-										h('span', { className: 'qux' }, 'six'),
-										h('span', { className: 'baz' }, 'seven'),
-										h('span', { className: state.msg }, 'eight')
-									)
+									h('span', { className: 'qux' }, 'six'),
+									h('span', { className: 'baz' }, 'seven'),
+									h('span', { className: state.msg }, 'eight')
 								)
 							)
 						)
-					);
-				}
+					)
+				);
 			}
 
+			const container = document.getElementById('root');
+
 			// const p = performance.now();
-			render(h(App), document.getElementById('app'));
+			render(h(App), container);
 			// console.log(`mount: ${(performance.now() - p).toFixed(2)}ms`);
 
 			// const patchResults = [];
@@ -71,7 +73,7 @@
 				// const s = performance.now();
 				state.msg = state.msg === 'hello' ? 'bye' : 'hello';
 				state.list[0].text = state.msg;
-				render(h(App), document.getElementById('app'));
+				render(h(App), container);
 				// patchResults.push(performance.now() - s);
 			}
 

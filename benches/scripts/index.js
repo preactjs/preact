@@ -61,7 +61,7 @@ prog
 // Tests:
 // - (no args)
 // - many*
-// - many* -f preact-local -f preact-v8
+// - many* -f preact-local -f preact-master
 prog
 	.command('deopts [benchmark]')
 	.describe(
