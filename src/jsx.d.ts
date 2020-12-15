@@ -709,6 +709,7 @@ export namespace JSXInternal {
 		poster?: string;
 		preload?: string;
 		radioGroup?: string;
+		readonly?: boolean;
 		readOnly?: boolean;
 		rel?: string;
 		required?: boolean;
