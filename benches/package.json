@@ -5,7 +5,6 @@
 	"type": "module",
 	"description": "Benchmarks for Preact",
 	"scripts": {
-		"prepare": "cd proxy-packages/preact-v8-proxy && npm ci && cd ../preact-proxy && npm ci",
 		"start": "node ./scripts config many_updates.html && tach --force-clean-npm-install --config dist/many_updates.config.json --manual",
 		"bench": "node ./scripts bench",
 		"deopts": "node ./scripts deopts",
