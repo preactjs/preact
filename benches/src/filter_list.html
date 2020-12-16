@@ -31,12 +31,16 @@
 			import { measureName, measureMemory } from './util.js';
 			import { render, createElement as h, Component } from 'framework';
 
+			function Row(props) {
+				return h('article', null, props.children);
+			}
+
 			function App(props) {
 				return h('div', {}, [
 					h(
 						'div',
 						{ class: 'items' },
-						props.items.map(id => h('article', { key: id }, id))
+						props.items.map(id => h(Row, { key: id }, id))
 					)
 				]);
 			}
