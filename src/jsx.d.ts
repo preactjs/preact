@@ -37,9 +37,10 @@ export namespace JSXInternal {
 			? string | number | null | undefined
 			: never;
 	};
-	interface CSSProperties extends DOMCSSProperties {
+	type AllCSSProperties = {
 		[key: string]: string | number | null | undefined;
-	}
+	};
+	interface CSSProperties extends AllCSSProperties, DOMCSSProperties {}
 
 	interface SVGAttributes<Target extends EventTarget = SVGElement>
 		extends HTMLAttributes<Target> {
