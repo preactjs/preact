@@ -33,7 +33,9 @@ export namespace JSXInternal {
 	}
 
 	type DOMCSSProperties = {
-		[key in keyof CSSStyleDeclaration]?: CSSStyleDeclaration[key] extends string ? (CSSStyleDeclaration[key] | number | null | undefined) : never;
+		[key in keyof CSSStyleDeclaration]?: CSSStyleDeclaration[key] extends string
+			? string | number | null | undefined
+			: never;
 	};
 	interface CSSProperties extends DOMCSSProperties {
 		[key: string]: string | number | null | undefined;
