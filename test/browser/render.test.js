@@ -625,7 +625,10 @@ describe.only('render()', () => {
 		expect(value()).to.equal(true);
 	});
 
-	it('should reorder child pairs', () => {
+	// This is a potential unsafe operation because we don't know
+	// if the subtree has stateful children. In that case we're not
+	// allowed to re-order unkeyed children.
+	it.skip('should reorder child pairs', () => {
 		render(
 			<div>
 				<a>a</a>
