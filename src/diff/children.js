@@ -1,6 +1,6 @@
 import { diff, applyRef } from './index';
 import { createVNode, Fragment } from '../create-element';
-import { EMPTY_OBJ, EMPTY_ARR, FLAG_UNMOUNT } from '../constants';
+import { EMPTY_OBJ, EMPTY_ARR, FLAG_UNMOUNT, FLAG_UPDATE } from '../constants';
 import { removeNode } from '../util';
 import { getDomSibling } from '../component';
 import { normalizeVNode } from './shared';
@@ -50,6 +50,15 @@ export function diffChildren(
 
 	let oldChildrenLength = oldChildren.length;
 
+	let map = null;
+	for (i = 0; i < oldChildrenLength; i++) {
+		oldVNode = oldChildren[i];
+		if (oldVNode != null && oldVNode.key != null) {
+			if (map == null) map = new Map();
+			map.set(oldVNode.key, oldVNode);
+		}
+	}
+
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = newParentVNode._children[i] = normalizeVNode(
@@ -67,35 +76,20 @@ export function diffChildren(
 		// If found, delete the array item by setting to `undefined`.
 		// We use `undefined`, as `null` is reserved for empty placeholders
 		// (holes).
-		oldVNode = oldChildren[i];
+		oldVNode =
+			childVNode.key != null && map != null
+				? map.get(childVNode.key)
+				: oldChildren[i];
 
 		if (
-			oldVNode === null ||
-			(oldVNode &&
-				childVNode.key == oldVNode.key &&
-				childVNode.type === oldVNode.type)
+			oldVNode != null &&
+			childVNode.key == oldVNode.key &&
+			childVNode.type === oldVNode.type
 		) {
-			oldChildren[i] = undefined;
+			oldVNode._flags |= FLAG_UPDATE;
 		} else {
-			// Either oldVNode === undefined or oldChildrenLength > 0,
-			// so after this loop oldVNode == null or oldVNode is a valid value.
-			for (j = 0; j < oldChildrenLength; j++) {
-				oldVNode = oldChildren[j];
-				// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
-				// We always match by type (in either case).
-				if (
-					oldVNode &&
-					childVNode.key == oldVNode.key &&
-					childVNode.type === oldVNode.type
-				) {
-					oldChildren[j] = undefined;
-					break;
-				}
-				oldVNode = null;
-			}
+			oldVNode = EMPTY_OBJ;
 		}
-
-		oldVNode = oldVNode || EMPTY_OBJ;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		diff(
@@ -111,17 +105,11 @@ export function diffChildren(
 			oldDom,
 			isHydrating
 		);
-
-		if ((j = childVNode.ref) && oldVNode.ref != j) {
-			if (!refs) refs = [];
-			if (oldVNode.ref) refs.push(oldVNode.ref, null, childVNode);
-			refs.push(j, true, childVNode);
-		}
 	}
 
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {
-		if (oldChildren[i] != null) {
+		if (oldChildren[i] != null && (oldChildren[i]._flags & FLAG_UPDATE) == 0) {
 			oldChildren[i]._flags |= FLAG_UNMOUNT;
 			unmountQueue.push(oldChildren[i]);
 		}

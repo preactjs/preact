@@ -6,6 +6,8 @@ import { diffProps, setProperty } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
 
+export function unmount() {}
+
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
@@ -251,6 +253,12 @@ export function diff(
 		}
 
 		if ((tmp = options.diffed)) tmp(newVNode);
+
+		if (newVNode.ref && oldVNode.ref != newVNode.ref) {
+			if (!refs) refs = [];
+			if (oldVNode.ref) refs.push(oldVNode.ref, null, newVNode);
+			refs.push(newVNode.ref, true, newVNode);
+		}
 	} catch (e) {
 		newVNode._original = null;
 		// if hydrating or creating initial tree, bailout preserves DOM:
