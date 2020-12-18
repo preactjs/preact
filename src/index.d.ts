@@ -266,6 +266,11 @@ declare namespace preact {
 		debounceRendering?(cb: () => void): void;
 		useDebugValue?(value: string | number): void;
 		__suspenseDidResolve?(vnode: VNode, cb: () => void): void;
+		_argsChanged?(
+			oldArgs: any[],
+			newArgs: any[],
+			currentComponent: Component
+		): void;
 		// __canSuspenseResolve?(vnode: VNode, cb: () => void): void;
 	}
 

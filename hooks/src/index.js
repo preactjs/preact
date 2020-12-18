@@ -163,7 +163,10 @@ export function useReducer(reducer, initialState, init) {
 export function useEffect(callback, args) {
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(currentIndex++, 3);
-	if (!options._skipEffects && argsChanged(state._args, args)) {
+	if (
+		!options._skipEffects &&
+		argsChanged(state._args, args, currentComponent)
+	) {
 		state._value = callback;
 		state._args = args;
 
@@ -178,7 +181,10 @@ export function useEffect(callback, args) {
 export function useLayoutEffect(callback, args) {
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(currentIndex++, 4);
-	if (!options._skipEffects && argsChanged(state._args, args)) {
+	if (
+		!options._skipEffects &&
+		argsChanged(state._args, args, currentComponent)
+	) {
 		state._value = callback;
 		state._args = args;
 
@@ -214,7 +220,7 @@ export function useImperativeHandle(ref, createHandle, args) {
 export function useMemo(factory, args) {
 	/** @type {import('./internal').MemoHookState} */
 	const state = getHookState(currentIndex++, 7);
-	if (argsChanged(state._args, args)) {
+	if (argsChanged(state._args, args, currentComponent)) {
 		state._value = factory();
 		state._args = args;
 		state._factory = factory;
@@ -367,8 +373,12 @@ function invokeEffect(hook) {
 /**
  * @param {any[]} oldArgs
  * @param {any[]} newArgs
+ * @param {import('./internal').Component} currentComponent
  */
-function argsChanged(oldArgs, newArgs) {
+function argsChanged(oldArgs, newArgs, currentComponent) {
+	if (options._argsChanged) {
+		options._argsChanged(oldArgs, newArgs, currentComponent);
+	}
 	return (
 		!oldArgs ||
 		oldArgs.length !== newArgs.length ||

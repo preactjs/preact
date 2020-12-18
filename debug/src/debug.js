@@ -23,6 +23,23 @@ function getClosestDomNodeParent(parent) {
 	return parent;
 }
 
+/**
+ * Get the name of a hook with arguments by type
+ * @param {import('../../src/internal').HookType} type
+ */
+function getArgsHookName(type) {
+	switch (type) {
+		case 3:
+			return 'useEffect';
+		case 4:
+			return 'useLayoutEffect';
+		case 7:
+			return 'useMemo';
+		default:
+			return 'unknown';
+	}
+}
+
 export function initDebug() {
 	setupComponentStack();
 
@@ -35,6 +52,7 @@ export function initDebug() {
 	let oldCatchError = options._catchError;
 	let oldRoot = options._root;
 	let oldHook = options._hook;
+	let oldArgsChanged = options._argsChanged;
 	const warnedComponents = !isWeakMapSupported
 		? null
 		: {
@@ -249,12 +267,27 @@ export function initDebug() {
 		if (oldBeforeDiff) oldBeforeDiff(vnode);
 	};
 
+	let lastHookType = -1;
 	options._hook = (comp, index, type) => {
+		lastHookType = type;
 		if (!comp || !hooksAllowed) {
 			throw new Error('Hook can only be invoked from render methods.');
 		}
 
 		if (oldHook) oldHook(comp, index, type);
+	};
+
+	options._argsChanged = (oldArgs, newArgs, currentComponent) => {
+		if (oldArgs && newArgs && oldArgs.length !== newArgs.length) {
+			const name = getArgsHookName(lastHookType);
+			console.error(
+				`Error: The dependency Array (last argument) passed to ${name} ` +
+					`changed size between renders. The order of the items and the size ` +
+					`of this Array must remain the same.` +
+					`\n\n${getOwnerStack(currentComponent._vnode)}`
+			);
+		}
+		if (oldArgsChanged) oldArgsChanged(oldArgs, newArgs, currentComponent);
 	};
 
 	// Ideally we'd want to print a warning once per component, but we
