@@ -42,27 +42,13 @@ export function diffChildren(
 	oldDom,
 	isHydrating
 ) {
-	let i, j, oldVNode, childVNode, newDom, firstChildDom;
+	let i, j, oldVNode, childVNode;
 
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
 
 	let oldChildrenLength = oldChildren.length;
-
-	// Only in very specific places should this logic be invoked (top level `render` and `diffElementNodes`).
-	// I'm using `EMPTY_OBJ` to signal when `diffChildren` is invoked in these situations. I can't use `null`
-	// for this purpose, because `null` is a valid value for `oldDom` which can mean to skip to this logic
-	// (e.g. if mounting a new tree in which the old DOM should be ignored (usually for Fragments).
-	if (oldDom == EMPTY_OBJ) {
-		if (excessDomChildren != null) {
-			oldDom = excessDomChildren[0];
-		} else if (oldChildrenLength) {
-			oldDom = getDomSibling(oldParentVNode, 0);
-		} else {
-			oldDom = null;
-		}
-	}
 
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
@@ -126,35 +112,10 @@ export function diffChildren(
 			isHydrating
 		);
 
-		newDom = childVNode._dom;
-
 		if ((j = childVNode.ref) && oldVNode.ref != j) {
 			if (!refs) refs = [];
 			if (oldVNode.ref) refs.push(oldVNode.ref, null, childVNode);
 			refs.push(j, true, childVNode);
-		}
-
-		if (newDom != null) {
-			if (firstChildDom == null) {
-				firstChildDom = newDom;
-			}
-		} else if (
-			oldDom &&
-			oldVNode._dom == oldDom &&
-			oldDom.parentNode != parentDom
-		) {
-			// The above condition is to handle null placeholders. See test in placeholder.test.js:
-			// `efficiently replace null placeholders in parent rerenders`
-			oldDom = getDomSibling(oldVNode);
-		}
-	}
-
-	newParentVNode._dom = firstChildDom;
-
-	// Remove children that are not part of any vnode.
-	if (excessDomChildren != null && typeof newParentVNode.type != 'function') {
-		for (i = excessDomChildren.length; i--; ) {
-			if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
 		}
 	}
 
