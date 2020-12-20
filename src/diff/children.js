@@ -8,7 +8,7 @@ import { getDomSibling } from '../component';
  * Diff the children of a virtual node
  * @param {import('../internal').PreactElement} parentDom The DOM element whose
  * children are being diffed
- * @param {import('../index').ComponentChildren[]} renderResult
+ * @param {import('../internal').ComponentChildren[]} renderResult
  * @param {import('../internal').VNode} newParentVNode The new virtual
  * node whose children should be diff'ed against oldParentVNode
  * @param {import('../internal').VNode} oldParentVNode The old virtual

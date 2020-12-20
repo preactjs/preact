@@ -53,6 +53,15 @@ export type ComponentFactory<P> =
 	| preact.ComponentClass<P>
 	| FunctionalComponent<P>;
 
+export type ComponentChild =
+	| VNode<any>
+	| string
+	| number
+	| boolean
+	| null
+	| undefined;
+export type ComponentChildren = ComponentChild[] | ComponentChild;
+
 export interface PreactElement extends HTMLElement, Text {
 	_children?: VNode<any> | null;
 	/** Event listeners to support event delegation */
