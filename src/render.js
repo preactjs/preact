@@ -2,6 +2,7 @@ import { EMPTY_OBJ, EMPTY_ARR } from './constants';
 import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
+import { mount } from './diff/mount';
 
 const IS_HYDRATE = EMPTY_OBJ;
 
@@ -32,26 +33,49 @@ export function render(vnode, parentDom, replaceNode) {
 	vnode = createElement(Fragment, null, [vnode]);
 
 	// List of effects that need to be called after diffing.
+	let newVNode = ((isHydrating
+		? parentDom
+		: replaceNode || parentDom
+	)._children = vnode);
 	let commitQueue = [];
-	diff(
-		parentDom,
-		// Determine the new vnode tree and store it on the DOM element on
-		// our custom `_children` property.
-		((isHydrating ? parentDom : replaceNode || parentDom)._children = vnode),
-		oldVNode || EMPTY_OBJ,
-		EMPTY_OBJ,
-		parentDom.ownerSVGElement !== undefined,
-		replaceNode && !isHydrating
-			? [replaceNode]
-			: oldVNode
-			? null
-			: parentDom.childNodes.length
-			? EMPTY_ARR.slice.call(parentDom.childNodes)
-			: null,
-		commitQueue,
-		replaceNode || EMPTY_OBJ,
-		isHydrating
-	);
+	if (oldVNode) {
+		diff(
+			parentDom,
+			// Determine the new vnode tree and store it on the DOM element on
+			// our custom `_children` property.
+			newVNode,
+			oldVNode || EMPTY_OBJ,
+			EMPTY_OBJ,
+			parentDom.ownerSVGElement !== undefined,
+			replaceNode && !isHydrating
+				? [replaceNode]
+				: oldVNode
+				? null
+				: parentDom.childNodes.length
+				? EMPTY_ARR.slice.call(parentDom.childNodes)
+				: null,
+			commitQueue,
+			replaceNode || EMPTY_OBJ,
+			isHydrating
+		);
+	} else {
+		mount(
+			parentDom,
+			newVNode,
+			EMPTY_OBJ,
+			parentDom.ownerSVGElement !== undefined,
+			replaceNode && !isHydrating
+				? [replaceNode]
+				: oldVNode
+				? null
+				: parentDom.childNodes.length
+				? EMPTY_ARR.slice.call(parentDom.childNodes)
+				: null,
+			commitQueue,
+			replaceNode || EMPTY_OBJ,
+			isHydrating
+		);
+	}
 
 	// Flush all queued effects
 	commitRoot(commitQueue, vnode);
