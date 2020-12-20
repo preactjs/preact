@@ -41,6 +41,14 @@ export interface Options extends preact.Options {
 	_catchError(error: any, vnode: VNode, oldVNode?: VNode | undefined): void;
 }
 
+	getDerivedStateFromProps?: undefined;
+}
+
+// Redefine ComponentFactory using our new internal FunctionalComponent interface above
+export type ComponentFactory<P> =
+	| preact.ComponentClass<P>
+	| FunctionalComponent<P>;
+
 export type ComponentChild =
 	| VNode<any>
 	| string
