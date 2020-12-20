@@ -103,7 +103,7 @@
 				runPatch();
 				await new Promise(r => requestAnimationFrame(r));
 				performance.mark('stop');
-				performance.measure('duration', 'start', 'stop');
+				performance.measure(measureName, 'start', 'stop');
 
 				measureMemory();
 			});
