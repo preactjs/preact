@@ -56,7 +56,7 @@ export type ComponentFactory<P> =
 export interface PreactElement extends HTMLElement, Text {
 	_children?: VNode<any> | null;
 	/** Event listeners to support event delegation */
-	_listeners: Record<string, (e: Event) => void>;
+	_listeners?: Record<string, (e: Event) => void>;
 
 	// Preact uses this attribute to detect SVG nodes
 	ownerSVGElement?: SVGElement | null;
