@@ -33,14 +33,21 @@ export namespace JSXInternal {
 	}
 
 	type DOMCSSProperties = {
-		[key in keyof CSSStyleDeclaration]?: CSSStyleDeclaration[key] extends string
-			? string | number | null | undefined
-			: never;
+		[key in keyof Omit<
+			CSSStyleDeclaration,
+			| 'item'
+			| 'setProperty'
+			| 'removeProperty'
+			| 'getPropertyValue'
+			| 'getPropertyPriority'
+		>]?: string | number | null | undefined;
 	};
 	type AllCSSProperties = {
 		[key: string]: string | number | null | undefined;
 	};
-	interface CSSProperties extends AllCSSProperties, DOMCSSProperties {}
+	interface CSSProperties extends AllCSSProperties, DOMCSSProperties {
+		cssText?: string | null;
+	}
 
 	interface SVGAttributes<Target extends EventTarget = SVGElement>
 		extends HTMLAttributes<Target> {
