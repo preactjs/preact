@@ -159,6 +159,19 @@ options.vnode = vnode => {
 			});
 		}
 
+		// Adding support for defaultValue in select tag
+		if (type == 'select' && normalizedProps.defaultValue != null) {
+			normalizedProps.value = toChildArray(props.children).forEach(child => {
+				if (normalizedProps.multiple) {
+					child.props.selected =
+						normalizedProps.defaultValue.indexOf(child.props.value) != -1;
+				} else {
+					child.props.selected =
+						normalizedProps.defaultValue == child.props.value;
+				}
+			});
+		}
+
 		vnode.props = normalizedProps;
 	}
 

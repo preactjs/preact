@@ -110,6 +110,41 @@ describe('compat render', () => {
 		expect(scratch.firstElementChild).to.have.property('value', 'foo');
 	});
 
+	it('should support defaultValue for select tag', () => {
+		function App() {
+			return (
+				<select defaultValue="2">
+					<option value="1">Picked 1</option>
+					<option value="2">Picked 2</option>
+					<option value="3">Picked 3</option>
+				</select>
+			);
+		}
+
+		render(<App />, scratch);
+		const options = scratch.firstChild.children;
+		expect(options[0]).to.have.property('selected', false);
+		expect(options[1]).to.have.property('selected', true);
+	});
+
+	it('should support defaultValue for select tag when using multi selection', () => {
+		function App() {
+			return (
+				<select multiple defaultValue={['1', '3']}>
+					<option value="1">Picked 1</option>
+					<option value="2">Picked 2</option>
+					<option value="3">Picked 3</option>
+				</select>
+			);
+		}
+
+		render(<App />, scratch);
+		const options = scratch.firstChild.children;
+		expect(options[0]).to.have.property('selected', true);
+		expect(options[1]).to.have.property('selected', false);
+		expect(options[2]).to.have.property('selected', true);
+	});
+
 	it('should ignore defaultValue when value is 0', () => {
 		render(<input defaultValue={2} value={0} />, scratch);
 		expect(scratch.firstElementChild.value).to.equal('0');

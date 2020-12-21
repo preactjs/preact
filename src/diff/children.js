@@ -84,7 +84,11 @@ export function diffChildren(
 				null,
 				null
 			);
-		} else if (childVNode._dom != null || childVNode._component != null) {
+		} else if (childVNode._depth > 0) {
+			// VNode is already in use, clone it. This can happen in the following
+			// scenario:
+			//   const reuse = <div />
+			//   <div>{reuse}<span />{reuse}</div>
 			childVNode = newParentVNode._children[i] = createVNode(
 				childVNode.type,
 				childVNode.props,
@@ -140,7 +144,7 @@ export function diffChildren(
 		oldVNode = oldVNode || EMPTY_OBJ;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		newDom = diff(
+		diff(
 			parentDom,
 			childVNode,
 			oldVNode,
@@ -151,6 +155,8 @@ export function diffChildren(
 			oldDom,
 			isHydrating
 		);
+
+		newDom = childVNode._dom;
 
 		if ((j = childVNode.ref) && oldVNode.ref != j) {
 			if (!refs) refs = [];
@@ -163,15 +169,26 @@ export function diffChildren(
 				firstChildDom = newDom;
 			}
 
-			oldDom = placeChild(
-				parentDom,
-				childVNode,
-				oldVNode,
-				oldChildren,
-				excessDomChildren,
-				newDom,
-				oldDom
-			);
+			if (
+				typeof childVNode.type == 'function' &&
+				childVNode._children === oldVNode._children
+			) {
+				childVNode._nextDom = oldDom = reorderChildren(
+					childVNode,
+					oldDom,
+					parentDom
+				);
+			} else {
+				oldDom = placeChild(
+					parentDom,
+					childVNode,
+					oldVNode,
+					oldChildren,
+					excessDomChildren,
+					newDom,
+					oldDom
+				);
+			}
 
 			// Browsers will infer an option's `value` from `textContent` when
 			// no value is present. This essentially bypasses our code to set it
@@ -183,7 +200,7 @@ export function diffChildren(
 			//
 			// To fix it we make sure to reset the inferred value, so that our own
 			// value check in `diff()` won't be skipped.
-			if (!isHydrating && newParentVNode.type == 'option') {
+			if (!isHydrating && newParentVNode.type === 'option') {
 				parentDom.value = '';
 			} else if (typeof newParentVNode.type == 'function') {
 				// Because the newParentVNode is Fragment-like, we need to set it's
@@ -228,6 +245,31 @@ export function diffChildren(
 	}
 }
 
+function reorderChildren(childVNode, oldDom, parentDom) {
+	for (let tmp = 0; tmp < childVNode._children.length; tmp++) {
+		let vnode = childVNode._children[tmp];
+		if (vnode) {
+			vnode._parent = childVNode;
+
+			if (typeof vnode.type == 'function') {
+				reorderChildren(vnode, oldDom, parentDom);
+			} else {
+				oldDom = placeChild(
+					parentDom,
+					vnode,
+					vnode,
+					childVNode._children,
+					null,
+					vnode._dom,
+					oldDom
+				);
+			}
+		}
+	}
+
+	return oldDom;
+}
+
 /**
  * Flatten and loop through the children of a virtual node
  * @param {import('../index').ComponentChildren} children The unflattened
@@ -247,7 +289,7 @@ export function toChildArray(children, out) {
 	return out;
 }
 
-export function placeChild(
+function placeChild(
 	parentDom,
 	childVNode,
 	oldVNode,
