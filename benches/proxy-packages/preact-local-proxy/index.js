@@ -1,4 +1,4 @@
-import { render } from 'preact';
+import { render, hydrate } from 'preact';
 
 export * from 'preact';
 
@@ -7,17 +7,12 @@ export * from 'preact';
  * @returns {{ render(vnode: JSX.Element): void; hydrate(vnode: JSX.Element): void; }}
  */
 export function createRoot(rootDom) {
-	let result;
 	return {
 		render(vnode) {
-			if (result) {
-				result = render(vnode, rootDom, result);
-			} else {
-				result = render(vnode, rootDom);
-			}
+			render(vnode, rootDom);
 		},
 		hydrate(vnode) {
-			render(vnode, rootDom, rootDom.firstElementChild);
+			hydrate(vnode, rootDom);
 		}
 	};
 }

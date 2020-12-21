@@ -8,12 +8,10 @@
 	<body>
 		<div id="root"></div>
 		<script type="module">
-			import { measureName, measureMemory, isPreactX } from './util.js';
-			import { render, createElement } from 'framework';
+			import { measureName, measureMemory } from './util.js';
+			import { createRoot, createElement } from 'framework';
 
-			const root = document.getElementById('root');
-
-			const isVersionX = isPreactX(createElement);
+			const root = createRoot(document.getElementById('root'));
 
 			function component({ randomValue }) {
 				return createElement('div', {}, [
@@ -26,15 +24,7 @@
 
 			performance.mark('start');
 			for (let i = 0; i < 100; i++) {
-				if (isVersionX) {
-					render(createElement(component, { randomValue: i }), root);
-				} else {
-					result = render(
-						createElement(component, { randomValue: i }),
-						root,
-						result
-					);
-				}
+				root.render(createElement(component, { randomValue: i }));
 			}
 			performance.mark('stop');
 			performance.measure(measureName, 'start', 'stop');

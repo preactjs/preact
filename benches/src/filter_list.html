@@ -29,7 +29,7 @@
 		<div id="app"></div>
 		<script type="module">
 			import { measureName, measureMemory } from './util.js';
-			import { render, createElement as h, Component } from 'framework';
+			import { createRoot, createElement as h, Component } from 'framework';
 
 			function Row(props) {
 				return h('article', null, props.children);
@@ -56,7 +56,8 @@
 			let items = newItems();
 			let currentItems = items;
 
-			render(h(App, { items }), document.getElementById('app'));
+			const root = createRoot(document.getElementById('app'));
+			root.render(h(App, { items }));
 
 			function runPatch() {
 				items = newItems().filter(id => {
@@ -65,7 +66,7 @@
 				});
 				currentItems = items;
 
-				render(h(App, { items }), document.getElementById('app'));
+				root.render(h(App, { items }));
 			}
 
 			async function warmup() {
@@ -82,7 +83,7 @@
 				runPatch();
 				await new Promise(r => requestAnimationFrame(r));
 				performance.mark('stop');
-				performance.measure('duration', 'start', 'stop');
+				performance.measure(measureName, 'start', 'stop');
 
 				measureMemory();
 			});
