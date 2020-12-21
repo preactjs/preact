@@ -2,6 +2,7 @@ import * as path from 'path';
 import { writeFile, stat, mkdir } from 'fs/promises';
 import { repoRoot, benchesRoot, toUrl } from './utils.js';
 import { defaultBenchOptions } from './bench.js';
+import { prepare } from './prepare.js';
 
 const measureName = 'duration'; // Must match measureName in '../src/util.js'
 const warnings = new Set([]);
@@ -9,26 +10,60 @@ const TACH_SCHEMA =
 	'https://raw.githubusercontent.com/Polymer/tachometer/master/config.schema.json';
 
 /**
+ * @param {ConfigFileBenchmark["packageVersions"]["dependencies"]["framework"]} framework
+ * @returns {Promise<boolean>}
+ */
+async function validateFileDep(framework) {
+	try {
+		if (typeof framework === 'string') {
+			await stat(framework.replace(/^file:/, ''));
+			return true;
+		} else {
+			return false;
+		}
+	} catch (e) {
+		console.log('Stat error:', e);
+		return false;
+	}
+}
+
+/**
  * @typedef {ConfigFileBenchmark["packageVersions"]} ConfigFilePackageVersion
- * @type {ConfigFilePackageVersion[]}
+ * @typedef {ConfigFilePackageVersion & { isValid(): Promise<boolean>; }} BenchConfig
+ * @type {BenchConfig[]}
  */
 const frameworks = [
 	{
 		label: 'preact-v8',
 		dependencies: {
 			framework: 'file:' + repoRoot('benches/proxy-packages/preact-v8-proxy')
+		},
+		isValid() {
+			return validateFileDep(this.dependencies.framework);
 		}
 	},
 	{
 		label: 'preact-master',
 		dependencies: {
-			framework: 'file:' + repoRoot('preact.tgz')
+			framework:
+				'file:' + repoRoot('benches/proxy-packages/preact-master-proxy')
+		},
+		async isValid() {
+			try {
+				await stat(repoRoot('preact.tgz'));
+				return validateFileDep(this.dependencies.framework);
+			} catch (e) {
+				return false;
+			}
 		}
 	},
 	{
 		label: 'preact-local',
 		dependencies: {
-			framework: 'file:' + repoRoot()
+			framework: 'file:' + repoRoot('benches/proxy-packages/preact-local-proxy')
+		},
+		isValid() {
+			return validateFileDep(this.dependencies.framework);
 		}
 	}
 ];
@@ -111,7 +146,7 @@ export async function generateSingleConfig(benchFile) {
  * @typedef {ConfigFile["benchmarks"][0]} ConfigFileBenchmark
  * @typedef {{ name: string; configPath: string; config: ConfigFile; }} ConfigData
  * @param {string} benchPath
- * @param {TachometerOptions} options
+ * @param {TachometerOptions & { prepare?: boolean }} options
  * @returns {Promise<ConfigData>}
  */
 export async function generateConfig(benchPath, options) {
@@ -132,7 +167,7 @@ export async function generateConfig(benchPath, options) {
 		browser = parseBrowserOption(options.browser);
 	}
 
-	/** @type {Array<ConfigFilePackageVersion>} */
+	/** @type {BenchConfig[]} */
 	let frameworksToRun;
 	if (!options.framework) {
 		frameworksToRun = frameworks;
@@ -171,19 +206,18 @@ export async function generateConfig(benchPath, options) {
 			);
 		}
 
-		if (frameworkPath.startsWith('file:')) {
-			frameworkPath = frameworkPath.replace(/^file:/, '');
-			try {
-				await stat(frameworkPath);
-			} catch (e) {
-				const warnMsg = `Could not locate path for ${framework.label}: ${framework.dependencies.framework}. \nSkipping...`;
-				if (!warnings.has(warnMsg)) {
-					console.warn(warnMsg);
-					warnings.add(warnMsg);
-				}
-
-				continue;
+		if (!(await framework.isValid())) {
+			const warnMsg = `Could not locate path for ${framework.label}: ${framework.dependencies.framework}. \nSkipping...`;
+			if (!warnings.has(warnMsg)) {
+				console.warn(warnMsg);
+				warnings.add(warnMsg);
 			}
+
+			continue;
+		}
+
+		if (options.prepare !== false) {
+			await prepare(framework.label);
 		}
 
 		benchmarks.push({
