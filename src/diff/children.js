@@ -3,6 +3,7 @@ import { createVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { removeNode } from '../util';
 import { getDomSibling } from '../component';
+import { mount } from './mount';
 
 /**
  * Diff the children of a virtual node
@@ -18,7 +19,7 @@ import { getDomSibling } from '../component';
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @param {Node | Text} oldDom The current attached DOM
+ * @param {import('../internal').PreactElement} oldDom The current attached DOM
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
@@ -143,18 +144,31 @@ export function diffChildren(
 
 		oldVNode = oldVNode || EMPTY_OBJ;
 
-		// Morph the old element into the new one, but don't append it to the dom yet
-		diff(
-			parentDom,
-			childVNode,
-			oldVNode,
-			globalContext,
-			isSvg,
-			excessDomChildren,
-			commitQueue,
-			oldDom,
-			isHydrating
-		);
+		if (oldVNode) {
+			// Morph the old element into the new one, but don't append it to the dom yet
+			diff(
+				parentDom,
+				childVNode,
+				oldVNode,
+				globalContext,
+				isSvg,
+				excessDomChildren,
+				commitQueue,
+				oldDom,
+				isHydrating
+			);
+		} else {
+			mount(
+				parentDom,
+				childVNode,
+				globalContext,
+				isSvg,
+				excessDomChildren,
+				commitQueue,
+				oldDom,
+				isHydrating
+			);
+		}
 
 		newDom = childVNode._dom;
 
