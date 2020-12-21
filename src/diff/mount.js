@@ -104,7 +104,7 @@ function mountComponent(
 	oldDom,
 	isHydrating
 ) {
-	let tmp, c, isNew, oldProps, oldState, clearProcessingException;
+	let tmp, c, clearProcessingException;
 	let newType = newVNode.type;
 	let newProps = newVNode.props;
 
@@ -132,7 +132,7 @@ function mountComponent(
 	if (!c.state) c.state = {};
 	c.context = componentContext;
 	c._globalContext = globalContext;
-	isNew = c._dirty = true;
+	c._dirty = true;
 	c._renderCallbacks = [];
 
 	// Invoke getDerivedStateFromProps
@@ -293,34 +293,45 @@ function mountDOMElement(
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 
-		oldProps = EMPTY_OBJ;
+		oldProps = null;
 
-		let newHtml = newProps.dangerouslySetInnerHTML;
-
-		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
-		// @TODO we should warn in debug mode when props don't match here.
-		if (!isHydrating) {
+		// @TODO: Consider removing and instructing users to instead set the desired
+		// prop for removal to undefined/null. During hydration, props are not
+		// diffed at all (including dangerouslySetInnerHTML)
+		if (!isHydrating && excessDomChildren != null) {
 			// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
 			// we should read the existing DOM attributes to diff them
-			if (excessDomChildren != null) {
-				oldProps = {};
-				for (let i = 0; i < dom.attributes.length; i++) {
-					oldProps[dom.attributes[i].name] = dom.attributes[i].value;
-				}
-			}
-
-			if (newHtml) {
-				// Avoid re-applying the same '__html' if it did not changed between re-render
-				if (!newHtml || newHtml.__html !== dom.innerHTML) {
-					dom.innerHTML = (newHtml && newHtml.__html) || '';
+			for (let i = 0; i < dom.attributes.length; i++) {
+				//oldProps[dom.attributes[i].name] = dom.attributes[i].value;
+				const name = dom.attributes[i].name;
+				if (!(name in newProps)) {
+					dom.removeAttribute(name);
 				}
 			}
 		}
 
-		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
+		let newHtml, newValue, newChecked;
+		for (i in newProps) {
+			if (i === 'key' || i === 'children') {
+			} else if (i === 'dangerouslySetInnerHTML') {
+				newHtml = newProps[i];
+			} else if (i === 'value') {
+				newValue = newProps[i];
+			} else if (i === 'checked') {
+				newChecked = newProps[i];
+			} else if (
+				(!isHydrating || typeof newProps[i] == 'function') &&
+				newProps[i] != null
+			) {
+				setProperty(dom, i, newProps[i], null, isSvg);
+			}
+		}
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (newHtml) {
+			if (!isHydrating && newHtml.__html) {
+				dom.innerHTML = newHtml.__html;
+			}
 			newVNode._children = [];
 		} else {
 			i = newVNode.props.children;
@@ -332,30 +343,18 @@ function mountDOMElement(
 				newVNode.type === 'foreignObject' ? false : isSvg,
 				excessDomChildren,
 				commitQueue,
-				EMPTY_OBJ,
+				excessDomChildren != null ? excessDomChildren[0] : null,
 				isHydrating
 			);
 		}
 
 		// (as above, don't diff props during hydration)
 		if (!isHydrating) {
-			if (
-				'value' in newProps &&
-				(i = newProps.value) !== undefined &&
-				// #2756 For the <progress>-element the initial value is 0,
-				// despite the attribute not being present. When the attribute
-				// is missing the progress bar is treated as indeterminate.
-				// To fix that we'll always update it when it is 0 for progress elements
-				(i !== dom.value || (newVNode.type === 'progress' && !i))
-			) {
-				setProperty(dom, 'value', i, null, false);
+			if (newValue != null) {
+				setProperty(dom, 'value', newValue, null, false);
 			}
-			if (
-				'checked' in newProps &&
-				(i = newProps.checked) !== undefined &&
-				i !== dom.checked
-			) {
-				setProperty(dom, 'checked', i, null, false);
+			if (newChecked != null) {
+				setProperty(dom, 'checked', newChecked, null, false);
 			}
 		}
 	}
@@ -393,18 +392,6 @@ export function mountChildren(
 	isHydrating
 ) {
 	let i, j, childVNode, newDom, firstChildDom, refs;
-
-	// Only in very specific places should this logic be invoked (top level `render` and `diffElementNodes`).
-	// I'm using `EMPTY_OBJ` to signal when `diffChildren` is invoked in these situations. I can't use `null`
-	// for this purpose, because `null` is a valid value for `oldDom` which can mean to skip to this logic
-	// (e.g. if mounting a new tree in which the old DOM should be ignored (usually for Fragments).
-	if (oldDom == EMPTY_OBJ) {
-		if (excessDomChildren != null) {
-			oldDom = excessDomChildren[0];
-		} else {
-			oldDom = null;
-		}
-	}
 
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
