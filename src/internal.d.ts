@@ -62,7 +62,7 @@ export type ComponentChild =
 	| undefined;
 export type ComponentChildren = ComponentChild[] | ComponentChild;
 
-export interface PreactElement extends HTMLElement, Text {
+export interface PreactElement extends HTMLElement {
 	_children?: VNode<any> | null;
 	/** Event listeners to support event delegation */
 	_listeners?: Record<string, (e: Event) => void>;

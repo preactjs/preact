@@ -268,15 +268,24 @@ function mountDOMElement(
 
 	if (dom == null) {
 		if (newVNode.type === null) {
+			// @ts-ignore createTextNode returns Text, we expect PreactElement
 			return document.createTextNode(newProps);
 		}
 
-		dom = isSvg
-			? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type)
-			: document.createElement(
-					newVNode.type,
-					newProps.is && { is: newProps.is }
-			  );
+		if (isSvg) {
+			dom = document.createElementNS(
+				'http://www.w3.org/2000/svg',
+				// @ts-ignore We know `newVNode.type` is a string
+				newVNode.type
+			);
+		} else {
+			dom = document.createElement(
+				// @ts-ignore We know `newVNode.type` is a string
+				newVNode.type,
+				newProps.is && { is: newProps.is }
+			);
+		}
+
 		// we created a new parent, so none of the previously attached children can be reused:
 		excessDomChildren = null;
 		// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
@@ -492,6 +501,7 @@ export function mountChildren(
 	// Set refs only after unmount
 	if (refs) {
 		for (i = 0; i < refs.length; i++) {
+			// @ts-ignore Nested flatten tuples are hard to do in TypeScript
 			applyRef(refs[i], refs[++i], refs[++i]);
 		}
 	}
