@@ -37,6 +37,20 @@ export function render(vnode, parentDom, replaceNode) {
 		? parentDom
 		: replaceNode || parentDom
 	)._children = vnode);
+
+	let excessDomChildren =
+		replaceNode && !isHydrating
+			? [replaceNode]
+			: oldVNode
+			? null
+			: parentDom.childNodes.length
+			? EMPTY_ARR.slice.call(parentDom.childNodes)
+			: null;
+
+	if (isHydrating) {
+		replaceNode = excessDomChildren[0];
+	}
+
 	let commitQueue = [];
 	if (oldVNode) {
 		diff(
@@ -47,13 +61,7 @@ export function render(vnode, parentDom, replaceNode) {
 			oldVNode || EMPTY_OBJ,
 			EMPTY_OBJ,
 			parentDom.ownerSVGElement !== undefined,
-			replaceNode && !isHydrating
-				? [replaceNode]
-				: oldVNode
-				? null
-				: parentDom.childNodes.length
-				? EMPTY_ARR.slice.call(parentDom.childNodes)
-				: null,
+			excessDomChildren,
 			commitQueue,
 			replaceNode || EMPTY_OBJ,
 			isHydrating
@@ -64,15 +72,9 @@ export function render(vnode, parentDom, replaceNode) {
 			newVNode,
 			EMPTY_OBJ,
 			parentDom.ownerSVGElement !== undefined,
-			replaceNode && !isHydrating
-				? [replaceNode]
-				: oldVNode
-				? null
-				: parentDom.childNodes.length
-				? EMPTY_ARR.slice.call(parentDom.childNodes)
-				: null,
+			excessDomChildren,
 			commitQueue,
-			replaceNode || EMPTY_OBJ,
+			replaceNode,
 			isHydrating
 		);
 	}
