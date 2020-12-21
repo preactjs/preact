@@ -31,8 +31,11 @@ export const defaultBenchOptions = {
 export async function runBenches(bench1 = 'all', opts) {
 	const globs = bench1 === 'all' ? allBenches : [bench1].concat(opts._);
 	const benchesToRun = await globSrc(globs);
-	const configFileTasks = benchesToRun.map(async benchPath => {
-		return generateConfig(benchesRoot('src', benchPath), opts);
+	const configFileTasks = benchesToRun.map(async (benchPath, i) => {
+		return generateConfig(benchesRoot('src', benchPath), {
+			...opts,
+			prepare: i === 0 // Only run prepare script for first config
+		});
 	});
 
 	await mkdir(resultsPath(), { recursive: true });
@@ -41,6 +44,7 @@ export async function runBenches(bench1 = 'all', opts) {
 	for (const { name, configPath } of configFiles) {
 		const args = [
 			benchesRoot('node_modules/tachometer/bin/tach.js'),
+			'--force-clean-npm-install',
 			'--config',
 			configPath,
 			'--json-file',

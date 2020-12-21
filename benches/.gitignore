@@ -1,3 +1,4 @@
 dist/
 results/
 node_modules/
+proxy-packages/*/package-lock.json

@@ -5,8 +5,7 @@
 	"type": "module",
 	"description": "Benchmarks for Preact",
 	"scripts": {
-		"prepare": "cd proxy-packages/preact-v8-proxy && npm ci",
-		"start": "node ./scripts config many_updates.html && tach --config dist/many_updates.config.json --manual",
+		"start": "node ./scripts config many_updates.html && tach --force-clean-npm-install --config dist/many_updates.config.json --manual",
 		"bench": "node ./scripts bench",
 		"deopts": "node ./scripts deopts",
 		"help": "node ./scripts --help"
@@ -17,6 +16,7 @@
 	},
 	"devDependencies": {
 		"@kristoferbaxter/async": "^1.0.0",
+		"del": "^6.0.0",
 		"escalade": "^3.0.2",
 		"escape-string-regexp": "^4.0.0",
 		"globby": "^11.0.0",

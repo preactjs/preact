@@ -3,6 +3,7 @@
 * Report `initial-run` metric to PR
 	- to capture unoptimized runtime which would be an important metric to understand perf characteristic before optimizations kick in
 * Add warmup reporting to all benchmarks
+* Add `preact-compat` proxy
 * Add UIBench
 * Add bench mimicking speedometer
 * Add a realworld-like bench?

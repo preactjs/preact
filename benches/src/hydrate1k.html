@@ -31,7 +31,7 @@
 			/** @type {HTMLTemplateElement} */
 			const template = document.getElementById('template');
 			const { Main } = getComponents(framework);
-			const { render, hydrate, createElement } = framework;
+			const { createRoot, createElement } = framework;
 
 			const firstRowSel = 'tr:first-child > td:first-child';
 			const lastRowSel = 'tr:last-child > td:first-child';
@@ -60,7 +60,9 @@
 			/** Render the app inside the template tag */
 			async function initializeTemplate() {
 				// Initialize template
-				render(createElement(Main, { store: baseStore }), template.content);
+				createRoot(template.content).render(
+					createElement(Main, { store: baseStore })
+				);
 				await afterFrameAsync();
 			}
 
@@ -101,7 +103,7 @@
 
 				const store = new Store();
 				store.data = baseStore.data.slice();
-				hydrate(createElement(Main, { store }), hydrateRoot);
+				createRoot(hydrateRoot).hydrate(createElement(Main, { store }));
 
 				// Verify hydrate has correct markup and is properly hydrated
 				testElementText(firstRowSel, '1');
@@ -110,7 +112,7 @@
 			}
 
 			function timedRun() {
-				afterFrame(function() {
+				afterFrame(function () {
 					performance.mark('stop');
 					performance.measure(measureName, 'start', 'stop');
 
@@ -122,7 +124,7 @@
 				store.data = baseStore.data.slice();
 
 				performance.mark('start');
-				hydrate(createElement(Main, { store }), hydrateRoot);
+				createRoot(hydrateRoot).hydrate(createElement(Main, { store }));
 			}
 
 			async function main() {

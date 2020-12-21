@@ -1,6 +1,5 @@
 // Users who only use Preact for SSR might not specify "dom" in their lib in tsconfig.json
 /// <reference lib="dom" />
-import * as CSS from './jsx-csstype';
 
 type Defaultize<Props, Defaults> =
 	// Distribute over unions
@@ -33,18 +32,21 @@ export namespace JSXInternal {
 		children: any;
 	}
 
-	interface CSSProperties<
-		TLength = (string & {}) | number,
-		TTime = string & {}
-	> extends CSS.Properties<TLength, TTime> {
-		/**
-		 * The index signature was removed to enable closed typing for style
-		 * using CSSType. You're able to use type assertion or module augmentation
-		 * to add properties or an index signature of your own.
-		 *
-		 * For examples and more information, visit:
-		 * https://github.com/frenic/csstype#what-should-i-do-when-i-get-type-errors
-		 */
+	type DOMCSSProperties = {
+		[key in keyof Omit<
+			CSSStyleDeclaration,
+			| 'item'
+			| 'setProperty'
+			| 'removeProperty'
+			| 'getPropertyValue'
+			| 'getPropertyPriority'
+		>]?: string | number | null | undefined;
+	};
+	type AllCSSProperties = {
+		[key: string]: string | number | null | undefined;
+	};
+	interface CSSProperties extends AllCSSProperties, DOMCSSProperties {
+		cssText?: string | null;
 	}
 
 	interface SVGAttributes<Target extends EventTarget = SVGElement>
