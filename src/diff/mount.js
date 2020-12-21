@@ -1,8 +1,8 @@
 import { applyRef } from './index';
-import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
+import { EMPTY_ARR } from '../constants';
 import { Component } from '../component';
 import { createVNode, Fragment } from '../create-element';
-import { diffProps, setProperty } from './props';
+import { setProperty } from './props';
 import { assign, removeNode } from '../util';
 import options from '../options';
 
@@ -90,7 +90,7 @@ export function mount(
 			// ^ could possibly be simplified to:
 			// excessDomChildren.length = 0;
 		}
-		options._catchError(e, newVNode, null);
+		options._catchError(e, newVNode, newVNode);
 	}
 }
 
@@ -239,7 +239,7 @@ function mountDOMElement(
 	commitQueue,
 	isHydrating
 ) {
-	let i, oldProps;
+	let i;
 	let newProps = newVNode.props;
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
@@ -293,8 +293,6 @@ function mountDOMElement(
 			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
 		}
 
-		oldProps = null;
-
 		// @TODO: Consider removing and instructing users to instead set the desired
 		// prop for removal to undefined/null. During hydration, props are not
 		// diffed at all (including dangerouslySetInnerHTML)
@@ -302,7 +300,6 @@ function mountDOMElement(
 			// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
 			// we should read the existing DOM attributes to diff them
 			for (let i = 0; i < dom.attributes.length; i++) {
-				//oldProps[dom.attributes[i].name] = dom.attributes[i].value;
 				const name = dom.attributes[i].name;
 				if (!(name in newProps)) {
 					dom.removeAttribute(name);
@@ -468,28 +465,9 @@ export function mountChildren(
 				firstChildDom = newDom;
 			}
 
-			oldDom = mountChild(
-				parentDom,
-				childVNode,
-				excessDomChildren,
-				newDom,
-				oldDom
-			);
+			oldDom = mountChild(parentDom, childVNode, newDom, oldDom);
 
-			// Browsers will infer an option's `value` from `textContent` when
-			// no value is present. This essentially bypasses our code to set it
-			// later in `diff()`. It works fine in all browsers except for IE11
-			// where it breaks setting `select.value`. There it will be always set
-			// to an empty string. Re-applying an options value will fix that, so
-			// there are probably some internal data structures that aren't
-			// updated properly.
-			//
-			// To fix it we make sure to reset the inferred value, so that our own
-			// value check in `diff()` won't be skipped.
-			if (!isHydrating && newParentVNode.type === 'option') {
-				// @ts-ignore
-				parentDom.value = '';
-			} else if (typeof newParentVNode.type == 'function') {
+			if (typeof newParentVNode.type == 'function') {
 				// Because the newParentVNode is Fragment-like, we need to set it's
 				// _nextDom property to the nextSibling of its last child DOM node.
 				//
@@ -519,56 +497,44 @@ export function mountChildren(
 	}
 }
 
-function mountChild(parentDom, childVNode, excessDomChildren, newDom, oldDom) {
-	let nextDom;
+function mountChild(parentDom, childVNode, newDom, oldDom) {
 	if (childVNode._nextDom !== undefined) {
 		// Only Fragments or components that return Fragment like VNodes will
 		// have a non-undefined _nextDom. Continue the diff from the sibling
 		// of last DOM child of this child VNode
-		nextDom = childVNode._nextDom;
+		let nextDom = childVNode._nextDom;
 
 		// Eagerly cleanup _nextDom. We don't need to persist the value because
 		// it is only used by `diffChildren` to determine where to resume the diff after
 		// diffing Components and Fragments. Once we store it the nextDOM local var, we
 		// can clean up the property
 		childVNode._nextDom = undefined;
-	} else if (
-		excessDomChildren == null ||
-		newDom != oldDom ||
-		newDom.parentNode == null
-	) {
-		// NOTE: excessDomChildren==oldVNode above:
-		// This is a compression of excessDomChildren==null && oldVNode==null!
-		// The values only have the same type when `null`.
 
-		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
-			parentDom.appendChild(newDom);
-			nextDom = null;
-		} else {
-			throw new Error('uh oh');
-			// // `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
-			// for (
-			// 	let sibDom = oldDom, j = 0;
-			// 	(sibDom = sibDom.nextSibling) && j < oldChildren.length;
-			// 	j += 2
-			// ) {
-			// 	if (sibDom == newDom) {
-			// 		break outer;
-			// 	}
-			// }
-			// parentDom.insertBefore(newDom, oldDom);
-			// nextDom = oldDom;
-		}
-	}
-
-	// If we have pre-calculated the nextDOM node, use it. Else calculate it now
-	// Strictly check for `undefined` here cuz `null` is a valid value of `nextDom`.
-	// See more detail in create-element.js:createVNode
-	if (nextDom !== undefined) {
-		oldDom = nextDom;
+		return nextDom;
+	} else if (newDom == oldDom) {
+		// If newDom and oldDom are the same when mounting (i.e hydrating), then the
+		// node is already in-place. Do nothing and return the next DOM node that
+		// should be hydrated.
+		return newDom.nextSibling;
 	} else {
-		oldDom = newDom.nextSibling;
+		// Hydration and non hydration
+		// Possible follow up related text node normalization.
+		/**
+		 * @TODO(golf): replace with:
+		 *  parentDom.insertBefore(newDom, oldDom);
+		 *  return oldDom || null;
+		 */
+		if (oldDom) {
+			// Insert before with a non-null oldDom is called during mounting in these
+			// cases:
+			// 1. mounting new vnodes during a diff
+			// 2. mounting mismatched trees during hydration
+			// 3. splitting text nodes during hydration (we don't normalize text
+			//    nodes)
+			parentDom.insertBefore(newDom, oldDom);
+		} else {
+			parentDom.appendChild(newDom);
+		}
+		return oldDom || null;
 	}
-
-	return oldDom;
 }
