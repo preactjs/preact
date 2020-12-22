@@ -268,18 +268,17 @@ export function useErrorBoundary(cb) {
 	const state = getHookState(currentIndex++, 10);
 	const errState = useState();
 	state._value = cb;
-	if (!currentComponent.componentDidCatch) {
+	if (!state._reset) {
+		const previousDidCatch = currentComponent.componentDidCatch;
 		currentComponent.componentDidCatch = err => {
 			if (state._value) state._value(err);
+			if (previousDidCatch) previousDidCatch.call(currentComponent, err);
 			errState[1](err);
 		};
+		state._reset = () => errState[1]();
 	}
-	return [
-		errState[0],
-		() => {
-			errState[1](undefined);
-		}
-	];
+
+	return [errState[0], state._reset];
 }
 
 /**
