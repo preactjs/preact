@@ -529,22 +529,13 @@ function mountChild(parentDom, childVNode, newDom, oldDom) {
 	} else {
 		// Hydration and non hydration
 		// Possible follow up related text node normalization.
-		/**
-		 * @TODO(golf): replace with:
-		 *  parentDom.insertBefore(newDom, oldDom);
-		 *  return oldDom || null;
-		 */
-		if (oldDom) {
-			// Insert before with a non-null oldDom is called during mounting in these
-			// cases:
-			// 1. mounting new vnodes during a diff
-			// 2. mounting mismatched trees during hydration
-			// 3. splitting text nodes during hydration (we don't normalize text
-			//    nodes)
-			parentDom.insertBefore(newDom, oldDom);
-		} else {
-			parentDom.appendChild(newDom);
-		}
+		// Insert before with a non-null oldDom is called during mounting in these
+		// cases:
+		// 1. mounting new vnodes during a diff
+		// 2. mounting mismatched trees during hydration
+		// 3. splitting text nodes during hydration (we don't normalize text
+		//    nodes)
+		parentDom.insertBefore(newDom, oldDom);
 		return oldDom || null;
 	}
 }
