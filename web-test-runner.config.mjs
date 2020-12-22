@@ -12,12 +12,6 @@ const sauceLabsKey = process.env.SAUCE_ACCESS_KEY;
 const sauceLabs = sauceLabsUser && sauceLabsKey;
 if (sauceLabs) {
 	const version = JSON.parse(fs.readFileSync('package.json', 'utf-8')).version;
-	const sauceLabsLauncher = createSauceLabsLauncher({
-		user: process.env.SAUCE_USERNAME,
-		key: process.env.SAUCE_ACCESS_KEY,
-		region: 'eu'
-	});
-
 	const sharedCapabilities = {
 		'sauce:options': {
 			name: 'unit-tests',
@@ -28,27 +22,32 @@ if (sauceLabs) {
 			tunnelIdentifier: process.env.GITHUB_RUN_NUMBER || `local${version}`
 		}
 	};
+	const sauceLabsLauncher = createSauceLabsLauncher(
+		{
+			user: process.env.SAUCE_USERNAME,
+			key: process.env.SAUCE_ACCESS_KEY,
+			region: 'eu-central-1'
+		},
+		sharedCapabilities
+	);
+
 	browsers = [
 		sauceLabsLauncher({
-			...sharedCapabilities,
 			browserName: 'internet explorer',
 			browserVersion: '11.0',
 			platformName: 'Windows 7'
 		}),
 		sauceLabsLauncher({
-			...sharedCapabilities,
 			browserName: 'chrome',
 			browserVersion: 'latest',
 			platformName: 'Windows 10'
 		}),
 		sauceLabsLauncher({
-			...sharedCapabilities,
 			browserName: 'MicrosoftEdge',
 			browserVersion: 'latest',
 			platformName: 'Windows 10'
 		}),
 		sauceLabsLauncher({
-			...sharedCapabilities,
 			browserName: 'firefox',
 			browserVersion: 'latest',
 			platformName: 'Windows 10'
