@@ -526,16 +526,16 @@ function mountChild(parentDom, childVNode, newDom, oldDom) {
 		// node is already in-place. Do nothing and return the next DOM node that
 		// should be hydrated.
 		return newDom.nextSibling;
-	} else {
-		// Hydration and non hydration
-		// Possible follow up related text node normalization.
-		// Insert before with a non-null oldDom is called during mounting in these
-		// cases:
-		// 1. mounting new vnodes during a diff
-		// 2. mounting mismatched trees during hydration
-		// 3. splitting text nodes during hydration (we don't normalize text
-		//    nodes)
-		parentDom.insertBefore(newDom, oldDom);
-		return oldDom || null;
 	}
+
+	// Hydration and non hydration
+	// Possible follow up related text node normalization.
+	// Insert before with a non-null oldDom is called during mounting in these
+	// cases:
+	// 1. mounting new vnodes during a diff
+	// 2. mounting mismatched trees during hydration
+	// 3. splitting text nodes during hydration (we don't normalize text
+	//    nodes)
+	parentDom.insertBefore(newDom, oldDom);
+	return oldDom || null;
 }
