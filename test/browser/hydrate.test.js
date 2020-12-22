@@ -107,10 +107,10 @@ describe('hydrate()', () => {
 
 		expect(scratch.innerHTML).to.equal(ul([li('1'), li('2'), li('3')]));
 		expect(getLog()).to.deep.equal([
-			'<li>.appendChild(#text)',
-			'<ul>1.appendChild(<li>2)',
-			'<li>.appendChild(#text)',
-			'<ul>12.appendChild(<li>3)'
+			'<li>.insertBefore(#text, Null)',
+			'<ul>1.insertBefore(<li>2, Null)',
+			'<li>.insertBefore(#text, Null)',
+			'<ul>12.insertBefore(<li>3, Null)'
 		]);
 	});
 

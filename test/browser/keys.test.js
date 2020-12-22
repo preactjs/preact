@@ -169,8 +169,8 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abc');
 		expect(getLog()).to.deep.equal([
-			'<li>.appendChild(#text)',
-			'<ol>ab.appendChild(<li>c)'
+			'<li>.insertBefore(#text, Null)',
+			'<ol>ab.insertBefore(<li>c, Null)'
 		]);
 	});
 
@@ -200,7 +200,7 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abc');
 		expect(getLog()).to.deep.equal([
-			'<li>.appendChild(#text)',
+			'<li>.insertBefore(#text, Null)',
 			'<ol>bc.insertBefore(<li>a, <li>b)'
 		]);
 	});
@@ -231,7 +231,7 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abc');
 		expect(getLog()).to.deep.equal([
-			'<li>.appendChild(#text)',
+			'<li>.insertBefore(#text, Null)',
 			'<ol>ac.insertBefore(<li>b, <li>c)'
 		]);
 	});
@@ -263,7 +263,7 @@ describe('keys', () => {
 		render(<List values={['b', 'a']} />, scratch);
 		expect(scratch.textContent).to.equal('ba');
 
-		expect(getLog()).to.deep.equal(['<ol>ab.appendChild(<li>a)']);
+		expect(getLog()).to.deep.equal(['<ol>ab.insertBefore(<li>a, Null)']);
 	});
 
 	it('should swap existing keyed children in the middle of a list efficiently', () => {
@@ -308,7 +308,7 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('bcda', 'move to end');
 		expect(getLog()).to.deep.equal(
-			['<ol>abcd.appendChild(<li>a)'],
+			['<ol>abcd.insertBefore(<li>a, Null)'],
 			'move to end'
 		);
 
@@ -341,11 +341,11 @@ describe('keys', () => {
 			'<ol>jabcdefghi.insertBefore(<li>i, <li>a)',
 			'<ol>jiabcdefgh.insertBefore(<li>h, <li>a)',
 			'<ol>jihabcdefg.insertBefore(<li>g, <li>a)',
-			'<ol>jihgabcdef.appendChild(<li>e)',
-			'<ol>jihgabcdfe.appendChild(<li>d)',
-			'<ol>jihgabcfed.appendChild(<li>c)',
-			'<ol>jihgabfedc.appendChild(<li>b)',
-			'<ol>jihgafedcb.appendChild(<li>a)'
+			'<ol>jihgabcdef.insertBefore(<li>e, Null)',
+			'<ol>jihgabcdfe.insertBefore(<li>d, Null)',
+			'<ol>jihgabcfed.insertBefore(<li>c, Null)',
+			'<ol>jihgabfedc.insertBefore(<li>b, Null)',
+			'<ol>jihgafedcb.insertBefore(<li>a, Null)'
 		]);
 	});
 
