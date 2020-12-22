@@ -1,5 +1,5 @@
 import { createElement, createContext } from '../../src';
-import { expect } from 'expectus';
+import { expect } from 'chai';
 
 /* eslint-env browser, mocha */
 

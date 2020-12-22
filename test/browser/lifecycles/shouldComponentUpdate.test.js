@@ -2,8 +2,8 @@ import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component, Fragment } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
 import { logCall, clearLog } from '../../_util/logCall';
-import sinon from 'sinon';
-import { expect } from 'expectus';
+
+import { expect } from 'chai';
 
 describe('Lifecycle methods', () => {
 	/** @type {HTMLDivElement} */

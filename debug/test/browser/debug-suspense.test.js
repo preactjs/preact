@@ -6,8 +6,7 @@ import {
 	teardown,
 	serializeHtml
 } from '../../../test/_util/helpers';
-import sinon from 'sinon';
-import { expect } from 'expectus';
+import { expect } from 'chai';
 
 describe('debug with suspense', () => {
 	/** @type {HTMLDivElement} */

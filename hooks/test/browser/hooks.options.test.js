@@ -1,3 +1,4 @@
+import { expect } from 'chai';
 import {
 	afterDiffSpy,
 	beforeRenderSpy,
@@ -20,8 +21,6 @@ import {
 	useContext,
 	useErrorBoundary
 } from 'preact/hooks';
-import sinon from 'sinon';
-import { expect } from 'expectus';
 
 describe('hook options', () => {
 	/** @type {HTMLDivElement} */

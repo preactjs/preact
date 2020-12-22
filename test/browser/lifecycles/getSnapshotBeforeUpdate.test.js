@@ -1,7 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
-import { expect } from 'expectus';
+import { expect } from 'chai';
 
 describe('Lifecycle methods', () => {
 	/** @type {HTMLDivElement} */

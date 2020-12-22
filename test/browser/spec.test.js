@@ -1,8 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
-import { expect } from 'expectus';
-import sinon from 'sinon';
+import { expect } from 'chai';
 
 describe('Component spec', () => {
 	let scratch, rerender;

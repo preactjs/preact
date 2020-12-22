@@ -2,7 +2,7 @@ import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component, Fragment, hydrate } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 import { div, span, input as inputStr, h1, h2 } from '../_util/dom';
-import { expect } from 'expectus';
+import { expect } from 'chai';
 import '../polyfills';
 
 /* eslint-disable react/jsx-boolean-value */

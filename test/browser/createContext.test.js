@@ -7,8 +7,7 @@ import {
 	Fragment
 } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
-import { expect } from 'expectus';
-import sinon from 'sinon';
+import { expect } from 'chai';
 
 describe('createContext', () => {
 	let scratch;

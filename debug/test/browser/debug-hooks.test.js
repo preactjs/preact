@@ -3,8 +3,7 @@ import { useState, useEffect } from 'preact/hooks';
 import 'preact/debug';
 import { act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import sinon from 'sinon';
-import { expect } from 'expectus';
+import { expect } from 'chai';
 
 describe('debug with hooks', () => {
 	let scratch;

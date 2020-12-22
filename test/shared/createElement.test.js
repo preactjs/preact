@@ -1,5 +1,5 @@
 import { createElement } from '../../src';
-import { expect } from 'expectus';
+import { expect } from 'chai';
 
 const h = createElement;
 /*eslint-env browser, mocha */

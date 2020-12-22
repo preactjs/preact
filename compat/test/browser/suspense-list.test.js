@@ -8,7 +8,7 @@ import React, {
 } from 'preact/compat';
 import { useState } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { expect } from 'expectus';
+import { expect } from 'chai';
 
 const h = React.createElement;
 /* eslint-env browser, mocha */

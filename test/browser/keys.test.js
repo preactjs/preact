@@ -2,8 +2,7 @@ import { createElement, Component, render } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 import { div } from '../_util/dom';
-import { expect } from 'expectus';
-import sinon from 'sinon';
+import { expect } from 'chai';
 
 describe('keys', () => {
 	/** @type {HTMLDivElement} */

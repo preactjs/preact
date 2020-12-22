@@ -1,6 +1,6 @@
 import { createElement, render } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
-import { expect } from 'expectus';
+import { expect } from 'chai';
 
 describe('Select', () => {
 	let scratch;

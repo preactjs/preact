@@ -3,7 +3,7 @@ import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 import { div } from '../_util/dom';
-import { expect } from 'expectus';
+import { expect } from 'chai';
 
 describe('null placeholders', () => {
 	/** @type {HTMLDivElement} */

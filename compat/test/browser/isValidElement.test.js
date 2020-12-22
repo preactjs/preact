@@ -1,6 +1,6 @@
 import { createElement as preactCreateElement } from 'preact';
 import React, { isValidElement } from 'preact/compat';
-import { expect } from 'expectus';
+import { expect } from 'chai';
 
 describe('isValidElement', () => {
 	it('should check return false for invalid arguments', () => {

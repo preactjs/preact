@@ -13,8 +13,7 @@ import React, {
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { setupRerender, act } from 'preact/test-utils';
 import { getSymbol } from './testUtils';
-import { expect } from 'expectus';
-import sinon from 'sinon';
+import { expect } from 'chai';
 import '../../../test/polyfills';
 
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */

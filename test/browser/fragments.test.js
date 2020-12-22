@@ -3,7 +3,7 @@ import { createElement, render, Component, Fragment } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 import { span, div, ul, ol, li, section } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
-import { expect } from 'expectus';
+import { expect } from 'chai';
 
 /* eslint-disable react/jsx-boolean-value */
 

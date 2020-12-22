@@ -13,8 +13,8 @@ import {
 } from '../_util/helpers';
 import { clearLog, getLog, logCall } from '../_util/logCall';
 import { useState } from 'preact/hooks';
-import { expect } from 'expectus';
-import sinon from 'sinon';
+import { expect } from 'chai';
+
 import '../polyfills';
 
 function getAttributes(node) {

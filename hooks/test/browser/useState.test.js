@@ -2,8 +2,7 @@ import { setupRerender } from 'preact/test-utils';
 import { createElement, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useState } from 'preact/hooks';
-import sinon from 'sinon';
-import { expect } from 'expectus';
+import { expect } from 'chai';
 
 describe('useState', () => {
 	/** @type {HTMLDivElement} */

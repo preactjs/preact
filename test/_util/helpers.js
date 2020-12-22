@@ -1,7 +1,6 @@
 import { createElement, options } from 'preact';
 import { clearLog, getLog } from './logCall';
 import { teardown as testUtilTeardown } from 'preact/test-utils';
-import sinon from 'sinon';
 
 /**
  * Assign properties from `props` to `obj`

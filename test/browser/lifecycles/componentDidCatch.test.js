@@ -6,8 +6,8 @@ import {
 	spyAll,
 	resetAllSpies
 } from '../../_util/helpers';
-import sinon from 'sinon';
-import { expect } from 'expectus';
+
+import { expect } from 'chai';
 
 describe('Lifecycle methods', () => {
 	/* eslint-disable react/display-name */

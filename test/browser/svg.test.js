@@ -1,7 +1,6 @@
 import { createElement, render } from 'preact';
 import { setupScratch, teardown, sortAttributes } from '../_util/helpers';
-import { expect } from 'expectus';
-import sinon from 'sinon';
+import { expect } from 'chai';
 
 describe('svg', () => {
 	let scratch;

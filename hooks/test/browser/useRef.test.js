@@ -1,7 +1,7 @@
 import { createElement, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useRef } from 'preact/hooks';
-import { expect } from 'expectus';
+import { expect } from 'chai';
 
 describe('useRef', () => {
 	/** @type {HTMLDivElement} */

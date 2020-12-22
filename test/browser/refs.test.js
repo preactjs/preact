@@ -1,8 +1,8 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component, createRef } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
-import { expect } from 'expectus';
-import sinon from 'sinon';
+import { expect } from 'chai';
+
 import '../polyfills';
 
 // gives call count and argument errors names (otherwise sinon just uses "spy"):

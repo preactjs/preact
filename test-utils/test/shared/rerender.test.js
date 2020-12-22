@@ -1,7 +1,7 @@
 import { options, createElement, render, Component } from 'preact';
 import { teardown, setupRerender } from 'preact/test-utils';
-import sinon from 'sinon';
-import { expect } from 'expectus';
+
+import { expect } from 'chai';
 
 /** @jsx createElement */
 

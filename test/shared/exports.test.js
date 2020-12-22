@@ -9,7 +9,7 @@ import {
 	cloneElement,
 	options
 } from '../../';
-import { expect } from 'expectus';
+import { expect } from 'chai';
 
 describe('preact', () => {
 	it('should be available as named exports', () => {

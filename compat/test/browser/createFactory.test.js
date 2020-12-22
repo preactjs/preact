@@ -1,6 +1,6 @@
 import React, { render, createElement, createFactory } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { expect } from 'expectus';
+import { expect } from 'chai';
 
 describe('createFactory', () => {
 	/** @type {HTMLDivElement} */

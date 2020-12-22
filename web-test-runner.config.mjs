@@ -98,6 +98,7 @@ export default {
 			inject: {
 				importMap: {
 					imports: {
+						chai: '/test/chai.js',
 						'preact/compat': '/compat/src/index.js',
 						'preact/debug': '/debug/src/index.js',
 						'preact/devtools': '/devtools/src/index.js',

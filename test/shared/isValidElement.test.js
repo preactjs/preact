@@ -1,5 +1,5 @@
 import { createElement, isValidElement, Component } from '../../';
-import { expect } from 'expectus';
+import { expect } from 'chai';
 import { isValidElementTests } from './isValidElementTests';
 
 isValidElementTests(expect, isValidElement, createElement, Component);

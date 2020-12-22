@@ -9,8 +9,7 @@ import {
 	useRef
 } from 'preact/hooks';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
-import sinon from 'sinon';
-import { expect } from 'expectus';
+import { expect } from 'chai';
 
 describe('combinations', () => {
 	/** @type {HTMLDivElement} */

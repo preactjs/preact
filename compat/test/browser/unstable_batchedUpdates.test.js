@@ -1,6 +1,5 @@
 import { unstable_batchedUpdates } from 'preact/compat';
-import { expect } from 'expectus';
-import sinon from 'sinon';
+import { expect } from 'chai';
 
 describe('unstable_batchedUpdates', () => {
 	it('should call the callback', () => {

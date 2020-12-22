@@ -1,3 +1,4 @@
+import { expect } from 'chai';
 import { vnodeSpy, eventSpy } from '../../../test/_util/optionSpies';
 import React, {
 	createElement,
@@ -11,7 +12,6 @@ import {
 	teardown,
 	createEvent
 } from '../../../test/_util/helpers';
-import { expect } from 'expectus';
 
 describe('compat options', () => {
 	/** @type {HTMLDivElement} */

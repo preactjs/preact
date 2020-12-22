@@ -1,10 +1,9 @@
+import { expect } from 'chai';
 import { createElement, render, createRef } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import './fakeDevTools';
 import 'preact/debug';
 import 'prop-types';
-import sinon from 'sinon';
-import { expect } from 'expectus';
 
 // eslint-disable-next-line no-duplicate-imports
 import { resetPropWarnings } from 'preact/debug';

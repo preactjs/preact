@@ -4,8 +4,7 @@ import {
 	teardown,
 	supportsPassiveEvents
 } from '../_util/helpers';
-import { expect } from 'expectus';
-import sinon from 'sinon';
+import { expect } from 'chai';
 
 describe('event handling', () => {
 	let scratch, proto;

@@ -1,6 +1,6 @@
 import { createElement, Component } from 'preact';
 import { serializeVNode } from '../../src/debug';
-import { expect } from 'expectus';
+import { expect } from 'chai';
 
 describe('serializeVNode', () => {
 	it("should prefer a function component's displayName", () => {

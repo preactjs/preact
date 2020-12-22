@@ -1,5 +1,5 @@
 import { createElement, cloneElement, createRef } from 'preact';
-import { expect } from 'expectus';
+import { expect } from 'chai';
 
 describe('cloneElement', () => {
 	it('should clone components', () => {

@@ -1,7 +1,7 @@
 import Compat from 'preact/compat';
 // eslint-disable-next-line no-duplicate-imports
 import * as Named from 'preact/compat';
-import { expect } from 'expectus';
+import { expect } from 'chai';
 
 describe('compat exports', () => {
 	it('should have a default export', () => {
