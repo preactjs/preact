@@ -52,7 +52,7 @@ if (sauceLabs) {
 			browserName: 'firefox',
 			browserVersion: 'latest',
 			platformName: 'Windows 10'
-		}),
+		})
 	];
 }
 
@@ -71,6 +71,9 @@ const babel = fromRollup(rollupBabel.default);
 
 export default {
 	nodeResolve: true,
+	files: [
+		'{debug/test,hooks/test,compat/test,test-utils/test,test}/{browser,shared}/{**/*,*}.test.{js,jsx}'
+	],
 	mimeTypes: {
 		'**/*.jsx': 'js'
 	},
