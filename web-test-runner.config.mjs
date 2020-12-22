@@ -25,8 +25,8 @@ if (sauceLabs) {
 	const sauceLabsLauncher = createSauceLabsLauncher(
 		{
 			user: process.env.SAUCE_USERNAME,
-			key: process.env.SAUCE_ACCESS_KEY,
-			region: 'eu-central-1'
+			key: process.env.SAUCE_ACCESS_KEY
+			// region: 'eu-central-1'
 		},
 		sharedCapabilities
 	);
