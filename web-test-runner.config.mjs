@@ -13,20 +13,18 @@ const sauceLabs = sauceLabsUser && sauceLabsKey;
 if (sauceLabs) {
 	const version = JSON.parse(fs.readFileSync('package.json', 'utf-8')).version;
 	const sharedCapabilities = {
-		'sauce:options': {
-			name: 'unit-tests',
-			// if you are running tests in a CI, the build id might be available as an
-			// environment variable. this is useful for identifying test runs
-			// this is for example the name for github actions
-			build: `CI #${process.env.GITHUB_RUN_NUMBER} (${process.env.GITHUB_RUN_ID})`,
-			tunnelIdentifier: process.env.GITHUB_RUN_NUMBER || `local${version}`
-		}
+		name: 'unit-tests',
+		// if you are running tests in a CI, the build id might be available as an
+		// environment variable. this is useful for identifying test runs
+		// this is for example the name for github actions
+		build: `CI #${process.env.GITHUB_RUN_NUMBER} (${process.env.GITHUB_RUN_ID})`,
+		tunnelIdentifier: process.env.GITHUB_RUN_NUMBER || `local${version}`
 	};
 	const sauceLabsLauncher = createSauceLabsLauncher(
 		{
 			user: process.env.SAUCE_USERNAME,
-			key: process.env.SAUCE_ACCESS_KEY
-			// region: 'eu-central-1'
+			key: process.env.SAUCE_ACCESS_KEY,
+			region: 'eu-central-1'
 		},
 		sharedCapabilities
 	);
