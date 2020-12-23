@@ -1,8 +1,9 @@
 import { EMPTY_OBJ, EMPTY_ARR } from './constants';
-import { commitRoot, diff } from './diff/index';
+import { commitRoot } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
 import { mount } from './diff/mount';
+import { patch } from './diff/patch';
 
 const IS_HYDRATE = EMPTY_OBJ;
 
@@ -53,7 +54,7 @@ export function render(vnode, parentDom, replaceNode) {
 
 	let commitQueue = [];
 	if (oldVNode) {
-		diff(
+		patch(
 			parentDom,
 			// Determine the new vnode tree and store it on the DOM element on
 			// our custom `_children` property.
