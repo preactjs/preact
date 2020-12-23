@@ -1,8 +1,9 @@
+import { EMPTY_ARR, EMPTY_OBJ } from '../constants';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
+import { diffProps, setProperty } from './props';
 import { assign } from '../util';
 import options from '../options';
-import { diffElementNodes } from '.';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -69,7 +70,7 @@ export function patch(
 			newVNode._children = oldVNode._children;
 			newVNode._dom = oldVNode._dom;
 		} else {
-			newVNode._dom = diffElementNodes(
+			newVNode._dom = patchDOMElement(
 				oldVNode._dom,
 				newVNode,
 				oldVNode,
@@ -253,4 +254,143 @@ function patchComponent(
 	}
 
 	c._force = false;
+}
+
+/**
+ * Diff two virtual nodes representing DOM element
+ * @param {import('../internal').PreactElement} dom The DOM element representing
+ * the virtual nodes being diffed
+ * @param {import('../internal').VNode} newVNode The new virtual node
+ * @param {import('../internal').VNode} oldVNode The old virtual node
+ * @param {object} globalContext The current context object
+ * @param {boolean} isSvg Whether or not this DOM node is an SVG node
+ * @param {*} excessDomChildren
+ * @param {Array<import('../internal').Component>} commitQueue List of components
+ * which have callbacks to invoke in commitRoot
+ * @param {boolean} isHydrating Whether or not we are in hydration
+ * @returns {import('../internal').PreactElement}
+ */
+function patchDOMElement(
+	dom,
+	newVNode,
+	oldVNode,
+	globalContext,
+	isSvg,
+	excessDomChildren,
+	commitQueue,
+	isHydrating
+) {
+	let i;
+	let oldProps = oldVNode.props;
+	let newProps = newVNode.props;
+
+	// Tracks entering and exiting SVG namespace when descending through the tree.
+	isSvg = newVNode.type === 'svg' || isSvg;
+
+	// TODO: Argh replaceNode!!
+	if (excessDomChildren != null) {
+		for (i = 0; i < excessDomChildren.length; i++) {
+			const child = excessDomChildren[i];
+
+			// if newVNode matches an element in excessDomChildren or the `dom`
+			// argument matches an element in excessDomChildren, remove it from
+			// excessDomChildren so it isn't later removed in diffChildren
+			if (
+				child != null &&
+				((newVNode.type === null
+					? child.nodeType === 3
+					: child.localName === newVNode.type) ||
+					dom == child)
+			) {
+				dom = child;
+				excessDomChildren[i] = null;
+				break;
+			}
+		}
+	}
+
+	if (newVNode.type === null) {
+		// During hydration, we still have to split merged text from SSR'd HTML.
+		if (oldProps !== newProps && (!isHydrating || dom.data !== newProps)) {
+			dom.data = newProps;
+		}
+	} else {
+		if (excessDomChildren != null) {
+			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
+		}
+
+		oldProps = oldVNode.props || EMPTY_OBJ;
+
+		let oldHtml = oldProps.dangerouslySetInnerHTML;
+		let newHtml = newProps.dangerouslySetInnerHTML;
+
+		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
+		// @TODO we should warn in debug mode when props don't match here.
+		if (!isHydrating) {
+			// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
+			// we should read the existing DOM attributes to diff them
+			if (excessDomChildren != null) {
+				oldProps = {};
+				for (let i = 0; i < dom.attributes.length; i++) {
+					oldProps[dom.attributes[i].name] = dom.attributes[i].value;
+				}
+			}
+
+			if (newHtml || oldHtml) {
+				// Avoid re-applying the same '__html' if it did not changed between re-render
+				if (
+					!newHtml ||
+					((!oldHtml || newHtml.__html != oldHtml.__html) &&
+						newHtml.__html !== dom.innerHTML)
+				) {
+					dom.innerHTML = (newHtml && newHtml.__html) || '';
+				}
+			}
+		}
+
+		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
+
+		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
+		if (newHtml) {
+			newVNode._children = [];
+		} else {
+			i = newVNode.props.children;
+			diffChildren(
+				dom,
+				Array.isArray(i) ? i : [i],
+				newVNode,
+				oldVNode,
+				globalContext,
+				newVNode.type === 'foreignObject' ? false : isSvg,
+				excessDomChildren,
+				commitQueue,
+				EMPTY_OBJ,
+				isHydrating
+			);
+		}
+
+		// (as above, don't diff props during hydration)
+		if (!isHydrating) {
+			if (
+				'value' in newProps &&
+				(i = newProps.value) !== undefined &&
+				// #2756 For the <progress>-element the initial value is 0,
+				// despite the attribute not being present. When the attribute
+				// is missing the progress bar is treated as indeterminate.
+				// To fix that we'll always update it when it is 0 for progress elements
+				(i !== dom.value || (newVNode.type === 'progress' && !i))
+			) {
+				setProperty(dom, 'value', i, oldProps.value, false);
+			}
+			if (
+				'checked' in newProps &&
+				(i = newProps.checked) !== undefined &&
+				i !== dom.checked
+			) {
+				setProperty(dom, 'checked', i, oldProps.checked, false);
+			}
+		}
+	}
+
+	return dom;
 }
