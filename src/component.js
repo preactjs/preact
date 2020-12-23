@@ -17,6 +17,7 @@ export function Component(props, context) {
 
 /**
  * Update component state and schedule a re-render.
+ * @this {import('./internal').Component}
  * @param {object | ((s: object, p: object) => object)} update A hash of state
  * properties to update with new values or a function that given the current
  * state and props returns a new partial state
@@ -53,6 +54,7 @@ Component.prototype.setState = function(update, callback) {
 
 /**
  * Immediately perform a synchronous re-render of the component
+ * @this {import('./internal').Component}
  * @param {() => void} [callback] A function to be called after component is
  * re-rendered
  */
