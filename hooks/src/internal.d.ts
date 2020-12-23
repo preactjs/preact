@@ -40,7 +40,8 @@ export type HookState =
 	| EffectHookState
 	| MemoHookState
 	| ReducerHookState
-	| ContextHookState;
+	| ContextHookState
+	| ErrorBoundaryHookState;
 
 export type Effect = () => void | Cleanup;
 export type Cleanup = () => void;
@@ -67,4 +68,8 @@ export interface ContextHookState {
 	/** Whether this hooks as subscribed to updates yet */
 	_value?: boolean;
 	_context?: PreactContext;
+}
+
+export interface ErrorBoundaryHookState {
+	_value?: (error: any) => void;
 }

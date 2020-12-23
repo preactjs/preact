@@ -265,7 +265,11 @@ export function useDebugValue(value, formatter) {
 	}
 }
 
+/**
+ * @param {(error: any) => void} cb
+ */
 export function useErrorBoundary(cb) {
+	/** @type {import('./internal').ErrorBoundaryHookState} */
 	const state = getHookState(currentIndex++, 10);
 	const errState = useState();
 	state._value = cb;
