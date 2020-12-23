@@ -155,8 +155,7 @@ export function diffChildren(
 				isSvg,
 				excessDomChildren,
 				commitQueue,
-				oldDom,
-				isHydrating
+				oldDom
 			);
 		} else {
 			mount(
