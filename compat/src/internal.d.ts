@@ -1,7 +1,7 @@
 import {
 	Component as PreactComponent,
 	VNode as PreactVNode,
-	FunctionalComponent as PreactFunctionalComponent
+	FunctionComponent as PreactFunctionComponent
 } from '../../src/internal';
 import { SuspenseProps } from './suspense';
 
@@ -19,8 +19,7 @@ export interface Component<P = {}, S = {}> extends PreactComponent<P, S> {
 	_suspendedComponentWillUnmount?(): void;
 }
 
-export interface FunctionalComponent<P = {}>
-	extends PreactFunctionalComponent<P> {
+export interface FunctionComponent<P = {}> extends PreactFunctionComponent<P> {
 	shouldComponentUpdate?(nextProps: Readonly<P>): boolean;
 	_forwarded?: boolean;
 	_patchedLifecycles?: true;

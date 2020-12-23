@@ -8,6 +8,7 @@ export function createContext(defaultValue, contextId) {
 	const context = {
 		_id: contextId,
 		_defaultValue: defaultValue,
+		/** @type {import('./internal').FunctionComponent} */
 		Consumer(props, contextValue) {
 			// return props.children(
 			// 	context[contextId] ? context[contextId].props.value : defaultValue
