@@ -64,8 +64,7 @@ export function render(vnode, parentDom, replaceNode) {
 			parentDom.ownerSVGElement !== undefined,
 			excessDomChildren,
 			commitQueue,
-			replaceNode || EMPTY_OBJ,
-			isHydrating
+			replaceNode || EMPTY_OBJ
 		);
 	} else {
 		mount(

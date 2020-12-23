@@ -19,7 +19,6 @@ import options from '../options';
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
- * @param {boolean} [isHydrating] Whether or not we are in hydration
  */
 export function patch(
 	parentDom,
@@ -29,8 +28,7 @@ export function patch(
 	isSvg,
 	excessDomChildren,
 	commitQueue,
-	oldDom,
-	isHydrating
+	oldDom
 ) {
 	let tmp,
 		newType = newVNode.type;
@@ -39,14 +37,15 @@ export function patch(
 	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== undefined) return null;
 
-	// If the previous diff bailed out, resume creating/hydrating.
-	if (oldVNode._hydrating != null) {
-		isHydrating = oldVNode._hydrating;
-		oldDom = newVNode._dom = oldVNode._dom;
-		// if we resume, we want the tree to be "unlocked"
-		newVNode._hydrating = null;
-		excessDomChildren = [oldDom];
-	}
+	// TODO: Ughhh, what do we do here?
+	// // If the previous diff bailed out, resume creating/hydrating.
+	// if (oldVNode._hydrating != null) {
+	// 	isHydrating = oldVNode._hydrating;
+	// 	oldDom = newVNode._dom = oldVNode._dom;
+	// 	// if we resume, we want the tree to be "unlocked"
+	// 	newVNode._hydrating = null;
+	// 	excessDomChildren = [oldDom];
+	// }
 
 	if ((tmp = options._diff)) tmp(newVNode);
 
@@ -60,8 +59,7 @@ export function patch(
 				isSvg,
 				excessDomChildren,
 				commitQueue,
-				oldDom,
-				isHydrating
+				oldDom
 			);
 		} else if (
 			excessDomChildren == null &&
@@ -77,22 +75,24 @@ export function patch(
 				globalContext,
 				isSvg,
 				excessDomChildren,
-				commitQueue,
-				isHydrating
+				commitQueue
 			);
 		}
 
 		if ((tmp = options.diffed)) tmp(newVNode);
 	} catch (e) {
 		newVNode._original = null;
-		// if hydrating or creating initial tree, bailout preserves DOM:
-		if (isHydrating || excessDomChildren != null) {
-			newVNode._dom = oldDom;
-			newVNode._hydrating = !!isHydrating;
-			excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
-			// ^ could possibly be simplified to:
-			// excessDomChildren.length = 0;
-		}
+
+		// TODO: Ughh what to do here??
+		// // if hydrating or creating initial tree, bailout preserves DOM:
+		// if (isHydrating || excessDomChildren != null) {
+		// 	newVNode._dom = oldDom;
+		// 	newVNode._hydrating = !!isHydrating;
+		// 	excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
+		// 	// ^ could possibly be simplified to:
+		// 	// excessDomChildren.length = 0;
+		// }
+
 		options._catchError(e, newVNode, oldVNode);
 	}
 }
@@ -267,7 +267,6 @@ function patchComponent(
  * @param {*} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @param {boolean} isHydrating Whether or not we are in hydration
  * @returns {import('../internal').PreactElement}
  */
 function patchDOMElement(
@@ -277,8 +276,7 @@ function patchDOMElement(
 	globalContext,
 	isSvg,
 	excessDomChildren,
-	commitQueue,
-	isHydrating
+	commitQueue
 ) {
 	let i;
 	let oldProps = oldVNode.props;
@@ -310,8 +308,7 @@ function patchDOMElement(
 	}
 
 	if (newVNode.type === null) {
-		// During hydration, we still have to split merged text from SSR'd HTML.
-		if (oldProps !== newProps && (!isHydrating || dom.data !== newProps)) {
+		if (oldProps !== newProps) {
 			dom.data = newProps;
 		}
 	} else {
@@ -324,31 +321,27 @@ function patchDOMElement(
 		let oldHtml = oldProps.dangerouslySetInnerHTML;
 		let newHtml = newProps.dangerouslySetInnerHTML;
 
-		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
-		// @TODO we should warn in debug mode when props don't match here.
-		if (!isHydrating) {
-			// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
-			// we should read the existing DOM attributes to diff them
-			if (excessDomChildren != null) {
-				oldProps = {};
-				for (let i = 0; i < dom.attributes.length; i++) {
-					oldProps[dom.attributes[i].name] = dom.attributes[i].value;
-				}
-			}
-
-			if (newHtml || oldHtml) {
-				// Avoid re-applying the same '__html' if it did not changed between re-render
-				if (
-					!newHtml ||
-					((!oldHtml || newHtml.__html != oldHtml.__html) &&
-						newHtml.__html !== dom.innerHTML)
-				) {
-					dom.innerHTML = (newHtml && newHtml.__html) || '';
-				}
+		// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
+		// we should read the existing DOM attributes to diff them
+		if (excessDomChildren != null) {
+			oldProps = {};
+			for (let i = 0; i < dom.attributes.length; i++) {
+				oldProps[dom.attributes[i].name] = dom.attributes[i].value;
 			}
 		}
 
-		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
+		if (newHtml || oldHtml) {
+			// Avoid re-applying the same '__html' if it did not changed between re-render
+			if (
+				!newHtml ||
+				((!oldHtml || newHtml.__html != oldHtml.__html) &&
+					newHtml.__html !== dom.innerHTML)
+			) {
+				dom.innerHTML = (newHtml && newHtml.__html) || '';
+			}
+		}
+
+		diffProps(dom, newProps, oldProps, isSvg, false);
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (newHtml) {
@@ -365,30 +358,27 @@ function patchDOMElement(
 				excessDomChildren,
 				commitQueue,
 				EMPTY_OBJ,
-				isHydrating
+				false
 			);
 		}
 
-		// (as above, don't diff props during hydration)
-		if (!isHydrating) {
-			if (
-				'value' in newProps &&
-				(i = newProps.value) !== undefined &&
-				// #2756 For the <progress>-element the initial value is 0,
-				// despite the attribute not being present. When the attribute
-				// is missing the progress bar is treated as indeterminate.
-				// To fix that we'll always update it when it is 0 for progress elements
-				(i !== dom.value || (newVNode.type === 'progress' && !i))
-			) {
-				setProperty(dom, 'value', i, oldProps.value, false);
-			}
-			if (
-				'checked' in newProps &&
-				(i = newProps.checked) !== undefined &&
-				i !== dom.checked
-			) {
-				setProperty(dom, 'checked', i, oldProps.checked, false);
-			}
+		if (
+			'value' in newProps &&
+			(i = newProps.value) !== undefined &&
+			// #2756 For the <progress>-element the initial value is 0,
+			// despite the attribute not being present. When the attribute
+			// is missing the progress bar is treated as indeterminate.
+			// To fix that we'll always update it when it is 0 for progress elements
+			(i !== dom.value || (newVNode.type === 'progress' && !i))
+		) {
+			setProperty(dom, 'value', i, oldProps.value, false);
+		}
+		if (
+			'checked' in newProps &&
+			(i = newProps.checked) !== undefined &&
+			i !== dom.checked
+		) {
+			setProperty(dom, 'checked', i, oldProps.checked, false);
 		}
 	}
 
