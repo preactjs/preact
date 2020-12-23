@@ -13,39 +13,42 @@ const sauceLabs = sauceLabsUser && sauceLabsKey;
 if (sauceLabs) {
 	const version = JSON.parse(fs.readFileSync('package.json', 'utf-8')).version;
 	const sharedCapabilities = {
-		name: 'unit-tests',
-		// if you are running tests in a CI, the build id might be available as an
-		// environment variable. this is useful for identifying test runs
-		// this is for example the name for github actions
-		build: `CI #${process.env.GITHUB_RUN_NUMBER} (${process.env.GITHUB_RUN_ID})`,
-		tunnelIdentifier: process.env.GITHUB_RUN_NUMBER || `local${version}`
+		'sauce:options': {
+			name: 'unit-tests',
+			// if you are running tests in a CI, the build id might be available as an
+			// environment variable. this is useful for identifying test runs
+			// this is for example the name for github actions
+			build: `CI #${process.env.GITHUB_RUN_NUMBER} (${process.env.GITHUB_RUN_ID})`,
+			tunnelIdentifier: process.env.GITHUB_RUN_NUMBER || `local${version}`
+		}
 	};
-	const sauceLabsLauncher = createSauceLabsLauncher(
-		{
-			user: process.env.SAUCE_USERNAME,
-			key: process.env.SAUCE_ACCESS_KEY,
-			region: 'eu-central-1'
-		},
-		sharedCapabilities
-	);
+	const sauceLabsLauncher = createSauceLabsLauncher({
+		user: process.env.SAUCE_USERNAME,
+		key: process.env.SAUCE_ACCESS_KEY,
+		region: 'eu'
+	});
 
 	browsers = [
 		sauceLabsLauncher({
+			...sharedCapabilities,
 			browserName: 'internet explorer',
 			browserVersion: '11.0',
 			platformName: 'Windows 7'
 		}),
 		sauceLabsLauncher({
+			...sharedCapabilities,
 			browserName: 'chrome',
 			browserVersion: 'latest',
 			platformName: 'Windows 10'
 		}),
 		sauceLabsLauncher({
+			...sharedCapabilities,
 			browserName: 'MicrosoftEdge',
 			browserVersion: 'latest',
 			platformName: 'Windows 10'
 		}),
 		sauceLabsLauncher({
+			...sharedCapabilities,
 			browserName: 'firefox',
 			browserVersion: 'latest',
 			platformName: 'Windows 10'
