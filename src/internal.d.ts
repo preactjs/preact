@@ -67,6 +67,9 @@ export interface FunctionComponent<P = {}> extends preact.FunctionComponent<P> {
 
 export interface ComponentClass<P = {}> extends preact.ComponentClass<P> {
 	_contextRef?: any;
+
+	// Override public contextType with internal PreactContext type
+	contextType?: PreactContext;
 }
 
 // Redefine ComponentType using our new internal FunctionComponent interface above
@@ -85,10 +88,17 @@ export interface PreactElement extends HTMLElement {
 	data?: string | number; // From Text node
 }
 
+// We use the `current` property to differentiate between the two kinds of Refs so
+// internally we'll define `current` on both to make TypeScript happy
+type RefObject<T> = { current: T | null };
+type RefCallback<T> = { (instance: T | null): void; current: undefined };
+type Ref<T> = RefObject<T> | RefCallback<T>;
+
 export interface VNode<P = {}> extends preact.VNode<P> {
 	// Redefine type here using our internal ComponentType type
 	type: string | ComponentType<P>;
 	props: P & { children: ComponentChildren };
+	ref?: Ref<any> | null;
 	_children: Array<VNode<any>> | null;
 	_parent: VNode | null;
 	_depth: number | null;

@@ -73,8 +73,10 @@ export function diff(
 			} else {
 				// Instantiate the new component
 				if ('prototype' in newType && newType.prototype.render) {
+					// @ts-ignore The check above verifies that newType is suppose to be constructed
 					newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
 				} else {
+					// @ts-ignore Trust me, Component implements the interface we want
 					newVNode._component = c = new Component(newProps, componentContext);
 					c.constructor = newType;
 					c.render = doRender;
@@ -261,9 +263,11 @@ export function commitRoot(commitQueue, root) {
 
 	commitQueue.some(c => {
 		try {
+			// @ts-ignore Reuse the commitQueue variable here so the type changes
 			commitQueue = c._renderCallbacks;
 			c._renderCallbacks = [];
 			commitQueue.some(cb => {
+				// @ts-ignore See above ts-ignore on commitQueue
 				cb.call(c);
 			});
 		} catch (e) {
@@ -326,15 +330,24 @@ function diffElementNodes(
 
 	if (dom == null) {
 		if (newVNode.type === null) {
+			// @ts-ignore createTextNode returns Text, we expect PreactElement
 			return document.createTextNode(newProps);
 		}
 
-		dom = isSvg
-			? document.createElementNS('http://www.w3.org/2000/svg', newVNode.type)
-			: document.createElement(
-					newVNode.type,
-					newProps.is && { is: newProps.is }
-			  );
+		if (isSvg) {
+			dom = document.createElementNS(
+				'http://www.w3.org/2000/svg',
+				// @ts-ignore We know `newVNode.type` is a string
+				newVNode.type
+			);
+		} else {
+			dom = document.createElement(
+				// @ts-ignore We know `newVNode.type` is a string
+				newVNode.type,
+				newProps.is && { is: newProps.is }
+			);
+		}
+
 		// we created a new parent, so none of the previously attached children can be reused:
 		excessDomChildren = null;
 		// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
