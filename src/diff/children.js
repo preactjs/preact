@@ -1,9 +1,10 @@
-import { diff, unmount, applyRef } from './index';
+import { unmount, applyRef } from './index';
 import { createVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { removeNode } from '../util';
 import { getDomSibling } from '../component';
 import { mount } from './mount';
+import { patch } from './patch';
 
 /**
  * Diff the children of a virtual node
@@ -144,9 +145,9 @@ export function diffChildren(
 
 		oldVNode = oldVNode || EMPTY_OBJ;
 
-		if (oldVNode) {
+		if (oldVNode !== EMPTY_OBJ) {
 			// Morph the old element into the new one, but don't append it to the dom yet
-			diff(
+			patch(
 				parentDom,
 				childVNode,
 				oldVNode,
