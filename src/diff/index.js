@@ -290,7 +290,7 @@ export function commitRoot(commitQueue, root) {
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @returns {import('../internal').PreactElement}
  */
-function diffElementNodes(
+export function diffElementNodes(
 	dom,
 	newVNode,
 	oldVNode,
