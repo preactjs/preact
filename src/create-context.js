@@ -15,10 +15,11 @@ export function createContext(defaultValue, contextId) {
 			// );
 			return props.children(contextValue);
 		},
-		Provider(props, subs, ctx) {
+		/** @type {import('./internal').FunctionComponent} */
+		Provider(props) {
 			if (!this.getChildContext) {
-				subs = [];
-				ctx = {};
+				let subs = [];
+				let ctx = {};
 				ctx[contextId] = this;
 
 				this.getChildContext = () => ctx;

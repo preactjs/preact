@@ -53,7 +53,11 @@ export type ComponentChildren = ComponentChild[] | ComponentChild;
 export interface FunctionComponent<P = {}> extends preact.FunctionComponent<P> {
 	// Internally, createContext uses `contextType` on a Function component to
 	// implement the Consumer component
-	contextType?: any;
+	contextType?: PreactContext;
+
+	// Internally, createContext stores a ref to the context object on the Provider
+	// Function component to help devtools
+	_contextRef?: PreactContext;
 
 	// Define these properties as undefined on FunctionComponent to get rid of
 	// some errors in `diff()`
