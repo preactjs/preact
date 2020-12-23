@@ -94,6 +94,21 @@ export function mount(
 	}
 }
 
+/**
+ * Diff two virtual nodes and apply proper changes to the DOM
+ * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
+ * @param {import('../internal').VNode} newVNode The new virtual node
+ * @param {object} globalContext The current context object. Modified by getChildContext
+ * @param {boolean} isSvg Whether or not this element is an SVG node
+ * @param {Array<import('../internal').PreactElement>} excessDomChildren
+ * @param {Array<import('../internal').Component>} commitQueue List of components
+ * which have callbacks to invoke in commitRoot
+ * @param {import('../internal').PreactElement} oldDom The current attached DOM
+ * element any new dom elements should be placed around. Likely `null` on first
+ * render (except when hydrating). Can be a sibling DOM element when diffing
+ * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
+ * @param {boolean} [isHydrating] Whether or not we are in hydration
+ */
 function mountComponent(
 	parentDom,
 	newVNode,
