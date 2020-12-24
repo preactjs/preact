@@ -37,7 +37,7 @@ export function patch(
 	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== undefined) return null;
 
-	// TODO: Ughhh, what do we do here?
+	// TODO: Panic! what do we do here?
 	// // If the previous diff bailed out, resume creating/hydrating.
 	// if (oldVNode._hydrating != null) {
 	// 	isHydrating = oldVNode._hydrating;
@@ -83,7 +83,7 @@ export function patch(
 	} catch (e) {
 		newVNode._original = null;
 
-		// TODO: Ughh what to do here??
+		// TODO: Panic! what to do here??
 		// // if hydrating or creating initial tree, bailout preserves DOM:
 		// if (isHydrating || excessDomChildren != null) {
 		// 	newVNode._dom = oldDom;
