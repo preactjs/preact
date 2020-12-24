@@ -1,5 +1,5 @@
 import { unmount, applyRef } from './index';
-import { createVNode, Fragment } from '../create-element';
+import { Fragment, normalizeToVNode } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { removeNode } from '../util';
 import { getDomSibling } from '../component';
@@ -63,44 +63,9 @@ export function diffChildren(
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = renderResult[i];
-
-		if (childVNode == null || typeof childVNode == 'boolean') {
-			childVNode = newParentVNode._children[i] = null;
-		}
-		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
-		// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
-		// it's own DOM & etc. pointers
-		else if (typeof childVNode == 'string' || typeof childVNode == 'number') {
-			childVNode = newParentVNode._children[i] = createVNode(
-				null,
-				childVNode,
-				null,
-				null,
-				childVNode
-			);
-		} else if (Array.isArray(childVNode)) {
-			childVNode = newParentVNode._children[i] = createVNode(
-				Fragment,
-				{ children: childVNode },
-				null,
-				null,
-				null
-			);
-		} else if (childVNode._depth > 0) {
-			// VNode is already in use, clone it. This can happen in the following
-			// scenario:
-			//   const reuse = <div />
-			//   <div>{reuse}<span />{reuse}</div>
-			childVNode = newParentVNode._children[i] = createVNode(
-				childVNode.type,
-				childVNode.props,
-				childVNode.key,
-				null,
-				childVNode._original
-			);
-		} else {
-			childVNode = newParentVNode._children[i] = childVNode;
-		}
+		childVNode = newParentVNode._children[i] = normalizeToVNode(
+			renderResult[i]
+		);
 
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
