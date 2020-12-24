@@ -39,7 +39,7 @@ function getSuspendableComponent(text) {
 	return LifecycleSuspender;
 }
 
-describe.skip('suspense-list', () => {
+describe('suspense-list', () => {
 	/** @type {HTMLDivElement} */
 	let scratch,
 		rerender,

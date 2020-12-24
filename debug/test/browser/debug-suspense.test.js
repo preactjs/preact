@@ -9,7 +9,7 @@ import {
 
 /** @jsx createElement */
 
-describe.skip('debug with suspense', () => {
+describe('debug with suspense', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 	let rerender;
