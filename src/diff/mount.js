@@ -228,7 +228,7 @@ function mountComponent(
 }
 
 /** The `.render()` method for a PFC backing instance. */
-function doRender(props, state, context) {
+export function doRender(props, state, context) {
 	return this.constructor(props, context);
 }
 
