@@ -110,9 +110,9 @@ export function normalizeToVNode(childVNode) {
 			null,
 			childVNode._original
 		);
-	} else {
-		return childVNode;
 	}
+
+	return childVNode;
 }
 
 export function createRef() {
