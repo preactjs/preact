@@ -21,7 +21,7 @@ export const REACT_FORWARD_SYMBOL =
  * wrap components. Using `forwardRef` there is an easy way to get a reference
  * of the wrapped component instead of one of the wrapper itself.
  * @param {import('./index').ForwardFn} fn
- * @returns {import('./internal').FunctionalComponent}
+ * @returns {import('./internal').FunctionComponent}
  */
 export function forwardRef(fn) {
 	// We always have ref in props.ref, except for
