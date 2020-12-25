@@ -49,7 +49,7 @@ export function render(vnode, parentDom, replaceNode) {
 			: null;
 
 	if (isHydrating) {
-		replaceNode = excessDomChildren[0];
+		replaceNode = excessDomChildren ? excessDomChildren[0] : null;
 	}
 
 	let commitQueue = [];

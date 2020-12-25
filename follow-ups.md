@@ -14,4 +14,5 @@
 * Remove the need for `excessDomChildren`. Do hydration more similarly to
   `keyed` if possible.
 * Golf everything! Look for @TODO(golf)
-* Unbreak Suspense and Portals 😅
+* Fix Suspense tests:
+	* "should correctly render nested Suspense components without intermediate DOM #2747"
