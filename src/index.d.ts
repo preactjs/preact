@@ -94,6 +94,7 @@ declare namespace preact {
 		new (props: P, context?: any): Component<P, S>;
 		displayName?: string;
 		defaultProps?: Partial<P>;
+		contextType?: Context<any>;
 		getDerivedStateFromProps?(
 			props: Readonly<P>,
 			state: Readonly<S>

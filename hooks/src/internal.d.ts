@@ -1,7 +1,10 @@
-import { Component as PreactComponent } from '../../src/internal';
+import {
+	Component as PreactComponent,
+	PreactContext
+} from '../../src/internal';
 import { Reducer } from '.';
 
-export { PreactContext } from '../../src/internal';
+export { PreactContext };
 
 /**
  * The type of arguments passed to a Hook function. While this type is not
@@ -33,7 +36,12 @@ export interface Component extends PreactComponent<any, any> {
 	__hooks?: ComponentHooks;
 }
 
-export type HookState = EffectHookState | MemoHookState | ReducerHookState;
+export type HookState =
+	| EffectHookState
+	| MemoHookState
+	| ReducerHookState
+	| ContextHookState
+	| ErrorBoundaryHookState;
 
 export type Effect = () => void | Cleanup;
 export type Cleanup = () => void;
@@ -41,7 +49,7 @@ export type Cleanup = () => void;
 export interface EffectHookState {
 	_value?: Effect;
 	_args?: any[];
-	_cleanup?: Cleanup;
+	_cleanup?: Cleanup | void;
 }
 
 export interface MemoHookState {
@@ -54,4 +62,14 @@ export interface ReducerHookState {
 	_value?: any;
 	_component?: Component;
 	_reducer?: Reducer<any, any>;
+}
+
+export interface ContextHookState {
+	/** Whether this hooks as subscribed to updates yet */
+	_value?: boolean;
+	_context?: PreactContext;
+}
+
+export interface ErrorBoundaryHookState {
+	_value?: (error: any) => void;
 }
