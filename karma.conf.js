@@ -117,13 +117,16 @@ module.exports = function(config) {
 			{
 				pattern:
 					config.grep ||
-					'{hooks,test-utils,jsx-runtime,}/test/{browser,shared}/**/*.test.js',
+					'{compat,debug,hooks,test-utils,jsx-runtime,}/test/{browser,shared}/**/*.test.js',
 				watched: false
 			}
 		],
 
 		preprocessors: {
-			'{hooks,test-utils,jsx-runtime,}/test/**/*': ['webpack', 'sourcemap']
+			'{compat,debug,hooks,test-utils,jsx-runtime,}/test/**/*': [
+				'webpack',
+				'sourcemap'
+			]
 		},
 
 		webpack: {

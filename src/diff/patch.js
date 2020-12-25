@@ -4,6 +4,8 @@ import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
 import { assign } from '../util';
 import options from '../options';
+import { doRender } from './mount';
+import { Component } from '../component';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -138,9 +140,27 @@ function patchComponent(
 			: tmp._defaultValue
 		: globalContext;
 
-	// Get component and set it to `c`
-	c = newVNode._component = oldVNode._component;
-	clearProcessingException = c._processingException = c._pendingError;
+	if (oldVNode._component) {
+		c = newVNode._component = oldVNode._component;
+		clearProcessingException = c._processingException = c._pendingError;
+	} else {
+		// Instantiate the new component
+		if ('prototype' in newType && newType.prototype.render) {
+			newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
+		} else {
+			newVNode._component = c = new Component(newProps, componentContext);
+			c.constructor = newType;
+			c.render = doRender;
+		}
+		if (provider) provider.sub(c);
+
+		c.props = newProps;
+		if (!c.state) c.state = {};
+		c.context = componentContext;
+		c._globalContext = globalContext;
+		isNew = c._dirty = true;
+		c._renderCallbacks = [];
+	}
 
 	// Invoke getDerivedStateFromProps
 	if (c._nextState == null) {
