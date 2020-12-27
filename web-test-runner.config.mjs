@@ -11,14 +11,12 @@ const sauceLabsUser = process.env.SAUCE_USERNAME;
 const sauceLabsKey = process.env.SAUCE_ACCESS_KEY;
 const sauceLabs = sauceLabsUser && sauceLabsKey;
 if (sauceLabs) {
-	const version = JSON.parse(fs.readFileSync('package.json', 'utf-8')).version;
-	const sharedCapabilities = {
+	const sauceLabsCapabilities = {
 		name: 'unit-tests',
 		// if you are running tests in a CI, the build id might be available as an
 		// environment variable. this is useful for identifying test runs
 		// this is for example the name for github actions
 		build: `CI #${process.env.GITHUB_RUN_NUMBER} (${process.env.GITHUB_RUN_ID})`,
-		tunnelIdentifier: process.env.GITHUB_RUN_NUMBER || `local${version}`
 	};
 	const sauceLabsLauncher = createSauceLabsLauncher(
 		{
@@ -26,7 +24,7 @@ if (sauceLabs) {
 			key: sauceLabsKey,
 			region: 'eu-central-1'
 		},
-		sharedCapabilities
+		sauceLabsCapabilities,
 	);
 
 	browsers = [
