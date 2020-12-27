@@ -30,7 +30,7 @@ A quick overview of our repository:
   	src/  # Source code of the compat addon
   	test/ # Tests related to the compat addon
   	dist/ # Build artifacts for publishing on npm (may not be present)
-  
+
   # Sub-package, can be imported via `preact/hooks` by users.
   # The hooks API is an effect based API to deal with component lifcycles.
   # It's similar to hooks in React
@@ -38,7 +38,7 @@ A quick overview of our repository:
   	src/  # Source code of the hooks addon
   	test/ # Tests related to the hooks addon
   	dist/ # Build artifacts for publishing on npm (may not be present)
-  
+
   # Sub-package, can be imported via `preact/debug` by users.
   # Includes debugging warnings and error messages for common mistakes found
   # in Preact application. Also hosts the devtools bridge
@@ -46,18 +46,18 @@ A quick overview of our repository:
   	src/  # Source code of the debug addon
   	test/ # Tests related to the debug addon
   	dist/ # Build artifacts for publishing on npm (may not be present)
-  
+
   # Sub-package, can be imported via `preact/test-utils` by users.
   # Provides helpers to make testing Preact applications easier
   test-utils/
   	src/  # Source code of the test-utils addon
   	test/ # Tests related to the test-utils addon
   	dist/ # Build artifacts for publishing on npm (may not be present)
-  
+
   # A demo application that we use to debug tricky errors and play with new
   # features.
   demo/
-  
+
   # Contains build scripts and dependencies for development
   package.json
 ```
@@ -103,14 +103,12 @@ Scripts can be executed via `npm run [script]` or `yarn [script]` respectively.
 - `build:hooks` - builds the hook addon only
 - `build:test-utils` - builds the test-utils addon only
 - `test:ts` - Run all tests for TypeScript definitions
-- `test:karma` - Run all unit/integration tests.
-- `test:karma:watch` - Same as above, but it will automatically re-run the test suite if a code change was detected.
+- `test:wtr` - Run all unit/integration tests.
+- `test:wtr:watch` - Same as above, but it will automatically re-run the test suite if a code change was detected.
 
-But to be fair, the only ones we use ourselves are `build` and `test:karma:watch`. The other ones are mainly used on our CI pipeline and we rarely use them.
+But to be fair, the only ones we use ourselves are `build` and `test:wtr:watch`. The other ones are mainly used on our CI pipeline and we rarely use them.
 
-_Note: Both `test:karma` and `test:karma:watch` listen to the environment variable `COVERAGE=true`. Disabling code coverage can significantly speed up the time it takes to complete the test suite._
-
-_Note2: The test suite is based on `karma` and `mocha`. Individual tests can be executed by appending `.only`:_
+_Note: The test suite is based on `mocha`. Individual tests can be executed by appending `.only`:_
 
 ```jsx
 it.only('should test something', () => {
