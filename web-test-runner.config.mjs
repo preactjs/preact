@@ -16,7 +16,7 @@ if (sauceLabs) {
 		// if you are running tests in a CI, the build id might be available as an
 		// environment variable. this is useful for identifying test runs
 		// this is for example the name for github actions
-		build: `CI #${process.env.GITHUB_RUN_NUMBER} (${process.env.GITHUB_RUN_ID})`,
+		build: `CI #${process.env.GITHUB_RUN_NUMBER} (${process.env.GITHUB_RUN_ID})`
 	};
 	const sauceLabsLauncher = createSauceLabsLauncher(
 		{
@@ -24,7 +24,7 @@ if (sauceLabs) {
 			key: sauceLabsKey,
 			region: 'eu-central-1'
 		},
-		sauceLabsCapabilities,
+		sauceLabsCapabilities
 	);
 
 	browsers = [
