@@ -39,6 +39,7 @@ export function render(vnode, parentDom, replaceNode) {
 		: replaceNode || parentDom
 	)._children = vnode);
 
+	/** @type {import('./internal').PreactElement[]} */
 	let excessDomChildren =
 		replaceNode && !isHydrating
 			? [replaceNode]

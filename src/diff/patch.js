@@ -102,7 +102,11 @@ function patchComponent(
 	commitQueue,
 	oldDom
 ) {
-	let c, isNew, oldProps, oldState, snapshot, clearProcessingException, tmp;
+	/** @type {import('../internal').Component} */
+	let c;
+	let isNew, oldProps, oldState, snapshot, clearProcessingException, tmp;
+
+	/** @type {import('../internal').ComponentType} */
 	let newType = newVNode.type;
 	let newProps = newVNode.props;
 
@@ -122,8 +126,10 @@ function patchComponent(
 	} else {
 		// Instantiate the new component
 		if ('prototype' in newType && newType.prototype.render) {
+			// @ts-ignore The check above verifies that newType is suppose to be constructed
 			newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
 		} else {
+			// @ts-ignore Trust me, Component implements the interface we want
 			newVNode._component = c = new Component(newProps, componentContext);
 			c.constructor = newType;
 			c.render = doRender;
