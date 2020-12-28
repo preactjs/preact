@@ -14,9 +14,14 @@ export interface Component<P = {}, S = {}> extends PreactComponent<P, S> {
 	isPureReactComponent?: true;
 	_patchedLifecycles?: true;
 
+	// Suspense internal properties
 	_childDidSuspend?(error: Promise<void>, suspendingVNode: VNode): void;
 	_suspended: (vnode: VNode) => (unsuspend: () => void) => void;
 	_suspendedComponentWillUnmount?(): void;
+
+	// Portal internal properties
+	_temp: any;
+	_container: PreactElement;
 }
 
 export interface FunctionComponent<P = {}> extends PreactFunctionComponent<P> {
