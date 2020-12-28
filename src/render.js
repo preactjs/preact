@@ -64,7 +64,6 @@ export function render(vnode, parentDom, replaceNode) {
 			oldVNode || EMPTY_OBJ,
 			EMPTY_OBJ,
 			parentDom.ownerSVGElement !== undefined,
-			excessDomChildren,
 			commitQueue,
 			// Begin diff with replaceNode or find the first non-null child with a dom
 			// pointer and begin the diff with that (i.e. what getDomSibling does)

@@ -1,7 +1,6 @@
 import { unmount, applyRef } from './index';
 import { normalizeToVNode } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
-import { removeNode } from '../util';
 import { getDomSibling } from '../component';
 import { mount } from './mount';
 import { patch } from './patch';
@@ -103,14 +102,13 @@ export function diffChildren(
 				startDom = childVNode._dom = oldVNode._dom;
 				// if we resume, we want the tree to be "unlocked"
 				childVNode._hydrating = null;
-				excessDomChildren = [startDom];
 
 				mount(
 					parentDom,
 					childVNode,
 					globalContext,
 					isSvg,
-					excessDomChildren,
+					[startDom],
 					commitQueue,
 					startDom,
 					isHydrating
@@ -123,7 +121,6 @@ export function diffChildren(
 					oldVNode,
 					globalContext,
 					isSvg,
-					excessDomChildren,
 					commitQueue,
 					startDom
 				);
