@@ -119,7 +119,11 @@ function mountComponent(
 	oldDom,
 	isHydrating
 ) {
-	let tmp, c, clearProcessingException;
+	/** @type {import('../internal').Component} */
+	let c;
+	let tmp, clearProcessingException;
+
+	/** @type {import('../internal').ComponentType} */
 	let newType = newVNode.type;
 	let newProps = newVNode.props;
 
@@ -135,8 +139,10 @@ function mountComponent(
 
 	// Instantiate the new component
 	if ('prototype' in newType && newType.prototype.render) {
+		// @ts-ignore The check above verifies that newType is suppose to be constructed
 		newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
 	} else {
+		// @ts-ignore Trust me, Component implements the interface we want
 		newVNode._component = c = new Component(newProps, componentContext);
 		c.constructor = newType;
 		c.render = doRender;
@@ -508,7 +514,7 @@ function mountChild(parentDom, childVNode, newDom, oldDom) {
 	}
 
 	// Hydration and non hydration
-	// Possible follow up related text node normalization.
+	// Possible follow up related to text node normalization.
 	// Insert before with a non-null oldDom is called during mounting in these
 	// cases:
 	// 1. mounting new vnodes during a diff
