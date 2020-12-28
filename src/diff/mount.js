@@ -80,11 +80,18 @@ export function mount(
 		}
 
 		if ((tmp = options.diffed)) tmp(newVNode);
+
+		// We successfully rendered this VNode, unset any stored hydration/bailout state:
+		newVNode._hydrating = null;
 	} catch (e) {
 		newVNode._original = null;
 		// if hydrating or creating initial tree, bailout preserves DOM:
 		if (isHydrating || excessDomChildren != null) {
 			newVNode._dom = oldDom;
+
+			// _hydrating = true if bailed out during hydration
+			// _hydrating = false if bailed out during mounting
+			// _hydrating = null if it didn't bail out
 			newVNode._hydrating = !!isHydrating;
 			excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
 			// ^ could possibly be simplified to:
