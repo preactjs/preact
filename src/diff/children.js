@@ -96,48 +96,46 @@ export function diffChildren(
 
 		let oldVNodeRef;
 
-		if (oldVNode !== EMPTY_OBJ) {
-			if (oldVNode._hydrating != null) {
-				isHydrating = oldVNode._hydrating;
-				startDom = childVNode._dom = oldVNode._dom;
-				// if we resume, we want the tree to be "unlocked"
-				childVNode._hydrating = null;
-
-				mount(
-					parentDom,
-					childVNode,
-					globalContext,
-					isSvg,
-					[startDom],
-					commitQueue,
-					startDom,
-					isHydrating
-				);
-			} else {
-				// Morph the old element into the new one, but don't append it to the dom yet
-				patch(
-					parentDom,
-					childVNode,
-					oldVNode,
-					globalContext,
-					isSvg,
-					commitQueue,
-					startDom
-				);
-			}
-
-			oldVNodeRef = oldVNode.ref;
-		} else {
+		if (oldVNode == EMPTY_OBJ) {
+			// We are mounting a new VNode
 			mount(
 				parentDom,
 				childVNode,
 				globalContext,
 				isSvg,
-				excessDomChildren,
+				null,
+				commitQueue,
+				startDom
+			);
+		} else if (oldVNode._hydrating != null) {
+			// We are resuming the hydration of a VNode
+			startDom = childVNode._dom = oldVNode._dom;
+			childVNode._hydrating = null;
+			oldVNodeRef = oldVNode.ref;
+
+			mount(
+				parentDom,
+				childVNode,
+				globalContext,
+				isSvg,
+				[startDom],
 				commitQueue,
 				startDom,
-				isHydrating
+				oldVNode._hydrating
 			);
+		} else {
+			// Morph the old element into the new one, but don't append it to the dom yet
+			patch(
+				parentDom,
+				childVNode,
+				oldVNode,
+				globalContext,
+				isSvg,
+				commitQueue,
+				startDom
+			);
+
+			oldVNodeRef = oldVNode.ref;
 		}
 
 		newDom = childVNode._dom;
