@@ -1,4 +1,4 @@
-import { EMPTY_ARR, EMPTY_OBJ } from '../constants';
+import { EMPTY_OBJ } from '../constants';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
@@ -14,7 +14,6 @@ import { Component, getDomSibling } from '../component';
  * @param {import('../internal').VNode} oldVNode The old virtual node
  * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {boolean} isSvg Whether or not this element is an SVG node
- * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} startDom
@@ -25,7 +24,6 @@ export function patch(
 	oldVNode,
 	globalContext,
 	isSvg,
-	excessDomChildren,
 	commitQueue,
 	startDom
 ) {
@@ -45,14 +43,10 @@ export function patch(
 				oldVNode,
 				globalContext,
 				isSvg,
-				excessDomChildren,
 				commitQueue,
 				startDom
 			);
-		} else if (
-			excessDomChildren == null &&
-			newVNode._original === oldVNode._original
-		) {
+		} else if (newVNode._original === oldVNode._original) {
 			newVNode._children = oldVNode._children;
 			newVNode._dom = oldVNode._dom;
 		} else {
@@ -80,7 +74,6 @@ export function patch(
  * @param {import('../internal').VNode} oldVNode The old virtual node
  * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {boolean} isSvg Whether or not this element is an SVG node
- * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} startDom The current attached DOM
@@ -94,7 +87,6 @@ function patchComponent(
 	oldVNode,
 	globalContext,
 	isSvg,
-	excessDomChildren,
 	commitQueue,
 	startDom
 ) {
@@ -232,7 +224,7 @@ function patchComponent(
 		oldVNode,
 		globalContext,
 		isSvg,
-		excessDomChildren,
+		null,
 		commitQueue,
 		startDom,
 		false
