@@ -199,7 +199,6 @@ export function diff(
 				oldVNode,
 				globalContext,
 				isSvg,
-				excessDomChildren,
 				commitQueue,
 				oldDom,
 				isHydrating
@@ -407,7 +406,6 @@ export function diffElementNodes(
 				oldVNode,
 				globalContext,
 				newVNode.type === 'foreignObject' ? false : isSvg,
-				excessDomChildren,
 				commitQueue,
 				EMPTY_OBJ,
 				isHydrating
