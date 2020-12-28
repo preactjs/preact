@@ -65,7 +65,6 @@ export function patch(
 				oldVNode,
 				globalContext,
 				isSvg,
-				excessDomChildren,
 				commitQueue
 			);
 		}
@@ -263,7 +262,6 @@ function patchComponent(
  * @param {import('../internal').VNode} oldVNode The old virtual node
  * @param {object} globalContext The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
- * @param {*} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @returns {import('../internal').PreactElement}
@@ -274,7 +272,6 @@ function patchDOMElement(
 	oldVNode,
 	globalContext,
 	isSvg,
-	excessDomChildren,
 	commitQueue
 ) {
 	let i;
@@ -284,50 +281,15 @@ function patchDOMElement(
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	isSvg = newVNode.type === 'svg' || isSvg;
 
-	// TODO: Argh replaceNode!!
-	if (excessDomChildren != null) {
-		for (i = 0; i < excessDomChildren.length; i++) {
-			const child = excessDomChildren[i];
-
-			// if newVNode matches an element in excessDomChildren or the `dom`
-			// argument matches an element in excessDomChildren, remove it from
-			// excessDomChildren so it isn't later removed in diffChildren
-			if (
-				child != null &&
-				((newVNode.type === null
-					? child.nodeType === 3
-					: child.localName === newVNode.type) ||
-					dom == child)
-			) {
-				dom = child;
-				excessDomChildren[i] = null;
-				break;
-			}
-		}
-	}
-
 	if (newVNode.type === null) {
 		if (oldProps !== newProps) {
 			dom.data = newProps;
 		}
 	} else {
-		if (excessDomChildren != null) {
-			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
-		}
-
 		oldProps = oldVNode.props || EMPTY_OBJ;
 
 		let oldHtml = oldProps.dangerouslySetInnerHTML;
 		let newHtml = newProps.dangerouslySetInnerHTML;
-
-		// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
-		// we should read the existing DOM attributes to diff them
-		if (excessDomChildren != null) {
-			oldProps = {};
-			for (let i = 0; i < dom.attributes.length; i++) {
-				oldProps[dom.attributes[i].name] = dom.attributes[i].value;
-			}
-		}
 
 		if (newHtml || oldHtml) {
 			// Avoid re-applying the same '__html' if it did not changed between re-render
@@ -354,7 +316,7 @@ function patchDOMElement(
 				oldVNode,
 				globalContext,
 				newVNode.type === 'foreignObject' ? false : isSvg,
-				excessDomChildren,
+				null,
 				commitQueue,
 				EMPTY_OBJ,
 				false
