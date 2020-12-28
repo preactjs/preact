@@ -15,3 +15,8 @@
   `keyed` if possible.
 * Golf everything! Look for @TODO(golf)
 * Unbreak Suspense and Portals 😅
+* Look for ways to optimize DOM element diffing, specifically how we diff props
+	- Investigate diffing props before or after children
+  - Investigate inlining the loops in diffProps to capture special props
+    (dangerouslySetInnerHTML, value, checked, multiple)
+* Top-level `render()` no longer accepts a `replaceNode` argument, and does not removed unmatched DOM nodes

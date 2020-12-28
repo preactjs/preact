@@ -110,6 +110,8 @@ export function diffChildren(
 
 		oldVNode = oldVNode || EMPTY_OBJ;
 
+		let oldVNodeRef;
+
 		if (oldVNode !== EMPTY_OBJ) {
 			if (oldVNode._hydrating != null) {
 				isHydrating = oldVNode._hydrating;
@@ -141,6 +143,8 @@ export function diffChildren(
 					oldDom
 				);
 			}
+
+			oldVNodeRef = oldVNode.ref;
 		} else {
 			mount(
 				parentDom,
@@ -156,10 +160,10 @@ export function diffChildren(
 
 		newDom = childVNode._dom;
 
-		if ((j = childVNode.ref) && oldVNode.ref != j) {
+		if (childVNode.ref && oldVNodeRef != childVNode.ref) {
 			if (!refs) refs = [];
-			if (oldVNode.ref) refs.push(oldVNode.ref, null, childVNode);
-			refs.push(j, childVNode._component || newDom, childVNode);
+			if (oldVNodeRef) refs.push(oldVNodeRef, null, childVNode);
+			refs.push(childVNode.ref, childVNode._component || newDom, childVNode);
 		}
 
 		if (newDom != null) {
@@ -224,13 +228,6 @@ export function diffChildren(
 	}
 
 	newParentVNode._dom = firstChildDom;
-
-	// Remove children that are not part of any vnode.
-	if (excessDomChildren != null && typeof newParentVNode.type != 'function') {
-		for (i = excessDomChildren.length; i--; ) {
-			if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
-		}
-	}
 
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {
