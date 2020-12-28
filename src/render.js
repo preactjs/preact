@@ -4,6 +4,7 @@ import { createElement, Fragment } from './create-element';
 import options from './options';
 import { mount } from './diff/mount';
 import { patch } from './diff/patch';
+import { getDomSibling } from './component';
 
 const IS_HYDRATE = EMPTY_OBJ;
 
@@ -65,7 +66,9 @@ export function render(vnode, parentDom, replaceNode) {
 			parentDom.ownerSVGElement !== undefined,
 			excessDomChildren,
 			commitQueue,
-			replaceNode || EMPTY_OBJ
+			// Begin diff with replaceNode or find the first non-null child with a dom
+			// pointer and begin the diff with that (i.e. what getDomSibling does)
+			replaceNode || getDomSibling(oldVNode, 0)
 		);
 	} else {
 		mount(

@@ -11,19 +11,18 @@ import { patch } from './patch';
  * @param {import('../internal').PreactElement} parentDom The DOM element whose
  * children are being diffed
  * @param {import('../internal').ComponentChildren[]} renderResult
- * @param {import('../internal').VNode} newParentVNode The new virtual
- * node whose children should be diff'ed against oldParentVNode
- * @param {import('../internal').VNode} oldParentVNode The old virtual
- * node whose children should be diff'ed against newParentVNode
- * @param {object} globalContext The current context object - modified by getChildContext
+ * @param {import('../internal').VNode} newParentVNode The new virtual node
+ * whose children should be diff'ed against oldParentVNode
+ * @param {import('../internal').VNode} oldParentVNode The old virtual node
+ * whose children should be diff'ed against newParentVNode
+ * @param {object} globalContext The current context object - modified by
+ * getChildContext
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
- * @param {Array<import('../internal').Component>} commitQueue List of components
- * which have callbacks to invoke in commitRoot
- * @param {import('../internal').PreactElement} oldDom The current attached DOM
- * element any new dom elements should be placed around. Likely `null` on first
- * render (except when hydrating). Can be a sibling DOM element when diffing
- * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
+ * @param {Array<import('../internal').Component>} commitQueue List of
+ * components which have callbacks to invoke in commitRoot
+ * @param {import('../internal').PreactElement} startDom The dom node
+ * diffChildren should begin diffing with.
  * @param {boolean} isHydrating Whether or not we are in hydration
  */
 export function diffChildren(
@@ -35,7 +34,7 @@ export function diffChildren(
 	isSvg,
 	excessDomChildren,
 	commitQueue,
-	oldDom,
+	startDom,
 	isHydrating
 ) {
 	let i, j, oldVNode, childVNode, newDom, firstChildDom, refs;
@@ -45,20 +44,6 @@ export function diffChildren(
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
 
 	let oldChildrenLength = oldChildren.length;
-
-	// Only in very specific places should this logic be invoked (top level `render` and `diffElementNodes`).
-	// I'm using `EMPTY_OBJ` to signal when `diffChildren` is invoked in these situations. I can't use `null`
-	// for this purpose, because `null` is a valid value for `oldDom` which can mean to skip to this logic
-	// (e.g. if mounting a new tree in which the old DOM should be ignored (usually for Fragments).
-	if (oldDom == EMPTY_OBJ) {
-		if (excessDomChildren != null) {
-			oldDom = excessDomChildren[0];
-		} else if (oldChildrenLength) {
-			oldDom = getDomSibling(oldParentVNode, 0);
-		} else {
-			oldDom = null;
-		}
-	}
 
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
@@ -115,10 +100,10 @@ export function diffChildren(
 		if (oldVNode !== EMPTY_OBJ) {
 			if (oldVNode._hydrating != null) {
 				isHydrating = oldVNode._hydrating;
-				oldDom = childVNode._dom = oldVNode._dom;
+				startDom = childVNode._dom = oldVNode._dom;
 				// if we resume, we want the tree to be "unlocked"
 				childVNode._hydrating = null;
-				excessDomChildren = [oldDom];
+				excessDomChildren = [startDom];
 
 				mount(
 					parentDom,
@@ -127,7 +112,7 @@ export function diffChildren(
 					isSvg,
 					excessDomChildren,
 					commitQueue,
-					oldDom,
+					startDom,
 					isHydrating
 				);
 			} else {
@@ -140,7 +125,7 @@ export function diffChildren(
 					isSvg,
 					excessDomChildren,
 					commitQueue,
-					oldDom
+					startDom
 				);
 			}
 
@@ -153,7 +138,7 @@ export function diffChildren(
 				isSvg,
 				excessDomChildren,
 				commitQueue,
-				oldDom,
+				startDom,
 				isHydrating
 			);
 		}
@@ -175,20 +160,20 @@ export function diffChildren(
 				typeof childVNode.type == 'function' &&
 				childVNode._children === oldVNode._children
 			) {
-				childVNode._nextDom = oldDom = reorderChildren(
+				childVNode._nextDom = startDom = reorderChildren(
 					childVNode,
-					oldDom,
+					startDom,
 					parentDom
 				);
 			} else {
-				oldDom = placeChild(
+				startDom = placeChild(
 					parentDom,
 					childVNode,
 					oldVNode,
 					oldChildren,
 					excessDomChildren,
 					newDom,
-					oldDom
+					startDom
 				);
 			}
 
@@ -210,20 +195,20 @@ export function diffChildren(
 				// Because the newParentVNode is Fragment-like, we need to set it's
 				// _nextDom property to the nextSibling of its last child DOM node.
 				//
-				// `oldDom` contains the correct value here because if the last child
-				// is a Fragment-like, then oldDom has already been set to that child's _nextDom.
-				// If the last child is a DOM VNode, then oldDom will be set to that DOM
-				// node's nextSibling.
-				newParentVNode._nextDom = oldDom;
+				// `startDom` contains the correct value here because if the last child
+				// is a Fragment-like, then startDom has already been set to that
+				// child's _nextDom. If the last child is a DOM VNode, then startDom
+				// will be set to that DOM node's nextSibling.
+				newParentVNode._nextDom = startDom;
 			}
 		} else if (
-			oldDom &&
-			oldVNode._dom == oldDom &&
-			oldDom.parentNode != parentDom
+			startDom &&
+			oldVNode._dom == startDom &&
+			startDom.parentNode != parentDom
 		) {
 			// The above condition is to handle null placeholders. See test in placeholder.test.js:
 			// `efficiently replace null placeholders in parent rerenders`
-			oldDom = getDomSibling(oldVNode);
+			startDom = getDomSibling(oldVNode);
 		}
 	}
 
@@ -242,29 +227,29 @@ export function diffChildren(
 	}
 }
 
-function reorderChildren(childVNode, oldDom, parentDom) {
+function reorderChildren(childVNode, startDom, parentDom) {
 	for (let tmp = 0; tmp < childVNode._children.length; tmp++) {
 		let vnode = childVNode._children[tmp];
 		if (vnode) {
 			vnode._parent = childVNode;
 
 			if (typeof vnode.type == 'function') {
-				reorderChildren(vnode, oldDom, parentDom);
+				reorderChildren(vnode, startDom, parentDom);
 			} else {
-				oldDom = placeChild(
+				startDom = placeChild(
 					parentDom,
 					vnode,
 					vnode,
 					childVNode._children,
 					null,
 					vnode._dom,
-					oldDom
+					startDom
 				);
 			}
 		}
 	}
 
-	return oldDom;
+	return startDom;
 }
 
 /**
@@ -293,7 +278,7 @@ function placeChild(
 	oldChildren,
 	excessDomChildren,
 	newDom,
-	oldDom
+	startDom
 ) {
 	let nextDom;
 	if (childVNode._nextDom !== undefined) {
@@ -309,20 +294,20 @@ function placeChild(
 		childVNode._nextDom = undefined;
 	} else if (
 		excessDomChildren == oldVNode ||
-		newDom != oldDom ||
+		newDom != startDom ||
 		newDom.parentNode == null
 	) {
 		// NOTE: excessDomChildren==oldVNode above:
 		// This is a compression of excessDomChildren==null && oldVNode==null!
 		// The values only have the same type when `null`.
 
-		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
+		outer: if (startDom == null || startDom.parentNode !== parentDom) {
 			parentDom.insertBefore(newDom, null);
 			nextDom = null;
 		} else {
 			// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
 			for (
-				let sibDom = oldDom, j = 0;
+				let sibDom = startDom, j = 0;
 				(sibDom = sibDom.nextSibling) && j < oldChildren.length;
 				j += 2
 			) {
@@ -330,8 +315,8 @@ function placeChild(
 					break outer;
 				}
 			}
-			parentDom.insertBefore(newDom, oldDom);
-			nextDom = oldDom;
+			parentDom.insertBefore(newDom, startDom);
+			nextDom = startDom;
 		}
 	}
 
@@ -339,10 +324,10 @@ function placeChild(
 	// Strictly check for `undefined` here cuz `null` is a valid value of `nextDom`.
 	// See more detail in create-element.js:createVNode
 	if (nextDom !== undefined) {
-		oldDom = nextDom;
+		startDom = nextDom;
 	} else {
-		oldDom = newDom.nextSibling;
+		startDom = newDom.nextSibling;
 	}
 
-	return oldDom;
+	return startDom;
 }
