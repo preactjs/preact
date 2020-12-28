@@ -197,6 +197,8 @@ Suspense.prototype.render = function(props, state) {
 	if (fallback) fallback._hydrating = null;
 
 	return [
+		// Wrap with a Fragment to prevent the current reconciler from
+		// picking the wrong DOM node.
 		createElement(Fragment, null, state._suspended ? null : props.children),
 		fallback
 	];

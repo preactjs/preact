@@ -111,17 +111,36 @@ export function diffChildren(
 		oldVNode = oldVNode || EMPTY_OBJ;
 
 		if (oldVNode !== EMPTY_OBJ) {
-			// Morph the old element into the new one, but don't append it to the dom yet
-			patch(
-				parentDom,
-				childVNode,
-				oldVNode,
-				globalContext,
-				isSvg,
-				excessDomChildren,
-				commitQueue,
-				oldDom
-			);
+			if (oldVNode._hydrating != null) {
+				isHydrating = oldVNode._hydrating;
+				oldDom = childVNode._dom = oldVNode._dom;
+				// if we resume, we want the tree to be "unlocked"
+				childVNode._hydrating = null;
+				excessDomChildren = [oldDom];
+
+				mount(
+					parentDom,
+					childVNode,
+					globalContext,
+					isSvg,
+					excessDomChildren,
+					commitQueue,
+					oldDom,
+					isHydrating
+				);
+			} else {
+				// Morph the old element into the new one, but don't append it to the dom yet
+				patch(
+					parentDom,
+					childVNode,
+					oldVNode,
+					globalContext,
+					isSvg,
+					excessDomChildren,
+					commitQueue,
+					oldDom
+				);
+			}
 		} else {
 			mount(
 				parentDom,

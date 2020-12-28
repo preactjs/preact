@@ -38,17 +38,6 @@ export function patch(
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== undefined) return null;
-
-	// TODO: Panic! what do we do here?
-	// // If the previous diff bailed out, resume creating/hydrating.
-	// if (oldVNode._hydrating != null) {
-	// 	isHydrating = oldVNode._hydrating;
-	// 	oldDom = newVNode._dom = oldVNode._dom;
-	// 	// if we resume, we want the tree to be "unlocked"
-	// 	newVNode._hydrating = null;
-	// 	excessDomChildren = [oldDom];
-	// }
-
 	if ((tmp = options._diff)) tmp(newVNode);
 
 	try {
@@ -84,17 +73,6 @@ export function patch(
 		if ((tmp = options.diffed)) tmp(newVNode);
 	} catch (e) {
 		newVNode._original = null;
-
-		// TODO: Panic! what to do here??
-		// // if hydrating or creating initial tree, bailout preserves DOM:
-		// if (isHydrating || excessDomChildren != null) {
-		// 	newVNode._dom = oldDom;
-		// 	newVNode._hydrating = !!isHydrating;
-		// 	excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
-		// 	// ^ could possibly be simplified to:
-		// 	// excessDomChildren.length = 0;
-		// }
-
 		options._catchError(e, newVNode, oldVNode);
 	}
 }
@@ -113,7 +91,6 @@ export function patch(
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
- * @param {boolean} [isHydrating] Whether or not we are in hydration
  */
 function patchComponent(
 	parentDom,
@@ -123,8 +100,7 @@ function patchComponent(
 	isSvg,
 	excessDomChildren,
 	commitQueue,
-	oldDom,
-	isHydrating
+	oldDom
 ) {
 	let c, isNew, oldProps, oldState, snapshot, clearProcessingException, tmp;
 	let newType = newVNode.type;
@@ -257,13 +233,10 @@ function patchComponent(
 		excessDomChildren,
 		commitQueue,
 		oldDom,
-		isHydrating
+		false
 	);
 
 	c.base = newVNode._dom;
-
-	// We successfully rendered this VNode, unset any stored hydration/bailout state:
-	newVNode._hydrating = null;
 
 	if (c._renderCallbacks.length) {
 		commitQueue.push(c);
