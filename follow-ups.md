@@ -21,3 +21,4 @@
   - Investigate inlining the loops in diffProps to capture special props
     (dangerouslySetInnerHTML, value, checked, multiple)
 * Top-level `render()` no longer accepts a `replaceNode` argument, and does not removed unmatched DOM nodes
+* Revisit all replaceNode tests
