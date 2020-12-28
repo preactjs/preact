@@ -8,7 +8,7 @@ import {
 
 /** @jsx createElement */
 
-describe('replaceNode parameter in render()', () => {
+describe.skip('replaceNode parameter in render()', () => {
 	let scratch;
 
 	/**
@@ -95,7 +95,7 @@ describe('replaceNode parameter in render()', () => {
 		expect(unmount).to.be.calledOnce;
 	});
 
-	it.skip('should unmount existing components in prerendered HTML', () => {
+	it('should unmount existing components in prerendered HTML', () => {
 		// TODO: Is is expected that we keep the old attributes even if the
 		// specified VNode doesn't have them?
 		const unmount = sinon.spy();
@@ -213,7 +213,7 @@ describe('replaceNode parameter in render()', () => {
 		);
 	});
 
-	it.skip('should remove redundant elements on subsequent renders with replaceNode', () => {
+	it('should remove redundant elements on subsequent renders with replaceNode', () => {
 		const placeholder = document.createElement('div');
 		scratch.appendChild(placeholder);
 		const App = () => (
