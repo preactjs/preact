@@ -17,7 +17,6 @@ import { patch } from './patch';
  * @param {object} globalContext The current context object - modified by
  * getChildContext
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
- * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of
  * components which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} startDom The dom node
@@ -31,7 +30,6 @@ export function diffChildren(
 	oldParentVNode,
 	globalContext,
 	isSvg,
-	excessDomChildren,
 	commitQueue,
 	startDom,
 	isHydrating
@@ -164,9 +162,7 @@ export function diffChildren(
 				startDom = placeChild(
 					parentDom,
 					childVNode,
-					oldVNode,
 					oldChildren,
-					excessDomChildren,
 					newDom,
 					startDom
 				);
@@ -234,9 +230,7 @@ function reorderChildren(childVNode, startDom, parentDom) {
 				startDom = placeChild(
 					parentDom,
 					vnode,
-					vnode,
 					childVNode._children,
-					null,
 					vnode._dom,
 					startDom
 				);
@@ -266,15 +260,7 @@ export function toChildArray(children, out) {
 	return out;
 }
 
-function placeChild(
-	parentDom,
-	childVNode,
-	oldVNode,
-	oldChildren,
-	excessDomChildren,
-	newDom,
-	startDom
-) {
+function placeChild(parentDom, childVNode, oldChildren, newDom, startDom) {
 	let nextDom;
 	if (childVNode._nextDom !== undefined) {
 		// Only Fragments or components that return Fragment like VNodes will
@@ -287,15 +273,7 @@ function placeChild(
 		// diffing Components and Fragments. Once we store it the nextDOM local var, we
 		// can clean up the property
 		childVNode._nextDom = undefined;
-	} else if (
-		excessDomChildren == oldVNode ||
-		newDom != startDom ||
-		newDom.parentNode == null
-	) {
-		// NOTE: excessDomChildren==oldVNode above:
-		// This is a compression of excessDomChildren==null && oldVNode==null!
-		// The values only have the same type when `null`.
-
+	} else if (newDom != startDom || newDom.parentNode == null) {
 		outer: if (startDom == null || startDom.parentNode !== parentDom) {
 			parentDom.insertBefore(newDom, null);
 			nextDom = null;

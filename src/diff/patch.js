@@ -224,7 +224,6 @@ function patchComponent(
 		oldVNode,
 		globalContext,
 		isSvg,
-		null,
 		commitQueue,
 		startDom,
 		false
@@ -305,7 +304,6 @@ function patchDOMElement(
 				oldVNode,
 				globalContext,
 				newVNode.type === 'foreignObject' ? false : isSvg,
-				null,
 				commitQueue,
 				// Find the first non-null child with a dom pointer and begin the diff
 				// with that (i.e. what getDomSibling does)
