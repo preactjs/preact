@@ -1,7 +1,8 @@
 import { assign } from './util';
-import { diff, commitRoot } from './diff/index';
+import { commitRoot } from './diff/commit';
 import options from './options';
 import { Fragment } from './create-element';
+import { patch } from './diff/patch';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -128,16 +129,14 @@ function renderComponent(component) {
 		const oldVNode = assign({}, vnode);
 		oldVNode._original = vnode._original + 1;
 
-		diff(
+		patch(
 			parentDom,
 			vnode,
 			oldVNode,
 			component._globalContext,
 			parentDom.ownerSVGElement !== undefined,
-			vnode._hydrating != null ? [startDom] : null,
 			commitQueue,
-			startDom == null ? getDomSibling(vnode) : startDom,
-			vnode._hydrating
+			startDom == null ? getDomSibling(vnode) : startDom
 		);
 		commitRoot(commitQueue, vnode);
 
