@@ -22,7 +22,6 @@ import { unmount } from './unmount';
  * components which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} startDom The dom node
  * diffChildren should begin diffing with.
- * @param {boolean} isHydrating Whether or not we are in hydration
  */
 export function diffChildren(
 	parentDom,
@@ -32,8 +31,7 @@ export function diffChildren(
 	globalContext,
 	isSvg,
 	commitQueue,
-	startDom,
-	isHydrating
+	startDom
 ) {
 	let i, j, oldVNode, childVNode, newDom, firstChildDom, refs;
 
@@ -180,7 +178,7 @@ export function diffChildren(
 			//
 			// To fix it we make sure to reset the inferred value, so that our own
 			// value check in `diff()` won't be skipped.
-			if (!isHydrating && newParentVNode.type === 'option') {
+			if (newParentVNode.type === 'option') {
 				// @ts-ignore We have validated that the type of parentDOM is 'option'
 				// in the above check
 				parentDom.value = '';
