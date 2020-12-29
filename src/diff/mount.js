@@ -371,7 +371,9 @@ function mountDOMElement(
 				newVNode.type === 'foreignObject' ? false : isSvg,
 				excessDomChildren,
 				commitQueue,
-				excessDomChildren != null ? excessDomChildren[0] : null,
+				excessDomChildren != null && excessDomChildren.length > 0
+					? excessDomChildren[0]
+					: null,
 				isHydrating
 			);
 		}
