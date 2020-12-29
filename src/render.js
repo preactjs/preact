@@ -1,5 +1,5 @@
 import { EMPTY_OBJ, EMPTY_ARR } from './constants';
-import { commitRoot } from './diff/index';
+import { commitRoot } from './diff/commit';
 import { createElement, Fragment } from './create-element';
 import options from './options';
 import { mount } from './diff/mount';

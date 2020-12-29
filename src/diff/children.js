@@ -1,9 +1,10 @@
-import { unmount, applyRef } from './index';
+import { applyRef } from './refs';
 import { normalizeToVNode } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { getDomSibling } from '../component';
 import { mount } from './mount';
 import { patch } from './patch';
+import { unmount } from './unmount';
 
 /**
  * Diff the children of a virtual node
