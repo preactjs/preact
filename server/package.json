@@ -28,7 +28,7 @@
 		"transpile:jsx": "microbundle src/jsx.js -o dist/jsx.js --target web --external none && microbundle dist/jsx.js -o dist/jsx.js -f cjs",
 		"copy-typescript-definition": "copyfiles -f src/*.d.ts dist",
 		"test": "eslint src test && tsc && npm run test:mocha",
-		"test:mocha": "mocha -r babel-core/register test/**/*.js",
+		"test:mocha": "mocha -r @babel/register test/**/*.js",
 		"format": "prettier src/**/*.{d.ts,js} test/**/*.js --write",
 		"prepublishOnly": "npm run build",
 		"release": "npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
@@ -65,16 +65,15 @@
 	},
 	"babel": {
 		"presets": [
-			"env"
+			"@babel/preset-env"
 		],
 		"plugins": [
 			[
-				"transform-react-jsx",
+				"@babel/plugin-transform-react-jsx",
 				{
 					"pragma": "h"
 				}
-			],
-			"transform-object-rest-spread"
+			]
 		]
 	},
 	"author": "Jason Miller <jason@developit.ca>",
@@ -87,10 +86,9 @@
 		"preact": ">=10"
 	},
 	"devDependencies": {
-		"babel-plugin-transform-object-rest-spread": "^6.26.0",
-		"babel-plugin-transform-react-jsx": "^6.24.1",
-		"babel-preset-env": "^1.7.0",
-		"babel-register": "^6.26.0",
+		"@babel/plugin-transform-react-jsx": "^7.12.12",
+		"@babel/preset-env": "^7.12.11",
+		"@babel/register": "^7.12.10",
 		"chai": "^4.2.0",
 		"copyfiles": "^2.4.1",
 		"eslint": "^4.19.1",
