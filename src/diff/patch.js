@@ -225,8 +225,7 @@ function patchComponent(
 		globalContext,
 		isSvg,
 		commitQueue,
-		startDom,
-		false
+		startDom
 	);
 
 	c.base = newVNode._dom;
@@ -307,8 +306,7 @@ function patchDOMElement(
 				commitQueue,
 				// Find the first non-null child with a dom pointer and begin the diff
 				// with that (i.e. what getDomSibling does)
-				getDomSibling(oldVNode, 0),
-				false
+				getDomSibling(oldVNode, 0)
 			);
 		}
 
