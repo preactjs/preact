@@ -97,7 +97,6 @@
 		"lint-staged": "^10.5.3",
 		"microbundle": "^0.13.0",
 		"mocha": "^8.2.1",
-		"npm-merge-driver-install": "^1.1.1",
 		"preact": "^10.5.7",
 		"prettier": "^2.2.1",
 		"sinon": "^9.2.2",
