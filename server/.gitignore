@@ -2,3 +2,4 @@
 /node_modules
 /npm-debug.log
 .DS_Store
+/src/preact-render-to-string-tests.d.ts

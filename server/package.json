@@ -28,7 +28,7 @@
 		"transpile:jsx": "microbundle src/jsx.js -o dist/jsx.js --target web --external none && microbundle dist/jsx.js -o dist/jsx.js -f cjs",
 		"copy-typescript-definition": "copyfiles -f src/*.d.ts dist",
 		"test": "eslint src test && tsc && npm run test:mocha",
-		"test:mocha": "mocha -r babel-core/register test/**/*.js",
+		"test:mocha": "mocha -r @babel/register test/**/*.js",
 		"format": "prettier src/**/*.{d.ts,js} test/**/*.js --write",
 		"prepublishOnly": "npm run build",
 		"release": "npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
@@ -65,16 +65,15 @@
 	},
 	"babel": {
 		"presets": [
-			"env"
+			"@babel/preset-env"
 		],
 		"plugins": [
 			[
-				"transform-react-jsx",
+				"@babel/plugin-transform-react-jsx",
 				{
 					"pragma": "h"
 				}
-			],
-			"transform-object-rest-spread"
+			]
 		]
 	},
 	"author": "Jason Miller <jason@developit.ca>",
@@ -87,24 +86,22 @@
 		"preact": ">=10"
 	},
 	"devDependencies": {
-		"babel-plugin-transform-object-rest-spread": "^6.26.0",
-		"babel-plugin-transform-react-jsx": "^6.24.1",
-		"babel-preset-env": "^1.7.0",
-		"babel-register": "^6.26.0",
-		"chai": "^3.5.0",
-		"copyfiles": "^1.2.0",
-		"eslint": "^4.19.1",
-		"eslint-config-developit": "^1.1.1",
-		"husky": "^4.3.0",
-		"lint-staged": "^10.4.0",
-		"microbundle": "^0.6.0",
-		"mocha": "^5.2.0",
-		"npm-merge-driver-install": "^1.1.1",
+		"@babel/plugin-transform-react-jsx": "^7.12.12",
+		"@babel/preset-env": "^7.12.11",
+		"@babel/register": "^7.12.10",
+		"chai": "^4.2.0",
+		"copyfiles": "^2.4.1",
+		"eslint": "^7.16.0",
+		"eslint-config-developit": "^1.2.0",
+		"husky": "^4.3.6",
+		"lint-staged": "^10.5.3",
+		"microbundle": "^0.13.0",
+		"mocha": "^8.2.1",
 		"preact": "^10.5.7",
-		"prettier": "^2.1.2",
-		"sinon": "^1.17.5",
-		"sinon-chai": "^2.8.0",
-		"typescript": "^3.4.1"
+		"prettier": "^2.2.1",
+		"sinon": "^9.2.2",
+		"sinon-chai": "^3.5.0",
+		"typescript": "^4.1.3"
 	},
 	"dependencies": {
 		"pretty-format": "^3.8.0"

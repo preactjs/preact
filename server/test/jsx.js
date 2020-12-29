@@ -5,6 +5,7 @@ import sinonChai from 'sinon-chai';
 chai.use(sinonChai);
 
 // tag to remove leading whitespace from tagged template literal
+// eslint-disable-next-line jest/no-export
 export function dedent([str]) {
 	return str
 		.split('\n' + str.match(/^\n*(\s+)/)[1])
