@@ -1,4 +1,4 @@
-import { applyRef } from './index';
+import { applyRef } from './refs';
 import { EMPTY_ARR } from '../constants';
 import { Component } from '../component';
 import { Fragment, normalizeToVNode } from '../create-element';
