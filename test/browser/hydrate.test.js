@@ -212,7 +212,7 @@ describe('hydrate()', () => {
 		expect(getLog()).to.deep.equal([]);
 	});
 
-	// Failing because the following condition in diffElementNodes doesn't evaluate to true
+	// Failing because the following condition in mountDomElement doesn't evaluate to true
 	// when hydrating a dom node which is not correct
 	//		dom===d && newVNode.text!==oldVNode.text
 	// We don't set `d` when hydrating. If we did, then newVNode.text would never equal
