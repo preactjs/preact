@@ -40,6 +40,10 @@ function Portal(props) {
 			_this._temp = {
 				parentNode: container,
 				childNodes: [],
+				appendChild(child) {
+					this.childNodes.push(child);
+					_this._container.appendChild(child);
+				},
 				insertBefore(child, before) {
 					this.childNodes.push(child);
 					_this._container.insertBefore(child, before);
