@@ -8,9 +8,8 @@ import options from '../options';
  * @param {object} newProps The new props
  * @param {object} oldProps The old props
  * @param {boolean} isSvg Whether or not this node is an SVG node
- * @param {boolean} hydrate Whether or not we are in hydration mode
  */
-export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
+export function diffProps(dom, newProps, oldProps, isSvg) {
 	let i;
 
 	for (i in oldProps) {
@@ -21,7 +20,6 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 
 	for (i in newProps) {
 		if (
-			(!hydrate || typeof newProps[i] == 'function') &&
 			i !== 'children' &&
 			i !== 'key' &&
 			i !== 'value' &&
