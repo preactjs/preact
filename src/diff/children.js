@@ -272,47 +272,52 @@ export function toChildArray(children, out) {
 	return out;
 }
 
+/**
+ * @param {import('../internal').PreactElement} parentDom
+ * @param {import('../internal').VNode} childVNode
+ * @param {import('../internal').VNode[]} oldChildren
+ * @param {import('../internal').PreactElement} newDom
+ * @param {import('../internal').PreactElement} startDom
+ * @returns {import('../internal').PreactElement}
+ */
 function placeChild(parentDom, childVNode, oldChildren, newDom, startDom) {
-	let nextDom;
 	if (childVNode._nextDom !== undefined) {
 		// Only Fragments or components that return Fragment like VNodes will
 		// have a non-undefined _nextDom. Continue the diff from the sibling
 		// of last DOM child of this child VNode
-		nextDom = childVNode._nextDom;
+		let nextDom = childVNode._nextDom;
 
 		// Eagerly cleanup _nextDom. We don't need to persist the value because
 		// it is only used by `diffChildren` to determine where to resume the diff after
 		// diffing Components and Fragments. Once we store it the nextDOM local var, we
 		// can clean up the property
 		childVNode._nextDom = undefined;
-	} else if (newDom != startDom || newDom.parentNode == null) {
-		outer: if (startDom == null || startDom.parentNode !== parentDom) {
-			parentDom.insertBefore(newDom, null);
-			nextDom = null;
-		} else {
-			// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
-			for (
-				let sibDom = startDom, j = 0;
-				(sibDom = sibDom.nextSibling) && j < oldChildren.length;
-				j += 2
-			) {
-				if (sibDom == newDom) {
-					break outer;
-				}
-			}
-			parentDom.insertBefore(newDom, startDom);
-			nextDom = startDom;
+
+		return nextDom;
+	} else if (newDom == startDom) {
+		// If the newDom and the dom we are expecting to be there are the same, then
+		// do nothing
+		return newDom.nextSibling;
+	} else if (startDom == null || newDom.parentNode == null) {
+		// "startDom == null": The diff has finished with existing DOM children and
+		// we are appending new ones.
+		//
+		// newDom.parentNode == null: newDom is a brand new unconnected DOM node. Go
+		// ahead and mount it here.
+		parentDom.insertBefore(newDom, startDom);
+		return startDom;
+	}
+
+	// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
+	for (
+		let sibDom = startDom, j = 0;
+		(sibDom = sibDom.nextSibling) && j < oldChildren.length;
+		j += 2
+	) {
+		if (sibDom == newDom) {
+			return newDom.nextSibling;
 		}
 	}
-
-	// If we have pre-calculated the nextDOM node, use it. Else calculate it now
-	// Strictly check for `undefined` here cuz `null` is a valid value of `nextDom`.
-	// See more detail in create-element.js:createVNode
-	if (nextDom !== undefined) {
-		startDom = nextDom;
-	} else {
-		startDom = newDom.nextSibling;
-	}
-
+	parentDom.insertBefore(newDom, startDom);
 	return startDom;
 }
