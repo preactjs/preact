@@ -1,4 +1,3 @@
-import { EMPTY_OBJ } from '../constants';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
@@ -273,8 +272,6 @@ function patchDOMElement(
 			dom.data = newProps;
 		}
 	} else {
-		oldProps = oldVNode.props || EMPTY_OBJ;
-
 		let oldHtml = oldProps.dangerouslySetInnerHTML;
 		let newHtml = newProps.dangerouslySetInnerHTML;
 
