@@ -62,6 +62,7 @@ export function Suspense() {
 Suspense.prototype = new Component();
 
 /**
+ * @this {import('./internal').SuspenseComponent}
  * @param {Promise} promise The thrown promise
  * @param {import('./internal').VNode<any, any>} suspendingVNode The suspending component
  */
@@ -131,13 +132,19 @@ Suspense.prototype.componentWillUnmount = function() {
 	this._suspenders = [];
 };
 
+/**
+ * @this {import('./internal').SuspenseComponent}
+ * @param {import('./index').Suspense["props"]} props
+ * @param {import('./internal').SuspenseState} state
+ */
 Suspense.prototype.render = function(props, state) {
 	if (this._detachOnNextRender) {
 		// When the Suspense's _vnode was created by a call to createVNode
 		// (i.e. due to a setState further up in the tree)
 		// it's _children prop is null, in this case we "forget" about the parked vnodes to detach
-		if (this._vnode._children)
+		if (this._vnode._children) {
 			this._vnode._children[0] = detachedClone(this._detachOnNextRender);
+		}
 		this._detachOnNextRender = null;
 	}
 
@@ -150,7 +157,7 @@ Suspense.prototype.render = function(props, state) {
 	return [
 		// Wrap with a Fragment to prevent the current reconciler from
 		// picking the wrong DOM node.
-		createElement(Fragment, null, state._suspended ? null : props.children),
+		state._suspended ? null : createElement(Fragment, null, props.children),
 		fallback
 	];
 };

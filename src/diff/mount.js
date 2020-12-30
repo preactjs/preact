@@ -1,10 +1,10 @@
 import { applyRef } from './refs';
 import { EMPTY_ARR } from '../constants';
-import { Component } from '../component';
-import { Fragment, normalizeToVNode } from '../create-element';
+import { normalizeToVNode } from '../create-element';
 import { setProperty } from './props';
-import { assign, removeNode } from '../util';
+import { removeNode } from '../util';
 import options from '../options';
+import { renderComponent } from './component';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -48,14 +48,15 @@ export function mount(
 
 	try {
 		if (typeof newType == 'function') {
-			mountComponent(
+			renderComponent(
 				parentDom,
 				newVNode,
+				null,
 				globalContext,
 				isSvg,
-				excessDomChildren,
 				commitQueue,
 				oldDom,
+				excessDomChildren,
 				isHydrating
 			);
 			// } else if (
@@ -96,147 +97,6 @@ export function mount(
 		}
 		options._catchError(e, newVNode, newVNode);
 	}
-}
-
-/**
- * Diff two virtual nodes and apply proper changes to the DOM
- * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
- * @param {import('../internal').VNode} newVNode The new virtual node
- * @param {object} globalContext The current context object. Modified by getChildContext
- * @param {boolean} isSvg Whether or not this element is an SVG node
- * @param {Array<import('../internal').PreactElement>} excessDomChildren
- * @param {Array<import('../internal').Component>} commitQueue List of components
- * which have callbacks to invoke in commitRoot
- * @param {import('../internal').PreactElement} oldDom
- * @param {boolean} [isHydrating] Whether or not we are in hydration
- */
-function mountComponent(
-	parentDom,
-	newVNode,
-	globalContext,
-	isSvg,
-	excessDomChildren,
-	commitQueue,
-	oldDom,
-	isHydrating
-) {
-	/** @type {import('../internal').Component} */
-	let c;
-	let tmp, clearProcessingException;
-
-	/** @type {import('../internal').ComponentType} */
-	let newType = newVNode.type;
-	let newProps = newVNode.props;
-
-	// Necessary for createContext api. Setting this property will pass
-	// the context value as `this.context` just for this component.
-	tmp = newType.contextType;
-	let provider = tmp && globalContext[tmp._id];
-	let componentContext = tmp
-		? provider
-			? provider.props.value
-			: tmp._defaultValue
-		: globalContext;
-
-	// Instantiate the new component
-	if ('prototype' in newType && newType.prototype.render) {
-		// @ts-ignore The check above verifies that newType is suppose to be constructed
-		newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
-	} else {
-		// @ts-ignore Trust me, Component implements the interface we want
-		newVNode._component = c = new Component(newProps, componentContext);
-		c.constructor = newType;
-		c.render = doRender;
-	}
-	if (provider) provider.sub(c);
-
-	c.props = newProps;
-	if (!c.state) c.state = {};
-	c.context = componentContext;
-	c._globalContext = globalContext;
-	c._dirty = true;
-	c._renderCallbacks = [];
-
-	// Invoke getDerivedStateFromProps
-	if (c._nextState == null) {
-		c._nextState = c.state;
-	}
-	if (newType.getDerivedStateFromProps != null) {
-		if (c._nextState == c.state) {
-			c._nextState = assign({}, c._nextState);
-		}
-
-		assign(
-			c._nextState,
-			newType.getDerivedStateFromProps(newProps, c._nextState)
-		);
-	}
-
-	if (
-		newType.getDerivedStateFromProps == null &&
-		c.componentWillMount != null
-	) {
-		c.componentWillMount();
-	}
-
-	if (c.componentDidMount != null) {
-		c._renderCallbacks.push(c.componentDidMount);
-	}
-
-	c.context = componentContext;
-	c.props = newProps;
-	c.state = c._nextState;
-
-	if ((tmp = options._render)) tmp(newVNode);
-
-	c._dirty = false;
-	c._vnode = newVNode;
-	c._parentDom = parentDom;
-
-	tmp = c.render(c.props, c.state, c.context);
-
-	// Handle setState called in render, see #2553
-	c.state = c._nextState;
-
-	if (c.getChildContext != null) {
-		globalContext = assign(assign({}, globalContext), c.getChildContext());
-	}
-
-	let isTopLevelFragment =
-		tmp != null && tmp.type === Fragment && tmp.key == null;
-	let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
-
-	mountChildren(
-		parentDom,
-		Array.isArray(renderResult) ? renderResult : [renderResult],
-		newVNode,
-		globalContext,
-		isSvg,
-		excessDomChildren,
-		commitQueue,
-		oldDom,
-		isHydrating
-	);
-
-	c.base = newVNode._dom;
-
-	// We successfully rendered this VNode, unset any stored hydration/bailout state:
-	newVNode._hydrating = null;
-
-	if (c._renderCallbacks.length) {
-		commitQueue.push(c);
-	}
-
-	if (clearProcessingException) {
-		c._pendingError = c._processingException = null;
-	}
-
-	c._force = false;
-}
-
-/** The `.render()` method for a PFC backing instance. */
-export function doRender(props, state, context) {
-	return this.constructor(props, context);
 }
 
 /**
@@ -407,7 +267,7 @@ function mountDOMElement(
  * @param {import('../internal').PreactElement} oldDom
  * @param {boolean} isHydrating Whether or not we are in hydration
  */
-function mountChildren(
+export function mountChildren(
 	parentDom,
 	renderResult,
 	newParentVNode,
