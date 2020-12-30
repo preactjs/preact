@@ -15,8 +15,9 @@ import { renderComponent } from './component';
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @param {import('../internal').PreactElement} oldDom
+ * @param {import('../internal').PreactElement} startDom
  * @param {boolean} [isHydrating] Whether or not we are in hydration
+ * @returns {import('../internal').PreactElement | null} pointer to the next DOM node to be hydrated (or null)
  */
 export function mount(
 	parentDom,
@@ -25,7 +26,7 @@ export function mount(
 	isSvg,
 	excessDomChildren,
 	commitQueue,
-	oldDom,
+	startDom,
 	isHydrating
 ) {
 	let tmp,
@@ -46,25 +47,21 @@ export function mount(
 
 	if ((tmp = options._diff)) tmp(newVNode);
 
+	let nextDomSibling;
+
 	try {
 		if (typeof newType == 'function') {
-			renderComponent(
+			nextDomSibling = renderComponent(
 				parentDom,
 				newVNode,
 				null,
 				globalContext,
 				isSvg,
 				commitQueue,
-				oldDom,
+				startDom,
 				excessDomChildren,
 				isHydrating
 			);
-			// } else if (
-			// 	excessDomChildren == null &&
-			// 	newVNode._original === oldVNode._original
-			// ) {
-			// 	newVNode._children = oldVNode._children;
-			// 	newVNode._dom = oldVNode._dom;
 		} else {
 			newVNode._dom = mountDOMElement(
 				null,
@@ -75,6 +72,7 @@ export function mount(
 				commitQueue,
 				isHydrating
 			);
+			nextDomSibling = newVNode._dom && newVNode._dom.nextSibling;
 		}
 
 		if ((tmp = options.diffed)) tmp(newVNode);
@@ -85,18 +83,22 @@ export function mount(
 		newVNode._original = null;
 		// if hydrating or creating initial tree, bailout preserves DOM:
 		if (isHydrating || excessDomChildren != null) {
-			newVNode._dom = oldDom;
+			newVNode._dom = startDom;
+			nextDomSibling = newVNode._dom && newVNode._dom.nextSibling;
 
 			// _hydrating = true if bailed out during hydration
 			// _hydrating = false if bailed out during mounting
 			// _hydrating = null if it didn't bail out
 			newVNode._hydrating = !!isHydrating;
-			excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
+			excessDomChildren[excessDomChildren.indexOf(startDom)] = null;
 			// ^ could possibly be simplified to:
 			// excessDomChildren.length = 0;
 		}
 		options._catchError(e, newVNode, newVNode);
 	}
+
+	// @ts-ignore-next
+	return nextDomSibling;
 }
 
 /**
@@ -264,7 +266,7 @@ function mountDOMElement(
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @param {import('../internal').PreactElement} oldDom
+ * @param {import('../internal').PreactElement} startDom
  * @param {boolean} isHydrating Whether or not we are in hydration
  */
 export function mountChildren(
@@ -275,10 +277,10 @@ export function mountChildren(
 	isSvg,
 	excessDomChildren,
 	commitQueue,
-	oldDom,
+	startDom,
 	isHydrating
 ) {
-	let i, j, childVNode, newDom, firstChildDom, refs;
+	let i, j, childVNode, newDom, firstChildDom, refs, mountedNextChild;
 
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
@@ -296,14 +298,14 @@ export function mountChildren(
 		childVNode._depth = newParentVNode._depth + 1;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		mount(
+		mountedNextChild = mount(
 			parentDom,
 			childVNode,
 			globalContext,
 			isSvg,
 			excessDomChildren,
 			commitQueue,
-			oldDom,
+			startDom,
 			isHydrating
 		);
 
@@ -319,18 +321,29 @@ export function mountChildren(
 				firstChildDom = newDom;
 			}
 
-			oldDom = mountChild(parentDom, childVNode, newDom, oldDom);
-
-			if (typeof newParentVNode.type == 'function') {
-				// Because the newParentVNode is Fragment-like, we need to set it's
-				// _nextDom property to the nextSibling of its last child DOM node.
-				//
-				// `oldDom` contains the correct value here because if the last child
-				// is a Fragment-like, then oldDom has already been set to that child's _nextDom.
-				// If the last child is a DOM VNode, then oldDom will be set to that DOM
-				// node's nextSibling.
-				newParentVNode._nextDom = oldDom;
+			if (typeof childVNode.type !== 'function') {
+				if (newDom === startDom) {
+					// @ts-ignore-next
+					startDom = mountedNextChild;
+					// startDom = startDom.nextSibling;
+				} else {
+					parentDom.insertBefore(newDom, startDom);
+				}
+				// startDom = mountChild(parentDom, childVNode, newDom, startDom);
+			} else {
+				startDom = mountedNextChild;
 			}
+
+			// if (typeof newParentVNode.type == 'function') {
+			// 	// Because the newParentVNode is Fragment-like, we need to set it's
+			// 	// _nextDom property to the nextSibling of its last child DOM node.
+			// 	//
+			// 	// `oldDom` contains the correct value here because if the last child
+			// 	// is a Fragment-like, then oldDom has already been set to that child's _nextDom.
+			// 	// If the last child is a DOM VNode, then oldDom will be set to that DOM
+			// 	// node's nextSibling.
+			// 	newParentVNode._nextDom = startDom;
+			// }
 		}
 	}
 
@@ -350,23 +363,26 @@ export function mountChildren(
 			applyRef(refs[i], refs[++i], refs[++i]);
 		}
 	}
+
+	return startDom;
 }
 
 function mountChild(parentDom, childVNode, newDom, oldDom) {
-	if (typeof childVNode.type === 'function') {
-		// Only Fragments or components that return Fragment like VNodes will
-		// have a non-undefined _nextDom. Continue the diff from the sibling
-		// of last DOM child of this child VNode
-		let nextDom = childVNode._nextDom;
-
-		// Eagerly cleanup _nextDom. We don't need to persist the value because
-		// it is only used by `diffChildren` to determine where to resume the diff after
-		// diffing Components and Fragments. Once we store it the nextDOM local var, we
-		// can clean up the property
-		childVNode._nextDom = null;
-
-		return nextDom;
-	} else if (newDom == oldDom) {
+	// if (typeof childVNode.type === 'function') {
+	// 	// // Only Fragments or components that return Fragment like VNodes will
+	// 	// // have a non-undefined _nextDom. Continue the diff from the sibling
+	// 	// // of last DOM child of this child VNode
+	// 	// let nextDom = childVNode._nextDom;
+	// 	//
+	// 	// // Eagerly cleanup _nextDom. We don't need to persist the value because
+	// 	// // it is only used by `diffChildren` to determine where to resume the diff after
+	// 	// // diffing Components and Fragments. Once we store it the nextDOM local var, we
+	// 	// // can clean up the property
+	// 	// childVNode._nextDom = null;
+	// 	//
+	// 	// return nextDom;
+	// } else
+	if (newDom == oldDom) {
 		// If newDom and oldDom are the same when mounting (i.e hydrating), then the
 		// node is already in-place. Do nothing and return the next DOM node that
 		// should be hydrated.

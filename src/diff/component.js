@@ -17,6 +17,7 @@ import { diffChildren } from './children';
  * @param {import('../internal').PreactElement} startDom
  * @param {Array<import('../internal').PreactElement>} [excessDomChildren]
  * @param {boolean} [isHydrating] Whether or not we are in hydration
+ * @returns {import('../internal').PreactElement} pointer to the next DOM node (in order) to be rendered (or null)
  */
 export function renderComponent(
 	parentDom,
@@ -167,8 +168,10 @@ export function renderComponent(
 		tmp != null && tmp.type === Fragment && tmp.key == null;
 	let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
 
+	let nextDomSibling;
+
 	if (isNew) {
-		mountChildren(
+		nextDomSibling = mountChildren(
 			parentDom,
 			Array.isArray(renderResult) ? renderResult : [renderResult],
 			newVNode,
@@ -203,6 +206,8 @@ export function renderComponent(
 	}
 
 	c._force = false;
+
+	return nextDomSibling;
 }
 
 /** The `.render()` method for a PFC backing instance. */
