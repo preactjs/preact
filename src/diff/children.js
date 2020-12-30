@@ -292,7 +292,7 @@ function placeChild(
 	newDom,
 	startDom
 ) {
-	if (childVNode._nextDom !== undefined) {
+	if (typeof childVNode.type === 'function') {
 		// Only Fragments or components that return Fragment like VNodes will
 		// have a non-undefined _nextDom. Continue the diff from the sibling
 		// of last DOM child of this child VNode
@@ -302,7 +302,7 @@ function placeChild(
 		// it is only used by `diffChildren` to determine where to resume the diff after
 		// diffing Components and Fragments. Once we store it the nextDOM local var, we
 		// can clean up the property
-		childVNode._nextDom = undefined;
+		childVNode._nextDom = null;
 
 		return nextDom;
 	} else if (newDom == startDom) {
