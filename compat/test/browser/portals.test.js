@@ -188,7 +188,7 @@ describe('Portal', () => {
 		}
 
 		render(<App />, root);
-		expect(dialog.childNodes.length).to.equal(2);
+		expect(dialog.childNodes.length).to.equal(1);
 		render(null, root);
 		expect(dialog.childNodes.length).to.equal(0);
 	});
@@ -489,7 +489,7 @@ describe('Portal', () => {
 
 		render(<App />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="outer">1</div><div id="inner">0</div><div id="app">test</div>'
+			'<div id="inner">0</div><div id="outer">1</div><div id="app">test</div>'
 		);
 
 		act(() => {
