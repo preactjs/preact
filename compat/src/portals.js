@@ -22,6 +22,7 @@ function Portal(props) {
 	_this.componentWillUnmount = function() {
 		render(null, _this._temp);
 		_this._temp = null;
+		_this._container = null;
 	};
 
 	// When we change container we should clear our old container and
@@ -46,7 +47,7 @@ function Portal(props) {
 				},
 				insertBefore(child, before) {
 					this.childNodes.push(child);
-					_this._container.insertBefore(child, before);
+					_this._container.appendChild(child, before);
 				},
 				removeChild(child) {
 					this.childNodes.splice(this.childNodes.indexOf(child) >>> 1, 1);
