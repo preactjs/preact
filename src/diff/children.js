@@ -162,7 +162,7 @@ export function diffChildren(
 				startDom = placeChild(
 					parentDom,
 					childVNode,
-					oldChildren,
+					oldChildrenLength,
 					newDom,
 					startDom
 				);
@@ -231,6 +231,11 @@ export function diffChildren(
 	}
 }
 
+/**
+ * @param {import('../internal').VNode} childVNode
+ * @param {import('../internal').PreactElement} startDom
+ * @param {import('../internal').PreactElement} parentDom
+ */
 function reorderChildren(childVNode, startDom, parentDom) {
 	for (let tmp = 0; tmp < childVNode._children.length; tmp++) {
 		let vnode = childVNode._children[tmp];
@@ -247,7 +252,7 @@ function reorderChildren(childVNode, startDom, parentDom) {
 				startDom = placeChild(
 					parentDom,
 					vnode,
-					childVNode._children,
+					childVNode._children.length,
 					vnode._dom,
 					startDom
 				);
@@ -280,12 +285,18 @@ export function toChildArray(children, out) {
 /**
  * @param {import('../internal').PreactElement} parentDom
  * @param {import('../internal').VNode} childVNode
- * @param {import('../internal').VNode[]} oldChildren
+ * @param {number} oldChildrenLength
  * @param {import('../internal').PreactElement} newDom
  * @param {import('../internal').PreactElement} startDom
  * @returns {import('../internal').PreactElement}
  */
-function placeChild(parentDom, childVNode, oldChildren, newDom, startDom) {
+function placeChild(
+	parentDom,
+	childVNode,
+	oldChildrenLength,
+	newDom,
+	startDom
+) {
 	if (childVNode._nextDom !== undefined) {
 		// Only Fragments or components that return Fragment like VNodes will
 		// have a non-undefined _nextDom. Continue the diff from the sibling
@@ -316,7 +327,7 @@ function placeChild(parentDom, childVNode, oldChildren, newDom, startDom) {
 	// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
 	for (
 		let sibDom = startDom, j = 0;
-		(sibDom = sibDom.nextSibling) && j < oldChildren.length;
+		(sibDom = sibDom.nextSibling) && j < oldChildrenLength;
 		j += 2
 	) {
 		if (sibDom == newDom) {
