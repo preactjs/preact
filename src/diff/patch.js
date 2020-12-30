@@ -289,7 +289,7 @@ function patchDOMElement(
 			}
 		}
 
-		diffProps(dom, newProps, oldProps, isSvg, false);
+		diffProps(dom, newProps, oldProps, isSvg);
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (newHtml) {
