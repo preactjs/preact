@@ -4,7 +4,12 @@ import {
 	serializeHtml
 } from '../../../test/_util/helpers';
 import { div, span } from '../../../test/_util/dom';
-import React, { createElement, Children, render } from 'preact/compat';
+import React, {
+	createElement,
+	Children,
+	render,
+	Fragment
+} from 'preact/compat';
 
 describe('Children', () => {
 	/** @type {HTMLDivElement} */
@@ -180,6 +185,29 @@ describe('Children', () => {
 			);
 			let expected = div([span('foo'), span(div('bar'))]);
 			expect(serializeHtml(scratch)).to.equal(expected);
+		});
+	});
+
+	describe('toArray', () => {
+		it('should add keys based on index if none present #2888', () => {
+			const res = Children.toArray([
+				<div key="a" />,
+				<span />,
+				<Fragment />,
+				'foo',
+				null,
+				false,
+				0
+			]);
+
+			expect(res[0].key).to.equal('a');
+			expect(res[1].key).to.equal(1);
+			expect(res[2].key).to.equal(2);
+
+			// Non-normalized vnodes should remain untouched,
+			// falsy vnodes will be filtered away
+			expect(res[3]).to.equal('foo');
+			expect(res[4]).to.equal(0);
 		});
 	});
 });
