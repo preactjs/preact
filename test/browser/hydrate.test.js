@@ -8,8 +8,7 @@ import {
 } from '../_util/helpers';
 import { ul, li, div } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
-
-/** @jsx createElement */
+import { expect } from 'chai';
 
 describe('hydrate()', () => {
 	let scratch, attributesSpy;

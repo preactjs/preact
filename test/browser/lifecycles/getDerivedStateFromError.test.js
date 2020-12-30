@@ -7,7 +7,7 @@ import {
 	resetAllSpies
 } from '../../_util/helpers';
 
-/** @jsx createElement */
+import { expect } from 'chai';
 
 describe('Lifecycle methods', () => {
 	/* eslint-disable react/display-name */
@@ -31,7 +31,7 @@ describe('Lifecycle methods', () => {
 		/** @type {Error} */
 		let expectedError;
 
-		/** @type {typeof import('../../../').Component} */
+		/** @type {typeof import('../../../src').Component} */
 		let ThrowErr;
 
 		let thrower;

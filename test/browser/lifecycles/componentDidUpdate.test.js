@@ -2,7 +2,8 @@ import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
 
-/** @jsx createElement */
+import { expect } from 'chai';
+import '../../polyfills';
 
 describe('Lifecycle methods', () => {
 	/** @type {HTMLDivElement} */

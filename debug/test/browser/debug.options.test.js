@@ -1,3 +1,4 @@
+import { expect } from 'chai';
 import {
 	vnodeSpy,
 	rootSpy,
@@ -12,8 +13,6 @@ import { useState } from 'preact/hooks';
 import { setupRerender } from 'preact/test-utils';
 import 'preact/debug';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-
-/** @jsx createElement */
 
 describe('debug options', () => {
 	/** @type {HTMLDivElement} */

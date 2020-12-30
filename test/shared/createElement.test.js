@@ -1,8 +1,7 @@
-import { createElement } from '../../';
+import { createElement } from '../../src';
 import { expect } from 'chai';
 
 const h = createElement;
-/** @jsx createElement */
 /*eslint-env browser, mocha */
 
 // const buildVNode = (nodeName, attributes, children=[]) => ({

@@ -1,5 +1,3 @@
-/** @jsx createElement */
-
 export function isValidElementTests(
 	expect,
 	isValidElement,

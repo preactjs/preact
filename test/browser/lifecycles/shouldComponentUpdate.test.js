@@ -3,7 +3,7 @@ import { createElement, render, Component, Fragment } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
 import { logCall, clearLog } from '../../_util/logCall';
 
-/** @jsx createElement */
+import { expect } from 'chai';
 
 describe('Lifecycle methods', () => {
 	/** @type {HTMLDivElement} */

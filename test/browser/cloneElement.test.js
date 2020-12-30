@@ -1,6 +1,5 @@
 import { createElement, cloneElement, createRef } from 'preact';
-
-/** @jsx createElement */
+import { expect } from 'chai';
 
 describe('cloneElement', () => {
 	it('should clone components', () => {

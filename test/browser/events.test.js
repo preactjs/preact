@@ -4,8 +4,7 @@ import {
 	teardown,
 	supportsPassiveEvents
 } from '../_util/helpers';
-
-/** @jsx createElement */
+import { expect } from 'chai';
 
 describe('event handling', () => {
 	let scratch, proto;

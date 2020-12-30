@@ -4,6 +4,7 @@ import {
 	teardown,
 	createEvent
 } from '../../../test/_util/helpers';
+import { expect } from 'chai';
 
 import React, { createElement } from 'preact/compat';
 

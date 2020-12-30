@@ -1,6 +1,8 @@
 import { options, createElement, render, Component } from 'preact';
 import { teardown, setupRerender } from 'preact/test-utils';
 
+import { expect } from 'chai';
+
 /** @jsx createElement */
 
 describe('setupRerender & teardown', () => {

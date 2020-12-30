@@ -2,8 +2,7 @@ import { createElement, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useErrorBoundary } from 'preact/hooks';
 import { setupRerender } from 'preact/test-utils';
-
-/** @jsx createElement */
+import { expect } from 'chai';
 
 describe('errorBoundary', () => {
 	/** @type {HTMLDivElement} */

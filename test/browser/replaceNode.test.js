@@ -5,8 +5,9 @@ import {
 	serializeHtml,
 	sortAttributes
 } from '../_util/helpers';
+import { expect } from 'chai';
 
-/** @jsx createElement */
+import '../polyfills';
 
 describe('replaceNode parameter in render()', () => {
 	let scratch;

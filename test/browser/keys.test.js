@@ -2,8 +2,7 @@ import { createElement, Component, render } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 import { div } from '../_util/dom';
-
-/** @jsx createElement */
+import { expect } from 'chai';
 
 describe('keys', () => {
 	/** @type {HTMLDivElement} */

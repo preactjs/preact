@@ -2,8 +2,6 @@ import { createElement, options } from 'preact';
 import { clearLog, getLog } from './logCall';
 import { teardown as testUtilTeardown } from 'preact/test-utils';
 
-/** @jsx createElement */
-
 /**
  * Assign properties from `props` to `obj`
  * @template O, P The obj and props types
@@ -255,8 +253,18 @@ export function sortAttributes(html) {
 	);
 }
 
-export const spyAll = obj =>
-	Object.keys(obj).forEach(key => sinon.spy(obj, key));
+export const spyAll = obj => {
+	Object.getOwnPropertyNames(obj).forEach(key => {
+		// Don't try to wrap `Function.prototype.length`
+		if (
+			typeof obj === 'function' &&
+			['length', 'prototype', 'name'].includes(key)
+		) {
+			return;
+		}
+		sinon.spy(obj, key);
+	});
+};
 
 export const resetAllSpies = obj =>
 	Object.keys(obj).forEach(key => {

@@ -1,8 +1,8 @@
-import { createElement, render, Fragment } from '../../src/';
+import { createElement, render, Fragment } from '../../src';
 import { getDomSibling } from '../../src/component';
 import { setupScratch, teardown } from '../_util/helpers';
-
-/** @jsx createElement */
+import { expect } from 'chai';
+import '../polyfills';
 
 describe('getDomSibling', () => {
 	/** @type {import('../../src/internal').PreactElement} */

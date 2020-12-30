@@ -3,6 +3,8 @@ import { useEffect, useReducer, useState } from 'preact/hooks';
 import { act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
+import { expect } from 'chai';
+
 /** @jsx createElement */
 
 // IE11 doesn't support `new Event()`

@@ -5,8 +5,7 @@ import {
 	getMixedArray,
 	mixedArrayHTML
 } from '../_util/helpers';
-
-/** @jsx createElement */
+import { expect } from 'chai';
 
 describe('toChildArray', () => {
 	/** @type {HTMLDivElement} */

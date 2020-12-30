@@ -2,8 +2,7 @@ import { createElement, render, createContext, Component } from 'preact';
 import { act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useContext, useEffect, useState } from 'preact/hooks';
-
-/** @jsx createElement */
+import { expect } from 'chai';
 
 describe('useContext', () => {
 	/** @type {HTMLDivElement} */

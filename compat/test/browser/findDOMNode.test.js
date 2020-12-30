@@ -1,5 +1,7 @@
 import React, { createElement, findDOMNode } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { expect } from 'chai';
+import '../../../test/polyfills';
 
 describe('findDOMNode()', () => {
 	/** @type {HTMLDivElement} */

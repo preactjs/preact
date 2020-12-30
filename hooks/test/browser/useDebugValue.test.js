@@ -1,8 +1,7 @@
 import { createElement, render, options } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useDebugValue, useState } from 'preact/hooks';
-
-/** @jsx createElement*/
+import { expect } from 'chai';
 
 describe('useDebugValue', () => {
 	/** @type {HTMLDivElement} */

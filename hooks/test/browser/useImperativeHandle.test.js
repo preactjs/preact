@@ -2,8 +2,7 @@ import { createElement, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useImperativeHandle, useRef, useState } from 'preact/hooks';
 import { setupRerender } from 'preact/test-utils';
-
-/** @jsx createElement */
+import { expect } from 'chai';
 
 describe('useImperativeHandle', () => {
 	/** @type {HTMLDivElement} */

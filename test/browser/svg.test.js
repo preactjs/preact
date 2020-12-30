@@ -1,7 +1,6 @@
 import { createElement, render } from 'preact';
 import { setupScratch, teardown, sortAttributes } from '../_util/helpers';
-
-/** @jsx createElement */
+import { expect } from 'chai';
 
 describe('svg', () => {
 	let scratch;

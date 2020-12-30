@@ -12,10 +12,7 @@
   "types": "src/index.d.ts",
   "scripts": {
     "build": "microbundle build --raw",
-    "dev": "microbundle watch --raw --format cjs",
-    "test": "npm-run-all build --parallel test:karma",
-    "test:karma": "karma start test/karma.conf.js --single-run",
-    "test:karma:watch": "karma start test/karma.conf.js --no-single-run"
+    "dev": "microbundle watch --raw --format cjs"
   },
   "peerDependencies": {
     "preact": "^10.0.0"

@@ -1,5 +1,6 @@
-import React, { hydrate } from 'preact/compat';
+import React, { createElement, hydrate } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { expect } from 'chai';
 
 describe('compat hydrate', () => {
 	/** @type {HTMLDivElement} */

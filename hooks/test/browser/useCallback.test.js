@@ -1,8 +1,7 @@
 import { createElement, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useCallback } from 'preact/hooks';
-
-/** @jsx createElement */
+import { expect } from 'chai';
 
 describe('useCallback', () => {
 	/** @type {HTMLDivElement} */

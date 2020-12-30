@@ -5,6 +5,7 @@ import {
 	serializeHtml,
 	sortAttributes
 } from '../../../test/_util/helpers';
+import { expect } from 'chai';
 
 describe('svg', () => {
 	/** @type {HTMLDivElement} */

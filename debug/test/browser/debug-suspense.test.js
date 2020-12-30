@@ -6,8 +6,7 @@ import {
 	teardown,
 	serializeHtml
 } from '../../../test/_util/helpers';
-
-/** @jsx createElement */
+import { expect } from 'chai';
 
 describe('debug with suspense', () => {
 	/** @type {HTMLDivElement} */

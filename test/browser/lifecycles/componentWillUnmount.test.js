@@ -1,7 +1,6 @@
 import { createElement, render, Component } from 'preact';
 import { setupScratch, teardown, spyAll } from '../../_util/helpers';
-
-/** @jsx createElement */
+import { expect } from 'chai';
 
 describe('Lifecycle methods', () => {
 	/** @type {HTMLDivElement} */

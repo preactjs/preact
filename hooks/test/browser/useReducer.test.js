@@ -2,8 +2,7 @@ import { setupRerender, act } from 'preact/test-utils';
 import { createElement, render, createContext } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useReducer, useEffect, useContext } from 'preact/hooks';
-
-/** @jsx createElement */
+import { expect } from 'chai';
 
 describe('useReducer', () => {
 	/** @type {HTMLDivElement} */

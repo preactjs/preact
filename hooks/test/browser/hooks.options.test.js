@@ -1,3 +1,4 @@
+import { expect } from 'chai';
 import {
 	afterDiffSpy,
 	beforeRenderSpy,
@@ -20,8 +21,6 @@ import {
 	useContext,
 	useErrorBoundary
 } from 'preact/hooks';
-
-/** @jsx createElement */
 
 describe('hook options', () => {
 	/** @type {HTMLDivElement} */

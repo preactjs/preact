@@ -7,8 +7,7 @@ import {
 } from '../../../test/_util/helpers';
 import { useEffectAssertions } from './useEffectAssertions.test';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
-
-/** @jsx createElement */
+import { expect } from 'chai';
 
 describe('useLayoutEffect', () => {
 	/** @type {HTMLDivElement} */

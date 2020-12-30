@@ -1,4 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
+import { expect } from 'chai';
 import React, {
 	createElement,
 	hydrate,

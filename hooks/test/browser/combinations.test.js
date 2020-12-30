@@ -9,8 +9,7 @@ import {
 	useRef
 } from 'preact/hooks';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
-
-/** @jsx createElement */
+import { expect } from 'chai';
 
 describe('combinations', () => {
 	/** @type {HTMLDivElement} */

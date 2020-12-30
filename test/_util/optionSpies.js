@@ -1,3 +1,4 @@
+import 'chai';
 import { options as rawOptions } from 'preact';
 
 /** @type {import('preact/src/internal').Options} */

@@ -5,6 +5,7 @@ import {
 } from '../../../test/_util/helpers';
 import { div, span } from '../../../test/_util/dom';
 import React, { createElement, Children, render } from 'preact/compat';
+import { expect } from 'chai';
 
 describe('Children', () => {
 	/** @type {HTMLDivElement} */

@@ -1,6 +1,7 @@
 import React, { createElement } from 'preact/compat';
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { expect } from 'chai';
 
 describe('PureComponent', () => {
 	/** @type {HTMLDivElement} */
