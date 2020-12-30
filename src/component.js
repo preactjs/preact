@@ -119,7 +119,7 @@ export function getDomSibling(vnode, childIndex) {
  * Trigger in-place re-rendering of a component.
  * @param {import('./internal').Component} component The component to rerender
  */
-function renderComponent(component) {
+function rerenderComponent(component) {
 	let vnode = component._vnode,
 		startDom = vnode._dom,
 		parentDom = component._parentDom;
@@ -218,7 +218,7 @@ function process() {
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 		// process() calls from getting scheduled while `queue` is still being consumed.
 		queue.some(c => {
-			if (c._dirty) renderComponent(c);
+			if (c._dirty) rerenderComponent(c);
 		});
 	}
 }

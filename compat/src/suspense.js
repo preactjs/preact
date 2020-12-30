@@ -220,7 +220,7 @@ Suspense.prototype.render = function(props, state) {
 	return [
 		// Wrap with a Fragment to prevent the current reconciler from
 		// picking the wrong DOM node.
-		createElement(Fragment, null, state._suspended ? null : props.children),
+		state._suspended ? null : createElement(Fragment, null, props.children),
 		fallback
 	];
 };
