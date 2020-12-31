@@ -61,7 +61,7 @@ export function render(vnode, parentDom, replaceNode) {
 			// Determine the new vnode tree and store it on the DOM element on
 			// our custom `_children` property.
 			newVNode,
-			oldVNode || EMPTY_OBJ,
+			oldVNode,
 			EMPTY_OBJ,
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,

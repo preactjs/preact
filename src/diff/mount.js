@@ -66,7 +66,7 @@ export function mount(
 			);
 
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
-			nextDomSibling = newVNode._dom && newVNode._dom.nextSibling;
+			nextDomSibling = newVNode._dom.nextSibling;
 		}
 
 		if ((tmp = options.diffed)) tmp(newVNode);
@@ -77,10 +77,9 @@ export function mount(
 		newVNode._original = null;
 		// if hydrating or creating initial tree, bailout preserves DOM:
 		if (isHydrating || excessDomChildren != null) {
-			newVNode._dom = startDom;
-
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
-			nextDomSibling = newVNode._dom && newVNode._dom.nextSibling;
+			nextDomSibling = startDom && startDom.nextSibling;
+			newVNode._dom = startDom;
 
 			// _hydrating = true if bailed out during hydration
 			// _hydrating = false if bailed out during mounting
@@ -318,7 +317,7 @@ export function mountChildren(
 
 			if (typeof childVNode.type === 'function' || newDom == startDom) {
 				// If the child is a Fragment-like or if it is DOM VNode and its _dom
-				// property matches the dom we are diffing (i.e. startDOM), just
+				// property matches the dom we are diffing (i.e. startDom), just
 				// continue with the mountedNextChild
 				startDom = mountedNextChild;
 			} else {
