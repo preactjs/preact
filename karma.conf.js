@@ -162,9 +162,39 @@ module.exports = function(config) {
 
 		preprocessors: {
 			'{debug,hooks,compat,test-utils,jsx-runtime,}/test/**/*': [
-				'webpack',
+				'rollup',
 				'sourcemap'
 			]
+		},
+
+		rollupPreprocessor: {
+			plugins: [
+				require('@rollup/plugin-babel').default({
+					babelHelpers: 'bundled'
+				}),
+				require('@rollup/plugin-alias')({
+					entries: {
+						'preact/debug': subPkgPath('./debug/'),
+						'preact/devtools': subPkgPath('./devtools/'),
+						'preact/compat': subPkgPath('./compat/'),
+						'preact/hooks': subPkgPath('./hooks/'),
+						'preact/test-utils': subPkgPath('./test-utils/'),
+						'preact/jsx-runtime': subPkgPath('./jsx-runtime/'),
+						'preact/jsx-dev-runtime': subPkgPath('./jsx-runtime/'),
+						preact: subPkgPath('')
+					}
+				}),
+				require('@rollup/plugin-node-resolve').default(),
+				require('@rollup/plugin-commonjs')(),
+				require('@rollup/plugin-replace')({
+					'process.env.NODE_ENV': JSON.stringify('production')
+				})
+			],
+			output: {
+				format: 'iife', // Helps prevent naming collisions.
+				name: 'preact', // Required for 'iife' format.
+				sourcemap: 'inline' // Sensible for testing.
+			}
 		},
 
 		webpack: {
