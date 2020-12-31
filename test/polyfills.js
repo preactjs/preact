@@ -73,6 +73,8 @@ function patchConsole(method) {
 	Object.defineProperty(window.console, method, {
 		get() {
 			return (...args) => {
+				// @ts-ignore
+				// eslint-disable-next-line no-undef
 				__karma__.log(method, serializeConsoleArgs(args));
 			};
 		}
