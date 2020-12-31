@@ -104,14 +104,17 @@ module.exports = function(config) {
 
 		formatError(msg) {
 			const frames = errorstacks.parseStackTrace(msg);
-			if (!frames.length) return msg;
+			if (!frames.length || frames[0].column === -1) return '\n' + msg + '\n';
 
 			const frame = frames[0];
 			const filePath = kl.lightCyan(
 				path.relative(__dirname, frame.sourceFileName)
 			);
+
+			const indentMatch = msg.match(/^(\s*)/);
+			const indent = indentMatch ? indentMatch[1] : '  ';
 			const location = kl.yellow(`:${frame.line}:${frame.column}`);
-			return `  at ${frame.name} (${filePath}${location})\n`;
+			return `${indent}at ${frame.name} (${filePath}${location})\n`;
 		},
 
 		coverageReporter: {
