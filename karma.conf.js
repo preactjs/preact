@@ -107,9 +107,7 @@ module.exports = function(config) {
 			if (!frames.length || frames[0].column === -1) return '\n' + msg + '\n';
 
 			const frame = frames[0];
-			const filePath = kl.lightCyan(
-				path.relative(__dirname, frame.sourceFileName)
-			);
+			const filePath = kl.lightCyan(frame.fileName.replace('webpack:///', ''));
 
 			const indentMatch = msg.match(/^(\s*)/);
 			const indent = indentMatch ? indentMatch[1] : '  ';
