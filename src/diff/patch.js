@@ -32,9 +32,12 @@ export function patch(
 	if (newVNode.constructor !== undefined) return null;
 	if ((tmp = options._diff)) tmp(newVNode);
 
+	/** @type {import('../internal').PreactElement} */
+	let nextDomSibling;
+
 	try {
 		if (typeof newType == 'function') {
-			renderComponent(
+			nextDomSibling = renderComponent(
 				parentDom,
 				newVNode,
 				oldVNode,
@@ -46,6 +49,7 @@ export function patch(
 		} else if (newVNode._original === oldVNode._original) {
 			newVNode._children = oldVNode._children;
 			newVNode._dom = oldVNode._dom;
+			nextDomSibling = newVNode._dom.nextSibling;
 		} else {
 			newVNode._dom = patchDOMElement(
 				oldVNode._dom,
@@ -55,6 +59,7 @@ export function patch(
 				isSvg,
 				commitQueue
 			);
+			nextDomSibling = newVNode._dom.nextSibling;
 		}
 
 		if ((tmp = options.diffed)) tmp(newVNode);
@@ -62,6 +67,8 @@ export function patch(
 		newVNode._original = null;
 		options._catchError(e, newVNode, oldVNode);
 	}
+
+	return nextDomSibling;
 }
 
 /**

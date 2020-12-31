@@ -23,7 +23,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		skipRemove = (dom = vnode._dom) != null;
 	}
 
-	vnode._dom = vnode._nextDom = null;
+	vnode._dom = null;
 
 	if ((r = vnode._component) != null) {
 		if (r.componentWillUnmount) {
