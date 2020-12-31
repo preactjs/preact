@@ -35,6 +35,9 @@ export function diffChildren(
 ) {
 	let i, j, oldVNode, childVNode, newDom, firstChildDom, refs;
 
+	// TODO: Remove the next comment and the oldParentVNode falsey check since it
+	// won't be in the new mount/patch world.
+
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
@@ -89,13 +92,14 @@ export function diffChildren(
 			}
 		}
 
+		// TODO: Try to not coerce oldVNode to EMPTY_OBJ
 		oldVNode = oldVNode || EMPTY_OBJ;
 
 		let oldVNodeRef;
-
+		let nextDomSibling;
 		if (oldVNode == EMPTY_OBJ) {
 			// We are mounting a new VNode
-			mount(
+			nextDomSibling = mount(
 				parentDom,
 				childVNode,
 				globalContext,
@@ -110,7 +114,7 @@ export function diffChildren(
 			childVNode._hydrating = null;
 			oldVNodeRef = oldVNode.ref;
 
-			mount(
+			nextDomSibling = mount(
 				parentDom,
 				childVNode,
 				globalContext,
@@ -122,7 +126,7 @@ export function diffChildren(
 			);
 		} else {
 			// Morph the old element into the new one, but don't append it to the dom yet
-			patch(
+			nextDomSibling = patch(
 				parentDom,
 				childVNode,
 				oldVNode,
@@ -148,15 +152,12 @@ export function diffChildren(
 				firstChildDom = newDom;
 			}
 
-			if (
-				typeof childVNode.type == 'function' &&
-				childVNode._children === oldVNode._children
-			) {
-				childVNode._nextDom = startDom = reorderChildren(
-					childVNode,
-					startDom,
-					parentDom
-				);
+			if (typeof childVNode.type == 'function') {
+				if (childVNode._children === oldVNode._children) {
+					startDom = reorderChildren(childVNode, startDom, parentDom);
+				} else {
+					startDom = nextDomSibling;
+				}
 			} else {
 				startDom = placeChild(
 					parentDom,
@@ -181,15 +182,6 @@ export function diffChildren(
 				// @ts-ignore We have validated that the type of parentDOM is 'option'
 				// in the above check
 				parentDom.value = '';
-			} else if (typeof newParentVNode.type == 'function') {
-				// Because the newParentVNode is Fragment-like, we need to set it's
-				// _nextDom property to the nextSibling of its last child DOM node.
-				//
-				// `startDom` contains the correct value here because if the last child
-				// is a Fragment-like, then startDom has already been set to that
-				// child's _nextDom. If the last child is a DOM VNode, then startDom
-				// will be set to that DOM node's nextSibling.
-				newParentVNode._nextDom = startDom;
 			}
 		} else if (
 			startDom &&
@@ -210,12 +202,11 @@ export function diffChildren(
 			if (
 				typeof newParentVNode.type == 'function' &&
 				oldChildren[i]._dom != null &&
-				oldChildren[i]._dom == newParentVNode._nextDom
+				oldChildren[i]._dom == startDom
 			) {
-				// If the newParentVNode.__nextDom points to a dom node that is about to
-				// be unmounted, then get the next sibling of that vnode and set
-				// _nextDom to it
-				newParentVNode._nextDom = getDomSibling(oldParentVNode, i + 1);
+				// If the startDom points to a dom node that is about to be unmounted,
+				// then get the next sibling of that vnode and set startDom to it
+				startDom = getDomSibling(oldParentVNode, i + 1);
 			}
 
 			unmount(oldChildren[i], oldChildren[i]);
@@ -228,6 +219,8 @@ export function diffChildren(
 			applyRef(refs[i], refs[++i], refs[++i]);
 		}
 	}
+
+	return startDom;
 }
 
 /**
@@ -292,20 +285,7 @@ function placeChild(
 	newDom,
 	startDom
 ) {
-	if (typeof childVNode.type === 'function') {
-		// Only Fragments or components that return Fragment like VNodes will
-		// have a non-undefined _nextDom. Continue the diff from the sibling
-		// of last DOM child of this child VNode
-		let nextDom = childVNode._nextDom;
-
-		// Eagerly cleanup _nextDom. We don't need to persist the value because
-		// it is only used by `diffChildren` to determine where to resume the diff after
-		// diffing Components and Fragments. Once we store it the nextDOM local var, we
-		// can clean up the property
-		childVNode._nextDom = null;
-
-		return nextDom;
-	} else if (newDom == startDom) {
+	if (newDom == startDom) {
 		// If the newDom and the dom we are expecting to be there are the same, then
 		// do nothing
 		return newDom.nextSibling;

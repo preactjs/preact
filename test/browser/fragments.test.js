@@ -2627,7 +2627,8 @@ describe('Fragment', () => {
 	});
 
 	it('should efficiently unmount Fragment children', () => {
-		// <div>1 => <span>1 and Fragment sibling unmounts. Does <span>1 get correct _nextDom pointer?
+		// <div>2 unmounts. Does Fragment around <div>1 return correct startDom
+		// pointer?
 		function App({ condition }) {
 			return condition ? (
 				<div>
@@ -2662,8 +2663,9 @@ describe('Fragment', () => {
 	});
 
 	it('should efficiently unmount nested Fragment children', () => {
-		// Fragment wrapping <div>2 and <div>3 unmounts. Does <div>1 get correct
-		// _nextDom pointer to efficiently update DOM? _nextDom should be <div>A
+		// Fragment wrapping <div>2 and <div>3 unmounts. Does diffChildren of the
+		// Fragment around <div>1 return the correct startDom to efficiently update
+		// DOM? It should be <div>A
 		function App({ condition }) {
 			return condition ? (
 				<div>
@@ -2706,7 +2708,8 @@ describe('Fragment', () => {
 	});
 
 	it('should efficiently place new children and unmount nested Fragment children', () => {
-		// <div>4 is added and Fragment sibling unmounts. Does <div>4 get correct _nextDom pointer?
+		// <div>4 is added and Fragment sibling unmounts. Does diffChildren of the
+		// Fragment around <div>4 return correct startDom pointer?
 		function App({ condition }) {
 			return condition ? (
 				<div>
@@ -2756,7 +2759,8 @@ describe('Fragment', () => {
 	});
 
 	it('should efficiently unmount nested Fragment children when changing node type', () => {
-		// <div>1 => <span>1 and Fragment sibling unmounts. Does <span>1 get correct _nextDom pointer?
+		// <div>1 => <span>1 and Fragment sibling unmounts. Does Fragment around
+		// <span>1 return correct startDom pointer?
 		function App({ condition }) {
 			return condition ? (
 				<div>
