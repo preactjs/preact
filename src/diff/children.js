@@ -227,10 +227,14 @@ function reorderChildren(childVNode, startDom, parentDom) {
 	for (let tmp = 0; tmp < childVNode._children.length; tmp++) {
 		let vnode = childVNode._children[tmp];
 		if (vnode) {
+			// We typically enter this code path on sCU bailout, where we copy
+			// oldVNode._children to newVNode._children. If that is the case, we need
+			// to update the old children's _parent pointer to point to the newVNode
+			// (childVNode here).
 			vnode._parent = childVNode;
 
 			if (typeof vnode.type == 'function') {
-				reorderChildren(vnode, startDom, parentDom);
+				startDom = reorderChildren(vnode, startDom, parentDom);
 			} else if (vnode._dom == startDom) {
 				startDom = startDom.nextSibling;
 			} else {
