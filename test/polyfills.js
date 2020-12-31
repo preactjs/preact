@@ -55,7 +55,7 @@ chai.use((chai, util) => {
 			this.assert(
 				obj === expectedNode,
 				`${message}: expected #{this} to be #{exp} but got #{act}`,
-				`${message}: expected #{this} not to be #{exp}`,
+				`${message}: expected #	{this} not to be #{exp}`,
 				expectedNode,
 				obj
 			);
@@ -70,15 +70,11 @@ chai.use((chai, util) => {
 // and support for Map and Set objects.
 //
 function patchConsole(method) {
-	Object.defineProperty(window.console, method, {
-		get() {
-			return (...args) => {
-				// @ts-ignore
-				// eslint-disable-next-line no-undef
-				__karma__.log(method, serializeConsoleArgs(args));
-			};
-		}
-	});
+	window.console[method] = (...args) => {
+		// @ts-ignore
+		// eslint-disable-next-line no-undef
+		__karma__.log(method, serializeConsoleArgs(args));
+	};
 }
 
 patchConsole('log');
