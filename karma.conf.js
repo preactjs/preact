@@ -170,7 +170,14 @@ module.exports = function(config) {
 		rollupPreprocessor: {
 			plugins: [
 				require('@rollup/plugin-babel').default({
-					babelHelpers: 'bundled'
+					babelHelpers: 'bundled',
+					exclude: /node_modules/,
+					plugins: [
+						coverage && [
+							'istanbul',
+							{ include: minify ? '**/dist/**/*.js' : '**/src/**/*.js' }
+						]
+					].filter(Boolean)
 				}),
 				require('@rollup/plugin-alias')({
 					entries: {
