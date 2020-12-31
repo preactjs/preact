@@ -8,7 +8,9 @@ var coverage = String(process.env.COVERAGE) === 'true',
 	sauceLabs = ci && !pullRequest && masterBranch,
 	performance = !coverage && String(process.env.PERFORMANCE) !== 'false',
 	webpack = require('webpack'),
-	path = require('path');
+	path = require('path'),
+	errorstacks = require('errorstacks'),
+	kl = require('kolorist');
 
 var sauceLabsLaunchers = {
 	sl_chrome: {
@@ -75,6 +77,18 @@ module.exports = function(config) {
 			coverage ? 'coverage' : [],
 			sauceLabs ? 'saucelabs' : []
 		),
+
+		formatError(msg) {
+			const frames = errorstacks.parseStackTrace(msg);
+			if (!frames.length) return msg;
+
+			const frame = frames[0];
+			const filePath = kl.lightCyan(
+				path.relative(__dirname, frame.sourceFileName)
+			);
+			const location = kl.yellow(`:${frame.line}:${frame.column}`);
+			return `  at ${frame.name} (${filePath}${location})\n`;
+		},
 
 		coverageReporter: {
 			dir: path.join(__dirname, 'coverage'),
