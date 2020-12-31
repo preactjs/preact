@@ -175,6 +175,11 @@ function serialize(value, mode, indent, seen) {
 		case 'boolean':
 			return kl.yellow(String(value));
 		case 'string': {
+			// By default node's built in logging doesn't wrap top level
+			// strings with quotes
+			if (indent === 0) {
+				return String(value);
+			}
 			const quote = /[^\\]"/.test(value) ? '"' : "'";
 			return kl.green(String(quote + value + quote));
 		}
