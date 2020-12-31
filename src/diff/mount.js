@@ -36,17 +36,9 @@ export function mount(
 	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== undefined) return null;
 
-	// // If the previous diff bailed out, resume creating/hydrating.
-	// if (oldVNode._hydrating != null) {
-	// 	isHydrating = oldVNode._hydrating;
-	// 	oldDom = newVNode._dom = oldVNode._dom;
-	// 	// if we resume, we want the tree to be "unlocked"
-	// 	newVNode._hydrating = null;
-	// 	excessDomChildren = [oldDom];
-	// }
-
 	if ((tmp = options._diff)) tmp(newVNode);
 
+	/** @type {import('../internal').PreactElement} */
 	let nextDomSibling;
 
 	try {
@@ -72,6 +64,8 @@ export function mount(
 				commitQueue,
 				isHydrating
 			);
+
+			// @ts-ignore Trust me TS, nextSibling is a PreactElement
 			nextDomSibling = newVNode._dom && newVNode._dom.nextSibling;
 		}
 
@@ -84,6 +78,8 @@ export function mount(
 		// if hydrating or creating initial tree, bailout preserves DOM:
 		if (isHydrating || excessDomChildren != null) {
 			newVNode._dom = startDom;
+
+			// @ts-ignore Trust me TS, nextSibling is a PreactElement
 			nextDomSibling = newVNode._dom && newVNode._dom.nextSibling;
 
 			// _hydrating = true if bailed out during hydration
@@ -97,7 +93,6 @@ export function mount(
 		options._catchError(e, newVNode, newVNode);
 	}
 
-	// @ts-ignore-next
 	return nextDomSibling;
 }
 
@@ -321,29 +316,17 @@ export function mountChildren(
 				firstChildDom = newDom;
 			}
 
-			if (typeof childVNode.type !== 'function') {
-				if (newDom === startDom) {
-					// @ts-ignore-next
-					startDom = mountedNextChild;
-					// startDom = startDom.nextSibling;
-				} else {
-					parentDom.insertBefore(newDom, startDom);
-				}
-				// startDom = mountChild(parentDom, childVNode, newDom, startDom);
-			} else {
+			if (typeof childVNode.type === 'function' || newDom == startDom) {
+				// If the child is a Fragment-like or if it is DOM VNode and its _dom
+				// property matches the dom we are diffing (i.e. startDOM), just
+				// continue with the mountedNextChild
 				startDom = mountedNextChild;
+			} else {
+				// The DOM the diff should begin with is now startDom (since we inserted
+				// newDom before startDom) so ignore mountedNextChild and continue with
+				// startDom
+				parentDom.insertBefore(newDom, startDom);
 			}
-
-			// if (typeof newParentVNode.type == 'function') {
-			// 	// Because the newParentVNode is Fragment-like, we need to set it's
-			// 	// _nextDom property to the nextSibling of its last child DOM node.
-			// 	//
-			// 	// `oldDom` contains the correct value here because if the last child
-			// 	// is a Fragment-like, then oldDom has already been set to that child's _nextDom.
-			// 	// If the last child is a DOM VNode, then oldDom will be set to that DOM
-			// 	// node's nextSibling.
-			// 	newParentVNode._nextDom = startDom;
-			// }
 		}
 	}
 
@@ -365,38 +348,4 @@ export function mountChildren(
 	}
 
 	return startDom;
-}
-
-function mountChild(parentDom, childVNode, newDom, oldDom) {
-	// if (typeof childVNode.type === 'function') {
-	// 	// // Only Fragments or components that return Fragment like VNodes will
-	// 	// // have a non-undefined _nextDom. Continue the diff from the sibling
-	// 	// // of last DOM child of this child VNode
-	// 	// let nextDom = childVNode._nextDom;
-	// 	//
-	// 	// // Eagerly cleanup _nextDom. We don't need to persist the value because
-	// 	// // it is only used by `diffChildren` to determine where to resume the diff after
-	// 	// // diffing Components and Fragments. Once we store it the nextDOM local var, we
-	// 	// // can clean up the property
-	// 	// childVNode._nextDom = null;
-	// 	//
-	// 	// return nextDom;
-	// } else
-	if (newDom == oldDom) {
-		// If newDom and oldDom are the same when mounting (i.e hydrating), then the
-		// node is already in-place. Do nothing and return the next DOM node that
-		// should be hydrated.
-		return newDom.nextSibling;
-	}
-
-	// Hydration and non hydration
-	// Possible follow up related to text node normalization.
-	// Insert before with a non-null oldDom is called during mounting in these
-	// cases:
-	// 1. mounting new vnodes during a diff
-	// 2. mounting mismatched trees during hydration
-	// 3. splitting text nodes during hydration (we don't normalize text
-	//    nodes)
-	parentDom.insertBefore(newDom, oldDom);
-	return oldDom || null;
 }
