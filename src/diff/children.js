@@ -158,14 +158,12 @@ export function diffChildren(
 				} else {
 					startDom = nextDomSibling;
 				}
+			} else if (newDom == startDom) {
+				// If the newDom and the dom we are expecting to be there are the same, then
+				// do nothing
+				startDom = nextDomSibling;
 			} else {
-				startDom = placeChild(
-					parentDom,
-					childVNode,
-					oldChildrenLength,
-					newDom,
-					startDom
-				);
+				startDom = placeChild(parentDom, oldChildrenLength, newDom, startDom);
 			}
 
 			// Browsers will infer an option's `value` from `textContent` when
@@ -236,10 +234,11 @@ function reorderChildren(childVNode, startDom, parentDom) {
 
 			if (typeof vnode.type == 'function') {
 				reorderChildren(vnode, startDom, parentDom);
+			} else if (vnode._dom == startDom) {
+				startDom = startDom.nextSibling;
 			} else {
 				startDom = placeChild(
 					parentDom,
-					vnode,
 					childVNode._children.length,
 					vnode._dom,
 					startDom
@@ -272,24 +271,13 @@ export function toChildArray(children, out) {
 
 /**
  * @param {import('../internal').PreactElement} parentDom
- * @param {import('../internal').VNode} childVNode
  * @param {number} oldChildrenLength
  * @param {import('../internal').PreactElement} newDom
  * @param {import('../internal').PreactElement} startDom
  * @returns {import('../internal').PreactElement}
  */
-function placeChild(
-	parentDom,
-	childVNode,
-	oldChildrenLength,
-	newDom,
-	startDom
-) {
-	if (newDom == startDom) {
-		// If the newDom and the dom we are expecting to be there are the same, then
-		// do nothing
-		return newDom.nextSibling;
-	} else if (startDom == null || newDom.parentNode == null) {
+function placeChild(parentDom, oldChildrenLength, newDom, startDom) {
+	if (startDom == null || newDom.parentNode == null) {
 		// "startDom == null": The diff has finished with existing DOM children and
 		// we are appending new ones.
 		//
