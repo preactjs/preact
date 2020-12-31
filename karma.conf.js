@@ -12,6 +12,17 @@ var coverage = String(process.env.COVERAGE) === 'true',
 	errorstacks = require('errorstacks'),
 	kl = require('kolorist');
 
+// This strips Karma's annoying `LOG: '...'` string from logs
+const orgStdoutWrite = process.stdout.write;
+process.stdout.write = msg => {
+	const match = msg.match(/(LOG|WARN|ERROR):\s'(.*)'/);
+	if (match && match.length >= 3) {
+		msg = match[2] + '\n';
+	}
+
+	return orgStdoutWrite.call(process.stdout, msg);
+};
+
 var sauceLabsLaunchers = {
 	sl_chrome: {
 		base: 'SauceLabs',
