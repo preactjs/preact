@@ -183,7 +183,7 @@ export function renderComponent(
 			isHydrating
 		);
 	} else {
-		diffChildren(
+		nextDomSibling = diffChildren(
 			parentDom,
 			Array.isArray(renderResult) ? renderResult : [renderResult],
 			newVNode,
