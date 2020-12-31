@@ -92,7 +92,7 @@ function serializeConsoleArgs(args) {
 	// format everything into one line if possible and assume a terminal
 	// width of 80 chars
 	if (kl.stripColors(flat.join(', ')).length <= 80) {
-		return ['\n' + flat.join(', ') + '\n'];
+		return [flat.join(', ')];
 	}
 
 	const serialized = args.map(arg => serialize(arg, 'default', 0, new Set()));
