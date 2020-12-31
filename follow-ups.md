@@ -1,5 +1,15 @@
 # Follow ups
 
+## TODOs
+
+* Combine placeChild and unmounting loop?? Do placeChild backwards? Do
+  unmounting first then placeChild loop
+* Consider removing startDom pointer from mounting instead passing it down
+  through _dom prop?
+* Consider further removing _dom pointers from non-dom VNodes
+
+## Other
+
 * `[MAJOR]` Remove select `<option>` IE11 fix in diffChildren and tell users to
   always specify a value attribute for `<option>`. History:
   https://github.com/preactjs/preact/pull/1838
