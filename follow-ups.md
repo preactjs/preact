@@ -4,8 +4,8 @@
 
 * Combine placeChild and unmounting loop?? Do placeChild backwards? Do
   unmounting first then placeChild loop
-* Consider removing startDom pointer from mounting instead passing it down
-  through _dom prop?
+* Remove the need for `excessDomChildren`. Do hydration more similarly to
+  `keyed` if possible.
 * Consider further removing _dom pointers from non-dom VNodes
 
 ## Other
@@ -21,13 +21,10 @@
   this child of parentDom" (in other words, remove all that code from core &
   recommend folks use
   [this technique](https://gist.github.com/developit/f321a9ef092ad39f54f8d7c8f99eb29a))
-* Remove the need for `excessDomChildren`. Do hydration more similarly to
-  `keyed` if possible.
 * Golf everything! Look for @TODO(golf)
-* Unbreak Suspense and Portals 😅
 * Look for ways to optimize DOM element diffing, specifically how we diff props
 	- Investigate diffing props before or after children
   - Investigate inlining the loops in diffProps to capture special props
     (dangerouslySetInnerHTML, value, checked, multiple)
-* Top-level `render()` no longer accepts a `replaceNode` argument, and does not removed unmatched DOM nodes
 * Revisit all replaceNode tests
+	- Top-level `render()` no longer accepts a `replaceNode` argument, and does not removed unmatched DOM nodes
