@@ -201,6 +201,19 @@ module.exports = function(config) {
 				format: 'iife', // Helps prevent naming collisions.
 				name: 'preact', // Required for 'iife' format.
 				sourcemap: 'inline' // Sensible for testing.
+			},
+			onwarn(warning) {
+				// Ignore useless warnings
+				if (
+					![
+						'CIRCULAR_DEPENDENCY', // Doesn't matter in our case
+						'THIS_IS_UNDEFINED', // Babel causes this
+						'EVAL' // ESLint warns for that already
+					].includes(warning.code)
+				) {
+					// eslint-disable-next-line no-console
+					console.log(warning.toString());
+				}
 			}
 		},
 
