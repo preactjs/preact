@@ -11,7 +11,6 @@ import options from '../options';
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').VNode} oldVNode The old virtual node
- * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {boolean} isSvg Whether or not this element is an SVG node
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
@@ -26,7 +25,6 @@ export function diff(
 	parentDom,
 	newVNode,
 	oldVNode,
-	globalContext,
 	isSvg,
 	excessDomChildren,
 	commitQueue,
@@ -59,12 +57,12 @@ export function diff(
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
 			tmp = newType.contextType;
-			let provider = tmp && globalContext[tmp._id];
+			let provider = tmp && newVNode._globalContext[tmp._id];
 			let componentContext = tmp
 				? provider
 					? provider.props.value
 					: tmp._defaultValue
-				: globalContext;
+				: newVNode._globalContext;
 
 			// Get component and set it to `c`
 			if (oldVNode._component) {
@@ -86,7 +84,8 @@ export function diff(
 				c.props = newProps;
 				if (!c.state) c.state = {};
 				c.context = componentContext;
-				c._globalContext = globalContext;
+				// TODO: Hmmm is this necessary....
+				c._globalContext = newVNode._globalContext;
 				isNew = c._dirty = true;
 				c._renderCallbacks = [];
 			}
@@ -181,7 +180,10 @@ export function diff(
 			c.state = c._nextState;
 
 			if (c.getChildContext != null) {
-				globalContext = assign(assign({}, globalContext), c.getChildContext());
+				newVNode._globalContext = assign(
+					assign({}, newVNode._globalContext),
+					c.getChildContext()
+				);
 			}
 
 			if (!isNew && c.getSnapshotBeforeUpdate != null) {
@@ -197,7 +199,6 @@ export function diff(
 				Array.isArray(renderResult) ? renderResult : [renderResult],
 				newVNode,
 				oldVNode,
-				globalContext,
 				isSvg,
 				excessDomChildren,
 				commitQueue,
@@ -230,7 +231,6 @@ export function diff(
 				oldVNode._dom,
 				newVNode,
 				oldVNode,
-				globalContext,
 				isSvg,
 				excessDomChildren,
 				commitQueue,
@@ -282,7 +282,6 @@ export function commitRoot(commitQueue, root) {
  * the virtual nodes being diffed
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').VNode} oldVNode The old virtual node
- * @param {object} globalContext The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {*} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
@@ -294,7 +293,6 @@ function diffElementNodes(
 	dom,
 	newVNode,
 	oldVNode,
-	globalContext,
 	isSvg,
 	excessDomChildren,
 	commitQueue,
@@ -405,7 +403,6 @@ function diffElementNodes(
 				Array.isArray(i) ? i : [i],
 				newVNode,
 				oldVNode,
-				globalContext,
 				newVNode.type === 'foreignObject' ? false : isSvg,
 				excessDomChildren,
 				commitQueue,
@@ -478,7 +475,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 
 	// Must be set to `undefined` to properly clean up `_nextDom`
 	// for which `null` is a valid value. See comment in `create-element.js`
-	vnode._dom = vnode._nextDom = undefined;
+	vnode._globalContext = vnode._dom = vnode._nextDom = undefined;
 
 	if ((r = vnode._component) != null) {
 		if (r.componentWillUnmount) {

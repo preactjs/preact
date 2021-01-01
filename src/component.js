@@ -131,7 +131,6 @@ function renderComponent(component) {
 			parentDom,
 			vnode,
 			oldVNode,
-			component._globalContext,
 			parentDom.ownerSVGElement !== undefined,
 			vnode._hydrating != null ? [oldDom] : null,
 			commitQueue,

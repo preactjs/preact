@@ -30,6 +30,7 @@ export function render(vnode, parentDom, replaceNode) {
 		? null
 		: (replaceNode && replaceNode._children) || parentDom._children;
 	vnode = createElement(Fragment, null, [vnode]);
+	vnode._globalContext = {};
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [];
@@ -39,7 +40,6 @@ export function render(vnode, parentDom, replaceNode) {
 		// our custom `_children` property.
 		((isHydrating ? parentDom : replaceNode || parentDom)._children = vnode),
 		oldVNode || EMPTY_OBJ,
-		EMPTY_OBJ,
 		parentDom.ownerSVGElement !== undefined,
 		replaceNode && !isHydrating
 			? [replaceNode]
