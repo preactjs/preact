@@ -244,11 +244,10 @@
 		"karma-coverage": "^2.0.3",
 		"karma-mocha": "^2.0.1",
 		"karma-mocha-reporter": "^2.2.5",
-		"karma-rollup-preprocessor": "^7.0.5",
+		"karma-rollup2-preprocessor": "^1.0.1",
 		"karma-sauce-launcher": "^4.3.4",
 		"karma-sinon": "^1.0.5",
 		"karma-sourcemap-loader": "^0.3.7",
-		"karma-webpack": "^3.0.5",
 		"kolorist": "^1.2.8",
 		"lint-staged": "^10.5.2",
 		"lodash": "^4.17.20",
@@ -261,7 +260,6 @@
 		"rollup": "^2.35.1",
 		"sinon": "^9.2.1",
 		"sinon-chai": "^3.0.0",
-		"typescript": "3.5.3",
-		"webpack": "^4.44.2"
+		"typescript": "3.5.3"
 	}
 }

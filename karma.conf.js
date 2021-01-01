@@ -7,7 +7,6 @@ var coverage = String(process.env.COVERAGE) === 'true',
 	masterBranch = String(process.env.GITHUB_WORKFLOW) === 'CI-master',
 	sauceLabs = ci && !pullRequest && masterBranch,
 	performance = !coverage && String(process.env.PERFORMANCE) !== 'false',
-	webpack = require('webpack'),
 	path = require('path'),
 	errorstacks = require('errorstacks'),
 	kl = require('kolorist');
@@ -162,7 +161,7 @@ module.exports = function(config) {
 
 		preprocessors: {
 			'{debug,hooks,compat,test-utils,jsx-runtime,}/test/**/*': [
-				'rollup',
+				'rollup2',
 				'sourcemap'
 			]
 		},
@@ -194,7 +193,9 @@ module.exports = function(config) {
 				require('@rollup/plugin-node-resolve').default(),
 				require('@rollup/plugin-commonjs')(),
 				require('@rollup/plugin-replace')({
-					'process.env.NODE_ENV': JSON.stringify('development')
+					COVERAGE: coverage,
+					'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || ''),
+					ENABLE_PERFORMANCE: performance
 				})
 			],
 			output: {
@@ -215,71 +216,6 @@ module.exports = function(config) {
 					console.log(warning.toString());
 				}
 			}
-		},
-
-		webpack: {
-			output: {
-				filename: '[name].js'
-			},
-			mode: 'development',
-			devtool: 'inline-source-map',
-			module: {
-				noParse: [/benchmark\.js$/],
-
-				/* Transpile source and test files */
-				rules: [
-					// Special case for sinon.js which ships ES2015+ code in their
-					// esm bundle
-					{
-						test: /node_modules\/sinon\/.*\.jsx?$/,
-						loader: 'babel-loader'
-					},
-
-					{
-						test: /\.jsx?$/,
-						exclude: /node_modules/,
-						loader: 'babel-loader',
-						options: {
-							plugins: [
-								coverage && [
-									'istanbul',
-									{ include: minify ? '**/dist/**/*.js' : '**/src/**/*.js' }
-								]
-							].filter(Boolean)
-						}
-					}
-				]
-			},
-			resolve: {
-				// The React DevTools integration requires preact as a module
-				// rather than referencing source files inside the module
-				// directly
-				alias: {
-					'preact/debug': subPkgPath('./debug/'),
-					'preact/devtools': subPkgPath('./devtools/'),
-					'preact/compat': subPkgPath('./compat/'),
-					'preact/hooks': subPkgPath('./hooks/'),
-					'preact/test-utils': subPkgPath('./test-utils/'),
-					'preact/jsx-runtime': subPkgPath('./jsx-runtime/'),
-					'preact/jsx-dev-runtime': subPkgPath('./jsx-runtime/'),
-					preact: subPkgPath('')
-				}
-			},
-			plugins: [
-				new webpack.DefinePlugin({
-					coverage: coverage,
-					NODE_ENV: JSON.stringify(process.env.NODE_ENV || ''),
-					ENABLE_PERFORMANCE: performance
-				})
-			],
-			performance: {
-				hints: false
-			}
-		},
-
-		webpackMiddleware: {
-			noInfo: true,
-			stats: 'errors-only'
 		}
 	});
 };
