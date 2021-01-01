@@ -8,7 +8,33 @@ var coverage = String(process.env.COVERAGE) === 'true',
 	sauceLabs = ci && !pullRequest && masterBranch,
 	performance = !coverage && String(process.env.PERFORMANCE) !== 'false',
 	webpack = require('webpack'),
-	path = require('path');
+	path = require('path'),
+	errorstacks = require('errorstacks'),
+	kl = require('kolorist');
+
+// This strips Karma's annoying `LOG: '...'` string from logs
+const orgStdoutWrite = process.stdout.write;
+process.stdout.write = msg => {
+	let out = '';
+	const match = msg.match(/(^|.*\s)(LOG|WARN|ERROR):\s'([\s\S]*)'/);
+	if (match && match.length >= 4) {
+		// Sometimes the UA of the browser will be included in the message
+		if (match[1].length) {
+			out += kl.yellow(kl.italic(match[1]));
+			out += match[3]
+				.split('\n')
+				.map(line => '  ' + line)
+				.join('\n');
+		} else {
+			out += match[3];
+		}
+		out += '\n';
+	} else {
+		out = msg;
+	}
+
+	return orgStdoutWrite.call(process.stdout, out);
+};
 
 var sauceLabsLaunchers = {
 	sl_chrome: {
@@ -75,6 +101,19 @@ module.exports = function(config) {
 			coverage ? 'coverage' : [],
 			sauceLabs ? 'saucelabs' : []
 		),
+
+		formatError(msg) {
+			const frames = errorstacks.parseStackTrace(msg);
+			if (!frames.length || frames[0].column === -1) return '\n' + msg + '\n';
+
+			const frame = frames[0];
+			const filePath = kl.lightCyan(frame.fileName.replace('webpack:///', ''));
+
+			const indentMatch = msg.match(/^(\s*)/);
+			const indent = indentMatch ? indentMatch[1] : '  ';
+			const location = kl.yellow(`:${frame.line}:${frame.column}`);
+			return `${indent}at ${frame.name} (${filePath}${location})\n`;
+		},
 
 		coverageReporter: {
 			dir: path.join(__dirname, 'coverage'),
