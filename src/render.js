@@ -6,8 +6,6 @@ import { mount } from './diff/mount';
 import { patch } from './diff/patch';
 import { getDomSibling } from './component';
 
-const IS_HYDRATE = [];
-
 /**
  * Render a Preact virtual node into a DOM element
  * @param {import('./internal').ComponentChild} vnode The virtual node to render
@@ -19,10 +17,10 @@ const IS_HYDRATE = [];
 export function render(vnode, parentDom, replaceNode) {
 	if (options._root) options._root(vnode, parentDom);
 
-	// We abuse the `replaceNode` parameter in `hydrate()` to signal if we
-	// are in hydration mode or not by passing `IS_HYDRATE` instead of a
-	// DOM element.
-	let isHydrating = replaceNode === IS_HYDRATE;
+	// We abuse the `replaceNode` parameter in `hydrate()` to signal if we are in
+	// hydration mode or not by passing the `hydrate` function instead of a DOM
+	// element. `typeof a === 'function'` compresses well.
+	let isHydrating = typeof replaceNode === 'function';
 
 	// To be able to support calling `render()` multiple times on the same
 	// DOM node, we need to obtain a reference to the previous tree. We do
@@ -93,5 +91,5 @@ export function render(vnode, parentDom, replaceNode) {
  * update
  */
 export function hydrate(vnode, parentDom) {
-	render(vnode, parentDom, IS_HYDRATE);
+	render(vnode, parentDom, hydrate);
 }
