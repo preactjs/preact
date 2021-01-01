@@ -1,4 +1,4 @@
-import { EMPTY_OBJ, EMPTY_ARR } from './constants';
+import { EMPTY_ARR } from './constants';
 import { commitRoot } from './diff/commit';
 import { createElement, Fragment } from './create-element';
 import options from './options';
@@ -6,7 +6,7 @@ import { mount } from './diff/mount';
 import { patch } from './diff/patch';
 import { getDomSibling } from './component';
 
-const IS_HYDRATE = EMPTY_OBJ;
+const IS_HYDRATE = [];
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -62,7 +62,7 @@ export function render(vnode, parentDom, replaceNode) {
 			// our custom `_children` property.
 			newVNode,
 			oldVNode,
-			EMPTY_OBJ,
+			{},
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
 			// Begin diff with replaceNode or find the first non-null child with a dom
@@ -73,7 +73,7 @@ export function render(vnode, parentDom, replaceNode) {
 		mount(
 			parentDom,
 			newVNode,
-			EMPTY_OBJ,
+			{},
 			parentDom.ownerSVGElement !== undefined,
 			excessDomChildren,
 			commitQueue,
