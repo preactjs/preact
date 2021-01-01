@@ -34,7 +34,8 @@ export function render(vnode, parentDom, replaceNode) {
 		: (replaceNode && replaceNode._children) || parentDom._children;
 	vnode = createElement(Fragment, null, [vnode]);
 
-	// List of effects that need to be called after diffing.
+	// Determine the new vnode tree and store it on the DOM element on
+	// our custom `_children` property.
 	let newVNode = ((isHydrating
 		? parentDom
 		: replaceNode || parentDom
@@ -54,12 +55,11 @@ export function render(vnode, parentDom, replaceNode) {
 		replaceNode = excessDomChildren ? excessDomChildren[0] : null;
 	}
 
+	// List of effects that need to be called after diffing.
 	let commitQueue = [];
 	if (oldVNode) {
 		patch(
 			parentDom,
-			// Determine the new vnode tree and store it on the DOM element on
-			// our custom `_children` property.
 			newVNode,
 			oldVNode,
 			{},
