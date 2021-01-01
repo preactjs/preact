@@ -1,6 +1,6 @@
 import { applyRef } from './refs';
 import { normalizeToVNode } from '../create-element';
-import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
+import { EMPTY_ARR } from '../constants';
 import { getDomSibling } from '../component';
 import { mount } from './mount';
 import { patch } from './patch';
@@ -41,13 +41,7 @@ export function diffChildren(
 	/** @type {import('../internal').VNode} */
 	let childVNode;
 
-	// TODO: Remove the next comment and the oldParentVNode falsey check since it
-	// won't be in the new mount/patch world.
-
-	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
-	// as EMPTY_OBJ._children should be `undefined`.
-	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
-
+	let oldChildren = oldParentVNode._children || EMPTY_ARR;
 	let oldChildrenLength = oldChildren.length;
 
 	newParentVNode._children = [];
