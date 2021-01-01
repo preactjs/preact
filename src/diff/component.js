@@ -10,7 +10,6 @@ import { diffChildren } from './children';
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').VNode} oldVNode The old virtual node
- * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {boolean} isSvg Whether or not this element is an SVG node
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
@@ -23,7 +22,6 @@ export function renderComponent(
 	parentDom,
 	newVNode,
 	oldVNode,
-	globalContext,
 	isSvg,
 	commitQueue,
 	startDom,
@@ -41,12 +39,12 @@ export function renderComponent(
 	// Necessary for createContext api. Setting this property will pass
 	// the context value as `this.context` just for this component.
 	tmp = newType.contextType;
-	let provider = tmp && globalContext[tmp._id];
+	let provider = tmp && newVNode._globalContext[tmp._id];
 	let componentContext = tmp
 		? provider
 			? provider.props.value
 			: tmp._defaultValue
-		: globalContext;
+		: newVNode._globalContext;
 
 	if (oldVNode && oldVNode._component) {
 		c = newVNode._component = oldVNode._component;
@@ -67,7 +65,8 @@ export function renderComponent(
 		c.props = newProps;
 		if (!c.state) c.state = {};
 		c.context = componentContext;
-		c._globalContext = globalContext;
+		// TODO: Is this necessary...
+		c._globalContext = newVNode._globalContext;
 		isNew = c._dirty = true;
 		c._renderCallbacks = [];
 	}
@@ -157,7 +156,10 @@ export function renderComponent(
 	c.state = c._nextState;
 
 	if (c.getChildContext != null) {
-		globalContext = assign(assign({}, globalContext), c.getChildContext());
+		newVNode._globalContext = assign(
+			assign({}, newVNode._globalContext),
+			c.getChildContext()
+		);
 	}
 
 	if (!isNew && c.getSnapshotBeforeUpdate != null) {
@@ -175,7 +177,6 @@ export function renderComponent(
 			parentDom,
 			Array.isArray(renderResult) ? renderResult : [renderResult],
 			newVNode,
-			globalContext,
 			isSvg,
 			excessDomChildren,
 			commitQueue,
@@ -188,7 +189,6 @@ export function renderComponent(
 			Array.isArray(renderResult) ? renderResult : [renderResult],
 			newVNode,
 			oldVNode,
-			globalContext,
 			isSvg,
 			commitQueue,
 			startDom

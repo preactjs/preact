@@ -15,8 +15,6 @@ import { unmount } from './unmount';
  * whose children should be diff'ed against oldParentVNode
  * @param {import('../internal').VNode} oldParentVNode The old virtual node
  * whose children should be diff'ed against newParentVNode
- * @param {object} globalContext The current context object - modified by
- * getChildContext
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {Array<import('../internal').Component>} commitQueue List of
  * components which have callbacks to invoke in commitRoot
@@ -28,7 +26,6 @@ export function diffChildren(
 	renderResult,
 	newParentVNode,
 	oldParentVNode,
-	globalContext,
 	isSvg,
 	commitQueue,
 	startDom
@@ -58,6 +55,7 @@ export function diffChildren(
 
 		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;
+		childVNode._globalContext = newParentVNode._globalContext;
 
 		// Check if we find a corresponding element in oldChildren.
 		// If found, delete the array item by setting to `undefined`.
@@ -98,7 +96,6 @@ export function diffChildren(
 			nextDomSibling = mount(
 				parentDom,
 				childVNode,
-				globalContext,
 				isSvg,
 				null,
 				commitQueue,
@@ -113,7 +110,6 @@ export function diffChildren(
 			nextDomSibling = mount(
 				parentDom,
 				childVNode,
-				globalContext,
 				isSvg,
 				[startDom],
 				commitQueue,
@@ -126,7 +122,6 @@ export function diffChildren(
 				parentDom,
 				childVNode,
 				oldVNode,
-				globalContext,
 				isSvg,
 				commitQueue,
 				startDom

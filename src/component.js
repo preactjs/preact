@@ -133,7 +133,6 @@ function rerenderComponent(component) {
 			parentDom,
 			vnode,
 			oldVNode,
-			component._globalContext,
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
 			startDom == null ? getDomSibling(vnode) : startDom

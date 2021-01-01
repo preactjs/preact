@@ -10,7 +10,6 @@ import { renderComponent } from './component';
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
  * @param {import('../internal').VNode} newVNode The new virtual node
- * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {boolean} isSvg Whether or not this element is an SVG node
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
@@ -22,7 +21,6 @@ import { renderComponent } from './component';
 export function mount(
 	parentDom,
 	newVNode,
-	globalContext,
 	isSvg,
 	excessDomChildren,
 	commitQueue,
@@ -47,7 +45,6 @@ export function mount(
 				parentDom,
 				newVNode,
 				null,
-				globalContext,
 				isSvg,
 				commitQueue,
 				startDom,
@@ -58,7 +55,6 @@ export function mount(
 			newVNode._dom = mountDOMElement(
 				null,
 				newVNode,
-				globalContext,
 				isSvg,
 				excessDomChildren,
 				commitQueue,
@@ -100,7 +96,6 @@ export function mount(
  * @param {import('../internal').PreactElement} dom The DOM element representing
  * the virtual nodes being diffed
  * @param {import('../internal').VNode} newVNode The new virtual node
- * @param {object} globalContext The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {*} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
@@ -111,7 +106,6 @@ export function mount(
 function mountDOMElement(
 	dom,
 	newVNode,
-	globalContext,
 	isSvg,
 	excessDomChildren,
 	commitQueue,
@@ -223,7 +217,6 @@ function mountDOMElement(
 				dom,
 				Array.isArray(i) ? i : [i],
 				newVNode,
-				globalContext,
 				newVNode.type === 'foreignObject' ? false : isSvg,
 				excessDomChildren,
 				commitQueue,
@@ -255,7 +248,6 @@ function mountDOMElement(
  * @param {import('../internal').ComponentChildren[]} renderResult
  * @param {import('../internal').VNode} newParentVNode The new virtual
  * node whose children should be diff'ed against oldParentVNode
- * @param {object} globalContext The current context object - modified by getChildContext
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
@@ -267,7 +259,6 @@ export function mountChildren(
 	parentDom,
 	renderResult,
 	newParentVNode,
-	globalContext,
 	isSvg,
 	excessDomChildren,
 	commitQueue,
@@ -290,12 +281,12 @@ export function mountChildren(
 
 		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;
+		childVNode._globalContext = newParentVNode._globalContext;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		mountedNextChild = mount(
 			parentDom,
 			childVNode,
-			globalContext,
 			isSvg,
 			excessDomChildren,
 			commitQueue,

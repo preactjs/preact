@@ -9,7 +9,6 @@ import { renderComponent } from './component';
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').VNode} oldVNode The old virtual node
- * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {boolean} isSvg Whether or not this element is an SVG node
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
@@ -19,7 +18,6 @@ export function patch(
 	parentDom,
 	newVNode,
 	oldVNode,
-	globalContext,
 	isSvg,
 	commitQueue,
 	startDom
@@ -41,7 +39,6 @@ export function patch(
 				parentDom,
 				newVNode,
 				oldVNode,
-				globalContext,
 				isSvg,
 				commitQueue,
 				startDom
@@ -55,7 +52,6 @@ export function patch(
 				oldVNode._dom,
 				newVNode,
 				oldVNode,
-				globalContext,
 				isSvg,
 				commitQueue
 			);
@@ -77,20 +73,12 @@ export function patch(
  * the virtual nodes being diffed
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').VNode} oldVNode The old virtual node
- * @param {object} globalContext The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @returns {import('../internal').PreactElement}
  */
-function patchDOMElement(
-	dom,
-	newVNode,
-	oldVNode,
-	globalContext,
-	isSvg,
-	commitQueue
-) {
+function patchDOMElement(dom, newVNode, oldVNode, isSvg, commitQueue) {
 	let i;
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
@@ -129,7 +117,6 @@ function patchDOMElement(
 				Array.isArray(i) ? i : [i],
 				newVNode,
 				oldVNode,
-				globalContext,
 				newVNode.type === 'foreignObject' ? false : isSvg,
 				commitQueue,
 				// Find the first non-null child with a dom pointer and begin the diff

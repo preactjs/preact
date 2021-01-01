@@ -33,6 +33,7 @@ export function render(vnode, parentDom, replaceNode) {
 		? null
 		: (replaceNode && replaceNode._children) || parentDom._children;
 	vnode = createElement(Fragment, null, [vnode]);
+	vnode._globalContext = {};
 
 	// Determine the new vnode tree and store it on the DOM element on
 	// our custom `_children` property.
@@ -62,7 +63,6 @@ export function render(vnode, parentDom, replaceNode) {
 			parentDom,
 			newVNode,
 			oldVNode,
-			{},
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
 			// Begin diff with replaceNode or find the first non-null child with a dom
@@ -73,7 +73,6 @@ export function render(vnode, parentDom, replaceNode) {
 		mount(
 			parentDom,
 			newVNode,
-			{},
 			parentDom.ownerSVGElement !== undefined,
 			excessDomChildren,
 			commitQueue,

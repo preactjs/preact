@@ -39,6 +39,8 @@ export interface Options extends preact.Options {
 	_skipEffects?: boolean;
 	/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
 	_catchError(error: any, vnode: VNode, oldVNode?: VNode | undefined): void;
+	/** An ID to represent the creation of VNode */
+	_vnodeId?: number;
 }
 
 // Redefine ComponentFactory using our new internal FunctionalComponent interface above
@@ -115,6 +117,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	_hydrating: boolean | null;
 	constructor: undefined;
 	_original: number;
+	_globalContext: any;
 }
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
