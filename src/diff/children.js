@@ -33,7 +33,13 @@ export function diffChildren(
 	commitQueue,
 	startDom
 ) {
-	let i, j, oldVNode, childVNode, newDom, firstChildDom, refs;
+	let i, j, newDom, firstChildDom, refs;
+
+	/** @type {import('../internal').VNode} */
+	let oldVNode;
+
+	/** @type {import('../internal').VNode} */
+	let childVNode;
 
 	// TODO: Remove the next comment and the oldParentVNode falsey check since it
 	// won't be in the new mount/patch world.
@@ -46,7 +52,6 @@ export function diffChildren(
 
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
-		childVNode = renderResult[i];
 		childVNode = newParentVNode._children[i] = normalizeToVNode(
 			renderResult[i]
 		);
@@ -92,12 +97,9 @@ export function diffChildren(
 			}
 		}
 
-		// TODO: Try to not coerce oldVNode to EMPTY_OBJ
-		oldVNode = oldVNode || EMPTY_OBJ;
-
 		let oldVNodeRef;
 		let nextDomSibling;
-		if (oldVNode == EMPTY_OBJ) {
+		if (oldVNode == null) {
 			// We are mounting a new VNode
 			nextDomSibling = mount(
 				parentDom,
@@ -153,7 +155,7 @@ export function diffChildren(
 			}
 
 			if (typeof childVNode.type == 'function') {
-				if (childVNode._children === oldVNode._children) {
+				if (oldVNode != null && childVNode._children === oldVNode._children) {
 					startDom = reorderChildren(childVNode, startDom, parentDom);
 				} else {
 					startDom = nextDomSibling;
@@ -183,6 +185,7 @@ export function diffChildren(
 			}
 		} else if (
 			startDom &&
+			oldVNode != null &&
 			oldVNode._dom == startDom &&
 			startDom.parentNode != parentDom
 		) {
