@@ -70,10 +70,12 @@ chai.use((chai, util) => {
 // and support for Map and Set objects.
 //
 function patchConsole(method) {
+	const original = window.console[method];
 	window.console[method] = (...args) => {
 		// @ts-ignore
 		// eslint-disable-next-line no-undef
 		__karma__.log(method, serializeConsoleArgs(args));
+		original.apply(window.console, args);
 	};
 }
 
