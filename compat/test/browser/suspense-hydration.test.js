@@ -217,12 +217,9 @@ describe('suspense hydration', () => {
 	});
 
 	it('should properly hydrate suspense with Fragment siblings', () => {
-		const originalHtml = ul(
-			[li(0), li(1), li(2), li(3), li(4), li(5)].join('')
-		);
+		const originalHtml = ul([li(0), li(1), li(2), li(3), li(4)].join(''));
 
 		const listeners = [
-			sinon.spy(),
 			sinon.spy(),
 			sinon.spy(),
 			sinon.spy(),
@@ -244,8 +241,8 @@ describe('suspense hydration', () => {
 					<Lazy />
 				</Suspense>
 				<Fragment>
+					<li onClick={listeners[3]}>3</li>
 					<li onClick={listeners[4]}>4</li>
-					<li onClick={listeners[5]}>5</li>
 				</Fragment>
 			</ul>,
 			scratch
@@ -253,16 +250,15 @@ describe('suspense hydration', () => {
 		rerender(); // Flush rerender queue to mimic what preact will really do
 		expect(scratch.innerHTML).to.equal(originalHtml);
 		expect(getLog()).to.deep.equal([]);
-		expect(listeners[5]).not.to.have.been.called;
+		expect(listeners[4]).not.to.have.been.called;
 
 		clearLog();
 		scratch.querySelector('li:last-child').dispatchEvent(createEvent('click'));
-		expect(listeners[5]).to.have.been.calledOnce;
+		expect(listeners[4]).to.have.been.calledOnce;
 
 		return resolve(() => (
 			<Fragment>
 				<li onClick={listeners[2]}>2</li>
-				<li onClick={listeners[3]}>3</li>
 			</Fragment>
 		)).then(() => {
 			rerender();
@@ -271,18 +267,80 @@ describe('suspense hydration', () => {
 			clearLog();
 
 			scratch
-				.querySelector('li:nth-child(4)')
+				.querySelector('li:nth-child(3)')
 				.dispatchEvent(createEvent('click'));
-			expect(listeners[3]).to.have.been.calledOnce;
+			expect(listeners[2]).to.have.been.calledOnce;
 
 			scratch
 				.querySelector('li:last-child')
 				.dispatchEvent(createEvent('click'));
-			expect(listeners[5]).to.have.been.calledTwice;
+			expect(listeners[4]).to.have.been.calledTwice;
 		});
 	});
 
 	it('should properly hydrate suspense with Component & Fragment siblings', () => {
+		const originalHtml = ul([li(0), li(1), li(2), li(3), li(4)].join(''));
+
+		const listeners = [
+			sinon.spy(),
+			sinon.spy(),
+			sinon.spy(),
+			sinon.spy(),
+			sinon.spy()
+		];
+
+		scratch.innerHTML = originalHtml;
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<List>
+				<Fragment>
+					<ListItem onClick={listeners[0]}>0</ListItem>
+					<ListItem onClick={listeners[1]}>1</ListItem>
+				</Fragment>
+				<Suspense>
+					<Lazy />
+				</Suspense>
+				<Fragment>
+					<ListItem onClick={listeners[3]}>3</ListItem>
+					<ListItem onClick={listeners[4]}>4</ListItem>
+				</Fragment>
+			</List>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal(originalHtml);
+		expect(getLog()).to.deep.equal([]);
+		expect(listeners[4]).not.to.have.been.called;
+
+		clearLog();
+		scratch.querySelector('li:last-child').dispatchEvent(createEvent('click'));
+		expect(listeners[4]).to.have.been.calledOnce;
+
+		return resolve(() => (
+			<Fragment>
+				<ListItem onClick={listeners[2]}>2</ListItem>
+			</Fragment>
+		)).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(originalHtml);
+			expect(getLog()).to.deep.equal([]);
+			clearLog();
+
+			scratch
+				.querySelector('li:nth-child(3)')
+				.dispatchEvent(createEvent('click'));
+			expect(listeners[2]).to.have.been.calledOnce;
+
+			scratch
+				.querySelector('li:last-child')
+				.dispatchEvent(createEvent('click'));
+			expect(listeners[4]).to.have.been.calledTwice;
+		});
+	});
+
+	it.skip('should properly hydrate suspense when resolves to a Fragment', () => {
 		const originalHtml = ul(
 			[li(0), li(1), li(2), li(3), li(4), li(5)].join('')
 		);
