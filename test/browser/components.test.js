@@ -6,8 +6,7 @@ import {
 	getMixedArray,
 	mixedArrayHTML,
 	serializeHtml,
-	sortAttributes,
-	spyAll
+	sortAttributes
 } from '../_util/helpers';
 import { div, span, p } from '../_util/dom';
 
@@ -1298,7 +1297,10 @@ describe('Components', () => {
 				}
 			}
 
-			spyAll(Inner.prototype);
+			sinon.spy(Inner.prototype, 'componentWillUnmount');
+			sinon.spy(Inner.prototype, 'componentWillMount');
+			sinon.spy(Inner.prototype, 'componentDidMount');
+			sinon.spy(Inner.prototype, 'render');
 
 			render(<Root />, scratch);
 
@@ -1333,7 +1335,10 @@ describe('Components', () => {
 					return <C />;
 				}
 			}
-			spyAll(Outer.prototype);
+			sinon.spy(Outer.prototype, 'componentWillUnmount');
+			sinon.spy(Outer.prototype, 'componentWillMount');
+			sinon.spy(Outer.prototype, 'componentDidMount');
+			sinon.spy(Outer.prototype, 'render');
 
 			class Inner extends Component {
 				componentWillUnmount() {}
@@ -1343,7 +1348,10 @@ describe('Components', () => {
 					return h('element' + ++counter);
 				}
 			}
-			spyAll(Inner.prototype);
+			sinon.spy(Inner.prototype, 'componentWillUnmount');
+			sinon.spy(Inner.prototype, 'componentWillMount');
+			sinon.spy(Inner.prototype, 'componentDidMount');
+			sinon.spy(Inner.prototype, 'render');
 
 			class Inner2 extends Component {
 				constructor(props, context) {
@@ -1357,7 +1365,10 @@ describe('Components', () => {
 					return h('element' + ++counter);
 				}
 			}
-			spyAll(Inner2.prototype);
+			sinon.spy(Inner2.prototype, 'componentWillUnmount');
+			sinon.spy(Inner2.prototype, 'componentWillMount');
+			sinon.spy(Inner2.prototype, 'componentDidMount');
+			sinon.spy(Inner2.prototype, 'render');
 
 			render(<Outer child={Inner} />, scratch);
 
@@ -1425,7 +1436,9 @@ describe('Components', () => {
 					return <div class="inner">foo</div>;
 				}
 			}
-			spyAll(Inner.prototype);
+			sinon.spy(Inner.prototype, 'componentWillMount');
+			sinon.spy(Inner.prototype, 'componentWillUnmount');
+			sinon.spy(Inner.prototype, 'render');
 
 			const InnerFunc = () => <div class="inner-func">bar</div>;
 
@@ -1466,7 +1479,8 @@ describe('Components', () => {
 					return <I>{children}</I>;
 				}
 			}
-			spyAll(C.prototype);
+			sinon.spy(C.prototype, 'componentWillMount');
+			sinon.spy(C.prototype, 'render');
 			return C;
 		};
 
@@ -1484,7 +1498,7 @@ describe('Components', () => {
 			[C1, C2, C3]
 				.reduce(
 					(acc, c) =>
-						acc.concat(Object.keys(c.prototype).map(key => c.prototype[key])),
+						acc.concat(c.prototype.render, c.prototype.componentWillMount),
 					[F1, F2, F3]
 				)
 				.forEach(c => c.resetHistory());
