@@ -36,7 +36,8 @@ export function diffChildren(
 	oldDom,
 	isHydrating
 ) {
-	let i, j, oldVNode, childVNode, newDom, firstChildDom, refs;
+	let i, j, oldVNode, childVNode, newDom, firstChildDom;
+	let refs = [];
 
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
@@ -159,7 +160,6 @@ export function diffChildren(
 		newDom = childVNode._dom;
 
 		if ((j = childVNode.ref) && oldVNode.ref != j) {
-			if (!refs) refs = [];
 			if (oldVNode.ref) refs.push(oldVNode.ref, null, childVNode);
 			refs.push(j, childVNode._component || newDom, childVNode);
 		}
@@ -253,10 +253,8 @@ export function diffChildren(
 	}
 
 	// Set refs only after unmount
-	if (refs) {
-		for (i = 0; i < refs.length; i++) {
-			applyRef(refs[i], refs[++i], refs[++i]);
-		}
+	for (i = 0; i < refs.length; i++) {
+		applyRef(refs[i], refs[++i], refs[++i]);
 	}
 }
 
