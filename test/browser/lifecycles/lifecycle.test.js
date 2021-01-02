@@ -1,6 +1,6 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component } from 'preact';
-import { setupScratch, teardown, spyAll } from '../../_util/helpers';
+import { setupScratch, teardown } from '../../_util/helpers';
 
 /** @jsx createElement */
 
@@ -627,7 +627,8 @@ describe('Lifecycle methods', () => {
 						return fn(props);
 					}
 				}
-				spyAll(C.prototype);
+				sinon.spy(C.prototype, 'componentWillUnmount');
+				sinon.spy(C.prototype, 'render');
 				return C;
 			};
 
