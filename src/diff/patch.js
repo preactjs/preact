@@ -95,14 +95,14 @@ function patchDOMElement(
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
 
-	// Tracks entering and exiting SVG namespace when descending through the tree.
-	isSvg = newVNode.type === 'svg' || isSvg;
-
 	if (newVNode.type === null) {
 		if (oldProps !== newProps) {
 			dom.data = newProps;
 		}
 	} else {
+		// Tracks entering and exiting SVG namespace when descending through the tree.
+		isSvg = newVNode.type === 'svg' || isSvg;
+
 		let oldHtml = oldProps.dangerouslySetInnerHTML;
 		let newHtml = newProps.dangerouslySetInnerHTML;
 
