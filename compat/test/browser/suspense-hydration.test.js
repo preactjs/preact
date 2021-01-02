@@ -7,7 +7,12 @@ import React, {
 	Suspense
 } from 'preact/compat';
 import { logCall, getLog, clearLog } from '../../../test/_util/logCall';
-import { setupScratch, teardown } from '../../../test/_util/helpers';
+import {
+	createEvent,
+	setupScratch,
+	teardown
+} from '../../../test/_util/helpers';
+import { ul, li } from '../../../test/_util/dom';
 import { createLazy } from './suspense-utils';
 
 /* eslint-env browser, mocha */
@@ -101,6 +106,48 @@ describe('suspense hydration', () => {
 		});
 	});
 
+	it('should properly attach event listeners when suspending while hydrating', () => {
+		scratch.innerHTML = '<div>Hello</div><div>World</div>';
+		clearLog();
+
+		const helloListener = sinon.spy();
+		const worldListener = sinon.spy();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<Suspense>
+				<Lazy />
+				<div onClick={worldListener}>World!</div>
+			</Suspense>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal('<div>Hello</div><div>World!</div>');
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		scratch.querySelector('div:last-child').dispatchEvent(createEvent('click'));
+		expect(worldListener, 'worldListener 1').to.have.been.calledOnce;
+
+		return resolve(() => <div onClick={helloListener}>Hello</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Hello</div><div>World!</div>');
+			expect(getLog()).to.deep.equal([]);
+
+			scratch
+				.querySelector('div:first-child')
+				.dispatchEvent(createEvent('click'));
+			expect(helloListener, 'helloListener').to.have.been.calledOnce;
+
+			scratch
+				.querySelector('div:last-child')
+				.dispatchEvent(createEvent('click'));
+			expect(worldListener, 'worldListener 2').to.have.been.calledTwice;
+
+			clearLog();
+		});
+	});
+
 	it('should allow siblings to update around suspense boundary', () => {
 		scratch.innerHTML = '<div>Count: 0</div><div>Hello</div>';
 		clearLog();
@@ -161,6 +208,72 @@ describe('suspense hydration', () => {
 			expect(scratch.innerHTML).to.equal('<div><div>Hello</div></div>');
 			expect(getLog()).to.deep.equal([]);
 			clearLog();
+		});
+	});
+
+	it('should properly hydrate suspense with Fragment siblings', () => {
+		const originalHtml = ul(
+			[li(0), li(1), li(2), li(3), li(4), li(5)].join('')
+		);
+
+		const listeners = [
+			sinon.spy(),
+			sinon.spy(),
+			sinon.spy(),
+			sinon.spy(),
+			sinon.spy(),
+			sinon.spy()
+		];
+
+		scratch.innerHTML = originalHtml;
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<ul>
+				<Fragment>
+					<li onClick={listeners[0]}>0</li>
+					<li onClick={listeners[1]}>1</li>
+				</Fragment>
+				<Suspense>
+					<Lazy />
+				</Suspense>
+				<Fragment>
+					<li onClick={listeners[4]}>4</li>
+					<li onClick={listeners[5]}>5</li>
+				</Fragment>
+			</ul>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal(originalHtml);
+		expect(getLog()).to.deep.equal([]);
+		expect(listeners[5]).not.to.have.been.called;
+
+		clearLog();
+		scratch.querySelector('li:last-child').dispatchEvent(createEvent('click'));
+		expect(listeners[5]).to.have.been.calledOnce;
+
+		return resolve(() => (
+			<Fragment>
+				<li onClick={listeners[2]}>2</li>
+				<li onClick={listeners[3]}>3</li>
+			</Fragment>
+		)).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(originalHtml);
+			expect(getLog()).to.deep.equal([]);
+			clearLog();
+
+			scratch
+				.querySelector('li:nth-child(4)')
+				.dispatchEvent(createEvent('click'));
+			expect(listeners[3]).to.have.been.calledOnce;
+
+			scratch
+				.querySelector('li:last-child')
+				.dispatchEvent(createEvent('click'));
+			expect(listeners[5]).to.have.been.calledTwice;
 		});
 	});
 
