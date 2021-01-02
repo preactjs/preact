@@ -62,6 +62,7 @@ export function Suspense() {
 Suspense.prototype = new Component();
 
 /**
+ * @this {import('./internal').SuspenseComponent}
  * @param {Promise} promise The thrown promise
  * @param {import('./internal').VNode<any, any>} suspendingVNode The suspending component
  */
@@ -105,7 +106,12 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 
 	const onSuspensionComplete = () => {
 		if (!--c._pendingSuspensionCount) {
-			c._vnode._children[0] = removeOriginal(c.state._suspended);
+			// If the suspension was during hydration we don't need to restore the
+			// suspended children into the _children array
+			if (c.state._suspended) {
+				c._vnode._children[0] = removeOriginal(c.state._suspended);
+			}
+
 			c.setState({ _suspended: (c._detachOnNextRender = null) });
 
 			let suspended;
@@ -121,7 +127,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 	 * While in non-hydration cases the usual fallback -> component flow would occour.
 	 */
 	const wasHydrating = suspendingVNode._hydrating === true;
-	if (!wasHydrating && !c._pendingSuspensionCount++) {
+	if (!c._pendingSuspensionCount++ && !wasHydrating) {
 		c.setState({ _suspended: (c._detachOnNextRender = c._vnode._children[0]) });
 	}
 	promise.then(onResolved, onResolved);
@@ -131,13 +137,20 @@ Suspense.prototype.componentWillUnmount = function() {
 	this._suspenders = [];
 };
 
+/**
+ * @this {import('./internal').SuspenseComponent}
+ * @param {import('./internal').SuspenseComponent["props"]} props
+ * @param {import('./internal').SuspenseState} state
+ */
 Suspense.prototype.render = function(props, state) {
 	if (this._detachOnNextRender) {
 		// When the Suspense's _vnode was created by a call to createVNode
 		// (i.e. due to a setState further up in the tree)
 		// it's _children prop is null, in this case we "forget" about the parked vnodes to detach
-		if (this._vnode._children)
+		if (this._vnode._children) {
 			this._vnode._children[0] = detachedClone(this._detachOnNextRender);
+		}
+
 		this._detachOnNextRender = null;
 	}
 
