@@ -22,6 +22,11 @@ describe('suspense hydration', () => {
 		rerender,
 		unhandledEvents = [];
 
+	const List = ({ children }) => <ul>{children}</ul>;
+	const ListItem = ({ children, onClick = null }) => (
+		<li onClick={onClick}>{children}</li>
+	);
+
 	function onUnhandledRejection(event) {
 		unhandledEvents.push(event);
 	}
@@ -258,6 +263,72 @@ describe('suspense hydration', () => {
 			<Fragment>
 				<li onClick={listeners[2]}>2</li>
 				<li onClick={listeners[3]}>3</li>
+			</Fragment>
+		)).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(originalHtml);
+			expect(getLog()).to.deep.equal([]);
+			clearLog();
+
+			scratch
+				.querySelector('li:nth-child(4)')
+				.dispatchEvent(createEvent('click'));
+			expect(listeners[3]).to.have.been.calledOnce;
+
+			scratch
+				.querySelector('li:last-child')
+				.dispatchEvent(createEvent('click'));
+			expect(listeners[5]).to.have.been.calledTwice;
+		});
+	});
+
+	it('should properly hydrate suspense with Component & Fragment siblings', () => {
+		const originalHtml = ul(
+			[li(0), li(1), li(2), li(3), li(4), li(5)].join('')
+		);
+
+		const listeners = [
+			sinon.spy(),
+			sinon.spy(),
+			sinon.spy(),
+			sinon.spy(),
+			sinon.spy(),
+			sinon.spy()
+		];
+
+		scratch.innerHTML = originalHtml;
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<List>
+				<Fragment>
+					<ListItem onClick={listeners[0]}>0</ListItem>
+					<ListItem onClick={listeners[1]}>1</ListItem>
+				</Fragment>
+				<Suspense>
+					<Lazy />
+				</Suspense>
+				<Fragment>
+					<ListItem onClick={listeners[4]}>4</ListItem>
+					<ListItem onClick={listeners[5]}>5</ListItem>
+				</Fragment>
+			</List>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal(originalHtml);
+		expect(getLog()).to.deep.equal([]);
+		expect(listeners[5]).not.to.have.been.called;
+
+		clearLog();
+		scratch.querySelector('li:last-child').dispatchEvent(createEvent('click'));
+		expect(listeners[5]).to.have.been.calledOnce;
+
+		return resolve(() => (
+			<Fragment>
+				<ListItem onClick={listeners[2]}>2</ListItem>
+				<ListItem onClick={listeners[3]}>3</ListItem>
 			</Fragment>
 		)).then(() => {
 			rerender();
