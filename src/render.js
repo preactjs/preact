@@ -50,7 +50,9 @@ export function render(vnode, parentDom, replaceNode) {
 			: null;
 
 	if (isHydrating) {
-		replaceNode = excessDomChildren ? excessDomChildren[0] : null;
+		newVNode._dom = replaceNode = excessDomChildren
+			? excessDomChildren[0]
+			: null;
 	}
 
 	// List of effects that need to be called after diffing.
@@ -73,7 +75,6 @@ export function render(vnode, parentDom, replaceNode) {
 			newVNode,
 			{},
 			parentDom.ownerSVGElement !== undefined,
-			excessDomChildren,
 			commitQueue,
 			replaceNode || null,
 			isHydrating

@@ -12,7 +12,6 @@ import { renderComponent } from './component';
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {boolean} isSvg Whether or not this element is an SVG node
- * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} startDom
@@ -24,7 +23,6 @@ export function mount(
 	newVNode,
 	globalContext,
 	isSvg,
-	excessDomChildren,
 	commitQueue,
 	startDom,
 	isHydrating
@@ -51,16 +49,14 @@ export function mount(
 				isSvg,
 				commitQueue,
 				startDom,
-				excessDomChildren,
 				isHydrating
 			);
 		} else {
 			newVNode._dom = mountDOMElement(
-				null,
+				newVNode._dom,
 				newVNode,
 				globalContext,
 				isSvg,
-				excessDomChildren,
 				commitQueue,
 				isHydrating
 			);
@@ -76,7 +72,8 @@ export function mount(
 	} catch (e) {
 		newVNode._original = null;
 		// if hydrating or creating initial tree, bailout preserves DOM:
-		if (isHydrating || excessDomChildren != null) {
+		// TODO: include replaceNode
+		if (isHydrating) {
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
 			nextDomSibling = startDom && startDom.nextSibling;
 			newVNode._dom = startDom;
@@ -85,7 +82,8 @@ export function mount(
 			// _hydrating = false if bailed out during mounting
 			// _hydrating = null if it didn't bail out
 			newVNode._hydrating = !!isHydrating;
-			excessDomChildren[excessDomChildren.indexOf(startDom)] = null;
+
+			// excessDomChildren[excessDomChildren.indexOf(startDom)] = null;
 			// ^ could possibly be simplified to:
 			// excessDomChildren.length = 0;
 		}
@@ -102,7 +100,6 @@ export function mount(
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {object} globalContext The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
- * @param {*} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
@@ -113,33 +110,11 @@ function mountDOMElement(
 	newVNode,
 	globalContext,
 	isSvg,
-	excessDomChildren,
 	commitQueue,
 	isHydrating
 ) {
 	let i;
 	let newProps = newVNode.props;
-
-	if (excessDomChildren != null) {
-		for (i = 0; i < excessDomChildren.length; i++) {
-			const child = excessDomChildren[i];
-
-			// if newVNode matches an element in excessDomChildren or the `dom`
-			// argument matches an element in excessDomChildren, remove it from
-			// excessDomChildren so it isn't later removed in diffChildren
-			if (
-				child != null &&
-				((newVNode.type === null
-					? child.nodeType === 3
-					: child.localName === newVNode.type) ||
-					dom == child)
-			) {
-				dom = child;
-				excessDomChildren[i] = null;
-				break;
-			}
-		}
-	}
 
 	if (newVNode.type == null) {
 		if (dom == null) {
@@ -167,8 +142,6 @@ function mountDOMElement(
 				);
 			}
 
-			// we created a new parent, so none of the previously attached children can be reused:
-			excessDomChildren = null;
 			// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
 			isHydrating = false;
 		}
@@ -176,9 +149,11 @@ function mountDOMElement(
 		// @TODO: Consider removing and instructing users to instead set the desired
 		// prop for removal to undefined/null. During hydration, props are not
 		// diffed at all (including dangerouslySetInnerHTML)
-		if (!isHydrating && excessDomChildren != null) {
+		if (!isHydrating) {
 			// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
 			// we should read the existing DOM attributes to diff them
+
+			// TODO: How to make this only for replaceNode
 			for (let i = 0; i < dom.attributes.length; i++) {
 				const name = dom.attributes[i].name;
 				if (!(name in newProps)) {
@@ -213,21 +188,17 @@ function mountDOMElement(
 		} else {
 			i = newVNode.props.children;
 
-			if (excessDomChildren != null) {
-				excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
-			}
-
 			mountChildren(
 				dom,
 				Array.isArray(i) ? i : [i],
 				newVNode,
 				globalContext,
 				newVNode.type === 'foreignObject' ? false : isSvg,
-				excessDomChildren,
 				commitQueue,
-				excessDomChildren != null && excessDomChildren.length > 0
-					? excessDomChildren[0]
-					: null,
+				// excessDomChildren != null && excessDomChildren.length > 0
+				// 	? excessDomChildren[0]
+				// 	: null,
+				null,
 				isHydrating
 			);
 		}
@@ -252,10 +223,9 @@ function mountDOMElement(
  * children are being diffed
  * @param {import('../internal').ComponentChildren[]} renderResult
  * @param {import('../internal').VNode} newParentVNode The new virtual
- * node whose children should be diff'ed against oldParentVNode
+ * node whose children should be diffed against oldParentVNode
  * @param {object} globalContext The current context object - modified by getChildContext
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
- * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} startDom
@@ -267,12 +237,27 @@ export function mountChildren(
 	newParentVNode,
 	globalContext,
 	isSvg,
-	excessDomChildren,
 	commitQueue,
 	startDom,
 	isHydrating
 ) {
-	let i, childVNode, newDom, firstChildDom, mountedNextChild;
+	let i,
+		childVNode,
+		newDom,
+		firstChildDom,
+		mountedNextChild,
+		excessDomChildren,
+		hydrateDom;
+
+	if (isHydrating) {
+		if (typeof newParentVNode.type !== 'function') {
+			// excessDomChildren = EMPTY_ARR.slice.call(parentDom.childNodes);
+			// hydrateDom = startDom = excessDomChildren[0];
+			hydrateDom = startDom = parentDom.childNodes[0];
+		} else {
+			hydrateDom = newParentVNode._dom;
+		}
+	}
 
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
@@ -286,8 +271,28 @@ export function mountChildren(
 			continue;
 		}
 
+		// if (typeof childVNode.type !== 'function' && excessDomChildren != null) {
+		// 	for (i = 0; i < excessDomChildren.length; i++) {
+		// 		const child = excessDomChildren[i];
+		//
+		// 		// if childVNode matches an element in excessDomChildren, remove it from
+		// 		// excessDomChildren so it isn't later removed in diffChildren
+		// 		if (
+		// 			child != null &&
+		// 			(childVNode.type === null
+		// 				? child.nodeType === 3
+		// 				: child.localName === childVNode.type)
+		// 		) {
+		// 			childVNode._dom = child;
+		// 			excessDomChildren[i] = null;
+		// 			break;
+		// 		}
+		// 	}
+		// }
+
 		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;
+		childVNode._dom = hydrateDom;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		mountedNextChild = mount(
@@ -295,7 +300,6 @@ export function mountChildren(
 			childVNode,
 			globalContext,
 			isSvg,
-			excessDomChildren,
 			commitQueue,
 			startDom,
 			isHydrating
@@ -312,7 +316,7 @@ export function mountChildren(
 				// If the child is a Fragment-like or if it is DOM VNode and its _dom
 				// property matches the dom we are diffing (i.e. startDom), just
 				// continue with the mountedNextChild
-				startDom = mountedNextChild;
+				hydrateDom = startDom = mountedNextChild;
 			} else {
 				// The DOM the diff should begin with is now startDom (since we inserted
 				// newDom before startDom) so ignore mountedNextChild and continue with
@@ -328,12 +332,12 @@ export function mountChildren(
 
 	newParentVNode._dom = firstChildDom;
 
-	// Remove children that are not part of any vnode.
-	if (excessDomChildren != null && typeof newParentVNode.type != 'function') {
-		for (i = excessDomChildren.length; i--; ) {
-			if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
-		}
-	}
+	// // Remove children that are not part of any vnode.
+	// if (excessDomChildren != null && typeof newParentVNode.type != 'function') {
+	// 	for (i = excessDomChildren.length; i--; ) {
+	// 		if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
+	// 	}
+	// }
 
 	return startDom;
 }

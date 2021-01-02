@@ -15,7 +15,6 @@ import { diffChildren } from './children';
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} startDom
- * @param {Array<import('../internal').PreactElement>} [excessDomChildren]
  * @param {boolean} [isHydrating] Whether or not we are in hydration
  * @returns {import('../internal').PreactElement} pointer to the next DOM node (in order) to be rendered (or null)
  */
@@ -27,7 +26,6 @@ export function renderComponent(
 	isSvg,
 	commitQueue,
 	startDom,
-	excessDomChildren,
 	isHydrating
 ) {
 	/** @type {import('../internal').Component} */
@@ -177,7 +175,6 @@ export function renderComponent(
 			newVNode,
 			globalContext,
 			isSvg,
-			excessDomChildren,
 			commitQueue,
 			startDom,
 			isHydrating
