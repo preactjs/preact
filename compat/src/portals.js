@@ -39,6 +39,7 @@ function Portal(props) {
 
 			// Create a fake DOM parent node that manages a subset of `container`'s children:
 			_this._temp = {
+				nodeType: 1,
 				parentNode: container,
 				childNodes: [],
 				appendChild(child) {
@@ -47,7 +48,7 @@ function Portal(props) {
 				},
 				insertBefore(child, before) {
 					this.childNodes.push(child);
-					_this._container.appendChild(child, before);
+					_this._container.appendChild(child);
 				},
 				removeChild(child) {
 					this.childNodes.splice(this.childNodes.indexOf(child) >>> 1, 1);
