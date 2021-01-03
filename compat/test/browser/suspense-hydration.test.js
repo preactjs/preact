@@ -2,9 +2,9 @@ import { setupRerender } from 'preact/test-utils';
 import React, {
 	createElement,
 	hydrate,
-	Component,
 	Fragment,
-	Suspense
+	Suspense,
+	useState
 } from 'preact/compat';
 import { logCall, getLog, clearLog } from '../../../test/_util/logCall';
 import {
@@ -12,7 +12,7 @@ import {
 	setupScratch,
 	teardown
 } from '../../../test/_util/helpers';
-import { ul, li } from '../../../test/_util/dom';
+import { ul, li, div } from '../../../test/_util/dom';
 import { createLazy } from './suspense-utils';
 
 /* eslint-env browser, mocha */
@@ -29,21 +29,6 @@ describe('suspense hydration', () => {
 
 	function onUnhandledRejection(event) {
 		unhandledEvents.push(event);
-	}
-
-	/** @type {() => void} */
-	let increment;
-	class Counter extends Component {
-		constructor(props) {
-			super(props);
-
-			this.state = { count: 0 };
-			increment = () => this.setState({ count: ++this.state.count });
-		}
-
-		render(props, { count }) {
-			return <div>Count: {count}</div>;
-		}
 	}
 
 	let resetAppendChild;
@@ -158,6 +143,15 @@ describe('suspense hydration', () => {
 		clearLog();
 
 		const [Lazy, resolve] = createLazy();
+
+		/** @type {() => void} */
+		let increment;
+		function Counter() {
+			const [count, setCount] = useState(0);
+			increment = () => setCount(c => c + 1);
+			return <div>Count: {count}</div>;
+		}
+
 		hydrate(
 			<Fragment>
 				<Counter />
@@ -217,7 +211,7 @@ describe('suspense hydration', () => {
 	});
 
 	it('should properly hydrate suspense with Fragment siblings', () => {
-		const originalHtml = ul([li(0), li(1), li(2), li(3), li(4)].join(''));
+		const originalHtml = ul([li(0), li(1), li(2), li(3), li(4)]);
 
 		const listeners = [
 			sinon.spy(),
@@ -279,7 +273,7 @@ describe('suspense hydration', () => {
 	});
 
 	it('should properly hydrate suspense with Component & Fragment siblings', () => {
-		const originalHtml = ul([li(0), li(1), li(2), li(3), li(4)].join(''));
+		const originalHtml = ul([li(0), li(1), li(2), li(3), li(4)]);
 
 		const listeners = [
 			sinon.spy(),
@@ -340,10 +334,252 @@ describe('suspense hydration', () => {
 		});
 	});
 
-	it.skip('should properly hydrate suspense when resolves to a Fragment', () => {
-		const originalHtml = ul(
-			[li(0), li(1), li(2), li(3), li(4), li(5)].join('')
+	it('should suspend hydration with components with state and event listeners between suspender and Suspense', () => {
+		let html = div([div('Count: 0'), div('Hello')]);
+		scratch.innerHTML = html;
+		clearLog();
+
+		function Counter({ children }) {
+			const [count, setCount] = useState(0);
+			return (
+				<div onClick={() => setCount(count + 1)}>
+					<div>Count: {count}</div>
+					{children}
+				</div>
+			);
+		}
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<Suspense>
+				<Counter>
+					<Lazy />
+				</Counter>
+			</Suspense>,
+			scratch
 		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal(html);
+		expect(getLog()).to.deep.equal(['<div>Count: .appendChild(#text)']);
+		clearLog();
+
+		scratch.firstElementChild.dispatchEvent(createEvent('click'));
+		rerender();
+
+		html = div([div('Count: 1'), div('Hello')]);
+		expect(scratch.innerHTML).to.equal(html);
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		const lazySpy = sinon.spy();
+		return resolve(() => <div onClick={lazySpy}>Hello</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(html);
+			expect(getLog()).to.deep.equal([]);
+			clearLog();
+
+			const lazyDiv = scratch.firstChild.firstChild.nextSibling;
+			expect(lazyDiv.textContent).to.equal('Hello');
+			expect(lazySpy).not.to.have.been.called;
+
+			lazyDiv.dispatchEvent(createEvent('click'));
+			rerender();
+
+			expect(lazySpy).to.have.been.calledOnce;
+		});
+	});
+
+	it('should maintain state of sibling components around suspender', () => {
+		let html = [div('Count: 0'), div('Hello'), div('Count: 0')].join('');
+		scratch.innerHTML = html;
+		clearLog();
+
+		function Counter() {
+			const [count, setCount] = useState(0);
+			return <div onClick={() => setCount(count + 1)}>Count: {count}</div>;
+		}
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<Suspense>
+				<Counter />
+				<Lazy />
+				<Counter />
+			</Suspense>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal(html);
+		expect(getLog()).to.deep.equal([
+			'<div>Count: .appendChild(#text)',
+			'<div>Count: .appendChild(#text)'
+		]);
+		clearLog();
+
+		// Update state of first Counter
+		scratch.firstElementChild.dispatchEvent(createEvent('click'));
+		rerender();
+
+		html = [div('Count: 1'), div('Hello'), div('Count: 0')].join('');
+		expect(scratch.innerHTML).to.equal(html);
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		// Update state of second Counter
+		scratch.lastElementChild.dispatchEvent(createEvent('click'));
+		rerender();
+
+		html = [div('Count: 1'), div('Hello'), div('Count: 1')].join('');
+		expect(scratch.innerHTML).to.equal(html);
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		const lazySpy = sinon.spy();
+		return resolve(() => <div onClick={lazySpy}>Hello</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(html);
+			expect(getLog()).to.deep.equal([]);
+			clearLog();
+
+			const lazyDiv = scratch.firstChild.nextSibling;
+			expect(lazyDiv.textContent).to.equal('Hello');
+			expect(lazySpy).not.to.have.been.called;
+
+			lazyDiv.dispatchEvent(createEvent('click'));
+			rerender();
+
+			expect(lazySpy).to.have.been.calledOnce;
+		});
+	});
+
+	it('should allow component to re-suspend using normal suspension mechanics after initial suspended hydration resumes', () => {
+		const originalHtml = [div('a'), div('b1'), div('c')].join('');
+		scratch.innerHTML = originalHtml;
+		clearLog();
+
+		const bOnClickSpy = sinon.spy();
+		const cOnClickSpy = sinon.spy();
+
+		const [Lazy, resolve] = createLazy();
+
+		/** @type {(c: React.JSX.Element) => void} */
+		let setChild;
+		function App() {
+			// Mimic some state that may cause a suspend
+			const [child, setChildInternal] = useState(<Lazy />);
+			setChild = setChildInternal;
+
+			return (
+				<Suspense fallback={<div>fallback</div>}>
+					<div>a</div>
+					{child}
+					<div onClick={cOnClickSpy}>c</div>
+				</Suspense>
+			);
+		}
+
+		// Validate initial hydration suspend resumes (initial markup stays the same
+		// and event listeners attached)
+		hydrate(<App />, scratch);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML, 'initial HTML').to.equal(originalHtml);
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		scratch.lastChild.dispatchEvent(createEvent('click'));
+		rerender();
+		expect(cOnClickSpy).to.have.been.calledOnce;
+
+		return resolve(() => <div onClick={bOnClickSpy}>b1</div>)
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML, 'hydration resumes').to.equal(originalHtml);
+				expect(getLog()).to.deep.equal([]);
+				clearLog();
+
+				scratch.firstChild.nextSibling.dispatchEvent(createEvent('click'));
+				rerender();
+				expect(bOnClickSpy).to.have.been.calledOnce;
+
+				// suspend again and validate normal suspension works (fallback renders
+				// and result)
+				const [Lazy2, resolve2] = createLazy();
+				setChild(<Lazy2 />);
+				rerender();
+
+				expect(scratch.innerHTML, 'second suspend').to.equal(div('fallback'));
+
+				return resolve2(() => <div onClick={bOnClickSpy}>b2</div>);
+			})
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML, 'second suspend resumes').to.equal(
+					[div('a'), div('b2'), div('c')].join('')
+				);
+
+				scratch.lastChild.dispatchEvent(createEvent('click'));
+				expect(cOnClickSpy).to.have.been.calledTwice;
+
+				scratch.firstChild.nextSibling.dispatchEvent(createEvent('click'));
+				expect(bOnClickSpy).to.have.been.calledTwice;
+			});
+	});
+
+	// Currently not supported. Hydration doesn't set attributes... but should it
+	// when coming back from suspense if props were updated?
+	it.skip('should hydrate and update attributes with latest props', () => {
+		const originalHtml = '<p>Count: 0</p><p data-count="0">Lazy count: 0</p>';
+		scratch.innerHTML = originalHtml;
+		clearLog();
+
+		/** @type {() => void} */
+		let increment;
+		const [Lazy, resolve] = createLazy();
+		function App() {
+			const [count, setCount] = useState(0);
+			increment = () => setCount(c => c + 1);
+
+			return (
+				<Suspense>
+					<p>Count: {count}</p>
+					<Lazy count={count} />
+				</Suspense>
+			);
+		}
+
+		hydrate(<App />, scratch);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal(originalHtml);
+		// Re: DOM OP below - Known issue with hydrating merged text nodes
+		expect(getLog()).to.deep.equal(['<p>Count: .appendChild(#text)']);
+		clearLog();
+
+		increment();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<p>Count: 1</p><p data-count="0">Lazy count: 0</p>'
+		);
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		return resolve(({ count }) => (
+			<p data-count={count}>Lazy count: {count}</p>
+		)).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				'<p>Count: 1</p><p data-count="1">Lazy count: 1</p>'
+			);
+			// Re: DOM OP below - Known issue with hydrating merged text nodes
+			expect(getLog()).to.deep.equal(['<p>Lazy count: .appendChild(#text)']);
+			clearLog();
+		});
+	});
+
+	// Currently not supported, but I wrote the test before I realized that so
+	// leaving it here in case we do support it eventually
+	it.skip('should properly hydrate suspense when resolves to a Fragment', () => {
+		const originalHtml = ul([li(0), li(1), li(2), li(3), li(4), li(5)]);
 
 		const listeners = [
 			sinon.spy(),
@@ -405,13 +641,4 @@ describe('suspense hydration', () => {
 			expect(listeners[5]).to.have.been.calledTwice;
 		});
 	});
-
-	// TODO:
-	// 1. What if props change between when hydrate suspended and suspense
-	//    resolves?
-	// 2. If using real Suspense, test re-suspending after hydrate suspense
-	// 3. Put some DOM and components with state and event listeners between
-	//    suspender and Suspense boundary
-	// 4. Put some sibling DOM and components with state and event listeners
-	//    sibling to suspender and under Suspense boundary
 });
