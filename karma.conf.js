@@ -7,10 +7,12 @@ var coverage = String(process.env.COVERAGE) === 'true',
 	masterBranch = String(process.env.GITHUB_WORKFLOW) === 'CI-master',
 	sauceLabs = ci && !pullRequest && masterBranch,
 	performance = !coverage && String(process.env.PERFORMANCE) !== 'false',
-	webpack = require('webpack'),
 	path = require('path'),
 	errorstacks = require('errorstacks'),
 	kl = require('kolorist');
+
+const babel = require('@babel/core');
+const fs = require('fs').promises;
 
 // This strips Karma's annoying `LOG: '...'` string from logs
 const orgStdoutWrite = process.stdout.write;
@@ -86,8 +88,108 @@ var localLaunchers = {
 	}
 };
 
-const subPkgPath = pkgName =>
-	path.join(__dirname, pkgName, !minify ? 'src' : '');
+const subPkgPath = pkgName => {
+	const parts = !minify ? ['src', 'index.js'] : [];
+	return path.join(__dirname, pkgName, ...parts);
+};
+
+// Esbuild plugin for aliasing + babel pass
+function createEsbuildPlugin() {
+	const pending = new Map();
+	const cache = new Map();
+
+	const rename = {};
+	const mangle = require('./mangle.json');
+	for (let prop in mangle.props.props) {
+		let name = prop;
+		if (name[0] === '$') {
+			name = name.slice(1);
+		}
+
+		rename[name] = mangle.props.props[prop];
+	}
+
+	const alias = {
+		'preact/debug': subPkgPath('./debug/'),
+		'preact/devtools': subPkgPath('./devtools/'),
+		'preact/compat': subPkgPath('./compat/'),
+		'preact/hooks': subPkgPath('./hooks/'),
+		'preact/test-utils': subPkgPath('./test-utils/'),
+		'preact/jsx-runtime': subPkgPath('./jsx-runtime/'),
+		'preact/jsx-dev-runtime': subPkgPath('./jsx-runtime/'),
+		preact: subPkgPath('')
+	};
+	return {
+		name: 'custom',
+		setup(build) {
+			// Aliasing: If "MINIFY" is set to "true" we use the dist/
+			// files instead of those from src/
+			build.onResolve({ filter: /^preact.*/ }, args => {
+				const pkg = alias[args.path];
+				return {
+					path: pkg,
+					namespace: 'preact'
+				};
+			});
+
+			// Apply babel pass whenever we load a .js file
+			build.onLoad({ filter: /\.js$/ }, async args => {
+				const contents = await fs.readFile(args.path, 'utf-8');
+
+				// Using a cache is crucial as babel is 30x slower than esbuild
+				const cached = cache.get(args.path);
+				if (cached && cached.input === contents) {
+					return {
+						contents: cached.result,
+						resolveDir: path.dirname(args.path),
+						loader: 'js'
+					};
+				}
+
+				let result = contents;
+
+				// Check if somebody already requested the current file. If they
+				// did than we push a listener instead of doing a duplicate
+				// transform of the same file. This is crucial for build perf.
+				if (!pending.has(args.path)) {
+					pending.set(args.path, []);
+
+					const tmp = await babel.transformAsync(result, {
+						filename: args.path,
+						plugins: [
+							coverage && [
+								'istanbul',
+								{
+									include: minify ? '**/dist/**/*.js' : '**/src/**/*.js'
+								}
+							]
+						].filter(Boolean)
+					});
+					result = tmp.code || result;
+					cache.set(args.path, { input: contents, result });
+
+					// Fire all pending listeners that are waiting on the same
+					// file transformation
+					const waited = pending.get(args.path);
+					pending.delete(args.path);
+					waited.forEach(fn => fn());
+				} else {
+					// Subscribe to the existing transformation completion call
+					await new Promise(r => {
+						pending.get(args.path).push(r);
+					});
+					result = cache.get(args.path).result;
+				}
+
+				return {
+					contents: result,
+					resolveDir: path.dirname(args.path),
+					loader: 'js'
+				};
+			});
+		}
+	};
+}
 
 module.exports = function(config) {
 	config.set({
@@ -156,80 +258,29 @@ module.exports = function(config) {
 				pattern:
 					config.grep ||
 					'{debug,hooks,compat,test-utils,jsx-runtime,}/test/{browser,shared}/**/*.test.js',
-				watched: false
+				watched: false,
+				type: 'js'
 			}
 		],
 
+		mime: {
+			'text/javascript': ['js', 'jsx']
+		},
+
 		preprocessors: {
 			'{debug,hooks,compat,test-utils,jsx-runtime,}/test/**/*': [
-				'webpack',
+				'esbuild',
 				'sourcemap'
 			]
 		},
 
-		webpack: {
-			output: {
-				filename: '[name].js'
+		esbuild: {
+			define: {
+				COVERAGE: coverage,
+				'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || ''),
+				ENABLE_PERFORMANCE: performance
 			},
-			mode: 'development',
-			devtool: 'inline-source-map',
-			module: {
-				noParse: [/benchmark\.js$/],
-
-				/* Transpile source and test files */
-				rules: [
-					// Special case for sinon.js which ships ES2015+ code in their
-					// esm bundle
-					{
-						test: /node_modules\/sinon\/.*\.jsx?$/,
-						loader: 'babel-loader'
-					},
-
-					{
-						test: /\.jsx?$/,
-						exclude: /node_modules/,
-						loader: 'babel-loader',
-						options: {
-							plugins: [
-								coverage && [
-									'istanbul',
-									{ include: minify ? '**/dist/**/*.js' : '**/src/**/*.js' }
-								]
-							].filter(Boolean)
-						}
-					}
-				]
-			},
-			resolve: {
-				// The React DevTools integration requires preact as a module
-				// rather than referencing source files inside the module
-				// directly
-				alias: {
-					'preact/debug': subPkgPath('./debug/'),
-					'preact/devtools': subPkgPath('./devtools/'),
-					'preact/compat': subPkgPath('./compat/'),
-					'preact/hooks': subPkgPath('./hooks/'),
-					'preact/test-utils': subPkgPath('./test-utils/'),
-					'preact/jsx-runtime': subPkgPath('./jsx-runtime/'),
-					'preact/jsx-dev-runtime': subPkgPath('./jsx-runtime/'),
-					preact: subPkgPath('')
-				}
-			},
-			plugins: [
-				new webpack.DefinePlugin({
-					COVERAGE: coverage,
-					NODE_ENV: JSON.stringify(process.env.NODE_ENV || ''),
-					ENABLE_PERFORMANCE: performance
-				})
-			],
-			performance: {
-				hints: false
-			}
-		},
-
-		webpackMiddleware: {
-			noInfo: true,
-			stats: 'errors-only'
+			plugins: [createEsbuildPlugin()]
 		}
 	});
 };

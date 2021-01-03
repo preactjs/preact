@@ -2,6 +2,7 @@ module.exports = function(api) {
 	api.cache(true);
 
 	const minify = String(process.env.MINIFY) === 'true';
+	const noModules = String(process.env.BABEL_NO_MODULES) === 'true';
 
 	const rename = {};
 	const mangle = require('./mangle.json');
@@ -20,6 +21,8 @@ module.exports = function(api) {
 				'@babel/preset-env',
 				{
 					loose: true,
+					// Don't transform modules when using esbuild
+					modules: noModules ? false : 'auto',
 					exclude: ['@babel/plugin-transform-typeof-symbol'],
 					targets: {
 						browsers: ['last 2 versions', 'IE >= 9']
