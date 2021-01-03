@@ -89,8 +89,16 @@ var localLaunchers = {
 };
 
 const subPkgPath = pkgName => {
-	const parts = !minify ? ['src', 'index.js'] : [];
-	return path.join(__dirname, pkgName, ...parts);
+	if (!minify) {
+		return path.join(__dirname, pkgName, 'src', 'index.js');
+	}
+
+	// Resolve from package.exports field
+	const stripped = pkgName.replace(/[/\\./]/g, '');
+	const pkgJson = path.join(__dirname, 'package.json');
+	const pkgExports = require(pkgJson).exports;
+	const file = pkgExports[stripped ? `./${stripped}` : '.'].browser;
+	return path.join(__dirname, file);
 };
 
 // Esbuild plugin for aliasing + babel pass
