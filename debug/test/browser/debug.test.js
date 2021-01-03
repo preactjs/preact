@@ -119,23 +119,26 @@ describe('debug', () => {
 
 	it('should warn when accessing certain attributes', () => {
 		const vnode = h('div', null);
-		vnode;
-		vnode.attributes;
+
+		// Push into an array to avoid empty statements being dead code eliminated
+		const res = [];
+		res.push(vnode);
+		res.push(vnode.attributes);
 		expect(console.warn).to.be.calledOnce;
 		expect(console.warn.args[0]).to.match(/use vnode.props/);
-		vnode.nodeName;
+		res.push(vnode.nodeName);
 		expect(console.warn).to.be.calledTwice;
 		expect(console.warn.args[1]).to.match(/use vnode.type/);
-		vnode.children;
+		res.push(vnode.children);
 		expect(console.warn).to.be.calledThrice;
 		expect(console.warn.args[2]).to.match(/use vnode.props.children/);
 
 		// Should only warn once
-		vnode.attributes;
+		res.push(vnode.attributes);
 		expect(console.warn).to.be.calledThrice;
-		vnode.nodeName;
+		res.push(vnode.nodeName);
 		expect(console.warn).to.be.calledThrice;
-		vnode.children;
+		res.push(vnode.children);
 		expect(console.warn).to.be.calledThrice;
 
 		vnode.attributes = {};
@@ -152,6 +155,9 @@ describe('debug', () => {
 		expect(console.warn.args.length).to.equal(6);
 		vnode.children = [];
 		expect(console.warn.args.length).to.equal(6);
+
+		// Mark res as used, otherwise it will be dead code eliminated
+		expect(res.length).to.equal(7);
 	});
 
 	it('should warn when calling setState inside the constructor', () => {
