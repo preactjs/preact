@@ -90,6 +90,7 @@ export function initDebug() {
 					'Check if the element is available in the DOM/has the correct id.'
 			);
 		}
+
 		let isValid;
 		switch (parentNode.nodeType) {
 			case ELEMENT_NODE:

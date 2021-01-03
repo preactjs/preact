@@ -6,7 +6,7 @@ import * as PropTypes from 'prop-types';
 
 // eslint-disable-next-line no-duplicate-imports
 import { resetPropWarnings } from 'preact/debug';
-import { forwardRef } from 'preact/compat';
+import { forwardRef, createPortal } from 'preact/compat';
 
 const h = createElement;
 /** @jsx createElement */
@@ -29,6 +29,18 @@ describe('debug compat', () => {
 		(console.error).restore();
 		console.warn.restore();
 		teardown(scratch);
+	});
+
+	describe('portals', () => {
+		it('should not throw an invalid render argument for a portal.', () => {
+			let root = document.createElement('div');
+			document.body.appendChild(root);
+
+			function Foo(props) {
+				return <div>{createPortal(props.children, root)}</div>;
+			}
+			expect(() => render(<Foo>foobar</Foo>, scratch)).not.to.throw();
+		});
 	});
 
 	describe('PropTypes', () => {
