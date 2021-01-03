@@ -217,7 +217,7 @@ module.exports = function(config) {
 			},
 			plugins: [
 				new webpack.DefinePlugin({
-					coverage: coverage,
+					COVERAGE: coverage,
 					NODE_ENV: JSON.stringify(process.env.NODE_ENV || ''),
 					ENABLE_PERFORMANCE: performance
 				})

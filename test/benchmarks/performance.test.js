@@ -1,4 +1,4 @@
-/*global coverage, ENABLE_PERFORMANCE*/
+/*global COVERAGE, ENABLE_PERFORMANCE*/
 /*eslint no-console:0*/
 /** @jsx createElement */
 import { setupScratch, teardown } from '../_util/helpers';
@@ -9,7 +9,7 @@ import {
 	hydrate
 } from 'preact/dist/preact.module';
 
-const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
+const MULTIPLIER = ENABLE_PERFORMANCE ? (COVERAGE ? 5 : 1) : 999999;
 
 // let now = typeof performance!=='undefined' && performance.now ? () => performance.now() : () => +new Date();
 if (typeof performance == 'undefined') {
@@ -67,7 +67,7 @@ describe('performance', function() {
 
 	before(function() {
 		if (!ENABLE_PERFORMANCE) this.skip();
-		if (coverage) {
+		if (COVERAGE) {
 			console.warn(
 				'WARNING: Code coverage is enabled, which dramatically reduces performance. Do not pay attention to these numbers.'
 			);
