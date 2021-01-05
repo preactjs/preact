@@ -659,7 +659,6 @@ describe('suspense', () => {
 		});
 	});
 
-	// TODO: Fix this test
 	it('should allow children to update state while suspending', () => {
 		/** @type {(state: { s: string }) => void} */
 		let setState;
@@ -1678,7 +1677,7 @@ describe('suspense', () => {
 		expect(scratch.innerHTML).to.eql(`<div>conditional hide</div>`);
 	});
 
-	xit('should support sCU=false when un-suspending', () => {
+	it('should support sCU=false when un-suspending', () => {
 		// See #2176 #2125
 		const [Suspender, suspend] = createSuspender(() => <div>Hello</div>);
 
@@ -1762,23 +1761,139 @@ describe('suspense', () => {
 
 		rerender();
 
-		/**
-		 * These currently failing assertion shows the issue that we currently unmount
-		 * the suspended tree (unlike react, which adds a display="none") and block any
-		 * further processing on that tree. Thus updates below a suspended Suspense are
-		 * getting lost.
-		 */
 		expect(log).to.eql(['construct', 'render', 'render']);
-
-		/**
-		 * When the above assertion will hold true we will certainly run into the second issue
-		 * here. The problem is that we do not remove suspensions from an instance of Suspense
-		 * when one of its suspending children no longer throws because of a state
-		 * update.
-		 */
 		expect(scratch.innerHTML).to.eql(
 			'<section><div>Suspender un-suspended</div></section>'
 		);
+	});
+
+	it('should allow multiple suspended children to update', () => {
+		function createSuspender() {
+			let suspender;
+			class Suspender extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { promise: new Promise(() => {}) };
+					suspender = this;
+				}
+
+				unsuspend(content) {
+					this.setState({ promise: null, content });
+				}
+
+				render() {
+					if (this.state.promise) {
+						throw this.state.promise;
+					}
+
+					return this.state.content;
+				}
+			}
+			return [content => suspender.unsuspend(content), Suspender];
+		}
+
+		const [unsuspender1, Suspender1] = createSuspender();
+		const [unsuspender2, Suspender2] = createSuspender();
+
+		render(
+			<section>
+				<Suspense fallback={<div>fallback</div>}>
+					<Suspender1 />
+					<div>
+						<Suspender2 />
+					</div>
+				</Suspense>
+			</section>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql('<section><div></div></section>');
+
+		// this rerender is needed because of Suspense issuing a forceUpdate itself
+		rerender();
+		expect(scratch.innerHTML).to.eql('<section><div>fallback</div></section>');
+
+		unsuspender1(
+			<>
+				<div>Suspender un-suspended 1</div>
+				<div>Suspender un-suspended 2</div>
+			</>
+		);
+
+		rerender();
+		expect(scratch.innerHTML).to.eql('<section><div>fallback</div></section>');
+
+		unsuspender2(<div>Suspender 2</div>);
+
+		rerender();
+		expect(scratch.innerHTML).to.eql(
+			'<section><div>Suspender un-suspended 1</div><div>Suspender un-suspended 2</div><div><div>Suspender 2</div></div></section>'
+		);
+	});
+
+	it('should allow suspended children children to update', () => {
+		function Suspender({ promise, content }) {
+			if (promise) {
+				throw promise;
+			}
+			return content;
+		}
+
+		let parent;
+		class Parent extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { promise: new Promise(() => {}), condition: true };
+				parent = this;
+			}
+
+			render() {
+				const { condition, promise, content } = this.state;
+				if (condition) {
+					return <Suspender promise={promise} content={content} />;
+				}
+				return <div>Parent</div>;
+			}
+		}
+
+		render(
+			<section>
+				<Suspense fallback={<div>fallback</div>}>
+					<Parent />
+				</Suspense>
+			</section>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql('<section></section>');
+
+		// this rerender is needed because of Suspense issuing a forceUpdate itself
+		rerender();
+		expect(scratch.innerHTML).to.eql('<section><div>fallback</div></section>');
+
+		// hide the <Suspender /> thus unsuspends
+		parent.setState({ condition: false });
+
+		rerender();
+		expect(scratch.innerHTML).to.eql('<section><div>Parent</div></section>');
+
+		// show the <Suspender /> thus re-suspends
+		parent.setState({ condition: true });
+		rerender();
+
+		expect(scratch.innerHTML).to.eql('<section><div>fallback</div></section>');
+
+		// update state so that <Suspender /> no longer suspends
+		parent.setState({ promise: null, content: <div>Content</div> });
+		rerender();
+
+		expect(scratch.innerHTML).to.eql('<section><div>Content</div></section>');
+
+		// hide the <Suspender /> again
+		parent.setState({ condition: false });
+		rerender();
+
+		expect(scratch.innerHTML).to.eql('<section><div>Parent</div></section>');
 	});
 
 	it('should render delayed lazy components through components using shouldComponentUpdate', () => {

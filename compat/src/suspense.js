@@ -59,12 +59,10 @@ function removeOriginal(vnode, detachedParent, originalParent) {
 			);
 		if (vnode._component) {
 			if (vnode._component._parentDom === detachedParent) {
-				if (
-					vnode._component.base &&
-					vnode._component.base.parentElement === vnode._component._parentDom
-				) {
-					originalParent.insertBefore(vnode._component.base, vnode._nextDom);
+				if (vnode._dom) {
+					originalParent.insertBefore(vnode._dom, vnode._nextDom);
 				}
+				vnode._component._force = true;
 				vnode._component._parentDom = originalParent;
 			}
 		}
