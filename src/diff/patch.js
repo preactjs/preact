@@ -5,7 +5,7 @@ import { diffProps, setProperty } from './props';
 import { assign } from '../util';
 import options from '../options';
 import { doRender } from './mount';
-import { Component } from '../component';
+import { Component, getDomSibling } from '../component';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -17,10 +17,7 @@ import { Component } from '../component';
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @param {import('../internal').PreactElement} oldDom The current attached DOM
- * element any new dom elements should be placed around. Likely `null` on first
- * render (except when hydrating). Can be a sibling DOM element when diffing
- * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
+ * @param {import('../internal').PreactElement} startDom
  */
 export function patch(
 	parentDom,
@@ -30,7 +27,7 @@ export function patch(
 	isSvg,
 	excessDomChildren,
 	commitQueue,
-	oldDom
+	startDom
 ) {
 	let tmp,
 		newType = newVNode.type;
@@ -50,7 +47,7 @@ export function patch(
 				isSvg,
 				excessDomChildren,
 				commitQueue,
-				oldDom
+				startDom
 			);
 		} else if (
 			excessDomChildren == null &&
@@ -86,7 +83,7 @@ export function patch(
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @param {import('../internal').PreactElement} oldDom The current attached DOM
+ * @param {import('../internal').PreactElement} startDom The current attached DOM
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
@@ -99,7 +96,7 @@ function patchComponent(
 	isSvg,
 	excessDomChildren,
 	commitQueue,
-	oldDom
+	startDom
 ) {
 	/** @type {import('../internal').Component} */
 	let c;
@@ -237,7 +234,7 @@ function patchComponent(
 		isSvg,
 		excessDomChildren,
 		commitQueue,
-		oldDom,
+		startDom,
 		false
 	);
 
@@ -318,7 +315,9 @@ function patchDOMElement(
 				newVNode.type === 'foreignObject' ? false : isSvg,
 				null,
 				commitQueue,
-				EMPTY_OBJ,
+				// Find the first non-null child with a dom pointer and begin the diff
+				// with that (i.e. what getDomSibling does)
+				getDomSibling(oldVNode, 0),
 				false
 			);
 		}

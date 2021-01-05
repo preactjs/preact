@@ -120,7 +120,7 @@ export function getDomSibling(vnode, childIndex) {
  */
 function renderComponent(component) {
 	let vnode = component._vnode,
-		oldDom = vnode._dom,
+		startDom = vnode._dom,
 		parentDom = component._parentDom;
 
 	if (parentDom) {
@@ -134,14 +134,14 @@ function renderComponent(component) {
 			oldVNode,
 			component._globalContext,
 			parentDom.ownerSVGElement !== undefined,
-			vnode._hydrating != null ? [oldDom] : null,
+			vnode._hydrating != null ? [startDom] : null,
 			commitQueue,
-			oldDom == null ? getDomSibling(vnode) : oldDom,
+			startDom == null ? getDomSibling(vnode) : startDom,
 			vnode._hydrating
 		);
 		commitRoot(commitQueue, vnode);
 
-		if (vnode._dom != oldDom) {
+		if (vnode._dom != startDom) {
 			updateParentDomPointers(vnode);
 		}
 	}
