@@ -216,7 +216,6 @@
 		"@types/chai": "^4.1.2",
 		"@types/mocha": "^5.0.0",
 		"@types/node": "^14.14.10",
-		"babel-loader": "^8.0.6",
 		"babel-plugin-istanbul": "^6.0.0",
 		"babel-plugin-transform-async-to-promises": "^0.8.15",
 		"babel-plugin-transform-rename-properties": "0.1.0",
