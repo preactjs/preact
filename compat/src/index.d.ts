@@ -125,4 +125,16 @@ declare namespace React {
 		only: (children: preact.ComponentChildren) => preact.ComponentChild;
 		toArray: (children: preact.ComponentChildren) => preact.VNode<{}>[];
 	};
+
+	// scheduler
+	export const unstable_ImmediatePriority: number;
+	export const unstable_UserBlockingPriority: number;
+	export const unstable_NormalPriority: number;
+	export const unstable_LowPriority: number;
+	export const unstable_IdlePriority: number;
+	export function unstable_runWithPriority(
+		priority: number,
+		callback: () => void
+	): void;
+	export const unstable_now: () => number;
 }
