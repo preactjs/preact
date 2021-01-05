@@ -61,6 +61,7 @@
       "$_id": "__c",
       "$_contextRef": "__",
       "$_parentDom": "__P",
+      "$_originalParentDom": "__O",
       "$_prevState": "__u",
       "$_root": "__",
       "$_diff": "__b",
@@ -72,7 +73,8 @@
       "$_owner": "__o",
       "$_skipEffects": "__s",
       "$_rerenderCount": "__r",
-      "$_forwarded": "__f"
+      "$_forwarded": "__f",
+      "$_isSuspended": "__i"
     }
   }
 }
