@@ -6,15 +6,6 @@ import { mount } from './diff/mount';
 import { patch } from './diff/patch';
 
 /**
- * Find the DOM for a given VNode
- * @param {import('./internal').VNode} vnode
- */
-function findDomNode(vnode) {
-	return vnode._dom;
-	// return vnode._dom || vnode._children.filter(findDomNode)[0];
-}
-
-/**
  * Render a Preact virtual node into a DOM element
  * @param {import('./internal').ComponentChild} vnode The virtual node to render
  * @param {import('./internal').PreactElement} parentDom The DOM element to
@@ -78,7 +69,8 @@ export function render(vnode, parentDom, replaceNode) {
 		mode = MODE_MUTATIVE_HYDRATE;
 		startDom = replaceNode;
 	} else if (oldVNode) {
-		startDom = findDomNode(oldVNode);
+		// Eventually, this'll be something like findDomNode(oldVnode)
+		startDom = oldVNode._dom;
 	} else if (startDom) {
 		mode = MODE_MUTATIVE_HYDRATE;
 	}

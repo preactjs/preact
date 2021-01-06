@@ -37,8 +37,6 @@ export function mount(
 	/** @type {import('../internal').PreactElement} */
 	let nextDomSibling;
 
-	const isHydrating = newVNode._mode === MODE_HYDRATE;
-
 	try {
 		if (typeof newType == 'function') {
 			nextDomSibling = renderComponent(
@@ -48,8 +46,7 @@ export function mount(
 				globalContext,
 				isSvg,
 				commitQueue,
-				startDom,
-				isHydrating
+				startDom
 			);
 		} else {
 			newVNode._dom = mountDOMElement(
@@ -74,7 +71,7 @@ export function mount(
 		newVNode._original = null;
 		// if hydrating or creating initial tree, bailout preserves DOM:
 		// TODO: include replaceNode
-		if (isHydrating) {
+		if (newVNode._mode === MODE_HYDRATE) {
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
 			nextDomSibling = startDom && startDom.nextSibling;
 			newVNode._dom = startDom;
@@ -82,7 +79,7 @@ export function mount(
 			// _hydrating = true if bailed out during hydration
 			// _hydrating = false if bailed out during mounting
 			// _hydrating = null if it didn't bail out
-			newVNode._hydrating = !!isHydrating;
+			newVNode._hydrating = newVNode._mode === MODE_HYDRATE;
 
 			// excessDomChildren[excessDomChildren.indexOf(startDom)] = null;
 			// ^ could possibly be simplified to:
