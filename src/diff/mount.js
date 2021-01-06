@@ -15,7 +15,6 @@ import { renderComponent } from './component';
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} startDom
- * @para\m {boolean} [isHydrating] Whether or not we are in hydration
  * @returns {import('../internal').PreactElement | null} pointer to the next DOM node to be hydrated (or null)
  */
 export function mount(
@@ -25,7 +24,6 @@ export function mount(
 	isSvg,
 	commitQueue,
 	startDom
-	// isHydrating
 ) {
 	let tmp,
 		newType = newVNode.type;
@@ -60,7 +58,6 @@ export function mount(
 				globalContext,
 				isSvg,
 				commitQueue
-				// isHydrating
 			);
 
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
@@ -106,7 +103,6 @@ export function mount(
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @para\m {boolean} isHydrating Whether or not we are in hydration
  * @returns {import('../internal').PreactElement}
  */
 function mountDOMElement(dom, newVNode, globalContext, isSvg, commitQueue) {
@@ -203,12 +199,7 @@ function mountDOMElement(dom, newVNode, globalContext, isSvg, commitQueue) {
 				globalContext,
 				newVNode.type === 'foreignObject' ? false : isSvg,
 				commitQueue,
-				// excessDomChildren != null && excessDomChildren.length > 0
-				// 	? excessDomChildren[0]
-				// 	: null,
 				null
-				// isHydrating
-				// newVNode._mode === MODE_HYDRATE
 			);
 		}
 
@@ -238,7 +229,6 @@ function mountDOMElement(dom, newVNode, globalContext, isSvg, commitQueue) {
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} startDom
- * @para\m {boolean} isHydrating Whether or not we are in hydration
  */
 export function mountChildren(
 	parentDom,
@@ -248,7 +238,6 @@ export function mountChildren(
 	isSvg,
 	commitQueue,
 	startDom
-	// isHydrating
 ) {
 	let i,
 		childVNode,
@@ -313,7 +302,6 @@ export function mountChildren(
 			isSvg,
 			commitQueue,
 			startDom
-			// isHydrating
 		);
 
 		newDom = childVNode._dom;

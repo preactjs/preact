@@ -64,6 +64,8 @@ export function render(vnode, parentDom, replaceNode) {
 	// 		? EMPTY_ARR.slice.call(parentDom.childNodes)
 	// 		: null;
 
+	/** @type {import('./internal').PreactElement} */
+	// @ts-ignore Trust me TS, parentDom.firstChild is correct
 	let startDom = parentDom.firstChild;
 	let mode = MODE_NONE;
 	if (isHydrating) {
@@ -94,9 +96,6 @@ export function render(vnode, parentDom, replaceNode) {
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
 			startDom
-			// Begin diff with replaceNode or find the first non-null child with a dom
-			// pointer and begin the diff with that (i.e. what getDomSibling does)
-			// replaceNode || getDomSibling(oldVNode, 0)
 		);
 	} else {
 		mount(
@@ -105,10 +104,7 @@ export function render(vnode, parentDom, replaceNode) {
 			{},
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
-			// replaceNode || null,
 			startDom
-			// mode === MODE_HYDRATE
-			// isHydrating
 		);
 	}
 
