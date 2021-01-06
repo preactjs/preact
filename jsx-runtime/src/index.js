@@ -1,4 +1,5 @@
 import { options, Fragment } from 'preact';
+import { MODE_NONE } from '../../src/constants';
 
 /** @typedef {import('preact').VNode} VNode */
 
@@ -45,6 +46,7 @@ function createVNode(type, props, key, __source, __self) {
 		_hydrating: null,
 		constructor: undefined,
 		_original: ++options._vnodeId,
+		_mode: MODE_NONE,
 		__source,
 		__self
 	};

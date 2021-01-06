@@ -1,10 +1,18 @@
-import { EMPTY_ARR } from './constants';
+import { MODE_HYDRATE, MODE_MUTATIVE_HYDRATE, MODE_NONE } from './constants';
 import { commitRoot } from './diff/commit';
 import { createElement, Fragment } from './create-element';
 import options from './options';
 import { mount } from './diff/mount';
 import { patch } from './diff/patch';
-import { getDomSibling } from './component';
+
+/**
+ * Find the DOM for a given VNode
+ * @param {import('./internal').VNode} vnode
+ */
+function findDomNode(vnode) {
+	return vnode._dom;
+	// return vnode._dom || vnode._children.filter(findDomNode)[0];
+}
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -39,21 +47,41 @@ export function render(vnode, parentDom, replaceNode) {
 		: replaceNode || parentDom
 	)._children = vnode);
 
-	/** @type {import('./internal').PreactElement[]} */
-	let excessDomChildren =
-		replaceNode && !isHydrating
-			? [replaceNode]
-			: oldVNode
-			? null
-			: parentDom.childNodes.length
-			? EMPTY_ARR.slice.call(parentDom.childNodes)
-			: null;
+	// Cases:
+	// render(vnode, parent): excessDomChildren=.childNodes --> startDom = parent.firstChild
+	// hydrate(vnode, parent): excessDomChildren=.childNodes --> startDom = parent.firstChild
+	// render(vnode, parent, child): excessDomChildren=[child] --> startDom = child
+	// render(vnode, parent) on existing tree: excessDomChildren=null --> startDom = (oldVNode=parent.__k)._dom
+	// const startDom = replaceNode || oldVNode && oldVNode._dom || parentDom.firstChild;
 
+	// /** @type {import('./internal').PreactElement[]} */
+	// let excessDomChildren =
+	// 	replaceNode && !isHydrating
+	// 		? [replaceNode]
+	// 		: oldVNode
+	// 		? null
+	// 		: parentDom.childNodes.length
+	// 		? EMPTY_ARR.slice.call(parentDom.childNodes)
+	// 		: null;
+
+	let startDom = parentDom.firstChild;
+	let mode = MODE_NONE;
 	if (isHydrating) {
-		newVNode._dom = replaceNode = excessDomChildren
-			? excessDomChildren[0]
-			: null;
+		mode = MODE_HYDRATE;
+		// startDom = parentDom.firstChild;
+		// newVNode._dom = replaceNode = excessDomChildren
+		// 	? excessDomChildren[0]
+		// 	: null;
+	} else if (replaceNode) {
+		mode = MODE_MUTATIVE_HYDRATE;
+		startDom = replaceNode;
+	} else if (oldVNode) {
+		startDom = findDomNode(oldVNode);
+	} else if (startDom) {
+		mode = MODE_MUTATIVE_HYDRATE;
 	}
+	newVNode._mode = mode;
+	newVNode._dom = startDom;
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [];
@@ -65,9 +93,10 @@ export function render(vnode, parentDom, replaceNode) {
 			{},
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
+			startDom
 			// Begin diff with replaceNode or find the first non-null child with a dom
 			// pointer and begin the diff with that (i.e. what getDomSibling does)
-			replaceNode || getDomSibling(oldVNode, 0)
+			// replaceNode || getDomSibling(oldVNode, 0)
 		);
 	} else {
 		mount(
@@ -76,8 +105,10 @@ export function render(vnode, parentDom, replaceNode) {
 			{},
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
-			replaceNode || null,
-			isHydrating
+			// replaceNode || null,
+			startDom
+			// mode === MODE_HYDRATE
+			// isHydrating
 		);
 	}
 
