@@ -2,15 +2,16 @@
 
 ## TODOs
 
+* Use bit-wise comparison for `_mode` checks
+* Replace `_hydrating` with `_mode`
+* Consider further removing \_dom pointers from non-dom VNodes
 * Combine placeChild and unmounting loop?? Do placeChild backwards? Do
   unmounting first then placeChild loop
-* Remove the need for `excessDomChildren`. Do hydration more similarly to
-  `keyed` if possible.
-* Consider further removing _dom pointers from non-dom VNodes
+* Consider further removing \_dom pointers from non-dom VNodes
 * Fix Suspense tests:
-	* "should correctly render nested Suspense components without intermediate DOM #2747"
+  * "should correctly render nested Suspense components without intermediate DOM #2747"
 * Fix Suspense hydration tests:
-	* "should hydrate lazy components through components using shouldComponentUpdate"
+  * "should hydrate lazy components through components using shouldComponentUpdate"
 
 ## Other
 
@@ -27,11 +28,10 @@
   [this technique](https://gist.github.com/developit/f321a9ef092ad39f54f8d7c8f99eb29a))
 * Golf everything! Look for @TODO(golf)
 * Look for ways to optimize DOM element diffing, specifically how we diff props
-	- Investigate diffing props before or after children
+  - Investigate diffing props before or after children
   - Investigate inlining the loops in diffProps to capture special props
     (dangerouslySetInnerHTML, value, checked, multiple)
-* Revisit all replaceNode tests
-	- Top-level `render()` no longer accepts a `replaceNode` argument, and does not removed unmatched DOM nodes
+* Revisit all replaceNode tests - Top-level `render()` no longer accepts a `replaceNode` argument, and does not removed unmatched DOM nodes
 
 ## Thoughts on Suspense
 
