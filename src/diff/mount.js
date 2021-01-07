@@ -5,6 +5,7 @@ import { setProperty } from './props';
 // import { removeNode } from '../util';
 import options from '../options';
 import { renderComponent } from './component';
+import { removeNode } from '../util';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -111,7 +112,7 @@ function mountDOMElement(dom, newVNode, globalContext, isSvg, commitQueue) {
 	if (newVNode.type == null) {
 		// TODO: Skip over wrong type nodes
 		// if we have been given the wrong type, seek forward to the right one:
-		// while (dom && dom.nodeType !== 1) dom = dom.nextSibling;
+		// while (dom && dom.nodeType !== 3) dom = dom.nextSibling;
 
 		if (dom == null) {
 			// @ts-ignore createTextNode returns Text, we expect PreactElement
@@ -331,12 +332,18 @@ export function mountChildren(
 
 	newParentVNode._dom = firstChildDom;
 
-	// // Remove children that are not part of any vnode.
-	// if (excessDomChildren != null && typeof newParentVNode.type != 'function') {
-	// 	for (i = excessDomChildren.length; i--; ) {
-	// 		if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
-	// 	}
-	// }
+	// Remove children that are not part of any vnode.
+	// Todo: bitwise MODE_HYDRATE|MODE_MUTATIVE_HYDRATE
+	if (
+		newParentVNode._mode !== MODE_NONE &&
+		typeof newParentVNode.type !== 'function'
+	) {
+		while (startDom) {
+			i = startDom;
+			startDom = startDom.nextSibling;
+			removeNode(i);
+		}
+	}
 
 	return startDom;
 }
