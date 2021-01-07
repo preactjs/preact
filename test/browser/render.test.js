@@ -547,7 +547,10 @@ describe('render()', () => {
 			);
 		});
 
-		it('should not hydrate with dangerouslySetInnerHTML', () => {
+		it('should not mutative render with dangerouslySetInnerHTML', () => {
+			// In other words, if render is called with a container with existing
+			// children, dangerouslySetInnerHTML should leave the DOM intact
+
 			let html = '<b>foo &amp; bar</b>';
 			scratch.innerHTML = `<div>${html}</div>`;
 			// eslint-disable-next-line react/no-danger
@@ -606,7 +609,7 @@ describe('render()', () => {
 		});
 	});
 
-	it('should reconcile mutated DOM attributes', () => {
+	it('should reconcile mutated checked property', () => {
 		let check = p => render(<input type="checkbox" checked={p} />, scratch),
 			value = () => scratch.lastChild.checked,
 			setValue = p => (scratch.lastChild.checked = p);

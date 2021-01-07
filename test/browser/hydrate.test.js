@@ -436,4 +436,18 @@ describe('hydrate()', () => {
 			'<p class="hi">hello baz</p><p class="hi">hello bar</p>'
 		);
 	});
+
+	it('should not hydrate with dangerouslySetInnerHTML', () => {
+		let html = '<b>foo &amp; bar</b>';
+		scratch.innerHTML = `<div>${html}</div>`;
+
+		clearLog();
+
+		// eslint-disable-next-line react/no-danger
+		hydrate(<div dangerouslySetInnerHTML={{ __html: html }} />, scratch);
+
+		expect(scratch.firstChild).to.have.property('innerHTML', html);
+		expect(scratch.innerHTML).to.equal(`<div>${html}</div>`);
+		expect(getLog()).to.deep.equal([]);
+	});
 });
