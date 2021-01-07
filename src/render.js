@@ -1,4 +1,4 @@
-import { MODE_HYDRATE, MODE_MUTATIVE_HYDRATE, MODE_NONE } from './constants';
+import { MODE_HYDRATE, MODE_MUTATIVE_HYDRATE } from './constants';
 import { commitRoot } from './diff/commit';
 import { createElement, Fragment } from './create-element';
 import options from './options';
@@ -16,41 +16,24 @@ import { patch } from './diff/patch';
 export function render(vnode, parentDom, replaceNode) {
 	if (options._root) options._root(vnode, parentDom);
 
-	// We abuse the `replaceNode` parameter in `hydrate()` to signal if we are in
-	// hydration mode or not by passing the `hydrate` function instead of a DOM
-	// element. `typeof a === 'function'` compresses well.
-	let isHydrating = typeof replaceNode === 'function';
-
 	// To be able to support calling `render()` multiple times on the same
 	// DOM node, we need to obtain a reference to the previous tree. We do
 	// this by assigning a new `_children` property to DOM nodes which points
 	// to the last rendered tree. By default this property is not present, which
 	// means that we are mounting a new tree for the first time.
-	let oldVNode = isHydrating
-		? null
-		: (replaceNode && replaceNode._children) || parentDom._children;
-	vnode = createElement(Fragment, null, [vnode]);
+	let oldVNode = (replaceNode && replaceNode._children) || parentDom._children;
 
 	// Determine the new vnode tree and store it on the DOM element on
 	// our custom `_children` property.
-	let newVNode = ((isHydrating
-		? parentDom
-		: replaceNode || parentDom
-	)._children = vnode);
+	vnode = (replaceNode || parentDom)._children = createElement(Fragment, null, [
+		vnode
+	]);
 
-	// Cases:
-	// render(vnode, parent): excessDomChildren=.childNodes --> startDom = parent.firstChild
-	// hydrate(vnode, parent): excessDomChildren=.childNodes --> startDom = parent.firstChild
-	// render(vnode, parent, child): excessDomChildren=[child] --> startDom = child
-	// render(vnode, parent) on existing tree: excessDomChildren=null --> startDom = (oldVNode=parent.__k)._dom
-
-	// Set newVNode._mode
-	if (isHydrating) {
-		newVNode._mode = MODE_HYDRATE;
-	} else if (replaceNode || parentDom.firstChild) {
+	// Set vnode._mode
+	if (replaceNode || parentDom.firstChild) {
 		// Providing a replaceNode parameter or calling `render` on a container with
 		// existing DOM elements puts the diff into mutative hydrate mode
-		newVNode._mode = MODE_MUTATIVE_HYDRATE;
+		vnode._mode = MODE_MUTATIVE_HYDRATE;
 	}
 
 	// List of effects that need to be called after diffing.
@@ -58,7 +41,7 @@ export function render(vnode, parentDom, replaceNode) {
 	if (oldVNode) {
 		patch(
 			parentDom,
-			newVNode,
+			vnode,
 			oldVNode,
 			{},
 			parentDom.ownerSVGElement !== undefined,
@@ -68,11 +51,13 @@ export function render(vnode, parentDom, replaceNode) {
 	} else {
 		mount(
 			parentDom,
-			newVNode,
+			vnode,
 			{},
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
-			!isHydrating && replaceNode ? replaceNode : parentDom.firstChild
+			// Start the diff at the replaceNode or the parentDOM.firstChild if any.
+			// Will be null if the parentDom is empty
+			replaceNode || parentDom.firstChild
 		);
 	}
 
@@ -87,5 +72,20 @@ export function render(vnode, parentDom, replaceNode) {
  * update
  */
 export function hydrate(vnode, parentDom) {
-	render(vnode, parentDom, hydrate);
+	if (options._root) options._root(vnode, parentDom);
+
+	vnode = createElement(Fragment, null, [vnode]);
+	vnode._mode = MODE_HYDRATE;
+
+	let commitQueue = [];
+	mount(
+		parentDom,
+		vnode,
+		{},
+		parentDom.ownerSVGElement !== undefined,
+		commitQueue,
+		// @ts-ignore Trust me TS, this is a PreactElement
+		parentDom.firstChild
+	);
+	commitRoot(commitQueue, vnode);
 }
