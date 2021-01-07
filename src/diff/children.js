@@ -116,6 +116,7 @@ export function diffChildren(
 				isSvg,
 				commitQueue,
 				startDom,
+				// TODO: Determine how to migrate this to _mode
 				oldVNode._hydrating
 			);
 		} else {
