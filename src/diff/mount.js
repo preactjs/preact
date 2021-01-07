@@ -2,7 +2,6 @@ import { applyRef } from './refs';
 import { MODE_HYDRATE, MODE_MUTATIVE_HYDRATE, MODE_NONE } from '../constants';
 import { normalizeToVNode } from '../create-element';
 import { setProperty } from './props';
-// import { removeNode } from '../util';
 import options from '../options';
 import { renderComponent } from './component';
 import { removeNode } from '../util';
@@ -51,7 +50,7 @@ export function mount(
 			);
 		} else {
 			newVNode._dom = mountDOMElement(
-				newVNode._dom,
+				newVNode._mode !== MODE_NONE ? startDom : null,
 				newVNode,
 				globalContext,
 				isSvg,
@@ -245,14 +244,13 @@ export function mountChildren(
 		mountedNextChild;
 
 	// Todo: bitwise MODE_HYDRATE|MODE_MUTATIVE_HYDRATE
-	if (newParentVNode._mode !== MODE_NONE) {
-		if (typeof newParentVNode.type !== 'function') {
-			// excessDomChildren = EMPTY_ARR.slice.call(parentDom.childNodes);
-			// hydrateDom = startDom = excessDomChildren[0];
-			startDom = parentDom.childNodes[0];
-		} else {
-			startDom = newParentVNode._dom;
-		}
+	if (
+		newParentVNode._mode !== MODE_NONE &&
+		typeof newParentVNode.type !== 'function'
+	) {
+		// excessDomChildren = EMPTY_ARR.slice.call(parentDom.childNodes);
+		// hydrateDom = startDom = excessDomChildren[0];
+		startDom = parentDom.childNodes[0];
 	}
 
 	newParentVNode._children = [];
@@ -289,11 +287,6 @@ export function mountChildren(
 		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;
 		childVNode._mode = newParentVNode._mode;
-
-		// Todo: bitwise MODE_HYDRATE|MODE_MUTATIVE_HYDRATE
-		if (newParentVNode._mode !== MODE_NONE) {
-			childVNode._dom = startDom;
-		}
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		mountedNextChild = mount(
@@ -338,6 +331,10 @@ export function mountChildren(
 		newParentVNode._mode !== MODE_NONE &&
 		typeof newParentVNode.type !== 'function'
 	) {
+		// TODO: At this point, would it be simpler to just clear the pre-existing
+		// DOM if render is called with no oldVNode & existing children & no
+		// replaceNode? Instead of patching the DOM to match the VNode tree? (remove
+		// attributes & unused DOM)
 		while (startDom) {
 			i = startDom;
 			startDom = startDom.nextSibling;

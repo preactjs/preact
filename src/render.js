@@ -62,9 +62,6 @@ export function render(vnode, parentDom, replaceNode) {
 	if (isHydrating) {
 		mode = MODE_HYDRATE;
 		// startDom = parentDom.firstChild;
-		// newVNode._dom = replaceNode = excessDomChildren
-		// 	? excessDomChildren[0]
-		// 	: null;
 	} else if (replaceNode) {
 		mode = MODE_MUTATIVE_HYDRATE;
 		startDom = replaceNode;
@@ -75,7 +72,6 @@ export function render(vnode, parentDom, replaceNode) {
 		mode = MODE_MUTATIVE_HYDRATE;
 	}
 	newVNode._mode = mode;
-	newVNode._dom = startDom;
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [];
