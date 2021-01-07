@@ -240,18 +240,17 @@ export function mountChildren(
 		childVNode,
 		newDom,
 		firstChildDom,
-		mountedNextChild,
-		// excessDomChildren,
-		hydrateDom;
+		// excessDomChildren
+		mountedNextChild;
 
 	// Todo: bitwise MODE_HYDRATE|MODE_MUTATIVE_HYDRATE
 	if (newParentVNode._mode !== MODE_NONE) {
 		if (typeof newParentVNode.type !== 'function') {
 			// excessDomChildren = EMPTY_ARR.slice.call(parentDom.childNodes);
 			// hydrateDom = startDom = excessDomChildren[0];
-			hydrateDom = startDom = parentDom.childNodes[0];
+			startDom = parentDom.childNodes[0];
 		} else {
-			hydrateDom = newParentVNode._dom;
+			startDom = newParentVNode._dom;
 		}
 	}
 
@@ -288,8 +287,12 @@ export function mountChildren(
 
 		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;
-		childVNode._dom = hydrateDom;
 		childVNode._mode = newParentVNode._mode;
+
+		// Todo: bitwise MODE_HYDRATE|MODE_MUTATIVE_HYDRATE
+		if (newParentVNode._mode !== MODE_NONE) {
+			childVNode._dom = startDom;
+		}
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		mountedNextChild = mount(
@@ -312,7 +315,7 @@ export function mountChildren(
 				// If the child is a Fragment-like or if it is DOM VNode and its _dom
 				// property matches the dom we are diffing (i.e. startDom), just
 				// continue with the mountedNextChild
-				hydrateDom = startDom = mountedNextChild;
+				startDom = mountedNextChild;
 			} else {
 				// The DOM the diff should begin with is now startDom (since we inserted
 				// newDom before startDom) so ignore mountedNextChild and continue with
