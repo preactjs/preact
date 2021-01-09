@@ -39,6 +39,7 @@ function detachedClone(vnode, detachedParent, parentDom) {
 			}
 			vnode._component = null;
 		}
+
 		vnode._children =
 			vnode._children &&
 			vnode._children.map(child =>
@@ -57,6 +58,7 @@ function removeOriginal(vnode, detachedParent, originalParent) {
 			vnode._children.map(child =>
 				removeOriginal(child, detachedParent, originalParent)
 			);
+
 		if (vnode._component) {
 			if (vnode._component._parentDom === detachedParent) {
 				if (vnode._dom) {
@@ -67,6 +69,7 @@ function removeOriginal(vnode, detachedParent, originalParent) {
 			}
 		}
 	}
+
 	return vnode;
 }
 
@@ -124,20 +127,6 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 		if (suspendingComponent._suspendedComponentWillUnmount) {
 			suspendingComponent._suspendedComponentWillUnmount();
 		}
-	};
-	const _suspendedRender = suspendingComponent.render;
-	suspendingComponent.render = (props, state, context) => {
-		const result = _suspendedRender.call(
-			suspendingComponent,
-			props,
-			state,
-			context
-		);
-
-		suspendingComponent._renderCallbacks.push(onResolved);
-
-		suspendingComponent.render = _suspendedRender;
-		return result;
 	};
 
 	const onSuspensionComplete = () => {
