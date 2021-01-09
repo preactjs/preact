@@ -1210,6 +1210,43 @@ describe('suspense', () => {
 			});
 	});
 
+	it('should correctly render nested Suspense components without intermediate DOM #2747', () => {
+		const [ProfileDetails, resolveDetails] = createLazy();
+		const [ProfileTimeline, resolveTimeline] = createLazy();
+
+		function ProfilePage() {
+			return (
+				<Suspense fallback={<h1>Loading profile...</h1>}>
+					<ProfileDetails />
+					<Suspense fallback={<h2>Loading posts...</h2>}>
+						<ProfileTimeline />
+					</Suspense>
+				</Suspense>
+			);
+		}
+
+		render(<ProfilePage />, scratch);
+		rerender(); // Render fallback
+
+		expect(scratch.innerHTML).to.equal('<h1>Loading profile...</h1>');
+
+		return resolveDetails(() => <h1>Ringo Starr</h1>)
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal(
+					'<h1>Ringo Starr</h1><h2>Loading posts...</h2>'
+				);
+
+				return resolveTimeline(() => <p>Timeline details</p>);
+			})
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal(
+					'<h1>Ringo Starr</h1><p>Timeline details</p>'
+				);
+			});
+	});
+
 	it('should correctly render Suspense components inside Fragments', () => {
 		// Issue #2106.
 
