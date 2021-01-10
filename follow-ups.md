@@ -16,3 +16,8 @@
 * Golf everything! Look for @TODO(golf)
 * Fix Suspense tests:
 	* "should correctly render nested Suspense components without intermediate DOM #2747"
+* Look for ways to optimize DOM element diffing, specifically how we diff props
+	- Investigate diffing props before or after children
+  - Investigate inlining the loops in diffProps to capture special props
+    (dangerouslySetInnerHTML, value, checked, multiple)
+* Top-level `render()` no longer accepts a `replaceNode` argument, and does not removed unmatched DOM nodes
