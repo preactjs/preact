@@ -32,3 +32,21 @@
     (dangerouslySetInnerHTML, value, checked, multiple)
 * Revisit all replaceNode tests
 	- Top-level `render()` no longer accepts a `replaceNode` argument, and does not removed unmatched DOM nodes
+
+## Thoughts on Suspense
+
+* Use a special VNode (e.g. Root node) that reparents all children into a new
+  DOM node (like Portals). Currently suspense manually does this but I think it
+  is buggy in that it doesn't properly reset all dom pointers we currently
+  maintain lol.
+* Need a way to trigger updates on VNodes that may need mounting or patching.
+  I'm thinking backing nodes will help here so when a node suspends, we can
+  maintain its suspended state on the backing node and not the component which
+  may need to be nulled or remounted (i.e. constructor & lifecycles called
+  again) (re: the bug about calling forceUpdate on a suspended hydration
+  component)
+* Maintain the state (i.e. whether or not a node's last render suspended) as a
+  flag on the VNode. This flag would be useful for commit or unmount option
+  hooks to discover that that a suspended node has successfully rerendered or
+  unmounted. Once that is detected the nearest Suspense node that is waiting can
+  be updated as such (no more overriding render or componentWillUnmount!)
