@@ -274,7 +274,7 @@ export function mountChildren(
 	startDom,
 	isHydrating
 ) {
-	let i, j, childVNode, newDom, firstChildDom, refs, mountedNextChild;
+	let i, childVNode, newDom, firstChildDom, mountedNextChild;
 
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
@@ -305,11 +305,6 @@ export function mountChildren(
 
 		newDom = childVNode._dom;
 
-		if ((j = childVNode.ref)) {
-			if (!refs) refs = [];
-			refs.push(j, childVNode._component || newDom, childVNode);
-		}
-
 		if (newDom != null) {
 			if (firstChildDom == null) {
 				firstChildDom = newDom;
@@ -327,6 +322,10 @@ export function mountChildren(
 				parentDom.insertBefore(newDom, startDom);
 			}
 		}
+
+		if (childVNode.ref) {
+			applyRef(childVNode.ref, childVNode._component || newDom, childVNode);
+		}
 	}
 
 	newParentVNode._dom = firstChildDom;
@@ -335,14 +334,6 @@ export function mountChildren(
 	if (excessDomChildren != null && typeof newParentVNode.type != 'function') {
 		for (i = excessDomChildren.length; i--; ) {
 			if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
-		}
-	}
-
-	// Set refs only after unmount
-	if (refs) {
-		for (i = 0; i < refs.length; i++) {
-			// @ts-ignore Nested flatten tuples are hard to do in TypeScript
-			applyRef(refs[i], refs[++i], refs[++i]);
 		}
 	}
 
