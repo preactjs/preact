@@ -4,7 +4,8 @@ import React, {
 	hydrate,
 	Fragment,
 	Suspense,
-	useState
+	useState,
+	Component
 } from 'preact/compat';
 import { logCall, getLog, clearLog } from '../../../test/_util/logCall';
 import {
@@ -16,7 +17,7 @@ import { ul, li, div } from '../../../test/_util/dom';
 import { createLazy } from './suspense-utils';
 
 /* eslint-env browser, mocha */
-describe.skip('suspense hydration', () => {
+describe('suspense hydration', () => {
 	/** @type {HTMLDivElement} */
 	let scratch,
 		rerender,
@@ -450,6 +451,77 @@ describe.skip('suspense hydration', () => {
 
 			expect(lazySpy).to.have.been.calledOnce;
 		});
+	});
+
+	// TODO: Fix this test
+	it.skip('should hydrate lazy components through components using shouldComponentUpdate', () => {
+		const originalHtml = '<b><i>a</i><i>b</i><i>c</i><i>d</i></b>';
+		scratch.innerHTML = originalHtml;
+
+		const listeners = [sinon.spy(), sinon.spy(), sinon.spy()];
+
+		const [Lazy1, resolve1] = createLazy();
+		const [Lazy2, resolve2] = createLazy();
+
+		class Blocker extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+			render(props) {
+				return (
+					<b>
+						<i onClick={listeners[0]}>a</i>
+						{props.children}
+						<i>d</i>
+					</b>
+				);
+			}
+		}
+
+		clearLog();
+
+		hydrate(
+			<Suspense>
+				<Blocker>
+					<Lazy1 />
+					<Lazy2 />
+				</Blocker>
+			</Suspense>,
+			scratch
+		);
+		rerender();
+		expect(scratch.innerHTML).to.equal(originalHtml);
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		scratch.querySelector('i:first-child').dispatchEvent(createEvent('click'));
+		expect(listeners[0]).to.have.been.calledOnce;
+
+		return resolve1(() => <i onClick={listeners[1]}>b</i>)
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal(originalHtml);
+				expect(getLog()).to.deep.equal([]);
+				clearLog();
+
+				scratch
+					.querySelector('i:nth-child(2)')
+					.dispatchEvent(createEvent('click'));
+				expect(listeners[1]).to.have.been.calledOnce;
+
+				return resolve2(() => <i onClick={listeners[2]}>c</i>);
+			})
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal(originalHtml);
+				expect(getLog()).to.deep.equal([]);
+				clearLog();
+
+				scratch
+					.querySelector('i:nth-child(3)')
+					.dispatchEvent(createEvent('click'));
+				expect(listeners[2]).to.have.been.calledOnce;
+			});
 	});
 
 	it('should allow component to re-suspend using normal suspension mechanics after initial suspended hydration resumes', () => {
