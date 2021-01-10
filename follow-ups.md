@@ -16,6 +16,8 @@
 * Golf everything! Look for @TODO(golf)
 * Fix Suspense tests:
 	* "should correctly render nested Suspense components without intermediate DOM #2747"
+* Fix Suspense hydration tests:
+	* "should hydrate lazy components through components using shouldComponentUpdate"
 * Look for ways to optimize DOM element diffing, specifically how we diff props
 	- Investigate diffing props before or after children
   - Investigate inlining the loops in diffProps to capture special props

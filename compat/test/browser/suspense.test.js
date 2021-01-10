@@ -1721,7 +1721,10 @@ describe('suspense', () => {
 		render(
 			<Suspense fallback={<div>Suspended...</div>}>
 				Text
-				{/* Adding a <div> here will make things work... */}
+				{/*
+					Adding a <div> here will make things work so don't add one here to
+					effectively repro the original issue...
+				*/}
 				<Suspender />
 			</Suspense>,
 			scratch
@@ -2036,6 +2039,62 @@ describe('suspense', () => {
 				rerender();
 				expect(scratch.innerHTML).to.equal(
 					'<b><i>a</i><i>b</i><i>c</i><i>d</i></b>'
+				);
+			});
+	});
+
+	it('should render delayed lazy components through nested DOM and components using shouldComponentUpdate', () => {
+		const [Suspender1, suspend1] = createSuspender(() => <i>1</i>);
+		const [Suspender2, suspend2] = createSuspender(() => <i>2</i>);
+
+		class Blocker extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+			render(props) {
+				return (
+					<b>
+						<i>a</i>
+						{props.children}
+						<i>d</i>
+					</b>
+				);
+			}
+		}
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<div>
+					<Fragment>
+						<Blocker>
+							<Suspender1 />
+							<Suspender2 />
+						</Blocker>
+					</Fragment>
+				</div>
+			</Suspense>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<div><b><i>a</i><i>1</i><i>2</i><i>d</i></b></div>'
+		);
+
+		const [resolve1] = suspend1();
+		const [resolve2] = suspend2();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		return resolve1(() => <i>b</i>)
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+				return resolve2(() => <i>c</i>);
+			})
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal(
+					'<div><b><i>a</i><i>b</i><i>c</i><i>d</i></b></div>'
 				);
 			});
 	});
