@@ -189,6 +189,24 @@ export function renderComponent(
 		);
 	}
 
+	commitComponent(c, newVNode, clearProcessingException, commitQueue);
+
+	return nextDomSibling;
+}
+
+/**
+ *
+ * @param {import('../internal').Component<any, any>} c
+ * @param {import('../internal').VNode} newVNode
+ * @param {*} clearProcessingException
+ * @param {any[]} commitQueue
+ */
+export function commitComponent(
+	c,
+	newVNode,
+	clearProcessingException,
+	commitQueue
+) {
 	c.base = newVNode._dom;
 
 	if (c._renderCallbacks.length) {
@@ -200,8 +218,6 @@ export function renderComponent(
 	}
 
 	c._force = false;
-
-	return nextDomSibling;
 }
 
 /** The `.render()` method for a PFC backing instance. */
