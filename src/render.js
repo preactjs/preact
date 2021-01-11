@@ -2,7 +2,7 @@ import { MODE_HYDRATE, MODE_MUTATIVE_HYDRATE } from './constants';
 import { commitRoot } from './diff/commit';
 import { createElement, Fragment } from './create-element';
 import options from './options';
-import { mount } from './diff/mount';
+import { create, mount } from './diff/mount';
 import { patch } from './diff/patch';
 
 /**
@@ -40,29 +40,27 @@ export function render(vnode, parentDom, replaceNode) {
 	let commitQueue = [];
 	if (oldVNode) {
 		patch(
-			parentDom,
 			vnode,
 			oldVNode,
 			{},
 			parentDom.ownerSVGElement !== undefined,
-			commitQueue,
-			oldVNode._dom
+			commitQueue
 		);
 	} else {
-		mount(
-			parentDom,
-			vnode,
-			{},
-			parentDom.ownerSVGElement !== undefined,
-			commitQueue,
-			// Start the diff at the replaceNode or the parentDOM.firstChild if any.
-			// Will be null if the parentDom is empty
-			replaceNode || parentDom.firstChild
-		);
+		create(vnode, {}, commitQueue);
 	}
 
 	// Flush all queued effects
-	commitRoot(commitQueue, vnode);
+	commitRoot(
+		commitQueue,
+		vnode,
+		parentDom,
+		oldVNode
+			? oldVNode._dom
+			: // Start the diff at the replaceNode or the parentDOM.firstChild if any.
+			  // Will be null if the parentDom is empty
+			  replaceNode || parentDom.firstChild
+	);
 }
 
 /**

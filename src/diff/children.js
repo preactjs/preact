@@ -2,14 +2,12 @@ import { applyRef } from './refs';
 import { normalizeToVNode } from '../create-element';
 import { EMPTY_ARR } from '../constants';
 import { getDomSibling } from '../component';
-import { mount } from './mount';
+import { create, mount } from './mount';
 import { patch } from './patch';
 import { unmount } from './unmount';
 
 /**
  * Diff the children of a virtual node
- * @param {import('../internal').PreactElement} parentDom The DOM element whose
- * children are being diffed
  * @param {import('../internal').ComponentChildren[]} renderResult
  * @param {import('../internal').VNode} newParentVNode The new virtual node
  * whose children should be diff'ed against oldParentVNode
@@ -20,20 +18,16 @@ import { unmount } from './unmount';
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {Array<import('../internal').Component>} commitQueue List of
  * components which have callbacks to invoke in commitRoot
- * @param {import('../internal').PreactElement} startDom The dom node
- * diffChildren should begin diffing with.
  */
 export function diffChildren(
-	parentDom,
 	renderResult,
 	newParentVNode,
 	oldParentVNode,
 	globalContext,
 	isSvg,
-	commitQueue,
-	startDom
+	commitQueue
 ) {
-	let i, j, newDom, firstChildDom, refs;
+	let i, j, newDom, refs;
 
 	/** @type {import('../internal').VNode} */
 	let oldVNode;
@@ -92,49 +86,32 @@ export function diffChildren(
 		}
 
 		let oldVNodeRef;
-		let nextDomSibling;
 		if (oldVNode == null) {
 			// We are mounting a new VNode
-			nextDomSibling = mount(
-				parentDom,
-				childVNode,
-				globalContext,
-				isSvg,
-				commitQueue,
-				startDom
-			);
+			create(childVNode, globalContext, commitQueue);
 		} else if (oldVNode._hydrating != null) {
 			// We are resuming the hydration of a VNode
-			startDom = childVNode._dom = oldVNode._dom;
+			// startDom = childVNode._dom = oldVNode._dom;
 			childVNode._hydrating = null;
 			oldVNodeRef = oldVNode.ref;
 
-			nextDomSibling = mount(
-				parentDom,
+			create(
 				childVNode,
 				globalContext,
-				isSvg,
-				commitQueue,
-				startDom,
-				// TODO: Determine how to migrate this to _mode
-				oldVNode._hydrating
+				commitQueue
+				// startDom,
+				// // TODO: Determine how to migrate this to _mode
+				// oldVNode._hydrating
 			);
 		} else {
 			// Morph the old element into the new one, but don't append it to the dom yet
-			nextDomSibling = patch(
-				parentDom,
-				childVNode,
-				oldVNode,
-				globalContext,
-				isSvg,
-				commitQueue,
-				startDom
-			);
+			// nextDomSibling = patch(
+			patch(childVNode, oldVNode, globalContext, isSvg, commitQueue);
 
 			oldVNodeRef = oldVNode.ref;
 		}
 
-		newDom = childVNode._dom;
+		// newDom = childVNode._dom;
 
 		if (childVNode.ref && oldVNodeRef != childVNode.ref) {
 			if (!refs) refs = [];
@@ -142,74 +119,74 @@ export function diffChildren(
 			refs.push(childVNode.ref, childVNode._component || newDom, childVNode);
 		}
 
-		if (newDom != null) {
-			if (firstChildDom == null) {
-				firstChildDom = newDom;
-			}
+		// if (newDom != null) {
+		// 	if (firstChildDom == null) {
+		// 		firstChildDom = newDom;
+		// 	}
 
-			if (typeof childVNode.type == 'function') {
-				if (
-					childVNode._children != null &&
-					oldVNode != null &&
-					childVNode._children === oldVNode._children
-				) {
-					startDom = reorderChildren(childVNode, startDom, parentDom);
-				} else {
-					startDom = nextDomSibling;
-				}
-			} else if (newDom == startDom) {
-				// If the newDom and the dom we are expecting to be there are the same, then
-				// do nothing
-				startDom = nextDomSibling;
-			} else {
-				startDom = placeChild(parentDom, oldChildrenLength, newDom, startDom);
-			}
+		// 	if (typeof childVNode.type == 'function') {
+		// 		if (
+		// 			childVNode._children != null &&
+		// 			oldVNode != null &&
+		// 			childVNode._children === oldVNode._children
+		// 		) {
+		// 			startDom = reorderChildren(childVNode, startDom, parentDom);
+		// 		} else {
+		// 			startDom = nextDomSibling;
+		// 		}
+		// 	} else if (newDom == startDom) {
+		// 		// If the newDom and the dom we are expecting to be there are the same, then
+		// 		// do nothing
+		// 		startDom = nextDomSibling;
+		// 	} else {
+		// 		startDom = placeChild(parentDom, oldChildrenLength, newDom, startDom);
+		// 	}
 
-			// Browsers will infer an option's `value` from `textContent` when
-			// no value is present. This essentially bypasses our code to set it
-			// later in `diff()`. It works fine in all browsers except for IE11
-			// where it breaks setting `select.value`. There it will be always set
-			// to an empty string. Re-applying an options value will fix that, so
-			// there are probably some internal data structures that aren't
-			// updated properly.
-			//
-			// To fix it we make sure to reset the inferred value, so that our own
-			// value check in `diff()` won't be skipped.
-			if (newParentVNode.type === 'option') {
-				// @ts-ignore We have validated that the type of parentDOM is 'option'
-				// in the above check
-				parentDom.value = '';
-			}
-		} else if (
-			startDom &&
-			oldVNode != null &&
-			oldVNode._dom == startDom &&
-			startDom.parentNode != parentDom
-		) {
-			// The above condition is to handle null placeholders. See test in placeholder.test.js:
-			// `efficiently replace null placeholders in parent rerenders`
-			startDom = getDomSibling(oldVNode);
-		}
+		// 	// Browsers will infer an option's `value` from `textContent` when
+		// 	// no value is present. This essentially bypasses our code to set it
+		// 	// later in `diff()`. It works fine in all browsers except for IE11
+		// 	// where it breaks setting `select.value`. There it will be always set
+		// 	// to an empty string. Re-applying an options value will fix that, so
+		// 	// there are probably some internal data structures that aren't
+		// 	// updated properly.
+		// 	//
+		// 	// To fix it we make sure to reset the inferred value, so that our own
+		// 	// value check in `diff()` won't be skipped.
+		// 	if (newParentVNode.type === 'option') {
+		// 		// @ts-ignore We have validated that the type of parentDOM is 'option'
+		// 		// in the above check
+		// 		parentDom.value = '';
+		// 	}
+		// } else if (
+		// 	startDom &&
+		// 	oldVNode != null &&
+		// 	oldVNode._dom == startDom &&
+		// 	startDom.parentNode != parentDom
+		// ) {
+		// 	// The above condition is to handle null placeholders. See test in placeholder.test.js:
+		// 	// `efficiently replace null placeholders in parent rerenders`
+		// 	startDom = getDomSibling(oldVNode);
+		// }
 	}
 
-	newParentVNode._dom = firstChildDom;
+	// newParentVNode._dom = firstChildDom;
 
-	// Remove remaining oldChildren if there are any.
-	for (i = oldChildrenLength; i--; ) {
-		if (oldChildren[i] != null) {
-			if (
-				typeof newParentVNode.type == 'function' &&
-				oldChildren[i]._dom != null &&
-				oldChildren[i]._dom == startDom
-			) {
-				// If the startDom points to a dom node that is about to be unmounted,
-				// then get the next sibling of that vnode and set startDom to it
-				startDom = getDomSibling(oldParentVNode, i + 1);
-			}
+	// // Remove remaining oldChildren if there are any.
+	// for (i = oldChildrenLength; i--; ) {
+	// 	if (oldChildren[i] != null) {
+	// 		if (
+	// 			typeof newParentVNode.type == 'function' &&
+	// 			oldChildren[i]._dom != null &&
+	// 			oldChildren[i]._dom == startDom
+	// 		) {
+	// 			// If the startDom points to a dom node that is about to be unmounted,
+	// 			// then get the next sibling of that vnode and set startDom to it
+	// 			startDom = getDomSibling(oldParentVNode, i + 1);
+	// 		}
 
-			unmount(oldChildren[i], oldChildren[i]);
-		}
-	}
+	// 		unmount(oldChildren[i], oldChildren[i]);
+	// 	}
+	// }
 
 	// Set refs only after unmount
 	if (refs) {
@@ -217,8 +194,6 @@ export function diffChildren(
 			applyRef(refs[i], refs[++i], refs[++i]);
 		}
 	}
-
-	return startDom;
 }
 
 /**

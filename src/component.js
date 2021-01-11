@@ -138,7 +138,7 @@ function rerenderComponent(component) {
 			commitQueue,
 			startDom == null ? getDomSibling(vnode) : startDom
 		);
-		commitRoot(commitQueue, vnode);
+		commitRoot(commitQueue, vnode, parentDom, startDom);
 
 		if (vnode._dom != startDom) {
 			updateParentDomPointers(vnode);

@@ -3,27 +3,18 @@ import { diffProps, setProperty } from './props';
 import options from '../options';
 import { getDomSibling } from '../component';
 import { renderComponent } from './component';
+import { MODE_UPDATE } from '../constants';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
- * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').VNode} oldVNode The old virtual node
  * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {boolean} isSvg Whether or not this element is an SVG node
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @param {import('../internal').PreactElement} startDom
  */
-export function patch(
-	parentDom,
-	newVNode,
-	oldVNode,
-	globalContext,
-	isSvg,
-	commitQueue,
-	startDom
-) {
+export function patch(newVNode, oldVNode, globalContext, isSvg, commitQueue) {
 	let tmp,
 		newType = newVNode.type;
 
@@ -32,34 +23,22 @@ export function patch(
 	if (newVNode.constructor !== undefined) return null;
 	if ((tmp = options._diff)) tmp(newVNode);
 
-	/** @type {import('../internal').PreactElement} */
-	let nextDomSibling;
-
 	try {
 		if (typeof newType == 'function') {
-			nextDomSibling = renderComponent(
-				parentDom,
-				newVNode,
-				oldVNode,
-				globalContext,
-				isSvg,
-				commitQueue,
-				startDom
-			);
-		} else if (newVNode._original === oldVNode._original) {
-			newVNode._children = oldVNode._children;
-			newVNode._dom = oldVNode._dom;
-			nextDomSibling = newVNode._dom.nextSibling;
-		} else {
-			newVNode._dom = patchDOMElement(
-				oldVNode._dom,
+			renderComponent(newVNode, oldVNode, globalContext, commitQueue);
+			diffChildren(
+				newVNode._children,
 				newVNode,
 				oldVNode,
 				globalContext,
 				isSvg,
 				commitQueue
 			);
-			nextDomSibling = newVNode._dom.nextSibling;
+		} else if (newVNode._original === oldVNode._original) {
+			newVNode._children = oldVNode._children;
+			newVNode._dom = oldVNode._dom;
+		} else {
+			patchDOMElement(newVNode, oldVNode, globalContext, isSvg, commitQueue);
 		}
 
 		if ((tmp = options.diffed)) tmp(newVNode);
@@ -67,13 +46,10 @@ export function patch(
 		newVNode._original = null;
 		options._catchError(e, newVNode, oldVNode);
 	}
-
-	return nextDomSibling;
 }
 
 /**
  * Diff two virtual nodes representing DOM element
- * @param {import('../internal').PreactElement} dom The DOM element representing
  * the virtual nodes being diffed
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').VNode} oldVNode The old virtual node
@@ -81,10 +57,8 @@ export function patch(
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @returns {import('../internal').PreactElement}
  */
 function patchDOMElement(
-	dom,
 	newVNode,
 	oldVNode,
 	globalContext,
@@ -97,7 +71,7 @@ function patchDOMElement(
 
 	if (newVNode.type === null) {
 		if (oldProps !== newProps) {
-			dom.data = newProps;
+			newVNode._mode = MODE_UPDATE;
 		}
 	} else {
 		// Tracks entering and exiting SVG namespace when descending through the tree.
@@ -157,6 +131,4 @@ function patchDOMElement(
 			setProperty(dom, 'checked', i, oldProps.checked, false);
 		}
 	}
-
-	return dom;
 }

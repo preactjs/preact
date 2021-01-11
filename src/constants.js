@@ -4,6 +4,8 @@ export const MODE_NONE = 0;
 export const MODE_HYDRATE = 1;
 /** Top level render unspecified behaviour (old replaceNode parameter to render) */
 export const MODE_MUTATIVE_HYDRATE = 2;
+/** When a VNode needs to be updated */
+export const MODE_UPDATE = 3;
 
 export const EMPTY_ARR = [];
 

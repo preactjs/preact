@@ -18,13 +18,10 @@ import { diffChildren } from './children';
  * @returns {import('../internal').PreactElement} pointer to the next DOM node (in order) to be rendered (or null)
  */
 export function renderComponent(
-	parentDom,
 	newVNode,
 	oldVNode,
 	globalContext,
-	isSvg,
-	commitQueue,
-	startDom
+	commitQueue
 ) {
 	/** @type {import('../internal').Component} */
 	let c;
@@ -145,7 +142,6 @@ export function renderComponent(
 
 	c._dirty = false;
 	c._vnode = newVNode;
-	c._parentDom = parentDom;
 
 	tmp = c.render(c.props, c.state, c.context);
 
@@ -163,35 +159,38 @@ export function renderComponent(
 	let isTopLevelFragment =
 		tmp != null && tmp.type === Fragment && tmp.key == null;
 	let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
+	newVNode._children = Array.isArray(renderResult)
+		? renderResult
+		: [renderResult];
 
-	let nextDomSibling;
+	// let nextDomSibling;
 
-	if (isNew) {
-		nextDomSibling = mountChildren(
-			parentDom,
-			Array.isArray(renderResult) ? renderResult : [renderResult],
-			newVNode,
-			globalContext,
-			isSvg,
-			commitQueue,
-			startDom
-		);
-	} else {
-		nextDomSibling = diffChildren(
-			parentDom,
-			Array.isArray(renderResult) ? renderResult : [renderResult],
-			newVNode,
-			oldVNode,
-			globalContext,
-			isSvg,
-			commitQueue,
-			startDom
-		);
-	}
+	// if (isNew) {
+	// 	nextDomSibling = mountChildren(
+	// 		parentDom,
+	// 		Array.isArray(renderResult) ? renderResult : [renderResult],
+	// 		newVNode,
+	// 		globalContext,
+	// 		isSvg,
+	// 		commitQueue,
+	// 		startDom
+	// 	);
+	// } else {
+	// 	nextDomSibling = diffChildren(
+	// 		parentDom,
+	// 		Array.isArray(renderResult) ? renderResult : [renderResult],
+	// 		newVNode,
+	// 		oldVNode,
+	// 		globalContext,
+	// 		isSvg,
+	// 		commitQueue,
+	// 		startDom
+	// 	);
+	// }
 
-	commitComponent(c, newVNode, clearProcessingException, commitQueue);
+	// commitComponent(c, newVNode, clearProcessingException, commitQueue);
 
-	return nextDomSibling;
+	// return nextDomSibling;
 }
 
 /**

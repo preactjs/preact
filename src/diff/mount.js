@@ -5,6 +5,79 @@ import { setProperty } from './props';
 import options from '../options';
 import { renderComponent } from './component';
 import { removeNode } from '../util';
+import { commitChildren } from './commit';
+
+/**
+ *
+ * @param {import('../internal').VNode} newVNode
+ * @param {object} globalContext The current context object. Modified by getChildContext
+ * @param {Array<import('../internal').Component>} commitQueue List of components
+ * which have callbacks to invoke in commitRoot
+ */
+export function create(newVNode, globalContext, commitQueue) {
+	let tmp,
+		newType = newVNode.type,
+		newProps = newVNode.props;
+
+	// When passing through createElement it assigns the object
+	// constructor as undefined. This to prevent JSON-injection.
+	if (newVNode.constructor !== undefined) return null;
+
+	if ((tmp = options._diff)) tmp(newVNode);
+
+	try {
+		if (typeof newType == 'function') {
+			renderComponent(newVNode, {}, globalContext, commitQueue);
+
+			createChildren(newVNode, newVNode._children, globalContext, commitQueue);
+		} else if (newProps == null || newProps.dangerouslySetInnerHTML == null) {
+			const newChildren = newProps.children;
+			createChildren(
+				newVNode,
+				Array.isArray(newChildren) ? newChildren : [newChildren],
+				globalContext,
+				commitQueue
+			);
+		} else {
+			newVNode._children = [];
+		}
+	} catch (err) {}
+}
+
+/**
+ *
+ * @param {import('../internal').VNode} newParentVNode
+ * @param {any[]} renderResult
+ * @param {object} globalContext The current context object. Modified by getChildContext
+ * @param {Array<import('../internal').Component>} commitQueue List of components
+ * which have callbacks to invoke in commitRoot
+ */
+function createChildren(
+	newParentVNode,
+	renderResult,
+	globalContext,
+	commitQueue
+) {
+	for (let i = 0; i < renderResult.length; i++) {
+		const childVNode = (newParentVNode._children[i] = normalizeToVNode(
+			renderResult[i]
+		));
+
+		// Terser removes the `continue` here and wraps the loop body
+		// in a `if (childVNode) { ... } condition
+		if (childVNode == null) {
+			continue;
+		}
+
+		childVNode._parent = newParentVNode;
+		childVNode._depth = newParentVNode._depth + 1;
+		childVNode._mode = newParentVNode._mode;
+
+		if (childVNode.type !== null) {
+			create(childVNode, globalContext, commitQueue);
+		}
+	}
+}
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -40,13 +113,10 @@ export function mount(
 	try {
 		if (typeof newType == 'function') {
 			nextDomSibling = renderComponent(
-				parentDom,
 				newVNode,
 				null,
 				globalContext,
-				isSvg,
-				commitQueue,
-				startDom
+				commitQueue
 			);
 		} else {
 			newVNode._dom = mountDOMElement(
@@ -101,13 +171,12 @@ export function mount(
  * @param {import('../internal').PreactElement} dom The DOM element representing
  * the virtual nodes being diffed
  * @param {import('../internal').VNode} newVNode The new virtual node
- * @param {object} globalContext The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @returns {import('../internal').PreactElement}
  */
-function mountDOMElement(dom, newVNode, globalContext, isSvg, commitQueue) {
+export function mountDOMElement(dom, newVNode, isSvg, commitQueue) {
 	let i;
 	let newProps = newVNode.props;
 
@@ -194,11 +263,9 @@ function mountDOMElement(dom, newVNode, globalContext, isSvg, commitQueue) {
 		} else {
 			i = newVNode.props.children;
 
-			mountChildren(
+			commitChildren(
 				dom,
-				Array.isArray(i) ? i : [i],
 				newVNode,
-				globalContext,
 				newVNode.type === 'foreignObject' ? false : isSvg,
 				commitQueue,
 				null

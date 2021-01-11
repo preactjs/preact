@@ -24,7 +24,7 @@ function getAttributes(node) {
 	return attrs;
 }
 
-describe('render()', () => {
+describe.only('render()', () => {
 	let scratch, rerender;
 
 	let resetAppendChild;
@@ -71,7 +71,7 @@ describe('render()', () => {
 		expect(c[0].nodeName).to.equal('#text');
 	});
 
-	it('should allow node type change with content', () => {
+	it.only('should allow node type change with content', () => {
 		render(<span>Bad</span>, scratch);
 		render(<div>Good</div>, scratch);
 		expect(scratch.innerHTML).to.eql(`<div>Good</div>`);
