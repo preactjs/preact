@@ -46,7 +46,7 @@
       "$_children": "__k",
       "$_pendingSuspensionCount": "__u",
       "$_childDidSuspend": "__c",
-      "$_suspendedComponentWillUnmount": "__c",
+      "$_onResolve": "__R",
       "$_suspended": "__e",
       "$_dom": "__e",
       "$_hydrating": "__h",

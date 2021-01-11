@@ -22,6 +22,16 @@ options._catchError = function(error, newVNode, oldVNode) {
 	oldCatchError(error, newVNode, oldVNode);
 };
 
+const oldUnmount = options.unmount;
+options.unmount = function(vnode) {
+	/** @type {import('./internal').Component} */
+	const component = vnode._component;
+	if (component && component._onResolve) {
+		component._onResolve();
+	}
+	if (oldUnmount) oldUnmount(vnode);
+};
+
 function detachedClone(vnode, detachedParent, parentDom) {
 	if (vnode) {
 		if (vnode._component && vnode._component.__hooks) {
@@ -109,8 +119,6 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 		if (resolved) return;
 
 		resolved = true;
-		suspendingComponent.componentWillUnmount =
-			suspendingComponent._suspendedComponentWillUnmount;
 
 		if (resolve) {
 			resolve(onSuspensionComplete);
@@ -119,14 +127,9 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 		}
 	};
 
-	suspendingComponent._suspendedComponentWillUnmount =
-		suspendingComponent.componentWillUnmount;
-	suspendingComponent.componentWillUnmount = () => {
+	suspendingComponent._onResolve = () => {
+		suspendingComponent._onResolve = null;
 		onResolved();
-
-		if (suspendingComponent._suspendedComponentWillUnmount) {
-			suspendingComponent._suspendedComponentWillUnmount();
-		}
 	};
 
 	const onSuspensionComplete = () => {
