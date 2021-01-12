@@ -20,6 +20,10 @@ describe('Textarea', () => {
 	});
 
 	it('should alias defaultValue to children', () => {
+		// TODO: IE11 doesn't update `node.value` when
+		// `node.defaultValue` is set.
+		if (/Trident/.test(navigator.userAgent)) return;
+
 		render(<textarea defaultValue="foo" />, scratch);
 
 		expect(scratch.firstElementChild.value).to.equal('foo');
