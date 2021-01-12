@@ -6,6 +6,7 @@ export const MODE_HYDRATE = 1;
 export const MODE_MUTATIVE_HYDRATE = 2;
 /** When a VNode needs to be updated */
 export const MODE_UPDATE = 3;
+export const MODE_REMOVE = 4;
 
 export const EMPTY_ARR = [];
 

@@ -85,6 +85,8 @@ export function diffChildren(
 			}
 		}
 
+		childVNode._oldVNode = oldVNode;
+
 		let oldVNodeRef;
 		if (oldVNode == null) {
 			// We are mounting a new VNode

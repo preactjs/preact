@@ -27,7 +27,7 @@ export function create(newVNode, globalContext, commitQueue) {
 
 	try {
 		if (typeof newType == 'function') {
-			renderComponent(newVNode, {}, globalContext, commitQueue);
+			renderComponent(newVNode, null, globalContext, commitQueue);
 
 			createChildren(newVNode, newVNode._children, globalContext, commitQueue);
 		} else if (newProps == null || newProps.dangerouslySetInnerHTML == null) {

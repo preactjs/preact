@@ -116,6 +116,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	constructor: undefined;
 	_original: number;
 	_mode: number;
+	_oldVNode: VNode<P> | null;
 }
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
