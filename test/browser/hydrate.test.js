@@ -400,8 +400,10 @@ describe('hydrate()', () => {
 		};
 
 		hydrate(<App />, scratch);
-		expect(scratch.innerHTML).to.equal(
-			'<select><option value="0">Zero</option><option selected="" value="2">Two</option></select>'
+		expect(sortAttributes(scratch.innerHTML)).to.equal(
+			sortAttributes(
+				'<select><option value="0">Zero</option><option selected="" value="2">Two</option></select>'
+			)
 		);
 	});
 
