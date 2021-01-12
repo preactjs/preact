@@ -13,6 +13,7 @@ const h = createElement;
 
 describe('debug compat', () => {
 	let scratch;
+	let root;
 	let errors = [];
 	let warnings = [];
 
@@ -22,6 +23,9 @@ describe('debug compat', () => {
 		scratch = setupScratch();
 		sinon.stub(console, 'error').callsFake(e => errors.push(e));
 		sinon.stub(console, 'warn').callsFake(w => warnings.push(w));
+
+		root = document.createElement('div');
+		document.body.appendChild(root);
 	});
 
 	afterEach(() => {
@@ -29,13 +33,12 @@ describe('debug compat', () => {
 		(console.error).restore();
 		console.warn.restore();
 		teardown(scratch);
+
+		document.body.removeChild(root);
 	});
 
 	describe('portals', () => {
 		it('should not throw an invalid render argument for a portal.', () => {
-			let root = document.createElement('div');
-			document.body.appendChild(root);
-
 			function Foo(props) {
 				return <div>{createPortal(props.children, root)}</div>;
 			}
