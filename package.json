@@ -252,8 +252,8 @@
 		"npm-run-all": "^4.0.0",
 		"prettier": "^1.18.2",
 		"prop-types": "^15.7.2",
-		"sinon": "^9.2.1",
-		"sinon-chai": "^3.0.0",
+		"sinon": "^9.2.3",
+		"sinon-chai": "^3.5.0",
 		"typescript": "3.5.3"
 	}
 }
