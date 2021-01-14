@@ -1,6 +1,6 @@
 import * as _hooks from '../../hooks';
 import * as preact from '../../src';
-import { JSXInternal } from '../../src/jsx';
+import * as JSXInternal from './jsx';
 import * as _Suspense from './suspense';
 import * as _SuspenseList from './suspense-list';
 
@@ -31,9 +31,23 @@ declare namespace React {
 	export import useState = _hooks.useState;
 
 	// Preact Defaults
-	export import Component = preact.Component;
+	export interface Component<P = {}, S = {}, SS = any> extends preact.Component<P, S> {}
+	export abstract class Component<P, S> extends preact.Component<P, S> {}
+	export interface ReactElement<P = {}, S = any> extends preact.VNode<P> {}
+	export import ComponentClass = preact.ComponentClass;
+	export import ComponentType = preact.ComponentType;
+	export import JSXElementConstructor = preact.AnyComponent;
+	export import Attributes = preact.Attributes;
+	export import ClassAttributes = preact.ClassAttributes;
+	export import Context = preact.Context;
+	export import Provider = preact.Provider;
+	export import ReactNode = preact.ComponentChildren;
+	export import ComponentPropsWithRef = preact.RenderableProps;
+	export type CSSProperties = string | {[key: string]: string | number};
+	export interface AllHTMLAttributes<T> extends JSX.HTMLAttributes {}
 	export import FunctionComponent = preact.FunctionComponent;
 	export import FC = preact.FunctionComponent;
+	export import SFC = preact.FunctionComponent;
 	export import createContext = preact.createContext;
 	export import createRef = preact.createRef;
 	export import Fragment = preact.Fragment;
@@ -125,4 +139,5 @@ declare namespace React {
 		only: (children: preact.ComponentChildren) => preact.ComponentChild;
 		toArray: (children: preact.ComponentChildren) => preact.VNode<{}>[];
 	};
+
 }
