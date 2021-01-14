@@ -56,6 +56,10 @@ export function diff(
 			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
 			let newProps = newVNode.props;
 
+			if (newProps._container) {
+				parentDom = newProps._container;
+			}
+
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
 			tmp = newType.contextType;
@@ -189,7 +193,10 @@ export function diff(
 			}
 
 			let isTopLevelFragment =
-				tmp != null && tmp.type === Fragment && tmp.key == null;
+				tmp != null &&
+				tmp.type === Fragment &&
+				tmp.key == null &&
+				tmp.props._container == null;
 			let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
 
 			diffChildren(
@@ -474,6 +481,8 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	let dom;
 	if (!skipRemove && typeof vnode.type != 'function') {
 		skipRemove = (dom = vnode._dom) != null;
+	} else if (vnode.props._container) {
+		skipRemove = false;
 	}
 
 	// Must be set to `undefined` to properly clean up `_nextDom`
