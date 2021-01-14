@@ -162,6 +162,7 @@ function createEsbuildPlugin() {
 
 					const tmp = await babel.transformAsync(result, {
 						filename: args.path,
+						sourceMaps: 'inline',
 						plugins: [
 							coverage && [
 								'istanbul',
