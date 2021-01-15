@@ -171,6 +171,8 @@
 		"compat/server.js",
 		"compat/jsx-runtime.js",
 		"compat/jsx-runtime.mjs",
+		"compat/jsx-dev-runtime.js",
+		"compat/jsx-dev-runtime.mjs",
 		"compat/package.json",
 		"debug/dist",
 		"debug/src",
