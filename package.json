@@ -169,6 +169,7 @@
 		"compat/dist",
 		"compat/src",
 		"compat/server.js",
+		"compat/test-utils.js",
 		"compat/jsx-runtime.js",
 		"compat/jsx-runtime.mjs",
 		"compat/jsx-dev-runtime.js",
