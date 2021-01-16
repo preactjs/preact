@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - restructure
 
 jobs:
   build_test:
