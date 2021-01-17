@@ -46,8 +46,13 @@ export function mount(
 				startDom
 			);
 		} else {
+			let hydrateDom =
+				newVNode._mode & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)
+					? startDom
+					: null;
+
 			newVNode._dom = mountDOMElement(
-				newVNode._mode !== MODE_NONE ? startDom : null,
+				hydrateDom,
 				newVNode,
 				globalContext,
 				isSvg,
@@ -70,7 +75,7 @@ export function mount(
 
 		// TODO: include replaceNode using MODE_MUTATIVE_HYDRATE, or could we just
 		// not allow this during MUTATIVE_HYDRATE?
-		if (newVNode._mode === MODE_HYDRATE) {
+		if (newVNode._mode & MODE_HYDRATE) {
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
 			nextDomSibling = startDom && startDom.nextSibling;
 			newVNode._dom = startDom;
@@ -81,7 +86,7 @@ export function mount(
 
 			// TODO: Is always true unless we change the above condition to allow this
 			// code path in MUTATIVE_HYDRATE
-			newVNode._hydrating = newVNode._mode === MODE_HYDRATE;
+			newVNode._hydrating = (newVNode._mode & MODE_HYDRATE) === MODE_HYDRATE;
 
 			// excessDomChildren[excessDomChildren.indexOf(startDom)] = null;
 			// ^ could possibly be simplified to:
@@ -110,7 +115,7 @@ function mountDOMElement(dom, newVNode, globalContext, isSvg, commitQueue) {
 	/** @type {any} */
 	let i = 0;
 
-	let isHydrating = newVNode._mode === MODE_HYDRATE;
+	let isHydrating = (newVNode._mode & MODE_HYDRATE) === MODE_HYDRATE;
 
 	if (nodeType == null) {
 		// TODO: Skip over wrong type nodes
@@ -154,7 +159,7 @@ function mountDOMElement(dom, newVNode, globalContext, isSvg, commitQueue) {
 		// @TODO: Consider removing and instructing users to instead set the desired
 		// prop for removal to undefined/null. During hydration, props are not
 		// diffed at all (including dangerouslySetInnerHTML)
-		if (newVNode._mode === MODE_MUTATIVE_HYDRATE) {
+		if (newVNode._mode & MODE_MUTATIVE_HYDRATE) {
 			// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
 			// we should read the existing DOM attributes to diff them
 
@@ -242,9 +247,8 @@ export function mountChildren(
 ) {
 	let i, childVNode, newDom, firstChildDom, mountedNextChild;
 
-	// TODO: bitwise MODE_HYDRATE|MODE_MUTATIVE_HYDRATE
 	if (
-		newParentVNode._mode !== MODE_NONE &&
+		newParentVNode._mode & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE) &&
 		typeof newParentVNode.type !== 'function'
 	) {
 		startDom = parentDom.childNodes[0];
@@ -304,9 +308,8 @@ export function mountChildren(
 	newParentVNode._dom = firstChildDom;
 
 	// Remove children that are not part of any vnode.
-	// TODO: bitwise MODE_HYDRATE|MODE_MUTATIVE_HYDRATE
 	if (
-		newParentVNode._mode !== MODE_NONE &&
+		newParentVNode._mode & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE) &&
 		typeof newParentVNode.type !== 'function'
 	) {
 		// TODO: Would it be simpler to just clear the pre-existing DOM in top-level

@@ -2,7 +2,6 @@
 
 ## TODOs
 
-* Use bit-wise comparison for `_mode` checks
 * Replace `_hydrating` with `_mode`
 * Consider further removing _dom pointers from non-dom VNodes
 * Combine placeChild and unmounting loop?? Do placeChild backwards? Do
