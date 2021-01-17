@@ -112,7 +112,6 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	 */
 	_dom: PreactElement | null;
 	_component: Component | null;
-	_hydrating: boolean | null;
 	constructor: undefined;
 	_original: number;
 	_mode: number;

@@ -4,6 +4,8 @@ export const MODE_NONE = 0;
 export const MODE_HYDRATE = 1;
 /** Top level render unspecified behaviour (old replaceNode parameter to render) */
 export const MODE_MUTATIVE_HYDRATE = 2;
+/** Signifies this VNode suspended on the previous render */
+export const MODE_SUSPENDED = 4;
 
 export const EMPTY_ARR = [];
 

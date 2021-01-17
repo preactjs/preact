@@ -1,5 +1,10 @@
 import { applyRef } from './refs';
-import { MODE_HYDRATE, MODE_MUTATIVE_HYDRATE, MODE_NONE } from '../constants';
+import {
+	MODE_HYDRATE,
+	MODE_MUTATIVE_HYDRATE,
+	MODE_NONE,
+	MODE_SUSPENDED
+} from '../constants';
 import { normalizeToVNode } from '../create-element';
 import { setProperty } from './props';
 import options from '../options';
@@ -66,31 +71,17 @@ export function mount(
 		if (options.diffed) options.diffed(newVNode);
 
 		// We successfully rendered this VNode, unset any stored hydration/bailout state:
-		// TODO: Replace _hydrating with _mode
-		newVNode._hydrating = null;
 		newVNode._mode = MODE_NONE;
 	} catch (e) {
 		newVNode._original = null;
-		// if hydrating or creating initial tree, bailout preserves DOM:
+		newVNode._mode = newVNode._mode | MODE_SUSPENDED;
 
 		// TODO: include replaceNode using MODE_MUTATIVE_HYDRATE, or could we just
 		// not allow this during MUTATIVE_HYDRATE?
 		if (newVNode._mode & MODE_HYDRATE) {
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
 			nextDomSibling = startDom && startDom.nextSibling;
-			newVNode._dom = startDom;
-
-			// _hydrating = true if bailed out during hydration
-			// _hydrating = false if bailed out during mounting
-			// _hydrating = null if it didn't bail out
-
-			// TODO: Is always true unless we change the above condition to allow this
-			// code path in MUTATIVE_HYDRATE
-			newVNode._hydrating = (newVNode._mode & MODE_HYDRATE) === MODE_HYDRATE;
-
-			// excessDomChildren[excessDomChildren.indexOf(startDom)] = null;
-			// ^ could possibly be simplified to:
-			// excessDomChildren.length = 0;
+			newVNode._dom = startDom; // Save our current DOM position
 		}
 		options._catchError(e, newVNode, newVNode);
 	}

@@ -1,4 +1,5 @@
 import { Component, createElement, options, Fragment } from 'preact';
+import { MODE_HYDRATE } from '../../src/constants';
 import { assign } from './util';
 
 const oldCatchError = options._catchError;
@@ -165,7 +166,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 				// component so the component instance stored by Suspense is no longer
 				// valid. Likely needs to be fixed with backing nodes and a way to
 				// trigger a rerender for backing nodes
-				if (suspended._vnode._hydrating == null) {
+				if (!(suspended._vnode._mode & MODE_HYDRATE)) {
 					suspended.forceUpdate();
 				}
 			}
@@ -177,7 +178,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 	 * to remain on screen and hydrate it when the suspense actually gets resolved.
 	 * While in non-hydration cases the usual fallback -> component flow would occur.
 	 */
-	const wasHydrating = suspendingVNode._hydrating === true;
+	const wasHydrating = (suspendingVNode._mode & MODE_HYDRATE) === MODE_HYDRATE;
 	if (!c._pendingSuspensionCount++ && !wasHydrating) {
 		c.setState({ _suspended: (c._detachOnNextRender = c._vnode._children[0]) });
 	}
@@ -215,7 +216,6 @@ Suspense.prototype.render = function(props, state) {
 	/** @type {import('./internal').VNode} */
 	const fallback =
 		state._suspended && createElement(Fragment, null, props.fallback);
-	if (fallback) fallback._hydrating = null;
 
 	return [
 		// Wrap with a Fragment to prevent the current reconciler from

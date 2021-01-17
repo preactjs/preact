@@ -43,7 +43,6 @@ function createVNode(type, props, key, __source, __self) {
 		_depth: 0,
 		_dom: null,
 		_component: null,
-		_hydrating: null,
 		constructor: undefined,
 		_original: ++options._vnodeId,
 		_mode: MODE_NONE,

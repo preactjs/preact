@@ -2,7 +2,8 @@
 
 ## TODOs
 
-* Replace `_hydrating` with `_mode`
+* Investigate consolidating _processingException & _pendingError into MODEs
+  (might need backing nodes)
 * Consider further removing _dom pointers from non-dom VNodes
 * Combine placeChild and unmounting loop?? Do placeChild backwards? Do
   unmounting first then placeChild loop
