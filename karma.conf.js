@@ -259,12 +259,13 @@ module.exports = function(config) {
 
 		customLaunchers: sauceLabs ? sauceLabsLaunchers : localLaunchers,
 
+		// TODO: ADD BACK COMPAT AND DEBUG TESTS
 		files: [
 			{ pattern: 'test/polyfills.js', watched: false },
 			{
 				pattern:
 					config.grep ||
-					'{debug,hooks,compat,test-utils,jsx-runtime,}/test/{browser,shared}/**/*.test.js',
+					'{compat,debug,hooks,test-utils,jsx-runtime,}/test/{browser,shared}/**/*.test.js',
 				watched: false,
 				type: 'js'
 			}

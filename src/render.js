@@ -1,9 +1,10 @@
-import { EMPTY_OBJ, EMPTY_ARR } from './constants';
-import { commitRoot, diff } from './diff/index';
+import { EMPTY_ARR } from './constants';
+import { commitRoot } from './diff/commit';
 import { createElement, Fragment } from './create-element';
 import options from './options';
-
-const IS_HYDRATE = EMPTY_OBJ;
+import { mount } from './diff/mount';
+import { patch } from './diff/patch';
+import { getDomSibling } from './component';
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -16,10 +17,10 @@ const IS_HYDRATE = EMPTY_OBJ;
 export function render(vnode, parentDom, replaceNode) {
 	if (options._root) options._root(vnode, parentDom);
 
-	// We abuse the `replaceNode` parameter in `hydrate()` to signal if we
-	// are in hydration mode or not by passing `IS_HYDRATE` instead of a
-	// DOM element.
-	let isHydrating = replaceNode === IS_HYDRATE;
+	// We abuse the `replaceNode` parameter in `hydrate()` to signal if we are in
+	// hydration mode or not by passing the `hydrate` function instead of a DOM
+	// element. `typeof a === 'function'` compresses well.
+	let isHydrating = typeof replaceNode === 'function';
 
 	// To be able to support calling `render()` multiple times on the same
 	// DOM node, we need to obtain a reference to the previous tree. We do
@@ -31,27 +32,53 @@ export function render(vnode, parentDom, replaceNode) {
 		: (replaceNode && replaceNode._children) || parentDom._children;
 	vnode = createElement(Fragment, null, [vnode]);
 
-	// List of effects that need to be called after diffing.
-	let commitQueue = [];
-	diff(
-		parentDom,
-		// Determine the new vnode tree and store it on the DOM element on
-		// our custom `_children` property.
-		((isHydrating ? parentDom : replaceNode || parentDom)._children = vnode),
-		oldVNode || EMPTY_OBJ,
-		EMPTY_OBJ,
-		parentDom.ownerSVGElement !== undefined,
+	// Determine the new vnode tree and store it on the DOM element on
+	// our custom `_children` property.
+	let newVNode = ((isHydrating
+		? parentDom
+		: replaceNode || parentDom
+	)._children = vnode);
+
+	/** @type {import('./internal').PreactElement[]} */
+	let excessDomChildren =
 		replaceNode && !isHydrating
 			? [replaceNode]
 			: oldVNode
 			? null
 			: parentDom.childNodes.length
 			? EMPTY_ARR.slice.call(parentDom.childNodes)
-			: null,
-		commitQueue,
-		replaceNode || EMPTY_OBJ,
-		isHydrating
-	);
+			: null;
+
+	if (isHydrating) {
+		replaceNode = excessDomChildren ? excessDomChildren[0] : null;
+	}
+
+	// List of effects that need to be called after diffing.
+	let commitQueue = [];
+	if (oldVNode) {
+		patch(
+			parentDom,
+			newVNode,
+			oldVNode,
+			{},
+			parentDom.ownerSVGElement !== undefined,
+			commitQueue,
+			// Begin diff with replaceNode or find the first non-null child with a dom
+			// pointer and begin the diff with that (i.e. what getDomSibling does)
+			replaceNode || getDomSibling(oldVNode, 0)
+		);
+	} else {
+		mount(
+			parentDom,
+			newVNode,
+			{},
+			parentDom.ownerSVGElement !== undefined,
+			excessDomChildren,
+			commitQueue,
+			replaceNode || null,
+			isHydrating
+		);
+	}
 
 	// Flush all queued effects
 	commitRoot(commitQueue, vnode);
@@ -64,5 +91,5 @@ export function render(vnode, parentDom, replaceNode) {
  * update
  */
 export function hydrate(vnode, parentDom) {
-	render(vnode, parentDom, IS_HYDRATE);
+	render(vnode, parentDom, hydrate);
 }

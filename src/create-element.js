@@ -67,11 +67,6 @@ export function createVNode(type, props, key, ref, original) {
 		_parent: null,
 		_depth: 0,
 		_dom: null,
-		// _nextDom must be initialized to undefined b/c it will eventually
-		// be set to dom.nextSibling which can return `null` and it is important
-		// to be able to distinguish between an uninitialized _nextDom and
-		// a _nextDom that has been set to `null`
-		_nextDom: undefined,
 		_component: null,
 		_hydrating: null,
 		constructor: undefined,
@@ -81,6 +76,38 @@ export function createVNode(type, props, key, ref, original) {
 	if (options.vnode != null) options.vnode(vnode);
 
 	return vnode;
+}
+
+/**
+ * @param {import('./internal').ComponentChildren} childVNode
+ * @returns {import('./internal').VNode | null}
+ */
+export function normalizeToVNode(childVNode) {
+	if (childVNode == null || typeof childVNode == 'boolean') {
+		return null;
+	}
+	// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
+	// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
+	// it's own DOM & etc. pointers
+	else if (typeof childVNode == 'string' || typeof childVNode == 'number') {
+		return createVNode(null, childVNode, null, null, childVNode);
+	} else if (Array.isArray(childVNode)) {
+		return createVNode(Fragment, { children: childVNode }, null, null, null);
+	} else if (childVNode._depth > 0) {
+		// VNode is already in use, clone it. This can happen in the following
+		// scenario:
+		//   const reuse = <div />
+		//   <div>{reuse}<span />{reuse}</div>
+		return createVNode(
+			childVNode.type,
+			childVNode.props,
+			childVNode.key,
+			null,
+			childVNode._original
+		);
+	}
+
+	return childVNode;
 }
 
 export function createRef() {

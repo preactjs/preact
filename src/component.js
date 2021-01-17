@@ -1,7 +1,8 @@
 import { assign } from './util';
-import { diff, commitRoot } from './diff/index';
+import { commitRoot } from './diff/commit';
 import options from './options';
 import { Fragment } from './create-element';
+import { patch } from './diff/patch';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -84,6 +85,7 @@ Component.prototype.render = Fragment;
 /**
  * @param {import('./internal').VNode} vnode
  * @param {number | null} [childIndex]
+ * @returns {import('./internal').PreactElement}
  */
 export function getDomSibling(vnode, childIndex) {
 	if (childIndex == null) {
@@ -117,9 +119,9 @@ export function getDomSibling(vnode, childIndex) {
  * Trigger in-place re-rendering of a component.
  * @param {import('./internal').Component} component The component to rerender
  */
-function renderComponent(component) {
+function rerenderComponent(component) {
 	let vnode = component._vnode,
-		oldDom = vnode._dom,
+		startDom = vnode._dom,
 		parentDom = component._parentDom;
 
 	if (parentDom) {
@@ -127,20 +129,18 @@ function renderComponent(component) {
 		const oldVNode = assign({}, vnode);
 		oldVNode._original = vnode._original + 1;
 
-		diff(
+		patch(
 			parentDom,
 			vnode,
 			oldVNode,
 			component._globalContext,
 			parentDom.ownerSVGElement !== undefined,
-			vnode._hydrating != null ? [oldDom] : null,
 			commitQueue,
-			oldDom == null ? getDomSibling(vnode) : oldDom,
-			vnode._hydrating
+			startDom == null ? getDomSibling(vnode) : startDom
 		);
 		commitRoot(commitQueue, vnode);
 
-		if (vnode._dom != oldDom) {
+		if (vnode._dom != startDom) {
 			updateParentDomPointers(vnode);
 		}
 	}
@@ -218,7 +218,7 @@ function process() {
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 		// process() calls from getting scheduled while `queue` is still being consumed.
 		queue.some(c => {
-			if (c._dirty) renderComponent(c);
+			if (c._dirty) rerenderComponent(c);
 		});
 	}
 }

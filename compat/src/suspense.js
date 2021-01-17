@@ -40,27 +40,37 @@ function detachedClone(vnode, detachedParent, parentDom) {
 			vnode._component = null;
 		}
 
-		vnode._children =
-			vnode._children &&
-			vnode._children.map(child =>
+		if (vnode._children) {
+			vnode._children = vnode._children.map(child =>
 				detachedClone(child, detachedParent, parentDom)
 			);
+		}
 	}
 
 	return vnode;
 }
 
+/**
+ * @param {import('./internal').VNode} vnode
+ * @param {import('./internal').PreactElement} detachedParent
+ * @param {import('./internal').PreactElement} originalParent
+ */
 function removeOriginal(vnode, detachedParent, originalParent) {
 	if (vnode) {
 		vnode._original = null;
-		vnode._children =
-			vnode._children &&
-			vnode._children.map(child =>
+
+		if (vnode._children) {
+			vnode._children = vnode._children.map(child =>
 				removeOriginal(child, detachedParent, originalParent)
 			);
+		}
 
 		if (vnode._component) {
-			if (vnode._component._parentDom === detachedParent) {
+			// originalParent will be undefined if a node suspended during hydration
+			if (
+				originalParent != null &&
+				vnode._component._parentDom === detachedParent
+			) {
 				if (vnode._dom) {
 					originalParent.insertBefore(vnode._dom, vnode._nextDom);
 				}
@@ -131,22 +141,33 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 
 	const onSuspensionComplete = () => {
 		if (!--c._pendingSuspensionCount) {
-			// If the suspension was during hydration we don't need to restore the
-			// suspended children into the _children array
+			let suspendedVNode;
 			if (c.state._suspended) {
-				const suspendedVNode = c.state._suspended;
-				c._vnode._children[0] = removeOriginal(
-					suspendedVNode,
-					suspendedVNode._component._parentDom,
-					suspendedVNode._component._originalParentDom
-				);
+				suspendedVNode = c.state._suspended;
+			} else {
+				// _suspended will be unset if we are suspending while hydrating. If so
+				// the suspendedVNode is still the first child of Suspense since we
+				// never rendered the fallback
+				suspendedVNode = c._vnode._children[0];
 			}
+
+			c._vnode._children[0] = removeOriginal(
+				suspendedVNode,
+				suspendedVNode._component._parentDom,
+				suspendedVNode._component._originalParentDom
+			);
 
 			c.setState({ _suspended: (c._detachOnNextRender = null) });
 
 			let suspended;
 			while ((suspended = c._suspenders.pop())) {
-				suspended.forceUpdate();
+				// TODO: If the component that suspended was hydrating, we remount the
+				// component so the component instance stored by Suspense is no longer
+				// valid. Likely needs to be fixed with backing nodes and a way to
+				// trigger a rerender for backing nodes
+				if (suspended._vnode._hydrating == null) {
+					suspended.forceUpdate();
+				}
 			}
 		}
 	};
@@ -154,7 +175,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 	/**
 	 * We do not set `suspended: true` during hydration because we want the actual markup
 	 * to remain on screen and hydrate it when the suspense actually gets resolved.
-	 * While in non-hydration cases the usual fallback -> component flow would occour.
+	 * While in non-hydration cases the usual fallback -> component flow would occur.
 	 */
 	const wasHydrating = suspendingVNode._hydrating === true;
 	if (!c._pendingSuspensionCount++ && !wasHydrating) {
@@ -197,7 +218,9 @@ Suspense.prototype.render = function(props, state) {
 	if (fallback) fallback._hydrating = null;
 
 	return [
-		createElement(Fragment, null, state._suspended ? null : props.children),
+		// Wrap with a Fragment to prevent the current reconciler from
+		// picking the wrong DOM node.
+		state._suspended ? null : createElement(Fragment, null, props.children),
 		fallback
 	];
 };

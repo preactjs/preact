@@ -41,6 +41,11 @@ export interface Options extends preact.Options {
 	_catchError(error: any, vnode: VNode, oldVNode?: VNode | undefined): void;
 }
 
+// Redefine ComponentFactory using our new internal FunctionalComponent interface above
+export type ComponentFactory<P> =
+	| preact.ComponentClass<P>
+	| FunctionalComponent<P>;
+
 export type ComponentChild =
 	| VNode<any>
 	| string
@@ -106,10 +111,6 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	 * The [first (for Fragments)] DOM child of a VNode
 	 */
 	_dom: PreactElement | null;
-	/**
-	 * The last dom child of a Fragment, or components that return a Fragment
-	 */
-	_nextDom: PreactElement | null;
 	_component: Component | null;
 	_hydrating: boolean | null;
 	constructor: undefined;

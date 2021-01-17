@@ -8,7 +8,7 @@ import {
 
 /** @jsx createElement */
 
-describe('replaceNode parameter in render()', () => {
+describe.skip('replaceNode parameter in render()', () => {
 	let scratch;
 
 	/**
@@ -96,6 +96,8 @@ describe('replaceNode parameter in render()', () => {
 	});
 
 	it('should unmount existing components in prerendered HTML', () => {
+		// TODO: Is is expected that we keep the old attributes even if the
+		// specified VNode doesn't have them?
 		const unmount = sinon.spy();
 		const mount = sinon.spy();
 		class App extends Component {

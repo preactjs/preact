@@ -4,7 +4,8 @@ import React, {
 	hydrate,
 	Fragment,
 	Suspense,
-	useState
+	useState,
+	Component
 } from 'preact/compat';
 import { logCall, getLog, clearLog } from '../../../test/_util/logCall';
 import {
@@ -164,7 +165,7 @@ describe('suspense hydration', () => {
 		rerender(); // Flush rerender queue to mimic what preact will really do
 		expect(scratch.innerHTML).to.equal('<div>Count: 0</div><div>Hello</div>');
 		// Re: DOM OP below - Known issue with hydrating merged text nodes
-		expect(getLog()).to.deep.equal(['<div>Count: .appendChild(#text)']);
+		expect(getLog()).to.deep.equal(['<div>Count: .insertBefore(#text, Null)']);
 		clearLog();
 
 		increment();
@@ -360,7 +361,7 @@ describe('suspense hydration', () => {
 		);
 		rerender(); // Flush rerender queue to mimic what preact will really do
 		expect(scratch.innerHTML).to.equal(html);
-		expect(getLog()).to.deep.equal(['<div>Count: .appendChild(#text)']);
+		expect(getLog()).to.deep.equal(['<div>Count: .insertBefore(#text, Null)']);
 		clearLog();
 
 		scratch.firstElementChild.dispatchEvent(createEvent('click'));
@@ -411,8 +412,8 @@ describe('suspense hydration', () => {
 		rerender(); // Flush rerender queue to mimic what preact will really do
 		expect(scratch.innerHTML).to.equal(html);
 		expect(getLog()).to.deep.equal([
-			'<div>Count: .appendChild(#text)',
-			'<div>Count: .appendChild(#text)'
+			'<div>Count: .insertBefore(#text, Null)',
+			'<div>Count: .insertBefore(#text, Null)'
 		]);
 		clearLog();
 
@@ -450,6 +451,77 @@ describe('suspense hydration', () => {
 
 			expect(lazySpy).to.have.been.calledOnce;
 		});
+	});
+
+	// TODO: Fix this test
+	it.skip('should hydrate lazy components through components using shouldComponentUpdate', () => {
+		const originalHtml = '<b><i>a</i><i>b</i><i>c</i><i>d</i></b>';
+		scratch.innerHTML = originalHtml;
+
+		const listeners = [sinon.spy(), sinon.spy(), sinon.spy()];
+
+		const [Lazy1, resolve1] = createLazy();
+		const [Lazy2, resolve2] = createLazy();
+
+		class Blocker extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+			render(props) {
+				return (
+					<b>
+						<i onClick={listeners[0]}>a</i>
+						{props.children}
+						<i>d</i>
+					</b>
+				);
+			}
+		}
+
+		clearLog();
+
+		hydrate(
+			<Suspense>
+				<Blocker>
+					<Lazy1 />
+					<Lazy2 />
+				</Blocker>
+			</Suspense>,
+			scratch
+		);
+		rerender();
+		expect(scratch.innerHTML).to.equal(originalHtml);
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		scratch.querySelector('i:first-child').dispatchEvent(createEvent('click'));
+		expect(listeners[0]).to.have.been.calledOnce;
+
+		return resolve1(() => <i onClick={listeners[1]}>b</i>)
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal(originalHtml);
+				expect(getLog()).to.deep.equal([]);
+				clearLog();
+
+				scratch
+					.querySelector('i:nth-child(2)')
+					.dispatchEvent(createEvent('click'));
+				expect(listeners[1]).to.have.been.calledOnce;
+
+				return resolve2(() => <i onClick={listeners[2]}>c</i>);
+			})
+			.then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal(originalHtml);
+				expect(getLog()).to.deep.equal([]);
+				clearLog();
+
+				scratch
+					.querySelector('i:nth-child(3)')
+					.dispatchEvent(createEvent('click'));
+				expect(listeners[2]).to.have.been.calledOnce;
+			});
 	});
 
 	it('should allow component to re-suspend using normal suspension mechanics after initial suspended hydration resumes', () => {
@@ -551,7 +623,7 @@ describe('suspense hydration', () => {
 		rerender(); // Flush rerender queue to mimic what preact will really do
 		expect(scratch.innerHTML).to.equal(originalHtml);
 		// Re: DOM OP below - Known issue with hydrating merged text nodes
-		expect(getLog()).to.deep.equal(['<p>Count: .appendChild(#text)']);
+		expect(getLog()).to.deep.equal(['<p>Count: .insertBefore(#text, Null)']);
 		clearLog();
 
 		increment();
@@ -571,7 +643,9 @@ describe('suspense hydration', () => {
 				'<p>Count: 1</p><p data-count="1">Lazy count: 1</p>'
 			);
 			// Re: DOM OP below - Known issue with hydrating merged text nodes
-			expect(getLog()).to.deep.equal(['<p>Lazy count: .appendChild(#text)']);
+			expect(getLog()).to.deep.equal([
+				'<p>Lazy count: .insertBefore(#text, Null)'
+			]);
 			clearLog();
 		});
 	});

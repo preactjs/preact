@@ -41,7 +41,6 @@ function createVNode(type, props, key, __source, __self) {
 		_parent: null,
 		_depth: 0,
 		_dom: null,
-		_nextDom: undefined,
 		_component: null,
 		_hydrating: null,
 		constructor: undefined,

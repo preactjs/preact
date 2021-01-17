@@ -153,10 +153,10 @@ describe('hydrate()', () => {
 
 		expect(scratch.innerHTML).to.equal(ul([li('1'), li('2'), li('3')]));
 		expect(getLog()).to.deep.equal([
-			'<li>.appendChild(#text)',
-			'<ul>1.appendChild(<li>2)',
-			'<li>.appendChild(#text)',
-			'<ul>12.appendChild(<li>3)'
+			'<li>.insertBefore(#text, Null)',
+			'<ul>1.insertBefore(<li>2, Null)',
+			'<li>.insertBefore(#text, Null)',
+			'<ul>12.insertBefore(<li>3, Null)'
 		]);
 	});
 
@@ -292,7 +292,7 @@ describe('hydrate()', () => {
 		expect(clickHandlers[4]).to.have.been.calledOnce;
 	});
 
-	// Failing because the following condition in diffElementNodes doesn't evaluate to true
+	// Failing because the following condition in mountDomElement doesn't evaluate to true
 	// when hydrating a dom node which is not correct
 	//		dom===d && newVNode.text!==oldVNode.text
 	// We don't set `d` when hydrating. If we did, then newVNode.text would never equal
