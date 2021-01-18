@@ -409,7 +409,7 @@ function diffElementNodes(
 				newVNode.type === 'foreignObject' ? false : isSvg,
 				excessDomChildren,
 				commitQueue,
-				EMPTY_OBJ,
+				dom.firstChild,
 				isHydrating
 			);
 

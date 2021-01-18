@@ -45,11 +45,15 @@ export function render(vnode, parentDom, replaceNode) {
 			? [replaceNode]
 			: oldVNode
 			? null
-			: parentDom.childNodes.length
+			: parentDom.firstChild
 			? EMPTY_ARR.slice.call(parentDom.childNodes)
 			: null,
 		commitQueue,
-		replaceNode || EMPTY_OBJ,
+		!isHydrating && replaceNode
+			? replaceNode
+			: oldVNode
+			? oldVNode._dom
+			: parentDom.firstChild,
 		isHydrating
 	);
 

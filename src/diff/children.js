@@ -44,20 +44,6 @@ export function diffChildren(
 
 	let oldChildrenLength = oldChildren.length;
 
-	// Only in very specific places should this logic be invoked (top level `render` and `diffElementNodes`).
-	// I'm using `EMPTY_OBJ` to signal when `diffChildren` is invoked in these situations. I can't use `null`
-	// for this purpose, because `null` is a valid value for `oldDom` which can mean to skip to this logic
-	// (e.g. if mounting a new tree in which the old DOM should be ignored (usually for Fragments).
-	if (oldDom == EMPTY_OBJ) {
-		if (excessDomChildren != null) {
-			oldDom = excessDomChildren[0];
-		} else if (oldChildrenLength) {
-			oldDom = getDomSibling(oldParentVNode, 0);
-		} else {
-			oldDom = null;
-		}
-	}
-
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = renderResult[i];
