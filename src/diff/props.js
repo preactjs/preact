@@ -103,22 +103,13 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		} else {
 			dom.removeEventListener(name, proxy, useCapture);
 		}
-	} else if (
-		name !== 'list' &&
-		name !== 'tagName' &&
-		// HTMLButtonElement.form and HTMLInputElement.form are read-only but can be set using
-		// setAttribute
-		name !== 'form' &&
-		name !== 'type' &&
-		name !== 'size' &&
-		name !== 'download' &&
-		name !== 'href' &&
-		name !== 'contentEditable' &&
-		!isSvg &&
-		name in dom
-	) {
-		dom[name] = value == null ? '' : value;
-	} else if (typeof value != 'function' && name !== 'dangerouslySetInnerHTML') {
+	} else if (name !== 'dangerouslySetInnerHTML') {
+		 if (!isSvg && name in dom || typeof value == 'function') {
+			try {
+				dom[name] = value == null ? '' : value;
+				return;
+			} catch (e) {}
+		 }
 		if (name !== (name = name.replace(/xlink:?/, ''))) {
 			if (value == null || value === false) {
 				dom.removeAttributeNS(
