@@ -108,7 +108,7 @@ export function diffChildren(
 			(MODE_HYDRATE | MODE_SUSPENDED)
 		) {
 			// We are resuming the hydration of a VNode
-			startDom = childVNode._dom = oldVNode._dom;
+			startDom = oldVNode._dom;
 			// Resume the same mode as before suspending
 			childVNode._mode = oldVNode._mode;
 			oldVNodeRef = oldVNode.ref;
