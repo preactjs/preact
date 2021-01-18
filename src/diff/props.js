@@ -103,7 +103,13 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			// - xlink:href / xlinkHref --> href (xlink:href was removed from SVG and isn't needed)
 			// - className --> class
 			name = name.replace(/xlink[H:h]/, 'h').replace(/Name$/, '');
-		} else if (name !== 'list' && name !== 'download' && name in dom) {
+		} else if (
+			name !== 'href' &&
+			name !== 'list' &&
+			name !== 'form' &&
+			name !== 'download' &&
+			name in dom
+		) {
 			try {
 				dom[name] = value == null ? '' : value;
 				// labelled break is 1b smaller here than a return statement (sorry)
