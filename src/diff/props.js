@@ -56,13 +56,7 @@ function setStyle(style, key, value) {
 export function setProperty(dom, name, value, oldValue, isSvg) {
 	let useCapture, nameLower, proxy;
 
-	if (isSvg && name == 'className') name = 'class';
-
-	// if (isSvg) {
-	// 	if (name === 'className') name = 'class';
-	// } else if (name === 'class') name += 'Name';
-
-	if (name === 'style') {
+	o: if (name === 'style') {
 		if (typeof value == 'string') {
 			dom.style.cssText = value;
 		} else {
@@ -104,39 +98,32 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			dom.removeEventListener(name, proxy, useCapture);
 		}
 	} else if (name !== 'dangerouslySetInnerHTML') {
-		 if (!isSvg && name in dom || typeof value == 'function') {
+		if (isSvg) {
+			// Normalize incorrect prop usage for SVG:
+			// - xlink:href / xlinkHref --> href (xlink:href was removed from SVG and isn't needed)
+			// - className --> class
+			name = name.replace(/xlink[H:h]/, 'h').replace(/Name$/, '');
+		} else if (name !== 'list' && name !== 'download' && name in dom) {
 			try {
 				dom[name] = value == null ? '' : value;
-				return;
+				// labelled break is 1b smaller here than a return statement (sorry)
+				break o;
 			} catch (e) {}
-		 }
-		if (name !== (name = name.replace(/xlink:?/, ''))) {
-			if (value == null || value === false) {
-				dom.removeAttributeNS(
-					'http://www.w3.org/1999/xlink',
-					name.toLowerCase()
-				);
-			} else {
-				dom.setAttributeNS(
-					'http://www.w3.org/1999/xlink',
-					name.toLowerCase(),
-					value
-				);
-			}
-		} else if (
-			value == null ||
-			(value === false &&
-				// ARIA-attributes have a different notion of boolean values.
-				// The value `false` is different from the attribute not
-				// existing on the DOM, so we can't remove it. For non-boolean
-				// ARIA-attributes we could treat false as a removal, but the
-				// amount of exceptions would cost us too many bytes. On top of
-				// that other VDOM frameworks also always stringify `false`.
-				!/^ar/.test(name))
-		) {
-			dom.removeAttribute(name);
-		} else {
+		}
+
+		// ARIA-attributes have a different notion of boolean values.
+		// The value `false` is different from the attribute not
+		// existing on the DOM, so we can't remove it. For non-boolean
+		// ARIA-attributes we could treat false as a removal, but the
+		// amount of exceptions would cost us too many bytes. On top of
+		// that other VDOM frameworks also always stringify `false`.
+
+		if (typeof value === 'function') {
+			// never serialize functions as attribute values
+		} else if (value != null && (value !== false || /^ar/.test(name))) {
 			dom.setAttribute(name, value);
+		} else {
+			dom.removeAttribute(name);
 		}
 	}
 }
