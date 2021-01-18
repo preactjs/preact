@@ -28,9 +28,9 @@ export function render(vnode, parentDom, replaceNode) {
 		? null
 		: (replaceNode && replaceNode._children) || parentDom._children;
 
-	vnode = (!isHydrating && replaceNode
-		? replaceNode
-		: parentDom
+	vnode = (
+		(!isHydrating && replaceNode) ||
+		parentDom
 	)._children = createElement(Fragment, null, [vnode]);
 
 	// List of effects that need to be called after diffing.
@@ -51,7 +51,7 @@ export function render(vnode, parentDom, replaceNode) {
 			? EMPTY_ARR.slice.call(parentDom.childNodes)
 			: null,
 		commitQueue,
-		!isHydrating && replaceNode ? replaceNode : EMPTY_OBJ,
+		(!isHydrating && replaceNode) || EMPTY_OBJ,
 		isHydrating
 	);
 
