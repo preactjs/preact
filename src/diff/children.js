@@ -171,7 +171,6 @@ export function diffChildren(
 					childVNode,
 					oldVNode,
 					oldChildren,
-					excessDomChildren,
 					newDom,
 					oldDom
 				);
@@ -258,7 +257,6 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 					vnode,
 					vnode,
 					childVNode._children,
-					null,
 					vnode._dom,
 					oldDom
 				);
@@ -293,7 +291,6 @@ function placeChild(
 	childVNode,
 	oldVNode,
 	oldChildren,
-	excessDomChildren,
 	newDom,
 	oldDom
 ) {
@@ -310,14 +307,10 @@ function placeChild(
 		// can clean up the property
 		childVNode._nextDom = undefined;
 	} else if (
-		excessDomChildren == oldVNode ||
+		oldVNode == null ||
 		newDom != oldDom ||
 		newDom.parentNode == null
 	) {
-		// NOTE: excessDomChildren==oldVNode above:
-		// This is a compression of excessDomChildren==null && oldVNode==null!
-		// The values only have the same type when `null`.
-
 		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
 			parentDom.appendChild(newDom);
 			nextDom = null;
