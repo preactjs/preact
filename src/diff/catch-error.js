@@ -9,8 +9,6 @@ export function _catchError(error, vnode) {
 	/** @type {import('../internal').Component} */
 	let component, ctor, handled;
 
-	const wasHydrating = vnode._hydrating;
-
 	for (; (vnode = vnode._parent); ) {
 		if ((component = vnode._component) && !component._processingException) {
 			try {
@@ -28,7 +26,6 @@ export function _catchError(error, vnode) {
 
 				// This is an error boundary. Mark it as having bailed out, and whether it was mid-hydration.
 				if (handled) {
-					vnode._hydrating = wasHydrating;
 					return (component._pendingError = component);
 				}
 			} catch (e) {
