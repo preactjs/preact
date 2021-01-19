@@ -1,7 +1,6 @@
 import { diff, unmount, applyRef } from './index';
 import { createVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
-import { removeNode } from '../util';
 import { getDomSibling } from '../component';
 
 /**
@@ -43,20 +42,6 @@ export function diffChildren(
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
 
 	let oldChildrenLength = oldChildren.length;
-
-	// Only in very specific places should this logic be invoked (top level `render` and `diffElementNodes`).
-	// I'm using `EMPTY_OBJ` to signal when `diffChildren` is invoked in these situations. I can't use `null`
-	// for this purpose, because `null` is a valid value for `oldDom` which can mean to skip to this logic
-	// (e.g. if mounting a new tree in which the old DOM should be ignored (usually for Fragments).
-	if (oldDom == EMPTY_OBJ) {
-		if (excessDomChildren != null) {
-			oldDom = excessDomChildren[0];
-		} else if (oldChildrenLength) {
-			oldDom = getDomSibling(oldParentVNode, 0);
-		} else {
-			oldDom = null;
-		}
-	}
 
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
@@ -185,7 +170,6 @@ export function diffChildren(
 					childVNode,
 					oldVNode,
 					oldChildren,
-					excessDomChildren,
 					newDom,
 					oldDom
 				);
@@ -227,13 +211,6 @@ export function diffChildren(
 	}
 
 	newParentVNode._dom = firstChildDom;
-
-	// Remove children that are not part of any vnode.
-	if (excessDomChildren != null && typeof newParentVNode.type != 'function') {
-		for (i = excessDomChildren.length; i--; ) {
-			if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
-		}
-	}
 
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {
@@ -279,7 +256,6 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 					vnode,
 					vnode,
 					childVNode._children,
-					null,
 					vnode._dom,
 					oldDom
 				);
@@ -314,7 +290,6 @@ function placeChild(
 	childVNode,
 	oldVNode,
 	oldChildren,
-	excessDomChildren,
 	newDom,
 	oldDom
 ) {
@@ -331,14 +306,10 @@ function placeChild(
 		// can clean up the property
 		childVNode._nextDom = undefined;
 	} else if (
-		excessDomChildren == oldVNode ||
+		oldVNode == null ||
 		newDom != oldDom ||
 		newDom.parentNode == null
 	) {
-		// NOTE: excessDomChildren==oldVNode above:
-		// This is a compression of excessDomChildren==null && oldVNode==null!
-		// The values only have the same type when `null`.
-
 		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
 			parentDom.appendChild(newDom);
 			nextDom = null;
