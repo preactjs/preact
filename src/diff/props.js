@@ -54,7 +54,7 @@ function setStyle(style, key, value) {
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
 export function setProperty(dom, name, value, oldValue, isSvg) {
-	let useCapture, nameLower, proxy;
+	let useCapture;
 
 	o: if (name === 'style') {
 		if (typeof value == 'string') {
@@ -84,18 +84,22 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0] === 'o' && name[1] === 'n') {
 		useCapture = name !== (name = name.replace(/Capture$/, ''));
-		nameLower = name.toLowerCase();
-		if (nameLower in dom) name = nameLower;
-		name = name.slice(2);
+
+		// Infer correct casing for DOM built-in events:
+		if (name.toLowerCase() in dom) name = name.toLowerCase().slice(2);
+		else name = name.slice(2);
 
 		if (!dom._listeners) dom._listeners = {};
 		dom._listeners[name + useCapture] = value;
 
-		proxy = useCapture ? eventProxyCapture : eventProxy;
 		if (value) {
-			if (!oldValue) dom.addEventListener(name, proxy, useCapture);
+			if (!oldValue) {
+				const handler = useCapture ? eventProxyCapture : eventProxy;
+				dom.addEventListener(name, handler, useCapture);
+			}
 		} else {
-			dom.removeEventListener(name, proxy, useCapture);
+			const handler = useCapture ? eventProxyCapture : eventProxy;
+			dom.removeEventListener(name, handler, useCapture);
 		}
 	} else if (name !== 'dangerouslySetInnerHTML') {
 		if (isSvg) {
