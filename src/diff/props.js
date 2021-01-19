@@ -54,15 +54,9 @@ function setStyle(style, key, value) {
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
 export function setProperty(dom, name, value, oldValue, isSvg) {
-	let useCapture, nameLower, proxy;
+	let useCapture;
 
-	if (isSvg && name == 'className') name = 'class';
-
-	// if (isSvg) {
-	// 	if (name === 'className') name = 'class';
-	// } else if (name === 'class') name += 'Name';
-
-	if (name === 'style') {
+	o: if (name === 'style') {
 		if (typeof value == 'string') {
 			dom.style.cssText = value;
 		} else {
@@ -90,62 +84,59 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0] === 'o' && name[1] === 'n') {
 		useCapture = name !== (name = name.replace(/Capture$/, ''));
-		nameLower = name.toLowerCase();
-		if (nameLower in dom) name = nameLower;
-		name = name.slice(2);
+
+		// Infer correct casing for DOM built-in events:
+		if (name.toLowerCase() in dom) name = name.toLowerCase().slice(2);
+		else name = name.slice(2);
 
 		if (!dom._listeners) dom._listeners = {};
 		dom._listeners[name + useCapture] = value;
 
-		proxy = useCapture ? eventProxyCapture : eventProxy;
 		if (value) {
-			if (!oldValue) dom.addEventListener(name, proxy, useCapture);
-		} else {
-			dom.removeEventListener(name, proxy, useCapture);
-		}
-	} else if (
-		name !== 'list' &&
-		name !== 'tagName' &&
-		// HTMLButtonElement.form and HTMLInputElement.form are read-only but can be set using
-		// setAttribute
-		name !== 'form' &&
-		name !== 'type' &&
-		name !== 'size' &&
-		name !== 'download' &&
-		name !== 'href' &&
-		name !== 'contentEditable' &&
-		!isSvg &&
-		name in dom
-	) {
-		dom[name] = value == null ? '' : value;
-	} else if (typeof value != 'function' && name !== 'dangerouslySetInnerHTML') {
-		if (name !== (name = name.replace(/xlink:?/, ''))) {
-			if (value == null || value === false) {
-				dom.removeAttributeNS(
-					'http://www.w3.org/1999/xlink',
-					name.toLowerCase()
-				);
-			} else {
-				dom.setAttributeNS(
-					'http://www.w3.org/1999/xlink',
-					name.toLowerCase(),
-					value
-				);
+			if (!oldValue) {
+				const handler = useCapture ? eventProxyCapture : eventProxy;
+				dom.addEventListener(name, handler, useCapture);
 			}
-		} else if (
-			value == null ||
-			(value === false &&
-				// ARIA-attributes have a different notion of boolean values.
-				// The value `false` is different from the attribute not
-				// existing on the DOM, so we can't remove it. For non-boolean
-				// ARIA-attributes we could treat false as a removal, but the
-				// amount of exceptions would cost us too many bytes. On top of
-				// that other VDOM frameworks also always stringify `false`.
-				!/^ar/.test(name))
-		) {
-			dom.removeAttribute(name);
 		} else {
+			const handler = useCapture ? eventProxyCapture : eventProxy;
+			dom.removeEventListener(name, handler, useCapture);
+		}
+	} else if (name !== 'dangerouslySetInnerHTML') {
+		if (isSvg) {
+			// Normalize incorrect prop usage for SVG:
+			// - xlink:href / xlinkHref --> href (xlink:href was removed from SVG and isn't needed)
+			// - className --> class
+			name = name.replace(/xlink[H:h]/, 'h').replace(/sName$/, 's');
+		} else if (
+			name !== 'href' &&
+			name !== 'list' &&
+			name !== 'form' &&
+			name !== 'download' &&
+			name in dom
+		) {
+			try {
+				dom[name] = value == null ? '' : value;
+				// labelled break is 1b smaller here than a return statement (sorry)
+				break o;
+			} catch (e) {}
+		}
+
+		// ARIA-attributes have a different notion of boolean values.
+		// The value `false` is different from the attribute not
+		// existing on the DOM, so we can't remove it. For non-boolean
+		// ARIA-attributes we could treat false as a removal, but the
+		// amount of exceptions would cost us too many bytes. On top of
+		// that other VDOM frameworks also always stringify `false`.
+
+		if (typeof value === 'function') {
+			// never serialize functions as attribute values
+		} else if (
+			value != null &&
+			(value !== false || (name[0] === 'a' && name[1] === 'r'))
+		) {
 			dom.setAttribute(name, value);
+		} else {
+			dom.removeAttribute(name);
 		}
 	}
 }
