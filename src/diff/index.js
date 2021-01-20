@@ -342,7 +342,7 @@ function diffElementNodes(
 			dom = document.createElement(
 				// @ts-ignore We know `newVNode.type` is a string
 				nodeType,
-				newProps.is && { is: newProps.is }
+				newProps.is && newProps
 			);
 		}
 
