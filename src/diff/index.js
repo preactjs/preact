@@ -315,6 +315,9 @@ function diffElementNodes(
 			// if newVNode matches an element in excessDomChildren or the `dom`
 			// argument matches an element in excessDomChildren, remove it from
 			// excessDomChildren so it isn't later removed in diffChildren
+			//
+			// Note: This takes advantage of Text nodes having `.localName=undefined`,
+			// which is loosely equal to Text VNodes' `.type=null`. Elements use string equality.
 			if (child != null && (dom == child || child.localName == nodeType)) {
 				dom = child;
 				excessDomChildren[i] = null;
