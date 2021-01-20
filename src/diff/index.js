@@ -303,9 +303,10 @@ function diffElementNodes(
 	let i;
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
+	let nodeType = newVNode.type;
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
-	isSvg = newVNode.type === 'svg' || isSvg;
+	if (nodeType === 'svg') isSvg = true;
 
 	if (excessDomChildren != null) {
 		for (i = 0; i < excessDomChildren.length; i++) {
@@ -314,13 +315,7 @@ function diffElementNodes(
 			// if newVNode matches an element in excessDomChildren or the `dom`
 			// argument matches an element in excessDomChildren, remove it from
 			// excessDomChildren so it isn't later removed in diffChildren
-			if (
-				child != null &&
-				((newVNode.type === null
-					? child.nodeType === 3
-					: child.localName === newVNode.type) ||
-					dom == child)
-			) {
+			if (child != null && (dom == child || child.localName == nodeType)) {
 				dom = child;
 				excessDomChildren[i] = null;
 				break;
@@ -329,7 +324,7 @@ function diffElementNodes(
 	}
 
 	if (dom == null) {
-		if (newVNode.type === null) {
+		if (nodeType === null) {
 			// @ts-ignore createTextNode returns Text, we expect PreactElement
 			return document.createTextNode(newProps);
 		}
@@ -338,12 +333,12 @@ function diffElementNodes(
 			dom = document.createElementNS(
 				'http://www.w3.org/2000/svg',
 				// @ts-ignore We know `newVNode.type` is a string
-				newVNode.type
+				nodeType
 			);
 		} else {
 			dom = document.createElement(
 				// @ts-ignore We know `newVNode.type` is a string
-				newVNode.type,
+				nodeType,
 				newProps.is && { is: newProps.is }
 			);
 		}
@@ -354,7 +349,7 @@ function diffElementNodes(
 		isHydrating = false;
 	}
 
-	if (newVNode.type === null) {
+	if (nodeType === null) {
 		// During hydration, we still have to split merged text from SSR'd HTML.
 		if (oldProps !== newProps && (!isHydrating || dom.data !== newProps)) {
 			dom.data = newProps;
@@ -406,7 +401,7 @@ function diffElementNodes(
 				newVNode,
 				oldVNode,
 				globalContext,
-				newVNode.type === 'foreignObject' ? false : isSvg,
+				isSvg && nodeType !== 'foreignObject',
 				excessDomChildren,
 				commitQueue,
 				dom.firstChild,
@@ -430,7 +425,7 @@ function diffElementNodes(
 				// despite the attribute not being present. When the attribute
 				// is missing the progress bar is treated as indeterminate.
 				// To fix that we'll always update it when it is 0 for progress elements
-				(i !== dom.value || (newVNode.type === 'progress' && !i))
+				(i !== dom.value || (nodeType === 'progress' && !i))
 			) {
 				setProperty(dom, 'value', i, oldProps.value, false);
 			}
