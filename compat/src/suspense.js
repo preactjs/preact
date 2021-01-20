@@ -22,7 +22,7 @@ options._catchError = function(error, newVNode, oldVNode) {
 	oldCatchError(error, newVNode, oldVNode);
 };
 
-function detachedClone(vnode) {
+function detachedClone(vnode, detachedParent, parentDom) {
 	if (vnode) {
 		if (vnode._component && vnode._component.__hooks) {
 			vnode._component.__hooks._list.forEach(effect => {
@@ -33,18 +33,43 @@ function detachedClone(vnode) {
 		}
 
 		vnode = assign({}, vnode);
-		vnode._component = null;
-		vnode._children = vnode._children && vnode._children.map(detachedClone);
+		if (vnode._component != null) {
+			if (vnode._component._parentDom === parentDom) {
+				vnode._component._parentDom = detachedParent;
+			}
+			vnode._component = null;
+		}
+
+		vnode._children =
+			vnode._children &&
+			vnode._children.map(child =>
+				detachedClone(child, detachedParent, parentDom)
+			);
 	}
 
 	return vnode;
 }
 
-function removeOriginal(vnode) {
+function removeOriginal(vnode, detachedParent, originalParent) {
 	if (vnode) {
 		vnode._original = null;
-		vnode._children = vnode._children && vnode._children.map(removeOriginal);
+		vnode._children =
+			vnode._children &&
+			vnode._children.map(child =>
+				removeOriginal(child, detachedParent, originalParent)
+			);
+
+		if (vnode._component) {
+			if (vnode._component._parentDom === detachedParent) {
+				if (vnode._dom) {
+					originalParent.insertBefore(vnode._dom, vnode._nextDom);
+				}
+				vnode._component._force = true;
+				vnode._component._parentDom = originalParent;
+			}
+		}
 	}
+
 	return vnode;
 }
 
@@ -62,6 +87,7 @@ export function Suspense() {
 Suspense.prototype = new Component();
 
 /**
+ * @this {import('./internal').SuspenseComponent}
  * @param {Promise} promise The thrown promise
  * @param {import('./internal').VNode<any, any>} suspendingVNode The suspending component
  */
@@ -105,7 +131,17 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 
 	const onSuspensionComplete = () => {
 		if (!--c._pendingSuspensionCount) {
-			c._vnode._children[0] = removeOriginal(c.state._suspended);
+			// If the suspension was during hydration we don't need to restore the
+			// suspended children into the _children array
+			if (c.state._suspended) {
+				const suspendedVNode = c.state._suspended;
+				c._vnode._children[0] = removeOriginal(
+					suspendedVNode,
+					suspendedVNode._component._parentDom,
+					suspendedVNode._component._originalParentDom
+				);
+			}
+
 			c.setState({ _suspended: (c._detachOnNextRender = null) });
 
 			let suspended;
@@ -121,7 +157,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 	 * While in non-hydration cases the usual fallback -> component flow would occour.
 	 */
 	const wasHydrating = suspendingVNode._hydrating === true;
-	if (!wasHydrating && !c._pendingSuspensionCount++) {
+	if (!c._pendingSuspensionCount++ && !wasHydrating) {
 		c.setState({ _suspended: (c._detachOnNextRender = c._vnode._children[0]) });
 	}
 	promise.then(onResolved, onResolved);
@@ -131,13 +167,26 @@ Suspense.prototype.componentWillUnmount = function() {
 	this._suspenders = [];
 };
 
+/**
+ * @this {import('./internal').SuspenseComponent}
+ * @param {import('./internal').SuspenseComponent["props"]} props
+ * @param {import('./internal').SuspenseState} state
+ */
 Suspense.prototype.render = function(props, state) {
 	if (this._detachOnNextRender) {
 		// When the Suspense's _vnode was created by a call to createVNode
 		// (i.e. due to a setState further up in the tree)
 		// it's _children prop is null, in this case we "forget" about the parked vnodes to detach
-		if (this._vnode._children)
-			this._vnode._children[0] = detachedClone(this._detachOnNextRender);
+		if (this._vnode._children) {
+			const detachedParent = document.createElement('div');
+			const detachedComponent = this._vnode._children[0]._component;
+			this._vnode._children[0] = detachedClone(
+				this._detachOnNextRender,
+				detachedParent,
+				(detachedComponent._originalParentDom = detachedComponent._parentDom)
+			);
+		}
+
 		this._detachOnNextRender = null;
 	}
 

@@ -28,7 +28,20 @@ describe('preact/compat events', () => {
 	});
 
 	it('should patch events', () => {
-		let spy = sinon.spy();
+		let spy = sinon.spy(event => {
+			// Calling ev.preventDefault() outside of an event handler
+			// does nothing in IE11. So we move these asserts inside
+			// the event handler. We ensure that it's called once
+			// in another assertion
+			expect(event.isDefaultPrevented()).to.be.false;
+			event.preventDefault();
+			expect(event.isDefaultPrevented()).to.be.true;
+
+			expect(event.isPropagationStopped()).to.be.false;
+			event.stopPropagation();
+			expect(event.isPropagationStopped()).to.be.true;
+		});
+
 		render(<div onClick={spy} />, scratch);
 		scratch.firstChild.click();
 
@@ -45,14 +58,6 @@ describe('preact/compat events', () => {
 		expect(() => event.persist()).to.not.throw();
 		expect(() => event.isDefaultPrevented()).to.not.throw();
 		expect(() => event.isPropagationStopped()).to.not.throw();
-
-		expect(event.isDefaultPrevented()).to.be.false;
-		event.preventDefault();
-		expect(event.isDefaultPrevented()).to.be.true;
-
-		expect(event.isPropagationStopped()).to.be.false;
-		event.stopPropagation();
-		expect(event.isPropagationStopped()).to.be.true;
 	});
 
 	it('should normalize ondoubleclick event', () => {

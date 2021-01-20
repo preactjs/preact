@@ -1,12 +1,14 @@
 name: CI
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - '**'
   push:
     branches:
       - master
+      - restructure
 
 jobs:
   build_test:

@@ -13,6 +13,12 @@ import 'core-js/fn/string/from-code-point';
 import 'core-js/fn/string/repeat';
 import * as kl from 'kolorist';
 
+// Something that's loaded before this file polyfills Symbol object.
+// We need to verify that it works in IE without that.
+if (/Trident/.test(window.navigator.userAgent)) {
+	window.Symbol = undefined;
+}
+
 // Fix Function#name on browsers that do not support it (IE).
 // Taken from: https://stackoverflow.com/a/17056530/755391
 if (!function f() {}.name) {
@@ -70,10 +76,12 @@ chai.use((chai, util) => {
 // and support for Map and Set objects.
 //
 function patchConsole(method) {
+	const original = window.console[method];
 	window.console[method] = (...args) => {
 		// @ts-ignore
 		// eslint-disable-next-line no-undef
 		__karma__.log(method, serializeConsoleArgs(args));
+		original.apply(window.console, args);
 	};
 }
 

@@ -24,6 +24,8 @@ function getAttributes(node) {
 	return attrs;
 }
 
+const isIE11 = /Trident\//.test(navigator.userAgent);
+
 describe('render()', () => {
 	let scratch, rerender;
 
@@ -130,7 +132,7 @@ describe('render()', () => {
 		const input = div.childNodes[2];
 
 		// IE11 doesn't support the form attribute
-		if (!/(Trident)/.test(navigator.userAgent)) {
+		if (!isIE11) {
 			expect(button).to.have.property('form', form);
 			expect(input).to.have.property('form', form);
 		}
@@ -1068,7 +1070,6 @@ describe('render()', () => {
 
 	it('should not read DOM attributes on render without existing DOM', () => {
 		const attributesSpy = spyOnElementAttributes();
-
 		render(
 			<div id="wrapper">
 				<div id="page1">Page 1</div>
@@ -1078,7 +1079,12 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal(
 			'<div id="wrapper"><div id="page1">Page 1</div></div>'
 		);
-		expect(attributesSpy.get).to.not.have.been.called;
+
+		// IE11 doesn't allow modifying Element.prototype functions properly.
+		// Custom spies will never be called.
+		if (!isIE11) {
+			expect(attributesSpy.get).to.not.have.been.called;
+		}
 
 		render(
 			<div id="wrapper">
@@ -1089,6 +1095,40 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal(
 			'<div id="wrapper"><div id="page2">Page 2</div></div>'
 		);
-		expect(attributesSpy.get).to.not.have.been.called;
+
+		// IE11 doesn't allow modifying Element.prototype functions properly.
+		// Custom spies will never be called.
+		if (!isIE11) {
+			expect(attributesSpy.get).to.not.have.been.called;
+		}
+	});
+
+	// #2926
+	it('should not throw when changing contentEditable to undefined or null', () => {
+		render(<p contentEditable>foo</p>, scratch);
+
+		expect(() =>
+			render(<p contentEditable={undefined}>foo</p>, scratch)
+		).to.not.throw();
+		expect(scratch.firstChild.contentEditable).to.equal('inherit');
+
+		expect(() =>
+			render(<p contentEditable={null}>foo</p>, scratch)
+		).to.not.throw();
+		expect(scratch.firstChild.contentEditable).to.equal('inherit');
+	});
+
+	// #2926 Part 2
+	it('should allow setting contentEditable to false', () => {
+		render(
+			<div contentEditable>
+				<span>editable</span>
+				<p contentEditable={false}>not editable</p>
+			</div>,
+			scratch
+		);
+
+		expect(scratch.firstChild.contentEditable).to.equal('true');
+		expect(scratch.querySelector('p').contentEditable).to.equal('false');
 	});
 });

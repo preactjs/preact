@@ -1,11 +1,6 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component } from 'preact';
-import {
-	setupScratch,
-	teardown,
-	spyAll,
-	resetAllSpies
-} from '../../_util/helpers';
+import { setupScratch, teardown } from '../../_util/helpers';
 
 /** @jsx createElement */
 
@@ -47,8 +42,8 @@ describe('Lifecycle methods', () => {
 			}
 		}
 
-		spyAll(Receiver);
-		spyAll(Receiver.prototype);
+		sinon.spy(Receiver, 'getDerivedStateFromError');
+		sinon.spy(Receiver.prototype, 'render');
 
 		function throwExpectedError() {
 			throw (expectedError = new Error('Error!'));
@@ -73,8 +68,8 @@ describe('Lifecycle methods', () => {
 
 			expectedError = undefined;
 
-			resetAllSpies(Receiver);
-			resetAllSpies(Receiver.prototype);
+			Receiver.getDerivedStateFromError.resetHistory();
+			Receiver.prototype.render.resetHistory();
 		});
 
 		afterEach(() => {

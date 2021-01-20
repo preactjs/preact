@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - restructure
 
 jobs:
   build_test:
@@ -34,6 +35,7 @@ jobs:
           CI: true
           COVERAGE: true
           FLAKEY: false
+          RUN_SAUCE_LABS: true
           SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
           SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
         # Not using `npm test` since it rebuilds source which npm ci has already done

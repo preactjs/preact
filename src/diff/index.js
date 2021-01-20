@@ -409,9 +409,16 @@ function diffElementNodes(
 				newVNode.type === 'foreignObject' ? false : isSvg,
 				excessDomChildren,
 				commitQueue,
-				EMPTY_OBJ,
+				dom.firstChild,
 				isHydrating
 			);
+
+			// Remove children that are not part of any vnode.
+			if (excessDomChildren != null) {
+				for (i = excessDomChildren.length; i--; ) {
+					if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
+				}
+			}
 		}
 
 		// (as above, don't diff props during hydration)
