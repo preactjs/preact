@@ -138,6 +138,14 @@ function createEsbuildPlugin() {
 				};
 			});
 
+			build.onResolve({ filter: /^(react|react-dom)$/ }, args => {
+				const pkg = alias['preact/compat'];
+				return {
+					path: pkg,
+					namespace: 'preact'
+				};
+			});
+
 			// Apply babel pass whenever we load a .js file
 			build.onLoad({ filter: /\.js$/ }, async args => {
 				const contents = await fs.readFile(args.path, 'utf-8');
