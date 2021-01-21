@@ -150,9 +150,6 @@ export function diff(
 					c._vnode = newVNode;
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
-					if (newVNode._renderCallbacks.length) {
-						commitQueue.push(newVNode);
-					}
 
 					break outer;
 				}
@@ -213,10 +210,6 @@ export function diff(
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
 			newVNode._hydrating = null;
 
-			if (newVNode._renderCallbacks.length) {
-				commitQueue.push(newVNode);
-			}
-
 			if (clearProcessingException) {
 				c._pendingError = c._processingException = null;
 			}
@@ -239,6 +232,10 @@ export function diff(
 				commitQueue,
 				isHydrating
 			);
+		}
+
+		if (newVNode._renderCallbacks && newVNode._renderCallbacks.length) {
+			commitQueue.push(newVNode);
 		}
 
 		if ((tmp = options.diffed)) tmp(newVNode);
