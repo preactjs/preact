@@ -58,18 +58,18 @@ options.diffed = vnode => {
 };
 
 options._commit = (vnode, commitQueue) => {
-	commitQueue.some(component => {
+	commitQueue.some(vnode => {
 		try {
-			component._renderCallbacks.forEach(invokeCleanup);
-			component._renderCallbacks = component._renderCallbacks.filter(cb =>
+			vnode._renderCallbacks.forEach(invokeCleanup);
+			vnode._renderCallbacks = vnode._renderCallbacks.filter(cb =>
 				cb._value ? invokeEffect(cb) : true
 			);
 		} catch (e) {
-			commitQueue.some(c => {
-				if (c._renderCallbacks) c._renderCallbacks = [];
+			commitQueue.some(vnode => {
+				if (vnode._renderCallbacks) vnode._renderCallbacks = [];
 			});
 			commitQueue = [];
-			options._catchError(e, component._vnode);
+			options._catchError(e, vnode);
 		}
 	});
 
@@ -182,7 +182,7 @@ export function useLayoutEffect(callback, args) {
 		state._value = callback;
 		state._args = args;
 
-		currentComponent._renderCallbacks.push(state);
+		currentComponent._vnode._renderCallbacks.push(state);
 	}
 }
 

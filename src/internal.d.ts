@@ -20,7 +20,7 @@ export interface DevSource {
 	lineNumber: number;
 }
 
-export type CommitQueue = Component[];
+export type CommitQueue = VNode[];
 
 export interface Options extends preact.Options {
 	_vnodeId: number;
@@ -114,6 +114,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	_nextDom: PreactElement | null;
 	_component: Component | null;
 	_hydrating: boolean | null;
+	_renderCallbacks: Array<() => void>;
 	constructor: undefined;
 	_original: number;
 }
@@ -126,7 +127,6 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 
 	_dirty: boolean;
 	_force?: boolean;
-	_renderCallbacks: Array<() => void>; // Only class components
 	_globalContext?: any;
 	_vnode?: VNode<P> | null;
 	_nextState?: S | null; // Only class components

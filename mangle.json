@@ -41,7 +41,7 @@
       "$_detachOnNextRender": "__b",
       "$_force": "__e",
       "$_nextState": "__s",
-      "$_renderCallbacks": "__h",
+      "$_renderCallbacks": "__r",
       "$_vnode": "__v",
       "$_children": "__k",
       "$_pendingSuspensionCount": "__u",
