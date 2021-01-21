@@ -1,4 +1,4 @@
-import { diff, unmount, applyRef } from './index';
+import { diff, unmount } from './index';
 import { createVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { getDomSibling } from '../component';
@@ -35,7 +35,7 @@ export function diffChildren(
 	oldDom,
 	isHydrating
 ) {
-	let i, j, oldVNode, childVNode, newDom, firstChildDom, refs;
+	let i, j, oldVNode, childVNode, newDom, firstChildDom;
 
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
@@ -143,12 +143,6 @@ export function diffChildren(
 
 		newDom = childVNode._dom;
 
-		if ((j = childVNode.ref) && oldVNode.ref != j) {
-			if (!refs) refs = [];
-			if (oldVNode.ref) refs.push(oldVNode.ref, null, childVNode);
-			refs.push(j, childVNode._component || newDom, childVNode);
-		}
-
 		if (newDom != null) {
 			if (firstChildDom == null) {
 				firstChildDom = newDom;
@@ -227,13 +221,6 @@ export function diffChildren(
 			}
 
 			unmount(oldChildren[i], oldChildren[i]);
-		}
-	}
-
-	// Set refs only after unmount
-	if (refs) {
-		for (i = 0; i < refs.length; i++) {
-			applyRef(refs[i], refs[++i], refs[++i]);
 		}
 	}
 }
