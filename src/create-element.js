@@ -74,6 +74,7 @@ export function createVNode(type, props, key, ref, original) {
 		_nextDom: undefined,
 		_component: null,
 		_hydrating: null,
+		_renderCallbacks: null,
 		constructor: undefined,
 		_original: original == null ? ++options._vnodeId : original
 	};

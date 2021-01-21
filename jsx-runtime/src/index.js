@@ -44,6 +44,7 @@ function createVNode(type, props, key, __source, __self) {
 		_nextDom: undefined,
 		_component: null,
 		_hydrating: null,
+		_renderCallbacks: null,
 		constructor: undefined,
 		_original: ++options._vnodeId,
 		__source,
