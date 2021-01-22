@@ -1,10 +1,11 @@
 import { createElement, render, options } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useDebugName, useState } from 'preact/hooks';
+import { useState } from 'preact/hooks';
+import { addHookName } from 'preact/devtools';
 
 /** @jsx createElement */
 
-describe('useDebugName', () => {
+describe('addHookName', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -14,12 +15,12 @@ describe('useDebugName', () => {
 
 	afterEach(() => {
 		teardown(scratch);
-		delete options.useDebugName;
+		delete options._addHookName;
 	});
 
 	it('should do nothing when no options hook is present', () => {
 		function useFoo() {
-			return useDebugName(useState(0), 'foo');
+			return addHookName(useState(0), 'foo');
 		}
 
 		function App() {
@@ -31,10 +32,10 @@ describe('useDebugName', () => {
 	});
 
 	it('should call options hook with value', () => {
-		let spy = (options.useDebugName = sinon.spy());
+		let spy = (options._addHookName = sinon.spy());
 
 		function useFoo() {
-			return useDebugName(useState(0), 'foo');
+			return addHookName(useState(0), 'foo');
 		}
 
 		function App() {

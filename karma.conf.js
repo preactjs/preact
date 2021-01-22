@@ -274,7 +274,7 @@ module.exports = function(config) {
 			{
 				pattern:
 					config.grep ||
-					'{debug,hooks,compat,test-utils,jsx-runtime,}/test/{browser,shared}/**/*.test.js',
+					'{debug,devtools,hooks,compat,test-utils,jsx-runtime,}/test/{browser,shared}/**/*.test.js',
 				watched: false,
 				type: 'js'
 			}
@@ -285,7 +285,7 @@ module.exports = function(config) {
 		},
 
 		preprocessors: {
-			'{debug,hooks,compat,test-utils,jsx-runtime,}/test/**/*': [
+			'{debug,devtools,hooks,compat,test-utils,jsx-runtime,}/test/**/*': [
 				'esbuild',
 				'sourcemap'
 			]

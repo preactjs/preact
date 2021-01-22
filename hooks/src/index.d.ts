@@ -125,15 +125,6 @@ export function useContext<T>(context: PreactContext<T>): T;
  */
 export function useDebugValue<T>(value: T, formatter?: (value: T) => any): void;
 
-/**
- * Customize the displayed name of a useState, useReducer or useRef hook
- * in the devtools panel.
- *
- * @param value Wrapped native hook.
- * @param name Custom name
- */
-export function useDebugName<T>(value: T, name: string): T;
-
 export function useErrorBoundary(
 	callback?: (error: any) => Promise<void> | void
 ): [any, () => void];

@@ -266,7 +266,7 @@ declare namespace preact {
 		requestAnimationFrame?: typeof requestAnimationFrame;
 		debounceRendering?(cb: () => void): void;
 		useDebugValue?(value: string | number): void;
-		useDebugName?(name: string | number): void;
+		_addHookName?(name: string | number): void;
 		__suspenseDidResolve?(vnode: VNode, cb: () => void): void;
 		// __canSuspenseResolve?(vnode: VNode, cb: () => void): void;
 	}

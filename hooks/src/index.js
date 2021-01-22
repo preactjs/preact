@@ -266,17 +266,6 @@ export function useDebugValue(value, formatter) {
 }
 
 /**
- * Display a custom label for a custom hook for the devtools panel
- * @type {<T>(value: T, name: string) => T}
- */
-export function useDebugName(value, name) {
-	if (options.useDebugName) {
-		options.useDebugName(name);
-	}
-	return value;
-}
-
-/**
  * @param {(error: any) => void} cb
  */
 export function useErrorBoundary(cb) {
