@@ -318,7 +318,13 @@ function diffElementNodes(
 			//
 			// Note: This takes advantage of Text nodes having `.localName=undefined`,
 			// which is loosely equal to Text VNodes' `.type=null`. Elements use string equality.
-			if (child != null && (dom == child || child.localName == nodeType)) {
+			if (
+				child != null &&
+				((newVNode.type === null
+					? child.nodeType === 3
+					: child.localName === newVNode.type) ||
+					dom == child)
+			) {
 				dom = child;
 				excessDomChildren[i] = null;
 				break;
