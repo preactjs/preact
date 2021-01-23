@@ -624,4 +624,35 @@ describe('keys', () => {
 		expect(Stateful1Ref).to.not.equal(Stateful1MovedRef);
 		expect(Stateful2Ref).to.not.equal(Stateful2MovedRef);
 	});
+
+	// TODO: See issue #2949
+	it.skip('should not swap unkeyed chlildren', () => {
+		class X extends Component {
+			constructor(props) {
+				super(props);
+				this.name = props.name;
+			}
+			render() {
+				return <p>{this.name}</p>;
+			}
+		}
+
+		function Foo({ condition }) {
+			return (
+				<div>
+					{condition ? '' : <X name="A" />}
+					{condition ? <X name="B" /> : ''}
+				</div>
+			);
+		}
+
+		render(<Foo />, scratch);
+		expect(scratch.textContent).to.equal('A');
+
+		render(<Foo condition />, scratch);
+		expect(scratch.textContent).to.equal('B');
+
+		render(<Foo />, scratch);
+		expect(scratch.textContent).to.equal('A');
+	});
 });
