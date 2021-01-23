@@ -9,6 +9,7 @@
 	"umd:main": "dist/devtools.umd.js",
 	"source": "src/index.js",
 	"license": "MIT",
+	"types": "src/index.d.ts",
 	"peerDependencies": {
 		"preact": "^10.0.0"
 	}

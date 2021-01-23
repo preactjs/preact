@@ -66,6 +66,7 @@
       "$_root": "__",
       "$_diff": "__b",
       "$_commit": "__c",
+      "$_addHookName": "__a",
       "$_render": "__r",
       "$_hook": "__h",
       "$_catchError": "__e",
