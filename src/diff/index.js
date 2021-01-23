@@ -320,9 +320,9 @@ function diffElementNodes(
 			// which is loosely equal to Text VNodes' `.type=null`. Elements use string equality.
 			if (
 				child != null &&
-				((newVNode.type === null
+				((nodeType === null
 					? child.nodeType === 3
-					: child.localName === newVNode.type) ||
+					: child.localName === nodeType) ||
 					dom == child)
 			) {
 				dom = child;
