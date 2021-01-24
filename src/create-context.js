@@ -48,7 +48,7 @@ export function createContext(defaultValue, contextId) {
 				};
 
 				this.sub = (c, selector) => {
-					const newLength = subs.push([c, cb]);
+					const newLength = subs.push([c, selector]);
 					let old = c.componentWillUnmount;
 					c.componentWillUnmount = () => {
 						subs.splice(newLength - 1, 1);

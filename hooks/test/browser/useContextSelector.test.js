@@ -1,4 +1,4 @@
-import { createElement, render, createContext, Component } from 'preact';
+import { createElement, render, createContext } from 'preact';
 import { act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useContextSelector, useState } from 'preact/hooks';
