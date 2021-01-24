@@ -250,8 +250,9 @@ export function useContext(context, selector) {
 	// This is probably not safe to convert to "!"
 	if (state._value == null) {
 		state._value = true;
-		provider.sub(currentComponent, selector);
+		state._subscription = provider.sub(currentComponent, selector);
 	}
+
 	return provider.props.value;
 }
 
@@ -261,6 +262,9 @@ export function useContext(context, selector) {
  */
 export function useContextSelector(context, selector) {
 	const contextValue = useContext(context, selector)
+	const state = getHookState(currentIndex, 11);
+	state._subscription[1] = selector;
+
 	return selector(contextValue);
 }
 
