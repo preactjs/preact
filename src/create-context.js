@@ -40,15 +40,19 @@ export function createContext(defaultValue, contextId) {
 						// 	c.context[contextId] = _props.value;
 						// 	enqueueRender(c);
 						// });
-						subs.some(enqueueRender);
+						subs.some(c => {
+							if (!c[1] || c[1](_props.value) !== c[1](this.props.value))
+								enqueueRender(c[0])
+						});
 					}
 				};
 
-				this.sub = c => {
-					subs.push(c);
+				this.sub = (c, selector) => {
+					const entry = [c, cb];
+					subs.push(entry);
 					let old = c.componentWillUnmount;
 					c.componentWillUnmount = () => {
-						subs.splice(subs.indexOf(c), 1);
+						subs.splice(subs.indexOf(entry), 1);
 						if (old) old.call(c);
 					};
 				};

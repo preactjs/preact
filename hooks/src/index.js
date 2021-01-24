@@ -235,7 +235,7 @@ export function useCallback(callback, args) {
 /**
  * @param {import('./internal').PreactContext} context
  */
-export function useContext(context) {
+export function useContext(context, selector) {
 	const provider = currentComponent.context[context._id];
 	// We could skip this call here, but than we'd not call
 	// `options._hook`. We need to do that in order to make
@@ -250,9 +250,18 @@ export function useContext(context) {
 	// This is probably not safe to convert to "!"
 	if (state._value == null) {
 		state._value = true;
-		provider.sub(currentComponent);
+		provider.sub(currentComponent, selector);
 	}
 	return provider.props.value;
+}
+
+/**
+ * @param {import('./internal').PreactContext} context
+ * @param {(c: any) => any} selector
+ */
+export function useContextSelector(context, selector) {
+	const contextValue = useContext(context, selector)
+	return selector(contextValue);
 }
 
 /**
