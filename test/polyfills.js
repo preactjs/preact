@@ -197,6 +197,10 @@ function serialize(value, mode, indent, seen) {
 			return kl.cyan(`[Function: ${value.name || 'anonymous'}]`);
 	}
 
+	if (value instanceof Element) {
+		return value.outerHTML;
+	}
+
 	seen.add(value);
 
 	const props = Object.keys(value).map(key => {
@@ -253,3 +257,4 @@ function serialize(value, mode, indent, seen) {
 // 	new Set([1, 2]),
 // 	new Map([[1, 2]])
 // );
+// console.log(document.createElement('div'));
