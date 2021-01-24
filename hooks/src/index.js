@@ -248,7 +248,7 @@ export function useContext(context, selector) {
 	state._context = context;
 	if (!provider) return context._defaultValue;
 	// This is probably not safe to convert to "!"
-	if (state._value == null) {
+	if (!state. _subscription) {
 		state._value = true;
 		state._subscription = provider.sub(currentComponent, selector);
 	}
