@@ -3,6 +3,8 @@ import { act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useContextSelector, useState } from 'preact/hooks';
 
+/** @jsx createElement */
+
 describe('useContextSelector', () =>{
 		/** @type {HTMLDivElement} */
 		let scratch;
