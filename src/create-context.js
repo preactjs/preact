@@ -49,10 +49,10 @@ export function createContext(defaultValue, contextId) {
 
 				this.sub = (c, selector) => {
 					const entry = [c, selector]
-					const newLength = subs.push(entry);
+					subs.push(entry);
 					let old = c.componentWillUnmount;
 					c.componentWillUnmount = () => {
-						subs.splice(newLength - 1, 1);
+						subs.splice(subs.indexOf(entry), 1);
 						if (old) old.call(c);
 					};
 					return entry;
