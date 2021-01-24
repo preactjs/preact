@@ -47,8 +47,8 @@ export function createContext(defaultValue, contextId) {
 					}
 				};
 
-				this.sub = (c, selector) => {
-					const entry = [c, selector]
+				this.sub = function() {
+					const entry = arguments;
 					subs.push(entry);
 					let old = c.componentWillUnmount;
 					c.componentWillUnmount = () => {
