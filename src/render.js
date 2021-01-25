@@ -4,7 +4,6 @@ import { createElement, Fragment } from './create-element';
 import options from './options';
 import { mount } from './diff/mount';
 import { patch } from './diff/patch';
-import { getDomSibling } from './component';
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -30,52 +29,39 @@ export function render(vnode, parentDom, replaceNode) {
 	let oldVNode = isHydrating
 		? null
 		: (replaceNode && replaceNode._children) || parentDom._children;
-	vnode = createElement(Fragment, null, [vnode]);
 
 	// Determine the new vnode tree and store it on the DOM element on
 	// our custom `_children` property.
-	let newVNode = ((isHydrating
-		? parentDom
-		: replaceNode || parentDom
-	)._children = vnode);
-
-	/** @type {import('./internal').PreactElement[]} */
-	let excessDomChildren =
-		replaceNode && !isHydrating
-			? [replaceNode]
-			: oldVNode
-			? null
-			: parentDom.childNodes.length
-			? EMPTY_ARR.slice.call(parentDom.childNodes)
-			: null;
-
-	if (isHydrating) {
-		replaceNode = excessDomChildren ? excessDomChildren[0] : null;
-	}
+	vnode = (
+		(!isHydrating && replaceNode) ||
+		parentDom
+	)._children = createElement(Fragment, null, [vnode]);
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [];
 	if (oldVNode) {
 		patch(
 			parentDom,
-			newVNode,
+			vnode,
 			oldVNode,
 			{},
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
-			// Begin diff with replaceNode or find the first non-null child with a dom
-			// pointer and begin the diff with that (i.e. what getDomSibling does)
-			replaceNode || getDomSibling(oldVNode, 0)
+			replaceNode || oldVNode._dom
 		);
 	} else {
 		mount(
 			parentDom,
-			newVNode,
+			vnode,
 			{},
 			parentDom.ownerSVGElement !== undefined,
-			excessDomChildren,
+			!isHydrating && replaceNode
+				? [replaceNode]
+				: parentDom.firstChild
+				? EMPTY_ARR.slice.call(parentDom.childNodes)
+				: null,
 			commitQueue,
-			replaceNode || null,
+			!isHydrating && replaceNode ? replaceNode : parentDom.firstChild,
 			isHydrating
 		);
 	}
