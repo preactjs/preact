@@ -24,19 +24,17 @@ export function patch(
 	commitQueue,
 	startDom
 ) {
-	let tmp,
-		newType = newVNode.type;
-
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== undefined) return null;
-	if ((tmp = options._diff)) tmp(newVNode);
+
+	if (options._diff) options._diff(newVNode);
 
 	/** @type {import('../internal').PreactElement} */
 	let nextDomSibling;
 
 	try {
-		if (typeof newType == 'function') {
+		if (typeof newVNode.type == 'function') {
 			nextDomSibling = renderComponent(
 				parentDom,
 				newVNode,
@@ -59,10 +57,12 @@ export function patch(
 				isSvg,
 				commitQueue
 			);
+
+			// @ts-ignore Trust me TS, nextSibling is a PreactElement
 			nextDomSibling = newVNode._dom.nextSibling;
 		}
 
-		if ((tmp = options.diffed)) tmp(newVNode);
+		if (options.diffed) options.diffed(newVNode);
 	} catch (e) {
 		newVNode._original = null;
 		options._catchError(e, newVNode, oldVNode);
@@ -91,17 +91,18 @@ function patchDOMElement(
 	isSvg,
 	commitQueue
 ) {
-	let i;
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
+	let newType = newVNode.type;
+	let tmp;
 
-	if (newVNode.type === null) {
+	if (newType === null) {
 		if (oldProps !== newProps) {
 			dom.data = newProps;
 		}
 	} else {
 		// Tracks entering and exiting SVG namespace when descending through the tree.
-		isSvg = newVNode.type === 'svg' || isSvg;
+		if (newType === 'svg') isSvg = true;
 
 		let oldHtml = oldProps.dangerouslySetInnerHTML;
 		let newHtml = newProps.dangerouslySetInnerHTML;
@@ -123,14 +124,14 @@ function patchDOMElement(
 		if (newHtml) {
 			newVNode._children = [];
 		} else {
-			i = newVNode.props.children;
+			tmp = newVNode.props.children;
 			diffChildren(
 				dom,
-				Array.isArray(i) ? i : [i],
+				Array.isArray(tmp) ? tmp : [tmp],
 				newVNode,
 				oldVNode,
 				globalContext,
-				newVNode.type === 'foreignObject' ? false : isSvg,
+				isSvg && newType !== 'foreignObject',
 				commitQueue,
 				// Find the first non-null child with a dom pointer and begin the diff
 				// with that (i.e. what getDomSibling does)
@@ -140,21 +141,21 @@ function patchDOMElement(
 
 		if (
 			'value' in newProps &&
-			(i = newProps.value) !== undefined &&
+			(tmp = newProps.value) !== undefined &&
 			// #2756 For the <progress>-element the initial value is 0,
 			// despite the attribute not being present. When the attribute
 			// is missing the progress bar is treated as indeterminate.
 			// To fix that we'll always update it when it is 0 for progress elements
-			(i !== dom.value || (newVNode.type === 'progress' && !i))
+			(tmp !== dom.value || (newType === 'progress' && !tmp))
 		) {
-			setProperty(dom, 'value', i, oldProps.value, false);
+			setProperty(dom, 'value', tmp, oldProps.value, false);
 		}
 		if (
 			'checked' in newProps &&
-			(i = newProps.checked) !== undefined &&
-			i !== dom.checked
+			(tmp = newProps.checked) !== undefined &&
+			tmp !== dom.checked
 		) {
-			setProperty(dom, 'checked', i, oldProps.checked, false);
+			setProperty(dom, 'checked', tmp, oldProps.checked, false);
 		}
 	}
 

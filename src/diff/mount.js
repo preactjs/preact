@@ -29,20 +29,17 @@ export function mount(
 	startDom,
 	isHydrating
 ) {
-	let tmp,
-		newType = newVNode.type;
-
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== undefined) return null;
 
-	if ((tmp = options._diff)) tmp(newVNode);
+	if (options._diff) options._diff(newVNode);
 
 	/** @type {import('../internal').PreactElement} */
 	let nextDomSibling;
 
 	try {
-		if (typeof newType == 'function') {
+		if (typeof newVNode.type == 'function') {
 			nextDomSibling = renderComponent(
 				parentDom,
 				newVNode,
@@ -69,7 +66,7 @@ export function mount(
 			nextDomSibling = newVNode._dom.nextSibling;
 		}
 
-		if ((tmp = options.diffed)) tmp(newVNode);
+		if (options.diffed) options.diffed(newVNode);
 
 		// We successfully rendered this VNode, unset any stored hydration/bailout state:
 		newVNode._hydrating = null;
@@ -117,22 +114,22 @@ function mountDOMElement(
 	commitQueue,
 	isHydrating
 ) {
-	let i;
 	let newProps = newVNode.props;
+	let nodeType = newVNode.type;
+	/** @type {any} */
+	let i = 0;
 
 	if (excessDomChildren != null) {
-		for (i = 0; i < excessDomChildren.length; i++) {
+		for (; i < excessDomChildren.length; i++) {
 			const child = excessDomChildren[i];
 
 			// if newVNode matches an element in excessDomChildren or the `dom`
 			// argument matches an element in excessDomChildren, remove it from
 			// excessDomChildren so it isn't later removed in diffChildren
 			if (
-				child != null &&
-				((newVNode.type === null
-					? child.nodeType === 3
-					: child.localName === newVNode.type) ||
-					dom == child)
+				child &&
+				(child === dom ||
+					(nodeType ? child.localName == nodeType : child.nodeType == 3))
 			) {
 				dom = child;
 				excessDomChildren[i] = null;
@@ -141,7 +138,7 @@ function mountDOMElement(
 		}
 	}
 
-	if (newVNode.type == null) {
+	if (nodeType == null) {
 		if (dom == null) {
 			// @ts-ignore createTextNode returns Text, we expect PreactElement
 			dom = document.createTextNode(newProps);
@@ -150,20 +147,20 @@ function mountDOMElement(
 		}
 	} else {
 		// Tracks entering and exiting SVG namespace when descending through the tree.
-		isSvg = newVNode.type === 'svg' || isSvg;
+		if (nodeType === 'svg') isSvg = true;
 
 		if (dom == null) {
 			if (isSvg) {
 				dom = document.createElementNS(
 					'http://www.w3.org/2000/svg',
 					// @ts-ignore We know `newVNode.type` is a string
-					newVNode.type
+					nodeType
 				);
 			} else {
 				dom = document.createElement(
 					// @ts-ignore We know `newVNode.type` is a string
-					newVNode.type,
-					newProps.is && { is: newProps.is }
+					nodeType,
+					newProps.is && newProps
 				);
 			}
 
@@ -213,23 +210,29 @@ function mountDOMElement(
 		} else {
 			i = newVNode.props.children;
 
-			if (excessDomChildren != null) {
-				excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
-			}
+			// If excessDomChildren was not null, repopulate it with the current
+			// element's children:
+			excessDomChildren =
+				excessDomChildren && EMPTY_ARR.slice.call(dom.childNodes);
 
 			mountChildren(
 				dom,
 				Array.isArray(i) ? i : [i],
 				newVNode,
 				globalContext,
-				newVNode.type === 'foreignObject' ? false : isSvg,
+				isSvg && nodeType !== 'foreignObject',
 				excessDomChildren,
 				commitQueue,
-				excessDomChildren != null && excessDomChildren.length > 0
-					? excessDomChildren[0]
-					: null,
+				dom.firstChild,
 				isHydrating
 			);
+
+			// Remove children that are not part of any vnode.
+			if (excessDomChildren != null) {
+				for (i = excessDomChildren.length; i--; ) {
+					if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
+				}
+			}
 		}
 
 		// (as above, don't diff props during hydration)
@@ -327,13 +330,6 @@ export function mountChildren(
 	}
 
 	newParentVNode._dom = firstChildDom;
-
-	// Remove children that are not part of any vnode.
-	if (excessDomChildren != null && typeof newParentVNode.type != 'function') {
-		for (i = excessDomChildren.length; i--; ) {
-			if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
-		}
-	}
 
 	return startDom;
 }
