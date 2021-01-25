@@ -257,26 +257,3 @@ jobs:
         with:
           name: results
           path: benches/results/filter_list.json
-
-  report_results:
-    name: Report Results
-    runs-on: ubuntu-latest
-    needs:
-      - bench_text_update
-      - bench_many_updates
-      - bench_02_replace1k
-      - bench_03_update10th1k_x16
-      - bench_07_create10k
-      - bench_hydrate1k
-      - bench_filter_list
-    steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: results
-          path: results
-      - uses: andrewiggins/tachometer-reporter-action@v2
-        with:
-          path: results/*.json
-          base-bench-name: preact-master
-          pr-bench-name: preact-local
-          summarize: 'duration, usedJSHeapSize'
