@@ -1117,4 +1117,18 @@ describe('render()', () => {
 		).to.not.throw();
 		expect(scratch.firstChild.contentEditable).to.equal('inherit');
 	});
+
+	// #2926 Part 2
+	it('should allow setting contentEditable to false', () => {
+		render(
+			<div contentEditable>
+				<span>editable</span>
+				<p contentEditable={false}>not editable</p>
+			</div>,
+			scratch
+		);
+
+		expect(scratch.firstChild.contentEditable).to.equal('true');
+		expect(scratch.querySelector('p').contentEditable).to.equal('false');
+	});
 });

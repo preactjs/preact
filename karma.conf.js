@@ -138,6 +138,14 @@ function createEsbuildPlugin() {
 				};
 			});
 
+			build.onResolve({ filter: /^(react|react-dom)$/ }, args => {
+				const pkg = alias['preact/compat'];
+				return {
+					path: pkg,
+					namespace: 'preact'
+				};
+			});
+
 			// Apply babel pass whenever we load a .js file
 			build.onLoad({ filter: /\.js$/ }, async args => {
 				const contents = await fs.readFile(args.path, 'utf-8');
@@ -216,7 +224,9 @@ module.exports = function(config) {
 			if (!frames.length || frames[0].column === -1) return '\n' + msg + '\n';
 
 			const frame = frames[0];
-			const filePath = kl.lightCyan(frame.fileName.replace('webpack:///', ''));
+			const filePath = kl.lightCyan(
+				frame.fileName.replace(__dirname + '/', '')
+			);
 
 			const indentMatch = msg.match(/^(\s*)/);
 			const indent = indentMatch ? indentMatch[1] : '  ';
@@ -265,7 +275,7 @@ module.exports = function(config) {
 			{
 				pattern:
 					config.grep ||
-					'{compat,debug,hooks,test-utils,jsx-runtime,}/test/{browser,shared}/**/*.test.js',
+					'{debug,devtools,hooks,compat,test-utils,jsx-runtime,}/test/{browser,shared}/**/*.test.js',
 				watched: false,
 				type: 'js'
 			}
@@ -276,7 +286,7 @@ module.exports = function(config) {
 		},
 
 		preprocessors: {
-			'{debug,hooks,compat,test-utils,jsx-runtime,}/test/**/*': [
+			'{debug,devtools,hooks,compat,test-utils,jsx-runtime,}/test/**/*': [
 				'esbuild',
 				'sourcemap'
 			]

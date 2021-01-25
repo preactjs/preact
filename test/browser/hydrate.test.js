@@ -445,4 +445,10 @@ describe('hydrate()', () => {
 			'<p class="hi">hello baz</p><p class="hi">hello bar</p>'
 		);
 	});
+
+	it('should skip comment nodes', () => {
+		scratch.innerHTML = '<p>hello <!-- c -->foo</p>';
+		hydrate(<p>hello {'foo'}</p>, scratch);
+		expect(scratch.innerHTML).to.equal('<p>hello foo</p>');
+	});
 });
