@@ -30,9 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     # Only run this job if the event action was "completed" and the triggering
     # workflow_run was successful
-    if: >
-      ${{ github.event.action == 'completed' &&
-      github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.action == 'completed' && github.event.workflow_run.conclusion == 'success' }}
     steps:
       # Download the artifact from the triggering workflow that contains the
       # Tachometer results to report
