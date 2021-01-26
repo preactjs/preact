@@ -37,6 +37,10 @@ export function render(vnode, parentDom, replaceNode) {
 		parentDom
 	)._children = createElement(Fragment, null, [vnode]);
 
+	if (isHydrating) {
+		vnode._dom = parentDom.firstChild;
+	}
+
 	// List of effects that need to be called after diffing.
 	let commitQueue = [];
 	if (oldVNode) {
@@ -55,11 +59,6 @@ export function render(vnode, parentDom, replaceNode) {
 			vnode,
 			{},
 			parentDom.ownerSVGElement !== undefined,
-			!isHydrating && replaceNode
-				? [replaceNode]
-				: parentDom.firstChild
-				? EMPTY_ARR.slice.call(parentDom.childNodes)
-				: null,
 			commitQueue,
 			!isHydrating && replaceNode ? replaceNode : parentDom.firstChild,
 			isHydrating

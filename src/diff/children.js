@@ -100,7 +100,6 @@ export function diffChildren(
 				childVNode,
 				globalContext,
 				isSvg,
-				null,
 				commitQueue,
 				startDom
 			);
@@ -115,7 +114,6 @@ export function diffChildren(
 				childVNode,
 				globalContext,
 				isSvg,
-				[startDom],
 				commitQueue,
 				startDom,
 				oldVNode._hydrating
