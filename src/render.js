@@ -42,25 +42,15 @@ export function render(vnode, parentDom, replaceNode) {
 	// hydrate(vnode, parent): excessDomChildren=.childNodes --> startDom = parent.firstChild
 	// render(vnode, parent, child): excessDomChildren=[child] --> startDom = child
 	// render(vnode, parent) on existing tree: excessDomChildren=null --> startDom = (oldVNode=parent.__k)._dom
-	// const startDom = replaceNode || oldVNode && oldVNode._dom || parentDom.firstChild;
 
-	/** @type {import('./internal').PreactElement} */
-	// @ts-ignore Trust me TS, parentDom.firstChild is correct
-	let startDom = parentDom.firstChild;
-	let mode = MODE_NONE;
+	// Set vnode._mode
 	if (isHydrating) {
-		mode = MODE_HYDRATE;
-		// startDom = parentDom.firstChild;
-	} else if (replaceNode) {
-		mode = MODE_MUTATIVE_HYDRATE;
-		startDom = replaceNode;
-	} else if (oldVNode) {
-		// Eventually, this'll be something like findDomNode(oldVnode)
-		startDom = oldVNode._dom;
-	} else if (startDom) {
-		mode = MODE_MUTATIVE_HYDRATE;
+		vnode._mode = MODE_HYDRATE;
+	} else if (replaceNode || parentDom.firstChild) {
+		// Providing a replaceNode parameter or calling `render` on a container with
+		// existing DOM elements puts the diff into mutative hydrate mode
+		vnode._mode = MODE_MUTATIVE_HYDRATE;
 	}
-	vnode._mode = mode;
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [];
@@ -72,7 +62,7 @@ export function render(vnode, parentDom, replaceNode) {
 			{},
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
-			startDom
+			oldVNode._dom
 		);
 	} else {
 		mount(
@@ -81,7 +71,7 @@ export function render(vnode, parentDom, replaceNode) {
 			{},
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
-			startDom
+			!isHydrating && replaceNode ? replaceNode : parentDom.firstChild
 		);
 	}
 
