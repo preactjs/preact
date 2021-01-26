@@ -53,6 +53,8 @@ export function render(vnode, parentDom, replaceNode) {
 	// render(vnode, parent) on existing tree: excessDomChildren=null --> startDom = (oldVNode=parent.__k)._dom
 	// const startDom = replaceNode || oldVNode && oldVNode._dom || parentDom.firstChild;
 
+	/** @type {import('./internal').PreactElement} */
+	// @ts-ignore Trust me TS, parentDom.firstChild is correct
 	let startDom = parentDom.firstChild;
 	let mode = MODE_NONE;
 	if (isHydrating) {
@@ -91,10 +93,7 @@ export function render(vnode, parentDom, replaceNode) {
 			{},
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
-			// replaceNode || null,
 			startDom
-			// mode === MODE_HYDRATE
-			// isHydrating
 		);
 	}
 
