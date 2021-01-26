@@ -2,11 +2,11 @@
 
 ## TODOs
 
+* Use bit-wise comparison for `_mode` checks
+* Replace `_hydrating` with `_mode`
+* Consider further removing _dom pointers from non-dom VNodes
 * Combine placeChild and unmounting loop?? Do placeChild backwards? Do
   unmounting first then placeChild loop
-* Remove the need for `excessDomChildren`. Do hydration more similarly to
-  `keyed` if possible.
-* Consider further removing _dom pointers from non-dom VNodes
 * Fix Suspense tests:
 	* "should correctly render nested Suspense components without intermediate DOM #2747"
 * Fix Suspense hydration tests:

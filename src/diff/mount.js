@@ -67,7 +67,9 @@ export function mount(
 	} catch (e) {
 		newVNode._original = null;
 		// if hydrating or creating initial tree, bailout preserves DOM:
-		// TODO: include replaceNode
+
+		// TODO: include replaceNode using MODE_MUTATIVE_HYDRATE, or could we just
+		// not allow this during MUTATIVE_HYDRATE?
 		if (newVNode._mode === MODE_HYDRATE) {
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
 			nextDomSibling = startDom && startDom.nextSibling;
@@ -76,6 +78,9 @@ export function mount(
 			// _hydrating = true if bailed out during hydration
 			// _hydrating = false if bailed out during mounting
 			// _hydrating = null if it didn't bail out
+
+			// TODO: Is always true unless we change the above condition to allow this
+			// code path in MUTATIVE_HYDRATE
 			newVNode._hydrating = newVNode._mode === MODE_HYDRATE;
 
 			// excessDomChildren[excessDomChildren.indexOf(startDom)] = null;
@@ -235,20 +240,13 @@ export function mountChildren(
 	commitQueue,
 	startDom
 ) {
-	let i,
-		childVNode,
-		newDom,
-		firstChildDom,
-		// excessDomChildren
-		mountedNextChild;
+	let i, childVNode, newDom, firstChildDom, mountedNextChild;
 
-	// Todo: bitwise MODE_HYDRATE|MODE_MUTATIVE_HYDRATE
+	// TODO: bitwise MODE_HYDRATE|MODE_MUTATIVE_HYDRATE
 	if (
 		newParentVNode._mode !== MODE_NONE &&
 		typeof newParentVNode.type !== 'function'
 	) {
-		// excessDomChildren = EMPTY_ARR.slice.call(parentDom.childNodes);
-		// hydrateDom = startDom = excessDomChildren[0];
 		startDom = parentDom.childNodes[0];
 	}
 
@@ -263,25 +261,6 @@ export function mountChildren(
 		if (childVNode == null) {
 			continue;
 		}
-
-		// if (typeof childVNode.type !== 'function' && excessDomChildren != null) {
-		// 	for (; i < excessDomChildren.length; i++) {
-		// 		const child = excessDomChildren[i];
-		//
-		// 		// if newVNode matches an element in excessDomChildren or the `dom`
-		// 		// argument matches an element in excessDomChildren, remove it from
-		// 		// excessDomChildren so it isn't later removed in diffChildren
-		// 		if (
-		// 			child &&
-		// 			(child === dom ||
-		// 				(nodeType ? child.localName == nodeType : child.nodeType == 3))
-		// 		) {
-		// 			dom = child;
-		// 			excessDomChildren[i] = null;
-		// 			break;
-		// 		}
-		// 	}
-		// }
 
 		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;
@@ -325,13 +304,13 @@ export function mountChildren(
 	newParentVNode._dom = firstChildDom;
 
 	// Remove children that are not part of any vnode.
-	// Todo: bitwise MODE_HYDRATE|MODE_MUTATIVE_HYDRATE
+	// TODO: bitwise MODE_HYDRATE|MODE_MUTATIVE_HYDRATE
 	if (
 		newParentVNode._mode !== MODE_NONE &&
 		typeof newParentVNode.type !== 'function'
 	) {
-		// TODO: At this point, would it be simpler to just clear the pre-existing
-		// DOM if render is called with no oldVNode & existing children & no
+		// TODO: Would it be simpler to just clear the pre-existing DOM in top-level
+		// render if render is called with no oldVNode & existing children & no
 		// replaceNode? Instead of patching the DOM to match the VNode tree? (remove
 		// attributes & unused DOM)
 		while (startDom) {
