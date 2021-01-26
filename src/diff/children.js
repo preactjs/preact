@@ -107,6 +107,8 @@ export function diffChildren(
 			// We are resuming the hydration of a VNode
 			startDom = childVNode._dom = oldVNode._dom;
 			childVNode._hydrating = null;
+			// Resume the same mode as before suspending
+			childVNode._mode = oldVNode._mode;
 			oldVNodeRef = oldVNode.ref;
 
 			nextDomSibling = mount(
@@ -115,8 +117,7 @@ export function diffChildren(
 				globalContext,
 				isSvg,
 				commitQueue,
-				startDom,
-				oldVNode._hydrating
+				startDom
 			);
 		} else {
 			// Morph the old element into the new one, but don't append it to the dom yet
