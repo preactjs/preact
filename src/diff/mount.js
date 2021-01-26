@@ -1,8 +1,8 @@
 import { applyRef } from './refs';
-import { EMPTY_ARR } from '../constants';
+import { MODE_HYDRATE, MODE_MUTATIVE_HYDRATE, MODE_NONE } from '../constants';
 import { normalizeToVNode } from '../create-element';
 import { setProperty } from './props';
-import { removeNode } from '../util';
+// import { removeNode } from '../util';
 import options from '../options';
 import { renderComponent } from './component';
 
@@ -15,7 +15,7 @@ import { renderComponent } from './component';
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} startDom
- * @param {boolean} [isHydrating] Whether or not we are in hydration
+ * @para\m {boolean} [isHydrating] Whether or not we are in hydration
  * @returns {import('../internal').PreactElement | null} pointer to the next DOM node to be hydrated (or null)
  */
 export function mount(
@@ -24,8 +24,8 @@ export function mount(
 	globalContext,
 	isSvg,
 	commitQueue,
-	startDom,
-	isHydrating
+	startDom
+	// isHydrating
 ) {
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
@@ -35,6 +35,8 @@ export function mount(
 
 	/** @type {import('../internal').PreactElement} */
 	let nextDomSibling;
+
+	const isHydrating = newVNode._mode === MODE_HYDRATE;
 
 	try {
 		if (typeof newVNode.type == 'function') {
@@ -54,8 +56,8 @@ export function mount(
 				newVNode,
 				globalContext,
 				isSvg,
-				commitQueue,
-				isHydrating
+				commitQueue
+				// isHydrating
 			);
 
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
@@ -65,7 +67,9 @@ export function mount(
 		if (options.diffed) options.diffed(newVNode);
 
 		// We successfully rendered this VNode, unset any stored hydration/bailout state:
+		// TODO: Replace _hydrating with _mode
 		newVNode._hydrating = null;
+		newVNode._mode = MODE_NONE;
 	} catch (e) {
 		newVNode._original = null;
 		// if hydrating or creating initial tree, bailout preserves DOM:
@@ -99,23 +103,22 @@ export function mount(
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @param {boolean} isHydrating Whether or not we are in hydration
+ * @para\m {boolean} isHydrating Whether or not we are in hydration
  * @returns {import('../internal').PreactElement}
  */
-function mountDOMElement(
-	dom,
-	newVNode,
-	globalContext,
-	isSvg,
-	commitQueue,
-	isHydrating
-) {
+function mountDOMElement(dom, newVNode, globalContext, isSvg, commitQueue) {
 	let newProps = newVNode.props;
 	let nodeType = newVNode.type;
 	/** @type {any} */
 	let i = 0;
 
+	let isHydrating = newVNode._mode === MODE_HYDRATE;
+
 	if (nodeType == null) {
+		// TODO: Skip over wrong type nodes
+		// if we have been given the wrong type, seek forward to the right one:
+		// while (dom && dom.nodeType !== 1) dom = dom.nextSibling;
+
 		if (dom == null) {
 			// @ts-ignore createTextNode returns Text, we expect PreactElement
 			dom = document.createTextNode(newProps);
@@ -125,6 +128,10 @@ function mountDOMElement(
 	} else {
 		// Tracks entering and exiting SVG namespace when descending through the tree.
 		if (nodeType === 'svg') isSvg = true;
+
+		// TODO: Skip over wrong type nodes and remove them
+		// if we have been given the wrong type, seek forward to the right one:
+		// while (dom && dom.localName !== newVNode.type) dom = dom.nextSibling;
 
 		if (dom == null) {
 			if (isSvg) {
@@ -143,12 +150,13 @@ function mountDOMElement(
 
 			// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
 			isHydrating = false;
+			newVNode._mode = MODE_NONE;
 		}
 
 		// @TODO: Consider removing and instructing users to instead set the desired
 		// prop for removal to undefined/null. During hydration, props are not
 		// diffed at all (including dangerouslySetInnerHTML)
-		if (!isHydrating) {
+		if (newVNode._mode === MODE_MUTATIVE_HYDRATE) {
 			// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
 			// we should read the existing DOM attributes to diff them
 
@@ -194,8 +202,7 @@ function mountDOMElement(
 				globalContext,
 				isSvg && nodeType !== 'foreignObject',
 				commitQueue,
-				dom.firstChild,
-				isHydrating
+				dom.firstChild
 			);
 
 			// // Remove children that are not part of any vnode.
@@ -232,7 +239,7 @@ function mountDOMElement(
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} startDom
- * @param {boolean} isHydrating Whether or not we are in hydration
+ * @para\m {boolean} isHydrating Whether or not we are in hydration
  */
 export function mountChildren(
 	parentDom,
@@ -241,18 +248,19 @@ export function mountChildren(
 	globalContext,
 	isSvg,
 	commitQueue,
-	startDom,
-	isHydrating
+	startDom
+	// isHydrating
 ) {
 	let i,
 		childVNode,
 		newDom,
 		firstChildDom,
 		mountedNextChild,
-		excessDomChildren,
+		// excessDomChildren,
 		hydrateDom;
 
-	if (isHydrating) {
+	// Todo: bitwise MODE_HYDRATE|MODE_MUTATIVE_HYDRATE
+	if (newParentVNode._mode !== MODE_NONE) {
 		if (typeof newParentVNode.type !== 'function') {
 			// excessDomChildren = EMPTY_ARR.slice.call(parentDom.childNodes);
 			// hydrateDom = startDom = excessDomChildren[0];
@@ -296,6 +304,7 @@ export function mountChildren(
 		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;
 		childVNode._dom = hydrateDom;
+		childVNode._mode = newParentVNode._mode;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		mountedNextChild = mount(
@@ -304,8 +313,8 @@ export function mountChildren(
 			globalContext,
 			isSvg,
 			commitQueue,
-			startDom,
-			isHydrating
+			startDom
+			// isHydrating
 		);
 
 		newDom = childVNode._dom;

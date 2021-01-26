@@ -1,9 +1,18 @@
-import { EMPTY_ARR } from './constants';
+import { MODE_HYDRATE, MODE_MUTATIVE_HYDRATE, MODE_NONE } from './constants';
 import { commitRoot } from './diff/commit';
 import { createElement, Fragment } from './create-element';
 import options from './options';
 import { mount } from './diff/mount';
 import { patch } from './diff/patch';
+
+/**
+ * Find the DOM for a given VNode
+ * @param {import('./internal').VNode} vnode
+ */
+function findDomNode(vnode) {
+	return vnode._dom;
+	// return vnode._dom || vnode._children.filter(findDomNode)[0];
+}
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -37,9 +46,31 @@ export function render(vnode, parentDom, replaceNode) {
 		parentDom
 	)._children = createElement(Fragment, null, [vnode]);
 
+	// Cases:
+	// render(vnode, parent): excessDomChildren=.childNodes --> startDom = parent.firstChild
+	// hydrate(vnode, parent): excessDomChildren=.childNodes --> startDom = parent.firstChild
+	// render(vnode, parent, child): excessDomChildren=[child] --> startDom = child
+	// render(vnode, parent) on existing tree: excessDomChildren=null --> startDom = (oldVNode=parent.__k)._dom
+	// const startDom = replaceNode || oldVNode && oldVNode._dom || parentDom.firstChild;
+
+	let startDom = parentDom.firstChild;
+	let mode = MODE_NONE;
 	if (isHydrating) {
-		vnode._dom = parentDom.firstChild;
+		mode = MODE_HYDRATE;
+		// startDom = parentDom.firstChild;
+		// newVNode._dom = replaceNode = excessDomChildren
+		// 	? excessDomChildren[0]
+		// 	: null;
+	} else if (replaceNode) {
+		mode = MODE_MUTATIVE_HYDRATE;
+		startDom = replaceNode;
+	} else if (oldVNode) {
+		startDom = findDomNode(oldVNode);
+	} else if (startDom) {
+		mode = MODE_MUTATIVE_HYDRATE;
 	}
+	vnode._mode = mode;
+	vnode._dom = startDom;
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [];
@@ -51,7 +82,7 @@ export function render(vnode, parentDom, replaceNode) {
 			{},
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
-			replaceNode || oldVNode._dom
+			startDom
 		);
 	} else {
 		mount(
@@ -60,8 +91,10 @@ export function render(vnode, parentDom, replaceNode) {
 			{},
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
-			!isHydrating && replaceNode ? replaceNode : parentDom.firstChild,
-			isHydrating
+			// replaceNode || null,
+			startDom
+			// mode === MODE_HYDRATE
+			// isHydrating
 		);
 	}
 
