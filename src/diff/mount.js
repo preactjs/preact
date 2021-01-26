@@ -153,8 +153,6 @@ function mountDOMElement(dom, newVNode, globalContext, isSvg, commitQueue) {
 		if (newVNode._mode & MODE_MUTATIVE_HYDRATE) {
 			// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
 			// we should read the existing DOM attributes to diff them
-
-			// TODO: How to make this only for replaceNode
 			for (let i = 0; i < dom.attributes.length; i++) {
 				const name = dom.attributes[i].name;
 				if (!(name in newProps)) {
@@ -237,13 +235,6 @@ export function mountChildren(
 	startDom
 ) {
 	let i, childVNode, newDom, firstChildDom, mountedNextChild;
-
-	if (
-		newParentVNode._mode & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE) &&
-		typeof newParentVNode.type !== 'function'
-	) {
-		startDom = parentDom.childNodes[0];
-	}
 
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
