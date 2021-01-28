@@ -296,11 +296,10 @@ function flushAfterPaintEffects() {
 			try {
 				component.__hooks._pendingEffects.forEach(invokeCleanup);
 				component.__hooks._pendingEffects.forEach(invokeEffect);
-				component.__hooks._pendingEffects = [];
 			} catch (e) {
-				component.__hooks._pendingEffects = [];
 				options._catchError(e, component._vnode);
 			}
+			component.__hooks._pendingEffects = [];
 		}
 	});
 	afterPaintEffects = [];
