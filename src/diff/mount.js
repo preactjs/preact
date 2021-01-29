@@ -104,7 +104,7 @@ function mountDOMElement(dom, newVNode, globalContext, isSvg, commitQueue) {
 	let newProps = newVNode.props;
 	let nodeType = newVNode.type;
 	/** @type {any} */
-	let i = 0;
+	let i;
 
 	let isHydrating = (newVNode._mode & MODE_HYDRATE) === MODE_HYDRATE;
 
@@ -153,7 +153,7 @@ function mountDOMElement(dom, newVNode, globalContext, isSvg, commitQueue) {
 		if (newVNode._mode & MODE_MUTATIVE_HYDRATE) {
 			// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
 			// we should read the existing DOM attributes to diff them
-			for (let i = 0; i < dom.attributes.length; i++) {
+			for (i = 0; i < dom.attributes.length; i++) {
 				const name = dom.attributes[i].name;
 				if (!(name in newProps)) {
 					dom.removeAttribute(name);
