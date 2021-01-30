@@ -7,9 +7,9 @@ import {
 } from '../constants';
 import { normalizeToVNode } from '../create-element';
 import { setProperty } from './props';
+import { removeNode } from '../util';
 import options from '../options';
 import { renderComponent } from './component';
-import { removeNode } from '../util';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -76,12 +76,10 @@ export function mount(
 		newVNode._original = null;
 		newVNode._mode = newVNode._mode | MODE_SUSPENDED;
 
-		// TODO: include replaceNode using MODE_MUTATIVE_HYDRATE, or could we just
-		// not allow this during MUTATIVE_HYDRATE?
 		if (newVNode._mode & MODE_HYDRATE) {
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
 			nextDomSibling = startDom && startDom.nextSibling;
-			newVNode._dom = startDom; // Save our current DOM position
+			newVNode._dom = startDom; // Save our current DOM position to resume later
 		}
 		options._catchError(e, newVNode, newVNode);
 	}
@@ -117,10 +115,6 @@ function mountDOMElement(dom, newVNode, globalContext, isSvg, commitQueue) {
 	}
 
 	if (nodeType == null) {
-		// TODO: Skip over wrong type nodes
-		// if we have been given the wrong type, seek forward to the right one:
-		// while (dom && dom.nodeType !== 3) dom = dom.nextSibling;
-
 		if (dom == null) {
 			// @ts-ignore createTextNode returns Text, we expect PreactElement
 			dom = document.createTextNode(newProps);
@@ -130,10 +124,6 @@ function mountDOMElement(dom, newVNode, globalContext, isSvg, commitQueue) {
 	} else {
 		// Tracks entering and exiting SVG namespace when descending through the tree.
 		if (nodeType === 'svg') isSvg = true;
-
-		// TODO: Skip over wrong type nodes and remove them
-		// if we have been given the wrong type, seek forward to the right one:
-		// while (dom && dom.localName !== newVNode.type) dom = dom.nextSibling;
 
 		if (dom == null) {
 			if (isSvg) {
