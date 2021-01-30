@@ -1,6 +1,6 @@
 import { applyRef } from './refs';
 import { normalizeToVNode } from '../create-element';
-import { EMPTY_ARR } from '../constants';
+import { EMPTY_ARR, MODE_HYDRATE, MODE_SUSPENDED } from '../constants';
 import { getDomSibling } from '../component';
 import { mount } from './mount';
 import { patch } from './patch';
@@ -100,14 +100,17 @@ export function diffChildren(
 				childVNode,
 				globalContext,
 				isSvg,
-				null,
 				commitQueue,
 				startDom
 			);
-		} else if (oldVNode._hydrating != null) {
+		} else if (
+			(oldVNode._mode & (MODE_HYDRATE | MODE_SUSPENDED)) ==
+			(MODE_HYDRATE | MODE_SUSPENDED)
+		) {
 			// We are resuming the hydration of a VNode
-			startDom = childVNode._dom = oldVNode._dom;
-			childVNode._hydrating = null;
+			startDom = oldVNode._dom;
+			// Resume the same mode as before suspending
+			childVNode._mode = oldVNode._mode;
 			oldVNodeRef = oldVNode.ref;
 
 			nextDomSibling = mount(
@@ -115,10 +118,8 @@ export function diffChildren(
 				childVNode,
 				globalContext,
 				isSvg,
-				[startDom],
 				commitQueue,
-				startDom,
-				oldVNode._hydrating
+				startDom
 			);
 		} else {
 			// Morph the old element into the new one, but don't append it to the dom yet

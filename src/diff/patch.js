@@ -1,7 +1,6 @@
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
 import options from '../options';
-import { getDomSibling } from '../component';
 import { renderComponent } from './component';
 
 /**
@@ -133,9 +132,7 @@ function patchDOMElement(
 				globalContext,
 				isSvg && newType !== 'foreignObject',
 				commitQueue,
-				// Find the first non-null child with a dom pointer and begin the diff
-				// with that (i.e. what getDomSibling does)
-				getDomSibling(oldVNode, 0)
+				dom.firstChild
 			);
 		}
 

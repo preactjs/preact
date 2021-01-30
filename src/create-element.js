@@ -1,3 +1,4 @@
+import { MODE_NONE } from './constants';
 import options from './options';
 
 /**
@@ -68,9 +69,9 @@ export function createVNode(type, props, key, ref, original) {
 		_depth: 0,
 		_dom: null,
 		_component: null,
-		_hydrating: null,
 		constructor: undefined,
-		_original: original == null ? ++options._vnodeId : original
+		_original: original == null ? ++options._vnodeId : original,
+		_mode: MODE_NONE
 	};
 
 	if (options.vnode != null) options.vnode(vnode);
