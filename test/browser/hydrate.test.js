@@ -446,10 +446,22 @@ describe('hydrate()', () => {
 		);
 	});
 
-	it('should skip comment nodes', () => {
+	it('should skip comment nodes between text nodes', () => {
 		scratch.innerHTML = '<p>hello <!-- c -->foo</p>';
 		hydrate(<p>hello {'foo'}</p>, scratch);
 		expect(scratch.innerHTML).to.equal('<p>hello foo</p>');
+	});
+
+	it('should skip comment nodes between dom nodes', () => {
+		scratch.innerHTML = '<p><i>0</i><!-- c --><b>1</b></p>';
+		hydrate(
+			<p>
+				<i>0</i>
+				<b>1</b>
+			</p>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal('<p><i>0</i><b>1</b></p>');
 	});
 
 	it('should not hydrate with dangerouslySetInnerHTML', () => {

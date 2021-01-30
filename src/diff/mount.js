@@ -107,6 +107,14 @@ function mountDOMElement(dom, newVNode, globalContext, isSvg, commitQueue) {
 	let i;
 
 	let isHydrating = (newVNode._mode & MODE_HYDRATE) === MODE_HYDRATE;
+	if (isHydrating) {
+		while (
+			dom &&
+			(nodeType ? dom.localName !== nodeType : dom.nodeType !== 3)
+		) {
+			dom = dom.nextSibling;
+		}
+	}
 
 	if (nodeType == null) {
 		// TODO: Skip over wrong type nodes
