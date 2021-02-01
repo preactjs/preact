@@ -1,5 +1,9 @@
 # Follow ups
 
+## DONE
+
+* `[MAJOR]` Deprecated `component.base`
+
 ## TODOs
 
 * Investigate consolidating _processingException & _pendingError into flags on

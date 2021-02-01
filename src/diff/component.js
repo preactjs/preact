@@ -189,8 +189,6 @@ export function renderComponent(
 		);
 	}
 
-	c.base = newVNode._dom;
-
 	if (c._renderCallbacks.length) {
 		commitQueue.push(c);
 	}
