@@ -324,6 +324,7 @@ describe('Lifecycle methods', () => {
 			);
 		});
 
+		// FIXME
 		it('should be called when applying a Component ref', () => {
 			const Foo = () => <div />;
 

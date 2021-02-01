@@ -1,6 +1,10 @@
 import { createElement, render, createContext, Component } from 'preact';
 import { act } from 'preact/test-utils';
-import { setupScratch, teardown } from '../../../test/_util/helpers';
+import {
+	getInstance,
+	setupScratch,
+	teardown
+} from '../../../test/_util/helpers';
 import { useContext, useEffect, useState } from 'preact/hooks';
 
 /** @jsx createElement */
@@ -177,7 +181,6 @@ describe('useContext', () => {
 	it('should only subscribe a component once', () => {
 		const values = [];
 		const Context = createContext(13);
-		let provider, subSpy;
 
 		function Comp() {
 			const value = useContext(Context);
@@ -188,12 +191,13 @@ describe('useContext', () => {
 		render(<Comp />, scratch);
 
 		render(
-			<Context.Provider ref={p => (provider = p)} value={42}>
+			<Context.Provider value={42}>
 				<Comp />
 			</Context.Provider>,
 			scratch
 		);
-		subSpy = sinon.spy(provider, 'sub');
+		const provider = getInstance(Context.Provider, scratch);
+		const subSpy = sinon.spy(provider, 'sub');
 
 		render(
 			<Context.Provider value={69}>

@@ -9,7 +9,8 @@ import {
 	supportsDataList,
 	sortAttributes,
 	spyOnElementAttributes,
-	createEvent
+	createEvent,
+	getInstance
 } from '../_util/helpers';
 import { clearLog, getLog, logCall } from '../_util/logCall';
 import { useState } from 'preact/hooks';
@@ -572,9 +573,8 @@ describe('render()', () => {
 				}
 			}
 
-			let thing;
-			render(<Thing ref={r => (thing = r)} />, scratch);
-
+			render(<Thing />, scratch);
+			const thing = getInstance(Thing, scratch);
 			let firstInnerHTMLChild = scratch.firstChild.firstChild;
 
 			// Re-render
@@ -785,7 +785,6 @@ describe('render()', () => {
 	it('should always diff `checked` and `value` properties against the DOM', () => {
 		// See https://github.com/preactjs/preact/issues/1324
 
-		let inputs;
 		let text;
 		let checkbox;
 
@@ -800,7 +799,8 @@ describe('render()', () => {
 			}
 		}
 
-		render(<Inputs ref={x => (inputs = x)} />, scratch);
+		render(<Inputs />, scratch);
+		const inputs = getInstance(Inputs, scratch);
 
 		expect(text.value).to.equal('Hello');
 		expect(checkbox.checked).to.equal(true);
@@ -945,7 +945,6 @@ describe('render()', () => {
 			}
 		}
 
-		let ref;
 		let updateApp;
 		class App extends Component {
 			constructor() {
@@ -957,8 +956,8 @@ describe('render()', () => {
 			render() {
 				return (
 					<div>
-						{this.state.i === 0 && <X />}
-						<X ref={node => (ref = node)} />
+						{this.state.i === 0 && <X name="first" />}
+						<X name="second" />
 					</div>
 				);
 			}
@@ -967,6 +966,7 @@ describe('render()', () => {
 		render(<App />, scratch);
 		expect(scratch.textContent).to.equal('00');
 
+		const ref = getInstance(X, scratch, { name: 'second' });
 		ref.update();
 		updateApp();
 		rerender();

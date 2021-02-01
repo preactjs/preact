@@ -71,6 +71,7 @@ describe('refs', () => {
 		expect(inner).to.have.been.calledWith(scratch.firstChild.firstChild);
 	});
 
+	// FIXME
 	it('should pass components to ref functions', () => {
 		let ref = spy('ref'),
 			instance;
@@ -109,6 +110,7 @@ describe('refs', () => {
 		]);
 	});
 
+	// FIXME
 	it('should pass rendered DOM from functional components to ref functions', () => {
 		let ref = spy('ref');
 
@@ -126,6 +128,7 @@ describe('refs', () => {
 		expect(ref).to.have.been.calledOnce.and.calledWith(null);
 	});
 
+	// FIXME
 	it('should pass children to ref functions', () => {
 		let outer = spy('outer'),
 			inner = spy('inner'),
@@ -190,6 +193,7 @@ describe('refs', () => {
 		expect(inner, 'unrender').to.have.been.calledOnce.and.calledWith(null);
 	});
 
+	// FIXME
 	it('should pass high-order children to ref functions', () => {
 		let outer = spy('outer'),
 			inner = spy('inner'),
@@ -264,6 +268,7 @@ describe('refs', () => {
 		).to.have.been.calledOnce.and.calledWith(null);
 	});
 
+	// FIXME
 	// Test for #1143
 	it('should not pass ref into component as a prop', () => {
 		let foo = spy('foo'),

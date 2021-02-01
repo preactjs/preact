@@ -49,6 +49,7 @@ describe('cloneElement', () => {
 		expect(clone.key).to.equal('2');
 	});
 
+	// FIXME
 	it('should override ref if specified', () => {
 		function a() {}
 		function b() {}

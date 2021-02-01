@@ -1,5 +1,5 @@
 import { createElement, Component, render } from 'preact';
-import { setupScratch, teardown } from '../_util/helpers';
+import { getInstance, setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 import { div } from '../_util/dom';
 
@@ -424,16 +424,16 @@ describe('keys', () => {
 			return moved ? (
 				<div>
 					<div>1</div>
-					<Stateful1 key="c" ref={c => (Stateful1MovedRef = c)} />
+					<Stateful1 key="c" />
 					<div>2</div>
-					<Stateful2 key="d" ref={c => (Stateful2MovedRef = c)} />
+					<Stateful2 key="d" />
 				</div>
 			) : (
 				<div>
 					<div>1</div>
-					<Stateful1 key="a" ref={c => (Stateful1Ref = c)} />
+					<Stateful1 key="a" />
 					<div>2</div>
-					<Stateful2 key="b" ref={c => (Stateful2Ref = c)} />
+					<Stateful2 key="b" />
 				</div>
 			);
 		}
@@ -448,6 +448,9 @@ describe('keys', () => {
 		ops = [];
 		render(<Foo moved={false} />, scratch);
 
+		Stateful1Ref = getInstance(Stateful1, scratch);
+		Stateful2Ref = getInstance(Stateful2, scratch);
+
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal(['Mount Stateful1', 'Mount Stateful2']);
 		expect(Stateful1Ref).to.exist;
@@ -455,6 +458,9 @@ describe('keys', () => {
 
 		ops = [];
 		render(<Foo moved />, scratch);
+
+		Stateful1MovedRef = getInstance(Stateful1, scratch);
+		Stateful2MovedRef = getInstance(Stateful2, scratch);
 
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
@@ -468,6 +474,9 @@ describe('keys', () => {
 
 		ops = [];
 		render(<Foo moved={false} />, scratch);
+
+		Stateful1Ref = getInstance(Stateful1, scratch);
+		Stateful2Ref = getInstance(Stateful2, scratch);
 
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
@@ -495,22 +504,16 @@ describe('keys', () => {
 			return moved ? (
 				<div>
 					<div>1</div>
-					<Stateful2
-						key="b"
-						ref={c => (c ? (Stateful2MovedRef = c) : undefined)}
-					/>
+					<Stateful2 key="b" />
 					<div>2</div>
-					<Stateful1
-						key="a"
-						ref={c => (c ? (Stateful1MovedRef = c) : undefined)}
-					/>
+					<Stateful1 key="a" />
 				</div>
 			) : (
 				<div>
 					<div>1</div>
-					<Stateful1 key="a" ref={c => (c ? (Stateful1Ref = c) : undefined)} />
+					<Stateful1 key="a" />
 					<div>2</div>
-					<Stateful2 key="b" ref={c => (c ? (Stateful2Ref = c) : undefined)} />
+					<Stateful2 key="b" />
 				</div>
 			);
 		}
@@ -532,6 +535,9 @@ describe('keys', () => {
 		ops = [];
 		render(<Foo moved={false} />, scratch);
 
+		Stateful1Ref = getInstance(Stateful1, scratch);
+		Stateful2Ref = getInstance(Stateful2, scratch);
+
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
 		expect(ops).to.deep.equal(['Mount Stateful1', 'Mount Stateful2']);
 		expect(Stateful1Ref).to.exist;
@@ -540,6 +546,9 @@ describe('keys', () => {
 		ops = [];
 		render(<Foo moved />, scratch);
 
+		Stateful1MovedRef = getInstance(Stateful1, scratch);
+		Stateful2MovedRef = getInstance(Stateful2, scratch);
+
 		expect(scratch.innerHTML).to.equal(htmlForTrue);
 		expect(ops).to.deep.equal(['Update Stateful2', 'Update Stateful1']);
 		expect(Stateful1MovedRef).to.equal(Stateful1Ref);
@@ -547,6 +556,9 @@ describe('keys', () => {
 
 		ops = [];
 		render(<Foo moved={false} />, scratch);
+
+		Stateful1Ref = getInstance(Stateful1, scratch);
+		Stateful2Ref = getInstance(Stateful2, scratch);
 
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
 		expect(ops).to.deep.equal(['Update Stateful1', 'Update Stateful2']);
@@ -569,16 +581,16 @@ describe('keys', () => {
 			return unkeyed ? (
 				<div>
 					<div>1</div>
-					<Stateful1 ref={c => (Stateful2MovedRef = c)} />
+					<Stateful1 />
 					<div>2</div>
-					<Stateful2 ref={c => (Stateful1MovedRef = c)} />
+					<Stateful2 />
 				</div>
 			) : (
 				<div>
 					<div>1</div>
-					<Stateful1 key="a" ref={c => (Stateful1Ref = c)} />
+					<Stateful1 key="a" />
 					<div>2</div>
-					<Stateful2 key="b" ref={c => (Stateful2Ref = c)} />
+					<Stateful2 key="b" />
 				</div>
 			);
 		}
@@ -593,6 +605,9 @@ describe('keys', () => {
 		ops = [];
 		render(<Foo unkeyed={false} />, scratch);
 
+		Stateful1Ref = getInstance(Stateful1, scratch);
+		Stateful2Ref = getInstance(Stateful2, scratch);
+
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal(['Mount Stateful1', 'Mount Stateful2']);
 		expect(Stateful1Ref).to.exist;
@@ -600,6 +615,9 @@ describe('keys', () => {
 
 		ops = [];
 		render(<Foo unkeyed />, scratch);
+
+		Stateful1MovedRef = getInstance(Stateful1, scratch);
+		Stateful2MovedRef = getInstance(Stateful2, scratch);
 
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
@@ -613,6 +631,9 @@ describe('keys', () => {
 
 		ops = [];
 		render(<Foo unkeyed={false} />, scratch);
+
+		Stateful1Ref = getInstance(Stateful1, scratch);
+		Stateful2Ref = getInstance(Stateful2, scratch);
 
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([

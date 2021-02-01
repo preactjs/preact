@@ -290,3 +290,45 @@ function restoreElementAttributes() {
 		attributesSpy = null;
 	}
 }
+
+/**
+ *
+ * @param {import('preact/src/internal').VNode["type"]}
+ * @param {import('preact/src/internal').PreactElement} container
+ * @param {Record<string, any>} [options] optional props to match
+ */
+export function getInstance(type, container, options) {
+	let root = container._children;
+	let results = [];
+
+	let stack = [root];
+	let item;
+	while ((item = stack.pop()) !== undefined) {
+		if (item === null) continue;
+
+		if (item.type === type) {
+			let matches = true;
+
+			if (options) {
+				for (const k in options) {
+					if (
+						k === 'key' ? item.key === options[k] : item.props[k] !== options[k]
+					) {
+						matches = false;
+						break;
+					}
+				}
+			}
+
+			if (matches) {
+				results.push(item);
+			}
+		}
+
+		if (item._children) {
+			stack.push(...item._children);
+		}
+	}
+
+	return (results[0] && results[0]._component) || null;
+}

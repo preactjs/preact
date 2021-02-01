@@ -1,6 +1,6 @@
 import { createElement, Component, render, createRef } from 'preact';
 import { setupRerender } from 'preact/test-utils';
-import { setupScratch, teardown } from '../_util/helpers';
+import { getInstance, setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 import { div } from '../_util/dom';
 
@@ -140,12 +140,8 @@ describe('null placeholders', () => {
 			}
 		}
 
-		const s1ref = createRef();
-		const s2ref = createRef();
-		const s3ref = createRef();
-
 		function App({ first = null, second = false }) {
-			return [first, second, <Stateful name="third" ref={s3ref} />];
+			return [first, second, <Stateful name="third" />];
 		}
 
 		// Mount third stateful - Initial render
@@ -155,14 +151,14 @@ describe('null placeholders', () => {
 
 		// Update third stateful
 		ops = [];
-		s3ref.current.increment();
+		getInstance(Stateful, scratch, { name: 'third' }).increment();
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div>third: 1</div>');
 		expect(ops).to.deep.equal(['Update third'], 'update third');
 
 		// Mount first stateful
 		ops = [];
-		render(<App first={<Stateful name="first" ref={s1ref} />} />, scratch);
+		render(<App first={<Stateful name="first" />} />, scratch);
 		expect(scratch.innerHTML).to.equal(
 			'<div>first: 0</div><div>third: 1</div>'
 		);
@@ -170,8 +166,8 @@ describe('null placeholders', () => {
 
 		// Update first stateful
 		ops = [];
-		s1ref.current.increment();
-		s3ref.current.increment();
+		getInstance(Stateful, scratch, { name: 'first' }).increment();
+		getInstance(Stateful, scratch, { name: 'third' }).increment();
 		rerender();
 		expect(scratch.innerHTML).to.equal(
 			'<div>first: 1</div><div>third: 2</div>'
@@ -182,8 +178,8 @@ describe('null placeholders', () => {
 		ops = [];
 		render(
 			<App
-				first={<Stateful name="first" ref={s1ref} />}
-				second={<Stateful name="second" ref={s2ref} />}
+				first={<Stateful name="first" />}
+				second={<Stateful name="second" />}
 			/>,
 			scratch
 		);
@@ -197,9 +193,9 @@ describe('null placeholders', () => {
 
 		// Update second stateful
 		ops = [];
-		s1ref.current.increment();
-		s2ref.current.increment();
-		s3ref.current.increment();
+		getInstance(Stateful, scratch, { name: 'first' }).increment();
+		getInstance(Stateful, scratch, { name: 'second' }).increment();
+		getInstance(Stateful, scratch, { name: 'third' }).increment();
 		rerender();
 		expect(scratch.innerHTML).to.equal(
 			'<div>first: 2</div><div>second: 1</div><div>third: 3</div>'
