@@ -23,21 +23,11 @@ import { MODE_NONE } from '../../src/constants';
  * @param {string} [__self]
  */
 function createVNode(type, props, key, __source, __self) {
-	// We'll want to preserve `ref` in props to get rid of the need for
-	// forwardRef components in the future, but that should happen via
-	// a separate PR.
-	let normalizedProps = {};
-	for (let i in props) {
-		if (i != 'ref') {
-			normalizedProps[i] = props[i];
-		}
-	}
-
 	const vnode = {
 		type,
-		props: normalizedProps,
+		props,
 		key,
-		ref: props && props.ref,
+		ref: typeof type !== 'function' && props && props.ref,
 		_children: null,
 		_parent: null,
 		_depth: 0,
