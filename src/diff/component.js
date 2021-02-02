@@ -167,7 +167,6 @@ export function renderComponent(
 
 	let nextDomSibling;
 
-	c._mode = MODE_NONE;
 	if (isNew) {
 		nextDomSibling = mountChildren(
 			parentDom,
@@ -197,6 +196,7 @@ export function renderComponent(
 		commitQueue.push(c);
 	}
 
+	c._mode = MODE_NONE;
 	c._force = false;
 
 	return nextDomSibling;
