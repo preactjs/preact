@@ -1,3 +1,5 @@
+import { MODE_ERRORED } from '../constants';
+
 /**
  * Find the closest error boundary to a thrown error and call it
  * @param {object} error The thrown value
@@ -10,7 +12,7 @@ export function _catchError(error, vnode) {
 	let component, ctor, handled;
 
 	for (; (vnode = vnode._parent); ) {
-		if ((component = vnode._component) && !component._processingException) {
+		if ((component = vnode._component) && !component._vnode._mode === MODE_ERRORED) {
 			try {
 				ctor = component.constructor;
 
@@ -26,7 +28,8 @@ export function _catchError(error, vnode) {
 
 				// This is an error boundary. Mark it as having bailed out, and whether it was mid-hydration.
 				if (handled) {
-					return (component._pendingError = component);
+					component._vnode._mode = MODE_ERRORED;
+					return component;
 				}
 			} catch (e) {
 				error = e;

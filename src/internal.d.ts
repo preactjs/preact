@@ -136,10 +136,6 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	 * components or array returns.
 	 */
 	_parentDom?: PreactElement | null;
-	// Always read, set only when handling error
-	_processingException?: Component<any, any> | null;
-	// Always read, set only when handling error. This is used to indicate at diffTime to set _processingException
-	_pendingError?: Component<any, any> | null;
 }
 
 export interface PreactContext extends preact.Context<any> {
