@@ -4,7 +4,6 @@ import { assign } from '../util';
 import { Component } from '../component';
 import { mountChildren } from './mount';
 import { diffChildren } from './children';
-import { vnodeSpy } from 'preact/test/_util/optionSpies';
 import { MODE_NONE } from '../constants';
 
 /**
