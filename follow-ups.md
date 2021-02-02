@@ -1,5 +1,9 @@
 # Follow ups
 
+## DONE
+
+* `[MAJOR]` Deprecated `component.base`
+
 ## TODOs
 
 * Consider further removing _dom pointers from non-dom VNodes
