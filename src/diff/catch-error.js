@@ -12,7 +12,7 @@ export function _catchError(error, vnode) {
 	let component, ctor, handled;
 
 	for (; (vnode = vnode._parent); ) {
-		if ((component = vnode._component) && !component._vnode._mode === MODE_ERRORED) {
+		if ((component = vnode._component) && component._vnode._mode !== MODE_ERRORED) {
 			try {
 				ctor = component.constructor;
 
