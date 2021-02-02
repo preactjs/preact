@@ -6,6 +6,8 @@ export const MODE_HYDRATE = 1;
 export const MODE_MUTATIVE_HYDRATE = 2;
 /** Signifies this VNode suspended on the previous render */
 export const MODE_SUSPENDED = 4;
+/** Signifies this VNode errored on the previous render */
+export const MODE_ERRORED = 8;
 
 export const EMPTY_ARR = [];
 

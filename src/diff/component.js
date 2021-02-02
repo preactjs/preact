@@ -28,7 +28,7 @@ export function renderComponent(
 ) {
 	/** @type {import('../internal').Component} */
 	let c;
-	let isNew, oldProps, oldState, snapshot, clearProcessingException, tmp;
+	let isNew, oldProps, oldState, snapshot, tmp;
 
 	/** @type {import('../internal').ComponentType} */
 	let newType = newVNode.type;
@@ -46,7 +46,6 @@ export function renderComponent(
 
 	if (oldVNode && oldVNode._component) {
 		c = newVNode._component = oldVNode._component;
-		clearProcessingException = c._processingException = c._pendingError;
 	} else {
 		// Instantiate the new component
 		if ('prototype' in newType && newType.prototype.render) {
@@ -191,10 +190,6 @@ export function renderComponent(
 
 	if (c._renderCallbacks.length) {
 		commitQueue.push(c);
-	}
-
-	if (clearProcessingException) {
-		c._pendingError = c._processingException = null;
 	}
 
 	c._force = false;
