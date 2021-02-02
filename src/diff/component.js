@@ -4,7 +4,6 @@ import { assign } from '../util';
 import { Component } from '../component';
 import { mountChildren } from './mount';
 import { diffChildren } from './children';
-import { MODE_NONE } from '../constants';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -195,7 +194,6 @@ export function renderComponent(
 		commitQueue.push(c);
 	}
 
-	c._mode = MODE_NONE;
 	c._force = false;
 
 	return nextDomSibling;
