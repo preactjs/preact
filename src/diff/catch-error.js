@@ -11,6 +11,8 @@ export function _catchError(error, vnode) {
 	/** @type {import('../internal').Component} */
 	let component, ctor;
 
+	if (vnode._component) vnode._component._mode = MODE_ERRORED;
+
 	for (; (vnode = vnode._parent); ) {
 		if ((component = vnode._component) && component._mode !== MODE_ERRORED) {
 			try {
@@ -26,7 +28,6 @@ export function _catchError(error, vnode) {
 
 				// This is an error boundary. Mark it as having bailed out, and whether it was mid-hydration.
 				if (component._dirty) {
-					component._mode = MODE_ERRORED;
 					return;
 				}
 			} catch (e) {
