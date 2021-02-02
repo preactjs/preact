@@ -34,7 +34,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 			}
 		}
 
-		r.base = r._parentDom = null;
+		r._parentDom = null;
 	}
 
 	if ((r = vnode._children)) {
