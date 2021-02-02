@@ -4,6 +4,8 @@ import { assign } from '../util';
 import { Component } from '../component';
 import { mountChildren } from './mount';
 import { diffChildren } from './children';
+import { vnodeSpy } from 'preact/test/_util/optionSpies';
+import { MODE_NONE } from '../constants';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -165,6 +167,7 @@ export function renderComponent(
 
 	let nextDomSibling;
 
+	c._mode = MODE_NONE;
 	if (isNew) {
 		nextDomSibling = mountChildren(
 			parentDom,
