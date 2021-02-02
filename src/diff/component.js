@@ -4,7 +4,6 @@ import { assign } from '../util';
 import { Component } from '../component';
 import { mountChildren } from './mount';
 import { diffChildren } from './children';
-import { MODE_ERRORED, MODE_NONE } from '../constants';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -29,7 +28,7 @@ export function renderComponent(
 ) {
 	/** @type {import('../internal').Component} */
 	let c;
-	let isNew, oldProps, oldState, snapshot, clearProcessingException, tmp;
+	let isNew, oldProps, oldState, snapshot, tmp;
 
 	/** @type {import('../internal').ComponentType} */
 	let newType = newVNode.type;
