@@ -109,8 +109,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 		if (resolved) return;
 
 		resolved = true;
-		suspendingComponent.componentWillUnmount =
-			suspendingComponent._suspendedComponentWillUnmount;
+		suspendingComponent.componentWillUnmount = prevComponentWillUnmount;
 
 		if (resolve) {
 			resolve(onSuspensionComplete);
@@ -119,13 +118,12 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 		}
 	};
 
-	suspendingComponent._suspendedComponentWillUnmount =
-		suspendingComponent.componentWillUnmount;
+	let prevComponentWillUnmount = suspendingComponent.componentWillUnmount;
 	suspendingComponent.componentWillUnmount = () => {
 		onResolved();
 
-		if (suspendingComponent._suspendedComponentWillUnmount) {
-			suspendingComponent._suspendedComponentWillUnmount();
+		if (prevComponentWillUnmount) {
+			prevComponentWillUnmount.call(suspendingComponent);
 		}
 	};
 
