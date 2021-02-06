@@ -614,6 +614,49 @@ describe('Lifecycle methods', () => {
 			expect(scratch).to.have.property('textContent', 'Error: Error!');
 		});
 
+		it('should bubble through already-dirty components', () => {
+			let middle;
+			class Middle extends Component {
+				render({ children }) {
+					middle = this;
+					// This component marks itself as dirty during rendering.
+					// The fact that it is marked as dirty should not prevent propagation of the error through this component.
+					if (this.state.a !== 1) {
+						this.setState({ a: 1 });
+					}
+					const markDirty = () => {
+						if (this.state.b !== 1) {
+							this.setState({ b: 1 });
+						}
+					};
+					// NOTE: the above avoids setting the _dirty flag during rendering, circumventing the propagation issue.
+					// However, manually marking a component as dirty during rendering *will* prevent error propagation:
+					// this._dirty = true;
+					return [<Fragment ref={markDirty} />, children];
+				}
+			}
+			sinon.spy(Middle.prototype, 'render');
+
+			ThrowErr.prototype.render = throwExpectedError;
+
+			render(
+				<Receiver>
+					<Middle>
+						<ThrowErr />
+					</Middle>
+				</Receiver>,
+				scratch
+			);
+			rerender();
+
+			expect(middle)
+				.to.haveOwnProperty('state')
+				.that.deep.equals({ a: 1, b: 1 });
+			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
+				expectedError
+			);
+		});
+
 		it('should be called through non-component parent elements', () => {
 			ThrowErr.prototype.render = throwExpectedError;
 			render(
