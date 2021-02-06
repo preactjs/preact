@@ -3,6 +3,7 @@
 ## DONE
 
 * `[MAJOR]` Deprecated `component.base`
+* `[MAJOR]` Moved `defaultProps` handling to `compat`
 
 ## TODOs
 
