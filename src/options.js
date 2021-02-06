@@ -10,8 +10,7 @@ import { _catchError } from './diff/catch-error';
  * @type {import('./internal').Options}
  */
 const options = {
-	_catchError,
-	_vnodeId: 0
+	_catchError
 };
 
 export default options;
