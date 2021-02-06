@@ -2,7 +2,7 @@ import { options, Fragment } from 'preact';
 
 /** @typedef {import('preact').VNode} VNode */
 
-let vnodeId = 0;
+let vnodeId = 9e9;
 
 /**
  * @fileoverview
@@ -51,7 +51,7 @@ function createVNode(type, props, key, __source, __self) {
 		_component: null,
 		_hydrating: null,
 		constructor: undefined,
-		_original: --vnodeId,
+		_original: ++vnodeId,
 		__source,
 		__self
 	};
