@@ -80,7 +80,7 @@ function patchConsole(method) {
 	window.console[method] = (...args) => {
 		// @ts-ignore
 		// eslint-disable-next-line no-undef
-		__karma__.log(method, serializeConsoleArgs(args));
+		__karma__.log(method, ['__LOG_CUSTOM:' + serializeConsoleArgs(args)]);
 		original.apply(window.console, args);
 	};
 }
@@ -197,6 +197,10 @@ function serialize(value, mode, indent, seen) {
 			return kl.cyan(`[Function: ${value.name || 'anonymous'}]`);
 	}
 
+	if (value instanceof Element) {
+		return value.outerHTML;
+	}
+
 	seen.add(value);
 
 	const props = Object.keys(value).map(key => {
@@ -253,3 +257,4 @@ function serialize(value, mode, indent, seen) {
 // 	new Set([1, 2]),
 // 	new Map([[1, 2]])
 // );
+// console.log(document.createElement('div'));
