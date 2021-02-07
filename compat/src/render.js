@@ -5,6 +5,7 @@ import {
 	toChildArray,
 	Component
 } from 'preact';
+import { assign } from './util';
 
 export const REACT_ELEMENT_TYPE =
 	(typeof Symbol != 'undefined' && Symbol.for && Symbol.for('react.element')) ||
@@ -109,6 +110,7 @@ options.vnode = vnode => {
 	let type = vnode.type;
 	let props = vnode.props;
 	let normalizedProps = props;
+	let defaults;
 
 	// only normalize props on Element nodes
 	if (typeof type === 'string') {
@@ -171,7 +173,17 @@ options.vnode = vnode => {
 				}
 			});
 		}
-
+		vnode.props = normalizedProps;
+	} else if (typeof type === 'function' && (defaults = type.defaultProps)) {
+		normalizedProps = assign({}, props);
+		// If a Component VNode, check for and apply defaultProps.
+		// Note: `type` is often a String, and can be `undefined` in development.
+		let i;
+		for (i in defaults) {
+			if (normalizedProps[i] === undefined) {
+				normalizedProps[i] = defaults[i];
+			}
+		}
 		vnode.props = normalizedProps;
 	}
 
