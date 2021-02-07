@@ -57,10 +57,6 @@ jobs:
         with:
           name: build-output
           path: preact.tgz
-      - name: Initialize Tachometer Results Report
-        uses: andrewiggins/tachometer-reporter-action@v2
-        with:
-          initialize: true
 
   bench_text_update:
     name: Bench text_update
