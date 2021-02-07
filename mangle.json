@@ -1,79 +1,78 @@
 {
-  "help": {
-    "what is this file?": "It controls protected/private property mangling so that minified builds have consistent property names.",
-    "why are there duplicate minified properties?": "Most properties are only used on one type of objects, so they can have the same name since they will never collide. Doing this reduces size."
-  },
-  "minify": {
-    "mangle": {
-      "properties": {
-        "regex": "^_[^_]",
-        "reserved": [
-          "__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED",
-          "__REACT_DEVTOOLS_GLOBAL_HOOK__",
-          "__PREACT_DEVTOOLS__",
-          "_renderers",
-          "__source",
-          "__self"
-        ]
-      }
-    },
-    "compress": {
-      "hoist_vars": true,
-      "reduce_funcs": false
-    }
-  },
-  "props": {
-    "cname": 6,
-    "props": {
-      "$_vnodeId": "__v",
-      "$_cleanup": "__c",
-      "$_afterPaintQueued": "__a",
-      "$__hooks": "__H",
-      "$_list": "__",
-      "$_pendingEffects": "__h",
-      "$_value": "__",
-      "$_original": "__v",
-      "$_args": "__H",
-      "$_factory": "__h",
-      "$_depth": "__b",
-      "$_dirty": "__d",
-      "$_detachOnNextRender": "__b",
-      "$_force": "__e",
-      "$_nextState": "__s",
-      "$_renderCallbacks": "__h",
-      "$_vnode": "__v",
-      "$_children": "__k",
-      "$_pendingSuspensionCount": "__u",
-      "$_childDidSuspend": "__c",
-      "$_suspendedComponentWillUnmount": "__c",
-      "$_suspended": "__e",
-      "$_dom": "__e",
-      "$_hydrating": "__h",
-      "$_mode": "__m",
-      "$_component": "__c",
-      "$__html": "__html",
-      "$_parent": "__",
-      "$_globalContext": "__n",
-      "$_context": "__c",
-      "$_defaultValue": "__",
-      "$_id": "__c",
-      "$_contextRef": "__",
-      "$_parentDom": "__P",
-      "$_originalParentDom": "__O",
-      "$_prevState": "__u",
-      "$_root": "__",
-      "$_diff": "__b",
-      "$_commit": "__c",
-      "$_addHookName": "__a",
-      "$_render": "__r",
-      "$_hook": "__h",
-      "$_catchError": "__e",
-      "$_unmount": "__u",
-      "$_owner": "__o",
-      "$_skipEffects": "__s",
-      "$_rerenderCount": "__r",
-      "$_forwarded": "__f",
-      "$_isSuspended": "__i"
-    }
-  }
+	"help": {
+		"what is this file?": "It controls protected/private property mangling so that minified builds have consistent property names.",
+		"why are there duplicate minified properties?": "Most properties are only used on one type of objects, so they can have the same name since they will never collide. Doing this reduces size."
+	},
+	"minify": {
+		"mangle": {
+			"properties": {
+				"regex": "^_[^_]",
+				"reserved": [
+					"__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED",
+					"__REACT_DEVTOOLS_GLOBAL_HOOK__",
+					"__PREACT_DEVTOOLS__",
+					"_renderers",
+					"__source",
+					"__self"
+				]
+			}
+		},
+		"compress": {
+			"hoist_vars": true,
+			"reduce_funcs": false
+		}
+	},
+	"props": {
+		"cname": 6,
+		"props": {
+			"$_vnodeId": "__v",
+			"$_cleanup": "__c",
+			"$_afterPaintQueued": "__a",
+			"$__hooks": "__H",
+			"$_list": "__",
+			"$_pendingEffects": "__h",
+			"$_value": "__",
+			"$_original": "__v",
+			"$_args": "__H",
+			"$_factory": "__h",
+			"$_depth": "__b",
+			"$_dirty": "__d",
+			"$_detachOnNextRender": "__b",
+			"$_nextState": "__s",
+			"$_renderCallbacks": "__h",
+			"$_vnode": "__v",
+			"$_children": "__k",
+			"$_pendingSuspensionCount": "__u",
+			"$_childDidSuspend": "__c",
+			"$_suspendedComponentWillUnmount": "__c",
+			"$_suspended": "__e",
+			"$_dom": "__e",
+			"$_hydrating": "__h",
+			"$_mode": "__m",
+			"$_component": "__c",
+			"$__html": "__html",
+			"$_parent": "__",
+			"$_globalContext": "__n",
+			"$_context": "__c",
+			"$_defaultValue": "__",
+			"$_id": "__c",
+			"$_contextRef": "__",
+			"$_parentDom": "__P",
+			"$_originalParentDom": "__O",
+			"$_prevState": "__u",
+			"$_root": "__",
+			"$_diff": "__b",
+			"$_commit": "__c",
+			"$_addHookName": "__a",
+			"$_render": "__r",
+			"$_hook": "__h",
+			"$_catchError": "__e",
+			"$_unmount": "__u",
+			"$_owner": "__o",
+			"$_skipEffects": "__s",
+			"$_rerenderCount": "__r",
+			"$_forwarded": "__f",
+			"$_isSuspended": "__i"
+		}
+	}
 }

@@ -8,6 +8,8 @@ export const MODE_MUTATIVE_HYDRATE = 2;
 export const MODE_SUSPENDED = 4;
 /** Signifies this VNode errored on the previous render */
 export const MODE_ERRORED = 8;
+/** Force a component to re-render */
+export const MODE_FORCE_UPDATE = 16;
 
 export const EMPTY_ARR = [];
 

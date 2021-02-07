@@ -4,6 +4,7 @@ import { assign } from '../util';
 import { Component } from '../component';
 import { mountChildren } from './mount';
 import { diffChildren } from './children';
+import { MODE_FORCE_UPDATE } from '../constants';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -45,6 +46,9 @@ export function renderComponent(
 		: globalContext;
 
 	if (oldVNode && oldVNode._component) {
+		if (oldVNode._mode & MODE_FORCE_UPDATE) {
+			newVNode._mode |= MODE_FORCE_UPDATE;
+		}
 		c = newVNode._component = oldVNode._component;
 	} else {
 		// Instantiate the new component
@@ -105,7 +109,7 @@ export function renderComponent(
 		}
 
 		if (
-			(!c._force &&
+			(!(newVNode._mode & MODE_FORCE_UPDATE) &&
 				c.shouldComponentUpdate != null &&
 				c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
 					false) ||
@@ -192,8 +196,8 @@ export function renderComponent(
 		commitQueue.push(c);
 	}
 
-	c._force = false;
-
+	// Clear MODE_FORCE_UPDATE
+	newVNode._mode &= ~MODE_FORCE_UPDATE;
 	return nextDomSibling;
 }
 
