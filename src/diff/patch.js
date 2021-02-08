@@ -7,13 +7,13 @@ import { COMPONENT_NODE, TEXT_NODE } from '../constants';
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
- * @param {import('../internal').VNode} newVNode The new virtual node
+ * @param {import('../internal').VNode | string} newVNode The new virtual node
  * @param {import('../internal').Internal} internal The Internal node to patch
  * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {boolean} isSvg Whether or not this element is an SVG node
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @param {import('../internal').PreactElement} startDom
+ * @param {import('../internal').PreactNode} startDom
  */
 export function patch(
 	parentDom,
@@ -24,6 +24,14 @@ export function patch(
 	commitQueue,
 	startDom
 ) {
+	if (internal._flags & TEXT_NODE) {
+		if (newVNode !== internal.props) {
+			internal._dom.data = newVNode;
+			internal.props = newVNode;
+		}
+		return internal._dom.nextSibling;
+	}
+
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== undefined) return null;
@@ -31,14 +39,15 @@ export function patch(
 	// @TODO newVNode is pretty useless here, it contains no tree information
 	if (options._diff) options._diff(newVNode);
 
-	/** @type {import('../internal').PreactElement} */
+	/** @type {import('../internal').PreactNode} */
 	let nextDomSibling;
 
 	try {
 		if (internal._flags & COMPONENT_NODE) {
 			nextDomSibling = renderComponent(
 				parentDom,
-				newVNode,
+				/** @type {import('../internal').VNode} */
+				(newVNode),
 				internal,
 				globalContext,
 				isSvg,
@@ -70,7 +79,7 @@ export function patch(
 
 /**
  * Diff two virtual nodes representing DOM element
- * @param {import('../internal').PreactNode} dom The DOM element representing
+ * @param {import('../internal').PreactElement} dom The DOM element representing
  * the virtual nodes being diffed
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').Internal} internal The Internal node to patch
@@ -78,7 +87,7 @@ export function patch(
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @returns {import('../internal').PreactNode}
+ * @returns {void}
  */
 function patchDOMElement(
 	dom,
@@ -92,13 +101,6 @@ function patchDOMElement(
 	let newProps = newVNode.props;
 	let newType = newVNode.type;
 	let tmp;
-
-	if (internal._flags & TEXT_NODE) {
-		if (oldProps !== newProps) {
-			dom.data = newProps;
-		}
-		return;
-	}
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	// @TODO this should happen when creating Internal nodes.

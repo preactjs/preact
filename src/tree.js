@@ -11,7 +11,7 @@ import { Fragment } from './create-element';
 
 /**
  * Create an internal tree node
- * @param {import('./internal').VNode} vnode
+ * @param {import('./internal').VNode | string} vnode
  * @returns {import('./internal').Internal}
  */
 export function createInternal(vnode) {
@@ -26,7 +26,7 @@ export function createInternal(vnode) {
 	if (typeof vnode === 'string') {
 		type = null;
 		props = vnode;
-	} else {
+	} else if (vnode.constructor === undefined) {
 		type = vnode.type;
 		props = vnode.props;
 		vnodeId = vnode._original;

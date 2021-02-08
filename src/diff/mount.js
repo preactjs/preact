@@ -5,7 +5,8 @@ import {
 	MODE_HYDRATE,
 	MODE_MUTATIVE_HYDRATE,
 	MODE_NONE,
-	MODE_SUSPENDED
+	MODE_SUSPENDED,
+	TEXT_NODE
 } from '../constants';
 import { normalizeToVNode } from '../create-element';
 import { setProperty } from './props';
@@ -32,10 +33,6 @@ export function mount(
 	commitQueue,
 	startDom
 ) {
-	// When passing through createElement it assigns the object
-	// constructor as undefined. This to prevent JSON-injection.
-	if (internal.constructor !== undefined) return null;
-
 	if (options._diff) options._diff(internal);
 
 	/** @type {import('../internal').PreactElement} */
@@ -45,8 +42,8 @@ export function mount(
 		if (internal._flags & COMPONENT_NODE) {
 			nextDomSibling = renderComponent(
 				parentDom,
-				internal,
 				null,
+				internal,
 				globalContext,
 				isSvg,
 				commitQueue,
@@ -108,7 +105,8 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
 
 	let isHydrating = internal._mode & MODE_HYDRATE;
 
-	if (isHydrating) {
+	// if hydrating (hydrate() or render() with replaceNode), find the matching child:
+	if (internal._mode & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)) {
 		while (
 			dom &&
 			(nodeType ? dom.localName !== nodeType : dom.nodeType !== 3)
@@ -117,7 +115,7 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
 		}
 	}
 
-	if (nodeType == null) {
+	if (internal._flags & TEXT_NODE) {
 		if (dom == null) {
 			// @ts-ignore createTextNode returns Text, we expect PreactElement
 			dom = document.createTextNode(newProps);
@@ -185,9 +183,7 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
 				dom.innerHTML = newHtml.__html;
 			}
 			internal._children = [];
-		} else {
-			i = internal.props.children;
-
+		} else if ((i = internal.props.children) != internal._children) {
 			mountChildren(
 				dom,
 				Array.isArray(i) ? i : [i],

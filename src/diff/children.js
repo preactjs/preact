@@ -4,7 +4,8 @@ import {
 	COMPONENT_NODE,
 	EMPTY_ARR,
 	MODE_HYDRATE,
-	MODE_SUSPENDED
+	MODE_SUSPENDED,
+	TEXT_NODE
 } from '../constants';
 import { getDomSibling } from '../component';
 import { mount } from './mount';
@@ -44,7 +45,7 @@ export function diffChildren(
 	/** @type {import('../internal').Internal} */
 	let childInternal;
 
-	/** @type {import('../internal').VNode} */
+	/** @type {import('../internal').VNode | string} */
 	let childVNode;
 
 	let oldChildren = internal._children || EMPTY_ARR;
@@ -59,6 +60,7 @@ export function diffChildren(
 		// in a `if (childVNode) { ... } condition
 		if (childVNode == null) {
 			// @TODO: assign `newChildren[i] = null`?
+			newChildren[i] = null;
 			continue;
 		}
 
@@ -71,7 +73,15 @@ export function diffChildren(
 		// (holes).
 		childInternal = oldChildren[i];
 
-		if (
+		if (typeof childVNode === 'string') {
+			// We never move Text nodes, so we only check for an in-place match:
+			if (childInternal._flags & TEXT_NODE) {
+				oldChildren[i] = undefined;
+			} else {
+				// We're looking for a Text node, but this wasn't one: ignore it
+				childInternal = undefined;
+			}
+		} else if (
 			childInternal === null ||
 			(childInternal &&
 				childVNode.key == childInternal.key &&
@@ -195,7 +205,7 @@ export function diffChildren(
 			//
 			// To fix it we make sure to reset the inferred value, so that our own
 			// value check in `diff()` won't be skipped.
-			if (newParentVNode.type === 'option') {
+			if (internal.type === 'option') {
 				// @ts-ignore We have validated that the type of parentDOM is 'option'
 				// in the above check
 				parentDom.value = '';
