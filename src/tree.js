@@ -29,15 +29,18 @@ export function createInternal(vnode) {
 	} else if (vnode.constructor === undefined) {
 		type = vnode.type;
 		props = vnode.props;
+		key = vnode.key;
+		ref = vnode.ref;
 		vnodeId = vnode._original;
 
+		// @TODO re-enable this when we stop removing key+ref from VNode props
 		if (props) {
-			if ((key = props.key) != null) {
-				props.key = undefined;
-			}
-			if (typeof type !== 'function' && (ref = props.ref) != null) {
-				props.ref = undefined;
-			}
+			// if ((key = props.key) != null) {
+			// 	props.key = undefined;
+			// }
+			// if (typeof type !== 'function' && (ref = props.ref) != null) {
+			// 	props.ref = undefined;
+			// }
 		} else {
 			props = {};
 		}
