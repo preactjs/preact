@@ -1,5 +1,7 @@
 import * as preact from './index';
 
+type CONSTANTS = typeof import('./lib/constants');
+
 export enum HookType {
 	useState = 1,
 	useReducer = 2,
@@ -81,7 +83,7 @@ export interface ComponentClass<P = {}> extends preact.ComponentClass<P> {
 export type ComponentType<P = {}> = ComponentClass<P> | FunctionComponent<P>;
 
 export interface PreactElement extends HTMLElement {
-	_children?: VNode<any> | null;
+	_children?: Internal<any> | null;
 	/** Event listeners to support event delegation */
 	_listeners?: Record<string, (e: Event) => void>;
 
@@ -93,6 +95,8 @@ export interface PreactElement extends HTMLElement {
 	data?: string | number; // From Text node
 }
 
+export type PreactNode = PreactElement | Text;
+
 // We use the `current` property to differentiate between the two kinds of Refs so
 // internally we'll define `current` on both to make TypeScript happy
 type RefObject<T> = { current: T | null };
@@ -103,18 +107,47 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	// Redefine type here using our internal ComponentType type
 	type: string | ComponentType<P>;
 	props: P & { children: ComponentChildren };
-	ref?: Ref<any> | null;
-	_children: Array<VNode<any>> | null;
-	_parent: VNode | null;
-	_depth: number | null;
-	/**
-	 * The [first (for Fragments)] DOM child of a VNode
-	 */
-	_dom: PreactElement | null;
-	_component: Component | null;
-	constructor: undefined;
 	_original: number;
-	_mode: number;
+}
+
+export type InternalFlags =
+	| CONSTANTS['TEXT_NODE']
+	| CONSTANTS['ELEMENT_NODE']
+	| CONSTANTS['CLASS_NODE']
+	| CONSTANTS['FUNCTION_NODE']
+	| CONSTANTS['COMPONENT_NODE'];
+
+/**
+ * An Internal is a persistent backing node within Preact's virtual DOM tree.
+ * Think of an Internal like a long-lived VNode with stored data and tree linkages.
+ */
+export interface Internal<P = {}> {
+	type: string | ComponentType<P>;
+	/** The props object for Elements/Components, and the string contents for Text */
+	props: (P & { children: ComponentChildren }) | string | number;
+	key: any;
+	ref: Ref<any> | null;
+	/** children Internal nodes */
+	_children: Internal[];
+	/** next sibling Internal node */
+	_parent: Internal;
+	/** next sibling Internal node */
+	_next: Internal;
+	/** most recent vnode ID @TODO rename to _vnodeId */
+	_original: number;
+	/**
+	 * Associated DOM element for the Internal, or its nearest realized descendant.
+	 * For Fragments, this is the first DOM child.
+	 */
+	_dom: PreactElement | Text | Node;
+	/** The component instance for which this is a backing Internal node */
+	_component: Component | null;
+	/** Bitfield containing rendering mode flags */
+	_mode: ModeFlags;
+	/** Bitfield containing information about the Internal or its component. */
+	_flags: InternalFlags;
+	/** This Internal's distance from the tree root */
+	_depth: number | null;
 }
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {

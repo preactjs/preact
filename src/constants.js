@@ -12,3 +12,12 @@ export const MODE_ERRORED = 8;
 export const EMPTY_ARR = [];
 
 export const IS_NON_DIMENSIONAL = /acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|itera/i;
+
+// Internal._flags bitfield constants
+export const TEXT_NODE = 1;
+export const ELEMENT_NODE = 2;
+export const CLASS_NODE = 4;
+export const FUNCTION_NODE = 8;
+export const FRAGMENT_NODE = 16;
+/** Any type of component */
+export const COMPONENT_NODE = CLASS_NODE | FUNCTION_NODE | FRAGMENT_NODE;
