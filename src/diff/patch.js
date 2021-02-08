@@ -54,23 +54,26 @@ export function patch(
 				commitQueue,
 				startDom
 			);
-		} else if (newVNode._original !== internal._original) {
-			patchDOMElement(
-				internal._dom,
-				newVNode,
-				internal,
-				globalContext,
-				isSvg,
-				commitQueue
-			);
+		} else {
+			if (newVNode._original !== internal._original) {
+				patchDOMElement(
+					internal._dom,
+					newVNode,
+					internal,
+					globalContext,
+					isSvg,
+					commitQueue
+				);
+			}
 
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
-			nextDomSibling = newVNode._dom.nextSibling;
+			nextDomSibling = internal._dom.nextSibling;
 		}
 
 		if (options.diffed) options.diffed(newVNode);
 	} catch (e) {
-		newVNode._original = null;
+		// @TODO: assign a new VNode ID here? Or NaN?
+		// newVNode._original = null;
 		options._catchError(e, newVNode, internal);
 	}
 
